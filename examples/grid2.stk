@@ -1,0 +1,51 @@
+;;;;
+;;;; grid2.stk	-- Another GTklos Grid Demo
+;;;; 
+;;;; Copyright © 2001 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 29-Jul-2001 20:06 (eg)
+;;;; Last file update: 26-Nov-2001 22:26 (eg)
+;;;;
+
+(include "gtklos-demo.stk")
+
+(define (main args)
+  (let* ((win (make <demo-window> :title "GTklos Grid Demo" :file "grid2"
+		    :message "
+This is a simple demonstration of the grid widget.
+See the code to view the options used
+"))
+	 (g (make <grid> :columns 5 :rows 5 :parent win)))
+
+    ;; Make a bunch of buttons with various "gridding" options
+    (dotimes (i 9)
+      (make <button> :text (format #f "Button ~S" i) :width 70 :height 30
+	    :parent `(,g :pad-x 5 :pad-y 5)))
+  
+    (make <button> :text "Button 8" :parent `(,g :width 3 :pad-x 50 :pad-y 5))
+    (make <button> :text "Button 9" :parent `(,g :height 6 :pad-x 5 :pad-y 5))
+    (make <button> :text "Button 10" :parent `(,g :height 3 :pad-x 5 :pad-y 5))
+    (make <button> :text "Button 11" :parent `(,g :height 3 :pad-x 5 :pad-y 5))
+  
+    (dotimes (i 2)
+      (make <button> :text (format #f "Button ~S" (+ i 12)) :width 70 :height 30
+	    :parent `(,g :pad-x 5 :pad-y 5)))
+    
+    (make <button> :text "Button 14" :parent `(,g :x 4 :y 7 :pad-x 5 :pad-y 5))))

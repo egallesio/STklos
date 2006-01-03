@@ -1,0 +1,37 @@
+								-*- outline -*-
+
+*				STklos Extensions
+
+You can find the following extensions modules in this directory
+    
+
+** ldap 
+
+This is a proof of concept module. Don't take it as a finished
+extension. This is a module that I have written because I need to
+hack a rather large LDAP base in our school. It does what I need and
+very little more. If you want to improve it to make something more
+useful, I would be glad to add your contribution.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ LocalWords:  ldap

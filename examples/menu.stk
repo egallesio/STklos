@@ -1,0 +1,93 @@
+;;;;
+;;;; menu.stk			-- GTK+ Menu Demo
+;;;; 
+;;;; Copyright © 2000-2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 27-Oct-2000 22:30 (eg)
+;;;; Last file update:  8-Apr-2002 15:24 (eg)
+;;;;
+
+(include "gtklos-demo.stk")
+
+(define *menu-msg* "
+This demo just shows a simple menu bar with various menu types:
+cascades, check buttons, radio buttons.
+")
+
+
+(define *initialized* #f)	;; to avoid some message when installing menus 
+
+(define (my-action e)
+  (when *initialized*		;; Simply display the text of the menu item selected
+    (format #t "You have clicked ~S\n" (text (event-widget e)))))
+
+(define (main args)
+  (let* ((win (make <demo-window> :title "Labels Demo" :x 100 :y 100
+		    :file "menu" :border-width 10 :padding 10
+		    :message *menu-msg*))
+	 (frm (make <frame> :parent win :width 400 :title "A menu"))
+	 (m   (make <menu-bar> :parent frm
+		    :items
+		    `(("File" 
+		         ("---"    :type   :tear-off)
+			 ("Load"   :action ,my-action)
+			 ("Save"   :action ,my-action)
+			 (""       :type   :separator)
+			 ("Quit"   :action ,(lambda(_) (exit 0))))
+		      ("Edit"
+		         ("Copy"   :action ,my-action)
+			 ("Cut"    :action ,my-action)
+			 ("Paste"  :action ,my-action))
+		      ("Cascade"
+		         ("---" 	:type :tear-off)
+			 ("  1  " :type :cascade 
+			  	  :menu (("One"  :action ,my-action)
+					 ("Un"   :action ,my-action)
+					 ("Eins" :action ,my-action)))
+			 ("  2  " :type :cascade 
+				  :menu (("Two"  :action ,my-action)
+					 ("Deux" :action ,my-action)
+					 ("Zwei" :action ,my-action))))
+		      ("Check"
+		         ("option1" :type :check :action ,my-action)
+			 ("option2" :type :check :action ,my-action :value #t))
+		      ("Radio"
+		         ("radio1 group1" :type :radio :action ,my-action)
+		         ("radio2 group1" :type :radio :action ,my-action :value #t)
+			 (""		:type :separator)
+			 ("radio1 group2" :type :radio :action ,my-action :first #t)
+			 ("radio2 group2" :type :radio :action ,my-action))
+		      ;; Add an empty list to make space
+		      ()
+		      ;; Now "Help" will be on the right part of the tool-bar
+		      ("Help"
+		         ("About"     :action ,my-action)
+			 ("More Info" :action ,my-action))))))
+    
+    ;; Set *initialized* to #t so that setting of option2 to #t and the setting of
+    ;; radio buttons don't print a message.
+    (set! *initialized* #t)))
+
+
+
+
+
+
+

@@ -1,0 +1,85 @@
+;;;;
+;;;; srfi.stk	-- List of implemented SRFI in STklos
+;;;; 
+;;;; Copyright © 2004-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 18-Aug-2004 12:43 (eg)
+;;;; Last file update: 31-Oct-2005 12:05 (eg)
+;;;;
+
+(define srfi-address "http://srfi.schemers.org/srfi-~A/srfi-~A.html")
+
+(define *srfis* 
+   '((0  . "Feature-based conditional expansion construct")
+     (1  . "List Library")
+     (2  . "AND-LET*: an AND with local bindings, a guarded LET* special form")
+     (4  . "Homogeneous numeric vector datatypes")
+     (6  . "Basic String Ports")
+     (7  . "Feature-based program configuration language ")
+     (8  . "Receive: Binding to multiple values")
+     (9  . "Defining Record Types")
+     (10 . "Sharp Comma External Form")
+     (11 . "Syntax for receiving multiple values")
+     (13 . "String Library")
+     (14 . "Character-Set Library")
+     (16 . "Syntax for procedures of variable arity")
+     (17 . "Generalized set!")
+     (22 . "Running Scheme Scripts on Unix")
+     (23 . "Error reporting mechanism")
+     (26 . "Notation for Specializing Parameters without Currying")
+     (27 . "Source of random bits")
+     (28 . "Basic Format Strings")
+     (30 . "Nested Multi-line Comments")
+     (31 . "A special form for recursive evaluation")
+     (34 . "Exception Handling for Programs")
+     (35 . "Conditions")
+     (36 . "I/O Conditions")
+     (38 . "External representation of shared structures")
+     (39 . "Parameters objects")
+     (48 . "Intermediate Format Strings")
+     (55 . "Require-extension")
+     (60 . "Integers as bits")
+     (62 . "S-expression comments")
+     (69 . "Basic Hash Tables")
+     (70 . "Numbers")
+   ))
+
+(define (srfi n)
+  [,(bold (format "SRFI-~A" n)) (,(cdr (assoc n *srfis*)))])
+
+(define (link-srfi n)
+  (let* ((info (assoc n *srfis*))
+	 (txt  (if info (cdr info) (error "SRFI ~S not in database!!" n)))
+	 (url (format srfi-address n n)))
+    [,(bold (ref :text (format "SRFI-~a" n) :url url))
+     (,(emph txt))]))
+
+(define (quick-link-srfi n)
+  (let* ((info (assoc n *srfis*))
+	 (txt  (if info (cdr info) (error "SRFI ~S not in database!!" n)))
+	 (url (format srfi-address n n)))
+    (ref :text (format "SRFI-~a" n) :url url)))
+
+(define (title-srfi n)
+  (let* ((info (assoc n *srfis*))
+	 (txt  (if info (cdr info) (error "SRFI ~S not in database!!" n)))
+	 (url (format srfi-address n n)))
+    (format "SRFI-~A -- ~A" n txt)))
+

@@ -1,0 +1,49 @@
+#!/bin/sh
+#
+# tmpcomp	-- A temporary script to bootstrap the system
+# 
+# Copyright © 2002-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# 
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+# USA.
+# 
+#           Author: Erick Gallesio [eg@unice.fr]
+#    Creation date:  1-Jan-2002 18:57 (eg)
+# Last file update: 29-Mar-2005 19:02 (eg)
+#
+
+# This script is only used to compile the different components of the
+# system which need compilation. It will not be installed since the
+# user version is the stklos-compile script.
+
+if [ $# != 2 ] ;then
+  echo "Usage: $0 src bytecode-file "
+  exit 1
+fi
+
+in=$1
+out=$2
+
+# Sep is now also ":"  on CYGWIN
+sep=":" 
+
+STKLOS_LOAD_PATH="../lib${sep}../gtklos" 
+export STKLOS_LOAD_PATH
+
+../src/stklos -c -q -b ../src/boot.img -f ../utils/stklos-compile -- \
+     --no-time --output=$out $in && chmod a+x $out
+
+

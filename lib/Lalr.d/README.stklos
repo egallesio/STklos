@@ -1,0 +1,11 @@
+							-*- Text -*-
+          Author: Erick Gallesio [eg@essi.fr]
+   Creation date: 25-Oct-2004 17:00 (eg)
+Last file update: 25-Oct-2004 17:01 (eg)
+
+This is a STklos port of Dominique Boucher lalr.scm (a fast LALR
+parser generator for Scheme).
+
+
+
+

@@ -1,0 +1,82 @@
+;;;;
+;;;; toolbar.stk	-- GTklos Toolbars Implementation
+;;;; 
+;;;; Copyright © 2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  7-Apr-2002 14:23 (eg)
+;;;; Last file update:  7-Apr-2002 20:37 (eg)
+;;;;
+
+
+(include "gtklos-demo.stk")
+
+(define *toolbar-msg* "
+In this demo, the tool bar is contained in a frame.
+Using the radio buttons, at the bottom of this window
+allows to change the orientation of the tool bar, as well as
+its appearance.
+")
+
+
+(define (tb-callback tb pos) ;  Callback associated to each button of the toolbar
+  (format #t "You have clicked item ~S of toolbar. Its text is ~S\n" 
+	  pos 
+	  (text (list-ref (children tb) pos))))
+
+
+(define (main args)
+  (let* ((win (make <demo-window> :title "Toolbar Demo" :x 100 :y 100
+		    :file "toolbar" :border-width 10 :padding 10
+		    :message *toolbar-msg*))
+	 (frm (make <frame> :title  "Toolbar Demo" :parent win :width 300
+		    :height 200))
+	 (tb (make <toolbar>
+	       :parent frm
+	       :style "both" :relief "none" :space-style "line"
+	       :orientation 'vertical
+	       :items `(
+			(:text "Up"   :file "up.xpm"   :command ,tb-callback)
+			(:text "Down" :file "down.xpm" :command ,tb-callback)
+			;; Add a space 
+			()
+			;; Left and right do have a tool tip
+			(:text "Left" :file "left.xpm" :tooltip "go left"
+			       :command ,tb-callback)
+			(:text "Right" :file "right.xpm" :tooltip "go right"
+			       :command ,tb-callback))))
+	 (box (make <box> :orientation 'horizontal :parent win :padding 10))
+	 (r1  (make <radio-button>
+		    :parent box
+		    :width 140
+		    :title "Orientation"
+		    :texts '("vertical" "horizontal")
+		    :command (lambda (e)
+			       (set! (orientation tb) (text (event-widget e))))))
+	 (r2  (make <radio-button>
+		    :parent box
+		    :width 140
+		    :title "Style"
+		    :texts '("both" "text" "icons")
+		    :command (lambda (e)
+			       (set! (style tb) (text (event-widget e)))))))
+	 tb))
+
+
+; LocalWords:  toolbar

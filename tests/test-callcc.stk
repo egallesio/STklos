@@ -1,0 +1,266 @@
+;;;;
+;;;; test-callcc.stk	-- Testing call/cc and dynamic-wind
+;;;; 
+;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date:  3-May-2005 14:29 (eg)
+;;;; Last file update: 25-May-2005 10:35 (eg)
+;;;;
+
+(require "test")
+(test-section "call/cc & dynamic-wind")
+
+;;----------------------------------------------------------------
+(test-subsection "call/cc")
+
+(define foo #f)
+(let ((k (lambda (x) x)))
+  (k (* 5 (* 4 (* 3 (* 2  (call/cc
+			   (lambda (cont)
+			     (set! foo (lambda (n)
+					 (call/cc
+					  (lambda (new-k)
+					    (set! k new-k)
+					    (cont n)))))
+			     0))))))))
+
+(test "foo.1" 1200 (foo 10))
+(test "foo.1" 120  (foo 1))
+(test "Al Petrofsky, 15 June 2002" 1
+      (call/cc (lambda (c) (0 (c 1)))))
+
+
+;;/(define adder #f)
+;;/(let ((counter 0))
+;;/  (call/cc (lambda (k) (set! adder k)))
+;;/  (set! counter (+ 1 counter))
+;;/  counter)
+;;/
+;;/(test "adder.1" 2000000000000 (adder))
+;;/(test "foo.1" 120  (foo 1))
+;;/(test "adder.2" 3 (adder))
+
+;====
+(define *coroutines* '())
+(define add-coroutine!
+  (lambda (thunk)
+    (set! *coroutines* (append *coroutines* (list thunk)))))
+
+(define start
+  (lambda ()
+    (let (( next (car *coroutines*)))
+      (set! *coroutines* (cdr *coroutines*))
+      (next))))
+
+(define pause
+  (lambda ()
+    (call/cc
+     (lambda (k)
+       (add-coroutine! (lambda () (k #f)))
+       (start)))))
+
+(for-each (lambda (x)
+	    (add-coroutine! (lambda()
+			      (dotimes (i 10)
+				(display x)
+				(pause)))))
+	  '(a b c d))
+
+(test "coroutines"
+      "abcdabcdabcdabcdabcdabcdabcdabcdabcdabcd"
+      (with-output-to-string start))
+
+(test "multiple values.0"
+      '()
+      (receive l
+	       (call/cc (lambda (k) (k)))
+	       l))
+
+(test "multiple values.1"
+      '(1)
+      (receive l
+	       (call/cc (lambda (k) (k 1)))
+	       l))
+
+(test "multiple values.2"
+      1
+      (call/cc (lambda (k) (k 1))))
+
+(test "multiple values.1"
+      '(1 2 3)
+      (receive l
+	       (call/cc (lambda (k) (k 1 2 3)))
+	       l))
+
+(test "Call/cc in an inline procedure call"
+      '((1 2 3 4 5 6 7 8) (1 2 3 4 -1 6 7 8))
+      (let ((cc #f)
+	    (r '()))
+	(let ((s (list 1 2 3 4 (call/cc (lambda (c) (set! cc c) 5)) 6 7 8)))
+	  (if (null? r)
+	      (begin (set! r s) (cc -1))
+	      (list r s)))))
+
+(test "R5RS simple example 1"
+      -3
+      (call-with-current-continuation
+       (lambda (exit)
+	 (for-each (lambda (x)
+		     (if (negative? x)
+			 (exit x)))
+		   '(54 0 37 -3 245 19))
+	 #t)))
+
+(define call/cc-list-length
+  (lambda (obj)
+    (call-with-current-continuation
+      (lambda (return)
+        (letrec ((r
+                  (lambda (obj)
+                    (cond ((null? obj) 0)
+                          ((pair? obj)
+                           (+ (r (cdr obj)) 1))
+                          (else (return #f))))))
+	  (r obj))))))
+
+(test "R5RS simple example 2"
+      4
+      (call/cc-list-length '(1 2 3 4)))
+
+(test "R5RS simple example 3"
+      #f
+      (call/cc-list-length '(1 2 . 3)))
+
+
+;;----------------------------------------------------------------
+(test-subsection "dynamic-wind")
+(test "dynamic-wind"
+      "123"
+      (with-output-to-string
+	(lambda ()
+	  (dynamic-wind
+	      (lambda () (display 1))
+	      (lambda () (display 2))
+	      (lambda () (display 3))))))
+
+(test "dynamic-wind & error.1"
+      "124"
+      (with-output-to-string
+	(lambda ()
+	  (with-handler (lambda (c) 'nothing)
+	     (dynamic-wind
+		 (lambda () (display 1))
+		 (lambda ()
+		   (display 2)
+		   (error "Test")
+		   (display 3))
+		 (lambda () (display 4)))))))
+
+(test "dynamic-wind & error.2"
+      "124ERROR"
+      (with-output-to-string
+	(lambda ()
+	  (with-handler (lambda (c) (display "ERROR"))
+	     (dynamic-wind
+		 (lambda () (display 1))
+		 (lambda ()
+		   (display 2)
+		   (/ "Test")
+		   (display 3))
+		 (lambda () (display 4)))))))
+
+;;----------------------------------------------------------------
+(test-subsection "dynamic-wind & call/cc Interaction")
+
+;; Example in R5RS
+(test "R5RS example"
+      '(connect talk1 disconnect connect talk2 disconnect)
+      (let ((path '())
+	    (c #f))
+	(let ((add (lambda (s)
+		     (set! path (cons s path)))))
+	  (dynamic-wind
+	      (lambda () (add 'connect))
+	      (lambda ()
+		(add (call-with-current-continuation
+		      (lambda (c0)
+			(set! c c0)
+			'talk1))))
+	      (lambda () (add 'disconnect)))
+	  (if (< (length path) 4)
+	      (c 'talk2)
+	      (reverse path)))))
+
+(test "Variation on R5RS example"
+      '(connect connect-internal talk1 disconnect-internal disconnect
+	connect connect-internal talk2 disconnect-internal disconnect)
+      (let ((path '())
+	    (c #f))
+	(let ((add (lambda (s)
+		     (set! path (cons s path)))))
+	  (dynamic-wind
+	      (lambda () (add 'connect))
+	      (lambda ()
+		(dynamic-wind
+		    (lambda () (add 'connect-internal))
+		    (lambda () (add (call-with-current-continuation
+				     (lambda (c0)
+				       (set! c c0)
+				       'talk1))))
+		    (lambda () (add 'disconnect-internal))))
+	      (lambda () (add 'disconnect)))
+	  (if (< (length path) 6)
+	      (c 'talk2)
+	      (reverse path)))))
+
+(test "Nested dynamic-wind"
+      '(a b c d e f g b c d e f g h)
+      (let ((x '())
+	    (c #f))
+	(dynamic-wind
+	    (lambda () (set! x (cons 'a x)))
+	    (lambda ()
+	      (dynamic-wind
+		  (lambda () (set! x (cons 'b x)))
+		  (lambda ()
+		    (dynamic-wind
+			(lambda () (set! x (cons 'c x)))
+			(lambda () (set! c (call/cc (lambda (x) x))))
+			(lambda () (set! x (cons 'd x)))))
+		  (lambda () (set! x (cons 'e x))))
+	      (dynamic-wind
+		  (lambda () (set! x (cons 'f x)))
+		  (lambda () (when c (c #f)))
+		  (lambda () (set! x (cons 'g x)))))
+	    (lambda () (set! x (cons 'h x))))
+	(reverse x)))
+
+(test "dynamic-wind and multiple values"
+      '(1 2 3)
+      (receive l
+	  (dynamic-wind (lambda () #f)
+	      (lambda () (values 1 2 3))
+	      (lambda () #f))
+	l))
+
+
+      
+
+(test-section-end)

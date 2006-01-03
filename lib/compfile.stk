@@ -1,0 +1,74 @@
+;;;;
+;;;; compfile.stk	-- STklos File Compiler 
+;;;; 
+;;;; Copyright © 2001-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 17-Mar-2001 12:11 (eg)
+;;;; Last file update: 29-Apr-2005 18:12 (eg)
+;;;;
+
+
+(define (compile-file input output)
+  (let* ((in       (open-input-file input)) ;; FIXME: A VIRER  ne sert  plus
+	 (out      (open-output-file output))
+	 (tm       (clock))
+	 (copts    *compiler-options*))
+
+    ;; Defer warning til the end of the compilation of file
+    (set! *compiler-options* (cons 'warn-use-undef-postpone *compiler-options*))
+
+    (initialize-compilation)
+
+    ;; Read the source file
+    (include-file input)
+    (emit 'END-OF-CODE)
+      
+    ;; Write the header
+    (format out "#!/usr/bin/env stklos-script\n")
+    (format out "STklos ~S ;-*-Scheme -*-\n" (version))
+      
+    (let ((code (assemble (reverse! *code-instr*))))
+      ;;Write the assembly code and code vector
+      ;;(format out "\n#|\n") 
+      ;;(disassemble-code code out)
+      ;;(format out "\n~S\n|#\n" code)
+	
+      ;; Write new constants as a vector
+      (format out "#~S\n" *code-constants*)
+      
+      ;; Write byte-code
+      (%dump-code out code))
+    
+    ;; Close files
+    (close-input-port in)
+    (close-output-port out)
+    
+    ;; Show undefined symbols
+    (compiler-show-undefined-symbols)
+    
+    ;; Display time used to compile file
+    (when (and (interactive-port? (current-input-port))
+	       (compiler:time-display))
+      (format #t "Compilation time ~S\n" (- (clock) tm)))
+    
+    ;; Restore Compiler flags
+    (set! *compiler-options* copts)))
+
+(provide "compfile")

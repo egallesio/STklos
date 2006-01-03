@@ -1,0 +1,80 @@
+#! /usr/bin/env stklos -f
+;;;;
+;;;; image2.stk	-- An Image Animation 
+;;;; 
+;;;; Copyright © 2001-2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 16-Aug-2001 15:45 (eg)
+;;;; Last file update:  5-Apr-2002 17:28 (eg)
+;;;;
+
+(include "gtklos-demo.stk")
+
+;; Change the image-path to allow execution of the demo without installation
+(set-image-path! (cons "./images" (image-path)))
+
+
+(define *speed* 100)	;; Speed of the animation in ms
+(define *imgs*		;; The image files
+  (list "anim-0.png" "anim-1.png" "anim-2.png" "anim-3.png"
+	"anim-4.png" "anim-5.png" "anim-6.png" "anim-7.png"
+	"anim-8.png" "anim-9.png" ))
+
+(define (animate but)
+  (slot-set! but 'image (car *imgs*))
+  (set! *imgs* (cdr *imgs*))
+  (after (inexact->exact *speed*) (lambda () (animate but))))
+
+; ======================================================================
+
+(define msg "
+A simple animation made of several files in PNG format.
+Use the scale to change the speed of the animation.
+")
+
+
+(define (main args)
+  (unless (gnome-available?)
+    (error "This demo needs GNOME support to be run.\nSorry."))
+  
+  (let* ((win  (make <demo-window> :title "Buttons Demo" :x 100 :y 100
+		   		 :file "button" :border-width 5
+				 :message msg))
+	 (but  (make <button> :parent win :relief 'none :border-width 0))
+	 (s    (make <scale>
+		     :orientation 'horizontal
+		     :from 5
+		     :to 300
+		     :value *speed*
+		     :digits 0
+		     :increment 10
+		     :title "Speed"
+		     :parent win
+		     :command (lambda (e)
+				(set! *speed* (value (event-widget e)))))))
+    ;; Build the list of images and make it circular
+    (set! *imgs* (map (lambda (x) (make <image> :file x)) *imgs*))
+    (set-cdr! (last-pair *imgs*) *imgs*)
+
+    ;; start the animation
+    (animate but)))
+
+
+; LocalWords:  imgs PNG galeon

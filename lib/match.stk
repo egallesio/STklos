@@ -1,0 +1,98 @@
+;;;;
+;;;; m a t c h  . s t k			-- The bigloo match-case and match-lambda
+;;;;
+;;;; Copyright © 1997-2004 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; Permission to use, copy, modify, distribute,and license this
+;;;; software and its documentation for any purpose is hereby granted,
+;;;; provided that existing copyright notices are retained in all
+;;;; copies and that this notice is included verbatim in any
+;;;; distributions.  No written agreement, license, or royalty fee is
+;;;; required for any of the authorized uses.
+;;;; This software is provided ``AS IS'' without express or implied
+;;;; warranty.
+;;;;
+;;;;           Author: Erick Gallesio [eg@kaolin.unice.fr]
+;;;;    Creation date: 28-Oct-1997 20:47
+;;;; Last file update: 29-Nov-2004 11:08 (eg)
+;;;;
+
+;;;; This file implements code for loading the MATCH-CASE and MATCH-LAMBDA 
+;;;; of the Bigloo system. Bigloo files are unmodified and could be probably
+;;;; adapted for STk (in particular, the code can deal with structures, and 
+;;;; a useful adaptation could be to manage objects instead).
+
+
+(include "bigloo.stk")
+
+
+
+
+;;;;
+;;;; WARNING: Order is important
+;;;; 
+(include "Match.d/s2cfun.scm")
+(include "Match.d/normalize.scm")
+(include "Match.d/descr.scm")
+(include "Match.d/compiler.scm")
+(include "Match.d/mexpand.scm")
+
+(select-module STklos)
+(import __match_expand)
+
+#|
+<doc EXT-SYNTAX match-lambda
+ * (match-lambda <clause> ...)
+ *
+ * |match-lambda| expands into a lambda-expression expecting an argument
+ * which, once applied to an expression, behaves exactly like a
+ * |match-case| expression.
+ * @lisp
+ * ((match-lambda
+ *   ((?x ?x) 'foo)
+ *   ((?x ?- ?x) 'bar))
+ *  '(a b a))           => bar
+ * @end lisp
+doc>
+|#
+(define-macro (match-lambda  . clauses)
+  (expand-match-lambda  (cons '()  clauses)))
+
+
+#|
+<doc EXT-SYNTAX match-case
+ * (match-case <key> <clause> ...)
+ *
+ * The argument key may be any expression and each clause has the form
+ * @lisp
+ * (<pattern> <expression> ...)
+ * @end lisp 
+ * A match-case expression is evaluated as follows: |<key>| is evaluated
+ * and the result is compared with each successive pattern. If the |<pattern>|
+ * in some clause yields a match, then the |<expression>|s in that clause are
+ * evaluated from left to right in an environment where the pattern variables
+ * are bound to the corresponding subparts of |<key>|, and the result of the
+ * last expression in that clause is returned as the result of the
+ * |match-case| expression. If no pattern in any clause matches the |<key>|,
+ * then, if there is an |else| clause, its expressions are evaluated and
+ * the result of the last is the result of the whole |match-case|
+ * expression; otherwise the result of the |match-case| expression
+ * is unspecified.
+ * £
+ * The equality predicate used for tests is |eq?|.
+ * @lisp 
+ * (match-case '(a b a)
+ *    ((?x ?x) 'foo)
+ *    ((?x ?- ?x) 'bar))   => bar
+ *
+ * (match-case '(a (b c) d)
+ *    ((?x ?y) (list 'length=2 y x))
+ *    ((?x ?y ?z) (list 'length=3 z y x)))
+ *                         => (length=3 d (b c) a)
+ * @end lisp
+doc>
+|#
+(define-macro (match-case expr . clauses)
+  `((match-lambda  ,@clauses) ,expr))
+
+(provide "match")

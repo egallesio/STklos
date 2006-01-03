@@ -1,0 +1,518 @@
+/*
+ * m i s c . c					-- Misc. functions
+ * 
+ * Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * 
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * USA.
+ * 
+ *           Author: Erick Gallesio [eg@unice.fr]
+ *    Creation date:  9-Jan-2000 12:50 (eg)
+ * Last file update: 25-Apr-2005 17:14 (eg)
+ */
+
+#include "stklos.h"
+#include "gnu-getopt.h"
+
+
+#ifdef STK_DEBUG
+int STk_interactive_debug = 0;
+#endif
+
+
+static void error_bad_string(SCM str)
+{
+  STk_error("bad string ~S", str);
+}
+
+
+char *STk_strdup(const char *s)
+{
+  /* Like standard strdup but with our allocator */
+  char *res; 
+  
+  res = STk_must_malloc_atomic(strlen(s) + 1);
+  strcpy(res, s);
+  return res;
+}
+
+
+void STk_add_primitive(struct primitive_obj *o)
+{
+  SCM symbol;
+
+  symbol = STk_intern(o->name);
+  STk_define_variable(symbol, (SCM) o, STk_current_module);
+}
+
+
+SCM STk_eval_C_string(char *str, SCM module)
+{
+  SCM ref, eval = STk_lookup(STk_intern("eval-from-string"),
+			     module,
+			     &ref, 
+			     TRUE);
+  return STk_C_apply(eval, 2, STk_Cstring2string(str), module);
+}
+
+
+
+/*===========================================================================*\
+ * 
+ * Primitives that feet anywhere else 
+ * 
+\*===========================================================================*/
+/*
+<doc EXT version
+ * (version)
+ *
+ * Returns a string identifying the current version of the system. A version is 
+ * constituted of three numbers separated by a point: the version, the release
+ * and sub-release numbers.
+doc>
+ */
+DEFINE_PRIMITIVE("version", version, subr0, (void))
+{
+  return STk_Cstring2string(VERSION);
+}
+
+
+/*
+<doc EXT void
+ * (void)
+ * (void arg1 ...)
+ *
+ * Returns the special ,(emph "void") object. If arguments are passed to |void|,
+ * they are evalued and simply ignored.
+doc>
+ */
+DEFINE_PRIMITIVE("void", scheme_void, vsubr, (int argc, SCM *argv))
+{
+  return STk_void;
+}
+
+
+/*
+<doc address-of
+ * (address-of obj)
+ *
+ * Returns the address of the object |obj| as an integer.
+doc>
+*/
+DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
+{
+  char buffer[50];     /* should be sufficient for a while */
+
+  sprintf(buffer, "%lx", (unsigned long) object); /* not very efficient ... */
+  return STk_Cstr2number(buffer, 16L);
+}
+
+
+/*
+<doc gc
+ * (gc)
+ *
+ * Returns the address of the object |obj| as an integer.
+doc>
+*/
+DEFINE_PRIMITIVE("gc", scheme_gc, subr0, (void))
+{
+  STk_gc();
+  return STk_void;
+}
+
+
+/*===========================================================================*\
+ * 
+ * 			Argument parsing
+ * 
+\*===========================================================================*/
+static int Argc;
+static char * optstring;
+static char **Argv;
+static struct option *long_options;
+
+
+DEFINE_PRIMITIVE("%initialize-getopt", init_getopt, subr3, (SCM argv, SCM s, SCM v))
+{
+  int i, len;
+
+  STk_start_getopt_from_scheme();
+  optind = 1;    /* Initialize optind, since it has already be used 
+		  * by ouserlves  before initializing the VM. 
+		  */
+
+  /* 
+   * Argv processing 
+   */
+  len = STk_int_length(argv);
+  if (len < 0) STk_error("bad argument list ~S", argv);
+  Argv = STk_must_malloc_atomic((len+1) * sizeof(char *));
+  for (i = 0; i < len; i++) {
+    if (!STRINGP(CAR(argv))) error_bad_string(CAR(argv));
+    Argv[i] = STRING_CHARS(CAR(argv));
+    argv    = CDR(argv);
+  }
+  Argv[len] = NULL;
+  Argc      = len;
+  
+  /*
+   * Optstring 
+   */
+  if (!STRINGP(s)) error_bad_string(s);
+  optstring = STRING_CHARS(s);
+
+  /* 
+   * Option vector processing
+   */
+  if (!VECTORP(v)) STk_error("bad vector ~S", v);
+  len = VECTOR_SIZE(v);
+  /* If there is an else clause, last item of the vector is #f */
+  if (VECTOR_DATA(v)[len-1] == STk_false) len -= 1;
+
+  long_options = STk_must_malloc_atomic((len+1) * sizeof(struct option));
+  
+  /* Copy the values in v in the long_options array */
+  for (i=0; i < len; i ++) {
+    if (!STRINGP(CAR(VECTOR_DATA(v)[i]))) error_bad_string(CAR(VECTOR_DATA(v)[i]));
+
+    long_options[i].name    = STRING_CHARS(CAR(VECTOR_DATA(v)[i]));
+    long_options[i].has_arg = (CDR(VECTOR_DATA(v)[i]) == STk_false) ? no_argument 
+      							        : required_argument;
+    long_options[i].flag    = 0;
+    long_options[i].val     = 0;
+  }
+  
+  long_options[len].name = NULL; long_options[len].has_arg = 0;
+  long_options[len].flag = NULL; long_options[len].val     = 0;
+
+  return STk_void;
+}
+
+DEFINE_PRIMITIVE("%getopt", getopt, subr0, (void))
+{
+  int  n, longindex; 
+
+  n = getopt_long(Argc, Argv, optstring, long_options, &longindex);
+
+  switch (n) {
+    case -1:
+      {
+	/* We are at the end. Collect all the remaining parameters in a list */
+	SCM l = STk_nil;
+	while (optind < Argc)
+	  l = STk_cons(STk_Cstring2string(Argv[optind++]), l);
+	
+	return STk_cons(MAKE_INT((long) -1), STk_dreverse(l));
+      }
+    case '?': /* Error or argument missing */
+    case ':': return STk_false;
+    case 0  : /* Long option */
+      {
+	SCM str = (optarg)? STk_Cstring2string(optarg): STk_void;
+	return STk_cons(MAKE_INT(longindex),str);
+      }
+    default: /* short option */
+      {
+	SCM str = (optarg)? STk_Cstring2string(optarg): STk_void;
+	return STk_cons(MAKE_CHARACTER(n),  str);
+      }
+  }
+}
+
+/*===========================================================================*\
+ * 
+ * 			HTML stuff
+ * 
+\*===========================================================================*/
+
+/*
+static char URI_regexp[] = 
+  "^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\\\?([^#]*))?(#(.*))?";
+*/
+
+/*
+ * URI parsing (RFC2396)
+ *
+ */
+
+/*
+<doc EXT uri-parse
+ * (uri-parse str)
+ * 
+ * Parses the string |str| as a RFC-2396 URI and return a keyed list with the 
+ * following components
+ * ,(itemize
+ * (item [|scheme| : the scheme used as a string (defaults to |"file"|)])
+ * (item [|host| : the host as a string (defaults to "")])
+ * (item [|port| : the port as an integer (0 if no port specified)])
+ * (item [|path| : the path ])
+ * (item [|query| : the qury part of the URI as a string (defaults to the 
+ * empty string)])
+ * (item [|fragment| : the fragment of the URI as a string (defaults to the 
+ * empty string)])
+ * )
+ * @lisp
+ * (uri-parse "http://google.com")
+ *     => (:scheme "http" :host "google.com" :port 80 :path "/" 
+ *         :query "" :fragment "")
+ * (uri-parse "http://stklos.net:8080/a/file?x=1;y=2#end")
+ *     => (:scheme "http" :host "stklos.net" :port 8080 
+ *         :path "/a/file" :query "x=1;y=2" :fragment "end")
+ * (uri-parse "/a/file")           
+ *    => (:scheme "file" :host "" :port 0 :path "/a/file" 
+ *        :query "" :fragment "")
+ * (uri-parse "")
+ *    => (:scheme "file" :host "" :port 0 :path "" 
+ *        :query "" :fragment "")
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
+{
+  SCM file, tmp, scheme, host, port, path, query, fragment;
+  SCM *vect;
+  char *url;
+
+  if (!STRINGP(url_str)) error_bad_string(url_str);
+
+  scheme = file = STk_Cstring2string("file");
+  url    = STRING_CHARS(url_str);    
+
+  if (!strstr(url,"://")) {			/* No :// => this is a file */
+    port   = MAKE_INT(0);
+    path   = url_str;
+    host = query = fragment = STk_Cstring2string("");
+  } else {					/* general URI */
+    char *start;
+    /* Scheme */
+    for (start = url; *url && *url != ':'; url++) {
+    }
+    if (strncmp(url, "://", 3) != 0) goto Error;
+    tmp    = STk_makestring(url-start, start);
+    scheme = STk_string_ddowncase(1, &tmp);
+    
+    if ((STk_equal(scheme, file) != STk_false) && (strncmp(url, ":///", 4) != 0))
+      /* URI such as file://tmp/X produce host="tmp" and file "/X"
+       * (as mozilla). It is incorrect, but this is a common mistake,
+       * so we try to fix input here */
+      url += 2;
+    else 
+      url += 3;
+    
+    /* Host */
+    for (start = url; *url && *url != '/' && *url != ':'; url++) {
+    }
+    host = STk_makestring(url-start, start); 
+
+
+    /* Port */
+    if (*url == ':') {
+      url += 1;
+      for (start = url; *url && *url != '/'; url++) {
+      }
+      tmp  = STk_makestring(url-start, start);
+      port = STk_Cstr2number(STRING_CHARS(tmp), 10);
+      if (port == STk_false)
+	STk_error("bad port number in URL ~S", url_str);
+    } else {
+      char *scm = STRING_CHARS(scheme);
+
+      if (strcmp(scm, "http") == 0) port = MAKE_INT(80); else 
+      if (strcmp(scm, "ftp") == 0) port = MAKE_INT(21);  
+      else port = MAKE_INT(0);
+    }
+    if (*url) url += 1;
+    
+    /* Path */
+    if (*url) {
+      for (start = url; *url && *url != '?' && *url != '#'; url++) {
+      }
+      path = STk_makestring(url-start+1, start-1);
+    } else {
+      path = STk_Cstring2string("/");
+    }
+        
+    /* Query */
+    if (*url == '?') {
+      url += 1;
+      for (start = url; *url && *url != '#'; url++) {
+      }
+      query = STk_makestring(url-start, start);
+    } else 
+      query = STk_Cstring2string("");
+
+    /* Fragment */
+    fragment = STk_Cstring2string((*url == '#') ? url+1: "");
+  }
+
+  /* Build the result */
+  tmp  = STk_makevect(12, STk_false);
+  vect = VECTOR_DATA(tmp);
+  
+  vect[0]  = STk_makekey("scheme");   vect[1]  = scheme;
+  vect[2]  = STk_makekey("host");     vect[3]  = host;
+  vect[4]  = STk_makekey("port");     vect[5]  = port;
+  vect[6]  = STk_makekey("path");     vect[7]  = path;
+  vect[8]  = STk_makekey("query");    vect[9]  = query;
+  vect[10] = STk_makekey("fragment"); vect[11] = fragment;
+
+  return STk_vector2list(tmp);
+Error:
+  STk_error("bad URL ~S", url_str);
+  return STk_void;  
+}
+
+/*
+<doc EXT string->html
+ * (string->html str)
+ *
+ * This primitive is a convenience function; it returns a string where 
+ * the HTML special chars are properly translated. It can easily written 
+ * in Scheme, but this version is fast.
+ * @lisp
+ * (string->html "Just a <test>")
+ *    => "Just a &lt;test&gt;"
+ * @end lisp
+doc>
+*/ 
+DEFINE_PRIMITIVE("string->html", str2html, subr1, (SCM str))
+{
+  char *s, *d;
+  int i, len, size = 0;
+  SCM z;
+
+  if (!STRINGP(str)) error_bad_string(str);
+  
+  s   = STRING_CHARS(str);
+  len = STRING_SIZE(str);
+  
+  /* Compute the size of the result string */
+  for (size=0, i=len; i; size++, i--) {
+    switch (*s++) {
+      case '\'': size += 5; break;
+      case '<':
+      case '>': size += 3; break;
+      case '&': size += 4; break;
+    }
+  }
+
+  if (size == len) 
+    /* No special character in the string */
+    return str;
+  else {
+    /* Build the result string */
+    z = STk_makestring(size, NULL);
+    d = STRING_CHARS(z);
+
+    for (s = STRING_CHARS(str); len--; s++) {
+      switch (*s) {
+      case '\'': 
+	d[0]='&'; d[1]='q'; d[2]='u'; d[3]='o'; d[4]='t'; d[5]=';';
+	d += 6; 
+	break;
+      case '<':
+	d[0]='&'; d[1]='l'; d[2]='t'; d[3]=';'; 
+	d += 4; 
+	break;
+      case '>': 
+	d[0]='&'; d[1]='g'; d[2]='t'; d[3]=';'; 
+	d += 4;
+	break;
+      case '&':	
+	d[0]='&'; d[1]='a'; d[2]='m'; d[3]='p'; d[4]=';'; 
+	d += 5; 
+	break;
+      default:
+	*d++ = *s;
+      }
+    }
+
+    return z;
+  }
+}
+
+/*
+<doc EXT get-password
+ * (get-password)
+ *
+ * This primitive permits to enter a password (character echoing 
+ * being turned off). The value returned by |get-password| is the entered
+ * password as a string.
+doc>
+*/
+DEFINE_PRIMITIVE("get-password", getpass, subr0, (void))
+{
+  char *s;
+  SCM z;
+  
+  s = getpass("");
+  if (!s) STk_error("terminal not available");
+
+   z = STk_Cstring2string(s);
+   memset(s, '\0', strlen(s)); /* more secure? */
+   return z;
+}
+
+
+/*===========================================================================*\
+ * 
+ * 			Debugging Code
+ * 
+\*===========================================================================*/
+#ifdef STK_DEBUG
+DEFINE_PRIMITIVE("%debug", set_debug, subr0, (void))
+{
+  STk_interactive_debug = !STk_interactive_debug;
+  STk_debug("Debug mode %d", STk_interactive_debug);
+  return STk_void;
+}
+
+DEFINE_PRIMITIVE("%test", test, subr1, (SCM s))
+{
+  /* A special place for doing tests */
+  STk_eval_C_string("(display \"Hello, world!\")", STk_current_module);
+  STk_eval_C_string("(display (fact 200))", STk_current_module);
+  return STk_void;
+}
+#endif
+
+/*===========================================================================*\
+ * 
+ * 				Initialization
+ * 
+\*===========================================================================*/
+int STk_init_misc(void)
+{
+  ADD_PRIMITIVE(version);
+  ADD_PRIMITIVE(scheme_void);
+  ADD_PRIMITIVE(address_of);
+  ADD_PRIMITIVE(scheme_gc);
+
+  ADD_PRIMITIVE(init_getopt);
+  ADD_PRIMITIVE(getopt);
+  ADD_PRIMITIVE(getpass);
+
+  ADD_PRIMITIVE(uri_parse);
+  ADD_PRIMITIVE(str2html);
+  
+#ifdef STK_DEBUG
+  ADD_PRIMITIVE(set_debug);
+  ADD_PRIMITIVE(test);
+#endif
+  return TRUE;
+}
+

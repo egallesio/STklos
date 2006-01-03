@@ -1,0 +1,80 @@
+#!/bin/sh
+# 							-*- shell-script -*-
+
+# 
+# s t k l o s - c o n f i g
+#
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+# USA.
+#
+#           Author: Erick Gallesio [eg@unice.fr]
+#    Creation date: 27-Jul-2000 23:58 (eg)
+# Last file update: 18-Mar-2005 15:39 (eg)
+
+
+prefix=@prefix@
+
+function usage()
+{
+    cat <<EOF
+Usage: stklos-config [OPTIONS]
+Options:
+	[--prefix | -p]		Prefix that was given during the build
+	[--version | -v]	Version of STklos that is installed
+	[--compile | -c]	Command that should be run to compile 
+				shared libraries.
+	[--link | -l]		Command that should be used to link shared 
+				libraries
+	[--shared-suffix | -s]	Suffix for shared libraries on current 
+				platform
+	[--help | -h | -?]	Show a list of options
+EOF
+    exit $1
+}
+
+
+if test $# -eq 0; then
+    usage 1 1>&2
+fi
+
+while test $# -gt 0; do
+    case $1 in
+	--prefix|-p)
+	    echo ${prefix}
+	    ;;
+	--version|-v)
+	    echo @VERSION@
+	    ;;
+	--compile|-c)
+	    echo @CC@ @SH_COMP_FLAGS@ -I${prefix}/include/@PACKAGE@
+	    ;;
+	--link|-l)
+	    echo @SH_LOADER@ @SH_LOAD_FLAGS@
+	    ;;
+	--shared-suffix|-s)
+	    echo @SH_SUFFIX@
+	    ;;
+	--help|-h|-\?)
+	    usage 0 1>&2
+	    ;;
+	*)
+	    echo "bad option $1" 1>&2
+	    usage 1 1>&2
+	    ;;
+    esac
+    shift
+done
+exit 0

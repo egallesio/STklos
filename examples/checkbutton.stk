@@ -1,0 +1,43 @@
+;;;;
+;;;; checkbutton.stk			-- GTklos Checkbutton Demo
+;;;; 
+;;;; Copyright © 2001 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 25-Jul-2001 21:29 (eg)
+;;;; Last file update: 26-Nov-2001 22:16 (eg)
+;;;;
+(include "gtklos-demo.stk")
+
+(define (main args)
+  (let* ((win (make <demo-window> :title "Check Button Demo" :x 100 :y 100
+		    		  :border-width 10 :file "checkbutton"
+				  :message "
+This is a demo showing a check button.
+Nothing special here
+"))
+	 (b  (make <check-button>
+	       	   :parent win
+		   :text "A Check Button"
+		   :border-width 20
+		   :command (lambda (e)
+			      (format #t "Check butoon state => ~S\n"
+				      (value (event-widget e)))))))
+    
+    'done))

@@ -1,0 +1,204 @@
+;; ======================================================================
+;; 
+;; 			STklos Reference Manual
+;;
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2 of the License, or
+;; (at your option) any later version.
+;; 
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;; 
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; USA.
+;;           Author: Erick Gallesio [eg@unice.fr]
+;;    Creation date: 26-Nov-2000 18:19 (eg)
+;; Last file update:  8-Feb-2005 19:37 (eg)
+;;
+;; ======================================================================
+
+  
+;; ======================================================================
+;;
+;;			Expressions
+;;
+;; ======================================================================
+(chapter :title "Expressions"
+
+(p [This chapter describes the main forms available in ,(stklos). ,(rfive)
+constructions are given
+very succinctly here for reference. See the (ref :bib "R5RS") for a complete
+description.])
+   
+   
+;;
+;; LITERAL EXPRESSIONS
+;;
+(section :title "Literal expressions"
+   (insertdoc 'quote))
+
+;;
+;; PROCEDURES
+;;  
+(section :title "Procedures"
+(index ":optional parameter")
+(index ":rest parameter")
+(index ":key parameter")
+(index "procedure parameter")
+(index "procedure parameter" :note ":optional")
+(index "procedure parameter" :note ":key")
+(index "procedure parameter" :note ":rest")
+(index "keyword parameter")
+(index "procedure")
+(index "closure")
+
+(insertdoc 'lambda)
+(insertdoc 'closure?)
+(insertdoc 'case-lambda)
+)
+
+ ;;
+;; ASSIGNMENTS
+;; 
+(section :title "Assignments"
+(index "assignment")
+(insertdoc 'set!)
+(insertdoc 'setter))
+
+;;
+;; CONDITIONALS
+;;     
+(section :title "Conditionals"
+(index "conditional")
+
+(insertdoc 'if)
+(insertdoc 'cond)
+
+(insertdoc 'case)
+(insertdoc 'and)
+(insertdoc 'or)
+(insertdoc 'when)
+(insertdoc 'unless))
+
+;;
+;; BINDING constructs 
+;; 
+(section :title "Binding Constructs"
+(index "binding constructs")
+   
+[The three binding constructs ,(code "let"), ,(code "let*"), and 
+,(code "letrec") are available in STklos.  
+These constructs differ in the regions they establish for
+their variable bindings.  In a ,(code "let") expression, the initial values are
+computed before any of the variables become bound; in a ,(code "let*")
+expression, the bindings and evaluations are performed sequentially; while in a
+,(code "letrec") expression, all the bindings are in effect while their initial
+values are being computed, thus allowing mutually recursive definitions.
+,(linebreak)
+,(stklos) also provides a ,(code "fluid-let") form which is described below.]
+
+(insertdoc 'let)
+(insertdoc 'let*)
+(insertdoc 'letrec)
+(insertdoc 'fluid-let))
+
+;;
+;; BEGIN
+;;
+(section :title "Sequencing"
+(insertdoc 'begin))
+
+
+;;
+;; LOOPS
+;;
+(section :title "Iterations"
+
+(insertdoc 'do)
+
+(insertdoc 'dotimes)
+(insertdoc 'while)
+(insertdoc 'until))
+
+
+;;
+;; DELAY
+;;
+(section :title "Delayed Evaluation"
+(index "call by need")
+(index "lazy evaluation")
+(index "promise")
+   
+(insertdoc 'delay)
+(insertdoc 'promise?))
+
+;;
+;; QUASIQUOTE
+;; 
+(section :title "Quasiquotation"
+(index "quasiquote")
+(index "backquote")
+(index "unquote")
+(index "unquote-splicing")
+(index ", in quasiquote")
+(index ",@ in quasiquote")
+(insertdoc 'quasiquote))
+   
+   
+;;
+;; MACROS
+;;
+(section :title "Macros"
+(index "macros")
+(index "hygienic macros")
+(index "low level macros")
+
+
+(p [STklos supports hygienic macros such as the ones defined in R5RS
+as well as low level macros.])
+(index "SLIB")
+
+(p [Low level macros are defined with ,(code "define-macro") whereas
+R5RS macros are defined with ,(code "define-syntax")
+,(footnote "Documentation about hygienic macros has been stolen in
+the SLIB manual").  Hygienic macros use the implementation
+called ,(emph "Macro by Example") (Eugene Kohlbecker, R4RS) done by Dorai
+Sitaram. This implementation generates low level STklos
+macros. This implementation of hygienic macros is not expensive.])
+
+ (index "macros" :note "referentially transparent") 
+(p [The major drawback of this implementation is that the macros are
+ not ,(emph "referentially transparent") (see section `Macros' in
+ R4RS for details). Lexically scoped macros
+ (i.e., ,(code "let-syntax") and ,(code "letrec-syntax") are not
+ supported). In any case, the problem of referential transparency
+ gains poignancy only when ,(code "let-syntax") and
+ ,(code "letrec-syntax") are used. So you will not be courting
+ large-scale disaster unless you're using system-function names as
+ local variables with unintuitive bindings that the macro can't
+ use. However, if you must have the full R5RS macro
+ functionality, you can do 
+ ,(fontified-code [(require "full-syntax")])
+ to have access to the more featureful (but also more expensive) 
+ versions of ,(code "syntax-rules"). Requiring ,(code "\"full-syntax\"") 
+ loads the version 2.1 of an implementation of hygienic macros by 
+ Robert Hieb and R. Kent Dybvig.])
+
+(TODO "DOCUMENT THE LOW LEVEL EXPANDER MECHANISM")
+(insertdoc 'define-macro)
+(insertdoc 'define-syntax)
+(insertdoc 'syntax-rules)
+(insertdoc 'let-syntax)
+(insertdoc 'letrec-syntax)
+
+(index "Macros" :note "expansion")
+(insertdoc 'macro-expand)
+)
+   
+)
+

@@ -1,0 +1,1196 @@
+;;;;
+;;;; test-number.stk	-- Test numbers
+;;;; 
+;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date:  3-May-2005 14:29 (eg)
+;;;; Last file update:  9-Aug-2005 15:59 (eg)
+;;;;
+
+;;;; Most of theses tests were stolen in Gauche Scheme distribution
+
+
+(test-section "Numbers")
+
+
+(define (exp2 pow)
+  (do ((i 0 (+ i 1))
+       (m 1 (+ m m)))
+      ((>= i pow) m)))
+
+(define (fermat n)                      ;Fermat's number
+  (+ (expt 2 (expt 2 n)) 1))
+
+
+;;==================================================================
+;; Reader/writer
+;;
+
+;;------------------------------------------------------------------
+(test-subsection "integer addition & reader")
+
+(define (i-tester x)
+  (list x (+ x -1 x) (+ x x) (- x) (- (+ x -1 x)) (- 0 x x) (- 0 x x 1)))
+
+(test "around 2^28"
+      '(268435456 536870911 536870912
+        -268435456 -536870911 -536870912 -536870913)
+      (i-tester (exp2 28)))
+      
+(test "around 2^31"
+      '(2147483648 4294967295 4294967296
+        -2147483648 -4294967295 -4294967296 -4294967297)
+      (i-tester (exp2 31)))
+
+(test "around 2^60"
+      '(1152921504606846976 2305843009213693951 2305843009213693952
+        -1152921504606846976 -2305843009213693951 -2305843009213693952
+        -2305843009213693953)
+      (i-tester (exp2 60)))
+
+(test "around 2^63"
+      '(9223372036854775808 18446744073709551615 18446744073709551616
+        -9223372036854775808 -18446744073709551615 -18446744073709551616
+        -18446744073709551617)
+      (i-tester (exp2 63)))
+
+(test "around 2^127"
+      '(170141183460469231731687303715884105728
+        340282366920938463463374607431768211455
+        340282366920938463463374607431768211456
+        -170141183460469231731687303715884105728
+        -340282366920938463463374607431768211455
+        -340282366920938463463374607431768211456
+        -340282366920938463463374607431768211457)
+      (i-tester (exp2 127)))
+
+;; test for reader's overflow detection code
+(test "peculiarity around 2^32"
+      (* 477226729 10) 4772267290)
+
+(test "radix" '(43605 342391 718048024785
+                123456789 123456789987654321
+                1193046 3735928559 3735928559)
+              (list #b1010101001010101
+              #o1234567
+              #o12345677654321
+              #d123456789
+              #d123456789987654321
+              #x123456
+              #xdeadbeef
+              #xDeadBeef))
+
+(test "exactness.1" #t (exact? #e10))
+(test "exactness.2" #t (exact? #e10.0))
+(test "exactness.3" #t (exact? #e10e10))
+(test "exactness.4" 617/50 (string->number "#e12.34"))
+(test "inexactness.1" #f (exact? #i10))
+(test "inexactness.2" #f (exact? #i10.0))
+(test "inexactness.3" #f (exact? #i12.34))
+
+(test "exactness & radix" '(#t 3735928559 #t 3735928559)
+      (list (exact? #e#xdeadbeef)
+                       #e#xdeadbeef
+                       (exact? #x#edeadbeef)
+                       #x#edeadbeef))
+(test "inexactness & radix" '(#f 3735928559.0 #f 3735928559.0)
+      (list (exact? #i#xdeadbeef)
+                       #i#xdeadbeef
+                       (exact? #x#ideadbeef)
+                       #x#ideadbeef))
+
+(test "invalid exactness/radix spec" #f
+      (or (string->number "#e")
+                     (string->number "#i")
+                     (string->number "#e#i3")
+                     (string->number "#i#e5")
+                     (string->number "#x#o13")
+                     (string->number "#e#b#i00101")))
+
+;;------------------------------------------------------------------
+(test-subsection "rational reader")
+
+(define (rational-test v)
+  (if (number? v) (list v (exact? v)) v))
+
+(test "rational reader.1" '(1234 #t) (rational-test '1234/1))
+(test "rational reader.2" '(-1234 #t) (rational-test '-1234/1))
+(test "rational reader.3" '(1234 #t) (rational-test '+1234/1))
+;; (test "rational reader.4" '(-1234 #t)| (rational-test '1234/-1)) ??
+(test "rational reader.5" '(1234 #t) (rational-test '2468/2))
+(test "rational reader.6" '(1/2 #t) (rational-test '1/2))
+(test "rational reader.7" '(-1/2 #t) (rational-test '-1/2))
+(test "rational reader.8" '(1/2 #t) (rational-test '+1/2))
+(test "rational reader.9" '(1/2 #t) (rational-test '751/1502))
+
+;; FIXME: string->number ne doit pas signaler une erreur ici
+;; (test "rational reader" '(1 #t)
+;;       (rational-test (string->number "3/03")))
+;; (test "rational reader" #f
+;;       (rational-test (string->number "3/0")))
+;; (test "rational reader" #f
+;;       (rational-test (string->number "3/3/4")))
+;; (test "rational reader" #f
+;;       (rational-test (string->number "1/2.")))
+;; (test "rational reader" #f
+;;       (rational-test (string->number "1.3/2")))
+
+(test "rational reader w/#e" '(1234 #t)
+      (rational-test '#e1234/1))
+(test "rational reader w/#e" '(-1234 #t)
+      (rational-test '#e-1234/1))
+(test "rational reader w/#e" 32/7
+      (string->number "#e32/7"))
+(test "rational reader w/#e" -32/7
+      (string->number "#e-32/7"))
+;; FIXME:
+;; (test "rational reader w/#i" '(1234.0 #f)
+;;       (rational-test '#i1234/1))
+;; (test "rational reader w/#i" '(-1234.0 #f)
+;;       (rational-test '#i-1234/1))
+;; (test "rational reader w/#i" '(-0.125 #f)
+;;       (rational-test '#i-4/32))
+
+(test "rational reader w/radix" '(15 #t)
+      (rational-test '#e#xff/11))
+(test "rational reader w/radix" '(56 #t)
+      (rational-test '#o770/11))
+;;FIXME:
+;;(test "rational reader w/radix" '(15.0 #f)
+;;      (rational-test '#x#iff/11))
+
+
+;;------------------------------------------------------------------
+(test-subsection "flonum reader")
+
+(define (flonum-test v)
+  (if (number? v) (list v (inexact? v)) v))
+
+(test "flonum reader.1" '(3.14 #t)  (flonum-test 3.14))
+(test "flonum reader.2" '(0.14 #t)  (flonum-test 0.14))
+(test "flonum reader.3" '(0.14 #t)  (flonum-test .14))
+(test "flonum reader.4" '(3.0  #t)  (flonum-test 3.))
+(test "flonum reader.5" '(-3.14 #t)  (flonum-test -3.14))
+(test "flonum reader.6" '(-0.14 #t)  (flonum-test -0.14))
+(test "flonum reader.7" '(-0.14 #t)  (flonum-test -.14))
+(test "flonum reader.8" '(-3.0  #t)  (flonum-test -3.))
+(test "flonum reader.9" '(3.14 #t)  (flonum-test +3.14))
+(test "flonum reader.10" '(0.14 #t)  (flonum-test +0.14))
+(test "flonum reader.11" '(0.14 #t)  (flonum-test +.14))
+(test "flonum reader.12" '(3.0  #t)  (flonum-test +3.))
+(test "flonum reader.13" '(0.0  #t)  (flonum-test .0))
+(test "flonum reader.14" '(0.0  #t)  (flonum-test 0.))
+(test "flonum reader.15" #f (string->number "."))
+(test "flonum reader.16" #f (string->number "-."))
+(test "flonum reader.17" #f (string->number "+."))
+
+(test "flonum reader (exp).1" '(314.0 #t) (flonum-test 3.14e2))
+(test "flonum reader (exp).2" '(314.0 #t) (flonum-test .314e3))
+(test "flonum reader (exp).3" '(314.0 #t) (flonum-test 314e0))
+(test "flonum reader (exp).4" '(314.0 #t) (flonum-test 314e-0))
+(test "flonum reader (exp).5" '(314.0 #t) (flonum-test 3140000e-4))
+(test "flonum reader (exp).6" '(-314.0 #t) (flonum-test -3.14e2))
+(test "flonum reader (exp).7" '(-314.0 #t) (flonum-test -.314e3))
+(test "flonum reader (exp).8" '(-314.0 #t) (flonum-test -314e0))
+(test "flonum reader (exp).9" '(-314.0 #t) (flonum-test -314.e-0))
+(test "flonum reader (exp).10" '(-314.0 #t) (flonum-test -3140000e-4))
+(test "flonum reader (exp).11" '(314.0 #t) (flonum-test +3.14e2))
+(test "flonum reader (exp).12" '(314.0 #t) (flonum-test +.314e3))
+(test "flonum reader (exp).13" '(314.0 #t) (flonum-test +314.e0))
+(test "flonum reader (exp).14" '(314.0 #t) (flonum-test +314e-0))
+(test "flonum reader (exp).15" '(314.0 #t) (flonum-test +3140000.000e-4))
+
+(test "flonum reader (exp)" '(314.0 #t) (flonum-test .314E3))
+(test "flonum reader (exp)" '(314.0 #t) (flonum-test .314s3))
+(test "flonum reader (exp)" '(314.0 #t) (flonum-test .314S3))
+(test "flonum reader (exp)" '(314.0 #t) (flonum-test .314l3))
+(test "flonum reader (exp)" '(314.0 #t) (flonum-test .314L3))
+(test "flonum reader (exp)" '(314.0 #t) (flonum-test .314f3))
+(test "flonum reader (exp)" '(314.0 #t) (flonum-test .314F3))
+(test "flonum reader (exp)" '(314.0 #t) (flonum-test .314d3))
+(test "flonum reader (exp)" '(314.0 #t) (flonum-test .314D3))
+
+(test "padding" '(10.0 #t) (flonum-test '1#))
+(test "padding" '(10.0 #t) (flonum-test '1#.))
+(test "padding" '(10.0 #t) (flonum-test '1#.#))
+(test "padding" '(100.0 #t) (flonum-test '10#.#))
+(test "padding" '(100.0 #t) (flonum-test '1##.#))
+(test "padding" '(100.0 #t) (flonum-test '100.0#))
+(test "padding" '(1.0 #t) (flonum-test '1.#))
+
+;; FIXME:
+;; (test "padding" '|1#1| (flonum-test '1#1))
+;; (test "padding" '|1##1| (flonum-test '1##1))
+;; (test "padding" '|1#.1| (flonum-test '1#.1))
+;; (test "padding" '|1.#1| (flonum-test '1.#1))
+
+;;FIXME: (test "padding" '|.#| (flonum-test '.#))
+(test "padding" '(0.0 #t) (flonum-test '0.#))
+(test "padding" '(0.0 #t) (flonum-test '.0#))
+(test "padding" '(0.0 #t) (flonum-test '0#))
+(test "padding" '(0.0 #t) (flonum-test '0#.#))
+;;FIXME: (test "padding" '|0#.0| (flonum-test '0#.0))
+
+(test "padding" '(1000.0 #t) (flonum-test '1#e2))
+(test "padding" '(1000.0 #t) (flonum-test '1##e1))
+(test "padding" '(1000.0 #t) (flonum-test '1#.##e2))
+(test "padding" '(0.0 #t) (flonum-test '0.#e2))
+(test "padding" '(0.0 #t) (flonum-test '.0#e2))
+;;FIXME: (test "padding" '|.##e2| (flonum-test '.##e2))
+
+
+(test "padding (exactness)" '(100 #f) (flonum-test '#e1##))
+(test "padding (exactness)" '(120 #f) (flonum-test '#e12#))
+(test "padding (exactness)" '(120 #f) (flonum-test '#e12#.#))
+(test "padding (exactness)" '(100.0 #t) (flonum-test '#i1##))
+(test "padding (exactness)" '(120.0 #t) (flonum-test '#i12#))
+(test "padding (exactness)" '(120.0 #t) (flonum-test '#i12#.#))
+
+;;------------------------------------------------------------------
+(test-subsection "complex reader")
+
+(define (decompose-complex z)
+  (cond ((real? z) z)
+        ((complex? z)
+         (list (real-part z) (imag-part z)))
+        (else z)))
+
+(test "complex reader" '(1 1) (decompose-complex '1+i))
+(test "complex reader" '(1 1) (decompose-complex '1+1i))
+(test "complex reader" '(1 -1) (decompose-complex '1-i))
+(test "complex reader" '(1 -1) (decompose-complex '1-1i))
+(test "complex reader" '(1.0 1) (decompose-complex '1.0+1i))
+(test "complex reader" '(1.0 1.0) (decompose-complex '1.0+1.0i))
+(test "complex reader" '(1e-5 1) (decompose-complex '1e-5+1i))
+(test "complex reader" '(1e+5 1) (decompose-complex '1e+5+1i))
+(test "complex reader" '(1 1e-5) (decompose-complex '1+1e-5i))
+(test "complex reader" '(1 1e+5) (decompose-complex '1+1e+5i))
+(test "complex reader" '(0.1 1e+4) (decompose-complex '0.1+0.1e+5i))
+(test "complex reader" '(0 1) (decompose-complex '+i))
+(test "complex reader" '(0 -1) (decompose-complex '-i))
+(test "complex reader" '(0 1) (decompose-complex '+1i))
+(test "complex reader" '(0 -1) (decompose-complex '-1i))
+(test "complex reader" '(0 1.0) (decompose-complex '+1.i))
+(test "complex reader" '(0 -1.0) (decompose-complex '-1.i))
+(test "complex reader" '(0 1.0) (decompose-complex '+1.0i))
+(test "complex reader" '(0 -1.0) (decompose-complex '-1.0i))
+(test "complex reader" 1 (decompose-complex '1+0.0i))
+(test "complex reader" 1 (decompose-complex '1+.0i))
+(test "complex reader" 1 (decompose-complex '1+0.i))
+(test "complex reader" 1 (decompose-complex '1+0.0e-43i))
+(test "complex reader" 100.0 (decompose-complex '1e2+0.0e-43i))
+
+(test "complex reader" 'i (decompose-complex 'i))
+(test "complex reader" #f (decompose-complex (string->number ".i")))
+(test "complex reader" #f (decompose-complex (string->number "+.i")))
+(test "complex reader" #f (decompose-complex (string->number "-.i")))
+(test "complex reader" '33i (decompose-complex '33i))
+(test "complex reader" 'i+1 (decompose-complex 'i+1))
+
+(test "complex reader" '(1/2 1/2) (decompose-complex 1/2+1/2i))
+(test "complex reader" '(0 1/2) (decompose-complex 0+1/2i))
+(test "complex reader" '(0 -1/2) (decompose-complex -1/2i))
+(test "complex reader" 1/2 (decompose-complex 1/2-0/2i))
+;;FIXME: (test "complex reader" #f (decompose-complex (string->number "1/2-1/0i")))
+
+(test "complex reader (polar)" (make-polar 1.0 1.0) 1.0@1.0)
+(test "complex reader (polar)" (make-polar 1.0 -1.0) 1.0@-1.0)
+(test "complex reader (polar)" (make-polar 1.0 1.0) 1.0@+1.0)
+(test "complex reader (polar)" (make-polar -7.0 -3.0) -7@-3.0)
+(test "complex reader (polar)" (make-polar 3.5 -3.0) 7/2@-3.0)
+(test "complex reader (polar)" #f (string->number "7/2@-3.14i"))
+
+
+;;------------------------------------------------------------------
+(test-subsection "integer writer syntax")
+
+(define (i-tester2 x)
+  (map number->string (i-tester x)))
+
+(test "around 2^28"
+      '("268435456" "536870911" "536870912"
+        "-268435456" "-536870911" "-536870912" "-536870913")
+      (i-tester2 (exp2 28)))
+      
+(test "around 2^31"
+      '("2147483648" "4294967295" "4294967296"
+        "-2147483648" "-4294967295" "-4294967296" "-4294967297")
+      (i-tester2 (exp2 31)))
+
+(test "around 2^60"
+      '("1152921504606846976" "2305843009213693951" "2305843009213693952"
+        "-1152921504606846976" "-2305843009213693951" "-2305843009213693952"
+        "-2305843009213693953")
+      (i-tester2 (exp2 60)))
+
+(test "around 2^63"
+      '("9223372036854775808" "18446744073709551615" "18446744073709551616"
+        "-9223372036854775808" "-18446744073709551615" "-18446744073709551616"
+        "-18446744073709551617")
+      (i-tester2 (exp2 63)))
+
+(test "around 2^127"
+      '("170141183460469231731687303715884105728"
+        "340282366920938463463374607431768211455"
+        "340282366920938463463374607431768211456"
+        "-170141183460469231731687303715884105728"
+        "-340282366920938463463374607431768211455"
+        "-340282366920938463463374607431768211456"
+        "-340282366920938463463374607431768211457")
+      (i-tester2 (exp2 127)))
+
+
+;;==================================================================
+;; Predicates
+;;
+
+(test-subsection "predicates")
+
+(test "integer?" #t (integer? 0))
+(test "integer?" #t (integer? 85736847562938475634534245))
+(test "integer?" #f (integer? 85736.534245))
+(test "integer?" #f (integer? 3.14))
+(test "integer?" #f (integer? 3+4i))
+(test "integer?" #t (integer? 3+0i))
+(test "integer?" #f (integer? #f))
+
+(test "rational?" #t (rational? 0))
+(test "rational?" #t (rational? 85736847562938475634534245))
+(test "rational?" #t (rational? 85736.534245))
+(test "rational?" #t (rational? 3.14))
+(test "rational?" #f (rational? 3+4i))
+(test "rational?" #t (rational? 3+0i))
+(test "rational?" #f (rational? #f))
+
+(test "real?" #t (real? 0))
+(test "real?" #t (real? 85736847562938475634534245))
+(test "real?" #t (real? 857368.4756293847))
+(test "real?" #t (real? 3+0i))
+(test "real?" #f (real? 3+4i))
+(test "real?" #f (real? +4.3i))
+(test "real?" #f (real? '()))
+
+(test "complex?" #t (complex? 0))
+(test "complex?" #t (complex? 85736847562938475634534245))
+(test "complex?" #t (complex? 857368.4756293847))
+(test "complex?" #t (complex? 3+0i))
+(test "complex?" #t (complex? 3+4i))
+(test "complex?" #t (complex? +4.3i))
+(test "complex?" #f (complex? '()))
+
+(test "number?" #t (number? 0))
+(test "number?" #t (number? 85736847562938475634534245))
+(test "number?" #t (number? 857368.4756293847))
+(test "number?" #t (number? 3+0i))
+(test "number?" #t (number? 3+4i))
+(test "number?" #t (number? +4.3i))
+(test "number?" #f (number? '()))
+
+(test "exact?" #t (exact? 1))
+(test "exact?" #t (exact? 4304953480349304983049304953804))
+(test "exact?" #f (exact? 1.0))
+(test "exact?" #f (exact? 4304953480349304983.049304953804))
+(test "exact?" #f (exact? 1.0+0i))
+(test "exact?" #f (exact? 1.0+5i))
+(test "inexact?" #f (inexact? 1))
+(test "inexact?" #f (inexact? 4304953480349304983049304953804))
+(test "inexact?" #t (inexact? 1.0))
+(test "inexact?" #t (inexact? 4304953480349304983.049304953804))
+(test "inexact?" #t (inexact? 1.0+0i))
+(test "inexact?" #t (inexact? 1.0+5i))
+
+(test "odd?" #t (odd? 1))
+(test "odd?" #f (odd? 2))
+(test "even?" #f (even? 1))
+(test "even?" #t (even? 2))
+;;FIXME: (test "odd?" #t (odd? 1.0))
+;;FIXME: (test "odd?" #f (odd? 2.0))
+;;FIXME: (test "even?" #f (even? 1.0))
+;;FIXME: (test "even?" #t (even? 2.0))
+(test "odd?" #t (odd? 10000000000000000000000000000000000001))
+(test "odd?" #f (odd? 10000000000000000000000000000000000002))
+(test "even?" #f (even? 10000000000000000000000000000000000001))
+(test "even?" #t (even? 10000000000000000000000000000000000002))
+
+(test "zero?" #t (zero? 0))
+(test "zero?" #t (zero? 0.0))
+(test "zero?" #t (zero? (- 10 10.0)))
+(test "zero?" #t (zero? 0+0i))
+(test "zero?" #f (zero? 1.0))
+(test "zero?" #f (zero? +5i))
+(test "positive?" #t (positive? 1))
+(test "positive?" #f (positive? -1))
+(test "positive?" #t (positive? 3.1416))
+(test "positive?" #f (positive? -3.1416))
+(test "positive?" #t (positive? 134539485343498539458394))
+(test "positive?" #f (positive? -134539485343498539458394))
+(test "negative?" #f (negative? 1))
+(test "negative?" #t (negative? -1))
+(test "negative?" #f (negative? 3.1416))
+(test "negative?" #t (negative? -3.1416))
+(test "negative?" #f (negative? 134539485343498539458394))
+(test "negative?" #t (negative? -134539485343498539458394))
+
+(test "eqv?" #t (eqv? 20 20))
+(test "eqv?" #t (eqv? 20.0 20.00000))
+(test "eqv?" #t (eqv? 20 (inexact->exact 20.0)))
+(test "eqv?" #f (eqv? 20 20.0))
+
+;;==================================================================
+;; Arithmetics
+;;
+
+;;------------------------------------------------------------------
+(test-subsection "integer addition")
+
+(define x #xffffffff00000000ffffffff00000000)
+(define xx (- x))
+(define y #x00000002000000000000000200000000)
+(define yy (- y))
+(define z #x00000000000000010000000000000001)
+(test "bignum + bignum" #x100000001000000010000000100000000
+      (+ x y))
+(test "bignum + -bignum" #xfffffffd00000000fffffffd00000000
+      (+ x yy))
+(test "bignum - bignum" #xfffffffefffffffffffffffeffffffff
+      (- x z))
+(test "bignum - bignum" x
+      (- (+ x y) y))
+(test "-bignum + bignum" #x-fffffffd00000000fffffffd00000000
+      (+ xx y))
+(test "-bignum + -bignum" #x-100000001000000010000000100000000
+      (+ xx yy))
+(test "-bignum - bignum" #x-100000001000000010000000100000000
+      (- xx y))
+(test "-bignum - -bignum" #x-fffffffd00000000fffffffd00000000
+      (- xx yy))
+
+;;------------------------------------------------------------------
+(test-subsection "small immediate integer constants")
+
+;; pushing small literal integer on the stack may be done
+;; by combined instruction PUSHI.  These tests if it works.
+
+(define (foo a b c d e) (list a b c d e))
+
+;; 2^19-1
+(test "PUSHI" '(0 524287 524288 -524287 -524288)
+              (foo 0 524287 524288 -524287 -524288))
+;; 2^51-1
+(test "PUSHI" '(0 2251799813685247 2251799813685248
+                  -2251799813685247 -2251799813685248 )
+              (foo 0 2251799813685247 2251799813685248
+             -2251799813685247 -2251799813685248))
+
+;;------------------------------------------------------------------
+(test-subsection "small immediate integer additions")
+
+;; small literal integer x (-2^19 <= x < 2^19 on 32bit architecture)
+;; in binary addition/subtraction is compiled in special instructuions,
+;; NUMADDI and NUMSUBI.
+
+(define x 2)
+(test "NUMADDI" 5 (+ 3 x))
+(test "NUMADDI" 5 (+ x 3))
+(test "NUMADDI" 1 (+ -1 x))
+(test "NUMADDI" 1 (+ x -1))
+(test "NUMSUBI" 1 (- 3 x))
+(test "NUMSUBI" -1 (- x 3))
+(test "NUMSUBI" -5 (- -3 x))
+(test "NUMSUBI" 5 (- x -3))
+(define x 2.0)
+(test "NUMADDI" 5.0 (+ 3 x))
+(test "NUMADDI" 5.0 (+ x 3))
+(test "NUMADDI" 1.0 (+ -1 x))
+(test "NUMADDI" 1.0 (+ x -1))
+(test "NUMSUBI" 1.0 (- 3 x))
+(test "NUMSUBI" -1.0 (- x 3))
+(test "NUMSUBI" -5.0 (- -3 x))
+(test "NUMSUBI" 5.0 (- x -3))
+(define x #x100000000)
+(test "NUMADDI" #x100000003 (+ 3 x))
+(test "NUMADDI" #x100000003 (+ x 3))
+(test "NUMADDI" #xffffffff (+ -1 x))
+(test "NUMADDI" #xffffffff (+ x -1))
+(test "NUMSUBI" #x-fffffffd (- 3 x))
+(test "NUMSUBI" #xfffffffd (- x 3))
+(test "NUMSUBI" #x-100000003 (- -3 x))
+(test "NUMSUBI" #x100000003 (- x -3))
+
+(test "NUMADDI" 30 (+ 10 (if #t 20 25)))
+(test "NUMADDI" 30 (+ (if #t 20 25) 10))
+(test "NUMADDI" 35 (+ 10 (if #f 20 25)))
+(test "NUMADDI" 35 (+ (if #f 20 25) 10))
+(test "NUMADDI" 30 (let ((x #t)) (+ 10 (if x 20 25))))
+(test "NUMADDI" 30 (let ((x #t)) (+ (if x 20 25) 10)))
+(test "NUMADDI" 35 (let ((x #f)) (+ 10 (if x 20 25))))
+(test "NUMADDI" 35 (let ((x #f)) (+ (if x 20 25) 10)))
+(test "NUMADDI" 21 (+ 10 (do ((x 0 (+ x 1))) ((> x 10) x))))
+(test "NUMADDI" 21 (+ (do ((x 0 (+ x 1))) ((> x 10) x)) 10))
+(test "NUMSUBI" -10 (- 10 (if #t 20 25)))
+(test "NUMSUBI" 10 (- (if #t 20 25) 10))
+(test "NUMSUBI" -15 (- 10 (if #f 20 25)))
+(test "NUMSUBI" 15 (- (if #f 20 25) 10))
+(test "NUMSUBI" -10 (let ((x #t)) (- 10 (if x 20 25))))
+(test "NUMSUBI" 10 (let ((x #t)) (- (if x 20 25) 10)))
+(test "NUMSUBI" -15 (let ((x #f)) (- 10 (if x 20 25))))
+(test "NUMSUBI" 15 (let ((x #f)) (- (if x 20 25) 10)))
+(test "NUMSUBI" -1 (- 10 (do ((x 0 (+ x 1))) ((> x 10) x))))
+(test "NUMSUBI" 1 (- (do ((x 0 (+ x 1))) ((> x 10) x)) 10))
+
+;;------------------------------------------------------------------
+(test-subsection "promotions in addition")
+
+(define (+-tester x) (list x (exact? x)))
+
+(test "+" '(0 #t) (+-tester (+)))
+(test "+" '(1 #t) (+-tester (+ 1)))
+(test "+" '(3 #t) (+-tester (+ 1 2)))
+(test "+" '(6 #t) (+-tester (+ 1 2 3)))
+(test "+" '(1.0 #f) (+-tester (+ 1.0)))
+(test "+" '(3.0 #f) (+-tester (+ 1.0 2)))
+(test "+" '(3.0 #f) (+-tester (+ 1 2.0)))
+(test "+" '(6.0 #f) (+-tester (+ 1 2 3.0)))
+(test "+" '(1+i #t) (+-tester (+ 1 +i)))
+(test "+" '(3+i #t) (+-tester (+ 1 2 +i)))
+(test "+" '(3+i #t) (+-tester (+ +i 1 2)))
+(test "+" '(3.0+i #f) (+-tester (+ 1.0 2 +i)))
+(test "+" '(3.0+i #f) (+-tester (+ +i 1.0 2)))
+(test "+" '(4294967298.0 #f) (+-tester (+ 4294967297 1.0)))
+(test "+" '(4294967299.0 #f) (+-tester (+ 4294967297 1 1.0)))
+(test "+" '(4294967298.0-i #f) (+-tester (+ 4294967297 1.0 -i)))
+(test "+" '(4294967298.0-i #f) (+-tester (+ -i 4294967297 1.0)))
+(test "+" '(4294967298.0-i #f) (+-tester (+ 1.0 4294967297 -i)))
+
+;;------------------------------------------------------------------
+(test-subsection "integer multiplication")
+
+(define (m-result x) (list x (- x) (- x) x))
+(define (m-tester x y)
+  (list (* x y) (* (- x) y) (* x (- y)) (* (- x) (- y))))
+
+(test "fix*fix->big[1]" (m-result 727836879)
+      (m-tester 41943 17353))
+(test "fix*fix->big[1]" (m-result 3663846879)
+      (m-tester 41943 87353))
+(test "fix*fix->big[2]" (m-result 4294967296)
+      (m-tester 65536 65536))
+(test "fix*fix->big[2]" (m-result 366384949959)
+      (m-tester 4194303 87353))
+(test "fix*big[1]->big[1]" (m-result 3378812463)
+      (m-tester 3 1126270821))
+(test "fix*big[1]->big[2]" (m-result 368276265762816)
+      (m-tester 85746 4294967296))
+(test "big[1]*fix->big[1]" (m-result 3378812463)
+      (m-tester 1126270821 3))
+(test "big[1]*fix->big[2]" (m-result 368276265762816)
+      (m-tester 4294967296 85746))
+(test "big[2]*fix->big[2]" (m-result 12312849128741)
+      (m-tester 535341266467 23))
+(test "big[1]*big[1]->big[2]" (m-result 1345585795375391817)
+      (m-tester 1194726677 1126270821))
+
+;; Large number multiplication test using Fermat's number
+;; The decomposition of Fermat's number is taken from
+;;   http://www.dd.iij4u.or.jp/~okuyamak/Information/Fermat.html
+(test "fermat(7)" (fermat 7)
+      (* 59649589127497217 5704689200685129054721))
+(test "fermat(8)" (fermat 8)
+              (* 1238926361552897
+           93461639715357977769163558199606896584051237541638188580280321))
+(test "fermat(9)" (fermat 9)
+              (* 2424833
+           7455602825647884208337395736200454918783366342657
+           741640062627530801524787141901937474059940781097519023905821316144415759504705008092818711693940737))
+(test "fermat(10)" (fermat 10)
+              (* 45592577
+           6487031809
+           4659775785220018543264560743076778192897
+           130439874405488189727484768796509903946608530841611892186895295776832416251471863574140227977573104895898783928842923844831149032913798729088601617946094119449010595906710130531906171018354491609619193912488538116080712299672322806217820753127014424577
+           ))
+(test "fermat(11)" (fermat 11)
+              (* 319489
+           974849
+           167988556341760475137
+           3560841906445833920513
+           173462447179147555430258970864309778377421844723664084649347019061363579192879108857591038330408837177983810868451546421940712978306134189864280826014542758708589243873685563973118948869399158545506611147420216132557017260564139394366945793220968665108959685482705388072645828554151936401912464931182546092879815733057795573358504982279280090942872567591518912118622751714319229788100979251036035496917279912663527358783236647193154777091427745377038294584918917590325110939381322486044298573971650711059244462177542540706913047034664643603491382441723306598834177
+           ))
+
+;;------------------------------------------------------------------
+(test-subsection "division")
+
+(define (almost=? x y)
+  (define (flonum=? x y)
+    (let ((ax (abs x)) (ay (abs y)))
+      (< (abs (- x y)) (* (max ax ay) 0.0000000000001))))
+  (and (flonum=? (car x) (car y))
+       (flonum=? (cadr x) (cadr y))
+       (flonum=? (caddr x) (caddr y))
+       (flonum=? (cadddr x) (cadddr y))
+       (eq? (list-ref x 4) (list-ref y 4))))
+
+(define (d-result x exact?) (list x (- x) (- x) x exact?))
+(define (d-tester x y)
+  (list (/ x y) (/ (- x) y) (/ x (- y)) (/ (- x) (- y))
+        (exact? (/ x y))))
+
+;; these uses BignumDivSI -> bignum_sdiv
+(test "big[1]/fix->fix" (d-result 17353 #t) 
+      (d-tester 727836879 41943))
+;;FIXME: (test "big[1]/fix->fix" (d-result 136582.040690235 #f)
+;;FIXME:       (d-tester 3735928559 27353)
+;;FIXME:       almost=?)
+(test "big[2]/fix->big[1]" (d-result 535341266467 #t)
+      (d-tester 12312849128741 23))
+(test "big[2]/fix->big[2]" (d-result 12312849128741 #t)
+      (d-tester 12312849128741 1))
+
+;; these uses BignumDivSI -> bignum_gdiv
+(test "big[1]/fix->fix" (d-result 41943 #t)
+      (d-tester 3663846879 87353))
+;;//FIXME: (test "big[2]/fix->fix" (d-result 92894912.9263878 #f)
+;;//FIXME:       (d-tester 12312849128741 132546)
+;;//FIXME:       almost=?)
+;;//FIXME:(test "big[2]/fix->big[1]" (d-result 2582762030.11968 #f)
+;;//FIXME:      (d-tester 425897458766735 164900)
+;;//FIXME:      almost=?)
+
+;; inexact division
+(test "exact/inexact -> inexact" (d-result 3.25 #f)
+      (d-tester 13 4.0))
+(test "inexact/exact -> inexact" (d-result 3.25 #f)
+      (d-tester 13.0 4))
+(test "inexact/inexact -> inexact" (d-result 3.25 #f)
+      (d-tester 13.0 4.0))
+
+;; complex division
+(test "complex division" 0.0
+       (let ((a 3)
+             (b 4+3i)
+             (c 7.3))
+         (- (/ a b c)
+            (/ (/ a b) c))))
+
+;;------------------------------------------------------------------
+(test-subsection "quotient")
+
+(define (q-result x exact?) (list x (- x) (- x) x exact?))
+(define (q-tester x y)
+  (list (quotient x y) (quotient (- x) y)
+        (quotient x (- y)) (quotient (- x) (- y))
+        (exact? (quotient x y))))
+
+;; these uses BignumDivSI -> bignum_sdiv
+(test "big[1]/fix->fix" (q-result 17353 #t) 
+      (q-tester 727836879 41943))
+(test "big[1]/fix->fix" (q-result 136582 #t)
+      (q-tester 3735928559 27353))
+(test "big[2]/fix->big[1]" (q-result 535341266467 #t)
+      (q-tester 12312849128741 23))
+(test "big[2]/fix->big[2]" (q-result 12312849128741 #t)
+      (q-tester 12312849128741 1))
+
+;; these uses BignumDivSI -> bignum_gdiv
+(test "big[1]/fix->fix" (q-result 41943 #t)
+      (q-tester 3663846879 87353))
+(test "big[2]/fix->fix" (q-result 19088743 #t)
+      (q-tester 705986470884353 36984440))
+(test "big[2]/fix->fix" (q-result 92894912 #t)
+      (q-tester 12312849128741 132546))
+(test "big[2]/fix->big[1]" (q-result 2582762030 #t)
+      (q-tester 425897458766735 164900))
+
+;; these uses BignumDivRem
+(test "big[1]/big[1]->fix" (q-result 2 #t)
+      (q-tester 4020957098 1952679221))
+(test "big[1]/big[1] -> fix" (q-result 0 #t)
+      (q-tester 1952679221 4020957098))
+;; this tests loop in estimation phase
+(test "big[3]/big[2] -> big[1]" (q-result #xffff0001 #t)
+      (q-tester #x10000000000000000 #x10000ffff))
+;; this test goes through a rare case handling code ("add back") in
+;; the algorithm.
+(test "big[3]/big[2] -> fix" (q-result #xeffe #t)
+      (q-tester #x7800000000000000 #x80008889ffff))
+
+;; inexact quotient
+(test "exact/inexact -> inexact" (q-result 3.0 #f)
+      (q-tester 13 4.0))
+(test "inexact/exact -> inexact" (q-result 3.0 #f)
+      (q-tester 13.0 4))
+(test "inexact/inexact -> inexact" (q-result 3.0 #f)
+      (q-tester 13.0 4.0))
+(test "exact/inexact -> inexact" (q-result 17353.0 #f)
+      (q-tester 727836879 41943.0))
+(test "inexact/exact -> inexact" (q-result 17353.0 #f)
+      (q-tester 727836879.0 41943))
+(test "inexact/inexact -> inexact" (q-result 17353.0 #f)
+      (q-tester 727836879.0 41943.0))
+
+;; Test by fermat numbers
+(test "fermat(7)" 59649589127497217
+      (quotient (fermat 7) 5704689200685129054721))
+(test "fermat(8)" 1238926361552897
+              (quotient (fermat 8) 93461639715357977769163558199606896584051237541638188580280321))
+(test "fermat(9)" 2424833
+              (quotient (quotient (fermat 9) 7455602825647884208337395736200454918783366342657)
+                  741640062627530801524787141901937474059940781097519023905821316144415759504705008092818711693940737))
+(test "fermat(10)" 4659775785220018543264560743076778192897
+              (quotient (quotient (quotient (fermat 10)
+                                      130439874405488189727484768796509903946608530841611892186895295776832416251471863574140227977573104895898783928842923844831149032913798729088601617946094119449010595906710130531906171018354491609619193912488538116080712299672322806217820753127014424577)
+                            6487031809)
+                  45592577))
+(test "fermat(11)" 3560841906445833920513
+              (quotient (quotient (quotient (quotient (fermat 11)
+                                                167988556341760475137)
+                                      173462447179147555430258970864309778377421844723664084649347019061363579192879108857591038330408837177983810868451546421940712978306134189864280826014542758708589243873685563973118948869399158545506611147420216132557017260564139394366945793220968665108959685482705388072645828554151936401912464931182546092879815733057795573358504982279280090942872567591518912118622751714319229788100979251036035496917279912663527358783236647193154777091427745377038294584918917590325110939381322486044298573971650711059244462177542540706913047034664643603491382441723306598834177
+                                      )
+                            974849)
+                  319489))
+
+;;------------------------------------------------------------------
+(test-subsection "remainder")
+
+(define (r-result x exact?) (list x (- x) x (- x) exact?))
+(define (r-tester x y)
+  (list (remainder x y) (remainder (- x) y)
+        (remainder x (- y)) (remainder (- x) (- y))
+        (exact? (remainder x y))))
+
+;; small int
+(test "fix rem fix -> fix" (r-result 1 #t)
+      (r-tester 13 4))
+(test "fix rem fix -> fix" (r-result 1234 #t)
+      (r-tester 1234 87935))
+(test "fix rem big[1] -> fix" (r-result 12345 #t)
+      (r-tester 12345 3735928559))
+
+;; these uses BignumDivSI -> bignum_sdiv
+(test "big[1] rem fix -> fix" (r-result 0 #t)
+      (r-tester 727836879 41943))
+(test "big[1] rem fix -> fix" (r-result 1113 #t)
+      (r-tester 3735928559 27353))
+(test "big[2] rem fix -> fix" (r-result 15 #t)
+      (r-tester 12312849128756 23))
+(test "big[2] rem fix -> fix" (r-result 0 #t)
+      (r-tester 12312849128756 1))
+
+;; these uses BignumDivSI -> bignum_gdiv
+(test "big[1] rem fix -> fix" (r-result 0 #t)
+      (r-tester 3663846879 87353))
+(test "big[2] rem fix -> fix" (r-result 725433 #t)
+      (r-tester 705986470884353 36984440))
+(test "big[2] rem fix -> fix" (r-result 122789 #t)
+      (r-tester 12312849128741 132546))
+(test "big[2] rem fix -> fix" (r-result 19735 #t)
+      (r-tester 425897458766735 164900))
+
+;; these uses BignumDivRem
+(test "big[1] rem big[1] -> fix" (r-result 115598656 #t)
+      (r-tester 4020957098 1952679221))
+(test "big[1] rem big[1] -> fix" (r-result 1952679221 #t)
+      (r-tester 1952679221 4020957098))
+;; this tests loop in estimation phase
+(test "big[3] rem big[2] -> big[1]" (r-result #xfffe0001 #t)
+      (r-tester #x10000000000000000 #x10000ffff))
+;; this tests "add back" code
+(test "big[3] rem big[2] -> big[2]" (r-result #x7fffb114effe #t)
+      (r-tester #x7800000000000000 #x80008889ffff))
+
+;; inexact remainder
+(test "exact rem inexact -> inexact" (r-result 1.0 #f)
+      (r-tester 13 4.0))
+(test "inexact rem exact -> inexact" (r-result 1.0 #f)
+      (r-tester 13.0 4))
+(test "inexact rem inexact -> inexact" (r-result 1.0 #f)
+      (r-tester 13.0 4.0))
+(test "exact rem inexact -> inexact" (r-result 1113.0 #f)
+      (r-tester 3735928559 27353.0))
+(test "inexact rem exact -> inexact" (r-result 1113.0 #f)
+      (r-tester 3735928559.0 27353))
+(test "inexact rem inexact -> inexact" (r-result 1113.0 #f)
+      (r-tester 3735928559.0 27353.0))
+
+;;------------------------------------------------------------------
+(test-subsection "modulo")
+
+(define (m-result a b exact?) (list a b (- b) (- a) exact?))
+(define (m-tester x y)
+  (list (modulo x y) (modulo (- x) y)
+        (modulo x (- y)) (modulo (- x) (- y))
+        (exact? (modulo x y))))
+
+;; small int
+(test "fix mod fix -> fix" (m-result 1 3 #t)
+      (m-tester 13 4))
+(test "fix mod fix -> fix" (m-result 1234 86701 #t)
+      (m-tester 1234 87935))
+(test "fix mod big[1] -> fix/big" (m-result 12345 3735916214 #t)
+      (m-tester 12345 3735928559))
+
+;; these uses BignumDivSI -> bignum_sdiv
+(test "big[1] mod fix -> fix" (m-result 0 0 #t)
+      (m-tester 727836879 41943))
+(test "big[1] mod fix -> fix" (m-result 1113 26240 #t)
+      (m-tester 3735928559 27353))
+(test "big[2] mod fix -> fix" (m-result 15 8 #t)
+      (m-tester 12312849128756 23))
+(test "big[2] mod fix -> fix" (m-result 0 0 #t)
+      (m-tester 12312849128756 1))
+
+;; these uses BignumDivSI -> bignum_gdiv
+(test "big[1] mod fix -> fix" (m-result 0 0 #t)
+      (m-tester 3663846879 87353))
+(test "big[2] mod fix -> fix" (m-result 725433 36259007 #t)
+      (m-tester 705986470884353 36984440))
+(test "big[2] mod fix -> fix" (m-result 122789 9757 #t)
+      (m-tester 12312849128741 132546))
+(test "big[2] mod fix -> fix" (m-result 19735 145165 #t)
+      (m-tester 425897458766735 164900))
+
+;; these uses BignumDivRem
+(test "big[1] mod big[1] -> fix" (m-result 115598656 1837080565 #t)
+      (m-tester 4020957098 1952679221))
+(test "big[1] mod big[1] -> fix" (m-result 1952679221 2068277877 #t)
+      (m-tester 1952679221 4020957098))
+;; this tests loop in estimation phase
+(test "big[3] mod big[2] -> big[1]" (m-result #xfffe0001 #x2fffe #t)
+      (m-tester #x10000000000000000 #x10000ffff))
+;; this tests "add back" code
+(test "big[3] mod big[2] -> big[2]" (m-result #x7fffb114effe #xd7751001 #t)
+      (m-tester #x7800000000000000 #x80008889ffff))
+
+;; inexact modulo
+(test "exact mod inexact -> inexact" (m-result 1.0 3.0 #f)
+      (m-tester 13 4.0))
+(test "inexact mod exact -> inexact" (m-result 1.0 3.0 #f)
+      (m-tester 13.0 4))
+(test "inexact mod inexact -> inexact" (m-result 1.0 3.0 #f)
+      (m-tester 13.0 4.0))
+(test "exact mod inexact -> inexact" (m-result 1113.0 26240.0 #f)
+      (m-tester 3735928559 27353.0))
+(test "inexact mod exact -> inexact" (m-result 1113.0 26240.0 #f)
+      (m-tester 3735928559.0 27353))
+(test "inexact mod inexact -> inexact" (m-result 1113.0 26240.0 #f)
+      (m-tester 3735928559.0 27353.0))
+
+;; test by mersenne prime? - code by 'hipster'
+
+(define (mersenne-prime? p)
+  (let ((m (- (expt 2 p) 1)))
+    (do ((i 3 (+ i 1))
+         (s 4 (modulo (- (* s s) 2) m)))
+        ((= i (+ p 1)) (= s 0)))))
+
+
+(test "mersenne prime? 3" #t (mersenne-prime? 3))
+(test "mersenne prime? 5" #t (mersenne-prime? 5))
+(test "mersenne prime? 7" #t (mersenne-prime? 7))
+(test "mersenne prime? 13" #t (mersenne-prime? 13))
+(test "mersenne prime? 17" #t (mersenne-prime? 17))
+(test "mersenne prime? 19" #t (mersenne-prime? 19))
+(test "mersenne prime? 31" #t (mersenne-prime? 31))
+(test "mersenne prime? 61" #t (mersenne-prime? 61))
+(test "mersenne prime? 89" #t (mersenne-prime? 89))
+(test "mersenne prime? 107" #t (mersenne-prime? 107))
+(test "mersenne prime? 127" #t (mersenne-prime? 127))
+(test "mersenne prime? 521" #t (mersenne-prime? 521))
+(test "mersenne prime? 607" #t (mersenne-prime? 607))
+(test "mersenne prime? 1279" #t (mersenne-prime? 1279))
+
+(test "mersenne prime? 48" #f (mersenne-prime? 48))
+(test "mersenne prime? 100" #f (mersenne-prime? 100))
+(test "mersenne prime? (* 61 19)" #f (mersenne-prime? (* 61 19)))
+
+
+
+;;------------------------------------------------------------------
+(test-subsection "expt")
+
+(test "exact expt" 1 (expt 5 0))
+(test "exact expt" 9765625 (expt 5 10))
+(test "exact expt" 1220703125 (expt 5 13))
+(test "exact expt" 94039548065783000637498922977779654225493244541767001720700136502273380756378173828125 (expt 5 123))
+(test "exact expt" 1 (expt -5 0))
+(test "exact expt" 9765625 (expt -5 10))
+(test "exact expt" -1220703125 (expt -5 13))
+(test "exact expt" -94039548065783000637498922977779654225493244541767001720700136502273380756378173828125 (expt -5 123))
+(test "exact expt" 1 (expt 1 720000))
+(test "exact expt" 1 (expt -1 720000))
+(test "exact expt" -1 (expt -1 720001))
+
+;;------------------------------------------------------------------
+(test-subsection "logical operations")
+
+(test "bit-shift (fixnum)" #x408000           ;fixnum
+      (bit-shift #x81 15))
+(test "bit-shift (fixnum)" #x81
+      (bit-shift #x408000 -15))
+(test "bit-shift (fixnum)" #x01
+      (bit-shift #x408000 -22))
+(test "bit-shift (fixnum)" 0
+      (bit-shift #x408000 -23))
+(test "bit-shift (fixnum)" 0
+      (bit-shift #x408000 -24))
+(test "bit-shift (fixnum)" 0
+      (bit-shift #x408000 -100))
+(test "bit-shift (fixnum)" #x81
+      (bit-shift #x81 0))
+(test "bit-shift (neg. fixnum)" #x-408000  ;negative fixnum
+      (bit-shift #x-81 15))
+(test "bit-shift (neg. fixnum)" #x-81      ;nagative fixnum
+      (bit-shift #x-408000 -15))
+(test "bit-shift (fixnum)" -2
+      (bit-shift #x-408000 -22))
+(test "bit-shift (fixnum)" -1
+      (bit-shift #x-408000 -23))
+(test "bit-shift (fixnum)" -1
+      (bit-shift #x-408000 -24))
+(test "bit-shift (fixnum)" -1
+      (bit-shift #x-408000 -100))
+(test "bit-shift (fixnum)" #x-408000
+      (bit-shift #x-408000 0))
+
+(test "bit-shift (fixnum->bignum)" #x81000000
+      (bit-shift #x81 24))
+(test "bit-shift (fixnum->bignum)" #x4080000000
+      (bit-shift #x81 31))
+(test "bit-shift (fixnum->bignum)" #x8100000000
+      (bit-shift #x81 32))
+(test "bit-shift (fixnum->bignum)" #x8100000000000000
+      (bit-shift #x81 56))
+(test "bit-shift (fixnum->bignum)" #x408000000000000000
+      (bit-shift #x81 63))
+(test "bit-shift (fixnum->bignum)" #x810000000000000000
+      (bit-shift #x81 64))
+(test "bit-shift (neg.fixnum->bignum)" #x-81000000
+      (bit-shift #x-81 24))
+(test "bit-shift (neg.fixnum->bignum)" #x-4080000000
+      (bit-shift #x-81 31))
+(test "bit-shift (neg.fixnum->bignum)" #x-8100000000
+      (bit-shift #x-81 32))
+(test "bit-shift (neg.fixnum->bignum)" #x-8100000000000000
+      (bit-shift #x-81 56))
+(test "bit-shift (neg.fixnum->bignum)" #x-408000000000000000
+      (bit-shift #x-81 63))
+(test "bit-shift (neg.fixnum->bignum)" #x-810000000000000000
+      (bit-shift #x-81 64))
+
+(test "bit-shift (bignum->fixnum)" #x81
+      (bit-shift  #x81000000 -24))
+(test "bit-shift (bignum->fixnum)" #x40
+      (bit-shift  #x81000000 -25))
+(test "bit-shift (bignum->fixnum)" 1
+      (bit-shift  #x81000000 -31))
+(test "bit-shift (bignum->fixnum)" 0
+      (bit-shift  #x81000000 -32))
+(test "bit-shift (bignum->fixnum)" 0
+      (bit-shift  #x81000000 -100))
+(test "bit-shift (bignum->fixnum)" #x81
+      (bit-shift #x4080000000 -31))
+(test "bit-shift (bignum->fixnum)" #x81
+      (bit-shift #x8100000000 -32))
+(test "bit-shift (bignum->fixnum)" #x40
+      (bit-shift #x8100000000 -33))
+(test "bit-shift (bignum->fixnum)" 1
+      (bit-shift #x8100000000 -39))
+(test "bit-shift (bignum->fixnum)" 0
+      (bit-shift #x8100000000 -40))
+(test "bit-shift (bignum->fixnum)" 0
+      (bit-shift #x8100000000 -100))
+(test "bit-shift (bignum->fixnum)" #x81
+      (bit-shift #x8100000000000000 -56))
+(test "bit-shift (bignum->fixnum)" #x81
+      (bit-shift #x408000000000000000 -63))
+(test "bit-shift (bignum->fixnum)" #x40
+      (bit-shift #x408000000000000000 -64))
+(test "bit-shift (bignum->fixnum)" #x20
+      (bit-shift #x408000000000000000 -65))
+(test "bit-shift (bignum->fixnum)" 1
+      (bit-shift #x408000000000000000 -70))
+(test "bit-shift (bignum->fixnum)" 0
+      (bit-shift #x408000000000000000 -71))
+(test "bit-shift (bignum->fixnum)" 0
+      (bit-shift #x408000000000000000 -100))
+
+(test "bit-shift (neg.bignum->fixnum)" #x-81
+      (bit-shift #x-81000000 -24))
+(test "bit-shift (neg.bignum->fixnum)" #x-41
+      (bit-shift #x-81000000 -25))
+(test "bit-shift (neg.bignum->fixnum)" #x-21
+      (bit-shift #x-81000000 -26))
+(test "bit-shift (neg.bignum->fixnum)" -2
+      (bit-shift #x-81000000 -31))
+(test "bit-shift (neg.bignum->fixnum)" -1
+      (bit-shift #x-81000000 -32))
+(test "bit-shift (neg.bignum->fixnum)" -1
+      (bit-shift #x-81000000 -33))
+(test "bit-shift (neg.bignum->fixnum)" -1
+      (bit-shift #x-81000000 -100))
+(test "bit-shift (neg.bignum->fixnum)" #x-81
+      (bit-shift #x-4080000000 -31))
+(test "bit-shift (neg.bignum->fixnum)" #x-41
+      (bit-shift #x-4080000000 -32))
+(test "bit-shift (neg.bignum->fixnum)" #x-21
+      (bit-shift #x-4080000000 -33))
+(test "bit-shift (neg.bignum->fixnum)" -2
+      (bit-shift #x-4080000000 -38))
+(test "bit-shift (neg.bignum->fixnum)" -1
+      (bit-shift #x-4080000000 -39))
+(test "bit-shift (neg.bignum->fixnum)" -1
+      (bit-shift #x-4080000000 -100))
+(test "bit-shift (neg.bignum->fixnum)" #x-81
+      (bit-shift #x-408000000000000000 -63))
+(test "bit-shift (neg.bignum->fixnum)" #x-41
+      (bit-shift #x-408000000000000000 -64))
+(test "bit-shift (neg.bignum->fixnum)" #x-21
+      (bit-shift #x-408000000000000000 -65))
+(test "bit-shift (neg.bignum->fixnum)" -2
+      (bit-shift #x-408000000000000000 -70))
+(test "bit-shift (neg.bignum->fixnum)" -1
+      (bit-shift #x-408000000000000000 -71))
+(test "bit-shift (neg.bignum->fixnum)" -1
+      (bit-shift #x-408000000000000000 -72))
+
+(test "bit-shift (bignum->bignum)" #x12345678123456780
+      (bit-shift #x1234567812345678 4))
+(test "bit-shift (bignum->bignum)" #x1234567812345678000000000000000
+      (bit-shift #x1234567812345678 60))
+(test "bit-shift (bignum->bignum)" #x12345678123456780000000000000000
+      (bit-shift #x1234567812345678 64))
+(test "bit-shift (bignum->bignum)" #x123456781234567
+      (bit-shift #x1234567812345678 -4))
+(test "bit-shift (bignum->bignum)" #x12345678
+      (bit-shift #x1234567812345678 -32))
+(test "bit-shift (neg.bignum->bignum)" #x-123456781234568
+      (bit-shift #x-1234567812345678 -4))
+(test "bit-shift (bignum->bignum)" #x-12345679
+      (bit-shift #x-1234567812345678 -32))
+
+(test "bit-not (fixnum)" -1 (bit-not 0))
+(test "bit-not (fixnum)" 0 (bit-not -1))
+(test "bit-not (fixnum)" -65536 (bit-not 65535))
+(test "bit-not (fixnum)" 65535 (bit-not -65536))
+(test "bit-not (bignum)" #x-1000000000000000001
+      (bit-not #x1000000000000000000))
+(test "bit-not (bignum)" #x1000000000000000000
+      (bit-not #x-1000000000000000001))
+
+(test "bit-and (+fix & 0)" 0
+      (bit-and #x123456 0))
+(test "bit-and (+big & 0)" 0
+      (bit-and #x1234567812345678 0))
+(test "bit-and (+fix & -1)" #x123456
+      (bit-and #x123456 -1))
+(test "bit-and (+big & -1)" #x1234567812345678
+      (bit-and #x1234567812345678 -1))
+(test "bit-and (+fix & +fix)" #x2244
+      (bit-and #xaa55 #x6666))
+(test "bit-and (+fix & +big)" #x2244
+      (bit-and #xaa55 #x6666666666))
+(test "bit-and (+big & +fix)" #x4422
+      (bit-and #xaa55aa55aa #x6666))
+(test "bit-and (+big & +big)" #x2244224422
+      (bit-and #xaa55aa55aa #x6666666666))
+(test "bit-and (+big & +big)" #x103454301aaccaa
+      (bit-and #x123456789abcdef #xfedcba987654321fedcba987654321fedcba))
+(test "bit-and (+big & +big)" #x400000
+      (bit-and #xaa55ea55aa #x55aa55aa55))
+(test "bit-and (+fix & -fix)" #x8810
+      (bit-and #xaa55 #x-6666))
+(test "bit-and (+fix & -big)" #x8810
+      (bit-and #xaa55 #x-6666666666))
+(test "bit-and (+big & -fix)" #xaa55aa118a
+      (bit-and #xaa55aa55aa #x-6666))
+(test "bit-and (+big & -big)" #x881188118a
+      (bit-and #xaa55aa55aa #x-6666666666))
+(test "bit-and (+big & -big)" #x20002488010146
+      (bit-and #x123456789abcdef #x-fedcba987654321fedcba987654321fedcba))
+(test "bit-and (-fix & +fix)" #x4422
+      (bit-and #x-aa55 #x6666))
+(test "bit-and (-fix & +big)" #x6666664422
+      (bit-and #x-aa55 #x6666666666))
+(test "bit-and (-big & +fix)" #x2246
+      (bit-and #x-aa55aa55aa #x6666))
+(test "bit-and (-big & +big)" #x4422442246
+      (bit-and #x-aa55aa55aa #x6666666666))
+(test "bit-and (-big & +big)" #xfedcba987654321fedcba884200020541010
+      (bit-and #x-123456789abcdef #xfedcba987654321fedcba987654321fedcba))
+(test "bit-and (-fix & -fix)" #x-ee76
+      (bit-and #x-aa55 #x-6666))
+(test "bit-and (-fix & -big)" #x-666666ee76
+      (bit-and #x-aa55 #x-6666666666))
+(test "bit-and (-big & -fix)" #x-aa55aa77ee
+      (bit-and #x-aa55aa55aa #x-6666))
+(test "bit-and (-big & -big)" #x-ee77ee77ee
+      (bit-and #x-aa55aa55aa #x-6666666666))
+(test "bit-and (-big & -big)" #x-fedcba987654321fedcba9a76567a9ffde00
+      (bit-and #x-123456789abcdef #x-fedcba987654321fedcba987654321fedcba))
+
+(test "bit-or (+fix | 0)" #x123456
+      (bit-or #x123456 0))
+(test "bit-or (+big | 0)" #x1234567812345678
+      (bit-or #x1234567812345678 0))
+(test "bit-or (+fix | -1)" -1
+      (bit-or #x123456 -1))
+(test "bit-or (+big | -1)" -1
+      (bit-or #x1234567812345678 -1))
+(test "bit-or (+fix | +fix)" #xee77
+      (bit-or #xaa55 #x6666))
+(test "bit-or (+fix | +big)" #x666666ee77
+      (bit-or #xaa55 #x6666666666))
+(test "bit-or (+big | +fix)" #xaa55aa77ee
+      (bit-or #xaa55aa55aa #x6666))
+(test "bit-or (+big | +big)" #xee77ee77ee
+      (bit-or #xaa55aa55aa #x6666666666))
+(test "bit-or (+big | +big)" #xfedcba987654321fedcba9a76567a9ffddff
+      (bit-or #x123456789abcdef #xfedcba987654321fedcba987654321fedcba))
+(test "bit-or (+fix | -fix)" #x-4421
+      (bit-or #xaa55 #x-6666))
+(test "bit-or (+fix | -big)" #x-6666664421
+      (bit-or #xaa55 #x-6666666666))
+(test "bit-or (+big | -fix)" #x-2246
+      (bit-or #xaa55aa55aa #x-6666))
+(test "bit-or (+big | -big)" #x-4422442246
+      (bit-or #xaa55aa55aa #x-6666666666))
+(test "bit-or (+big | -big)" #x-fedcba987654321fedcba884200020541011
+      (bit-or #x123456789abcdef #x-fedcba987654321fedcba987654321fedcba))
+(test "bit-or (-fix | +fix)" #x-8811
+      (bit-or #x-aa55 #x6666))
+(test "bit-or (-fix | +big)" #x-8811
+      (bit-or #x-aa55 #x6666666666))
+(test "bit-or (-big | +fix)" #x-aa55aa118a
+      (bit-or #x-aa55aa55aa #x6666))
+(test "bit-or (-big | +big)" #x-881188118a
+      (bit-or #x-aa55aa55aa #x6666666666))
+(test "bit-or (-big | +big)" #x-20002488010145
+      (bit-or #x-123456789abcdef #xfedcba987654321fedcba987654321fedcba))
+(test "bit-or (-fix | -fix)" #x-2245
+      (bit-or #x-aa55 #x-6666))
+(test "bit-or (-fix | -big)" #x-2245
+      (bit-or #x-aa55 #x-6666666666))
+(test "bit-or (-big | -fix)" #x-4422
+      (bit-or #x-aa55aa55aa #x-6666))
+(test "bit-or (-big | -big)" #x-2244224422
+      (bit-or #x-aa55aa55aa #x-6666666666))
+(test "bit-or (-big | -big)" #x-103454301aacca9
+      (bit-or #x-123456789abcdef #x-fedcba987654321fedcba987654321fedcba))
+
+(test-section-end)

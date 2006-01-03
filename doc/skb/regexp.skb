@@ -1,0 +1,1092 @@
+;; ======================================================================
+;; 
+;; 			STklos Reference Manual
+;;
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2 of the License, or
+;; (at your option) any later version.
+;; 
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;; 
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; USA.
+;;           Author: Erick Gallesio [eg@unice.fr]
+;;    Creation date: 26-Nov-2000 18:19 (eg)
+;; Last file update:  3-Nov-2004 16:28 (eg)
+;;
+;; ======================================================================
+
+(define (tdl x) (td :align 'left x))
+(define (tdc x) (td :width 50 x))
+
+(chapter :title "Regular Expressions"
+(index "regular expression")
+
+(p [,(stklos) uses the Philip Hazel's Perl-compatible Regular Expression
+(PCRE) library for implementing regexps ,(ref :bib "PCRE").
+Consequently, the ,(stklos) regular expression syntax is the same
+as PCRE, and Perl by the way.])
+
+(p [The following text is extracted from the PCRE package. However, to make
+things shorter, some of the original documentation as not been reported
+here. In particular some possibilities of PCRE have been completely
+occulted (those whose description was too long and which seems (at least
+to me), not too important). Read the documentation provided with PCRE
+for a complete description ,(footnote [The latest release of PCRE is
+available from ,(ref :url "http://www.pcre.org/")])])
+
+
+(p [A regular expression is a pattern that is matched against a
+subject string from left to right. Most characters stand for
+themselves in a pattern, and match the corresponding characters
+in the subject. As a trivial example, the pattern])
+
+(raw-code [The quick brown fox])
+
+(p [matches a portion of a subject string that is identical to
+itself.  The power of regular expressions comes from the ability
+to include alternatives and repetitions in the pattern. These are
+encoded in the pattern by the use of ,(emph "meta-characters"), which do
+not stand for themselves but instead are interpreted in some
+special way.])
+
+(p [There are two different sets of meta-characters: those that
+are recognized anywhere in the pattern except within square
+brackets, and those that are recognized in square
+brackets. Outside square brackets, the meta-characters are as
+follows:])
+
+(center (table 
+   (tr (tdc "  \\  ") (tdl "general escape character with several uses"))
+   (tr (tdc "  ^  ")  (tdl "assert start of subject (or line, in multiline mode)"))
+   (tr (tdc "  $  ")  (tdl "assert end of subject (or line, in multiline mode)"))
+   (tr (tdc "  .  ")  (tdl "match any character except newline (by default)"))
+   (tr (tdc "  [  ") (tdl "start character class definition"))
+   (tr (tdc "  |  ")  (tdl "start of alternative branch"))
+   (tr (tdc "  (  ")  (tdl "start subpattern"))
+   (tr (tdc "  )  ")  (tdl "end subpattern"))
+   (tr (tdc "  ?  ")  (tdl "extends the meaning of ("))
+   (tr (tdc "     ")  (tdl "also 0 or 1 quantifier"))
+   (tr (tdc "     ")  (tdl "also quantifier minimizer"))
+   (tr (tdc "  *  ")  (tdl "0 or more quantifier"))
+   (tr (tdc "  +  ")  (tdl "1 or more quantifier"))
+   (tr (tdc "  {  ")  (tdl "start min/max quantifier"))))
+
+(p [Part of a pattern that is in square brackets is called a "character
+class". In a character class the only meta-characters are:])
+
+(center (table
+ (tr (tdc "  \\  ")(tdl "general escape character"))
+ (tr (tdc "  ^  ") (tdl "negate the class, but only if the first character"))
+ (tr (tdc "  -  ") (tdl "indicates character range"))
+ (tr (tdc "  [  ") (tdl "POSIX character class (only if followed by POSIX syntax)"))
+ (tr (tdc "  ]  ") (tdl "terminates the character class"))))
+
+(p [The following sections describe the use of each of the meta-characters.])
+
+(section :title "Backslash"
+
+(p [The backslash character has several uses. Firstly, if it is followed by a
+non-alphameric character, it takes away any special meaning that character may
+have. This use of backslash as an escape character applies both inside and
+outside character classes.])
+
+(p [For example, if you want to match a * character, you write
+\\* in the pattern.  This escaping action applies whether or not
+the following character would otherwise be interpreted as a
+meta-character, so it is always safe to precede a non-alphameric
+with backslash to specify that it stands for itself. In
+particular, if you want to match a backslash, you write \\\\.])
+
+(p [If you want to remove the special meaning from a sequence of
+characters, you can do so by putting them between \\Q and
+\\E. This is different from Perl in that $ and @ are handled as
+literals in \\Q...\\E sequences in PCRE, whereas in Perl, $ and @
+cause variable interpolation. Note the following examples:])
+
+(center (table :width 70.
+(tr (th :width 33. :align "left" "Pattern") 
+    (th :width 33. :align "left" "PCRE matches")
+    (th :width 33. :align "left" "Perl matches"))
+(tr (tdl "\\Qabc$xyz\\E") 
+    (tdl "abc$xyz") 
+    (tdl "abc followed by the contents of $xyz"))
+(tr (tdl "\\Qabc\\$xyz\\E") (tdl "abc\\$xyz") (tdl "abc\\$xyz"))
+(tr (tdl "\\Qabc\\E\\$\\Qxyz\\E") (tdl "abc$xyz") (tdl "abc$xyz"))))
+   
+(p [The \\Q...\\E sequence is recognized both inside and outside
+character classes.])
+
+
+(p [A second use of backslash provides a way of encoding non-printing characters
+in patterns in a visible manner. There is no restriction on the appearance of
+non-printing characters, apart from the binary zero that terminates a pattern,
+but when a pattern is being prepared by text editing, it is usually easier to
+use one of the following escape sequences than the binary character it
+represents:])
+
+(center (table   
+(tr (tdc "  \\a  ")   (tdl "alarm, that is, the BEL character (hex 07)"))
+(tr (tdc "  \\cx  ")  (tdl "\"control-x\", where x is any character"))
+(tr (tdc "  \\e  ")   (tdl "escape (hex 1B)"))
+(tr (tdc "  \\f  ")   (tdl "formfeed (hex 0C)"))
+(tr (tdc "  \\n  ")   (tdl "newline (hex 0A)"))
+(tr (tdc "  \\r  ")   (tdl "carriage return (hex 0D)"))
+(tr (tdc "  \\t  ")   (tdl "tab (hex 09)"))
+(tr (tdc "  \\ddd  ") (tdl "character with octal code ddd, or backreference"))
+(tr (tdc "  \\xhh  ") (tdl "character with hex code hh"))))
+
+
+(p [The precise effect of \\cx is as follows: if x is a lower case letter, it
+is converted to upper case. Then bit 6 of the character (hex 40) is inverted.
+Thus \\cz becomes hex 1A, but \\c\{ becomes hex 3B, while \\c; becomes hex
+7B.])
+
+
+(p [The handling of a backslash followed by a digit other than 0 is complicated.
+Outside a character class, PCRE reads it and any following digits as a decimal
+number. If the number is less than 10, or if there have been at least that many
+previous capturing left parentheses in the expression, the entire sequence is
+taken as a ,(emph "back reference"). A description of how this works is given
+later, following the discussion of parenthesized subpatterns.])
+
+
+(p [The third use of backslash is for specifying generic character types:])
+(center (table
+  (tr (tdc " \\d ") (tdl "any decimal digit"))
+  (tr (tdc " \\D ") (tdl "any character that is not a decimal digit"))
+  (tr (tdc " \\s ") (tdl "any whitespace character"))
+  (tr (tdc " \\S ") (tdl "any character that is not a whitespace character"))
+  (tr (tdc " \\w ") (tdl "any \"word\" character"))
+  (tr (tdc " \\W ") (tdl "any \"non-word\" character"))))
+
+(p [Each pair of escape sequences partitions the complete set of
+characters into two disjoint sets. Any given character matches
+one, and only one, of each pair.])
+   
+   
+(p [For compatibility with Perl, \\s does not match the VT character (code 11).
+This makes it different from the the POSIX "space" class. The \\s characters
+are HT (9), LF (10), FF (12), CR (13), and space (32).])
+   
+   
+(p [A "word" character is any letter or digit or the underscore
+character, that is, any character which can be part of a
+Perl "word". The definition of letters and digits is controlled
+by PCRE's character tables, and may vary if locale-specific
+matching is taking place.  For example, in the "fr" (French)
+locale, some character codes greater than 128 are used for
+accented letters, and these are matched by \\w.])
+   
+   
+(p [These character type sequences can appear both inside and outside character
+classes. They each match one character of the appropriate type. If the current
+matching point is at the end of the subject string, all of them fail, since
+there is no character to match.])
+
+(p [The fourth use of backslash is for certain simple assertions. An assertion
+specifies a condition that has to be met at a particular point in a match,
+without consuming any characters from the subject string. The use of
+subpatterns for more complicated assertions is described below. The backslashed
+assertions are  ])
+   
+(center (table   
+(tr (tdc "  \\b  ") (tdl "matches at a word boundary"))
+(tr (tdc "  \\B  ") (tdl "matches when not at a word boundary"))
+(tr (tdc "  \\A  ") (tdl "matches at start of subject"))
+(tr (tdc "  \\Z  ") (tdl "matches at end of subject or before newline at end"))
+(tr (tdc "  \\z  ") (tdl "matches at end of subject"))
+(tr (tdc "  \\G  ") (tdl "matches at first matching position in subject"))))
+
+(p [These assertions may not appear in character classes (but
+note that \\b has a different meaning, namely the backspace
+character, inside a character class).])
+
+(p [A word boundary is a position in the subject string where the
+current character and the previous character do not both match
+\\w or \\W (i.e. one matches \\w and the other matches \\W), or
+the start or end of the string if the first or last character
+matches \\w, respectively.])
+
+(p [The \\A, \\Z, and \\z assertions differ from the traditional circumflex and
+dollar (described below) in that they only ever match at the very start and end
+of the subject string, whatever options are set. Thus, they are independent of
+multiline mode.])
+   
+   
+   
+   (p [The backslash character has several uses. Firstly, if it is followed by
+a non-alphameric character, it takes away any special meaning that
+character may have. This use of backslash as an escape character applies
+both inside and outside character classes.])
+
+(p [For example, if you want to match a "*" character, you write "\\*" in the
+pattern. This applies whether or not the following character would
+otherwise be interpreted as a meta-character, so it is always safe to
+precede a non-alphameric with "\\" to specify that it stands for
+itself. In particular, if you want to match a backslash, you write "\\\\".])
+
+
+(p [Another use of backslash is for specifying generic character types:])
+   
+(center (table
+  (tr (tdc " \\d ") (tdl "any decimal digit"))
+  (tr (tdc " \\D ") (tdl "any character that is not a decimal digit"))
+  (tr (tdc " \\s ") (tdl "any whitespace character"))
+  (tr (tdc " \\S ") (tdl "any character that is not a whitespace character"))
+  (tr (tdc " \\w ") (tdl "any \"word\" character"))
+  (tr (tdc " \\W ") (tdl "any \"non-word\" character"))))
+
+(p [Each pair of escape sequences partitions the complete set of characters
+into two disjoint sets. Any given character matches one, and only one,
+of each pair.])
+
+(p [A "word" character is any letter or digit or the underscore character,
+that is, any character which can be part of a ,(emph (q "word")).])
+
+(p [These character type sequences can appear both inside and outside
+character classes. They each match one character of the appropriate
+type. If the current matching point is at the end of the subject string,
+all of them fail, since there is no character to match.]))
+
+   
+;;;
+;;; Circumflex and Dollar
+;;;
+(section :title "Circumflex and Dollar"
+
+(p [Outside a character class, in the default matching mode, the
+circumflex character is an assertion which is true only if the
+current matching point is at the start of the subject
+string. Inside a character class, circumflex has an entirely
+different meaning (see below).])
+
+(p [Circumflex need not be the first character of the pattern if
+a number of alternatives are involved, but it should be the first
+thing in each alternative in which it appears if the pattern is
+ever to match that branch. If all possible alternatives start
+with a circumflex, that is, if the pattern is constrained to
+match only at the start of the subject, it is said to be an
+\"anchored\" pattern. (There are also other constructs that can
+cause a pattern to be anchored.)])
+
+(p [A dollar character is an assertion which is true only if the
+current matching point is at the end of the subject string, or
+immediately before a newline character that is the last character
+in the string (by default). Dollar need not be the last character
+of the pattern if a number of alternatives are involved, but it
+should be the last item in any branch in which it appears.
+Dollar has no special meaning in a character class.])
+
+(p [The meanings of the circumflex and dollar characters are changed if the
+,(sc "multiline") option is set. When this is the case, they match immediately
+after and immediately before an internal newline character, respectively, in
+addition to matching at the start and end of the subject string. For example,
+the pattern ^abc$ matches the subject string \"def\\nabc\" in multiline mode,
+but not otherwise.])
+
+(p [Note that the sequences \\A, \\Z, and \\z can be used to
+match the start and end of the subject in both modes, and if all
+branches of a pattern start with \\A it is always anchored,
+whether ,(sc "multiline") is set or not.]))
+
+;;;
+;;; FULL STOP (PERIOD, DOT)
+;;;
+(section :title "Full Stop (period, dot)"
+
+(p [Outside a character class, a dot in the pattern matches any
+one character in the subject, including a non-printing character,
+but not (by default) newline. If the ,(sc "dotall") option is
+set, dots match newlines as well. The handling of dot is entirely
+independent of the handling of circumflex and dollar, the only
+relationship being that they both involve newline characters. Dot
+has no special meaning in a character class.]))
+
+;;;
+;;; SQUARE BRACKETS
+;;;
+(section :title "Square Brackets"
+   
+(p [An opening square bracket introduces a character class,
+terminated by a closing square bracket. A closing square bracket
+on its own is not special. If a closing square bracket is
+required as a member of the class, it should be the first data
+character in the class (after an initial circumflex, if present)
+or escaped with a backslash.])
+
+(p [A character class matches a single character in the
+subject. A matched character must be in the set of characters
+defined by the class, unless the first character in the class
+definition is a circumflex, in which case the subject character
+must not be in the set defined by the class. If a circumflex is
+actually required as a member of the class, ensure it is not the
+first character, or escape it with a backslash.])
+
+(p [For example, the character class \[aeiou\] matches any lower case vowel, while
+\[^aeiou\] matches any character that is not a lower case vowel. Note that a
+circumflex is just a convenient notation for specifying the characters which
+are in the class by enumerating those that are not. It is not an assertion: it
+still consumes a character from the subject string, and fails if the current
+pointer is at the end of the string.])
+
+(p [When caseless matching is set, any letters in a class represent both their
+upper case and lower case versions, so for example, a caseless \[aeiou\] matches
+"A" as well as "a", and a caseless \[^aeiou\] does not match "A", whereas a
+caseful version would.])
+
+(p [The newline character is never treated in any special way in character classes,
+whatever the setting of the ,(sc "dotall") or ,(sc "multiline") options is. A class
+such as \[^a\] will always match a newline.])
+
+(p [The minus (hyphen) character can be used to specify a range of characters in a
+character class. For example, \[d-m\] matches any letter between d and m,
+inclusive. If a minus character is required in a class, it must be escaped with
+a backslash or appear in a position where it cannot be interpreted as
+indicating a range, typically as the first or last character in the class.])
+
+(p [It is not possible to have the literal character "\]" as the end character of a
+range. A pattern such as \[W-\]46\] is interpreted as a class of two characters
+("W" and "-") followed by a literal string "46\]", so it would match "W46\]" or
+"-46\]". However, if the "\]" is escaped with a backslash it is interpreted as
+the end of range, so [W-\\\]46] is interpreted as a single class containing a
+range followed by two separate characters. The octal or hexadecimal
+representation of "\]" can also be used to end a range.])
+
+(p [Ranges operate in the collating sequence of character values. They can also be
+used for characters specified numerically, for example \[\\000-\\037\].])
+
+(p [If a range that includes letters is used when caseless matching is set, it
+matches the letters in either case. For example, \[W-c\] is equivalent to
+\[\]\[\\^_`wxyzabc\], matched caselessly, and if character tables for the "fr"
+locale are in use, \[\\xc8-\\xcb\] matches accented E characters in both cases.])
+
+(p [The character types \\d, \\D, \\s, \\S, \\w, and \\W may also appear in a
+character class, and add the characters that they match to the class. For
+example, \[\\dABCDEF\] matches any hexadecimal digit. A circumflex can
+conveniently be used with the upper case character types to specify a more
+restricted set of characters than the matching lower case type. For example,
+the class \[^\\W_\] matches any letter or digit, but not underscore.])
+
+(p [All non-alphameric characters other than \\, -, ^ (at the start) and the
+terminating \] are non-special in character classes, but it does no harm if they
+are escaped.]))
+   
+;;;
+;;;POSIX CHARACTER CLASSES
+;;;
+(section :title "POSIX character classes"
+(p [Perl supports the POSIX notation for character classes, which
+uses names enclosed by \[: and :\] within the enclosing square
+brackets. ,(stklos) , thanks to PCRE, also supports this
+notation. For example,])
+
+(raw-code "[01[:alpha:]%]")
+
+(p [matches "0", "1", any alphabetic character, or "%". The supported class names
+are])
+   
+(center (table
+(tr (td "alnum")   (td "letters and digits"))
+(tr (td "alpha")   (td "letters"))
+(tr (td "ascii")   (td "character codes 0 - 127"))
+(tr (td "blank")   (td "space or tab only"))
+(tr (td "cntrl")   (td "control characters"))
+(tr (td "digit")   (td "decimal digits (same as \\d)"))
+(tr (td "graph")   (td "printing characters, excluding space"))
+(tr (td "lower")   (td "lower case letters"))
+(tr (td "print")   (td "printing characters, including space"))
+(tr (td "punct")   (td "printing characters, excluding letters and digits"))
+(tr (td "space")   (td "white space (not quite the same as \\s)"))
+(tr (td "upper")   (td "upper case letters"))
+(tr (td "word")    (td "\"word\" characters (same as \\w)"))
+(tr (td "xdigit")  (td "hexadecimal digits"))))
+
+(p [The "space" characters are HT (9), LF (10), VT (11), FF (12), CR (13), and
+space (32). Notice that this list includes the VT character (code 11). This
+makes "space" different to \\s, which does not include VT (for Perl
+compatibility).])
+
+(p [The name "word" is a Perl extension, and "blank" is a GNU extension from Perl
+5.8. Another Perl extension is negation, which is indicated by a ^ character
+after the colon. For example,])
+
+(raw-code "[12[:^digit:]]")
+
+(p [matches "1", "2", or any non-digit. ,(stklos) (and Perl) also
+recognize the POSIX syntax \[.ch.\] and \[=ch=\] where "ch" is
+a "collating element", but these are not supported, and an error
+is given if they are encountered.]))
+
+;;; 
+;;; VERTICAL BAR
+;;;
+(section :title "Vertical Bar"
+(p [Vertical bar characters are used to separate alternative patterns. For example,
+the pattern])
+
+(raw-code "gilbert|sullivan")
+
+(p [matches either "gilbert" or "sullivan". Any number of alternatives may appear,
+and an empty alternative is permitted (matching the empty string).
+The matching process tries each alternative in turn, from left to right,
+and the first one that succeeds is used. If the alternatives are within a
+subpattern (defined below), "succeeds" means matching the rest of the main
+pattern as well as the alternative in the subpattern.]))
+
+   
+;;;
+;;; INTERNAL OPTION SETTING
+;;;
+   
+(section :title "Internal Option Setting"
+
+(p [The settings of the ,(sc "caseless"), ,(sc "multiline"), ,(sc "dotall"), and
+,(sc "EXTENDED") options can be changed from within the pattern by a sequence of
+Perl option letters enclosed between "(?" and ")". The option letters are])
+
+(center (table
+	   (tr (tdc "i")  (tdl [for ,(sc "caseless")]))
+	   (tr (tdc "m")  (tdl [for ,(sc "multiline")]))
+	   (tr (tdc "s")  (tdl [for ,(sc "dotall")]))
+	   (tr (tdc "x")  (tdl [for ,(sc "extended")]))))
+
+(p [For example, (?im) sets caseless, multiline matching. It is also possible to
+unset these options by preceding the letter with a hyphen, and a combined
+setting and unsetting such as (?im-sx), which sets ,(sc "caseless") and
+,(sc "multiline") while unsetting ,(sc "dotall") and ,(sc "extended"), is also
+permitted. If a letter appears both before and after the hyphen, the option is
+unset.])
+
+(p [When an option change occurs at top level (that is, not inside subpattern
+parentheses), the change applies to the remainder of the pattern that follows.
+If the change is placed right at the start of a pattern, PCRE extracts it into
+the global options])
+
+(p [An option change within a subpattern affects only that part of the current
+pattern that follows it, so])
+
+(raw-code "(a(?i)b)c")
+
+(p [matches abc and aBc and no other strings (assuming
+,(sc "caseless") is not used).By this means, options can be made
+to have different settings in different parts of the pattern. Any
+changes made in one alternative do carry on into subsequent
+branches within the same subpattern. For example,])
+
+(raw-code "(a(?i)b|c)")
+
+(p [matches "ab", "aB", "c", and "C", even though when matching "C" the first
+branch is abandoned before the option setting. This is because the effects of
+option settings happen at compile time. There would be some very weird
+behaviour otherwise.])
+
+(p [The PCRE-specific options ,(sc "ungreedy") and ,(sc "extra")
+can be changed in the same way as the Perl-compatible options by
+using the characters U and X respectively. The (?X) flag setting
+is special in that it must always occur earlier in the pattern
+than any of the additional features it turns on, even when it is
+at top level. It is best put at the start.]))
+
+;;;
+;;; SUBPATTERNS
+;;;
+(section :title "Subpatterns"
+
+(p [Subpatterns are delimited by parentheses (round brackets), which can be nested.
+Marking part of a pattern as a subpattern does two things:])
+   
+(enumerate 
+ (item [It localizes a set of alternatives. For example, the pattern]
+
+  (raw-code "cat(aract|erpillar|)")
+
+[matches one of the words "cat", "cataract", or "caterpillar". Without the
+parentheses, it would match "cataract", "erpillar" or the empty string.])
+
+(item [It sets up the subpattern as a capturing subpattern (as
+defined above).  When the whole pattern matches, that portion of
+the subject string that matched the subpattern is set so that it
+can be used in the ,(ref :mark "regexp-replace") or
+,(ref :mark "regexp-replace-all") functions. Opening parentheses
+are counted from left to right (starting from 1) to obtain the
+numbers of the capturing subpatterns.]))
+
+(p [For example, if the string "the red king" is matched against the pattern])
+
+(raw-code "the ((red|white) (king|queen))")
+
+(p [the captured substrings are "red king", "red", and "king", and are numbered 1,
+2, and 3, respectively.])
+
+(p [The fact that plain parentheses fulfil two functions is not always helpful.
+There are often times when a grouping subpattern is required without a
+capturing requirement. If an opening parenthesis is followed by a question mark
+and a colon, the subpattern does not do any capturing, and is not counted when
+computing the number of any subsequent capturing subpatterns. For example, if
+the string "the white queen" is matched against the pattern])
+
+(raw-code "the ((?:red|white) (king|queen))")
+
+(p [the captured substrings are "white queen" and "queen", and are numbered 1 and
+2. The maximum number of capturing subpatterns is 65535, and the maximum depth
+of nesting of all subpatterns, both capturing and non-capturing, is 200.])
+
+(p [As a convenient shorthand, if any option settings are required at the start of
+a non-capturing subpattern, the option letters may appear between the "?" and
+the ":". Thus the two patterns])
+(raw-code "(?i:saturday|sunday)")
+(p [and])
+(raw-code "(?:(?i)saturday|sunday)")
+
+(p [match exactly the same set of strings. Because alternative branches are tried
+from left to right, and options are not reset until the end of the subpattern
+is reached, an option setting in one branch does affect subsequent branches, so
+the above patterns match "SUNDAY" as well as "Saturday".]))
+
+;;;
+;;; NAMED SUBPATTERNS
+;;;
+(section :title "Named Subpatterns"
+
+(p [Identifying capturing parentheses by number is simple, but it can be very hard
+to keep track of the numbers in complicated regular expressions. Furthermore,
+if an expression is modified, the numbers may change. To help with the
+difficulty, PCRE supports the naming of subpatterns, something that Perl does
+not provide. The Python syntax (?P<name>...) is used. Names consist of
+alphanumeric characters and underscores, and must be unique within a pattern.]))
+
+
+;;;
+;;; REPETITION
+;;;
+(section :title "Repetition"
+
+(p [Repetition is specified by quantifiers, which can follow any of the following
+items:])
+   (itemize
+      (item "a literal data character")
+      (item "the . metacharacter")
+      (item "the \\C escape sequence")
+      (item "escapes such as \\d that match single characters")
+      (item "a character class")
+      (item "a back reference (see next section)")
+      (item "a parenthesized subpattern (unless it is an assertion)"))
+
+(p [The general repetition quantifier specifies a minimum and maximum number of
+permitted matches, by giving the two numbers in curly brackets (braces),
+separated by a comma. The numbers must be less than 65536, and the first must
+be less than or equal to the second. For example:])
+
+(raw-code "z{2,4}")
+
+(p [matches "zz", "zzz", or "zzzz". A closing brace on its own is not a special
+character. If the second number is omitted, but the comma is present, there is
+no upper limit; if the second number and the comma are both omitted, the
+quantifier specifies an exact number of required matches. Thus])
+
+(raw-code "[aeiou]{3,}")
+
+(p [matches at least 3 successive vowels, but may match many more, while])
+
+(raw-code "\\d{8}")
+
+(p [matches exactly 8 digits. An opening curly bracket that appears in a position
+where a quantifier is not allowed, or one that does not match the syntax of a
+quantifier, is taken as a literal character. For example, {,6} is not a
+quantifier, but a literal string of four characters.])
+
+(p [The quantifier {0} is permitted, causing the expression to behave as if the
+previous item and the quantifier were not present.])
+
+(p [For convenience (and historical compatibility) the three most common
+quantifiers have single-character abbreviations:])
+
+  (itemize 
+     (item "*    is equivalent to {0,}")
+     (item "+    is equivalent to {1,}")
+     (item "?    is equivalent to {0,1}"))
+
+(p [It is possible to construct infinite loops by following a subpattern that can
+match no characters with a quantifier that has no upper limit, for example:])
+
+(raw-code"(a?)*")
+
+(p [Earlier versions of Perl and PCRE used to give an error at compile time for
+such patterns. However, because there are cases where this can be useful, such
+patterns are now accepted, but if any repetition of the subpattern does in fact
+match no characters, the loop is forcibly broken.])
+
+(p [By default, the quantifiers are "greedy", that is, they match as much as
+possible (up to the maximum number of permitted times), without causing the
+rest of the pattern to fail. The classic example of where this gives problems
+is in trying to match comments in C programs. These appear between the
+sequences /* and */ and within the sequence, individual * and / characters may
+appear. An attempt to match C comments by applying the pattern])
+
+(raw-code "/\\*.*\\*/")
+
+(p [to the string])
+
+(raw-code"/* first command */  not comment  /* second comment */")
+
+(p [fails, because it matches the entire string owing to the greediness of the .*
+item.])
+
+(p [However, if a quantifier is followed by a question mark, it ceases to be
+greedy, and instead matches the minimum number of times possible, so the
+pattern])
+
+(raw-code "/\\*.*?\\*/")
+
+(p [does the right thing with the C comments. The meaning of the various
+quantifiers is not otherwise changed, just the preferred number of matches.
+Do not confuse this use of question mark with its use as a quantifier in its
+own right. Because it has two uses, it can sometimes appear doubled, as in])
+
+(raw-code "\\d??\\d")
+
+(p [which matches one digit by preference, but can match two if that is the only
+way the rest of the pattern matches.])
+
+(p [If the ,(sc "ungreedy") option is set (an option which is not available 
+in Perl), the quantifiers are not greedy by default, but individual ones can be made
+greedy by following them with a question mark. In other words, it inverts the
+default behaviour.])
+
+(p [When a parenthesized subpattern is quantified with a minimum repeat count that
+is greater than 1 or with a limited maximum, more store is required for the
+compiled pattern, in proportion to the size of the minimum or maximum.])
+
+(p [If a pattern starts with .* or .{0,} and the ,(sc "dotall") option (equivalent
+to Perl's /s) is set, thus allowing the . to match newlines, the pattern is
+implicitly anchored, because whatever follows will be tried against every
+character position in the subject string, so there is no point in retrying the
+overall match at any position after the first. PCRE normally treats such a
+pattern as though it were preceded by \\A.])
+
+(p [In cases where it is known that the subject string contains no newlines, it is
+worth setting ,(sc "dotall") in order to obtain this optimization, or
+alternatively using ^ to indicate anchoring explicitly.])
+
+(p [However, there is one situation where the optimization cannot be used. When .*
+is inside capturing parentheses that are the subject of a backreference
+elsewhere in the pattern, a match at the start may fail, and a later one
+succeed. Consider, for example:])
+
+(raw-code "(.*)abc\\1")
+
+(p [If the subject is "xyz123abc123" the match point is the fourth character. For
+this reason, such a pattern is not implicitly anchored.])
+
+(p [When a capturing subpattern is repeated, the value captured is the substring
+that matched the final iteration. For example, after])
+
+(raw-code"(tweedle[dume]{3}\\s*)+")
+
+(p [has matched "tweedledum tweedledee" the value of the captured substring is
+"tweedledee". However, if there are nested capturing subpatterns, the
+corresponding captured values may have been set in previous iterations. For
+example, after])
+
+(raw-code "(a|(b))+")
+
+(p [matches "aba" the value of the second captured substring is "b".]))
+
+;;;
+;;; ATOMIC GROUPING AND POSSESSIVE QUANTIFIERS
+;;;
+(section :title "Atomic Grouping And Possessive Quantifiers"
+
+(p [With both maximizing and minimizing repetition, failure of what follows
+normally causes the repeated item to be re-evaluated to see if a different
+number of repeats allows the rest of the pattern to match. Sometimes it is
+useful to prevent this, either to change the nature of the match, or to cause
+it fail earlier than it otherwise might, when the author of the pattern knows
+there is no point in carrying on.])
+
+(p [Consider, for example, the pattern \\d+foo when applied to the subject line])
+
+(raw-code "123456bar")
+
+(p [After matching all 6 digits and then failing to match "foo", the normal
+action of the matcher is to try again with only 5 digits matching the \\d+
+item, and then with 4, and so on, before ultimately failing. "Atomic grouping"
+(a term taken from Jeffrey Friedl's book) provides the means for specifying
+that once a subpattern has matched, it is not to be re-evaluated in this way.])
+
+(p [If we use atomic grouping for the previous example, the matcher would give up
+immediately on failing to match "foo" the first time. The notation is a kind of
+special parenthesis, starting with (?> as in this example:)])
+
+(raw-code "(?>\\d+)foo")
+
+(p [This kind of parenthesis "locks up" the  part of the pattern it contains once
+it has matched, and a failure further into the pattern is prevented from
+backtracking into it. Backtracking past it to previous items, however, works as
+normal.])
+
+(p [An alternative description is that a subpattern of this type matches the string
+of characters that an identical standalone pattern would match, if anchored at
+the current point in the subject string.])
+
+(p [Atomic grouping subpatterns are not capturing subpatterns. Simple cases such as
+the above example can be thought of as a maximizing repeat that must swallow
+everything it can. So, while both \\d+ and \\d+? are prepared to adjust the
+number of digits they match in order to make the rest of the pattern match,
+(?>\\d+) can only match an entire sequence of digits.])
+
+(p [Atomic groups in general can of course contain arbitrarily complicated
+subpatterns, and can be nested. However, when the subpattern for an atomic
+group is just a single repeated item, as in the example above, a simpler
+notation, called a "possessive quantifier" can be used. This consists of an
+additional + character following a quantifier. Using this notation, the
+previous example can be rewritten as])
+
+(raw-code"\\d++bar")
+
+(p [Possessive quantifiers are always greedy; the setting of the ,(sc "ungreedy")
+option is ignored. They are a convenient notation for the simpler forms of
+atomic group. However, there is no difference in the meaning or processing of a
+possessive quantifier and the equivalent atomic group.])
+
+(p [The possessive quantifier syntax is an extension to the Perl syntax. It
+originates in Sun's Java package.])
+
+(p [When a pattern contains an unlimited repeat inside a subpattern that can itself
+be repeated an unlimited number of times, the use of an atomic group is the
+only way to avoid some failing matches taking a very long time indeed. The
+pattern])
+
+(raw-code "(\\D+|<\\d+>)*[!?]")
+
+(p [matches an unlimited number of substrings that either consist of non-digits, or
+digits enclosed in <>, followed by either ! or ?. When it matches, it runs
+quickly. However, if it is applied to])
+
+(raw-code "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
+(p [it takes a long time before reporting failure. This is because the string can
+be divided between the two repeats in a large number of ways, and all have to
+be tried. (The example used \[!?\] rather than a single character at the end,
+because both PCRE and Perl have an optimization that allows for fast failure
+when a single character is used. They remember the last single character that
+is required for a match, and fail early if it is not present in the string.)
+If the pattern is changed to])
+
+(raw-code "((?>\\D+)|<\\d+>)*[!?]")
+
+(p [sequences of non-digits cannot be broken, and failure happens quickly.]))
+
+;;;
+;;;  BACK REFERENCES
+;;;
+(section :title "Back References"
+
+(p [Outside a character class, a backslash followed by a digit greater than 0 (and
+possibly further digits) is a back reference to a capturing subpattern earlier
+(that is, to its left) in the pattern, provided there have been that many
+previous capturing left parentheses.])
+
+(p [However, if the decimal number following the backslash is less than 10, it is
+always taken as a back reference, and causes an error only if there are not
+that many capturing left parentheses in the entire pattern. In other words, the
+parentheses that are referenced need not be to the left of the reference for
+numbers less than 10. See the section entitled "Backslash" above for further
+details of the handling of digits following a backslash.])
+
+(p [A back reference matches whatever actually matched the capturing
+subpattern in the current subject string, rather than anything
+matching the subpattern itself (see 
+,(ref :section "Subpatterns As Subroutines") below for a way of 
+doing that). So the pattern])
+
+(raw-code "(sens|respons)e and \\1ibility")
+
+(p [matches "sense and sensibility" and "response and responsibility", but not
+"sense and responsibility". If caseful matching is in force at the time of the
+back reference, the case of letters is relevant. For example,])
+
+(raw-code"((?i)rah)\\s+\\1")
+
+(p [matches "rah rah" and "RAH RAH", but not "RAH rah", even though the original
+capturing subpattern is matched caselessly.])
+
+(p [Back references to named subpatterns use the Python syntax (?P=name). We could
+rewrite the above example as follows:])
+
+(raw-code  "(?<p1>(?i)rah)\\s+(?P=p1)")
+
+(p [There may be more than one back reference to the same subpattern. If a
+subpattern has not actually been used in a particular match, any back
+references to it always fail. For example, the pattern])
+
+(raw-code "(a|(bc))\\2")
+
+(p [always fails if it starts to match "a" rather than "bc". Because there may be
+many capturing parentheses in a pattern, all digits following the backslash are
+taken as part of a potential back reference number. If the pattern continues
+with a digit character, some delimiter must be used to terminate the back
+reference. If the ,(sc "extended") option is set, this can be whitespace.
+Otherwise an empty comment can be used.])
+
+(p [A back reference that occurs inside the parentheses to which it refers fails
+when the subpattern is first used, so, for example, (a\\1) never matches.
+However, such references can be useful inside repeated subpatterns. For
+example, the pattern])
+
+(raw-code  "(a|b\\1)+")
+
+(p [matches any number of "a"s and also "aba", "ababbaa" etc. At each iteration of
+the subpattern, the back reference matches the character string corresponding
+to the previous iteration. In order for this to work, the pattern must be such
+that the first iteration does not need to match the back reference. This can be
+done using alternation, as in the example above, or by a quantifier with a
+minimum of zero.]))
+
+;;;
+;;; ASSERTIONS
+;;;
+(section :title "Assertions"
+
+(p [An assertion is a test on the characters following or preceding the current
+matching point that does not actually consume any characters. The simple
+assertions coded as \\b, \\B, \\A, \\G, \\Z, \\z, ^ and $ are described above.
+More complicated assertions are coded as subpatterns. There are two kinds:
+those that look ahead of the current position in the subject string, and those
+that look behind it.])
+
+(p [An assertion subpattern is matched in the normal way, except that it does not
+cause the current matching position to be changed. Lookahead assertions start
+with \(?= for positive assertions and \(?! for negative assertions. For example,])
+
+(raw-code "\\w+(?=;)")
+
+(p [matches a word followed by a semicolon, but does not include the semicolon in
+the match, and])
+
+(raw-code "foo(?!bar)")
+
+(p [matches any occurrence of "foo" that is not followed by "bar". Note that the
+apparently similar pattern])
+
+(raw-code "(?!foo)bar")
+
+(p [does not find an occurrence of "bar" that is preceded by something other than
+"foo"; it finds any occurrence of "bar" whatsoever, because the assertion
+(?!foo) is always true when the next three characters are "bar". A
+lookbehind assertion is needed to achieve this effect.])
+
+(p [If you want to force a matching failure at some point in a pattern, the most
+convenient way to do it is with (?!) because an empty string always matches, so
+an assertion that requires there not to be an empty string must always fail.])
+
+(p [Lookbehind assertions start with \(?<= for positive assertions and \(?<! for
+negative assertions. For example,])
+
+(raw-code "(?<!foo)bar")
+
+(p [does find an occurrence of "bar" that is not preceded by "foo". The contents of
+a lookbehind assertion are restricted such that all the strings it matches must
+have a fixed length. However, if there are several alternatives, they do not
+all have to have the same fixed length. Thus])
+
+(raw-code "(?<=bullock|donkey)")
+
+(p [is permitted, but])
+
+(raw-code "(?<!dogs?|cats?)")
+
+(p [causes an error at compile time. Branches that match different length strings
+are permitted only at the top level of a lookbehind assertion. This is an
+extension compared with Perl (at least for 5.8), which requires all branches to
+match the same length of string. An assertion such as])
+
+(raw-code "(?<=ab(c|de))")
+
+(p [is not permitted, because its single top-level branch can match two different
+lengths, but it is acceptable if rewritten to use two top-level branches:])
+
+(raw-code "(?<=abc|abde)")
+
+(p [The implementation of lookbehind assertions is, for each alternative, to
+temporarily move the current position back by the fixed width and then try to
+match. If there are insufficient characters before the current position, the
+match is deemed to fail.])
+
+(p [Atomic groups can be used in conjunction with lookbehind assertions to specify
+efficient matching at the end of the subject string. Consider a simple pattern
+such as])
+
+(raw-code "abcd$")
+
+(p [when applied to a long string that does not match. Because matching proceeds
+from left to right, PCRE will look for each "a" in the subject and then see if
+what follows matches the rest of the pattern. If the pattern is specified as])
+
+(raw-code "^.*abcd$")
+
+(p [the initial .* matches the entire string at first, but when this fails (because
+there is no following "a"), it backtracks to match all but the last character,
+then all but the last two characters, and so on. Once again the search for "a"
+covers the entire string, from right to left, so we are no better off. However,
+if the pattern is written as])
+
+(raw-code "^(?>.*)(?<=abcd)")
+
+(p [or, equivalently,])
+
+(raw-code "^.*+(?<=abcd)")
+
+(p [there can be no backtracking for the .* item; it can match only the entire
+string. The subsequent lookbehind assertion does a single test on the last four
+characters. If it fails, the match fails immediately. For long strings, this
+approach makes a significant difference to the processing time.])
+
+(p [Several assertions (of any sort) may occur in succession. For example,])
+
+(raw-code "(?<=\\d{3})(?<!999)foo")
+
+(p [matches "foo" preceded by three digits that are not "999". Notice that each of
+the assertions is applied independently at the same point in the subject
+string. First there is a check that the previous three characters are all
+digits, and then there is a check that the same three characters are not "999".
+This pattern does \fInot\fR match "foo" preceded by six characters, the first
+of which are digits and the last three of which are not "999". For example, it
+doesn't match "123abcfoo". A pattern to do that is])
+
+(raw-code "(?<=\\d{3}...)(?<!999)foo")
+
+(p [This time the first assertion looks at the preceding six characters, checking
+that the first three are digits, and then the second assertion checks that the
+preceding three characters are not "999".])
+
+(p [Assertions can be nested in any combination. For example,])
+
+(raw-code "(?<=(?<!foo)bar)baz")
+
+(p [matches an occurrence of "baz" that is preceded by "bar" which in turn is not
+preceded by "foo", while])
+
+(raw-code "(?<=\\d{3}(?!999)...)foo")
+
+(p [is another pattern which matches "foo" preceded by three digits and any three
+characters that are not "999".])
+
+(p [Assertion subpatterns are not capturing subpatterns, and may not be repeated,
+because it makes no sense to assert the same thing several times. If any kind
+of assertion contains capturing subpatterns within it, these are counted for
+the purposes of numbering the capturing subpatterns in the whole pattern.
+However, substring capturing is carried out only for positive assertions,
+because it does not make sense for negative assertions.]))
+
+   
+;;;    
+;;; CONDITIONAL SUBPATTERNS
+;;;
+(section :title "Conditional Subpatterns"
+   
+(p [It is possible to cause the matching process to obey a subpattern
+conditionally or to choose between two alternative subpatterns, depending on
+the result of an assertion, or whether a previous capturing subpattern matched
+or not. The two possible forms of conditional subpattern are])
+
+(raw-code[(?(condition)yes-pattern)
+(?(condition)yes-pattern|no-pattern)])
+
+(p [If the condition is satisfied, the yes-pattern is used; otherwise the
+no-pattern (if present) is used. If there are more than two alternatives in the
+subpattern, a compile-time error occurs.])
+   
+(p [There are three kinds of condition. If the text between the parentheses
+consists of a sequence of digits, the condition is satisfied if the capturing
+subpattern of that number has previously matched. The number must be greater
+than zero. Consider the following pattern, which contains non-significant white
+space to make it more readable (assume the ,(sc "extended") option) and to divide
+it into three parts for ease of discussion:])
+
+(raw-code "( \\( )?    [^()]+    (?(1) \\) )")
+
+(p [The first part matches an optional opening parenthesis, and if that
+character is present, sets it as the first captured substring. The second part
+matches one or more characters that are not parentheses. The third part is a
+conditional subpattern that tests whether the first set of parentheses matched
+or not. If they did, that is, if subject started with an opening parenthesis,
+the condition is true, and so the yes-pattern is executed and a closing
+parenthesis is required. Otherwise, since no-pattern is not present, the
+subpattern matches nothing. In other words, this pattern matches a sequence of
+non-parentheses, optionally enclosed in parentheses.])
+
+(p [If the condition is the string (R), it is satisfied if a recursive call to the
+pattern or subpattern has been made. At "top level", the condition is false.
+This is a PCRE extension. See PCRE documentation for recursive patterns.])
+   
+(p [If the condition is not a sequence of digits or (R), it must be an assertion.
+This may be a positive or negative lookahead or lookbehind assertion. Consider
+this pattern, again containing non-significant white space, and with the two
+alternatives on the second line:])
+
+(raw-code [(?(?=[^a-z]*[a-z])
+\\d{2}-[a-z]{3}-\\d{2}  |  \\d{2}-\\d{2}-\\d{2} )])
+
+(p [The condition is a positive lookahead assertion that matches an optional
+sequence of non-letters followed by a letter. In other words, it tests for the
+presence of at least one letter in the subject. If a letter is found, the
+subject is matched against the first alternative; otherwise it is matched
+against the second. This pattern matches strings in one of the two forms
+dd-aaa-dd or dd-dd-dd, where aaa are letters and dd are digits.]))
+
+;;;
+;;; COMMENTS
+;;;
+(section  :title "Comments" :ident "pcre:comment"
+
+(p [The sequence \(?# marks the start of a comment which continues up to the next
+closing parenthesis. Nested parentheses are not permitted. The characters
+that make up a comment play no part in the pattern matching at all.])
+
+(p [If the ,(sc "extended") option is set, an unescaped # character outside a
+character class introduces a comment that continues up to the next newline
+character in the pattern.]))
+
+;;;
+;;;SUBPATTERNS AS SUBROUTINES
+(section :title "Subpatterns As Subroutines"
+
+(p [If the syntax for a recursive subpattern reference (either by number or by
+name) is used outside the parentheses to which it refers, it operates like a
+subroutine in a programming language. An earlier example pointed out that the
+pattern])
+
+(raw-code "(sens|respons)e and \\1ibility")
+
+(p [matches "sense and sensibility" and "response and responsibility", but not
+"sense and responsibility". If instead the pattern])
+
+(raw-code "(sens|respons)e and (?1)ibility")
+
+(p [is used, it does match "sense and responsibility" as well as the other two
+strings. Such references must, however, follow the subpattern to which they
+refer.]))
+
+   
+;;;
+;;; REGEXP PROCEDURES
+;;;
+(section :title "Regexp Procedures"
+(TODO "Traiter les locale... NE pas fontifier")
+(p [This section lists the Scheme functions that can use PCRE regexpr described 
+before])
+   
+(insertdoc 'string->regexp)
+(insertdoc 'regexp?)
+(insertdoc 'regexp-match-positions)
+(insertdoc 'regexp-replace-all)
+(insertdoc 'regexp-quote))
+)

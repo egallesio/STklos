@@ -1,0 +1,54 @@
+;;;;
+;;;; scroll1.stk	-- GTklos Scroll Widget Demo
+;;;; 
+;;;; Copyright © 2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 11-Feb-2002 16:05 (eg)
+;;;; Last file update:  8-Apr-2002 22:37 (eg)
+;;;;
+
+(include "gtklos-demo.stk")
+
+(define demo-msg "
+This is a demo showing a scrollable window containing
+a bunch of buttons.
+Try to resize the window to see the scrollbars disappear
+")
+
+(define (main args)
+  (let* ((win    (make <demo-window> :title "Scroll Demo" 
+		       :file "scroll1" :border-width 5 :message demo-msg))
+	 (grid   (make <grid> :columns 6 :row-spacing 5 :column-spacing 5))
+	 (scroll (make <scroll> :parent win
+		       :layout grid
+		       :width 200
+		       :height 350
+		       :hpolicy 'automatic
+		       :vpolicy 'automatic)))
+
+    ;; Change placement of scroll so that it occupies as much space as possible
+    (%container-place (parent scroll) scroll :expand #t :fill #t)
+
+    ;; Build a set of  buttons in the <scroll>
+    (dotimes (i 150)
+      (make <button> :text (format #f "Button #~A" i) :parent grid
+	    :command (lambda (e)
+		       (format #t "You have clicked on button #~A\n" i))))
+    0))

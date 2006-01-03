@@ -1,0 +1,196 @@
+;;;;
+;;;; repl.stk	-- STklos REPL
+;;;; 
+;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  4-Jun-2000 15:07 (eg)
+;;;; Last file update:  2-Jan-2006 10:41 (eg)
+;;;;
+
+;; This file defines the REPL module. This module does not export anything 
+;; and is completely self-contained. This is the module which is last loaded
+;; in the default boot file. 
+;; 
+
+
+(define-module REPL
+  (export main-repl repl)
+
+;;; In module REPL
+
+(define interactive?   (interactive-port? (current-input-port)))
+
+(define repl-level 0)
+(define repl-backtrace '())
+  
+(define do-color
+  (if (and (not (key-get *%program-args* :interactive #f))
+	   (member (getenv "TERM")
+		   '("rxvt" "xterm" "xterm-color" "linux" "cygwin")))
+      ;; Terminal accepts color
+      ansi-color
+      ;; Provide a procedure which ignore color indications
+      (lambda args
+	(apply string-append
+	       (map (lambda (x) (if (string? x) x ""))
+		    args)))))
+
+
+(define (do-repl-command l)
+  (case (car l)
+    ((help ?)		(display
+			 (do-color 'blue 'bold
+				   (format "Available Commands:
+- ,backtrace ,bt   Show the stack when last error occurred	
+- ,quit ,q	   Exit STklos
+- ,help ,? ,h	   This help\n")
+				   'clear)
+			 (current-error-port))
+     			(flush-output-port (current-error-port)))
+    ((quit q)	    	(exit 0))
+    ((backtrace bt) 	(%display-backtrace repl-backtrace 6))
+    (else		(format (current-error-port)
+				"bad command name: ~S. Type ,help for some help\n"
+				(car l)))))
+
+
+;; ----------------------------------------------------------------------
+;;	repl-handler ...
+;;	   -- The error handler for the REPL
+;; ----------------------------------------------------------------------
+(define (display-error-message who msg bt out)
+  (let ((loc (%build-error-location who bt)))
+    (display (do-color 'bold 'red
+		       (format "**** Error:\n~A: ~A\n" (car loc) msg)
+		       'clear
+		       "\t(type \""
+		       'underline ",help" 'clear
+		       "\" for more information)\n")
+	     out)))
+
+
+(define (repl-handler c port) 
+  (if (condition? c)
+      (cond
+	((condition-has-type? c &error-message)		;; &error-message
+	   (let ((who (condition-ref c 'location))
+		 (msg (condition-ref c 'message))
+		 (bt  (condition-ref c 'backtrace)))
+	     (display-error-message who msg bt port)
+	     (set! repl-backtrace bt)))
+	((condition-has-type? c &message)		;; &message (e.g. ^C)
+	   (format port (condition-ref c 'message)))
+	(else						;; Unknown
+	   (format port "**** Unknown condition raised.\n")
+	   (format port "Condition type: ~A\n" (struct-type-name (struct-type c)))
+	   (format port "Condition slots: ~S\n" (struct->list c))))
+      ;; Value raised is not a condition. Display it
+      (format port "**** The following non-condition was raised: ~S\n" c)))
+
+
+;; ----------------------------------------------------------------------
+;;	display-prompt ...
+;; ----------------------------------------------------------------------
+(define (display-prompt module port)
+  (when interactive?
+    (when (> repl-level 1)
+      (display (do-color 'bold 'red (format "[~A] " repl-level)) port))
+    (display (do-color 'bold 'magenta
+		       (format "~A> " (module-name module))
+		       'black)
+	     port)
+    (flush-output-port port)))
+
+;; ----------------------------------------------------------------------
+;;	repl ...
+;; ----------------------------------------------------------------------
+
+#|
+<doc EXT repl
+ * (repl)
+ * (repl :in inport :out outport :err errport)
+ *
+ * This procedure launches a new Read-Eval-Print-Loop. Calls to |repl| can be
+ * embedded. The ports used for input/output as well as the error port can
+ * be passed when |repl| is called. If not passed, they default to
+ * |current-input-port|, |current-output-port| and |current-error-port|.
+doc>
+|#
+(define (repl :key (in  (current-input-port))
+	      	   (out (current-output-port))
+		   (err (current-error-port)))
+  (let ((eof #f))
+    (set! repl-level (+ repl-level 1))
+    (let Loop ()
+      (with-handler (lambda (c) (repl-handler c err))
+	 (display-prompt (current-module) err)
+	 (let ((e (%read in)))
+	   (display (do-color 'clear))
+	   (cond 
+	     ((eof-object? e)
+		(set! repl-level (- repl-level 1))
+		(set! eof #t)
+		(display "\n")
+		(flush-output-port err)
+		(flush-output-port out))
+
+	     ((and (pair? e) (eq? (car e) 'unquote))
+		(do-repl-command (cdr e)))
+
+	     (else
+	        (call-with-values 
+		  (lambda () (eval e))
+		  (lambda v
+		    (when interactive?
+		      (cond
+			((null? v)
+			   ;; (values)
+			   #f)
+			((eq? (car v) (void))
+			   (when (= (length v) 2)
+			     ;; Special convention for variable definition
+			     (display (do-color 'bold 'blue
+						(format ";; ~A\n" (cadr v)))
+				      out)))
+			(else
+			   (for-each (lambda (x) (write* x out) (newline out))
+				     v)))
+		      (flush-output-port out))))))))
+      ;; Loop if we have not meet an EOF
+      (unless eof (Loop)))))
+
+;; ----------------------------------------------------------------------
+;;	main-repl ...
+;; ----------------------------------------------------------------------
+(define (main-repl)
+  ;; Initialize signals suitable for  a REPL session (e.g.be immune to ^C)
+  (%initialize-signals)
+  (when interactive?
+    (display (do-color
+	      'bold 'green
+	      (format "STklos version ~A\t\t\t[~A]\n" (version) (machine-type))
+	      "Copyright © 1999-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>\n"
+	      'normal)
+	     (current-error-port)))
+  (repl))
+)
+
+
+; LocalWords:  repl

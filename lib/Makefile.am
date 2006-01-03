@@ -1,0 +1,150 @@
+# Makefile.am for STklos lib
+#
+#           Author: Erick Gallesio [eg@unice.fr]
+#    Creation date: 11-Apr-2000 10:30 (eg)
+# Last file update: 15-Dec-2005 20:24 (eg)
+
+SUBDIRS = Match.d SILex.d Lalr.d
+
+scheme_BOOT = assembler.stk		\
+	      bb.stk 			\
+	      bonus.stk 		\
+	      boot.stk 			\
+	      compiler.stk 		\
+	      computils.stk		\
+	      expand.pp			\
+	      load.stk			\
+	      mbe.stk			\
+	      module.stk		\
+	      object.stk 		\
+	      obsolete.stk		\
+	      peephole.stk		\
+	      pragma.stk		\
+	      process.stk		\
+	      r5rs.stk 			\
+	      regexp.stk		\
+	      repl.stk 			\
+	      runtime.stk		\
+	      srfi-0.stk		\
+	      struct.stk
+
+
+scheme_SRCS = STklos.init		\
+	      bigloo.stk		\
+	      compfile.stk 		\
+	      date.stk			\
+	      describe.stk		\
+	      expand.ss			\
+	      full-syntax.stk		\
+	      full-conditions.stk 	\
+	      getopt.stk		\
+	      lex-rt.stk		\
+	      make-C-boot.stk		\
+	      match.stk			\
+	      pp.stk			\
+	      slib.stk			\
+	      srfi-1.stk		\
+	      srfi-2.stk		\
+	      srfi-4.stk		\
+	      srfi-7.stk		\
+	      srfi-9.stk		\
+	      srfi-11.stk		\
+	      srfi-13.stk		\
+	      srfi-14.stk		\
+	      srfi-17.stk		\
+	      srfi-26.stk		\
+	      srfi-27.stk		\
+	      srfi-31.stk		\
+	      srfi-34.stk		\
+	      srfi-35.stk		\
+	      srfi-36.stk		\
+	      srfi-48.stk		\
+	      srfi-60.stk		\
+	      srfi-66.stk		\
+	      srfi-70.stk		\
+	      trace.stk
+
+scheme_OBJS = date.ostk 		\
+	      compfile.ostk		\
+	      full-syntax.ostk		\
+	      full-conditions.ostk 	\
+	      describe.ostk		\
+	      getopt.ostk		\
+	      lex-rt.ostk		\
+	      match.ostk		\
+	      pp.ostk			\
+	      srfi-1.ostk 		\
+	      srfi-2.ostk		\
+	      srfi-4.ostk		\
+	      srfi-7.ostk		\
+	      srfi-9.ostk		\
+	      srfi-11.ostk		\
+	      srfi-13.ostk		\
+	      srfi-14.ostk		\
+	      srfi-17.ostk		\
+	      srfi-26.ostk		\
+	      srfi-27.ostk		\
+	      srfi-31.ostk		\
+	      srfi-34.ostk		\
+	      srfi-35.ostk		\
+	      srfi-36.ostk		\
+	      srfi-48.ostk		\
+	      srfi-60.ostk		\
+	      srfi-66.ostk		\
+	      srfi-70.ostk		\
+	      trace.ostk	
+
+DOCDB	    = DOCDB
+
+#======================================================================
+schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
+scheme_DATA = $(scheme_SRCS) $(scheme_OBJS) $(scheme_BOOT)
+
+#======================================================================
+
+SUFFIXES = .stk .ostk .scm
+.stk.ostk:
+	../utils/tmpcomp $*.stk $*.ostk
+
+.scm.ostk:
+	../utils/tmpcomp $*.scm $*.ostk
+
+#======================================================================
+
+all: boot $(scheme_OBJS)
+
+boot:	../src/boot.img 
+
+../src/boot.img: $(scheme_BOOT)
+	../src/stklos -q -c -b ../src/boot.img -f bb.stk boot.img0 instr0 
+	../src/stklos -q -c -b ./boot.img0     -f bb.stk boot.img1 instr1 
+	../src/stklos -q -c -b ./boot.img1     -f bb.stk boot.img2 instr2 
+	../src/stklos -q -c -b ./boot.img2     -f bb.stk boot.img3 instr3  
+	@if cmp ./boot.img2 ./boot.img3 ;then 				\
+	   echo "*** New boot file created";  				\
+	   cp ../src/boot.img ../src/boot.ok; 				\
+	   cp ./boot.img3 ../src/boot.img;    				\
+	   cp ./instr3    ../src/vm-instr.h;  				\
+	   echo "*** Create new boot.c";				\
+	   ../src/stklos -c -b ../src/boot.img  			\
+		-f make-C-boot.stk -- boot.img3 ../src/boot.c;		\
+	   echo "*** Recompile STklos";					\
+	   (cd ../src; make stklos);					\
+	   echo "*** Cleaning useless images";				\
+	   /bin/rm boot.img[0-3] instr[0-3];  				\
+	else 								\
+	   echo "*** Boot file creation failed"; 			\
+	   exit 1; 							\
+	fi
+
+doc: $(DOCDB)
+
+$(DOCDB): $(scheme_SRCS) $(scheme_BOOT)
+	../src/stklos -c -b ../src/boot.img -f ../doc/extract-doc \
+	$(scheme_SRCS) $(scheme_BOOT) > $(DOCDB)
+
+clean:
+	/bin/rm -f $(scheme_OBJS)
+
+distclean: clean
+	true

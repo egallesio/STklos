@@ -1,0 +1,74 @@
+.\" -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH STKLOS-GENLEX 1 "version @VERSION@"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAMEan
+stklos-genlex \- lexical analyzer generation for STklos
+
+.SH SYNOPSIS
+stklos-genlex lex-file output-file constructor
+
+
+.SH DESCRIPTION
+The
+.B stklos-genlex
+can be used to make  lexical analyzers with
+.B STklos.
+It is a simple front-end to the Danny Dubé
+.B SILex
+tool. This command always takes three parameters which are described
+below:
+.IP "\fIlex-file\fR"
+is the input file which contains the lex-like rules describing the
+analyzer to be built
+
+.IP "\fRoutput-file\fI"
+is a file which will contain the Scheme analyzer produced by the
+\fBSILex\fR tool.
+
+.IP "\fIconstructor\fR"
+is the name of the procedure that will be produced in the
+\fIoutput-file\fR . This procedure takes one parameter which is the
+file name (or the port) which is used as the input stream for the
+lexical analyzer. The value returned by this procedure is a STklos
+object which contains the automaton. To fetch the next token of the
+input stream, programs must use the \fIlexer-next-token\fR. procedure.
+See the example below for details.
+
+.SH "EXAMPLE"
+
+Suppose that the lexical rules are in the file \fIrules.l\fR. One can
+built an analyzer in the file \fIout.stk\fRfor this rules using the
+following command
+.nf
+     stklos-genlex  rules.l out.stk my-make-lex
+.fi
+The following piece of code show how to use the produced analyzer.
+.nf
+      (load "out.stk")
+      ...
+      (let ((lex (my-make-lex "foo")))
+	;; Display the first token of file foo
+	(display (lexer-next-token lex))
+	...)
+.fi
+
+.SH "SEE ALSO"
+.BR stklos (1)
+.BR lex (1) 
+and the \fBSILex\fR documentation
+
+	

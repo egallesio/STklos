@@ -1,0 +1,196 @@
+;;;;
+;;;; boot.stk					-- Default boot file
+;;;; 
+;;;; Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 01-Jan-2000 15:04 (eg)
+;;;; Last file update: 26-Apr-2005 15:12 (eg)
+;;;;
+
+(include "runtime.stk")		; Definition necessary for the bootstrap
+(include "module.stk")		; All the macros for defining modules
+(include "r5rs.stk")		; R5RS stuff written in Scheme
+(include "struct.stk")		; STklos structures
+(include "bonus.stk")		; Extended functions and syntaxes
+(include "load.stk")		; Extended load dealing with paths and suffixes
+(include "mbe.stk")		; A simple R5RS macro system 
+(include "regexp.stk")		; Regular expressions
+(include "process.stk")		; Processes from Scheme
+(include "srfi-0.stk")		; Implementation of SRFI-0
+(include "compiler.stk")	; VM Compiler
+(include "object.stk")		; CLOS like object system
+(include "date.stk")		; Dates
+(include "pragma.stk")		; Pragma system for STklos compiler
+(include "obsolete.stk")	; Obsolete functions. Candidates to disappear
+
+(include "repl.stk")		; Read Eval Print Loop
+(import REPL)
+
+;==============================================================================
+(autoload 	 "compfile" compile-file)
+(syntax-autoload "match"    match-case match-lambda)
+(autoload 	 "getopt"   %print-usage)
+(syntax-autoload "getopt"   parse-arguments)
+(syntax-autoload "trace"    trace untrace)
+(autoload	 "pp"	    pp pretty-print)
+(autoload 	 "srfi-27"  random-integer random-real)
+(syntax-autoload "srfi-34"  with-exception-handler guard)
+(syntax-autoload "srfi-35"  define-condition-type condition)
+(autoload 	 "srfi-48"  srfi48:help srfi48:format-fixed)
+
+;==============================================================================
+;; Execute the REPL only if a file was not given on the command line
+(define %before-exit-hook void)
+
+;; A main function which will probably overloaded by the user
+(define main void)
+
+
+;; ----------------------------------------------------------------------
+;; 	%display-backtrace ...
+;; ----------------------------------------------------------------------
+(define (%display-backtrace bt useless-frames)
+  (define (hack-bt)
+    ;; Backtrace show things that the user probably don't need to see
+    ;; (the internal of the repl in particular. Delete the bottom of the stack
+    ;; and replace it by EVAL
+    (if (>= (length bt) useless-frames)
+	(let ((bt (list-tail (reverse bt) useless-frames)))
+	  (reverse! (cons (cons eval #f) bt)))
+	bt))
+
+  (define (limit-bt bt)
+    (let ((depth (or (let ((x (getenv "STKLOS_FRAMES")))
+		       (and x (string->number x)))
+		     10))
+	  (len (length bt)))
+      (if (and (> depth 0) (> len depth))
+	  (reverse!
+	   (cons "  - ...\nSet shell variable STKLOS_FRAMES to set visible frames\n"
+		 (list-tail (reverse! bt) (- len depth))))
+	  bt)))
+  
+  (let ((p (current-error-port)))
+    (for-each (lambda (x)
+		(if (string? x)
+		    (display x p)
+		    (begin
+		      (display "  - " p)
+		      ;; Print the procedure name
+		      (let ((who (car x)))
+			(display (cond
+				   ((procedure? who) (%procedure-name who))
+				   ((not who)        "<<let/call>>")
+				   (else             who))
+				 p))
+		      ;; Print (eventually) the position
+		      (if (cdr x)
+			  (format p " @ [~S:~S]\n" (cadr x) (cddr x))
+			  (newline p)))))
+	      (limit-bt (hack-bt)))
+    (flush-output-port p)))
+
+;; ----------------------------------------------------------------------
+;; 	%build-error-location ...
+;; ----------------------------------------------------------------------
+(define (%build-error-location who bt)
+  (if who
+      (list who
+	    (if (null? bt) #f (cdar bt)))
+      (let Loop ((bt bt))
+	(cond
+	  ((null? bt)
+	   (list "???" #f))
+	  ((procedure? (caar bt))
+	   (let ((name (%procedure-name (caar bt))))
+	     (if (or (string? name) (cdar bt))
+		 ;; We have either a "pretty name" or a line information
+		 (list name (cdar bt))
+		 ;; Nothing interesting, continue to go down the stack
+		 (Loop (cdr bt)))))
+	  ((not (caar bt))
+	   ;; We have a let
+	   (if (cdar bt)
+	       (list "let" (cdar bt))
+	       (Loop (cdr bt))))))))
+
+
+;; ----------------------------------------------------------------------
+;; 	%simple-fatal-exception-handler ...
+;; ----------------------------------------------------------------------
+(define (%simple-fatal-exception-handler what who c useless-frames)
+  (let ((port (current-error-port))
+	(bt   #f))
+    ;; Display the message 
+    (format port "**** Error while ~A ~S\n" what who)
+    (when (condition? c)
+      (when (condition-has-type? c &error-message)
+	(set! bt (condition-ref c 'backtrace)) ;; will be displayed later
+	(format port "\tWhere: ~A\n" (car (%build-error-location who bt))))
+      (when (condition-has-type? c &message)
+	(format port "\tReason: ~A\n" (condition-ref c 'message))))
+    ;; Show a backtrace
+    (when bt
+      (%display-backtrace bt useless-frames))
+    (format port "EXIT\n")
+    (exit 70)))   ; 70 seems to be required by SRFI-22
+
+
+;; ----------------------------------------------------------------------
+;;	option analysis and REPL launching
+;; ----------------------------------------------------------------------
+(let ((no-init (key-get *%program-args* :no-init-file #f))
+      (ld      (key-get *%program-args* :load  #f))
+      (file    (key-get *%program-args* :file #f))
+      (expr    (key-get *%program-args* :sexpr #f)))
+
+ 
+  ;; Try to load the user initialization file except if "--no-init-file"
+  (unless no-init
+    (try-load (expand-file-name "~/.stklos/stklosrc")))
+  
+  ;; "--load" option
+  (when ld
+    (with-handler
+      (lambda (c) (%simple-fatal-exception-handler "loading file" ld c 7))
+      (load ld)))
+
+  ;; "--file" option
+  (when file
+    (with-handler
+       (lambda (c) (%simple-fatal-exception-handler "executing file" file c 2))
+       (load file)
+       ;; Try to execute the main procedure with the given arguments
+       (let ((ret-code (main (cons (program-name) (argv)))))
+	 (%before-exit-hook)
+	 (exit (if (integer? ret-code) ret-code 0)))))
+
+  ;; "--expression" option
+  (when expr
+    (with-handler
+       (lambda (c) (%simple-fatal-exception-handler "evaluating" expr c 4))
+       (eval (read-from-string expr))
+       (exit 0)))
+
+  ;; Starts the main REPL
+  (main-repl))
+
+
+; LocalWords:  VM EVAL SRFI REPL

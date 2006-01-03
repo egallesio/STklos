@@ -1,0 +1,1418 @@
+;;;;
+;;;; c o m p i l e r . s t k			-- STklos Compiler
+;;;; 
+;;;; Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 26-Feb-2000 10:47 (eg)
+;;;; Last file update: 27-Dec-2005 20:27 (eg)
+;;;;
+
+;;(define-module new-compiler
+  
+
+(define *compiler-port*		#f)
+(define *compiler-options* 	(list 'warn-use-undef))
+(define *compiler-inline*  	'(+ - * / = < <= > >= cons car cdr null? list not 
+ 				  vector-ref vector-set! string-ref string-set!
+ 				  eq? eqv? equal? void))
+;(define *compiler-inline*	'(+ - * / = <))
+(define *always-inlined*   	'(%set-current-module %%set-current-module 
+				  %%execute %%execute-handler))
+
+(define *code-instr*		#f)
+(define *code-constants*	'())
+(define *code-labels*		0)
+
+(include "peephole.stk")
+(include "assembler.stk")
+(include "computils.stk")
+
+
+;; ----------------------------------------------------------------------
+;; 	Compiler parameters ...
+;; ----------------------------------------------------------------------
+(define compiler:time-display    (make-parameter #t))
+(define compiler:gen-line-number (make-parameter #f))
+
+
+
+
+(define (initialize-compilation)
+  (set! *code-instr*     '())
+  (set! *code-constants* '())
+  '(set! *code-labels*	 0) ;// FIXME: pourquoi?
+  )
+
+(define (get-generated-code)
+  (reverse *code-instr*))
+
+(define (new-label)
+  (let ((lab *code-labels*))
+    (set! *code-labels* (+ *code-labels* 1))
+    lab))
+
+(define (emit . args)
+  (set! *code-instr* (cons args *code-instr*)))
+
+(define (emit-label lab)
+  (set! *code-instr* (cons lab *code-instr*)))
+
+
+; ======================================================================
+;
+; 				CONSTANTS
+;
+; ======================================================================
+
+(define (fetch-constant c)
+  (let ((x (member c *code-constants*)))
+    (unless x
+      ;; This constant was not in the table; add it.
+      (set! x (list c))
+      (set! *code-constants* (append! *code-constants* x)))
+    (- (length *code-constants*) (length x))))
+
+(define compile-constant
+  (let ((min-int (- (expt 2 15)))
+	(max-int (- (expt 2 15) 1)))
+    (lambda (v env tail?)
+      (cond 
+        ((eq? v #t)    		       (emit 'IM-TRUE))
+	((eq? v #f)    		       (emit 'IM-FALSE))
+	((eq? v '())   		       (emit 'IM-NIL))
+	((eq? v -1)    		       (emit 'IM-MINUS1))
+	((eq? v 0)     		       (emit 'IM-ZERO))
+	((eq? v 1)     		       (emit 'IM-ONE))
+	((eq? v (void))		       (emit 'IM-VOID))
+	((and (integer? v)
+	      (exact? v)
+	      (<= min-int v max-int))  (emit 'SMALL-INT v))
+	(else 			       (emit 'CONSTANT (fetch-constant v)))))))
+
+
+#|
+<doc syntax quote
+ * (quote <datum>)
+ * '<datum>
+ *
+ * The quoting mechanism is identical to R5RS, except that keywords 
+ * constants  evaluate "to themselves" as numerical constants, string 
+ * constants, character constants, and boolean constants
+ * @lisp
+ * '"abc"     =>  "abc"
+ * "abc"      =>  "abc"
+ * '145932    =>  145932
+ * 145932     =>  145932
+ * '#t        =>  #t
+ * #t         =>  #t
+ * :foo       =>  :foo
+ * ':foo      =>  :foo
+ * @end lisp
+ * ,(bold "Note:") R5RS requires to quote constant lists and
+ * constant vectors. This is not necessary with STklos.
+doc>
+|#
+(define (compile-quote expr env tail?)
+  (if (= (length expr) 2)
+      (compile-constant (cadr expr) env tail?)
+      (compiler-error 'quote expr "bad usage in ~S" expr)))
+
+; ======================================================================
+;
+;				DEFINE
+;
+; ======================================================================
+
+(define *known-globals* '())
+(define *forward-globals* '())
+
+(define (known-var? symbol)
+  (or (symbol-bound? symbol) (memq symbol *known-globals*)))
+
+(define (new-global symbol)
+  (unless (memq symbol *known-globals*)
+    (set! *known-globals* (cons symbol *known-globals*))))
+
+(define (compiler-warn-undef symbol epair)
+  (compiler-warning (void) epair "reference to undefined symbol ~S" symbol))
+
+(define (verify-global symbol epair)
+  (when (and (memq 'warn-use-undef *compiler-options*)
+	     (not (known-var? symbol)))
+    (if (memq 'warn-use-undef-postpone *compiler-options*)
+	(set! *forward-globals* (cons (cons symbol epair) *forward-globals*))
+	(begin
+	  (compiler-warn-undef symbol epair)
+	  (new-global symbol)))))	; to avoid multiple warnings
+
+(define (compiler-show-undefined-symbols)
+  (for-each (lambda (x)
+	      (let ((symbol (car x))
+		    (where  (cdr x)))
+		(unless (known-var? symbol)
+		  (compiler-warn-undef symbol where)
+		  (new-global symbol)))) ;; to avoid multiple warnings
+	    *forward-globals*)
+  (set! *forward-globals* '()))
+
+(define (define->lambda l)
+  (if (> (length l) 2)
+      (let ((bind (cadr l))
+	    (body (cddr l)))
+	(if (pair? bind)
+	    `(define ,(car bind) (lambda ,(cdr bind) ,@body))
+	    l))
+      (begin
+	(compiler-error 'define l "ill formed definition ~S" l)
+	l)))
+
+(define (compile-define args env tail?)
+  (let* ((l   (define->lambda args))
+	 (who (cadr l)))
+    (if (not (= (length l) 3))
+	(compiler-error 'define args "bad definition")
+	(if (null? env)
+	    (if (symbol? who)
+		(begin
+		  (new-global who)
+		  (compile (caddr l) '() args #f)
+		  (emit 'DEFINE-SYMBOL (fetch-constant who)))
+		(compiler-error 'define args "bad variable name ~S" who))
+	    (compiler-error 'define args "internal define forbidden here")))))
+
+
+;;;;
+;;;; REFERENCES & ASSIGNMENT
+;;;;
+(define (symbol-in-env? symb env)
+  (let Loop ((l env))
+    (cond
+      ((null? l) 		#f)
+      ((memq symb (car l))	#t)
+      (else			(Loop (cdr l))))))
+
+
+(define (compile-access name env epair ref)
+
+  (define (make-word v1 v2)		  ;; FIXME: Add control 
+    (+ (* v1 256) v2))
+
+
+  (define (em i1 i2 . args)
+    (apply emit (if ref i1 i2) args))
+
+  (let loop ((lev 0) (env env))
+    (if (null? env) 
+	;; name is a global variable
+	(begin
+	  (verify-global name epair)
+	  (em 'GLOBAL-REF 'GLOBAL-SET (fetch-constant name)))
+	;; name is a local variable 
+	(let loop2 ((idx 0) (l (car env)))
+	  (cond 
+	    ((null? l) 	
+	     (loop (+ lev 1) (cdr env)))
+	    ((eq? (car l) name) 
+	     (if (zero? lev)
+		 ;; variable in  innermost block
+		 (case idx
+		   ((0)  (em 'LOCAL-REF0 'LOCAL-SET0))
+		   ((1)  (em 'LOCAL-REF1 'LOCAL-SET1))
+		   ((2)  (em 'LOCAL-REF2 'LOCAL-SET2))
+		   ((3)  (em 'LOCAL-REF3 'LOCAL-SET3))
+		   ((4)  (em 'LOCAL-REF4 'LOCAL-SET4))
+		   (else (em 'LOCAL-REF  'LOCAL-SET  idx)))
+		 ;; local variable in a "between" block
+		 (em 'DEEP-LOCAL-REF  'DEEP-LOCAL-SET (make-word lev idx))))
+	    (else   (loop2 (+ idx 1) (cdr l))))))))
+
+
+(define (compile-reference name env epair tail?)
+  (compile-access name env epair #t))
+
+(define (compile-set! args env tail?)
+  (let ((len (length (cdr args))))
+    (if (= len 2)
+	(let ((var (cadr args))
+	      (val (caddr args)))
+	  (if (list? var)
+	      ;; This is a extended set! usage as in "(set! (f x y z) value)"
+	      (compile `((setter ,(car var)) ,@(cdr var) ,val) env args tail?)
+	      ;; R5RS usage
+	      (if (symbol? var)
+		  (begin 
+		    (compile val env args #f)
+		    (compile-access var env args #f))
+		  (compiler-error 'set! args "~S is a bad symbol" var))))
+	(compiler-error 'set! args "bad assignment syntax in ~S" args))))
+
+;;;;
+;;;; IF
+;;;;
+(define (compile-if args env tail?)
+  (let ((len (length (cdr args)))
+	(l1  (new-label))
+	(l2  (new-label)))
+    (if (<= 2 len 3)
+	(begin
+	  (compile (cadr args) env args #f)
+	  (emit 'JUMP-FALSE l1)
+	  (compile (caddr args) env args tail?)
+	  (emit 'GOTO l2)
+	  (emit-label l1)
+	  (if (= len 3)
+	      (compile (cadddr args) env args tail?)
+	      (emit 'IM-VOID))
+	  (emit-label l2))
+	(compiler-error 'if args "bad syntax in ~S" args))))
+
+;;
+;; DEFINE-MACRO
+;;
+
+;/(define (compile-define-macro e env tail?)
+;/  (let ((l (define->lambda e)))
+;/    (when (= (length l) 3)
+;/      (let* ((name (cadr l))
+;/	     (proc (caddr l))
+;/	     (args (cadr proc))
+;/	     (body (cddr proc)))
+;/	(let ((l `(lambda (form e)
+;/		    (apply (lambda ,args ,@body) (cdr form)))))
+;/	  (format #t "La forme de l'expanseur est ~S\n" l)
+;/	  ;; Produce code for the macro body
+;/	  (compile l env #f)
+;/	  (emit 'MAKE-EXPANDER (fetch-constant name))
+;/	  ;; An install expander for further compilation
+;/	  (display "ON INSTALLE l'EXPANDER\n")
+;/	  (install-expander! name (macro-eval l) l))))))
+
+
+
+
+(define (compile-define-macro e env tail?)  ;; FIXME: verifier que c'est bien global
+  (let ((l (define->lambda e)))
+    (when (= (length l) 3)
+      (let* ((l	       (extended-lambda->lambda l))
+	     (name     (cadr l))
+	     (proc     (caddr l))
+	     (expander `(lambda (form e) (apply ,proc (cdr form)))))
+	;; Compile code for installing expander
+	(compile expander '() e #f)
+	(emit 'MAKE-EXPANDER (fetch-constant name))
+	;; Install expander for further compilation
+	(install-expander! name (macro-eval expander))))))
+
+
+;;;;
+;;;; WHEN/UNLESS
+;;;;
+(define (compile-when args env tail?)
+  (let ((len (length (cdr args))))
+    (if (> len 1)
+	(compile `(if ,(cadr args) (begin ,@(cddr args))) env args tail?)
+	(compiler-error 'when args "bad syntax in ~S" args))))
+
+(define (compile-unless args env tail?)
+  (let ((len (length (cdr args))))
+    (if (> len 1)
+	(compile `(if (not ,(cadr args)) (begin ,@(cddr args))) env args tail?)
+	(compiler-error 'unless args "bad syntax in ~S" args))))
+
+
+#|
+
+				A N D
+
+<doc syntax and
+ * (and <test1> ...)
+ *
+ * The |<test>| expressions are evaluated from left to right, and the
+ * value of the first expression that evaluates to a false value is
+ * returned.  Any remaining expressions are not evaluated.  If all the
+ * expressions evaluate to true values, the value of the last expression
+ * is returned.  If there are no expressions then |¤t| is returned.
+ * 
+ * @lisp
+ *   (and (= 2 2) (> 2 1))           =>  #t
+ *   (and (= 2 2) (< 2 1))           =>  #f
+ *   (and 1 2 'c '(f g))             =>  (f g)
+ *   (and)                           =>  #t
+ * @end lisp
+doc>
+|#
+(define (compile-and args env tail?)
+  (if (null? (cdr args))
+      ;; Case (and) ==> #t
+      (emit 'IM-TRUE)
+      ;; General case
+      ;; code for (and x1 x2 .. xn) is
+      ;;      x1; jump-false l1; x2; jump-false l1; ... goto l2; l1: im-false; L2:
+      (let ((lab1 (new-label))
+	    (lab2 (new-label)))	  
+	(let Loop ((l (cdr args)))
+	  (cond ((null? l) 	     #f)
+		((null? (cdr l))     (compile (car l) env args tail?))
+		(else  	     	     (compile (car l) env args #f)
+				     (emit 'JUMP-FALSE lab1)
+				     (Loop (cdr l)))))
+	(emit 'GOTO lab2)
+	(emit-label lab1)
+	(emit 'IM-FALSE)
+	(emit-label lab2))))
+
+#|
+ 
+				O R
+ *
+<doc syntax or
+ * (or <test1> ...)
+ *
+ * The |<test>| expressions are evaluated from left to right, and the
+ * value of the first expression that evaluates to a true value is
+ * returned.  Any remaining expressions are not evaluated.  If all
+ * expressions evaluate to false values, the value of the last expression
+ * is returned.  If there are no expressions then |¤f| is returned.
+ * 
+ * @lisp
+ *   (or (= 2 2) (> 2 1))            =>  #t
+ *   (or (= 2 2) (< 2 1))            =>  #t
+ *   (or #f #f #f)                   =>  #f
+ *   (or (memq 'b '(a b c)) 
+ *       (/ 3 0))                    =>  (b c)
+ * @end lisp
+doc>
+|#
+(define (compile-or args env tail?)
+  ;; General case
+  ;; code for (or x1 x2 .. xn) is
+  ;;      x1; jump-true l1; x2; jump-true l1; ... ; im-false; L1:
+  (let ((lab (new-label)))
+    (let Loop ((l (cdr args)))
+      (unless (null? l)
+	(compile (car l) env args (and tail? (null? (cdr l))))
+	(emit 'JUMP-TRUE lab)
+	(Loop (cdr l))))
+    (emit 'IM-FALSE)
+    (emit-label lab)))
+      
+
+;;;;
+;;;; BEGIN
+;;;;
+(define (compile-begin args env tail?)
+  (let ((len (length (cdr args))))
+    (case len
+      ((0) ;; Body without form
+           (emit 'IM-VOID))
+      ((1) ;; A begin with only one sexpr in it
+       	   (compile (cadr args) env args tail?))
+      (else ;; General case
+           (let Loop ((body (cdr args)))
+	     (if (null? (cdr body))
+		 ;; last expression of the begin
+		 (compile (car body) env args tail?)
+		 ;; expression in the middle
+		 (begin
+		   (compile (car body) env args #f)
+		   (Loop (cdr body)))))))))
+
+;;;;
+;;;; LAMBDA
+;;;;
+(define (compute-arity l)
+  (let loop ((l l) (n 0))
+    (cond 
+       ((null? l) n)
+       ((pair? l) (loop (cdr l) (+ n 1)))
+       (else      (- (- n) 1)))))
+
+(define (extend-env env formals)
+  (letrec ((aux (lambda (l res)
+		  (cond
+		     ((null? l) res)
+		     ((pair? l) (aux (cdr l) (cons (car l) res)))
+		     (else      (cons l res))))))
+    (cons (aux formals '()) env)))
+
+
+(define (extend-current-env env symbol)
+  ;; Add just symbol to the current environment (used by let*)
+  (cons (append (car env) (list symbol))
+	(cdr env)))
+
+;;  (define (valid-lambda? expr)
+;;    (define (param-ok? l seen)
+;;      (cond 
+;;       ((null? l)   #t)
+;;       ((symbol? l) (if (memq l seen)
+;;  		      (compile-error "duplicate parameter ~S" l)
+;;  		      #t))
+;;       ((pair? l)   (and (symbol? (car l))
+;;  		       (param-ok? (car l) seen)
+;;  		       (param-ok? (cdr l) (cons (car l) seen))))
+;;       (else	      (compile-error "bad procedure parameter ~S" l))))
+;;    
+;;    ;; code of valid-lambda? starts here
+;;    
+;;    (and (> (length expr) 2)
+;;         (param-ok? (cadr expr) '())))
+;;  
+
+
+(define (rewrite-body body)
+  (let Loop ((l body) (defs '()))
+    (cond
+      ((and (pair? l) (pair? (car l)) (eq? (caar l) 'begin))
+          ;; Delete useless begin
+          (Loop (cdar l) defs))
+      ((and (pair? l) (pair? (car l)) (eq? (caar l) 'define))
+          ;; This is an internal define 
+	  (Loop (cdr l) (cons (cdr (define->lambda (car l))) defs)))
+      (else
+	  ;; We have parsed all the (starting) definitions 
+	  (if (null? defs)
+	      `(begin ,@l)
+	      (let ((defs (reverse! defs)))
+		;; Generate "similar" to a letrec*
+		`(let ,(map (lambda (x) (list (car x) #f)) defs)
+		   ,@(map (lambda (x) `(set! ,@x)) defs)
+		   ,@l)))))))
+
+(define (compile-user-lambda formals body arity env)	; i.e R5RS ones
+  (let ((env  (extend-env env formals))
+	(lab  (new-label)))
+    (emit 'CREATE-CLOSURE lab arity)
+    (compile (rewrite-body body) env body #t)
+    (emit 'RETURN)
+    (emit-label lab)))
+
+
+
+;;; EXTENDED LAMBDAS
+;;;
+;;; This code is an adaptation of the contribution of Ian Wild <imw@acm.org> 
+;;; which provided Common Lisp style lambda lists for the original STk.
+(define ext-lambda-key-get key-get)
+
+(define (build-let* opt key rest-name user-visible-rest body)
+  ;; Create a (LET*...) to do the actual bindings
+
+  (define (pop x)
+    (let ((pop-local-variable (gensym)))
+      `(let ((,pop-local-variable (car ,x)))
+	 (set! ,x (cdr ,x))
+	 ,pop-local-variable)))
+
+
+  (define (build-optional-let-header vars rest-name)
+    (apply append 
+	   (map (lambda (x)
+		  (let ((var  (car x))
+			(init (cadr x))
+			(var? (caddr x)))
+		    ;; if we have keywords, the end of optional
+		    ;; happens when we encounter the end of the
+		    ;; parameter list or the first keyword
+		    (if key
+			;; function accepts keywords
+			(cond
+			  (var? `((,var? (and (pair? ,rest-name)
+					      (not (keyword? (car ,rest-name)))))
+				  (,var ,(if init
+					     `(if ,var? ,(pop rest-name) ,init)
+					     `(and ,var? ,(pop rest-name))))))
+			  (init `((,var (if (or (null? ,rest-name)
+						(keyword? (car ,rest-name)))
+					    ,init
+					    ,(pop rest-name)))))
+			  (else `((,var (and (pair? ,rest-name)
+					     (not (keyword? (car ,rest-name)))
+					     ,(pop rest-name))))))
+			;; function has optionals but no keywords
+			(cond
+			  (var? `((,var? (pair? ,rest-name))
+				  (,var ,(if init
+					     `(if ,var? ,(pop rest-name) ,init)
+					     `(and ,var? ,(pop rest-name))))))
+			  (init `((,var (if (null? ,rest-name)
+					    ,init
+					    ,(pop rest-name)))))
+			  (else `((,var (and (pair? ,rest-name)
+					     ,(pop rest-name)))))))))
+		  vars)))
+ 
+   (define (constant? e)
+     (cond
+        ((symbol? e) #f)
+	((pair? e)   (memq (car e) '(quote lambda)))
+	(else 	     #t)))
+
+   (define (build-keyword-let-header vars rest-name)
+     (apply append 
+	    (map (lambda (x)
+		   (let* ((var  (car x))
+			  (init (cadr x))
+			  (var? (caddr x))
+			  (key  (make-keyword var)))
+		     (cond
+		        (var? (let ((g (gensym)))
+				`((,g (key-get ,rest-name ,key ',g))
+				  (,var? (not (eq? ,g ',g)))
+				  (,var ,(if init
+					     `(if ,var? ,g ,init)
+					     `(and ,var? ,g))))))
+			((constant? init)
+			    ;; if evaluating the initform is harmless, just
+			    ;; call key-get with it as default
+			    `((,var (key-get ,rest-name ,key ,init))))
+			(else 
+			     ;; only evaluate initform if get-keyword returns
+			     ;; our newly gensym'ed symbol
+			     (let ((g (gensym)))
+			       `((,g (key-get ,rest-name ,key ',g))
+				 (,var (if (eq? ,g ',g) ,init ,g))))))))
+		 vars)))
+
+  
+  (let ((error-check (if (or user-visible-rest key) 
+			 '()
+			 `((if (pair? ,rest-name)
+			       (error "too many optional parameters: ~a"
+				      ,rest-name))))))
+    `(let* (,@(if opt (build-optional-let-header opt rest-name) '())
+	    ,@(if key (build-keyword-let-header key rest-name) '()))
+       ,@error-check
+       ,(rewrite-body body))))
+
+
+(define (parse-parameter-list method? x)
+  ;; Read the incoming lambda (or method) list, return a list of four lists,
+  ;; the required, optional, keyword, and rest, in that order.
+  ;; The last three elements can be #f if not present.
+  ;; (Don't look too closely, this function isn't very nice.)
+  (define required '())
+  (define optional '())
+  (define keywords '())
+  (define rest 	   '())
+  (define epair    x)
+
+
+  (define (normalise-parameter-list x optional?)
+    ;; Convert optional or keyword parameters to three-element lists: 
+    ;; (variable initform supplied-p), providing an  explicit #f 
+    ;; initform  if needed, and maybe another #f as supplied-p.
+    (and (pair? x)
+	 (map (lambda (e)
+		(cond 
+		  ((symbol? e)		 	(list e #f #f))
+		  ((and (pair? e)
+			(= (length e) 2)
+			(symbol? (car e))) 	(append e (list #f)))
+		  ((and (pair? e)
+			(= (length e) 3)
+			(symbol? (car e))
+			(symbol? (caddr e))) 	e)
+		  (else (compiler-error 'lambda epair "illegal ~a parameter: ~a" 
+					(if optional? "optional" "keyword") e)
+			(list (gensym) #f #f))))
+	      x)))
+  
+  (define (collect-sequence)
+    (let loop ((seq '()) (still-left x))
+      (if (or (null? still-left) (memq (car still-left) '(:optional :key :rest)))
+	  (begin
+	    (set! x still-left)
+	    (reverse seq))
+	  (loop (cons (car still-left) seq) (cdr still-left)))))
+  
+  (define (collect-titled-sequence title)
+    (if (and (not (null? x)) (eq? (car x) title))
+	(begin
+	  (set! x (cdr x))
+	  (collect-sequence))
+	#f))
+
+  (define (check-formals l seen)
+    (unless (null? l)
+      (let ((param (car l)))
+	(cond
+	   ((symbol? param)
+		    (if (memq param seen)
+			(compiler-error (void) epair "duplicate parameter ~S" param)
+			(check-formals (cdr l) (cons param seen))))
+	   ((and method? (list? param) (= (length param) 2))
+	    	    (if (symbol? (cadr param))
+			(and (check-formals (list (car param)) seen)
+			     (check-formals (cdr l) (cons (car param) seen)))
+			(compiler-error (void) epair "bad class name ~S" param)))
+	   (else    (compiler-error (void) epair
+				     "bad procedure parameter ~S" param))))))
+
+
+  ;; If the original lambda list is *not* a proper list, i.e. a symbol
+  ;; or a dotted list, add in the implied :rest
+  (unless (list? x)
+    (set! x (if (pair? x)
+		(let* ((new-x (copy-tree x))
+		       (last  (last-pair new-x)))
+		  (set-cdr! last (list :rest (cdr last)))
+		  new-x)
+		(list :rest x))))
+
+  (set! required (collect-sequence))
+  (set! optional (normalise-parameter-list (collect-titled-sequence :optional) #t))
+  (set! rest 	 (collect-titled-sequence :rest))
+  (set! keywords (normalise-parameter-list (collect-titled-sequence :key) #f))
+  
+  ;; Do some checks on the arguments
+  ;; 1. no un-analyzed parameter
+  (unless (null? x)
+    (compiler-error 'lambda epair "illegal lambda list ending with ~a" x))
+
+  ;; 2. Rest is a symbol (collect returns a list)
+  (when rest
+    (unless (and (= (length rest) 1) (symbol? (car rest)))
+      (compiler-error 'lambda epair "rest parameter must be a single symbol"))
+    (set! rest (car rest)))
+
+  ;; 3. Every formal is a symbol and there is no duplicate
+  (check-formals (append (if optional (map car optional) '())
+			 (if keywords (map car keywords) '())
+			 (if rest     (list rest)        '())
+			 required)
+		 '())
+  ;; OK, let's go
+  (list required optional keywords rest))
+
+
+(define (rewrite-params-and-body method? formals body)
+  ;; Rewrite the extended form as an ordinary (though headless) lambda form.
+  ;; In a spurious attempt at efficiency, no LET* is generated
+  ;; unless at least one of :optional and :key is used.
+  (let* ((params (parse-parameter-list method? formals))
+	 (req 	 (car params))
+	 (opt 	 (cadr params))
+	 (key 	 (caddr params))
+	 (rest 	 (cadddr params)))
+    (if (or opt key)
+	;; We have a :optional or a :key keyword
+	(let ((rest-name (or rest (gensym))))
+	  (if (null? req)					; FIXME: simpl
+	      (set! req rest-name)
+	      (set-cdr! (last-pair req) rest-name))
+	  `(,req ,(build-let* opt key rest-name rest body)))
+	;; "Normal" lambda
+	(begin (if rest
+		   (if (null? req)
+		       (set! req rest)
+		       (set-cdr! (last-pair req) rest)))
+	       `(,req ,@body)))))
+  
+(define (extended-lambda->lambda el)	;; STklos lambda => R5RS lambda
+  (if (> (length el) 2)
+      (let ((method? (eq? (car el) 'method))
+	    (formals (cadr el))
+	    (body    (cddr el)))
+	(cons 'lambda (rewrite-params-and-body method? formals body)))
+      (compiler-error 'lambda el "bad definition ~S" el)))
+
+
+(define (compile-lambda args env tail?)
+  (let* ((r5rs-lambda (extended-lambda->lambda args))
+	 (formals     (cadr r5rs-lambda))
+	 (body        (cddr r5rs-lambda))
+	 (arity       (compute-arity formals)))
+    (compile-user-lambda formals body arity env)))
+
+;;;;
+;;;; APPLICATION
+;;;;
+
+(define (compile-args actuals env)
+  (unless (null? actuals)
+    (compile (car actuals) env actuals #f)
+    (emit 'PUSH)
+    (compile-args (cdr actuals) env)))
+
+
+(define (compile-var-args actuals number-of-fix env)
+  ;; for a (a b . c), replace (1 2 3 4 5) by (1 2 (list 3 4 5))
+  (let loop ((n number-of-fix) (f '()) (rest actuals))
+    (if (zero? n)
+	(compile-args `(,@(reverse f) (list ,@rest)) env)
+	(loop (- n 1) (cons (car rest) f) (cdr rest)))))
+
+(define (generate-PREPARE-CALL epair)
+  (emit 'PREPARE-CALL)
+  (when (and (compiler:gen-line-number) (%epair? epair))
+    ;; Generate a line number for the call
+    (compile-constant (%epair-file epair) '() #f)
+    (emit 'PUSH)
+    (compile-constant (%epair-line epair) '() #f)
+    (emit 'DBG-VM 1)))
+
+
+(define (compile-normal-call fct actuals len env epair tail?)
+  (generate-PREPARE-CALL epair)
+  (compile-args actuals env)
+  (compile fct env actuals #f)
+  (emit (if tail? 'TAIL-INVOKE  'INVOKE)
+	(length actuals)))
+
+
+(define (can-be-inlined fct)
+  (or (memq fct *always-inlined*)
+      (memq fct *compiler-inline*)))
+
+
+(define (compile-primitive-call fct actuals len env epair tail?)
+  (let ((comp  (lambda (mnemo expr)
+		 (compile expr env epair #f)
+		 (emit mnemo)))
+	(comp1 (lambda (mnemo)
+		 (if (= len 1)
+		     (begin
+		       (compile (car actuals) env epair #f)
+		       (emit mnemo))
+		     (compiler-error fct epair "1 argument required (~A provided)" 
+				    len))))
+	(comp2 (lambda (mnemo)
+		 (if (= len 2)
+		     (begin
+		       (compile (car actuals) env epair #f)
+		       (emit 'PUSH)
+		       (compile (cadr actuals) env epair #f)
+		       (emit mnemo))
+		     (compiler-error fct epair "2 arguments required (~A provided)"
+				    len))))
+	(comp3 (lambda (mnemo)
+		 (if (= len 3)
+		     (begin 
+		       (compile (car actuals) env epair #f)
+		       (emit 'PUSH)
+		       (compile (cadr actuals) env epair #f)
+		       (emit 'PUSH)
+		       (compile (caddr actuals) env epair #f)
+		       (emit mnemo))
+		     (compiler-error fct epair "3 arguments required (~A provided)"
+				     len)))))
+    (case fct
+      ;; Always inlined functions
+      ((%%set-current-module)
+       	      (if (= len 1)
+		  (comp1 'SET-CUR-MOD)
+		  (compiler-error '%%set-current-module epair
+				   "1 arg. only (~S)" len)))
+      ((%%execute-handler)
+       	      (comp3 'EXEC-HANDLER))
+
+      ;; User functions 
+      ((void) (emit 'IM-VOID))
+      ((+)    (case len
+		((0)  (emit 'IM-ZERO))
+		((2)  (if (eq? (car actuals) 1)
+			  (comp 'IN-INCR (cadr actuals))
+			  (if (eq? (cadr actuals) 1)
+			      (comp 'IN-INCR (car actuals))
+			      (comp2 'IN-ADD2))))
+		(else (compile-normal-call fct actuals len env epair #f))))
+      ((-)    (case len
+		((0)   (compiler-error '- epair "needs at least one argument"))
+		((2)   (if (eq? (cadr actuals) 1)
+			   (comp 'IN-DECR (car actuals))
+			   (comp2 'IN-SUB2)))
+		(else  (compile-normal-call fct actuals len env epair #f))))
+      ((*)    (case len
+		((0)  (emit 'IM-ONE))
+		((2)  (comp2 'IN-MUL2))
+		(else (compile-normal-call fct actuals len env epair #f))))
+      ((/)    (case len
+		((0)   (compiler-error '/ epair "needs at least one argument"))
+		((2)   (comp2 'IN-DIV2))
+		(else  (compile-normal-call fct actuals len env epair #f))))
+      ((= < > <= >=)
+		(case len
+		((O)   (compiler-error fct epair
+					"needs at least one argument" fct))
+		((2)   (comp2 (case fct
+				((=)  'IN-NUMEQ)
+				((<)  'IN-NUMLT)
+				((>)  'IN-NUMGT)
+				((<=) 'IN-NUMLE)
+				((>=) 'IN-NUMGE))))
+		(else  (compile-normal-call fct actuals len env epair #f))))
+      ((cons)   (comp2 'IN-CONS))
+      ((car)    (comp1 'IN-CAR))
+      ((cdr)    (comp1 'IN-CDR))
+      ((null?)  (comp1 'IN-NULLP))
+      ((not)    (comp1 'IN-NOT))
+      ((list)   (compile-args actuals env)
+	        (emit 'IN-LIST len))
+;;//      ((apply)  (case len
+;;//		  ((0)  (compile-error "no argument given to apply"))
+;;//		  ((1)  (compile-primitive-call fct (list (car actuals) '())
+;;//						(+ len 1) env tail?))
+;;//		  (else (emit 'PREPARE-CALL)
+;;//			(compile-args (cdr actuals) env)
+;;//			(compile (car actuals) env #f)
+;;//			(emit 'IN-APPLY (- len 1) (if tail? 1 0)))))
+      ((vector-ref)	(comp2 'IN-VREF))
+      ((vector-set!)	(comp3 'IN-VSET))
+      ((string-ref)	(comp2 'IN-SREF))
+      ((string-set!)	(comp3 'IN-SSET))
+      ((eq?)		(comp2 'IN-EQ))
+      ((eqv?)		(comp2 'IN-EQV))
+      ((equal?)		(comp2 'IN-EQUAL))
+      (else     	(panic "unimplemented inline primitive ~S" fct)))))
+
+
+
+(define (compile-lambda-call fct actuals len env epair tail?)
+  ;; Compilation of ( [LAMBDA(.)...] ..... )
+  (let* ((fct     (extended-lambda->lambda fct))
+	 (formals (cadr fct))
+	 (body    (cddr fct))
+	 (arity   (compute-arity formals)))
+    (if (or (= arity len)
+	    (and (negative? arity) (>= len (- (- arity) 1))))
+	(let ((kind (if tail? 'ENTER-TAIL-LET 'ENTER-LET)))
+	  (generate-PREPARE-CALL epair)
+	  (if (negative? arity)
+	      (begin
+		(compile-var-args actuals (- (- arity) 1) env)
+		(emit kind (- arity)))
+	      (begin
+		(compile-args actuals env)
+		(emit kind len)))
+	  (compile (rewrite-body body) (extend-env env formals) epair tail?)
+	  (emit (if tail? 'RETURN 'LEAVE-LET)))
+	(compiler-error 'lambda epair "bad number of parameters ~S" actuals))))
+
+
+(define (compile-call args env tail?)
+  (let* ((fct 	  (car args))
+	 (actuals (cdr args))
+	 (len 	  (length actuals)))
+    (if (and (pair? fct) (eq? (car fct) 'lambda))
+	;; fct is (lambda (...) ...)
+	;;    if fct is not an epair, it is probably because it has been
+	;;    built programmatically. Anyway its body is probably an epair 
+	(let ((ep (cond
+		    ((%epair? fct) fct)
+		    ((>= (length fct) 3) (cddr fct))
+		    (else fct))))
+	  (compile-lambda-call fct actuals len env ep tail?))
+	(if (can-be-inlined fct)
+	    (compile-primitive-call fct actuals len env args tail?)
+	    (compile-normal-call    fct actuals len env args tail?)))))
+
+;;;;
+;;;; LET / LET* / LETREC
+;;;;
+(define (valid-let-bindings? bindings unique?)
+  (letrec 
+      ((aux (lambda (l seen)
+	      (cond 
+	       ((null? l) #t)
+	       ((pair? l) (let ((b (car l)))
+			    (if (and (list? b) 
+				     (= (length b) 2)
+				     (symbol? (car b)))
+				(if (and unique? (memq (car b) seen))
+				    (compiler-error 'let bindings
+						     "duplicate binding ~S" (car b))
+				    (aux (cdr l) (cons (car b) seen)))
+				(compiler-error 'let bindings
+						 "malformed binding ~S" b))))
+	       (else #f)))))
+    (aux bindings '())))
+
+;;
+;; LETREC
+;;
+
+(define (compile-letrec args env tail?)
+  (let ((len (length args)))
+    (if (< len 3)
+	(compiler-error 'letrec args "ill formed letrec ~S" args)
+	(let ((bindings (cadr args))
+              (body     (cddr args)))
+	  (if (null? bindings)
+	      (compile (rewrite-body body) env body tail?)
+	      (when (valid-let-bindings? bindings #t)
+		(let ((tmps (map (lambda (_) (gensym)) bindings)))
+		  (compile `(let ,(map (lambda (x) (list (car x) #f)) bindings)
+			      (let ,(map (lambda (x y) (list x (cadr y)))
+					 tmps bindings)
+				,@(map (lambda (x y) `(set! ,(car y) ,x))
+				       tmps bindings))
+			      ,(rewrite-body body))
+			   env args tail?))))))))
+
+;;
+;; LET (& named let)
+;;
+
+(define (compile-named-let name bindings body len args env tail?)
+  (if (< len 4)
+      (compiler-error 'let args "ill formed named let ~S" args)
+      (when (valid-let-bindings? bindings #t)
+	(compile `((letrec ((,name (lambda ,(map car bindings) ,@body)))
+		       ,name)
+		   ,@(map cadr bindings))
+		 env
+		 args
+		 tail?))))
+
+
+(define (compile-let args env tail?)
+  (let ((len (length args)))
+    (if (< len 3)
+	(compiler-error 'let args "ill formed let ~S" args)
+	(let ((bindings (cadr args))
+	      (body	(cddr args)))
+	  (if (symbol? bindings)
+	      ;; Transform named let in letrec
+	      (compile-named-let bindings (car body) (cdr body) len args env tail?)
+	      (when (valid-let-bindings? bindings #t)
+		(if (null? bindings)
+		    (compile `(begin ,@body) env args tail?)
+		    (compile `((lambda ,(map car bindings) ,@body)
+			       ,@(map cadr bindings))
+			     env args tail?))))))))
+
+;;
+;; LET*
+;;
+
+;; Here is a simple version (inefficient) of compile-let*
+;;    
+;;    (define (compile-let* args env tail?)
+;;      (let ((len (length args)))
+;;        (if (< len 3)
+;;    	(compiler-error 'let* args "ill formed let* ~S" args)
+;;    	(let ((bindings (cadr args))
+;;    	      (body	(cddr args)))
+;;    	  (when (valid-let-bindings? bindings #f)
+;;    	    (compile (if (<= (length bindings) 1)
+;;    			 `(let ,bindings ,@body)
+;;    			 `(let (,(car bindings))
+;;     			    (let* ,(cdr bindings)
+;;    			      ,@body)))
+;;    		     env args tail?))))))
+;;    
+
+(define (compile-let* args env tail?)
+  ;; This is a little bit tricky
+  ;; We have something like
+  ;; (let ((a E1) (b E2)) ...) =>
+  ;;              (let ((a #f) (b #f))          [1]
+  ;;                (set! a E1) (set! b E2)	[2]
+  ;;                 ...)			[3]
+  ;;
+  ;; For [1], we have 2 special instructions which reserve space on the stack
+  ;; For [2], this is a little bit more complicate since E1 must be evaluated
+  ;; in an environment without a, E2 must be evaluated in an environment with
+  ;; a and without b
+  ;; [3] must be evaluated in an environment where a and b are defined;
+  ;; 
+  ;; If there are multiple definition of the same variable, it is multi-allocated
+  ;; but only one slot will be used. Not a big deal, in general
+  (let ((len (length args)))
+    (if (< len 3)
+	(compiler-error 'let* args "ill formed let* ~S" args)
+	(let ((bindings (cadr args))
+	      (body	(cddr args)))
+	  (when (valid-let-bindings? bindings #f)
+	    (if (<= (length bindings) 1)
+		(compile-let `(let ,bindings ,@body) env tail?)
+		(begin 
+		  (emit (if tail? 'ENTER-TAIL-LET-STAR 'ENTER-LET-STAR)
+			(length bindings))
+		  (let Loop ((l bindings)
+			     (locals '()))
+		    (if (null? l)
+			;; Compile body
+			(begin 
+			  (compile (rewrite-body body)
+				   (extend-env env locals)
+				   body
+				   tail?)
+			  (emit (if tail? 'RETURN 'LEAVE-LET)))
+			;; Compile an assignment
+			(let* ((var (caar l))
+			       (val (cadar l))
+			       (loc (cons var locals)))
+			  (compile val (extend-env env locals) args #f)
+			  (compile-access var (extend-env env loc) args #f)
+			  (Loop (cdr l)
+				loc)))))))))))
+
+;;
+;; COND
+;;
+(define (rewrite-cond-clauses c)
+  (cond 
+   ((null? c) 		      (void))
+   ((not (pair? (car c)))     (compiler-error 'cond c "invalid clause ~S" (car c)))
+   ((eq? (caar c) 'else)      (if (null? (cdr c))
+				  `(begin ,@(cdar c))
+				  (compiler-error 'cond
+						   c
+						   "else not in last clause ~S" 
+						   c)))
+   ((and (pair? (cdar c)) (eq? (cadar c) '=>))
+    			      (if (and (list? (car c)) (= (length (car c)) 3))
+				  (let ((test-var (gensym)))
+				    `(let ((,test-var ,(caar c)))
+				       (if ,test-var
+					   (,(caddar c) ,test-var)
+					   ,(rewrite-cond-clauses (cdr c)))))
+				  (compiler-error 'cond
+						   c
+						   "bad '=>' clause syntax ~S" 
+						   (car c))))
+   ((null? (cdar c))	      (let ((test-var (gensym)))
+				`(let ((,test-var ,(caar c)))
+				   (or ,test-var
+				       ,(rewrite-cond-clauses (cdr c))))))
+   (else 		      `(if ,(caar c) 
+				   (begin ,@(cdar c))
+				   ,(rewrite-cond-clauses (cdr c))))))
+
+(define (compile-cond e env tail?)
+  (let ((new-form (rewrite-cond-clauses (cdr e))))
+    (compile new-form env e tail?)))
+
+;;
+;; CASE
+;;
+
+(define (rewrite-case-clauses key clauses)
+  ;; Some controls on the case form
+  (let ((all-values '()))
+    (for-each (lambda (clause)
+		(if (pair? clause)
+		    (cond 
+		      ((eq? (car clause) 'else) 
+		       	   'ok)
+		      ((pair? (car clause))	
+		           ;; OK but verify that there are no duplicates 
+		       	   (for-each (lambda (x)
+				       (if (memv x all-values)
+					   (compiler-error
+					       'case clause
+					       "duplicate case value ~S in ~S" 
+					       x clause)))
+				     (car clause))
+			   (set! all-values (append (car clause) all-values)))
+		      (else  
+		           (compiler-error 'case clause
+					   "ill formed case clause ~S" clause)))
+		    (compiler-error 'case clauses
+				    "invalid clause syntax in ~S" clause)))
+	      clauses))
+
+  ;; Generate equivalent cond form
+  `(cond ,@(map (lambda (clause)
+		  ;; We are not sure it is a well formed clause since
+		  ;; previous checks may not call error (file compilation)
+		  (if (pair? clause)
+		      (let ((case  (car clause))
+			    (exprs (cdr clause)))
+			(if (eq? case 'else)
+			    `(else ,@exprs)
+			    (if (pair? case)
+				(if (= (length case) 1)
+				    `((eqv? ,key ',(car case)) ,@exprs)
+				    `((memv ,key ',case) ,@exprs))
+				`(#t (error "invalid case clause")))))
+		      `(#t (error "invalid case"))))
+		clauses)))
+
+(define (compile-case e env tail?)
+  (if (> (length e) 2)
+      (let* ((key     (cadr e))
+	     (clauses (cddr e))
+	     (new-form (if (pair? key)
+			   (let ((newkey (gensym)))
+			     `(let ((,newkey ,key)) 
+				,(rewrite-case-clauses newkey clauses)))
+			   (rewrite-case-clauses key clauses))))
+	(compile new-form env e tail?))
+      (compiler-error 'case e "no key given")))
+
+;;
+;; DO 
+;;
+(define (rewrite-do inits test body)
+  (let ((loop-name (gensym)))
+    `(letrec ((,loop-name
+       (lambda ,(map car inits)
+	 (if ,(car test)
+	     (begin ,@(if (null? (cdr test)) 
+			  (list (void))
+			  (cdr test)))
+	     (begin ,@body
+		    (,loop-name ,@(map (lambda (init)
+					 (if (< (length init) 2)
+					     (compiler-error 'do
+							      init
+							      "bad binding ~S"
+							      init)
+					     (if (null? (cddr init))
+						 (car init)
+						 (caddr init))))
+				       inits)))))))
+       (,loop-name ,@(map cadr inits)))))
+
+
+(define (compile-do e env tail?)
+  (if (>= (length e) 3)
+      (compile (rewrite-do (cadr e) (caddr e) (cdddr e))
+	       env
+	       e
+	       #f)
+      (compiler-error 'do e "bad syntax")))
+
+;;
+;; QUASIQUOTE
+;;
+
+(define (backquotify e level)
+  (cond
+     ((vector? e)     (list 'list->vector (backquotify (vector->list e) level)))
+     ((not (pair? e)) (list 'quote e))
+     ((eq? (car e) 'quasiquote)
+      		      (list 'list ''quasiquote 
+			    (backquotify (cadr e) (+ level 1))))
+     ((eq? (car e) 'unquote)
+      		      (if (= level 1)
+			  (cadr e)
+			  (list 'list ''unquote 
+				(backquotify (cadr e) (- level 1)))))
+     ((and (pair? (car e)) (eq? (caar e) 'unquote-splicing))
+      		       (if (null? (cdr e))
+			   (if (> level 1)
+			       (list 'quote e) 
+			       (cadar e))
+			   (list 'append (cadar e)
+				 (backquotify (cdr e) level))))
+    ((and  (list? e) (not (assv 'unquote-splicing  e)) (not (assv 'unquote e))
+	   (not (memv 'unquote e)) (not (memv 'unquote-splicing e)))
+     		      ;; This is an optimization to use list when possible
+     		      ;; instead of numerous cons For instance `(a ((b ,c)) d)
+     		      ;; will give (list 'a (list (list 'b c)) 'd) instead of
+     		      ;; (cons 'a (cons (cons (cons 'b (cons c '())) '())
+     		      ;;                (cons 'd '())))
+      		      (cons 'list (map (lambda (x) (backquotify x level)) e)))
+     (else	      (list 'cons 
+			    (backquotify (car e) level)
+			    (backquotify (cdr e) level)))))
+
+(define (compile-quasiquote e env tail?)
+  (if (= (length e) 2)
+      (compile (backquotify (cadr e) 1) env e tail?)
+      (compiler-error 'quasiquote e "bad syntax")))
+
+
+;;
+;; WITH-HANDLER
+;;
+(define (compile-with-handler e env tail?)
+  (if (> (length e) 2)
+      (let ((handler (cadr e))
+	    (body    (cddr e))
+	    (lab     (new-label)))
+	(compile handler env e #f)
+	(emit 'PUSH-HANDLER lab)
+	(compile `(begin ,@body) env body #f)
+	(emit 'POP-HANDLER)
+	(emit-label lab))
+      (compiler-error 'with-handler e "bad syntax")))
+
+
+;;
+;; INCLUDE
+;;
+
+#|
+<doc EXT-SYNTAX include
+ * (include <file>)
+ * 
+ * TODO
+doc>
+|#
+(define (include-file name)
+  (let ((port (open-input-file name))
+	(old  *compiler-port*))
+    (with-handler (lambda (c) (set! *compiler-port* old) (raise c))
+		  (set! *compiler-port* port)
+		  
+		  (do ((expr (%read port) (%read port)))
+		      ((eof-object? expr))
+		    (compile expr '() expr #f))
+		  
+		  (set! *compiler-port* old))
+    (close-port port)))
+
+(define (compile-include e env tail)
+  (if (and (= (length e) 2) (string? (cadr e)))
+      (include-file (cadr e))
+      (compiler-error 'include e "bad include directive ~S" e)))
+
+
+;;
+;; Autoloads management 
+;;
+(define (compiler-maybe-do-autoload symb)
+  (let ((file (autoload-file symb)))
+    (when file
+      ;; Do the autoload
+      (let ((old-code *code-instr*)
+	    (old-cst  *code-constants*))
+	(remove-autoload! symb)
+	(require file)
+	(set! *code-instr* old-code)
+	(set! *code-constants* old-cst)))))
+
+;;;;======================================================================
+;;;;
+;;;; 		Special Calls 
+;;;; 
+;;;;======================================================================
+
+(define (compile-%%label e env tail)
+  (if (= (length e) 2)
+      (emit-label (cadr e))
+      (compiler-error '%%label e "bad usage ~S" e)))
+
+(define (compile-%%goto e env tail)
+  (if (= (length e) 2)
+      (emit 'GOTO (cadr e))
+      (compiler-error '%%goto e "bad usage ~S" e)))
+
+
+(define (compile-%%source-pos e env tail)
+  (compile (if (%epair? e)
+	       `(cons ,(%epair-file e) ,(%epair-line e))
+	       #f)
+	   '()
+	   e
+	   #f))
+
+(define (generate-line-info e)
+  (when (%epair? e)
+    ;; File and line are pushed on the stack before calling DBG_VM(0)
+    (emit 'PUSH)
+    (compile-constant (%epair-file e) '() #f)
+    (emit 'PUSH)
+    (compile-constant (%epair-line e) '() #f)
+    (emit 'DBG-VM 0)))
+
+;;;;======================================================================
+;;;;
+;;;; 		The bytecode compiler 
+;;;; 
+;;;;======================================================================
+(define (compile e env epair tail?)
+  (if (not (pair? e))
+      (if (symbol? e)
+	  (begin
+	    (compiler-maybe-do-autoload e)
+	    (compile-reference e env epair tail?))
+	  (compile-constant  e env tail?))
+      (begin
+	(when (memq 'gen-line-info *compiler-options*)
+	  (generate-line-info e))
+
+	(case (car e)
+	  ((quote)		(compile-quote		e env tail?))
+	  ((if)			(compile-if		e env tail?))
+	  ((define)		(compile-define		e env tail?))
+	  ((begin)		(compile-begin		e env tail?))
+	  ((lambda)		(compile-lambda		e env tail?))
+	  ((let)		(compile-let		e env tail?))
+	  ((let*)		(compile-let*		e env tail?))
+	  ((letrec)		(compile-letrec		e env tail?))
+	  ((set!)		(compile-set!		e env tail?))
+	  ((and)		(compile-and		e env tail?))
+	  ((or)			(compile-or		e env tail?))
+	  ((cond)		(compile-cond		e env tail?))
+	  ((case)		(compile-case		e env tail?))
+	  ((do)			(compile-do		e env tail?))
+	  ((when)		(compile-when		e env tail?))
+	  ((unless)		(compile-unless		e env tail?))
+	  ((quasiquote)		(compile-quasiquote	e env tail?))
+	  ((with-handler) 	(compile-with-handler	e env tail?))
+	  ((define-macro) 	(compile-define-macro   e env tail?))
+	  
+	  ;; Special calls
+	  ((%%include)		(compile-include	e env tail?))
+	  ((%%source-pos)	(compile-%%source-pos   e env tail?))
+	  ((%%label)		(compile-%%label	e env tail?))
+	  ((%%goto)		(compile-%%goto		e env tail?))
+	  
+	  ;; Unmatched cases
+	  (else			(let ((first (car e)))
+				  (compiler-maybe-do-autoload first)
+				  (if (and (symbol? first)
+					   (not (symbol-in-env? first env))
+					   (expander? first))
+				      (compile (macro-expand e) env epair tail?)
+				      (compile-call e env tail?))))))))
+
+
+;=============================================================================
+;
+; Bootstrap
+;
+;=============================================================================
+
+(define (parse-expression e)
+  (initialize-compilation)
+  (compile e '() e #f)
+  (emit 'END-OF-CODE)
+  ;;   (assemble (open-input-string (generated-code)))
+  (assemble (reverse! *code-instr*)))
+
+
+(define (parse e)
+  (display-code (parse-expression e)))
+
+;(define (expand e) e)
+
+(define (eval e :optional env)
+  (let ((code (parse-expression e)))
+    ;;(disassemble-code code (current-error-port))
+    (%execute code (list->vector *code-constants*) (or env (current-module)))))
+
+
+(define (macro-eval e)			;//FIXME: La sauvegarde est est utile?
+  (let* ((old-code *code-instr*)
+	 (old-cst  *code-constants*)
+	 (res      (eval e)))
+    (set! *code-instr* old-code)
+    (set! *code-constants* old-cst)
+    res))
+
+;;)
+; LocalWords:  initform autoload Autoloads

@@ -1,0 +1,133 @@
+;;;;
+;;;; container.stk	-- GTK containers
+;;;; 
+;;;; Copyright © 2001-2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 25-May-2001 16:59 (eg)
+;;;; Last file update:  9-Apr-2002 00:01 (eg)
+;;;;
+
+;======================================================================
+;
+;		    C l a s s   < g t k - c o n t a i n e r>
+;
+;====================================================================== 
+(define-class <gtk-container> (<gtk-widget>)
+  ((children		:getter		children
+			:allocation	:virtual
+			:slot-ref 	(lambda (o)
+					  (%cont-children (slot-ref o 'wid)))
+			:slot-set!	(%gtk-slot-ro 'children))
+   (border-width 	:accessor	border-width
+			:init-keyword	:border-width
+			:allocation	:gtk-arg
+			:gtk-name	"border_width")
+   (pad-x		:init-form	0)	; FIXMOI : à virer ?
+   (pad-y		:init-form	0)))	; FIXMOI : à virer ?
+
+
+
+;;;;
+;;;; Methods for containers 
+;;;;
+(define-method container-add! (cont widget . args)
+  (error 'container-add! "~s cannot be the parent of ~S" cont widget))
+
+(define-method container-add! ((cont <gtk-container>) (widget <gtk-widget>) . args)
+  (let ((layout (slot-ref cont 'layout)))
+    (if (is-a? layout <gtk-object>)
+	(apply container-add! layout widget args)
+	(%set-widget-parent! (slot-ref widget 'wid) (slot-ref cont 'wid)))))
+
+
+
+
+
+(define-method container-remove! ((cont <gtk-container>) (w <gtk-widget>))
+  (if (eq? (parent w) cont)
+      (%cont-remove! (slot-ref cont 'wid) (slot-ref w 'wid))
+      (error 'container-remove! "~S is not the parent of ~S" cont w)))
+
+
+(define (container-remove-all! cont)
+  (for-each (lambda (widget)
+	      (container-remove! container widget))
+	    (children cont)))
+
+(define-method destroy ((w <gtk-container>))
+  ;; destroy all the children of w
+  (for-each destroy (children w))
+  (next-method w))		; //FIXME: next-method
+
+
+
+;// ;;;;
+;// ;;;; 				P L A C E
+;// ;;;;
+;// 
+;// (define-method %place ((obj <gtk-container>) . args) ;; FIXME
+;//   #f)
+;// 
+;// (define-method %place (obj . args)
+;//   (error 'place "~S is a bad container. Other args: ~S" obj args))
+;// 
+;// 
+;// (define-method place ((widget <gtk-widget>) :rest args :key (in #f in?))
+;//   (let ((widget  (or (container widget) widget))
+;// 	(into    #f))
+;//     (if in?
+;// 	;; A container was specified
+;// 	(begin
+;// 	  (set! into (or (container in) in))
+;// 	  (set! (parent widget) into))
+;// 	;; No container specified
+;// 	(let ((par (parent widget)))
+;// 	  (if par 
+;// 	      (set! into par)
+;// 	      (error 'place "~S has no container" widget))))
+;//     ;; Call %place (which is different for each geometry manager)
+;//     (apply %place into widget args)))
+;// 
+
+
+;;;;
+;;;; 			    C O N T A I N E R - I N F O
+;;;;
+
+(define-generic %container-info)
+
+(define-method container-info ((w <gtk-widget>))
+  (let ((p (parent w)))
+    (if p
+	(%container-info (parent w) w)
+	(error 'container-info "widget ~S has no parent yet" w))))
+
+
+
+;//(define-method set-widget-parent! ((widget <gtk-widget>) (parent <gtk-container>))
+;//  (%set-widget-parent! (slot-ref widget 'wid) (slot-ref parent  'wid)))
+;// 
+;//(define-method set-widget-parent! ((widget <gtk-widget>) (l <list>))  ;; FIXMOI
+;//  (apply set-widget-parent! (car l) o (cdr l)))
+;//
+;//
+;// (define-method container-children ((c <gtk-container>))
+;//   (%cont-children (slot-ref c 'wid)))
+

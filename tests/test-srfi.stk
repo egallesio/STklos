@@ -1,0 +1,108 @@
+;;;;
+;;;; test-srfi.stk	-- Test of various SRFIs
+;;;; 
+;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date:  4-Aug-2005 10:34 (eg)
+;;;; Last file update: 13-Sep-2005 17:32 (eg)
+;;;;
+
+(require "test")
+
+(test-section "SRFIs")
+
+
+;; ----------------------------------------------------------------------
+;; 	SRFI 71 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 70 - Numbers")
+
+(test "complex?" #t (complex? +inf.0))
+(test "real?" #t (real? -inf.0))
+(test "rational?" #f (rational? +inf.0))
+(test "integer?" #f (integer? -inf.0))
+
+(test "inexact?" #t (inexact? +inf.0))
+
+(test "=.1" #t (= +inf.0 +inf.0))
+(test "=.2" #f (= -inf.0 +inf.0))
+(test "=.3" #t (= -inf.0 -inf.0))
+
+(test "positive?" #t (positive? +inf.0))
+(test "negative?" #t (negative? -inf.0))
+(test "finite?" #f (finite? -inf.0))
+(test "infinite?" #t (infinite? +inf.0))
+
+(test "max.1" +inf.0 (max 12 +inf.0))
+(test "max.2" +inf.0 (max 12.0 +inf.0))
+(test "max.3" +inf.0 (max -inf.0 +inf.0))
+(test "min.1" -inf.0 (min 12 -inf.0))
+(test "min.2" -inf.0 (min 12.0 -inf.0))
+(test "min.3" -inf.0 (min -inf.0 +inf.0))
+
+(test "+.1" +inf.0 (+ +inf.0 +inf.0))
+(test "+.2" +nan.0 (+ +inf.0 -inf.0))
+
+(test "*.1" +inf.0 (* 5 +inf.0))
+(test "*.2" -inf.0 (* -5 +inf.0))
+(test "*.3" +inf.0 (* +inf.0 +inf.0))
+(test "*.4" -inf.0 (* +inf.0 -inf.0))
+(test "*.5" +nan.0 (* 0 +inf.0))
+
+(test "-" +nan.0 (- +inf.0 +inf.0))
+
+
+(test "/.1" +inf.0 (/ 0.0))
+(test "/.2" +inf.0 (/ 1.0 0))
+(test "/.3" -inf.0 (/ -1 0.0))
+(test "/.4" +nan.0 (/ 0 0.0))
+(test "/.5" +nan.0 (/ 0.0 0))
+(test "/.6" +nan.0 (/ 0.0 0.0))
+
+(test "angle.1" #t (< (- (* 4 (atan 1))
+			 (angle -inf.0))
+		      0.00001))
+(test "angle.2" 0.0 (angle +inf.0))
+
+(test "string->number.1" +inf.0 (string->number "+inf.0"))
+(test "string->number.2" -inf.0 (string->number "-inf.0"))
+(test "number->string.1" "+inf.0" (number->string +inf.0))
+(test "number->string.2" "-inf.0" (number->string -inf.0))
+
+
+
+
+;; ----------------------------------------------------------------------
+;; 	SRFI 62 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 62 - S-expression comments")
+
+(test "srfi-62.1" 5 (+ 1 #;(* 2 3) 4))
+(test "srfi-62.2" '(x z) (list 'x #;'y 'z))
+(test "srfi-62.3" 12 (* 3 4 #;(+ 1 2)))
+(test "srfi-62.4" 16 (#;sqrt abs -16))
+
+(test "srfi-62.5" '(a e) (list 'a #;(list 'b #;c 'd) 'e))
+(test "srfi-62.6" '(a . c) '(a . #;b c))
+(test "srfi-62.7" '(a . b) '(a . b #;c))
+
+		       
+;; ----------------------------------------------------------------------
+(test-section-end)

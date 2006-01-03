@@ -1,0 +1,178 @@
+;;;;
+;;;; radiobutton.stk			-- GTklos Radio button Widget
+;;;; 
+;;;; Copyright © 2001 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  2-Aug-2001 16:56 (eg)
+;;;; Last file update: 26-Nov-2001 22:33 (eg)
+;;;;
+
+;======================================================================
+;
+;			< G t k - R a d i o >
+;
+; A class which represents a GTK button. This is the real class, but user
+; should use the <radio-button> class which is higher level.
+;
+;====================================================================== 
+
+(define-class <gtk-radio> (<check-button>)
+  ((sibling	:getter		sibling
+		:allocation	:virtual
+		:slot-ref	(lambda (o)
+				  (%widget-plist (slot-ref o 'wid) :sibling))
+		:slot-set!	(%gtk-slot-ro 'sibling))))
+
+(define-method realize-widget ((self <gtk-radio>) initargs)
+  (let* ((sibling (key-get initargs :sibling #f))
+	 (id	  (%radiobut self (and sibling (wid sibling)))))
+    (slot-set! self 'wid id)
+    (%widget-plist id :sibling sibling)))
+
+
+
+;======================================================================
+;
+;			< R a d i o - b u t t o n >
+;
+;====================================================================== 
+
+;;; --------------------------------------------------
+;;; Radio value accessors
+;;; --------------------------------------------------
+(define (%gtk-radio-value-get o)
+  (let Loop ((buttons (children (layout o))))
+    (cond ((null? buttons)      "")
+      ((value (car buttons))    (text (car buttons)))
+      (else 			(Loop (cdr buttons))))))
+
+
+(define (%gtk-radio-value-set! o v)
+  (for-each (lambda (but) (when (equal? (text but) v) (slot-set! but 'value #t)))
+	    (children (layout o))))
+
+
+;;; --------------------------------------------------
+;;; Radio command accessors
+;;; --------------------------------------------------
+(define (%gtk-radio-command-get o)
+  (let ((children (children (layout o))))
+    (if (null? children)
+	#f
+	(command (car children)))))
+
+(define (%gtk-radio-command-set!  o v)
+  (let ((new-v (lambda (e)
+		 (let ((button (event-widget e)))
+		   (when (value button) (v e))))))
+    ;; Place new-v on all the buttons of the radio
+    (for-each (lambda (b) (slot-set! b 'command new-v))
+	      (children (layout o)))))
+
+;;; --------------------------------------------------
+;;; Radio tooltip accessors
+;;; --------------------------------------------------
+(define (%gtk-radio-tooltip-get o)
+  (%widget-plist (slot-ref o 'wid) :tooltip))
+
+(define (%gtk-radio-tooltip-set!  o v)
+  (let ((txt (texts o)))
+    (cond
+      ((string? v)
+         ;; Place the tooltip on all the buttons of the radio
+         (for-each (lambda (b) (slot-set! b 'tooltip v))
+		   (children (layout o))))
+
+      ((and (list? v) (list? txt) (eq? (length v) (length txt)))
+         ;; Place one tooltip on each button
+         (let ((children (children (layout o))))
+	   (for-each (lambda (t tooltip)
+		       (for-each (lambda (x)
+				   (if (equal? (text x) t)
+				       (slot-set! x 'tooltip tooltip)))
+				 children))
+		     txt
+		     v)))
+      (else
+         (error "bad tooltip value ~S for radio button ~S" v o))))
+
+  ;; Save the value in the widget plist
+  (%widget-plist (slot-ref o 'wid) :tooltip v))
+     
+
+;;; --------------------------------------------------
+;;; The class itself
+;;; --------------------------------------------------
+(define-class <radio-button> (<frame>)
+  ((texts 	:getter		  texts
+		:init-keyword	  :texts
+		:allocation	  :active
+		:before-slot-set! (%gtk-active-slot-ro 'texts))
+   (orientation	:accessor	  orientation
+		:init-keyword	  :orientation
+		:init-form	  'vertical
+		:allocation	  :active
+		:before-slot-set! (%gtk-active-slot-ro 'orientation))
+   (tooltip	:accessor	  tooltip
+		:allocation	  :virtual
+		:init-keyword	  :tooltip
+		:slot-ref	  %gtk-radio-tooltip-get
+		:slot-set!	  %gtk-radio-tooltip-set!)		
+   (command	:accessor	  command
+		:init-keyword	  :command
+		:allocation	  :virtual
+		:slot-ref	  %gtk-radio-command-get
+		:slot-set!	  %gtk-radio-command-set!)
+   (value	:accessor	  value
+		:init-keyword	  :value
+		:allocation	  :virtual
+		:slot-ref	  %gtk-radio-value-get
+		:slot-set!	  %gtk-radio-value-set!)))
+
+
+;;; ----------------------------------------------------------------------
+;;;
+;;; Methods for <radio-button>
+;;;
+;;; ----------------------------------------------------------------------
+(define-method initialize ((self <radio-button>) initargs)
+  (let* ((orientation (key-get initargs :orientation 'vertical))
+	 (texts	      (key-get initargs :texts	     '()))
+	 (layout      (make <box> :orientation orientation
+			    :fill #f :expand #f :homogeneous #f))
+	 (first	      #f))
+    ;; Create the internal <gtk-radio>s
+    (for-each (lambda (t)
+		(let ((x (make <gtk-radio> :text t :sibling first :parent layout)))
+		  (unless first
+		    (set! first x))))
+	      texts)
+    ;; Create a frame with a layout which is a box with adequate orientation
+    (next-method self (key-set! initargs :layout layout))
+    
+    ;; If an initial value is given. Do the initialization. This doesn't work
+    ;; "by itself" because of the weird initialization scheme that we have here
+    '(let ((val (key-get initargs :value (void))))
+      (unless (eq? val (void))
+	(slot-set! self 'value val)))))
+
+
+
+; LocalWords:  tooltip

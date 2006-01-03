@@ -1,0 +1,44 @@
+.\" -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH STKLOS-COMPILE 1 "version @VERSION@"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+stklos-compile \- Compiles a STklos file to byte-codes
+
+.SH DESCRIPTION
+The
+.B stklos-compile
+compiles a STklos file to byte-codes. For now, this command is very
+poor, it should be extended in the future.
+
+.SH OPTIONS
+Here are the options available in the version @VERSION@ of 
+.B stklos.
+
+.IP "--output=<file>, -o <file>"
+Output the compiled code in the given file instead of
+.I a.out.
+.IP "--case-sensitive, -c"
+Symbols are case sensitive
+.IP "--line-info, -l"
+Generate line informations to ease debugging (incurs a small
+performance penalty).
+.IP "--help | -h | -?"
+Show help.
+
+.SH "SEE ALSO"
+.BR stklos (1)
+.BR stklos-config (1)

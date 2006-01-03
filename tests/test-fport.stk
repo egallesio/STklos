@@ -1,0 +1,154 @@
+;;;;
+;;;; test-sport.stk	-- Testing String Ports
+;;;; 
+;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 20-May-2005 15:45 (eg)
+;;;; Last file update:  5-Sep-2005 15:43 (eg)
+;;;;
+
+(require "test")
+
+(test-section "File Ports")
+
+;;------------------------------------------------------------------
+(test-subsection "Input Ports")
+
+(with-output-to-file "./data" (lambda () (display "123456789\n123456789")))
+
+(let ((p (open-input-file "./data")))
+  (test "First char" #\1  (read-char p))
+  (test "Second-char" #\2 (read-char p))
+  (test "Third-char without reading" #\3 (peek-char p))
+  (test "Third-char" #\3 (read-char p))
+  (test "read 3 chars" "456" (read-chars 3 p))
+  (test "read 100 chars" "789\n123456789" (read-chars 100 p))
+  (test "read eof.1" #t (eof-object? (read-chars 1 p)))
+  (test "read eof.2" #t (eof-object? (peek-char p)))
+  (test "read eof.3" #t (eof-object? (read p)))
+  (close-port p))
+
+;;------------------------------------------------------------------
+(test-subsection "Output Ports")
+
+(let* ((p   (open-output-file "./data"))
+       (gos (lambda ()
+	      (flush-output-port p)
+	      (with-input-from-file "./data"
+		(lambda () (read-chars 1000))))))
+
+  (test "Curpos.1" 0 (begin (port-current-position p)))
+  (display "0" p)
+  (test "Curpos.2" 1 (begin (port-current-position p)))
+  (test "One char" "01" (begin (write-char #\1 p) (gos)))
+  (test "Two char" "012" (begin (write-char #\2 p) (gos)))
+  (test "Curpos.3" 3 (begin (port-current-position p)))
+  (display "3456" p)
+  (test "Curpos.4" 7 (begin (port-current-position p)))
+  (close-port p))
+
+
+;;------------------------------------------------------------------
+(test-subsection "Input File Ports & Direct access")
+
+(with-output-to-file "./data" (lambda () (display "123456789\n123456789")))
+
+(let ((p (open-input-file "./data")))
+  (test "First char" #\1  (read-char p))
+  (test "Second-char" #\2 (read-char p))
+  (test "Rewind" #\1 (begin (port-rewind p) (read-char p)))
+  (test "Go to char 2" #\3 (begin (port-seek p 2) (peek-char p)))
+  (test "Go to char 5" #\6 (begin (port-seek p 5) (peek-char p)))
+  (test "Go back char 2"  #\3 (begin (port-seek p 2) (peek-char p)))
+  (test "Go back char 5" #\6 (begin (port-seek p 5) (peek-char p)))
+  (test "Where I am.1" 5 (port-current-position p))
+  (test "Where I am.2" 5 (port-current-position p))
+  
+  (test "Go to Char 2 (rel) " #\3
+	(begin (port-seek p -3 :current) (peek-char p)))
+  (test "Where I am.3" 2 (port-current-position p))
+  (test "Go to Char 5 (rel) " #\6
+	(begin (port-seek p +3 :current) (peek-char p)))
+  (test "Where I am.4" 5 (port-current-position p))
+  
+  (test "Go to last character" #\9
+	(begin (port-seek p -1 :end) (peek-char p)))
+  (test "Where I am.5" 18 (port-current-position p))
+  (test "port-line.1" -1 (port-current-line p))
+  (test "Go to start" 0 (port-seek p 0))
+  (test "port-line.2" 1 (port-current-line p))
+  (test "readline.1" "123456789" (read-line p))
+  (test "port-line.3" 2 (port-current-line p))
+  (test "readline.2" "123456789" (read-line p))
+  (test "port-line.4" 2 (port-current-line p))
+  (port-rewind p)
+  (test "Read a 1.5 line" "123456789\n12345" (read-chars 15 p))
+  (test "port-line.5" -1 (port-current-line p))
+  (close-port p))
+
+
+;;------------------------------------------------------------------
+(test-subsection "Output File Ports & Direct access")
+
+(let* ((p   (open-output-file "./data"))
+       (gos (lambda ()
+	      (flush-output-port p)
+	      (with-input-from-file "./data"
+		(lambda () (read-chars 1000))))))
+  (test "Fill buffer" 10
+	(begin (display "1234567890" p) (port-current-position p)))
+  (test "Go to char 3" 3 (port-seek p 3))
+  (test "Look content" "1234567890" (gos))
+  ;; write 2 characters and move
+  (display "AB" p)
+  (port-seek p 2 :current)
+  (test "Write 2 characters"
+	"123AB67CD0"
+	(begin (display "CD" p) (gos)))
+  (test "Where I am.6" 9 (port-current-position p))
+  (test "Go to last character.2"  10 (port-seek p 0 :end))
+  (test "Add 5 characters" "123AB67CD0abcde"
+	(begin (display "abcde" p) (gos)))
+  
+  (test "Seek outside port.1" 20 (port-seek p 20))
+  ;; Reopen file in mode a
+  (close-port p)
+  (set! p (open-file "./data" "a"))
+  (test "Add a character after reopening" "123AB67CD0abcdeX"
+	(begin (display "X" p) (gos)))
+  (test "Seek outside port.2" 25 (port-seek p 25))
+  (test "Add a character" "123AB67CD0abcdeX?"
+	(begin (display #\? p) (gos)))
+  ;; Reopen file in mode w
+  (close-port p)
+  (set! p (open-file "./data" "w"))
+  (test "Add a character after reopening" "X"
+	(begin (display "X" p) (gos)))
+  (test "Seek outside port.3" 20 (port-seek p 20))
+  (test "Add a character after eof" "X\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0Y"
+	(begin (display #\Y p) (gos)))
+  (close-port p))
+  
+;;------------------------------------------------------------------
+
+;; Remove test file
+(remove-file "./data")
+
+(test-section-end)

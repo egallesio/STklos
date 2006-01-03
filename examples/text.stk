@@ -1,0 +1,51 @@
+;;;;
+;;;; text.stk	-- GTK+ Text Widget Demo
+;;;; 
+;;;; Copyright © 2000-2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 24-Oct-2000 17:20 (eg)
+;;;; Last file update:  7-Apr-2002 14:18 (eg)
+;;;;
+
+(include "gtklos-demo.stk")
+
+(define *text-msg* "
+This is a simple demo showing a text widget.
+")
+
+(define (main args)
+  (let* ((win (make <demo-window> :title "Text Demo" :file "text"
+		    :border-width 10 :padding 10
+		    :message *text-msg*))
+	 (txt (make <text> :parent win :width 400 :height 300
+		    :value "Some initial text\n\n\t\ton several lines\n")))
+    txt))
+
+
+#|
+
+(set! (scrollbar-position txt) "right")
+(set! (scrollbar-position txt) "left")
+(set! (scrollbar-position txt) "none")
+
+
+
+|#
+

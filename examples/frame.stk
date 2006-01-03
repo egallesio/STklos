@@ -1,0 +1,55 @@
+;;;;
+;;;; frame.stk	-- GTklos Frame Demo
+;;;; 
+;;;; Copyright © 2001 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 29-Jul-2001 18:17 (eg)
+;;;; Last file update: 26-Nov-2001 22:21 (eg)
+;;;;
+
+(include "gtklos-demo.stk")
+
+;; In this demo we create a layout (box) to give some spacing between the various
+;; frames; otherwise, they are too close.
+
+(define (main args)
+  (let* ((box    (make <box> :padding 5))
+	 (win    (make <demo-window> :title "Frame Demo" :width 450
+		       		     :file "frame" :border-width 10 :layout box
+				     :message "
+A frame is container with a (optional) border and a (optional) title.
+The title can be placed anywhere on the top border.
+Furthermore, we use here various shadows for the frame.
+" ))
+	 (frame1 (make <frame> :parent win :shadow 'in :border-width 10))
+	 (frame2 (make <frame> :parent win :shadow 'out :border-width 10
+		       	       :title " LEFT " :title-justify 0.0))
+	 (frame3 (make <frame> :parent win :shadow 'etched-in :border-width 10
+		     	       :title " CENTER " :title-justify 0.5))
+	 (frame4 (make <frame> :parent win :shadow 'etched-out :border-width 10
+		     	       :title " RIGHT " :title-justify 1.0))
+	 (frame5 (make <frame> :parent win :shadow 'none :border-width 10))
+       
+	 (label1 (make <label> :parent frame1 :text "shadow: in"         :y-pad 10))
+	 (label2 (make <label> :parent frame2 :text "shadow: out"        :y-pad 10))
+	 (label3 (make <label> :parent frame3 :text "shadow: etched-in"  :y-pad 10))
+	 (label4 (make <label> :parent frame4 :text "shadow: etched-out" :y-pad 10))
+	 (label5 (make <label> :parent frame5 :text "shadow: no"         :y-pad 10)))
+    win))

@@ -1,0 +1,189 @@
+;; ======================================================================
+;; 
+;; 			STklos Reference Manual
+;;
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2 of the License, or
+;; (at your option) any later version.
+;; 
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;; 
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; USA.
+;;           Author: Erick Gallesio [eg@unice.fr]
+;;    Creation date: 26-Nov-2000 18:19 (eg)
+;; Last file update: 22-Aug-2005 11:10 (eg)
+;;
+;; ======================================================================
+
+
+
+
+;; ======================================================================
+;;
+;;			Introduction
+;;
+;; ======================================================================
+(chapter :title "Introduction" :file #f  
+
+;;; ======================================================================
+;;;
+;;; 	Section "Overview of STklos"
+;;;
+;;; ======================================================================
+(section :title [Overview of ,(stklos)]
+(index "STk")
+(index "Tk")
+
+   (p [ ,(stklos) is the successor of ,(stk)
+,(ref :bib "Gallesio95-1a"), a Scheme interpreter which was tightly
+connected to the Tk graphical toolkit ,(ref :bib "Ouster-Tk").
+,(stk) had an object layer which was called ,(stklos). At this
+time, ,(stk) was used to denote the base Scheme interpreter and
+,(stklos) was used to denote its object layer, which was an
+extension.  For instance, when programming a GUI application,
+a user could access the widgets at the (low) Tk level, or access
+them using a neat hierarchy of classes wrapped in ,(stklos).])
+
+(p [ Since the object layer is now more closely integrated with
+the language, the new system has been renamed ,(stklos) and
+,(stk) is now used to designate the old system. ])
+
+(index "GTK+")
+(p [ ,(bold [Compatibility with ,(stk)]): ,(stklos) has been
+completely rewritten and as a consequence, due to new
+implementation choices, old ,(stk) programs are not fully
+compatible with the new system. However, these changes are very
+minor and adapting a ,(stk) program for the ,(stklos) system is
+generally quite easy. The only programs which need heavier work
+are programs which use Tk without objects, since the new
+preferred GUI system is now based on GTK+
+,(ref :bib "GTK"). Programmers used to GUI programming using
+,(stklos) classes will find that both system, even if not
+identical in every points, share the same philosophy.]))
+   
+;;; ======================================================================
+;;;
+;;; 	Section "Lexical Conventions"
+;;;
+;;; ======================================================================
+(section :title " Lexical Conventions"
+   
+
+;; ----------------------------------------------------------------------
+;; 	Subsection "Identifiers"
+;; ----------------------------------------------------------------------
+(subsection :title "Identifiers"
+(index "keyword")
+
+(p [In ,(stklos), identifiers which start (or end) with a colon
+,(q (code ":")) are considered as keywords.  For instance
+,(code ":foo") and ,(code "bar:") are ,(stklos) keywords, but
+,(code "not:key") is not a keyword. See
+section,(~),(ref :section "Keywords") for more information]))
+
+;; ----------------------------------------------------------------------
+;; 	Subsection "Comments"
+;; ----------------------------------------------------------------------
+(subsection :title "Comments"
+   (index "comments")
+   (index "scripts files")
+   (index "multi-line comment")
+   (index "SRFI-22")
+   (index "SRFI-30")
+
+(p [There are four types of comments in ,(stklos):])
+   
+   (itemize
+      (item [a semicolon ,(q (code ";")) indicates the start of a
+comment. This kind of comment extends to the end of the line (as
+described in ,(rfive)).])
+ 
+      (item [ multi-lines comment use the classical Lisp convention:
+a comment begins with ,(q (code "#|")) and ends with ,(q (code "|#")).
+This form of comment is now defined by ,(link-srfi 30).])
+      
+      (item [a sharp sign followed by a semicolon ,(q (code "#;"))
+comments the next Scheme expression. This is useful to comment 
+a piece of code which spans multiple lines])
+      
+      (item [comments can also be introduced by ,(q (code "#!"))''.
+Such a comment extends to the end of the line which introduces
+it. This extension is particularly useful for building ,(stklos)
+scripts. On most Unix implementations, if the first line of a
+script looks like this: 
+,(pre [ #!/usr/local/bin/stklos -file ])
+then the script can be started directly as if it was a binary
+program. ,(stklos) is loaded behind the scene and
+executes the script as a Scheme program. This form is compatible with 
+the notation introduced in ,(link-srfi 22)]
+	 (p [Note that, as a special case, that the sequences
+,(q (code "#!key")), ,(q (code "#!optional")) and
+,(q (code "#!rest")) are respectively converted to the ,(stklos)
+keywords ,(q (code ":key")), ,(q (code ":optional")) and
+,(q (code ":rest")). This permits to Scheme lambdas, which
+accepts keywords and optional arguments, to be compatible with
+DSSSL lambdas ,(ref :bib "dsssl:96").]))  ))
+
+;; ----------------------------------------------------------------------
+;; Subsection "Other Notations"
+;; ----------------------------------------------------------------------
+(subsection :title "Other Notations"
+
+   (p [,(stk) accepts all the notations defined in ,(rfive) plus])
+   
+   (itemize
+      (item [,(q (code "[]")) Brackets are equivalent to
+parentheses. They are used for grouping and to build lists. A
+list opened with a left square bracket must be closed with a
+right square bracket (see section ,(ref :section "Pairs and lists")).])
+      
+      (item [,(q (code ":")) a colon at the beginning or the end of
+a symbol introduces a keyword.  Keywords are described in section
+,(ref :section "Keywords").])
+      
+      (item [,(code "#n=") ,(mark "Circular structure") is used
+to represent circular structures.  The value given of ,(emph "n")
+must be a number. It is used as a label, which can be referenced
+later by a ,(code "#n#") notation
+(see below). The scope of the label is the expression being read by the
+outermost ,(code "read").])
+
+      (item [,(code "#n#") is used to reference some object
+previously labeled by a ,(code "#n=") notation\; that is,
+,(code "#n#") represents a pointer to the object labeled exactly
+by ,(code "#n="). For instance, the object returned by the
+following expression 
+
+,(pre [
+(let* ((a (list 1 2))
+       (b (cons 'x a)))
+  (list a b))
+])
+
+can also be represented in this way:
+
+,(pre [
+(#0=(1 2) (x . #0#))])])
+
+      )))  
+;;; ======================================================================
+;;;
+;;; 	Section "Basic Concepts"
+;;;
+;;; ======================================================================
+(section :title "Basic Concepts" 
+;;; 
+[See the original ,(rfive) document for more informations on
+the basic concepts of the Scheme Programming Language.]
+   (p (TODO "DESCRIBE THE VOID VALUE")))
+
+   
+)
+

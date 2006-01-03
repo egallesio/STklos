@@ -1,0 +1,59 @@
+;;;;
+;;;; obsolete.stk	-- Definition of functions which are obsolete.
+;;;;			   Function defined here are candidate to disappear.
+;;;; 
+;;;; Copyright © 2002-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 11-Jun-2002 17:54 (eg)
+;;;; Last file update: 27-Oct-2005 22:56 (eg)
+;;;;
+
+
+
+;;; 11-Jun-2002 (v0.53)
+(define string-lower string-downcase)
+(define string-upper string-upcase)
+
+;;; 29-Aug-2004
+(define (set-load-path! new-path)
+  (format (current-error-port)
+	  "*** Obsolete function set-load-path!. Use load-path instead.\n")
+  (load-path new-path))
+
+(define (set-load-suffixes! suffixes)
+  (format (current-error-port)
+	  "*** Obsolete function set-load-suffixes!. Use load-suffixes instead.\n")
+  (load-suffixes suffixes))
+
+;; 23-Sep-2004 (v 0.59)
+(define flush flush-output-port)
+
+;; 19-May-2005 (v 0.62)
+(define rewind-file-port port-rewind)
+
+
+;; 27-Oct-2005 (v 0.71)
+(define hash-table->list hash-table->alist)
+(define hash-table-put! hash-table-set!)
+(define (hash-table-get ht key :optional (default #f default?))
+  (if default?
+      (hash-table-ref/default ht key default)
+      (hash-table-ref ht key)))
+(define hash-table-remove!  hash-table-delete!)

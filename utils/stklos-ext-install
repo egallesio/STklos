@@ -1,0 +1,92 @@
+#!/bin/sh
+#							-*- shell-script -*-
+#
+# stklos-ext-installer		-- STklos extension installer
+# 
+# Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+# 
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+# USA.
+# 
+#           Author: Erick Gallesio [eg@essi.fr]
+#    Creation date: 18-Mar-2005 14:51 (eg)
+# Last file update: 28-Dec-2005 16:32 (eg)
+#
+
+
+function usage()
+{
+    echo "Usage: $0 pkg file dir mode
+where
+  pkg:  the package to which the file belongs (ignored if empty string)
+  file: the file to copy (can be a dir)
+  dir:  the directory to which the file must be copied (ignored if not root)
+  mode: the protection bits"
+}
+
+if [ $# -ne 4 ] ;then
+    usage >&2
+    exit 1
+fi
+
+PKG=$1
+FILE=$2
+DIR=$3
+MODE=$4
+
+# Create the destination directory
+if [ $UID = 0 ] ;then
+    DEST=`stklos-config -p`/$DIR
+    DB=`stklos-config -p`/share/stklos/extensions
+else 
+    DEST=$HOME/.stklos/ext
+    DB=$HOME/.stklos/
+fi
+mkdir -p $DEST
+
+# Copy file 
+if [ -d $FILE ] ;then
+    mkdir -p $DEST/$FILE
+else
+    mkdir -p $DEST/`dirname $FILE` 
+    cp $FILE $DEST/$FILE
+fi
+
+# Set protection
+chmod $MODE $DEST/$FILE
+
+# Retain in our DB that this file was installed 
+if [ $UID = 0 ] ;then
+    DBDIR=`stklos-config -p`/share/stklos/extensions
+else 
+    DBDIR=$HOME/.stklos/ext/extensions
+fi
+mkdir -p $DBDIR
+
+DB=$DBDIR/$PKG
+
+echo -n >> $DB
+grep -v $DEST/$FILE $DB > /tmp/stklos-install.$$
+(cat /tmp/stklos-install.$$; echo $DEST/$FILE) > $DB
+exit 0
+
+
+
+
+
+
+
+

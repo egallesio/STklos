@@ -1,0 +1,270 @@
+;;;;
+;;;; lex-rt.stk	-- A (simplified) version of the SIlex Runtime for STklos
+;;;; 
+;;;; Copyright © 2003 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 12-Dec-2003 12:59 (eg)
+;;;; Last file update: 12-Dec-2003 23:43 (eg)
+;;;;
+
+				;
+;;;; ======================================================================
+
+;;SILex - Scheme Implementation of Lex
+; Copyright (C) 2001  Danny Dube'
+
+;
+; Gestion des Input Systems
+; Fonctions a utiliser par l'usager:
+;   lexer-make-IS, lexer-get-func-getc, lexer-get-func-ungetc,
+;   lexer-get-func-line, lexer-get-func-column et lexer-get-func-offset
+;
+
+; Taille initiale par defaut du buffer d'entree
+(define lexer-init-buffer-len 1024)
+
+; Numero du caractere newline
+(define lexer-integer-newline (char->integer #\newline))
+
+; Constructeur d'IS brut
+(define lexer-raw-IS-maker
+  (lambda (buffer read-ptr input-f)
+    (let ((input-f          input-f)                ; Entree reelle
+	  (buffer           buffer)                 ; Buffer
+	  (buflen           (string-length buffer))
+	  (read-ptr         read-ptr)
+	  (start-ptr        1)                      ; Marque de debut de lexeme
+	  (start-line       1)
+	  (start-column     1)
+	  (start-offset     0)
+	  (end-ptr          1)                      ; Marque de fin de lexeme
+	  (point-ptr        1)                      ; Le point
+	  (user-ptr         1)                      ; Marque de l'usager
+	  (user-line        1)
+	  (user-column      1)
+	  (user-offset      0)
+	  (user-up-to-date? #t))                    ; Concerne la colonne seul.
+      (letrec
+	  ((start-go-to-end-line
+	    (lambda ()
+	      (let loop ((ptr start-ptr) (line start-line))
+		(if (= ptr end-ptr)
+		    (begin
+		      (set! start-ptr ptr)
+		      (set! start-line line))
+		    (if (char=? (string-ref buffer ptr) #\newline)
+			(loop (+ ptr 1) (+ line 1))
+			(loop (+ ptr 1) line))))))
+	   (start-go-to-user-line
+	    (lambda ()
+	      (set! start-ptr user-ptr)
+	      (set! start-line user-line)))
+	   (end-go-to-point
+	    (lambda ()
+	      (set! end-ptr point-ptr)))
+	   (point-go-to-start
+	    (lambda ()
+	      (set! point-ptr start-ptr)))
+	   (user-go-to-start-line
+	    (lambda ()
+	      (set! user-ptr start-ptr)
+	      (set! user-line start-line)))
+	   (init-lexeme-line
+	    (lambda ()
+	      (if (< start-ptr user-ptr)
+		  (start-go-to-user-line))
+	      (point-go-to-start)))
+	   (get-start-line               ; Obtention des stats du debut du lxm
+	    (lambda ()
+	      start-line))
+	   (peek-left-context            ; Obtention de caracteres (#f si EOF)
+	    (lambda ()
+	      (char->integer (string-ref buffer (- start-ptr 1)))))
+	   (peek-char
+	    (lambda ()
+	      (if (< point-ptr read-ptr)
+		  (char->integer (string-ref buffer point-ptr))
+		  (let ((c (input-f)))
+		    (if (char? c)
+			(begin
+			  (if (= read-ptr buflen)
+			      (reorganize-buffer))
+			  (string-set! buffer point-ptr c)
+			  (set! read-ptr (+ point-ptr 1))
+			  (char->integer c))
+			(begin
+			  (set! input-f (lambda () 'eof))
+			  #f))))))
+	   (read-char
+	    (lambda ()
+	      (if (< point-ptr read-ptr)
+		  (let ((c (string-ref buffer point-ptr)))
+		    (set! point-ptr (+ point-ptr 1))
+		    (char->integer c))
+		  (let ((c (input-f)))
+		    (if (char? c)
+			(begin
+			  (if (= read-ptr buflen)
+			      (reorganize-buffer))
+			  (string-set! buffer point-ptr c)
+			  (set! read-ptr (+ point-ptr 1))
+			  (set! point-ptr read-ptr)
+			  (char->integer c))
+			(begin
+			  (set! input-f (lambda () 'eof))
+			  #f))))))
+	   (get-start-end-text           ; Obtention du lexeme
+	    (lambda ()
+	      (substring buffer start-ptr end-ptr)))
+	   (get-user-line-line           ; Fonctions pour l'usager
+	    (lambda ()
+	      (if (< user-ptr start-ptr)
+		  (user-go-to-start-line))
+	      user-line))
+	   (user-getc-line
+	    (lambda ()
+	      (if (< user-ptr start-ptr)
+		  (user-go-to-start-line))
+	      (if (< user-ptr read-ptr)
+		  (let ((c (string-ref buffer user-ptr)))
+		    (set! user-ptr (+ user-ptr 1))
+		    (if (char=? c #\newline)
+			(set! user-line (+ user-line 1)))
+		    c)
+		  (let ((c (input-f)))
+		    (if (char? c)
+			(begin
+			  (if (= read-ptr buflen)
+			      (reorganize-buffer))
+			  (string-set! buffer user-ptr c)
+			  (set! read-ptr (+ read-ptr 1))
+			  (set! user-ptr read-ptr)
+			  (if (char=? c #\newline)
+			      (set! user-line (+ user-line 1)))
+			  c)
+			(begin
+			  (set! input-f (lambda () 'eof))
+			  'eof))))))
+	   (user-ungetc-line
+	    (lambda ()
+	      (if (> user-ptr start-ptr)
+		  (begin
+		    (set! user-ptr (- user-ptr 1))
+		    (let ((c (string-ref buffer user-ptr)))
+		      (if (char=? c #\newline)
+			  (set! user-line (- user-line 1))))))))
+	   (reorganize-buffer            ; Decaler ou agrandir le buffer
+	    (lambda ()
+	      (if (< (* 2 start-ptr) buflen)
+		  (let* ((newlen (* 2 buflen))
+			 (newbuf (make-string newlen))
+			 (delta (- start-ptr 1)))
+		    (let loop ((from (- start-ptr 1)))
+		      (if (< from buflen)
+			  (begin
+			    (string-set! newbuf
+					 (- from delta)
+					 (string-ref buffer from))
+			    (loop (+ from 1)))))
+		    (set! buffer    newbuf)
+		    (set! buflen    newlen)
+		    (set! read-ptr  (- read-ptr delta))
+		    (set! start-ptr (- start-ptr delta))
+		    (set! end-ptr   (- end-ptr delta))
+		    (set! point-ptr (- point-ptr delta))
+		    (set! user-ptr  (- user-ptr delta)))
+		  (let ((delta (- start-ptr 1)))
+		    (let loop ((from (- start-ptr 1)))
+		      (if (< from buflen)
+			  (begin
+			    (string-set! buffer
+					 (- from delta)
+					 (string-ref buffer from))
+			    (loop (+ from 1)))))
+		    (set! read-ptr  (- read-ptr delta))
+		    (set! start-ptr (- start-ptr delta))
+		    (set! end-ptr   (- end-ptr delta))
+		    (set! point-ptr (- point-ptr delta))
+		    (set! user-ptr  (- user-ptr delta)))))))
+	(list (cons 'start-go-to-end 	start-go-to-end-line)
+	      (cons 'end-go-to-point 	end-go-to-point)
+	      (cons 'init-lexeme	init-lexeme-line)
+	      (cons 'get-start-line     get-start-line)
+	      (cons 'get-start-column	#f)
+	      (cons 'get-start-offset	#f)
+	      (cons 'peek-left-context  peek-left-context)
+	      (cons 'peek-char          peek-char)
+	      (cons 'read-char 		read-char)
+	      (cons 'get-start-end-text get-start-end-text)
+	      (cons 'get-user-line	get-user-line-line)
+	      (cons 'user-getc		user-getc-line)
+	      (cons 'user-ungetc	user-ungetc-line))))))
+
+; Construit un Input System
+(define lexer-make-IS
+  (lambda (input)
+    (let* ((buffer   (make-string lexer-init-buffer-len #\newline))
+	   (read-ptr 1)
+	   (input-f  (lambda () (read-char input))))
+      (lexer-raw-IS-maker buffer read-ptr input-f))))
+
+; Fabrication d'un lexer a partir de code pre-genere
+(define lexer-make-lexer
+  (lambda (tables IS)
+    (let ((<<EOF>>-pre-action   (vector-ref tables 1))
+	  (<<ERROR>>-pre-action (vector-ref tables 2))
+	  (rules-pre-action     (vector-ref tables 3))
+	  (code                 (vector-ref tables 5)))
+      (code <<EOF>>-pre-action <<ERROR>>-pre-action rules-pre-action IS))))
+
+;;;; ======================================================================
+
+(define-class <lex> ()
+  ((input  :init-form #f :init-keyword :input)
+   (table  :init-form #f :init-keyword :table)
+   lexer
+   line
+   getc
+   ungetc))
+
+(define-method initialize ((self <lex>) initargs)
+  (next-method)
+  (let* ((input    (slot-ref self 'input))
+	 (table	   (slot-ref self 'table))
+	 (port     (cond
+		     ((string? input) 	  (open-file input "r"))
+		     ((input-port? input) input)
+		     (else 		  #f))))
+    (unless (input-port? port)
+      (error 'initialize-lex "bad or missing input ~S" input))
+    (unless table
+      (error 'initialize-lex "no table given"))
+
+    (let ((IS (lexer-make-IS port)))
+      (slot-set! self 'lexer  (lexer-make-lexer table IS))
+      (slot-set! self 'line   (cdr (assq 'get-user-line IS)))
+      (slot-set! self 'getc   (cdr (assq 'user-getc IS)))
+      (slot-set! self 'ungetc (cdr (assq 'user-ungetc IS))))))
+
+
+(define-method lexer-next-token ((self <lex>))
+  ( (slot-ref self 'lexer) ))
+
+(provide "lex-rt")

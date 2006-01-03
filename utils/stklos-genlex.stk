@@ -1,0 +1,78 @@
+;;;;
+;;;; stklos-genlex.stk	-- generate a lexical analyser using SIlex
+;;;; 
+;;;; Copyright © 2003-2004 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 12-Dec-2003 11:29 (eg)
+;;;; Last file update: 29-Nov-2004 11:14 (eg)
+;;;;
+
+
+(include "../lib/SILex.d/silex.scm")
+
+(define *runtime-file* "lex-rt")
+
+
+(define (build-constructor name expr)
+  (let ((name (if (string? name) (string->symbol name) name)))
+    `(define ,name
+       (lambda (%input)
+	 (make <lex> :input %input :table ,(caddr expr))))))
+
+
+(define (lex-generate input output name)
+  (let ((tmp (temporary-file-name))
+	(out (open-file output "w")))
+    (unless out
+      (error 'lex-generate "cannot open output file ~S" output))
+    
+    ;; Generate the tables in a temporary file
+    (let ((res (lex-tables input (format "~A" name) tmp 'code 'counters 'line)))
+      
+      (when res
+	;; Generate the header of the output file
+	(format out ";; This file has been generated. (DON'T EDIT)\n")
+	(format out ";; generated on ~A\n\n" (date))
+	(format out "(require ~S)\n\n" *runtime-file*)
+	
+	;; Copy the content of the temporary file
+	(let* ((in   (open-input-file tmp))
+	       (expr (read in))
+	       (res  (build-constructor name expr)))
+	  
+	  (pp res :port out)
+	  (newline out))
+	
+	;; Remove temporary file
+	(remove-file tmp))
+      ;; Close output
+      (close-port out)
+
+      ;; Return value is the status code of the program
+      (if res 0 1))))
+
+(define (main args)
+  (unless (= (length args) 4)
+    (die (format "Usage: ~A <lex-file> <output-file> <constructor>\n"
+		 (program-name))))
+  (lex-generate (cadr args)
+		(caddr args)
+		(cadddr args)))
+    

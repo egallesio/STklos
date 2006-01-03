@@ -1,0 +1,96 @@
+
+			STKLOS SUPPORTED SRFIS
+
+
+The "Scheme Requests for Implementation" (SRFI) process is a new
+approach to helping Scheme users to write portable and yet useful
+code. It is a forum for people interested in coordinating libraries
+and other additions to the Scheme language between implementations.
+
+STklos tries to supports as much as possible the "Final" SRFIs. For a
+definition of what is a final SRFI, you should have a look at the 
+SRFI home page at http://srfi.schemers.org/
+
+Hereafter is the list of final SRFIs, for the current release of
+STklos, and the state of their implementation in this release.
+
+State can be one of the following values
+   Y: completely implemented 
+   N: not implemented (and will probably not be implemented) 
+   -: not implemented yet, but on the TODO list
+   
+
+
+  State	SRFI    Title
+  ----------------------------------------------------------------------
+    Y	0       Feature-based conditional expansion construct
+    Y	1	List Library
+    Y   2	AND-LET*: an AND with local bindings, a guarded LET* special form
+    Y	4	Homogeneous numeric vector datatypes
+    N	5	A compatible let form with signatures and rest arguments
+
+    Y	6	Basic String Ports
+    Y	7	Feature-based program configuration language
+    Y	8	receive: Binding to multiple values
+    Y	9	Defining Record Types
+    Y	10	Sharp-Comma External Form
+
+    Y	11	Syntax for receiving multiple values
+    Y	13	String Library   
+    Y	14	Character-Set Library
+    Y	16	Syntax for procedures of variable arity
+    Y	17	Generalized set!
+
+    -	18	Multithreading support
+    -	19	Time Data Types and Procedures
+    -	21	Real-time multithreading support
+    Y	22	Running Scheme Scripts on Unix
+    Y	23	Error reporting mechanism
+
+    -	25	Multi-dimensional Array Primitives
+    Y	26	Notation for Specializing Parameters without Currying
+    Y	27	Sources of Random Bits
+    Y	28	Basic Format Strings
+    -	29	Localization
+
+    Y	30	Nested Multi-line Comments
+    Y	31	A special form for recursive evaluation 
+    Y	34	Exception Handling for Programs
+    Y	35	Conditions
+    Y	36	I/O Conditions
+
+    N	37	args-fold: a program argument processor
+    Y   38	External Representation for Data With Shared Structure
+    Y	39	Parameter objects
+    -   40	A Library of Streams
+    ?	42	Eager Comprehension
+    
+    -	43	Vector Library
+    -   44	Collections
+    ?   45	Primitives for expressing iterative lazy algorithms
+    ?	47	Array
+    Y   48	Intermediate Format Strings
+
+    N   49	Indentation-sensitive syntax
+    ?	51	Handling rest list
+    ?	54	Formatting
+    Y   55	Require-Extension
+    -   57	Records
+
+    ?   58	Array Notation
+    -   59	Vicinity
+    Y   60	Integers as Bits
+    -   61	A more general cond clause
+    Y   62	S-expression comments
+
+    -   63	Homogeneous and Heterogeneous Arrays
+    Y 	66	Octet Vectors
+    ?   67      Compare Procedures
+    Y   69	Basic hash tables
+    Y   70      Numbers
+
+    ?   71	LET-syntax for multiple values
+    -   72	Simple hygienic macros
+    -	74	Octet-Addressed Binary Blocks
+
+Implemented SRFIs: 33/58

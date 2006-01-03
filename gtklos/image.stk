@@ -1,0 +1,99 @@
+;;;;
+;;;; image.stk					-- GTK Image Widget
+;;;; 
+;;;; Copyright © 2000-2001 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 13-Oct-2000 17:15 (eg)
+;;;; Last file update: 14-Aug-2001 17:24 (eg)
+;;;;
+
+
+;;
+;; 				Images Utilities
+;;
+
+(define *image-suffixes*
+  (if (gnome-available?)
+      '("xpm" "jpg" "jpeg" "gif" "png") ;; common formats accepted with gnome
+      '("xpm")))			;; with GTK only, accepts only XPMs
+  
+(define *image-path* 
+  (let ((user-path (%build-path-from-shell-variable "STKLOS_IMAGE_PATH")))
+    (if (null? user-path)
+	(list (string-append (%library-prefix) 
+			     "/share/stklos/"
+			     (version)
+			     "/images"))
+	user-path)))
+
+(define (find-image fn)
+  (%guess-pathname fn *image-path* *image-suffixes*))
+
+
+(define (image-path)
+  *image-path*)
+
+
+(define (set-image-path! path)
+  ;; Sanity check 
+  (for-each (lambda (x) (unless (string? x) 
+			  (error 'set-image-path! "bad directory ~S" x)))
+	    path)
+  ;; Assignment 
+  (set! *image-path* path))
+
+
+(define (image-exists? fn)
+  (and (find-image fn) #t))
+
+  
+;;;; ======================================================================
+;;;;
+;;;; 				Class <image> 
+;;;;
+;;;; ======================================================================
+(define-class <image> (<gtk-misc>)
+  ((file 	:getter     	file
+	 	:allocation 	:virtual
+	 	:slot-ref   	(lambda (o) (%widget-plist (wid o) :file))
+	 	:slot-set!  	(%gtk-slot-ro 'file))
+   (value 	:getter      	value
+		:allocation 	:virtual
+		:slot-ref   	(lambda (o) (%widget-plist (wid o) :image-data))
+		:slot-set!  	(%gtk-slot-ro 'value))))
+
+
+(define-method realize-widget ((self <image>) initargs)
+  ;; User must specify :file or :value option at creation time
+  ;; This simplifies considerably the code for GTk
+  (let ((file (key-get initargs :file #f))
+	(val  (key-get initargs :value #f)))
+    (cond 
+     (file (let ((file (or (find-image file) file)))
+	     (unless (file-exists? file)
+	       (error "cannot create image from ~S. File doesn't exists" file))
+	     (slot-set! self 'wid (%image-file self file))
+	     (%widget-plist (wid self) :file file)))
+     (val  (slot-set! self 'wid (%image-data self val))
+	   (%widget-plist (wid self) :image-data val))
+     (else (error ":file or :value must be specified for an image")))))
+
+
+;LocalWords:  XPMs

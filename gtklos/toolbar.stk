@@ -1,0 +1,142 @@
+;;;;
+;;;; toolbar.stk	-- GTklos Toolbars Implementation
+;;;; 
+;;;; Copyright © 2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  7-Apr-2002 14:23 (eg)
+;;;; Last file update:  8-Apr-2002 23:38 (eg)
+;;;;
+
+(define %fill-toolbar #f)		;; forward declaration
+
+
+(define-class <toolbar> (<gtk-container>)
+  ((items	:getter		items
+		:allocation	:virtual
+		:init-form	'()
+		:init-keyword	:items
+		:slot-ref	(lambda (o)
+				  (%widget-plist (slot-ref o 'wid) :items))
+		:slot-set!	(%gtk-slot-init-only 'items))
+   (children    :accessor	children
+		:allocation	:virtual
+		:init-form	'()
+		:slot-ref	(lambda (o)
+				  (%widget-plist (slot-ref o 'wid) :children))
+		:slot-set!	(%gtk-slot-init-only 'children))
+   (orientation :accessor	orientation
+		:init-keyword	:orientation
+		:allocation	:gtk-arg)
+   (style	:accessor	style
+		:init-keyword	:style
+		:allocation	:gtk-arg
+		:gtk-name	"toolbar_style")
+   (space-size	:accessor	space-size
+		:init-keyword	:space-size
+		:allocation	:gtk-arg
+		:gtk-name	"space_size")
+   (space-style :accessor	space-style
+		:init-keyword	:space-style
+		:allocation	:gtk-arg
+		:gtk-name	"space_style")
+   (relief	:accessor	relief
+		:init-keyword	:relief
+		:allocation	:gtk-arg)
+))
+  
+(define-method realize-widget ((self <toolbar>) initargs)
+  (let ((id (%toolbar self)))
+    (slot-set! self 'wid id)))
+
+
+(define-method initialize ((self <toolbar>) initargs)
+  (next-method)
+  (%fill-toolbar self (slot-ref self 'items)))
+
+(define-method destroy ((self <toolbar>))
+  #f)
+		
+
+;======================================================================
+;
+;			< t o o l b a r - i t e m >
+;
+; and its two subclasses: 
+;	<toolbar-space-item> 
+;	<toolbar-button-item>
+;====================================================================== 
+(define-class <toolbar-item> (<gtk-object>)
+  ())
+
+(define-method container-add!((toolbar <toolbar>) (item <toolbar-item>))
+  (let* ((id       (slot-ref toolbar 'wid))
+	 (children (%widget-plist id :children)))
+    (%widget-plist id :children (append! children (list item)))))
+
+
+;;;;
+;;;; <toolbar-space-item>
+;;;; 
+(define-class <toolbar-space-item> (<toolbar-item>)
+  ())
+
+;; Add item for a space
+(define-method container-add!((toolbar <toolbar>)(item <toolbar-space-item>))
+  (%toolbar-add-space (wid toolbar))
+  (next-method))
+
+
+;;;;
+;;;; <toolbar-button-item>
+;;;; 
+(define-class <toolbar-button-item> (<toolbar-item> <image>)
+  ((text	:accessor	text    :init-keyword :text    :init-form "")
+   (command	:accessor	command :init-keyword :command :init-form #f)))
+
+;; Add item for a button
+(define-method container-add!((toolbar <toolbar>) (item <toolbar-button-item>))
+  (let ((callback (command item))
+	(len	  (length (children toolbar))))
+    ;; In C, we don't use the parameter to the call back since it is a
+    ;; GTK widget which is not visible in the Scheme world. So we make 
+    ;; here a closure which capture the toolbar and its position in the
+    ;; list of items 
+    (%toolbar-add (wid toolbar)
+		  (text item)
+		  (tooltip item)
+		  (wid item)
+		  (if callback 
+		      (lambda () (callback toolbar len))
+		      void)))
+    (next-method))
+
+;======================================================================
+;
+; %fill-toolbar: This function is called when a toolbar is created.
+; It creates all the internal components of the toolbar 
+; 
+;======================================================================
+(define (%fill-toolbar tb items)
+  (for-each (lambda (x)
+	      (container-add! tb (if (null? x)
+				     (make <toolbar-space-item>)
+				     (apply make <toolbar-button-item> x))))
+	    items))
+

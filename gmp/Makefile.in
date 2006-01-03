@@ -1,0 +1,424 @@
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
+
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = .
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+transform = @program_transform_name@
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
+BITS_PER_MP_LIMB = @BITS_PER_MP_LIMB@
+BYTES_PER_MP_LIMB = @BYTES_PER_MP_LIMB@
+CC = @CC@
+CPP = @CPP@
+DEFN_LONG_LONG_LIMB = @DEFN_LONG_LONG_LIMB@
+GMP_NAIL_BITS = @GMP_NAIL_BITS@
+HAVE_HOST_CPU_FAMILY_power = @HAVE_HOST_CPU_FAMILY_power@
+HAVE_HOST_CPU_FAMILY_powerpc = @HAVE_HOST_CPU_FAMILY_powerpc@
+HAVE_LIB = @HAVE_LIB@
+LIB = @LIB@
+LIBGMP_DLL = @LIBGMP_DLL@
+LTLIB = @LTLIB@
+MAKEINFO = @MAKEINFO@
+PACKAGE = @PACKAGE@
+RANLIB = @RANLIB@
+THE_ARCH = @THE_ARCH@
+U = @U@
+VERSION = @VERSION@
+
+noinst_LIBRARIES = libgmp.a
+libgmp_a_SOURCES =      assert.c     errno.c     insert-dbl.c     memory.c     mp_bpl.c     mp_clz_tab.c     mp_set_fns.c     mpn-add_n.c     mpn-addmul_1.c     mpn-bz_divrem_n.c     mpn-cmp.c     mpn-diveby3.c     mpn-divrem.c     mpn-divrem_1.c     mpn-divrem_2.c     mpn-get_str.c     mpn-lshift.c     mpn-mp_bases.c     mpn-mul.c     mpn-mul_1.c     mpn-mul_basecase.c     mpn-mul_n.c     mpn-rshift.c     mpn-sb_divrem_mn.c     mpn-set_str.c     mpn-sqr_basecase.c     mpn-sqrtrem.c     mpn-sub_n.c     mpn-submul_1.c     mpn-tdiv_qr.c     mpz-add.c     mpz-and.c     mpz-clear.c     mpz-cmp_si.c     mpz-cmp_ui.c     mpz-com.c     mpz-fdiv_qr.c     mpz-fdiv_qr_ui.c     mpz-get_d.c     mpz-get_si.c     mpz-get_str.c     mpz-get_ui.c     mpz-init.c     mpz-ior.c     mpz-iset.c     mpz-iset_si.c     mpz-iset_str.c     mpz-iset_ui.c     mpz-mul.c     mpz-neg.c     mpz-realloc.c     mpz-set.c     mpz-set_si.c     mpz-set_str.c     mpz-set_ui.c     mpz-sizeinbase.c     mpz-sqrtrem.c     mpz-sub.c     mpz-sub_ui.c     mpz-tdiv_qr.c     mpz-ui_pow_ui.c     mpz-xor.c
+
+ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
+mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
+CONFIG_HEADER = config.h
+CONFIG_CLEAN_FILES =  gmp-stklos.h
+LIBRARIES =  $(noinst_LIBRARIES)
+
+
+DEFS = @DEFS@ -I. -I$(srcdir) -I.
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+libgmp_a_LIBADD = 
+libgmp_a_OBJECTS =  assert.o errno.o insert-dbl.o memory.o mp_bpl.o \
+mp_clz_tab.o mp_set_fns.o mpn-add_n.o mpn-addmul_1.o mpn-bz_divrem_n.o \
+mpn-cmp.o mpn-diveby3.o mpn-divrem.o mpn-divrem_1.o mpn-divrem_2.o \
+mpn-get_str.o mpn-lshift.o mpn-mp_bases.o mpn-mul.o mpn-mul_1.o \
+mpn-mul_basecase.o mpn-mul_n.o mpn-rshift.o mpn-sb_divrem_mn.o \
+mpn-set_str.o mpn-sqr_basecase.o mpn-sqrtrem.o mpn-sub_n.o \
+mpn-submul_1.o mpn-tdiv_qr.o mpz-add.o mpz-and.o mpz-clear.o \
+mpz-cmp_si.o mpz-cmp_ui.o mpz-com.o mpz-fdiv_qr.o mpz-fdiv_qr_ui.o \
+mpz-get_d.o mpz-get_si.o mpz-get_str.o mpz-get_ui.o mpz-init.o \
+mpz-ior.o mpz-iset.o mpz-iset_si.o mpz-iset_str.o mpz-iset_ui.o \
+mpz-mul.o mpz-neg.o mpz-realloc.o mpz-set.o mpz-set_si.o mpz-set_str.o \
+mpz-set_ui.o mpz-sizeinbase.o mpz-sqrtrem.o mpz-sub.o mpz-sub_ui.o \
+mpz-tdiv_qr.o mpz-ui_pow_ui.o mpz-xor.o
+AR = ar
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
+Makefile.am Makefile.in NEWS aclocal.m4 config.h.in configure \
+configure.in gmp-stklos.h.in
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = tar
+GZIP_ENV = --best
+DEP_FILES =  .deps/assert.P .deps/errno.P .deps/insert-dbl.P \
+.deps/memory.P .deps/mp_bpl.P .deps/mp_clz_tab.P .deps/mp_set_fns.P \
+.deps/mpn-add_n.P .deps/mpn-addmul_1.P .deps/mpn-bz_divrem_n.P \
+.deps/mpn-cmp.P .deps/mpn-diveby3.P .deps/mpn-divrem.P \
+.deps/mpn-divrem_1.P .deps/mpn-divrem_2.P .deps/mpn-get_str.P \
+.deps/mpn-lshift.P .deps/mpn-mp_bases.P .deps/mpn-mul.P \
+.deps/mpn-mul_1.P .deps/mpn-mul_basecase.P .deps/mpn-mul_n.P \
+.deps/mpn-rshift.P .deps/mpn-sb_divrem_mn.P .deps/mpn-set_str.P \
+.deps/mpn-sqr_basecase.P .deps/mpn-sqrtrem.P .deps/mpn-sub_n.P \
+.deps/mpn-submul_1.P .deps/mpn-tdiv_qr.P .deps/mpz-add.P \
+.deps/mpz-and.P .deps/mpz-clear.P .deps/mpz-cmp_si.P .deps/mpz-cmp_ui.P \
+.deps/mpz-com.P .deps/mpz-fdiv_qr.P .deps/mpz-fdiv_qr_ui.P \
+.deps/mpz-get_d.P .deps/mpz-get_si.P .deps/mpz-get_str.P \
+.deps/mpz-get_ui.P .deps/mpz-init.P .deps/mpz-ior.P .deps/mpz-iset.P \
+.deps/mpz-iset_si.P .deps/mpz-iset_str.P .deps/mpz-iset_ui.P \
+.deps/mpz-mul.P .deps/mpz-neg.P .deps/mpz-realloc.P .deps/mpz-set.P \
+.deps/mpz-set_si.P .deps/mpz-set_str.P .deps/mpz-set_ui.P \
+.deps/mpz-sizeinbase.P .deps/mpz-sqrtrem.P .deps/mpz-sub.P \
+.deps/mpz-sub_ui.P .deps/mpz-tdiv_qr.P .deps/mpz-ui_pow_ui.P \
+.deps/mpz-xor.P
+SOURCES = $(libgmp_a_SOURCES)
+OBJECTS = $(libgmp_a_OBJECTS)
+
+all: all-redirect
+.SUFFIXES:
+.SUFFIXES: .S .c .o .s
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+$(ACLOCAL_M4):  configure.in 
+	cd $(srcdir) && $(ACLOCAL)
+
+config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
+	$(SHELL) ./config.status --recheck
+$(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
+	cd $(srcdir) && $(AUTOCONF)
+
+config.h: stamp-h
+	@if test ! -f $@; then \
+		rm -f stamp-h; \
+		$(MAKE) stamp-h; \
+	else :; fi
+stamp-h: $(srcdir)/config.h.in $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES= CONFIG_HEADERS=config.h \
+	     $(SHELL) ./config.status
+	@echo timestamp > stamp-h 2> /dev/null
+$(srcdir)/config.h.in: $(srcdir)/stamp-h.in
+	@if test ! -f $@; then \
+		rm -f $(srcdir)/stamp-h.in; \
+		$(MAKE) $(srcdir)/stamp-h.in; \
+	else :; fi
+$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOHEADER)
+	@echo timestamp > $(srcdir)/stamp-h.in 2> /dev/null
+
+mostlyclean-hdr:
+
+clean-hdr:
+
+distclean-hdr:
+	-rm -f config.h
+
+maintainer-clean-hdr:
+gmp-stklos.h: $(top_builddir)/config.status gmp-stklos.h.in
+	cd $(top_builddir) && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+mostlyclean-noinstLIBRARIES:
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+
+distclean-noinstLIBRARIES:
+
+maintainer-clean-noinstLIBRARIES:
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+mostlyclean-compile:
+	-rm -f *.o core *.core
+
+clean-compile:
+
+distclean-compile:
+	-rm -f *.tab.c
+
+maintainer-clean-compile:
+
+libgmp.a: $(libgmp_a_OBJECTS) $(libgmp_a_DEPENDENCIES)
+	-rm -f libgmp.a
+	$(AR) cru libgmp.a $(libgmp_a_OBJECTS) $(libgmp_a_LIBADD)
+	$(RANLIB) libgmp.a
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES) config.h.in $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)config.h.in$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags config.h.in $$unique $(LISP) -o $$here/TAGS)
+
+mostlyclean-tags:
+
+clean-tags:
+
+distclean-tags:
+	-rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(PACKAGE)-$(VERSION)
+top_distdir = $(distdir)
+
+# This target untars the dist file and tries a VPATH configuration.  Then
+# it guarantees that the distribution is self-contained by making another
+# tarfile.
+distcheck: dist
+	-rm -rf $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) zxf $(distdir).tar.gz
+	mkdir $(distdir)/=build
+	mkdir $(distdir)/=inst
+	dc_install_base=`cd $(distdir)/=inst && pwd`; \
+	cd $(distdir)/=build \
+	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
+	  && $(MAKE) $(AM_MAKEFLAGS) \
+	  && $(MAKE) $(AM_MAKEFLAGS) dvi \
+	  && $(MAKE) $(AM_MAKEFLAGS) check \
+	  && $(MAKE) $(AM_MAKEFLAGS) install \
+	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
+	  && $(MAKE) $(AM_MAKEFLAGS) dist
+	-rm -rf $(distdir)
+	@banner="$(distdir).tar.gz is ready for distribution"; \
+	dashes=`echo "$$banner" | sed s/./=/g`; \
+	echo "$$dashes"; \
+	echo "$$banner"; \
+	echo "$$dashes"
+dist: distdir
+	-chmod -R a+r $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	-rm -rf $(distdir)
+dist-all: distdir
+	-chmod -R a+r $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	-rm -rf $(distdir)
+distdir: $(DISTFILES)
+	-rm -rf $(distdir)
+	mkdir $(distdir)
+	-chmod 777 $(distdir)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	cd $(top_srcdir) \
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu Makefile
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+
+DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+
+-include $(DEP_FILES)
+
+mostlyclean-depend:
+
+clean-depend:
+
+distclean-depend:
+	-rm -rf .deps
+
+maintainer-clean-depend:
+
+%.o: %.c
+	@echo '$(COMPILE) -c $<'; \
+	$(COMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.c
+	@echo '$(LTCOMPILE) -c $<'; \
+	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+all-recursive-am: config.h
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+
+install-exec-am:
+install-exec: install-exec-am
+
+install-data-am:
+install-data: install-data-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am:
+uninstall: uninstall-am
+all-am: Makefile $(LIBRARIES) config.h
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
+
+
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstLIBRARIES \
+		mostlyclean-compile mostlyclean-tags mostlyclean-depend \
+		mostlyclean-generic
+
+mostlyclean: mostlyclean-am
+
+clean-am:  clean-hdr clean-noinstLIBRARIES clean-compile clean-tags \
+		clean-depend clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-hdr distclean-noinstLIBRARIES distclean-compile \
+		distclean-tags distclean-depend distclean-generic \
+		clean-am
+
+distclean: distclean-am
+	-rm -f config.status
+
+maintainer-clean-am:  maintainer-clean-hdr \
+		maintainer-clean-noinstLIBRARIES \
+		maintainer-clean-compile maintainer-clean-tags \
+		maintainer-clean-depend maintainer-clean-generic \
+		distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+	-rm -f config.status
+
+.PHONY: mostlyclean-hdr distclean-hdr clean-hdr maintainer-clean-hdr \
+mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
+clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
+mostlyclean-compile distclean-compile clean-compile \
+maintainer-clean-compile tags mostlyclean-tags distclean-tags \
+clean-tags maintainer-clean-tags distdir mostlyclean-depend \
+distclean-depend clean-depend maintainer-clean-depend info-am info \
+dvi-am dvi check check-am installcheck-am installcheck all-recursive-am \
+install-exec-am install-exec install-data-am install-data install-am \
+install uninstall-am uninstall all-redirect all-am all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+
+
+clean: 
+	/bin/rm -f configure.lineno
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

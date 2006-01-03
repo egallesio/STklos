@@ -1,0 +1,157 @@
+;;;;
+;;;; srfi-48.stk	-- Implementation of SRFI-48
+;;;; 
+;;;; Copyright © 2004 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 23-Apr-2004 21:19 (eg)
+;;;; Last file update: 26-May-2004 10:56 (eg)
+;;;;
+;;;;
+;;;; Most of the implementation is done in C. The part which are
+;;;; implemented here, are the
+;;;;     ~H format (to avoid to load a big string in the interpreter
+;;;;     ~wF format 
+;;;;
+;;;; They are taken from the reference implementation given in the
+;;;; SRFI itself. This implementation has the following copyright
+;;;;
+;;;;     Copyright (C) Kenneth A Dickey (2003). All Rights Reserved.
+;;;;
+;;;;     This document and translations of it may be copied and furnished
+;;;;     to others, and derivative works that comment on or otherwise
+;;;;     explain it or assist in its implementation may be prepared,
+;;;;     copied, published and distributed, in whole or in part, without
+;;;;     restriction of any kind, provided that the above copyright notice
+;;;;     and this paragraph are included on all such copies and derivative
+;;;;     works. However, this document itself may not be modified in any
+;;;;     way, such as by removing the copyright notice or references to
+;;;;     the Scheme Request For Implementation process or editors, except
+;;;;     as needed for the purpose of developing SRFIs in which case the
+;;;;     procedures for copyrights defined in the SRFI process must be
+;;;;     followed, or as required to translate it into languages other
+;;;;     than English.
+;;;;
+;;;;     The limited permissions granted above are perpetual and will not
+;;;;     be revoked by the authors or their successors or assigns.
+;;;;
+;;;;     This document and the information contained herein is provided on
+;;;;     an "AS IS" basis and THE AUTHOR AND THE SRFI EDITORS DISCLAIM ALL
+;;;;     WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY
+;;;;     WARRANTY THAT THE USE OF THE INFORMATION HEREIN WILL NOT INFRINGE
+;;;;     ANY RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR
+;;;;     FITNESS FOR A PARTICULAR PURPOSE.
+
+
+(define srfi48:help 
+  (let ((str "(format []  [...]) --  is #t, #f or an output-port
+OPTION	[MNEMONIC]	DESCRIPTION	-- Implementation Assumes ASCII Text
+                                           Encoding
+~H	[Help]		output this text
+~A	[Any]		(display arg) for humans
+~S	[Slashified]	(write arg) for parsers
+~W	[WriteCircular]	like ~s but outputs circular and recursive data
+                        structures
+~~	[tilde]		output a tilde
+~T	[Tab]		output a tab character
+~%	[Newline]	output a newline character
+~&	[Freshline]	output a newline character if the previous output
+                        was not a newline
+~D	[Decimal]	the arg is a number which is output in decimal radix
+~X	[heXadecimal]	the arg is a number which is output in hexadecimal
+                        radix
+~O	[Octal]		the arg is a number which is output in octal radix
+~B	[Binary]	the arg is a number which is output in binary radix
+~w,dF	[Fixed]		the arg is a string or number which has width w and
+                        d digits after the decimal
+~C	[Character]	character arg is output by write-char
+~_	[Space]		a single space character is output
+~Y	[Yuppify]	the list arg is pretty-printed to the output
+~?	[Indirection]	recursive format: next 2 args are format-string and
+                        list of arguments
+~K	[Indirection]	same as ~?\n"))
+    (lambda (port)
+      (format port "~A" str))))
+
+
+(define (srfi48:format-fixed number-or-string width digits)
+  (define (string-grow str len)
+    (let ((off (- len (string-length str))))
+      (if (positive? off)
+	  (string-append (make-string off #\space) str)
+	  str)))
+
+  (define (string-pad-right str len char)
+    (let ((slen (string-length str)))
+      (cond ((< slen len) (string-append str (make-string (- len slen) char)))
+	    ((> slen len) (substring str 0 len))
+	    (else         str))))
+
+  (define (round* n scale)
+    (let ((one (expt 10 scale)))
+      (/ (round (* n one)) one)))
+  
+  (cond
+    ((string? number-or-string)
+       (string-grow number-or-string width))
+    ((number? number-or-string)
+        (let ((real (real-part number-or-string))
+	      (imag (imag-part number-or-string)))
+	  (cond
+	    ((not (zero? imag))
+	     (string-grow (string-append (srfi48:format-fixed real 0 digits)
+					 (if (negative? imag) "" "+")
+					 (srfi48:format-fixed imag 0 digits)
+					 "i")
+			  width))
+ 	    (digits
+ 	     (let* ((rounded-number (exact->inexact (round* real digits)))
+		    (rounded-string (number->string rounded-number))
+		    (dot-index      (string-index  "." rounded-string))
+		    (exp-index      (string-index  "e" rounded-string))
+		    (length         (string-length rounded-string))
+		    (pre-string     (cond
+				      (exp-index
+				         (substring rounded-string
+						    0
+						    (+ (or dot-index exp-index) 1)))
+				      (dot-index
+				         (substring rounded-string
+						    0
+						    (+ dot-index 1)))
+				      (else
+				         rounded-string)))
+		    (exp-string     (if exp-index
+					(substring rounded-string exp-index length)
+					""))
+		    (frac-string    (substring rounded-string
+					       (+ dot-index 1)
+					       (or exp-index length))))
+
+	       (string-grow (string-append pre-string
+					   (if dot-index "" ".")
+					   (string-pad-right frac-string digits #\0)
+					   exp-string)
+			    width)))
+	    (else ;; no digits
+	     (string-grow (number->string real) width)))))
+    (else (error 'format "~~F requires a number or a string, parameter was ~s"
+		 number-or-string))))
+
+(provide "srfi-48")

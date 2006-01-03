@@ -1,0 +1,1163 @@
+;;;;
+;;;; r5rs.stk	-- R5RS function written in Scheme
+;;;; 
+;;;; Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 14-Jun-2000 12:27 (eg)
+;;;; Last file update:  4-Aug-2005 11:50 (eg)
+;;;;
+
+
+#|
+<doc EXT-SYNTAX lambda
+ * (lambda <formals> <body>)
+ *
+ * A lambda expression evaluates to a procedure. STklos lambda expression
+ * have been extended to allow a optional and keyword parameters. 
+ * |<formals>| should have one of the following forms:
+ * ,(itemize
+ * (item [
+ * |(<variable1> ...)|
+ * ,(linebreak)
+ * The procedure takes a fixed number of arguments; 
+ * when the procedure is called, the arguments will be stored in the 
+ * bindings of the corresponding variables.  This form is identical to
+ * R5RS.
+ * ])
+ *
+ * (item [
+ * |<variable>|
+ * ,(linebreak)
+ * The procedure takes any number of arguments; when the 
+ * procedure is called, the sequence of actual arguments is converted into
+ * a newly allocated list, and the list is stored in the binding of the
+ * |<variable>|. This form is identical to R5RS.
+ * ])
+ * 
+ * (item [
+ * |(<variable1> ... <variablen> . <variablen+1>)|
+ * ,(linebreak)
+ * If a space-delimited 
+ * period precedes the last variable, then the procedure takes n or more
+ *  arguments, where n is the number of formal arguments before the period 
+ * (there must be at least one). The value stored in the binding of the
+ * last variable will be a newly allocated list of the actual arguments left 
+ * over after all the other actual arguments have been matched up against 
+ * the other formal arguments. This form is identical to R5RS.
+ * ])
+ * 
+ * (item [
+ * |(<variable1 ... <variablen> \[:optional ...\] \[:rest ...\] \[:key ...\])|
+ * ,(linebreak)
+ * This form is specific to STklos and allows to have procedure with 
+ * optional and keyword parameters. The form |:optional| allows to specify 
+ * optional parameters. All the parameters specified after |:optional| to the end
+ * of |<formals>| (or until a |:rest| or |:key|) are optional parameters. An 
+ * optional parameter can declared as:
+ * ,(itemize 
+ * (item [
+ * |variable|: if a value is passed when the procedure is called, it will be 
+ * stored in the binding of the corresponding variable, otherwise the value |¤f|
+ * will be stored in it.
+ * ])
+ * (item [
+ * |(variable value)|: if a value is passed when the procedure is called, it 
+ * will be stored in the binding of the corresponding variable, otherwise |value|
+ * will be stored in it.
+ * ])
+ * (item [
+ * |(variable value test?)|: if a value is passed when the procedure is called, it 
+ * will be stored in the binding of the corresponding variable, otherwise |value|
+ * will be stored in it. Furthermore, |test?| will be given the value |¤t| if 
+ * a value is passed for the given variable, otherwise |test?| is set to |¤f|
+ * ])
+ * )
+ * £
+ * 
+ * Hereafter are some examples using |:optional| parameters
+ * @lisp
+ * ((lambda (a b :optional c d) (list a b c d)) 1 2)
+ *                             => (1 2 #f #f)
+ * ((lambda (a b :optional c d) (list a b c d)) 1 2 3)
+ *                             => (1 2 3 #f)
+ * ((lambda (a b :optional c (d 100)) (list a b c d)) 1 2 3)
+ *                             => (1 2 3 100)
+ * ((lambda (a b :optional c (d #f d?)) (list a b c d d?)) 1 2 3)
+ *                             => (1 2 3 #f #f)
+ * @end lisp
+ * The form |:rest| parameter is similar to the dot notation seen before. 
+ * It is used before an identifier to collects the parameters in a single
+ * binding:
+ * @lisp
+ * ((lambda (a :rest b) (list a b)) 1)
+ *                             => (1 ())
+ * ((lambda (a :rest b) (list a b)) 1 2)
+ *                             => (1 (2))
+ * ((lambda (a :rest b) (list a b)) 1 2 3)
+ *                             => (1 (2 3))
+ * @end lisp
+ * The form |:key| allows to use keyword parameter passing. All the parameters 
+ * specified after |:key| to the end of |<formals>| are keyword parameters. A 
+ * keyword  parameter can be declared using the three forms given for optional 
+ * parameters. Here are some examples illustrating how to declare and how to use 
+ * keyword parameters:
+ * @lisp
+ * ((lambda (a :key b c) (list a b c)) 1 :c 2 :b 3)
+ *                             => (1 3 2)
+ * ((lambda (a :key b c) (list a b c)) 1 :c 2)     
+ *                             => (1 #f 2)
+ * ((lambda (a :key (b 100 b?) c) (list a b c b?)) 1 :c 2)
+ *                             => (1 100 2 #f)
+ * @end lisp
+ * At last, here is an example showing |:optional| |:rest| and |:key| parameters
+ * @lisp
+ * (define f (lambda (a :optional b :rest c :key d e) 
+ *              (list a b c d e)))
+ * 
+ * (f 1)                       => (1 #f () #f #f)
+ * (f 1 2)                     => (1 2 () #f #f)
+ * (f 1 2 :d 3 :e 4)           => (1 2 (:d 3 :e 4) 3 4)
+ * (f 1 :d 3 :e 4)             => (1 #f (:d 3 :e 4) 3 4)
+ * @end lisp
+ * ])
+ * )
+doc>
+|#
+
+#|
+<doc syntax set!
+ * (set! <variable> <expression>)
+ * (set! (<proc> <arg> ...) <expression>)
+ *
+ * The first form of |set!| is the R5RS one:
+ * £
+ * |<Expression>| is evaluated, and the resulting value is stored in
+ * the location to which |<variable>| is bound. |<Variable>| must be bound
+ * either in some region enclosing the |set!| expression or at top level.
+ *
+ * @lisp
+ * (define x 2)
+ * (+ x 1)                   =>  3
+ * (set! x 4)                =>  unspecified
+ * (+ x 1)                   =>  5
+ * @end lisp
+ * 
+ * The second form of |set!| is defined in ,(link-srfi 17):
+ * £ 
+ * This special form |set!|
+ * is extended so the first operand can be a procedure application, and not
+ * just a variable. The procedure is typically one that extracts a component
+ * from some data structure. Informally, when the procedure is called in the
+ * first operand of |set!|, it causes the corresponding component to be
+ * replaced by the second operand. For example,
+ * @lisp
+ * (set (vector-ref x i) v)
+ * @end lisp
+ * would be equivalent to:
+ * @lisp
+ * (vector-set! x i v)
+ * @end lisp
+ * 
+ * Each procedure that may be used as the first operand to |set!| must have
+ * a corresponding ,(emph "setter") procedure. The procedure |setter| (see below)
+ * takes a procedure and returns the corresponding setter procedure.
+ * So, 
+ * @lisp
+ * (set! (proc arg ...) value)
+ * @end lisp
+ * is equivalent to the call
+ * @lisp
+ * ((setter proc) arg ... value)
+ * @end lisp
+ *
+ * The result of the |set!| expression is unspecified.
+doc>
+|#
+
+
+#|
+<doc syntax if
+ * (if <test> <consequent> <alternate>)
+ * (if <test> <consequent>)
+ *
+ * An |if| expression is evaluated as follows: first, |<test>| is
+ * evaluated.  If it yields a true value, then |<consequent>| is
+ * evaluated and its value(s) is(are) returned.  Otherwise |<alternate>|
+ * is evaluated and its value(s) is(are) returned.  If |<test>| yields a
+ * false value and no |<alternate>| is specified, then the result of the
+ * expression is ,(emph "void").
+ * 
+ * @lisp
+ *   (if (> 3 2) 'yes 'no)           =>  yes
+ *   (if (> 2 3) 'yes 'no)           =>  no
+ *   (if (> 3 2)
+ *       (- 3 2)
+ *       (+ 3 2))                    =>  1
+ * @end lisp
+doc>
+|#
+
+
+#|
+<doc syntax cond
+ * (cond <clause1> <clause2> ...)
+ *
+ * In a |cond|, each |<clause>| should be of the form
+ * 
+ * @lisp
+ * (<test> <expression1> ...)
+ * @end lisp
+ * 
+ * where |<test>| is any expression.  Alternatively, a |<clause>| may be
+ * of the form
+ * 
+ * @lisp
+ * (<test> => <expression>)
+ * @end lisp
+ * 
+ * The last |<clause>| may be an "else clause," which has the form
+ * @lisp
+ * (else <expression1> <expression2> ...)
+ * @end lisp
+ * 
+ * A cond expression is evaluated by evaluating the |<test>| expressions
+ * of successive |<clause>|s in order until one of them evaluates to a
+ * true value When a |<test>| evaluates to a true value, then the
+ * remaining |<expression>|s in its |<clause>| are evaluated in order,
+ * and the result(s) of the last |<expression>| in the |<clause>| is(are)
+ * returned as the result(s) of the entire cond expression.  If the
+ * selected |<clause>| contains only the |<test>| and no |<expression>|s,
+ * then the value of the |<test>| is returned as the result.  If the
+ * selected |<clause>| uses the => alternate form, then the
+ * |<expression>| is evaluated.  Its value must be a procedure that
+ * accepts one argument; this procedure is then called on the value of
+ * the |<test>| and the value(s) returned by this procedure is(are)
+ * returned by the cond expression.
+ * £
+ * If all |<test>|s evaluate to false
+ * values, and there is no else clause, then the result of the
+ * conditional expression is ,(emph "void"); if there is an else clause,
+ * then its |<expression>|s are evaluated, and the value(s) of the last
+ * one is(are) returned.
+ * 
+ * @lisp
+ *   (cond ((> 3 2) 'greater)
+ *         ((< 3 2) 'less))                    =>  greater
+ * 
+ *   (cond ((> 3 3) 'greater)
+ *         ((< 3 3) 'less)
+ *         (else 'equal))                      =>  equal
+ * 
+ *   (cond ((assv 'b '((a 1) (b 2))) => cadr)
+ *         (else #f))                          =>  2
+ * @end lisp
+doc>
+|#
+
+#|
+<doc syntax case
+ * (case <key> <clause1> <clause2> ...)
+ *
+ * In a |case|, each |<clause>| should have the form
+ * 
+ * @lisp
+ * ((<datum1> ...) <expression1> <expression2> ...),
+ * @end lisp
+ * 
+ * where each |<datum>| is an external representation of some object.  All the
+ * |<datum>|s must be distinct.  The last |<clause>| may be an "else clause," which
+ * has the form
+ * 
+ * @lisp
+ *     (else <expression1> <expression2> ...).
+ * @end lisp
+ * 
+ * A case expression is evaluated as follows. |<Key>| is evaluated and
+ * its result is compared against each |<datum>|.  If the result of
+ * evaluating |<key>| is equivalent (in the sense of eqv?) to a
+ * |<datum>|, then the expressions in the corresponding |<clause>| are
+ * evaluated from left to right and the result(s) of the last expression
+ * in the |<clause>| is(are) returned as the result(s) of the case
+ * expression.  If the result of evaluating |<key>| is different from
+ * every |<datum>|, then if there is an else clause its expressions are
+ * evaluated and the result(s) of the last is(are) the result(s) of the
+ * case expression; otherwise the result of the case expression is ,(emph "void").
+ * 
+ * @lisp
+ *   (case (* 2 3)
+ *     ((2 3 5 7) 'prime)
+ *     ((1 4 6 8 9) 'composite))     =>  composite
+ *   (case (car '(c d))
+ *     ((a) 'a)
+ *     ((b) 'b))                     =>  void
+ *   (case (car '(c d))
+ *     ((a e i o u) 'vowel)
+ *     ((w y) 'semivowel)
+ *     (else 'consonant))            =>  consonant
+ * @end lisp
+doc>
+|#
+
+
+#|
+<doc EXT-SYNTAX when
+ * (when <test> <expression1> <expression2> ...)
+ *
+ * If the |<test>| expression yields a true value, the |<expression>|s are
+ * evaluated from left to right and the value of the last |<expression>| is
+ * returned. Otherwise, |when| returns ,(emph "void").
+doc>
+|#
+
+
+#|
+<doc EXT-SYNTAX unless
+ * (unless <test> <expression1> <expression2> ...)
+ *
+ * If the |<test>| expression yields a false value, the |<expression>|s are
+ * evaluated from left to right and the value of the last |<expression>| is
+ * returned. Otherwise, |unless| returns ,(emph "void").
+doc>
+|#
+
+
+#|
+<doc syntax let
+ * (let <bindings> <body>)
+ * (let <variable> <bindings> <body>)
+ *
+ * In a |let|, |<bindings>| should have the form
+ * 
+ * @lisp
+ * ((<variable1> <init1>) ...)
+ * @end lisp
+ * 
+ * where each |<init>| is an expression, and |<body>| should be a sequence of one or
+ * more expressions.  It is an error for a |<variable>| to appear more than once in
+ * the list of variables being bound.
+ * £
+ * The |<init>|s are evaluated in the current environment (in some
+ * unspecified order), the |<variable>|s are bound to fresh locations holding the
+ * results, the |<body>| is evaluated in the extended environment, and the value(s)
+ * of the last expression of |<body>| is(are) returned.  Each binding of a
+ * |<variable>| has |<body>| as its region.
+ * 
+ * @lisp
+ * (let ((x 2) (y 3))
+ *   (* x y))                      =>  6
+ * 
+ * (let ((x 2) (y 3))
+ *   (let ((x 7)
+ *         (z (+ x y)))
+ *     (* z x)))                   =>  35
+ * @end lisp
+ * 
+ * The second form of |let|, which is generally called a ,(emph "named let"),
+ * is a variant on the syntax of let which provides a more general
+ * looping construct than |do| (@pxref{do}) and may also be used to
+ * express recursions. It has the same syntax and semantics as ordinary
+ * let except that |<variable>| is bound within |<body>| to a procedure whose
+ * formal arguments are the bound variables and whose body is |<body>|.
+ * Thus the execution of |<body>| may be repeated by invoking the procedure
+ * named by |<variable>|.
+ * 
+ * @lisp
+ * (let loop ((numbers '(3 -2 1 6 -5))
+ *            (nonneg  '())
+ *            (neg     '()))
+ *   (cond ((null? numbers) (list nonneg neg))
+ *         ((>= (car numbers) 0)
+ *            (loop (cdr numbers)
+ *                  (cons (car numbers) nonneg)
+ *                  neg))
+ *         ((< (car numbers) 0)
+ *            (loop (cdr numbers)
+ *                   nonneg
+ *                   (cons (car numbers) neg)))))
+ *    =>  ((6 1 3) (-5 -2))
+ * @end lisp
+doc>
+|#
+
+#|
+<doc syntax let*
+ * (let* <bindings> <body>)
+ *
+ * In a |let*|, |<bindings>| should have the same form as in a |let| (however, a 
+ * <variable> can appear more than once in the list of variables being bound).
+ * £
+ * |Let*| is similar to |let|, but the bindings are performed sequentially
+ * from left to right, and the region of a binding indicated by 
+ * @lisp
+ * (<variable> <init>) 
+ * @end lisp
+ * is that part of the |let*| expression to the right of the binding.  Thus
+ * the second binding is done in an environment in which the first binding is
+ * visible, and so on.
+ * 
+ * @lisp
+ * (let ((x 2) (y 3))
+ *   (let* ((x 7)
+ *          (z (+ x y)))
+ *     (* z x)))             =>  70
+ * @end lisp
+doc>
+|#
+
+#|
+<doc syntax letrec
+ * (letrec <bindings> <body>)
+ *
+ * <bindings> should have the form as in |let|. 
+ * 
+ * The |<variable>|s are bound to fresh locations holding undefined
+ * values, the |<init>|s are evaluated in the resulting environment (in
+ * some unspecified order), each |<variable>| is assigned to the result
+ * of the corresponding |<init>|, the |<body>| is evaluated in the
+ * resulting environment, and the value(s) of the last expression in
+ * |<body>| is(are) returned.  Each binding of a |<variable>| has the
+ * entire |letrec| expression as its region, making it possible to define
+ * mutually recursive procedures.
+ * 
+ * @lisp
+ * (letrec ((even? (lambda (n)
+ *                   (if (zero? n)
+ *                       #t
+ *                       (odd? (- n 1)))))
+ *          (odd?  (lambda (n)
+ *                   (if (zero? n)
+ *                       #f
+ *                       (even? (- n 1))))))
+ *   (even? 88))
+ *                   =>  #t
+ * @end lisp
+doc> 
+|#
+
+#|
+<doc syntax begin
+ * (begin <expression1> <expression2> ...)
+ *
+ * The |<expression>|s are evaluated sequentially from left to right, and the
+ * value(s) of the last |<expression>| is(are) returned.  This expression type is
+ * used to sequence side effects such as input and output.
+ * 
+ * @lisp
+ *   (define x 0)
+ * 
+ *   (begin (set! x 5)
+ *          (+ x 1))                  =>  6
+ * 
+ *   (begin (display "4 plus 1 equals ")
+ *          (display (+ 4 1)))        @print{} 4 plus 1 equals 5
+ *                                    =>  void
+ * @end lisp
+doc> 
+|#
+
+#|
+<doc syntax do
+ * (do [[<var1> <init1> <step1>] ...] [<test> <expr> ...] <command> ...)
+ *
+ * |Do| is an iteration construct.  It specifies a set of variables to be
+ * bound, how they are to be initialized at the start, and how they are
+ * to be updated on each iteration.  When a termination condition is met,
+ * the loop exits after evaluating the |<expr>|s.
+ * £
+ * |Do| expressions are evaluated as follows: The |<init>| expressions
+ * are evaluated (in some unspecified order), the |<var>|s are bound
+ * to fresh locations, the results of the |<init>| expressions are stored
+ * in the bindings of the |<var>|s, and then the iteration phase
+ * begins.
+ * £
+ * Each iteration begins by evaluating |<test>|; if the result is false
+ * then the |<command>| expressions are evaluated in order for effect,
+ * the |<step>| expressions are evaluated in some unspecified order, the
+ * |<var>|s are bound to fresh locations, the results of the |<step>|s
+ * are stored in the bindings of the |<var>|s, and the next iteration
+ * begins.
+ * £
+ * If |<test>| evaluates to a true value, then the |<expr>|s are
+ * evaluated from left to right and the value(s) of the last |<expr>|
+ * is(are) returned.  If no |<expr>|s are present, then the value of
+ * the do expression is ,(emph "void").
+ * £
+ * The region of the binding of a |<var>| consists of the entire do
+ * expression except for the |<init>|s.  It is an error for a |<var>| to
+ * appear more than once in the list of do variables.
+ * £
+ * A |<step>| may be omitted, in which case the effect is the same as if 
+ * @lisp
+ * (<var> <init> <var>) 
+ * @end lisp 
+ * had been written.
+ * 
+ * @lisp
+ *   (do ((vec (make-vector 5))
+ *        (i 0 (+ i 1)))
+ *       ((= i 5) vec)
+ *     (vector-set! vec i i))            =>  #(0 1 2 3 4)
+ * 
+ *   (let ((x '(1 3 5 7 9)))
+ *     (do ((x x (cdr x))
+ *          (sum 0 (+ sum (car x))))
+ *         ((null? x) sum)))             =>  25
+ * @end lisp
+doc>
+|#
+
+#|
+<doc syntax quasiquote
+ * (quasiquote <template>) 
+ * `<template>
+ *
+ * "Backquote" or "quasiquote" expressions are useful for constructing a
+ * list or vector structure when most but not all of the desired structure
+ * is known in advance.  If no commas appear within the |<template>|,
+ * the result of evaluating |`<template>| is equivalent to the result of
+ * evaluating |'<template>|.  If a comma appears within the 
+ * |<template>|, however, the expression following the comma is evaluated
+ * ("unquoted") and its result is inserted into the structure instead of
+ * the comma and the expression.  If a comma appears followed immediately
+ * by an at-sign (@), then the following expression must evaluate to a
+ * list; the opening and closing parentheses of the list are then
+ * "stripped away" and the elements of the list are inserted in place of the comma
+ * at-sign expression sequence.  A comma at-sign should only appear within
+ * a list or vector |<template>|.
+ * 
+ * @lisp
+ * `(list \,(+ 1 2) 4)  =>  (list 3 4)
+ * (let ((name 'a)) `(list ,name ',name))
+ *                     =>  (list a (quote a))
+ * `(a \,(+ 1 2) ,@(map abs '(4 -5 6)) b)
+ *                     =>  (a 3 4 5 6 b)
+ * `((foo \,(- 10 3)) ,@(cdr '(c)) . ,(car '(cons)))
+ *                     =>  ((foo 7) . cons)
+ * `#(10 5 \,(sqrt 4) ,@(map sqrt '(16 9)) 8)
+ *                     =>  #(10 5 2 4 3 8)
+ * @end lisp
+ *
+ * Quasiquote forms may be nested.  Substitutions are made only for unquoted
+ * components appearing at the same nesting level as the outermost backquote.  
+ * The nesting level increases by one inside each successive quasiquotation, 
+ * and decreases by one inside each unquotation.
+ * 
+ * @lisp
+ * `(a `(b \,(+ 1 2) \,(foo \,(+ 1 3) d) e) f)
+ *           =>  (a `(b \,(+ 1 2) \,(foo 4 d) e) f)
+ * (let ((name1 'x)
+ *       (name2 'y))
+ *   `(a `(b ,,name1 ,',name2 d) e))
+ *           =>  (a `(b ,x ,'y d) e)
+ * @end lisp
+ * 
+ * The two notations |`<template>| and |(quasiquote <template>)| are identical
+ * in all respects.  |,<expression>| is identical to |(unquote <expression>)|, and
+ * |,@<expression>| is identical to |(unquote-splicing <expression>)|.
+ *
+ * 
+doc>
+|#
+
+
+#|
+<doc EXT-SYNTAX define-macro
+ * (define-macro (<name> <formals>) <body>)
+ * (define-macro <name> (lambda <formals> <body>))
+ *
+ * |define-macro| can be used to define low-level macro
+ * (i.e. ,(emph "non hygienic") macros). This form is similar to the
+ * |defmacro| form of Common Lisp.
+ * @lisp
+ * (define-macro (incr x) `(set! ,x (+ ,x 1)))
+ * (let ((a 1)) (incr a) a)   => 2
+ * 
+ * (define-macro (when test . body)
+ *   `(if ,test ,@(if (null? (cdr body)) body `((begin ,@body)))))
+ * (macro-expand '(when a b)) => (if a b)
+ * (macro-expand '(when a b c d)) 
+ *                            => (if a (begin b c d))
+ * 
+ * (define-macro (my-and . exprs)
+ *   (cond
+ *    ((null? exprs)        #t)
+ *    ((= (length exprs) 1) (car exprs))
+ *    (else                 `(if \,(car exprs) 
+ * 			      (my-and ,@(cdr exprs)) 
+ * 			      #f))))
+ * (macro-expand '(my-and a b c))
+ *                           => (if a (my-and b c) #f)
+ * @end lisp
+doc>
+|#
+
+
+#|
+<doc EXT macro-expand
+ * (macro-expand form)
+ *
+ * Returns the macro expansion of |form| if it is a macro call,
+ * otherwise |form| is returned unchanged.
+ *
+ * @lisp
+ * (define-macro (incr x) `(set! ,x (+ ,x 1)))
+ * (macro-expand '(incr foo)) => (set! foo (+ foo 1))
+ * (macro-expand '(car bar))  => (car bar)
+ * @end lisp
+doc>
+|#
+
+#|
+<doc eval
+ * (eval expression environment)
+ * (eval expression) 
+ *
+ * Current form of STklos |eval| is not conform to R5RS. 
+ * £
+ * ,(TODO "MUST BE CORRECTED FOR A NEXT RELEASE")
+doc>
+|#
+
+
+
+
+#|
+<doc caar cdar cadr cddr caaar cdaar cadar cddar caadr cdadr caddr cdddr caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr
+ * (caar pair)
+ * (cadr pair)
+ * ...
+ * (cdddar pair)
+ * (cddddr pair)
+ *
+ * These procedures are compositions of |car| and |cdr|, where for example
+ * |caddr| could be defined by
+ * @lisp
+ *    (define caddr (lambda (x) (car (cdr (cdr x)))))
+ * @end lisp
+ * Arbitrary compositions, up to four deep, are provided.
+ * There are twenty-eight of these procedures in all.
+doc>
+|#
+
+(define caar   (lambda (x) (car (car x))))
+(define cdar   (lambda (x) (cdr (car x))))
+(define cadr   (lambda (x) (car (cdr x))))
+(define cddr   (lambda (x) (cdr (cdr x))))
+(define caaar  (lambda (x) (car (car (car x)))))
+(define cdaar  (lambda (x) (cdr (car (car x)))))
+(define cadar  (lambda (x) (car (cdr (car x)))))
+(define cddar  (lambda (x) (cdr (cdr (car x)))))
+(define caadr  (lambda (x) (car (car (cdr x)))))
+(define cdadr  (lambda (x) (cdr (car (cdr x)))))
+(define caddr  (lambda (x) (car (cdr (cdr x)))))
+(define cdddr  (lambda (x) (cdr (cdr (cdr x)))))
+(define caaaar (lambda (x) (car (car (car (car x))))))
+(define cdaaar (lambda (x) (cdr (car (car (car x))))))
+(define cadaar (lambda (x) (car (cdr (car (car x))))))
+(define cddaar (lambda (x) (cdr (cdr (car (car x))))))
+(define caadar (lambda (x) (car (car (cdr (car x))))))
+(define cdadar (lambda (x) (cdr (car (cdr (car x))))))
+(define caddar (lambda (x) (car (cdr (cdr (car x))))))
+(define cdddar (lambda (x) (cdr (cdr (cdr (car x))))))
+(define caaadr (lambda (x) (car (car (car (cdr x))))))
+(define cdaadr (lambda (x) (cdr (car (car (cdr x))))))
+(define cadadr (lambda (x) (car (cdr (car (cdr x))))))
+(define cddadr (lambda (x) (cdr (cdr (car (cdr x))))))
+(define caaddr (lambda (x) (car (car (cdr (cdr x))))))
+(define cdaddr (lambda (x) (cdr (car (cdr (cdr x))))))
+(define cadddr (lambda (x) (car (cdr (cdr (cdr x))))))
+(define cddddr (lambda (x) (cdr (cdr (cdr (cdr x))))))
+
+#|
+<doc call-with-current-continuation call/cc
+ * (call-with-current-continuation proc)
+ * (call/cc proc)
+ *
+ *  |Proc| must be a procedure of one argument. The procedure
+ * |call-with-current-continuation| packages up the current continuation
+ * (see the rationale below) as an ``escape procedure'' and passes it as
+ * an argument to |proc|. The escape procedure is a Scheme procedure that, if
+ * it is later called, will abandon whatever continuation is in effect at
+ * that later time and will instead use the continuation that was in effect
+ * when the escape procedure was created. Calling the escape procedure may cause
+ * the invocation of before and after thunks installed using |dynamic-wind|.
+ * £
+ * The escape procedure accepts the same number of arguments as
+ * the continuation to the original call to
+ * |call-with-current-continuation|. Except for continuations created
+ * by the |call-with-values| procedure, all continuations take exactly
+ * one value.
+ * £
+ * The escape procedure that is passed to proc has unlimited extent
+ * just like any other procedure in Scheme. It may be stored in variables
+ * or data structures and may be called as many times as desired.
+ * £
+ * The following examples show only the most common ways in which
+ * |call-with-current-continuation| is used. If all real uses were as simple
+ * as these examples, there would be no need for a procedure with the power
+ * of |call-with-current-continuation|.
+ *
+ * @lisp
+ * (call-with-current-continuation
+ *   (lambda (exit)
+ *     (for-each (lambda (x)
+ *                 (if (negative? x)
+ *                     (exit x)))
+ *               '(54 0 37 -3 245 19))
+ *     #t))                                =>  -3
+ * 
+ * (define list-length
+ *   (lambda (obj)
+ *     (call-with-current-continuation
+ *       (lambda (return)
+ *         (letrec ((r
+ *                   (lambda (obj)
+ *                     (cond ((null? obj) 0)
+ *                           ((pair? obj)
+ *                            (+ (r (cdr obj)) 1))
+ *                           (else (return #f))))))
+ *           (r obj))))))
+ * 
+ * (list-length '(1 2 3 4))                =>  4
+ * (list-length '(a b . c))                =>  #f
+ * @end lisp
+ *
+ * ,(bold "Rationale:") A common use of |call-with-current-continuation|
+ * is for structured, non-local exits from loops or procedure bodies,
+ * but in fact |call-with-current-continuation| is extremely useful
+ * for implementing a wide variety of advanced control structures.
+ * £
+ * Whenever a Scheme expression is evaluated there is a continuation
+ * wanting the result of the expression. The continuation represents
+ * an entire (default) future for the computation. If the expression
+ * is evaluated at top level, for example, then the continuation
+ * might take the result, print it on the screen, prompt for the
+ * next input, evaluate it, and so on forever. Most of the time the
+ * continuation includes actions specified by user code, as in a
+ * continuation that will take the result, multiply it by the value
+ * stored in a local variable, add seven, and give the answer to the
+ * top level continuation to be printed. Normally these ubiquitous
+ * continuations are hidden behind the scenes and programmers do not
+ * think much about them. On rare occasions, however, a programmer
+ * may need to deal with continuations explicitly.
+ * |Call-with-current-continuation| allows Scheme
+ * programmers to do that by creating a procedure that acts just
+ * like the current continuation.
+ * £
+ * ,(bold "Note:") |call/cc| is just another name for 
+ * |call-with-current-continuation|. 
+doc>
+|#
+#|
+<doc dynamic-wind
+ * (dynamic-wind before thunk after)
+ *
+ * Current version of |dynamic-wind| mimics the R5RS one. In particular, it 
+ * does not yet interact with |call-with-current-continuation| as required by 
+ * R5RS.
+ * £
+ * Calls |thunk| without arguments, returning the result(s) of this call.  
+ * |Before| and |after| are called, also without arguments, as required by
+ * the following rules (note that in the absence of calls to continuations 
+ * captured using |call-with-current-continuation| the three arguments are
+ * called once each, in order).  |Before| is called whenever execution enters
+ * the dynamic extent of the call to |thunk| and |after| is called whenever 
+ * it exits that dynamic extent.  The dynamic extent of a procedure call is
+ * the period between when the call is initiated and when it returns. 
+ * In Scheme, because of |call-with-current-continuation|, the dynamic 
+ * extent of a call may not be a single, connected time period. It is
+ * defined as follows:
+ * ,(itemize
+ *   (item [The dynamic extent is entered when execution of the body of
+ * the called procedure begins.])
+ *
+ *   (item [The dynamic extent is also entered when execution is not
+ * within the dynamic extent and a continuation is invoked that was
+ * captured (using |call-with-current-continuation|) during the dynamic extent.])
+ * 
+ *   (item [It is exited when the called procedure returns.])
+ *
+ *   (item [It is also exited when execution is within the dynamic
+ * extent and a continuation is invoked that was captured while not within
+ * the dynamic extent.]))
+ * £
+ * If a second call to |dynamic-wind| occurs within the dynamic extent
+ * of the call to thunk and then a continuation is invoked in such a
+ * way that the afters from these two invocations of |dynamic-wind|
+ * are both to be called, then the after associated with the
+ * second (inner) call to |dynamic-wind| is called first.
+ * 
+ * If a second call to |dynamic-wind| occurs within the dynamic extent
+ * of the call to |thunk| and then a continuation is invoked in such a
+ * way that the befores from these two invocations of |dynamic-wind|
+ * are both to be called, then the before associated with the
+ * first (outer) call to |dynamic-wind| is called first.
+ * 
+ * If invoking a continuation requires calling the |before| from one
+ * call to |dynamic-wind| and the |after| from another, then the |after|
+ * is called first.
+ * 
+ * The effect of using a captured continuation to enter or exit the
+ * dynamic extent of a call to |before| or |after| is undefined.
+ * @lisp
+ * (let ((path '())
+ *       (c #f))
+ *   (let ((add (lambda (s)
+ *                (set! path (cons s path)))))
+ *     (dynamic-wind
+ *       (lambda () (add 'connect))
+ *       (lambda ()
+ *         (add (call-with-current-continuation
+ *                (lambda (c0)
+ *                  (set! c c0)
+ *                  'talk1))))
+ *       (lambda () (add 'disconnect)))
+ *     (if (< (length path) 4)
+ *         (c 'talk2)
+ *         (reverse path))))
+ *                   =>  (connect talk1 disconnect
+ *                        connect talk2 disconnect)
+ * @end lisp
+doc>
+|#
+
+(define (%call/cc proc)
+  ;; A simple continuation without winding (accepts multiples values)
+  (let ((k  (%make-continuation)))
+    (if  (%fresh-continuation? k)
+        (proc (lambda v
+		(%restore-continuation k v)))
+        (apply values k))))
+
+
+(define call/cc #f)
+(define call-with-current-continuation #f)
+(define dynamic-wind #f)
+
+(let ((*here* (list #f)))
+  
+  (define (reroot! there)
+    (unless (eq? *here* there)
+      (reroot! (cdr there))
+      (let ((before (caar there))
+	    (after  (cdar there)))
+	(set-car! *here* (cons after before))
+	(set-cdr! *here* there)
+	(set-car! there #f)
+	(set-cdr! there '())
+	(set! *here* there)
+	(before))))
+
+  ;;
+  ;; call/cc
+  ;;
+  (set! call/cc
+    (lambda  (proc)
+      (let ((here *here*))
+	(%call/cc (lambda (cont)
+		    (proc (lambda results
+			    (reroot! here)
+			    (apply cont results))))))))
+  
+  ;;
+  ;; call-with-current-continuation
+  ;;
+  (set! call-with-current-continuation call/cc)
+
+  ;;
+  ;; dynamic-wind
+  ;;
+  (set! dynamic-wind
+    (lambda (before during after)
+      (define (verify-proc p)
+	(unless (procedure? p)  ; Should test it is a thunk
+	  (error 'dynamic-wind "bad procedure ~S" p)))
+      
+      (verify-proc before)
+      (verify-proc during)
+      (verify-proc after)
+      
+      (let ((here *here*))
+	(reroot! (cons (cons before after) here))
+	(with-handler (lambda (c)
+			(reroot! here)
+			(raise c))
+		      (call-with-values during
+			(lambda results (reroot! here) (apply values results))))))))
+
+
+
+#|
+<doc with-input-from-file with-output-to-file
+ * (with-input-from-file string thunk)
+ * (with-output-to-file string thunk)
+ *
+ * |String| should be a string naming a file, and |proc| should be a 
+ * procedure of no arguments. For |with-input-from-file|, the file should 
+ * already exist. The file is opened for input or output, an input or output
+ * port connected to it is made the default value returned by 
+ * |current-input-port| or |current-output-port| (and is used by |(read)|, 
+ * |(write obj)|, and so forth), and the thunk is called with no arguments. 
+ * When the thunk returns, the port is closed and the previous default is
+ * restored. |With-input-from-file| and |with-output-to-file| return(s) 
+ * the value(s) yielded by thunk. 
+ * £
+ * The following example uses a pipe port opened for reading. It permits to 
+ * read all the lines produced by an external ,(emph "ls") command (i.e. the 
+ * output of the ,(emph "ls") command is ,(emph "redirected") to the Scheme pipe 
+ * port).
+ * @lisp 
+ * (with-input-from-file "@pipe ls -ls" 
+ *   (lambda ()
+ *     (do ((l (read-line) (read-line)))
+ *         ((eof-object? l))
+ *       (display l)
+ *       (newline))))
+ * @end lisp
+ * 
+ * Hereafter is another example of Unix command redirection. This time,
+ * it is the standard input of the Unix command which is redirected.
+ * @lisp
+ * (with-output-to-file "@pipe mail root"
+ *   (lambda ()
+ *     (display "A simple mail from Scheme")
+ *     (newline)))
+ * @end lisp
+doc>
+
+<doc EXT  with-error-to-file
+ * (with-error-to-file string thunk)
+ *
+ * This procedure is similar to with-output-to-file, excepted that it uses the 
+ * current error port instead of the output port.
+doc>
+|#
+(define (%make-with-file name get-port fd mode)
+  (lambda (string thunk)
+    (let ((old-port (get-port))
+	  (port	    (open-file string mode)))
+      (unless port
+	(raise (make-condition &i/o-filename-error
+			       'location name
+			       'message  (format "cannot open file ~S" name)
+			       'backtrace (%vm-backtrace)
+			       'filename string)))
+      (dynamic-wind
+         (lambda () (%set-std-port! fd port))
+	 (lambda () (thunk))
+	 (lambda () (close-port (get-port))  (%set-std-port! fd old-port))))))
+
+
+(define with-input-from-file 
+  (%make-with-file 'with-input-from-file current-input-port 0 "r"))
+
+(define with-output-to-file 
+  (%make-with-file 'with-output-to-file current-output-port 1 "w"))
+
+(define with-error-to-file 
+  (%make-with-file 'with-error-to-file current-error-port 2 "w"))
+
+;  ######################################################################
+
+#|
+<doc EXT with-input-from-string
+ * (with-input-from-string string thunk)
+ *
+ * A string port is opened for input from |string|. |Current-input-port|
+ * is set to the port and |thunk| is called. When |thunk| returns,
+ * the previous default input port is restored. |With-input-from-string|
+ * returns the value(s) computed by |thunk|.
+ * @lisp
+ * (with-input-from-string "123 456" 
+ *   (lambda () (read)))                       =>  123
+ * @end lisp
+doc>
+|#
+(define (with-input-from-string string thunk)
+  (let ((old-port (current-input-port))
+	(port     (open-input-string string)))
+    (dynamic-wind
+       (lambda () (%set-std-port! 0 port))
+       (lambda () (thunk))
+       (lambda () (close-port port) (%set-std-port! 0 old-port)))))
+
+#|
+<doc EXT with-output-to-string
+ * (with-output-to-string thunk)
+ *
+ * A string port is opened for output. |Current-output-port|
+ * is set to it and |thunk| is called. When |thunk| returns,
+ * the previous default output port is restored. |With-output-to-string|
+ * returns the string containing the text written on the string port.
+ * @lisp
+ * (with-output-to-string 
+ *    (lambda () (write 123) (write "Hello"))) => "123\\"Hello\\""
+ * @end lisp 
+doc>
+|#
+(define (with-output-to-string thunk)
+  (let ((old-port (current-output-port))
+	(port     (open-output-string)))
+    (dynamic-wind
+       (lambda () (%set-std-port! 1 port))
+       (lambda () (thunk) (get-output-string port))
+       (lambda () (close-port port) (%set-std-port! 1 old-port)))))
+
+
+#|
+<doc EXT with-input-from-port with-output-to-port with-error-to-port
+ * (with-input-from-port port thunk)
+ * (with-output-to-port port thunk)
+ * (with-error-to-port port thunk)
+ *
+ * |Port| should be a port, and |proc| should be a 
+ * procedure of no arguments. These procedures do a job similar to the 
+ * |with-...-file| counterparts  excepted that they use an open port instead 
+ * of string specifying a file name
+doc>
+|#
+(define (%make-with-port get-port fd mode)
+  (lambda (port thunk)
+    (let ((old-port (get-port))
+	  (port-fd  (%port-file-fd port)))
+      (if (equal? (%port-file-fd old-port) port-fd) ;; Yes! equal?
+	  ;; useless redirection
+	  (thunk)
+	  ;; useful one
+	  (dynamic-wind
+	    (lambda () (%set-std-port! fd port))
+	    (lambda () (thunk))
+	    (lambda () (when (> 2 port-fd) (close-port (get-port)))
+		       (%set-std-port! fd old-port)))))))
+  
+(define with-input-from-port 
+  (%make-with-port current-input-port 0 "r"))
+
+(define with-output-to-port 
+  (%make-with-port current-output-port 1 "w"))
+
+(define with-error-to-port 
+  (%make-with-port current-error-port 2 "w"))
+
+#|
+<doc call-with-input-file call-with-output-file
+ * (call-with-input-file string proc)
+ * (call-with-output-file string proc)
+ *
+ * |String| should be a string naming a file, and |proc| should be a procedure 
+ * that accepts one argument. For |call-with-input-file|, the file should 
+ * already exist. These procedures call |proc| with one argument: the port 
+ * obtained by opening the named file for input or output. If the file cannot
+ * be opened, an error is signaled. If |proc| returns, then the port is closed
+ * automatically and the value(s) yielded by the proc is(are) returned. 
+ * If proc does not return, then the port will not be closed automatically.
+ * £
+ * ,(bold "Rationale:") Because Scheme's escape procedures have unlimited extent, 
+ * it is possible to escape from the current continuation but later to escape 
+ * back in. If implementations were permitted to close the port on any escape
+ * from the current continuation, then it would be impossible to write portable
+ * code using both |call-with-current-continuation| and |call-with-input-file|
+ * or |call-with-output-file|.
+doc>
+|#
+
+(define (%call-with open-proc)
+  (lambda (string proc)
+    (let* ((port (open-proc string))
+	   (res  (proc port)))
+      (close-port port)
+      res)))
+
+(define call-with-input-file  (%call-with open-input-file))
+(define call-with-output-file (%call-with open-output-file))
+
+
+#|
+<doc rationalize
+ * (rationalize x y)
+ *
+ * Rationalize returns the simplest rational number differing from |x|
+ * by no more than |y|. A rational number |r1| is simpler than another
+ * rational number |r2| if |r1| = |p1/q1| and |r2| = |p2/q2| (in lowest
+ * terms) and abs(p1) <= abs(p2) and abs(q1) <= abs(q2). Thus |3/5| is 
+ * simpler than |4/7|. Although not all rationals are comparable in 
+ * this ordering  (consider |2/7| and |3/5|) any interval contains a
+ * rational number that
+ * is simpler than every other rational number in that interval (the
+ * simpler |2/5| lies between |2/7| and |3/5|). Note that |0| = |0/1| is the
+ * simplest rational of all.
+ * @lisp
+ * (rationalize
+ *    (inexact->exact .3) 1/10)  => 1/3    ; exact
+ * (rationalize .3 1/10)         => #i1/3  ; inexact
+ * @end lisp
+doc>
+|#
+(define (rationalize x e) 
+
+  (define (error-bad-rational x)
+    (error 'rationalize "bad rational ~S" x))
+   
+  (define (sr x y)
+    (let ((fx (floor x)) 
+	  (fy (floor y)))
+      (cond 
+       ((>= fx x) fx)
+       ((= fx fy) (+ fx (/ (sr (/ (- y fy)) (/ (- x fx))))))
+       (else      (+ 1 fx)))))
+  
+  (define (simplest-rational x y)
+    (cond
+     ((>= x y)      x)
+     ((positive? x) (sr x y))
+     ((negative? y) (- (sr (- y) (- x))))
+     (else          (if (and (exact? x) (exact? y)) 0 0.0))))
+
+  ;;
+  ;; rationalize body  starts here
+  ;;
+  (unless (rational? x)(error-bad-rational x))
+  (unless (rational? e)(error-bad-rational e))
+   (let ((x (- x e))
+	 (y (+ x e)))
+     (if (< y x)
+	 (simplest-rational y x)
+	 (simplest-rational x y))))
+
+#|
+<doc delay 
+ * (delay <expression>)
+ *
+ * The |delay| construct is used together with the procedure |force|
+ * to implement ,(emph "lazy evaluation") or ,(emph "call by need"). |(delay
+ * <expression>)| returns an object called a ,(emph "promise") which at some
+ * point in the future may be asked (by the |force| procedure) to
+ * evaluate |<expression>|, and deliver the resulting value.
+ * The effect of |<expression>| returning multiple values is unpredictable.
+ * 
+ * See the description of |force| (@pxref{force}) for a more complete
+ * description of |delay|.
+doc>
+|#
+(define-macro (delay expr)
+  `(%make-promise (lambda () ,expr)))
+
+
+; LocalWords:  noindent EXT

@@ -1,0 +1,234 @@
+#!/bin/sh
+# 							-*- shell-script -*-
+# stklos-install		-- Install STklos extensions
+# 
+# Copyright © 2001-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# 
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+# USA.
+# 
+#           Author: Erick Gallesio [eg@essi.fr]
+#    Creation date: 18-Mar-2005 13:26 (eg)
+# Last file update: 23-May-2005 14:40 (eg)
+#
+
+DISTURL="http://www.stklos.net/download/extensions"
+PROG=$0
+
+opt_keep=0
+opt_uninstall=0
+
+# ----------------------------------------------------------------------
+# 	Usage ...
+# ----------------------------------------------------------------------
+function usage()
+{
+    cat <<EOF
+Usage: stklos-setup [OPTIONS] package
+Options:
+	[--help | -h | -?]	Show a list of options
+        |--keep | -k]		Keep files to fix installation problems
+	[--uninstall | -u]	Uninstall previously installed package
+	[--list | -l]		List installed extensions
+EOF
+    exit $1
+}
+
+# ----------------------------------------------------------------------
+# 	trace ...
+# ----------------------------------------------------------------------
+function trace()
+{
+    case $TERM in 
+	vt100|xterm*|rxvt|urxvt*) begin="[1;32m"; end="[0m" ;;
+	*) begin=""; end="";;
+    esac
+    echo "${begin}**** $1${end}" >&2
+}
+
+# ----------------------------------------------------------------------
+# 	try-fetch ...
+# ----------------------------------------------------------------------
+function try_fetch()
+{
+    pkg=$1
+    trace "Package $pkg is absent. Try to fetch it from $DISTURL" 
+    wget $DISTURL/${pkg}.stgz 2>/dev/null >&2
+    if [ $? = 0 ] ;then
+	trace "Download finished"
+    fi
+}
+
+# ----------------------------------------------------------------------
+# 	die ...
+# ----------------------------------------------------------------------
+function die()
+{
+    echo $1 >&2
+    exit 1
+}
+
+
+# ----------------------------------------------------------------------
+# 	find_prefix ...
+# ----------------------------------------------------------------------
+function find_prefix()
+{
+    if [ $UID = 0 ] ;then 
+	echo "`stklos-config --prefix`/share/stklos/extensions"
+    else
+	echo $HOME/.stklos/ext/extensions
+    fi
+}
+
+
+# ----------------------------------------------------------------------
+# 	install_package ...
+# ----------------------------------------------------------------------
+function install_package()
+{
+    pkg=$1
+    TMP=/tmp/stklos-setup-$$
+    BUILDDIR=$TMP/`basename $pkg`
+    
+    trace "Installing package $pkg"
+    if [ ! -f ${pkg}.stgz ] ;then
+	try_fetch $pkg
+    fi
+    
+    if [ ! -f ${pkg}.stgz ] ;then
+	# Not here after fetch. Signal an error 
+	trace "Cannot find extension $pkg. "
+	trace "Place \"$pkg.stgz\" file in current directory and run $PROG again"
+	exit 1
+    fi
+    
+    if [ $UID = 0 ] ;then 
+	prefix=`stklos-config --prefix`
+    else
+	mkdir -p $HOME/.stklos
+	prefix=$HOME/.stklos
+    fi
+
+    trace "Installation takes place in in $BUILDDIR"
+    mkdir -p $TMP || die "$PROG: cannot make trmporary directory"
+    cat $pkg.stgz | (cd $TMP; tar xvfz -)
+
+    (eval "cd ${BUILDDIR}*"; 
+     trace "Configuring package ..." && configure &&
+     trace "Make package ..." &&  make && 
+     trace "Installing package ..." && make install)
+
+    if [ $? = 0 -a $opt_keep = 0 ] ;then
+	/bin/rm -rf $TMP
+    else
+	trace "Problem while compiling package."
+	trace "Look at $BUILDDIR directory for more information"
+    fi
+    trace "Package $pkg is successfully installed."
+}
+
+
+# ----------------------------------------------------------------------
+# 	uninstall_package ...
+# ----------------------------------------------------------------------
+function uninstall_package()
+{
+    pkg=$1
+    
+    trace "Unstalling package $pkg"
+    
+    DBDIR=`find_prefix`
+    DATAFILE=`echo $DBDIR/$pkg*`
+    if [ ! -f $DATAFILE ] ;then
+	trace "Package $pkg was not previously installed. Quit."
+	exit 1;
+    fi
+    echo -n "Please confirm deletion of `basename $DATAFILE`? "
+    read R
+    case $R in 
+	y|Y) trace "Deleting files ..." 
+	     cat $DATAFILE | while read file ;do
+		 trace "   $file"
+		 rm -f $file
+	     done
+	     rm -f $DATAFILE
+	     trace "Package $pkg is successfully uninstalled."
+	     ;;
+	*) trace "No package uninstalled" ;;
+   esac
+}
+
+# ----------------------------------------------------------------------
+# 	list_extensions ...
+# ----------------------------------------------------------------------
+function list_extensions()
+{
+    trace "Available extensions:"
+    DIR=`find_prefix`
+    if [ -d $DIR ] ;then
+	cd $DIR
+	ls | while read line ;do
+	    echo "	$line"
+	done
+    fi
+}
+
+#
+# Program starts here
+#
+if test $# -eq 0; then
+    usage 1 1>&2
+fi
+
+while test $# -gt 0; do
+    case $1 in
+	--help|-h|-\?)
+	    usage 0 1>&2
+	    exit 0;
+	    ;;
+	--keep|-k)
+	    opt_keep=1;
+	    shift
+	    ;;
+	--uninstall|-u)
+	    opt_uninstall=1
+	    shift
+	    ;;
+	--list|-l) 
+	    list_extensions
+	    exit 0
+	    ;;
+	-*)
+	    echo "bad option $1" 1>&2
+	    usage 1 1>&2
+	    exit 1
+	    ;;
+	*)
+	    if [ $# -gt 1 ] ;then
+		echo "$PROG: too much arguments: $*" 1>&2
+		exit 1
+	    fi
+	    pkg=`basename $1 .stgz`
+	    if [ $opt_uninstall = 1 ] ;then
+		uninstall_package $pkg
+	    else
+		install_package $pkg
+	    fi
+	    exit 0
+	    ;;
+    esac
+done

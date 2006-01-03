@@ -1,0 +1,159 @@
+;; ======================================================================
+;; 
+;; 			STklos Reference Manual
+;;
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2 of the License, or
+;; (at your option) any later version.
+;; 
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;; 
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; USA.
+;;           Author: Erick Gallesio [eg@unice.fr]
+;;    Creation date: 26-Nov-2000 18:19 (eg)
+;; Last file update: 20-Apr-2005 20:56 (eg)
+;;
+;; ======================================================================
+
+;; ======================================================================
+;;
+;;			EXCEPTIONS AND CONDITIONS
+;;
+;; ======================================================================
+(chapter :title "Exceptions and Conditions"
+(index "exception")
+(index "condition")
+
+(section :title "Exceptions"
+
+(p [The following text is extracted from ,(link-srfi 34), from which ,(stklos)
+exceptions are derived.])
+
+(p [Exception handlers are one-argument procedures that determine the
+action the program takes when an exceptional situation is
+signalled. The system implicitly maintains a current exception
+handler.])
+
+(p [The program raises an exception by invoking the current exception
+handler, passing to it an object encapsulating information about the
+exception. Any procedure accepting one argument may serve as an
+exception handler and any object may be used to represent an
+exception.])
+
+(p [The system maintains the current exception handler as part of the
+dynamic environment of the program, akin to the current input or
+output port, or the context for dynamic-wind. The dynamic environment
+can be thought of as that part of a continuation that does not specify
+the destination of any returned values. It includes the current input
+and output ports, the dynamic-wind context, and this SRFI's current
+exception handler.])
+
+(insertdoc 'with-handler)
+(insertdoc 'with-exception-handler)
+(insertdoc 'raise)
+(insertdoc 'guard))
+   
+   
+(section :title "Conditions"
+
+(p [The following text is extracted from ,(link-srfi 35), from which ,(stklos)
+conditions are derived.])
+
+(p [Conditions are values that communicate information about exceptional
+situations between parts of a program. Code that detects an exception
+may be in a different part of the program than the code that handles
+it. In fact, the former may have been written independently from the
+latter. Consequently, to facilitate effective handling of exceptions,
+conditions must communicate as much information as possible as
+accurately as possible, and still allow effective handling by code
+that did not precisely anticipate the nature of the exception that
+occurred.])
+
+(p [Conditions available in ,(stklos) are derived from ,(srfi 35) and in this
+SRFI two mechanisms to enable this kind of communication are provided:])
+
+(itemize
+    (item [subtyping among condition types allows handling code to
+determine the general nature of an exception even though it does
+not anticipate its exact nature,])
+    (item [compound conditions allow an exceptional situation to be
+described in multiple ways.]))
+
+(p [Conditions are structures with named slots. Each condition belongs to
+one condition type (a condition type can be made from several
+condition types). Each condition type specifies a set of
+slot names. A condition belonging to a condition type includes a
+value for each of the type's slot names. These values can be
+extracted from the condition by using the appropriate slot name.])
+
+(index "&condition")
+(p [There is a tree of condition types with the distinguished ,(code "&condition")
+as its root. All other condition types have a parent condition type.])
+
+(p [Conditions are implemented with ,(stklos) structures (with a special bit
+indicating that there are conditions). Of course, condition types are
+implemented with structure types. As a consequence, functions on
+structures or structures types are available on conditions or
+conditions types (the contrary is not true). For instance, if C is a
+condition, the expression])
+
+(fontified-code [(struct->list C)])
+
+(p [is a simple way to see it's slots and their associated value.])
+
+
+
+(insertdoc 'make-condition-type)
+(insertdoc 'condition-type?)
+(insertdoc 'make-compound-condition-type)
+
+(insertdoc 'make-condition)
+(insertdoc 'condition?)
+(insertdoc 'condition-has-type?)
+(insertdoc 'condition-ref)
+(insertdoc 'make-compound-condition)
+(insertdoc 'extract-condition))
+
+
+(section :title "Predefined Conditions"
+(index "SRFI-35")
+(index "SRFI-36")
+
+(p [,(stklos) implements all the conditions types which are defined in 
+,(link-srfi 35) and ,(link-srfi 36). 
+However, the access functions which are (implicitely) defined 
+in those SRFIs are only available if the file |"full-conditions.stk"| is
+loaded. This can be done with the following call])
+
+(fontified-code [(require "full-conditions")])
+
+
+(p [The following hierarchy of conditions is predefined:])
+
+(raw-code [
+&condition 
+   &message (has "message" slot)
+   &serious
+   &error
+      &error-message (has "message", "location" and "backtrace" slots)
+      &i/o-error
+         &i/o-port-error (has a "port" slot)
+            &i/o-read-error
+            &i/o-write-error
+            &i/o-closed-error
+        &i/o-filename-error (has a "filename" slots)
+            &i/o-malformed-filename-error
+            &i/o-file-protection-error
+                &i/o-file-is-read-only-error
+            &i/o-file-already-exists-error
+            &i/o-no-such-file-error
+     &read-error (has the "line", "column", "position" and "span" slots)
+]))
+)

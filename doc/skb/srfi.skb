@@ -1,0 +1,468 @@
+;; ======================================================================
+;; 
+;; 			STklos Reference Manual
+;;
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2 of the License, or
+;; (at your option) any later version.
+;; 
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;; 
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; USA.
+;;           Author: Erick Gallesio [eg@unice.fr]
+;;    Creation date: 26-Nov-2000 18:19 (eg)
+;; Last file update: 31-Oct-2005 12:11 (eg)
+;;
+;; ======================================================================
+
+(define (srfi-section n . l)
+  (list 
+   (index (format "SRFI-~A" n))
+   (apply section :number #f :title (title-srfi n) l)))
+
+;; ======================================================================
+
+(index "SRFI")
+(chapter :title "SRFIs"
+
+(p [The ,(emph "Scheme Request for Implementation")
+(,(ref :url "http://srfi.schemers.org" :text "SRFI")) process
+grew out of the Scheme Workshop held in Baltimore, MD, on
+September 26, 1998, where the attendees considered a number of
+proposals for standardized feature sets for inclusion in Scheme
+implementations. Many of the proposals received overwhelming
+support in a series of straw votes. Along with this there was
+concern that the next Revised Report would not be produced for
+several years and this would prevent the timely implementation of
+standardized approaches to several important problems and needs
+in the Scheme community.])
+
+(p [Only the implemented SRFIs are (briefly) presented here. For further 
+information on each SRFI, please look at the official 
+,(ref :url "http://srfi.schemers.org" :text "SRFI site").])
+
+
+;; ----------------------------------------------------------------------
+;; SRFI-0 -- Conditional Expansion 
+;; ----------------------------------------------------------------------
+(srfi-section 0
+
+(p [,(quick-link-srfi 0) defines the ,(code "cond-expand")
+special form. It is fully supported by ,(stklos). ,(stklos)
+defines several features identifiers which are of the form
+,(emph "srfi-n") where ,(emph "n") represents the number of the
+SRFI supported by the implementation (for instance
+,(emph "srfi-1") or ,(emph "srfi-30")).])
+
+
+(p [,(stklos) ,(code "cond-expand") accepts also some 
+feature identifiers which are the same that the ones
+defined in igure ,(ref :figure "Feature identifiers")])
+
+(p [Furthermore, the feature
+identifier ,(emph "stklos") is defined for application which need
+to know on which Scheme implementation they are running on.]))
+
+
+;; ----------------------------------------------------------------------
+;; SRFI-1 -- List Primitives
+;; ----------------------------------------------------------------------
+(srfi-section 1
+
+(p [,(quick-link-srfi 1) defines an extensive library for list
+manipulation. The implementation used in STklos is based on the
+reference implementation from Olin Shivers. To use, SRFI-1 you
+need to insert the following expression])
+(fontified-code [(require "srfi-1")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 2 -- and-let* special-form
+;; ---------------------------------------------------------------------- 
+(srfi-section 2
+
+(p [,(quick-link-srfi 2) defines an ,(emph "and") form with local
+binding which acts as a guarded ,(emph "let*"). To use, SRFI-2
+you need to insert the following expression])
+(fontified-code [(require "srfi-2")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 4 -- Homogeneous Numeric Vectors 
+;; ----------------------------------------------------------------------   
+(srfi-section 4
+
+(p [,(quick-link-srfi 4) defines a set of data types for vectors
+whose element are of the same numeric type (homogeneous vectors).
+To use SRFI-4, you need to insert the following expression])
+(fontified-code [(require "srfi-4")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 6 -- String Ports
+;; ----------------------------------------------------------------------
+(index "open-input-string")
+(index "open-output-string")
+(index "get-output-string")
+(srfi-section 6
+
+(p [,(quick-link-srfi 6) is fully supported and is completely
+described in this document (procedures
+,(code "open-input-string"), ,(code "open-output-string") and
+,(code "get-output-string")). ]))
+
+
+;; ----------------------------------------------------------------------
+;; SRFI 7 -- Feature-based program configuration language
+;; ----------------------------------------------------------------------
+(srfi-section 7
+
+(p [,(quick-link-srfi 7) is fully supported. To use SRFI-7, you
+need to insert the following expression ])
+(fontified-code [(require "srfi-7")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 8 -- Binding to Multiple Values
+;; ----------------------------------------------------------------------
+(index "receive")
+(srfi-section 8
+(p [,(quick-link-srfi 8) is fully supported and is completely
+described in this document (special form ,(code "receive"))]))
+
+
+;; ----------------------------------------------------------------------
+;; SRFI 9 -- Defining Record Types
+;; ----------------------------------------------------------------------
+(srfi-section 9
+
+(p [,(quick-link-srfi 9) is fully supported (the implementation
+uses ,(stklos) classes to implement SRFI-9 records). To use
+SRFI-9, you need to insert the following expression ])
+(fontified-code [(require "srfi-9")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+
+;; ----------------------------------------------------------------------
+;; SRFI 10 -- #, External Form
+;; ----------------------------------------------------------------------
+(srfi-section 10
+
+(index "define-reader-ctor")
+(p [,(quick-link-srfi 10) is fully supported. This SRFI extends the 
+STklos reader with the ,(q (code "#,")) notation which is fully described in 
+this document (see ,(ref :mark "define-reader-ctor")).]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 11 -- let-values and let*-values
+;; ----------------------------------------------------------------------
+(index "let-values")
+(index "let*-values")
+(srfi-section 11
+
+(p [,(quick-link-srfi 11) is fully supported. To use SRFI-11, you
+need to insert the following expression])
+(fontified-code [(require "srfi-11")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 13 -- String Libraries
+;; ----------------------------------------------------------------------
+(index "string libraries") 
+(srfi-section 13
+
+(p [,(quick-link-srfi 13) is fully supported. To use SRFI-13, you
+need to insert the following expression])
+(fontified-code [(require "srfi-13")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 14 -- Characters sets 
+;; ----------------------------------------------------------------------
+(index "character sets") 
+(srfi-section 14
+
+(p [,(quick-link-srfi 14) is fully supported. To use SRFI-14, you
+need to insert the following expression])
+(fontified-code [(require "srfi-14")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 16 -- Syntax for procedures of variable arity
+;; ----------------------------------------------------------------------
+(index "procedure" :note "variable arity")
+(index "case-lambda")
+(srfi-section 16
+
+(p [,(quick-link-srfi 16) is fully supported and is completely
+described in this document (procedure ,(code "case-lambda")).]))
+
+
+;; ----------------------------------------------------------------------
+;; SRFI 17 -- Generalized set!
+;; ----------------------------------------------------------------------
+(index "assignment" :note "generalized")
+(index "set!" :note "generalized")
+(index "setter")
+(srfi-section 17
+
+(p [,(quick-link-srfi 17) is fully supported and is completely
+described in this document (procedures ,(code "set!") and
+,(code "setter")). However, the following expression ])
+(fontified-code [(require "srfi-17")])
+(p [in your code (or the use of the ,(code "cond-expand") special form) permits
+to define the setters for the (numerous) cXXXXr list procedures.]))
+
+
+;; ----------------------------------------------------------------------
+;; SRFI 19 -- Time Data Types and Procedures
+;; ----------------------------------------------------------------------   
+;(section :number #f :title (title-srfi 19)
+
+; (p [,(quick-link-srfi 19) is fully supported. To use SRFI-19, you
+; need to insert the following expression ]) (fontified-code [(require
+; "srfi-19")]) (p [in your code or uses the ,(code "cond-expand")
+; special form.]))
+;
+
+;; ----------------------------------------------------------------------   
+;; SRFI 22 -- Unix Scheme Scripts
+;; ----------------------------------------------------------------------   
+(index "script files")
+(srfi-section 22
+
+(p [,(quick-link-srfi 22) describes basic prerequisites for
+running Scheme programs as Unix scripts in a uniform
+way. Specifically, it describes: ,(itemize
+    (item [the syntax of Unix scripts written in Scheme,])
+    (item [a uniform convention for calling the Scheme script interpreter,
+	     and])
+    (item [a method for accessing the Unix command line arguments from
+within the Scheme script.]))])
+
+(p [,(srfi 22) recommends to invoke the Scheme script interpreter from the
+script via a /usr/bin/env trampoline, like this:
+,(raw-code "#!/usr/bin/env <executable>")
+where ,(code "<executable>") can recover several specified names. 
+,(stklos) uses only the name ,(code "stklos-script") for
+,(code "<executable>").])
+
+
+(p [Here is an example of the classical ,(code "echo")
+command (without option) in Scheme:])
+
+(fontified-code [
+#!/usr/bin/env stklos-script
+
+(define (main arguments)
+  (for-each (lambda (x) (display x) (display #\space))
+            (cdr arguments))
+  (newline)
+  0)
+]))
+   
+;; ----------------------------------------------------------------------
+;; SRFI 23 -- Error reporting mecanism
+;; ----------------------------------------------------------------------
+(index "error")
+(srfi-section 23
+
+(p [,(quick-link-srfi 23) is fully supported. See the
+documentation of the (ref :mark "error") primitive form more
+information (in fact ,(stklos) ,(code "error") is more general
+than the one defined in SRFI-23).]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 26 --  Specializing Parameters without Currying
+;; ----------------------------------------------------------------------   
+(srfi-section 26
+
+(p [,(quick-link-srfi 26) is fully supported.  To use SRFI-31,
+you need to insert the following expression ])
+(fontified-code [(require "srfi-26")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+   
+;; ----------------------------------------------------------------------
+;; SRFI 27 --  Sources of Random Bits
+;; ----------------------------------------------------------------------
+(index "random-integer")
+(index "random-real")
+(srfi-section 27
+
+(p [,(quick-link-srfi 27) is fully supported. See
+,(ref :mark "random-integer" :text "random-integer") and 
+,(ref :mark "random-real" :text "random-real").]))
+
+
+;; ----------------------------------------------------------------------
+;; SRFI 28 -- Basic Format Strings 
+;; ----------------------------------------------------------------------
+(index "format")
+(srfi-section 28
+
+(p [,(quick-link-srfi 28) is fully supported. See the
+documentation of the ,(ref :mark "format") primitive form more
+information (in fact ,(stklos) ,(code "format") is more general
+than the one defined in ,(srfi 28)).]))
+;; ----------------------------------------------------------------------   
+;; SRFI 30 -- Nested Multi-line Comments
+;; ----------------------------------------------------------------------
+(srfi-section 30
+
+(p [,(quick-link-srfi 30) is fully supported by ,(stklos)
+reader.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 31 -- A special form for recursive evaluation 
+;; ----------------------------------------------------------------------   
+(srfi-section 31
+
+(p [,(quick-link-srfi 31) is fully supported.  To use SRFI-31,
+you need to insert the following expression])
+(fontified-code [(require "srfi-31")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+   
+   
+;; ----------------------------------------------------------------------
+;; SRFI 34 -- Exception Handling for Programs
+;; ----------------------------------------------------------------------
+(index "with-exception-handler")
+(index "guard")
+(srfi-section 34
+
+(p [,(quick-link-srfi 34) is fully supported and is completely
+described in this document (see ,(code "with-exception-handler")
+and ,(code "guard")).]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 35 -- Conditions
+;; ----------------------------------------------------------------------
+(srfi-section 35
+
+(p [,(quick-link-srfi 35) is fully supported.  To use SRFI-35,
+you need to insert the following expression ])
+(fontified-code [(require "srfi-35")])
+(p [in your code or uses the ,(code "cond-expand") special form.
+See section ,(ref :section "Predefined Conditions") for the predefined conditions
+and when it is required to load this file.]))
+
+
+;; ----------------------------------------------------------------------
+;; SRFI 36 -- I/O Conditions
+;; ----------------------------------------------------------------------
+(srfi-section 36
+
+(p [,(quick-link-srfi 36) is fully supported.  To use SRFI-36,
+you need to insert the following expression ])
+(fontified-code [(require "srfi-36")])
+(p [in your code or uses the ,(code "cond-expand") special form.
+See section ,(ref :section "Predefined Conditions") for the predefined conditions
+and when it is required to load this file.]))
+   
+   
+;; ----------------------------------------------------------------------   
+;; SRFI 38 -- External Representation for Data With Shared Structure
+;; ----------------------------------------------------------------------
+(srfi-section 38
+
+(p [,(quick-link-srfi 38) is fully supported by ,(stklos)
+reader.]))
+;; ----------------------------------------------------------------------
+;; SRFI 39 -- Parameter objects
+;; ----------------------------------------------------------------------
+(srfi-section 39
+
+(p [,(quick-link-srfi 39) is fully supported and is completely
+described in this document (procedures
+,(ref :mark "make-parameter") and
+,(ref :mark "parameterize")).]))
+
+
+;; ----------------------------------------------------------------------
+;; SRFI 48 -- Intermediate Format Strings 
+;; ----------------------------------------------------------------------
+(index "format")
+(srfi-section 48
+
+(p [,(quick-link-srfi 48) is fully supported and is completely
+described in this document (procedure ,(code "format")).]))
+
+   
+;; ----------------------------------------------------------------------
+;; SRFI 55 -- Require-extension 
+;; ----------------------------------------------------------------------
+(index "require-extension")
+(srfi-section 55
+
+(p [,(quick-link-srfi 55) is fully supported and is completely
+described in this document (procedure ,(ref :mark "require-extension")).])
+
+(p [Furthermore, ,(stklos) also accepts the symbols defined in
+figure ,(ref :figure "Feature identifiers") in a
+,(code "require-extension") clause.])
+
+ (figure :legend "Feature identifiers"
+   (center
+      (table  :rules 'cols :frame 'border :width 60.
+	 (tr :bg "#eeeeee" (th "Symbol") (th "require SRFI(s)"))
+	 (tr (tdl "lists")       (tdl "srfi-1"))
+	 (tr (tdl "and-let*")    (tdl "srfi-2"))
+	 (tr (tdl "hvectors")    (tdl "srfi-4"))
+	 (tr (tdl "program")     (tdl "srfi-7"))
+	 (tr (tdl "records")     (tdl "srfi-9"))
+	 (tr (tdl "strings")     (tdl "srfi-13"))
+	 (tr (tdl "charsets")    (tdl "srfi-14"))
+	 (tr (tdl "case-lambda") (tdl "srfi-16"))
+	 (tr (tdl "error")       (tdl "srfi-23"))
+	 (tr (tdl "random")      (tdl "srfi-27"))
+	 (tr (tdl "conditions")  (tdl "srfi-34, srfi-35, srfi-36"))
+	 (tr (tdl "hash-tables") (tdl "srfi-69"))))))
+
+;; ----------------------------------------------------------------------
+;; SRFI 60 -- Integers as Bits 
+;; ----------------------------------------------------------------------   
+(srfi-section 60
+
+(p [,(quick-link-srfi 60) is fully supported.  To use SRFI-60,
+you need to insert the following expression])
+(fontified-code [(require "srfi-60")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+   
+;; ----------------------------------------------------------------------
+;; SRFI 62 -- S-expression comments 
+;; ----------------------------------------------------------------------   
+(srfi-section 62
+
+(p [,(quick-link-srfi 62) is fully supported. See ,(ref :subsection "Comments")]))
+   
+;; ----------------------------------------------------------------------
+;; SRFI 69 -- Basic Hash Tables
+;; ----------------------------------------------------------------------   
+(srfi-section 69
+
+(p [,(quick-link-srfi 69) is fully supported. Note that the
+default comparison function in STklos is ,(code "eq?") whereas it
+is ,(code "equal?") for the SRFI. Furthermore the hash functions
+defined in the SRFI are not defined by default in STklos. To have
+a fully compliant ,(srfi 69) behaviour, you need to insert the
+following expression ])
+(fontified-code [(require "srfi-69")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+   
+;; ----------------------------------------------------------------------
+;; SRFI 70 -- Numbers
+;; ----------------------------------------------------------------------   
+(srfi-section 70
+
+(p [,(quick-link-srfi 70) is fully supported.]))
+
+
+;; End of chapter   
+)

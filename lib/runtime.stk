@@ -1,0 +1,126 @@
+;;;;
+;;;; runtime.stk	-- Stuff necessary for bootstaping the system
+;;;; 
+;;;; Copyright © 2001-2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 15-Mar-2001 22:49 (eg)
+;;;; Last file update: 26-Oct-2003 23:11 (eg)
+;;;;
+
+
+(define (map* fn . l) 		; A map which accepts dotted lists (arg lists  
+  (cond 			; must be "isomorph"
+   ((null? (car l)) '())
+   ((pair? (car l)) (cons (apply fn      (map car l))
+			  (apply map* fn (map cdr l))))
+   (else            (apply fn l))))
+
+(define (for-each* fn . l) 	; A for-each which accepts dotted lists (arg lists  
+  (cond 			; must be "isomorph"
+   ((null? (car l)) '())
+   ((pair? (car l)) (apply fn (map car l)) (apply for-each* fn (map cdr l)))
+   (else            (apply fn l))))
+
+;;;
+;;; Expanders 
+;;;
+
+(define *expander-list* '())
+
+(define (expander? x)
+  (assq x *expander-list*))
+
+;?(define (initial-expander x e)
+;?  (let ((exp (cond
+;?	      ((not (pair? x))   (lambda (x e) x))
+;?	      ((symbol? (car x)) (if (expander? (car x))
+;?				     (cdr (assq (car x) *expander-list*))
+;?				     application-expander))
+;?	      (else		 application-expander))))
+;?    (exp x e)))
+
+(define (application-expander x e)
+  (map* (lambda (y) (e y e)) x))
+
+;;/(define (defmacro-expander x e)
+;;/  (let ((l (define->lambda x)))
+;;/    (when (= (length l) 3)
+;;/      (let* ((name     (cadr l))
+;;/	     (proc     (caddr l))
+;;/	     (args     (cadr proc))
+;;/	     (body     (cddr proc)))
+;;/	`(define-macro ,name
+;;/			(lambda ,args ,@(expand body)))))))
+
+(define (initial-expander x e)
+ (cond 
+   ((not (pair? x))   	      x)
+   ((not (symbol? (car x)))  (application-expander x e))
+   (else  (let ((functor (car x)))
+	    (cond 
+	       ((expander? functor) ((cdr (assq functor *expander-list*)) x e))
+;;/	       ((eq? functor 'define-macro) (defmacro-expander x e))
+	       (else (application-expander x e)))))))
+
+;(define (install-expander! id e source)
+;  (set! *expander-list* (cons (list id e source) *expander-list*)))
+
+(define (install-expander! id proc)
+  (set! *expander-list* (cons (cons id proc) *expander-list*)))
+
+(define (remove-expander! id)
+  (let ((exp (assq id *expander-list*)))
+    (set! *expander-list* (delete! exp *expander-list* eq?))))
+
+;;;
+;;; Runtime support for R5RS macro
+;;;
+(define (syntax-expand expr) expr)
+
+;;(define sc:put-global-definition-hook #f)
+;;(define sc:get-global-definition-hook #f)
+;;(define sc:syntax-case-macro?	   #f)
+;;
+;;(let ((*macros* '()))
+;;  (set! sc:put-global-definition-hook
+;;	(lambda (symbol binding)
+;;	  (let ((pair (assq symbol *macros*)))
+;;	    (if pair
+;;		(set-cdr! pair binding)
+;;		(set! *macros* (cons (cons symbol binding) *macros*))))))
+;;  (set! sc:get-global-definition-hook
+;;	(lambda (symbol)
+;;	  (let ((pair (assq symbol *macros*)))
+;;	    (and pair (cdr pair)))))
+;;  
+;;  (set! sc:syntax-case-macro? 
+;;	(lambda (symbol)
+;;	  (assq symbol *macros*))))
+;;
+
+
+(define (macro-expand x)
+  (initial-expander (syntax-expand x) initial-expander))
+
+;;(define (macro-expand* form)
+;;   (let Loop ((f form) (nf (macro-expand form)))
+;;     (if (equal? f nf)
+;; 	f
+;; 	(Loop nf (macro-expand nf)))))

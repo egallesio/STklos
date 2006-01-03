@@ -1,0 +1,762 @@
+;; ======================================================================
+;; 
+;; 			STklos Reference Manual
+;;
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2 of the License, or
+;; (at your option) any later version.
+;; 
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;; 
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; USA.
+;;           Author: Erick Gallesio [eg@unice.fr]
+;;    Creation date: 26-Nov-2000 18:19 (eg)
+;; Last file update: 31-Oct-2005 13:34 (eg)
+;;
+;; ======================================================================
+
+;; ======================================================================
+;;
+;;			Standard Procedures
+;;
+;; ======================================================================
+(chapter :title "Standard Procedures"
+
+;;;
+;;; EQUIVALENCE PREDICATES
+;;;
+(section :title "Equivalence predicates"
+
+(p [A predicate is a procedure that always returns a boolean value 
+(,(code "#t") or ,(code "#f")). An equivalence predicate is the
+computational analogue of a mathematical equivalence relation (it
+is symmetric, reflexive, and transitive).  Of the equivalence
+predicates described in this section, ,(code "eq?") is the finest
+or most discriminating, and ,(code "equal?") is the coarsest.
+,(code "Eqv?") is slightly less discriminating than ,(code "eq?").])
+
+(insertdoc 'eqv?)
+(insertdoc 'eq?)
+(insertdoc 'equal?))
+   
+;;;
+;;; NUMBERS
+;;;
+(section :title "Numbers"
+
+(p [,(rfive) description of numbers is quite long and will not be given here. 
+STklos support the full number tower as described in ,(rfive); see this 
+document for a complete description.])
+
+(p [,(stklos) extends the number syntax of R5RS with the
+following inexact numerical constants:
+,(code "+inf.0") (infinity), ,(code "-inf.0") (negative
+infinity), ,(code "+nan.0") (not a number), and
+,(code "-nan.0") (same as +nan.0).])
+
+(insertdoc 'integer?)
+(insertdoc 'inexact?)
+(insertdoc 'bignum?)
+
+(insertdoc '>=)
+
+(insertdoc 'even?)
+(insertdoc 'min)
+(insertdoc '*)
+(insertdoc '/)
+(insertdoc 'abs)
+(insertdoc 'modulo)
+(insertdoc 'lcm)
+(insertdoc 'denominator)
+(insertdoc 'round)
+(insertdoc 'rationalize)
+(insertdoc 'atan)
+(insertdoc 'sqrt)
+(insertdoc 'expt)
+(insertdoc 'angle)
+(insertdoc 'inexact->exact)
+(insertdoc 'number->string)
+(insertdoc 'string->number)
+
+(insertdoc 'bit-shift)
+(insertdoc 'random-integer)
+(insertdoc 'random-real)
+(insertdoc 'decode-float)
+)
+
+
+;;;
+;;; BOOLEANS
+;;;
+(section :title "Booleans"
+(index "true value")
+(index "false value")
+(index "boolean value")
+
+(p [Of all the standard Scheme values, only ,(code "#f") counts as false in
+conditional expressions.  Except for ,(code "#f"), all standard Scheme values,
+including ,(code "#t"), pairs, the empty list, symbols, numbers, strings,
+vectors, and procedures, count as true.])
+
+(p [Boolean constants evaluate to themselves, so they do not need to be
+quoted in programs.])
+
+(insertdoc 'not)
+(insertdoc 'boolean?))
+
+;;;
+;;; PAIRS AND LISTS
+;;;
+(section :title "Pairs and lists"
+(index "pair")
+(index "list")
+(mark "lists")
+
+(insertdoc 'pair?)
+(insertdoc 'cons)
+(insertdoc 'car)
+(insertdoc 'cdr)
+(insertdoc 'set-car!)
+(insertdoc 'set-cdr!)
+(insertdoc 'cddddr)
+(insertdoc 'null?)
+(insertdoc 'pair-mutable?)
+(insertdoc 'list?)
+(insertdoc 'list)
+(insertdoc 'list*)
+(insertdoc 'length)
+(insertdoc 'append)
+(insertdoc 'append!)
+(insertdoc 'reverse)
+(insertdoc 'reverse!)
+(insertdoc 'list-tail)
+(insertdoc 'last-pair)
+(insertdoc 'list-ref)
+(insertdoc 'member)
+(insertdoc 'assoc)
+(insertdoc 'copy-tree)
+(insertdoc 'filter!)
+(insertdoc 'remove!)
+(insertdoc 'delete!))
+
+;;;
+;;; SYMBOLS
+;;;
+(section :title "Symbols"
+
+(mark "bar-in-symbol")
+(p [The STklos reader can read symbols whose names contain special
+characters or letters in the non standard case.  When a symbol is
+read, the parts enclosed in bars ,(q "|") will be entered
+verbatim into the symbol's name. The ,(q "|") characters are not
+part of the symbol; they only serve to delimit the sequence of
+characters that must be entered ,(q "as is"). In order to maintain
+read-write invariance, symbols containing such sequences of special
+characters will be written between a pair of ,(q "|").])
+   
+(fontified-code [
+'|a|                  ,(symbol-arrow)  a
+(string->symbol "a")  ,(symbol-arrow)  |A|
+(symbol->string '|A|) ,(symbol-arrow)  "A"
+'|a  b|               ,(symbol-arrow)  |a  b|
+'a|B|c                ,(symbol-arrow)  |aBc|
+(write '|FoO|)        ,(symbol-print) |FoO| 
+(display '|FoO|)      ,(symbol-print) FoO
+])
+
+(insertdoc 'symbol?)
+(insertdoc 'symbol->string)
+(insertdoc 'string->symbol)
+(insertdoc 'string->uninterned-symbol)
+(insertdoc 'gensym))
+
+;;;
+;;; CHARACTERS
+;;;
+(section :title "Characters"
+
+(index "ASCII")
+(index "character")
+
+(p [The following table gives the list of allowed character names with their
+ASCII eqivalent expressed in octal. Some chracaters have an alternate name
+which is also shown in this table.]) 
+   
+(center (table  :rules 'cols :frame 'border :width 70.
+  (tr :bg "#eeeeee" 
+     (th "name") (th "value") (th "alt. name")
+     (th "name") (th "value") (th "alt. name"))
+  (tr (td "nul") (td "000") (td "null") (td "soh") (td "001") (td ""))
+  (tr (td "stx") (td "002") (td "") (td "etx") (td "003") (td ""))
+  (tr (td "eot") (td "004") (td "") (td "enq") (td "005") (td ""))
+  (tr (td "ack") (td "006") (td "") (td "bel") (td "007") (td "bell"))
+  (tr (td "bs") (td "010") (td "backspace") (td "ht") (td "011") (td "tab"))
+  (tr (td "nl") (td "012") (td "newline") (td "vt") (td "013") (td ""))
+  (tr (td "np") (td "014") (td "page") (td "cr") (td "015") (td "return"))
+  (tr (td "so") (td "016") (td "") (td "si") (td "017") (td ""))
+  (tr (td "dle") (td "020") (td "") (td "dc1") (td "021") (td ""))
+  (tr (td "dc2") (td "022") (td "") (td "dc3") (td "023") (td ""))
+  (tr (td "dc4") (td "024") (td "") (td "nak") (td "025") (td ""))
+  (tr (td "syn") (td "026") (td "") (td "etb") (td "027") (td ""))
+  (tr (td "can") (td "030") (td "") (td "em") (td "031") (td ""))
+  (tr (td "sub") (td "032") (td "") (td "esc") (td "033") (td "escape"))
+  (tr (td "fs") (td "034") (td "") (td "gs") (td "035") (td ""))
+  (tr (td "rs") (td "036") (td "") (td "us") (td "037") (td ""))
+  (tr (td "sp") (td "040") (td "space") (td "del") (td "177") (td "delete"))))
+
+(insertdoc 'char?)
+(insertdoc 'char>=?)
+(insertdoc 'char-ci>=?)
+(insertdoc 'char-lower-case?)
+(insertdoc 'integer->char)
+(insertdoc 'char-downcase))
+
+   
+;;;
+;;; STRINGS
+;;;
+(section :title "Strings"
+(index "string")
+
+(p [STklos string constants allow the insertion of arbitrary characters
+by encoding them as escape sequences. An escape sequence is introduced
+by a backslash ,(q "\\").  The valid escape sequences are shown in
+the following table.])
+(center 
+   (table :rules 'cols :frame 'border 
+      (tr :bg "#eeeeee" (th "Sequence") (th "Character inserted"))
+      (tr (td "\\b")	
+	  (td "Backspace"))
+      (tr (td "\\e")
+	  (td " Escape"))
+      (tr (td "\\n")
+	  (td " Newline"))
+      (tr (td "\\t")
+	  (td " Horizontal Tab"))
+      (tr (td "\\n")
+	  (td " Carriage Return"))
+      (tr (td "\\0abc")	
+	  (td " ASCII character with octal value abc"))
+      (tr (td "\\xab")
+	  (td " ASCII character with hexadecimal value ab"))
+      (tr (td "\\<newline>") 	
+	  (td " None (permits to enter a string on several lines)"))
+      (tr (td "\\<other>")	
+	  (td " <other>"))))
+(p [For instance, the string])
+(fontified-code ["ab\040c\\nd\
+e"])
+(p [is the string consisting of the characters 
+,(code "#\\a"), ,(code "#\\b"), ,(code "#\\space"), 
+,(code "#\\c"), ,(code "#\\newline"), ,(code "#\\d") and ,(code "#\\e").])
+
+(insertdoc 'string?)
+(insertdoc 'make-string)
+(insertdoc 'string)
+(insertdoc 'string-length)
+(insertdoc 'string-ref)
+(insertdoc 'string-set!)
+(insertdoc 'string-ci=?)
+(insertdoc 'string-ci>=?)
+(insertdoc 'substring)
+(insertdoc 'string-append)
+(insertdoc 'list->string)
+(insertdoc 'string-copy)
+(insertdoc 'string-split)
+(insertdoc 'string-index)
+(insertdoc 'string-find?)
+(insertdoc 'string-fill!)
+(insertdoc 'string-mutable?)
+   
+(index  "SRFI-13")
+(p [The following string primitives are compatible with ,(link-srfi 13)
+and their documentation comes from the SRFI document.])
+(p [,(bold "Note:") The string SRFI is supported by ,(stklos). The
+function listed below just don't need to load the full SRFI to be used])
+   
+(insertdoc 'string-downcase)
+(insertdoc 'string-downcase!)
+(insertdoc 'string-upcase)
+(insertdoc 'string-upcase!)
+(insertdoc 'string-titlecase)
+(insertdoc 'string-titlecase!))
+
+   
+;;;
+;;; VECTORS
+;;;
+(section :title "Vectors"
+(index "vectors")
+
+(p [Vectors are heterogenous structures whose elements are
+indexed by integers.  A vector typically occupies less space than
+a list of the same length, and the average time required to
+access a randomly chosen element is typically less for the vector
+than for the list.])
+
+(p [The length of a vector is the number of elements that it
+contains.  This number is a non-negative integer that is fixed
+when the vector is created.  The valid indexes of a vector are
+the exact non-negative integers less than the length of the
+vector.  The first element in a vector is indexed by zero, and
+the last element is indexed by one less than the length of the
+vector.])
+
+(p [Vectors are written using the notation ,(code "#(obj ...)").
+For example, a vector of length 3 containing the number zero in
+element 0, the list ,(code "(2 2 2 2)") in element 1, and the
+string ,(code "\"Anna\"") in element 2 can be written as
+following: ,(fontified-code [#(0 (2 2 2 2) "Anna")])])
+
+(p [,(bold "Note:") In STklos, vectors constants don't need to be quoted.])
+
+(insertdoc 'vector?)
+(insertdoc 'make-vector)
+(insertdoc 'vector)
+(insertdoc 'vector-length)
+(insertdoc 'vector-ref)
+(insertdoc 'vector-set!)
+(insertdoc 'list->vector)
+(insertdoc 'vector-fill!)
+(insertdoc 'vector-copy)
+(insertdoc 'vector-resize)
+(insertdoc 'vector-mutable?)
+(insertdoc 'sort))
+
+   
+;;;
+;;; STRUCTURES
+;;;
+(section :title "Structures"
+(index "structures")
+
+(p [A structure type is a record data type composing a number of slots. A
+structure, an instance of a structure type, is a first-class value
+that contains a value for each field of the structure type.])
+
+(p [Structures can be created with the ,(code "define-struct") high
+level syntax. However, ,(stklos) also offers some low-level functions
+to build and access the internals of a structure.]) 
+
+(insertdoc 'define-struct)
+(insertdoc 'make-struct-type)
+(insertdoc 'struct-type?)
+(insertdoc 'struct-type-slots)
+(insertdoc 'struct-type-parent)
+(insertdoc 'struct-type-name)
+(insertdoc 'struct-type-change-writer!)
+
+(insertdoc 'make-struct)
+(insertdoc 'struct?)
+(insertdoc 'struct-type)
+(insertdoc 'struct-ref)
+(insertdoc 'struct-set!)
+(insertdoc 'struct-is-a?)
+(insertdoc 'struct->list))
+
+
+;;;
+;;; CONTROL FEATURES
+;;;
+(section :title "Control features"
+
+(insertdoc 'procedure?)
+(insertdoc 'apply)
+(insertdoc 'map)
+(insertdoc 'for-each)
+(insertdoc 'every)
+(insertdoc 'any)
+
+(insertdoc 'force)
+
+(insertdoc 'call/cc)
+(insertdoc 'call/ec)
+
+(index "multiple values")
+(insertdoc 'values)
+(insertdoc 'call-with-values)
+(insertdoc 'receive)
+
+(insertdoc 'dynamic-wind)
+(insertdoc 'eval)
+(insertdoc 'eval-from-string)
+
+
+(TODO "DOCUMENT HERE CALL/EC")
+)
+   
+
+;;;
+;;; INPUT / OUTPUT 
+;;;
+(section :title "Input and Output"
+(index "input")
+(index "output")
+(index "string port")
+(index "virtual port")
+
+(p [,(rfive) states that ports represent input and output
+devices.  However, it defines only ports which are attached to
+files.  In ,(stklos), ports can also be attached to strings, to a
+external command input or output, or even be virtual (i.e. the
+behavior of the port is given by the user).])
+
+(itemize 
+   (item [String ports are similar to file ports, except that characters
+are read from (or written to) a string rather than a file.])
+   (item [External command input or output ports are implemented
+with Unix pipes and are called ,(emph "pipe ports"). A pipe port
+is created by specifying the command to execute prefixed with the
+string ,(code (q "| ")) (that is a pipe bar followed by a space). 
+Specification of a pipe port can occur everywhere a file name is needed.])
+   (item [Virtual ports are created by supplying basic I/O functions at
+port creation time. These functions will be used to simulate low
+level accesses to a ``virtual device''. This kind of port is
+particularly convenient for reading or writing in a graphical
+window as if it was a file. Once a virtual port is created, it can
+be accessed as a normal port with the standard Scheme primitives.])
+)
+
+(subsection :title "Ports"
+
+(insertdoc 'call-with-output-file)
+(insertdoc 'call-with-input-string)
+(insertdoc 'call-with-output-string)
+(insertdoc 'output-port?)
+(insertdoc 'output-string-port?)
+(insertdoc 'output-file-port?)
+(insertdoc 'output-virtual-port?)
+(insertdoc 'interactive-port?)
+
+(insertdoc 'current-output-port)
+(insertdoc 'current-error-port)
+(insertdoc 'with-output-to-file)
+(insertdoc 'with-error-to-file)
+(insertdoc 'with-input-from-string)
+(insertdoc 'with-output-to-string)
+(insertdoc 'with-error-to-port)
+(insertdoc 'open-input-file)
+(index "SRFI-6")
+(insertdoc 'open-input-string)
+(insertdoc 'open-input-virtual)
+(insertdoc 'open-output-file)
+(index "SRFI-6")
+(insertdoc 'open-output-string)
+(insertdoc 'open-output-virtual)
+(insertdoc 'open-file)
+(index "SRFI-6")
+(insertdoc 'get-output-string)
+(insertdoc 'close-output-port)
+(insertdoc 'close-port)
+(insertdoc 'port-rewind)
+(insertdoc 'seek-file-port)
+(insertdoc 'port-current-line)
+(insertdoc 'port-current-position)
+(insertdoc 'port-file-name)
+(insertdoc 'port-idle-reset!)
+(insertdoc 'port-closed?))
+
+(subsection :title "Input"
+(insertdoc 'read)
+(index "SRFI-38")
+(insertdoc 'read-with-shared-structure)
+(index "SRFI-10")
+(insertdoc 'define-reader-ctor)
+(insertdoc 'read-char)
+(insertdoc 'read-chars)
+(insertdoc 'read-chars!)
+(insertdoc 'peek-char)
+(insertdoc 'eof-object?)
+(insertdoc 'eof-object)
+(insertdoc 'char-ready?)
+(insertdoc 'read-line)
+(insertdoc 'read-from-string)
+(insertdoc 'port->string-list))
+
+(subsection :title "Output"
+(insertdoc 'write)
+(insertdoc 'write*)
+(index "SRFI-38")
+(insertdoc 'write-with-shared-structure)
+(insertdoc 'display)
+(insertdoc 'newline)
+(insertdoc 'write-char)
+(insertdoc 'write-chars)
+(index "SRFI-28")
+(insertdoc 'format)
+(insertdoc 'flush-output-port))
+
+(subsection :title "System interface"
+(index "STKLOS_LOAD_PATH")
+(insertdoc 'load)
+(insertdoc 'try-load)
+(insertdoc 'find-path)
+(insertdoc 'current-loading-file)
+(insertdoc 'provided?)
+(TODO "Document here autoload functions"))
+)
+
+   
+;;;
+;;; KEYWORDS
+;;;
+(section :title "Keywords" 
+(index "keyword")
+
+(p [Keywords are symbolic constants which evaluate to themselves. 
+A keyword is a symbol whose first (or last) character is a colon 
+(,(emph (q ":"))).])
+
+(insertdoc 'keyword?)
+(insertdoc 'make-keyword)
+(insertdoc 'keyword->string)
+(insertdoc 'key-get)
+(insertdoc 'key-set!)
+(insertdoc 'key-delete!))
+
+;;;
+;;; HASH TABLES
+;;;
+(section :title "Hash Tables"
+(index "hash tables")
+
+(p [A hash table consists of zero or more entries, each consisting of a key
+and a value. Given the key for an entry, the hashing function can very
+quickly locate the entry, and hence the corresponding value. There may
+be at most one entry in a hash table with a particular key, but many
+entries may have the same value.])
+
+(p [,(stklos) hash tables grow gracefully as the number of entries
+increases, so that there are always less than three entries per hash
+bucket, on average.  This allows for fast lookups regardless of the
+number of entries in a table.])
+   
+(p [,(stklos) hash tables procedures are identical to the ones
+defined in ,(link-srfi 69). Note that the default comparison function
+is ,(code "eq?") whereas it is ,(code "equal?") in this SRFI. See
+,(ref :chapter "SRFIs") for more information.])
+   
+
+(insertdoc 'make-hash-table)
+(insertdoc 'hash-table?)
+(index "sxhash Common Lisp Function")
+(insertdoc 'hash-table-hash)
+(insertdoc 'alist->hash-table)
+(insertdoc 'hash-table->alist)
+
+(insertdoc 'hash-table-set!)
+(insertdoc 'hash-table-ref)
+(insertdoc 'hash-table-ref/default)   
+(insertdoc 'hash-table-delete!)
+(insertdoc 'hash-table-exists?)
+(insertdoc 'hash-table-update!)
+(insertdoc 'hash-table-for-each)
+(insertdoc 'hash-table-map)
+(insertdoc 'hash-table-keys)
+(insertdoc 'hash-table-fold)
+(insertdoc 'hash-table-copy)
+(insertdoc 'hash-table-merge!)
+(insertdoc 'hash-table-equivalence-function)
+(insertdoc 'hash-table-hash-function)
+(insertdoc 'hash-table-size)
+(insertdoc 'hash-table-stats))
+
+
+;;;
+;;; DATES
+;;;
+(section :title "Dates and Times"
+(p [,(stklos) stores dates and times with a compact
+representation which consists is an integer which represents the
+number of seconds elapsed since the ,(emph "Epoch") (00:00:00 on
+January 1, 1970, Coordinated Universal Time --UTC). Dates can
+also be represented with date structures.])
+(insertdoc 'current-time)
+(insertdoc 'full-current-time)
+(insertdoc 'seconds->date)
+(insertdoc 'seconds->string)
+(insertdoc 'seconds->list)
+
+(insertdoc 'current-date)
+(insertdoc 'make-date)
+(insertdoc 'date?)
+(insertdoc 'date-second)
+(insertdoc 'date-minute)   
+(insertdoc 'date-hour)
+(insertdoc 'date-day)   
+(insertdoc 'date-month)
+(insertdoc 'date-year)   
+(insertdoc 'date-week-day)
+(insertdoc 'date-year-day)   
+(insertdoc 'date-dst)
+(insertdoc 'date-tz)
+(insertdoc 'date->seconds)
+(insertdoc 'date->string)
+
+(insertdoc 'date)
+)   
+
+
+;;;
+;;; PROCESSES
+;;;
+(section :title "Processes"
+(index "process")
+(index "PID")
+
+(p [,(stklos) provides access to Unix processes as first class objects. 
+Basically, a process contains several informations such as the standard
+system process identification (aka PID on Unix Systems), the files where
+the standard files of the process are redirected.])
+   
+(insertdoc 'run-process)
+(insertdoc 'process?)
+(insertdoc 'process-alive?)
+(insertdoc 'process-pid)
+(insertdoc 'process-error)
+(insertdoc 'process-wait)
+(insertdoc 'process-exit-status)
+(insertdoc 'process-send-signal)
+(insertdoc 'process-kill)
+(insertdoc 'process-continue)
+(insertdoc 'process-list)
+(insertdoc 'fork))
+
+;;;
+;;; SOCKETS
+;;;
+(section :title "Sockets"
+(index "sockets")
+
+(p [,(stklos) defines ,(bold "sockets"), on systems which support them, 
+as first class objects. Sockets permits processes to communicate even if
+they are on different machines. Sockets are useful for creating client-server
+applications.])
+
+(insertdoc 'make-client-socket)
+(insertdoc 'make-server-socket)
+(insertdoc 'socket-shutdown)
+(insertdoc 'socket-accept)
+(insertdoc 'socket?)
+(insertdoc 'socket-server?)
+(insertdoc 'socket-client?)
+(insertdoc 'socket-host-name)
+(insertdoc 'socket-host-address)
+(insertdoc 'socket-local-address)
+(insertdoc 'socket-port-number)
+(insertdoc 'socket-output))
+
+;;;
+;;; SYSTEM PROCEDURES
+;; 
+(section :title "System Procedures"
+
+;;; File Primitives.
+(subsection :title "File Primitives"
+(insertdoc 'temporary-file-name)
+(insertdoc 'rename-file)
+(insertdoc 'remove-file)
+(insertdoc 'copy-file)
+(insertdoc 'copy-port)
+(insertdoc 'file-exists?)
+(insertdoc 'file-size)
+(insertdoc 'getcwd)
+(insertdoc 'chmod)
+(insertdoc 'chdir)
+(index "tilde expansion")
+(insertdoc 'expand-file-name)
+(insertdoc 'canonical-file-name)
+(insertdoc 'decompose-file-name)
+(insertdoc 'winify-file-name)
+(insertdoc 'posixify-file-name)
+(insertdoc 'basename)
+(insertdoc 'dirname)
+(insertdoc 'file-separator)
+(insertdoc 'make-path)
+(insertdoc 'glob))
+
+;;; Environment.
+(subsection :title "Environment"
+(insertdoc 'getenv)
+(insertdoc 'setenv!)
+(insertdoc 'unsetenv!))
+
+(subsection :title "System Informations"
+(insertdoc 'running-os)
+(insertdoc 'hostname)
+(insertdoc 'argc)
+(insertdoc 'argv)
+(insertdoc 'program-name)
+(insertdoc 'version)
+(insertdoc 'machine-type)
+(insertdoc 'clock)
+(insertdoc 'sleep)
+(insertdoc 'time)
+(insertdoc 'getpid))
+
+(subsection :title "Program Arguments Parsing"
+(index "SRFI-22")
+
+(p [,(stklos) provides a simple way to parse program arguments with the 
+|parse-arguments| special form. This form is generally used into
+the |main| function in a Scheme script. See ,(link-srfi 22) on how to 
+use a |main| function in a Scheme program.])
+
+(insertdoc 'parse-arguments)
+(insertdoc 'arg-usage))
+
+(subsection :title "Misc. System Procedures"
+
+(insertdoc 'system)
+(insertdoc 'exec-list)
+(insertdoc 'address-of)
+(insertdoc 'exit)
+(insertdoc 'die)
+(insertdoc 'get-password)
+(insertdoc 'register-exit-function!)))
+
+;;;
+;;; SIGNALS 
+;;;
+(section :title "Signals"
+   (mark "signals")
+   (TODO "This section needs to be written"))
+   
+   
+;;;
+;;; PARAMETER OBJECTS
+;;;
+(section :title "Parameter Objects"
+
+(p [,(stklos) parameters correspond to the ones defined in ,(link-srfi 39). 
+See SRFI document for more information.])
+(insertdoc 'make-parameter)
+(insertdoc 'parameterize)
+(insertdoc 'parameter?))
+
+
+;;;
+;;; Misc
+;;;
+(section :title "Misc"
+(insertdoc 'gc)
+(insertdoc 'void)
+(index "SRFI-23")
+(insertdoc 'error)
+(insertdoc 'require-extension)
+(insertdoc 'repl)
+(insertdoc 'apropos)
+(insertdoc 'trace)
+(insertdoc 'untrace)
+(insertdoc 'pp)
+(insertdoc 'uri-parse)
+(insertdoc 'string->html))
+
+)

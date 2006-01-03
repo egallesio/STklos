@@ -1,0 +1,275 @@
+;;;;
+;;;; date.stk			-- Date and Time Operations
+;;;; 
+;;;; Copyright © 2002-2004 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  3-Apr-2002 10:06 (eg)
+;;;; Last file update: 29-Nov-2004 11:58 (eg)
+;;;;
+
+#|
+<doc EXT make-date
+ * (make-date :key second minute hour day month year)
+ * 
+ * Build a date from its argument. |hour|, |minute|, |second| default to 0;
+ * |day| and |month| default to 1; |year| defaults to 1970
+doc>
+|#
+(define (make-date :key (second 0) (minute 0) (hour 0)
+		        (day 1) (month 1) (year 1970))
+  (let ((tmp (make-struct %date second minute hour day month year)))
+    ;; tmp is probably partially initialized convert it to seconds and back
+    ;; to a date
+    (seconds->date (date->seconds tmp))))
+
+#|
+<doc EXT date?
+ * (date? obj)
+ *
+ * Return |¤t| if |obj| is a date, and otherwise returns |¤f|.
+doc>
+|#
+(define (date? obj)
+  (and (struct? obj) (eq? (struct-type obj) %date)))
+
+;; ======================================================================
+;;	date writer
+;; ======================================================================
+(struct-type-change-writer!
+   %date
+   (lambda (s port)
+     (format port "#[date ~A-~A-~A ~A:~A:~A]"
+	     (struct-ref s 'year) (struct-ref s 'month) (struct-ref s 'day)
+	     (struct-ref s 'hour) (struct-ref s 'minute) (struct-ref s 'second))))
+
+
+#|
+<doc EXT date-second
+ * (date-second d)
+ *
+ * Return the second of date |d|, in the range 0 to 59.
+doc>
+<doc EXT date-minute
+ * (date-minute d)
+ *
+ * Return the minute of date |d|, in the range 0 to 59.
+doc>
+<doc EXT date-hour
+ * (date-hour d)
+ *
+ * Return the hour of date |d|, in the range 0 to 23.
+doc>
+<doc EXT date-day
+ * (date-day d)
+ *
+ * Return the day of date |d|, in the range 1 to 31
+doc>
+<doc EXT date-month
+ * (date-month d)
+ *
+ * Return the month of date |d|, in the range 1 to 12
+doc>
+<doc EXT date-year
+ * (date-year d)
+ *
+ * Return the year of date |d|.
+doc>
+<doc EXT date-week-day
+ * (date-week-day d)
+ *
+ * Return the week day of date |d|, in the range 0 to 6 (0 is Sunday).
+doc>
+<doc EXT date-year-day
+ * (date-year-day d)
+ *
+ * Return the the number of days since January 1 of date |d|, in the range
+ * 1 to 366.
+doc>
+<doc EXT date-dst
+ * (date-dst d)
+ *
+ * Return an indication about daylight saving adjustment:
+ * ,(itemize
+ *   (item [0 if no daylight saving adjustment])
+ *   (item [1 if daylight saving adjustment])
+ *   (item [-1 if the information is not available]))
+doc>
+<doc EXT date-tz
+ * (date-tz d)
+ *
+ * Return the time zone of date |d|.
+doc>
+|#
+(define (date-second d)		(%fast-struct-ref d %date 'date-second 0))
+(define (date-minute d)		(%fast-struct-ref d %date 'date-minute 1))
+(define (date-hour d)		(%fast-struct-ref d %date 'date-hour 2))
+
+(define (date-day d)		(%fast-struct-ref d %date 'date-day 3))
+(define (date-month d)		(%fast-struct-ref d %date 'date-month 4))
+(define (date-year d)		(%fast-struct-ref d %date 'date-year 5))
+
+(define (date-week-day d)	(%fast-struct-ref d %date 'date-week-day 6))
+(define (date-year-day d)	(%fast-struct-ref d %date 'date-year-day 7))
+
+(define (date-dst d)		(%fast-struct-ref d %date 'date-dst 8))
+(define (date-tz d)		(%fast-struct-ref d %date 'date-tz 9))
+
+
+#|
+<doc EXT seconds->list
+ * (seconds->list sec)
+ * 
+ * Returns a keyword list for the date given by |sec| (a date based on the 
+ * Epoch). The keyed values returned are
+ * ,(itemize 
+ * (item [second : 0 to 59 (but can be up to 61 to allow for leap seconds)])
+ * (item [minute : 0 to 59])
+ * (item [hour : 0 to 23])
+ * (item [day : 1 to 31])
+ * (item [month : 1 to 12])
+ * (item [year : e.g., 2002])
+ * (item [week-day : 0 (Sunday) to 6 (Saturday)])
+ * (item [year-day : 0 to 365 (365 in leap years)])
+ * (item [dst : indication about daylight savings time. See ,(ref :mark "date-dst")])
+ * (item [tz : the difference between Coordinated Universal Time
+ * (UTC) and local standard time in seconds.])
+ * )
+ * @lisp
+ * (seconds->list (current-time))   
+ *        => (:second 51 :minute 26 :hour 19
+ *            :day 5 :month 11 :year 2004
+ *            :week-day 5 :year-day 310
+ *            :dst 0 :tz -3600)
+ * @end lisp
+doc>
+|#
+(define (seconds->list sec)
+  (apply append (map (lambda (x)
+		       (list (make-keyword (car x)) (cdr x)))
+		     (struct->list (seconds->date sec)))))
+
+
+#|
+<doc EXT current-date
+ * (current-date)
+ *
+ * Returns the current system date.
+doc>
+|#
+(define (current-date)
+  (seconds->date (current-time)))
+
+
+#|
+<doc EXT seconds->string
+ * (seconds->string format n)
+ *
+ * Convert a date expressed in seconds using the string |format| as a
+ * specification. Conventions for |format| are given below:
+ * ,(itemize
+ *  (item (bold "~~ ") [a literal ~])
+ *  (item (bold "~a ") [locale's abbreviated weekday name (Sun...Sat)])
+ *  (item (bold "~A ") [locale's full weekday name (Sunday...Saturday)])
+ *  (item (bold "~b ") [locale's abbreviate month name (Jan...Dec)])
+ *  (item (bold "~B ") [locale's full month day (January...December)])
+ *  (item (bold "~c ") [locale's date and time
+ * (e.g., ,(code "Fri Jul 14 20:28:42-0400 2000"))])
+ *  (item (bold "~d ") [day of month, zero padded (01...31)])
+ *  (item (bold "~D ") [date (mm/dd/yy)])
+ *  (item (bold "~e ") [day of month, blank padded ( 1...31)])
+ *  (item (bold "~f ") [seconds+fractional seconds, using locale's
+ *         decimal separator (e.g. 5.2).])
+ *  (item (bold "~h ") [same as ~b])
+ *  (item (bold "~H ") [hour, zero padded, 24-hour clock (00...23)])
+ *  (item (bold "~I ") [hour, zero padded, 12-hour clock (01...12)])
+ *  (item (bold "~j ") [day of year, zero padded])
+ *  (item (bold "~k ") [hour, blank padded, 24-hour clock (00...23)])
+ *  (item (bold "~l ") [hour, blank padded, 12-hour clock (01...12)])
+ *  (item (bold "~m ") [month, zero padded (01...12)])
+ *  (item (bold "~M ") [minute, zero padded (00...59)])
+ *  (item (bold "~n ") [new line])
+ *  (item (bold "~p ") [locale's AM or PM])
+ *  (item (bold "~r ") [time, 12 hour clock, same as ,(code "~I:~M:~S ~p")])
+ *  (item (bold "~s ") [number of full seconds since "the epoch" (in UTC)])
+ *  (item (bold "~S ") [second, zero padded (00...61)])
+ *  (item (bold "~t ") [horizontal tab])
+ *  (item (bold "~T ") [time, 24 hour clock, same as ,(code "~H:~M:~S")])
+ *  (item (bold "~U ") [week number of year with Sunday as first day of week
+ *         (00...53)])
+ *  (item (bold "~V ") [weekISO 8601:1988 week number of year (01...53)
+ *       (week 1 is the first week that has at least 4 days in the current year,
+ *        and  with  Monday  as  the first day of the week)])
+ *  (item (bold "~w ") [day of week (1...7, 1 is Monday)])
+ *  (item (bold "~W ") [week number of year with Monday as first day of week
+ *         (01...52)])
+ *  (item (bold "~x ") [week number of year with Monday as first day of week
+ *         (00...53)])
+ *  (item (bold "~X ") [locale's date representation, for example: "07/31/00"])
+ *  (item (bold "~y ") [last two digits of year (00...99)])
+ *  (item (bold "~Y ") [year])
+ *  (item (bold "~z ") [time zone in RFC-822 style])
+ *  (item (bold "~Z ") [symbol time zone])
+ * )
+doc>
+|#
+(define (seconds->string format seconds)
+  (unless (string? format)
+    (error 'seconds->string "bad string ~S" format))
+  ;; Convert the format string for C since conventions are different
+  (let ((len (string-length format))
+	(out (open-output-string)))
+    (let Loop ((i 0))
+      (when (< i len)
+	(let ((cur-char (string-ref format i)))
+	  (case cur-char
+	    ((#\%) ;; "%" ==> "%%"
+	     (display "%%" out) (Loop (+ i 1)))
+	    ((#\~) (if (and (< i (- len 1)) (eq? (string-ref format (+ i 1)) #\~))
+		       (begin
+			 ;; "~~" => "~"
+			 (display #\~ out)
+			 (Loop (+ i 2)))
+		       (begin
+			 ;; "~c" => "%c" where c is not a %
+			 (display #\% out)
+			 (Loop (+ i 1)))))
+	    (else (display cur-char out)
+		  (Loop (+ i 1)))))))
+    ;; String is converted in the "OUT" string port
+    (%seconds->string (get-output-string out) seconds)))
+
+#|
+<doc EXT date->string
+ * (date->string format d)
+ *
+ * Convert the date |d|using the string |format| as a
+ * specification. Conventions for format are the same as the one
+ * of ,(ref :mark "seconds->string").
+doc>
+|#
+(define (date->string format date)
+  (unless (string? format)
+    (error 'date->string "bad string ~S" format))
+  
+  (seconds->string format (date->seconds date)))
+
+
+(provide "date")
+

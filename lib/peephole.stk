@@ -1,0 +1,174 @@
+;;;;
+;;;; peephole.stk	-- Peephole Optimiser fro the STklos VM
+;;;; 
+;;;; Copyright © 2001-2003 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 17-Mar-2001 20:32 (eg)
+;;;; Last file update: 10-Feb-2003 17:41 (eg)
+;;;;
+
+; ======================================================================
+; 
+; 			    PEEPHOLE OPTIMIZER
+; 
+; ======================================================================
+
+(define (label? code)      (integer? (car code)))
+(define (this-instr code)  (if (label? code) 'NOP (caar code)))
+(define (next-instr code)  (if (label? (cdr code)) 'NOP (caadr code)))
+(define this-arg1	   cadar)
+(define this-arg2	   caddar)
+(define next-arg1	   cadadr)
+(define next-arg2	   (lambda (x) (car (cddadr x))))
+
+
+(define (peephole all-code)
+  
+  (define (replace-1-instr code instr)
+    (set-car! code instr))
+
+  (define (replace-2-instr code instr)
+    (set-car! code instr)
+    (set-cdr! code (cddr code)))
+
+  (define (optimize-goto code)
+    ;;//FIXME: normallement all-code ===> mais c'est très lent 
+    ;// on devrait avoir (memq (this-arg1 code) code) pour chercher au-dessus.
+    (let ((new-code (memq (this-arg1 code) code)))	
+      (if new-code
+	  (case (next-instr new-code)
+	    ((GOTO)   (replace-1-instr code (copy-tree (cadr new-code))))
+	    ((RETURN) (replace-1-instr code (copy-tree (cadr new-code))))
+	    (else     (set! code (cdr code))))
+	  (set! code (cdr code))))
+	;(panic "label ~S is not defined in code ~S" (this-arg1 code) all-code)))
+    code)
+
+  (unless (null? all-code)
+    (let Loop ((code all-code))
+      (if (null? (cdr code))
+	  (set! code (cdr code))	;; will stop the loop
+	  (let ((i1 (this-instr code))
+		(i2 (next-instr code)))
+	    (cond
+	     ;; [IM-FALSE, PUSH]	=> FALSE-PUSH
+	     ;; [IM-TRUE, PUSH]		=> TRUE-PUSH
+	     ;; [IM-NIL, PUSH]		=> NIL-PUSH
+	     ;; [IM-MINUS1, PUSH]	=> MINUS1-PUSH
+	     ;; [IM-ZERO, PUSH]		=> ZERO-PUSH
+	     ;; [IM-ONE, PUSH]		=> ONE-PUSH
+	     ;; [IM-VOID, PUSH]		=> VOID-PUSH
+	     ((and (eq? i2 'PUSH) (memq i1 '(IM-FALSE IM-TRUE IM-NIL IM-MINUS1
+					      IM-ZERO IM-ONE IM-VOID)))
+	      (replace-2-instr code (list (case i1
+					    ((IM-FALSE)  'FALSE-PUSH)
+					    ((IM-TRUE)   'TRUE-PUSH)
+					    ((IM-NIL)	 'NIL-PUSH)
+					    ((IM-MINUS1) 'MINUS1-PUSH)
+					    ((IM-ZERO)	 'ZERO-PUSH)
+					    ((IM-ONE)	 'ONE-PUSH)
+					    ((IM-VOID)	 'VOID-PUSH)))))
+;/POURQUOI?  ;; [TAIL-INVOKE, RETURN] => TAIL-INVOKE (eliminate useless return)
+;/	     ((and (eq? i1 'TAIL-INVOKE) (eq? i2 'RETURN))
+;/	      (format #t "On a ~S\n\n" code)
+;/	      (set-cdr! code (cons (list 'NOP) (cddr code)))
+;/	      (format #t "     => ~S\n\n" code))
+
+	     ;; [SMALL-INT, PUSH] => INT-PUSH
+	     ((and (eq? i1 'SMALL-INT) (eq? i2 'PUSH))
+	      (replace-2-instr code (list 'INT-PUSH (this-arg1 code))))
+
+	     ;; [CONSTANT, PUSH] => CONSTANT-PUSH
+	     ((and (eq? i1 'CONSTANT) (eq? i2 'PUSH))
+	      (replace-2-instr code (list 'CONSTANT-PUSH (this-arg1 code))))
+
+	     ;; [GOTO x], ... ,x: GOTO y => GOTO y
+	     ;; [GOTO x], ... ,x: RETURN => RETURN
+	     ((eq? i1 'GOTO)
+	      (set! code (optimize-goto code)))
+     
+	     ;; [IN-NUMEQ ; IN-NOT] 	=> IN-NUMDIFF
+	     ;; [IN-NUMDIFF; IN-NOT]	=> IN-EQ
+	     ;; [IN-NUMLT ; IN-NOT] 	=> IN-NUMGE
+	     ;; [IN-NUMLE ; IN-NOT] 	=> IN-NUMGT
+	     ;; [IN-NUMGT ; IN-NOT] 	=> IN-NUMLE
+	     ;; [IN-NUMGE ; IN-NOT] 	=> IN-NUMLT
+	     ;; [IN-EQ; IN-NOT]		=> IN-NOT-EQ
+	     ;; [IN-EQV; IN-NOT]	=> IN-NOT-EQV
+	     ;; [IN-EQUAL; IN-NOT]	=> IN-NOT-EQUAL
+	     ((and (eq? i2 'IN-NOT) (memq i1 '(IN-NUMEQ IN-NUMDIFF
+					       IN-NUMLT IN-NUMGT
+					       IN-NUMLE IN-NUMGE 
+					       IN-EQ IN-EQV IN-EQUAL)))
+	      (replace-2-instr code
+			       (list (case i1
+				       ((IN-NUMEQ)   'IN-NUMDIFF)
+				       ((IN-NUMDIFF) 'IN-NUMEQ)
+				       ((IN-NUMLT)   'IN-NUMGE)
+				       ((IN-NUMGT)   'IN-NUMLE)
+				       ((IN-NUMLE)   'IN-NUMGT)
+				       ((IN-NUMGE)   'IN-NUMLT)
+				       ((IN-EQ)      'IN-NOT-EQ)
+				       ((IN-EQV)     'IN-NOT-EQV)
+				       ((IN-EQUAL)   'IN-NOT-EQUAL)))))
+   
+	     ;; [IN-NUMEQ ; JUMP-FALSE] 	=> JUMP-NUMDIFF
+	     ;; [IN-NUMDIFF; JUMP-FALSE]	=> JUMP-NUMEQ
+	     ;; [IN-NUMLT ; JUMP-FALSE] 	=> JUMP-NUMGE
+	     ;; [IN-NUMLE ; JUMP-FALSE] 	=> JUMP-NUMGT
+	     ;; [IN-NUMGT ; JUMP-FALSE] 	=> JUMP-NUMLE
+	     ;; [IN-NUMGE ; JUMP-FALSE] 	=> JUMP-NUMLT
+	     ;; [IN-EQ; JUMP-FALSE]		=> JUMP-NOT-EQ
+	     ;; [IN-EQV; JUMP-FALSE]		=> JUMP-NOT-EQ
+	     ;; [IN-EQUAL; JUMP-FALSE]		=> JUMP-NOT-EQUAL
+	     ;; [IN-NOT; JUMP-FALSE]		=> JUMP-TRUE
+	     ((and (eq? i2 'JUMP-FALSE) (memq i1 '(IN-NUMEQ ; IN-NUMDIFF
+						   IN-NUMLT IN-NUMGT
+						   IN-NUMLE IN-NUMGE
+						   IN-EQ IN-EQV IN-EQUAL 
+						   IN-NOT)))
+	      (replace-2-instr code
+			       (list (case i1
+				       ((IN-NUMEQ)   'JUMP-NUMDIFF)
+				       ((IN-NUMDIFF) 'JUMP-NUMEQ)
+				       ((IN-NUMLT)   'JUMP-NUMGE)
+				       ((IN-NUMLE)   'JUMP-NUMGT)
+				       ((IN-NUMGT)   'JUMP-NUMLE)
+				       ((IN-NUMGE)   'JUMP-NUMLT)
+				       ((IN-EQ)      'JUMP-NOT-EQ)
+				       ((IN-EQV)     'JUMP-NOT-EQV)
+				       ((IN-EQUAL)   'JUMP-NOT-EQUAL)
+				       ((IN-NOT)     'JUMP-TRUE))
+				     (next-arg1 code))))
+
+	     ;; [GLOBAL-REF, INVOKE] => GREF-INVOKE
+	     ((and (eq? i1 'GLOBAL-REF) (eq? i2 'INVOKE))
+	      (replace-2-instr code (list 'GREF-INVOKE 
+					  (this-arg1 code)
+					  (next-arg1 code))))
+	     (else ;; No optimization; goto next instruction
+	      (set! code (cdr code))))))
+      ;; Loop again on the same instruction
+      (unless (null? code) (Loop code))))
+  
+  ;; return the optimized code
+  all-code)
+
+;(define (peephole c) c)

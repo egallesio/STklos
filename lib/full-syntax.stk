@@ -1,0 +1,280 @@
+;;;;
+;;;; full-syntax.stk	-- Robert Hieb and R. Kent Dybvig syntax-case macros
+;;;; 
+;;;; Scheme macro system Version 2.1
+;;;; Robert Hieb and R. Kent Dybvig
+;;;;
+;;;; This a port for STklos of the Robert Hieb and  R. Kent Dybvig 
+;;;; implementation of define-syntax.
+;;;;
+;;;; This file is the entry point of the system. It is inspired from 
+;;;; the file "scainit.scm" present in the SLIB whose author is 
+;;;; Harald Hanche-Olsen <hanche@imf.unit.no>. 
+;;;; The copyright assocaited to this file is
+;;;;
+;;;; Permission to copy this software, in whole or in part, to use this
+;;;; software for any lawful purpose, and to redistribute this software
+;;;; is granted subject to the restriction that all copies made of this
+;;;; software must include this copyright notice in full.  This software
+;;;; is provided AS IS, with NO WARRANTY, EITHER EXPRESS OR IMPLIED,
+;;;; INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY
+;;;; OR FITNESS FOR ANY PARTICULAR PURPOSE.  IN NO EVENT SHALL THE
+;;;; AUTHORS BE LIABLE FOR CONSEQUENTIAL OR INCIDENTAL DAMAGES OF ANY
+;;;; NATURE WHATSOEVER.
+;;;;
+;;;;    Creation date: 26-Jan-2001 17:49 (eg)
+;;;; Last file update:  5-Jun-2002 11:28 (eg)
+;;;;
+
+#|
+<doc SYNTAX let-syntax
+ * (let-syntax <bindings> <body>)
+ *
+ * |<Bindings>| should have the form
+ * @lisp
+ * ((<keyword> <transformer spec>) ...)
+ * @end lisp
+ * Each |<keyword>| is an identifier, each |<transformer spec>| is an instance of
+ * |syntax-rules|, and |<body>| should be a sequence of one or more expressions.  It
+ * is an error for a |<keyword>| to appear more than once in the list of keywords
+ * being bound.
+ * £
+ * The |<body>| is expanded in the syntactic environment obtained by
+ * extending the syntactic environment of the |let-syntax| expression with macros
+ * whose keywords are the |<keyword>|s, bound to the specified transformers.  Each
+ * binding of a |<keyword>| has |<body>| as its region.
+ * £
+ * ,(bold "Note:") |let-syntax| is available only after having required the file
+ * |"full-syntax"|.
+ * @lisp
+ * (let-syntax ((when (syntax-rules ()
+ * 		     ((when test stmt1 stmt2 ...)
+ * 		      (if test
+ * 			  (begin stmt1
+ * 				 stmt2 ...))))))
+ *   (let ((if #t))
+ *     (when if (set! if 'now))
+ *     if))                           =>  now
+ * 
+ * (let ((x 'outer))
+ *   (let-syntax ((m (syntax-rules () ((m) x))))
+ *     (let ((x 'inner))
+ *       (m))))                       =>  outer
+ * @end lisp
+doc>
+<doc SYNTAX letrec-syntax
+ * (letrec-syntax <bindings> <body>)
+ * 
+ * Syntax of |letrec-syntax| is the same as for |let-syntax|.
+ * £
+ * The |<body>| is expanded in the syntactic environment obtained by
+ * extending the syntactic environment of the |letrec-syntax| expression
+ * with macros whose keywords are the |<keyword>|s, bound to the specified
+ * transformers.  Each binding of a |<keyword>| has the |<bindings>| as well
+ * as the |<body>| within its region, so the transformers can transcribe
+ * expressions into uses of the macros introduced by the |letrec-syntax|
+ * expression.
+ * £
+ * ,(bold "Note:") |letrec-syntax| is available only after having required the file
+ * |"full-syntax"|.
+ * 
+ * @lisp
+ * (letrec-syntax
+ *   ((my-or (syntax-rules ()
+ *             ((my-or) #f)
+ *             ((my-or e) e)
+ *             ((my-or e1 e2 ...)
+ *              (let ((temp e1))
+ *                (if temp
+ *                    temp
+ *                    (my-or e2 ...)))))))
+ *   (let ((x #f)
+ *         (y 7)
+ *         (temp 8)
+ *         (let odd?)
+ *         (if even?))
+ *     (my-or x
+ *            (let temp)
+ *            (if y)
+ *            y)))        =>  7
+ * @end lisp
+doc>
+|#
+
+;;;
+;;; Don't re-load this file, or it will break everything
+;;;
+(when (find-module 'SYNTAX-CASE #f)
+  (error "full syntax is already loaded"))
+
+(define-module SYNTAX-CASE)	;; Empty module just to know that we have 
+				;; already loaded this file
+
+
+
+;;;
+;;; Real code starts here
+;;;
+(define sc:eval-hook	eval)
+(define sc:andmap    	every)
+
+(define (sc:error-hook who why what) 
+  (error who "~a ~s" why what))
+
+(define (sc:new-symbol-hook string)
+  (string->uninterned-symbol (string-append "S" string)))
+
+
+(define sc:put-global-definition-hook #f)
+(define sc:get-global-definition-hook #f)
+(define sc:syntax-case-macro?	   #f)
+
+(let ((*macros* '()))
+  (set! sc:put-global-definition-hook
+	(lambda (symbol binding)
+	  (let ((pair (assq symbol *macros*)))
+	    (if pair
+		(set-cdr! pair binding)
+		(set! *macros* (cons (cons symbol binding) *macros*))))))
+  (set! sc:get-global-definition-hook
+	(lambda (symbol)
+	  (let ((pair (assq symbol *macros*)))
+	    (and pair (cdr pair)))))
+  
+  (set! sc:syntax-case-macro? 
+	(lambda (symbol)
+	  (assq symbol *macros*))))
+
+; These initializations are done here rather than "expand.ss" so that
+; "expand.ss" can be loaded twice (for bootstrapping purposes).
+
+(define sc:expand-syntax 		#f)
+(define sc:syntax-dispatch 	   	#f)
+(define sc:generate-temporaries 	#f)
+(define sc:identifier? 		   	#f)
+(define sc:syntax-error 		#f)
+(define sc:syntax-object->datum 	#f)
+(define sc:bound-identifier=? 	        #f)
+(define sc:free-identifier=? 	        #f)
+(define sc:install-global-transformer   #f)
+(define sc:implicit-identifier 	        #f)
+
+; The output routines can be tailored to feed a specific system or compiler.
+; They are set up here to generate the following subset of standard Scheme:
+
+;  <expression> :== <application>
+;                |  <variable>
+;                |  (set! <variable> <expression>)
+;                |  (define <variable> <expression>)
+;                |  (lambda (<variable>*) <expression>)
+;                |  (lambda <variable> <expression>)
+;                |  (lambda (<variable>+ . <variable>) <expression>)
+;                |  (letrec (<binding>+) <expression>)
+;                |  (if <expression> <expression> <expression>)
+;                |  (begin <expression> <expression>)
+;                |  (quote <datum>)
+; <application> :== (<expression>+)
+;     <binding> :== (<variable> <expression>)
+;    <variable> :== <symbol>
+
+; Definitions are generated only at top level.
+
+(define sc:build-application
+   (lambda (fun-exp arg-exps)
+      `(,fun-exp ,@arg-exps)))
+
+(define sc:build-conditional
+   (lambda (test-exp then-exp else-exp)
+      `(if ,test-exp ,then-exp ,else-exp)))
+
+(define sc:build-lexical-reference (lambda (var) var))
+
+(define sc:build-lexical-assignment
+   (lambda (var exp)
+      `(set! ,var ,exp)))
+
+(define sc:build-global-reference (lambda (var) var))
+
+(define sc:build-global-assignment
+   (lambda (var exp)
+      `(set! ,var ,exp)))
+
+(define sc:build-lambda
+   (lambda (vars exp)
+     `(lambda ,vars ,exp)))
+
+(define sc:build-improper-lambda
+   (lambda (vars var exp)
+      `(lambda (,@vars . ,var) ,exp)))
+
+(define sc:build-data
+   (lambda (exp)
+      `(quote ,exp)))
+
+(define sc:build-identifier
+   (lambda (id)
+      `(quote ,id)))
+
+(define sc:build-sequence
+   (lambda (exps)
+      (if (null? (cdr exps))
+          (car exps)
+          `(begin ,(car exps) ,(sc:build-sequence (cdr exps))))))
+
+(define sc:build-letrec
+   (lambda (vars val-exps body-exp)
+      (if (null? vars)
+          body-exp
+          `(letrec ,(map list vars val-exps) ,body-exp))))
+
+(define sc:build-global-definition
+   (lambda (var val)
+      `(define ,var ,val)))
+
+;;;;
+;;;; Include the prepared expand.ss
+;;;;
+(include "expand.pp")
+
+;;;;
+;;;; Redefine eval so that it expand sexpr before calling the real eval
+;;;;
+(set! eval
+  (lambda (x :optional env)
+    (sc:eval-hook (sc:expand-syntax x) env)))
+
+;;;; 
+;;;; Evaluate new syntaxes with our brand new eval
+;;;; 
+(eval '(begin
+	 (define-syntax with-syntax
+	   (lambda (x)
+	     (syntax-case x ()
+		((_ () e1 e2 ...)
+		 (syntax (begin e1 e2 ...)))
+		((_ ((out in)) e1 e2 ...)
+		 (syntax (syntax-case in () (out (begin e1 e2 ...)))))
+		((_ ((out in) ...) e1 e2 ...)
+		 (syntax (syntax-case (list in ...) ()
+			    ((out ...) (begin e1 e2 ...))))))))
+	 
+	 (define-syntax syntax-rules
+	   (lambda (x)
+	     (syntax-case x ()
+		((_ (k ...) ((keyword . pattern) template) ...)
+		 (with-syntax (((dummy ...)
+				(sc:generate-temporaries (syntax (keyword ...)))))
+			      (syntax (lambda (x)
+					(syntax-case x (k ...)
+					   ((dummy . pattern) (syntax template))
+					   ...))))))))))
+
+
+;;;;
+;;;; Tell macro-expand that we have a new function to expand syntax-case macros
+;;;;
+(set! syntax-expand sc:expand-syntax)
+
+(provide "full-syntax")
+
+; LocalWords:  sexpr eval

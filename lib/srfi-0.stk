@@ -1,0 +1,173 @@
+;;;;
+;;;; srfi-0.stk 				-- SRFI-0 aka cond-expand
+;;;; 
+;;;; Copyright © 1999-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 30-Aug-1999 16:26 (eg)
+;;;; Last file update: 15-Dec-2005 20:24 (eg)
+;;;;
+
+; (select-module Scheme)	;//FIXME:
+
+(define *all-features*
+  '(stklos				; Of course
+    STklos				; In case of cases-sensitive reader
+    srfi-0 				; COND-EXPAND
+    ((srfi-1 lists)	"srfi-1")	; List primitives
+    ((srfi-2 and-let*)	"srfi-2")	; AND-LET*
+    ;; srfi-3				; ....... withdrawn
+    ((srfi-4 hvectors)	"srfi-4")	; Homogeneous vectors
+    ;; srfi-5				; let with signature & rest args
+    srfi-6				; String ports
+    ((srfi-7 program)	"srfi-7")	; PROGRAM
+    srfi-8				; RECEIVE
+    ((srfi-9 records)	"srfi-9")	; Records
+    srfi-10				; Sharp-Comma External Form
+    (srfi-11		 "srfi-11")	; LET-VALUES and LET*-VALUES
+    ;; srfi-12				; ....... withdrawn
+    ((srfi-13 strings)	"srfi-13")	; String Library
+    ((srfi-14 charsets)	"srfi-14")	; Character-Set Library
+    ;; srfi-15				; ....... withdrawn
+    ((srfi-16 case-lambda))		; CASE-LAMBDA
+    srfi-17				; Generalized set!
+    ;; srfi-18				; Multithreading support
+    ;; (srfi-19 "srfi-19")		; Time Data Types and Procedures
+    ;; srfi-20				; ....... withdrawn
+    ;; srfi-21				; Real-time multithreading support
+    srfi-22				; Unix Scheme Scripts
+    ((srfi-23 error))			; Error reporting mechanism
+    ;; srfi-24				; ....... withdrawn
+    ;; srfi-25				; Multi-dimensional Arrays
+    (srfi-26 "srfi-26")			; Specialize Param without Currying
+    ((srfi-27 random))			; Sources of Random Bits
+    srfi-28				; Basic Format Strings
+    ;; srfi-29				; Localization
+    srfi-30				; Nested Multi-line Comments
+    srfi-31				; REC form
+    ;; srfi-32				; ....... withdrawn
+    ;; srfi-33				; ....... withdrawn
+    srfi-34				; Exception Handling for Programs
+    (srfi-35 "srfi-35")			; Conditions
+    (srfi-36 "srfi-36")			; I/O Conditions
+    (conditions "srfi-35" "srfi-36")
+    ;; srfi-37				; Program Argument Processor
+    srfi-38				; Ext. Rep. of shared structures
+    ((srfi-39 parameters))		; Parameter Objects
+    ;; srfi-40				; A Library of Streams
+    ;; srfi-41				; ?????????? Disappeared
+    ;; srfi-42				; Eager Comprehensions
+    ;; srfi-43				; Vector library
+    ;; srfi-44				; Collections
+    ;; srfi-45				; primitives for lazy algorithms
+    ;; srfi-46
+    ;; srfi-47				; Array
+    srfi-48				; Intermediate Format Strings
+    ;; srfi-49				; Indentation-sensitive syntax (NEVER)
+    ;; srfi-50
+    ;; srfi-51				; Handling rest list
+    ;; srfi-52				; ....... withdrawn
+    ;; srfi-53				; ....... withdrawn
+    ;; srfi-54				; Formatting
+    srfi-55				; require-extension
+    ;; srfi-56
+    ;; srfi-57				; Records
+    ;; srfi-58				; Array Notation
+    ;; srfi-59				; Vicinity
+    (srfi-60 "srfi-60")			; Integers as Bits
+    ;; srfi-61				; A more general cond clause
+    srfi-62				; S-expression comments
+    ;; srfi-63				; Homogeneous and Heterogeneous Arrays
+    ;; srfi-64
+    ;; srfi-65
+    (srfi-66 "srfi-66")			; Octet Vectors
+    ;; srfi-67				; Compare Procedures
+    ;; srfi-68
+    ((srfi-69 hash-tables) "srfi-69")	; Basic Hash Tables
+    srfi-70				; Numbers
+    ;; srfi-71				; LET-syntax for multiple values
+    ;; srfi-72				; Simple hygienic macros
+    ))
+
+(define (%has-feature? x)
+  (define (req files) (for-each require files) #t)
+  (let Loop ((l *all-features*))
+    (cond
+      ((null? l)			;; not found 
+       #f)
+      ((symbol? (car l))		; clause  srfi-x
+       (or (eq? (car l) x) (Loop (cdr l))))
+      ((symbol? (caar l))		; clause  (srfi-x ...)
+       (if (eq? x (caar l))
+	   (req (cdar l))
+	   (Loop (cdr l))))
+      (else				; clause ((srfi-x foo bar) ...)
+       (if (memq x (caar l))
+	   (req (cdar l))
+	   (Loop (cdr l)))))))
+
+
+(define (srfi0-register-feature! feature)
+  (set! *all-features* (cons feature *all-features*)))
+
+
+(define-macro (cond-expand . clauses)
+  (define (rewrite l)
+    (cond
+      ((null? l)    l)
+      ((symbol? l)  `(%has-feature? ',l))
+      ((pair? l)    (if (memq (car l) ' (and or not))
+			`(,(car l) ,@(rewrite (cdr l)))
+			(cons (rewrite (car l)) (rewrite (cdr l)))))
+      (else         (error 'cond-expand "bad clause ~S" l))))
+   (let ((1-clause (lambda (c)
+		    (cond
+		      ((not (pair? c)) 
+		          (error 'cond-expand "bad clause ~S" c))
+		      ((pair? (car c))
+		       	  ;; Clause is ((AND..)..) ((OR..)..) ((NOT...))
+		          (cons (rewrite (car c)) (cdr c)))
+		      ((eq? (car c) 'else)
+		           ;; Clause is (ELSE ...)
+		           (cons #t (cdr c)))   ; Don't use ELSE here but later
+		      (else 
+		           ;; Clause is (FEATURE ...)
+		           `((%has-feature? ',(car c)) ,@(cdr c)))))))
+    `(cond
+	,@(map 1-clause clauses)
+	(else (error 'cond-expand "no clause match")))))
+
+(provide "srfi-0")
+
+
+#|
+Examples 
+
+     (cond-expand
+	((and srfi-1 srfi-10)
+	 (write 1))
+	((or srfi-1 srfi-10)
+	 (write 2))
+	(else))
+
+
+      (cond-expand
+	(command-line
+	 (define (program-name) (car (argv)))))
+|#

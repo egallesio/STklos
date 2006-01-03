@@ -1,0 +1,99 @@
+;;;;
+;;;; srfi-11.stk	-- LET-VALUES and LET*-VALUES
+;;;; 
+;;;; Copyright © 2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 28-May-2002 09:47 (eg)
+;;;; Last file update:  5-Jun-2002 16:09 (eg)
+;;;;
+
+
+(define-syntax let-values
+  (syntax-rules ()
+    ((let-values (?binding ...) ?body0 ?body1 ...)
+     (let-values "bind" (?binding ...) () (begin ?body0 ?body1 ...)))
+    
+    ((let-values "bind" () ?tmps ?body)
+     (let ?tmps ?body))
+    
+    ((let-values "bind" ((?b0 ?e0) ?binding ...) ?tmps ?body)
+     (let-values "mktmp" ?b0 ?e0 () (?binding ...) ?tmps ?body))
+    
+    ((let-values "mktmp" () ?e0 ?args ?bindings ?tmps ?body)
+     (call-with-values 
+       (lambda () ?e0)
+       (lambda ?args
+         (let-values "bind" ?bindings ?tmps ?body))))
+    
+    ((let-values "mktmp" (?a . ?b) ?e0 (?arg ...) ?bindings (?tmp ...) ?body)
+     (let-values "mktmp" ?b ?e0 (?arg ... %%x) ?bindings (?tmp ... (?a %%x)) ?body))
+    
+    ((let-values "mktmp" ?a ?e0 (?arg ...) ?bindings (?tmp ...) ?body)
+     (call-with-values
+       (lambda () ?e0)
+       (lambda (?arg ... . %%x)
+         (let-values "bind" ?bindings (?tmp ... (?a %%x)) ?body))))))
+
+(define-syntax let*-values
+  (syntax-rules ()
+    ((let*-values () ?body0 ?body1 ...)
+     (begin ?body0 ?body1 ...))
+
+    ((let*-values (?binding0 ?binding1 ...) ?body0 ?body1 ...)
+     (let-values (?binding0)
+       (let*-values (?binding1 ...) ?body0 ?body1 ...)))))
+
+(provide "srfi-11")
+
+#|
+Usage examples:
+
+(let-values (((a b . c) (values 1 2 3 4)))
+	    (list a b c))
+
+(let ((a 'a) (b 'b) (x 'x) (y 'y))
+  (let-values (((a b) (values x y))
+	       ((x y) (values a b)))
+	      (list a b x y)))
+
+(let ((a 'a) (b 'b) (x 'x) (y 'y))
+  (let*-values (((a b) (values x y))
+		((x y) (values a b)))
+	       (list a b x y)))
+|#
+
+;//
+;//(call-with-values
+;//  (lambda () (values 1 2 3 4))
+;//  (lambda (a b . c)
+;//     (list a b c)))
+;//
+;//(define-macro (let-values bindings . body)
+;//  (if (and (pair? bindings) (null? (cdr bindings)))
+;//      `(call-with-values
+;//	   (lambda () ,(cadar bindings))
+;//	   (lambda ,(caar bindings)
+;//	     ,@body))))
+;//  
+;//
+;//(macro-expand '(let-values (((a b . c) (values 1 2 3 4)))
+;//	    (list a b c)))
+;//
+		     

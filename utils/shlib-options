@@ -1,0 +1,162 @@
+#!/bin/sh
+#							-*- shell-script -*-
+#
+# s h l i b - o p t i o n s		--  Determine the options to use 
+#					    for compiling with dynamic loading
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+# USA.
+#
+#           Author: Erick Gallesio [eg@unice.fr]
+#    Creation date: 27-Jul-2000 12:21 (eg)
+# Last file update:  3-Aug-2005 13:12 (eg)
+
+
+#
+# Utilities
+#
+die() {
+ echo ERROR: $* 1>&2  
+ exit 1
+}
+
+
+os=`uname -s`
+version=`uname -r`
+machine=`uname -m`
+OS=""
+OS_FLAVOUR="unix"
+SH_COMP_FLAGS=""
+SH_LOAD_FLAGS=""
+SH_LOADER=":"
+SH_SUFFIX=""
+SH_MAIN_LOAD_FLAGS=""
+
+#
+# Parse arguments
+#
+
+
+if [ "$CC" = "" ]
+then
+    die "CC variable not set"
+fi
+
+case $os in
+  FreeBSD*)
+ 	  case $machine in
+ 	    i*86) machine=ix86;;
+ 	  esac
+	  OS=FREEBSD
+	  SH_COMP_FLAGS='-fpic'
+          SH_LOAD_FLAGS='-shared -o'
+          SH_LOADER='ld'
+          SH_SUFFIX='so'
+          SH_MAIN_LOAD_FLAGS="-rdynamic"
+	  ;;
+  HP*)
+          OS=HPUX
+     	  SH_COMP_FLAGS="+Z"
+     	  SH_LOAD_FLAGS="-b -o"
+     	  SH_LOADER="ld"
+     	  SH_SUFFIX='sl'
+	  SH_MAIN_LOAD_FLAGS="-Wl,-E"
+	  ;;
+  IRIX*)
+	  OS=IRIX;
+	  if test "$CC" = "gcc"
+	  then 
+	    SH_COMP_FLAGS="-fpic"
+	  else
+	    SH_COMP_FLAGS="-KPIC"
+	  fi
+	  SH_LOAD_FLAGS="-shared -o"
+	  SH_LOADER="$CC"
+	  SH_SUFFIX='so'
+	  ;;
+  Linux*) 
+	  case $version in
+            2.0.*) version=2.0.x;;
+	    2.1.*) version=2.1.x;;
+	    2.2.*) version=2.2.x;;
+	    2.3.*) version=2.3.x;;
+	    2.4.*) version=2.4.x;;
+          esac
+          case $machine in
+	    i*86) machine=ix86;;
+	  esac
+	  OS=LINUX
+	  SH_COMP_FLAGS='-fpic'
+          SH_LOAD_FLAGS='-shared -o'
+          SH_LOADER='ld'
+          SH_SUFFIX='so'
+          SH_MAIN_LOAD_FLAGS="-rdynamic"
+	  ;;
+  NetBSD*) 
+	  OS=NETBSD
+	  SH_COMP_FLAGS="-fpic"
+          SH_LOAD_FLAGS="-Bshareable -o"
+          SH_LOADER="ld"
+          SH_SUFFIX='so'
+	  ;;
+  OSF*)
+	  OS=OSF
+	  if [ "$CC" = "gcc" ] ;then
+	     SH_COMP_FLAGS="-fpic"
+             SH_LOAD_FLAGS="-shared -o"
+             SH_LOADER="ld"
+	     SH_SUFFIX='so'
+	   else
+	     die "I do not know how to dynamically load on $os with $CC"
+	   fi
+	  ;;
+  SunOS*)
+	  case $machine in
+	    sun4*) machine=sun4;;
+	  esac
+	  OS=SUNOS
+#         SH_COMP_FLAGS="-K pic"
+#	  SH_LOAD_FLAGS='-G -z text -h'
+	  SH_COMP_FLAGS="-fpic"
+	  SH_LOAD_FLAGS='-shared -o'
+          SH_LOADER="ld"
+          SH_SUFFIX='so'
+	  ;;
+  Darwin*)
+	  OS=DARWIN;
+          SH_COMP_FLAGS="-fPIC -fno-common"
+	  SH_LOAD_FLAGS='-bundle -flat_namespace -undefined suppress -o'
+          SH_LOADER="$CC"
+          SH_SUFFIX='so'
+	  ;;
+  CYGWIN*)
+	  # Since I cannot figure yet how to use shared libraries in Cygwin 
+	  # And since they are not used yet. Just don't do it;-)
+	  OS=CYGWIN;
+	  OS_FLAVOUR=WIN32;
+	  SH_COMP_FLAGS=
+          SH_LOAD_FLAGS='-shared -o'
+          SH_LOADER='true'
+          SH_SUFFIX='so'
+          SH_MAIN_LOAD_FLAGS=""
+	  ;;
+  *)      OS=UNKNOWN;;
+esac
+
+echo "os=\"$os\"; version=\"$version\"; machine=\"$machine\"; OS=\"$OS\"; \
+OS_FLAVOUR=\"$OS_FLAVOUR\";SH_COMP_FLAGS=\"$SH_COMP_FLAGS\"; \
+SH_LOAD_FLAGS=\"$SH_LOAD_FLAGS\"; \
+SH_LOADER=\"$SH_LOADER\"; SH_SUFFIX=\"$SH_SUFFIX\"; \
+SH_MAIN_LOAD_FLAGS=\"$SH_MAIN_LOAD_FLAGS\""

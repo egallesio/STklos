@@ -1,0 +1,143 @@
+;; ======================================================================
+;; 
+;; 			STklos Reference Manual
+;;
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 2 of the License, or
+;; (at your option) any later version.
+;; 
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;; 
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; USA.
+;;           Author: Erick Gallesio [eg@unice.fr]
+;;    Creation date: 26-Nov-2000 18:19 (eg)
+;; Last file update:  1-Sep-2004 18:36 (eg)
+;;
+;; ======================================================================
+
+(chapter :title "Pattern Matching"
+   (p [Pattern matching is a key feature of most modern functional programming
+languages since it allows clean and secure code to be
+written. Internally, ,(q "pattern-matching forms") should be translated
+(compiled) into cascades of ,(q "elementary tests") where code is made as
+efficient as possible, avoiding redundant tests; ,(stklos) 
+,(q "pattern matching compiler") provides this ,(footnote
+  [The ,(q "pattern matching compiler") has been written by Jean-Marie Geffroy
+  and is part of the Manuel Serrano's Bigloo compiler ,(ref :bib "Bigloo-home")
+  since several years. The code (and documentation) included in ,(stklos)
+  has been stolen from the Bigloo package v2.4 (the only difference
+  between both package is the pattern matching of structures which is
+  absent in ,(stklos)).]).])
+ 
+   (p [The technique used is described in details in
+,(ref :bib "Queinnec-Geffroy92"), and the code generated can be
+considered optimal])
+
+   (p [The ,(q "pattern language") allows the expression of a wide variety 
+of patterns, including:])
+   
+(itemize 
+(item [Non-linear patterns: pattern variables can appear more than
+once, allowing comparison of subparts of the datum (through ,(ref :mark "eq?"))])
+
+(item [Recursive patterns on lists: for example, checking that the
+datum is a list of zero or more ,(code "a")s followed by zero or more 
+,(code "b")s.])
+
+(item [Pattern matching on lists as well as on vectors.]))
+
+   
+;;;
+;;; STKLOS PATTEN MATCHING FACILITIES
+;;;
+(section :title [,(stklos) Pattern Matching Facilities]
+
+(p [Only two special forms are provided for this in ,(stklos): ,(code "match-case")
+and ,(code "match-lambda").])
+
+(insertdoc 'match-case)
+(insertdoc 'match-lambda))
+   
+
+;;;
+;;; THE PATTEN LANGUAGE
+;;;   
+(section :title "The Pattern Language"
+(index "pattern language")
+
+(p [The syntax for ,(code "<pattern>") is:])
+
+(raw-code [
+<pattern> ==>                ,(emph "Matches:")
+
+  <atom>                    ,(emph "the <atom>.")
+| (kwote <atom>)            ,(emph "any expression eq? to <atom>.")
+| (and <pat1> ... <patn>)   ,(emph "if all of <pati> match.")
+| (or <pat1> ... ...<patn>) ,(emph "if any of <pat1> through <patn> matches.")
+| (not <pat>)               ,(emph "if <pat> doesn't match.")
+| (? <predicate>)           ,(emph "if <predicate> is true.")
+| (<pat1> ... <patn>)       ,(emph "a list of n elements. Here, ... is a")
+                            ,(emph "meta-character denoting a finite repetition")
+                            ,(emph "of patterns.")
+| <pat> ...                 ,(emph "a (possibly empty) repetition")
+                            ,(emph "of <pat> in a list.")
+| #(<pat> ... <patn>)       ,(emph "a vector of n elements.")
+| ?<id>                     ,(emph "anything, and binds id as a variable.")
+| ?-                        ,(emph "anything.")
+| ??-                       ,(emph "any (possibly empty) repetition of anything")
+                            ,(emph "in a list.")
+| ???-                      ,(emph "any end of list.")
+])
+
+(p [,(bold "Remark:") ,(code "and"), ,(code "or"), ,(code "not")
+and ,(code "kwote") must be quoted in order to be treated as
+literals. This is the only justification for having the
+,(code "kwote") pattern since, by convention, any atom which is
+not a keyword is quoted.])  
+
+
+(subsection :number #f :title "Explanations Through Examples"
+(itemize
+(item [,(code "?-") matches any s-expr.])
+
+(item [,(code "a") matches the atom ,(code"'a").])
+
+(item [,(code "?a") matches any expression, and binds the variable ,(code "a") to
+this expression.])
+
+(item [,(code "(? integer?)") matches any integer.])
+
+(item [,(code "(a (a b))") matches the only list ,(code"'(a (a b))").])
+
+(item [,(code "???-") can only appear at the end of a list, and always succeeds.
+For instance, ,(code"(a ???-)") is equivalent to ,(code"(a . ?-)").])
+
+(item [when occurring in a list, ,(code"??-") matches any
+sequence of anything: ,(code"(a ??- b)") matches any list whose
+,(code"car") is ,(code "a") and last ,(code"car") is
+,(code"b").])
+
+(item [,(code "(a ...)") matches any list of ,(code "a")'s, possibly empty.])
+
+(item [,(code "(?x ?x)") matches any list of length 2 whose ,(code"car") is 
+ ,(emph "eq") to its ,(code"cadr").])
+
+(item [,(code "((and (not a) ?x) ?x)") matches any list of length
+2 whose ,(code"car") is not ,(emph "eq") to ,(code"'a") but is
+,(emph "eq") to its ,(code"cadr").])
+
+(item [,(code "#(?- ?- ???-)") matches any vector whose length is at least 2.])
+)
+
+(p [,(bold "Remark:") ,(code"??-") and ,(code"...") patterns can
+not appear inside a vector, where you should use ,(code"???-"):
+For example, ,(code"#(a ??- b)") or ,(code"#(a...)") are invalid
+patterns, whereas ,(code"#(a ???-)") is valid and matches any
+vector whose first element is the atom ,(code "a").]))))

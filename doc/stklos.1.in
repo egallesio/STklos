@@ -1,0 +1,98 @@
+.\" -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH STKLOS 1 "version @VERSION@"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+stklos \- An efficient Scheme System providing a powerful Object System
+
+.SH DESCRIPTION
+.B STklos
+is a free Scheme System (nearly) conform to R5RS. The aim of this
+implementation is to be fast as well as light. The implementation is
+based on an ad-hoc Virtual Machine. 
+.B STklos 
+can also be compiled as a library, so that one can easily embed it 
+in an application.
+.LP
+The salient points of STklos are:
+.IP "" 4
+- efficient and powerful object system based on CLOS providing:
+.IP "" 8
++ Multiple Inheritance,
+.IP "" 8
++ Generic Functions,
+.IP "" 8
++ Multi-methods
+.IP "" 8
++ an efficient MOP (Meta Object Protocol)
+.IP "" 4
+- a simple to use module system
+.IP "" 4
+- implemanents the full tower of numbers defined in R5RS
+.IP "" 4
+- easy connection to the GTK+ toolkit
+.IP "" 4
+- Perl compatible regular expressions thanks to the PCRE package.
+.IP "" 4
+- tail recursive calls are properly implemented
+
+.SH OPTIONS
+Here are the options available in the version @VERSION@ of 
+.B stklos.
+
+.IP "-l file, --load=file"
+load 'file' before going interactive
+.IP "-f file, --file=file"
+use 'file' as program
+.IP "-e sexpr, --execute=sexpr"
+evaluate the given sexpr and exit
+.IP "-b file, --boot-file=file"
+use 'file' to boot the system instead of the default one
+.IP "-q, --no-init-file"
+quiet: do not load the user init file
+.IP "-v, --version"
+print program version and exit
+.IP "-h, --help"
+print this help and exit
+
+.SH FILES
+
+.IP "~/.stklos/stklosrc" 
+This file is the user init file which is loaded when \fBstklos\fR
+starts. Use the \fB-q\fR to avoid the loading of this file 
+
+
+.SH VARIABLES
+
+.IP "STKLOS_LOAD_PATH"
+This is a colon-separated list of directories in which \fBstklos\fR
+looks for loading files. It is used by functions such as \fBload\fR
+or \fBtry-load\fR.
+
+.IP "STKLOS_FRAMES"
+This variable must contains an integer which indicates the number of
+frames printed on an error. Use the value \fB0\fR for an unlimited
+back-trace.
+
+
+.SH "SEE ALSO"
+.BR stklos-config (1),
+.BR stklos-compile (1)
+
+.LP
+The full documentation for 
+.B stkos
+is available at http://www.stklos.net/documentation.html

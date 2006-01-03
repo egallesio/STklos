@@ -1,0 +1,282 @@
+								-*- outline -*-
+
+				+======+
+				| NEWS |
+				+======+
+
+
+* version 0.71 (2005 11 03)
+
+    * Added virtual ports (ports defined by user functions)
+    * The reader accepts now #eof to denote the eend of file object
+    * Fix problems with SunOS support
+    * Fix problems with gcc4 compilation
+    * Hash tables are now compliant to SRFI-69 (Basic Hash Tables). 
+      This implies some (compatible) changes in the hash-tables
+      function names.
+    * New primitives
+          o finite?
+          o infinite?
+          o unsetenv!
+          o file-size
+    * New implemented SRFIs
+          o SRFI-62 (S-expression comments)
+          o SRFI-69 (Basic Hash Tables)
+          o SRFI-70 (Numbers)
+    * Bug fixes
+
+* version 0.70 (2005 05 27)  
+
+    The main changes in this release are: a new back-trace system, a
+    conform call/cc/dynamic-wind implementation and some performance
+    enhancements.                                                    
+    * Added a way to have a back-trace when an error occurs
+    * call/cc has been completely implemented. Its interaction with
+      dynamic-wind is now conform to R5RS.                         
+    * Perfomance improvements
+    * Added some infrastructure for auto-testing a newly built system.
+    * New primitives
+	 + port-rewind
+	 + port-seek  
+	 + current-loading-file
+	 + decode-float
+	 + read/ss
+	 + write/ss
+	 + repl
+    * Multiple EOF can be seen now on an input file to allow staged
+      REPLs
+    * Added the configure options --with-provided-gc and
+      --with-provided-regexp to force the usage of our GC and PCRE
+      versions, even if there are some version already installed on
+      the system
+    * The boot file is now integrated in the VM instead of being read
+      from a file. This enhances the loading time of the interpreter
+      a bit.
+    * Describe shows more information for structures types and
+      conditions.
+    * The object system takes now into account conditions and
+      conditions types                                                             
+    * Documentation updated
+    * Bug fixes
+
+
+* version 0.61 (2005 04 05)
+
+    * Documentation updated
+    * Distribution uses now PCRE 5.0 for regexp
+    * Build process has changed
+    * Performance improvement thanks to VM and I/O optimizations
+    * Added a way to download and install STklos extensions
+    * Better error signaling on undefined variables when compiling files
+    * Minor enhancements:
+          o Some corrections in the reader
+          o Parameter objects SRFI-39 (Parameters objects) can be used
+    	    now in generalized set! SRFI-17 (Generalized set!)
+          o Reader can be case-sensitive now (the system can be
+	    bootstraped using case sensitive read)
+          o ...
+    * New primitives
+          o eval-from-string
+          o require/provide
+          o read-chars
+          o read-chars!
+          o write-chars
+          o get-password
+    * Implementation of SRFI-60 (Integers as bits)
+    * Bug fixes
+
+* version 0.60 (2004 11 29)
+
+This version is mostly a correcting version which fixes a serious bug
+on file loading introduced in release 0.59. Very minor changes since
+previous release
+
+    * SRFIs can also have symbolic names
+    * Minor modifications to allow the compilation of Skribe with
+      STklos on Win32
+    * A bunch of functions on dates
+    * Implementation of SRFI-55 (Require-extension)
+    * Bug fixes
+
+Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 10, 11, 13, 14, 16, 22, 23, 
+	  26, 27, 28, 30, 31, 34, 35, 36, 38, 39, 48, 55.
+
+
+* version 0.59 (2004 11 04)
+
+    * Documentation has been rewritten in Skribe 
+      (http://www-sop.inria.fr/mimosa/fp/Skribe)
+    * Added Dominique Boucher LALR(1) parser generator. 
+      (http://www.iro.umontreal.ca/~boucherd/Lalr/documentation/lalr.html)
+      Thanks to Dominique for allowing me to do so
+    * Added the future R6RS comment syntax #;
+    * New primitives
+          o read-from-string
+          o load-path
+          o load-verbose
+          o load-suffixes
+          o fork
+          o port-current-position
+          o port-closed?
+    * New implemented SRFIs
+          o SRFI-10 (Sharp Comma External Form)
+    * Bug fixes
+
+Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 10, 11, 13, 14, 16, 22, 23, 
+	  26, 27, 28, 30, 31, 34, 35, 36, 38, 39, 48.
+
+* version 0.58
+
+    * Better Win32 port (was no more fully functional since 0.55)
+    * Added a way to configure the system with our version of GMP even
+    * if GMP is installed
+    * Added structure types
+    * Stack size can be changed when the VM is launched
+    * New port on Octane/SGI Irix (by Joshua Boyd) and Itanium
+    * Added the --interactive option for embedded VM
+    * Compiler can add line information to the generated code to ease debugging
+    * error locations are more accurate now
+    * New primitives
+          o winify-file-name (for Win32 only)
+          o sleep
+    * New implemented SRFIs
+          o SRFI-34 (Exception Handling for Programs)
+          o SRFI-35 (Conditions)
+          o SRFI-36 (I/O Conditions)
+          o SRFI-48 (Intermediate Format Strings)
+    * Bug fixes
+
+Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 11, 13, 14, 16, 22, 23, 26,
+  	  27, 28, 30, 31, 34, 35, 36, 38, 39, 48
+
+* version 0.57
+
+    	  * Added support for non Finked Mac-OS X
+	  * Added the Danny Dubé SIlex lexical analyser generator 
+	    to the distribution. Thanks to Danny for allowing me to do so
+	  * New primitives
+              o fork
+              o register-exit-function!
+              o html->string
+              o uri-parse
+              o chmod
+          * New implemented SRFIs
+	      o SRFI-16 (Syntax for procedures of variable arity)
+              o SRFI-26 (Notation for Specializing Parameters without Currying)
+	  * Bug corrections
+
+  Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 11, 13, 14, 16, 22, 23, 26,
+  	  27, 28, 30, 31, 38, 39
+
+* version 0.56
+        * The reader recognizes now the DSSL keywords #!rest,
+	  #!optional and #!key
+	* New implemented SRFIs: 27 (random), 38 (external
+	  representation of shared structures) and 39 (parameter
+	  objects)
+	* New parameter: REAL-PRECISION allow to change the precision 
+	  used when displaying a real number
+	* New primitives: HOSTNAME, REGEXP-QUOTE, MAKE-PATH,
+          FILE-SEPARATOR, HASH-TABLE-UPDATE!, DATE,
+	  {READ,WRITE}-WITH-SHARED-STRUCTURE
+	* Modified primitives: GENSYM, PARSE-ARGUMENTS
+	* Added the definition of feature 'stklos' for SRFI-0
+	* Bug corrections
+
+  Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 11, 13, 14, 22, 23, 27
+          28, 30, 31, 38, 39
+
+* version 0.55
+	* New PCRE vesion (4.3)
+	* New primitive: COPY-FILE
+	* Bug corrections	
+
+* version 0.54
+  	* Evaluation of parameters is now from left to right rather
+  	  than the opposite. 
+  	* New primitives: PORT-IDLE-REGISTER!,	PORT-IDLE-UNREGISTER!,
+  	  PORT-IDLE-RESET!, GLOB, CANONICAL-PATH-NAME,
+  	  EXPAND-FILE-NAME, BASENAME, DIRNAME, DECOMPOSE-FILE-NAME
+	* Socket Support
+	* Added support for SRFI-23 (Error)
+	* Added support for SRFI-30 (Nested comments)
+	* Added support for SRFI-31 (REC form)
+	* Changed the Boehm GC version to 6.1
+	* Code cleaning (again) to be accepted by gcc-3.x
+  	* New Ports: Solaris, Win32, Mac OS X
+	* Bug corrections
+	* ...
+  Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 11, 13, 14, 22, 23, 28,
+  	  30, 31
+
+* version 0.53
+	* Added support for SRFI-7
+	* Added support for SRFI-11
+	* Added support for SRFI-14
+	* Added support for SRFI-28
+	* Better LDAP support
+	* Added PRETTY-PRINTER
+	* Added TRACE 
+	* Added APROPOS
+	* A bunch of new primitives: DIE, PAIR-MUTABLE?,
+	  VECTOR-MUTABLE?, STRING-MUTABLE?, STRING-TITLECASE,
+	  STRING-TITLECASE!, SYMBOL-VALUE*
+	* New syntax: IN-MODULE
+	* Changed the Boehm GC version to 6.1 alpha5 
+	* Code cleaning to be accepted by gcc-3.x
+	* Bug corrections
+	* ...
+
+  Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 11, 13, 14, 22, 28
+
+* version 0.52
+	* Compiler has been rewritten and deliver code which is more
+          efficient
+	* New command 'compile-file' to	compile a stklos file to byte-codes
+	* Complete rewriting of GTklos (support of GTK+ in STklos)
+	  - the rewriting is still incomplete and needs some work
+	  - support of the Canvas widget (nearly completely finished)
+	  - more general event management
+	* All the demos have been rewritten
+	* Better error reporting 
+	* Errors can now be browsed with Emacs next-error previous-error
+	* Added support for SRFI-2
+	* Added support for SRFI-4
+	* Added support for SRFI-8
+	* Added support for SRFI-9
+	* Added support for SRFI-22
+	* new option: "--no-init-file"
+	* Added bitwise operations on bignums
+	* Virtual slots can now have an initial value
+	* New primitives: KEY-DELETE!, KEY-DELETE, PROGRAM-NAME, 
+	  PORT-FILE-NAME, FULL-CURRENT-TIME, SECONDS->DATE
+	* Added the Bigloo MATCH-CASE and MATCH-LAMBDA 
+	* New form PARSE-ARGUMENTS to simplify argument parsing
+	* Better support of dynamic loading.
+	* Minimal support of LDAP. 
+	* Support of active-slots (as in old STk)
+	* PCRE package used is now 3.7
+	* GC package used is now 6.0
+	* More documentation
+	* There are now man pages for stklos and utilities
+	* Many small improvements
+	* Bug corrections
+	* ...
+
+* Version 0.51
+	* Added R5RS hygienic macros
+	* Added compatibility with the Aubrey Jaffer's SLIB
+	* New port on Alpha/Linux
+	* Added SRFI 0
+	* Added SRFI 1
+	* Some parts of the VM have been rewritten to integrate full CALL/CC 
+	  (not yet finished)
+	* New primitives: CURRENT-TIME, RUNNING-OS, FIND-PATH, CALL/EC,
+	  LOAD-PATH, SET-LOAD-PATH!, LOAD-SUFFIXES and SET-LOAD-SUFFIXES!
+	* Exact reals can be read now (e.g #e3.14 => 157/50)
+	* New demo: edit.stk
+	* Bug corrections 
+
+* Version 0.50 (released on 2001-01-17)
+
+	* First public release

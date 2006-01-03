@@ -1,0 +1,1303 @@
+\input texinfo.tex   @c -*-texinfo-*-
+@setfilename silex.info
+@settitle SILex
+@setchapternewpage on
+@footnotestyle end
+@paragraphindent 3
+
+@syncodeindex fn cp
+@syncodeindex vr cp
+@syncodeindex ky cp
+@syncodeindex pg cp
+@syncodeindex tp cp
+
+
+@c ---------- Info copyright ----------
+@ifinfo
+        This file documents the version 1.0 of SILex, a Scheme
+Implementation of Lex.
+
+Copyright @copyright{} 2001  Danny Dub@'e
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+@end ifinfo
+
+
+@c ---------- Title & copyright pages (printed) ----------
+@titlepage
+@title SILex
+@subtitle A Scheme Implementation of Lex
+@subtitle Documentation for SILex version 1.0
+@author Danny Dub@'e
+
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 2001  Danny Dub@'e.
+
+        This is the first edition of the SILex documentation.  It
+documents the version 1.0 of SILex.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+@end titlepage
+@headings double
+
+
+@c ---------- Top node ----------
+@ifinfo
+@node Top,  Overview, (dir), (dir)
+@c    Node, Next,     Prev,  Up
+@top
+
+        This document describes SILex.  ``SILex'' stands for ``Scheme
+Implementation of Lex''.  It generates a Scheme lexical analyser from a
+Lex-like specification file.
+
+        This document is the first edition and describes SILex version
+1.0.
+
+@menu
+* Overview::     A general description of SILex.
+* Syntax::       The look of a specification file.
+* Semantics::    The meaning of a specification file.
+* Generating::   How to generate and use lexical analysers.
+* Interface::    With a Scheme LALR(1) parser generator.
+* Index::        Concepts and commands relating to SILex.
+* Acknowledgements:: 
+@end menu
+@end ifinfo
+
+
+@c ---------- 1st: overview ----------
+@node Overview, Syntax, Top,  Top
+@c    Node,     Next,   Prev, Up
+@chapter Overview
+
+        SILex is a lexical analyser generator similar to the Lex and
+Flex programs, but for Scheme.  ``SILex'' stands for ``Scheme
+Implementation of Lex''.
+
+        SILex has many similarities with the C programs, but has many
+differences, too.  The syntax of the specification files for SILex is
+close to that of Lex and Flex.  Of course, the actions must be written
+in Scheme and not in C.  The set of regular expressions is mostly the
+same.  An important difference is relative to the multiple start states
+in the C analysers.  SILex replaces them by allowing multiple analysers
+to take their input from the same source.  Different inputs can be
+analysed at the same time, possibly with different instances of one or
+more lexical analysers.  The analysers are created dynamically.
+
+        SILex provides many other features.  The designer of a lexical
+analyser can specify the actions to be taken when the end of file is
+reached or when an error occurs.  The analyser can keep track of the
+position in the input in terms of the number of the line, column and
+offset.  An analyser can take its input from an input port, a string or
+a function.  SILex is portable; it does not depend on a particular
+character set.  It can generate analysers that are portable, too.
+Finally, the table encoding the behavior of the analyser can be compiled
+to Scheme code.  The fastest lexical analysers can be produced this way.
+
+@ignore
+Lex-like
+Scheme program
+Driver for Scheme
+One or more Scheme actions
+Facilities for error handling
+Line & column counting
+Multiple inputs
+Multiple scanners per input
+Different input methods
+Different table codings
+Portable
+@end ignore
+
+
+@c ---------- 2nd: syntax of a specification file ----------
+@node Syntax, Semantics, Overview, Top
+@c    Node,   Next,      Prev,     Up
+@chapter Syntax of the specification file
+
+@cindex Syntax of the specification file
+@cindex Specification file
+@cindex Comment
+@cindex White space
+
+        A specification file for a lexical analyser contains two parts:
+the @dfn{macro definitions part} and the @dfn{rules part}.  The two
+parts are separated by the mark @code{%%}.  The first part is used to
+define @dfn{macros}; that is, to give names to some regular expressions.
+The second part is used to indicate the regular expressions with which
+the input will have to match and the @dfn{actions} associated with each
+expression.
+
+        Comments can be inserted any place where white space is allowed
+and is considered as white space itself.  The syntax of the comments is
+the same as in Scheme.  That is, it begins with a semicolon @samp{;} and
+extends up to the end of a line.  The semicolon is a valid token in many
+languages, so you should take care not to comment out an entire line
+when you write a regular expression matching a semicolon.
+
+        The syntax of each part is presented, except for the regular
+expressions, which are described apart.  A small example follows.
+
+@ignore
+Macros part %% rules part
+Comments & whitespace
+@end ignore
+
+@menu
+* Macros part::           Syntax of the macro definitions.
+* Rules part::            Syntax of the rule-action pairs.
+* Regular expressions::   How to build regular expressions.
+* Sample file::           Shows some frequent mistakes.
+@end menu
+
+@node Macros part, Rules part, Syntax, Syntax
+@section Macro definitions part
+
+@cindex Macro
+@cindex Macro definitions part
+@cindex Scope of a macro definition
+
+        The first part of a specification file contains zero or more
+macro definitions.  A definition consists of a name and a regular
+expression, separated by white space.  It looks better when each
+definition is written on a separate line.
+
+        The syntax for a macro name is that of a Scheme symbol.  The
+case of the letters is not significant.  For example, @code{abcd},
+@code{+}, @code{...}, @code{Digit} and @code{digit} are all valid macro
+names; the last two being the same.  You cannot write two macro
+definitions with the same name.
+
+        The defined macro can be referenced in regular expressions using
+the syntax @code{@{@var{name}@}} (@pxref{Regular expressions}).  The
+scope of a macro definition includes the remaining definitions and the
+rules part of the file.  It is analogous to the @code{let*} is Scheme,
+where the macro definitions correspond to the bindings and the rules
+part correspond to the body.
+
+        End the macro definitions part with @code{%%}.
+
+@ignore
+Names = Scheme symbols
+Case insensitive
+End with %%
+Order of macros
+@end ignore
+
+@node Rules part, Regular expressions, Macros part, Syntax
+@section Rules part
+
+@cindex Rules part
+@cindex Pattern
+@cindex Action
+@cindex Indentation in actions
+
+        The rules part contains the rules up to the end of the
+specification file.  Each rule is a @dfn{pattern} optionally followed by
+an @dfn{action}.  The pattern is a regular expression.  The action, if
+there is one, is formed of one or more Scheme expressions.
+
+        The actions can span over several lines.  To distinguish between
+the remaining of the current action and the start of a new rule, SILex
+checks the indentation.  A new rule must start at the beginning of the
+line.  That is, the action starts right after the pattern and contains
+all the following lines that start with white space.
+
+        SILex does not parse the actions.  It simply captures the text
+up to the start of the next rule.  So a syntax error in an action is not
+detected by SILex.
+
+        Nevertheless, SILex is able to detect that an action has been
+omitted.  In that case, a default action is supplied.
+
+@ignore
+Action = one or more Scheme expressions
+Action are taken verbatim
+Indentation is significant
+Default actions
+End of file
+@end ignore
+
+@node Regular expressions, Sample file, Rules part, Syntax
+@section Regular expressions
+
+@cindex Regular expression
+@cindex Atomic regular expression
+@cindex Ordinary character
+@cindex Dot
+@cindex Wild card
+@findex .
+@cindex Backslash
+@cindex Protecting a character
+@findex \n
+@findex \@var{integer}
+@findex \@var{c}
+@cindex Macro reference
+@findex @{@var{name}@}
+@cindex String
+@findex "@var{some text}"
+@cindex Character class
+@findex [@var{list of characters}]
+
+        We first describe the atomic regular expressions.  Then, we show
+how to build more complex regular expressions from simpler ones.
+Finally, the markers are introduced.
+
+        The following constructs are regular expressions:
+
+@table @asis
+@item @code{@var{c}}
+@dfn{Ordinary character}.  It is a regular expression that matches the
+character @var{c} itself.  @var{c} cannot be one of @samp{.}, @samp{\},
+@samp{@{}, @samp{"}, @samp{[}, @samp{|}, @samp{?}, @samp{+}, @samp{*},
+@samp{(}, @samp{)}, @samp{^}, @samp{$}, @samp{;} or any white space.
+
+@item @code{.}
+@dfn{Wild card}.  It matches any character except the newline character.
+
+@item @code{\n}
+@itemx @code{\@var{integer}}
+@itemx @code{\@var{c}}
+@dfn{Backslash}.  The backslash is used for two things: protect a
+character from special meaning; generating non-printable characters.
+The expression @code{\n} matches the newline character.  The expression
+@code{\@var{integer}} matches the character that has number
+@var{integer} (in the sense of @code{char->integer}).  @var{integer}
+must be a valid character number on the implementation that you use.  It
+may be more than 3 digits long and even negative@footnote{The Scheme
+standards do not impose a particular character set, such as @sc{ascii}.
+The only requirement is that the function @code{char->integer} returns
+an integer.}.  The expression @code{\@var{c}} matches the character
+@var{c} if @var{c} is not @samp{n}, @samp{-} nor a digit.
+
+@item @code{@{@var{name}@}}
+@dfn{Macro reference}.  This expression matches the same lexemes as
+those matched by the regular expression named @var{name}.  You can
+imagine that the reference is replaced by the text of the named
+expression.  However, it works as if parentheses had been added to
+protect the substituting expression.
+
+@item @code{"@var{some text}"}
+@dfn{String}.  A string matches a lexeme identical to its contents.  In
+a string, the only special characters are @samp{"}, which closes the
+string, and @samp{\} which keeps the effect mentioned above.
+
+@item @code{[@var{list of characters}]}
+@itemx @code{[]@var{list of characters}]}
+@itemx @code{[-@var{list of characters}]}
+@itemx @code{[^@var{list of characters}]}
+@dfn{Character class}.  The expression matches one of the enumerated
+characters.  For example, the expression @samp{[abc]} matches one of
+@samp{a}, @samp{b} and @samp{c}.  You can list a range of characters by
+writing the first character, the @samp{-} and the last character.  For
+example, @samp{[A-Za-z]} matches one letter (if the letters are ordered
+and contiguous in the character set used by your implementation).  The
+special characters in a class are @samp{]}, which closes the class,
+@samp{-}, which denotes a range of character, and @samp{\}, which keeps
+its usual meaning.  There is an exception with the first character in a
+class.  If the first character is @samp{]} or @samp{-}, it loses its
+special meaning.  If the first character is @samp{^}, the expression
+matches one character if it is @emph{not} enumerated in @var{list of
+characters}.
+
+@ignore
+Ordinary character
+Dot
+Backslash: with n, with an integer (finir les chiffres), otherwise
+Macro reference
+String
+Character class
+@end ignore
+@end table
+
+@cindex Union of regular expressions
+@cindex Alternatives
+@findex |
+@cindex Concatenation of regular expressions
+@cindex Optional regular expression
+@findex ?
+@cindex Closure of a regular expression
+@cindex Positive closure
+@findex +
+@cindex Kleene closure
+@findex *
+@cindex Repetition of a regular expression
+@findex @{@var{i},@var{j}@}
+@cindex Overriding the precedence
+@cindex Grouping regular expressions
+@cindex Precedence
+@findex ( )
+
+        Suppose @var{r} and @var{s} are regular expressions.  Then the
+following expressions can be built:
+
+@table @asis
+@item @code{@var{r}|@var{s}}
+@dfn{Union}.  This regular expression matches a lexeme if the lexeme is
+matched by @var{r} or by @var{s}.
+
+@item @code{@var{r}@var{s}}
+@dfn{Concatenation}.  This expression matches a lexeme if the lexeme can
+be written as the concatenation of a lexeme matched by @var{r} and a
+lexeme matched by @var{s}.
+
+@item @code{@var{r}?}
+@dfn{Optional expression}.  A lexeme matches this expression if it is
+the empty lexeme or if it matches @var{r}.
+
+@item @code{@var{r}+}
+@dfn{Positive closure}.  This expression matches a lexeme that can be
+written as the concatenation of one or more lexemes, where each of those
+matches @var{r}.
+
+@item @code{@var{r}*}
+@dfn{Kleene closure}.  A lexeme is matched by this expression if it can
+be written as the concatenation of zero or more lexemes, where each of
+those matches @var{r}.
+
+@item @code{@var{r}@{@var{i}@}}
+@itemx @code{@var{r}@{@var{i},@}}
+@itemx @code{@var{r}@{@var{i},@var{j}@}}
+@dfn{Power or repetition of an expression}.  These expressions allow the
+``repetition'' of a regular expression a certain number of times.
+@var{i} and @var{j} must be positive integers and @var{j} must be
+greater or equal to @var{i}.  The first form repeats the expression
+@var{r} exactly @var{i} times.  The second form repeats @var{r} at least
+@var{i} times.  The last form repeats @var{r} at least @var{i} times and
+at most @var{j} times.  You should avoid using large numbers (more than
+10), because the finite automaton for @var{r} is copied once for each
+repetition.  The tables of the analyser may quickly become very large.
+You should note that the syntax of these expressions does not conflict
+with the syntax of the macro reference.
+
+@item @code{(@var{r})}
+@dfn{Parentheses}.  This expression matches the same lexemes as @var{r}.
+It is used to override the precedence of the operators.
+@end table
+
+        The building operators are listed in order of increasing
+precedence.  The @code{?}, @code{+}, @code{*} and repetition operators
+have the same precedence.
+
+@ignore
+Or
+Conc
+Question
+Plus
+Star
+Power
+Parentheses
+@end ignore
+
+@cindex Marker
+@cindex Beginning of line marker
+@findex ^
+@cindex End of line marker
+@findex $
+@cindex End of file marker
+@findex <<EOF>>
+@cindex Error marker
+@findex <<ERROR>>
+
+        The remaining ``expressions'' would better be called
+@dfn{markers}.  They all match the empty lexeme but require certain
+conditions to be respected in the input.  They cannot be used in all
+regular expressions.  Suppose that @var{r} is a regular expression
+without markers.
+
+@table @asis
+@item @code{^@var{r}}
+@itemx @code{@var{r}$}
+@dfn{Beginning and end of line}.  These markers require that the lexeme
+is found at the beginning and at the end of the line, respectively.  The
+markers lose their special meaning if they are not placed at their end
+of the regular expression or if they are used in the first part of the
+specification file.  In those cases, they are treated as regular
+characters.
+
+@item @code{<<EOF>>}
+@dfn{End of file}.  This marker is matched only when the input is at the
+end of file.  The marker must be used alone in its pattern, and only in
+the second part of the file.  There can be at most one rule with this
+particular pattern.
+
+@item @code{<<ERROR>>}
+@dfn{Error}.  This marker is matched only when there is a parsing error.
+It can be used under the same conditions as @code{<<EOF>>}.
+
+@ignore
+Caret
+Dollar
+End of file
+Error
+@end ignore
+@end table
+
+@cindex White space in regular expressions
+
+        White space ends the regular expressions.  In order to include
+white space in a regular expression, it must be protected by a backslash
+or placed in a string.
+
+@ignore
+Ended with white spaces
+Examples
+@end ignore
+
+@node Sample file, , Regular expressions, Syntax
+@section An example of a specification file
+
+        Here is an example of a SILex specification file.  The file is
+syntactically correct from the SILex point of view.  However, many
+common mistakes are shown.  The file is not a useful one.
+
+@example
+; This is a syntactically correct but silly file.
+
+partial     hel
+complete    @{partial@}lo            ; @r{Backward macro ref. only}
+digit       [0-9]
+letter      [a-zA-Z]
+
+%%
+
+-?@{digit@}+    (cons 'integer yytext)   ; @r{@code{yytext} contains}
+                                       ; @r{the lexeme}
+-?@{digit@}+\.@{digit@}+[eE][-+]?@{digit@}+
+              (cons                ; @r{A long action}
+               'float
+               yytext)
+
+;             (list 'semicolon)    ; @r{Probably a mistake}
+
+begin         )list 'begin(        ; @r{No error detected here}
+end                                ; @r{The action is optional}
+
+\73           (list 'bell-3)       ; @r{It does not match the}
+                                   ; @r{char. # 7 followed by @samp{3}}
+\0073         (list 'bell-3)       ; @r{Neither does it}
+(\7)3         (list 'bell-3)       ; @r{This does it}
+
+"*()+|@{@}[].? are ordinary but \" and \\ are special"
+
+[^\n]         (list 'char)         ; @r{Same thing as @samp{.}}
+(@{letter@}|_)(@{letter@}|_|@{digit@})*  ; @r{A C identifier}
+[][]                               ; @r{One of the square brackets}
+
+Repe(ti)@{2@}on   (list 'repetition)
+
+^@{letter@}+:   (cons 'label yytext) ; @r{A label placed at the}
+                                   ; @r{beginning of the line}
+$^                                 ; @r{No special meaning}
+<<EOF>>       (list 'eof)          ; @r{Detection of the end of file}
+<<ERROR>>     (my-error)           ; @r{Error handling}
+@end example
+
+@ignore
+Subset of Scheme(?)
+Example of \73, \0073, (\7)3
+@end ignore
+
+
+@c ---------- 3rd: semantics of the specification file ----------
+@node Semantics, Generating, Syntax, Top
+@c    Node,      Next,       Prev,   Up
+@chapter Semantics of the specification file
+
+@cindex Semantics of the specification file
+
+        An important part of the semantics of a specification file is
+described with the syntax of the regular expressions.  The remainder is
+presented here.  We begin with the role of the actions.  Information on
+the matching method follows.
+
+@menu
+* Action::           What does an action.
+* Matching rules::   When does a regular expression matches the input.
+@end menu
+
+@node Action, Matching rules, Semantics, Semantics
+@section Evaluation of the actions
+
+@findex yycontinue
+@findex yygetc
+@findex yyungetc
+@findex yytext
+@findex yyline
+@findex yycolumn
+@findex yyoffset
+@cindex Skipping a lexeme
+@cindex Getting characters
+@cindex Ungetting characters
+@cindex Lexeme
+@cindex Line number
+@cindex Column number
+@cindex Offset
+@cindex Default action
+
+        The action of a rule is evaluated when the corresponding pattern
+is matched.  The result of its evaluation is the result that the lexical
+analyser returns to its caller.
+
+        There are a few local variables that are accessible by the
+action when it is evaluated.  Those are @code{yycontinue},
+@code{yygetc}, @code{yyungetc}, @code{yytext}, @code{yyline},
+@code{yycolumn} and @code{yyoffset}.  Each one is described here:
+
+@table @code
+@item yycontinue
+This variable contains the lexical analysis function itself.  Use
+@code{(yycontinue)} to ask for the next token.  Typically, the action
+associated with a pattern that matches white space is a call to
+@code{yycontinue}; it has the effect of skipping the white space.
+
+@item yygetc
+@itemx yyungetc
+These variables contain functions to get and unget characters from the
+input of the analyser.  They take no argument.  @code{yygetc} returns a
+character or the symbol @samp{eof} if the end of file is reached.  They
+should be used to read characters instead of accessing directly the
+input port because the analyser may have read more characters in order
+to have a look-ahead.  It is incorrect to try to unget more characters
+than has been gotten since @emph{the parsing of the last token}.  If
+such an attempt is made, @code{yyungetc} silently refuses.
+
+@item yytext
+This variable is bound to a string containing the lexeme.  This string
+is guaranteed not to be mutated.  The string is created only if the
+action `seems' to need it.  The action is considered to need the lexeme
+when @samp{yytext} appears somewhere in the text of the action.
+
+@item yyline
+@itemx yycolumn
+@itemx yyoffset
+These variables indicate the position in the input at the beginning of
+the lexeme.  @code{yyline} is the number of the line; the first line is
+the line 1.  @code{yycolumn} is the number of the column; the first
+column is the column 1.  It is important to mention that characters such
+as the tabulation generate a variable length output when they are
+printed.  So it would be more accurate to say that @code{yycolumn} is
+the number of the first character of the lexeme, starting at the
+beginning of the line.  @code{yyoffset} indicates the distance from the
+beginning of the input; the first lexeme has offset 0.  The three
+variables may not all be existant depending on the kind of counting you
+want the analyser to do for you (@pxref{Counters}).
+@end table
+
+        There is a default action that is provided for a rule when its
+action is omitted.  If the pattern is @samp{<<EOF>>}, the default action
+returns the object @samp{(0)}.  If the pattern is @samp{<<ERROR>>}, the
+default action displays an error message and returns the symbol
+@samp{error}@footnote{Note that there is no portable way for the
+analyser to end the execution of the program when an error occurs.}.
+The default action for the other patterns is to call the analyser again.
+It is clearer (and normally more useful) to specify explicitly the
+action associated with each rule.
+
+@ignore
+An action is executed when its corresp. regexp is matched
+Environment of the actions
+yycontinue, yygetc, yyungetc, yytext, yyline, yycolumn, yyoffset
+yycolumn = number of the character (cause: tabs)
+Default actions
+@end ignore
+
+@node Matching rules, , Action, Semantics
+@section Matching the rules
+
+@cindex Matching method
+@cindex Matching conflict
+@cindex Conflict between patterns
+@cindex Interactive analyser
+
+        Each time the analyser is asked to return a token, it tries to
+match a prefix of the input with a pattern.  There may be more than one
+possible match; when it is the case, we say there is a conflict.  For
+example, suppose we have those regular expressions:
+
+@example
+begin
+[a-z]*
+@end example
+
+@noindent
+and the input is @samp{beginning1 @r{@dots{}}}.  We have a match with
+the first expression and we have many different matches with the second.
+To resolve such a conflict, the longest match is chosen.  So the chosen
+match is the one between the lexeme @samp{beginning} and the second
+expression.
+
+        Suppose we have the same regular expressions but the input is
+@samp{begin+ @r{@dots{}}}.  We have @emph{two} longest match.  This
+conflict is resolved by choosing the first pattern that allows a longest
+match.  So the chosen match is between the lexeme @samp{begin} and the
+first pattern.
+
+        The analyser generated by SILex allows the empty lexeme to be
+matched if there is no longer match.  However, you should take care not
+to call the analyser again without consuming at least one character of
+the input.  It would cause an infinite loop.
+
+        The pattern @samp{<<EOF>>} is matched when the analyser is
+called and the input is at end of file.  In this situation, the marker
+is matched even if there is a pattern that matches the empty lexeme.
+The analyser can be called again and again and the @samp{<<EOF>>}
+pattern will be matched each time, causing its corresponding action to
+be evaluated each time, too.
+
+        The pattern @samp{<<ERROR>>} is matched when the input is not at
+end of file and no other match is possible.  Depending on the action
+associated with this pattern, your program may choose to stop or choose
+to try to recover from the error.  To recover from the error, your
+program has to read some characters from the input before it can call
+the analyser again.
+
+        All lexical analysers generated by SILex are interactive.  That
+is, they read as few characters as possible to get the longest match.
+This is a useful property when the input is coming from a terminal.  A
+lexical analyser is normally based on a finite automaton; it is the case
+for the analysers generated by SILex.  A non-interactive analyser always
+needs an extra character to provoke an invalid transition in the
+automaton.  The longest match is detected this way.  With an interactive
+analyser, an extra character is not required when it is impossible to
+obtain a longer match.
+
+        A lexical analyser generated by SILex does not impose any @i{a
+priori} limit on the size of the lexemes.  The internal buffer is
+extended each time it is necessary.
+
+@ignore
+Longest prefix of the input, first matching rule
+Warning for matching empty string
+^ & $ anchors
+End of file anchor
+Error anchor
+Interactive matching
+The lexeme is not limited to a certain length
+@end ignore
+
+
+@c ---------- 4th: generating a lexical analyser ----------
+@node Generating, Interface, Semantics, Top
+@c    Node,       Next,      Prev,      Up
+@chapter Generating and using a lexical analyser
+
+@cindex Generating a lexical analyser
+@cindex Using a lexical analyser
+
+        The most common use of SILex is to generate a single complete
+lexical analyser.  In some situations however, it is preferable to only
+generate the tables describing the analysers and leaving to the program
+to build complete analysers at run time.  It is the case when the
+program has to parse many files simultaneously with the same analyser;
+and when a file is to be parsed using many different analysers.  After
+the description of the two modes, we describe the SILex options and the
+different input methods.
+
+@ignore
+One or many analysers
+Options
+Different input methods
+@end ignore
+
+@menu
+* One analyser::     Generating and using one complete analyser.
+* Many analysers::   Dynamic creation of analysers.
+* Options::          Line counting, table encoding.
+* Input::            Input from a port, a string or a function.
+@end menu
+
+@node One analyser, Many analysers, Generating, Generating
+@section One complete analyser
+
+        The function @code{lex} generates a complete lexical analyser.
+We first describe its parameters.  Then the interface with the generated
+analyser is presented.
+
+@menu
+* Lex::         The @code{lex} command.
+* Functions::   The functions in the lexical analyser.
+* Usage::       Using the lexical analyser.
+@end menu
+
+@node Lex, Functions, One analyser, One analyser
+@subsection The @code{lex} command
+
+@findex lex
+
+        Here is the template of a call to @code{lex}:
+
+@noindent
+@code{(lex @var{input-file} @var{output-file} [@var{options} @r{@dots{}}])}
+
+@noindent
+@var{input-file} is a string containing the name of the specification
+file.  @var{output-file} is a string containing the name of the file in
+which the lexical analyser is written.  For a description of the
+options, see @ref{Options}.
+
+        This is an example of a call to @code{lex}:
+
+@example
+(lex "pascal.l" "pascal.l.scm")
+@end example
+
+@ignore
+Invocation of lex
+@end ignore
+
+@node Functions, Usage, Lex, One analyser
+@subsection The functions in the lexical analyser
+
+@findex lexer
+@findex lexer-get-line
+@findex lexer-get-column
+@findex lexer-get-offset
+@findex lexer-getc
+@findex lexer-ungetc
+@findex lexer-init
+@cindex Name convention
+
+        The file generated by @code{lex} contains a few global
+definitions.  A program using the analyser needs only the following
+functions: @code{lexer}, @code{lexer-get-line}, @code{lexer-get-column},
+@code{lexer-get-offset}, @code{lexer-getc}, @code{lexer-ungetc} and
+@code{lexer-init}.
+
+@table @code
+@item lexer
+The lexical analysis function.
+
+@item lexer-get-line
+@itemx lexer-get-column
+@itemx lexer-get-offset
+Functions to obtain the current position in the input.
+
+@item lexer-getc
+@itemx lexer-ungetc
+Reading and returning characters.  These functions have the advantage of
+being accessible from outside the actions.
+
+@item lexer-init
+Initializing the analyser with the input source.
+@end table
+
+        To avoid name conflicts, these variables and others that we did
+not mention all begin with @samp{lexer@r{@dots{}}}.
+
+@ignore
+List of variables
+Name convention (lexer...)
+@end ignore
+
+@node Usage, , Functions, One analyser
+@subsection Using the lexical analyser
+
+@cindex Initialization of the analyser
+@cindex Token
+
+        The first function that must be called is the initialization
+function.  It is necessary to give to the analyser its source of
+characters.  Here is the template of a call to this function:
+
+@noindent
+@code{(lexer-init @var{input-type} @var{input})}
+
+@noindent
+The values @var{input-type} and @var{input} are described in
+@ref{Input}.
+
+        Once the initialization is done, the program can get
+@dfn{tokens} from the analyser by calling the lexical analysing
+function:
+@example
+(lexer)
+@end example
+@noindent
+The token is the result of the evaluation of the action corresponding to
+the matched pattern.  The current position can be obtained with:
+@example
+(lexer-get-line)
+(lexer-get-column)
+(lexer-get-offset)
+@end example
+@noindent
+As is described in @ref{Options}, some or all of these functions may not
+be available.  Characters can be gotten and ungotten from the input this
+way:
+@example
+(lexer-getc)
+(lexer-ungetc)
+@end example
+@noindent
+It is important to note that the analyser remembers the characters
+previously gotten.  Your program does not have to keep those itself.
+
+        Even after the end of file has been reached or an error has
+occured, the @code{lexer} function can be called again.  Its behavior
+depends on the remaining characters in the input.
+
+        The analyser can be reinitialized in any time with a new input.
+
+@ignore
+How to use it
+Can be called many times at end-of-file
+@end ignore
+
+@node Many analysers, Options, One analyser, Generating
+@section Many analysers
+
+        There are applications where it is necessary to have more than
+one lexical analyser parsing more than one file at a time.  For example:
+
+@itemize @minus
+@item
+The parsing of a C file (with cpp) may cause the parsing of other files
+recursively because of the @code{#include} commands.
+
+@item
+An interactive compiler has to be able to compile a file without closing
+the communication with the standard input.
+
+@item
+SILex itself parses the macro names, the regular expressions, the
+interior of a string, @dots{}, with different sets of patterns.
+@end itemize
+
+        We first begin with an overview on how SILex allows the
+programmer to create multiple lexical analysers.  We continue with a
+description of the function @code{lex-tables}.  We end the explanations
+with the functions used to creat analysers dynamically.
+
+@menu
+* Dynamic style::   It is possible to parse many files
+                    with many analysers.
+* Lex-tables::      The @code{lex-tables} command.
+* Usage2::          Building and using lexical analysers dynamically.
+@end menu
+
+@node Dynamic style, Lex-tables, Many analysers, Many analysers
+@subsection Creating analysers dynamically
+
+@cindex Dynamic creation of analysers
+@cindex Input system
+
+        It is quite easy to create new analysers at run-time.  Suppose
+there is an input that you want to analyse.  There are just two steps to
+make.
+
+@itemize @bullet
+@item
+Create an @dfn{input system} from the input.  An input system provides
+the buffering, the line counting and similar low level services.
+
+@item
+Create one or more analysers from the input system and the analyser
+tables.  The tables are generated by the function @code{lex-tables} from
+a specification file.  A table contains all the necessary information to
+build up an analyser.  Normally, you have to use more than one analyser
+per input when you expect the syntax to vary greatly in the input.
+@end itemize
+
+        The following example shows a typical organization for a
+multi-analyser lexical analysis.  Note that one table may have been used
+to produce many instances of analysers.  Those analysers would simply be
+connected to different input systems@footnote{It would make no sense to
+create two instances coming from the same table and being connected to
+the same input system.  They would both have exactly the same
+behavior.}.
+
+@example
+           Input1            Input2        Input3
+             |                 |             |
+             |                 |             |
+            IS1               IS2           IS3
+             |                 |             |
+     +-------+-------+         |          +--+---+
+     |       |       |         |          |      |
+   An1.1   An1.2   An1.3     An2.1      An3.1  An3.2
+@end example
+
+        There is no @i{a priori} limit on the number of input systems
+and analysers that you can create dynamically.
+
+@ignore
+Input systems & dynamic lexical analysers
+@end ignore
+
+@node Lex-tables, Usage2, Dynamic style, Many analysers
+@subsection The @code{lex-tables} command
+
+@findex lex-tables
+
+        The function @code{lex-tables} produces a table describing an
+analyser from a specification file.  A call to @code{lex-tables} looks
+like:
+
+@noindent
+@code{(lex-tables @var{input-file} @var{table-name} @var{output-file} [@var{options} @r{@dots{}}])}
+
+@noindent
+@var{input-file} must be a string containing the name of the
+specification file.  @var{output-file} is a string containing the name
+in which the result is printed.  A definition is written in the output
+file.  @var{table-name} must be a string and it is the name appearing in
+the definition.  The options are defined in @ref{Options}.
+
+        This is an example of a call to @code{lex-tables}:
+
+@example
+(lex-tables "c.l" "c-table" "c.l.scm")
+@end example
+
+@ignore
+Invocation of lex-tables
+@end ignore
+
+@node Usage2, , Lex-tables, Many analysers
+@subsection Building and using lexical analysers dynamically
+
+@cindex Building an analyser dynamically
+@pindex multilex.scm
+@cindex Name convention
+@findex lexer-make-IS
+@findex lexer-get-func-line
+@findex lexer-get-func-column
+@findex lexer-get-func-offset
+@findex lexer-get-func-getc
+@findex lexer-get-func-ungetc
+@findex lexer-make-lexer
+
+        In order to be able to create dynamically the analysers the
+program needs, the files containing the tables and the file
+@file{multilex.scm} must be loaded as part of the program.  The name
+convention is the following: all definitions in @file{multilex.scm}
+introduce names beginning with @samp{lexer@r{@dots{}}} and the
+definitions in the other files introduce names that are specified by the
+programmer.  This way, it is easy to avoid name conflicts.
+
+        Input systems are created with the function
+@code{lexer-make-IS}.  A call to this function looks like:
+
+@noindent
+@code{(lexer-make-IS @var{input-type} @var{input} [@var{counters}])}
+
+@noindent
+The values @var{input-type} and @var{input} are described in
+@ref{Input}.  The value of @var{counters} determines which counters the
+input system should maintain.  This is discussed in @ref{Input}.  Input
+systems are associative lists that cannot be used directly.
+
+        Useful functions can be extracted from an input system.  The
+following calls return functions that allows the program to interact
+with the input system:
+
+@example
+(lexer-get-func-line @var{input-system})
+(lexer-get-func-column @var{input-system})
+(lexer-get-func-offset @var{input-system})
+(lexer-get-func-getc @var{input-system})
+(lexer-get-func-ungetc @var{input-system})
+@end example
+
+        Lexical analysers are created with the function
+@code{lexer-make-lexer}.  The template of a call to this function is:
+
+@noindent
+@code{(lexer-make-lexer @var{table} @var{input-system})}
+
+@noindent
+@var{table} is a table generated by SILex.  @var{input-system} is the
+input system from which the analyser will take its input.  The result of
+the call is the analysis function.  The analysis function takes no
+argument and returns tokens.
+
+        This example summarizes all the step in the creation of an
+analyser:
+
+@example
+(let* ((my-port       (open-input-file "my-file"))
+       (my-IS         (lexer-make-IS 'port my-port))
+       (my-get-line   (lexer-get-func-line IS))
+       (my-get-column (lexer-get-func-column IS))
+       (my-get-offset (lexer-get-func-offset IS))
+       (my-getc       (lexer-get-func-getc IS))
+       (my-ungetc     (lexer-get-func-ungetc IS))
+       (my-analyser   (lexer-make-lexer my-table IS)))
+  (let loop ((tok (my-analyser)))
+    (cond ((eq? tok 'eof)
+           @r{@dots{}}
+@end example
+
+@ignore
+File lex-rt.scm
+How to use it: lex-rt.scm, lexer-make-IS, lexer-make-lexer & cie
+Can be called many times at end-of-file
+Name convention (lexer...)
+@end ignore
+
+@node Options, Input, Many analysers, Generating
+@section Options at generation time
+
+@cindex Options
+
+        We describe the options that can be passed to @code{lex} and
+@code{lex-tables}.  They indicate which counters (line, column and
+offset) the actions need; which table encoding should be used; and
+whether the tables should be pretty-printed.
+
+@menu
+* Counters::          Keeping the position in the input.
+* Tables encoding::   Encodings of the tables of an analyser.
+* Pretty print::      Pretty printing the tables.
+@end menu
+
+@node Counters, Tables encoding, Options, Options
+@subsection Line, column and offset counters
+
+@cindex Counters
+@vindex none
+@vindex line
+@vindex all
+
+        There are three different counting modes: no counter, line
+counter and all counters.  The more counters the input system maintains,
+the more it is slowed down.  The default is the line counting.
+
+        This option is specified when the program calls the functions
+@code{lex}, @code{lex-tables} and @code{lexer-make-IS}.  The three modes
+are represented by the symbols @samp{none}, @samp{line} and @samp{all}.
+When one of the first two functions is called the mode must be preceded
+by the symbol @samp{counters}.  These examples illustrate the use of the
+option:
+
+@example
+(lex "html.l" "html.l.scm" 'counters 'none)
+
+(lex-tables "cobol.l" "cobol-table" "cobol.l.scm" 'counters 'line)
+
+(lexer-make-IS 'port my-port 'all)
+@end example
+
+        You should be careful when you build analysers dynamically.  The
+mode specified at the input system creation must be consistent with the
+mode specified at the tables creation.
+
+@ignore
+counters
+@end ignore
+
+@node Tables encoding, Pretty print, Counters, Options
+@subsection Encoding of the table of an analyser
+
+@cindex Encoding of the table
+@vindex portable
+@vindex code
+@cindex Portability
+@cindex Fast analyser
+
+        SILex provides three different encodings of the tables: the
+default encoding, the portable encoding and the ``compilation'' to
+Scheme code.
+
+        With the default encoding, the finite automaton of the analyser
+is represented with data structures that contain the @emph{numbers} of
+the characters (in the sense of @code{char->integer}).  Since the
+numbers associated with the characters may depend on the Scheme
+implementation, an analyser generated with an implementation can be
+safely used only with the same implementation.  An analyser encoded in
+the default style is not portable.  But this representation is the most
+compact.
+
+        With the portable encoding, the data structures describing the
+automaton contain characters directly.  If the automaton, as generated,
+contains a transition from state @var{s} to state @var{t} on character
+@var{c}, then somewhere in the table there is the Scheme character
+@samp{#\@var{c}}.  When the file containing the analyser is loaded in
+any implementation, the character is read as is, and not as the number
+@samp{(char->integer #\@var{c})} as evaluated by the original
+implementation.  As long as the implementation using the analyser
+recognizes the characters mentionned in it, there is no problem.
+
+        So this encoding is portable.  However, it is less compact.
+This is because something like @samp{(65 90)} is more compact than
+something like @samp{(#\A #\B @r{@dots{}} #\Y #\Z)} to represent
+@samp{[A-Z]}.  The construction of an analyser from a portable table
+takes more time than the construction from a default table.  But, once
+built, the performance of the analyser is the same in both cases.
+
+        It is important to note that in some character sets, the letters
+or the digits are not contiguous.  So, in those cases, the regular
+expression @samp{[A-Z]} does not necessarily accept only the uppercase
+letters.
+
+        The last encoding is the compilation to Scheme code.  This
+produces a fast lexical analyser.  Instead of containing data structures
+representing the behavior of the automaton, the table contains Scheme
+code that ``hard-codes'' the automaton.  This encoding often generates
+big tables.  Such an analyser is not portable.
+
+        The encoding of the tables can be specified as an option when
+@code{lex} and @code{lex-tables} are called.  The symbols
+@samp{portable} and @samp{code} are used to specify that the table must
+be portable and that the table must be compiled, respectively.  For
+example, these calls illustrate the use of the options:
+
+@example
+(lex "c.l" "c.l.scm")             ; @r{Default encoding}
+
+(lex "c.l" "c.l.scm" 'portable)   ; @r{Portable encoding}
+
+(lex "c.l" "c.l.scm" 'code)       ; @r{Compilation of the automaton}
+@end example
+
+@ignore
+portable / code
+@end ignore
+
+@node Pretty print, , Tables encoding, Options
+@subsection Pretty printing the tables
+
+@cindex Pretty-printing the tables
+
+        The pretty-print option (specified with the symbol @samp{pp})
+tells SILex to pretty-print the contents of the table.  Normally, the
+table is displayed as a compact mass of characters fitting in about 75
+columns.  The option is useful only for a developer of SILex.  The
+Scheme code generated with the @samp{code} option is always
+pretty-printed.
+
+@ignore
+pp
+@end ignore
+
+@node Input, , Options, Generating
+@section Input methods
+
+@cindex Input
+@cindex Input port, input from an
+@cindex String, input from a
+@cindex Function, input from a
+
+        An analyser can take its input from three different objects: an
+input port, a string or a function.  The type of input and the input
+itself must be passed when an analyser is initialized and when an input
+system is created.  The input type is specified using one of the three
+symbols: @samp{port}, @samp{string} or @samp{procedure}.  For example:
+
+@example
+(lexer-init 'port (current-input-port))
+
+(lexer-make-IS 'string "Input string.")
+@end example
+
+        When an input port is used by an analyser, the program should
+avoid reading characters directly from the port.  This is because the
+analyser may have needed a look-ahead to do the analysis of the
+preceding token.  The program would not find what it expects on the
+port.  The analyser provides safe functions to get characters from the
+input.  The analyser never closes itself the port it has received, this
+task is left to the program.
+
+        When the analyser is initialized with a string, it takes a copy
+of it.  This way, eventual mutations of the string do not affect the
+analysis.
+
+        The use of a function as character source allows the analyser to
+parse any character stream, no matter how it is obtained.  For example,
+the characters may come from the decompression or decryption of a huge
+file, the task being done lazily in order to save space.  The function
+must take no argument and return a character each time it is called.
+When the end of file (or its logical equivalent) is reached, the
+function must return an object that is not a character (for example, the
+symbol @samp{eof}).  After the function has returned an end of file
+indicator, it is not called again.
+
+@ignore
+port / string / function
+Copy of the string
+The function at end-of-file is not called again
+@end ignore
+
+
+@c ---------- Interfacing with lalr.scm ----------
+@node Interface, Acknowledgements, Generating, Top
+@c    Node,      Next,             Prev,       Up
+@appendix Interfacing with an @sc{lalr}(1) parser
+
+@cindex Dominique Boucher
+@cindex @sc{lalr}(1) parser generator
+
+        A nice @sc{lalr}(1) parser generator for Scheme has been written
+by Dominique Boucher.  The generator is accessible at the Scheme
+Repository at @code{ftp://ftp.cs.indiana.edu} in the file
+@file{/pub/scheme-repository/code/lang/lalr-scm.tar.gz}.
+
+        The parsers that are generated need two functions to operate: a
+lexical analysis function and an error function.  The analysis function
+must take no argument and return a token each time it is called.  This
+is exactly the behavior of the lexical analysis functions created by
+SILex.
+
+        The @sc{lalr}(1) parsers expect that the tokens are pairs with a
+number in the @sc{car}, the token number, and any value in the @sc{cdr},
+the token attribute.  It is easy to respect this convention with a SILex
+lexical analyser since the actions can be any Scheme expressions.
+Furthermore, the file created by the @sc{lalr}(1) parser generator
+contains definitions that give names to the number of the tokens.  A
+lexical analyser can use those names in its actions in order to simplify
+the coordination between the two analysers.
+
+
+@c ---------- Acknowledgements ----------
+@node Acknowledgements, Index, Interface, Top
+@c    Node,             Next,  Prev,      Up
+@chapheading Acknowledgements
+
+        I would like to thank my comrades of the laboratory for their
+support in this project.  Especially Martin Larose and Marc Feeley for
+their numerous suggestions.
+
+        I hope SILex will be useful for many Scheme programmers.
+
+        If you find a bug, please let me know at
+@code{mailto:dube@@iro.umontreal.ca}.
+
+
+@c ---------- Index & tables of contents ----------
+@node Index,     , Acknowledgements, Top
+@c    Node,  Next, Prev,             Up
+@unnumbered Index
+
+@printindex cp
+
+@contents
+@bye
+
+Memos:
+Verifier si des trucs comme #\^L sont portables

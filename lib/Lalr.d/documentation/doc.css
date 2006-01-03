@@ -1,0 +1,77 @@
+  H2 { margin-top: 0px; color: navy }
+  A:link { color: #0000CC; font-weight: bold; text-decoration: none }
+  A:visited { color: #0000CC; font-weight: bold; text-decoration: none }
+  A:hover { color: #0000CC; font-weight: bold; text-decoration:
+      underline }
+  body {
+  }
+  #header {
+     width: 100%;
+     text-align: center;
+     padding-bottom: 10px;
+     border-bottom: 1px solid #aaaaaa;
+     margin-botton: 0px;
+  }
+  #header h1 {
+     font-style: italic;
+  }
+  #menu {
+     width: 15%;
+     float: left;
+     text-align: left;
+     padding-top: 10px;
+     padding-left: 5px;
+     padding-right: 5px;
+  }
+  #menu h3 {
+    text-align: center;
+    color: navy;
+    margin-top: 0px;
+    border-left: 5px solid #aaaaaa;
+    border-top: 1px solid #aaaaaa;
+    border-bottom: 1px solid #aaaaaa;
+    border-right: 5px solid #aaaaaa;
+    background-color: #eeeeee;
+  }
+  #body {
+     float: left; 
+     width: 83%;
+     padding-top: 10px;
+     margin-top: 0px;
+     border-left: 1px solid #aaaaaa;
+     padding-left: 5px;
+  }
+  #body h3 {
+      padding-left: 10px;
+  }
+  #body p {
+      padding-left: 20px;
+  }
+  #body pre {
+    margin-left: 30px;
+    padding-left: 10px;
+    background-color: #cccccc;
+    border: 1px solid;
+  }
+  #body code {
+    color: blue;
+  }
+  #boxes {
+     float: right;
+     width: 15%;
+     padding: 5px;
+     margin-top: 10px;
+     border: 1px solid #aaaaaa;
+     border-top: 10px solid #aaaaaa;
+  }
+  #footer {
+     float: left;
+     width: 100%;
+     color: #888888; 
+     text-align: center; 
+     font-size: smaller;
+     padding-top: 5px;
+     border-top: 1px solid #aaaaaa;
+     clear: both;
+  }
+ 

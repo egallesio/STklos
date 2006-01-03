@@ -1,0 +1,375 @@
+;;;;
+;;;; load.stk	-- Extended load function
+;;;; 
+;;;; Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 17-May-2000 14:55 (eg)
+;;;; Last file update:  8-Nov-2005 19:47 (eg)
+;;;;
+
+
+(define *%autoloads* '())
+(define %try-load-tmp '())   ;; Use a global when restoring environment
+
+
+(define *path-separator*  	(if (eqv? (running-os) 'windows) ";" ":"))
+(define *load-suffixes*   	(list "ostk" "stk" "scm" "so"))
+(define *load-verbose*    	#f)
+(define *load-path*      	'()) ;; initialized  later 
+
+;======================================================================
+;
+; *load-path* construction 
+;
+;======================================================================
+(define (%build-path-from-shell-variable var)
+  (let ((path (getenv var)))
+    (if path
+	(string-split path *path-separator*)
+	'())))
+
+
+(set! *load-path*
+      (let ((user-path (%build-path-from-shell-variable "STKLOS_LOAD_PATH")))
+	(if (null? user-path)
+	    (let ((prefix  (%library-prefix))
+		  (release (version)))
+	      (list "."
+		    (expand-file-name "~/.stklos/ext")
+		    (string-append prefix "/share/stklos/" release)
+		    (string-append prefix "/lib/stklos/" release)))
+	    user-path)))
+
+#|
+<doc EXT load-path
+ * (load-path)
+ * (load-path value)
+ *
+ * |load-path| is a parameter object. It 
+ * returns the current load path. The load path is a list of strings 
+ * which correspond to the directories in which a file must be searched for 
+ * loading. Directories of the load path are ,(emph "prepended") (in
+ * their apparition 
+ * order) to the file name given to |load| or |try-load| until the file 
+ * can be loaded.
+ * £
+ * The initial value of the current load path can be set from the shell, by 
+ * setting the |STKLOS_LOAD_PATH| shell variable.
+ * £
+ * Giving a |value| to the parameter |load-path| permits to change the
+ * current list of paths.
+doc>
+|#
+(define load-path
+  (make-parameter *load-path*
+		  (lambda (new-path)
+		    ;; Sanity check
+		    (unless (list? new-path)
+		      (error 'load-path "bad list of path names ~S" new-path))
+		    (for-each (lambda (x) 
+				(unless (string? x) 
+				  (error 'load-path "bad path name ~S" x)))
+			      new-path)
+		    ;; Set the load path
+		    (set! *load-path* new-path)
+		    new-path)))
+
+#|
+<doc EXT load-suffixes
+ * (load-suffixes)
+ * (load-suffixes value)
+ * 
+ * |load-suffixes| is a parameter object. It
+ * returns the list of possible suffixes for a Scheme file. Each suffix,
+ * must be a string. Suffixes are appended (in their apparition order) 
+ * to a file name  is appended to a file name given to |load| or |try-load| 
+ * until the file can be loaded. 
+doc>
+|#
+(define load-suffixes
+  (make-parameter *load-suffixes*
+		  (lambda (new)
+		    ;; Sanity check
+		    (unless (list? new)
+		      (error 'load-path "bad list of suffixes ~S" new))
+		    (for-each (lambda (x) 
+				(unless (string? x) 
+				  (error 'load-path "bad path name ~S" x)))
+			      new)
+		    ;; Set the load suffixes
+		    (set! *load-suffixes* new)
+		    new)))
+
+#|
+<doc EXT load-verbose
+ * (load-verbose)
+ * (load-verbose value)
+ * 
+ * |load-verbose| is a parameter object. It permits to display the
+ * path name of the files whch are loaded by |load| or |try-load| on
+ * the current error port, when set to a true value. If |load-verbose|
+ * is set to |¤f|, no message is printed.
+doc>
+|#
+(define load-verbose
+  (make-parameter *load-verbose*
+		  (lambda (x) (set! *load-verbose* (and x #t)) *load-verbose*)))
+
+
+#|
+<doc EXT current-loading-file
+ * (current-loading-file)
+ *
+ * Returns the path of the file that is currently being load.
+doc>
+|#
+(define current-loading-file
+  (make-parameter #f))
+
+
+;=============================================================================
+;
+; 				GUESS-PATHNAME
+; 		
+; Try to guess the full pathname of a scheme file using *load-path* and 
+; *load-suffix*
+;=============================================================================
+
+(define (%guess-pathname fn paths suffixes)
+
+  (define (try f)
+    (and (file-exists? f) (file-is-readable? f) f))
+  
+  (define (try-load-with-suffixes name suffixes)
+    (let Loop ((s suffixes))
+      (if (null? s)
+	  #f
+	  (or (try (string-append name "." (car s)))
+	      (Loop (cdr s))))))
+  
+  (define (try-load-from-path name paths suffixes)
+    (let Loop ((dir paths))
+      (if (null? dir)
+	  #f
+	  (let ((fn (string-append (car dir) "/" name)))
+	    (or (try fn)
+		(try-load-with-suffixes fn suffixes)
+		(Loop (cdr dir)))))))
+  (if (regexp-match "\.?\.?/" fn)
+      (or ;; First try to load file as given by user
+	  (try fn)
+	  ;; try to load file with suffix
+	  (try-load-with-suffixes fn suffixes)
+	  ;; try to load file in path
+	  (try-load-from-path fn paths suffixes))
+      ;; Not a file which starts with './' '../' or '/'. Use the path
+      (try-load-from-path fn paths suffixes)))
+
+;=============================================================================
+;
+;  Rewriting of the TRY-LOAD primitive 
+;
+;=============================================================================
+(define try-load
+  (let ((primitive-try-load try-load))
+    (lambda (fn)
+      (let ((path (%guess-pathname fn *load-path* *load-suffixes*))
+	    (oldp (current-loading-file))
+	    (res  #f)
+	    (out  (current-error-port))
+	    (mod  (current-module)))
+	(when path
+	  (current-loading-file path)
+	  (with-handler (lambda (c)
+			  (set! %try-load-tmp (cons c %try-load-tmp))
+			  (current-loading-file oldp)
+			  (%%set-current-module mod)
+			  ;; We have lost current environment :-<
+			  (let ((c (car %try-load-tmp)))
+			    (set! %try-load-tmp (cdr %try-load-tmp))
+			    (raise c)))
+	     (when *load-verbose* (format out ";; Loading file ~S.\n" path))
+	     (set! res 	          (primitive-try-load path))
+	     (when *load-verbose* (format out ";; File ~S loaded.\n" path))
+	     ;; Restore current-load-path
+	     (current-loading-file oldp)
+	     ;; Restore the module we had when entering
+	     (%%set-current-module mod)))
+	res))))
+
+
+;=============================================================================
+;
+;  Rewriting of the LOAD primitive 
+;
+;=============================================================================
+
+(define (load fn)
+  (if (try-load fn)
+      (values (void)) ;; To be sure to have only 1 value (for repl printing defines)
+      (raise (make-condition &i/o-filename-error
+			     'location 'load
+			     'message  (format "cannot load file ~S" fn)
+			     'backtrace (%vm-backtrace)
+			     'filename fn))))
+
+
+#|
+<doc EXT find-path
+ * (find-path str)
+ * (find-path str path)
+ * (find-path str path suffixes)
+ * 
+ * In its first form, |find-path| returns the path name of the file
+ * that should be loaded by the procedure  |load| given the name |str|.
+ * The string returned depends of the current  load path and of the
+ * currently accepted suffixes.
+ * £
+ * The other forms of |find-path| are more general and allow to give a path
+ * list (a list of strings representing supposed directories) and a set
+ * of suffixes (given as a list of strings too) to try for finding a file.
+ * If no file is found, |find-path| returns |¤f|.
+ * £
+ * For instance, on a "classical" Unix box:
+ * @lisp
+ * (find-path "passwd" '("/bin" "/etc" "/tmp"))
+ *             => "/etc/passwd"
+ * (find-path "stdio" '("/usr" "/usr/include") '("c" "h" "stk"))
+ *             => "/usr/include/stdio.h"
+ * @end lisp
+doc>
+|#
+(define (find-path fn :optional (path *load-path*) (suffixes *load-suffixes*))
+  (%guess-pathname fn path suffixes))
+
+
+;=============================================================================
+;
+; REQUIRE/PROVIDE stuff
+;
+;=============================================================================
+
+#|
+<doc EXT require provide require/provide provided?
+ * (require string)
+ * (provide string)
+ * (require/provide string)
+ * (provided? string)
+ *
+ * |Require| loads the file whose name is |string| if it was not
+ * previously ,(q (emph  "provided")). |Provide| permits to store |string| in
+ * the list of already provided files. Providing a file permits to avoid
+ * subsequent loads of this file. |Require/provide| is more or less equivalent to
+ * a |require| followed by a |provide|. |Provided?| returns |¤t| if
+ * |string| was already provided; it returns |¤f| otherwise.
+doc>
+|#
+(define require   #f)
+(define provide   #f)
+(define provided? #f)
+(define require/provide #f)
+
+(let ((provided '()))
+  (set! require   (lambda (what)
+		    (unless (member what provided)
+		      (load what)
+		      (unless (member what provided)
+			(format (current-error-port)
+				"WARNING: ~S was not provided~%" what)))
+		    what))
+  (set! require/provide
+    		  (lambda (what)
+		    (unless (member what provided)
+		      (load what))
+		    (provide what)))
+  
+  (set! provide   (lambda (what)
+		    (unless (member what provided)
+		      (set! provided (cons what provided)))
+		    what))
+  
+  (set! provided? (lambda (what)
+		    (and (member what provided) #t))))
+
+
+;=============================================================================
+;
+; INCLUDE
+;
+;=============================================================================
+(define-macro (include file)
+  `(%%include ,file))
+
+
+;=============================================================================
+;
+; AUTOLOAD & SYNTAX-AUTOLOAD
+;
+;=============================================================================
+(define *%autoloads* '())
+
+(define (autoload-file id)
+  (let ((info (assq id *%autoloads*)))
+    (if info (cdr info) #f)))
+
+(define (remove-autoload! id)
+  (let ((exp (assq id *%autoloads*)))
+    (when exp
+      (set! *%autoloads* (delete! exp *%autoloads* eq?)))))
+
+#|
+<doc EXT autoload
+ * (autoload file symbol ...)
+ *
+ * TODO
+ *
+doc>
+|#
+(define-macro (autoload file . symbols)
+  (let ((args (gensym))
+	(old  (gensym)))
+    `(begin
+       ,@(map (lambda (x)
+		`(define ,x (lambda ,args
+			      (let ((,old ,x))
+				(require ,file)
+				(if (eq? ,old ,x)
+				    (error 'autoload "~S has not been defined in ~S"
+					   ',x ,file)
+				    (apply ,x ,args))))))
+	      symbols))))
+
+
+#|
+<doc EXT syntax-autoload
+ * (syntax-autoload file symbol ...)
+ *
+ * TODO
+ *
+doc>
+|#
+(define-macro (syntax-autoload file . symbols)
+  `(set! *%autoloads* (append ',(map (lambda (s) (cons s file)) symbols)
+			      *%autoloads*)))
+
+
+
+
+; LocalWords:  repl autoload prepended

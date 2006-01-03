@@ -1,0 +1,107 @@
+;;;;
+;;;; srfi-35.stk	-- Implementation of SRFI-35 (Conditions)
+;;;; 
+;;;; Copyright © 2004 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 25-May-2004 10:13 (eg)
+;;;; Last file update:  3-Jun-2004 13:23 (eg)
+;;;;
+
+;; ----------------------------------------------------------------------
+;; 	define-condition-type ...
+;; ----------------------------------------------------------------------
+(define-macro (define-condition-type name supertype predicate . slots)
+  `(begin
+     ;; define the condition name
+     (define ,name (make-condition-type ',name
+					,supertype
+					',(map car slots)))
+     ;; Define predicate and accessors
+     (%define-condition-type-accessors ,name ,supertype ,predicate ,@slots)))
+
+;; ----------------------------------------------------------------------
+;; 	condition ...
+;; ----------------------------------------------------------------------
+(define-macro (condition . bindings)
+  (let ((ct     (map car bindings))
+	(slots  (apply append (map cdr bindings)))
+	(new-ct (gensym))
+	(new    (gensym)))
+    `(let* ((,new-ct (make-compound-condition-type (gensym) (list ,@ct)))
+	    (,new    (%allocate-condition ,new-ct)))
+       ,@(map (lambda (x) `(struct-set! ,new ',(car x) ,(cadr x)))
+	      slots)
+       ,new)))
+
+;;;; ======================================================================
+;;;;
+;;;; 		    P R E D E F I N E D   C O N D I T I O N S
+;;;;
+;;;; ======================================================================
+
+;; ----------------------------------------------------------------------
+;; 	&message ...
+;; ----------------------------------------------------------------------
+(%define-condition-type-accessors &message &condition
+   message-condition?
+   (message condition-message))
+
+;; ----------------------------------------------------------------------
+;; 	&serious ...
+;; ----------------------------------------------------------------------
+(%define-condition-type-accessors &serious &condition
+  serious-condition?)
+
+;; ----------------------------------------------------------------------
+;; 	&error ...
+;; ----------------------------------------------------------------------
+(%define-condition-type-accessors &error &serious
+  error?)
+
+
+;; ----------------------------------------------------------------------
+;; 	&error-message
+;;
+;; This is not really srfi-35. Anyway ...
+;; ----------------------------------------------------------------------
+(%define-condition-type-accessors &error-message &error
+    error-message?
+    (location error-location)
+    (message  error-message))
+
+(provide "srfi-35")
+
+
+;;; (define &ct1 (make-condition-type '&ct1 &condition '(a b c)))
+;;; (define &ct2 (make-condition-type '&ct2 &ct1       '(d e)))
+;;; (define &ct3 (make-condition-type '&ct3 &condition '(x y)))
+;;; (define &ct4 (make-condition-type '&ct4 &condition '(w z)))
+;;; (define &ct5 (make-condition-type '&ct5 &condition '(toto)))
+
+;;; (define c1   (make-condition &ct1 'a 1 'c 3 'b 2))
+;;; (define c2   (make-condition &ct2 'a -1 'b -2 'c -3 'd 4 'e 5))
+;;; (define c3   (make-condition &ct3 'x 100 'y 200))
+;;; (define c4   (make-condition &ct4 'w 10 'z 20))
+;;; (define c5   (make-condition &ct5 'toto 1))
+
+;;; (define comp1 (make-compound-condition c2 c3))
+;;; (define comp2 (make-compound-condition c4 c5))
+;;; (define comp3 (make-compound-condition comp1 comp2))
+;;;

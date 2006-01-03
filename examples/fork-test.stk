@@ -1,0 +1,43 @@
+;;;;
+;;;; fork-test.stk	-- A simple program using fork
+;;;; 
+;;;; Copyright © 2004 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 10-Jan-2004 15:48 (eg)
+;;;; Last file update: 13-Jan-2004 11:26 (eg)
+;;;;
+
+(define (main args)
+  (let ((proc (fork)))
+    (if proc
+	(format #t "I'm the parent process. My child pid is ~S\n"
+		 (process-pid proc))
+	(format #t "I'm the chid process. My process id is ~S\n" (getpid)))
+
+    (format #t "   This text will be printed 2 times\n")
+
+    ;; Wait the end of child ...
+    (if proc
+	(process-wait proc)
+	(exit))
+
+    ;; ... and display a message to finish
+    (format #t "This is the last printed line...\n")))
+

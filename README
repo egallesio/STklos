@@ -1,0 +1,90 @@
+								-*- outline -*-	
+
+		      S T k l o s   ( v e r s i o n   0 . 7 1 )
+		      =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
+
+				   Erick Gallesio
+				   <eg(at)essi.fr>
+
+
+* Purpose 
+
+STklos is a free Scheme System (nearly) conform to R5RS. The aim of this
+implementation is to be fast as well as light. The implementation is
+based on an ad-hoc Virtual Machine. STklos can also be compiled as a 
+library, so that one can easily embed it in an application.
+
+The salient points of STklos are:
+    * efficient and powerful object system based on CLOS providing
+	- Multiple Inheritance,
+	- Generic Functions,
+	- Multi-methods
+	- an efficient MOP (Meta Object Protocol)
+    * a simple to use module system
+    * implements the full tower of numbers defined in R5RS 
+    * easy connection to the GTK+ toolkit
+
+* History
+
+STklos is the successor of STk, a Scheme interpreter tightly connected
+to the Tk toolkit, that I have developed since September 1993. 
+
+STklos is very similar to STk, for the user, but very different in he
+implementation. Everything has been rewritten and STklos uses now a
+compiler to a byte-code machine, rather than direct interpretation.
+As a consequence, it is a lot faster than STk.  STklos is also better
+designed and should be easily embedded in an application (it was not
+completely the case with STk).
+
+Whereas STk used the Tk toolkit, STklos used the GTK+ graphical
+toolkit.  This choice was dictated by the low activity around Tk (no
+new widgets for several years) and by, on contrary, the effervescence
+around GTK+. STklos is not completely compatible with STk but it
+should be easy to port old STk graphical applications (provided that
+they use objects). The GTK+ extension can be loaded at run time and
+does not require a special interpreter as it was the case with STk.
+
+* TO DO
+
+The current release of STklos is a preliminary version and a lot of
+things remain to do. In particular, I will try to finish first complete
+compliance to R5RS, and finish to port good things of STk to STklos
+(things like FFI for instance).
+
+Look at the file TODO in the source distribution for more information.
+
+* SRFI Support
+
+Current version of STklos supports some SRFIs (a complete list of
+implemented SRFIs is available in the file SUPPORTED-SRFIS in the
+distribution). The goal is to support as much as possible final
+SRFIs. Any help on implementing other SRFIs on STklos is welcome.
+
+
+* Supported architectures
+
+STklos is known to work on the following architectures:
+	- Linux 2.2/ 2.4 (i386/gcc)
+	- Linux 2.4 (itanium/gcc)
+	- Linux 2.2 (Alpha/egcs)
+	- FreeBSD 4.2 (i386/gcc)
+	- Win XP (i386/gcc(Cygwin)) 
+	- Mac OS-X (ppc/apple gcc)
+	- Solaris 8 (ultrasparc/gcc)
+	- Irix 6.5.20 (Octane, mips R10,000)
+	- Open Darwin  7.0 (PPC/gcc)
+
+This is clearly not sufficient and port to other architectures should
+be done, but any help in this area is really welcome.  More
+informations on supported platforms is available in the PORTING-NOTES
+file in the distribution.
+
+* Project Home 
+
+STklos home page is is located at http://stklos.net
+The project is also hosted on Source Forge http://sourceforge.net/projects/stklos. 
+
+
+
+--
+ LocalWords:  TODO SRFI OSF Solaris

@@ -1,0 +1,46 @@
+STklos uses some libraries developped by other people.
+These libraries are:
+
+GMP: The Gnu MP library
+=======================
+    - Version: 3.1.1 (the included version is only a subset of
+    original GMP)
+    - License: LGPL
+    - Home Page: http://www.swox.com/gmp/
+
+Note that if you have a version of GMP installed, it will be used
+instead of the one provided in. 
+
+GC: The Boehm's conservative garbage collector for C and C++
+============================================================
+    - Version: 6.1
+    - License: Free (BSD-like)
+    - Home Page: http://www.hpl.hp.com/personal/Hans_Boehm/gc
+
+PCRE: Perl-Compatible Regular Expression library
+================================================
+    - Version: 5.0
+    - License: Free ("morphes" to (L)GPL when used in a (L)GPL program)
+    - Home: http://pcre.sourceforge.net/
+
+SILex: The Dany Dubé Scheme Implementation of Lex
+=================================================
+    - Version 1.0
+    - Licence: GPL
+    - Home Page: http://www.iro.umontreal.ca/~dube/
+
+LALR: The Dominique Boucher LALR Package
+========================================
+    - Version 2.1.0
+    - Licence: GPL2
+    - Home Page: http://www.iro.umontreal.ca/~boucherd/Lalr/documentation/lalr.html
+
+
+      	   	 +++++++++++++++++++++++++++++++++++
+
+The GC and GMP libraries provided with STklos are only used if there
+are no identical (or higher) versions of these libraries already
+installed on the system at configuration time. 
+
+
+

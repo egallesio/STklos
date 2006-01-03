@@ -1,0 +1,73 @@
+;;;;
+;;;; srfi-66.stk	-- Octet Vectors
+;;;; 
+;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 15-Dec-2005 20:15 (eg)
+;;;; Last file update: 15-Dec-2005 20:23 (eg)
+;;;;
+
+(require "srfi-4")
+
+(define (u8vector-copy! source source-start target target-start count)
+  (if (>= source-start target-start)
+      (do ((i 0 (+ i 1)))
+	  ((= i count))
+        (u8vector-set! target
+                          (+ target-start i) 
+                          (u8vector-ref source (+ source-start i))))
+      (do ((i (- count 1) (- i 1)))
+	  ((= i -1))
+        (u8vector-set! target
+                          (+ target-start i) 
+                          (u8vector-ref source (+ source-start i))))))
+
+(define (u8vector-copy vect)
+  (let* ((size (u8vector-length vect))
+	 (copy (make-u8vector size 0)))
+    (u8vector-copy! vect 0 copy 0 size)
+    copy))
+
+(define (u8vector=? v1 v2)
+  (let ((size (u8vector-length v1)))
+    (and (= size (u8vector-length v2))
+	 (let Loop ((i 0))
+	   (or (>= i size)
+	       (and (= (u8vector-ref v1)
+		       (u8vector-ref v2))
+		    (Loop (+ 1 i))))))))
+
+(define (u8vector-compare v1 v2)
+  (let ((len1 (u8vector-length v1))
+        (len2 (u8vector-length v2)))
+    (cond
+      ((< len1 len2) -1)
+      ((> len1 len2)  1)
+      (else
+       (let Loop ((i 0))
+         (if (= i len1)
+             0
+             (let ((elt1 (u8vector-ref v1 i))
+                   (elt2 (u8vector-ref v2 i)))
+               (cond ((< elt1 elt2) -1)
+                     ((> elt1 elt2)  1)
+                     (else (Loop (+ i 1)))))))))))
+
+(provide "srfi-66")

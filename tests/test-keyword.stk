@@ -1,0 +1,127 @@
+;;;;
+;;;; test-keyword.stk	-- ss
+;;;; 
+;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date:  3-May-2005 14:29 (eg)
+;;;; Last file update:  3-May-2005 18:21 (eg)
+;;;;
+
+;;;; Most of theses tests were stolen in Gauche Scheme distribution
+
+
+(test-section "Keywords")
+
+;;----------------------------------------------------------------
+(test-subsection "keywords")
+
+(test "reader" #t (keyword? :abc))
+(test "keyword?" #f (keyword? 'abc))
+(test "make-keyword" #t (keyword? (make-keyword 'abc)))
+(test "keyword->string" "abc" (keyword->string (make-keyword 'abc)))
+(test "eq?.1" #t (eq? :a :a))
+(test "eq?.2" #f (eq? :a 'a))
+(test "eqv?.3" #t (eqv? :a :a))
+(test "eqv?.4" #f (eqv? :a 'a))
+
+;;----------------------------------------------------------------
+(test-subsection "key-get")
+
+(define *key-value-list* (list :a 33 :b "foo" :c :d :d 'ook :a 99))
+
+(test "key-get.1" "foo"
+       (key-get *key-value-list* :b))
+(test "key-get.2" 33
+       (key-get *key-value-list* :a))
+(test "key-get.3" 'ook
+       (key-get  *key-value-list* :d))
+(test "key-get.4" *test-failed*
+       (key-get *key-value-list* :z))
+(test "key-get.5" 88
+       (key-get *key-value-list* :z 88))
+(test "key-get.6" *test-failed*
+       (key-get :z (cdr *key-value-list*)))
+
+;;----------------------------------------------------------------
+(test-subsection "key-set!")
+
+(test "key-set!.1" '(33 100 :d)
+      (begin
+	(key-set! *key-value-list* :b 100)
+	(list (key-get *key-value-list* :a)
+	      (key-get *key-value-list* :b)
+	      (key-get *key-value-list* :c))))
+
+(test "key-set!.2" 'foo
+      (begin
+	(key-set! *key-value-list* :foo 'foo)
+	(key-get *key-value-list* :foo)))
+	      
+;;----------------------------------------------------------------
+(test-subsection "key-delete")
+
+(test "key-delete.1" '((:a 3 :b 5) (:a 3))
+       (let* ((x (list :a 3 :b 5))
+              (y (key-delete x :b)))
+         (list x y)))
+(test "key-delete.2" '((:a 3 :b 5) (:b 5))
+       (let* ((x (list :a 3 :b 5))
+              (y (key-delete x :a)))
+         (list x y)))
+(test "key-delete.3" '((:a 3 :b 5) (:a 3 :b 5))
+       (let* ((x (list :a 3 :b 5))
+              (y (key-delete x :c)))
+         (list x y)))
+(test "key-delete.4" '((:a 3) ())
+       (let* ((x (list :a 3))
+              (y (key-delete x :a)))
+         (list x y)))
+(test "key-delete.5" '(() ())
+       (let* ((x ())
+              (y (key-delete x :a)))
+         (list x y)))
+
+;;----------------------------------------------------------------
+(test-subsection "key-delete!")
+
+(test "key-delete!.1" '((:a 3) (:a 3))
+       (let* ((x (list :a 3 :b 5))
+              (y (key-delete! x :b)))
+         (list x y)))
+(test "key-delete!.2" '((:a 3 :b 5) (:b 5))
+       (let* ((x (list :a 3 :b 5))
+              (y (key-delete! x :a)))
+         (list x y)))
+(test "key-delete!.3" '((:a 3 :b 5) (:a 3 :b 5))
+       (let* ((x (list :a 3 :b 5))
+              (y (key-delete! x :c)))
+         (list x y)))
+(test "key-delete!.4" '((:a 3) ())
+       (let* ((x (list :a 3))
+              (y (key-delete! x :a)))
+         (list x y)))
+(test "key-delete!.5" '(() ())
+       (let* ((x ())
+              (y (key-delete! x :a)))
+         (list x y)))
+
+
+(test-section-end)
+

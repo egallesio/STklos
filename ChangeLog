@@ -1,0 +1,2148 @@
+2006-01-02  Erick Gallesio  <eg@essi.fr>
+
+	* src/str.c : New primitive STRING-BLIT!
+
+2005-12-30  Erick Gallesio  <eg@essi.fr>
+
+	* src/number.c (STk_ulong2integer): Use to always return a 
+	bignum. Fixed. 
+
+2005-12-28  Erick Gallesio  <eg@essi.fr>
+
+	* utils/stklos-ext-install: Modified to allow the installation of
+	doc files in user repository.
+
+2005-12-27  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk: Corrected a bug on internal defines. 
+	(define (foo) (define a 1) (define b a) (cons a b)) 
+	was incorrect.
+
+2005-12-26  Erick Gallesio  <eg@essi.fr>
+
+	* src/parameter.c (STk_make_C_parameter2): New function to define 
+	C parameters where the value of the parameter is implemented by a
+	C function (as the converter. Used to obtain the value of errno
+	for instance in Posix extension.
+
+	* lib/bonus.stk: Added the prnt and printerr procedures.
+
+2005-12-15  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-66.stk : Added SRFI-66
+
+2005-12-09  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk (dirname): On "/xxx", dirname used to return an
+	empty string instead of "/"	
+
+2005-12-06  Erick Gallesio  <eg@essi.fr>
+
+	* src/print.c (printhexa): FIX: character < ' ' are written in
+	hexa now. This is shorter and it fix a bug. 
+
+	* src/read.c (read_string): FIX: read-string didn't accept the same 
+	'\xx' conventions than write. 
+
+2005-11-08  Erick Gallesio  <eg@essi.fr>
+
+	* src/path.c (tilde_expand): Works now even if $HOME is not
+	defined. 
+
+	* lib/load.stk (*load-path*): initialized using ~ instead of $HOME 
+	for Web scripts 
+
+2005-11-04  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-1.stk (map-in-order): defined to primitive map, since
+	it is in order.
+
+	* lib/load.stk (load-verbose): Fix it. It always return void. 
+
+2005-11-03  Erick Gallesio  <eg@essi.fr>
+
+	* 0.71 Release
+	==================================================
+
+2005-10-31  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk (compile-let): Use a begin instead of a
+	procedure call when the binding is nil.
+
+	* src/hash.c (sxhash): Corrected bignum hash computation (it used 
+	to always return LON_MIN). 
+
+	* lib/bonus.stk: Hash tables are now conform to SRFI-69. Some
+	names have changed but the old one are kept for compatibility.
+	The only incompatible change comes from hash-table-update! 
+	(only when key does not exists). 
+
+2005-10-14  Erick Gallesio  <eg@essi.fr>
+
+	* src/read.c (read_list): An error was not signaled for dotted
+	list sucha as ( . ) and ( . xxx). 
+
+2005-10-09  Erick Gallesio  <eg@essi.fr>
+
+	* src/list.c (STk_dappend2): optimized loop.
+
+2005-09-13  Erick Gallesio  <eg@essi.fr>
+
+	* src/number.c: Several bug fixes to take into account
+	infinities. e.g. (log -inf.0), (sqrt -inf.0)
+	
+
+	* lib/srfi-70.stk: Added SRFI-70 (numbers)
+
+2005-09-12  Erick Gallesio  <eg@essi.fr>
+
+	* src/number.c: Added functions FINITE? and INFINITE?
+
+2005-09-05  Erick Gallesio  <eg@essi.fr>
+
+	* tests/test-fport.stk: Added close-port to avoid (normal) GC problems
+
+2005-08-23  Erick Gallesio  <eg@essi.fr>
+
+	* Added virtual ports
+
+	* src/vm.c (STk_boot_from_C): Another capitalization bug fix.
+
+2005-08-17  Erick Gallesio  <eg@essi.fr>
+
+	* src/read.c: Added the new notation #eof to denote end of file 
+
+	* src/port.c: New primitive EOF-OBJECT
+
+
+2005-08-16  Erick Gallesio  <eg@essi.fr>
+
+	* gtklos/dialog.stk (wait-dialog): Capitalization  fix. Patch
+	provided by Russell Senior <seniorr (at) aracnet.com>
+
+	* src/print.c : 
+	* src/str.c:
+	* src/sport.c:
+	* src/char.c: Characters are no more unsigned. Cast are done when 
+	necessary
+
+2005-08-15  Erick Gallesio  <eg@essi.fr>
+
+	* src/vm.c:
+	* src/port.c: Be case-sensitive when reading code. This avoids to
+	have problem with symbols when code is compiled in case-sensitive
+	mode and re-read in case-insensitive mode.
+
+	* src/: 
+	* gtklos/: Modified to avoid  gcc-4.0 compilation warning. 
+
+2005-08-04  Erick Gallesio  <eg@essi.fr>
+
+	* src/read.c: Fixed a bug when reading forms like '(a . b #;c)
+	which is allowed by SRFI-62.
+
+	* Added SRFI-62
+
+2005-08-03  Erick Gallesio  <eg@essi.fr>
+
+	* configure.in:
+	* utils/shlib-options : 
+	* configure.in: Fix problems with SunOS support
+
+	* utils/shlib-options: Suppressed support for Unixware, which was 
+	very probably incorrect. 
+
+2005-07-09  Erick Gallesio  <eg@essi.fr>
+
+	* configure.in: Added a test for the need of -lpthread loading
+	option. This is necessary for Ubuntu. Thanks to Joshua Boyd
+	<jdboyd (at) jdboyd.net> for signaling this bug.
+
+2005-06-15  Erick Gallesio  <eg@essi.fr>
+
+	* src/port.c: New primitive COPY-PORT.
+
+2005-06-06  Erick Gallesio  <eg@essi.fr>
+
+	* src/system.c: New primitive UNSETENV!
+
+2005-06-04  Erick Gallesio  <eg@essi.fr>
+
+	* src/process.c (run-process): RUN-PROCESS accepts now already
+	opened port for redirections. 
+
+2005-06-02  Erick Gallesio  <eg@essi.fr>
+
+	* src/system.c (file-size): New primitive FILE-SIZE
+
+	* src/socket.c (socket-accept): A useless dup implies the
+	allocation of one port descriptor which was never released. Fixed.
+
+2005-05-28  Erick Gallesio  <eg@essi.fr>
+
+	* src/vm.c: Some modifications for gcc-4.0.
+
+2005-05-27  Erick Gallesio  <eg@essi.fr>
+
+	* 0.70 release
+	============================================================
+	
+	* STklos.prj: Bump the version number to 0.70
+
+2005-05-26  Erick Gallesio  <eg@essi.fr>
+
+	* doc: Added documentation on call/cc, repl, decode-float.
+
+	* configure.in: Fixed a bug on Mac-OSX with Boehm GC. It seems
+	that the GC must be compiled without optimistion at all. So, The
+	configure scripts clears the CFLAGS and coompile the provided GC,
+	even if one already exists on the system. Thnaks to Rembrandt
+	Wolpert for signalling the bug. 
+
+2005-05-25  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Bug corrections of seek and IOs
+
+2005-05-24  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Remove the stklos.h file which was unused, from
+	distribution,
+
+2005-05-23  Erick Gallesio  <eg@essi.fr>
+
+	* lib/Makefile.am: Make boot file in --quiet mode. I thought it
+	was already done!!
+
+	* utils/stklos-install: Changed the name of the stklos-setup shell
+	script to stklos-install.
+
+	* Added the tests infrastructure.
+
+2005-05-19  Erick Gallesio  <eg@essi.fr>
+
+	* src/port.c: Replaced the REWIND-FILE-PORT by PORT-REWIND. The
+	new function accepts ports (instead of being limited to file ports
+	only).
+
+	* src/number.c: New primitive DECODE-FLOAT
+
+2005-05-17  Erick Gallesio  <eg@essi.fr>
+
+	* lib/r5rs.stk: A complete rewriting of call/cc & dynamic wind.
+	Now, things interact properly and should be conform to R5RS (I
+	hope so).
+
+	* lib/bonus.stk (write/ss): Added write/ss and read/ss which were
+	described in SRFI-38 and not available in STklos.
+
+2005-05-16  Erick Gallesio  <eg@essi.fr>
+
+	* src/port.c (port-seek): Added function for direct access to
+	a file: PORT-SEEK
+
+	* lib/load.stk (current-loading-file): Added the function 
+	CURRENT-LOADING-FILE asked by Rick Taube.
+
+	* lib/srfi-0.stk (cond-expand): Several problem fixed thanks to
+	Rick Taube <taube (at) uiuc (dot) edu>:
+	  - cond-expand return a value (as cond). It used to return void!!
+	  - added a provide in the file, to avoid multiple loading
+	  - added the key "STklos" for the cond clause (could be useful
+	    for "-c" users). 
+
+2005-05-13  Erick Gallesio  <eg@essi.fr>
+
+	* src/vm.c (run_vm): Fixed a bug with multiple values. Sometimes
+	the number of values was incorrect (eg (begin (values 1 2)
+	3)). This should be correct now. 
+
+2005-05-09  Erick Gallesio  <eg@essi.fr>
+
+	* lib/r5rs.stk:
+	* src/vm.c: Added back call/cc
+	Changed the way multiple values are implemented.
+
+2005-05-03  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk (bit-shift): Fixed a bug with negative numbers.
+
+2005-04-28  Erick Gallesio  <eg@essi.fr>
+
+	* src/fport.c (Fnputs): Changed the way line are printed for 
+	line buffered files.
+
+2005-04-27  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk: Code cleanup and optimization.
+	(compile-let*): New code scheme for let*, It
+	is more than 5x faster now.
+	(build-let*): avoid the inutile for the body of an extended lambda
+	if there are no definition inside it.
+	
+	* STklos.prj: Check-in: New backtrace system
+
+2005-04-26  Erick Gallesio  <eg@essi.fr>
+
+	* doc/stklos.1.in : Added documentation on STKLOS_LOAD_PATH and
+	STKLOS_FRAMES. 
+
+	* lib/boot.stk: Changed the default error handler such that 
+	it displays a backtrace when an error occurs.
+	The shell variable STKLOS_FRAMES can be used to indicate the depth
+	of a back trace.
+
+	* utils/stklos-compile.stk (main): Changed script to take into
+	account new line scheme.
+
+2005-04-25  Erick Gallesio  <eg@essi.fr>
+
+	* src/misc.c : Suppressed the (non documented) primitive
+	%enter-procedure which became useless.
+
+	* src/error.c: Supressed STk_primitive_name. Now the name of the
+	current procedure is found by introspecting the stack. It gives
+	better messages than before. 
+
+	* src/uvector.c (make_uvector): Fixed a bug that provoke a core
+	with incorrect values of length.
+
+	* src/cond.c (STk_make_C_cond): Replaced all the
+	STk_make_condX  by a function with variable number of arguments
+
+2005-04-24  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk: Line number generation is now embeded in the
+	stack (instead of in a global). This yields better informations
+	on errors and we have now a backtrace which is available when an
+	error occurs.
+
+2005-04-21  Erick Gallesio  <eg@essi.fr>
+
+	* lib/repl.stk: New primitive REPL.
+
+	* src/fport.c (fill_buffer): Clear the EOF flag to allow mutiple
+	EOF (useful for interactive ports and staged REPLs).
+
+2005-04-20  Erick Gallesio  <eg@essi.fr>
+
+	* lib/describe.stk: Detailed description for conditions and structures.
+
+	* src/object.c: Added the classes <condition-type> and <condition>.
+
+2005-04-18  Erick Gallesio  <eg@essi.fr>
+
+	* src/number.c:
+	* src/proc.c:
+	* src/vm.c:
+	* src/parameter.c:
+	* src/port.c:
+	* src/process.c:
+	* src/promise.c:
+	* src/regexp.c:
+	* src/hash.c: 
+	* src/struct.c:
+	* src/env.c:
+	* src/signal.c: some internal symbols were not static. Fixed.
+
+2005-04-14  Erick Gallesio  <eg@essi.fr>
+
+	* gc/Makefile.in:
+	* pcre/Makefile.in: Patched files to avoid library installation. 
+	
+	* configure.in: Added the options --with-provided-gc and
+	--with-provided-regexp to force the usage of our GC and PCRE
+	versions, even if there are some version already installed on the
+	system
+	
+
+2005-04-08  Erick Gallesio  <eg@essi.fr>
+
+	* src/socket.c (set_socket_io_ports): A port was allocated and
+	never closed, leading to file descriptor leaks. Fixed.
+
+2005-04-07  Erick Gallesio  <eg@essi.fr>
+
+	* lib/make-C-boot.stk: New file used when a new boot file is
+	created. It translates the boot file in C data which can be used
+	to boot on. This makes the interpreter autonomous.
+
+	* src/boot.c: New file created by the lib/make-C-boot.stk script.
+
+
+2005-04-05  Erick Gallesio  <eg@essi.fr>
+
+	* 0.61 Release
+	======================================================================
+	
+	* lib/compiler.stk (build-let*): Changed back ext-lambda-key-get
+	to the old key-get, because it breaks already compiled skribe1. 
+	Ait until the release of Skribe2 before reintroducing the patch.
+
+	* src/sio.c: 
+	* src/fport.c: Ports were not garbaged with new version of the GC.
+
+2005-04-04  Erick Gallesio  <eg@essi.fr>
+
+	* src/regexp.c (regexec_helper): Bug fix. Result was incorrect for
+	some expressions with submatches 
+
+2005-03-31  Erick Gallesio  <eg@essi.fr>
+
+	* src/read.c: Reading of '#;' comments was incorrect. Furthermore 
+	the evalutaion of "." at the toplevel yield a panic. 
+
+	* STklos.prj: Going back with GC 6.1. I had too much problem on
+	Mac OS X with 6.3 and 6.4 versions.
+
+2005-03-30  Erick Gallesio  <eg@essi.fr>
+
+	* doc/stklos.1.in: Documentation of the ~/.stklos/stklosrc file.
+
+	* STklos.prj: Completely changed the build preocess. Usage of
+	libary should be more coherent now
+
+	* pcre: Embed version 5.0 in distribution
+
+	* configure.in: don't use the provided PCRE library, if there is
+	already one installed. 
+
+	* lib/bonus.stk (setter): Parameter objects (srfi-39) can be used in
+	generalized set! (srfi-17) 
+
+2005-03-29  Erick Gallesio  <eg@essi.fr>
+
+	* lib/boot.stk: bootstraping the system in case insensitive mode
+	works now.
+
+	* src/port.c (initialize_io_conditions): Typo corection
+
+	* utilsP/stklos-compile.stk (main): Added option --no-time to not
+	display the compilation at end of compilation
+
+	* doc/stklos-compile.1.in: Documentation updated. 
+
+	* lib/compiler.stk (compile-user-lambda): Extended lambda don't
+	use anymore key-get but ext-lambda-key-get so that the user can
+	break it if the pairing method is not convenient. This was
+	originally asked by Giorgio Felchero 
+	<giorgio (dot) v (dot) felchero	(at) virgilio (dot) it>
+	but would had be useful in the first implementation of Skribe
+	too.  Of course, ext-lambda-key-get is initialized to key-get	
+
+	* lib/srfi-35.stk (condition): implementation of CONDITION was
+	incorrect since it uses a C function which was not
+	exported. Fixed.
+
+	* src/cond.c (make_comp_cond): Initialization of fields in common
+	was incorrect. Fixed.
+
+	* src/vm.c: VM has been optimized.
+
+	* lib/srfi-0.stk (srfi0-register-feature!): Permit to an extension
+	to add new feature for SRFI0 cond-expand.
+
+2005-03-27  Erick Gallesio  <eg@essi.fr>
+
+	* src/misc.c (STk_eval_C_string): New function to evaluate a
+	Scheme expression from C. This was requested by Zanbatou Zanza
+	<zanza (at) gdnmail (dot) net>
+
+	* lib/bonus.stk (eval-from-string): New primitive.
+
+2005-03-22  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Checkin with new GC (version 6.4)
+
+	* gc: Replaced old 6.1 GC by a new 6.4 one.
+
+2005-03-21  Erick Gallesio  <eg@essi.fr>
+
+	* lib/repl.stk (REPL): Added colors for repl in ANSI terminals 
+
+	* STklos.prj: Check-in of IO optimizations 
+
+	* src/sport.c (Swrite): Optimized string port writing 
+
+	* doc/stklos.1.in : deleted the reference to texinfo documentation
+	and added a link to the STklos distribution site.
+
+	* doc/stklos-setup.1.in: Added documentation for stklos-setup
+	command
+
+	* lib/load.stk: Added the primitive require/provide
+
+2005-03-20  Erick Gallesio  <eg@essi.fr>
+
+	* utils/stklos-setup: New command to install STklos extensions
+	by the web
+
+	
+2005-03-18  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Deleted the stklos.spec file. It was not maintained 
+	for several years (ans does not seem to miss to anybody)
+
+	* utils/stklos-config.in: The -c and -l option were incorect.
+
+2005-03-15  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk (gensym): rewritten to be more efficient
+
+	* src/port.c: New primitive WRITE-CHARS
+
+	* src/*port.c:
+	* src/io.c: General optimisations on write. This is really faster now. 
+	
+
+2005-03-14  Erick Gallesio  <eg@essi.fr>
+
+	* src/port.c : New primitives read-chars and read-chars!
+
+
+2005-03-09  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-60.stk: Added SRFI-60
+
+	* lib/STklos.init (scheme-implementation-home-page): Changed it to 
+	http://www.stklos.net
+	
+	* src/misc.c: Added the GET-PASSWORD primitive.
+
+2005-03-07  Erick Gallesio  <eg@essi.fr>
+
+	* src/struct.c (is_a): Documentation correction
+
+2005-02-28  Erick Gallesio  <eg@essi.fr>
+
+	* src/misc.c (uri-parse): Doc fix.
+
+2005-02-17  Erick Gallesio  <eg@essi.fr>
+
+	* src/fport.c (Fputs): rewritten to be more efficient. 
+
+2005-02-03  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compfile.stk:
+	* lib/compiler.stk: Warning on forward used symbols is deferred 
+	to the end of a compilation of a file. This avoids messages on
+	undefined symbols whereas these symbols are defined later. 	
+
+2005-01-11  Erick Gallesio  <eg@essi.fr>
+
+	* utils/shlib-options: 
+	* etc/stk-dynload.c (DLOPEN_COMPATIBLE): Changed NETBSD-1 to
+	NETBSD since dynamic loading is the same on both version of the
+	system. Thanks to Perry E. Metzger <perry _at_ piermont.com> for
+	signaling it.
+
+2004-12-12  Erick Gallesio  <eg@essi.fr>
+
+	* src/stklos.c (process_program_arguments): Added the "-c" option 
+	to be case-insensitive
+
+	* src/read.c (read_case_sensitive): New parameter to allow 
+	case sensitive reader
+
+	* utils/tmpcomp: Changed the path separator to ":" on cygwin too.
+
+2004-11-30  Erick Gallesio  <eg@essi.fr>
+
+	* 0.60 release
+	======================================================================
+
+	* src/system.c (running-os): return "cygwin-windows" when compiled
+	with CYWWIN (it was "windows").
+
+	* lib/bonus.stk: Changed the Win32 implementation of dirname,
+	basename and decompose-file-name. 
+
+	* src/system.c: New primitive POSIXIFY-FILE-NAME on Win32 systems.
+
+2004-11-29  Erick Gallesio  <eg@essi.fr>
+
+	* utils/tmpcomp: Use the -q option for compiling STklos to avoid
+	that people with their own ~/.stklos/stklosrc break the
+	installation.
+
+	* lib/load.stk (load-verbose): Bug Fix.
+
+	* lib/srfi-0.stk: srfi-0.stk did not allow combinations of and,
+	or, not. Thanks to Sven Hartrumpf <Sven dot Hartrumpf at
+	fernuni-hagen dot de> for signaling it.
+
+	* lib/Makefile.am: Changed the names of Match, SILex and Lalr
+	directories to Match.d SILex.d Lalr.d for Win32 and Mac OSX 
+	system which have kind of case insignificant fs. 
+
+	* lib/load.stk: Removed the module encapsulation of loading
+	primitives. This should be changed back for a future release. 
+
+2004-11-20  Erick Gallesio  <eg@essi.fr>
+
+	* lib/computils.stk (compiler-error): Added a colon at end of
+	messages for new Emacs next-error syntax.
+
+2004-11-17  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-0.stk: Added symbolic name for some srfis
+
+	* lib/bonus.stk: Added SRFI-55
+
+2004-11-07  Erick Gallesio  <eg@essi.fr>
+	
+	* PORTING-NOTES: Added a note about the port on Open Darwin
+	signaled by Markus W.Weissmann <mww at opendarwin dot org>
+
+2004-11-05  Erick Gallesio  <eg@essi.fr>
+
+	* lib/date.stk: Added a bunch of functions on date. Everything is 
+	documented now. Dates are in special section of the documentation
+	now.
+
+	* src/struct.c : Fast struct setter didn't return void
+
+2004-11-04  Erick Gallesio  <eg@essi.fr>
+
+	* 0.59 version release
+	======================================================================
+
+2004-11-03  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Check in with documentation
+
+2004-11-01  Erick Gallesio  <eg@essi.fr>
+
+	* doc/skb/stdproc.skb: Added the missing documentation of
+	READ-FROM-STRING, FORK and PORT-CLOSED?
+
+2004-10-27  Erick Gallesio  <eg@essi.fr>
+
+	* src/list.c : 
+		- %econs is no more a primitive. 
+		- %epairs store now line AND position (it was line only before)
+		- new primitive %EPAIR-POSITION
+
+	* src/port.c: New primitive PORT-CURRENT-POSITION
+
+	* src/read.c (read_rec): Added the future R6RS comment syntax '#;'
+
+2004-10-25  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: check-in with LALR
+
+	* lib/Lalr: Added the Dominique Boucher's lalrm.scm package. 
+	Thanks to Dominique for	allowing me to include it in STklos
+	distribution.
+
+	* lib/pragma.stk: New file allowing compiler pragmas. 
+
+2004-10-22  Erick Gallesio  <eg@essi.fr>
+
+	* utils/stklos-genlex.stk (lex-generate): Return code indicates
+	now if the analyser was produced or not. 
+
+2004-10-21  Erick Gallesio  <eg@essi.fr>
+
+	* lib/pp.stk: Pretty print is now on the standard output by
+	default as advertised in documention.
+
+2004-10-17  Erick Gallesio  <eg@essi.fr>
+
+	* lib/object.stk: Fixed initialization of a generic where a
+	function with same name already exists. 
+
+2004-10-15  Erick Gallesio  <eg@essi.fr>
+
+	* src/read.c: Added support for SRFI-10
+
+2004-09-23  Erick Gallesio  <eg@essi.fr>
+
+	* src/fport.c (close_all_ports): stdout and stderr were not
+	correctly flushed
+	
+	* lib/obsolete.stk: FLUSH has been renamed FLUSH-OUTPUT-PORT. The
+	old name is kept for comatibility, but shoud not be used anymore.	
+
+2004-09-14  Erick Gallesio  <eg@essi.fr>
+
+	* src/path.c (tilde_expand): ~/xyz is expanded in /xyz if HOME is
+	not set. It was an error before, but it was a problem for CGI
+	scripts. 
+
+2004-09-02  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: First skribified documention
+
+2004-08-29  Erick Gallesio  <eg@essi.fr>
+
+	* lib/load.stk : New parameters LOAD-PATH LOAD-VERBOSE LOAD-SUFFIXES
+	 and code cleaning (less symbol exported). 
+
+2004-08-21  Erick Gallesio  <eg@essi.fr>
+
+	* doc/extract-doc.stk (parse-documentation-item): Added 
+	the similar function in a main entry for new documentation format.
+
+	* src/keyword.c: Bug fix. It was possible to delete a value in a
+	constant key list. 
+
+2004-08-18  Erick Gallesio  <eg@essi.fr>
+
+	* src/print.c : Now we have something coherent for +inf.0 -inf.0
+	+nan.0 and -nan.0
+
+	* src/number.c: Added bignum? as a documented primitive.
+
+2004-07-17  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: 0.58 version release
+	======================================================================
+
+	* doc/stklos-body.stexi (): Added the documentation of 
+	with-input-from-port, with-{output,error}-to-port which exists
+	for years but was absent from the Reference Manual.
+
+2004-07-16  Erick Gallesio  <eg@essi.fr>
+
+	* src/fport.c (STk_rewind_file_port): Bug fix. Position in file
+	was not reseted when a port was rewinded. 
+
+2004-07-14  Erick Gallesio  <eg@essi.fr>
+
+	* src/system.c : New primitive WINIFY-FILE-NAME on Win32 systems
+
+	* PCRE: Using pcre-4.1.5
+
+2004-07-13  Erick Gallesio  <eg@essi.fr>
+
+	* PORTING-NOTES: Added informations about the port on SGI from
+	Joshua Boyd
+
+	* lib/boot.stk:
+	* src/stklos.c: Minor cleanup on program arguments
+
+	* src/vm.c: some cleanup in the VM instructions.
+
+2004-07-11  Erick Gallesio  <eg@essi.fr>
+
+	* src/system.c: Changed the divisor for the time and sleep
+	function for WIN32. Specified time was multiplied by 10.
+
+	* lib/repl.stk (REPL): Added the "cygwin" terminal to the ones
+	which must be colorized. Cygwin is the default value of TERM
+	under cygwin.
+	
+2004-07-07  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Go back with GMP 3.1.1 (rather than 4.1.2 which is
+	too complex for our lite version
+
+2004-06-29  Erick Gallesio  <eg@essi.fr>
+
+	* src/fport.c (close_all_ports): Bug fix which leads to an
+	infinite loop when closing standard input
+
+2004-06-28  Erick Gallesio  <eg@essi.fr>
+
+	* gmp/mp_clz_tab.c: New file needed by some architectures for
+	compiling gmp-light.
+
+	* configure.in: Added the configure option --with-gmp-light to
+	use our version of GMP, even one is provided by the system. This
+	is useful for debugging gmp-light
+
+2004-06-22  Erick Gallesio  <eg@essi.fr>
+
+	* src/vm.c (STk_allocate_stack): The stack is now allocated
+	dynamically. THe interpreter option --stack-size permit to change
+	the stack size
+
+	* STklos.prj: Implementation finished of SRFI-34 SRFI-35 SRFI-36
+
+
+2004-06-16  Erick Gallesio  <eg@essi.fr>
+
+	* lib/repl.stk (REPL): Don't display prompt in color when the -i 
+	option is used. 
+
+2004-06-15  Erick Gallesio  <eg@essi.fr>
+
+	* src/stklos.c: Added the --interactive option for the Eclipse
+	plugin
+
+2004-06-11  Erick Gallesio  <eg@essi.fr>
+
+	* src/uvector.c (STk_uniform_vector_tag): When the tag was
+	uncorrect, the reader crashed. 
+
+2004-06-04  Erick Gallesio  <eg@essi.fr>
+
+	* src/fport.c: 
+	* src/port.c: Code reorganization
+
+2004-05-28  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Commit with Exceptions (aka SRFI-34)
+
+2004-05-27  Erick Gallesio  <eg@essi.fr>
+
+	* lib/module.stk (%module-handler): Corrected a bug which lead to
+	a bad current module, when an error roccurs in a define-module.
+
+2004-05-25  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Commit with Conditions (aka SRFI-35)
+
+2004-05-22  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Commit with Structs
+
+2004-05-21  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-9.stk (define-record-type): New implementation using
+	structures (rather than objects). 
+
+	* src/struct.c: Added fast accessors to structures.
+
+	* lib/describe.stk (describe): Added structures
+
+	* src/socket.c (STk_init_socket): changed  from user type to
+	extended type
+
+	* src/object.c (): Added structures to the object layer
+
+	* lib/bonus.stk (setter): Added a setter for struct-ref
+
+2004-05-18  Erick Gallesio  <eg@essi.fr>
+
+	* stklos: Added Structures. These are cheap objects
+	
+	* lib/srfi-0.stk : Claim that SRFI-17 is implemented (this was
+	always the case!!)
+
+2004-05-17  Erick Gallesio  <eg@essi.fr>
+
+	* lib/pp.stk (pretty-print): Changed symbol->string to a format
+	to allow correct pretty-printing of symbols with spaces.
+
+2004-05-12  Erick Gallesio  <eg@essi.fr>
+
+	* src/struct.c: Added low level support for structures.
+
+2004-04-25  Erick Gallesio  <eg@essi.fr>
+
+	* src/port.c (internal_format): Modified to add support for
+	SRFI-48.
+
+2004-04-23  Erick Gallesio  <eg@essi.fr>
+
+	* src/number.c (imag_part): Bug fix. Image part of a non complex 
+	used to return the number itself instead of 0.
+
+2004-04-03  Erick Gallesio  <eg@essi.fr>
+
+	* src/socket.c: sockets are created with the SO_REUSEADDR flag
+	set now.
+
+2004-03-23  Erick Gallesio  <eg@essi.fr>
+
+	* src/vm.c (run_vm): Inlined the funcall function in the VM. This
+	speeds up excution time of 10% (only :-<)
+
+2004-03-10  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk : 
+	* lib/computils.stk: Rewritten compiler-error. Now, lines numbers
+	are correct when an error is encountered thanks to extended
+	pairs. 
+	
+
+2004-02-13  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-13.stk (string-concatenate-reverse/shared): Correction
+	of a bug signaled in the SRFI-13 mailing-list by Francisco
+	Solsona <solsona @ acm.org>
+
+2004-02-11  Erick Gallesio  <eg@essi.fr>
+
+	* src/fport.c : The code was buggy. Need to use a kind of fake
+	pointers to implement a weak list. 
+
+2004-01-26  Erick Gallesio  <eg@essi.fr>
+
+	* src/fport.c: Bug in GC, ports were never released and, as a
+	consequence, their associated file descriptors were never freed.
+
+2004-01-22  Erick Gallesio  <eg@essi.fr>
+
+	* src/system.c : New primitive SLEEP
+
+2004-01-16  Erick Gallesio  <eg@essi.fr>
+
+	* utils/stklos-compile.stk (main): Added -l option to
+	stklos-compile to insert line numbers	
+
+	* lib/boot.stk (%show-error-infos): When an error occurs, the
+	source file and line number can be printed if the file has been
+	compiled in debug mode
+
+2004-01-15  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk (include-file): Bug fix: code read by include is 
+	declared as a constant now.
+
+	* src/process.c: Typo error in the documentation of processes
+
+2004-01-14  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: 0.57 version release
+	======================================================================
+
+2004-01-13  Erick Gallesio  <eg@essi.fr>
+
+	* src/process.c (fork): Added FORK
+
+2004-01-10  Erick Gallesio  <eg@essi.fr>
+
+	* utils/stklos-genlex.stk (lex-generate): Corrected a bug when 
+	the input file syntax was incorrect.
+
+2004-01-09  Erick Gallesio  <eg@essi.fr>
+
+	* src/system.c: New primitive REGISTER-EXIT-FUNCTION!
+
+2004-01-05  Erick Gallesio  <eg@essi.fr>
+
+	* src/misc.c : New primitive HTML->STRING  and URI-PARSE 
+
+2004-01-04  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk: Code cleaning
+
+	* lib/bonus.stk: Added the CHMOD procedure
+
+	* utils/stklos-compile: Uses now the chmod procedure so that the
+	produced file is executable
+
+
+2004-01-02  Erick Gallesio  <eg@essi.fr>
+
+	* src/gnu-getopt.c (getopt_fprintf): Rewrited to avoid warnings
+	with gcc 3.X
+
+2004-01-01  Erick Gallesio  <eg@essi.fr>
+
+	* src/dynload.c: added support for non Finked Mac-OS 
+
+2003-12-23  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-13.stk (string-contains-ci): Bug correction 
+
+2003-12-20  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk: Added support for SRFI-16 (case-lambda)
+
+2003-12-19  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-26.stk: New file omplementing SRFI-26 (cut/cute)
+
+2003-12-13  Erick Gallesio  <eg@essi.fr>
+
+	* Added SILex to the distribution. Thanks to Danny Dubé for
+	allowing me to include it in STklos.
+
+2003-11-14  Erick Gallesio  <eg@essi.fr>
+
+	* src/proc.c (procedure?): procedure? didn't answer #t on
+	generic. Thanks to Sven.Hartrumpf@fernuni-hagen.de, for 
+	helping me to find this bug.
+
+	* lib/srfi-1.stk (check-arg): Typo correction
+
+2003-11-11  Erick Gallesio  <eg@essi.fr>
+
+	* examples/entry2.stk (main): typo error
+
+2003-11-06  Erick Gallesio  <eg@essi.fr>
+	
+	* STklos.prj: 0.56 version release
+	======================================================================
+
+	* src/system.c: New primitive HOSTNAME
+
+	* src/port.c (error): don't use anymore regexp to determine if the 
+	error message is a SRFI-23 one or not. 
+
+	* lib/srfi-27: Support for SRFI-27
+
+2003-11-04  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Modified again for MacOS X port
+
+2003-10-22  Erick Gallesio  <eg@essi.fr>
+
+	* lib/getopt.stk: Added an optional argument to arg-usage to allow
+	the printing of helps strings as s-exprs.
+
+	* src/sio.c (STk_ungetc): Bug fix. Line number was not always
+	correct after un-reading a newline.
+
+2003-10-19  Erick Gallesio  <eg@essi.fr>
+
+	* src/list.c : Added extended pairs (pairs which contains line and
+	file where they were read. Objects of this type should be
+	constructed by the reader only.
+
+2003-10-15  Erick Gallesio  <eg@essi.fr>
+
+	* src/regexp.c: new primitive REGEXP-QUOTE
+
+2003-10-05  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk: new primitives MAKE-PATH, FILE-SEPARATOR
+
+2003-09-02  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk: gensym accepts now a prefix which an be a string 
+	or a symbol (it was limited to a string before)
+
+2003-09-01  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk: Added the Bigloo function HASH-TABLE-UPDATE!
+
+2003-08-31  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-0.stk: Added the definition of feature 'stklos' for
+	SRFI-0. 
+
+2003-08-28  Erick Gallesio  <eg@essi.fr>
+
+	* src/system.c : New primitive DATE
+
+2003-08-24  Erick Gallesio  <eg@essi.fr>
+
+	* lib/object.stk: Correction of a long standing annoyance: when 
+	methods were defined their body evaluation was delayed => when
+	compiling a file, the final expansion of the method was done 
+	when the compiled file was loaded (hence, the message about
+	undefined function seems to appear at runtime rather than at
+	compile time).
+
+	Changed the way accessor were built. It should be a litle bit more 
+	efficient. 
+
+	* lib/describe.stk (describe): Corrected ans error when describing
+	method not associated to a generic.
+
+	* src/number.c (real_precision): New parameter object used to
+	obtain the precision used for real numbers
+
+	* src/parameter.c : New file to implement SRFI-39.
+
+2003-08-21  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk (extended-lambdas): Changed a little bit the
+	way extended lambdas are handled. Now, if we have :key, the end 
+	of optional when we encounter the end of the parameter list or 
+	the first keyword. This permits this kind of things:
+	   (define (foo :optional a :key i) (list a i))
+	   (foo 1 :i 20) ==> (1 20)
+	   (foo :i 20)   ==> (#f 20)
+	Before, the second call was forbidden.
+	
+	* lib/r5rs.stk: typo correction
+
+2003-08-17  Erick Gallesio  <eg@essi.fr>
+
+	* src/proc.c (%procedure-arity): changed to take also into account
+	subrs.
+
+2003-08-15  Erick Gallesio  <eg@essi.fr>
+
+	* src/vm.c (run_vm): DEFINE_SYMBOL always defined the symbol in
+	the current module insead of the module in the VM. That means that 
+	(eval '(define foo 'bar) (find-module 'another-module)) was 
+	incorrect.
+
+2003-07-29  Erick Gallesio  <eg@essi.fr>
+
+	* src/read.c (read_rec): The reader recognizes now the DSSSL
+	keywords #!key, #!optional and #!rest. They are converted to the 
+	STklos keywords :key :optional and :rest respectively. Otherwise, 
+	the sequence #! is always considered as a one line comment.
+	
+
+2003-07-06  Erick Gallesio  <eg@essi.fr>
+
+	* scale.stk:
+	* canvas.stk: suppressed direct calls to the main function which
+	are uneeded (Thanks to Ed Cavazos <proteus(at)theworld.com> for
+	signalling it.
+
+2003-07-04  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: new GMP library.
+
+	* gmp/longlong.h: modified strings to be compilable by GCC 3.3
+
+	* src/number.c (STk_init_number): BUG correction: bignums were
+	incorrectly freed.
+
+2003-07-02  Erick Gallesio  <eg@essi.fr>
+
+	* src/port.c (write*): Added {READ,WRITE}-WITH-SHARED-STRUCTURE to
+	be compatible with SRFI-38; We were already compatibe but with 
+	name WRITE* and READ. 
+
+	* doc/stklos-srfi.stexi: Added some information about SRFI in the
+	documentation index
+
+2003-06-25  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: 0.55 version release
+	======================================================================
+
+2003-06-20  Erick Gallesio  <eg@essi.fr>
+
+	* src/socket.c (socket-shutdown): Added back the close argument as
+	in STk.
+
+	* examples/socket-server.stk (main): Revamped the demo which was
+	incorrect.
+
+2003-06-05  Erick Gallesio  <eg@essi.fr>
+
+ 	* src/system.c (copy-file): new primitive
+
+2003-05-30  Erick Gallesio  <eg@essi.fr>
+
+	* New version of PCRE: pcre-4.3
+
+2003-05-09  Erick Gallesio  <eg@essi.fr>
+
+	* src/vm.c (STk_execute_current_handler): Since the re-ordering of
+	parameter passing, handlers take their parameter in wrong order.
+	This is corrected now.
+
+2003-04-04  Erick Gallesio  <eg@essi.fr>
+
+	* lib/load.stk (%guess-pathname): Changed the way file are
+	sesarched for loading. Don't use "." systematically. "." 
+	has been added in the default load path.
+
+2003-04-02  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk (dirname): Changed the behaviour: if no "/" is
+	present, now we return "." instead of the path itself (as the
+	Unix dirname command).
+
+2003-03-18  Erick Gallesio  <eg@essi.fr>
+
+	* lib/repl.stk: banner is now written on stderr rather than stdout.
+
+2003-03-11  Erick Gallesio  <eg@essi.fr>
+
+	* lib/repl.stk (REPL): Typo error.
+
+2003-02-25  Erick Gallesio  <eg@essi.fr>
+
+	* lib/r5rs.stk (%make-with-port): Uncorrect test to see if there
+	was no redirection.
+
+2003-02-14  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-9.stk (define-record-type): corrected a typo. Bug
+	signaled by Sven Hartrumpf <Sven.Hartrumpf@FernUni-Hagen.de>
+
+	* STklos.prj: 0.54 version release
+============================================================================	
+2003-02-12  Erick Gallesio  <eg@essi.fr>
+
+	* PORTING-NOTES: New file
+
+	* Finished the port on Solaris 6
+
+2003-02-11  Erick Gallesio  <eg@essi.fr>
+
+	* Finished the port on MAC OS-X
+
+2003-02-08  Erick Gallesio  <eg@essi.fr>
+
+	* SUPPORTED-SRFIS: New file.
+
+2003-02-07  Erick Gallesio  <eg@essi.fr>
+
+	* src/number.c (div2): typo correction (long double instead of double)
+
+2003-01-31  Erick Gallesio  <eg@essi.fr>
+
+	* src/read.c: BUG: token terminated by a '\r' were not always
+	correctly recognized.
+
+2003-01-30  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk: New Primitives port-idle-register!,
+	port-idle-unregister! and port-idle-reset!
+
+	
+2003-01-28  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Check-in before muliple idle handler
+
+2003-01-16  Erick Gallesio  <eg@essi.fr>
+
+	* src/fport.c: open file admits now files usting '~' notation.
+
+	* lib/bonus.c:
+	* src/system.c: Added back the STk GLOB, CANONICAL-PATH-NAME,
+	EXPAND-FILE-NAME, BASENAME, DIRNAME and DECOMPOSE-FILE-NAME
+	primitives
+
+2003-01-14  Erick Gallesio  <eg@essi.fr>
+
+	* src/port.c (read-line): modified to take into account line
+	terminated by "\r\n" as they are often seen on sockets.
+
+2002-12-27  Erick Gallesio  <eg@essi.fr>
+
+	* Arguments are now evaluated from left to right. The compiler has
+	been bootstraped completely (this was a lot harder than I thought)
+	
+	* lib/object.stk (apply-methods): no-next-method was called with 
+	bad parameters, for user generic functions.
+
+	* src/vm.c (funcall): Correction of a long standing bug with
+	next-method in a let in tail recursive position. 
+	
+2002-12-21  Erick Gallesio  <eg@essi.fr>
+
+	* src/vm.c (values): Correction of a bug in the values function
+
+2002-12-19  Erick Gallesio  <eg@essi.fr>
+
+	* src/object.c (slot-set-using-class!): Changed from a vsubr to a
+	subr4.
+
+2002-12-18  Erick Gallesio  <eg@essi.fr>
+
+	* src/system.c (STk_temporary_file_name): Don't use anymore tmpnam 
+	(which is POSIX) to avoid GCC message at link time!!! 
+
+2002-12-17  Erick Gallesio  <eg@essi.fr>
+
+	* lib/object.stk (slot-unbound): Avoid printing object itself in
+	the error message, because it might cause an infinite loop (via
+	write-object method). Problem signaled by Shiro Kawai
+	<shiro@acm.org>.
+
+2002-12-03  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-31.stk: New SRFI: the REC form.
+
+2002-11-23  Erick Gallesio  <eg@essi.fr>
+
+	* src/system.c (getenv): GETENV can be called now without
+	parameter. In this case, it returns the program environment as an
+	A-list.
+
+2002-11-22  Erick Gallesio  <eg@essi.fr>
+
+	* extensions/ldap.c : Modified to be compiled with GCC 3.x
+
+	* utils/stklos-script : Use an absolute path now to find the VM
+
+	* lib/boot.stk : BUG: if $HOME was not set, the VM didn't
+	initialize corrctly.
+
+2002-11-11  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: New GC: version 6.1
+
+	* configure.in: Changed stuff in configure.in so that it correctly
+	works when LDAP is not instaled (patch from Steve Dunham
+	<dunham@igeeks.net>) 
+
+	Now, if GC is available, use it instead of the file we provide in
+	the distribution (idea comes also from Steve Dunham
+	<dunham@igeeks.net>)
+
+	* STklos.prj: Changed GC form GC 6.1 alpha5 to true GC 6.1. 
+	
+
+2002-09-22  Erick Gallesio  <eg@essi.fr>
+
+	* lib/r5rs.stk (%make-with-port): BUG: Changed the forms that
+	redirect into/from a port to not close the port when it is a
+	standard one (i.e. 0, 1 or 2)
+
+	* src/fport.c : New undocumented primitive "%PORT-FILE-FD"
+
+2002-08-23  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk (include-file): Changed to always display a
+	file name. It worked for included file but not for file directly
+	compiled.
+
+2002-08-09  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Added SRFI-23 -- Error procedure.
+
+	* src/read.c (read_rec): Modified the reader to accept nested 
+	multi-line comments as requested by the (yet in draft status mode) 
+	SRFI-30.
+
+2002-08-06  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: 0.53 version release
+	======================================================================
+
+2002-08-05  Erick Gallesio  <eg@essi.fr>
+
+	* configure.in: Changed the configure script a little bit: ldap
+	support is not set by default, since I have not found a reliable
+	way to ensure that everything is correct.
+
+
+2002-08-04  Erick Gallesio  <eg@essi.fr>
+
+	* src/vector.c : Added VECTOR-MUTABLE?
+
+	* src/list.c : Added PAIR-MUTABLE? 
+
+2002-07-31  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-13.stk : Finished port of (the boring) SRFI-13!
+
+	* lib/bonus.stk: Added the DIE primitive.
+
+2002-07-09  Erick Gallesio  <eg@essi.fr>
+
+	* extensions/ldap.c (ldif_entry_out): Now keyword are always in 
+	lowercase since LDAP is case insensitive. 
+
+2002-07-08  Erick Gallesio  <eg@essi.fr>
+
+	* doc/stklos-body.stexi: Modified the @rfour and @rfive macro to
+	be correct on both tex and info outputs. 
+
+2002-07-07  Erick Gallesio  <eg@essi.fr>
+
+	* configure.in: Better detection of LDAP
+
+2002-06-26  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Added SRFI-28
+
+	* src/port.c (internal_format): Modification to be compliant with 
+	SRFI-28 (format).
+
+2002-06-19  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: Added SRFI-14
+
+2002-06-17  Erick Gallesio  <eg@essi.fr>
+
+	* STklos.prj: New GC: 6.1 alpha5
+
+	* gc/: Upgraded GC to 6.1 alpha5. STklos didn't work with RedHat
+	7.3. Bug signaled by Gérard Milmeister <gemi@bluewin.ch>
+	
+
+2002-06-12  Erick Gallesio  <eg@essi.fr>
+
+	* src/str.c: Added STRING-MUTABLE? predicate
+	
+	* src/str.c : Added the function STRING-TITLECASE and 
+	STRING-TITLECASE! of SRFI-13 as primitive.
+	
+
+2002-06-11  Erick Gallesio  <eg@essi.fr>
+
+	* src/str.c (STk_init_string): new primitives STRING-DOWNCASE
+	STRING-DOWNCASE!, STRING-UPCASE and STRING-UPCASE! that are
+	compatible with SRFI-13. They replace STRING-LOWER and
+	STRING-UPPER which were less general. The old names are kept for
+	compatibility. 
+
+2002-06-05  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-11.stk: New SRFI (LET-VALUES and LET*-VALUES)
+
+	* lib/full-syntax.stk: Small modifications to allow loading files
+	which require full-syntax. It used to work interactively only.
+
+	* src/port.c (STk_load_source_file): eval symbol is now searched
+	for each sexpr, since eval can change during loading. This is the
+	case with full-syntax.stk for instance.
+
+2002-05-26  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk (compile-begin): begin without expression is no 
+	more an error. It is equivalent to (void).
+
+	* lib/srfi-7.stk: Added support for SRFI-7
+
+	* lib/pp.stk: New file and new function PRETTY-PRINT
+
+2002-05-23  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk : Bad code generation when using a symbol in
+	environment which was already defined as a macro. Bug signaled by
+	Panagiotis Vossos <jacbre@internet.gr>
+
+2002-05-16  Erick Gallesio  <eg@essi.fr>
+
+	* lib/STklos.init (home-vicinity): Path did not a trailing
+	slash. Added. 
+
+	* lib/Makefile.am : Some files were not correctly
+	installed/compiled. thanks to Panagiotis Vossos
+	<jacbre@internet.gr> for signaling it.
+	
+
+	* configure.in: Deleted the compat directory which is no more useful.
+
+2002-05-15  Erick Gallesio  <eg@essi.fr>
+
+	* utils/shlib-options: Modifications of some variables name to be
+	compatible with recent versions of automake
+
+2002-05-08  Erick Gallesio  <eg@essi.fr>
+
+	* Some cleaning for GCC 3.0 compilation
+
+2002-05-03  Erick Gallesio  <eg@essi.fr>
+
+	* utils/stklos-script : The script did not work with argument
+	containg white spaces. 
+
+2002-05-01  Erick Gallesio  <eg@unice.fr>
+
+	* lib/trace.stk: new file for TRACE and UNTRACE
+
+	* lib/repl.stk (repl): Bug correction. There was an error when 
+	the last expression return no result (i.e. "(values)")
+
+	* lib/object.stk (find-class): Use symbol-value* instead of
+	symbol-value.
+
+	* lib/module.stk: New primitive SYMBOL-VALUE* which is like
+	SYMBOL-VALUE except that it searches in all imported modules too.
+
+2002-04-24  Erick Gallesio  <eg@unice.fr>
+
+	* lib/module.stk: New form IN-MODULE
+
+2002-04-23  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: First checkin of 0.53
+
+	* lib/bonus.stk (apropos): New primitive APROPOS 
+
+	* src/env.c (module_exports): If the given module is the STklos
+	module, return all the symbols herein. 
+
+	* src/env.c (module_imports): has been changed so that there 
+	all modules have the STklos module in their importation list
+	(except STklos which have nil by default).
+
+2002-04-22  Erick Gallesio  <eg@unice.fr>
+
+	* configure.in: Bug fix: there was an error when compiling
+	ldap.stk on machines without LDAP support. thanks to Sven
+	Hartrumpf <Sven.Hartrumpf@FernUni-Hagen.de> and Panagiotis Vossos
+	<jacbre@internet.gr> for signaling it.
+	
+	* src/simple-module.c: Updated the demo module for current
+	release. Cosmetic changes.
+
+2002-04-19  Erick Gallesio  <eg@unice.fr>
+
+	* src/env.c: Modified the documentation of module-symbols and
+	module-export which was inaccurate  
+
+2002-04-17  Erick Gallesio  <eg@unice.fr>
+
+	* extensions/ldap.c: Added control on parameters
+	Better error messages
+	
+
+2002-04-11  Erick Gallesio  <eg@unice.fr>
+
+	* src/: Cosmetic modifications to compile with GCC 3.1. Thanks to 
+	Sven Hartrumpf <Sven.Hartrumpf@FernUni-Hagen.de> for signalling
+	the problem.
+	
+	* src/keyword.c (key-set!): When an item is not present in the
+	list, it is added at the end of the list rather than the
+	beginning to allow step by step construction of the list.
+	
+2002-04-09  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: 0.52 version release
+	======================================================================
+
+2002-04-08  Erick Gallesio  <eg@unice.fr>
+
+	* gtklos/gtk-event.c: Added the primitive event-button to know
+	the mouse button pressed	    
+
+	* doc/Makefile.am: Added man pages for stklos, stklos-config and
+	stklos-compile.
+
+	* utils/stklos-config.in: Added informations when help is
+	requested
+
+	* examples/menu.stk: 
+	* gtklos/menu.stk:  New demo and widget re-writting
+
+	* STklos.prj: checkin: Integration of new demo/widgets
+
+	* examples/dialog.stk: new demo
+
+	* gtklos/dialog.stk (make-simple-dialog): New function to create
+	easily dialogs.
+
+2002-04-07  Erick Gallesio  <eg@unice.fr>
+
+	* gtklos/handle.stk:
+	* examples/handle.stk: New demo and widget re-writting
+
+	* gtklos/text.stk:
+	* examples/text.stk: New demo and widget re-writting
+	
+	* gtklos/toolbar.stk:
+	* examples/toolbar.stk: New demo and widget re-writting
+
+2002-04-05  Erick Gallesio  <eg@unice.fr>
+
+	* src/:
+	* gtklos/: Various modifications to avoid problems on 64 bits
+	architectures
+
+2002-04-04  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Start to integrate canvas in distribution
+
+2002-04-03  Erick Gallesio  <eg@unice.fr>
+
+	* lib/date.stk: Added some procedure to access time and date. 
+	This is quite  similar to SRFI-19, but not completely compliat
+	because there are things whioch are not clear in this SRFI, plus
+	the reference implementyation is *very* buggy.
+
+2002-04-02  Erick Gallesio  <eg@unice.fr>
+
+	* lib/: Added support for SRFI-9 and SRFI-8
+	
+	* src/system.c: New primitives FULL-CURRENT-TIME (resolution is µs)
+	and SECONDS->DATE 
+
+	* lib/srfi-9.stk: Added records (aka SRFI-9)
+
+	* lib/bonus.stk: Added receive macro (aka SRFI-8)
+
+	* extensions/ldap.c: Added ldap-delete
+
+2002-04-01  Erick Gallesio  <eg@unice.fr>
+
+	* gtklos/canvitem.stk (): Added polygon and text items
+
+2002-03-29  Erick Gallesio  <eg@unice.fr>
+
+	* extensions/ldap.c: Added ldap-add to the ldap module
+	
+
+2002-03-09  Erick Gallesio  <eg@unice.fr>
+
+	* src/keyword.c: Added key-delete a version of key-delete! which
+	is not destructive
+
+2002-03-08  Erick Gallesio  <eg@unice.fr>
+
+	* gtklos/scroll.stk: Typo correction
+
+2002-03-01  Erick Gallesio  <eg@unice.fr>
+
+	* stklos.spec : Updated the RPM spec file.
+
+2002-02-25  Erick Gallesio  <eg@unice.fr>
+
+	* src/keyword.c:
+	* src/print.c (STk_print): keywords now use bars (as symbols) if 
+	they contains uppercases or space characters
+
+2002-02-23  Erick Gallesio  <eg@unice.fr>
+
+	* extensions/ldap.c: Added a new extension to access ldap 
+	records and read/write files in LDIF format
+
+	* lib/compiler.stk: Bug correction: internal defines were not
+	allowed in extended lambdas
+
+2002-02-22  Erick Gallesio  <eg@unice.fr>
+
+	* src/fport.c: Corrected the long standing bug of file not being
+	flushed when the process exits.
+
+2002-02-16  Erick Gallesio  <eg@unice.fr>
+
+	* gtklos/fontselector.stk: All the dialogs have been rewritten:
+	font color and file choosers.
+
+2002-02-13  Erick Gallesio  <eg@unice.fr>
+
+	* examples/ : A serie of demo has been created or rewritten, 
+	images, listboxes, scroll, ...
+
+2002-02-12  Erick Gallesio  <eg@unice.fr>
+
+	* src/list.c (STk_dremq): Added utility procedure equivalent to 
+	  (delete! obj list eq?)
+
+2002-02-11  Erick Gallesio  <eg@unice.fr>
+
+	* examples/scroll[12].stk: New demo files
+
+2002-01-18  Erick Gallesio  <eg@unice.fr>
+
+	* gtklos/scroll.stk : Added scrolled window widget
+
+2002-01-17  Erick Gallesio  <eg@unice.fr>
+
+	* gtklos/combobox.stk: Added combo-box widget.
+
+2002-01-03  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: 
+	- Changed the version of GC to 6.0 stable.
+	- Changed installation script for machine without prior 
+	STklos installation
+
+2002-01-01  Erick Gallesio  <eg@unice.fr>
+
+	* lib/boot.stk : modified the message when an error occurs in a
+	script. This is better but far from perfect.
+
+2001-12-30  Erick Gallesio  <eg@unice.fr>
+
+	* src/number.c (number2Cstr): Correction of a bug in
+	number->string whan argument was a rational or complex number
+	with a second component being a bignum.
+
+2001-12-13  Erick Gallesio  <eg@unice.fr>
+
+	* lib/object.stk (declare-slots): hack to define the accessor of 
+	slot to avoid the message about unbound symbol on accessors that
+	we have when is file is compiled.
+
+	* src/fport.c: Added primitive port-file-name
+
+	* lib/computils.stk: Errors are now in Gnu format (i.e. can 
+	be parsed by emacs)
+	
+	* doc/stklos-body.stexi (Ports): Added documentation for
+	port-current-line, which was misssing
+
+2001-12-09  Erick Gallesio  <eg@unice.fr>
+
+	* lib/bonus.stk (gensym): Test if the user prefix is a string.
+
+2001-12-05  Erick Gallesio  <eg@unice.fr>
+
+	* lib/load.stk (find-path): Extended the function to allow usng it
+	for finding any file (not only Scheme ones).
+
+2001-12-04  Erick Gallesio  <eg@unice.fr>
+
+	* utils/stklos-compile: Added a new command 'compile-file' to
+	compile a stklos to byte-codes
+
+2001-12-02  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Added parse-arguments special form (based on the GNU
+	getopt function)
+
+2001-11-29  Erick Gallesio  <eg@unice.fr>
+
+	* lib/boot.stk (file): Modified the return code of the intepreter
+	when executing a script (we return now 70 as required by SRFI-22)
+
+2001-11-26  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Changed the version of PCRE to 3.7
+
+	* src/Makefile.am (regexplib): modified for PCRE 3.7
+
+	* lib/compfile.stk (compile-file): Added '#!' black magic to be
+	compatible with SRFI-22 on compiled scripts.
+
+	* STklos.prj: Added Bigloo's match-case and match-lambda
+
+	* doc/stklos-biblio.stexi: Added bibliography to the documentation
+
+2001-11-20  Erick Gallesio  <eg@unice.fr>
+
+	* lib/module.stk: Changed select-module since it didn't work
+	for included file (even if it worked for the loaded files)
+	
+2001-11-19  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Added support for SRFI-22
+
+2001-11-18  Erick Gallesio  <eg@unice.fr>
+
+	* lib/bigloo.stk : Added all the fx operation of Bigloo, since 
+	Bigloo sources often contains such calls.
+
+2001-11-14  Erick Gallesio  <eg@pistou.biot.fr>
+
+	* lib/load.stk (autoload): New version of autoload. It can handle
+	simple symbols and macros now. Furthermore the new implementation
+	is easier than the previous one.
+
+2001-11-04  Erick Gallesio  <eg@unice.fr>
+
+	* src/stklos.c (main): 
+	* lib/bonus.stk: new function PROGRAM-NAME 
+	
+
+2001-10-24  Erick Gallesio  <eg@unice.fr>
+
+	* src/proc.c (STk_for_each): A result (as with map) was computed during
+	for-each and lost just after. 
+
+2001-10-23  Erick Gallesio  <eg@unice.fr>
+
+	* lib/compiler.stk (rewrite-body): defines after a begin were not allowed
+	Thanks to Nicolas Evrard <nicoe@wanadoo.be> for signaling it.
+
+2001-08-12  Erick Gallesio  <eg@unice.fr>
+
+	* Modified the way extensions are linked. Now the VM is no more
+	pre-loaded with GTK libraries.
+
+2001-08-05  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: New wigets (radio-button and gauge). Modification in 
+	object.stk
+
+2001-08-04  Erick Gallesio  <eg@unice.fr>
+
+	* lib/describe.stk (describe): slots are now sorted when they are
+	displayed by describe.
+
+	* lib/object.stk (compute-get-n-set): Added STk active slots. They
+	are in the standard <class> meta-class instead of the
+	<active-metaclass> as it was the case in STk. Consequently there 
+	is no more the need of including a file and to define a metaclass 
+	which inherit from this metaclass and the GTK metaclass to have active
+	slot on GTK slots.
+
+2001-08-02  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: New GTklos widgets (scale, labels) and a new event
+	management. Better usage of MOP (more like v0.51) instead of ad-hoc 
+	code.
+
+	* src/keyword.c (key_delete): Added new primitive key-delete! to
+	delete a key in a keyword list.
+
+	* lib/object.stk ((%compute-slots C)): Use a stable sort when sorting
+	slots in a new class.
+
+2001-07-29  Erick Gallesio  <eg@unice.fr>
+
+	* src/object.c: 
+	* src/object.stk: Changed the initialization scheme of slots. As 
+	a consequence, we can now have a default value on virtual slots
+	and hence on GTklos widgets.
+
+2001-07-28  Erick Gallesio  <eg@unice.fr>
+
+	* lib/object.stk ((%compute-slots C)): Slots are sorted such that
+	instance slots are always before other slots. So, virtual slots
+	are fist and, for instance, virtual slots can have an initial
+	value which depends of real slots.
+
+2001-07-23  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Added New GTklos layout (this is a start)
+
+2001-06-17  Erick Gallesio  <eg@unice.fr>
+
+	* lib/bonus.stk: Added logical bit functions bit-and, bit-or,
+	bit-xor, bit-not and  bit-shift.
+
+2001-05-27  Erick Gallesio  <eg@unice.fr>
+
+	* lib/boot.stk : new option: "--no-init-file" (or -q) to avoid
+	loading user initialization file
+		
+2001-05-22  Erick Gallesio  <eg@unice.fr>
+
+	* src/print.c (printlist & printlist_star): modified to
+	pretty-print unquote, quasiquote and unquote-splicing (there was
+	only quote which was pretty-printed).
+
+2001-05-21  Erick Gallesio  <eg@unice.fr>
+
+	* lib/compiler.stk (backquotify): Level was not correctly managed on 
+	unquote-splicing. Bug signalled for STk by Ben L. Di Vito 
+	<b.l.divito@larc.nasa.gov> 
+
+2001-04-24  Erick Gallesio  <eg@unice.fr>
+
+	* Replaced the typedef of SCM to be a "void *" instead of a "ulong".
+	Several potential bug were detected in the renaming process.
+
+	* configure.in: Added detection of installed gmp library for post
+	3.0 version.
+
+2001-04-16  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Checkin of new SRFIs
+
+2001-04-15  Erick Gallesio  <eg@unice.fr>
+
+	* lib/srfi-4.stk: New file implementing SRFI-4 (homogeneous vectors)
+
+	* src/read.c:
+	* src/vector.c: Modified to add support for SRFI-4
+	* src/uvector.c New file
+
+2001-04-09  Erick Gallesio  <eg@unice.fr>
+
+	* lib/srfi-2.stk (): New file implementing SRFI-2 (and-let*)
+
+	* lib/compiler.stk:
+	(compile-define): Added control on the length of the defined form
+	[define x 1 2] was valid.
+	(compile-and):
+	(compile-or): New code generation scheme (don't use anymore Scheme
+	code equivalence, particularily for OR, since it is very
+	inefficient)
+	
+2001-03-29  Erick Gallesio  <eg@unice.fr>
+
+	* src/port.c (internal_format): changed to have better error reporting.
+
+	* lib/compiler.stk (backquotify): Fixed bad expansion 
+		(let ((a 10)) `(a . ,a))
+	returned (a unquote a) instead of (a . 10)
+
+2001-03-17  Erick Gallesio  <eg@unice.fr>
+
+	* lib/peephole.stk: Added a peephole optimizer to the compiler
+
+	* STklos.prj: Bootstrap reorganization: deleted file misc.stk
+	Bootstrap Reorganization
+	Plugged in the new compiler
+
+2001-03-15  Erick Gallesio  <eg@unice.fr>
+
+	* lib/boot.stk: Grand reorganization of the bootstrap.
+	
+	* STklos.prj: Deleted file number.stk
+
+	* lib/runtime.stk: New file which contains the all he stuff necessary 
+	for bootstrap.
+
+	* src/number.c (make_rational): The function was declared returning an 
+	int instead of a SCM. Thanks to George Bronnikov
+	<goga@bronnikov.mccme.ru> for signaling it.
+
+2001-03-11  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: 0.51 version release
+
+	* New packaging for demos and image files
+
+2001-03-11  Erick Gallesio  <eg@unice.fr>	
+
+	* examples/edit.stk: New demo
+
+2001-03-10  Erick Gallesio  <eg@unice.fr>
+
+	* lib/load.stk (*load-path*): the default load-path can be now 
+	initialized from the shell variable STKLOS_LOAD_PATH
+	New primitives
+		- LOAD-PATH and SET-LOAD-PATH!
+		- LOAD-SUFFIXES and SET-LOAD-SUFFIXES!
+
+	* src/vm.c: Code cleanup. 
+
+2001-03-09  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: New VM integration
+
+	* gc: GC 5.3 => GC 6.0alpha 6 for alpha/LINUX
+
+2001-03-07  Erick Gallesio  <eg@unice.fr>
+
+	* configure.in: Added a test to detect the growing direction of the 
+	stack.
+
+2001-03-04  Erick Gallesio  <eg@unice.fr>
+
+	* lib/bb.stk:	
+	* lib/Makefile.am : Modified to be sure that the new boot file can
+	effectively be used to boot the system (it's a long time I have to
+	do that but now that I have lost 3 hours to go back and forward again
+	to reconstruct a proper boot file;, here it is ;-)
+
+2001-03-03  Erick Gallesio  <eg@unice.fr>
+
+	* lib/load.stk: Added the function FIND-PATH to guess the actual path 
+	of a file given the current *load-path* and *load-suffix*.
+
+2001-03-02  Erick Gallesio  <eg@unice.fr>
+
+	* stklos.spec.in: Added a provide clause.
+
+2001-02-27  Erick Gallesio  <eg@unice.fr>
+
+	* src/misc.c (%emit): primitive deleted and replaced by the VM 
+	instruction EXEC-HANDLER.
+
+	* STklos.prj: checkpoint
+
+	* lib/misc.stk (call/ec): Fixed call/ec when called with multiple 
+	values.
+
+2001-02-24  Erick Gallesio  <eg@unice.fr>
+
+	* src/vm.c: File reorganization. Correction of a bug on nested 
+	error handlers.
+
+2001-02-19  Erick Gallesio  <eg@unice.fr>
+
+	* src/number.c (STk_uinteger_value): new function to obtain an 
+	unsigned long from a Scheme integer.
+
+	* gtklos/gtk-glue.c: modified to use the STk_uinteger_value
+
+2001-02-18  Erick Gallesio  <eg@unice.fr>
+
+	* src/number.c (STk_init_number): ignore signal SIGFPE on
+	Linux/Alpha (as it should be by default). 
+
+	* src/vm.c (NEXT): fixed value for NEXT when the VM is compiled
+	with a non GCC compiler. 
+
+2001-02-12  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Exact reals
+
+	* src/number.c (compute_exact_real): New function to enter exact real 
+        numbers (e.g. #e3.14 => 157/50)
+
+2001-02-11  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Added SRFI-0 and SRFI-1
+
+2001-02-10  Erick Gallesio  <eg@unice.fr>
+
+	* lib/expand.pp: Full R5RS Macros support (the implementation used 
+	is the one from Hieb and Dybvig)
+
+	* lib/load.stk (try-load): Restore the module we had on entering
+	as in STk. Installed a handler to guarantees that. 
+
+2001-02-08  Erick Gallesio  <eg@unice.fr>
+
+	* src/number.c (STk_init_number): modified the computation of +inf,
+	-inf and NaN for Alpha/Linux, to avoid floating point exception.
+
+2001-01-30  Erick Gallesio  <eg@unice.fr>
+
+	* lib/mbe.stk: New file implementing the R5RS define-syntax 	
+
+	* lib/boot.stk: modified to have a native define-syntax 
+
+2001-01-26  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: SLIB support
+
+	* src/print.c (printlist): Modified the list printer so that 
+	(quote xxxx) is now printed as 'xxxx. This make macro-expansions 
+	clearer.
+
+2001-01-25  Erick Gallesio  <eg@unice.fr>
+
+	* lib/STklos.init:
+	* lib/slib.stk:   (New files). Added support for Aubrey Jaffer's SLIB.
+	
+2001-01-24  Erick Gallesio  <eg@unice.fr>
+
+	* lib/compiler.stk ((rewrite-cond-clauses c)): Fixed (cond (#t))
+	which was said as invalid.
+
+	* lib/boot.stk: "number.stk" was not present in  "boot.stk" ==> 
+	  rationalize was not present at boot time. 
+
+	* src/system.c (STk_init_system): Added the primitives CURRENT-TIME
+	and RUNNING-OS.
+
+2001-01-21  Erick Gallesio  <eg@unice.fr>
+
+	* gtklos/Makefile.am: Fixed bug signaled by David Tillman
+	<dtillman@ozarkaircraftsystems.com> where the gtklos.so file was
+	not found.
+
+2001-01-19  Erick Gallesio  <eg@unice.fr>
+
+	* lib/compiler.stk ((compile-letrec)): Fixed bug signaled by Shiro
+	Kawai <shiro@squareusa.com> about letrec and named let
+
+	* PACKAGES-USED (PCRE): Updated.
+
+	* STklos.prj: Changed the version of Boehm GC (5.0 ->5.3)
+
+2001-01-17  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Release 0.50 (first public release)
+
+2001-01-05  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: New version of gmp (3.1.1). This is substantially bigger
+than the 2.x version but it works on a broader range of machines
+
+2000-12-30  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Cleanup for the FIXME: used #ifdef and no more C++ comments
+	Regenerate GNU install file (problems with PRCS and dates)
+
+2000-12-29  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: New packaging for a public release
+
+2000-12-10  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Multiple values. Some doc added.
+	Added PCRE package
+
+2000-11-17  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Complete widget set for first public version. Go back 
+	to Scheme
+	Packing option
+	Version stable avant call/cc
+
+2000-10-27  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Added widget reparenting
+	Added tooltips
+	Added text widget
+
+2000-10-23  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Added class <scrolled-window>
+
+2000-10-19  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Added Listbox with scrollbars
+
+2000-10-17  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: New widgets + Images
+	and fixes
+
+2000-09-16  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Promises + enhanced suport for GTK + program parameters
+
+2000-08-19  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: First integration of GTK+ widgets
+
+2000-08-15  Erick Gallesio  <eg@unice.fr>
+
+	* stklos.spec.in : Added stklos-config in RPM package stklos-devel
+
+	* STklos.prj: Setting framework for compiling GTk+ support
+	Added missing files
+
+2000-07-22  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: 
+	- New system functions.
+	- Dynamic loading stuff (for systems based on DLOPEN for now only).
+	- Added idle handler on input port for integration with GTK.
+	- New directory GTklos.
+	Added signal.c
+
+2000-07-14  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Insertion of spec file for RPM building
+
+	* Release of (private) 0.1 version
+
+2000-07-13  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Object code completed
+
+2000-07-12  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: First version with objects. Mostly everything works
+	excepts user generic function protocol
+
+2000-07-02  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Checkpoint
+
+2000-06-15  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: New documentation format
+
+2000-06-14  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Extended lambdas + extended macros
+
+2000-06-10  Erick Gallesio  <eg@unice.fr>
+
+	* src/fport.c: Finalizer cleanup
+
+	* STklos.prj: Added all the keyword stuff &  New Boehm GC version (5.0)
+
+2000-06-06  Erick Gallesio  <eg@unice.fr>
+
+	* src/sio.c (STk_close): Remove finalizer when closing a port to avoid
+	closing a fd which is still in use when the GC occurs.
+
+2000-06-04  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: - New functions on numbers & Modules
+	Packaging corrections
+	Packaging corrections
+
+2000-05-24  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Macros &  New functions in number.c about complex numbers
+
+2000-05-21  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Make install completed
+
+2000-05-19  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Implementation of load for binary and source file.
+	- Binary file use now a compacter form
+	- Configure.in & all related stuff
+
+2000-05-16  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: A more efficient apply callable from C: STk_C_apply. 
+	Some modifications of the VM.
+	Major additions in number.c
+
+2000-05-13  Erick Gallesio  <eg@unice.fr>
+
+	* STklos.prj: Added instruction "IN-APPLY". Vectors are completely
+	completely implemented. A first version of STk_apply is available 
+	from C (but not efficient for now).
+
+==============================================================================
+
+LocalWords:  metaclass UNTRACE fr stk sexpr
+	

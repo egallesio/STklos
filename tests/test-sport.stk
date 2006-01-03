@@ -1,0 +1,137 @@
+;;;;
+;;;; test-sport.stk	-- Testing String Ports
+;;;; 
+;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 20-May-2005 15:45 (eg)
+;;;; Last file update: 24-May-2005 15:49 (eg)
+;;;;
+
+(require "test")
+
+(test-section "String Ports (SRFI 6)")
+
+
+;;------------------------------------------------------------------
+(test-subsection "Input Ports")
+
+(define sport-p (open-input-string "0123456789"))
+
+(test "First char" #\0  (read-char sport-p))
+(test "Second-char" #\1 (read-char sport-p))
+(test "Third-char without reading" #\2 (peek-char sport-p))
+(test "Third-char" #\2 (read-char sport-p))
+(test "read 3 chars" "345" (read-chars 3 sport-p))
+(test "read 100 chars" "6789" 	(read-chars 100 sport-p))
+(test "read eof.1" #t (eof-object? (read-chars 1 sport-p)))
+(test "read eof.2" #t (eof-object? (peek-char sport-p)))
+(test "read eof.3" #t (eof-object? (read  sport-p)))
+
+
+(set! sport-p (open-input-string "123 \"foo\" a"))
+(test "read int"     123 (read sport-p))
+(test "read string"  "foo" (read sport-p))
+(test "read symbol"  'a (read sport-p))
+(test "read EOF" #t (eof-object? (read sport-p)))
+
+;;------------------------------------------------------------------
+(test-subsection "Output Ports")	;; Change START_ALLOC_SIZE to 10
+
+(set! sport-p (open-output-string))
+
+(define (gos) (get-output-string sport-p))
+
+(test "One char" "0" (begin (write-char #\0 sport-p) (gos)))
+(test "Two char" "01" (begin (write-char #\1 sport-p) (gos)))
+(test "Fill 1rst buffer"
+      "0123456789"
+      (begin
+	(for-each (lambda (x) (write-char x sport-p))
+		  (string->list "23456789"))
+	(gos)))
+(test "add two chars"
+      "0123456789AB"
+      (begin (display "AB" sport-p) (gos)))
+(test "add ten chars"
+      "0123456789ABCDEFGHIJKL"
+      (begin
+	(for-each (lambda (x) (write-char x sport-p))
+		  (string->list "CDEFGHIJKL"))
+	(gos)))
+(test "add a lot"
+      "0123456789ABCDEFGHIJKL012345678901234567890123456789*EOF*"
+      (begin
+	(for-each (lambda (x) (write-char x sport-p))
+		  (string->list "012345678901234567890123456789*EOF*"))
+	(gos)))
+
+;;------------------------------------------------------------------
+(test-subsection "Input Ports Direct access")
+
+(set! sport-p (open-input-string "1234567890"))
+
+(test "First char" #\1  (read-char sport-p))
+(test "Second-char" #\2 (read-char sport-p))
+(test "Rewind" #\1 (begin (port-rewind sport-p) (read-char sport-p)))
+(test "Go to char 2" #\3 (begin (port-seek sport-p 2) (peek-char sport-p)))
+(test "Go to char 5" #\6 (begin (port-seek sport-p 5) (peek-char sport-p)))
+(test "Go back char 2"  #\3 (begin (port-seek sport-p 2) (peek-char sport-p)))
+(test "Go back char 5" #\6 (begin (port-seek sport-p 5) (peek-char sport-p)))
+(test "Where I am.1" 5 (port-current-position sport-p))
+(test "Where I am.2" 5 (port-current-position sport-p))
+
+(test "Go to Char 2 (rel) " #\3
+      (begin (port-seek sport-p -3 :current) (peek-char sport-p)))
+(test "Where I am.3" 2 (port-current-position sport-p))
+(test "Go to Char 5 (rel) " #\6
+      (begin (port-seek sport-p +3 :current) (peek-char sport-p)))
+(test "Where I am.4" 5 (port-current-position sport-p))
+
+(test "Go to last character" #\0
+      (begin (port-seek sport-p -1 :end) (peek-char sport-p)))
+(test "Where I am.5" 9 (port-current-position sport-p))
+(test "port-line.1" -1 (port-current-line sport-p))
+(test "Go to start" 0 (port-seek sport-p 0))
+(test "port-line.2" 1 (port-current-line sport-p))
+
+
+;;------------------------------------------------------------------
+(test-subsection "Output Ports Direct access")
+
+(set! sport-p (open-output-string))
+
+(test "Fill buffer" 10
+      (begin (display "1234567890" sport-p) (port-current-position sport-p)))
+(test "Go to char 2" 2 (port-seek sport-p 2))
+(test "Look content" "1234567890" (gos))
+(test "Write 2 characters"
+      "12AB567890"
+      (begin (display "AB" sport-p) (gos)))
+(test "Where I am.6" 4 (port-current-position sport-p))
+(test "Go to last character.2"  10 (port-seek sport-p 0 :end))
+(test "Add 5 characters" "12AB567890abcde"
+      (begin (display "abcde" sport-p) (gos)))
+
+(test "Seek outside string" *test-failed* (port-seek 1 :end))
+
+
+
+;;------------------------------------------------------------------
+(test-section-end)

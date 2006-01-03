@@ -1,0 +1,25 @@
+<HTML><HEAD><LINK REL="StyleSheet" HREF="doc.css" TYPE="text/css"/><TITLE>A portable and efficient LALR(1) parser generator for Scheme / Description</TITLE></HEAD><BODY><DIV ID="header"><H1>A portable and efficient LALR(1) parser generator for Scheme</H1></DIV><DIV ID="menu"><h3>Content</h3><p><div>&gt; Description &lt;</div><div><a href="distrib.html">Distribution</a></div><div><a href="port.html">Portability</a></div><div><a href="def.html">Defining a parser</a></div><div><a href="format.html">Syntax</a></div></p></DIV><DIV ID="body"><h2>Description</h2><p>
+This file contains yet another LALR(1) parser generator written in
+Scheme. In contrast to other such parser generators, this one
+implements a more efficient algorithm for computing the lookahead sets.
+The algorithm is the same as used in Bison (GNU yacc) and is described
+in the following paper:
+</p><p><i>Efficient Computation of LALR(1) Look-Ahead Set</i>, F. DeRemer and
+T. Pennello, TOPLAS, vol. 4, no. 4, october 1982.
+</p><p>
+As a consequence, it is not written in a fully functional style.
+In fact, much of the code is a direct translation from C to Scheme
+of the Bison sources.
+</p><h2>New features</h2><p>
+ The new features are:
+</p><ul><li>Better support for interactive parsers (no lookahead needed when
+	  the default action is to reduce).</li><li>Simple error recovery à la Yacc (<code>error</code> productions).</li><li>Parsers can be saved in files (<code>output:</code>
+	  option).</li><li>The parsing tables can be output in a human-readable format
+	  (<code>out-table:</code> option).</li><li>Suppression of conflicts warnings (<code>expect:</code>
+	  option)</li></ul><p>
+Send questions, comments or suggestions to
+<a href="mailto:boucherd@iro.umontreal.ca">boucherd@iro.umontreal.ca</a></p><h2>Acknowledgments</h2><p>
+I would like to thank the following people for their contributions to this software:
+<ul><li> Scott G. Miller for the port to SISC</li><li> Rouben Rostamian for testing the port to Guile </li><li> Felix L. Winkelmann for the port to Chicken </li><li> Erick Gallesio for the port to STklos</li></ul></p><p>
+Dominique Boucher -- Nu Echo Inc.
+</p><hr/><p><dl><dt><b>Creation date:</b><dd>Mon Jan 22 15:42:32 1996 </dd></dt><dt><b>Last modification:</b><dd>Wed Jan 28 16:43:27 2004</dd></dt><dt><b>Version:</b><dd>2.1 </dd></dt><dt><b>Author:</b><dd>Dominique Boucher </dd></dt></dl></p></DIV><DIV ID="footer"><I>Dominique Boucher </I>(dominique DOT boucher AT nuecho DOT com)<BR/>Dernière modification: Mon Oct 25 11:22:28 EDT 2004</DIV></BODY></HTML>

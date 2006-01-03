@@ -1,0 +1,59 @@
+;;;;
+;;;; handle.stk	-- GTklos Handle Window Demo
+;;;; 
+;;;; Copyright © 2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  7-Apr-2002 20:36 (eg)
+;;;; Last file update:  7-Apr-2002 20:47 (eg)
+;;;;
+
+(include "gtklos-demo.stk")
+
+(define *handle-msg* "
+In this demo, the tool bar is contained in a handle window.
+It can be detached form this window using the handle
+located on the left.
+")
+
+(define (tb-callback tb pos) ;  Callback associated to each button of the toolbar
+  (format #t "You have clicked item ~S of toolbar. Its text is ~S\n" 
+	  pos 
+	  (text (list-ref (children tb) pos))))
+
+(define (main args)
+  (let* ((win (make <demo-window> :title "Handle Demo" :x 100 :y 100
+		    :file "handle" :border-width 10 :padding 10
+		    :message *handle-msg*))
+	 (frm (make <handle-window> :parent win))
+	 (tb (make <toolbar>
+	       :parent frm
+	       :style 'both :relief 'none :orientation 'horizontal
+	       :items `(
+			(:text "Up"   :file "up.xpm"   :command ,tb-callback)
+			(:text "Down" :file "down.xpm" :command ,tb-callback)
+			;; Add a space 
+			()
+			;; Left and right do have a tool tip
+			(:text "Left" :file "left.xpm" :tooltip "go left"
+			       :command ,tb-callback)
+			(:text "Right" :file "right.xpm" :tooltip "go right"
+			       :command ,tb-callback)))))
+    frm))
+

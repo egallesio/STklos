@@ -1,0 +1,104 @@
+;;;;
+;;;; layout.stk	-- GTK layout abstract class
+;;;; 
+;;;; Copyright © 2001-2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 25-May-2001 15:48 (eg)
+;;;; Last file update:  8-Apr-2002 23:55 (eg)
+;;;;
+
+;======================================================================
+;
+;	              C l a s s    < g t k - l a y o u t >
+;
+;======================================================================       
+
+;; A <gtk-layout> is a container with a specific layout.
+
+(define-class <gtk-layout> (<gtk-container>)
+  ((layout	 :accessor 	layout
+		 :init-keyword	:layout
+		 :init-form	(make <box> :orientation 'vertical
+				      :fill #f :expand #f :homogeneous #f))
+   (expand	 :accessor 	expand
+		 :init-keyword	:expand
+		 :allocation 	:virtual
+		 :slot-ref 	(lambda (o)
+				  (let ((layout (slot-ref o 'layout)))
+				    (if (is-a? layout <box>)
+					(slot-ref layout 'expand)
+					#f)))
+		 :slot-set!	(lambda (o v)
+				  (let ((layout (slot-ref o 'layout)))
+				    (if (is-a? layout <box>)
+					(slot-set! layout 'expand v)
+					#f))))
+   (fill	 :accessor 	fill
+		 :init-keyword	:fill
+		 :allocation 	:virtual
+		 :slot-ref 	(lambda (o)
+				  (let ((layout (slot-ref o 'layout)))
+				    (if (is-a? layout <box>)
+					(slot-ref layout 'fill)
+					#f)))
+		 :slot-set!	(lambda (o v)
+				  (let ((layout (slot-ref o 'layout)))
+				    (if (is-a? layout <box>)
+					(slot-set! layout 'fill v)
+					#f))))
+   (border-width :accessor 	border-width
+		 :init-keyword	:border-width
+		 :allocation 	:virtual
+		 :slot-ref 	(lambda (o)
+				  (let ((layout (slot-ref o 'layout)))
+				    (if (is-a? layout <box>)
+					(slot-ref layout 'border-width)
+					#f)))
+		 :slot-set!	(lambda (o v)
+				  (let ((layout (slot-ref o 'layout)))
+				    (if (is-a? layout <box>)
+					(slot-set! layout 'border-width v)
+					#f))))
+   (padding	 :accessor 	padding
+		 :init-keyword	:padding
+		 :allocation 	:virtual
+		 :slot-ref 	(lambda (o)
+				  (let ((layout (slot-ref o 'layout)))
+				    (if (is-a? layout <box>)
+					(slot-ref layout 'padding)
+					#f)))
+		 :slot-set!	(lambda (o v)
+				  (let ((layout (slot-ref o 'layout)))
+				    (if (is-a? layout <box>)
+					(slot-set! layout 'padding v)
+					#f))))))
+
+
+(define-method initialize ((self <gtk-layout>) initargs)
+  (next-method)
+  (let ((layout (slot-ref self 'layout)))
+    (when layout
+      ;; Verify that the layout is a container (only useful if the container
+      ;; was given by the user since default value is a vertical box).
+      (unless (is-a? layout <gtk-container>)
+	(error "cannot use ~S for the layout of ~S" layout self))
+      ;; Parent the layout to self
+      (%set-widget-parent! (slot-ref layout 'wid) (slot-ref self 'wid)))))
+

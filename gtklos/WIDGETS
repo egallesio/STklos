@@ -1,0 +1,30 @@
+Widgets which are currently available in this version of stklos and their 
+implementation state
+
+Native Widgets
+==============
+
+    * LABEL		Uncomplete
+    * BUTTON		Uncomplete
+    * TOGGLE-BUTTON	Complete
+    * CHECK-BUTTON	Complete
+    * RADIO-BUTTON	UnComplete (there is no way to find back the 
+			group of a radio button. Th function givent by
+			 GTk Find a way to get this value)
+    * ENTRY		Uncomplete
+    * TEXT		Not done
+    * SCALE 		Complete	
+    * SCROLLBAR		Not done
+    * COMBO-BOX		Not done
+    * SEPARATOR		Complete
+
+Containers
+    
+    * BOX		Complete
+    * PACKER		Complete?
+    * FRAME		Complete
+
+Composite Widgets
+=================
+
+* LABELED-ENTRY 	Very uncomplete

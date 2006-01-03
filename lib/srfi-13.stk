@@ -1,0 +1,1298 @@
+;;;;
+;;;; srfi-13.stk		-- Implementation of SRFI-13
+;;;; 
+;;;; Copyright © 2002-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the Olin Shivers implementation of
+;;;; this SRFI, it is copyrighted as:
+;;;;
+;;;;   Copyright (c) 1988-1994 Massachusetts Institute of Technology.
+;;;;   Copyright (c) 1998, 1999, 2000 Olin Shivers. All rights reserved.
+;;;;     The details of the copyrights appear at the end of the file. Short
+;;;;     summary: BSD-style open source.
+;;;;
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date:  5-Jun-2002 19:20 (eg)
+;;;; Last file update: 29-Mar-2005 19:52 (eg)
+;;;;
+
+(require "srfi-14")
+
+(define-module SRFI-13
+  (import SRFI-14)
+  (export ;;predicates
+	  string-null? string-every string-any
+	  ;; Constructors
+	  string-tabulate
+	  ;; List & String Conversions
+	  string->list reverse-list->string string-join
+	  ;; Selection
+	  string-copy substring/shared string-copy!
+	  string-take string-drop string-take-right string-drop-right
+	  string-pad string-pad-right string-trim string-trim-right
+	  string-trim-both
+	  ;; Modification
+	  string-fill!
+	  ;; Comparison
+	  string-compare string-compare-ci
+	  string= string<> string< string> string<= string>=
+	  string-ci= string-ci<> string-ci< string-ci> string-ci<= string-ci>=
+	  string-hash string-hash-ci
+	  ;; Searching
+	  string-index string-index-right string-skip string-skip-right
+	  string-count string-contains string-contains-ci
+	  ;; Alphabetic case mapping
+	  ;     ==> nothing (they are STklos primitives)
+	  ;; Reverse & append
+	  string-reverse string-reverse! string-concatenate
+	  string-concatenate/shared string-append/shared
+	  string-concatenate-reverse string-concatenate-reverse/shared
+	  ;; Fold, unfold & map
+	  string-map string-map! string-fold string-right
+	  string-fold string-fold-right string-unfold string-unfold-right
+	  string-for-each string-for-each-index
+	  ;; Replicate & rotate
+	  xsubstring strin-xcopy
+	  ;; Miscellaneous: insertion, parsing
+	  string-replace string-tokenize
+	  ;; Filtering & deleting
+	  string-filter string-delete
+	  ;; Low-level procedure
+	  string-parse-start+end string-parse-final-start+end
+	  substring-spec-ok? check-substring-spec
+	  ;; Knuth Morris Pratt Searching
+	  make-kmp-restart-vector kmp-step string-kmp-partial-search
+	  
+  )
+
+  (define-macro (check-arg pred val caller)
+    `(if (,pred ,val) 
+	 ,val 
+	 (error ,caller "bad argument ~S" ,val)))
+
+  ;;
+  ;; Code for procedure which accepts optional start-end indexes
+  ;;
+  (define (%%check-indexes-func str start end proc off)
+    (unless (string? str)
+      (error proc "bad string ~S" str))
+    (let* ((max (+ (string-length str) off))
+	   (end (if (negative? end) max end)))
+      (unless (and (integer? start) (<= 0 start max))
+	(error proc "bad starting index ~S on ~S" start str))
+      (unless (and (integer? end) (<= 0 end max))
+	(error proc "bad ending index ~S on ~S" end str))
+      (unless (<= start end)
+	(error proc "low index is greater than high index on ~S" str))
+      end))
+  
+  (define-macro (%check-indexes str start end proc :optional (off 0))
+    `(set! ,end (%%check-indexes-func ,str ,start ,end ,proc ,off)))
+
+  (define (%check-substring-indexes s start end proc)
+    (unless (and (string? s) (integer? start) (integer? end)
+		 (<= 0 start end (string-length s)))
+      (error proc "illegal substring specification for ~S (~S ~S)" s start end)))
+
+  
+
+;;;; ======================================================================
+;;;;
+;;;;				P R E D I C A T E S
+;;;;
+;;;; ======================================================================
+(define (string-null? str)
+  (check-arg string? str 'string-null?)
+  (equal? "" str))
+
+
+(define (string-every criterion str :optional (start 0) (end -1))
+  (%check-indexes str start end 'string-every -1)
+  (cond
+    ((char? criterion)
+     (let Loop ((i start))
+       (or (>= i end)
+	   (and (char=? criterion (string-ref str i))
+		(Loop (+ i 1))))))
+
+    ((char-set? criterion)
+     (let Loop ((i start))
+       (or (>= i end)
+	   (and (char-set-contains? criterion (string-ref str i))
+		(Loop (+ i 1))))))
+
+    ((procedure? criterion)		; Slightly funky loop so that
+     (or (= start end)			; final (PRED S[END-1]) call
+	 (let Loop ((i start))		; is a tail call.
+	   (let ((c (string-ref str i))
+		 (i1 (+ i 1)))
+	     (if (= i1 end) (criterion c)	; Tail call.
+		 (and (criterion c) (Loop i1)))))))
+    
+    (else (error 'string-every "bad critrion ~S" criterion))))
+
+
+(define (string-any criterion str :optional (start 0) (end -1))
+  (%check-indexes str start end 'string-any)
+  (cond
+    ((char? criterion)
+     (let Loop ((i start))
+       (and (< i end)
+	    (or (char=? criterion (string-ref str i))
+		(Loop (+ i 1))))))
+    
+    ((char-set? criterion)
+     (let Loop ((i start))
+       (and (< i end)
+	    (or (char-set-contains? criterion (string-ref str i))
+		(Loop (+ i 1))))))
+    
+    ((procedure? criterion)		; Slightly funky loop so that
+     (and (< start end)			; final (PRED S[END-1]) call
+	  (let Loop ((i start))		; is a tail call.
+	    (let ((c (string-ref str i))
+		  (i1 (+ i 1)))
+	      (if (= i1 end) (criterion c)	; Tail call
+		  (or (criterion c) (Loop i1)))))))
+    
+    (else (error 'string-any "bad critrion ~S" criterion))))
+
+;;;; ======================================================================
+;;;;
+;;;;				C O N S T R U C T O R S
+;;;;
+;;;; ======================================================================
+(define (string-tabulate proc len)
+  (check-arg (lambda (l) (and (integer? l) (>= l 0))) len 'string-tabulate)
+  (let ((sink (open-output-string)))
+    (do ((i 0 (+ i 1)))
+        ((>= i len) (get-output-string sink))
+      (write-char (proc i) sink))))
+
+;;;; ======================================================================
+;;;;
+;;;;		L I S T   &   S T R I N G   C O N V E R S I O N
+;;;;
+;;;; ======================================================================
+(define (string->list str :optional (start 0) (end -1))
+  (%check-indexes str start end 'string->list)
+  (do ((i (- end 1) (- i 1))
+       (res '() (cons (string-ref str i) res)))
+      ((< i start) res)))
+      
+(define (  char-list)
+  (list->string (reverse char-list)))
+
+
+(define (string-join strings :optional (delim " ") (grammar 'infix))
+  (let ((buildit (lambda (lis final)
+		   (let recur ((lis lis))
+		     (if (pair? lis)
+			 (cons delim (cons (car lis) (recur (cdr lis))))
+			 final)))))
+    (cond
+      ((pair? strings)
+       (apply string-append
+	(case grammar
+	  ((infix strict-infix)
+	   (cons (car strings) (buildit (cdr strings) '())))
+	  ((prefix)
+	   (buildit strings '()))
+	  ((suffix)
+	   (cons (car strings) (buildit (cdr strings) (list delim))))
+	  (else (error 'string-join "illegal join grammar ~S" grammar)))))
+      ((not (null? strings))
+       (error 'string-join "bad list ~S" strings))
+      
+      ;; STRINGS is ()
+      ((eq? grammar 'strict-infix)
+       (error 'string-join
+	      "empty list cannot be joined with STRICT-INFIX grammar."))
+      (else ""))))		; Special-cased for infix grammar.
+
+;;;; ======================================================================
+;;;;
+;;;;				S E L E C T I O N
+;;;;
+;;;; ======================================================================
+
+(define (%substring/shared str start end)
+  (if (and (= start 0) (= end (string-length str)))
+      str			; here (and only here) we share 
+      (substring str start end)))
+
+(define (%string-copy! to tstart from fstart fend)
+  (if (> fstart tstart)
+      (do ((i fstart (+ i 1))
+	   (j tstart (+ j 1)))
+	  ((>= i fend))
+	(string-set! to j (string-ref from i)))
+
+      (do ((i (- fend 1)                    (- i 1))
+	   (j (+ -1 tstart (- fend fstart)) (- j 1)))
+	  ((< i fstart))
+	(string-set! to j (string-ref from i)))))
+
+;;;
+;;; Exported procedures
+;;; 
+(define (string-copy str :optional (start 0) (end -1))
+  (%check-indexes str start end 'string-copy)
+  (substring str start end))
+
+(define (substring/shared str :optional (start 0) (end -1))
+  (%check-indexes str start end 'substring/shared)
+  (%substring/shared str start end))
+
+(define (string-copy! to tstart from :optional (fstart 0) (fend -1))
+  (%check-indexes from fstart fend 'string-copy!)
+  (check-arg integer? tstart 'string-copy!)
+  (%check-substring-indexes  to tstart (+ tstart (- fend fstart)) 'string-copy!)
+  (%string-copy! to tstart from fstart fend))
+
+(define (string-take s n)
+  (check-arg string? s 'string-take)
+  (check-arg (lambda (val) (and (integer? n) (<= 0 n (string-length s))))
+	     n 'string-take)
+  (%substring/shared s 0 n))
+
+(define (string-take-right s n)
+  (check-arg string? s 'string-take-right)
+  (let ((len (string-length s)))
+    (check-arg (lambda (val) (and (integer? n) (<= 0 n len))) n 'string-take-right)
+    (%substring/shared s (- len n) len)))
+
+(define (string-drop s n)
+  (check-arg string? s 'string-drop)
+  (let ((len (string-length s)))
+    (check-arg (lambda (val) (and (integer? n) (<= 0 n len))) n 'string-drop)
+    (%substring/shared s n len)))
+
+(define (string-drop-right s n)
+  (check-arg string? s 'string-drop-right)
+  (let ((len (string-length s)))
+    (check-arg (lambda (val) (and (integer? n) (<= 0 n len))) n string-drop-right)
+    (%substring/shared s 0 (- len n))))
+
+(define (string-pad str n :optional (char #\space) (start 0) (end -1))
+  (%check-indexes str start end 'string-pad)
+  (check-arg (lambda (n) (and (integer? n) (<= 0 n))) n 'string-pad)
+  (let ((len (- end start)))
+    (if (<= n len)
+	(%substring/shared str (- end n) end)
+	(let ((res (make-string n char)))
+	  (%string-copy! res (- n len) str start end)
+	  res))))
+
+(define (string-pad-right str n :optional (char #\space) (start 0) (end -1))
+  (%check-indexes str start end 'string-pad-right)
+  (check-arg (lambda (n) (and (integer? n) (<= 0 n))) n 'string-pad-right)
+  (let ((len (- end start)))
+    (if (<= n len)
+	(%substring/shared str start (+ start n))
+	(let ((res (make-string n char)))
+	  (%string-copy! res 0 str start end)
+	  res))))
+;;;; ======================================================================
+;;;;
+;;;;				M O D I F I C A T I O N
+;;;;
+;;;; ======================================================================
+(define (string-fill! str char :optional (start 0) (end -1))
+  (%check-indexes str start end 'string-fill!)
+  (check-arg char? char 'string-fill!)
+  (do ((i (- end 1) (- i 1)))
+      ((< i start))
+    (string-set! str i char)))
+
+;;;; ======================================================================
+;;;;
+;;;;				C O M P A R I S O N
+;;;;
+;;;; ======================================================================
+
+(define (%string-compare s1 s2 proc< proc= proc> start1 end1 start2 end2
+			 char<? char>?)
+  (let Loop ((i start1) (j start2))
+    (cond
+      ((= i end1)
+       ((if (= j end2) proc= proc<) i))
+      ((= j end2)
+       (proc> i))
+      ((char<? (string-ref s1 i) (string-ref s2 j))
+       (proc< i))
+      ((char>? (string-ref s1 i) (string-ref s2 j))
+       (proc> i))
+      (else (Loop (+ i 1) (+ j 1))))))
+
+(define %true  (lambda (_) #t))
+(define %false (lambda (_) #f))
+
+(define (%str-cmp s1 s2 proc< proc= proc> start1 end1 start2 end2 proc-name)
+  (%check-indexes s1 start1 end1 proc-name)
+  (%check-indexes s2 start2 end2 proc-name)
+  (%string-compare s1 s2 proc< proc= proc> start1 end1 start2 end2 char<? char>?))
+
+(define (%str-cmp-ci s1 s2 proc< proc= proc> start1 end1 start2 end2 proc-name)
+  (%check-indexes s1 start1 end1 proc-name)
+  (%check-indexes s2 start2 end2 proc-name)
+  (%string-compare s1 s2 proc< proc= proc> start1 end1 start2 end2
+		   char-ci<? char-ci>?))
+
+(define (%string-hash str bound start end)
+  (let ((h (hash-table-hash (substring str start end))))
+    (if (positive? bound)
+	(modulo h bound)
+	h)))
+
+;;;
+;;; Exported procedures
+;;;
+(define (string-compare s1 s2 proc< proc= proc>
+		       :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-compare -1)
+  (%check-indexes s2 start2 end2 'string-compare -1)
+  (%string-compare s1 s2 proc< proc= proc> start1 end1 start2 end2 char<? char>?))
+   
+(define (string-compare-ci s1 s2 proc< proc= proc>
+			   :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-compare-ci -1)
+  (%check-indexes s2 start2 end2 'string-compare-ci -1)
+  (%string-compare s1 s2 proc< proc= proc> start1 end1 start2 end2
+		   char-ci<? char-ci>?))
+
+(define (string= s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%str-cmp s1 s2 %false %true %false start1 end1 start2 end2 'string=))
+
+(define (string<> s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%str-cmp s1 s2 %true %false %true start1 end1 start2 end2 'string<>))
+
+(define (string< s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%str-cmp s1 s2 %true %false %false start1 end1 start2 end2 'string<))
+
+(define (string> s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%str-cmp s1 s2 %false %false %true start1 end1 start2 end2 'string>))
+
+(define (string<= s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%str-cmp s1 s2 %true %true %false start1 end1 start2 end2 'string<=))
+
+(define (string>= s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%str-cmp s1 s2 %false %true %true start1 end1 start2 end2 'string>=))
+
+
+(define (string-ci= s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%str-cmp-ci s1 s2 %false %true %false start1 end1 start2 end2 'string-ci=))
+
+(define (string-ci<> s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%str-cmp-ci s1 s2 %true %false %true start1 end1 start2 end2 'string-ci<>))
+
+(define (string-ci< s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%str-cmp-ci s1 s2 %true %false %false start1 end1 start2 end2 'string-ci<))
+
+(define (string-ci> s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%str-cmp-ci s1 s2 %false %false %true start1 end1 start2 end2 'string-ci>))
+
+(define (string-ci<= s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%str-cmp-ci s1 s2 %true %true %false start1 end1 start2 end2 'string-ci<=))
+
+(define (string-ci>= s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%str-cmp-ci s1 s2 %false %true %true start1 end1 start2 end2 'string-ci>=))
+
+(define (string-hash str :optional (bound -1) (start 0) (end -1))
+  (%check-indexes str start end 'string-hash)
+  (%string-hash str bound start end))
+
+(define (string-hash-ci str :optional (bound -1) (start 0) (end -1))
+  (%check-indexes str start end 'string-hash-ci)
+  (%string-hash (string-lower str) bound start end))
+
+;;;; ======================================================================
+;;;;
+;;;;		      P R E F I X E S   &   S U F F I X E S
+;;;;
+;;;; ======================================================================
+(define (%string-prefix-length s1 start1 end1 s2 start2 end2 char=?)
+  (let* ((delta (min (- end1 start1) (- end2 start2)))
+	 (end1 (+ start1 delta)))
+    (if (and (eq? s1 s2) (= start1 start2))		; EQ fast path
+	delta
+	(let Loop ((i start1) (j start2))		; Regular path
+	  (if (or (>= i end1)
+		  (not (char=? (string-ref s1 i)
+			       (string-ref s2 j))))
+	      (- i start1)
+	      (Loop (+ i 1) (+ j 1)))))))
+
+(define (%string-suffix-length s1 start1 end1 s2 start2 end2 char=?)
+  (let* ((delta (min (- end1 start1) (- end2 start2)))
+	 (start1 (- end1 delta)))
+    (if (and (eq? s1 s2) (= end1 end2))			; EQ fast path
+	delta
+	(let Loop ((i (- end1 1)) (j (- end2 1)))	; Regular path
+	  (if (or (< i start1)
+		  (not (char=? (string-ref s1 i)
+			       (string-ref s2 j))))
+	      (- (- end1 i) 1)
+	      (Loop (- i 1) (- j 1)))))))
+
+(define (%string-prefix? s1 start1 end1 s2 start2 end2 char=?)
+  (let ((len1 (- end1 start1)))
+    (and (<= len1 (- end2 start2))	; Quick check
+	 (= (%string-prefix-length s1 start1 end1 s2 start2 end2 char=?)
+	    len1))))
+
+(define (%string-suffix? s1 start1 end1 s2 start2 end2 char=?)
+  (let ((len1 (- end1 start1)))
+    (and (<= len1 (- end2 start2))	; Quick check
+	 (= (%string-suffix-length s1 start1 end1 s2 start2 end2 char-ci=?)
+	    len1))))
+
+;;;
+;;; Exported procedures
+;;;
+(define (string-prefix-length s1 s2
+			      :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-prefix-length -1)
+  (%check-indexes s2 start2 end2 'string-prefix-length -1)
+  (%string-prefix-length s1 start1 end1 s2 start2 end2 char=?))
+
+(define (string-suffix-length s1 s2
+			      :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-suffix-length -1)
+  (%check-indexes s2 start2 end2 'string-suffix-length -1)
+  (%string-suffix-length s1 start1 end1 s2 start2 end2 char=?))
+
+(define (string-prefix-length-ci s1 s2
+			      :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-prefix-length-ci -1)
+  (%check-indexes s2 start2 end2 'string-prefix-length-ci -1)
+  (%string-prefix-length s1 start1 end1 s2 start2 end2 char-ci=?))
+
+(define (string-suffix-length-ci s1 s2
+				 :optional (start1 0) (end1 -1)
+				 (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-suffix-length-ci -1)
+  (%check-indexes s2 start2 end2 'string-suffix-length-ci -1)
+  (%string-suffix-length s1 start1 end1 s2 start2 end2 char-ci=?))
+
+
+(define (string-prefix? s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-prefix? -1)
+  (%check-indexes s2 start2 end2 'string-prefix? -1)
+  (%string-prefix? s1 start1 end1 s2 start2 end2 char=?))
+
+(define (string-suffix? s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-prefix? -1)
+  (%check-indexes s2 start2 end2 'string-prefix? -1)
+  (%string-suffix? s1 start1 end1 s2 start2 end2 char=?))
+
+(define (string-prefix-ci? s1 s2 :optional (start1 0) (end1 -1)
+			                   (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-prefix-ci? -1)
+  (%check-indexes s2 start2 end2 'string-prefix-ci? -1)
+  (%string-prefix? s1 start1 end1 s2 start2 end2 char-ci=?))
+
+(define (string-suffix-ci? s1 s2 :optional (start1 0) (end1 -1)
+			                   (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-suffix-ci? -1)
+  (%check-indexes s2 start2 end2 'string-suffix-ci? -1)
+  (%string-suffix? s1 start1 end1 s2 start2 end2 char-ci=?))
+
+;;;; ======================================================================
+;;;;
+;;;;				S E A R C H I N G
+;;;;
+;;;; ======================================================================
+(define (string-index str criterion :optional (start 0) (end -1))
+  (%check-indexes str start end 'string-index)
+  (cond
+    ((char? criterion)
+     (let Loop ((i start))
+       (and (< i end)
+	    (if (char=? criterion (string-ref str i))
+		i
+		(Loop (+ i 1))))))
+    ((char-set? criterion)
+     (let Loop ((i start))
+       (and (< i end)
+	    (if (char-set-contains? criterion (string-ref str i))
+		i
+		(Loop (+ i 1))))))
+    ((procedure? criterion)
+     (let Loop ((i start))
+       (and (< i end)
+	    (if (criterion (string-ref str i))
+		i
+		(Loop (+ i 1))))))
+    (else (error 'string-index "bad criterion ~S" criterion))))
+
+(define (string-index-right str criterion :optional (start 0) (end -1))
+  (%check-indexes str start end 'string-index-right)
+  (cond
+    ((char? criterion)
+     (let Loop ((i (- end 1)))
+       (and (>= i 0)
+	    (if (char=? criterion (string-ref str i))
+		i
+		(Loop (- i 1))))))
+    ((char-set? criterion)
+     (let Loop ((i (- end 1)))
+       (and (>= i 0)
+	    (if (char-set-contains? criterion (string-ref str i))
+		i
+		(Loop (- i 1))))))
+    ((procedure? criterion)
+     (let Loop ((i (- end 1)))
+       (and (>= i 0)
+	    (if (criterion (string-ref str i))
+		i
+		(Loop (- i 1))))))
+    (else (error 'string-index-right "bad criterion ~S" criterion))))
+
+(define (string-skip str criterion :optional (start 0) (end -1))
+  (%check-indexes str start end 'string-skip)
+  (cond
+    ((char? criterion)
+     (let Loop ((i start))
+       (and (< i end)
+	    (if (char=? criterion (string-ref str i))
+		(Loop (+ i 1))
+		i))))
+    ((char-set? criterion)
+     (let Loop ((i start))
+       (and (< i end)
+	    (if (char-set-contains? criterion (string-ref str i))
+		(Loop (+ i 1))
+		i))))
+    ((procedure? criterion)
+     (let Loop ((i start))
+       (and (< i end)
+	    (if (criterion (string-ref str i)) (Loop (+ i 1))
+		i))))
+    (else (error 'string-skip "bad criterion ~S" criterion))))
+
+
+(define (string-skip-right str criterion :optional (start 0) (end -1))
+  (%check-indexes str start end 'string-skip-right)
+  (cond
+    ((char? criterion)
+     (let Loop ((i (- end 1)))
+       (and (>= i 0)
+	    (if (char=? criterion (string-ref str i))
+		(Loop (- i 1))
+		i))))
+    ((char-set? criterion)
+     (let Loop ((i (- end 1)))
+       (and (>= i 0)
+	    (if (char-set-contains? criterion (string-ref str i))
+		(Loop (- i 1))
+		i))))
+    ((procedure? criterion)
+     (let Loop ((i (- end 1)))
+       (and (>= i 0)
+	    (if (criterion (string-ref str i)) (Loop (- i 1))
+		i))))
+    (else (error 'string-skip-right "bad criterion ~S" criterion))))
+
+
+(define (string-count s criterion :optional (start 0) (end -1))
+  (%check-indexes s start end 'string-count)
+  (cond
+    ((char? criterion)
+     (do ((i start (+ i 1))
+	  (count 0 (if (char=? criterion (string-ref s i))
+		       (+ count 1)
+		       count)))
+	 ((>= i end) count)))
+    
+    ((char-set? criterion)
+     (do ((i start (+ i 1))
+	  (count 0 (if (char-set-contains? criterion (string-ref s i))
+		       (+ count 1)
+		       count)))
+	 ((>= i end) count)))
+    
+    ((procedure? criterion)
+     (do ((i start (+ i 1))
+	  (count 0 (if (criterion (string-ref s i)) (+ count 1) count)))
+	 ((>= i end) count)))
+    
+    (else (error 'string-count "bad criterion ~S" criterion))))
+
+
+(define (string-contains s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-contains)
+  (%check-indexes s2 start2 end2 'string-contains)
+  (let* ((len   (- end2 start2))
+	 (i-max (- end1 len)))
+    (let Loop ((i start1))
+      (and (<= i i-max)
+	   (if (string= s1 s2 i (+ i len) start2 end2)
+	        i
+	       (Loop (+ i 1)))))))
+
+(define (string-contains-ci s1 s2 :optional (start1 0) (end1 -1)
+					    (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-contains-ci)
+  (%check-indexes s2 start2 end2 'string-contains-ci)
+  (let* ((len   (- end2 start2))
+	 (i-max (- end1 len)))
+    (let Loop ((i start1))
+      (and (<= i i-max)
+	   (if (string-ci= s1 s2 i (+ i len) start2 end2)
+	       i
+	       (Loop (+ i 1)))))))
+
+;;;; ======================================================================
+;;;;
+;;;;			R E V E R S E   &   A P P E N D
+;;;;
+;;;; ======================================================================
+(define (%finish-string-concatenate-reverse len string-list final end)
+  (let ((res (make-string (+ end len))))
+    (%string-copy! res len final 0 end)
+    (let Loop ((i len) (lis string-list))
+      (if (pair? lis)
+	  (let* ((s   (car lis))
+		 (lis (cdr lis))
+		 (slen (string-length s))
+		 (i (- i slen)))
+	    (%string-copy! res i s 0 slen)
+	    (Loop i lis))))
+    res))
+
+
+(define (string-reverse s :optional (start 0) (end -1))
+  (%check-indexes s start end 'string-reverse)
+  (let* ((len (- end start))
+	 (res (make-string len)))
+    (do ((i start (+ i 1))
+	 (j (- len 1) (- j 1)))
+	((< j 0))
+      (string-set! res j (string-ref s i)))
+    res))
+
+(define (string-reverse! s :optional (start 0) (end -1))
+  (%check-indexes s start end 'string-reverse!)
+  (do ((i (- end 1) (- i 1))
+       (j start (+ j 1)))
+      ((<= i j))
+    (let ((ci (string-ref s i)))
+      (string-set! s i (string-ref s j))
+      (string-set! s j ci))))
+
+(define (string-concatenate strings)
+  (let* ((total (do ((strings strings (cdr strings))
+		     (i 0 (+ i (string-length (car strings)))))
+		    ((not (pair? strings)) i)))
+	 (res (make-string total)))
+    (let Loop ((i 0) (strings strings))
+      (if (pair? strings)
+	  (let* ((s (car strings))
+		 (slen (string-length s)))
+	    (%string-copy! res i s 0 slen)
+	    (Loop (+ i slen) (cdr strings)))))
+    res))
+
+(define (string-concatenate/shared strings)
+  (let Loop ((strings strings) (nchars 0) (first #f))
+    (cond
+      ((pair? strings)			; Scan the args, add up total
+       (let* ((string  (car strings))	; length, remember 1st 
+	      (tail (cdr strings))	; non-empty string.
+	      (slen (string-length string)))
+	 (if (zero? slen)
+	     (Loop tail nchars first)
+	     (Loop tail (+ nchars slen) (or first strings)))))
+      
+      ((zero? nchars) "")
+      
+      ;; Just one non-empty string! Return it.
+      ((= nchars (string-length (car first))) (car first))
+      
+      (else (let ((res (make-string nchars)))
+	      (let Loop ((strings first) (i 0))
+		(if (pair? strings)
+		    (let* ((s (car strings))
+			   (slen (string-length s)))
+		      (%string-copy! res i s 0 slen)
+		      (Loop (cdr strings) (+ i slen)))))
+	      res)))))
+
+(define (string-append/shared . strings)
+  (string-concatenate/shared strings))
+
+
+(define (string-concatenate-reverse string-list
+				    :optional (final "") (end -1))
+  (%check-indexes final 0 end 'string-concatenate-reverse)
+  (let ((len (let Loop ((sum 0) (lis string-list))
+	       (if (pair? lis)
+		   (Loop (+ sum (string-length (car lis))) (cdr lis))
+		   sum))))
+    (%finish-string-concatenate-reverse len string-list final end)))
+
+(define (string-concatenate-reverse/shared string-list
+					   :optional (final "") (end -1))
+  ;; Add up the lengths of all the strings in STRING-LIST; also get a
+  ;; pointer NZLIST into STRING-LIST showing where the first non-zero-length
+  ;; string starts.
+  (let Loop ((len 0) (nzlist #f) (lis string-list))
+    (if (pair? lis)
+	(let ((slen (string-length (car lis))))
+	  (Loop (+ len slen)
+		(if (or nzlist (zero? slen)) nzlist lis)
+		(cdr lis)))
+	
+	(cond ((zero? len) (substring/shared final 0 end))
+	      ;; LEN > 0, so NZLIST is non-empty.
+	      ((and (zero? end) (= len (string-length (car nzlist))))
+	       (car nzlist))
+	      (else (%finish-string-concatenate-reverse len nzlist final end))))))
+
+;;;; ======================================================================
+;;;;
+;;;;		       F O L D ,   U N F O L D   &   M A P
+;;;;
+;;;; ======================================================================  
+(define (%string-map proc s start end)	
+  (let* ((len (- end start))
+	 (res (make-string len)))
+    (do ((i start (+ i 1))
+	 (j 0     (+ j 1)))
+	((>= j len))
+      (string-set! res j (proc (string-ref s i))))
+    res))
+
+(define (%string-map! proc s start end)
+  (do ((i (- end 1) (- i 1)))
+      ((< i start))
+    (string-set! s i (proc (string-ref s i)))))
+
+;;
+;; exported procedures
+;;
+(define (string-map proc s :optional (start 0) (end -1))
+  (check-arg procedure? proc 'string-map)
+  (%check-indexes s start end 'string-map)
+  (%string-map proc s start end))
+
+(define (string-map! proc s :optional (start 0) (end -1))
+  (check-arg procedure? proc 'string-map!)
+  (%check-indexes s start end 'string-map)
+  (unless (string-mutable? s) (error 'string-map! "~S is not a mutable string" s))
+  (%string-map! proc s start end))
+
+(define (string-fold kons knil s :optional (start 0) (end -1))
+  (check-arg procedure? kons 'string-fold)
+  (%check-indexes s start end 'string-fold)
+  (let Loop ((v knil) (i start))
+    (if (< i end) (Loop (kons (string-ref s i) v) (+ i 1))
+	v)))
+
+(define (string-fold-right kons knil s :optional (start 0) (end -1))
+  (check-arg procedure? kons string-fold-right)
+  (%check-indexes s start end 'string-fold-right)
+  (let Loop ((v knil) (i (- end 1)))
+    (if (>= i start) (Loop (kons (string-ref s i) v) (- i 1))
+	v)))
+
+(define (string-unfold p f g seed :optional
+		       (base "") (make-final (lambda (_) "")))
+  (check-arg procedure? p 'string-unfold)
+  (check-arg procedure? f 'string-unfold)
+  (check-arg procedure? g 'string-unfold)
+  (with-output-to-string
+    (lambda ()
+      (display base)
+      (let Loop ((seed seed))
+	(if (p seed)
+	    (display (make-final seed))
+	    (begin
+	      (write-char (f seed))
+	      (Loop (g seed))))))))
+
+
+(define (string-unfold-right p f g seed :optional
+			     (base "") (make-final (lambda (_) "")))
+  (check-arg procedure? p 'string-unfold-right)
+  (check-arg procedure? f 'string-unfold-right)
+  (check-arg procedure? g 'string-unfold-right)
+
+  (let ((str (open-output-string)))
+    (let Loop ((seed seed))
+      (if (p seed)
+	  (string-append (make-final seed)
+			 (string-reverse (get-output-string str))
+			 base)
+	  (begin
+	    (write-char (f seed) str)
+	    (Loop (g seed)))))))
+
+(define (string-for-each proc s :optional (start 0) (end -1))
+  (check-arg procedure? proc 'string-for-each)
+  (%check-indexes s start end 'string-for-each)
+  (let Loop ((i start))
+    (when (< i end)
+      (proc (string-ref s i)) 
+      (Loop (+ i 1)))))
+
+
+(define (string-for-each-index proc s :optional (start 0) (end -1))
+  (check-arg procedure? proc string-for-each-index)
+  (%check-indexes s start end 'string-for-each)
+  (let Loop ((i start))
+    (when (< i end)
+      (proc i)
+      (Loop (+ i 1)))))
+
+;;;; ======================================================================
+;;;;
+;;;;		     R E P L I C A T E   &   R O T A T E     
+;;;;
+;;;; ======================================================================  
+(define (%multispan-repcopy! target tstart s sfrom sto start end)
+  (let* ((slen	      (- end start))
+	 (i0	      (+ start (modulo sfrom slen)))
+	 (total-chars (- sto sfrom)))
+
+    ;; Copy the partial span @ the beginning
+    (%string-copy! target tstart s i0 end)
+    
+    (let* ((ncopied (- end i0))			; We've copied this many.
+	   (nleft   (- total-chars ncopied))	; # chars left to copy.
+	   (nspans  (quotient nleft slen)))	; # whole spans to copy
+			   
+      ;; Copy the whole spans in the middle.
+      (do ((i (+ tstart ncopied) (+ i slen))	; Current target index.
+	   (nspans nspans (- nspans 1)))	; # spans to copy
+	  ((zero? nspans)
+	   ;; Copy the partial-span @ the end & we're done.
+	   (%string-copy! target i s start (+ start (- total-chars (- i tstart)))))
+
+	(%string-copy! target i s start end))))); Copy a whole span.
+
+;;;
+;;; Exported primitives
+;;;
+(define (xsubstring s from :optional (to -1 to?) (start 0) (end -1))
+  (check-arg (lambda (val) (and (integer? val) (exact? val))) from 'xsubstring)
+  (%check-indexes s start end 'xsubstring)
+  (if to?
+      (check-arg (lambda (val) (and (integer? val) (exact? val) (<= from val)))
+		 to 'xsubstring)
+      (set! to (+ from (- end start))))
+
+  (let ((slen   (- end start))
+	(anslen (- to  from)))
+    (cond ((zero? anslen) "")
+	  ((zero? slen) (error 'xsubstring
+			       "Cannot replicate empty (sub)string ~S ~S ~S ~S ~S"
+			       s from to start end))
+	  
+	  ((= 1 slen)		; Fast path for 1-char replication.
+	   (make-string anslen (string-ref s start)))
+	  
+	  ;; Selected text falls entirely within one span.
+	  ((= (floor (/ from slen)) (floor (/ to slen)))
+	   (substring s
+		      (+ start (modulo from slen))
+		      (+ start (modulo to   slen))))
+	  
+	  ;; Selected text requires multiple spans.
+	  (else (let ((ans (make-string anslen)))
+		  (%multispan-repcopy! ans 0 s from to start end)
+		  ans)))))
+
+
+(define (string-xcopy! target tstart s sfrom
+		       :optional (sto -1 sto?) (start 0) (end -1))
+  (check-arg (lambda (val) (and (integer? val) (exact? val))) sfrom 'string-xcopy!)
+  (%check-indexes s start end 'string-xcopy!)
+  (if sto?
+      (check-arg (lambda (val) (and (integer? val) (exact? val) (<= sfrom val)))
+		 sto 'string-xcopy!)
+      (set! sto (+ sfrom (string-length s))))
+  
+  (let* ((tocopy (- sto sfrom))
+	 (tend (+ tstart tocopy))
+	 (slen (- end start)))
+    ;;(check-substring-spec string-xcopy! target tstart tend)
+    (cond ((zero? tocopy))
+	  ((zero? slen) (error 'string-xcopy!
+			       "cannot replicate empty (sub)string"))
+	  ((= 1 slen)			; Fast path for 1-char replication.
+	   (string-fill! target (string-ref s start) tstart tend))
+	  
+	  ;; Selected text falls entirely within one span.
+	  ((= (floor (/ sfrom slen)) (floor (/ sto slen)))
+	   (%string-copy! target tstart s 
+			  (+ start (modulo sfrom slen))
+			  (+ start (modulo sto   slen))))
+	  
+	  ;; Multi-span copy.
+	  (else (%multispan-repcopy! target tstart s sfrom sto start end)))))
+
+;;;; ======================================================================
+;;;;
+;;;;	M I S C E L L A N E O U S :   I N S E R T I O N ,   P A R S I N G
+;;;;
+;;;; ======================================================================  
+(define (string-replace s1 s2 start1 end1 :optional (start2 0) (end2 -1))
+  (%check-indexes s1 start1 end1 'string-replace)
+  (%check-indexes s2 start2 end2 'string-replace)
+  (let* ((slen1   (string-length s1))
+	 (sublen2 (- end2 start2))
+	 (rlen    (+ (- slen1 (- end1 start1)) sublen2))
+	 (res     (make-string rlen)))
+      (%string-copy! res 0 s1 0 start1)
+      (%string-copy! res start1 s2 start2 end2)
+      (%string-copy! res (+ start1 sublen2) s1 end1 slen1)
+      res))
+
+(define (string-tokenize s
+		 :optional (token-chars char-set:graphic) (start 0) (end -1))
+  (check-arg char-set? token-chars 'string-tokenize)
+  (%check-indexes s start end 'string-tokenize)
+  (let Loop ((i end) (res '()))
+    (cond
+      ((and (< start i) (string-index-right s token-chars start i))
+           => (lambda (tend-1)
+		(let ((tend (+ 1 tend-1)))
+		  (cond
+		    ((string-skip-right s token-chars start tend-1)
+		       => (lambda (tstart-1)
+			    (Loop tstart-1 (cons (substring s (+ 1 tstart-1) tend)
+						 res))))
+		    (else (cons (substring s start tend) res))))))
+      (else res))))
+
+;;;; ======================================================================
+;;;;
+;;;;			F I L T E R I N G   &   D E L E T I N G
+;;;;
+;;;; ======================================================================
+(define (string-filter str criterion :optional (start 0) (end -1))
+  (%check-indexes str start end 'string-filter)
+  (let ((dst  (open-output-string))
+	(proc (cond
+		((char? criterion)
+		    (lambda (c) (char=? criterion c)))
+		((char-set? criterion)
+		    (lambda (c) (char-set-contains? criterion c)))
+		((procedure? criterion)
+		    criterion)
+		(else (error 'string-filter "bad criterion ~S" criterion)))))
+    (let Loop ((i start))
+      (when (< i end)
+	(let ((c (string-ref str i)))
+	  (if (proc c)
+	      (write-char c dst))
+	  (Loop (+ i 1)))))
+    (get-output-string dst)))
+
+
+(define (string-delete str criterion :optional (start 0) (end -1))
+  (%check-indexes str start end 'string-filter)
+  (let ((dst  (open-output-string))
+	(proc (cond
+		((char? criterion)
+		    (lambda (c) (not (char=? criterion c))))
+		((char-set? criterion)
+		    (lambda (c) (not (char-set-contains? criterion c))))
+		((procedure? criterion)
+		    (lambda (c) (not (criterion c))))
+		(else (error 'string-delete "bad criterion ~S" criterion)))))
+    (let Loop ((i start))
+      (when (< i end)
+	(let ((c (string-ref str i)))
+	  (if (proc c)
+	      (write-char c dst))
+	  (Loop (+ i 1)))))
+    (get-output-string dst)))
+
+
+;;;; ======================================================================
+;;;;
+;;;;			L O W   L E V E L   P R O C E D U R E S
+;;;;
+;;;; ======================================================================
+(define (string-parse-start+end proc s args)
+  (check-arg string? s 'string-parse-start+end)
+  (let ((slen (string-length s)))
+    (if (pair? args)
+	(let ((start (car args))
+	      (args  (cdr args)))
+	  (if (and (integer? start) (exact? start) (>= start 0))
+	      (receive (end args)
+		       (if (pair? args)
+			   (let ((end  (car args))
+				 (args (cdr args)))
+			     (if (and (integer? end) (exact? end) (<= end slen))
+				 (values end args)
+				 (error proc "illegal substring END spec ~S" end)))
+			   (values slen args))
+		       (if (<= start end)
+			   (values args start end)
+			   (error proc "Illegal substring START/END spec ~S ~S"
+				  start end)))
+	      (error proc "Illegal substring START spec ~S on ~S" start s)))
+	(values '() 0 slen))))
+
+(define (string-parse-final-start+end proc s args)
+  (receive (rest start end) (string-parse-start+end proc s args)
+   (if (pair? rest)
+       (error proc "Extra arguments to procedure ~S" rest)
+       (values start end))))
+
+
+(define-syntax let-string-start+end
+  (syntax-rules ()
+    ((_ (?start ?end ?rest) ?proc ?s ?args . ?body)
+     (call-with-values
+       (lambda () (string-parse-start+end ?proc ?s ?args))
+       (lambda (?rest ?start ?end) . ?body)))
+    ((_ (?start ?end) ?proc ?s ?args . ?body)
+     (call-with-values
+       (lambda () (string-parse-final-start+end ?proc ?s ?args))
+       (lambda (?start ?end) . ?body)))))
+
+(define (substring-spec-ok? s start end)
+  (and (string? s)
+       (integer? start) (exact? start)
+       (integer? end) (exact? end)
+       (<= 0 start end (string-length s))))
+
+(define (check-substring-spec proc s start end)
+  (unless (substring-spec-ok? s start end)
+    (error proc "invalid substring spec: ~s (~s, ~s)" s start end)))
+
+;;; Knuth-Morris-Pratt string searching
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; See
+;;;     "Fast pattern matching in strings"
+;;;     SIAM J. Computing 6(2):323-350 1977
+;;;     D. E. Knuth, J. H. Morris and V. R. Pratt
+;;; also described in
+;;;     "Pattern matching in strings"
+;;;     Alfred V. Aho
+;;;     Formal Language Theory - Perspectives and Open Problems
+;;;     Ronald V. Brook (editor)
+;;; This algorithm is O(m + n) where m and n are the 
+;;; lengths of the pattern and string respectively
+
+
+
+;;; (make-kmp-restart-vector pattern [c= start end]) -> integer-vector
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Compute the KMP restart vector RV for string PATTERN.  If
+;;; we have matched chars 0..i-1 of PATTERN against a search string S, and
+;;; PATTERN[i] doesn't match S[k], then reset i := RV[i], and try again to
+;;; match S[k].  If RV[i] = -1, then punt S[k] completely, and move on to
+;;; S[k+1] and PATTERN[0] -- no possible match of PAT[0..i] contains S[k].
+;;;
+;;; In other words, if you have matched the first i chars of PATTERN, but
+;;; the i+1'th char doesn't match, RV[i] tells you what the next-longest
+;;; prefix of PATTERN is that you have matched.
+;;;
+;;; - C= (default CHAR=?) is used to compare characters for equality.
+;;;   Pass in CHAR-CI=? for case-folded string search.
+;;;
+;;; - START & END restrict the pattern to the indicated substring; the
+;;;   returned vector will be of length END - START. The numbers stored
+;;;   in the vector will be values in the range [0,END-START) -- that is,
+;;;   they are valid indices into the restart vector; you have to add START
+;;;   to them to use them as indices into PATTERN.
+;;;
+;;; I've split this out as a separate function in case other constant-string
+;;; searchers might want to use it.
+;;;
+;;; E.g.:
+;;;    a b d  a b x
+;;; #(-1 0 0 -1 1 2)
+(define (make-kmp-restart-vector pattern :optional (c= char=?) (start 0) (end -1))
+  (check-arg procedure? c= 'make-kmp-restart-vector)
+  (%check-indexes pattern start end 'make-kmp-restart-vector)
+
+  (let* ((rvlen (- end start))
+	 (rv (make-vector rvlen -1)))
+    (if (> rvlen 0)
+	(let ((rvlen-1 (- rvlen 1))
+	      (c0 (string-ref pattern start)))
+	  
+	  ;; Here's the main loop. We have set rv[0] ... rv[i].
+	  ;; K = I + START -- it is the corresponding index into PATTERN.
+	  (let Loop1 ((i 0) (j -1) (k start))	
+	    (if (< i rvlen-1)
+		
+		(let ((ck (string-ref pattern k)))
+		  ;; Loop2 invariant:
+		  ;;   pat[(k-j) .. k-1] matches pat[start .. start+j-1]
+		  ;;   or j = -1.
+		  (let Loop2 ((j j))
+		    
+		    (cond ((= j -1)
+			   (let ((i1 (+ i 1)))
+			     (vector-set! rv i1 (if (c= ck c0) -1 0))
+			     (Loop1 i1 0 (+ k 1))))
+			  
+			  ;; pat[(k-j) .. k] matches pat[start..start+j].
+			  ((c= ck (string-ref pattern (+ j start)))
+			   (let* ((i1 (+ 1 i))
+				  (j1 (+ 1 j)))
+			     (vector-set! rv i1 j1)
+			     (Loop1 i1 j1 (+ k 1))))
+			  
+			  (else (Loop2 (vector-ref rv j))))))))))
+    rv))
+
+
+;;; We've matched I chars from PAT. C is the next char from the search string.
+;;; Return the new I after handling C. 
+;;;
+;;; The pattern is (VECTOR-LENGTH RV) chars long, beginning at index PAT-START
+;;; in PAT (PAT-START is usually 0). The I chars of the pattern we've matched
+;;; are 
+;;;     PAT[PAT-START .. PAT-START + I].
+;;;
+;;; It's *not* an oversight that there is no friendly error checking or
+;;; defaulting of arguments. This is a low-level, inner-loop procedure
+;;; that we want integrated/inlined into the point of call.
+(define (kmp-step pat rv c i c= p-start)
+  (let Loop ((i i))
+    (if (c= c (string-ref pat (+ i p-start)))	; Match =>
+	(+ i 1)					;   Done.
+	(let ((i (vector-ref rv i)))		; Back up in PAT.
+	  (if (= i -1) 0			; Can't back up further.
+	      (Loop i))))))			; Keep trying for match.
+
+
+;;; Zip through S[start,end), looking for a match of PAT. Assume we've
+;;; already matched the first I chars of PAT when we commence at S[start].
+;;; - <0:  If we find a match *ending* at index J, return -J.
+;;; - >=0: If we get to the end of the S[start,end) span without finding
+;;;   a complete match, return the number of chars from PAT we'd matched
+;;;   when we ran off the end.
+;;;
+;;; This is useful for searching *across* buffers -- that is, when your
+;;; input comes in chunks of text. We hand-integrate the KMP-STEP loop
+;;; for speed.
+
+(define (string-kmp-partial-search pat rv s i :optional (c= char?) (p-start 0)
+				   (s-start 0)
+				   (s-end -1))
+  (check-arg vector? rv 'string-kmp-partial-search)
+  (check-arg procedure? c= 'string-kmp-partial-search)
+  (check-arg (lambda (x) (and (integer? x) (exact? x) (<= 0 x))) c=
+	     'string-kmp-partial-search)
+  (%check-indexes s s-start s-end 'string-kmp-partial-search -1)
+  
+  (let ((patlen (vector-length rv)))
+    (check-arg (lambda (i) (and (integer? i) (exact? i) (<= 0 i) (< i patlen)))
+	       i 'string-kmp-partial-search)
+    
+    ;; Enough prelude. Here's the actual code.
+    (let Loop ((si s-start)		; An index into S.
+	       (vi i))			; An index into RV.
+      (cond ((= vi patlen) (- si))	; Win.
+	    ((= si s-end) vi)		; Ran off the end.
+	    (else			; Match s[si] & loop.
+	     (let ((c (string-ref s si)))
+	       (Loop (+ si 1)	
+		     (let Loop2 ((vi vi))	; This is just KMP-STEP.
+		       (if (c= c (string-ref pat (+ vi p-start)))
+			   (+ vi 1)
+			   (let ((vi (vector-ref rv vi)))
+			     (if (= vi -1) 0
+				 (Loop2 vi))))))))))))
+
+
+;;; End of module SRFI-13
+)
+
+;; Import SRFI-13 in the module STklos
+(select-module STklos)
+(import SRFI-13)
+
+;; Redefine the R5RS primitives with the SRFI-13 extended ones
+(set! list->string (in-module SRFI-13 list->string))
+(set! string-copy  (in-module SRFI-13 string-copy))
+(set! string-fill! (in-module SRFI-13 string-fill!))
+
+;; Overload STklos string-index with the SRFI one
+(set! string-index (in-module SRFI-13 string-index))
+
+(provide "srfi-13")
+
+;;; MIT Scheme copyright terms
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; This material was developed by the Scheme project at the Massachusetts
+;;; Institute of Technology, Department of Electrical Engineering and
+;;; Computer Science.  Permission to copy and modify this software, to
+;;; redistribute either the original software or a modified version, and
+;;; to use this software for any purpose is granted, subject to the
+;;; following restrictions and understandings.
+;;; 
+;;; 1. Any copy made of this software must include this copyright notice
+;;; in full.
+;;; 
+;;; 2. Users of this software agree to make their best efforts (a) to
+;;; return to the MIT Scheme project any improvements or extensions that
+;;; they make, so that these may be included in future releases; and (b)
+;;; to inform MIT of noteworthy uses of this software.
+;;; 
+;;; 3. All materials developed as a consequence of the use of this
+;;; software shall duly acknowledge such use, in accordance with the usual
+;;; standards of acknowledging credit in academic research.
+;;; 
+;;; 4. MIT has made no warrantee or representation that the operation of
+;;; this software will be error-free, and MIT is under no obligation to
+;;; provide any services, by way of maintenance, update, or otherwise.
+;;; 
+;;; 5. In conjunction with products arising from the use of this material,
+;;; there shall be no use of the name of the Massachusetts Institute of
+;;; Technology nor of any adaptation thereof in any advertising,
+;;; promotional, or sales literature without prior written consent from
+;;; MIT in each case.
+
+;;; Scsh copyright terms
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; All rights reserved.
+;;; 
+;;; Redistribution and use in source and binary forms, with or without
+;;; modification, are permitted provided that the following conditions
+;;; are met:
+;;; 1. Redistributions of source code must retain the above copyright
+;;;    notice, this list of conditions and the following disclaimer.
+;;; 2. Redistributions in binary form must reproduce the above copyright
+;;;    notice, this list of conditions and the following disclaimer in the
+;;;    documentation and/or other materials provided with the distribution.
+;;; 3. The name of the authors may not be used to endorse or promote products
+;;;    derived from this software without specific prior written permission.
+;;; 
+;;; THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS OR
+;;; IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+;;; OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+;;; IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+;;; INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+;;; NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+;;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

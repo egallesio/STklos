@@ -1,0 +1,122 @@
+;;;;
+;;;; test.stk	-- STklos regression testing
+;;;; 
+;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date:  3-May-2005 11:19 (eg)
+;;;; Last file update: 25-May-2005 07:45 (eg)
+;;;;
+
+(define *all-errors* '())
+(define *log* (current-output-port))
+(define *err* (current-error-port))
+(define *test-failed* (vector 'fail))
+(define *test-counter* 0)
+(define *test-ko* 0)
+
+;; ----------------------------------------------------------------------
+;; 	%tester ...
+;; ----------------------------------------------------------------------
+(define (%tester message expect thunk code compare)
+  (format *log* "  testing ~A expects ~S ==> " message expect)
+  (flush-output-port)
+  (let ((res (with-handler
+	        (lambda (c) *test-failed*)
+		(thunk))))
+    (set! *test-counter* (+ *test-counter* 1))
+    (if (compare expect res)
+	(format *log* "OK.\n")
+	(begin
+	  (set! *test-ko* (+ *test-ko* 1))
+	  (format *log* "ERROR: got ~S.\n" res)
+	  (set! *all-errors* (cons (list message code expect res)
+				   *all-errors*)))))
+  (flush-output-port *log*))
+
+;; ----------------------------------------------------------------------
+;; 	test-init ...
+;; ----------------------------------------------------------------------
+(define (test-init log-file)
+  (let ((port (open-output-file log-file)))
+    (set! *log* port)))
+
+;; ----------------------------------------------------------------------
+;; 	test-end ...
+;; ----------------------------------------------------------------------
+(define (test-end)
+  (for-each (lambda (port)
+	      (format port "~A\n" (make-string 70 #\-))
+	      (format port "Number of tests: ~A (OK: ~A Error: ~A)\n"
+		       *test-counter* (- *test-counter* *test-ko*) *test-ko*)
+	      (format port "   Elapsed Time: ~Ams\n"
+		      (inexact->exact (round (clock))))
+	      (format port "*** End of tests ***\n")
+	      (close-output-port port))
+	    (list *log* *err*))
+  (exit (if (positive? *test-ko*) 1 0)))
+
+;; ----------------------------------------------------------------------
+;; 	test-section ...
+;; ----------------------------------------------------------------------
+(define (test-section msg)
+  (let* ((s   (format "==== Testing ~a " msg))
+	 (len (string-length s)))
+    (set! *all-errors* '())
+    ;; Log
+    (format *log* "~a ~a\n" s (make-string (- 70 len) #\=))
+    (flush-output-port *log*)
+    ;; Output
+    (format *err* "~a ... ~a" s (make-string (- 60 len) #\space))
+    (flush-output-port *err*)))
+
+;; ----------------------------------------------------------------------
+;; 	test-section-end ...
+;; ----------------------------------------------------------------------
+(define (test-section-end)
+  (define (fmt . args)
+    (apply format *log* args)
+    (apply format *err* args)
+    (flush-output-port *log*)
+    (flush-output-port *err*))
+  
+  (if (null? *all-errors*)
+      (fmt "passed\n")
+      (begin
+	(fmt "failed\n")
+	(fmt "Errors found in this section:\n")
+	(for-each (lambda (x) (apply fmt "test ~a on ~S expected ~S but got ~S\n" x))
+		  (reverse! *all-errors*)))))
+
+;; ----------------------------------------------------------------------
+;; 	test-subsection ...
+;; ----------------------------------------------------------------------
+(define (test-subsection msg)
+  (let* ((s (format "---- ~a " msg))
+	 (len (string-length s)))
+  (format *log* "~a ~a\n" msg (make-string (- 70 len) #\=))
+  (flush-output-port *log*)))
+
+;; ----------------------------------------------------------------------
+;; 	test ...
+;; ----------------------------------------------------------------------
+(define-macro (test msg expect expr :optional (compare equal?))
+  `(%tester ,msg ,expect (lambda () ,expr) ',expr ,compare))
+
+(provide "test")

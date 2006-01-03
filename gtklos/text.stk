@@ -1,0 +1,225 @@
+;;;;
+;;;; text.stk	-- GTklos Text Widget
+;;;; 
+;;;; Copyright © 2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 14-Feb-2002 22:24 (eg)
+;;;; Last file update:  8-Apr-2002 00:39 (eg)
+;;;;
+
+;======================================================================
+;
+;			< g t k - t e x t >   C l a s s
+;
+;======================================================================
+
+;;
+;; The class <gtk-text> corresponds to text without scrollbar. It should 
+;; not be used in user programs. Use instead the general <text> class 
+;;
+
+(define-class <gtk-text> (<gtk-editable>)
+  ((line-wrap   	:accessor	line-wrap
+			:init-keyword	:line-wrap
+			:allocation	:gtk-arg
+			:gtk-name	"line_wrap")
+   (word-wrap		:accessor	word-wrap
+			:init-keyword	:word-wrap
+			:allocation	:gtk-arg
+			:gtk-name	"word_wrap")
+   (text-point		:accessor	text-point
+			:init-keyword	:text-point
+			:allocation	:virtual
+			:slot-ref	(lambda (o)
+					  (%text-ctrl (slot-ref o 'wid) 0))
+			:slot-set!	(lambda (o v)
+					  (%text-ctrl (slot-ref o 'wid) 1 v)))))
+
+
+(define-method realize-widget((self <gtk-text>) initargs)
+  (let ((wid (%text self)))
+    (slot-set! self 'wid  wid)))
+
+;======================================================================
+#|
+
+This is the code of version 0.51.
+It permits to have a vertical scrollbar on the of a text. However
+since scrollbar (and all the text widget btw) are buggy in GTK v1
+and since GTK v2 is now out, I'll wait for a better solution as soon as
+GTK v2 will appears in the main distributions. To avoid compatibility
+problems, I will keep it minimal for now, and develop a real solution
+for the next version
+
+
+
+
+(define-class <text> (<gtk-text>)
+  ((%vsb)		;; Don't touch: the vertical scrollbar
+   (scrollbar-position	:accessor	scrollbar-position
+			:init-keyword	:scrollbar-position
+			:allocation	:virtual
+			:slot-ref	(lambda (o)
+					  (let ((pos (%widget-plist (wid o) :spos)))
+					    (if (eq? pos (void)) "right" pos)))
+			:slot-set!
+			(lambda (o v)
+			  (let ((txt  (slot-ref o 'wid))
+				(vsb  (slot-ref o '%vsb))
+				(cont (slot-ref o 'container)))
+			    ;; Things are too much complicated. GTK+ seems to 
+			    ;; to have problem when un-parenting a window. 
+			    ;; Furthermore, hiding a window lets its trace 
+			    ;; on the screen. Consequently we destroy the 
+			    ;; scrollbar when it is hidden and rebuild it if
+			    ;; necessary
+			    (cond 
+			     ((equal? v "none")
+			      (destroy vsb)
+			      (slot-set! o '%vsb #f))
+
+			     ((equal? v "right")
+			      (unless vsb
+				(set! vsb (make <gtk-scrollbar> 
+					    :orientation "vertical"
+					    :adjustment (%text-vadj txt)))
+				(slot-set! o '%vsb vsb))
+			      (place vsb :in cont :position 1 :fill "y" 
+					 :expand #f :side "right"))
+
+			     ((equal? v "left") 
+			      (unless vsb
+				(set! vsb (make <gtk-scrollbar> 
+					    :orientation "vertical"
+					    :adjustment (%text-vadj txt)))
+				(slot-set! o '%vsb vsb))
+			      (place vsb :in cont :position 0 :fill "y"
+				     :expand #f :side "left"))
+			     (else
+			      (error 'scrollbar-position 
+				     "bad scrollbar position ~S" v)))
+			    ;; Retain position in the associated plist for reader
+			    (%widget-plist txt :spos v))))))
+
+
+
+(define-method internal-arrange-widget ((self <text>) initargs)
+  (next-method)
+  (let* ((wid (slot-ref self 'wid))
+	 (c   (make <packer>))
+	 (s   (make <gtk-scrollbar> :adjustment (%text-vadj wid)
+		    		    :orientation "vertical")))
+    (place self :in c :fill "both" :expand #t :side "left")
+    (place s    :in c :fill "y"    :expand #f :side "left")
+    (slot-set! self '%vsb s)
+    (slot-set! self 'container c)))
+
+(define-method realize-widget ((self <text>) initargs)
+  (next-method)
+  (let ((wid (%text self)))
+    (slot-set! self 'wid wid)
+    ;; keep a reference to the (internal) listbox widget in the special slot %lb
+    '(slot-set! self '%lb (%widget-plist wid :listbox))))
+
+|#
+
+;======================================================================
+;
+;			     < t e x t >   C l a s s
+;
+;======================================================================
+
+(define-class <text> (<gtk-text>)
+  ;; Very minimal for now. It will be developed for a next release.
+  ())
+
+
+(define-method initialize ((self <text>) initargs)
+  ;; Force to have a null layout to avoid the creation of the implicit
+  ;; vertical box. Furthermore, since the listbox is already placed
+  ;; in the scrolled window, if the layout is not forced GTK issues
+  ;; a warning
+  (next-method self (list* :layout #f initargs)))
+
+(define-method realize-widget ((self <text>) initargs)
+  (next-method)
+  (let ((wid (%text self)))
+    (slot-set! self 'wid wid)
+    ;; keep a reference to the (internal) listbox widget in the special slot %lb
+    '(slot-set! self '%lb (%widget-plist wid :listbox))))
+
+;;;;
+;;;;
+;;;; Text Methods and functions
+;;;;
+
+(define (text-insert txt str :optional (position (void) position?))
+  (when position?
+    (let* ((v (value txt))
+	   (p (min (string-length v) position)))
+      (set! (text-point txt) p)))
+  (%text-insert (slot-ref txt 'wid) str))
+
+(define (text-freeze txt)
+  (%text-ctrl (wid txt) 2))
+
+(define (text-unfreeze txt)
+  (%text-ctrl (wid txt) 3))
+
+(define (text-cut-clipboard txt)
+  (%text-ctrl (wid txt) 4))
+
+(define (text-copy-clipboard txt)
+  (%text-ctrl (wid txt) 5))
+
+(define (text-paste-clipboard txt)
+  (%text-ctrl (wid txt) 6))
+
+
+;;
+;; File IO operations 
+;;
+(define (text-read-file txt file)
+  (let ((port (open-file file "r")))
+    (unless port
+      (error 'text-read-file "Cannot open file ~S" file))
+    (set! (value txt) "")
+    
+    ;; Freeze text
+    (text-freeze txt)
+
+    ;; Do the reading
+    (do ((l (read-line port) (read-line port)))
+	((eof-object? l))
+      (text-insert txt l)
+      (text-insert txt "\n"))
+
+    ;; Unfreeze text
+    (text-unfreeze txt)
+    (close-port port)))
+
+(define (text-write-file txt file)
+  (let ((port (open-file file "w")))
+    (unless port
+      (error 'text-write-file "Cannot open file ~S" file))
+    (display (slot-ref txt 'value) port)
+    (close-port port)))
+
+; LocalWords:  txt wid

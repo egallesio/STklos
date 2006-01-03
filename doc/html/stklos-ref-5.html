@@ -1,0 +1,962 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
+ <style type="text/css">
+  <!--
+  tt { font-family: monospace }
+  code { font-family: monospace }
+  -->
+ </style>
+<link href="doc-style.css" rel="stylesheet" type="text/css">
+</head>
+<body >
+<table width='100%' cellpadding='0' cellspacing='0'><tr><td bgcolor="#E6F2E6"><center><h1>STklos Reference Manual<hr align="center" width="10%">5. Regular Expressions</h1></center></table><table cellpadding="3" cellspacing="0" width="100%"><tr>
+<td align="left" valign="top" width="20%" bgcolor="#E6F2E6">
+<br /><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
+<tr><th align="center" colspan="2" bgcolor="darkolivegreen"><font color="white">Contents</font></th></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-19716">*Top*</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">4&nbsp;</td><td align="left"><a href="stklos-ref-4.html#Standard-Procedures">Standard Procedures</a></td></tr>
+<tr class="navsel"><td width="8%" align="left" valign="top">5&nbsp;</td><td align="left"><a href="stklos-ref-5.html#Regular-Expressions">Regular Expressions</a><br /><table cellspacing="1" cellpadding="1" width="100%">
+<tbody>
+ <tr><td valign="top" align="left">5.1</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Backslash">Backslash</td></tr>
+ <tr><td valign="top" align="left">5.2</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Circumflex-and-Dollar">Circumflex and Dollar</td></tr>
+ <tr><td valign="top" align="left">5.3</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Full-Stop--period--dot-">Full Stop (period, dot)</td></tr>
+ <tr><td valign="top" align="left">5.4</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Square-Brackets">Square Brackets</td></tr>
+ <tr><td valign="top" align="left">5.5</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#POSIX-character-classes">POSIX character classes</td></tr>
+ <tr><td valign="top" align="left">5.6</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Vertical-Bar">Vertical Bar</td></tr>
+ <tr><td valign="top" align="left">5.7</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Internal-Option-Setting">Internal Option Setting</td></tr>
+ <tr><td valign="top" align="left">5.8</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Subpatterns">Subpatterns</td></tr>
+ <tr><td valign="top" align="left">5.9</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Named-Subpatterns">Named Subpatterns</td></tr>
+ <tr><td valign="top" align="left">5.10</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Repetition">Repetition</td></tr>
+ <tr><td valign="top" align="left">5.11</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Atomic-Grouping-And-Possessive-Quantifiers">Atomic Grouping And Possessive Quantifiers</td></tr>
+ <tr><td valign="top" align="left">5.12</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Back-References">Back References</td></tr>
+ <tr><td valign="top" align="left">5.13</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Assertions">Assertions</td></tr>
+ <tr><td valign="top" align="left">5.14</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Conditional-Subpatterns">Conditional Subpatterns</td></tr>
+ <tr><td valign="top" align="left">5.15</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#pcre-comment">Comments</td></tr>
+ <tr><td valign="top" align="left">5.16</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Subpatterns-As-Subroutines">Subpatterns As Subroutines</td></tr>
+ <tr><td valign="top" align="left">5.17</td><td colspan="4" width="100%"><a href="stklos-ref-5.html#Regexp-Procedures">Regexp Procedures</td></tr>
+</tbody>
+</table>
+</td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">6&nbsp;</td><td align="left"><a href="stklos-ref-6.html#Pattern-Matching">Pattern Matching</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">7&nbsp;</td><td align="left"><a href="stklos-ref-7.html#Exceptions-and-Conditions">Exceptions and Conditions</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">8&nbsp;</td><td align="left"><a href="stklos-ref-8.html#STklos-Object-System">STklos Object System</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">9&nbsp;</td><td align="left"><a href="stklos-ref-9.html#Customizations">Customizations</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">10&nbsp;</td><td align="left"><a href="stklos-ref-10.html#Using-the-SLIB-package">Using the SLIB package</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">11&nbsp;</td><td align="left"><a href="stklos-ref-11.html#SRFIs">SRFIs</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">12&nbsp;</td><td align="left"><a href="stklos-ref-12.html#Index">Index</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">&nbsp;</td><td align="left"><a href="stklos-ref-13.html#Bibliography">Bibliography</a></td></tr>
+</tbody></table>
+</td>
+<td align="left" valign="top">
+<a name="--index-entry-16071"></a><p><span style="font-variant: small-caps">STklos</span> uses the Philip Hazel's Perl-compatible Regular Expression
+(PCRE) library for implementing regexps [<a href="stklos-ref-13.html#PCRE">13</a>].
+Consequently, the <span style="font-variant: small-caps">STklos</span> regular expression syntax is the same
+as PCRE, and Perl by the way.</p><p>The following text is extracted from the PCRE package. However, to make
+things shorter, some of the original documentation as not been reported
+here. In particular some possibilities of PCRE have been completely
+occulted (those whose description was too long and which seems (at least
+to me), not too important). Read the documentation provided with PCRE
+for a complete description <a href="#fn--footnote-16084"><sup><small>1</small></sup></a></p><p>A regular expression is a pattern that is matched against a
+subject string from left to right. Most characters stand for
+themselves in a pattern, and match the corresponding characters
+in the subject. As a trivial example, the pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>The quick brown fox
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches a portion of a subject string that is identical to
+itself.  The power of regular expressions comes from the ability
+to include alternatives and repetitions in the pattern. These are
+encoded in the pattern by the use of <em>meta-characters</em>, which do
+not stand for themselves but instead are interpreted in some
+special way.</p><p>There are two different sets of meta-characters: those that
+are recognized anywhere in the pattern except within square
+brackets, and those that are recognized in square
+brackets. Outside square brackets, the meta-characters are as
+follows:</p><center><table style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td width="50" align="center">  \  </td><td align="left">general escape character with several uses</td></tr>
+<tr><td width="50" align="center">  ^  </td><td align="left">assert start of subject (or line, in multiline mode)</td></tr>
+<tr><td width="50" align="center">  $  </td><td align="left">assert end of subject (or line, in multiline mode)</td></tr>
+<tr><td width="50" align="center">  .  </td><td align="left">match any character except newline (by default)</td></tr>
+<tr><td width="50" align="center">  [  </td><td align="left">start character class definition</td></tr>
+<tr><td width="50" align="center">  |  </td><td align="left">start of alternative branch</td></tr>
+<tr><td width="50" align="center">  (  </td><td align="left">start subpattern</td></tr>
+<tr><td width="50" align="center">  )  </td><td align="left">end subpattern</td></tr>
+<tr><td width="50" align="center">  ?  </td><td align="left">extends the meaning of (</td></tr>
+<tr><td width="50" align="center">     </td><td align="left">also 0 or 1 quantifier</td></tr>
+<tr><td width="50" align="center">     </td><td align="left">also quantifier minimizer</td></tr>
+<tr><td width="50" align="center">  *  </td><td align="left">0 or more quantifier</td></tr>
+<tr><td width="50" align="center">  +  </td><td align="left">1 or more quantifier</td></tr>
+<tr><td width="50" align="center">  {  </td><td align="left">start min/max quantifier</td></tr>
+</tbody></table>
+</center>
+<p>Part of a pattern that is in square brackets is called a &quot;character
+class&quot;. In a character class the only meta-characters are:</p><center><table style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td width="50" align="center">  \  </td><td align="left">general escape character</td></tr>
+<tr><td width="50" align="center">  ^  </td><td align="left">negate the class, but only if the first character</td></tr>
+<tr><td width="50" align="center">  -  </td><td align="left">indicates character range</td></tr>
+<tr><td width="50" align="center">  [  </td><td align="left">POSIX character class (only if followed by POSIX syntax)</td></tr>
+<tr><td width="50" align="center">  ]  </td><td align="left">terminates the character class</td></tr>
+</tbody></table>
+</center>
+<p>The following sections describe the use of each of the meta-characters.</p><a name="Backslash"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Backslash"><font color="#000000">5.1 Backslash</font></h3></table>
+<p>The backslash character has several uses. Firstly, if it is followed by a
+non-alphameric character, it takes away any special meaning that character may
+have. This use of backslash as an escape character applies both inside and
+outside character classes.</p><p>For example, if you want to match a * character, you write
+\* in the pattern.  This escaping action applies whether or not
+the following character would otherwise be interpreted as a
+meta-character, so it is always safe to precede a non-alphameric
+with backslash to specify that it stands for itself. In
+particular, if you want to match a backslash, you write \\.</p><p>If you want to remove the special meaning from a sequence of
+characters, you can do so by putting them between \Q and
+\E. This is different from Perl in that $ and &#x40; are handled as
+literals in \Q...\E sequences in PCRE, whereas in Perl, $ and &#x40;
+cause variable interpolation. Note the following examples:</p><center><table width="70%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><th width="33%" align="left">Pattern</th><th width="33%" align="left">PCRE matches</th><th width="33%" align="left">Perl matches</th></tr>
+<tr><td align="left">\Qabc$xyz\E</td><td align="left">abc$xyz</td><td align="left">abc followed by the contents of $xyz</td></tr>
+<tr><td align="left">\Qabc\$xyz\E</td><td align="left">abc\$xyz</td><td align="left">abc\$xyz</td></tr>
+<tr><td align="left">\Qabc\E\$\Qxyz\E</td><td align="left">abc$xyz</td><td align="left">abc$xyz</td></tr>
+</tbody></table>
+</center>
+<p>The \Q...\E sequence is recognized both inside and outside
+character classes.</p><p>A second use of backslash provides a way of encoding non-printing characters
+in patterns in a visible manner. There is no restriction on the appearance of
+non-printing characters, apart from the binary zero that terminates a pattern,
+but when a pattern is being prepared by text editing, it is usually easier to
+use one of the following escape sequences than the binary character it
+represents:</p><center><table style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td width="50" align="center">  \a  </td><td align="left">alarm, that is, the BEL character (hex 07)</td></tr>
+<tr><td width="50" align="center">  \cx  </td><td align="left">&quot;control-x&quot;, where x is any character</td></tr>
+<tr><td width="50" align="center">  \e  </td><td align="left">escape (hex 1B)</td></tr>
+<tr><td width="50" align="center">  \f  </td><td align="left">formfeed (hex 0C)</td></tr>
+<tr><td width="50" align="center">  \n  </td><td align="left">newline (hex 0A)</td></tr>
+<tr><td width="50" align="center">  \r  </td><td align="left">carriage return (hex 0D)</td></tr>
+<tr><td width="50" align="center">  \t  </td><td align="left">tab (hex 09)</td></tr>
+<tr><td width="50" align="center">  \ddd  </td><td align="left">character with octal code ddd, or backreference</td></tr>
+<tr><td width="50" align="center">  \xhh  </td><td align="left">character with hex code hh</td></tr>
+</tbody></table>
+</center>
+<p>The precise effect of \cx is as follows: if x is a lower case letter, it
+is converted to upper case. Then bit 6 of the character (hex 40) is inverted.
+Thus \cz becomes hex 1A, but \c{ becomes hex 3B, while \c; becomes hex
+7B.</p><p>The handling of a backslash followed by a digit other than 0 is complicated.
+Outside a character class, PCRE reads it and any following digits as a decimal
+number. If the number is less than 10, or if there have been at least that many
+previous capturing left parentheses in the expression, the entire sequence is
+taken as a <em>back reference</em>. A description of how this works is given
+later, following the discussion of parenthesized subpatterns.</p><p>The third use of backslash is for specifying generic character types:</p><center><table style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td width="50" align="center"> \d </td><td align="left">any decimal digit</td></tr>
+<tr><td width="50" align="center"> \D </td><td align="left">any character that is not a decimal digit</td></tr>
+<tr><td width="50" align="center"> \s </td><td align="left">any whitespace character</td></tr>
+<tr><td width="50" align="center"> \S </td><td align="left">any character that is not a whitespace character</td></tr>
+<tr><td width="50" align="center"> \w </td><td align="left">any &quot;word&quot; character</td></tr>
+<tr><td width="50" align="center"> \W </td><td align="left">any &quot;non-word&quot; character</td></tr>
+</tbody></table>
+</center>
+<p>Each pair of escape sequences partitions the complete set of
+characters into two disjoint sets. Any given character matches
+one, and only one, of each pair.</p><p>For compatibility with Perl, \s does not match the VT character (code 11).
+This makes it different from the the POSIX &quot;space&quot; class. The \s characters
+are HT (9), LF (10), FF (12), CR (13), and space (32).</p><p>A &quot;word&quot; character is any letter or digit or the underscore
+character, that is, any character which can be part of a
+Perl &quot;word&quot;. The definition of letters and digits is controlled
+by PCRE's character tables, and may vary if locale-specific
+matching is taking place.  For example, in the &quot;fr&quot; (French)
+locale, some character codes greater than 128 are used for
+accented letters, and these are matched by \w.</p><p>These character type sequences can appear both inside and outside character
+classes. They each match one character of the appropriate type. If the current
+matching point is at the end of the subject string, all of them fail, since
+there is no character to match.</p><p>The fourth use of backslash is for certain simple assertions. An assertion
+specifies a condition that has to be met at a particular point in a match,
+without consuming any characters from the subject string. The use of
+subpatterns for more complicated assertions is described below. The backslashed
+assertions are  </p><center><table style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td width="50" align="center">  \b  </td><td align="left">matches at a word boundary</td></tr>
+<tr><td width="50" align="center">  \B  </td><td align="left">matches when not at a word boundary</td></tr>
+<tr><td width="50" align="center">  \A  </td><td align="left">matches at start of subject</td></tr>
+<tr><td width="50" align="center">  \Z  </td><td align="left">matches at end of subject or before newline at end</td></tr>
+<tr><td width="50" align="center">  \z  </td><td align="left">matches at end of subject</td></tr>
+<tr><td width="50" align="center">  \G  </td><td align="left">matches at first matching position in subject</td></tr>
+</tbody></table>
+</center>
+<p>These assertions may not appear in character classes (but
+note that \b has a different meaning, namely the backspace
+character, inside a character class).</p><p>A word boundary is a position in the subject string where the
+current character and the previous character do not both match
+\w or \W (i.e. one matches \w and the other matches \W), or
+the start or end of the string if the first or last character
+matches \w, respectively.</p><p>The \A, \Z, and \z assertions differ from the traditional circumflex and
+dollar (described below) in that they only ever match at the very start and end
+of the subject string, whatever options are set. Thus, they are independent of
+multiline mode.</p><p>The backslash character has several uses. Firstly, if it is followed by
+a non-alphameric character, it takes away any special meaning that
+character may have. This use of backslash as an escape character applies
+both inside and outside character classes.</p><p>For example, if you want to match a &quot;*&quot; character, you write &quot;\*&quot; in the
+pattern. This applies whether or not the following character would
+otherwise be interpreted as a meta-character, so it is always safe to
+precede a non-alphameric with &quot;\&quot; to specify that it stands for
+itself. In particular, if you want to match a backslash, you write &quot;\\&quot;.</p><p>Another use of backslash is for specifying generic character types:</p><center><table style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td width="50" align="center"> \d </td><td align="left">any decimal digit</td></tr>
+<tr><td width="50" align="center"> \D </td><td align="left">any character that is not a decimal digit</td></tr>
+<tr><td width="50" align="center"> \s </td><td align="left">any whitespace character</td></tr>
+<tr><td width="50" align="center"> \S </td><td align="left">any character that is not a whitespace character</td></tr>
+<tr><td width="50" align="center"> \w </td><td align="left">any &quot;word&quot; character</td></tr>
+<tr><td width="50" align="center"> \W </td><td align="left">any &quot;non-word&quot; character</td></tr>
+</tbody></table>
+</center>
+<p>Each pair of escape sequences partitions the complete set of characters
+into two disjoint sets. Any given character matches one, and only one,
+of each pair.</p><p>A &quot;word&quot; character is any letter or digit or the underscore character,
+that is, any character which can be part of a <em>"word"</em>.</p><p>These character type sequences can appear both inside and outside
+character classes. They each match one character of the appropriate
+type. If the current matching point is at the end of the subject string,
+all of them fail, since there is no character to match.</p><a name="Circumflex-and-Dollar"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Circumflex-and-Dollar"><font color="#000000">5.2 Circumflex and Dollar</font></h3></table>
+<p>Outside a character class, in the default matching mode, the
+circumflex character is an assertion which is true only if the
+current matching point is at the start of the subject
+string. Inside a character class, circumflex has an entirely
+different meaning (see below).</p><p>Circumflex need not be the first character of the pattern if
+a number of alternatives are involved, but it should be the first
+thing in each alternative in which it appears if the pattern is
+ever to match that branch. If all possible alternatives start
+with a circumflex, that is, if the pattern is constrained to
+match only at the start of the subject, it is said to be an
+&quot;anchored&quot; pattern. (There are also other constructs that can
+cause a pattern to be anchored.)</p><p>A dollar character is an assertion which is true only if the
+current matching point is at the end of the subject string, or
+immediately before a newline character that is the last character
+in the string (by default). Dollar need not be the last character
+of the pattern if a number of alternatives are involved, but it
+should be the last item in any branch in which it appears.
+Dollar has no special meaning in a character class.</p><p>The meanings of the circumflex and dollar characters are changed if the
+<span style="font-variant: small-caps">multiline</span> option is set. When this is the case, they match immediately
+after and immediately before an internal newline character, respectively, in
+addition to matching at the start and end of the subject string. For example,
+the pattern ^abc$ matches the subject string &quot;def\nabc&quot; in multiline mode,
+but not otherwise.</p><p>Note that the sequences \A, \Z, and \z can be used to
+match the start and end of the subject in both modes, and if all
+branches of a pattern start with \A it is always anchored,
+whether <span style="font-variant: small-caps">multiline</span> is set or not.</p><a name="Full-Stop--period--dot-"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Full-Stop--period--dot-"><font color="#000000">5.3 Full Stop (period, dot)</font></h3></table>
+<p>Outside a character class, a dot in the pattern matches any
+one character in the subject, including a non-printing character,
+but not (by default) newline. If the <span style="font-variant: small-caps">dotall</span> option is
+set, dots match newlines as well. The handling of dot is entirely
+independent of the handling of circumflex and dollar, the only
+relationship being that they both involve newline characters. Dot
+has no special meaning in a character class.</p><a name="Square-Brackets"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Square-Brackets"><font color="#000000">5.4 Square Brackets</font></h3></table>
+<p>An opening square bracket introduces a character class,
+terminated by a closing square bracket. A closing square bracket
+on its own is not special. If a closing square bracket is
+required as a member of the class, it should be the first data
+character in the class (after an initial circumflex, if present)
+or escaped with a backslash.</p><p>A character class matches a single character in the
+subject. A matched character must be in the set of characters
+defined by the class, unless the first character in the class
+definition is a circumflex, in which case the subject character
+must not be in the set defined by the class. If a circumflex is
+actually required as a member of the class, ensure it is not the
+first character, or escape it with a backslash.</p><p>For example, the character class [aeiou] matches any lower case vowel, while
+[^aeiou] matches any character that is not a lower case vowel. Note that a
+circumflex is just a convenient notation for specifying the characters which
+are in the class by enumerating those that are not. It is not an assertion: it
+still consumes a character from the subject string, and fails if the current
+pointer is at the end of the string.</p><p>When caseless matching is set, any letters in a class represent both their
+upper case and lower case versions, so for example, a caseless [aeiou] matches
+&quot;A&quot; as well as &quot;a&quot;, and a caseless [^aeiou] does not match &quot;A&quot;, whereas a
+caseful version would.</p><p>The newline character is never treated in any special way in character classes,
+whatever the setting of the <span style="font-variant: small-caps">dotall</span> or <span style="font-variant: small-caps">multiline</span> options is. A class
+such as [^a] will always match a newline.</p><p>The minus (hyphen) character can be used to specify a range of characters in a
+character class. For example, [d-m] matches any letter between d and m,
+inclusive. If a minus character is required in a class, it must be escaped with
+a backslash or appear in a position where it cannot be interpreted as
+indicating a range, typically as the first or last character in the class.</p><p>It is not possible to have the literal character &quot;]&quot; as the end character of a
+range. A pattern such as [W-]46] is interpreted as a class of two characters
+(&quot;W&quot; and &quot;-&quot;) followed by a literal string &quot;46]&quot;, so it would match &quot;W46]&quot; or
+&quot;-46]&quot;. However, if the &quot;]&quot; is escaped with a backslash it is interpreted as
+the end of range, so `(W-\]46) is interpreted as a single class containing a
+range followed by two separate characters. The octal or hexadecimal
+representation of &quot;]&quot; can also be used to end a range.</p><p>Ranges operate in the collating sequence of character values. They can also be
+used for characters specified numerically, for example [\000-\037].</p><p>If a range that includes letters is used when caseless matching is set, it
+matches the letters in either case. For example, [W-c] is equivalent to
+[][\^_`wxyzabc], matched caselessly, and if character tables for the &quot;fr&quot;
+locale are in use, [\xc8-\xcb] matches accented E characters in both cases.</p><p>The character types \d, \D, \s, \S, \w, and \W may also appear in a
+character class, and add the characters that they match to the class. For
+example, [\dABCDEF] matches any hexadecimal digit. A circumflex can
+conveniently be used with the upper case character types to specify a more
+restricted set of characters than the matching lower case type. For example,
+the class [^\W_] matches any letter or digit, but not underscore.</p><p>All non-alphameric characters other than \, -, ^ (at the start) and the
+terminating ] are non-special in character classes, but it does no harm if they
+are escaped.</p><a name="POSIX-character-classes"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="POSIX-character-classes"><font color="#000000">5.5 POSIX character classes</font></h3></table>
+<p>Perl supports the POSIX notation for character classes, which
+uses names enclosed by [: and :] within the enclosing square
+brackets. <span style="font-variant: small-caps">STklos</span> , thanks to PCRE, also supports this
+notation. For example,</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>[01[:alpha:]%]
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches &quot;0&quot;, &quot;1&quot;, any alphabetic character, or &quot;%&quot;. The supported class names
+are</p><center><table style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center">alnum</td><td align="center">letters and digits</td></tr>
+<tr><td align="center">alpha</td><td align="center">letters</td></tr>
+<tr><td align="center">ascii</td><td align="center">character codes 0 - 127</td></tr>
+<tr><td align="center">blank</td><td align="center">space or tab only</td></tr>
+<tr><td align="center">cntrl</td><td align="center">control characters</td></tr>
+<tr><td align="center">digit</td><td align="center">decimal digits (same as \d)</td></tr>
+<tr><td align="center">graph</td><td align="center">printing characters, excluding space</td></tr>
+<tr><td align="center">lower</td><td align="center">lower case letters</td></tr>
+<tr><td align="center">print</td><td align="center">printing characters, including space</td></tr>
+<tr><td align="center">punct</td><td align="center">printing characters, excluding letters and digits</td></tr>
+<tr><td align="center">space</td><td align="center">white space (not quite the same as \s)</td></tr>
+<tr><td align="center">upper</td><td align="center">upper case letters</td></tr>
+<tr><td align="center">word</td><td align="center">&quot;word&quot; characters (same as \w)</td></tr>
+<tr><td align="center">xdigit</td><td align="center">hexadecimal digits</td></tr>
+</tbody></table>
+</center>
+<p>The &quot;space&quot; characters are HT (9), LF (10), VT (11), FF (12), CR (13), and
+space (32). Notice that this list includes the VT character (code 11). This
+makes &quot;space&quot; different to \s, which does not include VT (for Perl
+compatibility).</p><p>The name &quot;word&quot; is a Perl extension, and &quot;blank&quot; is a GNU extension from Perl
+5.8. Another Perl extension is negation, which is indicated by a ^ character
+after the colon. For example,</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>[12[:^digit:]]
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches &quot;1&quot;, &quot;2&quot;, or any non-digit. <span style="font-variant: small-caps">STklos</span> (and Perl) also
+recognize the POSIX syntax [.ch.] and [=ch=] where &quot;ch&quot; is
+a &quot;collating element&quot;, but these are not supported, and an error
+is given if they are encountered.</p><a name="Vertical-Bar"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Vertical-Bar"><font color="#000000">5.6 Vertical Bar</font></h3></table>
+<p>Vertical bar characters are used to separate alternative patterns. For example,
+the pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>gilbert|sullivan
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches either &quot;gilbert&quot; or &quot;sullivan&quot;. Any number of alternatives may appear,
+and an empty alternative is permitted (matching the empty string).
+The matching process tries each alternative in turn, from left to right,
+and the first one that succeeds is used. If the alternatives are within a
+subpattern (defined below), &quot;succeeds&quot; means matching the rest of the main
+pattern as well as the alternative in the subpattern.</p><a name="Internal-Option-Setting"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Internal-Option-Setting"><font color="#000000">5.7 Internal Option Setting</font></h3></table>
+<p>The settings of the <span style="font-variant: small-caps">caseless</span>, <span style="font-variant: small-caps">multiline</span>, <span style="font-variant: small-caps">dotall</span>, and
+<span style="font-variant: small-caps">EXTENDED</span> options can be changed from within the pattern by a sequence of
+Perl option letters enclosed between &quot;(?&quot; and &quot;)&quot;. The option letters are</p><center><table style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td width="50" align="center">i</td><td align="left">for <span style="font-variant: small-caps">caseless</span></td></tr>
+<tr><td width="50" align="center">m</td><td align="left">for <span style="font-variant: small-caps">multiline</span></td></tr>
+<tr><td width="50" align="center">s</td><td align="left">for <span style="font-variant: small-caps">dotall</span></td></tr>
+<tr><td width="50" align="center">x</td><td align="left">for <span style="font-variant: small-caps">extended</span></td></tr>
+</tbody></table>
+</center>
+<p>For example, (?im) sets caseless, multiline matching. It is also possible to
+unset these options by preceding the letter with a hyphen, and a combined
+setting and unsetting such as (?im-sx), which sets <span style="font-variant: small-caps">caseless</span> and
+<span style="font-variant: small-caps">multiline</span> while unsetting <span style="font-variant: small-caps">dotall</span> and <span style="font-variant: small-caps">extended</span>, is also
+permitted. If a letter appears both before and after the hyphen, the option is
+unset.</p><p>When an option change occurs at top level (that is, not inside subpattern
+parentheses), the change applies to the remainder of the pattern that follows.
+If the change is placed right at the start of a pattern, PCRE extracts it into
+the global options</p><p>An option change within a subpattern affects only that part of the current
+pattern that follows it, so</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(a(?i)b)c
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches abc and aBc and no other strings (assuming
+<span style="font-variant: small-caps">caseless</span> is not used).By this means, options can be made
+to have different settings in different parts of the pattern. Any
+changes made in one alternative do carry on into subsequent
+branches within the same subpattern. For example,</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(a(?i)b|c)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches &quot;ab&quot;, &quot;aB&quot;, &quot;c&quot;, and &quot;C&quot;, even though when matching &quot;C&quot; the first
+branch is abandoned before the option setting. This is because the effects of
+option settings happen at compile time. There would be some very weird
+behaviour otherwise.</p><p>The PCRE-specific options <span style="font-variant: small-caps">ungreedy</span> and <span style="font-variant: small-caps">extra</span>
+can be changed in the same way as the Perl-compatible options by
+using the characters U and X respectively. The (?X) flag setting
+is special in that it must always occur earlier in the pattern
+than any of the additional features it turns on, even when it is
+at top level. It is best put at the start.</p><a name="Subpatterns"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Subpatterns"><font color="#000000">5.8 Subpatterns</font></h3></table>
+<p>Subpatterns are delimited by parentheses (round brackets), which can be nested.
+Marking part of a pattern as a subpattern does two things:</p><ol><li>It localizes a set of alternatives. For example, the pattern<blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>cat(aract|erpillar|)
+</pre></td></tr>
+</tbody></table></blockquote>
+matches one of the words &quot;cat&quot;, &quot;cataract&quot;, or &quot;caterpillar&quot;. Without the
+parentheses, it would match &quot;cataract&quot;, &quot;erpillar&quot; or the empty string.</li>
+<li>It sets up the subpattern as a capturing subpattern (as
+defined above).  When the whole pattern matches, that portion of
+the subject string that matched the subpattern is set so that it
+can be used in the <a href="stklos-ref-5.html#regexp-replace">???</a> or
+<a href="stklos-ref-5.html#regexp-replace-all">???</a> functions. Opening parentheses
+are counted from left to right (starting from 1) to obtain the
+numbers of the capturing subpatterns.</li>
+</ol><p>For example, if the string &quot;the red king&quot; is matched against the pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>the ((red|white) (king|queen))
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>the captured substrings are &quot;red king&quot;, &quot;red&quot;, and &quot;king&quot;, and are numbered 1,
+2, and 3, respectively.</p><p>The fact that plain parentheses fulfil two functions is not always helpful.
+There are often times when a grouping subpattern is required without a
+capturing requirement. If an opening parenthesis is followed by a question mark
+and a colon, the subpattern does not do any capturing, and is not counted when
+computing the number of any subsequent capturing subpatterns. For example, if
+the string &quot;the white queen&quot; is matched against the pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>the ((?:red|white) (king|queen))
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>the captured substrings are &quot;white queen&quot; and &quot;queen&quot;, and are numbered 1 and
+2. The maximum number of capturing subpatterns is 65535, and the maximum depth
+of nesting of all subpatterns, both capturing and non-capturing, is 200.</p><p>As a convenient shorthand, if any option settings are required at the start of
+a non-capturing subpattern, the option letters may appear between the &quot;?&quot; and
+the &quot;:&quot;. Thus the two patterns</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?i:saturday|sunday)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>and</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?:(?i)saturday|sunday)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>match exactly the same set of strings. Because alternative branches are tried
+from left to right, and options are not reset until the end of the subpattern
+is reached, an option setting in one branch does affect subsequent branches, so
+the above patterns match &quot;SUNDAY&quot; as well as &quot;Saturday&quot;.</p><a name="Named-Subpatterns"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Named-Subpatterns"><font color="#000000">5.9 Named Subpatterns</font></h3></table>
+<p>Identifying capturing parentheses by number is simple, but it can be very hard
+to keep track of the numbers in complicated regular expressions. Furthermore,
+if an expression is modified, the numbers may change. To help with the
+difficulty, PCRE supports the naming of subpatterns, something that Perl does
+not provide. The Python syntax (?P&lt;name&gt;...) is used. Names consist of
+alphanumeric characters and underscores, and must be unique within a pattern.</p><a name="Repetition"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Repetition"><font color="#000000">5.10 Repetition</font></h3></table>
+<p>Repetition is specified by quantifiers, which can follow any of the following
+items:</p><ul><li>a literal data character</li>
+<li>the . metacharacter</li>
+<li>the \C escape sequence</li>
+<li>escapes such as \d that match single characters</li>
+<li>a character class</li>
+<li>a back reference (see next section)</li>
+<li>a parenthesized subpattern (unless it is an assertion)</li>
+</ul><p>The general repetition quantifier specifies a minimum and maximum number of
+permitted matches, by giving the two numbers in curly brackets (braces),
+separated by a comma. The numbers must be less than 65536, and the first must
+be less than or equal to the second. For example:</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>z{2,4}
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches &quot;zz&quot;, &quot;zzz&quot;, or &quot;zzzz&quot;. A closing brace on its own is not a special
+character. If the second number is omitted, but the comma is present, there is
+no upper limit; if the second number and the comma are both omitted, the
+quantifier specifies an exact number of required matches. Thus</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>[aeiou]{3,}
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches at least 3 successive vowels, but may match many more, while</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>\d{8}
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches exactly 8 digits. An opening curly bracket that appears in a position
+where a quantifier is not allowed, or one that does not match the syntax of a
+quantifier, is taken as a literal character. For example, {,6} is not a
+quantifier, but a literal string of four characters.</p><p>The quantifier {0} is permitted, causing the expression to behave as if the
+previous item and the quantifier were not present.</p><p>For convenience (and historical compatibility) the three most common
+quantifiers have single-character abbreviations:</p><ul><li>*    is equivalent to {0,}</li>
+<li>+    is equivalent to {1,}</li>
+<li>?    is equivalent to {0,1}</li>
+</ul><p>It is possible to construct infinite loops by following a subpattern that can
+match no characters with a quantifier that has no upper limit, for example:</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(a?)*
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>Earlier versions of Perl and PCRE used to give an error at compile time for
+such patterns. However, because there are cases where this can be useful, such
+patterns are now accepted, but if any repetition of the subpattern does in fact
+match no characters, the loop is forcibly broken.</p><p>By default, the quantifiers are &quot;greedy&quot;, that is, they match as much as
+possible (up to the maximum number of permitted times), without causing the
+rest of the pattern to fail. The classic example of where this gives problems
+is in trying to match comments in C programs. These appear between the
+sequences /* and */ and within the sequence, individual * and / characters may
+appear. An attempt to match C comments by applying the pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>/\*.*\*/
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>to the string</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>/* first command */  not comment  /* second comment */
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>fails, because it matches the entire string owing to the greediness of the .*
+item.</p><p>However, if a quantifier is followed by a question mark, it ceases to be
+greedy, and instead matches the minimum number of times possible, so the
+pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>/\*.*?\*/
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>does the right thing with the C comments. The meaning of the various
+quantifiers is not otherwise changed, just the preferred number of matches.
+Do not confuse this use of question mark with its use as a quantifier in its
+own right. Because it has two uses, it can sometimes appear doubled, as in</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>\d??\d
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>which matches one digit by preference, but can match two if that is the only
+way the rest of the pattern matches.</p><p>If the <span style="font-variant: small-caps">ungreedy</span> option is set (an option which is not available 
+in Perl), the quantifiers are not greedy by default, but individual ones can be made
+greedy by following them with a question mark. In other words, it inverts the
+default behaviour.</p><p>When a parenthesized subpattern is quantified with a minimum repeat count that
+is greater than 1 or with a limited maximum, more store is required for the
+compiled pattern, in proportion to the size of the minimum or maximum.</p><p>If a pattern starts with .* or .{0,} and the <span style="font-variant: small-caps">dotall</span> option (equivalent
+to Perl's /s) is set, thus allowing the . to match newlines, the pattern is
+implicitly anchored, because whatever follows will be tried against every
+character position in the subject string, so there is no point in retrying the
+overall match at any position after the first. PCRE normally treats such a
+pattern as though it were preceded by \A.</p><p>In cases where it is known that the subject string contains no newlines, it is
+worth setting <span style="font-variant: small-caps">dotall</span> in order to obtain this optimization, or
+alternatively using ^ to indicate anchoring explicitly.</p><p>However, there is one situation where the optimization cannot be used. When .*
+is inside capturing parentheses that are the subject of a backreference
+elsewhere in the pattern, a match at the start may fail, and a later one
+succeed. Consider, for example:</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(.*)abc\1
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>If the subject is &quot;xyz123abc123&quot; the match point is the fourth character. For
+this reason, such a pattern is not implicitly anchored.</p><p>When a capturing subpattern is repeated, the value captured is the substring
+that matched the final iteration. For example, after</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(tweedle[dume]{3}\s*)+
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>has matched &quot;tweedledum tweedledee&quot; the value of the captured substring is
+&quot;tweedledee&quot;. However, if there are nested capturing subpatterns, the
+corresponding captured values may have been set in previous iterations. For
+example, after</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(a|(b))+
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches &quot;aba&quot; the value of the second captured substring is &quot;b&quot;.</p><a name="Atomic-Grouping-And-Possessive-Quantifiers"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Atomic-Grouping-And-Possessive-Quantifiers"><font color="#000000">5.11 Atomic Grouping And Possessive Quantifiers</font></h3></table>
+<p>With both maximizing and minimizing repetition, failure of what follows
+normally causes the repeated item to be re-evaluated to see if a different
+number of repeats allows the rest of the pattern to match. Sometimes it is
+useful to prevent this, either to change the nature of the match, or to cause
+it fail earlier than it otherwise might, when the author of the pattern knows
+there is no point in carrying on.</p><p>Consider, for example, the pattern \d+foo when applied to the subject line</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>123456bar
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>After matching all 6 digits and then failing to match &quot;foo&quot;, the normal
+action of the matcher is to try again with only 5 digits matching the \d+
+item, and then with 4, and so on, before ultimately failing. &quot;Atomic grouping&quot;
+(a term taken from Jeffrey Friedl's book) provides the means for specifying
+that once a subpattern has matched, it is not to be re-evaluated in this way.</p><p>If we use atomic grouping for the previous example, the matcher would give up
+immediately on failing to match &quot;foo&quot; the first time. The notation is a kind of
+special parenthesis, starting with (?&gt; as in this example:)</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?&gt;\d+)foo
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>This kind of parenthesis &quot;locks up&quot; the  part of the pattern it contains once
+it has matched, and a failure further into the pattern is prevented from
+backtracking into it. Backtracking past it to previous items, however, works as
+normal.</p><p>An alternative description is that a subpattern of this type matches the string
+of characters that an identical standalone pattern would match, if anchored at
+the current point in the subject string.</p><p>Atomic grouping subpatterns are not capturing subpatterns. Simple cases such as
+the above example can be thought of as a maximizing repeat that must swallow
+everything it can. So, while both \d+ and \d+? are prepared to adjust the
+number of digits they match in order to make the rest of the pattern match,
+(?&gt;\d+) can only match an entire sequence of digits.</p><p>Atomic groups in general can of course contain arbitrarily complicated
+subpatterns, and can be nested. However, when the subpattern for an atomic
+group is just a single repeated item, as in the example above, a simpler
+notation, called a &quot;possessive quantifier&quot; can be used. This consists of an
+additional + character following a quantifier. Using this notation, the
+previous example can be rewritten as</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>\d++bar
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>Possessive quantifiers are always greedy; the setting of the <span style="font-variant: small-caps">ungreedy</span>
+option is ignored. They are a convenient notation for the simpler forms of
+atomic group. However, there is no difference in the meaning or processing of a
+possessive quantifier and the equivalent atomic group.</p><p>The possessive quantifier syntax is an extension to the Perl syntax. It
+originates in Sun's Java package.</p><p>When a pattern contains an unlimited repeat inside a subpattern that can itself
+be repeated an unlimited number of times, the use of an atomic group is the
+only way to avoid some failing matches taking a very long time indeed. The
+pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(\D+|&lt;\d+&gt;)*[!?]
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches an unlimited number of substrings that either consist of non-digits, or
+digits enclosed in &lt;&gt;, followed by either ! or ?. When it matches, it runs
+quickly. However, if it is applied to</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>it takes a long time before reporting failure. This is because the string can
+be divided between the two repeats in a large number of ways, and all have to
+be tried. (The example used [!?] rather than a single character at the end,
+because both PCRE and Perl have an optimization that allows for fast failure
+when a single character is used. They remember the last single character that
+is required for a match, and fail early if it is not present in the string.)
+If the pattern is changed to</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>((?&gt;\D+)|&lt;\d+&gt;)*[!?]
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>sequences of non-digits cannot be broken, and failure happens quickly.</p><a name="Back-References"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Back-References"><font color="#000000">5.12 Back References</font></h3></table>
+<p>Outside a character class, a backslash followed by a digit greater than 0 (and
+possibly further digits) is a back reference to a capturing subpattern earlier
+(that is, to its left) in the pattern, provided there have been that many
+previous capturing left parentheses.</p><p>However, if the decimal number following the backslash is less than 10, it is
+always taken as a back reference, and causes an error only if there are not
+that many capturing left parentheses in the entire pattern. In other words, the
+parentheses that are referenced need not be to the left of the reference for
+numbers less than 10. See the section entitled &quot;Backslash&quot; above for further
+details of the handling of digits following a backslash.</p><p>A back reference matches whatever actually matched the capturing
+subpattern in the current subject string, rather than anything
+matching the subpattern itself (see 
+<a href="stklos-ref-5.html#Subpatterns-As-Subroutines">Subpatterns As Subroutines</a> below for a way of 
+doing that). So the pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(sens|respons)e and \1ibility
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches &quot;sense and sensibility&quot; and &quot;response and responsibility&quot;, but not
+&quot;sense and responsibility&quot;. If caseful matching is in force at the time of the
+back reference, the case of letters is relevant. For example,</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>((?i)rah)\s+\1
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches &quot;rah rah&quot; and &quot;RAH RAH&quot;, but not &quot;RAH rah&quot;, even though the original
+capturing subpattern is matched caselessly.</p><p>Back references to named subpatterns use the Python syntax (?P=name). We could
+rewrite the above example as follows:</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?&lt;p1&gt;(?i)rah)\s+(?P=p1)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>There may be more than one back reference to the same subpattern. If a
+subpattern has not actually been used in a particular match, any back
+references to it always fail. For example, the pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(a|(bc))\2
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>always fails if it starts to match &quot;a&quot; rather than &quot;bc&quot;. Because there may be
+many capturing parentheses in a pattern, all digits following the backslash are
+taken as part of a potential back reference number. If the pattern continues
+with a digit character, some delimiter must be used to terminate the back
+reference. If the <span style="font-variant: small-caps">extended</span> option is set, this can be whitespace.
+Otherwise an empty comment can be used.</p><p>A back reference that occurs inside the parentheses to which it refers fails
+when the subpattern is first used, so, for example, (a\1) never matches.
+However, such references can be useful inside repeated subpatterns. For
+example, the pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(a|b\1)+
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches any number of &quot;a&quot;s and also &quot;aba&quot;, &quot;ababbaa&quot; etc. At each iteration of
+the subpattern, the back reference matches the character string corresponding
+to the previous iteration. In order for this to work, the pattern must be such
+that the first iteration does not need to match the back reference. This can be
+done using alternation, as in the example above, or by a quantifier with a
+minimum of zero.</p><a name="Assertions"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Assertions"><font color="#000000">5.13 Assertions</font></h3></table>
+<p>An assertion is a test on the characters following or preceding the current
+matching point that does not actually consume any characters. The simple
+assertions coded as \b, \B, \A, \G, \Z, \z, ^ and $ are described above.
+More complicated assertions are coded as subpatterns. There are two kinds:
+those that look ahead of the current position in the subject string, and those
+that look behind it.</p><p>An assertion subpattern is matched in the normal way, except that it does not
+cause the current matching position to be changed. Lookahead assertions start
+with (?= for positive assertions and (?! for negative assertions. For example,</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>\w+(?=;)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches a word followed by a semicolon, but does not include the semicolon in
+the match, and</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>foo(?!bar)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches any occurrence of &quot;foo&quot; that is not followed by &quot;bar&quot;. Note that the
+apparently similar pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?!foo)bar
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>does not find an occurrence of &quot;bar&quot; that is preceded by something other than
+&quot;foo&quot;; it finds any occurrence of &quot;bar&quot; whatsoever, because the assertion
+(?!foo) is always true when the next three characters are &quot;bar&quot;. A
+lookbehind assertion is needed to achieve this effect.</p><p>If you want to force a matching failure at some point in a pattern, the most
+convenient way to do it is with (?!) because an empty string always matches, so
+an assertion that requires there not to be an empty string must always fail.</p><p>Lookbehind assertions start with (?&lt;= for positive assertions and (?&lt;! for
+negative assertions. For example,</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?&lt;!foo)bar
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>does find an occurrence of &quot;bar&quot; that is not preceded by &quot;foo&quot;. The contents of
+a lookbehind assertion are restricted such that all the strings it matches must
+have a fixed length. However, if there are several alternatives, they do not
+all have to have the same fixed length. Thus</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?&lt;=bullock|donkey)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>is permitted, but</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?&lt;!dogs?|cats?)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>causes an error at compile time. Branches that match different length strings
+are permitted only at the top level of a lookbehind assertion. This is an
+extension compared with Perl (at least for 5.8), which requires all branches to
+match the same length of string. An assertion such as</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?&lt;=ab(c|de))
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>is not permitted, because its single top-level branch can match two different
+lengths, but it is acceptable if rewritten to use two top-level branches:</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?&lt;=abc|abde)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>The implementation of lookbehind assertions is, for each alternative, to
+temporarily move the current position back by the fixed width and then try to
+match. If there are insufficient characters before the current position, the
+match is deemed to fail.</p><p>Atomic groups can be used in conjunction with lookbehind assertions to specify
+efficient matching at the end of the subject string. Consider a simple pattern
+such as</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>abcd$
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>when applied to a long string that does not match. Because matching proceeds
+from left to right, PCRE will look for each &quot;a&quot; in the subject and then see if
+what follows matches the rest of the pattern. If the pattern is specified as</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>^.*abcd$
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>the initial .* matches the entire string at first, but when this fails (because
+there is no following &quot;a&quot;), it backtracks to match all but the last character,
+then all but the last two characters, and so on. Once again the search for &quot;a&quot;
+covers the entire string, from right to left, so we are no better off. However,
+if the pattern is written as</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>^(?&gt;.*)(?&lt;=abcd)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>or, equivalently,</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>^.*+(?&lt;=abcd)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>there can be no backtracking for the .* item; it can match only the entire
+string. The subsequent lookbehind assertion does a single test on the last four
+characters. If it fails, the match fails immediately. For long strings, this
+approach makes a significant difference to the processing time.</p><p>Several assertions (of any sort) may occur in succession. For example,</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?&lt;=\d{3})(?&lt;!999)foo
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches &quot;foo&quot; preceded by three digits that are not &quot;999&quot;. Notice that each of
+the assertions is applied independently at the same point in the subject
+string. First there is a check that the previous three characters are all
+digits, and then there is a check that the same three characters are not &quot;999&quot;.
+This pattern does fInotfR match &quot;foo&quot; preceded by six characters, the first
+of which are digits and the last three of which are not &quot;999&quot;. For example, it
+doesn't match &quot;123abcfoo&quot;. A pattern to do that is</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?&lt;=\d{3}...)(?&lt;!999)foo
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>This time the first assertion looks at the preceding six characters, checking
+that the first three are digits, and then the second assertion checks that the
+preceding three characters are not &quot;999&quot;.</p><p>Assertions can be nested in any combination. For example,</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?&lt;=(?&lt;!foo)bar)baz
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches an occurrence of &quot;baz&quot; that is preceded by &quot;bar&quot; which in turn is not
+preceded by &quot;foo&quot;, while</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?&lt;=\d{3}(?!999)...)foo
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>is another pattern which matches &quot;foo&quot; preceded by three digits and any three
+characters that are not &quot;999&quot;.</p><p>Assertion subpatterns are not capturing subpatterns, and may not be repeated,
+because it makes no sense to assert the same thing several times. If any kind
+of assertion contains capturing subpatterns within it, these are counted for
+the purposes of numbering the capturing subpatterns in the whole pattern.
+However, substring capturing is carried out only for positive assertions,
+because it does not make sense for negative assertions.</p><a name="Conditional-Subpatterns"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Conditional-Subpatterns"><font color="#000000">5.14 Conditional Subpatterns</font></h3></table>
+<p>It is possible to cause the matching process to obey a subpattern
+conditionally or to choose between two alternative subpatterns, depending on
+the result of an assertion, or whether a previous capturing subpattern matched
+or not. The two possible forms of conditional subpattern are</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?(condition)yes-pattern)
+(?(condition)yes-pattern|no-pattern)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>If the condition is satisfied, the yes-pattern is used; otherwise the
+no-pattern (if present) is used. If there are more than two alternatives in the
+subpattern, a compile-time error occurs.</p><p>There are three kinds of condition. If the text between the parentheses
+consists of a sequence of digits, the condition is satisfied if the capturing
+subpattern of that number has previously matched. The number must be greater
+than zero. Consider the following pattern, which contains non-significant white
+space to make it more readable (assume the <span style="font-variant: small-caps">extended</span> option) and to divide
+it into three parts for ease of discussion:</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>( \( )?    [^()]+    (?(1) \) )
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>The first part matches an optional opening parenthesis, and if that
+character is present, sets it as the first captured substring. The second part
+matches one or more characters that are not parentheses. The third part is a
+conditional subpattern that tests whether the first set of parentheses matched
+or not. If they did, that is, if subject started with an opening parenthesis,
+the condition is true, and so the yes-pattern is executed and a closing
+parenthesis is required. Otherwise, since no-pattern is not present, the
+subpattern matches nothing. In other words, this pattern matches a sequence of
+non-parentheses, optionally enclosed in parentheses.</p><p>If the condition is the string (R), it is satisfied if a recursive call to the
+pattern or subpattern has been made. At &quot;top level&quot;, the condition is false.
+This is a PCRE extension. See PCRE documentation for recursive patterns.</p><p>If the condition is not a sequence of digits or (R), it must be an assertion.
+This may be a positive or negative lookahead or lookbehind assertion. Consider
+this pattern, again containing non-significant white space, and with the two
+alternatives on the second line:</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(?(?=`(^a-z)*`(a-z))
+\d{2}-`(a-z){3}-\d{2}  |  \d{2}-\d{2}-\d{2} )
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>The condition is a positive lookahead assertion that matches an optional
+sequence of non-letters followed by a letter. In other words, it tests for the
+presence of at least one letter in the subject. If a letter is found, the
+subject is matched against the first alternative; otherwise it is matched
+against the second. This pattern matches strings in one of the two forms
+dd-aaa-dd or dd-dd-dd, where aaa are letters and dd are digits.</p><a name="pcre-comment"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="pcre:comment"><font color="#000000">5.15 Comments</font></h3></table>
+<p>The sequence (?# marks the start of a comment which continues up to the next
+closing parenthesis. Nested parentheses are not permitted. The characters
+that make up a comment play no part in the pattern matching at all.</p><p>If the <span style="font-variant: small-caps">extended</span> option is set, an unescaped # character outside a
+character class introduces a comment that continues up to the next newline
+character in the pattern.</p><a name="Subpatterns-As-Subroutines"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Subpatterns-As-Subroutines"><font color="#000000">5.16 Subpatterns As Subroutines</font></h3></table>
+<p>If the syntax for a recursive subpattern reference (either by number or by
+name) is used outside the parentheses to which it refers, it operates like a
+subroutine in a programming language. An earlier example pointed out that the
+pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(sens|respons)e and \1ibility
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>matches &quot;sense and sensibility&quot; and &quot;response and responsibility&quot;, but not
+&quot;sense and responsibility&quot;. If instead the pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(sens|respons)e and (?1)ibility
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>is used, it does match &quot;sense and responsibility&quot; as well as the other two
+strings. Such references must, however, follow the subpattern to which they
+refer.</p><a name="Regexp-Procedures"></a>
+<table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Regexp-Procedures"><font color="#000000">5.17 Regexp Procedures</font></h3></table>
+<p>This section lists the Scheme functions that can use PCRE regexpr described 
+before</p><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="string--regexp"></a><a name="--index-entry-16839"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(string-&gt;regexp string)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br /><code>String-&gt;regexp</code> takes a string representation of a regular
+expression and compiles it into a regexp value. Other regular
+expression procedures accept either a string or a regexp value as
+the matching pattern. If a regular expression string is used
+multiple times, it is faster to compile the string once to a regexp
+value and use it for repeated matches instead of using the string
+each time.  </td></tr>
+</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="regexp-"></a><a name="--index-entry-16858"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(regexp? obj) </font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br /><code>Regexp</code> returns <code>#t</code> if <code>obj</code> is a regexp value created by the <code>regexp</code>, 
+otherwise <code>regexp</code> returns <code>#f</code>.</td></tr>
+</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="regexp-match-positions"></a><a name="regexp-match"></a><a name="--index-entry-16883"></a><a name="--index-entry-16887"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(regexp-match pattern str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<code><strong><font color="IndianRed">(regexp-match-positions pattern str)</font></strong></code><br /><br />These functions attempt to match <code>pattern</code> (a string or a regexp value) 
+to <code>str</code>. If the match fails, <code>#f</code> is returned. If the match succeeds, 
+a list (containing strings for <code>regexp-match</code> and positions for 
+<code>regexp-match-positions</code> is returned. The first string (or positions) in
+this list is the portion of string that matched pattern. If two portions 
+of string can match pattern, then the earliest and longest match is found,
+by default. 
+
+Additional strings or positions are returned in the list if pattern contains
+parenthesized sub-expressions; matches for the sub-expressions are provided
+in the order of the opening parentheses in pattern. 
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(regexp-match-positions <font color="red">&quot;ca&quot;</font> <font color="red">&quot;abracadabra&quot;</font>)
+                 &#8658; ((4 6))
+(regexp-match-positions <font color="red">&quot;CA&quot;</font> <font color="red">&quot;abracadabra&quot;</font>)
+                 &#8658; #f
+(regexp-match-positions <font color="red">&quot;(?i)CA&quot;</font> <font color="red">&quot;abracadabra&quot;</font>)
+                 &#8658; ((4 6))
+(regexp-match <font color="red">&quot;(a*)(b*)(c*)&quot;</font> <font color="red">&quot;abc&quot;</font>)
+                 &#8658; (<font color="red">&quot;abc&quot;</font> <font color="red">&quot;a&quot;</font> <font color="red">&quot;b&quot;</font> <font color="red">&quot;c&quot;</font>)
+(regexp-match-positions <font color="red">&quot;(a*)(b*)(c*)&quot;</font> <font color="red">&quot;abc&quot;</font>)
+                 &#8658; ((0 3) (0 1) (1 2) (2 3))
+(regexp-match-positions <font color="red">&quot;(a*)(b*)(c*)&quot;</font> <font color="red">&quot;c&quot;</font>)
+                 &#8658; ((0 1) (0 0) (0 0) (0 1))
+(regexp-match-positions <font color="red">&quot;(?&lt;=\\d{3})(?&lt;!999)foo&quot;</font> 
+                        <font color="red">&quot;999foo and 123foo&quot;</font>)
+     &#8658; ((14 17)) 
+</pre></td></tr>
+</tbody></table></blockquote>
+</td></tr>
+</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="regexp-replace-all"></a><a name="regexp-replace"></a><a name="--index-entry-16966"></a><a name="--index-entry-16970"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(regexp-replace pattern string substitution)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<code><strong><font color="IndianRed">(regexp-replace-all pattern string substitution)</font></strong></code><br /><br /><code>Regexp-replace</code> matches the regular expression <code>pattern</code> against
+<code>string</code>. If there is a match, the portion of <code>string</code> which matches
+<code>pattern</code> is replaced by the <code>substitution</code> string. If there is no
+match, <code>regexp-replace</code> returns <code>string</code> unmodified. Note that the
+given <code>pattern</code> could be here either a string or a regular expression.
+<br /><br />
+If <code>pattern</code> contains <code>\n</code> where <strong>n</strong> is a digit between 1 and 9, 
+then it is replaced in the substitution with the portion of string that
+matched the <strong>n</strong>-th parenthesized subexpression of <code>pattern</code>. If
+<strong>n</strong> is equal to 0, then it is replaced in <code>substitution</code>
+with the portion of <code>string</code> that matched <code>pattern</code>.
+<br /><br />
+<code>Regexp-replace</code> replaces the first occurrence of <code>pattern</code> in <code>string</code>. 
+To replace <strong>all</strong> the occurrences of <code>pattern</code>, use <code>regexp-replace-all</code>.
+
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(regexp-replace <font color="red">&quot;a*b&quot;</font> <font color="red">&quot;aaabbcccc&quot;</font> <font color="red">&quot;X&quot;</font>)
+                   &#8658; <font color="red">&quot;Xbcccc&quot;</font>
+(regexp-replace (string-&gt;regexp <font color="red">&quot;a*b&quot;</font>) <font color="red">&quot;aaabbcccc&quot;</font> <font color="red">&quot;X&quot;</font>)
+                   &#8658; <font color="red">&quot;Xbcccc&quot;</font>
+(regexp-replace <font color="red">&quot;(a*)b&quot;</font> <font color="red">&quot;aaabbcccc&quot;</font> <font color="red">&quot;X\1Y&quot;</font>)
+                   &#8658; <font color="red">&quot;XaaaYbcccc&quot;</font>
+(regexp-replace <font color="red">&quot;f(.*)r&quot;</font> <font color="red">&quot;foobar&quot;</font> <font color="red">&quot;\1 \1&quot;</font>)
+                   &#8658; <font color="red">&quot;ooba ooba&quot;</font>
+(regexp-replace <font color="red">&quot;f(.*)r&quot;</font> <font color="red">&quot;foobar&quot;</font> <font color="red">&quot;\0 \0&quot;</font>)
+                   &#8658; <font color="red">&quot;foobar foobar&quot;</font>
+
+(regexp-replace <font color="red">&quot;a*b&quot;</font> <font color="red">&quot;aaabbcccc&quot;</font> <font color="red">&quot;X&quot;</font>)
+                   &#8658; <font color="red">&quot;Xbcccc&quot;</font>
+(regexp-replace-all <font color="red">&quot;a*b&quot;</font> <font color="red">&quot;aaabbcccc&quot;</font> <font color="red">&quot;X&quot;</font>)
+                   &#8658; <font color="red">&quot;XXcccc&quot;</font>
+</pre></td></tr>
+</tbody></table></blockquote>
+</td></tr>
+</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="regexp-quote"></a><a name="--index-entry-17079"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(regexp-quote str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Takes an arbitrary string and returns a string where characters of
+<code>str</code> that could serve as regexp metacharacters are escaped with a
+backslash, so that they safely match only themselves.
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(regexp-quote <font color="red">&quot;cons&quot;</font>)       &#8658; <font color="red">&quot;cons&quot;</font>
+(regexp-quote <font color="red">&quot;list?&quot;</font>)      &#8658; <font color="red">&quot;list\\?&quot;</font>
+</pre></td></tr>
+</tbody></table></blockquote>
+
+<code>regexp-quote</code> is useful when building a composite regexp from
+a mix of regexp strings and verbatim strings. </td></tr>
+</tbody></table><br><br><hr width='20%' size='2' align='left'>
+<a name="fn--footnote-16084"><sup><small>1</small></sup></a>: The latest release of PCRE is
+available from <a href="http://www.pcre.org/">http://www.pcre.org/</a>
+<br>
+</td>
+</tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
+				     <a href="http://www.inria.fr/mimosa/fp/Skribe">Skribe</a>.<br />Last update <em>Thu Nov  3 17:05:27 2005</em></small>
+</body>
+</html>
