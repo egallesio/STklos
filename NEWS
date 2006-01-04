@@ -4,6 +4,16 @@
 				| NEWS |
 				+======+
 
+* version 0.72 (2006 01 04)
+
+    This is a minor release.
+    * New primitives
+         o string-blit!
+	 o print
+	 o printerr
+    * New implemented SRFIS
+         o SRFI-66 (Octet Vectors)
+    * Bug fixes
 
 * version 0.71 (2005 11 03)
 
