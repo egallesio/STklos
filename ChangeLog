@@ -1,3 +1,8 @@
+2006-01-04  Erick Gallesio  <eg@essi.fr>
+
+	* 0.72 Release
+	==================================================
+
 2006-01-02  Erick Gallesio  <eg@essi.fr>
 
 	* src/str.c : New primitive STRING-BLIT!
