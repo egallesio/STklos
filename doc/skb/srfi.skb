@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 31-Oct-2005 12:11 (eg)
+;; Last file update:  3-Jan-2006 16:18 (eg)
 ;;
 ;; ======================================================================
 
@@ -441,6 +441,17 @@ you need to insert the following expression])
 (srfi-section 62
 
 (p [,(quick-link-srfi 62) is fully supported. See ,(ref :subsection "Comments")]))
+   
+;; ----------------------------------------------------------------------
+;; SRFI 66 -- Octet vectors 
+;; ----------------------------------------------------------------------   
+(srfi-section 66
+
+(p [,(quick-link-srfi 66) is fully supported.  To use SRFI-66,
+you need to insert the following expression])
+(fontified-code [(require "srfi-66")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+   
    
 ;; ----------------------------------------------------------------------
 ;; SRFI 69 -- Basic Hash Tables

@@ -25,7 +25,7 @@
 	C function (as the converter. Used to obtain the value of errno
 	for instance in Posix extension.
 
-	* lib/bonus.stk: Added the prnt and printerr procedures.
+	* lib/bonus.stk: Added the PRINT and PRINTERR procedures.
 
 2005-12-15  Erick Gallesio  <eg@essi.fr>
 

@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 31-Oct-2005 13:34 (eg)
+;; Last file update:  3-Jan-2006 16:24 (eg)
 ;;
 ;; ======================================================================
 
@@ -273,6 +273,7 @@ e"])
 (insertdoc 'string-index)
 (insertdoc 'string-find?)
 (insertdoc 'string-fill!)
+(insertdoc 'string-blit!)
 (insertdoc 'string-mutable?)
    
 (index  "SRFI-13")
@@ -491,7 +492,8 @@ be accessed as a normal port with the standard Scheme primitives.])
 (insertdoc 'write-chars)
 (index "SRFI-28")
 (insertdoc 'format)
-(insertdoc 'flush-output-port))
+(insertdoc 'flush-output-port)
+(insertdoc 'printerr))
 
 (subsection :title "System interface"
 (index "STKLOS_LOAD_PATH")

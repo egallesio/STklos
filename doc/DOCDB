@@ -1,5 +1,5 @@
 ;; **DO NOT EDIT**			-*- scheme -*-
-;; File generated automatically on Mon Dec 12 22:05:10 CET 2005
+;; File generated automatically on Tue Jan  3 16:21:24 CET 2006
 
 
 ;; Source file "boolean.c"
@@ -583,6 +583,8 @@
 
 (string-titlecase! :type extended :synopsis "(string-titlecase! str)\n(string-titlecase! str start)\n(string-titlecase! str start end)" :description "This is the in-place side-effecting variant of |string-titlecase|. " :similar ())
 
+(string-blit! :type extended :synopsis "(string-blit! s1 s2 offset)" :description "This function places the characters of string |s2| in the string |s1| \nstarting at position |offset|. The result of |string-blit!| may modify \nthe string |s1|. Note that the characters of |s2| can be written after \nthe end of |s1| (in which case a new string is allocated).\n@lisp\n(string-blit! (make-string 6 #\\X) \"abc\" 2)\n              => \"XXabcX\"\n(string-blit! (make-string 10 #\\X) \"abc\" 5)\n              => \"XXXXXabc\"\n(string-blit! (make-string 6 #\\X) \"a\" 10)\n              => \"XXXXXX\\0\\0\\0\\0a\"\n@end lisp" :similar ())
+
 
 ;; Source file "struct.c"
 
@@ -742,7 +744,7 @@
 
 (input-virtual-port? :see output-virtual-port?)
 ;; **DO NOT EDIT**			-*- scheme -*-
-;; File generated automatically on Thu Nov  3 22:10:11 CET 2005
+;; File generated automatically on Tue Jan  3 16:21:24 CET 2006
 
 
 ;; Source file "STklos.init"
@@ -895,6 +897,9 @@
 ;; Source file "srfi-60.stk"
 
 
+;; Source file "srfi-66.stk"
+
+
 ;; Source file "srfi-70.stk"
 
 
@@ -979,6 +984,9 @@
 
 (port->sexp-list :see port->string-list)
 (port->string :see port->string-list)
+(printerr :type extended :synopsis "(print obj ...)\n(printerr obj ...)" :description "These procedures display all their arguments followed by a newline. The\nprocedure |print| uses the standard output port, whereas |printerr| uses the\ncurrent error port" :similar (print))
+
+(print :see printerr)
 (exec-list :type extended :synopsis "(exec str)\n(exec-list str)" :description "These procedures execute the command given in |str|. The command given \nin |str| is passed to |/bin/sh|. |Exec| returns a strings which contains \nall the characters that the command |str| has printed on it's standard\noutput, whereas |exec-list| returns a list of the lines which constitute\nthe output of |str|.\n@lisp\n(exec \"echo A; echo B\")                => \"A\\\\nB\\\\n\"\n(exec-list \"echo A; echo B\")           => (\"A\" \"B\")\n@end lisp" :similar (exec))
 
 (exec :see exec-list)

@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update:  3-Nov-2005 18:19 (eg)
+# Last file update:  3-Jan-2006 16:36 (eg)
 
 
 SOURCES  = biblio.skb cond.skb custom.skb expr.skb index.skb 		\
@@ -32,6 +32,7 @@ $(CTEX): $(SOURCES) $(DOCDB) $(BIB) $(IMG)
 
 
 $(HTML): $(SOURCES) $(DOCDB) $(BIB) $(IMG)
+	mkdir -p html html/images
 	skribe  -t html-color -b ./html -o $(HTML) stklos.skb
 	cp -a $(CSS) html
 	cp -a $(IMG) html/images
