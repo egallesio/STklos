@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  4-Jan-2006 14:42 (eg)
+# Last file update:  4-Jan-2006 14:44 (eg)
 
 EXTRA_DIST   = 
 SUBDIRS      =  @PCRE@ @GC@ @GMP@ src utils lib @GTKLOS@ @EXAMPLES@ \
@@ -41,7 +41,7 @@ prep-version:
 	hgclonedates `pwd` /usr/tmp/$(VERSION_TAG)
 
 beta: prep-version
-	( cd /usr/tmp; mv $(VERSION_TAG) $(VERSION_BETA) \
+	( cd /usr/tmp; mv $(VERSION_TAG) $(VERSION_BETA);  \
 	  tar cvfz $(VERSION_BETA).tar.gz $(VERSION_BETA) )
 	ls -ls /usr/tmp/$(VERSION_BETA).tar.gz
 
