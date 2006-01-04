@@ -2,7 +2,7 @@
  *
  * s i g n a l . c			-- Signal handling
  *
- * Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 10-Oct-1995 07:55
- * Last file update: 30-Dec-2005 17:42 (eg)
+ * Last file update:  4-Jan-2006 13:52 (eg)
  *
  */
 
@@ -134,7 +134,7 @@ static void sighup(int i)
 {
   /* FIXME: perhaps we should be more verbose */
   fprintf(stderr, "Received a SIGHUP signal.\n");
-  exit(4);
+  exit(0);
 }
 
 

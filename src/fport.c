@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 30-Dec-2005 17:30 (eg)
+ * Last file update: 13-Sep-2005 22:41 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -92,7 +92,7 @@ static void unregister_port(SCM port)
 static void close_all_ports(void)
 {
   struct port_list *tmp, *cur;
-
+  
   for (cur = all_file_ports; cur ; cur = cur->next) {
     tmp = GET_FAKE_POINTER(cur->port);
     PORT_RELEASE(tmp) = nop_release_port;
