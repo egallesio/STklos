@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  4-Jan-2006 14:44 (eg)
+# Last file update:  4-Jan-2006 14:45 (eg)
 
 EXTRA_DIST   = 
 SUBDIRS      =  @PCRE@ @GC@ @GMP@ src utils lib @GTKLOS@ @EXAMPLES@ \
@@ -45,7 +45,7 @@ beta: prep-version
 	  tar cvfz $(VERSION_BETA).tar.gz $(VERSION_BETA) )
 	ls -ls /usr/tmp/$(VERSION_BETA).tar.gz
 
-version: beta
+version: prep-version
 	( cd /usr/tmp; tar cvfz $(VERSION_TAG).tar.gz $(VERSION_TAG) )
 	ls -ls /usr/tmp/$(VERSION_TAG).tar.gz
 
