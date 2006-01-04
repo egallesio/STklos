@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update:  3-Jan-2006 16:36 (eg)
+# Last file update:  4-Jan-2006 14:08 (eg)
 
 
 SOURCES  = biblio.skb cond.skb custom.skb expr.skb index.skb 		\
@@ -46,5 +46,5 @@ clean:
 
 install: Html Pdf
 	rm -rf ../html/*.html ../html/images/*; 
-	cp -a html ../html
+	cp -a html/* ../html
 	cp -a $(PDF) ../pdf
