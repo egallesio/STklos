@@ -1,7 +1,7 @@
 /*
  * l i b . c					-- Scheme library 
  * 
- * Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  5-Jan-2000 12:17 (eg)
- * Last file update:  7-May-2005 15:50 (eg)
+ * Last file update: 20-Jan-2006 10:01 (eg)
  */
 
 
@@ -49,7 +49,7 @@ static void init_library_path(void)
 
 
 int
-STk_init_library(int *argc, char ***argv)
+STk_init_library(int *argc, char ***argv, int stack_size)
 {
   STk_get_stack_pointer(&STk_start_stack);
 
@@ -74,7 +74,7 @@ STk_init_library(int *argc, char ***argv)
     STk_init_boolean()		&&
     STk_init_reader()   	&&
     STk_init_system()   	&&
-    STk_init_vm()		&&
+    STk_init_vm(stack_size)	&&
     STk_init_hash()		&&
     STk_init_misc()		&&
     STk_init_signal()		&&

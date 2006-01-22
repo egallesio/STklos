@@ -1,7 +1,7 @@
 /*
  * stklos.c	-- STklos interpreter main function
  * 
- * Copyright © 1999-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 30-Dec-2005 17:06 (eg)
+ * Last file update: 20-Jan-2006 10:03 (eg)
  */
 
 #include <stklos.h>
@@ -159,11 +159,8 @@ int main(int argc, char *argv[])
   /* Hack: to give the illusion that ther is no VM under the scene */
   if (*program_file) argv0 = program_file;
 
-  /* Allocate a stack */
-  STk_allocate_stack(stack_size);
-
   /* Initialize the library */
-  if (!STk_init_library(&argc, &argv)) {
+  if (!STk_init_library(&argc, &argv, stack_size)) {
     fprintf(stderr, "cannot initialize the STklos library\nABORT\n");
     exit(1);
   }

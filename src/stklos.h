@@ -1,7 +1,7 @@
 /*
  * stklos.h	-- stklos.h
  * 
- * Copyright © 1999-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 26-Dec-2005 18:28 (eg)
+ * Last file update: 20-Jan-2006 10:06 (eg)
  */
 
 #ifndef STKLOS_H
@@ -468,7 +468,7 @@ extern int   STk_library_initialized; /* True when successfully initialized */
 extern char *STk_library_path;	      /* The base directory where files are found */
 extern void *STk_start_stack;	      /* An approx. of main thread stack addr */
 
-int STk_init_library(int *argc, char ***argv);
+  int STk_init_library(int *argc, char ***argv, int stack_size);
 
 /*
   ------------------------------------------------------------------------------
@@ -1142,15 +1142,13 @@ SCM STk_C_apply(SCM func, int nargs, ...);
 void STk_get_stack_pointer(void **addr);
 SCM STk_n_values(int n, ...);
 
-void STk_allocate_stack(long n);
-
 EXTERN_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void));
 
 SCM STk_load_bcode_file(SCM f);
 int STk_load_boot(char *s);
 int STk_boot_from_C(void);
 
-int STk_init_vm(void);
+int STk_init_vm(int stack_size);
 
 
 /*****************************************************************************/
