@@ -1,3 +1,11 @@
+2006-01-23  Erick Gallesio  <eg@essi.fr>
+
+	* src/vm.c (apply): apply is now inlined in the VM.
+
+2006-01-22  Erick Gallesio  <eg@essi.fr>
+
+	* src/vm.c : Rewritten to avoid the usage of globals.
+
 2006-01-04  Erick Gallesio  <eg@essi.fr>
 
 	* 0.72 Release

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 20-Jan-2006 10:06 (eg)
+ * Last file update: 23-Jan-2006 13:47 (eg)
  */
 
 #ifndef STKLOS_H
@@ -150,7 +150,7 @@ typedef enum {
   tc_subr23, tc_vsubr, tc_apply, tc_vector, tc_uvector,			/* 20 */
   tc_hash_table, tc_port, tc_frame, tc_next_method, tc_promise, 	/* 25 */
   tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,	/* 30 */
-  tc_socket, tc_struct_type, tc_struct, 		 		/* 35 */
+  tc_socket, tc_struct_type, tc_struct, tc_thread, 	 		/* 35 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -1166,9 +1166,8 @@ extern STk_instr STk_boot_code[];
 #define STk_eof   	((SCM) MAKE_SCONST(3))
 #define STk_void 	((SCM) MAKE_SCONST(4))
 
-#define STk_apply_call	((SCM) MAKE_SCONST(5)) /* special pupose value see vm.c */
-#define STk_dot		((SCM) MAKE_SCONST(6)) /* special pupose value see read.c */
-#define STk_close_par	((SCM) MAKE_SCONST(7)) /* special pupose value see read.c */
+#define STk_dot		((SCM) MAKE_SCONST(5)) /* special pupose value see read.c */
+#define STk_close_par	((SCM) MAKE_SCONST(6)) /* special pupose value see read.c */
 
 
 /* Misc */

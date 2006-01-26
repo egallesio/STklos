@@ -21,21 +21,21 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 22-Jan-2006 19:52 (eg)
+ * Last file update: 24-Jan-2006 07:50 (eg)
  */
 
-
-// INLINER apply 
 // INLINER values
 // Voir FIX:
+// Call with-values !STkprocedurep est faux: tester =STk_false voire, virer le code
+
+#define USE_THREADS 1    /* FIX: */
+
 
 #include "stklos.h"
 #include "object.h"
 #include "vm.h"
 #include "vm-instr.h"
 #include "struct.h"
-
-#define MAXVALS2 8
 
 
 /* #define DEBUG_VM */
@@ -118,32 +118,39 @@ static Inline void set_signal_mask(sigset_t mask)
  * 			V M   T H R E A D
  *
 \*===========================================================================*/
-#define MAX_VALS 8
-
-typedef struct {
-  STk_instr *pc;	/* Program Counter		*/
-  SCM *fp;		/* Frame pointer		*/
-  SCM *sp;		/* Stack pointer		*/
-  SCM val;		/* Current value register 	*/
-  SCM env;		/* Current environment register */
-  SCM *constants;	/* Constants of current code 	*/
-  SCM *handlers;	/* Exceptions handlers		*/
-  
-  SCM r1, r2;		/* general registers		 */
-  
-  SCM vals[MAX_VALS];	/* registers for multiple values */
-  int valc;		/* # of multiple values 	 */
-    
-  jbuf *top_jmp_buf;  
-
-  SCM *stack;
-  int stack_len;
-} vm_thread_t;
-
-
-
-
+#ifdef USE_THREAD
+static ....... 
+#endif
 static vm_thread_t *the_vm;
+
+vm_thread_t *STk_allocate_vm(int stack_size)
+{
+  vm_thread_t *vm = STk_must_malloc(sizeof(vm_thread_t));
+
+  /* Allocate the stack */
+  vm->stack_len = stack_size;
+  vm->stack     = STk_must_malloc(stack_size * sizeof(SCM));
+  if (!vm->stack) {
+    fprintf(stderr, "cannot allocate a stack with a size of %d cells\n", stack_size);
+    fflush(stderr);
+    exit(1);
+  }
+ 
+  /* Initialize the VM registers */
+  vm->sp            = vm->stack + vm->stack_len;
+  vm->fp            = vm->sp;
+  vm->val           = STk_void;
+  vm->env           = STk_current_module;
+  vm->handlers      = NULL;
+  vm->top_jmp_buf   = NULL;
+  vm->scheme_thread = STk_false;
+
+#ifdef USE_THREADS
+  pthread_key_create(....)
+#endif
+  return vm;
+}
+
 
 
 vm_thread_t *get_current_vm(void)
@@ -430,47 +437,12 @@ static int add_global(SCM *ref)
  * @end lisp
 doc>
  */
-DEFINE_PRIMITIVE("apply", scheme_apply, apply, (int argc, vm_thread_t *vm))
+DEFINE_PRIMITIVE("apply", scheme_apply, apply, (void))
 {
-  SCM l, func, *tmp, *argv;
-  int len, nargs;
-
-  if (argc == 0) STk_error("no function given");
-
-  nargs = argc - 1;
-  argv  = vm->sp + nargs;
-  func  = *argv;
-
-  if (nargs > 0) {
-    /* look at last argument */
-    l   = *vm->sp;
-    len = STk_int_length(l);
-
-    if (len < 0)
-      STk_error("last argument ~S is not a list", l);
-    else {
-      /* move all the arguments, except the last one, one cell lower in the 
-       * stack (i.e. overwrite the function to call) */
-      for (tmp = argv-1; tmp > vm->sp; tmp--)
-	*(tmp+1) = *tmp;
-
-      vm->sp = tmp + 2;
-      if (len != 0) {
-	/* Unfold the last argument in place */
-	while (!NULLP(l)) {
-	  push(CAR(l));
-	  l = CDR(l);
-	}
-      }
-      nargs += len-1;
-    }
-  }
-
-  /* Place the function to apply and its number of arguments in R1 and R2 */
-  vm->r1 = func;
-  vm->r2 = AS_SCM(nargs);
-
-  return STk_apply_call;
+  /* This function is never called. It is just here to declare the primitive 
+   * apply, as a primitive of type tc_apply
+   */
+  return STk_void;
 }
 
 
@@ -1322,10 +1294,42 @@ FUNCALL:  /* (int nargs, int tailp) */
     }
 
     case tc_apply: {
-      /* Call the function in the call frame of apply */
-      STk_scheme_apply(nargs, vm);
-      nargs   = (short) AS_LONG(vm->r2); 
-      vm->val = vm->r1; 
+      SCM l, func, *tmp, *argv;
+      int len;
+      
+      if (nargs == 0) STk_error("no function given to apply");
+
+      nargs -= 1;
+      argv   = vm->sp + nargs;
+      func   = *argv;
+
+      if (nargs > 0) {
+	/* look at last argument */
+	l   = *vm->sp;
+	len = STk_int_length(l);
+	
+	if (len < 0)
+	  STk_error("last argument of apply is not a list: ~S", l);
+	else {
+	  /* move all the arguments, except the last one, one cell lower in the 
+	   * stack (i.e. overwrite the function to call) */
+	  for (tmp = argv-1; tmp > vm->sp; tmp--)
+	    *(tmp+1) = *tmp;
+	  
+	  vm->sp = tmp + 2;
+	  if (len != 0) {
+	    /* Unfold the last argument in place */
+	    while (!NULLP(l)) {
+	      push(CAR(l));
+	      l = CDR(l);
+	    }
+	  }
+	  nargs += len-1;
+	}
+      }
+      
+      /* Now we can call call "func" with "nargs" arguments */
+      vm->val = func;
       goto FUNCALL;
     }
 
@@ -1721,31 +1725,10 @@ int STk_boot_from_C(void)
 
 int STk_init_vm(int stack_size)
 {
-  vm_thread_t *vm;
+  DEFINE_XTYPE(continuation, &xtype_continuation);
 
   /* Allocate the main thread */
-  the_vm = STk_must_malloc(sizeof(vm_thread_t));
-  vm     = the_vm;
-
-  /* Allocate the stack */
-  vm->stack_len = stack_size;
-  vm->stack     = STk_must_malloc(stack_size * sizeof(SCM));
-  if (!vm->stack) {
-    fprintf(stderr, "cannot allocate a stack with a size of %d cells\n", stack_size);
-    fflush(stderr);
-    exit(1);
-  }
- 
-  /* Initialize the VM registers */
-  vm->sp          = vm->stack + vm->stack_len;
-  vm->fp          = vm->sp;
-  vm->val         = STk_void;
-  vm->env         = STk_current_module;
-  vm->handlers    = NULL;
-  vm->top_jmp_buf = NULL;
-  
-
-  DEFINE_XTYPE(continuation, &xtype_continuation);
+  the_vm = STk_allocate_vm(stack_size);
 
   /* Initialize the table of checked references */
   checked_globals = STk_must_malloc(checked_globals_len * sizeof(SCM));

@@ -1,7 +1,7 @@
 /*
  * v m . h				-- The STklos Virtual Machine
  * 
- * Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 25-May-2005 11:00 (eg)
+ * Last file update: 23-Jan-2006 13:46 (eg)
  */
 
 
@@ -72,4 +72,37 @@ struct continuation_obj {
 
 SCM STk_make_continuation(void);
 SCM STk_restore_continuation(SCM cont, SCM val);
+
+
+/*===========================================================================*\
+ * 
+ *  			T H R E A D   S U P P O R T
+ * 
+\*===========================================================================*/
+
+#define MAX_VALS 8	/* static number of values	*/
+
+typedef struct {
+  STk_instr *pc;	/* Program Counter		*/
+  SCM *fp;		/* Frame pointer		*/
+  SCM *sp;		/* Stack pointer		*/
+  SCM val;		/* Current value register 	*/
+  SCM env;		/* Current environment register */
+  SCM *constants;	/* Constants of current code 	*/
+  SCM *handlers;	/* Exceptions handlers		*/
+  
+  SCM r1, r2;		/* general registers		 */
+  
+  SCM vals[MAX_VALS];	/* registers for multiple values */
+  int valc;		/* # of multiple values 	 */
+    
+  jbuf *top_jmp_buf;  
+
+  SCM *stack;
+  int stack_len;
+  
+
+  SCM scheme_thread; 	/* Scheme associated thread 	*/
+} vm_thread_t;
+
 
