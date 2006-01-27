@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 23-Jan-2006 13:47 (eg)
+ * Last file update: 26-Jan-2006 19:54 (eg)
  */
 
 #ifndef STKLOS_H

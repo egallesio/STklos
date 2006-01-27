@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 23-Jan-2006 13:46 (eg)
+ * Last file update: 26-Jan-2006 20:20 (eg)
  */
 
 
@@ -100,9 +100,10 @@ typedef struct {
 
   SCM *stack;
   int stack_len;
-  
-
   SCM scheme_thread; 	/* Scheme associated thread 	*/
 } vm_thread_t;
 
+
+vm_thread_t *STk_allocate_vm(int stack_size);
+vm_thread_t inline *STk_get_current_vm(void);
 

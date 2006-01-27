@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 24-Jan-2006 07:50 (eg)
+ * Last file update: 26-Jan-2006 19:57 (eg)
  */
 
 // INLINER values
@@ -29,7 +29,6 @@
 // Call with-values !STkprocedurep est faux: tester =STk_false voire, virer le code
 
 #define USE_THREADS 1    /* FIX: */
-
 
 #include "stklos.h"
 #include "object.h"
@@ -118,11 +117,6 @@ static Inline void set_signal_mask(sigset_t mask)
  * 			V M   T H R E A D
  *
 \*===========================================================================*/
-#ifdef USE_THREAD
-static ....... 
-#endif
-static vm_thread_t *the_vm;
-
 vm_thread_t *STk_allocate_vm(int stack_size)
 {
   vm_thread_t *vm = STk_must_malloc(sizeof(vm_thread_t));
@@ -145,17 +139,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   vm->top_jmp_buf   = NULL;
   vm->scheme_thread = STk_false;
 
-#ifdef USE_THREADS
-  pthread_key_create(....)
-#endif
   return vm;
-}
-
-
-
-vm_thread_t *get_current_vm(void)
-{
-  return the_vm;
 }
 
 
@@ -309,7 +293,7 @@ static int   checked_globals_used = 0;
     vm->fp = (SCM *) ACT_SAVE_FP(vm->fp);	\
 }
 
-static void run_vm(STk_instr *code, SCM *constants, SCM envt);
+static void run_vm(vm_thread_t *vm);
 
 
 /*===========================================================================*\
@@ -321,7 +305,7 @@ static void run_vm(STk_instr *code, SCM *constants, SCM envt);
 #ifdef DEBUG_VM
 void STk_print_vm_registers(char *msg, STk_instr *code)
 {
-  vm_thread_t *vm = get_current_vm();
+  vm_thread_t *vm = STk_get_current_vm();
   if (IS_IN_STACKP(vm->env))
     STk_fprintf(STk_stderr, "%s VAL=~S PC=%d SP=%d FP=%d CST=%x ENV=%x (%d)\n", 
 		msg, vm->val, vm->pc - code, vm->sp - vm->stack,
@@ -465,7 +449,7 @@ SCM STk_C_apply(SCM func, int nargs, ...)
 {
   static STk_instr code[]= {INVOKE, 0, END_OF_CODE};
   va_list ap;
-  vm_thread_t *vm = get_current_vm();
+  vm_thread_t *vm = STk_get_current_vm();
   int i;
 
   va_start(ap, nargs);
@@ -485,10 +469,11 @@ SCM STk_C_apply(SCM func, int nargs, ...)
     for (i = 0; i < nargs; i++) push(va_arg(ap, SCM));
   }
 
-  vm->val = func;				    /* Store fun in VAL */
   code[1] = (short) nargs;			    /* Patch # of args  */
+  vm->val     = func;				    /* Store fun in VAL */
+  vm->pc      = code;
+  run_vm(vm);
 
-  run_vm(code, vm->constants, vm->env);
   FULL_RESTORE_VM_STATE(vm->sp);
   
   return vm->val;
@@ -499,7 +484,7 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
 {
   int i, len;
   STk_instr *vinstr, *p;
-  vm_thread_t *vm = get_current_vm();
+  vm_thread_t *vm = STk_get_current_vm();
 
   if (!envt) envt = STk_current_module;
   
@@ -515,7 +500,10 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
     *p++ = (STk_instr) STk_integer_value(VECTOR_DATA(code)[i]);
 
   SAVE_VM_STATE();
-  run_vm(vinstr, VECTOR_DATA(consts), envt);
+  vm->pc        = vinstr;
+  vm->constants = VECTOR_DATA(consts);
+  vm->env       = envt;
+  run_vm(vm);
   FULL_RESTORE_VM_STATE(vm->sp);
 
   return vm->val;
@@ -541,7 +529,7 @@ doc>
 */
 DEFINE_PRIMITIVE("values", values, vsubr, (int argc, SCM *argv))
 {
-  vm_thread_t *vm = get_current_vm();
+  vm_thread_t *vm = STk_get_current_vm();
   int i;
 
   if (argc == 0)
@@ -583,7 +571,7 @@ doc>
  */
 DEFINE_PRIMITIVE("call-with-values", call_with_values, subr2, (SCM prod, SCM con))
 {
-  vm_thread_t *vm = get_current_vm();
+  vm_thread_t *vm = STk_get_current_vm();
   int tmp;
 
   if (!STk_procedurep(prod)) STk_error("bad producer", prod);
@@ -607,7 +595,7 @@ DEFINE_PRIMITIVE("call-with-values", call_with_values, subr2, (SCM prod, SCM con
 
 SCM STk_n_values(int n, ...)
 {
-  vm_thread_t *vm = get_current_vm();
+  vm_thread_t *vm = STk_get_current_vm();
 
   vm->valc = n;
   
@@ -669,7 +657,7 @@ static void vm_debug(int kind, vm_thread_t *vm)
 DEFINE_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void))
 {  
   SCM res, *lfp;
-  vm_thread_t *vm = get_current_vm();
+  vm_thread_t *vm = STk_get_current_vm();
 
   res = STk_nil;
   for (lfp = vm->fp; lfp; lfp = ACT_SAVE_FP(lfp)) {
@@ -726,9 +714,8 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int argc, SCM *argv))
  *
 \*===========================================================================*/
 
-static void run_vm(STk_instr *code, SCM *consts, SCM envt)
+static void run_vm(vm_thread_t *vm)
 {
-  vm_thread_t *vm = get_current_vm();
   jbuf jb; 
   jbuf *old_jb = NULL; 		/* to make Gcc happy */
   short offset, nargs=0;
@@ -747,11 +734,6 @@ static void run_vm(STk_instr *code, SCM *consts, SCM envt)
 #if defined(STAT_VM)
   static short previous_op = NOP;
 #endif
-
-  vm->constants = consts;
-  vm->env       = envt;
-  vm->pc	= code;
-
 
 #if defined(USE_COMPUTED_GOTO)
   NEXT;
@@ -1403,7 +1385,7 @@ end_funcall:
 void STk_raise_exception(SCM cond)
 {
   SCM proc, *save_vm_state;
-  vm_thread_t *vm = get_current_vm();
+  vm_thread_t *vm = STk_get_current_vm();
   
   save_vm_state = (vm->handlers) + EXCEPTION_HANDLER_SIZE;
 
@@ -1435,7 +1417,6 @@ void STk_raise_exception(SCM cond)
   /* 
    * Return in the good "run_vm" incarnation 
    */
-  //FIX: ?? parenthèses
   MY_LONGJMP(*(vm->top_jmp_buf), 1);
 }
 
@@ -1455,7 +1436,7 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 {
   SCM z;
   struct continuation_obj *k;
-  vm_thread_t *vm = get_current_vm();
+  vm_thread_t *vm = STk_get_current_vm();
   int csize, ssize;
   void *cstart, *sstart, *cend, *send;
   void *addr;
@@ -1519,7 +1500,7 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
     /* Since we are not sure of the way locals are allocated by the compiler
      * we cannot be sure that vm has kept its value. So we  get back another 
      * time the current vm data*/
-    return get_current_vm()->val;
+    return STk_get_current_vm()->val;
   }
 }
 
@@ -1531,7 +1512,7 @@ DEFINE_PRIMITIVE("%restore-continuation", restore_cont, subr2, (SCM cont, SCM va
   volatile void *p;
   void *addr;
   int cur_stack_size; 
-  vm_thread_t *vm = get_current_vm();
+  vm_thread_t *vm = STk_get_current_vm();
 
   if (!CONTP(cont)) STk_error("bad continuation ~S", cont);
 
@@ -1659,9 +1640,9 @@ static Inline STk_instr* read_code(SCM f, int len) /* read a code phrase */
 SCM STk_load_bcode_file(SCM f)
 {
   SCM consts, code_size, *save_constants, save_env;
-  STk_instr *code, *save_pc;
+  STk_instr *save_pc;
   int size;
-  vm_thread_t *vm = get_current_vm();
+  vm_thread_t *vm = STk_get_current_vm();
 
   /* Save machine state */
   save_pc = vm->pc; save_constants = vm->constants; save_env = vm->env;
@@ -1680,8 +1661,10 @@ SCM STk_load_bcode_file(SCM f)
 	return STk_false;
     }
 
-    code = read_code(f, size);			    	   /* Read the code */
-    run_vm(code, VECTOR_DATA(consts), STk_current_module); /* Execute code read */
+    vm->pc 	  = read_code(f, size);			     /* Read the code */
+    vm->constants = VECTOR_DATA(consts);
+    vm->env       = STk_current_module;
+    run_vm(vm);
   }
   
   /* restore machine state */
@@ -1713,12 +1696,18 @@ int STk_load_boot(char *filename)
 int STk_boot_from_C(void)
 {
   SCM port, consts;
+  vm_thread_t *vm = STk_get_current_vm();
 
   /* Get the constants */
   port = STk_open_C_string(STk_boot_consts);
   consts = STk_read(port, TRUE);
+
   /* Run the VM */
-  run_vm(STk_boot_code, VECTOR_DATA(consts), STk_current_module); 
+  vm->pc 	= STk_boot_code;
+  vm->constants = VECTOR_DATA(consts);
+  vm->env       = STk_current_module;
+  run_vm(vm);
+
   system_has_booted = 1;
   return 0;
 }
@@ -1726,9 +1715,6 @@ int STk_boot_from_C(void)
 int STk_init_vm(int stack_size)
 {
   DEFINE_XTYPE(continuation, &xtype_continuation);
-
-  /* Allocate the main thread */
-  the_vm = STk_allocate_vm(stack_size);
 
   /* Initialize the table of checked references */
   checked_globals = STk_must_malloc(checked_globals_len * sizeof(SCM));
@@ -1750,3 +1736,4 @@ int STk_init_vm(int stack_size)
 #endif
   return TRUE;
 }
+
