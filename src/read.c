@@ -1,7 +1,7 @@
 /*
  * r e a d  . c				-- reading stuff
  *
- * Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update:  6-Dec-2005 16:22 (eg)
+ * Last file update:  1-Feb-2006 17:13 (eg)
  *
  */
 
@@ -802,12 +802,14 @@ int STk_init_reader(void)
   sym_read_brace       = STk_intern("%read-brace");
   
   /* read-error condition */
-  DEFCOND(read_error, "&read-error", STk_err_mess_condition,
-	  LIST4(STk_intern("line"),
-		STk_intern("column"),
-		STk_intern("position"),
-		STk_intern("span")));
+  read_error = STk_defcond_type("&read-error", STk_err_mess_condition,
+				LIST4(STk_intern("line"),
+				      STk_intern("column"),
+				      STk_intern("position"),
+				      STk_intern("span")),
+				STk_current_module);
 
+  
   /* Declare SRFI-10 support function */
   ADD_PRIMITIVE(reader_ctor);
 

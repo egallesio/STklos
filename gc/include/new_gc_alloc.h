@@ -88,10 +88,11 @@ extern "C" {
     extern void ** const GC_uobjfreelist_ptr;
     extern void ** const GC_auobjfreelist_ptr;
 
-    extern void GC_incr_words_allocd(size_t words);
-    extern void GC_incr_mem_freed(size_t words);
+    extern void GC_incr_bytes_allocd(size_t bytes);
+    extern void GC_incr_mem_freed(size_t words); /* FIXME: use bytes */
 
     extern char * GC_generic_malloc_words_small(size_t word, int kind);
+    		/* FIXME: Doesn't exist anymore.	*/
 }
 
 // Object kinds; must match PTRFREE, NORMAL, UNCOLLECTABLE, and
@@ -109,7 +110,7 @@ enum { GC_byte_alignment = 8 };
 enum { GC_word_alignment = GC_byte_alignment/GC_bytes_per_word };
 
 inline void * &GC_obj_link(void * p)
-{   return *(void **)p;  }
+{   return *reinterpret_cast<void **>(p);  }
 
 // Compute a number of words >= n+1 bytes.
 // The +1 allows for pointers one past the end.
@@ -130,51 +131,50 @@ public:
   // File local count of allocated words.  Occasionally this is
   // added into the global count.  A separate count is necessary since the
   // real one must be updated with a procedure call.
-  static size_t GC_words_recently_allocd;
+  static size_t GC_bytes_recently_allocd;
 
   // Same for uncollectable mmory.  Not yet reflected in either
-  // GC_words_recently_allocd or GC_non_gc_bytes.
-  static size_t GC_uncollectable_words_recently_allocd;
+  // GC_bytes_recently_allocd or GC_non_gc_bytes.
+  static size_t GC_uncollectable_bytes_recently_allocd;
 
   // Similar counter for explicitly deallocated memory.
-  static size_t GC_mem_recently_freed;
+  static size_t GC_bytes_recently_freed;
 
   // Again for uncollectable memory.
-  static size_t GC_uncollectable_mem_recently_freed;
+  static size_t GC_uncollectable_bytes_recently_freed;
 
   static void * GC_out_of_line_malloc(size_t nwords, int kind);
 };
 
 template <int dummy>
-size_t GC_aux_template<dummy>::GC_words_recently_allocd = 0;
+size_t GC_aux_template<dummy>::GC_bytes_recently_allocd = 0;
 
 template <int dummy>
-size_t GC_aux_template<dummy>::GC_uncollectable_words_recently_allocd = 0;
+size_t GC_aux_template<dummy>::GC_uncollectable_bytes_recently_allocd = 0;
 
 template <int dummy>
-size_t GC_aux_template<dummy>::GC_mem_recently_freed = 0;
+size_t GC_aux_template<dummy>::GC_bytes_recently_freed = 0;
 
 template <int dummy>
-size_t GC_aux_template<dummy>::GC_uncollectable_mem_recently_freed = 0;
+size_t GC_aux_template<dummy>::GC_uncollectable_bytes_recently_freed = 0;
 
 template <int dummy>
 void * GC_aux_template<dummy>::GC_out_of_line_malloc(size_t nwords, int kind)
 {
-    GC_words_recently_allocd += GC_uncollectable_words_recently_allocd;
+    GC_bytes_recently_allocd += GC_uncollectable_bytes_recently_allocd;
     GC_non_gc_bytes +=
-                GC_bytes_per_word * GC_uncollectable_words_recently_allocd;
-    GC_uncollectable_words_recently_allocd = 0;
+                GC_uncollectable_bytes_recently_allocd;
+    GC_uncollectable_bytes_recently_allocd = 0;
 
-    GC_mem_recently_freed += GC_uncollectable_mem_recently_freed;
-    GC_non_gc_bytes -= 
-                GC_bytes_per_word * GC_uncollectable_mem_recently_freed;
-    GC_uncollectable_mem_recently_freed = 0;
+    GC_bytes_recently_freed += GC_uncollectable_bytes_recently_freed;
+    GC_non_gc_bytes -= GC_uncollectable_bytes_recently_freed;
+    GC_uncollectable_bytes_recently_freed = 0;
 
-    GC_incr_words_allocd(GC_words_recently_allocd);
-    GC_words_recently_allocd = 0;
+    GC_incr_bytes_allocd(GC_bytes_recently_allocd);
+    GC_bytes_recently_allocd = 0;
 
-    GC_incr_mem_freed(GC_mem_recently_freed);
-    GC_mem_recently_freed = 0;
+    GC_incr_mem_freed(GC_bytes_per_word(GC_bytes_recently_freed));
+    GC_bytes_recently_freed = 0;
 
     return GC_generic_malloc_words_small(nwords, kind);
 }
@@ -200,7 +200,7 @@ class single_client_gc_alloc_template {
 		return GC_aux::GC_out_of_line_malloc(nwords, GC_NORMAL);
 	    }
 	    *flh = GC_obj_link(op);
-	    GC_aux::GC_words_recently_allocd += nwords;
+	    GC_aux::GC_bytes_recently_allocd += nwords * GC_bytes_per_word;
 	    return op;
         }
      	static void * ptr_free_allocate(size_t n)
@@ -215,7 +215,7 @@ class single_client_gc_alloc_template {
 		return GC_aux::GC_out_of_line_malloc(nwords, GC_PTRFREE);
 	    }
 	    *flh = GC_obj_link(op);
-	    GC_aux::GC_words_recently_allocd += nwords;
+	    GC_aux::GC_bytes_recently_allocd += nwords * GC_bytes_per_word;
 	    return op;
         }
 	static void deallocate(void *p, size_t n)
@@ -228,10 +228,10 @@ class single_client_gc_alloc_template {
 	    } else {
 	        flh = GC_objfreelist_ptr + nwords;
 	        GC_obj_link(p) = *flh;
-		memset((char *)p + GC_bytes_per_word, 0,
+		memset(reinterpret_cast<char *>(p) + GC_bytes_per_word, 0,
 		       GC_bytes_per_word * (nwords - 1));
 	        *flh = p;
-	        GC_aux::GC_mem_recently_freed += nwords;
+	        GC_aux::GC_bytes_recently_freed += nwords * GC_bytes_per_word;
 	    }
 	}
 	static void ptr_free_deallocate(void *p, size_t n)
@@ -245,7 +245,7 @@ class single_client_gc_alloc_template {
 	    	flh = GC_aobjfreelist_ptr + nwords;
 	    	GC_obj_link(p) = *flh;
 	    	*flh = p;
-	    	GC_aux::GC_mem_recently_freed += nwords;
+	    	GC_aux::GC_bytes_recently_freed += nwords * GC_bytes_per_word;
 	    }
 	}
 };
@@ -268,7 +268,8 @@ class single_client_traceable_alloc_template {
 		return GC_aux::GC_out_of_line_malloc(nwords, GC_UNCOLLECTABLE);
 	    }
 	    *flh = GC_obj_link(op);
-	    GC_aux::GC_uncollectable_words_recently_allocd += nwords;
+	    GC_aux::GC_uncollectable_bytes_recently_allocd +=
+		    			nwords * GC_bytes_per_word;
 	    return op;
         }
      	static void * ptr_free_allocate(size_t n)
@@ -283,7 +284,8 @@ class single_client_traceable_alloc_template {
 		return GC_aux::GC_out_of_line_malloc(nwords, GC_AUNCOLLECTABLE);
 	    }
 	    *flh = GC_obj_link(op);
-	    GC_aux::GC_uncollectable_words_recently_allocd += nwords;
+	    GC_aux::GC_uncollectable_bytes_recently_allocd +=
+		    			nwords * GC_bytes_per_word;
 	    return op;
         }
 	static void deallocate(void *p, size_t n)
@@ -297,7 +299,8 @@ class single_client_traceable_alloc_template {
 	        flh = GC_uobjfreelist_ptr + nwords;
 	        GC_obj_link(p) = *flh;
 	        *flh = p;
-	        GC_aux::GC_uncollectable_mem_recently_freed += nwords;
+	        GC_aux::GC_uncollectable_bytes_recently_freed +=
+				nwords * GC_bytes_per_word;
 	    }
 	}
 	static void ptr_free_deallocate(void *p, size_t n)
@@ -311,7 +314,8 @@ class single_client_traceable_alloc_template {
 	    	flh = GC_auobjfreelist_ptr + nwords;
 	    	GC_obj_link(p) = *flh;
 	    	*flh = p;
-	    	GC_aux::GC_uncollectable_mem_recently_freed += nwords;
+	    	GC_aux::GC_uncollectable_bytes_recently_freed +=
+				nwords * GC_bytes_per_word;
 	    }
 	}
 };
@@ -352,9 +356,9 @@ class simple_alloc<T, alloc> { \
 public: \
     static T *allocate(size_t n) \
 	{ return 0 == n? 0 : \
-			 (T*) alloc::ptr_free_allocate(n * sizeof (T)); } \
+			 reinterpret_cast<T*>(alloc::ptr_free_allocate(n * sizeof (T))); } \
     static T *allocate(void) \
-	{ return (T*) alloc::ptr_free_allocate(sizeof (T)); } \
+	{ return reinterpret_cast<T*>(alloc::ptr_free_allocate(sizeof (T))); } \
     static void deallocate(T *p, size_t n) \
 	{ if (0 != n) alloc::ptr_free_deallocate(p, n * sizeof (T)); } \
     static void deallocate(T *p) \
@@ -393,12 +397,12 @@ __STL_END_NAMESPACE
 
 __STL_BEGIN_NAMESPACE
 
-template <class _T>
-struct _Alloc_traits<_T, gc_alloc >
+template <class _Tp>
+struct _Alloc_traits<_Tp, gc_alloc >
 {
   static const bool _S_instanceless = true;
-  typedef simple_alloc<_T, gc_alloc > _Alloc_type;
-  typedef __allocator<_T, gc_alloc > allocator_type;
+  typedef simple_alloc<_Tp, gc_alloc > _Alloc_type;
+  typedef __allocator<_Tp, gc_alloc > allocator_type;
 };
 
 inline bool operator==(const gc_alloc&,
@@ -413,12 +417,12 @@ inline bool operator!=(const gc_alloc&,
   return false;
 }
 
-template <class _T>
-struct _Alloc_traits<_T, single_client_gc_alloc >
+template <class _Tp>
+struct _Alloc_traits<_Tp, single_client_gc_alloc >
 {
   static const bool _S_instanceless = true;
-  typedef simple_alloc<_T, single_client_gc_alloc > _Alloc_type;
-  typedef __allocator<_T, single_client_gc_alloc > allocator_type;
+  typedef simple_alloc<_Tp, single_client_gc_alloc > _Alloc_type;
+  typedef __allocator<_Tp, single_client_gc_alloc > allocator_type;
 };
 
 inline bool operator==(const single_client_gc_alloc&,
@@ -433,12 +437,12 @@ inline bool operator!=(const single_client_gc_alloc&,
   return false;
 }
 
-template <class _T>
-struct _Alloc_traits<_T, traceable_alloc >
+template <class _Tp>
+struct _Alloc_traits<_Tp, traceable_alloc >
 {
   static const bool _S_instanceless = true;
-  typedef simple_alloc<_T, traceable_alloc > _Alloc_type;
-  typedef __allocator<_T, traceable_alloc > allocator_type;
+  typedef simple_alloc<_Tp, traceable_alloc > _Alloc_type;
+  typedef __allocator<_Tp, traceable_alloc > allocator_type;
 };
 
 inline bool operator==(const traceable_alloc&,
@@ -453,12 +457,12 @@ inline bool operator!=(const traceable_alloc&,
   return false;
 }
 
-template <class _T>
-struct _Alloc_traits<_T, single_client_traceable_alloc >
+template <class _Tp>
+struct _Alloc_traits<_Tp, single_client_traceable_alloc >
 {
   static const bool _S_instanceless = true;
-  typedef simple_alloc<_T, single_client_traceable_alloc > _Alloc_type;
-  typedef __allocator<_T, single_client_traceable_alloc > allocator_type;
+  typedef simple_alloc<_Tp, single_client_traceable_alloc > _Alloc_type;
+  typedef __allocator<_Tp, single_client_traceable_alloc > allocator_type;
 };
 
 inline bool operator==(const single_client_traceable_alloc&,

@@ -19,10 +19,8 @@
  * This interface should not be used by normal C or C++ clients.
  * It will be useful to runtimes for other languages.
  * 
- * Note that this file is not "namespace-clean", i.e. it introduces names
- * not prefixed with GC_, which may collide with the client's names.  It
- * should be included only in those few places that directly provide
- * information to the collector.
+ * This is an experts-only interface!  There are many ways to break the
+ * collector in subtle ways by using this functionality.
  */
 #ifndef GC_MARK_H
 # define GC_MARK_H
@@ -55,9 +53,9 @@
 /* case correctly somehow.						*/
 # define GC_PROC_BYTES 100
 struct GC_ms_entry;
-typedef struct GC_ms_entry * (*GC_mark_proc) GC_PROTO((
+typedef struct GC_ms_entry * (*GC_mark_proc) (
 		GC_word * addr, struct GC_ms_entry * mark_stack_ptr,
-		struct GC_ms_entry * mark_stack_limit, GC_word env));
+		struct GC_ms_entry * mark_stack_limit, GC_word env);
 
 # define GC_LOG_MAX_MARK_PROCS 6
 # define GC_MAX_MARK_PROCS (1 << GC_LOG_MAX_MARK_PROCS)
@@ -108,8 +106,8 @@ typedef struct GC_ms_entry * (*GC_mark_proc) GC_PROTO((
 			/* held.					*/
 #define GC_INDIR_PER_OBJ_BIAS 0x10
 			
-extern GC_PTR GC_least_plausible_heap_addr;
-extern GC_PTR GC_greatest_plausible_heap_addr;
+extern void * GC_least_plausible_heap_addr;
+extern void * GC_greatest_plausible_heap_addr;
 			/* Bounds on the heap.  Guaranteed valid	*/
 			/* Likely to include future heap expansion.	*/
 
@@ -129,17 +127,75 @@ extern GC_PTR GC_greatest_plausible_heap_addr;
 /* be reserved for exceptional cases.  That will ensure that 		*/
 /* performance of this call is not extremely performance critical.	*/
 /* (Otherwise we would need to inline GC_mark_and_push completely,	*/
-/* which would tie the client code to a fixed colllector version.)	*/
-struct GC_ms_entry *GC_mark_and_push
-		GC_PROTO((GC_PTR obj,
-			  struct GC_ms_entry * mark_stack_ptr,
-		          struct GC_ms_entry * mark_stack_limit, GC_PTR *src));
+/* which would tie the client code to a fixed collector version.)	*/
+/* Note that mark procedures should explicitly call FIXUP_POINTER()	*/
+/* if required.								*/
+struct GC_ms_entry *GC_mark_and_push(void * obj,
+			  	     struct GC_ms_entry * mark_stack_ptr,
+		          	     struct GC_ms_entry * mark_stack_limit,
+				     void * *src);
 
 #define GC_MARK_AND_PUSH(obj, msp, lim, src) \
 	(((GC_word)obj >= (GC_word)GC_least_plausible_heap_addr && \
 	  (GC_word)obj <= (GC_word)GC_greatest_plausible_heap_addr)? \
 	  GC_mark_and_push(obj, msp, lim, src) : \
 	  msp)
+
+extern size_t GC_debug_header_size;
+       /* The size of the header added to objects allocated through    */
+       /* the GC_debug routines.                                       */
+       /* Defined as a variable so that client mark procedures don't   */
+       /* need to be recompiled for collector version changes.         */
+#define GC_USR_PTR_FROM_BASE(p) ((void *)((char *)(p) + GC_debug_header_size))
+
+/* And some routines to support creation of new "kinds", e.g. with	*/
+/* custom mark procedures, by language runtimes.			*/
+/* The _inner versions assume the caller holds the allocation lock.	*/
+
+/* Return a new free list array.	*/
+void ** GC_new_free_list(void);
+void ** GC_new_free_list_inner(void);
+
+/* Return a new kind, as specified. */
+int GC_new_kind(void **free_list, GC_word mark_descriptor_template,
+		int add_size_to_descriptor, int clear_new_objects);
+		/* The last two parameters must be zero or one. */
+int GC_new_kind_inner(void **free_list,
+		      GC_word mark_descriptor_template,
+		      int add_size_to_descriptor,
+		      int clear_new_objects);
+
+/* Return a new mark procedure identifier, suitable for use as	*/
+/* the first argument in GC_MAKE_PROC.				*/
+int GC_new_proc(GC_mark_proc);
+int GC_new_proc_inner(GC_mark_proc);
+
+/* Allocate an object of a given kind.  Note that in multithreaded	*/
+/* contexts, this is usually unsafe for kinds that have the descriptor	*/
+/* in the object itself, since there is otherwise a window in which	*/
+/* the descriptor is not correct.  Even in the single-threaded case,	*/
+/* we need to be sure that cleared objects on a free list don't		*/
+/* cause a GC crash if they are accidentally traced.			*/
+void * GC_generic_malloc(size_t lb, int k);
+
+typedef void (*GC_describe_type_fn) (void *p, char *out_buf);
+				/* A procedure which			*/
+				/* produces a human-readable 		*/
+				/* description of the "type" of object	*/
+				/* p into the buffer out_buf of length	*/
+				/* GC_TYPE_DESCR_LEN.  This is used by	*/
+				/* the debug support when printing 	*/
+				/* objects.				*/ 
+				/* These functions should be as robust	*/
+				/* as possible, though we do avoid 	*/
+				/* invoking them on objects on the 	*/
+				/* global free list.			*/
+#	define GC_TYPE_DESCR_LEN 40
+
+void GC_register_describe_type_fn(int kind, GC_describe_type_fn knd);
+				/* Register a describe_type function	*/
+				/* to be used when printing objects	*/
+				/* of a particular kind.		*/
 
 #endif  /* GC_MARK_H */
 

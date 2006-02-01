@@ -1,7 +1,7 @@
 /*
  * cond.c	-- Condition implementation
  * 
- * Copyright © 2004-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 22-May-2004 08:57 (eg)
- * Last file update: 25-Apr-2005 17:09 (eg)
+ * Last file update:  1-Feb-2006 18:13 (eg)
  */
 
 #include "stklos.h"
@@ -181,6 +181,18 @@ DEFINE_PRIMITIVE("condition-type?", ctp, subr1, (SCM obj))
   return MAKE_BOOLEAN(COND_TYPEP(obj));
 }
 
+/* ======================================================================
+ * 	STk_defcond_type ...
+ * ====================================================================== */
+SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module)
+{
+  SCM res, tmp = STk_intern(name);
+  
+  if (parent == STk_false) parent = root_condition;
+  res = STk_make_cond_type(tmp, parent, slots);
+  STk_define_variable(tmp, res, module);
+  return res;
+}
 
 
 /* ======================================================================
@@ -449,10 +461,12 @@ SCM STk_make_C_cond(SCM type, int nargs, ...)
  * 	Init ...
  * ====================================================================== */
 
-#define DEFVAR(x) STk_define_variable(STRUCT_TYPE_NAME(x), x, STk_current_module)
+#define DEFVAR(x, mod) STk_define_variable(STRUCT_TYPE_NAME(x), x, mod)
 
 int STk_init_cond(void)
 {
+  SCM module = STk_current_module;
+
   /* Build the special value SRFI-35 &condition */
   NEWCELL(root_condition, struct_type);
   STRUCT_TYPE_SLOTS(root_condition)   = STk_nil;
@@ -461,24 +475,29 @@ int STk_init_cond(void)
   STRUCT_TYPE_PARENT(root_condition)  = STk_false;
   STRUCT_TYPE_PRINTER(root_condition) = STk_false;
   SET_COND_FLAG(root_condition);
-  DEFVAR(root_condition);
+  DEFVAR(root_condition, module);
 
   /* Build special-values SRFI-35 &message, &serious, &error */
-  DEFCOND(STk_message_condition, "&message", root_condition, 
-	  LIST1(STk_intern("message")));
-  DEFCOND(location_condition, "&location", root_condition,
-	  LIST2(STk_intern("location"), STk_intern("backtrace")));
-  DEFCOND(serious_condition, "&serious", root_condition,  STk_nil);
-  DEFCOND(error_condition, "&error", serious_condition,
-	  LIST1(STk_intern("location")));
-
+  STk_message_condition = STk_defcond_type("&message", root_condition, 
+					   LIST1(STk_intern("message")),
+					   module);
+  location_condition    = STk_defcond_type("&location", root_condition,
+					   LIST2(STk_intern("location"), 
+						 STk_intern("backtrace")),
+					   module);
+  serious_condition     = STk_defcond_type("&serious", root_condition, 
+					   STk_nil,
+					   module);
+  error_condition       = STk_defcond_type("&error", serious_condition,
+					   LIST1(STk_intern("location")),
+					   module);
 
   /* Define STklos &error-message condition (used for error messages) */
   STk_err_mess_condition = STk_make_comp_cond_type(STk_intern("&error-message"),
 						   LIST3(error_condition,
 							 location_condition,
 							 STk_message_condition));
-  DEFVAR(STk_err_mess_condition);
+  DEFVAR(STk_err_mess_condition, module);
 
 
   /* Conditions types */

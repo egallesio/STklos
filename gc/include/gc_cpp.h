@@ -74,7 +74,7 @@ cycle, then that's considered a storage leak, and neither will be
 collectable.  See the interface gc.h for low-level facilities for
 handling such cycles of objects with clean-up.
 
-The collector cannot guarrantee that it will find all inaccessible
+The collector cannot guarantee that it will find all inaccessible
 objects.  In practice, it finds almost all of them.
 
 
@@ -152,6 +152,11 @@ by UseGC.  GC is an alias for UseGC, unless GC_NAME_CONFLICT is defined.
 #   define GC_OPERATOR_NEW_ARRAY
 #endif
 
+#if    ! defined ( __BORLANDC__ )  /* Confuses the Borland compiler. */ \
+    && ! defined ( __sgi )
+#  define GC_PLACEMENT_DELETE
+#endif
+
 enum GCPlacement {UseGC,
 #ifndef GC_NAME_CONFLICT
 		  GC=UseGC,
@@ -165,14 +170,18 @@ class gc {public:
     	/* Must be redefined here, since the other overloadings	*/
     	/* hide the global definition.				*/
     inline void operator delete( void* obj );
-    inline void operator delete( void*, void* );
+#   ifdef GC_PLACEMENT_DELETE  
+      inline void operator delete( void*, void* );
+#   endif
 
 #ifdef GC_OPERATOR_NEW_ARRAY
     inline void* operator new[]( size_t size );
     inline void* operator new[]( size_t size, GCPlacement gcp );
     inline void* operator new[]( size_t size, void *p );
     inline void operator delete[]( void* obj );
-    inline void gc::operator delete[]( void*, void* );
+#   ifdef GC_PLACEMENT_DELETE
+      inline void gc::operator delete[]( void*, void* );
+#   endif
 #endif /* GC_OPERATOR_NEW_ARRAY */
     };    
     /*
@@ -278,7 +287,9 @@ inline void* gc::operator new( size_t size, void *p ) {
 inline void gc::operator delete( void* obj ) {
     GC_FREE( obj );}
     
-inline void gc::operator delete( void*, void* ) {}
+#ifdef GC_PLACEMENT_DELETE
+  inline void gc::operator delete( void*, void* ) {}
+#endif
 
 #ifdef GC_OPERATOR_NEW_ARRAY
 
@@ -294,13 +305,15 @@ inline void* gc::operator new[]( size_t size, void *p ) {
 inline void gc::operator delete[]( void* obj ) {
     gc::operator delete( obj );}
 
-inline void gc::operator delete[]( void*, void* ) {}
+#ifdef GC_PLACEMENT_DELETE
+  inline void gc::operator delete[]( void*, void* ) {}
+#endif
     
 #endif /* GC_OPERATOR_NEW_ARRAY */
 
 
 inline gc_cleanup::~gc_cleanup() {
-    GC_REGISTER_FINALIZER_IGNORE_SELF( GC_base(this), 0, 0, 0, 0 );}
+    GC_register_finalizer_ignore_self( GC_base(this), 0, 0, 0, 0 );}
 
 inline void gc_cleanup::cleanup( void* obj, void* displ ) {
     ((gc_cleanup*) ((char*) obj + (ptrdiff_t) displ))->~gc_cleanup();}

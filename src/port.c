@@ -1,7 +1,7 @@
 /*
  *  p o r t . c			-- ports implementation
  *
- * Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,13 +20,9 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 18-Aug-2005 00:17 (eg)
+ * Last file update:  1-Feb-2006 17:11 (eg)
  *
  */
-
-#ifdef STK_DEBUG
-#  include <syslog.h>
-#endif
 
 #include <ctype.h>
 #include "stklos.h"
@@ -1286,33 +1282,18 @@ DEFINE_PRIMITIVE("port-rewind", port_rewind, subr1, (SCM port))
   return STk_void;
 }
 
-#ifdef STK_DEBUG
-/*
-<doc EXT logger
- * (logger str obj ...)
- * 
- * TODO
-doc>
-*/
-DEFINE_PRIMITIVE("logger", scheme_log, vsubr, (int argc, SCM *argv))
-{
-  SCM msg;
-  
-  msg = internal_format(argc, argv, TRUE);
-  syslog(LOG_ERR, "%s", STRING_CHARS(msg));
-  return STk_void;
-}
-#endif 
-
-
 /*===========================================================================*\
  * 
  * Initializations
  * 
 \*===========================================================================*/
-
 static void initialize_io_conditions(void)
 {
+  SCM module = STk_current_module;
+
+#define DEFCOND(x, name, parent, slots)			\
+  x = STk_defcond_type(name, parent, slots, module)
+
   DEFCOND(io_error, "&i/o-error", STk_err_mess_condition, STk_nil);
 
   DEFCOND(io_port_error, "&i/o-port-error", io_error, LIST1(STk_intern("port")));
@@ -1400,12 +1381,6 @@ int STk_init_port(void)
   ADD_PRIMITIVE(port_position);
   ADD_PRIMITIVE(port_seek);
   ADD_PRIMITIVE(port_rewind);
-
-#ifdef STK_DEBUG
-  /* Initialize logging facility */
-  openlog("**STklos**", LOG_PID | LOG_CONS, LOG_USER);
-  ADD_PRIMITIVE(scheme_log);
-#endif
 
   return STk_init_fport() && 
     	 STk_init_sport() &&

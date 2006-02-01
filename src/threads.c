@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 27-Jan-2006 09:12 (eg)
+ * Last file update:  1-Feb-2006 18:07 (eg)
  */
 
 
@@ -31,6 +31,8 @@
 #include <unistd.h>
 #include "stklos.h"
 #include "vm.h"
+
+static SCM primordial, thread_terminated_cond;
 
 
 enum thread_state { th_new, th_runnable, th_terminated, th_blocked};
@@ -115,7 +117,7 @@ static SCM do_make_thread(SCM thunk, char *name)
   THREAD_DYNWIND(z)   = STk_nil;
   THREAD_STATE(z)     = th_new;
 
-  // FIX: lock 
+  // FIX: lock
   all_threads = STk_cons(z, all_threads); /* For the GC */
   return z;
 }
@@ -145,7 +147,6 @@ DEFINE_PRIMITIVE("make-thread", make_thread, subr12, (SCM thunk, SCM name))
 
 DEFINE_PRIMITIVE("thread?", threadp, subr1, (SCM obj))
 {
-  STk_debug("===> %x", STk_get_current_vm());
   return MAKE_BOOLEAN(THREADP(obj));
 }
 
@@ -189,10 +190,10 @@ static void * start_scheme_thread(void *arg)
   THREAD_VM(thr) = vm;
   vm->scheme_thread = thr;
 
-  STk_debug("Ma VM = %x", THREAD_VM(thr), STk_get_current_vm());
-
   THREAD_RESULT(thr) = STk_C_apply(THREAD_THUNK(thr), 0);
+  STk_debug("On termine normallement la thread ~S", thr);
   terminate_scheme_thread(thr);
+  return NULL;
 }
 
 
@@ -226,15 +227,18 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
 {
   if (!THREADP(thr)) error_bad_thread(thr);
 
+  
   if (THREAD_STATE(thr) != th_terminated) {
     terminate_scheme_thread(thr);
+    if (thr == primordial) {
+      /* Terminate the primordial thread exits the program */
+      STk_quit(0);
+    }
     THREAD_EXCEPTION(thr) = STk_nil;		//FIX:
     pthread_cancel(THREAD_PTHREAD(thr));
   }
   return STk_void;
 }
-
-
 
 
 DEFINE_PRIMITIVE("all-threads", all_threads, subr0, (void))
@@ -281,21 +285,23 @@ static struct extended_type_descr xtype_thread = {
 int STk_init_threads(int stack_size)
 {
   vm_thread_t *vm = STk_allocate_vm(stack_size);
-  SCM primordial;
 
   /* Thread Type declaration */
   DEFINE_XTYPE(thread, &xtype_thread);
-
+  
+  /* Define the key to access the thead specific VM */ 
   initialize_vm_key();
   pthread_setspecific(vm_key, vm);
+
+  /* Define the threads exceptions */
+  //  thread_terminated_cond =  STk_defcond_type("&thread-terminated", STk_false,
+  //					     STk_nil, STk_current_module);
   
   /* Wrap the main thread in a thread called "primordial" */
   primordial = do_make_thread(STk_false, STk_Cstring2string("primordial"));
   THREAD_STATE(primordial) = th_runnable;
   THREAD_VM(primordial)    = vm;
   vm->scheme_thread        = primordial;
-
-  // all_threads = STk_cons(primordial, all_threads);
 
   /* Thread primitives */
   ADD_PRIMITIVE(current_thread);

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  5-Jan-2000 12:17 (eg)
- * Last file update: 26-Jan-2006 19:58 (eg)
+ * Last file update:  1-Feb-2006 18:02 (eg)
  */
 
 

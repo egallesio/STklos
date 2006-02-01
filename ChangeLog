@@ -1,3 +1,22 @@
+2006-02-01  Erick Gallesio  <eg@essi.fr>
+
+	* src/stklos.h:
+	* src/read.c:
+	* src/port.c:
+	* src/cond.c (STk_defcond_type): Use a function instead of the
+	macro DEFCOND.
+
+2006-01-31  Erick Gallesio  <eg@essi.fr>
+
+	* src/port.c: Deleted the ssylog facility since it is avialable as
+	an extension now
+
+2006-01-30  Erick Gallesio  <eg@essi.fr>
+
+	* src/stklos.h: Modifications for newer versions of the GC
+	
+	* src/stklos.c (main): Added call to GC_init for people using gc7.xx
+
 2006-01-23  Erick Gallesio  <eg@essi.fr>
 
 	* src/vm.c (apply): apply is now inlined in the VM.

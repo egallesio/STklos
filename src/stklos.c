@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 20-Jan-2006 10:03 (eg)
+ * Last file update:  1-Feb-2006 13:41 (eg)
  */
 
 #include <stklos.h>
@@ -142,21 +142,18 @@ int main(int argc, char *argv[])
   int ret;
   char *argv0 = *argv;
 
-#ifdef STK_DEBUG
-  STk_log_file = fopen(STK_LOG_FILE, "w");
-  if (!STk_log_file) {
-    fprintf(STk_log_file, "Cannot open log file %s\n", STK_LOG_FILE);
-    exit(1);
-  }
-  setvbuf(STk_log_file, NULL, _IONBF, 0);
+  /* Initialize the Garbage Collector */
+#if (defined(__CYGWIN32__) &&  defined(GC_DLL)) || defined(_AIX)
+# error GC problem
 #endif
+  STk_gc_init();
 
   /* Process command arguments */
   ret = process_program_arguments(argc, argv);
   argc -= ret;
   argv += ret;
   
-  /* Hack: to give the illusion that ther is no VM under the scene */
+  /* Hack: to give the illusion that there is no VM under the scene */
   if (*program_file) argv0 = program_file;
 
   /* Initialize the library */

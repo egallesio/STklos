@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 26-Jan-2006 19:57 (eg)
+ * Last file update: 31-Jan-2006 13:48 (eg)
  */
 
 // INLINER values
@@ -37,7 +37,7 @@
 #include "struct.h"
 
 
-/* #define DEBUG_VM */
+#define DEBUG_VM
 /* #define STAT_VM  */
 
 #ifdef STAT_VM 
@@ -47,7 +47,7 @@ static int cpt_inst[NB_VM_INSTR];
 #endif
 
 #ifdef DEBUG_VM
-static int debug_level = 2;	/* 0 is quiet, 1, 2, ... are more verbose */
+static int debug_level = 0;	/* 0 is quiet, 1, 2, ... are more verbose */
 #endif
 
 
@@ -702,6 +702,10 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int argc, SCM *argv))
    * This function is just a placeholder for debugging the VM. It's body is 
    * changed depending of the current bug to track 
    */
+  int x;
+  vm_thread_t *vm = STk_get_current_vm();
+
+  printf("C stack %p, Scheme %p\n", &x, vm->sp);
   return STk_void;
 }
 #endif 

@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <setjmp.h>
 #include <string.h>
-#include "private/gcconfig.h"
+#include "private/gc_priv.h"
 
 #ifdef OS2
 /* GETPAGESIZE() is set to getpagesize() by default, but that	*/
@@ -57,7 +57,7 @@ int * nested_sp()
     return(&dummy);
 }
 
-main()
+int main()
 {
 	int dummy;
 	long ps = GETPAGESIZE();
@@ -82,15 +82,21 @@ main()
 	printf("A good guess for ALIGNMENT on this machine is %ld.\n",
 	       (unsigned long)(&(a.a_b))-(unsigned long)(&a));
 	
+	printf("The following is a very dubious test of one root marking"
+	       " strategy.\n");
+	printf("Results may not be accurate/useful:\n");
 	/* Encourage the compiler to keep x in a callee-save register */
 	x = 2*x-1;
 	printf("");
 	x = 2*x-1;
 	setjmp(b);
 	if (y == 1) {
+	    /* FIXME: I'm nto sure how accurate this is now that we	*/
+	    /* mostly use getcontext().					*/
 	    if (x == 2) {
 		printf("Generic mark_regs code probably wont work\n");
-#		if defined(SPARC) || defined(RS6000) || defined(VAX) || defined(MIPS) || defined(M68K) || defined(I386) || defined(NS32K) || defined(RT)
+#		if defined(SPARC) || defined(M68K) || defined(I386) \
+		   || defined(USE_ASM_PUSH_REGS)
 		    printf("Assembly code supplied\n");
 #		else
 		    printf("Need assembly code\n");
@@ -104,6 +110,27 @@ main()
 	y++;
 	x = 2;
 	if (y == 1) longjmp(b,1);
+	printf("Some GC internal configuration stuff: \n");
+	printf("\tWORDSZ = %d, ALIGNMENT = %d, GC_GRANULE_BYTES = %d\n",
+	       WORDSZ, ALIGNMENT, GC_GRANULE_BYTES);
+	printf("\tUsing one mark ");
+#       if defined(USE_MARK_BYTES)
+	  printf("byte");
+#	elif defined(USE_MARK_BITS)
+	  printf("bit");
+#       endif
+	printf(" per ");
+#       if defined(MARK_BIT_PER_OBJ)
+	  printf("object.\n");
+#	elif defined(MARK_BIT_PER_GRANULE)
+	  printf("granule.\n");
+#	endif
+# 	ifdef THREAD_LOCAL_ALLOC
+	  printf("Thread local allocation enabled.\n");
+#	endif
+#	ifdef PARALLEL_MARK
+	  printf("Parallel marking enabled.\n");
+#	endif
 	return(0);
 }
 

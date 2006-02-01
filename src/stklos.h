@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 26-Jan-2006 19:54 (eg)
+ * Last file update:  1-Feb-2006 17:12 (eg)
  */
 
 #ifndef STKLOS_H
@@ -31,6 +31,8 @@
 extern "C" 
 {
 #endif
+
+#define STK_USE_PTHREADS 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,7 +45,7 @@ extern "C"
 #include <errno.h>
 #include <setjmp.h>
 #include <memory.h>
-
+#include <gc/gc.h> 
 
 #include "stklosconf.h"
 #include "extraconf.h"
@@ -95,31 +97,22 @@ extern "C"
    */
 
   /* GC interface. *** DON'T USE IT DIRECTLY *** */
-
-#define GC_API extern 
-# if defined(__STDC__) || defined(__cplusplus)
-#   define GC_PROTO(args) args
-    typedef void * GC_PTR;
-#   define GC_CONST const
-# else
-#   define GC_PROTO(args) ()
-    typedef char * GC_PTR;
-#   define GC_CONST
-#  endif
-
-typedef void (*GC_finalization_proc)
-  	GC_PROTO((GC_PTR obj, GC_PTR client_data));
-
-GC_API GC_PTR GC_malloc GC_PROTO((size_t size_in_bytes));
-GC_API GC_PTR GC_malloc_atomic GC_PROTO((size_t size_in_bytes));
-GC_API GC_PTR GC_realloc GC_PROTO((GC_PTR old_object, size_t new_size_in_bytes));
-GC_API void GC_free GC_PROTO((GC_PTR object_addr));
-GC_API void GC_register_finalizer 
-	GC_PROTO((GC_PTR obj, GC_finalization_proc fn, GC_PTR cd,
-		  GC_finalization_proc *ofn, GC_PTR *ocd));
-GC_API void GC_gcollect GC_PROTO((void));
-GC_API char *GC_stackbottom;
-
+// 
+// #define GC_API extern 
+// 
+// typedef void (*GC_finalization_proc) (void * obj, void * client_data);
+// 
+// GC_API void * GC_malloc(size_t size_in_bytes);
+// GC_API void * GC_malloc_atomic(size_t size_in_bytes);
+// GC_API void * GC_realloc(void * old_object, size_t new_size_in_bytes);
+// GC_API void GC_free(void * object_addr);
+// 
+// GC_API void GC_register_finalizer(void * obj, GC_finalization_proc fn,
+// 				  void * cd, GC_finalization_proc *ofn,
+// 				  void * *ocd);
+// 
+// GC_API void GC_gcollect(void);
+// GC_API void GC_init(void);
 
   /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
@@ -127,9 +120,10 @@ GC_API char *GC_stackbottom;
 #define STk_must_malloc_atomic(size)	GC_malloc_atomic(size)
 #define STk_must_realloc(ptr, size) 	GC_realloc((ptr), (size))
 #define STk_free(ptr)			GC_free(ptr)
-#define STk_register_finalizer(ptr, f)  GC_register_finalizer((GC_PTR) (ptr), \
+#define STk_register_finalizer(ptr, f)  GC_register_finalizer((void *) (ptr), \
 					    (GC_finalization_proc)(f), 0, 0, 0)
 #define STk_gc()			GC_gcollect()
+#define STk_gc_init()			GC_init()
 
 /*===========================================================================*\
  * 
@@ -311,13 +305,7 @@ SCM STk_make_C_cond(SCM type, int nargs, ...);
 EXTERN_PRIMITIVE("make-condition-type", make_cond_type, subr3, 
 		 (SCM name, SCM parent, SCM slots));
 
-#define DEFCOND(x, name, parent, slots) {		\
-    SCM tmp = STk_intern(name); 			\
-							\
-    x = STk_make_cond_type(tmp, parent, slots);		\
-    STk_define_variable(tmp, x, STk_current_module);	\
-}
-
+SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module);
 
 int STk_init_cond(void);
 
@@ -1171,11 +1159,6 @@ extern STk_instr STk_boot_code[];
 
 
 /* Misc */
-#ifdef STK_DEBUG
-#define STK_LOG_FILE "/tmp/STklos.log"
-FILE * STk_log_file;
-#endif
-
 
 #ifdef __cplusplus
 }
