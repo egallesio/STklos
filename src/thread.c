@@ -1,5 +1,5 @@
 /*
- * threads.c			-- Threads support in STklos
+ * thread.c			-- Threads support in STklos
  * 
  * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  1-Feb-2006 18:07 (eg)
+ * Last file update:  3-Feb-2006 11:06 (eg)
  */
 
 
@@ -32,7 +32,7 @@
 #include "stklos.h"
 #include "vm.h"
 
-static SCM primordial, thread_terminated_cond;
+static SCM primordial, cond_thread_terminated;
 
 
 enum thread_state { th_new, th_runnable, th_terminated, th_blocked};
@@ -44,11 +44,11 @@ struct thread_obj {
   SCM specific;
   SCM end_result;
   SCM end_exception;
-  SCM mutexes;
-  SCM dynwind;
   enum thread_state state;
   vm_thread_t *vm;
   pthread_t pthread;
+  pthread_mutex_t mymutex;
+  pthread_cond_t  mycondv;
 };
 
 
@@ -58,11 +58,11 @@ struct thread_obj {
 #define THREAD_SPECIFIC(p)	(((struct thread_obj *) (p))->specific)
 #define THREAD_RESULT(p)	(((struct thread_obj *) (p))->end_result)
 #define THREAD_EXCEPTION(p)	(((struct thread_obj *) (p))->end_exception)
-#define THREAD_MUTEXES(p)	(((struct thread_obj *) (p))->mutexes)
-#define THREAD_DYNWIND(p)	(((struct thread_obj *) (p))->dynwind)
 #define THREAD_STATE(p)		(((struct thread_obj *) (p))->state)
 #define THREAD_VM(p)		(((struct thread_obj *) (p))->vm)
 #define THREAD_PTHREAD(p)	(((struct thread_obj *) (p))->pthread)
+#define THREAD_MYMUTEX(p)	(((struct thread_obj *) (p))->mymutex)
+#define THREAD_MYCONDV(p)	(((struct thread_obj *) (p))->mycondv)
 
 static SCM all_threads = STk_nil;
 
@@ -102,6 +102,45 @@ vm_thread_t *STk_get_current_vm(void)
 
 /* ====================================================================== */
 
+static void terminate_scheme_thread(void *arg)
+{
+  SCM thr = (SCM) arg;
+
+  STk_debug("Cleaning thread thr");
+
+  pthread_mutex_lock(&THREAD_MYMUTEX(thr));
+  THREAD_STATE(thr)  = th_terminated;
+
+  /* signal the death of this thread to the ones waiting it */
+  pthread_cond_broadcast(&THREAD_MYCONDV(thr));
+  pthread_mutex_unlock(&THREAD_MYMUTEX(thr));
+}
+
+
+static void *start_scheme_thread(void *arg)
+{
+  volatile SCM thr = (SCM) arg;
+  vm_thread_t *vm;
+  SCM res;
+
+  vm = THREAD_VM(thr) = STk_allocate_vm(5000);			// FIX:
+  vm->scheme_thread = thr;  
+  pthread_setspecific(vm_key, vm);
+
+  pthread_cleanup_push(terminate_scheme_thread, thr);
+  
+  res = STk_C_apply(THREAD_THUNK(thr), 0);
+  if (THREAD_EXCEPTION(thr) == STk_false) {
+    THREAD_RESULT(thr) = res;
+  }
+  pthread_cleanup_pop(1);
+  return NULL;
+}
+
+
+
+/* ====================================================================== */
+
 static SCM do_make_thread(SCM thunk, char *name)
 {
   SCM z;
@@ -113,12 +152,10 @@ static SCM do_make_thread(SCM thunk, char *name)
   THREAD_SPECIFIC(z)  = STk_void;
   THREAD_RESULT(z)    = STk_void;
   THREAD_EXCEPTION(z) = STk_false;
-  THREAD_MUTEXES(z)   = STk_nil;
-  THREAD_DYNWIND(z)   = STk_nil;
   THREAD_STATE(z)     = th_new;
 
   // FIX: lock
-  all_threads = STk_cons(z, all_threads); /* For the GC */
+  //  all_threads = STk_cons(z, all_threads); /* For the GC */
   return z;
 }
 
@@ -128,7 +165,7 @@ DEFINE_PRIMITIVE("current-thread", current_thread, subr0, (void))
   return vm->scheme_thread;
 }
 
-DEFINE_PRIMITIVE("make-thread", make_thread, subr12, (SCM thunk, SCM name))
+DEFINE_PRIMITIVE("%make-thread", make_thread, subr12, (SCM thunk, SCM name))
 {
   SCM z;
 
@@ -156,6 +193,35 @@ DEFINE_PRIMITIVE("thread-name", thread_name, subr1, (SCM thr))
   return THREAD_NAME(thr);
 }
 
+DEFINE_PRIMITIVE("%thread-end-exception", thread_end_exception, subr1, (SCM thr))
+{
+  if (!THREADP(thr)) error_bad_thread(thr);
+  return THREAD_EXCEPTION(thr);
+}
+
+DEFINE_PRIMITIVE("%thread-end-exception-set!", thread_end_exception_set, 
+		 subr2, (SCM thr, SCM val))
+{
+  if (!THREADP(thr)) error_bad_thread(thr);
+  THREAD_EXCEPTION(thr) = val;
+  return STk_void;
+}
+
+DEFINE_PRIMITIVE("%thread-end-result", thread_end_result, subr1, (SCM thr))
+{
+  if (!THREADP(thr)) error_bad_thread(thr);
+  return THREAD_RESULT(thr);
+}
+
+DEFINE_PRIMITIVE("%thread-end-result-set!", thread_end_result_set, 
+		 subr2, (SCM thr, SCM val))
+{
+  if (!THREADP(thr)) error_bad_thread(thr);
+  THREAD_RESULT(thr) = val;
+  return STk_void;
+}
+
+
 DEFINE_PRIMITIVE("thread-specific", thread_specific, subr1, (SCM thr))
 {
   if (! THREADP(thr)) error_bad_thread(thr);
@@ -171,42 +237,29 @@ DEFINE_PRIMITIVE("thread-specific-set!", thread_specific_set, subr2,
 }
 
 
-static void terminate_scheme_thread(SCM thr)
-{
-  THREAD_STATE(thr)  = th_terminated;
-  // ...........................
-}
-
-
-
-static void * start_scheme_thread(void *arg)
-{
-  SCM thr = (SCM) arg;
-  vm_thread_t *vm;
-
-  vm = STk_allocate_vm(5000);			// FIX:
-  
-  pthread_setspecific(vm_key, vm);
-  THREAD_VM(thr) = vm;
-  vm->scheme_thread = thr;
-
-  THREAD_RESULT(thr) = STk_C_apply(THREAD_THUNK(thr), 0);
-  STk_debug("On termine normallement la thread ~S", thr);
-  terminate_scheme_thread(thr);
-  return NULL;
-}
 
 
 DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
 {
+  pthread_attr_t attr;
+  
   if (!THREADP(thr)) error_bad_thread(thr);
   if (THREAD_STATE(thr) != th_new) 
     STk_error("thread has already been started ~S", thr);
 
   THREAD_STATE(thr) = th_runnable;
 
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, TRUE);
+  pthread_mutex_init(&THREAD_MYMUTEX(thr), NULL);
+  pthread_cond_init(&THREAD_MYCONDV(thr), NULL);
+
+  // pthread_mutex_lock(&THREAD_MYMUTEX(thr));
+
   if (pthread_create(&THREAD_PTHREAD(thr), NULL, start_scheme_thread, thr))
     STk_error("cannot start thread ~S", thr);
+
+  pthread_attr_destroy(&attr);
 
   return thr;
 }
@@ -227,25 +280,52 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
 {
   if (!THREADP(thr)) error_bad_thread(thr);
 
-  
   if (THREAD_STATE(thr) != th_terminated) {
     terminate_scheme_thread(thr);
     if (thr == primordial) {
       /* Terminate the primordial thread exits the program */
       STk_quit(0);
     }
-    THREAD_EXCEPTION(thr) = STk_nil;		//FIX:
+    THREAD_EXCEPTION(thr) = STk_make_C_cond(cond_thread_terminated, 0);
     pthread_cancel(THREAD_PTHREAD(thr));
   }
   return STk_void;
 }
 
 
-DEFINE_PRIMITIVE("all-threads", all_threads, subr0, (void))
+DEFINE_PRIMITIVE("%thread-join!", thread_join, subr4, (SCM thr, SCM tm1, SCM tm2,
+						       SCM use_time))
 {
-  /* Use reverse to give a (time creation ordered) copy of our list */
-  return STk_reverse(all_threads);
+  struct timespec ts;
+  int overflow;
+  time_t t1 = STk_integer2uint32(tm1, &overflow);
+  long   t2 = STk_integer2uint32(tm2, &overflow);
+  SCM res = STk_false;
+
+  if (!THREADP(thr)) error_bad_thread(thr);
+  
+  ts.tv_sec  = t1;
+  ts.tv_nsec = t2;
+
+  pthread_mutex_lock(&THREAD_MYMUTEX(thr));
+  while (THREAD_STATE(thr) != th_terminated) {
+    STk_debug("On est dans la boucle avec %d", THREAD_STATE(thr));
+    if (use_time != STk_false) {
+      int n = pthread_cond_timedwait(&THREAD_MYCONDV(thr), 
+				     &THREAD_MYMUTEX(thr),
+				     &ts);
+      if (n == ETIMEDOUT) { STk_debug("TIMEOUT"); res = STk_true; break; }
+    }
+    else 
+      pthread_cond_wait(&THREAD_MYCONDV(thr), &THREAD_MYMUTEX(thr));
+  }
+  pthread_mutex_unlock(&THREAD_MYMUTEX(thr));
+  STk_debug("Fin de l'attente");
+  return res;
 }
+
+
+
 
 
 
@@ -294,8 +374,8 @@ int STk_init_threads(int stack_size)
   pthread_setspecific(vm_key, vm);
 
   /* Define the threads exceptions */
-  //  thread_terminated_cond =  STk_defcond_type("&thread-terminated", STk_false,
-  //					     STk_nil, STk_current_module);
+  cond_thread_terminated =  STk_defcond_type("&thread-terminated", STk_false,
+					     STk_nil, STk_current_module);
   
   /* Wrap the main thread in a thread called "primordial" */
   primordial = do_make_thread(STk_false, STk_Cstring2string("primordial"));
@@ -308,14 +388,17 @@ int STk_init_threads(int stack_size)
   ADD_PRIMITIVE(make_thread);
   ADD_PRIMITIVE(threadp);
   ADD_PRIMITIVE(thread_name);
+  ADD_PRIMITIVE(thread_end_exception);
+  ADD_PRIMITIVE(thread_end_exception_set);
+  ADD_PRIMITIVE(thread_end_result);
+  ADD_PRIMITIVE(thread_end_result_set);
   ADD_PRIMITIVE(thread_specific);
   ADD_PRIMITIVE(thread_specific_set);
   ADD_PRIMITIVE(thread_start);
   ADD_PRIMITIVE(thread_yield);
   ADD_PRIMITIVE(thread_terminate);
-
-  
-  ADD_PRIMITIVE(all_threads);
+  ADD_PRIMITIVE(thread_join);
 
   return TRUE;
 }
+

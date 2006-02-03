@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  1-Feb-2006 17:12 (eg)
+ * Last file update:  3-Feb-2006 10:45 (eg)
  */
 
 #ifndef STKLOS_H
@@ -144,7 +144,8 @@ typedef enum {
   tc_subr23, tc_vsubr, tc_apply, tc_vector, tc_uvector,			/* 20 */
   tc_hash_table, tc_port, tc_frame, tc_next_method, tc_promise, 	/* 25 */
   tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,	/* 30 */
-  tc_socket, tc_struct_type, tc_struct, tc_thread, 	 		/* 35 */
+  tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex, 		/* 35 */
+  tc_condv,								/* 40 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -1136,7 +1137,7 @@ SCM STk_load_bcode_file(SCM f);
 int STk_load_boot(char *s);
 int STk_boot_from_C(void);
 
-int STk_init_vm(int stack_size);
+int STk_init_vm();
 
 
 /*****************************************************************************/

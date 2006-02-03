@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 31-Jan-2006 13:48 (eg)
+ * Last file update:  2-Feb-2006 22:25 (eg)
  */
 
 // INLINER values
@@ -1716,7 +1716,7 @@ int STk_boot_from_C(void)
   return 0;
 }
 
-int STk_init_vm(int stack_size)
+int STk_init_vm()
 {
   DEFINE_XTYPE(continuation, &xtype_continuation);
 

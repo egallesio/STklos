@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 23-Jan-2006 12:15 (eg)
+# Last file update:  2-Feb-2006 21:59 (eg)
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -131,10 +131,10 @@ DOCDB = DOCDB
 
 stklos_SOURCES = boolean.c boot.c char.c cond.c dynload.c env.c error.c \
  extend.c fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
- list.c misc.c number.c object.c parameter.c path.c port.c print.c \
+ list.c misc.c mutex.c number.c object.c parameter.c path.c port.c print.c \
  proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
- symbol.c system.c threads.c uvector.c vector.c vm.c vport.c
+ symbol.c system.c thread.c uvector.c vector.c vm.c vport.c
 
 
 ### # The STklos library
@@ -181,14 +181,15 @@ am_stklos_OBJECTS = boolean.$(OBJEXT) boot.$(OBJEXT) char.$(OBJEXT) \
 	cond.$(OBJEXT) dynload.$(OBJEXT) env.$(OBJEXT) error.$(OBJEXT) \
 	extend.$(OBJEXT) fport.$(OBJEXT) gnu-getopt.$(OBJEXT) \
 	gnu-glob.$(OBJEXT) hash.$(OBJEXT) keyword.$(OBJEXT) \
-	lib.$(OBJEXT) list.$(OBJEXT) misc.$(OBJEXT) number.$(OBJEXT) \
-	object.$(OBJEXT) parameter.$(OBJEXT) path.$(OBJEXT) \
-	port.$(OBJEXT) print.$(OBJEXT) proc.$(OBJEXT) process.$(OBJEXT) \
-	promise.$(OBJEXT) read.$(OBJEXT) regexp.$(OBJEXT) \
-	signal.$(OBJEXT) sio.$(OBJEXT) socket.$(OBJEXT) sport.$(OBJEXT) \
-	stklos.$(OBJEXT) str.$(OBJEXT) struct.$(OBJEXT) \
-	symbol.$(OBJEXT) system.$(OBJEXT) threads.$(OBJEXT) \
-	uvector.$(OBJEXT) vector.$(OBJEXT) vm.$(OBJEXT) vport.$(OBJEXT)
+	lib.$(OBJEXT) list.$(OBJEXT) misc.$(OBJEXT) mutex.$(OBJEXT) \
+	number.$(OBJEXT) object.$(OBJEXT) parameter.$(OBJEXT) \
+	path.$(OBJEXT) port.$(OBJEXT) print.$(OBJEXT) proc.$(OBJEXT) \
+	process.$(OBJEXT) promise.$(OBJEXT) read.$(OBJEXT) \
+	regexp.$(OBJEXT) signal.$(OBJEXT) sio.$(OBJEXT) \
+	socket.$(OBJEXT) sport.$(OBJEXT) stklos.$(OBJEXT) str.$(OBJEXT) \
+	struct.$(OBJEXT) symbol.$(OBJEXT) system.$(OBJEXT) \
+	thread.$(OBJEXT) uvector.$(OBJEXT) vector.$(OBJEXT) \
+	vm.$(OBJEXT) vport.$(OBJEXT)
 stklos_OBJECTS = $(am_stklos_OBJECTS)
 stklos_DEPENDENCIES =
 
@@ -207,19 +208,19 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/gnu-glob.Po ./$(DEPDIR)/hash.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/keyword.Po ./$(DEPDIR)/lib.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/list.Po ./$(DEPDIR)/misc.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/number.Po ./$(DEPDIR)/object.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/parameter.Po ./$(DEPDIR)/path.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/port.Po ./$(DEPDIR)/print.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/proc.Po ./$(DEPDIR)/process.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/promise.Po ./$(DEPDIR)/read.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/regexp.Po ./$(DEPDIR)/signal.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sio.Po ./$(DEPDIR)/socket.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sport.Po ./$(DEPDIR)/stklos.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/str.Po ./$(DEPDIR)/struct.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/symbol.Po ./$(DEPDIR)/system.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/threads.Po ./$(DEPDIR)/uvector.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/vector.Po ./$(DEPDIR)/vm.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/vport.Po
+@AMDEP_TRUE@	./$(DEPDIR)/mutex.Po ./$(DEPDIR)/number.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/object.Po ./$(DEPDIR)/parameter.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/path.Po ./$(DEPDIR)/port.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/print.Po ./$(DEPDIR)/proc.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/process.Po ./$(DEPDIR)/promise.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/read.Po ./$(DEPDIR)/regexp.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/signal.Po ./$(DEPDIR)/sio.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/socket.Po ./$(DEPDIR)/sport.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/stklos.Po ./$(DEPDIR)/str.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/struct.Po ./$(DEPDIR)/symbol.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/system.Po ./$(DEPDIR)/thread.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/uvector.Po ./$(DEPDIR)/vector.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/vm.Po ./$(DEPDIR)/vport.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -310,6 +311,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/number.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameter.Po@am__quote@
@@ -330,7 +332,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symbol.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/system.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threads.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/uvector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vm.Po@am__quote@
