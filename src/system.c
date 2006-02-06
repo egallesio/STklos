@@ -2,7 +2,7 @@
  *
  * s y s t e m . c				-- System relative primitives
  *
- * Copyright © 1994-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  6-Jun-2005 22:16 (eg)
+ * Last file update:  3-Feb-2006 17:12 (eg)
  */
 
 #include <unistd.h>
@@ -40,10 +40,8 @@
 #endif
 
 
-
-
 static SCM exit_procs = STk_nil; /* atexit functions */
-static SCM date_type;
+static SCM date_type, time_type;
 
 /******************************************************************************
  *
@@ -719,40 +717,39 @@ DEFINE_PRIMITIVE("clock", clock, subr0, (void))
 }
 
 /*
-<doc EXT current-time 
- * (current-time)
+<doc EXT current-second 
+ * (current-second)
  *
  * Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970), 
  * measured in seconds.
 doc>
  */
-DEFINE_PRIMITIVE("current-time", current_time, subr0, (void))
+DEFINE_PRIMITIVE("current-second", current_second, subr0, (void))
 {
   return STk_ulong2integer(time(NULL));
 }
 
 /*
-<doc EXT full-current-time
- * (full-current-time)
+<doc current-time
+ * (current-time)
  * 
- * Returns the time of the day as a pair where 
- * ,(itemize
- * (item [the  first element is the time since the Epoch 
- * (that is 00:00:00 UTC, January 1, 1970),  measured in seconds. ])
- * 
- * (item [the second element is the number of microseconds in the given 
- * second.])
- * )
+ * Returns a time object corresponding to the current time.
 doc>
 */
-DEFINE_PRIMITIVE("full-current-time", full_current_time, subr0, (void))
+DEFINE_PRIMITIVE("current-time", current_time, subr0, (void))
 {
   struct timeval now;
-  gettimeofday(&now, NULL); 
+  SCM argv[3];
 
-  return STk_cons(STk_long2integer(now.tv_sec),
-		  STk_long2integer(now.tv_usec));
+  gettimeofday(&now, NULL); 
+  
+  argv[2] = time_type;
+  argv[1] =  STk_long2integer(now.tv_sec);
+  argv[0] =  STk_long2integer(now.tv_usec);
+  return STk_make_struct(3, &argv[2]);
 }
+
+
 
 /*
 <doc EXT sleep
@@ -788,7 +785,7 @@ DEFINE_PRIMITIVE("sleep", sleep, subr1, (SCM ms))
  * to a date.
 doc>
 */ 
-DEFINE_PRIMITIVE("seconds->date", seconds2date, subr1, (SCM seconds))
+DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
 {
   int overflow; 
   SCM argv[11];
@@ -847,7 +844,7 @@ DEFINE_PRIMITIVE("date->seconds", date2seconds, subr1, (SCM date))
   n = mktime(&t);
   if (n == (time_t)(-1)) STk_error("cannot convert date to seconds (~S)", date);
   
-  return STk_ulong2integer((long) n);
+  return STk_double2real((double) n);
 }
 
 
@@ -1030,7 +1027,6 @@ DEFINE_PRIMITIVE("%chmod", change_mode, subr2, (SCM file, SCM value))
 
 int STk_init_system(void)
 {
-
   /* Create the system-date structure-type */
   date_type =  STk_make_struct_type(STk_intern("%date"),
 				    STk_false,
@@ -1046,11 +1042,18 @@ int STk_init_system(void)
 					   STk_intern("tz")));
   STk_define_variable(STk_intern("%date"), date_type, STk_current_module);
 
+  /* Create the time structure-type */
+  time_type =  STk_make_struct_type(STk_intern("%time"),
+				    STk_false,
+				    LIST2(STk_intern("second"),
+					  STk_intern("microsecond")));
+  STk_define_variable(STk_intern("%time"), time_type, STk_current_module);
+
   /* Declare primitives */
   ADD_PRIMITIVE(clock);
   ADD_PRIMITIVE(date);
+  ADD_PRIMITIVE(current_second);
   ADD_PRIMITIVE(current_time);
-  ADD_PRIMITIVE(full_current_time);
   ADD_PRIMITIVE(sleep);
   ADD_PRIMITIVE(seconds2date);
   ADD_PRIMITIVE(date2seconds);

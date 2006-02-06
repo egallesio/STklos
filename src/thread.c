@@ -21,49 +21,20 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  3-Feb-2006 11:06 (eg)
+ * Last file update:  5-Feb-2006 21:52 (eg)
  */
 
 
 #define _REENTRANT 1
 #define GC_LINUX_THREADS 1
-#include <pthread.h>
+
 #include <unistd.h>
 #include "stklos.h"
 #include "vm.h"
+#include "thread.h"
 
-static SCM primordial, cond_thread_terminated;
-
-
-enum thread_state { th_new, th_runnable, th_terminated, th_blocked};
-
-struct thread_obj {
-  stk_header header;
-  SCM thunk;
-  SCM name;
-  SCM specific;
-  SCM end_result;
-  SCM end_exception;
-  enum thread_state state;
-  vm_thread_t *vm;
-  pthread_t pthread;
-  pthread_mutex_t mymutex;
-  pthread_cond_t  mycondv;
-};
-
-
-#define THREADP(p)		(BOXED_TYPE_EQ((p), tc_thread))
-#define THREAD_THUNK(p)		(((struct thread_obj *) (p))->thunk)
-#define THREAD_NAME(p)		(((struct thread_obj *) (p))->name)
-#define THREAD_SPECIFIC(p)	(((struct thread_obj *) (p))->specific)
-#define THREAD_RESULT(p)	(((struct thread_obj *) (p))->end_result)
-#define THREAD_EXCEPTION(p)	(((struct thread_obj *) (p))->end_exception)
-#define THREAD_STATE(p)		(((struct thread_obj *) (p))->state)
-#define THREAD_VM(p)		(((struct thread_obj *) (p))->vm)
-#define THREAD_PTHREAD(p)	(((struct thread_obj *) (p))->pthread)
-#define THREAD_MYMUTEX(p)	(((struct thread_obj *) (p))->mymutex)
-#define THREAD_MYCONDV(p)	(((struct thread_obj *) (p))->mycondv)
-
+static SCM primordial;
+static SCM cond_thread_terminated, cond_join_timeout, cond_thread_abandonned_mutex;
 static SCM all_threads = STk_nil;
 
 
@@ -155,7 +126,7 @@ static SCM do_make_thread(SCM thunk, char *name)
   THREAD_STATE(z)     = th_new;
 
   // FIX: lock
-  //  all_threads = STk_cons(z, all_threads); /* For the GC */
+  all_threads = STk_cons(z, all_threads); /* For the GC */
   return z;
 }
 
@@ -282,35 +253,46 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
 
   if (THREAD_STATE(thr) != th_terminated) {
     terminate_scheme_thread(thr);
-    if (thr == primordial) {
-      /* Terminate the primordial thread exits the program */
-      STk_quit(0);
+
+    pthread_mutex_lock(&THREAD_MYMUTEX(thr));
+    if (THREAD_EXCEPTION(thr) == STk_void) {
+      /* Be sure to register the first canceller only!  */
+      THREAD_EXCEPTION(thr) = STk_make_C_cond(cond_thread_terminated, 1, thr);
     }
-    THREAD_EXCEPTION(thr) = STk_make_C_cond(cond_thread_terminated, 0);
+    pthread_mutex_lock(&THREAD_MYMUTEX(thr));
+    
+    /* Terminate effectively the thread */
+    if (thr == THREAD_VM(thr)->scheme_thread)
+      pthread_exit(0); 				/* Suicide */
+    else 
+      pthread_cancel(THREAD_PTHREAD(thr));	/* terminate an other thread */
+
     pthread_cancel(THREAD_PTHREAD(thr));
   }
   return STk_void;
 }
 
 
-DEFINE_PRIMITIVE("%thread-join!", thread_join, subr4, (SCM thr, SCM tm1, SCM tm2,
-						       SCM use_time))
+DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
 {
   struct timespec ts;
-  int overflow;
-  time_t t1 = STk_integer2uint32(tm1, &overflow);
-  long   t2 = STk_integer2uint32(tm2, &overflow);
   SCM res = STk_false;
+  double tmd;
 
   if (!THREADP(thr)) error_bad_thread(thr);
-  
-  ts.tv_sec  = t1;
-  ts.tv_nsec = t2;
 
+  if (REALP(tm)) {
+    tmd = REAL_VAL(tm);
+    ts.tv_sec  = (time_t) tmd;
+    ts.tv_nsec = (suseconds_t) ((tmd - ts.tv_sec) * 1000000);
+  } 
+  else if (!BOOLEANP(tm))
+    STk_error("bad timeout ~S", tm);
+  
   pthread_mutex_lock(&THREAD_MYMUTEX(thr));
   while (THREAD_STATE(thr) != th_terminated) {
-    STk_debug("On est dans la boucle avec %d", THREAD_STATE(thr));
-    if (use_time != STk_false) {
+    STk_debug("thread-join loop state=%d", THREAD_STATE(thr));
+    if (tm != STk_false) {
       int n = pthread_cond_timedwait(&THREAD_MYCONDV(thr), 
 				     &THREAD_MYMUTEX(thr),
 				     &ts);
@@ -323,8 +305,6 @@ DEFINE_PRIMITIVE("%thread-join!", thread_join, subr4, (SCM thr, SCM tm1, SCM tm2
   STk_debug("Fin de l'attente");
   return res;
 }
-
-
 
 
 
@@ -375,7 +355,14 @@ int STk_init_threads(int stack_size)
 
   /* Define the threads exceptions */
   cond_thread_terminated =  STk_defcond_type("&thread-terminated", STk_false,
-					     STk_nil, STk_current_module);
+					     LIST1(STk_intern("canceller")),
+					     STk_current_module);
+  cond_thread_abandonned_mutex =  STk_defcond_type("&thread-abandonned-mutex", 
+						   STk_false,
+						   STk_nil,
+						   STk_current_module);
+  cond_join_timeout = STk_defcond_type("&thead-join-timeout", STk_false,
+				       STk_nil, STk_current_module);
   
   /* Wrap the main thread in a thread called "primordial" */
   primordial = do_make_thread(STk_false, STk_Cstring2string("primordial"));

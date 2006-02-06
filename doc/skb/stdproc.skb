@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  3-Jan-2006 16:24 (eg)
+;; Last file update:  3-Feb-2006 17:54 (eg)
 ;;
 ;; ======================================================================
 
@@ -580,12 +580,12 @@ representation which consists is an integer which represents the
 number of seconds elapsed since the ,(emph "Epoch") (00:00:00 on
 January 1, 1970, Coordinated Universal Time --UTC). Dates can
 also be represented with date structures.])
+(insertdoc 'current-second)
 (insertdoc 'current-time)
-(insertdoc 'full-current-time)
-(insertdoc 'seconds->date)
-(insertdoc 'seconds->string)
-(insertdoc 'seconds->list)
-
+(insertdoc 'time?)
+(insertdoc 'time->seconds)
+(insertdoc 'seconds->time)
+   
 (insertdoc 'current-date)
 (insertdoc 'make-date)
 (insertdoc 'date?)
@@ -601,6 +601,10 @@ also be represented with date structures.])
 (insertdoc 'date-tz)
 (insertdoc 'date->seconds)
 (insertdoc 'date->string)
+(insertdoc 'seconds->date)
+(insertdoc 'seconds->string)
+(insertdoc 'seconds->list)
+
 
 (insertdoc 'date)
 )   

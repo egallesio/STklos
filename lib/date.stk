@@ -1,7 +1,7 @@
 ;;;;
 ;;;; date.stk			-- Date and Time Operations
 ;;;; 
-;;;; Copyright © 2002-2004 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,9 +21,74 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2002 10:06 (eg)
-;;;; Last file update: 29-Nov-2004 11:58 (eg)
+;;;; Last file update:  3-Feb-2006 17:47 (eg)
 ;;;;
 
+;;;; ======================================================================
+;;;;
+;;;;			TIME functions
+;;;;
+;;;; ======================================================================
+
+#|
+<doc EXT time? 
+ * (time? obj)
+ *
+ * Return |¤t| if |obj| is a time object, othererwise returns |¤f|.
+doc>
+|#
+(define (time? obj)
+  (and (struct? obj) (eq? (struct-type obj) %time)))
+
+
+#|
+<doc EXT time->seconds
+ * (time->seconds time)
+ *
+ * Convert the time object |time| into an inexact real number representing
+ * the number of seconds elapsed since the Epoch. 
+ * @lisp
+ * (time->seconds (current-time))  ==>  1138983411.09337
+ * @end lisp
+doc>
+|#
+(define (time->seconds time)
+  (if (time? time)
+      (+ (%fast-struct-ref time %time 'second 0)
+	 (/ (%fast-struct-ref time %time 'micro-second 1)  1e6))
+      (error 'time-seconds "bad time ~S" time)))
+
+
+#|
+<doc EXT seconds->time
+ * (seconds->time x)
+ *
+ * Converts into a time object the real number |x| representing the number
+ * of seconds elapsed since the Epoch.
+ * @lisp
+ * (seconds->time (+ 10 (time->seconds (current-time)))
+ *          ==>  a time object representing 10 seconds in the future
+ * @end lisp
+doc>
+|#
+(define (seconds->time x)
+  (if (and (number? x) (positive? x))
+      (cond
+	((real? x)
+	 (let ((n (inexact->exact (round (* x 1e6)))))
+	   (make-struct %time (quotient n 1000000) (remainder n 1000000))))
+	((integer? x)
+	 (make-struct %time  x 0))
+	(else
+	 (error 'seconds->time "cannot convert ~S to a time" x)))
+      (error 'seconds->time "bad number ~S" x)))
+
+
+;;;; ======================================================================
+;;;;
+;;;;			DATE functions
+;;;;
+;;;; ======================================================================
 #|
 <doc EXT make-date
  * (make-date :key second minute hour day month year)
@@ -48,6 +113,11 @@ doc>
 |#
 (define (date? obj)
   (and (struct? obj) (eq? (struct-type obj) %date)))
+
+
+
+(define (seconds->date s)
+  (%seconds->date (if (real? s) (inexact->exact (round s)) s)))
 
 ;; ======================================================================
 ;;	date writer
@@ -152,7 +222,7 @@ doc>
  * (UTC) and local standard time in seconds.])
  * )
  * @lisp
- * (seconds->list (current-time))   
+ * (seconds->list (current-second))   
  *        => (:second 51 :minute 26 :hour 19
  *            :day 5 :month 11 :year 2004
  *            :week-day 5 :year-day 310
@@ -174,8 +244,7 @@ doc>
 doc>
 |#
 (define (current-date)
-  (seconds->date (current-time)))
-
+  (seconds->date (current-second)))
 
 #|
 <doc EXT seconds->string
@@ -234,7 +303,8 @@ doc>
     (error 'seconds->string "bad string ~S" format))
   ;; Convert the format string for C since conventions are different
   (let ((len (string-length format))
-	(out (open-output-string)))
+	(out (open-output-string))
+	(sec (if (real? seconds) (inexact->exact (round seconds)) seconds)))
     (let Loop ((i 0))
       (when (< i len)
 	(let ((cur-char (string-ref format i)))
@@ -253,13 +323,13 @@ doc>
 	    (else (display cur-char out)
 		  (Loop (+ i 1)))))))
     ;; String is converted in the "OUT" string port
-    (%seconds->string (get-output-string out) seconds)))
+    (%seconds->string (get-output-string out) sec)))
 
 #|
 <doc EXT date->string
  * (date->string format d)
  *
- * Convert the date |d|using the string |format| as a
+ * Convert the date |d| using the string |format| as a
  * specification. Conventions for format are the same as the one
  * of ,(ref :mark "seconds->string").
 doc>
@@ -269,6 +339,7 @@ doc>
     (error 'date->string "bad string ~S" format))
   
   (seconds->string format (date->seconds date)))
+
 
 
 (provide "date")

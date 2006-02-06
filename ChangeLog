@@ -1,3 +1,10 @@
+2006-02-03  Erick Gallesio  <eg@essi.fr>
+
+	* src/system.c: primitive CURRENT-TIME as been renamed to
+	CURRENT-SECOND. to be compliant with SRFI-18.
+	
+	* A bunch of new functions have been added for time. 	
+
 2006-02-01  Erick Gallesio  <eg@essi.fr>
 
 	* src/stklos.h:
