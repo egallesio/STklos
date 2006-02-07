@@ -1,3 +1,12 @@
+2006-02-07  Erick Gallesio  <eg@essi.fr>
+
+	* src/vm.c (STk_C_apply): Return STk_void if valc == 0. 
+
+	* src/read.c (read_srfi10): 
+	* src/port.c (format):  Use STk_apply_C_list instead of
+	(apply (apply ...))
+		
+
 2006-02-03  Erick Gallesio  <eg@essi.fr>
 
 	* src/system.c: primitive CURRENT-TIME as been renamed to

@@ -20,7 +20,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update:  1-Feb-2006 17:13 (eg)
+ * Last file update:  7-Feb-2006 17:53 (eg)
  *
  */
 
@@ -740,13 +740,10 @@ static SCM read_srfi10(SCM port, SCM l)
   tmp = STk_int_assq(CAR(l), ctor_table);
   if (tmp == STk_false)
     signal_error(port, "bad tag in a #,(...) form ~S", CAR(l));
-  else 
+  else {
     /* result is (apply (cdr tmp) (cdr l)) */
-    return STk_C_apply(STk_lookup(STk_intern("apply"),
-				  STk_current_module, &ref, TRUE),
-		       2,
-		       CDR(tmp),
-		       CDR (l));
+    return STk_C_apply_list(CDR(tmp), CDR (l));
+  }
   
   return STk_void;	/* For the C compiler */
 }

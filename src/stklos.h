@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  3-Feb-2006 10:45 (eg)
+ * Last file update:  7-Feb-2006 16:07 (eg)
  */
 
 #ifndef STKLOS_H
@@ -1128,6 +1128,7 @@ int STk_init_vector(void);
 void STk_execute_current_handler(SCM kind, SCM location, SCM message);
 void STk_raise_exception(SCM cond);
 SCM STk_C_apply(SCM func, int nargs, ...);
+SCM STk_C_apply_list(SCM func, SCM l);
 void STk_get_stack_pointer(void **addr);
 SCM STk_n_values(int n, ...);
 

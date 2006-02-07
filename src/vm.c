@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  2-Feb-2006 22:25 (eg)
+ * Last file update:  7-Feb-2006 18:27 (eg)
  */
 
 // INLINER values
@@ -426,6 +426,7 @@ DEFINE_PRIMITIVE("apply", scheme_apply, apply, (void))
   /* This function is never called. It is just here to declare the primitive 
    * apply, as a primitive of type tc_apply
    */
+  STk_debug("CALL apply");
   return STk_void;
 }
 
@@ -439,12 +440,11 @@ DEFINE_PRIMITIVE("apply", scheme_apply, apply, (void))
  * an "excv" or an "execl" function. If nargs is > 0 it is as a Unix "execl" 
  * function: 
  *    STk_C_apply(STk_cons, 2, MAKE_INT(1), MAKE_INT(2)) => (1 . 2)
- * If nargs is < 0, we have something similar to an "execv fucntion
+ * If nargs is < 0, we have something similar to an "execv function
  *    STk_C_apply(...STk_intern("cons")..., -2, Argv)
  * where Argv[0] == MAKE_INT(1) and Argv[1] == MAKE_INT(2) ==> (1 . 2)
  *
 \*===========================================================================*/
-
 SCM STk_C_apply(SCM func, int nargs, ...) 
 {
   static STk_instr code[]= {INVOKE, 0, END_OF_CODE};
@@ -476,7 +476,23 @@ SCM STk_C_apply(SCM func, int nargs, ...)
 
   FULL_RESTORE_VM_STATE(vm->sp);
   
-  return vm->val;
+  return (vm->valc) ? vm->val : STk_void;
+}
+
+/* Another way to call apply from C. This time with a Scheme list */
+SCM STk_C_apply_list(SCM func, SCM l)
+{
+  int i, argc = STk_int_length(l);
+  SCM *argv = NULL;
+  
+  if (argc > 0) {
+    argv = STk_must_malloc(argc * sizeof (SCM *));
+    for (i = 0; i < argc; i++) {
+      argv[i] = CAR(l);
+      l = CDR(l);
+    }
+  }
+  return STk_C_apply(func, -argc, argv);
 }
 
 
@@ -864,7 +880,7 @@ CASE(LOCAL_SET1) { FRAME_LOCAL(vm->env, 1)           = vm->val; NEXT0;}
 CASE(LOCAL_SET2) { FRAME_LOCAL(vm->env, 2)           = vm->val; NEXT0;}
 CASE(LOCAL_SET3) { FRAME_LOCAL(vm->env, 3)    	     = vm->val; NEXT0;}
 CASE(LOCAL_SET4) { FRAME_LOCAL(vm->env, 4)    	     = vm->val; NEXT0;}
-CASE(LOCAL_SET)  { FRAME_LOCAL(vm->env,fetch_next()) = vm->val; NEXT0; }
+CASE(LOCAL_SET)  { FRAME_LOCAL(vm->env,fetch_next()) = vm->val; NEXT0;}
 
 CASE(DEEP_LOCAL_SET) {
   int level, info = fetch_next();

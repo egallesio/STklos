@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  1-Feb-2006 17:11 (eg)
+ * Last file update:  7-Feb-2006 18:24 (eg)
  *
  */
 
@@ -746,14 +746,9 @@ static SCM internal_format(int argc, SCM *argv, int error)
 		      STk_error_bad_io_param("bad list for ~~? format ~S", args);
 
 		    /* Do (apply format port fmt args) */
-		    STk_C_apply(STk_lookup(STk_intern("apply"),
-					   STk_current_module, &ref, TRUE),
-				4,
-				STk_lookup(STk_intern("format"),
-					   STk_current_module, &ref, TRUE),
-				port,
-				fmt,
-				args);
+		    STk_C_apply_list(STk_lookup(STk_intern("format"),
+						STk_current_module, &ref, TRUE),
+				     STk_cons(port, STk_cons(fmt, args)));
 		    break;
 		  }
         case 'H':

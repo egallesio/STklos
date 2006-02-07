@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  3-Feb-2006 16:32 (eg)
+# Last file update:  7-Feb-2006 10:16 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d
 
@@ -33,12 +33,12 @@ scheme_BOOT = assembler.stk		\
 scheme_SRCS = STklos.init		\
 	      bigloo.stk		\
 	      compfile.stk 		\
-	      date.stk			\
 	      describe.stk		\
 	      expand.ss			\
 	      full-syntax.stk		\
 	      full-conditions.stk 	\
 	      getopt.stk		\
+	      lalr.stk			\
 	      lex-rt.stk		\
 	      make-C-boot.stk		\
 	      match.stk			\
@@ -62,16 +62,17 @@ scheme_SRCS = STklos.init		\
 	      srfi-48.stk		\
 	      srfi-60.stk		\
 	      srfi-66.stk		\
+	      srfi-69.stk		\
 	      srfi-70.stk		\
 	      trace.stk
 
-scheme_OBJS = date.ostk 		\
-	      compfile.ostk		\
+scheme_OBJS = compfile.ostk		\
 	      full-syntax.ostk		\
 	      full-conditions.ostk 	\
 	      describe.ostk		\
 	      getopt.ostk		\
 	      lex-rt.ostk		\
+	      lalr.ostk			\
 	      match.ostk		\
 	      pp.ostk			\
 	      srfi-1.ostk 		\
@@ -92,6 +93,7 @@ scheme_OBJS = date.ostk 		\
 	      srfi-48.ostk		\
 	      srfi-60.ostk		\
 	      srfi-66.ostk		\
+	      srfi-69.ostk		\
 	      srfi-70.ostk		\
 	      trace.ostk	
 
