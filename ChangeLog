@@ -1,3 +1,10 @@
+2006-03-22  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-27.stk (%random-source-current-time): Change
+	current-time to current-source
+
+	* lib/STklos.init: some modifications for SLIB
+
 2006-02-07  Erick Gallesio  <eg@essi.fr>
 
 	* src/vm.c (STk_C_apply): Return STk_void if valc == 0. 

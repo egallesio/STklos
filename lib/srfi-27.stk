@@ -1,7 +1,7 @@
 ;;;;
 ;;;; random.stk	-- Random numbers (SRFI-27)
 ;;;;
-;;;; Copyright © 2002-2003 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 ;;;;
 ;;;;           Author: Sebastian Egner (reference implementation of SRFI-27)
 ;;;;    Creation date: 10-Aug-2002 17:03 (eg)
-;;;; Last file update:  6-Nov-2003 13:57 (eg)
+;;;; Last file update: 22-Mar-2006 21:23 (eg)
 ;;;;
 
 
@@ -90,7 +90,7 @@ doc>
 (define-method %random-source? (x139) #f)
 
 
-(define %random-source-current-time current-time)
+(define %random-source-current-time current-second)
 
 ;;; ======================================================================
 ;;;

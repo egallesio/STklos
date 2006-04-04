@@ -114,7 +114,7 @@
 	values				;proposed multiple values
 	dynamic-wind			;proposed dynamic-wind
 	ieee-floating-point		;conforms to
-;	full-continuation		;can return multiple times
+	full-continuation		;can return multiple times
 ;	object-hash			;has OBJECT-HASH
 
 ;	sort				; commented because incomplete
