@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  5-Jan-2000 12:17 (eg)
- * Last file update:  4-Apr-2006 23:52 (eg)
+ * Last file update:  6-Apr-2006 12:52 (eg)
  */
 
 
@@ -60,13 +60,14 @@ STk_init_library(int *argc, char ***argv, int stack_size)
     STk_late_init_env() 	&&
     STk_init_struct()		&&
     STk_init_cond()		&&
+    STk_init_vm()		&&
+    STk_init_threads(stack_size)&&
     STk_init_port() 		&&
     STk_init_extend()		&&
     STk_init_list() 		&&
     STk_init_vector() 		&&
     STk_init_uniform_vector()	&&
     STk_init_char()		&&
-    STk_init_number()		&&
     STk_init_keyword()		&&
     STk_init_string()   	&&
     STk_init_parameter()	&&
@@ -74,9 +75,8 @@ STk_init_library(int *argc, char ***argv, int stack_size)
     STk_init_boolean()		&&
     STk_init_reader()   	&&
     STk_init_system()   	&&
-    STk_init_vm()		&&
-    STk_init_threads(stack_size)&&
     STk_init_mutexes()		&&
+    STk_init_number()		&&
     STk_init_hash()		&&
     STk_init_misc()		&&
     STk_init_signal()		&&

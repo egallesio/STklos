@@ -1,3 +1,7 @@
+2006-04-06  Erick Gallesio  <eg@essi.fr>
+
+	* src/env.c: CURRENT-MODULE is now thread sepcific
+
 2006-04-05  Erick Gallesio  <eg@essi.fr>
 
 	* lib/computils.stk (symbol-bound?): Use SYMBOL-VALUE* instead of

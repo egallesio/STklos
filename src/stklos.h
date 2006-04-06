@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  4-Apr-2006 19:23 (eg)
+ * Last file update:  6-Apr-2006 17:21 (eg)
  */
 
 #ifndef STKLOS_H
@@ -1077,6 +1077,16 @@ int STk_init_symbol(void);
 int STk_dirp(const char *path);
 int STk_init_system();
 EXTERN_PRIMITIVE("exit", quit, subr01, (SCM retcode));
+
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ---- 				 T H R E A D . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+EXTERN_PRIMITIVE("current-thread", current_thread, subr0, (void))
+
 
 /*
   ------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; bonus.stk	-- Useful primitives not in R5RS
 ;;;; 
-;;;; Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 26-Dec-2005 17:19 (eg)
+;;;; Last file update:  6-Apr-2006 17:54 (eg)
 ;;;;
 
 ;;
@@ -1391,19 +1391,17 @@ doc>
 doc>
 |#
 (define-macro (parameterize bindings . body)
-  (let ((save (gensym)))
-    `(let ((,save #f))
-       (dynamic-wind
+  (if (null? bindings)
+      `(begin ,@body)
+      `(dynamic-wind
 	   (lambda ()
-	     (set! ,save (list ,@(map (lambda (x) (list (car x))) bindings)))
-	     ,@bindings)
-	   (lambda()
-	     ,@body)
+	     (%parameter-dynenv-push! ,(caar bindings))
+	     ,(car bindings))
 	   (lambda ()
-	     (for-each (lambda(x y) (x y))
-		       (list ,@(map car bindings))
-		       ,save))))))
-			 
+	     (parameterize ,(cdr bindings) ,@body))
+	   (lambda ()
+	     (%parameter-dynenv-pop! ,(caar bindings))))))
+
 ;;
 ;; SRFI-55: "require-extension"
 ;;
