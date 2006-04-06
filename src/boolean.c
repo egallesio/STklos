@@ -2,7 +2,7 @@
  *
  * b o o l e a n . c			-- Booleans and Equivalence predicates
  *
- * Copyright © 1993-2004 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 12-May-2004 18:01 (eg)
+ * Last file update:  4-Apr-2006 18:44 (eg)
  */
 
 #include "stklos.h"
@@ -194,7 +194,8 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
       if (STk_oo_initialized) {
 	SCM fg, res;
 
-	fg = STk_lookup(STk_intern("object-eqv?"), STk_current_module, &res, FALSE);
+	fg = STk_lookup(STk_intern("object-eqv?"), STk_current_module(), 
+			&res, FALSE);
 	res = STk_C_apply(fg, 2, x, y);
 	return res;
       }
@@ -323,7 +324,8 @@ DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
       if (STk_oo_initialized) {
 	SCM fg, res;
 
-	fg = STk_lookup(STk_intern("object-equal?"),STk_current_module,&res,FALSE);
+	fg = STk_lookup(STk_intern("object-equal?"),STk_current_module(),
+			&res,FALSE);
 	res = STk_C_apply(fg, 2, x, y);
 	return res;
       }

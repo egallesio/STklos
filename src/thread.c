@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  5-Feb-2006 21:52 (eg)
+ * Last file update:  4-Apr-2006 23:58 (eg)
  */
 
 
@@ -33,7 +33,7 @@
 #include "vm.h"
 #include "thread.h"
 
-static SCM primordial;
+SCM STk_primordial_thread = NULL;
 static SCM cond_thread_terminated, cond_join_timeout, cond_thread_abandonned_mutex;
 static SCM all_threads = STk_nil;
 
@@ -345,6 +345,7 @@ static struct extended_type_descr xtype_thread = {
 int STk_init_threads(int stack_size)
 {
   vm_thread_t *vm = STk_allocate_vm(stack_size);
+  SCM primordial;
 
   /* Thread Type declaration */
   DEFINE_XTYPE(thread, &xtype_thread);
@@ -356,19 +357,20 @@ int STk_init_threads(int stack_size)
   /* Define the threads exceptions */
   cond_thread_terminated =  STk_defcond_type("&thread-terminated", STk_false,
 					     LIST1(STk_intern("canceller")),
-					     STk_current_module);
+					     STk_STklos_module);
   cond_thread_abandonned_mutex =  STk_defcond_type("&thread-abandonned-mutex", 
 						   STk_false,
 						   STk_nil,
-						   STk_current_module);
+						   STk_STklos_module);
   cond_join_timeout = STk_defcond_type("&thead-join-timeout", STk_false,
-				       STk_nil, STk_current_module);
+				       STk_nil, STk_STklos_module);
   
   /* Wrap the main thread in a thread called "primordial" */
   primordial = do_make_thread(STk_false, STk_Cstring2string("primordial"));
   THREAD_STATE(primordial) = th_runnable;
   THREAD_VM(primordial)    = vm;
   vm->scheme_thread        = primordial;
+  STk_primordial_thread	   = primordial;
 
   /* Thread primitives */
   ADD_PRIMITIVE(current_thread);

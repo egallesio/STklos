@@ -1,3 +1,8 @@
+2006-04-05  Erick Gallesio  <eg@essi.fr>
+
+	* lib/computils.stk (symbol-bound?): Use SYMBOL-VALUE* instead of
+	SYMBOL-VALUE. This avoids some undefined symbols warnings.
+
 2006-03-22  Erick Gallesio  <eg@essi.fr>
 
 	* lib/srfi-27.stk (%random-source-current-time): Change

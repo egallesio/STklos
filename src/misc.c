@@ -1,7 +1,7 @@
 /*
  * m i s c . c					-- Misc. functions
  * 
- * Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 25-Apr-2005 17:14 (eg)
+ * Last file update:  4-Apr-2006 19:00 (eg)
  */
 
 #include "stklos.h"
@@ -55,7 +55,7 @@ void STk_add_primitive(struct primitive_obj *o)
   SCM symbol;
 
   symbol = STk_intern(o->name);
-  STk_define_variable(symbol, (SCM) o, STk_current_module);
+  STk_define_variable(symbol, (SCM) o, STk_current_module());
 }
 
 
@@ -484,8 +484,8 @@ DEFINE_PRIMITIVE("%debug", set_debug, subr0, (void))
 DEFINE_PRIMITIVE("%test", test, subr1, (SCM s))
 {
   /* A special place for doing tests */
-  STk_eval_C_string("(display \"Hello, world!\")", STk_current_module);
-  STk_eval_C_string("(display (fact 200))", STk_current_module);
+  STk_eval_C_string("(display \"Hello, world!\")", STk_current_module());
+  STk_eval_C_string("(display (fact 200))", STk_current_module());
   return STk_void;
 }
 #endif

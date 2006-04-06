@@ -1,7 +1,7 @@
 /*
  * parameter.c	-- Parameter Objects (SRFI-39)
  * 
- * Copyright © 2003-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  1-Jul-2003 11:38 (eg)
- * Last file update: 26-Dec-2005 19:05 (eg)
+ * Last file update:  4-Apr-2006 19:02 (eg)
  */
 
 
@@ -92,7 +92,7 @@ SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value))
   PARAMETER_C_TYPE(z) = 1;
 
   /* Bind it to the given symbol */
-  STk_define_variable(STk_intern(symbol), z, STk_current_module);
+  STk_define_variable(STk_intern(symbol), z, STk_current_module());
 
   return z;
 }

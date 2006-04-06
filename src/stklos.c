@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  1-Feb-2006 13:41 (eg)
+ * Last file update:  4-Apr-2006 19:26 (eg)
  */
 
 #include <stklos.h>
@@ -134,7 +134,8 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   ADD_BOOL_OPTION(vanilla,	   ":no-init-file");
   ADD_BOOL_OPTION(STk_interactive, ":interactive")
 
-  STk_define_variable(STk_intern("*%program-args*"), options, STk_current_module);
+    STk_define_variable(STk_intern("*%program-args*"), options, 
+			STk_STklos_module);
 }
 
 int main(int argc, char *argv[])

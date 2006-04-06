@@ -1,7 +1,7 @@
 /*
  * f p o r t . c				-- File ports
  *
- * Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 13-Sep-2005 22:41 (eg)
+ * Last file update:  4-Apr-2006 18:59 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -752,7 +752,7 @@ SCM STk_load_source_file(SCM f)
      */
     sexpr = STk_read_constant(f, STk_read_case_sensitive);
     if (sexpr == STk_eof) break;
-    eval  = STk_lookup(eval_symb, STk_current_module, &ref, TRUE);
+    eval  = STk_lookup(eval_symb, STk_current_module(), &ref, TRUE);
     STk_C_apply(eval, 1, sexpr);
   }
   STk_close_port(f);

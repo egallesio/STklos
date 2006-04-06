@@ -2,7 +2,7 @@
  *
  *  o b j e c t . c			-- Objects support
  *
- * Copyright © 1994-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update: 25-Apr-2005 17:06 (eg)
+ * Last file update:  4-Apr-2006 20:10 (eg)
  */
 
 #include "stklos.h"
@@ -29,7 +29,7 @@
 #include "struct.h"
 
 #define GF_VAL(name)		(STk_lookup(STk_intern(name), \
-					    STk_current_module, &unused, FALSE))
+					    STk_current_module(), &unused, FALSE))
 #define CALL_GF1(name,a)	(STk_C_apply(GF_VAL(name), 1, (a)))
 #define CALL_GF2(name,a,b)	(STk_C_apply(GF_VAL(name), 2, (a), (b)))
 #define CALL_GF3(name,a,b,c)	(STk_C_apply(GF_VAL(name), 3, (a), (b), (c)))
@@ -812,6 +812,7 @@ static void create_Top_Object_Class(void)
 			    STk_cons(STk_intern("getters-n-setters"),
 			    STk_cons(STk_intern("redefined"),
 				     STk_nil))))))))));
+  SCM current_module = STk_STklos_module;
 
 
   /* ========== Creation of the <Class> class  ========== */
@@ -833,21 +834,21 @@ static void create_Top_Object_Class(void)
   INST_SLOT(Class, S_getters_n_setters)  = INST_ACCESSORS(Class);
   INST_SLOT(Class, S_redefined) 	 = STk_false;
 
-  STk_define_variable(tmp, Class, STk_current_module);
+  STk_define_variable(tmp, Class, current_module);
 
 
   /* ========== Creation of the <Top> class  ========== */
   tmp = STk_intern("<top>");
   Top = basic_make_class(Class, tmp, STk_nil, STk_nil);
 
-  STk_define_variable(tmp, Top, STk_current_module);
+  STk_define_variable(tmp, Top, current_module);
   
 
   /* ========== Creation of the <Object> class  ========== */
   tmp	 = STk_intern("<object>");
   Object = basic_make_class(Class, tmp, LIST1(Top), STk_nil);
 
-  STk_define_variable(tmp, Object, STk_current_module);
+  STk_define_variable(tmp, Object, current_module);
 
   /* 
    * <top> <object> and <class> were partially initialized. 
@@ -864,7 +865,7 @@ static void mk_cls(SCM *var, char *name, SCM meta, SCM super, SCM slots)
    SCM tmp = STk_intern(name);
    
    *var = basic_make_class(meta, tmp, LIST1(super), slots);
-   STk_define_variable(tmp, *var, STk_current_module);
+   STk_define_variable(tmp, *var, STk_STklos_module);
 }
 
 static void make_standard_classes(void)
@@ -1088,7 +1089,7 @@ static void print_instance(SCM inst, SCM port, int mode)
   SCM fct, res;
  
   fct_name = (mode == DSP_MODE) ? "display-object" : "write-object";
-  fct      = STk_lookup(STk_intern(fct_name), STk_current_module, &res, FALSE);
+  fct      = STk_lookup(STk_intern(fct_name), STk_current_module(), &res, FALSE);
   
   if (fct == STk_void) {
     /* Do a default print */

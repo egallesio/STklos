@@ -1,7 +1,7 @@
 ;;;;
 ;;;; utils.stk	-- Compiler Utilities
 ;;;; 
-;;;; Copyright © 2000-2004 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:57 (eg)
-;;;; Last file update: 20-Nov-2004 19:34 (eg)
+;;;; Last file update:  5-Apr-2006 10:14 (eg)
 ;;;;
 
 
@@ -92,7 +92,7 @@
 (define symbol-bound?
   (let ((unbound (list 'unbound)))
     (lambda (symbol)
-      (not (eq? (symbol-value symbol (current-module) unbound) unbound)))))
+      (not (eq? (symbol-value* symbol (current-module) unbound) unbound)))))
 
 
 

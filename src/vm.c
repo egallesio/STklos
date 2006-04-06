@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  7-Feb-2006 18:27 (eg)
+ * Last file update:  4-Apr-2006 19:32 (eg)
  */
 
 // INLINER values
@@ -131,13 +131,14 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   }
  
   /* Initialize the VM registers */
-  vm->sp            = vm->stack + vm->stack_len;
-  vm->fp            = vm->sp;
-  vm->val           = STk_void;
-  vm->env           = STk_current_module;
-  vm->handlers      = NULL;
-  vm->top_jmp_buf   = NULL;
-  vm->scheme_thread = STk_false;
+  vm->sp             = vm->stack + vm->stack_len;
+  vm->fp             = vm->sp;
+  vm->val            = STk_void;
+  vm->current_module = STk_current_module(); 
+  vm->env            = vm->current_module;
+  vm->handlers       = NULL;
+  vm->top_jmp_buf    = NULL;
+  vm->scheme_thread  = STk_false;
 
   return vm;
 }
@@ -502,7 +503,7 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
   STk_instr *vinstr, *p;
   vm_thread_t *vm = STk_get_current_vm();
 
-  if (!envt) envt = STk_current_module;
+  if (!envt) envt = vm->current_module;
   
   if (!VECTORP(code)) 	STk_error("bad code vector ~S", code);
   if (!VECTORP(consts)) STk_error("bad constant list ~S", consts);
@@ -954,8 +955,8 @@ CASE(DEFINE_SYMBOL) {
 
 
 CASE(SET_CUR_MOD) {
-  if (!MODULEP(vm->val)) STk_error("bad module ~S", vm->val);
-  STk_current_module = vm->env = vm->val;
+  vm->env = vm->val;
+  STk_select_module(vm->val);
   NEXT0;
 }
 
@@ -1089,7 +1090,7 @@ CASE(MAKE_EXPANDER) {
   SCM name = fetch_const();
   SCM ref;
 
-  STk_lookup(STk_intern("*expander-list*"), STk_current_module, &ref, TRUE);
+  STk_lookup(STk_intern("*expander-list*"), STk_current_module(), &ref, TRUE);
   CDR(ref) = STk_cons(STk_cons(name, vm->val), CDR(ref));
   vm->valc    = 2;
   vm->val     = STk_void;
@@ -1220,7 +1221,7 @@ FUNCALL:  /* (int nargs, int tailp) */
 	args = listify_top(nargs, vm);
 	push(vm->val); 
 	push(args);
-	vm->val = STk_lookup(STk_intern("apply-generic"), STk_current_module, 
+	vm->val = STk_lookup(STk_intern("apply-generic"), vm->current_module, 
 			     &gf, FALSE);
 	nargs = 2;
 	goto FUNCALL;
@@ -1284,7 +1285,7 @@ FUNCALL:  /* (int nargs, int tailp) */
 	push(NXT_MTHD_METHOD(vm->val));
 	push(argv);
 	nargs = 3;
-	vm->val   = STk_lookup(STk_intern("no-next-method"), STk_current_module, 
+	vm->val   = STk_lookup(STk_intern("no-next-method"), vm->current_module, 
 			       &proc, FALSE);
       } else {
 	/* Call the next method after creating a new next-method */
@@ -1683,7 +1684,7 @@ SCM STk_load_bcode_file(SCM f)
 
     vm->pc 	  = read_code(f, size);			     /* Read the code */
     vm->constants = VECTOR_DATA(consts);
-    vm->env       = STk_current_module;
+    vm->env       = vm->current_module;
     run_vm(vm);
   }
   
@@ -1725,7 +1726,7 @@ int STk_boot_from_C(void)
   /* Run the VM */
   vm->pc 	= STk_boot_code;
   vm->constants = VECTOR_DATA(consts);
-  vm->env       = STk_current_module;
+  vm->env       = vm->current_module;
   run_vm(vm);
 
   system_has_booted = 1;

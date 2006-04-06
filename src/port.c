@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  7-Feb-2006 18:24 (eg)
+ * Last file update:  4-Apr-2006 19:07 (eg)
  *
  */
 
@@ -674,7 +674,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
 	  	      
 		      if (argc-- <= 0) goto TooMuch;
 		      pp = STk_lookup(STk_intern("pp"), 
-				      STk_current_module, 
+				      STk_current_module(), 
 				      &ref, 
 				      TRUE);
 		      STk_print(STk_C_apply(pp, 3, *argv--, 
@@ -714,7 +714,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
 		   * Call the Scheme routine srfi48:format-fixed
 		   */
 		  ff = STk_lookup(STk_intern("srfi48:format-fixed"), 
-				  STk_current_module, 
+				  STk_current_module(), 
 				  &ref, 
 				  TRUE);
 		  tmp = STk_C_apply(ff, 3, 
@@ -747,7 +747,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
 
 		    /* Do (apply format port fmt args) */
 		    STk_C_apply_list(STk_lookup(STk_intern("format"),
-						STk_current_module, &ref, TRUE),
+						STk_current_module(), &ref, TRUE),
 				     STk_cons(port, STk_cons(fmt, args)));
 		    break;
 		  }
@@ -756,7 +756,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
 	  	     SCM ref, help;
 	  	      
 		      help = STk_lookup(STk_intern("srfi48:help"), 
-					STk_current_module, 
+					STk_current_module(), 
 					&ref, 
 					TRUE);
 		      STk_C_apply(help, 1, port);
@@ -1284,7 +1284,7 @@ DEFINE_PRIMITIVE("port-rewind", port_rewind, subr1, (SCM port))
 \*===========================================================================*/
 static void initialize_io_conditions(void)
 {
-  SCM module = STk_current_module;
+  SCM module = STk_STklos_module;
 
 #define DEFCOND(x, name, parent, slots)			\
   x = STk_defcond_type(name, parent, slots, module)

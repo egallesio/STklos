@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  7-Feb-2006 16:07 (eg)
+ * Last file update:  4-Apr-2006 19:23 (eg)
  */
 
 #ifndef STKLOS_H
@@ -378,8 +378,6 @@ struct frame_obj {
 /* modules are defined in env.c but are private */
 #define MODULEP(p)		(BOXED_TYPE_EQ((p), tc_module))
 
-extern SCM STk_current_module;
-
 SCM STk_make_frame(int len);
 SCM STk_clone_frame(SCM f);
 
@@ -390,7 +388,11 @@ void STk_define_variable(SCM symbol, SCM value, SCM module);
 int STk_init_env(void);
 int STk_late_init_env(void); /* must be done after symbol initialization */
 
+extern SCM STk_STklos_module;
+
 EXTERN_PRIMITIVE("%create-module", create_module, subr1, (SCM name))
+EXTERN_PRIMITIVE("current-module", current_module, subr0, (void))
+EXTERN_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
 
 /*
   ------------------------------------------------------------------------------

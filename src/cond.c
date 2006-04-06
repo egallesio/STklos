@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 22-May-2004 08:57 (eg)
- * Last file update:  1-Feb-2006 18:13 (eg)
+ * Last file update:  4-Apr-2006 20:07 (eg)
  */
 
 #include "stklos.h"
@@ -465,7 +465,7 @@ SCM STk_make_C_cond(SCM type, int nargs, ...)
 
 int STk_init_cond(void)
 {
-  SCM module = STk_current_module;
+  SCM module = STk_STklos_module;
 
   /* Build the special value SRFI-35 &condition */
   NEWCELL(root_condition, struct_type);

@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  3-Feb-2006 17:12 (eg)
+ * Last file update:  4-Apr-2006 19:26 (eg)
  */
 
 #include <unistd.h>
@@ -1027,6 +1027,8 @@ DEFINE_PRIMITIVE("%chmod", change_mode, subr2, (SCM file, SCM value))
 
 int STk_init_system(void)
 {
+  SCM current_module = STk_STklos_module;
+
   /* Create the system-date structure-type */
   date_type =  STk_make_struct_type(STk_intern("%date"),
 				    STk_false,
@@ -1040,14 +1042,14 @@ int STk_init_system(void)
 					   STk_intern("year-day"),
 					   STk_intern("dst"),
 					   STk_intern("tz")));
-  STk_define_variable(STk_intern("%date"), date_type, STk_current_module);
+  STk_define_variable(STk_intern("%date"), date_type, current_module);
 
   /* Create the time structure-type */
   time_type =  STk_make_struct_type(STk_intern("%time"),
 				    STk_false,
 				    LIST2(STk_intern("second"),
 					  STk_intern("microsecond")));
-  STk_define_variable(STk_intern("%time"), time_type, STk_current_module);
+  STk_define_variable(STk_intern("%time"), time_type, current_module);
 
   /* Declare primitives */
   ADD_PRIMITIVE(clock);

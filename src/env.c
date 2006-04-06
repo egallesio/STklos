@@ -2,7 +2,7 @@
  *
  * e n v . c			-- Environment management
  *
- * Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,11 +22,13 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 23-Aug-2005 08:28 (eg)
+ * Last file update:  4-Apr-2006 23:58 (eg)
  */
 
 #include "stklos.h"
 #include "hash.h"
+#include "vm.h"
+#include "thread.h"
 
 
 static void error_bad_module_name(SCM obj)
@@ -82,8 +84,7 @@ struct module_obj {
 #define VISIBLE_P(symb, mod)	(STk_memq((symb), MODULE_EXPORTS(mod))!=STk_false)
 
 
-SCM STk_current_module;		/* The current module */
-static SCM stklos_module;	/* The module whose name is STklos */ 
+SCM STk_STklos_module;		/* The module whose name is STklos */ 
 static SCM all_modules;		/* List of all knowm modules */		
 
 
@@ -102,7 +103,7 @@ static SCM STk_makemodule(SCM name)
   NEWCELL(z, module);
   MODULE_NAME(z)	= name;
   MODULE_EXPORTS(z)	= STk_nil;
-  MODULE_IMPORTS(z)	= (name == STk_void)? STk_nil : LIST1(stklos_module);
+  MODULE_IMPORTS(z)	= (name == STk_void)? STk_nil : LIST1(STk_STklos_module);
   /* Initialize the associated hash table & stor the module in the global list*/
   STk_hashtable_init(&MODULE_HASH_TABLE(z), HASH_VAR_FLAG);
   all_modules = STk_cons(z, all_modules);
@@ -115,7 +116,7 @@ static SCM find_module(SCM name, int create)
   SCM tmp;
   
   if (name == STk_intern("STklos") || name == STk_intern("stklos")) 
-    return stklos_module;
+    return STk_STklos_module;
   
   for (tmp = all_modules; !NULLP(tmp); tmp = CDR(tmp)) {
     if (MODULE_NAME(CAR(tmp)) == name)
@@ -141,9 +142,10 @@ DEFINE_PRIMITIVE("%create-module", create_module, subr1, (SCM name))
 
 DEFINE_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
 {
+  vm_thread_t *vm = STk_get_current_vm();
+
   if (!MODULEP(module)) error_bad_module(module);
-  
-  STk_current_module = module;
+  vm->current_module= module;
   return STk_void;
 }
 
@@ -224,9 +226,14 @@ DEFINE_PRIMITIVE("find-module", scheme_find_module, subr12, (SCM name, SCM def))
  * @end lisp
 doc>
  */
-DEFINE_PRIMITIVE("current-module", scheme_current_module, subr0, (void))
+DEFINE_PRIMITIVE("current-module", current_module, subr0, (void))
 {
-  return STk_current_module;
+  if (STk_primordial_thread) {
+    vm_thread_t *vm = STk_get_current_vm();
+    return vm->current_module;
+  } else {
+    return STk_STklos_module;
+  }
 }
 
 
@@ -272,7 +279,7 @@ DEFINE_PRIMITIVE("module-exports", module_exports, subr1, (SCM module))
   if (!MODULEP(module)) error_bad_module(module);
 
   /* STklos module is special: everything is exported ==> module-symbols */
-  return (module == stklos_module) ?
+  return (module == STk_STklos_module) ?
     		STk_hash_keys(&MODULE_HASH_TABLE(module)) :
     		MODULE_EXPORTS(module);
 }
@@ -413,8 +420,8 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
     /* Not found in the imported modules. Try in the stklos module (if we 
      * didn't had searched it yet
      */
-    if (env != stklos_module) {
-      res = STk_hash_get_variable(&MODULE_HASH_TABLE(stklos_module), symbol, &i);
+    if (env != STk_STklos_module) {
+      res = STk_hash_get_variable(&MODULE_HASH_TABLE(STk_STklos_module), symbol, &i);
       if (res) {
 	*ref = res;
 	return CDR(res);
@@ -456,8 +463,7 @@ int STk_init_env(void)
   all_modules = STk_nil;
 
   /* Create the stklos module */
-  stklos_module      = STk_makemodule(STk_void); /* will be changed later */
-  STk_current_module = stklos_module;
+  STk_STklos_module  = STk_makemodule(STk_void); /* will be changed later */
   
   /* Declare the extended types module_obj and frame_obj */
   DEFINE_XTYPE(module, &xtype_module);
@@ -468,7 +474,7 @@ int STk_init_env(void)
 int STk_late_init_env(void)
 {
   /* Now that symbols are initialized change the STklos module name */
-  MODULE_NAME(stklos_module) = STk_intern("stklos");
+  MODULE_NAME(STk_STklos_module) = STk_intern("stklos");
   
   /* ==== Undocumented primitives ==== */
   ADD_PRIMITIVE(create_module);
@@ -479,7 +485,7 @@ int STk_late_init_env(void)
   /* ==== User primitives ==== */
   ADD_PRIMITIVE(modulep);
   ADD_PRIMITIVE(scheme_find_module);
-  ADD_PRIMITIVE(scheme_current_module);
+  ADD_PRIMITIVE(current_module);
   ADD_PRIMITIVE(module_name);
   ADD_PRIMITIVE(module_imports);
   ADD_PRIMITIVE(module_exports);
@@ -492,4 +498,3 @@ int STk_late_init_env(void)
 
   return TRUE;
 }
-

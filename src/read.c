@@ -20,7 +20,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update:  7-Feb-2006 17:53 (eg)
+ * Last file update:  4-Apr-2006 19:31 (eg)
  *
  */
 
@@ -42,7 +42,7 @@ int STk_read_case_sensitive = 0;
 #define PLACEHOLDERP(x) 	(CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
 #define PLACEHOLDER_VAL(x)	(CDR(x))
 
-#define SYMBOL_VALUE(x,ref)	STk_lookup((x), STk_current_module, &(ref), FALSE)
+#define SYMBOL_VALUE(x,ref)	STk_lookup((x), STk_current_module(), &(ref), FALSE)
 
 /*===========================================================================*\
  * 
@@ -732,7 +732,7 @@ DEFINE_PRIMITIVE("define-reader-ctor",reader_ctor, subr2, (SCM symbol, SCM proc)
 static SCM read_srfi10(SCM port, SCM l)
 {
   int len = STk_int_length(l);
-  SCM tmp, ref;
+  SCM tmp;
 
   if (len < 0) 
     signal_error(port, "bad list in a #,(...) form ~S", l);
@@ -804,7 +804,7 @@ int STk_init_reader(void)
 				      STk_intern("column"),
 				      STk_intern("position"),
 				      STk_intern("span")),
-				STk_current_module);
+				STk_STklos_module);
 
   
   /* Declare SRFI-10 support function */
