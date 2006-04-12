@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  6-Apr-2006 12:39 (eg)
+ * Last file update:  6-Apr-2006 18:28 (eg)
  */
 
 
@@ -102,7 +102,7 @@ typedef struct {
   int stack_len;
   SCM current_module;
   SCM scheme_thread; 	/* Scheme associated thread 	*/
-  SCM dynenv;		/* Scheme dynamic environement (parameter objects) */
+  SCM parameters;	/* Scheme dynamic environement (parameter objects) */
 } vm_thread_t;
 
 

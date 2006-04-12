@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  6-Apr-2006 17:21 (eg)
+ * Last file update:  6-Apr-2006 19:05 (eg)
  */
 
 
@@ -95,7 +95,7 @@ static void *start_scheme_thread(void *arg)
   SCM res;
 
   vm = THREAD_VM(thr) = STk_allocate_vm(5000);			// FIX:
-  vm->scheme_thread = thr;  
+  vm->scheme_thread = thr;
   pthread_setspecific(vm_key, vm);
 
   pthread_cleanup_push(terminate_scheme_thread, thr);
@@ -124,7 +124,7 @@ static SCM do_make_thread(SCM thunk, char *name)
   THREAD_RESULT(z)    = STk_void;
   THREAD_EXCEPTION(z) = STk_false;
   THREAD_STATE(z)     = th_new;
-
+  
   // FIX: lock
   all_threads = STk_cons(z, all_threads); /* For the GC */
   return z;
@@ -308,6 +308,10 @@ DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
 
 
 
+DEFINE_PRIMITIVE("%thread-system", thread_system, subr0, (void))
+{
+  return STk_intern("pthread");
+}
 
 /* ======================================================================
  * 	Initialization ...
@@ -387,7 +391,12 @@ int STk_init_threads(int stack_size)
   ADD_PRIMITIVE(thread_yield);
   ADD_PRIMITIVE(thread_terminate);
   ADD_PRIMITIVE(thread_join);
-
+  ADD_PRIMITIVE(thread_system);
   return TRUE;
 }
 
+#ifdef THREAD_LURC
+int STk_thread_main(STk_main_t themain, int argc, char **argv){
+  return themain(argc, argv);
+}
+#endif

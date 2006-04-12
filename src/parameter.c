@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  1-Jul-2003 11:38 (eg)
- * Last file update:  6-Apr-2006 17:49 (eg)
+ * Last file update:  6-Apr-2006 18:28 (eg)
  */
 
 
@@ -59,7 +59,7 @@ static void error_bad_parameter(SCM obj)
 static void add_to_dynamic_env(SCM z)
 {
   vm_thread_t *vm = STk_get_current_vm();
-  vm->dynenv = STk_cons(z, vm->dynenv);
+  vm->parameters = STk_cons(z, vm->parameters);
 }
 
 

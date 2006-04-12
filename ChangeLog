@@ -1,5 +1,15 @@
 2006-04-06  Erick Gallesio  <eg@essi.fr>
 
+	* lib/bonus.stk (parameterize): 
+	* src/lib.c
+	* src/parameter.c
+	* src/stklos.h
+	* src/thread.c
+	* src/vm.c
+	* src/vm.h: New implementetaion of parameters. Paramateres can now 
+	be assocaited to a thread. PARAMETERIZE permits to have a thread
+	specific dynamic environment.
+	
 	* src/env.c: CURRENT-MODULE is now thread sepcific
 
 2006-04-05  Erick Gallesio  <eg@essi.fr>

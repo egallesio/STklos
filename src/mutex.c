@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update:  5-Feb-2006 21:52 (eg)
+ * Last file update:  6-Apr-2006 19:16 (eg)
  */
 
 #define _REENTRANT 1
@@ -59,6 +59,18 @@ struct mutex_obj {
 #define MUTEX_MYMUTEX(p)	(((struct mutex_obj *) (p))->mymutex)
 #define MUTEX_MYCONDV(p)	(((struct mutex_obj *) (p))->mycondv)
 
+struct condv_obj {
+  stk_header header;
+  SCM name;
+  SCM specific;
+  pthread_cond_t mycondv;
+};
+
+#define CONDVP(p)		(BOXED_TYPE_EQ((p), tc_condv))
+#define CONDV_NAME(p)		(((struct condv_obj *) (p))->name)
+#define CONDV_SPECIFIC(p)	(((struct condv_obj *) (p))->specific)
+#define CONDV_MYCONDV(p)	(((struct condv_obj *) (p))->mycondv)
+
 
 void error_bad_mutex(SCM obj)
 {
@@ -78,7 +90,6 @@ void error_bad_timeout(SCM tm)
 
 void mutex_finalizer(SCM mtx)
 {
-  STk_debug("Finalizer mutex ~S", mtx);
   pthread_mutex_destroy(&MUTEX_MYMUTEX(mtx));
   pthread_cond_destroy(&MUTEX_MYCONDV(mtx));
 }
@@ -185,7 +196,7 @@ DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread
     if (tm != STk_false) {
       int n = pthread_cond_timedwait(&MUTEX_MYCONDV(mtx), &MUTEX_MYMUTEX(mtx), &ts);
       
-      if (n == ETIMEDOUT) { STk_debug("TIMEOUT"); res = STk_false; break; }
+      if (n == ETIMEDOUT) { res = STk_false; break; }
     }
     else
       pthread_cond_wait(&MUTEX_MYCONDV(mtx), &MUTEX_MYMUTEX(mtx));
@@ -234,11 +245,11 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
   pthread_cond_signal(&MUTEX_MYCONDV(mtx));
   if (cv != STk_false) {
     if (tm != STk_false) {
-      int n = pthread_cond_timedwait(&MUTEX_MYCONDV(mtx), &MUTEX_MYMUTEX(mtx), &ts);
+      int n = pthread_cond_timedwait(&CONDV_MYCONDV(cv), &MUTEX_MYMUTEX(mtx), &ts);
       
       if (n == ETIMEDOUT) res = STk_false; 
     } else {
-      pthread_cond_wait(&MUTEX_MYCONDV(mtx), &MUTEX_MYMUTEX(mtx));
+      pthread_cond_wait(&CONDV_MYCONDV(cv), &MUTEX_MYMUTEX(mtx));
     }
   }
   pthread_mutex_unlock(&MUTEX_MYMUTEX(mtx));
@@ -253,20 +264,6 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
  * 
 \* ====================================================================== */
 
-struct condv_obj {
-  stk_header header;
-  SCM name;
-  SCM specific;
-  pthread_cond_t mycondv;
-};
-
-
-#define CONDVP(p)		(BOXED_TYPE_EQ((p), tc_mutex))
-#define CONDV_NAME(p)		(((struct mutex_obj *) (p))->name)
-#define CONDV_SPECIFIC(p)	(((struct mutex_obj *) (p))->specific)
-#define CONDV_MYCONDV(p)	(((struct mutex_obj *) (p))->mycondv)
-
-
 void error_bad_condv(SCM obj)
 {
   STk_error("bad confdition variable ~S", obj);
@@ -274,7 +271,6 @@ void error_bad_condv(SCM obj)
 
 void condv_finalizer(SCM cv)
 {
-  STk_debug("Finalizer condv ~S", cv);
   pthread_cond_destroy(&CONDV_MYCONDV(cv));
 }
 
