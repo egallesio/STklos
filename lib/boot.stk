@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 13-Apr-2006 11:50 (eg)
+;;;; Last file update: 13-Apr-2006 17:55 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -47,6 +47,7 @@
 (autoload 	 "compfile" compile-file)
 (syntax-autoload "match"    match-case match-lambda)
 (autoload 	 "getopt"   %print-usage)
+(autoload        "threads"  make-thread)
 (syntax-autoload "getopt"   parse-arguments)
 (syntax-autoload "trace"    trace untrace)
 (autoload	 "pp"	    pp pretty-print)
