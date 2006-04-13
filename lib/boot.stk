@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 30-Mar-2006 16:10 (eg)
+;;;; Last file update: 13-Apr-2006 11:50 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -166,31 +166,28 @@
   (unless no-init
     (try-load (expand-file-name "~/.stklos/stklosrc")))
   
-  ;; "--load" option
   (when ld
+    ;; "--load" option
     (with-handler
       (lambda (c) (%simple-fatal-exception-handler "loading file" ld c 7))
       (load ld)))
-
-  ;; "--file" option
-  (when file
-    (with-handler
-       (lambda (c) (%simple-fatal-exception-handler "executing file" file c 2))
-       (load file)
-       ;; Try to execute the main procedure with the given arguments
-       (let ((ret-code (main (cons (program-name) (argv)))))
-	 (%before-exit-hook)
-	 (exit (if (integer? ret-code) ret-code 0)))))
-
-  ;; "--expression" option
-  (when expr
-    (with-handler
-       (lambda (c) (%simple-fatal-exception-handler "evaluating" expr c 4))
-       (eval (read-from-string expr))
-       (exit 0)))
-
-  ;; Starts the main REPL
-  (main-repl))
+  
+  (cond
+    ;; "--file" option
+    (file (with-handler
+	    (lambda (c) (%simple-fatal-exception-handler "executing file" file c 2))
+	    (load file)
+	    ;; Try to execute the main procedure with the given arguments
+	    (let ((ret-code (main (cons (program-name) (argv)))))
+	      (%before-exit-hook)
+	      (if (integer? ret-code) ret-code 0))))
+    ;; "--expression" option
+    (expr (with-handler
+	    (lambda (c) (%simple-fatal-exception-handler "evaluating" expr c 4))
+	    (eval (read-from-string expr))
+	    0))
+    (else  ;; Starts the main REPL
+           (main-repl))))
 
 
 ; LocalWords:  VM EVAL SRFI REPL

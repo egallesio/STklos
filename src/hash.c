@@ -2,7 +2,7 @@
  *
  * h a s h  . c			-- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 31-Oct-2005 13:32 (eg)
+ * Last file update: 12-Apr-2006 12:43 (eg)
  */
 
 #include "stklos.h"
@@ -843,7 +843,7 @@ doc>
 DEFINE_PRIMITIVE("hash-table-stats", hash_stats, subr12, (SCM ht, SCM port))
 {
   if(!HASHP(ht)) error_bad_hash_table(ht);
-  if (!port) port = STk_curr_oport;
+  if (!port) port = STk_current_output_port();
   else if (!OPORTP(port)) STk_error("bad port ~S", port);
   
   hash_stats((struct hash_table_obj *) ht, port);

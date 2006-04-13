@@ -20,12 +20,13 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  4-Apr-2006 19:07 (eg)
+ * Last file update: 12-Apr-2006 16:07 (eg)
  *
  */
 
 #include <ctype.h>
 #include "stklos.h"
+#include "vm.h"
 #include "../pcre/pcreposix.h"
 
 
@@ -86,10 +87,10 @@ void STk_error_cannot_load(SCM f)
 static SCM verify_port(SCM port, int mode)
 {
   if (mode == PORT_WRITE) {
-    if (!port) return STk_curr_oport;
+    if (!port) return STk_current_output_port();
     if (!OPORTP(port)) STk_error_bad_port(port);
   } else {
-    if (!port) return STk_curr_iport;
+    if (!port) return STk_current_input_port();
     if (!IPORTP(port)) STk_error_bad_port(port);
   }
   if (PORT_IS_CLOSEDP(port)) error_closed_port(port);
@@ -142,12 +143,12 @@ doc>
  */
 DEFINE_PRIMITIVE("current-input-port",current_input_port, subr0, (void))
 {
-  return STk_curr_iport;
+  return STk_get_current_vm()->iport;
 }
 
 DEFINE_PRIMITIVE("current-output-port",current_output_port, subr0, (void))
 {
-  return STk_curr_oport;
+  return STk_get_current_vm()->oport;
 }
 
 /*
@@ -159,16 +160,18 @@ doc>
  */
 DEFINE_PRIMITIVE("current-error-port",current_error_port, subr0, (void))
 {
-  return STk_curr_eport;
+  return STk_get_current_vm()->eport;
 }
 
 
 DEFINE_PRIMITIVE("%set-std-port!", set_std_port, subr2, (SCM index, SCM port))
 {
+  vm_thread_t *vm = STk_get_current_vm();
+
   switch (AS_LONG(index)) {
-    case SCM_LONG(0): if (!IPORTP(port)) goto badport; STk_curr_iport = port; break;
-    case SCM_LONG(1): if (!OPORTP(port)) goto badport; STk_curr_oport = port; break;
-    case SCM_LONG(2): if (!OPORTP(port)) goto badport; STk_curr_eport = port; break;
+    case SCM_LONG(0): if (!IPORTP(port)) goto badport; vm->iport = port; break;
+    case SCM_LONG(1): if (!OPORTP(port)) goto badport; vm->oport = port; break;
+    case SCM_LONG(2): if (!OPORTP(port)) goto badport; vm->eport = port; break;
     default: STk_error_bad_io_param("bad code ~S", index);
   }
   return STk_void;
@@ -600,7 +603,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
       argc -= 2;
       
       if (BOOLEANP(port)){
-	if (port == STk_true) port = STk_curr_oport;
+	if (port == STk_true) port = STk_current_output_port();
 	else {
 	  format_in_string = 1;
 	  port = STk_open_output_string();

@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 14-Nov-1993 14:58
- * Last file update: 25-Apr-2005 14:12 (eg)
+ * Last file update: 12-Apr-2006 12:39 (eg)
  */
 
 #include "stklos.h"
@@ -171,37 +171,39 @@ void STk_error(char *format, ...)
 void STk_warning(char *format, ...)
 {
   va_list ap;
+  SCM eport = STk_current_error_port();
 
   /* Print the prologue */
-  STk_fprintf(STk_curr_eport, "\n**** Warning:\n");
+  STk_fprintf(eport, "\n**** Warning:\n");
 
   /* Print the message */
   va_start(ap, format);
-  print_format(STk_curr_eport, format, ap);
+  print_format(eport, format, ap);
   va_end(ap);
 
-  STk_putc('\n', STk_curr_eport);
-  STk_flush(STk_curr_eport);
+  STk_putc('\n', eport);
+  STk_flush(eport);
 }
 
 
 void STk_panic(char *format, ...)
 {
   va_list ap;
+  SCM eport = STk_current_error_port();
 
   /* Print the prologue */
-  STk_fprintf(STk_curr_eport, "\n**** PANIC:\n");
+  STk_fprintf(eport, "\n**** PANIC:\n");
 
   /* Print the message */
   va_start(ap, format);
-  print_format(STk_curr_eport, format, ap);
+  print_format(eport, format, ap);
   va_end(ap);
 
-  STk_putc('\n', STk_curr_eport);
-  STk_flush(STk_curr_eport);
+  STk_putc('\n', eport);
+  STk_flush(eport);
 
   /*  And terminate execution  */
-  STk_puts("ABORT.\n", STk_curr_eport);
+  STk_puts("ABORT.\n", eport);
   _exit(1);
 }
 
@@ -219,16 +221,17 @@ void STk_signal(char *str)
 void STk_debug(char *format, ...)
 {
   va_list ap;
+  SCM eport = STk_current_error_port();
 
   /* Print the prologue */
-  STk_fprintf(STk_curr_eport, "**** Debug: ");
+  STk_fprintf(eport, "**** Debug: ");
   
   va_start(ap, format);
-  print_format(STk_curr_eport, format, ap);
+  print_format(eport, format, ap);
   va_end(ap);
   
-  STk_putc('\n', STk_curr_eport);
-  STk_flush(STk_curr_eport);
+  STk_putc('\n', eport);
+  STk_flush(eport);
 }
 
 void STk_gdb(SCM obj)		/* associated to the  gdb write function */

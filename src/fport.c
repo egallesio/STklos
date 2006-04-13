@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update:  4-Apr-2006 18:59 (eg)
+ * Last file update: 12-Apr-2006 16:06 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -32,11 +32,11 @@
 #include <ctype.h>
 #include "stklos.h"
 #include "fport.h"
+#include "vm.h"
 
 char *STk_current_filename;		  /* Name of the file we read */
 int STk_interactive = 0;		  /* We are in interactive mode */
 
-SCM STk_curr_iport, STk_curr_oport, STk_curr_eport;  /* current active ports   */
 SCM STk_stdin, STk_stdout, STk_stderr;		     /* The unredirected ports */
 
 /*
@@ -92,19 +92,21 @@ static void unregister_port(SCM port)
 static void close_all_ports(void)
 {
   struct port_list *tmp, *cur;
-  
+  SCM eport = STk_current_error_port();
+  SCM oport = STk_current_output_port(); 		//FIXME:PORT
+
   for (cur = all_file_ports; cur ; cur = cur->next) {
     tmp = GET_FAKE_POINTER(cur->port);
     PORT_RELEASE(tmp) = nop_release_port;
     if (OPORTP(tmp)) {
-      if (tmp != STk_curr_eport && tmp != STk_curr_oport)
+      if (tmp != eport && tmp != oport)
 	STk_close(tmp);
     }
   }
   
   /* Finally close error and output port (must be done last) */
-  STk_close(STk_curr_eport); 
-  STk_close(STk_curr_oport);
+  STk_close(eport); 
+  STk_close(oport);
 }
 
 /*===========================================================================*\
@@ -826,12 +828,14 @@ DEFINE_PRIMITIVE("try-load", scheme_try_load, subr1, (SCM filename))
 
 int STk_init_fport(void)
 {
-  STk_stdin  = STk_curr_iport = (SCM) make_fport("*stdin*",  stdin,
-						 PORT_IS_FILE | PORT_READ); 
-  STk_stdout = STk_curr_oport = (SCM) make_fport("*stdout*", stdout,
-						 PORT_IS_FILE | PORT_WRITE);
-  STk_stderr = STk_curr_eport = (SCM) make_fport("*stderr*", stderr,
-						 PORT_IS_FILE | PORT_WRITE);
+  vm_thread_t *vm = STk_get_current_vm();
+
+  STk_stdin  = vm->iport = (SCM) make_fport("*stdin*",  stdin,  
+					    PORT_IS_FILE | PORT_READ); 
+  STk_stdout = vm->oport = (SCM) make_fport("*stdout*", stdout, 
+					    PORT_IS_FILE | PORT_WRITE);
+  STk_stderr = vm->eport = (SCM) make_fport("*stderr*", stderr, 
+					    PORT_IS_FILE | PORT_WRITE);
 
   ADD_PRIMITIVE(scheme_load);
   ADD_PRIMITIVE(scheme_try_load);

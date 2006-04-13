@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  6-Apr-2006 19:05 (eg)
+ * Last file update: 13-Apr-2006 15:51 (eg)
  */
 
 
@@ -91,13 +91,9 @@ static void terminate_scheme_thread(void *arg)
 static void *start_scheme_thread(void *arg)
 {
   volatile SCM thr = (SCM) arg;
-  vm_thread_t *vm;
   SCM res;
-
-  vm = THREAD_VM(thr) = STk_allocate_vm(5000);			// FIX:
-  vm->scheme_thread = thr;
-  pthread_setspecific(vm_key, vm);
-
+  
+  pthread_setspecific(vm_key, THREAD_VM(thr));
   pthread_cleanup_push(terminate_scheme_thread, thr);
   
   res = STk_C_apply(THREAD_THUNK(thr), 0);
@@ -124,6 +120,7 @@ static SCM do_make_thread(SCM thunk, char *name)
   THREAD_RESULT(z)    = STk_void;
   THREAD_EXCEPTION(z) = STk_false;
   THREAD_STATE(z)     = th_new;
+  THREAD_VM(z)        = NULL;
   
   // FIX: lock
   all_threads = STk_cons(z, all_threads); /* For the GC */
@@ -213,12 +210,24 @@ DEFINE_PRIMITIVE("thread-specific-set!", thread_specific_set, subr2,
 DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
 {
   pthread_attr_t attr;
-  
+  vm_thread_t *vm, *new;
+
   if (!THREADP(thr)) error_bad_thread(thr);
   if (THREAD_STATE(thr) != th_new) 
     STk_error("thread has already been started ~S", thr);
 
-  THREAD_STATE(thr) = th_runnable;
+  vm  = STk_get_current_vm();
+  new = STk_allocate_vm(5000);			// FIX:
+
+  new->current_module = vm->current_module;
+  new->iport          = vm->iport;
+  new->oport          = vm->oport;
+  new->eport          = vm->eport;
+  new->parameters     = STk_copy_tree(vm->parameters);
+  new->scheme_thread  = thr;
+  
+  THREAD_VM(thr)      = vm; 
+  THREAD_STATE(thr)   = th_runnable;  
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, TRUE);

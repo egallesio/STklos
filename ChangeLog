@@ -1,11 +1,17 @@
+2006-04-13  Erick Gallesio  <eg@essi.fr>
+
+	* src/error.c, src/fport.c, src/gnu-getopt.c, src/hash.c,
+	* src/port.c, src/process.c, src/stklos.h: 
+	Current-{input,output,error}-port are now thread specific.
+
+	* src/stklosconf.h.in, src/thread.c, src/thread.h, src/vm.h,
+	* lib/Lurc.d: Start the integration of Stephane Épardaud LURC stuff. 
+	
+
 2006-04-06  Erick Gallesio  <eg@essi.fr>
 
-	* lib/bonus.stk (parameterize): 
-	* src/lib.c
-	* src/parameter.c
-	* src/stklos.h
-	* src/thread.c
-	* src/vm.c
+	* lib/bonus.stk, src/lib.c, src/parameter.c, src/stklos.h,
+	* src/thread.c, src/vm.c,
 	* src/vm.h: New implementetaion of parameters. Paramateres can now 
 	be assocaited to a thread. PARAMETERIZE permits to have a thread
 	specific dynamic environment.

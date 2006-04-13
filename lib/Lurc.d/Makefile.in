@@ -14,11 +14,11 @@
 
 @SET_MAKE@
 
-# Makefile for SILex/STklos
+# Makefile.am for STklos Lurc directory
 #
-#           Author: Erick Gallesio [eg@essi.fr]
-#    Creation date: 13-Dec-2003 10:54 (eg)
-# Last file update: 13-Dec-2003 10:55 (eg)
+#           Author: Stephane Epardaud [Stephane.Epardaud@inria.fr]
+#    Creation date:  3-Apr-2006 10:30 (se)
+# Last file update: 13-Apr-2006 13:20 (eg)
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -73,6 +73,7 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 BUILD_ARCH = @BUILD_ARCH@
 BUILD_OS = @BUILD_OS@
+
 CC = @CC@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
@@ -96,7 +97,6 @@ HAVE_GNOME = @HAVE_GNOME@
 HAVE_LDAP = @HAVE_LDAP@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDAP_LIB = @LDAP_LIB@
-LURCDIR = @LURCDIR@
 OS_FLAVOUR = @OS_FLAVOUR@
 OS_NAME = @OS_NAME@
 PACKAGE = @PACKAGE@
@@ -120,25 +120,115 @@ VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
+CFLAGS = @CFLAGS@
 
+MGCINC = $(subst ../,../../,@GCINC@)
+STKCONF = ../../utils/stklos-config
+INCLUDES = -I../../src $(COMPFLAGS) $(MGCINC)
+COMPILE = @CC@ @CFLAGS@ @SH_COMP_FLAGS@ $(INCLUDES)
+
+shobjectdir = $(prefix)/lib/@PACKAGE@/@VERSION@
+
+shobject_SCRIPTS = stklurc.@SH_SUFFIX@
+noinst_LIBRARIES = libstklurc.a
+libstklurc_a_SOURCES = lurc.c
+
+# Scheme part
 schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
-scheme_DATA = silex.scm multilex.scm
-subdir = lib/SILex.d
+scheme_files = 
+
+scheme_DATA = $(scheme_files)
+subdir = lib/Lurc.d
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/stklosconf.h
 CONFIG_CLEAN_FILES =
-DIST_SOURCES =
+LIBRARIES = $(noinst_LIBRARIES)
+
+libstklurc_a_AR = $(AR) cru
+libstklurc_a_LIBADD =
+am_libstklurc_a_OBJECTS = lurc.$(OBJEXT)
+libstklurc_a_OBJECTS = $(am_libstklurc_a_OBJECTS)
+SCRIPTS = $(shobject_SCRIPTS)
+
+
+DEFS = @DEFS@
+DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)/src
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+depcomp = $(SHELL) $(top_srcdir)/depcomp
+am__depfiles_maybe = depfiles
+@AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/lurc.Po
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+DIST_SOURCES = $(libstklurc_a_SOURCES)
 DATA = $(scheme_DATA)
 
 DIST_COMMON = Makefile.am Makefile.in
+SOURCES = $(libstklurc_a_SOURCES)
+
 all: all-am
 
 .SUFFIXES:
+.SUFFIXES: .c .o .obj
 $(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  lib/SILex.d/Makefile
+	  $(AUTOMAKE) --gnu  lib/Lurc.d/Makefile
 Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
+
+AR = ar
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+libstklurc.a: $(libstklurc_a_OBJECTS) $(libstklurc_a_DEPENDENCIES) 
+	-rm -f libstklurc.a
+	$(libstklurc_a_AR) libstklurc.a $(libstklurc_a_OBJECTS) $(libstklurc_a_LIBADD)
+	$(RANLIB) libstklurc.a
+shobjectSCRIPT_INSTALL = $(INSTALL_SCRIPT)
+install-shobjectSCRIPTS: $(shobject_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(shobjectdir)
+	@list='$(shobject_SCRIPTS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f $$d$$p; then \
+	    f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
+	    echo " $(shobjectSCRIPT_INSTALL) $$d$$p $(DESTDIR)$(shobjectdir)/$$f"; \
+	    $(shobjectSCRIPT_INSTALL) $$d$$p $(DESTDIR)$(shobjectdir)/$$f; \
+	  else :; fi; \
+	done
+
+uninstall-shobjectSCRIPTS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(shobject_SCRIPTS)'; for p in $$list; do \
+	  f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
+	  echo " rm -f $(DESTDIR)$(shobjectdir)/$$f"; \
+	  rm -f $(DESTDIR)$(shobjectdir)/$$f; \
+	done
+
+mostlyclean-compile:
+	-rm -f *.$(OBJEXT) core *.core
+
+distclean-compile:
+	-rm -f *.tab.c
+
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lurc.Po@am__quote@
+
+distclean-depend:
+	-rm -rf ./$(DEPDIR)
+
+.c.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `test -f '$<' || echo '$(srcdir)/'`$<
+
+.c.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `cygpath -w $<`
+CCDEPMODE = @CCDEPMODE@
 uninstall-info-am:
 schemeDATA_INSTALL = $(INSTALL_DATA)
 install-schemeDATA: $(scheme_DATA)
@@ -158,9 +248,42 @@ uninstall-schemeDATA:
 	  echo " rm -f $(DESTDIR)$(schemedir)/$$f"; \
 	  rm -f $(DESTDIR)$(schemedir)/$$f; \
 	done
-tags: TAGS
-TAGS:
 
+ETAGS = etags
+ETAGSFLAGS =
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
+	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	mkid -fID $$unique
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+		$(TAGS_FILES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	unique=`for i in $$list; do \
+	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+	  done | \
+	  $(AWK) '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$tags$$unique" \
+	  || $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+	     $$tags $$unique
+
+GTAGS:
+	here=`$(am__cd) $(top_builddir) && pwd` \
+	  && cd $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) $$here
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 
 top_distdir = ../..
@@ -189,10 +312,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(DATA)
+all-am: Makefile $(LIBRARIES) $(SCRIPTS) $(DATA)
 
 installdirs:
-	$(mkinstalldirs) $(DESTDIR)$(schemedir)
+	$(mkinstalldirs) $(DESTDIR)$(shobjectdir) $(DESTDIR)$(schemedir)
 
 install: install-am
 install-exec: install-exec-am
@@ -220,11 +343,12 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic mostlyclean-am
+clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 
-distclean-am: clean-am distclean-generic
+distclean-am: clean-am distclean-compile distclean-depend \
+	distclean-generic distclean-tags
 
 dvi: dvi-am
 
@@ -234,7 +358,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-schemeDATA
+install-data-am: install-schemeDATA install-shobjectSCRIPTS
 
 install-exec-am:
 
@@ -250,19 +374,33 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic
 
-uninstall-am: uninstall-info-am uninstall-schemeDATA
+uninstall-am: uninstall-info-am uninstall-schemeDATA \
+	uninstall-shobjectSCRIPTS
 
-.PHONY: all all-am check check-am clean clean-generic distclean \
-	distclean-generic distdir dvi dvi-am info info-am install \
-	install-am install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am install-man \
-	install-schemeDATA install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic uninstall uninstall-am \
-	uninstall-info-am uninstall-schemeDATA
+.PHONY: GTAGS all all-am check check-am clean clean-generic \
+	clean-noinstLIBRARIES distclean distclean-compile \
+	distclean-depend distclean-generic distclean-tags distdir dvi \
+	dvi-am info info-am install install-am install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-man install-schemeDATA \
+	install-shobjectSCRIPTS install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic tags uninstall uninstall-am \
+	uninstall-info-am uninstall-schemeDATA \
+	uninstall-shobjectSCRIPTS
 
+
+stklurc.@SH_SUFFIX@: libstklurc.a 
+	@CC@ @SH_LOAD_FLAGS@ stklurc.@SH_SUFFIX@ $(libstklurc_a_OBJECTS)
+	chmod 0755 stklurc.@SH_SUFFIX@
+
+clean:
+	/bin/rm -f *.o *.ostk *.@SH_SUFFIX@ *.a *~ 
+
+distclean: clean 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

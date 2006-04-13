@@ -1,11 +1,11 @@
 /*
  * gnu-getopt.c		-- Adaptation of the GNU getopt function for STklos
  * 
- * Copyright © 2001-2004 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2001-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Nov-2001 23:40 (eg)
- * Last file update:  4-Jan-2004 16:46 (eg)
+ * Last file update: 12-Apr-2006 12:43 (eg)
  *
  * The following code is constituted of the GNU getopt, getopt_long
  * and getopt_long_only implementation. Code is slightly modified (all
@@ -78,7 +78,7 @@ static void getopt_fprintf(FILE* f, const char *format, ...)
   vsnprintf(buffer, GETOPT_BUF_SIZE, format, ap);
   
   if (we_are_in_scheme) {
-    STk_puts(buffer, STk_curr_oport);
+    STk_puts(buffer, STk_current_output_port());
   } else {
     fprintf(f, "%s", buffer);
   }

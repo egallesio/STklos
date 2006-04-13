@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update:  4-Jan-2006 16:18 (eg)
+dnl Last file update: 13-Apr-2006 13:25 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -47,9 +47,66 @@ then
   HAVE_DLOPEN="#define HAVE_DLOPEN 1"
 fi
 
-dnl Check for pthreads
-AC_CHECK_LIB(pthread, pthread_create, LIBS="-lpthread $LIBS")
+dnl
+dnl To thread or not to thread ?
+dnl
+AC_ARG_ENABLE(threads,
+  [AC_HELP_STRING([--enable-threads=TYPE], [choose threading package (none,pthread,lurc)])],
+  THREADS=$enableval,
+  THREADS=none)
 
+AC_LANG(C)
+dnl This checks for the presence of a given CPP define in a fiven header file
+AC_DEFUN(GC_CHECK_DEFINE, [
+ dnl $1: header file
+ dnl $2: CPP variable
+ dnl $3: then
+ dnl $4: else
+ AC_PREPROC_IFELSE([
+ #include <$1>
+ #ifndef $2
+ # error "$2 undefined"
+ #else
+  ok
+ #endif
+ ],
+ [$3], [$4])
+])
+
+dnl Now look at what threads we want
+case "$THREADS" in
+ no | none | single)
+   THREADS=none
+   AC_DEFINE(THREADS_NONE, [], [No thread support])
+   ;;
+ posix | pthreads)
+   dnl Check for pthreads
+   AC_CHECK_LIB(pthread, pthread_create, LIBS="-lpthread $LIBS", 
+                [AC_MSG_ERROR([Missing PThread library])])
+   THREADS=pthreads
+   AC_DEFINE(THREADS_PTHREADS, [], [PThread support])
+   ;;
+ lurc)
+   dnl Check for lurc
+   AC_CHECK_LIB(lurc, lurc_thread_create, LIBS="-llurc $LIBS", 
+                [AC_MSG_ERROR([Missing LURC library])])
+   AC_CHECK_HEADER([lurc.h], [], [AC_MSG_ERROR([Missing LURC header file])])
+   dnl Now check if it is compiled with GC support
+   AC_MSG_CHECKING([for LURC GC support])
+   GC_CHECK_DEFINE([lurc.h], [LURC_ENABLE_GC], 
+                   [AC_MSG_RESULT([ok])],
+                   [AC_MSG_ERROR([Missing GC support in LURC])])
+   dnl That should be good
+   AC_DEFINE(THREADS_LURC, [], [LURC threads support])
+   ;;
+ *)
+   AC_MSG_ERROR([Unknown thread system: $THREADS])
+   ;;
+esac
+dnl Automake nightmare
+AM_CONDITIONAL(PTHREADS, test "$THREADS" = pthreads)
+AM_CONDITIONAL(LURC, test "$THREADS" = lurc)
+AM_CONDITIONAL(NO_THREAD, test "$THREADS" = none)
 
 dnl check for GMP pre-version 3.0
 AC_CHECK_LIB(gmp, mpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
@@ -68,7 +125,13 @@ AC_ARG_WITH(gmp-light,
 dnl
 dnl check for GC
 dnl
-AC_CHECK_LIB(gc, GC_malloc, HAVE_GC="yes", HAVE_GC="no", $LIBS)
+if test "$THREADS" = lurc
+then
+  AC_MSG_WARN([Using the bundled GC for LURC support])
+  HAVE_GC="no"
+else
+  AC_CHECK_LIB(gc, GC_malloc, HAVE_GC="yes", HAVE_GC="no", $LIBS)
+fi
 
 # Test if the user want to force with our GC
 AC_ARG_WITH(provided-gc,
@@ -241,13 +304,15 @@ then
   case `uname -s` in
     Darwin*) echo "Force GC compilation  without optimizations on MacOS";
             (cd gc; CC="$CC" CFLAGS="-g" sh ./configure --prefix=$prefix \
-	    --disable-threads) ;;
-    *) (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix) ;;
+	    --disable-threads) || { echo "Cannot configure the GC"; exit; } ;;
+    *) (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix \
+            --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; } ;;
   esac
 
   GC=gc
   GCLIB="../gc/.libs/libgc.a"
-  GCINC="-I../gc"
+  GCINC="-I../gc/include"
+  AC_DEFINE(HAVE_GC, [], [Use system GC])
   # Eventually add a distclean target to the GC Makefile
 else
   echo "Using the system Boehm-Demers-Weiser library"
@@ -379,6 +444,13 @@ if test "$SVN_REPOSITORY" = "" ;then
    SVN_URL="NOT_AVAILABLE"
 fi
 
+# LURC adjustment
+LURCDIR=""
+if test "$THREADS" = "lurc" ;then
+   LURCDIR=Lurc.d
+fi
+
+
 
 dnl Output files 
 AC_SUBST(VERSION)
@@ -386,6 +458,7 @@ AC_SUBST(HAVE_DLOPEN)
 AC_SUBST(OS_FLAVOUR)
 AC_SUBST(GC)
 AC_SUBST(GCLIB)
+AC_SUBST(GCINC)
 AC_SUBST(GMP)
 AC_SUBST(GMPLIB)
 AC_SUBST(GMPINC)
@@ -416,6 +489,9 @@ AC_SUBST(PCRELIB)
 AC_SUBST(PCREINC)
 AC_SUBST(DEF_PCRE)
 AC_SUBST(SVN_URL)
+AC_SUBST(THREADS)
+AC_SUBST(LURCDIR)
+
 	
 AC_OUTPUT(Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile gtklos/Makefile gtklos/gtklosconf.h
@@ -423,7 +499,7 @@ AC_OUTPUT(Makefile src/Makefile src/extraconf.h doc/Makefile
 	  utils/stklos-config utils/stklos-script
 	  extensions/Makefile examples/Makefile
 	  examples/images/Makefile lib/Match.d/Makefile 
-	  lib/SILex.d/Makefile lib/Lalr.d/Makefile
+	  lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/Lurc.d/Makefile
 	  tests/Makefile extensions/extconf.h 
 	  doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 
 	  doc/stklos-genlex.1 doc/stklos-install.1 
@@ -446,6 +522,7 @@ echo "        GC library: " $gclib
 echo "      LDAP support: " $USE_LDAP
 echo "      GTK+ support: " $USE_GTK 
 echo "     GNOME support: " $USE_GNOME 
+echo "    Thread support: " $THREADS 
 echo " "
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options." 

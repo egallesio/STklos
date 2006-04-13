@@ -1,0 +1,25 @@
+(define-module lurc
+  (load "stklurc.so")
+
+  (export
+   lurc:when
+   %lurc:when
+   lurc:watch
+   %lurc:watch
+   lurc:emit
+   lurc:signal
+   lurc:signal?
+   lurc:signal-name
+   lurc:await
+   lurc:pause)
+
+  (define-macro (lurc:when sig e . rest)
+    `(%lurc:when ,sig (lambda () ,e ,@rest)))
+  (define-macro (lurc:watch sig e . rest)
+    `(%lurc:watch ,sig (lambda () ,e ,@rest)))
+)
+
+(select-module STklos)
+(import lurc)
+
+(provide "lurc")

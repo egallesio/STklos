@@ -3,6 +3,9 @@
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
+/* Use system GC */
+#undef HAVE_GC
+
 /* Define to 1 if you have the `getcwd' function. */
 #undef HAVE_GETCWD
 
@@ -95,6 +98,15 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* LURC threads support */
+#undef THREADS_LURC
+
+/* No thread support */
+#undef THREADS_NONE
+
+/* PThread support */
+#undef THREADS_PTHREADS
 
 /* Version number of package */
 #undef VERSION

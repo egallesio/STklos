@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  7-Feb-2006 10:16 (eg)
+# Last file update: 13-Apr-2006 13:20 (eg)
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -81,6 +81,7 @@ DEPDIR = @DEPDIR@
 EXAMPLES = @EXAMPLES@
 EXECDIR = @EXECDIR@
 GC = @GC@
+GCINC = @GCINC@
 GCLIB = @GCLIB@
 GMP = @GMP@
 GMPINC = @GMPINC@
@@ -95,6 +96,7 @@ HAVE_GNOME = @HAVE_GNOME@
 HAVE_LDAP = @HAVE_LDAP@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDAP_LIB = @LDAP_LIB@
+LURCDIR = @LURCDIR@
 OS_FLAVOUR = @OS_FLAVOUR@
 OS_NAME = @OS_NAME@
 PACKAGE = @PACKAGE@
@@ -113,12 +115,13 @@ SH_SUFFIX = @SH_SUFFIX@
 STACK_DIRECTION = @STACK_DIRECTION@
 STRIP = @STRIP@
 SVN_URL = @SVN_URL@
+THREADS = @THREADS@
 VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
 
-SUBDIRS = Match.d SILex.d Lalr.d
+SUBDIRS = Match.d SILex.d Lalr.d @LURCDIR@
 
 scheme_BOOT = assembler.stk		\
 	      bb.stk 			\

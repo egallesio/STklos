@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE RANLIB ac_ct_RANLIB CPP EGREP GTK_CONFIG GNOME_CONFIG LIBOBJS HAVE_DLOPEN OS_FLAVOUR GC GCLIB GMP GMPLIB GMPINC PREFIX SCMDIR EXECDIR BUILD_OS BUILD_ARCH OS_NAME SH_COMP_FLAGS SH_LOAD_FLAGS SH_LOADER SH_SUFFIX SH_MAIN_LOAD_FLAGS COMPOBJ COMPSRC STACK_DIRECTION GTKLOS GTK_CONFIG_LIBS GTK_CONFIG_CFLAGS EXAMPLES HAVE_GNOME HAVE_LDAP LDAP_LIB PCRETARGET PCRE PCRELIB PCREINC DEF_PCRE SVN_URL LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE RANLIB ac_ct_RANLIB CPP EGREP PTHREADS_TRUE PTHREADS_FALSE LURC_TRUE LURC_FALSE NO_THREAD_TRUE NO_THREAD_FALSE GTK_CONFIG GNOME_CONFIG LIBOBJS HAVE_DLOPEN OS_FLAVOUR GC GCLIB GCINC GMP GMPLIB GMPINC PREFIX SCMDIR EXECDIR BUILD_OS BUILD_ARCH OS_NAME SH_COMP_FLAGS SH_LOAD_FLAGS SH_LOADER SH_SUFFIX SH_MAIN_LOAD_FLAGS COMPOBJ COMPSRC STACK_DIRECTION GTKLOS GTK_CONFIG_LIBS GTK_CONFIG_CFLAGS EXAMPLES HAVE_GNOME HAVE_LDAP LDAP_LIB PCRETARGET PCRE PCRELIB PCREINC DEF_PCRE SVN_URL THREADS LURCDIR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -847,6 +847,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-dependency-tracking Speeds up one-time builds
   --enable-dependency-tracking  Do not reject slow dependency extractors
+  --enable-threads=TYPE   choose threading package (none,pthread,lurc)
   --enable-ldap			enable ldap
   --disable-gtk			disable gtk support
   --disable-gnome		disable gnome support
@@ -3784,7 +3785,33 @@ then
   HAVE_DLOPEN="#define HAVE_DLOPEN 1"
 fi
 
-echo "$as_me:$LINENO: checking for pthread_create in -lpthread" >&5
+# Check whether --enable-threads or --disable-threads was given.
+if test "${enable_threads+set}" = set; then
+  enableval="$enable_threads"
+  THREADS=$enableval
+else
+  THREADS=none
+fi;
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+
+case "$THREADS" in
+ no | none | single)
+   THREADS=none
+
+cat >>confdefs.h <<\_ACEOF
+#define THREADS_NONE
+_ACEOF
+
+   ;;
+ posix | pthreads)
+      echo "$as_me:$LINENO: checking for pthread_create in -lpthread" >&5
 echo $ECHO_N "checking for pthread_create in -lpthread... $ECHO_C" >&6
 if test "${ac_cv_lib_pthread_pthread_create+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -3850,8 +3877,322 @@ echo "$as_me:$LINENO: result: $ac_cv_lib_pthread_pthread_create" >&5
 echo "${ECHO_T}$ac_cv_lib_pthread_pthread_create" >&6
 if test $ac_cv_lib_pthread_pthread_create = yes; then
   LIBS="-lpthread $LIBS"
+else
+  { { echo "$as_me:$LINENO: error: Missing PThread library" >&5
+echo "$as_me: error: Missing PThread library" >&2;}
+   { (exit 1); exit 1; }; }
 fi
 
+   THREADS=pthreads
+
+cat >>confdefs.h <<\_ACEOF
+#define THREADS_PTHREADS
+_ACEOF
+
+   ;;
+ lurc)
+      echo "$as_me:$LINENO: checking for lurc_thread_create in -llurc" >&5
+echo $ECHO_N "checking for lurc_thread_create in -llurc... $ECHO_C" >&6
+if test "${ac_cv_lib_lurc_lurc_thread_create+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-llurc  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char lurc_thread_create ();
+int
+main ()
+{
+lurc_thread_create ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_lurc_lurc_thread_create=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_lurc_lurc_thread_create=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_lurc_lurc_thread_create" >&5
+echo "${ECHO_T}$ac_cv_lib_lurc_lurc_thread_create" >&6
+if test $ac_cv_lib_lurc_lurc_thread_create = yes; then
+  LIBS="-llurc $LIBS"
+else
+  { { echo "$as_me:$LINENO: error: Missing LURC library" >&5
+echo "$as_me: error: Missing LURC library" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+   if test "${ac_cv_header_lurc_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for lurc.h" >&5
+echo $ECHO_N "checking for lurc.h... $ECHO_C" >&6
+if test "${ac_cv_header_lurc_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_lurc_h" >&5
+echo "${ECHO_T}$ac_cv_header_lurc_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking lurc.h usability" >&5
+echo $ECHO_N "checking lurc.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <lurc.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking lurc.h presence" >&5
+echo $ECHO_N "checking lurc.h presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <lurc.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: lurc.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: lurc.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: lurc.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: lurc.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: lurc.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: lurc.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: lurc.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: lurc.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: lurc.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: lurc.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: lurc.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: lurc.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: lurc.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: lurc.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: lurc.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: lurc.h: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## ------------------------------------------ ##
+## Report this to the AC_PACKAGE_NAME lists.  ##
+## ------------------------------------------ ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for lurc.h" >&5
+echo $ECHO_N "checking for lurc.h... $ECHO_C" >&6
+if test "${ac_cv_header_lurc_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_lurc_h=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_lurc_h" >&5
+echo "${ECHO_T}$ac_cv_header_lurc_h" >&6
+
+fi
+if test $ac_cv_header_lurc_h = yes; then
+  :
+else
+  { { echo "$as_me:$LINENO: error: Missing LURC header file" >&5
+echo "$as_me: error: Missing LURC header file" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+      echo "$as_me:$LINENO: checking for LURC GC support" >&5
+echo $ECHO_N "checking for LURC GC support... $ECHO_C" >&6
+
+     cat >conftest.$ac_ext <<_ACEOF
+
+ #include <lurc.h>
+ #ifndef LURC_ENABLE_GC
+ # error "LURC_ENABLE_GC undefined"
+ #else
+  ok
+ #endif
+
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  echo "$as_me:$LINENO: result: ok" >&5
+echo "${ECHO_T}ok" >&6
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  { { echo "$as_me:$LINENO: error: Missing GC support in LURC" >&5
+echo "$as_me: error: Missing GC support in LURC" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+rm -f conftest.err conftest.$ac_ext
+
+
+cat >>confdefs.h <<\_ACEOF
+#define THREADS_LURC
+_ACEOF
+
+   ;;
+ *)
+   { { echo "$as_me:$LINENO: error: Unknown thread system: $THREADS" >&5
+echo "$as_me: error: Unknown thread system: $THREADS" >&2;}
+   { (exit 1); exit 1; }; }
+   ;;
+esac
+
+
+if test "$THREADS" = pthreads; then
+  PTHREADS_TRUE=
+  PTHREADS_FALSE='#'
+else
+  PTHREADS_TRUE='#'
+  PTHREADS_FALSE=
+fi
+
+
+
+if test "$THREADS" = lurc; then
+  LURC_TRUE=
+  LURC_FALSE='#'
+else
+  LURC_TRUE='#'
+  LURC_FALSE=
+fi
+
+
+
+if test "$THREADS" = none; then
+  NO_THREAD_TRUE=
+  NO_THREAD_FALSE='#'
+else
+  NO_THREAD_TRUE='#'
+  NO_THREAD_FALSE=
+fi
 
 
 echo "$as_me:$LINENO: checking for mpz_init_set in -lgmp" >&5
@@ -4007,7 +4348,13 @@ if test "${with_gmp_light+set}" = set; then
   HAVE_GMP="no"
 fi;
 
-echo "$as_me:$LINENO: checking for GC_malloc in -lgc" >&5
+if test "$THREADS" = lurc
+then
+  { echo "$as_me:$LINENO: WARNING: Using the bundled GC for LURC support" >&5
+echo "$as_me: WARNING: Using the bundled GC for LURC support" >&2;}
+  HAVE_GC="no"
+else
+  echo "$as_me:$LINENO: checking for GC_malloc in -lgc" >&5
 echo $ECHO_N "checking for GC_malloc in -lgc... $ECHO_C" >&6
 if test "${ac_cv_lib_gc_GC_malloc+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
@@ -4077,6 +4424,7 @@ else
   HAVE_GC="no"
 fi
 
+fi
 
 # Test if the user want to force with our GC
 
@@ -5598,13 +5946,19 @@ then
   case `uname -s` in
     Darwin*) echo "Force GC compilation  without optimizations on MacOS";
             (cd gc; CC="$CC" CFLAGS="-g" sh ./configure --prefix=$prefix \
-	    --disable-threads) ;;
-    *) (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix) ;;
+	    --disable-threads) || { echo "Cannot configure the GC"; exit; } ;;
+    *) (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix \
+            --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; } ;;
   esac
 
   GC=gc
   GCLIB="../gc/.libs/libgc.a"
-  GCINC="-I../gc"
+  GCINC="-I../gc/include"
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_GC
+_ACEOF
+
   # Eventually add a distclean target to the GC Makefile
 else
   echo "Using the system Boehm-Demers-Weiser library"
@@ -5724,6 +6078,11 @@ if test "$SVN_REPOSITORY" = "" ;then
    SVN_URL="NOT_AVAILABLE"
 fi
 
+# LURC adjustment
+LURCDIR=""
+if test "$THREADS" = "lurc" ;then
+   LURCDIR=Lurc.d
+fi
 
 
 
@@ -5761,7 +6120,13 @@ fi
 
 
 
-                                                                                                                                                                                                                                                ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile gtklos/Makefile gtklos/gtklosconf.h utils/Makefile utils/stklos-config utils/stklos-script extensions/Makefile examples/Makefile examples/images/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile tests/Makefile extensions/extconf.h doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-install.1 doc/skb/stklos-version.stk"
+
+
+
+
+
+
+                                                                                                                                                                                                                                                          ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile gtklos/Makefile gtklos/gtklosconf.h utils/Makefile utils/stklos-config utils/stklos-script extensions/Makefile examples/Makefile examples/images/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/Lurc.d/Makefile tests/Makefile extensions/extconf.h doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-install.1 doc/skb/stklos-version.stk"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -5857,6 +6222,27 @@ if test -z "${AMDEP_TRUE}" && test -z "${AMDEP_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"AMDEP\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"AMDEP\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${PTHREADS_TRUE}" && test -z "${PTHREADS_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"PTHREADS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"PTHREADS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${LURC_TRUE}" && test -z "${LURC_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"LURC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"LURC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${NO_THREAD_TRUE}" && test -z "${NO_THREAD_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"NO_THREAD\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"NO_THREAD\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -6320,6 +6706,7 @@ do
   "lib/Match.d/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/Match.d/Makefile" ;;
   "lib/SILex.d/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/SILex.d/Makefile" ;;
   "lib/Lalr.d/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/Lalr.d/Makefile" ;;
+  "lib/Lurc.d/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/Lurc.d/Makefile" ;;
   "tests/Makefile" ) CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
   "extensions/extconf.h" ) CONFIG_FILES="$CONFIG_FILES extensions/extconf.h" ;;
   "doc/stklos.1" ) CONFIG_FILES="$CONFIG_FILES doc/stklos.1" ;;
@@ -6450,6 +6837,12 @@ s,@RANLIB@,$RANLIB,;t t
 s,@ac_ct_RANLIB@,$ac_ct_RANLIB,;t t
 s,@CPP@,$CPP,;t t
 s,@EGREP@,$EGREP,;t t
+s,@PTHREADS_TRUE@,$PTHREADS_TRUE,;t t
+s,@PTHREADS_FALSE@,$PTHREADS_FALSE,;t t
+s,@LURC_TRUE@,$LURC_TRUE,;t t
+s,@LURC_FALSE@,$LURC_FALSE,;t t
+s,@NO_THREAD_TRUE@,$NO_THREAD_TRUE,;t t
+s,@NO_THREAD_FALSE@,$NO_THREAD_FALSE,;t t
 s,@GTK_CONFIG@,$GTK_CONFIG,;t t
 s,@GNOME_CONFIG@,$GNOME_CONFIG,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
@@ -6457,6 +6850,7 @@ s,@HAVE_DLOPEN@,$HAVE_DLOPEN,;t t
 s,@OS_FLAVOUR@,$OS_FLAVOUR,;t t
 s,@GC@,$GC,;t t
 s,@GCLIB@,$GCLIB,;t t
+s,@GCINC@,$GCINC,;t t
 s,@GMP@,$GMP,;t t
 s,@GMPLIB@,$GMPLIB,;t t
 s,@GMPINC@,$GMPINC,;t t
@@ -6487,6 +6881,8 @@ s,@PCRELIB@,$PCRELIB,;t t
 s,@PCREINC@,$PCREINC,;t t
 s,@DEF_PCRE@,$DEF_PCRE,;t t
 s,@SVN_URL@,$SVN_URL,;t t
+s,@THREADS@,$THREADS,;t t
+s,@LURCDIR@,$LURCDIR,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
 
@@ -7211,6 +7607,7 @@ echo "        GC library: " $gclib
 echo "      LDAP support: " $USE_LDAP
 echo "      GTK+ support: " $USE_GTK
 echo "     GNOME support: " $USE_GNOME
+echo "    Thread support: " $THREADS
 echo " "
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options."

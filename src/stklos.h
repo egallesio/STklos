@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  6-Apr-2006 17:21 (eg)
+ * Last file update: 12-Apr-2006 16:00 (eg)
  */
 
 #ifndef STKLOS_H
@@ -829,7 +829,9 @@ SCM STk_add_port_idle(SCM port, SCM idle_func);
 SCM STk_fd2scheme_port(int fd, char *mode, char *identification);
 void STk_set_line_buffered_mode(SCM port);
 int STk_init_fport(void);
-
+SCM STk_current_input_port(void);
+SCM STk_current_output_port(void);
+SCM STk_current_error_port(void);
 
 
 /****
@@ -867,7 +869,6 @@ int STk_init_port(void);
 
 extern char *STk_current_filename;		 /* Name of the file we read */ 
 
-extern SCM STk_curr_iport, STk_curr_oport, STk_curr_eport;/* current active ports */
 extern SCM STk_stdin, STk_stdout, STk_stderr;		  /* unredirected ports   */
 extern int STk_interactive;			/* We are in intearctive mode */
 

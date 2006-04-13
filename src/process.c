@@ -1,7 +1,7 @@
 /*
  * p r o c e s s . c 		-- Access to processes from STklos
  *
- * Copyright © 1994-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -15,7 +15,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 15-Aug-2005 21:24 (eg)
+ * Last file update: 12-Apr-2006 12:49 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and 
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -325,7 +325,7 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
   	     execvp(*argv, argv);
  	     
  	     /* Cannot exec if we are here */
- 	     STk_fprintf(STk_curr_eport, "**** Cannot  exec %s!\n", *argv);
+ 	     STk_fprintf(STk_current_error_port(), "**** Cannot  exec %s!\n", *argv);
  	     exit(1);
     default: /* PARENT */
       	     PROCESS_PID(z) = pid;

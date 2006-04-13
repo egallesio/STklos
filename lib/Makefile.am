@@ -2,9 +2,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  7-Feb-2006 10:16 (eg)
+# Last file update: 13-Apr-2006 13:20 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d
+SUBDIRS = Match.d SILex.d Lalr.d @LURCDIR@
 
 scheme_BOOT = assembler.stk		\
 	      bb.stk 			\
