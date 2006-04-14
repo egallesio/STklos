@@ -97,6 +97,10 @@
   typedef unsigned int  sem_t;
 #endif /* GC_DGUX386_THREADS */
 
+#ifdef GC_LURC_THREADS
+# include <lurc.h>
+#endif /* GC_LURC_THREADS */
+
 #ifndef __GNUC__
 #   define __inline__
 #endif
@@ -745,6 +749,12 @@ void GC_thr_init(void)
       /* If we are using a parallel marker, actually start helper threads.  */
         if (GC_parallel) start_mark_threads();
 #   endif
+#ifdef GC_LURC_THREADS
+        /* initialize the lurc lib so that it calls the proper 
+           gc_pthread_create */
+        lurc_gc_init(&WRAP_FUNC(pthread_create),
+                     &GC_enable, &GC_disable);
+#endif /* GC_LURC_THREADS */
 }
 
 

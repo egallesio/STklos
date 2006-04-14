@@ -619,7 +619,7 @@ void GC_init_inner()
 	GC_init_netbsd_elf();
 #   endif
 #   if defined(GC_PTHREADS) || defined(GC_SOLARIS_THREADS) \
-       || defined(GC_WIN32_THREADS)
+       || defined(GC_WIN32_THREADS) || defined(GC_LURC_THREADS)
         GC_thr_init();
 #   endif
 #   ifdef GC_SOLARIS_THREADS
@@ -627,7 +627,7 @@ void GC_init_inner()
         GC_dirty_init();
 #   endif
 #   if !defined(THREADS) || defined(GC_PTHREADS) || defined(GC_WIN32_THREADS) \
-	|| defined(GC_SOLARIS_THREADS)
+	|| defined(GC_SOLARIS_THREADS) || defined(GC_LURC_THREADS)
       if (GC_stackbottom == 0) {
 	GC_stackbottom = GC_get_main_stack_base();
 #       if (defined(LINUX) || defined(HPUX)) && defined(IA64)

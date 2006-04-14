@@ -138,16 +138,10 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
 			STk_STklos_module);
 }
 
-int main(int argc, char *argv[])
+int mymain(int argc, char *argv[])
 {
   int ret;
   char *argv0 = *argv;
-
-  /* Initialize the Garbage Collector */
-#if (defined(__CYGWIN32__) &&  defined(GC_DLL)) || defined(_AIX)
-# error GC problem
-#endif
-  STk_gc_init();
 
   /* Process command arguments */
   ret = process_program_arguments(argc, argv);
@@ -179,4 +173,19 @@ int main(int argc, char *argv[])
     exit(1);
   }
   return ret;
+}
+
+int main(int argc, char *argv[])
+{
+  /* Initialize the Garbage Collector */
+#if (defined(__CYGWIN32__) &&  defined(GC_DLL)) || defined(_AIX)
+# error GC problem
+#endif
+  STk_gc_init();
+
+#ifdef THREADS_LURC
+  return STk_thread_main(&mymain, argc, argv);
+#else
+  return mymain(argc, argv);
+#endif /* ! THREAD_LURC */
 }

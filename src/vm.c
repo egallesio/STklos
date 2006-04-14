@@ -36,6 +36,9 @@
 #include "vm-instr.h"
 #include "struct.h"
 
+#ifdef THREADS_LURC
+# include <lurc.h>
+#endif
 
 #define DEBUG_VM
 /* #define STAT_VM  */
@@ -73,8 +76,14 @@ static int debug_level = 0;	/* 0 is quiet, 1, 2, ... are more verbose */
 #endif
 
 
-#define MY_SETJMP(jb) 		(jb.blocked = get_signal_mask(), setjmp(jb.j))
-#define MY_LONGJMP(jb, val)	(longjmp((jb).j, val))
+#ifdef THREADS_LURC
+# define MY_SETJMP(jb) \
+  (jb.blocked = get_signal_mask(), LURC_SAVE_CONTEXT(jb.j))
+# define MY_LONGJMP(jb, val)	(lurc_restore_context((jb).j, val))
+#else
+# define MY_SETJMP(jb) 		(jb.blocked = get_signal_mask(), setjmp(jb.j))
+# define MY_LONGJMP(jb, val)	(longjmp((jb).j, val))
+#endif
 
 
 static Inline sigset_t get_signal_mask(void)
@@ -428,7 +437,9 @@ DEFINE_PRIMITIVE("apply", scheme_apply, apply, (void))
   /* This function is never called. It is just here to declare the primitive 
    * apply, as a primitive of type tc_apply
    */
+#ifdef STK_DEBUG
   STk_debug("CALL apply");
+#endif
   return STk_void;
 }
 
@@ -470,6 +481,7 @@ SCM STk_C_apply(SCM func, int nargs, ...)
     /* We have nargs SCM parameters to read */
     for (i = 0; i < nargs; i++) push(va_arg(ap, SCM));
   }
+  va_end(ap);
 
   code[1] = (short) nargs;			    /* Patch # of args  */
   vm->val     = func;				    /* Store fun in VAL */
@@ -1453,6 +1465,7 @@ void STk_get_stack_pointer(void **addr)
   *addr = (void *) &c;
 }
 
+#ifndef THREADS_LURC
 
 DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 {
@@ -1528,12 +1541,13 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 
 #define CALL_CC_SPACE	1024	/* Add some space for restoration bookeepping */
 
+static void restore_cont_jump(struct continuation_obj *k, void* addr);
+static void restore_cont_allocate(struct continuation_obj *k, size_t s);
+
 DEFINE_PRIMITIVE("%restore-continuation", restore_cont, subr2, (SCM cont, SCM value))
 {
   struct continuation_obj *k;
-  volatile void *p;
   void *addr;
-  int cur_stack_size; 
   vm_thread_t *vm = STk_get_current_vm();
 
   if (!CONTP(cont)) STk_error("bad continuation ~S", cont);
@@ -1550,25 +1564,40 @@ DEFINE_PRIMITIVE("%restore-continuation", restore_cont, subr2, (SCM cont, SCM va
   vm->handlers		= k->handlers;
   vm->top_jmp_buf	= k->jb;
   
-
   k->fresh = 0;
   /* Restore the Scheme stack */
   memcpy(k->sstart, k->stacks, k->ssize);
 
   /* Restore the C stack */
   STk_get_stack_pointer(&addr);
-  cur_stack_size = STk_start_stack - addr;
+  
+  restore_cont_jump(k, addr);
+
+  /* never reached */
+  return STk_void;
+}
+
+static void restore_cont_allocate(struct continuation_obj *k, size_t s){
+  //  void *buf = alloca(s);
+  char buf[1024];
+  void *addr;
+  buf[0]=0;
+  STk_get_stack_pointer(&addr);
+  restore_cont_jump(k, addr);
+}
+
+static void restore_cont_jump(struct continuation_obj *k, void* addr){
+  int cur_stack_size = STk_start_stack - addr;
   if (cur_stack_size < 0) cur_stack_size = -cur_stack_size;
   if (cur_stack_size <= (k->csize + CALL_CC_SPACE))
-    /* Allocate some space on stack to allow restoration */
-    p = alloca(k->csize + CALL_CC_SPACE - cur_stack_size);
-  //  memcpy(k->cstart, k->cstack, k->csize);
-  memcpy(k->cstart, k->stacks + k->ssize, k->csize);
-  
-  /* Return */
-  MY_LONGJMP(k->state, 1);
-
-  return STk_void; /* never reached */
+    restore_cont_allocate(k, k->csize + CALL_CC_SPACE - cur_stack_size);
+  else{
+    //  memcpy(k->cstart, k->cstack, k->csize);
+    memcpy(k->cstart, k->stacks + k->ssize, k->csize);
+    
+    /* Return */
+    MY_LONGJMP(k->state, 1);
+  }
 }
 
 DEFINE_PRIMITIVE("%continuation?", continuationp, subr1, (SCM obj))
@@ -1595,6 +1624,7 @@ static struct extended_type_descr xtype_continuation = {
   print_continuation		/* print function */
 };
 
+#endif /* ! THREADS_LURC */
 
 /*===========================================================================*\
  * 
@@ -1734,9 +1764,27 @@ int STk_boot_from_C(void)
   return 0;
 }
 
+SCM *STk_save_vm(void){
+  vm_thread_t *vm = STk_get_current_vm();
+  
+  SAVE_HANDLER_STATE(vm->val, vm->pc);
+  SAVE_VM_STATE();
+
+  return vm->sp;
+}
+
+void STk_restore_vm(SCM *sp){
+  vm_thread_t *vm = STk_get_current_vm();
+  vm->sp = sp;
+  FULL_RESTORE_VM_STATE(vm->sp);
+  UNSAVE_HANDLER_STATE();
+}
+
 int STk_init_vm()
 {
+#ifndef THREADS_LURC
   DEFINE_XTYPE(continuation, &xtype_continuation);
+#endif /* ! THREADS_LURC */
 
   /* Initialize the table of checked references */
   checked_globals = STk_must_malloc(checked_globals_len * sizeof(SCM));
@@ -1749,10 +1797,12 @@ int STk_init_vm()
 
   ADD_PRIMITIVE(values);
   ADD_PRIMITIVE(call_with_values);
+#ifndef THREADS_LURC
   ADD_PRIMITIVE(make_continuation);
   ADD_PRIMITIVE(restore_cont);
   ADD_PRIMITIVE(continuationp);
   ADD_PRIMITIVE(fresh_continuationp);
+#endif /* ! THREADS_LURC */
 #ifdef DEBUG_VM
   ADD_PRIMITIVE(set_vm_debug);
 #endif

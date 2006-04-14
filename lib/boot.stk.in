@@ -26,6 +26,7 @@
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
 (include "module.stk")		; All the macros for defining modules
+(include "@CALLCC_STK@")	; Call/cc support
 (include "r5rs.stk")		; R5RS stuff written in Scheme
 (include "struct.stk")		; STklos structures
 (include "bonus.stk")		; Extended functions and syntaxes

@@ -73,6 +73,7 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 BUILD_ARCH = @BUILD_ARCH@
 BUILD_OS = @BUILD_OS@
+CALLCC_STK = @CALLCC_STK@
 CC = @CC@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
@@ -228,7 +229,7 @@ SUFFIXES = .stk .ostk .scm
 subdir = lib
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/stklosconf.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = boot.stk
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -242,7 +243,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
 	install-exec-recursive installdirs-recursive install-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
-DIST_COMMON = Makefile.am Makefile.in
+DIST_COMMON = Makefile.am Makefile.in boot.stk.in
 DIST_SUBDIRS = $(SUBDIRS)
 all: all-recursive
 
@@ -253,6 +254,8 @@ $(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 	  $(AUTOMAKE) --gnu  lib/Makefile
 Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
+boot.stk: $(top_builddir)/config.status boot.stk.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 uninstall-info-am:
 schemeDATA_INSTALL = $(INSTALL_DATA)
 install-schemeDATA: $(scheme_DATA)

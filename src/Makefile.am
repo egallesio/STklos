@@ -17,12 +17,25 @@ extrainc_DATA   = stklos.h extraconf.h stklosconf.h socket.h fport.h
 
 DOCDB	        = DOCDB
 
+THREADS     = @THREADS@
+
+# what thread support do we put in?
+if LURC
+  THREAD_FILES = lurc_thread.c lurc_mutex.c
+endif
+if PTHREADS
+  THREAD_FILES = thread.c mutex.c
+endif
+if NO_THREAD
+  THREAD_FILES = nothread.c
+endif
+
 stklos_SOURCES = boolean.c boot.c char.c cond.c dynload.c env.c error.c \
  extend.c fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
- list.c misc.c mutex.c number.c object.c parameter.c path.c port.c print.c \
+ list.c misc.c number.c object.c parameter.c path.c port.c print.c \
  proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
- symbol.c system.c thread.c uvector.c vector.c vm.c vport.c
+ symbol.c system.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
 
 
 ### # The STklos library
@@ -44,6 +57,7 @@ stklos_SOURCES = boolean.c boot.c char.c cond.c dynload.c env.c error.c \
 # GC LIBRARY
 gc              = @GC@
 gclib           = @GCLIB@
+gcinc           = @GCINC@
 
 # GMP LIBRARY 
 gmp	        = @GMP@
@@ -57,7 +71,7 @@ pcreinc		= @PCREINC@
 
 stklos_LDADD   = $(compatlib) $(gmplib) $(pcrelib) $(gclib) -lm
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
-INCLUDES       = $(gmpinc) $(pcreinc)
+INCLUDES       = $(gmpinc) $(pcreinc) $(gcinc)
 
 
 struct.o cond.o: struct.h

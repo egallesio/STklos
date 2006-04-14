@@ -21,16 +21,15 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update: 12-Apr-2006 23:24 (eg)
+ * Last file update:  4-Feb-2006 11:04 (eg)
  */
 #ifndef _STK_THREAD_H
 #define _STK_THREAD_H
 
-//FIX: 
 #define _REENTRANT 1
-#define GC_LINUX_THREADS 1
+#define GC_LURC_THREADS 1
 
-#include <pthread.h>
+#include <lurc.h>
 
 enum thread_state { th_new, th_runnable, th_terminated, th_blocked};
 
@@ -43,9 +42,9 @@ struct thread_obj {
   SCM end_exception;
   enum thread_state state;
   vm_thread_t *vm;
-  pthread_t pthread;
-  pthread_mutex_t mymutex;
-  pthread_cond_t  mycondv;
+  lurc_thread_t lthread;
+  lurc_signal_t term_sig; // emit to terminate this thread
+  lurc_signal_t death_sig; // emitted on thread death
 };
 
 
@@ -55,12 +54,13 @@ struct thread_obj {
 #define THREAD_SPECIFIC(p)	(((struct thread_obj *) (p))->specific)
 #define THREAD_RESULT(p)	(((struct thread_obj *) (p))->end_result)
 #define THREAD_EXCEPTION(p)	(((struct thread_obj *) (p))->end_exception)
-#define THREAD_CURMOD(p)	(((struct thread_obj *) (p))->current_module)
 #define THREAD_STATE(p)		(((struct thread_obj *) (p))->state)
 #define THREAD_VM(p)		(((struct thread_obj *) (p))->vm)
-#define THREAD_PTHREAD(p)	(((struct thread_obj *) (p))->pthread)
-#define THREAD_MYMUTEX(p)	(((struct thread_obj *) (p))->mymutex)
-#define THREAD_MYCONDV(p)	(((struct thread_obj *) (p))->mycondv)
+#define THREAD_LTHREAD(p)	(((struct thread_obj *) (p))->lthread)
+#define THREAD_TERM_SIG(p)	(((struct thread_obj *) (p))->term_sig)
+#define THREAD_DEATH_SIG(p)	(((struct thread_obj *) (p))->death_sig)
+
+extern struct timeval lthr_abs_time_to_rel_time(double abs_secs);
 
 extern SCM STk_primordial_thread; 
 

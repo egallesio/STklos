@@ -73,6 +73,7 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 BUILD_ARCH = @BUILD_ARCH@
 BUILD_OS = @BUILD_OS@
+CALLCC_STK = @CALLCC_STK@
 
 CC = @CC@
 COMPOBJ = @COMPOBJ@
@@ -116,6 +117,7 @@ SH_SUFFIX = @SH_SUFFIX@
 STACK_DIRECTION = @STACK_DIRECTION@
 STRIP = @STRIP@
 SVN_URL = @SVN_URL@
+
 THREADS = @THREADS@
 VERSION = @VERSION@
 am__include = @am__include@
@@ -132,12 +134,17 @@ extrainc_DATA = stklos.h extraconf.h stklosconf.h socket.h fport.h
 
 DOCDB = DOCDB
 
+# what thread support do we put in?
+@LURC_TRUE@THREAD_FILES = lurc_thread.c lurc_mutex.c
+@NO_THREAD_TRUE@THREAD_FILES = nothread.c
+@PTHREADS_TRUE@THREAD_FILES = thread.c mutex.c
+
 stklos_SOURCES = boolean.c boot.c char.c cond.c dynload.c env.c error.c \
  extend.c fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
- list.c misc.c mutex.c number.c object.c parameter.c path.c port.c print.c \
+ list.c misc.c number.c object.c parameter.c path.c port.c print.c \
  proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
- symbol.c system.c thread.c uvector.c vector.c vm.c vport.c
+ symbol.c system.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
 
 
 ### # The STklos library
@@ -159,6 +166,7 @@ stklos_SOURCES = boolean.c boot.c char.c cond.c dynload.c env.c error.c \
 # GC LIBRARY
 gc = @GC@
 gclib = @GCLIB@
+gcinc = @GCINC@
 
 # GMP LIBRARY 
 gmp = @GMP@
@@ -172,7 +180,7 @@ pcreinc = @PCREINC@
 
 stklos_LDADD = $(compatlib) $(gmplib) $(pcrelib) $(gclib) -lm
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
-INCLUDES = $(gmpinc) $(pcreinc)
+INCLUDES = $(gmpinc) $(pcreinc) $(gcinc)
 subdir = src
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = stklosconf.h
@@ -180,19 +188,21 @@ CONFIG_CLEAN_FILES = extraconf.h
 bin_PROGRAMS = stklos$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
+@LURC_TRUE@am__objects_1 = lurc_thread.$(OBJEXT) lurc_mutex.$(OBJEXT)
+@NO_THREAD_TRUE@am__objects_1 = nothread.$(OBJEXT)
+@PTHREADS_TRUE@am__objects_1 = thread.$(OBJEXT) mutex.$(OBJEXT)
 am_stklos_OBJECTS = boolean.$(OBJEXT) boot.$(OBJEXT) char.$(OBJEXT) \
 	cond.$(OBJEXT) dynload.$(OBJEXT) env.$(OBJEXT) error.$(OBJEXT) \
 	extend.$(OBJEXT) fport.$(OBJEXT) gnu-getopt.$(OBJEXT) \
 	gnu-glob.$(OBJEXT) hash.$(OBJEXT) keyword.$(OBJEXT) \
-	lib.$(OBJEXT) list.$(OBJEXT) misc.$(OBJEXT) mutex.$(OBJEXT) \
-	number.$(OBJEXT) object.$(OBJEXT) parameter.$(OBJEXT) \
-	path.$(OBJEXT) port.$(OBJEXT) print.$(OBJEXT) proc.$(OBJEXT) \
-	process.$(OBJEXT) promise.$(OBJEXT) read.$(OBJEXT) \
-	regexp.$(OBJEXT) signal.$(OBJEXT) sio.$(OBJEXT) \
-	socket.$(OBJEXT) sport.$(OBJEXT) stklos.$(OBJEXT) str.$(OBJEXT) \
-	struct.$(OBJEXT) symbol.$(OBJEXT) system.$(OBJEXT) \
-	thread.$(OBJEXT) uvector.$(OBJEXT) vector.$(OBJEXT) \
-	vm.$(OBJEXT) vport.$(OBJEXT)
+	lib.$(OBJEXT) list.$(OBJEXT) misc.$(OBJEXT) number.$(OBJEXT) \
+	object.$(OBJEXT) parameter.$(OBJEXT) path.$(OBJEXT) \
+	port.$(OBJEXT) print.$(OBJEXT) proc.$(OBJEXT) process.$(OBJEXT) \
+	promise.$(OBJEXT) read.$(OBJEXT) regexp.$(OBJEXT) \
+	signal.$(OBJEXT) sio.$(OBJEXT) socket.$(OBJEXT) sport.$(OBJEXT) \
+	stklos.$(OBJEXT) str.$(OBJEXT) struct.$(OBJEXT) \
+	symbol.$(OBJEXT) system.$(OBJEXT) uvector.$(OBJEXT) \
+	vector.$(OBJEXT) vm.$(OBJEXT) vport.$(OBJEXT) $(am__objects_1)
 stklos_OBJECTS = $(am_stklos_OBJECTS)
 stklos_DEPENDENCIES =
 
@@ -210,20 +220,22 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/fport.Po ./$(DEPDIR)/gnu-getopt.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gnu-glob.Po ./$(DEPDIR)/hash.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/keyword.Po ./$(DEPDIR)/lib.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/list.Po ./$(DEPDIR)/misc.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/mutex.Po ./$(DEPDIR)/number.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/object.Po ./$(DEPDIR)/parameter.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/path.Po ./$(DEPDIR)/port.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/print.Po ./$(DEPDIR)/proc.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/process.Po ./$(DEPDIR)/promise.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/read.Po ./$(DEPDIR)/regexp.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/signal.Po ./$(DEPDIR)/sio.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/socket.Po ./$(DEPDIR)/sport.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/stklos.Po ./$(DEPDIR)/str.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/struct.Po ./$(DEPDIR)/symbol.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/system.Po ./$(DEPDIR)/thread.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/uvector.Po ./$(DEPDIR)/vector.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/vm.Po ./$(DEPDIR)/vport.Po
+@AMDEP_TRUE@	./$(DEPDIR)/list.Po ./$(DEPDIR)/lurc_mutex.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/lurc_thread.Po ./$(DEPDIR)/misc.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/mutex.Po ./$(DEPDIR)/nothread.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/number.Po ./$(DEPDIR)/object.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/parameter.Po ./$(DEPDIR)/path.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/port.Po ./$(DEPDIR)/print.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/proc.Po ./$(DEPDIR)/process.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/promise.Po ./$(DEPDIR)/read.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/regexp.Po ./$(DEPDIR)/signal.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sio.Po ./$(DEPDIR)/socket.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sport.Po ./$(DEPDIR)/stklos.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/str.Po ./$(DEPDIR)/struct.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/symbol.Po ./$(DEPDIR)/system.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/thread.Po ./$(DEPDIR)/uvector.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/vector.Po ./$(DEPDIR)/vm.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/vport.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -231,8 +243,7 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(stklos_SOURCES)
 DATA = $(extrainc_DATA)
 
-DIST_COMMON = Makefile.am Makefile.in TODO extraconf.h.in \
-	stklosconf.h.in
+DIST_COMMON = Makefile.am Makefile.in extraconf.h.in stklosconf.h.in
 SOURCES = $(stklos_SOURCES)
 
 all: stklosconf.h
@@ -313,8 +324,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/keyword.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lurc_mutex.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lurc_thread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutex.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nothread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/number.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameter.Po@am__quote@

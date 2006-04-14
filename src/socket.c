@@ -35,6 +35,16 @@
 #include <stklos.h>
 #include "socket.h"
 
+#ifdef THREADS_LURC
+# include <lurc.h>
+/* use the lurc IO wrapper */
+# define socket(d,t,p)   lurc_io_socket(d,t,p)
+# define connect(fd,a,l) lurc_io_connect(fd,a,l)
+# define accept(fd,a,l)  lurc_io_accept(fd,a,l)
+# define close(fd)       lurc_io_close(fd)
+# define shutdown(fd,f)  lurc_io_shutdown(fd,f)
+#endif
+
 /*===========================================================================*\
  * 
  *			Definition of the socket type 

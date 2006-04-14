@@ -2025,7 +2025,8 @@ void GC_default_push_other_roots(void)
 # endif /* PCR */
 
 
-# if defined(GC_PTHREADS) || defined(GC_WIN32_THREADS)
+# if defined(GC_PTHREADS) || defined(GC_WIN32_THREADS) \
+     || defined(GC_LURC_THREADS)
 
 extern void GC_push_all_stacks(void);
 

@@ -22,6 +22,9 @@
 #if defined(AIX_THREADS)
 # define GC_AIX_THREADS
 #endif
+#if defined(LURC_THREADS)
+# define GC_LURC_THREADS
+#endif
 #if defined(HPUX_THREADS)
 # define GC_HPUX_THREADS
 #endif

@@ -34,6 +34,17 @@
 #include "fport.h"
 #include "vm.h"
 
+#ifdef THREADS_LURC
+# include <lurc.h>
+/* use the lurc IO wrapper */
+# define read(fd,buf,n)  lurc_io_read(fd,buf,n)
+# define write(fd,buf,n) lurc_io_write(fd,buf,n)
+# define close(fd)       lurc_io_close(fd)
+# define release(fd)     lurc_io_release(fd)
+#else
+# define release(fd)
+#endif
+
 char *STk_current_filename;		  /* Name of the file we read */
 int STk_interactive = 0;		  /* We are in interactive mode */
 
@@ -246,6 +257,8 @@ static int Fclose_pipe(void *stream)	/* pipe version (used by "| cmd" files */
 {
   int ret = flush_buffer(stream);
 
+  /* release any associated data with this file descriptor */
+  release(PORT_FD(stream));
   return (ret == EOF) ? EOF : pclose(PORT_FILE(stream));
 }
 
@@ -854,7 +867,8 @@ int STk_init_fport(void)
   STk_current_filename	= "";	/* "" <=> stdin */
 
   //  ADD_PRIMITIVE(dbg);
-  atexit(close_all_ports);
+  // FIXME: put this back
+  //  atexit(close_all_ports);
   return TRUE;
 }
 

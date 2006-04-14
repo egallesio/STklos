@@ -73,6 +73,7 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 BUILD_ARCH = @BUILD_ARCH@
 BUILD_OS = @BUILD_OS@
+CALLCC_STK = @CALLCC_STK@
 
 CC = @CC@
 COMPOBJ = @COMPOBJ@
@@ -124,7 +125,7 @@ install_sh = @install_sh@
 CFLAGS = @CFLAGS@
 
 STKCONF = ../utils/stklos-config
-INCLUDES = -I../src $(COMPFLAGS)
+INCLUDES = -I../src $(COMPFLAGS) @GCINC@
 COMPILE = @CC@ @CFLAGS@ @SH_COMP_FLAGS@ @GTK_CONFIG_CFLAGS@ $(INCLUDES)
 
 shobjectdir = $(prefix)/lib/@PACKAGE@/@VERSION@
@@ -185,7 +186,7 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(libgtklos_a_SOURCES)
 DATA = $(scheme_DATA)
 
-DIST_COMMON = Makefile.am Makefile.in TODO gtklosconf.h.in
+DIST_COMMON = Makefile.am Makefile.in gtklosconf.h.in
 SOURCES = $(libgtklos_a_SOURCES)
 
 all: all-am

@@ -71,7 +71,7 @@ SCM STk_get_parameter(SCM param)
 
   tmp = STk_int_assq(STk_current_thread(), PARAMETER_DYNENV(param));
   val =  (tmp != STk_false) ? CDR(tmp) : PARAMETER_VALUE(param);
-  
+
   return (PARAMETER_C_TYPE(param) == 2) ? ((SCM (*)(void)) val)(): val;
 }
 
@@ -90,7 +90,7 @@ SCM STk_set_parameter(SCM param, SCM value)
     /* We have a Scheme converter */
     new = (conv != STk_false) ? STk_C_apply(conv,1,value): value;
   }
-  
+
   tmp  = STk_int_assq(STk_current_thread(), PARAMETER_DYNENV(param));
   if (tmp != STk_false) 
     CDR(tmp) = new;

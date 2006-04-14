@@ -9,7 +9,7 @@ CC	  = @CC@
 CFLAGS	  = @CFLAGS@
 
 STKCONF	  = ../utils/stklos-config
-INCLUDES  = -I../src $(COMPFLAGS)
+INCLUDES  = -I../src $(COMPFLAGS) @GCINC@
 COMPILE   = @CC@ @CFLAGS@ @SH_COMP_FLAGS@ @GTK_CONFIG_CFLAGS@ $(INCLUDES)
 
 shobjectdir=$(prefix)/lib/@PACKAGE@/@VERSION@

@@ -917,7 +917,8 @@ void * GC_malloc_many(size_t lb);
 #define GC_NEXT(p) (*(void * *)(p)) 	/* Retrieve the next element	*/
 					/* in returned list.		*/
 extern void GC_thr_init(void);	/* Needed for Solaris/X86	*/
-
+#elif defined(GC_LURC_THREADS)
+extern void GC_thr_init(void);	/* Needed for Solaris/X86	*/
 #endif /* THREADS && !SRC_M3 */
 
 #if defined(GC_WIN32_THREADS) && !defined(__CYGWIN32__) && !defined(__CYGWIN__)

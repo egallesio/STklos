@@ -24,14 +24,14 @@ libstklurc_a_SOURCES = lurc.c
 schemedir    = $(prefix)/share/@PACKAGE@/@VERSION@
 scheme_files = lurc.stk
 
-scheme_DATA = $(scheme_files) lursk.ostk
+scheme_DATA = $(scheme_files) lurc.ostk
 
 stklurc.@SH_SUFFIX@: libstklurc.a 
 	@CC@ @SH_LOAD_FLAGS@ stklurc.@SH_SUFFIX@ $(libstklurc_a_OBJECTS)
 	chmod 0755 stklurc.@SH_SUFFIX@
 
 lurc.ostk: $(scheme_files)
-	../../utils/tmpcomp lurc.stk lurc.ostk
+	../../utils/tmpcomp lurc.stk lurc.ostk ../..
 
 clean:
 	/bin/rm -f *.o *.ostk *.@SH_SUFFIX@ *.a *~ 

@@ -34,9 +34,17 @@
  * system.
 \*===========================================================================*/
 #include <signal.h>
+#include "stklosconf.h"
+#ifdef THREADS_LURC
+# include <lurc.h>
+#endif
 
 typedef struct {	/* simple wrapper around jmp_buf */
+#ifdef THREADS_LURC
+  lurc_context_t j;
+#else
   jmp_buf j;
+#endif /* THREADS_LURC */
   sigset_t blocked;
 } jbuf;
 

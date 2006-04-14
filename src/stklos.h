@@ -45,10 +45,15 @@ extern "C"
 #include <errno.h>
 #include <setjmp.h>
 #include <memory.h>
-#include <gc/gc.h> 
 
 #include "stklosconf.h"
 #include "extraconf.h"
+
+#ifdef HAVE_GC
+# include <gc/gc.h>
+#else
+# include <gc.h>
+#endif
 
 /*===========================================================================*\
  * 
@@ -1152,6 +1157,14 @@ int STk_load_boot(char *s);
 int STk_boot_from_C(void);
 
 int STk_init_vm();
+
+#ifdef THREADS_LURC
+typedef int (*STk_main_t)(int, char**);
+int STk_thread_main(STk_main_t themain, int argc, char **argv);
+#endif /* ! THREADS_LURC */
+
+SCM *STk_save_vm(void);
+void STk_restore_vm(SCM *sp);
 
 
 /*****************************************************************************/

@@ -73,6 +73,7 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 BUILD_ARCH = @BUILD_ARCH@
 BUILD_OS = @BUILD_OS@
+CALLCC_STK = @CALLCC_STK@
 CC = @CC@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
@@ -277,7 +278,7 @@ distcleancheck_listfiles = find . -type f -print
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkinstalldirs) $(distdir)/doc $(distdir)/doc/skb $(distdir)/extensions $(distdir)/gtklos $(distdir)/src $(distdir)/utils
+	$(mkinstalldirs) $(distdir)/doc $(distdir)/doc/skb $(distdir)/extensions $(distdir)/gtklos $(distdir)/lib $(distdir)/src $(distdir)/utils
 	@list='$(DISTFILES)'; for file in $$list; do \
 	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
 	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \

@@ -25,7 +25,7 @@
 ;;;;
 (define (%thread-timeout->seconds timeout)
   (cond
-    ((time? timeout) timeout)
+    ((time? timeout) (time->seconds timeout))
     ((not timeout)   timeout)
     ((real? timeout) (+ (time->seconds (current-time))
 			timeout))
@@ -34,8 +34,8 @@
 
 (define (make-thread thunk :optional (name (symbol->string (gensym "thread"))))
   (define (thread-handler c)
-    (DEBUG "Erreur dans une thread. Type de cond ~S" c)
-    (describe c)
+;    (DEBUG "Erreur dans une thread. Type de cond ~S" c)
+;    (describe c)
     (%thread-end-exception-set! (current-thread) c)
     c)
   (%make-thread (lambda ()
@@ -48,7 +48,7 @@
   (let ((n (%thread-timeout->seconds timeout)))
     (unless n
       (error 'thread-sleep! "cannot used #f as timeout"))
-    (sleep (inexact->exact (round (* 1000 n))))))
+    (%thread-sleep! n)))
 
 
 (define (thread-join! thread :optional timeout (timeout-val #f timeout-val?))

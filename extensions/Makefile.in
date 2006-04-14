@@ -73,6 +73,7 @@ AMTAR = @AMTAR@
 AWK = @AWK@
 BUILD_ARCH = @BUILD_ARCH@
 BUILD_OS = @BUILD_OS@
+CALLCC_STK = @CALLCC_STK@
 CC = @CC@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
@@ -123,7 +124,7 @@ install_sh = @install_sh@
 
 STKCONF = ../utils/stklos-config
 INCLUDES = -I../src $(COMPFLAGS)
-CFLAGS = @CFLAGS@ @SH_COMP_FLAGS@ @GTK_CONFIG_CFLAGS@ $(INCLUDES)
+CFLAGS = @CFLAGS@ @SH_COMP_FLAGS@ @GTK_CONFIG_CFLAGS@ @GCINC@ $(INCLUDES)
 
 shobjectdir = $(prefix)/lib/@PACKAGE@/@VERSION@
 shobject_SCRIPTS = ldap.@SH_SUFFIX@
@@ -152,7 +153,7 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES =
 DATA = $(scheme_DATA)
 
-DIST_COMMON = README Makefile.am Makefile.in TODO extconf.h.in
+DIST_COMMON = README Makefile.am Makefile.in extconf.h.in
 all: all-am
 
 .SUFFIXES:

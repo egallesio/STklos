@@ -3,6 +3,10 @@
 #if defined(GC_PTHREADS) && !defined(GC_WIN32_THREADS) && \
     !defined(GC_DARWIN_THREADS)
 
+#ifdef GC_LURC_THREADS
+# include <lurc.h>
+#endif /* GC_LURC_THREADS */
+
 #include <signal.h>
 #include <semaphore.h>
 #include <errno.h>
@@ -237,6 +241,10 @@ void GC_push_all_stacks()
     /* On IA64, we also need to scan the register backing store. */
     IF_IA64(ptr_t bs_lo; ptr_t bs_hi;)
     pthread_t me = pthread_self();
+#   ifdef GC_LURC_THREADS
+      lurc_thread_t lt = NULL;
+      void *llo,*lhi;
+#   endif /* GC_LURC_THREADS */
     
     if (!GC_thr_initialized) GC_thr_init();
     #if DEBUG_THREADS
@@ -270,6 +278,10 @@ void GC_push_all_stacks()
     	              (unsigned)(p -> id), lo, hi);
         #endif
 	if (0 == lo) ABORT("GC_push_all_stacks: sp not set!\n");
+#       ifdef GC_LURC_THREADS
+        /* check wether the lurc lib wants us to push this now or later */
+          if (lurc_gc_is_lurc_thread(p -> id, lo, hi)) continue;
+#       endif /* GC_LURC_THREADS */
 #       ifdef STACK_GROWS_UP
 	  /* We got them backwards! */
           GC_push_all_stack(hi, lo);
@@ -291,6 +303,18 @@ void GC_push_all_stacks()
 #	endif
       }
     }
+#   ifdef GC_LURC_THREADS
+    /* walk all those threads to ask for the roots */
+    while ((lt = lurc_get_next_thread(lt)) != NULL) {
+      lurc_gc_get_root(lt, &llo, &lhi);
+      if(llo != NULL)
+        GC_push_all_stack(llo, lhi);
+    }
+    /* does it have another part ? */
+    lurc_gc_get_additional_root(&llo, &lhi);
+    if (llo != NULL)
+      GC_push_all_stack(llo, lhi);
+#   endif /* GC_LURC_THREADS */
     if (!found_me && !GC_in_thread_creation)
       ABORT("Collecting from unknown thread.");
 }
@@ -319,6 +343,9 @@ int GC_suspend_all()
             if (p -> flags & FINISHED) continue;
             if (p -> stop_info.last_stop_count == GC_stop_count) continue;
 	    if (p -> thread_blocked) /* Will wait */ continue;
+#           ifdef GC_LURC_THREADS
+            if (!lurc_gc_can_stop_thread(p -> id)) continue;
+#           endif /* GC_LURC_THREADS */
             n_live_threads++;
 	    #if DEBUG_THREADS
 	      GC_printf("Sending suspend signal to 0x%x\n",

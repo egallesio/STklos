@@ -77,6 +77,7 @@ dnl Now look at what threads we want
 case "$THREADS" in
  no | none | single)
    THREADS=none
+   CALLCC_STK=callcc.stk
    AC_DEFINE(THREADS_NONE, [], [No thread support])
    ;;
  posix | pthreads)
@@ -84,6 +85,7 @@ case "$THREADS" in
    AC_CHECK_LIB(pthread, pthread_create, LIBS="-lpthread $LIBS", 
                 [AC_MSG_ERROR([Missing PThread library])])
    THREADS=pthreads
+   CALLCC_STK=callcc.stk
    AC_DEFINE(THREADS_PTHREADS, [], [PThread support])
    ;;
  lurc)
@@ -98,6 +100,7 @@ case "$THREADS" in
                    [AC_MSG_ERROR([Missing GC support in LURC])])
    dnl That should be good
    AC_DEFINE(THREADS_LURC, [], [LURC threads support])
+   CALLCC_STK=dyn-wind-lurc.stk
    ;;
  *)
    AC_MSG_ERROR([Unknown thread system: $THREADS])
@@ -312,13 +315,13 @@ then
   GC=gc
   GCLIB="../gc/.libs/libgc.a"
   GCINC="-I../gc/include"
-  AC_DEFINE(HAVE_GC, [], [Use system GC])
   # Eventually add a distclean target to the GC Makefile
 else
   echo "Using the system Boehm-Demers-Weiser library"
   GC=""
   GCLIB="-lgc"
   GCINC=""
+  AC_DEFINE(HAVE_GC, [], [Use system GC])
 fi
 
 if test "$HAVE_PCRE" = "no"
@@ -491,11 +494,11 @@ AC_SUBST(DEF_PCRE)
 AC_SUBST(SVN_URL)
 AC_SUBST(THREADS)
 AC_SUBST(LURCDIR)
-
+AC_SUBST(CALLCC_STK)
 	
 AC_OUTPUT(Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile gtklos/Makefile gtklos/gtklosconf.h
-	  utils/Makefile
+	  utils/Makefile lib/boot.stk
 	  utils/stklos-config utils/stklos-script
 	  extensions/Makefile examples/Makefile
 	  examples/images/Makefile lib/Match.d/Makefile 

@@ -8,7 +8,7 @@
 STKCONF	  = ../utils/stklos-config
 INCLUDES  = -I../src $(COMPFLAGS)
 CC	  = @CC@
-CFLAGS	  = @CFLAGS@ @SH_COMP_FLAGS@ @GTK_CONFIG_CFLAGS@ $(INCLUDES)
+CFLAGS	  = @CFLAGS@ @SH_COMP_FLAGS@ @GTK_CONFIG_CFLAGS@ @GCINC@ $(INCLUDES)
 
 
 shobjectdir	    = $(prefix)/lib/@PACKAGE@/@VERSION@
