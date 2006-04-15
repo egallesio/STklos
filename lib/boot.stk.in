@@ -21,13 +21,13 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 13-Apr-2006 17:55 (eg)
+;;;; Last file update: 14-Apr-2006 23:34 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
 (include "module.stk")		; All the macros for defining modules
-(include "@CALLCC_STK@")	; Call/cc support
 (include "r5rs.stk")		; R5RS stuff written in Scheme
+(include @CALLCC_STK@)		; Call/cc support
 (include "struct.stk")		; STklos structures
 (include "bonus.stk")		; Extended functions and syntaxes
 (include "load.stk")		; Extended load dealing with paths and suffixes

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update: 20-Jan-2006 10:48 (eg)
+;;;; Last file update: 14-Apr-2006 20:34 (eg)
 ;;;;
 
 (load "./test.stk")
@@ -30,7 +30,7 @@
   (load "test-number.stk")
   (load "test-keyword.stk")
   (unless (eq? (%thread-system) 'lurc)
-          (load "test-callcc.stk"))
+    (load "test-callcc.stk"))
   (load "test-sport.stk")
   (load "test-fport.stk")
   (load "test-srfi.stk")

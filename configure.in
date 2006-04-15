@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 13-Apr-2006 13:25 (eg)
+dnl Last file update: 15-Apr-2006 00:07 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -77,7 +77,7 @@ dnl Now look at what threads we want
 case "$THREADS" in
  no | none | single)
    THREADS=none
-   CALLCC_STK=callcc.stk
+   CALLCC_STK='"callcc.stk"'
    AC_DEFINE(THREADS_NONE, [], [No thread support])
    ;;
  posix | pthreads)
@@ -85,7 +85,7 @@ case "$THREADS" in
    AC_CHECK_LIB(pthread, pthread_create, LIBS="-lpthread $LIBS", 
                 [AC_MSG_ERROR([Missing PThread library])])
    THREADS=pthreads
-   CALLCC_STK=callcc.stk
+   CALLCC_STK='"callcc.stk"'
    AC_DEFINE(THREADS_PTHREADS, [], [PThread support])
    ;;
  lurc)
@@ -100,7 +100,7 @@ case "$THREADS" in
                    [AC_MSG_ERROR([Missing GC support in LURC])])
    dnl That should be good
    AC_DEFINE(THREADS_LURC, [], [LURC threads support])
-   CALLCC_STK=dyn-wind-lurc.stk
+   CALLCC_STK='"dyn-wind-lurc.stk"'
    ;;
  *)
    AC_MSG_ERROR([Unknown thread system: $THREADS])

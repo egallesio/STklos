@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 12-Apr-2006 16:00 (eg)
+ * Last file update: 14-Apr-2006 20:17 (eg)
  */
 
 #ifndef STKLOS_H
@@ -1161,11 +1161,10 @@ int STk_init_vm();
 #ifdef THREADS_LURC
 typedef int (*STk_main_t)(int, char**);
 int STk_thread_main(STk_main_t themain, int argc, char **argv);
-#endif /* ! THREADS_LURC */
 
 SCM *STk_save_vm(void);
 void STk_restore_vm(SCM *sp);
-
+#endif /* ! THREADS_LURC */
 
 /*****************************************************************************/
 

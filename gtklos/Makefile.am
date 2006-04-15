@@ -2,14 +2,14 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 18-Jul-2000 10:30 (eg)
-# Last file update: 13-Sep-2005 22:45 (eg)
+# Last file update: 14-Apr-2006 19:20 (eg)
 
 
 CC	  = @CC@
 CFLAGS	  = @CFLAGS@
 
 STKCONF	  = ../utils/stklos-config
-INCLUDES  = -I../src $(COMPFLAGS) @GCINC@
+INCLUDES  = -I../src @GCINC@ $(COMPFLAGS) 
 COMPILE   = @CC@ @CFLAGS@ @SH_COMP_FLAGS@ @GTK_CONFIG_CFLAGS@ $(INCLUDES)
 
 shobjectdir=$(prefix)/lib/@PACKAGE@/@VERSION@

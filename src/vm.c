@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  6-Apr-2006 19:16 (eg)
+ * Last file update: 14-Apr-2006 20:33 (eg)
  */
 
 // INLINER values
@@ -35,7 +35,6 @@
 #include "vm.h"
 #include "vm-instr.h"
 #include "struct.h"
-
 #ifdef THREADS_LURC
 # include <lurc.h>
 #endif
@@ -437,9 +436,7 @@ DEFINE_PRIMITIVE("apply", scheme_apply, apply, (void))
   /* This function is never called. It is just here to declare the primitive 
    * apply, as a primitive of type tc_apply
    */
-#ifdef STK_DEBUG
-  STk_debug("CALL apply");
-#endif
+  STk_panic("Inside apply. Should not occur");
   return STk_void;
 }
 
@@ -1763,7 +1760,7 @@ int STk_boot_from_C(void)
   system_has_booted = 1;
   return 0;
 }
-
+#ifdef THREADS_LURC
 SCM *STk_save_vm(void){
   vm_thread_t *vm = STk_get_current_vm();
   
@@ -1779,6 +1776,7 @@ void STk_restore_vm(SCM *sp){
   FULL_RESTORE_VM_STATE(vm->sp);
   UNSAVE_HANDLER_STATE();
 }
+#endif
 
 int STk_init_vm()
 {

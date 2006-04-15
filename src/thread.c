@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 13-Apr-2006 15:51 (eg)
+ * Last file update: 14-Apr-2006 20:28 (eg)
  */
 
 
@@ -34,7 +34,6 @@
 #include "thread.h"
 
 SCM STk_primordial_thread = NULL;
-static SCM primordial;
 static SCM cond_thread_terminated, cond_join_timeout, cond_thread_abandonned_mutex;
 static SCM all_threads = STk_nil;
 
@@ -77,10 +76,6 @@ vm_thread_t *STk_get_current_vm(void)
 static void terminate_scheme_thread(void *arg)
 {
   SCM thr = (SCM) arg;
-
-#ifdef STK_DEBUG
-  STk_debug("Cleaning thread thr");
-#endif
 
   pthread_mutex_lock(&THREAD_MYMUTEX(thr));
   THREAD_STATE(thr)  = th_terminated;
@@ -303,28 +298,16 @@ DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
   
   pthread_mutex_lock(&THREAD_MYMUTEX(thr));
   while (THREAD_STATE(thr) != th_terminated) {
-#ifdef STK_DEBUG
-    STk_debug("thread-join loop state=%d", THREAD_STATE(thr));
-#endif
     if (tm != STk_false) {
       int n = pthread_cond_timedwait(&THREAD_MYCONDV(thr), 
 				     &THREAD_MYMUTEX(thr),
 				     &ts);
-      if (n == ETIMEDOUT) { 
-#ifdef STK_DEBUG
-        STk_debug("TIMEOUT"); 
-#endif
-        res = STk_true; 
-        break; 
-      }
+      if (n == ETIMEDOUT) { res = STk_true; break; }
     }
     else 
       pthread_cond_wait(&THREAD_MYCONDV(thr), &THREAD_MYMUTEX(thr));
   }
   pthread_mutex_unlock(&THREAD_MYMUTEX(thr));
-#ifdef STK_DEBUG
-  STk_debug("Fin de l'attente");
-#endif
   return res;
 }
 

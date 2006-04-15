@@ -2,7 +2,7 @@
 #
 #           Author: Stephane Epardaud [Stephane.Epardaud@inria.fr]
 #    Creation date:  3-Apr-2006 10:30 (se)
-# Last file update: 13-Apr-2006 17:31 (eg)
+# Last file update: 14-Apr-2006 19:22 (eg)
 
 
 CC	  = @CC@
@@ -31,7 +31,7 @@ stklurc.@SH_SUFFIX@: libstklurc.a
 	chmod 0755 stklurc.@SH_SUFFIX@
 
 lurc.ostk: $(scheme_files)
-	../../utils/tmpcomp lurc.stk lurc.ostk ../..
+	../../utils/tmpcomp lurc.stk lurc.ostk
 
 clean:
 	/bin/rm -f *.o *.ostk *.@SH_SUFFIX@ *.a *~ 

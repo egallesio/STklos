@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Jan-2006 22:56 (eg)
-;;;; Last file update:  6-Feb-2006 13:32 (eg)
+;;;; Last file update: 14-Apr-2006 20:00 (eg)
 ;;;;
 (define (%thread-timeout->seconds timeout)
   (cond
@@ -34,8 +34,6 @@
 
 (define (make-thread thunk :optional (name (symbol->string (gensym "thread"))))
   (define (thread-handler c)
-;    (DEBUG "Erreur dans une thread. Type de cond ~S" c)
-;    (describe c)
     (%thread-end-exception-set! (current-thread) c)
     c)
   (%make-thread (lambda ()
