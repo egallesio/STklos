@@ -1,7 +1,7 @@
 /*
  * v m . c				-- The STklos Virtual Machine
  * 
- * Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright  2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify

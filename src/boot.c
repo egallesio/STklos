@@ -1,6 +1,6 @@
 /*
-This file was automatically generated on Sat Apr 15 00:19:10 2006 by make-C-boot
-This is a dump of the image in file /tmp/stklos/lib/boot.img3
+This file was automatically generated on Sat Apr 15 11:19:18 2006 by make-C-boot
+This is a dump of the image in file /mnt/users/eg/Projects/STklos/lib/boot.img3
 ***DO NOT EDIT BY HAND***
 */
 

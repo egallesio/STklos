@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  2-Feb-2006 21:59 (eg)
+# Last file update: 14-Apr-2006 17:28 (eg)
 
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@

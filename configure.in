@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 15-Apr-2006 00:07 (eg)
+dnl Last file update: 15-Apr-2006 11:17 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -11,7 +11,7 @@ AM_INIT_AUTOMAKE(stklos, 0.73)
 AM_CONFIG_HEADER(src/stklosconf.h)
 AC_PROG_MAKE_SET
 
-
+USER_CFLAGS=$CFLAGS
 
 dnl Checks for programs.
 AC_PROG_INSTALL
@@ -30,7 +30,7 @@ dnl Initialize prefix
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
 
 dnl use -O3 if user has not specified something else and we are using GCC
-if test "X$CFLAGS" = "X" -a "$CC" = "gcc"
+if test "X$USER_CFLAGS" = "X" -a "$CC" = "gcc"
 then
   CFLAGS="-O3 -fomit-frame-pointer"
 fi

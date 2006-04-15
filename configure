@@ -1727,7 +1727,7 @@ echo "${ECHO_T}no" >&6
 fi
 
 
-
+USER_CFLAGS=$CFLAGS
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
@@ -3610,7 +3610,7 @@ export CC
 
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
 
-if test "X$CFLAGS" = "X" -a "$CC" = "gcc"
+if test "X$USER_CFLAGS" = "X" -a "$CC" = "gcc"
 then
   CFLAGS="-O3 -fomit-frame-pointer"
 fi

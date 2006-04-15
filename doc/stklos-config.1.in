@@ -40,6 +40,9 @@ The command that should be run to compile shared libraries.
 The command that should be used to link shared libraries.
 .IP "--shared-suffix | -s"
 The suffix for shared libraries.
+.IP "--threads | -t"
+The name thread system compiled in 
+.B stklos. 
 .IP "--help | -h | -?"
 Show a list of options
 

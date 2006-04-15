@@ -15,7 +15,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 12-Apr-2006 12:49 (eg)
+ * Last file update: 15-Apr-2006 11:06 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and 
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -326,7 +326,7 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
  	     
  	     /* Cannot exec if we are here */
  	     STk_fprintf(STk_current_error_port(), "**** Cannot  exec %s!\n", *argv);
- 	     exit(1);
+ 	     _exit(1);
     default: /* PARENT */
       	     PROCESS_PID(z) = pid;
        	     for(i = 0; i < 3; i++) {

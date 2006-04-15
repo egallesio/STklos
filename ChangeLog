@@ -1,3 +1,22 @@
+2006-04-15  Erick Gallesio  <eg@essi.fr>
+
+	* utils/stklos-config.in: Added the option --threads to know what
+	thread system is compiled in. 
+	
+
+2006-04-14 Stephane Epardaud <Stephane.Epardaud@sophia.inria.fr>
+
+	* Threads Merging:
+	Added --enable-threads={none,lurc,pthreads} to configure
+	Added support for no threads and lurc threads.
+	Basic srfi-18 support extended for lurc, plus lurc.stk for additionnal
+	functions.
+	New GC with lurc support.
+	Examples in examples/thread.stk
+	boot.stk now generated in configure
+	callcc.stk out of r5rs.stk
+
+	
 2006-04-13  Erick Gallesio  <eg@essi.fr>
 
 	* src/error.c, src/fport.c, src/gnu-getopt.c, src/hash.c,
