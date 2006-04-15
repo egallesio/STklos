@@ -15,7 +15,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 15-Apr-2006 11:06 (eg)
+ * Last file update: 15-Apr-2006 11:56 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and 
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -403,7 +403,7 @@ DEFINE_PRIMITIVE("fork", fork, subr01, (SCM thunk))
     case 0:  						      /* CHILD */
       if (thunk) {
 	STk_C_apply(thunk, 0);
-	STk_quit(0);
+	STk_exit(0);
       }
       return STk_false;
     default: 						      /* PARENT */

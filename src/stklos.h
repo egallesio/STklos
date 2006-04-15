@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 14-Apr-2006 20:17 (eg)
+ * Last file update: 15-Apr-2006 11:53 (eg)
  */
 
 #ifndef STKLOS_H
@@ -837,6 +837,7 @@ int STk_init_fport(void);
 SCM STk_current_input_port(void);
 SCM STk_current_output_port(void);
 SCM STk_current_error_port(void);
+void STk_close_all_ports(void);
 
 
 /****

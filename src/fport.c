@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 12-Apr-2006 16:06 (eg)
+ * Last file update: 15-Apr-2006 11:53 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -100,11 +100,11 @@ static void unregister_port(SCM port)
   }
 }
 
-static void close_all_ports(void)
+void STk_close_all_ports(void)
 {
   struct port_list *tmp, *cur;
   SCM eport = STk_current_error_port();
-  SCM oport = STk_current_output_port(); 		//FIXME:PORT
+  SCM oport = STk_current_output_port();
 
   for (cur = all_file_ports; cur ; cur = cur->next) {
     tmp = GET_FAKE_POINTER(cur->port);
@@ -867,8 +867,6 @@ int STk_init_fport(void)
   STk_current_filename	= "";	/* "" <=> stdin */
 
   //  ADD_PRIMITIVE(dbg);
-  // FIXME: put this back
-  //  atexit(close_all_ports);
   return TRUE;
 }
 

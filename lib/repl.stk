@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  2-Jan-2006 10:41 (eg)
+;;;; Last file update: 15-Apr-2006 12:27 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything 
@@ -189,7 +189,8 @@ doc>
 	      "Copyright © 1999-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>\n"
 	      'normal)
 	     (current-error-port)))
-  (repl))
+  (repl)
+  (%pre-exit 0))
 )
 
 

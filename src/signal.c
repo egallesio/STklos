@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 10-Oct-1995 07:55
- * Last file update:  4-Jan-2006 13:52 (eg)
+ * Last file update: 15-Apr-2006 11:33 (eg)
  *
  */
 
@@ -134,7 +134,7 @@ static void sighup(int i)
 {
   /* FIXME: perhaps we should be more verbose */
   fprintf(stderr, "Received a SIGHUP signal.\n");
-  exit(0);
+  STk_exit(0);
 }
 
 

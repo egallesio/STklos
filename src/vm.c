@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 14-Apr-2006 20:33 (eg)
+ * Last file update: 15-Apr-2006 11:55 (eg)
  */
 
 // INLINER values
@@ -135,7 +135,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   if (!vm->stack) {
     fprintf(stderr, "cannot allocate a stack with a size of %d cells\n", stack_size);
     fflush(stderr);
-    exit(1);
+    STk_exit(1);
   }
  
   /* Initialize the VM registers */

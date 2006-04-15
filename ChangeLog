@@ -1,5 +1,10 @@
 2006-04-15  Erick Gallesio  <eg@essi.fr>
 
+	* src/fport.c, src/system.c
+	* lib/repl.stk (main-repl): Changed the way buffer are flushed.
+	Bonus: when programs exits normally in interactive mode, the 
+	exit functions are executed.
+
 	* utils/stklos-config.in: Added the option --threads to know what
 	thread system is compiled in. 
 	

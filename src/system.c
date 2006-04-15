@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  4-Apr-2006 19:26 (eg)
+ * Last file update: 15-Apr-2006 12:27 (eg)
  */
 
 #include <unistd.h>
@@ -556,8 +556,9 @@ DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
  *
  * This function registers |proc| as an exit function. This function will 
  * be called when the program exits. When called, |proc| will be passed one 
- * parmater which is the status given to the |exit| function. The result of 
- * |register-exit-function!| is undefined. 
+ * parmater which is the status given to the |exit| function (or 0 if the 
+ * programe terminates normally). The result of  |register-exit-function!| 
+ * is undefined. 
  * @lisp
  * (let* ((tmp (temporary-file-name))
  *        (out (open-output-file tmp)))
@@ -577,32 +578,14 @@ DEFINE_PRIMITIVE("register-exit-function!", at_exit, subr1, (SCM proc))
 }
 
 
-/*
-<doc EXT exit
- * (exit) 
- * (exit ret-code)
- *
- * Exits the program with the specified integer return code. If |ret-code|
- * is omitted, the program terminates with a return code of 0.
- * If  program has registerd exit functions with |register-exit-function!|, 
- * they are called (in an order which is the reverse of their call order).
-doc>
-*/
-DEFINE_PRIMITIVE("exit", quit, subr01, (SCM retcode))
+DEFINE_PRIMITIVE("%pre-exit", pre_exit, subr1, (SCM retcode))
 {
-  long ret = 0;
-  
-  if (retcode) {
-    ret = STk_integer_value(retcode);
-    if (ret == LONG_MIN) STk_error("bad return code ~S", retcode);
-  } else {
-    retcode = MAKE_INT(ret);
-  }
-
   /* Execute the at-exit handlers */
   for (  ; !NULLP(exit_procs); exit_procs = CDR(exit_procs))
     STk_C_apply(CAR(exit_procs), 1, retcode);
-       
+  
+  /* Flush all bufers */
+  STk_close_all_ports();
 
 #ifdef FIXME
 //EG:  /* Execute all the terminal thunks of pending dynamic-wind */
@@ -617,7 +600,34 @@ DEFINE_PRIMITIVE("exit", quit, subr01, (SCM retcode))
 //EG:#endif
 #endif
 
+  return STk_void;
+}
+
+/*
+<doc EXT exit
+ * (exit) 
+ * (exit ret-code)
+ *
+ * Exits the program with the specified integer return code. If |ret-code|
+ * is omitted, the program terminates with a return code of 0.
+ * If  program has registered exit functions with |register-exit-function!|, 
+ * they are called (in an order which is the reverse of their call order).
+doc>
+*/
+DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
+{
+  long ret = 0;
+  
+  if (retcode) {
+    ret = STk_integer_value(retcode);
+    if (ret == LONG_MIN) STk_error("bad return code ~S", retcode);
+  } else {
+    retcode = MAKE_INT(0);
+  }
+
+  STk_pre_exit(retcode);
   exit(ret);
+
   return STk_void; /* never reached */
 }
 
@@ -1088,7 +1098,8 @@ int STk_init_system(void)
   ADD_PRIMITIVE(rename_file);
   ADD_PRIMITIVE(copy_file);
   ADD_PRIMITIVE(tmp_file);
-  ADD_PRIMITIVE(quit);
+  ADD_PRIMITIVE(pre_exit);
+  ADD_PRIMITIVE(exit);
   ADD_PRIMITIVE(at_exit);
   ADD_PRIMITIVE(machine_type);
 
