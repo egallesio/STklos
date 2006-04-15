@@ -21,11 +21,8 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update:  8-Feb-2006 10:24 (eg)
+ * Last file update: 15-Apr-2006 13:05 (eg)
  */
-
-#define _REENTRANT 1
-#define GC_LINUX_THREADS 1
 
 #include <lurc.h>
 

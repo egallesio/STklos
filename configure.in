@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 15-Apr-2006 11:17 (eg)
+dnl Last file update: 15-Apr-2006 12:44 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -73,6 +73,7 @@ AC_DEFUN(GC_CHECK_DEFINE, [
  [$3], [$4])
 ])
 
+
 dnl Now look at what threads we want
 case "$THREADS" in
  no | none | single)
@@ -106,6 +107,17 @@ case "$THREADS" in
    AC_MSG_ERROR([Unknown thread system: $THREADS])
    ;;
 esac
+
+dnl Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
+case "$THREADS" in
+  none) true ;;
+  *) case `uname -s` in
+        Linux*) CFLAGS="$CFLAGS -D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
+     esac
+esac
+
+
+
 dnl Automake nightmare
 AM_CONDITIONAL(PTHREADS, test "$THREADS" = pthreads)
 AM_CONDITIONAL(LURC, test "$THREADS" = lurc)
@@ -141,7 +153,7 @@ AC_ARG_WITH(provided-gc,
        [  --with-provided-gc		use our GC version even the system provides one],
        HAVE_GC="no")
 
-# On Mac OS X use the given GC (tio compile it without -Ox)
+# On Mac OS X use the given GC (to compile it without -Ox)
 case `uname -s` in
   Darwin*) echo "Force '--with-provided-gc' on MacOS";
            HAVE_GC="no" ;;

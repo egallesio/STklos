@@ -21,14 +21,10 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update: 12-Apr-2006 23:24 (eg)
+ * Last file update: 15-Apr-2006 13:06 (eg)
  */
 #ifndef _STK_THREAD_H
 #define _STK_THREAD_H
-
-//FIX: 
-#define _REENTRANT 1
-#define GC_LINUX_THREADS 1
 
 #include <pthread.h>
 

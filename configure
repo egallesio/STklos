@@ -3801,6 +3801,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+
 case "$THREADS" in
  no | none | single)
    THREADS=none
@@ -4168,6 +4169,16 @@ echo "$as_me: error: Unknown thread system: $THREADS" >&2;}
    ;;
 esac
 
+case "$THREADS" in
+  none) true ;;
+  *) case `uname -s` in
+        Linux*) CFLAGS="$CFLAGS -D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
+     esac
+esac
+
+
+
+
 
 if test "$THREADS" = pthreads; then
   PTHREADS_TRUE=
@@ -4437,7 +4448,7 @@ if test "${with_provided_gc+set}" = set; then
   HAVE_GC="no"
 fi;
 
-# On Mac OS X use the given GC (tio compile it without -Ox)
+# On Mac OS X use the given GC (to compile it without -Ox)
 case `uname -s` in
   Darwin*) echo "Force '--with-provided-gc' on MacOS";
            HAVE_GC="no" ;;

@@ -21,12 +21,9 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 15-Apr-2006 00:16 (eg)
+ * Last file update: 15-Apr-2006 13:06 (eg)
  */
 
-
-#define _REENTRANT 1
-#define GC_LINUX_THREADS 1
 
 #include <unistd.h>
 #include "stklos.h"

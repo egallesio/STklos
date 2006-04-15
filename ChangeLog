@@ -1,5 +1,8 @@
 2006-04-15  Erick Gallesio  <eg@essi.fr>
 
+	* configure.in: Added the _REENTRANT and GC_LINUX_THREADS in the
+	CFLAGS for Linux, when using threads for the GC.	
+
 	* src/fport.c, src/system.c
 	* lib/repl.stk (main-repl): Changed the way buffer are flushed.
 	Bonus: when programs exits normally in interactive mode, the 
