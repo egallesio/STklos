@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update:  4-Feb-2006 11:04 (eg)
+ * Last file update: 16-Apr-2006 11:42 (eg)
  */
 #ifndef _STK_THREAD_H
 #define _STK_THREAD_H
@@ -29,5 +29,12 @@
 #include "stklos.h"
 
 extern SCM STk_primordial_thread; 
+
+extern  struct primitive_obj STk_o_threadno; 	/* A pseudo primitive which 	*/
+						/* always fails 		*/
+
+#define FAKE_PRIMITIVE(name) \
+  STk_define_variable(STk_intern(name), &STk_o_threadno, STk_STklos_module)
+
 
 #endif /* ! _STK_THREAD_H */

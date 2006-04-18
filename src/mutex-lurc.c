@@ -21,13 +21,19 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 15-Apr-2006 13:06 (eg)
+ * Last file update: 16-Apr-2006 10:51 (eg)
  */
+
+#include <lurc.h>
+
+#ifdef LURC_ENABLE_PTHREAD
+#error LURC pthreads not supported yet
+#endif
 
 #include <unistd.h>
 #include "stklos.h"
 #include "vm.h"
-#include "thread.h"
+#include "thread-lurc.h"
 
 static SCM sym_not_owned, sym_abandoned, sym_not_abandoned;
 
@@ -44,8 +50,8 @@ struct mutex_obj {
   SCM specific;
   SCM owner;
   int locked;
-  pthread_mutex_t mymutex;
-  pthread_cond_t mycondv;
+  lurc_mutex_t mymutex;
+  lurc_signal_t mysignal;
 };
 
 #define MUTEXP(p)		(BOXED_TYPE_EQ((p), tc_mutex))
@@ -54,19 +60,25 @@ struct mutex_obj {
 #define MUTEX_OWNER(p)		(((struct mutex_obj *) (p))->owner)
 #define MUTEX_LOCKED(p)		(((struct mutex_obj *) (p))->locked)
 #define MUTEX_MYMUTEX(p)	(((struct mutex_obj *) (p))->mymutex)
-#define MUTEX_MYCONDV(p)	(((struct mutex_obj *) (p))->mycondv)
+#define MUTEX_MYSIGNAL(p)	(((struct mutex_obj *) (p))->mysignal)
+
+typedef enum {CV_NONE, CV_ONE, CV_ALL} cv_target_t;
 
 struct condv_obj {
   stk_header header;
   SCM name;
   SCM specific;
-  pthread_cond_t mycondv;
+  lurc_signal_t mysignal;
+  cv_target_t target;
+  lurc_instant_t emitted;
 };
 
-#define CONDVP(p)		(BOXED_TYPE_EQ((p), tc_condv))
+#define CONDVP(p)		(BOXED_TYPE_EQ((p), tc_mutex))
 #define CONDV_NAME(p)		(((struct condv_obj *) (p))->name)
 #define CONDV_SPECIFIC(p)	(((struct condv_obj *) (p))->specific)
-#define CONDV_MYCONDV(p)	(((struct condv_obj *) (p))->mycondv)
+#define CONDV_MYSIGNAL(p)	(((struct condv_obj *) (p))->mysignal)
+#define CONDV_TARGET(p)	        (((struct condv_obj *) (p))->target)
+#define CONDV_EMITTED(p)	(((struct condv_obj *) (p))->emitted)
 
 
 void error_bad_mutex(SCM obj)
@@ -87,8 +99,8 @@ void error_bad_timeout(SCM tm)
 
 void mutex_finalizer(SCM mtx)
 {
-  pthread_mutex_destroy(&MUTEX_MYMUTEX(mtx));
-  pthread_cond_destroy(&MUTEX_MYCONDV(mtx));
+  lurc_mutex_destroy(&MUTEX_MYMUTEX(mtx));
+  lurc_signal_destroy(&MUTEX_MYSIGNAL(mtx));
 }
 
 
@@ -110,8 +122,8 @@ DEFINE_PRIMITIVE("make-mutex", make_mutex, subr01, (SCM name))
   MUTEX_OWNER(z)    = STk_false;
   MUTEX_LOCKED(z)   = FALSE;
 
-  pthread_mutex_init(&MUTEX_MYMUTEX(z), NULL);
-  pthread_cond_init(&MUTEX_MYCONDV(z), NULL);
+  lurc_mutex_init(&MUTEX_MYMUTEX(z), NULL);
+  lurc_signal_init(&MUTEX_MYSIGNAL(z), NULL);
 
   STk_register_finalizer(z, mutex_finalizer);
 
@@ -149,14 +161,14 @@ DEFINE_PRIMITIVE("mutex-state", mutex_state, subr1, (SCM mtx))
 
   if (! MUTEXP(mtx)) error_bad_mutex(mtx);
   
-  pthread_mutex_lock(&MUTEX_MYMUTEX(mtx));
+  lurc_mutex_lock(&MUTEX_MYMUTEX(mtx));
 
   if (MUTEX_LOCKED(mtx))
     res = (MUTEX_OWNER(mtx) == STk_false) ? sym_not_owned : MUTEX_OWNER(mtx);
   else 
     res = (MUTEX_OWNER(mtx) == STk_false) ? sym_not_abandoned: sym_abandoned;
   
-  pthread_mutex_unlock(&MUTEX_MYMUTEX(mtx));
+  lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx));
 
   return res;
 }
@@ -164,22 +176,17 @@ DEFINE_PRIMITIVE("mutex-state", mutex_state, subr1, (SCM mtx))
 
 DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread))
 {
-  struct timespec ts;
-  double tmd;
+  struct timeval rel_tv;
   SCM res = STk_true;
+  int did_loop = 0;
 
   if (! MUTEXP(mtx)) error_bad_mutex(mtx);
-  if (REALP(tm)) {
-    tmd = REAL_VAL(tm);
-    ts.tv_sec  = (time_t) tmd;
-    ts.tv_nsec = (suseconds_t) ((tmd - ts.tv_sec) * 1000000);
-  }
-  else if (!BOOLEANP(tm))
+  if (REALP(tm)){
+    // bah nothing
+  }else if (!BOOLEANP(tm))
     error_bad_timeout(tm);
 
-  pthread_cleanup_push((void (*)(void*))mutex_finalizer, mtx);
-  
-  if (pthread_mutex_lock(&MUTEX_MYMUTEX(mtx)) != 0)
+  if (lurc_mutex_lock(&MUTEX_MYMUTEX(mtx)) != 0)
     error_deadlock();
 
   while (MUTEX_LOCKED(mtx)) {
@@ -190,21 +197,38 @@ DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread
       res = MUTEX_OWNER(mtx);
       break;
     }
+    // reset the signal ?
+    if(did_loop)
+      lurc_pause();
+    did_loop = 1;
     if (tm != STk_false) {
-      int n = pthread_cond_timedwait(&MUTEX_MYCONDV(mtx), &MUTEX_MYMUTEX(mtx), &ts);
-      
-      if (n == ETIMEDOUT) { res = STk_false; break; }
+      char timedout = 1;
+      // get a new timeout
+      rel_tv = lthr_abs_time_to_rel_time(REAL_VAL(tm));
+      if(rel_tv.tv_sec != 0 || rel_tv.tv_usec != 0){
+        lurc_signal_t sig_to = lurc_timeout_signal(NULL, rel_tv);
+        // await the given timeout
+        LURC_PROTECT{
+          LURC_WATCH(&sig_to){
+            lurc_signal_await(&MUTEX_MYSIGNAL(mtx));
+            // we did not timeout
+            timedout = 0;
+          }
+        }LURC_WITH{
+          lurc_signal_destroy(&sig_to);
+        }LURC_PROTECT_END;
+      }
+      if (timedout) { res = STk_false; break; }
     }
     else
-      pthread_cond_wait(&MUTEX_MYCONDV(mtx), &MUTEX_MYMUTEX(mtx));
+      lurc_signal_await(&MUTEX_MYSIGNAL(mtx));
   }
   if (res == STk_true) {
     /* We can lock the mutex */
     MUTEX_LOCKED(mtx) = TRUE;
     MUTEX_OWNER(mtx) = thread;
   }
-  pthread_mutex_unlock(&MUTEX_MYMUTEX(mtx));
-  pthread_cleanup_pop(0);
+  lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx));
 
   /* Different cases for res:
    *  - The owning thread which is now terminated (a condition must be raised)
@@ -216,22 +240,17 @@ DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread
 
 DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm))
 {
-  struct timespec ts;
-  double tmd;
   SCM res = STk_true;
+  struct timeval rel_tv;
 
   if (! MUTEXP(mtx)) error_bad_mutex(mtx);
   if (REALP(tm)) {
-    tmd = REAL_VAL(tm);
-    ts.tv_sec  = (time_t) tmd;
-    ts.tv_nsec = (suseconds_t) ((tmd - ts.tv_sec) * 1000000);
+    rel_tv = lthr_abs_time_to_rel_time(REAL_VAL(tm));
   }
   else if (!BOOLEANP(tm))
     error_bad_timeout(tm);
   
-  pthread_cleanup_push((void (*)(void*))mutex_finalizer, mtx);
-
-  if (pthread_mutex_lock(&MUTEX_MYMUTEX(mtx)) != 0)
+  if (lurc_mutex_lock(&MUTEX_MYMUTEX(mtx)) != 0)
     error_deadlock();
 
   /* Go in the unlocked/abandonned state */
@@ -239,18 +258,37 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
   MUTEX_OWNER(mtx)  = STk_false;
   
   /* Signal to waiting threads */
-  pthread_cond_signal(&MUTEX_MYCONDV(mtx));
+  lurc_signal_emit(&MUTEX_MYSIGNAL(mtx));
   if (cv != STk_false) {
     if (tm != STk_false) {
-      int n = pthread_cond_timedwait(&CONDV_MYCONDV(cv), &MUTEX_MYMUTEX(mtx), &ts);
-      
-      if (n == ETIMEDOUT) res = STk_false; 
+      char timedout = 1;
+      lurc_signal_t sig_to = lurc_timeout_signal(NULL, rel_tv);
+      // await the signal, but no longer than given timeout
+      LURC_PROTECT{
+        LURC_WATCH(&sig_to){
+          do{
+            // skip the first emission if needed
+            // not that this also works for loop cases
+            if(CONDV_EMITTED(cv) == lurc_instant())
+              lurc_pause();
+            lurc_signal_await(&CONDV_MYSIGNAL(cv));
+            // was it for us ?
+          }while(CONDV_TARGET(cv) == CV_NONE);
+          // it was for us, we take it
+          CONDV_TARGET(cv) = CV_NONE;
+          // we did not timeout
+          timedout = 0;
+        }
+      }LURC_WITH{
+        lurc_signal_destroy(&sig_to);
+      }LURC_PROTECT_END;
+
+      if (timedout) res = STk_false; 
     } else {
-      pthread_cond_wait(&CONDV_MYCONDV(cv), &MUTEX_MYMUTEX(mtx));
+      lurc_signal_await(&CONDV_MYSIGNAL(cv));
     }
   }
-  pthread_mutex_unlock(&MUTEX_MYMUTEX(mtx));
-  pthread_cleanup_pop(0);
+  lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx));
   return res;
 }
 
@@ -261,6 +299,7 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
  * 
 \* ====================================================================== */
 
+
 void error_bad_condv(SCM obj)
 {
   STk_error("bad confdition variable ~S", obj);
@@ -268,7 +307,7 @@ void error_bad_condv(SCM obj)
 
 void condv_finalizer(SCM cv)
 {
-  pthread_cond_destroy(&CONDV_MYCONDV(cv));
+  lurc_signal_destroy(&CONDV_MYSIGNAL(cv));
 }
 
 
@@ -287,7 +326,9 @@ DEFINE_PRIMITIVE("make-condition-variable", make_condv, subr01, (SCM name))
   NEWCELL(z, condv);
   CONDV_NAME(z)     = name;
   CONDV_SPECIFIC(z) = STk_void;
-  pthread_cond_init(&CONDV_MYCONDV(z), NULL);
+  CONDV_TARGET(z) = -1;
+  CONDV_EMITTED(z) = CV_NONE;
+  lurc_signal_init(&CONDV_MYSIGNAL(z), NULL);
 
   STk_register_finalizer(z, condv_finalizer);
 
@@ -323,14 +364,30 @@ DEFINE_PRIMITIVE("condition-variable-specific-set!", condv_specific_set, subr2,
 DEFINE_PRIMITIVE("condition-variable-signal!", condv_signal, subr1, (SCM cv))
 {
    if (! CONDVP(cv)) error_bad_condv(cv);
-   pthread_cond_signal(&CONDV_MYCONDV(cv));
+   // find a free instant to emit
+   while(lurc_instant() == CONDV_EMITTED(cv))
+     lurc_pause();
+
+   // we can now safely emit it for one person
+   CONDV_EMITTED(cv) = lurc_instant();
+   CONDV_TARGET(cv) = CV_ONE;
+   lurc_signal_emit(&CONDV_MYSIGNAL(cv));
+
    return STk_void;
 }
 
 DEFINE_PRIMITIVE("condition-variable-brodcast!", condv_broadcast, subr1, (SCM cv))
 {
    if (! CONDVP(cv)) error_bad_condv(cv);
-   pthread_cond_broadcast(&CONDV_MYCONDV(cv));
+   // find a free instant to emit
+   while(lurc_instant() == CONDV_EMITTED(cv))
+     lurc_pause();
+
+   // we can now safely emit it for one person
+   CONDV_EMITTED(cv) = lurc_instant();
+   CONDV_TARGET(cv) = CV_ALL;
+   lurc_signal_emit(&CONDV_MYSIGNAL(cv));
+
    return STk_void;
 }
 

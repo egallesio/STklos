@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 15-Apr-2006 11:53 (eg)
+ * Last file update: 15-Apr-2006 17:30 (eg)
  */
 
 #ifndef STKLOS_H
@@ -1081,7 +1081,7 @@ int STk_init_symbol(void);
 
 int STk_dirp(const char *path);
 int STk_init_system();
-EXTERN_PRIMITIVE("exit", quit, subr01, (SCM retcode));
+EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
 
 /*
   ------------------------------------------------------------------------------

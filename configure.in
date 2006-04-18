@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 15-Apr-2006 12:44 (eg)
+dnl Last file update: 15-Apr-2006 16:57 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -50,10 +50,12 @@ fi
 dnl
 dnl To thread or not to thread ?
 dnl
+AC_CHECK_LIB(pthread, pthread_create, deflt_threads=pthreads, deflt_threads=none)
+
 AC_ARG_ENABLE(threads,
   [AC_HELP_STRING([--enable-threads=TYPE], [choose threading package (none,pthread,lurc)])],
   THREADS=$enableval,
-  THREADS=none)
+  THREADS=$deflt_threads)
 
 AC_LANG(C)
 dnl This checks for the presence of a given CPP define in a fiven header file

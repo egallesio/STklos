@@ -1,0 +1,165 @@
+;;;;
+;;;; test-threads.stk			-- Testing Threads
+;;;; 
+;;;; Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 16-Apr-2006 12:54 (eg)
+;;;; Last file update: 17-Apr-2006 00:05 (eg)
+;;;;
+
+;;;; Most of theses tests were stolen in Gauche Scheme distribution
+
+(require "test")
+
+(test-section "Threads")
+
+;;------------------------------------------------------------------
+(test-subsection "Basic threads")
+
+(test "current-thread" #t (eq? (current-thread) (current-thread)))
+
+(test "thread?" '(#t #f)
+      (list (thread? (current-thread)) (thread? 'foo)))
+
+(test "make-thread" #t (thread? (make-thread (lambda () #f))))
+
+(test "thread-name.1" "foo" (thread-name (make-thread (lambda () #f) "foo")))
+(test "thread-name.2" 'foo  (thread-name (make-thread (lambda () #f) 'foo)))
+
+(test "thread-specific" "hello"
+      (begin
+	(thread-specific-set! (current-thread) "hello")
+	(thread-specific (current-thread))))
+
+(test "thread-start!" "hello"
+      (call-with-output-string
+          (lambda (p)
+	    (let ((t (thread-start! (make-thread (lambda () (display "hello" p))))))
+	      (thread-join! t)
+	      t))))
+
+;; calculate fibonacchi in awful way
+;;// (define (mt-fib n)
+;;//   (let ((threads (make-vector n)))
+;;//     (dotimes (i n)
+;;//       (vector-set! threads
+;;// 		   i
+;;// 		   (make-thread
+;;// 		    (case i
+;;// 		      ((0)  (lambda () 1))
+;;// 		      ((1)  (lambda () 2))
+;;// 		      (else (lambda ()
+;;// 			      (+ (thread-join! (vector-ref threads (- i 1)))
+;;// 				 (thread-join! (vector-ref threads (- i 2))))))))))
+;;//     (dotimes (i n)
+;;//       (thread-start! (vector-ref threads (- n i 1))))
+;;//     (thread-join! (vector-ref threads (- n 1)))))
+;;// 
+;;// (test "thread-join!" 14930352 (mt-fib 35))
+
+;;---------------------------------------------------------------------
+(test-subsection "Thread and error")
+
+(test "uncaught-exception.1" 123
+       (let ((t (make-thread (lambda () (error "foo")))))
+         (thread-start! t)
+         (with-handler (lambda (c)
+			 ;; c is the condition associated to error "foo"
+			 123)
+           (thread-join! t))))
+
+(test "uncaught-exception.2" 42
+     (let ((t (make-thread (lambda () (raise 4)))))
+       (thread-start! t)
+       (with-handler (lambda (c) (+ c 38))
+	 (thread-join! t))))
+
+;;------------------------------------------------------------------
+(test-subsection "Parameterize and threads")
+
+(test "parameter.1" 1
+      (let ((local #f))
+	(thread-join! (thread-start!
+		       (make-thread
+			(lambda ()
+			  (set! local (make-parameter 1))))))
+         (thread-join! (thread-start!
+			(make-thread
+			 (lambda ()
+			   (local)))))))
+
+(define *thr1-val* #f)
+(define *thr2-val* #f)
+(define p (make-parameter 3))
+
+(test "parameter.2" '(3 4 5)
+       (let ((th1 (make-thread
+                   (lambda ()
+		     (parameterize ((p 4))
+		       (set! *thr1-val* (p))))))
+             (th2 (make-thread
+                   (lambda ()
+		     (parameterize ((p 5))
+		       (set! *thr2-val* (p)))))))
+         (thread-start! th1)
+         (thread-start! th2)
+         (thread-join! th1)
+         (thread-join! th2)
+         (list (p) *thr1-val* *thr2-val*)))
+
+;------------------------------------------------------------------
+(test-subsection "Mutexes")
+
+(test "make-mutex" #t (mutex? (make-mutex)))
+(test "mutex-name" 'foo (mutex-name (make-mutex 'foo)))
+
+(test "mutex-specific" "hello"
+      (let ((m (make-mutex 'bar)))
+	(mutex-specific-set! m "hello")
+	(mutex-specific m)))
+
+(test "lock and unlock - no blocking" #t
+      (let ((m (make-mutex)))
+	(mutex-lock! m)
+	(mutex-unlock! m)))
+
+(test "mutex-state"
+       (list 'not-abandoned (current-thread) 'not-owned 'not-abandoned)
+       (let ((m (make-mutex)))
+	 (list (mutex-state m)
+	       (begin 
+		 (mutex-lock! m)
+		 (mutex-state m))
+	       (begin 
+		 (mutex-unlock! m)
+		 (mutex-lock! m #f #f)
+		 (mutex-state m))
+	       (begin (mutex-unlock! m)
+		      (mutex-state m)))))
+
+
+;;------------------------------------------------------------------
+
+
+
+
+
+
+(test-section-end)

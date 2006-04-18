@@ -1,8 +1,14 @@
 2006-04-15  Erick Gallesio  <eg@essi.fr>
 
-	* configure.in: Added the _REENTRANT and GC_LINUX_THREADS in the
-	CFLAGS for Linux, when using threads for the GC.	
+	* src/vm.c (call-with-values): Fixed bug when no values was
+	returned by the producer.
 
+	* configure.in: 
+	   - Added the _REENTRANT and GC_LINUX_THREADS in the
+	     CFLAGS for Linux, when using threads for the GC.
+	   - Use pthreads as a default if the pthreads librarie is 
+	     present
+	
 	* src/fport.c, src/system.c
 	* lib/repl.stk (main-repl): Changed the way buffer are flushed.
 	Bonus: when programs exits normally in interactive mode, the 
@@ -46,7 +52,7 @@
 	* src/env.c: CURRENT-MODULE is now thread sepcific
 
 2006-04-05  Erick Gallesio  <eg@essi.fr>
-
+n
 	* lib/computils.stk (symbol-bound?): Use SYMBOL-VALUE* instead of
 	SYMBOL-VALUE. This avoids some undefined symbols warnings.
 

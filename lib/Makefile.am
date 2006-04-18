@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 13-Apr-2006 13:20 (eg)
+# Last file update: 16-Apr-2006 11:47 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d @LURCDIR@
 
@@ -27,7 +27,8 @@ scheme_BOOT = assembler.stk		\
 	      repl.stk 			\
 	      runtime.stk		\
 	      srfi-0.stk		\
-	      struct.stk
+	      struct.stk		\
+	      thread.stk
 
 
 scheme_SRCS = STklos.init		\

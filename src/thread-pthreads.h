@@ -1,5 +1,5 @@
 /*
- * thread.h	-- Thread support for STklos
+ * thread-pthreads.h	-- Thread support for STklos
  * 
  * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update: 15-Apr-2006 13:06 (eg)
+ * Last file update: 16-Apr-2006 10:53 (eg)
  */
 #ifndef _STK_THREAD_H
 #define _STK_THREAD_H

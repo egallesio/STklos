@@ -22,20 +22,20 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  4-Apr-2006 23:58 (eg)
+ * Last file update: 16-Apr-2006 10:51 (eg)
  */
 
 #include "stklos.h"
 #include "hash.h"
 #include "vm.h"
 #ifdef THREADS_PTHREADS
-# include "thread.h"
+# include "thread-pthreads.h"
 #endif
 #ifdef THREADS_LURC
-# include "lurc_thread.h"
+# include "thread-lurc.h"
 #endif
 #ifdef THREADS_NONE
-# include "nothread.h"
+# include "thread-none.h"
 #endif
 
 static void error_bad_module_name(SCM obj)

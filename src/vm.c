@@ -21,14 +21,12 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 15-Apr-2006 11:55 (eg)
+ * Last file update: 15-Apr-2006 17:45 (eg)
  */
 
 // INLINER values
 // Voir FIX:
-// Call with-values !STkprocedurep est faux: tester =STk_false voire, virer le code
 
-#define USE_THREADS 1    /* FIX: */
 
 #include "stklos.h"
 #include "object.h"
@@ -135,7 +133,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   if (!vm->stack) {
     fprintf(stderr, "cannot allocate a stack with a size of %d cells\n", stack_size);
     fflush(stderr);
-    STk_exit(1);
+    STk_exit(MAKE_INT(1));
   }
  
   /* Initialize the VM registers */
@@ -601,11 +599,10 @@ DEFINE_PRIMITIVE("call-with-values", call_with_values, subr2, (SCM prod, SCM con
   vm_thread_t *vm = STk_get_current_vm();
   int tmp;
 
-  if (!STk_procedurep(prod)) STk_error("bad producer", prod);
-  if (!STk_procedurep(con))  STk_error("bad consumer", con);
-  
+  /* Test on prod and con being good procedure is useless, apply will evtly fail */
   vm->val  = STk_C_apply(prod, 0);
   tmp      = vm->valc;
+  vm->valc = 1;
 
   if (tmp == 0)
     return STk_C_apply(con, 0);
@@ -1538,8 +1535,25 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 
 #define CALL_CC_SPACE	1024	/* Add some space for restoration bookeepping */
 
-static void restore_cont_jump(struct continuation_obj *k, void* addr);
-static void restore_cont_allocate(struct continuation_obj *k, size_t s);
+static void restore_cont_jump(struct continuation_obj *k, void* addr){
+  char buf[1024];
+  int cur_stack_size = STk_start_stack - addr;
+  
+  buf[42] = 0x2a;
+
+  if (cur_stack_size < 0) cur_stack_size = -cur_stack_size;
+  if (cur_stack_size <= (k->csize + CALL_CC_SPACE)) { 
+    /* Not enough space, recurse */
+    STk_get_stack_pointer(&addr);
+    restore_cont_jump(k, &addr);
+  } else {
+    memcpy(k->cstart, k->stacks + k->ssize, k->csize);
+    
+    /* Return */
+    MY_LONGJMP(k->state, 1);
+  }
+}
+
 
 DEFINE_PRIMITIVE("%restore-continuation", restore_cont, subr2, (SCM cont, SCM value))
 {
@@ -1567,35 +1581,12 @@ DEFINE_PRIMITIVE("%restore-continuation", restore_cont, subr2, (SCM cont, SCM va
 
   /* Restore the C stack */
   STk_get_stack_pointer(&addr);
-  
   restore_cont_jump(k, addr);
 
   /* never reached */
   return STk_void;
 }
 
-static void restore_cont_allocate(struct continuation_obj *k, size_t s){
-  //  void *buf = alloca(s);
-  char buf[1024];
-  void *addr;
-  buf[0]=0;
-  STk_get_stack_pointer(&addr);
-  restore_cont_jump(k, addr);
-}
-
-static void restore_cont_jump(struct continuation_obj *k, void* addr){
-  int cur_stack_size = STk_start_stack - addr;
-  if (cur_stack_size < 0) cur_stack_size = -cur_stack_size;
-  if (cur_stack_size <= (k->csize + CALL_CC_SPACE))
-    restore_cont_allocate(k, k->csize + CALL_CC_SPACE - cur_stack_size);
-  else{
-    //  memcpy(k->cstart, k->cstack, k->csize);
-    memcpy(k->cstart, k->stacks + k->ssize, k->csize);
-    
-    /* Return */
-    MY_LONGJMP(k->state, 1);
-  }
-}
 
 DEFINE_PRIMITIVE("%continuation?", continuationp, subr1, (SCM obj))
 {

@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 14-Apr-2006 17:28 (eg)
+# Last file update: 16-Apr-2006 10:58 (eg)
 
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@
@@ -21,13 +21,13 @@ THREADS     = @THREADS@
 
 # what thread support do we put in?
 if LURC
-  THREAD_FILES = lurc_thread.c lurc_mutex.c
+  THREAD_FILES = thread-lurc.c mutex-lurc.c
 endif
 if PTHREADS
-  THREAD_FILES = thread.c mutex.c
+  THREAD_FILES = thread-pthreads.c mutex-pthreads.c
 endif
 if NO_THREAD
-  THREAD_FILES = nothread.c
+  THREAD_FILES = thread-none.c mutex-none.c
 endif
 
 stklos_SOURCES = boolean.c boot.c char.c cond.c dynload.c env.c error.c \

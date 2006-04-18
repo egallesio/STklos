@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 14-Apr-2006 23:34 (eg)
+;;;; Last file update: 16-Apr-2006 10:20 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -38,6 +38,7 @@
 (include "compiler.stk")	; VM Compiler
 (include "object.stk")		; CLOS like object system
 (include "date.stk")		; Dates
+(include "threads.stk")		; Thread support
 (include "pragma.stk")		; Pragma system for STklos compiler
 (include "obsolete.stk")	; Obsolete functions. Candidates to disappear
 
@@ -48,7 +49,6 @@
 (autoload 	 "compfile" compile-file)
 (syntax-autoload "match"    match-case match-lambda)
 (autoload 	 "getopt"   %print-usage)
-(autoload        "threads"  make-thread)
 (syntax-autoload "getopt"   parse-arguments)
 (syntax-autoload "trace"    trace untrace)
 (autoload	 "pp"	    pp pretty-print)
