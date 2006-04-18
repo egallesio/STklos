@@ -1,5 +1,5 @@
 (set! *load-path* (cons "lib/" (cons "lib/Lurc.d/" *load-path*)))
-(load "threads")
+(load "thread")
 
 (print (%thread-system))
 
@@ -41,9 +41,11 @@
  (thread-join! thread2))
 (print "done")
 
+(if (eq? (%thread-system) 'lurc)
+    (load "lurc"))
+
 (when (eq? (%thread-system) 'lurc)
-      (load "lurc")
-      
+      (print "testing lurc")
       (let ((sig (lurc:signal "test")))
         (lurc:watch 
          sig

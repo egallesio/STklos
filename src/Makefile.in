@@ -246,8 +246,7 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(stklos_SOURCES)
 DATA = $(extrainc_DATA)
 
-DIST_COMMON = Makefile.am Makefile.in TODO extraconf.h.in \
-	stklosconf.h.in
+DIST_COMMON = Makefile.am Makefile.in extraconf.h.in stklosconf.h.in
 SOURCES = $(stklos_SOURCES)
 
 all: stklosconf.h

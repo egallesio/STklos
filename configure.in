@@ -113,6 +113,7 @@ esac
 dnl Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
 case "$THREADS" in
   none) true ;;
+  lurc) true ;;
   *) case `uname -s` in
         Linux*) CFLAGS="$CFLAGS -D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
      esac

@@ -22,4 +22,6 @@
 (select-module STklos)
 (import lurc)
 
+(print "got lurc")
+
 (provide "lurc")

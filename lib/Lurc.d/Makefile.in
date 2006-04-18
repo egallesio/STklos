@@ -118,7 +118,6 @@ STACK_DIRECTION = @STACK_DIRECTION@
 STRIP = @STRIP@
 SVN_URL = @SVN_URL@
 THREADS = @THREADS@
-THREAD_FILES = @THREAD_FILES@
 VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@

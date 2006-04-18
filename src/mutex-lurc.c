@@ -110,14 +110,8 @@ DEFINE_PRIMITIVE("make-mutex", make_mutex, subr01, (SCM name))
 {
   SCM z;
 
-  if (name) {
-    if (!STRINGP(name))
-      STk_error("bad mutex name ~S", name);
-  }
-  else name = STk_Cstring2string("");
-  
   NEWCELL(z, mutex);
-  MUTEX_NAME(z)     = name;
+  MUTEX_NAME(z)     = (name ? name : STk_false);
   MUTEX_SPECIFIC(z) = STk_void;
   MUTEX_OWNER(z)    = STk_false;
   MUTEX_LOCKED(z)   = FALSE;
@@ -317,14 +311,8 @@ DEFINE_PRIMITIVE("make-condition-variable", make_condv, subr01, (SCM name))
 {
   SCM z;
 
-  if (name) {
-    if (!STRINGP(name))
-      STk_error("bad condition variable name ~S", name);
-  }
-  else name = STk_Cstring2string("");
-  
   NEWCELL(z, condv);
-  CONDV_NAME(z)     = name;
+  CONDV_NAME(z)     = (name ? name : STk_false);
   CONDV_SPECIFIC(z) = STk_void;
   CONDV_TARGET(z) = -1;
   CONDV_EMITTED(z) = CV_NONE;
@@ -398,25 +386,15 @@ DEFINE_PRIMITIVE("condition-variable-brodcast!", condv_broadcast, subr1, (SCM cv
 
 static void print_mutex(SCM mutex, SCM port, int mode)
 {
-  char *name = STRING_CHARS(MUTEX_NAME(mutex));
-  
   STk_puts("#[mutex ", port);
-  if (*name) 
-    STk_puts(name, port);
-  else
-    STk_fprintf(port, "%lx", (unsigned long) mutex);
+  STk_print(MUTEX_NAME(mutex), port, DSP_MODE);
   STk_putc(']', port);
 }
 
 static void print_condv(SCM condv, SCM port, int mode)
 {
-  char *name = STRING_CHARS(CONDV_NAME(condv));
-  
   STk_puts("#[condition-variable ", port);
-  if (*name) 
-    STk_puts(name, port);
-  else
-    STk_fprintf(port, "%lx", (unsigned long) condv);
+  STk_print(CONDV_NAME(condv), port, DSP_MODE);
   STk_putc(']', port);
 }
 

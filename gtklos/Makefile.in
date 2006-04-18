@@ -186,7 +186,7 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(libgtklos_a_SOURCES)
 DATA = $(scheme_DATA)
 
-DIST_COMMON = Makefile.am Makefile.in TODO gtklosconf.h.in
+DIST_COMMON = Makefile.am Makefile.in gtklosconf.h.in
 SOURCES = $(libgtklos_a_SOURCES)
 
 all: all-am

@@ -80,6 +80,10 @@ static void terminate_scheme_thread(void *arg)
   /* signal the death of this thread to the ones waiting it */
   pthread_cond_broadcast(&THREAD_MYCONDV(thr));
   pthread_mutex_unlock(&THREAD_MYMUTEX(thr));
+
+  /* remove the thread from the GC list, it can now dissapear when
+     everyone has stopped referencing it */
+  all_threads = STk_dremq(thr, all_threads);
 }
 
 

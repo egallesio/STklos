@@ -97,16 +97,19 @@ static void start_scheme_thread(void *arg)
   // now deallocate the signals
   lurc_signal_destroy(&THREAD_TERM_SIG(thr));
   lurc_signal_destroy(&THREAD_DEATH_SIG(thr));
+
+  // remove the thread from the GC list, it can now dissapear when
+  // everyone has stopped referencing it
+  all_threads = STk_dremq(thr, all_threads);
 }
 
 
 
 /* ====================================================================== */
 
-static SCM do_make_thread(SCM thunk, char *name)
+static SCM do_make_thread(SCM thunk, SCM name)
 {
   SCM z;
-  char buf[255];
   
   NEWCELL(z, thread);
   
@@ -117,18 +120,11 @@ static SCM do_make_thread(SCM thunk, char *name)
   THREAD_EXCEPTION(z) = STk_false;
   THREAD_STATE(z)     = th_new;
 
-  // give them meaningful names
-  strncpy(buf, name, 244);
-  buf[244] = 0;
-  strcat(buf, "-term-sig");
-  THREAD_TERM_SIG(z)  = lurc_signal(buf);
+  // give them semi-meaningful names
+  THREAD_TERM_SIG(z)  = lurc_signal("thread-term-sig");
 
-  strncpy(buf, name, 244);
-  buf[244] = 0;
-  strcat(buf, "-death-sig");
-  THREAD_DEATH_SIG(z)  = lurc_signal(buf);
+  THREAD_DEATH_SIG(z)  = lurc_signal("thread-death-sig");
   
-  // FIX: lock
   all_threads = STk_cons(z, all_threads); /* For the GC */
   return z;
 }
@@ -309,7 +305,8 @@ DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
       lurc_signal_await(&THREAD_DEATH_SIG(thr));
       res = STk_false;
     }
-  }
+  }else
+    res = STk_false;
   return res;
 }
 
