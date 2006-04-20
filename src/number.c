@@ -91,8 +91,8 @@ static int positivep(SCM n);
 static int isexactp(SCM z);
 static SCM gcd2(SCM o1, SCM o2);
 
-EXTERN_PRIMITIVE("make-rectangular", make_rectangular, subr2, (SCM r, SCM i))
-EXTERN_PRIMITIVE("real-part", real_part, subr1, (SCM z))
+EXTERN_PRIMITIVE("make-rectangular", make_rectangular, subr2, (SCM r, SCM i));
+EXTERN_PRIMITIVE("real-part", real_part, subr1, (SCM z));
 EXTERN_PRIMITIVE("magnitude", magnitude, subr1, (SCM z));
 EXTERN_PRIMITIVE("angle", angle, subr1, (SCM z));
 EXTERN_PRIMITIVE("sqrt", sqrt, subr1, (SCM z));

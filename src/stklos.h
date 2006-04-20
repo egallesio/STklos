@@ -243,7 +243,8 @@ struct primitive_obj {
 
 #define EXTERN_PRIMITIVE(_sname, _cname, _type, _params)	\
   /* the same one as before but without function definition */  \
-  SCM CPP_CONCAT(STk_, _cname) _params;
+  extern SCM CPP_CONCAT(STk_, _cname) _params;                  \
+  extern struct primitive_obj CPP_CONCAT(STk_o_, _cname)
 
 
 #define ENTER_PRIMITIVE(x)     /* here for compability with pre 0.62 version */
@@ -264,9 +265,9 @@ struct primitive_obj {
 #define BOOLEANP(o)		(((o) == STk_true) || ((o) == STk_false))
 
 
-EXTERN_PRIMITIVE("eq?",    eq,    subr2, (SCM x,SCM y))
-EXTERN_PRIMITIVE("eqv?",   eqv,   subr2, (SCM x,SCM y))
-EXTERN_PRIMITIVE("equal?", equal, subr2, (SCM x,SCM y))
+EXTERN_PRIMITIVE("eq?",    eq,    subr2, (SCM x,SCM y));
+EXTERN_PRIMITIVE("eqv?",   eqv,   subr2, (SCM x,SCM y));
+EXTERN_PRIMITIVE("equal?", equal, subr2, (SCM x,SCM y));
 
 
 int STk_init_boolean(void);
@@ -393,9 +394,9 @@ int STk_late_init_env(void); /* must be done after symbol initialization */
 
 extern SCM STk_STklos_module;
 
-EXTERN_PRIMITIVE("%create-module", create_module, subr1, (SCM name))
-EXTERN_PRIMITIVE("current-module", current_module, subr0, (void))
-EXTERN_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
+EXTERN_PRIMITIVE("%create-module", create_module, subr1, (SCM name));
+EXTERN_PRIMITIVE("current-module", current_module, subr0, (void));
+EXTERN_PRIMITIVE("%select-module", select_module, subr1, (SCM module));
 
 /*
   ------------------------------------------------------------------------------
@@ -445,8 +446,8 @@ struct keyword_obj {
 #define KEYWORD_NEEDS_BARS 	(1 << 0)	/* Info flag */
 #define KEYWORD_HAS_UPPER 	(1 << 1)	
 
-EXTERN_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val))
-EXTERN_PRIMITIVE("key-get", key_get, subr23, (SCM l, SCM key, SCM dflt))
+EXTERN_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val));
+EXTERN_PRIMITIVE("key-get", key_get, subr23, (SCM l, SCM key, SCM dflt));
 
 SCM STk_makekey(char *tok);
 int STk_init_keyword(void);
@@ -509,17 +510,17 @@ SCM STk_dappend2(SCM l1, SCM l2);	/* destructive append */
 SCM STk_dremq(SCM obj, SCM list);	/* destructive remove with eq? */
 SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos);
 
-EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y))
-EXTERN_PRIMITIVE("car", car, subr1, (SCM x))
-EXTERN_PRIMITIVE("cdr", cdr, subr1, (SCM x))
-EXTERN_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv))
-EXTERN_PRIMITIVE("memq", memq, subr2, (SCM obj, SCM list))
-EXTERN_PRIMITIVE("reverse", reverse, subr1, (SCM l))
-EXTERN_PRIMITIVE("reverse!", dreverse, subr1, (SCM l))
-EXTERN_PRIMITIVE("copy-tree", copy_tree, subr1, (SCM l))
-EXTERN_PRIMITIVE("assq", assq, subr2, (SCM obj, SCM alist))
-EXTERN_PRIMITIVE("assv", assv, subr2, (SCM obj, SCM alist))
-EXTERN_PRIMITIVE("assoc", assoc, subr2, (SCM obj, SCM alist))
+EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
+EXTERN_PRIMITIVE("car", car, subr1, (SCM x));
+EXTERN_PRIMITIVE("cdr", cdr, subr1, (SCM x));
+EXTERN_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv));
+EXTERN_PRIMITIVE("memq", memq, subr2, (SCM obj, SCM list));
+EXTERN_PRIMITIVE("reverse", reverse, subr1, (SCM l));
+EXTERN_PRIMITIVE("reverse!", dreverse, subr1, (SCM l));
+EXTERN_PRIMITIVE("copy-tree", copy_tree, subr1, (SCM l));
+EXTERN_PRIMITIVE("assq", assq, subr2, (SCM obj, SCM alist));
+EXTERN_PRIMITIVE("assv", assv, subr2, (SCM obj, SCM alist));
+EXTERN_PRIMITIVE("assoc", assoc, subr2, (SCM obj, SCM alist));
 
 
 int STk_init_list(void);
@@ -841,7 +842,7 @@ void STk_close_all_ports(void);
 /****
  ****		sport.h primitives
  ****/
-EXTERN_PRIMITIVE("open-output-string", open_output_string, subr0, (void))
+EXTERN_PRIMITIVE("open-output-string", open_output_string, subr0, (void));
 SCM STk_get_output_string(SCM port);
 SCM STk_open_C_string(char *str);
 int STk_init_sport(void);
@@ -855,7 +856,7 @@ int STk_init_vport(void);
 /****
  **** 		port.h primitives
  ****/
-EXTERN_PRIMITIVE("close-port", close_port, subr1, (SCM port))
+EXTERN_PRIMITIVE("close-port", close_port, subr1, (SCM port));
 
 void STk_error_bad_port(SCM p);
 void STk_error_bad_file_name(SCM f);
@@ -946,8 +947,8 @@ struct closure_obj {
 #define CLOSURE_BCODE(p)	(((struct closure_obj *) (p))->bcode)
 #define CLOSUREP(p)		(BOXED_TYPE_EQ((p), tc_closure))
 
-EXTERN_PRIMITIVE("procedure?", procedurep, subr1, (SCM obj))
-EXTERN_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc))
+EXTERN_PRIMITIVE("procedure?", procedurep, subr1, (SCM obj));
+EXTERN_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc));
 
 
 SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env);
@@ -1028,10 +1029,10 @@ SCM STk_Cstring2string(char *str); 	     /* Embed a C string in Scheme world  */
 SCM STk_chars2string(char *str, size_t len); /* Original can have null characters */
 
 
-EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2))
-EXTERN_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index))
-EXTERN_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM value))
-EXTERN_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *argv))
+EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));
+EXTERN_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index));
+EXTERN_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM value));
+EXTERN_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *argv));
 int STk_init_string(void);
 
 /*
@@ -1062,7 +1063,7 @@ struct symbol_obj {
 #define SYMBOL_NEEDS_BARS 	(1 << 0)	/* Info flag */
 #define SYMBOL_HAS_UPPER	(1 << 1)
 
-EXTERN_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string))
+EXTERN_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string));
 
 int STk_symbol_flags(register char *s);
 SCM STk_intern(char *name);
@@ -1090,25 +1091,26 @@ EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
   ----
   ------------------------------------------------------------------------------
 */
-EXTERN_PRIMITIVE("current-thread", current_thread, subr0, (void))
-
+EXTERN_PRIMITIVE("current-thread", current_thread, subr0, (void));
 
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 U V E C T O R . C
+  ----                                 U V E C T O R . C
   ----
   ------------------------------------------------------------------------------
 */
+
 extern int STk_uvectors_allowed;
 
 int STk_uniform_vector_tag(char *s);
 SCM STk_list2uvector(int type, SCM l);
 int STk_init_uniform_vector(void);
+
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 V E C T O R . C
+  ----                                 V E C T O R . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -1119,15 +1121,15 @@ struct vector_obj {
   SCM data[1];
 };
 
-#define VECTOR_SIZE(p)	(((struct vector_obj *) (p))->size)
-#define VECTOR_DATA(p) 	(((struct vector_obj *) (p))->data)
-#define VECTORP(p)	(BOXED_TYPE_EQ((p), tc_vector))
+#define VECTOR_SIZE(p)        (((struct vector_obj *) (p))->size)
+#define VECTOR_DATA(p)        (((struct vector_obj *) (p))->data)
+#define VECTORP(p)    (BOXED_TYPE_EQ((p), tc_vector))
 
-#define VECTOR_CONST	 (1 << 0)
+#define VECTOR_CONST   (1 << 0)
 
-EXTERN_PRIMITIVE("vector-ref", vector_ref, subr2, (SCM v, SCM index))
-EXTERN_PRIMITIVE("vector-set!", vector_set, subr3, (SCM v, SCM index, SCM value))
-EXTERN_PRIMITIVE("vector->list", vector2list, subr1, (SCM v))
+EXTERN_PRIMITIVE("vector-ref", vector_ref, subr2, (SCM v, SCM index));
+EXTERN_PRIMITIVE("vector-set!", vector_set, subr3, (SCM v, SCM index, SCM value));
+EXTERN_PRIMITIVE("vector->list", vector2list, subr1, (SCM v));
 EXTERN_PRIMITIVE("list->vector", list2vector, subr1, (SCM l));
 
 SCM STk_makevect(int len, SCM init);

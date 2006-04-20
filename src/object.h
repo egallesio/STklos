@@ -95,8 +95,8 @@ struct instance_obj {
 #define SET_NEXT_METHOD(closure, value) \
 		{FRAME_LOCAL(CLOSURE_ENV(closure),0) = (value);}
 
-EXTERN_PRIMITIVE("method?", methodp, subr1, (SCM obj))
-EXTERN_PRIMITIVE("generic?", genericp, subr1, (SCM obj))
+EXTERN_PRIMITIVE("method?", methodp, subr1, (SCM obj));
+EXTERN_PRIMITIVE("generic?", genericp, subr1, (SCM obj));
 
 SCM STk_compute_applicable_methods(SCM gf, int argc, SCM *argv, int find_method);
 

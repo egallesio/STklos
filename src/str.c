@@ -90,7 +90,7 @@ static int stringcompi(SCM s1, SCM s2)
 static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
 {
   SCM s = NULL;
-  int len, start=0, end=-1;
+  long len, start=0, end=-1;
 
   /* Controling number of arguments */
   switch (argc) {
@@ -384,7 +384,7 @@ doc>
 
 DEFINE_PRIMITIVE("substring", substring, subr3, (SCM string, SCM start, SCM end))
 {
-  int from, to;
+  long from, to;
 
   if (!STRINGP(string)) error_bad_string(string);
 

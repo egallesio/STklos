@@ -57,7 +57,7 @@ static SCM unused; 	/* for the (useless here) reference returned by lookup */
 
 static SCM make_instance(SCM classe, short size, short type);
 static SCM compute_getters_n_setters(SCM slots);
-EXTERN_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
+EXTERN_PRIMITIVE("class-of", class_of, subr1, (SCM obj));
 
 
 

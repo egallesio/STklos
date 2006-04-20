@@ -38,7 +38,7 @@
 (include "compiler.stk")	; VM Compiler
 (include "object.stk")		; CLOS like object system
 (include "date.stk")		; Dates
-(include "threads.stk")		; Thread support
+(include "thread.stk")		; Thread support
 (include "pragma.stk")		; Pragma system for STklos compiler
 (include "obsolete.stk")	; Obsolete functions. Candidates to disappear
 

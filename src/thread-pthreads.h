@@ -23,41 +23,23 @@
  *    Creation date:  4-Feb-2006 11:03 (eg)
  * Last file update: 16-Apr-2006 10:53 (eg)
  */
-#ifndef _STK_THREAD_H
-#define _STK_THREAD_H
+#ifndef _STK_THREAD_PTHREADS_H
+#define _STK_THREAD_PTHREADS_H
 
 #include <pthread.h>
 
-enum thread_state { th_new, th_runnable, th_terminated, th_blocked};
-
-struct thread_obj {
-  stk_header header;
-  SCM thunk;
-  SCM name;
-  SCM specific;
-  SCM end_result;
-  SCM end_exception;
-  enum thread_state state;
-  vm_thread_t *vm;
+struct thread_obj_specific {
   pthread_t pthread;
   pthread_mutex_t mymutex;
   pthread_cond_t  mycondv;
 };
 
 
-#define THREADP(p)		(BOXED_TYPE_EQ((p), tc_thread))
-#define THREAD_THUNK(p)		(((struct thread_obj *) (p))->thunk)
-#define THREAD_NAME(p)		(((struct thread_obj *) (p))->name)
-#define THREAD_SPECIFIC(p)	(((struct thread_obj *) (p))->specific)
-#define THREAD_RESULT(p)	(((struct thread_obj *) (p))->end_result)
-#define THREAD_EXCEPTION(p)	(((struct thread_obj *) (p))->end_exception)
-#define THREAD_CURMOD(p)	(((struct thread_obj *) (p))->current_module)
-#define THREAD_STATE(p)		(((struct thread_obj *) (p))->state)
-#define THREAD_VM(p)		(((struct thread_obj *) (p))->vm)
-#define THREAD_PTHREAD(p)	(((struct thread_obj *) (p))->pthread)
-#define THREAD_MYMUTEX(p)	(((struct thread_obj *) (p))->mymutex)
-#define THREAD_MYCONDV(p)	(((struct thread_obj *) (p))->mycondv)
+#define THREAD_PTHREAD(p)	(((struct thread_obj *) (p))->sys_thread.pthread)
+#define THREAD_MYMUTEX(p)	(((struct thread_obj *) (p))->sys_thread.mymutex)
+#define THREAD_MYCONDV(p)	(((struct thread_obj *) (p))->sys_thread.mycondv)
 
-extern SCM STk_primordial_thread; 
+extern void STk_thread_start_specific(SCM thr);
+extern int STk_init_threads_specific(vm_thread_t *vm);
 
-#endif /* ! _STK_THREAD_H */
+#endif /* ! _STK_THREAD_PTHREADS_H */

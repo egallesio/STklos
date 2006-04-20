@@ -23,12 +23,8 @@
  *    Creation date:  4-Feb-2006 11:03 (eg)
  * Last file update: 16-Apr-2006 11:42 (eg)
  */
-#ifndef _STK_THREAD_H
-#define _STK_THREAD_H
-
-#include "stklos.h"
-
-extern SCM STk_primordial_thread; 
+#ifndef _STK_THREAD_NONE_H
+#define _STK_THREAD_NONE_H
 
 extern  struct primitive_obj STk_o_threadno; 	/* A pseudo primitive which 	*/
 						/* always fails 		*/
@@ -37,4 +33,4 @@ extern  struct primitive_obj STk_o_threadno; 	/* A pseudo primitive which 	*/
   STk_define_variable(STk_intern(name), &STk_o_threadno, STk_STklos_module)
 
 
-#endif /* ! _STK_THREAD_H */
+#endif /* ! _STK_THREAD_NONE_H */

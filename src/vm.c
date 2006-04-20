@@ -291,8 +291,8 @@ static int   checked_globals_used = 0;
 }
 
 #define REG_CALL_PRIM(name) {				\
-  extern SCM CPP_CONCAT(STk_o_, name)();		\
-  ACT_SAVE_PROC(vm->fp) = CPP_CONCAT(STk_o_, name);	\
+  extern struct primitive_obj CPP_CONCAT(STk_o_, name);		\
+  ACT_SAVE_PROC(vm->fp) = &CPP_CONCAT(STk_o_, name);	\
 }
 
 
@@ -771,12 +771,12 @@ static void run_vm(vm_thread_t *vm)
     byteop = fetch_next();
 #  ifdef DEBUG_VM
     if (debug_level > 1)
-      fprintf(stderr, "%08x [%03d]: %20s  sp=%-6d fp=%-6d env=%x\n", 
+      fprintf(stderr, "%08x [%03d]: %20s  sp=%-6d fp=%-6d env=%p\n", 
 	      vm->pc - 1,
 	      vm->pc - code_base-1, 
 	      name_table[(int)byteop], 
               vm->sp - vm->stack, 
-              vm->fp - vm->stack, (int) vm->env);
+              vm->fp - vm->stack, vm->env);
 #    ifdef STAT_VM
     couple_instr[previous_op][byteop]++;
     cpt_inst[byteop]++;

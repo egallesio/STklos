@@ -135,9 +135,9 @@ extrainc_DATA = stklos.h extraconf.h stklosconf.h socket.h fport.h
 DOCDB = DOCDB
 
 # what thread support do we put in?
-@LURC_TRUE@THREAD_FILES = thread-lurc.c mutex-lurc.c
+@LURC_TRUE@THREAD_FILES = thread-common.c thread-lurc.c mutex-common.c mutex-lurc.c
 @NO_THREAD_TRUE@THREAD_FILES = thread-none.c mutex-none.c
-@PTHREADS_TRUE@THREAD_FILES = thread-pthreads.c mutex-pthreads.c
+@PTHREADS_TRUE@THREAD_FILES = thread-common.c thread-pthreads.c mutex-common.c mutex-pthreads.c
 
 stklos_SOURCES = boolean.c boot.c char.c cond.c dynload.c env.c error.c \
  extend.c fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
@@ -188,10 +188,12 @@ CONFIG_CLEAN_FILES = extraconf.h
 bin_PROGRAMS = stklos$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
-@LURC_TRUE@am__objects_1 = thread-lurc.$(OBJEXT) mutex-lurc.$(OBJEXT)
+@LURC_TRUE@am__objects_1 = thread-common.$(OBJEXT) thread-lurc.$(OBJEXT) \
+@LURC_TRUE@	mutex-common.$(OBJEXT) mutex-lurc.$(OBJEXT)
 @NO_THREAD_TRUE@am__objects_1 = thread-none.$(OBJEXT) \
 @NO_THREAD_TRUE@	mutex-none.$(OBJEXT)
-@PTHREADS_TRUE@am__objects_1 = thread-pthreads.$(OBJEXT) \
+@PTHREADS_TRUE@am__objects_1 = thread-common.$(OBJEXT) \
+@PTHREADS_TRUE@	thread-pthreads.$(OBJEXT) mutex-common.$(OBJEXT) \
 @PTHREADS_TRUE@	mutex-pthreads.$(OBJEXT)
 am_stklos_OBJECTS = boolean.$(OBJEXT) boot.$(OBJEXT) char.$(OBJEXT) \
 	cond.$(OBJEXT) dynload.$(OBJEXT) env.$(OBJEXT) error.$(OBJEXT) \
@@ -223,6 +225,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/gnu-glob.Po ./$(DEPDIR)/hash.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/keyword.Po ./$(DEPDIR)/lib.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/list.Po ./$(DEPDIR)/misc.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/mutex-common.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mutex-lurc.Po ./$(DEPDIR)/mutex-none.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mutex-pthreads.Po ./$(DEPDIR)/number.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/object.Po ./$(DEPDIR)/parameter.Po \
@@ -234,7 +237,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/socket.Po ./$(DEPDIR)/sport.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/stklos.Po ./$(DEPDIR)/str.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/struct.Po ./$(DEPDIR)/symbol.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/system.Po ./$(DEPDIR)/thread-lurc.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/system.Po ./$(DEPDIR)/thread-common.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/thread-lurc.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/thread-none.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/thread-pthreads.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/uvector.Po ./$(DEPDIR)/vector.Po \
@@ -328,6 +332,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutex-common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutex-lurc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutex-none.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutex-pthreads.Po@am__quote@
@@ -351,6 +356,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/struct.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symbol.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/system.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-lurc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-none.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-pthreads.Po@am__quote@

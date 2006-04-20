@@ -21,10 +21,10 @@ THREADS     = @THREADS@
 
 # what thread support do we put in?
 if LURC
-  THREAD_FILES = thread-lurc.c mutex-lurc.c
+  THREAD_FILES = thread-common.c thread-lurc.c mutex-common.c mutex-lurc.c
 endif
 if PTHREADS
-  THREAD_FILES = thread-pthreads.c mutex-pthreads.c
+  THREAD_FILES = thread-common.c thread-pthreads.c mutex-common.c mutex-pthreads.c
 endif
 if NO_THREAD
   THREAD_FILES = thread-none.c mutex-none.c

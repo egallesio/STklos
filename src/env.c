@@ -28,15 +28,7 @@
 #include "stklos.h"
 #include "hash.h"
 #include "vm.h"
-#ifdef THREADS_PTHREADS
-# include "thread-pthreads.h"
-#endif
-#ifdef THREADS_LURC
-# include "thread-lurc.h"
-#endif
-#ifdef THREADS_NONE
-# include "thread-none.h"
-#endif
+#include "thread-common.h"
 
 static void error_bad_module_name(SCM obj)
 {

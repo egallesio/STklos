@@ -58,7 +58,7 @@ struct struct_obj {
 EXTERN_PRIMITIVE("make-struct-type", make_struct_type, subr3, 
 		 (SCM name, SCM parent, SCM slots));
 EXTERN_PRIMITIVE("struct-type-slots", st_slots, subr1, (SCM obj));
-EXTERN_PRIMITIVE("struct-set!", struct_set, subr3, (SCM s, SCM slot, SCM val))
+EXTERN_PRIMITIVE("struct-set!", struct_set, subr3, (SCM s, SCM slot, SCM val));
 EXTERN_PRIMITIVE("make-struct", make_struct, vsubr, (int argc, SCM *argv));
 
 SCM STk_int_struct_ref(SCM s, SCM slot);

@@ -59,7 +59,7 @@
 	     ;; We had a timeout
 	    (if timeout-val?
 		timeout-val
-		(raise (make-condition &thead-join-timeout))))
+		(raise (make-condition &thread-join-timeout))))
 	  ((%thread-end-exception thread)
 	     ;; We had an exceptionin thread. Raise it
 	     (raise (%thread-end-exception thread)))

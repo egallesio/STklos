@@ -24,7 +24,7 @@
  * Last file update: 16-Apr-2006 11:35 (eg)
  */
 
-#include "thread-none.h"
+#include "thread-common.h"
 #include "stklos.h"
 #include "vm.h"
 
