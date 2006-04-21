@@ -43,7 +43,7 @@ static void mutex_finalizer(SCM mtx)
   pthread_cond_destroy(&MUTEX_MYCONDV(mtx));
 }
 
-void STk_make_mutex_specific(SCM z)
+void STk_make_sys_mutex(SCM z)
 {
   pthread_mutex_init(&MUTEX_MYMUTEX(z), NULL);
   pthread_cond_init(&MUTEX_MYCONDV(z), NULL);
@@ -174,7 +174,7 @@ static void condv_finalizer(SCM cv)
   pthread_cond_destroy(&CONDV_MYCONDV(cv));
 }
 
-void STk_make_condv_specific(SCM z)
+void STk_make_sys_condv(SCM z)
 {
   pthread_cond_init(&CONDV_MYCONDV(z), NULL);
 

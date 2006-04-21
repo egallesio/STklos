@@ -152,7 +152,7 @@ DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
   THREAD_VM(thr)      = new; 
   THREAD_STATE(thr)   = th_runnable;  
 
-  STk_thread_start_specific(thr);
+  STk_sys_thread_start(thr);
   
   return thr;
 }
@@ -205,7 +205,7 @@ int STk_init_threads(int stack_size)
   DEFINE_XTYPE(thread, &xtype_thread);
   
   /* Specific thread initialisation */ 
-  if(STk_init_threads_specific(vm) != TRUE)
+  if(STk_init_sys_threads(vm) != TRUE)
     return FALSE;
 
   /* Define the threads exceptions */

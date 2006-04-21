@@ -28,7 +28,7 @@
 
 #include <pthread.h>
 
-struct thread_obj_specific {
+struct sys_thread_obj {
   pthread_t pthread;
   pthread_mutex_t mymutex;
   pthread_cond_t  mycondv;
@@ -39,7 +39,7 @@ struct thread_obj_specific {
 #define THREAD_MYMUTEX(p)	(((struct thread_obj *) (p))->sys_thread.mymutex)
 #define THREAD_MYCONDV(p)	(((struct thread_obj *) (p))->sys_thread.mycondv)
 
-extern void STk_thread_start_specific(SCM thr);
-extern int STk_init_threads_specific(vm_thread_t *vm);
+extern void STk_sys_thread_start(SCM thr);
+extern int STk_init_sys_threads(vm_thread_t *vm);
 
 #endif /* ! _STK_THREAD_PTHREADS_H */

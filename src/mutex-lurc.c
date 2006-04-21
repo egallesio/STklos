@@ -50,7 +50,7 @@ static void mutex_finalizer(SCM mtx)
 }
 
 
-void STk_make_mutex_specific(SCM z)
+void STk_make_sys_mutex(SCM z)
 {
   lurc_mutex_init(&MUTEX_MYMUTEX(z), NULL);
   lurc_signal_init(&MUTEX_MYSIGNAL(z), NULL);
@@ -208,7 +208,7 @@ static void condv_finalizer(SCM cv)
   lurc_signal_destroy(&CONDV_MYSIGNAL(cv));
 }
 
-void STk_make_condv_specific(SCM z)
+void STk_make_sys_condv(SCM z)
 {
   CONDV_TARGET(z) = CV_NONE;
   CONDV_EMITTED(z) = -1;

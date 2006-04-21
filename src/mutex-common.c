@@ -65,7 +65,7 @@ DEFINE_PRIMITIVE("make-mutex", make_mutex, subr01, (SCM name))
   MUTEX_OWNER(z)    = STk_false;
   MUTEX_LOCKED(z)   = FALSE;
 
-  STk_make_mutex_specific(z);
+  STk_make_sys_mutex(z);
   
   return z;
 }
@@ -116,7 +116,7 @@ DEFINE_PRIMITIVE("make-condition-variable", make_condv, subr01, (SCM name))
   CONDV_NAME(z)     = (name ? name : STk_false);
   CONDV_SPECIFIC(z) = STk_void;
 
-  STk_make_condv_specific(z);
+  STk_make_sys_condv(z);
 
   return z;
 }

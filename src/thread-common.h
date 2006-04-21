@@ -49,7 +49,7 @@ struct thread_obj {
   SCM end_exception;
   enum thread_state state;
   vm_thread_t *vm;
-  struct thread_obj_specific sys_thread;
+  struct sys_thread_obj sys_thread;
 };
 
 

@@ -35,7 +35,7 @@
  * 
 \* ====================================================================== */
 
-struct mutex_obj_specific {
+struct sys_mutex_obj {
   pthread_mutex_t mymutex;
   pthread_cond_t mycondv;
 };
@@ -49,7 +49,7 @@ struct mutex_obj_specific {
  * 
 \* ====================================================================== */
 
-struct condv_obj_specific {
+struct sys_condv_obj {
   pthread_cond_t mycondv;
 };
 
@@ -63,8 +63,8 @@ EXTERN_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
 EXTERN_PRIMITIVE("condition-variable-signal!", condv_signal, subr1, (SCM cv));
 EXTERN_PRIMITIVE("condition-variable-brodcast!", condv_broadcast, subr1, (SCM cv));
 
-extern void STk_make_condv_specific(SCM z);
-extern void STk_make_mutex_specific(SCM z);
+extern void STk_make_sys_condv(SCM z);
+extern void STk_make_sys_mutex(SCM z);
 
 
 #endif /* ! _STK_MUTEX_PTHREADS_H */

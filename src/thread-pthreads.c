@@ -103,7 +103,7 @@ static void *start_scheme_thread(void *arg)
 
 /* ====================================================================== */
 
-void STk_thread_start_specific(SCM thr)
+void STk_sys_thread_start(SCM thr)
 {
   pthread_attr_t attr;
 
@@ -145,6 +145,7 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
     pthread_mutex_lock(&THREAD_MYMUTEX(thr));
     
     /* Terminate effectively the thread */
+    // FIXME: this looks like an error
     if (thr == THREAD_VM(thr)->scheme_thread)
       pthread_exit(0); 				/* Suicide */
     else 
@@ -212,7 +213,7 @@ DEFINE_PRIMITIVE("%thread-system", thread_system, subr0, (void))
  * ====================================================================== 
  */
 
-int STk_init_threads_specific(vm_thread_t *vm)
+int STk_init_sys_threads(vm_thread_t *vm)
 {
   /* Define the key to access the thead specific VM */ 
   initialize_vm_key();

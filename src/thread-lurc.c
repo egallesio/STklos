@@ -39,64 +39,120 @@
 #include "vm.h"
 #include "thread-common.h"
 
+static void no_vm_error(void){
+  STk_error("No VM");
+}
+
+static void lurc_error(int err){
+  STk_error("Lurc error: ~S", lurc_strerror(err));
+}
+
 /*
  * Thread specific value (the VM)
  */
 
 vm_thread_t *STk_get_current_vm(void)
 {
-  return (vm_thread_t *) lurc_get_data();
+  vm_thread_t *vm = (vm_thread_t *) lurc_get_data();
+  if(vm == NULL)
+    no_vm_error();
+  return vm;
 }
 
 
 /* ====================================================================== */
 
+static void thread_watch(void *arg){
+  SCM thr = (SCM) arg;
+  // run the thread thunk
+  SCM res = STk_C_apply(THREAD_THUNK(thr), 0);
+  // only catch the result if we did not get out of apply via an exception
+  if (THREAD_EXCEPTION(thr) == STk_false) {
+    THREAD_RESULT(thr) = res;
+  }
+}
+
 // this is the lurc thread entry function
 static void start_scheme_thread(void *arg)
 {
-  volatile SCM thr = (SCM) arg;
-  SCM res;
+  SCM thr = (SCM) arg;
+  int err;
 
   lurc_set_data(THREAD_VM(thr), NULL);
-
+  
   // we do the VM loop until we're terminated
-  LURC_WATCH(&THREAD_TERM_SIG(thr)){
-    res = STk_C_apply(THREAD_THUNK(thr), 0);
-    if (THREAD_EXCEPTION(thr) == STk_false) {
-      THREAD_RESULT(thr) = res;
-    }
+  if((err = lurc_watch(&THREAD_TERM_SIG(thr), &thread_watch, thr)) != 0){
+    // this one is tricky we cannot raise, so we save it in the thread
+    THREAD_EXCEPTION(thr) = STk_make_error("Lurc error: ~S", 
+                                           lurc_strerror(err));
   }
 
   THREAD_STATE(thr)  = th_terminated;
 
   // signal the death of this thread
-  lurc_signal_emit(&THREAD_DEATH_SIG(thr));
+  if((err = lurc_signal_emit(&THREAD_DEATH_SIG(thr))) != 0){
+    // we cannot notify any waiting threads that we have a problem,
+    // this is a real panic since there's no way to forward the error.
+    STk_panic("Lurc error: ~S", lurc_strerror(err));
+  }
 
   // FIXME: abandon the mutexes ?
 
   // now deallocate the signals
-  lurc_signal_destroy(&THREAD_TERM_SIG(thr));
-  lurc_signal_destroy(&THREAD_DEATH_SIG(thr));
+  if(((err = lurc_signal_destroy(&THREAD_TERM_SIG(thr))) != 0)
+     || ((err = lurc_signal_destroy(&THREAD_DEATH_SIG(thr))) != 0)){
+    // any error here is fatal since we cannot raise it properly
+    STk_panic("Lurc error: ~S", lurc_strerror(err));
+  }
 
   STk_thread_terminate_common(thr);
 }
 
 /* ====================================================================== */
 
-void STk_thread_start_specific(SCM thr)
+void STk_sys_thread_start(SCM thr)
 {
+  lurc_signal_attr_t attr;
+  int err;
   // give them semi-meaningful names
-  THREAD_TERM_SIG(thr)  = lurc_signal("thread-term-sig");
-  THREAD_DEATH_SIG(thr)  = lurc_signal("thread-death-sig");
+  if((err = lurc_signal_attr_init(&attr)) != 0)
+    lurc_error(err);
+  // first signal
+  if((err = lurc_signal_attr_setname(&attr, "thread-term-sig")) != 0
+     || (err = lurc_signal_init(&(THREAD_TERM_SIG(thr)), &attr)) != 0){
+    lurc_signal_attr_destroy(&attr);
+    lurc_error(err);
+  }
+  // second signal
+  if((err = lurc_signal_attr_setname(&attr, "thread-death-sig")) != 0
+     || (err = lurc_signal_init(&(THREAD_DEATH_SIG(thr)), &attr)) != 0){
+    lurc_signal_attr_destroy(&attr);
+    // do not forget the first successfull signal
+    lurc_signal_destroy(&(THREAD_TERM_SIG(thr)));
+    lurc_error(err);
+  }
+  // cleanup
+  if((err = lurc_signal_attr_destroy(&attr)) != 0){
+    // do not forget the signals
+    lurc_signal_destroy(&(THREAD_TERM_SIG(thr)));
+    lurc_signal_destroy(&(THREAD_DEATH_SIG(thr)));
+    lurc_error(err);
+  }
 
-  if (lurc_thread_create(&THREAD_LTHREAD(thr), NULL, 
-                         &start_scheme_thread, thr))
-    STk_error("cannot start thread ~S", thr);
+  if((err = lurc_thread_create(&THREAD_LTHREAD(thr), NULL, 
+                               &start_scheme_thread, thr)) != 0){
+    // do not forget the signals
+    lurc_signal_destroy(&(THREAD_TERM_SIG(thr)));
+    lurc_signal_destroy(&(THREAD_DEATH_SIG(thr)));
+    lurc_error(err);
+  }
 }
 
 DEFINE_PRIMITIVE("thread-yield!", thread_yield, subr0, (void))
 {
-  lurc_pause();
+  int err;
+  if((err = lurc_pause()) != 0)
+    lurc_error(err);
   return STk_void;
 }
 
@@ -105,9 +161,10 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
   if (!THREADP(thr)) error_bad_thread(thr);
 
   if (THREAD_STATE(thr) != th_terminated) {
-
+    int err;
     // emit its term signal
-    lurc_signal_emit(&THREAD_TERM_SIG(thr));
+    if((err = lurc_signal_emit(&THREAD_TERM_SIG(thr))) != 0)
+      lurc_error(err);
     if (THREAD_EXCEPTION(thr) == STk_void) {
       /* Be sure to register the first canceller only!  */
       THREAD_EXCEPTION(thr) =
@@ -115,7 +172,11 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
     }
     
     /* wait for it to terminate (also works for self) */
-    lurc_signal_await(&THREAD_DEATH_SIG(thr));
+    if((err = lurc_signal_await(&THREAD_DEATH_SIG(thr))) != 0){
+      // if we cannot terminate ourselves, we can still notify
+      // if we cannot terminate someone else, we can notify
+      lurc_error(err);
+    }
   }
   return STk_void;
 }
@@ -137,6 +198,34 @@ lthr_abs_time_to_rel_time(double abs_secs){
   return rel_tv;
 }
 
+struct prot_wait_t {
+  lurc_signal_t sig;
+  SCM thr;
+  SCM res;
+};
+
+static void join_watched_await(void *arg){
+  struct prot_wait_t *pw = (struct prot_wait_t *)arg;
+  int err;
+  if((err = lurc_signal_await(&THREAD_DEATH_SIG(pw->thr))) != 0)
+    lurc_error(err);
+  pw->res = STk_false;
+}
+
+static void join_protected_await(void *arg){
+  struct prot_wait_t *pw = (struct prot_wait_t *)arg;
+  int err;
+  if((err = lurc_watch(&(pw->sig), &join_watched_await, arg)) != 0)
+    lurc_error(err);
+}
+
+static void join_finally_destroyer(void *arg){
+  struct prot_wait_t *pw = (struct prot_wait_t *)arg;
+  int err;
+  if((err = lurc_signal_destroy(&(pw->sig))) != 0)
+    lurc_error(err);
+}
+
 DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
 {
   SCM res = STk_true;
@@ -152,22 +241,47 @@ DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
   if(THREAD_STATE(thr) != th_terminated){
     if(tm != STk_false){
       lurc_signal_t sig_to = lurc_timeout_signal(NULL, rel_tv);
+      struct prot_wait_t pw;
+      int err;
+
+      if(sig_to == NULL)
+        STk_error("Lurc cannot allocate signal");
       // await its death signal, but no longer than given timeout
-      LURC_PROTECT{
-        LURC_WATCH(&sig_to){
-          lurc_signal_await(&THREAD_DEATH_SIG(thr));
-          res = STk_false;
-        }
-      }LURC_WITH{
+      pw.thr = thr;
+      pw.res = STk_true;
+      pw.sig = sig_to;
+      if((err = lurc_protect_with(&join_protected_await, &pw, 
+                                  &join_finally_destroyer, &pw)) != 0){
+        // try to destroy the signal first
         lurc_signal_destroy(&sig_to);
-      }LURC_PROTECT_END;
-    }else{ // just a wait
-      lurc_signal_await(&THREAD_DEATH_SIG(thr));
+        lurc_error(err);
+      }
+      // take the result
+      res = pw.res;
+    }else{ 
+      int err;
+      // just a wait
+      if((err = lurc_signal_await(&THREAD_DEATH_SIG(thr))) != 0)
+        lurc_error(err);
       res = STk_false;
     }
   }else
     res = STk_false;
   return res;
+}
+
+static void sleep_protected_await(void *arg){
+  lurc_signal_t *sig = (lurc_signal_t *)arg;
+  int err;
+  if((err = lurc_signal_await(sig)) != 0)
+    lurc_error(err);
+}
+
+static void sleep_finally_destroyer(void *arg){
+  lurc_signal_t *sig = (lurc_signal_t *)arg;
+  int err;
+  if((err = lurc_signal_destroy(sig)) != 0)
+    lurc_error(err);
 }
 
 DEFINE_PRIMITIVE("%thread-sleep!", thread_sleep, subr1, (SCM tm))
@@ -181,13 +295,17 @@ DEFINE_PRIMITIVE("%thread-sleep!", thread_sleep, subr1, (SCM tm))
 
   // do the sleep only if > 0
   if(rel_tv.tv_sec != 0 || rel_tv.tv_usec != 0){
+    int err;
     lurc_signal_t sig_to = lurc_timeout_signal(NULL, rel_tv);
+    if(sig_to == NULL)
+      STk_error("Lurc cannot allocate signal");
     // await the given timeout
-    LURC_PROTECT{
-      lurc_signal_await(&sig_to);
-    }LURC_WITH{
+    if((err = lurc_protect_with(&sleep_protected_await, &sig_to,
+                                &sleep_finally_destroyer, &sig_to)) != 0){
+      // try to destroy the signal first
       lurc_signal_destroy(&sig_to);
-    }LURC_PROTECT_END;
+      lurc_error(err);
+    }
   }
   return STk_void;
 }
@@ -203,10 +321,11 @@ DEFINE_PRIMITIVE("%thread-system", thread_system, subr0, (void))
  * ====================================================================== 
  */
 
-int STk_init_threads_specific(vm_thread_t *vm)
+int STk_init_sys_threads(vm_thread_t *vm)
 {
   /* Define the key to access the thead specific VM */ 
-  lurc_set_data(vm, NULL);
+  if(lurc_set_data(vm, NULL) != 0)
+    return FALSE;
 
   return TRUE;
 }

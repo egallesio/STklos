@@ -40,7 +40,7 @@
  * 
 \* ====================================================================== */
 
-struct mutex_obj_specific {
+struct sys_mutex_obj {
   lurc_mutex_t mymutex;
   lurc_signal_t mysignal;
 };
@@ -56,7 +56,7 @@ struct mutex_obj_specific {
 
 typedef enum {CV_NONE, CV_ONE, CV_ALL} cv_target_t;
 
-struct condv_obj_specific {
+struct sys_condv_obj {
   lurc_signal_t mysignal;
   cv_target_t target;
   lurc_instant_t emitted;
@@ -74,8 +74,8 @@ EXTERN_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
 EXTERN_PRIMITIVE("condition-variable-signal!", condv_signal, subr1, (SCM cv));
 EXTERN_PRIMITIVE("condition-variable-brodcast!", condv_broadcast, subr1, (SCM cv));
 
-extern void STk_make_condv_specific(SCM z);
-extern void STk_make_mutex_specific(SCM z);
+extern void STk_make_sys_condv(SCM z);
+extern void STk_make_sys_mutex(SCM z);
 
 
 #endif /* ! _STK_MUTEX_LURC_H */

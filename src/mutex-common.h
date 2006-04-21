@@ -50,7 +50,7 @@ struct mutex_obj {
   SCM specific;
   SCM owner;
   int locked;
-  struct mutex_obj_specific sys_mutex;
+  struct sys_mutex_obj sys_mutex;
 };
 
 #define MUTEXP(p)		(BOXED_TYPE_EQ((p), tc_mutex))
@@ -69,7 +69,7 @@ struct condv_obj {
   stk_header header;
   SCM name;
   SCM specific;
-  struct condv_obj_specific sys_condv;
+  struct sys_condv_obj sys_condv;
 };
 
 #define CONDVP(p)		(BOXED_TYPE_EQ((p), tc_condv))

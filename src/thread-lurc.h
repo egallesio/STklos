@@ -28,7 +28,7 @@
 
 #include <lurc.h>
 
-struct thread_obj_specific {
+struct sys_thread_obj {
   lurc_thread_t lthread;
   lurc_signal_t term_sig; // emit to terminate this thread
   lurc_signal_t death_sig; // emitted on thread death
@@ -41,8 +41,8 @@ struct thread_obj_specific {
 
 extern struct timeval lthr_abs_time_to_rel_time(double abs_secs);
 
-extern void STk_thread_start_specific(SCM thr);
-extern int STk_init_threads_specific(vm_thread_t *vm);
+extern void STk_sys_thread_start(SCM thr);
+extern int STk_init_sys_threads(vm_thread_t *vm);
 
 EXTERN_PRIMITIVE("thread-yield!", thread_yield, subr0, (void));
 EXTERN_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr));

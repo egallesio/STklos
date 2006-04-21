@@ -347,7 +347,8 @@ SCM STk_load_object_file(SCM f, char *fname);
 
 void STk_signal_error(SCM who, SCM str);
 void STk_error(char *format, ...);
-SCM STk_format_error(char *format, ...);
+SCM  STk_make_error(char *format, ...);
+SCM  STk_format_error(char *format, ...);
 void STk_warning(char *format, ...);
 void STk_panic(char *format, ...);
 void STk_signal(char *str);
