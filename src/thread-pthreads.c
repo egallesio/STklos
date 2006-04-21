@@ -145,8 +145,7 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
     pthread_mutex_lock(&THREAD_MYMUTEX(thr));
     
     /* Terminate effectively the thread */
-    // FIXME: this looks like an error
-    if (thr == THREAD_VM(thr)->scheme_thread)
+    if (thr == STk_get_current_vm()->scheme_thread)
       pthread_exit(0); 				/* Suicide */
     else 
       pthread_cancel(THREAD_PTHREAD(thr));	/* terminate an other thread */
