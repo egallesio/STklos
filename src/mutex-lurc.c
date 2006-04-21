@@ -36,6 +36,9 @@
 #include "mutex-common.h"
 #include "thread-common.h"
 
+static void lurc_error(int err){
+  STk_error("Lurc error: ~S", lurc_strerror(err));
+}
 
 /* ====================================================================== *\
  *
@@ -45,15 +48,24 @@
 
 static void mutex_finalizer(SCM mtx)
 {
-  lurc_mutex_destroy(&MUTEX_MYMUTEX(mtx));
-  lurc_signal_destroy(&MUTEX_MYSIGNAL(mtx));
+  // any error here is non-forwardable
+  int err;
+  if((err = lurc_mutex_destroy(&MUTEX_MYMUTEX(mtx))) != 0)
+    STk_panic("Lurc error: ~S", lurc_strerror(err));
+  if((err = lurc_signal_destroy(&MUTEX_MYSIGNAL(mtx))) != 0)
+    STk_panic("Lurc error: ~S", lurc_strerror(err));
 }
 
 
 void STk_make_sys_mutex(SCM z)
 {
-  lurc_mutex_init(&MUTEX_MYMUTEX(z), NULL);
-  lurc_signal_init(&MUTEX_MYSIGNAL(z), NULL);
+  int err;
+  if((err = lurc_mutex_init(&MUTEX_MYMUTEX(z), NULL)) != 0)
+    lurc_error(err);
+  if((err = lurc_signal_init(&MUTEX_MYSIGNAL(z), NULL)) != 0){
+    lurc_mutex_destroy(&MUTEX_MYMUTEX(z));
+    lurc_error(err);
+  }
 
   STk_register_finalizer(z, mutex_finalizer);
 }
@@ -65,24 +77,120 @@ DEFINE_PRIMITIVE("mutex-state", mutex_state, subr1, (SCM mtx))
 
   if (! MUTEXP(mtx)) STk_error_bad_mutex(mtx);
   
-  lurc_mutex_lock(&MUTEX_MYMUTEX(mtx));
-
   if (MUTEX_LOCKED(mtx))
     res = (MUTEX_OWNER(mtx) == STk_false) ? STk_sym_not_owned : MUTEX_OWNER(mtx);
   else 
     res = (MUTEX_OWNER(mtx) == STk_false) ? STk_sym_not_abandoned: STk_sym_abandoned;
   
-  lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx));
-
   return res;
 }
 
+struct mut_lock_t {
+  SCM mtx;
+  SCM thread;
+  SCM tm;
+  SCM res;
+  lurc_signal_t sig_to;
+  unsigned raising:1;
+  unsigned timedout:1;
+};
+
+static void lock_watched_await(void *arg){
+  struct mut_lock_t* ml = (struct mut_lock_t*)arg;
+  int err;
+  if((err = lurc_signal_await(&MUTEX_MYSIGNAL(ml->mtx))) != 0){
+    ml->raising = 1;
+    lurc_error(err);
+  }
+  // we did not timeout
+  ml->timedout = 0;
+}
+
+static void lock_protected_watch(void *arg){
+  struct mut_lock_t* ml = (struct mut_lock_t*)arg;
+  int err;
+  if((err = lurc_watch(&(ml->sig_to), &lock_watched_await, ml)) != 0){
+    ml->raising = 1;
+    lurc_error(err);
+  }
+}
+
+static void lock_finally_destroy(void *arg){
+  struct mut_lock_t* ml = (struct mut_lock_t*)arg;
+  int err;
+  if((err = lurc_signal_destroy(&(ml->sig_to))) != 0
+     && ! ml->raising){
+    ml->raising = 1;
+    lurc_error(err);
+  }
+}
+
+static void lock_protected_grab(void *arg){
+  struct mut_lock_t* ml = (struct mut_lock_t*)arg;
+  SCM mtx = ml->mtx;
+  struct timeval rel_tv;
+  int did_loop = 0;
+  int err;
+
+  while (MUTEX_LOCKED(mtx)) {
+    if ((MUTEX_OWNER(mtx) != STk_false) &&
+        (THREAD_STATE(MUTEX_OWNER(mtx)) == th_terminated)) {
+      MUTEX_LOCKED(mtx) = FALSE;
+      MUTEX_OWNER(mtx)  = STk_false;
+      ml->res = MUTEX_OWNER(mtx);
+      break;
+    }
+    // reset the signal ?
+    if(did_loop){
+      if((err = lurc_pause()) != 0)
+        lurc_error(err);
+    }
+    did_loop = 1;
+    if (ml->tm != STk_false) {
+      ml->timedout = 1;
+      // get a new timeout
+      rel_tv = lthr_abs_time_to_rel_time(REAL_VAL(ml->tm));
+      if(rel_tv.tv_sec != 0 || rel_tv.tv_usec != 0){
+        ml->sig_to = lurc_timeout_signal(NULL, rel_tv);
+        if(ml->sig_to == NULL)
+          STk_error("Lurc cannot allocate signal");
+        // await the given timeout
+        if((err = lurc_protect_with(&lock_protected_watch, ml,
+                                    &lock_finally_destroy, ml)) != 0){
+          lurc_signal_destroy(&(ml->sig_to));
+          ml->raising = 1;
+          lurc_error(err);
+        }
+      }
+      if (ml->timedout) { ml->res = STk_false; break; }
+    }else{
+      if((err = lurc_signal_await(&MUTEX_MYSIGNAL(mtx))) != 0){
+        ml->raising = 1;
+        lurc_error(err);
+      }
+    }
+  }
+  if (ml->res == STk_true) {
+    /* We can lock the mutex */
+    MUTEX_LOCKED(mtx) = TRUE;
+    MUTEX_OWNER(mtx) = ml->thread;
+  }
+}
+
+
+static void lock_finally_unlock(void *arg){
+  struct mut_lock_t* ml = (struct mut_lock_t*)arg;
+  SCM mtx = ml->mtx;
+  int err;
+  if((err = lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx))) != 0
+     && !ml->raising)
+    lurc_error(err);
+}
 
 DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread))
 {
-  struct timeval rel_tv;
-  SCM res = STk_true;
-  int did_loop = 0;
+  struct mut_lock_t ml;
+  int err;
 
   if (! MUTEXP(mtx)) STk_error_bad_mutex(mtx);
   if (REALP(tm)){
@@ -90,110 +198,159 @@ DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread
   }else if (!BOOLEANP(tm))
     STk_error_bad_timeout(tm);
 
-  if (lurc_mutex_lock(&MUTEX_MYMUTEX(mtx)) != 0)
-    STk_error_deadlock();
+  if ((err = lurc_mutex_lock(&MUTEX_MYMUTEX(mtx))) != 0)
+    lurc_error(err);
 
-  while (MUTEX_LOCKED(mtx)) {
-    if ((MUTEX_OWNER(mtx) != STk_false) &&
- 	(THREAD_STATE(MUTEX_OWNER(mtx)) == th_terminated)) {
-      MUTEX_LOCKED(mtx) = FALSE;
-      MUTEX_OWNER(mtx)  = STk_false;
-      res = MUTEX_OWNER(mtx);
-      break;
-    }
-    // reset the signal ?
-    if(did_loop)
-      lurc_pause();
-    did_loop = 1;
-    if (tm != STk_false) {
-      char timedout = 1;
-      // get a new timeout
-      rel_tv = lthr_abs_time_to_rel_time(REAL_VAL(tm));
-      if(rel_tv.tv_sec != 0 || rel_tv.tv_usec != 0){
-        lurc_signal_t sig_to = lurc_timeout_signal(NULL, rel_tv);
-        // await the given timeout
-        LURC_PROTECT{
-          LURC_WATCH(&sig_to){
-            lurc_signal_await(&MUTEX_MYSIGNAL(mtx));
-            // we did not timeout
-            timedout = 0;
-          }
-        }LURC_WITH{
-          lurc_signal_destroy(&sig_to);
-        }LURC_PROTECT_END;
-      }
-      if (timedout) { res = STk_false; break; }
-    }
-    else
-      lurc_signal_await(&MUTEX_MYSIGNAL(mtx));
+  ml.res = STk_true;
+  ml.thread = thread;
+  ml.tm = tm;
+  ml.mtx = mtx;
+  ml.raising = 0;
+  if((err = lurc_protect_with(&lock_protected_grab, &ml,
+                              &lock_finally_unlock, &ml)) != 0){
+    lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx));
+    lurc_error(err);
   }
-  if (res == STk_true) {
-    /* We can lock the mutex */
-    MUTEX_LOCKED(mtx) = TRUE;
-    MUTEX_OWNER(mtx) = thread;
-  }
-  lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx));
 
   /* Different cases for res:
    *  - The owning thread which is now terminated (a condition must be raised)
    *  - #f: we had a timeout
    *  - #t: otherwise
    */
-  return res;
+  return ml.res;
+}
+
+
+struct mut_unlock_t {
+  SCM mtx;
+  SCM tm;
+  SCM cv;
+  SCM res;
+  lurc_signal_t sig_to;
+  unsigned raising:1;
+  unsigned timedout:1;
+};
+
+static void unlock_watched_await(void *arg){
+  struct mut_unlock_t* ml = (struct mut_unlock_t*)arg;
+  SCM cv = ml->cv;
+  int err;
+
+  do{
+    // skip the first emission if needed
+    // not that this also works for loop cases
+    if(CONDV_EMITTED(cv) == lurc_instant())
+      if((err = lurc_pause()) != 0){
+        ml->raising = 1;
+        lurc_error(err);
+      }
+    if((err = lurc_signal_await(&CONDV_MYSIGNAL(cv))) != 0){
+      ml->raising = 1;
+      lurc_error(err);
+    }
+    // was it for us ?
+  }while(CONDV_TARGET(cv) == CV_NONE);
+  // it was for us, we take it
+  CONDV_TARGET(cv) = CV_NONE;
+  // we did not timeout
+  ml->timedout = 0;
+}
+
+static void unlock_protected_watch(void *arg){
+  struct mut_unlock_t* ml = (struct mut_unlock_t*)arg;
+  int err;
+  if((err = lurc_watch(&(ml->sig_to), &unlock_watched_await, ml)) != 0){
+    ml->raising = 1;
+    lurc_error(err);
+  }
+}
+
+static void unlock_finally_destroy(void *arg){
+  struct mut_unlock_t* ml = (struct mut_unlock_t*)arg;
+  int err;
+  if((err = lurc_signal_destroy(&(ml->sig_to))) != 0
+     && ! ml->raising){
+    ml->raising = 1;
+    lurc_error(err);
+  }
+}
+
+static void unlock_protected_drop(void *arg){
+  struct mut_unlock_t* ml = (struct mut_unlock_t*)arg;
+  SCM mtx = ml->mtx;
+  int err;
+
+  /* Signal to waiting threads */
+  if((err = lurc_signal_emit(&MUTEX_MYSIGNAL(mtx))) != 0){
+    ml->raising = 1;
+    lurc_error(err);
+  }
+
+  if (ml->cv != STk_false) {
+    if (ml->tm != STk_false) {
+      struct timeval rel_tv = lthr_abs_time_to_rel_time(REAL_VAL(ml->tm));
+      ml->timedout = 1;
+      ml->sig_to = lurc_timeout_signal(NULL, rel_tv);
+      if(ml->sig_to == NULL)
+        STk_error("Lurc cannot allocate signal");
+
+      // await the signal, but no longer than given timeout
+      if((err = lurc_protect_with(&unlock_protected_watch, ml,
+                                  &unlock_finally_destroy, ml)) != 0){
+        lurc_signal_destroy(&(ml->sig_to));
+        ml->raising = 1;
+        lurc_error(err);
+      }
+      if (ml->timedout) ml->res = STk_false; 
+    } else {
+      if((err = lurc_signal_await(&CONDV_MYSIGNAL(ml->cv))) != 0){
+        ml->raising = 1;
+        lurc_error(err);
+      }
+    }
+  }
+}
+
+static void unlock_finally_unlock(void *arg){
+  struct mut_unlock_t* ml = (struct mut_unlock_t*)arg;
+  SCM mtx = ml->mtx;
+  int err;
+  if((err = lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx))) != 0
+     && !ml->raising)
+    lurc_error(err);
 }
 
 DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm))
 {
-  SCM res = STk_true;
-  struct timeval rel_tv;
+  struct mut_unlock_t ml;
+  int err;
 
   if (! MUTEXP(mtx)) STk_error_bad_mutex(mtx);
   if (REALP(tm)) {
-    rel_tv = lthr_abs_time_to_rel_time(REAL_VAL(tm));
   }
   else if (!BOOLEANP(tm))
     STk_error_bad_timeout(tm);
   
-  if (lurc_mutex_lock(&MUTEX_MYMUTEX(mtx)) != 0)
-    STk_error_deadlock();
+  if((err = lurc_mutex_lock(&MUTEX_MYMUTEX(mtx))) != 0)
+    lurc_error(err);
 
   /* Go in the unlocked/abandonned state */
   MUTEX_LOCKED(mtx) = FALSE;
   MUTEX_OWNER(mtx)  = STk_false;
-  
-  /* Signal to waiting threads */
-  lurc_signal_emit(&MUTEX_MYSIGNAL(mtx));
-  if (cv != STk_false) {
-    if (tm != STk_false) {
-      char timedout = 1;
-      lurc_signal_t sig_to = lurc_timeout_signal(NULL, rel_tv);
-      // await the signal, but no longer than given timeout
-      LURC_PROTECT{
-        LURC_WATCH(&sig_to){
-          do{
-            // skip the first emission if needed
-            // not that this also works for loop cases
-            if(CONDV_EMITTED(cv) == lurc_instant())
-              lurc_pause();
-            lurc_signal_await(&CONDV_MYSIGNAL(cv));
-            // was it for us ?
-          }while(CONDV_TARGET(cv) == CV_NONE);
-          // it was for us, we take it
-          CONDV_TARGET(cv) = CV_NONE;
-          // we did not timeout
-          timedout = 0;
-        }
-      }LURC_WITH{
-        lurc_signal_destroy(&sig_to);
-      }LURC_PROTECT_END;
 
-      if (timedout) res = STk_false; 
-    } else {
-      lurc_signal_await(&CONDV_MYSIGNAL(cv));
-    }
+  // now try to drop it
+  ml.res = STk_true;
+  ml.cv = cv;
+  ml.tm = tm;
+  ml.mtx = mtx;
+  ml.raising = 0;
+  if((err = lurc_protect_with(&unlock_protected_drop, &ml,
+                              &unlock_finally_unlock, &ml)) != 0){
+    lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx));
+    lurc_error(err);
   }
-  lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx));
-  return res;
+  
+  return ml.res;
 }
 
 
@@ -205,14 +362,19 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
 
 static void condv_finalizer(SCM cv)
 {
-  lurc_signal_destroy(&CONDV_MYSIGNAL(cv));
+  int err;
+  // anything here is fatal since we cannot propagate it
+  if((err = lurc_signal_destroy(&CONDV_MYSIGNAL(cv))) != 0)
+    STk_panic("Lurc error: ~S", lurc_strerror(err));
 }
 
 void STk_make_sys_condv(SCM z)
 {
+  int err;
   CONDV_TARGET(z) = CV_NONE;
   CONDV_EMITTED(z) = -1;
-  lurc_signal_init(&CONDV_MYSIGNAL(z), NULL);
+  if((err = lurc_signal_init(&CONDV_MYSIGNAL(z), NULL)) != 0)
+    lurc_error(err);
 
   STk_register_finalizer(z, condv_finalizer);
 }
@@ -220,30 +382,38 @@ void STk_make_sys_condv(SCM z)
 
 DEFINE_PRIMITIVE("condition-variable-signal!", condv_signal, subr1, (SCM cv))
 {
-   if (! CONDVP(cv)) STk_error_bad_condv(cv);
-   // find a free instant to emit
-   while(lurc_instant() == CONDV_EMITTED(cv))
-     lurc_pause();
-
-   // we can now safely emit it for one person
-   CONDV_EMITTED(cv) = lurc_instant();
-   CONDV_TARGET(cv) = CV_ONE;
-   lurc_signal_emit(&CONDV_MYSIGNAL(cv));
-
-   return STk_void;
+  int err;
+  if (! CONDVP(cv)) STk_error_bad_condv(cv);
+  // find a free instant to emit
+  while(lurc_instant() == CONDV_EMITTED(cv)){
+    if((err = lurc_pause()) != 0)
+      lurc_error(err);
+  }
+  
+  // we can now safely emit it for one person
+  CONDV_EMITTED(cv) = lurc_instant();
+  CONDV_TARGET(cv) = CV_ONE;
+  if((err = lurc_signal_emit(&CONDV_MYSIGNAL(cv))) != 0)
+    lurc_error(err);
+  
+  return STk_void;
 }
 
 DEFINE_PRIMITIVE("condition-variable-brodcast!", condv_broadcast, subr1, (SCM cv))
 {
-   if (! CONDVP(cv)) STk_error_bad_condv(cv);
-   // find a free instant to emit
-   while(lurc_instant() == CONDV_EMITTED(cv))
-     lurc_pause();
-
-   // we can now safely emit it for one person
-   CONDV_EMITTED(cv) = lurc_instant();
-   CONDV_TARGET(cv) = CV_ALL;
-   lurc_signal_emit(&CONDV_MYSIGNAL(cv));
-
-   return STk_void;
+  int err;
+  if (! CONDVP(cv)) STk_error_bad_condv(cv);
+  // find a free instant to emit
+  while(lurc_instant() == CONDV_EMITTED(cv)){
+    if((err = lurc_pause()) != 0)
+      lurc_error(err);
+  }
+  
+  // we can now safely emit it for one person
+  CONDV_EMITTED(cv) = lurc_instant();
+  CONDV_TARGET(cv) = CV_ALL;
+  if((err = lurc_signal_emit(&CONDV_MYSIGNAL(cv))) != 0)
+    lurc_error(err);
+  
+  return STk_void;
 }
