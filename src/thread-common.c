@@ -32,9 +32,8 @@ SCM STk_primordial_thread = NULL;
 
 SCM STk_cond_thread_terminated;
 static SCM cond_thread_abandonned_mutex, cond_join_timeout;
-static SCM all_threads = STk_nil;
 
-void error_bad_thread(SCM obj)
+void STk_error_bad_thread(SCM obj)
 {
   STk_error("bad thread ~S", obj);
 }
@@ -61,7 +60,8 @@ static SCM do_make_thread(SCM thunk, SCM name)
   THREAD_STATE(z)     = th_new;
   THREAD_VM(z)        = NULL;
 
-  all_threads = STk_cons(z, all_threads); /* For the GC */
+  STk_do_make_sys_thread(z);
+
   return z;
 }
 
@@ -84,34 +84,34 @@ DEFINE_PRIMITIVE("thread?", threadp, subr1, (SCM obj))
 
 DEFINE_PRIMITIVE("thread-name", thread_name, subr1, (SCM thr))
 {
-  if (! THREADP(thr)) error_bad_thread(thr);
+  if (! THREADP(thr)) STk_error_bad_thread(thr);
   return THREAD_NAME(thr);
 }
 
 DEFINE_PRIMITIVE("%thread-end-exception", thread_end_exception, subr1, (SCM thr))
 {
-  if (!THREADP(thr)) error_bad_thread(thr);
+  if (!THREADP(thr)) STk_error_bad_thread(thr);
   return THREAD_EXCEPTION(thr);
 }
 
 DEFINE_PRIMITIVE("%thread-end-exception-set!", thread_end_exception_set, 
 		 subr2, (SCM thr, SCM val))
 {
-  if (!THREADP(thr)) error_bad_thread(thr);
+  if (!THREADP(thr)) STk_error_bad_thread(thr);
   THREAD_EXCEPTION(thr) = val;
   return STk_void;
 }
 
 DEFINE_PRIMITIVE("%thread-end-result", thread_end_result, subr1, (SCM thr))
 {
-  if (!THREADP(thr)) error_bad_thread(thr);
+  if (!THREADP(thr)) STk_error_bad_thread(thr);
   return THREAD_RESULT(thr);
 }
 
 DEFINE_PRIMITIVE("%thread-end-result-set!", thread_end_result_set, 
 		 subr2, (SCM thr, SCM val))
 {
-  if (!THREADP(thr)) error_bad_thread(thr);
+  if (!THREADP(thr)) STk_error_bad_thread(thr);
   THREAD_RESULT(thr) = val;
   return STk_void;
 }
@@ -119,14 +119,14 @@ DEFINE_PRIMITIVE("%thread-end-result-set!", thread_end_result_set,
 
 DEFINE_PRIMITIVE("thread-specific", thread_specific, subr1, (SCM thr))
 {
-  if (! THREADP(thr)) error_bad_thread(thr);
+  if (! THREADP(thr)) STk_error_bad_thread(thr);
   return THREAD_SPECIFIC(thr);
 }
 
 DEFINE_PRIMITIVE("thread-specific-set!", thread_specific_set, subr2, 
 		 (SCM thr, SCM value))
 {
-  if (!THREADP(thr)) error_bad_thread(thr);
+  if (!THREADP(thr)) STk_error_bad_thread(thr);
   THREAD_SPECIFIC(thr) = value;
   return STk_void;
 }
@@ -135,7 +135,7 @@ DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
 {
   vm_thread_t *vm, *new;
   
-  if (!THREADP(thr)) error_bad_thread(thr);
+  if (!THREADP(thr)) STk_error_bad_thread(thr);
   if (THREAD_STATE(thr) != th_new) 
     STk_error("thread has already been started ~S", thr);
 
@@ -155,12 +155,6 @@ DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
   STk_sys_thread_start(thr);
   
   return thr;
-}
-
-void STk_thread_terminate_common(SCM thr){
-  /* remove the thread from the GC list, it can now dissapear when
-     everyone has stopped referencing it */
-  all_threads = STk_dremq(thr, all_threads);
 }
 
 /* ======================================================================

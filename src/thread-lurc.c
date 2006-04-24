@@ -62,6 +62,19 @@ vm_thread_t *STk_get_current_vm(void)
 
 /* ====================================================================== */
 
+static void thread_finalizer(SCM thr){
+  int err;
+
+  // deallocate the signals
+  if((THREAD_TERM_SIG(thr) != NULL
+      && ((err = lurc_signal_destroy(&THREAD_TERM_SIG(thr))) != 0))
+     || (THREAD_DEATH_SIG(thr) != NULL
+         && ((err = lurc_signal_destroy(&THREAD_DEATH_SIG(thr))) != 0))){
+    // any error here is fatal since we cannot raise it properly
+    STk_panic("Lurc error: ~S", lurc_strerror(err));
+  }
+}
+
 static void thread_watch(void *arg){
   SCM thr = (SCM) arg;
   // run the thread thunk
@@ -97,23 +110,18 @@ static void start_scheme_thread(void *arg)
   }
 
   // FIXME: abandon the mutexes ?
-
-  // now deallocate the signals
-  if(((err = lurc_signal_destroy(&THREAD_TERM_SIG(thr))) != 0)
-     || ((err = lurc_signal_destroy(&THREAD_DEATH_SIG(thr))) != 0)){
-    // any error here is fatal since we cannot raise it properly
-    STk_panic("Lurc error: ~S", lurc_strerror(err));
-  }
-
-  STk_thread_terminate_common(thr);
 }
 
 /* ====================================================================== */
 
-void STk_sys_thread_start(SCM thr)
+void STk_do_make_sys_thread(SCM thr)
 {
   lurc_signal_attr_t attr;
   int err;
+
+  THREAD_TERM_SIG(thr) = NULL;
+  THREAD_DEATH_SIG(thr) = NULL;
+
   // give them semi-meaningful names
   if((err = lurc_signal_attr_init(&attr)) != 0)
     lurc_error(err);
@@ -127,7 +135,7 @@ void STk_sys_thread_start(SCM thr)
   if((err = lurc_signal_attr_setname(&attr, "thread-death-sig")) != 0
      || (err = lurc_signal_init(&(THREAD_DEATH_SIG(thr)), &attr)) != 0){
     lurc_signal_attr_destroy(&attr);
-    // do not forget the first successfull signal
+    // do not forget the first signal
     lurc_signal_destroy(&(THREAD_TERM_SIG(thr)));
     lurc_error(err);
   }
@@ -138,6 +146,14 @@ void STk_sys_thread_start(SCM thr)
     lurc_signal_destroy(&(THREAD_DEATH_SIG(thr)));
     lurc_error(err);
   }
+
+  // now the finalizer
+  STk_register_finalizer(thr, thread_finalizer);
+}
+
+void STk_sys_thread_start(SCM thr)
+{
+  int err;
 
   if((err = lurc_thread_create(&THREAD_LTHREAD(thr), NULL, 
                                &start_scheme_thread, thr)) != 0){

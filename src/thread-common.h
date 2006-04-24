@@ -63,7 +63,6 @@ struct thread_obj {
 #define THREAD_VM(p)		(((struct thread_obj *) (p))->vm)
 
 extern void STk_error_bad_thread(SCM obj);
-extern void STk_thread_terminate_common(SCM thr);
 
 extern SCM STk_cond_thread_terminated;
 

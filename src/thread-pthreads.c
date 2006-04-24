@@ -30,15 +30,6 @@
 #include "vm.h"
 #include "thread-common.h"
 
-static SCM all_threads = STk_nil;
-
-
-static void error_bad_thread(SCM obj)
-{
-  STk_error("bad thread ~S", obj);
-}
-
-
 /*
  * Thread specific value (the VM)
  */
@@ -68,6 +59,14 @@ vm_thread_t *STk_get_current_vm(void)
 
 /* ====================================================================== */
 
+static void thread_finalizer(SCM thr)
+{
+  printf("DESTROY!!\n");
+  fflush(stdout);
+  pthread_mutex_destroy(&THREAD_MYMUTEX(thr));
+  pthread_cond_destroy(&THREAD_MYCONDV(thr));
+}
+
 static void terminate_scheme_thread(void *arg)
 {
   SCM thr = (SCM) arg;
@@ -75,11 +74,9 @@ static void terminate_scheme_thread(void *arg)
   pthread_mutex_lock(&THREAD_MYMUTEX(thr));
   THREAD_STATE(thr)  = th_terminated;
 
-  /* signal the death of this thread to the ones waiting it */
+  /* signal the death of this thread to the ones awaiting it */
   pthread_cond_broadcast(&THREAD_MYCONDV(thr));
   pthread_mutex_unlock(&THREAD_MYMUTEX(thr));
-
-  STk_thread_terminate_common(thr);
 }
 
 
@@ -90,7 +87,7 @@ static void *start_scheme_thread(void *arg)
   
   pthread_setspecific(vm_key, THREAD_VM(thr));
   pthread_cleanup_push(terminate_scheme_thread, thr);
-  
+
   res = STk_C_apply(THREAD_THUNK(thr), 0);
   if (THREAD_EXCEPTION(thr) == STk_false) {
     THREAD_RESULT(thr) = res;
@@ -103,14 +100,22 @@ static void *start_scheme_thread(void *arg)
 
 /* ====================================================================== */
 
+void STk_do_make_sys_thread(SCM thr)
+{
+  pthread_mutex_init(&THREAD_MYMUTEX(thr), NULL);
+  pthread_cond_init(&THREAD_MYCONDV(thr), NULL);
+
+  // now the finalizer
+  STk_register_finalizer(thr, thread_finalizer);
+  //  printf("bla\n");
+}
+
 void STk_sys_thread_start(SCM thr)
 {
   pthread_attr_t attr;
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, TRUE);
-  pthread_mutex_init(&THREAD_MYMUTEX(thr), NULL);
-  pthread_cond_init(&THREAD_MYCONDV(thr), NULL);
 
   // pthread_mutex_lock(&THREAD_MYMUTEX(thr));
 
@@ -132,7 +137,7 @@ DEFINE_PRIMITIVE("thread-yield!", thread_yield, subr0, (void))
 
 DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
 {
-  if (!THREADP(thr)) error_bad_thread(thr);
+  if (!THREADP(thr)) STk_error_bad_thread(thr);
 
   if (THREAD_STATE(thr) != th_terminated) {
     terminate_scheme_thread(thr);
@@ -140,7 +145,8 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
     pthread_mutex_lock(&THREAD_MYMUTEX(thr));
     if (THREAD_EXCEPTION(thr) == STk_void) {
       /* Be sure to register the first canceller only!  */
-      THREAD_EXCEPTION(thr) = STk_make_C_cond(cond_thread_terminated, 1, thr);
+      THREAD_EXCEPTION(thr) = 
+        STk_make_C_cond(STk_cond_thread_terminated, 1, thr);
     }
     pthread_mutex_lock(&THREAD_MYMUTEX(thr));
     
@@ -162,7 +168,8 @@ DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
   SCM res = STk_false;
   double tmd;
 
-  if (!THREADP(thr)) error_bad_thread(thr);
+
+  if (!THREADP(thr)) STk_error_bad_thread(thr);
 
   if (REALP(tm)) {
     tmd = REAL_VAL(tm);

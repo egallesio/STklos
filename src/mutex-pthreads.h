@@ -26,7 +26,7 @@
 #ifndef _STK_MUTEX_PTHREADS_H
 #define _STK_MUTEX_PTHREADS_H
 
-#include <pthreads.h>
+#include <pthread.h>
 #include "stklos.h"
 
 /* ====================================================================== *\

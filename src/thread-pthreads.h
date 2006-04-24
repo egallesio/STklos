@@ -40,6 +40,13 @@ struct sys_thread_obj {
 #define THREAD_MYCONDV(p)	(((struct thread_obj *) (p))->sys_thread.mycondv)
 
 extern void STk_sys_thread_start(SCM thr);
+extern void STk_do_make_sys_thread(SCM thr);
 extern int STk_init_sys_threads(vm_thread_t *vm);
+
+EXTERN_PRIMITIVE("thread-yield!", thread_yield, subr0, (void));
+EXTERN_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr));
+EXTERN_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm));
+EXTERN_PRIMITIVE("%thread-sleep!", thread_sleep, subr1, (SCM tm));
+EXTERN_PRIMITIVE("%thread-system", thread_system, subr0, (void));
 
 #endif /* ! _STK_THREAD_PTHREADS_H */

@@ -56,23 +56,23 @@
 	      t))))
 
 ;; calculate fibonacchi in awful way
-;;// (define (mt-fib n)
-;;//   (let ((threads (make-vector n)))
-;;//     (dotimes (i n)
-;;//       (vector-set! threads
-;;// 		   i
-;;// 		   (make-thread
-;;// 		    (case i
-;;// 		      ((0)  (lambda () 1))
-;;// 		      ((1)  (lambda () 2))
-;;// 		      (else (lambda ()
-;;// 			      (+ (thread-join! (vector-ref threads (- i 1)))
-;;// 				 (thread-join! (vector-ref threads (- i 2))))))))))
-;;//     (dotimes (i n)
-;;//       (thread-start! (vector-ref threads (- n i 1))))
-;;//     (thread-join! (vector-ref threads (- n 1)))))
-;;// 
-;;// (test "thread-join!" 14930352 (mt-fib 35))
+ (define (mt-fib n)
+   (let ((threads (make-vector n)))
+     (dotimes (i n)
+       (vector-set! threads
+ 		   i
+ 		   (make-thread
+ 		    (case i
+ 		      ((0)  (lambda () 1))
+ 		      ((1)  (lambda () 2))
+ 		      (else (lambda ()
+ 			      (+ (thread-join! (vector-ref threads (- i 1)))
+ 				 (thread-join! (vector-ref threads (- i 2))))))))))
+     (dotimes (i n)
+       (thread-start! (vector-ref threads (- n i 1))))
+     (thread-join! (vector-ref threads (- n 1)))))
+ 
+ (test "thread-join!" 14930352 (mt-fib 35))
 
 ;;---------------------------------------------------------------------
 (test-subsection "Thread and error")
