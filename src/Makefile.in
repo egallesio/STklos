@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 16-Apr-2006 10:58 (eg)
+# Last file update: 25-Apr-2006 16:46 (eg)
 SHELL = @SHELL@
 
 srcdir = @srcdir@
@@ -99,7 +99,6 @@ HAVE_LDAP = @HAVE_LDAP@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDAP_LIB = @LDAP_LIB@
 LURCDIR = @LURCDIR@
-MYCFLAGS = @MYCFLAGS@
 OS_FLAVOUR = @OS_FLAVOUR@
 OS_NAME = @OS_NAME@
 PACKAGE = @PACKAGE@
@@ -116,6 +115,7 @@ SH_LOAD_FLAGS = @SH_LOAD_FLAGS@
 SH_MAIN_LOAD_FLAGS = @SH_MAIN_LOAD_FLAGS@
 SH_SUFFIX = @SH_SUFFIX@
 STACK_DIRECTION = @STACK_DIRECTION@
+STKCFLAGS = @STKCFLAGS@
 STRIP = @STRIP@
 SVN_URL = @SVN_URL@
 
@@ -124,7 +124,7 @@ VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-CFLAGS = @CFLAGS@ @MYCFLAGS@
+CFLAGS = @CFLAGS@ @STKCFLAGS@
 
 schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
 extraincdir = $(prefix)/include/@PACKAGE@
@@ -251,7 +251,8 @@ LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(stklos_SOURCES)
 DATA = $(extrainc_DATA)
 
-DIST_COMMON = Makefile.am Makefile.in extraconf.h.in stklosconf.h.in
+DIST_COMMON = Makefile.am Makefile.in TODO extraconf.h.in \
+	stklosconf.h.in
 SOURCES = $(stklos_SOURCES)
 
 all: stklosconf.h

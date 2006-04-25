@@ -99,7 +99,6 @@ HAVE_LDAP = @HAVE_LDAP@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDAP_LIB = @LDAP_LIB@
 LURCDIR = @LURCDIR@
-MYCFLAGS = @MYCFLAGS@
 OS_FLAVOUR = @OS_FLAVOUR@
 OS_NAME = @OS_NAME@
 PACKAGE = @PACKAGE@
@@ -116,6 +115,7 @@ SH_LOAD_FLAGS = @SH_LOAD_FLAGS@
 SH_MAIN_LOAD_FLAGS = @SH_MAIN_LOAD_FLAGS@
 SH_SUFFIX = @SH_SUFFIX@
 STACK_DIRECTION = @STACK_DIRECTION@
+STKCFLAGS = @STKCFLAGS@
 STRIP = @STRIP@
 SVN_URL = @SVN_URL@
 THREADS = @THREADS@
@@ -156,7 +156,7 @@ NROFF = nroff
 MANS = $(man_MANS)
 DATA = $(dochtml_DATA) $(docimg_DATA) $(docpdf_DATA) $(scheme_DATA)
 
-DIST_COMMON = Makefile.am Makefile.in stklos-compile.1.in \
+DIST_COMMON = Makefile.am Makefile.in TODO stklos-compile.1.in \
 	stklos-config.1.in stklos-genlex.1.in stklos-install.1.in \
 	stklos.1.in
 all: all-am

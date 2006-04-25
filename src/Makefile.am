@@ -2,10 +2,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 16-Apr-2006 10:58 (eg)
+# Last file update: 25-Apr-2006 16:46 (eg)
 
 CC	    = @CC@
-CFLAGS	    = @CFLAGS@ @MYCFLAGS@
+CFLAGS	    = @CFLAGS@ @STKCFLAGS@
 
 schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
 extraincdir = $(prefix)/include/@PACKAGE@

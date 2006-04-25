@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 15-Apr-2006 16:57 (eg)
+dnl Last file update: 25-Apr-2006 16:45 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -115,7 +115,7 @@ case "$THREADS" in
   none) true ;;
   lurc) true ;;
   *) case `uname -s` in
-        Linux*) MYCFLAGS="$CFLAGS -D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
+        Linux*) STKCFLAGS="-D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
      esac
 esac
 
@@ -471,7 +471,7 @@ fi
 
 
 dnl Output files 
-AC_SUBST(MYCFLAGS)
+AC_SUBST(STKCFLAGS)
 AC_SUBST(VERSION)
 AC_SUBST(HAVE_DLOPEN)
 AC_SUBST(OS_FLAVOUR)

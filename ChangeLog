@@ -1,3 +1,74 @@
+2006-04-21  separdau  <separdau@localhost>
+
+	* src/thread-pthreads.c:
+	Fix a bug I think, since a thread_obj is always == to its
+	vm->scheme_thread field.
+	[6c653e49de75] [tip]
+
+	* src/mutex-lurc.c:
+	And the same dull insane-driving error handling in mutex-lurc
+	[524410e6f0aa]
+
+	* src/boot.c, src/error.c, src/mutex-common.c, src/mutex-common.h, 
+	* src/mutex-lurc.c, src/mutex-lurc.h, src/mutex-pthreads.c, 
+	* src/mutex-pthreads.h, src/stklos.h, src/thread-common.c, 
+	* src/thread-common.h, src/thread-lurc.c, src/thread-lurc.h, 
+	* src/thread-pthreads.c, src/thread-pthreads.h, src/error.c: 
+	added a function to create an error like STk_error but
+	without raising it (it returns it). There is a lot of code
+	duplication but I didn't know how to use it from STk_error because
+	of the ... argument. 
+
+	* all_threads: renamed _specific to sys_(sys_thread,sys_mutex,sys_condv) 
+	for code and data which are specific to a thread system. 
+	The _specific was confusing with TLS specific. 
+
+	* all_lurc_thread: deal in the best way possible with lurc
+	errors.
+	[40024c22c956]
+
+2006-04-20  stephane  <stephane@localhost>
+
+	* src/vm.c: put in common the common files and code of thread and 
+	mutex 
+
+	* str.c: fix a compile warning about LONG_MIN not fitting in int variable
+
+	* strklos.h: made EXTERN_PRIMITIVE actually declare the primitive
+	extern, and also declare its associated primitive_obj as extern.
+
+	* vm.c: fix (??) REG_CALL_PRIM which was doing some real wrong stuff I
+	have no idead why it worked, and if it did work, no idea why it
+	still works after my fix... 
+	[7db9abfc564b]
+
+2006-04-18  separdau  <separdau@localhost>
+
+	* configure.in: removed REENTRANT and GC_LINUX_THREADS for Lurc, I'm
+	still not sure this does the right thing, especially when giving it
+	to the GC we're builing, which should not happen (I think).
+
+	* lib/thread.stk: this one got removed (by accident?) and since the
+	Makefile called it thread.stk (and not thread_S_.stk) I renamed
+	it... fixme ? 
+
+	* thread*: remove threads from all_threads when they
+	terminate, I think it's a good time then, but for the pthreads impl
+	there are a few mutex and condv destroy missing... 
+
+	* lurc-*: made threads, mutexes and cond vars accept any SCM obj 
+	as name lurc-
+
+	* thread.c: fixed a bug in thread_join for already dead threads now
+	make test passes !!!
+	[8c0840e4f538]
+
+2006-04-18  Erick Gallesio  <eg@essi.fr>
+
+	* Integration of Stef work
+	* Added a test for thread in test directory
+	[b4a91d2209a1]
+
 2006-04-15  Erick Gallesio  <eg@essi.fr>
 
 	* src/vm.c (call-with-values): Fixed bug when no values was

@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 14-Nov-1993 14:58
- * Last file update: 12-Apr-2006 12:39 (eg)
+ * Last file update: 25-Apr-2006 18:48 (eg)
  */
 
 #include "stklos.h"
@@ -141,21 +141,18 @@ SCM STk_format_error(char *format, ...)
 }
 
 
-SCM STk_make_error(char *format, ...)
+static SCM make_error_condition(char *format, va_list ap)
 {
-  va_list ap;
   SCM out, bt;
-
+  
   /* Grab a baktrace */
   bt = STk_vm_bt();
-
+  
   /* Open a string port */
   out = STk_open_output_string();
 
   /* Build the message string in the string port */
-  va_start(ap, format);
   print_format(out, format, ap);
-  va_end(ap);
 
   /* and return error */
   return STk_make_C_cond(STk_err_mess_condition,
@@ -164,31 +161,34 @@ SCM STk_make_error(char *format, ...)
                          bt,
                          STk_get_output_string(out));
 
+}  
+
+
+SCM STk_make_error(char *format, ...)
+{
+  va_list ap;
+  SCM cond;
+
+  va_start(ap, format);
+  cond = make_error_condition(format, ap);
+  va_end(ap);
+  
+  /* Return the error condition */
+  return cond;
 }
+
 
 void STk_error(char *format, ...)
 {
   va_list ap;
-  SCM out, bt;
+  SCM cond;
 
-  /* Grab a baktrace */
-  bt = STk_vm_bt();
-
-  /* Open a string port */
-  out = STk_open_output_string();
-
-  /* Build the message string in the string port */
-  va_start(ap, format);
-  print_format(out, format, ap);
+  va_start(ap, format); 
+  cond = make_error_condition(format, ap); 
   va_end(ap);
 
-  /* and signal error */
-  STk_raise_exception(STk_make_C_cond(STk_err_mess_condition,
-				      3,
-				      STk_false, /* no location */
-				      bt,
-				      STk_get_output_string(out)));
-
+  /* Signal error */
+  STk_raise_exception(cond);
 }
 
 
