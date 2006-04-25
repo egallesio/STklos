@@ -115,7 +115,7 @@ case "$THREADS" in
   none) true ;;
   lurc) true ;;
   *) case `uname -s` in
-        Linux*) CFLAGS="$CFLAGS -D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
+        Linux*) MYCFLAGS="$CFLAGS -D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
      esac
 esac
 
@@ -471,6 +471,7 @@ fi
 
 
 dnl Output files 
+AC_SUBST(MYCFLAGS)
 AC_SUBST(VERSION)
 AC_SUBST(HAVE_DLOPEN)
 AC_SUBST(OS_FLAVOUR)

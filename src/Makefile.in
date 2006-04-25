@@ -99,6 +99,7 @@ HAVE_LDAP = @HAVE_LDAP@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDAP_LIB = @LDAP_LIB@
 LURCDIR = @LURCDIR@
+MYCFLAGS = @MYCFLAGS@
 OS_FLAVOUR = @OS_FLAVOUR@
 OS_NAME = @OS_NAME@
 PACKAGE = @PACKAGE@
@@ -123,7 +124,7 @@ VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-CFLAGS = @CFLAGS@
+CFLAGS = @CFLAGS@ @MYCFLAGS@
 
 schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
 extraincdir = $(prefix)/include/@PACKAGE@

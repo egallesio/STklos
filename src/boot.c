@@ -1,5 +1,5 @@
 /*
-This file was automatically generated on Mon Apr 24 13:47:47 2006 by make-C-boot
+This file was automatically generated on Tue Apr 25 15:35:53 2006 by make-C-boot
 This is a dump of the image in file /home/separdau/src/stklos-0.73-hg/lib/boot.img3
 ***DO NOT EDIT BY HAND***
 */

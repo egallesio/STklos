@@ -5,7 +5,7 @@
 # Last file update: 16-Apr-2006 10:58 (eg)
 
 CC	    = @CC@
-CFLAGS	    = @CFLAGS@
+CFLAGS	    = @CFLAGS@ @MYCFLAGS@
 
 schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
 extraincdir = $(prefix)/include/@PACKAGE@

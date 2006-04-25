@@ -174,7 +174,7 @@ DEFINE_PRIMITIVE("thread-yield!", thread_yield, subr0, (void))
 
 DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
 {
-  if (!THREADP(thr)) error_bad_thread(thr);
+  if (!THREADP(thr)) STk_error_bad_thread(thr);
 
   if (THREAD_STATE(thr) != th_terminated) {
     int err;
@@ -247,7 +247,7 @@ DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
   SCM res = STk_true;
   struct timeval rel_tv;
 
-  if (!THREADP(thr)) error_bad_thread(thr);
+  if (!THREADP(thr)) STk_error_bad_thread(thr);
 
   if (REALP(tm))
     rel_tv = lthr_abs_time_to_rel_time(REAL_VAL(tm));

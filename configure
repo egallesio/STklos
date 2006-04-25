@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE RANLIB ac_ct_RANLIB CPP EGREP PTHREADS_TRUE PTHREADS_FALSE LURC_TRUE LURC_FALSE NO_THREAD_TRUE NO_THREAD_FALSE GTK_CONFIG GNOME_CONFIG LIBOBJS HAVE_DLOPEN OS_FLAVOUR GC GCLIB GCINC GMP GMPLIB GMPINC PREFIX SCMDIR EXECDIR BUILD_OS BUILD_ARCH OS_NAME SH_COMP_FLAGS SH_LOAD_FLAGS SH_LOADER SH_SUFFIX SH_MAIN_LOAD_FLAGS COMPOBJ COMPSRC STACK_DIRECTION GTKLOS GTK_CONFIG_LIBS GTK_CONFIG_CFLAGS EXAMPLES HAVE_GNOME HAVE_LDAP LDAP_LIB PCRETARGET PCRE PCRELIB PCREINC DEF_PCRE SVN_URL THREADS LURCDIR CALLCC_STK LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE RANLIB ac_ct_RANLIB CPP EGREP PTHREADS_TRUE PTHREADS_FALSE LURC_TRUE LURC_FALSE NO_THREAD_TRUE NO_THREAD_FALSE GTK_CONFIG GNOME_CONFIG LIBOBJS MYCFLAGS HAVE_DLOPEN OS_FLAVOUR GC GCLIB GCINC GMP GMPLIB GMPINC PREFIX SCMDIR EXECDIR BUILD_OS BUILD_ARCH OS_NAME SH_COMP_FLAGS SH_LOAD_FLAGS SH_LOADER SH_SUFFIX SH_MAIN_LOAD_FLAGS COMPOBJ COMPSRC STACK_DIRECTION GTKLOS GTK_CONFIG_LIBS GTK_CONFIG_CFLAGS EXAMPLES HAVE_GNOME HAVE_LDAP LDAP_LIB PCRETARGET PCRE PCRELIB PCREINC DEF_PCRE SVN_URL THREADS LURCDIR CALLCC_STK LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -4229,7 +4229,7 @@ case "$THREADS" in
   none) true ;;
   lurc) true ;;
   *) case `uname -s` in
-        Linux*) CFLAGS="$CFLAGS -D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
+        Linux*) MYCFLAGS="$CFLAGS -D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
      esac
 esac
 
@@ -6177,6 +6177,7 @@ fi
 
 
 
+
                                                                                                                                                                                                                                                                     ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile gtklos/Makefile gtklos/gtklosconf.h utils/Makefile lib/boot.stk utils/stklos-config utils/stklos-script extensions/Makefile examples/Makefile examples/images/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/Lurc.d/Makefile tests/Makefile extensions/extconf.h doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-install.1 doc/skb/stklos-version.stk"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -6898,6 +6899,7 @@ s,@NO_THREAD_FALSE@,$NO_THREAD_FALSE,;t t
 s,@GTK_CONFIG@,$GTK_CONFIG,;t t
 s,@GNOME_CONFIG@,$GNOME_CONFIG,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
+s,@MYCFLAGS@,$MYCFLAGS,;t t
 s,@HAVE_DLOPEN@,$HAVE_DLOPEN,;t t
 s,@OS_FLAVOUR@,$OS_FLAVOUR,;t t
 s,@GC@,$GC,;t t

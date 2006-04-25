@@ -107,7 +107,6 @@ void STk_do_make_sys_thread(SCM thr)
 
   // now the finalizer
   STk_register_finalizer(thr, thread_finalizer);
-  //  printf("bla\n");
 }
 
 void STk_sys_thread_start(SCM thr)
