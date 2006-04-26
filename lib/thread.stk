@@ -1,5 +1,5 @@
 ;;;;
-;;;; threads.stk				-- Threads support
+;;;; thread.stk				-- Threads support
 ;;;; 
 ;;;; Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Jan-2006 22:56 (eg)
-;;;; Last file update: 14-Apr-2006 20:00 (eg)
+;;;; Last file update: 25-Apr-2006 19:10 (eg)
 ;;;;
 (define (%thread-timeout->seconds timeout)
   (cond

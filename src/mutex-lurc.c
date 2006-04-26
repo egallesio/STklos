@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 16-Apr-2006 10:51 (eg)
+ * Last file update: 26-Apr-2006 16:20 (eg)
  */
 
 #include <lurc.h>
@@ -149,7 +149,7 @@ static void lock_protected_grab(void *arg){
     if (ml->tm != STk_false) {
       ml->timedout = 1;
       // get a new timeout
-      rel_tv = lthr_abs_time_to_rel_time(REAL_VAL(ml->tm));
+      rel_tv = STk_thread_abstime_to_reltime(REAL_VAL(ml->tm));
       if(rel_tv.tv_sec != 0 || rel_tv.tv_usec != 0){
         ml->sig_to = lurc_timeout_signal(NULL, rel_tv);
         if(ml->sig_to == NULL)
@@ -288,7 +288,7 @@ static void unlock_protected_drop(void *arg){
 
   if (ml->cv != STk_false) {
     if (ml->tm != STk_false) {
-      struct timeval rel_tv = lthr_abs_time_to_rel_time(REAL_VAL(ml->tm));
+      struct timeval rel_tv = STk_thread_abstime_to_reltime(REAL_VAL(ml->tm));
       ml->timedout = 1;
       ml->sig_to = lurc_timeout_signal(NULL, rel_tv);
       if(ml->sig_to == NULL)

@@ -1,5 +1,5 @@
 /*
- * thread-pthread.c			-- Threads support in STklos
+ * thread-pthreads.c			-- Threads support in STklos
  * 
  * Copyright  2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 16-Apr-2006 13:11 (eg)
+ * Last file update: 26-Apr-2006 16:18 (eg)
  */
 
 
@@ -193,14 +193,17 @@ DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
   return res;
 }
 
+
 DEFINE_PRIMITIVE("%thread-sleep!", thread_sleep, subr1, (SCM tm))
 {
-
   if (REALP(tm)){
-    long n = (1000 * REAL_VAL(tm));
-
-    // call sleep
-    STk_sleep(MAKE_INT(n));
+    struct timeval tv = STk_thread_abstime_to_reltime(REAL_VAL(tm));
+    struct timespec ts;
+    
+    /* convert a timeval (in µs) to a timesepc (in ns) */
+    ts.tv_sec  = (time_t) tv.tv_sec;
+    ts.tv_nsec = (long) tv.tv_usec * 1000; 
+    nanosleep(&ts, NULL);
   }else
     STk_error("bad timeout ~S", tm);
 

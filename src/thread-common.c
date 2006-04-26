@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 16-Apr-2006 13:16 (eg)
+ * Last file update: 26-Apr-2006 16:18 (eg)
  */
 #include <unistd.h>
 #include "stklos.h"
@@ -36,6 +36,31 @@ static SCM cond_thread_abandonned_mutex, cond_join_timeout;
 void STk_error_bad_thread(SCM obj)
 {
   STk_error("bad thread ~S", obj);
+}
+
+
+struct timeval STk_thread_abstime_to_reltime(double abs_secs)
+{
+  struct timeval abs, cur, rel;
+
+  abs.tv_sec  = (long) abs_secs; /* trim to the second */
+  abs.tv_usec = (long) ((abs_secs - abs.tv_sec) * 1000000);
+
+  /* now deduce the current time */
+  gettimeofday(&cur, NULL);
+  rel.tv_sec  = abs.tv_sec - cur.tv_sec;
+  rel.tv_usec = abs.tv_usec - cur.tv_usec;
+  if (rel.tv_usec < 0) {
+    rel.tv_sec  -= 1;
+    rel.tv_usec += 1000000;
+  }
+
+  /* is it negative ? */
+  if (rel.tv_sec < 0) {
+    rel.tv_sec = 0;
+    rel.tv_usec = 0;
+  }
+  return rel;
 }
 
 /* ====================================================================== */

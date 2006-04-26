@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update:  4-Feb-2006 11:04 (eg)
+ * Last file update: 26-Apr-2006 16:21 (eg)
  */
 #ifndef _STK_THREAD_LURC_H
 #define _STK_THREAD_LURC_H
@@ -38,8 +38,6 @@ struct sys_thread_obj {
 #define THREAD_LTHREAD(p)	(((struct thread_obj *) (p))->sys_thread.lthread)
 #define THREAD_TERM_SIG(p)	(((struct thread_obj *) (p))->sys_thread.term_sig)
 #define THREAD_DEATH_SIG(p)	(((struct thread_obj *) (p))->sys_thread.death_sig)
-
-extern struct timeval lthr_abs_time_to_rel_time(double abs_secs);
 
 extern void STk_do_make_sys_thread(SCM thr);
 extern void STk_sys_thread_start(SCM thr);

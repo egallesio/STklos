@@ -1,3 +1,16 @@
+2006-04-26  Erick Gallesio  <eg@essi.fr>
+
+	* src/thread-*: defined the STk_thread_abstime_to_reltime in the 
+	common part. Used it for pthreads and lurc.
+
+	* src/thread-pthreads.c: Corrected thread-sleep!
+
+2006-04-25  Erick Gallesio  <eg@essi.fr>
+
+	* src/error.c: Code Factorization of STk_error and STk_make_error 
+	* configure.in: Changed the MYCFLAGS to STKCFLAGS in configure
+	[4a2dc773744d]
+	
 2006-04-21  separdau  <separdau@localhost>
 
 	* src/thread-pthreads.c:

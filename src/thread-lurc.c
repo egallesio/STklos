@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 16-Apr-2006 13:16 (eg)
+ * Last file update: 26-Apr-2006 16:21 (eg)
  */
 
 
@@ -197,23 +197,6 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
   return STk_void;
 }
 
-struct timeval 
-lthr_abs_time_to_rel_time(double abs_secs){
-  struct timeval abs_tv, cur_tv, rel_tv;
-  abs_tv.tv_sec  = (long) abs_secs; // trim to the second
-  abs_tv.tv_usec = (long) ((abs_secs - abs_tv.tv_sec) * 1000000);
-  // now deduce the current time
-  gettimeofday(&cur_tv, NULL);
-  timersub(&abs_tv, &cur_tv, &rel_tv);
-  // is it negative ?
-  if(rel_tv.tv_sec < 0 || rel_tv.tv_usec < 0){
-    rel_tv.tv_sec = 0;
-    rel_tv.tv_usec = 0;
-  }
-  // we've got it
-  return rel_tv;
-}
-
 struct prot_wait_t {
   lurc_signal_t sig;
   SCM thr;
@@ -250,7 +233,7 @@ DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
   if (!THREADP(thr)) STk_error_bad_thread(thr);
 
   if (REALP(tm))
-    rel_tv = lthr_abs_time_to_rel_time(REAL_VAL(tm));
+    rel_tv = STk_thread_abstime_to_reltime(REAL_VAL(tm));
   else if (!BOOLEANP(tm))
     STk_error("bad timeout ~S", tm);
   
@@ -305,7 +288,7 @@ DEFINE_PRIMITIVE("%thread-sleep!", thread_sleep, subr1, (SCM tm))
   struct timeval rel_tv;
 
   if (REALP(tm))
-    rel_tv = lthr_abs_time_to_rel_time(REAL_VAL(tm));
+    rel_tv = STk_thread_abstime_to_reltime(REAL_VAL(tm));
   else
     STk_error("bad timeout ~S", tm);
 

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update:  4-Feb-2006 11:04 (eg)
+ * Last file update: 26-Apr-2006 16:02 (eg)
  */
 #ifndef _STK_THREAD_H
 #define _STK_THREAD_H
@@ -68,6 +68,7 @@ extern SCM STk_cond_thread_terminated;
 
 #endif /* ! THREADS_NONE */
 
+struct timeval STk_thread_abstime_to_reltime(double abs_secs);
 extern SCM STk_primordial_thread; 
 
 #endif /* ! _STK_THREAD_H */
