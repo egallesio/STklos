@@ -1,5 +1,7 @@
 2006-04-26  Erick Gallesio  <eg@essi.fr>
 
+	* src/thread-pthreads.c (thread-terminate!): Fixed a deadlock problem.
+
 	* src/thread-*: defined the STk_thread_abstime_to_reltime in the 
 	common part. Used it for pthreads and lurc.
 

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 17-Apr-2006 00:00 (eg)
+ * Last file update:  2-May-2006 16:52 (eg)
  */
 
 #include <unistd.h>
@@ -48,7 +48,7 @@ void STk_make_sys_mutex(SCM z)
   pthread_mutex_init(&MUTEX_MYMUTEX(z), NULL);
   pthread_cond_init(&MUTEX_MYCONDV(z), NULL);
 
-  STk_register_finalizer(z, mutex_finalizer);
+  //FINAL  STk_register_finalizer(z, mutex_finalizer);
 }
 
 DEFINE_PRIMITIVE("mutex-state", mutex_state, subr1, (SCM mtx))
@@ -178,7 +178,7 @@ void STk_make_sys_condv(SCM z)
 {
   pthread_cond_init(&CONDV_MYCONDV(z), NULL);
 
-  STk_register_finalizer(z, condv_finalizer);
+  //FINAL STk_register_finalizer(z, condv_finalizer);
 }
 
 DEFINE_PRIMITIVE("condition-variable-signal!", condv_signal, subr1, (SCM cv))

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 26-Apr-2006 16:18 (eg)
+ * Last file update:  2-May-2006 16:58 (eg)
  */
 
 
@@ -106,7 +106,7 @@ void STk_do_make_sys_thread(SCM thr)
   pthread_cond_init(&THREAD_MYCONDV(thr), NULL);
 
   // now the finalizer
-  STk_register_finalizer(thr, thread_finalizer);
+  //FINAL STk_register_finalizer(thr, thread_finalizer);
 }
 
 void STk_sys_thread_start(SCM thr)
@@ -139,6 +139,8 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
   if (!THREADP(thr)) STk_error_bad_thread(thr);
 
   if (THREAD_STATE(thr) != th_terminated) {
+    enum thread_state saved_state = THREAD_STATE(thr);
+
     terminate_scheme_thread(thr);
 
     pthread_mutex_lock(&THREAD_MYMUTEX(thr));
@@ -147,15 +149,15 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
       THREAD_EXCEPTION(thr) = 
         STk_make_C_cond(STk_cond_thread_terminated, 1, thr);
     }
-    pthread_mutex_lock(&THREAD_MYMUTEX(thr));
+    pthread_mutex_unlock(&THREAD_MYMUTEX(thr));
     
     /* Terminate effectively the thread */
     if (thr == STk_get_current_vm()->scheme_thread)
       pthread_exit(0); 				/* Suicide */
-    else 
-      pthread_cancel(THREAD_PTHREAD(thr));	/* terminate an other thread */
-
-    pthread_cancel(THREAD_PTHREAD(thr));
+    else {
+      if (saved_state != th_new)
+	pthread_cancel(THREAD_PTHREAD(thr));	/* terminate an other thread */
+    }
   }
   return STk_void;
 }
