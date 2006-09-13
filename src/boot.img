@@ -1,7 +1,7 @@
 #!/usr/bin/env stklos-script
 STklos "0.73" ;-*-Scheme -*-
-#(pair? car map apply map* cdr for-each* *expander-list* assq expander? application-expander symbol? initial-expander install-expander! eq? delete! remove-expander! syntax-expand macro-expand "too many optional parameters: ~a" error gensym module-imports symbol-value* "symbol ``~S'' not found" symbol-value %%set-current-module find-module quote select-module %modules-stack current-module %create-module %module-create %module-restore raise %module-handler with-handler values void append define-module reverse %module-imports-set! memq import "module `~S' does not exist" %module-import module-exports %module-exports-set! export "bad symbol `~S'" %module-export in-module %symbol-define for-each %define-exported-symbols caar cdar cadr cddr caaar cdaar cadar cddar caadr cdadr caddr cdddr caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr open-file &i/o-filename-error location message "cannot open file ~S" format backtrace %vm-backtrace filename make-condition %set-std-port! close-port dynamic-wind %make-with-file with-input-from-file current-input-port "r" with-output-to-file current-output-port "w" with-error-to-file current-error-port open-input-string with-input-from-string open-output-string get-output-string with-output-to-string %port-file-fd %make-with-port with-input-from-port with-output-to-port with-error-to-port %call-with open-input-file call-with-input-file open-output-file call-with-output-file rationalize "bad rational ~S" floor / positive? negative? - exact? 0.0 rational? %make-promise lambda delay %make-continuation %fresh-continuation? %restore-continuation %call/cc call/cc call-with-current-continuation set-car! set-cdr! procedure? "bad procedure ~S" call-with-values length "~a?" string->symbol begin define make-struct-type "make-~a" make-struct and struct? struct-is-a? "~a-~a" %fast-struct-ref set! setter %fast-struct-set! define-struct %binary->n-ary %bit-or bit-or %bit-and bit-and %bit-xor bit-xor expt quotient bit-shift "G" symbol->string string? "bad gensym prefix ~S" number->string string-append string->uninterned-symbol filter remove filter! remove! equal? delete every any call-with-input-string call-with-output-string :read-char key-get :ready? :eof? :close vector %open-input-virtual open-input-virtual :write-char :write-string :flush %open-output-virtual open-output-virtual read read-from-string parse-expression *code-constants* list->vector %execute eval-from-string *%program-args* :argv argv :program-name program-name hash-table-hash %make-hash-table make-hash-table cons hash-table-map hash-table->alist hash-table-exists? hash-table-set! alist->hash-table hash-table-ref hash-table-update! hash-table-ref/default hash-table-update!/default hash-table-keys hash-table-values hash-table-for-each hash-table-fold hash-table-merge! hash-table-equivalence-function hash-table-hash-function hash-table-copy let list fluid-let generic? parameter? %procedure-plist :setter "no setter defined for ~S" key-set! %set-procedure-plist! vector-ref vector-set! string-ref string-set! slot-ref slot-set! struct-ref struct-set! let* clock "Elapsed time: ~S ms\n" time (void) do + >= dotimes when while unless until "call/ec" call/ec ((normal . "0") (bold . "1") (no-bold . "21") (italic . "2") (no-italic . "22") (underline . "4") (no-undeline . "24") (blink . "5") (no-blink . "25") (reverse . "7") (no-reverse . "27") (black . "30") (bg-black . "40") (red . "31") (bg-red . "41") (green . "32") (bg-green . "42") (yellow . "33") (bg-yellow . "43") (blue . "34") (bg-blue . "44") (magenta . "35") (bg-magenta . "45") (cyan . "36") (bg-cyan . "46") (white . "37") (bg-white . "47")) assoc "" "m" "\x1b[" ";" ansi-color "bad command ~S" input-port? input-string-port? port->list "bad port ~S" eof-object? %port->list port->string read-line "\n" port->sexp-list port->string-list display newline print printerr "| " exec exec-list argc module? apropos "bad module ~S" module-symbols string-find? "**** ~A\n**** EXIT\n" exit die running-os cygwin-windows posixify-file-name string-length #\/ char=? "/" "." string-split decompose-file-name "^(.*)/(.+)$" "\\1" regexp-replace string=? dirname "^(.*)/(.*)$" "\\2" basename (unix cygwin-windows) memv windows #\\ #\? file-separator "~A~A~A" make-path port-idle-register! %port-idle port-idle-unregister! port-idle-reset! expand-file-name %chmod write execute chmod "bad option ~S" integer? receive cond case-lambda "bad clause ~S" compute-arity = zero? else "no matching clause in list ~S for ~S" read-with-shared-structure write* write-with-shared-structure read/ss write/ss condition? condition-has-type? "bad type for condition ~S" condition-ref %define-condition-type-accessors %parameter-dynenv-push! parameterize %parameter-dynenv-pop! require-extension "requires at least one clause" srfi not null? ok? x if "srfi-~a" or %has-feature? "extension ~S is absent" *%autoloads* %try-load-tmp ":" *path-separator* "ostk" "stk" "scm" "so" *load-suffixes* *load-verbose* *load-path* getenv %build-path-from-shell-variable "STKLOS_LOAD_PATH" %library-prefix version "~/.stklos/ext" "/share/stklos/" "/lib/stklos/" list? load-path "bad list of path names ~S" "bad path name ~S" make-parameter "bad list of suffixes ~S" load-suffixes load-verbose current-loading-file file-exists? file-is-readable? ".?.?/" regexp-match %guess-pathname try-load ";; Loading file ~S.\n" ";; File ~S loaded.\n" load "cannot load file ~S" find-path require provide provided? require/provide member "WARNING: ~S was not provided~%" %%include include autoload-file remove-autoload! autoload "~S has not been defined in ~S" syntax-autoload (stklos STklos srfi-0 ((srfi-1 lists) "srfi-1") ((srfi-2 and-let*) "srfi-2") ((srfi-4 hvectors) "srfi-4") srfi-6 ((srfi-7 program) "srfi-7") srfi-8 ((srfi-9 records) "srfi-9") srfi-10 (srfi-11 "srfi-11") ((srfi-13 strings) "srfi-13") ((srfi-14 charsets) "srfi-14") ((srfi-16 case-lambda)) srfi-17 srfi-22 ((srfi-23 error)) (srfi-26 "srfi-26") ((srfi-27 random)) srfi-28 srfi-30 srfi-31 srfi-34 (srfi-35 "srfi-35") (srfi-36 "srfi-36") (conditions "srfi-35" "srfi-36") srfi-38 ((srfi-39 parameters)) srfi-48 srfi-55 (srfi-60 "srfi-60") srfi-62 (srfi-66 "srfi-66") ((srfi-69 hash-tables) "srfi-69") srfi-70) *all-features* srfi0-register-feature! (and or not) cond-expand "no clause match" "srfi-0" MBE some butlast "negative argument ~S" hyg:untag-no-tags hyg:untag-vanilla hyg:untag-lambda hyg:untag-letrec hyg:untag-named-let hyg:untag-let hyg:untag-let* hyg:untag-do hyg:untag-list hyg:untag-list* hyg:untag-quasiquote hyg:flatten mbe:ellipsis? mbe:split-at-ellipsis mbe:get-ellipsis-nestings mbe:ellipsis-sub-envs mbe:contained-in? hyg:rassq hyg:tag vector? vector->list ... hyg:untag quasiquote (if begin) (set! define) letrec case unquote "takes exactly one expression" unquote-splicing "invalid context within quasiquote" append! reverse! list-tail substring "%%" mbe:position mbe:append-map mbe:matches-pattern? mbe:get-bindings mbe:expand-pattern "bad-arg" "no matching clause for ~S" find-clause %find-macro-clause syntax-rules define-syntax "in `~S', bad syntax-rules ~S" define-macro args regexp-replace-all replace-string "\\\\[0-9]" regexp-match-positions string->number "cannot match \\~A in model" list-ref replace-submodels keyword? "value expected after keyword ~S" :input :output :error :wait :fork :args %run-process run-process SIGTERM process-signal process-kill SIGSTOP process-stop SIGCONT process-continue *compiler-port* warn-use-undef *compiler-options* (+ - * / = < <= > >= cons car cdr null? list not vector-ref vector-set! string-ref string-set! eq? eqv? equal? void) *compiler-inline* (%set-current-module %%set-current-module %%execute %%execute-handler) *always-inlined* *code-instr* *code-labels* label? NOP this-instr next-instr this-arg1 this-arg2 next-arg1 next-arg2 GOTO copy-tree RETURN PUSH (IM-FALSE IM-TRUE IM-NIL IM-MINUS1 IM-ZERO IM-ONE IM-VOID) IM-FALSE FALSE-PUSH IM-TRUE TRUE-PUSH IM-NIL NIL-PUSH IM-MINUS1 MINUS1-PUSH IM-ZERO ZERO-PUSH IM-ONE ONE-PUSH IM-VOID VOID-PUSH SMALL-INT INT-PUSH CONSTANT CONSTANT-PUSH IN-NOT (IN-NUMEQ IN-NUMDIFF IN-NUMLT IN-NUMGT IN-NUMLE IN-NUMGE IN-EQ IN-EQV IN-EQUAL) IN-NUMEQ IN-NUMDIFF IN-NUMLT IN-NUMGE IN-NUMGT IN-NUMLE IN-EQ IN-NOT-EQ IN-EQV IN-NOT-EQV IN-EQUAL IN-NOT-EQUAL JUMP-FALSE (IN-NUMEQ IN-NUMLT IN-NUMGT IN-NUMLE IN-NUMGE IN-EQ IN-EQV IN-EQUAL IN-NOT) JUMP-NUMDIFF JUMP-NUMEQ JUMP-NUMGE JUMP-NUMGT JUMP-NUMLE JUMP-NUMLT JUMP-NOT-EQ JUMP-NOT-EQV JUMP-NOT-EQUAL JUMP-TRUE GLOBAL-REF INVOKE GREF-INVOKE peephole ((NOP 0) (IM-FALSE 0) (IM-TRUE 0) (IM-NIL 0) (IM-MINUS1 0) (IM-ZERO 0) (IM-ONE 0) (IM-VOID 0) (SMALL-INT 1) (CONSTANT 1) (GLOBAL-REF 1) (UGLOBAL-REF 1) (LOCAL-REF0 0) (LOCAL-REF1 0) (LOCAL-REF2 0) (LOCAL-REF3 0) (LOCAL-REF4 0) (LOCAL-REF 1) (DEEP-LOCAL-REF 1) (GLOBAL-SET 1) (UGLOBAL-SET 1) (LOCAL-SET0 0) (LOCAL-SET1 0) (LOCAL-SET2 0) (LOCAL-SET3 0) (LOCAL-SET4 0) (LOCAL-SET 1) (DEEP-LOCAL-SET 1) (GOTO 1) (JUMP-FALSE 1) (JUMP-TRUE 1) (DEFINE-SYMBOL 1) (POP 0) (PUSH 0) (DBG-VM 1) (CREATE-CLOSURE 2) (RETURN 0) (PREPARE-CALL 0) (INVOKE 1) (TAIL-INVOKE 1) (ENTER-LET-STAR 1) (ENTER-LET 1) (ENTER-TAIL-LET-STAR 1) (ENTER-TAIL-LET 1) (LEAVE-LET 0) (PUSH-HANDLER 1) (POP-HANDLER 0) (END-OF-CODE 0) (IN-ADD2 0) (IN-SUB2 0) (IN-MUL2 0) (IN-DIV2 0) (IN-NUMEQ 0) (IN-NUMLT 0) (IN-NUMGT 0) (IN-NUMLE 0) (IN-NUMGE 0) (IN-INCR 0) (IN-DECR 0) (IN-CONS 0) (IN-NULLP 0) (IN-CAR 0) (IN-CDR 0) (IN-LIST 1) (IN-NOT 0) (IN-VREF 0) (IN-VSET 0) (IN-SREF 0) (IN-SSET 0) (IN-EQ 0) (IN-EQV 0) (IN-EQUAL 0) (IN-APPLY 2) (MAKE-EXPANDER 1) (SET-CUR-MOD 0) (UNUSED-1 0) (UNUSED-2 0) (FALSE-PUSH 0) (TRUE-PUSH 0) (NIL-PUSH 0) (MINUS1-PUSH 0) (ZERO-PUSH 0) (ONE-PUSH 0) (VOID-PUSH 0) (INT-PUSH 1) (CONSTANT-PUSH 1) (GREF-INVOKE 2) (UGREF-INVOKE 2) (IN-NUMDIFF 0) (IN-NOT-EQ 0) (IN-NOT-EQV 0) (IN-NOT-EQUAL 0) (JUMP-NUMDIFF 1) (JUMP-NUMEQ 1) (JUMP-NUMLT 1) (JUMP-NUMLE 1) (JUMP-NUMGT 1) (JUMP-NUMGE 1) (JUMP-NOT-EQ 1) (JUMP-NOT-EQV 1) (JUMP-NOT-EQUAL 1)) INSTRUCTION-SET *lab-equiv* "non existent opcode ~S" panic info-opcode (GOTO JUMP-FALSE JUMP-TRUE JUMP-NUMDIFF JUMP-NUMGE JUMP-NUMGT JUMP-NUMGE JUMP-NUMLT JUMP-NUMLE JUMP-NOT-EQ JUMP-NOT-EQV JUMP-NOT-EQUAL CREATE-CLOSURE PUSH-HANDLER) use-address? string-upcase #\space make-string pretty-mnemonic old+ make-vector "Instruction with more than 2 parameters ~S" assemble "L~A:" "\t~A\n" display-code "Cannot decode ~S opcode" find-opcode remainder "\t;; ==> ~A" vector-length "\n~A:  ~A" " ~A" " ~S ~S" "cannot disassemble instruction (~S)" "\n~A:\n" disassemble-code %procedure-code disassemble "cannot disassemble ~S" "*** PANIC *** " "~A: " %epair? "~A:~A: " %epair-file %epair-line "~AError: ~A~A\n" compiler-error "~Awarning: ~A~A\n" "**** Warning;\n~A~A\n" compiler-warning unbound symbol-bound? "used outside of a quasiquote context" compiler:time-display compiler:gen-line-number (set! *code-labels* 0) initialize-compilation get-generated-code new-label emit emit-label fetch-constant <= compile-constant "bad usage in ~S" compile-quote *known-globals* *forward-globals* known-var? new-global "reference to undefined symbol ~S" compiler-warn-undef warn-use-undef-postpone verify-global compiler-show-undefined-symbols "ill formed definition ~S" define->lambda "bad definition" compile DEFINE-SYMBOL "bad variable name ~S" "internal define forbidden here" compile-define symbol-in-env? GLOBAL-SET LOCAL-REF0 LOCAL-SET0 LOCAL-REF1 LOCAL-SET1 LOCAL-REF2 LOCAL-SET2 LOCAL-REF3 LOCAL-SET3 LOCAL-REF4 LOCAL-SET4 LOCAL-REF LOCAL-SET DEEP-LOCAL-REF DEEP-LOCAL-SET compile-access compile-reference "~S is a bad symbol" "bad assignment syntax in ~S" compile-set! "bad syntax in ~S" compile-if extended-lambda->lambda form e MAKE-EXPANDER macro-eval compile-define-macro compile-when compile-unless compile-and compile-or compile-begin extend-env extend-current-env rewrite-body CREATE-CLOSURE compile-user-lambda ext-lambda-key-get 'lambda make-keyword build-let* "illegal ~a parameter: ~a" "optional" "keyword" (:optional :key :rest) "duplicate parameter ~S" "bad class name ~S" "bad procedure parameter ~S" last-pair :rest :optional :key "illegal lambda list ending with ~a" "rest parameter must be a single symbol" parse-parameter-list rewrite-params-and-body method "bad definition ~S" compile-lambda compile-args compile-var-args PREPARE-CALL DBG-VM generate-PREPARE-CALL TAIL-INVOKE compile-normal-call can-be-inlined "1 argument required (~A provided)" "2 arguments required (~A provided)" "3 arguments required (~A provided)" SET-CUR-MOD "1 arg. only (~S)" %%execute-handler EXEC-HANDLER IN-INCR IN-ADD2 "needs at least one argument" IN-DECR IN-SUB2 * IN-MUL2 IN-DIV2 (= < > <= >=) O < > IN-CONS IN-CAR IN-CDR IN-NULLP IN-LIST IN-VREF IN-VSET IN-SREF IN-SSET eqv? "unimplemented inline primitive ~S" compile-primitive-call ENTER-TAIL-LET ENTER-LET LEAVE-LET "bad number of parameters ~S" compile-lambda-call compile-call "duplicate binding ~S" "malformed binding ~S" valid-let-bindings? "ill formed letrec ~S" compile-letrec "ill formed named let ~S" compile-named-let "ill formed let ~S" compile-let "ill formed let* ~S" ENTER-TAIL-LET-STAR ENTER-LET-STAR compile-let* "invalid clause ~S" "else not in last clause ~S" => rewrite-cond-clauses "bad '=>' clause syntax ~S" compile-cond ok "duplicate case value ~S in ~S" "ill formed case clause ~S" "invalid clause syntax in ~S" "invalid case clause" "invalid case" rewrite-case-clauses "no key given" compile-case "bad binding ~S" rewrite-do "bad syntax" compile-do backquotify 'quasiquote 'unquote assv compile-quasiquote PUSH-HANDLER POP-HANDLER compile-with-handler %read include-file "bad include directive ~S" compile-include compiler-maybe-do-autoload %%label "bad usage ~S" compile-%%label %%goto compile-%%goto compile-%%source-pos generate-line-info gen-line-info %%source-pos END-OF-CODE parse eval class-redefinition "bad class ~S" %error-bad-class "bad generic function ~S" %error-bad-generic "bad method ~S" %error-bad-method make-closure <top> specializers formals slot-definition-getter slot-definition-setter slot-definition-accessor declare-slots <generic> generic :name ??? %make <method> :generic-function :specializers :procedure basic-make "cannot make ~S with ~S" make class? name class-name direct-supers class-direct-supers direct-slots class-direct-slots direct-subclasses class-direct-subclasses direct-methods class-direct-methods cpl class-precedence-list slots class-slots slot-definition-name slot-definition-options :instance :allocation slot-definition-allocation :getter :accessor :init-form slot-definition-init-form :init-keyword slot-definition-init-keyword getters-n-setters slot-init-function class-slot-definition generic-function-name methods generic-function-methods method? generic-function method-generic-function method-specializers procedure method-procedure class-of is-a? <class> find-class compute-slots "bad slot name ~S" %compute-slots :dsupers :slots "metaclass" ensure-metaclass-with-supers ensure-metaclass ensure-class :metaclass define-class <object> "super class ~S is duplicated in class ~S" "slot ~S is duplicated in class ~S" ensure-generic-function define-generic :default add-method-in-classes! remove-method-in-classes! compute-new-list-of-methods add-method! next-method ensure-method ensure-method* "gf" define-method object-eqv? (<top> <top>) object-equal? write-object "#[instance ~A]" address-of (<object> <top>) slot-bound? "#[~A ~A]" (<class> <top>) "#[~A ~A ~A]" (<generic> <top>) "#[~A ~A (~A)]" display-object slot-unbound (<class> <object> <top>) "slot ~S is unbound in #p~A (an object of class ~S)" slot-missing (<class> <object> <top> . <top>) "no slot with name `~S' in #p~A (an object of class ~S)" no-next-method (<generic> <top> <top>) "no next method for ~S in call ~S" no-applicable-method "no applicable method for ~S\nin call ~S" no-method "no method defined for ~S" shallow-clone (<object>) %allocate-instance deep-clone instance? remove-class-accessors (<class>) <accessor-method> update-direct-method (<method> <class> <class>) update-direct-subclass (<class> <class> <class>) (<class> <class>) redefined compute-get-n-set nfields :class :each-subclass :virtual :slot-ref :slot-set! "a :slot-ref and a :slot-set! must be supplied in ~S" :active :before-slot-ref :after-slot-ref :before-slot-set! :after-slot-set! %fast-slot-ref %fast-slot-set! "allocation type \"~S\" is unknown" compute-slot-accessors o val %slot-ref closure? %procedure-arity "bad getter closure for slot `~S' in ~S: ~S" "bad setter closure for slot `~S' in ~S: ~S" list* compute-getters-n-setters compute-cpl initialize %initialize-object (<method> <top>) allocate-instance make-instance (<class> . <top>) slot-exists-using-class? slot-bound-using-class? slot-ref-using-class slot-set-using-class! %modify-instance change-object-class change-class (<object> <class>) compute-applicable-methods find-method method-more-specific? (<method> <method> <top>) %method-more-specific? sort-applicable-methods sort apply-method (<generic> <top> <top> <top>) %set-next-method! apply-methods (<generic> <list> <top>) apply-generic class-subclasses class-methods list2set mapappend slot-value (<object> <top> <top>) describe "describe" %object-system-initialized struct-type %time time? second micro-second 1000000.0 time-seconds "bad time ~S" time->seconds number? real? round inexact->exact 1000000 seconds->time "cannot convert ~S to a time" "bad number ~S" :second :minute :hour :day :month :year %date date->seconds seconds->date make-date date? %seconds->date "#[date ~A-~A-~A ~A:~A:~A]" year month day hour minute struct-type-change-writer! date-second date-minute date-hour date-day date-month date-year date-week-day date-year-day date-dst date-tz struct->list seconds->list current-second current-date seconds->string "bad string ~S" #\% #\~ %seconds->string date->string "date" current-time "bad timeout ~S" %thread-timeout->seconds "thread" current-thread %thread-end-exception-set! %make-thread make-thread thread-sleep! "cannot used #f as timeout" %thread-sleep! thread-join! "cannot join on myself (deadlock will occur)" %thread-join! &thread-join-timeout %thread-end-exception %thread-end-result %mutex-lock! thread? &thread-abandonned-mutex mutex-lock! %mutex-unlock! mutex-unlock! :undefined-symbol-warning pragma "unknown pragma ~S" stklos-pragma define-reader-ctor string-downcase string-lower string-upper "*** Obsolete function set-load-path!. Use load-path instead.\n" set-load-path! "*** Obsolete function set-load-suffixes!. Use load-suffixes instead.\n" set-load-suffixes! flush-output-port flush port-rewind rewind-file-port hash-table->list hash-table-put! hash-table-get hash-table-delete! hash-table-remove! REPL (main-repl repl) interactive-port? interactive? repl-level repl-backtrace :interactive "TERM" ("rxvt" "xterm" "xterm-color" "linux" "cygwin") do-color (help ?) blue bold "Available Commands:\n- ,backtrace ,bt   Show the stack when last error occurred\t\n- ,quit ,q\t   Exit STklos\n- ,help ,? ,h\t   This help\n" clear (quit q) (backtrace bt) %display-backtrace "bad command name: ~S. Type ,help for some help\n" do-repl-command %build-error-location red "**** Error:\n~A: ~A\n" "\t(type \"" underline ",help" "\" for more information)\n" display-error-message &error-message &message "**** Unknown condition raised.\n" "Condition type: ~A\n" struct-type-name "Condition slots: ~S\n" "**** The following non-condition was raised: ~S\n" repl-handler "[~A] " magenta "~A> " module-name black display-prompt :in G3051 :out G3052 :err G3053 ";; ~A\n" repl %initialize-signals green "STklos version ~A\t\t\t[~A]\n" machine-type "Copyright © 1999-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>\n" normal %pre-exit main-repl (REPL) compile-file "compfile" ((match-case . "match") (match-lambda . "match")) %print-usage "getopt" ((parse-arguments . "getopt")) ((trace . "trace") (untrace . "trace")) pp "pp" pretty-print random-integer "srfi-27" random-real ((with-exception-handler . "srfi-34") (guard . "srfi-34")) ((define-condition-type . "srfi-35") (condition . "srfi-35")) srfi48:help "srfi-48" srfi48:format-fixed %before-exit-hook main "STKLOS_FRAMES" "  - ...\nSet shell variable STKLOS_FRAMES to set visible frames\n" "  - " %procedure-name "<<let/call>>" " @ [~S:~S]\n" "???" "let" "**** Error while ~A ~S\n" "\tWhere: ~A\n" "\tReason: ~A\n" "EXIT\n" %simple-fatal-exception-handler :no-init-file :load :file :sexpr "~/.stklos/stklosrc" "loading file" "executing file" "evaluating")
-38661
+#(pair? car map apply map* cdr for-each* *expander-list* assq expander? application-expander symbol? initial-expander install-expander! eq? delete! remove-expander! syntax-expand macro-expand "too many optional parameters: ~a" error gensym module-imports symbol-value* "symbol ``~S'' not found" symbol-value %%set-current-module find-module quote select-module %modules-stack current-module %create-module %module-create %module-restore raise %module-handler with-handler values void append define-module reverse %module-imports-set! memq import "module `~S' does not exist" %module-import module-exports %module-exports-set! export "bad symbol `~S'" %module-export in-module %symbol-define for-each %define-exported-symbols caar cdar cadr cddr caaar cdaar cadar cddar caadr cdadr caddr cdddr caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr open-file &i/o-filename-error location message "cannot open file ~S" format backtrace %vm-backtrace filename make-condition %set-std-port! close-port dynamic-wind %make-with-file with-input-from-file current-input-port "r" with-output-to-file current-output-port "w" with-error-to-file current-error-port open-input-string with-input-from-string open-output-string get-output-string with-output-to-string %port-file-fd %make-with-port with-input-from-port with-output-to-port with-error-to-port %call-with open-input-file call-with-input-file open-output-file call-with-output-file rationalize "bad rational ~S" floor / positive? negative? - exact? 0.0 rational? %make-promise lambda delay %make-continuation %fresh-continuation? %restore-continuation %call/cc call/cc call-with-current-continuation set-car! set-cdr! procedure? "bad procedure ~S" call-with-values length "~a?" string->symbol begin define make-struct-type "make-~a" make-struct and struct? struct-is-a? "~a-~a" %fast-struct-ref set! setter %fast-struct-set! define-struct %binary->n-ary %bit-or bit-or %bit-and bit-and %bit-xor bit-xor expt quotient bit-shift "G" symbol->string string? "bad gensym prefix ~S" number->string string-append string->uninterned-symbol filter remove filter! remove! equal? delete every any call-with-input-string call-with-output-string :read-char key-get :ready? :eof? :close vector %open-input-virtual open-input-virtual :write-char :write-string :flush %open-output-virtual open-output-virtual read read-from-string parse-expression *code-constants* list->vector %execute eval-from-string *%program-args* :argv argv :program-name program-name hash-table-hash %make-hash-table make-hash-table cons hash-table-map hash-table->alist hash-table-exists? hash-table-set! alist->hash-table hash-table-ref hash-table-update! hash-table-ref/default hash-table-update!/default hash-table-keys hash-table-values hash-table-for-each hash-table-fold hash-table-merge! hash-table-equivalence-function hash-table-hash-function hash-table-copy let list fluid-let generic? parameter? %procedure-plist :setter "no setter defined for ~S" key-set! %set-procedure-plist! vector-ref vector-set! string-ref string-set! slot-ref slot-set! struct-ref struct-set! let* clock "Elapsed time: ~S ms\n" time (void) do + >= dotimes when while unless until "call/ec" call/ec ((normal . "0") (bold . "1") (no-bold . "21") (italic . "2") (no-italic . "22") (underline . "4") (no-undeline . "24") (blink . "5") (no-blink . "25") (reverse . "7") (no-reverse . "27") (black . "30") (bg-black . "40") (red . "31") (bg-red . "41") (green . "32") (bg-green . "42") (yellow . "33") (bg-yellow . "43") (blue . "34") (bg-blue . "44") (magenta . "35") (bg-magenta . "45") (cyan . "36") (bg-cyan . "46") (white . "37") (bg-white . "47")) assoc "" "m" "\x1b[" ";" ansi-color "bad command ~S" input-port? input-string-port? port->list "bad port ~S" eof-object? %port->list port->string read-line "\n" port->sexp-list port->string-list display newline print printerr eprintf printf fprintf "| " exec exec-list argc module? apropos "bad module ~S" module-symbols string-find? "**** ~A\n**** EXIT\n" exit die running-os cygwin-windows posixify-file-name string-length #\/ char=? "/" "." string-split decompose-file-name "^(.*)/(.+)$" "\\1" regexp-replace string=? dirname "^(.*)/(.*)$" "\\2" basename (unix cygwin-windows) memv windows #\\ #\? file-separator make-path "~A~A~A" port-idle-register! %port-idle port-idle-unregister! port-idle-reset! expand-file-name %chmod write execute chmod "bad option ~S" integer? receive cond case-lambda "bad clause ~S" compute-arity = zero? else "no matching clause in list ~S for ~S" read-with-shared-structure write* write-with-shared-structure read/ss write/ss condition? condition-has-type? "bad type for condition ~S" condition-ref %define-condition-type-accessors %parameter-dynenv-push! %parameter-dynenv-pop! parameterize require-extension "requires at least one clause" srfi not null? ok? x if "srfi-~a" or %has-feature? "extension ~S is absent" *%autoloads* %try-load-tmp ":" *path-separator* "ostk" "stk" "scm" "so" *load-suffixes* *load-verbose* *load-path* getenv %build-path-from-shell-variable "STKLOS_LOAD_PATH" %library-prefix version "~/.stklos/ext" "/share/stklos/" "/lib/stklos/" list? load-path "bad list of path names ~S" "bad path name ~S" make-parameter "bad list of suffixes ~S" load-suffixes load-verbose current-loading-file file-exists? file-is-readable? ".?.?/" regexp-match %guess-pathname try-load ";; Loading file ~S.\n" ";; File ~S loaded.\n" load "cannot load file ~S" find-path require provide provided? require/provide member "WARNING: ~S was not provided~%" %%include include autoload-file remove-autoload! autoload "~S has not been defined in ~S" syntax-autoload (stklos STklos srfi-0 ((srfi-1 lists) "srfi-1") ((srfi-2 and-let*) "srfi-2") ((srfi-4 hvectors) "srfi-4") srfi-6 ((srfi-7 program) "srfi-7") srfi-8 ((srfi-9 records) "srfi-9") srfi-10 (srfi-11 "srfi-11") ((srfi-13 strings) "srfi-13") ((srfi-14 charsets) "srfi-14") ((srfi-16 case-lambda)) srfi-17 srfi-22 ((srfi-23 error)) (srfi-26 "srfi-26") ((srfi-27 random)) srfi-28 srfi-30 srfi-31 srfi-34 (srfi-35 "srfi-35") (srfi-36 "srfi-36") (conditions "srfi-35" "srfi-36") srfi-38 ((srfi-39 parameters)) srfi-48 srfi-55 (srfi-60 "srfi-60") srfi-62 (srfi-66 "srfi-66") ((srfi-69 hash-tables) "srfi-69") srfi-70) *all-features* srfi0-register-feature! (and or not) cond-expand "no clause match" "srfi-0" MBE some butlast "negative argument ~S" hyg:untag-no-tags hyg:untag-vanilla hyg:untag-lambda hyg:untag-letrec hyg:untag-named-let hyg:untag-let hyg:untag-let* hyg:untag-do hyg:untag-list hyg:untag-list* hyg:untag-quasiquote hyg:flatten mbe:ellipsis? mbe:split-at-ellipsis mbe:get-ellipsis-nestings mbe:ellipsis-sub-envs mbe:contained-in? hyg:rassq hyg:tag vector? vector->list ... hyg:untag quasiquote (if begin) (set! define) letrec case unquote "takes exactly one expression" unquote-splicing "invalid context within quasiquote" append! reverse! list-tail substring "%%" mbe:position mbe:append-map mbe:matches-pattern? mbe:get-bindings mbe:expand-pattern "bad-arg" "no matching clause for ~S" find-clause %find-macro-clause syntax-rules define-syntax "in `~S', bad syntax-rules ~S" define-macro args regexp-replace-all replace-string "\\\\[0-9]" regexp-match-positions string->number "cannot match \\~A in model" list-ref replace-submodels keyword? "value expected after keyword ~S" :input :output :error :wait :fork :args %run-process run-process SIGTERM process-signal process-kill SIGSTOP process-stop SIGCONT process-continue *compiler-port* warn-use-undef *compiler-options* (+ - * / = < <= > >= cons car cdr null? list not vector-ref vector-set! string-ref string-set! eq? eqv? equal? void) *compiler-inline* (%set-current-module %%set-current-module %%execute %%execute-handler) *always-inlined* *code-instr* *code-labels* label? NOP this-instr next-instr this-arg1 this-arg2 next-arg1 next-arg2 GOTO copy-tree RETURN PUSH (IM-FALSE IM-TRUE IM-NIL IM-MINUS1 IM-ZERO IM-ONE IM-VOID) IM-FALSE FALSE-PUSH IM-TRUE TRUE-PUSH IM-NIL NIL-PUSH IM-MINUS1 MINUS1-PUSH IM-ZERO ZERO-PUSH IM-ONE ONE-PUSH IM-VOID VOID-PUSH SMALL-INT INT-PUSH CONSTANT CONSTANT-PUSH IN-NOT (IN-NUMEQ IN-NUMDIFF IN-NUMLT IN-NUMGT IN-NUMLE IN-NUMGE IN-EQ IN-EQV IN-EQUAL) IN-NUMEQ IN-NUMDIFF IN-NUMLT IN-NUMGE IN-NUMGT IN-NUMLE IN-EQ IN-NOT-EQ IN-EQV IN-NOT-EQV IN-EQUAL IN-NOT-EQUAL JUMP-FALSE (IN-NUMEQ IN-NUMLT IN-NUMGT IN-NUMLE IN-NUMGE IN-EQ IN-EQV IN-EQUAL IN-NOT) JUMP-NUMDIFF JUMP-NUMEQ JUMP-NUMGE JUMP-NUMGT JUMP-NUMLE JUMP-NUMLT JUMP-NOT-EQ JUMP-NOT-EQV JUMP-NOT-EQUAL JUMP-TRUE GLOBAL-REF INVOKE GREF-INVOKE peephole ((NOP 0) (IM-FALSE 0) (IM-TRUE 0) (IM-NIL 0) (IM-MINUS1 0) (IM-ZERO 0) (IM-ONE 0) (IM-VOID 0) (SMALL-INT 1) (CONSTANT 1) (GLOBAL-REF 1) (UGLOBAL-REF 1) (LOCAL-REF0 0) (LOCAL-REF1 0) (LOCAL-REF2 0) (LOCAL-REF3 0) (LOCAL-REF4 0) (LOCAL-REF 1) (DEEP-LOCAL-REF 1) (GLOBAL-SET 1) (UGLOBAL-SET 1) (LOCAL-SET0 0) (LOCAL-SET1 0) (LOCAL-SET2 0) (LOCAL-SET3 0) (LOCAL-SET4 0) (LOCAL-SET 1) (DEEP-LOCAL-SET 1) (GOTO 1) (JUMP-FALSE 1) (JUMP-TRUE 1) (DEFINE-SYMBOL 1) (POP 0) (PUSH 0) (DBG-VM 1) (CREATE-CLOSURE 2) (RETURN 0) (PREPARE-CALL 0) (INVOKE 1) (TAIL-INVOKE 1) (ENTER-LET-STAR 1) (ENTER-LET 1) (ENTER-TAIL-LET-STAR 1) (ENTER-TAIL-LET 1) (LEAVE-LET 0) (PUSH-HANDLER 1) (POP-HANDLER 0) (END-OF-CODE 0) (IN-ADD2 0) (IN-SUB2 0) (IN-MUL2 0) (IN-DIV2 0) (IN-NUMEQ 0) (IN-NUMLT 0) (IN-NUMGT 0) (IN-NUMLE 0) (IN-NUMGE 0) (IN-INCR 0) (IN-DECR 0) (IN-CONS 0) (IN-NULLP 0) (IN-CAR 0) (IN-CDR 0) (IN-LIST 1) (IN-NOT 0) (IN-VREF 0) (IN-VSET 0) (IN-SREF 0) (IN-SSET 0) (IN-EQ 0) (IN-EQV 0) (IN-EQUAL 0) (IN-APPLY 2) (MAKE-EXPANDER 1) (SET-CUR-MOD 0) (UNUSED-1 0) (UNUSED-2 0) (FALSE-PUSH 0) (TRUE-PUSH 0) (NIL-PUSH 0) (MINUS1-PUSH 0) (ZERO-PUSH 0) (ONE-PUSH 0) (VOID-PUSH 0) (INT-PUSH 1) (CONSTANT-PUSH 1) (GREF-INVOKE 2) (UGREF-INVOKE 2) (IN-NUMDIFF 0) (IN-NOT-EQ 0) (IN-NOT-EQV 0) (IN-NOT-EQUAL 0) (JUMP-NUMDIFF 1) (JUMP-NUMEQ 1) (JUMP-NUMLT 1) (JUMP-NUMLE 1) (JUMP-NUMGT 1) (JUMP-NUMGE 1) (JUMP-NOT-EQ 1) (JUMP-NOT-EQV 1) (JUMP-NOT-EQUAL 1)) INSTRUCTION-SET *lab-equiv* "non existent opcode ~S" panic info-opcode (GOTO JUMP-FALSE JUMP-TRUE JUMP-NUMDIFF JUMP-NUMGE JUMP-NUMGT JUMP-NUMGE JUMP-NUMLT JUMP-NUMLE JUMP-NOT-EQ JUMP-NOT-EQV JUMP-NOT-EQUAL CREATE-CLOSURE PUSH-HANDLER) use-address? string-upcase #\space make-string pretty-mnemonic old+ make-vector "Instruction with more than 2 parameters ~S" assemble "L~A:" "\t~A\n" display-code "Cannot decode ~S opcode" find-opcode remainder "\t;; ==> ~A" vector-length "\n~A:  ~A" " ~A" " ~S ~S" "cannot disassemble instruction (~S)" "\n~A:\n" disassemble-code %procedure-code disassemble "cannot disassemble ~S" "*** PANIC *** " "~A: " %epair? "~A:~A: " %epair-file %epair-line "~AError: ~A~A\n" compiler-error "~Awarning: ~A~A\n" "**** Warning;\n~A~A\n" compiler-warning unbound symbol-bound? "used outside of a quasiquote context" compiler:time-display compiler:gen-line-number (set! *code-labels* 0) initialize-compilation get-generated-code new-label emit emit-label fetch-constant <= compile-constant "bad usage in ~S" compile-quote *known-globals* *forward-globals* known-var? new-global "reference to undefined symbol ~S" compiler-warn-undef warn-use-undef-postpone verify-global compiler-show-undefined-symbols "ill formed definition ~S" define->lambda "bad definition" compile DEFINE-SYMBOL "bad variable name ~S" "internal define forbidden here" compile-define symbol-in-env? GLOBAL-SET LOCAL-REF0 LOCAL-SET0 LOCAL-REF1 LOCAL-SET1 LOCAL-REF2 LOCAL-SET2 LOCAL-REF3 LOCAL-SET3 LOCAL-REF4 LOCAL-SET4 LOCAL-REF LOCAL-SET DEEP-LOCAL-REF DEEP-LOCAL-SET compile-access compile-reference "~S is a bad symbol" "bad assignment syntax in ~S" compile-set! "bad syntax in ~S" compile-if extended-lambda->lambda form e MAKE-EXPANDER macro-eval compile-define-macro compile-when compile-unless compile-and compile-or compile-begin extend-env extend-current-env rewrite-body CREATE-CLOSURE compile-user-lambda ext-lambda-key-get 'lambda make-keyword build-let* "illegal ~a parameter: ~a" "optional" "keyword" (:optional :key :rest) "duplicate parameter ~S" "bad class name ~S" "bad procedure parameter ~S" last-pair :rest :optional :key "illegal lambda list ending with ~a" "rest parameter must be a single symbol" parse-parameter-list rewrite-params-and-body method "bad definition ~S" compile-lambda compile-args compile-var-args PREPARE-CALL DBG-VM generate-PREPARE-CALL TAIL-INVOKE compile-normal-call can-be-inlined "1 argument required (~A provided)" "2 arguments required (~A provided)" "3 arguments required (~A provided)" SET-CUR-MOD "1 arg. only (~S)" %%execute-handler EXEC-HANDLER IN-INCR IN-ADD2 "needs at least one argument" IN-DECR IN-SUB2 * IN-MUL2 IN-DIV2 (= < > <= >=) O < > IN-CONS IN-CAR IN-CDR IN-NULLP IN-LIST IN-VREF IN-VSET IN-SREF IN-SSET eqv? "unimplemented inline primitive ~S" compile-primitive-call ENTER-TAIL-LET ENTER-LET LEAVE-LET "bad number of parameters ~S" compile-lambda-call compile-call "duplicate binding ~S" "malformed binding ~S" valid-let-bindings? "ill formed letrec ~S" compile-letrec "ill formed named let ~S" compile-named-let "ill formed let ~S" compile-let "ill formed let* ~S" ENTER-TAIL-LET-STAR ENTER-LET-STAR compile-let* "invalid clause ~S" "else not in last clause ~S" => rewrite-cond-clauses "bad '=>' clause syntax ~S" compile-cond ok "duplicate case value ~S in ~S" "ill formed case clause ~S" "invalid clause syntax in ~S" "invalid case clause" "invalid case" rewrite-case-clauses "no key given" compile-case "bad binding ~S" rewrite-do "bad syntax" compile-do backquotify 'quasiquote 'unquote assv compile-quasiquote PUSH-HANDLER POP-HANDLER compile-with-handler %read include-file "bad include directive ~S" compile-include compiler-maybe-do-autoload %%label "bad usage ~S" compile-%%label %%goto compile-%%goto compile-%%source-pos generate-line-info gen-line-info %%source-pos END-OF-CODE parse eval class-redefinition "bad class ~S" %error-bad-class "bad generic function ~S" %error-bad-generic "bad method ~S" %error-bad-method make-closure <top> specializers formals slot-definition-getter slot-definition-setter slot-definition-accessor declare-slots <generic> generic :name ??? %make <method> :generic-function :specializers :procedure basic-make "cannot make ~S with ~S" make class? name class-name direct-supers class-direct-supers direct-slots class-direct-slots direct-subclasses class-direct-subclasses direct-methods class-direct-methods cpl class-precedence-list slots class-slots slot-definition-name slot-definition-options :instance :allocation slot-definition-allocation :getter :accessor :init-form slot-definition-init-form :init-keyword slot-definition-init-keyword getters-n-setters slot-init-function class-slot-definition generic-function-name methods generic-function-methods method? generic-function method-generic-function method-specializers procedure method-procedure class-of is-a? <class> find-class compute-slots "bad slot name ~S" %compute-slots :dsupers :slots "metaclass" ensure-metaclass-with-supers ensure-metaclass ensure-class :metaclass define-class <object> "super class ~S is duplicated in class ~S" "slot ~S is duplicated in class ~S" ensure-generic-function define-generic :default add-method-in-classes! remove-method-in-classes! compute-new-list-of-methods add-method! next-method ensure-method ensure-method* "gf" define-method object-eqv? (<top> <top>) object-equal? write-object "#[instance ~A]" address-of (<object> <top>) slot-bound? "#[~A ~A]" (<class> <top>) "#[~A ~A ~A]" (<generic> <top>) "#[~A ~A (~A)]" display-object slot-unbound (<class> <object> <top>) "slot ~S is unbound in #p~A (an object of class ~S)" slot-missing (<class> <object> <top> . <top>) "no slot with name `~S' in #p~A (an object of class ~S)" no-next-method (<generic> <top> <top>) "no next method for ~S in call ~S" no-applicable-method "no applicable method for ~S\nin call ~S" no-method "no method defined for ~S" shallow-clone (<object>) %allocate-instance deep-clone instance? remove-class-accessors (<class>) <accessor-method> update-direct-method (<method> <class> <class>) update-direct-subclass (<class> <class> <class>) (<class> <class>) redefined compute-get-n-set nfields :class :each-subclass :virtual :slot-ref :slot-set! "a :slot-ref and a :slot-set! must be supplied in ~S" :active :before-slot-ref :after-slot-ref :before-slot-set! :after-slot-set! %fast-slot-ref %fast-slot-set! "allocation type \"~S\" is unknown" compute-slot-accessors o val %slot-ref closure? %procedure-arity "bad getter closure for slot `~S' in ~S: ~S" "bad setter closure for slot `~S' in ~S: ~S" list* compute-getters-n-setters compute-cpl initialize %initialize-object (<method> <top>) allocate-instance make-instance (<class> . <top>) slot-exists-using-class? slot-bound-using-class? slot-ref-using-class slot-set-using-class! %modify-instance change-object-class change-class (<object> <class>) compute-applicable-methods find-method method-more-specific? (<method> <method> <top>) %method-more-specific? sort-applicable-methods sort apply-method (<generic> <top> <top> <top>) %set-next-method! apply-methods (<generic> <list> <top>) apply-generic class-subclasses class-methods list2set mapappend slot-value (<object> <top> <top>) describe "describe" %object-system-initialized struct-type %time time? second micro-second 1000000.0 time-seconds "bad time ~S" time->seconds number? real? round inexact->exact 1000000 seconds->time "cannot convert ~S to a time" "bad number ~S" :second :minute :hour :day :month :year %date date->seconds seconds->date make-date date? %seconds->date "#[date ~A-~A-~A ~A:~A:~A]" year month day hour minute struct-type-change-writer! date-second date-minute date-hour date-day date-month date-year date-week-day date-year-day date-dst date-tz struct->list seconds->list current-second current-date seconds->string "bad string ~S" #\% #\~ %seconds->string date->string "date" current-time "bad timeout ~S" %thread-timeout->seconds "thread" current-thread %thread-end-exception-set! %make-thread make-thread thread-sleep! "cannot used #f as timeout" %thread-sleep! thread-join! "cannot join on myself (deadlock will occur)" %thread-join! &thread-join-timeout %thread-end-exception %thread-end-result %mutex-lock! thread? &thread-abandonned-mutex mutex-lock! %mutex-unlock! mutex-unlock! :undefined-symbol-warning pragma "unknown pragma ~S" stklos-pragma define-reader-ctor string-downcase string-lower string-upper "*** Obsolete function set-load-path!. Use load-path instead.\n" set-load-path! "*** Obsolete function set-load-suffixes!. Use load-suffixes instead.\n" set-load-suffixes! flush-output-port flush port-rewind rewind-file-port hash-table->list hash-table-put! hash-table-get hash-table-delete! hash-table-remove! REPL (main-repl repl repl-display-prompt main-repl-hook) interactive-port? interactive? repl-level repl-backtrace :interactive "TERM" ("rxvt" "xterm" "xterm-color" "linux" "cygwin") do-color (help ?) blue bold "Available Commands:\n- ,backtrace ,bt   Show the stack when last error occurred\t\n- ,quit ,q\t   Exit STklos\n- ,help ,? ,h\t   This help\n" clear (quit q) (backtrace bt) %display-backtrace "bad command name: ~S. Type ,help for some help\n" do-repl-command %build-error-location red "**** Error:\n~A: ~A\n" "\t(type \"" underline ",help" "\" for more information)\n" display-error-message &error-message &message "**** Unknown condition raised.\n" "Condition type: ~A\n" struct-type-name "Condition slots: ~S\n" "**** The following non-condition was raised: ~S\n" repl-handler "[~A] " magenta "~A> " module-name black display-prompt repl-display-prompt main-repl-hook :in G3075 :out G3076 :err G3077 ";; ~A\n" repl %initialize-signals green "STklos version ~A\t\t\t[~A]\n" machine-type "Copyright © 1999-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>\n" normal %pre-exit main-repl (REPL) compile-file "compfile" ((match-case . "match") (match-lambda . "match")) %print-usage "getopt" ((parse-arguments . "getopt")) ((trace . "trace") (untrace . "trace")) pp "pp" pretty-print random-integer "srfi-27" random-real ((with-exception-handler . "srfi-34") (guard . "srfi-34")) ((define-condition-type . "srfi-35") (condition . "srfi-35")) srfi48:help "srfi-48" srfi48:format-fixed %before-exit-hook main "STKLOS_FRAMES" "  - ...\nSet shell variable STKLOS_FRAMES to set visible frames\n" "  - " %procedure-name "<<let/call>>" " @ [~S:~S]\n" "???" "let" "**** Error while ~A ~S\n" "\tWhere: ~A\n" "\tReason: ~A\n" "EXIT\n" %simple-fatal-exception-handler :no-init-file :load :file :sexpr "~/.stklos/stklosrc" "loading file" "executing file" "evaluating")
+38844
  # Bˇ˛  = <    $ %  = ! V     ' %  ! % 
   !  ! V   ! V   ! % 
   !  ! % 
@@ -46,7 +46,7 @@ STklos "0.73" ;-*-Scheme -*-
   '  $ I 5 # eˇ˛ %  <   % V      %  = ! )    >    , ! +  %   ! V      % U    ! V      *  %  ! V    %  ! V 0   % #   %  ! %  !   ! V   !   ! 
  6 '  $ !  ! 
  7 '  $ $ $  8 #    = = $  9 #    = > $  : #    > = $  ; #    > > $  < #    = = = $  = #    = = > $  > #    = > = $  ? #    = > > $  @ #    > = = $  A #    > = > $  B #    > > = $  C #    > > > $  D #    = = = = $  E #    = = = > $  F #    = = > = $  G #    = = > > $  H #    = > = = $  I #    = > = > $  J #    = > > = $  K #    = > > > $  L #    > = = = $  M #    > = = > $  N #    > = > = $  O #    > = > > $  P #    > > = = $  Q #    > > = > $  R #    > > > = $  S #    > > > > $  T # Ç  # ~  % %  &   ! %  !   ! V U  ! +    + % % 
- V ! U W  ! U X % U Y  ! V Z  ! U [ % V \   ! U ]  ! V ^ 	 ! V #     % #    %  !   ! 
+ V ! U W  ! U X % U Y  ! V Z  ! U [ % V \   ! U ]  ! V ^ 	 ! V #     % #    %  !   ! 
  _ '  $ ! #    %   '   $ ! #    % %  &   ! V `  %  !  ! 
  _ '  $ ! 
  a '  $ $ $  b % U c 
@@ -174,806 +174,818 @@ STklos "0.73" ;-*-Scheme -*-
   !  ! V 7  % 
 ! '   $ " # (ˇˇ % % V j   ! +  % #   %  !   ! 
   '  $ !   ! V 7  %  ! 
-! '  $ $ # #   % % U$  ! V ≤  ! 
+! '  $ $ # # ˇ˛ % 
+ Z ! % V j   !  !  ! 
+  '  $ $ # ˇ˛ % 
+ Z ! N  !  ! 
+  '  $ % # ˇ˝ % 
+ Z !  !  !  ! 
+  '  $ & #   % % U'  ! V ≤  ! 
  ! 
- w '  $ % #   % % U$  ! V ≤  ! 
+ w '  $ ( #   % % U'  ! V ≤  ! 
  ! 
- w '  $ & #    % % V ‘   ! 
- í '  $ ' # ’ˇ˛ %  <   % V      %  = ! )    >    , ! +  %   ! V      % U    ! V      %  ! V(    % U) U*  ! V      % %  ! V    	 %  ! V Æ     ! % 
+ w '  $ ) #    % % V ‘   ! 
+ í '  $ * # ’ˇ˛ %  <   % V      %  = ! )    >    , ! +  %   ! V      % U    ! V      %  ! V+    % U, U-  ! V      % %  ! V    	 %  ! V Æ     ! % 
  ( ! % 
- 0 ! %  ! V   ! V   ! V   ! %  ! V+  ! +  % %  !  ! V (  ! O % M )  % # 9   <    <    $  $ %  ! %  = ! V Æ  ! V,    %  > !  = !  ; !   '   
- %  > !  !   '  $ ! )     ,  , '  $ $ $ ) # Eˇ˛ %  <      %  = ! )    >    , ! +  %   ! V      % U    ! V      % % V j   ! U-  ! V Z  %  ! 
-. '  $ $ / % V0   ! 	1 b ñ # 7  % %  ! V2  ! +  %  ! V3  !  _  %  !  C ! U4 V5       	6   	7 ! %  ! U6 V8  ; $ $ 9 # 9  % %  ! V2  ! +  % % U:  ! U; V<  ! +  %  ! U V=    	6 $ %  !   ! V=    	7    $ $ $ > #   % %  ! V2  ! +  % U?  ! U@ 
-< '  $ $ A  s # ,  %  ! V3  !  _  %  !  C ! U4 V5       	6   	7 ! %  ! U6 V8  ; $ 9 # .  % % U:  ! U; V<  ! +  %  ! U V=    	6 $ %  !   ! V=    	7    $ $ > #   % U?  ! U@ 
-< '  $ A # $   % % V0   ! +  %  ! UB VC    	4 $  ! 	D c  	E   	F $ $ G #   % UH  ! % VG   !  ! 
- Z '  $ I # 0  %  ! V è    % UJ U ê  ! V      % %  ! VK  ! +  %  !   !  ; ! 
-K '  $ $ J # 4  %  ! V è    % UL U ê  ! V      % %  ! VK  ! +  %  ! %   !  ! V   ! 
-K '  $ $ L # 
+ 0 ! %  ! V   ! V   ! V   ! %  ! V.  ! +  % %  !  ! V (  ! O % M )  % # 9   <    <    $  $ %  ! %  = ! V Æ  ! V/    %  > !  = !  ; !   '   
+ %  > !  !   '  $ ! )     ,  , '  $ $ $ , # Eˇ˛ %  <      %  = ! )    >    , ! +  %   ! V      % U    ! V      % % V j   ! U0  ! V Z  %  ! 
+1 '  $ $ 2 % V3   ! 	4 b ñ # 7  % %  ! V5  ! +  %  ! V6  !  _  %  !  C ! U7 V8       	9   	: ! %  ! U9 V;  ; $ $ < # 9  % %  ! V5  ! +  % % U=  ! U> V?  ! +  %  ! U V@    	9 $ %  !   ! V@    	:    $ $ $ A #   % %  ! V5  ! +  % UB  ! UC 
+? '  $ $ D  s # ,  %  ! V6  !  _  %  !  C ! U7 V8       	9   	: ! %  ! U9 V;  ; $ < # .  % % U=  ! U> V?  ! +  %  ! U V@    	9 $ %  !   ! V@    	:    $ $ A #   % UB  ! UC 
+? '  $ D # $   % % V3   ! +  %  ! UE VF    	7 $  ! 	G c  	H   	I $ $ J # $ˇ˛  <    $ % 
+K ! % UL  ! % VJ   !  = ! V Z  !  > ! 
+  '  $ K # 0  %  ! V è    % UM U ê  ! V      % %  ! VN  ! +  %  !   !  ; ! 
+N '  $ $ M # 4  %  ! V è    % UO U ê  ! V      % %  ! VN  ! +  %  ! %   !  ! V   ! 
+N '  $ $ O # 
   %  ! O 
-K '  $ M # ¬ˇ˛ % %  ! V Ø    %  ! VN     ! Q +  %   ! % M )  % # ì   <   %  !   ! 
-O '  $ %  = ! V    V %  = ! )   ! 	 À c  %   ! T  V •     2  ! 	P c  %   ! T Ä V •       ! 	Q c  %   ! T @ V •      % UR US   = ! V   , %  > !   '   " %  = ! VT    %  !  = ! 
-O '    % UR US  = ! 
-  '  $ ! )     ,  , '  $ $ R # %  % # ˇ˝ U ë U Ö O  !  ; ; ; ! U Ö  !  ; ; ! ?  $ !  > ! 
-  '  $ IU #  % #ˇˇ % % V    ! % V    ! +  U Ö  ! U Ï  ! U í  !  ; ; ! ?  ; ! ?  ! UV % % # ì  %  ! V í  !   a  % UW UX  ! V      *    =    >  %  ! VY   %  ! V ~   ! UZ  !  !  ; ; ; ! U  U Ö  !  ; ; !   !  ; ; ; ! ?  $ %  ! V[    UZ  !  !  ; ; ; !  ;  & U  ! %  ! V Ä  : !  ; ; ; ! U  U Ö  !  ; ; !   !  ; ; ; ! ?  $ $ !   ! V   ! U\ U  U  UW ?  ! U] U  % 
+N '  $ P # ¬ˇ˛ % %  ! V Ø    %  ! VQ     ! Q +  %   ! % M )  % # ì   <   %  !   ! 
+R '  $ %  = ! V    V %  = ! )   ! 	 À c  %   ! T  V •     2  ! 	S c  %   ! T Ä V •       ! 	T c  %   ! T @ V •      % UU UV   = ! V   , %  > !   '   " %  = ! VW    %  !  = ! 
+R '    % UU UV  = ! 
+  '  $ ! )     ,  , '  $ $ U # %  % # ˇ˝ U ë U Ö O  !  ; ; ; ! U Ö  !  ; ; ! ?  $ !  > ! 
+  '  $ IX #  % #ˇˇ % % V    ! % V    ! +  U Ö  ! U Ï  ! U í  !  ; ; ! ?  ; ! ?  ! UY % % # ì  %  ! V í  !   a  % UZ U[  ! V      *    =    >  %  ! V\   %  ! V ~   ! U]  !  !  ; ; ; ! U  U Ö  !  ; ; !   !  ; ; ; ! ?  $ %  ! V^    U]  !  !  ; ; ; !  ;  & U  ! %  ! V Ä  : !  ; ; ; ! U  U Ö  !  ; ; !   !  ; ; ; ! ?  $ $ !   ! V   ! U_ U  U  UZ ?  ! U` U  % 
   !   ! V   !  ; ; !  !  ; ; ; ; ; ! ?  ! ?  ! V (  ; ! ?  ! ?  ; ; $ $ !  > ! 
-  '  $ IW 
- À ^ # Yˇ˛ *    <   % V g     %   = ! )    >    ,  %   ! V      %   = ! )    >    ,     %   ! V      % U    ! V      %  !  ! 
-_ '  $ $ ` 
-^ a 
-` b # ù  % # êˇ¸ % % V    ! +  U ï U ñ  !  !  ; ; ! U ö Uc  !  ; ; ! Ud  !  !  ; ; ; ! ?  ! ?  ! % # P  U ñ %  ! V ;  !   !  ; ; ! U	  !   !  ; ; ! U  U  %  ! V ;  !  ; ; ! Ue   !  ; ; ; ; ! ?  ! Uf   ! U   = !  ; ; ! ?  ; ; ! ?  $ !   ! V   ; ; $ $ !  > ! 
-  '  $ Ig # W  % # Jˇ˛  <   U ï  ; $ U a U Ö O Uh %  ! V 9  !  ; ; !  = !  ; ; ; ; ! U Ö O Ui  > !  ; ; ! ?  ! U Ö O Uj %  ! V 9  !  ; ; ! ?  ! ?  $ !  > ! 
-  '  $ Ii #  % #ˇˇ  <  
- % Uk Ul V      U ï % # Î  UV U ö U   U   !  ; ; ! ?  ! U  U  U   !  ; ; ! ?  ! U  Um ?  ! ?  ! Un Uo U  U   !  ; ; ! ?  ! ?  ! ?  ! ?  ! U Ï Up U Ö Uq ?  ! U Ï Uq Ur UT Uq ?  ! U î U Z Us Uq ?  ! ?  ! Uq ?  ! ?  ! ?  ! Ut Uu Uq ?  ! U  U  Uk ?  ! Uv Uq ?  ! ?  ! ?  ! ?  ! ?  ! ?  ! U ö % % #   Up U   !  ; ; ! ?  $ !  > ! V   ! U ' ?  ! ?  ! V (  ; ! ?  ! ?  ! U\ U  U  Uk ?  ! UX U   !  ; ; ! ?  ! ?  ! ?  $ !  ! V   ; $ !  > ! 
-  '  $ Ik  w  x % V0   ! 	D c  	   	y z U{ U| U} U~ ?    Ä  Å #   % %  ! VÇ  ! +     %  ! 
-z ! 
-8 '  $  $ $ É % % UÑ VÉ  ! )   <  1 % % VÖ   ! % VÜ   ! )  U7 % Uá VN  ! %  ! Uà  ! V ≤  ! %  ! Uâ  ! V ≤  ! ?  ,    , Å % 
-Å ! # ;  %  ! Vä    % Uã Uå  ! V      % #   %  ! V Ø    % Uã Uç  ! 
-  '  $  $ !  ! V 7   Å  $ ! Vé  ã % 
- ! # ;  %  ! Vä    % Uã Uè  ! V      % #   %  ! V Ø    % Uã Uç  ! 
-  '  $  $ !  ! V 7     $ ! Vé  ê % 
-Ä ! #          Ä 
-Ä $ ! Vé  ë % M Vé  í # Ù  % M M M +  #   %  ! Vì   
- %  ! Vî     $  $  # >  %  ! % M )  % # '   <    $ % %  ! U7  = ! V ≤  !  &    %  > !   '     $ ! )     ,  , '  $  # Q  %  ! % M )  % # :   <    $ % %  = ! U6  ! V ≤  ! +  %  !  &    %  !   !  &    %   > !   '     $ $ ! )     ,  , '  $  % Uï  ! Vñ   & %  !  &    %  !   !  &    %  !  !   !  '     $ %  !  !   !  '  $ $ ó % 
-ò ! )  # é  % %  ! 
-Å ! 
- ! Vó  ! % Ví   ! M % V j   ! % V    ! +    f %  ! Ví  # '   ! 
-x ; x %  ! Ví    J % 
-x = ! +  
-x > x %  ! 
+  '  $ IZ 
+ À a # Yˇ˛ *    <   % V g     %   = ! )    >    ,  %   ! V      %   = ! )    >    ,     %   ! V      % U    ! V      %  !  ! 
+b '  $ $ c 
+a d 
+c e # ù  % # êˇ¸ % % V    ! +  U ï U ñ  !  !  ; ; ! U ö Uf  !  ; ; ! Ug  !  !  ; ; ; ! ?  ! ?  ! % # P  U ñ %  ! V ;  !   !  ; ; ! U	  !   !  ; ; ! U  U  %  ! V ;  !  ; ; ! Uh   !  ; ; ; ; ! ?  ! Ui   ! U   = !  ; ; ! ?  ; ; ! ?  $ !   ! V   ; ; $ $ !  > ! 
+  '  $ Ij # °  % # îˇ˛ % % #   % 
+  '   $ !  ! V   ! +  U Ï % #    ! %  ! V ;  ! ?  $ !  !  ! V   ! U a U Ö O % % # 
+  Uk  = !  ; ; $ !  ! V   ! % # 
+   = !  !  ; ; $ !  !  ! V   ! V (  ; ; ! U Ö O   ; ; ! U Ö O % # 
+  Ul  = !  ; ; $ !  ! V   ; ; ! ?  ! ?  ; ; $ $ !  > ! 
+  '  $ Im #  % #ˇˇ  <  
+ % Un Uo V      U ï % # Î  UY U ö U   U   !  ; ; ! ?  ! U  U  U   !  ; ; ! ?  ! U  Up ?  ! ?  ! Uq Ur U  U   !  ; ; ! ?  ! ?  ! ?  ! ?  ! U Ï Us U Ö Ut ?  ! U Ï Ut Uu UW Ut ?  ! U î U Z Uv Ut ?  ! ?  ! Ut ?  ! ?  ! ?  ! Uw Ux Ut ?  ! U  U  Un ?  ! Uy Ut ?  ! ?  ! ?  ! ?  ! ?  ! ?  ! U ö % % #   Us U   !  ; ; ! ?  $ !  > ! V   ! U ' ?  ! ?  ! V (  ; ! ?  ! ?  ! U_ U  U  Un ?  ! U[ U   !  ; ; ! ?  ! ?  ! ?  $ !  ! V   ; $ !  > ! 
+  '  $ In  z  { % V3   ! 	G c  	   	| } U~ U UÄ UÅ ?  Ç  É  Ñ #   % %  ! VÖ  ! +     %  ! 
+} ! 
+; '  $  $ $ Ü % % Uá VÜ  ! )   <  1 % % Và   ! % Vâ   ! )  U: % Uä VQ  ! %  ! Uã  ! V ≤  ! %  ! Uå  ! V ≤  ! ?  ,    , Ñ % 
+Ñ ! # ;  %  ! Vç    % Ué Uè  ! V      % #   %  ! V Ø    % Ué Uê  ! 
+  '  $  $ !  ! V 7   Ñ  $ ! Vë  é % 
+Ç ! # ;  %  ! Vç    % Ué Uí  ! V      % #   %  ! V Ø    % Ué Uê  ! 
+  '  $  $ !  ! V 7   Ç  $ ! Vë  ì % 
+É ! #          É 
+É $ ! Vë  î % M Vë  ï # Ù  % M M M +  #   %  ! Vñ   
+ %  ! Vó     $  $  # >  %  ! % M )  % # '   <    $ % %  ! U:  = ! V ≤  !  &    %  > !   '     $ ! )     ,  , '  $  # Q  %  ! % M )  % # :   <    $ % %  = ! U9  ! V ≤  ! +  %  !  &    %  !   !  &    %   > !   '     $ $ ! )     ,  , '  $  % Uò  ! Vô   & %  !  &    %  !   !  &    %  !  !   !  '     $ %  !  !   !  '  $ $ ö % 
+õ ! )  # é  % %  ! 
+Ñ ! 
+Ç ! Vö  ! % Vï   ! M % V j   ! % V    ! +    f %  ! Vï  # '   ! 
+{ ; { %  ! Vï    J % 
+{ = ! +  
+{ > { %  ! 
  # '  $ $ - 3 
-Ä   %  ! Uô  ! V Z     %  !   &   
-Ä   %  ! Uö  ! V Z     %  ! Ví   J .     $ $ , ò # 8  %  ! Vò    % S 
+É   %  ! Uú  ! V Z     %  !   &   
+É   %  ! Uù  ! V Z     %  ! Vï   J .     $ $ , õ # 8  %  ! Võ    % S 
  & '  $ % % 
- V ! U W Uõ U X % Uú  ! V Z  ! U [ % V \   ! U ]  ! V ^ 	 ! 
- # '  $ õ # Vˇ˛ *    <   
-Å   %   = ! )    >    ,    <   
-   %   = ! )    >    ,  %   ! V      % U    ! V      %  !  !  ! 
-ó '  $ $ ù  û  ü  †  ° % O )  # 2  %  !   ! V¢   # %  ! Võ  %  !   ! V¢    % % V j   ! U£  ! V Z         $ û #   %  !   ! V¢    %  ! Võ     %  ! 
-ü '  $ ° #   %  !   ! V¢   	  !   ;       $ ü #   %  !   ! V¢     $  $ † , #   % # 	  U§  !  ; ; $ !  > ! 
-  '  $ I•  w #   % %  ! 
-w ! V   ! +      > $  $ $ ¶ # #  % %  ! 
-w ! V   ! +     %  ! 
-w ! 
-  ! V   w $  $ $ ß # í  % # Öˇ˛ % % V    ! % V    ! +  U ï % # h  U ñ  ! U Ö  ! U Ï   !  !  ; ; ! ?  ! Uû  !  ; ; ! Ur U    !  !  ; ; ; ! U  U  U® ?  ! U© U   !  ; ; !  !  ; ; ; ; ; ! U   !  !  ; ; ; ! ?  ! ?  ! ?  ; ; ! ?  ; ; $ !   ! V   ; $ $ !  > ! 
-  '  $ I® # 3  % # &ˇ˛ U ü Uw U ( U  % #    !  ; $ !  ! V   !  ; ; ! Uw ?  ! ?  $ !  > ! 
-  '  $ I™ 	´ ¨ # ®  % M +  #   % 
-û !  ! V 7   $  % 
-¨ ! % M )  % # |   <    $ %  = ! V      = !   E   %  > !   '      V % %  ! V 9  ! V    #   ! %  ! V 9  b  % %  ! V :  !   '   0 %  > !   '   & %   ! %  ! V 9  ! V ,    % %  ! V :  !   '    %  > !   '  $ ! )     ,  , '  $ $ u # 	   ! 
-¨ ; ¨ $ ≠ # Ó  % # ·ˇˇ % M +  # ^   <    $ %  ! V     Uu U   !  ; ; ! ?   @ %  ! V     - %  = ! UÆ V ,     = ! %  > !   &  ;   %  = !   &  ! %  > !   &  ;   % UØ UX  ! 
-  '  $  % # K  %  ! V      % UØ UX  ! 
-  '  $ %  = ! V      %  = !   &  !  > ;    = ! 	\ b  N  > ;   Uu U   = !  ; ; ! ?  !  > ; $ ! +  UV % %  !   ! V   ! U\ U  U  UØ ?  ! U∞ ?  ! ?  ! ?  ! V (  ; $ $ $ !  > ! 
-  '  $ IØ % U± Vü  
- $ -£ % U≤ V !  J 
- ª ≥ # ã  % M M +  % %  ! V í  !   1 ! # J  %  !  ! O % M )  % # 0   <   %  ! 
+ V ! U W Uû U X % Uü  ! V Z  ! U [ % V \   ! U ]  ! V ^ 	 ! 
+ # '  $ û # Vˇ˛ *    <   
+Ñ   %   = ! )    >    ,    <   
+Ç   %   = ! )    >    ,  %   ! V      % U    ! V      %  !  !  ! 
+ö '  $ $ †  °  ¢  £  § % O )  # 2  %  !   ! V•   # %  ! Vû  %  !   ! V•    % % V j   ! U¶  ! V Z         $ ° #   %  !   ! V•    %  ! Vû     %  ! 
+¢ '  $ § #   %  !   ! V•   	  !   ;       $ ¢ #   %  !   ! V•     $  $ £ , #   % # 	  Uß  !  ; ; $ !  > ! 
+  '  $ I®  z #   % %  ! 
+z ! V   ! +      > $  $ $ © # #  % %  ! 
+z ! V   ! +     %  ! 
+z ! 
+  ! V   z $  $ $ ™ # í  % # Öˇ˛ % % V    ! % V    ! +  U ï % # h  U ñ  ! U Ö  ! U Ï   !  !  ; ; ! ?  ! U°  !  ; ; ! Uu U    !  !  ; ; ; ! U  U  U´ ?  ! U¨ U   !  ; ; !  !  ; ; ; ; ; ! U   !  !  ; ; ; ! ?  ! ?  ! ?  ; ; ! ?  ; ; $ !   ! V   ; $ $ !  > ! 
+  '  $ I´ # 3  % # &ˇ˛ U ü Uz U ( U  % #    !  ; $ !  ! V   !  ; ; ! Uz ?  ! ?  $ !  > ! 
+  '  $ I≠ 	Æ Ø # ®  % M +  #   % 
+° !  ! V 7   $  % 
+Ø ! % M )  % # |   <    $ %  = ! V      = !   E   %  > !   '      V % %  ! V 9  ! V    #   ! %  ! V 9  b  % %  ! V :  !   '   0 %  > !   '   & %   ! %  ! V 9  ! V ,    % %  ! V :  !   '    %  > !   '  $ ! )     ,  , '  $ $ x # 	   ! 
+Ø ; Ø $ ∞ # Ó  % # ·ˇˇ % M +  # ^   <    $ %  ! V     Ux U   !  ; ; ! ?   @ %  ! V     - %  = ! U± V ,     = ! %  > !   &  ;   %  = !   &  ! %  > !   &  ;   % U≤ U[  ! 
+  '  $  % # K  %  ! V      % U≤ U[  ! 
+  '  $ %  = ! V      %  = !   &  !  > ;    = ! 	_ b  N  > ;   Ux U   = !  ; ; ! ?  !  > ; $ ! +  UY % %  !   ! V   ! U_ U  U  U≤ ?  ! U≥ ?  ! ?  ! ?  ! V (  ; $ $ $ !  > ! 
+  '  $ I≤ % U¥ V¢  
+ $ -£ % Uµ V !  J 
+ ª ∂ # ã  % M M +  % %  ! V í  !   1 ! # J  %  !  ! O % M )  % # 0   <   %  ! 
  * '  $ %  ! V ~    %  > !  : !  = !  ; !   '    %  ! 
- * '  $ ! )     ,  , '  $ ! )       , %   ! V     % U¥ Uµ   ! V      %  !  !  '  $ $ ¥  ∂  ∑  ∏  π  ∫  ª  º  Ω  æ  ø  ¿  ¡  ¬  √  ƒ  ≈  ∆ # 8  %  ! % M )  % # !   <    $ %  = ! +   > !  b   $ %   > !   '  $ $ ! )     ,  , '  $ « # ±  %  ! V     , *  %  = !  !   ! V»   %  > !  !  > ! V»    = !  = ; !  > ; $ $ %  ! V…    % % %  ! V   !  !  ! V»  ! 
- œ '   \ %  ! V    P  ! 	À b  UÀ  ;  H %  !  ! V ,     !  ;  2 % %  !  ! V«  ! +     %  ! +   = !   ; $ $ % % V    ! +   !  !  ; !   ; ; $ $    !  ; $ » #A  %  ! V    , % %  = !  !  ! VÃ  ! +  %  ! Vä    ! 	  c  %  !  ! 
-∂ '  $  ! 	Õ c   ! % %  ! V ;  !  !   ! V¿  ! ?  œ %  ! UŒ VC     ! % #   %  !  !   ! 
-Ã '  $ !  > ! V   ; ¶ %  ! Uœ VC   7  ! % %  ! V ;  !  !   ! V∑  ! % #   %  !  !   ! 
-Ã '  $ ! %  ! V <  ! V   ; ; e  ! 	 Ö c  % %  ! V ;  ! %  ! V <  !  !   ! 
-∏ '  B  ! 	– c  % %  ! V ;  ! %  ! V <  !  !   ! 
-π '    ! 	 Ï c I % %  ! V ;  ! +  %  ! V     %  ! %  ! V C  ! %  ! V D  !  !   ! 
-∫ '  $ %  ! %  ! V <  !  !   ! 
-ª '  $  –  ! 	 ˛ c  % %  ! V ;  ! %  ! V <  !  !   ! 
-º '   ≠  ! 	 c % % %  ! V ;  ! %  ! V C  ! %  ! V D  !  !   ! 
-Ω '   Ç  ! 	— c F U— % %  ! V ;  !  !   ! V∑  ! % #   %  = !  !   ! V∑  ! %  > !  !   ! Væ  ; $ ! %  ! V <  ! V   ; ;  6  ! 	V c  UV % #   %  !  !   ! 
-æ '  $ !  > ! V   ;    ! %  > !  !   ! Væ  ; $  ! %  > !  !   ! Vø  ; $ $ %  !  !  ! 
-∑ '  $ Ã #   % #   %  !  !   ! 
-Ã '  $ !  ! 
-  '  $ æ # F  %  ! % M )  % # /  %  ! V      %  = !  !   ! VÃ  ! %  > !   &  ; $ %  !  !   ! 
-Ã '  $ ! )     ,  , '  $ ø # \  %  ! V      %  = !  ! V∂  ! %  > !  ! V∂  ; $ %  ! V…    % % %  ! V   !  ! V∂  ! 
- œ '     %  ! V        % %  !  ! V   ! +      > $  $ $ ∂ #º  %  ! Q % M )  % #§  %  ! V    r % %  = !  !   &  ! +   ! 	“ b 	 %  ! Vä      Q %  > ! +  %  ! V    @    > < @     
- % U“ U” 
-  '  $ %   ! V[    U“ %  = !  !   ! VÃ  ! ?      ! %  !   : !   &  ; $ $  ! 	Õ b 	 %  ! Vä       UÕ %  > !   9 !   &  ;  €  ! 	‘ b 	 %  ! Vä       % U‘ U’ 
-  '   æ %  ! V     ß % %  = !   !   &  ! +   ! 	‘ b 	 %   ! Vä      f %   > ! +  %  ! V    @    > < @     
- % U‘ U” 
-  '  $ U‘ %   ! V[    % %  ! V ;  !  !   ! VÃ    % %  ! V ;  !   : !   &  ! %  > !   !   &  ! ?  ! ?  $ $  ! %   > !   !   &  ; ! %  > !   !   &  ; $    ! %  > !   !   &  ; $ $ %  ! V…    % % %  ! V   !  !   &  ! 
+ * '  $ ! )     ,  , '  $ ! )       , %   ! V     % U∑ U∏   ! V      %  !  !  '  $ $ ∑  π  ∫  ª  º  Ω  æ  ø  ¿  ¡  ¬  √  ƒ  ≈  ∆  «  »  … # 8  %  ! % M )  % # !   <    $ %  = ! +   > !  b   $ %   > !   '  $ $ ! )     ,  , '  $   # ±  %  ! V     , *  %  = !  !   ! VÀ   %  > !  !  > ! VÀ    = !  = ; !  > ; $ $ %  ! VÃ    % % %  ! VÕ  !  !  ! VÀ  ! 
+ œ '   \ %  ! V    P  ! 	Œ b  UŒ  ;  H %  !  ! V ,     !  ;  2 % %  !  ! V   ! +     %  ! +   = !   ; $ $ % % V    ! +   !  !  ; !   ; ; $ $    !  ; $ À #A  %  ! V    , % %  = !  !  ! Vœ  ! +  %  ! Vç    ! 	  c  %  !  ! 
+π '  $  ! 	– c   ! % %  ! V ;  !  !   ! V√  ! ?  œ %  ! U— VF     ! % #   %  !  !   ! 
+œ '  $ !  > ! V   ; ¶ %  ! U“ VF   7  ! % %  ! V ;  !  !   ! V∫  ! % #   %  !  !   ! 
+œ '  $ ! %  ! V <  ! V   ; ; e  ! 	 Ö c  % %  ! V ;  ! %  ! V <  !  !   ! 
+ª '  B  ! 	” c  % %  ! V ;  ! %  ! V <  !  !   ! 
+º '    ! 	 Ï c I % %  ! V ;  ! +  %  ! V     %  ! %  ! V C  ! %  ! V D  !  !   ! 
+Ω '  $ %  ! %  ! V <  !  !   ! 
+æ '  $  –  ! 	 ˛ c  % %  ! V ;  ! %  ! V <  !  !   ! 
+ø '   ≠  ! 	 c % % %  ! V ;  ! %  ! V C  ! %  ! V D  !  !   ! 
+¿ '   Ç  ! 	‘ c F U‘ % %  ! V ;  !  !   ! V∫  ! % #   %  = !  !   ! V∫  ! %  > !  !   ! V¡  ; $ ! %  ! V <  ! V   ; ;  6  ! 	Y c  UY % #   %  !  !   ! 
+¡ '  $ !  > ! V   ;    ! %  > !  !   ! V¡  ; $  ! %  > !  !   ! V¬  ; $ $ %  !  !  ! 
+∫ '  $ œ #   % #   %  !  !   ! 
+œ '  $ !  ! 
+  '  $ ¡ # F  %  ! % M )  % # /  %  ! V      %  = !  !   ! Vœ  ! %  > !   &  ; $ %  !  !   ! 
+œ '  $ ! )     ,  , '  $ ¬ # \  %  ! V      %  = !  ! Vπ  ! %  > !  ! Vπ  ; $ %  ! VÃ    % % %  ! VÕ  !  ! Vπ  ! 
+ œ '     %  ! V        % %  !  ! V   ! +      > $  $ $ π #º  %  ! Q % M )  % #§  %  ! V    r % %  = !  !   &  ! +   ! 	’ b 	 %  ! Vç      Q %  > ! +  %  ! V    @    > < @     
+ % U’ U÷ 
+  '  $ %   ! V^    U’ %  = !  !   ! Vœ  ! ?      ! %  !   : !   &  ; $ $  ! 	– b 	 %  ! Vç       U– %  > !   9 !   &  ;  €  ! 	◊ b 	 %  ! Vç       % U◊ Uÿ 
+  '   æ %  ! V     ß % %  = !   !   &  ! +   ! 	◊ b 	 %   ! Vç      f %   > ! +  %  ! V    @    > < @     
+ % U◊ U÷ 
+  '  $ U◊ %   ! V^    % %  ! V ;  !  !   ! Vœ    % %  ! V ;  !   : !   &  ! %  > !   !   &  ! ?  ! ?  $ $  ! %   > !   !   &  ; ! %  > !   !   &  ; $    ! %  > !   !   &  ; $ $ %  ! VÃ    % % %  ! VÕ  !  !   &  ! 
  œ '   
  %  !  ! 
-∂ '  $ ! )     ,  , '  $ ¿ # '  % % %  ! V¡  !  ! V÷  ! +  U Ö  ! %  !  !  ! Væ  ; ; $ $ ∏ # L  % % % 
-  !  ! V   !  ! V÷  ! +  U– % #    = ! % %  ! V ;  !  !   ! VÃ  !  ; ; $ !  ! V   ! %  !  !  ! Væ  ; ; $ $ π # L  % % % 
-  !  ! V   !  ! V÷  ! +  U Ï % #    = ! % %  ! V ;  !  !   ! VÃ  !  ; ; $ !  ! V   ! %  !  !  ! Væ  ; ; $ $ ª # S  %  ! % % 
-  !  ! V   !  ! V÷  ; ! +  U Ï  ! % #    = ! % %  ! V ;  !  !   ! VÃ  !  ; ; $ !  ! V   ! %  !  !  ! Væ  ; ; ; $ $ ∫ # â  % % % % 
-  !  ! V   ! V◊  !  ! V÷  ! +  U ˛ %  ! %  ! V í  ! % M )  % # >   <    $ %  = ! +   = ! % %  ! V ;  !  ! %   !   ! Vÿ  ! VÃ  !  ; ; ! %  > !   : !   &  ; $ $ ! )     ,  , &  ! %  !  !  ! Væ  ; ; $ $ º # ]  % % % 
-  !  ! V   !  ! V÷  ! +  U % #   %  = ! +   ! %   > !  !  !   ; ! Væ  ; $ $ !  ! V   ! %  !  !  ! Væ  ! %  !  !  ! Væ  ; ; ; $ $ Ω # ¶  %  ! V      %  = !  !  ! V∑  ! %  > !  !  ! V∑  ; $ %  ! V…    % % %  ! V   !  !  ! V∑  ! 
- œ '   d %  ! V       Y %  !  ! V ,      L % %  !  ! V   ! +    : %  ! +  % %  > ! V Æ  ! +  %  ! V3  !   _  % %  ! Q T  VŸ  ! U⁄ V=         = $   > $ $ $  $ $ ∑ # A  %  ! O % M )  % # )  %  ! V      %  = ! %  > !  !   &  !   '  $  <       !  ; $ ! )     ,  , '  $ ¡ # 9  %  ! Q % M )  % # !  %  ! V       $  = !  d     %  > !  9 !   '  $ ! )     ,  , '  $ € # 6  %  ! % M )  % #    <    $ % %  = !  &  ! %  > !   &  ! 
- ( '  $ ! )     ,  , '  $ ‹ # º  %  ! V¬   c  <  	 %  ! V        R *   =  %  ! V <   %  !  ! V√     4 %  = !  > ! +  % #   %   !  !   ! 
-› '  $ !  ! V ∫    %  !  !   ! 
-› '  $  $ $  $ $  $ %  ! V     ( %  ! V      %  = !  = !  ! V›    %  > !  > !  ! 
-› '   "    %  ! V     %  !  ! V ,     !  E       !  G $ › # ¢  %  ! V¬   P *   =  %  ! V <   %  !  ! V√    =   >  %  !   ! Vƒ  ! % #   %   !  !   ! 
-ﬁ '  $ !  ! V   ; ! %  !  !   ! Vﬁ  ; $ $ %  ! V     ! % %  = !  = !  ! Vﬁ  ! %  > !  > !  ! Vﬁ  ! 
+π '  $ ! )     ,  , '  $ √ # '  % % %  ! Vƒ  !  ! VŸ  ! +  U Ö  ! %  !  !  ! V¡  ; ; $ $ ª # L  % % % 
+  !  ! V   !  ! VŸ  ! +  U” % #    = ! % %  ! V ;  !  !   ! Vœ  !  ; ; $ !  ! V   ! %  !  !  ! V¡  ; ; $ $ º # L  % % % 
+  !  ! V   !  ! VŸ  ! +  U Ï % #    = ! % %  ! V ;  !  !   ! Vœ  !  ; ; $ !  ! V   ! %  !  !  ! V¡  ; ; $ $ æ # S  %  ! % % 
+  !  ! V   !  ! VŸ  ; ! +  U Ï  ! % #    = ! % %  ! V ;  !  !   ! Vœ  !  ; ; $ !  ! V   ! %  !  !  ! V¡  ; ; ; $ $ Ω # â  % % % % 
+  !  ! V   ! V⁄  !  ! VŸ  ! +  U ˛ %  ! %  ! V í  ! % M )  % # >   <    $ %  = ! +   = ! % %  ! V ;  !  ! %   !   ! V€  ! Vœ  !  ; ; ! %  > !   : !   &  ; $ $ ! )     ,  , &  ! %  !  !  ! V¡  ; ; $ $ ø # ]  % % % 
+  !  ! V   !  ! VŸ  ! +  U % #   %  = ! +   ! %   > !  !  !   ; ! V¡  ; $ $ !  ! V   ! %  !  !  ! V¡  ! %  !  !  ! V¡  ; ; ; $ $ ¿ # ¶  %  ! V      %  = !  !  ! V∫  ! %  > !  !  ! V∫  ; $ %  ! VÃ    % % %  ! VÕ  !  !  ! V∫  ! 
+ œ '   d %  ! V       Y %  !  ! V ,      L % %  !  ! V   ! +    : %  ! +  % %  > ! V Æ  ! +  %  ! V6  !   _  % %  ! Q T  V‹  ! U› V@         = $   > $ $ $  $ $ ∫ # A  %  ! O % M )  % # )  %  ! V      %  = ! %  > !  !   &  !   '  $  <       !  ; $ ! )     ,  , '  $ ƒ # 9  %  ! Q % M )  % # !  %  ! V       $  = !  d     %  > !  9 !   '  $ ! )     ,  , '  $ ﬁ # 6  %  ! % M )  % #    <    $ % %  = !  &  ! %  > !   &  ! 
+ ( '  $ ! )     ,  , '  $ ﬂ # º  %  ! V≈   c  <  	 %  ! V        R *   =  %  ! V <   %  !  ! V∆     4 %  = !  > ! +  % #   %   !  !   ! 
+‡ '  $ !  ! V ∫    %  !  !   ! 
+‡ '  $  $ $  $ $  $ %  ! V     ( %  ! V      %  = !  = !  ! V‡    %  > !  > !  ! 
+‡ '   "    %  ! V     %  !  ! V ,     !  E       !  G $ ‡ # ¢  %  ! V≈   P *   =  %  ! V <   %  !  ! V∆    =   >  %  !   ! V«  ! % #   %   !  !   ! 
+· '  $ !  ! V   ; ! %  !  !   ! V·  ; $ $ %  ! V     ! % %  = !  = !  ! V·  ! %  > !  > !  ! V·  ! 
  ( '    %  ! V     %  !  ! V ,      
-  !  ; ! ?     $ ﬁ # ´  %  ! V¬   R % (   =  %  !   ! Vƒ   %  !  ! V≈   % #   %   ! %  !  ! V (  !   ! 
-ﬂ '  $ !  ! V   , ! % %  ! V <  !  !  ! Vﬂ  ! 
- ( '  $ %  ! V      %  = !  !  ! Vﬂ  ! %  > !  !  ! Vﬂ  ;  - %  ! V    $ %  !  ! V ,       % %  !  ! V   ! +      > $  $    $ ﬂ # v  %  ! % M )  % # _  %  ! V¬    %  = !   &  ! % %  ! V <  !   &  ; $ %  ! V      % %  = !   &  ! %  > !   &  ! 
- ( '    %  ! V     %  !   ! V ,        ! ?     $ ! )     ,  , '  $ ƒ # ∂  % %  ! O % M )  % # 5   <   %  ! 
-◊ '  $ %  = ! +  %  > ! %  !  = ! V∆     > !   ;     !   '  $ $ ! )     ,  , &  ! +  % %  ! V í  ! +   !  c   $  !  c    =  H %   ! O % M )  % # 1  % 
-o !  ! V≥    %  ! 
-◊ '  $ % % 
+  !  ; ! ?     $ · # ´  %  ! V≈   R % (   =  %  !   ! V«   %  !  ! V»   % #   %   ! %  !  ! V (  !   ! 
+‚ '  $ !  ! V   , ! % %  ! V <  !  !  ! V‚  ! 
+ ( '  $ %  ! V      %  = !  !  ! V‚  ! %  > !  !  ! V‚  ;  - %  ! V    $ %  !  ! V ,       % %  !  ! V   ! +      > $  $    $ ‚ # v  %  ! % M )  % # _  %  ! V≈    %  = !   &  ! % %  ! V <  !   &  ; $ %  ! V      % %  = !   &  ! %  > !   &  ! 
+ ( '    %  ! V     %  !   ! V ,        ! ?     $ ! )     ,  , '  $ « # ∂  % %  ! O % M )  % # 5   <   %  ! 
+⁄ '  $ %  = ! +  %  > ! %  !  = ! V…     > !   ;     !   '  $ $ ! )     ,  , &  ! +  % %  ! V í  ! +   !  c   $  !  c    =  H %   ! O % M )  % # 1  % 
+r !  ! V∂    %  ! 
+⁄ '  $ % % 
   !  ! V   ! % 
-  !  ! V‹  !  ; !   '  $ ! )     ,  , '  $ $ $ ≈ # =  %  ! V    	 %  ! V         !  E $ % #   % #   %   !  ! 
-∆ '  $ !   ! 
-≥ '  $ !  ! 
-≥ '  $ ∆ # C   <    !  ; $ % %  = !  ! V€  ! +     %  ! %  ! V í  !  1 ! V¥  ! %  !  ! Vÿ  ; $ % U√ U‡ 
-  '  $ $ √ #   %  ! V      %  > ! V      %  ! V ;  ! 	À E $  $ ¬ # ú  %  !  ; ! +  %   ! % M )  % # {   <   %  ! U·   ! 
-  '  $ % %  ! V 9  ! %  ! V ?  ! +  %  !   !  ! V›   > % %  ! % %  ! V¡  !  ! V÷  ! O V»  ! +  % %  = ! %  !   !  ! Vﬁ  !  ! Vﬂ  !  > ! O 
-Ã '  $ $ %   > !   '  $ $ ! )     ,  , '  $ $ ‚ % V "   J % S U≤ V &  . % U‚ % U≤ V   ! V   „ #   % # r  %  ! V    @  	  = ! 	‰ Y      % UÂ UÊ  !  ! 
-  '  $ %  ! %  ! V ;  ; ! %  ! V <  ! % U‚ % U≤ V   ! V   ! +  UÁ  ! 	Ë ; ! U„ U   !  ; ; ! UË U   !  ; ; ! U   !  ; ; ! ?  ! ?  $ $ !  > ! 
-  '  $ IÂ  <  È # #  % %  ! Q  ! VŸ  !  ! %  !  ! %  ! V3  ! VŸ  ! 
- ≤ '  $ Í # ü  %  ! V í  !  \   $ %  ! % M )  % # |  % % UÎ  ! VÏ  ! +    h *  %   ! V 9  9  % %   !  !  9 ! VŸ  ! VÌ    ! %   ! V í  ^  % U< UÓ  ! 
+  !  ! Vﬂ  !  ; !   '  $ ! )     ,  , '  $ $ $ » # =  %  ! V    	 %  ! V         !  E $ % #   % #   %   !  ! 
+… '  $ !   ! 
+∂ '  $ !  ! 
+∂ '  $ … # C   <    !  ; $ % %  = !  ! Vﬁ  ! +     %  ! %  ! V í  !  1 ! V∑  ! %  !  ! V€  ; $ % U∆ U„ 
+  '  $ $ ∆ #   %  ! V      %  > ! V      %  ! V ;  ! 	Œ E $  $ ≈ # ú  %  !  ; ! +  %   ! % M )  % # {   <   %  ! U‰   ! 
+  '  $ % %  ! V 9  ! %  ! V ?  ! +  %  !   !  ! V‡   > % %  ! % %  ! Vƒ  !  ! VŸ  ! O VÀ  ! +  % %  = ! %  !   !  ! V·  !  ! V‚  !  > ! O 
+œ '  $ $ %   > !   '  $ $ ! )     ,  , '  $ $ Â % V "   J % S Uµ V &  . % UÂ % Uµ V   ! V   Ê #   % # r  %  ! V    @  	  = ! 	Á Y      % UË UÈ  !  ! 
+  '  $ %  ! %  ! V ;  ; ! %  ! V <  ! % UÂ % Uµ V   ! V   ! +  UÍ  ! 	Î ; ! UÊ U   !  ; ; ! UÎ U   !  ; ; ! U   !  ; ; ! ?  ! ?  $ $ !  > ! 
+  '  $ IË  ?  Ï # #  % %  ! Q  ! V‹  !  ! %  !  ! %  ! V6  ! V‹  ! 
+ ≤ '  $ Ì # ü  %  ! V í  !  \   $ %  ! % M )  % # |  % % UÓ  ! VÔ  ! +    h *  %   ! V 9  9  % %   !  !  9 ! V‹  ! V    ! %   ! V í  ^  % U? UÒ  ! 
   '  $ % %   ! %   ! V 9  ! %   ! V ?  ! % 
-Ÿ !  ! %   !  ! VÔ  ! V   ! VÍ  !   '  $ $   $ $ ! )     ,  , '  $  # 8  % %  !  ! VÏ  ! +    $ %  ! %  ! V 9  ! %  ! V ?  ! %  !   !  ! V  ! 
-Í '  $  $ $ < # x  % M +  % # Z  % %  !  ! VÏ  ! +    F % %  ! Q %  ! V 9  ! VŸ  ! %  !   !  ! V  ! %  ! %  ! %  ! V ?  ! %  ! V3  ! VŸ  !   !   &  ! 
- ≤ '  $  $ $ ! )     , %  !  !   !  '  $ $ È #ˇˇ % M M +  # {  %  ! O O % M )  % # b   <   % %  ! V◊  ! %  ! V◊  ! 
- & '  $ %  = ! VÒ   /  > <   % UÚ  = ! V      % %  ! V <  ! %  ! V ;  !  = !  ; ; !  !   '    %  > !  !  = !  ; !   '  $ ! )     ,  , '  $  # _ˇˇ *  %   ! UÛ M V ø   %   ! UÙ M V ø   %   ! Uı M V ø   %   ! Uˆ M V ø   %   ! U˜ N V ø   %   ! U¯ O V ø    % %  !  !  ! V √  !  !  !   ! 
-˘ '  $ $  % # 
-   %   !  '  $ ! #   % %   ! U¯  !  ! V   ! 
+‹ !  ! %   !  ! VÚ  ! V   ! VÌ  !   '  $ $   $ $ ! )     ,  , '  $ Û # 8  % %  !  ! VÔ  ! +    $ %  ! %  ! V 9  ! %  ! V ?  ! %  !   !  ! VÛ  ! 
+Ì '  $  $ $ ? # x  % M +  % # Z  % %  !  ! VÔ  ! +    F % %  ! Q %  ! V 9  ! V‹  ! %  !   !  ! VÛ  ! %  ! %  ! %  ! V ?  ! %  ! V6  ! V‹  !   !   &  ! 
+ ≤ '  $  $ $ ! )     , %  !  !   !  '  $ $ Ï #ˇˇ % M M +  # {  %  ! O O % M )  % # b   <   % %  ! V⁄  ! %  ! V⁄  ! 
+ & '  $ %  = ! VÙ   /  > <   % Uı  = ! V      % %  ! V <  ! %  ! V ;  !  = !  ; ; !  !   '    %  > !  !  = !  ; !   '  $ ! )     ,  , '  $  # _ˇˇ *  %   ! Uˆ M V ø   %   ! U˜ M V ø   %   ! U¯ M V ø   %   ! U˘ M V ø   %   ! U˙ N V ø   %   ! U˚ O V ø    % %  !  !  ! V √  !  !  !   ! 
+¸ '  $ $  % # 
+   %   !  '  $ ! #   % %   ! U˚  !  ! V   ! 
  & '  $ ! 
- ë '  $ $ ˙ #   %  ! U˚ 
-¸ '  $ ˝ #   %  ! U˛ 
-¸ '  $ ˇ #   %  ! U  
-¸ '  $    U ?   	  	   	   Œ  
- # 
+ ë '  $ $ ˝ #   %  ! U˛ 
+ˇ '  $   #   %  ! U 
+ˇ '  $  #   %  ! U 
+ˇ '  $    U ?   	 	 	
+      Œ   # 
   %  = ! 
-T '  $  #   %  ! V    	 $ %  ! 
- 9 '  $  #   %  > ! V    	 $ %  ! 
- A '  $  
- ?  
- K  
- O  # 	  %  ! V P  = $  #Ô  % M M M +  #   %  !  ! 
+W '  $  #   %  ! V    	 $ %  ! 
+ 9 '  $  #   %  > ! V    	 $ %  ! 
+ A '  $  
+ ?  
+ K  
+ O  # 	  %  ! V P  = $  #Ô  % M M M +  #   %  !  ! 
  ç '  $  #   %  !  ! V ç  %  ! %  ! V <  ! 
- é '  $  # i  % % %  ! V  !  ! V ,  ! )    L % %  ! V  ! )   ! 	 c  %   ! % %   ! V ;  ! V  !  &   "  ! 	 c  %   ! % %   ! V ;  ! V  !  &      >   ,     >   ,  $    < I %   ! % M )  % #1   > <    >   % %  ! V  ! %  ! V  ! )   ! 	 b 
- %  ! U V ,      U %   !  ! 	 c  	  =  ! 	 c  	  3  ! 	 c  	  )  ! 	 c  	    ! 	  c  	!    ! 	" c  	#    ! 	$ c  	%    ! ?  !  &  û  ! 	& b   ! 	 E      %   ! U' %   ! V  ! ?  !  &  w  ! 	( b   ! 	 E      %   ! U) %   ! V  ! ?  !  &  P  ! 	 b  %   !   &    >  ! 	* b 
- %  ! U+ V ,      i %   !  ! 	, c  	-  Q  ! 	- c  	,  G  ! 	. c  	/  =  ! 	0 c  	1  3  ! 	1 c  	0  )  ! 	/ c  	.    ! 	2 c  	3    ! 	4 c  	5    ! 	6 c  	7    ! ?  !  &   ¬  ! 	8 b 
- %  ! U9 V ,      { %   !  ! 	, c  	:  [  ! 	- c  	;  Q  ! 	. c  	<  G  ! 	1 c  	=  =  ! 	0 c  	>  3  ! 	/ c  	?  )  ! 	2 c  	@    ! 	4 c  	A    ! 	6 c  	B    ! 	* c  	C    ! %   ! V  ! ?  !  &   4  ! 	D b   ! 	E E      %   ! UF %   ! V  ! %   ! V  ! ?  !  &      >   ,  <   %  !   '  $  $ ! )     ,  , &       $ $ G % Q )  % #   %  = !   ! %  ! V ;  ! ?  ! +    9    $ $ ! UH V   , I  J #    % %  ! 
-I ! V   ! +      > $ % UK   ! 
-L '  $ $ M % % # 	  %  ! VM  = $ ! UN V   ! )  #   %  !   ! 
- , '  $ , O # ,  *  % %   ! V Æ  ! VP   % T  %  ! V3  1 ! UQ VR   %  !  ! 
- ≤ '  $ $ S 
- T #   % Q O %  ! VG  ! +  % # ;  %  ! VT     !  ; !  ;  $ *    =  %  ! VM   %   !  = ! V ç   ! %   ! V í  0  $ $ !  ! V 7  % %  ! VU  ! Q +  % # ñ  %  ! V     ã % %  ! V í  ! +   !   !   = B  !  _ ; %   = ! %   ! V ;  ! )  %  ! VO    % %  !  ! V   > !   ! T  V Ä       !   9 !  B ,     !   _   !   !   0 ! %   ! V C  B     !   _  % UV   ! VL       !  0   $ $  $ !   ! V 7   $ $ $ W # /  % #   %  ! VT    % N UX  ! 
- Z '  $ % N UY  ! 
+ é '  $  # i  % % %  ! V  !  ! V ,  ! )    L % %  ! V  ! )   ! 	 c  %   ! % %   ! V ;  ! V  !  &   "  ! 	 c  %   ! % %   ! V ;  ! V  !  &      >   ,     >   ,  $    < I %   ! % M )  % #1   > <    >   % %  ! V  ! %  ! V  ! )   ! 	 b 
+ %  ! U V ,      U %   !  ! 	 c  	  =  ! 	 c  	  3  ! 	 c  	   )  ! 	! c  	"    ! 	# c  	$    ! 	% c  	&    ! 	' c  	(    ! ?  !  &  û  ! 	) b   ! 	 E      %   ! U* %   ! V  ! ?  !  &  w  ! 	+ b   ! 	 E      %   ! U, %   ! V  ! ?  !  &  P  ! 	 b  %   !   &    >  ! 	- b 
+ %  ! U. V ,      i %   !  ! 	/ c  	0  Q  ! 	0 c  	/  G  ! 	1 c  	2  =  ! 	3 c  	4  3  ! 	4 c  	3  )  ! 	2 c  	1    ! 	5 c  	6    ! 	7 c  	8    ! 	9 c  	:    ! ?  !  &   ¬  ! 	; b 
+ %  ! U< V ,      { %   !  ! 	/ c  	=  [  ! 	0 c  	>  Q  ! 	1 c  	?  G  ! 	4 c  	@  =  ! 	3 c  	A  3  ! 	2 c  	B  )  ! 	5 c  	C    ! 	7 c  	D    ! 	9 c  	E    ! 	- c  	F    ! %   ! V  ! ?  !  &   4  ! 	G b   ! 	H E      %   ! UI %   ! V  ! %   ! V  ! ?  !  &      >   ,  <   %  !   '  $  $ ! )     ,  , &       $ $ J % Q )  % #   %  = !   ! %  ! V ;  ! ?  ! +    9    $ $ ! UK V   , L  M #    % %  ! 
+L ! V   ! +      > $ % UN   ! 
+O '  $ $ P % % # 	  %  ! VP  = $ ! UQ V   ! )  #   %  !   ! 
+ , '  $ , R # ,  *  % %   ! V Æ  ! VS   % T  %  ! V6  1 ! UT VU   %  !  ! 
+ ≤ '  $ $ V 
+ W #   % Q O %  ! VJ  ! +  % # ;  %  ! VW     !  ; !  ;  $ *    =  %  ! VP   %   !  = ! V ç   ! %   ! V í  0  $ $ !  ! V 7  % %  ! VX  ! Q +  % # ñ  %  ! V     ã % %  ! V í  ! +   !   !   = B  !  _ ; %   = ! %   ! V ;  ! )  %  ! VR    % %  !  ! V   > !   ! T  V Ä       !   9 !  B ,     !   _   !   !   0 ! %   ! V C  B     !   _  % UY   ! VO       !  0   $ $  $ !   ! V 7   $ $ $ Z # /  % #   %  ! VW    % N U[  ! 
+ Z '  $ % N U\  ! 
  Z '  $ !  ! V 7  % 
-! '   $ Z # @  % 
-I ! % M )  % # (   <   % U[   ! 
-L '  $ %  ! V ?  !   \   =   %  > !   '  $ ! )     ,  , '  $ \ #]  % M M +  # ,  % M UH %  ! T d V ´  ! % %  ! T d V]  ! T 
+! '   $ ] # @  % 
+L ! % M )  % # (   <   % U^   ! 
+O '  $ %  ! V ?  !   \   =   %  > !   '  $ ! )     ,  , '  $ _ #]  % M M +  # ,  % M UL %  ! T d V ´  ! % %  ! T d V`  ! T 
  V ´  ! %  ! T 
- V]  ! 
- Z '  $  # *  %  ! VO    %   ! U^ % %  !  !  A ! R V  !  &  ! 
- Z '  $  $  % %  ! V_  ! +  % Q % M )  % # Ÿ   !   a ø *  %  !   A ! V\    =  %  ! V C   %   ! U` %   !  &  ! %  ! VS  ! V Z   !  c 
- %   9 !   '  $  !  c / %   ! Ua  !   9 A ! V Z  %  !   A !   9 !   &  %   !   0 !   '   I  !   c : %   ! Ub  !   9 A !  !   !   0 A ! V Z  %  !   A !   9 !   &  %   !   0 !   '   	 % Uc  ! 
-L '  $ $ %   ! Ud %  !  &  ! 
- Z '  $ ! )     ,  , '  $ $ $ e # )  % %  ! Vf  ! +     %  ! % V g   ! 
-e '  $ % Ug Uh   ! 
-  '  $ $ g # ˇˇ % 
-  ! UL % Ui  = ! V ≤  !  > ! 
-  '  $ L # uˇ¸ *   !  b  	  	 % Uj  ! V Z   %  ! Vk    % Ul %  ! Vm  ! %  ! Vn  ! V Z    	  
-   % 
- Z ! % V j   ! % Uo  !  !  ! V Z  !   ! 
+ V`  ! 
+ Z '  $  # *  %  ! VR    %   ! Ua % %  !  !  A ! R V  !  &  ! 
+ Z '  $  $  % %  ! Vb  ! +  % Q % M )  % # Ÿ   !   a ø *  %  !   A ! V_    =  %  ! V C   %   ! Uc %   !  &  ! %  ! VV  ! V Z   !  c 
+ %   9 !   '  $  !  c / %   ! Ud  !   9 A ! V Z  %  !   A !   9 !   &  %   !   0 !   '   I  !   c : %   ! Ue  !   9 A !  !   !   0 A ! V Z  %  !   A !   9 !   &  %   !   0 !   '   	 % Uf  ! 
+O '  $ $ %   ! Ug %  !  &  ! 
+ Z '  $ ! )     ,  , '  $ $ $ h # )  % %  ! Vi  ! +     %  ! % V g   ! 
+h '  $ % Uj Uk   ! 
+  '  $ $ j # ˇˇ % 
+  ! UO % Ul  = ! V ≤  !  > ! 
+  '  $ O # uˇ¸ *   !  b  	  	 % Um  ! V Z   %  ! Vn    % Uo %  ! Vp  ! %  ! Vq  ! V Z    	  
+   % 
+ Z ! % V j   ! % Ur  !  !  ! V Z  !   ! 
   '  $ % 
   ! %  !  ! V ≤  !   ! 
-  '  $ $ p # Çˇ¸ *   !  b  	  	 % Uj  ! V Z   %  ! Vk    % Ul %  ! Vm  ! %  ! Vn  ! V Z    	     
-      % 
- Z ! % V j   ! % Uq  !  !  ! V Z  !   ! 
+  '  $ $ s # Çˇ¸ *   !  b  	  	 % Um  ! V Z   %  ! Vn    % Uo %  ! Vp  ! %  ! Vq  ! V Z    	     
+      % 
+ Z ! % V j   ! % Ut  !  !  ! V Z  !   ! 
   '  $ % 
- Z ! % V j   ! % Ur  !  ! V Z  !   ! 
-  '  $ $ s % Ut ?  ! )  #   %  ! % V    !   ! V   !   Y $ , u # ˇˇ % U“ Uv 
-  '  $ “ # ˇˇ % U‘ Uv 
-  '  $ ‘ % N Vé  w % M Vé  x # 
-    	   Œ 	y $ z # 
+ Z ! % V j   ! % Uu  !  ! V Z  !   ! 
+  '  $ $ v % Uw ?  ! )  #   %  ! % V    !   ! V   !   Y $ , x # ˇˇ % U’ Uy 
+  '  $ ’ # ˇˇ % U◊ Uy 
+  '  $ ◊ % N Vë  z % M Vë  { # 
+       Œ 	| $ } # 
    % 
-	 ! 
- * '  $ { #    % 
-
- ! +  
-
- 9 
-  $ $ | # 	ˇˇ  ! 
-	 ; 	 $ } # 	   ! 
-	 ; 	 $ ~ # 6  % %  ! 
- Œ ! V¢  ! +       ! ?   % 
- Œ !  ! V÷   Œ    % 
- Œ ! V í  ! %  ! V í  1 $ $  % % % T  T  V ™  ! V Ä  ! % T  T  V ™  : ! )  # ù   !  b  % U 
-} '  $  !  b 	 % U 
-} '   Ä  !  b 	 % U 
-} '   r  !  b 	 % U 
-} '   d  !  b 	 % U  
-} '   V  !  b 	 % U" 
-} '   H  !  b 	 % U$ 
-} '   : %  ! VT    %  ! V Å    %  !  !   ! VÄ       % U&  ! 
-} '    % U( %  ! V  ! 
-} '  $ , Å # +  %  ! V í  !   \  % %  ! V ;  !  !  ! 
-Å '  $ % U   ! UÇ  ! 
-p '  $ É  Ñ  Ö #   %  ! Vu    %  ! 
-Ñ ! 
- , '     $ Ü #   %  ! 
-Ñ ! V ,     ! 
-Ñ ; Ñ $  $ á #   % S  ! Uà  ! 
-s '  $ â # @  % U 
- ! V ,   	 %  ! VÜ  @     & % Uä 
- ! V ,     !  ; ! 
-Ö ; Ö $ %  !  ! Vâ  %  ! 
-á '  $  $ ã # 4   % # %  %  = !  > ! +  %  ! VÜ    %  !  ! Vâ  %  ! 
-á '  $  $ $ ! 
-Ö ! V 7   Ö $ å # J  %  ! V í  !   _ 0 % %  ! V ;  ! %  ! V <  ! +  %  ! V      U ñ  = ! U Ö  > !  ; ; ! ?  ; ; $   $ $ % U ñ  ! Uç  ! Vp   $ é # |  *  %  ! Vé   %  ! V ;   %  ! V í  !   X   % U ñ  ! Uè 
-p '  $  <  > %  ! V    & %  ! Vá  % %  ! V C  ! O  ! M Vê  % Uë %  ! V  ! 
-} '    % U ñ  ! Uí  ! 
-p '    % U ñ  ! Uì 
-p '  $ $ î # 6  %  ! % M )  % #    <    $ %  !  = ! V ,       %  > !   '  $ ! )     ,  , '  $ ï #"  % M M +  # 
+ ! 
+ * '  $ ~ #    % 
+ ! +  
+ 9   $ $  # 	ˇˇ  ! 
+ ;  $ Ä # 	   ! 
+ ;  $ Å # 6  % %  ! 
+ Œ ! V•  ! +       ! ?   % 
+ Œ !  ! VŸ   Œ    % 
+ Œ ! V í  ! %  ! V í  1 $ $ Ç % % % T  T  V ™  ! V Ä  ! % T  T  V ™  : ! )  # ù   !  b  % U 
+Ä '  $  !  b 	 % U 
+Ä '   Ä  !  b 	 % U 
+Ä '   r  !  b 	 % U! 
+Ä '   d  !  b 	 % U# 
+Ä '   V  !  b 	 % U% 
+Ä '   H  !  b 	 % U' 
+Ä '   : %  ! VW    %  ! V Å    %  !  !   ! VÉ       % U)  ! 
+Ä '    % U+ %  ! VÇ  ! 
+Ä '  $ , Ñ # +  %  ! V í  !   \  % %  ! V ;  !  !  ! 
+Ñ '  $ % U   ! UÖ  ! 
+s '  $ Ü  á  à #   %  ! Vx    %  ! 
+á ! 
+ , '     $ â #   %  ! 
+á ! V ,     ! 
+á ; á $  $ ä #   % S  ! Uã  ! 
+v '  $ å # @  % U 
+ ! V ,   	 %  ! Vâ  @     & % Uç 
+ ! V ,     !  ; ! 
+à ; à $ %  !  ! Vå  %  ! 
+ä '  $  $ é # 4   % # %  %  = !  > ! +  %  ! Vâ    %  !  ! Vå  %  ! 
+ä '  $  $ $ ! 
+à ! V 7   à $ è # J  %  ! V í  !   _ 0 % %  ! V ;  ! %  ! V <  ! +  %  ! V      U ñ  = ! U Ö  > !  ; ; ! ?  ; ; $   $ $ % U ñ  ! Uê  ! Vs   $ ë # |  *  %  ! Vë   %  ! V ;   %  ! V í  !   X   % U ñ  ! Uí 
+s '  $  <  > %  ! V    & %  ! Vä  % %  ! V C  ! O  ! M Vì  % Uî %  ! VÇ  ! 
+Ä '    % U ñ  ! Uï  ! 
+s '    % U ñ  ! Uñ 
+s '  $ $ ó # 6  %  ! % M )  % #    <    $ %  !  = ! V ,       %  > !   '  $ ! )     ,  , '  $ ò #"  % M M +  # 
    !   2 !  0 $  # ˇ˝ % 
-} !         !  ! 
-  '  $  % Q  ! % M )  % # ﬁ   <   %  !  ! Vã  % UD Uñ %  ! V  !   '  $ % Q  = ! % M )  % # •   <   %  9 !   > !   '  $  = !  b  %  ! V[   `  !  c  % Uó Uò   '   q  !  c  % Uô Uö   '   >  !   c  % Uõ Uú   '   -  !   c  % Uù Uû   '     !   c  % Uü U†   '    % U° U¢  !   '   ! % U£ U§ %  !  !  &  !   '    %  9 !  > !   '  $ ! )     ,  , '  $ ! )     ,  , '  $ $ • #   %  !  !  ! N 
-• '  $ ¶ # ô  % %  > ! V í  ! +   !   \ v % %  ! V ;  ! %  ! V C  ! +  %  ! Vä   & % U †  = !  ; ; ! %  > !  !  ; ! V (  ; !  !  !   ! 
-ê '  $ %  ! V     %  !  !  ! M Vê  %  !  !  ! M 
-• '    % U ü  ! Uß  ! 
-p '  $ $ % U ü  ! U®  ! 
-p '  $ $ © # ú  % %  > ! V í  ! % V|   ! % V|   ! +  % T   ! T  VÄ   i % %  ! V ;  !  !  ! M Vê  % U8  ! V}  % %  ! V C  !  !  !   ! Vê  % U  ! V}  %  ! V~   !   \  % %  ! V S  !  !  !   ! Vê    % U$ V}  %  ! 
-~ '  $ % Ur  ! U™  ! 
-p '  $ $ ´ # u  % %  ! Vé  ! +  %  ! V í  !   \ \ *  %   ! V¨   %  ! V ;   %  ! V C   U Ö U≠ UÆ ?  ! U   ! U  U≠ ?  ! ?  ; ; ! ?   %  ! O  ! M Vê  % UØ %  ! V  ! V}  %  ! %  ! V∞  ! 
-  '  $ $  $ $ ± # K  % %  > ! V í  ! +   !  _ ) % Ur %  ! V ;  ! U ï %  ! V <  ; ! ?  ; ; !  !  !   ! 
-ê '  $ % U  ! U™  ! 
-p '  $ $ ≤ # O  % %  > ! V í  ! +   !  _ - % Ur Un %  ! V ;  !  ; ; ! U ï %  ! V <  ; ! ?  !  !  !   ! 
-ê '  $ % U	  ! U™  ! 
-p '  $ $ ≥ # é   > <   % U 
-} '  $ % % V|   ! % V|   ! +  %  > ! % M )  % # ?   <    $  > <   %  = !  !  !   ! 
-ê '    %  = !  !  ! M Vê  % U8  ! V}  %  > !   '  $ ! )     ,  , &  % U  ! V}  %  ! V~  % U V}  %  ! 
-~ '  $ $ ¥ # `  % % V|   ! +  %  > ! % M )  % # 1   <  * %  = !  !  !      > <    ! Vê  % UC   ! V}  %  > !   '  $  $ ! )     ,  , &  % U V}  %  ! 
-~ '  $ $ µ # ~  % %  > ! V í  ! +   !  c  % U$ 
-} '  $  !  c  % %  ! V ;  !  !  !   ! 
-ê '   F %  > ! % M )  % # /   > <   %  = !  !  !   ! 
-ê '  $ %  = !  !  ! M Vê  %  > !   '  $ ! )     ,  , '  $ $ ∂ # <  %  ! Q % M )  % # $   <    $ %  ! V      %  > !  9 !   '    %  ! V Ä  : $ ! )     ,  , '  $ Y # A  % M +  % # $   <    $ %  ! V      %  > !  = !  ; !   '     !  ; $ ! )     , %   ! O  &  !  ; $ $ ∑ #   %  = !  ! ?  ! V (  !  > ; $ ∏ # ¡  %  ! O % M )  % # ©  %  ! V      %  = ! V      %  ! V 9  ! 	 ï E      % %  ! V :  !  !   '  $ %  ! V      %  = ! V      %  ! V 9  ! 	 ñ E      %  > ! %  = ! Vé  > !  ; !   '   B  <   U ï  ;  8 % %  ! V◊  ! +  U Ï % #    = ! M ?  $ !  ! V   ! % % #   U ü  ; $ !  ! V   !  ! V (  ; ; $ $ ! )     ,  , '  $ π # >  % %  !  ! V∑  ! % V|   ! +  % U∫  !  ! V}  % %  ! Vπ  !  !  ! N Vê  % U V}  %  ! 
-~ '  $ $ ª 
- ø º #Å  % M M M M +  # 9  % % V    ! +  U Ï  ! U    !  ; ; ! ?  ; ! ?  ! U ü   ! U    !  ; ; ! ?  ; ; !  !  ; ; ; ; $ $  #ê  % 
- ( ! % #|  %  = ! %  ! V ;  ! %  ! V C  ! +    –   [  ! U ö U     !  ; ; ! Un UÒ U    !  ; ; ! ?  ! ?  ! ?  ! ?  ; !  !    Ur  ! %   !  &  !  !  ; ; ; ;   U ö  ! %   !  &  !  ; ; ; !  ; ; ! ?  $   9  ! Ur Ut Uo   !  ; ; ! UÒ U    !  ; ; ! ?  ! ?  !  ! %   !  &  !  ; ; ; ; ! ?  ; ! ?   5  ! U ö U     !  ; ; ! Un UÒ U    !  ; ; ! ?  ! ?  ! %   !  &  !  ; ; ; ; ! ?  ; ! ?  $   D  ! U     !  ; ; ! ?  ; !  !    Ur  ! %   !  &  !  !  ; ; ; ;   U ö  ! %   !  &  !  ; ; ; !  ; ; ! ?   J   &  ! Ur Uo   !  ; ; !  ! %   !  &  !  ; ; ; ; ! ?  ; ! ?   !  ! U ö U     !  ; ; ! %   !  &  !  ; ; ; ! ?  ; ! ?  $ $ !  ! V   ! 
-  '  $  # !  %  ! V      $ %  ! V      %  = ! UΩ 
+Ä !         !  ! 
+  '  $  % Q  ! % M )  % # ﬁ   <   %  !  ! Vé  % UG Uô %  ! VÇ  !   '  $ % Q  = ! % M )  % # •   <   %  9 !   > !   '  $  = !  b  %  ! V^   `  !  c  % Uö Uõ   '   q  !  c  % Uú Uù   '   >  !   c  % Uû Uü   '   -  !   c  % U† U°   '     !   c  % U¢ U£   '    % U§ U•  !   '   ! % U¶ Uß %  !  !  &  !   '    %  9 !  > !   '  $ ! )     ,  , '  $ ! )     ,  , '  $ $ ® #   %  !  !  ! N 
+® '  $ © # ô  % %  > ! V í  ! +   !   \ v % %  ! V ;  ! %  ! V C  ! +  %  ! Vç   & % U †  = !  ; ; ! %  > !  !  ; ! V (  ; !  !  !   ! 
+ì '  $ %  ! V     %  !  !  ! M Vì  %  !  !  ! M 
+® '    % U ü  ! U™  ! 
+s '  $ $ % U ü  ! U´  ! 
+s '  $ $ ¨ # ú  % %  > ! V í  ! % V   ! % V   ! +  % T   ! T  VÉ   i % %  ! V ;  !  !  ! M Vì  % U;  ! VÄ  % %  ! V C  !  !  !   ! Vì  % U  ! VÄ  %  ! VÅ   !   \  % %  ! V S  !  !  !   ! Vì    % U' VÄ  %  ! 
+Å '  $ % Uu  ! U≠  ! 
+s '  $ $ Æ # u  % %  ! Vë  ! +  %  ! V í  !   \ \ *  %   ! VØ   %  ! V ;   %  ! V C   U Ö U∞ U± ?  ! U   ! U  U∞ ?  ! ?  ; ; ! ?   %  ! O  ! M Vì  % U≤ %  ! VÇ  ! VÄ  %  ! %  ! V≥  ! 
+  '  $ $  $ $ ¥ # K  % %  > ! V í  ! +   !  _ ) % Uu %  ! V ;  ! U ï %  ! V <  ; ! ?  ; ; !  !  !   ! 
+ì '  $ % U  ! U≠  ! 
+s '  $ $ µ # O  % %  > ! V í  ! +   !  _ - % Uu Uq %  ! V ;  !  ; ; ! U ï %  ! V <  ; ! ?  !  !  !   ! 
+ì '  $ % U	  ! U≠  ! 
+s '  $ $ ∂ # é   > <   % U 
+Ä '  $ % % V   ! % V   ! +  %  > ! % M )  % # ?   <    $  > <   %  = !  !  !   ! 
+ì '    %  = !  !  ! M Vì  % U;  ! VÄ  %  > !   '  $ ! )     ,  , &  % U  ! VÄ  %  ! VÅ  % U VÄ  %  ! 
+Å '  $ $ ∑ # `  % % V   ! +  %  > ! % M )  % # 1   <  * %  = !  !  !      > <    ! Vì  % UF   ! VÄ  %  > !   '  $  $ ! )     ,  , &  % U VÄ  %  ! 
+Å '  $ $ ∏ # ~  % %  > ! V í  ! +   !  c  % U' 
+Ä '  $  !  c  % %  ! V ;  !  !  !   ! 
+ì '   F %  > ! % M )  % # /   > <   %  = !  !  !   ! 
+ì '  $ %  = !  !  ! M Vì  %  > !   '  $ ! )     ,  , '  $ $ π # <  %  ! Q % M )  % # $   <    $ %  ! V      %  > !  9 !   '    %  ! V Ä  : $ ! )     ,  , '  $ \ # A  % M +  % # $   <    $ %  ! V      %  > !  = !  ; !   '     !  ; $ ! )     , %   ! O  &  !  ; $ $ ∫ #   %  = !  ! ?  ! V (  !  > ; $ ª # ¡  %  ! O % M )  % # ©  %  ! V      %  = ! V      %  ! V 9  ! 	 ï E      % %  ! V :  !  !   '  $ %  ! V      %  = ! V      %  ! V 9  ! 	 ñ E      %  > ! %  = ! Vë  > !  ; !   '   B  <   U ï  ;  8 % %  ! V⁄  ! +  U Ï % #    = ! M ?  $ !  ! V   ! % % #   U ü  ; $ !  ! V   !  ! V (  ; ; $ $ ! )     ,  , '  $ º # >  % %  !  ! V∫  ! % V   ! +  % UΩ  !  ! VÄ  % %  ! Vº  !  !  ! N Vì  % U VÄ  %  ! 
+Å '  $ $ æ 
+ ø ø #Å  % M M M M +  # 9  % % V    ! +  U Ï  ! U    !  ; ; ! ?  ; ! ?  ! U ü   ! U    !  ; ; ! ?  ; ; !  !  ; ; ; ; $ $  #ê  % 
+ ( ! % #|  %  = ! %  ! V ;  ! %  ! V C  ! +    –   [  ! U ö U     !  ; ; ! Uq UÙ U    !  ; ; ! ?  ! ?  ! ?  ! ?  ; !  !    Uu  ! %   !  &  !  !  ; ; ; ;   U ö  ! %   !  &  !  ; ; ; !  ; ; ! ?  $   9  ! Uu Uw Ur   !  ; ; ! UÙ U    !  ; ; ! ?  ! ?  !  ! %   !  &  !  ; ; ; ; ! ?  ; ! ?   5  ! U ö U     !  ; ; ! Uq UÙ U    !  ; ; ! ?  ! ?  ! %   !  &  !  ; ; ; ; ! ?  ; ! ?  $   D  ! U     !  ; ; ! ?  ; !  !    Uu  ! %   !  &  !  !  ; ; ; ;   U ö  ! %   !  &  !  ; ; ; !  ; ; ! ?   J   &  ! Uu Ur   !  ; ; !  ! %   !  &  !  ; ; ; ; ! ?  ; ! ?   !  ! U ö U     !  ; ; ! %   !  &  !  ; ; ; ! ?  ; ! ?  $ $ !  ! V   ! 
+  '  $  # !  %  ! V      $ %  ! V      %  = ! U¿ 
  , '     $  #  % 
- ( ! % # ˛  *    =  %   ! V ;   %   ! V C   %  ! Væ     m % % V    ! +   ! U ø   !  ! U   !  ; ; ! ?  ; ; ; ! ?  ; !  ! Un U   ! U   !  ; ; ! ?  ; ; ! ?  ! ?  ; !   !    Ur  !  !  !  ; ; ; ;   U ö  !  !  ; ; ; !  ; ; ! ?  $ $ %  !  &     ! U ø   !  !  !  ; ; ; ; ! ?  ; ! ?   L % % V    ! +   ! U ø   !  ! U   !  ; ; ! ?  ; ; ; ! ?  ; !   ! Ur U   ! U   !  ; ; ! ?  ; ; !  !  !  ; ; ; ; ! ?  ; ! ?  $ $ $ !  ! V   ! 
-  '  $  %             Ur U    !  ; ; ! U  U   !  ; ; ; ! ?  ! ?  ! +  U ˛ %    %  !  !  &     !    %  !  !   &     ! V (  ! %  ! %   ! Vπ  !  ; ! V (  ; ; $ $ $ ø #◊  % M M M M M M M M M + 	                # £  %  ! V     ò % # ç  %  ! V      ! M M ?  $ %  ! V      %  ! V í  !   \ 	 %  = ! V        %  ! M ?  ! 
- ( '   P %  ! V     ! %  ! V í  !   \  %  = ! V     % %  ! V C  ! V          ! % U Ö  ! U¿     	¡   	¬ !  ! Vp  % V    ! M M ?  $ !  ! 
-  '  $  $  # F   % O   ! % M )  % # -   <   %  = ! U√ V ,          %  ! 
- * '  $ %  = !  ; !  > !   '  $ ! )     ,  , '  $  #     <     = !  E        >   %  '   $  $  # ©   <  ¢ %  = ! +  %  ! V    ) %  !   ! V ,    % S  ! Uƒ  ! 
-p '  $ %  > !  !   ; !   '  $    %  ! Vä    %  ! V í  !   4     A % %  ! V ;  ! V    % %  = ! ?  !   !   &    %  > !  = !   ; !   '       % S  ! U≈  ! 
-p '    % S  ! U∆  ! 
-p '  $ $  $  %   ! Vä   7 %   ! V     # (  %   ! V   %  ! V«   %  ! U»  > ! ?  ! V é   ,   U»   ! ?       %  &     % % U…  &  ! N  &    % U»  &    % % U   &  ! M  &      <   % U Ö  ! UÀ   ! Vp        , %   ! V í  !  \ 
- %   = ! V        % U Ö  ! UÃ Vp       =      % %     % 
+ ( ! % # ˛  *    =  %   ! V ;   %   ! V C   %  ! V¡     m % % V    ! +   ! U ø   !  ! U   !  ; ; ! ?  ; ; ; ! ?  ; !  ! Uq U   ! U   !  ; ; ! ?  ; ; ! ?  ! ?  ; !   !    Uu  !  !  !  ; ; ; ;   U ö  !  !  ; ; ; !  ; ; ! ?  $ $ %  !  &     ! U ø   !  !  !  ; ; ; ; ! ?  ; ! ?   L % % V    ! +   ! U ø   !  ! U   !  ; ; ! ?  ; ; ; ! ?  ; !   ! Uu U   ! U   !  ; ; ! ?  ; ; !  !  !  ; ; ; ; ! ?  ; ! ?  $ $ $ !  ! V   ! 
+  '  $  %             Uu U    !  ; ; ! U  U   !  ; ; ; ! ?  ! ?  ! +  U ˛ %    %  !  !  &     !    %  !  !   &     ! V (  ! %  ! %   ! Vº  !  ; ! V (  ; ; $ $ $ ¬ #◊  % M M M M M M M M M + 	                # £  %  ! V     ò % # ç  %  ! V      ! M M ?  $ %  ! V      %  ! V í  !   \ 	 %  = ! V        %  ! M ?  ! 
+ ( '   P %  ! V     ! %  ! V í  !   \  %  = ! V     % %  ! V C  ! V          ! % U Ö  ! U√     	ƒ   	≈ !  ! Vs  % V    ! M M ?  $ !  ! 
+  '  $  $  # F   % O   ! % M )  % # -   <   %  = ! U∆ V ,          %  ! 
+ * '  $ %  = !  ; !  > !   '  $ ! )     ,  , '  $  #     <     = !  E        >   %  '   $  $  # ©   <  ¢ %  = ! +  %  ! V    ) %  !   ! V ,    % S  ! U«  ! 
+s '  $ %  > !  !   ; !   '  $    %  ! Vç    %  ! V í  !   4     A % %  ! V ;  ! V    % %  = ! ?  !   !   &    %  > !  = !   ; !   '       % S  ! U»  ! 
+s '    % S  ! U…  ! 
+s '  $ $  $  %   ! Vç   7 %   ! V     # (  %   ! V   %  ! V    %  ! UÀ  > ! ?  ! V é   ,   UÀ   ! ?       %  &     % % UÃ  &  ! N  &    % UÀ  &    % % UÕ  &  ! M  &      <   % U Ö  ! UŒ   ! Vs        , %   ! V í  !  \ 
+ %   = ! V        % U Ö  ! Uœ Vs       =      % %     % 
   !   ! V      !     % 
-  !   ! V      !       ! ?     !   ! V (  ! O  &    !   !   !   ! ?  $ $ Õ # í  *  %  !  ! VÕ    =  %  ! V ;   %  ! V C   %  ! V S           A %    % V       ! +   <       % %  ! V«  !  ! V é   ! %  !  !  !  !   ! Vø  !  ; ; $ $     <       % %  ! V«  !  ! V é      !   ; $ $ Œ # A  %  ! V í  !   _ ' %  = ! 	œ E ! %  ! V ;  ! %  ! V <  ! +  U Ö %  !  !  ! VŒ  ; $ $ % U Ö  ! U–  ! 
-p '  $ ¨ # 0  *  %  ! V¨   %  ! V ;   %  ! V <   %  ! VY   %  !  !  !  ! 
-ª '  $ $ — # $   <   %  = !  !  ! M Vê  % U V}  %  > !  ! 
-“ '  $  $ “ # R  %  ! O  ! % M )  % # 8  %  ! V[    % % %  ! V *  ! U Ì  ; ! ?  ! V (  !   ! 
-“ '  $ %  : !  = !  ; !  > !   '  $ ! )     ,  , '  $ ” # C  % U‘ V}  % Vx     %  ! Vk      ) % %  ! Vm  ! O M VÅ  % U V}  % %  ! Vn  ! O M VÅ  % U’ R 
-} '  $  $ ÷ # 2  %  ! V÷  %  !  ! V“  %   !  !  ! M Vê  %    	◊   	E ! %  ! V í  ! 
-} '  $ ÿ #   %  ! 
- ! V ,    %  ! 
- ! 
- , '     $ Ÿ #‡  % #   %  !  !  ! M Vê  %  ! 
-} '  $ ! # /   !  \  %  = !  !  ! M Vê  %  ! 
-} '  $ %  !  ! U⁄  ! 
-p '  $ ! # I   !   \ 0 %  = !  !  ! M Vê  % U V}  % %  ! V ;  !  !  ! M Vê  %  ! 
-} '  $ %  !  ! U€  ! 
-p '  $ ! # b   !   \ I %  = !  !  ! M Vê  % U V}  % %  ! V ;  !  !  ! M Vê  % U V}  % %  ! V C  !  !  ! M Vê  %  ! 
-} '  $ %  !  ! U‹  ! 
-p '  $ ! +   ! 	  c   !  \  % U›  '  $ % U   ! Uﬁ  ! 
-p '  $  ! 	ﬂ c  % U‡  '  ´  ! 	 ' c 	 % U$ 
-} '  õ  ! 	 c c  !  c 	 % U  
-} '  Ö  !   c 6  = !  b  % U· %  ! V ;  !  '   4 %  ! V ;  !  b  % U·  = !  '    % U‚  '    %  !  !  !  !  ! M 
-ÿ '  1  ! 	 Ä c Q  !  c  % U Ä  ! U„ 
-p '    !   c  %  ! V ;  !  b  % U‰  = !  '    % UÂ  '    %  !  !  !  !  ! M 
-ÿ '  Ÿ  ! 	Ê c 5  !  c 	 % U" 
-} '  √  !   c  % UÁ  '    %  !  !  !  !  ! M 
-ÿ '  ù  ! 	 } c :  !  c  % U }  ! U„ 
-p '  Ç  !   c  % UË  '    %  !  !  !  !  ! M 
-ÿ '  \ %  ! UÈ VC   v  ! 	Í c  %  !  ! U„  ! 
-p '  8  !   c ? %  ! 	Z c  	,  -  ! 	Î c  	.  "  ! 	Ï c  	0    ! 	Ä c  	1    ! 	 c  	/    !  '    %  !  !  !  !  ! M 
-ÿ '   €  ! 	 ⁄ c  % UÌ  '   Ã  ! 	  c  % UÓ  '   Ω  ! 	  c  % UÔ  '   Æ  ! 	o c  % U  '   ü  ! 	n c  % U*  '   ê  ! 	 Ì c  %  !  ! V“  % UÒ  ! 
-} '   s  ! 	 ˆ c  % UÚ  '   d  ! 	 ˜ c  % UÛ  '   U  ! 	 ¯ c  % UÙ  '   F  ! 	 ˘ c  % Uı  '   7  ! 	  c  % U2  '   (  ! 	ˆ c  % U4  '     ! 	 ∏ c  % U6  '   
- % U˜  ! 
-L '  $ $ ¯ # ÷  *  %  ! V¨   %  ! V ;   %  ! V <   %  ! VY    !  4   %  ! V      ! %  ! V Ä  : 8        É %     	˘   	˙ ! +  %  ! V÷  %  ! V    # %  ! %  ! V Ä  : !  ! V”  %  ! %  ! V Ä  ! V}    %  !  ! V“  %  !  ! V}  % %  ! Vπ  ! %  !  ! V∑  !  !   ! Vê  %     	   	˚ ! 
-} '  $ $ % U Ö  ! U¸  ! 
-p '  $ $ ˝ # î  *   =   >  %  ! V í   %  ! V       = ! 	 Ö E     ; % %  ! Vk       %  ! V í  !   ^  %  ! V <     ! +  %   !  !  !  !  !   ! 
-˝ '  $ $ %  ! VŸ    %  !  !  !  !  !   ! 
-¯ '    %  !  !  !  !  !   ! 
-ÿ '  $ $ ˛ # î  % M +  % # {   <    $ %  ! V     j %  = ! +  %  ! Vä    %  ! V í  !   \ 	 %  = ! V       4     %  = !   ! V ,       % U Ï  ! Uˇ  = ! 
-p '  $ %  > !  = !   ; !   '  $ % U Ï  ! U   ! 
-p '  $    $ ! )     , %  ! O  '  $ $  # ⁄  % %  ! V í  ! +   !   a  % U–  ! U  ! 
-p '  $ % %  ! V ;  ! %  ! V <  ! +   <   % %  ! Vπ  !  !  !   ! 
-ê '  $ %  ! N V   Ä % % #   % 
-  '   $ !  ! V   ! +  % U Ï % #    = ! M ?  $ !  ! V   ! U Ï % #    ! %  ! V ;  ! ?  $ !  !  ! V   ! % #   U ü  = !  !  ; ; ; $ !  !  ! V   ; ; ! %   ! Vπ  !  ; ; ; ; !  !  !   ! 
-ê '  $    $ $ $  # _   !   a  % U Ï  ! U  ! 
-p '  $ %   ! N V   > % U–   ! U Ö % 
+  !   ! V      !       ! ?     !   ! V (  ! O  &    !   !   !   ! ?  $ $ – # í  *  %  !  ! V–    =  %  ! V ;   %  ! V C   %  ! V S           A %    % V       ! +   <       % %  ! V   !  ! V é   ! %  !  !  !  !   ! V¬  !  ; ; $ $     <       % %  ! V   !  ! V é      !   ; $ $ — # A  %  ! V í  !   _ ' %  = ! 	“ E ! %  ! V ;  ! %  ! V <  ! +  U Ö %  !  !  ! V—  ; $ $ % U Ö  ! U”  ! 
+s '  $ Ø # 0  *  %  ! VØ   %  ! V ;   %  ! V <   %  ! V\   %  !  !  !  ! 
+æ '  $ $ ‘ # $   <   %  = !  !  ! M Vì  % U VÄ  %  > !  ! 
+’ '  $  $ ’ # R  %  ! O  ! % M )  % # 8  %  ! V^    % % %  ! V *  ! U Ì  ; ! ?  ! V (  !   ! 
+’ '  $ %  : !  = !  ; !  > !   '  $ ! )     ,  , '  $ ÷ # C  % U◊ VÄ  % V{     %  ! Vn      ) % %  ! Vp  ! O M VÑ  % U VÄ  % %  ! Vq  ! O M VÑ  % Uÿ R 
+Ä '  $  $ Ÿ # 2  %  ! VŸ  %  !  ! V’  %   !  !  ! M Vì  %    	⁄   	H ! %  ! V í  ! 
+Ä '  $ € #   %  ! 
+ ! V ,    %  ! 
+	 ! 
+ , '     $ ‹ #‡  % #   %  !  !  ! M Vì  %  ! 
+Ä '  $ ! # /   !  \  %  = !  !  ! M Vì  %  ! 
+Ä '  $ %  !  ! U›  ! 
+s '  $ ! # I   !   \ 0 %  = !  !  ! M Vì  % U VÄ  % %  ! V ;  !  !  ! M Vì  %  ! 
+Ä '  $ %  !  ! Uﬁ  ! 
+s '  $ ! # b   !   \ I %  = !  !  ! M Vì  % U VÄ  % %  ! V ;  !  !  ! M Vì  % U VÄ  % %  ! V C  !  !  ! M Vì  %  ! 
+Ä '  $ %  !  ! Uﬂ  ! 
+s '  $ ! +   ! 	  c   !  \  % U‡  '  $ % U   ! U·  ! 
+s '  $  ! 	‚ c  % U„  '  ´  ! 	 ' c 	 % U' 
+Ä '  õ  ! 	 c c  !  c 	 % U# 
+Ä '  Ö  !   c 6  = !  b  % U‰ %  ! V ;  !  '   4 %  ! V ;  !  b  % U‰  = !  '    % UÂ  '    %  !  !  !  !  ! M 
+€ '  1  ! 	 Ä c Q  !  c  % U Ä  ! UÊ 
+s '    !   c  %  ! V ;  !  b  % UÁ  = !  '    % UË  '    %  !  !  !  !  ! M 
+€ '  Ÿ  ! 	È c 5  !  c 	 % U% 
+Ä '  √  !   c  % UÍ  '    %  !  !  !  !  ! M 
+€ '  ù  ! 	 } c :  !  c  % U }  ! UÊ 
+s '  Ç  !   c  % UÎ  '    %  !  !  !  !  ! M 
+€ '  \ %  ! UÏ VF   v  ! 	Ì c  %  !  ! UÊ  ! 
+s '  8  !   c ? %  ! 	] c  	/  -  ! 	Ó c  	1  "  ! 	Ô c  	3    ! 	É c  	4    ! 	 c  	2    !  '    %  !  !  !  !  ! M 
+€ '   €  ! 	 ⁄ c  % U  '   Ã  ! 	  c  % UÒ  '   Ω  ! 	  c  % UÚ  '   Æ  ! 	r c  % UÛ  '   ü  ! 	q c  % U-  '   ê  ! 	 Ì c  %  !  ! V’  % UÙ  ! 
+Ä '   s  ! 	 ˆ c  % Uı  '   d  ! 	 ˜ c  % Uˆ  '   U  ! 	 ¯ c  % U˜  '   F  ! 	 ˘ c  % U¯  '   7  ! 	  c  % U5  '   (  ! 	˘ c  % U7  '     ! 	 ∏ c  % U9  '   
+ % U˙  ! 
+O '  $ $ ˚ # ÷  *  %  ! VØ   %  ! V ;   %  ! V <   %  ! V\    !  4   %  ! V      ! %  ! V Ä  : 8        É %     	¸   	˝ ! +  %  ! VŸ  %  ! V    # %  ! %  ! V Ä  : !  ! V÷  %  ! %  ! V Ä  ! VÄ    %  !  ! V’  %  !  ! VÄ  % %  ! Vº  ! %  !  ! V∫  !  !   ! Vì  %     	   	˛ ! 
+Ä '  $ $ % U Ö  ! Uˇ  ! 
+s '  $ $   # î  *   =   >  %  ! V í   %  ! V       = ! 	 Ö E     ; % %  ! Vn       %  ! V í  !   ^  %  ! V <     ! +  %   !  !  !  !  !   ! 
+  '  $ $ %  ! V‹    %  !  !  !  !  !   ! 
+˚ '    %  !  !  !  !  !   ! 
+€ '  $ $  # î  % M +  % # {   <    $ %  ! V     j %  = ! +  %  ! Vç    %  ! V í  !   \ 	 %  = ! V       4     %  = !   ! V ,       % U Ï  ! U  = ! 
+s '  $ %  > !  = !   ; !   '  $ % U Ï  ! U  ! 
+s '  $    $ ! )     , %  ! O  '  $ $  # ⁄  % %  ! V í  ! +   !   a  % U”  ! U  ! 
+s '  $ % %  ! V ;  ! %  ! V <  ! +   <   % %  ! Vº  !  !  !   ! 
+ì '  $ %  ! N V   Ä % % #   % 
+  '   $ !  ! V   ! +  % U Ï % #    = ! M ?  $ !  ! V   ! U Ï % #    ! %  ! V ;  ! ?  $ !  !  ! V   ! % #   U ü  = !  !  ; ; ; $ !  !  ! V   ; ; ! %   ! Vº  !  ; ; ; ; !  !  !   ! 
+ì '  $    $ $ $  # _   !   a  % U Ï  ! U  ! 
+s '  $ %   ! N V   > % U”   ! U Ö % 
   !   ! V   !  ; ; ! ?  ; ! ?  !   !  ; ; ; ! % 
  ; !   ! V   ; !  !  !  ! 
-ê '     $  # ß  % %  ! V í  ! +   !   a  % U Ï  ! U  ! 
-p '  $ % %  ! V ;  ! %  ! V <  ! +  %  ! V     %  !  = !  > !   !  !  !   ! 
- '  $ %  ! N V   D  <   % U ï  ; !  !  !   ! 
-ê '   , % U Ö % 
+ì '     $  # ß  % %  ! V í  ! +   !   a  % U Ï  ! U	  ! 
+s '  $ % %  ! V ;  ! %  ! V <  ! +  %  ! V     %  !  = !  > !   !  !  !   ! 
+ '  $ %  ! N V   D  <   % U ï  ; !  !  !   ! 
+ì '   , % U Ö % 
   !  ! V   !  ; ; ! % 
  ; !  ! V   ; !  !  !   ! 
-ê '     $ $ $  #  % %  ! V í  ! +   !   a  % U ˛  ! U  ! 
-p '  $ % %  ! V ;  ! %  ! V <  ! +  %  ! M V   À %  ! V í  !  `  % U Ï  !  ; ; !  !   ! 
- '  $ %     		   	
- ! %  ! V í  ! V}  %  ! O % M )  % # Ä   <  - % %   ! Vπ  ! %  !  ! V∑  !   !   ! Vê  %     	   	˚ ! 
-} '  $ *  %  ! V 9   %  ! V ?    !   ;  %  ! %  !   ! V∑  !  ! M Vê  %  ! %  !  ! V∑  !  ! M V•  %  > !  !   '  $ $ ! )     ,  , '  $  $ $ $  #,   <    $ %  = ! V      % UV  ! U  = ! 
-p '   %  ! V 9  ! 	\ b   > <   U ï %  ! V :  ;   % UV  ! U  ! 
-p '   · % %  ! V :  ! V      %  ! V ?  ! 	 E     j %  = ! Vä    %  = ! V í  !   4     A % % V    ! +  U Ï  ! %   ! V 9  !  ; ; ! ?  ! Ur  ! %   ! V K  !  !  ; ; ! %   > ! V  !  ; ; ; ; ! ?  $  k % UV  ! U  = ! 
-p '   [ %  ! V :  <  2 % % V    ! +  U Ï  ! %   ! V 9  !  ; ; ! ?  ! Ut  ! %   > ! V  !  ; ; ; ! ?  $    Ur %  ! V 9  ! U ï %  ! V :  ; ! %  > ! V  !  ; ; ; ; $  #   % %  > ! V  ! +  %  !  !  !   ! 
-ê '  $ $  #  % O )  % # q  %  ! V     Y  = ! 	\ b  	 $ %  = ! V     8 % #    %  !   ! VC    % U—   ! U  !   ! 
-p '  $  $ !  = ! V 7  %  = !   ! V (      % U—  ! U  ! 
-p '  $ % U—   ! U  ! 
-p '  $ !   ! V 7  , UV % # s  %  ! V     _ %  = !  > ! +   ! 	\ b  U\  ; $ %  ! V     7 %  ! V í  !  \  Uˆ  ! U   = !  ; ; ! ?  ; ; !  ;    UC  ! U   !  ; ; ! ?  ; ; !  ;  
- N U  U ?  ! ?  $ $ N U  U ?  ! ?  $ !  ! V   ; $  # t  %  ! V í  !   _ \ *  %  ! V ;   %  ! V <   %  ! V     ' % % V    ! )  U Ï  !   !  ; ; ! ?  ! %  !  ! V  !  ; ; ; ,   %  !  ! V   %  !  !  !   ! 
-ê '  $ $ % U—  ! U 
-p '  $  # †  % % V    ! +  U–  ! U Ö % 
-  !  ! V   ! Ur  = ! U ï  > <   S ?     > ; ! U ï %   !  ! % # /  %  ! V í  !   a  % U  ! U  ! 
-p '  $ %  ! V <  <    =   %  ! 
+ì '     $ $ $ 
+ #  % %  ! V í  ! +   !   a  % U ˛  ! U  ! 
+s '  $ % %  ! V ;  ! %  ! V <  ! +  %  ! M V   À %  ! V í  !  `  % U Ï  !  ; ; !  !   ! 
+
+ '  $ %     	   	 ! %  ! V í  ! VÄ  %  ! O % M )  % # Ä   <  - % %   ! Vº  ! %  !  ! V∫  !   !   ! Vì  %     	   	˛ ! 
+Ä '  $ *  %  ! V 9   %  ! V ?    !   ;  %  ! %  !   ! V∫  !  ! M Vì  %  ! %  !  ! V∫  !  ! M V®  %  > !  !   '  $ $ ! )     ,  , '  $  $ $ $  #,   <    $ %  = ! V      % UY  ! U  = ! 
+s '   %  ! V 9  ! 	_ b   > <   U ï %  ! V :  ;   % UY  ! U  ! 
+s '   · % %  ! V :  ! V      %  ! V ?  ! 	 E     j %  = ! Vç    %  = ! V í  !   4     A % % V    ! +  U Ï  ! %   ! V 9  !  ; ; ! ?  ! Uu  ! %   ! V K  !  !  ; ; ! %   > ! V  !  ; ; ; ; ! ?  $  k % UY  ! U  = ! 
+s '   [ %  ! V :  <  2 % % V    ! +  U Ï  ! %   ! V 9  !  ; ; ! ?  ! Uw  ! %   > ! V  !  ; ; ; ! ?  $    Uu %  ! V 9  ! U ï %  ! V :  ; ! %  > ! V  !  ; ; ; ; $  #   % %  > ! V  ! +  %  !  !  !   ! 
+ì '  $ $  #  % O )  % # q  %  ! V     Y  = ! 	_ b  	 $ %  = ! V     8 % #    %  !   ! VF    % U‘   ! U  !   ! 
+s '  $  $ !  = ! V 7  %  = !   ! V (      % U‘  ! U  ! 
+s '  $ % U‘   ! U  ! 
+s '  $ !   ! V 7  , UY % # s  %  ! V     _ %  = !  > ! +   ! 	_ b  U_  ; $ %  ! V     7 %  ! V í  !  \  U˘  ! U   = !  ; ; ! ?  ; ; !  ;    UF  ! U   !  ; ; ! ?  ; ; !  ;  
+ N U  U ?  ! ?  $ $ N U  U ?  ! ?  $ !  ! V   ; $  # t  %  ! V í  !   _ \ *  %  ! V ;   %  ! V <   %  ! V     ' % % V    ! )  U Ï  !   !  ; ; ! ?  ! %  !  ! V  !  ; ; ; ,   %  !  ! V   %  !  !  !   ! 
+ì '  $ $ % U‘  ! U 
+s '  $  # †  % % V    ! +  U”  ! U Ö % 
+  !  ! V   ! Uu  = ! U ï  > <   S ?     > ; ! U ï %   !  ! % # /  %  ! V í  !   a  % U  ! U  ! 
+s '  $ %  ! V <  <    =   %  ! 
  C '  $ !  ! V   ; ! ?  ! V (  ; ! ?  ; ; ! ?  ; ; ! ?  ; ! ?  !  ! % 
- ; !  ! V   ; ! ?  $ $  # =  %  ! V í  !   ^ % % % %  ! V ;  ! %  ! V C  ! %  ! V D  ! V  !  !  ! M 
-ê '  $ % U  ! U 
-p '  $  #'  %  ! V…    U œ % %  ! V   !  ! V  ! ?  $ %  ! V      U   ! ?   ˙  = ! 	Õ b  U Ì U  % %  ! V ;  !  9 ! V  ! ?   ‹  = ! 	“ b %  !  \ 	 %  ! 
- ; '   « U Ì U! % %  ! V ;  !  : ! V  ! ?   ∞ %  = ! V      %  ! V 9  ! 	‘ E     2  > <    !  _  U   ! ?   Ü %  ! 
- ? '   } U ( %  ! V ?  ! %  > !  ! V  ! ?   f %  ! Vä   ) % U‘  ! V"    % U“  ! V"    % U“  ! VC    % U‘  ! VC  @      U Ì % #   %  !   ! 
- '  $ !  ! V   ;   U ⁄ %  = !  ! V  ! %  > !  ! V  ! ?  $  # 1  %  ! V í  !   \  % % %  ! V ;  ! R V  !  !  !  ! 
-ê '  $ % UÕ  ! U 
-p '  $ # # a  %  ! V í  !   _ I % %  ! V ;  ! %  ! V <  ! % V|   ! +  %  !  !  ! M Vê  % U$  ! V}  % U ï  ; !  !  ! M Vê  % U% V}  %  ! 
-~ '  $ $ % U %  ! U 
-p '  $ & # m  % %  ! V v  ! 
- ! +  #      %  ! 
- # '  $ - E   % M )  % # #  %  ! V     $ %  ! O  ! M Vê  % %  ! V'  !   '  $ ! )     , % %  ! V'  !  &  ,   . %  ! 
- ` '  $ $ ( # 7  %  ! V í  !   \  % %  ! V ;  ! V Ø       % %  ! V ;  ! 
-( '  $ % U•  ! U)  ! 
-p '  $ * # 0  % %  ! V¶  ! +     % 
-	 ! 
- Œ ! +  %   ! Vß  %   ! Vû   	   Œ $ $  $ $ + # '  %  ! V í  !   \  % %  ! V ;  ! 
-~ '  $ % U,  ! U-  ! 
-p '  $ . # )  %  ! V í  !   \  % U %  ! V ;  ! 
-} '  $ % U/  ! U-  ! 
-p '  $ 0 # +  % %  ! Vk    U ⁄ %  ! Vm  ! %  ! Vn  !  ; ; ;    ! O  ! M 
-ê '  $ 1 # :  %  ! Vk   / % U V}  % %  ! Vm  ! O M VÅ  % U V}  % %  ! Vn  ! O M VÅ  % U’ Q 
-} '  $  $ 2 #ó  %  ! V     ( %  ! V     %  ! V+  %  !  !  !  ! 
-¶ '  $ %  !  !  ! 
-Å '  $ % U3 
- ! V ,    %  ! V2     %  = ! +   ! 	  c  %  !  !   ! 
-É '  $  ! 	r c  %  !  !   ! 
-´ '    ! 	 ñ c  %  !  !   ! 
-î '  	  ! 	 ï c  %  !  !   ! 
-∂ '  Û  ! 	 Ö c  %  !  !   ! 
-— '  ›  ! 	 Ï c  %  !  !   ! 
- '  «  ! 	 ˛ c  %  !  !   ! 
- '  ±  ! 	– c  %  !  !   ! 
- '  õ  ! 	 ü c  %  !  !   ! 
-© '  Ö  ! 	 ö c  %  !  !   ! 
-¥ '  o  ! 	t c  %  !  !   ! 
-µ '  Y  ! 	V c  %  !  !   ! 
- '  C  ! 	— c  %  !  !   ! 
- '  -  ! 	 c  %  !  !   ! 
- '    ! 	 c  %  !  !   ! 
-≤ '    ! 		 c  %  !  !   ! 
-≥ '   Î  ! 	Õ c  %  !  !   ! 
-# '   ’  ! 	 % c  %  !  !   ! 
-& '   ø  ! 	Á c  %  !  !   ! 
-± '   ©  ! 	§ c  %  !  !   ! 
-* '   ì  ! 	4 c  %  !  !   ! 
-1 '   }  ! 	, c  %  !  !   ! 
-. '   g  ! 	/ c  %  !  !   ! 
-0 '   Q %  = ! +  %  ! V+  %  ! V     %  !  ! Vï    %  ! V 	       % %  ! V   !  !  !   ! 
-ê '  $ %  !  !   ! 
-˛ '  $ $ $ ê # #  % Vz   %  ! O  ! M Vê  % U5 V}  % % 
-	 ! V◊  ! 
-W '  $  Õ #   % %  ! V Õ  ! 
-Z '  $ 6 # [ˇ˛ % %  ! V      %  = ! )    >    ,    ! +  %   ! V      % U    ! V      % %  ! V Õ  ! +  %  ! % 
+ ; !  ! V   ; ! ?  $ $  # =  %  ! V í  !   ^ % % % %  ! V ;  ! %  ! V C  ! %  ! V D  ! V  !  !  ! M 
+ì '  $ % U  ! U  
+s '  $ ! #'  %  ! VÃ    U œ % %  ! VÕ  !  ! V"  ! ?  $ %  ! V      U   ! ?   ˙  = ! 	– b  U Ì U# % %  ! V ;  !  9 ! V"  ! ?   ‹  = ! 	’ b %  !  \ 	 %  ! 
+ ; '   « U Ì U$ % %  ! V ;  !  : ! V"  ! ?   ∞ %  = ! V      %  ! V 9  ! 	◊ E     2  > <    !  _  U   ! ?   Ü %  ! 
+ ? '   } U ( %  ! V ?  ! %  > !  ! V"  ! ?   f %  ! Vç   ) % U◊  ! V%    % U’  ! V%    % U’  ! VF    % U◊  ! VF  @      U Ì % #   %  !   ! 
+" '  $ !  ! V   ;   U ⁄ %  = !  ! V"  ! %  > !  ! V"  ! ?  $ " # 1  %  ! V í  !   \  % % %  ! V ;  ! R V"  !  !  !  ! 
+ì '  $ % U–  ! U  
+s '  $ & # a  %  ! V í  !   _ I % %  ! V ;  ! %  ! V <  ! % V   ! +  %  !  !  ! M Vì  % U'  ! VÄ  % U ï  ; !  !  ! M Vì  % U( VÄ  %  ! 
+Å '  $ $ % U %  ! U  
+s '  $ ) # m  % %  ! V v  ! 
+ ! +  #      %  ! 
+ # '  $ - E   % M )  % # #  %  ! V     $ %  ! O  ! M Vì  % %  ! V*  !   '  $ ! )     , % %  ! V*  !  &  ,   . %  ! 
+ ` '  $ $ + # 7  %  ! V í  !   \  % %  ! V ;  ! V Ø       % %  ! V ;  ! 
++ '  $ % U®  ! U,  ! 
+s '  $ - # 0  % %  ! V©  ! +     % 
+ ! 
+ Œ ! +  %   ! V™  %   ! V°      Œ $ $  $ $ . # '  %  ! V í  !   \  % %  ! V ;  ! 
+Å '  $ % U/  ! U0  ! 
+s '  $ 1 # )  %  ! V í  !   \  % U %  ! V ;  ! 
+Ä '  $ % U2  ! U0  ! 
+s '  $ 3 # +  % %  ! Vn    U ⁄ %  ! Vp  ! %  ! Vq  !  ; ; ;    ! O  ! M 
+ì '  $ 4 # :  %  ! Vn   / % U VÄ  % %  ! Vp  ! O M VÑ  % U VÄ  % %  ! Vq  ! O M VÑ  % Uÿ Q 
+Ä '  $  $ 5 #ó  %  ! V     ( %  ! V     %  ! V.  %  !  !  !  ! 
+© '  $ %  !  !  ! 
+Ñ '  $ % U6 
+ ! V ,    %  ! V5     %  = ! +   ! 	  c  %  !  !   ! 
+Ü '  $  ! 	u c  %  !  !   ! 
+Æ '    ! 	 ñ c  %  !  !   ! 
+ó '  	  ! 	 ï c  %  !  !   ! 
+π '  Û  ! 	 Ö c  %  !  !   ! 
+‘ '  ›  ! 	 Ï c  %  !  !   ! 
+
+ '  «  ! 	 ˛ c  %  !  !   ! 
+ '  ±  ! 	” c  %  !  !   ! 
+ '  õ  ! 	 ü c  %  !  !   ! 
+¨ '  Ö  ! 	 ö c  %  !  !   ! 
+∑ '  o  ! 	w c  %  !  !   ! 
+∏ '  Y  ! 	Y c  %  !  !   ! 
+ '  C  ! 	‘ c  %  !  !   ! 
+ '  -  ! 	 c  %  !  !   ! 
+! '    ! 	 c  %  !  !   ! 
+µ '    ! 		 c  %  !  !   ! 
+∂ '   Î  ! 	– c  %  !  !   ! 
+& '   ’  ! 	 % c  %  !  !   ! 
+) '   ø  ! 	Í c  %  !  !   ! 
+¥ '   ©  ! 	ß c  %  !  !   ! 
+- '   ì  ! 	7 c  %  !  !   ! 
+4 '   }  ! 	/ c  %  !  !   ! 
+1 '   g  ! 	2 c  %  !  !   ! 
+3 '   Q %  = ! +  %  ! V.  %  ! V     %  !  ! Vò    %  ! V 	       % %  ! V   !  !  !   ! 
+ì '  $ %  !  !   ! 
+ '  $ $ $ ì # #  % V}   %  ! O  ! M Vì  % U8 VÄ  % % 
+ ! V⁄  ! 
+Z '  $  Õ #   % %  ! V Õ  ! 
+] '  $ 9 # [ˇ˛ % %  ! V      %  = ! )    >    ,    ! +  %   ! V      % U    ! V      % %  ! V Õ  ! +  %  ! % 
  Œ ! V œ  !     % V       ! 
- – '  $ $ $ 7 #   *  
-	  
- Œ  %   ! V7    	   Œ  $ $ ∞  8 #   %  ! U9  ! 
-  '  $ : #   %  ! U;  ! 
-  '  $ < #   %  ! U=  ! 
-  '  $ > 
-7 ? # 0   <    $ %  ! V      %  = ! V      %  ! V ?    	@ ! %  > ! VA  ;   	@ $ A # (  %  ! V      %  = ! V      %  ! V 9     = ! %  > ! VB  ; $  $ B # K  % # ?  % %  ! VC  ! %  ! VD  ! %  ! VE  ! +     %  ! Vá        %  ! Vá        %  ! 
-á '  $  $ $ !  ! V 7   $ F # \ˇ˛  ! 
-G b  %  ! UH %  ! UI UJ V ø  ! 
-K '  $  ! 
-L b , %  ! Uœ %  ! UM M V ø  ! %  ! UN O V ø  ! %  ! UO O V ø  ! ?  ! 
-K '    % UP UQ  !  ! 
-  '  $ R #   %  ! VS   
- %  ! UT 
- ˙ '  $ % UU  ! 
-: '  $ U #   %  ! VS   
- %  ! UV 
- ˙ '  $ % UW  ! 
-: '  $ W #   %  ! VS   
- %  ! UX 
- ˙ '  $ % UY  ! 
-: '  $ Y #   %  ! VS   
- %  ! UZ 
- ˙ '  $ % U[  ! 
-: '  $ [ #   %  ! VS   
- %  ! U\ 
- ˙ '  $ % U]  ! 
-: '  $ ] #   %  ! VS   
- %  ! U^ 
- ˙ '  $ % U_  ! 
-: '  $ _ #   %  ! VS   
- %  ! U` 
- ˙ '  $ % Ua  ! 
-: '  $ a #   %  ! V       = $  $ b #   %  ! V       > $  $ c #   %  ! V     	d $ %  > ! Ue Ud 
- ø '  $ f #   %  ! V      %  > ! Ug M 
- ø '  $  $ C #   %  ! V      %  > ! U Ú M 
- ø '  $  $ D #   %  ! V      %  > ! Uh M 
- ø '  $  $ E #   %  ! V      %  > ! Ui S 
- ø '  $  $ j #   %  ! V      %  > ! Uk M 
- ø '  $  $ l # #  % %  ! Vb  ! +  % %  ! %  ! Um V ˙  ! V   ! 
- ; '  $ $ n #   %  ! %  ! Va  ! 
-  '  $ o #   %  ! V Ô   
- %  ! UT 
- ˙ '  $ % Up  ! 
-< '  $ p #   %  ! V Ô   
- %  ! Uq 
- ˙ '  $ % Ur  ! 
-< '  $ r #   %  ! Vs   
+ – '  $ $ $ : #   *  
+  
+ Œ  %   ! V:       Œ  $ $ ≥  ; #   %  ! U<  ! 
+  '  $ = #   %  ! U>  ! 
+  '  $ ? #   %  ! U@  ! 
+  '  $ A 
+: B # 0   <    $ %  ! V      %  = ! V      %  ! V ?    	C ! %  > ! VD  ;   	C $ D # (  %  ! V      %  = ! V      %  ! V 9     = ! %  > ! VE  ; $  $ E # K  % # ?  % %  ! VF  ! %  ! VG  ! %  ! VH  ! +     %  ! Vä        %  ! Vä        %  ! 
+ä '  $  $ $ !  ! V 7   $ I # \ˇ˛  ! 
+J b  %  ! UK %  ! UL UM V ø  ! 
+N '  $  ! 
+O b , %  ! U“ %  ! UP M V ø  ! %  ! UQ O V ø  ! %  ! UR O V ø  ! ?  ! 
+N '    % US UT  !  ! 
+  '  $ U #   %  ! VV   
+ %  ! UW 
+ ˙ '  $ % UX  ! 
+= '  $ X #   %  ! VV   
+ %  ! UY 
+ ˙ '  $ % UZ  ! 
+= '  $ Z #   %  ! VV   
+ %  ! U[ 
+ ˙ '  $ % U\  ! 
+= '  $ \ #   %  ! VV   
+ %  ! U] 
+ ˙ '  $ % U^  ! 
+= '  $ ^ #   %  ! VV   
+ %  ! U_ 
+ ˙ '  $ % U`  ! 
+= '  $ ` #   %  ! VV   
+ %  ! Ua 
+ ˙ '  $ % Ub  ! 
+= '  $ b #   %  ! VV   
+ %  ! Uc 
+ ˙ '  $ % Ud  ! 
+= '  $ d #   %  ! V       = $  $ e #   %  ! V       > $  $ f #   %  ! V     	g $ %  > ! Uh Ug 
+ ø '  $ i #   %  ! V      %  > ! Uj M 
+ ø '  $  $ F #   %  ! V      %  > ! U Ú M 
+ ø '  $  $ G #   %  ! V      %  > ! Uk M 
+ ø '  $  $ H #   %  ! V      %  > ! Ul S 
+ ø '  $  $ m #   %  ! V      %  > ! Un M 
+ ø '  $  $ o # #  % %  ! Ve  ! +  % %  ! %  ! Up V ˙  ! V   ! 
+ ; '  $ $ q #   %  ! %  ! Vd  ! 
+  '  $ r #   %  ! V Ô   
+ %  ! UW 
+ ˙ '  $ % Us  ! 
+? '  $ s #   %  ! V Ô   
  %  ! Ut 
  ˙ '  $ % Uu  ! 
-> '  $ u #   %  ! Vs   
- %  ! UA 
- ˙ '  $ % Uv  ! 
-> '  $ v #   %  ! Vs   
+? '  $ u #   %  ! Vv   
  %  ! Uw 
  ˙ '  $ % Ux  ! 
-> '  $ x #   %  ! % %  ! Vy  ! V_  ! V ,     $  $ z # wˇ˛ *  %   ! V        %   = ! )    >    ,     %   ! V      % U    ! V      % %  ! V     %  ! % V    ! M V      ! +  %  ! 
-{ ! Vz     $        % U| U9  ! 
-  '  $ $ $ | # ˘  % M M M +  # I   <    $ % %  = ! Vb  ! +  %  ! V     % U} U~  ! V      %  > ! %  !   ! V          = !   ; !  '  $ $  # +   <   % %  ! V *  ! O  '  $ %  > ! % %  = ! VY  !  ! V (  !  '  $  # a  %  ! O O % M )  % # H   <   % %  ! V◊  ! %  ! V◊  ! 
- ( '  $ %  = ! Vf  ! 	d b  %  > !  = !  ; !  !   '    %  > !  !  = !  ; !   '  $ ! )     ,  , '  $  % % %   ! V_  ! O  &  !  '  $ $  % O )  # ?  % %  !   ! V  ! +      > $ % % 
-{ ! UÄ   ! UÅ O UI % UÇ V   ! VR  ! +    !  ; !   ;    $ $ $ , É # ô   <  	 % 
-{ ! 
-| '  $ *  % #   %  ! 
-{ ! Vz     $ % %  ! V|  ! 
-y '  $ !   ! V    % 
- ( ! % # 	  %  ! V_  > $ !  ! V   ! V      % # ,  %  !  ! V¢    %  !  ! V¢  @      %  !  ! ?  ! V (   $  $ !  ! V 7   > <    = $ %  ! 
-É '  $ $ Ñ # X  % # Kˇ¸ U ñ  ! UÖ U   !  ; ; ! U   !  ; ; ! U  %  ! VF  !  ; ; ! %  ! UÜ M V ø    UÑ U   !  ; ; ! ?     !  ; ; ; ; ; ! ?  ; ; $ !  > ! 
-  '  $ Iá # ƒˇ˚ % M +  #     <    $ %  = !  > ! V ,     =   %  > !   '  $  %  <   
-à ! ?   
+A '  $ x #   %  ! Vv   
+ %  ! UD 
+ ˙ '  $ % Uy  ! 
+A '  $ y #   %  ! Vv   
+ %  ! Uz 
+ ˙ '  $ % U{  ! 
+A '  $ { #   %  ! % %  ! V|  ! Vb  ! V ,     $  $ } # wˇ˛ *  %   ! V        %   = ! )    >    ,     %   ! V      % U    ! V      % %  ! V     %  ! % V    ! M V      ! +  %  ! 
+~ ! V}     $        % U U<  ! 
+  '  $ $ $  # ˘  % M M M +  # I   <    $ % %  = ! Ve  ! +  %  ! V     % UÄ UÅ  ! V      %  > ! %  !   ! V          = !   ; !  '  $ $  # +   <   % %  ! V *  ! O  '  $ %  > ! % %  = ! V\  !  ! V (  !  '  $  # a  %  ! O O % M )  % # H   <   % %  ! V⁄  ! %  ! V⁄  ! 
+ ( '  $ %  = ! Vi  ! 	g b  %  > !  = !  ; !  !   '    %  > !  !  = !  ; !   '  $ ! )     ,  , '  $  % % %   ! Vb  ! O  &  !  '  $ $ Ç % O )  # ?  % %  !   ! V  ! +      > $ % % 
+~ ! UÉ   ! UÑ O UL % UÖ V   ! VU  ! +    !  ; !   ;    $ $ $ , Ü # ô   <  	 % 
+~ ! 
+ '  $ *  % #   %  ! 
+~ ! V}     $ % %  ! V  ! 
+| '  $ !   ! V    % 
+ ( ! % # 	  %  ! Vb  > $ !  ! V   ! V      % # ,  %  !  ! V•    %  !  ! V•  @      %  !  ! ?  ! V (   $  $ !  ! V 7   > <    = $ %  ! 
+Ü '  $ $ á # X  % # Kˇ¸ U ñ  ! Uà U   !  ; ; ! U   !  ; ; ! U  %  ! VI  !  ; ; ! %  ! Uâ M V ø    Uá U   !  ; ; ! ?     !  ; ; ; ; ; ! ?  ; ; $ !  > ! 
+  '  $ Iä # ƒˇ˚ % M +  #     <    $ %  = !  > ! V ,     =   %  > !   '  $  %  <   
+ã ! ?   
  % 
-| !  ! V   ! +  % %  !   &  ! )     % Uá Uâ  !  ! V      , % % % 
-b !  ! V   !   &  ! )     % Uá Uä  !  ! V      , % %  ! M V|  ! % 
-R !  ! UÄ  ! UÅ  ! UI  !   ! V  	 ! +    
- %  !  ! V8      $ $ $ $ Ö # $  % #   U ñ  ! Uã U   !  ; ; ! ?  ! ?  ; ; $ !  > ! 
-  '  $ Iå # F  % %  ! % V    ! M V   ! +  %  ! V Ô     $ %   ! % 
-G ! UI   ! Uç %  ! V è        ! VR  ! % V    ! 
- 6 '  $ $ ã # ;  % # *  % %  ! V]  ! +  %   !  ! V ,    %   ! U\   !  ; ! 
- ˚ '  $  $ $ ! %  ! Vv  ! 
-  '  $ é # .  % #   %  ! U\ %   ! %  ! V]  ! 
+ !  ! V   ! +  % %  !   &  ! )     % Uä Uå  !  ! V      , % % % 
+e !  ! V   !   &  ! )     % Uä Uç  !  ! V      , % %  ! M V  ! % 
+U !  ! UÉ  ! UÑ  ! UL  !   ! V  	 ! +    
+ %  !  ! V;      $ $ $ $ à # $  % #   U ñ  ! Ué U   !  ; ; ! ?  ! ?  ; ; $ !  > ! 
+  '  $ Iè # F  % %  ! % V    ! M V   ! +  %  ! V Ô     $ %   ! % 
+J ! UL   ! Uê %  ! V è        ! VU  ! % V    ! 
+ 6 '  $ $ é # ;  % # *  % %  ! V`  ! +  %   !  ! V ,    %   ! U_   !  ; ! 
+ ˚ '  $  $ $ ! %  ! Vy  ! 
+  '  $ ë # .  % #   %  ! U_ %   ! %  ! V`  ! 
   ! V   ! 
- ˚ '  $ ! %  ! Vv  ! 
-  '  $ è # ^  % %  ! Vv  ! %  ! Vr  ! +  %  ! % M )  % # 5   <     !   ; $ %  = ! Vv  !  d  %  = ! Vè  %  !   ! V ç      %  > !   '  $ ! )     ,  , '  $ $ ê #   %  ! Uq %  !  ! Vê  ! V ˚  %  ! Vé   $ ë # üˇ¸ % %  ! V      %  = ! )    >    ,    ! +  %   ! V      % U    ! V      *  % Uœ  !  ; ; ! V¨   %  ! V ;   %  ! V <   %     
-L    ! UM  ! UN % 
-| ! %  ! VA  ! V   ! UO % U Ï Uí U ' ?  ! ?  ! ?  ! U Ö %  ! VB  !  ; ; ! ?  ! V?  ! 
-R '  $ $ $ ì # ¢ˇ¸ % %  ! V      %  = ! )    >    ,    ! +  %   ! V      % U    ! V      *  % Uœ  !  ; ; ! V¨   %  ! V ;   %  ! V <   UR     	L    ! UM  ! UN U  U| U  %  ! VA  !  ; ; ! ?  ! UO U Ï Uí U ' ?  ! ?  ! ?  ! U Ö %  ! VB  !  ; ; ! ?  ! ?  ; ; ; ; $ $ $ î #   % # ˇ˛ % M  !  ! 
-î '  $ !  > ! 
-  '  $ Iœ # ^  % # Qˇ˝ % % Uï V   ! +  U Ï  ! Uã U   !  ; ; ! ?  ! ?  ; ! ?  ! Uë  ! %  !  !   ! Vî  !  ; ; ; ! U & U ' ?  ! U   !  ; ; ! ?  ! ?  $ $ !  > ! 
-  '  $ Iñ % % Uó Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! Uò V   ! UO % S )  #    $ , ! VR  ! Vë  % S Uó V &  , % % Uô Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! Uò V   ! UO % S )  #    !  F $ , ! VR  ! Vë  % S Uô V &  , % % Uö Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! Uò V   ! UO % S )  #   %  ! Uõ % %  ! Vú  ! T  V ±  ! 
- Z '  $ , ! VR  ! Vë  % S Uö V &  , % % Uö Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! Uù V   ! UO % S )  # =  % %  ! Vy  ! +  %  ! UT Vû   ! %   ! Uü %  ! VU  ! % %  ! Vú  ! T  V ±  ! 
- Z '  $ %   '   $ $ , ! VR  ! Vë  % S Uö V &  , % % Uö Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U† V   ! UO % S )  # S  % %  ! Vy  ! +  %  ! UT Vû   
- %  ! UT Vû      ) %   ! U° %  ! VU  ! %  ! VU  ! % %  ! Vú  ! T  V ±  ! 
- Z '  $ %   '   $ $ , ! VR  ! Vë  % S Uö V &  , % % Uö Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U¢ V   ! UO % S )  # \  % %  ! Vy  ! +  %  ! UT Vû    %  ! UT Vû    %  ! Uq Vû      ' %   ! U£ %  ! VU  ! %  ! Vp  ! % %  ! Vr  ! V í  ! 
- Z '  $ %   '   $ $ , ! VR  ! Vë  % S Uö V &  , % % U§ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! Uò V   ! UO % S )  #   %  !  ! 
-ö '  $ , ! VR  ! Vë  % S U§ V &  , % % U• Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U¶ V   ! UO % S )  #   % Uß  ! % %  ! Vú  ! T  V ±  !  ! 
-  '  $ , ! VR  ! Vë  % S U• V &  , % % U® Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U© V   ! UO % S )  # Pˇ¸ % %  ! V      %  = ! )    >    ,    ! +  %   ! V      % U    ! V      % U™  ! % %  ! Vú  ! T  V ±  !  ! 
-  '  $ $ , ! VR  ! Vë  % S U® V &  , % % U´ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U¨ V   ! UO % S )  #   % U≠  ! %  ! Vp  !  ; ! 
-  '  $ , ! VR  ! Vë  % S U´ V &  , % % UÆ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U¢ V   ! UO % S )  #   % UØ  ! %  ! Vp  !  ; ! 
-  '  $ , ! VR  ! Vë  % S UÆ V &  , % % U∞ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U¢ V   ! UO % S )  #   % U±  ! 
-  '  $ , ! VR  ! Vë  % S U∞ V &  , % % U≤ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U≥ V   ! UO % S )  # S  % % %  ! Vy  ! V¥  ! % 
-b ! % %  ! Vy  ! Va  ! V   ! +  % # #  %   !  ! Vû    %  !  ! %   !  ! V ˙  ! 
- ˚ '  $  $ !  ! V 7   $ $ , ! VR  ! Vë  % S U≤ V &  , % % Uµ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U≥ V   ! UO % S )  # i  % % %  ! Vy  ! V¥  ! % 
-b ! % %  ! Vy  ! Va  ! V   ! +  % # 9  %   !  ! Vû   + %  !  ! % %   !  ! V ˙  ! )  %  ! V∂    %  ! Vµ     , ! 
- ˚ '  $  $ !  ! V 7   $ $ , ! VR  ! Vë  % S Uµ V &  , % % U∑ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U∏ V   ! UO % S )  # '  % #   %  ! 
-π ! Vz    %  ! 
-è '  $  $ ! %  ! V]  ! 
- 7 '  $ , ! VR  ! Vë  % S U∑ V &  , % % U∫ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! Uª V   ! UO % S )  # C  % %  ! Vv  ! % M )  % # '  %  ! V       = !  b  %  !   ! V ç     %  > !   '  $  $ ! )     ,  , '  $ , ! VR  ! Vë  % S U∫ V &  , % % Uº Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! UΩ V   ! UO % S )  # @  % % #    !  b    $  $ ! %  ! VW  ! V   ! +  % %  ! VU  !  ! %  ! VY  ! %  ! Vy  ! 
-Ö '  $ $ , ! VR  ! Vë  % S Uº V &  , % % U8 Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! Uæ V   ! UO % S )  # â  %  ! V∑  % %  ! V]  ! )  % #   %  !  !   ! 
-∫ '  $ !  ! V 7  %   ! U\  ! V ˚  , % #   %  ! UZ %  ! %  ! V[  ! 
+ ˚ '  $ ! %  ! Vy  ! 
+  '  $ í # ^  % %  ! Vy  ! %  ! Vu  ! +  %  ! % M )  % # 5   <     !   ; $ %  = ! Vy  !  d  %  = ! Ví  %  !   ! V ç      %  > !   '  $ ! )     ,  , '  $ $ ì #   %  ! Ut %  !  ! Vì  ! V ˚  %  ! Vë   $ î # üˇ¸ % %  ! V      %  = ! )    >    ,    ! +  %   ! V      % U    ! V      *  % U“  !  ; ; ! VØ   %  ! V ;   %  ! V <   %     
+O    ! UP  ! UQ % 
+ ! %  ! VD  ! V   ! UR % U Ï Uï U ' ?  ! ?  ! ?  ! U Ö %  ! VE  !  ; ; ! ?  ! VB  ! 
+U '  $ $ $ ñ # ¢ˇ¸ % %  ! V      %  = ! )    >    ,    ! +  %   ! V      % U    ! V      *  % U“  !  ; ; ! VØ   %  ! V ;   %  ! V <   UU     	O    ! UP  ! UQ U  U U  %  ! VD  !  ; ; ! ?  ! UR U Ï Uï U ' ?  ! ?  ! ?  ! U Ö %  ! VE  !  ; ; ! ?  ! ?  ; ; ; ; $ $ $ ó #   % # ˇ˛ % M  !  ! 
+ó '  $ !  > ! 
+  '  $ I“ # ^  % # Qˇ˝ % % Uò V   ! +  U Ï  ! Ué U   !  ; ; ! ?  ! ?  ; ! ?  ! Uî  ! %  !  !   ! Vó  !  ; ; ; ! U & U ' ?  ! U   !  ; ; ! ?  ! ?  $ $ !  > ! 
+  '  $ Iô % % Uö Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! Uõ V   ! UR % S )  #    $ , ! VU  ! Vî  % S Uö V &  , % % Uú Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! Uõ V   ! UR % S )  #    !  F $ , ! VU  ! Vî  % S Uú V &  , % % Uù Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! Uõ V   ! UR % S )  #   %  ! Uû % %  ! Vü  ! T  V ±  ! 
+ Z '  $ , ! VU  ! Vî  % S Uù V &  , % % Uù Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U† V   ! UR % S )  # =  % %  ! V|  ! +  %  ! UW V°   ! %   ! U¢ %  ! VX  ! % %  ! Vü  ! T  V ±  ! 
+ Z '  $ %   '   $ $ , ! VU  ! Vî  % S Uù V &  , % % Uù Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U£ V   ! UR % S )  # S  % %  ! V|  ! +  %  ! UW V°   
+ %  ! UW V°      ) %   ! U§ %  ! VX  ! %  ! VX  ! % %  ! Vü  ! T  V ±  ! 
+ Z '  $ %   '   $ $ , ! VU  ! Vî  % S Uù V &  , % % Uù Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U• V   ! UR % S )  # \  % %  ! V|  ! +  %  ! UW V°    %  ! UW V°    %  ! Ut V°      ' %   ! U¶ %  ! VX  ! %  ! Vs  ! % %  ! Vu  ! V í  ! 
+ Z '  $ %   '   $ $ , ! VU  ! Vî  % S Uù V &  , % % Uß Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! Uõ V   ! UR % S )  #   %  !  ! 
+ù '  $ , ! VU  ! Vî  % S Uß V &  , % % U® Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U© V   ! UR % S )  #   % U™  ! % %  ! Vü  ! T  V ±  !  ! 
+  '  $ , ! VU  ! Vî  % S U® V &  , % % U´ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U¨ V   ! UR % S )  # Pˇ¸ % %  ! V      %  = ! )    >    ,    ! +  %   ! V      % U    ! V      % U≠  ! % %  ! Vü  ! T  V ±  !  ! 
+  '  $ $ , ! VU  ! Vî  % S U´ V &  , % % UÆ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! UØ V   ! UR % S )  #   % U∞  ! %  ! Vs  !  ; ! 
+  '  $ , ! VU  ! Vî  % S UÆ V &  , % % U± Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U• V   ! UR % S )  #   % U≤  ! %  ! Vs  !  ; ! 
+  '  $ , ! VU  ! Vî  % S U± V &  , % % U≥ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U• V   ! UR % S )  #   % U¥  ! 
+  '  $ , ! VU  ! Vî  % S U≥ V &  , % % Uµ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U∂ V   ! UR % S )  # S  % % %  ! V|  ! V∑  ! % 
+e ! % %  ! V|  ! Vd  ! V   ! +  % # #  %   !  ! V°    %  !  ! %   !  ! V ˙  ! 
+ ˚ '  $  $ !  ! V 7   $ $ , ! VU  ! Vî  % S Uµ V &  , % % U∏ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U∂ V   ! UR % S )  # i  % % %  ! V|  ! V∑  ! % 
+e ! % %  ! V|  ! Vd  ! V   ! +  % # 9  %   !  ! V°   + %  !  ! % %   !  ! V ˙  ! )  %  ! Vπ    %  ! V∏     , ! 
+ ˚ '  $  $ !  ! V 7   $ $ , ! VU  ! Vî  % S U∏ V &  , % % U∫ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! Uª V   ! UR % S )  # '  % #   %  ! 
+º ! V}    %  ! 
+í '  $  $ ! %  ! V`  ! 
+ 7 '  $ , ! VU  ! Vî  % S U∫ V &  , % % UΩ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! Uæ V   ! UR % S )  # C  % %  ! Vy  ! % M )  % # '  %  ! V       = !  b  %  !   ! V ç     %  > !   '  $  $ ! )     ,  , '  $ , ! VU  ! Vî  % S UΩ V &  , % % Uø Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U¿ V   ! UR % S )  # @  % % #    !  b    $  $ ! %  ! VZ  ! V   ! +  % %  ! VX  !  ! %  ! V\  ! %  ! V|  ! 
+à '  $ $ , ! VU  ! Vî  % S Uø V &  , % % U; Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U¡ V   ! UR % S )  # â  %  ! V∫  % %  ! V`  ! )  % #   %  !  !   ! 
+Ω '  $ !  ! V 7  %   ! U_  ! V ˚  , % #   %  ! U] %  ! %  ! V^  ! 
   ! V   ! 
- ˚ '  $ ! %  ! VW  ! V 7  % #   %  !  !   ! 
-º '  $ ! %  ! V[  ! V 7  %  ! Uø  ! 
- ˚ '  $ , ! VR  ! Vë  % S U8 V &  , % % U¿ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U† V   ! UO % S )  #@  % %  ! Vf  ! +   ! 	d c  % %  ! U¡ V ˙  ! +  %  ! U¡  9 ! V ˚   $ $  ! 	¬ c Ö % %   ! Vb  ! +  %  ! % 
-b ! %  ! VY  ! V   ! V ,    % S +  #     $ ! #      $ ! ?  $ $ % %  ! V_  > ! % M )  % # ,  % %   ! %  = ! Um V ˙  ! V   ! +     %  ! 
- < '  $ %   > !   '  $ $ ! )     ,  , '  $ Ü  ! 	√ c  % S +  #     $ ! #      $ ! ?  $ h  ! 	ƒ c K % % %   ! Vc  ! U≈ M V ø  ! % %   ! Vc  ! U∆ M V ø  ! +           % U«   ! V      %  ! V?  ! %  ! V?  ! ?  $   ! 	» c *  %  ! U¡ V ˙     =    >  % %  ! U… M V ø  ! V?   % %  ! U  M V ø  ! V?   % %  ! UÀ M V ø  ! V?    % %  ! UÃ M V ø  ! V?    %  ! U¡  9 ! V ˚  # Z    0 %  !  &   % % %  !   ! VÕ  ! +      !  Z  
- %   !  &      $ $  $ % %  !   ! VÕ  ! +      !  Z  
- %   !  &      $ $ ! # I    ( %  !  !  &    %  !   !  ! VŒ    
- %  !  !  '  $  $  $ %  !   !  ! VŒ     %  !  !  '     $ ! ?  $   %   '   $ $ , ! VR  ! Vë  % S U¿ V &  , % % U¿ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! Uù V   ! UO % S )  #   % Uœ %  ! Vf  ! 
-  '  $ , ! VR  ! Vë  % S U¿ V &  , # Á  % M M +  # 9  % %  ! Vã  ! +  %  ! % 
-π ! UM  ! UN  ! ?  ! UO #   %  !  ! 
- ˙ '  $ ! VR  ! 
-ë '  $ $  # >  % %  ! Vã  ! +  %  ! % 
-π ! UM  ! UN  ! 
-@ ! ?  ! UO #   %  !  !  ! 
- ˚ '  $ ! VR  ! 
-ë '  $ $  % # W  % %  ! Vb  ! %  ! VC  ! %  ! VD  ! %  ! VE  ! +     %  !  !  &        %  !  !   &        %  !  !  &  %  !  !   '  $  $ $ !   ! 
- 7 '  $ $ – #J  % M M +  # Ö  % %  ! Vj  ! +   !  b   $ %   ! Vf  ! 	¬ b R % %   ! Vb  ! +  % U Ö U— ?  ! U Ï U“ U” U— U   !  ; ; ! ?  ! ?  ! ?  ! Ur U  U“ U ' ?  ! ?  !   ! U“ ?  ; ; ; ! ?  ! ?  ! 
-? '  $   % U Ö U— ?  !  !  ; ; ; ! 
-? '  $ $  # i  %  ! V     ^ %  = ! %  ! V ;  ! +  %  ! V‘    %  ! V’  !  4      % U÷  !  !  ! V      %  ! V‘    %  ! V’  !   4      % U◊  !  !  ! 
-  '  $  $ $  $  % # C  *  %   ! V            ! ?   %  !  ! V¿   %  ! Vb   %  !  !   &  %  ! %  !  &  !  ! 
-ÿ '  $ $ !   ! 
-  '  $ $ Ÿ #Y  % M M M M M M +  # 7  % M +  # #  %  ! V      %  = !   ! V ,      	 %  > !   '  $  $  %  !  ! 
+ ˚ '  $ ! %  ! VZ  ! V 7  % #   %  !  !   ! 
+ø '  $ ! %  ! V^  ! V 7  %  ! U¬  ! 
+ ˚ '  $ , ! VU  ! Vî  % S U; V &  , % % U√ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U£ V   ! UR % S )  #@  % %  ! Vi  ! +   ! 	g c  % %  ! Uƒ V ˙  ! +  %  ! Uƒ  9 ! V ˚   $ $  ! 	≈ c Ö % %   ! Ve  ! +  %  ! % 
+e ! %  ! V\  ! V   ! V ,    % S +  #     $ ! #      $ ! ?  $ $ % %  ! Vb  > ! % M )  % # ,  % %   ! %  = ! Up V ˙  ! V   ! +     %  ! 
+ < '  $ %   > !   '  $ $ ! )     ,  , '  $ Ü  ! 	∆ c  % S +  #     $ ! #      $ ! ?  $ h  ! 	« c K % % %   ! Vf  ! U» M V ø  ! % %   ! Vf  ! U… M V ø  ! +           % U    ! V      %  ! VB  ! %  ! VB  ! ?  $   ! 	À c *  %  ! Uƒ V ˙     =    >  % %  ! UÃ M V ø  ! VB   % %  ! UÕ M V ø  ! VB   % %  ! UŒ M V ø  ! VB    % %  ! Uœ M V ø  ! VB    %  ! Uƒ  9 ! V ˚  # Z    0 %  !  &   % % %  !   ! V–  ! +      !  Z  
+ %   !  &      $ $  $ % %  !   ! V–  ! +      !  Z  
+ %   !  &      $ $ ! # I    ( %  !  !  &    %  !   !  ! V—    
+ %  !  !  '  $  $  $ %  !   !  ! V—     %  !  !  '     $ ! ?  $   %   '   $ $ , ! VU  ! Vî  % S U√ V &  , % % U√ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U† V   ! UR % S )  #   % U“ %  ! Vi  ! 
+  '  $ , ! VU  ! Vî  % S U√ V &  , # Á  % M M +  # 9  % %  ! Vé  ! +  %  ! % 
+º ! UP  ! UQ  ! ?  ! UR #   %  !  ! 
+ ˙ '  $ ! VU  ! 
+î '  $ $  # >  % %  ! Vé  ! +  %  ! % 
+º ! UP  ! UQ  ! 
+C ! ?  ! UR #   %  !  !  ! 
+ ˚ '  $ ! VU  ! 
+î '  $ $  % # W  % %  ! Ve  ! %  ! VF  ! %  ! VG  ! %  ! VH  ! +     %  !  !  &        %  !  !   &        %  !  !  &  %  !  !   '  $  $ $ !   ! 
+ 7 '  $ $ ” #J  % M M +  # Ö  % %  ! Vm  ! +   !  b   $ %   ! Vi  ! 	≈ b R % %   ! Ve  ! +  % U Ö U‘ ?  ! U Ï U’ U÷ U‘ U   !  ; ; ! ?  ! ?  ! ?  ! Uu U  U’ U ' ?  ! ?  !   ! U’ ?  ; ; ; ! ?  ! ?  ! 
+B '  $   % U Ö U‘ ?  !  !  ; ; ; ! 
+B '  $ $  # i  %  ! V     ^ %  = ! %  ! V ;  ! +  %  ! V◊    %  ! Vÿ  !  4      % UŸ  !  !  ! V      %  ! V◊    %  ! Vÿ  !   4      % U⁄  !  !  ! 
+  '  $  $ $  $  % # C  *  %   ! V            ! ?   %  !  ! V√   %  ! Ve   %  !  !   &  %  ! %  !  &  !  ! 
+€ '  $ $ !   ! 
+  '  $ $ ‹ #Y  % M M M M M M +  # 7  % M +  # #  %  ! V      %  = !   ! V ,      	 %  > !   '  $  $  %  !  ! 
   '  $ $   # 1  %  ! V     & %  = ! +  %  ! V       ! %   > !  &  ; $ %   > !  '  $ $  $  # $  %  ! V      %  !  = > ! V ,    %  !  > !  '  $  $  $  # %  %  ! V      %  = !  !  &    %  > !  !  '     $  $  # !  % % 
   !  ! V   ! +  %  !   !  &     =    $ $  # 9  %  ! V     ( % %  !  &  !  ; ! +  %  ! % %   !  !  &  !  &  !   '  $ $ %  ! 
- * '  $  % O % %   ! UV V ˙  ! )    !  ; ! % #   %  ! U^ 
- ˙ '  $ !  ! V   ; , !  '  $ $ ⁄ % % U€ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! Uù V   ! UO % S )  #   %  !  ! 
-‹ '  $ , ! VR  ! Vë  % S U€ V &  , % % U€ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U† V   ! UO % S )  # ÿ  %   &   % %  ! UÅ O V ø  ! %  ! UÄ O V ø  ! +  %  ! UT %   ! UI UJ V ø  ! V ˚  %  ! UV  ! V ˚  %  ! UX  ! V ˚  %  ! UZ O V ˚  %  ! U\ O V ˚  %  ! U^ %  ! V⁄  ! V ˚  %  ! Uø M V ˚  % %  ! V  ! )  %  ! U`  ! V ˚  %  ! U¡ Q V ˚  %  ! Um %  !  ! VŸ  ! V ˚  , % #   %  ! UZ  ! %  ! UZ V ˙  ; ! 
+ * '  $  % O % %   ! UY V ˙  ! )    !  ; ! % #   %  ! Ua 
+ ˙ '  $ !  ! V   ; , !  '  $ $ › % % Uﬁ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U† V   ! UR % S )  #   %  !  ! 
+ﬂ '  $ , ! VU  ! Vî  % S Uﬁ V &  , % % Uﬁ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U£ V   ! UR % S )  # ÿ  %   &   % %  ! UÑ O V ø  ! %  ! UÉ O V ø  ! +  %  ! UW %   ! UL UM V ø  ! V ˚  %  ! UY  ! V ˚  %  ! U[  ! V ˚  %  ! U] O V ˚  %  ! U_ O V ˚  %  ! Ua %  ! V›  ! V ˚  %  ! U¬ M V ˚  % %  ! VÇ  ! )  %  ! Uc  ! V ˚  %  ! Uƒ Q V ˚  %  ! Up %  !  ! V‹  ! V ˚  , % #   %  ! U]  ! %  ! U] V ˙  ; ! 
  ˚ '  $ !  ! V 7  %  !  ! 
-– '  $ $ , ! VR  ! Vë  % S U€ V &  , % % U€ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U¢ V   ! UO % S )  # j  % %  ! Uç M V ø  ! +  %   &   %  ! UT %   ! UI UJ V ø  ! V ˚  %  ! Uq %  ! V è   , % 
-L ! UN 
-@ ! UM  ! UO % M )  # ˇˇ %   !  ! 
-  '  $ , ! VR  ! ?     ! 
- ˚ '  $ $ , ! VR  ! Vë  % S U€ V &  , % % U€ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U› V   ! UO % S )  # C  %   &   %  ! Ut %  ! UM M V ø  ! V ˚  %  ! UA %  ! UN O V ø  ! V ˚  %  ! Uw %  ! UO # ˇˇ  $ ! V ø  ! 
- ˚ '  $ , ! VR  ! Vë  % S U€ V &  , % % Uﬁ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U† V   ! UO % S )  # 	  %  ! 
-¥ '  $ , ! VR  ! Vë  % S Uﬁ V &  , % % Uﬂ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U‡ V   ! UO % S )  # ˇ˛ % %  !  ! Vﬁ  ! +  %  !   ! V€   $ $ , ! VR  ! Vë  % S Uﬂ V &  , 
-ﬂ R # î  % %  ! O Vﬁ  ! +  % # d  %  !  !  ! V·   + %  !  !  ! V‚    %   !   !  ! %  !  !  ! V„  ! 
-‰ '  $  $ % %   !  ! Vn  ! +     %   !   !   ! %  ! O V   ! 
-‰ '  $  $ $ ! % 
-b ! %   ! Va  ! V   ! V 7  %  !  ! VÂ   $ $ Ê % % UÁ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! UË V   ! UO % S )  #   %  ! %  ! Vy  !  ! 
-Ê '  $ , ! VR  ! Vë  % S UÁ V &  , % % UÈ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U¢ V   ! UO % S )  #   % 
-Í !  !  ! 
-  '  $ , ! VR  ! Vë  % S UÈ V &  , % % UÎ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! UÏ V   ! UO % S )  #   %  !  !  ! 
-Ì '  $ , ! VR  ! Vë  % S UÎ V &  , % % UÓ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U¨ V   ! UO % S )  # )  % % 
-y !  ! V   ! +  %  ! #   %  !  !   ! 
-Î '  $ ! 
-Ô '  $ $ , ! VR  ! Vë  % S UÓ V &  , % % U Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! UÒ V   ! UO % S )  # *  % %  = ! Vx  ! +  %  ! %  !   !  &  ! VÚ  %  !   ! 
-  '  $ $ , ! VR  ! Vë  % S U V &  , % % UÛ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! UÙ V   ! UO % S )  # [  % M +  % # :  # 6ˇˇ %  <        ! +   > <   %  !  = !  ! 
-´ '  $ %  !  > !   !  ! 
- '  $ $ $ ! )     , %  !  !  !   ! 
- '  $ $ , ! VR  ! Vë  % S UÛ V &  , % % Uı Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U¢ V   ! UO % S )  # J  %  ! Vr  <  
- %  !  ! V∞     % %  !  ! VÈ  ! +     %  ! %  !  !   ! VÓ  !   ! 
-Û '  $ %  !   ! 
-Æ '  $ $ , ! VR  ! Vë  % S Uı V &  ,  ˆ  ˜ # E  %  ! O % M )  % # -   <    $ %  = !  ! V ,    %  > !  !   '    %  > !  = !  ; !   '  $ ! )     ,  , '  $ ¯ # 7ˇ˛ % O  ! V ,     $ % %  ! % 
+” '  $ $ , ! VU  ! Vî  % S Uﬁ V &  , % % Uﬁ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U• V   ! UR % S )  # j  % %  ! Uê M V ø  ! +  %   &   %  ! UW %   ! UL UM V ø  ! V ˚  %  ! Ut %  ! V è   , % 
+O ! UQ 
+C ! UP  ! UR % M )  # ˇˇ %   !  ! 
+  '  $ , ! VU  ! ?     ! 
+ ˚ '  $ $ , ! VU  ! Vî  % S Uﬁ V &  , % % Uﬁ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U‡ V   ! UR % S )  # C  %   &   %  ! Uw %  ! UP M V ø  ! V ˚  %  ! UD %  ! UQ O V ø  ! V ˚  %  ! Uz %  ! UR # ˇˇ  $ ! V ø  ! 
+ ˚ '  $ , ! VU  ! Vî  % S Uﬁ V &  , % % U· Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U£ V   ! UR % S )  # 	  %  ! 
+∑ '  $ , ! VU  ! Vî  % S U· V &  , % % U‚ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U„ V   ! UR % S )  # ˇ˛ % %  !  ! V·  ! +  %  !   ! Vﬁ   $ $ , ! VU  ! Vî  % S U‚ V &  , 
+‚ U # î  % %  ! O V·  ! +  % # d  %  !  !  ! V‰   + %  !  !  ! VÂ    %   !   !  ! %  !  !  ! VÊ  ! 
+Á '  $  $ % %   !  ! Vq  ! +     %   !   !   ! %  ! O V   ! 
+Á '  $  $ $ ! % 
+e ! %   ! Vd  ! V   ! V 7  %  !  ! VË   $ $ È % % UÍ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! UÎ V   ! UR % S )  #   %  ! %  ! V|  !  ! 
+È '  $ , ! VU  ! Vî  % S UÍ V &  , % % UÏ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U• V   ! UR % S )  #   % 
+Ì !  !  ! 
+  '  $ , ! VU  ! Vî  % S UÏ V &  , % % UÓ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! UÔ V   ! UR % S )  #   %  !  !  ! 
+ '  $ , ! VU  ! Vî  % S UÓ V &  , % % UÒ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! UØ V   ! UR % S )  # )  % % 
+| !  ! V   ! +  %  ! #   %  !  !   ! 
+Ó '  $ ! 
+Ú '  $ $ , ! VU  ! Vî  % S UÒ V &  , % % UÛ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! UÙ V   ! UR % S )  # *  % %  = ! V{  ! +  %  ! %  !   !  &  ! Vı  %  !   ! 
+  '  $ $ , ! VU  ! Vî  % S UÛ V &  , % % Uˆ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U˜ V   ! UR % S )  # [  % M +  % # :  # 6ˇˇ %  <        ! +   > <   %  !  = !  ! 
+Æ '  $ %  !  > !   !  ! 
+Û '  $ $ $ ! )     , %  !  !  !   ! 
+Û '  $ $ , ! VU  ! Vî  % S Uˆ V &  , % % U¯ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U• V   ! UR % S )  # J  %  ! Vu  <  
+ %  !  ! V≥     % %  !  ! VÏ  ! +     %  ! %  !  !   ! VÒ  !   ! 
+ˆ '  $ %  !   ! 
+± '  $ $ , ! VU  ! Vî  % S U¯ V &  ,  ˘  ˙ # E  %  ! O % M )  % # -   <    $ %  = !  ! V ,    %  > !  !   '    %  > !  = !  ; !   '  $ ! )     ,  , '  $ ˚ # 7ˇ˛ % O  ! V ,     $ % %  ! % 
   !  ! V   ! V   ! % 
-˘ !  ! % 
+¸ !  ! % 
   !  ! V   ! V   ! 
- ( '  $ ˘ # 2  % M +  % #    ! %   ! %  ! V[  ! V˘  ; $ ! )     , % %   !  &  > ! 
-¯ '  $ $ ˆ #   % % 
-] !  ! %  ! Vˆ  ; ! V˘  ! 
-¯ '  $ ˜ % % U˙ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! Uù V   ! UO % S )  #   %  !  ! 
- ˙ '  $ , ! VR  ! Vë  % S U˙ V &  , % % U˙ Vã  ! )  %  ! % 
-L ! UM  ! UN % 
-| ! U˚ V   ! UO % S )  #   %  !  !  ! 
- ˚ '  $ , ! VR  ! Vë  % S U˙ V &  , # .ˇˇ % 
-¸ ! +  % U˝ Vû   ! 
-¸ b  % U® U© U¸ U˝ 
+ ( '  $ ¸ # 2  % M +  % #    ! %   ! %  ! V^  ! V¸  ; $ ! )     , % %   !  &  > ! 
+˚ '  $ $ ˘ #   % % 
+` !  ! %  ! V˘  ; ! V¸  ! 
+˚ '  $ ˙ % % U˝ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U† V   ! UR % S )  #   %  !  ! 
+ ˙ '  $ , ! VU  ! Vî  % S U˝ V &  , % % U˝ Vé  ! )  %  ! % 
+O ! UP  ! UQ % 
+ ! U˛ V   ! UR % S )  #   %  !  !  ! 
+ ˚ '  $ , ! VU  ! Vî  % S U˝ V &  , # .ˇˇ % 
+ˇ ! +  % U  V°   ! 
+ˇ b  % U´ U¨ Uˇ U  
   '  $ % 
-¸ !   ! 
-  '  $ $ ¸ % V˛   #   %  ! V õ    %  ! Vˇ  ! 
-  E $  $  # 4  %  ! V    %  ! 
-  ! U Q V û  ! %  ! 
-  ! U R V û  ! 	 3 0 $ % U U  ! 
-  '  $  # x  %  ! V    %  ! V ~      X %  ! V	   / % % %  ! 	 2 ! V
-  ! V  ! +  % 
-  ! %  ! U V ´  ! %  ! U V]  ! 
- ô '  $ $ %  ! VT    % 
-  !  ! Q 
- ô '    % U U  ! 
-  '  $ % U U  ! 
-  '  $  # nˇˇ *  %   ! U Q V ø   %   ! U Q V ø   %   ! U Q V ø   %   ! U R V ø   %   ! U R V ø   %   ! U T≤ V ø    % % 
- !  !  !  !  !  !   ! V ô  ! +  % %  ! V  ! 
- '  $ $ $  #   %  ! V õ    %  ! Vˇ  ! 
- E $  $  #   % %  ! V	    % %  ! V
-  ! V     ! 
- '  $  % 
- ! # A  %  ! U %  ! U V ¸  ! %  ! U V ¸  ! %  ! U V ¸  ! %  ! U  V ¸  ! %  ! U! V ¸  ! %  ! U V ¸  ! 
- Z '  $ ! V"  #   %  ! 
- ! U# Q 
- û '  $ # #   %  ! 
- ! U$ R 
- û '  $ $ #   %  ! 
- ! U% T  
- û '  $ % #   %  ! 
- ! U& T  
- û '  $ & #   %  ! 
- ! U' T  
+ˇ !   ! 
+  '  $ $ ˇ % V   #   %  ! V õ    %  ! V  ! 
+ E $  $  # 4  %  ! V    %  ! 
+ ! U Q V û  ! %  ! 
+ ! U R V û  ! 	 3 0 $ % U U	  ! 
+  '  $ 
+ # x  %  ! V    %  ! V ~      X %  ! V   / % % %  ! 	 2 ! V  ! V  ! +  % 
+ ! %  ! U V ´  ! %  ! U V`  ! 
+ ô '  $ $ %  ! VW    % 
+ !  ! Q 
+ ô '    % U U  ! 
+  '  $ % U U  ! 
+  '  $  # nˇˇ *  %   ! U Q V ø   %   ! U Q V ø   %   ! U Q V ø   %   ! U R V ø   %   ! U R V ø   %   ! U T≤ V ø    % % 
+ !  !  !  !  !  !   ! V ô  ! +  % %  ! V  ! 
+ '  $ $ $  #   %  ! V õ    %  ! V  ! 
+ E $  $  #   % %  ! V    % %  ! V  ! V     ! 
+ '  $  % 
+ ! # A  %  ! U %  ! U  V ¸  ! %  ! U! V ¸  ! %  ! U" V ¸  ! %  ! U# V ¸  ! %  ! U$ V ¸  ! %  ! U V ¸  ! 
+ Z '  $ ! V%  #   %  ! 
+ ! U& Q 
+ û '  $ & #   %  ! 
+ ! U' R 
  û '  $ ' #   %  ! 
- ! U( T  
+ ! U( T  
  û '  $ ( #   %  ! 
- ! U) T  
+ ! U) T  
  û '  $ ) #   %  ! 
- ! U* T  
+ ! U* T  
  û '  $ * #   %  ! 
- ! U+ T  
+ ! U+ T  
  û '  $ + #   %  ! 
- ! U, T 	 
- û '  $ , # -  % 
- ( ! % #   %  = ! Væ  !  > ! ?  $ ! % %  ! V  ! V-  ! V   ! 
-  '  $ . #    % % V/   ! 
- '  $ 0 # Ë  %  ! V Ø    % U1 U2  ! V      % %  ! V3  ! % V m   ! %  ! V	    % %  ! V
-  ! V     ! +  % Q % M )  % # à   !  a  %  !  C ! +   ! 	3 c  % U⁄  ! V   %   9 !   '  $  ! 	4 c C   !  : a   !   9 C ! 	4 E      % U4  ! V   %   !   0 !   '   & % U3  ! V   %   9 !   '    %  !  ! V   %   9 !   '  $ $  $ ! )     ,  , &  % %  ! V n  !  ! 
-5 '  $ $ 1 # %  %  ! V Ø    % U6 U2  ! V      %  ! %  ! V  ! 
-1 '  $ 6 % U7 Vü  # 7  %  ! V    %  ! 
- '  $       %  ! V	    % % V8   ! V  !  0  	 % U9  ! 
-  '  $ : # gˇ˛ %  <   % % U; V   ! V Æ    %  = ! )    >    , ! +  %   ! V      % U    ! V      % M +  #   % % V<   !  ! V=   $  % #      -  %  &   . $ !   ! 
-> '  $ $ $ ? # "  % %  ! V:  ! +    
- % U@ UA V      %  ! 
-B '  $ $ @ # ∑ˇ˛ *  %   ! V      %   = ! )    >    ,     %   ! V        %   = ! )    >    ,     %   ! V      % U    ! V       ! % V<   b   @     
- % UC UD 
-  '  $ % %  ! %  ! V:  ! VE  ! +         $ % % 
-F ! V ^  ! 
- # '  $ %  ! VG    % %  ! VG  ! 
+ ! U, T  
+ û '  $ , #   %  ! 
+ ! U- T  
+ û '  $ - #   %  ! 
+ ! U. T  
+ û '  $ . #   %  ! 
+ ! U/ T 	 
+ û '  $ / # -  % 
+ ( ! % #   %  = ! V¡  !  > ! ?  $ ! % %  ! V  ! V0  ! V   ! 
+  '  $ 1 #    % % V2   ! 
+ '  $ 3 # Ë  %  ! V Ø    % U4 U5  ! V      % %  ! V6  ! % V m   ! %  ! V    % %  ! V  ! V     ! +  % Q % M )  % # à   !  a  %  !  C ! +   ! 	6 c  % U›  ! V   %   9 !   '  $  ! 	7 c C   !  : a   !   9 C ! 	7 E      % U7  ! V   %   !   0 !   '   & % U6  ! V   %   9 !   '    %  !  ! V   %   9 !   '  $ $  $ ! )     ,  , &  % %  ! V n  !  ! 
+8 '  $ $ 4 # %  %  ! V Ø    % U9 U5  ! V      %  ! %  ! V  ! 
+4 '  $ 9 % U: V¢  # 7  %  ! V    %  ! 
+
+ '  $       %  ! V    % % V;   ! V
+  !  0  	 % U<  ! 
+  '  $ = # gˇ˛ %  <   % % U> V   ! V Æ    %  = ! )    >    , ! +  %   ! V      % U    ! V      % M +  #   % % V?   !  ! V@   $  % #      -  %  &   . $ !   ! 
+A '  $ $ $ B # "  % %  ! V=  ! +    
+ % UC UD V      %  ! 
+E '  $ $ C # ∑ˇ˛ *  %   ! V      %   = ! )    >    ,     %   ! V        %   = ! )    >    ,     %   ! V      % U    ! V       ! % V?   b   @     
+ % UF UG 
+  '  $ % %  ! %  ! V=  ! VH  ! +         $ % % 
+I ! V ^  ! 
+ # '  $ %  ! VJ    % %  ! VJ  ! 
  # '    %  ! 
-H '  $ $ $ C # vˇ˛ *  %   ! V      %   = ! )    >    ,       <   % V<     %   = ! )    >    ,  %   ! V      % U    ! V      % %  ! %  ! V:  !  ! VI  ! +  %  ! VJ   	 % 
-K ! 
- ^ '  $  $ $ $ L # \ˇ˛ *  %   ! V      %   = ! )    >    ,     %   ! V      %   = ! )    >    ,     %   ! V      % U    ! V      %  !  !  ! 
-M '  $ $ N # Fˇ˛  ! 	O c 3  <   % U 
- ! V¢     $  $  =   U % U 
- ! V   ;    % U 
- ! V    $ % UP UQ  ! 
-  '  $ R % UP 
-R ! VS  
-T U 
-P V #   % % V j   ! UW V Z  %  ! 
-ã '  $ X #   % % V j   ! UY V Z  %  ! 
-ê '  $ Z 
-[ \ 
-] ^ 
- ‹ _ 
- ﬁ ` # Sˇ˝ *  %   ! V        %   = ! )    >    ,     %   ! V      % U    ! V         %  !  !  ! 
+K '  $ $ $ F # vˇ˛ *  %   ! V      %   = ! )    >    ,       <   % V?     %   = ! )    >    ,  %   ! V      % U    ! V      % %  ! %  ! V=  !  ! VL  ! +  %  ! VM   	 % 
+N ! 
+ ^ '  $  $ $ $ O # \ˇ˛ *  %   ! V      %   = ! )    >    ,     %   ! V      %   = ! )    >    ,     %   ! V      % U    ! V      %  !  !  ! 
+P '  $ $ Q # Fˇ˛  ! 	R c 3  <   % U 
+ ! V•     $  $  =   U % U 
+ ! V   ;    % U 
+ ! V    $ % US UT  ! 
+  '  $ U % US 
+U ! VV  
+W X 
+S Y #   % % V j   ! UZ V Z  %  ! 
+é '  $ [ #   % % V j   ! U\ V Z  %  ! 
+ì '  $ ] 
+^ _ 
+` a 
+ ‹ b 
+ ﬁ c # Sˇ˝ *  %   ! V        %   = ! )    >    ,     %   ! V      % U    ! V         %  !  !  ! 
  ‚ '  $ %  !  ! 
- ‡ '  $ $ a 
-b c 
- $ -— % Ud V !  J % % V    ! Ue V 4  % % V d   ! Vf  g  h  i % 
- “ ! Uj M V ø    % % Uk VÇ  ! Ul V¢       
+ ‡ '  $ $ d 
+e f 
+ $ -Ó % Ug V !  J % % V    ! Uh V 4  % % V d   ! Vi  j  k  l % 
+ “ ! Um M V ø    % % Un VÖ  ! Uo V•       
   $ # "ˇˇ % 
  ≤ ! % #   %  ! V Ø     $ 	 $ !  ! V   ! 
-  '  $ m # q  %  = ! +  %  ! Un VC   & % % Uo Up % Uq V Z  ! Ur Vm  ! % V j   ! V   % % V j   ! 
-[ '  $ %  ! Us VC    % Q 
-. '   & %  ! Ut VC    % 
-i ! T  
-u '    % % V j   ! Uv   = ! 
- Z '  $ $ w # 9  % %  !  ! Vx  ! +  % % Up Uy % Uz  = !  ! V Z  ! Ur U{ U| U} Ur U~ Vm 	 !   ! 
-  '  $ $  # ö  %  ! Vc   Ö %  ! 
-Ä ! Vd   0 % %  ! U W Vf  ! %  ! U X Vf  ! %  ! U [ Vf  ! +  %  !  !  !   ! V   i $ $ %  ! 
-Å ! Vd    %  ! %  ! U X Vf  ! 
- Z '   , %  ! UÇ V Z  %  ! UÉ % %  ! Vˇ  ! VÑ  ! V Z  %  ! UÖ %  ! V-  ! 
- Z '  $ %  ! UÜ  ! 
- Z '  $ á # P  
-g  I 
-h !  _  % % Up Uy % Uà 
-h ! V Z  ! Vm  !  ! V      % % Up Uâ % Uä %  ! Vã  ! V Z  ! Uå Vm  !  ! V   %  ! 
-[ '  $  $ ç #oˇˇ *  %   ! Ué Uè V ø    ! 	è b  % V d       %   ! Uê Uë V ø    ! 	ë b  % V g       %   ! Uí Uì V ø    ! 	ì b  % V j        % M +  
-h 9 h % % M )  % # ˛   #   %  !  ! 
-á '  $ - · % % V    !  ! Vç  % %  ! V'  ! )  % % Ur Vm  ! V   %  ! V    
-h : h    % U V   %  ! V[  %  ! V[   ó %  ! V       = ! 	“ E     	 %  > ! Vw   { % # 
+  '  $ p # q  %  = ! +  %  ! Uq VF   & % % Ur Us % Ut V Z  ! Uu Vp  ! % V j   ! V   % % V j   ! 
+^ '  $ %  ! Uv VF    % Q 
+1 '   & %  ! Uw VF    % 
+l ! T  
+x '    % % V j   ! Uy   = ! 
+ Z '  $ $ z # 9  % %  !  ! V{  ! +  % % Us U| % U}  = !  ! V Z  ! Uu U~ U UÄ Uu UÅ Vp 	 !   ! 
+  '  $ $ Ç # ö  %  ! Vf   Ö %  ! 
+É ! Vg   0 % %  ! U W Vi  ! %  ! U X Vi  ! %  ! U [ Vi  ! +  %  !  !  !   ! VÇ   l $ $ %  ! 
+Ñ ! Vg    %  ! %  ! U X Vi  ! 
+ Z '   , %  ! UÖ V Z  %  ! UÜ % %  ! V  ! Vá  ! V Z  %  ! Uà %  ! V0  ! 
+ Z '  $ %  ! Uâ  ! 
+ Z '  $ ä # J  
+k !  _  % % Us U| % Uã 
+k ! V Z  ! Vp  !  ! V      % % Us Uå % Uç %  ! Vé  ! V Z  ! Uè Vp  !  ! V   %  ! 
+^ '  $ ê % 
+ê ! Vë  ë % 
+ ' ! Vë  í #yˇˇ *  %   ! Uì Uî V ø    ! 	î b  % V d       %   ! Uï Uñ V ø    ! 	ñ b  % V g       %   ! Uó Uò V ø    ! 	ò b  % V j        % M +  
+k 9 k % % M )  % #   #   %  !  ! 
+ä '  $ - Î 
+j   % % V    !  ! % Vë   &     % %  ! V*  ! )  % % Uu Vp  ! V   %  ! V    
+k : k    % U V   %  ! V^  %  ! V^   ó %  ! V       = ! 	’ E     	 %  > ! Vz   { % # 
    %   ! 
-7 '  $ ! # gˇˇ 
-g  `  <     P  = !  b . %  ! V í  !   \   % % Up Uo % Uî %  ! V ;  ! V Z  ! Vm  !  ! V        % #   %  !  ! V_  %  ! 
+: '  $ ! # gˇˇ 
+j  `  <     P  = !  b . %  ! V í  !   \   % % Us Ur % Uô %  ! V ;  ! V Z  ! Vp  !  ! V        % #   %  !  ! Vb  %  ! 
 ! '  $ !  ! V 7  %  ! 
-[ '  $  $ ! V ë  , .     %   '   $  $ ! )     ,  , '   $ $ $ ï # >   % Vñ   
-g  ) % % Up Uó % Uò % VÜ   ! % Vô   ! V Z  ! Uö Uõ Vm  ! % V j   ! V      % Vï   % Q 
-ú '  $ ù % V "   J % S Ud V &  . % % V    ! Uû V /  # .ˇˇ % 
-ü ! +  % U† Vû   ! 
-ü b  % U® U© Uü U† 
+^ '  $  $ ! V ë  , .     %   '   $  $ ! )     ,  , '   $ $ $ ö # E   % Võ   
+j  ) % % Us Uú % Uù % Vâ   ! % Vû   ! V Z  ! Uü U† Vp  ! % V j   ! V      % % Ví   &   % Vö   % Q 
+° '  $ ¢ % V "   J % S Ug V &  . % % V    ! U£ V /  # .ˇˇ % 
+§ ! +  % U• V°   ! 
+§ b  % U´ U¨ U§ U• 
   '  $ % 
-ü !   ! 
-  '  $ $ ü % U° 
-w ! V (  w # .ˇˇ % 
-¢ ! +  % U£ Vû   ! 
-¢ b  % U® U© U¢ U£ 
+§ !   ! 
+  '  $ $ § % U¶ 
+z ! V (  z # .ˇˇ % 
+ß ! +  % U® V°   ! 
+ß b  % U´ U¨ Uß U® 
   '  $ % 
-¢ !   ! 
-  '  $ $ ¢ % U§ 
-w ! V (  w % U• 
-w ! V (  w # .ˇˇ % 
-¶ ! +  % Uß Vû   ! 
-¶ b  % U® U© U¶ Uß 
-  '  $ % 
-¶ !   ! 
-  '  $ $ ¶ # .ˇˇ % 
-® ! +  % Uß Vû   ! 
-® b  % U® U© U® Uß 
-  '  $ % 
-® !   ! 
-  '  $ $ ® # .ˇˇ % 
-© ! +  % U™ Vû   ! 
-© b  % U® U© U© U™ 
-  '  $ % 
-© !   ! 
-  '  $ $ © # .ˇˇ % 
-´ ! +  % U™ Vû   ! 
-´ b  % U® U© U´ U™ 
+ß !   ! 
+  '  $ $ ß % U© 
+z ! V (  z % U™ 
+z ! V (  z # .ˇˇ % 
+´ ! +  % U¨ V°   ! 
+´ b  % U´ U¨ U´ U¨ 
   '  $ % 
 ´ !   ! 
-  '  $ $ ´ % U¨ 
-w ! V (  w % U≠ 
-w ! V (  w # .ˇˇ % 
-Æ ! +  % UØ Vû   ! 
-Æ b  % U® U© UÆ UØ 
+  '  $ $ ´ # .ˇˇ % 
+≠ ! +  % U¨ V°   ! 
+≠ b  % U´ U¨ U≠ U¨ 
+  '  $ % 
+≠ !   ! 
+  '  $ $ ≠ # .ˇˇ % 
+Æ ! +  % UØ V°   ! 
+Æ b  % U´ U¨ UÆ UØ 
   '  $ % 
 Æ !   ! 
   '  $ $ Æ # .ˇˇ % 
-∞ ! +  % UØ Vû   ! 
-∞ b  % U® U© U∞ UØ 
+∞ ! +  % UØ V°   ! 
+∞ b  % U´ U¨ U∞ UØ 
   '  $ % 
 ∞ !   ! 
-  '  $ $ ∞ 
- ' ± 
- ' ≤ #&  % M M +  # 3   %  ! V í  !   ^ # % % %  ! V *  !   ! Vÿ  ! +  % 
-7 !  ; !  ; ! 
-◊ '  $ $  $  # W  % % % U≥ VÇ  ! )     %  ! VÌ     ,    
-    ! %  ! V í  ! +   !  _   !  6      % U¥ % %   ! V◊  !  !  1 ! Vÿ  ; ! 
-◊ '  $   $ $  % % V j   ! +  % # k  %  ! V Ø    %  !   ! 
-  '  $ % Uµ   ! V   %  = ! )  % %  ! V è    %  ! V∂       	∑    !   ! V   ,  >   %   ! U∏ %  ! V ;  ! %  ! V <  ! 
+  '  $ $ ∞ % U± 
+z ! V (  z % U≤ 
+z ! V (  z # .ˇˇ % 
+≥ ! +  % U¥ V°   ! 
+≥ b  % U´ U¨ U≥ U¥ 
+  '  $ % 
+≥ !   ! 
+  '  $ $ ≥ # .ˇˇ % 
+µ ! +  % U¥ V°   ! 
+µ b  % U´ U¨ Uµ U¥ 
+  '  $ % 
+µ !   ! 
+  '  $ $ µ 
+ ' ∂ 
+ ' ∑ #&  % M M +  # 3   %  ! V í  !   ^ # % % %  ! V *  !   ! V€  ! +  % 
+: !  ; !  ; ! 
+⁄ '  $ $  $  # W  % % % U∏ VÖ  ! )     %  ! V     ,    
+    ! %  ! V í  ! +   !  _   !  6      % Uπ % %   ! V⁄  !  !  1 ! V€  ; ! 
+⁄ '  $   $ $  % % V j   ! +  % # k  %  ! V Ø    %  !   ! 
+  '  $ % U∫   ! V   %  = ! )  % %  ! V è    %  ! Vª       	º    !   ! V   ,  >   %   ! UΩ %  ! V ;  ! %  ! V <  ! 
  Z '    %   ! 
 ! '  $ ! % %  &   !   &  ! V 7  %  ! 
-[ '  $ $ $ u # ™      !  <      %  ! V :  ! ?  $ %  ! % M )  % # }   <   Uπ M ?  $ % %  ! V 9  ! V è   < % % %  ! V 9  ! V∂  ! +  %  ! V Ø   
- %   ! V :        ! %   ! V :  ! ?  $ %   > !   '  $  ( %  ! V 9    %  ! V :    U∫ %  ! V :  ! ?    %  > !   '     $ ! )     ,  , '  $ x # ë  % % V j   ! M +  %  ! Uª  !  ! V Z  %  ! Vc   O %  ! 
-Ä ! Vd    %  ! U [ Vf   %  ! Uº %  !  ! Vx  = ! V Z     %  ! 
-Å ! Vd    %  ! UΩ %  ! U X Vf  ! V Z           %  !   ! Vu     %  ! Uæ V Z  % T F 
-. '  $ $ ø % % 
- “ ! U¿ M V ø  ! % 
- “ ! U¡ M V ø  ! % 
- “ ! U¬ M V ø  ! % 
- “ ! U√ M V ø  ! )     % % Uƒ VN  ! Vò        #   % U≈  !  ! T  
-ø '  $ -  %  ! Võ  .      A #   % U∆  !  ! T  
-ø '  $ - + %  ! Võ  % % % V ÷   ! % V ‘   ; ! V≤  ! )  % V±   %  ! VT        , .  *   # #   % U«   !  ! T  
-ø '  $ -  % %  ! V Ã  ! V7   .   % Vù   , /
+^ '  $ $ $ x # ™      !  <      %  ! V :  ! ?  $ %  ! % M )  % # }   <   Uæ M ?  $ % %  ! V 9  ! V è   < % % %  ! V 9  ! Vª  ! +  %  ! V Ø   
+ %   ! V :        ! %   ! V :  ! ?  $ %   > !   '  $  ( %  ! V 9    %  ! V :    Uø %  ! V :  ! ?    %  > !   '     $ ! )     ,  , '  $ { # ë  % % V j   ! M +  %  ! U¿  !  ! V Z  %  ! Vf   O %  ! 
+É ! Vg    %  ! U [ Vi   %  ! U¡ %  !  ! V{  = ! V Z     %  ! 
+Ñ ! Vg    %  ! U¬ %  ! U X Vi  ! V Z           %  !   ! Vx     %  ! U√ V Z  % T F 
+1 '  $ $ ƒ % % 
+ “ ! U≈ M V ø  ! % 
+ “ ! U∆ M V ø  ! % 
+ “ ! U« M V ø  ! % 
+ “ ! U» M V ø  ! )     % % U… VQ  ! Võ        #   % U   !  ! T  
+ƒ '  $ -  %  ! Vû  .      A #   % UÀ  !  ! T  
+ƒ '  $ - + %  ! Vû  % % % V ÷   ! % V ‘   ; ! V∑  ! )  % V∂   %  ! VW        , .  *   # #   % UÃ   !  ! T  
+ƒ '  $ -  % %  ! V Ã  ! V:   .   % V¢   , /

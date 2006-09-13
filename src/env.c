@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 16-Apr-2006 10:51 (eg)
+ * Last file update:  6-Aug-2006 22:46 (eg)
  */
 
 #include "stklos.h"
@@ -86,7 +86,6 @@ struct module_obj {
 SCM STk_STklos_module;		/* The module whose name is STklos */ 
 static SCM all_modules;		/* List of all knowm modules */		
 
-
 static void print_module(SCM module, SCM port, int mode)
 {
   STk_nputs(port, "#[module ", 9);
@@ -103,9 +102,14 @@ static SCM STk_makemodule(SCM name)
   MODULE_NAME(z)	= name;
   MODULE_EXPORTS(z)	= STk_nil;
   MODULE_IMPORTS(z)	= (name == STk_void)? STk_nil : LIST1(STk_STklos_module);
-  /* Initialize the associated hash table & stor the module in the global list*/
+  /* Initialize the associated hash table & store the module in the global list*/
   STk_hashtable_init(&MODULE_HASH_TABLE(z), HASH_VAR_FLAG);
-  all_modules = STk_cons(z, all_modules);
+  {
+    MUT_DECL(lck);
+    MUT_LOCK(lck);
+    all_modules = STk_cons(z, all_modules);
+    MUT_UNLOCK(lck);
+  }
   return z;
 }
 

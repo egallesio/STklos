@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  4-Apr-2006 19:26 (eg)
+ * Last file update:  4-Aug-2006 12:12 (eg)
  */
 
 #include <stklos.h>
@@ -107,8 +107,7 @@ static int process_program_arguments(int argc, char *argv[])
       case 'i': STk_interactive = 1;      	break;
       case 'q': vanilla         = 1;	  	break;
       case 's': stack_size      = atoi(optarg); break;
-      case 'c': STk_read_case_sensitive 
-				= 1;		break;
+      case 'c': STk_read_case_sensitive = 1;	break;
       case '?': /* message error is printed by getopt */
 		fprintf(stderr, "Try `%s --help' for more infomation\n", *argv);
 		exit(1);

@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 15-Apr-2006 12:27 (eg)
+ * Last file update:  7-Aug-2006 07:07 (eg)
  */
 
 #include <unistd.h>
@@ -77,8 +77,15 @@ static void error_win32_primitive(void)
 static SCM my_access(SCM path, int mode)
 {
   if (!STRINGP(path)) error_bad_path(path);
-  return MAKE_BOOLEAN(access(STRING_CHARS(path), mode) == 0);
+  return MAKE_BOOLEAN(access(STk_expand_file_name(STRING_CHARS(path)), mode) == 0);
 }
+
+static int my_stat(SCM path, struct stat *s)
+{
+  if (!STRINGP(path)) error_bad_path(path);
+  return stat(STk_expand_file_name(STRING_CHARS(path)), s);
+}
+
 
 
 int STk_dirp(const char *path)
@@ -344,9 +351,7 @@ DEFINE_PRIMITIVE("file-is-directory?", file_is_directoryp, subr1, (SCM f))
 {
   struct stat info;
 
-  if (!STRINGP(f)) error_bad_path(f);
-  if (stat(STRING_CHARS(f), &info) != 0) return STk_false;
-
+  if (my_stat(f, &info) != 0) return STk_false;
   return MAKE_BOOLEAN((S_ISDIR(info.st_mode)));
 }
 
@@ -355,9 +360,7 @@ DEFINE_PRIMITIVE("file-is-regular?", file_is_regularp, subr1, (SCM f))
 {
   struct stat info;
 
-  if (!STRINGP(f)) error_bad_path(f);
-  if (stat(STRING_CHARS(f), &info) != 0) return STk_false;
-
+  if (my_stat(f, &info) != 0) return STk_false;
   return MAKE_BOOLEAN((S_ISREG(info.st_mode)));
 }
 
@@ -399,9 +402,7 @@ DEFINE_PRIMITIVE("file-size", file_size, subr1, (SCM f))
 {
   struct stat info;
 
-  if (!STRINGP(f)) error_bad_path(f);
-  if (stat(STRING_CHARS(f), &info) != 0) return STk_false;
-
+  if (my_stat(f, &info) != 0) return STk_false;
   return STk_long2integer((long) info.st_size);
 }
 
@@ -537,13 +538,16 @@ DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
 #else
   static int cpt=0;
   char buff[MAX_PATH_LENGTH];
+  MUT_DECL(tmpnam_mutex);
 
+  MUT_LOCK(tmpnam_mutex);
   for ( ; ; ) {
     sprintf(buff, "/tmp/stklos%05x", cpt++);
     if (cpt > 100000)		/* arbitrary limit to avoid infinite search */
       return STk_false; 
     if (access(buff, F_OK) == -1) break;
   }
+  MUT_UNLOCK(tmpnam_mutex);
 
   return STk_Cstring2string(buff);
 #endif
@@ -569,11 +573,15 @@ DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
  * @end lisp
 doc>
 */
+MUT_DECL(at_exit_mutex);	 /* The exit mutex */
+
 DEFINE_PRIMITIVE("register-exit-function!", at_exit, subr1, (SCM proc))
 {
   if (STk_procedurep(proc) == STk_false) STk_error("bad procedure ~S", proc);
-  
+
+  MUT_LOCK(at_exit_mutex);
   exit_procs = STk_cons(proc, exit_procs);
+  MUT_UNLOCK(at_exit_mutex);
   return STk_void;
 }
 
@@ -581,9 +589,11 @@ DEFINE_PRIMITIVE("register-exit-function!", at_exit, subr1, (SCM proc))
 DEFINE_PRIMITIVE("%pre-exit", pre_exit, subr1, (SCM retcode))
 {
   /* Execute the at-exit handlers */
+  MUT_LOCK(at_exit_mutex);
   for (  ; !NULLP(exit_procs); exit_procs = CDR(exit_procs))
     STk_C_apply(CAR(exit_procs), 1, retcode);
-  
+  MUT_UNLOCK(at_exit_mutex);
+
   /* Flush all bufers */
   STk_close_all_ports();
 

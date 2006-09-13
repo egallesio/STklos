@@ -1,7 +1,7 @@
 /*
  * dynload.c	-- Dynamic loading stuff
  * 
- * Copyright © 2000-2004 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Jan-1994 19:09
- * Last file update:  4-Jan-2004 15:51 (eg)
+ * Last file update:  6-Aug-2006 21:11 (eg)
  *
  */
 
@@ -60,7 +60,7 @@ typedef void (*InitFunc)(void);
 
 
 static SCM files_already_loaded = (SCM) NULL;
-
+MUT_DECL(dynload_mutex);
 
 
 static void initialize_dynload(void)
@@ -69,8 +69,10 @@ static void initialize_dynload(void)
 
   if ((handle = (void *) dlopen(NULL, DYN_FLAG)) == NULL)
     STk_error("cannot initialize dynamic loading system (%s)", dlerror());
-  
+
+  MUT_LOCK(dynload_mutex);
   files_already_loaded = LIST1(STk_cons(STk_Cstring2string(""), (SCM) handle));
+  MUT_UNLOCK(dynload_mutex);
 }
 
 
@@ -78,7 +80,7 @@ static void *find_function(char *path, char *fname, int error_if_absent)
 {
   void *handle, *fct;
   SCM l;
-
+  
   handle = fct = NULL;
 
   if (!files_already_loaded) 
@@ -99,8 +101,10 @@ static void *find_function(char *path, char *fname, int error_if_absent)
     if ((handle=(void *) dlopen(path, DYN_FLAG)) == NULL) {
       STk_error("cannot open object file %s (%s)", path, dlerror());
     }
-    files_already_loaded = STk_cons(STk_cons(STk_Cstring2string(path),(SCM) handle),
+    MUT_LOCK(dynload_mutex);
+    files_already_loaded = STk_cons(STk_cons(STk_Cstring2string(path), (SCM) handle),
 				    files_already_loaded);
+    MUT_UNLOCK(dynload_mutex);
   }
 
   if ((fct = (void *) dlsym(handle, fname)) == NULL && error_if_absent) {

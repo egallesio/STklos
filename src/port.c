@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 12-Apr-2006 16:07 (eg)
+ * Last file update: 12-Sep-2006 15:26 (eg)
  *
  */
 
@@ -346,6 +346,25 @@ DEFINE_PRIMITIVE("read-chars!", d_read_chars, subr12, (SCM str, SCM port))
 }
 
 /*
+<doc EXT read-byte
+ * (read-byte)
+ * (read-byte port)
+ *
+ * Returns the next character available from the input |port| as an integer.
+ * If the end of file is readched, thuis function returns the end of file 
+ * object.
+doc>
+*/
+DEFINE_PRIMITIVE("read-byte", read_byte, subr01, (SCM port))
+{
+  int c;
+
+  port = verify_port(port, PORT_READ);
+  c = STk_getc(port);
+  return (c == EOF) ? STk_eof : MAKE_INT(c); 
+}
+
+/*
 <doc  peek-char
  * (peek-char)
  * (peek-char port)
@@ -373,6 +392,27 @@ DEFINE_PRIMITIVE("peek-char", peek_char, subr01, (SCM port))
   STk_ungetc(c, port);
 
   return (c == EOF) ? STk_eof : MAKE_CHARACTER(c);
+}
+
+/*
+<doc EXT peek-byte
+ * (peek-byte)
+ * (peek-byte port)
+ *
+ * Returns the next character available from the input |port|, without updating 
+ * the port to point to the following character. Whereas |peek-char| 
+ * returns a character, this function returns an integer between 0and 255. 
+doc>
+*/
+DEFINE_PRIMITIVE("peek-byte", peek_char, subr01, (SCM port))
+{
+  int c;
+
+  port = verify_port(port, PORT_READ);
+  c = STk_getc(port);
+  STk_ungetc(c, port);
+
+  return (c == EOF) ? STk_eof : MAKE_INT(c);
 }
 
 
@@ -567,6 +607,28 @@ DEFINE_PRIMITIVE("write-chars", write_chars, subr12, (SCM str, SCM port))
   port = verify_port(port, PORT_WRITE);
   STk_write_buffer(port, STRING_CHARS(str), STRING_SIZE(str));
   return STk_void;
+}
+
+
+
+/*
+<doc EXT write-byte
+ * (write-byte b)
+ * (write-byte b port)
+ *
+ * Write byte |b| to the port. |b| must be an exact integer in range between 0
+ * and 255.
+doc>
+*/
+DEFINE_PRIMITIVE("write-byte", write_byte, subr12, (SCM byte, SCM port))
+{
+  int b = STk_integer_value(byte);
+  
+  if (b == LONG_MIN) STk_error_bad_io_param("bad byte value ~S", byte);
+  port = verify_port(port, PORT_WRITE);
+  STk_putc(b, port);
+  return STk_void;
+
 }
 
 
@@ -1107,10 +1169,10 @@ DEFINE_PRIMITIVE("read-line", read_line, subr01, (SCM port))
  * (copy-port in out)
  * (copy-port in out max)
  *
- * Copy the content of port |in|, which must be opened for readind, on
+ * Copy the content of port |in|, which must be opened for reading, on
  * port |out|, which must be opened for writing. If |max| is nont specified,
  * All the characters from the input port are copied on ouput port. If |max|
- * is specified, it must be an integer indicatin the maximum number of characters
+ * is specified, it must be an integer indicating the maximum number of characters
  * which are copied from |in| to |out|.
 doc>
 */
@@ -1128,7 +1190,7 @@ DEFINE_PRIMITIVE("copy-port", copy_port, subr23, (SCM p1, SCM p2, SCM max))
       STk_error("bad size ~S", max);
   }
   
-  /* Copy at most sz characters dorm p1 to p2 */
+  /* Copy at most sz characters from p1 to p2 */
   for ( ; ; ) {
     if (sz < 0) {
       n = COPY_PORT_SIZE;
@@ -1152,7 +1214,8 @@ DEFINE_PRIMITIVE("copy-port", copy_port, subr23, (SCM p1, SCM p2, SCM max))
   return STk_void;
 
  Error: 
-  STk_error("problem while copying port ~S on port ~S", p1 , p2);
+  STk_error("problem while copying port ~S on port ~S (~S)", 
+	    p1 , p2, STk_Cstring2string(strerror(errno)));
   return STk_void;
 }
 
@@ -1353,6 +1416,8 @@ int STk_init_port(void)
   ADD_PRIMITIVE(read_chars);
   ADD_PRIMITIVE(d_read_chars);
   ADD_PRIMITIVE(peek_char);
+  ADD_PRIMITIVE(peek_byte);
+  ADD_PRIMITIVE(read_byte);
   ADD_PRIMITIVE(eof_objectp);
   ADD_PRIMITIVE(eof_object);
   ADD_PRIMITIVE(char_readyp);
@@ -1362,6 +1427,7 @@ int STk_init_port(void)
   ADD_PRIMITIVE(newline);
   ADD_PRIMITIVE(write_char);
   ADD_PRIMITIVE(write_chars);
+  ADD_PRIMITIVE(write_byte);
 
   ADD_PRIMITIVE(write_star);
   ADD_PRIMITIVE(format);

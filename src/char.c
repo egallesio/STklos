@@ -2,7 +2,7 @@
  *
  * c h a r . c				-- Characters management
  *
- * Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update: 15-Aug-2005 20:14 (eg)
+ * Last file update:  6-Aug-2006 22:16 (eg)
  */
 
 #include <ctype.h>
@@ -141,15 +141,13 @@ unsigned char STk_string2char(char *s)
 
 char *STk_char2string(char c)  		/* convert a char to it's */
 {					/* external representation */
-  static char result[2] = " ";  /* sets the \0 */
   register struct charelem *p;
 
   for (p=chartable; *(p->name); p++)
     if (p->value == c) return (char *) p->name;
   
   /* If we are here it's a "normal" char */
-  *result = c;
-  return result;
+  return NULL;
 }
 
 

@@ -897,7 +897,7 @@ doc>
       (unless port
 	(raise (make-condition &i/o-filename-error
 			       'location name
-			       'message  (format "cannot open file ~S" name)
+			       'message  (format "cannot open file ~S" string)
 			       'backtrace (%vm-backtrace)
 			       'filename string)))
       (dynamic-wind

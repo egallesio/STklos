@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  2-May-2006 16:58 (eg)
+ * Last file update:  4-Aug-2006 09:50 (eg)
  */
 
 
@@ -61,7 +61,6 @@ vm_thread_t *STk_get_current_vm(void)
 
 static void thread_finalizer(SCM thr)
 {
-  printf("DESTROY!!\n");
   fflush(stdout);
   pthread_mutex_destroy(&THREAD_MYMUTEX(thr));
   pthread_cond_destroy(&THREAD_MYCONDV(thr));

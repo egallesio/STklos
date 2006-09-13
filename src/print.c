@@ -1,7 +1,7 @@
 /*
  * p r i n t . c				-- writing stuff
  *
- * Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update:  6-Dec-2005 17:51 (eg)
+ * Last file update:  6-Aug-2006 22:19 (eg)
  *
  */
 #include <ctype.h>
@@ -160,8 +160,13 @@ void STk_print(SCM exp, SCM port, int mode)
 
   if (CHARACTERP(exp)) {
     if (mode!=DSP_MODE){
+      char *s = STk_char2string(CHARACTER_VAL(exp));
+
       STk_puts("#\\", port);
-      STk_puts(STk_char2string(CHARACTER_VAL(exp)), port);
+      if (s) 
+	STk_puts(STk_char2string(CHARACTER_VAL(exp)), port);
+      else
+	STk_putc(CHARACTER_VAL(exp), port);
     }
     else STk_putc(CHARACTER_VAL(exp), port);
     return;
@@ -353,9 +358,13 @@ static void pass2(SCM exp, SCM port)
 
 void STk_print_star(SCM exp, SCM port)
 {
+  MUT_DECL(lck);
+
   if (!CONSP(exp) &&  !VECTORP(exp)) return STk_print(exp, port, WRT_MODE);
+  MUT_LOCK(lck);
   cycles      = STk_nil;
   index_label = 0;
 
   pass1(exp); pass2(exp, port);
+  MUT_UNLOCK(lck);
 }

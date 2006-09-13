@@ -15,7 +15,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 15-Apr-2006 11:56 (eg)
+ * Last file update:  4-Sep-2006 15:35 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and 
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -78,6 +78,8 @@ static SCM all_processes = STk_nil;
 #else
 #  define PURGE_PROCESS_TABLE() process_terminate_handler(0)/* Simulate a SIGCHLD */
 #endif
+
+MUT_DECL(process_table_mutex);
  
 /******************************************************************************/
 
@@ -127,6 +129,7 @@ static void process_terminate_handler(int sig) /* called when a child dies */
    * we act blindly here since it does not seem that there is a POSIX way 
    * to find the id of the process which died.
    */
+  MUT_LOCK(process_table_mutex);
   for (prev=l=all_processes; !NULLP(l); prev=l, l=CDR(l)) {
     if (!process_alivep(CAR(l))) {
       /* Process died. delete it from the list */
@@ -136,6 +139,7 @@ static void process_terminate_handler(int sig) /* called when a child dies */
 	CDR(prev) = CDR(l);
     }
   }
+  MUT_UNLOCK(process_table_mutex);
 }
 
 
@@ -363,7 +367,9 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
 	     }
   }
   /* Chain new process in the list of all process */
+  MUT_LOCK(process_table_mutex);
   all_processes = STk_cons(z, all_processes);
+  MUT_UNLOCK(process_table_mutex);
   return z;
 } 
 
@@ -410,7 +416,9 @@ DEFINE_PRIMITIVE("fork", fork, subr01, (SCM thunk))
       z  = make_process();
       PROCESS_PID(z) = pid;
       /* Chain new process in the list of all process */
+      MUT_LOCK(process_table_mutex);
       all_processes = STk_cons(z, all_processes);
+      MUT_UNLOCK(process_table_mutex);
       return z;
   }
   return STk_false; /* never reached */
@@ -768,6 +776,7 @@ int STk_init_process(void)
   ADD_PRIMITIVE(proc_output);
   ADD_PRIMITIVE(proc_error);
   ADD_PRIMITIVE(proc_wait);
+  ADD_PRIMITIVE(proc_xstatus);
   ADD_PRIMITIVE(proc_signal);
   return TRUE;
 }

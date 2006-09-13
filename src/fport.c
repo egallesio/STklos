@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 15-Apr-2006 11:53 (eg)
+ * Last file update:  6-Aug-2006 22:05 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -45,10 +45,10 @@
 # define release(fd)
 #endif
 
-char *STk_current_filename;		  /* Name of the file we read */
 int STk_interactive = 0;		  /* We are in interactive mode */
+SCM STk_stdin, STk_stdout, STk_stderr;	  /* The unredirected ports */
+MUT_DECL(all_fports_mutex);
 
-SCM STk_stdin, STk_stdout, STk_stderr;		     /* The unredirected ports */
 
 /*
  * Since we manage ourselves our ports, we need to keep a reference on
@@ -79,16 +79,19 @@ static void register_port(SCM port)
 {
   struct port_list *new;
 
+  MUT_LOCK(all_fports_mutex);
   new            = STk_must_malloc(sizeof(struct port_list));
   new->port      = MAKE_FAKE_POINTER(port);
   new->next      = all_file_ports;
   all_file_ports = new;
+  MUT_UNLOCK(all_fports_mutex);
 }
 
 static void unregister_port(SCM port)
 {
   struct port_list *cur, *prev;
 
+  MUT_LOCK(all_fports_mutex);
   for (prev = cur = all_file_ports; cur ; prev=cur, cur=cur->next) {
     if (GET_FAKE_POINTER(cur->port) == port) {
       if (cur == prev)
@@ -98,6 +101,7 @@ static void unregister_port(SCM port)
       break;
     }
   }
+  MUT_UNLOCK(all_fports_mutex);
 }
 
 void STk_close_all_ports(void)
@@ -106,6 +110,7 @@ void STk_close_all_ports(void)
   SCM eport = STk_current_error_port();
   SCM oport = STk_current_output_port();
 
+  MUT_LOCK(all_fports_mutex);
   for (cur = all_file_ports; cur ; cur = cur->next) {
     tmp = GET_FAKE_POINTER(cur->port);
     PORT_RELEASE(tmp) = nop_release_port;
@@ -114,7 +119,8 @@ void STk_close_all_ports(void)
 	STk_close(tmp);
     }
   }
-  
+  MUT_UNLOCK(all_fports_mutex);
+
   /* Finally close error and output port (must be done last) */
   STk_close(eport); 
   STk_close(oport);
@@ -864,7 +870,6 @@ int STk_init_fport(void)
 
   ADD_PRIMITIVE(port_file_fd);
   ADD_PRIMITIVE(port_idle);
-  STk_current_filename	= "";	/* "" <=> stdin */
 
   //  ADD_PRIMITIVE(dbg);
   return TRUE;

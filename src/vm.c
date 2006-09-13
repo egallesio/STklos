@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 15-Apr-2006 17:45 (eg)
+ * Last file update:  4-Aug-2006 12:46 (eg)
  */
 
 // INLINER values
@@ -37,7 +37,7 @@
 # include <lurc.h>
 #endif
 
-#define DEBUG_VM
+// #define DEBUG_VM
 /* #define STAT_VM  */
 
 #ifdef STAT_VM 
@@ -455,7 +455,7 @@ DEFINE_PRIMITIVE("apply", scheme_apply, apply, (void))
 \*===========================================================================*/
 SCM STk_C_apply(SCM func, int nargs, ...) 
 {
-  static STk_instr code[]= {INVOKE, 0, END_OF_CODE};
+  STk_instr code[]= {INVOKE, 0, END_OF_CODE};
   va_list ap;
   vm_thread_t *vm = STk_get_current_vm();
   int i;

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update: 15-Apr-2006 12:27 (eg)
+;;;; Last file update: 20-Jun-2006 19:24 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything 
@@ -31,7 +31,7 @@
 
 
 (define-module REPL
-  (export main-repl repl)
+  (export main-repl repl repl-display-prompt main-repl-hook)
 
 ;;; In module REPL
 
@@ -51,7 +51,6 @@
 	(apply string-append
 	       (map (lambda (x) (if (string? x) x ""))
 		    args)))))
-
 
 (define (do-repl-command l)
   (case (car l)
@@ -109,14 +108,23 @@
 ;;	display-prompt ...
 ;; ----------------------------------------------------------------------
 (define (display-prompt module port)
-  (when interactive?
-    (when (> repl-level 1)
-      (display (do-color 'bold 'red (format "[~A] " repl-level)) port))
-    (display (do-color 'bold 'magenta
-		       (format "~A> " (module-name module))
-		       'black)
-	     port)
-    (flush-output-port port)))
+  (when (> repl-level 1)
+    (display (do-color 'bold 'red (format "[~A] " repl-level)) port))
+  (display (do-color 'bold 'magenta
+		     (format "~A> " (module-name module))
+		     'black)
+	   port)
+  (flush-output-port port))
+
+;; ----------------------------------------------------------------------
+;;	repl-display-prompt ...
+;; ----------------------------------------------------------------------
+(define repl-display-prompt (make-parameter display-prompt))
+
+;; ----------------------------------------------------------------------
+;;	main-repl-start ...
+;; ----------------------------------------------------------------------
+(define main-repl-hook (make-parameter void))
 
 ;; ----------------------------------------------------------------------
 ;;	repl ...
@@ -140,7 +148,10 @@ doc>
     (set! repl-level (+ repl-level 1))
     (let Loop ()
       (with-handler (lambda (c) (repl-handler c err))
-	 (display-prompt (current-module) err)
+	 ;; display prompt
+	 (when interactive? 
+	   ( (repl-display-prompt) (current-module) err ))
+
 	 (let ((e (%read in)))
 	   (display (do-color 'clear))
 	   (cond 
@@ -189,6 +200,7 @@ doc>
 	      "Copyright © 1999-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>\n"
 	      'normal)
 	     (current-error-port)))
+  ((main-repl-hook))
   (repl)
   (%pre-exit 0))
 )

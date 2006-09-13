@@ -2,7 +2,7 @@
  *
  * s y m b o l . c			-- Symbols management
  *
- * Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 20-Nov-1993 12:12
- * Last file update: 15-Dec-2005 15:10 (eg)
+ * Last file update:  6-Aug-2006 23:19 (eg)
  */
 
 #include <ctype.h>
@@ -71,7 +71,13 @@ SCM STk_make_uninterned_symbol(char *name)
 
 SCM STk_intern(char *name)
 {
-  return STk_hash_intern_symbol(&obarray, name, STk_make_uninterned_symbol);
+  SCM res;
+  MUT_DECL(obarray_mutex);
+
+  MUT_LOCK(obarray_mutex);
+  res =  STk_hash_intern_symbol(&obarray, name, STk_make_uninterned_symbol);
+  MUT_UNLOCK(obarray_mutex);
+  return res;
 }
 
 SCM STk_intern_ci(char *name)
@@ -80,7 +86,7 @@ SCM STk_intern_ci(char *name)
 
   if (!STk_read_case_sensitive)
     for (s= name; *s; s++) *s=tolower(*s);
-  return STk_hash_intern_symbol(&obarray, name, STk_make_uninterned_symbol);
+  return STk_intern(name);
 }
   
 

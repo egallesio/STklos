@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  3-Feb-2006 17:54 (eg)
+;; Last file update: 12-Sep-2006 15:27 (eg)
 ;;
 ;; ======================================================================
 
@@ -473,7 +473,9 @@ be accessed as a normal port with the standard Scheme primitives.])
 (insertdoc 'read-char)
 (insertdoc 'read-chars)
 (insertdoc 'read-chars!)
+(insertdoc 'read-byte)
 (insertdoc 'peek-char)
+(insertdoc 'peek-byte)
 (insertdoc 'eof-object?)
 (insertdoc 'eof-object)
 (insertdoc 'char-ready?)
@@ -490,6 +492,7 @@ be accessed as a normal port with the standard Scheme primitives.])
 (insertdoc 'newline)
 (insertdoc 'write-char)
 (insertdoc 'write-chars)
+(insertdoc 'write-byte)
 (index "SRFI-28")
 (insertdoc 'format)
 (insertdoc 'flush-output-port)
@@ -764,5 +767,9 @@ See SRFI document for more information.])
 (insertdoc 'pp)
 (insertdoc 'uri-parse)
 (insertdoc 'string->html))
-
+(insertdoc 'base64-encode)
+(insertdoc 'base64-decode)
+(insertdoc 'base64-encode-string)
+(insertdoc 'base64-decode-string)
+   
 )

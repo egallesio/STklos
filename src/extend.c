@@ -3,7 +3,7 @@
  * e x t e n d . c			-- All the stuff dealing with 
  *					   extended types
  *
- * Copyright © 1995-2000 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1995-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Mar-1995 11:31
- * Last file update: 14-Jun-2000 13:34 (eg)
+ * Last file update:  6-Aug-2006 22:09 (eg)
  */
 
 #include "stklos.h"
@@ -34,9 +34,17 @@ struct extended_type_descr *STk_xtypes[MAX_CELL_TYPES] = {NULL};
 
 static int user_extended_type = tc_last_standard;
 
-int STk_new_user_type(void)
+
+int STk_new_user_type(struct extended_type_descr *descr)
 {
-  return ++user_extended_type;
+  MUT_DECL(lck);
+
+  MUT_LOCK(lck);
+  user_extended_type += 1;
+  STk_xtypes[user_extended_type]= descr;
+  MUT_UNLOCK(lck);
+
+  return user_extended_type;
 }
 
 

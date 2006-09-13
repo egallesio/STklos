@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  5-Jan-2000 12:17 (eg)
- * Last file update: 16-Apr-2006 11:00 (eg)
+ * Last file update:  5-Sep-2006 12:02 (eg)
  */
 
 
@@ -30,30 +30,13 @@
 
 
 int STk_library_initialized = FALSE;  /* True when successfully initialized */
-char *STk_library_path      = SCMDIR; /* The base directory where files are found */
 void *STk_start_stack;
-
-static void init_library_path(void)
-{
-  char *s;
-
-  if ((s = getenv("STKLOS_LIBRARY"))) {
-    /* Initialize STk_library_path with the content of STKLOS_LIBRARY 
-     * shell variable.
-     */
-    STk_library_path = (char *) STk_must_malloc(strlen(s) + 1); 
-    strcpy(STk_library_path, s);
-  }
-  /* Otherwise the variable is already intialized */
-}
-
 
 int
 STk_init_library(int *argc, char ***argv, int stack_size)
 {
   STk_get_stack_pointer(&STk_start_stack);
 
-  init_library_path();
   return 
     STk_init_env()		&&
     STk_init_symbol()		&&
@@ -85,5 +68,6 @@ STk_init_library(int *argc, char ***argv, int stack_size)
     STk_init_process()		&&
     STk_init_socket()		&&
     STk_init_object()		&&
+    STk_init_base64()		&&
     (STk_library_initialized = TRUE);
 }

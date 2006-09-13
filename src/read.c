@@ -20,7 +20,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update:  4-Apr-2006 19:31 (eg)
+ * Last file update:  6-Aug-2006 22:27 (eg)
  *
  */
 
@@ -664,11 +664,15 @@ static SCM read_it(SCM port, int case_significant, int constant)
 {
   int c;
   SCM l, res;
-  
+  MUT_DECL(read_mutex);
+
+  c = flush_spaces(port, (char *) NULL, (SCM) NULL);
+
+  MUT_LOCK(read_mutex);
   cycles        = STk_nil;
   comment_level = 0;
 
-  c = flush_spaces(port, (char *) NULL, (SCM) NULL);
+
   if (c == EOF) return(STk_eof);
   STk_ungetc(c, port);
 
@@ -678,6 +682,7 @@ static SCM read_it(SCM port, int case_significant, int constant)
     l = find_references(&res, STk_nil);
     patch_references(port, l);
   }
+  MUT_UNLOCK(read_mutex);
   return res;
 }
 
@@ -722,9 +727,12 @@ DEFINE_PRIMITIVE("define-reader-ctor",reader_ctor, subr2, (SCM symbol, SCM proc)
   tmp = STk_int_assq(symbol, ctor_table);
   if (tmp != STk_false)
     CDR(tmp) = proc;
-  else
+  else {
+    MUT_DECL(lck);
+    MUT_LOCK(lck);
     ctor_table = STk_cons(STk_cons(symbol, proc), ctor_table);
-  
+    MUT_UNLOCK(lck);
+  }
   return STk_void;
 }
 

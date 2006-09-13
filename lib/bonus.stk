@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  6-Apr-2006 17:54 (eg)
+;;;; Last file update: 11-Sep-2006 17:23 (eg)
 ;;;;
 
 ;;
@@ -815,6 +815,36 @@ doc>
 
 
 ;; ======================================================================
+;;	base64 ...
+;; ======================================================================
+#|
+<doc EXT base64-encode-string
+ * (base64-encode-string str)
+ *
+ * Return a string contening the contents of |str| converted to Base64
+ * encoded format
+doc>
+
+<doc EXT base64-decode-string
+ * (base64-encode-string str)
+ *
+ * Decode the contents of |str| expressed in Base64.
+doc>
+|#
+(define base64-encode-string #f)
+(define base64-decode-string #f)
+(let ((encode/decode (lambda (op)
+		       (lambda (str)
+			 (let ((in  (open-input-string str))
+			       (out (open-output-string)))
+			   (op in out)
+			   (get-output-string out))))))
+
+  (set! base64-encode-string (encode/decode base64-encode))
+  (set! base64-decode-string (encode/decode base64-decode)))
+
+
+;; ======================================================================
 ;;	ansi-color ...
 ;; ======================================================================
 (define (ansi-color . args)
@@ -926,6 +956,30 @@ doc>
   (let ((p (current-error-port)))
     (for-each (lambda (x) (display x p)) l)
     (newline p)))
+
+
+#|
+<doc EXT printf fprintf eprintf
+ * (printf fmt obj ...)
+ * (fprintf port fmt obj ...)
+ * (eprintf fmt obj ...)
+ *
+ * These procedures are specialized version of |,(ref :mark "format")|.
+ * In these procedures, |fmt| is a string using the |format| conventions.
+ * |printf| outputs go on the current output port.
+ * |eprintf| outputs go on the current error port.
+ * |fprintf| outputs go on the specified |port|.
+doc>
+|#
+(define (eprintf fmt . args)
+  (apply format (current-error-port) fmt args))
+
+(define (printf fmt . args)
+  (apply format #t fmt args))
+
+(define (fprintf port fmt . args)
+  (apply format port fmt args))
+
 
 #|
 <doc EXT  exec exec-list
@@ -1099,15 +1153,21 @@ doc>
 
 #|
 <doc EXT make-path
- * (make-path dirname name)
+ * (make-path dirname .  names)
  *
- * Builds a file name from the directory |dirname| and |name|.
- *
+ * Builds a file name from the directory |dirname| and |names|. For instance,
+ * on a Unix system:
+ * @lisp
+ * (make-path "a" "b" "c")   => "a/b/c"
+ * @lisp
 doc>
 |#
-(define (make-path dirname name)
-  (format "~A~A~A" dirname (file-separator) name))
-
+(define (make-path dirname . names)
+  (if (null? names)
+      dirname
+      (apply make-path
+	     (format "~A~A~A" dirname (file-separator) (car names))
+	     (cdr names))))
 
 #|
 <doc  EXT port-idle-register! port-idle-unregister! port-idle-reset!
@@ -1391,16 +1451,22 @@ doc>
 doc>
 |#
 (define-macro (parameterize bindings . body)
-  (if (null? bindings)
-      `(begin ,@body)
-      `(dynamic-wind
+  (let ((tmp (map (lambda (_) (gensym)) bindings)))
+    `(let ,(map (lambda (x y) (list y (cadr x)))
+		 bindings tmp)
+       (dynamic-wind
 	   (lambda ()
-	     (%parameter-dynenv-push! ,(caar bindings))
-	     ,(car bindings))
+	     ;; First push all the current parameter values
+	     ,@(map (lambda (x) `(%parameter-dynenv-push! ,(car x)))
+		    bindings)
+	     ;; Change all parameters values
+	     ,@(map (lambda (x y) `(,(car x) ,y))
+		    bindings tmp))
 	   (lambda ()
-	     (parameterize ,(cdr bindings) ,@body))
+	     ,@body)
 	   (lambda ()
-	     (%parameter-dynenv-pop! ,(caar bindings))))))
+	     ,@(map (lambda (x) `(%parameter-dynenv-pop! ,(car x)))
+		   bindings))))))
 
 ;;
 ;; SRFI-55: "require-extension"

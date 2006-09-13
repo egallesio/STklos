@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 15-Apr-2006 17:30 (eg)
+ * Last file update:  6-Aug-2006 22:09 (eg)
  */
 
 #ifndef STKLOS_H
@@ -53,6 +53,11 @@ extern "C"
 # include <gc.h>
 #endif
 
+#ifndef THEADS_NONE 
+#  include <pthread.h>
+#endif
+
+
 /*===========================================================================*\
  * 
  * 		Declaration of some constants (mainly maxima) 
@@ -83,6 +88,22 @@ extern "C"
 #define AS_LONG(x)		((unsigned long) (x))
 #define AS_SCM(x)		((SCM) ((unsigned long) (x)))
 
+
+/*===========================================================================*\
+ * 
+ * 				Threads stuff
+ *
+\*===========================================================================*/
+#ifdef THREADS_NONE 
+#  define MUT_DECL(lck)
+#  define MUT_LOCK(lck)
+#  define MUT_UNLOCK(lck)
+#else
+#  define MUT_DECL(lck)	   static pthread_mutex_t lck = PTHREAD_MUTEX_INITIALIZER;
+#  define MUT_LOCK(lck)    pthread_mutex_lock(&lck);
+#  define MUT_UNLOCK(lck)  {  pthread_mutex_unlock(&lck); \
+    			      pthread_mutex_destroy(&lck); }
+#endif
 
 /*===========================================================================*\
  * 
@@ -421,12 +442,9 @@ extern struct extended_type_descr *STk_xtypes[];
 #define XTYPE_NAME(d)		    	 (d->name)
 #define XTYPE_PRINT(d)		    	 (d->print)
 #define DEFINE_XTYPE(_type, _descr) 	 (STk_xtypes[CPP_CONCAT(tc_, _type)]=_descr)
-#define DEFINE_USER_TYPE(_type, _descr) {	\
-   _type = STk_new_user_type();			\
-   STk_xtypes[_type]=_descr;			\
-}
+#define DEFINE_USER_TYPE(_type, _descr)  { _type = STk_new_user_type(_descr); }
 
-int STk_new_user_type(void);
+int STk_new_user_type(struct extended_type_descr *);
 int STk_init_extend(void);
 
 /*
@@ -461,7 +479,6 @@ int STk_init_keyword(void);
   ------------------------------------------------------------------------------
 */
 extern int   STk_library_initialized; /* True when successfully initialized */
-extern char *STk_library_path;	      /* The base directory where files are found */
 extern void *STk_start_stack;	      /* An approx. of main thread stack addr */
 
   int STk_init_library(int *argc, char ***argv, int stack_size);

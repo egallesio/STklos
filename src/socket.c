@@ -1,7 +1,7 @@
 /*
  * socket.c				-- Socket acess for STklos
  * 
- * Copyright © 2003-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update: 15-Aug-2005 20:15 (eg)
+ * Last file update: 26-May-2006 10:52 (eg)
  */
 
 #include <sys/types.h>
@@ -104,7 +104,7 @@ static void error_bad_socket(SCM obj)
 
 static void set_socket_io_ports(SCM sock, int line_buffered)
 {
-  int s;
+  int s, t;
   char *hostname, *fname;
   SCM in, out;
 
@@ -113,8 +113,9 @@ static void set_socket_io_ports(SCM sock, int line_buffered)
   sprintf(fname, "%s:%ld", hostname, SOCKET_PORTNUM(sock));
   
   s   = SOCKET_FD(sock);
+  t   = dup(s);
   in  = STk_fd2scheme_port(s, "r", fname);
-  out = STk_fd2scheme_port(s, "w", fname);
+  out = STk_fd2scheme_port(t, "w", fname);
 
   if (NULLP(in) || NULLP(out)) 
     STk_error("cannot create socket IO ports");

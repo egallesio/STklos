@@ -1,3 +1,52 @@
+2006-09-12  Erick Gallesio  <eg@essi.fr>
+
+	* src/port.c: Added READ-BYTE and WRITE-BYTE
+
+2006-09-08  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk: Added primitives PRINTF, EPRINTF, FPRINTF
+
+2006-09-05  Erick Gallesio  <eg@essi.fr>
+
+	* lib/boot.stk ("base64"): Added base64 functions
+
+	* lib/bonus.stk (make-path): Accept now multiple file to build a
+	complete hierarchy
+
+2006-09-04  Erick Gallesio  <eg@essi.fr>
+
+	* lib/r5rs.stk (%make-with-file): The file name in error messages 
+	was incorrect.
+
+	* src/process.c: PROCESS-EXIT-STATUS was not exported.
+
+2006-08-04  Erick Gallesio  <eg@essi.fr>
+
+	* src/lib.c: Deletedthe managemement of the STk_library_path
+	variable which was not used anymore
+
+2006-06-20  Erick Gallesio  <eg@essi.fr>
+
+	* src/system.c: file-size, file-exists? and a bunch of other
+	functions didn't use the ~ expansion.
+
+	* lib/repl.stk: Added the MAIN-REPL-HOOK parameter.
+
+2006-06-16  Erick Gallesio  <eg@essi.fr>
+
+	* lib/repl.stk (repl-display-prompt): A new parameter which permit
+	to get/change the repl display function.
+
+2006-05-29  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk (parameterize): Bug fix when using parallel
+	assignments
+
+2006-05-26  Erick Gallesio  <eg@essi.fr>
+
+	* src/socket.c (set_socket_io_ports): Going back and added back
+	the dup on socket creation. 
+
 2006-04-26  Erick Gallesio  <eg@essi.fr>
 
 	* src/thread-pthreads.c (thread-terminate!): Fixed a deadlock problem.

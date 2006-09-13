@@ -1,7 +1,7 @@
 /*
  * u v e c t o r . c			-- Uniform Vectors Implementation
  * 
- * Copyright © 2001-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2001-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 25-Apr-2005 13:58 (eg)
+ * Last file update:  6-Aug-2006 23:07 (eg)
  */
 
 #include "stklos.h"
@@ -121,8 +121,9 @@ static char* type_vector(SCM vect)
 /* Return the type of an uniform vector given its tag */
 int STk_uniform_vector_tag(char *s)
 {
-  static char **p, *table[] = 
+  static char *table[] = 
     {"s8", "u8", "s16", "u16", "s32", "u32", "s64", "u64", "f32", "f64", "" };
+  char **p;
 
   for (p = table; **p; p++) {
     if (strcmp(s, *p) == 0) return p - table;

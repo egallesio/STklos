@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 16-Apr-2006 11:47 (eg)
+# Last file update: 11-Sep-2006 17:24 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d @LURCDIR@
 
@@ -144,7 +144,7 @@ boot:	../src/boot.img
 doc: $(DOCDB)
 
 $(DOCDB): $(scheme_SRCS) $(scheme_BOOT)
-	../src/stklos -c -b ../src/boot.img -f ../doc/extract-doc \
+	../src/stklos -q -c -b ../src/boot.img -f ../doc/extract-doc \
 	$(scheme_SRCS) $(scheme_BOOT) > $(DOCDB)
 
 clean:

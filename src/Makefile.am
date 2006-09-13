@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 25-Apr-2006 16:46 (eg)
+# Last file update:  5-Sep-2006 11:42 (eg)
 
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -30,7 +30,7 @@ if NO_THREAD
   THREAD_FILES = thread-none.c mutex-none.c
 endif
 
-stklos_SOURCES = boolean.c boot.c char.c cond.c dynload.c env.c error.c \
+stklos_SOURCES = base64.c boolean.c boot.c char.c cond.c dynload.c env.c error.c \
  extend.c fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
  list.c misc.c number.c object.c parameter.c path.c port.c print.c \
  proc.c process.c promise.c read.c regexp.c  \
@@ -79,7 +79,7 @@ struct.o cond.o: struct.h
 doc:  $(DOCDB)
 
 $(DOCDB): $(stklos_SOURCES)	
-	./stklos -b boot.img -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
+	./stklos -b boot.img -c -q -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
 
 clean:
 	/bin/rm -f *.o $(DOCDB)
