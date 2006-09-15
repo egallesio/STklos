@@ -1,7 +1,7 @@
 ;;;;
 ;;;; peephole.stk	-- Peephole Optimiser fro the STklos VM
 ;;;; 
-;;;; Copyright © 2001-2003 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 20:32 (eg)
-;;;; Last file update: 10-Feb-2003 17:41 (eg)
+;;;; Last file update: 14-Sep-2006 14:41 (eg)
 ;;;;
 
 ; ======================================================================
@@ -163,6 +163,34 @@
 	      (replace-2-instr code (list 'GREF-INVOKE 
 					  (this-arg1 code)
 					  (next-arg1 code))))
+
+	     ;; [GLOBAL-REF, TAIL-INVOKE] => GREF-TAIL(INVOKE
+	     ((and (eq? i1 'GLOBAL-REF) (eq? i2 'TAIL-INVOKE))
+	      (replace-2-instr code (list 'GREF-TAIL-INVOKE 
+					  (this-arg1 code)
+					  (next-arg1 code))))
+	     
+	     ;; [LOCAL-REFx, PUSH] => LOCAL-REFx-PUSH
+	     ((and (eq? i2 'PUSH) (memq i1 '(LOCAL-REF0 LOCAL-REF1
+					     LOCAL-REF2 LOCAL-REF3
+					     LOCAL-REF4)))
+	      (replace-2-instr code
+			       (list (case i1
+				       ((LOCAL-REF0) 'LOCAL-REF0-PUSH)
+				       ((LOCAL-REF1) 'LOCAL-REF1-PUSH)
+				       ((LOCAL-REF2) 'LOCAL-REF2-PUSH)
+				       ((LOCAL-REF3) 'LOCAL-REF3-PUSH)
+				       ((LOCAL-REF4) 'LOCAL-REF4-PUSH)))))
+	     
+	     ;; [GLOBAL-REF, PUSH] => GLOBAL-REF-PUSH
+	     ((and (eq? i1 'GLOBAL-REF) (eq? i2 'PUSH))
+	      (replace-2-instr code (list 'GLOBAL-REF-PUSH
+					  (this-arg1 code))))
+
+	     ;; [PUSH, PREPARE-CALL] => PUSH-PREPARE-CALL
+	     ((and (eq? i1 'PUSH) (eq? i2 'PREPARE-CALL))
+	      (replace-2-instr code (list 'PUSH-PREPARE-CALL)))
+			       
 	     (else ;; No optimization; goto next instruction
 	      (set! code (cdr code))))))
       ;; Loop again on the same instruction

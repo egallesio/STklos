@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k			-- STklos Compiler
 ;;;; 
-;;;; Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 27-Dec-2005 20:27 (eg)
+;;;; Last file update: 15-Sep-2006 11:18 (eg)
 ;;;;
 
 ;;(define-module new-compiler
@@ -29,7 +29,7 @@
 
 (define *compiler-port*		#f)
 (define *compiler-options* 	(list 'warn-use-undef))
-(define *compiler-inline*  	'(+ - * / = < <= > >= cons car cdr null? list not 
+(define *compiler-inline*  	'(+ ++ - * / = < <= > >= cons car cdr null? list not 
  				  vector-ref vector-set! string-ref string-set!
  				  eq? eqv? equal? void))
 ;(define *compiler-inline*	'(+ - * / = <))
@@ -89,22 +89,25 @@
       (set! *code-constants* (append! *code-constants* x)))
     (- (length *code-constants*) (length x))))
 
-(define compile-constant
+(define small-integer-constant?
   (let ((min-int (- (expt 2 15)))
 	(max-int (- (expt 2 15) 1)))
-    (lambda (v env tail?)
-      (cond 
-        ((eq? v #t)    		       (emit 'IM-TRUE))
-	((eq? v #f)    		       (emit 'IM-FALSE))
-	((eq? v '())   		       (emit 'IM-NIL))
-	((eq? v -1)    		       (emit 'IM-MINUS1))
-	((eq? v 0)     		       (emit 'IM-ZERO))
-	((eq? v 1)     		       (emit 'IM-ONE))
-	((eq? v (void))		       (emit 'IM-VOID))
-	((and (integer? v)
-	      (exact? v)
-	      (<= min-int v max-int))  (emit 'SMALL-INT v))
-	(else 			       (emit 'CONSTANT (fetch-constant v)))))))
+    (lambda (v)
+      (and (integer? v)
+	   (exact? v)
+	   (<= min-int v max-int)))))
+      
+(define (compile-constant v env tail?)
+  (cond 
+    ((eq? v #t)    		       (emit 'IM-TRUE))
+    ((eq? v #f)    		       (emit 'IM-FALSE))
+    ((eq? v '())   		       (emit 'IM-NIL))
+    ((eq? v -1)    		       (emit 'IM-MINUS1))
+    ((eq? v 0)     		       (emit 'IM-ZERO))
+    ((eq? v 1)     		       (emit 'IM-ONE))
+    ((eq? v (void))		       (emit 'IM-VOID))
+    ((small-integer-constant? v)       (emit 'SMALL-INT v))
+    (else 			       (emit 'CONSTANT (fetch-constant v)))))
 
 
 #|
@@ -777,7 +780,6 @@ doc>
   (emit (if tail? 'TAIL-INVOKE  'INVOKE)
 	(length actuals)))
 
-
 (define (can-be-inlined fct)
   (or (memq fct *always-inlined*)
       (memq fct *compiler-inline*)))
@@ -803,6 +805,14 @@ doc>
 		       (emit mnemo))
 		     (compiler-error fct epair "2 arguments required (~A provided)"
 				    len))))
+	(oper2 (lambda (mnemo a b)
+		 (compile a env epair #f)
+		 (emit mnemo b)))
+	(komp2 (lambda (mnemo a b)
+		 (compile a env epair #f)
+		 (emit 'PUSH)
+		 (compile b env epair #f)
+		 (emit mnemo)))
 	(comp3 (lambda (mnemo)
 		 (if (= len 3)
 		     (begin 
@@ -826,27 +836,70 @@ doc>
 
       ;; User functions 
       ((void) (emit 'IM-VOID))
-      ((+)    (case len
-		((0)  (emit 'IM-ZERO))
-		((2)  (if (eq? (car actuals) 1)
-			  (comp 'IN-INCR (cadr actuals))
-			  (if (eq? (cadr actuals) 1)
-			      (comp 'IN-INCR (car actuals))
-			      (comp2 'IN-ADD2))))
+      ((+)  (case len
+	      ((0)  (emit 'IM-ZERO))
+	      ((1)  (compile (car actuals) env epair tail?))
+	      ((2)  (let ((a (car actuals))
+			  (b (cadr actuals)))
+		      (cond
+			((and (number? a) (number? b))
+			 (compile-constant (+ a b) env #f))
+			((small-integer-constant? a)
+			 (oper2 'IN-SINT-ADD2 b a))
+			((small-integer-constant? b)
+			 (oper2 'IN-SINT-ADD2 a b))
+			(else
+			 (comp2 'IN-ADD2)))))
+	      (else (compile-normal-call fct actuals len env epair #f))))
+      ((-)  (case len
+		((0)  (compiler-error '- epair "needs at least one argument"))
+		((1)  (if (number? (car actuals))
+			  (compile-constant (- (car actuals)) env epair #f)
+			  (compile-normal-call fct actuals len env epair #f)))
+		((2)  (let ((a (car actuals))
+			    (b (cadr actuals)))
+			(cond
+			  ((and (number? a) (number? b))
+			   (compile-constant (- a b) env tail?))
+			  ((small-integer-constant? a)
+			   (oper2 'IN-SINT-SUB2 b a))
+			  ((and (number? b)
+				(small-integer-constant? (- b)))
+			   (oper2 'IN-SINT-ADD2 a (- b)))
+			  (else
+			   (comp2 'IN-SUB2)))))
 		(else (compile-normal-call fct actuals len env epair #f))))
-      ((-)    (case len
-		((0)   (compiler-error '- epair "needs at least one argument"))
-		((2)   (if (eq? (cadr actuals) 1)
-			   (comp 'IN-DECR (car actuals))
-			   (comp2 'IN-SUB2)))
-		(else  (compile-normal-call fct actuals len env epair #f))))
       ((*)    (case len
 		((0)  (emit 'IM-ONE))
-		((2)  (comp2 'IN-MUL2))
+		((1)  (compile (car actuals) env epair tail?))
+		((2)  (let ((a (car actuals))
+			    (b (cadr actuals)))
+			(cond
+			  ((and (number? a) (number? b))
+			   (compile-constant (* a b) env tail?))
+			  ((small-integer-constant? a)
+			   (oper2 'IN-SINT-MUL2 b a))
+			  ((small-integer-constant? b)
+			   (oper2 'IN-SINT-MUL2 a  b))
+			  (else
+			   (comp2 'IN-MUL2)))))
 		(else (compile-normal-call fct actuals len env epair #f))))
       ((/)    (case len
 		((0)   (compiler-error '/ epair "needs at least one argument"))
-		((2)   (comp2 'IN-DIV2))
+		((1)   (if (number? (car actuals))
+			  (compile-constant (/ (car actuals)) env epair #f)
+			  (compile-normal-call fct actuals len env epair #f)))
+		((2)  (let ((a (car actuals))
+			    (b (cadr actuals)))
+			(cond
+			  ((and (number? a) (number? b))
+			   (compile-constant (/ a b) env tail?))
+			  ((small-integer-constant? a)
+			   (oper2 'IN-SINT-DIV2 b a))
+			  ((small-integer-constant? b)
+			   (oper2 'IN-SINT-DIV2 a  b))
+			  (else
+			   (comp2 'IN-DIV2)))))
 		(else  (compile-normal-call fct actuals len env epair #f))))
       ((= < > <= >=)
 		(case len

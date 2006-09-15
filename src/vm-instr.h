@@ -103,8 +103,32 @@
 #  define JUMP_NOT_EQ          98
 #  define JUMP_NOT_EQV         99
 #  define JUMP_NOT_EQUAL       100
+#  define LOCAL_REF0_PUSH      101
+#  define LOCAL_REF1_PUSH      102
+#  define LOCAL_REF2_PUSH      103
+#  define LOCAL_REF3_PUSH      104
+#  define LOCAL_REF4_PUSH      105
+#  define GLOBAL_REF_PUSH      106
+#  define UGLOBAL_REF_PUSH     107
+#  define GREF_TAIL_INVOKE     108
+#  define UGREF_TAIL_INVOKE    109
+#  define PUSH_PREPARE_CALL    110
+#  define IN_SINT_ADD2         111
+#  define IN_SINT_SUB2         112
+#  define IN_SINT_MUL2         113
+#  define IN_SINT_DIV2         114
+#  define UNUSED_3             115
+#  define UNUSED_4             116
+#  define UNUSED_5             117
+#  define UNUSED_6             118
+#  define UNUSED_7             119
+#  define UNUSED_8             120
+#  define UNUSED_9             121
+#  define UNUSED_10            122
+#  define UNUSED_11            123
+#  define UNUSED_12            124
 
-#  define NB_VM_INSTR (JUMP_NOT_EQUAL      +1)
+#  define NB_VM_INSTR (UNUSED_12           +1)
 #endif
 
 
@@ -212,6 +236,30 @@ static void *jump_table[] = {
   &&lab_JUMP_NOT_EQ         ,
   &&lab_JUMP_NOT_EQV        ,
   &&lab_JUMP_NOT_EQUAL      ,
+  &&lab_LOCAL_REF0_PUSH     ,
+  &&lab_LOCAL_REF1_PUSH     ,
+  &&lab_LOCAL_REF2_PUSH     ,
+  &&lab_LOCAL_REF3_PUSH     ,
+  &&lab_LOCAL_REF4_PUSH     ,
+  &&lab_GLOBAL_REF_PUSH     ,
+  &&lab_UGLOBAL_REF_PUSH    ,
+  &&lab_GREF_TAIL_INVOKE    ,
+  &&lab_UGREF_TAIL_INVOKE   ,
+  &&lab_PUSH_PREPARE_CALL   ,
+  &&lab_IN_SINT_ADD2        ,
+  &&lab_IN_SINT_SUB2        ,
+  &&lab_IN_SINT_MUL2        ,
+  &&lab_IN_SINT_DIV2        ,
+  &&lab_UNUSED_3            ,
+  &&lab_UNUSED_4            ,
+  &&lab_UNUSED_5            ,
+  &&lab_UNUSED_6            ,
+  &&lab_UNUSED_7            ,
+  &&lab_UNUSED_8            ,
+  &&lab_UNUSED_9            ,
+  &&lab_UNUSED_10           ,
+  &&lab_UNUSED_11           ,
+  &&lab_UNUSED_12           ,
   NULL};
 #endif
 #undef DEFINE_JUMP_TABLE
@@ -321,6 +369,30 @@ static char *name_table[] = {
   "JUMP_NOT_EQ         ",
   "JUMP_NOT_EQV        ",
   "JUMP_NOT_EQUAL      ",
+  "LOCAL_REF0_PUSH     ",
+  "LOCAL_REF1_PUSH     ",
+  "LOCAL_REF2_PUSH     ",
+  "LOCAL_REF3_PUSH     ",
+  "LOCAL_REF4_PUSH     ",
+  "GLOBAL_REF_PUSH     ",
+  "UGLOBAL_REF_PUSH    ",
+  "GREF_TAIL_INVOKE    ",
+  "UGREF_TAIL_INVOKE   ",
+  "PUSH_PREPARE_CALL   ",
+  "IN_SINT_ADD2        ",
+  "IN_SINT_SUB2        ",
+  "IN_SINT_MUL2        ",
+  "IN_SINT_DIV2        ",
+  "UNUSED_3            ",
+  "UNUSED_4            ",
+  "UNUSED_5            ",
+  "UNUSED_6            ",
+  "UNUSED_7            ",
+  "UNUSED_8            ",
+  "UNUSED_9            ",
+  "UNUSED_10           ",
+  "UNUSED_11           ",
+  "UNUSED_12           ",
   NULL};
 #endif
 #undef DEFINE_NAME_TABLE

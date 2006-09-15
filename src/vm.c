@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  4-Aug-2006 12:46 (eg)
+ * Last file update: 15-Sep-2006 11:19 (eg)
  */
 
 // INLINER values
@@ -801,17 +801,17 @@ CASE(IM_VOID)   { vm->val = STk_void; 	     NEXT1;}
 CASE(SMALL_INT) { vm->val = MAKE_INT(fetch_next());		NEXT1;}
 CASE(CONSTANT)  { vm->val = fetch_const();	        	NEXT1;}
 
-CASE(FALSE_PUSH)  { push(vm->val = STk_false);       NEXT1;}
-CASE(TRUE_PUSH)   { push(vm->val = STk_true);        NEXT1;}
-CASE(NIL_PUSH)    { push(vm->val = STk_nil);         NEXT1;}
-CASE(MINUS1_PUSH) { push(vm->val = MAKE_INT(-1));    NEXT1;}
-CASE(ZERO_PUSH)   { push(vm->val = MAKE_INT( 0));    NEXT1;}
-CASE(ONE_PUSH)    { push(vm->val = MAKE_INT(+1));    NEXT1;}
-CASE(VOID_PUSH)   { push(vm->val = STk_void);        NEXT1;}
+CASE(FALSE_PUSH)  { push(STk_false);       NEXT;}
+CASE(TRUE_PUSH)   { push(STk_true);        NEXT;}
+CASE(NIL_PUSH)    { push(STk_nil);         NEXT;}
+CASE(MINUS1_PUSH) { push(MAKE_INT(-1));    NEXT;}
+CASE(ZERO_PUSH)   { push(MAKE_INT( 0));    NEXT;}
+CASE(ONE_PUSH)    { push(MAKE_INT(+1));    NEXT;}
+CASE(VOID_PUSH)   { push(STk_void);        NEXT;}
 
 
-CASE(INT_PUSH)      { push(vm->val=MAKE_INT(fetch_next())) ; NEXT1; }
-CASE(CONSTANT_PUSH) { push(vm->val=fetch_const()); 	     NEXT1; }
+CASE(INT_PUSH)      { push(MAKE_INT(fetch_next())) ; NEXT; }
+CASE(CONSTANT_PUSH) { push(fetch_const()); 	     NEXT; }
 
 
 CASE(GLOBAL_REF) {
@@ -826,8 +826,24 @@ CASE(GLOBAL_REF) {
 CASE(UGLOBAL_REF) { 
   /* Never produced by compiler */ 
   vm->val = fetch_global(); 
-  NEXT1; 
+  NEXT1;
 }
+
+CASE(GLOBAL_REF_PUSH) {
+  SCM ref;
+
+  push(STk_lookup(fetch_const(), vm->env, &ref, TRUE));
+  /* patch the code for optimize next accesses */
+  vm->pc[-2]  = UGLOBAL_REF_PUSH;
+  vm->pc[-1]  = add_global(&CDR(ref));
+  NEXT;
+}
+CASE(UGLOBAL_REF_PUSH) { 
+  /* Never produced by compiler */ 
+  push(fetch_global()); 
+  NEXT;
+}
+
 
 CASE(GREF_INVOKE) {
   SCM ref;
@@ -850,6 +866,29 @@ CASE(UGREF_INVOKE) { /* Never produced by compiler */
   tailp = FALSE; goto FUNCALL;
 }
 
+CASE(GREF_TAIL_INVOKE) {
+  SCM ref;
+
+  vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
+  nargs   = fetch_next();
+  /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
+  vm->pc[-3]  = UGREF_TAIL_INVOKE;
+  vm->pc[-2]  = add_global(&CDR(ref));
+
+  /* and now invoke */
+  tailp=TRUE; goto FUNCALL;
+}
+
+CASE(UGREF_TAIL_INVOKE) { /* Never produced by compiler */ 
+  vm->val = fetch_global();
+  nargs   = fetch_next();
+  
+  /* invoke */
+  tailp = TRUE; goto FUNCALL;
+}
+
+
+
 CASE(LOCAL_REF0) { vm->val = FRAME_LOCAL(vm->env, 0); 	     NEXT1;}
 CASE(LOCAL_REF1) { vm->val = FRAME_LOCAL(vm->env, 1); 	     NEXT1;}
 CASE(LOCAL_REF2) { vm->val = FRAME_LOCAL(vm->env, 2); 	     NEXT1;}
@@ -868,6 +907,11 @@ CASE(DEEP_LOCAL_REF) {
   NEXT1;
 }
 
+CASE(LOCAL_REF0_PUSH) {push(FRAME_LOCAL(vm->env, 0));  NEXT;}
+CASE(LOCAL_REF1_PUSH) {push(FRAME_LOCAL(vm->env, 1));  NEXT;}
+CASE(LOCAL_REF2_PUSH) {push(FRAME_LOCAL(vm->env, 2));  NEXT;}
+CASE(LOCAL_REF3_PUSH) {push(FRAME_LOCAL(vm->env, 3));  NEXT;}
+CASE(LOCAL_REF4_PUSH) {push(FRAME_LOCAL(vm->env, 4));  NEXT;}
 
 CASE(GLOBAL_SET) {
   SCM ref;
@@ -889,6 +933,7 @@ CASE(LOCAL_SET2) { FRAME_LOCAL(vm->env, 2)           = vm->val; NEXT0;}
 CASE(LOCAL_SET3) { FRAME_LOCAL(vm->env, 3)    	     = vm->val; NEXT0;}
 CASE(LOCAL_SET4) { FRAME_LOCAL(vm->env, 4)    	     = vm->val; NEXT0;}
 CASE(LOCAL_SET)  { FRAME_LOCAL(vm->env,fetch_next()) = vm->val; NEXT0;}
+
 
 CASE(DEEP_LOCAL_SET) {
   int level, info = fetch_next();
@@ -996,6 +1041,8 @@ CASE(TAIL_INVOKE) {
   tailp = TRUE;
   goto FUNCALL;
 }
+
+ CASE(PUSH_PREPARE_CALL) {push(vm->val); PREP_CALL(); NEXT; }
 
 CASE(ENTER_LET_STAR) {
   nargs = fetch_next();
@@ -1109,15 +1156,24 @@ CASE(END_OF_CODE) {
   return;
 }
 
- 
-CASE(UNUSED_1) {
-}
-
-CASE(UNUSED_2) {
-}
+CASE(UNUSED_1)
+CASE(UNUSED_2)
+CASE(UNUSED_3)
+CASE(UNUSED_4)
+CASE(UNUSED_5)
+CASE(UNUSED_6)
+CASE(UNUSED_7)
+CASE(UNUSED_8)
+CASE(UNUSED_9)
+CASE(UNUSED_10)
+CASE(UNUSED_11)
+CASE(UNUSED_12) {
   
+}
 
 
+
+ 
 /******************************************************************************
  *
  * 			     I n l i n e d   F u n c t i o n s
@@ -1134,6 +1190,16 @@ CASE(IN_MUL2)   { REG_CALL_PRIM(multiplication);
   		  vm->val = STk_mul2(pop(), vm->val); NEXT1;}
 CASE(IN_DIV2)   { REG_CALL_PRIM(division);
   		  vm->val = STk_div2(pop(), vm->val); NEXT1;}
+
+CASE(IN_SINT_ADD2) { REG_CALL_PRIM(plus);
+  		     vm->val = STk_add2(vm->val, MAKE_INT(fetch_next())); NEXT1;}
+CASE(IN_SINT_SUB2) { REG_CALL_PRIM(difference);
+  		     vm->val = STk_sub2(MAKE_INT(fetch_next()), vm->val); NEXT1;}
+CASE(IN_SINT_MUL2) { REG_CALL_PRIM(multiplication);
+  		     vm->val = STk_mul2(vm->val, MAKE_INT(fetch_next())); NEXT1;}
+CASE(IN_SINT_DIV2) { REG_CALL_PRIM(division);
+  		     vm->val = STk_div2(vm->val, MAKE_INT(fetch_next())); NEXT1;}
+
 
 CASE(IN_NUMEQ)  { REG_CALL_PRIM(numeq); 
   		  vm->val = MAKE_BOOLEAN(STk_numeq2(pop(), vm->val));      NEXT1;}

@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 12-Sep-2006 15:26 (eg)
+ * Last file update: 13-Sep-2006 08:58 (eg)
  *
  */
 
@@ -404,7 +404,7 @@ DEFINE_PRIMITIVE("peek-char", peek_char, subr01, (SCM port))
  * returns a character, this function returns an integer between 0and 255. 
 doc>
 */
-DEFINE_PRIMITIVE("peek-byte", peek_char, subr01, (SCM port))
+DEFINE_PRIMITIVE("peek-byte", peek_byte, subr01, (SCM port))
 {
   int c;
 

@@ -1,3 +1,11 @@
+2006-09-15  Erick Gallesio  <eg@essi.fr>
+
+	* lib/peephole.stk: New peephole optimizations
+	
+	* src/vm.c:
+	* lib/compiler.stk (compile-primitive-call): Better optimisation
+	on simple +, -, *, / operations.
+
 2006-09-12  Erick Gallesio  <eg@essi.fr>
 
 	* src/port.c: Added READ-BYTE and WRITE-BYTE
