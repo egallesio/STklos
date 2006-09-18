@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 15-Sep-2006 11:19 (eg)
+ * Last file update: 15-Sep-2006 16:31 (eg)
  */
 
 // INLINER values
@@ -814,15 +814,20 @@ CASE(INT_PUSH)      { push(MAKE_INT(fetch_next())) ; NEXT; }
 CASE(CONSTANT_PUSH) { push(fetch_const()); 	     NEXT; }
 
 
+CASE(PUSH_GLOBAL_REF)
+  push(vm->val); 	/* Fall through */
 CASE(GLOBAL_REF) {
   SCM ref;
 
   vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
   /* patch the code for optimize next accesses */
-  vm->pc[-2]  = UGLOBAL_REF;
+  vm->pc[-2]  = (vm->pc[-2] == GLOBAL_REF) ? UGLOBAL_REF: PUSH_UGLOBAL_REF;
   vm->pc[-1]  = add_global(&CDR(ref));
   NEXT1;
 }
+
+CASE(PUSH_UGLOBAL_REF)
+  push(vm->val); 	/* Fall through */
 CASE(UGLOBAL_REF) { 
   /* Never produced by compiler */ 
   vm->val = fetch_global(); 
@@ -845,19 +850,24 @@ CASE(UGLOBAL_REF_PUSH) {
 }
 
 
+CASE(PUSH_GREF_INVOKE)
+  push(vm->val);	/* Fall through */	
 CASE(GREF_INVOKE) {
   SCM ref;
 
   vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
   nargs   = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  vm->pc[-3]  = UGREF_INVOKE;
+  vm->pc[-3]  = (vm->pc[-3] == GREF_INVOKE)? UGREF_INVOKE : PUSH_UGREF_INVOKE;
   vm->pc[-2]  = add_global(&CDR(ref));
 
   /*and now invoke */
   tailp=FALSE; goto FUNCALL;
 }
 
+
+CASE(PUSH_UGREF_INVOKE)
+  push(vm->val);	/* Fall through */	
 CASE(UGREF_INVOKE) { /* Never produced by compiler */ 
   vm->val = fetch_global();
   nargs   = fetch_next();
@@ -1167,8 +1177,17 @@ CASE(UNUSED_8)
 CASE(UNUSED_9)
 CASE(UNUSED_10)
 CASE(UNUSED_11)
-CASE(UNUSED_12) {
-  
+CASE(UNUSED_12) 
+CASE(UNUSED_13) 
+CASE(UNUSED_14) 
+CASE(UNUSED_15) 
+CASE(UNUSED_16) 
+CASE(UNUSED_17) 
+CASE(UNUSED_18) 
+CASE(UNUSED_19) 
+CASE(UNUSED_20) 
+{
+  ;
 }
 
 

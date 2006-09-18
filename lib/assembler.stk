@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 14-Sep-2006 14:44 (eg)
+;;;; Last file update: 15-Sep-2006 16:28 (eg)
 ;;;;
 
 ;;;
@@ -179,28 +179,33 @@
 	   (UGREF-TAIL-INVOKE   2)	;; Never produced by the compiler
 
 	   (PUSH-PREPARE-CALL   0)	;; PUSH + PREPARE-CALL
+	   
+	   (PUSH-GLOBAL-REF	1)	;; peephole: PUSH + GLOBAL-REF
+	   (PUSH-UGLOBAL-REF	1)	;; Never produced by the compiler
+	   (PUSH-GREF-INVOKE	2)	;; PUSH + GLOBAL-REF +INVOKE
+	   (PUSH-UGREF-INVOKE	2)	;; PUSH + GLOBAL-REF +INVOKE
+	   
+	   (UNUSED-16		0)
+	   (UNUSED-15		0)	   
+	   (UNUSED-14		0)	   
+	   (UNUSED-13		0)	   
+	   (UNUSED-12		0)
+	   (UNUSED-11		0)
+	   (UNUSED-10		0)
+	   (UNUSED-9		0)
+	   (UNUSED-8		0)
+	   (UNUSED-7		0)
+	   (UNUSED-6		0)
+	   (UNUSED-5		0)	   
+	   (UNUSED-4		0)
+	   (UNUSED-3		0)
+	   
 
-
+	   ;; INLINED FUNCTIONS (again)
 	   (IN-SINT-ADD2	1)
 	   (IN-SINT-SUB2	1)
 	   (IN-SINT-MUL2	1)
 	   (IN-SINT-DIV2	1)
-   
-
-	   ;; To allow easy evolution without recompiling everything,
-	   ;; we declare fake instructions.
-	   (UNUSED-3		0)
-	   (UNUSED-4		0)
-	   (UNUSED-5		0)
-	   (UNUSED-6		0)
-	   (UNUSED-7		0)
-	   (UNUSED-8		0)	   
-	   (UNUSED-9		0)	   
-	   (UNUSED-10		0)	   
-	   (UNUSED-11		0)
-	   (UNUSED-12		0)	   
-	   
-
 	   
 ))))
 

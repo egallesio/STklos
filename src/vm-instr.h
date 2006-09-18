@@ -113,22 +113,30 @@
 #  define GREF_TAIL_INVOKE     108
 #  define UGREF_TAIL_INVOKE    109
 #  define PUSH_PREPARE_CALL    110
-#  define IN_SINT_ADD2         111
-#  define IN_SINT_SUB2         112
-#  define IN_SINT_MUL2         113
-#  define IN_SINT_DIV2         114
-#  define UNUSED_3             115
-#  define UNUSED_4             116
-#  define UNUSED_5             117
-#  define UNUSED_6             118
-#  define UNUSED_7             119
-#  define UNUSED_8             120
-#  define UNUSED_9             121
-#  define UNUSED_10            122
-#  define UNUSED_11            123
-#  define UNUSED_12            124
+#  define PUSH_GLOBAL_REF      111
+#  define PUSH_UGLOBAL_REF     112
+#  define PUSH_GREF_INVOKE     113
+#  define PUSH_UGREF_INVOKE    114
+#  define UNUSED_16            115
+#  define UNUSED_15            116
+#  define UNUSED_14            117
+#  define UNUSED_13            118
+#  define UNUSED_12            119
+#  define UNUSED_11            120
+#  define UNUSED_10            121
+#  define UNUSED_9             122
+#  define UNUSED_8             123
+#  define UNUSED_7             124
+#  define UNUSED_6             125
+#  define UNUSED_5             126
+#  define UNUSED_4             127
+#  define UNUSED_3             128
+#  define IN_SINT_ADD2         129
+#  define IN_SINT_SUB2         130
+#  define IN_SINT_MUL2         131
+#  define IN_SINT_DIV2         132
 
-#  define NB_VM_INSTR (UNUSED_12           +1)
+#  define NB_VM_INSTR (IN_SINT_DIV2        +1)
 #endif
 
 
@@ -246,20 +254,28 @@ static void *jump_table[] = {
   &&lab_GREF_TAIL_INVOKE    ,
   &&lab_UGREF_TAIL_INVOKE   ,
   &&lab_PUSH_PREPARE_CALL   ,
+  &&lab_PUSH_GLOBAL_REF     ,
+  &&lab_PUSH_UGLOBAL_REF    ,
+  &&lab_PUSH_GREF_INVOKE    ,
+  &&lab_PUSH_UGREF_INVOKE   ,
+  &&lab_UNUSED_16           ,
+  &&lab_UNUSED_15           ,
+  &&lab_UNUSED_14           ,
+  &&lab_UNUSED_13           ,
+  &&lab_UNUSED_12           ,
+  &&lab_UNUSED_11           ,
+  &&lab_UNUSED_10           ,
+  &&lab_UNUSED_9            ,
+  &&lab_UNUSED_8            ,
+  &&lab_UNUSED_7            ,
+  &&lab_UNUSED_6            ,
+  &&lab_UNUSED_5            ,
+  &&lab_UNUSED_4            ,
+  &&lab_UNUSED_3            ,
   &&lab_IN_SINT_ADD2        ,
   &&lab_IN_SINT_SUB2        ,
   &&lab_IN_SINT_MUL2        ,
   &&lab_IN_SINT_DIV2        ,
-  &&lab_UNUSED_3            ,
-  &&lab_UNUSED_4            ,
-  &&lab_UNUSED_5            ,
-  &&lab_UNUSED_6            ,
-  &&lab_UNUSED_7            ,
-  &&lab_UNUSED_8            ,
-  &&lab_UNUSED_9            ,
-  &&lab_UNUSED_10           ,
-  &&lab_UNUSED_11           ,
-  &&lab_UNUSED_12           ,
   NULL};
 #endif
 #undef DEFINE_JUMP_TABLE
@@ -379,20 +395,28 @@ static char *name_table[] = {
   "GREF_TAIL_INVOKE    ",
   "UGREF_TAIL_INVOKE   ",
   "PUSH_PREPARE_CALL   ",
+  "PUSH_GLOBAL_REF     ",
+  "PUSH_UGLOBAL_REF    ",
+  "PUSH_GREF_INVOKE    ",
+  "PUSH_UGREF_INVOKE   ",
+  "UNUSED_16           ",
+  "UNUSED_15           ",
+  "UNUSED_14           ",
+  "UNUSED_13           ",
+  "UNUSED_12           ",
+  "UNUSED_11           ",
+  "UNUSED_10           ",
+  "UNUSED_9            ",
+  "UNUSED_8            ",
+  "UNUSED_7            ",
+  "UNUSED_6            ",
+  "UNUSED_5            ",
+  "UNUSED_4            ",
+  "UNUSED_3            ",
   "IN_SINT_ADD2        ",
   "IN_SINT_SUB2        ",
   "IN_SINT_MUL2        ",
   "IN_SINT_DIV2        ",
-  "UNUSED_3            ",
-  "UNUSED_4            ",
-  "UNUSED_5            ",
-  "UNUSED_6            ",
-  "UNUSED_7            ",
-  "UNUSED_8            ",
-  "UNUSED_9            ",
-  "UNUSED_10           ",
-  "UNUSED_11           ",
-  "UNUSED_12           ",
   NULL};
 #endif
 #undef DEFINE_NAME_TABLE
