@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 15-Sep-2006 16:28 (eg)
+;;;; Last file update: 18-Sep-2006 11:25 (eg)
 ;;;;
 
 ;;;
@@ -183,10 +183,10 @@
 	   (PUSH-GLOBAL-REF	1)	;; peephole: PUSH + GLOBAL-REF
 	   (PUSH-UGLOBAL-REF	1)	;; Never produced by the compiler
 	   (PUSH-GREF-INVOKE	2)	;; PUSH + GLOBAL-REF +INVOKE
-	   (PUSH-UGREF-INVOKE	2)	;; PUSH + GLOBAL-REF +INVOKE
+	   (PUSH-UGREF-INVOKE	2)	;; Never produced by the compiler
+	   (PUSH-GREF-TAIL-INV  2)	;; PUSH + GLOBAL-REF + TAIL-INVOKE
+	   (PUSH-UGREF-TAIL-INV	2)	;; Never produced by the compiler
 	   
-	   (UNUSED-16		0)
-	   (UNUSED-15		0)	   
 	   (UNUSED-14		0)	   
 	   (UNUSED-13		0)	   
 	   (UNUSED-12		0)

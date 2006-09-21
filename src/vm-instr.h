@@ -117,8 +117,8 @@
 #  define PUSH_UGLOBAL_REF     112
 #  define PUSH_GREF_INVOKE     113
 #  define PUSH_UGREF_INVOKE    114
-#  define UNUSED_16            115
-#  define UNUSED_15            116
+#  define PUSH_GREF_TAIL_INV   115
+#  define PUSH_UGREF_TAIL_INV  116
 #  define UNUSED_14            117
 #  define UNUSED_13            118
 #  define UNUSED_12            119
@@ -258,8 +258,8 @@ static void *jump_table[] = {
   &&lab_PUSH_UGLOBAL_REF    ,
   &&lab_PUSH_GREF_INVOKE    ,
   &&lab_PUSH_UGREF_INVOKE   ,
-  &&lab_UNUSED_16           ,
-  &&lab_UNUSED_15           ,
+  &&lab_PUSH_GREF_TAIL_INV  ,
+  &&lab_PUSH_UGREF_TAIL_INV ,
   &&lab_UNUSED_14           ,
   &&lab_UNUSED_13           ,
   &&lab_UNUSED_12           ,
@@ -399,8 +399,8 @@ static char *name_table[] = {
   "PUSH_UGLOBAL_REF    ",
   "PUSH_GREF_INVOKE    ",
   "PUSH_UGREF_INVOKE   ",
-  "UNUSED_16           ",
-  "UNUSED_15           ",
+  "PUSH_GREF_TAIL_INV  ",
+  "PUSH_UGREF_TAIL_INV ",
   "UNUSED_14           ",
   "UNUSED_13           ",
   "UNUSED_12           ",

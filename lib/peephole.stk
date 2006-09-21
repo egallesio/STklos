@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 20:32 (eg)
-;;;; Last file update: 15-Sep-2006 16:32 (eg)
+;;;; Last file update: 18-Sep-2006 11:29 (eg)
 ;;;;
 
 ; ======================================================================
@@ -171,6 +171,12 @@
 	     ;; [PUSH-GLOBAL-REF, INVOKE] => PUSH-GREF-INVOKE
 	     ((and (eq? i1 'PUSH-GLOBAL-REF) (eq? i2 'INVOKE))
 	      (replace-2-instr code (list 'PUSH-GREF-INVOKE
+					  (this-arg1 code)
+					  (next-arg1 code))))
+	     
+	     ;; [PUSH-GLOBAL-REF, TAIL-INVOKE] => PUSH-GREF-TAIL-INV
+	     ((and (eq? i1 'PUSH-GLOBAL-REF) (eq? i2 'TAIL-INVOKE))
+	      (replace-2-instr code (list 'PUSH-GREF-TAIL-INV
 					  (this-arg1 code)
 					  (next-arg1 code))))
 	     

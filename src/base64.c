@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 20-Jul-1998 12:19
- * Last file update:  5-Sep-2006 13:25 (eg)
+ * Last file update: 21-Sep-2006 16:45 (eg)
  */
 
 #include <stklos.h>
@@ -104,9 +104,9 @@ static void decode(SCM f, SCM g)
       j -= 6;
       
       if (j < 0) {
-	c = (group&0xff0000) >> 16; if (c) STk_putc(c, g);
-	c = (group&0x00ff00) >> 8;  if (c) STk_putc(c, g);
-	c = (group&0x0000ff);       if (c) STk_putc(c, g);
+	c = (group&0xff0000) >> 16; STk_putc(c, g);
+	c = (group&0x00ff00) >> 8;  STk_putc(c, g);
+	c = (group&0x0000ff);       STk_putc(c, g);
 	group = 0;
 	j = 18;
       }

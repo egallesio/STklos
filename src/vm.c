@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 15-Sep-2006 16:31 (eg)
+ * Last file update: 18-Sep-2006 11:27 (eg)
  */
 
 // INLINER values
@@ -865,7 +865,6 @@ CASE(GREF_INVOKE) {
   tailp=FALSE; goto FUNCALL;
 }
 
-
 CASE(PUSH_UGREF_INVOKE)
   push(vm->val);	/* Fall through */	
 CASE(UGREF_INVOKE) { /* Never produced by compiler */ 
@@ -876,19 +875,24 @@ CASE(UGREF_INVOKE) { /* Never produced by compiler */
   tailp = FALSE; goto FUNCALL;
 }
 
+CASE(PUSH_GREF_TAIL_INV)
+  push(vm->val);	/* Fall through */	
 CASE(GREF_TAIL_INVOKE) {
   SCM ref;
 
   vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
   nargs   = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  vm->pc[-3]  = UGREF_TAIL_INVOKE;
+  vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ? 
+    			UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
   vm->pc[-2]  = add_global(&CDR(ref));
 
   /* and now invoke */
   tailp=TRUE; goto FUNCALL;
 }
 
+CASE(PUSH_UGREF_TAIL_INV)
+  push(vm->val);	/* Fall through */	
 CASE(UGREF_TAIL_INVOKE) { /* Never produced by compiler */ 
   vm->val = fetch_global();
   nargs   = fetch_next();
