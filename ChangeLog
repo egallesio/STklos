@@ -1,3 +1,8 @@
+2006-09-21  Erick Gallesio  <eg@essi.fr>
+
+	* src/base64.c : Bug fix: null characteters could be added at end
+	of streams.
+
 2006-09-15  Erick Gallesio  <eg@essi.fr>
 
 	* lib/peephole.stk: New peephole optimizations

@@ -16,14 +16,24 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 20-Jul-1998 12:19
- * Last file update: 21-Sep-2006 16:45 (eg)
+ * Last file update: 21-Sep-2006 18:12 (eg)
  */
 
 #include <stklos.h>
 
 static char table[] =  
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-static char rev_table[128];
+
+static char rev_table[128] = {
+      0,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+      0,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+      0,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0, 62,  0,  0,  0, 63,
+     52, 53, 54, 55,  56, 57, 58, 59, 60, 61,  0,  0,  0,  0,  0,  0,
+      0,  0,  1,  2,   3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
+     15, 16, 17, 18,  19, 20, 21, 22, 23, 24, 25,  0,  0,  0,  0,  0,
+      0, 26, 27, 28,  29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+     41, 42, 43, 44,  45, 46, 47, 48, 49, 50, 51,  0,  0,  0,  0,  0
+};
 
 #define OutChar(c, f) { 			\
     STk_putc((c), (f)); 			\
@@ -31,15 +41,6 @@ static char rev_table[128];
       STk_putc('\n', (f));			\
       count=0;					\
     }						\
-}
-
-
-static void initialize_rev_table(void)
-{
-  char *p;
-  int count = 0;
-
-  for (p = table; *p; p++) rev_table[(int) *p] = count++;
 }
 
 static void error_bad_input_port(SCM obj)
@@ -72,7 +73,7 @@ static void encode(SCM f, SCM g)
     old = c;
   }
   switch (state) {
-    case 0: /* nothing */;
+    case 0: break;
     case 1: OutChar(table[(old<<4) & 0x30], g);
             OutChar('=', g);
             OutChar('=', g);
@@ -85,13 +86,7 @@ static void encode(SCM f, SCM g)
 
 static void decode(SCM f, SCM g)
 {
-  static int initialized = 0;
-  int c, bits, group, j;
-
-  if (!initialized) {
-    initialize_rev_table();    
-    initialized = 1;
-  }
+  int c, bits, group, j, equal= 0;
 
   group = 0;  j = 18;
   while ((c = STk_getc(f)) != EOF) {
@@ -99,14 +94,15 @@ static void decode(SCM f, SCM g)
       if (c != '=') {
 	bits = rev_table[c];
 	group |= bits << j;
-      }
+      } 
+      else equal += 1;
       
       j -= 6;
       
       if (j < 0) {
 	c = (group&0xff0000) >> 16; STk_putc(c, g);
-	c = (group&0x00ff00) >> 8;  STk_putc(c, g);
-	c = (group&0x0000ff);       STk_putc(c, g);
+	c = (group&0x00ff00) >> 8;  if (equal < 2) STk_putc(c, g);
+	c = (group&0x0000ff);       if (equal < 1) STk_putc(c, g);
 	group = 0;
 	j = 18;
       }
