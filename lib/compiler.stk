@@ -1,4 +1,4 @@
-;;;;
+;;;
 ;;;; c o m p i l e r . s t k			-- STklos Compiler
 ;;;; 
 ;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 15-Sep-2006 16:05 (eg)
+;;;; Last file update: 26-Sep-2006 22:03 (eg)
 ;;;;
 
 ;;(define-module new-compiler
@@ -29,7 +29,7 @@
 
 (define *compiler-port*		#f)
 (define *compiler-options* 	(list 'warn-use-undef))
-(define *compiler-inline*  	'(+ ++ - * / = < <= > >= cons car cdr null? list not 
+(define *compiler-inline*  	'(+ - * / = < <= > >= cons car cdr null? list not 
  				  vector-ref vector-set! string-ref string-set!
  				  eq? eqv? equal? void))
 ;(define *compiler-inline*	'(+ - * / = <))
@@ -880,24 +880,22 @@ doc>
 			  ((small-integer-constant? a)
 			   (oper2 'IN-SINT-MUL2 b a))
 			  ((small-integer-constant? b)
-			   (oper2 'IN-SINT-MUL2 a  b))
+			   (oper2 'IN-SINT-MUL2 a b))
 			  (else
 			   (comp2 'IN-MUL2)))))
 		(else (compile-normal-call fct actuals len env epair #f))))
       ((/)    (case len
 		((0)   (compiler-error '/ epair "needs at least one argument"))
 		((1)   (if (number? (car actuals))
-			  (compile-constant (/ (car actuals)) env epair #f)
+			  (compile-constant (/ 1 (car actuals)) env epair #f)
 			  (compile-normal-call fct actuals len env epair #f)))
 		((2)  (let ((a (car actuals))
 			    (b (cadr actuals)))
 			(cond
 			  ((and (number? a) (number? b))
 			   (compile-constant (/ a b) env tail?))
-			  ((small-integer-constant? a)
-			   (oper2 'IN-SINT-DIV2 b a))
 			  ((small-integer-constant? b)
-			   (oper2 'IN-SINT-DIV2 a  b))
+			   (oper2 'IN-SINT-DIV2 a b))
 			  (else
 			   (comp2 'IN-DIV2)))))
 		(else  (compile-normal-call fct actuals len env epair #f))))

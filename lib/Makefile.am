@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 11-Sep-2006 17:24 (eg)
+# Last file update: 26-Sep-2006 19:51 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d @LURCDIR@
 
@@ -149,6 +149,9 @@ $(DOCDB): $(scheme_SRCS) $(scheme_BOOT)
 
 clean:
 	/bin/rm -f $(scheme_OBJS)
+	@for i in $(SUBDIRS) ;do \
+	   (cd $$i; make clean)\
+	done
 
 distclean: clean
 	true

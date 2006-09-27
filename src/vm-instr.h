@@ -119,22 +119,28 @@
 #  define PUSH_UGREF_INVOKE    114
 #  define PUSH_GREF_TAIL_INV   115
 #  define PUSH_UGREF_TAIL_INV  116
-#  define UNUSED_14            117
-#  define UNUSED_13            118
-#  define UNUSED_12            119
-#  define UNUSED_11            120
-#  define UNUSED_10            121
-#  define UNUSED_9             122
-#  define UNUSED_8             123
-#  define UNUSED_7             124
-#  define UNUSED_6             125
-#  define UNUSED_5             126
-#  define UNUSED_4             127
-#  define UNUSED_3             128
-#  define IN_SINT_ADD2         129
-#  define IN_SINT_SUB2         130
-#  define IN_SINT_MUL2         131
-#  define IN_SINT_DIV2         132
+#  define UNUSED_20            117
+#  define UNUSED_19            118
+#  define UNUSED_18            119
+#  define UNUSED_17            120
+#  define UNUSED_16            121
+#  define UNUSED_15            122
+#  define UNUSED_14            123
+#  define UNUSED_13            124
+#  define UNUSED_12            125
+#  define UNUSED_11            126
+#  define UNUSED_10            127
+#  define UNUSED_9             128
+#  define UNUSED_8             129
+#  define UNUSED_7             130
+#  define UNUSED_6             131
+#  define UNUSED_5             132
+#  define UNUSED_4             133
+#  define UNUSED_3             134
+#  define IN_SINT_ADD2         135
+#  define IN_SINT_SUB2         136
+#  define IN_SINT_MUL2         137
+#  define IN_SINT_DIV2         138
 
 #  define NB_VM_INSTR (IN_SINT_DIV2        +1)
 #endif
@@ -260,6 +266,12 @@ static void *jump_table[] = {
   &&lab_PUSH_UGREF_INVOKE   ,
   &&lab_PUSH_GREF_TAIL_INV  ,
   &&lab_PUSH_UGREF_TAIL_INV ,
+  &&lab_UNUSED_20           ,
+  &&lab_UNUSED_19           ,
+  &&lab_UNUSED_18           ,
+  &&lab_UNUSED_17           ,
+  &&lab_UNUSED_16           ,
+  &&lab_UNUSED_15           ,
   &&lab_UNUSED_14           ,
   &&lab_UNUSED_13           ,
   &&lab_UNUSED_12           ,
@@ -401,6 +413,12 @@ static char *name_table[] = {
   "PUSH_UGREF_INVOKE   ",
   "PUSH_GREF_TAIL_INV  ",
   "PUSH_UGREF_TAIL_INV ",
+  "UNUSED_20           ",
+  "UNUSED_19           ",
+  "UNUSED_18           ",
+  "UNUSED_17           ",
+  "UNUSED_16           ",
+  "UNUSED_15           ",
   "UNUSED_14           ",
   "UNUSED_13           ",
   "UNUSED_12           ",

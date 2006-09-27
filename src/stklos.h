@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  6-Aug-2006 22:09 (eg)
+ * Last file update: 26-Sep-2006 13:26 (eg)
  */
 
 #ifndef STKLOS_H
@@ -1174,6 +1174,7 @@ EXTERN_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void));
 SCM STk_load_bcode_file(SCM f);
 int STk_load_boot(char *s);
 int STk_boot_from_C(void);
+SCM STk_execute_C_bytecode(SCM consts, STk_instr *instr);
 
 int STk_init_vm();
 

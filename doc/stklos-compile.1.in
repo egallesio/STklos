@@ -33,9 +33,13 @@ Output the compiled code in the given file instead of
 .I a.out.
 .IP "--case-sensitive, -c"
 Symbols are case sensitive
+.IP "--C-code, -C"
+Produce the byte-code in a C file instead of a ".ostk" file.
 .IP "--line-info, -l"
 Generate line informations to ease debugging (incurs a small
 performance penalty).
+.IP "--no-time"
+Do not display the compilation time
 .IP "--help | -h | -?"
 Show help.
 

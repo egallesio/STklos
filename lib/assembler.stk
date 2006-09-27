@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 18-Sep-2006 11:25 (eg)
+;;;; Last file update: 26-Sep-2006 19:36 (eg)
 ;;;;
 
 ;;;
@@ -187,6 +187,12 @@
 	   (PUSH-GREF-TAIL-INV  2)	;; PUSH + GLOBAL-REF + TAIL-INVOKE
 	   (PUSH-UGREF-TAIL-INV	2)	;; Never produced by the compiler
 	   
+	   (UNUSED-20		0)	   
+	   (UNUSED-19		0)	   
+	   (UNUSED-18		0)	   
+	   (UNUSED-17		0)	   
+	   (UNUSED-16		0)	   
+	   (UNUSED-15		0)	   
 	   (UNUSED-14		0)	   
 	   (UNUSED-13		0)	   
 	   (UNUSED-12		0)

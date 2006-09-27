@@ -1,3 +1,8 @@
+2006-09-26  Erick Gallesio  <eg@essi.fr>
+
+	* utils/stklos-compile: Added the possibility to compile
+	byte-codes to a C file.
+
 2006-09-22  Erick Gallesio  <eg@essi.fr>
 
 	* src/sport.c (Sgetc): Bug fix: the character #xff was read as

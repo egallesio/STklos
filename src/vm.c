@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 18-Sep-2006 11:27 (eg)
+ * Last file update: 26-Sep-2006 16:18 (eg)
  */
 
 // INLINER values
@@ -1056,7 +1056,7 @@ CASE(TAIL_INVOKE) {
   goto FUNCALL;
 }
 
- CASE(PUSH_PREPARE_CALL) {push(vm->val); PREP_CALL(); NEXT; }
+CASE(PUSH_PREPARE_CALL) {push(vm->val); PREP_CALL(); NEXT; }
 
 CASE(ENTER_LET_STAR) {
   nargs = fetch_next();
@@ -1840,6 +1840,30 @@ int STk_boot_from_C(void)
   system_has_booted = 1;
   return 0;
 }
+
+
+SCM STk_execute_C_bytecode(SCM all_consts, STk_instr *instr)
+{
+  SCM consts, *save_constants, save_env;
+  STk_instr *save_pc;
+  vm_thread_t *vm = STk_get_current_vm();
+
+  consts = STk_read(STk_open_C_string(all_consts), TRUE);
+  /* Save machine state */
+  save_pc = vm->pc; save_constants = vm->constants; save_env = vm->env;
+  
+  /* Go */
+  vm->pc = instr;
+  vm->constants = VECTOR_DATA(consts);
+  vm->env	= vm->current_module;
+  run_vm(vm);
+ 
+  /* restore machine state */
+  vm->pc = save_pc; vm->constants = save_constants, vm->env = save_env;
+  return STk_void;
+}
+
+
 #ifdef THREADS_LURC
 SCM *STk_save_vm(void){
   vm_thread_t *vm = STk_get_current_vm();

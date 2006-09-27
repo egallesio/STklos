@@ -1,7 +1,7 @@
 ;;;;
 ;;;; stklos-compile.stk	-- Call the stklos compiler
 ;;;; 
-;;;; Copyright © 2001-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,11 +21,89 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 26-Apr-2005 11:22 (eg)
+;;;; Last file update: 26-Sep-2006 17:42 (eg)
 ;;;;
 
 (define *output* "a.out")
+(define *c-code* #f)
 
+
+;; ----------------------------------------------------------------------
+;;	convert-to-C ...
+;; ----------------------------------------------------------------------
+(define (convert-to-C src dst module-name)
+  (define (header in out)
+    (format out "/*  -*- C -*-\n")
+    (format out "  This file was automatically generated on ~A\n" (date))
+    (format out "  This is a dump of the image in file ~A\n" (port-file-name in))
+    (format out "  ***DO NOT EDIT BY HAND***\n*/\n")
+    (format out "#include <stklos.h>\n\n"))
+
+  (define (footer out name)
+    (format out "#ifdef MODULE_ENTRY\n")
+    (format out "MODULE_ENTRY_START(~S) {\n" name)
+    (format out "  STk_execute_C_bytecode(__module_consts, __module_code);\n")
+    (format out "} MODULE_ENTRY_END\n")
+    (format out "#endif\n"))
+
+   
+  (let ((in   (open-input-file src))
+	(out  (open-output-file dst)))
+    (read in)
+    (read in)
+    (let ((v (read in))
+	  (str (open-output-string)))
+      (write v str)
+      (header in out)
+      (format out "static char* __module_consts = ~S;\n\n" (get-output-string str)))
+    (let ((sz (read in)))
+      (format out "static STk_instr __module_code [] = { \n")
+      (read-char in)  ; To skip the newline after size
+      (dotimes (i sz)
+	(let* ((c1 (read-char in))
+	       (c2 (read-char in)))
+	  (format out
+		  "~5f"
+		  (string-append
+		   "0x"
+		   (number->string (bit-or (bit-shift (char->integer c1) 8)
+					   (char->integer c2))
+				   16)))
+	  (when (< i (- sz 1))
+	    (display ", " out))
+	  (when (= (modulo i 10) 9)
+	    (newline out))))
+      (display "};\n\n" out))
+    (footer out module-name)
+    (flush-output-port out)
+    (close-port out)))
+
+;; ----------------------------------------------------------------------
+;;	compile-to-C-code ...
+;; ----------------------------------------------------------------------
+(define (compile-to-C-code file out)
+
+  (define (file-prefix str)
+    ;; very approximate
+    (let ((x (string-split str ".")))
+      (if (= (length x) 2) (car x) str)))
+  
+  (let ((tmp (temporary-file-name))
+	(name (file-prefix (basename file))))    
+    (compile-to-bytecode file tmp)
+    (convert-to-C tmp out name)
+    (remove-file tmp)))
+
+;; ----------------------------------------------------------------------
+;;	compile-to-bytecode ...
+;; ----------------------------------------------------------------------
+(define (compile-to-bytecode file out)
+  (compile-file file out)
+  (chmod out #o755))
+
+;; ----------------------------------------------------------------------
+;;	main ...
+;; ----------------------------------------------------------------------
 (define (main args)
   (parse-arguments args
      "Usage: stklos-compile [options] file"
@@ -35,6 +113,8 @@
         (set! *output* file))
      (("case-sensitive" :alternate "c"  :help "Be case sensitive on symbols")
         (read-case-sensitive #t))
+     (("C-code" :alternate "C" :help "Produce C code")
+        (set! *c-code* #t))
      (("line-info" :alternate "l" :help "Insert line numbers in generated file")
         (compiler:gen-line-number #t))
      (("no-time" :help "Don't display compilation time")
@@ -45,9 +125,10 @@
      (else
       (cond
 	((= (length other-arguments) 1)
-	   (compile-file (car other-arguments) *output*)
-	   (chmod *output* #o755)
-	   (exit 0))
+	 (if *c-code*
+	     (compile-to-C-code (car other-arguments) *output*)
+	     (compile-to-bytecode (car other-arguments) *output*))
+	 (exit 0))
 	(else
 	  (arg-usage (current-error-port))
 	  (exit 1))))))
