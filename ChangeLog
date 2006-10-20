@@ -1,3 +1,8 @@
+2006-10-20  Erick Gallesio  <eg@essi.fr>
+
+	* src/stklos.c (main): FIXED: open file ports were not flushed on
+	compiled code.
+
 2006-09-27  Erick Gallesio  <eg@essi.fr>
 
 	* lib/compfile.stk:
