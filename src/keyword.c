@@ -2,7 +2,7 @@
  *
  * k e y w o r d . c				-- Keywords management
  *
- * Copyright © 1993-2004 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 19-Nov-1993 16:12
- * Last file update: 12-Dec-2004 23:11 (eg)
+ * Last file update: 20-Oct-2006 14:42 (eg)
  */
 
 #include "stklos.h"
@@ -61,7 +61,9 @@ static SCM make_uninterned_keyword(char *name)
 
 SCM STk_makekey(char *token)
 {
+  SCM res;
   char *s;
+  MUT_DECL(lck);
 
   /* We accept two kinds of keywords :xy and xy:. In anycase, the value 
    * stored does not contain the ':' char.
@@ -77,7 +79,11 @@ SCM STk_makekey(char *token)
       s[len - 1] = '\0';
     }
   }
-  return STk_hash_intern_symbol(&keyword_table, s, make_uninterned_keyword);
+  MUT_LOCK(lck);
+  res =  STk_hash_intern_symbol(&keyword_table, s, make_uninterned_keyword);
+  MUT_UNLOCK(lck);
+  
+  return res;
 }
 
 /*===========================================================================*\

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 20-Oct-2006 12:17 (eg)
+ * Last file update: 20-Oct-2006 14:36 (eg)
  */
 
 #include <stklos.h>
@@ -185,6 +185,7 @@ int main(int argc, char *argv[])
 #ifdef THREADS_LURC
   STk_exit(MAKE_INT(STk_thread_main(&mymain, argc, argv)));
 #else
-  STk_exit(MAKE_INT(mymain(argc, endif)));
-#argv /* ! THREAD_LURC */
+  STk_exit(MAKE_INT(mymain(argc, argv)));
+#endif /* ! THREAD_LURC */
+  return 0; 
 }
