@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 26-Sep-2006 16:18 (eg)
+ * Last file update: 27-Sep-2006 13:41 (eg)
  */
 
 // INLINER values
@@ -841,12 +841,12 @@ CASE(GLOBAL_REF_PUSH) {
   /* patch the code for optimize next accesses */
   vm->pc[-2]  = UGLOBAL_REF_PUSH;
   vm->pc[-1]  = add_global(&CDR(ref));
-  NEXT;
+  NEXT1;
 }
 CASE(UGLOBAL_REF_PUSH) { 
   /* Never produced by compiler */ 
   push(fetch_global()); 
-  NEXT;
+  NEXT1;
 }
 
 
@@ -921,11 +921,11 @@ CASE(DEEP_LOCAL_REF) {
   NEXT1;
 }
 
-CASE(LOCAL_REF0_PUSH) {push(FRAME_LOCAL(vm->env, 0));  NEXT;}
-CASE(LOCAL_REF1_PUSH) {push(FRAME_LOCAL(vm->env, 1));  NEXT;}
-CASE(LOCAL_REF2_PUSH) {push(FRAME_LOCAL(vm->env, 2));  NEXT;}
-CASE(LOCAL_REF3_PUSH) {push(FRAME_LOCAL(vm->env, 3));  NEXT;}
-CASE(LOCAL_REF4_PUSH) {push(FRAME_LOCAL(vm->env, 4));  NEXT;}
+CASE(LOCAL_REF0_PUSH) {push(FRAME_LOCAL(vm->env, 0));  NEXT1;}
+CASE(LOCAL_REF1_PUSH) {push(FRAME_LOCAL(vm->env, 1));  NEXT1;}
+CASE(LOCAL_REF2_PUSH) {push(FRAME_LOCAL(vm->env, 2));  NEXT1;}
+CASE(LOCAL_REF3_PUSH) {push(FRAME_LOCAL(vm->env, 3));  NEXT1;}
+CASE(LOCAL_REF4_PUSH) {push(FRAME_LOCAL(vm->env, 4));  NEXT1;}
 
 CASE(GLOBAL_SET) {
   SCM ref;
@@ -1776,7 +1776,9 @@ SCM STk_load_bcode_file(SCM f)
   /* Save machine state */
   save_pc = vm->pc; save_constants = vm->constants; save_env = vm->env;
 
-  /* Signature has been skipped during file type analysing */
+  /* Signature has been skipped during file type analysis (but not informations) */
+  STk_read(f, TRUE); /* skip infos */
+
   for ( ; ; ) {
     consts = STk_read_constant(f, TRUE); 		   /* Read  the constants */
     if (consts == STk_eof) break;
@@ -1812,7 +1814,6 @@ int STk_load_boot(char *filename)
   /* Verify that the file is a bytecode file */
   tmp = STk_read(f, TRUE);
   if (tmp != STk_intern("STklos")) return -2;
-  STk_read(f, FALSE); /* Read the version -- unused for now */
   
   tmp = STk_load_bcode_file(f);
   if (tmp == STk_false) return -3;

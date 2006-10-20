@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Sep-2006 19:51 (eg)
+# Last file update: 27-Sep-2006 14:02 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d @LURCDIR@
 
@@ -130,7 +130,7 @@ boot:	../src/boot.img
 	   cp ./boot.img3 ../src/boot.img;    				\
 	   cp ./instr3    ../src/vm-instr.h;  				\
 	   echo "*** Create new boot.c";				\
-	   ../src/stklos -c -b ../src/boot.img  			\
+	   ../src/stklos -q -c -b ../src/boot.img  			\
 		-f make-C-boot.stk -- boot.img3 ../src/boot.c;		\
 	   echo "*** Recompile STklos";					\
 	   (cd ../src; make stklos);					\
@@ -140,6 +140,9 @@ boot:	../src/boot.img
 	   echo "*** Boot file creation failed"; 			\
 	   exit 1; 							\
 	fi
+
+# Compile SRFI13 before SRFI14 to avoid 2 warnings
+srfi-13.ostk: srfi-14.ostk
 
 doc: $(DOCDB)
 

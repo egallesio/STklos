@@ -1,3 +1,12 @@
+2006-09-27  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compfile.stk:
+	* lib/compiler.stk
+	* src/fport.c
+	* src/vm.c: Added informations on the global variables in  
+	compiled bytecode files. This permits to avoid false messages on
+	references to undefined symbols.
+
 2006-09-26  Erick Gallesio  <eg@essi.fr>
 
 	* utils/stklos-compile: Added the possibility to compile

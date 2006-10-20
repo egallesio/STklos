@@ -1,7 +1,7 @@
 ;;;;
 ;;;; compfile.stk	-- STklos File Compiler 
 ;;;; 
-;;;; Copyright © 2001-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,15 +21,28 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
-;;;; Last file update: 29-Apr-2005 18:12 (eg)
+;;;; Last file update: 27-Sep-2006 10:03 (eg)
 ;;;;
 
 
 (define (compile-file input output)
-  (let* ((in       (open-input-file input)) ;; FIXME: A VIRER  ne sert  plus
-	 (out      (open-output-file output))
-	 (tm       (clock))
-	 (copts    *compiler-options*))
+
+  (define (compute-file-informations initial-globals)
+    (let ((globs (let loop ((lst (compiler-known-globals))
+			    (old   initial-globals))
+		   (cond
+		     ((null? old)           lst)
+		     ((memv (car old) lst)  (loop (delete (car old) lst)
+						  (cdr old)))
+		     (else                  (loop lst (cdr old)))))))
+      ;; Return informations
+      (list :version (version)
+	    :globals globs)))
+  
+  (let ((out      (open-output-file output))
+	(globs    (compiler-known-globals))
+	(tm       (clock))
+	(copts    *compiler-options*))
 
     ;; Defer warning til the end of the compilation of file
     (set! *compiler-options* (cons 'warn-use-undef-postpone *compiler-options*))
@@ -39,16 +52,17 @@
     ;; Read the source file
     (include-file input)
     (emit 'END-OF-CODE)
-      
+
     ;; Write the header
     (format out "#!/usr/bin/env stklos-script\n")
-    (format out "STklos ~S ;-*-Scheme -*-\n" (version))
+    (format out "; A -*- Scheme -*- generated file *DO NOT EDIT**\n")
+    (format out "STklos ~S\n" (compute-file-informations globs))
       
     (let ((code (assemble (reverse! *code-instr*))))
       ;;Write the assembly code and code vector
       ;;(format out "\n#|\n") 
       ;;(disassemble-code code out)
-      ;;(format out "\n~S\n|#\n" code)
+      ;;(format out "\n~S\n|\#\n" code)
 	
       ;; Write new constants as a vector
       (format out "#~S\n" *code-constants*)
@@ -56,8 +70,7 @@
       ;; Write byte-code
       (%dump-code out code))
     
-    ;; Close files
-    (close-input-port in)
+    ;; Close file
     (close-output-port out)
     
     ;; Show undefined symbols

@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update:  6-Aug-2006 22:05 (eg)
+ * Last file update: 27-Sep-2006 10:31 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -746,11 +746,9 @@ static int find_file_nature(SCM f)
       return FILE_IS_OBJECT;
 
     tmp = STk_read(f, TRUE);
-    if (tmp == STk_intern("STklos")) {
-      /* This is a bytecode file. Skip  the (unused) version number*/
-      tmp = STk_read(f, TRUE);
+    if (tmp == STk_intern("STklos")) 
       return FILE_IS_BCODE;
-    }
+    
     /* We'll suppose that this is a source file, but we have read the first sexpr */
     STk_rewind(f);
   }
@@ -845,6 +843,31 @@ DEFINE_PRIMITIVE("try-load", scheme_try_load, subr1, (SCM filename))
 
 
 
+DEFINE_PRIMITIVE("%file-informations", file_informations, subr1, (SCM filename))
+{
+  SCM f, res = STk_nil;
+  char *fname;
+
+  if (!STRINGP(filename)) STk_error_bad_file_name(filename);
+
+  fname = STRING_CHARS(filename);
+  
+  /* Verify that file is not a directory */
+  if (!STk_dirp(fname)) {
+    f = STk_open_file(fname, "r");
+    if (f != STk_false) {
+      switch (find_file_nature(f)) {
+      case FILE_IS_SOURCE: break;
+      case FILE_IS_BCODE: res = STk_read(f, TRUE); break;
+      case FILE_IS_OBJECT: break;
+      }
+      STk_close_port(f);
+    }
+  }
+  return res;
+}
+
+
 int STk_init_fport(void)
 {
   vm_thread_t *vm = STk_get_current_vm();
@@ -872,6 +895,7 @@ int STk_init_fport(void)
   ADD_PRIMITIVE(port_idle);
 
   //  ADD_PRIMITIVE(dbg);
+  ADD_PRIMITIVE(file_informations);
   return TRUE;
 }
 

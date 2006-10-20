@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:57 (eg)
-;;;; Last file update:  5-Apr-2006 10:14 (eg)
+;;;; Last file update: 27-Sep-2006 15:59 (eg)
 ;;;;
 
 
@@ -30,13 +30,23 @@
   (apply error 'panic (string-append "*** PANIC *** "  (car l)) (cdr l)))
 
 
+(define (%path-without-cwd path)
+  (let ((cwd (getcwd)))
+    (if (eq? (string-index cwd path) 0)
+	(substring path
+		   (+  1 (string-length cwd))
+		   (string-length path))
+	path)))
+
 ;;; ----------------------------------------------------------------------
 ;;;	compiler-error ...
 ;;; ----------------------------------------------------------------------
 (define (compiler-error where who fmt . l)
   (let* ((where (if (eq? where (void)) "" (format "~A: " where)))
 	 (loc   (if (%epair? who)
-		    (format "~A:~A: " (%epair-file who) (%epair-line who))
+		    (format "~A:~A: "
+			    (%path-without-cwd (%epair-file who))
+			    (%epair-line who))
 		    "")))
     (if *compiler-port*
 	;; Compiling a file
@@ -55,7 +65,9 @@
 (define (compiler-warning where who fmt . l)
   (let* ((where (if (eq? where (void)) "" (format "~A: " where)))
 	 (loc   (if (%epair? who)
-		    (format "~A:~A: " (%epair-file who) (%epair-line who))
+		    (format "~A:~A: "
+			    (%path-without-cwd (%epair-file who))
+			    (%epair-line who))
 		    "")))
     (if (or #t *compiler-port*)
 	;; Compiling a file
