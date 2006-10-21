@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 26-Sep-2006 13:26 (eg)
+ * Last file update: 20-Oct-2006 20:40 (eg)
  */
 
 #ifndef STKLOS_H
@@ -479,9 +479,8 @@ int STk_init_keyword(void);
   ------------------------------------------------------------------------------
 */
 extern int   STk_library_initialized; /* True when successfully initialized */
-extern void *STk_start_stack;	      /* An approx. of main thread stack addr */
 
-  int STk_init_library(int *argc, char ***argv, int stack_size);
+int STk_init_library(int *argc, char ***argv, int stack_size);
 
 /*
   ------------------------------------------------------------------------------

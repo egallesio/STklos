@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  5-Jan-2000 12:17 (eg)
- * Last file update:  5-Sep-2006 12:02 (eg)
+ * Last file update: 21-Oct-2006 10:59 (eg)
  */
 
 
@@ -30,44 +30,45 @@
 
 
 int STk_library_initialized = FALSE;  /* True when successfully initialized */
-void *STk_start_stack;
 
 int
 STk_init_library(int *argc, char ***argv, int stack_size)
 {
-  STk_get_stack_pointer(&STk_start_stack);
+  void * start_stack;
+
+  STk_get_stack_pointer(&start_stack);
 
   return 
-    STk_init_env()		&&
-    STk_init_symbol()		&&
-    STk_late_init_env() 	&&
-    STk_init_struct()		&&
-    STk_init_cond()		&&
-    STk_init_vm()		&&
-    STk_init_threads(stack_size)&&
-    STk_init_port() 		&&
-    STk_init_extend()		&&
-    STk_init_list() 		&&
-    STk_init_vector() 		&&
-    STk_init_uniform_vector()	&&
-    STk_init_char()		&&
-    STk_init_keyword()		&&
-    STk_init_string()   	&&
-    STk_init_parameter()	&&
-    STk_init_proc()		&&
-    STk_init_boolean()		&&
-    STk_init_reader()   	&&
-    STk_init_system()   	&&
-    STk_init_mutexes()		&&
-    STk_init_number()		&&
-    STk_init_hash()		&&
-    STk_init_misc()		&&
-    STk_init_signal()		&&
-    STk_init_promise()		&&
-    STk_init_regexp()		&&
-    STk_init_process()		&&
-    STk_init_socket()		&&
-    STk_init_object()		&&
-    STk_init_base64()		&&
+    STk_init_env()				&&
+    STk_init_symbol()				&&
+    STk_late_init_env() 			&&
+    STk_init_struct()				&&
+    STk_init_cond()				&&
+    STk_init_vm()				&&
+    STk_init_threads(stack_size, start_stack)	&&
+    STk_init_port() 				&&
+    STk_init_extend()				&&
+    STk_init_list() 				&&
+    STk_init_vector() 				&&
+    STk_init_uniform_vector()			&&
+    STk_init_char()				&&
+    STk_init_keyword()				&&
+    STk_init_string()   			&&
+    STk_init_parameter()			&&
+    STk_init_proc()				&&
+    STk_init_boolean()				&&
+    STk_init_reader()   			&&
+    STk_init_system()   			&&
+    STk_init_mutexes()				&&
+    STk_init_number()				&&
+    STk_init_hash()				&&
+    STk_init_misc()				&&
+    STk_init_signal()				&&
+    STk_init_promise()				&&
+    STk_init_regexp()				&&
+    STk_init_process()				&&
+    STk_init_socket()				&&
+    STk_init_object()				&&
+    STk_init_base64()				&&
     (STk_library_initialized = TRUE);
 }

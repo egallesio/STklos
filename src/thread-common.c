@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 26-Apr-2006 16:18 (eg)
+ * Last file update: 21-Oct-2006 13:02 (eg)
  */
 #include <unistd.h>
 #include "stklos.h"
@@ -71,33 +71,43 @@ DEFINE_PRIMITIVE("current-thread", current_thread, subr0, (void))
   return vm->scheme_thread;
 }
 
-static SCM do_make_thread(SCM thunk, SCM name)
+static SCM do_make_thread(SCM thunk, SCM name, int stack_size)
 {
   SCM z;
   
   NEWCELL(z, thread);
   
-  THREAD_THUNK(z)     = thunk;
-  THREAD_NAME(z)      = name;
-  THREAD_SPECIFIC(z)  = STk_void;
-  THREAD_RESULT(z)    = STk_void;
-  THREAD_EXCEPTION(z) = STk_false;
-  THREAD_STATE(z)     = th_new;
-  THREAD_VM(z)        = NULL;
+  THREAD_THUNK(z)      = thunk;
+  THREAD_NAME(z)       = name;
+  THREAD_SPECIFIC(z)   = STk_void;
+  THREAD_RESULT(z)     = STk_void;
+  THREAD_EXCEPTION(z)  = STk_false;
+  THREAD_STATE(z)      = th_new;
+  THREAD_STACK_SIZE(z) = stack_size;
+  THREAD_VM(z)         = NULL;
 
   STk_do_make_sys_thread(z);
 
   return z;
 }
 
-DEFINE_PRIMITIVE("%make-thread", make_thread, subr12, (SCM thunk, SCM name))
+DEFINE_PRIMITIVE("%make-thread", make_thread, subr3,(SCM thunk, SCM name, SCM ssize))
 {
   SCM z;
+  int stack_size;
 
   if (STk_procedurep(thunk) == STk_false) 
     STk_error("bad thunk ~S", thunk);
-
-  z = do_make_thread(thunk, (name ? name : STk_false));
+  if (ssize == STk_false) 
+    /* If no size is specified, use primordial thread stack size */
+    stack_size = THREAD_STACK_SIZE(STk_primordial_thread);
+  else {
+    stack_size = STk_integer_value(ssize);
+    if (stack_size < 0)
+      STk_error("bad stack size ~S", ssize);
+  }
+  
+  z = do_make_thread(thunk, (name ? name : STk_false), stack_size);
   return z;
 }
 
@@ -165,7 +175,7 @@ DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
     STk_error("thread has already been started ~S", thr);
 
   vm  = STk_get_current_vm();
-  new = STk_allocate_vm(5000);			// FIX:
+  new = STk_allocate_vm(THREAD_STACK_SIZE(thr));
 
   new->current_module = vm->current_module;
   new->iport          = vm->iport;
@@ -215,7 +225,7 @@ static struct extended_type_descr xtype_thread = {
   print_thread			/* print function */
 };
 
-int STk_init_threads(int stack_size)
+int STk_init_threads(int stack_size, void *start_stack)
 {
   vm_thread_t *vm = STk_allocate_vm(stack_size);
   SCM primordial;
@@ -240,10 +250,13 @@ int STk_init_threads(int stack_size)
                                        STk_nil, STk_STklos_module);
 
   /* Wrap the main thread in a thread called "primordial" */
-  primordial = do_make_thread(STk_false, STk_Cstring2string("primordial"));
+  primordial = do_make_thread(STk_false, 
+			      STk_Cstring2string("primordial"),
+			      stack_size);
   THREAD_STATE(primordial) = th_runnable;
   THREAD_VM(primordial)    = vm;
   vm->scheme_thread        = primordial;
+  vm->start_stack	   = start_stack;
   STk_primordial_thread    = primordial;
 
   /* Thread primitives */

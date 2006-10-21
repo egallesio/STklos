@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 12-Apr-2006 15:57 (eg)
+ * Last file update: 21-Oct-2006 13:02 (eg)
  */
 
 
@@ -105,6 +105,7 @@ typedef struct {
   int valc;		/* # of multiple values 	 */
     
   jbuf *top_jmp_buf;  
+  void *start_stack; 
 
   SCM *stack;
   int stack_len;

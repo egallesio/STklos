@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Jan-2006 22:56 (eg)
-;;;; Last file update: 25-Apr-2006 19:10 (eg)
+;;;; Last file update: 21-Oct-2006 11:31 (eg)
 ;;;;
 (define (%thread-timeout->seconds timeout)
   (cond
@@ -32,14 +32,16 @@
     (else (error "bad timeout ~S" timeout))))
  
 
-(define (make-thread thunk :optional (name (symbol->string (gensym "thread"))))
+(define (make-thread thunk :optional (name (symbol->string (gensym "thread")))
+		                     stack-size)
   (define (thread-handler c)
     (%thread-end-exception-set! (current-thread) c)
     c)
   (%make-thread (lambda ()
 		  (with-handler thread-handler
 		     (thunk)))
-		name))
+		name
+		stack-size))
 
 
 (define (thread-sleep! timeout)

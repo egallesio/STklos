@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 30-Dec-2005 21:41 (eg)
+ * Last file update: 21-Oct-2006 11:00 (eg)
  */
 
 
@@ -2938,7 +2938,7 @@ doc>
 DEFINE_PRIMITIVE("decode-float", decode_float, subr1, (SCM n))
 {
   SCM tmp;
-  int exp, sign;
+  int exp, sign=0;
 
   if (!NUMBERP(n)) error_bad_number(n);
   if (COMPLEXP(n)) STk_error("real number expected. It was ~S", n);

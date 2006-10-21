@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update: 26-Apr-2006 16:02 (eg)
+ * Last file update: 21-Oct-2006 12:29 (eg)
  */
 #ifndef _STK_THREAD_H
 #define _STK_THREAD_H
@@ -48,6 +48,7 @@ struct thread_obj {
   SCM end_result;
   SCM end_exception;
   enum thread_state state;
+  int stack_stize;
   vm_thread_t *vm;
   struct sys_thread_obj sys_thread;
 };
@@ -60,6 +61,7 @@ struct thread_obj {
 #define THREAD_RESULT(p)	(((struct thread_obj *) (p))->end_result)
 #define THREAD_EXCEPTION(p)	(((struct thread_obj *) (p))->end_exception)
 #define THREAD_STATE(p)		(((struct thread_obj *) (p))->state)
+#define THREAD_STACK_SIZE(p)	(((struct thread_obj *) (p))->stack_stize)
 #define THREAD_VM(p)		(((struct thread_obj *) (p))->vm)
 
 extern void STk_error_bad_thread(SCM obj);

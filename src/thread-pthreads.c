@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  4-Aug-2006 09:50 (eg)
+ * Last file update: 21-Oct-2006 13:08 (eg)
  */
 
 
@@ -83,9 +83,15 @@ static void *start_scheme_thread(void *arg)
 {
   volatile SCM thr = (SCM) arg;
   SCM res;
+  void * start_stack;
+
+  /* Get the stack start address and place it in the thread (for call/cc) */
+  STk_get_stack_pointer(&start_stack);
+  THREAD_VM(thr)->start_stack = start_stack;
   
   pthread_setspecific(vm_key, THREAD_VM(thr));
   pthread_cleanup_push(terminate_scheme_thread, thr);
+
 
   res = STk_C_apply(THREAD_THUNK(thr), 0);
   if (THREAD_EXCEPTION(thr) == STk_false) {

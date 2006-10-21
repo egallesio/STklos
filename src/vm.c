@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 27-Sep-2006 13:41 (eg)
+ * Last file update: 21-Oct-2006 13:01 (eg)
  */
 
 // INLINER values
@@ -144,6 +144,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   vm->env            = vm->current_module;
   vm->handlers       = NULL;
   vm->top_jmp_buf    = NULL;
+  vm->start_stack    = 0;  		/* MUST be initialized later */
   vm->scheme_thread  = STk_false;
   vm->parameters     = STk_nil;
 
@@ -1557,19 +1558,21 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   vm_thread_t *vm = STk_get_current_vm();
   int csize, ssize;
   void *cstart, *sstart, *cend, *send;
-  void *addr;
+  void *addr, *start_stack;
 
 
 
   /* Determine the size of the C stack and the start address */
   STk_get_stack_pointer(&addr);
-  if ((unsigned long) addr < (unsigned long) STk_start_stack) {
-    csize  = (unsigned long) STk_start_stack - (unsigned long) addr;
+  start_stack = vm->start_stack;
+
+  if ((unsigned long) addr < (unsigned long) start_stack) {
+    csize  = (unsigned long) start_stack - (unsigned long) addr;
     cstart = addr;
-    cend   = STk_start_stack;
+    cend   = start_stack;
   } else {
-    csize  = (unsigned long) addr - (unsigned long) STk_start_stack;
-    cstart = STk_start_stack;
+    csize  = (unsigned long) addr - (unsigned long) start_stack;
+    cstart = start_stack;
     cend   = addr;
   }
 
@@ -1626,7 +1629,10 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 
 static void restore_cont_jump(struct continuation_obj *k, void* addr){
   char buf[1024];
-  int cur_stack_size = STk_start_stack - addr;
+  vm_thread_t *vm = STk_get_current_vm();
+  int cur_stack_size;
+
+  cur_stack_size = vm->start_stack - addr;
   
   buf[42] = 0x2a;
 
