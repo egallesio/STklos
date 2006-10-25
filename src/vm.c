@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 24-Oct-2006 17:18 (eg)
+ * Last file update: 25-Oct-2006 19:57 (eg)
  */
 
 // INLINER values
@@ -1538,6 +1538,25 @@ void STk_raise_exception(SCM cond)
   MY_LONGJMP(*(vm->top_jmp_buf), 1);
 }
 
+/*
+<doc EXT current-exception-handler
+ * (current-exception-handler)
+ *
+ * Returns the current exception handler. This procedure is defined in 
+ * ,(link-srfi 18).
+doc>
+*/
+DEFINE_PRIMITIVE("current-exception-handler", current_handler, subr0, (void))
+{
+  vm_thread_t *vm = STk_get_current_vm();
+  
+  if (vm->handlers == NULL)
+    return STk_false;
+  else 
+    return (SCM) HANDLER_PROC(vm->handlers);
+}
+
+
 /*===========================================================================*\
  * 
  *			   C O N T I N U A T I O N S
@@ -1708,6 +1727,7 @@ static struct extended_type_descr xtype_continuation = {
 };
 
 #endif /* ! THREADS_LURC */
+
 
 /*===========================================================================*\
  * 
@@ -1906,6 +1926,9 @@ int STk_init_vm()
 
   ADD_PRIMITIVE(values);
   ADD_PRIMITIVE(call_with_values);
+
+  ADD_PRIMITIVE(current_handler);
+
 #ifndef THREADS_LURC
   ADD_PRIMITIVE(make_continuation);
   ADD_PRIMITIVE(restore_cont);

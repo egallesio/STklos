@@ -1,3 +1,7 @@
+2006-10-25  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-0.stk: Fully  srfi-18 compliant.
+
 2006-10-20  Erick Gallesio  <eg@essi.fr>
 
 	* src/stklos.c (main): FIXED: open file ports were not flushed on

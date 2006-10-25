@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  3-Jan-2006 16:18 (eg)
+;; Last file update: 25-Oct-2006 17:40 (eg)
 ;;
 ;; ======================================================================
 
@@ -220,7 +220,16 @@ described in this document (procedures ,(code "set!") and
 (p [in your code (or the use of the ,(code "cond-expand") special form) permits
 to define the setters for the (numerous) cXXXXr list procedures.]))
 
-
+;; ----------------------------------------------------------------------
+;; SRFI 18 -- Multithreading support
+;; ----------------------------------------------------------------------
+(index "thread")
+(index "mutex")
+(index "condition-variable")   
+(srfi-section 18
+(p [,(quick-link-srfi 18) is fully supported and is completely
+described in this document]))
+   
 ;; ----------------------------------------------------------------------
 ;; SRFI 19 -- Time Data Types and Procedures
 ;; ----------------------------------------------------------------------   

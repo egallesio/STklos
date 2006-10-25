@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-0.stk 				-- SRFI-0 aka cond-expand
 ;;;; 
-;;;; Copyright © 1999-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1999-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 15-Dec-2005 20:24 (eg)
+;;;; Last file update: 25-Oct-2006 17:37 (eg)
 ;;;;
 
 ; (select-module Scheme)	;//FIXME:
@@ -47,7 +47,7 @@
     ;; srfi-15				; ....... withdrawn
     ((srfi-16 case-lambda))		; CASE-LAMBDA
     srfi-17				; Generalized set!
-    ;; srfi-18				; Multithreading support
+    srfi-18				; Multithreading support
     ;; (srfi-19 "srfi-19")		; Time Data Types and Procedures
     ;; srfi-20				; ....... withdrawn
     ;; srfi-21				; Real-time multithreading support
@@ -76,17 +76,17 @@
     ;; srfi-43				; Vector library
     ;; srfi-44				; Collections
     ;; srfi-45				; primitives for lazy algorithms
-    ;; srfi-46
+    ;; srfi-46				; Basic Syntax-rules Extensions
     ;; srfi-47				; Array
     srfi-48				; Intermediate Format Strings
     ;; srfi-49				; Indentation-sensitive syntax (NEVER)
-    ;; srfi-50
+    ;; srfi-50				; ....... withdrawn
     ;; srfi-51				; Handling rest list
     ;; srfi-52				; ....... withdrawn
     ;; srfi-53				; ....... withdrawn
     ;; srfi-54				; Formatting
     srfi-55				; require-extension
-    ;; srfi-56
+    ;; srfi-56				; ....... withdrawn
     ;; srfi-57				; Records
     ;; srfi-58				; Array Notation
     ;; srfi-59				; Vicinity
@@ -94,15 +94,38 @@
     ;; srfi-61				; A more general cond clause
     srfi-62				; S-expression comments
     ;; srfi-63				; Homogeneous and Heterogeneous Arrays
-    ;; srfi-64
-    ;; srfi-65
+    ;; srfi-64			        ; A Scheme API for test suites
+    ;; srfi-65				; ....... withdrawn
     (srfi-66 "srfi-66")			; Octet Vectors
     ;; srfi-67				; Compare Procedures
-    ;; srfi-68
+    ;; srfi-68				; ....... withdrawn
     ((srfi-69 hash-tables) "srfi-69")	; Basic Hash Tables
     srfi-70				; Numbers
     ;; srfi-71				; LET-syntax for multiple values
     ;; srfi-72				; Simple hygienic macros
+    ;; srfi-73				; ....... withdrawn
+    ;; srfi-74				; Octet-Addressed Binary Blocks
+    ;; srfi-75				; ....... withdrawn
+    ;; srfi-76				; ....... withdrawn
+    ;; srfi-77				; ....... withdrawn
+    ;; srfi-78				; Lightweight testing
+    ;; srfi-79
+    ;; srfi-80
+    ;; srfi-81
+    ;; srfi-82
+    ;; srfi-83				; ....... withdrawn
+    ;; srfi-84
+    ;; srfi-85				; ....... withdrawn
+    ;; srfi-86
+    ;; srfi-87				; => in case clauses
+    ;; srfi-88
+    ;; srfi-89
+    ;; srfi-90
+    ;; srfi-91
+    ;; srfi-92
+    ;; srfi-93				; ....... withdrawn
+    ;; srfi-94
+    ;; srfi-95
     ))
 
 (define (%has-feature? x)

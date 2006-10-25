@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Jan-2006 22:56 (eg)
-;;;; Last file update: 25-Oct-2006 15:43 (eg)
+;;;; Last file update: 25-Oct-2006 17:06 (eg)
 ;;;;
 (define (%thread-timeout->seconds timeout)
   (cond
@@ -91,7 +91,6 @@ doc>
 		(raise (make-condition &thread-join-timeout))))
 	  ((%thread-end-exception thread)
 	     ;; We had an exception in thread. Raise an uncaught-exception
-	     (eprintf "FOOOOO\n")
 	     (let ((old-exception  (%thread-end-exception thread)))
 	       (raise (make-condition &uncaught-exception
 				       'reason old-exception))))
@@ -133,10 +132,21 @@ doc>
 (%define-condition-type-accessors &thread-terminated  &condition
   terminated-thread-exception?)
 
-(define &uncaught-exception
-  (make-condition-type '&uncaught-execption
-		       &condition
-		       '(reason)))
+
+;; The following definitions correspond to the macro-expansion of the form
+;;
+;;   (define-condition-type &uncaught-exception &condition
+;;     &uncaught-exception?
+;;     (reason uncaught-exception-reason))
+::
+;; Using the macro-expansion avoid the auto-loading of SRFI-35
+(define &uncaught-exception (make-condition-type '&uncaught-exception
+						 &condition
+						 '(reason)))
+(%define-condition-type-accessors &uncaught-exception &condition
+   uncaught-exception?
+   (reason uncaught-exception-reason))
+
 
 #|
 <doc EXT join-timeout-exception?

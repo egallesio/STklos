@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 20-Apr-2005 20:56 (eg)
+;; Last file update: 25-Oct-2006 19:54 (eg)
 ;;
 ;; ======================================================================
 
@@ -58,7 +58,8 @@ exception handler.])
 (insertdoc 'with-handler)
 (insertdoc 'with-exception-handler)
 (insertdoc 'raise)
-(insertdoc 'guard))
+(insertdoc 'guard)
+(insertdoc 'current-exception-handler))
    
    
 (section :title "Conditions"
