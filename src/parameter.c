@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  1-Jul-2003 11:38 (eg)
- * Last file update:  6-Apr-2006 18:28 (eg)
+ * Last file update: 24-Oct-2006 17:08 (eg)
  */
 
 
@@ -54,12 +54,6 @@ struct parameter_obj {
 static void error_bad_parameter(SCM obj)
 {
   STk_error("bad parameter ~S", obj);
-}
-
-static void add_to_dynamic_env(SCM z)
-{
-  vm_thread_t *vm = STk_get_current_vm();
-  vm->parameters = STk_cons(z, vm->parameters);
 }
 
 
@@ -110,9 +104,6 @@ SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value))
   PARAMETER_CONV(z)   = (SCM) proc;
   PARAMETER_C_TYPE(z) = 1;
   PARAMETER_DYNENV(z) = STk_nil;
-
-  /* Add parameter ro dynamic environment */
-  add_to_dynamic_env(z);
 
   /* Bind it to the given symbol */
   STk_define_variable(STk_intern(symbol), z, STk_current_module());
@@ -203,8 +194,6 @@ DEFINE_PRIMITIVE("make-parameter", make_parameter, subr12, (SCM value, SCM conv)
   PARAMETER_C_TYPE(z) = 0;
   PARAMETER_DYNENV(z) = STk_nil;
 
-  /* Add parameter ro dynamic environment */
-  add_to_dynamic_env(z);
   return z;
 }
 

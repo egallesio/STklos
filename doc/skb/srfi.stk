@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Aug-2004 12:43 (eg)
-;;;; Last file update:  3-Jan-2006 16:22 (eg)
+;;;; Last file update: 24-Oct-2006 14:51 (eg)
 ;;;;
 
 (define srfi-address "http://srfi.schemers.org/srfi-~A/srfi-~A.html")
@@ -41,6 +41,7 @@
      (14 . "Character-Set Library")
      (16 . "Syntax for procedures of variable arity")
      (17 . "Generalized set!")
+     (18 . "Multithreading support")
      (22 . "Running Scheme Scripts on Unix")
      (23 . "Error reporting mechanism")
      (26 . "Notation for Specializing Parameters without Currying")

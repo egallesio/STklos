@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 17-Apr-2006 00:00 (eg)
+ * Last file update: 25-Oct-2006 16:22 (eg)
  */
 
 #include <unistd.h>
@@ -55,6 +55,17 @@ void STk_error_bad_timeout(SCM tm)
 
 /* ====================================================================== */
 
+/*
+<doc EXT make-mutex
+ * (make-mutex)
+ * (make-mutex name)
+ * 
+ *  Returns a new mutex in the unlocked/not-abandoned state. The optional |name| 
+ * is an arbitrary Scheme object which identifies the mutex 
+ * (useful for debugging); it defaults to an unspecified value. 
+ * The mutex's specific field is set to an unspecified value.
+doc>
+*/
 DEFINE_PRIMITIVE("make-mutex", make_mutex, subr01, (SCM name))
 {
   SCM z;
@@ -70,23 +81,74 @@ DEFINE_PRIMITIVE("make-mutex", make_mutex, subr01, (SCM name))
   return z;
 }
 
+/*
+<doc EXT mutex?
+ * (mutex? obj)
+ * 
+ * Returns |#t| if obj is a mutex, otherwise returns |#f|.
+doc>
+*/
 DEFINE_PRIMITIVE("mutex?", mutexp, subr1, (SCM obj))
 {
   return MAKE_BOOLEAN(MUTEXP(obj));
 }
 
+/*
+<doc EXT mutex-name
+ * (mutex-name mutex)
+ * 
+ * Returns the name of the |mutex|.
+ * @lisp
+ * (mutex-name (make-mutex 'foo))  =>  foo
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("mutex-name", mutex_name, subr1, (SCM mtx))
 {
   if (! MUTEXP(mtx)) STk_error_bad_mutex(mtx);
   return MUTEX_NAME(mtx);
 }
 
+/*
+<doc EXT mutex-specific
+ * (mutex-specific mutex)
+ * 
+ * Returns the content of the |mutex|'s specific field.
+doc>
+*/
 DEFINE_PRIMITIVE("mutex-specific", mutex_specific, subr1, (SCM mtx))
 {
   if (! MUTEXP(mtx)) STk_error_bad_mutex(mtx);
   return MUTEX_SPECIFIC(mtx);
 }
 
+
+/*
+<doc EXT mutex-specific-set!
+ * (mutex-specific! mutex obj)
+ * 
+ * Stores |obj| into the |mutex|'s specific field and eturns an unspecified value.
+ * @lisp
+ * (define m (make-mutex))
+ * (mutex-specific-set! m "hello")  =>  unspecified
+ * (mutex-specific m)               =>  "hello"
+ *
+ * (define (mutex-lock-recursively! mutex)
+ *   (if (eq? (mutex-state mutex) (current-thread))
+ *       (let ((n (mutex-specific mutex)))
+ *         (mutex-specific-set! mutex (+ n 1)))
+ *       (begin
+ *         (mutex-lock! mutex)
+ *         (mutex-specific-set! mutex 0))))
+ *
+ * (define (mutex-unlock-recursively! mutex)
+ *   (let ((n (mutex-specific mutex)))
+ *     (if (= n 0)
+ *         (mutex-unlock! mutex)
+ *         (mutex-specific-set! mutex (- n 1)))))
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("mutex-specific-set!", mutex_specific_set, subr2, (SCM mtx, SCM v))
 {
   if (! MUTEXP(mtx)) STk_error_bad_mutex(mtx);
@@ -106,8 +168,18 @@ void STk_error_bad_condv(SCM obj)
   STk_error("bad confdition variable ~S", obj);
 }
 
-/* ====================================================================== */
 
+/*
+<doc EXT make-condition-variable
+ * (make-conditon-variable)
+ * (make-conditon-variable name)
+ * 
+ * Returns a new empty condition variable. The optional |name| is an arbitrary 
+ * Scheme object which identifies the condition variable (useful for debugging); 
+ * it defaults to an unspecified value. The condition variable's specific 
+ * field is set to an unspecified value.
+doc>
+*/
 DEFINE_PRIMITIVE("make-condition-variable", make_condv, subr01, (SCM name))
 {
   SCM z;
@@ -122,23 +194,53 @@ DEFINE_PRIMITIVE("make-condition-variable", make_condv, subr01, (SCM name))
 }
 
 
+/*
+<doc EXT condition-variable?
+ * (conditon-variable? obj)
+ * 
+ * Returns |#t| if |obj| is a condition variable, otherwise returns |#f|.
+doc>
+*/
 DEFINE_PRIMITIVE("condition-variable?", condvp, subr1, (SCM obj))
 {
   return MAKE_BOOLEAN(CONDVP(obj));
 }
 
+/*
+<doc EXT condition-variable-name
+ * (conditon-variable-name conditon-variable)
+ * 
+ *Returns the name of the |condition-variable|.
+doc>
+*/
 DEFINE_PRIMITIVE("condition-variable-name", condv_name, subr1, (SCM cv))
 {
   if (! CONDVP(cv)) STk_error_bad_condv(cv);
   return CONDV_NAME(cv);
 }
 
+
+/*
+<doc EXT condition-variable-specific
+ * (conditon-variable-specific conditon-variable)
+ * 
+ * Returns the content of the |condition-variable|'s specific field.
+doc>
+*/
 DEFINE_PRIMITIVE("condition-variable-specific", condv_specific, subr1, (SCM cv))
 {
   if (! CONDVP(cv)) STk_error_bad_condv(cv);
   return CONDV_SPECIFIC(cv);
 }
 
+
+/*
+<doc EXT condition-variable-specific-set!
+ * (conditon-variable-specific-set! conditon-variable obj)
+ * 
+ * Stores |obj| into the |condition-variable|'s specific field. 
+doc>
+*/
 DEFINE_PRIMITIVE("condition-variable-specific-set!", condv_specific_set, subr2, 
 		 (SCM cv, SCM v))
 {

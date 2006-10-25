@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 27-May-2005 11:22 (eg)
+;; Last file update: 24-Oct-2006 20:12 (eg)
 ;;
 ;; ======================================================================
 
@@ -80,6 +80,7 @@ document.]
 (skribe-include "match.skb")
 (skribe-include "cond.skb")
 (skribe-include "object.skb")
+(skribe-include "threads.skb")
 (skribe-include "custom.skb")
 (skribe-include "slib.skb")
 (skribe-include "srfi.skb")

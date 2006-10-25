@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 21-Oct-2006 13:02 (eg)
+ * Last file update: 24-Oct-2006 17:15 (eg)
  */
 
 
@@ -112,7 +112,7 @@ typedef struct {
   SCM current_module;
   SCM iport, oport,eport; /* Standard ports */
   SCM scheme_thread; 	  /* Scheme associated thread 	*/
-  SCM parameters;	  /* Scheme dynamic environement (parameter objects) */
+  SCM dynwind_stack;
 } vm_thread_t;
 
 

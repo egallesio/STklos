@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update:  2-May-2006 16:52 (eg)
+ * Last file update: 25-Oct-2006 16:22 (eg)
  */
 
 #include <unistd.h>
@@ -48,9 +48,36 @@ void STk_make_sys_mutex(SCM z)
   pthread_mutex_init(&MUTEX_MYMUTEX(z), NULL);
   pthread_cond_init(&MUTEX_MYCONDV(z), NULL);
 
-  //FINAL  STk_register_finalizer(z, mutex_finalizer);
+  // STk_register_finalizer(z, mutex_finalizer);
 }
 
+/*
+<doc EXT mutex-state
+ * (mutex-state mutex)
+ * 
+ * Returns information about the state of the |mutex|. The possible results 
+ * are:
+ * ,(itemize
+ *  (item [,(bold "thread T"): the mutex is in the locked/owned state and
+ *     thread T is the owner of the mutex])
+ *  (item [,(bold "symbol not-owned"): the mutex is in the locked/not-owned 
+ *     state])
+ *  (item [,(bold "symbol abandoned"): the mutex is in the unlocked/abandoned 
+ *      state])
+ *  (item [,(bold "symbol not-abandoned"): the mutex is in the 
+ *      unlocked/not-abandoned state]))
+ * @lisp
+ * (mutex-state (make-mutex))  =>  not-abandoned
+ * 
+ * (define (thread-alive? thread)
+ *   (let ((mutex (make-mutex)))
+ *     (mutex-lock! mutex #f thread)
+ *     (let ((state (mutex-state mutex)))
+ *       (mutex-unlock! mutex) ; avoid space leak
+ *       (eq? state thread))))
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("mutex-state", mutex_state, subr1, (SCM mtx))
 {
   SCM res;
@@ -58,6 +85,13 @@ DEFINE_PRIMITIVE("mutex-state", mutex_state, subr1, (SCM mtx))
   if (! MUTEXP(mtx)) STk_error_bad_mutex(mtx);
   
   pthread_mutex_lock(&MUTEX_MYMUTEX(mtx));
+
+  if (MUTEX_LOCKED(mtx) && 
+      (MUTEX_OWNER(mtx) != STk_false) &&
+      (THREAD_STATE(MUTEX_OWNER(mtx)) == th_terminated)) {
+    /* The thread which owns this mutex is terminated => Unlock the mutex */
+    MUTEX_LOCKED(mtx) = FALSE;
+  }
 
   if (MUTEX_LOCKED(mtx))
     res = (MUTEX_OWNER(mtx) == STk_false) ? STk_sym_not_owned : MUTEX_OWNER(mtx);
@@ -70,6 +104,36 @@ DEFINE_PRIMITIVE("mutex-state", mutex_state, subr1, (SCM mtx))
 }
 
 
+/*
+<doc EXT mutex-lock!
+ * (mutex-lock! mutex)
+ * (mutex-lock! mutex timeout)
+ * (mutex-lock! mutex timeout thread)
+ * 
+ * If the |mutex| is currently locked, the current thread waits until the
+ * |mutex| is unlocked, or until the timeout is reached if |timeout| is supplied. 
+ * If the |timeout| is reached, |mutex-lock!| returns |#f|. 
+ * Otherwise, the state of the mutex is changed as follows:
+ * ,(itemize 
+ *  (item [if thread is |#f| the mutex becomes locked/not-owned,])
+ *  (item [otherwise, let T be thread (or the current thread if thread
+ *         is not supplied),
+ *         ,(itemize 
+ *           (item [if T is terminated the mutex becomes unlocked/abandoned,])
+ *           (item [otherwise mutex becomes locked/owned with T as the owner.]))]))
+ * £
+ * After changing the state of the mutex, an "abandoned mutex exception" is 
+ * raised if the mutex was unlocked/abandoned before the state change, 
+ * otherwise |mutex-lock!| returns |#t|. 
+ * @lisp
+ * (define (sleep! timeout)
+ *   ;; an alternate implementation of thread-sleep!
+ *   (let ((m (make-mutex)))
+ *   (mutex-lock! m #f #f)
+ *   (mutex-lock! m timeout #f)))
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread))
 {
   struct timespec ts;
@@ -122,6 +186,25 @@ DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread
   return res;
 }
 
+/*
+<doc EXT mutex-unlock!
+ * (mutex-unlock! mutex)
+ * (mutex-unlock! mutex condition-variable)
+ * (mutex-unlock! mutex condition-variable timeout)
+ * 
+ * Unlocks the |mutex| by making it unlocked/not-abandoned. It is not an error 
+ * to unlock an unlocked mutex and a mutex that is owned by any thread. 
+ * If |condition-variable| is supplied, the current thread is blocked and 
+ * added to the |condition-variable| before unlocking |mutex|; the thread 
+ * can unblock at any time but no later than when an appropriate call to 
+ * |condition-variable-signal!| or |condition-variable-broadcast!| is 
+ * performed (see below), and no later than the timeout (if timeout is 
+ * supplied). If there are threads waiting to lock this mutex, the scheduler
+ * selects a thread, the |mutex| becomes locked/owned or locked/not-owned, 
+ * and the thread is unblocked. |mutex-unlock!| returns |#f| when the 
+ * |timeout| is reached, otherwise it returns |#t|.
+doc>
+*/
 DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm))
 {
   struct timespec ts;
@@ -129,6 +212,7 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
   SCM res = STk_true;
 
   if (! MUTEXP(mtx)) STk_error_bad_mutex(mtx);
+  if ((cv != STk_false) && (!CONDVP(cv))) STk_error_bad_condv(cv);
   if (REALP(tm)) {
     tmd = REAL_VAL(tm);
     ts.tv_sec  = (time_t) tmd;
@@ -178,9 +262,19 @@ void STk_make_sys_condv(SCM z)
 {
   pthread_cond_init(&CONDV_MYCONDV(z), NULL);
 
-  //FINAL STk_register_finalizer(z, condv_finalizer);
+  //   STk_register_finalizer(z, condv_finalizer);
 }
 
+
+/*
+<doc EXT condition-variable-signal!
+ * (condition-variable-signal! condition-variable)
+ * 
+ * If there are threads blocked on the |condition-variable|, the scheduler 
+ * selects a thread and unblocks it. |Condition-variable-signal!|  returns 
+ * an unspecified value.
+doc>
+*/
 DEFINE_PRIMITIVE("condition-variable-signal!", condv_signal, subr1, (SCM cv))
 {
    if (! CONDVP(cv)) STk_error_bad_condv(cv);
@@ -188,6 +282,14 @@ DEFINE_PRIMITIVE("condition-variable-signal!", condv_signal, subr1, (SCM cv))
    return STk_void;
 }
 
+/*
+<doc EXT condition-variable-broadcast!
+ * (condition-variable-broadcast! condition-variable)
+ * 
+ * Unblocks all the threads blocked on the |condition-variable|. 
+ * |Condition-variable-broadcast!| returns an unspecified value.
+doc>
+*/
 DEFINE_PRIMITIVE("condition-variable-brodcast!", condv_broadcast, subr1, (SCM cv))
 {
    if (! CONDVP(cv)) STk_error_bad_condv(cv);

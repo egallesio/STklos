@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 27-Sep-2006 14:02 (eg)
+# Last file update: 23-Oct-2006 23:11 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d @LURCDIR@
 
@@ -10,6 +10,7 @@ scheme_BOOT = assembler.stk		\
 	      bb.stk 			\
 	      bonus.stk 		\
 	      boot.stk 			\
+	      callcc.stk		\
 	      compiler.stk 		\
 	      computils.stk		\
 	      date.stk			\

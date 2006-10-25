@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 21-Oct-2006 13:02 (eg)
+ * Last file update: 25-Oct-2006 10:19 (eg)
  */
 #include <unistd.h>
 #include "stklos.h"
@@ -65,6 +65,16 @@ struct timeval STk_thread_abstime_to_reltime(double abs_secs)
 
 /* ====================================================================== */
 
+/*
+<doc EXT current-thread 
+ * (current-thread)
+ *
+ *  Returns the current thread.
+ * @lisp
+ * (eq? (current-thread) (current-thread))  =>  #t
+ * @end lisp 
+doc>
+*/
 DEFINE_PRIMITIVE("current-thread", current_thread, subr0, (void))
 {
   vm_thread_t *vm = STk_get_current_vm();
@@ -111,17 +121,69 @@ DEFINE_PRIMITIVE("%make-thread", make_thread, subr3,(SCM thunk, SCM name, SCM ss
   return z;
 }
 
-
+/*
+<doc EXT thread? 
+ * (thread? obj)
+ * 
+ * Returns |#t| if |obj| is a thread, otherwise returns |#f|.
+ * @lisp
+ * (thread? (current-thread))  => #t
+   (thread? 'foo)              => #f
+ * @end lisp 
+doc>
+*/
 DEFINE_PRIMITIVE("thread?", threadp, subr1, (SCM obj))
 {
   return MAKE_BOOLEAN(THREADP(obj));
 }
 
+
+/*
+<doc EXT thread-name 
+ * (thread-name thread)
+ * 
+ * Returns the name of the |thread|.
+ * @lisp
+ * (thread-name (make-thread (lambda () #f) 'foo))  =>  foo
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("thread-name", thread_name, subr1, (SCM thr))
 {
   if (! THREADP(thr)) STk_error_bad_thread(thr);
   return THREAD_NAME(thr);
 }
+
+/*
+<doc EXT thread-stack-size 
+ * (thread-stack-size thread)
+ * 
+ * Returns the allocated stack size for |thread|.
+ * Note that this procedure is not present in ,(quick-link-srfi 18).
+doc>
+*/
+DEFINE_PRIMITIVE("thread-stack-size", thread_ssize, subr1, (SCM thr))
+{
+  if (! THREADP(thr)) STk_error_bad_thread(thr);
+  return MAKE_INT(THREAD_STACK_SIZE(thr));
+}
+
+
+DEFINE_PRIMITIVE("%thread-dynwind-stack", thread_dynwind_stack, subr0, (void))
+{
+  vm_thread_t *vm = STk_get_current_vm();
+  return vm->dynwind_stack;
+}
+
+DEFINE_PRIMITIVE("%thread-dynwind-stack-set!", thread_dynwind_stack_set, subr1, 
+		 (SCM value))
+{
+  vm_thread_t *vm = STk_get_current_vm();
+  vm->dynwind_stack = value;
+  return STk_void;
+    
+}
+
 
 DEFINE_PRIMITIVE("%thread-end-exception", thread_end_exception, subr1, (SCM thr))
 {
@@ -151,13 +213,33 @@ DEFINE_PRIMITIVE("%thread-end-result-set!", thread_end_result_set,
   return STk_void;
 }
 
-
+/*
+<doc EXT thread-specific
+ * (thread-specific thread)
+ * 
+ * Returns the content of the |thread|'s specific field.
+doc>
+*/
 DEFINE_PRIMITIVE("thread-specific", thread_specific, subr1, (SCM thr))
 {
   if (! THREADP(thr)) STk_error_bad_thread(thr);
   return THREAD_SPECIFIC(thr);
 }
 
+/*
+<doc EXT thread-specific-set!
+ * (thread-specific-set! thread)
+ * 
+ * Stores |obj| into the |thread|'s specific field. |Thread-specific-set!| 
+ * returns an unspecified value.
+ * @lisp
+ * (thread-specific-set! (current-thread) "hello")  
+ *            =>  unspecified
+ * (thread-specific (current-thread))
+ *            =>  "hello"
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("thread-specific-set!", thread_specific_set, subr2, 
 		 (SCM thr, SCM value))
 {
@@ -166,6 +248,22 @@ DEFINE_PRIMITIVE("thread-specific-set!", thread_specific_set, subr2,
   return STk_void;
 }
 
+
+/*
+<doc EXT thread-start!
+ * (thread-start! thread)
+ * 
+ * Makes |thread| runnable. The |thread| must be a new thread. 
+ * |Thread-start!| returns the thread.
+ * @lisp
+ * (let ((t (thread-start! (make-thread 
+ *                            (lambda () (write 'a))))))
+ *    (write 'b)
+ *    (thread-join! t))       =>  unspecified
+ *                                after writing ab or ba
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
 {
   vm_thread_t *vm, *new;
@@ -181,7 +279,6 @@ DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
   new->iport          = vm->iport;
   new->oport          = vm->oport;
   new->eport          = vm->eport;
-  new->parameters     = STk_copy_tree(vm->parameters);
   new->scheme_thread  = thr;
   
   THREAD_VM(thr)      = new; 
@@ -264,10 +361,13 @@ int STk_init_threads(int stack_size, void *start_stack)
   ADD_PRIMITIVE(make_thread);
   ADD_PRIMITIVE(threadp);
   ADD_PRIMITIVE(thread_name);
+  ADD_PRIMITIVE(thread_ssize);
   ADD_PRIMITIVE(thread_end_exception);
   ADD_PRIMITIVE(thread_end_exception_set);
   ADD_PRIMITIVE(thread_end_result);
   ADD_PRIMITIVE(thread_end_result_set);
+  ADD_PRIMITIVE(thread_dynwind_stack);
+  ADD_PRIMITIVE(thread_dynwind_stack_set);
   ADD_PRIMITIVE(thread_specific);
   ADD_PRIMITIVE(thread_specific_set);
   ADD_PRIMITIVE(thread_start);

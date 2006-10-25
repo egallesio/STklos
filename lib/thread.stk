@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Jan-2006 22:56 (eg)
-;;;; Last file update: 21-Oct-2006 11:31 (eg)
+;;;; Last file update: 25-Oct-2006 15:43 (eg)
 ;;;;
 (define (%thread-timeout->seconds timeout)
   (cond
@@ -31,7 +31,34 @@
 			timeout))
     (else (error "bad timeout ~S" timeout))))
  
-
+#|
+<doc EXT make-thread
+ * (make-thread thunk)
+ * (make-thread thunk name)
+ * (make-thread thunk name stack-size)
+ *
+ * Returns a new thread. This thread is not automatically made runnable
+ * (the procedure |thread-start!| must be used for this). A thread has the
+ * following fields:  name, specific, end-result, end-exception, and a list
+ * of locked/owned mutexes it owns. The thread's execution consists of a call
+ * to thunk with the "initial continuation". This continuation causes the
+ * (then) current thread to store the result in its end-result field, abandon
+ * all mutexes it owns, and finally terminate. The dynamic-wind
+ * stack of the initial continuation is empty. The optional name is an
+ * arbitrary Scheme object which identifies the thread (useful for debugging)\;
+ * it defaults to an unspecified value. The specific field is set to an
+ * unspecified value.  The thread inherits the dynamic environment from the
+ * current thread. Moreover, in this dynamic environment the exception handler
+ * is bound to the "initial exception handler" which is a unary procedure
+ * which causes the (then) current thread to store in its end-exception
+ * field an "uncaught exception" object whose "reason" is the argument
+ * of the handler, abandon all mutexes it owns, and finally terminate.
+ * £
+ * ,(bold "Note:") The optional parameter |stack-size| permits to specify
+ * the size (in words) reserved for the thread. This option does not exist
+ * in ,(quick-link-srfi 18).
+doc>
+|#
 (define (make-thread thunk :optional (name (symbol->string (gensym "thread")))
 		                     stack-size)
   (define (thread-handler c)
@@ -39,9 +66,9 @@
     c)
   (%make-thread (lambda ()
 		  (with-handler thread-handler
-		     (thunk)))
-		name
-		stack-size))
+		       (thunk)))
+		  name
+		  stack-size))
 
 
 (define (thread-sleep! timeout)
@@ -63,13 +90,20 @@
 		timeout-val
 		(raise (make-condition &thread-join-timeout))))
 	  ((%thread-end-exception thread)
-	     ;; We had an exceptionin thread. Raise it
-	     (raise (%thread-end-exception thread)))
+	     ;; We had an exception in thread. Raise an uncaught-exception
+	     (eprintf "FOOOOO\n")
+	     (let ((old-exception  (%thread-end-exception thread)))
+	       (raise (make-condition &uncaught-exception
+				       'reason old-exception))))
 	  (else
 	   ;; No exception. Return the thread-result
 	   (%thread-end-result thread))))))
 
-
+;; **********************************************************************
+;; 
+;; 	Mutexes
+;;
+;; **********************************************************************
 
 (define (mutex-lock! mtx :optional timeout (thread (current-thread)))
   (let ((res (%mutex-lock! mtx (%thread-timeout->seconds timeout) thread)))
@@ -83,3 +117,62 @@
 
 (define (mutex-unlock! mtx :optional condv timeout)
   (%mutex-unlock! mtx condv timeout))
+
+;; **********************************************************************
+;; 
+;; Conditions
+;;
+;; **********************************************************************
+
+(%define-condition-type-accessors &thread-join-timeout  &condition
+  join-timeout-exception?)
+
+(%define-condition-type-accessors &thread-abandonned-mutex  &condition
+  abandoned-mutex-exception?)
+
+(%define-condition-type-accessors &thread-terminated  &condition
+  terminated-thread-exception?)
+
+(define &uncaught-exception
+  (make-condition-type '&uncaught-execption
+		       &condition
+		       '(reason)))
+
+#|
+<doc EXT join-timeout-exception?
+ * (join-timeout-exception? obj)
+ *
+ * Returns #t if |obj| is a "join timeout exception" object, otherwise returns #f.
+ * A join timeout exception is raised when thread-join! is called, the timeout
+ * is reached and no timeout-val is supplied.
+doc>
+<doc EXT abandoned-mutex-exception?
+ * (abandoned-mutex-exception? obj)
+ *
+ * Returns #t if |obj| is an "abandoned mutex exception" object, otherwise returns
+ * #f. An abandoned mutex exception is raised when the current thread locks
+ * a mutex that was owned by a thread which terminated (see |mutex-lock!|).
+doc>
+<doc EXT terminated-thread-exception?
+ * (terminated-thread-exception? obj)
+ *
+ * Returns #t if |obj| is a "terminated thread exception" object, otherwise
+ * returns #f. A terminated thread exception is raised when thread-join! is
+ * called and the target thread has terminated as a result of a call to
+ * |thread-terminate!|.
+doc>
+<doc EXT uncaught-exception?
+ * (uncaught-exception? obj)
+ * 
+ * Returns #t if |obj| is an "uncaught exception" object, otherwise returns
+ * #f. An uncaught exception is raised when |thread-join!| is called and the
+ * target thread has terminated because it raised an exception that called
+ * the initial exception handler of that thread.
+doc>
+<doc EXT uncaught-exception-reason 
+ * (uncaught-exception-reason exc)
+ *
+ * Returns the object which was passed to the initial exception handler
+ * of that thread (exc must be an "uncaught exception" object).
+doc>
+|#

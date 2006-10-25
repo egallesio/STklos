@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2006 12:27 (eg)
-;;;; Last file update: 14-Apr-2006 19:53 (eg)
+;;;; Last file update: 24-Oct-2006 17:33 (eg)
 ;;;;
 
 (define (%call/cc proc)
@@ -32,41 +32,37 @@
 		(%restore-continuation k v)))
         (apply values k))))
 
+;(define %dynamic-wind-stack (make-parameter (list #f)))
 
 (define call/cc #f)
-(define call-with-current-continuation #f)
 (define dynamic-wind #f)
 
-(let ((*here* (list #f)))
+(let ()
   
   (define (reroot! there)
-    (unless (eq? *here* there)
-      (reroot! (cdr there))
-      (let ((before (caar there))
-	    (after  (cdar there)))
-	(set-car! *here* (cons after before))
-	(set-cdr! *here* there)
-	(set-car! there #f)
-	(set-cdr! there '())
-	(set! *here* there)
-	(before))))
+      (unless (eq? (%thread-dynwind-stack) there)
+	(reroot! (cdr there))
+	(let ((before (caar there))
+	      (after  (cdar there))
+	      (here   (%thread-dynwind-stack)))
+	  (set-car! here (cons after before))
+	  (set-cdr! here  there)
+	  (set-car! there #f)
+	  (set-cdr! there '())
+	  (%thread-dynwind-stack-set! there)
+	  (before))))
 
   ;;
   ;; call/cc
   ;;
   (set! call/cc
     (lambda  (proc)
-      (let ((here *here*))
+      (let ((here (%thread-dynwind-stack)))
 	(%call/cc (lambda (cont)
 		    (proc (lambda results
 			    (reroot! here)
 			    (apply cont results))))))))
   
-  ;;
-  ;; call-with-current-continuation
-  ;;
-  (set! call-with-current-continuation call/cc)
-
   ;;
   ;; dynamic-wind
   ;;
@@ -80,7 +76,7 @@
       (verify-proc during)
       (verify-proc after)
       
-      (let ((here *here*))
+      (let ((here (%thread-dynwind-stack)))
 	(reroot! (cons (cons before after) here))
 	(with-handler (lambda (c)
 			(reroot! here)
@@ -88,3 +84,8 @@
 		      (call-with-values during
 			(lambda results (reroot! here) (apply values results))))))))
 
+
+;;
+;; call-with-current-continuation
+;;
+(define call-with-current-continuation call/cc)

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 26-Apr-2006 16:21 (eg)
+ * Last file update: 25-Oct-2006 11:35 (eg)
  */
 
 
@@ -181,7 +181,7 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
     // emit its term signal
     if((err = lurc_signal_emit(&THREAD_TERM_SIG(thr))) != 0)
       lurc_error(err);
-    if (THREAD_EXCEPTION(thr) == STk_void) {
+    if (THREAD_EXCEPTION(thr) == STk_false) {
       /* Be sure to register the first canceller only!  */
       THREAD_EXCEPTION(thr) =
         STk_make_C_cond(STk_cond_thread_terminated, 1, thr);

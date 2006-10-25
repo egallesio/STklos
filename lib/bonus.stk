@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 11-Sep-2006 17:23 (eg)
+;;;; Last file update: 24-Oct-2006 20:34 (eg)
 ;;;;
 
 ;;
@@ -1159,7 +1159,7 @@ doc>
  * on a Unix system:
  * @lisp
  * (make-path "a" "b" "c")   => "a/b/c"
- * @lisp
+ * @end lisp
 doc>
 |#
 (define (make-path dirname . names)

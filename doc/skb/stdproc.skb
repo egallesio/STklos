@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 12-Sep-2006 15:27 (eg)
+;; Last file update: 24-Oct-2006 21:08 (eg)
 ;;
 ;; ======================================================================
 
@@ -761,15 +761,15 @@ See SRFI document for more information.])
 (insertdoc 'error)
 (insertdoc 'require-extension)
 (insertdoc 'repl)
+   
 (insertdoc 'apropos)
 (insertdoc 'trace)
 (insertdoc 'untrace)
 (insertdoc 'pp)
 (insertdoc 'uri-parse)
-(insertdoc 'string->html))
+(insertdoc 'string->html)
 (insertdoc 'base64-encode)
 (insertdoc 'base64-decode)
 (insertdoc 'base64-encode-string)
-(insertdoc 'base64-decode-string)
-   
+(insertdoc 'base64-decode-string) )   
 )

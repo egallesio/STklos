@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 21-Oct-2006 13:08 (eg)
+ * Last file update: 25-Oct-2006 16:20 (eg)
  */
 
 
@@ -61,7 +61,6 @@ vm_thread_t *STk_get_current_vm(void)
 
 static void thread_finalizer(SCM thr)
 {
-  fflush(stdout);
   pthread_mutex_destroy(&THREAD_MYMUTEX(thr));
   pthread_cond_destroy(&THREAD_MYCONDV(thr));
 }
@@ -69,7 +68,7 @@ static void thread_finalizer(SCM thr)
 static void terminate_scheme_thread(void *arg)
 {
   SCM thr = (SCM) arg;
-
+  
   pthread_mutex_lock(&THREAD_MYMUTEX(thr));
   THREAD_STATE(thr)  = th_terminated;
 
@@ -92,7 +91,6 @@ static void *start_scheme_thread(void *arg)
   pthread_setspecific(vm_key, THREAD_VM(thr));
   pthread_cleanup_push(terminate_scheme_thread, thr);
 
-
   res = STk_C_apply(THREAD_THUNK(thr), 0);
   if (THREAD_EXCEPTION(thr) == STk_false) {
     THREAD_RESULT(thr) = res;
@@ -111,7 +109,7 @@ void STk_do_make_sys_thread(SCM thr)
   pthread_cond_init(&THREAD_MYCONDV(thr), NULL);
 
   // now the finalizer
-  //FINAL STk_register_finalizer(thr, thread_finalizer);
+  // STk_register_finalizer(thr, thread_finalizer);
 }
 
 void STk_sys_thread_start(SCM thr)
@@ -129,6 +127,15 @@ void STk_sys_thread_start(SCM thr)
   pthread_attr_destroy(&attr);
 }
 
+
+/*
+<doc EXT thread-yield! 
+ * (thread-yield!)
+ * 
+ * The current thread exits the running state as if its quantum had 
+ * expired. |Thread-yield!| returns an unspecified value.
+doc>
+*/
 DEFINE_PRIMITIVE("thread-yield!", thread_yield, subr0, (void))
 {
 #ifdef _POSIX_PRIORITY_SCHEDULING
@@ -139,6 +146,29 @@ DEFINE_PRIMITIVE("thread-yield!", thread_yield, subr0, (void))
   return STk_void;
 }
 
+
+/*
+<doc EXT thread-terminate! 
+ * (thread-terminate! thread)
+ * 
+ * Causes an abnormal termination of the |thread|. If the |thread| is not 
+ * already terminated, all mutexes owned by the |thread| become 
+ * unlocked/abandoned and a "terminated thread exception" object is stored 
+ * in the thread's end-exception field. If |thread| is the current thread, 
+ * |thread-terminate!| does not return. Otherwise, |thread-terminate!| 
+ * returns an unspecified value; the termination of the thread will occur
+ * before |thread-terminate!| returns. 
+ * £
+ * ,(bold "Note: ")
+ * This operation must be used carefully because it terminates a thread 
+ * abruptly and it is impossible for that thread to perform any kind of
+ * cleanup. This may be a problem if the thread is in the middle of a
+ * critical section where some structure has been put in an inconsistent
+ * state. However, another thread attempting to enter this critical section 
+ * will raise an "abandoned mutex exception" because the mutex is
+ * unlocked/abandoned.
+doc>
+*/
 DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
 {
   if (!THREADP(thr)) STk_error_bad_thread(thr);
@@ -149,13 +179,11 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
     terminate_scheme_thread(thr);
 
     pthread_mutex_lock(&THREAD_MYMUTEX(thr));
-    if (THREAD_EXCEPTION(thr) == STk_void) {
+    if (THREAD_EXCEPTION(thr) == STk_false) {
       /* Be sure to register the first canceller only!  */
       THREAD_EXCEPTION(thr) = 
         STk_make_C_cond(STk_cond_thread_terminated, 1, thr);
     }
-    pthread_mutex_unlock(&THREAD_MYMUTEX(thr));
-    
     /* Terminate effectively the thread */
     if (thr == STk_get_current_vm()->scheme_thread)
       pthread_exit(0); 				/* Suicide */
@@ -163,11 +191,32 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
       if (saved_state != th_new)
 	pthread_cancel(THREAD_PTHREAD(thr));	/* terminate an other thread */
     }
+    pthread_mutex_unlock(&THREAD_MYMUTEX(thr));
   }
   return STk_void;
 }
 
-
+/*
+<doc EXT thread-join! 
+ * (thread-join! thread)
+ * (thread-join! thread timeout)
+ * (thread-join! thread timeout timeout-val)
+ *
+ * The current thread waits until the |thread| terminates (normally or not) 
+ * or until the timeout is reached if |timeout| is supplied. 
+ * If the timeout is reached, |thread-join!| returns |timeout-val| if it is 
+ * supplied, otherwise a "join timeout exception" is raised. 
+ * If the |thread| terminated normally, the content of the end-result 
+ * field is returned, otherwise the content of the end-exception field 
+ * is raised.
+ * @lisp
+ * (let ((t (thread-start! (make-thread (lambda () 
+ *                                        (expt 2 100))))))
+ *   (thread-sleep! 1)
+ *   (thread-join! t)) => 1267650600228229401496703205376
+ * @end lisp
+doc>
+*/
 DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
 {
   struct timespec ts;
@@ -200,10 +249,18 @@ DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
   return res;
 }
 
-
+/*
+<doc EXT thread-sleep!
+ * (thread-sleep! timeout)
+ * 
+ * The current thread waits until the |timeout| is reached. This blocks the
+ * thread only if timeout represents a point in the future. It is an error 
+ * for timeout to be |#f|. |Thread-sleep!| returns an unspecified value.
+doc>
+*/
 DEFINE_PRIMITIVE("%thread-sleep!", thread_sleep, subr1, (SCM tm))
 {
-  if (REALP(tm)){
+  if (REALP(tm)) {
     struct timeval tv = STk_thread_abstime_to_reltime(REAL_VAL(tm));
     struct timespec ts;
     
@@ -211,7 +268,7 @@ DEFINE_PRIMITIVE("%thread-sleep!", thread_sleep, subr1, (SCM tm))
     ts.tv_sec  = (time_t) tv.tv_sec;
     ts.tv_nsec = (long) tv.tv_usec * 1000; 
     nanosleep(&ts, NULL);
-  }else
+  } else
     STk_error("bad timeout ~S", tm);
 
   return STk_void;

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 21-Oct-2006 13:01 (eg)
+ * Last file update: 24-Oct-2006 17:18 (eg)
  */
 
 // INLINER values
@@ -146,7 +146,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
   vm->top_jmp_buf    = NULL;
   vm->start_stack    = 0;  		/* MUST be initialized later */
   vm->scheme_thread  = STk_false;
-  vm->parameters     = STk_nil;
+  vm->dynwind_stack  = LIST1(STk_false);
 
   return vm;
 }

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 16-Apr-2006 12:54 (eg)
-;;;; Last file update:  2-May-2006 17:17 (eg)
+;;;; Last file update: 25-Oct-2006 14:17 (eg)
 ;;;;
 
 ;;;; Most of theses tests were stolen in Gauche Scheme distribution
@@ -113,6 +113,7 @@
        (with-handler (lambda (c) (+ c 38))
 	 (thread-join! t))))
 
+
 ;;------------------------------------------------------------------
 (test-subsection "Parameterize and threads")
 
@@ -135,10 +136,12 @@
        (let ((th1 (make-thread
                    (lambda ()
 		     (parameterize ((p 4))
+		       (thread-yield!)
 		       (set! *thr1-val* (p))))))
              (th2 (make-thread
                    (lambda ()
 		     (parameterize ((p 5))
+		       (thread-yield!)
 		       (set! *thr2-val* (p)))))))
          (thread-start! th1)
          (thread-start! th2)
@@ -255,10 +258,61 @@
 
 
 ;;------------------------------------------------------------------
+(test-subsection "Condition Variables")
 
+(test "make-condition-variable"
+      #t
+      (condition-variable? (make-condition-variable)))
 
+(test "condition-varaible-name"
+      'foo
+      (condition-variable-name (make-condition-variable 'foo)))
 
+(test "condition-variable-specific"
+      "hello"
+      (let ((c (make-condition-variable 'foo)))
+	(condition-variable-specific-set! c "hello")
+	(condition-variable-specific c)))
 
-
+(test "condition-variable-signal!"
+      '((put a) (get a) (put b) (get b) (put c) (get c))
+      (let ((log '())
+	    (cell #f)
+	    (m  (make-mutex))
+	    (put-cv (make-condition-variable))
+	    (get-cv (make-condition-variable)))
+	(define (put! msg)
+	  (mutex-lock! m)
+	  (if cell
+	      (begin (mutex-unlock! m put-cv) (put! msg))
+	      (begin (set! cell msg)
+		     (set! log (cons `(put ,msg) log))
+		     (condition-variable-signal! get-cv)
+		     (mutex-unlock! m))))
+	(define (get!)
+	  (mutex-lock! m)
+	  (if cell
+	      (let ((r cell))
+		(set! cell #f)
+		(set! log (cons `(get ,r) log))
+		(condition-variable-signal! put-cv)
+		(mutex-unlock! m)
+		r)
+	      (begin
+		(mutex-unlock! m get-cv) (get!))))
+	(define (producer)
+	  (put! 'a)
+	  (put! 'b)
+	  (put! 'c))
+	(define (consumer)
+	  (get!)
+	  (get!)
+	  (get!))
+	
+	(let ((tp (thread-start! (make-thread producer 'producer)))
+	      (tc (thread-start! (make-thread consumer 'consumer))))
+	  (thread-join! tp)
+	  (thread-join! tc)
+	  (reverse log))))
 
 (test-section-end)
