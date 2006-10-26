@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 25-Oct-2006 19:57 (eg)
+ * Last file update: 26-Oct-2006 13:20 (eg)
  */
 
 // INLINER values
@@ -81,7 +81,6 @@ static int debug_level = 0;	/* 0 is quiet, 1, 2, ... are more verbose */
 # define MY_SETJMP(jb) 		(jb.blocked = get_signal_mask(), setjmp(jb.j))
 # define MY_LONGJMP(jb, val)	(longjmp((jb).j, val))
 #endif
-
 
 static Inline sigset_t get_signal_mask(void)
 {
@@ -265,6 +264,8 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 static SCM** checked_globals;
 static int   checked_globals_len  = CHECK_GLOBAL_INIT_SIZE;
 static int   checked_globals_used = 0;
+MUT_DECL(global_lock);		/* the lock to access checked_globals */
+
 
 
 #define FIRST_BYTE(n)  ((n) >> 8)
@@ -822,8 +823,10 @@ CASE(GLOBAL_REF) {
 
   vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
   /* patch the code for optimize next accesses */
+  MUT_LOCK(global_lock);
   vm->pc[-2]  = (vm->pc[-2] == GLOBAL_REF) ? UGLOBAL_REF: PUSH_UGLOBAL_REF;
   vm->pc[-1]  = add_global(&CDR(ref));
+  MUT_UNLOCK(global_lock);
   NEXT1;
 }
 
@@ -840,8 +843,10 @@ CASE(GLOBAL_REF_PUSH) {
 
   push(STk_lookup(fetch_const(), vm->env, &ref, TRUE));
   /* patch the code for optimize next accesses */
+  MUT_LOCK(global_lock);
   vm->pc[-2]  = UGLOBAL_REF_PUSH;
   vm->pc[-1]  = add_global(&CDR(ref));
+  MUT_UNLOCK(global_lock);
   NEXT1;
 }
 CASE(UGLOBAL_REF_PUSH) { 
@@ -856,11 +861,14 @@ CASE(PUSH_GREF_INVOKE)
 CASE(GREF_INVOKE) {
   SCM ref;
 
+
   vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
   nargs   = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
+  MUT_LOCK(global_lock);
   vm->pc[-3]  = (vm->pc[-3] == GREF_INVOKE)? UGREF_INVOKE : PUSH_UGREF_INVOKE;
   vm->pc[-2]  = add_global(&CDR(ref));
+  MUT_UNLOCK(global_lock);
 
   /*and now invoke */
   tailp=FALSE; goto FUNCALL;
@@ -884,9 +892,11 @@ CASE(GREF_TAIL_INVOKE) {
   vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
   nargs   = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
+  MUT_LOCK(global_lock);
   vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ? 
     			UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
   vm->pc[-2]  = add_global(&CDR(ref));
+  MUT_UNLOCK(global_lock);
 
   /* and now invoke */
   tailp=TRUE; goto FUNCALL;
@@ -934,8 +944,10 @@ CASE(GLOBAL_SET) {
   STk_lookup(fetch_const(), vm->env, &ref, TRUE);
   CDR(ref) = vm->val;
   /* patch the code for optimize next accesses */
+  MUT_LOCK(global_lock);
   vm->pc[-2] = UGLOBAL_SET;
   vm->pc[-1] = add_global(&CDR(ref));
+  MUT_UNLOCK(global_lock);
   NEXT0;
 }
 CASE(UGLOBAL_SET) { /* Never produced by compiler */

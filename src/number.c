@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 21-Oct-2006 11:00 (eg)
+ * Last file update: 26-Oct-2006 15:27 (eg)
  */
 
 

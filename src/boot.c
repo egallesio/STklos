@@ -1,5 +1,5 @@
 /*
-This file was automatically generated on Wed Oct 25 19:42:36 2006 by make-C-boot
+This file was automatically generated on Thu Oct 26 15:33:44 2006 by make-C-boot
 This is a dump of the image in file /mnt/users/eg/Projects/STklos/lib/boot.img3
 ***DO NOT EDIT BY HAND***
 */

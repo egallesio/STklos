@@ -63,7 +63,7 @@
 
 2006-08-04  Erick Gallesio  <eg@essi.fr>
 
-	* src/lib.c: Deletedthe managemement of the STk_library_path
+	* src/lib.c: Deleted the managemement of the STk_library_path
 	variable which was not used anymore
 
 2006-06-20  Erick Gallesio  <eg@essi.fr>
@@ -235,7 +235,7 @@ n
 2006-03-22  Erick Gallesio  <eg@essi.fr>
 
 	* lib/srfi-27.stk (%random-source-current-time): Change
-	current-time to current-source
+	current-time to current-second
 
 	* lib/STklos.init: some modifications for SLIB
 

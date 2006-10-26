@@ -4,6 +4,27 @@
 				| NEWS |
 				+======+
 
+* version 0.80 (2006 10 27)
+
+    This is a version with important changes for supporting multi-threading.
+
+    * Thread support
+    * Better error messages
+    * Added the possibility to compile byte-codes to a C file.
+    * New optimizations
+    * More customizable REPL
+    * New primitives
+          o read-byte
+          o write-byte
+          o printf
+          o fprintf
+          o base64-{en|de}code
+          o current-second
+    * New implemented SRFIs
+          o SRFI-18 (Multithreading support)
+    * Bug fixes
+
+
 * version 0.72 (2006 01 04)
 
     This is a minor release.
@@ -35,7 +56,7 @@
           o SRFI-70 (Numbers)
     * Bug fixes
 
-* version 0.70 (2005 05 27)  
+* version 0.70 (2005 05 27)	
 
     The main changes in this release are: a new back-trace system, a
     conform call/cc/dynamic-wind implementation and some performance
