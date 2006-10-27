@@ -1,7 +1,7 @@
 /*
  * thread-common.c			-- Threads support in STklos
  * 
- * Copyright Â© 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 25-Oct-2006 10:19 (eg)
+ * Last file update: 27-Oct-2006 14:49 (eg)
  */
 #include <unistd.h>
 #include "stklos.h"
@@ -32,6 +32,7 @@ SCM STk_primordial_thread = NULL;
 
 SCM STk_cond_thread_terminated;
 static SCM cond_thread_abandonned_mutex, cond_join_timeout;
+
 
 void STk_error_bad_thread(SCM obj)
 {
@@ -63,7 +64,6 @@ struct timeval STk_thread_abstime_to_reltime(double abs_secs)
   return rel;
 }
 
-/* ====================================================================== */
 
 /*
 <doc EXT current-thread 
@@ -80,6 +80,25 @@ DEFINE_PRIMITIVE("current-thread", current_thread, subr0, (void))
   vm_thread_t *vm = STk_get_current_vm();
   return vm->scheme_thread;
 }
+
+DEFINE_PRIMITIVE("%thread-dynwind-stack", thread_dynwind_stack, subr0, (void))
+{
+  vm_thread_t *vm = STk_get_current_vm();
+  return vm->dynwind_stack;
+}
+
+DEFINE_PRIMITIVE("%thread-dynwind-stack-set!", thread_dynwind_stack_set, subr1, 
+		 (SCM value))
+{
+  vm_thread_t *vm = STk_get_current_vm();
+  vm->dynwind_stack = value;
+  return STk_void;
+    
+}
+
+
+/* ====================================================================== */
+
 
 static SCM do_make_thread(SCM thunk, SCM name, int stack_size)
 {
@@ -100,6 +119,7 @@ static SCM do_make_thread(SCM thunk, SCM name, int stack_size)
 
   return z;
 }
+
 
 DEFINE_PRIMITIVE("%make-thread", make_thread, subr3,(SCM thunk, SCM name, SCM ssize))
 {
@@ -167,23 +187,6 @@ DEFINE_PRIMITIVE("thread-stack-size", thread_ssize, subr1, (SCM thr))
   if (! THREADP(thr)) STk_error_bad_thread(thr);
   return MAKE_INT(THREAD_STACK_SIZE(thr));
 }
-
-
-DEFINE_PRIMITIVE("%thread-dynwind-stack", thread_dynwind_stack, subr0, (void))
-{
-  vm_thread_t *vm = STk_get_current_vm();
-  return vm->dynwind_stack;
-}
-
-DEFINE_PRIMITIVE("%thread-dynwind-stack-set!", thread_dynwind_stack_set, subr1, 
-		 (SCM value))
-{
-  vm_thread_t *vm = STk_get_current_vm();
-  vm->dynwind_stack = value;
-  return STk_void;
-    
-}
-
 
 DEFINE_PRIMITIVE("%thread-end-exception", thread_end_exception, subr1, (SCM thr))
 {
@@ -322,6 +325,8 @@ static struct extended_type_descr xtype_thread = {
   print_thread			/* print function */
 };
 
+/* ---------------------------------------------------------------------- */
+
 int STk_init_threads(int stack_size, void *start_stack)
 {
   vm_thread_t *vm = STk_allocate_vm(stack_size);
@@ -329,9 +334,9 @@ int STk_init_threads(int stack_size, void *start_stack)
 
   /* Thread Type declaration */
   DEFINE_XTYPE(thread, &xtype_thread);
-  
+
   /* Specific thread initialisation */ 
-  if(STk_init_sys_threads(vm) != TRUE)
+  if (STk_init_sys_threads(vm) != TRUE)
     return FALSE;
 
   /* Define the threads exceptions */
@@ -358,6 +363,8 @@ int STk_init_threads(int stack_size, void *start_stack)
 
   /* Thread primitives */
   ADD_PRIMITIVE(current_thread);
+  ADD_PRIMITIVE(thread_dynwind_stack);
+  ADD_PRIMITIVE(thread_dynwind_stack_set);
   ADD_PRIMITIVE(make_thread);
   ADD_PRIMITIVE(threadp);
   ADD_PRIMITIVE(thread_name);
@@ -366,8 +373,6 @@ int STk_init_threads(int stack_size, void *start_stack)
   ADD_PRIMITIVE(thread_end_exception_set);
   ADD_PRIMITIVE(thread_end_result);
   ADD_PRIMITIVE(thread_end_result_set);
-  ADD_PRIMITIVE(thread_dynwind_stack);
-  ADD_PRIMITIVE(thread_dynwind_stack_set);
   ADD_PRIMITIVE(thread_specific);
   ADD_PRIMITIVE(thread_specific_set);
   ADD_PRIMITIVE(thread_start);

@@ -21,7 +21,7 @@
  * 
  *           Author: Stephane Epardaud [stephane.epardaud@inria.fr]
  *    Creation date: 23-Jan-2006 12:14 (se)
- * Last file update: 16-Apr-2006 11:35 (eg)
+ * Last file update: 27-Oct-2006 14:55 (eg)
  */
 
 #include "thread-common.h"
@@ -29,6 +29,9 @@
 #include "vm.h"
 
 SCM STk_primordial_thread = NULL;
+SCM STk_cond_thread_terminated;
+static SCM cond_thread_abandonned_mutex, cond_join_timeout;
+
 static vm_thread_t *current_vm;
 
 
@@ -54,17 +57,46 @@ DEFINE_PRIMITIVE("%thread-no-support", threadno, vsubr, (int argc, SCM *argv))
   return STk_void;
 }  
 
-
-
-int STk_init_threads(int stack_size)
+DEFINE_PRIMITIVE("%thread-dynwind-stack", thread_dynwind_stack, subr0, (void))
 {
+  vm_thread_t *vm = STk_get_current_vm();
+  return vm->dynwind_stack;
+}
+
+DEFINE_PRIMITIVE("%thread-dynwind-stack-set!", thread_dynwind_stack_set, subr1, 
+		 (SCM value))
+{
+  vm_thread_t *vm = STk_get_current_vm();
+  vm->dynwind_stack = value;
+  return STk_void;
+    
+}
+
+int STk_init_threads(int stack_size, void *start_stack)
+{
+  /* Define the threads exceptions */
+  STk_cond_thread_terminated =
+    STk_defcond_type("&thread-terminated", STk_false,
+                     LIST1(STk_intern("canceller")),
+                     STk_STklos_module);
+  cond_thread_abandonned_mutex =  STk_defcond_type("&thread-abandonned-mutex", 
+                                                   STk_false,
+                                                   STk_nil,
+                                                   STk_STklos_module);
+  cond_join_timeout = STk_defcond_type("&thread-join-timeout", STk_false,
+                                       STk_nil, STk_STklos_module);
+
+  /* Wrap the main thread in a thread called "primordial" */
   current_vm = STk_allocate_vm(stack_size);
   current_vm->scheme_thread = STk_false;
+  current_vm->start_stack   = start_stack;
   STk_primordial_thread = STk_false;
 
   /* Thread primitives */
   ADD_PRIMITIVE(current_thread);
   ADD_PRIMITIVE(thread_system);
+  ADD_PRIMITIVE(thread_dynwind_stack);
+  ADD_PRIMITIVE(thread_dynwind_stack_set);
 
   /* Fake primitives */
   ADD_PRIMITIVE(threadno);

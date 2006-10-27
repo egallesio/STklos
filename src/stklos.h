@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 20-Oct-2006 20:40 (eg)
+ * Last file update: 27-Oct-2006 12:37 (eg)
  */
 
 #ifndef STKLOS_H
@@ -272,6 +272,15 @@ struct primitive_obj {
 #define ADD_PRIMITIVE(_name)   STk_add_primitive(CPP_CONCAT(&STk_o_, _name))
 #define THE_PRIMITIVE(_name)   ((SCM) CPP_CONCAT(&STk_o_, _name))
 
+
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ---- 				 B A S E 6 4 . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+int STk_init_base64(void);
 
 
 /*
@@ -1109,6 +1118,8 @@ EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
   ------------------------------------------------------------------------------
 */
 EXTERN_PRIMITIVE("current-thread", current_thread, subr0, (void));
+int STk_init_threads(int stack_size, void *start_stack);
+int STk_init_mutexes(void);
 
 /*
   ------------------------------------------------------------------------------
