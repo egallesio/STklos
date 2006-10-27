@@ -1,10 +1,8 @@
 #include "private/pthread_support.h"
 
-# if defined(GC_DARWIN_THREADS)
+/* This probably needs more porting work to ppc64. */
 
-#ifdef GC_LURC_THREADS
-# include <lurc.h>
-#endif /* GC_LURC_THREADS */
+# if defined(GC_DARWIN_THREADS)
 
 /* From "Inside Mac OS X - Mach-O Runtime Architecture" published by Apple
    Page 49:
@@ -40,7 +38,7 @@ unsigned long FindTopOfStack(unsigned int stack_start) {
 #   if CPP_WORDSZ == 32
       __asm__ volatile("lwz	%0,0(r1)" : "=r" (frame));
 #   else
-      __asm__ volatile("ldz	%0,0(r1)" : "=r" (frame));
+      __asm__ volatile("ld	%0,0(r1)" : "=r" (frame));
 #   endif
 # endif
   } else {
@@ -77,7 +75,13 @@ void GC_push_all_stacks() {
   GC_thread p;
   pthread_t me;
   ptr_t lo, hi;
+#if defined(POWERPC)
   ppc_thread_state_t state;
+#elif defined(I386)
+  i386_thread_state_t state;
+#else
+# error FIXME for non-x86 || ppc architectures
+#endif
   mach_msg_type_number_t thread_state_count = MACHINE_THREAD_STATE_COUNT;
   
   me = pthread_self();
@@ -97,6 +101,17 @@ void GC_push_all_stacks() {
 			     &thread_state_count);
 	if(r != KERN_SUCCESS) ABORT("thread_get_state failed");
 	
+#if defined(I386)
+	lo = state.esp;
+
+	GC_push_one(state.eax); 
+	GC_push_one(state.ebx); 
+	GC_push_one(state.ecx); 
+	GC_push_one(state.edx); 
+	GC_push_one(state.edi); 
+	GC_push_one(state.esi); 
+	GC_push_one(state.ebp); 
+#elif defined(POWERPC)
 	lo = (void*)(state.r1 - PPC_RED_ZONE_SIZE);
         
 	GC_push_one(state.r0); 
@@ -130,6 +145,9 @@ void GC_push_all_stacks() {
 	GC_push_one(state.r29); 
 	GC_push_one(state.r30); 
 	GC_push_one(state.r31);
+#else
+# error FIXME for non-x86 || ppc architectures
+#endif
       } /* p != me */
       if(p->flags & MAIN_THREAD)
 	hi = GC_stackbottom;
@@ -149,44 +167,23 @@ void GC_push_all_stacks() {
 
 #else /* !DARWIN_DONT_PARSE_STACK; Use FindTopOfStack() */
 
-#ifdef GC_LURC_THREADS
-static GC_thread lookup_gc_thread(thread_act_t mach_thread){
-  int i;
-  GC_thread p;
-  
-  for (i = 0; i < THREAD_TABLE_SZ; ++i) {
-    for (p = GC_threads[i]; 0 != p; p = p -> next) {
-      if(p->stop_info.mach_thread == mach_thread)
-        return p;
-    }
-  }
-  /* not found ? */
-  return NULL;
-}
-#endif /* GC_LURC_THREADS */
-
 void GC_push_all_stacks() {
     int i;
+	task_t my_task;
     kern_return_t r;
     mach_port_t me;
     ptr_t lo, hi;
     thread_act_array_t act_list = 0;
     mach_msg_type_number_t listcount = 0;
-#   ifdef GC_LURC_THREADS
-      lurc_thread_t lt = NULL;
-      void *llo,*lhi;
-#   endif /* GC_LURC_THREADS */
 
     me = mach_thread_self();
     if (!GC_thr_initialized) GC_thr_init();
     
-    r = task_threads(current_task(), &act_list, &listcount);
+	my_task = current_task();
+    r = task_threads(my_task, &act_list, &listcount);
     if(r != KERN_SUCCESS) ABORT("task_threads failed");
     for(i = 0; i < listcount; i++) {
       thread_act_t thread = act_list[i];
-#     ifdef GC_LURC_THREADS
-        GC_thread gct = lookup_gc_thread(thread);
-#     endif /* GC_LURC_THREADS */
       if (thread == me) {
 	lo = GC_approx_sp();
 	hi = (ptr_t)FindTopOfStack(0);
@@ -270,27 +267,12 @@ void GC_push_all_stacks() {
 		  (unsigned long) thread, lo, hi
 		);
 #     endif
-#     ifdef GC_LURC_THREADS
-        /* check wether the lurc lib wants us to push this now or later */
-        if (gct != NULL
-            && lurc_gc_is_lurc_thread(gct -> id, lo, hi)) 
-          continue;
-#     endif /* GC_LURC_THREADS */
       GC_push_all_stack(lo, hi); 
+	  mach_port_deallocate(my_task, thread);
     } /* for(p=GC_threads[i]...) */
-#   ifdef GC_LURC_THREADS
-    /* walk all those threads to ask for the roots */
-    while ((lt = lurc_get_next_thread(lt)) != NULL) {
-      lurc_gc_get_root(lt, &llo, &lhi);
-      if(llo != NULL)
-        GC_push_all_stack(llo, lhi);
-    }
-    /* does it have another part ? */
-    lurc_gc_get_additional_root(&llo, &lhi);
-    if (llo != NULL)
-      GC_push_all_stack(llo, lhi);
-#   endif /* GC_LURC_THREADS */
-
+    vm_deallocate(my_task, (vm_address_t)act_list,
+		  sizeof(thread_t) * listcount);
+    mach_port_deallocate(my_task, me);
 }
 #endif /* !DARWIN_DONT_PARSE_STACK */
 
@@ -385,6 +367,7 @@ int GC_suspend_thread_list(thread_act_array_t act_list, int count,
     } 
     if (!found) GC_mach_threads_count++;
   }
+  mach_port_deallocate(current_task(), my_thread);
   return changed;
 }
 
@@ -392,8 +375,9 @@ int GC_suspend_thread_list(thread_act_array_t act_list, int count,
 /* Caller holds allocation lock.	*/
 void GC_stop_world()
 {
-  int i, changes;
+    int i, changes;
     GC_thread p;
+    task_t my_task = current_task();
     mach_port_t my_thread = mach_thread_self();
     kern_return_t kern_result;
     thread_act_array_t act_list, prev_list;
@@ -430,12 +414,22 @@ void GC_stop_world()
       prevcount = 0;
       do {
 	int result;
-	kern_result = task_threads(current_task(), &act_list, &listcount);
+	kern_result = task_threads(my_task, &act_list, &listcount);
 	result = GC_suspend_thread_list(act_list, listcount,
 					prev_list, prevcount);
 	changes = result;
 	prev_list = act_list;
 	prevcount = listcount;
+	
+	if(kern_result == KERN_SUCCESS) {
+	    int i;
+	
+	    for(i = 0; i < listcount; i++)
+		mach_port_deallocate(my_task, act_list[i]);
+		
+            vm_deallocate(my_task, (vm_address_t)act_list,
+			  sizeof(thread_t) * listcount);
+	}
       } while (changes);
       
  
@@ -449,15 +443,18 @@ void GC_stop_world()
 #   ifdef PARALLEL_MARK
       GC_release_mark_lock();
 #   endif
-    #if DEBUG_THREADS
+#   if DEBUG_THREADS
       GC_printf("World stopped from 0x%lx\n", (unsigned long)my_thread);
-    #endif
+#   endif
+	  
+    mach_port_deallocate(my_task, my_thread);
 }
 
 /* Caller holds allocation lock, and has held it continuously since	*/
 /* the world stopped.							*/
 void GC_start_world()
 {
+  task_t my_task = current_task();
   mach_port_t my_thread = mach_thread_self();
   int i, j;
   GC_thread p;
@@ -478,7 +475,7 @@ void GC_start_world()
       }
 #   endif
 
-    kern_result = task_threads(current_task(), &act_list, &listcount);
+    kern_result = task_threads(my_task, &act_list, &listcount);
     for(i = 0; i < listcount; i++) {
       thread_act_t thread = act_list[i];
       if (thread != my_thread &&
@@ -506,7 +503,12 @@ void GC_start_world()
 	  } 
 	}
       }
+      mach_port_deallocate(my_task, thread);
     }
+    vm_deallocate(my_task, (vm_address_t)act_list,
+		  sizeof(thread_t) * listcount);
+	
+    mach_port_deallocate(my_task, my_thread);
 #   if DEBUG_THREADS
      GC_printf("World started\n");
 #   endif

@@ -88,7 +88,7 @@
 /* indicates that it succeeded.					*/
 /* Test_and_set takes an address, atomically replaces it by	*/
 /* AO_TS_SET, and returns the prior value.			*/
-/* An AO_TS_t clear location can be reset with the		*/
+/* An AO_TS_t location can be reset with the			*/
 /* AO_CLEAR macro, which normally uses AO_store_release.	*/
 /* AO_fetch_and_add takes an address and an AO_t increment 	*/
 /* value.  The AO_fetch_and_add1 and AO_fetch_and_sub1 variants	*/
@@ -210,7 +210,7 @@
 # if defined(__m68k__)
 #   include "atomic_ops/sysdeps/gcc/m68k.h"
 # endif /* __m68k__ */
-# if defined(__powerpc__) || defined(__ppc__)
+# if defined(__powerpc__) || defined(__ppc__) || defined(__PPC__)
 #   include "atomic_ops/sysdeps/gcc/powerpc.h"
 # endif /* __powerpc__ */
 # if defined(__arm__) && !defined(AO_USE_PTHREAD_DEFS)

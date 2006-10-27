@@ -278,17 +278,9 @@ sexpr y;
     sexpr result;
     static int count = 0;
     
-    if (++count & 1) {
-#     ifdef USE_MARK_BYTES
-        r = (GC_word *) GC_GCJ_FAST_MALLOC(4, &gcj_class_struct1);
-#     else
-        r = (GC_word *) GC_GCJ_FAST_MALLOC(3, &gcj_class_struct1);
-#     endif
-    } else {
-        r = (GC_word *) GC_GCJ_MALLOC(sizeof(struct SEXPR)
-				      + sizeof(struct fake_vtable*),
-				      &gcj_class_struct2);
-    }
+    r = (GC_word *) GC_GCJ_MALLOC(sizeof(struct SEXPR)
+		   		  + sizeof(struct fake_vtable*),
+				   &gcj_class_struct2);
     if (r == 0) {
         (void)GC_printf("Out of memory\n");
         exit(1);
@@ -1164,6 +1156,11 @@ void run_one_test()
 	(GC_gcollect(),GC_malloc(12)),
         (void *)0);
 #   endif
+    /* GC_malloc(0) must return NULL or something we can deallocate. */
+        GC_free(GC_malloc(0));
+        GC_free(GC_malloc_atomic(0));
+        GC_free(GC_malloc(0));
+        GC_free(GC_malloc_atomic(0));
     /* Repeated list reversal test. */
 	reverse_test();
 #   ifdef PRINTSTATS

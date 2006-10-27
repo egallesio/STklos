@@ -14,6 +14,8 @@
  * modified is included with the above copyright notice.
  */
 
+#include <errno.h>
+#include <string.h>
 #include "private/dbg_mlc.h"
 
 void GC_default_print_heap_obj_proc();
@@ -58,7 +60,7 @@ GC_bool GC_has_other_debug_info(ptr_t p)
 
 # include <stdlib.h>
 
-# if defined(LINUX) || defined(SUNOS5) \
+# if defined(LINUX) || defined(SOLARIS) \
      || defined(HPUX) || defined(IRIX5) || defined(OSF1)
 #   define RANDOM() random()
 # else
@@ -379,7 +381,7 @@ ptr_t p;
 {
     register oh * ohdr = (oh *)GC_base(p);
     
-    GC_ASSERT(!I_HOLD_LOCK());
+    GC_ASSERT(I_DONT_HOLD_LOCK());
     GC_err_printf("%p (", ((ptr_t)ohdr + sizeof(oh)));
     GC_err_puts(ohdr -> oh_string);
 #   ifdef SHORT_DBG_HDRS
@@ -395,7 +397,7 @@ ptr_t p;
 
 void GC_debug_print_heap_obj_proc(ptr_t p)
 {
-    GC_ASSERT(!I_HOLD_LOCK());
+    GC_ASSERT(I_DONT_HOLD_LOCK());
     if (GC_HAS_DEBUG_INFO(p)) {
 	GC_print_obj(p);
     } else {
@@ -408,7 +410,7 @@ void GC_print_smashed_obj(ptr_t p, ptr_t clobbered_addr)
 {
     register oh * ohdr = (oh *)GC_base(p);
     
-    GC_ASSERT(!I_HOLD_LOCK());
+    GC_ASSERT(I_DONT_HOLD_LOCK());
     GC_err_printf("%p in object at %p(", clobbered_addr, p);
     if (clobbered_addr <= (ptr_t)(&(ohdr -> oh_sz))
         || ohdr -> oh_string == 0) {
@@ -636,6 +638,19 @@ void * GC_debug_malloc_atomic(size_t lb, GC_EXTRA_PARAMS)
     return (GC_store_debug_info(result, (word)lb, s, (word)i));
 }
 
+char *GC_debug_strdup(const char *str, GC_EXTRA_PARAMS)
+{
+    char *copy;
+    if (str == NULL) return NULL;
+    copy = GC_debug_malloc_atomic(strlen(str) + 1, OPT_RA s, i);
+    if (copy == NULL) {
+      errno = ENOMEM;
+      return NULL;
+    }
+    strcpy(copy, str);
+    return copy;
+}
+
 void * GC_debug_malloc_uncollectable(size_t lb, GC_EXTRA_PARAMS)
 {
     void * result = GC_malloc_uncollectable(lb + UNCOLLECTABLE_DEBUG_BYTES);
@@ -829,7 +844,7 @@ void GC_print_all_smashed_proc(void)
 {
     unsigned i;
 
-    GC_ASSERT(!I_HOLD_LOCK());
+    GC_ASSERT(I_DONT_HOLD_LOCK());
     if (GC_n_smashed == 0) return;
     GC_err_printf("GC_check_heap_block: found smashed heap objects:\n");
     for (i = 0; i < GC_n_smashed; ++i) {

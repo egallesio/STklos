@@ -57,9 +57,8 @@ typedef int GC_bool;
 # define FALSE 0
 
 typedef char * ptr_t;	/* A generic pointer to which we can add	*/
-			/* byte displacements.				*/
-			/* Preferably identical to caddr_t, if it 	*/
-			/* exists.					*/
+			/* byte displacements and which can be used	*/
+			/* for address comparisons.			*/
 
 # ifndef GCCONFIG_H
 #   include "gcconfig.h"
@@ -311,7 +310,7 @@ void GC_print_callers(struct callinfo info[NFRAMES]);
  				   PCR_waitForever);
 # else
 #   if defined(GC_SOLARIS_THREADS) || defined(GC_WIN32_THREADS) \
-	|| defined(GC_PTHREADS) || defined(GC_LURC_THREADS)
+	|| defined(GC_PTHREADS)
       void GC_stop_world();
       void GC_start_world();
 #     define STOP_WORLD() GC_stop_world()
@@ -525,8 +524,11 @@ extern GC_warn_proc GC_current_warn_proc;
 
 
 /*
- * Hash table representation of sets of pages.  This assumes it is
- * OK to add spurious entries to sets.
+ * Hash table representation of sets of pages.
+ * Implements a map from aligned HBLKSIZE chunks of the address space to one
+ * bit each.
+ * This assumes it is OK to spuriously set bits, e.g. because multiple
+ * addresses are represented by a single location.
  * Used by black-listing code, and perhaps by dirty bit maintenance code.
  */
  
@@ -664,10 +666,13 @@ struct hblkhdr {
     				/* never decrement it to zero during a	*/
     				/* collection, and hence the count may 	*/
     				/* be one too high.  Due to concurrent	*/
-    				/* updates, and arbitrary number of	*/
+    				/* updates, an arbitrary number of	*/
     				/* increments, but not all of them (!)	*/
     				/* may be lost, hence it may in theory	*/
     				/* be much too low.			*/
+    				/* The count may also be too high if	*/
+    				/* multiple mark threads mark the	*/
+    				/* same object due to a race.		*/
     				/* Without parallel marking, the count	*/
     				/* is accurate.				*/
 #   ifdef USE_MARK_BYTES
@@ -721,17 +726,9 @@ struct hblk {
 # ifdef LARGE_CONFIG
 #   define MAX_ROOT_SETS 4096
 # else
-#   ifdef PCR
-#     define MAX_ROOT_SETS 1024
-#   else
-#     if defined(MSWIN32) || defined(MSWINCE)
-#	define MAX_ROOT_SETS 1024
-	    /* Under NT, we add only written pages, which can result 	*/
-	    /* in many small root sets.					*/
-#     else
-#       define MAX_ROOT_SETS 256
-#     endif
-#   endif
+    /* GCJ LOCAL: MAX_ROOT_SETS increased to permit more shared */
+    /* libraries to be loaded.                                  */ 
+#   define MAX_ROOT_SETS 1024
 # endif
 
 # define MAX_EXCLUSIONS (MAX_ROOT_SETS/4)
@@ -1782,7 +1779,7 @@ void GC_print_hblkfreelist(void);
 void GC_print_heap_sects(void);
 void GC_print_static_roots(void);
 void GC_print_finalization_stats(void);
-void GC_dump(void);
+/* void GC_dump(void); - declared in gc.h */
 
 #ifdef KEEP_BACK_PTRS
    void GC_store_back_pointer(ptr_t source, ptr_t dest);
@@ -1961,6 +1958,11 @@ void GC_err_puts(const char *s);
     && !defined(NEED_FIND_LIMIT)
    /* Used by GC_init_netbsd_elf() in os_dep.c.	*/
 #  define NEED_FIND_LIMIT
+#endif
+
+#if defined(IA64) && !defined(NEED_FIND_LIMIT)
+#  define NEED_FIND_LIMIT
+     /* May be needed for register backing store base. */
 #endif
 
 # if defined(NEED_FIND_LIMIT) || \

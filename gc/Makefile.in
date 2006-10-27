@@ -107,27 +107,22 @@ DIST_COMMON = $(am__configure_deps) $(am__pkginclude_HEADERS_DIST) \
 	config.guess config.sub depcomp install-sh ltmain.sh missing \
 	mkinstalldirs
 
-#TESTS += tracetest
+#TESTS += tracetest$(EXEEXT)
 #check_PROGRAMS += tracetest
 #tracetest_SOURCES = tests/trace_test.c
 #tracetest_LDADD = $(test_ldadd)
-@THREADS_TRUE@am__append_1 = threadleaktest
+@THREADS_TRUE@am__append_1 = threadleaktest$(EXEEXT)
 @THREADS_TRUE@am__append_2 = threadleaktest
-@CPLUSPLUS_TRUE@am__append_3 = test_cpp
+@CPLUSPLUS_TRUE@am__append_3 = test_cpp$(EXEEXT)
 @CPLUSPLUS_TRUE@am__append_4 = test_cpp
 
 # C Library: Architecture Dependent
 # ---------------------------------
 @PTHREADS_TRUE@am__append_5 = pthread_support.c pthread_stop_world.c
-
-# CHECK: No solaris_pthreads.c solaris_threads.c in gc7.0alpha2.tar.gz.
-#if ARCH_SOLARIS
-#libgc_la_SOURCES += solaris_pthreads.c solaris_threads.c
-#endif
-@POWERPC_DARWIN_TRUE@am__append_6 = powerpc_darwin_mach_dep.s
-@DARWIN_THREADS_TRUE@am__append_7 = darwin_stop_world.c
-@LURC_THREADS_TRUE@am__append_8 = lurc_support.c
-@WIN32_THREADS_TRUE@am__append_9 = win32_threads.c
+@DARWIN_THREADS_TRUE@am__append_6 = darwin_stop_world.c
+@WIN32_THREADS_TRUE@am__append_7 = win32_threads.c
+@USE_INTERNAL_LIBATOMIC_OPS_TRUE@am__append_8 = atomic_ops.c
+@NEED_ATOMIC_OPS_ASM_TRUE@am__append_9 = atomic_ops_sysdeps.S
 
 # C++ Interface
 # -------------
@@ -166,14 +161,14 @@ am__libgc_la_SOURCES_DIST = allchblk.c alloc.c blacklst.c checksums.c \
 	new_hblk.c obj_map.c os_dep.c pcr_interface.c ptr_chck.c \
 	real_malloc.c reclaim.c specific.c stubborn.c typd_mlc.c \
 	backgraph.c thread_local_alloc.c pthread_support.c \
-	pthread_stop_world.c powerpc_darwin_mach_dep.s \
-	darwin_stop_world.c lurc_support.c win32_threads.c
+	pthread_stop_world.c darwin_stop_world.c win32_threads.c \
+	atomic_ops.c atomic_ops_sysdeps.S
 @PTHREADS_TRUE@am__objects_1 = pthread_support.lo \
 @PTHREADS_TRUE@	pthread_stop_world.lo
-@POWERPC_DARWIN_TRUE@am__objects_2 = powerpc_darwin_mach_dep.lo
-@DARWIN_THREADS_TRUE@am__objects_3 = darwin_stop_world.lo
-@LURC_THREADS_TRUE@am__objects_4 = lurc_support.lo
-@WIN32_THREADS_TRUE@am__objects_5 = win32_threads.lo
+@DARWIN_THREADS_TRUE@am__objects_2 = darwin_stop_world.lo
+@WIN32_THREADS_TRUE@am__objects_3 = win32_threads.lo
+@USE_INTERNAL_LIBATOMIC_OPS_TRUE@am__objects_4 = atomic_ops.lo
+@NEED_ATOMIC_OPS_ASM_TRUE@am__objects_5 = atomic_ops_sysdeps.lo
 am_libgc_la_OBJECTS = allchblk.lo alloc.lo blacklst.lo checksums.lo \
 	dbg_mlc.lo dyn_load.lo finalize.lo gc_dlopen.lo gcj_mlc.lo \
 	headers.lo malloc.lo mallocx.lo mark.lo mark_rts.lo misc.lo \
@@ -194,7 +189,7 @@ libgccpp_la_OBJECTS = $(am_libgccpp_la_OBJECTS)
 am_gctest_OBJECTS = tests/test.$(OBJEXT)
 gctest_OBJECTS = $(am_gctest_OBJECTS)
 am__DEPENDENCIES_2 = $(top_builddir)/libgc.la $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_leaktest_OBJECTS = tests/leak_test.$(OBJEXT)
 leaktest_OBJECTS = $(am_leaktest_OBJECTS)
 leaktest_DEPENDENCIES = $(am__DEPENDENCIES_2)
@@ -220,7 +215,12 @@ LTCCASCOMPILE = $(LIBTOOL) --mode=compile $(CCAS) $(AM_CCASFLAGS) \
 	$(CCASFLAGS)
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
@@ -260,7 +260,7 @@ HEADERS = $(dist_noinst_HEADERS) $(include_HEADERS) \
 	$(pkginclude_HEADERS)
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = . @maybe_libatomic_ops@
+DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -277,8 +277,6 @@ AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AR = @AR@
-ARCH_SOLARIS_FALSE = @ARCH_SOLARIS_FALSE@
-ARCH_SOLARIS_TRUE = @ARCH_SOLARIS_TRUE@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -325,13 +323,12 @@ LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-LURC_THREADS_FALSE = @LURC_THREADS_FALSE@
-LURC_THREADS_TRUE = @LURC_THREADS_TRUE@
 MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
-MY_CFLAGS = @MY_CFLAGS@
+NEED_ATOMIC_OPS_ASM_FALSE = @NEED_ATOMIC_OPS_ASM_FALSE@
+NEED_ATOMIC_OPS_ASM_TRUE = @NEED_ATOMIC_OPS_ASM_TRUE@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -340,8 +337,6 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-POWERPC_DARWIN_FALSE = @POWERPC_DARWIN_FALSE@
-POWERPC_DARWIN_TRUE = @POWERPC_DARWIN_TRUE@
 PTHREADS_FALSE = @PTHREADS_FALSE@
 PTHREADS_TRUE = @PTHREADS_TRUE@
 RANLIB = @RANLIB@
@@ -352,8 +347,8 @@ THREADDLLIBS = @THREADDLLIBS@
 THREADS_FALSE = @THREADS_FALSE@
 THREADS_TRUE = @THREADS_TRUE@
 UNWINDLIBS = @UNWINDLIBS@
-USE_INTERNAL_LIBATOMICS_OPS_FALSE = @USE_INTERNAL_LIBATOMICS_OPS_FALSE@
-USE_INTERNAL_LIBATOMICS_OPS_TRUE = @USE_INTERNAL_LIBATOMICS_OPS_TRUE@
+USE_INTERNAL_LIBATOMIC_OPS_FALSE = @USE_INTERNAL_LIBATOMIC_OPS_FALSE@
+USE_INTERNAL_LIBATOMIC_OPS_TRUE = @USE_INTERNAL_LIBATOMIC_OPS_TRUE@
 USE_LIBDIR_FALSE = @USE_LIBDIR_FALSE@
 USE_LIBDIR_TRUE = @USE_LIBDIR_TRUE@
 VERSION = @VERSION@
@@ -375,6 +370,7 @@ am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
+atomic_ops_libs = @atomic_ops_libs@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -395,7 +391,6 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localstatedir = @localstatedir@
 mandir = @mandir@
-maybe_libatomic_ops = @maybe_libatomic_ops@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 prefix = @prefix@
@@ -410,8 +405,19 @@ target_all = @target_all@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
-@USE_INTERNAL_LIBATOMICS_OPS_FALSE@SUBDIRS = .
-@USE_INTERNAL_LIBATOMICS_OPS_TRUE@SUBDIRS = @maybe_libatomic_ops@ .
+
+# We currently use the source files directly from libatomic_ops, if we
+# use the internal version.  This is done since libatomic_ops doesn't
+# use libtool, since it has no real use for it.  But that seems to make
+# it hard to use either the resulting object files or libraries.
+# Thus there seems too be no real reason to recusively build in the
+# libatomic_ops directory.
+# if USE_INTERNAL_LIBATOMICS_OPS
+# SUBDIRS = @maybe_libatomic_ops@
+# else
+# SUBDIRS =
+# endif
+SUBDIRS = .
 
 # Initialize variables so that we can declare files locally.
 
@@ -441,7 +447,7 @@ EXTRA_DIST = cord/cordbscs.c cord/cordtest.c cord/de.c cord/cordprnt.c \
 	mach_dep.c setjmp_t.c threadlibs.c AmigaOS.c \
 	Mac_files/datastart.c Mac_files/dataend.c \
 	Mac_files/MacOS_config.h Mac_files/MacOS_Test_config.h \
-	libtool.m4
+	include/private/msvc_dbg.h msvc_dbg.c libtool.m4
 
 # C Library
 # ---------
@@ -474,7 +480,8 @@ dist_noinst_HEADERS = include/private/gc_hdrs.h \
 	include/private/darwin_stop_world.h \
 	include/private/thread_local_alloc.h include/cord.h \
 	include/ec.h include/javaxfc.h version.h
-TESTS = gctest leaktest middletest $(am__append_1) $(am__append_3)
+TESTS = gctest$(EXEEXT) leaktest$(EXEEXT) middletest$(EXEEXT) \
+	$(am__append_1) $(am__append_3)
 pkgconfigdir = $(libdir)/pkgconfig
 dist_pkgconfig_DATA = bdw-gc.pc
 libcord_la_SOURCES = \
@@ -487,7 +494,7 @@ libcord_la_SOURCES = \
 # Common libs to _LDADD for all tests.
 test_ldadd = \
 	$(top_builddir)/libgc.la \
-	$(THREADLIBS) $(UNWINDLIBS) $(EXTRA_TEST_LIBS)
+	$(THREADDLLIBS) $(UNWINDLIBS) $(EXTRA_TEST_LIBS)
 
 gctest_SOURCES = tests/test.c
 gctest_LDADD = $(test_ldadd)
@@ -553,7 +560,7 @@ libgc_la_LIBADD = @addobjs@ $(THREADDLLIBS) $(UNWINDLIBS)
 libgc_la_DEPENDENCIES = @addobjs@
 libgc_la_LDFLAGS = -version-info 1:2:0
 EXTRA_libgc_la_SOURCES = alpha_mach_dep.S \
-    mips_sgi_mach_dep.s mips_ultrix_mach_dep.s powerpc_darwin_mach_dep.s \
+    mips_sgi_mach_dep.s mips_ultrix_mach_dep.s \
     rs6000_mach_dep.s sparc_mach_dep.S sparc_netbsd_mach_dep.s \
     sparc_sunos4_mach_dep.s ia64_save_regs_in_stack.s
 
@@ -575,11 +582,6 @@ AM_CFLAGS = @GC_CFLAGS@
 #include/private/pthread_stop_world.h \
 #include/gc_mark.h @addincludes@
 @COMPILER_XLC_TRUE@ASM_CPP_OPTIONS = 
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) \
-	$(AM_CFLAGS) $(MY_CFLAGS) $(GC_CFLAGS) 
-
-LINK = $(LIBTOOL) --mode=link $(CC) $(AM_CFLAGS) $(MY_CFLAGS) $(LDFLAGS) -o $@
 dist_noinst_SCRIPTS = callprocs configure.host
 # :CHECK: If pc_excludes still around, re-add to EXTRA_DIST.
 
@@ -728,6 +730,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/allchblk.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alloc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/atomic_ops.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/backgraph.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/blacklst.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/checksums.Plo@am__quote@
@@ -739,7 +742,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gc_dlopen.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gcj_mlc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/headers.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lurc_support.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/malloc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mallocx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mark.Plo@am__quote@

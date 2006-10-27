@@ -19,11 +19,18 @@
 ## FIXME: `make distcheck' in this directory will not currently work.
 ##     This is most likely to the explicit flags passed to submakes.
 
-if USE_INTERNAL_LIBATOMICS_OPS
-SUBDIRS = @maybe_libatomic_ops@
-else
+# We currently use the source files directly from libatomic_ops, if we
+# use the internal version.  This is done since libatomic_ops doesn't
+# use libtool, since it has no real use for it.  But that seems to make
+# it hard to use either the resulting object files or libraries.
+# Thus there seems too be no real reason to recusively build in the
+# libatomic_ops directory.
+# if USE_INTERNAL_LIBATOMICS_OPS
+# SUBDIRS = @maybe_libatomic_ops@
+# else
+# SUBDIRS =
+# endif
 SUBDIRS =
-endif
 
 SUBDIRS += .
 
@@ -64,24 +71,20 @@ if PTHREADS
 libgc_la_SOURCES += pthread_support.c pthread_stop_world.c
 endif
 
-# CHECK: No solaris_pthreads.c solaris_threads.c in gc7.0alpha2.tar.gz.
-#if ARCH_SOLARIS
-#libgc_la_SOURCES += solaris_pthreads.c solaris_threads.c
-#endif
-
-if POWERPC_DARWIN
-libgc_la_SOURCES += powerpc_darwin_mach_dep.s
-endif
 if DARWIN_THREADS
 libgc_la_SOURCES += darwin_stop_world.c
 endif
 
-if LURC_THREADS
-libgc_la_SOURCES += lurc_support.c
-endif
-
 if WIN32_THREADS
 libgc_la_SOURCES += win32_threads.c
+endif
+
+if USE_INTERNAL_LIBATOMIC_OPS
+libgc_la_SOURCES += atomic_ops.c
+endif
+
+if NEED_ATOMIC_OPS_ASM
+libgc_la_SOURCES += atomic_ops_sysdeps.S
 endif
 
 # Include THREADDLLIBS here to ensure that the correct versions of
@@ -91,7 +94,7 @@ libgc_la_DEPENDENCIES = @addobjs@
 libgc_la_LDFLAGS = -version-info 1:2:0
 
 EXTRA_libgc_la_SOURCES = alpha_mach_dep.S \
-    mips_sgi_mach_dep.s mips_ultrix_mach_dep.s powerpc_darwin_mach_dep.s \
+    mips_sgi_mach_dep.s mips_ultrix_mach_dep.s \
     rs6000_mach_dep.s sparc_mach_dep.S sparc_netbsd_mach_dep.s \
     sparc_sunos4_mach_dep.s ia64_save_regs_in_stack.s
 
@@ -146,13 +149,6 @@ endif
 .S.lo:
 	$(LTCOMPILE) $(ASM_CPP_OPTIONS) -c $<
 
-## We have our own definition of LTCOMPILE because we want to use our
-## CFLAGS, not those passed in from the top level make.
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) \
-	$(AM_CFLAGS) $(MY_CFLAGS) $(GC_CFLAGS) 
-LINK = $(LIBTOOL) --mode=link $(CC) $(AM_CFLAGS) $(MY_CFLAGS) $(LDFLAGS) -o $@
-
 ## We need to add DEFS to assembler flags
 ## :FIXME: what if assembler does not accept -D... ?
 ##     (use Autoconf to prepare ASDEFS ???)
@@ -186,7 +182,8 @@ EXTRA_DIST += add_gc_prefix.c gcname.c if_mach.c if_not_there.c \
     MacProjects.sit.hqx mach_dep.c setjmp_t.c \
     threadlibs.c AmigaOS.c \
     Mac_files/datastart.c Mac_files/dataend.c \
-    Mac_files/MacOS_config.h Mac_files/MacOS_Test_config.h
+    Mac_files/MacOS_config.h Mac_files/MacOS_Test_config.h \
+    include/private/msvc_dbg.h msvc_dbg.c
 # :CHECK: If pc_excludes still around, re-add to EXTRA_DIST.
 
 

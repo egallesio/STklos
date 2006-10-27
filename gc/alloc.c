@@ -144,7 +144,7 @@ static word min_bytes_allocd()
 {
 #   ifdef THREADS
  	/* We punt, for now. */
- 	register signed_word stack_size = 10000;
+ 	signed_word stack_size = 10000;
 #   else
         int dummy;
         signed_word stack_size = (ptr_t)(&dummy) - GC_stackbottom;
@@ -171,8 +171,8 @@ static word min_bytes_allocd()
 /* collections.								*/
 word GC_adj_bytes_allocd(void)
 {
-    register signed_word result;
-    register signed_word expl_managed =
+    signed_word result;
+    signed_word expl_managed =
     		(long)GC_non_gc_bytes - (long)GC_non_gc_bytes_at_gc;
     
     /* Don't count what was explicitly freed, or newly allocated for	*/
@@ -307,10 +307,10 @@ GC_bool GC_try_to_collect_inner(GC_stop_func stop_func)
     CLOCK_TYPE start_time, current_time;
     if (GC_dont_gc) return FALSE;
     if (GC_incremental && GC_collection_in_progress()) {
-    if (GC_print_stats) {
+      if (GC_print_stats) {
 	GC_log_printf(
 	    "GC_try_to_collect_inner: finishing collection in progress\n");
-    }
+      }
       /* Just finish collection already in progress.	*/
     	while(GC_collection_in_progress()) {
     	    if (stop_func()) return(FALSE);
@@ -369,7 +369,7 @@ GC_bool GC_try_to_collect_inner(GC_stop_func stop_func)
 /*
  * Perform n units of garbage collection work.  A unit is intended to touch
  * roughly GC_RATE pages.  Every once in a while, we do more than that.
- * This needa to be a fairly large number with our current incremental
+ * This needs to be a fairly large number with our current incremental
  * GC strategy, since otherwise we allocate too much during GC, and the
  * cleanup gets expensive.
  */

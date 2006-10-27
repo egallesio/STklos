@@ -39,10 +39,12 @@
 #     else
 #       define USE_WIN32_COMPILER_TLS
 #     endif /* !GNU */
-#   elif defined(LINUX) && defined(__GNUC__)
+#   elif defined(LINUX) && \
+		 (__GNUC__ > 3 || (__GNUC == 3 && __GNUC_MINOR__ >=3))
 #     define USE_COMPILER_TLS
 #   elif (defined(GC_DGUX386_THREADS) || defined(GC_OSF1_THREADS) || \
-         defined(GC_DARWIN_THREADS) || defined(GC_AIX_THREADS))
+         defined(GC_DARWIN_THREADS) || defined(GC_AIX_THREADS)) || \
+	 defined(GC_NETBSD_THREADS)
 #     define USE_PTHREAD_SPECIFIC
 #   elif defined(GC_HPUX_THREADS)
 #     ifdef __GNUC__
@@ -66,6 +68,9 @@ typedef struct thread_local_freelists {
 	void * normal_freelists[TINY_FREELISTS];
 #	ifdef GC_GCJ_SUPPORT
 	  void * gcj_freelists[TINY_FREELISTS];
+#	  define ERROR_FL (void *)(-1)
+	  	/* Value used for gcj_freelist[-1]; allocation is 	*/
+	  	/* erroneous.						*/
 #	endif
 		/* Free lists contain either a pointer or a small count */
 		/* reflecting the number of granules allocated at that	*/
@@ -89,13 +94,13 @@ typedef struct thread_local_freelists {
 #   define GC_getspecific pthread_getspecific
 #   define GC_setspecific pthread_setspecific
 #   define GC_key_create pthread_key_create
-#   define GC_remove_specific()  /* No need for cleanup on exit. */
+#   define GC_remove_specific(key)  /* No need for cleanup on exit. */
     typedef pthread_key_t GC_key_t;
 # elif defined(USE_COMPILER_TLS) || defined(USE_WIN32_COMPILER_TLS)
 #   define GC_getspecific(x) (x)
 #   define GC_setspecific(key, v) ((key) = (v), 0)
 #   define GC_key_create(key, d) 0
-#   define GC_remove_specific()  /* No need for cleanup on exit. */
+#   define GC_remove_specific(key)  /* No need for cleanup on exit. */
     typedef void * GC_key_t;
 # elif defined(USE_WIN32_SPECIFIC)
 #   include <windows.h>
@@ -105,7 +110,7 @@ typedef struct thread_local_freelists {
 #   define GC_key_create(key, d)  \
 	((d) != 0? (ABORT("Destructor unsupported by TlsAlloc"),0) \
 	 	 : (*(key) = TlsAlloc(), 0))
-#   define GC_remove_specific()  /* No need for cleanup on thread exit. */
+#   define GC_remove_specific(key)  /* No need for cleanup on thread exit. */
     	/* Need TlsFree on process exit/detach ? */
     typedef DWORD GC_key_t;
 # elif defined(USE_CUSTOM_SPECIFIC)

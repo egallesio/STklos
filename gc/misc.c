@@ -43,6 +43,10 @@
   int GC_log;  /* Forward decl, so we can set it.	*/
 #endif
 
+#ifdef NONSTOP
+# include <floss.h>
+#endif
+
 #if defined(THREADS) && defined(PCR)
 # include "il/PCR_IL.h"
   PCR_Th_ML GC_allocate_ml;
@@ -406,8 +410,9 @@ void GC_init(void)
       BOOL (WINAPI *pfn) (LPCRITICAL_SECTION, DWORD) = NULL;
       HMODULE hK32 = GetModuleHandleA("kernel32.dll");
       if (hK32)
-          (FARPROC) pfn = GetProcAddress(hK32,
-			  "InitializeCriticalSectionAndSpinCount");
+	  pfn = (BOOL (WINAPI *) (LPCRITICAL_SECTION, DWORD))
+		GetProcAddress (hK32,
+				"InitializeCriticalSectionAndSpinCount");
       if (pfn)
           pfn(&GC_allocate_ml, 4000);
       else
@@ -612,6 +617,12 @@ void GC_init_inner()
 #   ifdef MSWIN32
  	GC_init_win32();
 #   endif
+#   if defined(USE_PROC_FOR_LIBRARIES) && defined(GC_LINUX_THREADS)
+	WARN("USE_PROC_FOR_LIBRARIES + GC_LINUX_THREADS performs poorly.", 0);
+	/* If thread stacks are cached, they tend to be scanned in 	*/
+	/* entirety as part of the root set.  This wil grow them to	*/
+	/* maximum size, and is generally not desirable.		*/
+#   endif
 #   if defined(SEARCH_FOR_DATA_START)
 	GC_init_linux_data_start();
 #   endif
@@ -619,15 +630,11 @@ void GC_init_inner()
 	GC_init_netbsd_elf();
 #   endif
 #   if defined(GC_PTHREADS) || defined(GC_SOLARIS_THREADS) \
-       || defined(GC_WIN32_THREADS) || defined(GC_LURC_THREADS)
+       || defined(GC_WIN32_THREADS)
         GC_thr_init();
 #   endif
-#   ifdef GC_SOLARIS_THREADS
-	/* We need dirty bits in order to find live stack sections.	*/
-        GC_dirty_init();
-#   endif
 #   if !defined(THREADS) || defined(GC_PTHREADS) || defined(GC_WIN32_THREADS) \
-	|| defined(GC_SOLARIS_THREADS) || defined(GC_LURC_THREADS)
+	|| defined(GC_SOLARIS_THREADS)
       if (GC_stackbottom == 0) {
 	GC_stackbottom = GC_get_main_stack_base();
 #       if (defined(LINUX) || defined(HPUX)) && defined(IA64)
@@ -651,12 +658,10 @@ void GC_init_inner()
     GC_STATIC_ASSERT(sizeof (struct hblk) == HBLKSIZE);
 #   ifndef THREADS
 #     if defined(STACK_GROWS_UP) && defined(STACK_GROWS_DOWN)
-  	ABORT(
-  	  "Only one of STACK_GROWS_UP and STACK_GROWS_DOWN should be defd\n");
+#       error "Only one of STACK_GROWS_UP and STACK_GROWS_DOWN should be defd"
 #     endif
 #     if !defined(STACK_GROWS_UP) && !defined(STACK_GROWS_DOWN)
-  	ABORT(
-  	  "One of STACK_GROWS_UP and STACK_GROWS_DOWN should be defd\n");
+#       error "One of STACK_GROWS_UP and STACK_GROWS_DOWN should be defd"
 #     endif
 #     ifdef STACK_GROWS_DOWN
         GC_ASSERT((word)(&dummy) <= (word)GC_stackbottom);
@@ -668,7 +673,20 @@ void GC_init_inner()
       GC_ASSERT((word)(-1) > (word)0);
       /* word should be unsigned */
 #   endif
+    GC_ASSERT((ptr_t)(word)(-1) > (ptr_t)0);
+    	/* Ptr_t comparisons should behave as unsigned comparisons.	*/
     GC_ASSERT((signed_word)(-1) < (signed_word)0);
+#   if !defined(SMALL_CONFIG)
+      if (GC_incremental || 0 != GETENV("GC_ENABLE_INCREMENTAL")) {
+	/* This used to test for !GC_no_win32_dlls.  Why? */
+        GC_setpagesize();
+	/* For GWW_MPROTECT on Win32, this needs to happen before any	*/
+	/* heap memory is allocated.					*/
+        GC_dirty_init();
+        GC_ASSERT(GC_bytes_allocd == 0)
+    	GC_incremental = TRUE;
+      }
+#   endif /* !SMALL_CONFIG */
     
     /* Add initial guess of root sets.  Do this first, since sbrk(0)	*/
     /* might be used.							*/
@@ -705,6 +723,12 @@ void GC_init_inner()
     }
     GC_initialize_offsets();
     GC_register_displacement_inner(0L);
+#   if defined(GC_LINUX_THREADS) && defined(REDIRECT_MALLOC)
+      if (!GC_all_interior_pointers) {
+	/* TLS ABI uses pointer-sized offsets for dtv. */
+        GC_register_displacement_inner(sizeof(void *));
+      }
+#   endif
     GC_init_size_map();
 #   ifdef PCR
       if (PCR_IL_Lock(PCR_Bool_false, PCR_allSigsBlocked, PCR_waitForever)
@@ -716,23 +740,18 @@ void GC_init_inner()
       PCR_IL_Unlock();
       GC_pcr_install();
 #   endif
-#   if !defined(SMALL_CONFIG)
-      if (!GC_no_win32_dlls && 0 != GETENV("GC_ENABLE_INCREMENTAL")) {
-	GC_ASSERT(!GC_incremental);
-        GC_setpagesize();
-#       ifndef GC_SOLARIS_THREADS
-          GC_dirty_init();
-#       endif
-        GC_ASSERT(GC_bytes_allocd == 0)
-    	GC_incremental = TRUE;
-      }
-#   endif /* !SMALL_CONFIG */
     COND_DUMP;
     /* Get black list set up and/or incremental GC started */
       if (!GC_dont_precollect || GC_incremental) GC_gcollect_inner();
     GC_is_initialized = TRUE;
 #   ifdef STUBBORN_ALLOC
     	GC_stubborn_init();
+#   endif
+#   if defined(GC_LINUX_THREADS) && defined(REDIRECT_MALLOC)
+	{
+	  extern void GC_init_lib_bounds(void);
+	  GC_init_lib_bounds();
+	}
 #   endif
     /* Convince lint that some things are used */
 #   ifdef LINT
@@ -764,16 +783,15 @@ void GC_enable_incremental(void)
     LOCK();
     if (GC_incremental) goto out;
     GC_setpagesize();
-    if (GC_no_win32_dlls) goto out;
-#   ifndef GC_SOLARIS_THREADS 
-      maybe_install_looping_handler();  /* Before write fault handler! */
-      GC_dirty_init();
-      if (!GC_dirty_maintained) goto out;
-#   endif
+    /* if (GC_no_win32_dlls) goto out; Should be win32S test? */
+    maybe_install_looping_handler();  /* Before write fault handler! */
+    GC_incremental = TRUE;
     if (!GC_is_initialized) {
         GC_init_inner();
+    } else {
+	GC_dirty_init();
     }
-    if (GC_incremental) goto out;
+    if (!GC_dirty_maintained) goto out;
     if (GC_dont_gc) {
         /* Can't easily do it. */
         UNLOCK();
@@ -786,16 +804,24 @@ void GC_enable_incremental(void)
     	/* clean since nothing can point to an	  	*/
     	/* unmarked object.			  	*/
     GC_read_dirty();
-    GC_incremental = TRUE;
 out:
     UNLOCK();
+  } else {
+    GC_init();
   }
+# else
+    GC_init();
 # endif
 }
 
 
 #if defined(MSWIN32) || defined(MSWINCE)
-# define LOG_FILE _T("gc.log")
+# if defined(_MSC_VER) && defined(_DEBUG)
+#  include <crtdbg.h>
+# endif
+# ifdef OLD_WIN32_LOG_FILE
+#   define LOG_FILE _T("gc.log")
+# endif
 
   HANDLE GC_stdout = 0;
 
@@ -818,15 +844,31 @@ out:
       if (GC_stdout == INVALID_HANDLE_VALUE) {
 	  return -1;
       } else if (GC_stdout == 0) {
-	  GC_stdout = CreateFile(LOG_FILE, GENERIC_WRITE,
-        			 FILE_SHARE_READ | FILE_SHARE_WRITE,
-        			 NULL, CREATE_ALWAYS, FILE_FLAG_WRITE_THROUGH,
-        			 NULL); 
-    	  if (GC_stdout == INVALID_HANDLE_VALUE) ABORT("Open of log file failed");
+	char * file_name = GETENV("GC_LOG_FILE");
+	char logPath[_MAX_PATH + 5];
+
+        if (0 == file_name) {
+#         ifdef OLD_WIN32_LOG_FILE
+	    strcpy(logPath, LOG_FILE);
+#	  else
+	    GetModuleFileName(NULL, logPath, _MAX_PATH);
+	    strcat(logPath, ".log");
+#	  endif
+	  file_name = logPath;
+	}
+	GC_stdout = CreateFile(logPath, GENERIC_WRITE,
+        		       FILE_SHARE_READ,
+        		       NULL, CREATE_ALWAYS, FILE_FLAG_WRITE_THROUGH,
+        		       NULL); 
+    	if (GC_stdout == INVALID_HANDLE_VALUE)
+	    ABORT("Open of log file failed");
       }
       tmp = WriteFile(GC_stdout, buf, len, &written, NULL);
       if (!tmp)
 	  DebugBreak();
+#     if defined(_MSC_VER) && defined(_DEBUG)
+	  _CrtDbgReport(_CRT_WARN, NULL, 0, NULL, "%.*s", len, buf);
+#     endif
       LeaveCriticalSection(&GC_write_cs);
       return tmp ? (int)written : -1;
   }
@@ -846,6 +888,9 @@ int GC_tmp;  /* Should really be local ... */
     }
     if (GC_stderr == NULL) {
 	GC_stderr = stderr;
+    }
+    if (GC_log == NULL) {
+	GC_log = stderr;
     }
   }
 #endif
@@ -901,6 +946,7 @@ int GC_write(fd, buf, len)
 
 
 #if defined(MSWIN32) || defined(MSWINCE)
+    /* FIXME: This is pretty ugly ... */
 #   define WRITE(f, buf, len) GC_write(buf, len)
 #else
 #   if defined(OS2) || defined(MACOS)

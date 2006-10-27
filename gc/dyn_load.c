@@ -26,7 +26,7 @@
  * None of this is safe with dlclose and incremental collection.
  * But then not much of anything is safe in the presence of dlclose.
  */
-#if defined(__linux__) && !defined(_GNU_SOURCE)
+#if (defined(__linux__) || defined(__GLIBC__)) && !defined(_GNU_SOURCE)
     /* Can't test LINUX, since this must be define before other includes */
 #   define _GNU_SOURCE
 #endif
@@ -49,9 +49,14 @@
 #   undef GC_must_restore_redefined_dlopen
 # endif
 
+/* A user-supplied routine that is called to determine if a DSO must
+   be scanned by the gc.  */
+static int (*GC_has_static_roots)(const char *, void *, size_t);
+
+
 #if (defined(DYNAMIC_LOADING) || defined(MSWIN32) || defined(MSWINCE)) \
     && !defined(PCR)
-#if !defined(SUNOS5DL) && !defined(IRIX5) && \
+#if !defined(SOLARISDL) && !defined(IRIX5) && \
     !defined(MSWIN32) && !defined(MSWINCE) && \
     !(defined(ALPHA) && defined(OSF1)) && \
     !defined(HPUX) && !(defined(LINUX) && defined(__ELF__)) && \
@@ -65,7 +70,7 @@
 #endif
 
 #include <stdio.h>
-#ifdef SUNOS5DL
+#ifdef SOLARISDL
 #   include <sys/elf.h>
 #   include <dlfcn.h>
 #   include <link.h>
@@ -108,7 +113,7 @@
 #    endif
 #  endif
 
-#if defined(SUNOS5DL) && !defined(USE_PROC_FOR_LIBRARIES)
+#if defined(SOLARISDL) && !defined(USE_PROC_FOR_LIBRARIES)
 
 #ifdef LINT
     Elf32_Dyn _DYNAMIC;
@@ -154,19 +159,17 @@ GC_FirstDLOpenedLinkMap()
     return cachedResult;
 }
 
-#endif /* SUNOS5DL ... */
+#endif /* SOLARISDL ... */
 
 /* BTL: added to fix circular dlopen definition if GC_SOLARIS_THREADS defined */
 # if defined(GC_must_restore_redefined_dlopen)
 #   define dlopen GC_dlopen
 # endif
 
-# if defined(SUNOS5DL)
+# if defined(SOLARISDL)
 /* Add dynamic library data sections to the root set.		*/
 # if !defined(PCR) && !defined(GC_SOLARIS_THREADS) && defined(THREADS)
-#   ifndef SRC_M3
 	--> fix mutual exclusion with dlopen
-#   endif  /* We assume M3 programs don't call dlopen for now */
 # endif
 
 # ifndef USE_PROC_FOR_LIBRARIES
@@ -178,7 +181,6 @@ void GC_register_dynamic_libraries()
   for (lm = GC_FirstDLOpenedLinkMap();
        lm != (struct link_map *) 0;  lm = lm->l_next)
     {
-#     ifdef SUNOS5DL
 	ElfW(Ehdr) * e;
         ElfW(Phdr) * p;
         unsigned long offset;
@@ -205,12 +207,11 @@ void GC_register_dynamic_libraries()
               break;
           }
 	}
-#     endif
     }
 }
 
 # endif /* !USE_PROC ... */
-# endif /* SUNOS */
+# endif /* SOLARISDL */
 
 #if defined(LINUX) && defined(__ELF__) || defined(SCO_ELF) || \
     (defined(FREEBSD) && defined(__ELF__)) || defined(DGUX) || \
@@ -231,46 +232,48 @@ extern ssize_t GC_repeat_read(int fd, char *buf, size_t count);
 	/* Repeatedly read until buffer is filled, or EOF is encountered */
 	/* Defined in os_dep.c.  					 */
 
-char *GC_parse_map_entry(char *buf_ptr, word *start, word *end,
-                         char *prot_buf, unsigned int *maj_dev);
-word GC_apply_to_maps(word (*fn)(char *));
+char *GC_parse_map_entry(char *buf_ptr, ptr_t *start, ptr_t *end,
+                         char **prot, unsigned int *maj_dev,
+			 char **mapping_name);
+char *GC_get_maps(void);
 	/* From os_dep.c	*/
 
 word GC_register_map_entries(char *maps)
 {
-    char prot_buf[5];
+    char *prot_buf;
     char *buf_ptr = maps;
     int count;
-    word start, end;
+    ptr_t start, end;
     unsigned int maj_dev;
-    word least_ha, greatest_ha;
+    ptr_t least_ha, greatest_ha;
     unsigned i;
-    word datastart = (word)(DATASTART);
+    ptr_t datastart = (ptr_t)(DATASTART);
 
-    /* Compute heap bounds. FIXME: Should be done by add_to_heap?	*/
-	least_ha = (word)(-1);
+    /* Compute heap bounds. FIXME: Should work if heap and roots are 	*/
+    /* interleaved?							*/
+	least_ha = (ptr_t)(word)(-1);
 	greatest_ha = 0;
 	for (i = 0; i < GC_n_heap_sects; ++i) {
-	    word sect_start = (word)GC_heap_sects[i].hs_start;
-	    word sect_end = sect_start + GC_heap_sects[i].hs_bytes;
+	    ptr_t sect_start = GC_heap_sects[i].hs_start;
+	    ptr_t sect_end = sect_start + GC_heap_sects[i].hs_bytes;
 	    if (sect_start < least_ha) least_ha = sect_start;
 	    if (sect_end > greatest_ha) greatest_ha = sect_end;
         }
-    	if (greatest_ha < (word)GC_scratch_last_end_ptr)
-	    greatest_ha = (word)GC_scratch_last_end_ptr; 
+    	if (greatest_ha < (ptr_t)GC_scratch_last_end_ptr)
+	    greatest_ha = (ptr_t)GC_scratch_last_end_ptr; 
 
     for (;;) {
-        buf_ptr = GC_parse_map_entry(buf_ptr, &start, &end, prot_buf, &maj_dev);
+        buf_ptr = GC_parse_map_entry(buf_ptr, &start, &end, &prot, &maj_dev, 0);
 	if (buf_ptr == NULL) return 1;
-	if (prot_buf[1] == 'w') {
+	if (prot[1] == 'w') {
 	    /* This is a writable mapping.  Add it to		*/
 	    /* the root set unless it is already otherwise	*/
 	    /* accounted for.					*/
-	    if (start <= (word)GC_stackbottom && end >= (word)GC_stackbottom) {
+	    if (start <= GC_stackbottom && end >= GC_stackbottom) {
 		/* Stack mapping; discard	*/
 		continue;
 	    }
-#	    if def THREADS
+#	    ifdef THREADS
 	      /* This may fail, since a thread may already be 		*/
 	      /* unregistered, but its thread stack may still be there.	*/
 	      /* That can fail because the stack may disappear while	*/
@@ -302,14 +305,14 @@ word GC_register_map_entries(char *maps)
 
 void GC_register_dynamic_libraries()
 {
-   if (!GC_apply_to_maps(GC_register_map_entries))
-       ABORT("Failed to read /proc for library registration.");
+    if (!GC_register_map_entries(GC_get_maps()))
+        ABORT("Failed to read /proc for library registration.");
 }
 
 /* We now take care of the main data segment ourselves: */
 GC_bool GC_register_main_static_data()
 {
-  return FALSE;
+    return FALSE;
 }
   
 # define HAVE_REGISTER_MAIN_STATIC_DATA
@@ -321,7 +324,7 @@ GC_bool GC_register_main_static_data()
 /* For glibc 2.2.4+.  Unfortunately, it doesn't work for older	*/
 /* versions.  Thanks to Jakub Jelinek for most of the code.	*/
 
-# if defined(LINUX) /* Are others OK here, too? */ \
+# if (defined(LINUX) || defined (__GLIBC__)) /* Are others OK here, too? */ \
      && (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ > 2) \
          || (__GLIBC__ == 2 && __GLIBC_MINOR__ == 2 && defined(DT_CONFIG))) 
 
@@ -351,6 +354,11 @@ static int GC_register_dynlib_callback(info, size, ptr)
 	{
 	  if( !(p->p_flags & PF_W) ) break;
 	  start = ((char *)(p->p_vaddr)) + info->dlpi_addr;
+
+	  if (GC_has_static_roots
+	      && !GC_has_static_roots(info->dlpi_name, start, p->p_memsz))
+	    break;
+
 	  GC_add_roots_inner(start, start + p->p_memsz, TRUE);
 	}
       break;
@@ -530,9 +538,9 @@ void GC_register_dynamic_libraries()
     ptr_t heap_start = (ptr_t)HEAP_START;
     ptr_t heap_end = heap_start;
 
-#   ifdef SUNOS5DL
+#   ifdef SOLARISDL
 #     define MA_PHYS 0
-#   endif /* SUNOS5DL */
+#   endif /* SOLARISDL */
 
     if (fd < 0) {
       sprintf(buf, "/proc/%d", getpid());
@@ -701,6 +709,9 @@ void GC_register_dynamic_libraries()
   }
 # endif /* DEBUG_VIRTUALQUERY */
 
+  extern GC_bool GC_wnt;  /* Is Windows NT derivative.		*/
+  			  /* Defined and set in os_dep.c.	*/
+
   void GC_register_dynamic_libraries()
   {
     MEMORY_BASIC_INFORMATION buf;
@@ -738,7 +749,12 @@ void GC_register_dynamic_libraries()
 		&& (protect == PAGE_EXECUTE_READWRITE
 		    || protect == PAGE_READWRITE)
 		&& !GC_is_heap_base(buf.AllocationBase)
-		&& buf.Type == MEM_IMAGE) {  
+ 		/* There is some evidence that we cannot always
+ 		 * ignore MEM_PRIVATE sections under Windows ME
+ 		 * and predecessors.  Hence we now also check for
+ 		 * that case.	*/
+ 		&& (buf.Type == MEM_IMAGE ||
+ 		    !GC_wnt && buf.Type == MEM_PRIVATE)) {
 #	        ifdef DEBUG_VIRTUALQUERY
 	          GC_dump_meminfo(&buf);
 #	        endif
@@ -1148,5 +1164,13 @@ GC_bool GC_register_main_static_data()
 {
   return TRUE;
 }
+
+/* Register a routine to filter dynamic library registration.  */
+void
+GC_register_has_static_roots_callback
+  (int (*callback)(const char *, void *, size_t)) {
+  GC_has_static_roots = callback;
+}
+
 #endif /* HAVE_REGISTER_MAIN_STATIC_DATA */
 

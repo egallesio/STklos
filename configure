@@ -7252,13 +7252,8 @@ fi
 if test "$HAVE_GC" = "no"
 then
   echo "No Boehm-Demers-Weiser GC library. Using the one provided with the package"
-  case `uname -s` in
-    Darwin*) echo "Force GC compilation  without optimizations on MacOS";
-            (cd gc; CC="$CC" CFLAGS="-g" sh ./configure --prefix=$prefix \
-	    --disable-threads) || { echo "Cannot configure the GC"; exit; } ;;
-    *) (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix \
-            --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; } ;;
-  esac
+  (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix \
+          --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
 
   GC=gc
   GCLIB="../gc/.libs/libgc.a"

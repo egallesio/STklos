@@ -114,7 +114,7 @@ GC_API int GC_java_finalization;
 			/* ordered finalization.  Default value is	*/
 			/* determined by JAVA_FINALIZATION macro.	*/
 
-GC_API void (* GC_finalizer_notifier)();
+GC_API void (* GC_finalizer_notifier)(void);
 			/* Invoked by the collector when there are 	*/
 			/* objects to be finalized.  Invoked at most	*/
 			/* once per GC cycle.  Never invoked unless 	*/
@@ -253,6 +253,7 @@ GC_API void GC_init(void);
  */
 GC_API void * GC_malloc(size_t size_in_bytes);
 GC_API void * GC_malloc_atomic(size_t size_in_bytes);
+GC_API char * GC_strdup (const char *str);
 GC_API void * GC_malloc_uncollectable(size_t size_in_bytes);
 GC_API void * GC_malloc_stubborn(size_t size_in_bytes);
 
@@ -409,13 +410,16 @@ GC_API void GC_enable(void);
 /* Causes GC_local_gcj_malloc() to revert to	*/
 /* locked allocation.  Must be called 		*/
 /* before any GC_local_gcj_malloc() calls.	*/
+/* For best performance, should be called as early as possible.	*/
+/* On some platforms, calling it later may have adverse effects.*/
+/* Safe to call before GC_INIT().  Includes a GC_init() call.	*/
 GC_API void GC_enable_incremental(void);
 
 /* Does incremental mode write-protect pages?  Returns zero or	*/
 /* more of the following, or'ed together:			*/
 #define GC_PROTECTS_POINTER_HEAP  1 /* May protect non-atomic objs.	*/
 #define GC_PROTECTS_PTRFREE_HEAP  2
-#define GC_PROTECTS_STATIC_DATA   4 /* Curently never.			*/
+#define GC_PROTECTS_STATIC_DATA   4 /* Currently never.			*/
 #define GC_PROTECTS_STACK	  8 /* Probably impractical.		*/
 
 #define GC_PROTECTS_NONE 0
@@ -452,7 +456,7 @@ GC_API void * GC_malloc_atomic_ignore_off_page(size_t lb);
 #   define GC_RETURN_ADDR (GC_word)__return_address
 #endif
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__GLIBC__)
 # include <features.h>
 # if (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 1 || __GLIBC__ > 2) \
      && !defined(__ia64__)
@@ -462,6 +466,12 @@ GC_API void * GC_malloc_atomic_ignore_off_page(size_t lb);
 # endif
 # if defined(__i386__) || defined(__x86_64__)
 #   define GC_CAN_SAVE_CALL_STACKS
+# endif
+#endif
+
+#if defined(_MSC_VER) && _MSC_VER >= 1200 /* version 12.0+ (MSVC 6.0+)  */
+# ifndef GC_HAVE_NO_BUILTIN_BACKTRACE
+#   define GC_HAVE_BUILTIN_BACKTRACE
 # endif
 #endif
 
@@ -481,7 +491,7 @@ GC_API void * GC_malloc_atomic_ignore_off_page(size_t lb);
 /* This may also be desirable if it is possible but expensive to	*/
 /* retrieve the call chain.						*/
 #if (defined(__linux__) || defined(__NetBSD__) || defined(__OpenBSD__) \
-     || defined(__FreeBSD__)) & !defined(GC_CAN_SAVE_CALL_STACKS)
+     || defined(__FreeBSD__) || defined(__DragonFly__)) & !defined(GC_CAN_SAVE_CALL_STACKS)
 # define GC_ADD_CALLER
 # if __GNUC__ >= 3 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95) 
     /* gcc knows how to retrieve return address, but we don't know */
@@ -505,6 +515,7 @@ GC_API void * GC_malloc_atomic_ignore_off_page(size_t lb);
 /* objects allocated in this way for overwrites, etc.			*/
 GC_API void * GC_debug_malloc(size_t size_in_bytes, GC_EXTRA_PARAMS);
 GC_API void * GC_debug_malloc_atomic(size_t size_in_bytes, GC_EXTRA_PARAMS);
+GC_API char * GC_debug_strdup(const char *str, GC_EXTRA_PARAMS);
 GC_API void * GC_debug_malloc_uncollectable
 	(size_t size_in_bytes, GC_EXTRA_PARAMS);
 GC_API void * GC_debug_malloc_stubborn
@@ -538,6 +549,7 @@ GC_API void * GC_debug_realloc_replacement
 # ifdef GC_DEBUG
 #   define GC_MALLOC(sz) GC_debug_malloc(sz, GC_EXTRAS)
 #   define GC_MALLOC_ATOMIC(sz) GC_debug_malloc_atomic(sz, GC_EXTRAS)
+#   define GC_STRDUP(s) GC_debug_strdup((s), GC_EXTRAS)
 #   define GC_MALLOC_UNCOLLECTABLE(sz) \
 			GC_debug_malloc_uncollectable(sz, GC_EXTRAS)
 #   define GC_MALLOC_IGNORE_OFF_PAGE(sz) \
@@ -561,6 +573,7 @@ GC_API void * GC_debug_realloc_replacement
 # else
 #   define GC_MALLOC(sz) GC_malloc(sz)
 #   define GC_MALLOC_ATOMIC(sz) GC_malloc_atomic(sz)
+#   define GC_STRDUP(s) GC_strdup(s)
 #   define GC_MALLOC_UNCOLLECTABLE(sz) GC_malloc_uncollectable(sz)
 #   define GC_MALLOC_IGNORE_OFF_PAGE(sz) \
 			GC_malloc_ignore_off_page(sz)
@@ -849,6 +862,11 @@ GC_API void * GC_is_visible (void * p);
 /* Always returns its argument.						*/
 GC_API void * GC_is_valid_displacement (void *	p);
 
+/* Explicitly dump the GC state.  This is most often called from the	*/
+/* debugger, or by setting the GC_DUMP_REGULARLY environment variable,	*/
+/* but it may be useful to call it from client code during debugging.	*/
+void GC_dump(void);
+
 /* Safer, but slow, pointer addition.  Probably useful mainly with 	*/
 /* a preprocessor.  Useful only for heap pointers.			*/
 #ifdef GC_DEBUG
@@ -916,20 +934,37 @@ GC_API void (*GC_is_visible_print_proc) (void * p);
 void * GC_malloc_many(size_t lb);
 #define GC_NEXT(p) (*(void * *)(p)) 	/* Retrieve the next element	*/
 					/* in returned list.		*/
-extern void GC_thr_init(void);	/* Needed for Solaris/X86	*/
-#elif defined(GC_LURC_THREADS)
-extern void GC_thr_init(void);	/* Needed for Solaris/X86	*/
+extern void GC_thr_init(void);	/* Needed for Solaris/X86 ??	*/
+
 #endif /* THREADS && !SRC_M3 */
+
+/* Register a callback to control the scanning of dynamic libraries.
+   When the GC scans the static data of a dynamic library, it will
+   first call a user-supplied routine with filename of the library and
+   the address and length of the memory region.  This routine should
+   return nonzero if that region should be scanned.  */
+GC_API void 
+GC_register_has_static_roots_callback
+  (int (*callback)(const char *, void *, size_t));
+
 
 #if defined(GC_WIN32_THREADS) && !defined(__CYGWIN32__) && !defined(__CYGWIN__)
 # include <windows.h>
 
   /*
-   * All threads must be created using GC_CreateThread, so that they will be
-   * recorded in the thread table.  For backwards compatibility, this is not
-   * technically true if the GC is built as a dynamic library, since it can
-   * and does then use DllMain to keep track of thread creations.  But new code
-   * should be built to call GC_CreateThread.
+   * All threads must be created using GC_CreateThread or GC_beginthreadex,
+   * or must explicitly call GC_register_my_thread,
+   * so that they will be recorded in the thread table.
+   * For backwards compatibility, it is possible to build the GC
+   * with GC_DLL defined, and to call GC_use_DllMain().
+   * This implicitly registers all created threads, but appears to be
+   * less robust.
+   *
+   * Currently the collector expects all threads to fall through and
+   * terminate normally, or call GC_endthreadex() or GC_ExitThread,
+   * so that the thread is properly unregistered.  (An explicit call
+   * to GC_unregister_my_thread() should also work, but risks unregistering
+   * the thread twice.)
    */
    GC_API HANDLE WINAPI GC_CreateThread(
       LPSECURITY_ATTRIBUTES lpThreadAttributes,
@@ -949,9 +984,18 @@ extern void GC_thr_init(void);	/* Needed for Solaris/X86	*/
 
 #  ifndef GC_BUILD
 #    define WinMain GC_WinMain
-#    define CreateThread GC_CreateThread
 #  endif
 # endif /* defined(_WIN32_WCE) */
+
+  /*
+   * Use implicit thread registration via DllMain.
+   */
+GC_API void GC_use_DllMain(void);
+
+# define CreateThread GC_CreateThread
+# define ExitThread GC_ExitThread
+# define _beginthreadex GC_beginthreadex
+# define _endthreadex GC_endthreadex
 
 #endif /* defined(GC_WIN32_THREADS)  && !cygwin */
 
@@ -978,10 +1022,10 @@ extern void GC_thr_init(void);	/* Needed for Solaris/X86	*/
 #     define GC_DATASTART ((void *) GC_MIN(_data_start__, _bss_start__))
 #     define GC_DATAEND	 ((void *) GC_MAX(_data_end__, _bss_end__))
 #     if defined(GC_DLL)
-#       define GC_INIT() { GC_add_roots(GC_DATASTART, GC_DATAEND); GC_init(); }
+#       define GC_INIT() { GC_add_roots(GC_DATASTART, GC_DATAEND); \
+			   GC_gcollect(); /* For blacklisting. */}
 #     else
-	/* Main program init not required, but other defined needed for */
-	/* uniformity.							*/
+	/* Main program init not required  */
 #       define GC_INIT() { GC_init(); }
 #     endif
 #   endif
@@ -989,7 +1033,7 @@ extern void GC_thr_init(void);	/* Needed for Solaris/X86	*/
       extern int _data[], _end[];
 #     define GC_DATASTART ((void *)((ulong)_data))
 #     define GC_DATAEND ((void *)((ulong)_end))
-#     define GC_INIT() { GC_add_roots(GC_DATASTART, GC_DATAEND); GC_init(); }
+#     define GC_INIT() { GC_add_roots(GC_DATASTART, GC_DATAEND); }
 #   endif
 #else
 #   define GC_INIT() { GC_init(); }

@@ -28,6 +28,26 @@ GC_key_t GC_thread_key;
 
 static GC_bool keys_initialized;
 
+/* Return a single nonempty freelist fl to the global one pointed to 	*/
+/* by gfl.	*/
+
+static void return_single_freelist(void *fl, void **gfl)
+{
+    void *q, **qptr;
+
+    if (*gfl == 0) {
+      *gfl = fl;
+    } else {
+      GC_ASSERT(GC_size(fl) == GC_size(*gfl));
+      /* Concatenate: */
+	for (qptr = &(obj_link(fl)), q = *qptr;
+	     (word)q >= HBLKSIZE; qptr = &(obj_link(q)), q = *qptr);
+	GC_ASSERT(0 == q);
+	*qptr = *gfl;
+	*gfl = fl;
+    }
+}
+
 /* Recover the contents of the freelist array fl into the global one gfl.*/
 /* We hold the allocator lock.						*/
 static void return_freelists(void **fl, void **gfl)
@@ -37,30 +57,20 @@ static void return_freelists(void **fl, void **gfl)
 
     for (i = 1; i < TINY_FREELISTS; ++i) {
 	if ((word)(fl[i]) >= HBLKSIZE) {
-	  if (gfl[i] == 0) {
-	    gfl[i] = fl[i];
-	  } else {
-	    GC_ASSERT(GC_size(fl[i]) == GRANULES_TO_BYTES(i));
-	    GC_ASSERT(GC_size(gfl[i]) == GRANULES_TO_BYTES(i));
-	    /* Concatenate: */
-	      for (qptr = fl+i, q = *qptr;
-		   (word)q >= HBLKSIZE; qptr = &(obj_link(q)), q = *qptr);
-	      GC_ASSERT(0 == q);
-	      *qptr = gfl[i];
-	      gfl[i] = fl[i];
-	  }
+	  return_single_freelist(fl[i], gfl+i);
 	}
 	/* Clear fl[i], since the thread structure may hang around.	*/
 	/* Do it in a way that is likely to trap if we access it.	*/
 	fl[i] = (ptr_t)HBLKSIZE;
     }
+    /* The 0 granule freelist really contains 1 granule objects.	*/
+#   ifdef GC_GCJ_SUPPORT
+      if (fl[0] == ERROR_FL) return;
+#   endif
+    if ((word)(fl[0]) >= HBLKSIZE) {
+        return_single_freelist(fl[0], gfl+1);
+    }
 }
-
-/* We statically allocate a single "size 0" object. It is linked to	*/
-/* itself, and is thus repeatedly reused for all size 0 allocation	*/
-/* requests.  (Size 0 gcj allocation requests are incorrect, and	*/
-/* we arrange for those to fault asap.)					*/
-static ptr_t size_zero_object = (ptr_t)(&size_zero_object);
 
 /* Each thread structure must be initialized.	*/
 /* This call must be made from the new thread.	*/
@@ -86,10 +96,13 @@ void GC_init_thread_local(GC_tlfs p)
 #	endif
     }   
     /* Set up the size 0 free lists.	*/
-    p -> ptrfree_freelists[0] = (void *)(&size_zero_object);
-    p -> normal_freelists[0] = (void *)(&size_zero_object);
+    /* We now handle most of them like regular free lists, to ensure	*/
+    /* That explicit deallocation works.  However, allocation of a	*/
+    /* size 0 "gcj" object is always an error.				*/
+    p -> ptrfree_freelists[0] = (void *)1;
+    p -> normal_freelists[0] = (void *)1;
 #   ifdef GC_GCJ_SUPPORT
-        p -> gcj_freelists[0] = (void *)(-1);
+        p -> gcj_freelists[0] = ERROR_FL;
 #   endif
 }
 
@@ -172,7 +185,7 @@ void * GC_malloc_atomic(size_t bytes)
     void **tiny_fl = ((GC_tlfs)GC_getspecific(GC_thread_key))
 		        		-> ptrfree_freelists;
     GC_FAST_MALLOC_GRANS(result, bytes, tiny_fl, DIRECT_GRANULES,
-		         PTRFREE, GC_core_malloc_atomic(bytes), /* no init */);
+		         PTRFREE, GC_core_malloc_atomic(bytes), 0/* no init */);
     return result;
 }
 
@@ -186,18 +199,41 @@ void * GC_malloc_atomic(size_t bytes)
 
 extern int GC_gcj_kind;
 
+/* Gcj-style allocation without locks is extremely tricky.  The 	*/
+/* fundamental issue is that we may end up marking a free list, which	*/
+/* has freelist links instead of "vtable" pointers.  That is usually	*/
+/* OK, since the next object on the free list will be cleared, and	*/
+/* will thus be interpreted as containg a zero descriptor.  That's fine	*/
+/* if the object has not yet been initialized.  But there are		*/
+/* interesting potential races.						*/
+/* In the case of incremental collection, this seems hopeless, since	*/
+/* the marker may run asynchronously, and may pick up the pointer to  	*/
+/* the next freelist entry (which it thinks is a vtable pointer), get	*/
+/* suspended for a while, and then see an allocated object instead	*/
+/* of the vtable.  This made be avoidable with either a handshake with	*/
+/* the collector or, probably more easily, by moving the free list	*/
+/* links to the second word of each object.  The latter isn't a		*/
+/* universal win, since on architecture like Itanium, nonzero offsets	*/
+/* are not necessarily free.  And there may be cache fill order issues.	*/
+/* For now, we punt with incremental GC.  This probably means that	*/
+/* incremental GC should be enabled before we fork a second thread.	*/
 void * GC_gcj_malloc(size_t bytes,
 		     void * ptr_to_struct_containing_descr)
 {
+  if (GC_EXPECT(GC_incremental, 0)) {
+    return GC_core_gcj_malloc(bytes, ptr_to_struct_containing_descr);
+  } else {
     size_t granules = ROUNDED_UP_GRANULES(bytes);
     void *result;
-    void **tiny_fl = (GC_tlfs)GC_getspecific(GC_thread_key)
-		        		-> ptrfree_freelists;
+    void **tiny_fl = ((GC_tlfs)GC_getspecific(GC_thread_key))
+		        		-> gcj_freelists;
     GC_ASSERT(GC_gcj_malloc_initialized);
     GC_FAST_MALLOC_GRANS(result, bytes, tiny_fl, DIRECT_GRANULES,
-		         PTRFREE, GC_core_gcj_malloc(bytes),
-			 (AO_compiler_barrier(),
-			  *(void **)result = ptr_to_struct_containing_descr));
+		         GC_gcj_kind,
+			 GC_core_gcj_malloc(bytes,
+				 	    ptr_to_struct_containing_descr),
+			 {AO_compiler_barrier();
+			  *(void **)result = ptr_to_struct_containing_descr;});
     	/* This forces the initialization of the "method ptr".		*/
         /* This is necessary to ensure some very subtle properties	*/
     	/* required if a GC is run in the middle of such an allocation.	*/
@@ -213,8 +249,11 @@ void * GC_gcj_malloc(size_t bytes,
 	/* Thus it is impossible for a mark procedure to see the 	*/
 	/* allocation of the next object, but to see this object 	*/
 	/* still containing a free list pointer.  Otherwise the 	*/
-	/* marker might find a random "mark descriptor".		*/
+	/* marker, by misinterpreting the freelist link as a vtable	*/
+        /* pointer, might find a random "mark descriptor" in the next	*/
+        /* object.							*/
     return result;
+  }
 }
 
 #endif /* GC_GCJ_SUPPORT */

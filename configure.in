@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update:  2-May-2006 16:29 (eg)
+dnl Last file update: 27-Oct-2006 11:17 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -319,14 +319,9 @@ fi
 if test "$HAVE_GC" = "no"
 then
   echo "No Boehm-Demers-Weiser GC library. Using the one provided with the package"
-  case `uname -s` in
-    Darwin*) echo "Force GC compilation  without optimizations on MacOS";
-            (cd gc; CC="$CC" CFLAGS="-g" sh ./configure --prefix=$prefix \
-	    --disable-threads) || { echo "Cannot configure the GC"; exit; } ;;
-    *) (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix \
-            --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; } ;;
-  esac
-
+  (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix \
+          --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
+  
   GC=gc
   GCLIB="../gc/.libs/libgc.a"
   GCINC="-I../gc/include"

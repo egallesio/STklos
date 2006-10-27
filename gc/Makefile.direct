@@ -32,7 +32,7 @@ VPATH= $(srcdir)
 
 # Atomic_ops installation directory.  If this doesn't exist, we create
 # it from the included libatomic_ops distribution.
-AO_VERSION=1.1
+AO_VERSION=1.2
 AO_SRC_DIR=$(srcdir)/libatomic_ops-$(AO_VERSION)
 AO_INSTALL_DIR=$(srcdir)/libatomic_ops-install
 
@@ -145,9 +145,9 @@ HOSTCFLAGS=$(CFLAGS)
 # -DJAVA_FINALIZATION makes it somewhat safer to finalize objects out of
 #   order by specifying a nonstandard finalization mark procedure  (see
 #   finalize.c).  Objects reachable from finalizable objects will be marked
-#   in a sepearte postpass, and hence their memory won't be reclaimed.
+#   in a separate postpass, and hence their memory won't be reclaimed.
 #   Not recommended unless you are implementing a language that specifies
-#   these semantics.  Since 5.0, determines only only the initial value
+#   these semantics.  Since 5.0, determines only the initial value
 #   of GC_java_finalization variable.
 # -DFINALIZE_ON_DEMAND causes finalizers to be run only in response
 #   to explicit GC_invoke_finalizers() calls.
@@ -339,7 +339,7 @@ SRCS= $(CSRCS) mips_sgi_mach_dep.s rs6000_mach_dep.s alpha_mach_dep.S \
     include/gc_backptr.h \
     hpux_test_and_clear.s include/gc_gcj.h \
     include/private/dbg_mlc.h \
-    include/private/specific.h powerpc_darwin_mach_dep.s \
+    include/private/specific.h \
     include/leak_detector.h include/gc_amiga_redirects.h \
     include/gc_pthread_redirects.h ia64_save_regs_in_stack.s \
     include/gc_config_macros.h include/private/pthread_support.h \
@@ -369,7 +369,7 @@ GNU_BUILD_FILES= configure.ac Makefile.am configure acinclude.m4 \
 		 include/include.am doc/doc.am \
 		 ltmain.sh mkinstalldirs depcomp missing \
 		 cord/cord.am tests/tests.am autogen.sh \
-		 bdw-gc.pc.in
+		 bdw-gc.pc.in compile
 
 OTHER_MAKEFILES= OS2_MAKEFILE NT_MAKEFILE NT_THREADS_MAKEFILE gc.mak \
 		 BCC_MAKEFILE EMX_MAKEFILE WCC_MAKEFILE Makefile.dj \
@@ -383,7 +383,7 @@ OTHER_FILES= Makefile setjmp_t.c callprocs \
            Mac_files/datastart.c Mac_files/dataend.c \
            Mac_files/MacOS_config.h Mac_files/MacOS_Test_config.h \
            add_gc_prefix.c gc_cpp.cpp \
-	   version.h AmigaOS.c \
+	   version.h AmigaOS.c mscvc_dbg.c include/private/msvc_dbg.h \
 	   $(TESTS) $(GNU_BUILD_FILES) $(OTHER_MAKEFILES)
 
 CORD_INCLUDE_FILES= $(srcdir)/include/gc.h $(srcdir)/include/cord.h \
@@ -467,8 +467,8 @@ base_lib gc.a: $(OBJS) dyn_load.o $(UTILS)
 	echo > base_lib
 	rm -f dont_ar_1
 	cp $(AO_INSTALL_DIR)/lib/libatomic_ops.a gc.a
-	./if_mach SPARC SUNOS5 touch dont_ar_1
-	./if_mach SPARC SUNOS5 $(AR) rus gc.a $(OBJS) dyn_load.o
+	./if_mach SPARC SOLARIS touch dont_ar_1
+	./if_mach SPARC SOLARIS $(AR) rus gc.a $(OBJS) dyn_load.o
 	./if_mach M68K AMIGA touch dont_ar_1
 	./if_mach M68K AMIGA $(AR) -vrus gc.a $(OBJS) dyn_load.o
 	./if_not_there dont_ar_1 $(AR) ru gc.a $(OBJS) dyn_load.o
@@ -477,8 +477,8 @@ base_lib gc.a: $(OBJS) dyn_load.o $(UTILS)
 
 cords: $(CORD_OBJS) cord/cordtest $(UTILS)
 	rm -f dont_ar_3
-	./if_mach SPARC SUNOS5 touch dont_ar_3
-	./if_mach SPARC SUNOS5 $(AR) rus gc.a $(CORD_OBJS)
+	./if_mach SPARC SOLARIS touch dont_ar_3
+	./if_mach SPARC SOLARIS $(AR) rus gc.a $(CORD_OBJS)
 	./if_mach M68K AMIGA touch dont_ar_3
 	./if_mach M68K AMIGA $(AR) -vrus gc.a $(CORD_OBJS)
 	./if_not_there dont_ar_3 $(AR) ru gc.a $(CORD_OBJS)
@@ -501,8 +501,8 @@ c++-nt: c++
 
 c++: gc_cpp.o $(srcdir)/include/gc_cpp.h test_cpp
 	rm -f dont_ar_4
-	./if_mach SPARC SUNOS5 touch dont_ar_4
-	./if_mach SPARC SUNOS5 $(AR) rus gc.a gc_cpp.o
+	./if_mach SPARC SOLARIS touch dont_ar_4
+	./if_mach SPARC SOLARIS $(AR) rus gc.a gc_cpp.o
 	./if_mach M68K AMIGA touch dont_ar_4
 	./if_mach M68K AMIGA $(AR) -vrus gc.a gc_cpp.o
 	./if_not_there dont_ar_4 $(AR) ru gc.a gc_cpp.o
@@ -553,12 +553,12 @@ dyn_test:
 
 mach_dep.o: $(srcdir)/mach_dep.c $(srcdir)/mips_sgi_mach_dep.s \
 	    $(srcdir)/mips_ultrix_mach_dep.s \
-            $(srcdir)/rs6000_mach_dep.s $(srcdir)/powerpc_darwin_mach_dep.s \
+            $(srcdir)/rs6000_mach_dep.s \
 	    $(srcdir)/sparc_mach_dep.S $(srcdir)/sparc_sunos4_mach_dep.s \
 	    $(srcdir)/ia64_save_regs_in_stack.s \
 	    $(srcdir)/sparc_netbsd_mach_dep.s $(UTILS)
 	rm -f mach_dep.o
-	./if_mach SPARC SUNOS5 $(CC) -c -o mach_dep2.o $(srcdir)/sparc_mach_dep.S
+	./if_mach SPARC SOLARIS $(CC) -c -o mach_dep2.o $(srcdir)/sparc_mach_dep.S
 	./if_mach SPARC OPENBSD $(AS) -o mach_dep2.o $(srcdir)/sparc_sunos4_mach_dep.s
 	./if_mach SPARC NETBSD $(AS) -o mach_dep2.o $(srcdir)/sparc_netbsd_mach_dep.s
 	./if_mach SPARC "" $(CC) -c -o mach_dep1.o $(SPECIALCFLAGS) $(srcdir)/mach_dep.c

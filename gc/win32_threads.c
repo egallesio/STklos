@@ -39,6 +39,14 @@
 
 # include <pthread.h>
 
+#else
+
+# undef CreateThread
+# undef ExitThread
+# undef _beginthreadex
+# undef _endthreadex
+# include <process.h>  /* For _beginthreadex, _endthreadex */
+
 #endif
 
 #if defined(GC_DLL) && !defined(MSWINCE)
@@ -150,7 +158,7 @@ struct GC_Thread_Rep {
 };
 
 typedef struct GC_Thread_Rep * GC_thread;
-
+typedef volatile struct GC_Thread_Rep * GC_vthread;
 
 /*
  * We assumed that volatile ==> memory ordering, at least among
@@ -186,7 +194,7 @@ static GC_bool client_has_run = FALSE;
 /* This is a chained hash table, with much of the code borrowed	*/
 /* From the Posix implementation.				*/
 # define THREAD_TABLE_SZ 256	/* Must be power of 2	*/
-  volatile GC_thread GC_threads[THREAD_TABLE_SZ];
+  GC_thread GC_threads[THREAD_TABLE_SZ];
   
 
 /* Add a thread to GC_threads.  We assume it wasn't already there.	*/
@@ -208,17 +216,27 @@ GC_thread GC_new_thread(DWORD id)
         GC_ASSERT(!GC_win32_dll_threads);
         result = (struct GC_Thread_Rep *)
         	 GC_INTERNAL_MALLOC(sizeof(struct GC_Thread_Rep), NORMAL);
-	GC_ASSERT(result -> flags == 0);
+#       ifdef CYGWIN32
+	  GC_ASSERT(result -> flags == 0);
+#       endif
     }
     if (result == 0) return(0);
     /* result -> id = id; Done by caller.	*/
     result -> next = GC_threads[hv];
     GC_threads[hv] = result;
-    GC_ASSERT(result -> flags == 0 /* && result -> thread_blocked == 0 */);
+#   ifdef CYGWIN32
+      GC_ASSERT(result -> flags == 0 /* && result -> thread_blocked == 0 */);
+#   endif
     return(result);
 }
 
 extern LONG WINAPI GC_write_fault_handler(struct _EXCEPTION_POINTERS *exc_info);
+
+#if defined(GWW_VDB) && defined(MPROTECT_VDB)
+  extern GC_bool GC_gww_dirty_init(void);
+  /* Defined in os_dep.c.  Returns TRUE if GetWriteWatch is available. 	*/
+  /* may be called repeatedly.						*/
+#endif
 
 /*
  * This may be called from DllMain, and hence operates under unusual
@@ -230,13 +248,18 @@ extern LONG WINAPI GC_write_fault_handler(struct _EXCEPTION_POINTERS *exc_info);
 static GC_thread GC_register_my_thread_inner(struct GC_stack_base *sb,
 					     DWORD thread_id)
 {
-  volatile struct GC_Thread_Rep * me;
+  GC_vthread me;
 
   /* The following should be a noop according to the win32	*/
   /* documentation.  There is empirical evidence that it	*/
   /* isn't.		- HB					*/
 # if defined(MPROTECT_VDB)
-   if (GC_incremental) SetUnhandledExceptionFilter(GC_write_fault_handler);
+#   if defined(GWW_VDB)
+      if (GC_incremental && !GC_gww_dirty_init())
+	SetUnhandledExceptionFilter(GC_write_fault_handler);
+#   else
+      if (GC_incremental) SetUnhandledExceptionFilter(GC_write_fault_handler);
+#   endif
 # endif
 
   if (GC_win32_dll_threads || !client_has_run) {
@@ -392,14 +415,14 @@ static GC_thread GC_lookup_thread(DWORD thread_id)
 /* GC_win32_dll_threads is set.					*/
 /* If GC_win32_dll_threads is set it should be called from the	*/
 /* thread being deleted.					*/
-void GC_delete_gc_thread(GC_thread gc_id)
+void GC_delete_gc_thread(GC_vthread gc_id)
 {
   if (GC_win32_dll_threads) {
     /* This is intended to be lock-free.				*/
     /* It is either called synchronously from the thread being deleted,	*/
     /* or by the joining thread.					*/
+    /* In this branch asynchronosu changes to *gc_id are possible.	*/
     CloseHandle(gc_id->handle);
-      /* cast away volatile qualifier */
     gc_id -> stack_base = 0;
     gc_id -> id = 0;
 #   ifdef CYGWIN32
@@ -407,13 +430,15 @@ void GC_delete_gc_thread(GC_thread gc_id)
 #   endif /* CYGWIN32 */
     AO_store_release(&(gc_id->in_use), FALSE);
   } else {
-    DWORD id = gc_id -> id;
+    /* Cast away volatile qualifier, since we have lock. */
+    GC_thread gc_nvid = (GC_thread)gc_id;
+    DWORD id = gc_nvid -> id;
     int hv = ((word)id) % THREAD_TABLE_SZ;
     register GC_thread p = GC_threads[hv];
     register GC_thread prev = 0;
 
     GC_ASSERT(I_HOLD_LOCK());
-    while (p != gc_id) {
+    while (p != gc_nvid) {
         prev = p;
         p = p -> next;
     }
@@ -477,22 +502,24 @@ int GC_register_my_thread(struct GC_stack_base *sb) {
 
 int GC_unregister_my_thread(void)
 {
-    if (GC_win32_dll_threads) {
-      /* Should we just ignore this? */
-      GC_delete_thread(GetCurrentThreadId());
-    } else {
-      LOCK();
-      GC_delete_thread(GetCurrentThreadId());
-      UNLOCK();
-    }
+    DWORD t = GetCurrentThreadId();
+
 #   if defined(THREAD_LOCAL_ALLOC)
       LOCK();
       {
-	GC_thread me = GC_lookup_thread_inner(GetCurrentThreadId());
+	GC_thread me = GC_lookup_thread_inner(t);
         GC_destroy_thread_local(&(me->tlfs));
       }
       UNLOCK();
 #   endif
+    if (GC_win32_dll_threads) {
+      /* Should we just ignore this? */
+      GC_delete_thread(t);
+    } else {
+      LOCK();
+      GC_delete_thread(t);
+      UNLOCK();
+    }
     return GC_SUCCESS;
 }
 
@@ -585,7 +612,7 @@ void GC_push_thread_structures(void)
 }
 
 /* Suspend the given thread, if it's still active.	*/
-GC_suspend(GC_thread t)
+void GC_suspend(GC_thread t)
 {
 # ifdef MSWINCE
     /* SuspendThread will fail if thread is running kernel code */
@@ -637,7 +664,7 @@ void GC_stop_world(void)
     /* in the thread registration code until GC_please_stop becomes	*/
     /* false.  This is not ideal, but hopefully correct.		*/
     for (i = 0; i <= GC_get_max_thread_index(); i++) {
-      volatile struct GC_Thread_Rep * t = dll_thread_table + i;
+      GC_vthread t = dll_thread_table + i;
       if (t -> stack_base != 0
 	  && t -> id != thread_id) {
 	  GC_suspend((GC_thread)t);
@@ -867,6 +894,37 @@ typedef struct {
 
 static DWORD WINAPI thread_start(LPVOID arg);
 
+void * GC_win32_start_inner(struct GC_stack_base *sb, LPVOID arg)
+{
+    void * ret;
+    thread_args *args = (thread_args *)arg;
+
+    GC_register_my_thread(sb); /* This waits for an in-progress GC. */
+
+    /* Clear the thread entry even if we exit with an exception.	*/
+    /* This is probably pointless, since an uncaught exception is	*/
+    /* supposed to result in the process being killed.			*/
+#ifndef __GNUC__
+    __try {
+#endif /* __GNUC__ */
+	ret = (void *)args->start (args->param);
+#ifndef __GNUC__
+    } __finally {
+#endif /* __GNUC__ */
+	GC_unregister_my_thread();
+	GC_free(args);
+#ifndef __GNUC__
+    }
+#endif /* __GNUC__ */
+
+    return ret;
+}
+
+DWORD WINAPI GC_win32_start(LPVOID arg)
+{
+    return (DWORD)GC_call_with_stack_base(GC_win32_start_inner, arg);
+}
+
 GC_API HANDLE WINAPI GC_CreateThread(
     LPSECURITY_ATTRIBUTES lpThreadAttributes, 
     DWORD dwStackSize, LPTHREAD_START_ROUTINE lpStartAddress, 
@@ -906,41 +964,55 @@ GC_API HANDLE WINAPI GC_CreateThread(
     }
 }
 
-void * GC_win32_start_inner(struct GC_stack_base *sb, LPVOID arg)
+void WINAPI GC_ExitThread(DWORD dwExitCode)
 {
-    void * ret;
-    thread_args *args = (thread_args *)arg;
+  GC_unregister_my_thread();
+  ExitThread(dwExitCode);
+}
 
-    GC_register_my_thread(sb); /* This waits for an in-progress GC. */
+uintptr_t GC_beginthreadex(
+    void *security, unsigned stack_size,
+    unsigned ( __stdcall *start_address )( void * ),
+    void *arglist, unsigned initflag, unsigned *thrdaddr)
+{
+    uintptr_t thread_h = -1L;
 
-    /* Clear the thread entry even if we exit with an exception.	*/
-    /* This is probably pointless, since an uncaught exception is	*/
-    /* supposed to result in the process being killed.			*/
-#ifndef __GNUC__
-    __try {
-#endif /* __GNUC__ */
-	ret = (void *)args->start (args->param);
-#ifndef __GNUC__
-    } __finally {
-#endif /* __GNUC__ */
-#       if defined(THREAD_LOCAL_ALLOC)
-          LOCK();
-          GC_destroy_thread_local(&(me->tlfs));
-          UNLOCK();
-#       endif
-	GC_free(args);
-	GC_delete_thread(GetCurrentThreadId());
-#ifndef __GNUC__
+    thread_args *args;
+
+    if (!parallel_initialized) GC_init_parallel();
+    		/* make sure GC is initialized (i.e. main thread is attached,
+		   tls initialized) */
+
+    client_has_run = TRUE;
+    if (GC_win32_dll_threads) {
+      return _beginthreadex(security, stack_size, start_address,
+                            arglist, initflag, thrdaddr);
+    } else {
+      args = GC_malloc_uncollectable(sizeof(thread_args)); 
+	/* Handed off to and deallocated by child thread.	*/
+      if (0 == args) {
+	SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        return -1L;
+      }
+
+      /* set up thread arguments */
+    	args -> start = start_address;
+    	args -> param = arglist;
+
+      GC_need_to_lock = TRUE;
+      thread_h = _beginthreadex(security, stack_size, GC_win32_start,
+                                args, initflag, thrdaddr);
+
+      return thread_h;
     }
-#endif /* __GNUC__ */
-
-    return ret;
 }
 
-DWORD WINAPI GC_win32_start(struct GC_stack_base *sb, LPVOID arg)
+void GC_endthreadex(unsigned retval)
 {
-    return (DWORD)GC_call_with_stack_base(GC_win32_start_inner, arg);
+  GC_unregister_my_thread();
+  _endthreadex(retval);
 }
+
 #endif /* !CYGWIN32 */
 
 #ifdef MSWINCE

@@ -1,4 +1,4 @@
-a/*
+/*
 Copyright (c) 2002 Jorge Acereda  <jacereda@users.sourceforge.net> &
                    Peter O'Gorman <ogorman@users.sourceforge.net>
                    

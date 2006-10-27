@@ -17,12 +17,12 @@ dnl Process this file with autoconf to produce configure.
 # Initialization
 # ==============
 
-AC_INIT(gc,7.0alpha5,Hans.Boehm@hp.com) 
+AC_INIT(gc,7.0alpha7,Hans.Boehm@hp.com) 
     ## version must conform to [0-9]+[.][0-9]+(alpha[0-9]+)?
 AC_CONFIG_SRCDIR(gcj_mlc.c)
 AC_CANONICAL_TARGET 
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.2 $)
+AC_REVISION($Revision: 1.14 $)
 GC_SET_VERSION
 AM_INIT_AUTOMAKE([foreign dist-bzip2 subdir-objects nostdinc])
 AM_MAINTAINER_MODE
@@ -44,23 +44,6 @@ AC_PROG_INSTALL
 
 GC_CFLAGS=${gc_cflags}
 AC_SUBST(GC_CFLAGS)
-
-AC_LANG(C)
-AC_DEFUN(GC_CHECK_DEFINE, [
- dnl $1: header file
- dnl $2: CPP variable
- dnl $3: then
- dnl $4: else
- AC_PREPROC_IFELSE([
- #include <$1>
- #ifndef $2
- # error "$2 undefined"
- #else
-  ok
- #endif
- ],
-                   [$3], [$4])
-])
 
 AC_ARG_ENABLE(threads,
   [AC_HELP_STRING([--enable-threads=TYPE], [choose threading package])],
@@ -85,22 +68,9 @@ AC_ARG_ENABLE(parallel-mark,
 AC_ARG_ENABLE(cplusplus,
     [AC_HELP_STRING([--enable-cplusplus], [install C++ support])])
 
-if test "$THREADS" = lurc
-then
-  AC_CHECK_HEADER([lurc.h], [], [AC_MSG_ERROR([Missing lurc.h])])
-  AC_MSG_CHECKING([for LURC GC support])
-  GC_CHECK_DEFINE([lurc.h], [LURC_ENABLE_GC],
-                  [AC_MSG_RESULT(ok)],
-                  [AC_MSG_ERROR([LURC not compiled with GC support])])
-  AC_MSG_CHECKING([for LURC PThread support])
-  GC_CHECK_DEFINE([lurc.h], [LURC_ENABLE_PTHREAD],
-                  [AC_MSG_RESULT(yes); THREADS=pthreads; LURC=yes],
-                  [AC_MSG_RESULT(no)])
-fi
-
-
 INCLUDES=-I${srcdir}/include
 THREADDLLIBS=
+need_atomic_ops_asm=false
 ## Libraries needed to support dynamic loading and/or threads.
 case "$THREADS" in
  no | none | single)
@@ -109,12 +79,6 @@ case "$THREADS" in
  posix | pthreads)
     THREADS=posix
     THREADDLLIBS=-lpthread
-    # check wether we want LURC support
-    if test $LURC = yes
-    then
-        THREADDLLIBS="$THREADLIBS -llurc"
-        AC_DEFINE(GC_LURC_THREADS)
-    fi
     case "$host" in
      x86-*-linux* | ia64-*-linux* | i586-*-linux* | i686-*-linux* | x86_64-*-linux* | alpha-*-linux*)
 	AC_DEFINE(GC_LINUX_THREADS)
@@ -133,8 +97,8 @@ case "$THREADS" in
 	AC_DEFINE(GC_AIX_THREADS)
 	AC_DEFINE(_REENTRANT)
 	;;
-     *-*-hpux*)
-	AC_MSG_WARN("Only HP/UX 11 threads are supported.")
+     *-*-hpux11*)
+	AC_MSG_WARN("Only HP/UX 11 POSIX threads are supported.")
 	AC_DEFINE(GC_HPUX_THREADS)
 	AC_DEFINE(_POSIX_C_SOURCE,199506L)
 	if test "${enable_parallel_mark}" = yes; then
@@ -143,17 +107,43 @@ case "$THREADS" in
 	AC_DEFINE(THREAD_LOCAL_ALLOC)
 	AC_MSG_WARN("Explict GC_INIT() calls may be required.");
 	THREADDLLIBS="-lpthread -lrt"
+	# HPUX needs REENTRANT for the _r calls.
+	AC_DEFINE(_REENTRANT, 1, [Required define if using POSIX threads])
+	;;
+     *-*-hpux10*)
+	AC_MSG_WARN("Only HP-UX 11 POSIX threads are supported.")
 	;;
      *-*-freebsd*)
 	AC_MSG_WARN("FreeBSD does not yet fully support threads with Boehm GC.")
 	AC_DEFINE(GC_FREEBSD_THREADS)
 	INCLUDES="$INCLUDES -pthread"
-	THREADDLLIBS=-pthread
       	;;
+     *-*-kfreebsd*-gnu)
+	AC_DEFINE(GC_FREEBSD_THREADS)
+	INCLUDES="$INCLUDES -pthread"
+	THREADDLLIBS=-pthread
+	AC_DEFINE(_REENTRANT)
+        if test "${enable_parallel_mark}" = yes; then
+	  AC_DEFINE(PARALLEL_MARK)
+	fi
+	AC_DEFINE(THREAD_LOCAL_ALLOC)
+	AC_DEFINE(USE_COMPILER_TLS)
+      	;;
+     *-*-netbsd*)
+	AC_MSG_WARN("Only on NetBSD 2.0 or later.")
+	AC_DEFINE(GC_NETBSD_THREADS)
+	AC_DEFINE(_REENTRANT)
+	AC_DEFINE(_PTHREADS)
+	THREADDLLIBS="-lpthread -lrt"
+	;;
      *-*-solaris*)
 	AC_DEFINE(GC_SOLARIS_THREADS)
-	AC_DEFINE(GC_SOLARIS_PTHREADS)
-	solaris_threads=true
+	AC_DEFINE(THREAD_LOCAL_ALLOC)
+	THREADDLLIBS="-lpthread -lrt"
+	if test "$GCC" != yes; then
+          CFLAGS="$CFLAGS -O"
+          need_atomic_ops_asm=true
+        fi
 	;;
      *-*-irix*)
 	AC_DEFINE(GC_IRIX_THREADS)
@@ -187,10 +177,6 @@ case "$THREADS" in
 	AC_MSG_ERROR("Pthreads not supported by the GC on this platform.")
 	;;
     esac
-    ;;
- lurc)
-    THREADDLLIBS=-llurc
-    AC_DEFINE(GC_LURC_THREADS)
     ;;
  win32)
     AC_DEFINE(GC_WIN32_THREADS)
@@ -228,9 +214,7 @@ esac
 AC_SUBST(THREADDLLIBS)
 AM_CONDITIONAL(THREADS, test x$THREADS != xnone)
 AM_CONDITIONAL(PTHREADS, test x$THREADS = xposix)
-AM_CONDITIONAL(LURC_THREADS, test x$THREADS = xlurc)
 AM_CONDITIONAL(DARWIN_THREADS, test x$darwin_threads = xtrue)
-AM_CONDITIONAL(ARCH_SOLARIS, test x$solaris_threads = xtrue)
 AM_CONDITIONAL(WIN32_THREADS, test x$win32_threads = xtrue)
 
 case "$host" in 
@@ -238,7 +222,6 @@ case "$host" in
       powerpc_darwin=true
       ;;
 esac
-AM_CONDITIONAL(POWERPC_DARWIN,test x$powerpc_darwin = xtrue)
 
 AC_MSG_CHECKING(for xlc)
 AC_TRY_COMPILE([],[
@@ -256,9 +239,7 @@ fi
 # We never want libdl on darwin. It is a fake libdl that just ends up making
 # dyld calls anyway
 case "$host" in
-  *-*-darwin*) 
-    CFLAGS="$CFLAGS -no-cpp-precomp"
-    ;;
+  *-*-darwin*) ;;
   *) 
     AC_CHECK_LIB(dl, dlopen, THREADDLLIBS="$THREADDLLIBS -ldl")
     ;;
@@ -435,10 +416,6 @@ case "$host" in
  *) AC_MSG_RESULT(no) ;;
 esac
 
-dnl We need to override the top-level CFLAGS.  This is how we do it.
-MY_CFLAGS="$CFLAGS"
-AC_SUBST(MY_CFLAGS)
-
 dnl Include defines that have become de facto standard.
 dnl ALL_INTERIOR_POINTERS can be overridden in startup code.
 AC_DEFINE(NO_EXECUTE_PERMISSION)
@@ -449,12 +426,10 @@ dnl Interface Selection
 dnl -------------------
 dnl
 dnl By default, make the library as general as possible.
-
-dnl :FIXME: gcj does not work as of gc-7.0_alpha2, so default set to no.
-enable_gcj_support=no
+dnl enable_gcj_support=no
 AC_ARG_ENABLE(gcj-support,
-    [AC_HELP_STRING([--enable-gcj-support],
-	[Enable support for gcj.])])
+    [AC_HELP_STRING([--disable-gcj-support],
+	[Disable support for gcj.])])
 AM_CONDITIONAL(ENABLE_GCJ_SUPPORT,
     [test x"$enable_gcj_support" != xno])
 if test x"$enable_gcj_support" != xno; then
@@ -490,12 +465,18 @@ if test "${enable_redirect_malloc}" = yes; then
     fi
 fi
 
+AC_ARG_ENABLE(large-config,
+    [AC_HELP_STRING([--enable-large-config],
+	[Optimize for large (> 100 MB) heap or root set])])
+
+if test "${enable_large_config}" = yes; then
+    AC_DEFINE(LARGE_CONFIG, 1, [Define to optimize for large heaps or root sets])
+fi
 
 dnl This is something of a hack.  When cross-compiling we turn off
 dnl some functionality.  We also enable the "small" configuration.
 dnl These is only correct when targetting an embedded system.  FIXME.
 if test -n "${with_cross_host}"; then
-   AC_DEFINE(NO_SIGSET)
    AC_DEFINE(NO_CLOCK)
    AC_DEFINE(SMALL_CONFIG)
    AC_DEFINE(NO_DEBUGGING)
@@ -549,12 +530,16 @@ AM_CONDITIONAL(USE_LIBDIR, test -z "$with_cross_host")
 dnl Atomic Ops
 dnl ----------
 
+atomic_ops_libs=-latomic_ops
 AC_CHECK_HEADER(atomic_ops.h,
   [ AC_MSG_NOTICE([Using pre-installed libatomic_ops]) ],
   [ ao_dir=
     for candidate in ${srcdir}/libatomic_ops*; do
 	case $candidate in
 	    *.tar.gz)
+		;;
+	    *install)
+	    	dnl generated by alternate Makefile.
 		;;
 	    *)
 		if test -e "$candidate"; then
@@ -567,21 +552,32 @@ AC_CHECK_HEADER(atomic_ops.h,
 	AC_MSG_ERROR([Missig libatomic_ops.])
     fi
     ao_version="${ao_dir#*libatomic_ops-}"
-    ao_dir=libatomic_ops-${ao_version}
     AC_MSG_NOTICE([Using internal version of libatomic_ops])
 
     dnl Automake does not accept shell variables in AC_CONFIG_SUBDIRS
     test -e ${srcdir}/libatomic_ops \
-	|| ln -sf ${ao_dir} ${srcdir}/libatomic_ops
+	|| ln -s ${ao_dir} ${srcdir}/libatomic_ops
     AC_CONFIG_SUBDIRS(libatomic_ops)
 
-    GC_CFLAGS="${MY_CFLAGS} -I \$(top_srcdir)/libatomic_ops/src"
-    ATOMIC_OPS_LIBS="-L \$(top_builddir)/libatomic_ops/src -latomic_ops"
-    maybe_libatomic_ops=libatomic_ops
+    dnl Also copy the source files to be linked in.
+    test -e ${srcdir}/atomic_ops.c \
+    	|| ln -s ${srcdir}/libatomic_ops/src/atomic_ops.c \
+		 ${srcdir}/atomic_ops.c
+
+    test -e ${srcdir}/atomic_ops_sysdeps.S \
+    	|| ln -s ${srcdir}/libatomic_ops/src/atomic_ops_sysdeps.S \
+		 ${srcdir}/atomic_ops_sysdeps.S
+
+    dnl This gets the source include files, which is often close enough.
+    dnl It also makes atomic_ops_sysdeps.S assemble.
+    GC_CFLAGS="${GC_CFLAGS} -I \$(top_srcdir)/libatomic_ops/src"
+    maybe_libatomic_ops="libatomic_ops"
   ])
 
-AM_CONDITIONAL(USE_INTERNAL_LIBATOMICS_OPS, test -z "$maybe_libatomic_ops")
-AC_SUBST(maybe_libatomic_ops)
+AM_CONDITIONAL(USE_INTERNAL_LIBATOMIC_OPS,
+		test -n "$maybe_libatomic_ops" -a "$THREADS" != "none")
+AM_CONDITIONAL(NEED_ATOMIC_OPS_ASM, test -n "$maybe_libatomic_ops" -a x$need_atomic_ops_asm = xtrue)
+AC_SUBST(atomic_ops_libs)
 
 dnl Produce the Files
 dnl -----------------
