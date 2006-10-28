@@ -5,6 +5,8 @@
 	* src/stklos.c:
 	* src/stklos.h: Fixes for MacOS X
 
+	* src/*-lurc.*: Aplied the pathches from Stephane for Lurc.
+
 2006-10-27  Erick Gallesio  <eg@essi.fr>
 
 	* Changed the GC to version 7.0alpha7

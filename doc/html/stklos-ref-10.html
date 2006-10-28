@@ -11,11 +11,11 @@
 <link href="doc-style.css" rel="stylesheet" type="text/css">
 </head>
 <body >
-<table width='100%' cellpadding='0' cellspacing='0'><tr><td bgcolor="#E6F2E6"><center><h1>STklos Reference Manual<hr align="center" width="10%">10. Using the SLIB package</h1></center></table><table cellpadding="3" cellspacing="0" width="100%"><tr>
+<table width='100%' cellpadding='0' cellspacing='0'><tr><td bgcolor="#E6F2E6"><center><h1>STklos Reference Manual<hr align="center" width="10%">10. Customizations</h1></center></table><table cellpadding="3" cellspacing="0" width="100%"><tr>
 <td align="left" valign="top" width="20%" bgcolor="#E6F2E6">
 <br /><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="darkolivegreen"><font color="white">Contents</font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-19777">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-29879">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -24,31 +24,92 @@
 <tr class="navnorm"><td width="8%" align="left" valign="top">6&nbsp;</td><td align="left"><a href="stklos-ref-6.html#Pattern-Matching">Pattern Matching</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">7&nbsp;</td><td align="left"><a href="stklos-ref-7.html#Exceptions-and-Conditions">Exceptions and Conditions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">8&nbsp;</td><td align="left"><a href="stklos-ref-8.html#STklos-Object-System">STklos Object System</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">9&nbsp;</td><td align="left"><a href="stklos-ref-9.html#Customizations">Customizations</a></td></tr>
-<tr class="navsel"><td width="8%" align="left" valign="top">10&nbsp;</td><td align="left"><a href="stklos-ref-10.html#Using-the-SLIB-package">Using the SLIB package</a><br /></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">11&nbsp;</td><td align="left"><a href="stklos-ref-11.html#SRFIs">SRFIs</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">12&nbsp;</td><td align="left"><a href="stklos-ref-12.html#Index">Index</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">&nbsp;</td><td align="left"><a href="stklos-ref-13.html#Bibliography">Bibliography</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">9&nbsp;</td><td align="left"><a href="stklos-ref-9.html#Threads--Mutexes-and-Condition-Variables">Threads, Mutexes and Condition Variables</a></td></tr>
+<tr class="navsel"><td width="8%" align="left" valign="top">10&nbsp;</td><td align="left"><a href="stklos-ref-10.html#Customizations">Customizations</a><br /></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">11&nbsp;</td><td align="left"><a href="stklos-ref-11.html#Using-the-SLIB-package">Using the SLIB package</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">12&nbsp;</td><td align="left"><a href="stklos-ref-12.html#SRFIs">SRFIs</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">13&nbsp;</td><td align="left"><a href="stklos-ref-13.html#Index">Index</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">&nbsp;</td><td align="left"><a href="stklos-ref-14.html#Bibliography">Bibliography</a></td></tr>
 </tbody></table>
 </td>
 <td align="left" valign="top">
-<a name="--index-entry-19046"></a><a name="--index-entry-19050"></a><p>Aubrey Jaffer maintains a package called
-<em><a href="http://swiss.csail.mit.edu/~jaffer/SLIB">SLIB</a></em>
-which is a portable Scheme library which provides compatibility
-and utility functions for all standard Scheme implementations. To
-use this package, you have just to type</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
-<tr><td bgcolor="#eee8bf"><pre>(require <font color="red">&quot;slib&quot;</font>)
+<p><span style="font-variant: small-caps">STklos</span> environement can be customized using
+<a href="stklos-ref-4.html#Parameter-Objects">parameters objects</a>. These
+parmaters are listed below.</p><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="real-precision"></a><a name="--index-entry-28604"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(real-precision)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<code><strong><font color="IndianRed">(real-precision value)</font></strong></code><br /><br />This parameter object permits to change the default precision used 
+to print real numbers. 
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(real-precision)        &#8658; 15
+(<font color="#6959cf"><strong>define</strong></font> f 0.123456789)
+(display f)             -| 0.123456789
+(real-precision 3)
+(display f)             -| 0.123
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>and follow the instructions given in the <em>SLIB</em> library
-to use a particular package.</p><p><strong>Note:</strong> <em>SLIB</em> uses also the
-<em>require and provide</em> mechanism to load components of the
-library. Once <em>SLIB</em> has been loaded, the standard
-<span style="font-variant: small-caps">STklos</span> <code>require</code> and <code>provide</code> are overloaded
-such as if their parameter is a string this is the old <span style="font-variant: small-caps">STklos</span>
-procedure which is called, and if their parameter is a symbol,
-this is the <em>SLIB</em> one which is called.</p></td>
+</td></tr>
+</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="read-case-sensitive"></a><a name="--index-entry-28646"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(read-case-sensitive)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<code><strong><font color="IndianRed">(read-case-sensitive value)</font></strong></code><br /><br />This parameter object permits to change the default behaviour of 
+the <code>read</code> primitive when reading a symbol. If this parameter has a 
+a true value a symbol is not converted to a default case when interned. 
+Since <span style="font-variant: small-caps">R<sup>5</sup>RS</span> requires that symbol are case insignificant, the default 
+value  of this parameter is ¤f.
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(read-case-sensitive)        &#8658; ¤f
+(<font color="#6959cf"><strong>define</strong></font> x 'Symbol)
+(display x)             -| symbol
+(read-case-sensitive ¤t)
+(<font color="#6959cf"><strong>define</strong></font> y 'Symbol)
+(display y)             -| Symbol
+</pre></td></tr>
+</tbody></table></blockquote>
+
+<strong>Note:</strong>  Default behaviour can be changed for a whole execution 
+with the <code>--case-sensitive</code> option.
+<br /><br />
+<strong>Note:</strong> See also syntax for <a href="stklos-ref-4.html#bar-in-symbol">special characters</a> in symbols.
+</td></tr>
+</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="load-path"></a><a name="--index-entry-28705"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(load-path)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<code><strong><font color="IndianRed">(load-path value)</font></strong></code><br /><br /><code>load-path</code> is a parameter object. It 
+returns the current load path. The load path is a list of strings 
+which correspond to the directories in which a file must be searched for 
+loading. Directories of the load path are <em>prepended</em> (in
+their apparition 
+order) to the file name given to <code>load</code> or <code>try-load</code> until the file 
+can be loaded.
+<br /><br />
+The initial value of the current load path can be set from the shell, by 
+setting the <code>STKLOS_LOAD_PATH</code> shell variable.
+<br /><br />
+Giving a <code>value</code> to the parameter <code>load-path</code> permits to change the
+current list of paths.</td></tr>
+</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="load-suffixes"></a><a name="--index-entry-28745"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(load-suffixes)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<code><strong><font color="IndianRed">(load-suffixes value)</font></strong></code><br /><br /><code>load-suffixes</code> is a parameter object. It
+returns the list of possible suffixes for a Scheme file. Each suffix,
+must be a string. Suffixes are appended (in their apparition order) 
+to a file name  is appended to a file name given to <code>load</code> or <code>try-load</code> 
+until the file can be loaded. </td></tr>
+</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="load-verbose"></a><a name="--index-entry-28773"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(load-verbose)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<code><strong><font color="IndianRed">(load-verbose value)</font></strong></code><br /><br /><code>load-verbose</code> is a parameter object. It permits to display the
+path name of the files whch are loaded by <code>load</code> or <code>try-load</code> on
+the current error port, when set to a true value. If <code>load-verbose</code>
+is set to <code>#f</code>, no message is printed.</td></tr>
+</tbody></table></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-				     <a href="http://www.inria.fr/mimosa/fp/Skribe">Skribe</a>.<br />Last update <em>Wed Jan  4 14:05:39 2006</em></small>
+				     <a href="http://www.inria.fr/mimosa/fp/Skribe">Skribe</a>.<br />Last update <em>Sat Oct 28 21:51:51 2006</em></small>
 </body>
 </html>

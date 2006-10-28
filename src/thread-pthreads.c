@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 28-Oct-2006 19:27 (eg)
+ * Last file update: 28-Oct-2006 21:42 (eg)
  */
 
 
@@ -139,11 +139,7 @@ doc>
 */
 DEFINE_PRIMITIVE("thread-yield!", thread_yield, subr0, (void))
 {
-#ifdef _POSIX_PRIORITY_SCHEDULING
-  sched_yield();
-#else
-  /* Do nothing. Is it correct? */
-#endif
+  pthread_yield();
   return STk_void;
 }
 

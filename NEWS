@@ -6,7 +6,16 @@
 
 * version 0.80 (2006 10 27)
 
-    This is a version with important changes for supporting multi-threading.
+    This is a version with important changes to support
+    multi-threading. This version provides two kinds of threads: LURC
+    threads and Posix threads (aka pthreads). LURC threads are
+    implemented using the LURC library, the Light ULM/Reactive library
+    for C developed at INRIA. LURC supports the creation of
+    synchronous cooperative threads, synchronizing and communicating
+    with each other using signals in a deterministic scheduler (see
+    http://www-sop.inria.fr/mimosa/Stephane.Epardaud/lurc for
+    details).
+
 
     * Thread support
     * Better error messages
