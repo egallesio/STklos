@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  4-Jan-2006 14:49 (eg)
+# Last file update: 28-Oct-2006 18:01 (eg)
 
 EXTRA_DIST   = 
 SUBDIRS      =  @PCRE@ @GC@ @GMP@ src utils lib @GTKLOS@ @EXAMPLES@ \
@@ -33,19 +33,27 @@ test:
 ##	( cd /usr/tmp; tar cvfz $(VERSION_TAG).tar.gz $(VERSION_TAG) )
 ##	ls -ls /usr/tmp/$(VERSION_TAG).tar.gz
 ##
+
+commit-beta:
+	eval "expr `cat .beta-number` + 1" > .beta-number
+	hg commit -m "Preparing version $(VERSION_BETA)`cat .beta-number`"
+
+commit-version:
+	echo 0 > .beta-number	
+	hg commit -m "Commit version $(VERSION_TAG)"
+
 prep-version:
-	hg commit -m "preparing version $(VERSION_TAG)"
-	rm -rf /usr/tmp/$(VERSION_TAG) /usr/tmp/$(VERSION_BETA)
+	rm -rf /usr/tmp/$(VERSION_TAG) /usr/tmp/$(VERSION_BETA)*
 	hg clone . /usr/tmp/$(VERSION_TAG)
 	rm -rf /usr/tmp/$(VERSION_TAG)/.hg
 	hgclonedates `pwd` /usr/tmp/$(VERSION_TAG)
 
-beta: prep-version
-	( cd /usr/tmp; mv $(VERSION_TAG) $(VERSION_BETA);  \
-	  tar cvfz $(VERSION_BETA).tar.gz $(VERSION_BETA) )
-	ls -ls /usr/tmp/$(VERSION_BETA).tar.gz
+beta: commit-beta prep-version
+	( cd /usr/tmp; mv $(VERSION_TAG) $(VERSION_BETA)`cat .beta-number`;  \
+	  tar cvfz $(VERSION_BETA).tar.gz $(VERSION_BETA)`cat .beta-number` )
+	ls -ls /usr/tmp/$(VERSION_BETA)*.tar.gz
 
-version: prep-version
+version: commit-version prep-version
 	hg tag $(VERSION_TAG)
 	( cd /usr/tmp; tar cvfz $(VERSION_TAG).tar.gz $(VERSION_TAG) )
 	ls -ls /usr/tmp/$(VERSION_TAG).tar.gz
