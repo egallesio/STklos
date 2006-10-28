@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 28-Oct-2006 18:09 (eg)
+# Last file update: 28-Oct-2006 18:12 (eg)
 
 EXTRA_DIST   = 
 SUBDIRS      =  @PCRE@ @GC@ @GMP@ src utils lib @GTKLOS@ @EXAMPLES@ \
@@ -50,7 +50,7 @@ prep-version:
 
 beta: commit-beta prep-version
 	(mv /usr/tmp/$(VERSION_TAG) /usr/tmp/$(VERSION_BETA)`cat .beta-number`;  \
-	 echo "$VERSION_BETA)`cat .beta-number`" > /usr/tmp/beta ; \
+	 echo "$(VERSION_BETA)`cat .beta-number`" > /usr/tmp/beta ; \
 	 cd /usr/tmp; tar cvfz `cat beta`.tar.gz `cat beta` )
 	ls -ls /usr/tmp/$(VERSION_BETA)*.tar.gz
 
