@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  4-Apr-2006 19:00 (eg)
+ * Last file update: 28-Oct-2006 20:03 (eg)
  */
 
 #include "stklos.h"
@@ -118,6 +118,25 @@ DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
 
   sprintf(buffer, "%lx", (unsigned long) object); /* not very efficient ... */
   return STk_Cstr2number(buffer, 16L);
+}
+
+
+/*===========================================================================*\
+ * 
+ * GC stuff
+ * 
+\*===========================================================================*/
+#ifdef STK_DEBUG
+static void ignore_GC_warning(char *msg, GC_word arg) { return; }
+#endif
+
+void STk_gc_init(void)
+{
+  GC_init();
+#ifdef STK_DEBUG  
+  /* No warning when on production. Is this reasonable? */
+  GC_set_warn_proc(ignore_GC_warning);
+#endif
 }
 
 

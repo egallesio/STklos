@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 28-Oct-2006 17:37 (eg)
+ * Last file update: 28-Oct-2006 20:09 (eg)
  */
 
 #ifndef STKLOS_H
@@ -147,7 +147,10 @@ extern "C"
 #define STk_register_finalizer(ptr, f)  GC_register_finalizer((void *) (ptr), \
 					    (GC_finalization_proc)(f), 0, 0, 0)
 #define STk_gc()			GC_gcollect()
-#define STk_gc_init()			GC_init()
+
+void STk_gc_init(void);
+
+
 
 /*===========================================================================*\
  * 
@@ -272,6 +275,15 @@ struct primitive_obj {
 #define ADD_PRIMITIVE(_name)   STk_add_primitive(CPP_CONCAT(&STk_o_, _name))
 #define THE_PRIMITIVE(_name)   ((SCM) CPP_CONCAT(&STk_o_, _name))
 
+
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ---- 				 B A S E 6 4 . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+int STk_init_base64(void);
 
 
 /*
@@ -1099,7 +1111,6 @@ int STk_init_symbol(void);
 
 int STk_dirp(const char *path);
 int STk_init_system();
-int STk_do_exit_tasks(SCM retcode);
 
 EXTERN_PRIMITIVE("%pre-exit", pre_exit, subr1, (SCM retcode));
 EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
@@ -1113,6 +1124,8 @@ EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
   ------------------------------------------------------------------------------
 */
 EXTERN_PRIMITIVE("current-thread", current_thread, subr0, (void));
+int STk_init_threads(int stack_size, void *start_stack);
+int STk_init_mutexes(void);
 
 /*
   ------------------------------------------------------------------------------

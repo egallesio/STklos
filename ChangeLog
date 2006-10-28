@@ -1,3 +1,10 @@
+2006-10-28  Erick Gallesio  <eg@essi.fr>
+
+	* src/mutex-pthreads.c: 
+	* src/misc.c:
+	* src/stklos.c:
+	* src/stklos.h: Fixes for MacOS X
+
 2006-10-27  Erick Gallesio  <eg@essi.fr>
 
 	* Changed the GC to version 7.0alpha7

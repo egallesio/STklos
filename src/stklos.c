@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 28-Oct-2006 17:45 (eg)
+ * Last file update: 28-Oct-2006 19:59 (eg)
  */
 
 #include <stklos.h>
@@ -142,6 +142,12 @@ int mymain(int argc, char *argv[])
   int ret;
   char *argv0 = *argv;
 
+  /* Initialize the Garbage Collector */
+#if (defined(__CYGWIN32__) &&  defined(GC_DLL)) || defined(_AIX)
+# error GC problem
+#endif
+  STk_gc_init();
+
   /* Process command arguments */
   ret = process_program_arguments(argc, argv);
   argc -= ret;
@@ -178,12 +184,6 @@ int mymain(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-  /* Initialize the Garbage Collector */
-#if (defined(__CYGWIN32__) &&  defined(GC_DLL)) || defined(_AIX)
-# error GC problem
-#endif
-  STk_gc_init();
-
 #ifdef THREADS_LURC
   return STk_thread_main(&mymain, argc, argv);
 #else

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 25-Oct-2006 16:20 (eg)
+ * Last file update: 28-Oct-2006 19:27 (eg)
  */
 
 
@@ -120,8 +120,9 @@ void STk_sys_thread_start(SCM thr)
   pthread_attr_setdetachstate(&attr, TRUE);
 
   // pthread_mutex_lock(&THREAD_MYMUTEX(thr));
-
-  if (pthread_create(&THREAD_PTHREAD(thr), NULL, start_scheme_thread, thr))
+  
+  /* !!!!! Use the GC_pthread_create instaed of pthread_create !!!!! */
+  if (GC_pthread_create(&THREAD_PTHREAD(thr), NULL, start_scheme_thread, thr))
     STk_error("cannot start thread ~S", thr);
 
   pthread_attr_destroy(&attr);
