@@ -75,6 +75,10 @@ if DARWIN_THREADS
 libgc_la_SOURCES += darwin_stop_world.c
 endif
 
+if LURC_THREADS
+libgc_la_SOURCES += lurc_support.c
+endif
+
 if WIN32_THREADS
 libgc_la_SOURCES += win32_threads.c
 endif

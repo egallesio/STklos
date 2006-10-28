@@ -45,6 +45,23 @@ AC_PROG_INSTALL
 GC_CFLAGS=${gc_cflags}
 AC_SUBST(GC_CFLAGS)
 
+AC_LANG(C)
+AC_DEFUN(GC_CHECK_DEFINE, [
+ dnl $1: header file
+ dnl $2: CPP variable
+ dnl $3: then
+ dnl $4: else
+ AC_PREPROC_IFELSE([
+ #include <$1>
+ #ifndef $2
+ # error "$2 undefined"
+ #else
+  ok
+ #endif
+ ],
+                   [$3], [$4])
+])
+
 AC_ARG_ENABLE(threads,
   [AC_HELP_STRING([--enable-threads=TYPE], [choose threading package])],
   THREADS=$enableval,
@@ -68,6 +85,20 @@ AC_ARG_ENABLE(parallel-mark,
 AC_ARG_ENABLE(cplusplus,
     [AC_HELP_STRING([--enable-cplusplus], [install C++ support])])
 
+if test "$THREADS" = lurc
+then
+  AC_CHECK_HEADER([lurc.h], [have_lurc_h=1], [AC_MSG_ERROR([Missing lurc.h])])
+  AC_MSG_CHECKING([for LURC GC support])
+  GC_CHECK_DEFINE([lurc.h], [LURC_ENABLE_GC],
+                  [have_lurc_gc=1; AC_MSG_RESULT(ok)],
+                  [AC_MSG_ERROR([LURC not compiled with GC support])])
+  AC_MSG_CHECKING([for LURC PThread support])
+  GC_CHECK_DEFINE([lurc.h], [LURC_ENABLE_PTHREAD],
+                  [AC_MSG_RESULT(yes); THREADS=pthreads; LURC=yes],
+                  [AC_MSG_RESULT(no)])
+fi
+
+
 INCLUDES=-I${srcdir}/include
 THREADDLLIBS=
 need_atomic_ops_asm=false
@@ -79,6 +110,12 @@ case "$THREADS" in
  posix | pthreads)
     THREADS=posix
     THREADDLLIBS=-lpthread
+    # check wether we want LURC support
+    if test "$LURC" = yes
+    then
+        THREADDLLIBS="$THREADLIBS -llurc"
+        AC_DEFINE(GC_LURC_THREADS)
+    fi
     case "$host" in
      x86-*-linux* | ia64-*-linux* | i586-*-linux* | i686-*-linux* | x86_64-*-linux* | alpha-*-linux*)
 	AC_DEFINE(GC_LINUX_THREADS)
@@ -178,6 +215,16 @@ case "$THREADS" in
 	;;
     esac
     ;;
+ lurc)
+    if test "x$have_lurc_h" = x 
+    then AC_MSG_ERROR(Missing lurc.h)
+    fi
+    if test "x$have_lurc_gc" = x
+    then AC_MSG_ERROR(LURC not compiled with GC support)
+    fi
+    THREADDLLIBS=-llurc
+    AC_DEFINE(GC_LURC_THREADS)
+    ;;
  win32)
     AC_DEFINE(GC_WIN32_THREADS)
     dnl Wine getenv may not return NULL for missing entry
@@ -214,6 +261,7 @@ esac
 AC_SUBST(THREADDLLIBS)
 AM_CONDITIONAL(THREADS, test x$THREADS != xnone)
 AM_CONDITIONAL(PTHREADS, test x$THREADS = xposix)
+AM_CONDITIONAL(LURC_THREADS, test x$THREADS = xlurc)
 AM_CONDITIONAL(DARWIN_THREADS, test x$darwin_threads = xtrue)
 AM_CONDITIONAL(WIN32_THREADS, test x$win32_threads = xtrue)
 
@@ -239,7 +287,9 @@ fi
 # We never want libdl on darwin. It is a fake libdl that just ends up making
 # dyld calls anyway
 case "$host" in
-  *-*-darwin*) ;;
+  *-*-darwin*) 
+    CFLAGS="$CFLAGS -no-cpp-precomp"
+    ;;
   *) 
     AC_CHECK_LIB(dl, dlopen, THREADDLLIBS="$THREADDLLIBS -ldl")
     ;;

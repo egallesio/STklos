@@ -4,6 +4,10 @@
 
 # if defined(GC_DARWIN_THREADS)
 
+#ifdef GC_LURC_THREADS
+# include <lurc.h>
+#endif /* GC_LURC_THREADS */
+
 /* From "Inside Mac OS X - Mach-O Runtime Architecture" published by Apple
    Page 49:
    "The space beneath the stack pointer, where a new stack frame would normally
@@ -167,6 +171,22 @@ void GC_push_all_stacks() {
 
 #else /* !DARWIN_DONT_PARSE_STACK; Use FindTopOfStack() */
 
+#ifdef GC_LURC_THREADS
+static GC_thread lookup_gc_thread(thread_act_t mach_thread){
+  int i;
+  GC_thread p;
+  
+  for (i = 0; i < THREAD_TABLE_SZ; ++i) {
+    for (p = GC_threads[i]; 0 != p; p = p -> next) {
+      if(p->stop_info.mach_thread == mach_thread)
+        return p;
+    }
+  }
+  /* not found ? */
+  return NULL;
+}
+#endif /* GC_LURC_THREADS */
+
 void GC_push_all_stacks() {
     int i;
 	task_t my_task;
@@ -175,6 +195,10 @@ void GC_push_all_stacks() {
     ptr_t lo, hi;
     thread_act_array_t act_list = 0;
     mach_msg_type_number_t listcount = 0;
+#   ifdef GC_LURC_THREADS
+      lurc_thread_t lt = NULL;
+      void *llo,*lhi;
+#   endif /* GC_LURC_THREADS */
 
     me = mach_thread_self();
     if (!GC_thr_initialized) GC_thr_init();
@@ -184,6 +208,9 @@ void GC_push_all_stacks() {
     if(r != KERN_SUCCESS) ABORT("task_threads failed");
     for(i = 0; i < listcount; i++) {
       thread_act_t thread = act_list[i];
+#     ifdef GC_LURC_THREADS
+        GC_thread gct = lookup_gc_thread(thread);
+#     endif /* GC_LURC_THREADS */
       if (thread == me) {
 	lo = GC_approx_sp();
 	hi = (ptr_t)FindTopOfStack(0);
@@ -267,7 +294,27 @@ void GC_push_all_stacks() {
 		  (unsigned long) thread, lo, hi
 		);
 #     endif
+#     ifdef GC_LURC_THREADS
+        /* check wether the lurc lib wants us to push this now or later */
+        if (gct != NULL
+            && lurc_gc_is_lurc_thread(gct -> id, lo, hi)){
+	  mach_port_deallocate(my_task, thread);
+          continue;
+        }
+#     endif /* GC_LURC_THREADS */
       GC_push_all_stack(lo, hi); 
+#   ifdef GC_LURC_THREADS
+    /* walk all those threads to ask for the roots */
+    while ((lt = lurc_get_next_thread(lt)) != NULL) {
+      lurc_gc_get_root(lt, &llo, &lhi);
+      if(llo != NULL)
+        GC_push_all_stack(llo, lhi);
+    }
+    /* does it have another part ? */
+    lurc_gc_get_additional_root(&llo, &lhi);
+    if (llo != NULL)
+      GC_push_all_stack(llo, lhi);
+#   endif /* GC_LURC_THREADS */
 	  mach_port_deallocate(my_task, thread);
     } /* for(p=GC_threads[i]...) */
     vm_deallocate(my_task, (vm_address_t)act_list,

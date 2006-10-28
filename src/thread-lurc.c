@@ -176,6 +176,11 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
 {
   if (!THREADP(thr)) STk_error_bad_thread(thr);
 
+  if (THREAD_STATE(thr) == th_new){
+    THREAD_STATE(thr) = th_terminated;
+    return STk_void;
+  }
+
   if (THREAD_STATE(thr) != th_terminated) {
     int err;
     // emit its term signal

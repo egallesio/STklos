@@ -2132,7 +2132,7 @@
 
 # if defined(PCR) || defined(SRC_M3) || \
 		defined(GC_SOLARIS_THREADS) || defined(GC_WIN32_THREADS) || \
-		defined(GC_PTHREADS)
+		defined(GC_PTHREADS) || defined(GC_LURC_THREADS)
 #   define THREADS
 # endif
 

@@ -120,14 +120,15 @@ DIST_COMMON = $(am__configure_deps) $(am__pkginclude_HEADERS_DIST) \
 # ---------------------------------
 @PTHREADS_TRUE@am__append_5 = pthread_support.c pthread_stop_world.c
 @DARWIN_THREADS_TRUE@am__append_6 = darwin_stop_world.c
-@WIN32_THREADS_TRUE@am__append_7 = win32_threads.c
-@USE_INTERNAL_LIBATOMIC_OPS_TRUE@am__append_8 = atomic_ops.c
-@NEED_ATOMIC_OPS_ASM_TRUE@am__append_9 = atomic_ops_sysdeps.S
+@LURC_THREADS_TRUE@am__append_7 = lurc_support.c
+@WIN32_THREADS_TRUE@am__append_8 = win32_threads.c
+@USE_INTERNAL_LIBATOMIC_OPS_TRUE@am__append_9 = atomic_ops.c
+@NEED_ATOMIC_OPS_ASM_TRUE@am__append_10 = atomic_ops_sysdeps.S
 
 # C++ Interface
 # -------------
-@CPLUSPLUS_TRUE@am__append_10 = libgccpp.la
-@CPLUSPLUS_TRUE@am__append_11 = include/gc_cpp.h include/gc_allocator.h
+@CPLUSPLUS_TRUE@am__append_11 = libgccpp.la
+@CPLUSPLUS_TRUE@am__append_12 = include/gc_cpp.h include/gc_allocator.h
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
@@ -161,14 +162,15 @@ am__libgc_la_SOURCES_DIST = allchblk.c alloc.c blacklst.c checksums.c \
 	new_hblk.c obj_map.c os_dep.c pcr_interface.c ptr_chck.c \
 	real_malloc.c reclaim.c specific.c stubborn.c typd_mlc.c \
 	backgraph.c thread_local_alloc.c pthread_support.c \
-	pthread_stop_world.c darwin_stop_world.c win32_threads.c \
-	atomic_ops.c atomic_ops_sysdeps.S
+	pthread_stop_world.c darwin_stop_world.c lurc_support.c \
+	win32_threads.c atomic_ops.c atomic_ops_sysdeps.S
 @PTHREADS_TRUE@am__objects_1 = pthread_support.lo \
 @PTHREADS_TRUE@	pthread_stop_world.lo
 @DARWIN_THREADS_TRUE@am__objects_2 = darwin_stop_world.lo
-@WIN32_THREADS_TRUE@am__objects_3 = win32_threads.lo
-@USE_INTERNAL_LIBATOMIC_OPS_TRUE@am__objects_4 = atomic_ops.lo
-@NEED_ATOMIC_OPS_ASM_TRUE@am__objects_5 = atomic_ops_sysdeps.lo
+@LURC_THREADS_TRUE@am__objects_3 = lurc_support.lo
+@WIN32_THREADS_TRUE@am__objects_4 = win32_threads.lo
+@USE_INTERNAL_LIBATOMIC_OPS_TRUE@am__objects_5 = atomic_ops.lo
+@NEED_ATOMIC_OPS_ASM_TRUE@am__objects_6 = atomic_ops_sysdeps.lo
 am_libgc_la_OBJECTS = allchblk.lo alloc.lo blacklst.lo checksums.lo \
 	dbg_mlc.lo dyn_load.lo finalize.lo gc_dlopen.lo gcj_mlc.lo \
 	headers.lo malloc.lo mallocx.lo mark.lo mark_rts.lo misc.lo \
@@ -176,7 +178,7 @@ am_libgc_la_OBJECTS = allchblk.lo alloc.lo blacklst.lo checksums.lo \
 	real_malloc.lo reclaim.lo specific.lo stubborn.lo typd_mlc.lo \
 	backgraph.lo thread_local_alloc.lo $(am__objects_1) \
 	$(am__objects_2) $(am__objects_3) $(am__objects_4) \
-	$(am__objects_5)
+	$(am__objects_5) $(am__objects_6)
 libgc_la_OBJECTS = $(am_libgc_la_OBJECTS)
 @CPLUSPLUS_TRUE@libgccpp_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 @CPLUSPLUS_TRUE@	$(am__DEPENDENCIES_1)
@@ -312,6 +314,7 @@ EXEEXT = @EXEEXT@
 EXTRA_TEST_LIBS = @EXTRA_TEST_LIBS@
 GC_CFLAGS = @GC_CFLAGS@
 GC_VERSION = @GC_VERSION@
+GREP = @GREP@
 INCLUDES = @INCLUDES@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -323,6 +326,8 @@ LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+LURC_THREADS_FALSE = @LURC_THREADS_FALSE@
+LURC_THREADS_TRUE = @LURC_THREADS_TRUE@
 MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
@@ -354,11 +359,8 @@ USE_LIBDIR_TRUE = @USE_LIBDIR_TRUE@
 VERSION = @VERSION@
 WIN32_THREADS_FALSE = @WIN32_THREADS_FALSE@
 WIN32_THREADS_TRUE = @WIN32_THREADS_TRUE@
-ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
-ac_ct_RANLIB = @ac_ct_RANLIB@
-ac_ct_STRIP = @ac_ct_STRIP@
 addlibs = @addlibs@
 addobjs = @addobjs@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
@@ -378,23 +380,30 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 datadir = @datadir@
+datarootdir = @datarootdir@
+docdir = @docdir@
+dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
+htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
+localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
+pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
+psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 subdirs = @subdirs@
@@ -451,7 +460,7 @@ EXTRA_DIST = cord/cordbscs.c cord/cordtest.c cord/de.c cord/cordprnt.c \
 
 # C Library
 # ---------
-lib_LTLIBRARIES = libcord.la libgc.la $(am__append_10)
+lib_LTLIBRARIES = libcord.la libgc.la $(am__append_11)
 include_HEADERS = 
 
 # installed headers
@@ -462,7 +471,7 @@ pkginclude_HEADERS = include/gc.h include/gc_typed.h \
 	include/gc_allocator.h include/gc_backptr.h include/gc_gcj.h \
 	include/leak_detector.h include/gc_amiga_redirects.h \
 	include/gc_pthread_redirects.h include/gc_config_macros.h \
-	include/gc_tiny_fl.h $(am__append_11)
+	include/gc_tiny_fl.h $(am__append_12)
 
 # headers which are not installed
 #
@@ -552,7 +561,8 @@ libgc_la_SOURCES = allchblk.c alloc.c blacklst.c checksums.c dbg_mlc.c \
 	os_dep.c pcr_interface.c ptr_chck.c real_malloc.c reclaim.c \
 	specific.c stubborn.c typd_mlc.c backgraph.c \
 	thread_local_alloc.c $(am__append_5) $(am__append_6) \
-	$(am__append_7) $(am__append_8) $(am__append_9)
+	$(am__append_7) $(am__append_8) $(am__append_9) \
+	$(am__append_10)
 
 # Include THREADDLLIBS here to ensure that the correct versions of
 # linuxthread semaphore functions get linked:
@@ -742,6 +752,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gc_dlopen.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gcj_mlc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/headers.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lurc_support.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/malloc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mallocx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mark.Plo@am__quote@

@@ -147,6 +147,13 @@
 #    endif
 #  endif /* GC_PTHREADS with linux_threads.c implementation */
 
+#  if defined(GC_LURC_THREADS) && !defined(GC_PTHREADS)
+#   define LOCK()
+#   define UNLOCK()
+#   define SET_LOCK_HOLDER()
+#   define UNSET_LOCK_HOLDER()
+#   define I_HOLD_LOCK() TRUE
+#  endif
 
 # else /* !THREADS */
 #   define LOCK()

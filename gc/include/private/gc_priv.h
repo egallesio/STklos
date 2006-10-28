@@ -310,7 +310,7 @@ void GC_print_callers(struct callinfo info[NFRAMES]);
  				   PCR_waitForever);
 # else
 #   if defined(GC_SOLARIS_THREADS) || defined(GC_WIN32_THREADS) \
-	|| defined(GC_PTHREADS)
+	|| defined(GC_PTHREADS) || defined(GC_LURC_THREADS)
       void GC_stop_world();
       void GC_start_world();
 #     define STOP_WORLD() GC_stop_world()

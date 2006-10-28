@@ -2,22 +2,20 @@
 
 * THINGS TO DO (NEXT RELEASES PLAN)
 
-** Version 0.75 ... 
-	- Always make argv[0] absolute or at least give a way to find it	
+** Version 0.85 ... 
 	- Terminate canvas implementation
 	- Add new widgets that exist in 0.51 and have not been ported back
    	- Add GTk2 support
 	- Add STk Posix support
 	- ... 
 
-** Version 0.80
-	- autolad (and syntax-autoload) and modules as in STk?
+** Version 0.90
+	- autoload (and syntax-autoload) and modules as in STk?
 	- Use  packages in all the library to hide functions which
 	  should not be exported. Use a scheme similar to STk, such as
 	  if a user redefines a standard function, it will not break
 	  the library itself.
 	- Tree widget
-	- Transcripts
 	- R5RS Eval
 	- ... 
 
@@ -33,8 +31,7 @@ Some things need to be done to be fully R5RS
  - Transcripts
 
 
-**  STUFF TO PORT FROM STK
- - Implement the virtual ports of STk
+**  STUFF TO PORT FROM STk
  - when-port-readable ...
  - ...
 

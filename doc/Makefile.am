@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 23-May-2005 14:41 (eg)
+# Last file update: 28-Oct-2006 16:54 (eg)
 
 mandir	      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1\
@@ -52,3 +52,4 @@ $(DOCDB): $(OTHERDB)
 clean:
 	/bin/rm -f $(ALLDB)  stklos*.1 *~
 
+distclean: clean

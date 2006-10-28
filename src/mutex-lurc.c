@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 26-Apr-2006 16:20 (eg)
+ * Last file update: 28-Oct-2006 16:18 (eg)
  */
 
 #include <lurc.h>
@@ -50,10 +50,15 @@ static void mutex_finalizer(SCM mtx)
 {
   // any error here is non-forwardable
   int err;
-  if((err = lurc_mutex_destroy(&MUTEX_MYMUTEX(mtx))) != 0)
+  if(MUTEX_MYMUTEX(mtx) != NULL
+     && (err = lurc_mutex_destroy(&MUTEX_MYMUTEX(mtx))) != 0)
     STk_panic("Lurc error: ~S", lurc_strerror(err));
-  if((err = lurc_signal_destroy(&MUTEX_MYSIGNAL(mtx))) != 0)
+  if(MUTEX_MYSIGNAL(mtx) != NULL
+     && (err = lurc_signal_destroy(&MUTEX_MYSIGNAL(mtx))) != 0)
     STk_panic("Lurc error: ~S", lurc_strerror(err));
+
+  MUTEX_MYMUTEX(mtx) = NULL;
+  MUTEX_MYSIGNAL(mtx) = NULL;
 }
 
 
@@ -238,12 +243,13 @@ static void unlock_watched_await(void *arg){
 
   do{
     // skip the first emission if needed
-    // not that this also works for loop cases
-    if(CONDV_EMITTED(cv) == lurc_instant())
+    // note that this also works for loop cases
+    if(CONDV_EMITTED(cv) == lurc_instant()){
       if((err = lurc_pause()) != 0){
         ml->raising = 1;
         lurc_error(err);
       }
+    }
     if((err = lurc_signal_await(&CONDV_MYSIGNAL(cv))) != 0){
       ml->raising = 1;
       lurc_error(err);
@@ -275,51 +281,6 @@ static void unlock_finally_destroy(void *arg){
   }
 }
 
-static void unlock_protected_drop(void *arg){
-  struct mut_unlock_t* ml = (struct mut_unlock_t*)arg;
-  SCM mtx = ml->mtx;
-  int err;
-
-  /* Signal to waiting threads */
-  if((err = lurc_signal_emit(&MUTEX_MYSIGNAL(mtx))) != 0){
-    ml->raising = 1;
-    lurc_error(err);
-  }
-
-  if (ml->cv != STk_false) {
-    if (ml->tm != STk_false) {
-      struct timeval rel_tv = STk_thread_abstime_to_reltime(REAL_VAL(ml->tm));
-      ml->timedout = 1;
-      ml->sig_to = lurc_timeout_signal(NULL, rel_tv);
-      if(ml->sig_to == NULL)
-        STk_error("Lurc cannot allocate signal");
-
-      // await the signal, but no longer than given timeout
-      if((err = lurc_protect_with(&unlock_protected_watch, ml,
-                                  &unlock_finally_destroy, ml)) != 0){
-        lurc_signal_destroy(&(ml->sig_to));
-        ml->raising = 1;
-        lurc_error(err);
-      }
-      if (ml->timedout) ml->res = STk_false; 
-    } else {
-      if((err = lurc_signal_await(&CONDV_MYSIGNAL(ml->cv))) != 0){
-        ml->raising = 1;
-        lurc_error(err);
-      }
-    }
-  }
-}
-
-static void unlock_finally_unlock(void *arg){
-  struct mut_unlock_t* ml = (struct mut_unlock_t*)arg;
-  SCM mtx = ml->mtx;
-  int err;
-  if((err = lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx))) != 0
-     && !ml->raising)
-    lurc_error(err);
-}
-
 DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm))
 {
   struct mut_unlock_t ml;
@@ -344,10 +305,31 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
   ml.tm = tm;
   ml.mtx = mtx;
   ml.raising = 0;
-  if((err = lurc_protect_with(&unlock_protected_drop, &ml,
-                              &unlock_finally_unlock, &ml)) != 0){
-    lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx));
+  if((err = lurc_mutex_unlock(&MUTEX_MYMUTEX(mtx))) != 0)
     lurc_error(err);
+
+  /* Signal to waiting threads */
+  if((err = lurc_signal_emit(&MUTEX_MYSIGNAL(mtx))) != 0)
+    lurc_error(err);
+
+  if (ml.cv != STk_false) {
+    if (ml.tm != STk_false) {
+      struct timeval rel_tv = STk_thread_abstime_to_reltime(REAL_VAL(ml.tm));
+      ml.timedout = 1;
+      ml.sig_to = lurc_timeout_signal(NULL, rel_tv);
+      if(ml.sig_to == NULL)
+        STk_error("Lurc cannot allocate signal");
+
+      // await the signal, but no longer than given timeout
+      if((err = lurc_protect_with(&unlock_protected_watch, &ml,
+                                  &unlock_finally_destroy, &ml)) != 0){
+        lurc_signal_destroy(&(ml.sig_to));
+        lurc_error(err);
+      }
+      if (ml.timedout) ml.res = STk_false; 
+    } else {
+      unlock_watched_await(&ml);
+    }
   }
   
   return ml.res;
@@ -364,8 +346,10 @@ static void condv_finalizer(SCM cv)
 {
   int err;
   // anything here is fatal since we cannot propagate it
-  if((err = lurc_signal_destroy(&CONDV_MYSIGNAL(cv))) != 0)
+  if(CONDV_MYSIGNAL(cv) != NULL
+     && (err = lurc_signal_destroy(&CONDV_MYSIGNAL(cv))) != 0)
     STk_panic("Lurc error: ~S", lurc_strerror(err));
+  CONDV_MYSIGNAL(cv) = NULL;
 }
 
 void STk_make_sys_condv(SCM z)
@@ -389,7 +373,7 @@ DEFINE_PRIMITIVE("condition-variable-signal!", condv_signal, subr1, (SCM cv))
     if((err = lurc_pause()) != 0)
       lurc_error(err);
   }
-  
+
   // we can now safely emit it for one person
   CONDV_EMITTED(cv) = lurc_instant();
   CONDV_TARGET(cv) = CV_ONE;

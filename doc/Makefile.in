@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 23-May-2005 14:41 (eg)
+# Last file update: 28-Oct-2006 16:54 (eg)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -438,8 +438,6 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean-am: clean-generic mostlyclean-am
 
-distclean: distclean-am
-	-rm -f Makefile
 distclean-am: clean-am distclean-generic
 
 dvi: dvi-am
@@ -520,6 +518,8 @@ $(DOCDB): $(OTHERDB)
 #
 clean:
 	/bin/rm -f $(ALLDB)  stklos*.1 *~
+
+distclean: clean
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

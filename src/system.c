@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  7-Aug-2006 07:07 (eg)
+ * Last file update: 28-Oct-2006 17:46 (eg)
  */
 
 #include <unistd.h>
@@ -597,19 +597,6 @@ DEFINE_PRIMITIVE("%pre-exit", pre_exit, subr1, (SCM retcode))
   /* Flush all bufers */
   STk_close_all_ports();
 
-#ifdef FIXME
-//EG:  /* Execute all the terminal thunks of pending dynamic-wind */
-//EG:  STk_unwind_all();
-//EG:
-//EG:  /* call user finalization code */
-//EG:  STk_user_cleanup();
-//EG:
-//EG:#if defined(WIN32) && defined(USE_SOCKET)
-//EG:  /* Unregister the interpreter from Winsock */
-//EG:  WSACleanup();  
-//EG:#endif
-#endif
-
   return STk_void;
 }
 
@@ -640,7 +627,6 @@ DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
 
   return STk_void; /* never reached */
 }
-
 
 
 /*
@@ -1018,10 +1004,7 @@ DEFINE_PRIMITIVE("hostname", hostname, subr0, (void))
     buff[255] = '0';
   return STk_Cstring2string(buff);
 }
-
-
-
-   
+  
 
 /*
  * Undocumented primitives

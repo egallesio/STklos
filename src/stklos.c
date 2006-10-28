@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 20-Oct-2006 14:36 (eg)
+ * Last file update: 28-Oct-2006 17:45 (eg)
  */
 
 #include <stklos.h>
@@ -171,6 +171,8 @@ int mymain(int argc, char *argv[])
     fprintf(stderr, "cannot boot with \"%s\" file (code=%d)\n", boot_file, ret);
     exit(1);
   }
+
+  STk_pre_exit(MAKE_INT(ret));
   return ret;
 }
 
@@ -183,9 +185,8 @@ int main(int argc, char *argv[])
   STk_gc_init();
 
 #ifdef THREADS_LURC
-  STk_exit(MAKE_INT(STk_thread_main(&mymain, argc, argv)));
+  return STk_thread_main(&mymain, argc, argv);
 #else
-  STk_exit(MAKE_INT(mymain(argc, argv)));
+  return mymain(argc, argv);
 #endif /* ! THREAD_LURC */
-  return 0; 
 }
