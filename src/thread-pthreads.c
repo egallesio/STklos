@@ -21,11 +21,12 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 28-Oct-2006 21:42 (eg)
+ * Last file update:  4-Nov-2006 12:44 (eg)
  */
 
 
 #include <unistd.h>
+#include <sched.h>
 #include "stklos.h"
 #include "vm.h"
 #include "thread-common.h"
@@ -139,7 +140,7 @@ doc>
 */
 DEFINE_PRIMITIVE("thread-yield!", thread_yield, subr0, (void))
 {
-  pthread_yield();
+  sched_yield();
   return STk_void;
 }
 

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 26-Sep-2006 17:42 (eg)
+;;;; Last file update:  3-Nov-2006 16:04 (eg)
 ;;;;
 
 (define *output* "a.out")
@@ -79,6 +79,13 @@
     (close-port out)))
 
 ;; ----------------------------------------------------------------------
+;;	compile-to-bytecode ...
+;; ----------------------------------------------------------------------
+(define (compile-to-bytecode file out)
+  (compile-file file out)
+  (chmod out #o755))
+
+;; ----------------------------------------------------------------------
 ;;	compile-to-C-code ...
 ;; ----------------------------------------------------------------------
 (define (compile-to-C-code file out)
@@ -93,13 +100,6 @@
     (compile-to-bytecode file tmp)
     (convert-to-C tmp out name)
     (remove-file tmp)))
-
-;; ----------------------------------------------------------------------
-;;	compile-to-bytecode ...
-;; ----------------------------------------------------------------------
-(define (compile-to-bytecode file out)
-  (compile-file file out)
-  (chmod out #o755))
 
 ;; ----------------------------------------------------------------------
 ;;	main ...

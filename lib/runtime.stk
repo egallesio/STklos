@@ -1,7 +1,7 @@
 ;;;;
 ;;;; runtime.stk	-- Stuff necessary for bootstaping the system
 ;;;; 
-;;;; Copyright © 2001-2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update: 26-Oct-2003 23:11 (eg)
+;;;; Last file update:  4-Nov-2006 16:45 (eg)
 ;;;;
 
 
@@ -119,8 +119,8 @@
 (define (macro-expand x)
   (initial-expander (syntax-expand x) initial-expander))
 
-;;(define (macro-expand* form)
-;;   (let Loop ((f form) (nf (macro-expand form)))
-;;     (if (equal? f nf)
-;; 	f
-;; 	(Loop nf (macro-expand nf)))))
+(define (macro-expand* exp)
+  (let ((new (macro-expand exp)))
+    (if (equal? new exp)
+        new
+        (macro-expand* new))))

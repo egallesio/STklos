@@ -2,12 +2,12 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 28-Oct-2006 17:22 (eg)
+dnl Last file update:  3-Nov-2006 22:35 (eg)
 
 
 AC_INIT(src/stklos.c)
 AC_PREREQ(2.52)
-AM_INIT_AUTOMAKE(stklos, 0.80)
+AM_INIT_AUTOMAKE(stklos, 0.81)
 AM_CONFIG_HEADER(src/stklosconf.h)
 AC_PROG_MAKE_SET
 

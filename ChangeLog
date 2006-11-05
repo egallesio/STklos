@@ -1,4 +1,27 @@
+2006-11-04  Erick Gallesio  <eg@essi.fr>
+
+	* tests/Makefile.am: make check run the tests now. 
+
+	* src/thread-pthreads.c (thread-yield!): Changed the non POSIX
+	call pthread_yield() to the POSIX one sched_yield(). Done already
+	that in the other sense, but can remeber why. This should resolve 
+	compilation problems on some MacOS X machines. 
+	
+
+2006-11-03  Erick Gallesio  <eg@essi.fr>
+
+	* lib/repl.stk (main-repl): Added the thread system in the 
+	interactive header. 
+
+	* src/stklos.h: Fixed a problem on mutexes locking. This bug
+	prevents the compilation od STklos on some architectures. 
+
+	* utils/stklos-compile.stk: Minor change to avoid a warning
+
 2006-10-28  Erick Gallesio  <eg@essi.fr>
+
+	* 0.80 release
+	============================================================
 
 	* src/mutex-pthreads.c: 
 	* src/misc.c:

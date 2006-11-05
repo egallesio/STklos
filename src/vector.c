@@ -2,7 +2,7 @@
  *
  * v e c t o r . c 			-- vectors management
  *
- * Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??? 1993
- * Last file update: 25-Apr-2005 14:52 (eg)
+ * Last file update:  5-Nov-2006 11:27 (eg)
  */
 
 #include <string.h>
@@ -293,7 +293,7 @@ DEFINE_PRIMITIVE("vector-fill!", vector_fill, subr2, (SCM v, SCM fill))
 <doc EXT vector-copy
  * (vector-copy v)
  *
- * Return a copy of vectot |v|. Note that, if |v| is a constant vector, 
+ * Return a copy of vector |v|. Note that, if |v| is a constant vector, 
  * its copy is not constant. 
 doc>
  */

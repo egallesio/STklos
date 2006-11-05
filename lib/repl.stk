@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update: 20-Jun-2006 19:24 (eg)
+;;;; Last file update:  3-Nov-2006 19:04 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything 
@@ -196,7 +196,8 @@ doc>
   (when interactive?
     (display (do-color
 	      'bold 'green
-	      (format "STklos version ~A\t\t\t[~A]\n" (version) (machine-type))
+	      (format "STklos version ~A\t\t[~A/~A]\n" (version) (machine-type)
+		      (%thread-system))
 	      "Copyright © 1999-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>\n"
 	      'normal)
 	     (current-error-port)))

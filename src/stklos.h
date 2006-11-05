@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 28-Oct-2006 20:09 (eg)
+ * Last file update:  3-Nov-2006 21:00 (eg)
  */
 
 #ifndef STKLOS_H
@@ -99,10 +99,11 @@ extern "C"
 #  define MUT_LOCK(lck)
 #  define MUT_UNLOCK(lck)
 #else
-#  define MUT_DECL(lck)	   static pthread_mutex_t lck = PTHREAD_MUTEX_INITIALIZER;
-#  define MUT_LOCK(lck)    pthread_mutex_lock(&lck);
-#  define MUT_UNLOCK(lck)  {  pthread_mutex_unlock(&lck); \
-    			      pthread_mutex_destroy(&lck); }
+#  define MUT_DECL(lck)    static pthread_mutex_t lck;
+#  define MUT_LOCK(lck)    { pthread_mutex_init(&lck, NULL); \
+  			     pthread_mutex_lock(&lck); }
+#  define MUT_UNLOCK(lck)  { pthread_mutex_unlock(&lck); \
+                             pthread_mutex_destroy(&lck); }
 #endif
 
 /*===========================================================================*\
