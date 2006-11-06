@@ -4,6 +4,14 @@
 				| NEWS |
 				+======+
 
+* version 0.81 (2006 11 06)
+
+This is a bug-fix version. Previous release had a bug which prevent to
+compile it on some architectures/systems.
+
+    * Corrected a deadlock when compiling the system
+    * Corrected bugs in SRFI-0 and SRFI-13
+
 * version 0.80 (2006 10 27)
 
     This is a version with important changes to support

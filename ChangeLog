@@ -1,3 +1,13 @@
+2006-11-06  Erick Gallesio  <eg@essi.fr>
+	* 0.81 release
+	============================================================
+
+	* lib/srfi-0.stk, src/boot.c, src/boot.img, tests/test-threads.stk:
+	Corrected SRFI-0. Thanks to Marc Feeley for signaling the problem
+
+	* lib/srfi-13.stk, src/boot.c, src/boot.img:
+	Corrected a bug in SRFI-13
+
 2006-11-04  Erick Gallesio  <eg@essi.fr>
 
 	* tests/Makefile.am: make check run the tests now. 
