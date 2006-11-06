@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-13.stk		-- Implementation of SRFI-13
 ;;;; 
-;;;; Copyright © 2002-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  5-Jun-2002 19:20 (eg)
-;;;; Last file update: 29-Mar-2005 19:52 (eg)
+;;;; Last file update:  6-Nov-2006 10:28 (eg)
 ;;;;
 
 (require "srfi-14")
@@ -547,19 +547,19 @@
   (cond
     ((char? criterion)
      (let Loop ((i (- end 1)))
-       (and (>= i 0)
+       (and (>= i start)
 	    (if (char=? criterion (string-ref str i))
 		i
 		(Loop (- i 1))))))
     ((char-set? criterion)
      (let Loop ((i (- end 1)))
-       (and (>= i 0)
+       (and (>= i start)
 	    (if (char-set-contains? criterion (string-ref str i))
 		i
 		(Loop (- i 1))))))
     ((procedure? criterion)
      (let Loop ((i (- end 1)))
-       (and (>= i 0)
+       (and (>= i start)
 	    (if (criterion (string-ref str i))
 		i
 		(Loop (- i 1))))))
@@ -593,19 +593,19 @@
   (cond
     ((char? criterion)
      (let Loop ((i (- end 1)))
-       (and (>= i 0)
+       (and (>= i start)
 	    (if (char=? criterion (string-ref str i))
 		(Loop (- i 1))
 		i))))
     ((char-set? criterion)
      (let Loop ((i (- end 1)))
-       (and (>= i 0)
+       (and (>= i start)
 	    (if (char-set-contains? criterion (string-ref str i))
 		(Loop (- i 1))
 		i))))
     ((procedure? criterion)
      (let Loop ((i (- end 1)))
-       (and (>= i 0)
+       (and (>= i start)
 	    (if (criterion (string-ref str i)) (Loop (- i 1))
 		i))))
     (else (error 'string-skip-right "bad criterion ~S" criterion))))
