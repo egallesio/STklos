@@ -21,9 +21,10 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
-;;;; Last file update: 27-Sep-2006 10:03 (eg)
+;;;; Last file update:  7-Nov-2006 13:58 (eg)
 ;;;;
 
+(select-module STKLOS-COMPILER)
 
 (define (compile-file input output)
 
@@ -83,5 +84,9 @@
     
     ;; Restore Compiler flags
     (set! *compiler-options* copts)))
+
+;; ======================================================================
+(select-module STklos)
+(define compile-file (in-module STKLOS-COMPILER compile-file))
 
 (provide "compfile")

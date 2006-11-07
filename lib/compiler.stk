@@ -21,14 +21,13 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  7-Nov-2006 12:54 (eg)
+;;;; Last file update:  7-Nov-2006 13:39 (eg)
 ;;;;
 
 ;;(define-module new-compiler
 
-(define-module STKLOS-COMPILER
-  (export eval))
-
+(define-module STKLOS-COMPILER)
+(select-module STKLOS-COMPILER)
 
 (define *compiler-port*		#f)
 (define *compiler-options* 	(list 'warn-use-undef))
@@ -1486,6 +1485,11 @@ doc>
     (set! *code-instr* old-code)
     (set! *code-constants* old-cst)
     res))
+
+;; ======================================================================
+(select-module STklos)
+(define eval (in-module STKLOS-COMPILER eval))
+
 
 ;;)
 ; LocalWords:  initform autoload Autoloads
