@@ -21,11 +21,14 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 25-Oct-2006 16:48 (eg)
+;;;; Last file update:  7-Nov-2006 12:54 (eg)
 ;;;;
 
 ;;(define-module new-compiler
-  
+
+(define-module STKLOS-COMPILER
+  (export eval))
+
 
 (define *compiler-port*		#f)
 (define *compiler-options* 	(list 'warn-use-undef))
