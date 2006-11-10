@@ -22,8 +22,9 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  6-Jun-2000 22:05 (eg)
-;;;; Last file update:  7-Nov-2006 13:40 (eg)
+;;;; Last file update:  8-Nov-2006 11:08 (eg)
 ;;;;
+
 
 (select-module STKLOS-COMPILER)
 

@@ -21,12 +21,14 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  7-Nov-2006 13:39 (eg)
+;;;; Last file update:  8-Nov-2006 11:24 (eg)
 ;;;;
 
-;;(define-module new-compiler
-
-(define-module STKLOS-COMPILER)
+(define-module STKLOS-COMPILER
+  (export eval
+	  disassemble
+	  compiler:time-display
+	  compiler:gen-line-number))
 (select-module STKLOS-COMPILER)
 
 (define *compiler-port*		#f)
@@ -1488,6 +1490,7 @@ doc>
 
 ;; ======================================================================
 (select-module STklos)
+(import STKLOS-COMPILER)
 (define eval (in-module STKLOS-COMPILER eval))
 
 

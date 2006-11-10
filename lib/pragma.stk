@@ -1,7 +1,7 @@
 ;;;;
 ;;;; pragma.stk	-- STklos Pragmas
 ;;;; 
-;;;; Copyright © 2004 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2004-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,26 +21,29 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-Oct-2004 15:53 (eg)
-;;;; Last file update: 25-Oct-2004 16:17 (eg)
+;;;; Last file update: 10-Nov-2006 11:53 (eg)
 ;;;;
 
+(define-module STKLOS-COMPILER
+  (export stklos-pragma)
 
-(define (stklos-pragma msg . args)
-  (case msg
-    ;; #,(pragma :undefined-symbol-warning) => return state of warning
-    ;; #,(pragma :undefined-symbol-warning bool) => set! state
-    ((:undefined-symbol-warning)
-     (cond
-       ((null? args)
-	(and (member 'warn-use-undef *compiler-options*) #t))
-       ((car args)
-	(set! *compiler-options* (cons 'warn-use-undef
-				       (delete! 'warn-use-undef
-						*compiler-options*))))
-       (else
-	(set! *compiler-options* (delete! 'warn-use-undef *compiler-options*)))))
-    (else
-     (error 'pragma "unknown pragma ~S" msg))))
-     
+  (define (stklos-pragma msg . args)
+    (case msg
+      ;; #,(pragma :undefined-symbol-warning) => return state of warning
+      ;; #,(pragma :undefined-symbol-warning bool) => set! state
+      ((:undefined-symbol-warning)
+       (cond
+	 ((null? args)
+	  (and (member 'warn-use-undef *compiler-options*) #t))
+	 ((car args)
+	  (set! *compiler-options* (cons 'warn-use-undef
+					 (delete! 'warn-use-undef
+						  *compiler-options*))))
+	 (else
+	  (set! *compiler-options* (delete! 'warn-use-undef *compiler-options*)))))
+      (else
+       (error 'pragma "unknown pragma ~S" msg))))
+  
+  
+  (define-reader-ctor 'pragma stklos-pragma))
 
-(define-reader-ctor 'pragma stklos-pragma)

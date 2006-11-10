@@ -1,7 +1,7 @@
 ;;;;
 ;;;; object.stk	-- -- A variation of the Gregor Kickzales Tiny CLOS for STklos
 ;;;; 
-;;;; Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update: 29-Mar-2005 18:10 (eg)
+;;;; Last file update: 10-Nov-2006 11:49 (eg)
 
 
 #|
@@ -33,6 +33,42 @@
 
 |#
 
+(define-module STKLOS-OBJECT
+  (export				  ; Define the exported symbols of this file
+    find-class is-a?
+    ensure-metaclass ensure-metaclass-with-supers
+    ensure-class
+    ensure-generic-function
+    ensure-method ensure-method* add-method!
+    object-eqv? object-equal?
+    write-object display-object
+    slot-unbound slot-missing 
+    slot-definition-name  slot-definition-options slot-definition-allocation
+    slot-definition-getter slot-definition-setter slot-definition-accessor
+    slot-definition-init-form slot-definition-init-keyword 
+    slot-init-function class-slot-definition
+    compute-get-n-set
+    allocate-instance initialize make-instance make
+    no-next-method  no-applicable-method no-method ;; next-method-exists?
+    change-class 
+    shallow-clone deep-clone
+    apply-generic apply-method apply-methods compute-applicable-methods 
+    method-more-specific? sort-applicable-methods
+    class-subclasses class-methods
+    slot-value))
+
+(define-module STKLOS-COMPILER
+  (import STKLOS-OBJECT))
+
+(select-module STKLOS-OBJECT)
+
+
+
+(define extended-lambda->lambda		;; Compiler function used here
+  (in-module STKLOS-COMPILER extended-lambda->lambda))
+
+(define new-global
+  (in-module STKLOS-COMPILER new-global))
 
 
 (define class-redefinition (void))	;; forward declaration
@@ -1084,13 +1120,11 @@
   (slot-set! o s v))
 
 
-(autoload "describe" describe)
 
-
-
-;// FIXME:
+;; ======================================================================
+(select-module STklos)
+(import STKLOS-OBJECT)
 (%object-system-initialized)
 
-
-; LocalWords:  supers metaclass OOPSLA linearization beurive labri fr Cassels
-; LocalWords:  Beuriv Playford Withington Haahr Gregor Kickzales init
+;; LocalWords:  supers metaclass OOPSLA linearization beurive labri fr Cassels
+;; LocalWords:  Beuriv Playford Withington Haahr Gregor Kickzales init
