@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  6-Aug-2006 22:46 (eg)
+ * Last file update: 13-Nov-2006 18:46 (eg)
  */
 
 #include "stklos.h"
@@ -158,7 +158,7 @@ DEFINE_PRIMITIVE("%module-imports-set!", module_imports_set, subr2,
   if (!MODULEP(importer)) error_bad_module(importer);
   if (!CONSP(imported))   error_bad_list(imported);
   
-  MODULE_IMPORTS(importer) = imported;
+  MODULE_IMPORTS(importer) = STk_dappend2(imported, LIST1(STk_STklos_module));
   return STk_void;
 }
 
@@ -478,7 +478,8 @@ int STk_late_init_env(void)
 {
   /* Now that symbols are initialized change the STklos module name */
   MODULE_NAME(STk_STklos_module) = STk_intern("stklos");
-  
+  MODULE_IMPORTS(STk_STklos_module) = LIST1(STk_STklos_module);
+
   /* ==== Undocumented primitives ==== */
   ADD_PRIMITIVE(create_module);
   ADD_PRIMITIVE(select_module);

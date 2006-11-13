@@ -1,7 +1,7 @@
 ;;;;
 ;;;; module.stk	-- Module stuff
 ;;;; 
-;;;; Copyright © 2000-2004 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  1-Sep-2004 17:22 (eg)
+;;;; Last file update: 13-Nov-2006 18:47 (eg)
 ;;;;
 
 
@@ -221,7 +221,8 @@ doc>
 doc>
 |#
 (define (%module-import importer modules)
-  (let Loop ((l modules) (res (reverse (module-imports importer))))
+  (let Loop ((l modules)
+	     (res (cdr (reverse! (module-imports importer)))))
     (if (null? l)
 	(%module-imports-set! importer (reverse res))
 	(let ((mod (find-module (car l) #f)))
