@@ -1,7 +1,7 @@
 ;;;;
 ;;;; make-C-boot.stk		-- Create a C image to boot on
 ;;;; 
-;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 29-Mar-2005 14:58 (eg)
-;;;; Last file update:  7-Apr-2005 16:38 (eg)
+;;;; Last file update: 13-Nov-2006 18:56 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -52,20 +52,16 @@ This is a dump of the image in file ~A
     (let ((sz (read in)))
       (format out "STk_instr STk_boot_code [] = { \n")
       (read-char in)  ; To skip the newline after size
-      (let ((j 0))
-	(dotimes (i sz)
-	  (let* ((c1 (read-char in))
-		 (c2 (read-char in)))
-	    (format out
-		    "0x~A"
-		    (number->string (bit-or (bit-shift (char->integer c1) 8)
-					    (char->integer c2))
-				    16))
-	    (when (< i (- sz 1))
-	      (display ", " out))
-	    (when (zero? (modulo j 10))
-	      (format out "   /* ~A */\n" j))
-	  (set! j (+ j 1)))))
+      (dotimes (i sz)
+	(let* ((c1 (read-char in))
+	       (c2 (read-char in)))
+	  (format out
+		  "0x~A"
+		  (number->string (bit-or (bit-shift (char->integer c1) 8)
+					  (char->integer c2))
+				  16))
+	  (when (< i (- sz 1))
+	    (display ",\n" out))))
       (display "};\n" out))
     (flush-output-port out)
     (close-port out)))
