@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  8-Nov-2006 11:24 (eg)
+;;;; Last file update: 13-Nov-2006 14:28 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -205,7 +205,7 @@ doc>
 		  (compile (caddr l) '() args #f)
 		  (emit 'DEFINE-SYMBOL (fetch-constant who)))
 		(compiler-error 'define args "bad variable name ~S" who))
-	    (compiler-error 'define args "internal define forbidden here")))))
+	    (compiler-error 'define args "internal define forbidden here ~S " args)))))
 
 
 ;;;;
@@ -487,15 +487,25 @@ doc>
 ;;  
 
 
-(define (rewrite-body body)
+(define (rewrite-body body env)
   (let Loop ((l body) (defs '()))
     (cond
       ((and (pair? l) (pair? (car l)) (eq? (caar l) 'begin))
-          ;; Delete useless begin
-          (Loop (cdar l) defs))
+         ;; Delete useless begin
+          (Loop (append (cdar l) (cdr l))
+		defs))
       ((and (pair? l) (pair? (car l)) (eq? (caar l) 'define))
           ;; This is an internal define 
 	  (Loop (cdr l) (cons (cdr (define->lambda (car l))) defs)))
+      ((and (pair? l)
+	    (pair? (car l))
+	    (symbol?  (caar l))
+	    (not (symbol-in-env? (caar l) env))
+	    (expander? (caar l)))
+           ;; Macro-call: expand it
+	   (Loop (cons (macro-expand (car l))
+		       (cdr l))
+		defs))
       (else
 	  ;; We have parsed all the (starting) definitions 
 	  (if (null? defs)
@@ -506,11 +516,12 @@ doc>
 		   ,@(map (lambda (x) `(set! ,@x)) defs)
 		   ,@l)))))))
 
+
 (define (compile-user-lambda formals body arity env)	; i.e R5RS ones
   (let ((env  (extend-env env formals))
 	(lab  (new-label)))
     (emit 'CREATE-CLOSURE lab arity)
-    (compile (rewrite-body body) env body #t)
+    (compile (rewrite-body body env) env body #t)
     (emit 'RETURN)
     (emit-label lab)))
 
@@ -606,12 +617,13 @@ doc>
 			 '()
 			 `((if (pair? ,rest-name)
 			       (error "too many optional parameters: ~a"
-				      ,rest-name))))))
+				      ,rest-name)))))
+	(vars (append (if opt (build-optional-let-header opt rest-name) '())
+		      (if key (build-keyword-let-header key rest-name) '()))))
     `(let* (,@(if opt (build-optional-let-header opt rest-name) '())
 	    ,@(if key (build-keyword-let-header key rest-name) '()))
        ,@error-check
-       ,(rewrite-body body))))
-
+       (let () ,@body))))
 
 (define (parse-parameter-list method? x)
   ;; Read the incoming lambda (or method) list, return a list of four lists,
@@ -951,7 +963,8 @@ doc>
 	 (arity   (compute-arity formals)))
     (if (or (= arity len)
 	    (and (negative? arity) (>= len (- (- arity) 1))))
-	(let ((kind (if tail? 'ENTER-TAIL-LET 'ENTER-LET)))
+	(let ((kind    (if tail? 'ENTER-TAIL-LET 'ENTER-LET))
+	      (new-env (extend-env env formals)))
 	  (generate-PREPARE-CALL epair)
 	  (if (negative? arity)
 	      (begin
@@ -960,7 +973,7 @@ doc>
 	      (begin
 		(compile-args actuals env)
 		(emit kind len)))
-	  (compile (rewrite-body body) (extend-env env formals) epair tail?)
+	  (compile (rewrite-body body new-env) new-env epair tail?)
 	  (emit (if tail? 'RETURN 'LEAVE-LET)))
 	(compiler-error 'lambda epair "bad number of parameters ~S" actuals))))
 
@@ -1014,7 +1027,7 @@ doc>
 	(let ((bindings (cadr args))
               (body     (cddr args)))
 	  (if (null? bindings)
-	      (compile (rewrite-body body) env body tail?)
+	      (compile (rewrite-body body env) env body tail?)
 	      (when (valid-let-bindings? bindings #t)
 		(let ((tmps (map (lambda (_) (gensym)) bindings)))
 		  (compile `(let ,(map (lambda (x) (list (car x) #f)) bindings)
@@ -1022,7 +1035,7 @@ doc>
 					 tmps bindings)
 				,@(map (lambda (x y) `(set! ,(car y) ,x))
 				       tmps bindings))
-			      ,(rewrite-body body))
+			      (let () ,@body))
 			   env args tail?))))))))
 
 ;;
@@ -1052,7 +1065,7 @@ doc>
 	      (compile-named-let bindings (car body) (cdr body) len args env tail?)
 	      (when (valid-let-bindings? bindings #t)
 		(if (null? bindings)
-		    (compile `(begin ,@body) env args tail?)
+		    (compile (rewrite-body body env) env args tail?)
 		    (compile `((lambda ,(map car bindings) ,@body)
 			       ,@(map cadr bindings))
 			     env args tail?))))))))
@@ -1109,9 +1122,9 @@ doc>
 			     (locals '()))
 		    (if (null? l)
 			;; Compile body
-			(begin 
-			  (compile (rewrite-body body)
-				   (extend-env env locals)
+			(let ((new-env (extend-env env locals)))
+			  (compile (rewrite-body body new-env)
+				   new-env
 				   body
 				   tail?)
 			  (emit (if tail? 'RETURN 'LEAVE-LET)))
