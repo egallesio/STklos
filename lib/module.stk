@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 13-Nov-2006 18:47 (eg)
+;;;; Last file update: 16-Nov-2006 17:05 (eg)
 ;;;;
 
 
@@ -299,19 +299,6 @@ doc>
 |#
 (define-macro (in-module mod symb . default)
   `(apply symbol-value* ',symb (find-module ',mod) ',default))
-
-
-;;=============================================================================
-;;
-;; 				%DEFINE-EXPORTED-SYMBOLS
-;;
-;;=============================================================================
-(define (%define-exported-symbols who :optional (in (current-module)))
-  (let* ((mod     (find-module who))
-	 (symbols (module-exports mod)))
-    (for-each (lambda (x)
-		(%symbol-define x (symbol-value* x mod) in))
-	      symbols)))
 
 
 ;; LocalWords:  emph doc ext
