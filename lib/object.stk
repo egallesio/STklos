@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update: 10-Nov-2006 11:49 (eg)
+;;;; Last file update: 17-Nov-2006 10:45 (eg)
 
 
 #|
@@ -39,7 +39,7 @@
     ensure-metaclass ensure-metaclass-with-supers
     ensure-class
     ensure-generic-function
-    ensure-method ensure-method* add-method!
+    ensure-method add-method!
     object-eqv? object-equal?
     write-object display-object
     slot-unbound slot-missing 
@@ -477,17 +477,6 @@
   (let* ((new  (extended-lambda->lambda `(method ,args ,@body)))
 	 (args (cadr new))
 	 (body (cddr new)))
-    (make (or kind-of-method <method>)
-          :generic-function gf
-	  :specializers     (map* find-class (specializers args))
-	  :procedure        (make-closure `(let ((next-method (void)))
-					     (lambda ,(formals args)
-					       ,@body))))))
-
-(define (ensure-method* gf args body :optional kind-of-method)
-  (let* ((new  (extended-lambda->lambda `(method ,args ,@body)))
-	 (args (cadr new))
-	 (body (cddr new)))
     `(make ,(or kind-of-method '<method>)
           :generic-function ,gf
 	  :specializers     (map* find-class ',(specializers args))
@@ -495,16 +484,17 @@
 			      (lambda ,(formals args)
 				,@body)))))
 
+
 ;====  Method
 (define-macro (method args . body)
-  (ensure-method* #f args body))
+  (ensure-method #f args body))
 
 
 ; ==== Define-method
 (define-macro (define-method name args . body)
   (let ((gf (gensym "gf")))
     `(let ((,gf (ensure-generic-function ',name)))
-       (add-method! ,gf ,(ensure-method* gf args body))
+       (add-method! ,gf ,(ensure-method gf args body))
        (values (void) ',name))))
 
 
@@ -1120,11 +1110,13 @@
   (slot-set! o s v))
 
 
+;; Just tell C that the object system is now fully initialized
+(%object-system-initialized)
 
 ;; ======================================================================
 (select-module STklos)
-(import STKLOS-OBJECT)
-(%object-system-initialized)
+(%redefine-module-exports (find-module 'STKLOS-OBJECT))
+
 
 ;; LocalWords:  supers metaclass OOPSLA linearization beurive labri fr Cassels
 ;; LocalWords:  Beuriv Playford Withington Haahr Gregor Kickzales init

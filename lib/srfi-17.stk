@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-17.stk		-- General setters for lists
 ;;;; 
-;;;; Copyright © 2004 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2004-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 20-May-2004 17:14 (eg)
-;;;; Last file update: 20-May-2004 17:15 (eg)
+;;;; Last file update: 17-Nov-2006 10:35 (eg)
 ;;;;
 
 (set! (setter caar) (lambda (x v) (set-car! (car x) v)))
@@ -62,3 +62,4 @@
 (set! (setter cdddar) (lambda (x v) (set-cdr! (cddar x) v)))
 (set! (setter cddddr) (lambda (x v) (set-cdr! (cdddr x) v)))
 
+(provide "srfi-17")

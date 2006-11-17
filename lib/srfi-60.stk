@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-60.stk	-- SRFI-60: Integers as Bits
 ;;;; 
-;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  9-Mar-2005 19:43 (eg)
-;;;; Last file update:  9-Mar-2005 21:09 (eg)
+;;;; Last file update: 17-Nov-2006 10:36 (eg)
 ;;;;
 
 ;;;; This implementation is an adaptation of the code given in the reference
@@ -233,3 +233,5 @@
 (define any-bits-set? logtest)
 (define first-set-bit log2-binary-factors)
 (define bitwise-merge bitwise-if)
+
+(provide "srfi-60")
