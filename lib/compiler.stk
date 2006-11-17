@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 13-Nov-2006 14:28 (eg)
+;;;; Last file update: 17-Nov-2006 18:11 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -494,7 +494,7 @@ doc>
          ;; Delete useless begin
           (Loop (append (cdar l) (cdr l))
 		defs))
-      ((and (pair? l) (pair? (car l)) (eq? (caar l) 'define))
+      ((and (pair? l) (pair? (car l)) (memq (caar l) '( define define-macro)))
           ;; This is an internal define 
 	  (Loop (cdr l) (cons (cdr (define->lambda (car l))) defs)))
       ((and (pair? l)
