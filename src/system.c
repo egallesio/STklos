@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 28-Oct-2006 17:46 (eg)
+ * Last file update: 18-Nov-2006 16:46 (eg)
  */
 
 #include <unistd.h>
@@ -73,6 +73,16 @@ static void error_win32_primitive(void)
   STk_error("Win32 primitive not available on this system");
 }
 
+static void error_posix(SCM obj1, SCM obj2)
+{
+  if (obj1 && obj2)
+    STk_error("%s: ~A ~A", strerror(errno), obj1, obj2);
+  else 
+    if (obj1)
+      STk_error("%s: ~A", strerror(errno), obj1);
+    else
+      STk_error("%s", strerror(errno));
+}
 
 static SCM my_access(SCM path, int mode)
 {
@@ -280,7 +290,8 @@ DEFINE_PRIMITIVE("getcwd", getcwd, subr0, (void))
   SCM z;
 
   s = getcwd(buf, MAX_PATH_LENGTH);
-  if (!s) STk_error("cannot determine current directory");
+  if (!s) 
+    error_posix(NULL, NULL);
   z = STk_Cstring2string(buf);
 
   return z;
@@ -298,9 +309,42 @@ DEFINE_PRIMITIVE("chdir", chdir, subr1, (SCM s))
 {
   if (!STRINGP(s)) error_bad_path(s);
   
-  if (chdir(STk_expand_file_name(STRING_CHARS(s))))
-    STk_error("cannot change directory to ~S", s);
+  if (chdir(STk_expand_file_name(STRING_CHARS(s))) != 0)
+    error_posix(s, NULL);
  
+  return STk_void;
+}
+
+/*
+<doc EXT make-directory
+ * (make-directory dir)
+ *
+ * Create a directory with name |dir|.
+doc>
+*/
+DEFINE_PRIMITIVE("make-directory", make_directory, subr1, (SCM path))
+{
+  mode_t mask;
+
+  if (!STRINGP(path)) error_bad_path(path);
+  umask(mask = umask(0));
+  if (mkdir(STRING_CHARS(path), 0777) != 0)
+    error_posix(path, NULL);
+  return STk_void;
+}
+
+/*
+<doc EXT delete-directory
+ * (delete-directory dir)
+ *
+ * Delete the directory with name |dir|.
+doc>
+*/
+DEFINE_PRIMITIVE("delete-directory", delete_directory, subr1, (SCM path))
+{
+  if (!STRINGP(path)) error_bad_path(path);
+  if (rmdir(STRING_CHARS(path)) != 0)
+    error_posix(path, NULL);
   return STk_void;
 }
 
@@ -459,7 +503,7 @@ DEFINE_PRIMITIVE("remove-file", remove_file, subr1, (SCM filename))
 {
   if (!STRINGP(filename)) error_bad_string(filename);
   if (remove(STRING_CHARS(filename)) != 0)
-    STk_error("cannot remove ~S", filename);
+    error_posix(filename, NULL);
   return STk_void;
 }
  
@@ -477,7 +521,7 @@ DEFINE_PRIMITIVE("rename-file", rename_file, subr2, (SCM filename1, SCM filename
   if (!STRINGP(filename1)) error_bad_string(filename1);
   if (!STRINGP(filename2)) error_bad_string(filename2);
   if (rename(STRING_CHARS(filename1), STRING_CHARS(filename2)) != 0)
-    STk_error("cannot rename file ~S in ~S", filename1, filename2);
+    error_posix(filename1, filename2);
   return STk_void;
 }
  
@@ -504,13 +548,13 @@ DEFINE_PRIMITIVE("copy-file", copy_file, subr2, (SCM filename1, SCM filename2))
   f2 = open(STRING_CHARS(filename2), O_WRONLY|O_CREAT|O_TRUNC, 0666);
   
   if ((f1==-1) || (f2==-1)) {
-    error_cannot_copy(filename1, filename2);
+    error_posix(filename1, filename2);
   }
 
   while ((n = read(f1, buff, MAXBUFF)) > 0) {
     if ((n < 0) || (write(f2, buff, n) < n)) {
       close(f1); close(f2); 
-      error_cannot_copy(filename1, filename2);
+      error_posix(filename1, filename2);
     }
   }
   
@@ -1073,6 +1117,8 @@ int STk_init_system(void)
 
   ADD_PRIMITIVE(getcwd);
   ADD_PRIMITIVE(chdir);
+  ADD_PRIMITIVE(make_directory);
+  ADD_PRIMITIVE(delete_directory);
   ADD_PRIMITIVE(getpid);
   ADD_PRIMITIVE(system);
     
