@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 17-Nov-2006 18:11 (eg)
+;;;; Last file update: 18-Nov-2006 12:24 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -205,7 +205,7 @@ doc>
 		  (compile (caddr l) '() args #f)
 		  (emit 'DEFINE-SYMBOL (fetch-constant who)))
 		(compiler-error 'define args "bad variable name ~S" who))
-	    (compiler-error 'define args "internal define forbidden here ~S " args)))))
+	    (compiler-error 'define args "internal define forbidden here ~S" args)))))
 
 
 ;;;;
@@ -296,37 +296,32 @@ doc>
 ;;
 ;; DEFINE-MACRO
 ;;
-
-;/(define (compile-define-macro e env tail?)
-;/  (let ((l (define->lambda e)))
-;/    (when (= (length l) 3)
-;/      (let* ((name (cadr l))
-;/	     (proc (caddr l))
-;/	     (args (cadr proc))
-;/	     (body (cddr proc)))
-;/	(let ((l `(lambda (form e)
-;/		    (apply (lambda ,args ,@body) (cdr form)))))
-;/	  (format #t "La forme de l'expanseur est ~S\n" l)
-;/	  ;; Produce code for the macro body
-;/	  (compile l env #f)
-;/	  (emit 'MAKE-EXPANDER (fetch-constant name))
-;/	  ;; An install expander for further compilation
-;/	  (display "ON INSTALLE l'EXPANDER\n")
-;/	  (install-expander! name (macro-eval l) l))))))
+(define (compile-define-macro e env tail?)
+  ;; Called for global macros. 
+  (if (null? env)
+      (let ((l (define->lambda e)))
+	(when (= (length l) 3)
+	  (let* ((l	       (extended-lambda->lambda l))
+		 (name     (cadr l))
+		 (proc     (caddr l))
+		 (expander `(lambda (form e) (apply ,proc (cdr form)))))
+	    ;; Compile code for installing expander
+	    (compile expander '() e #f)
+	    (emit 'MAKE-EXPANDER (fetch-constant name))
+	    ;; Install expander for further compilation
+	    (install-expander! name (macro-eval expander)))))
+      (compiler-error 'define-macro e "internal define-macro forbidden here ~S" e)))
 
 
-
-
-(define (compile-define-macro e env tail?)  ;; FIXME: verifier que c'est bien global
+(define (compile-internal-define-macro e env tail?)
+  ;; This one is called when we find a define-macro while rewriting a body
+  ;; (for internal defines -> letrec)
   (let ((l (define->lambda e)))
     (when (= (length l) 3)
       (let* ((l	       (extended-lambda->lambda l))
 	     (name     (cadr l))
 	     (proc     (caddr l))
 	     (expander `(lambda (form e) (apply ,proc (cdr form)))))
-	;; Compile code for installing expander
-	(compile expander '() e #f)
-	(emit 'MAKE-EXPANDER (fetch-constant name))
 	;; Install expander for further compilation
 	(install-expander! name (macro-eval expander))))))
 
@@ -486,35 +481,39 @@ doc>
 ;;         (param-ok? (cadr expr) '())))
 ;;  
 
-
 (define (rewrite-body body env)
-  (let Loop ((l body) (defs '()))
-    (cond
-      ((and (pair? l) (pair? (car l)) (eq? (caar l) 'begin))
-         ;; Delete useless begin
-          (Loop (append (cdar l) (cdr l))
-		defs))
-      ((and (pair? l) (pair? (car l)) (memq (caar l) '( define define-macro)))
-          ;; This is an internal define 
-	  (Loop (cdr l) (cons (cdr (define->lambda (car l))) defs)))
-      ((and (pair? l)
-	    (pair? (car l))
-	    (symbol?  (caar l))
-	    (not (symbol-in-env? (caar l) env))
-	    (expander? (caar l)))
-           ;; Macro-call: expand it
-	   (Loop (cons (macro-expand (car l))
-		       (cdr l))
-		defs))
-      (else
-	  ;; We have parsed all the (starting) definitions 
-	  (if (null? defs)
-	      `(begin ,@l)
-	      (let ((defs (reverse! defs)))
-		;; Generate "similar" to a letrec*
-		`(let ,(map (lambda (x) (list (car x) #f)) defs)
-		   ,@(map (lambda (x) `(set! ,@x)) defs)
-		   ,@l)))))))
+  (fluid-let ((*expander-list* *expander-list*))
+    (let Loop ((l body) (defs '()))
+      (cond
+	((and (pair? l) (pair? (car l)) (eq? (caar l) 'begin))
+	   ;; Delete useless begin
+	    (Loop (append (cdar l) (cdr l))
+		  defs))
+	((and (pair? l) (pair? (car l)) (eq? (caar l) 'define))
+	    ;; This is an internal define 
+	    (Loop (cdr l) (cons (cdr (define->lambda (car l))) defs)))
+	((and (pair? l) (pair? (car l)) (eq? (caar l) 'define-macro))
+	    ;; This is an internal define-macro. Add expander + skip expression
+	    (compile-internal-define-macro (car l) env #f)
+	    (Loop (cdr l) defs))
+	((and (pair? l)
+	      (pair? (car l))
+	      (symbol?  (caar l))
+	      (not (symbol-in-env? (caar l) env))
+	      (expander? (caar l)))
+	     ;; Macro-call: expand it
+	     (Loop (cons (macro-expand (car l))
+			 (cdr l))
+		  defs))
+	(else
+	    ;; We have parsed all the (starting) definitions 
+	    (if (null? defs)
+		`(begin ,@l)
+		(let ((defs (reverse! defs)))
+		  ;; Generate "similar" to a letrec*
+		  `(let ,(map (lambda (x) (list (car x) #f)) defs)
+		     ,@(map (lambda (x) `(set! ,@x)) defs)
+		     ,@l))))))))
 
 
 (define (compile-user-lambda formals body arity env)	; i.e R5RS ones
