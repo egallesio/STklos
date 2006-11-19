@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 18-Nov-2006 16:46 (eg)
+ * Last file update: 19-Nov-2006 22:24 (eg)
  */
 
 #include <unistd.h>
@@ -524,8 +524,36 @@ DEFINE_PRIMITIVE("rename-file", rename_file, subr2, (SCM filename1, SCM filename
     error_posix(filename1, filename2);
   return STk_void;
 }
- 
 
+
+/*
+<doc EXT directory-files
+ * (directory-files path)
+ *
+ * Returns the list of the files in the directory |path|.
+doc>
+*/
+DEFINE_PRIMITIVE("directory-files", directory_files, subr1, (SCM dirname))
+{
+  char *path;
+  DIR* dir;
+  SCM res = STk_nil;
+  struct dirent *d;
+
+  if (!STRINGP(dirname)) error_bad_string(dirname);
+  path = STk_expand_file_name(STRING_CHARS(dirname));
+  dir  = opendir(path);
+  if (!dir) error_posix(dirname, NULL);
+  
+  for (d = readdir(dir); d ; d = readdir(dir)) {
+    res = STk_cons(STk_Cstring2string(d->d_name), res);
+  }
+  closedir(dir);
+  return STk_dreverse(res);
+}
+		   
+  
+ 
 /*
 <doc EXT copy-file
  * (copy-file string1 string2)
@@ -1119,6 +1147,7 @@ int STk_init_system(void)
   ADD_PRIMITIVE(chdir);
   ADD_PRIMITIVE(make_directory);
   ADD_PRIMITIVE(delete_directory);
+  ADD_PRIMITIVE(directory_files);
   ADD_PRIMITIVE(getpid);
   ADD_PRIMITIVE(system);
     
