@@ -1,0 +1,48 @@
+2005-02-10    <dboucher@nuecho.com>
+
+	* ports/plt-scheme200/lalr.ss:
+	* lalr.skl: a few bug fixes (reported by Florian Loitsch)
+
+	* doc-src: ported the documentation to Skribe
+
+2004-10-25    <dboucher@nuecho.com>
+
+	* ports/stklos.decls: new port (thanks to Erick Gallesio).
+	
+	* examples/calc.scm: the initial environment is no longer
+	initialized to a constant list.
+	
+
+2004-01-28   <dboucher@nuecho.com>
+
+	* examples/calc.scm: enhanced version.
+
+	* lalr.scm: various new features (error recovery, new 'expect:' option)
+
+	* ports/plt-scheme200/lalr.ss:
+	* ports/plt-scheme200/lalr-private.ss: updated version
+
+2004-01-06     <dboucher@nuecho.com>
+
+	* lalr.scm: optimized the handling of lookaheads for states which
+	only have a default action that reduces a rule (this helps for
+	interactive parsers), as suggested by Rouben Rostamian.
+
+	* lalr.scm: modified the format of documentation comments. Will
+	be compatible with my new documentation system.
+
+	* ports/kawa/lalr.scm: removed. The port to Kawa is similar to
+	(most of) all other ports.
+
+2004-01-04    <dboucher@nuecho.com>
+
+	* ports/guile.decls: File added.
+	* Makefile, lalr.skl: added support for the port to Guile
+
+2003-09-10    <dboucher@nuecho.com>
+
+	* ports/kawa/lalr.scm: File added. It contains a version
+	specific to the Kawa Scheme system. This version was necessary due
+	to a limitation in the way defmacro operates with the compiler.
+
+

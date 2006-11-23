@@ -1,0 +1,97 @@
+<!-- 95% W3C COMPLIANT, 95% CSS FREE, RAW HTML -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
+<title>A portable and efficient LALR(1) parser generator for Scheme</title>
+ <style type="text/css">
+  <!--
+  pre { font-family: monospace }
+  tt { font-family: monospace }
+  code { font-family: monospace }
+  p.flushright { text-align: right }
+  p.flushleft { text-align: left }
+  span.sc { font-variant: small-caps }
+  span.sf { font-family: sans-serif }
+  span.skribetitle { font-family: sans-serif; font-weight: bolder; font-size: x-large; }
+  -->
+ </style>
+ <link href="doc.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="chapter" bgcolor="#ffffff">
+<table width="100%" class="skribetitle" cellspacing="0" cellpadding="0"><tbody>
+<tr><td align="center" bgcolor="#000070"><font color="yellow"><div class="skribetitle"><strong><big><big><big>3. A portable and efficient LALR(1) parser generator for Scheme -- Installation</big></big></big></strong></div><center>
+</center>
+</font></td></tr></tbody></table>
+<table cellpadding="3" cellspacing="0" width="100%" class="skribe-margins"><tr>
+<td align="left" valign="top" class="skribe-left-margin" width="20%"><div class="skribe-left-margin">
+<br/><center><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
+<tr bgcolor="#000070"><th align="center" colspan="1"><font color="#ffffff"><strong>main page</strong></font></th></tr>
+<tr bgcolor="#ffffff"><td align="center" colspan="1"><table width="100%" border="0" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left" valign="top" colspan="1"><strong>top:</strong></td><td align="right" valign="top" colspan="1"><a href="lalr.html#A-portable-and-efficient-LALR(1)-parser-generator-for-Scheme" class="inbound">A portable and efficient LALR(1) parser generator for Scheme</a></td></tr>
+</tbody></table>
+</td></tr>
+</tbody></table>
+</center>
+<br/><br/><center><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
+<tr bgcolor="#000070"><th align="center" colspan="1"><font color="#ffffff"><strong>Installation</strong></font></th></tr>
+<tr bgcolor="#ffffff"><td align="center" colspan="1"><table cellspacing="1" cellpadding="1" width="100%" class="toc">
+<tbody>
+ <tr><td valign="top" align="left">3.1</td><td colspan="4" width="100%"><a href="lalr-3.html#Getting-the-distribution">Getting the distribution</a></td></tr>
+ <tr><td valign="top" align="left">3.2</td><td colspan="4" width="100%"><a href="lalr-3.html#Installing-the-parser-generator">Installing the parser generator</a></td></tr>
+</tbody>
+</table>
+</td></tr>
+</tbody></table>
+</center>
+<br/><br/><center><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
+<tr bgcolor="#000070"><th align="center" colspan="1"><font color="#ffffff"><strong>Chapters</strong></font></th></tr>
+<tr bgcolor="#ffffff"><td align="center" colspan="1"><table cellspacing="1" cellpadding="1" width="100%" class="toc">
+<tbody>
+ <tr><td valign="top" align="left">1</td><td colspan="4" width="100%"><a href="lalr-1.html#Description">Description</a></td></tr>
+ <tr><td valign="top" align="left">2</td><td colspan="4" width="100%"><a href="lalr-2.html#Portability">Portability</a></td></tr>
+ <tr><td valign="top" align="left">3</td><td colspan="4" width="100%"><a href="lalr-3.html#Installation">Installation</a></td></tr>
+ <tr><td valign="top" align="left">4</td><td colspan="4" width="100%"><a href="lalr-4.html#Defining-a-parser">Defining a parser</a></td></tr>
+ <tr><td valign="top" align="left">5</td><td colspan="4" width="100%"><a href="lalr-5.html#The-grammar-format">The grammar format</a></td></tr>
+</tbody>
+</table>
+</td></tr>
+</tbody></table>
+</center>
+</div></td>
+<td align="left" valign="top" class="skribe-body"><div class="skribe-body">
+<!-- Getting the distribution -->
+<a name="Getting-the-distribution"></a>
+<div class="skribesectiontitle"><h3>3.1 Getting the distribution</h3></div><div class="section">
+<p>The distribution for <code>lalr-scm</code> v2.1.2 can be obtained <a href="http://www.iro.umontreal.ca/~boucherd/soft/lalr-2.1.taz" class="http">here</a>.</p></div><br>
+<!-- Installing the parser generator -->
+<a name="Installing-the-parser-generator"></a>
+<div class="skribesectiontitle"><h3>3.2 Installing the parser generator</h3></div><div class="section">
+<p>To configure the parser generater under Unix or cygwin, simply type<pre class="fragment">   % make *scheme-system*
+</pre>
+</p><p>where <em>*scheme-system*</em> is one of<ul class="itemize"><li><code>gambit</code></li>
+<li><code>plt-scheme</code> v103 and v205</li>
+<li><code>sisc</code></li>
+<li><code>chicken</code></li>
+<li><code>bigloo</code></li>
+<li><code>kawa</code></li>
+<li><code>guile</code></li>
+<li><code>STklos</code></li>
+</ul></p><p>The exact list of supported Scheme systems may differ from
+this list.  Typing <code>make</code> without any argument will list
+all supported systems.</p><p>The configuration will generate a file <code>lalr.scm</code>
+containing the code for the parser generator.</p><p>Finally, note that <code>lalr-scm</code> is distributed with
+some Scheme systems, like <a href="http://www.call-with-current-continuation.org/index.html" class="http">Chicken</a> and <a href="www.stklos.org">STklos</a>. A modified
+(and somewhat outdated) version of <code>lalr-scm</code> is already included in
+<a href="http://www-sop.inria.fr/mimosa/fp/Bigloo/" class="http">Bigloo</a></p></div><br>
+</div></td>
+</tr></table><div class="skribe-ending">
+<hr> 
+<p class="ending"><font size="-1">
+This <span class="sc">Html</span> page has been produced by 
+<a href="http://www.inria.fr/mimosa/fp/Skribe" class="http">Skribe</a>.
+<br/>
+Last update <em>Thu Feb 10 22:04:32 2005</em>.</font></p></div>
+</body>
+</html>

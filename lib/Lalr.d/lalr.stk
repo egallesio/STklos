@@ -3,7 +3,7 @@
 ;;;
 ;;
 ;; @created   "Mon Jan 22 15:42:32 1996"
-;; @modified  "Wed Jan 28 19:25:54 2004"
+;; @modified  "Thu Feb 10 20:14:46 2005"
 ;; @author    "Dominique Boucher"
 ;; @version   "2.1.0"
 ;; @copyright "Dominique Boucher"
@@ -11,8 +11,7 @@
 ;;   (for the Bison source code translated in Scheme)
 ;; Copyright (C) 1996-2003 Dominique Boucher
 ;;   (for the translation in Scheme)
-;; STklos Version by Erick Gallesio
-;; Last file update: 25-Oct-2004 19:07 (eg)
+;;
 ;;;
 ;;;; --
 ;;;; Introduction
@@ -255,17 +254,17 @@
 
 ; ---------- SYSTEM DEPENDENT SECTION -----------------
 ;; File written in -*- Scheme -*-
-
-#,(pragma :undefined-symbol-warning #f)
-(define-macro (def-macro form . body)
-  `(define-macro ,form (let () ,@body)))
-
-(define (pprint form) (pp form :port (current-output-port)))
-
-(define lalr-keyword? keyword?)
-(define-macro (BITS-PER-WORD) 30)
-(define-macro (logical-or x . y) `(bit-or ,x ,@y))
-(define-macro (lalr-error msg obj) `(error 'lalr-parser ,msg ,obj))
+(begin
+  (require "pp")
+  (define-macro (def-macro form . body)
+    `(define-macro ,form (let () ,@body)))
+  
+  (define (pprint form) (pp form :port (current-output-port)))
+  
+  (define lalr-keyword? keyword?)
+  (define-macro (BITS-PER-WORD) 30)
+  (define-macro (logical-or x . y) `(bit-or ,x ,@y))
+  (define-macro (lalr-error msg obj) `(error 'lalr-parser ,msg ,obj)))
 
 ; ---------- END OF SYSTEM DEPENDENT SECTION ------------
 
@@ -1353,7 +1352,7 @@
       (if (vector? (vector-ref reduction-table i))
 	  (let ((act (most-common-action acts)))
 	    (vector-set! action-table i
-			 (cons `(*default* . ,(if act act 'error))
+			 (cons `(*default* . ,(if act act '*error*))
 			       (translate-terms
 				(lalr-filter (lambda (x) 
 					  (not (eq? (cdr x) act)))
@@ -1492,10 +1491,10 @@
 	      (cons first (loop rest)))
 	     ((and (pair? first)
 		   (eq? (car first) 'prec:))
-		   (pair? (cdr first))
 	      (if (and (pair? (cdr first))
+                       (null? (cddr first))
 		       (member (cadr first) terms))
-		  (if (null? (cddr first))
+		  (if (null? rest)
 		      (begin
 			(add-rule-precedence! ruleno (pos-in-list (cadr first) terms))
 			(loop rest))

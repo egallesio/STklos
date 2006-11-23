@@ -5,28 +5,29 @@ Send questions, comments, suggestions or bug reports to
    boucherd@iro.umontreal.ca
 
 Dominique Boucher, Ph.D. -- NuEcho Inc.
-January 2004
+February 2005
 -----------------------------------------------------------------------------
 
 The distribution contains the following files:
 
-	. README        : this file.
-	. doc/lalr.html : The parser generator documentation.
-	. lalr.skl      : The parser generator skeleton (sh script)
- 	. Makefile      : makefile for generating system-specific 
-		          parser generators.
-	. examples/     : examples of parsers
-	. ports/        : directory containing the various 
-                          implementation-specific code fragments
+	. README                  : this file.
+	. documentation/lalr.html : The parser generator documentation.
+	. lalr.skl                : The parser generator skeleton (sh script)
+ 	. Makefile                : makefile for generating system-specific 
+		                    parser generators.
+	. examples/               : examples of parsers
+	. ports/                  : directory containing the various 
+                                    implementation-specific code fragments
 
 It has been successfully tested under the following Scheme systems:
 
-	- Gambit v3.0
+	- Gambit v3.0, v4.0
 	- PLT-Scheme 103.5
 	- PLT-Scheme 205
-	- Bigloo 2.5a
+	- Bigloo 2.6e
 	- Kawa 1.7
 	- Guile 1.6.4
+        - STklos 
 
 This distribution also contains ports to the following Scheme systems:
 

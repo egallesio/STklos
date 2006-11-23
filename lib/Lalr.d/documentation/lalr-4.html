@@ -1,0 +1,101 @@
+<!-- 95% W3C COMPLIANT, 95% CSS FREE, RAW HTML -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">
+<title>A portable and efficient LALR(1) parser generator for Scheme</title>
+ <style type="text/css">
+  <!--
+  pre { font-family: monospace }
+  tt { font-family: monospace }
+  code { font-family: monospace }
+  p.flushright { text-align: right }
+  p.flushleft { text-align: left }
+  span.sc { font-variant: small-caps }
+  span.sf { font-family: sans-serif }
+  span.skribetitle { font-family: sans-serif; font-weight: bolder; font-size: x-large; }
+  -->
+ </style>
+ <link href="doc.css" rel="stylesheet" type="text/css">
+</head>
+
+<body class="chapter" bgcolor="#ffffff">
+<table width="100%" class="skribetitle" cellspacing="0" cellpadding="0"><tbody>
+<tr><td align="center" bgcolor="#000070"><font color="yellow"><div class="skribetitle"><strong><big><big><big>4. A portable and efficient LALR(1) parser generator for Scheme -- Defining a parser</big></big></big></strong></div><center>
+</center>
+</font></td></tr></tbody></table>
+<table cellpadding="3" cellspacing="0" width="100%" class="skribe-margins"><tr>
+<td align="left" valign="top" class="skribe-left-margin" width="20%"><div class="skribe-left-margin">
+<br/><center><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
+<tr bgcolor="#000070"><th align="center" colspan="1"><font color="#ffffff"><strong>main page</strong></font></th></tr>
+<tr bgcolor="#ffffff"><td align="center" colspan="1"><table width="100%" border="0" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left" valign="top" colspan="1"><strong>top:</strong></td><td align="right" valign="top" colspan="1"><a href="lalr.html#A-portable-and-efficient-LALR(1)-parser-generator-for-Scheme" class="inbound">A portable and efficient LALR(1) parser generator for Scheme</a></td></tr>
+</tbody></table>
+</td></tr>
+</tbody></table>
+</center>
+<br/><br/><center><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
+<tr bgcolor="#000070"><th align="center" colspan="1"><font color="#ffffff"><strong>Defining a parser</strong></font></th></tr>
+<tr bgcolor="#ffffff"><td align="center" colspan="1"><table cellspacing="1" cellpadding="1" width="100%" class="toc">
+<tbody>
+ <tr><td valign="top" align="left">4.1</td><td colspan="4" width="100%"><a href="lalr-4.html#Loading-the-generator">Loading the generator</a></td></tr>
+ <tr><td valign="top" align="left">4.2</td><td colspan="4" width="100%"><a href="lalr-4.html#Running-the-parser">Running the parser</a></td></tr>
+</tbody>
+</table>
+</td></tr>
+</tbody></table>
+</center>
+<br/><br/><center><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
+<tr bgcolor="#000070"><th align="center" colspan="1"><font color="#ffffff"><strong>Chapters</strong></font></th></tr>
+<tr bgcolor="#ffffff"><td align="center" colspan="1"><table cellspacing="1" cellpadding="1" width="100%" class="toc">
+<tbody>
+ <tr><td valign="top" align="left">1</td><td colspan="4" width="100%"><a href="lalr-1.html#Description">Description</a></td></tr>
+ <tr><td valign="top" align="left">2</td><td colspan="4" width="100%"><a href="lalr-2.html#Portability">Portability</a></td></tr>
+ <tr><td valign="top" align="left">3</td><td colspan="4" width="100%"><a href="lalr-3.html#Installation">Installation</a></td></tr>
+ <tr><td valign="top" align="left">4</td><td colspan="4" width="100%"><a href="lalr-4.html#Defining-a-parser">Defining a parser</a></td></tr>
+ <tr><td valign="top" align="left">5</td><td colspan="4" width="100%"><a href="lalr-5.html#The-grammar-format">The grammar format</a></td></tr>
+</tbody>
+</table>
+</td></tr>
+</tbody></table>
+</center>
+</div></td>
+<td align="left" valign="top" class="skribe-body"><div class="skribe-body">
+<!-- Loading the generator -->
+<a name="Loading-the-generator"></a>
+<div class="skribesectiontitle"><h3>4.1 Loading the generator</h3></div><div class="section">
+<p>The file <code>lalr.scm</code> declares a macro called <code>lalr-parser</code>:<pre class="fragment">(lalr-parser [options] tokens rules ...)
+</pre>
+</p><p>To use this macro, you must first load <code>lalr.scm</code> in your
+Scheme system using either <code>load</code> or the
+<code>include</code> special form in Gambit-C.</p><p>This macro, when given appropriate arguments, generates an LALR(1)
+syntax analyzer.  The macro accepts at least two arguments. The first
+is a list of symbols which represent the terminal symbols of the
+grammar. The remaining arguments are the grammar production rules. See
+section <a href="lalr-5.html#The-grammar-format" class="inbound">The grammar format</a> for further details.</p></div><br>
+<!-- Running the parser -->
+<a name="Running-the-parser"></a>
+<div class="skribesectiontitle"><h3>4.2 Running the parser</h3></div><div class="section">
+<p>The parser generated by the <code>lalr-parser</code> macro is a
+function that takes two parameters. The first parameter is a lexical
+analyzer while the second is an error procedure.</p><p>The lexical analyzer is zero-argument function (a thunk)
+invoked each time the parser needs to look-ahead in the token stream.
+A token is usually a pair whose <code>car</code> is the symbol
+corresponding to the token (the same symbol as used in the grammar
+definition). The <code>cdr</code> of the pair is the semantic value
+associated with the token. For example, a string token would have the
+<code>car</code> set to <code>'string</code> while the
+<code>cdr</code> is set to the string value <code>&quot;hello&quot;</code>.</p><p>Once the end of file is encountered, the lexical analyzer
+must always return the symbol <code>'*eoi*</code> each time it is
+invoked.</p><p>The error procedure must be a function that accepts at least
+two parameters.</p></div><br>
+</div></td>
+</tr></table><div class="skribe-ending">
+<hr> 
+<p class="ending"><font size="-1">
+This <span class="sc">Html</span> page has been produced by 
+<a href="http://www.inria.fr/mimosa/fp/Skribe" class="http">Skribe</a>.
+<br/>
+Last update <em>Thu Feb 10 22:04:32 2005</em>.</font></p></div>
+</body>
+</html>
