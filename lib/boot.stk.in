@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  8-Nov-2006 11:28 (eg)
+;;;; Last file update: 23-Nov-2006 14:01 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -39,7 +39,6 @@
 (include "object.stk")		; CLOS like object system
 (include "date.stk")		; Dates
 (include "thread.stk")		; Thread support
-(include "pragma.stk")		; Pragma system for STklos compiler
 (include "obsolete.stk")	; Obsolete functions. Candidates to disappear
 
 (include "repl.stk")		; Read Eval Print Loop

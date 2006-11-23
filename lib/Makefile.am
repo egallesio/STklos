@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 23-Oct-2006 23:11 (eg)
+# Last file update: 23-Nov-2006 14:02 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d @LURCDIR@
 
@@ -21,7 +21,6 @@ scheme_BOOT = assembler.stk		\
 	      object.stk 		\
 	      obsolete.stk		\
 	      peephole.stk		\
-	      pragma.stk		\
 	      process.stk		\
 	      r5rs.stk 			\
 	      regexp.stk		\
@@ -40,7 +39,6 @@ scheme_SRCS = STklos.init		\
 	      full-syntax.stk		\
 	      full-conditions.stk 	\
 	      getopt.stk		\
-	      lalr.stk			\
 	      lex-rt.stk		\
 	      make-C-boot.stk		\
 	      match.stk			\
@@ -74,7 +72,6 @@ scheme_OBJS = compfile.ostk		\
 	      describe.ostk		\
 	      getopt.ostk		\
 	      lex-rt.ostk		\
-	      lalr.ostk			\
 	      match.ostk		\
 	      pp.ostk			\
 	      srfi-1.ostk 		\

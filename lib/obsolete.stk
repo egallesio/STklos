@@ -2,7 +2,7 @@
 ;;;; obsolete.stk	-- Definition of functions which are obsolete.
 ;;;;			   Function defined here are candidate to disappear.
 ;;;; 
-;;;; Copyright © 2002-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update: 27-Oct-2005 22:56 (eg)
+;;;; Last file update: 23-Nov-2006 13:59 (eg)
 ;;;;
 
 
@@ -57,3 +57,9 @@
       (hash-table-ref/default ht key default)
       (hash-table-ref ht key)))
 (define hash-table-remove!  hash-table-delete!)
+
+
+;; 23-Nov-2006 (v 0.82)
+(define (stklos-pragma . args)
+  (error "Don't use anymore pragma, but compiler:warn-use-undef parameter"))
+(define-reader-ctor 'pragma stklos-pragma)

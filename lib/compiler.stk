@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 22-Nov-2006 16:43 (eg)
+;;;; Last file update: 23-Nov-2006 14:00 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -33,8 +33,6 @@
 	  compiler:warn-use-undefined-postpone))
   
 (select-module STKLOS-COMPILER)
-
-(define *compiler-options* 	'())
 
 (define *compiler-port*		#f)
 (define *compiler-inline*  	'(+ - * / = < <= > >= cons car cdr null? list not 
