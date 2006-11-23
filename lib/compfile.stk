@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
-;;;; Last file update:  7-Nov-2006 13:58 (eg)
+;;;; Last file update: 22-Nov-2006 16:34 (eg)
 ;;;;
 
 (select-module STKLOS-COMPILER)
@@ -43,10 +43,10 @@
   (let ((out      (open-output-file output))
 	(globs    (compiler-known-globals))
 	(tm       (clock))
-	(copts    *compiler-options*))
+	(copts    (compiler:warn-use-undefined-postpone)))
 
     ;; Defer warning til the end of the compilation of file
-    (set! *compiler-options* (cons 'warn-use-undef-postpone *compiler-options*))
+    (compiler:warn-use-undefined-postpone #t)
 
     (initialize-compilation)
 
@@ -83,7 +83,7 @@
       (format #t "Compilation time ~S\n" (- (clock) tm)))
     
     ;; Restore Compiler flags
-    (set! *compiler-options* copts)))
+    (compiler:warn-use-undefined-postpone copts)))
 
 ;; ======================================================================
 (select-module STklos)

@@ -1,4 +1,4 @@
-;;;
+;;;;
 ;;;; c o m p i l e r . s t k			-- STklos Compiler
 ;;;; 
 ;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
@@ -21,18 +21,22 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 18-Nov-2006 12:24 (eg)
+;;;; Last file update: 22-Nov-2006 16:43 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
   (export eval
 	  disassemble
 	  compiler:time-display
-	  compiler:gen-line-number))
+	  compiler:gen-line-number
+	  compiler:warn-use-undefined
+	  compiler:warn-use-undefined-postpone))
+  
 (select-module STKLOS-COMPILER)
 
+(define *compiler-options* 	'())
+
 (define *compiler-port*		#f)
-(define *compiler-options* 	(list 'warn-use-undef))
 (define *compiler-inline*  	'(+ - * / = < <= > >= cons car cdr null? list not 
  				  vector-ref vector-set! string-ref string-set!
  				  eq? eqv? equal? void))
@@ -52,10 +56,10 @@
 ;; ----------------------------------------------------------------------
 ;; 	Compiler parameters ...
 ;; ----------------------------------------------------------------------
-(define compiler:time-display    (make-parameter #t))
-(define compiler:gen-line-number (make-parameter #f))
-
-
+(define compiler:time-display			(make-parameter #t))
+(define compiler:gen-line-number		(make-parameter #f))
+(define compiler:warn-use-undefined  		(make-parameter #f))
+(define compiler:warn-use-undefined-postpone	(make-parameter #f))
 
 
 (define (initialize-compilation)
@@ -161,13 +165,14 @@ doc>
   (compiler-warning (void) epair "reference to undefined symbol ~S" symbol))
 
 (define (verify-global symbol epair)
-  (when (and (memq 'warn-use-undef *compiler-options*)
-	     (not (known-var? symbol)))
-    (if (memq 'warn-use-undef-postpone *compiler-options*)
-	(set! *forward-globals* (cons (cons symbol epair) *forward-globals*))
-	(begin
-	  (compiler-warn-undef symbol epair)
-	  (new-global symbol)))))	; to avoid multiple warnings
+  (unless (known-var? symbol)
+    (cond
+      ((compiler:warn-use-undefined-postpone)
+       (set! *forward-globals* (cons (cons symbol epair) *forward-globals*)))
+      ((compiler:warn-use-undefined)
+       (compiler-warn-undef symbol epair)
+       (new-global symbol))))) 		; to avoid multiple warnings
+
 
 (define (compiler-show-undefined-symbols)
   (for-each (lambda (x)
@@ -181,6 +186,8 @@ doc>
 
 (define (compiler-known-globals)
   *known-globals*)
+
+
 
 (define (define->lambda l)
   (if (> (length l) 2)
@@ -1404,15 +1411,6 @@ doc>
 	   e
 	   #f))
 
-(define (generate-line-info e)
-  (when (%epair? e)
-    ;; File and line are pushed on the stack before calling DBG_VM(0)
-    (emit 'PUSH)
-    (compile-constant (%epair-file e) '() #f)
-    (emit 'PUSH)
-    (compile-constant (%epair-line e) '() #f)
-    (emit 'DBG-VM 0)))
-
 ;;;;======================================================================
 ;;;;
 ;;;; 		The bytecode compiler 
@@ -1426,9 +1424,6 @@ doc>
 	    (compile-reference e env epair tail?))
 	  (compile-constant  e env tail?))
       (begin
-	(when (memq 'gen-line-info *compiler-options*)
-	  (generate-line-info e))
-
 	(case (car e)
 	  ((quote)		(compile-quote		e env tail?))
 	  ((if)			(compile-if		e env tail?))

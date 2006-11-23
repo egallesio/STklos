@@ -1,7 +1,7 @@
 ;;;;
 ;;;; d e s c r i b e . s t k 	-- The DESCRIBE method (partly stolen fom Elk lib)
 ;;;;
-;;;; Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 21-Mar-1993 14:33
-;;;; Last file update: 20-Apr-2005 16:25 (eg)
+;;;; Last file update: 22-Nov-2006 16:25 (eg)
 ;;;;
 
 

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update: 17-Nov-2006 10:45 (eg)
+;;;; Last file update: 22-Nov-2006 16:30 (eg)
 
 
 #|
@@ -54,7 +54,11 @@
     shallow-clone deep-clone
     apply-generic apply-method apply-methods compute-applicable-methods 
     method-more-specific? sort-applicable-methods
-    class-subclasses class-methods
+    method-procedure method-specializers method-generic-function
+    class-subclasses class-methods class-name class-direct-supers
+    class-direct-subclasses class-precedence-list class-direct-methods
+    class-direct-slots class-slots
+    generic-function-name generic-function-methods
     slot-value))
 
 (define-module STKLOS-COMPILER

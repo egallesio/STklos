@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 26-Oct-2006 13:20 (eg)
+ * Last file update: 22-Nov-2006 16:41 (eg)
  */
 
 // INLINER values
@@ -655,7 +655,7 @@ SCM STk_n_values(int n, ...)
 \*===========================================================================*/
 
 /* Add support for debugging 
- * vm_debug is called wiemacs th the kind of desired support and sp. It returns 
+ * vm_debug is called with the kind of desired support and sp. It returns 
  * the number of elements used on the stack
  */
 
