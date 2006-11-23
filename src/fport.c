@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 27-Sep-2006 10:31 (eg)
+ * Last file update: 23-Nov-2006 16:56 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -137,7 +137,7 @@ static void fill_buffer(struct fstream *f)
   int n = 0; 				/* to avoid gcc warning */
   unsigned char *ptr = PORT_BASE(f);
 
-  /* Interactive ports ca seen multiple EOF, so clear EOF flag  */
+  /* Interactive ports can see multiple EOF, so clear EOF flag  */
   PORT_STREAM_FLAGS(f) &= ~STK_IOEOF; 
 
   /* Read */

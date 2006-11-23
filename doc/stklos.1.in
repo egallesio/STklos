@@ -16,7 +16,11 @@
 .\" .sp <n>    insert n1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-stklos \- An efficient Scheme System providing a powerful Object System
+stklos \- An efficient Scheme System providing a powerful Object
+System
+
+.SH SYNOPSYS
+\fbstklos\fR [OPTION ...] [ARGUMENT ... ]
 
 .SH DESCRIPTION
 .B STklos
@@ -63,10 +67,27 @@ evaluate the given sexpr and exit
 use 'file' to boot the system instead of the default one
 .IP "-q, --no-init-file"
 quiet: do not load the user init file
+.IP "-i, --interactive"
+be interactive, even if the command finds it is not the case. This
+option is generally useful when used inside emacs since it permits to
+display the REPL prompts.
+.IP "-d, --debug"
+insert informations to ease debugging (e.g, line numbers, signaling
+usage of undefined symbols, ...)
+.IP "-s, --stack-size=n"
+use a stack of \fBn\fR cells.
+.IP "-c, --case-sensitive"
+be case sensitive. The default is to be case insensitive as specified
+by R5RS.
 .IP "-v, --version"
 print program version and exit
 .IP "-h, --help"
 print this help and exit
+.IP "--"
+This special option signals the end of the \fBstklos\fR command. The
+arguments placed after this option are taken program arguments, 
+even if they start with a "-" character.
+
 
 .SH FILES
 

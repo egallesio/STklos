@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 17-Nov-2006 08:45 (eg)
+ * Last file update: 23-Nov-2006 17:20 (eg)
  */
 
 #include <stklos.h>
@@ -32,10 +32,16 @@
   if (*o) options = STk_key_set(options, 			\
 				STk_makekey(k), 		\
 				STk_Cstring2string(o));
-#define ADD_BOOL_OPTION(o, k)  					\
+
+#define ADD_BOOL_OPTION(o, k)  				\
   options = STk_key_set(options, 			\
 			STk_makekey(k), 		\
 			MAKE_BOOLEAN(o));
+
+#define ADD_INT_OPTION(o, k)  				\
+  options = STk_key_set(options, 			\
+			STk_makekey(k), 		\
+			MAKE_INT(o));
 
 
 /*=============================================================================
@@ -51,6 +57,7 @@ static char *load_file    = "";
 static char *sexpr        = "";
 static int  vanilla	  = 0;
 static int  stack_size    = DEFAULT_STACK_SIZE;
+static int  debug_mode    = 0;
 
 static struct option long_options [] = 
 {
@@ -61,6 +68,7 @@ static struct option long_options [] =
   {"boot-file",    	required_argument, NULL, 'b'},
   {"no-init-file", 	no_argument,       NULL, 'q'},
   {"interactive",  	no_argument,	   NULL, 'i'},
+  {"debug",		no_argument,	   NULL, 'd'},
   {"stack-size",   	required_argument, NULL, 's'},
   {"case-sensitive",	no_argument,	   NULL, 'c'},
   {"help",         	no_argument,       NULL, 'h'},
@@ -71,7 +79,7 @@ static void Usage(char *progname, int only_version)
 {
   fprintf(stderr, "%s (version %s)\n", progname, VERSION);
   if (only_version) return;
-  fprintf(stderr, "Usage: %s [options] progname [arg ... ]", progname);
+  fprintf(stderr, "Usage: %s [option ...] [arg ... ]", progname);
   fprintf(stderr, "\n"
 "Possible options:\n"
 "	-l file, --load=file		load 'file' before going interactive\n"
@@ -80,10 +88,12 @@ static void Usage(char *progname, int only_version)
 "	-b file, --boot-file=file	use 'file' to boot the system\n"
 "	-q, --no-init-file		quiet: do not load the user init file\n"
 "	-i, --interactive		interactive mode\n"
+"	-d, --debug			add informations to ease debugging\n"
 "	-s, --stack-size=n		use a stack of size n (default %d)\n"
 "	-c, --case-sensitive		be case sensitive (default is #f)\n"
 "	-v, --version			print program version and exit\n"
-"	-h, --help			print this help and exit\n", 
+"	-h, --help			print this help and exit\n" 
+"All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
 }
 
@@ -95,7 +105,7 @@ static int process_program_arguments(int argc, char *argv[])
   int c;
 
   for ( ; ; ) {
-    c = getopt_long(argc, argv, "qivhcf:l:e:b:s:", long_options, NULL);
+    c = getopt_long(argc, argv, "qidvhcf:l:e:b:s:", long_options, NULL);
     if (c == -1) break;
     
     switch (c) {
@@ -105,6 +115,7 @@ static int process_program_arguments(int argc, char *argv[])
       case 'e': sexpr	        = optarg; 	break;
       case 'b': boot_file       = optarg; 	break;
       case 'i': STk_interactive = 1;      	break;
+      case 'd': debug_mode++;			break;
       case 'q': vanilla         = 1;	  	break;
       case 's': stack_size      = atoi(optarg); break;
       case 'c': STk_read_case_sensitive = 1;	break;
@@ -126,15 +137,16 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
     l = STk_cons(STk_Cstring2string(argv[i]), l);
 
   options = LIST2(STk_makekey(":argv"), l);
-  ADD_OPTION(argv0,	   ":program-name");
-  ADD_OPTION(program_file, ":file");
-  ADD_OPTION(load_file,    ":load");
-  ADD_OPTION(sexpr, 	   ":sexpr");
+  ADD_OPTION(argv0,	   	   ":program-name");
+  ADD_OPTION(program_file, 	   ":file");
+  ADD_OPTION(load_file,    	   ":load");
+  ADD_OPTION(sexpr, 	   	   ":sexpr");
   ADD_BOOL_OPTION(vanilla,	   ":no-init-file");
-  ADD_BOOL_OPTION(STk_interactive, ":interactive")
+  ADD_BOOL_OPTION(STk_interactive, ":interactive");
+  ADD_INT_OPTION(debug_mode,   	   ":debug");
 
-    STk_define_variable(STk_intern("*%program-args*"), options, 
-			STk_STklos_module);
+  STk_define_variable(STk_intern("*%program-args*"), options, 
+		      STk_STklos_module);
 }
 
 int mymain(int argc, char *argv[])
