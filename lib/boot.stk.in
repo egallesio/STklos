@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 23-Nov-2006 14:01 (eg)
+;;;; Last file update: 23-Nov-2006 17:53 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -161,8 +161,13 @@
 (let ((no-init (key-get *%program-args* :no-init-file #f))
       (ld      (key-get *%program-args* :load  #f))
       (file    (key-get *%program-args* :file #f))
-      (expr    (key-get *%program-args* :sexpr #f)))
+      (expr    (key-get *%program-args* :sexpr #f))
+      (debug   (key-get *%program-args* :debug 0)))
 
+  ;; Look at the debug flag
+  (when (> debug 0)
+    (compiler:warn-use-undefined #t)	; Signal usage of still undefined symbols
+    (compiler:gen-line-number #t))	; Generate line nuumbers
  
   ;; Try to load the user initialization file except if "--no-init-file"
   (unless no-init
