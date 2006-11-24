@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  3-Nov-2006 19:04 (eg)
+;;;; Last file update: 24-Nov-2006 11:54 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything 
@@ -75,9 +75,12 @@
 ;;	   -- The error handler for the REPL
 ;; ----------------------------------------------------------------------
 (define (display-error-message who msg bt out)
-  (let ((loc (%build-error-location who bt)))
+  (let* ((loc (%build-error-location who bt))
+	 (from (if (cadr loc)
+		   (format " (near line ~a in file ~s)" (cdadr loc) (caadr loc))
+		   "")))
     (display (do-color 'bold 'red
-		       (format "**** Error:\n~A: ~A\n" (car loc) msg)
+		       (format "**** Error~A:\n~A: ~A\n" from (car loc) msg)
 		       'clear
 		       "\t(type \""
 		       'underline ",help" 'clear

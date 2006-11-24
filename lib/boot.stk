@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 24-Nov-2006 10:10 (eg)
+;;;; Last file update: 24-Nov-2006 11:22 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -115,7 +115,7 @@
   (if who
       (list who
 	    (if (null? bt) #f (cdar bt)))
-      (let Loop ((bt bt))
+      (let Loop ((bt bt) (info #f))
 	(cond
 	  ((null? bt)
 	   (list "???" #f))
@@ -123,15 +123,15 @@
 	   (let ((name (%procedure-name (caar bt))))
 	     (if (or (string? name) (cdar bt))
 		 ;; We have either a "pretty name" or a line information
-		 (list name (cdar bt))
+		 (list name
+		       (or info (cdar bt)))
 		 ;; Nothing interesting, continue to go down the stack
-		 (Loop (cdr bt)))))
+		 (Loop (cdr bt) info))))
 	  ((not (caar bt))
-	   ;; We have a let
-	   (if (cdar bt)
-	       (list "let" (cdar bt))
-	       (Loop (cdr bt))))))))
-
+	   ;; We have a let. Go down the stack (but keep the info -- if this
+	   ;; is the first time we have an info)
+	   (Loop (cdr bt)
+		 (or info (cdar bt))))))))
 
 ;; ----------------------------------------------------------------------
 ;; 	%simple-fatal-exception-handler ...
@@ -144,10 +144,15 @@
     (when (condition? c)
       (when (condition-has-type? c &error-message)
 	(set! bt (condition-ref c 'backtrace)) ;; will be displayed later
-	(format port "\tWhere: ~A\n" (car (%build-error-location who bt))))
+	(let ((loc (%build-error-location #f bt)))
+	  (format port "\t Where: in ~A" (car loc))
+	  (when (cadr loc)
+	    (format port " (near line ~a in file ~s)" (cdadr loc) (caadr loc)))
+	  (newline port)))
       (when (condition-has-type? c &message)
 	(format port "\tReason: ~A\n" (condition-ref c 'message))))
     ;; Show a backtrace
+    (newline port)
     (when bt
       (%display-backtrace bt useless-frames))
     (format port "EXIT\n")
