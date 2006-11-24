@@ -7431,7 +7431,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile gtklos/Makefile gtklos/gtklosconf.h utils/Makefile lib/boot.stk utils/stklos-config utils/stklos-script extensions/Makefile examples/Makefile examples/images/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/Lurc.d/Makefile tests/Makefile extensions/extconf.h doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-install.1 doc/skb/stklos-version.stk"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile gtklos/Makefile gtklos/gtklosconf.h utils/Makefile lib/boot-callcc.stk utils/stklos-config utils/stklos-script extensions/Makefile examples/Makefile examples/images/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/Lurc.d/Makefile tests/Makefile extensions/extconf.h doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-install.1 doc/skb/stklos-version.stk"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8027,7 +8027,7 @@ do
     "gtklos/Makefile") CONFIG_FILES="$CONFIG_FILES gtklos/Makefile" ;;
     "gtklos/gtklosconf.h") CONFIG_FILES="$CONFIG_FILES gtklos/gtklosconf.h" ;;
     "utils/Makefile") CONFIG_FILES="$CONFIG_FILES utils/Makefile" ;;
-    "lib/boot.stk") CONFIG_FILES="$CONFIG_FILES lib/boot.stk" ;;
+    "lib/boot-callcc.stk") CONFIG_FILES="$CONFIG_FILES lib/boot-callcc.stk" ;;
     "utils/stklos-config") CONFIG_FILES="$CONFIG_FILES utils/stklos-config" ;;
     "utils/stklos-script") CONFIG_FILES="$CONFIG_FILES utils/stklos-script" ;;
     "extensions/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/Makefile" ;;

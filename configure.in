@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 11-Nov-2006 19:34 (eg)
+dnl Last file update: 24-Nov-2006 10:11 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -509,7 +509,7 @@ AC_SUBST(CALLCC_STK)
 	
 AC_OUTPUT(Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile gtklos/Makefile gtklos/gtklosconf.h
-	  utils/Makefile lib/boot.stk
+	  utils/Makefile lib/boot-callcc.stk
 	  utils/stklos-config utils/stklos-script
 	  extensions/Makefile examples/Makefile
 	  examples/images/Makefile lib/Match.d/Makefile 

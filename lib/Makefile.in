@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 23-Nov-2006 14:02 (eg)
+# Last file update: 24-Nov-2006 10:18 (eg)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -42,14 +42,14 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 subdir = lib
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/boot.stk.in
+	$(srcdir)/boot-callcc.stk.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/stklosconf.h
-CONFIG_CLEAN_FILES = boot.stk
+CONFIG_CLEAN_FILES = boot-callcc.stk
 SOURCES =
 DIST_SOURCES =
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -202,6 +202,7 @@ scheme_BOOT = assembler.stk		\
 	      bb.stk 			\
 	      bonus.stk 		\
 	      boot.stk 			\
+	      boot-callcc.stk		\
 	      callcc.stk		\
 	      compiler.stk 		\
 	      computils.stk		\
@@ -328,7 +329,7 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-boot.stk: $(top_builddir)/config.status $(srcdir)/boot.stk.in
+boot-callcc.stk: $(top_builddir)/config.status $(srcdir)/boot-callcc.stk.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 uninstall-info-am:
 install-schemeDATA: $(scheme_DATA)
