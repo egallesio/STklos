@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 24-Oct-2006 20:34 (eg)
+;;;; Last file update: 25-Nov-2006 19:32 (eg)
 ;;;;
 
 ;;
@@ -329,8 +329,8 @@ doc>
  * (eval-from-string str module)
  *
  * Read an expression from |str| and evaluates it with |eval|. If a |module|
- * is passed, the evaluation takes place in the enviroment of this module.
- * Otherwise, the evaluation takes palce in the environmebnt returned by
+ * is passed, the evaluation takes place in the environment of this module.
+ * Otherwise, the evaluation takes place in the environment returned by
  * |current-module|.
  * @lisp
  * (define x 10)
@@ -342,10 +342,10 @@ doc>
 doc>
 |#
 (define (eval-from-string str :optional env)
-  (let ((code (parse-expression (read-from-string str))))
-    (%execute code
-	      (list->vector *code-constants*)
-	      (or env (current-module)))))
+  (eval (read-from-string str)
+	env))
+
+
 
 
 ;;;;

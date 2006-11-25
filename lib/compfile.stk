@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
-;;;; Last file update: 22-Nov-2006 16:34 (eg)
+;;;; Last file update: 25-Nov-2006 20:05 (eg)
 ;;;;
 
 (select-module STKLOS-COMPILER)
@@ -48,31 +48,31 @@
     ;; Defer warning til the end of the compilation of file
     (compiler:warn-use-undefined-postpone #t)
 
-    (initialize-compilation)
+    (fluid-let ((*code-instr* '())
+		(*code-constants* '()))
+      ;; Read the source file
+      (include-file input)
+      (emit 'END-OF-CODE)
 
-    ;; Read the source file
-    (include-file input)
-    (emit 'END-OF-CODE)
-
-    ;; Write the header
-    (format out "#!/usr/bin/env stklos-script\n")
-    (format out "; A -*- Scheme -*- generated file *DO NOT EDIT**\n")
-    (format out "STklos ~S\n" (compute-file-informations globs))
+      ;; Write the header
+      (format out "#!/usr/bin/env stklos-script\n")
+      (format out "; A -*- Scheme -*- generated file *DO NOT EDIT**\n")
+      (format out "STklos ~S\n" (compute-file-informations globs))
       
-    (let ((code (assemble (reverse! *code-instr*))))
-      ;;Write the assembly code and code vector
-      ;;(format out "\n#|\n") 
-      ;;(disassemble-code code out)
-      ;;(format out "\n~S\n|\#\n" code)
+      (let ((code (assemble (reverse! *code-instr*))))
+	;;Write the assembly code and code vector
+	;;(format out "\n#|\n") 
+	;;(disassemble-code code out)
+	;;(format out "\n~S\n|\#\n" code)
 	
-      ;; Write new constants as a vector
-      (format out "#~S\n" *code-constants*)
+	;; Write new constants as a vector
+	(format out "#~S\n" *code-constants*)
+	
+	;; Write byte-code
+	(%dump-code out code))
       
-      ;; Write byte-code
-      (%dump-code out code))
-    
-    ;; Close file
-    (close-output-port out)
+      ;; Close file
+      (close-output-port out))
     
     ;; Show undefined symbols
     (compiler-show-undefined-symbols)

@@ -1,4 +1,4 @@
-;;;;
+					;bonus;;;
 ;;;; c o m p i l e r . s t k			-- STklos Compiler
 ;;;; 
 ;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 23-Nov-2006 14:00 (eg)
+;;;; Last file update: 25-Nov-2006 20:15 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -59,15 +59,6 @@
 (define compiler:warn-use-undefined  		(make-parameter #f))
 (define compiler:warn-use-undefined-postpone	(make-parameter #f))
 
-
-(define (initialize-compilation)
-  (set! *code-instr*     '())
-  (set! *code-constants* '())
-  '(set! *code-labels*	 0) ;// FIXME: pourquoi?
-  )
-
-(define (get-generated-code)
-  (reverse *code-instr*))
 
 (define (new-label)
   (let ((lab *code-labels*))
@@ -314,7 +305,7 @@ doc>
 	    (compile expander '() e #f)
 	    (emit 'MAKE-EXPANDER (fetch-constant name))
 	    ;; Install expander for further compilation
-	    (install-expander! name (macro-eval expander)))))
+	    (install-expander! name (eval expander)))))
       (compiler-error 'define-macro e "internal define-macro forbidden here ~S" e)))
 
 
@@ -328,7 +319,7 @@ doc>
 	     (proc     (caddr l))
 	     (expander `(lambda (form e) (apply ,proc (cdr form)))))
 	;; Install expander for further compilation
-	(install-expander! name (macro-eval expander))))))
+	(install-expander! name (eval expander))))))
 
 
 ;;;;
@@ -1462,36 +1453,22 @@ doc>
 
 ;=============================================================================
 ;
-; Bootstrap
+; Eval
 ;
 ;=============================================================================
 
-(define (parse-expression e)
-  (initialize-compilation)
-  (compile e '() e #f)
-  (emit 'END-OF-CODE)
-  ;;   (assemble (open-input-string (generated-code)))
-  (assemble (reverse! *code-instr*)))
-
-
-(define (parse e)
-  (display-code (parse-expression e)))
-
-;(define (expand e) e)
-
 (define (eval e :optional env)
-  (let ((code (parse-expression e)))
-    ;;(disassemble-code code (current-error-port))
-    (%execute code (list->vector *code-constants*) (or env (current-module)))))
 
+  (define (parse-expression e)
+    (compile e '() e #f)
+    (emit 'END-OF-CODE)
+    (assemble (reverse! *code-instr*)))
 
-(define (macro-eval e)			;//FIXME: La sauvegarde est est utile?
-  (let* ((old-code *code-instr*)
-	 (old-cst  *code-constants*)
-	 (res      (eval e)))
-    (set! *code-instr* old-code)
-    (set! *code-constants* old-cst)
-    res))
+  (fluid-let ((*code-instr*     '())
+	      (*code-constants* '()))
+    (let ((code (parse-expression e)))
+      ;;(disassemble-code code (current-error-port))
+      (%execute code (list->vector *code-constants*) (or env (current-module))))))
 
 ;; ======================================================================
 (select-module STklos)
