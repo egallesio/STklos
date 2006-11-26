@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 22-Nov-2006 16:41 (eg)
+ * Last file update: 26-Nov-2006 12:16 (eg)
  */
 
 // INLINER values
@@ -62,7 +62,7 @@ static int debug_level = 0;	/* 0 is quiet, 1, 2, ... are more verbose */
 #  define NEXT		continue;/* Be sure to not use continue elsewhere */
 #endif
 
-#define NEXT0 		{vm->valc = 0; NEXT;}
+#define NEXT0 		{vm->val = STk_void; vm->valc = 0; NEXT;}
 #define NEXT1		{vm->valc = 1; NEXT;}
 
 
