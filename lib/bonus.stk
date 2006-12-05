@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  5-Dec-2006 11:24 (eg)
+;;;; Last file update:  5-Dec-2006 11:41 (eg)
 ;;;;
 
 ;;
@@ -1055,7 +1055,6 @@ doc>
 	   (Loop (cdr symbs) (cons (car symbs) res)))
 	(else
 	   (Loop (cdr symbs) res))))))
-
 
 #|
 <doc EXT die
