@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 25-Nov-2006 19:32 (eg)
+;;;; Last file update:  5-Dec-2006 11:24 (eg)
 ;;;;
 
 ;;
@@ -1028,6 +1028,16 @@ doc>
 doc>
 |#
 (define (apropos str :optional (module (current-module)))
+
+  (define (list->set lst res)
+    (cond
+      ((null? lst) res)
+      ((memq (car lst) res) (list->set (cdr lst) res))
+      (else (list->set (cdr lst) (cons (car lst) res)))))
+  
+  (define (symbol<? s1 s2)
+    (string<? (symbol->string s1) (symbol->string s2)))
+
   ;; Sanity check
   (unless (module? module)
     (error 'apropos "bad module ~S" module))
@@ -1036,15 +1046,16 @@ doc>
   (let ((s        (if (symbol? str) (symbol->string str) str))
 	(external (apply append (map module-exports (module-imports module))))
 	(internal (module-symbols module)))
-    (let Loop ((symbs (append internal external))
+    (let Loop ((symbs (list->set (append internal external) '()))
 	       (res   '()))
       (cond
 	((null? symbs)
-	   (and (not (null? res)) res))
+	   (and (not (null? res)) (sort res symbol<?)))
 	((string-find? s (symbol->string (car symbs)))
 	   (Loop (cdr symbs) (cons (car symbs) res)))
 	(else
 	   (Loop (cdr symbs) res))))))
+
 
 #|
 <doc EXT die
