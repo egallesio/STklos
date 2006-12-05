@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 28-Feb-2005 17:15 (eg)
+;; Last file update: 28-Nov-2006 23:57 (eg)
 ;;
 ;; ======================================================================
 
@@ -277,10 +277,10 @@ description.  Hereafter, is another definition of our
 ])
    
 
-   (p [Using this class definition, reading the x coordianate of the
+   (p [Using this class definition, reading the x coordinate of the
 ,(code "p") point can be done with:])
    
-   (fontified-code [(p c)])
+   (fontified-code [(x-of p)])
 
    (p [and setting it to 100 can be done using the extended ,(code "set!")])
    

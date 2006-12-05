@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 16-Nov-2006 17:05 (eg)
+;;;; Last file update: 29-Nov-2006 23:15 (eg)
 ;;;;
 
 
@@ -299,6 +299,23 @@ doc>
 |#
 (define-macro (in-module mod symb . default)
   `(apply symbol-value* ',symb (find-module ',mod) ',default))
+
+
+;;=============================================================================
+;;
+;; 				R5RS Environments
+;;
+;;=============================================================================
+#|
+<doc interaction-environment
+ * (interaction-environment)
+ *
+ * TO DO
+doc>
+|#
+(define (interaction-environment)
+  (find-module 'STklos))  
+
 
 
 ;; LocalWords:  emph doc ext
