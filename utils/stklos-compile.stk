@@ -21,12 +21,12 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update:  3-Nov-2006 16:04 (eg)
+;;;; Last file update:  5-Dec-2006 18:53 (eg)
 ;;;;
 
 (define *output* "a.out")
 (define *c-code* #f)
-
+(define *expr* #f)
 
 ;; ----------------------------------------------------------------------
 ;;	convert-to-C ...
@@ -109,12 +109,18 @@
      "Usage: stklos-compile [options] file"
      "Compile a stklos file to byte codes"
      ""
-     (("output" :alternate "o" :arg file :help "Output compiled code in <file>")
-        (set! *output* file))
+     "Input options"
      (("case-sensitive" :alternate "c"  :help "Be case sensitive on symbols")
         (read-case-sensitive #t))
+     "Output options"
+     (("output" :alternate "o" :arg file :help "Output compiled code in <file>")
+        (set! *output* file))
      (("C-code" :alternate "C" :help "Produce C code")
         (set! *c-code* #t))
+     "Compiling options"
+     (("evaluate" :alternate "e" :arg expr
+       :help "evaluate <expr> before compiling file")
+      (set! *expr* expr))
      (("line-info" :alternate "l" :help "Insert line numbers in generated file")
         (compiler:gen-line-number #t))
      (("no-time" :help "Don't display compilation time")
@@ -125,6 +131,13 @@
      (else
       (cond
 	((= (length other-arguments) 1)
+	 ;; Evaluate prelude code
+	 (when (string? *expr*)
+	   (with-handler (lambda (c)
+			   (die (format "Error in --evaluate ~A option" *expr*)))
+	      (eval (read-from-string *expr*)
+		    (interaction-environment))))
+	 ;; Produce code
 	 (if *c-code*
 	     (compile-to-C-code (car other-arguments) *output*)
 	     (compile-to-bytecode (car other-arguments) *output*))
