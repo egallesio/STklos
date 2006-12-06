@@ -1,3 +1,157 @@
+2006-12-05  Erick Gallesio  <eg@essi.fr>
+
+	* doc/stklos-compile.1.in, lib/make-C-boot.stk, src/boot.c, utils
+	/stklos-compile.stk:
+	Added the --evaluate option to stklos-compile
+	[c2ef606fede9] [tip]
+
+	* lib/bonus.stk, lib/getopt.stk, src/boot.c:
+	Optimisation of PARSE-ARGUMENTS
+	[46b48e3bb21e]
+
+	* lib/bonus.stk, src/boot.c, src/boot.img:
+	Deleted duplicates in APROPOS results
+	[0b21914ea504]
+
+	* doc/skb/object.skb, lib/module.stk, src/boot.c, src/boot.img:
+	Added the interaction-environment function
+	[fe2b863ba95e]
+
+2006-11-26  Erick Gallesio  <eg@essi.fr>
+
+	* src/vm.c:
+	small bug fix
+	[04c98c9e9839]
+
+2006-11-25  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk, lib/compfile.stk, lib/compiler.stk, src/boot.c,
+	src/boot.img:
+	- Correction of a bug with eval in macro
+	- Compiler code cleaning
+	[d77bc7e3ad58]
+
+2006-11-24  Erick Gallesio  <eg@essi.fr>
+
+	* lib/boot.stk, lib/repl.stk, src/boot.c, src/boot.img:
+	Better error messages when the debug mode is used (or when compiled
+	with line number informations)
+	[96301a2d147b]
+
+	* configure, configure.in, lib/Lalr.d/Makefile.in, lib/Makefile.am,
+	lib/Makefile.in, lib/boot-callcc.stk.in, lib/boot.stk,
+	lib/boot.stk.in, src/boot.c:
+	Moved the configure dependency form boot.stk.in to the new file
+	boot-callcc.stk.in
+	[10e9541aa35c]
+
+2006-11-23  Erick Gallesio  <eg@essi.fr>
+
+	* doc/stklos.1.in, src/boot.c, src/fport.c, src/stklos.c:
+	Added the --debug option to the stklos command
+	[35a8f1c2efde]
+
+	* lib/Makefile.am, lib/Makefile.in, lib/boot.stk.in, lib/compiler.stk,
+	lib/lalr.stk, lib/obsolete.stk, lib/pragma.stk, src/boot.c,
+	src/boot.img:
+	- Deleted the undocumented pragma construction
+	- There was two different version of lalr in the distribution! Deleted
+	the one which is in /lib and kept the one in /lib/Lalr.d
+	[32f73c65bebc]
+
+	* lib/Lalr.d/ChangeLog, lib/Lalr.d/README,
+	lib/Lalr.d/documentation/def.html,
+	lib/Lalr.d/documentation/distrib.html,
+	lib/Lalr.d/documentation/doc.css,
+	lib/Lalr.d/documentation/format.html,
+	lib/Lalr.d/documentation/index.html,
+	lib/Lalr.d/documentation/lalr-1.html,
+	lib/Lalr.d/documentation/lalr-2.html,
+	lib/Lalr.d/documentation/lalr-3.html,
+	lib/Lalr.d/documentation/lalr-4.html,
+	lib/Lalr.d/documentation/lalr-5.html,
+	lib/Lalr.d/documentation/lalr.html,
+	lib/Lalr.d/documentation/port.html, lib/Lalr.d/lalr.stk, src/boot.c:
+	Updated the version of LALR
+	[d7941431ffdc]
+
+	* lib/compfile.stk, lib/compiler.stk, lib/describe.stk,
+	lib/object.stk, lib/trace.stk, src/boot.c, src/boot.img, src/vm.c:
+	Change the behaviour of warnings on undefined symbols. Now, by
+	default, undefined symbols are not signaled in interactive mode, but
+	they are always signaled (in old postponed mode) when a file is
+	compiled. This avoid a lot of false warnings when loading a file or
+	pasting it on standard input.
+	[d9822324598a]
+
+2006-11-19  Erick Gallesio  <eg@essi.fr>
+
+	* doc/skb/stdproc.skb, src/system.c:
+	Added the primitive DIRECTORY-FILES
+	[fad8352c55d9]
+
+2006-11-18  Erick Gallesio  <eg@essi.fr>
+
+	* doc/skb/stdproc.skb, src/system.c:
+	- Added the primitives MAKE-DIRECTORY and DELETE-DIRECTORY
+	- In case of error, POSIX functions return the POSIX message rather
+	than a less informative ad-hoc one.
+	[a6f32dac48f8]
+
+	* lib/compiler.stk, src/boot.c, src/boot.img:
+	Permit internal macro definition
+	[9bd32ed9187f]
+
+2006-11-17  Erick Gallesio  <eg@essi.fr>
+
+	* lib/object.stk, lib/srfi-17.stk, lib/srfi-60.stk, src/boot.c,
+	src/boot.img:
+	Get rid of ensure-method*
+	[b1627747a174]
+
+
+2006-11-16  Erick Gallesio  <eg@essi.fr>
+
+	* lib/module.stk, src/boot.c, src/boot.img, src/env.c:
+	Added "%REDEFINE-MODULE-EXPORTS function
+	[3f390118b15c]
+
+2006-11-13  Erick Gallesio  <eg@saxo.polytech.unice.fr>
+
+	* lib/make-C-boot.stk, src/boot.c:
+	Generate the boot file in C with one octet by line. This shorten the
+	diffs when committing changes
+	[295768920873]
+
+	* lib/module.stk, src/boot.c, src/boot.img, src/env.c:
+	Fixed the order of imported modules (STklos was not always last
+	[aa435044ca87]
+
+2006-11-13  Erick Gallesio  <eg@essi.fr>
+
+	* configure, configure.in, lib/compiler.stk, src/boot.c, src/boot.img:
+	Fixed a bug in code for internal defines rewriting
+	[1c4dae61710f]
+
+2006-11-10  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bb.stk, lib/boot.stk.in, lib/compiler.stk, lib/object.stk,
+	lib/pragma.stk, src/boot.c, src/boot.img:
+	STklos compiler and object system are now isolated in their own
+	module
+	[53e5abe3de96]
+
+2006-11-07  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bb.stk, lib/compfile.stk, lib/compiler.stk, src/boot.c,
+	src/boot.img:
+	Creation of STKLOS-COMPILER module
+	[4fb8089031a0]
+
+	* lib/compiler.stk, src/boot.c, src/boot.img:
+	Creation of STKLOS-COMPILER module
+	[572530d3fb80]
+	
 2006-11-06  Erick Gallesio  <eg@essi.fr>
 	* 0.81 release
 	============================================================
