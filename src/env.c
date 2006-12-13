@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 16-Nov-2006 17:07 (eg)
+ * Last file update: 13-Dec-2006 12:05 (eg)
  */
 
 #include "stklos.h"
@@ -156,6 +156,7 @@ DEFINE_PRIMITIVE("%module-imports-set!", module_imports_set, subr2,
 		 (SCM importer,SCM imported))
 {
   if (!MODULEP(importer)) error_bad_module(importer);
+  if (NULLP(imported))    return STk_void;
   if (!CONSP(imported))   error_bad_list(imported);
   
   MODULE_IMPORTS(importer) = STk_dappend2(imported, LIST1(STk_STklos_module));
