@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 25-Nov-2006 20:15 (eg)
+;;;; Last file update: 11-Dec-2006 17:27 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1381,6 +1381,16 @@ doc>
 
   (compile-normal-call (car e) (cdr e) (length e) env e tail))
 
+
+(define (compile-require4syntax e env tail)
+  ;; No code is produced here, we only load the file for the compiler
+  (with-handler
+     (lambda (c)
+       (eprintf "*** Exception while evaluation of required syntax ~S\n" e)
+       (raise c))
+     (require (cadr e))))
+
+
 (define (compile-%%label e env tail)
   (if (= (length e) 2)
       (emit-label (cadr e))
@@ -1436,6 +1446,7 @@ doc>
 	  
 	  ;; Special calls
 	  ((require)		(compile-require	e env tail?))
+	  ((%%require4syntax)	(compile-require4syntax e env tail?))
 	  ((%%include)		(compile-include	e env tail?))
 	  ((%%source-pos)	(compile-%%source-pos   e env tail?))
 	  ((%%label)		(compile-%%label	e env tail?))
