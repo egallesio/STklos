@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 11-Dec-2006 17:27 (eg)
+;;;; Last file update: 13-Dec-2006 17:09 (eg)
 ;;;;
 
 
@@ -155,6 +155,7 @@ doc>
 (define (%guess-pathname fn paths suffixes)
 
   (define (try f)
+    ; (eprintf "Try ~S\n" f)
     (and (file-exists? f) (file-is-readable? f) f))
   
   (define (try-load-with-suffixes name suffixes)

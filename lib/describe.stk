@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 21-Mar-1993 14:33
-;;;; Last file update: 22-Nov-2006 16:25 (eg)
+;;;; Last file update: 18-Dec-2006 08:59 (eg)
 ;;;;
 
 
@@ -160,28 +160,17 @@
 ;;; 	Describe for methods
 ;;; ======================================================================
 (define-method describe ((x <method>) port :optional omit-title)
-  (letrec ((print-args (lambda (args)
-			 ;; take care of dotted arg lists
-			 (cond ((null? args) (newline port))
-			       ((pair? args) (display #\space port)
-					     (display (class-name (car args)) port)
-					     (print-args (cdr args)))
-			       (else	     (display #\space port)
-					     (display (class-name args) port)
-					     (newline port))))))
-
-    ;; Title
-    (if omit-title
-	(format port "    Method ~A~%" x)
-	(let ((gf (method-generic-function x)))
-	  (if gf
-	      (format port "~S is a method of the `~S' generic function.~%" 
-		      x (generic-function-name gf))
-	      (format port "~S is a method (no generic function).~%" x))))
-    
-    ;; GF specializers
-    (format port "\tSpecializers:")
-    (print-args (method-specializers x)))
+  (if omit-title
+      (format port "    Method ~A~%" x)
+      (let ((gf (method-generic-function x)))
+	(if gf
+	    (format port "~S is a method of the `~S' generic function.~%" 
+		    x (generic-function-name gf))
+	    (format port "~S is a method (no generic function).~%" x))))
+  
+  ;; GF specializers
+  (format port "\tSpecializers: ~S\n"
+	  (map* class-name (method-specializers x)))
   (void))
 
 ;;; ======================================================================

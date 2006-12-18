@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 11-Dec-2006 17:27 (eg)
+;;;; Last file update: 18-Dec-2006 13:37 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -30,15 +30,39 @@
 	  compiler:time-display
 	  compiler:gen-line-number
 	  compiler:warn-use-undefined
-	  compiler:warn-use-undefined-postpone))
+	  compiler:warn-use-undefined-postpone
+	  compiler:inline-common-functions))
   
 (select-module STKLOS-COMPILER)
 
-(define *compiler-port*		#f)
-(define *compiler-inline*  	'(+ - * / = < <= > >= cons car cdr null? list not 
- 				  vector-ref vector-set! string-ref string-set!
- 				  eq? eqv? equal? void))
-;(define *compiler-inline*	'(+ - * / = <))
+(define *compiler-port* #f)
+
+(define *inline-table* `((+ 		 . ,+)
+			 (- 		 . ,-)
+			 (* 		 . ,*)
+			 (/		 . ,/)
+			 (=		 . ,=)
+			 (<		 . ,<)
+			 (<=		 . ,<=)
+			 (>		 . ,>)
+			 (>=		 . ,>=)
+			 (cons	 	 . ,cons)
+			 (car	 	 . ,car)
+			 (cdr	 	 . ,cdr)
+			 (null?	 	 . ,null?)
+			 (list	 	 . ,list)
+			 (not 	 	 . ,not)
+			 (vector-ref	 . ,vector-ref)
+			 (vector-set!	 . ,vector-set!)
+			 (string-ref	 . ,string-ref)
+			 (string-set! 	 . ,string-set!)
+			 (eq?	 	 . ,eq?)
+			 (eqv?	 	 . ,eqv?)
+			 (equal?	 . ,equal?)
+			 (void	 	 . ,void)))
+
+(define *inline-symbols* (map car *inline-table*))
+
 (define *always-inlined*   	'(%set-current-module %%set-current-module 
 				  %%execute %%execute-handler))
 
@@ -58,7 +82,12 @@
 (define compiler:gen-line-number		(make-parameter #f))
 (define compiler:warn-use-undefined  		(make-parameter #f))
 (define compiler:warn-use-undefined-postpone	(make-parameter #f))
-
+(define compiler:inline-common-functions
+  (let ((inlined *inline-symbols*))
+    (make-parameter #t
+		    (lambda (v)
+		      (set! *inline-symbols* (if v inlined '()))
+		      (not (null? *inline-symbols*))))))
 
 (define (new-label)
   (let ((lab *code-labels*))
@@ -794,9 +823,15 @@ doc>
   (emit (if tail? 'TAIL-INVOKE  'INVOKE)
 	(length actuals)))
 
-(define (can-be-inlined fct)
-  (or (memq fct *always-inlined*)
-      (memq fct *compiler-inline*)))
+(define can-be-inlined?
+  (let ((STklos (find-module 'STklos)))
+    (lambda (fct env)
+      ;; Avoid to use *inline-table* on all symbols (assoc is too expensive here)
+      (if (and (memq fct *inline-symbols*)
+	       (not (symbol-in-env? fct env)))
+	  (let ((f (assoc fct *inline-table*)))
+	    (and f (eq? (symbol-value* fct STklos) (cdr f))))
+	  (memq fct *always-inlined*)))))
 
 
 (define (compile-primitive-call fct actuals len env epair tail?)
@@ -986,7 +1021,7 @@ doc>
 		    ((>= (length fct) 3) (cddr fct))
 		    (else fct))))
 	  (compile-lambda-call fct actuals len env ep tail?))
-	(if (can-be-inlined fct)
+	(if (can-be-inlined? fct env)
 	    (compile-primitive-call fct actuals len env args tail?)
 	    (compile-normal-call    fct actuals len env args tail?)))))
 
