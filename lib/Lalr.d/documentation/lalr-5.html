@@ -72,7 +72,8 @@ and the list of non-terminal definitions. Each non-terminal definition
 is a list where the first element is the non-terminal and the other
 elements are the right-hand sides (lists of grammar symbols). In
 addition to this, each rhs can be followed by a semantic action.</p><p>For example, consider the following (yacc) grammar for a very simple
-expression language:</p><pre class="fragment">  e : e '+' t
+expression language:</p><pre class="fragment">
+  e : e '+' t
     | e '-' t
     | t
     ;
@@ -84,7 +85,8 @@ expression language:</p><pre class="fragment">  e : e '+' t
     ;
 </pre>
 <p>The same grammar, written for the scheme parser generator, would look
-like this (with semantic actions)</p><pre class="fragment">(define expr-parser
+like this (with semantic actions)</p><pre class="fragment">
+(define expr-parser
   (lalr-parser
    ; Terminal symbols
    (ID + - * /)
@@ -107,7 +109,8 @@ evaluating the semantic action (it defaults to <code>#f</code>).</p></div><br>
 <p>The above grammar implicitly handles operator
 precedences. It is also possible to explicitly assign precedences and
 associativity to terminal symbols and productions <em>à la</em>
-Yacc. Here is a modified (and augmented) version of the grammar: </p><pre class="fragment">(define expr-parser
+Yacc. Here is a modified (and augmented) version of the grammar: </p><pre class="fragment">
+(define expr-parser
  (lalr-parser
   ; Terminal symbols
   (ID
@@ -145,7 +148,8 @@ the list of terminal symbols (token definitions).</p></div><br>
 <a name="Error-recovery"></a>
 <div class="skribesectiontitle"><h3>5.4 Error recovery</h3></div><div class="section">
 <p><code>lalr-scm</code> implements a very simple error recovery
-strategy. A production can be of the form</p><pre class="fragment">   (rulename
+strategy. A production can be of the form</p><pre class="fragment">
+   (rulename
       ...
       (error TERMINAL) : action-code
 )
@@ -154,7 +158,8 @@ strategy. A production can be of the form</p><pre class="fragment">   (rulename
 rulename.) This will cause the parser to skip all the tokens produced
 by the lexer that are different than the given TERMINAL. For a C-like
 language, one can synchronize on semicolons and closing curly brackets
-by writing error rules like these:</p><pre class="fragment">   (stmt
+by writing error rules like these:</p><pre class="fragment">
+   (stmt
       (expression SEMICOLON) : ...
       (LBRACKET stmt RBRACKET) : ...
       (error SEMICOLON)
@@ -175,6 +180,6 @@ choosing the rule listed first in the grammar definition.</p></div><br>
 This <span class="sc">Html</span> page has been produced by 
 <a href="http://www.inria.fr/mimosa/fp/Skribe" class="http">Skribe</a>.
 <br/>
-Last update <em>Thu Feb 10 22:04:32 2005</em>.</font></p></div>
+Last update <em>Sun Dec  3 20:16:43 2006</em>.</font></p></div>
 </body>
 </html>

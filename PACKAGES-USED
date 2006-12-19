@@ -31,7 +31,7 @@ SILex: The Dany Dubé Scheme Implementation of Lex
 
 LALR: The Dominique Boucher LALR Package
 ========================================
-    - Version 2.1.0
+    - Version 2.1.4
     - Licence: GPL2
     - Home Page: http://www.iro.umontreal.ca/~boucherd/Lalr/documentation/lalr.html
 

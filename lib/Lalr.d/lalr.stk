@@ -1725,33 +1725,44 @@
 
 (define build-reduction-table
   (lambda (gram/actions)
-    `(vector
-      '()
-      ,@(map
-	 (lambda (p)
-	   (let ((act (cdr p)))
-	     `(lambda (___stack ___sp ___goto-table ___k)
-		,(let* ((nt (caar p)) (rhs (cdar p)) (n (length rhs)))
-		   `(let* (,@(if act
-				 (let loop ((i 1) (l rhs))
-				   (if (pair? l)
-				       (let ((rest (cdr l)))
-					 (cons 
-					  `(,(string->symbol
-					      (string-append
-					       "$"
-					       (number->string 
-						(+ (- n i) 1))))
-					    (vector-ref ___stack (- ___sp ,(- (* i 2) 1))))
-					  (loop (+ i 1) rest)))
-				       '()))
-				 '()))
-		      ,(if (= nt 0)
-			   '$1
-			   `(___push ___stack (- ___sp ,(* 2 n)) 
-				  ,nt ___goto-table ,(cdr p) ___k)))))))
+    `(let ((___v (make-vector ,(+ 1 (length gram/actions)) '())))
+      ,@(map*
+	 (let ((index 0))
+	   (lambda (p)
+	     (let ((act (cdr p)))
+	       (set! index (+ index 1))
+	       `(vector-set! ___v ,index
+			     (lambda (___stack ___sp ___goto-table ___k)
+			       ,(let* ((nt (caar p)) (rhs (cdar p)) (n (length rhs)))
+				  `(let* (,@(if act
+						(let loop ((i 1) (l rhs))
+						  (if (pair? l)
+						      (let ((rest (cdr l)))
+							(cons 
+							 `(,(string->symbol
+							     (string-append
+							      "$"
+							      (number->string 
+							       (+ (- n i) 1))))
+							   (vector-ref ___stack (- ___sp ,(- (* i 2) 1))))
+							 (loop (+ i 1) rest)))
+						      '()))
+						'()))
+				     ,(if (= nt 0)
+					  '$1
+					  `(___push ___stack (- ___sp ,(* 2 n)) 
+						    ,nt ___goto-table ,(cdr p) ___k)))))))))
 
-	 gram/actions))))
+	   gram/actions)
+      ___v)))
+
+(define (map* proc l)
+  (let loop ((l l) (res '()))
+    (cond ((null? l)
+	   (reverse res))
+	  (else
+	   (loop (cdr l)
+		 (cons (proc (car l)) res))))))
 
 
 ; Options
@@ -1829,142 +1840,150 @@
 	    (proc options p (cdr lst)))))
 	(lalr-error "Malformed lalr-parser form" lst))))
 
-
 (def-macro (lalr-parser . arguments)
-  (extract-arguments arguments
-    (lambda (options tokens rules)
-      (validate-options options)
-      (set-expected-conflicts! options)
-      (let* ((gram/actions (gen-tables! tokens rules))
-	     (code
-	      `(letrec ((___max-stack-size 500)
+  (extract-arguments
+   arguments
+   (lambda (options tokens rules)
+     (validate-options options)
+     (set-expected-conflicts! options)
+     (let* ((gram/actions (gen-tables! tokens rules))
+            (code
+             `(letrec ((___max-stack-size 500)
 
-			(___atable         ',action-table)
-			(___gtable         ,(build-goto-table))
-			(___grow-stack     (lambda (stack)
-					     ;; make a new stack twice as big as the original
-					     (let ((new-stack (make-vector (* 2 (vector-length stack)) #f)))
-					       ;; then copy the elements...
-					       (let loop ((i (- (vector-length stack) 1)))
-						 (if (< i 0)
-						     new-stack
-						     (begin
-						       (vector-set! new-stack i (vector-ref stack i))
-						       (loop (- i 1))))))))
-	      
-			(___push           (lambda (stack sp new-cat goto-table lval k)
-					     (let* ((state     (vector-ref stack sp))
-						    (new-state (cdr (assq new-cat (vector-ref goto-table state))))
-						    (new-sp    (+ sp 2))
-						    (stack     (if (< new-sp (vector-length stack))
-								   stack
-								   (___grow-stack stack))))
-					       (vector-set! stack new-sp new-state)
-					       (vector-set! stack (- new-sp 1) lval)
-					       (k stack new-sp))))
+                       (___atable         ',action-table)
+                       (___gtable         ,(build-goto-table))
+                       (___grow-stack     (lambda (stack)
+                                            ;; make a new stack twice as big as the original
+                                            (let ((new-stack (make-vector (* 2 (vector-length stack)) #f)))
+                                              ;; then copy the elements...
+                                              (let loop ((i (- (vector-length stack) 1)))
+                                                (if (< i 0)
+                                                    new-stack
+                                                    (begin
+                                                      (vector-set! new-stack i (vector-ref stack i))
+                                                      (loop (- i 1))))))))
 
-			(___action         (lambda (x l)
-					     (let ((y (assq x l)))
-					       (if y (cdr y) (cdar l)))))
-			
-			(___recover        (lambda (stack sp tok lexerp k)
-					     ;; -- find a state with a transition on the
-					     ;; -- 'error' token
-					     (let find-state ((sp sp))
-					       (if (< sp 0)
-						   (k stack sp)
-						   (let* ((state (vector-ref stack sp))
-							  (act   (assq 'error (vector-ref ___atable state))))
-						     (if act
-							 (___sync stack sp (cdr act) tok lexerp k)
-							 (find-state (- sp 2))))))))
-			
-			(___sync          (lambda (stack sp state tok lexerp k)
-					    ;; -- synchronize with the token following the
-					    ;; -- 'error' token
-					    (let ((sync-set  (map car (cdr (vector-ref ___atable state))))
-						  (stack     (if (< (+ sp 4) (vector-length stack))
-								 stack
-								 (___grow-stack stack))))
-					      (vector-set! stack (+ sp 1) #f)
-					      (vector-set! stack (+ sp 2) state)
-					      (let skip ((tok tok))
-						(let ((i (if (pair? tok) (car tok) tok)))
-						  (if (eq? i '*eoi*)
-						      (k stack -1)
-						      (if (memq i sync-set)
-							  (let ((act (assq i (vector-ref ___atable state))))
-							    (vector-set! stack (+ sp 3) #f)
-							    (vector-set! stack (+ sp 4) (cdr act))
-							    (k stack (+ sp 4)))
-							  (skip (lexerp)))))))))
-	      
-			(___rtable         ,(build-reduction-table gram/actions)))
+                       (___push           (lambda (stack sp new-cat goto-table lval k)
+                                            (let* ((state     (vector-ref stack sp))
+                                                   (new-state (cdr (assv new-cat (vector-ref goto-table state))))
+                                                   (new-sp    (+ sp 2))
+                                                   (stack     (if (< new-sp (vector-length stack))
+                                                                  stack
+                                                                  (___grow-stack stack))))
+                                              (vector-set! stack new-sp new-state)
+                                              (vector-set! stack (- new-sp 1) lval)
+                                              (k stack new-sp))))
 
-		 (lambda (lexerp errorp)
+                       (___action         (lambda (x l)
+                                            (let ((y (assq x l)))
+                                              (if y (cdr y) (cdar l)))))
 
-		   (let ((stack (make-vector ___max-stack-size 0)))
-		     (let loop ((stack stack) (sp 0) (input #f))
-		       (if input
-			   (let* ((state (vector-ref stack sp))
-				  (i     (if (pair? input) (car input) input))
-				  (attr  (if (pair? input) (cdr input) #f))
-				  (act   (___action i (vector-ref ___atable state))))
+                       (___recover        (lambda (stack sp tok lexerp k)
+                                            ;; -- find a state with a transition on the
+                                            ;; -- 'error' token
+                                            (let find-state ((sp sp))
+                                              (if (< sp 0)
+                                                  (k stack sp)
+                                                  (let* ((state (vector-ref stack sp))
+                                                         (act   (assq 'error (vector-ref ___atable state))))
+                                                    (if act
+                                                        (___sync stack sp (cdr act) tok lexerp k)
+                                                        (find-state (- sp 2))))))))
 
-			     (cond
-			      ((not (symbol? i))
-			       (errorp "PARSE ERROR: invalid token: " i)
-			       #f)
-			      
-			      ;; Input succesfully parsed
-			      ((eq? act 'accept)
-			       (vector-ref stack 1))
-		  
-			      ;; Syntax error in input
-			      ((eq? act '*error*)
-			       (if (eq? i '*eoi*)
-				   (begin
-				     (errorp "PARSE ERROR : unexpected end of input ")
-				     #f)
-				   (begin
-				     (errorp "PARSE ERROR : unexpected token : " i)
-				     (___recover
-				      stack sp i lexerp
-				      (lambda (stack sp)
-					(if (>= sp 0)
-					    (loop stack sp #f)
-					    (loop stack sp '*eoi*)))))))
-		  
-			      ;; Shift current token on top of the stack
-			      ((>= act 0)
-			       (let ((stack (if (< (+ sp 2) (vector-length stack))
-						stack
-						(___grow-stack stack))))
-				 (vector-set! stack (+ sp 1) attr)
-				 (vector-set! stack (+ sp 2) act)
-				 (loop stack (+ sp 2) (if (eq? i '*eoi*) '*eoi* #f))))
+                       (___sync          (lambda (stack sp state tok lexerp k)
+                                           ;; -- synchronize with the token following the
+                                           ;; -- 'error' token
+                                           (let ((sync-set  (map car (cdr (vector-ref ___atable state))))
+                                                 (stack     (if (< (+ sp 4) (vector-length stack))
+                                                                stack
+                                                                (___grow-stack stack))))
+                                             (vector-set! stack (+ sp 1) #f)
+                                             (vector-set! stack (+ sp 2) state)
+                                             (let skip ((tok tok))
+                                               (let ((i (if (pair? tok) (car tok) tok)))
+                                                 (if (eq? i '*eoi*)
+                                                     (k stack -1)
+                                                     (if (memq i sync-set)
+                                                         (let ((act (assq i (vector-ref ___atable state))))
+                                                           (vector-set! stack (+ sp 3) #f)
+                                                           (vector-set! stack (+ sp 4) (cdr act))
+                                                           (k stack (+ sp 4)))
+                                                         (skip (lexerp)))))))))
 
-			      ;; Reduce by rule (- act)
-			      (else
-			       ((vector-ref ___rtable (- act))
-				stack sp ___gtable
-				(lambda (stack sp)
-				  (loop stack sp input))))))
-			   
-			   ;; no lookahead, so check if there is a default action
-			   ;; that does not require the lookahead
-			   (let* ((state  (vector-ref stack sp))
-				  (acts   (vector-ref ___atable state))
-				  (defact (if (pair? acts) (cdar acts) #f)))
-			     (if (and (= 1 (length acts))
-				      (< defact 0))
-				 ((vector-ref ___rtable (- defact))
-				  stack sp ___gtable
-				  (lambda (stack sp)
-				    (loop stack sp input)))
-				 (loop stack sp (lexerp)))))))))))
-				 
-	(output-table! options)
-	(output-parser! options code)
-	code))))
+                       (___rtable         ,(build-reduction-table gram/actions)))
+
+                (lambda (lexerp errorp)
+
+                  (let ((stack (make-vector ___max-stack-size 0)))
+                    (let loop ((stack stack) (sp 0) (input #f))
+                      (cond
+                       ;; stack pointer is < 0 - this means there is no 
+                       ;; error production and an error occurred
+                       ((< sp 0)
+                        #f)
+                       
+                       ;; otherwise do we have an input token to process?
+                       (input
+                        (let* ((state (vector-ref stack sp))
+                               (i     (if (pair? input) (car input) input))
+                               (attr  (if (pair? input) (cdr input) #f))
+                               (act   (___action i (vector-ref ___atable state))))
+
+                          (cond
+                           ((not (symbol? i))
+                            (errorp "PARSE ERROR: invalid token: " i)
+                            #f)
+
+                           ;; Input succesfully parsed
+                           ((eq? act 'accept)
+                            (vector-ref stack 1))
+
+                           ;; Syntax error in input
+                           ((eq? act '*error*)
+                            (if (eq? i '*eoi*)
+                                (begin
+                                  (errorp "PARSE ERROR : unexpected end of input ")
+                                  #f)
+                                (begin
+                                  (errorp "PARSE ERROR : unexpected token : " i)
+                                  (___recover
+                                   stack sp i lexerp
+                                   (lambda (stack sp)
+                                     (if (>= sp 0)
+                                         (loop stack sp #f)
+                                         (loop stack sp '*eoi*)))))))
+
+                           ;; Shift current token on top of the stack
+                           ((>= act 0)
+                            (let ((stack (if (< (+ sp 2) (vector-length stack))
+                                             stack
+                                             (___grow-stack stack))))
+                              (vector-set! stack (+ sp 1) attr)
+                              (vector-set! stack (+ sp 2) act)
+                              (loop stack (+ sp 2) (if (eq? i '*eoi*) '*eoi* #f))))
+
+                           ;; Reduce by rule (- act)
+                           (else
+                            ((vector-ref ___rtable (- act))
+                             stack sp ___gtable
+                             (lambda (stack sp)
+                               (loop stack sp input)))))))
+
+                       (else
+                        ;; no lookahead, so check if there is a default action
+                        ;; that does not require the lookahead
+                        (let* ((state  (vector-ref stack sp))
+                               (acts   (vector-ref ___atable state))
+                               (defact (if (pair? acts) (cdar acts) #f)))
+                          (if (and (= 1 (length acts))
+                                   (< defact 0))
+                              ((vector-ref ___rtable (- defact))
+                               stack sp ___gtable
+                               (lambda (stack sp)
+                                 (loop stack sp input)))
+                              (loop stack sp (lexerp))))))))))))
+
+       (output-table! options)
+       (output-parser! options code)
+       code))))
 
