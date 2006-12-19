@@ -1,6 +1,6 @@
 								-*- outline -*-	
 
-		      S T k l o s   ( v e r s i o n   0 . 8 1 )
+		      S T k l o s   ( v e r s i o n   0 . 8 2 )
 		      =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 				   Erick Gallesio
@@ -43,15 +43,6 @@ around GTK+. STklos is not completely compatible with STk but it
 should be easy to port old STk graphical applications (provided that
 they use objects). The GTK+ extension can be loaded at run time and
 does not require a special interpreter as it was the case with STk.
-
-* TO DO
-
-The current release of STklos is a preliminary version and a lot of
-things remain to do. In particular, I will try to finish first complete
-compliance to R5RS, and finish to port good things of STk to STklos
-(things like FFI for instance).
-
-Look at the file TODO in the source distribution for more information.
 
 * SRFI Support
 

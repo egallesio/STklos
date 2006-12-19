@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 12:27 (eg)
-;;;; Last file update: 14-Apr-2006 19:54 (eg)
+;;;; Last file update: 19-Dec-2006 11:53 (eg)
 ;;;;
 
 
@@ -629,12 +629,25 @@ doc>
  * (eval expression environment)
  * (eval expression) 
  *
- * Current form of STklos |eval| is not conform to R5RS. 
- * £
- * ,(TODO "MUST BE CORRECTED FOR A NEXT RELEASE")
+ * Evaluates expression in the specified environment and returns its
+ * value. |Expression| must be a valid Scheme expression represented
+ * as data. |Environment| may be a R5RS environment-specifier
+ * (|interaction-environment|, |scheme-report-environment| or
+ * |null-environment|) or a ,(stklos) module.
+ * @lisp
+ * (eval '(* 7 3) (scheme-report-environment 5))
+ *               => 21
+ * (let ((f (eval '(lambda (f x) (f x x))
+ *                (null-environment 5))))
+ *   (f + 10))
+ *               => 20
+ * (define-module A
+ *   (define x 1))
+ * (eval '(cons x x) (find-module 'A))
+ *               => (1 . 1)
+ * @end lisp
 doc>
 |#
-
 
 
 

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  5-Dec-2006 11:41 (eg)
+;;;; Last file update: 19-Dec-2006 12:20 (eg)
 ;;;;
 
 ;;
@@ -964,7 +964,7 @@ doc>
  * (fprintf port fmt obj ...)
  * (eprintf fmt obj ...)
  *
- * These procedures are specialized version of |,(ref :mark "format")|.
+ * These procedures are specialized version of |,(ref :mark "format" "format")|.
  * In these procedures, |fmt| is a string using the |format| conventions.
  * |printf| outputs go on the current output port.
  * |eprintf| outputs go on the current error port.

@@ -1,3 +1,50 @@
+2006-12-19  Erick Gallesio  <eg@essi.fr>
+
+	* PACKAGES-USED, lib/Lalr.d/documentation/doc.css,
+	lib/Lalr.d/documentation/lalr-1.html,
+	lib/Lalr.d/documentation/lalr-2.html,
+	lib/Lalr.d/documentation/lalr-3.html,
+	lib/Lalr.d/documentation/lalr-4.html,
+	lib/Lalr.d/documentation/lalr-5.html,
+	lib/Lalr.d/documentation/lalr.html, lib/Lalr.d/lalr.stk:
+	Upgraded Lalr package to 2.1.4
+	[8699ff13953c] [tip]
+
+	* TODO, lib/Makefile.am, lib/Makefile.in, lib/boot.stk, lib/env.stk,
+	lib/module.stk, lib/object.stk, src/boot.c, src/boot.img, src/env.c:
+	- Added the null-environment and scheme-report-environment
+	procedures => The eval procedure is now correct.
+	- The Scheme module has been added. It contains a copy of all the
+	bindings defined when STklos starts. A library module can now
+	import this module to be sure to find the original bindings, and
+	prevent problems due to user redefinitions of standard symbols
+	[6a01935a2ada]
+
+2006-12-18  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk, lib/describe.stk, lib/load.stk, src/boot.c,
+	src/boot.img:
+	New parameter compiler:inline-common-functions No more inlining if a
+	function has been redefined by the user (only works if the symbol is
+	in the STklos module).
+	[969edddd8487]
+
+2006-12-13  Erick Gallesio  <eg@essi.fr>
+
+	* lib/module.stk, src/boot.c, src/boot.img, src/env.c:
+	Avoid that a module import itself
+	[f09da1d6bf1d]
+
+	* lib/compiler.stk, lib/load.stk, src/boot.c, src/boot.img:
+	added REQUIRE-FOR-SYNTAX (first version)
+	[e5899f362719]
+
+2006-12-06  eg  <eg@saxo.polytech.unice.fr>
+
+	* ChangeLog:
+	Preparing version stklos-0.82-beta2
+	[788f16b21de6]
+
 2006-12-05  Erick Gallesio  <eg@essi.fr>
 
 	* doc/stklos-compile.1.in, lib/make-C-boot.stk, src/boot.c, utils
@@ -41,7 +88,7 @@
 	* configure, configure.in, lib/Lalr.d/Makefile.in, lib/Makefile.am,
 	lib/Makefile.in, lib/boot-callcc.stk.in, lib/boot.stk,
 	lib/boot.stk.in, src/boot.c:
-	Moved the configure dependency form boot.stk.in to the new file
+	Moved the configure dependency from boot.stk.in to the new file
 	boot-callcc.stk.in
 	[10e9541aa35c]
 

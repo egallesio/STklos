@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 19-Nov-2006 22:26 (eg)
+;; Last file update: 19-Dec-2006 12:10 (eg)
 ;;
 ;; ======================================================================
 
@@ -387,6 +387,9 @@ to build and access the internals of a structure.])
 
 (insertdoc 'dynamic-wind)
 (insertdoc 'eval)
+(insertdoc 'scheme-report-environment)
+(insertdoc 'null-environment)
+(insertdoc 'interaction-environment)
 (insertdoc 'eval-from-string)
 
 
@@ -496,7 +499,8 @@ be accessed as a normal port with the standard Scheme primitives.])
 (index "SRFI-28")
 (insertdoc 'format)
 (insertdoc 'flush-output-port)
-(insertdoc 'printerr))
+(insertdoc 'printerr)
+(insertdoc 'eprintf))
 
 (subsection :title "System interface"
 (index "STKLOS_LOAD_PATH")

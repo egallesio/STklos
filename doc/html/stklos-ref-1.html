@@ -15,10 +15,10 @@
 <td align="left" valign="top" width="20%" bgcolor="#E6F2E6">
 <br /><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="darkolivegreen"><font color="white">Contents</font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-29858">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-41280">*Top*</a></td></tr>
 <tr class="navsel"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a><br /><table cellspacing="1" cellpadding="1" width="100%">
 <tbody>
- <tr><td valign="top" align="left">1.1</td><td colspan="4" width="100%"><a href="stklos-ref-1.html#-section-4154">Overview of <span style="font-variant: small-caps">STklos</span></td></tr>
+ <tr><td valign="top" align="left">1.1</td><td colspan="4" width="100%"><a href="stklos-ref-1.html#-section-4859">Overview of <span style="font-variant: small-caps">STklos</span></td></tr>
  <tr><td valign="top" align="left">1.2</td><td colspan="4" width="100%"><a href="stklos-ref-1.html#-Lexical-Conventions"> Lexical Conventions</td></tr>
  <tr><td valign="top" align="left">1.3</td><td colspan="4" width="100%"><a href="stklos-ref-1.html#Basic-Concepts">Basic Concepts</td></tr>
 </tbody>
@@ -40,9 +40,9 @@
 </tbody></table>
 </td>
 <td align="left" valign="top">
-<a name="-section-4154"></a>
+<a name="-section-4859"></a>
 <table width="100%"><tr><td bgcolor="#E6F2E6"><h3><font color="#000000">1.1 Overview of <span style="font-variant: small-caps">STklos</span></font></h3></table>
-<a name="--index-entry-4110"></a><a name="--index-entry-4115"></a><p> <span style="font-variant: small-caps">STklos</span> is the successor of <span style="font-variant: small-caps">STk</span>
+<a name="--index-entry-4815"></a><a name="--index-entry-4820"></a><p> <span style="font-variant: small-caps">STklos</span> is the successor of <span style="font-variant: small-caps">STk</span>
 [<a href="stklos-ref-14.html#Gallesio95-1a">6</a>], a Scheme interpreter which was tightly
 connected to the Tk graphical toolkit [<a href="stklos-ref-14.html#Ouster-Tk">11</a>].
 <span style="font-variant: small-caps">STk</span> had an object layer which was called <span style="font-variant: small-caps">STklos</span>. At this
@@ -52,7 +52,7 @@ extension.  For instance, when programming a GUI application,
 a user could access the widgets at the (low) Tk level, or access
 them using a neat hierarchy of classes wrapped in <span style="font-variant: small-caps">STklos</span>.</p><p> Since the object layer is now more closely integrated with
 the language, the new system has been renamed <span style="font-variant: small-caps">STklos</span> and
-<span style="font-variant: small-caps">STk</span> is now used to designate the old system. </p><a name="--index-entry-4138"></a><p> <strong>Compatibility with <span style="font-variant: small-caps">STk</span></strong>: <span style="font-variant: small-caps">STklos</span> has been
+<span style="font-variant: small-caps">STk</span> is now used to designate the old system. </p><a name="--index-entry-4843"></a><p> <strong>Compatibility with <span style="font-variant: small-caps">STk</span></strong>: <span style="font-variant: small-caps">STklos</span> has been
 completely rewritten and as a consequence, due to new
 implementation choices, old <span style="font-variant: small-caps">STk</span> programs are not fully
 compatible with the new system. However, these changes are very
@@ -66,13 +66,13 @@ identical in every points, share the same philosophy.</p><a name="-Lexical-Conve
 <table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="-Lexical-Conventions"><font color="#000000">1.2  Lexical Conventions</font></h3></table>
 <a name="Identifiers"></a>
 <h4 id="Identifiers"><font color="darkolivegreen">1.2.1 Identifiers</font></h4>
-<a name="--index-entry-4157"></a><p>In <span style="font-variant: small-caps">STklos</span>, identifiers which start (or end) with a colon
+<a name="--index-entry-4862"></a><p>In <span style="font-variant: small-caps">STklos</span>, identifiers which start (or end) with a colon
 "<code>:</code>" are considered as keywords.  For instance
 <code>:foo</code> and <code>bar:</code> are <span style="font-variant: small-caps">STklos</span> keywords, but
 <code>not:key</code> is not a keyword. See
 section&nbsp;<a href="stklos-ref-4.html#Keywords">Keywords</a> for more information</p><a name="Comments"></a>
 <h4 id="Comments"><font color="darkolivegreen">1.2.2 Comments</font></h4>
-<a name="--index-entry-4175"></a><a name="--index-entry-4179"></a><a name="--index-entry-4183"></a><a name="--index-entry-4187"></a><a name="--index-entry-4191"></a><p>There are four types of comments in <span style="font-variant: small-caps">STklos</span>:</p><ul><li>a semicolon "<code>;</code>" indicates the start of a
+<a name="--index-entry-4880"></a><a name="--index-entry-4884"></a><a name="--index-entry-4888"></a><a name="--index-entry-4892"></a><a name="--index-entry-4896"></a><p>There are four types of comments in <span style="font-variant: small-caps">STklos</span>:</p><ul><li>a semicolon "<code>;</code>" indicates the start of a
 comment. This kind of comment extends to the end of the line (as
 described in <span style="font-variant: small-caps">R<sup>5</sup>RS</span>).</li>
 <li> multi-lines comment use the classical Lisp convention:
@@ -135,6 +135,6 @@ can also be represented in this way:
 See the original <span style="font-variant: small-caps">R<sup>5</sup>RS</span> document for more informations on
 the basic concepts of the Scheme Programming Language.<p></p></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-				     <a href="http://www.inria.fr/mimosa/fp/Skribe">Skribe</a>.<br />Last update <em>Mon Nov  6 17:31:11 2006</em></small>
+				     <a href="http://www.inria.fr/mimosa/fp/Skribe">Skribe</a>.<br />Last update <em>Tue Dec 19 15:25:36 2006</em></small>
 </body>
 </html>
