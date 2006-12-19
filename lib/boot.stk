@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 24-Nov-2006 11:22 (eg)
+;;;; Last file update: 18-Dec-2006 21:34 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -51,6 +51,8 @@
 (syntax-autoload "getopt"   parse-arguments)
 (syntax-autoload "trace"    trace untrace)
 (autoload	 "pp"	    pp pretty-print)
+(autoload	 "env"	    null-environment scheme-report-environment
+		 	    interaction-environment)
 (autoload 	 "srfi-27"  random-integer random-real)
 (syntax-autoload "srfi-34"  with-exception-handler guard)
 (syntax-autoload "srfi-35"  define-condition-type condition)
@@ -157,6 +159,24 @@
       (%display-backtrace bt useless-frames))
     (format port "EXIT\n")
     (exit 70)))   ; 70 seems to be required by SRFI-22
+
+
+;; ----------------------------------------------------------------------
+;;	Scheme Module
+;; ----------------------------------------------------------------------
+;; The SCHEME module is a copy of the STklos module before the user
+;;; may have the possibility to modify standard bindings.
+;;; If a module needs to be sure to have the original bindings, it
+;;; can import this module which will be visible before the STklos
+;;; module. Note that this is only partially true since bindings
+;;; in SCHEME module are mutable
+
+(define-module SCHEME)
+
+(let ((STklos (find-module 'STklos))
+      (Scheme (find-module 'SCHEME)))
+  (%redefine-module-exports STklos Scheme)
+  (%module-exports-set! Scheme (module-exports STklos)))
 
 
 ;; ----------------------------------------------------------------------

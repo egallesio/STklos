@@ -16,19 +16,11 @@
 	  if a user redefines a standard function, it will not break
 	  the library itself.
 	- Tree widget
-	- R5RS Eval
 	- ... 
 
 ************************************************************************
 
 * THINGS TO DO (BY CATEGORY)
-
-** R5RS STUFF
-Some things need to be done to be fully R5RS
-
- - eval must take the second parameter sepcified in R5RS. Our version is
- more general, but some tuning must be done
- - Transcripts
 
 
 **  STUFF TO PORT FROM STk

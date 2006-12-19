@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 24-Nov-2006 10:18 (eg)
+# Last file update: 18-Dec-2006 21:30 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d @LURCDIR@
 
@@ -36,6 +36,7 @@ scheme_SRCS = STklos.init		\
 	      bigloo.stk		\
 	      compfile.stk 		\
 	      describe.stk		\
+	      env.stk			\
 	      expand.ss			\
 	      full-syntax.stk		\
 	      full-conditions.stk 	\
@@ -71,6 +72,7 @@ scheme_OBJS = compfile.ostk		\
 	      full-syntax.ostk		\
 	      full-conditions.ostk 	\
 	      describe.ostk		\
+	      env.ostk			\
 	      getopt.ostk		\
 	      lex-rt.ostk		\
 	      match.ostk		\

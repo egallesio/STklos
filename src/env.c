@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 13-Dec-2006 12:05 (eg)
+ * Last file update: 19-Dec-2006 10:11 (eg)
  */
 
 #include "stklos.h"
@@ -80,7 +80,8 @@ struct module_obj {
 #define MODULE_IMPORTS(m)	(((struct module_obj *) (m))->imports)
 #define MODULE_HASH_TABLE(m)	(((struct module_obj *) (m))->hash)
 
-#define VISIBLE_P(symb, mod)	(STk_memq((symb), MODULE_EXPORTS(mod))!=STk_false)
+#define VISIBLE_P(symb, mod)	(((mod) == STk_STklos_module) ||	\
+				 (STk_memq((symb), MODULE_EXPORTS(mod))!=STk_false))
 
 
 SCM STk_STklos_module;		/* The module whose name is STklos */ 
@@ -156,10 +157,13 @@ DEFINE_PRIMITIVE("%module-imports-set!", module_imports_set, subr2,
 		 (SCM importer,SCM imported))
 {
   if (!MODULEP(importer)) error_bad_module(importer);
-  if (NULLP(imported))    return STk_void;
-  if (!CONSP(imported))   error_bad_list(imported);
+
+  if (CONSP(imported)) 
+    MODULE_IMPORTS(importer) = STk_dappend2(imported, LIST1(STk_STklos_module));
+  else if (NULLP(imported))
+    MODULE_IMPORTS(importer) = STk_nil;
+  else error_bad_list(imported);
   
-  MODULE_IMPORTS(importer) = STk_dappend2(imported, LIST1(STk_STklos_module));
   return STk_void;
 }
 
@@ -356,7 +360,13 @@ DEFINE_PRIMITIVE("%redefine-module-exports", redefine_module_exports, subr12,
   else 
     if (!MODULEP(to)) error_bad_module(to);
 
-  for (lst = MODULE_EXPORTS(from); !NULLP(lst); lst = CDR(lst)) {
+  /* Compute the list of exported symbols */
+  if (from == STk_STklos_module)
+    lst = STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module)); /* everybody */
+  else 
+    lst = MODULE_EXPORTS(from);				/* explicitly exported */
+
+  for (     ; !NULLP(lst); lst = CDR(lst)) {
     res = STk_hash_get_variable(&MODULE_HASH_TABLE(from), CAR(lst), &i);
     if (res)
       /* symbol (car lst) is bound in module from. redefine it in module to */
@@ -422,31 +432,19 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
 
   while (FRAMEP(env)) env = FRAME_NEXT(env);
 
-
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol, &i);
   if (res) {
     *ref = res;
     return CDR(res);
   }
   else {
-    /* symbol was not found in the module. Try to find it in the 
-     * exported symbols of its imported modules
+    /* symbol was not found in the given env module. Try to find it in
+     * the  exported symbols of its imported modules. 
      */
     for (l = MODULE_IMPORTS(env)  ; !NULLP(l); l = CDR(l)) {
       module = CAR(l);
       res    = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol, &i);
       if (res && VISIBLE_P(symbol, module)) {
-	*ref = res;
-	return CDR(res);
-      }
-    }
-
-    /* Not found in the imported modules. Try in the stklos module (if we 
-     * didn't had searched it yet
-     */
-    if (env != STk_STklos_module) {
-      res = STk_hash_get_variable(&MODULE_HASH_TABLE(STk_STklos_module), symbol, &i);
-      if (res) {
 	*ref = res;
 	return CDR(res);
       }
