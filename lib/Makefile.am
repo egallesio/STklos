@@ -2,9 +2,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 18-Dec-2006 21:30 (eg)
+# Last file update: 20-Dec-2006 10:36 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d @LURCDIR@
+SUBDIRS = Match.d SILex.d Lalr.d Snow.d @LURCDIR@
 
 scheme_BOOT = assembler.stk		\
 	      bb.stk 			\
@@ -77,6 +77,7 @@ scheme_OBJS = compfile.ostk		\
 	      lex-rt.ostk		\
 	      match.ostk		\
 	      pp.ostk			\
+	      snow-support.ostk		\
 	      srfi-1.ostk 		\
 	      srfi-2.ostk		\
 	      srfi-4.ostk		\
