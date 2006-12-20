@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Dec-2006 10:09 (eg)
-# Last file update: 20-Dec-2006 10:09 (eg)
+# Last file update: 20-Dec-2006 10:43 (eg)
 
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
@@ -57,9 +57,9 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(scheme_matchdir)"
-scheme_matchDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(scheme_match_DATA)
+am__installdirs = "$(DESTDIR)$(scheme_snowdir)"
+scheme_snowDATA_INSTALL = $(INSTALL_DATA)
+DATA = $(scheme_snow_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
@@ -187,8 +187,8 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-scheme_matchdir = $(prefix)/share/@PACKAGE@/@VERSION@/
-scheme_match_DATA = 
+scheme_snowdir = $(prefix)/share/@PACKAGE@/@VERSION@/Snow.d
+scheme_snow_DATA = 
 all: all-am
 
 .SUFFIXES:
@@ -222,22 +222,22 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 uninstall-info-am:
-install-scheme_matchDATA: $(scheme_match_DATA)
+install-scheme_snowDATA: $(scheme_snow_DATA)
 	@$(NORMAL_INSTALL)
-	test -z "$(scheme_matchdir)" || $(mkdir_p) "$(DESTDIR)$(scheme_matchdir)"
-	@list='$(scheme_match_DATA)'; for p in $$list; do \
+	test -z "$(scheme_snowdir)" || $(mkdir_p) "$(DESTDIR)$(scheme_snowdir)"
+	@list='$(scheme_snow_DATA)'; for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  f=$(am__strip_dir) \
-	  echo " $(scheme_matchDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(scheme_matchdir)/$$f'"; \
-	  $(scheme_matchDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(scheme_matchdir)/$$f"; \
+	  echo " $(scheme_snowDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(scheme_snowdir)/$$f'"; \
+	  $(scheme_snowDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(scheme_snowdir)/$$f"; \
 	done
 
-uninstall-scheme_matchDATA:
+uninstall-scheme_snowDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(scheme_match_DATA)'; for p in $$list; do \
+	@list='$(scheme_snow_DATA)'; for p in $$list; do \
 	  f=$(am__strip_dir) \
-	  echo " rm -f '$(DESTDIR)$(scheme_matchdir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(scheme_matchdir)/$$f"; \
+	  echo " rm -f '$(DESTDIR)$(scheme_snowdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(scheme_snowdir)/$$f"; \
 	done
 tags: TAGS
 TAGS:
@@ -277,7 +277,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(scheme_matchdir)"; do \
+	for dir in "$(DESTDIR)$(scheme_snowdir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-am
@@ -322,7 +322,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-scheme_matchDATA
+install-data-am: install-scheme_snowDATA
 
 install-exec-am:
 
@@ -348,17 +348,17 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-info-am uninstall-scheme_matchDATA
+uninstall-am: uninstall-info-am uninstall-scheme_snowDATA
 
 .PHONY: all all-am check check-am clean clean-generic distclean \
 	distclean-generic distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-exec \
 	install-exec-am install-info install-info-am install-man \
-	install-scheme_matchDATA install-strip installcheck \
+	install-scheme_snowDATA install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
 	pdf-am ps ps-am uninstall uninstall-am uninstall-info-am \
-	uninstall-scheme_matchDATA
+	uninstall-scheme_snowDATA
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

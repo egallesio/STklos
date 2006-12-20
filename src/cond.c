@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 22-May-2004 08:57 (eg)
- * Last file update:  4-Apr-2006 20:07 (eg)
+ * Last file update: 20-Dec-2006 11:09 (eg)
  */
 
 #include "stklos.h"
@@ -321,7 +321,6 @@ DEFINE_PRIMITIVE("make-compound-condition", make_comp_cond, vsubr,
 }
 
 
-
 /*
 <doc EXT condition-ref
  * (condition-ref condition slot-name)
@@ -329,7 +328,7 @@ DEFINE_PRIMITIVE("make-compound-condition", make_comp_cond, vsubr,
  * |Condition| must be a condition, and |slot-name| a symbol. Moreover, 
  * |condition| must belong to a condition type which has a slot name called 
  * |slot-name|, or one of its (direct or indirect) supertypes must have the
- *  slot. |Condition-ref| returns the value associated with |slot-name|.
+ * slot. |Condition-ref| returns the value associated with |slot-name|.
  * @lisp
  * (let* ((ct (make-condition-type 'ct1 &condition '(a b)))
  *        (c  (make-condition ct 'b 2 'a 1)))
@@ -343,7 +342,27 @@ DEFINE_PRIMITIVE("condition-ref", condition_ref, subr2, (SCM c, SCM slot))
   if (!CONDP(c)) error_bad_cond(c);
   return STk_int_struct_ref(c, slot);
 }
+
   
+/*
+<doc EXT condition-set!
+ * (condition-set! condition slot-name obj)
+ *
+ * |Condition| must be a condition, and |slot-name| a symbol. Moreover, 
+ * |condition| must belong to a condition type which has a slot name called 
+ * |slot-name|, or one of its (direct or indirect) supertypes must have the
+ * slot. |Condition-set!| change the value associated with |slot-name| to |obj|.
+ * £
+ * ,(bold "Note"): Whereas |condition-ref| is defined in ,(srfi 35), 
+ * |confition-set!| is not. 
+doc>
+*/
+DEFINE_PRIMITIVE("condition-set!", condition_set, subr3, (SCM c, SCM slot, SCM val))
+{
+  if (!CONDP(c)) error_bad_cond(c);
+  return STk_int_struct_set(c, slot, val);
+}
+
 
 /*
 <doc EXT condition-has-type?
@@ -364,6 +383,7 @@ DEFINE_PRIMITIVE("condition-ref", condition_ref, subr2, (SCM c, SCM slot))
  * @end lisp
 doc>
 */
+
 DEFINE_PRIMITIVE("condition-has-type?", cond_has_typep, subr2, (SCM c, SCM t))
 {
   if (!CONDP(c)) error_bad_cond(c);
@@ -511,6 +531,7 @@ int STk_init_cond(void)
   ADD_PRIMITIVE(make_comp_cond);
   ADD_PRIMITIVE(condp);
   ADD_PRIMITIVE(condition_ref);
+  ADD_PRIMITIVE(condition_set);
   ADD_PRIMITIVE(cond_has_typep);
   ADD_PRIMITIVE(extract_cond);
 

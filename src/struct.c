@@ -1,7 +1,7 @@
 /*
  * struct.c			-- Low level support for structures
  * 
- * Copyright © 2004-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 12-May-2004 17:26 (eg)
- * Last file update: 25-Apr-2005 17:23 (eg)
+ * Last file update: 20-Dec-2006 11:04 (eg)
  */
 
 #include "stklos.h"
@@ -46,13 +46,24 @@ static void error_bad_slot(SCM slot, SCM obj)
 
 SCM STk_int_struct_ref(SCM s, SCM slot)
 {
-  SCM index;
+  SCM index = STk_int_assq(slot, STRUCT_TYPE_SLOTS(STRUCT_TYPE(s)));
 
-  index = STk_int_assq(slot, STRUCT_TYPE_SLOTS(STRUCT_TYPE(s)));
   if (!SYMBOLP(slot) || index == STk_false) error_bad_slot(slot, s);
     
   return STRUCT_SLOTS(s)[INT_VAL(CDR(index))];
 }
+
+SCM STk_int_struct_set(SCM s, SCM slot, SCM val)  
+{
+  SCM index = STk_int_assq(slot, STRUCT_TYPE_SLOTS(STRUCT_TYPE(s)));
+
+  if (!SYMBOLP(slot) || index == STk_false) error_bad_slot(slot, s);
+    
+  STRUCT_SLOTS(s)[INT_VAL(CDR(index))] = val;
+  return STk_void;
+}
+
+
 
 
 /* ======================================================================
@@ -361,12 +372,7 @@ DEFINE_PRIMITIVE("struct-set!", struct_set, subr3, (SCM s, SCM slot, SCM val))
   SCM index;
 
   if (!STRUCTP(s)) error_bad_struct(s);
-  
-  index = STk_int_assq(slot, STRUCT_TYPE_SLOTS(STRUCT_TYPE(s)));
-  if (!SYMBOLP(slot) || index == STk_false) error_bad_slot(slot, s);
-    
-  STRUCT_SLOTS(s)[INT_VAL(CDR(index))] = val;
-  return STk_void;
+  return STk_int_struct_set(s, slot, val);
 }
 
 
