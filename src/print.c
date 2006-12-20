@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update:  6-Aug-2006 22:19 (eg)
+ * Last file update: 20-Dec-2006 09:59 (eg)
  *
  */
 #include <ctype.h>
@@ -146,8 +146,8 @@ void STk_print(SCM exp, SCM port, int mode)
       case AS_LONG(STk_nil):   STk_nputs(port, "()", 2); 	  	return;
       case AS_LONG(STk_false): STk_nputs(port, "#f", 2); 	  	return;
       case AS_LONG(STk_true):  STk_nputs(port, "#t", 2); 	  	return;
-      case AS_LONG(STk_eof):   STk_nputs(port, "#[eof]", 6);	  	return;
-      case AS_LONG(STk_void):  STk_nputs(port, "#[void]", 7);	 	return;
+      case AS_LONG(STk_eof):   STk_nputs(port, "#eof", 4);	  	return;
+      case AS_LONG(STk_void):  STk_nputs(port, "#void", 5);	 	return;
       default:		       STk_panic("Bad small constant %d", exp); return;
     }
   }

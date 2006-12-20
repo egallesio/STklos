@@ -20,7 +20,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update:  6-Aug-2006 22:27 (eg)
+ * Last file update: 20-Dec-2006 09:59 (eg)
  *
  */
 
@@ -213,7 +213,9 @@ static SCM read_token(SCM port, int c, int case_significant)
     switch (*tok) {
       case ':': return STk_makekey(tok);
       case '#': if (strcasecmp(tok+1, "eof") == 0)
-	           return STk_eof;
+	          return STk_eof;
+                else if (strcasecmp(tok+1, "void") == 0)
+		  return STk_void;
       		else
 		  error_bad_sharp_syntax(port, tok);
       default : return (tok[len-1] == ':') ? STk_makekey(tok) : STk_intern(tok);
