@@ -1,0 +1,117 @@
+;;;;
+;;;; snow-exception.stk	-- Snow exception implementation
+;;;; 
+;;;; Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 15-Dec-2006 15:15 (eg)
+;;;; Last file update: 21-Dec-2006 17:29 (eg)
+;;;;
+
+;; ======================================================================
+;; 	define-exception*
+;; ======================================================================
+(define-macro (define-exception* name . body)
+
+  (define (%define-exception->condition name parent slots)
+    (let ((pred    (string->symbol (format "~a?" name)))
+	  (constr  (string->symbol (format "make-~a" name)))
+	  (arg     (gensym))
+	  (val     (gensym)))
+      `(begin
+	 ;; Build the condition
+	 (define ,name (make-condition-type ',name
+					    ,(if parent parent '&condition)
+					    ',slots))
+	 
+	 
+	 ;; Build the predicate
+	 (define (,pred ,arg)
+	   (and (condition? ,arg) (condition-has-type? ,arg ,name)))
+	 
+	 ;; Export name constructor and predicate
+	 (export ,name ,constr ,pred)
+	 
+	 ;; Build the readers and setters
+	 (let ((module (current-module)))
+	   (for-each (lambda (x)
+		       (let ((reader (string->symbol (format "~a-~a" ',name x)))
+			     (writer (string->symbol (format "~a-~a-set!"
+							     ',name x))))
+			 ;; reader
+			 (%symbol-define reader
+					 (lambda(,arg)
+					   (condition-ref ,arg x x))
+					 module)
+			 ;; writer
+			 (%symbol-define writer
+					 (lambda (,arg ,val)
+					   (condition-set! ,arg x ,val))
+					 module)
+			 ;; export reader and writer
+			 (%module-export  module (list reader writer))))
+		     (struct-type-slots ,name)))
+	 
+	 ;; Build the toplevel result
+	 (values (void) ',name))))
+
+  ;;
+  ;; body of define-exception*
+  ;;  
+  (let Loop ((body body)
+	     (parent #f)
+	     (fields '()))
+    (cond
+      ((null? body)
+       (%define-exception->condition name parent (reverse! fields)))
+
+      ((keyword? (car body))
+       (cond
+	 ((null? (cdr body))
+	     (error "value expected after keyword ~S" (car body)))
+	 ((eq? (car body) parent:)
+	     (Loop (cddr body) (cadr body) fields))
+	 (else ;; ignore this keyword for STklos
+	     (Loop (cddr body) parent fields))))
+
+      ((symbol? (car body))
+       (Loop (cdr body)
+	     parent
+	     (cons (car body) fields)))
+
+      (else
+       (error "bad exception field expected ~S" (car body))))))
+
+;; ======================================================================
+;; 	exception*
+;; ======================================================================
+(define-macro (exception* name . args)
+  (let Loop ((args args)
+	     (res  '()))
+    (cond
+      ((null? args)
+       `(make-condition ,name ,@res))
+      ((and (pair? args)
+	    (keyword? (car args))
+	    (not (null? (cdr args)))
+	    (Loop (cddr args)
+		  (append! res
+			   `(',(string->symbol (keyword->string (car args)))
+			     ,(cadr args))))))
+      (else (error "bad parameter ~S" args)))))

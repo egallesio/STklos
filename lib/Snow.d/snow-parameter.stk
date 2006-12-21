@@ -1,5 +1,5 @@
 ;;;;
-;;;; snow-support.stk	-- Support Scheme Now! packages for STklos
+;;;; snow-parameter.stk	-- Snow parameters
 ;;;; 
 ;;;; Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -20,26 +20,14 @@
 ;;;; USA.
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
-;;;;    Creation date: 20-Dec-2006 10:18 (eg)
-;;;; Last file update: 21-Dec-2006 15:44 (eg)
+;;;;    Creation date: 21-Dec-2006 11:52 (eg)
+;;;; Last file update: 21-Dec-2006 17:11 (eg)
 ;;;;
 
-;; ======================================================================
-;; 	The SNOW STklos module
-;; ======================================================================
-(define-module SNOW
-  (include "Snow.d/snow-srfi89.stk")
-  (include "Snow.d/snow-exception.stk")
-  (include "Snow.d/snow-parameter.stk")
-  (include "Snow.d/snow-record.stk")
-  (include "Snow.d/snow-package.stk")
-  (include "Snow.d/snow-misc.stk")
-)
-
-;; ======================================================================
-;; 	bootstrap
-;; ======================================================================
-(include "Snow.d/_snow.stk")
-
-(provide "snow-support")
-
+(define-macro (define-parameter* name default :optional setter)
+  (let ((var   (gensym))
+	(sname (string->symbol (format "~a-set!" name))))
+    `(begin
+       (define ,name  (make-parameter ,default ,@(if setter (list setter) '())))
+       (define ,sname (lambda (val) (,name val)))
+       (void))))

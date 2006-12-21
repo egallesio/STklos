@@ -1,0 +1,108 @@
+;;;;
+;;;; snow-stklos.stk	-- Snow packages in STklos
+;;;; 
+;;;; Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 11-Dec-2006 14:39 (eg)
+;;;; Last file update: 21-Dec-2006 15:39 (eg)
+;;;;
+
+
+;; ======================================================================
+;;	package*
+;; ======================================================================
+(define-macro (package* name version . body)
+  `(begin
+     (define-module ,name
+       (require "_snow")
+       (define %%package-version ',version)
+       ,@(package*-body-expand body))
+     (select-module ,name)))
+
+
+(define (package*-body-expand body)
+  (match-case body
+    (((provide: . ?prov) . ?impl-reqs)
+     (append (package*-expand-provide prov)
+	     (package*-expand-impl-require impl-reqs)))
+    (else
+     (package*-expand-impl-require body))))
+
+(define (package*-expand-provide provide)
+  (map (lambda (x)
+         (match-case x
+	   ;; require: clause
+           ((require: ?pkg)
+              (if (symbol? pkg)
+                  `(require-for-syntax ,(symbol->string pkg))
+                  (error "package name must be a symbol. It was: ~S" pkg)))
+
+	   ;; define*
+           ((define* (?var . ?args))
+            `(export ,var))
+           ((define* (?var . ?args) . ?rest)
+            `(begin
+               (define (,var . ,(srfi89->ext-lambda-proto args))  ,@rest)
+               (export ,var)))
+           ((define* ?var)
+            `(export ,var))
+	   ((define* ?var ?value)
+	    `(begin
+	       (define ,var ,value)
+	       (export ,var)))
+	   ;; define-macro*
+	   ((define-macro* . ?rest)
+	    `(define-macro ,@rest))
+
+	   ;; define-record*
+	   ((define-record* ?name . ?rest)
+	    (%define-record* name rest #t))
+
+	   ;; define-exception*
+	   ((define-exception* ?name . ?rest)
+	    `(define-exception* ,name ,@rest))
+
+	   ;; else
+	   (else
+	    (error "Form ~S not implemented" x))))
+       provide))
+
+
+(define (package*-expand-impl-require reqs)
+  (map (lambda (x)
+         (match-case x
+	  ;; require clause
+          ((require: ?pkg)
+             (if (symbol? pkg)
+                 `(begin
+		    (require ,(symbol->string pkg))
+		    (import ,pkg))
+                 (error "package name must be a symbol. It was: ~S" pkg)))
+
+	  ;; Meta informations
+	  (((? keyword?) . ?args)
+	    (eprintf "J'ai vu le keyword ~S\n" x))
+	   
+          (else
+             (error "bad implementation requirement: ~S" x))))
+       reqs))
+
+
+

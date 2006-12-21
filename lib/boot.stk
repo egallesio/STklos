@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 18-Dec-2006 21:34 (eg)
+;;;; Last file update: 21-Dec-2006 18:24 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -44,19 +44,20 @@
 (import REPL)
 
 ;==============================================================================
-(autoload 	 "compfile" compile-file)
-(autoload 	 "describe" describe)
-(syntax-autoload "match"    match-case match-lambda)
-(autoload 	 "getopt"   %print-usage)
-(syntax-autoload "getopt"   parse-arguments)
-(syntax-autoload "trace"    trace untrace)
-(autoload	 "pp"	    pp pretty-print)
-(autoload	 "env"	    null-environment scheme-report-environment
-		 	    interaction-environment)
-(autoload 	 "srfi-27"  random-integer random-real)
+(autoload	 "compfile"	compile-file)
+(autoload	 "describe"	describe)
+(syntax-autoload "match"	match-case match-lambda)
+(autoload	 "getopt"	%print-usage)
+(syntax-autoload "getopt"	parse-arguments)
+(syntax-autoload "trace"	trace untrace)
+(autoload	 "pp"		pp pretty-print)
+(autoload	 "env"		null-environment scheme-report-environment
+			        interaction-environment)
+;(syntax-autoload "snow-support" package*)
+(autoload	 "srfi-27"  random-integer random-real)
 (syntax-autoload "srfi-34"  with-exception-handler guard)
 (syntax-autoload "srfi-35"  define-condition-type condition)
-(autoload 	 "srfi-48"  srfi48:help srfi48:format-fixed)
+(autoload	 "srfi-48"  srfi48:help srfi48:format-fixed)
 
 ;==============================================================================
 ;; Execute the REPL only if a file was not given on the command line
