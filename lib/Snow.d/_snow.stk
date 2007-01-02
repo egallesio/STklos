@@ -21,15 +21,17 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 21-Dec-2006 14:55 (eg)
-;;;; Last file update: 21-Dec-2006 17:31 (eg)
+;;;; Last file update: 22-Dec-2006 00:15 (eg)
 ;;;;
 
+;//FIXME: _snow:program-filename should be defined as program-file-name
 
 (require "srfi-4")		;;//FIXME:
 
 
 (define-module _snow
-  (export snow-raise snow-error snow-with-exception-catcher)
+  (export snow-raise snow-error snow-with-exception-catcher
+	  _snow:program-filename)
 
   ;;
   ;; Functions
@@ -46,6 +48,8 @@
 	      args)
     (eprintf "\n")
     (raise (exception* snow-error-condition msg: msg args: args)))
+
+  (define _snow:program-filename (program-name))
 
   ;;
   ;; Exceptions

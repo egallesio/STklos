@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 21-Dec-2006 18:24 (eg)
+;;;; Last file update: 21-Dec-2006 23:51 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -53,7 +53,7 @@
 (autoload	 "pp"		pp pretty-print)
 (autoload	 "env"		null-environment scheme-report-environment
 			        interaction-environment)
-;(syntax-autoload "snow-support" package*)
+(syntax-autoload "snow-support" package*)
 (autoload	 "srfi-27"  random-integer random-real)
 (syntax-autoload "srfi-34"  with-exception-handler guard)
 (syntax-autoload "srfi-35"  define-condition-type condition)

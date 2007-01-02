@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 19-Dec-2006 12:20 (eg)
+;;;; Last file update: 26-Dec-2006 16:18 (eg)
 ;;;;
 
 ;;
@@ -372,6 +372,20 @@ doc>
 |#
 (define (program-name)
   (key-get *%program-args* :program-name))
+
+
+#|
+<doc EXT make-directories
+ * (make-directories str)
+ *
+ * .....
+doc>
+|#
+(define (make-directories path)
+  (let ((dir (dirname path)))
+    (unless (file-is-directory? dir)
+      (make-directories dir))
+    (make-directory path)))
 
 ;;;;
 ;;;; Hash-tables functions

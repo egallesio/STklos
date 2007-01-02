@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 20-Dec-2006 09:59 (eg)
+ * Last file update: 24-Dec-2006 11:39 (eg)
  *
  */
 #include <ctype.h>
@@ -118,7 +118,7 @@ static void printstring(SCM s, SCM port, int mode)
         case '\v' : *buff++ = '\\'; *buff++ = 'v'; break;
         case '"'  : 
         case '\\' : *buff++ = '\\'; *buff++ = *p;  break;
-      default   : if ((unsigned char) *p < (unsigned char) ' ') { 
+        default   : if ((unsigned char) *p < (unsigned char) ' ') { 
 	  	      /* Non printable character (This work only for ASCII!!) */
 	  	      *buff++ = '\\';
 	  	      *buff++ = 'x';
