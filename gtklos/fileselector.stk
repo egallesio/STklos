@@ -1,7 +1,7 @@
 ;;;;
 ;;;; fileselector.stk	-- GTKlos File Selector Widget
 ;;;; 
-;;;; Copyright © 2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Feb-2002 16:59 (eg)
-;;;; Last file update: 15-Feb-2002 18:06 (eg)
+;;;; Last file update:  7-Jan-2007 23:01 (eg)
 ;;;;
 
 (define-class <file-selector> (<gtk-container>)
@@ -36,7 +36,7 @@
 
 (define-method realize-widget ((self <file-selector>) initargs)
   (let ((title (key-get initargs :title "")))
-    (slot-set! self 'wid (%fileseLector self title))))
+    (slot-set! self 'wid (%fileselector self title))))
 
 ;======================================================================
 ;

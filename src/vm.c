@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 26-Nov-2006 12:16 (eg)
+ * Last file update:  5-Jan-2007 00:49 (eg)
  */
 
 // INLINER values
@@ -350,6 +350,44 @@ static Inline SCM clone_env(SCM e, vm_thread_t *vm)
   }
   return e;
 }
+
+static void verif_environment(vm_thread_t *vm)
+{  
+  SCM *lfp, *env;
+
+  STk_debug("<<<<<<VVVVVVVV<<<<");
+  for (lfp = vm->fp; lfp; lfp = ACT_SAVE_FP(lfp)) {
+    SCM self = (SCM) (ACT_SAVE_PROC(lfp));
+    STk_debug("self = ~S", self);
+    if (!self || !ACT_SAVE_ENV(lfp)) break;
+
+    STk_debug("++++ %d", ACT_SAVE_ENV(lfp));
+    for (env = ACT_SAVE_ENV(lfp); FRAMEP(env); env = FRAME_NEXT(env)){
+      STk_debug("    On a l'environment ~S (%d)", (SCM) env,
+		IS_IN_STACKP(env));
+      
+    }
+    STk_debug("---");
+  }
+  STk_debug(">>>VVV>>>>>>>");
+}
+
+static void patch_environment(vm_thread_t *vm)
+{  
+  SCM *lfp;
+
+  STk_debug("<<<<<<<<<<");
+  for (lfp = vm->fp; lfp; lfp = ACT_SAVE_FP(lfp)) {
+    if (!ACT_SAVE_ENV(lfp)) break;
+
+    STk_debug("++++ %d", ACT_SAVE_ENV(lfp));
+    ACT_SAVE_ENV(lfp) = clone_env(ACT_SAVE_ENV(lfp), vm);
+    STk_debug("---");
+  }
+  STk_debug(">>>>>>>>>>");
+  verif_environment(vm);
+}
+
 
 
 static void error_bad_arity(SCM func, int arity, short given_args, vm_thread_t *vm)
@@ -721,21 +759,22 @@ static void dump_couple_instr(void)
   fprintf(dump, "\n]\n");
 }
 # endif
+#endif
 
+
+#ifdef STK_DEBUG
+static void patch_environment(vm_thread_t *vm);
 DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int argc, SCM *argv))
 {
   /* 
    * This function is just a placeholder for debugging the VM. It's body is 
    * changed depending of the current bug to track 
    */
-  int x;
-  vm_thread_t *vm = STk_get_current_vm();
 
-  printf("C stack %p, Scheme %p\n", &x, vm->sp);
+  patch_environment(STk_get_current_vm());
   return STk_void;
 }
 #endif 
-
 
 
 /*===========================================================================*\
@@ -1582,6 +1621,7 @@ void STk_get_stack_pointer(void **addr)
 
 #ifndef THREADS_LURC
 
+
 DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 {
   SCM z;
@@ -1624,10 +1664,12 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   k->sstart	= sstart;
   k->send	= send;
 
+  patch_environment(vm);
+
   k->pc		 = vm->pc;
   k->fp		 = vm->fp;
   k->sp		 = vm->sp;
-  k->env	 = clone_env(vm->env, vm);
+  k->env	 = vm->env = clone_env(vm->env, vm);
   k->constants	 = vm->constants;
   k->handlers	 = vm->handlers;
   k->jb		 = vm->top_jmp_buf;
@@ -1947,9 +1989,11 @@ int STk_init_vm()
   ADD_PRIMITIVE(continuationp);
   ADD_PRIMITIVE(fresh_continuationp);
 #endif /* ! THREADS_LURC */
-#ifdef DEBUG_VM
+
+#ifdef STK_DEBUG
   ADD_PRIMITIVE(set_vm_debug);
 #endif
   return TRUE;
 }
+
 

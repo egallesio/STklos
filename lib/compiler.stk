@@ -1,7 +1,7 @@
 					;bonus;;;
 ;;;; c o m p i l e r . s t k			-- STklos Compiler
 ;;;; 
-;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 18-Dec-2006 13:37 (eg)
+;;;; Last file update:  5-Jan-2007 19:43 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1166,6 +1166,23 @@ doc>
 			  (compile-access var (extend-env env loc) args #f)
 			  (Loop (cdr l)
 				loc)))))))))))
+
+(define (compile-let* args env tail?)
+  (let ((len (length args)))
+    (if (< len 3)
+	(compiler-error 'let* args "ill formed let* ~S" args)
+	(let ((bindings (cadr args))
+	      (body	(cddr args)))
+	  (when (valid-let-bindings? bindings #f)
+	    (compile (if (<= (length bindings) 1)
+			 `(let ,bindings ,@body)
+			 `(let (,(car bindings))
+ 			    (let* ,(cdr bindings)
+			      ,@body)))
+		     env args tail?))))))
+
+
+
 
 ;;
 ;; COND
