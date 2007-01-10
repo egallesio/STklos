@@ -1,7 +1,7 @@
 /*
  * p r i n t . c				-- writing stuff
  *
- * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 24-Dec-2006 11:39 (eg)
+ * Last file update: 10-Jan-2007 11:09 (eg)
  *
  */
 #include <ctype.h>
@@ -118,12 +118,12 @@ static void printstring(SCM s, SCM port, int mode)
         case '\v' : *buff++ = '\\'; *buff++ = 'v'; break;
         case '"'  : 
         case '\\' : *buff++ = '\\'; *buff++ = *p;  break;
-        default   : if ((unsigned char) *p < (unsigned char) ' ') { 
-	  	      /* Non printable character (This work only for ASCII!!) */
+      default   : if ((((unsigned char) *p) & 0177) < (unsigned char) ' ') {
+	  	      /* Non printable character (It works only for ISO 8859-x !!) */
 	  	      *buff++ = '\\';
 	  	      *buff++ = 'x';
-		      *buff++ = printhexa(*p / 16);
-		      *buff++ = printhexa(*p % 16);
+		      *buff++ = printhexa((unsigned char) *p / 16);
+		      *buff++ = printhexa((unsigned char) *p % 16);
 		    } 
 		    else *buff++ = *p;
       }

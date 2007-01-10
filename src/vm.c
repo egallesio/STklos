@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  5-Jan-2007 00:49 (eg)
+ * Last file update:  8-Jan-2007 23:21 (eg)
  */
 
 // INLINER values
@@ -355,36 +355,36 @@ static void verif_environment(vm_thread_t *vm)
 {  
   SCM *lfp, *env;
 
-  STk_debug("<<<<<<VVVVVVVV<<<<");
+  //STk_debug("<<<<<<VVVVVVVV<<<<");
   for (lfp = vm->fp; lfp; lfp = ACT_SAVE_FP(lfp)) {
     SCM self = (SCM) (ACT_SAVE_PROC(lfp));
-    STk_debug("self = ~S", self);
+    //STk_debug("self = ~S", self);
     if (!self || !ACT_SAVE_ENV(lfp)) break;
 
-    STk_debug("++++ %d", ACT_SAVE_ENV(lfp));
+    //STk_debug("++++ %d", ACT_SAVE_ENV(lfp));
     for (env = ACT_SAVE_ENV(lfp); FRAMEP(env); env = FRAME_NEXT(env)){
-      STk_debug("    On a l'environment ~S (%d)", (SCM) env,
-		IS_IN_STACKP(env));
+      //STk_debug("    On a l'environment ~S (%d)", (SCM) env,
+      //IS_IN_STACKP(env));
       
     }
-    STk_debug("---");
+    //STk_debug("---");
   }
-  STk_debug(">>>VVV>>>>>>>");
+  //STk_debug(">>>VVV>>>>>>>");
 }
 
 static void patch_environment(vm_thread_t *vm)
 {  
   SCM *lfp;
 
-  STk_debug("<<<<<<<<<<");
+  //STk_debug("<<<<<<<<<<");
   for (lfp = vm->fp; lfp; lfp = ACT_SAVE_FP(lfp)) {
     if (!ACT_SAVE_ENV(lfp)) break;
 
-    STk_debug("++++ %d", ACT_SAVE_ENV(lfp));
+    //STk_debug("++++ %d", ACT_SAVE_ENV(lfp));
     ACT_SAVE_ENV(lfp) = clone_env(ACT_SAVE_ENV(lfp), vm);
-    STk_debug("---");
+    //STk_debug("---");
   }
-  STk_debug(">>>>>>>>>>");
+  //STk_debug(">>>>>>>>>>");
   verif_environment(vm);
 }
 

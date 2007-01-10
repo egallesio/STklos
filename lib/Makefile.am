@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 22-Dec-2006 00:13 (eg)
+# Last file update:  8-Jan-2007 14:02 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d Snow.d @LURCDIR@
 
@@ -41,6 +41,7 @@ scheme_SRCS = STklos.init		\
 	      full-syntax.stk		\
 	      full-conditions.stk 	\
 	      getopt.stk		\
+	      gunzip.stk		\
 	      lex-rt.stk		\
 	      make-C-boot.stk		\
 	      match.stk			\
@@ -66,6 +67,7 @@ scheme_SRCS = STklos.init		\
 	      srfi-66.stk		\
 	      srfi-69.stk		\
 	      srfi-70.stk		\
+	      tar.stk			\
 	      trace.stk
 
 scheme_OBJS = compfile.ostk		\
@@ -74,6 +76,7 @@ scheme_OBJS = compfile.ostk		\
 	      describe.ostk		\
 	      env.ostk			\
 	      getopt.ostk		\
+	      gunzip.ostk		\
 	      lex-rt.ostk		\
 	      match.ostk		\
 	      pp.ostk			\
@@ -98,6 +101,7 @@ scheme_OBJS = compfile.ostk		\
 	      srfi-66.ostk		\
 	      srfi-69.ostk		\
 	      srfi-70.ostk		\
+	      tar.ostk			\
 	      trace.ostk	
 
 DOCDB	    = DOCDB
