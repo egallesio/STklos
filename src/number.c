@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 26-Oct-2006 15:27 (eg)
+ * Last file update: 10-Jan-2007 22:32 (eg)
  */
 
 
@@ -1348,11 +1348,11 @@ static Inline int is_oddp(SCM n)
 static int zerop(SCM n)
 {
   switch (TYPEOF(n)) {
-    case tc_complex:  return zerop(COMPLEX_REAL(n)) && zerop(COMPLEX_IMAG(n));
-    case tc_real:     return (REAL_VAL(n) == 0.0);
-    case tc_rational: return zerop(RATIONAL_NUM(n));
-    case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) == 0);
     case tc_integer:  return (INT_VAL(n) == 0);
+    case tc_real:     return (REAL_VAL(n) == 0.0);
+    case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) == 0);
+    case tc_complex:  return zerop(COMPLEX_REAL(n)) && zerop(COMPLEX_IMAG(n));
+    case tc_rational: return zerop(RATIONAL_NUM(n));
     default:	      error_bad_number(n);
   }
   return FALSE;	/* never reached */
@@ -1361,10 +1361,10 @@ static int zerop(SCM n)
 static int positivep(SCM n)
 {
   switch (TYPEOF(n)) {
-    case tc_real:     return (REAL_VAL(n) > 0.0);
-    case tc_rational: return positivep(RATIONAL_NUM(n));
-    case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) > 0);
     case tc_integer:  return (INT_VAL(n) > 0);
+    case tc_real:     return (REAL_VAL(n) > 0.0);
+    case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) > 0);
+    case tc_rational: return positivep(RATIONAL_NUM(n));
     case tc_complex:  error_not_on_a_complex(n); break;
     default:	      error_bad_number(n);
   }
@@ -1375,10 +1375,10 @@ static int positivep(SCM n)
 static int negativep(SCM n)
 {
   switch (TYPEOF(n)) {
-    case tc_real:     return (REAL_VAL(n) < 0.0);
-    case tc_rational: return negativep(RATIONAL_NUM(n));
-    case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) < 0);
     case tc_integer:  return (INT_VAL(n) < 0);
+    case tc_real:     return (REAL_VAL(n) < 0.0);
+    case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) < 0);
+    case tc_rational: return negativep(RATIONAL_NUM(n));
     case tc_complex:  error_not_on_a_complex(n); break;
     default:	      error_bad_number(n);
   }
@@ -1617,7 +1617,7 @@ SCM STk_mul2(SCM o1, SCM o2)
 {
   switch (convert(&o1, &o2)) {
     case tc_bignum: 
-mult_bignum:
+      mult_bignum:
       {
 	mpz_t prod; 
 	
@@ -2963,6 +2963,10 @@ DEFINE_PRIMITIVE("%bit-or", bit_or, subr2, (SCM n1, SCM n2))
   mpz_t n;
   SCM z;
 
+  if (INTP(n1) && INTP(n2)) {
+    return (SCM) ((long) n1 | (long) n2); /* tags are identical => no problem */
+  }
+
   switch (TYPEOF(n1)) {
     case tc_bignum:  /* nothing */ break;
     case tc_integer: n1 = long2scheme_bignum(INT_VAL(n1)); break;
@@ -2983,10 +2987,16 @@ DEFINE_PRIMITIVE("%bit-or", bit_or, subr2, (SCM n1, SCM n2))
   return z;
 }
 
+
+
 DEFINE_PRIMITIVE("%bit-and", bit_and, subr2, (SCM n1, SCM n2))
 {
   mpz_t n;
   SCM z;
+
+  if (INTP(n1) && INTP(n2)) {
+    return (SCM) ((long) n1 & (long) n2); /* tags are identical => no problem */
+  }
 
   switch (TYPEOF(n1)) {
     case tc_bignum:  /* nothing */ break;
@@ -3007,10 +3017,15 @@ DEFINE_PRIMITIVE("%bit-and", bit_and, subr2, (SCM n1, SCM n2))
   return z;
 }
 
+
 DEFINE_PRIMITIVE("%bit-xor", bit_xor, subr2, (SCM n1, SCM n2))
 {
   mpz_t tmp1, tmp2, tmp3;
   SCM z;
+
+  if (INTP(n1) && INTP(n2)) { 
+    return MAKE_INT(INT_VAL(n1) ^ INT_VAL(n2));
+  }
 
   switch (TYPEOF(n1)) {
     case tc_bignum:  /* nothing */ break;
@@ -3044,16 +3059,32 @@ DEFINE_PRIMITIVE("bit-not", bit_not, subr1, (SCM n))
   mpz_t z;
 
   switch (TYPEOF(n)) {
-    case tc_bignum:  /* nothing */ break;
-    case tc_integer: n = long2scheme_bignum(INT_VAL(n)); break;
+    case tc_integer: return MAKE_INT(~(INT_VAL(n)));
+    case tc_bignum:  mpz_init(z);  mpz_com(z, BIGNUM_VAL(n)); 
+                     return  bignum2number(z);
     default:	     error_bad_number(n);
   }
 
-  mpz_init(z);
-  mpz_com(z, BIGNUM_VAL(n));
-  
-  return bignum2number(z);
+  return STk_void; /* never reached */
 }
+
+
+DEFINE_PRIMITIVE("bit-rshift", bit_rshift, subr2, (SCM n, SCM m))
+{
+  if (INTP(n) && INTP(m))
+    return (MAKE_INT(INT_VAL(n) >> INT_VAL(m)));
+  STk_error("bad numbers ~S ~S", n, m);
+  return STk_void;
+}
+
+DEFINE_PRIMITIVE("bit-lshift", bit_lshift, subr2, (SCM n, SCM m))
+{
+  if (INTP(n) && INTP(m))
+    return (long2integer(INT_VAL(n) << INT_VAL(m)));
+  STk_error("bad numbers ~S ~S", n, m);
+  return STk_void;
+}
+
 
 /*
  *
@@ -3191,7 +3222,8 @@ int STk_init_number(void)
   ADD_PRIMITIVE(bit_and);
   ADD_PRIMITIVE(bit_xor);
   ADD_PRIMITIVE(bit_not);
-
+  ADD_PRIMITIVE(bit_rshift);
+  ADD_PRIMITIVE(bit_lshift);
  
   /* Add parameter for float numbers precision */
   STk_make_C_parameter("real-precision",
