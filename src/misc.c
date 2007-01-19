@@ -1,7 +1,7 @@
 /*
  * m i s c . c					-- Misc. functions
  * 
- * Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 28-Oct-2006 21:47 (eg)
+ * Last file update: 12-Jan-2007 12:22 (eg)
  */
 
 #include "stklos.h"
@@ -276,6 +276,8 @@ static char URI_regexp[] =
  * following components
  * ,(itemize
  * (item [|scheme| : the scheme used as a string (defaults to |"file"|)])
+ * (item [|user|: the user information (generally expressed as 
+ *      |login:password|)])
  * (item [|host| : the host as a string (defaults to "")])
  * (item [|port| : the port as an integer (0 if no port specified)])
  * (item [|path| : the path ])
@@ -286,23 +288,26 @@ static char URI_regexp[] =
  * )
  * @lisp
  * (uri-parse "http://google.com")
- *     => (:scheme "http" :host "google.com" :port 80 :path "/" 
- *         :query "" :fragment "")
+ *     => (:scheme "http" :user "" :host "google.com" :port 80 
+ *         :path "/" :query "" :fragment "")
  * (uri-parse "http://stklos.net:8080/a/file?x=1;y=2#end")
- *     => (:scheme "http" :host "stklos.net" :port 8080 
+ *     => (:scheme "http" :user "" :host "stklos.net" :port 8080 
  *         :path "/a/file" :query "x=1;y=2" :fragment "end")
+ * (uri-parse "http://foo:secret@stklos.net:2000/a/file")
+ *     => (:scheme "http" :user "foo:secret" :host "stklos.net" 
+ *         :port 2000  :path "/a/file" :query "" :fragment "")
  * (uri-parse "/a/file")           
- *    => (:scheme "file" :host "" :port 0 :path "/a/file" 
+ *    => (:scheme "file" :user "" :host "" :port 0 :path "/a/file" 
  *        :query "" :fragment "")
  * (uri-parse "")
- *    => (:scheme "file" :host "" :port 0 :path "" 
+ *    => (:scheme "file"  :user "" :host "" :port 0 :path "" 
  *        :query "" :fragment "")
  * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
 {
-  SCM file, tmp, scheme, host, port, path, query, fragment;
+  SCM file, tmp, scheme, host, port, path, query, fragment, user;
   SCM *vect;
   char *url;
 
@@ -314,7 +319,7 @@ DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
   if (!strstr(url,"://")) {			/* No :// => this is a file */
     port   = MAKE_INT(0);
     path   = url_str;
-    host = query = fragment = STk_Cstring2string("");
+    host = query = fragment = user = STk_Cstring2string("");
   } else {					/* general URI */
     char *start;
     /* Scheme */
@@ -332,11 +337,23 @@ DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
     else 
       url += 3;
     
-    /* Host */
-    for (start = url; *url && *url != '/' && *url != ':'; url++) {
+    /* Host or user@host. Look forward to see if we have an '@'*/
+    for (start = url; *url && *url != '/' && *url != '@'; url++) {
     }
-    host = STk_makestring(url-start, start); 
-
+    if (*url == '@') {
+      /* We have an user */
+      user = STk_makestring(url-start, start);
+      /* read the host now */
+      for (start = ++url; *url && *url != '/' && *url != ':'; url++) {
+      }
+      host = STk_makestring(url-start, start);
+    } else {
+      /* no user info: backtrack since we may have skipped a ":" */
+      for (url = start; *url && *url != '/' && *url != ':'; url++) {
+      }
+      host = STk_makestring(url-start, start);
+      user = STk_Cstring2string("");
+    }
 
     /* Port */
     if (*url == ':') {
@@ -379,15 +396,16 @@ DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
   }
 
   /* Build the result */
-  tmp  = STk_makevect(12, STk_false);
+  tmp  = STk_makevect(14, STk_false);
   vect = VECTOR_DATA(tmp);
   
   vect[0]  = STk_makekey("scheme");   vect[1]  = scheme;
-  vect[2]  = STk_makekey("host");     vect[3]  = host;
-  vect[4]  = STk_makekey("port");     vect[5]  = port;
-  vect[6]  = STk_makekey("path");     vect[7]  = path;
-  vect[8]  = STk_makekey("query");    vect[9]  = query;
-  vect[10] = STk_makekey("fragment"); vect[11] = fragment;
+  vect[2]  = STk_makekey("user");     vect[3]  = user;
+  vect[4]  = STk_makekey("host");     vect[5]  = host;
+  vect[6]  = STk_makekey("port");     vect[7]  = port;
+  vect[8]  = STk_makekey("path");     vect[9]  = path;
+  vect[10] = STk_makekey("query");    vect[11]  = query;
+  vect[12] = STk_makekey("fragment"); vect[13] = fragment;
 
   return STk_vector2list(tmp);
 Error:
