@@ -1,0 +1,112 @@
+;;;;
+;;;; main.stk	-- Snowman main program
+;;;; 
+;;;; Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 22-Dec-2006 11:32 (eg)
+;;;; Last file update: 18-Jan-2007 16:37 (eg)
+;;;;
+
+(include "types.stk")
+(include "params.stk")
+(include "http.stk")
+;;(include "snowball.stk")
+(include "repository.stk")
+(include "extract.stk")
+(include "misc.stk")
+
+
+;; ----------------------------------------------------------------------
+;;	snowman-arguments ...
+;; ----------------------------------------------------------------------
+(define (snowman-arguments argv)
+  (let ((actions '()))
+
+    (parse-arguments argv
+       "Usage: stklos-snowman [options] [parameter ...]"
+       
+       "Actions"
+       (("extract" :arg pkg :alternate "e" :help "Extract <pkg>. Don't install it")
+	(set! actions (cons (list 'extract pkg) actions)))
+       (("add" :alternate "a" :arg sb
+	 :help "Add <sb> snowball to the local repository")
+	1111111)
+
+       "Informations"
+       (("depends" :arg pkg :help "Show all the dependencies of <pkg>")
+	(set! actions (cons (list 'package-deps pkg) actions)))
+
+       "Repository administration"
+       (("sync" :alternate "s" :help "synchronize with remote snowfort servers")
+	(set! actions (cons 'sync actions)))
+       (("list" :alternate "l" :help "list available packages")
+	(set! actions (cons 'list actions)))
+       (("delete-repository" :help "delete snowman repository. USE WITH CAUTION")
+	(set! actions (cons 'delete-repo actions)))
+
+       "Misc"
+       (("directory" :arg dir :alternate "C"
+	 :help "Change to directory <dir> when extracting")
+	(snowman-extract-dir dir))
+       (("verbose" :alternate "v" :help "be verbose (can be cumulated)")
+	(snowman-verbosity (+ (snowman-verbosity) 1)))
+       (("help" :alternate "h" :help "display this help")
+	(arg-usage (current-error-port))
+	(exit 0))
+       (("options" :help "display program options")
+	(arg-usage (current-error-port) #t)
+	(exit 0))
+       (("version" :alternate "V" :help "print the version and exit")
+	(eprintf "stklos-snowman shipped with STklos (version ~A)\n" (version))
+	(exit 0)))
+
+    (if (null? actions)
+	'(list)
+	(reverse actions))))
+       
+;; ----------------------------------------------------------------------
+;;	main ...
+;; ----------------------------------------------------------------------
+(define (main argv)
+  ;; Ensure that files are correctly set
+  (ensure-repository-hierarchy)
+  ;; load the snowforts informations
+  (load-repository-descriptions)
+  ;; Parse the program arguments
+  (let loop ((actions (snowman-arguments argv)))
+    (unless (null? actions)
+      (case ((if (pair? (car actions)) caar car) actions)
+	((list)
+	   (list-repository-packages))
+	((sync)
+	   (synchronize-snowforts))
+	((delete-repo)
+	   (rm-rf (snowman-cache-directory))
+	   (rm-rf (snowman-snowforts-directory))
+	   (exit 0))
+	((extract)
+	   (find-and-extract-package (cadar actions)
+				     (snowman-extract-dir)))
+	((package-deps)
+	   (for-each (lambda (x) (printf "~a\n" x))
+		     (package-deps* (cadar actions))))
+	(else (die (format "bad command ~S" (car actions)))))
+      (loop (cdr actions))))
+  (exit 0))

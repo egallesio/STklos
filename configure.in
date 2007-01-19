@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 20-Dec-2006 10:10 (eg)
+dnl Last file update: 11-Jan-2007 16:27 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -518,7 +518,8 @@ AC_OUTPUT(Makefile src/Makefile src/extraconf.h doc/Makefile
 	  tests/Makefile extensions/extconf.h 
 	  doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 
 	  doc/stklos-genlex.1 doc/stklos-install.1 
-	  doc/skb/stklos-version.stk)
+	  doc/skb/stklos-version.stk
+	  snowman/Makefile)
 
 chmod 0755 utils/stklos-config utils/stklos-script
 

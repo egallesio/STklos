@@ -1,0 +1,228 @@
+;;;;
+;;;; repository.stk	-- Local repository management
+;;;; 
+;;;; Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 26-Dec-2006 18:20 (eg)
+;;;; Last file update: 17-Jan-2007 16:24 (eg)
+;;;;
+
+;; ----------------------------------------------------------------------
+;;	ensure-repository-hierarchy ...
+;; ----------------------------------------------------------------------
+(define (ensure-repository-hierarchy)
+  ;; Create the snowforts directory (eventually)
+  (unless (file-exists? (snowman-snowforts-directory))
+    (make-directories (snowman-snowforts-directory))
+    (for-each (lambda (x)
+		(let* ((name (make-path (snowman-snowforts-directory) x))
+		       (out  (open-file name "w")))
+		  (unless out
+		    (die (format "Cannot create snowfort file ~a" name)))
+		  (fprintf out ";; Generated file. DO NOT EDIT\n~a\n" '())
+		  (close-port out)))
+	      (snowfort-names)))
+  ;; Create the cache directory (eventually)
+  (unless (file-exists? (snowman-cache-directory))
+    (make-directories (snowman-cache-directory))))
+
+;; ----------------------------------------------------------------------
+;;	load-repository-descriptions ...
+;; ----------------------------------------------------------------------
+(define (load-repository-descriptions)
+
+  (define (add-tuning descr)
+    (and (pair? descr)
+	 (let ((options (cdr descr)))
+	   (make-tuning (key-get options :snowball "")
+			(key-get options :url "")
+			(key-get options :md5 "")))))
+
+  (define (add-package descr)
+    (let* ((options (cddr descr))
+	   (pkg     (make-package
+		            (car descr)		; name
+			    (cadr descr)	; version
+			    (key-get options :category #f)
+			    (key-get options :snowball "")
+			    (key-get options :url "")
+			    (key-get options :md5 "")
+			    (key-get options :description "")
+			    (key-get options :author "")
+			    (key-get options :license "")
+			    (key-get options :homepage "")
+			    (key-get options :dependencies '())
+			    (add-tuning (key-get options :tunings '())))))
+      (set! *snowman-pkgs* (cons pkg *snowman-pkgs*))))
+
+  (define (add-packages src)
+    (let ((in (open-file src "r")))
+      (unless in
+	(die (format "Cannot load description in file ~s" src)))
+      (let ((lst (read in)))
+	(close-port in)
+	(for-each add-package lst))))
+	  
+  (let ((all (map (lambda (x)
+		    (make-path (snowman-snowforts-directory) x))
+		  (snowfort-names))))
+    (for-each add-packages all)))
+
+
+;; ----------------------------------------------------------------------
+;; 	synchronize-snowforts ...
+;; ----------------------------------------------------------------------
+(define (synchronize-snowforts)
+
+  (define (build-cache-name pkg version)
+    (make-path (snowman-cache-directory) (format "~a-~a.tar.gz" pkg version)))
+  
+  (define (simplify-package-descr descr)
+    (match-case descr
+       ((?name ?version . ?rest)
+	;; Build the name of the file in local cache 
+	(key-set! rest :snowball (build-cache-name name version))
+	;; Build the names of STklos the tunings in the local cache
+	;; and delete informations on other tunings 
+	(let* ((tunings   (key-get rest :tunings '()))
+	       (my-tuning (assoc "bigloo" tunings)))
+	  (if my-tuning
+	      (begin 
+		(key-set! (cdr my-tuning)
+			  :snowball
+			  (build-cache-name (format "~a-stklos" name) version))
+		(key-set! rest :tunings (list my-tuning)))
+	      (key-set! rest :tunings '()))))
+       (else
+	(eprintf "Warning: illegal description ~S" descr))))
+
+  (define (sync snowfort-name url)
+    (eprintf "Synchronizing snowfort ~S\n   ~S ... " snowfort-name url)
+    (flush-output-port (current-error-port))
+
+    (let ((out (open-output-string)))
+      (http-get url out)
+      (let ((pkgs (read-from-string (get-output-string out))))
+	;; Simplify packages description (e.g. delete non STklos tunings ...)
+	(for-each simplify-package-descr pkgs)
+
+	;; Save the informations of this snowfort
+	(let* ((name (make-path (snowman-snowforts-directory) snowfort-name))
+	       (out  (open-file name "w")))
+	  (unless out
+	    (die (format "cannot save snowfort descriptions of ~s" snowfort-name)))
+	  (fprintf out ";; -*- Scheme -*-    Generated file DO NOT EDIT\n")
+	  (fprintf out ";; Synchronization of ~a at ~s\n" snowfort-name url)
+	  (fprintf out ";; State saved ~a\n" (date))
+	  (write pkgs out)
+	  (newline out)
+	  (close-port out))))
+    (eprintf "done\n"))
+
+  ;;
+  ;; synchronize-snowforts starts here
+  ;;
+  (for-each (lambda (x) (sync (car x) (cadr x)))
+	    (snowman-sync-urls)))
+
+;; ----------------------------------------------------------------------
+;; 	list-repository-packages ...
+;; ----------------------------------------------------------------------
+(define (list-repository-packages)
+
+  (define (display-package pkg)
+    (printf "~a-~a\n" (package-name pkg) (package-version pkg))
+    (when (> (snowman-verbosity) 0)
+      (printf "   Description: ~a\n" (package-description pkg))
+      (printf "   Category: ~a\n" (package-category pkg))
+      (printf "   STklos tuning: ~a\n" (if (package-tuning pkg) "yes" "no"))))
+
+  (for-each display-package
+	    (sort *snowman-pkgs* package<?)))
+
+
+;; ----------------------------------------------------------------------
+;; 	find-package ...
+;; ----------------------------------------------------------------------
+(define (find-package pkg)
+
+  (define (parse-name name)
+    (match-case (string-split name "-")
+       ((?name  ?version)
+	(values name version))
+       ((?name)
+	(values name #f))
+       (else
+	(error 'find-package "bad package name" name))))
+
+  (receive (name version)
+	   (parse-name pkg)
+     (let ((candidates (filter (lambda (x) (equal? (package-name x) name))
+			       *snowman-pkgs*)))
+       (cond
+	 ((null? candidates)	;; no package found
+	  #f)
+	 (version		;; a version was specified filter the list
+	  (let ((res (filter (lambda (x) (equal? (package-version x) version))
+			     candidates)))
+	    (and (not (null? res))
+		 (car res))))
+	 (else 			;; return the most recent package
+	  (car (last-pair (sort candidates package<?))))))))
+
+;; ----------------------------------------------------------------------
+;; 	download-package ...
+;; ----------------------------------------------------------------------
+(define (download-package package)
+
+  (define (download-snowball path url md5)
+    (when (> (snowman-verbosity) 0)
+      (eprintf "Downloading package ~s ... " package)
+      (flush-output-port (current-error-port)))
+    (let ((out (open-file path "w")))
+      (unless out
+	(die (format "cannot open file ~s when downloading ~s" path package)))
+      (http-get url out)
+      (close-port out))
+    ;; Verify file integrity
+    (let ((lmd5 (md5sum-file path)))
+      (unless (equal? lmd5 md5)
+	(remove-file path)
+	(die (format "Package ~S corrupted. Cache file has been deleted" package))))
+    ;; We have finished
+    (when (> (snowman-verbosity) 0)
+      (eprintf "done\n")))
+    
+  (let ((pkg (find-package package)))
+    (unless pkg
+      (die (format "cannot find package ~s in repository" package)))
+    ;; Download dependencies
+    (let ((dep (package-dependencies pkg)))
+      (if (pair? dep)
+	  (for-each (lambda (x)
+		      (download-package (string-append (car x) (cadr x))))
+		    dep)))
+    ;; Try to find the package in the cache
+    (let ((path (package-snowball pkg)))
+      (unless (file-exists? path)
+	;; Absent. download it
+	(download-snowball path (package-url pkg) (package-md5 pkg))))
+    pkg))
+

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; _snow.stk	-- A special version of _snow package (the one used by everybody)
 ;;;; 
-;;;; Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 21-Dec-2006 14:55 (eg)
-;;;; Last file update: 22-Dec-2006 00:15 (eg)
+;;;; Last file update: 17-Jan-2007 10:54 (eg)
 ;;;;
 
 ;//FIXME: _snow:program-filename should be defined as program-file-name
@@ -30,8 +30,15 @@
 
 
 (define-module _snow
+  (import SNOW)
   (export snow-raise snow-error snow-with-exception-catcher
-	  _snow:program-filename)
+	  _snow:program-filename
+
+	  snow-condition snow-type-check-condition snow-error-condition
+
+	  ;; FIXME
+	  snow-exception)
+	  
 
   ;;
   ;; Functions
@@ -54,16 +61,28 @@
   ;;
   ;; Exceptions
   ;;
-  (define-exception* snow-condition)
+;;//  (define-exception* snow-condition)
+;;//
+;;//  (define-exception* snow-type-check-condition
+;;//    parent: snow-condition)
+;;//
+;;//  (define-exception* snow-error-condition
+;;//    parent: snow-condition
+;;//    msg
+;;//    args))
+  (define-record* snow-condition)
 
-  (define-exception* snow-type-check-condition
-    parent: snow-condition)
+  (define-record* snow-type-check-condition parent: snow-condition)
 
-  (define-exception* snow-error-condition
+  (define-record* snow-error-condition
     parent: snow-condition
     msg
-    args))
+    args)
 
+
+  (define snow-exception snow-condition) ;; FIXME: Bigloo adaptation
+)
+  
 ;; ----------------------------------------------------------------------
 ;; Redefine all the symbols exported by _snow to the STklos module
 ;; so that STklos is in fact now a Snow interpreter

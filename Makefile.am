@@ -2,11 +2,11 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 28-Oct-2006 18:12 (eg)
+# Last file update: 11-Jan-2007 16:29 (eg)
 
 EXTRA_DIST   = 
 SUBDIRS      =  @PCRE@ @GC@ @GMP@ src utils lib @GTKLOS@ @EXAMPLES@ \
-	       extensions tests doc
+	       snowman extensions tests doc snowman
 SVN_URL      = @SVN_URL@/STklos
 VERSION_TAG  = @PACKAGE@-@VERSION@
 VERSION_BETA = $(VERSION_TAG)-beta

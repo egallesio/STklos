@@ -1,0 +1,124 @@
+;;;;
+;;;; misc.stk	-- Misc functions for snowman
+;;;; 
+;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 14-Jan-2007 13:37 (eg)
+;;;; Last file update: 17-Jan-2007 23:12 (eg)
+;;;;
+
+;; ----------------------------------------------------------------------
+;;	package<? ...
+;; ----------------------------------------------------------------------
+(define (package<? p1 p2)
+  (define (version-value v)
+    (let ((v (map string->number (string-split v "."))))
+      (if (and (= (length v) 3)
+	       (every number? v))
+	  (+ (* (car v) 1000000)
+	     (* (cadr v) 1000)
+	     (* (caddr v) 1))
+	  0)))
+  (let ((n1 (package-name p1))
+	(n2 (package-name p2))
+	(v1 (package-version p1))
+	(v2 (package-version p2)))
+    (if (string=? n1 n2)
+	(< (version-value v1) (version-value v2))
+	(string<? n1 n2))))
+
+;; ----------------------------------------------------------------------
+;;	snowfort-names ...
+;; ----------------------------------------------------------------------
+(define (snowfort-names)
+  (cons "local" (map car (snowman-sync-urls))))
+
+
+;; ----------------------------------------------------------------------
+;;	package-deps* ...
+;; ----------------------------------------------------------------------
+(define (package-deps* package)
+
+  (define (deps* package)
+    (let* ((pkg  (find-package package))
+	   (deps (map (lambda (x) (string-append (car x) (cadr x)))
+		      (package-dependencies pkg))))
+      (if (null? deps)
+	  deps
+	  (append deps (apply append (map deps* deps))))))
+
+  (define (list->set lst res)
+    (cond
+      ((null? lst)
+       res)
+      ((member (car lst) res)
+       (list->set (cdr lst) res))
+      (else
+       (list->set (cdr lst) (cons (car lst) res)))))
+    
+  (list->set (deps* package) '()))
+	     
+;; ----------------------------------------------------------------------
+;;	package-sans-version ...
+;; ----------------------------------------------------------------------
+(define (package-sans-version str)
+  (car (string-split str "-")))
+
+
+
+;; ----------------------------------------------------------------------
+;;	rm-rf ...
+;; ----------------------------------------------------------------------
+(define (rm-rf path)
+  (when (file-exists? path)
+    (if (file-is-directory? path)
+	(let ((files (cddr (directory-files path))))
+	  (for-each (lambda (f) (rm-rf (make-path path f)))
+		    files)
+	  (delete-directory path))
+	(remove-file path))))
+
+;; ----------------------------------------------------------------------
+;;	untar ...
+;; ----------------------------------------------------------------------
+(define (untar file directory)
+  (when (> (snowman-verbosity) 0)
+    (eprintf "Uncompressing snowball ~s\n" (basename file)))
+  (system (format "tar xfz ~a -C ~a" file directory)))
+
+
+;; ----------------------------------------------------------------------
+;;	md5sum-file ...
+;; ----------------------------------------------------------------------
+(define (md5sum-file filename)
+  (with-input-from-file (format "| md5sum ~a" filename)
+    (lambda ()
+      (read-chars 32))))
+
+
+;; ----------------------------------------------------------------------
+;; 	sed ...
+;; ----------------------------------------------------------------------
+(define (sed str substs)
+  (if (null? substs)
+      str
+      (sed  (regexp-replace-all (caar substs) str (cadar substs))
+	    (cdr substs))))
+

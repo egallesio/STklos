@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 28-Oct-2006 18:12 (eg)
+# Last file update: 11-Jan-2007 16:29 (eg)
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -204,7 +204,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 EXTRA_DIST = 
 SUBDIRS = @PCRE@ @GC@ @GMP@ src utils lib @GTKLOS@ @EXAMPLES@ \
-	       extensions tests doc
+	       snowman extensions tests doc snowman
 
 VERSION_TAG = @PACKAGE@-@VERSION@
 VERSION_BETA = $(VERSION_TAG)-beta

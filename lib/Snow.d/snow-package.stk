@@ -1,7 +1,7 @@
 ;;;;
 ;;;; snow-stklos.stk	-- Snow packages in STklos
 ;;;; 
-;;;; Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update: 21-Dec-2006 15:39 (eg)
+;;;; Last file update: 17-Jan-2007 11:25 (eg)
 ;;;;
 
 
@@ -30,8 +30,9 @@
 ;; ======================================================================
 (define-macro (package* name version . body)
   `(begin
+     (require "snow-support")
      (define-module ,name
-       (require "_snow")
+       ;(require "_snow")
        (define %%package-version ',version)
        ,@(package*-body-expand body))
      (select-module ,name)))
@@ -67,6 +68,21 @@
 	    `(begin
 	       (define ,var ,value)
 	       (export ,var)))
+
+	   ;; define
+	   ((define (?var . ?args))
+            `(export ,var))
+           ((define (?var . ?args) . ?rest)
+            `(begin
+               (define (,var . args)  ,@rest)
+               (export ,var)))
+           ((define ?var)
+            `(export ,var))
+	   ((define ?var ?value)
+	    `(begin
+	       (define ,var ,value)
+	       (export ,var)))
+	   
 	   ;; define-macro*
 	   ((define-macro* . ?rest)
 	    `(define-macro ,@rest))

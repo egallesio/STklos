@@ -1,5 +1,5 @@
 ;;;;
-;;;; snow-support.stk	-- Support Scheme Now! packages for STklos
+;;;; params.stk	-- Snowman parameters
 ;;;; 
 ;;;; Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -20,27 +20,36 @@
 ;;;; USA.
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
-;;;;    Creation date: 20-Dec-2006 10:18 (eg)
-;;;; Last file update: 17-Jan-2007 11:06 (eg)
+;;;;    Creation date: 26-Dec-2006 16:23 (eg)
+;;;; Last file update: 15-Jan-2007 12:00 (eg)
 ;;;;
 
-;; ======================================================================
-;; 	The SNOW STklos module
-;; ======================================================================
-(define-module SNOW
-  (include "Snow.d/snow-srfi89.stk")
-  (include "Snow.d/snow-exception.stk")
-  (include "Snow.d/snow-parameter.stk")
-  (include "Snow.d/snow-record.stk")
-  (include "Snow.d/snow-package.stk")
-  (include "Snow.d/snow-misc.stk")
-)
 
-;; ======================================================================
-;; 	bootstrap
-;; ======================================================================
-(require-for-syntax "Snow.d/snow-record.stk")
-(include "Snow.d/_snow.stk")
+(define snowman-directory
+  (make-parameter (expand-file-name "~/.stklos/snow")))
 
-(provide "snow-support")
+(define snowman-snowforts-directory
+  (make-parameter (make-path (snowman-directory) "snowforts")))
 
+(define snowman-cache-directory
+  (make-parameter (make-path (snowman-directory) "cache")))
+
+(define snowman-extract-dir
+  (make-parameter (getcwd)))
+
+(define snowman-verbosity
+  (make-parameter 0))
+
+(define snowball-suffix
+  (make-parameter ".tar.gz"))
+
+(define snowman-sync-urls
+  (make-parameter '(
+      ("snow"   "http://scheme:snow@redrock.inria.fr:8080/hop/snow/sync")
+;     ("stklos" "http://www.stklos.net/snow/sync")
+      )))
+
+
+
+;; ----------------------------------------------------------------------
+(define *snowman-pkgs* '())
