@@ -1,7 +1,7 @@
 ;;;;
 ;;;; bonus.stk	-- Useful primitives not in R5RS
 ;;;; 
-;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 26-Dec-2006 16:18 (eg)
+;;;; Last file update: 22-Jan-2007 20:10 (eg)
 ;;;;
 
 ;;
@@ -1192,6 +1192,32 @@ doc>
       (apply make-path
 	     (format "~A~A~A" dirname (file-separator) (car names))
 	     (cdr names))))
+
+
+#|
+<doc EXT file-suffix
+ * (file-suffix pathname)
+ *
+ * Returns the suffix of given |pathname|. If no suffix is found, |file-suffix|
+ * returns an empty string.
+ * @lisp
+ * (file-suffix "./foo.tar.gz") => "gz"
+ * (file-suffix "./a.b/c")      => ""
+ * @end lisp
+|#
+(define (file-suffix pathname)
+  (let ((end (string-length pathname)))
+    (let loop ((i (- end 1)))
+      (if (< i 0)
+          ""
+          (let ((c (string-ref pathname i)))
+            (cond
+	      ((char=? c #\.)
+	       (substring pathname (+ i 1) end))
+	      ((char=? c (file-separator))
+	       "")
+	      (else
+	       (loop (- i 1)))))))))
 
 #|
 <doc  EXT port-idle-register! port-idle-unregister! port-idle-reset!
