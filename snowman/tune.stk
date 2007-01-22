@@ -21,51 +21,133 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Jan-2007 16:44 (eg)
-;;;; Last file update: 18-Jan-2007 16:52 (eg)
+;;;; Last file update: 19-Jan-2007 23:27 (eg)
 ;;;;
-
 
 ;; ----------------------------------------------------------------------
 ;; 	tune-package ...
 ;; ----------------------------------------------------------------------
 (define (tune-package package dir)
-  (DEBUG "DIR= ~S" dir)
-  (let ((tuner (make-path dir "stklos" "tuning.stk")))
+  (let* ((pdir  (make-path dir (package-name package)))
+	 (tuner (make-path pdir "stklos" "tuning.stk")))
     (when (file-exists? tuner)
-      (eprintf "We can tune\n"))))
+      (tune-package-scheme (package-name package) pdir tuner))))
 
-;;  
-;;
-;;  (define (tune-package dir package version tuning)
-;;   (with-trace 3 'tune-package
-;;      (trace-item "dir=" dir)
-;;      (trace-item "package=" package)
-;;      (trace-item "tuning=" tuning))
-;;   (let* ((pdir (make-file-name dir package))
-;;	  (tuner (make-file-path pdir tuning "tuning.scm")))
-;;      (when (and tuning (file-exists? tuner))
-;;	 (let ((srcs (filter-map (lambda (x)
-;;				    (let ((p (make-file-path
-;;					      pdir
-;;					      (string-append package "." x))))
-;;				       (when (file-exists? p)
-;;					  p)))
-;;				 (snowfort-suffixes))))
-;;	    ;; read the sources in sequence, the package being located
-;;	    ;; in the first one
-;;	    (if (null? srcs)
-;;		(error 'tune-package "Cannot find source for package" package)
-;;		(let ((ip (open-input-file (car srcs))))
-;;		   (unless (input-port? ip)
-;;		      (raise (instantiate::&io-port-error
-;;				(proc 'tune-package)
-;;				(msg "Cannot open file for input")
-;;				(obj (car srcs)))))
-;;		   (unwind-protect
-;;		      (let* ((decl (package-read-package ip))
-;;			     (body0 (port->sexp-list ip))
-;;			     (bodies (append-map file->list (cdr srcs))))
-;;			 (tune (suffix (car srcs))
-;;			       package tuning tuner pdir
-;;			       decl (append! body0 bodies)))
-;;		      (close-input-port ip))))))))
+;; ----------------------------------------------------------------------
+;; 	tune-package-scheme ...
+;; ----------------------------------------------------------------------
+(define (tune-package-scheme name dir tuner)
+
+  (define (find-src name)
+    (let ((snow (make-path dir (format "~a.snow" name)))
+	  (scm  (make-path dir (format "~a.scm" name))))
+      (cond
+	((file-exists? snow) snow)
+	((file-exists? scm)  scm)
+	(else (die (format "cannot find the source of package ~s" name))))))
+  
+  (let ((src (find-src name)))
+    (when (> (snowman-verbosity) 0)
+      (eprintf "Start tuning of file ~s\n" src))
+    (let ((in (open-file src "r")))
+      (unless in
+	(die (format "cannot open source file ~s" src)))
+
+      ;; Read the source file
+      (let ((decl (parse-package-package in))
+	    (body (port->sexp-list in)))
+	(tune src
+	      name
+	      tuner
+	      dir
+	      decl
+	      body))
+      (close-port in))))
+
+;; ----------------------------------------------------------------------
+;; 	tune ...
+;; ----------------------------------------------------------------------
+(define *package* '())
+(define *body* '())
+(define *dir* #f)
+
+
+(define (tune src name tuner packagedir pkgdecl body)
+  (set! *package* pkgdecl)
+  (set! *body* body)
+  (set! *dir* packagedir)
+  (with-handler (lambda (c)
+		  (eprintf "error while tuning package ~s\n" package)
+		  (raise c))
+     (load tuner))
+  ;; Rename the src to src.orig
+  (rename-file src (string-append src ".orig"))
+  ;; Rewrite the package
+  (let ((out (open-file src "w")))
+    (unless out
+      (die (format "Cannot open output file ~s for tuning" src)))
+    (fprintf out ";; This file was automatically generated on ~a\n" (date))
+    (fprintf out ";; This is a STklos tuning for package ~a\n" name)
+    ;; Output the dclaration
+    (pp *package* :port out);
+    (newline out)
+    ;; Output the body
+    (for-each (lambda (x) (pp x :port out) (newline out))
+	      *body*)))
+
+;;;; =============================================================================
+;;;;
+;;;; 	Tuning functions
+;;;;
+;;;; ======================================================================
+(define (%snowman-replace-definitions! src replacements)
+
+  (define (replace orig id)
+    (let ((c (assq id replacements)))
+      (if (pair? c)
+	  (cadr c)
+	  orig)))
+
+  (map (lambda (orig)
+	 (match-case orig
+	   (((or define* define) (and ?id (? symbol?)) . ?-)
+	    (replace orig id))
+	   (((or define* define define-macro* define-macro)
+	     ((and ?id (? symbol?)) . ?-) . ?-)
+	    (replace orig id))
+	   ((define-record* ?id . ?-)
+	    (replace orig id))
+	   (else
+	    orig)))
+       src))
+
+
+;; ----------------------------------------------------------------------
+;; 	snowman-tune-package-declaration! ...
+;; ----------------------------------------------------------------------
+(define (snowman-tune-package-declaration! proc)
+  (let ((res (proc *package* "" *dir*)))
+    (unless (eq? res (void))
+      (set! *package* res)))
+  *package*)
+
+;; ----------------------------------------------------------------------
+;; 	snowman-tune-body! ...
+;; ----------------------------------------------------------------------
+(define (snowman-tune-body! proc)
+  (let ((res (proc *body* "" *dir*)))
+    (unless (eq? res (void))
+      (set! *body* res)))
+  *body*)
+
+;; ----------------------------------------------------------------------
+;; 	snowman-replace-package-provide! ...
+;; ----------------------------------------------------------------------
+(define (snowman-replace-package-provide! src replacements)
+  (%snowman-replace-definitions! src replacements))
+
+;; ----------------------------------------------------------------------
+;; 	snowman-replace-body-definitions! ...
+;; ----------------------------------------------------------------------
+(define (snowman-replace-body-definitions! src replacements)
+  (%snowman-replace-definitions! src replacements))

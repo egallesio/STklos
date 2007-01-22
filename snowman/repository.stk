@@ -21,8 +21,10 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update: 17-Jan-2007 16:24 (eg)
+;;;; Last file update: 22-Jan-2007 13:42 (eg)
 ;;;;
+
+(define interesting-tuning "stklos")	; The tuning we want to keep in our base
 
 ;; ----------------------------------------------------------------------
 ;;	ensure-repository-hierarchy ...
@@ -48,12 +50,24 @@
 ;; ----------------------------------------------------------------------
 (define (load-repository-descriptions)
 
+  (define tuning-only-list '())  ; tuning only packages are added at the end
+
   (define (add-tuning descr)
     (and (pair? descr)
-	 (let ((options (cdr descr)))
+	 (let ((options (cdar descr)))
 	   (make-tuning (key-get options :snowball "")
 			(key-get options :url "")
 			(key-get options :md5 "")))))
+
+  (define (add-tuning-only-package pkg)
+    (let* ((name    (package-name pkg))
+	   (version (package-version pkg))
+	   (items   (filter (lambda (x) (and (equal? (package-name x) name)
+					     (equal? (package-version x) version)))
+			    *snowman-pkgs*)))
+      (if (null? items)
+	  (eprintf "Warning: no package for tuning ~a-~a" name version)
+	  (set! (package-tuning (car items)) (package-tuning pkg)))))
 
   (define (add-package descr)
     (let* ((options (cddr descr))
@@ -69,8 +83,14 @@
 			    (key-get options :license "")
 			    (key-get options :homepage "")
 			    (key-get options :dependencies '())
-			    (add-tuning (key-get options :tunings '())))))
-      (set! *snowman-pkgs* (cons pkg *snowman-pkgs*))))
+			    (add-tuning (key-get options :tunings '()))))
+	   (tuning-only (key-get options :tuning-only #f)))
+   
+      (if tuning-only
+	  ;; This is a tuning only package. Add it to tuning-only-list
+	  (set! tuning-only-list (cons pkg tuning-only-list))
+	  ;; Normal package. Add it to the global list 
+	  (set! *snowman-pkgs* (cons pkg *snowman-pkgs*)))))
 
   (define (add-packages src)
     (let ((in (open-file src "r")))
@@ -83,7 +103,9 @@
   (let ((all (map (lambda (x)
 		    (make-path (snowman-snowforts-directory) x))
 		  (snowfort-names))))
-    (for-each add-packages all)))
+    (for-each add-packages all)
+    ;; Patch our database with tuning-only packages
+    (for-each add-tuning-only-package tuning-only-list)))
 
 
 ;; ----------------------------------------------------------------------
@@ -102,7 +124,7 @@
 	;; Build the names of STklos the tunings in the local cache
 	;; and delete informations on other tunings 
 	(let* ((tunings   (key-get rest :tunings '()))
-	       (my-tuning (assoc "bigloo" tunings)))
+	       (my-tuning (assoc interesting-tuning tunings)))
 	  (if my-tuning
 	      (begin 
 		(key-set! (cdr my-tuning)
@@ -148,11 +170,14 @@
 (define (list-repository-packages)
 
   (define (display-package pkg)
-    (printf "~a-~a\n" (package-name pkg) (package-version pkg))
-    (when (> (snowman-verbosity) 0)
-      (printf "   Description: ~a\n" (package-description pkg))
-      (printf "   Category: ~a\n" (package-category pkg))
-      (printf "   STklos tuning: ~a\n" (if (package-tuning pkg) "yes" "no"))))
+    (printf "~a-~a" (package-name pkg) (package-version pkg))
+    (if (> (snowman-verbosity) 0)
+	(begin
+	  (newline)
+	  (printf "   Description: ~a\n" (package-description pkg))
+	  (printf "   Category: ~a\n" (package-category pkg))
+	  (printf "   STklos tuning: ~a\n" (if (package-tuning pkg) "yes" "no")))
+	(printf "~a\n" (if (package-tuning pkg) " (tuning)" ""))))
 
   (for-each display-package
 	    (sort *snowman-pkgs* package<?)))
@@ -192,9 +217,9 @@
 ;; ----------------------------------------------------------------------
 (define (download-package package)
 
-  (define (download-snowball path url md5)
+  (define (download-tarball path url md5 tuning?)
     (when (> (snowman-verbosity) 0)
-      (eprintf "Downloading package ~s ... " package)
+      (eprintf "Downloading ~a ~s ... " (if tuning? "tuning for" "package") package)
       (flush-output-port (current-error-port)))
     (let ((out (open-file path "w")))
       (unless out
@@ -209,7 +234,7 @@
     ;; We have finished
     (when (> (snowman-verbosity) 0)
       (eprintf "done\n")))
-    
+
   (let ((pkg (find-package package)))
     (unless pkg
       (die (format "cannot find package ~s in repository" package)))
@@ -220,9 +245,25 @@
 		      (download-package (string-append (car x) (cadr x))))
 		    dep)))
     ;; Try to find the package in the cache
-    (let ((path (package-snowball pkg)))
+    (let ((path   (package-snowball pkg)))
       (unless (file-exists? path)
-	;; Absent. download it
-	(download-snowball path (package-url pkg) (package-md5 pkg))))
+	;; Snowball absent. download it
+	(download-tarball path (package-url pkg) (package-md5 pkg) #f)))
+    ;; See if a tuning exits for this package. 
+    (let ((tuning (package-tuning pkg)))
+      (if tuning
+	  (let ((path (tuning-snowball tuning)))
+	    (unless (file-exists? path)
+	      ;; Tuning absent. download it
+	      (download-tarball path (tuning-url tuning) (tuning-md5 tuning) #t)))))
     pkg))
+
+;; ----------------------------------------------------------------------
+;; 	fill-cache ...
+;; ----------------------------------------------------------------------
+(define (fill-cache)
+  (for-each (lambda (x)
+	      (let ((name (format "~a-~a" (package-name x) (package-version x))))
+		(download-package name)))
+	    *snowman-pkgs*))
 

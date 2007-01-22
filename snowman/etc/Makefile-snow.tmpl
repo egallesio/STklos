@@ -3,6 +3,7 @@
 # The main package
 PKG=@PKG@
 PKGVERS=@PKGVERS@
+PKGSRC=@PKGSRC@
 
 # Compiler 
 SCC=stklos-compile
@@ -21,8 +22,8 @@ all: $(OSTK) $(PKGVERS).$(SO)
 clean: 
 	/bin/rm -f $(OSTK) $(PKGVERS).{c,stk,$(SO),o}
 
-$(PKGVERS).ostk: src/$(PKG)/$(PKG).snow
-	(cd src/$(PKG); $(SCC) $(SFLAGS) -o ../../$(PKG).ostk $(PKG).snow)
+$(PKGVERS).ostk: src/$(PKG)/$(PKGSRC)
+	(cd src/$(PKG); $(SCC) $(SFLAGS) -o ../../$(PKG).ostk $(PKGSRC))
 
 $(PKGVERS).$(SO): $(PKGVERS).c
 	$(SCOMP) -c -DMODULE_ENTRY=1 -o $(PKGVERS).o $(PKGVERS).c

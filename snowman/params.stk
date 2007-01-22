@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 16:23 (eg)
-;;;; Last file update: 15-Jan-2007 12:00 (eg)
+;;;; Last file update: 22-Jan-2007 14:08 (eg)
 ;;;;
 
 
@@ -46,7 +46,7 @@
 (define snowman-sync-urls
   (make-parameter '(
       ("snow"   "http://scheme:snow@redrock.inria.fr:8080/hop/snow/sync")
-;     ("stklos" "http://www.stklos.net/snow/sync")
+      ("stklos" "http://www.stklos.org/Snow/sync")
       )))
 
 

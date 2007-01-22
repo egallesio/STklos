@@ -1,7 +1,7 @@
 # Makefile for stklos-snowman
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 22-Dec-2006 12:00 (eg)
-# Last file update: 18-Jan-2007 16:41 (eg)
+# Last file update: 19-Jan-2007 17:23 (eg)
 
 
 makefiledir=  $(prefix)/etc/stklos
@@ -9,8 +9,8 @@ makefile_DATA= etc/Makefile-snow.tmpl
 
 bin_SCRIPTS = stklos-snowman 
 
-SRC     = main.stk extract.stk params.stk repository.stk \
-	  snowball.stk misc.stk types.stk
+SRC     = main.stk extract.stk parse.stk params.stk repository.stk \
+	  snowball.stk misc.stk tune.stk types.stk
 SFLAGS  = -l 
 RM      = /bin/rm
 SCC	= ../utils/stklos-compile
