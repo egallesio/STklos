@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 22-Jan-2007 20:11 (eg)
+;; Last file update: 22-Jan-2007 23:54 (eg)
 ;;
 ;; ======================================================================
 
@@ -695,6 +695,7 @@ applications.])
 (insertdoc 'basename)
 (insertdoc 'dirname)
 (insertdoc 'file-suffix)
+(insertdoc 'file-prefix)
 (insertdoc 'file-separator)
 (insertdoc 'make-path)
 (insertdoc 'glob))

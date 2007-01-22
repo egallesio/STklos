@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 22-Jan-2007 20:10 (eg)
+;;;; Last file update: 22-Jan-2007 23:53 (eg)
 ;;;;
 
 ;;
@@ -1218,6 +1218,31 @@ doc>
 	       "")
 	      (else
 	       (loop (- i 1)))))))))
+
+#|
+<doc EXT file-prefix
+ * (file-prefix pathname)
+ *
+ * Returns the suffix of given |pathname|. 
+ * @lisp
+ * (file-prefix "./foo.tar.gz") => "./foo.tar"
+ * (file-prefix "./a.b/c")      => "./a.b/c"
+ * @end lisp
+|#
+(define (file-prefix pathname)
+  (let ((end (string-length pathname)))
+    (let loop ((i (- end 1)))
+      (if (< i 0)
+          pathname
+          (let ((c (string-ref pathname i)))
+            (cond
+	      ((char=? c #\.)
+	       (substring pathname 0 i))
+	      ((char=? c (file-separator))
+	       pathname)
+	      (else
+	       (loop (- i 1)))))))))
+
 
 #|
 <doc  EXT port-idle-register! port-idle-unregister! port-idle-reset!

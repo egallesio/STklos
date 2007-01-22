@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Jan-2007 16:44 (eg)
-;;;; Last file update: 19-Jan-2007 23:27 (eg)
+;;;; Last file update: 22-Jan-2007 21:35 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -100,27 +100,6 @@
 ;;;; 	Tuning functions
 ;;;;
 ;;;; ======================================================================
-(define (%snowman-replace-definitions! src replacements)
-
-  (define (replace orig id)
-    (let ((c (assq id replacements)))
-      (if (pair? c)
-	  (cadr c)
-	  orig)))
-
-  (map (lambda (orig)
-	 (match-case orig
-	   (((or define* define) (and ?id (? symbol?)) . ?-)
-	    (replace orig id))
-	   (((or define* define define-macro* define-macro)
-	     ((and ?id (? symbol?)) . ?-) . ?-)
-	    (replace orig id))
-	   ((define-record* ?id . ?-)
-	    (replace orig id))
-	   (else
-	    orig)))
-       src))
-
 
 ;; ----------------------------------------------------------------------
 ;; 	snowman-tune-package-declaration! ...
@@ -140,14 +119,39 @@
       (set! *body* res)))
   *body*)
 
-;; ----------------------------------------------------------------------
-;; 	snowman-replace-package-provide! ...
-;; ----------------------------------------------------------------------
-(define (snowman-replace-package-provide! src replacements)
-  (%snowman-replace-definitions! src replacements))
 
-;; ----------------------------------------------------------------------
-;; 	snowman-replace-body-definitions! ...
-;; ----------------------------------------------------------------------
-(define (snowman-replace-body-definitions! src replacements)
-  (%snowman-replace-definitions! src replacements))
+(define (snowman-subst-definitions src replacements)
+
+  (define (replace orig id)
+    (let ((c (assq id replacements)))
+      (if (pair? c)
+	  (begin (DEBUG "==> ~S" (cadr c)) (cadr c))
+	  orig)))
+
+  (map (lambda (orig)
+	 (match-case orig
+	   (((or define* define) (and ?id (? symbol?)) . ?-)
+	    (replace orig id))
+	   (((or define* define define-macro* define-macro)
+	     ((and ?id (? symbol?)) . ?-) . ?-)
+	    (replace orig id))
+	   ((define-record* ?id . ?-)
+	    (replace orig id))
+	   (else
+	    orig)))
+       src))
+
+;;// 
+;;// ;; ----------------------------------------------------------------------
+;;// ;; 	snowman-replace-package-provide! ...
+;;// ;; ----------------------------------------------------------------------
+;;// (define (snowman-replace-package-provide! src replacements)
+;;//   (%snowman-replace-definitions! src replacements))
+;;// 
+;;// ;; ----------------------------------------------------------------------
+;;// ;; 	snowman-replace-body-definitions! ...
+;;// ;; ----------------------------------------------------------------------
+;;// (define (snowman-replace-body-definitions! src replacements)
+;;//   (%snowman-replace-definitions! src replacements))
+
+
