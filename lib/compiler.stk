@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 19-Jan-2007 10:17 (eg)
+;;;; Last file update: 23-Jan-2007 09:54 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1166,8 +1166,7 @@ doc>
 			  (compile-access var (extend-env env loc) args #f)
 			  (Loop (cdr l)
 				loc)))))))))))
-
-
+    
 ;;
 ;; COND
 ;;
