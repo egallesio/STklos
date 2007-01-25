@@ -1,7 +1,7 @@
 ;;;;
 ;;;; utils.stk	-- Compiler Utilities
 ;;;; 
-;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:57 (eg)
-;;;; Last file update: 27-Sep-2006 15:59 (eg)
+;;;; Last file update: 25-Jan-2007 19:09 (eg)
 ;;;;
 
 
@@ -107,7 +107,6 @@
       (not (eq? (symbol-value* symbol (current-module) unbound) unbound)))))
 
 
-
 (define (unquote . l)
   (error 'unquote "used outside of a quasiquote context"))
 
@@ -115,80 +114,4 @@
   (error 'unquote-splicing "used outside of a quasiquote context"))
 
 
-;!!§ 
-;!!§ 
-;!!§ (define (map* fn . l) 		; A map which accepts dotted lists (arg lists  
-;!!§   (cond 			; must be "isomorph"
-;!!§    ((null? (car l)) '())
-;!!§    ((pair? (car l)) (cons (apply fn      (map car l))
-;!!§ 			  (apply map* fn (map cdr l))))
-;!!§    (else            (apply fn l))))
-;!!§ 
-;!!§ (define (for-each* fn . l) 	; A for-each which accepts dotted lists (arg lists  
-;!!§   (cond 			; must be "isomorph"
-;!!§    ((null? (car l)) '())
-;!!§    ((pair? (car l)) (apply fn (map car l)) (apply for-each* fn (map cdr l)))
-;!!§    (else            (apply fn l))))
-;!!§ 
-;!!§ 
-;!!§ 
-;!!§ 
-;!!§ 
-;!!§ ;;;
-;!!§ ;;; Expanders 
-;!!§ ;;;
-;!!§ 
-;!!§ (define *expander-list* '())
-;!!§ 
-;!!§ (define (expander? x)
-;!!§   (assq x *expander-list*))
-;!!§ 
-;!!§ ;?(define (initial-expander x e)
-;!!§ ;?  (let ((exp (cond
-;!!§ ;?	      ((not (pair? x))   (lambda (x e) x))
-;!!§ ;?	      ((symbol? (car x)) (if (expander? (car x))
-;!!§ ;?				     (cdr (assq (car x) *expander-list*))
-;!!§ ;?				     application-expander))
-;!!§ ;?	      (else		 application-expander))))
-;!!§ ;?    (exp x e)))
-;!!§ 
-;!!§ (define (application-expander x e)
-;!!§   (map* (lambda (y) (e y e)) x))
-;!!§ 
-;!!§ ;;/(define (defmacro-expander x e)
-;!!§ ;;/  (let ((l (define->lambda x)))
-;!!§ ;;/    (when (= (length l) 3)
-;!!§ ;;/      (let* ((name     (cadr l))
-;!!§ ;;/	     (proc     (caddr l))
-;!!§ ;;/	     (args     (cadr proc))
-;!!§ ;;/	     (body     (cddr proc)))
-;!!§ ;;/	`(define-macro ,name
-;!!§ ;;/			(lambda ,args ,@(expand body)))))))
-;!!§ 
-;!!§ (define (initial-expander x e)
-;!!§  (cond 
-;!!§    ((not (pair? x))   	      x)
-;!!§    ((not (symbol? (car x)))  (application-expander x e))
-;!!§    (else  (let ((functor (car x)))
-;!!§ 	    (cond 
-;!!§ 	       ((expander? functor) ((cdr (assq functor *expander-list*)) x e))
-;!!§ ;;/	       ((eq? functor 'define-macro) (defmacro-expander x e))
-;!!§ 	       (else (application-expander x e)))))))
-;!!§ 
-;!!§ (define (macro-expand x)
-;!!§   (initial-expander x initial-expander))
-;!!§ 
-;!!§ 
-;!!§ 
-;!!§ ;(define (install-expander! id e source)
-;!!§ ;  (set! *expander-list* (cons (list id e source) *expander-list*)))
-;!!§ 
-;!!§ (define (install-expander! id proc)
-;!!§   (set! *expander-list* (cons (cons id proc) *expander-list*)))
-;!!§ 
-;!!§ (define (remove-expander! id)
-;!!§   (let ((exp (assq id *expander-list*)))
-;!!§     (set! *expander-list* (delete! id *expander-list* eq?))))
-;!!§ 
-;!!§ 
 

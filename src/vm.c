@@ -1,7 +1,7 @@
 /*
  * v m . c				-- The STklos Virtual Machine
  * 
- * Copyright  2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  8-Jan-2007 23:21 (eg)
+ * Last file update: 25-Jan-2007 19:43 (eg)
  */
 
 // INLINER values
@@ -1208,10 +1208,19 @@ CASE(POP_HANDLER) {
 
 CASE(MAKE_EXPANDER) {
   SCM name = fetch_const();
-  SCM ref;
+  SCM ref, val;
 
   STk_lookup(STk_intern("*expander-list*"), STk_current_module(), &ref, TRUE);
-  CDR(ref) = STk_cons(STk_cons(name, vm->val), CDR(ref));
+
+  val = CDR(ref);
+  if ( ! (CONSP(val) &&CONSP(CDR(val)) && (CAR(CAR(val)) == name)) ) {
+    /* We are just compiling this macro, so it is already entered in the 
+     * table of expanders by the compiler. Don't add it twice. 
+     * Note: if this test is false, this is probably that wa are reading 
+     * back a bytecode file and the macro must be entered in the table 
+     */
+    CDR(ref) = STk_cons(STk_cons(name, vm->val), val);
+  }
   vm->valc    = 2;
   vm->val     = STk_void;
   vm->vals[1] = name;
