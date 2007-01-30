@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 21-Dec-2006 14:55 (eg)
-;;;; Last file update: 24-Jan-2007 10:29 (eg)
+;;;; Last file update: 30-Jan-2007 17:37 (eg)
 ;;;;
 
 ;//FIXME: _snow:program-filename should be defined as program-file-name
@@ -30,7 +30,7 @@
 
 
 (define-module _snow
-  (import SNOW)
+  (import |SNOW|)
   (export snow-raise snow-error snow-with-exception-catcher
 	  _snow:program-filename
 

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update: 17-Jan-2007 11:25 (eg)
+;;;; Last file update: 30-Jan-2007 18:11 (eg)
 ;;;;
 
 
@@ -30,11 +30,12 @@
 ;; ======================================================================
 (define-macro (package* name version . body)
   `(begin
-     (require "snow-support")
+     ;; Be sure to load STklos snow support file
+     (require-for-syntax "snow-support")
+     ;; Define a module with the given name and body
      (define-module ,name
-       ;(require "_snow")
-       (define %%package-version ',version)
        ,@(package*-body-expand body))
+     ;; The rest of the file take place in the new module
      (select-module ,name)))
 
 
@@ -119,6 +120,3 @@
           (else
              (error "bad implementation requirement: ~S" x))))
        reqs))
-
-
-

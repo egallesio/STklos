@@ -1,7 +1,7 @@
 /*
  * struct.c			-- Low level support for structures
  * 
- * Copyright © 2004-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 12-May-2004 17:26 (eg)
- * Last file update: 20-Dec-2006 11:04 (eg)
+ * Last file update: 30-Jan-2007 18:36 (eg)
  */
 
 #include "stklos.h"
@@ -369,8 +369,6 @@ doc>
 */
 DEFINE_PRIMITIVE("struct-set!", struct_set, subr3, (SCM s, SCM slot, SCM val))
 {
-  SCM index;
-
   if (!STRUCTP(s)) error_bad_struct(s);
   return STk_int_struct_set(s, slot, val);
 }

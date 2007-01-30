@@ -21,13 +21,13 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 20-Dec-2006 10:18 (eg)
-;;;; Last file update: 17-Jan-2007 11:06 (eg)
+;;;; Last file update: 30-Jan-2007 17:36 (eg)
 ;;;;
 
 ;; ======================================================================
 ;; 	The SNOW STklos module
 ;; ======================================================================
-(define-module SNOW
+(define-module |SNOW|
   (include "Snow.d/snow-srfi89.stk")
   (include "Snow.d/snow-exception.stk")
   (include "Snow.d/snow-parameter.stk")

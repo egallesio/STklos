@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 12-Jan-2007 12:22 (eg)
+ * Last file update: 30-Jan-2007 18:38 (eg)
  */
 
 #include "stklos.h"
@@ -68,6 +68,11 @@ SCM STk_eval_C_string(char *str, SCM module)
   return STk_C_apply(eval, 2, STk_Cstring2string(str), module);
 }
 
+
+SCM STk_read_from_C_string(char *str)
+{
+  return STk_read(STk_open_C_string(str), STk_read_case_sensitive);
+}
 
 
 /*===========================================================================*\

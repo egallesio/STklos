@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 25-Jan-2007 19:43 (eg)
+ * Last file update: 26-Jan-2007 11:35 (eg)
  */
 
 // INLINER values
@@ -2004,5 +2004,3 @@ int STk_init_vm()
 #endif
   return TRUE;
 }
-
-

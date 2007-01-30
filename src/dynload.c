@@ -1,7 +1,7 @@
 /*
  * dynload.c	-- Dynamic loading stuff
  * 
- * Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,20 +21,21 @@
  * 
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Jan-1994 19:09
- * Last file update:  6-Aug-2006 21:11 (eg)
+ * Last file update: 26-Jan-2007 12:01 (eg)
  *
  */
 
 #include "stklos.h"
 
+#define INIT_FUNC_NAME "STk_module_main"
+#define INFO_FUNC_NAME "STk_module_info"
 
 #if defined(DARWIN)
-#  define INIT_FUNC_NAME "STk_module_main"
 #  include "dynload-macos.c"
 #  define HAVE_DLOPEN
-#else 
-#  define INIT_FUNC_NAME "STk_module_main"
 #endif
+
+
 
 #define INIT_FUNC_NAME_STRING(x) #x
 
@@ -56,6 +57,7 @@
 #  define DYN_FLAG (FLAG1|FLAG2)
 
 typedef void (*InitFunc)(void);
+typedef SCM  (*InfoFunc)(void);
 
 
 
@@ -126,4 +128,11 @@ SCM STk_load_object_file(SCM f, char *path)
   return STk_true;
 }
 
+SCM STk_info_object_file(char *path)
+{
+  InfoFunc info_fct;
+
+  info_fct = find_function(path, INFO_FUNC_NAME, FALSE);
+  return (info_fct) ? info_fct() : STk_nil;
+}
 #endif /* HAVE_DLOPEN */

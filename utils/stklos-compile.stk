@@ -1,7 +1,7 @@
 ;;;;
 ;;;; stklos-compile.stk	-- Call the stklos compiler
 ;;;; 
-;;;; Copyright © 2001-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update:  5-Dec-2006 18:53 (eg)
+;;;; Last file update: 30-Jan-2007 18:39 (eg)
 ;;;;
 
 (define *output* "a.out")
@@ -43,19 +43,30 @@
     (format out "#ifdef MODULE_ENTRY\n")
     (format out "MODULE_ENTRY_START(~S) {\n" name)
     (format out "  STk_execute_C_bytecode(__module_consts, __module_code);\n")
-    (format out "} MODULE_ENTRY_END\n")
+    (format out "} MODULE_ENTRY_END\n\n")
+    (format out "MODULE_ENTRY_INFO() {\n")
+    (format out "   return STk_read_from_C_string(__module_infos);\n")
+    (format out "}\n")
     (format out "#endif\n"))
 
    
   (let ((in   (open-input-file src))
 	(out  (open-output-file dst)))
-    (read in)
-    (read in)
-    (let ((v (read in))
+    ;; Output the header
+    (header in out)
+    ;; Skip the symbol STklos
+    (read in)		
+    ;; Write file informations
+    (let ((info (read in))
+	  (str  (open-output-string)))
+      (write info str)
+      (format out "static char* __module_infos = ~S;\n\n" (get-output-string str)))
+    ;; Write constants
+    (let ((v   (read in))
 	  (str (open-output-string)))
       (write v str)
-      (header in out)
       (format out "static char* __module_consts = ~S;\n\n" (get-output-string str)))
+    ;; Write the code
     (let ((sz (read in)))
       (format out "static STk_instr __module_code [] = { \n")
       (read-char in)  ; To skip the newline after size
@@ -89,13 +100,7 @@
 ;;	compile-to-C-code ...
 ;; ----------------------------------------------------------------------
 (define (compile-to-C-code file out)
-
-  (define (file-prefix str)
-    ;; very approximate
-    (let ((x (string-split str ".")))
-      (if (= (length x) 2) (car x) str)))
-  
-  (let ((tmp (temporary-file-name))
+  (let ((tmp  (temporary-file-name))
 	(name (file-prefix (basename file))))    
     (compile-to-bytecode file tmp)
     (convert-to-C tmp out name)

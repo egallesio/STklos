@@ -1,7 +1,7 @@
 /*
  * stklos.h	-- stklos.h
  * 
- * Copyright © 1999-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  3-Nov-2006 21:00 (eg)
+ * Last file update: 30-Jan-2007 18:38 (eg)
  */
 
 #ifndef STKLOS_H
@@ -367,9 +367,10 @@ int STk_init_cond(void);
 
 #define MODULE_ENTRY_END	} }
 
+#define MODULE_ENTRY_INFO() SCM STk_module_info(void)
 
 SCM STk_load_object_file(SCM f, char *fname);
-
+SCM STk_info_object_file(char *fname);
 
 /*
   ------------------------------------------------------------------------------
@@ -571,6 +572,7 @@ extern int STk_interactive_debug;
 char *STk_strdup(const char *s);
 void STk_add_primitive(struct primitive_obj *o);
 SCM STk_eval_C_string(char *str, SCM module);
+SCM STk_read_from_C_string(char *str);
 
 int STk_init_misc(void);
 
