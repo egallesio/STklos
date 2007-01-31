@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update: 30-Jan-2007 18:11 (eg)
+;;;; Last file update: 31-Jan-2007 08:33 (eg)
 ;;;;
 
 
@@ -75,7 +75,7 @@
             `(export ,var))
            ((define (?var . ?args) . ?rest)
             `(begin
-               (define (,var . args)  ,@rest)
+               (define (,var . ,args)  ,@rest)
                (export ,var)))
            ((define ?var)
             `(export ,var))
