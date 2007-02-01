@@ -23,8 +23,8 @@ all: $(OSTK) $(PKGVERS).$(SO)
 clean: 
 	/bin/rm -f $(OSTK) $(PKGVERS).{c,stk,$(SO),o}
 
-$(PKGVERS).ostk: src/$(PKG)/$(PKGSRC)
-	(cd src/$(PKG); $(SCC) $(SFLAGS) -o ../../$(PKG).ostk $(PKGSRC))
+$(PKGVERS).ostk: $(PKG)/$(PKGSRC)
+	(cd $(PKG); $(SCC) $(SFLAGS) -o ../$(PKG).ostk $(PKGSRC))
 
 $(PKGVERS).$(SO): $(PKGVERS).c
 	$(SCOMP) -c -DMODULE_ENTRY=1 -o $(PKGVERS).o $(PKGVERS).c

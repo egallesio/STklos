@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Jan-2007 13:37 (eg)
-;;;; Last file update: 31-Jan-2007 11:20 (eg)
+;;;; Last file update:  1-Feb-2007 11:00 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -41,14 +41,6 @@
 	     (every integer? v))
 	(string->number (format "~A~A~A" (car v) (fmt (cadr v)) (fmt (caddr v))))
 	0)))
-
-;; ----------------------------------------------------------------------
-;;	find-source-file ...
-;; ----------------------------------------------------------------------
-(define (find-source-file dir name)
-  (let ((snow (make-path dir name (format "~a.snow" name)))
-	(scm  (make-path dir name (format "~a.scm" name))))
-    (if (file-exists? snow) snow scm)))
 
 ;; ----------------------------------------------------------------------
 ;;	package<? ...

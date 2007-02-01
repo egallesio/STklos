@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Jan-2007 16:44 (eg)
-;;;; Last file update: 31-Jan-2007 08:50 (eg)
+;;;; Last file update:  1-Feb-2007 10:55 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -125,7 +125,7 @@
   (define (replace orig id)
     (let ((c (assq id replacements)))
       (if (pair? c)
-	  (begin (DEBUG "==> ~S" (cadr c)) (cadr c))
+	  (cadr c)
 	  orig)))
 
   (map (lambda (orig)

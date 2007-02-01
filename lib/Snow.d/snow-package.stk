@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update: 31-Jan-2007 08:33 (eg)
+;;;; Last file update:  1-Feb-2007 11:02 (eg)
 ;;;;
 
 
@@ -115,7 +115,8 @@
 
 	  ;; Meta informations
 	  (((? keyword?) . ?args)
-	    (eprintf "J'ai vu le keyword ~S\n" x))
+	    ; Skip this information
+	    (void))
 	   
           (else
              (error "bad implementation requirement: ~S" x))))

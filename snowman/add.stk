@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Jan-2007 16:59 (eg)
-;;;; Last file update: 31-Jan-2007 14:57 (eg)
+;;;; Last file update:  1-Feb-2007 11:00 (eg)
 ;;;;
 
 
@@ -54,9 +54,14 @@
 ;; ----------------------------------------------------------------------
 (define (local-snowfort-add-package! snowball package version directory)
 
+  (define (find-src name)
+    (let ((snow (make-path directory name (format "~a.snow" name)))
+	  (scm  (make-path directory name (format "~a.scm" name))))
+      (if (file-exists? snow) snow scm)))
+
   (when (> (snowman-verbosity) 0)
     (eprintf "Adding  package ~S (~a) to local repository\n" package version))
-  (let* ((src  (find-source-file directory package))
+  (let* ((src  (find-src package))
 	 (in   (open-file src "r")))
     (unless in
       (die (format "Cannot open source file ~S ~S" directory src)))

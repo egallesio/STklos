@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Jan-2007 12:10 (eg)
-;;;; Last file update: 31-Jan-2007 11:13 (eg)
+;;;; Last file update:  1-Feb-2007 10:57 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -30,12 +30,14 @@
 (define (write-extract-makefile package version targets dir)
 
   (define (find-src name)
-    (find-source-file (make-path "src" dir) name))
+    (let ((snow (make-path name (format "~a.snow" name)))
+	  (scm  (make-path name (format "~a.scm" name))))
+      (if (file-exists? (make-path dir snow)) snow scm)))
   
   (define (make-entry name)
     (let ((src (find-src name)))
       (printf "~a.ostk: ~a\n" name src)
-      (printf "\t(cd src/~a; $(SCC) $(SFLAGS) -o ../../~a.ostk ~a)\n\n"
+      (printf "\t(cd ~a; $(SCC) $(SFLAGS) -o ../~a.ostk ~a)\n\n"
 	      name name (basename src))))
 
   (define (make-library-entry)
@@ -90,25 +92,24 @@
 (define (find-and-extract-package package dir)
   
   (define (extract-package pkg dir)
-    (let ((src-dir  (make-path dir "src"))
-	  (snowball (package-snowball pkg))
+    (let ((snowball (package-snowball pkg))
 	  (tuning   (package-tuning pkg)))
       ;; create directory
-      (unless (file-exists? src-dir)
-	(make-directories src-dir))
+      (unless (file-exists? dir)
+	(make-directories dir))
       ;; extract package
       (unless (file-exists? snowball)
 	(die (format "cannot find snowball in cache ~s" (basename snowball))))
-      (untar snowball src-dir)
+      (untar snowball dir)
       ;; if the package has a tuning extract it too.
       (when tuning
 	(let ((tuneball (tuning-snowball tuning)))
 	  (unless (file-exists? snowball)
 	    (die (format "cannot find tuning snowball in cache ~s"
 			 (basename tuneball))))
-	  (untar tuneball src-dir)
+	  (untar tuneball dir)
 	  ;; Tune the original package
-	  (tune-package pkg src-dir)))))
+	  (tune-package pkg dir)))))
 
   (let ((pkg  (download-package package))
 	(deps (package-deps* package)))
