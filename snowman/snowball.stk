@@ -1,5 +1,5 @@
 ;;;;
-;;;; snowball.stk	-- Snowball management
+;;;; snowball.stk			-- Snowball management
 ;;;; 
 ;;;; Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 17:44 (eg)
-;;;; Last file update: 14-Jan-2007 21:31 (eg)
+;;;; Last file update: 31-Jan-2007 09:26 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -42,15 +42,15 @@
 		   (snowball-suffix)))))
 
 ;*---------------------------------------------------------------------*/
-;*    snowball-name-parse ...                                          */
+;*    parse-snowball-name ...                                          */
 ;*---------------------------------------------------------------------*/
-(define (snowball-name-parse name)
-   (unless (snowball? name)
-      (error  "illegal snowball name" name))
-   (match-case (string-split (basename (snowball-sans-suffix name)) "-")
-      ((?name ?tuning ?version)
-       (values name tuning version))
-      ((?name ?version)
-       (values name #f version))
-      (else
-       (error 'snowball-name-parse "Illegal snowball name" name))))
+(define (parse-snowball-name name)
+   (if (snowball? name)
+       (match-case (string-split (basename (snowball-sans-suffix name)) "-")
+	   ((?name ?tuning ?version)
+	    (values name tuning version))
+	   ((?name ?version)
+	    (values name #f version))
+	   (else
+	    (values #f #f #f)))
+       (values #f #f #f)))

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update: 22-Jan-2007 13:42 (eg)
+;;;; Last file update: 31-Jan-2007 14:48 (eg)
 ;;;;
 
 (define interesting-tuning "stklos")	; The tuning we want to keep in our base
@@ -245,7 +245,7 @@
 		      (download-package (string-append (car x) (cadr x))))
 		    dep)))
     ;; Try to find the package in the cache
-    (let ((path   (package-snowball pkg)))
+    (let ((path (package-snowball pkg)))
       (unless (file-exists? path)
 	;; Snowball absent. download it
 	(download-tarball path (package-url pkg) (package-md5 pkg) #f)))
@@ -267,3 +267,33 @@
 		(download-package name)))
 	    *snowman-pkgs*))
 
+
+;; ----------------------------------------------------------------------
+;; 	add-description-to-local-repository! ...
+;; ----------------------------------------------------------------------
+(define (add-description-to-local-repository! descr)
+
+  (define (insert-descr lst name version descr)
+    (let Loop ((lst lst)
+	       (res '()))
+      (cond
+	((null? lst)
+	 (cons descr res))
+	((and (equal? (caar lst) name)
+	      (equal? (cadar lst) version))
+	 (Loop (cdr lst) res))
+	(else
+	 (Loop (cdr lst) (cons (car lst) res))))))
+
+  (let* ((repo (make-path (snowman-snowforts-directory) "local"))
+	 (old  (with-input-from-file repo read))
+	 (name (car descr))
+	 (vers (cadr descr))
+	 (new  (insert-descr old name vers descr)))
+    ;; save the new version
+    (with-output-to-file repo
+      (lambda ()
+	(pp new :port #t)))))
+    
+
+	       

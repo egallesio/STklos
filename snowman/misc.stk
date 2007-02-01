@@ -21,27 +21,45 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Jan-2007 13:37 (eg)
-;;;; Last file update: 17-Jan-2007 23:12 (eg)
+;;;; Last file update: 31-Jan-2007 11:20 (eg)
 ;;;;
+
+;; ----------------------------------------------------------------------
+;;	version-number->integer ...
+;; ----------------------------------------------------------------------
+(define (version-number->integer str)
+
+  (define (fmt n)
+    (cond
+      ((< n 10) (format "000~a" n))
+      ((< n 100) (format "00~a" n))
+      ((< n 1000) (format "0~a" n))
+      (else  (number->string n))))
+  
+  (let ((v (map string->number (string-split str "."))))
+    (if (and (= (length v) 3)
+	     (every integer? v))
+	(string->number (format "~A~A~A" (car v) (fmt (cadr v)) (fmt (caddr v))))
+	0)))
+
+;; ----------------------------------------------------------------------
+;;	find-source-file ...
+;; ----------------------------------------------------------------------
+(define (find-source-file dir name)
+  (let ((snow (make-path dir name (format "~a.snow" name)))
+	(scm  (make-path dir name (format "~a.scm" name))))
+    (if (file-exists? snow) snow scm)))
 
 ;; ----------------------------------------------------------------------
 ;;	package<? ...
 ;; ----------------------------------------------------------------------
 (define (package<? p1 p2)
-  (define (version-value v)
-    (let ((v (map string->number (string-split v "."))))
-      (if (and (= (length v) 3)
-	       (every number? v))
-	  (+ (* (car v) 1000000)
-	     (* (cadr v) 1000)
-	     (* (caddr v) 1))
-	  0)))
   (let ((n1 (package-name p1))
 	(n2 (package-name p2))
 	(v1 (package-version p1))
 	(v2 (package-version p2)))
     (if (string=? n1 n2)
-	(< (version-value v1) (version-value v2))
+	(< (version-number->integer v1) (version-number->integer v2))
 	(string<? n1 n2))))
 
 ;; ----------------------------------------------------------------------
@@ -49,7 +67,6 @@
 ;; ----------------------------------------------------------------------
 (define (snowfort-names)
   (cons "local" (map car (snowman-sync-urls))))
-
 
 ;; ----------------------------------------------------------------------
 ;;	package-deps* ...
@@ -80,8 +97,6 @@
 ;; ----------------------------------------------------------------------
 (define (package-sans-version str)
   (car (string-split str "-")))
-
-
 
 ;; ----------------------------------------------------------------------
 ;;	rm-rf ...
