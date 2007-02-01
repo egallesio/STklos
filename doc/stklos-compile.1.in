@@ -35,6 +35,7 @@ Output the compiled code in the given file instead of
 .I a.out.
 .IP "--C-code, -C"
 Produce the byte-code in a C file instead of a ".ostk" file.
+
 .IP "--evalute=<expr>, e <expr>"
 Evaluate the Sexpr <expr> before starting compilation. This is useful,
 for loading files which are needed for the compilation (e.g. files 
@@ -42,6 +43,12 @@ defining new syntaxes).
 .IP "--line-info, -l"
 Generate line informations to ease debugging (incurs a small
 performance penalty).
+
+.IP "--prepend-load-path=<dir>, -L <dir>"
+Prepend the directory <dir> to the compiler loading path.
+.IP "--append-load-path=<dir>"
+Append the directory <dir> to the compiler loading path.
+
 .IP "--no-time"
 Do not display the compilation time
 .IP "--help | -h | -?"
