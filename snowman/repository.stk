@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update: 31-Jan-2007 14:48 (eg)
+;;;; Last file update:  1-Feb-2007 17:54 (eg)
 ;;;;
 
 (define interesting-tuning "stklos")	; The tuning we want to keep in our base
@@ -274,26 +274,34 @@
 (define (add-description-to-local-repository! descr)
 
   (define (insert-descr lst name version descr)
-    (let Loop ((lst lst)
-	       (res '()))
-      (cond
-	((null? lst)
-	 (cons descr res))
-	((and (equal? (caar lst) name)
-	      (equal? (cadar lst) version))
-	 (Loop (cdr lst) res))
-	(else
-	 (Loop (cdr lst) (cons (car lst) res))))))
-
-  (let* ((repo (make-path (snowman-snowforts-directory) "local"))
-	 (old  (with-input-from-file repo read))
-	 (name (car descr))
-	 (vers (cadr descr))
-	 (new  (insert-descr old name vers descr)))
-    ;; save the new version
-    (with-output-to-file repo
-      (lambda ()
-	(pp new :port #t)))))
+    (let ((descr-tuning-only (key-get (cddr descr) :tuning-only #f)))
+      (let Loop ((lst lst)
+		 (res '()))
+	(cond
+	  ((null? lst)
+	   (cons descr res))
+	  ((and (equal? (caar lst) name)
+		(equal? (cadar lst) version))
+	   (let ((lst-tuning-only (key-get (cddar lst) :tuning-only #f)))
+	     (cond
+	       ((equal? descr-tuning-only lst-tuning-only)
+		;; We replace a tuning/package by another 
+		(Loop (cdr lst) res))
+	       (else
+		;; One is a package the other is a tuning
+		(Loop (cdr lst) (cons (car lst) res))))))
+	  (else
+	   (Loop (cdr lst) (cons (car lst) res)))))))
+    
+    (let* ((repo (make-path (snowman-snowforts-directory) "local"))
+	   (old  (with-input-from-file repo read))
+	   (name (car descr))
+	   (vers (cadr descr))
+	   (new  (insert-descr old name vers descr)))
+      ;; save the new version
+      (with-output-to-file repo
+	(lambda ()
+	  (pp new :port #t)))))
     
 
 	       

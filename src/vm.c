@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 26-Jan-2007 11:35 (eg)
+ * Last file update:  3-Feb-2007 19:19 (eg)
  */
 
 // INLINER values
@@ -774,6 +774,28 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int argc, SCM *argv))
   patch_environment(STk_get_current_vm());
   return STk_void;
 }
+
+//#define VM_OFFSET(x) ((SCM) x - (SCM) vm->sp)
+//
+//static void show_stack_content(void)
+//{
+//  int i = 0;
+//  vm_thread_t *vm = STk_get_current_vm();
+//  char buff[10];
+//
+//  /* Show the registers */
+//  STk_debug("=====================");
+//  STk_debug("FP = %d", VM_OFFSET(vm->fp));
+//  for (i=0; ;i++) {
+//    STk_debug("offset %d value %d (0x%x)", i, vm->sp[i], vm->sp[i]);
+//    fgets(buff, 10, stdin);
+//    switch(*buff) {
+//    case 's': STk_debug("Scheme value ~S",  vm->sp[i]); break;
+//    case 'q': return;
+//    default: /* nothing */;
+//    }
+//  }
+//}
 #endif 
 
 
@@ -1393,7 +1415,7 @@ FUNCALL:  /* (int nargs, int tailp) */
 	SCM *old_fp = (SCM *) ACT_SAVE_FP(vm->fp);
 	
 	/* Move the arguments of the function to the old_fp */
-	if (nargs) memcpy(old_fp-nargs, vm->sp, nargs*sizeof(SCM));
+	if (nargs) memmove(old_fp-nargs, vm->sp, nargs*sizeof(SCM));
 	vm->fp = old_fp;
 	
 	/* Push a new environment on the stack */

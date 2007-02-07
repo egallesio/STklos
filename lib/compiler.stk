@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 25-Jan-2007 22:22 (eg)
+;;;; Last file update:  3-Feb-2007 16:01 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -349,7 +349,7 @@ doc>
 	     (proc     (caddr l))
 	     (expander `(lambda (form e) (apply ,proc (cdr form)))))
 	;; Install expander for further compilation
-	(install-expander! name (eval expander) proc)))))
+	(install-expander! name (eval expander) #f)))))
 
 
 ;;;;
@@ -1419,7 +1419,6 @@ doc>
 		    (let* ((name     (car x))
 			   (proc     (cdr x))
 			   (expander `(lambda (form e) (apply ,proc (cdr form)))))
-		      (eprintf "DEBUG: create back macro ~S\n" name)
 		      (install-expander! name (eval expander) proc)))
 		  (key-get infos :expanders '()))
       )))

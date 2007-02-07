@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Jan-2007 16:59 (eg)
-;;;; Last file update:  1-Feb-2007 11:00 (eg)
+;;;; Last file update:  1-Feb-2007 15:55 (eg)
 ;;;;
 
 
@@ -77,6 +77,27 @@
 	   (die (format "bad package* clause ~S" pkg*)))))))
 
 ;; ----------------------------------------------------------------------
+;; 	local-snowfort-add-tuning! ...
+;; ----------------------------------------------------------------------
+(define (local-snowfort-add-tuning! snowball package version tuning directory)
+  (unless (equal? tuning "stklos")
+    (die "Cannot manage non STklos tunings"))
+  (when (> (snowman-verbosity) 0)
+    (eprintf "Adding tuning for package ~S (~a) to local repository\n"
+	     package version))
+
+  (let* ((cache-name (make-path (snowman-cache-directory) (basename snowball)))
+	 (descr     `(,package
+		      ,version
+		      :tuning-only #t
+		      :tunings (("stklos"
+				 :url ""
+				 :snowball ,cache-name
+				 :md5 ,(md5sum-file snowball))))))
+    (copy-file snowball cache-name)
+    (add-description-to-local-repository! descr)))
+
+;; ----------------------------------------------------------------------
 ;; 	build-package-description ...
 ;; ----------------------------------------------------------------------
 (define (build-package-description snowball package version lst)
@@ -108,15 +129,5 @@
     :homepage ,(or home "")
     :tunings ()
     :dependencies ,(build-dependencies lst))))
-
-;; ----------------------------------------------------------------------
-;; 	local-snowfort-add-tuning! ...
-;; ----------------------------------------------------------------------
-(define (local-snowfort-add-tuning! snowball package version tuning directory)
-  (unless (equal? tuning "stklos")
-    (die "Cannot manage non STklos tunings"))
-  (when (> (snowman-verbosity) 0)
-    (eprintf "Adding tuning for package ~S (~a) to local repository\n"
-	     package version)))
 
   

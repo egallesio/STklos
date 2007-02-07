@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update: 25-Jan-2007 21:23 (eg)
+;;;; Last file update:  1-Feb-2007 22:39 (eg)
 ;;;;
 
 
@@ -67,8 +67,9 @@
 
 (define (install-expander! id proc code)
   (set! *expander-list* (cons (cons id proc) *expander-list*))
-  ;; Keep the code associated to the macro to save it in byte-code header
-  (set! *expander-list-src* (cons (cons id code) *expander-list-src*)))
+  (when code
+    ;; Global macro: Keep the macro code to save it in byte-code header
+    (set! *expander-list-src* (cons (cons id code) *expander-list-src*))))
 
 ;;;
 ;;; Expander-list-src management

@@ -1,7 +1,7 @@
 /*
  * mutex.c	-- Pthread Mutexes in Scheme
  * 
- * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 28-Oct-2006 16:18 (eg)
+ * Last file update:  1-Feb-2007 17:20 (eg)
  */
 
 #include <lurc.h>
@@ -383,7 +383,7 @@ DEFINE_PRIMITIVE("condition-variable-signal!", condv_signal, subr1, (SCM cv))
   return STk_void;
 }
 
-DEFINE_PRIMITIVE("condition-variable-brodcast!", condv_broadcast, subr1, (SCM cv))
+DEFINE_PRIMITIVE("condition-variable-broadcast!", condv_broadcast, subr1, (SCM cv))
 {
   int err;
   if (! CONDVP(cv)) STk_error_bad_condv(cv);

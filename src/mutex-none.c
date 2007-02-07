@@ -1,7 +1,7 @@
 /*
  * mutex-none.c	-- Pthread Mutexes in Scheme
  * 
- * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 16-Apr-2006 11:13 (eg)
- * Last file update: 16-Apr-2006 11:39 (eg)
+ * Last file update:  1-Feb-2007 17:20 (eg)
  */
 
 
@@ -48,6 +48,6 @@ int STk_init_mutexes(void)
   FAKE_PRIMITIVE("condition-variable-specific");
   FAKE_PRIMITIVE("condition-variable-specific-set!");
   FAKE_PRIMITIVE("condition-variable-signal!");
-  FAKE_PRIMITIVE("condition-variable-brodcast!");
+  FAKE_PRIMITIVE("condition-variable-broadcast!");
   return TRUE;
 }
