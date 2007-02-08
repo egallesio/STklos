@@ -2,9 +2,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  8-Jan-2007 14:02 (eg)
+# Last file update:  7-Feb-2007 11:35 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d Snow.d @LURCDIR@
+SUBDIRS = Match.d SILex.d Lalr.d Snow.d Split.d @LURCDIR@
 
 scheme_BOOT = assembler.stk		\
 	      bb.stk 			\
@@ -46,6 +46,8 @@ scheme_SRCS = STklos.init		\
 	      make-C-boot.stk		\
 	      match.stk			\
 	      pp.stk			\
+	      snow-support.stk		\
+	      split-support.stk		\
 	      slib.stk			\
 	      srfi-1.stk		\
 	      srfi-2.stk		\
@@ -81,6 +83,7 @@ scheme_OBJS = compfile.ostk		\
 	      match.ostk		\
 	      pp.ostk			\
 	      snow-support.ostk		\
+	      split-support.ostk	\
 	      srfi-1.ostk 		\
 	      srfi-2.ostk		\
 	      srfi-4.ostk		\
