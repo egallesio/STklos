@@ -1,0 +1,154 @@
+;;;;
+;;;; split-interface.stk	-- Split interfaces in STklos
+;;;; 
+;;;; Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 11-Dec-2006 14:39 (eg)
+;;;; Last file update:  9-Feb-2007 14:31 (eg)
+;;;;
+
+
+(define-struct split-package
+  name
+  version
+  language
+  source
+  suffix
+  imports
+  exports
+  macros
+  syntaxes
+  exceptions)
+
+(define (%new-split-package name)
+  (make-split-package name		; name
+		      'v0.0.0		; version
+		      'scheme		; language
+		      #f		; source
+		      #f		; suffix
+		      '()		; imports
+		      '()		; exports
+		      '()		; macros
+		      '()		; syntaxes
+		      '()		; exceptions
+		      ))
+
+
+(define-macro (%push! lst v)
+  `(set! ,lst (cons ,v ,lst)))
+		     
+;; ======================================================================
+;;	interface ...
+;; ======================================================================
+(define-macro (interface name . body)
+  (let* ((pkg (parse-interface name body))
+	 (imp (split-package-imports pkg))
+	 (exp (split-package-exports pkg)))
+    `(begin
+       ;; Require all the imported modules
+       ,@(map (lambda (x) (list 'require  (symbol->string x))) imp)
+       ;; Define a module for the split package
+       (define-module ,name
+	 ;; Imports
+	 (import ,@(split-package-imports pkg))
+	 ;; Exports
+	 (export ,@(split-package-exports pkg))
+	 ;; Define all the macros
+	 ,@(map (lambda (x)
+		  (eprintf "Definition de la macro ~S\n" x)
+		  `(define-macro ,@x))
+		(reverse (split-package-macros pkg)))
+	 ;; Syntaxes
+	 ,@(map (lambda (x)
+		  (eprintf "Syntax definition ~S\n" x))
+		(reverse (split-package-syntaxes pkg)))
+	 ;; Exceptions
+	 ,@(map (lambda (x)
+		  `(define-scmpkg-exception ,@x))
+		(reverse (split-package-exceptions pkg)))
+	 ;; Body
+	 (include ,(split-package-source pkg)))
+       ;; Provide
+       (provide ,(symbol->string name)))))
+
+;; ======================================================================
+;;	parse-interface ...
+;; ======================================================================
+(define (parse-interface name body)
+
+  (define (choose-language pkg lang)
+    (let ((info (assoc lang *split-languages*)))
+      (unless info
+	(error 'interface "Language ~S is not managed" lang))
+      ;; Set the language
+      (set! (split-package-language pkg) lang)
+      ;; Set the default suffix
+      (unless (split-package-suffix pkg)
+	(set! (split-package-suffix pkg) (key-get (cdr info) :suffix)))))
+
+  (define (patch-package-export-list! pkg)
+    (let ((exports '()))
+      (for-each
+          (lambda (x)
+	    (if (symbol? x)
+	      (%push! exports x)			     ;; export a variable
+	      (match-case x
+		 ((macro . ?rest)			     ;; export a macro
+		  (%push! (split-package-macros pkg) rest))
+		 ((syntax ?args . ?-)			     ;; export a syntax
+		  (%push! (split-package-syntaxes pkg) args))
+		 ((exception . ?rest)	     	     	     ;; export an exception
+		  (%push! (split-package-exceptions pkg) rest))
+		 (else
+		  (%push! exports (car x))))))
+	  (split-package-exports pkg))
+      (set! (split-package-exports pkg) exports)))
+  
+  (define (patch-package! pkg)
+    ;; Language & suffix
+    (choose-language pkg (split-package-language pkg))
+    ;; Source 
+    (unless (split-package-source pkg)
+      (set! (split-package-source pkg)
+	(format "~a.~a" name (split-package-suffix pkg))))
+    ;; Arrange the export list
+    (patch-package-export-list! pkg)
+    ;; Return the updated package
+    pkg)
+  
+  (let ((pkg (%new-split-package name)))
+    (for-each (lambda (clause)
+		(match-case clause
+		  ((version  ?version)
+		   (set! (split-package-version pkg) version))
+		  ((language ?lg)
+		   (set! (split-package-language pkg) lg))
+		  ((source ?src)
+		   (set! (split-package-source pkg) src))
+		  ((suffix ?sfx)
+		   (set! (split-package-suffix pkg) sfx))
+		  ((import . ?imp)
+		   (set! (split-package-imports pkg) imp))
+		  ((export . ?exp)
+		   (set! (split-package-exports pkg) exp))
+		  (else
+		   (error 'interface "Invalid clause ~S" clause))))
+	      body)
+    (patch-package! pkg)))

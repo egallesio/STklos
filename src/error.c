@@ -2,7 +2,7 @@
  *
  * e r r o r . c 			-- The error procedure
  *
- * Copyright © 1993-2000 ESSIrick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 14-Nov-1993 14:58
- * Last file update: 25-Apr-2006 18:48 (eg)
+ * Last file update:  8-Feb-2007 18:47 (eg)
  */
 
 #include "stklos.h"

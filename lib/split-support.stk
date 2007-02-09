@@ -1,0 +1,62 @@
+;;;;
+;;;; split-support.stk	-- SPLIT support
+;;;; 
+;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date:  7-Feb-2007 11:03 (eg)
+;;;; Last file update:  9-Feb-2007 15:23 (eg)
+;;;;
+
+;; ======================================================================
+;; 	The SPLIT STklos module
+;; ======================================================================
+(define-module |SPLIT|
+  (include "Split.d/split-languages.stk")
+  (include "Split.d/split-interface.stk")
+  (include "Split.d/split-exception.stk")
+  (include "Split.d/split-parameter.stk")
+  (include "Split.d/split-define.stk")
+;  (include "Snow.d/snow-srfi89.stk")
+;  (include "Snow.d/snow-record.stk")
+;  (include "Snow.d/snow-package.stk")
+;  (include "Snow.d/snow-misc.stk")
+
+)
+;; ======================================================================
+;;	Split Runtime
+;; ======================================================================
+
+
+(define-condition-type @exception  &message   	   @exception?)
+(define-condition-type @error      &error-message  @error?)
+(define-condition-type @io-error   &i/o-error      @io-error?)
+(define-condition-type @type-error &error-message  @type-error?)
+
+(define (exception-get-message cond)
+  (if (condition? cond)
+    (if (condition-has-type? cond &message)
+      (condition-ref cond 'message)
+      (format "condition of type ~S raised" (struct-type-name (struct-type cond))))
+    (error "bad exception ~S" cond)))
+
+
+(%redefine-module-exports (find-module '|SPLIT|))
+
+(provide "split-support")
