@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 26-Jan-2007 11:58 (eg)
+ * Last file update:  9-Feb-2007 16:15 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -856,13 +856,21 @@ DEFINE_PRIMITIVE("%file-informations", file_informations, subr1, (SCM filename))
   if (!STk_dirp(fname)) {
     f = STk_open_file(fname, "r");
     if (f != STk_false) {
-      switch (find_file_nature(f)) {
-        case FILE_IS_SOURCE: break;
-        case FILE_IS_BCODE:  res = STk_read(f, TRUE); break;
-        case FILE_IS_OBJECT: res = STk_info_object_file(STRING_CHARS(filename)); 
+      int type  = find_file_nature(f);
+      char* str = ""; 
+
+      switch (type) {
+        case FILE_IS_SOURCE: str = "source"; break;
+        case FILE_IS_BCODE:  str = "byte-code"; res = STk_read(f, TRUE); break;
+        case FILE_IS_OBJECT: str = "object"; 
+			     res = STk_info_object_file(STRING_CHARS(filename)); 
 	  		     break;
       }
       STk_close_port(f);
+      /* Add the file nature to result */
+      res = STk_cons(STk_makekey("nature"), 
+		     STk_cons(STk_intern(str), 
+			      res));
     }
   }
   return res;
