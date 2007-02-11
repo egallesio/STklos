@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 11-Feb-2007 20:56 (eg)
+;;;; Last file update: 11-Feb-2007 21:51 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1421,9 +1421,11 @@ doc>
 	(if (and eventually-compile?
 		 (eq? (key-get infos :nature 'unknown) 'source))
 	  ;; We have a source file (i.e. we have no info, compile it to have them)
-	  (compile-and-find-infos path)
+	  (parameterize ((compiler:time-display #f))
+	      (compile-and-find-infos path))
 	  infos))
       '())))
+
 
 (define (import-file-informations infos)
   (when (pair? infos)
@@ -1436,7 +1438,6 @@ doc>
 		       (expander `(lambda (form e) (apply ,proc (cdr form)))))
 		  (install-expander! name (eval expander) proc)))
 	      (key-get infos :expanders '()))))
-
 
 ;;;;
 ;;;; REQUIRE
@@ -1457,6 +1458,19 @@ doc>
 ;;;;
 ;;;; REQUIRE-FOR-SYNTAX
 ;;;;
+(define (compile-require4syntax e env tail)
+   (if  (and (= (length e) 2)
+	     (string? (cadr e)))
+     (with-handler
+         (lambda (c) (eprintf "*** Exception while required-for-syntax ~S\n" e)
+		     (raise c))
+	 (let ((infos (find-file-informations (cadr e) #t)))
+	   (when (pair? infos)
+	     (import-file-informations infos))
+	   (void)))
+     (error 'require-for-syntax "bad form ~S" e)))
+
+
 #;(define (compile-require4syntax e env tail)
   ;; No code is produced here, we only load the file for the compiler
   (with-handler
@@ -1536,7 +1550,7 @@ doc>
 	  
 	  ;; Special calls
 	  ((require)		(compile-require	e env tail?))
-;	  ((%%require4syntax)	(compile-require4syntax e env tail?))
+	  ((%%require4syntax)	(compile-require4syntax e env tail?))
 	  ((%%when-compile)	(compile-when-compile   e env tail?))
 	  ((%%include)		(compile-include	e env tail?))
 	  ((%%source-pos)	(compile-%%source-pos   e env tail?))
