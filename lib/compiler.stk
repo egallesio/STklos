@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  3-Feb-2007 16:01 (eg)
+;;;; Last file update: 11-Feb-2007 20:56 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1401,6 +1401,46 @@ doc>
 ;;;; 		Special Calls 
 ;;;; 
 ;;;;======================================================================
+
+;;;;
+;;;; Utilities for REQUIRE / REQUIRE-FOR-SYNTAX
+;;;; 
+(define (find-file-informations file eventually-compile?)
+
+  (define (compile-and-find-infos path)
+    (let ((tmp (temporary-file-name)))
+      (compile-file path tmp)
+      (let ((infos (%file-informations tmp)))
+	(remove-file tmp)
+	(set! infos (key-set! infos :nature 'source))
+	infos)))
+
+  (let ((path (find-path file)))
+    (if path
+      (let ((infos (%file-informations path)))
+	(if (and eventually-compile?
+		 (eq? (key-get infos :nature 'unknown) 'source))
+	  ;; We have a source file (i.e. we have no info, compile it to have them)
+	  (compile-and-find-infos path)
+	  infos))
+      '())))
+
+(define (import-file-informations infos)
+  (when (pair? infos)
+    ;; Register all the global symbols of the file
+    (for-each new-global (key-get infos :globals '()))
+    ;; Install the expanders of the required file
+    (for-each (lambda (x)
+		(let* ((name     (car x))
+		       (proc     (cdr x))
+		       (expander `(lambda (form e) (apply ,proc (cdr form)))))
+		  (install-expander! name (eval expander) proc)))
+	      (key-get infos :expanders '()))))
+
+
+;;;;
+;;;; REQUIRE
+;;;;
 (define (compile-require e env tail)
   ;; Require is not really special (it is in fact compiled as a normal call)
   ;; We just try to add the globals of the file to the list of known
@@ -1408,31 +1448,37 @@ doc>
   ;; warning when compiling a file using another one.
   (when (and (= (length e) 2)
 	     (string? (cadr e)))
-    (let ((infos (let ((path (find-path (cadr e))))
-		   (if path
-		       (%file-informations path)
-		       '()))))
-      (when (pair? infos)
-	(for-each new-global (key-get infos :globals '()))
-	;; Install the expanders of the required file
-	(for-each (lambda (x)
-		    (let* ((name     (car x))
-			   (proc     (cdr x))
-			   (expander `(lambda (form e) (apply ,proc (cdr form)))))
-		      (install-expander! name (eval expander) proc)))
-		  (key-get infos :expanders '()))
-      )))
+    (let ((infos (find-file-informations (cadr e) #f)))
+      (import-file-informations infos)))
 
   (compile-normal-call (car e) (cdr e) (length e) env e tail))
 
 
-(define (compile-require4syntax e env tail)
+;;;;
+;;;; REQUIRE-FOR-SYNTAX
+;;;;
+#;(define (compile-require4syntax e env tail)
   ;; No code is produced here, we only load the file for the compiler
   (with-handler
      (lambda (c)
        (eprintf "*** Exception while evaluation of required syntax ~S\n" e)
        (raise c))
      (require (cadr e))))
+
+
+;;;;
+;;;; WHEN-COMPILE
+;;;;
+(define (compile-when-compile e env tail)
+  (with-handler (lambda (c)
+		  (eprintf "*** Exception on when-compile form of ~S\n" e)
+		  (raise c))
+     (eval `(begin ,@(cdr e) (void)))))
+
+(define-macro (when-compile . body)
+  `(begin
+     (%%when-compile ,@body)
+     (void)))
 
 
 (define (compile-%%label e env tail)
@@ -1490,7 +1536,8 @@ doc>
 	  
 	  ;; Special calls
 	  ((require)		(compile-require	e env tail?))
-	  ((%%require4syntax)	(compile-require4syntax e env tail?))
+;	  ((%%require4syntax)	(compile-require4syntax e env tail?))
+	  ((%%when-compile)	(compile-when-compile   e env tail?))
 	  ((%%include)		(compile-include	e env tail?))
 	  ((%%source-pos)	(compile-%%source-pos   e env tail?))
 	  ((%%label)		(compile-%%label	e env tail?))

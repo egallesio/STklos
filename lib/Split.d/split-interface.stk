@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update:  9-Feb-2007 14:31 (eg)
+;;;; Last file update: 11-Feb-2007 20:52 (eg)
 ;;;;
 
 
@@ -63,7 +63,10 @@
 	 (exp (split-package-exports pkg)))
     `(begin
        ;; Require all the imported modules
-       ,@(map (lambda (x) (list 'require  (symbol->string x))) imp)
+       ,@(map (lambda (x) `(when-compile (require ,(symbol->string x))))
+	      imp)
+       ,@(map (lambda (x) `(require ,(symbol->string x)))
+	      imp)
        ;; Define a module for the split package
        (define-module ,name
 	 ;; Imports
