@@ -21,8 +21,23 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Dec-2006 15:15 (eg)
-;;;; Last file update:  9-Feb-2007 14:33 (eg)
+;;;; Last file update: 13-Feb-2007 22:26 (eg)
 ;;;;
+
+
+(export map-scmpkg-exception-on-condition)
+
+
+
+(define (map-scmpkg-exception-on-condition name)
+  (case name
+    ((@exception)  	      '&@exception)
+    ((@error)      	      '&@error)
+    ((@io-error)   	      '&@io-error)
+    ((@type-error) 	      '&@type-error)
+    ((@not-implemented-error) '&@not-implemented-error)
+    (else name)))
+
 
 ;; ======================================================================
 ;; 	define-exception
@@ -37,7 +52,7 @@
       `(begin
 	 ;; Build the condition
 	 (define ,name (make-condition-type ',name
-					    ,(if parent parent '&condition)
+					    ,parent
 					    ',slots))
 	 
          ;; Build the predicate
@@ -73,14 +88,15 @@
   ;; body of define-exception*
   ;;  
   (let Loop ((name name)
-	     (parent #f)
+	     (parent '&@exception)
 	     (body body)
 	     (fields '()))
     (cond
       ((pair? name)
        (case (length name)
-	 ((1) (Loop (car name) #f body fields))
-	 ((2) (Loop (car name) (cadr name) body fields))
+	 ((1) (Loop (car name) '&@exception body fields))
+	 ((2) (Loop (car name) (map-scmpkg-exception-on-condition (cadr name))
+		    body fields))
 	 (else (error "bad exception name ~S" name))))
       ((null? body)
        (%define-exception->condition name parent (reverse! fields)))
@@ -96,16 +112,33 @@
 ;; 	exception
 ;; ======================================================================
 (define-macro (exception name . args)
+
+  (define (valid-keyword? key)
+    (or (keyword? key) (memq key '(?proc ?reason ?obj))))
+
   (let Loop ((args args)
-	     (res  '()))
-    (cond
-      ((null? args)
-       `(make-condition ,name ,@res))
-      ((and (pair? args)
-	    (keyword? (car args))
-	    (not (null? (cdr args)))
-	    (Loop (cddr args)
-		  (append! res
-			   `(',(string->symbol (keyword->string (car args)))
-			     ,(cadr args))))))
-      (else (error "bad parameter ~S" args)))))
+	     (proc #f)
+	     (reason #f)
+	     (obj #f)
+	     (other '()))
+   
+    (if (null? args)
+      (let ((name (map-scmpkg-exception-on-condition name)))
+	`(make-condition ,name
+			 'backtrace '()
+			 'location ',(or proc name)
+			 'message (string-append (or ,reason "")
+						 (if ,obj (format " ~s" ,obj) ""))
+			 ,@other))
+      (let ((key (car args)))
+	(if (and (valid-keyword? key) (not (null? (cdr args))))
+	  (case key
+	    ((?proc)   (Loop (cddr args) (cadr args) reason obj other))
+	    ((?reason) (Loop (cddr args) proc (cadr args) obj other))
+	    ((?obj)    (Loop (cddr args) proc reason (cadr args) other))
+	    (else      (Loop (cddr args) proc reason obj
+			     (append!
+			      other
+			      `(',(string->symbol (keyword->string (car args)))
+				,(cadr args))))))
+	  (error "bad keyword ~S" (car args)))))))

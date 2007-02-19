@@ -2,7 +2,7 @@
  *
  * s y s t e m . c				-- System relative primitives
  *
- * Copyright © 1994-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 19-Nov-2006 22:24 (eg)
+ * Last file update: 12-Feb-2007 19:07 (eg)
  */
 
 #include <unistd.h>
@@ -334,13 +334,13 @@ DEFINE_PRIMITIVE("make-directory", make_directory, subr1, (SCM path))
 }
 
 /*
-<doc EXT delete-directory
- * (delete-directory dir)
+<doc EXT remove-directory
+ * (remove-directory dir)
  *
  * Delete the directory with name |dir|.
 doc>
 */
-DEFINE_PRIMITIVE("delete-directory", delete_directory, subr1, (SCM path))
+DEFINE_PRIMITIVE("remove-directory", remove_directory, subr1, (SCM path))
 {
   if (!STRINGP(path)) error_bad_path(path);
   if (rmdir(STRING_CHARS(path)) != 0)
@@ -1146,7 +1146,7 @@ int STk_init_system(void)
   ADD_PRIMITIVE(getcwd);
   ADD_PRIMITIVE(chdir);
   ADD_PRIMITIVE(make_directory);
-  ADD_PRIMITIVE(delete_directory);
+  ADD_PRIMITIVE(remove_directory);
   ADD_PRIMITIVE(directory_files);
   ADD_PRIMITIVE(getpid);
   ADD_PRIMITIVE(system);

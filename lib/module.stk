@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  7-Feb-2007 15:03 (eg)
+;;;; Last file update: 16-Feb-2007 16:26 (eg)
 ;;;;
 
 
@@ -272,7 +272,9 @@ doc>
 	    (error 'export "bad symbol `~S'" (car l))))))
 
 (define-macro (export . symbols)
-  `(%module-export (current-module) ',symbols))
+  (if (null? symbols)
+    '()
+    `(%module-export (current-module) ',symbols)))
 
 ;;=============================================================================
 ;;

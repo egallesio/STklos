@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  7-Feb-2007 13:39 (eg)
-;;;; Last file update:  7-Feb-2007 16:26 (eg)
+;;;; Last file update: 16-Feb-2007 16:15 (eg)
 ;;;;
 
 (define *split-languages*
@@ -30,8 +30,11 @@
     (stklos :suffix "stk")
     ;; Bigloo
     (bigloo :suffix "scm")
-    ;; Scheme (the default)
-    (scheme :suffix "scm")))
+    ;; Snow
+    (snow   :suffix "scm")
+    ;; R5RS (the default)
+    (r5rs :suffix "scm")))
+    
 
 
    

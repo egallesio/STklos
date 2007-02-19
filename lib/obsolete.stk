@@ -2,7 +2,7 @@
 ;;;; obsolete.stk	-- Definition of functions which are obsolete.
 ;;;;			   Function defined here are candidate to disappear.
 ;;;; 
-;;;; Copyright © 2002-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update: 23-Nov-2006 13:59 (eg)
+;;;; Last file update: 12-Feb-2007 19:21 (eg)
 ;;;;
 
 
@@ -63,3 +63,7 @@
 (define (stklos-pragma . args)
   (error "Don't use anymore pragma, but compiler:warn-use-undef parameter"))
 (define-reader-ctor 'pragma stklos-pragma)
+
+
+;; 12-Feb-2007 (v0.83)
+(define delete-directory remove-directory)

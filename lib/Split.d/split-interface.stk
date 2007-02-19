@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update: 11-Feb-2007 21:49 (eg)
+;;;; Last file update: 18-Feb-2007 21:24 (eg)
 ;;;;
 
 
@@ -35,12 +35,13 @@
   exports
   macros
   syntaxes
-  exceptions)
+  exceptions
+  records)
 
 (define (%new-split-package name)
   (make-split-package name		; name
 		      'v0.0.0		; version
-		      'scheme		; language
+		      'r5rs		; language
 		      #f		; source
 		      #f		; suffix
 		      '()		; imports
@@ -48,6 +49,7 @@
 		      '()		; macros
 		      '()		; syntaxes
 		      '()		; exceptions
+		      '()		; records
 		      ))
 
 
@@ -58,10 +60,21 @@
 ;;	interface ...
 ;; ======================================================================
 (define-macro (interface name . body)
+
+  (define (find-imports lang imp)
+    (if (member lang '(r5rs stklos))
+      imp
+      (cons (string->symbol (format "@~a" lang)) imp)))
+
+    
   (let* ((pkg (parse-interface name body))
-	 (imp (split-package-imports pkg))
-	 (exp (split-package-exports pkg)))
+	 (exp (split-package-exports pkg))
+	 (imp (find-imports
+	       (split-package-language pkg)
+	       (split-package-imports pkg))))
     `(begin
+       ;; Require split-support
+       (require "split-support")
        ;; Require all the imported modules
        ,@(map (lambda (x) `(require-for-syntax ,(symbol->string x)))
 	      imp)
@@ -70,22 +83,26 @@
        ;; Define a module for the split package
        (define-module ,name
 	 ;; Imports
-	 (import ,@(split-package-imports pkg))
+	 (import ,@imp)
 	 ;; Exports
-	 (export ,@(split-package-exports pkg))
-	 ;; Define all the macros
-	 ,@(map (lambda (x)
-		  (eprintf "Definition de la macro ~S\n" x)
-		  `(define-macro ,@x))
-		(reverse (split-package-macros pkg)))
-	 ;; Syntaxes
-	 ,@(map (lambda (x)
-		  (eprintf "Syntax definition ~S\n" x))
-		(reverse (split-package-syntaxes pkg)))
+	 (export ,@exp)
+;;//	 ;; Define all the macros
+;;//	 ,@(map (lambda (x)
+;;//		  (eprintf "Definition de la macro ~S\n" x)
+;;//		  `(define-macro ,@x))
+;;//		(reverse (split-package-macros pkg)))
+;;//	 ;; Syntaxes
+;;//	 ,@(map (lambda (x)
+;;//		  (eprintf "Syntax definition ~S\n" x))
+;;//		(reverse (split-package-syntaxes pkg)))
 	 ;; Exceptions
 	 ,@(map (lambda (x)
 		  `(define-scmpkg-exception ,@x))
 		(reverse (split-package-exceptions pkg)))
+	 ;; Records
+	 ,@(map (lambda (x)
+		  `(%define-exported-record ,(car x) ,@cdr x))
+		(reverse (split-package-records pkg)))
 	 ;; Body
 	 (include ,(split-package-source pkg)))
        ;; Provide
@@ -119,6 +136,8 @@
 		  (%push! (split-package-syntaxes pkg) args))
 		 ((exception . ?rest)	     	     	     ;; export an exception
 		  (%push! (split-package-exceptions pkg) rest))
+		 ((record ?name . ?body)
+		  (%push! (split-package-records pkg) (cons name body)))
 		 (else
 		  (%push! exports (car x))))))
 	  (split-package-exports pkg))
