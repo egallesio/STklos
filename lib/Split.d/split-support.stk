@@ -1,0 +1,62 @@
+;;;;
+;;;; split-support.stk	-- SPLIT support
+;;;; 
+;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date:  7-Feb-2007 11:03 (eg)
+;;;; Last file update: 14-Feb-2007 11:33 (eg)
+;;;;
+
+
+;; ======================================================================
+;;	Split Runtime
+;; ======================================================================
+(define-condition-type &type-error &message &type-error?)
+(include "Split.d/split-runtime.stk")
+
+
+(define (exception-get-message cond)
+  (if (condition? cond)
+    (if (condition-has-type? cond &message)
+      (condition-ref cond 'message)
+      (format "condition of type ~S raised" (struct-type-name (struct-type cond))))
+    (error "bad exception ~S" cond)))
+
+
+;; ======================================================================
+;; 	The SPLIT STklos module
+;; ======================================================================
+(define-module |SPLIT|
+  (include "Split.d/split-languages.stk")
+  (include "Split.d/split-interface.stk")
+  (include "Split.d/split-exception.stk")
+  (include "Split.d/split-parameter.stk")
+  (include "Split.d/split-define.stk")
+  (include "Split.d/split-record.stk")
+;  (include "Snow.d/snow-srfi89.stk")
+;  (include "Snow.d/snow-record.stk")
+;  (include "Snow.d/snow-package.stk")
+;  (include "Snow.d/snow-misc.stk")
+)
+
+
+(%redefine-module-exports (find-module '|SPLIT|))
+
+(provide "split-support")

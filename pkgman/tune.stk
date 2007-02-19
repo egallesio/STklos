@@ -1,0 +1,178 @@
+;;;;
+;;;; tune.stk	-- Package tuning
+;;;; 
+;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 18-Jan-2007 16:44 (eg)
+;;;; Last file update: 19-Feb-2007 16:05 (eg)
+;;;;
+
+;; ----------------------------------------------------------------------
+;; 	tune-package ...
+;; ----------------------------------------------------------------------
+(define (tune-package pkg dir)
+
+  (define (maybe-overwrite suffix)
+    (let* ((name   (package-name pkg))
+	   (pdir   (make-path dir name))
+	   (tundir (make-path pdir "stklos")))
+      (when (file-is-directory? tundir)
+	;; If the tune directory has a file with given suffix, use it
+	(let* ((src    (format "~a.~a" name suffix))
+	       (tuning (make-path tundir src)))
+	  (when (file-exists? tuning)
+	    (when (> (stklos-pkg-verbosity) 0)
+	      (eprintf "   Overwriting ~s with tuning file\n" (basename tuning)))
+	    (copy-file tuning (make-path pdir src)))))))
+  
+  (maybe-overwrite "spi")
+  (maybe-overwrite "scm"))
+
+;;//;; ----------------------------------------------------------------------
+;;//;; 	tune-package ...
+;;//;; ----------------------------------------------------------------------
+;;//(define (tune-package package dir)
+;;//  (let* ((pdir  (make-path dir (package-name package)))
+;;//	 (tuner (make-path pdir "stklos" "tuning.stk")))
+;;//    (when (file-exists? tuner)
+;;//      (tune-package-scheme (package-name package) pdir tuner))))
+;;//
+;;//;; ----------------------------------------------------------------------
+;;//;; 	tune-package-scheme ...
+;;//;; ----------------------------------------------------------------------
+;;//(define (tune-package-scheme name dir tuner)
+;;//
+;;//  (define (find-src name)
+;;//    (let ((snow (make-path dir (format "~a.snow" name)))
+;;//	  (scm  (make-path dir (format "~a.scm" name))))
+;;//      (cond
+;;//	((file-exists? snow) snow)
+;;//	((file-exists? scm)  scm)
+;;//	(else (die (format "cannot find the source of package ~s" name))))))
+;;//  
+;;//  (let ((src (find-src name)))
+;;//    (when (> (stklos-pkg-verbosity) 0)
+;;//      (eprintf "Start tuning of file ~s\n" src))
+;;//    (let ((in (open-file src "r")))
+;;//      (unless in
+;;//	(die (format "cannot open source file ~s" src)))
+;;//
+;;//      ;; Read the source file
+;;//      (let ((decl (parse-package-interface in))
+;;//	    (body (port->sexp-list in)))
+;;//	(tune src
+;;//	      name
+;;//	      tuner
+;;//	      dir
+;;//	      decl
+;;//	      body))
+;;//      (close-port in))))
+;;//
+;;//;; ----------------------------------------------------------------------
+;;//;; 	tune ...
+;;//;; ----------------------------------------------------------------------
+;;//(define *package* '())
+;;//(define *body* '())
+;;//(define *dir* #f)
+;;//
+;;//
+;;//(define (tune src name tuner packagedir pkgdecl body)
+;;//  (set! *package* pkgdecl)
+;;//  (set! *body* body)
+;;//  (set! *dir* packagedir)
+;;//  (with-handler (lambda (c)
+;;//		  (eprintf "error while tuning package ~s\n" package)
+;;//		  (raise c))
+;;//     (load tuner))
+;;//  ;; Rename the src to src.orig
+;;//  (rename-file src (string-append src ".orig"))
+;;//  ;; Rewrite the package
+;;//  (let ((out (open-file src "w")))
+;;//    (unless out
+;;//      (die (format "Cannot open output file ~s for tuning" src)))
+;;//    (fprintf out ";; This file was automatically generated on ~a\n" (date))
+;;//    (fprintf out ";; This is a STklos tuning for package ~a\n" name)
+;;//    ;; Output the dclaration
+;;//    (pp *package* :port out);
+;;//    (newline out)
+;;//    ;; Output the body
+;;//    (for-each (lambda (x) (pp x :port out) (newline out))
+;;//	      *body*)))
+;;//
+;;//;;;; =============================================================================
+;;//;;;;
+;;//;;;; 	Tuning functions
+;;//;;;;
+;;//;;;; ======================================================================
+;;//
+;;//;; ----------------------------------------------------------------------
+;;//;; 	stklos-pkg-tune-package-declaration! ...
+;;//;; ----------------------------------------------------------------------
+;;//(define (stklos-pkg-tune-package-declaration! proc)
+;;//  (let ((res (proc *package* "" *dir*)))
+;;//    (unless (eq? res (void))
+;;//      (set! *package* res)))
+;;//  *package*)
+;;//
+;;//;; ----------------------------------------------------------------------
+;;//;; 	stklos-pkg-tune-body! ...
+;;//;; ----------------------------------------------------------------------
+;;//(define (stklos-pkg-tune-body! proc)
+;;//  (let ((res (proc *body* "" *dir*)))
+;;//    (unless (eq? res (void))
+;;//      (set! *body* res)))
+;;//  *body*)
+;;//
+;;//
+;;//(define (stklos-pkg-subst-definitions src replacements)
+;;//
+;;//  (define (replace orig id)
+;;//    (let ((c (assq id replacements)))
+;;//      (if (pair? c)
+;;//	  (cadr c)
+;;//	  orig)))
+;;//
+;;//  (map (lambda (orig)
+;;//	 (match-case orig
+;;//	   (((or define* define) (and ?id (? symbol?)) . ?-)
+;;//	    (replace orig id))
+;;//	   (((or define* define define-macro* define-macro)
+;;//	     ((and ?id (? symbol?)) . ?-) . ?-)
+;;//	    (replace orig id))
+;;//	   ((define-record* ?id . ?-)
+;;//	    (replace orig id))
+;;//	   (else
+;;//	    orig)))
+;;//       src))
+;;//
+;;//;;// 
+;;//;;// ;; ----------------------------------------------------------------------
+;;//;;// ;; 	stklos-pkg-replace-package-provide! ...
+;;//;;// ;; ----------------------------------------------------------------------
+;;//;;// (define (stklos-pkg-replace-package-provide! src replacements)
+;;//;;//   (%stklos-pkg-replace-definitions! src replacements))
+;;//;;// 
+;;//;;// ;; ----------------------------------------------------------------------
+;;//;;// ;; 	stklos-pkg-replace-body-definitions! ...
+;;//;;// ;; ----------------------------------------------------------------------
+;;//;;// (define (stklos-pkg-replace-body-definitions! src replacements)
+;;//;;//   (%stklos-pkg-replace-definitions! src replacements))
+;;//
+;;//

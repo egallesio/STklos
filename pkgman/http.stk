@@ -1,0 +1,95 @@
+;;;;
+;;;; http.stk	-- Minimal HTTP management for stklos-pkg
+;;;; 
+;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 12-Jan-2007 09:03 (eg)
+;;;; Last file update: 12-Feb-2007 18:40 (eg)
+;;;;
+
+(define (http-get url output)
+  ;; Copy the content of url to the output port
+
+  (define (skip-header port)
+    (let loop ((line (read-line port)))
+      (unless (or (eof-object? line) (string=? line ""))
+	(loop (read-line port)))))
+
+  (define (read-header port)
+    (let loop ((line (read-line port))
+	       (res  '()))
+      (if (or (eof-object? line) (string=? line ""))
+	res
+	(let ((ln (regexp-match "([^:]+): *(.*)" line)))
+	  (if ln
+	    (loop (read-line port)
+		  (cons (cons (string-upcase (cadr ln)) (caddr ln))
+			res))
+	    (loop (read-line port) res))))))
+
+  (define (redirect-url server port user sock)
+    (let* ((header (read-header (socket-input sock)))
+	   (loc    (assoc "LOCATION" header)))
+      (if loc
+	(begin
+	  (socket-shutdown sock #t)
+	  (copy-url server port user (cdr loc) ""))
+	(error "bad redirection when fetching url ~S" url))))
+  
+  (define (copy-url server port user path query)
+    (let* ((s    (make-client-socket server port))
+	   (out  (socket-output s))
+	   (in   (socket-input s))
+	   (pth  (if (equal? query "") path (format "~a?~a" path query))))
+      ;; Send HTTP request
+      (fprintf out "GET ~a HTTP/1.0\r\n" pth)
+      (fprintf out "Host: ~a\r\n" server)
+      (fprintf out "Port: ~a\r\n" port)
+      (when user
+	(fprintf out "Authorization: Basic ~a\r\n" (base64-encode-string user)))
+      (fprintf out "Connection: close\r\n")
+      (fprintf out "\r\n")
+      (flush-output-port out)
+
+      ;; Read header
+      (let ((line (read-line in)))
+	(cond
+	  ((regexp-match "[Hh][Tt][Tt][Pp].* +200 +.*" line)
+	     ;; The request is correct. Skip the header
+	     (skip-header in)
+	     ;; copy the content of the url on output
+	     (copy-port in output)
+	     (socket-shutdown s #t))
+	  ((regexp-match "[Hh][Tt][Tt][Pp].* +301 +.*" line)
+	     ;; Page has moved
+	     (redirect-url server port user s))
+	  (else 	   
+	     (error "cannot get the document at url ~s. code ~s" url line))))))
+
+  (let ((info (uri-parse url)))
+    (unless (equal? (key-get info :scheme) "http")
+      (error "bad url (protocol is not http) ~S" url))
+    (let ((user  (key-get info :user #f))
+	  (host  (key-get info :host))
+	  (port  (key-get info :port))
+	  (path  (key-get info :path))
+	  (query (key-get info :query)))
+      (copy-url host port user path query))))
+      
