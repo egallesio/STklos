@@ -21,8 +21,9 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 30-Jan-2007 18:38 (eg)
+ * Last file update: 22-Feb-2007 17:42 (eg)
  */
+
 
 #ifndef STKLOS_H
 #define STKLOS_H
@@ -46,6 +47,10 @@ extern "C"
 
 #include "stklosconf.h"
 #include "extraconf.h"
+
+/* To debug the GC uncomment the following line */
+/* #define GC_DEBUG 1*/
+
 
 #ifdef HAVE_GC
 # include <gc/gc.h>
@@ -141,11 +146,12 @@ extern "C"
 
   /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
-#define STk_must_malloc(size) 		GC_malloc(size)
-#define STk_must_malloc_atomic(size)	GC_malloc_atomic(size)
-#define STk_must_realloc(ptr, size) 	GC_realloc((ptr), (size))
-#define STk_free(ptr)			GC_free(ptr)
-#define STk_register_finalizer(ptr, f)  GC_register_finalizer((void *) (ptr), \
+
+#define STk_must_malloc(size) 		GC_MALLOC(size)
+#define STk_must_malloc_atomic(size)	GC_MALLOC_ATOMIC(size)
+#define STk_must_realloc(ptr, size) 	GC_REALLOC((ptr), (size))
+#define STk_free(ptr)			GC_FREE(ptr)
+#define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER((void *) (ptr), \
 					    (GC_finalization_proc)(f), 0, 0, 0)
 #define STk_gc()			GC_gcollect()
 
@@ -1179,7 +1185,7 @@ int STk_init_vector(void);
   ----
   ------------------------------------------------------------------------------
 */
-#define DEFAULT_STACK_SIZE 50000
+#define DEFAULT_STACK_SIZE 100000
 
 void STk_execute_current_handler(SCM kind, SCM location, SCM message);
 void STk_raise_exception(SCM cond);

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 20:32 (eg)
-;;;; Last file update:  3-Feb-2007 15:18 (eg)
+;;;; Last file update: 22-Feb-2007 18:31 (eg)
 ;;;;
 
 ; ======================================================================
@@ -210,6 +210,10 @@
 				       ((LOCAL-REF2) 'LOCAL-REF2-PUSH)
 				       ((LOCAL-REF3) 'LOCAL-REF3-PUSH)
 				       ((LOCAL-REF4) 'LOCAL-REF4-PUSH)))))
+
+	     ;; [RETURN; RETURN] => [RETURN]
+	     ((and (eq? i1 'RETURN) (eq? i2 'RETURN))
+	      (replace-2-instr code (list 'RETURN)))
 	     
 	     (else ;; No optimization; goto next instruction
 	      (set! code (cdr code))))))
