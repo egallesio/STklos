@@ -119,7 +119,7 @@
 #  define PUSH_UGREF_INVOKE    114
 #  define PUSH_GREF_TAIL_INV   115
 #  define PUSH_UGREF_TAIL_INV  116
-#  define UNUSED_20            117
+#  define DEEP_LOC_REF_PUSH    117
 #  define UNUSED_19            118
 #  define UNUSED_18            119
 #  define UNUSED_17            120
@@ -266,7 +266,7 @@ static void *jump_table[] = {
   &&lab_PUSH_UGREF_INVOKE   ,
   &&lab_PUSH_GREF_TAIL_INV  ,
   &&lab_PUSH_UGREF_TAIL_INV ,
-  &&lab_UNUSED_20           ,
+  &&lab_DEEP_LOC_REF_PUSH   ,
   &&lab_UNUSED_19           ,
   &&lab_UNUSED_18           ,
   &&lab_UNUSED_17           ,
@@ -413,7 +413,7 @@ static char *name_table[] = {
   "PUSH_UGREF_INVOKE   ",
   "PUSH_GREF_TAIL_INV  ",
   "PUSH_UGREF_TAIL_INV ",
-  "UNUSED_20           ",
+  "DEEP_LOC_REF_PUSH   ",
   "UNUSED_19           ",
   "UNUSED_18           ",
   "UNUSED_17           ",

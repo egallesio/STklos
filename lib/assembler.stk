@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 22-Feb-2007 18:39 (eg)
+;;;; Last file update: 22-Feb-2007 19:51 (eg)
 ;;;;
 
 ;;;
@@ -187,7 +187,7 @@
 	   (PUSH-GREF-TAIL-INV  2)	;; PUSH + GLOBAL-REF + TAIL-INVOKE
 	   (PUSH-UGREF-TAIL-INV	2)	;; Never produced by the compiler
 	   
-	   (UNUSED-20		0)	   
+	   (DEEP-LOC-REF-PUSH   1)	;; peephole: DEEP-LOCAL-SET + PUSH
 	   (UNUSED-19		0)	   
 	   (UNUSED-18		0)	   
 	   (UNUSED-17		0)	   

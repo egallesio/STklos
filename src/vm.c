@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  3-Feb-2007 19:19 (eg)
+ * Last file update: 22-Feb-2007 20:12 (eg)
  */
 
 // INLINER values
@@ -992,6 +992,19 @@ CASE(DEEP_LOCAL_REF) {
   vm->val = FRAME_LOCAL(e, SECOND_BYTE(info));
   NEXT1;
 }
+CASE(DEEP_LOC_REF_PUSH) {
+  int level, info = fetch_next();
+  SCM e = vm->env;
+
+  /* Go down in the dynamic environment */
+  for (level = FIRST_BYTE(info); level; level--)
+    e = (SCM) FRAME_NEXT(e);
+
+  push(vm->val = FRAME_LOCAL(e, SECOND_BYTE(info)));
+  NEXT1;
+}
+
+
 
 CASE(LOCAL_REF0_PUSH) {push(FRAME_LOCAL(vm->env, 0));  NEXT1;}
 CASE(LOCAL_REF1_PUSH) {push(FRAME_LOCAL(vm->env, 1));  NEXT1;}
@@ -1272,7 +1285,6 @@ CASE(UNUSED_16)
 CASE(UNUSED_17) 
 CASE(UNUSED_18) 
 CASE(UNUSED_19) 
-CASE(UNUSED_20) 
 {
   ;
 }
