@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 11-Feb-2007 21:51 (eg)
+;;;; Last file update: 23-Feb-2007 15:47 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -275,7 +275,11 @@ doc>
 		   ((4)  (em 'LOCAL-REF4 'LOCAL-SET4))
 		   (else (em 'LOCAL-REF  'LOCAL-SET  idx)))
 		 ;; local variable in a "between" block
-		 (em 'DEEP-LOCAL-REF  'DEEP-LOCAL-SET (make-word lev idx))))
+		 (let ((arg (make-word lev idx)))
+		   (if (small-integer-constant? arg)
+		     (em 'DEEP-LOCAL-REF  'DEEP-LOCAL-SET (make-word lev idx))
+		     (em 'DEEP-LOC-REF-FAR 'DEEP-LOC-SET-FAR ;; Use a FAR variants
+			 (fetch-constant (cons lev idx)))))))
 	    (else   (loop2 (+ idx 1) (cdr l))))))))
 
 

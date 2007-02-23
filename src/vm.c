@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 22-Feb-2007 20:12 (eg)
+ * Last file update: 23-Feb-2007 16:23 (eg)
  */
 
 // INLINER values
@@ -992,6 +992,25 @@ CASE(DEEP_LOCAL_REF) {
   vm->val = FRAME_LOCAL(e, SECOND_BYTE(info));
   NEXT1;
 }
+
+CASE(DEEP_LOC_REF_FAR) {
+  /* DEEP-LOCAL-REF but FAR (arg is a cons). (This is inefficient but rare) */
+  SCM info = fetch_const();
+  int level;
+  SCM e = vm->env;
+
+  if (!CONSP(info) || !INTP(CAR(info)) || !INTP(CDR(info)))
+    STk_panic("DEEP_LOCAL_REF_FAR with ~S", info);
+
+  /* Go down in the dynamic environment */
+  for (level = INT_VAL(CAR(info)); level; level--)
+    e = (SCM) FRAME_NEXT(e);
+
+  vm->val = FRAME_LOCAL(e, INT_VAL(CDR(info)));
+  NEXT1;
+}
+
+
 CASE(DEEP_LOC_REF_PUSH) {
   int level, info = fetch_next();
   SCM e = vm->env;
@@ -1047,6 +1066,25 @@ CASE(DEEP_LOCAL_SET) {
   FRAME_LOCAL(e, SECOND_BYTE(info)) = vm->val;
   NEXT0;
 }
+
+
+CASE(DEEP_LOC_SET_FAR) {
+  /* DEEP-LOCAL-SET but FAR (arg is a cons) (This is inefficient but rare) */
+  SCM info = fetch_const();
+  int level;
+  SCM e = vm->env;
+
+  if (!CONSP(info) || !INTP(CAR(info)) || !INTP(CDR(info)))
+    STk_panic("DEEP_LOCAL_SET_FAR with ~S", info);
+
+  /* Go down in the dynamic environment */
+  for (level = INT_VAL(CAR(info)); level; level--)
+    e = (SCM) FRAME_NEXT(e);
+
+  FRAME_LOCAL(e, INT_VAL(CDR(info))) = vm->val;
+  NEXT0;
+}
+
 
 
 CASE(GOTO) { offset = fetch_next(); vm->pc += offset; NEXT;}
@@ -1128,7 +1166,18 @@ CASE(CREATE_CLOSURE) {
   vm->pc    += vm->pc[0] + 1;
   NEXT1;
 }
+CASE(CREATE_CLOSURE_FAR) {
+  /* CREATE_CLOSURE but with a cons instead of 2 integers */
+  SCM info = fetch_const();
 
+  if (!CONSP(info) || !INTP(CAR(info)) || !INTP(CDR(info)))
+    STk_panic("CREATE_CLOSURE_FAR with ~S", info);
+  vm->env    = clone_env(vm->env, vm);
+  vm->val    = STk_make_closure(vm->pc+1, INT_VAL(CAR(info)), INT_VAL(CDR(info)), 
+				vm->constants, vm->env);
+  vm->pc    += INT_VAL(CAR(info));
+  NEXT1;
+}
 
 CASE(PREPARE_CALL) { PREP_CALL(); NEXT; }
 CASE(RETURN) 	   { RET_CALL();  NEXT; }
@@ -1285,6 +1334,17 @@ CASE(UNUSED_16)
 CASE(UNUSED_17) 
 CASE(UNUSED_18) 
 CASE(UNUSED_19) 
+CASE(UNUSED_20)
+CASE(UNUSED_21)
+CASE(UNUSED_22) 
+CASE(UNUSED_23) 
+CASE(UNUSED_24) 
+CASE(UNUSED_25) 
+CASE(UNUSED_26) 
+CASE(UNUSED_27) 
+CASE(UNUSED_28) 
+CASE(UNUSED_29) 
+
 {
   ;
 }

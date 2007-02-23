@@ -141,8 +141,21 @@
 #  define IN_SINT_SUB2         136
 #  define IN_SINT_MUL2         137
 #  define IN_SINT_DIV2         138
+#  define UNUSED_29            139
+#  define UNUSED_28            140
+#  define UNUSED_27            141
+#  define UNUSED_26            142
+#  define UNUSED_25            143
+#  define UNUSED_24            144
+#  define UNUSED_23            145
+#  define UNUSED_22            146
+#  define UNUSED_21            147
+#  define UNUSED_20            148
+#  define DEEP_LOC_REF_FAR     149
+#  define DEEP_LOC_SET_FAR     150
+#  define CREATE_CLOSURE_FAR   151
 
-#  define NB_VM_INSTR (IN_SINT_DIV2        +1)
+#  define NB_VM_INSTR (CREATE_CLOSURE_FAR  +1)
 #endif
 
 
@@ -288,6 +301,19 @@ static void *jump_table[] = {
   &&lab_IN_SINT_SUB2        ,
   &&lab_IN_SINT_MUL2        ,
   &&lab_IN_SINT_DIV2        ,
+  &&lab_UNUSED_29           ,
+  &&lab_UNUSED_28           ,
+  &&lab_UNUSED_27           ,
+  &&lab_UNUSED_26           ,
+  &&lab_UNUSED_25           ,
+  &&lab_UNUSED_24           ,
+  &&lab_UNUSED_23           ,
+  &&lab_UNUSED_22           ,
+  &&lab_UNUSED_21           ,
+  &&lab_UNUSED_20           ,
+  &&lab_DEEP_LOC_REF_FAR    ,
+  &&lab_DEEP_LOC_SET_FAR    ,
+  &&lab_CREATE_CLOSURE_FAR  ,
   NULL};
 #endif
 #undef DEFINE_JUMP_TABLE
@@ -435,6 +461,19 @@ static char *name_table[] = {
   "IN_SINT_SUB2        ",
   "IN_SINT_MUL2        ",
   "IN_SINT_DIV2        ",
+  "UNUSED_29           ",
+  "UNUSED_28           ",
+  "UNUSED_27           ",
+  "UNUSED_26           ",
+  "UNUSED_25           ",
+  "UNUSED_24           ",
+  "UNUSED_23           ",
+  "UNUSED_22           ",
+  "UNUSED_21           ",
+  "UNUSED_20           ",
+  "DEEP_LOC_REF_FAR    ",
+  "DEEP_LOC_SET_FAR    ",
+  "CREATE_CLOSURE_FAR  ",
   NULL};
 #endif
 #undef DEFINE_NAME_TABLE

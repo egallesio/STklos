@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 22-Feb-2007 19:51 (eg)
+;;;; Last file update: 23-Feb-2007 16:29 (eg)
 ;;;;
 
 ;;;
@@ -212,6 +212,22 @@
 	   (IN-SINT-SUB2	1)
 	   (IN-SINT-MUL2	1)
 	   (IN-SINT-DIV2	1)
+	   (UNUSED-29		0)
+	   (UNUSED-28		0)
+	   (UNUSED-27		0)
+	   (UNUSED-26		0)
+	   (UNUSED-25		0)
+	   (UNUSED-24		0)
+	   (UNUSED-23		0)
+	   (UNUSED-22		0)
+	   (UNUSED-21		0)
+	   (UNUSED-20 	        0)
+
+
+	   ;; FAR instructions
+	   (DEEP-LOC-REF-FAR	1)
+	   (DEEP-LOC-SET-FAR	1)
+	   (CREATE-CLOSURE-FAR	2)
 	   
 ))))
 
@@ -232,7 +248,8 @@
 				   JUMP-NUMGT JUMP-NUMGE
 				   JUMP-NUMLT JUMP-NUMLE
 				   JUMP-NOT-EQ JUMP-NOT-EQV JUMP-NOT-EQUAL
-				   CREATE-CLOSURE PUSH-HANDLER))))
+				   CREATE-CLOSURE CREATE-CLOSURE-FAR
+				   PUSH-HANDLER))))
     (lambda (instr)
       (memq instr instr-with-address))))
 
@@ -241,6 +258,20 @@
 	 (filler (make-string (- 20 (string-length m)) #\space)))
     (string-append m filler)))
 
+
+(define (find-instruction-infos opcode)
+  (let Loop ((l INSTRUCTION-SET))
+    (cond 
+       ((null? l) 	     (panic "Cannot decode ~S opcode" opcode))
+       ((= (cadar l) opcode) (car l))
+       (else		     (Loop (cdr l))))))
+
+
+(define (find-far-codeop opcode)
+  (let ((old-mnemo (car (find-instruction-infos opcode))))
+    (case old-mnemo
+      ((CREATE-CLOSURE) opcode)
+      (else (panic "No FAR version of instruction ~S" old-mnemo)))))
 
 ;;;;======================================================================
 ;;;;
@@ -255,7 +286,6 @@
   (let ((pc    0)
 	(labs '())
 	(code  (peephole code)))
-
     ;;
     ;; Pass 1
     ;;
@@ -267,15 +297,12 @@
 	    ;; We have an instruction
 	    (let* ((token (car x))
 		   (info  (info-opcode token)))
-	      ;//(format (current-error-port) "~S: ~S" pc x)
 	      ;; Replace the op-code in (car x) by its code
 	      (set-car! x (car info))
-	      ;//(format (current-error-port) "==> ~S\n" x)
 	      ;; Compute new PC
 	      (set! pc (+ pc (length x))))))
       code)
-    		   
-    (eprintf "A l'issue de la passe 1 pc=~S labs=~S\n" pc labs)
+    ;(eprintf "A l'issue de la passe 1 pc=~S labs=~S\n" pc labs)
 
     ;;
     ;; Pass2
@@ -296,30 +323,29 @@
 		   ;; If this instruction has a parameter which is an label,
 		   ;; replace it with the offset to the destination
 		   (when (use-address? instr)
-;;//		     (format #t "~S ~S ~S\n" 
-;;//			    (cdr (assq param1 labs))
-;;//			    pos
-;;//			    (- (cdr (assq param1 labs)) pos 2))
-
-		     (set! param1 (- (cdr (assq param1 labs)) pos 2))
-;//		     (set! param1 `((etiq ,param1) 
-;//				    (real ,(cdr (assq param1 labs)))
-;//				    (pos = ,pos)
-;//				    (offset ,(- (cdr (assq param1 labs)) pos 2))))
-		     )
+		     (set! param1 (- (cdr (assq param1 labs)) pos 2)))
+		   ;;  For instructions using big constants use their FAR version
+		   (unless (small-integer-constant? param1)
+		     (let ((new (find-far-codeop instr)))
+		       (eprintf "FAR ~S ~S ~S\n"
+				(car (find-instruction-infos instr))
+				new
+				param1)))
+		   ;; Store the (eventually new) value of param1 in code array
 		   (vector-set! vect (+ pos 1) param1)))
 
 	       ;; Place (eventually) the second parameter in the code vector
 	       (when (> len 2)
+		 (unless (small-integer-constant? (caddr x))
+		   (panic "Instruction with a big constant as second parameter ~S"
+			  x))
 		 (vector-set! vect (+ pos 2) (caddr x)))
 	       
 	       (when (> len 3) 
 		 (panic "Instruction with more than 2 parameters ~S" x))
-	       (set! pos (+ pos len))))
-;	   (eprintf "A LA FIN pos=~S vector=~S\n" pos vect)
-	   )
+	       (set! pos (+ pos len)))))
 	 code)
-      (eprintf "A LA FIN pos=~S vector=~S\n" pos (vector-length vect))
+;      (eprintf "A LA FIN pos=~S vector=~S\n" pos (vector-length vect))
       vect)))
 
 
@@ -343,14 +369,6 @@
 ;;;; DISASSEMBLE
 ;;;;
 ;;;; ======================================================================
-(define (find-opcode opcode)
-  (let Loop ((l INSTRUCTION-SET))
-    (cond 
-       ((null? l) 	     (panic "Cannot decode ~S opcode" opcode))
-       ((= (cadar l) opcode) (car l))
-       (else		     (Loop (cdr l))))))
-
-
 (define (disassemble-code v out)
   (define (show x)
     (format #f "~A~A~A" 
@@ -366,7 +384,7 @@
     (let Loop ((pos 0))
       (if (< pos len)
 	  ;; Disassemble an instruction
-	  (let* ((instr    (find-opcode (vector-ref v pos)))
+	  (let* ((instr    (find-instruction-infos (vector-ref v pos)))
 		 (mnemonic (car instr))
 		 (params   (caddr instr)))
 	    (format out "\n~A:  ~A" (show pos) (pretty-mnemonic mnemonic))
