@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  9-Feb-2007 15:11 (eg)
-;;;; Last file update: 18-Feb-2007 22:13 (eg)
+;;;; Last file update: 28-Feb-2007 18:58 (eg)
 ;;;;
 
 
@@ -87,16 +87,23 @@
 
 
 ;; ----------------------------------------------------------------------
-;; 	define*
+;; 	@define
 ;; ----------------------------------------------------------------------
-(define-macro (define* . body)
+(define-macro (@define . body)
   (match-case body
      (((?var . ?args) . ?rest)
         `(define (,var . ,(%srfi89->ext-lambda-proto args))  ,@rest))
      ((?var ?value)
         `(define ,var ,value))
      (else
-        (error 'define* "bad form ~S" body))))
+        (error '@define "bad form ~S" body))))
+
+;; ----------------------------------------------------------------------
+;; 	define*
+;; ----------------------------------------------------------------------
+(define-macro (define* . body)
+  `(@define ,@body))
+
 
 ;;;
 ;;; export %srfi89->ext-lambda-proto 

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 23-Feb-2007 16:29 (eg)
+;;;; Last file update: 23-Feb-2007 23:04 (eg)
 ;;;;
 
 ;;;
@@ -270,7 +270,7 @@
 (define (find-far-codeop opcode)
   (let ((old-mnemo (car (find-instruction-infos opcode))))
     (case old-mnemo
-      ((CREATE-CLOSURE) opcode)
+      ((CREATE-CLOSURE) 'CREATE-CLOSURE-FAR)
       (else (panic "No FAR version of instruction ~S" old-mnemo)))))
 
 ;;;;======================================================================
@@ -313,9 +313,11 @@
          (lambda (x)
 	   (when (pair? x)	     ;; This is an instruction
 	     (let ((len (length x)))
+	       ;; ----------
 	       ;; Place the op-code in the code vector
 	       (vector-set! vect pos (car x))
 
+	       ;; ----------
 	       ;; Place (eventually) the first parameter in the code vector
 	       (when (> len 1)
 		 (let ((instr  (car x))
@@ -324,21 +326,21 @@
 		   ;; replace it with the offset to the destination
 		   (when (use-address? instr)
 		     (set! param1 (- (cdr (assq param1 labs)) pos 2)))
+		   (vector-set! vect (+ pos 1) param1)
+
 		   ;;  For instructions using big constants use their FAR version
 		   (unless (small-integer-constant? param1)
 		     (let ((new (find-far-codeop instr)))
-		       (eprintf "FAR ~S ~S ~S\n"
-				(car (find-instruction-infos instr))
-				new
-				param1)))
-		   ;; Store the (eventually new) value of param1 in code array
-		   (vector-set! vect (+ pos 1) param1)))
+		       (case new
+			 ((CREATE-CLOSURE-FAR)
+			  (vector-set! vect pos (car (info-opcode new)))
+			  (vector-set! vect (+ pos 1) (fetch-constant param1))))))))
 
+	       ;; ----------
 	       ;; Place (eventually) the second parameter in the code vector
 	       (when (> len 2)
 		 (unless (small-integer-constant? (caddr x))
-		   (panic "Instruction with a big constant as second parameter ~S"
-			  x))
+		   (panic "Instr. using a big constant as 2nd operand ~S" x))
 		 (vector-set! vect (+ pos 2) (caddr x)))
 	       
 	       (when (> len 3) 
@@ -349,20 +351,14 @@
       vect)))
 
 
-
-
-
-
-
-
-      
-(define (display-code c)
-  (for-each (lambda (x)
-	      (if (integer? x)
-		  (format #t "L~A:" x)
-		  (format #t "\t~A\n" x)))
-	    c)
-  (newline))
+;;      
+;;(define (display-code c)
+;;  (for-each (lambda (x)
+;;	      (if (integer? x)
+;;		  (format #t "L~A:" x)
+;;		  (format #t "\t~A\n" x)))
+;;	    c)
+;;  (newline))
 
 ;;;; ======================================================================
 ;;;;

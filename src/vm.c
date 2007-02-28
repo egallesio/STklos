@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 23-Feb-2007 16:23 (eg)
+ * Last file update: 23-Feb-2007 23:01 (eg)
  */
 
 // INLINER values
@@ -113,6 +113,7 @@ static Inline void set_signal_mask(sigset_t mask)
 /* ==== Code access macros ==== */
 #define fetch_next()	(*(vm->pc)++)
 #define fetch_const()	(vm->constants[fetch_next()])
+#define look_const()    (vm->constants[*(vm->pc)])
 #define fetch_global()	(*(checked_globals[(unsigned) fetch_next()]))
 
 
@@ -1167,15 +1168,15 @@ CASE(CREATE_CLOSURE) {
   NEXT1;
 }
 CASE(CREATE_CLOSURE_FAR) {
-  /* CREATE_CLOSURE but with a cons instead of 2 integers */
-  SCM info = fetch_const();
+  /* CREATE_CLOSURE but with a pc[0] which is a long constant */
+  SCM offset = look_const();
 
-  if (!CONSP(info) || !INTP(CAR(info)) || !INTP(CDR(info)))
-    STk_panic("CREATE_CLOSURE_FAR with ~S", info);
+  if (!INTP(offset)) STk_panic("CREATE_CLOSURE_FAR with offset=~S", offset);
+
   vm->env    = clone_env(vm->env, vm);
-  vm->val    = STk_make_closure(vm->pc+1, INT_VAL(CAR(info)), INT_VAL(CDR(info)), 
+  vm->val    = STk_make_closure(vm->pc+2, INT_VAL(offset)-1, vm->pc[1],
 				vm->constants, vm->env);
-  vm->pc    += INT_VAL(CAR(info));
+  vm->pc    += INT_VAL(offset) + 1;
   NEXT1;
 }
 

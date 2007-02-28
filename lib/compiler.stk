@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 23-Feb-2007 15:47 (eg)
+;;;; Last file update: 28-Feb-2007 16:51 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -81,7 +81,7 @@
 (define compiler:time-display			(make-parameter #t))
 (define compiler:gen-line-number		(make-parameter #f))
 (define compiler:warn-use-undefined  		(make-parameter #f))
-(define compiler:warn-use-undefined-postpone	(make-parameter #f))
+(define compiler:warn-use-undefined-postpone	(make-parameter #t))
 (define compiler:inline-common-functions
   (let ((inlined *inline-symbols*))
     (make-parameter #t
