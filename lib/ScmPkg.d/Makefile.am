@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Dec-2006 10:09 (eg)
-# Last file update: 28-Feb-2007 21:51 (eg)
+# Last file update: 28-Feb-2007 22:58 (eg)
 
 SRCS =  scmpkg-define.stk    \
 	scmpkg-exception.stk \
@@ -16,8 +16,11 @@ OBJ =   scmpkg-support.ostk
 
 
 
-scheme_scmpkgdir   = $(prefix)/share/@PACKAGE@/@VERSION@
-scheme_scmpkg_DATA = scmpkg-support.stk $(SRCS) $(OBJ)
+scheme_libdir      = $(prefix)/share/@PACKAGE@/@VERSION@
+scheme_lib_DATA    = scmpkg-support.stk $(OBJ)
+
+scheme_scmpkgdir   = $(scheme_libdir)/ScmPkg.d
+scheme_scmpkg_DATA = $(SRCS)
 
 #======================================================================
 SUFFIXES = .stk .ostk .scm
