@@ -1,5 +1,5 @@
 ;;;;
-;;;; split-interface.stk	-- Split interfaces in STklos
+;;;; scmpkg-interface.stk	-- ScmPkg interfaces in STklos
 ;;;; 
 ;;;; Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -21,11 +21,11 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update: 18-Feb-2007 21:24 (eg)
+;;;; Last file update: 28-Feb-2007 22:40 (eg)
 ;;;;
 
 
-(define-struct split-package
+(define-struct scmpkg-package
   name
   version
   language
@@ -38,19 +38,19 @@
   exceptions
   records)
 
-(define (%new-split-package name)
-  (make-split-package name		; name
-		      'v0.0.0		; version
-		      'r5rs		; language
-		      #f		; source
-		      #f		; suffix
-		      '()		; imports
-		      '()		; exports
-		      '()		; macros
-		      '()		; syntaxes
-		      '()		; exceptions
-		      '()		; records
-		      ))
+(define (%new-scmpkg-package name)
+  (make-scmpkg-package name		; name
+		       'v0.0.0		; version
+		       'r5rs		; language
+		       #f		; source
+		       #f		; suffix
+		       '()		; imports
+		       '()		; exports
+		       '()		; macros
+		       '()		; syntaxes
+		       '()		; exceptions
+		       '()		; records
+		       ))
 
 
 (define-macro (%push! lst v)
@@ -67,20 +67,21 @@
       (cons (string->symbol (format "@~a" lang)) imp)))
 
     
-  (let* ((pkg (parse-interface name body))
-	 (exp (split-package-exports pkg))
+  (let* ((pi  (in-module  |ScmPkg| parse-interface))
+	 (pkg (pi name body))
+	 (exp (scmpkg-package-exports pkg))
 	 (imp (find-imports
-	       (split-package-language pkg)
-	       (split-package-imports pkg))))
+	       (scmpkg-package-language pkg)
+	       (scmpkg-package-imports pkg))))
     `(begin
-       ;; Require split-support
-       (require "split-support")
+       ;; Require scmpkg-support
+       (require "scmpkg-support")
        ;; Require all the imported modules
        ,@(map (lambda (x) `(require-for-syntax ,(symbol->string x)))
 	      imp)
        ,@(map (lambda (x) `(require ,(symbol->string x)))
 	      imp)
-       ;; Define a module for the split package
+       ;; Define a module for the scmpkg package
        (define-module ,name
 	 ;; Imports
 	 (import ,@imp)
@@ -90,21 +91,21 @@
 ;;//	 ,@(map (lambda (x)
 ;;//		  (eprintf "Definition de la macro ~S\n" x)
 ;;//		  `(define-macro ,@x))
-;;//		(reverse (split-package-macros pkg)))
+;;//		(reverse (scmpkg-package-macros pkg)))
 ;;//	 ;; Syntaxes
 ;;//	 ,@(map (lambda (x)
 ;;//		  (eprintf "Syntax definition ~S\n" x))
-;;//		(reverse (split-package-syntaxes pkg)))
+;;//		(reverse (scmpkg-package-syntaxes pkg)))
 	 ;; Exceptions
 	 ,@(map (lambda (x)
 		  `(define-scmpkg-exception ,@x))
-		(reverse (split-package-exceptions pkg)))
+		(reverse (scmpkg-package-exceptions pkg)))
 	 ;; Records
 	 ,@(map (lambda (x)
 		  `(%define-exported-record ,(car x) ,@cdr x))
-		(reverse (split-package-records pkg)))
+		(reverse (scmpkg-package-records pkg)))
 	 ;; Body
-	 (include ,(split-package-source pkg)))
+	 (include ,(scmpkg-package-source pkg)))
        ;; Provide
        (provide ,(symbol->string name)))))
 
@@ -114,14 +115,14 @@
 (define (parse-interface name body)
 
   (define (choose-language pkg lang)
-    (let ((info (assoc lang *split-languages*)))
+    (let ((info (assoc lang *scmpkg-languages*)))
       (unless info
 	(error 'interface "Language ~S is not managed" lang))
       ;; Set the language
-      (set! (split-package-language pkg) lang)
+      (set! (scmpkg-package-language pkg) lang)
       ;; Set the default suffix
-      (unless (split-package-suffix pkg)
-	(set! (split-package-suffix pkg) (key-get (cdr info) :suffix)))))
+      (unless (scmpkg-package-suffix pkg)
+	(set! (scmpkg-package-suffix pkg) (key-get (cdr info) :suffix)))))
 
   (define (patch-package-export-list! pkg)
     (let ((exports '()))
@@ -131,46 +132,51 @@
 	      (%push! exports x)			     ;; export a variable
 	      (match-case x
 		 ((macro . ?rest)			     ;; export a macro
-		  (%push! (split-package-macros pkg) rest))
+		  (%push! (scmpkg-package-macros pkg) rest))
 		 ((syntax ?args . ?-)			     ;; export a syntax
-		  (%push! (split-package-syntaxes pkg) args))
+		  (%push! (scmpkg-package-syntaxes pkg) args))
 		 ((exception . ?rest)	     	     	     ;; export an exception
-		  (%push! (split-package-exceptions pkg) rest))
+		  (%push! (scmpkg-package-exceptions pkg) rest))
 		 ((record ?name . ?body)
-		  (%push! (split-package-records pkg) (cons name body)))
+		  (%push! (scmpkg-package-records pkg) (cons name body)))
 		 (else
 		  (%push! exports (car x))))))
-	  (split-package-exports pkg))
-      (set! (split-package-exports pkg) exports)))
+	  (scmpkg-package-exports pkg))
+      (set! (scmpkg-package-exports pkg) exports)))
   
   (define (patch-package! pkg)
     ;; Language & suffix
-    (choose-language pkg (split-package-language pkg))
+    (choose-language pkg (scmpkg-package-language pkg))
     ;; Source 
-    (unless (split-package-source pkg)
-      (set! (split-package-source pkg)
-	(format "~a.~a" name (split-package-suffix pkg))))
+    (unless (scmpkg-package-source pkg)
+      (set! (scmpkg-package-source pkg)
+	(format "~a.~a" name (scmpkg-package-suffix pkg))))
     ;; Arrange the export list
     (patch-package-export-list! pkg)
     ;; Return the updated package
     pkg)
   
-  (let ((pkg (%new-split-package name)))
+  (let ((pkg (%new-scmpkg-package name)))
     (for-each (lambda (clause)
 		(match-case clause
 		  ((version  ?version)
-		   (set! (split-package-version pkg) version))
+		   (set! (scmpkg-package-version pkg) version))
 		  ((language ?lg)
-		   (set! (split-package-language pkg) lg))
+		   (set! (scmpkg-package-language pkg) lg))
 		  ((source ?src)
-		   (set! (split-package-source pkg) src))
+		   (set! (scmpkg-package-source pkg) src))
 		  ((suffix ?sfx)
-		   (set! (split-package-suffix pkg) sfx))
+		   (set! (scmpkg-package-suffix pkg) sfx))
 		  ((import . ?imp)
-		   (set! (split-package-imports pkg) imp))
+		   (set! (scmpkg-package-imports pkg) imp))
 		  ((export . ?exp)
-		   (set! (split-package-exports pkg) exp))
+		   (set! (scmpkg-package-exports pkg) exp))
 		  (else
 		   (error 'interface "Invalid clause ~S" clause))))
 	      body)
     (patch-package! pkg)))
+
+
+;; ======================================================================
+(export scmpkg-package-exports scmpkg-package-imports scmpkg-package-language
+	scmpkg-package-exceptions scmpkg-package-records scmpkg-package-source)

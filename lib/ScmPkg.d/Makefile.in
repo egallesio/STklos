@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Dec-2006 10:09 (eg)
-# Last file update: 14-Feb-2007 12:20 (eg)
+# Last file update: 28-Feb-2007 21:51 (eg)
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -36,7 +36,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-subdir = lib/Split.d
+subdir = lib/ScmPkg.d
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -53,9 +53,9 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(scheme_splitdir)"
-scheme_splitDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(scheme_split_DATA)
+am__installdirs = "$(DESTDIR)$(scheme_scmpkgdir)"
+scheme_scmpkgDATA_INSTALL = $(INSTALL_DATA)
+DATA = $(scheme_scmpkg_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -183,17 +183,17 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SRCS = split-define.stk    \
-	split-exception.stk \
-	split-interface.stk \
-	split-languages.stk \
-	split-parameter.stk \
-	split-record.stk    \
-	split-runtime.stk   
+SRCS = scmpkg-define.stk    \
+	scmpkg-exception.stk \
+	scmpkg-interface.stk \
+	scmpkg-languages.stk \
+	scmpkg-parameter.stk \
+	scmpkg-record.stk    \
+	scmpkg-runtime.stk   
 
-OBJ = split-support.ostk
-scheme_splitdir = $(prefix)/share/@PACKAGE@/@VERSION@
-scheme_split_DATA = split-support.stk $(SRCS) $(OBJ)
+OBJ = scmpkg-support.ostk
+scheme_scmpkgdir = $(prefix)/share/@PACKAGE@/@VERSION@
+scheme_scmpkg_DATA = scmpkg-support.stk $(SRCS) $(OBJ)
 
 #======================================================================
 SUFFIXES = .stk .ostk .scm
@@ -210,9 +210,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  lib/Split.d/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  lib/ScmPkg.d/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  lib/Split.d/Makefile
+	  $(AUTOMAKE) --gnu  lib/ScmPkg.d/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -230,22 +230,22 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-install-scheme_splitDATA: $(scheme_split_DATA)
+install-scheme_scmpkgDATA: $(scheme_scmpkg_DATA)
 	@$(NORMAL_INSTALL)
-	test -z "$(scheme_splitdir)" || $(MKDIR_P) "$(DESTDIR)$(scheme_splitdir)"
-	@list='$(scheme_split_DATA)'; for p in $$list; do \
+	test -z "$(scheme_scmpkgdir)" || $(MKDIR_P) "$(DESTDIR)$(scheme_scmpkgdir)"
+	@list='$(scheme_scmpkg_DATA)'; for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  f=$(am__strip_dir) \
-	  echo " $(scheme_splitDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(scheme_splitdir)/$$f'"; \
-	  $(scheme_splitDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(scheme_splitdir)/$$f"; \
+	  echo " $(scheme_scmpkgDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(scheme_scmpkgdir)/$$f'"; \
+	  $(scheme_scmpkgDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(scheme_scmpkgdir)/$$f"; \
 	done
 
-uninstall-scheme_splitDATA:
+uninstall-scheme_scmpkgDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(scheme_split_DATA)'; for p in $$list; do \
+	@list='$(scheme_scmpkg_DATA)'; for p in $$list; do \
 	  f=$(am__strip_dir) \
-	  echo " rm -f '$(DESTDIR)$(scheme_splitdir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(scheme_splitdir)/$$f"; \
+	  echo " rm -f '$(DESTDIR)$(scheme_scmpkgdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(scheme_scmpkgdir)/$$f"; \
 	done
 tags: TAGS
 TAGS:
@@ -284,7 +284,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(scheme_splitdir)"; do \
+	for dir in "$(DESTDIR)$(scheme_scmpkgdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -325,7 +325,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-scheme_splitDATA
+install-data-am: install-scheme_scmpkgDATA
 
 install-dvi: install-dvi-am
 
@@ -359,7 +359,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-scheme_splitDATA
+uninstall-am: uninstall-scheme_scmpkgDATA
 
 .MAKE: install-am install-strip
 
@@ -369,19 +369,19 @@ uninstall-am: uninstall-scheme_splitDATA
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am install-man \
 	install-pdf install-pdf-am install-ps install-ps-am \
-	install-scheme_splitDATA install-strip installcheck \
+	install-scheme_scmpkgDATA install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
 	pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-scheme_splitDATA
+	uninstall-scheme_scmpkgDATA
 
 .stk.ostk:
-	(cd ..; ../utils/tmpcomp Split.d/$*.stk Split.d/$*.ostk)
+	(cd ..; ../utils/tmpcomp ScmPkg.d/$*.stk ScmPkg.d/$*.ostk)
 #======================================================================
 
 all: $(OBJ)
 
-$(OBJ): split-support.stk $(SRCS)
+$(OBJ): scmpkg-support.stk $(SRCS)
 
 clean: 
 	/bin/rm -f *.ostk *~

@@ -1,5 +1,5 @@
 ;;;;
-;;;; split-exception.stk	-- Split exception implementation
+;;;; scmpkg-exception.stk	-- ScmPkg exception implementation
 ;;;; 
 ;;;; Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -21,15 +21,11 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Dec-2006 15:15 (eg)
-;;;; Last file update: 13-Feb-2007 22:26 (eg)
+;;;; Last file update: 28-Feb-2007 22:32 (eg)
 ;;;;
 
 
-(export map-scmpkg-exception-on-condition)
-
-
-
-(define (map-scmpkg-exception-on-condition name)
+(define (%map-scmpkg-exception-on-condition name)
   (case name
     ((@exception)  	      '&@exception)
     ((@error)      	      '&@error)
@@ -95,7 +91,7 @@
       ((pair? name)
        (case (length name)
 	 ((1) (Loop (car name) '&@exception body fields))
-	 ((2) (Loop (car name) (map-scmpkg-exception-on-condition (cadr name))
+	 ((2) (Loop (car name) (%map-scmpkg-exception-on-condition (cadr name))
 		    body fields))
 	 (else (error "bad exception name ~S" name))))
       ((null? body)
@@ -123,7 +119,7 @@
 	     (other '()))
    
     (if (null? args)
-      (let ((name (map-scmpkg-exception-on-condition name)))
+      (let ((name (%map-scmpkg-exception-on-condition name)))
 	`(make-condition ,name
 			 'backtrace '()
 			 'location ',(or proc name)
@@ -142,3 +138,6 @@
 			      `(',(string->symbol (keyword->string (car args)))
 				,(cadr args))))))
 	  (error "bad keyword ~S" (car args)))))))
+
+;; ======================================================================
+(export %map-scmpkg-exception-on-condition)

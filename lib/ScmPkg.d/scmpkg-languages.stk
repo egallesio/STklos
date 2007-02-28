@@ -1,5 +1,5 @@
 ;;;;
-;;;; split-languages.stk	-- Split Languages support
+;;;; scmpkg-languages.stk	-- ScmPkg Languages support
 ;;;; 
 ;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -21,10 +21,10 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  7-Feb-2007 13:39 (eg)
-;;;; Last file update: 16-Feb-2007 16:15 (eg)
+;;;; Last file update: 28-Feb-2007 22:04 (eg)
 ;;;;
 
-(define *split-languages*
+(define *scmpkg-languages*
   '(
     ;; STklos
     (stklos :suffix "stk")

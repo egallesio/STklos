@@ -1,5 +1,5 @@
 ;;;;
-;;;; split-support.stk	-- SPLIT support
+;;;; scmpkg-support.stk				-- ScmPkg support
 ;;;; 
 ;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -21,15 +21,15 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  7-Feb-2007 11:03 (eg)
-;;;; Last file update: 14-Feb-2007 11:33 (eg)
+;;;; Last file update: 28-Feb-2007 22:34 (eg)
 ;;;;
 
 
 ;; ======================================================================
-;;	Split Runtime
+;;	ScmPkg Runtime
 ;; ======================================================================
 (define-condition-type &type-error &message &type-error?)
-(include "Split.d/split-runtime.stk")
+(include "ScmPkg.d/scmpkg-runtime.stk")
 
 
 (define (exception-get-message cond)
@@ -41,22 +41,18 @@
 
 
 ;; ======================================================================
-;; 	The SPLIT STklos module
+;; 	The ScmPkg STklos module
 ;; ======================================================================
-(define-module |SPLIT|
-  (include "Split.d/split-languages.stk")
-  (include "Split.d/split-interface.stk")
-  (include "Split.d/split-exception.stk")
-  (include "Split.d/split-parameter.stk")
-  (include "Split.d/split-define.stk")
-  (include "Split.d/split-record.stk")
-;  (include "Snow.d/snow-srfi89.stk")
-;  (include "Snow.d/snow-record.stk")
-;  (include "Snow.d/snow-package.stk")
-;  (include "Snow.d/snow-misc.stk")
+(define-module |ScmPkg|
+  (include "ScmPkg.d/scmpkg-languages.stk")
+  (include "ScmPkg.d/scmpkg-interface.stk")
+  (include "ScmPkg.d/scmpkg-exception.stk")
+  (include "ScmPkg.d/scmpkg-parameter.stk")
+  (include "ScmPkg.d/scmpkg-define.stk")
+  (include "ScmPkg.d/scmpkg-record.stk")
 )
 
 
-(%redefine-module-exports (find-module '|SPLIT|))
+(%redefine-module-exports (find-module '|ScmPkg|))
 
-(provide "split-support")
+(provide "scmpkg-support")

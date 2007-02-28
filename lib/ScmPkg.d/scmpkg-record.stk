@@ -1,5 +1,5 @@
 ;;;;
-;;;; split-record.stk			-- ScmPkg record support
+;;;; scmpkg-record.stk			-- ScmPkg record support
 ;;;; 
 ;;;; Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 21-Dec-2006 12:00 (eg)
-;;;; Last file update: 18-Feb-2007 21:22 (eg)
+;;;; Last file update: 28-Feb-2007 22:05 (eg)
 ;;;;
 
 
@@ -127,5 +127,5 @@
 (export %define-scmpkg-record %define-scmpkg-record->struct)
 
 
-(provide "split-record")
+(provide "scmpkg-record")
 

@@ -1,5 +1,5 @@
 ;;;;
-;;;; split-runtime.stk	-- ScmPkg runtime for STklos
+;;;; scmpkg-runtime.stk	-- ScmPkg runtime for STklos
 ;;;; 
 ;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 12-Feb-2007 18:51 (eg)
-;;;; Last file update: 14-Feb-2007 15:08 (eg)
+;;;; Last file update: 28-Feb-2007 22:05 (eg)
 ;;;;
 
 ;; ======================================================================

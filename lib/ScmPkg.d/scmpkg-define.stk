@@ -1,5 +1,5 @@
 ;;;;
-;;;; split-define.stk	-- Split define* form
+;;;; scmpkg-define.stk	-- ScmPkg define* form
 ;;;; 
 ;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  9-Feb-2007 15:11 (eg)
-;;;; Last file update: 28-Feb-2007 18:58 (eg)
+;;;; Last file update: 28-Feb-2007 22:00 (eg)
 ;;;;
 
 

@@ -6883,7 +6883,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile gtklos/Makefile gtklos/gtklosconf.h utils/Makefile lib/boot-callcc.stk utils/stklos-config utils/stklos-script extensions/Makefile examples/Makefile examples/images/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/Lurc.d/Makefile lib/Split.d/Makefile tests/Makefile extensions/extconf.h doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-install.1 doc/skb/stklos-version.stk pkgman/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile gtklos/Makefile gtklos/gtklosconf.h utils/Makefile lib/boot-callcc.stk utils/stklos-config utils/stklos-script extensions/Makefile examples/Makefile examples/images/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/Lurc.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile extensions/extconf.h doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-install.1 doc/skb/stklos-version.stk pkgman/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -7503,7 +7503,7 @@ do
     "lib/SILex.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/SILex.d/Makefile" ;;
     "lib/Lalr.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Lalr.d/Makefile" ;;
     "lib/Lurc.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Lurc.d/Makefile" ;;
-    "lib/Split.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Split.d/Makefile" ;;
+    "lib/ScmPkg.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/ScmPkg.d/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "extensions/extconf.h") CONFIG_FILES="$CONFIG_FILES extensions/extconf.h" ;;
     "doc/stklos.1") CONFIG_FILES="$CONFIG_FILES doc/stklos.1" ;;
