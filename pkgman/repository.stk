@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update: 18-Feb-2007 20:08 (eg)
+;;;; Last file update:  4-Mar-2007 13:52 (eg)
 ;;;;
 
 (define interesting-tuning "stklos")	; The tuning we want to keep in our base
@@ -133,7 +133,7 @@
 	  (fprintf out ";; -*- Scheme -*-    Generated file DO NOT EDIT\n")
 	  (fprintf out ";; Synchronization of ~a at ~s\n" server-name url)
 	  (fprintf out ";; State saved ~a\n" (date))
-	  (write pkgs out)
+	  (pp pkgs :port out)
 	  (newline out)
 	  (close-port out))))
     (eprintf "done\n"))
@@ -167,13 +167,13 @@
 (define (find-package pkg)
 
   (define (parse-name name)
-    (match-case (string-split name "-")
-       ((?name  ?version)
-	(values name version))
-       ((?name)
-	(values name #f))
-       (else
-	(error 'find-package "bad package name" name))))
+    (let ((res (regexp-match-positions "(.+)-([0-9]+.[0-9]+.[0-9]+)" name)))
+      (if res
+	;; We had a version
+	(values (apply substring name (cadr res))
+		(apply substring name (caddr res)))
+	;; No version seen
+	(values name #f))))
 
   (receive (name version)
 	   (parse-name pkg)
@@ -267,7 +267,6 @@
 (define (add-description-to-local-repository! descr)
 
   (define (insert-descr lst type name version descr)
-    (eprintf "ON insère ~S\n" descr)    
     (let ((descr-tuning-only (key-get (cddr descr) :tuning-only #f)))
       (let Loop ((lst lst)
 		 (res '()))
@@ -291,7 +290,6 @@
 	   (vers (key-get (cddr descr) :version "0.0.0"))
 	   (new  (insert-descr old type name vers descr)))
       ;; save the new version
-      (eprintf "Resultat des courses ~S\n" new)
       (with-output-to-file repo
 	(lambda ()
 	  (pp new :port #t)))))

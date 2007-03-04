@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update: 28-Feb-2007 22:40 (eg)
+;;;; Last file update:  4-Mar-2007 14:41 (eg)
 ;;;;
 
 
@@ -55,7 +55,12 @@
 
 (define-macro (%push! lst v)
   `(set! ,lst (cons ,v ,lst)))
-		     
+
+
+(define *ignored-interface-clauses*
+  '(maintainer authors description categories license snow))
+						 
+
 ;; ======================================================================
 ;;	interface ...
 ;; ======================================================================
@@ -102,7 +107,7 @@
 		(reverse (scmpkg-package-exceptions pkg)))
 	 ;; Records
 	 ,@(map (lambda (x)
-		  `(%define-exported-record ,(car x) ,@cdr x))
+		  `(%define-exported-record ,(car x) ,@(cdr x)))
 		(reverse (scmpkg-package-records pkg)))
 	 ;; Body
 	 (include ,(scmpkg-package-source pkg)))
@@ -172,7 +177,9 @@
 		  ((export . ?exp)
 		   (set! (scmpkg-package-exports pkg) exp))
 		  (else
-		   (error 'interface "Invalid clause ~S" clause))))
+		   (unless (and (pair? clause)
+				(memq (car clause) *ignored-interface-clauses*))
+		     (error 'interface "Invalid clause ~S" clause)))))
 	      body)
     (patch-package! pkg)))
 

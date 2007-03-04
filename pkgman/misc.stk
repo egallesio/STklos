@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Jan-2007 13:37 (eg)
-;;;; Last file update: 18-Feb-2007 19:54 (eg)
+;;;; Last file update:  4-Mar-2007 15:36 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -96,7 +96,7 @@
 
   (define (list->set lst res)
     (cond
-      ((null? lst) 	      res)
+      ((null? lst) 	      (reverse! res))
       ((member (car lst) res) (list->set (cdr lst) res))
       (else                   (list->set (cdr lst) (cons (car lst) res)))))
   
@@ -115,11 +115,15 @@
 		   (cons (format "@~a" lang) deps))))
       (if (null? all)
 	  all
-	  (append all (apply append (map deps* all))))))
+	  (append (apply append (map deps* all))
+		  all))))
 
   ;;
   ;; package-deps* starts here
   ;;
+  (eprintf "Dependance(~s) ==> ~S\n=> ~S\n" package (deps* package)
+	   (list->set (deps* package) '()))
+  
   (list->set (deps* package) '()))
 	     
 ;; ----------------------------------------------------------------------
