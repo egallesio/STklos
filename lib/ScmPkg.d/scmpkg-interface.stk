@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update:  4-Mar-2007 14:41 (eg)
+;;;; Last file update:  4-Mar-2007 16:15 (eg)
 ;;;;
 
 
@@ -107,7 +107,7 @@
 		(reverse (scmpkg-package-exceptions pkg)))
 	 ;; Records
 	 ,@(map (lambda (x)
-		  `(%define-exported-record ,(car x) ,@(cdr x)))
+		  `(define-exported-record ,(car x) ,@(cdr x)))
 		(reverse (scmpkg-package-records pkg)))
 	 ;; Body
 	 (include ,(scmpkg-package-source pkg)))
