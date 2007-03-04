@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 28-Feb-2007 16:51 (eg)
+;;;; Last file update:  4-Mar-2007 21:02 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -73,6 +73,18 @@
 (include "peephole.stk")
 (include "assembler.stk")
 (include "computils.stk")
+
+
+
+;; ----------------------------------------------------------------------
+;; Debbugging support
+;; ----------------------------------------------------------------------
+(export %compiler-debug)
+
+(define %compiler-debug (make-parameter #f))
+
+(define (dprintf . args)
+  (when  (%compiler-debug) (apply eprintf args)))
 
 
 ;; ----------------------------------------------------------------------
@@ -511,8 +523,9 @@ doc>
 ;;         (param-ok? (cadr expr) '())))
 ;;  
 
-(define (rewrite-body body env)
-  (fluid-let ((*expander-list* *expander-list*))
+(define (compile-body body env epair tail?)
+
+  (define (rewrite-body body)
     (let Loop ((l body) (defs '()))
       (cond
 	((and (pair? l) (pair? (car l)) (eq? (caar l) 'begin))
@@ -524,36 +537,29 @@ doc>
 	    (Loop (cdr l) (cons (cdr (define->lambda (car l))) defs)))
 	((and (pair? l) (pair? (car l)) (eq? (caar l) 'define-macro))
 	    ;; This is an internal define-macro. Add expander + skip expression
+	    (eprintf "Internal macro ~S\n" (car l))
 	    (compile-internal-define-macro (car l) env #f)
 	    (Loop (cdr l) defs))
-	((and (pair? l)
-	      (pair? (car l))
-	      (symbol?  (caar l))
-	      (not (symbol-in-env? (caar l) env))
-	      (expander? (caar l)))
-	     ;; Macro-call: expand it
-	     (Loop (cons (macro-expand (car l))
-			 (cdr l))
-		  defs))
 	(else
 	    ;; We have parsed all the (starting) definitions 
 	    (if (null? defs)
-		`(begin ,@l)
-		(let ((defs (reverse! defs)))
-		  ;; Generate "similar" to a letrec*
-		  `(let ,(map (lambda (x) (list (car x) #f)) defs)
-		     ,@(map (lambda (x) `(set! ,@x)) defs)
-		     ,@l))))))))
+	      `(begin ,@l)
+	      (let ((defs (reverse! defs)))
+		;; Generate "similar" to a letrec*
+		`(let ,(map (lambda (x) (list (car x) #f)) defs)
+		   ,@(map (lambda (x) `(set! ,@x)) defs)
+		   ,@l)))))))
+  (fluid-let ((*expander-list* (copy-tree *expander-list*)))
+    (compile (rewrite-body body) env epair tail?)))
 
 
 (define (compile-user-lambda formals body arity env)	; i.e R5RS ones
   (let ((env  (extend-env env formals))
 	(lab  (new-label)))
     (emit 'CREATE-CLOSURE lab arity)
-    (compile (rewrite-body body env) env body #t)
+    (compile-body body env body #t)
     (emit 'RETURN)
     (emit-label lab)))
-
 
 
 ;;; EXTENDED LAMBDAS
@@ -1008,7 +1014,7 @@ doc>
 	      (begin
 		(compile-args actuals env)
 		(emit kind len)))
-	  (compile (rewrite-body body new-env) new-env epair tail?)
+	  (compile-body body new-env epair tail?)
 	  (emit (if tail? 'RETURN 'LEAVE-LET)))
 	(compiler-error 'lambda epair "bad number of parameters ~S" actuals))))
 
@@ -1062,7 +1068,7 @@ doc>
 	(let ((bindings (cadr args))
               (body     (cddr args)))
 	  (if (null? bindings)
-	      (compile (rewrite-body body env) env body tail?)
+	      (compile-body body env body tail?)
 	      (when (valid-let-bindings? bindings #t)
 		(let ((tmps (map (lambda (_) (gensym)) bindings)))
 		  (compile `(let ,(map (lambda (x) (list (car x) #f)) bindings)
@@ -1100,7 +1106,7 @@ doc>
 	      (compile-named-let bindings (car body) (cdr body) len args env tail?)
 	      (when (valid-let-bindings? bindings #t)
 		(if (null? bindings)
-		    (compile (rewrite-body body env) env args tail?)
+		    (compile-body body env args tail?)
 		    (compile `((lambda ,(map car bindings) ,@body)
 			       ,@(map cadr bindings))
 			     env args tail?))))))))
@@ -1158,10 +1164,7 @@ doc>
 		    (if (null? l)
 			;; Compile body
 			(let ((new-env (extend-env env locals)))
-			  (compile (rewrite-body body new-env)
-				   new-env
-				   body
-				   tail?)
+			  (compile-body body new-env body tail?)
 			  (emit (if tail? 'RETURN 'LEAVE-LET)))
 			;; Compile an assignment
 			(let* ((var (caar l))
