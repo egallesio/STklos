@@ -21,8 +21,10 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 20-Dec-2006 10:18 (eg)
-;;;; Last file update: 11-Feb-2007 21:47 (eg)
+;;;; Last file update:  4-Mar-2007 22:49 (eg)
 ;;;;
+
+(require-for-syntax "match")
 
 ;; ======================================================================
 ;; 	The SNOW STklos module
