@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update:  1-Feb-2007 22:39 (eg)
+;;;; Last file update:  8-Mar-2007 14:00 (eg)
 ;;;;
 
 
@@ -66,10 +66,35 @@
 
 
 (define (install-expander! id proc code)
-  (set! *expander-list* (cons (cons id proc) *expander-list*))
-  (when code
-    ;; Global macro: Keep the macro code to save it in byte-code header
-    (set! *expander-list-src* (cons (cons id code) *expander-list-src*))))
+  ;; Add the new macro to the expander list
+  (let ((old (assq id *expander-list*)))
+    (if old
+      (set-cdr! old proc)
+      (set! *expander-list* (cons (cons id proc) *expander-list*))))
+  ;; Global macro: Keep the macro code to eventually save it in byte-code header
+  (let ((old (assq id *expander-list-src*)))
+    (if old
+      (set-cdr! old code)
+      (set! *expander-list-src* (cons (cons id code) *expander-list-src*)))))
+
+
+(define (push-expander! id proc)
+  ;; Used by internal macro. Macro is pushed on the list to shadow the global one
+  (set! *expander-list* (cons (cons id proc) *expander-list*)))
+
+
+(define (delete-expander! id)
+  (let loop ((lst *expander-list*)
+	     (prv #f))
+    (cond
+      ((null? lst)
+         (void))
+      ((eq? (caar lst) id)
+         (if prv
+	   (set-cdr! prv (cdr lst))
+	   (set! *expander-list* (cdr lst))))
+      (else
+         (loop (cdr lst) lst)))))
 
 ;;;
 ;;; Expander-list-src management

@@ -21,8 +21,11 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update: 16-Feb-2007 19:22 (eg)
+;;;; Last file update:  5-Mar-2007 22:11 (eg)
 ;;;;
+
+(require "getopt")
+(require "match")
 
 (include "types.stk")
 (include "params.stk")

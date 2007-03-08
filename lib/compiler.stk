@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  5-Mar-2007 00:20 (eg)
+;;;; Last file update:  8-Mar-2007 14:01 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -364,9 +364,10 @@ doc>
 	     (name     (cadr l))
 	     (proc     (caddr l))
 	     (expander `(lambda (form e) (apply ,proc (cdr form)))))
-	;; Install expander for further compilation
-	(install-expander! name (eval expander) #f)))))
-
+	;; Push expander for further compilation (shadowing global macro)
+	(push-expander! name (eval expander))
+	;; return the name of the defined macro
+	name))))
 
 ;;;;
 ;;;; WHEN/UNLESS
@@ -523,8 +524,11 @@ doc>
 ;;         (param-ok? (cadr expr) '())))
 ;;  
 
-(define (rewrite-body body env)
-  (fluid-let ((*expander-list* *expander-list*))
+(define (compile-body body env epair tail?)
+
+  (define internal-macros '())
+  
+  (define (rewrite-body body)
     (let Loop ((l body) (defs '()))
       (cond
 	((and (pair? l) (pair? (car l)) (eq? (caar l) 'begin))
@@ -536,36 +540,34 @@ doc>
 	    (Loop (cdr l) (cons (cdr (define->lambda (car l))) defs)))
 	((and (pair? l) (pair? (car l)) (eq? (caar l) 'define-macro))
 	    ;; This is an internal define-macro. Add expander + skip expression
-	    (compile-internal-define-macro (car l) env #f)
-	    (Loop (cdr l) defs))
-	((and (pair? l)
-	      (pair? (car l))
-	      (symbol?  (caar l))
-	      (not (symbol-in-env? (caar l) env))
-	      (expander? (caar l)))
-	     ;; Macro-call: expand it
-	     (Loop (cons (macro-expand (car l))
-			 (cdr l))
-		  defs))
+	    (let ((name (compile-internal-define-macro (car l) env #f)))
+	      (eprintf "Internal macro ~S\n" name)
+	      (set! internal-macros (cons name internal-macros))
+	      (Loop (cdr l) defs)))
 	(else
 	    ;; We have parsed all the (starting) definitions 
 	    (if (null? defs)
-		`(begin ,@l)
-		(let ((defs (reverse! defs)))
-		  ;; Generate "similar" to a letrec*
-		  `(let ,(map (lambda (x) (list (car x) #f)) defs)
-		     ,@(map (lambda (x) `(set! ,@x)) defs)
-		     ,@l))))))))
+	      `(begin ,@l)
+	      (let ((defs (reverse! defs)))
+		;; Generate "similar" to a letrec*
+		`(let ,(map (lambda (x) (list (car x) #f)) defs)
+		   ,@(map (lambda (x) `(set! ,@x)) defs)
+		   ,@l)))))))
+
+  ;; rewrite the body to transform internal define to letrec
+  (compile (rewrite-body body) env epair tail?)
+
+  ;; delete all the internal macros from the list of expanders
+  (for-each delete-expander! internal-macros))
 
 
 (define (compile-user-lambda formals body arity env)	; i.e R5RS ones
   (let ((env  (extend-env env formals))
 	(lab  (new-label)))
     (emit 'CREATE-CLOSURE lab arity)
-    (compile (rewrite-body body env) env body #t)
+    (compile-body body env body #t)
     (emit 'RETURN)
     (emit-label lab)))
-
 
 
 ;;; EXTENDED LAMBDAS
@@ -1020,7 +1022,7 @@ doc>
 	      (begin
 		(compile-args actuals env)
 		(emit kind len)))
-	  (compile (rewrite-body body new-env) new-env epair tail?)
+	  (compile-body body new-env epair tail?)
 	  (emit (if tail? 'RETURN 'LEAVE-LET)))
 	(compiler-error 'lambda epair "bad number of parameters ~S" actuals))))
 
@@ -1074,7 +1076,7 @@ doc>
 	(let ((bindings (cadr args))
               (body     (cddr args)))
 	  (if (null? bindings)
-	      (compile (rewrite-body body env) env body tail?)
+	      (compile-body body env body tail?)
 	      (when (valid-let-bindings? bindings #t)
 		(let ((tmps (map (lambda (_) (gensym)) bindings)))
 		  (compile `(let ,(map (lambda (x) (list (car x) #f)) bindings)
@@ -1112,7 +1114,7 @@ doc>
 	      (compile-named-let bindings (car body) (cdr body) len args env tail?)
 	      (when (valid-let-bindings? bindings #t)
 		(if (null? bindings)
-		    (compile (rewrite-body body env) env args tail?)
+		    (compile-body body env args tail?)
 		    (compile `((lambda ,(map car bindings) ,@body)
 			       ,@(map cadr bindings))
 			     env args tail?))))))))
@@ -1170,10 +1172,7 @@ doc>
 		    (if (null? l)
 			;; Compile body
 			(let ((new-env (extend-env env locals)))
-			  (compile (rewrite-body body new-env)
-				   new-env
-				   body
-				   tail?)
+			  (compile-body body new-env body tail?)
 			  (emit (if tail? 'RETURN 'LEAVE-LET)))
 			;; Compile an assignment
 			(let* ((var (caar l))

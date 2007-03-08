@@ -21,8 +21,11 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update:  1-Feb-2007 13:34 (eg)
+;;;; Last file update:  7-Mar-2007 16:01 (eg)
 ;;;;
+
+;(require "match")
+;(require "getopt")
 
 (define *output* "a.out")
 (define *c-code* #f)

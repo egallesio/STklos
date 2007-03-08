@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update:  4-Mar-2007 16:15 (eg)
+;;;; Last file update:  7-Mar-2007 20:36 (eg)
 ;;;;
 
 
@@ -58,7 +58,7 @@
 
 
 (define *ignored-interface-clauses*
-  '(maintainer authors description categories license snow))
+  '(maintainer author description keyword license homepage snow))
 						 
 
 ;; ======================================================================
