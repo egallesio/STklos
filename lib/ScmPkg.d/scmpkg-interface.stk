@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update:  7-Mar-2007 20:36 (eg)
+;;;; Last file update:  8-Mar-2007 16:49 (eg)
 ;;;;
 
 
@@ -35,8 +35,9 @@
   exports
   macros
   syntaxes
-  exceptions
-  records)
+;;//  exceptions
+;;//  records
+  )
 
 (define (%new-scmpkg-package name)
   (make-scmpkg-package name		; name
@@ -48,8 +49,8 @@
 		       '()		; exports
 		       '()		; macros
 		       '()		; syntaxes
-		       '()		; exceptions
-		       '()		; records
+;;//		       '()		; exceptions
+;;//		       '()		; records
 		       ))
 
 
@@ -101,14 +102,14 @@
 ;;//	 ,@(map (lambda (x)
 ;;//		  (eprintf "Syntax definition ~S\n" x))
 ;;//		(reverse (scmpkg-package-syntaxes pkg)))
-	 ;; Exceptions
-	 ,@(map (lambda (x)
-		  `(define-scmpkg-exception ,@x))
-		(reverse (scmpkg-package-exceptions pkg)))
-	 ;; Records
-	 ,@(map (lambda (x)
-		  `(define-exported-record ,(car x) ,@(cdr x)))
-		(reverse (scmpkg-package-records pkg)))
+;;//	 ;; Exceptions
+;;//	 ,@(map (lambda (x)
+;;//		  `(define-scmpkg-exception ,@x))
+;;//		(reverse (scmpkg-package-exceptions pkg)))
+;;//	 ;; Records
+;;//	 ,@(map (lambda (x)
+;;//		  `(define-exported-record ,(car x) ,@(cdr x)))
+;;//		(reverse (scmpkg-package-records pkg)))
 	 ;; Body
 	 (include ,(scmpkg-package-source pkg)))
        ;; Provide
@@ -140,10 +141,10 @@
 		  (%push! (scmpkg-package-macros pkg) rest))
 		 ((syntax ?args . ?-)			     ;; export a syntax
 		  (%push! (scmpkg-package-syntaxes pkg) args))
-		 ((exception . ?rest)	     	     	     ;; export an exception
-		  (%push! (scmpkg-package-exceptions pkg) rest))
-		 ((record ?name . ?body)
-		  (%push! (scmpkg-package-records pkg) (cons name body)))
+;;//		 ((exception . ?rest)	     	     	     ;; export an exception
+;;//		  (%push! (scmpkg-package-exceptions pkg) rest))
+;;//		 ((record ?name . ?body)
+;;//		  (%push! (scmpkg-package-records pkg) (cons name body)))
 		 (else
 		  (%push! exports (car x))))))
 	  (scmpkg-package-exports pkg))
@@ -186,4 +187,5 @@
 
 ;; ======================================================================
 (export scmpkg-package-exports scmpkg-package-imports scmpkg-package-language
-	scmpkg-package-exceptions scmpkg-package-records scmpkg-package-source)
+;;//	scmpkg-package-exceptions scmpkg-package-records
+	scmpkg-package-source)

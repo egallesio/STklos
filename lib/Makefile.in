@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  5-Mar-2007 07:45 (eg)
+# Last file update:  8-Mar-2007 14:18 (eg)
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -236,7 +236,6 @@ scheme_SRCS = STklos.init		\
 	      make-C-boot.stk		\
 	      match.stk			\
 	      pp.stk			\
-	      snow-support.stk		\
 	      slib.stk			\
 	      srfi-1.stk		\
 	      srfi-2.stk		\
@@ -271,7 +270,6 @@ scheme_OBJS = compfile.ostk		\
 	      lex-rt.ostk		\
 	      match.ostk		\
 	      pp.ostk			\
-	      snow-support.ostk		\
 	      srfi-1.ostk 		\
 	      srfi-2.ostk		\
 	      srfi-4.ostk		\

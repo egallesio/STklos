@@ -21,24 +21,25 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  7-Feb-2007 11:03 (eg)
-;;;; Last file update:  5-Mar-2007 23:34 (eg)
+;;;; Last file update:  8-Mar-2007 16:45 (eg)
 ;;;;
 
 
 ;; ======================================================================
 ;;	ScmPkg Runtime
 ;; ======================================================================
-(define-condition-type &type-error &message &type-error?)
-(include "ScmPkg.d/scmpkg-runtime.stk")
-
-
-(define (exception-get-message cond)
-  (if (condition? cond)
-    (if (condition-has-type? cond &message)
-      (condition-ref cond 'message)
-      (format "condition of type ~S raised" (struct-type-name (struct-type cond))))
-    (error "bad exception ~S" cond)))
-
+;;//(define-condition-type &type-error &message &type-error?)
+;;//(include "ScmPkg.d/scmpkg-runtime.stk")
+;;//
+;;//
+;;//(define (exception-get-message cond)
+;;//  (if (condition? cond)
+;;//    (if (condition-has-type? cond &message)
+;;//      (condition-ref cond 'message)
+;;//      (format "condition of type ~S raised" (struct-type-name (struct-type cond))))
+;;//    (error "bad exception ~S" cond)))
+;;//
+;;//
 
 ;; ======================================================================
 ;; 	The ScmPkg STklos module
@@ -46,10 +47,10 @@
 (define-module |ScmPkg|
   (include "ScmPkg.d/scmpkg-languages.stk")
   (include "ScmPkg.d/scmpkg-interface.stk")
-  (include "ScmPkg.d/scmpkg-exception.stk")
-  (include "ScmPkg.d/scmpkg-parameter.stk")
-  (include "ScmPkg.d/scmpkg-define.stk")
-  (include "ScmPkg.d/scmpkg-record.stk")
+;  (include "ScmPkg.d/scmpkg-exception.stk")
+;  (include "ScmPkg.d/scmpkg-parameter.stk")
+;  (include "ScmPkg.d/scmpkg-define.stk")
+;  (include "ScmPkg.d/scmpkg-record.stk")
 )
 
 
