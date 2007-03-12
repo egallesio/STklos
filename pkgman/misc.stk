@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Jan-2007 13:37 (eg)
-;;;; Last file update:  4-Mar-2007 15:36 (eg)
+;;;; Last file update: 12-Mar-2007 15:39 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -121,16 +121,16 @@
   ;;
   ;; package-deps* starts here
   ;;
-  (eprintf "Dependance(~s) ==> ~S\n=> ~S\n" package (deps* package)
-	   (list->set (deps* package) '()))
-  
   (list->set (deps* package) '()))
 	     
 ;; ----------------------------------------------------------------------
 ;;	package-sans-version ...
 ;; ----------------------------------------------------------------------
 (define (package-sans-version str)
-  (car (string-split str "-")))
+  (let ((x (regexp-match "(.*)-[0-9]+.[0-9]+.[0-9]+" str)))
+    (if x
+      (cadr x)
+      str)))
 
 ;; ----------------------------------------------------------------------
 ;;	rm-rf ...
