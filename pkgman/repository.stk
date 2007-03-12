@@ -21,10 +21,13 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update:  4-Mar-2007 13:52 (eg)
+;;;; Last file update:  8-Mar-2007 22:16 (eg)
 ;;;;
 
-(define interesting-tuning "stklos")	; The tuning we want to keep in our base
+
+(define *all-packages* 		'())
+(define *non-stklos-tunings*    '())
+
 
 ;; ----------------------------------------------------------------------
 ;;	ensure-repository-hierarchy ...
@@ -37,12 +40,13 @@
 		(let* ((name (make-path (stklos-pkg-servers-directory) x))
 		       (out  (open-file name "w")))
 		  (unless out
-		    (die (format "Cannot create server file ~a" name)))
+		    (error "cannot create server file ~a" name))
 		  (fprintf out ";; Generated file. DO NOT EDIT\n~a\n" '())
 		  (close-port out)))
 	      (server-names)))
   ;; Create the cache directory (eventually)
   (unless (file-exists? (stklos-pkg-cache-directory))
+
     (make-directories (stklos-pkg-cache-directory))))
 
 ;; ----------------------------------------------------------------------
@@ -50,7 +54,7 @@
 ;; ----------------------------------------------------------------------
 (define (load-repository-descriptions)
 
-  (define tunings '())  ; tuning only packages are added at the end
+  (define stklos-tunings '())  ; tuning only packages are added at the end
 
   (define (add-package name options)
     (let ((new (new-package name
@@ -66,17 +70,19 @@
 			    :dependencies (key-get options :dependencies '())
 			    :provides     (key-get options :provides '()))))
       ;; Store new package in list
-      (set! *stklos-packages* (cons new *stklos-packages*))))
+      (set! *all-packages* (cons new *all-packages*))))
   
   (define (add-tuning name options)
-    (when (equal? (key-get options :host) "stklos")
-      (let ((new (new-tuning name
-		   :host "stklos"
-		   :version (key-get options :version "0.0.0")
-		   :path    (key-get options :path "")
-		   :url     (key-get options :url "")
-		   :md5     (key-get options :md5 ""))))
-	(set! tunings (cons new tunings)))))
+    (let ((new (new-tuning name
+			   :host    (key-get options :host)
+			   :version (key-get options :version "0.0.0")
+			   :path    (key-get options :path "")
+			   :url     (key-get options :url "")
+			   :md5     (key-get options :md5 ""))))
+      (if (equal? (key-get options :host) "stklos")
+	(set! stklos-tunings       (cons new stklos-tunings))
+	(set! *non-stklos-tunings* (cons new *non-stklos-tunings*)))))
+
  
   (define (add-description descr)
     (match-case descr
@@ -90,17 +96,18 @@
   (define (add-descriptions src)
     (let ((in (open-file src "r")))
       (unless in
-	(die (format "Cannot load description in file ~s" src)))
+	(error "cannot load description in file ~s" src))
       (let ((lst (read in)))
 	(close-port in)
 	(for-each add-description lst))))
 
   (define (add-tuning-to-package tuning)
+    ;; This is only called for STklos tunings
     (let* ((name    (tuning-name tuning))
 	   (version (tuning-version tuning))
 	   (items   (filter (lambda (x) (and (equal? (package-name x) name)
 					     (equal? (package-version x) version)))
-			    *stklos-packages*)))
+			    *all-packages*)))
       (if (null? items)
 	  (eprintf "Warning: no package for tuning ~a-~a" name version)
 	  (set! (package-tuning (car items)) tuning))))
@@ -110,8 +117,8 @@
   (let ((all (map (lambda (x) (make-path (stklos-pkg-servers-directory) x))
 		  (server-names))))
     (for-each add-descriptions all)
-    ;; Patch our database with tuning-only packages
-    (for-each add-tuning-to-package tunings)))
+    ;; Patch our database with all STklos tunings
+    (for-each add-tuning-to-package stklos-tunings)))
 
 ;; ----------------------------------------------------------------------
 ;; 	synchronize-servers ...
@@ -129,7 +136,7 @@
 	(let* ((name (make-path (stklos-pkg-servers-directory) server-name))
 	       (out  (open-file name "w")))
 	  (unless out
-	    (die (format "cannot save server descriptions of ~s" server-name)))
+	    (error "cannot save server descriptions of ~s" server-name))
 	  (fprintf out ";; -*- Scheme -*-    Generated file DO NOT EDIT\n")
 	  (fprintf out ";; Synchronization of ~a at ~s\n" server-name url)
 	  (fprintf out ";; State saved ~a\n" (date))
@@ -159,7 +166,7 @@
 	(printf "~a\n" (if (package-tuning pkg) " (tuning)" ""))))
 
   (for-each display-package
-	    (sort *stklos-packages* package<?)))
+	    (sort *all-packages* package<?)))
 
 ;; ----------------------------------------------------------------------
 ;; 	find-package ...
@@ -178,7 +185,7 @@
   (receive (name version)
 	   (parse-name pkg)
      (let ((candidates (filter (lambda (x) (equal? (package-name x) name))
-			       *stklos-packages*)))
+			       *all-packages*)))
        (cond
 	 ((null? candidates)	;; no package found
 	  #f)
@@ -194,26 +201,7 @@
 ;; 	download-package ...
 ;; ----------------------------------------------------------------------
 (define (download-package package)
-
-  (define (download-pkgball path url md5 tuning?)
-    (when (> (stklos-pkg-verbosity) 0)
-      (eprintf "Downloading ~a ~s ... " (if tuning? "tuning for" "package") package)
-      (flush-output-port (current-error-port)))
-    (let ((out (open-file path "w")))
-      (unless out
-	(die (format "cannot open file ~s when downloading ~s" path package)))
-      (http-get url out)
-      (close-port out))
-    ;; Verify file integrity
-    (let ((lmd5 (md5sum-file path)))
-      (unless (equal? lmd5 md5)
-	(remove-file path)
-	(die (format "Package ~S corrupted. Cache file has been deleted" package))))
-    ;; We have finished
-    (when (> (stklos-pkg-verbosity) 0)
-      (eprintf "done\n")))
-
-  (let ((pkg (find-package package)))
+   (let ((pkg (find-package package)))
     (unless pkg
       (die (format "cannot find package ~s in repository" package)))
     ;; Download dependencies
@@ -228,27 +216,60 @@
 		    dep)))
     ;; Try to find the package in the cache
     (let ((path (package-path pkg)))
-      (unless (file-exists? path)
-	;; Pkgball absent. download it
-	(download-pkgball path (package-url pkg) (package-md5 pkg) #f)))
-    ;; See if a tuning exits for this package. 
+      (cache-package-tarball package path (package-url pkg) (package-md5 pkg) #f))
+
+    ;; See if a STklos tuning exits for this package. 
     (let ((tuning (package-tuning pkg)))
       (if tuning
-	  (let ((path (tuning-path tuning)))
-	    (unless (file-exists? path)
-	      ;; Tuning absent. download it
-	      (download-pkgball path (tuning-url tuning) (tuning-md5 tuning) #t)))))
+	(let ((path (tuning-path tuning)))
+	  (cache-package-tarball package path (tuning-url tuning)
+				 (tuning-md5 tuning) "stklos"))))
     pkg))
+
+;; ----------------------------------------------------------------------
+;; 	cache-package-tarball ...
+;; ----------------------------------------------------------------------
+(define (cache-package-tarball package path url md5 host-tuning)
+  (unless (file-exists? path)
+    (when (> (stklos-pkg-verbosity) 0)
+      (eprintf "Downloading ~a ~s ... "
+	       (if host-tuning (format "~a tuning for" host-tuning) "package")
+	       package))
+
+    ;; Download file
+    (let ((out (open-file path "w")))
+      (unless out
+	(error "cannot open file ~s when downloading ~s" path package))
+      (http-get url out)
+      (close-port out))
+    
+    ;; Verify file integrity
+    (let ((lmd5 (md5sum-file path)))
+      (unless (equal? lmd5 md5)
+	(remove-file path)
+	(error "package ~S corrupted. Cache file has been deleted" package)))
+    
+    ;; We have finished
+    (when (> (stklos-pkg-verbosity) 0)
+      (eprintf "done\n"))))
+
 
 ;; ----------------------------------------------------------------------
 ;; 	fill-cache ...
 ;; ----------------------------------------------------------------------
 (define (fill-cache)
-  (for-each (lambda (x)
+  ;; download all the packages 
+  (for-each (lambda (x)		  
 	      (let ((name (format "~a-~a" (package-name x) (package-version x))))
 		(download-package name)))
-	    *stklos-packages*))
-
+	    *all-packages*)
+  ;; download all  the non STklos tunings
+  (for-each (lambda (x)
+	      (cache-package-tarball
+	          (string-append (tuning-name x) "-" (tuning-version x))
+		  (tuning-path x) (tuning-url x) (tuning-md5 x)
+		  (tuning-host x)))
+	    *non-stklos-tunings*))
 
 ;; ----------------------------------------------------------------------
 ;; 	clear-cache ...
@@ -267,22 +288,21 @@
 (define (add-description-to-local-repository! descr)
 
   (define (insert-descr lst type name version descr)
-    (let ((descr-tuning-only (key-get (cddr descr) :tuning-only #f)))
-      (let Loop ((lst lst)
-		 (res '()))
-	(if (null? lst)
-	  (cons descr res)
-	  (let ((item (car lst)))
-	    (cond
-	      ((and (equal? (car item) type)
-		    (equal? (cadr item) name)
-		    (equal? (key-get (cddr item) :version "0.0.0") version))
-	       (Loop (cdr lst)
-		     (cons item res)))
-	      (else
-	       (Loop (cdr lst)
-		     (cons (car lst) res)))))))))
-    
+    (let Loop ((lst lst)
+	       (res '()))
+      (if (null? lst)
+	(cons descr res)
+	(let ((item (car lst)))
+	  (cond
+	    ((and (equal? (car item) type)
+		  (equal? (cadr item) name)
+		  (equal? (key-get (cddr item) :version "0.0.0") version))
+	     (Loop (cdr lst)
+		   (cons item res)))
+	    (else
+	     (Loop (cdr lst)
+		   (cons (car lst) res))))))))
+
     (let* ((repo (make-path (stklos-pkg-servers-directory) "local"))
 	   (old  (with-input-from-file repo read))
 	   (type (car descr))

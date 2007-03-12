@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 22-Jan-2007 23:53 (eg)
+;;;; Last file update:  8-Mar-2007 20:25 (eg)
 ;;;;
 
 ;;
@@ -981,12 +981,14 @@ doc>
  * These procedures are specialized version of |,(ref :mark "format" "format")|.
  * In these procedures, |fmt| is a string using the |format| conventions.
  * |printf| outputs go on the current output port.
- * |eprintf| outputs go on the current error port.
  * |fprintf| outputs go on the specified |port|.
+ * |eprintf| outputs go on the current error port (note that eprintf always
+ * flushes the characters printed).
 doc>
 |#
 (define (eprintf fmt . args)
-  (apply format (current-error-port) fmt args))
+  (apply format (current-error-port) fmt args)
+  (flush-output-port (current-error-port)))
 
 (define (printf fmt . args)
   (apply format #t fmt args))

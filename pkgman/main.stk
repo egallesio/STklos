@@ -21,21 +21,22 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update:  5-Mar-2007 22:11 (eg)
+;;;; Last file update:  8-Mar-2007 20:03 (eg)
 ;;;;
 
 (require "getopt")
 (require "match")
 
+
+(include "http.stk")
+
 (include "types.stk")
 (include "params.stk")
-(include "http.stk")
+(include "repository.stk")
 (include "pkgball.stk")
 (include "add.stk")
 (include "tune.stk")
-(include "repository.stk")
 (include "extract.stk")
-(include "pkgball.stk")
 (include "misc.stk")
 
 
@@ -91,37 +92,53 @@
     (if (null? actions)
 	'(list)
 	(reverse actions))))
-       
+
+;; ----------------------------------------------------------------------
+;;	global-handler ...
+;; ----------------------------------------------------------------------
+(define (global-handler c)
+  (if  (and (condition? c) (condition-has-type? c &error-message))
+    (let ((who (condition-ref c 'location))
+	  (msg (condition-ref c 'message)))
+      
+      (format (current-error-port)
+	      "**** ERROR: ~a~a\n"
+	      msg
+	      (if who (format " (in procedure ~a)" who) "")))
+    (format (current-error-port) "UNKNOWN error!!!\n"))
+  (exit 70))
+
+
 ;; ----------------------------------------------------------------------
 ;;	main ...
 ;; ----------------------------------------------------------------------
 (define (main argv)
-  ;; Ensure that files are correctly set
-  (ensure-repository-hierarchy)
-  ;; load the servers informations
-  (load-repository-descriptions)
-  ;; Parse the program arguments
-  (let loop ((actions (stklos-pkg-arguments argv)))
-    (unless (null? actions)
-      (case ((if (pair? (car actions)) caar car) actions)
-	((list)
-	   (list-repository-packages))
-	((sync)
-	   (synchronize-servers))
-	((delete-repo)
-	   (rm-rf (stklos-pkg-cache-directory))
-	   (rm-rf (stklos-pkg-servers-directory))
-	   (exit 0))
-	((fill-cache)
-	   (fill-cache))
-	((clear-cache)
-	   (clear-cache))
-	((extract)
-	   (find-and-extract-package (cadar actions)
-				     (stklos-pkg-extract-dir)))
-	((package-deps)
-	   (for-each (lambda (x) (printf "~a\n" x))
-		     (package-deps* (cadar actions))))
-	(else (die (format "bad command ~S" (car actions)))))
-      (loop (cdr actions))))
-  (exit 0))
+  (with-handler global-handler
+    ;; Ensure that files are correctly set
+    (ensure-repository-hierarchy)
+    ;; load the servers informations
+    (load-repository-descriptions)
+    ;; Parse the program arguments
+    (let loop ((actions (stklos-pkg-arguments argv)))
+      (unless (null? actions)
+	(case ((if (pair? (car actions)) caar car) actions)
+	  ((list)
+	     (list-repository-packages))
+	  ((sync)
+	     (synchronize-servers))
+	  ((delete-repo)
+	     (rm-rf (stklos-pkg-cache-directory))
+	     (rm-rf (stklos-pkg-servers-directory))
+	     (exit 0))
+	  ((fill-cache)
+	     (fill-cache))
+	  ((clear-cache)
+	     (clear-cache))
+	  ((extract)
+	     (find-and-extract-package (cadar actions)
+				       (stklos-pkg-extract-dir)))
+	  ((package-deps)
+	     (for-each (lambda (x) (printf "~a\n" x))
+		       (package-deps* (cadar actions))))
+	  (else (error "bad command ~S" (car actions))))
+	(loop (cdr actions))))))

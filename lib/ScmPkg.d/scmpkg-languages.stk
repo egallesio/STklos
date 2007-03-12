@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  7-Feb-2007 13:39 (eg)
-;;;; Last file update: 28-Feb-2007 22:04 (eg)
+;;;; Last file update: 11-Mar-2007 23:49 (eg)
 ;;;;
 
 (define *scmpkg-languages*
@@ -34,7 +34,9 @@
     (snow   :suffix "scm")
     ;; R5RS (the default)
     (r5rs :suffix "scm")))
-    
+
+
+
 
 
    

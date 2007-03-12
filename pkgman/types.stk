@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 13-Jan-2007 23:24 (eg)
-;;;; Last file update: 14-Feb-2007 14:52 (eg)
+;;;; Last file update: 12-Mar-2007 00:05 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -40,10 +40,11 @@
   failures
   dependencies
   provides
-  tuning)
+  tuning
+  suffix)
 
 (define (new-package name :key version language category path url md5 description
-		               author failures dependencies provides tuning)
+		               author failures dependencies provides tuning suffix)
   (unless path
     ;; Build a path in the cache for this package
     (set! path (make-path (stklos-pkg-cache-directory)
@@ -51,8 +52,13 @@
   (when (string? language)
     (set! language (string->symbol language)))
 
+  (unless suffix
+    (set! suffix (case language
+		   ((stklos ".stk"))
+		   (else ".scm"))))
+
   (make-package name version language category path url md5 description
-		author failures dependencies provides tuning))
+		author failures dependencies provides tuning suffix))
 
 ;; ----------------------------------------------------------------------
 ;; 	structure tuning ...
@@ -69,5 +75,5 @@
   (unless path
     ;; Build a path in the cache for this tuning
     (set! path (make-path (stklos-pkg-cache-directory)
-			  (format "~a-stklos~a.tar.gz" name version))))
-  (make-tuning name  version host path url md5))
+			  (format "~a_~a-~a.tar.gz" name host version))))
+  (make-tuning name version host path url md5))

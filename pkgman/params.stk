@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 16:23 (eg)
-;;;; Last file update: 12-Feb-2007 13:30 (eg)
+;;;; Last file update:  8-Mar-2007 19:40 (eg)
 ;;;;
 
 
@@ -49,7 +49,3 @@
 ;     ("stklos" "http://www.stklos.org/Snow/sync")
       )))
 
-
-
-;; ----------------------------------------------------------------------
-(define *stklos-packages* '())

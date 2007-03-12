@@ -19,160 +19,221 @@
 ;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
 ;;;; USA.
 ;;;; 
-;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;           Author: Manuel Serrano
 ;;;;    Creation date: 18-Jan-2007 16:44 (eg)
-;;;; Last file update: 19-Feb-2007 16:05 (eg)
+;;;; Last file update: 12-Mar-2007 09:25 (eg)
 ;;;;
+
+;; Most of the code her was given by Manuel Serrano.
+
+
+
+
+(define (file->string path)
+  (with-input-from-file path
+    (lambda ()
+      (port->string (current-input-port)))))
 
 ;; ----------------------------------------------------------------------
 ;; 	tune-package ...
 ;; ----------------------------------------------------------------------
-(define (tune-package pkg dir)
-
-  (define (maybe-overwrite suffix)
-    (let* ((name   (package-name pkg))
-	   (pdir   (make-path dir name))
-	   (tundir (make-path pdir "stklos")))
-      (when (file-is-directory? tundir)
-	;; If the tune directory has a file with given suffix, use it
-	(let* ((src    (format "~a.~a" name suffix))
-	       (tuning (make-path tundir src)))
-	  (when (file-exists? tuning)
-	    (when (> (stklos-pkg-verbosity) 0)
-	      (eprintf "   Overwriting ~s with tuning file\n" (basename tuning)))
-	    (copy-file tuning (make-path pdir src)))))))
-  
-  (maybe-overwrite "spi")
-  (maybe-overwrite "scm"))
-
-;;//;; ----------------------------------------------------------------------
-;;//;; 	tune-package ...
-;;//;; ----------------------------------------------------------------------
-;;//(define (tune-package package dir)
-;;//  (let* ((pdir  (make-path dir (package-name package)))
-;;//	 (tuner (make-path pdir "stklos" "tuning.stk")))
-;;//    (when (file-exists? tuner)
-;;//      (tune-package-scheme (package-name package) pdir tuner))))
+;;//(define (tune-package pkg dir)
 ;;//
-;;//;; ----------------------------------------------------------------------
-;;//;; 	tune-package-scheme ...
-;;//;; ----------------------------------------------------------------------
-;;//(define (tune-package-scheme name dir tuner)
-;;//
-;;//  (define (find-src name)
-;;//    (let ((snow (make-path dir (format "~a.snow" name)))
-;;//	  (scm  (make-path dir (format "~a.scm" name))))
-;;//      (cond
-;;//	((file-exists? snow) snow)
-;;//	((file-exists? scm)  scm)
-;;//	(else (die (format "cannot find the source of package ~s" name))))))
+;;//  (define (maybe-overwrite suffix)
+;;//    (let* ((name   (package-name pkg))
+;;//	   (pdir   (make-path dir name))
+;;//	   (tundir (make-path pdir "stklos")))
+;;//      (when (file-is-directory? tundir)
+;;//	;; If the tune directory has a file with given suffix, use it
+;;//	(let* ((src    (format "~a.~a" name suffix))
+;;//	       (tuning (make-path tundir src)))
+;;//	  (when (file-exists? tuning)
+;;//	    (when (> (stklos-pkg-verbosity) 0)
+;;//	      (eprintf "   Overwriting ~s with tuning file\n" (basename tuning)))
+;;//	    (copy-file tuning (make-path pdir src)))))))
 ;;//  
-;;//  (let ((src (find-src name)))
-;;//    (when (> (stklos-pkg-verbosity) 0)
-;;//      (eprintf "Start tuning of file ~s\n" src))
-;;//    (let ((in (open-file src "r")))
-;;//      (unless in
-;;//	(die (format "cannot open source file ~s" src)))
+;;//  (maybe-overwrite "spi")
+;;//  (maybe-overwrite "scm"))
 ;;//
-;;//      ;; Read the source file
-;;//      (let ((decl (parse-package-interface in))
-;;//	    (body (port->sexp-list in)))
-;;//	(tune src
-;;//	      name
-;;//	      tuner
-;;//	      dir
-;;//	      decl
-;;//	      body))
-;;//      (close-port in))))
-;;//
-;;//;; ----------------------------------------------------------------------
-;;//;; 	tune ...
-;;//;; ----------------------------------------------------------------------
-;;//(define *package* '())
-;;//(define *body* '())
-;;//(define *dir* #f)
-;;//
-;;//
-;;//(define (tune src name tuner packagedir pkgdecl body)
-;;//  (set! *package* pkgdecl)
-;;//  (set! *body* body)
-;;//  (set! *dir* packagedir)
-;;//  (with-handler (lambda (c)
-;;//		  (eprintf "error while tuning package ~s\n" package)
-;;//		  (raise c))
-;;//     (load tuner))
-;;//  ;; Rename the src to src.orig
-;;//  (rename-file src (string-append src ".orig"))
-;;//  ;; Rewrite the package
-;;//  (let ((out (open-file src "w")))
-;;//    (unless out
-;;//      (die (format "Cannot open output file ~s for tuning" src)))
-;;//    (fprintf out ";; This file was automatically generated on ~a\n" (date))
-;;//    (fprintf out ";; This is a STklos tuning for package ~a\n" name)
-;;//    ;; Output the dclaration
-;;//    (pp *package* :port out);
-;;//    (newline out)
-;;//    ;; Output the body
-;;//    (for-each (lambda (x) (pp x :port out) (newline out))
-;;//	      *body*)))
-;;//
-;;//;;;; =============================================================================
-;;//;;;;
-;;//;;;; 	Tuning functions
-;;//;;;;
-;;//;;;; ======================================================================
-;;//
-;;//;; ----------------------------------------------------------------------
-;;//;; 	stklos-pkg-tune-package-declaration! ...
-;;//;; ----------------------------------------------------------------------
-;;//(define (stklos-pkg-tune-package-declaration! proc)
-;;//  (let ((res (proc *package* "" *dir*)))
-;;//    (unless (eq? res (void))
-;;//      (set! *package* res)))
-;;//  *package*)
-;;//
-;;//;; ----------------------------------------------------------------------
-;;//;; 	stklos-pkg-tune-body! ...
-;;//;; ----------------------------------------------------------------------
-;;//(define (stklos-pkg-tune-body! proc)
-;;//  (let ((res (proc *body* "" *dir*)))
-;;//    (unless (eq? res (void))
-;;//      (set! *body* res)))
-;;//  *body*)
-;;//
-;;//
-;;//(define (stklos-pkg-subst-definitions src replacements)
-;;//
-;;//  (define (replace orig id)
-;;//    (let ((c (assq id replacements)))
-;;//      (if (pair? c)
-;;//	  (cadr c)
-;;//	  orig)))
-;;//
-;;//  (map (lambda (orig)
-;;//	 (match-case orig
-;;//	   (((or define* define) (and ?id (? symbol?)) . ?-)
-;;//	    (replace orig id))
-;;//	   (((or define* define define-macro* define-macro)
-;;//	     ((and ?id (? symbol?)) . ?-) . ?-)
-;;//	    (replace orig id))
-;;//	   ((define-record* ?id . ?-)
-;;//	    (replace orig id))
-;;//	   (else
-;;//	    orig)))
-;;//       src))
-;;//
-;;//;;// 
-;;//;;// ;; ----------------------------------------------------------------------
-;;//;;// ;; 	stklos-pkg-replace-package-provide! ...
-;;//;;// ;; ----------------------------------------------------------------------
-;;//;;// (define (stklos-pkg-replace-package-provide! src replacements)
-;;//;;//   (%stklos-pkg-replace-definitions! src replacements))
-;;//;;// 
-;;//;;// ;; ----------------------------------------------------------------------
-;;//;;// ;; 	stklos-pkg-replace-body-definitions! ...
-;;//;;// ;; ----------------------------------------------------------------------
-;;//;;// (define (stklos-pkg-replace-body-definitions! src replacements)
-;;//;;//   (%stklos-pkg-replace-definitions! src replacements))
-;;//
-;;//
+
+(define (tune-package pkg dir)
+  (let* ((name (package-name pkg))
+	 (pdir (make-path dir name))
+	 (tdir (make-path pdir "stklos")))
+    (when (> (stklos-pkg-verbosity) 0)
+      (eprintf "  Starting package ~a tuning\n" name))
+    (tune-package-stk!  pkg name pdir tdir)
+    (tune-package-spi!  pkg name pdir tdir)
+    (tune-package-body! pkg name pdir tdir)))
+
+
+;; ----------------------------------------------------------------------
+;; 	tune-package-stk! ...
+;; ----------------------------------------------------------------------
+(define (tune-package-stk! pkg name pdir tdir)
+  (let* ((stk  (string-append name ".stk"))
+	 (fstk (make-path tdir stk)))
+    (when (file-exists? fstk)
+      (when (> (stklos-pkg-verbosity) 0)
+	(eprintf "    - Overwriting the given package by pure STklos code\n"))
+      (copy-file fstk (make-path pdir stk))
+      (with-output-to-file (make-path pdir (string-append name ".spi"))
+	(lambda ()
+	  (printf ";; File generated by STklos tuning. ** DO NOT EDIT **\n")
+	  (printf "(include ~S)\n" stk))))))
+
+
+;; ----------------------------------------------------------------------
+;; 	tune-package-spi! ...
+;; ----------------------------------------------------------------------
+(define (tune-package-spi! pkg name pdir tdir)
+  (let* ((spifile (string-append name ".spi"))
+	 (tspi    (make-path tdir spifile)))
+    (if (file-exists? tspi)
+      (begin
+	;; substitute the whole spi file
+	(when (> (stklos-pkg-verbosity) 0)
+	  (eprintf "    - Overwriting the given spi file\n"))
+	(copy-file tspi (make-path pdir spifile)))
+      ;; See if we have a pkg-after.spi file
+      (let ((after (make-path tdir (string-append name "-after.spi"))))
+	(when (file-exists? after)
+	  ;; add clauses after the original interface declaration
+	  (when (> (stklos-pkg-verbosity) 0)
+	    (eprintf "    - Adding tuning clauses\n"))
+	  (let ((spi (file->string (make-path pdir spifile)))
+		(add (file->string after)))
+	    ;; Replace the last closing parenthesis by a newline and add
+	    ;; the content of the after file at the end 
+	    (let ((new (regexp-replace "(?s)(.*)\\)(.*)" spi "\\1\n\\2")))
+	      (with-output-to-file (make-path pdir spifile)
+		(lambda ()
+		  (print new)
+		  (printf ";; *** Code added during tuning ***\n")
+		  (print add)
+		  (print ")"))))))))))
+
+;; ----------------------------------------------------------------------
+;; 	tune-package-body! ...
+;; ----------------------------------------------------------------------
+(define (tune-package-body! pkg  name pdir tdir)
+  (let* ((suffix  (package-suffix pkg))
+	 (scmfile (string-append name suffix))
+	 (tscm    (make-path tdir scmfile)))
+    (if (file-exists? tscm)
+      (begin
+	;; substitute the whole scm file
+	(when (> (stklos-pkg-verbosity) 0)
+	  (eprintf "    - Overwriting package body\n"))
+	(copy-file tscm (make-path pdir scmfile)))
+      (let ((ovd (make-path tdir (string-append name "-override.stk")))
+	    (bef (make-path tdir (string-append name "-before.stk")))
+	    (aft (make-path tdir (string-append name "-after.stk"))))
+
+	(when (file-exists? bef)
+	  ;; add the before body.
+	  (when (> (stklos-pkg-verbosity) 0)
+	    (eprintf "    - Adding code before body\n"))
+	  (let* ((sfil (make-path pdir scmfile))
+		 (add (file->string bef))
+		 (old (file->string sfil)))
+	    (with-output-to-file sfil
+	      (lambda ()
+		(printf ";; *** Code added during tuning (before code)\n")
+		(display add)
+		(print ";; *** original code ***\n")
+		(display old)
+		(newline)))))
+
+	(when (file-exists? aft)
+	  ;; add the after body at the end of the source
+	  (when (> (stklos-pkg-verbosity) 0)
+	    (eprintf "    - Adding code after body\n"))
+	  (let* ((sfil (make-path pdir scmfile))
+		 (add (file->string aft))
+		 (old (file->string sfil)))
+	    (with-output-to-file sfil
+	      (lambda ()
+		(display old)
+		(printf ";; *** Code added during tuning (after code)\n")
+		(display add)
+		(newline)))))
+
+	(when (file-exists? ovd)
+	  ;; override the body
+	  (when (> (stklos-pkg-verbosity) 0)
+	    (eprintf "    - Override some definitions of body\n"))
+	  (body-override tdir pdir scmfile ovd))))))
+
+;; ----------------------------------------------------------------------
+;; 	body-override ...
+;; ----------------------------------------------------------------------
+(define (body-override tdir pdir scmfile override)
+
+  (define (get-def-ident exp)
+    (match-case exp
+       ((@undef ?var)
+	var)
+       ((define (and ?var (or (? symbol?) (? keyword?))) . ?-)
+	var)
+       (((or @define define define-macro) (?var . ?-) . ?-)
+	var)
+       ((define-syntax ?var . ?-)
+	var)
+       ((define-record (or (and ?var (? symbol?))
+			   ((and ?var (? symbol?)) ?-))
+	  . ?-)
+	var)))
+
+  (let ((defs (make-hash-table))
+	(tscmfile (make-path tdir scmfile))
+	(pscmfile (make-path pdir scmfile)))
+    ;; during a first pass, read all the definitions
+    (with-input-from-file override
+      (lambda ()
+	(let loop ()
+	  (let ((e (read)))
+	    (unless (eof-object? e)
+	      (let ((i (get-def-ident e)))
+		(when i
+		  (hash-table-put! defs i i))
+		(loop)))))))
+	     
+    ;; get the commented definitions position
+    (let ((pos (with-input-from-file pscmfile
+		 (lambda ()
+		   (let loop ((pos '()))
+		     (let ((e (%read)))
+		       (if (eof-object? e)
+			 (reverse! pos)
+			 (let ((i (get-def-ident e)))
+			   (if (and i (hash-table-get defs i #f))
+			     (loop (cons (%epair-line e) pos))
+			     (loop pos))))))))))
+
+      ;; build the new source file
+      (with-output-to-file tscmfile
+	(lambda ()
+	  ;; comment the definitions
+	  (with-input-from-file pscmfile
+	    (lambda ()
+	      (let loop ((line 1)
+			 (pos pos))
+		(cond
+		  ((null? pos)
+		   (copy-port (current-input-port) (current-output-port)))
+		  ((= (car pos) line)
+		   (display "#;")
+		   (print (read-line))
+		   (loop (+ line 1) (cdr pos)))
+		  (else
+		   (print (read-line))
+		   (loop (+ line 1) pos))))))
+	  ;; write the new definitions
+	  (print ";; *** overriden definitions ***")
+	  (print '(define-macro (@undef . args) #f))
+	  (display (file->string override))
+	  (newline)))
+      ;; switch the files
+      (remove-file pscmfile)
+      (rename-file tscmfile pscmfile))))
