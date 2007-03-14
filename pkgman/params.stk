@@ -21,12 +21,18 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 16:23 (eg)
-;;;; Last file update:  8-Mar-2007 19:40 (eg)
+;;;; Last file update: 14-Mar-2007 11:38 (eg)
 ;;;;
 
 
 (define stklos-pkg-directory
   (make-parameter (expand-file-name "~/.stklos/pkg")))
+
+(define stklos-ext-directory
+  (make-parameter (expand-file-name "~/.stklos/ext")))
+
+(define stklos-ext-db-directory
+  (make-parameter (expand-file-name "~/.stklos/ext/extensions"))) 
 
 (define stklos-pkg-servers-directory
   (make-parameter (make-path (stklos-pkg-directory) "servers")))

@@ -1,11 +1,11 @@
 # Makefile for stklos-pkgman
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 22-Dec-2006 12:00 (eg)
-# Last file update:  5-Mar-2007 12:00 (eg)
+# Last file update: 14-Mar-2007 12:41 (eg)
 
 
 makefiledir=  $(prefix)/etc/stklos
-makefile_DATA= etc/Makefile-stklospkg.tmpl
+makefile_DATA= etc/Makefile-scmpkg.tmpl
 
 bin_SCRIPTS = stklos-pkg
 

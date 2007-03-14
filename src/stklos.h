@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 23-Feb-2007 15:40 (eg)
+ * Last file update: 14-Mar-2007 15:14 (eg)
  */
 
 
@@ -279,9 +279,10 @@ struct primitive_obj {
 
 
 #define ENTER_PRIMITIVE(x)     /* here for compability with pre 0.62 version */
-#define ADD_PRIMITIVE(_name)   STk_add_primitive(CPP_CONCAT(&STk_o_, _name))
 #define THE_PRIMITIVE(_name)   ((SCM) CPP_CONCAT(&STk_o_, _name))
-
+#define ADD_PRIMITIVE(_name)   STk_add_primitive(CPP_CONCAT(&STk_o_, _name))
+#define ADD_PRIMITIVE_IN_MODULE(_name, _mod) \
+  		 STk_add_primitive_in_module(CPP_CONCAT(&STk_o_, _name), _mod)
 
 /*
   ------------------------------------------------------------------------------
@@ -577,6 +578,7 @@ extern int STk_interactive_debug;
 
 char *STk_strdup(const char *s);
 void STk_add_primitive(struct primitive_obj *o);
+void STk_add_primitive_in_module(struct primitive_obj *o, SCM module);
 SCM STk_eval_C_string(char *str, SCM module);
 SCM STk_read_from_C_string(char *str);
 

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 30-Jan-2007 18:38 (eg)
+ * Last file update: 14-Mar-2007 14:56 (eg)
  */
 
 #include "stklos.h"
@@ -55,8 +55,18 @@ void STk_add_primitive(struct primitive_obj *o)
   SCM symbol;
 
   symbol = STk_intern(o->name);
-  STk_define_variable(symbol, (SCM) o, STk_current_module());
+  STk_define_variable(symbol, (SCM) o, STk_STklos_module);
 }
+
+void STk_add_primitive_in_module(struct primitive_obj *o, SCM module)
+{
+  SCM symbol;
+
+  symbol = STk_intern(o->name);
+  STk_define_variable(symbol, (SCM) o, module);
+}
+
+
 
 
 SCM STk_eval_C_string(char *str, SCM module)

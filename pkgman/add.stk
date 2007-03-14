@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Jan-2007 16:59 (eg)
-;;;; Last file update: 19-Feb-2007 12:44 (eg)
+;;;; Last file update: 14-Mar-2007 10:11 (eg)
 ;;;;
 
 
@@ -106,13 +106,13 @@
 	     (cdr val))
 	'())))
   
-  (let ((lang   (get-value 'language "r5rs"))
+  (let ((lang   (get-value 'language 'r5rs))
 	(cat    (get-value 'category "misc"))
 	(descr  (get-value 'description "N/A"))
 	(author (get-value 'author "none")))
     `(interface ,(format "~a" package)
        :version ,version
-       :language ,@lang
+       :language ,(if (pair? lang) lang (list lang))
        :category ,@cat
        :url #f
        :path ,(make-path (stklos-pkg-cache-directory) (basename pkgball))
