@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update: 10-Mar-2007 10:06 (eg)
+;;;; Last file update: 13-Mar-2007 16:22 (eg)
 ;;;;
 
 
@@ -42,7 +42,7 @@
 (define (%new-scmpkg-package name)
   (make-scmpkg-package name		; name
 		       'v0.0.0		; version
-		       'r5rs		; language
+		       '(r5rs)		; language
 		       #f		; source
 		       #f		; suffix
 		       '()		; imports
@@ -121,7 +121,8 @@
 (define (parse-interface name body)
 
   (define (choose-language pkg lang)
-    (let ((info (assoc lang *scmpkg-languages*)))
+    (let* ((lang (if (pair? lang) (car lang) lang))
+	   (info (assoc lang *scmpkg-languages*)))
       (unless info
 	(error 'interface "Language ~S is not managed" lang))
       ;; Set the language
@@ -167,7 +168,7 @@
 		(match-case clause
 		  ((version  ?version)
 		   (set! (scmpkg-package-version pkg) version))
-		  ((language ?lg)
+		  ((language . ?lg)
 		   (set! (scmpkg-package-language pkg) lg))
 		  ((source ?src)
 		   (set! (scmpkg-package-source pkg) src))
