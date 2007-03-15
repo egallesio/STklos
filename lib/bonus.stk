@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  8-Mar-2007 20:25 (eg)
+;;;; Last file update: 15-Mar-2007 16:07 (eg)
 ;;;;
 
 ;;
@@ -927,23 +927,17 @@ doc>
 doc>
 |#
 (define (%port->list reader p)
-  (unless (or (input-port? p) (input-string-port? p))
-     (error 'port->list "bad port ~S" p))
+  (unless (input-port? p) (error 'port->list "bad port ~S" p))
   ;; Read all the lines of port and put them in a list
   (let loop ((res '()) (sexp (reader p)))
     (if (eof-object? sexp) 
 	(values (reverse res))
 	(loop (cons sexp res) (reader p)))))
  
-
 (define (port->string p)
-  (unless (or (input-port? p) (input-string-port? p))
-     (error 'port->string "bad port ~S" p))
-  (let loop ((res '()))
-    (let ((line (read-line p)))
-      (if (eof-object? line)
-          (values (apply string-append (reverse res)))
-	  (loop (cons "\n" (cons line res)))))))
+  (unless (input-port? p) (error "bad port ~S" p))
+  (with-output-to-string
+    (lambda () (copy-port p (current-output-port)))))
 
 (define (port->sexp-list p) 
   (%port->list read p))
