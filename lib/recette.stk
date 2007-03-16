@@ -1,0 +1,119 @@
+;;;;
+;;;; recette.stk	-- Port of Bigloo Snow recette to STklos
+;;;; 
+;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Manuel Serrano
+;;;;    Creation date: 16-Mar-2007 15:59 (eg)
+;;;; Last file update: 16-Mar-2007 16:28 (eg)
+;;;;
+
+(require "pp")
+
+(define-module recette
+  (export run-tests
+	  recette-add-test!)
+	  
+(define *tests* '())
+
+;; ----------------------------------------------------------------------
+;;	run-tests ...
+;; ----------------------------------------------------------------------
+(define (run-tests . tests)
+   
+  (define success 0)
+  (define failure '())
+
+  (define (error-notify e)
+    (pp e))
+   
+  (define (test name prgm res)
+    (printf "~a ... " name)
+    (flush-output-port (current-output-port))
+    (let ((provided (with-handler
+		     (lambda (e)
+		       (if (eq? res :error)
+			 res
+			 (begin
+			   (error-notify e)
+			   e)))
+		     (prgm))))
+      (if (or (eq? res '__unspecified__)
+	      (and (procedure? res) (res provided))
+	      (equal? res provided))
+	(begin
+	  (set! success (+ 1 success))
+	  (display "ok.\n"))
+	(begin
+	  (set! failure (cons name failure))
+	  (display "error.\n")
+	  (printf "   ==> provided: [~S]\n" provided)
+	  (printf "       expected: [~S]\n" (if (procedure? res)
+					      (res 'result)
+					      res))))))
+  
+  (for-each (lambda (pvn) (apply test pvn))
+	    (if (null? tests)
+	      (reverse *tests*)
+	      (reverse (filter (lambda (t) (memq (car t) tests)) *tests*))))
+  
+  (printf "\n~A tests executed ...\n" (if (null? tests) "All" (length tests)))
+  (if (null? failure)
+    (display "  all succeeded\n")
+    (printf "  ~a succeeded\n  ~a failed: ~s\n"
+	    success (length failure) (reverse failure))))
+
+;; ----------------------------------------------------------------------
+;;	recette-add-test! ...
+;; ----------------------------------------------------------------------
+(define *recette-mutex* (make-mutex "recette-mutex"))
+
+(define (recette-add-test! t)
+  (dynamic-wind
+      (lambda () (mutex-lock! *recette-mutex*))
+      (lambda () (set! *tests* (cons t *tests*)))
+      (lambda () (mutex-unlock! *recette-mutex*))))
+
+)  ;;; *** End of module recette ***
+
+;; ----------------------------------------------------------------------
+;; 	define-test ...
+;; ----------------------------------------------------------------------
+(select-module STklos)
+(%redefine-module-exports (find-module 'recette))
+
+(define-macro (define-test id prgm . rest)
+  (let ((t (cond
+	     ((null? rest)
+	      `(list ',id (lambda () ,prgm) '__unspecified__))
+	     ((and (pair? rest)
+		   (eq? (car rest) :result)
+		   (pair? (cdr rest))
+		   (null? (cddr rest)))
+	      `(list ',id (lambda () ,prgm) ,(cadr rest)))
+	     ((and (pair? rest)
+		   (eq? (car rest) :error)
+		   (null? (cdr rest)))
+	      `(list ',id (lambda () ,prgm) :error))
+	     (else
+	      (error 'define-test "illegal rest argument ~S" rest)))))
+    
+    `(recette-add-test! ,t)))
+
+(provide "recette")
