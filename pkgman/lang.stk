@@ -1,5 +1,5 @@
 ;;;;
-;;;; scmpkg-languages.stk	-- ScmPkg Languages support
+;;;; lang.stk	-- ScmPkg languages
 ;;;; 
 ;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -20,19 +20,8 @@
 ;;;; USA.
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
-;;;;    Creation date:  7-Feb-2007 13:39 (eg)
-;;;; Last file update: 21-Mar-2007 14:28 (eg)
+;;;;    Creation date: 21-Mar-2007 14:31 (eg)
+;;;; Last file update: 21-Mar-2007 14:31 (eg)
 ;;;;
 
-(define *scmpkg-languages*
-  '(
-    ;; STklos
-    (stklos :suffix "stk")
-    ;; Bigloo
-    (bigloo :suffix "scm")
-    ;; Snow
-    (snow   :suffix "scm")
-    ;; ScmPkg
-    (scmpkg :suffix "scm")
-    ;; R5RS (the default)
-    (r5rs :suffix "scm")))
+(include "lang-bigloo.stk")

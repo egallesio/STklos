@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  8-Mar-2007 13:57 (eg)
+;;;; Last file update: 21-Mar-2007 14:57 (eg)
 ;;;;
 
 (include "runtime.stk")	; Definition necessary for the bootstrap
@@ -53,6 +53,7 @@
 (autoload	 "pp"		pp pretty-print)
 (autoload	 "env"		null-environment scheme-report-environment
 			        interaction-environment)
+(autoload	 "lex-rt"	lexer-next-token)
 ;(syntax-autoload "snow-support" package*)
 (syntax-autoload "scmpkg-support" interface)
 (autoload	 "srfi-27"  random-integer random-real)

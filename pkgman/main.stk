@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update:  8-Mar-2007 20:03 (eg)
+;;;; Last file update: 21-Mar-2007 14:32 (eg)
 ;;;;
 
 (require "getopt")
@@ -35,6 +35,8 @@
 (include "repository.stk")
 (include "pkgball.stk")
 (include "add.stk")
+(include "rewrite.stk")
+(include "lang.stk")
 (include "tune.stk")
 (include "extract.stk")
 (include "misc.stk")

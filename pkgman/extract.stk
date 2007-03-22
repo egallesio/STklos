@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Jan-2007 12:10 (eg)
-;;;; Last file update: 16-Mar-2007 17:08 (eg)
+;;;; Last file update: 22-Mar-2007 11:40 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -53,16 +53,18 @@
 
   (define (build-test-target)
     (let ((spi (format "~a-test.spi" package)))
-      (when (file-exists? (make-path package "test" spi))
-	(printf "test:  $(OBJS)\n")
-	(printf "\t(cd ~a; $(SCC) $(SFLAGS) -L ../.. -o ../../~a.ostk ~a)\n"
-		(make-path package "test")
-		(format "~a-test" package)
-		spi)
-	(printf "\techo 'Running test'\n")
-	(printf "\tstklos -l ~a -e '(begin (import ~a-test) (run-tests))'\n\n"
-		(format "~a-test.ostk" package)
-		package))))
+      (printf "test:  $(OBJS)\n")
+      (if (file-exists? (make-path package "test" spi))
+	(begin
+	  (printf "\t(cd ~a; $(SCC) $(SFLAGS) -L ../.. -o ../../~a.ostk ~a)\n"
+		  (make-path package "test")
+		  (format "~a-test" package)
+		  spi)
+	  (printf "\techo 'Running test'\n")
+	  (printf "\tstklos -l ~a -e '(begin (import ~a-test) (run-tests))'\n\n"
+		  (format "~a-test.ostk" package)
+		  package))
+	(printf "\t@echo '**** No test provided with package ~A'\n" package))))
        
   ;;;
   ;;; write-extract-file starts here
@@ -108,6 +110,8 @@
       (unless (file-exists? pkgball)
 	(die (format "cannot find pkgball in cache ~s" (basename pkgball))))
       (untar pkgball dir)
+      ;; Eventually rewrite package with its specialized preprocessor
+      (rewrite-package pkg dir)
       ;; if the package has a tuning extract it too.
       (when tuning
 	(let ((tuneball (tuning-path tuning)))

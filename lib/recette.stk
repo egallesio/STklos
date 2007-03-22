@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Manuel Serrano
 ;;;;    Creation date: 16-Mar-2007 15:59 (eg)
-;;;; Last file update: 16-Mar-2007 16:28 (eg)
+;;;; Last file update: 19-Mar-2007 14:40 (eg)
 ;;;;
 
 (require "pp")
@@ -64,6 +64,8 @@
 	  (set! failure (cons name failure))
 	  (display "error.\n")
 	  (printf "   ==> provided: [~S]\n" provided)
+	  (when (condition? provided)
+	    (describe provided))
 	  (printf "       expected: [~S]\n" (if (procedure? res)
 					      (res 'result)
 					      res))))))

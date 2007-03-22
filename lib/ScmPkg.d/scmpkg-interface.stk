@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update: 13-Mar-2007 16:22 (eg)
+;;;; Last file update: 21-Mar-2007 15:07 (eg)
 ;;;;
 
 
@@ -59,8 +59,11 @@
 
 
 (define *ignored-interface-clauses*
-  '(maintainer author description keywords license homepage snow))
-						 
+  (append
+      ;; meta-informations
+      '(maintainer author description keywords license homepage snow)
+      ;; Language specifics meta-informations
+      (map car *scmpkg-languages*)))						 
 
 ;; ======================================================================
 ;;	interface ...
