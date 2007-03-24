@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update: 21-Mar-2007 14:32 (eg)
+;;;; Last file update: 24-Mar-2007 16:14 (eg)
 ;;;;
 
 (require "getopt")
@@ -72,9 +72,8 @@
 	(set! actions (cons 'clear-cache actions)))
        (("add" :alternate "a" :arg sb
 	 :help "Add <sb> pkgball to the local repository")
-	(local-description-add! sb)
-	(exit 0))
-       
+	(set! actions (cons (list 'add sb) actions)))
+
        "Misc"
        (("directory" :arg dir :alternate "C"
 	 :help "Change to directory <dir> when extracting")
@@ -142,5 +141,10 @@
 	  ((package-deps)
 	     (for-each (lambda (x) (printf "~a\n" x))
 		       (package-deps* (cadar actions))))
+	  ((add)
+	   (local-description-add!(cadar actions))
+	   (exit 0))
+       
+
 	  (else (error "bad command ~S" (car actions))))
 	(loop (cdr actions))))))

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Manuel Serrano
 ;;;;    Creation date: 16-Mar-2007 15:59 (eg)
-;;;; Last file update: 19-Mar-2007 14:40 (eg)
+;;;; Last file update: 22-Mar-2007 17:23 (eg)
 ;;;;
 
 (require "pp")
@@ -43,7 +43,7 @@
   (define (error-notify e)
     (pp e))
    
-  (define (test name prgm res)
+  (define (test name prgm res equal)
     (printf "~a ... " name)
     (flush-output-port (current-output-port))
     (let ((provided (with-handler
@@ -54,9 +54,8 @@
 			   (error-notify e)
 			   e)))
 		     (prgm))))
-      (if (or (eq? res '__unspecified__)
-	      (and (procedure? res) (res provided))
-	      (equal? res provided))
+      (if (or (and (procedure? res) (res provided))
+	      (equal res provided))
 	(begin
 	  (set! success (+ 1 success))
 	  (display "ok.\n"))
@@ -94,6 +93,7 @@
 
 )  ;;; *** End of module recette ***
 
+
 ;; ----------------------------------------------------------------------
 ;; 	define-test ...
 ;; ----------------------------------------------------------------------
@@ -103,19 +103,34 @@
 (define-macro (define-test id prgm . rest)
   (let ((t (cond
 	     ((null? rest)
-	      `(list ',id (lambda () ,prgm) '__unspecified__))
-	     ((and (pair? rest)
-		   (eq? (car rest) :result)
-		   (pair? (cdr rest))
-		   (null? (cddr rest)))
-	      `(list ',id (lambda () ,prgm) ,(cadr rest)))
+	      `(list ',id (lambda () ,prgm) #f (lambda (x y) #t)))
 	     ((and (pair? rest)
 		   (eq? (car rest) :error)
 		   (null? (cdr rest)))
-	      `(list ',id (lambda () ,prgm) :error))
+	      `(list ',id (lambda () ,prgm) :error equal?))
 	     (else
-	      (error 'define-test "illegal rest argument ~S" rest)))))
-    
+	      (let loop ((rest rest)
+			 (result #f)
+			 (comp 'equal?))
+		(cond
+		  ((null? rest)
+		   `(list ',id (lambda () ,prgm) ,result ,comp))
+		  ((null? (cdr rest))
+		   (error 'define-test "Illegal argument" rest))
+		  (else
+		   (case (car rest)
+		     ((:result)
+		      (loop (cddr rest)
+			    (cadr rest)
+			    comp))
+		     ((:equal)
+		      (loop (cddr rest)
+			    result
+			    (cadr rest)))
+		     (else
+		      (error 'define-test
+			     "Illegal rest argument"
+			     rest))))))))))
     `(recette-add-test! ,t)))
-
+  
 (provide "recette")

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 21-Mar-2007 13:57 (eg)
-;;;; Last file update: 22-Mar-2007 11:44 (eg)
+;;;; Last file update: 22-Mar-2007 17:14 (eg)
 ;;;;
 
 (include "lang-bigloo.inc")
@@ -40,10 +40,11 @@
 	      (display token)
 	      (loop (lexer-next-token lex))))))))
 
-  (let ((tmp (temporary-file-name)))
-    (do-rewrite src tmp)
-    (copy-file tmp src)
-    (remove-file tmp)))
+  (when (file-exists? src)
+    (let ((tmp (temporary-file-name)))
+      (do-rewrite src tmp)
+      (copy-file tmp src)
+      (remove-file tmp))))
   
 ;;;
 ;;; Register this language

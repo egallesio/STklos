@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 17:44 (eg)
-;;;; Last file update:  4-Mar-2007 12:26 (eg)
+;;;; Last file update: 24-Mar-2007 16:18 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -46,7 +46,7 @@
 ;*---------------------------------------------------------------------*/
 (define (parse-pkgball-name name)
   (let ((res (regexp-match  "(_*[^_]+)_*([a-z]+)*-([0-9]+.[0-9]+.[0-9]+).tar.gz"
-			    name)))
+			    (basename name))))
     (if res
       (values (cadr res) (caddr res) (cadddr res))
       (values #f #f #f))))

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update: 14-Mar-2007 10:15 (eg)
+;;;; Last file update: 24-Mar-2007 16:39 (eg)
 ;;;;
 
 
@@ -298,8 +298,8 @@
 	    ((and (equal? (car item) type)
 		  (equal? (cadr item) name)
 		  (equal? (key-get (cddr item) :version "0.0.0") version))
-	     (Loop (cdr lst)
-		   (cons item res)))
+	     (cons descr
+		   (append res (cdr lst))))
 	    (else
 	     (Loop (cdr lst)
 		   (cons (car lst) res))))))))
@@ -313,4 +313,5 @@
       ;; save the new version
       (with-output-to-file repo
 	(lambda ()
+	  (display ";; Generated -*- scheme -*- file. *DO NOT EDIT*\n\n")
 	  (pp new :port #t)))))
