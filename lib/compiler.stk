@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  8-Mar-2007 14:01 (eg)
+;;;; Last file update:  3-Apr-2007 22:12 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -180,16 +180,12 @@ doc>
 ;				DEFINE
 ;
 ; ======================================================================
-
-(define *known-globals* '())
 (define *forward-globals* '())
 
 (define (known-var? symbol)
-  (or (symbol-bound? symbol) (memq symbol *known-globals*)))
+  (or (symbol-bound? symbol)
+      (memq symbol (compiler-known-globals))))
 
-(define (new-global symbol)
-  (unless (memq symbol *known-globals*)
-    (set! *known-globals* (cons symbol *known-globals*))))
 
 (define (compiler-warn-undef symbol epair)
   (compiler-warning (void) epair "reference to undefined symbol ~S" symbol))
@@ -201,7 +197,7 @@ doc>
        (set! *forward-globals* (cons (cons symbol epair) *forward-globals*)))
       ((compiler:warn-use-undefined)
        (compiler-warn-undef symbol epair)
-       (new-global symbol))))) 		; to avoid multiple warnings
+       (register-new-global! symbol))))) 	; to avoid multiple warnings
 
 
 (define (compiler-show-undefined-symbols)
@@ -210,12 +206,9 @@ doc>
 		    (where  (cdr x)))
 		(unless (known-var? symbol)
 		  (compiler-warn-undef symbol where)
-		  (new-global symbol)))) ;; to avoid multiple warnings
+		  (register-new-global! symbol)))) ;; to avoid multiple warnings
 	    *forward-globals*)
   (set! *forward-globals* '()))
-
-(define (compiler-known-globals)
-  *known-globals*)
 
 
 
@@ -238,7 +231,7 @@ doc>
 	(if (null? env)
 	    (if (symbol? who)
 		(begin
-		  (new-global who)
+		  (register-new-global! who)
 		  (compile (caddr l) '() args #f)
 		  (emit 'DEFINE-SYMBOL (fetch-constant who)))
 		(compiler-error 'define args "bad variable name ~S" who))
@@ -1420,7 +1413,7 @@ doc>
 ;;;;
 ;;;; Utilities for REQUIRE / REQUIRE-FOR-SYNTAX
 ;;;; 
-(define (find-file-informations file eventually-compile?)
+(define (find-file-informations file lib-only? eventually-compile?)
 
   (define (compile-and-find-infos path)
     (let ((tmp (temporary-file-name)))
@@ -1430,22 +1423,27 @@ doc>
 	(set! infos (key-set! infos :nature 'source))
 	infos)))
 
-  (let ((path (find-path file)))
+  (let ((path (find-path file
+			 (if lib-only?
+			     (list (make-path (%library-prefix)
+					      "share" "stklos"
+					      (version)))
+			     (load-path)))))
     (if path
-      (let ((infos (%file-informations path)))
-	(if (and eventually-compile?
-		 (eq? (key-get infos :nature 'unknown) 'source))
-	  ;; We have a source file (i.e. we have no info, compile it to have them)
-	  (parameterize ((compiler:time-display #f))
-	      (compile-and-find-infos path))
-	  infos))
-      '())))
+        (let ((infos (%file-informations path)))
+	  (if (and eventually-compile?
+		   (eq? (key-get infos :nature 'unknown) 'source))
+	      ;; We have a source file (i.e. no info, compile it to have them)
+	      (parameterize ((compiler:time-display #f))
+		 (compile-and-find-infos path))
+	      infos))
+	'())))
 
 
 (define (import-file-informations infos)
   (when (pair? infos)
     ;; Register all the global symbols of the file
-    (for-each new-global (key-get infos :globals '()))
+    (for-each register-new-global! (key-get infos :globals '()))
     ;; Install the expanders of the required file
     (for-each (lambda (x)
 		(let* ((name     (car x))
@@ -1462,9 +1460,10 @@ doc>
   ;; We just try to add the globals of the file to the list of known
   ;; globals. This is very empiric, but it avoids to add too much false
   ;; warning when compiling a file using another one.
-  (when (and (= (length e) 2)
-	     (string? (cadr e)))
-    (let ((infos (find-file-informations (cadr e) #f)))
+  (when (and (= (length e) 3)
+	     (string? (cadr e))
+	     (boolean? (caddr e)))
+    (let ((infos (find-file-informations (cadr e) (caddr e) #f)))
       (import-file-informations infos)))
 
   (compile-normal-call (car e) (cdr e) (length e) env e tail))
@@ -1479,9 +1478,8 @@ doc>
      (with-handler
          (lambda (c) (eprintf "*** Exception while required-for-syntax ~S\n" e)
 		     (raise c))
-	 (let ((infos (find-file-informations (cadr e) #t)))
-	   (when (pair? infos)
-	     (import-file-informations infos))
+	 (let ((infos (find-file-informations (cadr e) (load-path) #t)))
+	   (import-file-informations infos)
 	   (void)))
      (error 'require-for-syntax "bad form ~S" e)))
 
@@ -1564,7 +1562,7 @@ doc>
 	  ((define-macro) 	(compile-define-macro   e env tail?))
 	  
 	  ;; Special calls
-	  ((require)		(compile-require	e env tail?))
+	  ((%%require)		(compile-require	e env tail?))
 	  ((%%require4syntax)	(compile-require4syntax e env tail?))
 	  ((%%when-compile)	(compile-when-compile   e env tail?))
 	  ((%%include)		(compile-include	e env tail?))

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; object.stk	-- -- A variation of the Gregor Kickzales Tiny CLOS for STklos
 ;;;; 
-;;;; Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update: 19-Dec-2006 10:11 (eg)
+;;;; Last file update:  3-Apr-2007 10:43 (eg)
 
 
 #|
@@ -71,9 +71,6 @@
 (define extended-lambda->lambda		;; Compiler function used here
   (in-module STKLOS-COMPILER extended-lambda->lambda))
 
-(define new-global
-  (in-module STKLOS-COMPILER new-global))
-
 
 (define class-redefinition (void))	;; forward declaration
 
@@ -114,9 +111,9 @@
 	      (let ((getter   (slot-definition-getter   s))
 		    (setter   (slot-definition-setter   s))
 		    (accessor (slot-definition-accessor s)))
-		(when getter   (new-global getter))
-		(when setter   (new-global setter))
-		(when accessor (new-global accessor))))
+		(when getter   (register-new-global! getter))
+		(when setter   (register-new-global! setter))
+		(when accessor (register-new-global! accessor))))
 	    slots)
   slots)
 
@@ -368,7 +365,7 @@
       (ensure-class
         ',name					; name
 	',supers				; supers
-	',(declare-slots slots)		; slots 
+	',(declare-slots slots)			; slots 
 	,(or (key-get options :metaclass #f)	; metaclass
 	     `(ensure-metaclass ',supers))
 	,@options)))

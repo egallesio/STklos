@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 16-Feb-2007 16:26 (eg)
+;;;; Last file update:  3-Apr-2007 20:34 (eg)
 ;;;;
 
 
@@ -239,6 +239,10 @@ doc>
       '()
       `(%module-import (current-module) ',modules)))
 
+
+
+(define-macro (export-syntax . arg)
+  #f)
 ;;=============================================================================
 ;;
 ;; 				EXPORT
@@ -263,18 +267,22 @@ doc>
 (define (%module-export exporter symbols)
   (let Loop ((l symbols) (res (module-exports exporter)))
     (if (null? l)
-	(%module-exports-set! exporter res)
-	(if (symbol? (car l))
-	    (Loop (cdr l)
-		  (if (memq (car l) res)
-		      res			; already exported
-		      (cons (car l) res)))	; add it to our result
-	    (error 'export "bad symbol `~S'" (car l))))))
+      (%module-exports-set! exporter res)
+      (if (symbol? (car l))
+	(Loop (cdr l)
+	      (if (memq (car l) res)
+		res			; already exported
+		(cons (car l) res)))	; add it to our result
+	(error 'export "bad symbol `~S'" (car l))))))
 
 (define-macro (export . symbols)
   (if (null? symbols)
     '()
-    `(%module-export (current-module) ',symbols)))
+    (begin
+      ;; Hack to avoid useless message. This can declare too much symbols
+      (for-each (lambda (x) (when symbol? x) (register-new-global! x))
+		symbols)
+      `(%module-export (current-module) ',symbols))))
 
 ;;=============================================================================
 ;;

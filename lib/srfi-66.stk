@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-66.stk	-- Octet Vectors
 ;;;; 
-;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Dec-2005 20:15 (eg)
-;;;; Last file update: 15-Dec-2005 20:23 (eg)
+;;;; Last file update:  3-Apr-2007 23:25 (eg)
 ;;;;
 
 (require "srfi-4")
@@ -50,8 +50,8 @@
     (and (= size (u8vector-length v2))
 	 (let Loop ((i 0))
 	   (or (>= i size)
-	       (and (= (u8vector-ref v1)
-		       (u8vector-ref v2))
+	       (and (= (u8vector-ref v1 i)
+		       (u8vector-ref v2 i))
 		    (Loop (+ 1 i))))))))
 
 (define (u8vector-compare v1 v2)

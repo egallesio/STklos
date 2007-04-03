@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-13.stk		-- Implementation of SRFI-13
 ;;;; 
-;;;; Copyright © 2002-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  5-Jun-2002 19:20 (eg)
-;;;; Last file update:  6-Nov-2006 10:28 (eg)
+;;;; Last file update:  3-Apr-2007 13:59 (eg)
 ;;;;
 
 (require "srfi-14")
@@ -196,7 +196,7 @@
        (res '() (cons (string-ref str i) res)))
       ((< i start) res)))
       
-(define (  char-list)
+(define (reverse-list->string char-list)
   (list->string (reverse char-list)))
 
 
@@ -290,6 +290,32 @@
     (check-arg (lambda (val) (and (integer? n) (<= 0 n len))) n string-drop-right)
     (%substring/shared s 0 (- len n))))
 
+(define (string-trim s :optional (criterion char-set:whitespace)
+		     (start 0)
+		     (end (string-length s)))
+  (%check-indexes start end s 'string-trim)
+  (cond ((string-skip s criterion start end) =>
+	 (lambda (i) (%substring/shared s i end)))
+	(else "")))
+
+(define (string-trim-right s :optional (criterion char-set:whitespace)
+			   (start 0)
+			   (end (string-length s)))
+  (%check-indexes s start end  'string-trim-right)
+  (cond ((string-skip-right s criterion start end) =>
+	 (lambda (i) (%substring/shared s 0 (+ 1 i))))
+	(else "")))
+
+(define (string-trim-both s :optional (criterion char-set:whitespace)
+			  (start 0)
+			  (end (string-length s)))
+  (%check-indexes s start end  'string-trim-both)
+  (cond ((string-skip s criterion start end)
+	 =>
+	 (lambda (i)
+	   (%substring/shared s i (+ 1 (string-skip-right s criterion i end)))))
+	(else "")))
+
 (define (string-pad str n :optional (char #\space) (start 0) (end -1))
   (%check-indexes str start end 'string-pad)
   (check-arg (lambda (n) (and (integer? n) (<= 0 n))) n 'string-pad)
@@ -309,6 +335,8 @@
 	(let ((res (make-string n char)))
 	  (%string-copy! res 0 str start end)
 	  res))))
+
+
 ;;;; ======================================================================
 ;;;;
 ;;;;				M O D I F I C A T I O N
