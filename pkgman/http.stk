@@ -77,7 +77,7 @@
 	     ;; copy the content of the url on output
 	     (copy-port in output)
 	     (socket-shutdown s #t))
-	  ((regexp-match "[Hh][Tt][Tt][Pp].* +301 +.*" line)
+	  ((regexp-match "[Hh][Tt][Tt][Pp].* +307 +.*" line)
 	     ;; Page has moved
 	     (redirect-url server port user s))
 	  (else 	   

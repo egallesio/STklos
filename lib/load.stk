@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 11-Feb-2007 21:52 (eg)
+;;;; Last file update:  3-Apr-2007 08:37 (eg)
 ;;;;
 
 
@@ -289,6 +289,7 @@ doc>
 (define provide   #f)
 (define provided? #f)
 (define require/provide #f)
+(define require-library #f)
 
 (let ((provided '()))
   (set! require   (lambda (what)
@@ -308,6 +309,17 @@ doc>
 		    (unless (member what provided)
 		      (set! provided (cons what provided)))
 		    what))
+  (set! require-library
+    		  (lambda (what)
+		    (unless (member what provided)
+		      (let ((fname (make-path (%library-prefix)
+					      "share" "stklos" (version)
+					      (string-append what ".ostk"))))
+			(if (file-exists? fname)
+			  (begin
+			    (load fname)
+			    (provide what))
+			  (error "cannot require file ~S" fname))))))
   
   (set! provided? (lambda (what)
 		    (and (member what provided) #t))))

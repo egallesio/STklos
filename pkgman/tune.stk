@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Manuel Serrano
 ;;;;    Creation date: 18-Jan-2007 16:44 (eg)
-;;;; Last file update: 20-Mar-2007 16:26 (eg)
+;;;; Last file update: 27-Mar-2007 16:26 (eg)
 ;;;;
 
 ;; Most of the code her was given by Manuel Serrano.
@@ -106,6 +106,12 @@
 	    (bef (make-path tdir (string-append name "-before.stk")))
 	    (aft (make-path tdir (string-append name "-after.stk"))))
 
+	(when (file-exists? ovd)
+	  ;; override the body
+	  (when (> (stklos-pkg-verbosity) 0)
+	    (eprintf "    - Override some definitions of body\n"))
+	  (body-override tdir pdir scmfile ovd))
+	
 	(when (file-exists? bef)
 	  ;; add the before body.
 	  (when (> (stklos-pkg-verbosity) 0)
@@ -133,13 +139,7 @@
 		(display old)
 		(printf ";; *** Code added during tuning (after code)\n")
 		(display add)
-		(newline)))))
-
-	(when (file-exists? ovd)
-	  ;; override the body
-	  (when (> (stklos-pkg-verbosity) 0)
-	    (eprintf "    - Override some definitions of body\n"))
-	  (body-override tdir pdir scmfile ovd))))))
+		(newline)))))))))
 
 ;; ----------------------------------------------------------------------
 ;; 	body-override ...

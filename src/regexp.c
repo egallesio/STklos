@@ -1,7 +1,7 @@
 /*
  * regexp.c	-- STklos Regexps
  * 
- * Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 24-Nov-2000 10:35 (eg)
- * Last file update: 25-Apr-2005 17:18 (eg)
+ * Last file update: 24-Mar-2007 22:19 (eg)
  */
 
 #include "stklos.h"
@@ -160,9 +160,11 @@ DEFINE_PRIMITIVE("regexp?", regexpp, subr1, (SCM obj))
  * @end lisp
 doc>
 */
+#define MAX_PMATCH 30
+
 static SCM regexec_helper(SCM re, SCM str, int pos_only)
 {
-  regmatch_t pmatch[10];
+  regmatch_t pmatch[MAX_PMATCH+1];
   int i, ret, depth, max;
   SCM result;
 
@@ -172,7 +174,7 @@ static SCM regexec_helper(SCM re, SCM str, int pos_only)
 
   if (!STRINGP(str)) error_bad_string(str);
 
-  ret = PCRE_regexec(&REGEXP_BUFFER(re), STRING_CHARS(str), 10, pmatch, 0);
+  ret = PCRE_regexec(&REGEXP_BUFFER(re), STRING_CHARS(str), MAX_PMATCH, pmatch, 0);
 
   if (ret) {
     if (ret == REG_NOMATCH) /* No match ==> #f */ return STk_false;
@@ -181,7 +183,7 @@ static SCM regexec_helper(SCM re, SCM str, int pos_only)
 
   result = STk_nil;
   depth  = REGEXP_DEPTH(re);
-  max    = (depth < 10) ? (depth + 1) : 10;
+  max    = (depth < MAX_PMATCH) ? (depth + 1) : MAX_PMATCH;
   
   for(i=0; i < max; i++) {
     int from = pmatch[i].rm_so;
