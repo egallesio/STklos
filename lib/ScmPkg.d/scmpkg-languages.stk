@@ -21,19 +21,23 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  7-Feb-2007 13:39 (eg)
-;;;; Last file update: 23-Mar-2007 08:43 (eg)
+;;;; Last file update:  6-Apr-2007 16:41 (eg)
 ;;;;
 
 (define *scmpkg-languages*
   '(
     ;; Bigloo
     (bigloo :suffix "scm")
+    ;; Chicken
+    (chicken :suffix "scm")
     ;; Gambit
     (gambit :suffix "scm")
     ;; ScmPkg
     (scmpkg :suffix "scm")
     ;; R5RS (the default)
     (r5rs :suffix "scm")
+    ;; R6RS
+    (r6rs :suffix "scm")
     ;; Snow
     (snow   :suffix "scm")
     ;; STklos

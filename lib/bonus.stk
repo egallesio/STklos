@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 15-Mar-2007 16:07 (eg)
+;;;; Last file update:  4-Apr-2007 15:22 (eg)
 ;;;;
 
 ;;
@@ -1433,7 +1433,8 @@ doc>
 |#
 (define-macro (case-lambda . clauses)
   (let ((len  (gensym))
-	(args (gensym)))
+	(args (gensym))
+	(compute-arity (in-module STKLOS-COMPILER compute-arity)))
     `(lambda ,args
        (let ((,len (length ,args)))
 	 (cond 

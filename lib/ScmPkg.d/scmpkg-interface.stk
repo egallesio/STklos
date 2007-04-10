@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update: 21-Mar-2007 15:07 (eg)
+;;;; Last file update:  9-Apr-2007 19:30 (eg)
 ;;;;
 
 
@@ -71,10 +71,13 @@
 (define-macro (interface name . body)
 
   (define (find-imports lang imp)
-    (if (member lang '(r5rs stklos))
-      imp
-      (cons (string->symbol (format "@~a" lang)) imp)))
-
+    (let ((main (car lang)))
+      (if (member main '(r5rs stklos))
+	  imp
+	  (append! (cons (string->symbol (format "@~a" main))
+			 (map (lambda (x) (string->symbol (format "@~a-~a" main x)))
+			      (cdr lang)))
+		   imp))))
     
   (let* ((pi  (in-module  |ScmPkg| parse-interface))
 	 (pkg (pi name body))
@@ -124,10 +127,10 @@
 (define (parse-interface name body)
 
   (define (choose-language pkg lang)
-    (let* ((lang (if (pair? lang) (car lang) lang))
-	   (info (assoc lang *scmpkg-languages*)))
+    (let* ((lg   (if (pair? lang) (car lang) lang))
+	   (info (assoc lg *scmpkg-languages*)))
       (unless info
-	(error 'interface "Language ~S is not managed" lang))
+	(error 'interface "Language '~S' is not managed" lg))
       ;; Set the language
       (set! (scmpkg-package-language pkg) lang)
       ;; Set the default suffix

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update: 24-Mar-2007 16:14 (eg)
+;;;; Last file update:  8-Apr-2007 12:22 (eg)
 ;;;;
 
 (require "getopt")
@@ -101,7 +101,7 @@
   (if  (and (condition? c) (condition-has-type? c &error-message))
     (let ((who (condition-ref c 'location))
 	  (msg (condition-ref c 'message)))
-      
+      (describe c)
       (format (current-error-port)
 	      "**** ERROR: ~a~a\n"
 	      msg
