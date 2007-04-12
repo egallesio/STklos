@@ -3,7 +3,7 @@
 #
 # stklos-ext-installer		-- STklos extension installer
 # 
-# Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+# Copyright © 2005-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 # 
 # 
 # This program is free software; you can redistribute it and/or modify
@@ -23,11 +23,11 @@
 # 
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 18-Mar-2005 14:51 (eg)
-# Last file update: 28-Dec-2005 16:32 (eg)
+# Last file update: 12-Apr-2007 15:06 (eg)
 #
 
 
-function usage()
+usage()
 {
     echo "Usage: $0 pkg file dir mode
 where
@@ -48,7 +48,7 @@ DIR=$3
 MODE=$4
 
 # Create the destination directory
-if [ $UID = 0 ] ;then
+if [ `id -u` -eq 0 ] ;then
     DEST=`stklos-config -p`/$DIR
     DB=`stklos-config -p`/share/stklos/extensions
 else 
@@ -69,7 +69,7 @@ fi
 chmod $MODE $DEST/$FILE
 
 # Retain in our DB that this file was installed 
-if [ $UID = 0 ] ;then
+if [ `id -u` -eq 0 ] ;then
     DBDIR=`stklos-config -p`/share/stklos/extensions
 else 
     DBDIR=$HOME/.stklos/ext/extensions

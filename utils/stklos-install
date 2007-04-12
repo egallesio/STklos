@@ -22,7 +22,7 @@
 # 
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 18-Mar-2005 13:26 (eg)
-# Last file update: 12-Apr-2007 12:12 (eg)
+# Last file update: 12-Apr-2007 15:05 (eg)
 #
 
 DISTURL="http://www.stklos.net/download/extensions"
@@ -34,7 +34,7 @@ opt_uninstall=0
 # ----------------------------------------------------------------------
 # 	Usage ...
 # ----------------------------------------------------------------------
-function usage()
+usage()
 {
     cat <<EOF
 Usage: stklos-setup [OPTIONS] package
@@ -50,7 +50,7 @@ EOF
 # ----------------------------------------------------------------------
 # 	trace ...
 # ----------------------------------------------------------------------
-function trace()
+trace()
 {
     case $TERM in 
 	vt100|xterm*|rxvt|urxvt*) begin="[1;32m"; end="[0m" ;;
@@ -62,7 +62,7 @@ function trace()
 # ----------------------------------------------------------------------
 # 	try-fetch ...
 # ----------------------------------------------------------------------
-function try_fetch()
+try_fetch()
 {
     pkg=$1
     trace "Package $pkg is absent. Try to fetch it from $DISTURL" 
@@ -75,7 +75,7 @@ function try_fetch()
 # ----------------------------------------------------------------------
 # 	die ...
 # ----------------------------------------------------------------------
-function die()
+die()
 {
     echo $1 >&2
     exit 1
@@ -85,9 +85,9 @@ function die()
 # ----------------------------------------------------------------------
 # 	find_prefix ...
 # ----------------------------------------------------------------------
-function find_prefix()
+find_prefix()
 {
-    if [ $UID = 0 ] ;then 
+    if [ `id -u` -eq 0 ] ;then 
 	echo "`stklos-config --prefix`/share/stklos/extensions"
     else
 	echo $HOME/.stklos/ext/extensions
@@ -98,7 +98,7 @@ function find_prefix()
 # ----------------------------------------------------------------------
 # 	install_package ...
 # ----------------------------------------------------------------------
-function install_package()
+install_package()
 {
     pkg=$1
     TMP=/tmp/stklos-setup-$$
@@ -116,7 +116,7 @@ function install_package()
 	exit 1
     fi
     
-    if [ $UID = 0 ] ;then 
+    if [ `id -u` -eq 0 ] ;then 
 	prefix=`stklos-config --prefix`
     else
 	mkdir -p $HOME/.stklos
@@ -145,7 +145,7 @@ function install_package()
 # ----------------------------------------------------------------------
 # 	uninstall_package ...
 # ----------------------------------------------------------------------
-function uninstall_package()
+uninstall_package()
 {
     pkg=$1
     
@@ -175,7 +175,7 @@ function uninstall_package()
 # ----------------------------------------------------------------------
 # 	list_extensions ...
 # ----------------------------------------------------------------------
-function list_extensions()
+list_extensions()
 {
     trace "Available extensions:"
     DIR=`find_prefix`
