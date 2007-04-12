@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 10-Jan-2007 11:09 (eg)
+ * Last file update: 11-Apr-2007 15:41 (eg)
  *
  */
 #include <ctype.h>
@@ -189,6 +189,11 @@ void STk_print(SCM exp, SCM port, int mode)
     case tc_string:
       printstring(exp, port, mode);
       return;
+    case tc_box:		/* Should never occur in user code */
+      STk_putc('{', port);
+      STk_print(BOX_VALUE(exp), port, mode);
+      STk_putc('}', port);
+      break;
     case tc_subr0:       /* ==================> Utiliser un type étendu //FIXME */
     case tc_subr1:
     case tc_subr2:

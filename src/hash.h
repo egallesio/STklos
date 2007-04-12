@@ -2,7 +2,7 @@
  *
  * h a s h  . h			-- Hash Tables 
  *
- * Copyright © 1994-2000 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -34,7 +34,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 14-Dec-2000 22:50 (eg)
+ * Last file update: 11-Apr-2007 17:58 (eg)
  */
 
 
@@ -95,6 +95,7 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s,
  */
 SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v, int *index);
 void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value);
+void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value);
 
 /*
  * Utilities on hash tables

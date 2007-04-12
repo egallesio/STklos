@@ -2,7 +2,7 @@
  *
  * e n v . c			-- Environment management
  *
- * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 19-Dec-2006 10:11 (eg)
+ * Last file update: 11-Apr-2007 18:03 (eg)
  */
 
 #include "stklos.h"
@@ -340,7 +340,7 @@ DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol, &i);
   if (res) {
-    return CDR(res);
+    return BOX_VALUE(CDR(res));
   } else {
     if (!default_value) error_unbound_variable(symbol);
     return default_value;
@@ -370,7 +370,7 @@ DEFINE_PRIMITIVE("%redefine-module-exports", redefine_module_exports, subr12,
     res = STk_hash_get_variable(&MODULE_HASH_TABLE(from), CAR(lst), &i);
     if (res)
       /* symbol (car lst) is bound in module from. redefine it in module to */
-      STk_define_variable(CAR(lst), CDR(res), to);
+      STk_define_variable(CAR(lst), BOX_VALUE(CDR(res)), to);
   }
   return STk_void;
 }
@@ -419,6 +419,26 @@ DEFINE_PRIMITIVE("%symbol-define", symbol_define, subr3,
   return value;
 }
 
+DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23, 
+		 (SCM new, SCM old, SCM module))
+{
+  SCM res, mod = STk_current_module();;
+  int i;
+  
+  if (!SYMBOLP(new)) error_bad_symbol(new);
+  if (!SYMBOLP(old)) error_bad_symbol(old);
+  if (!module) 
+    module = mod;
+  else 
+    if (!MODULEP(module)) error_bad_module(module);
+
+  res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), old, &i);
+  if (!res)
+    error_unbound_variable(old);
+
+  STk_hash_set_alias(&MODULE_HASH_TABLE(mod), new, CDR(res));
+  return STk_void;
+}
 
 
 /*===========================================================================*\
@@ -435,7 +455,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol, &i);
   if (res) {
     *ref = res;
-    return CDR(res);
+    return BOX_VALUE(CDR(res));
   }
   else {
     /* symbol was not found in the given env module. Try to find it in
@@ -446,7 +466,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
       res    = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol, &i);
       if (res && VISIBLE_P(symbol, module)) {
 	*ref = res;
-	return CDR(res);
+	return BOX_VALUE(CDR(res));
       }
     }
     
@@ -516,8 +536,9 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_symbols);
   ADD_PRIMITIVE(all_modules);
 
-  ADD_PRIMITIVE(symbol_define);
   ADD_PRIMITIVE(symbol_value);
+  ADD_PRIMITIVE(symbol_define);
+  ADD_PRIMITIVE(symbol_alias);
   
 
   return TRUE;

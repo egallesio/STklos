@@ -2,7 +2,7 @@
  *
  * h a s h  . c			-- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 12-Apr-2006 12:43 (eg)
+ * Last file update: 11-Apr-2007 17:57 (eg)
  */
 
 #include "stklos.h"
@@ -357,6 +357,32 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value)
 
   if (z) {
     /* Variable already exists. Change its value*/
+    BOX_VALUE(CDR(z)) = value;
+  } else {
+    SCM z;
+    
+    /* Create a new box or this value */
+    NEWCELL(z, box); BOX_VALUE(z) = value;
+
+    
+    /* Enter the new variable in table */
+    HASH_BUCKETS(h)[index] = STk_cons(STk_cons(v, z),
+				      HASH_BUCKETS(h)[index]);
+    HASH_NENTRIES(h) += 1;
+    /* If the table has exceeded a decent size, rebuild it */
+    if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
+  }
+}
+
+void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value)
+{
+  SCM z;
+  int index;
+
+  z = STk_hash_get_variable(h, v, &index);
+
+  if (z) {
+    /* Variable already exists. Change its value*/
     CDR(z) = value;
   } else {
     /* Enter the new variable in table */
@@ -367,6 +393,8 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value)
     if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
   }
 }
+
+
 
 
 /*===========================================================================*\

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 14-Mar-2007 15:14 (eg)
+ * Last file update: 11-Apr-2007 16:43 (eg)
  */
 
 
@@ -179,7 +179,7 @@ typedef enum {
   tc_hash_table, tc_port, tc_frame, tc_next_method, tc_promise, 	/* 25 */
   tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,	/* 30 */
   tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex, 		/* 35 */
-  tc_condv,								/* 40 */
+  tc_condv, tc_box,							/* 40 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -408,6 +408,14 @@ void STk_signal(char *str);
   ----
   ------------------------------------------------------------------------------
 */
+struct box_obj {	/* A simple box (used for global variables */
+  stk_header header;
+  SCM value;
+};
+#define BOXP(p) 	(BOXED_TYPE_EQ((p), tc_box))
+#define BOX_VALUE(p)	(((struct box_obj *) (p))->value)
+
+
 struct frame_obj {		
   stk_header header;
   SCM next_frame;

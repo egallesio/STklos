@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 23-Feb-2007 23:01 (eg)
+ * Last file update: 11-Apr-2007 17:16 (eg)
  */
 
 // INLINER values
@@ -885,10 +885,10 @@ CASE(GLOBAL_REF) {
 
   vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
   /* patch the code for optimize next accesses */
-  MUT_LOCK(global_lock);
-  vm->pc[-2]  = (vm->pc[-2] == GLOBAL_REF) ? UGLOBAL_REF: PUSH_UGLOBAL_REF;
-  vm->pc[-1]  = add_global(&CDR(ref));
-  MUT_UNLOCK(global_lock);
+//§  MUT_LOCK(global_lock);
+//§  vm->pc[-2]  = (vm->pc[-2] == GLOBAL_REF) ? UGLOBAL_REF: PUSH_UGLOBAL_REF;
+//§  vm->pc[-1]  = add_global(&CDR(ref));
+//§  MUT_UNLOCK(global_lock);
   NEXT1;
 }
 
@@ -905,10 +905,10 @@ CASE(GLOBAL_REF_PUSH) {
 
   push(STk_lookup(fetch_const(), vm->env, &ref, TRUE));
   /* patch the code for optimize next accesses */
-  MUT_LOCK(global_lock);
-  vm->pc[-2]  = UGLOBAL_REF_PUSH;
-  vm->pc[-1]  = add_global(&CDR(ref));
-  MUT_UNLOCK(global_lock);
+//§  MUT_LOCK(global_lock);
+//§  vm->pc[-2]  = UGLOBAL_REF_PUSH;
+//§  vm->pc[-1]  = add_global(&CDR(ref));
+//§  MUT_UNLOCK(global_lock);
   NEXT1;
 }
 CASE(UGLOBAL_REF_PUSH) { 
@@ -927,10 +927,10 @@ CASE(GREF_INVOKE) {
   vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
   nargs   = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  MUT_LOCK(global_lock);
-  vm->pc[-3]  = (vm->pc[-3] == GREF_INVOKE)? UGREF_INVOKE : PUSH_UGREF_INVOKE;
-  vm->pc[-2]  = add_global(&CDR(ref));
-  MUT_UNLOCK(global_lock);
+//§  MUT_LOCK(global_lock);
+//§  vm->pc[-3]  = (vm->pc[-3] == GREF_INVOKE)? UGREF_INVOKE : PUSH_UGREF_INVOKE;
+//§  vm->pc[-2]  = add_global(&CDR(ref));
+//§  MUT_UNLOCK(global_lock);
 
   /*and now invoke */
   tailp=FALSE; goto FUNCALL;
@@ -954,11 +954,11 @@ CASE(GREF_TAIL_INVOKE) {
   vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
   nargs   = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  MUT_LOCK(global_lock);
-  vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ? 
-    			UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
-  vm->pc[-2]  = add_global(&CDR(ref));
-  MUT_UNLOCK(global_lock);
+//§  MUT_LOCK(global_lock);
+//§  vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ? 
+//§    			UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
+//§  vm->pc[-2]  = add_global(&CDR(ref));
+//§  MUT_UNLOCK(global_lock);
 
   /* and now invoke */
   tailp=TRUE; goto FUNCALL;
@@ -1036,12 +1036,12 @@ CASE(GLOBAL_SET) {
   SCM ref;
   
   STk_lookup(fetch_const(), vm->env, &ref, TRUE);
-  CDR(ref) = vm->val;
+  BOX_VALUE(CDR(ref)) = vm->val;
   /* patch the code for optimize next accesses */
-  MUT_LOCK(global_lock);
-  vm->pc[-2] = UGLOBAL_SET;
-  vm->pc[-1] = add_global(&CDR(ref));
-  MUT_UNLOCK(global_lock);
+//§  MUT_LOCK(global_lock);
+//§  vm->pc[-2] = UGLOBAL_SET;
+//§  vm->pc[-1] = add_global(&CDR(ref));
+//§  MUT_UNLOCK(global_lock);
   NEXT0;
 }
 CASE(UGLOBAL_SET) { /* Never produced by compiler */
@@ -1295,16 +1295,14 @@ CASE(MAKE_EXPANDER) {
   SCM name = fetch_const();
   SCM ref, val;
 
-  STk_lookup(STk_intern("*expander-list*"), STk_current_module(), &ref, TRUE);
-
-  val = CDR(ref);
+  val = STk_lookup(STk_intern("*expander-list*"), STk_current_module(), &ref, TRUE);
   if ( ! (CONSP(val) &&CONSP(CDR(val)) && (CAR(CAR(val)) == name)) ) {
     /* We are just compiling this macro, so it is already entered in the 
      * table of expanders by the compiler. Don't add it twice. 
      * Note: if this test is false, this is probably that wa are reading 
      * back a bytecode file and the macro must be entered in the table 
      */
-    CDR(ref) = STk_cons(STk_cons(name, vm->val), val);
+    BOX_VALUE(CDR(ref)) = STk_cons(STk_cons(name, vm->val), val);
   }
   vm->valc    = 2;
   vm->val     = STk_void;
