@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update:  3-Apr-2007 10:41 (eg)
+;;;; Last file update: 13-Apr-2007 09:45 (eg)
 ;;;;
 
 
@@ -37,6 +37,24 @@
    ((null? (car l)) '())
    ((pair? (car l)) (apply fn (map car l)) (apply for-each* fn (map cdr l)))
    (else            (apply fn l))))
+
+
+(define (filter-map func . args)
+  (filter (lambda (x) x)
+	  (apply map func args)))
+
+(define (append-map proc . args)
+  (apply append (apply map proc args)))
+
+(define (append-map! proc . args)
+  (apply append! (apply map proc args)))
+
+
+#| example
+  (filter-map (lambda (x) (and (number? x) (+ x 1)))
+	    '(1 2 foo "bar" 7))
+                 
+|#
 
 ;; ----------------------------------------------------------------------
 ;;	management of globals ...

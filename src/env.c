@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 11-Apr-2007 18:03 (eg)
+ * Last file update: 13-Apr-2007 11:09 (eg)
  */
 
 #include "stklos.h"
@@ -263,7 +263,7 @@ DEFINE_PRIMITIVE("module-name", module_name, subr1, (SCM module))
 <doc EXT module-imports
  * (module-imports module)
  *
- * Returns the list of modules that |module| imports.
+ * Returns the list of modules that |module| (fully) imports. 
 doc>
  */
 DEFINE_PRIMITIVE("module-imports", module_imports, subr1, (SCM module))

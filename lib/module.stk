@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  3-Apr-2007 20:34 (eg)
+;;;; Last file update: 13-Apr-2007 11:00 (eg)
 ;;;;
 
 
@@ -200,22 +200,38 @@ doc>
  *   (define b 'M1-b))
  * 
  * (define-module M2
- *   (export b c)
+ *   (export b c d)
  *   (define b 'M2-b)
- *   (define c 'M2-c))
+ *   (define c 'M2-c)
+ *   (define d 'M2-d))
  * 
  * (define-module M3
  *   (import M1 M2)
- *   (display (list a b c)))  @print{} (m1-a m1-b m2-c)
+ *   (display (list a b c d)))  @print{} (M1-a M1-b M2-c M2-d)
  * @end lisp
  *
+ * (define-module M4
+ *   (import M2 M1)
+ *   (display (list a b c d)))  @print{} (M1-a M2-b M2-c M2-d)
+ * @end lisp
+ *
+ * It is also possible to import partially (i.e. not all
+ * exported symbols) from a module, as shown below:
+ * @lisp
+ * (define-module M5
+ *   (import (M2 c d) M1)
+ *   (display (list a b c d)))  @print{} (M1-a M1-b M2-c M2-d)
+ * @end lisp
+ * In this case, only the symbols |c| and |d| are imported from
+ * module |M2|.
+ * £
  * ,(bold "Note:") Importations are not ,(emph "transitive"): when
  * the module ,(emph "C") imports the module ,(emph "B") which is an importer
  * of module ,(emph "A") the symbols of ,(emph "A") are not visible
  * from ,(emph "C"), except  by explicitly importing the ,(emph "A")
  * module from ,(emph "C").
  * £
- * ,(bold "Note:") The module |STklos|, which contains the ,(emph "global
+* ,(bold "Note:") The module |STklos|, which contains the ,(emph "global
  * variables") is always implicitly imported from a module. Furthermore, 
  * this module is always placed at the end of the list of imported modules.
 doc>
@@ -234,15 +250,70 @@ doc>
 			  (cons mod res))) 	 ; add it to our result
 	      (error 'import "module `~S' does not exist" (car l)))))))
 
+(define (%module-aliases module-name symbols)
+  ;; define aliases in the current module of symbols from module-name
+  (let ((module (find-module module-name #f)))
+    (unless module
+      (error 'import "cannot find module ~S" module-name))
+    (let ((exports (module-exports module)))
+      (for-each (lambda (x)
+		  (if (memq x exports)
+		      (%symbol-alias x x module)
+		      (error 'import "symbol ~S is not exported from module ~S"
+			     x module-name)))
+		symbols))))
+
+;;(define-macro (import . modules)
+;;  (if (null? modules)
+;;      '()
+;;      `(%module-import (current-module) ',modules)))
+
 (define-macro (import . modules)
+
+  (define (split-modules lst)
+    (let loop ((lst modules)
+	       (full '())
+	       (part '()))
+      (cond
+	((null? lst)
+	 (values (reverse! full) (reverse! part)))
+	((symbol? (car lst))
+	 ;; full import
+	 (loop (cdr lst)
+	       (cons (car lst) full)
+	       part))
+	((and (pair? (car lst)) (symbol? (caar lst)) (null? (cdar lst)))
+	 ;; a list which contains only a symbol. This is a full import
+	 (loop (cdr lst)
+	       (cons (caar lst) full)
+	       part))
+	((and (pair? (car lst)) (every symbol? (car lst)))
+	 ;; a partial import
+	 (loop (cdr lst)
+	       full
+	       (cons (car lst) part)))
+	(else (error 'import "bad import clause ~S" (car lst))))))
+  
   (if (null? modules)
       '()
-      `(%module-import (current-module) ',modules)))
+      (receive (full part)
+	 (split-modules modules)
+	 (cond
+	   ((null? part)
+	    ;; Only full exports
+	    `(%module-import (current-module) ',full))
+	   ((null? full)
+	    ;; Only partial exports
+	    `(begin
+	       ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x)))
+		      part)))
+	   (else
+	    `(begin
+	       (%module-import (current-module) ',full)
+	       ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x)))
+		      part)))))))
 
 
-
-(define-macro (export-syntax . arg)
-  #f)
 ;;=============================================================================
 ;;
 ;; 				EXPORT
@@ -283,6 +354,10 @@ doc>
       (for-each (lambda (x) (when symbol? x) (register-new-global! x))
 		symbols)
       `(%module-export (current-module) ',symbols))))
+
+
+(define-macro (export-syntax . arg)
+  #f)
 
 ;;=============================================================================
 ;;

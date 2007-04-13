@@ -2,17 +2,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Dec-2006 10:09 (eg)
-# Last file update: 28-Feb-2007 22:58 (eg)
+# Last file update: 12-Apr-2007 18:34 (eg)
 
-SRCS =  scmpkg-define.stk    \
-	scmpkg-exception.stk \
-	scmpkg-interface.stk \
-	scmpkg-languages.stk \
-	scmpkg-parameter.stk \
-	scmpkg-record.stk    \
-	scmpkg-runtime.stk   
-
-OBJ =   scmpkg-support.ostk
+SRCS =  scmpkg-interface.stk scmpkg-languages.stk
+OBJ  =   scmpkg-support.ostk
 
 
 

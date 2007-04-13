@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update:  9-Apr-2007 19:30 (eg)
+;;;; Last file update: 12-Apr-2007 21:24 (eg)
 ;;;;
 
 
@@ -78,44 +78,44 @@
 			 (map (lambda (x) (string->symbol (format "@~a-~a" main x)))
 			      (cdr lang)))
 		   imp))))
+
+  (define (partial-import module symbols)
+    ;; Generate code for importing only some symbols of a module
+    (unless (and (symbol? module)
+		 (list? symbols)
+		 (every symbol? symbols))
+      (error 'interface "bad import ~S" (cons module symbols)))
     
+    `(let ((module (find-module ',module)))
+       ,@(map (lambda(x)`(%symbol-alias ',x ',x module)) symbols)))
+  
+
   (let* ((pi  (in-module  |ScmPkg| parse-interface))
 	 (pkg (pi name body))
 	 (exp (scmpkg-package-exports pkg))
 	 (imp (find-imports
 	       (scmpkg-package-language pkg)
 	       (scmpkg-package-imports pkg))))
+    (eprintf ")==> ~S\n" imp)
     `(begin
        ;; Require scmpkg-support
        (require "scmpkg-support")
        ;; Require all the imported modules
-       ,@(map (lambda (x) `(require-for-syntax ,(symbol->string x)))
+       ,@(map (lambda (x)
+		`(require-for-syntax ,(symbol->string (if (pair? x) (car x) x))))
 	      imp)
-       ,@(map (lambda (x) `(require ,(symbol->string x)))
+       ,@(map (lambda (x) `(require ,(symbol->string (if (pair? x) (car x) x))))
 	      imp)
        ;; Define a module for the scmpkg package
        (define-module ,name
 	 ;; Imports
-	 (import ,@imp)
+	 ,@(map (lambda (x)
+		  (if (pair? x)
+		      (partial-import (car x) (cdr x))
+		      `(import ,x)))
+		imp)
 	 ;; Exports
 	 (export ,@exp)
-;;//	 ;; Define all the macros
-;;//	 ,@(map (lambda (x)
-;;//		  (eprintf "Definition de la macro ~S\n" x)
-;;//		  `(define-macro ,@x))
-;;//		(reverse (scmpkg-package-macros pkg)))
-;;//	 ;; Syntaxes
-;;//	 ,@(map (lambda (x)
-;;//		  (eprintf "Syntax definition ~S\n" x))
-;;//		(reverse (scmpkg-package-syntaxes pkg)))
-;;//	 ;; Exceptions
-;;//	 ,@(map (lambda (x)
-;;//		  `(define-scmpkg-exception ,@x))
-;;//		(reverse (scmpkg-package-exceptions pkg)))
-;;//	 ;; Records
-;;//	 ,@(map (lambda (x)
-;;//		  `(define-exported-record ,(car x) ,@(cdr x)))
-;;//		(reverse (scmpkg-package-records pkg)))
 	 ;; Body
 	 (include ,(scmpkg-package-source pkg)))
        ;; Provide
