@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 13-Apr-2007 11:00 (eg)
+;;;; Last file update: 13-Apr-2007 14:33 (eg)
 ;;;;
 
 
@@ -250,7 +250,7 @@ doc>
 			  (cons mod res))) 	 ; add it to our result
 	      (error 'import "module `~S' does not exist" (car l)))))))
 
-(define (%module-aliases module-name symbols)
+(define (%module-aliases module-name symbols export?)
   ;; define aliases in the current module of symbols from module-name
   (let ((module (find-module module-name #f)))
     (unless module
@@ -261,7 +261,11 @@ doc>
 		      (%symbol-alias x x module)
 		      (error 'import "symbol ~S is not exported from module ~S"
 			     x module-name)))
-		symbols))))
+		symbols)))
+  ;; if export? is true, export the given symbols
+  (when export?
+    (%module-export (current-module) symbols)))
+    
 
 ;;(define-macro (import . modules)
 ;;  (if (null? modules)
@@ -305,7 +309,7 @@ doc>
 	   ((null? full)
 	    ;; Only partial exports
 	    `(begin
-	       ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x)))
+	       ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x) #f))
 		      part)))
 	   (else
 	    `(begin

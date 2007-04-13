@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update: 24-Jan-2007 10:49 (eg)
+ * Last file update: 13-Apr-2007 18:36 (eg)
  */
 
 #include <sys/types.h>
@@ -521,7 +521,7 @@ DEFINE_PRIMITIVE("socket-client?", socket_clientp, subr1, (SCM obj))
  * Returns |#t| if |socket| is a server socket, otherwise returns |#f|.
 doc>
 */
-DEFINE_PRIMITIVE("socket-client?", socket_serverp, subr1, (SCM obj))
+DEFINE_PRIMITIVE("socket-server?", socket_serverp, subr1, (SCM obj))
 {
   return MAKE_BOOLEAN(SOCKETP(obj) && SOCKET_TYPE(obj) == SOCKET_CLIENT);
 }

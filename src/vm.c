@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 12-Apr-2007 17:43 (eg)
+ * Last file update: 13-Apr-2007 12:25 (eg)
  */
 
 // INLINER values
@@ -435,7 +435,7 @@ static int add_global(SCM ref)
   int i;
 
   /* Search this global in the already accessed globals */
-  for (i = 0; i <  checked_globals_used-1; i++) {
+  for (i = 0; i <  checked_globals_used; i++) {
     if (checked_globals[i] == addr) return i;
   }
   

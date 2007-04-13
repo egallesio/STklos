@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update: 12-Apr-2007 21:24 (eg)
+;;;; Last file update: 13-Apr-2007 15:37 (eg)
 ;;;;
 
 
@@ -34,10 +34,7 @@
   imports
   exports
   macros
-  syntaxes
-;;//  exceptions
-;;//  records
-  )
+  syntaxes)
 
 (define (%new-scmpkg-package name)
   (make-scmpkg-package name		; name
@@ -49,8 +46,6 @@
 		       '()		; exports
 		       '()		; macros
 		       '()		; syntaxes
-;;//		       '()		; exceptions
-;;//		       '()		; records
 		       ))
 
 
@@ -79,43 +74,64 @@
 			      (cdr lang)))
 		   imp))))
 
-  (define (partial-import module symbols)
-    ;; Generate code for importing only some symbols of a module
-    (unless (and (symbol? module)
-		 (list? symbols)
-		 (every symbol? symbols))
-      (error 'interface "bad import ~S" (cons module symbols)))
-    
-    `(let ((module (find-module ',module)))
-       ,@(map (lambda(x)`(%symbol-alias ',x ',x module)) symbols)))
-  
+  (define (merge-imports-exports imp exp)
+    ;; When we have a "from" export clauses, add its package to imports
+    (let ((add (filter-map (lambda(x)
+			     (and (pair? x) (eq? (car x) 'from)
+				  (if (= (length x) 2)
+				      (cadr x)
+				      (cdr x))))
+			   exp)))
+      (append imp add)))
 
-  (let* ((pi  (in-module  |ScmPkg| parse-interface))
-	 (pkg (pi name body))
-	 (exp (scmpkg-package-exports pkg))
-	 (imp (find-imports
-	       (scmpkg-package-language pkg)
-	       (scmpkg-package-imports pkg))))
-    (eprintf ")==> ~S\n" imp)
+  (define (do-exports lst)
+    (let loop ((lst lst)
+	       (symbs '())
+	       (aliases '()))
+      (cond
+	((null? lst)
+	 `(begin
+	    (export ,@symbs)
+	    ,@(map (lambda (x)
+		     (if (null? (cdr x))
+			 `(%module-aliases ',(car x)
+					   (module-exports (find-module ',(car x)))
+					   #t)
+			 `(%module-aliases ',(car x) ',(cdr x) #t)))
+		   aliases)))
+	((symbol? (car lst))				; a symbol	
+	 (loop (cdr lst)
+	       (cons (car lst) symbs)
+	       aliases))
+	(else						; (from module ...)
+	 (loop (cdr lst)
+	       symbs
+	       (cons (cdar lst) aliases))))))
+
+  (let* ((pi     (in-module  |ScmPkg| parse-interface))
+	 (pkg    (pi name body))
+	 (imp    (scmpkg-package-imports pkg))
+	 (exp    (reverse (scmpkg-package-exports pkg)))
+	 (lang   (scmpkg-package-language pkg))
+	 (req    (merge-imports-exports imp exp))
+	 (allreq (find-imports lang req))
+	 (allimp (find-imports lang imp)))
+
     `(begin
        ;; Require scmpkg-support
        (require "scmpkg-support")
        ;; Require all the imported modules
        ,@(map (lambda (x)
 		`(require-for-syntax ,(symbol->string (if (pair? x) (car x) x))))
-	      imp)
+	      allreq)
        ,@(map (lambda (x) `(require ,(symbol->string (if (pair? x) (car x) x))))
-	      imp)
+	      allreq)
        ;; Define a module for the scmpkg package
        (define-module ,name
 	 ;; Imports
-	 ,@(map (lambda (x)
-		  (if (pair? x)
-		      (partial-import (car x) (cdr x))
-		      `(import ,x)))
-		imp)
+	 (import ,@allimp)
 	 ;; Exports
-	 (export ,@exp)
+	 ,(do-exports exp)
 	 ;; Body
 	 (include ,(scmpkg-package-source pkg)))
        ;; Provide
@@ -144,14 +160,12 @@
 	    (if (symbol? x)
 	      (%push! exports x)			     ;; export a variable
 	      (match-case x
+		 ((from ?mod . ?rest)			     ;; re-exportation
+		  (%push! exports x))
 		 ((macro . ?rest)			     ;; export a macro
 		  (%push! (scmpkg-package-macros pkg) rest))
 		 ((syntax ?args . ?-)			     ;; export a syntax
 		  (%push! (scmpkg-package-syntaxes pkg) args))
-;;//		 ((exception . ?rest)	     	     	     ;; export an exception
-;;//		  (%push! (scmpkg-package-exceptions pkg) rest))
-;;//		 ((record ?name . ?body)
-;;//		  (%push! (scmpkg-package-records pkg) (cons name body)))
 		 (else
 		  (%push! exports (car x))))))
 	  (scmpkg-package-exports pkg))
