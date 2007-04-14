@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 16-Mar-2007 16:19 (eg)
+# Last file update: 14-Apr-2007 10:44 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d @LURCDIR@
 
@@ -34,6 +34,7 @@ scheme_BOOT = assembler.stk		\
 
 scheme_SRCS = STklos.init		\
 	      bigloo.stk		\
+	      bigmatch.stk		\
 	      compfile.stk 		\
 	      describe.stk		\
 	      env.stk			\
@@ -44,7 +45,6 @@ scheme_SRCS = STklos.init		\
 	      gunzip.stk		\
 	      lex-rt.stk		\
 	      make-C-boot.stk		\
-	      match.stk			\
 	      pp.stk			\
 	      recette.stk		\
 	      slib.stk			\
@@ -72,6 +72,7 @@ scheme_SRCS = STklos.init		\
 	      trace.stk
 
 scheme_OBJS = compfile.ostk		\
+	      bigmatch.ostk		\
 	      full-syntax.ostk		\
 	      full-conditions.ostk 	\
 	      describe.ostk		\
@@ -79,7 +80,6 @@ scheme_OBJS = compfile.ostk		\
 	      getopt.ostk		\
 	      gunzip.ostk		\
 	      lex-rt.ostk		\
-	      match.ostk		\
 	      pp.ostk			\
 	      recette.ostk		\
 	      srfi-1.ostk 		\

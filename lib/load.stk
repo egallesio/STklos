@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update:  3-Apr-2007 20:23 (eg)
+;;;; Last file update: 13-Apr-2007 18:54 (eg)
 ;;;;
 
 
@@ -391,7 +391,7 @@ doc>
        ,@(map (lambda (x)
 		`(define ,x (lambda ,args
 			      (let ((,old ,x))
-				(require ,file)
+				(require-library ,file)
 				(if (eq? ,old ,x)
 				    (error 'autoload "~S has not been defined in ~S"
 					   ',x ,file)
