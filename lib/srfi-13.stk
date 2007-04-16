@@ -29,7 +29,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  5-Jun-2002 19:20 (eg)
-;;;; Last file update:  3-Apr-2007 13:59 (eg)
+;;;; Last file update: 15-Apr-2007 18:10 (eg)
 ;;;;
 
 (require "srfi-14")
@@ -54,6 +54,11 @@
 	  string= string<> string< string> string<= string>=
 	  string-ci= string-ci<> string-ci< string-ci> string-ci<= string-ci>=
 	  string-hash string-hash-ci
+	  ;; Prefixes & suffixes
+	  string-prefix-length string-suffix-length string-prefix-length-ci
+	  string-suffix-length-ci string-prefix? string-suffix?    
+	  string-prefix-ci? string-suffix-ci? 
+
 	  ;; Searching
 	  string-index string-index-right string-skip string-skip-right
 	  string-count string-contains string-contains-ci
@@ -521,13 +526,13 @@
 
 
 (define (string-prefix? s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
-  (%check-indexes s1 start1 end1 'string-prefix? -1)
-  (%check-indexes s2 start2 end2 'string-prefix? -1)
+;  (%check-indexes s1 start1 end1 'string-prefix? -1)
+;  (%check-indexes s2 start2 end2 'string-prefix? -1)
   (%string-prefix? s1 start1 end1 s2 start2 end2 char=?))
 
 (define (string-suffix? s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
-  (%check-indexes s1 start1 end1 'string-prefix? -1)
-  (%check-indexes s2 start2 end2 'string-prefix? -1)
+;  (%check-indexes s1 start1 end1 'string-prefix? -1)
+;  (%check-indexes s2 start2 end2 'string-prefix? -1)
   (%string-suffix? s1 start1 end1 s2 start2 end2 char=?))
 
 (define (string-prefix-ci? s1 s2 :optional (start1 0) (end1 -1)

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  4-Apr-2007 15:22 (eg)
+;;;; Last file update: 14-Apr-2007 15:37 (eg)
 ;;;;
 
 ;;
@@ -291,7 +291,7 @@ doc>
 ;;; Virtual Port functions 
 ;;;
 (define (open-input-virtual :key (read-char #f) (ready? #f) (eof? #f) (close #f))
-  (%open-input-virtual (vector read-char ready? eof? close-port)))
+  (%open-input-virtual (vector read-char ready? eof? close)))
 
 
 (define (open-output-virtual :key (write-char #f) (write-string #f)
