@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Jan-2007 12:10 (eg)
-;;;; Last file update: 26-Mar-2007 13:31 (eg)
+;;;; Last file update: 17-Apr-2007 12:32 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -124,10 +124,10 @@
 
   (let ((pkg  (download-package package))
 	(deps (package-deps* package)))
-    ;; package (as well as its dependencies) is now in the cache.
+    ;; Download all package dependencies
+    (for-each download-package deps)
     ;; extract all its dependencies
-    (for-each (lambda (x) (extract-package (find-package x) dir))
-	      deps)
+    (for-each (lambda (x) (extract-package (find-package x) dir)) deps)
     ;; extract the package itself and (eventually) its tuning
     (extract-package pkg dir)
     ;; Create the Makefile able to build the package

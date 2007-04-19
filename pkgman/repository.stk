@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update: 24-Mar-2007 16:39 (eg)
+;;;; Last file update: 17-Apr-2007 12:31 (eg)
 ;;;;
 
 
@@ -205,16 +205,6 @@
    (let ((pkg (find-package package)))
     (unless pkg
       (die (format "cannot find package ~s in repository" package)))
-    ;; Download dependencies
-    (let ((dep (package-dependencies pkg)))
-      (if (pair? dep)
-	  (for-each (lambda (x)
-		      (let ((name (car x))
-			    (version (cadr x)))
-			(download-package (if (equal? version "*")
-					    name
-					    (string-append name version)))))
-		    dep)))
     ;; Try to find the package in the cache
     (let ((path (package-path pkg)))
       (cache-package-tarball package path (package-url pkg) (package-md5 pkg) #f))
