@@ -1,7 +1,7 @@
 /*
  * r e a d  . c				-- reading stuff
  *
- * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 20-Dec-2006 09:59 (eg)
+ * Last file update: 19-Apr-2007 16:24 (eg)
  *
  */
 
@@ -261,6 +261,38 @@ static SCM read_address(SCM port)
   return (SCM) address;
 }
 
+static SCM read_here_string(SCM port)
+{
+  SCM eof_token = read_token(port, STk_getc(port), TRUE);
+  SCM res, line;
+  int ch, first_line = TRUE;
+
+  if (!SYMBOLP(eof_token)) STk_error("bad symbol for here string ~S", eof_token);
+
+  /* skip the end of line */
+  line = STk_read_line(port);
+  if (!STRINGP(line) || (STRING_SIZE(line) != 0)) 
+    STk_error("enf of line expected after the ~S delimiter", eof_token);
+
+      
+  res = STk_open_output_string();
+  while (1) {
+    line = STk_read_line(port);
+    if (line == STk_eof) 
+      STk_error("eof seen while reading an here-string");
+    else 
+      if (strcmp(STRING_CHARS(line), SYMBOL_PNAME(eof_token)) == 0)
+	break;
+    /* Append the read string to the result */
+    if (first_line) 
+      first_line = FALSE;
+    else
+      STk_putc('\n', res);
+    STk_putstring(line, res);
+  }
+  
+  return STk_get_output_string(res);
+}
 
 static SCM read_cycle(SCM port, int c, int case_significant, int constant)
 /* read a #xx# or #xx= cycle item whose 1st char is in c. */
@@ -593,6 +625,15 @@ static SCM read_rec(SCM port, int case_significant, int constant, int inlist)
 			 continue;
 		       }
 		    }
+  	  case '<': {
+	    	       char c2 = STk_getc(port);
+		       if (c2 == '<' ) 
+			 return read_here_string(port);
+		       else  {
+			 STk_ungetc(c2, port);
+			 goto unknown_sharp;
+		       }
+	  	    }
 	  case 'p':
 	  case 'P': return read_address(port);
 	  case 'S':

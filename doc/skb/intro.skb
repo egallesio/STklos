@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 22-Aug-2005 11:10 (eg)
+;; Last file update: 20-Apr-2007 16:00 (eg)
 ;;
 ;; ======================================================================
 
@@ -131,6 +131,30 @@ keywords ,(q (code ":key")), ,(q (code ":optional")) and
 accepts keywords and optional arguments, to be compatible with
 DSSSL lambdas ,(ref :bib "dsssl:96").]))  ))
 
+;; ----------------------------------------------------------------------
+;; 	Here Strings
+;; ----------------------------------------------------------------------
+(subsection :title "Here Strings"
+   (index "here string")
+   (index "string" :note "here")
+   
+   (p [Here strings permit to easily enter multilines strings in programs. 
+The sequence of characters ,(emph "#<<") starts a here string. The characters 
+following this sequence #<< until a newline character define a terminator for
+the here string. The content of the string includes all characters between 
+the ,(emph "#<<") line and a line whose only content is the specified terminator.
+No escape sequences are recognized between the starting and terminating lines.])
+   (p (bold "Example: ") "the sequence")
+   (pre [
+#<<EOF
+abc
+def
+  ghi
+EOF])
+   (p [is equivalent to the string ])
+   (pre ["abc\\ndef\\n  ghi"]))
+   
+      
 ;; ----------------------------------------------------------------------
 ;; Subsection "Other Notations"
 ;; ----------------------------------------------------------------------

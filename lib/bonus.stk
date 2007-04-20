@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 14-Apr-2007 15:37 (eg)
+;;;; Last file update: 20-Apr-2007 15:58 (eg)
 ;;;;
 
 ;;
@@ -1200,6 +1200,7 @@ doc>
  * (file-suffix "./foo.tar.gz") => "gz"
  * (file-suffix "./a.b/c")      => ""
  * @end lisp
+doc>
 |#
 (define (file-suffix pathname)
   (let ((end (string-length pathname)))
@@ -1224,6 +1225,7 @@ doc>
  * (file-prefix "./foo.tar.gz") => "./foo.tar"
  * (file-prefix "./a.b/c")      => "./a.b/c"
  * @end lisp
+doc>
 |#
 (define (file-prefix pathname)
   (let ((end (string-length pathname)))
