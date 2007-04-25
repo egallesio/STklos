@@ -23,7 +23,7 @@
 ;;;;		Copyright (c) 1991, Marc Feeley
 ;;;; 
 ;;;;    Creation date: 10-May-2002 16:22 (eg)
-;;;; Last file update: 31-Jan-2007 14:45 (eg)
+;;;; Last file update: 20-Apr-2007 17:31 (eg)
 ;;;;
 
 #|
@@ -133,7 +133,7 @@ doc>
 				       (out "#\\" col))))
 	    ((input-port? obj)  (out "#[input-port]" col))
 	    ((output-port? obj) (out "#[output-port]" col))
-	    ((eof-object? obj)  (out "#[eof-object]" col))
+	    ((eof-object? obj)  (out "#eof" col))
 	    ;; STk types
 	    ((keyword? obj)     (out (string-append ":" (keyword->string obj)) col))
 	    ((hash-table? obj)  (out "#[hash-table]"))

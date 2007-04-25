@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update:  3-Apr-2007 10:43 (eg)
+;;;; Last file update: 21-Apr-2007 20:15 (eg)
 
 
 #|
@@ -962,7 +962,7 @@
 (define-method allocate-instance ((class <class>) initargs)
   (%allocate-instance class))
 
-(define-method make-instance ((class <class>) . initargs)   ;// VIRER CE SYMBOLE
+(define-method make-instance ((class <class>) . initargs)
   (let ((instance (allocate-instance class initargs)))
     (initialize instance initargs)
     instance))

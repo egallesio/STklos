@@ -1,7 +1,7 @@
 ;;;;
 ;;;; stklos-genlex.stk	-- generate a lexical analyser using SIlex
 ;;;; 
-;;;; Copyright © 2003-2004 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2003-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 12-Dec-2003 11:29 (eg)
-;;;; Last file update: 29-Nov-2004 11:14 (eg)
+;;;; Last file update: 21-Apr-2007 20:40 (eg)
 ;;;;
 
 
@@ -29,7 +29,17 @@
 
 (define *runtime-file* "lex-rt")
 
+;; ----------------------------------------------------------------------
+;; 	generate-header ...
+;; ----------------------------------------------------------------------
+(define (generate-header out)
+  (format out ";; This file has been generated. (DON'T EDIT)\n")
+  (format out ";; generated on ~A\n\n" (date))
+  (format out "(require ~S)\n\n" *runtime-file*))
 
+;; ----------------------------------------------------------------------
+;; 	build-constructor ...
+;; ----------------------------------------------------------------------
 (define (build-constructor name expr)
   (let ((name (if (string? name) (string->symbol name) name)))
     `(define ,name
@@ -37,21 +47,22 @@
 	 (make <lex> :input %input :table ,(caddr expr))))))
 
 
+;; ----------------------------------------------------------------------
+;; 	lex-generate ...
+;; ----------------------------------------------------------------------
 (define (lex-generate input output name)
   (let ((tmp (temporary-file-name))
 	(out (open-file output "w")))
     (unless out
-      (error 'lex-generate "cannot open output file ~S" output))
+      (error "cannot open output file ~S" output))
     
     ;; Generate the tables in a temporary file
     (let ((res (lex-tables input (format "~A" name) tmp 'code 'counters 'line)))
       
       (when res
 	;; Generate the header of the output file
-	(format out ";; This file has been generated. (DON'T EDIT)\n")
-	(format out ";; generated on ~A\n\n" (date))
-	(format out "(require ~S)\n\n" *runtime-file*)
-	
+	(generate-header out)
+
 	;; Copy the content of the temporary file
 	(let* ((in   (open-input-file tmp))
 	       (expr (read in))
@@ -68,11 +79,42 @@
       ;; Return value is the status code of the program
       (if res 0 1))))
 
+;; ----------------------------------------------------------------------
+;; 	lex-expand ...
+;; ----------------------------------------------------------------------
+(define (lex-expand input output)
+  (let ((in  (open-file input "r"))
+	(out (open-file output "w")))
+    (unless in  (error "cannot open input file ~S" input))
+    (unless out (error "cannot open output file ~S" output))
+
+    ;; Copy the input file and expand only the define-regular-grammar calls
+    (let Loop ((expr (read in)))
+      (cond 
+	((eof-object? expr)
+	   (close-output-port out))
+	((and (list? expr)
+	      (eq? (car expr) 'define-regular-grammar)
+	      (= (length expr) 5))
+	   (pp (macro-expand expr) :port out)
+	   (newline out)
+	   (Loop (read in)))
+	(else
+	 (write expr out)
+	 (newline out)
+	 (Loop (read in)))))))
+
+;; ----------------------------------------------------------------------
+;; 	main ...
+;; ----------------------------------------------------------------------
 (define (main args)
-  (unless (= (length args) 4)
-    (die (format "Usage: ~A <lex-file> <output-file> <constructor>\n"
-		 (program-name))))
-  (lex-generate (cadr args)
-		(caddr args)
-		(cadddr args)))
+  (case (length args)
+    ((3) (begin (lex-expand (cadr args) (caddr args))
+		0))
+    ((4) (lex-generate (cadr args)
+		       (caddr args)
+		       (cadddr args)))
+    (else (die (string-append
+		"Usage: " (program-name) "<lex-file> <output-file> <constructor>\n"
+		"       " (program-name) "<src-file> <output-file>\n")))))
     

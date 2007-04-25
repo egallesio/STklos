@@ -16,6 +16,31 @@
 ; along with this program; if not, write to the Free Software
 ; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+
+;;; STklos modifications
+;;; Modifications to allow the use of string ports 
+(define (silex-open-input-file obj)
+  (if (input-port? obj)
+      obj
+      (open-input-file obj)))
+
+(define (silex-open-output-file obj)
+  (if (output-port? obj)
+      obj
+      (open-output-file obj)))
+
+;;; Macro used for multi-grammar readers à la Bigloo
+(define-macro (define-regular-grammar name args defs grammar)
+  (let ((tmp (open-input-string (string-append defs "\n%%\n" grammar)))
+	(out (open-output-string)))
+    (lex-tables tmp (symbol->string name) out 'code 'counters 'line)
+    (let ((code (read-from-string (get-output-string out))))
+      `(begin
+	 (require-library "lex-rt")
+	 (define ,name
+	   (lambda (%input ,@args)
+	     (make-instance <lex> :input %input :table ,(caddr code))))))))
+
 ; Module util.scm.
 
 ;
@@ -2970,7 +2995,7 @@
 
 (define parser
   (lambda (filename)
-    (let* ((port (open-input-file filename))
+    (let* ((port (silex-open-input-file filename))
 	   (port-open? #t))
       (lex-unwind-protect (lambda ()
 			    (if port-open?
@@ -5276,7 +5301,7 @@
 	   <<EOF>>-action <<ERROR>>-action rules
 	   nl-start no-nl-start arcs acc)
     (let* ((fileout          (cdr (assq 'fileout args-alist)))
-	   (port             (open-output-file fileout))
+	   (port             (silex-open-output-file fileout))
 	   (complete-driver? (cdr (assq 'complete-driver? args-alist))))
       (if complete-driver?
 	  (begin

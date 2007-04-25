@@ -1,7 +1,7 @@
 ;;;;
 ;;;; lex-rt.stk	-- A (simplified) version of the SIlex Runtime for STklos
 ;;;; 
-;;;; Copyright © 2003 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2003-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 12-Dec-2003 12:59 (eg)
-;;;; Last file update: 12-Dec-2003 23:43 (eg)
+;;;; Last file update: 21-Apr-2007 19:14 (eg)
 ;;;;
 
 				;
@@ -266,5 +266,11 @@
 
 (define-method lexer-next-token ((self <lex>))
   ( (slot-ref self 'lexer) ))
+
+
+(define (make-regular-reader grammar port . args)
+  (let ((lex (apply grammar port args)))
+    (slot-ref  lex 'lexer)))
+
 
 (provide "lex-rt")
