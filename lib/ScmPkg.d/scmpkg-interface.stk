@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Dec-2006 14:39 (eg)
-;;;; Last file update: 13-Apr-2007 15:37 (eg)
+;;;; Last file update: 26-Apr-2007 10:59 (eg)
 ;;;;
 
 
@@ -108,6 +108,9 @@
 	       symbs
 	       (cons (cdar lst) aliases))))))
 
+  (define (publish-syntaxes lst)
+    `(%%publish-syntax ,@lst))
+
   (let* ((pi     (in-module  |ScmPkg| parse-interface))
 	 (pkg    (pi name body))
 	 (imp    (scmpkg-package-imports pkg))
@@ -115,11 +118,12 @@
 	 (lang   (scmpkg-package-language pkg))
 	 (req    (merge-imports-exports imp exp))
 	 (allreq (find-imports lang req))
-	 (allimp (find-imports lang imp)))
-
+	 (allimp (find-imports lang imp))
+	 (macs   (append (scmpkg-package-macros pkg)
+			 (scmpkg-package-syntaxes pkg))))
     `(begin
        ;; Require scmpkg-support
-       (require "scmpkg-support")
+       (require-library "scmpkg-support")
        ;; Require all the imported modules
        ,@(map (lambda (x)
 		`(require-for-syntax ,(symbol->string (if (pair? x) (car x) x))))
@@ -133,7 +137,9 @@
 	 ;; Exports
 	 ,(do-exports exp)
 	 ;; Body
-	 (include ,(scmpkg-package-source pkg)))
+	 (include ,(scmpkg-package-source pkg))
+	 ;; Publish macros and syntaxes 
+	 ,(publish-syntaxes macs))
        ;; Provide
        (provide ,(symbol->string name)))))
 
@@ -162,8 +168,8 @@
 	      (match-case x
 		 ((from ?mod . ?rest)			     ;; re-exportation
 		  (%push! exports x))
-		 ((macro . ?rest)			     ;; export a macro
-		  (%push! (scmpkg-package-macros pkg) rest))
+		 ((macro (?name . ?rest))		     ;; export a macro
+		  (%push! (scmpkg-package-macros pkg) name))
 		 ((syntax ?args . ?-)			     ;; export a syntax
 		  (%push! (scmpkg-package-syntaxes pkg) args))
 		 (else

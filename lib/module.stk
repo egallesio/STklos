@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 13-Apr-2007 14:33 (eg)
+;;;; Last file update: 26-Apr-2007 10:58 (eg)
 ;;;;
 
 
@@ -358,7 +358,6 @@ doc>
       (for-each (lambda (x) (when symbol? x) (register-new-global! x))
 		symbols)
       `(%module-export (current-module) ',symbols))))
-
 
 (define-macro (export-syntax . arg)
   #f)

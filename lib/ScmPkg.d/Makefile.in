@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Dec-2006 10:09 (eg)
-# Last file update: 12-Apr-2007 18:34 (eg)
+# Last file update: 26-Apr-2007 16:07 (eg)
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -186,7 +186,7 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SRCS = scmpkg-interface.stk scmpkg-languages.stk
-OBJ = scmpkg-support.ostk
+OBJ = ../scmpkg-support.ostk
 scheme_libdir = $(prefix)/share/@PACKAGE@/@VERSION@
 scheme_lib_DATA = scmpkg-support.stk $(OBJ)
 scheme_scmpkgdir = $(scheme_libdir)/ScmPkg.d
@@ -398,7 +398,7 @@ all: $(OBJ)
 $(OBJ): scmpkg-support.stk $(SRCS)
 
 clean: 
-	/bin/rm -f *.ostk *~
+	/bin/rm -f $(OBJ) *~
 
 distclean: clean
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

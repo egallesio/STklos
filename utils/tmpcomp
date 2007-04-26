@@ -22,7 +22,7 @@
 # 
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  1-Jan-2002 18:57 (eg)
-# Last file update:  5-Mar-2007 12:11 (eg)
+# Last file update: 26-Apr-2007 16:15 (eg)
 #
 
 # This script is only used to compile the different components of the
@@ -47,7 +47,8 @@ else
 fi
 
 STKLOS_LOAD_PATH="${prefix}/lib${sep}${prefix}/gtklos" 
-export STKLOS_LOAD_PATH
+STKLOS_BUILDING=1
+export STKLOS_LOAD_PATH STKLOS_BUILDING
 
 ${prefix}/src/stklos -c -q -b ${prefix}/src/boot.img \
      -f ${prefix}/utils/stklos-compile.stk -- \

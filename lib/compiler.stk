@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  3-Apr-2007 22:12 (eg)
+;;;; Last file update: 26-Apr-2007 12:15 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1468,6 +1468,15 @@ doc>
 
   (compile-normal-call (car e) (cdr e) (length e) env e tail))
 
+;;;;
+;;;; PUBLISH-SYNTAX
+;;;;
+(define (compile-%%pubsyntax e env tail)
+  (for-each (lambda (x)
+	      (if (symbol? x)
+		  (expander-published-add! x)
+		  (error '%%publish-syntax "bad symbol ~S" x)))
+	    (cdr e)))
 
 ;;;;
 ;;;; REQUIRE-FOR-SYNTAX
@@ -1569,6 +1578,7 @@ doc>
 	  ((%%source-pos)	(compile-%%source-pos   e env tail?))
 	  ((%%label)		(compile-%%label	e env tail?))
 	  ((%%goto)		(compile-%%goto		e env tail?))
+	  ((%%publish-syntax)	(compile-%%pubsyntax	e env tail?))
 	  
 	  ;; Unmatched cases
 	  (else			(let ((first (car e)))
