@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update: 26-Apr-2007 12:26 (eg)
+;;;; Last file update: 26-Apr-2007 17:48 (eg)
 ;;;;
 
 
@@ -145,7 +145,6 @@
 	      (error "cannot find source of syntax named ~S" (car lst)))))))
 
 (define (expander-published-add! name)
-  (eprintf "ajout publish ~S\n" name)
   (unless (memq name *expander-published*)
     (set! *expander-published* (cons name *expander-published*))))  
 

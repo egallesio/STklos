@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Dec-2006 10:09 (eg)
-# Last file update: 26-Apr-2007 16:07 (eg)
+# Last file update: 26-Apr-2007 17:29 (eg)
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -191,13 +191,9 @@ scheme_libdir = $(prefix)/share/@PACKAGE@/@VERSION@
 scheme_lib_DATA = scmpkg-support.stk $(OBJ)
 scheme_scmpkgdir = $(scheme_libdir)/ScmPkg.d
 scheme_scmpkg_DATA = $(SRCS)
-
-#======================================================================
-SUFFIXES = .stk .ostk .scm
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .stk .ostk .scm
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -389,13 +385,11 @@ uninstall-am: uninstall-scheme_libDATA uninstall-scheme_scmpkgDATA
 	pdf-am ps ps-am uninstall uninstall-am \
 	uninstall-scheme_libDATA uninstall-scheme_scmpkgDATA
 
-.stk.ostk:
-	(cd ..; ../utils/tmpcomp ScmPkg.d/$*.stk ScmPkg.d/$*.ostk)
-#======================================================================
 
 all: $(OBJ)
 
 $(OBJ): scmpkg-support.stk $(SRCS)
+	(cd ..; ../utils/tmpcomp ScmPkg.d/scmpkg-support.stk scmpkg-support.ostk)
 
 clean: 
 	/bin/rm -f $(OBJ) *~

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 26-Apr-2007 10:58 (eg)
+;;;; Last file update: 26-Apr-2007 17:47 (eg)
 ;;;;
 
 
@@ -360,7 +360,8 @@ doc>
       `(%module-export (current-module) ',symbols))))
 
 (define-macro (export-syntax . arg)
-  #f)
+  ;; This is only an approximation. Must be rewritten
+  `(%%publish-syntax ,@arg))
 
 ;;=============================================================================
 ;;
