@@ -1,7 +1,7 @@
 ;;;;
-;;;; b i g l o o . s t k			-- Bigloo compatibility file
+;;;; b i g l o o -s u p p o r t. s t k		-- Bigloo compatibility file
 ;;;;
-;;;; Copyright © 1997-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1997-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; Permission to use, copy, modify, distribute,and license this
 ;;;; software and its documentation for any purpose is hereby granted,
@@ -14,7 +14,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 28-Oct-1997 11:09
-;;;; Last file update: 29-Mar-2005 19:48 (eg)
+;;;; Last file update: 25-Apr-2007 23:57 (eg)
 
 
 ;;;
@@ -47,7 +47,7 @@
 (define-macro (+fx a b) `(+ ,a ,b))
 (define-macro (-fx a b) `(- ,a ,b))
 (define-macro (*fx a b) `(* ,a ,b))
-(define-macro (/fx a b) `(/ ,a ,b))
+(define-macro (/fx a b) `(truncate (/ ,a ,b)))
 
 
 ;;;
@@ -90,4 +90,4 @@
 (define-module __error)
 
 
-(provide "bigloo")
+(provide "bigloo-support")

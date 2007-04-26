@@ -14,7 +14,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@kaolin.unice.fr]
 ;;;;    Creation date: 28-Oct-1997 20:47
-;;;; Last file update: 14-Apr-2007 10:49 (eg)
+;;;; Last file update: 25-Apr-2007 23:57 (eg)
 ;;;;
 
 ;;;; This file implements code for loading the MATCH-CASE and MATCH-LAMBDA 
@@ -23,9 +23,7 @@
 ;;;; a useful adaptation could be to manage objects instead).
 
 
-(include "bigloo.stk")
-
-
+(include "bigloo-support.stk")
 
 
 ;;;;

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 20-Mar-2007 15:13 (eg)
-;;;; Last file update: 22-Mar-2007 17:14 (eg)
+;;;; Last file update: 25-Apr-2007 18:19 (eg)
 ;;;;
 
 (define *code-rewriters* '())
@@ -51,8 +51,3 @@
 	(when (> (stklos-pkg-verbosity) 0)
 	  (eprintf "    - Rewriting package tests for ~S\n" name))
 	( (cdr rwt) tst dir )))))
-      
-    
-    
-
-

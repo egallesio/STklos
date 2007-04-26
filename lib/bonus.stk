@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 20-Apr-2007 15:58 (eg)
+;;;; Last file update: 25-Apr-2007 22:20 (eg)
 ;;;;
 
 ;;
@@ -814,8 +814,8 @@ doc>
  *       (call/ec (lambda (return) (list 'a (return 'b) 'c)))
  *       3)        => (1 b 3)
  * @end lisp
- * |call/ec| is cheaper than the full call/ec. It is particularily useful
- * whence all the power of |call/cc| is not needded. 
+ * |call/ec| is cheaper than the full call/cc. It is particularily useful
+ * when all the power of |call/cc| is not needded. 
 doc>
 |#
 (define (call/ec proc)

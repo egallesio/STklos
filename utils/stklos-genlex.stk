@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 12-Dec-2003 11:29 (eg)
-;;;; Last file update: 21-Apr-2007 20:40 (eg)
+;;;; Last file update: 25-Apr-2007 18:17 (eg)
 ;;;;
 
 
@@ -43,9 +43,15 @@
 (define (build-constructor name expr)
   (let ((name (if (string? name) (string->symbol name) name)))
     `(define ,name
-       (lambda (%input)
-	 (make <lex> :input %input :table ,(caddr expr))))))
-
+       (lambda (%%input)
+	 (letrec ((%%self (make <lex> :input %%input :table ,(caddr expr)))
+		  (lexer-get-line #f)
+		  (lexer-getc     #f)
+		  (lexer-ungetc   #f))
+	   (set! lexer-get-line (slot-ref %%self 'line))
+	   (set! lexer-getc     (slot-ref %%self 'line))
+	   (set! lexer-ungetc   (slot-ref %%self 'line))
+	   %%self)))))
 
 ;; ----------------------------------------------------------------------
 ;; 	lex-generate ...

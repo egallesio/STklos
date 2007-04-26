@@ -1,5 +1,5 @@
 ;;;;
-;;;; lang-bigloo.stk	-- Bigloo language support
+;;;; lang-r6rs.stk	-- R6RS language support
 ;;;; 
 ;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -20,34 +20,7 @@
 ;;;; USA.
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
-;;;;    Creation date: 21-Mar-2007 13:57 (eg)
-;;;; Last file update: 25-Apr-2007 18:46 (eg)
+;;;;    Creation date:  4-Apr-2007 14:44 (eg)
+;;;; Last file update:  4-Apr-2007 14:44 (eg)
 ;;;;
 
-(include "lang-bigloo.inc")
-
-;; ----------------------------------------------------------------------
-;; 	bigloo-rewrite ...
-;; ----------------------------------------------------------------------
-(define (bigloo-rewrite src dir)
-
-  (define (do-rewrite in tmp)
-    (with-output-to-file tmp
-      (lambda ()
-	(let ((lex (lang-bigloo in)))
-	  (let loop ((token  (lexer-next-token lex)))
-	    (unless (eq? token 'eof)
-	      (display token)
-	      (loop (lexer-next-token lex))))))))
-
-  (when (file-exists? src)
-    (let ((tmp (temporary-file-name)))
-      (do-rewrite src tmp)
-      (copy-file tmp src)
-      (remove-file tmp))))
-  
-;;;
-;;; Register this language
-;;;
-
-(add-rewriter! 'bigloo bigloo-rewrite)
