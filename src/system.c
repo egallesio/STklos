@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 12-Feb-2007 19:07 (eg)
+ * Last file update:  5-May-2007 11:08 (eg)
  */
 
 #include <unistd.h>
@@ -795,14 +795,14 @@ DEFINE_PRIMITIVE("clock", clock, subr0, (void))
 }
 
 /*
-<doc EXT current-second 
- * (current-second)
+<doc EXT current-seconds 
+ * (current-seconds)
  *
  * Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970), 
  * measured in seconds.
 doc>
  */
-DEFINE_PRIMITIVE("current-second", current_second, subr0, (void))
+DEFINE_PRIMITIVE("current-seconds", current_seconds, subr0, (void))
 {
   return STk_ulong2integer(time(NULL));
 }
@@ -1129,7 +1129,7 @@ int STk_init_system(void)
   /* Declare primitives */
   ADD_PRIMITIVE(clock);
   ADD_PRIMITIVE(date);
-  ADD_PRIMITIVE(current_second);
+  ADD_PRIMITIVE(current_seconds);
   ADD_PRIMITIVE(current_time);
   ADD_PRIMITIVE(sleep);
   ADD_PRIMITIVE(seconds2date);

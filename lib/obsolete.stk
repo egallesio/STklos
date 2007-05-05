@@ -22,7 +22,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update: 12-Feb-2007 19:21 (eg)
+;;;; Last file update:  5-May-2007 11:10 (eg)
 ;;;;
 
 
@@ -67,3 +67,7 @@
 
 ;; 12-Feb-2007 (v0.83)
 (define delete-directory remove-directory)
+
+;; 05-May-2007 (v0.83)
+(define current-second current-seconds)
+
