@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 26-Apr-2007 12:15 (eg)
+;;;; Last file update:  4-May-2007 15:10 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -305,7 +305,7 @@ doc>
 		    (compile val env args #f)
 		    (compile-access var env args #f))
 		  (compiler-error 'set! args "~S is a bad symbol" var))))
-	(compiler-error 'set! args "bad assignment syntax in ~S" args))))
+	(compiler-error 'set! (cdr args) "bad assignment syntax in ~S" args))))
 
 ;;;;
 ;;;; IF
@@ -365,17 +365,24 @@ doc>
 ;;;;
 ;;;; WHEN/UNLESS
 ;;;;
-(define (compile-when args env tail?)
-  (let ((len (length (cdr args))))
+(define-macro (when . args)
+  (let ((len (length args)))
     (if (> len 1)
-	(compile `(if ,(cadr args) (begin ,@(cddr args))) env args tail?)
-	(compiler-error 'when args "bad syntax in ~S" args))))
+	`(if ,(car args) (begin ,@(cdr args)))
+	(compiler-error 'when args "bad syntax in ~S" `(when ,@args)))))
 
-(define (compile-unless args env tail?)
-  (let ((len (length (cdr args))))
+(define-macro (unless . args)
+  (let ((len (length args)))
     (if (> len 1)
-	(compile `(if (not ,(cadr args)) (begin ,@(cddr args))) env args tail?)
-	(compiler-error 'unless args "bad syntax in ~S" args))))
+	`(if (not ,(car args)) (begin ,@(cdr args)))
+	(compiler-error 'unless args "bad syntax in ~S" `(unless ,@args)))))
+
+
+;;;;
+;;;; WHEN/UNLESS
+;;;;
+(define-macro (set! . args)
+  `(%%set! ,@args))
 
 
 #|
@@ -1550,7 +1557,6 @@ doc>
 	  (compile-constant  e env tail?))
       (begin
 	(case (car e)
-	  ((quote)		(compile-quote		e env tail?))
 	  ((if)			(compile-if		e env tail?))
 	  ((define)		(compile-define		e env tail?))
 	  ((begin)		(compile-begin		e env tail?))
@@ -1558,17 +1564,16 @@ doc>
 	  ((let)		(compile-let		e env tail?))
 	  ((let*)		(compile-let*		e env tail?))
 	  ((letrec)		(compile-letrec		e env tail?))
-	  ((set!)		(compile-set!		e env tail?))
 	  ((and)		(compile-and		e env tail?))
 	  ((or)			(compile-or		e env tail?))
 	  ((cond)		(compile-cond		e env tail?))
 	  ((case)		(compile-case		e env tail?))
 	  ((do)			(compile-do		e env tail?))
-	  ((when)		(compile-when		e env tail?))
-	  ((unless)		(compile-unless		e env tail?))
+	  ((quote)		(compile-quote		e env tail?))
 	  ((quasiquote)		(compile-quasiquote	e env tail?))
 	  ((with-handler) 	(compile-with-handler	e env tail?))
 	  ((define-macro) 	(compile-define-macro   e env tail?))
+	  ((%%set!)		(compile-set!		e env tail?))
 	  
 	  ;; Special calls
 	  ((%%require)		(compile-require	e env tail?))

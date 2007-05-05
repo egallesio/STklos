@@ -23,7 +23,7 @@
 ;;;;		Copyright (c) 1991, Marc Feeley
 ;;;; 
 ;;;;    Creation date: 10-May-2002 16:22 (eg)
-;;;; Last file update: 20-Apr-2007 17:31 (eg)
+;;;; Last file update: 30-Apr-2007 00:28 (eg)
 ;;;;
 
 #|
@@ -136,7 +136,8 @@ doc>
 	    ((eof-object? obj)  (out "#eof" col))
 	    ;; STk types
 	    ((keyword? obj)     (out (string-append ":" (keyword->string obj)) col))
-	    ((hash-table? obj)  (out "#[hash-table]"))
+	    ((eq? obj (void))   (out "#void" col))
+	    ((hash-table? obj)  (out "#[hash-table]" col))
 	    (else               (out "#[unknown]" col))))
 
     (define (pp obj col)

@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Apr-2007 16:47 (eg)
+# Last file update: 26-Apr-2007 18:44 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d @LURCDIR@
 
@@ -146,7 +146,7 @@ boot:	../src/boot.img
 	   cp ./instr3    ../src/vm-instr.h;  				\
 	   echo "*** Create new boot.c";				\
 	   (export STKLOS_BUILDING=1;					\
-	    ./src/stklos -q -c -b ../src/boot.img  			\
+	    ../src/stklos -q -c -b ../src/boot.img  			\
 		-f make-C-boot.stk -- boot.img3 ../src/boot.c);		\
 	   echo "*** Recompile STklos";					\
 	   (cd ../src; make stklos);					\

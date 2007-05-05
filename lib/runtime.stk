@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update: 26-Apr-2007 17:48 (eg)
+;;;; Last file update:  5-May-2007 09:41 (eg)
 ;;;;
 
 
@@ -42,6 +42,11 @@
 (define (filter-map func . args)
   (filter (lambda (x) x)
 	  (apply map func args)))
+#| example
+  (filter-map (lambda (x) (and (number? x) (+ x 1)))
+	    '(1 2 foo "bar" 7))
+                 
+|#
 
 (define (append-map proc . args)
   (apply append (apply map proc args)))
@@ -50,11 +55,13 @@
   (apply append! (apply map proc args)))
 
 
-#| example
-  (filter-map (lambda (x) (and (number? x) (+ x 1)))
-	    '(1 2 foo "bar" 7))
-                 
-|#
+(define (symbol-append . args)
+  (let loop ((args args)
+	     (res  ""))
+    (if (null? args)
+	(string->symbol res)
+	(loop (cdr args)
+	      (string-append res (format "~a" (car args)))))))
 
 ;; ----------------------------------------------------------------------
 ;;	management of globals ...
@@ -135,14 +142,18 @@
   (set! *expander-published* '()))
 
 (define (expander-published-sources)
-  (let Loop ((lst *expander-published*)
-	     (res '()))
-    (if (null? lst)
-	(reverse! res)
-	(let ((mac (assoc (car lst) *expander-list-src*)))
-	  (if mac
-	      (Loop (cdr lst) (cons mac res))
-	      (error "cannot find source of syntax named ~S" (car lst)))))))
+  (let ((warning (in-module |STKLOS-COMPILER| compiler-warning)))
+    (let Loop ((lst *expander-published*)
+	       (res '()))
+      (if (null? lst)
+	  (reverse! res)
+	  (let ((mac (assoc (car lst) *expander-list-src*)))
+	    (if mac
+		(Loop (cdr lst) (cons mac res))
+		(begin
+		  (warning (void) 'export-syntax
+			   "cannot find source of syntax named ~S" (car lst))
+		  (Loop (cdr lst) res))))))))
 
 (define (expander-published-add! name)
   (unless (memq name *expander-published*)
