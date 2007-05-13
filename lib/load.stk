@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 26-Apr-2007 16:37 (eg)
+;;;; Last file update:  5-May-2007 20:12 (eg)
 ;;;;
 
 
@@ -298,7 +298,7 @@ doc>
 (let ((provided '())
       (stklos-building? (getenv "STKLOS_BUILDING")))
   
-  (set! %%require  (lambda (what :optional lib-only?)
+  (set! %%require  (lambda (what lib-only?)
 		     (when stklos-building?
 		       ;; When building STklos, require-library ==  require.
 		       ;; Otherwise, we need an already installed  STklos

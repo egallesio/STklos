@@ -2,9 +2,11 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Apr-2007 18:44 (eg)
+# Last file update:  5-May-2007 21:00 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d @LURCDIR@
+
+SFLAGS=
 
 scheme_BOOT = assembler.stk		\
 	      bb.stk 			\
@@ -132,13 +134,13 @@ boot:	../src/boot.img
 	../src/stklos -q -c -b ../src/boot.img -f bb.stk boot.img0 instr0)
 	@echo "*** Boot 1"; \
 	(export STKLOS_BUILDING=1; \
-	../src/stklos -q -c -b ./boot.img0     -f bb.stk boot.img1 instr1)
+	../src/stklos $(SFLAGS) -q -c -b ./boot.img0     -f bb.stk boot.img1 instr1)
 	@echo "*** Boot 2"; \
 	(export STKLOS_BUILDING=1; \
-	 ../src/stklos -q -c -b ./boot.img1    -f bb.stk boot.img2 instr2)
+	 ../src/stklos $(SFLAGS) -q -c -b ./boot.img1    -f bb.stk boot.img2 instr2)
 	@echo "*** Boot 3"; \
 	(export STKLOS_BUILDING=1; \
-	../src/stklos -q -c -b ./boot.img2     -f bb.stk boot.img3 instr3)
+	../src/stklos $(SFLAGS) -q -c -b ./boot.img2     -f bb.stk boot.img3 instr3)
 	@if cmp ./boot.img2 ./boot.img3 ;then 				\
 	   echo "*** New boot file created";  				\
 	   cp ../src/boot.img ../src/boot.ok; 				\
@@ -146,7 +148,7 @@ boot:	../src/boot.img
 	   cp ./instr3    ../src/vm-instr.h;  				\
 	   echo "*** Create new boot.c";				\
 	   (export STKLOS_BUILDING=1;					\
-	    ../src/stklos -q -c -b ../src/boot.img  			\
+	    ../src/stklos $(SFLAGS) -q -c -b ../src/boot.img  		\
 		-f make-C-boot.stk -- boot.img3 ../src/boot.c);		\
 	   echo "*** Recompile STklos";					\
 	   (cd ../src; make stklos);					\

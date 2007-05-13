@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 21-Mar-2007 14:31 (eg)
-;;;; Last file update: 11-Apr-2007 08:32 (eg)
+;;;; Last file update:  5-May-2007 18:50 (eg)
 ;;;;
 
 
@@ -33,12 +33,13 @@
 ;;;
 ;;; Chicken
 ;;;
-(add-rewriter! 'chicken void)
+(include "lang-chicken.stk")
+
 
 ;;;
 ;;; Gambit
 ;;;
-(add-rewriter! 'gambit void)
+(include "lang-chicken.stk")
 
 
 ;;;
