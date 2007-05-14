@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update:  9-Feb-2007 17:02 (eg)
+ * Last file update: 11-May-2007 15:50 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -141,11 +141,13 @@ static void fill_buffer(struct fstream *f)
   PORT_STREAM_FLAGS(f) &= ~STK_IOEOF; 
 
   /* Read */
-  do
+  do {
+    if (n == -1) perror("fill_buffer");
     if (PORT_USERDATA(f))
       n = PORT_LOWREAD(f)(f, ptr, PORT_BUFSIZE(f));
     else
       n = read(PORT_FD(f), ptr, PORT_BUFSIZE(f));
+  }
   while ((n == -1) && (errno == EINTR));
   
   if (n == 0) {

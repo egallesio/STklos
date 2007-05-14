@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  5-May-2007 11:09 (eg)
+;; Last file update: 14-May-2007 10:36 (eg)
 ;;
 ;; ======================================================================
 
@@ -777,6 +777,8 @@ See SRFI document for more information.])
 (insertdoc 'pp)
 (insertdoc 'uri-parse)
 (insertdoc 'string->html)
+(insertdoc 'md5sum)
+(insertdoc 'md5sum-file)
 (insertdoc 'base64-encode)
 (insertdoc 'base64-decode)
 (insertdoc 'base64-encode-string)

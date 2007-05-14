@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  4-May-2007 15:10 (eg)
+;;;; Last file update: 10-May-2007 16:32 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -41,6 +41,10 @@
 			 (- 		 . ,-)
 			 (* 		 . ,*)
 			 (/		 . ,/)
+			 (fx+		 . ,fx+)
+			 (fx-		 . ,fx-)
+			 (fx*		 . ,fx*)
+			 (fxdiv		 . ,fxdiv)			 
 			 (=		 . ,=)
 			 (<		 . ,<)
 			 (<=		 . ,<=)
@@ -541,7 +545,6 @@ doc>
 	((and (pair? l) (pair? (car l)) (eq? (caar l) 'define-macro))
 	    ;; This is an internal define-macro. Add expander + skip expression
 	    (let ((name (compile-internal-define-macro (car l) env #f)))
-	      (eprintf "Internal macro ~S\n" name)
 	      (set! internal-macros (cons name internal-macros))
 	      (Loop (cdr l) defs)))
 	(else
@@ -967,6 +970,39 @@ doc>
 			  (else
 			   (comp2 'IN-DIV2)))))
 		(else  (compile-normal-call fct actuals len env epair #f))))
+      ((fx+ fx- fx* fxdiv)
+                (case len
+		  ((2) (let ((a (car actuals))
+			     (b (cadr actuals)))
+			 (cond
+			   ((and (fixnum? a) (fixnum? b))
+			    (compile-constant (case fct
+						((fx+) (fx+ a b))
+						((fx-) (fx- a b))
+						((fx*) (fx* a b))
+						((fxdiv) (fxdiv a b)))
+					      env
+					      tail?))
+			   ((and (small-integer-constant? a)
+				 (memq fct '(fx+ fx*)))	; commutative only
+			    (oper2 (if (eq? fct 'fx+) 'IN-SINT-ADD2 'INT-SINT-MUL2)
+				   b a))
+			   ((small-integer-constant? b)
+			    (oper2 (case fct
+				     ((fx+)   'IN-SINT-FXADD2)
+				     ((fx-)   'IN-SINT-FXSUB2)
+				     ((fx*)   'IN-SINT-FXMUL2)
+				     ((fxdiv) 'IN-SINT-FXDIV2))
+				   a b))
+			   (else
+			    (comp2 (case fct
+				     ((fx+)   'IN-FXADD2)
+				     ((fx-)   'IN-FXSUB2)
+				     ((fx*)   'IN-FXMUL2)
+				     ((fxdiv) 'IN-FXDIV2)))))))
+		  (else
+		   (compile-normal-call fct actuals len env epair #f))))
+      
       ((= < > <= >=)
 		(case len
 		((O)   (compiler-error fct epair

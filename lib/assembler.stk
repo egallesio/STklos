@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 23-Feb-2007 23:04 (eg)
+;;;; Last file update: 10-May-2007 15:48 (eg)
 ;;;;
 
 ;;;
@@ -228,6 +228,16 @@
 	   (DEEP-LOC-REF-FAR	1)
 	   (DEEP-LOC-SET-FAR	1)
 	   (CREATE-CLOSURE-FAR	2)
+
+	   ;; Fixnum
+	   (IN-FXADD2		0)
+	   (IN-FXSUB2		0)
+	   (IN-FXMUL2		0)
+	   (IN-FXDIV2		0)
+	   (IN-SINT-FXADD2	1)
+	   (IN-SINT-FXSUB2	1)
+	   (IN-SINT-FXMUL2	1)
+	   (IN-SINT-FXDIV2	1)
 	   
 ))))
 

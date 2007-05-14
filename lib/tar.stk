@@ -21,17 +21,17 @@
 ;;;; 
 ;;;;           Author: Manuel Serrano 
 ;;;;    Creation date:  8-Jan-2007 11:33 (eg)
-;;;; Last file update:  8-Jan-2007 13:19 (eg)
+;;;; Last file update: 10-May-2007 17:03 (eg)
 ;;;;
 ;;;;
 ;;;;   Based on Chicken's tar implementation (Felix L. Winkelmann). 
 
-;(define-module TAR-MODULE
+;(define-module TAR
   (export tar-header
 	  tar-read-header
 	  tar-read-block
 	  tar-round-up-to-record-size)
-
+  
 
 (define-struct tar-header
   name mode uid gid size mtime checksum type linkname magic uname gname
@@ -54,47 +54,46 @@
 (define (tar-name-size) 100)
 (define (tar-tunmlen) 32)
 (define (tar-tgnmlen) 32)
-(define (tar-tmagic) "ustar  ")
-(define (tar-umagic) "ustar")
+(define (tar-tmagic)   "ustar  ")
+(define (tar-umagic)   "ustar")
 (define (tar-gnumagic) "GNUtar ")
 
 ;; ----------------------------------------------------------------------
 ;;    tar-type-name ...
 ;; ----------------------------------------------------------------------
 (define (tar-type-name c)
-   (case c
-      ((#\null) 'oldnormal)
-      ((#\0) 'normal)
-      ((#\1) 'link)
-      ((#\2) 'symlink)
-      ((#\3) 'chr)
-      ((#\4) 'blk)
-      ((#\5) 'dir)
-      ((#\6) 'fifo)
-      ((#\7) 'contig)
-      (else (tar-error "invalid file type" c))))
+  (case c
+    ((#\null) 'oldnormal)
+    ((#\0) 'normal)
+    ((#\1) 'link)
+    ((#\2) 'symlink)
+    ((#\3) 'chr)
+    ((#\4) 'blk)
+    ((#\5) 'dir)
+    ((#\6) 'fifo)
+    ((#\7) 'contig)
+    (else  (tar-error "invalid file type" c))))
 
 ;; ----------------------------------------------------------------------
 ;;    str->octal ...
 ;; ----------------------------------------------------------------------
 (define (str->octal str #!optional (err #t))
-   (or (string->number str 8)
-       (if err
-	   (tar-error "invalid octal record item" str)
-	   0)))
+  (or (string->number str 8)
+      (if err
+	  (tar-error "invalid octal record item" str)
+	  0)))
 
 ;; ----------------------------------------------------------------------
 ;;    checksum ...
 ;; ----------------------------------------------------------------------
 (define (checksum buf)
-   (let* ((p  (+ (tar-name-size) 48))
-	  (b2 (string-append
-	       (substring buf 0 p)
-	       "        "
-	       (substring buf (+ p 8) (string-length buf)))))
-     (do ((i 0 (+ 1 i))
-	  (s 0 (+ s (char->integer (string-ref b2 i)))))
-	 ((>= i (tar-record-size)) s))))
+  (let* ((p  (+ (tar-name-size) 48))
+	 (b2 (string-append (substring buf 0 p)
+			    "        "
+			    (substring buf (+ p 8) (string-length buf)))))
+    (do ((i 0 (+ 1 i))
+	 (s 0 (+ s (char->integer (string-ref b2 i)))))
+	((>= i (tar-record-size)) s))))
 
 ;; ----------------------------------------------------------------------
 ;;    tar-read-header ...
@@ -103,6 +102,7 @@
   (let* ((ptr  0)
 	 (data (read-chars (tar-record-size) port))
 	 (len  (string-length data)))
+
     (define (extract size)
       (let loop ((i 0))
 	(cond
@@ -122,10 +122,12 @@
 		      sub))
 		   (else
 		    (loop (+ 1 i)))))))))
+    
     (define (fetch)
       (let ((c (string-ref data ptr)))
 	(set! ptr (+ 1 ptr))
 	c))
+    
     (let ((name (if (or (not (string? data)) (= (string-length data) 0))
 		    ""
 		    (extract (tar-name-size)))))
@@ -155,20 +157,20 @@
 	      csum2))
 	    (else
 	     (make-struct tar-header 
-			   name
-			   mode
-			   uid
-			   gid
-			   size
-			   (seconds->date mtime)
-			   chksum
-			   (tar-type-name linkflag)
-			   linkname
-			   magic
-			   uname
-			   gname
-			   devmajor
-			   devminor))))))))
+			  name
+			  mode
+			  uid
+			  gid
+			  size
+			  (seconds->date mtime)
+			  chksum
+			  (tar-type-name linkflag)
+			  linkname
+			  magic
+			  uname
+			  gname
+			  devmajor
+			  devminor))))))))
 
 ;; ----------------------------------------------------------------------
 ;;    tar-round-up-to-record-size ...
@@ -185,11 +187,11 @@
       (let ((n (tar-header-size h)))
 	(if (= n 0)
 	    #f
-	     (let ((s (read-chars n p)))
-	       (if (< (string-length s) n)
-		   (error "illegal block ~S" (tar-header-name h))
-		   (read-chars (- (tar-round-up-to-record-size n) n) p))
-	       s)))
+	    (let ((s (read-chars n p)))
+	      (if (< (string-length s) n)
+		  (error "illegal block ~S" (tar-header-name h))
+		  (read-chars (- (tar-round-up-to-record-size n) n) p))
+	      s)))
       (error "incorrect tar header ~S" h)))
 
 (provide "tar")

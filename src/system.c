@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  5-May-2007 11:08 (eg)
+ * Last file update: 11-May-2007 14:56 (eg)
  */
 
 #include <unistd.h>

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 25-Apr-2007 22:20 (eg)
+;;;; Last file update: 14-May-2007 10:33 (eg)
 ;;;;
 
 ;;
@@ -857,6 +857,23 @@ doc>
   (set! base64-encode-string (encode/decode base64-encode))
   (set! base64-decode-string (encode/decode base64-decode)))
 
+;; ======================================================================
+;;	md5sum ...
+;; ======================================================================
+#|
+<doc EXT md5sum-file
+ * (md5sum-file str)
+ *
+ * Return a string contening the md5 dum of the file whose name is |str|.
+doc>
+|#
+(define (md5sum-file path)
+  (let ((port (open-file path "r")))
+    (if port
+	(let ((res (md5sum port)))
+	  (close-input-port port)
+	  res)
+	(error "cannot read file ~s" path))))
 
 ;; ======================================================================
 ;;	ansi-color ...

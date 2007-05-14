@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 11-Apr-2007 16:43 (eg)
+ * Last file update: 10-May-2007 15:15 (eg)
  */
 
 
@@ -476,6 +476,20 @@ extern struct extended_type_descr *STk_xtypes[];
 int STk_new_user_type(struct extended_type_descr *);
 int STk_init_extend(void);
 
+
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ---- 				F I X N U M . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+EXTERN_PRIMITIVE("fx+",   fxplus,  subr2, (SCM o1, SCM o2));
+EXTERN_PRIMITIVE("fx-",   fxminus, subr2, (SCM o1, SCM o2));
+EXTERN_PRIMITIVE("fx*",   fxtime,  subr2, (SCM o1, SCM o2));
+EXTERN_PRIMITIVE("fxdiv", fxdiv,   subr2, (SCM o1, SCM o2));
+
+
 /*
   ------------------------------------------------------------------------------
   ----
@@ -734,7 +748,6 @@ SCM STk_get_parameter(SCM param);
 SCM STk_set_parameter(SCM param, SCM value);
 SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value));
 SCM STk_make_C_parameter2(SCM symbol,SCM (*value)(void),SCM (*proc)(SCM new_value));
-
 
 
 /*

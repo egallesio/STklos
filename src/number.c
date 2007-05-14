@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 26-Apr-2007 18:21 (eg)
+ * Last file update:  9-May-2007 17:15 (eg)
  */
 
 
@@ -1595,14 +1595,6 @@ SCM STk_add2(SCM o1, SCM o2)
   }
   return o1;
 }
-
-//DEFINE_PRIMITIVE("fx+", fxplus, subr2, (SCM o1, SCM o2))
-//{
-//  if (!INTP(o1)) STk_error("bad fixnum ~S", o1);
-//  if (!INTP(o2)) STk_error("bad fixnum ~S", o1);
-//  return MAKE_INT(INT_VAL(o1) + INT_VAL(o2));
-//}
-
 
 DEFINE_PRIMITIVE("+", plus, vsubr, (int argc, SCM *argv))
 {

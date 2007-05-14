@@ -1,0 +1,53 @@
+;;;;
+;;;; test-md5.stk	-- MD5 testing
+;;;; 
+;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 13-May-2007 23:33 (eg)
+;;;; Last file update: 13-May-2007 23:41 (eg)
+;;;;
+(require "test")
+
+(test-section "MD5 checksum")
+
+(test ""
+      (md5sum "")
+      "d41d8cd98f00b204e9800998ecf8427e")
+(test "a"
+      (md5sum "a")
+      "0cc175b9c0f1b6a831c399e269772661")
+(test "abc"
+      (md5sum "abc")
+      "900150983cd24fb0d6963f7d28e17f72")
+(test "message digest"
+      (md5sum "message digest")
+      "f96b697d7cb7938d525a2f31aaf161d0")
+(test "abcdefghijklmnopqrstuvwxyz"
+      (md5sum "abcdefghijklmnopqrstuvwxyz")
+      "c3fcd3d76192e4007dfb496cca67e13b")
+(test "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+      (md5sum "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
+      "d174ab98d277d9f5a5611c2c9f419d9f")
+(test "A very long string"
+      (md5sum "12345678901234567890123456789012345678901234567890123456789012345678901234567890")
+      "57edf4a22be3c955ac49da2e2107b67a")
+
+(test-section-end)
+	      

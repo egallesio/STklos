@@ -154,8 +154,16 @@
 #  define DEEP_LOC_REF_FAR     149
 #  define DEEP_LOC_SET_FAR     150
 #  define CREATE_CLOSURE_FAR   151
+#  define IN_FXADD2            152
+#  define IN_FXSUB2            153
+#  define IN_FXMUL2            154
+#  define IN_FXDIV2            155
+#  define IN_SINT_FXADD2       156
+#  define IN_SINT_FXSUB2       157
+#  define IN_SINT_FXMUL2       158
+#  define IN_SINT_FXDIV2       159
 
-#  define NB_VM_INSTR (CREATE_CLOSURE_FAR  +1)
+#  define NB_VM_INSTR (IN_SINT_FXDIV2      +1)
 #endif
 
 
@@ -314,6 +322,14 @@ static void *jump_table[] = {
   &&lab_DEEP_LOC_REF_FAR    ,
   &&lab_DEEP_LOC_SET_FAR    ,
   &&lab_CREATE_CLOSURE_FAR  ,
+  &&lab_IN_FXADD2           ,
+  &&lab_IN_FXSUB2           ,
+  &&lab_IN_FXMUL2           ,
+  &&lab_IN_FXDIV2           ,
+  &&lab_IN_SINT_FXADD2      ,
+  &&lab_IN_SINT_FXSUB2      ,
+  &&lab_IN_SINT_FXMUL2      ,
+  &&lab_IN_SINT_FXDIV2      ,
   NULL};
 #endif
 #undef DEFINE_JUMP_TABLE
@@ -474,6 +490,14 @@ static char *name_table[] = {
   "DEEP_LOC_REF_FAR    ",
   "DEEP_LOC_SET_FAR    ",
   "CREATE_CLOSURE_FAR  ",
+  "IN_FXADD2           ",
+  "IN_FXSUB2           ",
+  "IN_FXMUL2           ",
+  "IN_FXDIV2           ",
+  "IN_SINT_FXADD2      ",
+  "IN_SINT_FXSUB2      ",
+  "IN_SINT_FXMUL2      ",
+  "IN_SINT_FXDIV2      ",
   NULL};
 #endif
 #undef DEFINE_NAME_TABLE

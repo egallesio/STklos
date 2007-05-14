@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 13-Apr-2007 12:25 (eg)
+ * Last file update: 10-May-2007 15:51 (eg)
  */
 
 // INLINER values
@@ -1376,6 +1376,16 @@ CASE(IN_MUL2)   { REG_CALL_PRIM(multiplication);
 CASE(IN_DIV2)   { REG_CALL_PRIM(division);
   		  vm->val = STk_div2(pop(), vm->val); NEXT1;}
 
+CASE(IN_FXADD2)   { REG_CALL_PRIM(fxplus);
+  		  vm->val = STk_fxplus(pop(), vm->val); NEXT1;}
+CASE(IN_FXSUB2)   { REG_CALL_PRIM(fxminus);
+  		  vm->val = STk_fxminus(pop(), vm->val); NEXT1;}
+CASE(IN_FXMUL2)   { REG_CALL_PRIM(fxtime); 
+  		  vm->val = STk_fxtime(pop(), vm->val); NEXT1;}
+CASE(IN_FXDIV2)   { REG_CALL_PRIM(fxdiv);
+  		  vm->val = STk_fxdiv(pop(), vm->val); NEXT1;}
+
+
 CASE(IN_SINT_ADD2) { REG_CALL_PRIM(plus);
   		     vm->val = STk_add2(vm->val, MAKE_INT(fetch_next())); NEXT1;}
 CASE(IN_SINT_SUB2) { REG_CALL_PRIM(difference);
@@ -1384,6 +1394,16 @@ CASE(IN_SINT_MUL2) { REG_CALL_PRIM(multiplication);
   		     vm->val = STk_mul2(vm->val, MAKE_INT(fetch_next())); NEXT1;}
 CASE(IN_SINT_DIV2) { REG_CALL_PRIM(division);
   		     vm->val = STk_div2(vm->val, MAKE_INT(fetch_next())); NEXT1;}
+
+
+CASE(IN_SINT_FXADD2) { REG_CALL_PRIM(fxplus);
+  		     vm->val = STk_fxplus(vm->val, MAKE_INT(fetch_next())); NEXT1;}
+CASE(IN_SINT_FXSUB2) { REG_CALL_PRIM(fxminus);
+                     vm->val = STk_fxminus(MAKE_INT(fetch_next()), vm->val); NEXT1;}
+CASE(IN_SINT_FXMUL2) { REG_CALL_PRIM(fxtime);
+  		     vm->val = STk_fxtime(vm->val, MAKE_INT(fetch_next())); NEXT1;}
+CASE(IN_SINT_FXDIV2) { REG_CALL_PRIM(fxdiv);
+  		     vm->val = STk_fxdiv(vm->val, MAKE_INT(fetch_next())); NEXT1;}
 
 
 CASE(IN_NUMEQ)  { REG_CALL_PRIM(numeq); 
