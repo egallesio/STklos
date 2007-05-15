@@ -1,7 +1,7 @@
 /*
  * s i o . c					-- Low level I/O
  * 
- * Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  * 
  *	     Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ????
- * Last file update: 22-Aug-2005 12:01 (eg)
+ * Last file update: 14-May-2007 13:36 (eg)
  *
  *
  * Completely rewritten for the STklos version (Jan. 2000)
@@ -72,12 +72,22 @@ STk_ungetc(int c, SCM port)
 int 
 STk_close(SCM port)
 { 
-  if (! (PORT_FLAGS(port) & PORT_CLOSED))
+  int res, exec_hook = FALSE;;
+
+  if (! (PORT_FLAGS(port) & PORT_CLOSED)) {
     PORT_RELEASE(port)(port);
+    exec_hook = TRUE;
+  }
 
   STk_register_finalizer(port, NULL); /* Unregister (possible) finalizer */
   PORT_FLAGS(port) |= PORT_CLOSED;
-  return PORT_CLOSE(port)(PORT_STREAM(port));
+  res = PORT_CLOSE(port)(PORT_STREAM(port));
+  
+  /* Eventually call the close hook */
+  if (exec_hook && (PORT_CLOSEHOOK(port) != STk_false))
+    STk_C_apply(PORT_CLOSEHOOK(port), 0);
+
+  return res;
 }
 
 int 
@@ -193,4 +203,3 @@ STk_fprintf(SCM port, char *format, ...)
   vsprintf(buffer, format, ap);
   return STk_puts(buffer, port);
 }
-

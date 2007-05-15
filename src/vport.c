@@ -1,7 +1,7 @@
 /*
  * vport.c					-- Virtual Ports
  * 
- * Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2005-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 17-Aug-2005 08:31 (eg)
- * Last file update: 23-Aug-2005 08:58 (eg)
+ * Last file update: 14-May-2007 12:03 (eg)
  */
 
 #include "stklos.h"
@@ -279,6 +279,7 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
   PORT_LINE(z)		= 1;
   PORT_POS(z)		= 0;
   PORT_FNAME(z)		= NULL;
+  PORT_CLOSEHOOK(z)	= STk_false;
   
   PORT_PRINT(z)		= vport_print;
   PORT_RELEASE(z)	= vport_release;

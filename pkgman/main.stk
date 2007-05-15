@@ -21,10 +21,10 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update: 26-Apr-2007 17:40 (eg)
+;;;; Last file update: 15-May-2007 16:30 (eg)
 ;;;;
 
-(include "http.stk")
+(include "../lib/http.stk")
 
 (include "types.stk")
 (include "params.stk")

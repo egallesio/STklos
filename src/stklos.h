@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 10-May-2007 15:15 (eg)
+ * Last file update: 14-May-2007 11:55 (eg)
  */
 
 
@@ -789,6 +789,7 @@ struct port_obj {
   char *filename;		/* File name (NULL if not a file port) */
   int  line;			/* Line number  (unused when writing) */
   int  pos;			/* position from the start of file */
+  SCM  close_hook;		/* hook called when a file is closed */
 
   /* virtual functions (in the object 'cause the # of ports should be low ) */
   void  (*print_it)  (SCM obj, SCM port);  /* used to display or print object */
@@ -826,6 +827,7 @@ struct port_obj {
 #define PORT_LINE(x)	  (((struct port_obj *) (x))->line)
 #define PORT_POS(x)	  (((struct port_obj *) (x))->pos)
 #define PORT_FNAME(x)	  (((struct port_obj *) (x))->filename)
+#define PORT_CLOSEHOOK(x) (((struct port_obj *) (x))->close_hook)
 
 #define PORT_PRINT(x)     (((struct port_obj *) (x))->print_it)
 #define PORT_RELEASE(x)   (((struct port_obj *) (x))->release_it)

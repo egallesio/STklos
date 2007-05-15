@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update: 17-Apr-2007 12:31 (eg)
+;;;; Last file update: 15-May-2007 15:49 (eg)
 ;;;;
 
 
@@ -131,7 +131,7 @@
     (flush-output-port (current-error-port))
 
     (let ((out (open-output-string)))
-      (http-get url out)
+      (http-download url out)
       (let ((pkgs (read-from-string (get-output-string out))))
 	;; Save the informations of this server
 	(let* ((name (make-path (stklos-pkg-servers-directory) server-name))
@@ -228,11 +228,7 @@
 	       package))
 
     ;; Download file
-    (let ((out (open-file path "w")))
-      (unless out
-	(error "cannot open file ~s when downloading ~s" path package))
-      (http-get url out)
-      (close-port out))
+    (http-download url path)
     
     ;; Verify file integrity
     (let ((lmd5 (md5sum-file path)))

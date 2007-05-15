@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 30-Jan-2007 18:32 (eg)
+ * Last file update: 14-May-2007 12:02 (eg)
  *
  */
 
@@ -242,6 +242,7 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
   PORT_LINE(res)	= 1;
   PORT_POS(res)		= 0;
   PORT_FNAME(res)	= NULL;
+  PORT_CLOSEHOOK(res)	= STk_false;
   
   PORT_PRINT(res)	= sport_print;
   PORT_RELEASE(res)	= sport_release;

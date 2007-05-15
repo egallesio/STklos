@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 11-May-2007 15:50 (eg)
+ * Last file update: 14-May-2007 12:02 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -432,6 +432,7 @@ make_fport(char *fname, FILE *f, int flags)
   PORT_FNAME(res)	= STk_strdup(fname);
   PORT_LINE(res)	= 1;
   PORT_POS(res)		= 0;
+  PORT_CLOSEHOOK(res)	= STk_false;
 
   PORT_PRINT(res)	= fport_print;
   PORT_RELEASE(res)	= unregister_port;

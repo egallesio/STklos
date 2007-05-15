@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  5-May-2007 21:00 (eg)
+# Last file update: 15-May-2007 13:44 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d @LURCDIR@
 
@@ -45,6 +45,7 @@ scheme_SRCS = STklos.init		\
 	      full-conditions.stk 	\
 	      getopt.stk		\
 	      gunzip.stk		\
+	      http.stk			\
 	      lex-rt.stk		\
 	      make-C-boot.stk		\
 	      pp.stk			\
@@ -81,6 +82,7 @@ scheme_OBJS = compfile.ostk		\
 	      env.ostk			\
 	      getopt.ostk		\
 	      gunzip.ostk		\
+	      http.ostk			\
 	      lex-rt.ostk		\
 	      pp.ostk			\
 	      recette.ostk		\

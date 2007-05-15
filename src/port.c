@@ -1,7 +1,7 @@
 /*
  *  p o r t . c			-- ports implementation
  *
- * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 13-Sep-2006 08:58 (eg)
+ * Last file update: 15-May-2007 11:38 (eg)
  *
  */
 
@@ -1170,7 +1170,7 @@ DEFINE_PRIMITIVE("read-line", read_line, subr01, (SCM port))
  * (copy-port in out max)
  *
  * Copy the content of port |in|, which must be opened for reading, on
- * port |out|, which must be opened for writing. If |max| is nont specified,
+ * port |out|, which must be opened for writing. If |max| is not specified,
  * All the characters from the input port are copied on ouput port. If |max|
  * is specified, it must be an integer indicating the maximum number of characters
  * which are copied from |in| to |out|.
@@ -1203,7 +1203,6 @@ DEFINE_PRIMITIVE("copy-port", copy_port, subr23, (SCM p1, SCM p2, SCM max))
     }
     
     if (n == 0) break;
-
     if ((n = STk_read_buffer(p1, buffer, n)) > 0) {
       m = STk_write_buffer(p2, buffer, n);
       if (n != m) goto Error;
@@ -1343,6 +1342,50 @@ DEFINE_PRIMITIVE("port-rewind", port_rewind, subr1, (SCM port))
   return STk_void;
 }
 
+/*
+<doc EXT port-close-hook-set!
+ * (port-close-hook-set! port thunk)
+ *
+ * Associate the procedure |thunk| to |port|. The thunk will be called
+ * the first time |port| is closed. 
+ * @lisp
+ * (let* ((tmp (temporary-file-name))
+ *        (p   (open-output-file tmp))
+ *        (foo #t))
+ *   (port-close-hook-set! p
+ * 			(lambda()
+ * 			  (remove-file tmp)
+ * 			  (set! foo #t)))
+ *   (close-port p)
+ *   foo)
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("port-close-hook-set!", port_close_hook_set, subr2, 
+		 (SCM port, SCM thunk))
+{
+  if (!PORTP(port)) STk_error_bad_port(port);
+  if (!STk_procedurep(thunk)) STk_error("bad procedure ~S", thunk);
+  
+  PORT_CLOSEHOOK(port) = thunk;
+  return STk_void;
+}
+
+
+/*
+<doc EXT port-close-hook
+ * (port-close-hook port)
+ *
+ * Returns the user close procedure associated to the given |port|.
+doc>
+*/
+DEFINE_PRIMITIVE("port-close-hook", port_close_hook, subr1, (SCM port))
+{
+  if (!PORTP(port)) STk_error_bad_port(port);
+  return PORT_CLOSEHOOK(port);
+}
+
+
 /*===========================================================================*\
  * 
  * Initializations
@@ -1445,6 +1488,8 @@ int STk_init_port(void)
   ADD_PRIMITIVE(port_position);
   ADD_PRIMITIVE(port_seek);
   ADD_PRIMITIVE(port_rewind);
+  ADD_PRIMITIVE(port_close_hook);
+  ADD_PRIMITIVE(port_close_hook_set);
 
   return STk_init_fport() && 
     	 STk_init_sport() &&
