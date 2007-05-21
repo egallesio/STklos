@@ -29,7 +29,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  5-Jun-2002 19:20 (eg)
-;;;; Last file update: 15-Apr-2007 18:10 (eg)
+;;;; Last file update: 18-May-2007 14:14 (eg)
 ;;;;
 
 (require "srfi-14")
@@ -45,7 +45,7 @@
 	  ;; Selection
 	  string-copy substring/shared string-copy!
 	  string-take string-drop string-take-right string-drop-right
-	  string-pad string-pad-right string-trim string-trim-right
+	  string-pad string-pad-right string-trim-left string-trim-right
 	  string-trim-both
 	  ;; Modification
 	  string-fill!

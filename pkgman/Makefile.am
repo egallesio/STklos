@@ -1,7 +1,7 @@
 # Makefile for stklos-pkgman
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 22-Dec-2006 12:00 (eg)
-# Last file update:  5-May-2007 18:52 (eg)
+# Last file update: 15-May-2007 17:23 (eg)
 
 
 makefiledir=  $(prefix)/etc/stklos
@@ -12,7 +12,7 @@ bin_SCRIPTS = stklos-pkg
 LEX     = lang-bigloo.l lang-chicken.l lang-mzscheme.l
 LEXOBJS = lang-bigloo.inc lang-chicken.inc lang-mzscheme.inc
 
-SRC     = main.stk add.stk extract.stk http.stk lang.stk lang-bigloo.stk \
+SRC     = main.stk add.stk extract.stk lang.stk lang-bigloo.stk \
 	  params.stk pkgball.stk \
 	  repository.stk rewrite.stk misc.stk tune.stk types.stk
 SFLAGS  = -l 
