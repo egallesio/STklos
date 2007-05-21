@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 28-Feb-2007 22:08 (eg)
+dnl Last file update: 21-May-2007 14:39 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -136,9 +136,16 @@ fi
 
 
 # Eventually force our gmp usage
+withval=""
 AC_ARG_WITH(gmp-light,
-	[  --with-gmp-light		use our GMP version even the system provides one],
-	HAVE_GMP="no")
+	[  --with-gmp-light		use our GMP version even the system provides one])
+
+case $withval in
+  "yes") HAVE_GMP="no";;
+  "no")  HAVE_GMP="yes";;
+esac
+
+
 
 dnl
 dnl check for GC
@@ -152,9 +159,14 @@ else
 fi
 
 # Test if the user want to force with our GC
+withval=""
 AC_ARG_WITH(provided-gc,
-       [  --with-provided-gc		use our GC version even the system provides one],
-       HAVE_GC="no")
+       [  --with-provided-gc		use our GC version even the system provides one])
+
+case $withval in
+  "yes") HAVE_GC="no";;
+  "no")  HAVE_GC="yes";;
+esac
 
 # On Mac OS X use the given GC (to compile it without -Ox)
 case `uname -s` in
@@ -170,9 +182,14 @@ dnl
 AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
 
 # Test if the user want to force with our PCRE lib
+withval=""
 AC_ARG_WITH(provided-regexp,
-       [  --with-provided-regexp	use our PCRE regexp version],
-       HAVE_PCRE="no")
+       [  --with-provided-regexp	use our PCRE regexp version])
+
+case $withval in
+  "yes") HAVE_PCRE="no";;
+  "no")  HAVE_PCRE="yes";;
+esac
 
 
 dnl
@@ -183,7 +200,7 @@ LDAP_LIB=""
 
 AC_ARG_ENABLE(ldap, 
      [  --enable-ldap			enable ldap],
-     USE_LDAP="yes")
+     USE_LDAP="$enableval")
 
 if test "$USE_LDAP" = "yes" ;then
    AC_CHECK_HEADERS(ldap.h, USE_LDAP=yes, USE_LDAP=false)

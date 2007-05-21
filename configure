@@ -5115,11 +5115,19 @@ fi
 
 
 # Eventually force our gmp usage
+withval=""
 
 # Check whether --with-gmp-light was given.
 if test "${with_gmp_light+set}" = set; then
-  withval=$with_gmp_light; HAVE_GMP="no"
+  withval=$with_gmp_light;
 fi
+
+
+case $withval in
+  "yes") HAVE_GMP="no";;
+  "no")  HAVE_GMP="yes";;
+esac
+
 
 
 if test "$THREADS" = lurc
@@ -5198,12 +5206,18 @@ fi
 fi
 
 # Test if the user want to force with our GC
+withval=""
 
 # Check whether --with-provided-gc was given.
 if test "${with_provided_gc+set}" = set; then
-  withval=$with_provided_gc; HAVE_GC="no"
+  withval=$with_provided_gc;
 fi
 
+
+case $withval in
+  "yes") HAVE_GC="no";;
+  "no")  HAVE_GC="yes";;
+esac
 
 # On Mac OS X use the given GC (to compile it without -Ox)
 case `uname -s` in
@@ -5282,12 +5296,18 @@ fi
 
 
 # Test if the user want to force with our PCRE lib
+withval=""
 
 # Check whether --with-provided-regexp was given.
 if test "${with_provided_regexp+set}" = set; then
-  withval=$with_provided_regexp; HAVE_PCRE="no"
+  withval=$with_provided_regexp;
 fi
 
+
+case $withval in
+  "yes") HAVE_PCRE="no";;
+  "no")  HAVE_PCRE="yes";;
+esac
 
 
 USE_LDAP="no"
@@ -5295,7 +5315,7 @@ LDAP_LIB=""
 
 # Check whether --enable-ldap was given.
 if test "${enable_ldap+set}" = set; then
-  enableval=$enable_ldap; USE_LDAP="yes"
+  enableval=$enable_ldap; USE_LDAP="$enableval"
 fi
 
 
@@ -6705,8 +6725,7 @@ if test "$HAVE_GC" = "no"
 then
   echo "No Boehm-Demers-Weiser GC library. Using the one provided with the package"
   (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix \
-          --includedir=$prefix/include/stklos --enable-threads=$THREADS) \
-     || { echo "Cannot configure the GC"; exit; }
+          --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
 
   GC=gc
   GCLIB="../gc/.libs/libgc.a"
