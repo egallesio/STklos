@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 14-May-2007 11:55 (eg)
+ * Last file update: 22-May-2007 15:30 (eg)
  */
 
 
@@ -488,6 +488,7 @@ EXTERN_PRIMITIVE("fx+",   fxplus,  subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fx-",   fxminus, subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fx*",   fxtime,  subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fxdiv", fxdiv,   subr2, (SCM o1, SCM o2));
+int STk_init_fixnum(void);
 
 
 /*
@@ -584,6 +585,15 @@ EXTERN_PRIMITIVE("assoc", assoc, subr2, (SCM obj, SCM alist));
 
 
 int STk_init_list(void);
+
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ---- 					M D 5 . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+int STk_init_md5(void);
 
 
 /*
@@ -746,8 +756,10 @@ int STk_init_parameter(void);
 
 SCM STk_get_parameter(SCM param);
 SCM STk_set_parameter(SCM param, SCM value);
-SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value));
-SCM STk_make_C_parameter2(SCM symbol,SCM (*value)(void),SCM (*proc)(SCM new_value));
+SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value), 
+			 SCM module);
+SCM STk_make_C_parameter2(SCM symbol,SCM (*value)(void),SCM (*proc)(SCM new_value),
+			  SCM module);
 
 
 /*
@@ -920,6 +932,7 @@ int STk_init_vport(void);
  **** 		port.h primitives
  ****/
 EXTERN_PRIMITIVE("close-port", close_port, subr1, (SCM port));
+EXTERN_PRIMITIVE("read-line", read_line, subr01, (SCM port));
 
 void STk_error_bad_port(SCM p);
 void STk_error_bad_file_name(SCM f);

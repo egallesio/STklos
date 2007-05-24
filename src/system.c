@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 11-May-2007 14:56 (eg)
+ * Last file update: 23-May-2007 17:26 (eg)
  */
 
 #include <unistd.h>
@@ -63,11 +63,6 @@ static void error_bad_int_or_out_of_bounds(SCM val)
   STk_error("bad integer ~S (or out of range)", val);
 }
 
-static void error_cannot_copy(SCM f1, SCM f2)
-{
-  STk_error("cannot copy file ~S to ~S", f1, f2);
-}
-
 static void error_win32_primitive(void)
 {
   STk_error("Win32 primitive not available on this system");
@@ -94,6 +89,12 @@ static int my_stat(SCM path, struct stat *s)
 {
   if (!STRINGP(path)) error_bad_path(path);
   return stat(STk_expand_file_name(STRING_CHARS(path)), s);
+}
+
+static int my_lstat(SCM path, struct stat *s)
+{
+  if (!STRINGP(path)) error_bad_path(path);
+  return lstat(STk_expand_file_name(STRING_CHARS(path)), s);
 }
 
 
@@ -429,7 +430,9 @@ DEFINE_PRIMITIVE("file-is-executable?", file_is_executablep, subr1, (SCM f))
 
 DEFINE_PRIMITIVE("file-exists?", file_existsp, subr1, (SCM f))
 {
-  return my_access(f, F_OK);
+  struct stat info;
+
+  return MAKE_BOOLEAN(my_lstat(f, &info) == 0);
 }
 
 /*

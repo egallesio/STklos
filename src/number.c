@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  9-May-2007 17:15 (eg)
+ * Last file update: 24-May-2007 09:28 (eg)
  */
 
 
@@ -3228,8 +3228,8 @@ int STk_init_number(void)
   /* Add parameter for float numbers precision */
   STk_make_C_parameter("real-precision",
 		       MAKE_INT(real_precision),
-		       real_precision_conv);
+		       real_precision_conv,
+		       STk_STklos_module);
 
-  //  ADD_PRIMITIVE(fxplus);
   return TRUE;
 }

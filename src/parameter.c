@@ -1,7 +1,7 @@
 /*
  * parameter.c	-- Parameter Objects (SRFI-39)
  * 
- * Copyright © 2003-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  1-Jul-2003 11:38 (eg)
- * Last file update: 24-Oct-2006 17:08 (eg)
+ * Last file update: 23-May-2007 14:22 (eg)
  */
 
 
@@ -77,7 +77,7 @@ SCM STk_set_parameter(SCM param, SCM value)
   
   conv = PARAMETER_CONV(param);
   
-  if PARAMETER_C_TYPE(param) {
+  if (PARAMETER_C_TYPE(param)) {
     /* We have a C converter */
     new = (conv != STk_false) ? ((SCM (*) (SCM))conv)(value): value;
   } else {
@@ -86,15 +86,18 @@ SCM STk_set_parameter(SCM param, SCM value)
   }
 
   tmp  = STk_int_assq(STk_current_thread(), PARAMETER_DYNENV(param));
-  if (tmp != STk_false) 
+  if (tmp != STk_false)
     CDR(tmp) = new;
-  else
-    PARAMETER_VALUE(param) = new;
+  else {
+    if (PARAMETER_C_TYPE(param) != 2)
+      PARAMETER_VALUE(param) = new;
+  }
 
   return STk_void;
 }
 
-SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value))
+SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value),
+			 SCM module)
 {
   SCM z;
 
@@ -106,14 +109,15 @@ SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value))
   PARAMETER_DYNENV(z) = STk_nil;
 
   /* Bind it to the given symbol */
-  STk_define_variable(STk_intern(symbol), z, STk_current_module());
+  STk_define_variable(STk_intern(symbol), z, module);
 
   return z;
 }
 
-SCM STk_make_C_parameter2(SCM symbol, SCM (*value)(void), SCM (*proc)(SCM new_value))
+SCM STk_make_C_parameter2(SCM symbol, SCM (*value)(void), SCM (*proc)(SCM new_value),
+			  SCM module)
 {
-  SCM z = STk_make_C_parameter(symbol, (SCM) value, proc);
+  SCM z = STk_make_C_parameter(symbol, (SCM) value, proc, module);
   
   PARAMETER_C_TYPE(z) = 2;
   return z;

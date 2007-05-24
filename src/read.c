@@ -20,7 +20,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 19-Apr-2007 16:24 (eg)
+ * Last file update: 22-May-2007 15:30 (eg)
  *
  */
 
@@ -265,7 +265,7 @@ static SCM read_here_string(SCM port)
 {
   SCM eof_token = read_token(port, STk_getc(port), TRUE);
   SCM res, line;
-  int ch, first_line = TRUE;
+  int first_line = TRUE;
 
   if (!SYMBOLP(eof_token)) STk_error("bad symbol for here string ~S", eof_token);
 
@@ -864,6 +864,7 @@ int STk_init_reader(void)
   /* Declare parameter read-case-sensitve */
   STk_make_C_parameter("read-case-sensitive",
 		       MAKE_BOOLEAN(STk_read_case_sensitive),
-		       read_case_sensitive_conv);
+		       read_case_sensitive_conv,
+		       STk_STklos_module);
   return TRUE;
 }

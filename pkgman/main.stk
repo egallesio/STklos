@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update: 15-May-2007 16:30 (eg)
+;;;; Last file update: 21-May-2007 15:24 (eg)
 ;;;;
 
 (include "../lib/http.stk")
@@ -50,7 +50,8 @@
        "Actions"
        (("extract" :arg pkg :alternate "e" :help "Extract <pkg>. Don't install it")
 	(set! actions (cons (list 'extract pkg) actions)))
-       
+       (("test" :arg pkg :alternate "t" :help "Test <pkg>.")
+	 (set! actions (cons (list 'test pkg) actions)))
        "Informations"
        (("depends" :arg pkg :help "Show all the dependencies of <pkg>")
 	(set! actions (cons (list 'package-deps pkg) actions)))
@@ -134,6 +135,9 @@
 	  ((extract)
 	     (find-and-extract-package (cadar actions)
 				       (stklos-pkg-extract-dir)))
+	  ((test)
+	     (exit (find-extract-and-test-package (cadar actions)
+						  (temporary-file-name))))
 	  ((package-deps)
 	     (for-each (lambda (x) (printf "~a\n" x))
 		       (package-deps* (cadar actions))))
