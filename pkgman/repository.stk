@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update: 15-May-2007 15:49 (eg)
+;;;; Last file update: 30-May-2007 11:42 (eg)
 ;;;;
 
 
@@ -46,7 +46,6 @@
 	      (server-names)))
   ;; Create the cache directory (eventually)
   (unless (file-exists? (stklos-pkg-cache-directory))
-
     (make-directories (stklos-pkg-cache-directory))))
 
 ;; ----------------------------------------------------------------------
@@ -301,3 +300,4 @@
 	(lambda ()
 	  (display ";; Generated -*- scheme -*- file. *DO NOT EDIT*\n\n")
 	  (pp new :port #t)))))
+

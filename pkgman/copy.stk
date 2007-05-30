@@ -1,0 +1,76 @@
+;;;;
+;;;; copy.stk	-- Copy files for installation
+;;;; 
+;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 25-May-2007 11:15 (eg)
+;;;; Last file update: 29-May-2007 18:23 (eg)
+;;;;
+
+
+(define (do-copy args)
+
+  (define (install-prefix)
+    (if (stklos-pkg-swide)
+	(stklos-pkg-system-directory)
+	(stklos-pkg-directory)))
+
+  (define (create-destination-dirs)
+    (let* ((prefix (install-prefix))
+	   (doc    (make-path prefix "doc"))
+	   (etc    (make-path prefix "etc"))
+	   (lib    (make-path prefix "lib")))
+      
+      ;; Ensure creation of the destination doc, etc and lib directories
+      (unless (file-is-directory? doc)
+	(make-directories doc))
+      (unless (file-is-directory? etc)
+	(make-directories etc))
+      (unless (file-is-directory? lib)
+	(make-directories lib))))
+
+  (define (register-file package file)
+    (let* ((db  (make-path (install-prefix) "etc" package))
+	   (old (if (file-exists? db)
+		    (with-input-from-file db read)
+		    '()))
+	   (new (cons file (delete file old))))
+      (with-output-to-file db
+	(lambda ()
+	  (write new)
+	  (newline)))))
+  ;;;
+  ;;;	 do-copy starts here
+  ;;;
+  (unless (= (length args) 4)
+    (error "Bad usage of --cp option. 4 parameters required"))
+
+  (let ((package (car args))
+	(file    (cadr args))
+	(dir     (caddr args))
+	(mode    (string->number (cadddr args) 8)))
+    ;; Ensure that the installation directories exist
+    (create-destination-dirs)
+
+    (let ((new (make-path (install-prefix) dir (basename file))))
+      (copy-file file new)
+      (when (and mode (> mode 0))
+	(chmod new mode))
+      (register-file package new))))

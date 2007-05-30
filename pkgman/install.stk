@@ -1,0 +1,62 @@
+;;;;
+;;;; install.stk	-- Installin/Uninstalling packages
+;;;; 
+;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 30-May-2007 11:42 (eg)
+;;;; Last file update: 30-May-2007 13:01 (eg)
+;;;;
+
+;; ----------------------------------------------------------------------
+;; 	show-installed-packages ...
+;; ----------------------------------------------------------------------
+(define (show-installed-packages)
+
+  (define (do-print dir)
+    (for-each (lambda(x) (printf "  ~a\n" x))
+	      (sort (cddr (directory-files dir)) string<=?)))
+     
+  (let ((system (make-path (stklos-pkg-system-directory) "etc"))
+	(user   (make-path (stklos-pkg-directory) "etc")))
+    (when (file-is-directory? user)
+      (printf "User installed packages:\n")
+      (do-print user))
+    (when (file-is-directory? system)
+      (printf "System-wide installed packages:\n")
+      (do-print system))))
+       
+
+;; ----------------------------------------------------------------------
+;; 	show-installed-packages ...
+;; ----------------------------------------------------------------------
+(define (uninstall-package package)
+  (let* ((dir (if (stklos-pkg-swide)
+		  (stklos-pkg-system-directory)
+		  (stklos-pkg-directory)))
+	 (filedir (make-path dir "etc" package)))
+    (if (file-exists? filedir)
+	(let ((files (with-input-from-file filedir read)))
+	  (for-each remove-file files)
+	  (remove-file filedir)
+	  (eprintf "Package ~a is un-installed\n" package))
+	(error "package ~a is not installed" package))))
+
+		 
+

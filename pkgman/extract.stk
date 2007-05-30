@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Jan-2007 12:10 (eg)
-;;;; Last file update: 22-May-2007 10:25 (eg)
+;;;; Last file update: 29-May-2007 18:10 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -67,25 +67,27 @@
 	(printf "\t@echo '**** No test provided with package ~A'\n" package))))
 
   (define (build-install-target targets system-wide?)
-    (let ((prefix (if system-wide? "system-" "")))
+    (let ((prefix (if system-wide? "system-" ""))
+	  (option (if system-wide? "-S" "")))
       (printf "~ainstall: $(OBJ)\n" prefix)
       (for-each (lambda (x)
-		  (let* ((tunedir  (make-path package "stklos"))
+		  (let* ((tunedir  (make-path x "stklos"))
 			 (tuneconf (make-path tunedir "configure"))
-			 (docdir   (make-path package "doc"))
+			 (docdir   (make-path x "doc"))
 			 (obj      (format "~a.~a" x
 					   (if (file-exists? tuneconf)
 					       "$(SO)"
 					       "ostk")))
 			 (docs     (cddr (directory-files docdir))))
 		    ;; installing the object file
-		    (printf "\tstklos-ext-install ~ascmpkg ~a ~a 0755 && \\\n"
-			    prefix x  obj)
+		    (printf "\tstklos-pkg ~a --cp ~a ~a lib 0755 && \\\n"
+			    option x obj)
 		    ;; installing the doc files
 		    (for-each
 		     (lambda (d)
-		       (printf "\tstklos-ext-install ~ascmpkg ~a doc/~a 0744 && \\\n"
-			prefix x d))
+		       (eprintf "x = ~S d = ~s\n" x d)
+		       (printf "\tstklos-pkg ~a --cp ~a ~a doc 0744 && \\\n"
+			       option x (make-path x "doc" d)))
 		     docs)))
 		targets)
       (printf "\techo '~ainstall done.'\n\n" prefix)))

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update: 21-May-2007 15:24 (eg)
+;;;; Last file update: 30-May-2007 13:13 (eg)
 ;;;;
 
 (include "../lib/http.stk")
@@ -35,6 +35,8 @@
 (include "lang.stk")
 (include "tune.stk")
 (include "extract.stk")
+(include "copy.stk")
+(include "install.stk")
 (include "misc.stk")
 
 
@@ -42,7 +44,8 @@
 ;;	stklos-pkg-arguments ...
 ;; ----------------------------------------------------------------------
 (define (stklos-pkg-arguments argv)
-  (let ((actions '()))
+  (let ((actions '())
+	(cp #f))
 
     (parse-arguments argv
        "Usage: stklos-pkg [options] [parameter ...]"
@@ -52,15 +55,20 @@
 	(set! actions (cons (list 'extract pkg) actions)))
        (("test" :arg pkg :alternate "t" :help "Test <pkg>.")
 	 (set! actions (cons (list 'test pkg) actions)))
+       (("uninstall" :arg pkg :help "un-install package <pkg>")
+	(set! actions (cons (cons 'uninstall pkg) actions)))
+
        "Informations"
+       (("list" :alternate "l" :help "list available packages")
+	(set! actions (cons 'list actions)))
        (("depends" :arg pkg :help "Show all the dependencies of <pkg>")
 	(set! actions (cons (list 'package-deps pkg) actions)))
-
+       (("installed" :help "Show installed packages")
+	(set! actions (cons 'installed actions)))
+       
        "Repository administration"
        (("sync" :alternate "s" :help "synchronize with remote server servers")
 	(set! actions (cons 'sync actions)))
-       (("list" :alternate "l" :help "list available packages")
-	(set! actions (cons 'list actions)))
        (("delete-repository" :help "delete stklos-pkg repository. USE WITH CAUTION")
 	(set! actions (cons 'delete-repo actions)))
        (("fill-cache" :help "fill the cache with all available packages")
@@ -77,6 +85,8 @@
 	(stklos-pkg-extract-dir dir))
        (("verbose" :alternate "v" :help "be verbose (can be cumulated)")
 	(stklos-pkg-verbosity (+ (stklos-pkg-verbosity) 1)))
+       (("system-wide" :alternate "S" :help "do a system wide (de)installation")
+	(stklos-pkg-swide #t))
        (("help" :alternate "h" :help "display this help")
 	(arg-usage (current-error-port))
 	(exit 0))
@@ -85,7 +95,12 @@
 	(exit 0))
        (("version" :alternate "V" :help "print the version and exit")
 	(eprintf "stklos-stklos-pkg shipped with STklos (version ~A)\n" (version))
-	(exit 0)))
+	(exit 0))
+       (("cp" :help "INTERNAL USE ONLY. Do not use this option")
+	(set! cp #t))
+       (else
+	(when cp
+	  (set! actions (cons (cons 'cp other-arguments) actions)))))
 
     (if (null? actions)
 	'(list)
@@ -94,6 +109,20 @@
 ;; ----------------------------------------------------------------------
 ;;	global-handler ...
 ;; ----------------------------------------------------------------------
+(define-macro (declare-new-error name)
+  (let ((condition-name (string->symbol (format "&~a" name)))
+	(predicate      (string->symbol (format "&~a?" name)))) 
+    `(begin
+       (define-condition-type ,
+  
+
+
+(declare-new-error error-pkg)
+
+(define-condition-type &error-pkg &error-message foo)
+
+
+
 (define (global-handler c)
   (if  (and (condition? c) (condition-has-type? c &error-message))
     (let ((who (condition-ref c 'location))
@@ -144,7 +173,15 @@
 	  ((add)
 	   (local-description-add!(cadar actions))
 	   (exit 0))
-       
+
+	  ((cp)
+	   (do-copy (cdar actions)))
+
+	  ((installed)
+	   (show-installed-packages))
+
+	  ((uninstall)
+	   (uninstall-package (cdar actions)))
 
 	  (else (error "bad command ~S" (car actions))))
 	(loop (cdr actions))))))

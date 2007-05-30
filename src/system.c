@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 23-May-2007 17:26 (eg)
+ * Last file update: 25-May-2007 12:04 (eg)
  */
 
 #include <unistd.h>
@@ -576,11 +576,9 @@ DEFINE_PRIMITIVE("copy-file", copy_file, subr2, (SCM filename1, SCM filename2))
   if (!STRINGP(filename2)) error_bad_string(filename2);
   
   f1 = open(STRING_CHARS(filename1), O_RDONLY);
+  if (f1 == -1) error_posix(filename1, NULL);
   f2 = open(STRING_CHARS(filename2), O_WRONLY|O_CREAT|O_TRUNC, 0666);
-  
-  if ((f1==-1) || (f2==-1)) {
-    error_posix(filename1, filename2);
-  }
+  if (f2 == -1) error_posix(filename2, NULL);
 
   while ((n = read(f1, buff, MAXBUFF)) > 0) {
     if ((n < 0) || (write(f2, buff, n) < n)) {
