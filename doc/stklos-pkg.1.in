@@ -1,0 +1,129 @@
+.\" -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH STKLOS-PKG 1 "version @VERSION@"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+stklos-pkg \- ScmPkg packages management
+
+.SH SYNOPSIS
+\fbstklos-pkg\fR [\fIoptions\fR]
+
+.SH DESCRIPTION
+The
+.B stklos-pkg
+command is the general tool for downloading, installing and  uninstalling
+.B ScmPkg 
+packages in STklos. 
+.LP
+The first time you use stklos-pkg you must synchronize your local
+repository with the ScmPkg server. This is done using the
+\fI--setup\fR option. The other options of stklos-pkg are described 
+below. 
+
+.SH OPTIONS
+Here are the options available in the version @VERSION@ of 
+.B stklos.
+
+.IP "--extract package | -e package" 
+extract the files of  \fIpackage\fR (and all its dependencies) and build a
+Unix Makefile for compiling the package. The files are extracted in the
+directory specified with option \fI--directory\fR (or the current
+directory if the option is unused. The generated Makefile offers the
+following targets: 
+.RS
+.IP  "all" 
+to build the package dependencies nd the package itself
+.IP "test" 
+to run package tests
+.IP "install" 
+to install the package (and its dependencies) for the current user
+.IP "   system-install" 
+to install the package (and its dependencies) system-wide 
+.RE
+
+.IP "--test=package | -t package"
+extract and test the given package in a temporary directory. If the 
+test succeeds, the \fIstklos-pkg\fR command returns 0. 
+
+.IP "--install=package| -i package"
+install the given package and its dependencies in the standard
+installation directory. If the \fI--system-wide\fR flag is not used, files
+are installed in the user directory. Otherwise, files are installed in 
+a shared directory available to all users. 
+
+.IP "--uninstall package"
+un-install the files which were copied during the installation of the
+given package. Use the \fI--system-wide\fR option to un-install shared files.
+
+.IP "--sync | -s"
+synchronize the local repository on the ScmPkg server(s). This will
+download the description of all the packages which are available on 
+the server(s). The packages themselves are downloaded, only when
+needed. 
+
+.IP "--add=package| -a package"
+adds the given package to the repository. 
+
+.IP "--fill-cache" 
+downloads all the package which are available on the server(s). This
+can be used for copying all remote packages, when the net connection
+is not permanent for instance.
+
+.IP "--clear-cache" 
+remove all the packages from the cache. This can be used when packages 
+files take too much place. Packages will be downloaded when needed 
+
+.IP "--reset"
+remove all the files needed by ScmPkg, that is the cache of packages,
+but also the binary of installed packages, their documentation, and
+all the meta-data of ScmPkg. 
+
+.IP "--list |-l"
+list all the packages which are available from server(s) and from the
+current repository. 
+
+.IP "--depends=package"
+list the packages needed by the given package
+
+.IP "--installed" 
+list the packages which are locally installed
+
+.IP "--directory=dir | -C dir"
+Use the specified directory for extracting file. If this option is not
+specified, files are extracted in the current directory.
+
+.IP "--verbose | -v"
+be more verbose. Several usage of this flag increase the verbosity of 
+stklos-pkg.
+
+.IP "--system-wide | -S"
+flag used to indicate that (un-)installation must be system wide. 
+
+.IP "--version |-V"
+display the version of \fRstklos-pkg\fR and exit. 
+
+.IP "--help | -h"
+Show a list of options
+
+.SH "FILES"
+.IP "~/.stklos/pkg"
+The \fISTklos\fR user ScmPkg repository 
+.IP "@PREFIX@/lib/stklos/pkg"
+The \fISTklos\fR system ScmPkg repository here 
+
+
+.SH "SEE ALSO"
+.BR stklos (1)

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Jan-2007 13:37 (eg)
-;;;; Last file update: 30-May-2007 11:41 (eg)
+;;;; Last file update: 30-May-2007 19:58 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -37,7 +37,7 @@
 		       ((interface ?- . ?rest) rest)
 		       (else (loop (read e)))))))))
     (unless in
-      (error "Cannot open source file ~S" file))
+      (error-pkg "Cannot open source file ~S" file))
     (let ((res (parse in)))
       (close-port in)
       res)))
@@ -143,12 +143,17 @@
 ;; ----------------------------------------------------------------------
 (define (rm-rf path)
   (when (file-exists? path)
+    ;(eprintf "rm -rf ~S\n" path)
     (if (file-is-directory? path)
 	(let ((files (cddr (directory-files path))))
+	  ;(eprintf "C'est un directory ~S\n" path)
 	  (for-each (lambda (f) (rm-rf (make-path path f)))
 		    files)
+	  ;(eprintf "effacer le repertoire à lafin ~S\n" path)
 	  (delete-directory path))
-	(remove-file path))))
+	(begin
+	  ;(eprintf "effacer fichier ~S\n" path)
+	(remove-file path)))))
 
 ;; ----------------------------------------------------------------------
 ;;	untar ...

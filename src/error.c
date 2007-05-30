@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 14-Nov-1993 14:58
- * Last file update:  8-Feb-2007 18:47 (eg)
+ * Last file update: 30-May-2007 16:27 (eg)
  */
 
 #include "stklos.h"
@@ -116,11 +116,11 @@ static void print_format(SCM port,char *format, va_list ap)
   }
 }
 
-void STk_signal_error(SCM where, SCM str)
+void STk_signal_error(SCM type, SCM where, SCM str)
 {
   SCM bt = STk_vm_bt();
   
-  STk_raise_exception(STk_make_C_cond(STk_err_mess_condition, 3, where, bt, str));
+  STk_raise_exception(STk_make_C_cond(type, 3, where, bt, str));
 }
 
 SCM STk_format_error(char *format, ...)
@@ -176,6 +176,8 @@ SCM STk_make_error(char *format, ...)
   /* Return the error condition */
   return cond;
 }
+
+
 
 
 void STk_error(char *format, ...)

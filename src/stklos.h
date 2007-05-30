@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 22-May-2007 15:30 (eg)
+ * Last file update: 30-May-2007 17:00 (eg)
  */
 
 
@@ -352,7 +352,7 @@ EXTERN_PRIMITIVE("make-condition-type", make_cond_type, subr3,
 		 (SCM name, SCM parent, SCM slots));
 
 SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module);
-
+SCM STk_condition_type_is_a(SCM type, SCM t);
 int STk_init_cond(void);
 
 
@@ -387,7 +387,7 @@ SCM STk_info_object_file(char *fname);
   ------------------------------------------------------------------------------
 */
 
-void STk_signal_error(SCM who, SCM str);
+void STk_signal_error(SCM type, SCM who, SCM str);
 void STk_error(char *format, ...);
 SCM  STk_make_error(char *format, ...);
 SCM  STk_format_error(char *format, ...);

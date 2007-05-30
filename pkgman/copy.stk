@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-May-2007 11:15 (eg)
-;;;; Last file update: 29-May-2007 18:23 (eg)
+;;;; Last file update: 30-May-2007 18:07 (eg)
 ;;;;
 
 
@@ -60,7 +60,7 @@
   ;;;	 do-copy starts here
   ;;;
   (unless (= (length args) 4)
-    (error "Bad usage of --cp option. 4 parameters required"))
+    (error-pkg "Bad usage of --cp option. 4 parameters required"))
 
   (let ((package (car args))
 	(file    (cadr args))

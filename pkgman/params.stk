@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 16:23 (eg)
-;;;; Last file update: 29-May-2007 18:22 (eg)
+;;;; Last file update: 30-May-2007 23:23 (eg)
 ;;;;
 
 
@@ -29,7 +29,7 @@
   (make-parameter (expand-file-name "~/.stklos/pkg")))
 
 (define stklos-pkg-system-directory
-  (make-parameter (make-path (%library-prefix) "share" "stklos" "pkg")))
+  (make-parameter (make-path (%library-prefix) "lib" "stklos" "pkg")))
 
 
 (define stklos-pkg-servers-directory

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update: 30-May-2007 11:42 (eg)
+;;;; Last file update: 30-May-2007 18:08 (eg)
 ;;;;
 
 
@@ -40,7 +40,7 @@
 		(let* ((name (make-path (stklos-pkg-servers-directory) x))
 		       (out  (open-file name "w")))
 		  (unless out
-		    (error "cannot create server file ~a" name))
+		    (error-pkg "cannot create server file ~a" name))
 		  (fprintf out ";; Generated file. DO NOT EDIT\n~a\n" '())
 		  (close-port out)))
 	      (server-names)))
@@ -90,12 +90,12 @@
        ((tuning ?name . ?options)
 	(add-tuning name options))
        (else
-	(error "bad package/tuning description ~S" descr))))
+	(error-pkg "bad package/tuning description ~S" descr))))
 	
   (define (add-descriptions src)
     (let ((in (open-file src "r")))
       (unless in
-	(error "cannot load description in file ~s" src))
+	(error-pkg "cannot load description in file ~s" src))
       (let ((lst (read in)))
 	(close-port in)
 	(unless (eof-object? lst) 
@@ -136,7 +136,7 @@
 	(let* ((name (make-path (stklos-pkg-servers-directory) server-name))
 	       (out  (open-file name "w")))
 	  (unless out
-	    (error "cannot save server descriptions of ~s" server-name))
+	    (error-pkg "cannot save server descriptions of ~s" server-name))
 	  (fprintf out ";; -*- Scheme -*-    Generated file DO NOT EDIT\n")
 	  (fprintf out ";; Synchronization of ~a at ~s\n" server-name url)
 	  (fprintf out ";; State saved ~a\n" (date))
@@ -233,7 +233,7 @@
     (let ((lmd5 (md5sum-file path)))
       (unless (equal? lmd5 md5)
 	(remove-file path)
-	(error "package ~S corrupted. Cache file has been deleted" package)))
+	(error-pkg "package ~S corrupted. Cache file has been deleted" package)))
     
     ;; We have finished
     (when (> (stklos-pkg-verbosity) 0)

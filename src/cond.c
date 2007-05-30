@@ -1,7 +1,7 @@
 /*
  * cond.c	-- Condition implementation
  * 
- * Copyright © 2004-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 22-May-2004 08:57 (eg)
- * Last file update: 20-Dec-2006 11:09 (eg)
+ * Last file update: 30-May-2007 17:18 (eg)
  */
 
 #include "stklos.h"
@@ -78,6 +78,8 @@ static SCM is_a(SCM type, SCM t)
     return STk_false;
   }
 }
+
+
 
 /* ----------------------------------------------------------------------
  * 	allocate_condition ...
@@ -194,6 +196,13 @@ SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module)
   return res;
 }
 
+
+SCM STk_condition_type_is_a(SCM type, SCM t)
+{
+  if (!COND_TYPEP(type)) error_bad_type(type);
+  if (!COND_TYPEP(t))    error_bad_type(t);
+  return is_a(type, t);
+}
 
 /* ======================================================================
  *

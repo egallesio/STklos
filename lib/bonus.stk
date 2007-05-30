@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 14-May-2007 10:33 (eg)
+;;;; Last file update: 30-May-2007 17:30 (eg)
 ;;;;
 
 ;;
@@ -1007,6 +1007,26 @@ doc>
 (define (fprintf port fmt . args)
   (apply format port fmt args))
 
+
+#|
+<doc EXT-SYNTAX declare-new-error
+ * (declare-new-error name)
+ *
+ * TODO
+ *
+doc>
+|#
+(define-macro (declare-new-error name)
+  (let ((cond-name (string->symbol (format "&~a" name)))
+	(predicate (string->symbol (format "&~a?" name)))
+	(args      (gensym)))
+    `(begin
+       (define-condition-type ,cond-name &error-message ,predicate)
+       (define (,name . ,args)
+	 (if (and (not (null? ,args))
+		  (symbol? (car ,args)))
+	     (apply signal-error ,cond-name ,args)
+	     (apply signal-error ,cond-name ',name ,args))))))
 
 #|
 <doc EXT  exec exec-list

@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 15-May-2007 11:38 (eg)
+ * Last file update: 30-May-2007 17:03 (eg)
  *
  */
 
@@ -1021,8 +1021,7 @@ static int msg_use_tilde(char *s)
   return p ? (p[1] && strchr("aAsSwW~", p[1]) != NULL): 0;
 }
 
-
-DEFINE_PRIMITIVE("error", scheme_error, vsubr, (int argc, SCM *argv))
+static SCM do_error(SCM type, int argc, SCM *argv)
 {
   SCM who = STk_false;
 
@@ -1040,13 +1039,49 @@ DEFINE_PRIMITIVE("error", scheme_error, vsubr, (int argc, SCM *argv))
 	msg = srfi_23_error(argc, argv);
       else 
 	msg = internal_format(argc, argv, TRUE);
-      STk_signal_error(who, msg);
+      STk_signal_error(type, who, msg);
     }
   }
-  STk_signal_error(who, STk_Cstring2string(""));
+  STk_signal_error(type, who, STk_Cstring2string(""));
   return STk_void;
 }
 
+
+DEFINE_PRIMITIVE("error", scheme_error, vsubr, (int argc, SCM *argv))
+{
+  return do_error(STk_err_mess_condition, argc, argv);
+}
+
+
+/*
+<doc EXT signal-error
+ * (signal-error cond str obj ...)
+ * (signal-error cond name str obj ...)
+ *
+ * This procedure is similar to error, except that the type of the error 
+ * can be passed as the first parameter. The type of the error must be a 
+ * condition which inherit from |&error-message|.
+ * £
+ * Note that |(error arg ...)|s equivalent to 
+ * @lisp
+ * (signal-error &error-message arg ...)
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("signal-error", scheme_signal_error, vsubr, (int argc, SCM *argv))
+{
+  SCM type_error;
+
+  if (! argc) STk_error("error condtion expected");
+
+  type_error = *argv;
+  argc -= 1;
+  argv -= 1;
+  
+  if (STk_condition_type_is_a(type_error, STk_err_mess_condition) == STk_false)
+    STk_error("bad &error-message ~S", type_error);
+  return do_error(type_error, argc, argv);
+}
 
 
 /*
@@ -1475,6 +1510,7 @@ int STk_init_port(void)
   ADD_PRIMITIVE(write_star);
   ADD_PRIMITIVE(format);
   ADD_PRIMITIVE(scheme_error);
+  ADD_PRIMITIVE(scheme_signal_error);
 
   ADD_PRIMITIVE(close_input_port);
   ADD_PRIMITIVE(close_output_port);

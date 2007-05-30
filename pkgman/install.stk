@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 30-May-2007 11:42 (eg)
-;;;; Last file update: 30-May-2007 13:01 (eg)
+;;;; Last file update: 30-May-2007 19:55 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -56,7 +56,10 @@
 	  (for-each remove-file files)
 	  (remove-file filedir)
 	  (eprintf "Package ~a is un-installed\n" package))
-	(error "package ~a is not installed" package))))
+	(error-pkg "package ~a is not installed" package))))
 
-		 
-
+;; ----------------------------------------------------------------------
+;; 	install-packages ...
+;; ----------------------------------------------------------------------
+(define (install-package name dir)
+  (system (format "cd ~a; make all install" dir)))
