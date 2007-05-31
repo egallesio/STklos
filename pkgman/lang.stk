@@ -21,30 +21,42 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 21-Mar-2007 14:31 (eg)
-;;;; Last file update:  5-May-2007 18:50 (eg)
+;;;; Last file update: 31-May-2007 14:48 (eg)
 ;;;;
 
+(include "lang-bigloo.inc")
+(include "lang-chicken.inc")
+(include "lang-mzscheme.inc")
 
-;;;
-;;; Bigloo
-;;;
-(include "lang-bigloo.stk")
+;; ----------------------------------------------------------------------
+;;	lang-rewrite ...
+;; ----------------------------------------------------------------------
+(define (language-rewrite lang-lex)
+  ;; Return the function in charge of language rewriting. This
+  ;; function takes an analyzer as parameter
+  (lambda (src dir)
+    
+    (define (do-rewrite in tmp)
+      (with-output-to-file tmp
+	(lambda ()
+	  (let ((lex (lang-lex in)))
+	    (let loop ((token  (lexer-next-token lex)))
+	      (unless (eq? token 'eof)
+		(display token)
+		(loop (lexer-next-token lex))))))))
+    
+    (when (file-exists? src)
+      (let ((tmp (temporary-file-name)))
+	(do-rewrite src tmp)
+	(copy-file tmp src)
+	(remove-file tmp)))))
 
-;;;
-;;; Chicken
-;;;
-(include "lang-chicken.stk")
 
-
-;;;
-;;; Gambit
-;;;
-(include "lang-chicken.stk")
-
-
-;;;
-;;; R6RS
-;;;
-(add-rewriter! 'r6rs void)
-
-
+;; ----------------------------------------------------------------------
+;;	Languages rewriters 
+;; ----------------------------------------------------------------------
+(add-rewriter! 'bigloo	 (language-rewrite lang-bigloo))
+(add-rewriter! 'chicken  (language-rewrite lang-chicken))
+(add-rewriter! 'gambit	 void)
+(add-rewriter! 'mzscheme (language-rewrite lang-chicken))
+(add-rewriter! 'r6rs	  void)

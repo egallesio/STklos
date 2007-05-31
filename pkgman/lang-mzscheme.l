@@ -1,6 +1,6 @@
 ;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;    Creation date: 21-Mar-2007 13:45 (eg)
-;;; Last file update:  5-May-2007 18:49 (eg)
+;;; Last file update: 31-May-2007 14:44 (eg)
 
 
 %%
@@ -26,5 +26,5 @@
 
 
 <<EOF>>			'eof
-<<ERROR>>		(error 'chicken-preprocessor "parse error ~S (line ~a)" 
+<<ERROR>>		(error 'mzscheme-preprocessor "parse error ~S (line ~a)" 
 			       yytext (lexer-get-line))
