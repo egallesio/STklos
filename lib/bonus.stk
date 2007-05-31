@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 30-May-2007 17:30 (eg)
+;;;; Last file update: 31-May-2007 15:16 (eg)
 ;;;;
 
 ;;
@@ -1617,7 +1617,7 @@ doc>
 (define-macro (require-extension . clauses)
   (when (null? clauses)
     (error 'require-extension "requires at least one clause"))
-  `(begin
+  `(let ((%has-feature? (in-module SRFI-0 %has-feature?)))
      ,@(map (lambda (x)
 	      `(cond
 		((and (pair? ',x) (eq? (car ',x) 'srfi) (not (null? (cdr ',x))))
