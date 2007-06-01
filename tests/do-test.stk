@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update: 13-May-2007 23:41 (eg)
+;;;; Last file update:  1-Jun-2007 16:08 (eg)
 ;;;;
 
 (load "./test.stk")
@@ -36,7 +36,8 @@
   (load "test-threads.stk")
   (load "test-srfi.stk")
   (load "test-md5.stk")
-  (load "test-base64.stk"))
+  (load "test-base64.stk")
+  (load "test-r5rs-pitfall.stk"))
 
   
 (define (main _)
