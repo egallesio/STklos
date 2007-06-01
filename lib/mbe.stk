@@ -31,7 +31,7 @@
 ;;; by Eugene Kohlbecker and in R4RS Appendix. 
 ;;;
 ;;;
-;;; Last file update:  5-Jun-2002 15:06 (eg)
+;;; Last file update:  1-Jun-2007 10:27 (eg)
 
 #|
 			STklos Implementation Notes
@@ -39,7 +39,8 @@
 This macro implementation has been slightly modified for STklos. 
 In particular, 
   - all the function reside in the module MBE, the only binding which is
-    visible from outside is DEFINE-SYNTAX.
+    visible from outside is DEFINE-SYNTAX (and the fake LET-SYNTAX and
+    LETREC-SYNTAX).
   - functions some and butlast used by the original code are added in the 
     MBE module
   - The macro define-syntax itself is expanded to a function call which 
@@ -118,6 +119,14 @@ doc>
 |#
 
 (define-module MBE
+
+  (define (%not-implemented name)
+    (error name
+       "cannot be used here. You must load the file \"full-syntax\" to access it"))
+  
+  (define-macro (let-syntax . args)   (%not-implemented 'let-syntax))
+  (define-macro (letrec-syntax . args)(%not-implemented 'letrec-syntax))
+
   
 ;;; 
 ;;; Scheme utilities
