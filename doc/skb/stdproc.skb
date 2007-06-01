@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 14-May-2007 10:36 (eg)
+;; Last file update:  1-Jun-2007 22:13 (eg)
 ;;
 ;; ======================================================================
 
@@ -89,6 +89,21 @@ infinity), ,(code "+nan.0") (not a number), and
 (insertdoc 'random-integer)
 (insertdoc 'random-real)
 (insertdoc 'decode-float)
+
+(subsection :title "Fixnums"
+
+   (p [,(stklos) defines small integers as fixnums. Operations on fixnums
+are generally faster than operations which accept general numbers. 
+Fixnums operations, as described below, may produce results which are incorrect 
+if some temporary computation falls outside the range of fixnum. These 
+functions should be used only when speed really matters.])
+   
+(insertdoc 'fixnum?)
+(insertdoc 'fixnum-width)
+(insertdoc 'greatest-fixnum)
+(insertdoc 'fxmod)
+(insertdoc 'fx=))
+
 )
 
 

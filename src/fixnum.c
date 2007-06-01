@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 10-May-2007 15:14 (eg)
+ * Last file update:  1-Jun-2007 20:11 (eg)
  */
 
 #include <stklos.h>
@@ -31,16 +31,46 @@ static void error_bad_fixnum(SCM obj)
   STk_error("bad fixnum ~S", obj);
 }
 
+static void error_division_by_0(void)
+{
+  STk_error("division by 0");
+}
+
+
+/*
+<doc EXT fixnum?
+ * (fixnum? obj)
+ * 
+ * Returns |#t| if obj is an exact integer within the fixnum range, 
+ * |#f| otherwise.
+doc>
+*/
 DEFINE_PRIMITIVE("fixnum?", fixnump, subr1, (SCM obj))
 {
   return MAKE_BOOLEAN(INTP(obj));
 }
 
+/*
+<doc EXT fixnum-width
+ * (fixnum-width)
+ * 
+ * Returns the number of bits used to represent a fixnum number
+doc>
+*/
 DEFINE_PRIMITIVE("fixnum-width", fixnum_width, subr0, (void))
 {
   return MAKE_INT(sizeof(long)* 8 - 2);
 }
 
+/*
+<doc EXT least-fixnum greatest-fixnum
+ * (least-fixnum)
+ * (greatest-fixnum)
+ * 
+ * These procedures return the minimum value and the maximum value of
+ * the fixnum range.
+doc>
+*/
 DEFINE_PRIMITIVE("least-fixnum", least_fixnum, subr0, (void))
 {
   return MAKE_INT(INT_MIN_VAL);
@@ -53,29 +83,103 @@ DEFINE_PRIMITIVE("greatest-fixnum", greatest_fixnum, subr0, (void))
 
 
 /*
- * fx+, fx-, fx*, fx/, fxmod
- *
+<doc EXT fx+ fx- fx* fxdiv fxrem fxmod 
+ * (fx+ fx1 fx2)
+ * (fx- fx1 fx2)
+ * (fx* fx1 fx2)
+ * (fxdiv fx1 fx2)
+ * (fxrem fx1 fx2)
+ * (fxmod fx1 fx2)
+ * (fx- fx)
+ * 
+ * These procedures compute (respectively) the sum, the difference, the product, 
+ * the quotient and the remainder and modulp of the fixnums |fx1| and |fx2|. 
+ * The call of  |fx-| with one parameter |fx| computes the opposite of |fx|.
+doc>
  */
-
-#define SIMPLE_OP(name, func, op) \
-DEFINE_PRIMITIVE(name, func, subr2, (SCM o1, SCM o2))		\
-{								\
-  if (!INTP(o1)) error_bad_fixnum(o1);				\
-  if (!INTP(o2)) error_bad_fixnum(o2);				\
-  return MAKE_INT(INT_VAL(o1) op INT_VAL(o2));			\
+DEFINE_PRIMITIVE("fx+", fxplus, subr2, (SCM o1, SCM o2))
+{
+  if (!INTP(o1)) error_bad_fixnum(o1);
+  if (!INTP(o2)) error_bad_fixnum(o2);
+  return MAKE_INT(INT_VAL(o1) + INT_VAL(o2));
 }
 
-SIMPLE_OP("fx+",   fxplus, +)
-SIMPLE_OP("fx-",   fxminus, -)
-SIMPLE_OP("fx*",   fxtime, *)
-SIMPLE_OP("fxdiv", fxdiv, /)
-SIMPLE_OP("fxmod", fxmod, %)
+DEFINE_PRIMITIVE("fx-", fxminus, subr12, (SCM o1, SCM o2))
+{
+  if (!INTP(o1)) error_bad_fixnum(o1);
+  if (!o2) 
+    return MAKE_INT(-INT_VAL(o1));
+  if (!INTP(o2)) error_bad_fixnum(o2);
+  return MAKE_INT(INT_VAL(o1) + INT_VAL(o2));
+}
+
+DEFINE_PRIMITIVE("fx*", fxtime, subr2, (SCM o1, SCM o2))
+{
+  if (!INTP(o1)) error_bad_fixnum(o1);
+  if (!INTP(o2)) error_bad_fixnum(o2);
+  return MAKE_INT(INT_VAL(o1) * INT_VAL(o2));
+}
+
+DEFINE_PRIMITIVE("fxdiv", fxdiv, subr2, (SCM o1, SCM o2))
+{
+  int n;
+
+  if (!INTP(o1)) error_bad_fixnum(o1);
+  if (!INTP(o2)) error_bad_fixnum(o2);
+
+  n = INT_VAL(o2);
+  
+  if (!n) error_division_by_0();
+  return MAKE_INT(INT_VAL(o1) / n);
+}
+
+DEFINE_PRIMITIVE("fxrem", fxrem, subr2, (SCM o1, SCM o2))
+{
+  int n;
+
+  if (!INTP(o1)) error_bad_fixnum(o1);
+  if (!INTP(o2)) error_bad_fixnum(o2);
+
+  n = INT_VAL(o2);
+  
+  if (!n) error_division_by_0();
+  return MAKE_INT(INT_VAL(o1) % n);
+}
+
+
+DEFINE_PRIMITIVE("fxmod", fxmod, subr2, (SCM o1, SCM o2))
+{
+  if (!INTP(o1)) error_bad_fixnum(o1);
+  if (!INTP(o2)) error_bad_fixnum(o2);
+  {
+    int n1 = INT_VAL(o1);
+    int n2 = INT_VAL(o2);
+    int r;
+
+    if (!n2) error_division_by_0();
+    r = n1 % n2;
+
+    /* (negativep(n1) != negativep(n2) && !zerop(r)) */
+    if ((((n1 < 0) && (n2 >= 0)) || ((n1 >= 0) && (n2 < 0))) &&
+	r)
+      r += n2;
+    
+    return MAKE_INT(r);
+  }
+}
 
 /*
- * fx<, fx<=, fx>, fx>=, fx=
- *
+<doc EXT fx< fx<= fx> fx>= fx= 
+ * (fx< fx1 fx2)
+ * (fx<= fx1 fx2)
+ * (fx> fx1 fx2)
+ * (fx>= fx1 fx2)
+ * (fx= fx1 fx2)
+ * 
+ * These procedures compare the fixnums |fx1| and |fx2| and retun |#t| if 
+ * the comparison is true and |#f| otherwise.
+doc>
  */
-
 #define SIMPLE_COMP(name, func, op) \
 DEFINE_PRIMITIVE(name, func, subr2, (SCM o1, SCM o2))		\
 {								\
@@ -104,6 +208,7 @@ int STk_init_fixnum(void)
   ADD_PRIMITIVE(fxtime);
   ADD_PRIMITIVE(fxdiv);
   ADD_PRIMITIVE(fxmod);
+  ADD_PRIMITIVE(fxrem);
 
   ADD_PRIMITIVE(fxlt);
   ADD_PRIMITIVE(fxle);
