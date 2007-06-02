@@ -15,12 +15,13 @@
 .\" .br        insert line break
 .\" .sp <n>    insert n1 empty lines
 .\" for manpage-specific macros, see man(7)
-.SH NAMEan
+.SH NAME
 stklos-genlex \- lexical analyzer generation for STklos
 
 .SH SYNOPSIS
 stklos-genlex lex-file output-file constructor
-
+.LP
+stklos-genlex source-file output-file
 
 .SH DESCRIPTION
 The
@@ -29,8 +30,12 @@ can be used to make  lexical analyzers with
 .B STklos.
 It is a simple front-end to the Danny Dubé
 .B SILex
-tool. This command always takes three parameters which are described
-below:
+tool. 
+
+.PP 
+When this command is called with three parameters, it takes 
+a standard SILex input file as input and generate an analyzer. 
+These parameters are described below:
 .IP "\fIlex-file\fR"
 is the input file which contains the lex-like rules describing the
 analyzer to be built
@@ -48,6 +53,16 @@ object which contains the automaton. To fetch the next token of the
 input stream, programs must use the \fIlexer-next-token\fR. procedure.
 See the example below for details.
 
+.PP
+Another usage of the \fBstklos-genlex\fR can be to use the
+\fIdefine-regular-grammar\fR special form directly in a source
+file. This form takes the name of the analyzer, the arguments which are
+passed to the analyzer, the macros part and rules part of the
+analyzer. In this case,  \fBstklos-genlex\fR is called with the source
+file and the name of the output file. The output file, will contain
+a copy of the source file where the \fIdefine-regular-grammar\fR  have
+been replaced by the code of the analyzer.
+
 .SH "EXAMPLE"
 
 Suppose that the lexical rules are in the file \fIrules.l\fR. One can
@@ -64,6 +79,40 @@ The following piece of code show how to use the produced analyzer.
 	;; Display the first token of file foo
 	(display (lexer-next-token lex))
 	...)
+.fi
+.PP
+This example uses the second form of  \fBstklos-genlex\fR
+usage. Here is an analyzer which skips lines starting with 
+2 slashes. Suppose that we have a file \fIlex.stk\fR which is:
+.nf
+(define-regular-grammar skip-//-lines
+  ;; The arguments
+  ()
+  ;; The macros
+  #<<%EOM
+space [ \\9]
+eol   \\n
+%EOM
+  ;; The grammar
+  #<<%EOG
+{space}*//.*{eol}       (yycontinue)
+^.*{eol}                yytext
+<<EOF>>                 (eof-object)
+<<ERROR>>               (error "invalid token")
+%EOG
+)
+
+(define (copy in out)
+  (let ((reader (make-regular-reader skip-//-lines in)))
+    (let loop ((line (reader)))
+      (unless (eof-object? line)
+	(display line out)
+	(loop (reader))))))
+.fi
+
+The following command will produce an analyzer in file \fIana.stk\fR
+.nf
+     stklos-genlex  lex.stk ana.stk
 .fi
 
 .SH "SEE ALSO"

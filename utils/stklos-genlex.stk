@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 12-Dec-2003 11:29 (eg)
-;;;; Last file update: 25-Apr-2007 18:17 (eg)
+;;;; Last file update:  2-Jun-2007 10:38 (eg)
 ;;;;
 
 
@@ -120,7 +120,7 @@
     ((4) (lex-generate (cadr args)
 		       (caddr args)
 		       (cadddr args)))
-    (else (die (string-append
-		"Usage: " (program-name) "<lex-file> <output-file> <constructor>\n"
-		"       " (program-name) "<src-file> <output-file>\n")))))
-    
+    (else (let ((prog (basename (program-name))))
+	    (die (string-append
+		  "Usage: " prog "<lex-file> <output-file> <constructor>\n"
+		  "       " prog "<src-file> <output-file>\n"))))))
