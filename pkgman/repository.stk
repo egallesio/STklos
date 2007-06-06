@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update:  5-Jun-2007 16:00 (eg)
+;;;; Last file update:  6-Jun-2007 22:57 (eg)
 ;;;;
 
 
@@ -96,12 +96,13 @@
 	
   (define (add-descriptions src)
     (let ((in (open-file src "r")))
-      (unless in
-	(error-pkg "cannot load description in file ~s" src))
-      (let ((lst (read in)))
-	(close-port in)
-	(unless (eof-object? lst) 
-	  (for-each add-description lst)))))
+      (if (not in)
+	(eprintf "Warning: cannot load package descriptions. File ~s doesn't exist"
+		 src)
+	(let ((lst (read in)))
+	  (close-port in)
+	  (unless (eof-object? lst) 
+	    (for-each add-description lst))))))
 
   (define (add-tuning-to-package tuning)
 
