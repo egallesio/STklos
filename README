@@ -1,10 +1,10 @@
 								-*- outline -*-	
 
-		      S T k l o s   ( v e r s i o n   0 . 8 2 )
+		      S T k l o s   ( v e r s i o n   0 . 9 5 )
 		      =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 				   Erick Gallesio
-				   <eg(at)essi.fr>
+				   <eg(at)unice.fr>
 
 
 * Purpose 
@@ -60,7 +60,7 @@ STklos is known to work on the following architectures:
 	- Linux 2.2 (Alpha/egcs)
 	- FreeBSD 4.2 (i386/gcc)
 	- Win XP (i386/gcc(Cygwin)) 
-	- Mac OS-X (ppc/apple gcc)
+	- Mac OS-X (ppc/apple gcc & intel/apple gcc)
 	- Solaris 8 (ultrasparc/gcc)
 	- Irix 6.5.20 (Octane, mips R10,000)
 	- Open Darwin  7.0 (PPC/gcc)

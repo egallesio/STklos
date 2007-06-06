@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update:  5-Jun-2007 19:45 (eg)
+ * Last file update:  6-Jun-2007 09:21 (eg)
  */
 
 #include <stklos.h>
@@ -106,7 +106,6 @@ DEFINE_PRIMITIVE("fx+", fxplus, subr2, (SCM o1, SCM o2))
 
 DEFINE_PRIMITIVE("fx-", fxminus, subr12, (SCM o1, SCM o2))
 {
-  STk_debug("On fait fx- ~S ~S", o1 ,o2);
   if (!INTP(o1)) error_bad_fixnum(o1);
   if (!o2) 
     return MAKE_INT(-INT_VAL(o1));

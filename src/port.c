@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 30-May-2007 17:03 (eg)
+ * Last file update:  6-Jun-2007 18:56 (eg)
  *
  */
 
@@ -1060,9 +1060,9 @@ DEFINE_PRIMITIVE("error", scheme_error, vsubr, (int argc, SCM *argv))
  *
  * This procedure is similar to error, except that the type of the error 
  * can be passed as the first parameter. The type of the error must be a 
- * condition which inherit from |&error-message|.
+ * condition which inherits from |&error-message|.
  * £
- * Note that |(error arg ...)|s equivalent to 
+ * Note that |(error arg ...)| is equivalent to 
  * @lisp
  * (signal-error &error-message arg ...)
  * @end lisp

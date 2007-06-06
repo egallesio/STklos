@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 16:23 (eg)
-;;;; Last file update: 30-May-2007 23:23 (eg)
+;;;; Last file update:  6-Jun-2007 18:05 (eg)
 ;;;;
 
 
@@ -55,6 +55,6 @@
 (define stklos-pkg-sync-urls
   (make-parameter '(
       ("main"   "http://hop.inria.fr/hop/scmpkg/sync")
-;     ("stklos" "http://www.stklos.org/Snow/sync")
+      ("stklos" "http://www.stklos.org/ScmPkg/sync")
       )))
 

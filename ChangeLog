@@ -1,3 +1,503 @@
+2007-06-06  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compiler.stk, lib/http.stk, pkgman/Makefile.am,
+	pkgman/Makefile.in, pkgman/add.stk, pkgman/misc.stk,
+	pkgman/repository.stk, pkgman/types.stk, src/boot.c, src/boot.img,
+	src/fixnum.c, src/vm.c:
+	Various small fixes
+	[0e659fe75740] [tip]
+
+2007-06-02  Erick Gallesio  <eg@essi.fr>
+
+	* doc/stklos-genlex.1.in, utils/stklos-genlex.stk:
+	Added documentation for new usage of stklos-genlex
+	[ac99363829df]
+
+2007-06-01  Erick Gallesio  <eg@essi.fr>
+
+	* doc/skb/stdproc.skb, src/fixnum.c:
+	Added documentation of fixnum functions
+	[e6931b703b39]
+
+	* lib/mbe.stk, src/boot.c, src/boot.img:
+	added stubs for let-syntax and letrec-syntax
+	[1bba37c10372]
+
+2007-05-31  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk, src/boot.c, src/boot.img:
+	Fixed SRFI55 implementation
+	[a3e6ab24d83a]
+
+	* pkgman/Makefile.am, pkgman/Makefile.in, pkgman/lang-bigloo.inc,
+	pkgman/lang-bigloo.stk, pkgman/lang-chicken.inc, pkgman/lang-
+	chicken.stk, pkgman/lang-mzcheme.stk, pkgman/lang-mzscheme.inc,
+	pkgman/lang-mzscheme.l, pkgman/lang-r6rs.stk, pkgman/lang.stk:
+	stklos-pkg cleaning and man page
+	[48615baa5145]
+
+2007-05-30  Erick Gallesio  <eg@essi.fr>
+
+	* configure, configure.in, doc/Makefile.in, doc/stklos-pkg.1.in,
+	lib/bonus.stk, pkgman/copy.stk, pkgman/etc/Makefile-scmpkg.tmpl,
+	pkgman/extract.stk, pkgman/install.stk, pkgman/main.stk,
+	pkgman/misc.stk, pkgman/params.stk, pkgman/repository.stk,
+	src/boot.c, src/boot.img, src/cond.c, src/error.c, src/port.c,
+	src/stklos.h:
+	new primitive: SIGNAL-ERROR
+	[2d18efbd06bb]
+
+
+2007-05-24  Erick Gallesio  <eg@essi.fr>
+
+	* pkgman/extract.stk, pkgman/main.stk, pkgman/misc.stk, src/fixnum.c,
+	src/number.c, src/parameter.c, src/read.c, src/stklos.h,
+	src/system.c:
+	Bug Fix in C parameters
+	[f9293fbc4563]
+
+2007-05-21  Erick Gallesio  <eg@essi.fr>
+
+	* configure, configure.in, src/boot.img:
+	Fixed problems with --without-XXX configure options. Thank to Marijn
+	Schouten (hkBst)" <hkBst at gentoo dot org> for signaling it.
+	[4955c3606e60]
+
+2007-05-15  Erick Gallesio  <eg@essi.fr>
+
+	* lib/http.stk:
+	Added http utilities functions
+	[1994d70da577]
+
+	* lib/Makefile.am, lib/Makefile.in, lib/boot.stk, pkgman/http.stk,
+	pkgman/main.stk, pkgman/misc.stk, pkgman/params.stk,
+	pkgman/repository.stk, src/boot.c, src/boot.img, src/fport.c,
+	src/md5.c, src/md5.h, src/port.c, src/sio.c, src/sport.c,
+	src/stklos.h, src/vport.c:
+	Added the function CLOSE-PORT-HOOK and CLOSE-PORT-HOOK-SET!
+	[52444b98bec7]
+
+2007-05-14  Erick Gallesio  <eg@essi.fr>
+
+	* doc/skb/stdproc.skb, lib/assembler.stk, lib/bonus.stk,
+	lib/compiler.stk, lib/tar.stk, pkgman/lang-chicken.l, pkgman/lang-
+	chicken.stk, pkgman/lang-mzcheme.stk, pkgman/lang-mzscheme.l,
+	src/Makefile.am, src/Makefile.in, src/boot.c, src/boot.img,
+	src/fport.c, src/lib.c, src/number.c, src/stklos.h, src/system.c,
+	src/vm-instr.h, src/vm.c, tests/do-test.stk, tests/test-base64.stk,
+	tests/test-md5.stk:
+	- Fixes on fixnum
+	- New primitives: MD5SUM and MD5SUM-FILE
+	[98377d6f840f]
+
+
+2007-05-05  Erick Gallesio  <eg@essi.fr>
+
+	* doc/skb/stdproc.skb, lib/obsolete.stk, src/boot.c, src/boot.img,
+	src/system.c:
+	Changed current-second in currents-seconds since it seems to be the
+	rule with other Scheme implementations
+	[2113e5417687]
+
+	* lib/Makefile.am, lib/Makefile.in, lib/compiler.stk, lib/pp.stk,
+	lib/runtime.stk, lib/srfi-11.stk, lib/srfi-2.stk, lib/srfi-26.stk,
+	lib/srfi-31.stk, lib/srfi-34.stk, lib/srfi-35.stk, lib/srfi-7.stk,
+	lib/srfi-9.stk, src/boot.c, src/boot.img, src/number.c:
+	Better export macros
+	[bcd3b2b2dc6a]
+
+2007-04-26  Erick Gallesio  <eg@essi.fr>
+
+	* lib/Makefile.am, lib/Makefile.in, lib/ScmPkg.d/Makefile.am,
+	lib/ScmPkg.d/Makefile.in, lib/ScmPkg.d/scmpkg-interface.stk,
+	lib/compfile.stk, lib/compiler.stk, lib/load.stk, lib/module.stk,
+	lib/runtime.stk, src/boot.c, src/boot.img, utils/tmpcomp:
+	- Fixed a path problem which prevent compilation on system without
+	STklos already installed ((a consequence of require-library
+	generalization). Use of a shell variable to indicate that we are
+	building STklos (STKLOS_BUILDING)
+	- Added the %%publish-syntax primitive for ScmPkg
+	[3416550e0692]
+
+
+2007-04-20  Erick Gallesio  <eg@essi.fr>
+
+	* doc/skb/intro.skb, lib/bonus.stk, src/read.c:
+	Added here-strings
+	[4b6c1479a300]
+
+
+2007-04-14  Erick Gallesio  <eg@essi.fr>
+
+	* lib/Makefile.am, lib/Makefile.in, lib/bigmatch.stk, lib/boot.stk,
+	lib/load.stk, lib/match.stk, src/boot.c, src/boot.img:
+	- Use require-library for autoloads (to be changed later)
+	- match.stk renamed in bigmatch.stk
+	[9341f1c78d00]
+
+2007-04-13  Erick Gallesio  <eg@essi.fr>
+
+	* lib/ScmPkg.d/scmpkg-interface.stk, lib/ScmPkg.d/scmpkg-support.stk,
+	lib/module.stk, src/boot.c, src/boot.img, src/socket.c, src/vm.c:
+	Added partial exports for ScmPkg
+	[09b627bde763]
+
+	* lib/ScmPkg.d/Makefile.am, lib/ScmPkg.d/Makefile.in, lib/ScmPkg.d
+	/scmpkg-define.stk, lib/ScmPkg.d/scmpkg-exception.stk, lib/ScmPkg.d
+	/scmpkg-interface.stk, lib/ScmPkg.d/scmpkg-parameter.stk,
+	lib/ScmPkg.d/scmpkg-record.stk, lib/ScmPkg.d/scmpkg-runtime.stk,
+	lib/module.stk, lib/runtime.stk, src/boot.c, src/boot.img,
+	src/env.c, src/vm.c:
+	Added a way to partially import a module
+	[a9ef96d8aa9a]
+
+2007-04-12  Erick Gallesio  <eg@essi.fr>
+
+	* utils/stklos-ext-install, utils/stklos-install:
+	Changed the install scripts to be more FreeBSD friendly
+	[c67b1549d3e2]
+
+	* configure, pkgman/Makefile.am, pkgman/Makefile.in, src/env.c,
+	src/hash.c, src/hash.h, src/print.c, src/stklos.h, src/vm.c, utils
+	/stklos-config.in, utils/stklos-install:
+	* New representation of global variable to permit aliases (not
+	finished yet)
+	* Some modification in configure scripts for usage without gc
+	installed
+	[51874b284f2f]
+
+2007-04-11  Erick Gallesio  <eg@essi.fr>
+
+	* lib/srfi-69.stk:
+	Fix for SRFI-69
+	[343ae28ea1bb]
+
+2007-04-03  Erick Gallesio  <eg@essi.fr>
+
+	* lib/load.stk, pkgman/extract.stk, pkgman/http.stk, pkgman/tune.stk,
+	src/boot.c, src/boot.img, src/regexp.c:
+	Added REQUIRE-LIBRARY function
+	[9c3a79638d2a]
+
+2007-03-24  Erick Gallesio  <eg@essi.fr>
+
+	* lib/ScmPkg.d/scmpkg-languages.stk, lib/recette.stk, pkgman/add.stk,
+	pkgman/lang-bigloo.stk, pkgman/main.stk, pkgman/pkgball.stk,
+	pkgman/repository.stk, pkgman/rewrite.stk:
+	bigloo rewritting for ScmPkg
+	[3e97289705c3]
+
+2007-03-22  Erick Gallesio  <eg@essi.fr>
+
+	* lib/ScmPkg.d/scmpkg-interface.stk, lib/ScmPkg.d/scmpkg-
+	languages.stk, lib/boot.stk, lib/recette.stk, pkgman/Makefile.am,
+	pkgman/Makefile.in, pkgman/extract.stk, pkgman/lang-bigloo.l, pkgman
+	/lang-bigloo.stk, pkgman/lang.stk, pkgman/main.stk,
+	pkgman/rewrite.stk, pkgman/tune.stk, src/boot.c, src/boot.img:
+	Added code rewriting in pkgman
+	[649f4242296c]
+
+2007-03-16  Erick Gallesio  <eg@essi.fr>
+
+	* pkgman/etc/Makefile-scmpkg.tmpl, pkgman/extract.stk:
+	Fixed ScmPkg test
+	[c9d8c128b403]
+
+	* lib/Makefile.am, lib/Makefile.in, lib/recette.stk, src/boot.c,
+	src/boot.img:
+	Added recette in library
+	[c182b725ba51]
+
+2007-03-15  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk, src/boot.c:
+	PORT->STRING used to add a newline on eof. Fixed
+	[3694b7cb04ec]
+
+2007-03-14  Erick Gallesio  <eg@essi.fr>
+
+	* pkgman/Makefile.am, pkgman/Makefile.in, pkgman/add.stk, pkgman/etc
+	/Makefile-scmpkg.tmpl, pkgman/etc/Makefile-stklospkg.tmpl,
+	pkgman/extract.stk, pkgman/misc.stk, pkgman/params.stk,
+	pkgman/repository.stk, src/boot.c, src/misc.c, src/stklos.h:
+	-- Added a way to add primitives in a given module
+	-- Code cleaning in ScmPKg
+	[48281b1336eb]
+
+2007-03-12  Erick Gallesio  <eg@essi.fr>
+
+	* pkgman/misc.stk:
+	Bug fix in ScmPkg Makefile generation
+	[5703c82044ba]
+
+	* lib/ScmPkg.d/scmpkg-interface.stk, lib/ScmPkg.d/scmpkg-
+	languages.stk, lib/bonus.stk, pkgman/main.stk, pkgman/params.stk,
+	pkgman/repository.stk, pkgman/tune.stk, pkgman/types.stk,
+	src/boot.c, src/boot.img:
+	ScmPkg tuning rewriting
+	[88c8c1ffca22]
+
+2007-03-08  Erick Gallesio  <eg@essi.fr>
+
+	* lib/Makefile.in, lib/ScmPkg.d/scmpkg-interface.stk, lib/ScmPkg.d
+	/scmpkg-support.stk:
+	ScmPkg simplification (records and exceptions removed)
+	[8f043ebf2644]
+
+	* lib/Makefile.am, lib/Snow.d/Makefile.am, lib/Snow.d/Makefile.in,
+	lib/Snow.d/_snow.stk, lib/Snow.d/snow-exception.stk, lib/Snow.d
+	/snow-misc.stk, lib/Snow.d/snow-package.stk, lib/Snow.d/snow-
+	parameter.stk, lib/Snow.d/snow-record.stk, lib/Snow.d/snow-
+	srfi89.stk, lib/snow-support.stk, snowman/Makefile.am,
+	snowman/Makefile.in, snowman/add.stk, snowman/etc/Makefile-
+	snow.tmpl, snowman/extract.stk, snowman/http.stk, snowman/main.stk,
+	snowman/misc.stk, snowman/params.stk, snowman/parse.stk,
+	snowman/repository.stk, snowman/snowball.stk, snowman/tune.stk,
+	snowman/types.stk:
+	snow cleaning
+	[53da210ae1e5]
+
+	* lib/ScmPkg.d/scmpkg-interface.stk, lib/ScmPkg.d/scmpkg-support.stk,
+	lib/boot.stk, lib/compiler.stk, lib/runtime.stk, pkgman/main.stk,
+	src/boot.c, src/boot.img, utils/stklos-compile.stk:
+	Fixed a bug with internal macros
+	[c4e6671750af]
+
+2007-03-04  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compfile.stk, lib/compiler.stk, src/boot.c, src/boot.img:
+	Fix a bug with internal macros
+	[197d7bdb5e9f]
+
+	* lib/ScmPkg.d/scmpkg-interface.stk:
+	Fixed a typo
+	[9db3bb60184c]
+
+	* lib/ScmPkg.d/scmpkg-interface.stk, pkgman/misc.stk,
+	pkgman/pkgball.stk, pkgman/repository.stk:
+	Fixed the dependencies sort
+	[f1c62795cb3d]
+
+2007-02-28  Erick Gallesio  <eg@essi.fr>
+
+	* lib/ScmPkg.d/Makefile.am, lib/ScmPkg.d/Makefile.in:
+	Install ScmPkg sources in their own dir
+	[c11fb3c9e883]
+
+	* configure, configure.in, lib/Makefile.am, lib/Makefile.in,
+	lib/ScmPkg.d/Makefile.am, lib/ScmPkg.d/Makefile.in, lib/ScmPkg.d
+	/scmpkg-define.stk, lib/ScmPkg.d/scmpkg-exception.stk, lib/ScmPkg.d
+	/scmpkg-interface.stk, lib/ScmPkg.d/scmpkg-languages.stk,
+	lib/ScmPkg.d/scmpkg-parameter.stk, lib/ScmPkg.d/scmpkg-record.stk,
+	lib/ScmPkg.d/scmpkg-runtime.stk, lib/ScmPkg.d/scmpkg-support.stk,
+	lib/Split.d/Makefile.am, lib/Split.d/Makefile.in, lib/Split.d/split-
+	define.stk, lib/Split.d/split-exception.stk, lib/Split.d/split-
+	interface.stk, lib/Split.d/split-languages.stk, lib/Split.d/split-
+	parameter.stk, lib/Split.d/split-record.stk, lib/Split.d/split-
+	runtime.stk, lib/Split.d/split-support.stk, lib/boot.stk,
+	src/boot.c, src/boot.img:
+	Renamed split in ScmPkg
+	[71db8688d84d]
+
+2007-02-23  Erick Gallesio  <eg@essi.fr>
+
+	* lib/assembler.stk, lib/compiler.stk, src/boot.c, src/boot.img,
+	src/stklos.h, src/vm-instr.h, src/vm.c:
+	Addind 3 new instructions (FAR mode)
+	[6ae4e363f49b]
+
+2007-02-22  Erick Gallesio  <eg@essi.fr>
+
+	* lib/assembler.stk, lib/peephole.stk, src/boot.c, src/boot.img, src
+	/vm-instr.h, src/vm.c:
+	adding a peehole optim
+	[39068db07d0e]
+
+	* lib/assembler.stk, lib/peephole.stk, src/boot.c, src/boot.img,
+	src/stklos.h:
+	adding peehole optim for successive returns
+	[f52728c38b69]
+
+2007-02-19  Erick Gallesio  <eg@essi.fr>
+
+	* lib/Split.d/split-record.stk, lib/Split.d/split-runtime.stk,
+	lib/Split.d/split-support.stk, pkgman/Makefile.am,
+	pkgman/Makefile.in, pkgman/add.stk, pkgman/etc/Makefile-
+	stklospkg.tmpl, pkgman/extract.stk, pkgman/http.stk,
+	pkgman/main.stk, pkgman/misc.stk, pkgman/params.stk,
+	pkgman/pkgball.stk, pkgman/repository.stk, pkgman/tune.stk,
+	pkgman/types.stk:
+	Adding the package manager directory pkgman
+	[73d399713311]
+
+	* Makefile.am, Makefile.in, aclocal.m4, configure, configure.in,
+	doc/Makefile.in, doc/skb/stdproc.skb, examples/Makefile.in,
+	examples/images/Makefile.in, extensions/Makefile.in,
+	gtklos/Makefile.in, lib/Lalr.d/Makefile.in, lib/Lurc.d/Makefile.in,
+	lib/Makefile.am, lib/Makefile.in, lib/Match.d/Makefile.in,
+	lib/SILex.d/Makefile.in, lib/Split.d/Makefile.am,
+	lib/Split.d/Makefile.in, lib/Split.d/split-define.stk, lib/Split.d
+	/split-exception.stk, lib/Split.d/split-interface.stk, lib/Split.d
+	/split-languages.stk, lib/module.stk, lib/obsolete.stk, lib/split-
+	support.stk, src/Makefile.in, src/boot.c, src/boot.img,
+	src/system.c, tests/Makefile.in, utils/Makefile.in:
+	Spkg support
+	[7862a345f502]
+
+2007-02-11  Erick Gallesio  <eg@essi.fr>
+
+	* lib/Snow.d/snow-record.stk, lib/Split.d/split-interface.stk,
+	lib/compiler.stk, lib/load.stk, lib/snow-support.stk, src/boot.c,
+	src/boot.img:
+	new REQUIRE-FOR-SYNTAX which only deal with syntax (instead of
+	loading completely the file)
+	[c4a820c91539]
+
+	* lib/Snow.d/snow-package.stk, lib/Split.d/split-interface.stk,
+	lib/compiler.stk, lib/load.stk, lib/snow-support.stk, src/boot.c,
+	src/boot.img, src/fport.c:
+	New mechanism WHEN-COMPILE which is evalueated only when compiling
+	[92e7ffbee1f7]
+
+2007-02-09  Erick Gallesio  <eg@essi.fr>
+
+	* src/fport.c:
+	Added the nature of a file to %file-informations. It can be source,
+	byte-code or object
+	[39e06f30b4a4]
+
+	* lib/Split.d/Makefile.am, lib/Split.d/Makefile.in, lib/Split.d/split-
+	define.stk, lib/Split.d/split-exception.stk, lib/Split.d/split-
+	interface.stk, lib/Split.d/split-languages.stk, lib/Split.d/split-
+	parameter.stk, lib/split-support.stk, src/error.c:
+	Introducing Split packages
+	[0ffab4e21b0a]
+
+2007-02-08  Erick Gallesio  <eg@essi.fr>
+
+	* configure, configure.in, lib/Makefile.am, lib/Makefile.in,
+	lib/boot.stk, lib/load.stk, lib/module.stk, src/boot.c,
+	src/boot.img:
+	Starting SPLIT integration
+	[b1a27e070557]
+
+2007-02-07  Erick Gallesio  <eg@essi.fr>
+
+	* lib/boot.stk, lib/compiler.stk, lib/peephole.stk, lib/runtime.stk,
+	snowman/add.stk, snowman/repository.stk, src/boot.c, src/boot.img,
+	src/mutex-lurc.c, src/mutex-none.c, src/mutex-pthreads.c, src/vm.c:
+	Fixed a problem with macros with great arity (> 12)
+	[eacc0d92725e]
+
+2007-02-01  Erick Gallesio  <eg@essi.fr>
+
+	* doc/stklos-compile.1.in, utils/stklos-compile.stk:
+	Added --prepend-load-path and --append-load-path options to the
+	compiler
+	[07d3e746a3a1]
+
+	* lib/Snow.d/snow-package.stk, snowman/add.stk, snowman/etc/Makefile-
+	snow.tmpl, snowman/extract.stk, snowman/misc.stk, snowman/tune.stk:
+	snowman improvements
+	[8371b9702ceb]
+
+2007-01-31  Erick Gallesio  <eg@essi.fr>
+
+	* lib/Snow.d/snow-package.stk, src/boot.img:
+	Bug fix: define in package*
+	[7c4d31159b72]
+
+2007-01-30  Erick Gallesio  <eg@essi.fr>
+
+	* lib/Snow.d/_snow.stk, lib/Snow.d/snow-package.stk, lib/compfile.stk,
+	lib/snow-support.stk, src/boot.img, src/dynload.c, src/fport.c,
+	src/misc.c, src/sport.c, src/stklos.h, src/struct.c, src/vm.c, utils
+	/stklos-compile.stk:
+	Added file-informations to .so files
+	[ab43472293e7]
+
+2007-01-25  Erick Gallesio  <eg@essi.fr>
+
+	* lib/compfile.stk, lib/compiler.stk, lib/runtime.stk, src/boot.c,
+	src/boot.img:
+	.
+	[263704816fbf]
+
+	* lib/compiler.stk, lib/computils.stk, lib/runtime.stk, src/boot.c,
+	src/boot.img, src/vm.c:
+	New code for macros
+	[8bf5da3bddf5]
+
+2007-01-22  Erick Gallesio  <eg@essi.fr>
+
+	* doc/skb/stdproc.skb, lib/bonus.stk, snowman/tune.stk, src/boot.c,
+	src/boot.img:
+	Added FILE-PREFIX primitive
+	[66226181c238]
+
+	* doc/skb/stdproc.skb, lib/bonus.stk:
+	Added FILE-SUFFIX primitive
+	[88b3ff1d04bc]
+
+	* snowman/Makefile.am, snowman/Makefile.in, snowman/etc/Makefile-
+	snow.tmpl, snowman/extract.stk, snowman/http.stk, snowman/main.stk,
+	snowman/params.stk, snowman/parse.stk, snowman/repository.stk,
+	snowman/tune.stk, src/boot.c:
+	Snowman improvment
+	[54fe506cacae]
+
+2007-01-19  Erick Gallesio  <eg@essi.fr>
+
+	* src/boot.c, src/boot.img, src/misc.c:
+	Added user authentication to uri-parse
+	[579935c37712]
+
+	* src/number.c:
+	Optimisation of bit operations
+	[6c16c85ed48a]
+
+	* Makefile.am, Makefile.in, configure, configure.in,
+	lib/Snow.d/_snow.stk, lib/Snow.d/snow-package.stk, lib/Snow.d/snow-
+	record.stk, lib/compiler.stk, lib/load.stk, lib/snow-support.stk,
+	snowman/Makefile.am, snowman/Makefile.in, snowman/add.stk,
+	snowman/etc/Makefile-snow.tmpl, snowman/extract.stk,
+	snowman/http.stk, snowman/main.stk, snowman/misc.stk,
+	snowman/params.stk, snowman/repository.stk, snowman/snowball.stk,
+	snowman/tune.stk, snowman/types.stk, src/boot.c, src/boot.img:
+	Adding snowman prototype
+	[048984beb7b1]
+
+2007-01-10  Erick Gallesio  <eg@essi.fr>
+
+	* lib/tar.stk:
+	Added TAR file support
+	[a19df8969c1d]
+
+	* lib/Makefile.am, lib/Makefile.in, src/print.c, src/vm.c:
+	Corrected a bug in string printing for control characters > 0177
+	[8ad28a37d5de]
+
+
+2006-12-20  Erick Gallesio  <eg@essi.fr>
+
+	* lib/Snow.d/Makefile.in, src/cond.c, src/struct.c, src/struct.h:
+	Added CONDITION-SET! primitive
+	[a0be06f704db]
+
+	* configure, configure.in, lib/Makefile.am, lib/Makefile.in,
+	lib/Snow.d/Makefile.am, lib/Snow.d/Makefile.in, lib/Snow.d/snow-
+	srfi89.stk, lib/snow-support.stk:
+	Infrastructure for Snow support
+	[ae207e1afb5a]
+
+	* ChangeLog, configure, configure.in, src/boot.img, src/print.c,
+	src/read.c:
+	- Added #void notation
+	- eof and void are now written as #eof and #void and can hence be read
+	back
+	[764c014f870c]
+
+	
 2006-12-19  Erick Gallesio  <eg@essi.fr>
 
 	* 0/82 Release
