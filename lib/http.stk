@@ -24,7 +24,7 @@
 ;;;; Manuel Serrano. 
 ;;;;
 ;;;;    Creation date: 14-May-2007 19:12 (eg)
-;;;; Last file update: 15-May-2007 16:44 (eg)
+;;;; Last file update:  5-Jun-2007 14:28 (eg)
 ;;;;
 
 (define-module HTTP-MODULE
@@ -298,12 +298,18 @@
 	(cond
 	  ((input-port? pt)
 	   pt)
-	  ((and (list? pt) (= (length pt) 3))
+	  ((and (list? pt) (= (length pt) 3) (eq? (car pt) 'redirection))
 	   ;; We have a redirection     (redirection old-port new-url)
-	   (close-input-port (cadr pt))
-	   (open-url (format "http://~a:~a~a" host port (caddr pt))))
+	   (let* ((old-port (cadr pt))
+		  (new-url  (caddr pt))
+		  (uri      (uri-parse new-url)))
+	     (close-input-port old-port)
+	     (let ((url (if (equal? (key-get uri :scheme #f) "http")
+			    new-url
+			    (format "http://~a:~a~a" host port new-url))))
+	       (open-url url))))
 	  (else
-	   (error "unexpected result ~S" pt))))))
+	   (error 'http-download "unexpected result ~S" pt))))))
   
   (let ((port (open-url url)))
     (cond

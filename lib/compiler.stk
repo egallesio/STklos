@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 10-May-2007 16:32 (eg)
+;;;; Last file update:  6-Jun-2007 09:11 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -985,7 +985,9 @@ doc>
 					      tail?))
 			   ((and (small-integer-constant? a)
 				 (memq fct '(fx+ fx*)))	; commutative only
-			    (oper2 (if (eq? fct 'fx+) 'IN-SINT-ADD2 'INT-SINT-MUL2)
+			    (oper2 (if (eq? fct 'fx+)
+				       'IN-SINT-FXADD2
+				       'INT-SINT-FXMUL2)
 				   b a))
 			   ((small-integer-constant? b)
 			    (oper2 (case fct

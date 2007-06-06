@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 10-May-2007 15:51 (eg)
+ * Last file update:  6-Jun-2007 09:14 (eg)
  */
 
 // INLINER values
@@ -1399,7 +1399,7 @@ CASE(IN_SINT_DIV2) { REG_CALL_PRIM(division);
 CASE(IN_SINT_FXADD2) { REG_CALL_PRIM(fxplus);
   		     vm->val = STk_fxplus(vm->val, MAKE_INT(fetch_next())); NEXT1;}
 CASE(IN_SINT_FXSUB2) { REG_CALL_PRIM(fxminus);
-                     vm->val = STk_fxminus(MAKE_INT(fetch_next()), vm->val); NEXT1;}
+  		     vm->val = STk_fxminus(vm->val, MAKE_INT(fetch_next())); NEXT1;}
 CASE(IN_SINT_FXMUL2) { REG_CALL_PRIM(fxtime);
   		     vm->val = STk_fxtime(vm->val, MAKE_INT(fetch_next())); NEXT1;}
 CASE(IN_SINT_FXDIV2) { REG_CALL_PRIM(fxdiv);

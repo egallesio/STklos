@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update: 30-May-2007 18:08 (eg)
+;;;; Last file update:  5-Jun-2007 16:00 (eg)
 ;;;;
 
 
@@ -58,6 +58,7 @@
   (define (add-package name options)
     (let ((new (new-package name
 			    :version      (key-get options :version "0.0.0")
+			    :release      (key-get options :release #f)
 			    :language     (key-get options :language '(r5rs))
 			    :category     (key-get options :category #f)
 			    :path         (key-get options :path #f)
@@ -75,6 +76,7 @@
     (let ((new (new-tuning name
 			   :host    (key-get options :host)
 			   :version (key-get options :version "0.0.0")
+			   :release (key-get options :release #f)
 			   :path    (key-get options :path "")
 			   :url     (key-get options :url "")
 			   :md5     (key-get options :md5 ""))))
@@ -102,15 +104,28 @@
 	  (for-each add-description lst)))))
 
   (define (add-tuning-to-package tuning)
+
+    (define (release>? a b)
+      (cond
+	((not a) #t) ; a is unnumbered (it is a local file) 
+	((not b) #f) ; b is unnumbered (it is a local file) 
+	(else (> a b))))
+    
     ;; This is only called for STklos tunings
     (let* ((name    (tuning-name tuning))
 	   (version (tuning-version tuning))
+	   (release (tuning-release tuning))
 	   (items   (filter (lambda (x) (and (equal? (package-name x) name)
 					     (equal? (package-version x) version)))
 			    *all-packages*)))
       (if (null? items)
 	  (eprintf "Warning: no package for tuning ~a-~a" name version)
-	  (set! (package-tuning (car items)) tuning))))
+	  (let ((old-tuning (package-tuning (car items))))
+	    (if (or (not old-tuning)
+		    (release>? release (tuning-release old-tuning)))
+		;; This is the first tuning we see or its release number is greater
+		;; than the one we have already stored in our db
+		(set! (package-tuning (car items)) tuning))))))
   ;;;
   ;;; load-repository-descriptions starts here 
   ;;;
