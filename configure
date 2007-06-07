@@ -6725,6 +6725,7 @@ if test "$HAVE_GC" = "no"
 then
   echo "No Boehm-Demers-Weiser GC library. Using the one provided with the package"
   (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix \
+          --includedir=$prefix/include/stklos \
           --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
 
   GC=gc

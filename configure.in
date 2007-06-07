@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update:  6-Jun-2007 18:34 (eg)
+dnl Last file update:  7-Jun-2007 10:55 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -337,6 +337,7 @@ if test "$HAVE_GC" = "no"
 then
   echo "No Boehm-Demers-Weiser GC library. Using the one provided with the package"
   (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix \
+          --includedir=$prefix/include/stklos \
           --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
   
   GC=gc
