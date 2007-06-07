@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update: 30-May-2007 23:16 (eg)
+;;;; Last file update:  7-Jun-2007 11:41 (eg)
 ;;;;
 
 (include "../lib/http.stk")
@@ -109,6 +109,19 @@
 	'(list)
 	(reverse actions))))
 
+
+;; ----------------------------------------------------------------------
+;;	load-user-rc ...
+;; ----------------------------------------------------------------------
+(define (load-user-rc)
+  (let ((rc (expand-file-name "~/.stklos/pkgrc")))
+    (when (and (file-exists? rc)
+	       (file-is-readable? rc))
+      (with-handler (lambda (c)
+		      (eprintf "**** Error while loading RC file ~S\n" rc)
+		      (raise c))
+	(load rc)))))
+
 ;; ----------------------------------------------------------------------
 ;;	global-handler ...
 ;; ----------------------------------------------------------------------
@@ -127,12 +140,13 @@
     (format (current-error-port) "UNKNOWN error!!!\n"))
   (exit 70))
 
-
 ;; ----------------------------------------------------------------------
 ;;	main ...
 ;; ----------------------------------------------------------------------
 (define (main argv)
   (with-handler global-handler
+    ;; Eventually load user rc file
+    (load-user-rc)
     ;; Ensure that files are correctly set
     (ensure-repository-hierarchy)
     ;; load the servers informations
