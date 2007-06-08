@@ -5,7 +5,7 @@
 				+======+
 
 
-* version 0.95 (2007 06 06)
+* version 0.95 (2007 06 08)
 This is a major version introducing support for the ScmPkg source packaging system.
 
     * Better support for lexical analyzer generation

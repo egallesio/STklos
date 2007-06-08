@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  1-Jan-2007 19:17 (eg)
+;;;; Last file update:  8-Jun-2007 10:32 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything 
@@ -197,13 +197,14 @@ doc>
   ;; Initialize signals suitable for  a REPL session (e.g.be immune to ^C)
   (%initialize-signals)
   (when interactive?
-    (display (do-color
-	      'bold 'green
-	      (format "STklos version ~A\t\t[~A/~A]\n" (version) (machine-type)
-		      (%thread-system))
-	      "Copyright (C) 1999-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>\n"
-	      'normal)
-	     (current-error-port)))
+    (let ((line1 (format "STklos version ~A\n" (version)))
+	  (line2 "Copyright (C) 1999-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>\n")
+	  (line3 (format "[~a/~a]\n" (machine-type) (%thread-system))))
+      (display (do-color 'bold 'red "*   " 'bold 'green line1))
+      (display (do-color 'bold 'red " *  " 'bold 'green line2))
+      (display (do-color 'bold 'red "* * " 'bold 'green line3 'normal))))
+      
+  
   ((main-repl-hook))
   (repl)
   (%pre-exit 0))
