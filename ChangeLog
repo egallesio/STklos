@@ -1,4 +1,50 @@
+2007-06-07  Erick Gallesio  <eg@essi.fr>
+
+	* lib/load.stk, pkgman/extract.stk, pkgman/misc.stk, src/boot.c,
+	src/boot.img:
+	Preparing version stklos-0.95-beta4
+	[a95cd23a9576]
+
+	* pkgman/main.stk:
+	Added a rc file for stklos-pkg. Should be documented
+	[74cdbf7e145b]
+
+	* configure, configure.in, lib/SILex.d/silex-original.scm, src/boot.c,
+	src/boot.img:
+	Corrected path problems with GC
+	[4e6e1b1d6b12]
+
 2007-06-06  Erick Gallesio  <eg@essi.fr>
+
+	* pkgman/repository.stk:
+	Preparing version stklos-0.95-beta3
+	[2027b433ddf4]
+
+	* doc/html/stklos-ref-1.html, doc/html/stklos-ref-10.html, doc/html
+	/stklos-ref-11.html, doc/html/stklos-ref-12.html, doc/html/stklos-
+	ref-13.html, doc/html/stklos-ref-14.html, doc/html/stklos-
+	ref-15.html, doc/html/stklos-ref-2.html, doc/html/stklos-ref-3.html,
+	doc/html/stklos-ref-4.html, doc/html/stklos-ref-5.html, doc/html
+	/stklos-ref-6.html, doc/html/stklos-ref-7.html, doc/html/stklos-
+	ref-8.html, doc/html/stklos-ref-9.html, doc/html/stklos-ref.html,
+	doc/pdf/stklos-ref.pdf, pkgman/extract.stk, pkgman/misc.stk:
+	Preparing version stklos-0.95-beta2
+	[8d0cfadc9243]
+
+	* ChangeLog, NEWS, README, TODO, configure, configure.in, doc/html
+	/stklos-ref-1.html, doc/html/stklos-ref-10.html, doc/html/stklos-
+	ref-11.html, doc/html/stklos-ref-12.html, doc/html/stklos-
+	ref-13.html, doc/html/stklos-ref-14.html, doc/html/stklos-
+	ref-15.html, doc/html/stklos-ref-2.html, doc/html/stklos-ref-3.html,
+	doc/html/stklos-ref-4.html, doc/html/stklos-ref-5.html, doc/html
+	/stklos-ref-6.html, doc/html/stklos-ref-7.html, doc/html/stklos-
+	ref-8.html, doc/html/stklos-ref-9.html, doc/html/stklos-ref.html,
+	doc/pdf/stklos-ref.pdf, doc/skb/Makefile, doc/skb/cond.skb,
+	doc/skb/scmpkg.skb, doc/skb/stdproc.skb, doc/skb/stklos.skb,
+	lib/Makefile.am, lib/Makefile.in, pkgman/params.stk, src/boot.img,
+	src/fixnum.c, src/port.c, tests/test-r5rs-pitfall.stk:
+	Pre-release packaging
+	[fd9a701bdd2b]
 
 	* lib/compiler.stk, lib/http.stk, pkgman/Makefile.am,
 	pkgman/Makefile.in, pkgman/add.stk, pkgman/misc.stk,
