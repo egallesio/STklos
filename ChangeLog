@@ -1,5 +1,8 @@
 2007-06-07  Erick Gallesio  <eg@essi.fr>
 
+	STklos 0.95 release
+	===================
+
 	* lib/load.stk, pkgman/extract.stk, pkgman/misc.stk, src/boot.c,
 	src/boot.img:
 	Preparing version stklos-0.95-beta4

@@ -24,7 +24,7 @@
 ;;;; Manuel Serrano. 
 ;;;;
 ;;;;    Creation date: 14-May-2007 19:12 (eg)
-;;;; Last file update:  5-Jun-2007 14:28 (eg)
+;;;; Last file update:  8-Jun-2007 14:44 (eg)
 ;;;;
 
 (define-module HTTP-MODULE
@@ -384,3 +384,5 @@
 
 (%redefine-module-exports (find-module 'HTTP-MODULE)
 			  (find-module 'STklos))
+
+(provide "http")
