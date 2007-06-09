@@ -22,12 +22,12 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 23:58 (eg)
-# Last file update: 12-Apr-2007 12:12 (eg)
+# Last file update:  9-Jun-2007 22:40 (eg)
 
 
 prefix=@prefix@
 
-function usage()
+usage()
 {
     cat <<EOF
 Usage: stklos-config [OPTIONS]
