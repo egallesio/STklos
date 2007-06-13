@@ -22,7 +22,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 23:58 (eg)
-# Last file update:  9-Jun-2007 22:40 (eg)
+# Last file update: 10-Jun-2007 11:16 (eg)
 
 
 prefix=@prefix@
@@ -38,6 +38,8 @@ Options:
 				shared libraries.
 	[--link | -l]		Command that should be used to link shared 
 				libraries
+        [--cflags]		CFLAGS used for building STklos
+        [--ldflags]		LDFLAGS used for building STklos
 	[--shared-suffix | -s]	Suffix for shared libraries on current 
 				platform
         [--threads | -t ]	Display the name of the valiable thread
@@ -65,6 +67,12 @@ while test $# -gt 0; do
 	    ;;
 	--link|-l)
 	    echo @SH_LOADER@ @SH_LOAD_FLAGS@
+	    ;;
+	--cflags)
+	    echo @CFLAGS@
+	    ;;
+	--ldflags)
+	    echo @LDFLAGS@
 	    ;;
 	--shared-suffix|-s)
 	    echo @SH_SUFFIX@

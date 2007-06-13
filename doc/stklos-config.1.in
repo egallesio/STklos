@@ -38,6 +38,10 @@ The version of STklos that is installed.
 The command that should be run to compile shared libraries.
 .IP "--link | -l"
 The command that should be used to link shared libraries.
+.IP "--cflags"
+Value of CFLAGS used to compile STklos
+.IP "--ldlags"
+Value of LDFLAGS used to compile STklos
 .IP "--shared-suffix | -s"
 The suffix for shared libraries.
 .IP "--threads | -t"
