@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Jan-1994 19:09
- * Last file update: 26-Jan-2007 12:01 (eg)
+ * Last file update: 14-Jun-2007 15:09 (eg)
  *
  */
 
@@ -113,6 +113,11 @@ static void *find_function(char *path, char *fname, int error_if_absent)
     STk_error("cannot find symbol `%s' in `%s'", fname, path);
   }
   return fct;
+}
+
+void *STk_find_external_function(char *path, char *fname, int error_if_absent)
+{
+  return find_function(path, fname, error_if_absent);
 }
 
 

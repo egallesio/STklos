@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 30-May-2007 17:00 (eg)
+ * Last file update: 15-Jun-2007 11:42 (eg)
  */
 
 
@@ -179,7 +179,7 @@ typedef enum {
   tc_hash_table, tc_port, tc_frame, tc_next_method, tc_promise, 	/* 25 */
   tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,	/* 30 */
   tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex, 		/* 35 */
-  tc_condv, tc_box,							/* 40 */
+  tc_condv, tc_box, tc_ext_func, tc_pointer,				/* 40 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -475,6 +475,16 @@ extern struct extended_type_descr *STk_xtypes[];
 
 int STk_new_user_type(struct extended_type_descr *);
 int STk_init_extend(void);
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ---- 				F F I . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+SCM STk_call_ext_function(SCM fct, int argc, SCM *argv);
+SCM STk_ext_func_name(SCM fct);
+int STk_init_ffi(void);
 
 
 /*

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Jan-2007 12:10 (eg)
-;;;; Last file update:  7-Jun-2007 12:21 (eg)
+;;;; Last file update: 12-Jun-2007 10:01 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -61,7 +61,7 @@
 		  (format "~a-test" package)
 		  spi)
 	  (printf "\techo 'Running test'\n")
-	  (printf "\tstklos -l ~a -e '(begin (import ~a-test) (run '\\''()))'\n\n"
+	  (printf "\tstklos -c -l ~a -e '(begin (import ~a-test) (run '\\''()))'\n\n"
 		  (format "~a-test.ostk" package)
 		  package))
 	(printf "\t@echo '**** No test provided with package ~A'\n" package))))

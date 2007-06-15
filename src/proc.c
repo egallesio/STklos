@@ -2,7 +2,7 @@
  *
  * p r o c . c				-- Things about procedures 
  *
- * Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 25-Apr-2005 17:17 (eg)
+ * Last file update: 15-Jun-2007 12:15 (eg)
  */
 
 #include "stklos.h"
@@ -112,7 +112,8 @@ DEFINE_PRIMITIVE("procedure?", procedurep, subr1, (SCM obj))
     case tc_next_method:
     case tc_continuation:
     case tc_parameter:
-    case tc_closure: 	 return STk_true;	
+    case tc_closure:
+    case tc_ext_func:    return STk_true;	
     case tc_instance:    return (STk_methodp(obj) != STk_false) ?
 			   	   STk_true: 
       				   STk_genericp(obj);
@@ -140,11 +141,12 @@ DEFINE_PRIMITIVE("%procedure-name", procedure_name, subr1, (SCM obj))
     case tc_subr01:	
     case tc_subr12:
     case tc_subr23:
-    case tc_vsubr:
-    case tc_apply:   return STk_Cstring2string(PRIMITIVE_NAME(obj));
-    case tc_closure: if (CLOSURE_NAME(obj) != STk_false)
-		       return STk_Cstring2string(SYMBOL_PNAME(CLOSURE_NAME(obj)));
-      		     /* NO BREAK */
+    case tc_apply:    return STk_Cstring2string(PRIMITIVE_NAME(obj));
+    case tc_vsubr:    return STk_ext_func_name(obj);
+    case tc_ext_func:  return STk_ext_func_name(obj);
+    case tc_closure:  if (CLOSURE_NAME(obj) != STk_false)
+		         return STk_Cstring2string(SYMBOL_PNAME(CLOSURE_NAME(obj)));
+                         /* NO BREAK */
     default:         return obj;
   }
 }

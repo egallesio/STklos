@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 14-May-2007 10:21 (eg)
+# Last file update: 14-Jun-2007 13:47 (eg)
 
 
 VPATH = @srcdir@
@@ -52,14 +52,14 @@ am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(extraincdir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am__stklos_SOURCES_DIST = base64.c boolean.c boot.c char.c cond.c \
-	dynload.c env.c error.c extend.c fixnum.c fport.c gnu-getopt.c \
-	gnu-glob.c hash.c keyword.c lib.c list.c misc.c md5.c number.c \
-	object.c parameter.c path.c port.c print.c proc.c process.c \
-	promise.c read.c regexp.c signal.c sio.c socket.c sport.c \
-	stklos.c str.c struct.c symbol.c system.c uvector.c vector.c \
-	vm.c vport.c thread-common.c thread-lurc.c mutex-common.c \
-	mutex-lurc.c thread-none.c mutex-none.c thread-pthreads.c \
-	mutex-pthreads.c
+	dynload.c env.c error.c extend.c ffi.c fixnum.c fport.c \
+	gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c list.c misc.c \
+	md5.c number.c object.c parameter.c path.c port.c print.c \
+	proc.c process.c promise.c read.c regexp.c signal.c sio.c \
+	socket.c sport.c stklos.c str.c struct.c symbol.c system.c \
+	uvector.c vector.c vm.c vport.c thread-common.c thread-lurc.c \
+	mutex-common.c mutex-lurc.c thread-none.c mutex-none.c \
+	thread-pthreads.c mutex-pthreads.c
 @LURC_FALSE@@NO_THREAD_FALSE@@PTHREADS_TRUE@am__objects_1 = thread-common.$(OBJEXT) \
 @LURC_FALSE@@NO_THREAD_FALSE@@PTHREADS_TRUE@	thread-pthreads.$(OBJEXT) \
 @LURC_FALSE@@NO_THREAD_FALSE@@PTHREADS_TRUE@	mutex-common.$(OBJEXT) \
@@ -71,18 +71,18 @@ am__stklos_SOURCES_DIST = base64.c boolean.c boot.c char.c cond.c \
 @LURC_TRUE@	mutex-lurc.$(OBJEXT)
 am_stklos_OBJECTS = base64.$(OBJEXT) boolean.$(OBJEXT) boot.$(OBJEXT) \
 	char.$(OBJEXT) cond.$(OBJEXT) dynload.$(OBJEXT) env.$(OBJEXT) \
-	error.$(OBJEXT) extend.$(OBJEXT) fixnum.$(OBJEXT) \
-	fport.$(OBJEXT) gnu-getopt.$(OBJEXT) gnu-glob.$(OBJEXT) \
-	hash.$(OBJEXT) keyword.$(OBJEXT) lib.$(OBJEXT) list.$(OBJEXT) \
-	misc.$(OBJEXT) md5.$(OBJEXT) number.$(OBJEXT) object.$(OBJEXT) \
-	parameter.$(OBJEXT) path.$(OBJEXT) port.$(OBJEXT) \
-	print.$(OBJEXT) proc.$(OBJEXT) process.$(OBJEXT) \
-	promise.$(OBJEXT) read.$(OBJEXT) regexp.$(OBJEXT) \
-	signal.$(OBJEXT) sio.$(OBJEXT) socket.$(OBJEXT) \
-	sport.$(OBJEXT) stklos.$(OBJEXT) str.$(OBJEXT) \
-	struct.$(OBJEXT) symbol.$(OBJEXT) system.$(OBJEXT) \
-	uvector.$(OBJEXT) vector.$(OBJEXT) vm.$(OBJEXT) \
-	vport.$(OBJEXT) $(am__objects_1)
+	error.$(OBJEXT) extend.$(OBJEXT) ffi.$(OBJEXT) \
+	fixnum.$(OBJEXT) fport.$(OBJEXT) gnu-getopt.$(OBJEXT) \
+	gnu-glob.$(OBJEXT) hash.$(OBJEXT) keyword.$(OBJEXT) \
+	lib.$(OBJEXT) list.$(OBJEXT) misc.$(OBJEXT) md5.$(OBJEXT) \
+	number.$(OBJEXT) object.$(OBJEXT) parameter.$(OBJEXT) \
+	path.$(OBJEXT) port.$(OBJEXT) print.$(OBJEXT) proc.$(OBJEXT) \
+	process.$(OBJEXT) promise.$(OBJEXT) read.$(OBJEXT) \
+	regexp.$(OBJEXT) signal.$(OBJEXT) sio.$(OBJEXT) \
+	socket.$(OBJEXT) sport.$(OBJEXT) stklos.$(OBJEXT) \
+	str.$(OBJEXT) struct.$(OBJEXT) symbol.$(OBJEXT) \
+	system.$(OBJEXT) uvector.$(OBJEXT) vector.$(OBJEXT) \
+	vm.$(OBJEXT) vport.$(OBJEXT) $(am__objects_1)
 stklos_OBJECTS = $(am_stklos_OBJECTS)
 am__DEPENDENCIES_1 =
 stklos_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -246,7 +246,7 @@ DOCDB = DOCDB
 @NO_THREAD_TRUE@THREAD_FILES = thread-none.c mutex-none.c
 @PTHREADS_TRUE@THREAD_FILES = thread-common.c thread-pthreads.c mutex-common.c mutex-pthreads.c
 stklos_SOURCES = base64.c boolean.c boot.c char.c cond.c dynload.c env.c error.c \
- extend.c fixnum.c fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
+ extend.c ffi.c fixnum.c fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
  list.c misc.c md5.c number.c object.c parameter.c path.c port.c print.c \
  proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
@@ -283,7 +283,7 @@ gmpinc = @GMPINC@
 pcre = @PCRE@
 pcrelib = @PCRELIB@
 pcreinc = @PCREINC@
-stklos_LDADD = $(compatlib) $(gmplib) $(pcrelib) $(gclib) -lm
+stklos_LDADD = $(compatlib) $(gmplib) $(pcrelib) $(gclib) -lcinvoke -lm 
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
 INCLUDES = $(gmpinc) $(pcreinc) $(gcinc)
 all: stklosconf.h
@@ -381,6 +381,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/env.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extend.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fixnum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fport.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnu-getopt.Po@am__quote@

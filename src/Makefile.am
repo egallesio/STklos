@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 14-May-2007 10:21 (eg)
+# Last file update: 14-Jun-2007 13:47 (eg)
 
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -31,7 +31,7 @@ if NO_THREAD
 endif
 
 stklos_SOURCES = base64.c boolean.c boot.c char.c cond.c dynload.c env.c error.c \
- extend.c fixnum.c fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
+ extend.c ffi.c fixnum.c fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
  list.c misc.c md5.c number.c object.c parameter.c path.c port.c print.c \
  proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
@@ -69,7 +69,7 @@ pcre		= @PCRE@
 pcrelib		= @PCRELIB@
 pcreinc		= @PCREINC@
 
-stklos_LDADD   = $(compatlib) $(gmplib) $(pcrelib) $(gclib) -lm
+stklos_LDADD   = $(compatlib) $(gmplib) $(pcrelib) $(gclib) -lcinvoke -lm 
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
 INCLUDES       = $(gmpinc) $(pcreinc) $(gcinc)
 

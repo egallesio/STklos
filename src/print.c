@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 11-Apr-2007 15:41 (eg)
+ * Last file update: 15-Jun-2007 11:46 (eg)
  *
  */
 #include <ctype.h>
@@ -185,7 +185,7 @@ void STk_print(SCM exp, SCM port, int mode)
       return;
     case tc_keyword:
       printkeyword(exp, port, mode);
-      break;
+      return;
     case tc_string:
       printstring(exp, port, mode);
       return;
@@ -193,7 +193,7 @@ void STk_print(SCM exp, SCM port, int mode)
       STk_putc('{', port);
       STk_print(BOX_VALUE(exp), port, mode);
       STk_putc('}', port);
-      break;
+      return;
     case tc_subr0:       /* ==================> Utiliser un type étendu //FIXME */
     case tc_subr1:
     case tc_subr2:
@@ -209,7 +209,12 @@ void STk_print(SCM exp, SCM port, int mode)
       STk_puts(PRIMITIVE_NAME(exp), port);
       STk_putc(']', port);
       return;
-    default: 
+    case tc_ext_func:
+      STk_puts("#[external-func ", port);
+      STk_puts(STRING_CHARS(STk_ext_func_name(exp)), port);
+      STk_putc(']', port);
+      return;
+    default:
       {
 	struct extended_type_descr *xdescr = BOXED_XTYPE(exp);
 	

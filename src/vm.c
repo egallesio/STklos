@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  6-Jun-2007 09:14 (eg)
+ * Last file update: 15-Jun-2007 11:56 (eg)
  */
 
 // INLINER values
@@ -1657,7 +1657,11 @@ FUNCALL:  /* (int nargs, int tailp) */
       if (nargs == 0) {vm->val = STk_get_parameter(vm->val);		break;}
       if (nargs == 1) {vm->val = STk_set_parameter(vm->val, vm->sp[0]);	break;}
       goto error_invoke;
-      
+
+    case tc_ext_func:
+      ACT_SAVE_PROC(vm->fp) = vm->val;
+      vm->val = STk_call_ext_function(vm->val, nargs, vm->sp+nargs-1);	break;
+
     default: 
       STk_error("bad function ~S. Cannot be applied", vm->val);
     error_invoke:

@@ -1,0 +1,95 @@
+;;;;
+;;;; ffi.stk			-- FFI support
+;;;; 
+;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 14-Bun-2007 09:24 (eg)
+;;;; Last file update: 15-Jun-2007 12:20 (eg)
+;;;;
+
+(define-macro (define-external name parameters . args)
+
+  (define arg-type->number
+    (let ((table '((:void 	0)
+		   (:char 	1)
+		   (:short 	2)
+		   (:ushort 	3)
+		   (:int 	4)
+		   (:uint 	5)
+		   (:long 	6)
+		   (:ulong 	7)
+		   (:lonlong	8)
+		   (:ulonlong	9)
+		   (:float 	10)
+		   (:double 	11)
+		   (:boolean 	12)
+		   (:pointer 	13)
+		   (:string	14)
+		   (:int8	15)		 
+		   (:int16	16)
+		   (:int32	17)
+		   (:int64	18))))
+      (lambda (k argument?)
+	(let ((info (assoc k table)))
+	  (if info
+	      (let ((r (cadr info)))
+		(if (and (zero? r) argument?)
+		    (error 'define-external "parameter of type :void are forbidden")
+		    (cadr info)))
+	      (error 'define-external "bad type name ~S" k))))))
+
+  
+  (define (parse-parameters lst)
+    (map (lambda (x)
+	   (cond
+	     ((keyword? x) (arg-type->number x #t))
+	     ((pair? x)
+	      (match-case x
+		(((? symbol?) (? keyword?))
+		 (arg-type->number (cadr x) #t))
+		(else
+		 (error 'define-external "bad parameter description: ~S" x))))
+	     (else
+	      (error 'define-external "bad parameter description: ~S" x))))
+	 lst))
+
+  
+  (let ((args 	     (parse-parameters parameters))
+	(lib-name    (key-get args :library-name ""))
+	(entry-name  (key-get args :entry-name (symbol->string name)))
+	(return-type (key-get args :return-type :void)))
+    `(define ,name
+       (%make-ext-func ,entry-name
+		       ',args
+		       ,(arg-type->number return-type #f)
+		       ,lib-name))))
+
+(define-external isatty ((fd :int))
+  :return-type :boolean)
+
+(define-external ttyname (:int)
+  :return-type :string)
+
+(define-external labs (:long)
+  :return-type :long)
+
+(define-external longabs (:long)
+  :entry-name "labs"
+  :return-type :long)
