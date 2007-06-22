@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 25-May-2007 12:04 (eg)
+ * Last file update: 22-Jun-2007 14:13 (eg)
  */
 
 #include <unistd.h>
@@ -533,7 +533,8 @@ DEFINE_PRIMITIVE("rename-file", rename_file, subr2, (SCM filename1, SCM filename
 <doc EXT directory-files
  * (directory-files path)
  *
- * Returns the list of the files in the directory |path|.
+ * Returns the list of the files in the directory |path|. Directories ,(q ".")
+ * and ,(q "..") don't appear in the result.
 doc>
 */
 DEFINE_PRIMITIVE("directory-files", directory_files, subr1, (SCM dirname))
@@ -549,6 +550,9 @@ DEFINE_PRIMITIVE("directory-files", directory_files, subr1, (SCM dirname))
   if (!dir) error_posix(dirname, NULL);
   
   for (d = readdir(dir); d ; d = readdir(dir)) {
+    if (d->d_name[0] == '.') 
+      if ((d->d_name[1] == '\0') || (d->d_name[1] == '.' && d->d_name[2] == '\0'))
+	continue;
     res = STk_cons(STk_Cstring2string(d->d_name), res);
   }
   closedir(dir);
