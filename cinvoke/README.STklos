@@ -1,0 +1,8 @@
+This directory contains a subset of the standard distribution of
+C/invoke (which is available at http://www.nongnu.org/cinvoke/index.html)
+
+The files which are not present here are th one used for the Lua and
+Java bindings. Use the standard distribution if needed.
+
+Erick Gallesio
+

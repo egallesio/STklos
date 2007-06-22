@@ -1,0 +1,21 @@
+all:
+	cd lib && $(MAKE)
+	cd test && $(MAKE)
+	cp -f lib/arch/[ARCH_HEADER] lib/cinvoke-archspec.h
+
+install:
+	install -d [PREFIX]/include
+	install -d [PREFIX]/lib
+	install lib/cinvoke.h lib/cinvoke-arch.h lib/cinvoke-archspec.h \
+		[PREFIX]/include
+	install lib/libcinvoke.a [PREFIX]/lib
+
+uninstall:
+	rm -f [PREFIX]/include/cinvoke.h [PREFIX]/include/cinvoke-arch.h \
+		[PREFIX]/include/cinvoke-archspec.h [PREFIX]/lib/libcinvoke.a
+
+clean:
+	cd lib && $(MAKE) clean
+	cd test && $(MAKE) clean
+
+distclean: clean

@@ -2,11 +2,11 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 12-Feb-2007 11:23 (eg)
+# Last file update: 19-Jun-2007 11:55 (eg)
 
 EXTRA_DIST   = 
-SUBDIRS      =  @PCRE@ @GC@ @GMP@ src utils lib @GTKLOS@ @EXAMPLES@ \
-	       pkgman extensions tests doc
+SUBDIRS      =  @PCRE@ @GC@ @GMP@ @CINVOKE@ src utils lib @GTKLOS@ \
+	        @EXAMPLES@ pkgman extensions tests doc
 SVN_URL      = @SVN_URL@/STklos
 VERSION_TAG  = @PACKAGE@-@VERSION@
 VERSION_BETA = $(VERSION_TAG)-beta

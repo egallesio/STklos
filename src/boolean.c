@@ -2,7 +2,7 @@
  *
  * b o o l e a n . c			-- Booleans and Equivalence predicates
  *
- * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  4-Apr-2006 18:44 (eg)
+ * Last file update: 21-Jun-2007 16:27 (eg)
  */
 
 #include "stklos.h"
@@ -199,6 +199,10 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
 	res = STk_C_apply(fg, 2, x, y);
 	return res;
       }
+      break;
+    case tc_pointer:
+      if (CPOINTERP(y) && (CPOINTER_VALUE(x) == CPOINTER_VALUE(y)))
+	return STk_true;
       break;
 #ifdef FIXME
 //EG:       default: if (EXTENDEDP(x) && EXTENDEDP(y) && TYPE(x) == TYPE(y)) 

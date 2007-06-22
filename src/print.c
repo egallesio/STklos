@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 15-Jun-2007 11:46 (eg)
+ * Last file update: 21-Jun-2007 16:51 (eg)
  *
  */
 #include <ctype.h>
@@ -194,6 +194,10 @@ void STk_print(SCM exp, SCM port, int mode)
       STk_print(BOX_VALUE(exp), port, mode);
       STk_putc('}', port);
       return;
+    case tc_pointer:
+      sprintf(buffer, "#[C-pointer %lx]", (unsigned long) CPOINTER_VALUE(exp));
+      STk_puts(buffer, port);
+      return;
     case tc_subr0:       /* ==================> Utiliser un type étendu //FIXME */
     case tc_subr1:
     case tc_subr2:
@@ -213,6 +217,10 @@ void STk_print(SCM exp, SCM port, int mode)
       STk_puts("#[external-func ", port);
       STk_puts(STRING_CHARS(STk_ext_func_name(exp)), port);
       STk_putc(']', port);
+      return;
+    case tc_callback:
+      sprintf(buffer, "#[callback %lx]", (unsigned long) exp);
+      STk_puts(buffer, port);
       return;
     default:
       {

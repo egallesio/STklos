@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 14-Jun-2007 13:47 (eg)
+# Last file update: 19-Jun-2007 11:09 (eg)
 
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -69,7 +69,7 @@ pcre		= @PCRE@
 pcrelib		= @PCRELIB@
 pcreinc		= @PCREINC@
 
-stklos_LDADD   = $(compatlib) $(gmplib) $(pcrelib) $(gclib) -lcinvoke -lm 
+stklos_LDADD   = $(compatlib) $(gmplib) $(pcrelib) $(gclib) -lm 
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
 INCLUDES       = $(gmpinc) $(pcreinc) $(gcinc)
 

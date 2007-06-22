@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 14-Jun-2007 13:47 (eg)
+# Last file update: 19-Jun-2007 11:09 (eg)
 
 
 VPATH = @srcdir@
@@ -121,6 +121,7 @@ CALLCC_STK = @CALLCC_STK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@ @STKCFLAGS@
+CINVOKE = @CINVOKE@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
 CPP = @CPP@
@@ -178,6 +179,7 @@ PCRE = @PCRE@
 PCREINC = @PCREINC@
 PCRELIB = @PCRELIB@
 PCRETARGET = @PCRETARGET@
+PERLINT = @PERLINT@
 PREFIX = @PREFIX@
 RANLIB = @RANLIB@
 SCMDIR = @SCMDIR@
@@ -283,7 +285,7 @@ gmpinc = @GMPINC@
 pcre = @PCRE@
 pcrelib = @PCRELIB@
 pcreinc = @PCREINC@
-stklos_LDADD = $(compatlib) $(gmplib) $(pcrelib) $(gclib) -lcinvoke -lm 
+stklos_LDADD = $(compatlib) $(gmplib) $(pcrelib) $(gclib) -lm 
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
 INCLUDES = $(gmpinc) $(pcreinc) $(gcinc)
 all: stklosconf.h

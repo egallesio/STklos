@@ -36,9 +36,15 @@ LALR: The Dominique Boucher LALR Package
     - Home Page: http://www.iro.umontreal.ca/~boucherd/Lalr/documentation/lalr.html
 
 
+C/INVOKE: a library for connecting to C libraries at runtime
+============================================================
+     - Version: 1.0
+     - License: 3 clauses BSD
+     - Home Page: http://www.nongnu.org/cinvoke/index.html
+
       	   	 +++++++++++++++++++++++++++++++++++
 
-The GC and GMP libraries provided with STklos are only used if there
+The GC, PCRE and GMP libraries provided with STklos are only used if there
 are no identical (or higher) versions of these libraries already
 installed on the system at configuration time. 
 

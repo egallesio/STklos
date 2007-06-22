@@ -21,12 +21,10 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
-;;;; Last file update: 15-Jun-2007 12:20 (eg)
+;;;; Last file update: 21-Jun-2007 16:05 (eg)
 ;;;;
 
-(define-macro (define-external name parameters . args)
-
-  (define arg-type->number
+(define ffi:arg-type->number
     (let ((table '((:void 	0)
 		   (:char 	1)
 		   (:short 	2)
@@ -45,7 +43,8 @@
 		   (:int8	15)		 
 		   (:int16	16)
 		   (:int32	17)
-		   (:int64	18))))
+		   (:int64	18)
+		   (:obj	19))))
       (lambda (k argument?)
 	(let ((info (assoc k table)))
 	  (if info
@@ -55,15 +54,16 @@
 		    (cadr info)))
 	      (error 'define-external "bad type name ~S" k))))))
 
-  
+(define-macro (define-external name parameters . args)
+
   (define (parse-parameters lst)
     (map (lambda (x)
 	   (cond
-	     ((keyword? x) (arg-type->number x #t))
+	     ((keyword? x) (ffi:arg-type->number x #t))
 	     ((pair? x)
 	      (match-case x
 		(((? symbol?) (? keyword?))
-		 (arg-type->number (cadr x) #t))
+		 (ffi:arg-type->number (cadr x) #t))
 		(else
 		 (error 'define-external "bad parameter description: ~S" x))))
 	     (else
@@ -78,18 +78,7 @@
     `(define ,name
        (%make-ext-func ,entry-name
 		       ',args
-		       ,(arg-type->number return-type #f)
+		       ,(ffi:arg-type->number return-type #f)
 		       ,lib-name))))
 
-(define-external isatty ((fd :int))
-  :return-type :boolean)
-
-(define-external ttyname (:int)
-  :return-type :string)
-
-(define-external labs (:long)
-  :return-type :long)
-
-(define-external longabs (:long)
-  :entry-name "labs"
-  :return-type :long)
+(provide "ffi")

@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 12-Jun-2007 10:01 (eg)
+dnl Last file update: 19-Jun-2007 12:07 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -17,7 +17,9 @@ dnl Checks for programs.
 AC_PROG_INSTALL
 AC_PROG_CC
 AC_PROG_RANLIB
+
 dnl AC_PROG_LIBTOOL
+
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -316,6 +318,8 @@ dnl #### fi
 
 
 dnl configure libraries
+
+
 if test "$HAVE_GMP" = "no"
 then 
   echo "No GMP library. Using the one provided with the package"
@@ -379,6 +383,24 @@ fi
 #   CYGWIN*) PCRETARGET="libpcre.la";;
 #   *)       PCRETARGET="libpcre.la libpcreposix.la";;
 # esac
+
+## C/INVOKE
+
+AC_CHECK_PROG(PERLINT, [perl], "yes", "no")
+
+if test "$PERLINT" = "yes" ;then
+  # We have perl. We can try to configure C/invoke
+  echo "Configuring C/Invoke"
+  (cd cinvoke; perl configure.pl --prefix=$prefix)
+  LIBS="$LIBS ../cinvoke/lib/libcinvoke.a"
+  CFLAGS="$CFLAGS -I../cinvoke/lib"
+  CINVOKE="cinvoke"
+else
+  echo "No perl interpreter. Disabling FFI support"
+  CINVOKE=""
+fi
+FFI=$PERLINT
+
 
 
 dnl ======================================================================
@@ -524,6 +546,7 @@ AC_SUBST(SVN_URL)
 AC_SUBST(THREADS)
 AC_SUBST(LURCDIR)
 AC_SUBST(CALLCC_STK)
+AC_SUBST(CINVOKE)
 	
 AC_OUTPUT(Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile gtklos/Makefile gtklos/gtklosconf.h
@@ -556,6 +579,7 @@ echo "        GC library: " $gclib
 echo "      LDAP support: " $USE_LDAP
 echo "      GTK+ support: " $USE_GTK 
 echo "     GNOME support: " $USE_GNOME 
+echo "       FFI support: " $FFI
 echo "    Thread support: " $THREADS 
 echo " "
 echo "If this is correct, you can just type 'make' now at your shell prompt."

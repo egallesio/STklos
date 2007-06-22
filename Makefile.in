@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 12-Feb-2007 11:23 (eg)
+# Last file update: 19-Jun-2007 11:55 (eg)
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -87,6 +87,7 @@ CALLCC_STK = @CALLCC_STK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CINVOKE = @CINVOKE@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
 CPP = @CPP@
@@ -144,6 +145,7 @@ PCRE = @PCRE@
 PCREINC = @PCREINC@
 PCRELIB = @PCRELIB@
 PCRETARGET = @PCRETARGET@
+PERLINT = @PERLINT@
 PREFIX = @PREFIX@
 RANLIB = @RANLIB@
 SCMDIR = @SCMDIR@
@@ -202,8 +204,8 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = 
-SUBDIRS = @PCRE@ @GC@ @GMP@ src utils lib @GTKLOS@ @EXAMPLES@ \
-	       pkgman extensions tests doc
+SUBDIRS = @PCRE@ @GC@ @GMP@ @CINVOKE@ src utils lib @GTKLOS@ \
+	        @EXAMPLES@ pkgman extensions tests doc
 
 VERSION_TAG = @PACKAGE@-@VERSION@
 VERSION_BETA = $(VERSION_TAG)-beta

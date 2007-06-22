@@ -21,12 +21,15 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update: 15-Jun-2007 12:18 (eg)
+ * Last file update: 21-Jun-2007 17:23 (eg)
  */
 
 #include <stklos.h>
 #include <cinvoke.h>
 
+/* ------------------------------ *\
+ * STklos C external functions
+ * ------------------------------ */
 struct ext_func_obj {
   stk_header header;
   SCM name;
@@ -52,7 +55,6 @@ union any {
   void *         pvalue;
 };
 
-
 #define EXTFUNC_NAME(f)		(((struct ext_func_obj *) (f))->name)
 #define EXTFUNC_PARAMS(f)	(((struct ext_func_obj *) (f))->params)
 #define EXTFUNC_RETTYPE(f)	(((struct ext_func_obj *) (f))->rettype)
@@ -64,6 +66,23 @@ union any {
 #define EXTFUNCP(f)	 	(BOXED_TYPE_EQ((f), tc_ext_func))
 
 
+/* ------------------------------ *\
+ * STklos callbacks
+ * ------------------------------ */
+struct callback_obj {
+  stk_header header;
+  SCM proc;
+  SCM types;
+  SCM data;
+};
+
+#define CALLBACK_PROC(p)	(((struct callback_obj *) (p))->proc)
+#define CALLBACK_TYPES(p)	(((struct callback_obj *) (p))->types)
+#define CALLBACK_DATA(p)	(((struct callback_obj *) (p))->data)
+
+#define CALLBACKP(p)		(BOXED_TYPE_EQ((p), tc_callback))
+
+/* ====================================================================== */
 
 static void signal_error(CInvContext *ctx)
 {
@@ -93,12 +112,12 @@ static void ext_func_finalizer(SCM obj)
  (:int 		4)  (:uint 	5)  (:long 	6)   (:ulong 	7)
  (:lonlong	8)  (:ulonlong	9)  (:float 	10)  (:double 	11)
  (:boolean 	12) (:pointer 	13) (:string	14)  (:int8	15)		 
- (:int16	16) (:int32	17) (:int64	18))
+ (:int16	16) (:int32	17) (:int64	18)  (:obj      19))
 */
-#define EXT_FUNC_MAX_TYPE 18		/* maximal value for types */
+#define EXT_FUNC_MAX_TYPE 19		/* maximal value for types */
 #define EXT_FUNC_MAX_PARAMS 30		/* max # of parameters to an external func */
 
-static char conversion[] = "\0cssiilleefdippc248";
+static char conversion[] = "\0cssiilleefdippc248p";
 
 
 static char convert(SCM obj)
@@ -125,6 +144,7 @@ static void fill_parameters_descr(char *str, SCM params)
   }
   STk_error("too muchparameters. (# max = %d)", EXT_FUNC_MAX_PARAMS);
 }
+
 
 /* ======================================================================
  *  	scheme2c ...
@@ -180,7 +200,19 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
       res->ivalue = (obj != STk_false);
       return;
     case 13:						/* pointer */
-      STk_error("NYI");
+      if (CPOINTERP(obj)) {
+	res->pvalue = CPOINTER_VALUE(obj);
+	return;
+      }
+      else if (obj == STk_void) {
+	res->pvalue = NULL;
+	return;
+      } else if (EXTFUNCP(obj)) {
+	/* Pass the address of C function for external functions */
+	res->pvalue = EXTFUNC_CODE(obj);
+	return;
+      }
+      break;
     case 14:						/* string */
       if (STRINGP(obj)) {
 	res->pvalue = STRING_CHARS(obj);
@@ -196,6 +228,9 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
     case 17:						/* int32 */
     case 18:						/* int64 */
       STk_error("passing intXX is not implemented yet");
+    case 19:						/* obj */
+      res->pvalue = obj;
+      return;
   }
   STk_error("Argument #%d cannot be converted to requested type. Value was ~S",
 	    index, obj);
@@ -234,7 +269,14 @@ static SCM c2scheme(union any obj, SCM rettype)
     case 12:						/* boolean */
       return MAKE_BOOLEAN(obj.ivalue);
     case 13:						/* pointer */
-      STk_error("NYI");
+      if (obj.pvalue) {
+	SCM z; 
+	NEWCELL(z, pointer);
+	CPOINTER_VALUE(z) = obj.pvalue;
+	return z;
+      } else {
+	return STk_void;
+      }
     case 14:						/* string */
       if (! obj.pvalue) return STk_void;
       return STk_Cstring2string(obj.pvalue);
@@ -243,6 +285,8 @@ static SCM c2scheme(union any obj, SCM rettype)
     case 17:						/* int32 */
     case 18:						/* int64 */
       STk_error("returning intXX is not implemented yet");
+    case 19: 						/* obj */
+      return  obj.pvalue;
     default: 
       STk_panic("incorrect type number for FFI %d", rettype);
   }
@@ -359,10 +403,115 @@ SCM STk_call_ext_function(SCM fct, int argc, SCM *argv)
 
 
 /* ======================================================================
+ *  	make-callback ...
+ * ====================================================================== */
+DEFINE_PRIMITIVE("make-callback", make_callback, subr3, 
+		 (SCM proc, SCM types, SCM data))
+{
+  SCM z;
+
+  if (STk_procedurep(proc) == STk_false) STk_error("bad procedure ~S", proc);
+  if (!CONSP(types)) STk_error("incorrect types description ~S", types);
+  
+  NEWCELL(z, callback);
+  CALLBACK_PROC(z) = proc;
+  CALLBACK_TYPES(z) = types;
+  CALLBACK_DATA(z) = data;
+  return z;
+}
+
+
+/* ======================================================================
+ *  	STk_exec_callback ...
+ * ====================================================================== */
+#define MAX_ARGS_CALLBACK 20
+
+static int exec_callback(SCM callback, ...)
+{
+  va_list ap;
+  SCM res, Cargs, Sargs[MAX_ARGS_CALLBACK];
+  union any param;
+  int i = 0;
+
+  va_start(ap, callback);
+
+  for (Cargs = CALLBACK_TYPES(callback); !NULLP(Cargs); Cargs = CDR(Cargs)) {
+    /* grab the argument on the stack */
+    switch(INT_VAL(CAR(Cargs))) {
+      case 0: 						/* void */
+	break;
+      case 1: 						/* char */
+	param.cvalue = va_arg(ap, int); break;
+      case 2:						/* short */
+	param.svalue = va_arg(ap, int); break;
+      case 3:						/* ushort */
+	param.usvalue = va_arg(ap, unsigned int); break;
+      case 4:						/* int */
+	param.ivalue = va_arg(ap, int); break;
+      case 5:						/* uint */
+	param.uivalue = va_arg(ap, unsigned int); break;
+      case 6:						/* long */
+	param.lvalue = va_arg(ap, long); break;
+      case 7:						/* ulong */
+	param.ulvalue = va_arg(ap, unsigned long); break;
+      case 8:						/* lonlong */
+      case 9:						/* ulonlong */
+	STk_debug("long long in a callback are not implemented yet");
+      case 10:						/* float */
+	param.fvalue = (float) va_arg(ap, double); break;
+      case 11:						/* double */
+	param.dvalue = va_arg(ap, double); break;
+      case 12:						/* boolean */
+	param.ivalue = va_arg(ap, int); break;
+      case 13:						/* pointer */
+	param.pvalue = va_arg(ap, void *); break;
+      case 14:						/* string */
+	param.pvalue = va_arg(ap, char *); break;
+      case 15:						/* int8 */
+      case 16:						/* int16 */
+      case 17:						/* int32 */
+      case 18:						/* int64 */
+	STk_debug("argument of type ~S in callback are not implemented yet",
+		  CAR(Cargs));
+      case 19: 						/* obj */
+	param.pvalue = va_arg(ap, void *); break;
+      default: 
+	STk_panic("incorrect type number for FFI ~s", (CAR(Cargs)));
+    }
+    
+    /* param contains the C argument */
+    if (i >= MAX_ARGS_CALLBACK - 1) 
+      STk_error("a callback cannot have more than %d arguments", MAX_ARGS_CALLBACK);
+
+    Sargs[i++] = c2scheme(param, CAR(Cargs));
+  }
+  
+  /* Add the callback value as last parameter */
+  Sargs[i++] = CALLBACK_DATA(callback);
+  Sargs[i]= NULL;
+
+  res = STk_C_apply(CALLBACK_PROC(callback), -i, Sargs);
+  return (res != STk_false);
+}
+
+
+DEFINE_PRIMITIVE("%exec-callback-address", exec_cb_addr, subr0, (void))
+{
+  SCM z;
+  
+  NEWCELL(z, pointer);
+  CPOINTER_VALUE(z) = (void *) exec_callback;
+  return z;
+}
+
+
+/* ======================================================================
  *  	INIT  ...
  * ====================================================================== */
 int STk_init_ffi(void)
 {
   ADD_PRIMITIVE(make_ext_func);
+  ADD_PRIMITIVE(make_callback);
+  ADD_PRIMITIVE(exec_cb_addr);
   return TRUE;
 }
