@@ -2,7 +2,7 @@ dnl configure.in for GMPlite
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date:  4-Jul-2003 16:56 (eg) 
-dnl Last file update:  3-Aug-2005 10:08 (eg)
+dnl Last file update: 25-Jun-2007 08:46 (eg)
 
 
 AC_INIT(gmp-impl.h)
@@ -38,6 +38,16 @@ case `uname -m` in
      HAVE_HOST_CPU_FAMILY_power=0
      HAVE_HOST_CPU_FAMILY_powerpc=0
      THE_ARCH=x86
+     LIBGMP_DLL=0
+     GMP_NAIL_BITS=0
+     ;;
+  *86_64)
+     BITS_PER_MP_LIMB=32
+     BYTES_PER_MP_LIMB=4
+     DEFN_LONG_LONG_LIMB="/* #undef _LONG_LONG_LIMB */"
+     HAVE_HOST_CPU_FAMILY_power=0
+     HAVE_HOST_CPU_FAMILY_powerpc=0
+     THE_ARCH=x86_64
      LIBGMP_DLL=0
      GMP_NAIL_BITS=0
      ;;
