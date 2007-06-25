@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Jan-2007 13:37 (eg)
-;;;; Last file update: 22-Jun-2007 14:14 (eg)
+;;;; Last file update: 22-Jun-2007 14:18 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -154,14 +154,10 @@
     ;(eprintf "rm -rf ~S\n" path)
     (if (file-is-directory? path)
 	(let ((files (directory-files path)))
-	  ;(eprintf "C'est un directory ~S\n" path)
 	  (for-each (lambda (f) (rm-rf (make-path path f)))
 		    files)
-	  ;(eprintf "effacer le repertoire à lafin ~S\n" path)
 	  (delete-directory path))
-	(begin
-	  ;(eprintf "effacer fichier ~S\n" path)
-	(remove-file path)))))
+	(remove-file path))))
 
 ;; ----------------------------------------------------------------------
 ;;	untar ...

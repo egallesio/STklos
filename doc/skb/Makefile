@@ -2,12 +2,12 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update:  6-Jun-2007 16:09 (eg)
+# Last file update: 22-Jun-2007 23:55 (eg)
 
 
 SOURCES  = biblio.skb cond.skb custom.skb expr.skb index.skb 		\
 	   intro.skb match.skb object.skb	 			\
-	   overview.skb progstruct.skb regexp.skb slib.skb 		\
+	   overview.skb progstruct.skb regexp.skb slib.skb ffi.skb	\
 	   scmpkg.skb srfi.skb stdproc.skb stklos.skb threads.skb
 BIB	 = biblio.skbib
 DOCDB    = ../DOCDB

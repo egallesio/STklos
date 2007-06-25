@@ -1,7 +1,14 @@
-all:
+all: lib test archspec
+
+lib:
 	cd lib && $(MAKE)
+test: 
 	cd test && $(MAKE)
-	cp -f lib/arch/[ARCH_HEADER] lib/cinvoke-archspec.h
+
+archspec: lib/cinvoke-archspec.h
+
+lib/cinvoke-archspec.h:  lib/arch/[ARCH_HEADER]
+	 cp -f lib/arch/[ARCH_HEADER] lib/cinvoke-archspec.h
 
 install:
 	install -d [PREFIX]/include
