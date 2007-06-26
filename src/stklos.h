@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 21-Jun-2007 16:24 (eg)
+ * Last file update: 25-Jun-2007 15:21 (eg)
  */
 
 
@@ -376,6 +376,7 @@ int STk_init_cond(void);
 
 #define MODULE_ENTRY_INFO() SCM STk_module_info(void)
 
+void *STk_find_external_function(char *path, char *fname, int error_if_absent);
 SCM STk_load_object_file(SCM f, char *fname);
 SCM STk_info_object_file(char *fname);
 

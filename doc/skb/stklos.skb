@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 22-Jun-2007 23:59 (eg)
+;; Last file update: 26-Jun-2007 11:11 (eg)
 ;;
 ;; ======================================================================
 
@@ -75,14 +75,14 @@ document.]
 (skribe-include "intro.skb")
 (skribe-include "expr.skb")
 (skribe-include "progstruct.skb")   
-;(skribe-include "stdproc.skb")
+(skribe-include "stdproc.skb")
 (skribe-include "regexp.skb")
-;(skribe-include "match.skb")
-;(skribe-include "cond.skb")
-;(skribe-include "object.skb")
-;(skribe-include "threads.skb")
-;(skribe-include "custom.skb")
-;(skribe-include "scmpkg.skb")
+(skribe-include "match.skb")
+(skribe-include "cond.skb")
+(skribe-include "object.skb")
+(skribe-include "threads.skb")
+(skribe-include "custom.skb")
+(skribe-include "scmpkg.skb")
 (skribe-include "ffi.skb")
 (skribe-include "slib.skb")
 (skribe-include "srfi.skb")

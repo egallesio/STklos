@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Jan-1994 19:09
- * Last file update: 14-Jun-2007 15:09 (eg)
+ * Last file update: 25-Jun-2007 15:20 (eg)
  *
  */
 
@@ -78,7 +78,7 @@ static void initialize_dynload(void)
 }
 
 
-static void *find_function(char *path, char *fname, int error_if_absent)
+void *STk_find_external_function(char *path, char *fname, int error_if_absent)
 {
   void *handle, *fct;
   SCM l;
@@ -115,12 +115,6 @@ static void *find_function(char *path, char *fname, int error_if_absent)
   return fct;
 }
 
-void *STk_find_external_function(char *path, char *fname, int error_if_absent)
-{
-  return find_function(path, fname, error_if_absent);
-}
-
-
 SCM STk_load_object_file(SCM f, char *path)
 {
   InitFunc init_fct;
@@ -128,7 +122,7 @@ SCM STk_load_object_file(SCM f, char *path)
   /* Close the port since we don't need it */
   STk_close_port(f);
 
-  init_fct = find_function(path, INIT_FUNC_NAME, TRUE);
+  init_fct = STk_find_external_function(path, INIT_FUNC_NAME, TRUE);
   init_fct();
   return STk_true;
 }
@@ -137,7 +131,7 @@ SCM STk_info_object_file(char *path)
 {
   InfoFunc info_fct;
 
-  info_fct = find_function(path, INFO_FUNC_NAME, FALSE);
+  info_fct = STk_find_external_function(path, INFO_FUNC_NAME, FALSE);
   return (info_fct) ? info_fct() : STk_nil;
 }
 #endif /* HAVE_DLOPEN */

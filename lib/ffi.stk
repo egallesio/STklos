@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
-;;;; Last file update: 21-Jun-2007 16:05 (eg)
+;;;; Last file update: 25-Jun-2007 14:21 (eg)
 ;;;;
 
 (define ffi:arg-type->number
@@ -54,6 +54,62 @@
 		    (cadr info)))
 	      (error 'define-external "bad type name ~S" k))))))
 
+#|
+<doc EXT-SYNTAX define-external
+ * (define-external name parameters option)
+ *
+ * The form |define-external| binds a new procedure to |name|.
+ * The arity of this new procedure is defined by the typed list of
+ * parameters given by |parameters|. This parameters list is a list
+ * of keywords (as defined in the previous table) or couples whose first
+ * element is the name of the parameter, and the second one is a type
+ * keyword.  All the types defined in the above table, except
+ * |:void|, are allowed for the parameters of a foreign function.
+ * £
+ * |Define-external| accepts several options:
+ * ,(itemize
+ * (item [
+ * |:return-type| is used to define the type of the value returned 
+ * by the foreign function. The type returned must be chosen in the types specified
+ * in the table. For instance:
+ * @lisp
+ * (define-external maximum(:int :int)
+ *    :return-type :int)
+ * @end lisp
+ * defines the foreign function maximum which takes two C integers and
+ * returns an integer result. Omitting this option default to a result
+ * type equal to |:void| (i.e. the returned value is ,(emph "undefined")).
+ * ])
+ * 
+ * (item [
+ * |:entry-name| is used to specify the name of the foreign
+ * function in the C world. If this option is omitted, the entry-name is
+ * supposed to be |name|. For instance:
+ * @lisp 
+ * (define-external minimum((a :int) (b :int))
+ *    :return-type :int
+ *    :entry-name  "min")
+ * @end lisp
+ * defines the Scheme function |minimum| whose application
+ * executes the C function called |min|.
+ * ])
+ * (item [
+ * |:library-name| is used to specify the library which contains the 
+ * foreign-function. If necessary, the library is loaded before calling the 
+ * C function. So, 
+ * @lisp 
+ * (define-external minimum((a :int) (b :int))
+ *    :return-type  :int
+ *    :entry-name   "min"
+ *     :library-name "libminmax")
+ * @end lisp 
+ * defines a function which will execute the function |min|
+ * located in the library |libminmax.xx| (where |xx| is the suffix used
+ * for shared libraries on the running system (generally |so|))
+ * ])
+ * )
+doc>
+|#
 (define-macro (define-external name parameters . args)
 
   (define (parse-parameters lst)

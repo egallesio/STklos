@@ -15,7 +15,7 @@
 <td align="left" valign="top" width="20%" bgcolor="#E6F2E6">
 <br /><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="darkolivegreen"><font color="white">Contents</font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-42080">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-42524">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navsel"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a><br /><table cellspacing="1" cellpadding="1" width="100%">
 <tbody>
@@ -41,10 +41,11 @@
 <tr class="navnorm"><td width="8%" align="left" valign="top">9&nbsp;</td><td align="left"><a href="stklos-ref-9.html#Threads--Mutexes-and-Condition-Variables">Threads, Mutexes and Condition Variables</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">10&nbsp;</td><td align="left"><a href="stklos-ref-10.html#Customizations">Customizations</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">11&nbsp;</td><td align="left"><a href="stklos-ref-11.html#The-ScmPkg-Package-System">The ScmPkg Package System</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">12&nbsp;</td><td align="left"><a href="stklos-ref-12.html#Using-the-SLIB-package">Using the SLIB package</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">13&nbsp;</td><td align="left"><a href="stklos-ref-13.html#SRFIs">SRFIs</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">14&nbsp;</td><td align="left"><a href="stklos-ref-14.html#Index">Index</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">&nbsp;</td><td align="left"><a href="stklos-ref-15.html#Bibliography">Bibliography</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">12&nbsp;</td><td align="left"><a href="stklos-ref-12.html#Foreign-Function-Interface">Foreign Function Interface</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">13&nbsp;</td><td align="left"><a href="stklos-ref-13.html#Using-the-SLIB-package">Using the SLIB package</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">14&nbsp;</td><td align="left"><a href="stklos-ref-14.html#SRFIs">SRFIs</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">15&nbsp;</td><td align="left"><a href="stklos-ref-15.html#Index">Index</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">&nbsp;</td><td align="left"><a href="stklos-ref-16.html#Bibliography">Bibliography</a></td></tr>
 </tbody></table>
 </td>
 <td align="left" valign="top">
@@ -54,7 +55,7 @@ very succinctly here for reference. See the (ref :bib &quot;R5RS&quot;) for a co
 description.</p><a name="Literal-expressions"></a>
 <table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Literal-expressions"><font color="#000000">2.1 Literal expressions</font></h3></table>
 <br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="quote"></a><a name="--index-entry-5188"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="quote"></a><a name="--index-entry-5189"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(quote &lt;datum&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">'&lt;datum&gt;</font></strong></code><br /><br />The quoting mechanism is identical to <span style="font-variant: small-caps">R<sup>5</sup>RS</span>, except that keywords 
@@ -76,8 +77,8 @@ constants, character constants, and boolean constants
 constant vectors. This is not necessary with <span style="font-variant: small-caps">STklos</span>.</td></tr>
 </tbody></table><a name="Procedures"></a>
 <table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Procedures"><font color="#000000">2.2 Procedures</font></h3></table>
-<a name="--index-entry-5294"></a><a name="--index-entry-5298"></a><a name="--index-entry-5302"></a><a name="--index-entry-5306"></a><a name="--index-entry-5310"></a><a name="--index-entry-5314"></a><a name="--index-entry-5318"></a><a name="--index-entry-5322"></a><a name="--index-entry-5326"></a><a name="--index-entry-5330"></a><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="lambda"></a><a name="--index-entry-5336"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<a name="--index-entry-5295"></a><a name="--index-entry-5299"></a><a name="--index-entry-5303"></a><a name="--index-entry-5307"></a><a name="--index-entry-5311"></a><a name="--index-entry-5315"></a><a name="--index-entry-5319"></a><a name="--index-entry-5323"></a><a name="--index-entry-5327"></a><a name="--index-entry-5331"></a><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="lambda"></a><a name="--index-entry-5337"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(lambda &lt;formals&gt; &lt;body&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />A lambda expression evaluates to a procedure. <span style="font-variant: small-caps">STklos</span> lambda expression
@@ -193,13 +194,13 @@ At last, here is an example showing <code>:optional</code> <code>:rest</code> an
 </li>
 </ul></td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="closure-"></a><a name="--index-entry-5737"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="closure-"></a><a name="--index-entry-5738"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(closure? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>obj</code> is a procedure created with the <code>lambda</code> syntax and 
 <code>#f</code> otherwise.</td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="case-lambda"></a><a name="--index-entry-5776"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="case-lambda"></a><a name="--index-entry-5777"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(case-lambda &lt;clause&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />Each <code>&lt;clause&gt;</code> should have the form <code>(&lt;formals&gt; &lt;body&gt;)</code>, where 
@@ -246,8 +247,8 @@ This form is defined in <strong><a href="http://srfi.schemers.org/srfi-16/srfi-1
 </td></tr>
 </tbody></table><a name="Assignments"></a>
 <table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Assignments"><font color="#000000">2.3 Assignments</font></h3></table>
-<a name="--index-entry-5962"></a><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="set-"></a><a name="--index-entry-5968"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<a name="--index-entry-5963"></a><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="set-"></a><a name="--index-entry-5969"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(set! &lt;variable&gt; &lt;expression&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(set! (&lt;proc&gt; &lt;arg&gt; ...) &lt;expression&gt;)</font></strong></code><br /><br />The first form of <code>set!</code> is the <span style="font-variant: small-caps">R<sup>5</sup>RS</span> one:
@@ -304,7 +305,7 @@ is equivalent to the call
 
 The result of the <code>set!</code> expression is unspecified.</td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="setter"></a><a name="--index-entry-6137"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="setter"></a><a name="--index-entry-6138"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(setter proc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the setter associated to a <code>proc</code>. Setters are defined in the
@@ -347,8 +348,8 @@ are their own setter:
 </td></tr>
 </tbody></table><a name="Conditionals"></a>
 <table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Conditionals"><font color="#000000">2.4 Conditionals</font></h3></table>
-<a name="--index-entry-6254"></a><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="if"></a><a name="--index-entry-6260"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<a name="--index-entry-6255"></a><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="if"></a><a name="--index-entry-6261"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(if &lt;test&gt; &lt;consequent&gt; &lt;alternate&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(if &lt;test&gt; &lt;consequent&gt;)</font></strong></code><br /><br />An <code>if</code> expression is evaluated as follows: first, <code>&lt;test&gt;</code> is
@@ -368,7 +369,7 @@ expression is <em>void</em>.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="cond"></a><a name="--index-entry-6348"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="cond"></a><a name="--index-entry-6349"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(cond &lt;clause1&gt; &lt;clause2&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />In a <code>cond</code>, each <code>&lt;clause&gt;</code> should be of the form
@@ -429,7 +430,7 @@ one is(are) returned.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="case"></a><a name="--index-entry-6566"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="case"></a><a name="--index-entry-6567"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(case &lt;key&gt; &lt;clause1&gt; &lt;clause2&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />In a <code>case</code>, each <code>&lt;clause&gt;</code> should have the form
@@ -476,7 +477,7 @@ case expression; otherwise the result of the case expression is <em>void</em>.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="and"></a><a name="--index-entry-6715"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="and"></a><a name="--index-entry-6716"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(and &lt;test1&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />The <code>&lt;test&gt;</code> expressions are evaluated from left to right, and the
@@ -494,7 +495,7 @@ is returned.  If there are no expressions then <code>#t</code> is returned.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="or"></a><a name="--index-entry-6776"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="or"></a><a name="--index-entry-6777"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(or &lt;test1&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />The <code>&lt;test&gt;</code> expressions are evaluated from left to right, and the
@@ -513,14 +514,14 @@ is returned.  If there are no expressions then <code>#f</code> is returned.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="when"></a><a name="--index-entry-6838"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="when"></a><a name="--index-entry-6839"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(when &lt;test&gt; &lt;expression1&gt; &lt;expression2&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />If the <code>&lt;test&gt;</code> expression yields a true value, the <code>&lt;expression&gt;</code>s are
 evaluated from left to right and the value of the last <code>&lt;expression&gt;</code> is
 returned. Otherwise, <code>when</code> returns <em>void</em>.</td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="unless"></a><a name="--index-entry-6881"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="unless"></a><a name="--index-entry-6882"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(unless &lt;test&gt; &lt;expression1&gt; &lt;expression2&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />If the <code>&lt;test&gt;</code> expression yields a false value, the <code>&lt;expression&gt;</code>s are
@@ -528,7 +529,7 @@ evaluated from left to right and the value of the last <code>&lt;expression&gt;<
 returned. Otherwise, <code>unless</code> returns <em>void</em>.</td></tr>
 </tbody></table><a name="Binding-Constructs"></a>
 <table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Binding-Constructs"><font color="#000000">2.5 Binding Constructs</font></h3></table>
-<a name="--index-entry-6925"></a>The three binding constructs <code>let</code>, <code>let*</code>, and 
+<a name="--index-entry-6926"></a>The three binding constructs <code>let</code>, <code>let*</code>, and 
 <code>letrec</code> are available in STklos.  
 These constructs differ in the regions they establish for
 their variable bindings.  In a <code>let</code> expression, the initial values are
@@ -538,7 +539,7 @@ expression, the bindings and evaluations are performed sequentially; while in a
 values are being computed, thus allowing mutually recursive definitions.
 <br />
 <span style="font-variant: small-caps">STklos</span> also provides a <code>fluid-let</code> form which is described below.<br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="let"></a><a name="--index-entry-6940"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="let"></a><a name="--index-entry-6941"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(let &lt;bindings&gt; &lt;body&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(let &lt;variable&gt; &lt;bindings&gt; &lt;body&gt;)</font></strong></code><br /><br />In a <code>let</code>, <code>&lt;bindings&gt;</code> should have the form
@@ -598,7 +599,7 @@ named by <code>&lt;variable&gt;</code>.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="let-"></a><a name="--index-entry-7128"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="let-"></a><a name="--index-entry-7129"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(let* &lt;bindings&gt; &lt;body&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />In a <code>let*</code>, <code>&lt;bindings&gt;</code> should have the same form as in a <code>let</code> (however, a 
@@ -624,7 +625,7 @@ visible, and so on.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="letrec"></a><a name="--index-entry-7211"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="letrec"></a><a name="--index-entry-7212"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(letrec &lt;bindings&gt; &lt;body&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />&lt;bindings&gt; should have the form as in <code>let</code>. 
@@ -653,7 +654,7 @@ mutually recursive procedures.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="fluid-let"></a><a name="--index-entry-7303"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="fluid-let"></a><a name="--index-entry-7304"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(fluid-let &lt;bindings&gt; &lt;body&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />The <code>&lt;bindings&gt;</code> are evaluated in the current environment, in some
@@ -697,7 +698,7 @@ this behavior
 </tbody></table><a name="Sequencing"></a>
 <table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Sequencing"><font color="#000000">2.6 Sequencing</font></h3></table>
 <br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="begin"></a><a name="--index-entry-7409"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="begin"></a><a name="--index-entry-7410"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(begin &lt;expression1&gt; &lt;expression2&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />The <code>&lt;expression&gt;</code>s are evaluated sequentially from left to right, and the
@@ -719,7 +720,7 @@ used to sequence side effects such as input and output.
 </tbody></table><a name="Iterations"></a>
 <table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Iterations"><font color="#000000">2.7 Iterations</font></h3></table>
 <br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="do"></a><a name="--index-entry-7477"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="do"></a><a name="--index-entry-7478"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(do [[&lt;var1&gt; &lt;init1&gt; &lt;step1&gt;] ...] [&lt;test&gt; &lt;expr&gt; ...] &lt;command&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br /><code>Do</code> is an iteration construct.  It specifies a set of variables to be
@@ -771,7 +772,7 @@ had been written.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="dotimes"></a><a name="--index-entry-7667"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="dotimes"></a><a name="--index-entry-7668"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(dotimes [var count] &lt;expression1&gt; &lt;expression2&gt; ... )</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(dotimes [var count result] &lt;expression1&gt; &lt;expression2&gt; ... )</font></strong></code><br /><br />Evaluates the <code>count</code> expression, which must return an
@@ -790,21 +791,21 @@ value is returned as the value of the <code>dotimes</code> construction. If
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="while"></a><a name="--index-entry-7762"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="while"></a><a name="--index-entry-7763"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(while &lt;test&gt; &lt;expression1&gt; &lt;expression2&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br /><code>While</code> evaluates the <code>&lt;expression&gt;</code>s until <code>&lt;test&gt;</code> returns a false
 value. The value returned by this form is <em>void</em>.</td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="until"></a><a name="--index-entry-7800"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="until"></a><a name="--index-entry-7801"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(until &lt;test&gt; &lt;expression1&gt; &lt;expression2&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br /><code>Until</code> evaluates the <code>&lt;expression&gt;</code>s until <code>&lt;while&gt;</code> returns a false
 value. The value returned by this form is <em>void</em>.</td></tr>
 </tbody></table><a name="Delayed-Evaluation"></a>
 <table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Delayed-Evaluation"><font color="#000000">2.8 Delayed Evaluation</font></h3></table>
-<a name="--index-entry-7839"></a><a name="--index-entry-7843"></a><a name="--index-entry-7847"></a><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="delay"></a><a name="--index-entry-7853"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<a name="--index-entry-7840"></a><a name="--index-entry-7844"></a><a name="--index-entry-7848"></a><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="delay"></a><a name="--index-entry-7854"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(delay &lt;expression&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />The <code>delay</code> construct is used together with the procedure <code>force</code>
@@ -817,14 +818,14 @@ The effect of <code>&lt;expression&gt;</code> returning multiple values is unpre
 See the description of <code>force</code> (&#x40;pxref{force}) for a more complete
 description of <code>delay</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="promise-"></a><a name="--index-entry-7925"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="promise-"></a><a name="--index-entry-7926"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(promise? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /> Returns <code>#t</code> if <code>obj</code> is a promise, otherwise returns <code>#f</code>.</td></tr>
 </tbody></table><a name="Quasiquotation"></a>
 <table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Quasiquotation"><font color="#000000">2.9 Quasiquotation</font></h3></table>
-<a name="--index-entry-7960"></a><a name="--index-entry-7964"></a><a name="--index-entry-7968"></a><a name="--index-entry-7972"></a><a name="--index-entry-7976"></a><a name="--index-entry-7980"></a><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="quasiquote"></a><a name="--index-entry-7986"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<a name="--index-entry-7961"></a><a name="--index-entry-7965"></a><a name="--index-entry-7969"></a><a name="--index-entry-7973"></a><a name="--index-entry-7977"></a><a name="--index-entry-7981"></a><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="quasiquote"></a><a name="--index-entry-7987"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(quasiquote &lt;template&gt;) </font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">`&lt;template&gt;</font></strong></code><br /><br />&quot;Backquote&quot; or &quot;quasiquote&quot; expressions are useful for constructing a
@@ -878,13 +879,13 @@ in all respects.  <code>,&lt;expression&gt;</code> is identical to <code>(unquot
 </td></tr>
 </tbody></table><a name="Macros"></a>
 <table width="100%"><tr><td bgcolor="#E6F2E6"><h3 id="Macros"><font color="#000000">2.10 Macros</font></h3></table>
-<a name="--index-entry-8138"></a><a name="--index-entry-8142"></a><a name="--index-entry-8146"></a><p>STklos supports hygienic macros such as the ones defined in R5RS
-as well as low level macros.</p><a name="--index-entry-8151"></a><p>Low level macros are defined with <code>define-macro</code> whereas
+<a name="--index-entry-8139"></a><a name="--index-entry-8143"></a><a name="--index-entry-8147"></a><p>STklos supports hygienic macros such as the ones defined in R5RS
+as well as low level macros.</p><a name="--index-entry-8152"></a><p>Low level macros are defined with <code>define-macro</code> whereas
 R5RS macros are defined with <code>define-syntax</code>
-<a href="#fn--footnote-8157"><sup><small>1</small></sup></a>.  Hygienic macros use the implementation
+<a href="#fn--footnote-8158"><sup><small>1</small></sup></a>.  Hygienic macros use the implementation
 called <em>Macro by Example</em> (Eugene Kohlbecker, R4RS) done by Dorai
 Sitaram. This implementation generates low level STklos
-macros. This implementation of hygienic macros is not expensive.</p><a name="--index-entry-8160"></a><p>The major drawback of this implementation is that the macros are
+macros. This implementation of hygienic macros is not expensive.</p><a name="--index-entry-8161"></a><p>The major drawback of this implementation is that the macros are
  not <em>referentially transparent</em> (see section `Macros' in
  R4RS for details). Lexically scoped macros
  (i.e., <code>let-syntax</code> and <code>letrec-syntax</code> are not
@@ -904,7 +905,7 @@ macros. This implementation of hygienic macros is not expensive.</p><a name="--i
  versions of <code>syntax-rules</code>. Requiring <code>&quot;full-syntax&quot;</code> 
  loads the version 2.1 of an implementation of hygienic macros by 
  Robert Hieb and R. Kent Dybvig.</p><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="define-macro"></a><a name="--index-entry-8182"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="define-macro"></a><a name="--index-entry-8183"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(define-macro (&lt;name&gt; &lt;formals&gt;) &lt;body&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(define-macro &lt;name&gt; (lambda &lt;formals&gt; &lt;body&gt;))</font></strong></code><br /><br /><code>define-macro</code> can be used to define low-level macro
@@ -933,7 +934,7 @@ macros. This implementation of hygienic macros is not expensive.</p><a name="--i
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="define-syntax"></a><a name="--index-entry-8279"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="define-syntax"></a><a name="--index-entry-8280"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(define-syntax &lt;identifier&gt; &lt;transformer-spec&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br /><code>&lt;Define-syntax&gt;</code>  extends the top-level syntactic environment by binding 
@@ -954,7 +955,7 @@ the <code>&lt;identifier&gt;</code> to the specified transformer.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="syntax-rules"></a><a name="--index-entry-8346"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="syntax-rules"></a><a name="--index-entry-8347"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(syntax-rules &lt;literals&gt; &lt;syntax-rule&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br /><code>&lt;literals&gt;</code> is a list of identifiers, and each <code>&lt;syntax-rule&gt;</code> should be of
@@ -980,7 +981,7 @@ literal identifier.
 <strong>Note:</strong> For a complete description of the Scheme pattern language, 
 refer to <span style="font-variant: small-caps">R<sup>5</sup>RS</span>.</td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="let-syntax"></a><a name="--index-entry-8407"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="let-syntax"></a><a name="--index-entry-8408"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(let-syntax &lt;bindings&gt; &lt;body&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br /><code>&lt;Bindings&gt;</code> should have the form
@@ -1019,7 +1020,7 @@ binding of a <code>&lt;keyword&gt;</code> has <code>&lt;body&gt;</code> as its r
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="letrec-syntax"></a><a name="--index-entry-8554"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="letrec-syntax"></a><a name="--index-entry-8555"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(letrec-syntax &lt;bindings&gt; &lt;body&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />Syntax of <code>letrec-syntax</code> is the same as for <code>let-syntax</code>.
@@ -1057,8 +1058,8 @@ expression.
 </pre></td></tr>
 </tbody></table></blockquote>
 </td></tr>
-</tbody></table><a name="--index-entry-8676"></a><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="macro-expand"></a><a name="--index-entry-8682"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+</tbody></table><a name="--index-entry-8677"></a><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="macro-expand"></a><a name="--index-entry-8683"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(macro-expand form)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the macro expansion of <code>form</code> if it is a macro call,
@@ -1072,11 +1073,11 @@ otherwise <code>form</code> is returned unchanged.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br><br><hr width='20%' size='2' align='left'>
-<a name="fn--footnote-8157"><sup><small>1</small></sup></a>: Documentation about hygienic macros has been stolen in
+<a name="fn--footnote-8158"><sup><small>1</small></sup></a>: Documentation about hygienic macros has been stolen in
 the SLIB manual
 <br>
 </td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-				     <a href="http://www.inria.fr/mimosa/fp/Skribe">Skribe</a>.<br />Last update <em>Wed Jun  6 22:53:03 2007</em></small>
+				     <a href="http://www.inria.fr/mimosa/fp/Skribe">Skribe</a>.<br />Last update <em>Tue Jun 26 11:12:25 2007</em></small>
 </body>
 </html>

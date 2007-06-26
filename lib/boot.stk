@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 15-May-2007 16:48 (eg)
+;;;; Last file update: 25-Jun-2007 13:57 (eg)
 ;;;;
 
 (include "runtime.stk")	; Definition necessary for the bootstrap
@@ -44,23 +44,24 @@
 (import REPL)
 
 ;==============================================================================
-(autoload	 "compfile"	compile-file)
-(autoload	 "describe"	describe)
-(syntax-autoload "bigmatch"	match-case match-lambda)
-(autoload	 "getopt"	%print-usage)
-(syntax-autoload "getopt"	parse-arguments)
-(syntax-autoload "trace"	trace untrace)
-(autoload	 "pp"		pp pretty-print)
-(autoload	 "env"		null-environment scheme-report-environment
-			        interaction-environment)
-(autoload	 "http" 	http-open http-parse-status-line
-		 		http-parse-header http-find-body http-download)
-(autoload	 "lex-rt"	lexer-next-token)
+(autoload	 "compfile"	  compile-file)
+(autoload	 "describe"	  describe)
+(syntax-autoload "bigmatch"	  match-case match-lambda)
+(autoload	 "getopt"	  %print-usage)
+(syntax-autoload "getopt"	  parse-arguments)
+(syntax-autoload "trace"	  trace untrace)
+(autoload	 "pp"		  pp pretty-print)
+(autoload	 "env"		  null-environment scheme-report-environment
+			          interaction-environment)
+(autoload	 "http" 	  http-open http-parse-status-line
+		 		  http-parse-header http-find-body http-download)
+(autoload	 "lex-rt"	  lexer-next-token)
 (syntax-autoload "scmpkg-support" interface)
-(autoload	 "srfi-27"  random-integer random-real)
-(syntax-autoload "srfi-34"  with-exception-handler guard)
-(syntax-autoload "srfi-35"  define-condition-type condition)
-(autoload	 "srfi-48"  srfi48:help srfi48:format-fixed)
+(syntax-autoload "ffi"		  define-external)
+(autoload	 "srfi-27"        random-integer random-real)
+(syntax-autoload "srfi-34"        with-exception-handler guard)
+(syntax-autoload "srfi-35"        define-condition-type condition)
+(autoload	 "srfi-48"        srfi48:help srfi48:format-fixed)
 
 ;==============================================================================
 ;; Execute the REPL only if a file was not given on the command line

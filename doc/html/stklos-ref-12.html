@@ -11,11 +11,11 @@
 <link href="doc-style.css" rel="stylesheet" type="text/css">
 </head>
 <body >
-<table width='100%' cellpadding='0' cellspacing='0'><tr><td bgcolor="#E6F2E6"><center><h1>STklos Reference Manual<hr align="center" width="10%">12. Using the SLIB package</h1></center></table><table cellpadding="3" cellspacing="0" width="100%"><tr>
+<table width='100%' cellpadding='0' cellspacing='0'><tr><td bgcolor="#E6F2E6"><center><h1>STklos Reference Manual<hr align="center" width="10%">12. Foreign Function Interface</h1></center></table><table cellpadding="3" cellspacing="0" width="100%"><tr>
 <td align="left" valign="top" width="20%" bgcolor="#E6F2E6">
 <br /><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="darkolivegreen"><font color="white">Contents</font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-42080">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-42524">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -27,30 +27,140 @@
 <tr class="navnorm"><td width="8%" align="left" valign="top">9&nbsp;</td><td align="left"><a href="stklos-ref-9.html#Threads--Mutexes-and-Condition-Variables">Threads, Mutexes and Condition Variables</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">10&nbsp;</td><td align="left"><a href="stklos-ref-10.html#Customizations">Customizations</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">11&nbsp;</td><td align="left"><a href="stklos-ref-11.html#The-ScmPkg-Package-System">The ScmPkg Package System</a></td></tr>
-<tr class="navsel"><td width="8%" align="left" valign="top">12&nbsp;</td><td align="left"><a href="stklos-ref-12.html#Using-the-SLIB-package">Using the SLIB package</a><br /></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">13&nbsp;</td><td align="left"><a href="stklos-ref-13.html#SRFIs">SRFIs</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">14&nbsp;</td><td align="left"><a href="stklos-ref-14.html#Index">Index</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">&nbsp;</td><td align="left"><a href="stklos-ref-15.html#Bibliography">Bibliography</a></td></tr>
+<tr class="navsel"><td width="8%" align="left" valign="top">12&nbsp;</td><td align="left"><a href="stklos-ref-12.html#Foreign-Function-Interface">Foreign Function Interface</a><br /></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">13&nbsp;</td><td align="left"><a href="stklos-ref-13.html#Using-the-SLIB-package">Using the SLIB package</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">14&nbsp;</td><td align="left"><a href="stklos-ref-14.html#SRFIs">SRFIs</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">15&nbsp;</td><td align="left"><a href="stklos-ref-15.html#Index">Index</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">&nbsp;</td><td align="left"><a href="stklos-ref-16.html#Bibliography">Bibliography</a></td></tr>
 </tbody></table>
 </td>
 <td align="left" valign="top">
-<a name="--index-entry-40733"></a><a name="--index-entry-40737"></a><p>Aubrey Jaffer maintains a package called
-<em><a href="http://swiss.csail.mit.edu/~jaffer/SLIB">SLIB</a></em>
-which is a portable Scheme library which provides compatibility
-and utility functions for all standard Scheme implementations. To
-use this package, you have just to type</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
-<tr><td bgcolor="#eee8bf"><pre>(require <font color="red">&quot;slib&quot;</font>)
+<p>The <span style="font-variant: small-caps">STklos</span> Foreign Function Interface (FFI for short) has been
+defined to allow an easy access to functions written in C without
+needing to build C-wrappers and, consequently, without any need to
+write C code.  Note that the FFI is very machine dependent and that it
+works only on a limited set of architectures/systems <a href="#fn--footnote-40835"><sup><small>1</small></sup></a>. Moreover,
+since FFI allows very low level access, it is easy to crash the
+<span style="font-variant: small-caps">STklos</span> VM when using an external C function.</p><p><strong>Note that the support for FFI is still minimal and that it will
+evolve in future versions.</strong></p><p>The definition of an external function is done with the
+<em>define-external</em> special form.  This form takes as arguments
+a typed list of parameters and accepts several options to define the
+name of the function in the C world, the library which defines this
+function, ... The type of the function result and the type of its
+arguments are defined in Figure <a href="stklos-ref-12.html#FFI-types">2</a>. This table lists
+the various keywords reserved for denoting types and their equivalence
+between the C and the Scheme worlds.</p><br id="FFI-types"><a name="FFI-types"></a>
+<center><table width="90%" style="border-collapse: collapse;" frame="border" rules="cols"><tbody>
+<tr bgcolor="#eeeeee"><th align="left">Name</th><th align="left">Corresponding C type</th><th align="left">Corresponding Scheme Type</th></tr>
+<tr><td align="left"><strong>:void</strong></td><td align="left">void</td><td align="left">none</td></tr>
+<tr><td align="left"><strong>:char</strong></td><td align="left">char</td><td align="left">Scheme character</td></tr>
+<tr><td align="left"><strong>:short</strong></td><td align="left">short</td><td align="left">Scheme integer</td></tr>
+<tr><td align="left"><strong>:ushort</strong></td><td align="left">unsigned short</td><td align="left">Scheme integer</td></tr>
+<tr><td align="left"><strong>:int</strong></td><td align="left">int</td><td align="left">Scheme integer</td></tr>
+<tr><td align="left"><strong>:uint</strong></td><td align="left">unsined int</td><td align="left">Scheme integer</td></tr>
+<tr><td align="left"><strong>:long</strong></td><td align="left">long int</td><td align="left">Scheme integer</td></tr>
+<tr><td align="left"><strong>:ulong</strong></td><td align="left">unsigned long int</td><td align="left">Scheme integer</td></tr>
+<tr><td align="left"><strong>:float</strong></td><td align="left">float</td><td align="left">Scheme real number</td></tr>
+<tr><td align="left"><strong>:double</strong></td><td align="left">double</td><td align="left">Scheme real number</td></tr>
+<tr><td align="left"><strong>:boolean</strong></td><td align="left">int</td><td align="left">boolean</td></tr>
+<tr><td align="left"><strong>:pointer</strong></td><td align="left">void *</td><td align="left">Scheme pointer object or Scheme string</td></tr>
+<tr><td align="left"><strong>:string</strong></td><td align="left">char *</td><td align="left">Scheme string</td></tr>
+<tr><td align="left"><strong>:obj</strong></td><td align="left">void *</td><td align="left">Any Scheme object passed as is</td></tr>
+</tbody></table>
+</center>
+<center>
+<strong>Fig. 2:</strong> FFI types</center>
+<br>
+<br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="define-external"></a><a name="--index-entry-40924"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(define-external name parameters option)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
+</tbody></table>
+<br />The form <code>define-external</code> binds a new procedure to <code>name</code>.
+The arity of this new procedure is defined by the typed list of
+parameters given by <code>parameters</code>. This parameters list is a list
+of keywords (as defined in the previous table) or couples whose first
+element is the name of the parameter, and the second one is a type
+keyword.  All the types defined in the above table, except
+<code>:void</code>, are allowed for the parameters of a foreign function.
+<br /><br />
+<code>Define-external</code> accepts several options:
+<ul><li>
+<code>:return-type</code> is used to define the type of the value returned 
+by the foreign function. The type returned must be chosen in the types specified
+in the table. For instance:
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre>(define-external maximum(<font color="#00cf00">:int</font> <font color="#00cf00">:int</font>)
+   <font color="#00cf00">:return-type</font> <font color="#00cf00">:int</font>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>and follow the instructions given in the <em>SLIB</em> library
-to use a particular package.</p><p><strong>Note:</strong> <em>SLIB</em> uses also the
-<em>require and provide</em> mechanism to load components of the
-library. Once <em>SLIB</em> has been loaded, the standard
-<span style="font-variant: small-caps">STklos</span> <code>require</code> and <code>provide</code> are overloaded
-such as if their parameter is a string this is the old <span style="font-variant: small-caps">STklos</span>
-procedure which is called, and if their parameter is a symbol,
-this is the <em>SLIB</em> one which is called.</p></td>
+
+defines the foreign function maximum which takes two C integers and
+returns an integer result. Omitting this option default to a result
+type equal to <code>:void</code> (i.e. the returned value is <em>undefined</em>).
+</li>
+<li>
+<code>:entry-name</code> is used to specify the name of the foreign
+function in the C world. If this option is omitted, the entry-name is
+supposed to be <code>name</code>. For instance:
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre> 
+(define-external minimum((a <font color="#00cf00">:int</font>) (b <font color="#00cf00">:int</font>))
+   <font color="#00cf00">:return-type</font> <font color="#00cf00">:int</font>
+   <font color="#00cf00">:entry-name</font>  <font color="red">&quot;min&quot;</font>)
+</pre></td></tr>
+</tbody></table></blockquote>
+
+defines the Scheme function <code>minimum</code> whose application
+executes the C function called <code>min</code>.
+</li>
+<li>
+<code>:library-name</code> is used to specify the library which contains the 
+foreign-function. If necessary, the library is loaded before calling the 
+C function. So, 
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre> 
+(define-external minimum((a <font color="#00cf00">:int</font>) (b <font color="#00cf00">:int</font>))
+   <font color="#00cf00">:return-type</font>  <font color="#00cf00">:int</font>
+   <font color="#00cf00">:entry-name</font>   <font color="red">&quot;min&quot;</font>
+    <font color="#00cf00">:library-name</font> <font color="red">&quot;libminmax&quot;</font>)
+</pre></td></tr>
+</tbody></table></blockquote>
+ 
+defines a function which will execute the function <code>min</code>
+located in the library <code>libminmax.xx</code> (where <code>xx</code> is the suffix used
+for shared libraries on the running system (generally <code>so</code>))
+</li>
+</ul></td></tr>
+</tbody></table><p>Hereafter, there are some commented definitions of external functions:</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="#eee8bf"><pre> (define-external isatty ((fd <font color="#00cf00">:int</font>))  
+     <font color="#00cf00">:return-type</font> <font color="#00cf00">:boolean</font>)
+
+  (define-external system ((cmd <font color="#00cf00">:string</font>))
+    <font color="#00cf00">:return-type</font> <font color="#00cf00">:int</font>)
+
+  (define-external ttyname (<font color="#00cf00">:int</font>)
+    <font color="#00cf00">:return-type</font> <font color="#00cf00">:string</font>)
+</pre></td></tr>
+</tbody></table></blockquote>
+<p>All these functions are defined in the C standard library, hence it is not
+necessary to specify the <tt>:library-name</tt> option.</p><ul><li><em>istty</em> is declared here as a function which takes an
+integer and returns a boolean (in fact, the value returned by the
+C function <em>isatty</em> is an <em>int</em>, but we ask here to the FFI
+system to translate this result as a boolean value in the Scheme
+world).</li>
+<li><em>system</em> is a function which takes a string as parameter
+and returns an <em>int</em>.</li>
+<li><em>ttyname</em> is a function whih takes an int and returns a string. 
+Note that in this function the name of the parameter has been omitted 
+as within C prototypes.</li>
+</ul><strong>TODO: describe malloc and malloc_atomic and their
+interaction with the GC</strong><br><br><hr width='20%' size='2' align='left'>
+<a name="fn--footnote-40835"><sup><small>1</small></sup></a>: FFI
+system should works on the following architectures/systems:
+gcc_ppc_osx, gcc_sparc_unix, gcc_x64_unix, gcc_x86_unix.
+<br>
+</td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-				     <a href="http://www.inria.fr/mimosa/fp/Skribe">Skribe</a>.<br />Last update <em>Wed Jun  6 22:53:06 2007</em></small>
+				     <a href="http://www.inria.fr/mimosa/fp/Skribe">Skribe</a>.<br />Last update <em>Tue Jun 26 11:12:29 2007</em></small>
 </body>
 </html>

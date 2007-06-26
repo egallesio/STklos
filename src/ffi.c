@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update: 21-Jun-2007 17:23 (eg)
+ * Last file update: 25-Jun-2007 15:21 (eg)
  */
 
 #include <stklos.h>
@@ -307,23 +307,6 @@ SCM STk_ext_func_name(SCM fct)
 /* ======================================================================
  * 	STk_make-ext_func primitive ... 
  * ====================================================================== */
-void *STk_find_external_function(char *path, char *fname, int error_if_absent);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 DEFINE_PRIMITIVE("%make-ext-func", make_ext_func, subr4, 
 		 (SCM name, SCM params, SCM rettype, SCM libname))
 {

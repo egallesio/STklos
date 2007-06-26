@@ -15,7 +15,7 @@
 <td align="left" valign="top" width="20%" bgcolor="#E6F2E6">
 <br /><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="darkolivegreen"><font color="white">Contents</font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-42080">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-42524">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -34,10 +34,11 @@
 <tr class="navnorm"><td width="8%" align="left" valign="top">9&nbsp;</td><td align="left"><a href="stklos-ref-9.html#Threads--Mutexes-and-Condition-Variables">Threads, Mutexes and Condition Variables</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">10&nbsp;</td><td align="left"><a href="stklos-ref-10.html#Customizations">Customizations</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">11&nbsp;</td><td align="left"><a href="stklos-ref-11.html#The-ScmPkg-Package-System">The ScmPkg Package System</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">12&nbsp;</td><td align="left"><a href="stklos-ref-12.html#Using-the-SLIB-package">Using the SLIB package</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">13&nbsp;</td><td align="left"><a href="stklos-ref-13.html#SRFIs">SRFIs</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">14&nbsp;</td><td align="left"><a href="stklos-ref-14.html#Index">Index</a></td></tr>
-<tr class="navnorm"><td width="8%" align="left" valign="top">&nbsp;</td><td align="left"><a href="stklos-ref-15.html#Bibliography">Bibliography</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">12&nbsp;</td><td align="left"><a href="stklos-ref-12.html#Foreign-Function-Interface">Foreign Function Interface</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">13&nbsp;</td><td align="left"><a href="stklos-ref-13.html#Using-the-SLIB-package">Using the SLIB package</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">14&nbsp;</td><td align="left"><a href="stklos-ref-14.html#SRFIs">SRFIs</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">15&nbsp;</td><td align="left"><a href="stklos-ref-15.html#Index">Index</a></td></tr>
+<tr class="navnorm"><td width="8%" align="left" valign="top">&nbsp;</td><td align="left"><a href="stklos-ref-16.html#Bibliography">Bibliography</a></td></tr>
 </tbody></table>
 </td>
 <td align="left" valign="top">
@@ -48,17 +49,17 @@ system.  Briefly stated, <span style="font-variant: small-caps">STklos</span> gi
 an extensive object system with meta-classes, multiple
 inheritance, generic functions and multi-methods.  Furthermore,
 its implementation relies on a Meta Object Protocol
-(MOP) [<a href="stklos-ref-15.html#AMOP">8</a>], in the spirit of the one defined for
-CLOS [<a href="stklos-ref-15.html#CLtL2">9</a>].</p><p><span style="font-variant: small-caps">STklos</span> implementation is derived from the version 1.3
+(MOP) [<a href="stklos-ref-16.html#AMOP">8</a>], in the spirit of the one defined for
+CLOS [<a href="stklos-ref-16.html#CLtL2">9</a>].</p><p><span style="font-variant: small-caps">STklos</span> implementation is derived from the version 1.3
 of <em>Tiny CLOS</em>, a pure and clean CLOS-like MOP
 implementation in Scheme written by Gregor Kickzales
-[<a href="stklos-ref-15.html#Tiny-Clos">7</a>]. However, Tiny CLOS implementation was
+[<a href="stklos-ref-16.html#Tiny-Clos">7</a>]. However, Tiny CLOS implementation was
 designed as a pedagogical tool and consequently, completeness and
 efficiency were not the author concern for it.  <span style="font-variant: small-caps">STklos</span>
 extends the Tiny CLOS model to be efficient and as close as
-possible to CLOS, the Common Lisp Object System [<a href="stklos-ref-15.html#CLtL2">9</a>].
+possible to CLOS, the Common Lisp Object System [<a href="stklos-ref-16.html#CLtL2">9</a>].
 Some features of <span style="font-variant: small-caps">STklos</span> are also issued from
-Dylan [<a href="stklos-ref-15.html#Dylan">3</a>] or SOS [<a href="stklos-ref-15.html#SOS">5</a>].</p><p>This chapter is divided in three parts, which have a
+Dylan [<a href="stklos-ref-16.html#Dylan">3</a>] or SOS [<a href="stklos-ref-16.html#SOS">5</a>].</p><p>This chapter is divided in three parts, which have a
 quite different audience in mind:</p><ul><li> The first part presents the <span style="font-variant: small-caps">STklos</span> object system rather
 informally; it is intended to be a tutorial of the language and is
 for people who want to have an idea of the <em>look and feel</em> of
@@ -75,14 +76,14 @@ for people who want to have an idea of the <em>look and feel</em> of
 the current OO languages.  Furthermore, <span style="font-variant: small-caps">STklos</span> provides
 meta-classes, multiple inheritance, generic functions and
 multi-methods as in CLOS, the Common Lisp Object System
-[<a href="stklos-ref-15.html#CLtL2">9</a>] or Dylan [<a href="stklos-ref-15.html#Dylan">3</a>].  This chapter
+[<a href="stklos-ref-16.html#CLtL2">9</a>] or Dylan [<a href="stklos-ref-16.html#Dylan">3</a>].  This chapter
 presents <span style="font-variant: small-caps">STklos</span> in a rather informal manner.  Its intent is to
 give the reader an idea of the "<em>look and feel</em>" of
 <span style="font-variant: small-caps">STklos</span> programming.  However, we suppose here that the reader
 has some basic notions of OO programming, and is familiar with
 terms such as <em>classes, instances</em> or <em>methods.</em></p><a name="Class-definition-and-instantiation"></a>
 <h4 id="Class-definition-and-instantiation"><font color="darkolivegreen">8.2.1 Class definition and instantiation</font></h4>
-<a name="--index-entry-37848"></a><a name="--index-entry-37852"></a><a name="--index-entry-37856"></a><a name="Class-definition"></a>
+<a name="--index-entry-37857"></a><a name="--index-entry-37861"></a><a name="--index-entry-37865"></a><a name="Class-definition"></a>
 <h5 id="Class-definition"><font color="#8381de">8.2.1.1 Class definition</font></h5>
 <p>A new class is defined with the <code>define-class</code> form.
 The syntax of <code>define-class</code> is close to CLOS <code>defclass</code>:</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
@@ -96,7 +97,7 @@ The syntax of <code>define-class</code> is close to CLOS <code>defclass</code>:<
 <p>The <em>metaclass option</em> will not be discussed here.
 The <em>superclass</em>es list specifies the super classes of
 <em>class</em>
-(see <a href="stklos-ref-8.html#inheritance">inheritance</a> for details).</p><a name="--index-entry-37883"></a><p>A <em>slot description</em> gives the name of a slot and,
+(see <a href="stklos-ref-8.html#inheritance">inheritance</a> for details).</p><a name="--index-entry-37892"></a><p>A <em>slot description</em> gives the name of a slot and,
 eventually, some "properties" of this slot (such as its
 initial value, the function which permit to access its value,
 ...). Slot descriptions will be discussed in
@@ -119,7 +120,7 @@ contain the coordinates of a 2D point.</p><p>Let us define now a circle, as a 2D
 constructed by inheriting from the class <code>&lt;point&gt;</code> and
 adding a new slot (the <code>radius</code> slot).</p><a name="Instance-creation-and-slot-access"></a>
 <h5 id="Instance-creation-and-slot-access"><font color="#8381de">8.2.1.2 Instance creation and slot access</font></h5>
-<a name="--index-entry-37921"></a><a name="--index-entry-37925"></a><p>Creation of an instance of a previously defined class can
+<a name="--index-entry-37930"></a><a name="--index-entry-37934"></a><p>Creation of an instance of a previously defined class can
 be done with the <code>make</code> procedure. This procedure takes
 one mandatory parameter which is the class of the instance which
 must be created and a list of optional arguments. Optional
@@ -129,7 +130,7 @@ newly created instance. For instance, the following form:</p><blockquote><table 
 </pre></td></tr>
 </tbody></table></blockquote>
 <p>creates a new <code>&lt;circle&gt;</code> object and binds it to the
-<code>c</code> Scheme variable.</p><a name="--index-entry-37941"></a><a name="--index-entry-37945"></a><a name="--index-entry-37949"></a><p>Accessing the slots of the newly created circle can be done
+<code>c</code> Scheme variable.</p><a name="--index-entry-37950"></a><a name="--index-entry-37954"></a><a name="--index-entry-37958"></a><p>Accessing the slots of the newly created circle can be done
 with the <code>slot-ref</code> and the <code>slot-set!</code>
 primitives. The <code>slot-set!</code> primitive permits to set the
 value of an object slot and <code>slot-ref</code> permits to get its
@@ -157,17 +158,17 @@ Slots are:
 </tbody></table></blockquote>
 <a name="Slot-Definition"></a>
 <h5 id="Slot-Definition"><font color="#8381de">8.2.1.3 Slot Definition</font></h5>
-<a name="slot-definition"></a><a name="--index-entry-37991"></a><p>When specifying a slot, a set of options can be given to
+<a name="slot-definition"></a><a name="--index-entry-38000"></a><p>When specifying a slot, a set of options can be given to
 the system.  Each option is specified with a keyword. For
-instance, </p><ul><li><a name="--index-entry-37996"></a><strong>:init-form</strong> can be used to supply a default
+instance, </p><ul><li><a name="--index-entry-38005"></a><strong>:init-form</strong> can be used to supply a default
 value for the slot.</li>
 <li><strong>:init-keyword</strong> can be used to specify the
 keyword used for initializing a slot.</li>
-<li><a name="--index-entry-38004"></a><strong>:getter</strong> can be used to define the name of the
+<li><a name="--index-entry-38013"></a><strong>:getter</strong> can be used to define the name of the
 slot getter</li>
-<li><a name="--index-entry-38010"></a><strong>:setter</strong> can be used to define the name of the
+<li><a name="--index-entry-38019"></a><strong>:setter</strong> can be used to define the name of the
 slot setter</li>
-</ul><a name="--index-entry-38017"></a><strong>:accessor</strong> can be used to define the name of the
+</ul><a name="--index-entry-38026"></a><strong>:accessor</strong> can be used to define the name of the
 slot accessor (see below)<p>To illustrate slot description, we redefine here the
 <code>&lt;point&gt;</code> class seen before. A new definition of this
 class could be:</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
@@ -194,7 +195,7 @@ defined by the system to read and write the <code>x</code> (resp.
 (get-y p2)        &#8658; 0
 </pre></td></tr>
 </tbody></table></blockquote>
-<a name="--index-entry-38086"></a><p>Accessors provide an uniform access for reading and writing an object slot.
+<a name="--index-entry-38095"></a><p>Accessors provide an uniform access for reading and writing an object slot.
 Writing a slot is done with an extended form of <code>set!</code>  which is
 close to the Common Lisp <code>setf</code> macro.  A slot accessor can be
 defined with the <code>:accessor</code> option in the slot
@@ -223,7 +224,7 @@ As a consequence, we have:</p><blockquote><table cellspacing="0" class="code" ce
 </tbody></table></blockquote>
 <a name="Virtual-Slots"></a>
 <h5 id="Virtual-Slots"><font color="#8381de">8.2.1.4 Virtual Slots</font></h5>
-<a name="--index-entry-38142"></a><a name="--index-entry-38146"></a><p>Suppose that we need a slot named <code>area</code> in circle
+<a name="--index-entry-38151"></a><a name="--index-entry-38155"></a><p>Suppose that we need a slot named <code>area</code> in circle
 objects which contain the area of the circle. One way to do this
 would be to add the new slot to the class definition and have an
 initialisation form for this slot which takes into account the
@@ -310,7 +311,7 @@ instance, </p><blockquote><table cellspacing="0" class="code" cellpadding="4" wi
 </tbody></table></blockquote>
 <p><strong>Note:</strong> The order of slots is not significant.</p><a name="Class-precedence-list"></a>
 <h5 id="Class-precedence-list"><font color="#8381de">8.2.2.2 Class precedence list</font></h5>
-<a name="--index-entry-38295"></a><p>A class may have more than one superclass.<a href="#fn--footnote-38303"><sup><small>1</small></sup></a>
+<a name="--index-entry-38304"></a><p>A class may have more than one superclass.<a href="#fn--footnote-38312"><sup><small>1</small></sup></a>
 
 With single inheritance (only one superclass), it is easy to
 order the super classes from most to least specific.  This is the
@@ -366,7 +367,7 @@ algorithm:</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tb
 <tr><td bgcolor="#eee8bf"><pre>(f d e a c b &lt;object&gt; &lt;top&gt;)
 </pre></td></tr>
 </tbody></table></blockquote>
-<a name="--index-entry-38364"></a><p>However, it is usually considered a bad idea for programmers
+<a name="--index-entry-38373"></a><p>However, it is usually considered a bad idea for programmers
 to rely on exactly what the order is.  If the order for some
 superclasses is important, it can be expressed directly in the
 class definition.  The precedence list of a class can be obtained
@@ -379,17 +380,17 @@ class.  For instance,</p><blockquote><table cellspacing="0" cellpadding="4" widt
   #[&lt;class&gt; &lt;top&gt; 80effa8])
 </pre></td></tr>
 </tbody></table></blockquote>
-<a name="--index-entry-38380"></a><p>However, this result is not too much readable; using the
+<a name="--index-entry-38389"></a><p>However, this result is not too much readable; using the
 function <code>class-name</code> yields a clearer result:</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="#eee8bf"><pre>(map class-name (class-precedence-list D))
   &#8658; (d a b <font color="#1919af"><strong>&lt;object&gt;</strong></font> <font color="#1919af"><strong>&lt;top&gt;</strong></font>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<a name="--index-entry-38402"></a><a name="Generic-function"></a>
+<a name="--index-entry-38411"></a><a name="Generic-function"></a>
 <h4 id="Generic-function"><font color="darkolivegreen">8.2.3 Generic function</font></h4>
 <a name="Generic-functions-and-methods"></a>
 <h5 id="Generic-functions-and-methods"><font color="#8381de">8.2.3.1 Generic functions and methods</font></h5>
-<a name="--index-entry-38406"></a><a name="--index-entry-38410"></a><p>Neither <span style="font-variant: small-caps">STklos</span> nor CLOS use the message passing mechanism
+<a name="--index-entry-38415"></a><a name="--index-entry-38419"></a><p>Neither <span style="font-variant: small-caps">STklos</span> nor CLOS use the message passing mechanism
 for methods as most Object Oriented languages do.  Instead, they
 use the notion of <em>generic function</em>.A generic function
 can be seen as a "<em>tanker</em>" of methods.  When the
@@ -406,7 +407,7 @@ are applicable (i.e.  the ones which filter on types which are
 order,</li>
 <li>calls the most specific method of this list (i.e.  the
 first of the list of sorted methods).</li>
-</ol><a name="--index-entry-38432"></a><a name="--index-entry-38436"></a><p>The definition of a generic function is done with the
+</ol><a name="--index-entry-38441"></a><a name="--index-entry-38445"></a><p>The definition of a generic function is done with the
 <code>define-generic</code> macro. Definition of a new method is
 done with the <code>define-method</code> macro.</p><p>Consider the following definitions:</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="#eee8bf"><pre>(<font color="#6959cf"><strong>define-generic</strong></font> M)
@@ -483,7 +484,7 @@ For instance:
 generic function if it has not been defined before.
 Consequently, most of the time, the <code>define-generic</code> is
 not needed.</li>
-</ol></p><a name="--index-entry-38569"></a><a name="--index-entry-38573"></a><a name="Next-method"></a>
+</ol></p><a name="--index-entry-38578"></a><a name="--index-entry-38582"></a><a name="Next-method"></a>
 <h5 id="Next-method"><font color="#8381de">8.2.3.2 Next-method</font></h5>
 <p>When a generic function is called, the list of applicable
 methods is built.  As mentioned before, the most specific method
@@ -510,7 +511,7 @@ applicable methods.  This is done by using the special form
 </tbody></table></blockquote>
 <a name="Standard--generic-functions"></a>
 <h5 id="Standard--generic-functions"><font color="#8381de">8.2.3.3 Standard  generic functions</font></h5>
-<a name="--index-entry-38614"></a><a name="--index-entry-38618"></a><p><strong>Printing objects</strong></p><p>When the Scheme primitives <code>write</code> or
+<a name="--index-entry-38623"></a><a name="--index-entry-38627"></a><p><strong>Printing objects</strong></p><p>When the Scheme primitives <code>write</code> or
 <code>display</code> are called with a parameter which is an object,
 the <code>write-object</code> or <code>display-object</code> generic
 functions are called with this object and the port to which the
@@ -546,7 +547,7 @@ prints the following text on the output port:</p><blockquote><table cellspacing=
 </tbody></table></blockquote>
 <p>Note here the usage of the "<code>#,</code>"  notation of <strong><a href="http://srfi.schemers.org/srfi-10/srfi-10.html">SRFI-10</a></strong>
      (<em>Sharp Comma External Form</em>)
-to "evaluate" the form when reading it<a href="#fn--footnote-38689"><sup><small>2</small></sup></a>.</p><p><strong>Comparing objects</strong></p><p>When objects are compared with the <code>eqv?</code>  or
+to "evaluate" the form when reading it<a href="#fn--footnote-38698"><sup><small>2</small></sup></a>.</p><p><strong>Comparing objects</strong></p><p>When objects are compared with the <code>eqv?</code>  or
 <code>equal?</code>  Scheme standard primitives, <span style="font-variant: small-caps">STklos</span>
 calls the <code>object-eqv?</code>  or <code>object-equal?</code> 
 generic functions.  This facility permits to define a
@@ -565,13 +566,13 @@ define the following method to compare points:</p><blockquote><table cellspacing
 <a name="Class-Definition"></a>
 <h4 id="Class-Definition"><font color="darkolivegreen">8.3.1 Class Definition</font></h4>
 <br><br><hr width='20%' size='2' align='left'>
-<a name="fn--footnote-38303"><sup><small>1</small></sup></a>: 
+<a name="fn--footnote-38312"><sup><small>1</small></sup></a>: 
 This section is an adaptation of Jeff Dalton's
 (J.Dalton&#x40;ed.ac.uk) "<em>Brief introduction to CLOS</em>"
 which can be found at the URL
 <a href="http://www.aiai.ed.ac.uk/~jeff/clos-guide.html">http://www.aiai.ed.ac.uk/~jeff/clos-guide.html</a>
 <br>
-<a name="fn--footnote-38689"><sup><small>2</small></sup></a>: We suppose here that 
+<a name="fn--footnote-38698"><sup><small>2</small></sup></a>: We suppose here that 
 we are in a context where <blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="#eee8bf"><pre>(define-reader-ctor 'make make)
 </pre></td></tr>
@@ -581,6 +582,6 @@ as already been evaluated
 <br>
 </td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-				     <a href="http://www.inria.fr/mimosa/fp/Skribe">Skribe</a>.<br />Last update <em>Wed Jun  6 22:53:06 2007</em></small>
+				     <a href="http://www.inria.fr/mimosa/fp/Skribe">Skribe</a>.<br />Last update <em>Tue Jun 26 11:12:28 2007</em></small>
 </body>
 </html>
