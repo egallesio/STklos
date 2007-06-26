@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "gmp-stklos.h"
 #include "gmp.h"
 #include "gmp-impl.h"
