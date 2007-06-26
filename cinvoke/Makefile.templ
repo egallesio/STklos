@@ -1,9 +1,9 @@
-all: lib.d test.d archspec
+all: lib.d archspec
 
 lib.d:
 	cd lib && $(MAKE)
-test.d: 
-	cd test && $(MAKE)
+#test.d: 
+#	cd test && $(MAKE)
 
 archspec: lib/cinvoke-archspec.h
 
@@ -23,6 +23,6 @@ uninstall:
 
 clean:
 	cd lib && $(MAKE) clean
-	cd test && $(MAKE) clean
+#	cd test && $(MAKE) clean
 
 distclean: clean

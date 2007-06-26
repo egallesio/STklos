@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 25-Jun-2007 13:58 (eg)
+# Last file update: 26-Jun-2007 12:19 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d @LURCDIR@
 
@@ -126,7 +126,7 @@ SUFFIXES = .stk .ostk .scm
 
 #======================================================================
 
-all: boot $(scheme_OBJS)
+all: $(scheme_OBJS)
 
 boot:	../src/boot.img 
 
