@@ -21,16 +21,18 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update:  7-Jun-2007 14:01 (eg)
+;;;; Last file update: 26-Jun-2007 23:31 (eg)
 ;;;;
 
 
 (define *%autoloads* '())
 (define %try-load-tmp '())   ;; Use a global when restoring environment
 
-
+(define *stklos-building* 	(getenv "STKLOS_BUILDING"))
 (define *path-separator*  	(if (eqv? (running-os) 'windows) ";" ":"))
-(define *load-suffixes*   	(list "ostk" "spi" "stk" "scm" "so"))
+(define *load-suffixes*   	(if *stklos-building*
+				    (list "spi" "stk" "scm")
+				    (list "ostk" "spi" "stk" "scm" "so")))
 (define *load-verbose*    	#f)
 (define *load-path*      	'()) ;; initialized  later 
 
@@ -296,11 +298,10 @@ doc>
 (define provided? 	#f)
 (define require/provide #f)
 
-(let ((provided '())
-      (stklos-building? (getenv "STKLOS_BUILDING")))
+(let ((provided '()))
   
   (set! %%require  (lambda (what lib-only?)
-		     (when stklos-building?
+		     (when *stklos-building*
 		       ;; When building STklos, require-library ==  require.
 		       ;; Otherwise, we need an already installed  STklos
 		       (set! lib-only? #f))

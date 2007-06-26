@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Jun-2007 12:19 (eg)
+# Last file update: 26-Jun-2007 23:33 (eg)
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -642,7 +642,7 @@ uninstall-am: uninstall-schemeDATA
 
 #======================================================================
 
-all: $(scheme_OBJS)
+all: boot $(scheme_OBJS)
 
 boot:	../src/boot.img 
 
