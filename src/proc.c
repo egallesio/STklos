@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 15-Jun-2007 12:15 (eg)
+ * Last file update: 28-Jun-2007 18:23 (eg)
  */
 
 #include "stklos.h"
@@ -141,9 +141,11 @@ DEFINE_PRIMITIVE("%procedure-name", procedure_name, subr1, (SCM obj))
     case tc_subr01:	
     case tc_subr12:
     case tc_subr23:
+    case tc_vsubr:
     case tc_apply:    return STk_Cstring2string(PRIMITIVE_NAME(obj));
-    case tc_vsubr:    return STk_ext_func_name(obj);
-    case tc_ext_func:  return STk_ext_func_name(obj);
+#ifdef HAVE_FFI
+    case tc_ext_func: return STk_ext_func_name(obj);
+#endif
     case tc_closure:  if (CLOSURE_NAME(obj) != STk_false)
 		         return STk_Cstring2string(SYMBOL_PNAME(CLOSURE_NAME(obj)));
                          /* NO BREAK */

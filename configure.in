@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 19-Jun-2007 12:07 (eg)
+dnl Last file update: 28-Jun-2007 18:37 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -384,23 +384,32 @@ fi
 #   *)       PCRETARGET="libpcre.la libpcreposix.la";;
 # esac
 
-## C/INVOKE
 
+
+dnl
+dnl FFI support 
+dnl
 AC_CHECK_PROG(PERLINT, [perl], "yes", "no")
 
-if test "$PERLINT" = "yes" ;then
-  # We have perl. We can try to configure C/invoke
+AC_ARG_ENABLE(ffi, 
+      [  --disable-ffi			disable FFI support],
+      USER_FFI="no", USER_FFI="yes")
+
+if test "$PERLINT" = "yes" -a "$USER_FFI" = "yes" ;then
+  # We have perl and user did't disable FFI. We can try to configure C/invoke
   echo "Configuring C/Invoke"
   (cd cinvoke; perl configure.pl --prefix=$prefix)
   LIBS="$LIBS ../cinvoke/lib/libcinvoke.a"
   CFLAGS="$CFLAGS -I../cinvoke/lib"
   CINVOKE="cinvoke"
+  HAVE_FFI="#define HAVE_FFI 1"
+  FFI="yes"
 else
-  echo "No perl interpreter. Disabling FFI support"
+  echo "Disabling FFI support"
   CINVOKE=""
+  HAVE_FFI=""
+  FFI="no"
 fi
-FFI=$PERLINT
-
 
 
 dnl ======================================================================
@@ -509,6 +518,7 @@ dnl Output files
 AC_SUBST(STKCFLAGS)
 AC_SUBST(VERSION)
 AC_SUBST(HAVE_DLOPEN)
+AC_SUBST(HAVE_FFI)
 AC_SUBST(OS_FLAVOUR)
 AC_SUBST(GC)
 AC_SUBST(GCLIB)

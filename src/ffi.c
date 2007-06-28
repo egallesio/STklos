@@ -21,11 +21,13 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update: 25-Jun-2007 15:21 (eg)
+ * Last file update: 28-Jun-2007 18:26 (eg)
  */
 
 #include <stklos.h>
-#include <cinvoke.h>
+
+#ifdef HAVE_FFI
+#  include <cinvoke.h>
 
 /* ------------------------------ *\
  * STklos C external functions
@@ -439,7 +441,7 @@ static int exec_callback(SCM callback, ...)
 	param.ulvalue = va_arg(ap, unsigned long); break;
       case 8:						/* lonlong */
       case 9:						/* ulonlong */
-	STk_debug("long long in a callback are not implemented yet");
+	STk_error("long long in a callback are not implemented yet");
       case 10:						/* float */
 	param.fvalue = (float) va_arg(ap, double); break;
       case 11:						/* double */
@@ -454,7 +456,7 @@ static int exec_callback(SCM callback, ...)
       case 16:						/* int16 */
       case 17:						/* int32 */
       case 18:						/* int64 */
-	STk_debug("argument of type ~S in callback are not implemented yet",
+	STk_error("argument of type ~S in callback are not implemented yet",
 		  CAR(Cargs));
       case 19: 						/* obj */
 	param.pvalue = va_arg(ap, void *); break;
@@ -487,6 +489,23 @@ DEFINE_PRIMITIVE("%exec-callback-address", exec_cb_addr, subr0, (void))
   return z;
 }
 
+#else /* HAVE_FFI */
+static void error_no_ffi(void)
+{
+  STk_error("current system does not support FFI");
+}
+
+
+DEFINE_PRIMITIVE("%make-ext-func", make_ext_func, subr4, 
+		 (SCM p1, SCM p2, SCM p3, SCM p4))
+{ error_no_ffi(); return STk_void;}
+
+DEFINE_PRIMITIVE("make-callback", make_callback, subr3, (SCM p1, SCM p2, SCM p3))
+{ error_no_ffi(); return STk_void;}
+
+DEFINE_PRIMITIVE("%exec-callback-address", exec_cb_addr, subr0, (void))
+{ error_no_ffi(); return STk_void;}
+#endif
 
 /* ======================================================================
  *  	INIT  ...

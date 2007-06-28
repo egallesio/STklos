@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 21-Jun-2007 16:51 (eg)
+ * Last file update: 28-Jun-2007 18:21 (eg)
  *
  */
 #include <ctype.h>
@@ -213,6 +213,7 @@ void STk_print(SCM exp, SCM port, int mode)
       STk_puts(PRIMITIVE_NAME(exp), port);
       STk_putc(']', port);
       return;
+#ifdef HAVE_FFI
     case tc_ext_func:
       STk_puts("#[external-func ", port);
       STk_puts(STRING_CHARS(STk_ext_func_name(exp)), port);
@@ -222,6 +223,7 @@ void STk_print(SCM exp, SCM port, int mode)
       sprintf(buffer, "#[callback %lx]", (unsigned long) exp);
       STk_puts(buffer, port);
       return;
+#endif
     default:
       {
 	struct extended_type_descr *xdescr = BOXED_XTYPE(exp);

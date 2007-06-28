@@ -82,6 +82,9 @@ typedef enum _cinv_callconv_t {
 #ifdef ARCH_GCC_SPARC_UNIX
 #include "arch/gcc_sparc_unix.h"
 #endif
+#ifdef ARCH_GCC_X86_OSX
+#include "arch/gcc_x86_osx.h"
+#endif
 #ifndef CINVOKE_BUILD
 #include "cinvoke-archspec.h"
 #endif

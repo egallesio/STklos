@@ -704,6 +704,7 @@ LIBOBJS
 PERLINT
 STKCFLAGS
 HAVE_DLOPEN
+HAVE_FFI
 OS_FLAVOUR
 GC
 GCLIB
@@ -1332,6 +1333,7 @@ Optional Features:
   --enable-ldap			enable ldap
   --disable-gtk			disable gtk support
   --disable-gnome		disable gnome support
+  --disable-ffi			disable FFI support
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -6778,7 +6780,7 @@ fi
 #   *)       PCRETARGET="libpcre.la libpcreposix.la";;
 # esac
 
-## C/INVOKE
+
 
 # Extract the first word of "perl", so it can be a program name with args.
 set dummy perl; ac_word=$2
@@ -6819,19 +6821,29 @@ fi
 
 
 
-if test "$PERLINT" = "yes" ;then
-  # We have perl. We can try to configure C/invoke
+# Check whether --enable-ffi was given.
+if test "${enable_ffi+set}" = set; then
+  enableval=$enable_ffi; USER_FFI="no"
+else
+  USER_FFI="yes"
+fi
+
+
+if test "$PERLINT" = "yes" -a "$USER_FFI" = "yes" ;then
+  # We have perl and user did't disable FFI. We can try to configure C/invoke
   echo "Configuring C/Invoke"
   (cd cinvoke; perl configure.pl --prefix=$prefix)
   LIBS="$LIBS ../cinvoke/lib/libcinvoke.a"
   CFLAGS="$CFLAGS -I../cinvoke/lib"
   CINVOKE="cinvoke"
+  HAVE_FFI="#define HAVE_FFI 1"
+  FFI="yes"
 else
-  echo "No perl interpreter. Disabling FFI support"
+  echo "Disabling FFI support"
   CINVOKE=""
+  HAVE_FFI=""
+  FFI="no"
 fi
-FFI=$PERLINT
-
 
 
 
@@ -6921,6 +6933,7 @@ LURCDIR=""
 if test "$THREADS" = "lurc" ;then
    LURCDIR=Lurc.d
 fi
+
 
 
 
@@ -7750,12 +7763,12 @@ LIBOBJS!$LIBOBJS$ac_delim
 PERLINT!$PERLINT$ac_delim
 STKCFLAGS!$STKCFLAGS$ac_delim
 HAVE_DLOPEN!$HAVE_DLOPEN$ac_delim
+HAVE_FFI!$HAVE_FFI$ac_delim
 OS_FLAVOUR!$OS_FLAVOUR$ac_delim
 GC!$GC$ac_delim
 GCLIB!$GCLIB$ac_delim
 GCINC!$GCINC$ac_delim
 GMP!$GMP$ac_delim
-GMPLIB!$GMPLIB$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -7797,6 +7810,7 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+GMPLIB!$GMPLIB$ac_delim
 GMPINC!$GMPINC$ac_delim
 PREFIX!$PREFIX$ac_delim
 SCMDIR!$SCMDIR$ac_delim
@@ -7832,7 +7846,7 @@ CINVOKE!$CINVOKE$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 33; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 34; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
