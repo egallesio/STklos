@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 16:23 (eg)
-;;;; Last file update:  6-Jun-2007 18:05 (eg)
+;;;; Last file update: 29-Jun-2007 18:05 (eg)
 ;;;;
 
 
@@ -38,7 +38,8 @@
 (define stklos-pkg-cache-directory
   (make-parameter (make-path (stklos-pkg-directory) "cache")))
 
-
+(define (make-command)
+  (make-parameter (or (getenv "MAKE") "make")))
 
 (define stklos-pkg-extract-dir
   (make-parameter (getcwd)))

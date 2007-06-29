@@ -21,8 +21,9 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Jan-2007 12:10 (eg)
-;;;; Last file update: 22-Jun-2007 14:13 (eg)
+;;;; Last file update: 29-Jun-2007 18:05 (eg)
 ;;;;
+
 
 ;; ----------------------------------------------------------------------
 ;; 	write-extract-makefile ...
@@ -43,7 +44,7 @@
 	   ;; We have a configure in a tuning
 	   (set! objs (cons (format "~a.$(SO)" target) objs))
 	   (printf "~a.$(SO):\n" target)
-	   (printf "\t(cd ~a; ./configure; make)\n\n" tunedir))
+	   (printf "\t(cd ~a; ./configure; ~a)\n\n" tunedir (make-command)))
 	(else
 	   ;; A simple package
 	   (set! objs (cons (format "~a.ostk" target) objs))

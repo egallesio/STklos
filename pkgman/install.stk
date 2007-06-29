@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 30-May-2007 11:42 (eg)
-;;;; Last file update: 22-Jun-2007 14:13 (eg)
+;;;; Last file update: 29-Jun-2007 18:05 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -62,4 +62,4 @@
 ;; 	install-packages ...
 ;; ----------------------------------------------------------------------
 (define (install-package name dir)
-  (system (format "cd ~a; make all install" dir)))
+  (system (format "cd ~a; ~ all install" dir (make-command))))
