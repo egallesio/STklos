@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 14-Mar-2007 14:56 (eg)
+ * Last file update: 29-Jun-2007 22:01 (eg)
  */
 
 #include "stklos.h"
@@ -141,17 +141,21 @@ DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
  * GC stuff
  * 
 \*===========================================================================*/
-#ifndef STK_DEBUG
-static void ignore_GC_warning(char *msg, GC_word arg) { return; }
+static void stklos_GC_warning(char *msg, GC_word arg) 
+{
+#ifdef STK_DEBUG
+  fprintf(stderr, msg, arg);
+  STk_debug("arg=~S", (SCM) arg);
+#else
+  /* No warning when on production. Is this reasonable? */
 #endif
+}
+
 
 void STk_gc_init(void)
 {
   GC_init();
-#ifndef STK_DEBUG  
-  /* No warning when on production. Is this reasonable? */
-  GC_set_warn_proc(ignore_GC_warning);
-#endif
+  GC_set_warn_proc(stklos_GC_warning);
 }
 
 

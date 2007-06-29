@@ -95,6 +95,7 @@ sub find_jni {
 sub determine_platform {
 	my $processor;
 	
+#	my $gccout = `gcc -dumpmachine`;
 	my $gccout = `uname -m`;
 	if ($? != 0) { die "error executing gcc -dumpmachine: $!"; }
 	if ($gccout =~ m/i[3456]86/) {

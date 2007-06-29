@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 29-Jun-2007 18:12 (eg)
+ * Last file update: 29-Jun-2007 22:18 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -37,7 +37,7 @@
 #define STK_IOLBF	(1 << 1) /* Line buffered */
 #define STK_IONBF	(1 << 2) /* No buffered (unused for now) */
 #define STK_IOEOF	(1 << 3) /* EOF encountered on this file */
-
+#define STK_IOREAD	(1 << 4) /* File is opened in read */
 
 struct fstream {
   unsigned char *base;  /* buffer start */
@@ -53,7 +53,6 @@ struct fstream {
   void *user_data;
   int (*low_read)(struct fstream *f, void *buf, int count);
   int (*low_write)(struct fstream *f, void *buf, int count);
-  SCM backptr;
 };
 
 
@@ -70,4 +69,3 @@ struct fstream {
 #define PORT_USERDATA(x)	(((struct fstream *) (x))->user_data)
 #define PORT_LOWREAD(x)		(((struct fstream *) (x))->low_read)
 #define PORT_LOWWRITE(x)	(((struct fstream *) (x))->low_write)
-#define PORT_BACKPTR(x)		(((struct fstream *) (x))->backptr)

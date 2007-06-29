@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 29-Jun-2007 18:36 (eg)
+ * Last file update: 29-Jun-2007 22:27 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -164,15 +164,16 @@ static int flush_buffer(struct fstream *f)
 {
   int n, ret;
 
-  if (IPORTP(PORT_BACKPTR(f))) /* open on RDONLY */ return 0;
-
-  n = PORT_CNT(f);
-  /* Write buffer */
-  if (PORT_USERDATA(f))
-    ret = PORT_LOWWRITE(f)(f, PORT_BASE(f), n);
-  else 
-    ret = write(PORT_FD(f), PORT_BASE(f), n);
-
+  if (PORT_STREAM_FLAGS(f) & STK_IOREAD) {
+    ret = 0; /* FIXME: don't return. See why */
+  } else {
+    n = PORT_CNT(f);
+    /* Write buffer */
+    if (PORT_USERDATA(f))
+      ret = PORT_LOWWRITE(f)(f, PORT_BASE(f), n);
+    else 
+      ret = write(PORT_FD(f), PORT_BASE(f), n);
+  }
   /* Update structure */
   PORT_CNT(f) = 0;
   PORT_PTR(f) = PORT_BASE(f);
@@ -390,8 +391,9 @@ static void fport_print(SCM obj, SCM port) 	/* Generic printing of file ports */
 
 static void fport_finalizer(struct port_obj *port)
 {
-  /* Close the associated stream */
-  STk_close((SCM) port);
+  if (!PORT_IS_CLOSEDP(port))
+    /* Close the associated stream */
+    STk_close((SCM) port);
 }
 
 
@@ -412,6 +414,9 @@ make_fport(char *fname, FILE *f, int flags)
     n    = OTHER_BUFSIZE;
     mode = STK_IOFBF;
   }
+  
+  /* keep the indication that file is opened in read in the steam part */
+  if (flags & (PORT_READ | PORT_RW)) mode |= STK_IOREAD;
 
   /* Initialize the stream part */
   PORT_BASE(fs)    	 = STk_must_malloc_atomic(n);
@@ -424,7 +429,7 @@ make_fport(char *fname, FILE *f, int flags)
   PORT_REVENT(fs)	 = STk_false;
   PORT_WEVENT(fs)	 = STk_false;
   PORT_IDLE(fs)		 = STk_nil;
-  
+
   /* Initialize now the port itsef */
   NEWCELL(res, port);
 
@@ -450,9 +455,6 @@ make_fport(char *fname, FILE *f, int flags)
   PORT_BREAD(res)	= Fread;
   PORT_BWRITE(res)	= Fwrite;
   PORT_SEEK(res)	= Fseek;
-
-  /* Add the back pointer */
-  PORT_BACKPTR(fs)	= res;
   
   /* Add a finalizer on file to close it when the GC frees it */
   STk_register_finalizer(res, fport_finalizer);
