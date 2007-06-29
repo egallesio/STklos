@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 14-May-2007 12:02 (eg)
+ * Last file update: 29-Jun-2007 18:36 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -163,6 +163,8 @@ static void fill_buffer(struct fstream *f)
 static int flush_buffer(struct fstream *f)
 {
   int n, ret;
+
+  if (IPORTP(PORT_BACKPTR(f))) /* open on RDONLY */ return 0;
 
   n = PORT_CNT(f);
   /* Write buffer */
@@ -422,7 +424,7 @@ make_fport(char *fname, FILE *f, int flags)
   PORT_REVENT(fs)	 = STk_false;
   PORT_WEVENT(fs)	 = STk_false;
   PORT_IDLE(fs)		 = STk_nil;
-
+  
   /* Initialize now the port itsef */
   NEWCELL(res, port);
 
@@ -449,6 +451,9 @@ make_fport(char *fname, FILE *f, int flags)
   PORT_BWRITE(res)	= Fwrite;
   PORT_SEEK(res)	= Fseek;
 
+  /* Add the back pointer */
+  PORT_BACKPTR(fs)	= res;
+  
   /* Add a finalizer on file to close it when the GC frees it */
   STk_register_finalizer(res, fport_finalizer);
 

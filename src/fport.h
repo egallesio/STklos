@@ -1,7 +1,7 @@
 /*
  * f p o r t . h				-- File ports
  *
- * Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 24-May-2005 20:21 (eg)
+ * Last file update: 29-Jun-2007 18:12 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -53,6 +53,7 @@ struct fstream {
   void *user_data;
   int (*low_read)(struct fstream *f, void *buf, int count);
   int (*low_write)(struct fstream *f, void *buf, int count);
+  SCM backptr;
 };
 
 
@@ -69,3 +70,4 @@ struct fstream {
 #define PORT_USERDATA(x)	(((struct fstream *) (x))->user_data)
 #define PORT_LOWREAD(x)		(((struct fstream *) (x))->low_read)
 #define PORT_LOWWRITE(x)	(((struct fstream *) (x))->low_write)
+#define PORT_BACKPTR(x)		(((struct fstream *) (x))->backptr)
