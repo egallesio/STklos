@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Jan-2007 12:10 (eg)
-;;;; Last file update: 29-Jun-2007 18:05 (eg)
+;;;; Last file update: 30-Jun-2007 12:16 (eg)
 ;;;;
 
 
@@ -44,7 +44,7 @@
 	   ;; We have a configure in a tuning
 	   (set! objs (cons (format "~a.$(SO)" target) objs))
 	   (printf "~a.$(SO):\n" target)
-	   (printf "\t(cd ~a; ./configure; ~a)\n\n" tunedir (make-command)))
+	   (printf "\t(cd ~a; ./configure; $(MAKE))\n\n" tunedir))
 	(else
 	   ;; A simple package
 	   (set! objs (cons (format "~a.ostk" target) objs))
@@ -114,6 +114,7 @@
 	  (display 
 	   (sed make
 		`(("@OBJS@"    ,(flat-string (reverse objs)))
+		  ("@MAKE@"    ,(make-command))
 		  ("@SO@"      ,(exec "stklos-config --shared-suffix"))
 		  ("@SCOMP@"   ,(exec "stklos-config --compile"))
 		  ("@SLINK@"   ,(exec "stklos-config --link")))))
