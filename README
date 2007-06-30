@@ -1,6 +1,6 @@
 								-*- outline -*-	
 
-		      S T k l o s   ( v e r s i o n   0 . 9 5 )
+		      S T k l o s   ( v e r s i o n   0 . 9 6 )
 		      =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 				   Erick Gallesio
@@ -55,10 +55,10 @@ SRFIs. Any help on implementing other SRFIs on STklos is welcome.
 * Supported architectures
 
 STklos is known to work on the following architectures:
-	- Linux 2.2/ 2.4 (i386/gcc)
+	- Linux 2.2/ 2.4 / 2.6 (i386/gcc)
 	- Linux 2.4 (itanium/gcc)
 	- Linux 2.2 (Alpha/egcs)
-	- FreeBSD 4.2 (i386/gcc)
+	- FreeBSD 6.2 (i386/gcc)
 	- Win XP (i386/gcc(Cygwin)) 
 	- Mac OS-X (ppc/apple gcc & intel/apple gcc)
 	- Solaris 8 (ultrasparc/gcc)

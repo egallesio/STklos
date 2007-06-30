@@ -1,3 +1,116 @@
+
+2007-06-30  Erick Gallesio  <eg@essi.fr>
+
+	* STklos 0.96 Release
+	=====================
+
+2007-06-29  Erick Gallesio  <eg@essi.fr>
+
+	* src/fport.c, src/fport.h:
+	Fixed a bug which appeared on FreeBSD when flushing an input pipe
+	port.
+	[7a8f008007e2]
+
+	* pkgman/etc/Makefile-scmpkg.tmpl, pkgman/extract.stk,
+	pkgman/install.stk, pkgman/misc.stk, pkgman/params.stk:
+	stklos-pkg can be parameterized to use another make command
+	[66a370ea418f]
+
+2007-06-28  Erick Gallesio  <eg@essi.fr>
+
+	* configure:
+	Added option --disable-ffi to configure
+	[6f3ae0427465]
+
+2007-06-27  Erick Gallesio  <eg@essi.fr>
+
+	* src/boot.c, src/boot.img:
+	Preparing version stklos-0.96-beta3
+	[af3054e8f208]
+
+	* lib/Makefile.am, lib/Makefile.in, lib/load.stk, src/boot.c, src/boot.img:
+	Fixed problems with make -j 
+	[8c4a9d9f4087]
+
+2007-06-26  Erick Gallesio  <eg@essi.fr>
+
+	* cinvoke/Makefile.templ, cinvoke/README.STklos,
+	cinvoke/test/Makefile.templ, cinvoke/test/lib.c,
+	cinvoke/test/runtests.c, cinvoke/test/test.vcproj,
+	cinvoke/test/testlib.vcproj, lib/Makefile.am, lib/Makefile.in:
+	Removed the test directory from C/Invoke
+	[c9cd304f1d3e]
+
+2007-06-25  Erick Gallesio  <eg@essi.fr>
+
+	* gmp/configure.in:
+	Fixed support for x64 thanks to Pierre-Alexandre Fournier
+	[59822fbb9d1b]
+
+
+2007-06-22  Erick Gallesio  <eg@essi.fr>
+
+	* pkgman/extract.stk, pkgman/install.stk, pkgman/misc.stk, src/system.c:
+	DIRECTORY-FILES doesn't return "." and ".." anymore'
+	[7de14e44a131]
+
+	* AUTHORS, Makefile.am, Makefile.in, PACKAGES-USED,
+	cinvoke/LICENSE.txt, cinvoke/Makefile.templ, cinvoke/PORTING.txt,
+	cinvoke/README.STklos, cinvoke/README.txt, cinvoke/configure.pl,
+	cinvoke/lib/Makefile.templ, cinvoke/lib/arch/cl_x86_win.c,
+	cinvoke/lib/arch/cl_x86_win.h, cinvoke/lib/arch/empty_empty_empty.c,
+	cinvoke/lib/arch/empty_empty_empty.h,
+	cinvoke/lib/arch/gcc_ppc_osx.c, cinvoke/lib/arch/gcc_ppc_osx.h,
+	cinvoke/lib/arch/gcc_sparc_unix.c,
+	cinvoke/lib/arch/gcc_sparc_unix.h, cinvoke/lib/arch/gcc_x64_unix.c,
+	cinvoke/lib/arch/gcc_x64_unix.h, cinvoke/lib/arch/gcc_x86_unix.c,
+	cinvoke/lib/arch/gcc_x86_unix.h, cinvoke/lib/cinvoke-arch.h,
+	cinvoke/lib/cinvoke-dll.vcproj, cinvoke/lib/cinvoke-private.h,
+	cinvoke/lib/cinvoke.c, cinvoke/lib/cinvoke.h,
+	cinvoke/lib/cinvoke.vcproj, cinvoke/lib/hashtable.c,
+	cinvoke/lib/hashtable.h, cinvoke/lib/structure.c,
+	cinvoke/test/Makefile.templ, cinvoke/test/lib.c,
+	cinvoke/test/runtests, cinvoke/test/runtests.c,
+	cinvoke/test/test.vcproj, cinvoke/test/testlib.vcproj, configure,
+	configure.in, doc/Makefile.in, examples/Makefile.in,
+	examples/images/Makefile.in, extensions/Makefile.in,
+	gtklos/Makefile.in, lib/Lalr.d/Makefile.in, lib/Lurc.d/Makefile.in,
+	lib/Makefile.in, lib/Match.d/Makefile.in, lib/SILex.d/Makefile.in,
+	lib/ScmPkg.d/Makefile.in, lib/ffi.stk, pkgman/Makefile.in,
+	src/Makefile.am, src/Makefile.in, src/boolean.c, src/ffi.c,
+	src/print.c, src/stklos.h, tests/Makefile.in, utils/Makefile.in:
+	Added cinvoke lib and some FFI refinements
+	[6a0ccd813995]
+
+2007-06-15  Erick Gallesio  <eg@essi.fr>
+
+	* configure, configure.in, lib/ffi.stk, lib/repl.stk,
+	pkgman/extract.stk, src/Makefile.am, src/Makefile.in, src/boot.c,
+	src/boot.img, src/dynload.c, src/ffi.c, src/lib.c, src/print.c,
+	src/proc.c, src/stklos.h, src/vm.c:
+	Starting integration of FFI
+	[15120f6db46c]
+
+2007-06-13  Erick Gallesio  <eg@essi.fr>
+
+	* doc/stklos-config.1.in, src/boot.c, utils/stklos-config.in:
+	Added the --{c,ld}flags option to stklos-config
+	[955437861052]
+
+2007-06-09  Erick Gallesio  <eg@essi.fr>
+
+	* src/boot.c, utils/stklos-config.in:
+	Fixed a problem with /bin/sh which are not zsh or bash
+	[9a7207fe268f]
+
+2007-06-08  Erick Gallesio  <eg@essi.fr>
+
+	* ChangeLog, lib/http.stk, pkgman/add.stk:
+	Fixed description/authors field when adding a package to the
+	repository
+	[b566bb815fba]
+
+
 2007-06-07  Erick Gallesio  <eg@essi.fr>
 
 	STklos 0.95 release

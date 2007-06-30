@@ -4,6 +4,12 @@
 				| NEWS |
 				+======+
 
+* version 0.96 (2007 06 30)
+This release introduces a simple FFI (Foreign Function Interface).
+
+    * Better support for FreeBSD
+    * Fixed a bug when using the -j option of make during bootstrap
+    * Fixed several problems with ScmPkg packages installation
 
 * version 0.95 (2007 06 08)
 This is a major version introducing support for the ScmPkg source packaging system.
