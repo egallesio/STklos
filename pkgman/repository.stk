@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update:  6-Jun-2007 22:57 (eg)
+;;;; Last file update:  2-Jul-2007 13:57 (eg)
 ;;;;
 
 
@@ -231,6 +231,25 @@
 	  (cache-package-tarball package path (tuning-url tuning)
 				 (tuning-md5 tuning) "stklos"))))
     pkg))
+
+;; ----------------------------------------------------------------------
+;; 	download-package-only ...
+;; ----------------------------------------------------------------------
+(define (download-package-only package)
+  
+  (define (cp from dir)
+    (when (> (stklos-pkg-verbosity) 0)
+      (eprintf "Copying ~S in directory ~S\n" (basename from) dir))
+    (copy-file from (make-path dir (basename from))))
+  
+  (let* ((pkg    (download-package package))
+	 (dir    (stklos-pkg-extract-dir))
+	 (tuning (package-tuning pkg)))
+    ;; Copy main tarball
+    (cp (package-path pkg) dir)
+    ;; Copy (eventually) tuning
+    (when tuning
+      (cp (tuning-path tuning) dir))))
 
 ;; ----------------------------------------------------------------------
 ;; 	cache-package-tarball ...

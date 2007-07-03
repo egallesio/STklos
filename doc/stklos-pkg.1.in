@@ -77,6 +77,11 @@ needed.
 .IP "--add=package| -a package"
 adds the given package to the repository. 
 
+.IP "--download=package"
+download the tarball associated to given package and copy it in the
+current directory or the directory specified by the "--directory"
+option.
+
 .IP "--fill-cache" 
 downloads all the package which are available on the server(s). This
 can be used for copying all remote packages, when the net connection

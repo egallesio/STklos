@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update:  7-Jun-2007 11:41 (eg)
+;;;; Last file update:  2-Jul-2007 13:58 (eg)
 ;;;;
 
 (include "../lib/http.stk")
@@ -66,6 +66,8 @@
        (("add" :alternate "a" :arg sb
 	 :help "Add <sb> pkgball to the local repository")
 	(set! actions (cons (list 'add sb) actions)))
+       (("download" :arg pkg :help "download <pkg>")
+	 (set! actions (cons (list 'download pkg) actions)))
        (("fill-cache" :help "fill cache with available distant packages")
 	(set! actions (cons 'fill-cache actions)))
        (("clear-cache" :help "delete packages present in cache")
@@ -84,7 +86,7 @@
        
        "Misc"
        (("directory" :arg dir :alternate "C"
-	 :help "Change to directory <dir> when extracting")
+	 :help "Change to directory <dir> (extract/download)")
 	(stklos-pkg-extract-dir dir))
        (("verbose" :alternate "v" :help "be verbose (can be cumulated)")
 	(stklos-pkg-verbosity (+ (stklos-pkg-verbosity) 1)))
@@ -174,11 +176,15 @@
 	     (exit (find-extract-and-test-package (cadar actions)
 						  (temporary-file-name))))
 	  ((install)
-	   (exit (find-extract-and-install-package (cadar actions)
-						   (temporary-file-name))))
+	     (exit (find-extract-and-install-package (cadar actions)
+						     `(temporary-file-name))))
+	  ((download)
+	     (download-package-only (cadar actions))
+	     (exit 0))	  
+	  
 	  ((package-deps)
-	     (for-each (lambda (x) (printf "~a\n" x))
-		       (package-deps* (cadar actions))))
+	   (for-each (lambda (x) (printf "~a\n" x))
+		     (package-deps* (cadar actions))))
 	  ((add)
 	   (local-description-add!(cadar actions))
 	   (exit 0))
