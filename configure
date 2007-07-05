@@ -6852,6 +6852,7 @@ eval `CC=$CC /bin/sh ./utils/shlib-options`
 
 case $OS in
   SUNOS)
+    CFLAGS="$CFLAGS -DSOLARIS";
     LIBS="$LIBS -lsocket -lrt -lnsl -lpthread" ;;
   UNKNOWN)
     echo ""
