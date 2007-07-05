@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  6-Jun-2007 18:56 (eg)
+ * Last file update:  4-Jul-2007 12:36 (eg)
  *
  */
 
@@ -839,7 +839,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
         case '~': STk_putc('~', port);
                   break;
         default:  STk_putc('~',  port);
-	  	  STk_putc(*p, port);
+	  	  if (*p) STk_putc(*p, port);
       }
       prev_char = '?';
     } else {
