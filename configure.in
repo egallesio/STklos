@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 28-Jun-2007 18:37 (eg)
+dnl Last file update:  5-Jul-2007 10:42 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -422,6 +422,7 @@ eval `CC=$CC /bin/sh ./utils/shlib-options`
 
 case $OS in
   SUNOS) 
+    CFLAGS="$CFLAGS -DSOLARIS";
     LIBS="$LIBS -lsocket -lrt -lnsl -lpthread" ;;
   UNKNOWN)
     echo ""

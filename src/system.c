@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 22-Jun-2007 14:13 (eg)
+ * Last file update:  4-Jul-2007 11:07 (eg)
  */
 
 #include <unistd.h>
@@ -1053,17 +1053,22 @@ DEFINE_PRIMITIVE("setenv!", setenv, subr2, (SCM var, SCM value))
 }
 /*
 <doc EXT unsetenv!
- * (setenv! var)
+ * (unsetenv! var)
  *
- * Unsets the environment variable |var|. |Var|   must be a strings. 
+ * Unsets the environment variable |var|. |Var| must be a string. 
  * The result of |unsetenv!| is ,(emph "void").
 doc>
  */
 DEFINE_PRIMITIVE("unsetenv!", unsetenv, subr1, (SCM var))
 {
+#ifndef SOLARIS
   if (!STRINGP(var)) error_bad_string(var);
   unsetenv(STRING_CHARS(var));
-  return STk_void;
+  return STk_void;  
+#else
+  /* not exactly the same since getenv will not return #f after that */
+  return STk_setenv(var, STk_Cstring2string(""));
+#endif
 }
 
 /*
