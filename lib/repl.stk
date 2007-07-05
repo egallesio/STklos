@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update: 30-Jun-2007 12:02 (eg)
+;;;; Last file update:  4-Jul-2007 15:11 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything 
@@ -31,6 +31,7 @@
 
 
 (define-module REPL
+  (import SCHEME)
   (export main-repl repl repl-display-prompt main-repl-hook)
 
 ;;; In module REPL

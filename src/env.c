@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 13-Apr-2007 11:09 (eg)
+ * Last file update:  4-Jul-2007 14:50 (eg)
  */
 
 #include "stklos.h"
@@ -519,6 +519,9 @@ int STk_late_init_env(void)
   MODULE_NAME(STk_STklos_module) = STk_intern("stklos");
   MODULE_IMPORTS(STk_STklos_module) = LIST1(STk_STklos_module);
 
+  /* Create the SCHEME module */
+  STk_makemodule(STk_intern("SCHEME"));
+  
   /* ==== Undocumented primitives ==== */
   ADD_PRIMITIVE(create_module);
   ADD_PRIMITIVE(select_module);

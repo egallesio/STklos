@@ -31,7 +31,7 @@
 ;;; by Eugene Kohlbecker and in R4RS Appendix. 
 ;;;
 ;;;
-;;; Last file update:  1-Jun-2007 10:27 (eg)
+;;; Last file update:  4-Jul-2007 15:15 (eg)
 
 #|
 			STklos Implementation Notes
@@ -119,7 +119,8 @@ doc>
 |#
 
 (define-module MBE
-
+  (import SCHEME)
+  
   (define (%not-implemented name)
     (error name
        "cannot be used here. You must load the file \"full-syntax\" to access it"))

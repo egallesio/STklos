@@ -21,10 +21,11 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  6-Jun-2007 09:11 (eg)
+;;;; Last file update:  4-Jul-2007 15:12 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
+  (import SCHEME)
   (export eval
 	  disassemble
 	  compiler:time-display

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 25-Jun-2007 13:57 (eg)
+;;;; Last file update:  4-Jul-2007 14:53 (eg)
 ;;;;
 
 (include "runtime.stk")	; Definition necessary for the bootstrap
@@ -175,8 +175,7 @@
 ;;; can import this module which will be visible before the STklos
 ;;; module. Note that this is only partially true since bindings
 ;;; in SCHEME module are mutable
-
-(define-module SCHEME)
+;;; Note that module SCHEME was already created before bootstrap
 
 (let ((STklos (find-module 'STklos))
       (Scheme (find-module 'SCHEME)))

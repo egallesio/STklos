@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update: 21-Apr-2007 20:15 (eg)
+;;;; Last file update:  4-Jul-2007 15:14 (eg)
 
 
 #|
@@ -34,6 +34,7 @@
 |#
 
 (define-module STKLOS-OBJECT
+  (import SCHEME)
   (export				  ; Define the exported symbols of this file
     find-class is-a?
     ensure-metaclass ensure-metaclass-with-supers
