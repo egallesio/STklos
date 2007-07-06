@@ -1,7 +1,7 @@
 /*
  * struct.h			-- Low level support for structures
  * 
- * Copyright © 2004-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 12-May-2004 17:26 (eg)
- * Last file update: 20-Dec-2006 11:04 (eg)
+ * Last file update:  6-Jul-2007 17:17 (eg)
  */
 
 /**** Structure types ****/
@@ -60,6 +60,7 @@ EXTERN_PRIMITIVE("make-struct-type", make_struct_type, subr3,
 EXTERN_PRIMITIVE("struct-type-slots", st_slots, subr1, (SCM obj));
 EXTERN_PRIMITIVE("struct-set!", struct_set, subr3, (SCM s, SCM slot, SCM val));
 EXTERN_PRIMITIVE("make-struct", make_struct, vsubr, (int argc, SCM *argv));
+EXTERN_PRIMITIVE("struct->list", struct2list, subr1, (SCM s));
 
 SCM STk_int_struct_ref(SCM s, SCM slot);
 SCM STk_int_struct_set(SCM s, SCM slot, SCM val);

@@ -22,11 +22,12 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 21-Jun-2007 16:27 (eg)
+ * Last file update:  6-Jul-2007 17:19 (eg)
  */
 
 #include "stklos.h"
 #include "object.h"
+#include "struct.h"
 
 DEFINE_PRIMITIVE("not", not, subr1, (SCM x))
 /*
@@ -333,6 +334,10 @@ DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
 	res = STk_C_apply(fg, 2, x, y);
 	return res;
       }
+      break;
+    case tc_struct:
+      if (STRUCTP(y) && (STRUCT_TYPE(x) == STRUCT_TYPE(y)))
+	return STk_equal(STk_struct2list(x), STk_struct2list(y));
       break;
 #ifdef FIXME
 //EG:       default:	
