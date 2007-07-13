@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update:  2-Jul-2007 13:58 (eg)
+;;;; Last file update: 13-Jul-2007 14:49 (eg)
 ;;;;
 
 (include "../lib/http.stk")
@@ -177,7 +177,7 @@
 						  (temporary-file-name))))
 	  ((install)
 	     (exit (find-extract-and-install-package (cadar actions)
-						     `(temporary-file-name))))
+						     (temporary-file-name))))
 	  ((download)
 	     (download-package-only (cadar actions))
 	     (exit 0))	  
