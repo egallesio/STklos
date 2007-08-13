@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  4-Jul-2007 15:12 (eg)
+;;;; Last file update:  5-Aug-2007 18:29 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1562,6 +1562,11 @@ doc>
      (%%when-compile ,@body)
      (void)))
 
+(define-macro (when-load-and-compile . body)
+  `(begin
+     (%%when-compile ,@body)
+     ,@body
+     (void)))
 
 (define (compile-%%label e env tail)
   (if (= (length e) 2)
