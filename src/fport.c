@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 29-Jun-2007 22:27 (eg)
+ * Last file update: 14-Aug-2007 16:27 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -179,6 +179,12 @@ static int flush_buffer(struct fstream *f)
   PORT_PTR(f) = PORT_BASE(f);
 
   return ret < 0;
+}
+
+int STk_fport_flush_buffer(struct fstream *f)
+{
+  /* Exported version of the previous one */
+  return flush_buffer(f);
 }
 
 /*=============================================================================*/
