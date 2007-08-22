@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update: 28-Jun-2007 18:26 (eg)
+ * Last file update: 22-Aug-2007 23:32 (eg)
  */
 
 #include <stklos.h>
@@ -288,7 +288,7 @@ static SCM c2scheme(union any obj, SCM rettype)
     case 18:						/* int64 */
       STk_error("returning intXX is not implemented yet");
     case 19: 						/* obj */
-      return  obj.pvalue;
+      return (obj.pvalue ? obj.pvalue : STk_void);
     default: 
       STk_panic("incorrect type number for FFI %d", rettype);
   }
