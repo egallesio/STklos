@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 28-Jun-2007 18:21 (eg)
+ * Last file update: 29-Aug-2007 12:26 (eg)
  *
  */
 #include <ctype.h>
@@ -195,7 +195,13 @@ void STk_print(SCM exp, SCM port, int mode)
       STk_putc('}', port);
       return;
     case tc_pointer:
-      sprintf(buffer, "#[C-pointer %lx]", (unsigned long) CPOINTER_VALUE(exp));
+      if (CPOINTER_TYPE(exp) == STk_void) {
+	sprintf(buffer, "#[C-pointer %lx]", (unsigned long) CPOINTER_VALUE(exp));
+      } else {
+	STk_puts("#[", port);
+	STk_print(CPOINTER_TYPE(exp), port, mode);
+	sprintf(buffer, "-pointer %lx]", (unsigned long) CPOINTER_VALUE(exp));
+      }
       STk_puts(buffer, port);
       return;
     case tc_subr0:       /* ==================> Utiliser un type étendu //FIXME */

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update: 22-Aug-2007 23:32 (eg)
+ * Last file update: 29-Aug-2007 12:25 (eg)
  */
 
 #include <stklos.h>
@@ -271,14 +271,9 @@ static SCM c2scheme(union any obj, SCM rettype)
     case 12:						/* boolean */
       return MAKE_BOOLEAN(obj.ivalue);
     case 13:						/* pointer */
-      if (obj.pvalue) {
-	SCM z; 
-	NEWCELL(z, pointer);
-	CPOINTER_VALUE(z) = obj.pvalue;
-	return z;
-      } else {
-	return STk_void;
-      }
+      return (obj.pvalue) ? 
+	STk_make_Cpointer(obj.pvalue, STk_void, STk_false) : 
+        STk_void;
     case 14:						/* string */
       if (! obj.pvalue) return STk_void;
       return STk_Cstring2string(obj.pvalue);
@@ -482,11 +477,7 @@ static int exec_callback(SCM callback, ...)
 
 DEFINE_PRIMITIVE("%exec-callback-address", exec_cb_addr, subr0, (void))
 {
-  SCM z;
-  
-  NEWCELL(z, pointer);
-  CPOINTER_VALUE(z) = (void *) exec_callback;
-  return z;
+  return STk_make_Cpointer(exec_callback, STk_void, STk_false);
 }
 
 #else /* HAVE_FFI */

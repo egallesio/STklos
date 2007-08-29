@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 19-Jun-2007 11:09 (eg)
+# Last file update: 28-Aug-2007 15:00 (eg)
 
 
 VPATH = @srcdir@
@@ -52,14 +52,14 @@ am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(extraincdir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am__stklos_SOURCES_DIST = base64.c boolean.c boot.c char.c cond.c \
-	dynload.c env.c error.c extend.c ffi.c fixnum.c fport.c \
-	gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c list.c misc.c \
-	md5.c number.c object.c parameter.c path.c port.c print.c \
-	proc.c process.c promise.c read.c regexp.c signal.c sio.c \
-	socket.c sport.c stklos.c str.c struct.c symbol.c system.c \
-	uvector.c vector.c vm.c vport.c thread-common.c thread-lurc.c \
-	mutex-common.c mutex-lurc.c thread-none.c mutex-none.c \
-	thread-pthreads.c mutex-pthreads.c
+	cpointer.c dynload.c env.c error.c extend.c ffi.c fixnum.c \
+	fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c list.c \
+	misc.c md5.c number.c object.c parameter.c path.c port.c \
+	print.c proc.c process.c promise.c read.c regexp.c signal.c \
+	sio.c socket.c sport.c stklos.c str.c struct.c symbol.c \
+	system.c uvector.c vector.c vm.c vport.c thread-common.c \
+	thread-lurc.c mutex-common.c mutex-lurc.c thread-none.c \
+	mutex-none.c thread-pthreads.c mutex-pthreads.c
 @LURC_FALSE@@NO_THREAD_FALSE@@PTHREADS_TRUE@am__objects_1 = thread-common.$(OBJEXT) \
 @LURC_FALSE@@NO_THREAD_FALSE@@PTHREADS_TRUE@	thread-pthreads.$(OBJEXT) \
 @LURC_FALSE@@NO_THREAD_FALSE@@PTHREADS_TRUE@	mutex-common.$(OBJEXT) \
@@ -70,19 +70,20 @@ am__stklos_SOURCES_DIST = base64.c boolean.c boot.c char.c cond.c \
 @LURC_TRUE@	thread-lurc.$(OBJEXT) mutex-common.$(OBJEXT) \
 @LURC_TRUE@	mutex-lurc.$(OBJEXT)
 am_stklos_OBJECTS = base64.$(OBJEXT) boolean.$(OBJEXT) boot.$(OBJEXT) \
-	char.$(OBJEXT) cond.$(OBJEXT) dynload.$(OBJEXT) env.$(OBJEXT) \
-	error.$(OBJEXT) extend.$(OBJEXT) ffi.$(OBJEXT) \
-	fixnum.$(OBJEXT) fport.$(OBJEXT) gnu-getopt.$(OBJEXT) \
-	gnu-glob.$(OBJEXT) hash.$(OBJEXT) keyword.$(OBJEXT) \
-	lib.$(OBJEXT) list.$(OBJEXT) misc.$(OBJEXT) md5.$(OBJEXT) \
-	number.$(OBJEXT) object.$(OBJEXT) parameter.$(OBJEXT) \
-	path.$(OBJEXT) port.$(OBJEXT) print.$(OBJEXT) proc.$(OBJEXT) \
-	process.$(OBJEXT) promise.$(OBJEXT) read.$(OBJEXT) \
-	regexp.$(OBJEXT) signal.$(OBJEXT) sio.$(OBJEXT) \
-	socket.$(OBJEXT) sport.$(OBJEXT) stklos.$(OBJEXT) \
-	str.$(OBJEXT) struct.$(OBJEXT) symbol.$(OBJEXT) \
-	system.$(OBJEXT) uvector.$(OBJEXT) vector.$(OBJEXT) \
-	vm.$(OBJEXT) vport.$(OBJEXT) $(am__objects_1)
+	char.$(OBJEXT) cond.$(OBJEXT) cpointer.$(OBJEXT) \
+	dynload.$(OBJEXT) env.$(OBJEXT) error.$(OBJEXT) \
+	extend.$(OBJEXT) ffi.$(OBJEXT) fixnum.$(OBJEXT) \
+	fport.$(OBJEXT) gnu-getopt.$(OBJEXT) gnu-glob.$(OBJEXT) \
+	hash.$(OBJEXT) keyword.$(OBJEXT) lib.$(OBJEXT) list.$(OBJEXT) \
+	misc.$(OBJEXT) md5.$(OBJEXT) number.$(OBJEXT) object.$(OBJEXT) \
+	parameter.$(OBJEXT) path.$(OBJEXT) port.$(OBJEXT) \
+	print.$(OBJEXT) proc.$(OBJEXT) process.$(OBJEXT) \
+	promise.$(OBJEXT) read.$(OBJEXT) regexp.$(OBJEXT) \
+	signal.$(OBJEXT) sio.$(OBJEXT) socket.$(OBJEXT) \
+	sport.$(OBJEXT) stklos.$(OBJEXT) str.$(OBJEXT) \
+	struct.$(OBJEXT) symbol.$(OBJEXT) system.$(OBJEXT) \
+	uvector.$(OBJEXT) vector.$(OBJEXT) vm.$(OBJEXT) \
+	vport.$(OBJEXT) $(am__objects_1)
 stklos_OBJECTS = $(am_stklos_OBJECTS)
 am__DEPENDENCIES_1 =
 stklos_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -248,10 +249,10 @@ DOCDB = DOCDB
 @LURC_TRUE@THREAD_FILES = thread-common.c thread-lurc.c mutex-common.c mutex-lurc.c
 @NO_THREAD_TRUE@THREAD_FILES = thread-none.c mutex-none.c
 @PTHREADS_TRUE@THREAD_FILES = thread-common.c thread-pthreads.c mutex-common.c mutex-pthreads.c
-stklos_SOURCES = base64.c boolean.c boot.c char.c cond.c dynload.c env.c error.c \
- extend.c ffi.c fixnum.c fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
- list.c misc.c md5.c number.c object.c parameter.c path.c port.c print.c \
- proc.c process.c promise.c read.c regexp.c  \
+stklos_SOURCES = base64.c boolean.c boot.c char.c cond.c cpointer.c dynload.c \
+ env.c error.c extend.c ffi.c fixnum.c fport.c gnu-getopt.c gnu-glob.c \
+ hash.c keyword.c lib.c list.c misc.c md5.c number.c object.c parameter.c \
+ path.c port.c print.c proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
  symbol.c system.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
 
@@ -380,6 +381,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/char.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cond.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpointer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynload.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/env.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Po@am__quote@

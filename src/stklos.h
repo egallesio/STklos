@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 25-Jun-2007 15:21 (eg)
+ * Last file update: 29-Aug-2007 12:32 (eg)
  */
 
 
@@ -355,6 +355,27 @@ SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module);
 SCM STk_condition_type_is_a(SCM type, SCM t);
 int STk_init_cond(void);
 
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ---- 				 C P O I N T E R  . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+struct pointer_obj {
+  stk_header header;
+  void *value;
+  SCM type;
+  SCM  data;
+};
+
+#define CPOINTERP(p)		(BOXED_TYPE_EQ((p), tc_pointer))
+#define CPOINTER_VALUE(p)	(((struct pointer_obj *) (p))->value)
+#define CPOINTER_TYPE(p)	(((struct pointer_obj *) (p))->type)
+#define CPOINTER_DATA(p)	(((struct pointer_obj *) (p))->data)
+
+SCM STk_make_Cpointer(void *ptr, SCM type, SCM data);
+int STk_init_cpointer(void);
 
 /*
   ------------------------------------------------------------------------------
@@ -483,15 +504,6 @@ int STk_init_extend(void);
   ----
   ------------------------------------------------------------------------------
 */
-struct pointer_obj {
-  stk_header header;
-  void *value;
-};
-
-#define CPOINTER_VALUE(p)	(((struct pointer_obj *) (p))->value)
-#define CPOINTERP(p)		(BOXED_TYPE_EQ((p), tc_pointer))
-
-
 SCM STk_call_ext_function(SCM fct, int argc, SCM *argv);
 SCM STk_ext_func_name(SCM fct);
 int STk_init_ffi(void);
