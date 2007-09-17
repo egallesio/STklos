@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 31-May-2007 15:16 (eg)
+;;;; Last file update: 13-Sep-2007 11:52 (eg)
 ;;;;
 
 ;;
@@ -1356,6 +1356,18 @@ doc>
 	 (%chmod file (car opt)))
 	(else
 	   (error 'chmod "bad option ~S" (car opt)))))))
+
+#|
+<doc EXT with-mutex
+ * (with-mutex mtx <body>)
+ *
+doc>
+|#
+(define (with-mutex mtx  proc)
+  (dynamic-wind
+      (lambda () (mutex-lock! mtx))
+      proc
+      (lambda () (mutex-unlock! mtx))))
 
 
 ;;;; ======================================================================

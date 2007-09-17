@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 28-Aug-2007 14:35 (eg)
- * Last file update: 29-Aug-2007 12:35 (eg)
+ * Last file update: 13-Sep-2007 10:32 (eg)
  */
 
 #include <stklos.h>
@@ -39,9 +39,14 @@ SCM STk_make_Cpointer(void *ptr, SCM type, SCM data)
   NEWCELL(z, pointer);
   CPOINTER_VALUE(z) = ptr;
   CPOINTER_TYPE(z)  = type;
-  CPOINTER_DATA(z)  = type;
+  CPOINTER_DATA(z)  = data;
 
   return z;
+}
+
+DEFINE_PRIMITIVE("cpointer?", cpointerp, subr1, (SCM obj))
+{
+  return MAKE_BOOLEAN(CPOINTERP(obj));
 }
 
 DEFINE_PRIMITIVE("cpointer-type", cpointer_type, subr1, (SCM obj))
@@ -73,6 +78,7 @@ DEFINE_PRIMITIVE("cpointer-data-set!", cpointer_data_set, subr2, (SCM obj, SCM v
 
 int STk_init_cpointer(void)
 {
+  ADD_PRIMITIVE(cpointerp);
   ADD_PRIMITIVE(cpointer_data);
   ADD_PRIMITIVE(cpointer_type);
   ADD_PRIMITIVE(cpointer_data_set);
