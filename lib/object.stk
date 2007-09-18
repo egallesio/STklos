@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update:  4-Jul-2007 15:14 (eg)
+;;;; Last file update: 18-Sep-2007 12:39 (eg)
 
 
 #|
@@ -43,7 +43,7 @@
     ensure-method add-method!
     object-eqv? object-equal?
     write-object display-object
-    slot-unbound slot-missing 
+    slot-unbound slot-missing
     slot-definition-name  slot-definition-options slot-definition-allocation
     slot-definition-getter slot-definition-setter slot-definition-accessor
     slot-definition-init-form slot-definition-init-keyword 
@@ -677,80 +677,110 @@
 ;
 ;=============================================================================
 
+(define (%find-inherited-get-n-set slot-name class)
+  (let Loop ((l (cdr (class-precedence-list class))))
+    (let ((r (assq slot-name (slot-ref (car l) 'getters-n-setters))))
+      (if r
+	  (cddr r)
+	  (Loop (cdr l))))))
+
+(define (%direct-slot? slot-name class)
+  (memq slot-name (map slot-definition-name
+		       (class-direct-slots class))))
+
+(define (%make-active-getter-n-setter index keys)
+  (let ((before-ref  (make-closure (key-get keys :before-slot-ref #f)))
+	(after-ref   (make-closure (key-get keys :after-slot-ref #f)))
+	(before-set! (make-closure (key-get keys :before-slot-set! #f)))
+	(after-set!  (make-closure (key-get keys :after-slot-set! #f))))
+    ;; Compute the getter and setter of an active slot at given index
+    ;; The result is of the form '(getter setter (:before-ref ... :after-ref ...))
+    (list (lambda (o)
+	    (if before-ref
+		(if (before-ref o)
+		    (let ((res (%fast-slot-ref o index)))
+		      (and after-ref
+			   (not (eqv? res (void)))
+			   (after-ref o))
+		      res)
+		    (void))
+		(let ((res (%fast-slot-ref o index)))
+		  (and after-ref
+		       (not (eqv? res (void)))
+		       (after-ref o))
+		  res)))
+	  (lambda (o v)
+	    (if before-set!
+		(when (before-set! o v)
+		  (%fast-slot-set! o index v)
+		  (and after-set! (after-set! o v)))
+		(begin
+		  (%fast-slot-set! o index v)
+		  (and after-set! (after-set! o v)))))
+	  (list
+	     :before-slot-ref  before-ref
+	     :after-slot-ref   after-ref
+	     :before-slot-set! before-set!
+	     :after-slot-set!  after-set!))))
 
 ;;;
 ;;; Compute-get-n-set
 ;;;
 (define-method compute-get-n-set ((class <class>) s)
-  (case (slot-definition-allocation s)
-    ((:instance) ;; Instance slot
-     		 ;; get-n-set is just its offset
-     		 (let ((already-allocated (slot-ref class 'nfields)))
-		   (slot-set! class 'nfields (+ already-allocated 1))
-		   already-allocated))
+  (eprintf "*** COMPUTE ~S ~S\n" class (car s))
+  (let ((name (slot-definition-name s)))
+    (case (slot-definition-allocation s)
+      ((:instance) ;; Instance slot
+                   ;; get-n-set is just its offset
+       		   (let ((already-allocated (slot-ref class 'nfields)))
+		     (slot-set! class 'nfields (+ already-allocated 1))
+		     already-allocated))
 
-    ((:class)  ;; Class slot
-               ;; Class-slots accessors are implemented as 2 closures around 
-     	       ;; a Scheme variable. 
-               (let ((name (slot-definition-name s)))
-		 (if (memq name (map slot-definition-name 
-				     (class-direct-slots class)))
+      ((:class)  ;; Class slot
+       		 ;; Class-slots accessors are implemented as 2 closures around 
+       		 ;; a Scheme variable.
+       		 (if (%direct-slot? name class)
 		     ;; This slot is direct; create a new shared cell
 		     (let ((shared-cell (void)))
 		       (list (lambda (o)   shared-cell)
 			     (lambda (o v) (set! shared-cell v))))
 		     ;; Slot is inherited. Find its definition in superclass
-		     (let Loop ((l (cdr (class-precedence-list class))))
-		       (let ((r (assq name (slot-ref (car l) 'getters-n-setters))))
-			 (if r
-			     (cddr r)
-			     (Loop (cdr l))))))))
+		     (%find-inherited-get-n-set name class)))
+      
+      ((:each-subclass) ;; slot shared by instances of direct subclass only.
+       			;; (Thomas Buerger, April 1998)
+       			(let ((shared-cell (void)))
+			  (list (lambda (o)   shared-cell)
+				(lambda (o v) (set! shared-cell v)))))
 
-    ((:each-subclass) ;; slot shared by instances of direct subclass.
-     		      ;; (Thomas Buerger, April 1998)
-     		      (let ((shared-cell (void)))
-			(list (lambda (o)   shared-cell)
-			      (lambda (o v) (set! shared-cell v)))))
-
-    ((:virtual) ;; No allocation
-     		;; slot-ref and slot-set! function must be given by the user
-     	     	(let ((get (key-get (slot-definition-options s) :slot-ref  #f))
-		      (set (key-get (slot-definition-options s) :slot-set! #f)))
-		  (unless (and get set)
-		    (error "a :slot-ref and a :slot-set! must be supplied in ~S" s))
-		  (list (make-closure get)
-			(make-closure set))))
-    ((:active) ;; Active slot
-     	       ;; active slots admit a daemon before or after slot access
-               (let* ((index 	   (slot-ref class 'nfields))
-		      (name	   (car s))
-		      (s	   (cdr s))
-		      (before-ref  (make-closure (key-get s :before-slot-ref  #f)))
-		      (after-ref   (make-closure (key-get s :after-slot-ref   #f)))
-		      (before-set! (make-closure (key-get s :before-slot-set! #f)))
-		      (after-set!  (make-closure (key-get s :after-slot-set!  #f))))
-		 (slot-set! class 'nfields (+ index 1))
-		 (list (lambda (o)
-			 (if before-ref
-			     (if (before-ref o)
-				 (let ((res (%fast-slot-ref o index)))
-				   (and after-ref
-					(not (eqv? res (void)))
-					(after-ref o))
-				   res)
-				 (void))
-			     (let ((res (%fast-slot-ref o index)))
-			       (and after-ref (not (eqv? res (void))) (after-ref o))
-			       res)))
-		       (lambda (o v) 
-			 (if before-set!
-			     (when (before-set! o v)
-			       (%fast-slot-set! o index v)
-			       (and after-set! (after-set! o v)))
-			     (begin
-			       (%fast-slot-set! o index v)
-			       (and after-set! (after-set! o v))))))))
-    (else    (next-method))))
+      ((:virtual) ;; No allocation
+     		  ;; slot-ref and slot-set! function must be given by the user
+       		  (if (%direct-slot? name class)
+		      (let* ((s   (slot-definition-options s))
+			     (get (key-get s :slot-ref  #f))
+			     (set (key-get s :slot-set! #f)))
+			(unless (and get set)
+			  (error
+			      "a :slot-ref and a :slot-set! must be supplied in ~S"
+			      s))
+			(list (make-closure get)
+			      (make-closure set)))
+		      (%find-inherited-get-n-set name class)))
+      ((:active) ;; Active slot
+       		 ;; active slots admit a daemon before or after slot access
+              (let ((index 	(slot-ref class 'nfields)))
+		(slot-set! class 'nfields (+ index 1))
+		(if (%direct-slot? name class)
+		    (%make-active-getter-n-setter index (slot-definition-options s))
+		    (let ((old (%find-inherited-get-n-set name class)))
+		      ;; Old is of the form
+		      ;;   (getter setter XXXX)
+		      ;; where XXX is (:before-slot-ref closure ...)
+		      ;; We must re-create the getter and setter since the offset
+		      ;; of the slot can be different. but we MUST NOT re-evaluate
+		      ;; the 4 daemons (they can be not exported closures).
+		      (%make-active-getter-n-setter index (list-ref old 2))))))
+      (else    (next-method)))))
 
 (define-method compute-get-n-set ((o <object>) s)
   (error "allocation type \"~S\" is unknown" (slot-definition-allocation s)))
@@ -828,8 +858,9 @@
 	 (let* ((s     (if (pair? s) s (list s)))
 		(g-n-s (compute-get-n-set class s))
 		(name  (slot-definition-name s)))
-	   ;; For each slot we have '(name init-function getter setter)
-	   ;; If slot is an instance one, we have the simplest
+	   ;; For each slot we have
+	   ;;    '(name init-function getter setter <optional infos>)
+	   ;; If slot is an instance slot, we have the simplest
 	   ;; form '(name init-function . index)
 	   (verify-accessors name g-n-s)
 	   (list* name (compute-slot-init-function s) g-n-s)))
