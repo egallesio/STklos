@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  5-Jan-2000 12:17 (eg)
- * Last file update: 29-Aug-2007 12:33 (eg)
+ * Last file update: 18-Sep-2007 13:02 (eg)
  */
 
 
@@ -58,6 +58,7 @@ STk_init_library(int *argc, char ***argv, int stack_size)
     STk_init_proc()				&&
     STk_init_boolean()				&&
     STk_init_reader()   			&&
+    STk_init_printer()				&&
     STk_init_system()   			&&
     STk_init_mutexes()				&&
     STk_init_number()				&&

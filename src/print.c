@@ -21,11 +21,13 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 29-Aug-2007 12:26 (eg)
+ * Last file update: 18-Sep-2007 13:20 (eg)
  *
  */
 #include <ctype.h>
 #include "stklos.h"
+
+static int pretty_quotes = 1;
 
 
 static void printlist(SCM exp, SCM port, int mode)
@@ -33,12 +35,14 @@ static void printlist(SCM exp, SCM port, int mode)
   register SCM tmp;
   char *s;
 
-  /* Special case for pretty printing of quoted expressions */
-  s = STk_quote2str(CAR(exp));
-  if (s && !NULLP(CDR(exp)) && NULLP(CDR(CDR(exp)))) {
-    STk_puts(s, port);
-    STk_print(CAR(CDR(exp)), port, mode);
-    return;
+  if (pretty_quotes) {
+    /* Special case for pretty printing of quoted expressions */
+    s = STk_quote2str(CAR(exp));
+    if (s && !NULLP(CDR(exp)) && NULLP(CDR(CDR(exp)))) {
+      STk_puts(s, port);
+      STk_print(CAR(CDR(exp)), port, mode);
+      return;
+    }
   }
 
   STk_putc('(', port);
@@ -290,12 +294,14 @@ static void printlist_star(SCM exp, SCM port)
 
   tmp = STk_nil;		/* for GCC */
 
-  /* Special case for pretty printing of quoted expressions */
-  s = STk_quote2str(CAR(exp));
-  if (s && !NULLP(CDR(exp)) && NULLP(CDR(CDR(exp)))) {
-    STk_puts(s, port);
-    print_cycle(CAR(CDR(exp)), port);
-    return;
+  if (pretty_quotes) {
+    /* Special case for pretty printing of quoted expressions */
+    s = STk_quote2str(CAR(exp));
+    if (s && !NULLP(CDR(exp)) && NULLP(CDR(CDR(exp)))) {
+      STk_puts(s, port);
+      print_cycle(CAR(CDR(exp)), port);
+      return;
+    }
   }
 
   STk_putc('(', port);
@@ -393,4 +399,44 @@ void STk_print_star(SCM exp, SCM port)
 
   pass1(exp); pass2(exp, port);
   MUT_UNLOCK(lck);
+}
+
+/*
+<doc EXT write-pretty-quotes
+ * (write-pretty-quotes)
+ * (write-pretty-quotes value)
+ *
+ * This parameter object permits to change the default behaviour of 
+ * the |display| or |write| primitives when they write a list which starts with 
+ *  the symbol quote,  quasiquote, unquote or unquote-splicing. If this parameter 
+ * has a false value, the writer uses the list notation instead of a 
+ * more human-readable value.
+ * By default, this parameter value is set to |#t|.
+ * @lisp
+ * (let ((x ''a))
+ *   (display x)
+ *   (display " ")
+ *   (write-pretty-quotes #f)
+ *   (display x))               @print 'a (quote a)
+ * @end lisp
+doc>
+*/
+static SCM write_pretty_quotes_conv(SCM value)
+{
+  pretty_quotes = (value != STk_false);
+  return MAKE_BOOLEAN(pretty_quotes);
+}
+
+/*===========================================================================*\
+ * 
+ *			I n i t i a l i z a t i o n 
+ * 
+\*===========================================================================*/
+int STk_init_printer(void)
+{
+  STk_make_C_parameter("write-pretty-quotes",
+		       MAKE_BOOLEAN(pretty_quotes),
+		       write_pretty_quotes_conv,
+		       STk_STklos_module);
+  return TRUE;
 }

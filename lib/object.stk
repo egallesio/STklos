@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update: 18-Sep-2007 12:39 (eg)
+;;;; Last file update: 18-Sep-2007 12:41 (eg)
 
 
 #|
@@ -727,7 +727,6 @@
 ;;; Compute-get-n-set
 ;;;
 (define-method compute-get-n-set ((class <class>) s)
-  (eprintf "*** COMPUTE ~S ~S\n" class (car s))
   (let ((name (slot-definition-name s)))
     (case (slot-definition-allocation s)
       ((:instance) ;; Instance slot

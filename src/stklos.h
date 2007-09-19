@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 29-Aug-2007 12:32 (eg)
+ * Last file update: 18-Sep-2007 13:03 (eg)
  */
 
 
@@ -998,6 +998,7 @@ void STk_print_star(SCM exp, SCM port);
 #define DSP_MODE		0
 #define WRT_MODE		1
 
+int STk_init_printer(void);
 
 /*
   ------------------------------------------------------------------------------

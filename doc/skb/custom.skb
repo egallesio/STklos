@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 29-Aug-2004 23:08 (eg)
+;; Last file update: 18-Sep-2007 13:15 (eg)
 ;;
 ;; ======================================================================
 
@@ -29,6 +29,7 @@ parmaters are listed below.])
 
 (insertdoc 'real-precision)
 (insertdoc 'read-case-sensitive)
+(insertdoc 'write-pretty-quotes)
 (insertdoc 'load-path)
 (insertdoc 'load-suffixes)
 (insertdoc 'load-verbose))

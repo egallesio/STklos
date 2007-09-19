@@ -20,7 +20,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 22-May-2007 15:30 (eg)
+ * Last file update: 19-Sep-2007 09:10 (eg)
  *
  */
 
@@ -809,9 +809,9 @@ static SCM read_srfi10(SCM port, SCM l)
  * the |read| primitive when reading a symbol. If this parameter has a 
  * a true value a symbol is not converted to a default case when interned. 
  * Since ,(rfive) requires that symbol are case insignificant, the default 
- * value  of this parameter is ¤f.
+ * value  of this parameter is |#f|.
  * @lisp
- * (read-case-sensitive)        => ¤f
+ * (read-case-sensitive)        => |#f|
  * (define x 'Symbol)
  * (display x)             @print{} symbol
  * (read-case-sensitive ¤t)
