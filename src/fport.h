@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 14-Aug-2007 16:30 (eg)
+ * Last file update: 29-Jun-2007 22:18 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -69,5 +69,3 @@ struct fstream {
 #define PORT_USERDATA(x)	(((struct fstream *) (x))->user_data)
 #define PORT_LOWREAD(x)		(((struct fstream *) (x))->low_read)
 #define PORT_LOWWRITE(x)	(((struct fstream *) (x))->low_write)
-
-int STk_fport_flush_buffer(struct fstream *f);

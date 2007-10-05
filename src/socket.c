@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update: 14-Aug-2007 16:54 (eg)
+ * Last file update: 13-Apr-2007 18:36 (eg)
  */
 
 #include <sys/types.h>
@@ -34,7 +34,6 @@
 
 #include <stklos.h>
 #include "socket.h"
-#include "fport.h"
 
 #ifdef THREADS_LURC
 # include <lurc.h>
@@ -102,21 +101,6 @@ static void error_bad_socket(SCM obj)
   STk_error("bad socket ~S", obj);
 }
 
-		/* ------------------------------ */
-
-static int socket_close_input(void *stream)
-{
-  return shutdown(PORT_FD(stream), SHUT_RD);
-}
-
-static int socket_close_output (void *stream)
-{
-  int ret = STk_fport_flush_buffer(stream);
-
-  return (ret == EOF) ? EOF : shutdown(PORT_FD(stream), SHUT_WR);
-}
-
-		/* ------------------------------ */
 
 static void set_socket_io_ports(SCM sock, int line_buffered)
 {
@@ -129,16 +113,12 @@ static void set_socket_io_ports(SCM sock, int line_buffered)
   sprintf(fname, "%s:%ld", hostname, SOCKET_PORTNUM(sock));
   
   s   = SOCKET_FD(sock);
-  t = s;	  /* was t = dup(s); */
-
+  t   = dup(s);
   in  = STk_fd2scheme_port(s, "r", fname);
   out = STk_fd2scheme_port(t, "w", fname);
 
   if (NULLP(in) || NULLP(out)) 
     STk_error("cannot create socket IO ports");
-
-  PORT_CLOSE(in)  = socket_close_input;		/* Patch the close function */
-  PORT_CLOSE(out) = socket_close_output;	/* Patch the close function */
 
   SOCKET_IN(sock)  = in;
   SOCKET_OUT(sock) = out;
