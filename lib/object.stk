@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update: 18-Sep-2007 12:41 (eg)
+;;;; Last file update:  8-Nov-2007 22:05 (eg)
 
 
 #|
@@ -834,14 +834,16 @@
 	((eq? init (void))
 	   #f)
 	((eq? (slot-definition-allocation s) :class)
-	   (let ((sn (slot-definition-name s)))
-	     (make-closure `(lambda (o)
-			      (let ((val (%slot-ref o ',sn)))
-				(if (eq? val (void))
+	   (let ((sn  (slot-definition-name s))
+		 (o   (gensym))
+		 (val (gensym)))
+	     (make-closure `(lambda (,o)
+			      (let ((,val (%slot-ref ,o ',sn)))
+				(if (eq? ,val (void))
 				    ,init
-				    val))))))
+				    ,val))))))
 	(else
-	   (make-closure `(lambda (o) ,init))))))
+	   (make-closure `(lambda (,(gensym)) ,init))))))
 
 
   (define (verify-accessors slot l)
@@ -1012,20 +1014,20 @@
     (for-each (lambda (slot)
 		(if (slot-exists-using-class? old-class old-instance slot)
 		    ;; Slot was present in old instance; set it 
-		    (if (slot-bound-using-class? old-class old-instance slot)
-			(slot-set-using-class!
+		    (when (slot-bound-using-class? old-class old-instance slot)
+		      (slot-set-using-class!
 			     new-class 
 			     new-instance 
 			     slot 
 			     (slot-ref-using-class old-class old-instance slot)))
 		    ;; slot was absent; initialize it with its default value
 		    (let ((init (slot-init-function new-class slot)))
-		      (if init
+		      (when init
 			  (slot-set-using-class!
 			       new-class 
 			       new-instance 
 			       slot
-			       (apply init '()))))))
+			       (init new-instance))))))
 	      (map slot-definition-name (class-slots new-class)))
     ;; Exchange old an new instance in place to keep pointers valids
     (%modify-instance old-instance new-instance)
