@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update:  8-Nov-2007 22:05 (eg)
+;;;; Last file update:  8-Nov-2007 23:16 (eg)
 
 
 #|
@@ -51,7 +51,7 @@
     compute-get-n-set
     allocate-instance initialize make-instance make
     no-next-method  no-applicable-method no-method ;; next-method-exists?
-    change-class 
+    change-class change-object-class 
     shallow-clone deep-clone
     apply-generic apply-method apply-methods compute-applicable-methods 
     method-more-specific? sort-applicable-methods

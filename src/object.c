@@ -2,7 +2,7 @@
  *
  *  o b j e c t . c			-- Objects support
  *
- * Copyright © 1994-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update:  4-Apr-2006 20:10 (eg)
+ * Last file update:  8-Nov-2007 23:18 (eg)
  */
 
 #include "stklos.h"
@@ -29,18 +29,14 @@
 #include "struct.h"
 
 #define GF_VAL(name)		(STk_lookup(STk_intern(name), \
-					    STk_current_module(), &unused, FALSE))
+					    STk_current_module(), &unused, TRUE))
 #define CALL_GF1(name,a)	(STk_C_apply(GF_VAL(name), 1, (a)))
 #define CALL_GF2(name,a,b)	(STk_C_apply(GF_VAL(name), 2, (a), (b)))
 #define CALL_GF3(name,a,b,c)	(STk_C_apply(GF_VAL(name), 3, (a), (b), (c)))
 #define CALL_GF4(name,a,b,c,d)	(STk_C_apply(GF_VAL(name), 4, (a), (b), (c), (d)))
 
 #define CLASS_REDEF(c) 	INST_SLOT(c, S_redefined)
-#define TEST_CHANGE_CLASS(obj, classe) 	{				\
-  if (CLASS_REDEF(classe) != STk_false)					\
-     CALL_GF3("change-object-class", obj, classe, CLASS_REDEF(classe));	\
-}
- 
+
 
 #define CLASSP(x)	(INSTANCEP(x) && SUBCLASSP(INST_CLASS_OF(x), Class))
 #define GENERICP(x)    	(INSTANCEP(x) && SUBCLASSP(INST_CLASS_OF(x), Generic))
@@ -410,6 +406,17 @@ DEFINE_PRIMITIVE("%method-more-specific?", method_more_specificp, subr3,
  *
 \*===========================================================================*/
 
+static Inline SCM test_change_class(SCM obj)
+{
+  SCM classe = INST_CLASS_OF(obj);
+
+  if (CLASS_REDEF(classe) != STk_false)
+    CALL_GF3("change-object-class", obj, classe, CLASS_REDEF(classe));
+  return classe;
+}
+  
+
+
 static Inline SCM get_slot_value(SCM classe, SCM obj, SCM slot_name)
 {
   SCM l;
@@ -460,8 +467,7 @@ DEFINE_PRIMITIVE("slot-ref", slot_ref, subr2, (SCM obj, SCM slot_name))
 
   if (!INSTANCEP(obj)) error_bad_instance(obj);
 
-  classe = INST_CLASS_OF(obj);
-  TEST_CHANGE_CLASS(obj, classe);
+  classe = test_change_class(obj);
   res = get_slot_value(classe, obj, slot_name);
 
   return (res==STk_void) ? CALL_GF3("slot-unbound", classe, obj, slot_name): res;
@@ -474,8 +480,7 @@ DEFINE_PRIMITIVE("slot-set!", slot_set, subr3, (SCM obj, SCM slot_name, SCM valu
 
   if (!INSTANCEP(obj)) error_bad_instance(obj);
 
-  classe = INST_CLASS_OF(obj);
-  TEST_CHANGE_CLASS(obj, classe);
+  classe = test_change_class(obj);
   return set_slot_value(classe, obj, slot_name, value);
 }
 
@@ -529,8 +534,7 @@ DEFINE_PRIMITIVE("%slot-ref", undoc_slot_ref, subr2, (SCM obj, SCM slot_name))
 
   if (!INSTANCEP(obj)) error_bad_instance(obj);
 
-  classe = INST_CLASS_OF(obj);
-  TEST_CHANGE_CLASS(obj, classe);
+  classe = test_change_class(obj);
   return get_slot_value(classe, obj, slot_name);
 }
 
@@ -626,8 +630,7 @@ DEFINE_PRIMITIVE("slot-bound?", slot_boundp, subr2, (SCM obj, SCM slot_name))
   if (!INSTANCEP(obj))     error_bad_instance(obj);
   if (!SYMBOLP(slot_name)) error_bad_slot_name(obj);
 
-  classe = INST_CLASS_OF(obj);
-  TEST_CHANGE_CLASS(obj, classe);
+  classe = test_change_class(obj);
 
   return MAKE_BOOLEAN(get_slot_value(classe, obj, slot_name) != STk_void);
 }
@@ -639,8 +642,7 @@ DEFINE_PRIMITIVE("slot-exists?", slot_existsp, subr2, (SCM obj, SCM slot_name))
   if (!INSTANCEP(obj))     error_bad_instance(obj);
   if (!SYMBOLP(slot_name)) error_bad_slot_name(obj);
 
-  classe = INST_CLASS_OF(obj);
-  TEST_CHANGE_CLASS(obj, classe);
+  classe = test_change_class(obj);
 
   return test_slot_existence(classe, obj, slot_name);
 }
@@ -978,9 +980,7 @@ DEFINE_PRIMITIVE("method?", methodp, subr1, (SCM obj))
 DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
 {
   if (INSTANCEP(obj)) {
-    SCM classe = INST_CLASS_OF(obj);
-
-    TEST_CHANGE_CLASS(obj, classe);
+    test_change_class(obj);
     return INST_CLASS_OF(obj);
   }
   
