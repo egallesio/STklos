@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update:  1-Feb-2007 17:20 (eg)
+ * Last file update: 19-Nov-2007 11:10 (eg)
  */
 
 #include <unistd.h>
@@ -216,7 +216,7 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
   if (REALP(tm)) {
     tmd = REAL_VAL(tm);
     ts.tv_sec  = (time_t) tmd;
-    ts.tv_nsec = (suseconds_t) ((tmd - ts.tv_sec) * 1000000);
+    ts.tv_nsec = (suseconds_t) ((tmd - ts.tv_sec) * 1000000000);
   }
   else if (!BOOLEANP(tm))
     STk_error_bad_timeout(tm);

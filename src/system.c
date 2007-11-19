@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  4-Jul-2007 11:07 (eg)
+ * Last file update: 19-Nov-2007 11:19 (eg)
  */
 
 #include <unistd.h>
@@ -852,8 +852,8 @@ DEFINE_PRIMITIVE("sleep", sleep, subr1, (SCM ms))
   if (n == LONG_MIN) 
     error_bad_int_or_out_of_bounds(ms);
   
-  ts.tv_sec  = n / TIME_DIV_CONST;
-  ts.tv_nsec = n % TIME_DIV_CONST;
+  ts.tv_sec  = n / 1000;
+  ts.tv_nsec = (n % 1000) * 1000000;
 
   nanosleep(&ts, NULL);
   return STk_void;
