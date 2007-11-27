@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 18-Sep-2007 13:03 (eg)
+ * Last file update: 27-Nov-2007 16:25 (eg)
  */
 
 
@@ -104,11 +104,9 @@ extern "C"
 #  define MUT_LOCK(lck)
 #  define MUT_UNLOCK(lck)
 #else
-#  define MUT_DECL(lck)    static pthread_mutex_t lck;
-#  define MUT_LOCK(lck)    { pthread_mutex_init(&lck, NULL); \
-  			     pthread_mutex_lock(&lck); }
-#  define MUT_UNLOCK(lck)  { pthread_mutex_unlock(&lck); \
-                             pthread_mutex_destroy(&lck); }
+#  define MUT_DECL(lck)    static pthread_mutex_t lck = PTHREAD_MUTEX_INITIALIZER;
+#  define MUT_LOCK(lck)    { pthread_mutex_lock(&lck); }
+#  define MUT_UNLOCK(lck)  { pthread_mutex_unlock(&lck); }
 #endif
 
 /*===========================================================================*\

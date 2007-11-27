@@ -20,7 +20,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 19-Sep-2007 09:10 (eg)
+ * Last file update: 19-Nov-2007 11:27 (eg)
  *
  */
 
@@ -716,7 +716,10 @@ static SCM read_it(SCM port, int case_significant, int constant)
   comment_level = 0;
 
 
-  if (c == EOF) return(STk_eof);
+  if (c == EOF) {
+    MUT_UNLOCK(read_mutex);
+    return STk_eof;
+  }
   STk_ungetc(c, port);
 
   res = read_rec(port, case_significant, constant, FALSE);

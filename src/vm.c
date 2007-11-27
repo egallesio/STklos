@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 28-Jun-2007 18:24 (eg)
+ * Last file update: 27-Nov-2007 16:22 (eg)
  */
 
 // INLINER values
@@ -96,6 +96,11 @@ static Inline void set_signal_mask(sigset_t mask)
   sigprocmask(SIG_SETMASK, &mask, NULL);
 }
 
+static void error_unbound_variable(SCM symbol)
+{
+  STk_error("variable ~S unbound", symbol);
+}
+ 
 
 /*===========================================================================*\
  * 
@@ -814,12 +819,62 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int argc, SCM *argv))
  *
 \*===========================================================================*/
 
+/*
+ * For optimization, some opcode/operand pairs get patched on the fly,
+ * and replaced by another operation.  It's important that the two
+ * reads (opcode and operand) happen atomically. If not, we can get this
+ * situation:
+ *   1) Thread A reads opcode at [n]
+ *   2) Thread B suspends thread A, changes opcode at [n] and operand
+ *      at [n+1]
+ *   3) Thread A resumes, reads new operand at [n+1], which does not
+ *      match the old opcode.
+ *
+ * To avoid this situation, and avoid a global lock around each
+ * operation, we can do this:
+ *    1) When we jump into one of the to-be-optimized opcodes, obtain
+ *       the global lock.
+ *    2) In case we hit the race condition (2, above), re-fetch and
+ *       dispatch the current operand. We will either:
+ *   3a) Re-dispatch to the same (to-be-optimized) opcode. Go ahead
+ *       and optimize, then release lock.
+ *   3b) We hit the race condition, and are dispatched to the new
+ *       operand. Release the global lock and process the operation.
+ *
+ * We need to patch the opcode last, otherwise:
+ *   1) Thread A obtains lock
+ *   2) Modifies opcode at [n]
+ *   3) Thread B interrupts thread A. Reads new opcode at [n], old
+ *      operand at [n+1]
+ *   4) Thread A resumes, updates operand at [n+1], releases lock
+ */
+#define LOCK_AND_RESTART			\
+  if (!have_global_lock) {			\
+    MUT_LOCK(global_lock);			\
+    have_global_lock=1;				\
+    (vm->pc)--;					\
+    NEXT;					\
+  }
+ 
+#define RELEASE_LOCK				\
+   {						\
+    MUT_UNLOCK(global_lock);			\
+    have_global_lock=0;				\
+   }
+ 
+#define RELEASE_POSSIBLE_LOCK			\
+  if (have_global_lock) {			\
+    MUT_UNLOCK(global_lock);			\
+    have_global_lock=0;				\
+  }
+ 
 static void run_vm(vm_thread_t *vm)
 {
   jbuf jb; 
   jbuf *old_jb = NULL; 		/* to make Gcc happy */
   short offset, nargs=0;
   short tailp;
+  int have_global_lock = 0;     /* if true, we're patching the code */
 #if defined(USE_COMPUTED_GOTO) 
 #  define DEFINE_JUMP_TABLE
 #  include "vm-instr.h"
@@ -887,58 +942,99 @@ CASE(CONSTANT_PUSH) { push(fetch_const()); 	     NEXT; }
 
 
 CASE(PUSH_GLOBAL_REF)
-  push(vm->val); 	/* Fall through */
 CASE(GLOBAL_REF) {
-  SCM ref;
+  SCM ref = NULL;
+  short orig_opcode;
+  SCM orig_operand;
+ 
+  LOCK_AND_RESTART;
+  orig_opcode  = vm->pc[-1];
+  orig_operand = fetch_const();
+ 
+  if (orig_opcode == PUSH_GLOBAL_REF)
+    push(vm->val);
+ 
+  vm->val= STk_lookup(orig_operand, vm->env, &ref, FALSE);
+  if (!ref) {
+    RELEASE_LOCK;
+    error_unbound_variable(orig_operand);
+  }
 
-  vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
   /* patch the code for optimize next accesses */
-  MUT_LOCK(global_lock);
-  vm->pc[-2]  = (vm->pc[-2] == GLOBAL_REF) ? UGLOBAL_REF: PUSH_UGLOBAL_REF;
   vm->pc[-1]  = add_global(CDR(ref));
-  MUT_UNLOCK(global_lock);
+  vm->pc[-2]  = (orig_opcode == GLOBAL_REF) ? UGLOBAL_REF: PUSH_UGLOBAL_REF;
+  RELEASE_LOCK;
   NEXT1;
 }
 
 CASE(PUSH_UGLOBAL_REF)
   push(vm->val); 	/* Fall through */
-CASE(UGLOBAL_REF) { 
-  /* Never produced by compiler */ 
-  vm->val = fetch_global(); 
+CASE(UGLOBAL_REF) {     /* Never produced by compiler */
+  /* Because of optimization, we may get re-dispatched to here. */
+  RELEASE_POSSIBLE_LOCK;
+ 
+  vm->val = fetch_global();
   NEXT1;
 }
 
 CASE(GLOBAL_REF_PUSH) {
-  SCM ref;
+  SCM ref = NULL;
+  short orig_opcode;
+  SCM orig_operand;
+  SCM res;
+ 
+  LOCK_AND_RESTART;
+  orig_opcode  = vm->pc[-1];
+  orig_operand = fetch_const();
 
-  push(STk_lookup(fetch_const(), vm->env, &ref, TRUE));
+  res = STk_lookup(orig_operand, vm->env, &ref, FALSE);
+  if (!ref) {
+    RELEASE_LOCK;
+    error_unbound_variable(orig_operand);
+  }
+
+  push(res);
+ 
   /* patch the code for optimize next accesses */
-  MUT_LOCK(global_lock);
-  vm->pc[-2]  = UGLOBAL_REF_PUSH;
   vm->pc[-1]  = add_global(CDR(ref));
-  MUT_UNLOCK(global_lock);
+  vm->pc[-2]  = UGLOBAL_REF_PUSH;
+  RELEASE_LOCK;
   NEXT1;
 }
-CASE(UGLOBAL_REF_PUSH) { 
-  /* Never produced by compiler */ 
+
+CASE(UGLOBAL_REF_PUSH) { /* Never produced by compiler */ 
+  /* Because of optimization, we may get re-dispatched to here. */
+  RELEASE_POSSIBLE_LOCK;
+ 
   push(fetch_global()); 
   NEXT1;
 }
 
 
 CASE(PUSH_GREF_INVOKE)
-  push(vm->val);	/* Fall through */	
 CASE(GREF_INVOKE) {
-  SCM ref;
-
-
-  vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
-  nargs   = fetch_next();
+  SCM ref = NULL;
+  short orig_opcode;
+  SCM orig_operand;
+ 
+  LOCK_AND_RESTART;
+  orig_opcode  = vm->pc[-1];
+  orig_operand = fetch_const();
+ 
+  if (orig_opcode == PUSH_GREF_INVOKE)
+    push(vm->val);
+ 
+  vm->val = STk_lookup(orig_operand, vm->env, &ref, FALSE);
+  if (!ref) {
+    RELEASE_LOCK;
+    error_unbound_variable(orig_operand);
+  }
+ 
+  nargs = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  MUT_LOCK(global_lock);
-  vm->pc[-3]  = (vm->pc[-3] == GREF_INVOKE)? UGREF_INVOKE : PUSH_UGREF_INVOKE;
   vm->pc[-2]  = add_global(CDR(ref));
-  MUT_UNLOCK(global_lock);
+  vm->pc[-3]  = (vm->pc[-3] == GREF_INVOKE)? UGREF_INVOKE : PUSH_UGREF_INVOKE;
+  RELEASE_LOCK;
 
   /*and now invoke */
   tailp=FALSE; goto FUNCALL;
@@ -947,6 +1043,10 @@ CASE(GREF_INVOKE) {
 CASE(PUSH_UGREF_INVOKE)
   push(vm->val);	/* Fall through */	
 CASE(UGREF_INVOKE) { /* Never produced by compiler */ 
+ 
+  /* Because of optimization, we may get re-dispatched to here. */
+  RELEASE_POSSIBLE_LOCK;
+ 
   vm->val = fetch_global();
   nargs   = fetch_next();
   
@@ -955,18 +1055,30 @@ CASE(UGREF_INVOKE) { /* Never produced by compiler */
 }
 
 CASE(PUSH_GREF_TAIL_INV)
-  push(vm->val);	/* Fall through */	
 CASE(GREF_TAIL_INVOKE) {
-  SCM ref;
+  SCM ref = NULL;
+  short orig_opcode;
+  SCM orig_operand;
+ 
+  LOCK_AND_RESTART;
+  orig_opcode  = vm->pc[-1];
+  orig_operand = fetch_const();
+ 
+  if (orig_opcode == PUSH_GREF_TAIL_INV)
+    push(vm->val);
+ 
+  vm->val = STk_lookup(orig_operand, vm->env, &ref, FALSE);
+  if (!ref) {
+    RELEASE_LOCK;
+    error_unbound_variable(orig_operand);
+  }
 
-  vm->val = STk_lookup(fetch_const(), vm->env, &ref, TRUE);
-  nargs   = fetch_next();
+  nargs = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
-  MUT_LOCK(global_lock);
+  vm->pc[-2]  = add_global(CDR(ref));
   vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ? 
     			UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
-  vm->pc[-2]  = add_global(CDR(ref));
-  MUT_UNLOCK(global_lock);
+  RELEASE_LOCK;
 
   /* and now invoke */
   tailp=TRUE; goto FUNCALL;
@@ -974,7 +1086,10 @@ CASE(GREF_TAIL_INVOKE) {
 
 CASE(PUSH_UGREF_TAIL_INV)
   push(vm->val);	/* Fall through */	
-CASE(UGREF_TAIL_INVOKE) { /* Never produced by compiler */ 
+CASE(UGREF_TAIL_INVOKE) { /* Never produced by compiler */
+  /* Because of optimization, we may get re-dispatched to here. */
+  RELEASE_POSSIBLE_LOCK;
+ 
   vm->val = fetch_global();
   nargs   = fetch_next();
   
@@ -1041,18 +1156,32 @@ CASE(LOCAL_REF3_PUSH) {push(FRAME_LOCAL(vm->env, 3));  NEXT1;}
 CASE(LOCAL_REF4_PUSH) {push(FRAME_LOCAL(vm->env, 4));  NEXT1;}
 
 CASE(GLOBAL_SET) {
-  SCM ref;
-  
-  STk_lookup(fetch_const(), vm->env, &ref, TRUE);
+  SCM ref = NULL;
+  short orig_opcode;
+  SCM orig_operand;
+ 
+  LOCK_AND_RESTART;
+  orig_opcode  = vm->pc[-1];
+  orig_operand = fetch_const();
+ 
+  STk_lookup(orig_operand, vm->env, &ref, FALSE);
+  if (!ref) {
+    RELEASE_LOCK;
+    error_unbound_variable(orig_operand);
+  }
+
   BOX_VALUE(CDR(ref)) = vm->val;
   /* patch the code for optimize next accesses */
-  MUT_LOCK(global_lock);
-  vm->pc[-2] = UGLOBAL_SET;
   vm->pc[-1] = add_global(CDR(ref));
-  MUT_UNLOCK(global_lock);
+  vm->pc[-2] = UGLOBAL_SET;
+  RELEASE_LOCK;
   NEXT0;
 }
+ 
 CASE(UGLOBAL_SET) { /* Never produced by compiler */
+  /* Because of optimization, we may get re-dispatched to here. */
+  RELEASE_POSSIBLE_LOCK;
+ 
   fetch_global() = vm->val; NEXT0;
 }
 
