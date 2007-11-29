@@ -11,15 +11,17 @@ lib/cinvoke-archspec.h:  lib/arch/[ARCH_HEADER]
 	 cp -f lib/arch/[ARCH_HEADER] lib/cinvoke-archspec.h
 
 install:
-	install -d [PREFIX]/include
-	install -d [PREFIX]/lib
+	install -d $(DESTDIR)[PREFIX]/include
+	install -d $(DESTDIR)[PREFIX]/lib
 	install lib/cinvoke.h lib/cinvoke-arch.h lib/cinvoke-archspec.h \
-		[PREFIX]/include
-	install lib/libcinvoke.a [PREFIX]/lib
+		$(DESTDIR)[PREFIX]/include
+	install lib/libcinvoke.a $(DESTDIR)[PREFIX]/lib
 
 uninstall:
-	rm -f [PREFIX]/include/cinvoke.h [PREFIX]/include/cinvoke-arch.h \
-		[PREFIX]/include/cinvoke-archspec.h [PREFIX]/lib/libcinvoke.a
+	rm -f $(DESTDIR)[PREFIX]/include/cinvoke.h \
+              $(DESTDIR)[PREFIX]/include/cinvoke-arch.h \
+	      $(DESTDIR)[PREFIX]/include/cinvoke-archspec.h \
+	      $(DESTDIR)[PREFIX]/lib/libcinvoke.a
 
 clean:
 	cd lib && $(MAKE) clean

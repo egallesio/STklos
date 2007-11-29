@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  4-Jul-2001 11:36 (eg)
-# Last file update: 10-Jan-2003 11:37 (eg)
+# Last file update: 29-Nov-2007 22:30 (eg)
 
 
 STKCONF	  = ../utils/stklos-config
@@ -11,7 +11,7 @@ CC	  = @CC@
 CFLAGS	  = @CFLAGS@ @SH_COMP_FLAGS@ @GTK_CONFIG_CFLAGS@ @GCINC@ $(INCLUDES)
 
 
-shobjectdir	    = $(prefix)/lib/@PACKAGE@/@VERSION@
+shobjectdir	    = $(libdir)/@PACKAGE@/@VERSION@
 shobject_SCRIPTS    = ldap.@SH_SUFFIX@
 
 #======================================================================
@@ -20,7 +20,7 @@ shobject_SCRIPTS    = ldap.@SH_SUFFIX@
 scheme_SRCS = ldap.stk
 scheme_OBJS = ldap.ostk
 
-schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
+schemedir   = $(datadir)/@PACKAGE@/@VERSION@
 scheme_DATA = $(scheme_SRCS) $(scheme_OBJS) 
 
 
