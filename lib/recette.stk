@@ -21,12 +21,13 @@
 ;;;; 
 ;;;;           Author: Manuel Serrano
 ;;;;    Creation date: 16-Mar-2007 15:59 (eg)
-;;;; Last file update: 26-Apr-2007 17:46 (eg)
+;;;; Last file update:  4-Dec-2007 15:33 (eg)
 ;;;;
 
 (require "pp")
 
 (define-module recette
+  (import SCHEME)
   (export
       run-tests recette-add-test!)
   (export-syntax

@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 27-Jun-2007 11:13 (eg)
+# Last file update:  4-Dec-2007 15:21 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d @LURCDIR@
 
@@ -86,6 +86,7 @@ scheme_OBJS = compfile.ostk		\
 	      lex-rt.ostk		\
 	      pp.ostk			\
 	      recette.ostk		\
+	      slib.ostk			\
 	      srfi-1.ostk 		\
 	      srfi-2.ostk		\
 	      srfi-4.ostk		\
@@ -170,6 +171,7 @@ full-conditions: srfi-35.ostk srfi-36.stk
 recette.ostk: pp.ostk
 srfi-13.ostk: srfi-14.ostk
 srfi-66.ostk: srfi-4.ostk
+slib.ostk: slib.stk STklos.init
 
 
 doc: $(DOCDB)

@@ -21,12 +21,13 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  4-Jul-2007 15:13 (eg)
+;;;; Last file update:  4-Dec-2007 15:55 (eg)
 ;;;;
 
 (define-module SRFI-0
   (import SCHEME)
-  (export srfi0-register-feature!))
+  (export srfi0-register-feature!
+	  srfi-0-feature-implementation-file))
 
 (select-module SRFI-0)
   
@@ -135,6 +136,25 @@
 ;; ----------------------------------------------------------------------
 (define (srfi0-register-feature! feature)
   (set! *all-features* (cons feature *all-features*)))
+
+;; ----------------------------------------------------------------------
+(define (srfi-0-feature-implementation-file x)
+  (let Loop ((l *all-features*))
+    (cond
+      ((null? l)			;; not found 
+       #f)
+      ((symbol? (car l))		; clause  srfi-x
+       (if (eq? (car l) x)
+	   #f
+	   (Loop (cdr l))))
+      ((symbol? (caar l))		; clause  (srfi-x ...)
+       (if (eq? x (caar l))
+           (cdar l)
+           (Loop (cdr l))))
+      (else				; clause ((srfi-x foo bar) ...)
+       (if (memq x (caar l))
+	   (cdar l)
+           (Loop (cdr l)))))))
 
 ;; ----------------------------------------------------------------------
 (define (%has-feature? x)
