@@ -4,7 +4,7 @@
 ;;;
 ;;; This code is in the public domain.
 ;;;
-;;; Last file update:  5-Dec-2007 12:33 (eg)
+;;; Last file update:  6-Dec-2007 12:53 (eg)
 ;;; 
 
 
@@ -44,10 +44,15 @@
 	  ;; Use this path if your scheme does not support GETENV
 	  ;; or if SCHEME_LIBRARY_PATH is not set.
 	  (case (software-type)
-	    ((unix) (let ((perso (expand-file-name "~/.stklos/slib")))
-		      (if (file-exists? perso)
-			  (string-append perso "/")
-			  "/usr/local/lib/slib/")))
+	    ((unix) (let ((perso (expand-file-name "~/.stklos/slib/require.scm")))
+		      (string-append
+		          (if (file-exists? perso)
+			      (expand-file-name "~/.stklos/slib")
+			      (make-path (%library-prefix)
+					 "lib"
+					 "stklos"
+					 "slib"))
+			  "/")))
 	    ((vms) "lib$scheme:")
 	    ((ms-dos) "C:\\SLIB\\")
 	    (else "")))))

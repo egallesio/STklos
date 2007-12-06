@@ -21,11 +21,24 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  8-Sep-1994 11:45
-;;;; Last file update:  4-Dec-2007 13:58 (eg)
+;;;; Last file update:  6-Dec-2007 13:05 (eg)
 ;;;;
 
 (define slib:require #f)	;; to avoid a compiler warning
 (define slib:eval-load #f)	;; ditto
 
 (include "STklos.init")
+
+;;; If the installation is sytem-wide and there is no catalog
+;;; in user dir, copy the system-wide catalog for user.
+(let ((system-wide  (make-path (library-vicinity) "slibcat"))
+      (personal     (make-path (implementation-vicinity) "slibcat")))
+  (when (and (file-exists? system-wide)
+	     (not (file-exists? personal)))
+    (unless (file-is-directory?(implementation-vicinity))
+      (make-directories (implementation-vicinity)))
+    (eprintf "Initializing SLIB...\n")
+    (copy-file system-wide personal)))
+
+
 (provide "slib")
