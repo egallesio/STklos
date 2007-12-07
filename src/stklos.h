@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 27-Nov-2007 16:25 (eg)
+ * Last file update:  7-Dec-2007 23:38 (eg)
  */
 
 
@@ -1073,7 +1073,6 @@ SCM   STk_read(SCM port, int case_significant);
 SCM   STk_read_constant(SCM port, int case_significant);
 char *STk_quote2str(SCM symb);
 int   STk_init_reader(void);
-extern SCM STk_sym_quote;		/* The interned value of symbol "quote" */
 extern int STk_read_case_sensitive;
 
 

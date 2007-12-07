@@ -20,22 +20,30 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 19-Nov-2007 11:27 (eg)
+ * Last file update:  8-Dec-2007 00:15 (eg)
  *
  */
 
 #include <ctype.h>
 #include "stklos.h"
 
+struct read_context {
+  SCM cycles;
+  int comment_level;
+  int case_significant;
+  int constant;
+};
+
+
 static SCM read_srfi10(SCM port, SCM l);
-static SCM read_rec(SCM port, int case_significant, int constant, int inlist);
+static SCM read_rec(SCM port, struct read_context *ctx, int inlist);
 
 
-static SCM cycles;		/* used for reading circular data */
-static SCM sym_quasiquote, sym_unquote, sym_unquote_splicing, sym_dot;
+//static SCM cycles;		/* used for reading circular data */
+static SCM sym_quote, sym_quasiquote, sym_unquote, sym_unquote_splicing, sym_dot;
 static SCM sym_read_brace, sym_read_bracket, read_error;
-SCM STk_sym_quote;
-static int comment_level;
+
+//static int comment_level;
 int STk_read_case_sensitive = 0;
 
 
@@ -108,7 +116,7 @@ static int flush_spaces(SCM port, char *message, SCM file)
 }
 
 
-static SCM read_list(SCM port, char delim, int case_significant, int constant)
+static SCM read_list(SCM port, char delim, struct read_context *ctx)
 /* Read a list ended by the `delim' char */
 {
   static char *eof_seen = "end of file encountered on ~S";
@@ -122,7 +130,7 @@ static SCM read_list(SCM port, char delim, int case_significant, int constant)
 Top:
   /* Read the car */
   STk_ungetc(c, port);
-  tmp = read_rec(port, case_significant, constant, TRUE);
+  tmp = read_rec(port, ctx, TRUE);
   
   /* See if we don't have a special car */
   if (tmp == STk_close_par) {
@@ -137,7 +145,7 @@ Top:
   }
   
   if (tmp == STk_dot) {
-    tmp = read_rec(port, case_significant, constant, TRUE);
+    tmp = read_rec(port, ctx, TRUE);
     if (tmp == STk_close_par) 
       error_bad_dotted_list(port);
 
@@ -146,7 +154,7 @@ Top:
       SCM tmp;
       
       STk_ungetc(c, port);
-      tmp = read_rec(port, case_significant, constant, TRUE);
+      tmp = read_rec(port, ctx, TRUE);
       if (tmp != STk_close_par) warning_parenthesis(port);
       c = flush_spaces(port, eof_seen, port);
     }
@@ -156,11 +164,11 @@ Top:
   }
   
   /* OK, read now the cdr */
-  cdr = read_list(port, delim, case_significant, constant);
+  cdr = read_list(port, delim, ctx);
   if (cdr == STk_close_par)
     error_bad_dotted_list(port);
 
-  if (constant) {
+  if (ctx->constant) {
     /* Constant read uses extended cons instead of cons */
     cell = STk_econs(tmp, cdr, PORT_FNAME(port), line, PORT_POS(port));
     BOXED_INFO(cell) |= CONS_CONST;
@@ -294,7 +302,7 @@ static SCM read_here_string(SCM port)
   return STk_get_output_string(res);
 }
 
-static SCM read_cycle(SCM port, int c, int case_significant, int constant)
+static SCM read_cycle(SCM port, int c, struct read_context *ctx)
 /* read a #xx# or #xx= cycle item whose 1st char is in c. */
 { 
   char buffer[MAX_TOKEN_SIZE];
@@ -311,12 +319,12 @@ static SCM read_cycle(SCM port, int c, int case_significant, int constant)
   k = MAKE_INT(atoi(buffer));
 
   switch (c) {
-    case '#': if ((tmp = STk_assv(k, cycles)) != STk_false)
+    case '#': if ((tmp = STk_assv(k, ctx->cycles)) != STk_false)
 		return CDR(tmp);
 	      else
 		error_key_not_defined(port, k);
 
-    case '=': if ((tmp = STk_assv(k, cycles)) == STk_false) {
+    case '=': if ((tmp = STk_assv(k, ctx->cycles)) == STk_false) {
       		/* This is a little bit tricky here: We create a fake cell
 		 * that serves as a place-holder. In some cases this is not 
 		 * useful (e.g. (#0=(1 2) 3 4 . #0#) ), but in some other 
@@ -333,11 +341,11 @@ static SCM read_cycle(SCM port, int c, int case_significant, int constant)
 		 BOXED_INFO(tmp) |= CONS_PLACEHOLDER;
 
 		 /* Add the couple (k . <fake-cell>) to the cycles list */
-		 tmp      = STk_cons(k, tmp);
-		 cycles   = STk_cons(tmp, cycles);
+		 tmp         = STk_cons(k, tmp);
+		 ctx->cycles = STk_cons(tmp, ctx->cycles);
 
 		 /* Read item */
-		 val      = read_rec(port, case_significant, constant, FALSE);
+		 val         = read_rec(port, ctx, FALSE);
 
 		 /* Patch the list of cycles with the correct value */
 		 CDR(tmp) = val;
@@ -384,7 +392,7 @@ static SCM find_references(SCM *obj, SCM to_correct)
   return to_correct;
 }
 
-static void patch_references(SCM port, SCM l)
+static void patch_references(SCM port, SCM l, SCM cycles)
 {
   for ( ; !NULLP(l); l = CDR(l)) {
     SCM k, tmp;
@@ -471,21 +479,21 @@ static SCM read_string(SCM port, int constant)
 }
 
 
-static SCM read_vector(SCM port, int case_significant, int constant)
+static SCM read_vector(SCM port, struct read_context *ctx)
 {
-  SCM v = STk_list2vector(read_list(port, ')', case_significant, constant));
+  SCM v = STk_list2vector(read_list(port, ')', ctx));
  
-  if (constant) BOXED_INFO(v) |= VECTOR_CONST;
+  if (ctx->constant) BOXED_INFO(v) |= VECTOR_CONST;
   return v;
 }
 
-static SCM maybe_read_uniform_vector(SCM port, int c, int case_significant)
+static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
 {
   char tok[MAX_TOKEN_SIZE];
   int tag, len;
   SCM v;
   
-  len = read_word(port, c, tok, case_significant);
+  len = read_word(port, c, tok, ctx->case_significant);
   if (len == 1 && (*tok == 'F' || *tok == 'f')) {
     /* This is the #f constant */
     return STk_false;
@@ -495,8 +503,12 @@ static SCM maybe_read_uniform_vector(SCM port, int c, int case_significant)
       if (c != '(') goto bad_spec;
       tag = STk_uniform_vector_tag(tok);
       if (tag >= 0) {
+	int konst = ctx->constant;
+
 	/* Ok that's seems correct read the list of values (this IS a constant) */
-	v =  STk_list2uvector(tag, read_list(port, ')', case_significant, TRUE));
+	ctx->constant = TRUE;
+	v =  STk_list2uvector(tag, read_list(port, ')', ctx));
+	ctx->constant = konst;
 	BOXED_INFO(v) |= VECTOR_CONST;
 	return v;
       }
@@ -508,7 +520,7 @@ static SCM maybe_read_uniform_vector(SCM port, int c, int case_significant)
 }
 
 
-static SCM read_rec(SCM port, int case_significant, int constant, int inlist)
+static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
 {
   int c;
 
@@ -517,7 +529,7 @@ static SCM read_rec(SCM port, int case_significant, int constant, int inlist)
     
     switch (c) {
       case '(':
-        return(read_list(port, ')', case_significant, constant));
+        return(read_list(port, ')', ctx));
 
       case '[': {
 	SCM ref, read_bracket_func = SYMBOL_VALUE(sym_read_bracket, ref);
@@ -526,7 +538,7 @@ static SCM read_rec(SCM port, int case_significant, int constant, int inlist)
 	  STk_ungetc(c, port);
 	  return STk_C_apply(read_bracket_func, 1, port);
 	}
-	return(read_list(port, ']', case_significant, constant));
+	return(read_list(port, ']', ctx));
       }
 
     case '{': {
@@ -549,22 +561,22 @@ static SCM read_rec(SCM port, int case_significant, int constant, int inlist)
 	warning_parenthesis(port);
 	break;
       case '\'':
- 	return LIST2(STk_sym_quote, 
-		     read_rec(port, case_significant, constant, inlist));
+ 	return LIST2(sym_quote, 
+		     read_rec(port, ctx, inlist));
       case '`':
  	return LIST2(sym_quasiquote, 
-		     read_rec(port, case_significant, constant, inlist));
+		     read_rec(port, ctx, inlist));
       case '#':
 	switch(c=STk_getc(port)) {
 	  case 't':
           case 'T':  return STk_true;
 	  case 'f':
  	  case 'F':  if (STk_uvectors_allowed) 
-	    	       return maybe_read_uniform_vector(port, c, case_significant);
+	    	       return maybe_read_uniform_vector(port, c, ctx);
 	  	     else
 		       return STk_false;
  	  case '\\': return read_char(port, STk_getc(port));
-	  case '(' : return read_vector(port, case_significant, constant);
+	  case '(' : return read_vector(port, ctx);
 	  case '!' : { /* This can be a comment or a DSSSL keyword */
 	    	       c = STk_getc(port);
 		       if (c == 'o' || c == 'k' || c == 'r') {
@@ -590,7 +602,7 @@ static SCM read_rec(SCM port, int case_significant, int constant, int inlist)
 	  case '|':  {
 		       char prev = ' ';
 
-		       comment_level += 1;
+		       ctx->comment_level += 1;
 		       for ( ; ; ) {
 			 switch (c = STk_getc(port)) {
 			   case EOF:
@@ -599,13 +611,13 @@ static SCM read_rec(SCM port, int case_significant, int constant, int inlist)
 			     break;
 			   case '#': 
 			     if (prev == '|') {
-			       comment_level -= 1;
-			       if (!comment_level) goto end_comment;
+			       ctx->comment_level -= 1;
+			       if (!ctx->comment_level) goto end_comment;
 			     }
 			     break;
 			   case '|':
 			     if (prev == '#')
-			       comment_level += 1;
+			       ctx->comment_level += 1;
 			     break;
 			   default: ;
 			 }
@@ -614,7 +626,7 @@ static SCM read_rec(SCM port, int case_significant, int constant, int inlist)
 		       end_comment:
 		       c = flush_spaces(port, (char *) NULL, (SCM) NULL);
 		       if (c == EOF) {
-			 if (comment_level)
+			 if (ctx->comment_level)
 			   signal_error(port, 
 					"eof encountered when reading a comment",
 					STk_nil);
@@ -640,12 +652,12 @@ static SCM read_rec(SCM port, int case_significant, int constant, int inlist)
 	  case 's':
 	  case 'U':
 	  case 'u': if (STk_uvectors_allowed)
-		      return maybe_read_uniform_vector(port, c, case_significant);
+		      return maybe_read_uniform_vector(port, c, ctx);
 	  	    else 
 		      goto unknown_sharp;
 		      
 	 case ';': /* R6RS comments */
-	   	   read_rec(port, case_significant, constant, FALSE);
+	   	   read_rec(port, ctx, FALSE);
 		   c = flush_spaces(port, NULL, NULL);
 		   STk_ungetc(c, port);
 		   if (inlist && (c == ')' || c == ']' || c == '}'))
@@ -653,8 +665,7 @@ static SCM read_rec(SCM port, int case_significant, int constant, int inlist)
 		   continue;
 	  case ',': /* SRFI-10 */
 	    	    return read_srfi10(port, 
-				       read_rec(port, case_significant, 
-						constant, inlist));
+				       read_rec(port, ctx, inlist));
 	  case '0':
 	  case '1':
 	  case '2':
@@ -664,7 +675,7 @@ static SCM read_rec(SCM port, int case_significant, int constant, int inlist)
 	  case '6':
 	  case '7':
 	  case '8':
-	  case '9': return read_cycle(port, c, case_significant, constant);
+	  case '9': return read_cycle(port, c, ctx);
 	  default:  
 	unknown_sharp:
 	  	    STk_ungetc(c, port); return read_token(port, '#', FALSE);
@@ -679,13 +690,13 @@ static SCM read_rec(SCM port, int case_significant, int constant, int inlist)
  	  symb = sym_unquote; 
  	  STk_ungetc(c, port);
  	}
-	return LIST2(symb, read_rec(port, case_significant, constant, inlist));
+	return LIST2(symb, read_rec(port, ctx, inlist));
       }
       case '"':
-	return read_string(port, constant);
+	return read_string(port, ctx->constant);
       default:
     default_case: {
-	  SCM tmp = read_token(port, c, case_significant);
+	  SCM tmp = read_token(port, c, ctx->case_significant);
 
 	  return ((tmp == sym_dot) && inlist) ? STk_dot : tmp;
 	}
@@ -707,28 +718,26 @@ static SCM read_it(SCM port, int case_significant, int constant)
 {
   int c;
   SCM l, res;
-  MUT_DECL(read_mutex);
+  struct read_context ctx;
 
   c = flush_spaces(port, (char *) NULL, (SCM) NULL);
 
-  MUT_LOCK(read_mutex);
-  cycles        = STk_nil;
-  comment_level = 0;
+  ctx.cycles 	       = STk_nil;
+  ctx.comment_level    = 0;
+  ctx.case_significant = case_significant;
+  ctx.constant	       = constant;
 
-
-  if (c == EOF) {
-    MUT_UNLOCK(read_mutex);
+  if (c == EOF) 
     return STk_eof;
-  }
+
   STk_ungetc(c, port);
 
-  res = read_rec(port, case_significant, constant, FALSE);
+  res = read_rec(port, &ctx, FALSE);
 
-  if (!NULLP(cycles)) {
+  if (!NULLP(ctx.cycles)) {
     l = find_references(&res, STk_nil);
-    patch_references(port, l);
+    patch_references(port, l, ctx.cycles);
   }
-  MUT_UNLOCK(read_mutex);
   return res;
 }
 
@@ -747,7 +756,7 @@ SCM STk_read_constant(SCM port, int case_significant)
 
 char *STk_quote2str(SCM symb)
 {
-  if (symb == STk_sym_quote) 		return "\'";
+  if (symb == sym_quote) 		return "\'";
   if (symb == sym_quasiquote) 		return "`";
   if (symb == sym_unquote) 		return ",";
   if (symb == sym_unquote_splicing) 	return ",@";
@@ -844,7 +853,7 @@ static SCM read_case_sensitive_conv(SCM value)
 \*===========================================================================*/
 int STk_init_reader(void)
 {
-  STk_sym_quote        = STk_intern("quote");
+  sym_quote            = STk_intern("quote");
   sym_quasiquote       = STk_intern("quasiquote");
   sym_unquote	       = STk_intern("unquote");
   sym_unquote_splicing = STk_intern("unquote-splicing");
