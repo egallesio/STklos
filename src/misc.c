@@ -21,14 +21,15 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 29-Jun-2007 22:01 (eg)
+ * Last file update:  7-Dec-2007 18:38 (eg)
  */
 
 #include "stklos.h"
 #include "gnu-getopt.h"
 
-
 #ifdef STK_DEBUG
+#include <execinfo.h>
+
 int STk_interactive_debug = 0;
 #endif
 
@@ -530,6 +531,9 @@ DEFINE_PRIMITIVE("get-password", getpass, subr0, (void))
  * 
 \*===========================================================================*/
 #ifdef STK_DEBUG
+
+#define BACKTRACE_SIZE 1024
+
 DEFINE_PRIMITIVE("%debug", set_debug, subr0, (void))
 {
   STk_interactive_debug = !STk_interactive_debug;
@@ -542,6 +546,20 @@ DEFINE_PRIMITIVE("%test", test, subr1, (SCM s))
   /* A special place for doing tests */
   STk_eval_C_string("(display \"Hello, world!\")", STk_current_module());
   STk_eval_C_string("(display (fact 200))", STk_current_module());
+  return STk_void;
+}
+
+DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
+{
+  void *buffer[BACKTRACE_SIZE];
+  int n;
+
+  n = backtrace(buffer, BACKTRACE_SIZE);
+  if (n >= BACKTRACE_SIZE) {
+    STk_debug("***** Backtrace truncated to %d entries\n", n);
+  }
+  
+  backtrace_symbols_fd(buffer, n, 2);
   return STk_void;
 }
 #endif
@@ -568,6 +586,7 @@ int STk_init_misc(void)
 #ifdef STK_DEBUG
   ADD_PRIMITIVE(set_debug);
   ADD_PRIMITIVE(test);
+  ADD_PRIMITIVE(c_backtrace);
 #endif
   return TRUE;
 }
