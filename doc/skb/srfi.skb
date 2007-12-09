@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  9-Dec-2007 16:59 (eg)
+;; Last file update:  9-Dec-2007 21:33 (eg)
 ;;
 ;; ======================================================================
 
@@ -392,6 +392,16 @@ reader.]))
 described in this document (procedures
 ,(ref :mark "make-parameter") and
 ,(ref :mark "parameterize")).]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 45 -- Primitives for Expressing Iterative Lazy Algorithms
+;; ----------------------------------------------------------------------   
+(srfi-section 45
+	      
+(p [,(quick-link-srfi 45) is fully supported.  To use SRFI-45,
+you need to insert the following expression])
+(fontified-code [(require "srfi-45")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
 
 
 ;; ----------------------------------------------------------------------

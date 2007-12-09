@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Aug-2004 12:43 (eg)
-;;;; Last file update:  9-Dec-2007 16:57 (eg)
+;;;; Last file update:  9-Dec-2007 21:34 (eg)
 ;;;;
 
 (define srfi-address "http://srfi.schemers.org/srfi-~A/srfi-~A.html")
@@ -54,6 +54,7 @@
      (36 . "I/O Conditions")
      (38 . "External representation of shared structures")
      (39 . "Parameters objects")
+     (45 . "Optional positional and named parameters")
      (48 . "Intermediate Format Strings")
      (55 . "Require-extension")
      (60 . "Integers as bits")

@@ -1,7 +1,7 @@
 ;;;;
-;;;; do-test.stk	-- The pilot of all tests
+;;;; test-box.stk	-- Tests on boxes
 ;;;; 
-;;;; Copyright © 2005-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -20,28 +20,33 @@
 ;;;; USA.
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
-;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update:  9-Dec-2007 21:03 (eg)
+;;;;    Creation date:  9-Dec-2007 21:02 (eg)
+;;;; Last file update:  9-Dec-2007 21:11 (eg)
 ;;;;
+(require "test")
 
-(load "./test.stk")
+(test-section "Boxes")
 
-(define (load-tests)
-  (load "test-number.stk")
-  (load "test-keyword.stk")
-  (unless (eq? (%thread-system) 'lurc)
-    (load "test-callcc.stk"))
-  (load "test-sport.stk")
-  (load "test-fport.stk")
-  (load "test-threads.stk")
-  (load "test-srfi.stk")
-  (load "test-md5.stk")
-  (load "test-base64.stk")
-  (load "test-box.stk")
-  (load "test-r5rs-pitfall.stk"))
 
-  
-(define (main _)
-  (test-init "TEST.LOG")
-  (load-tests)
-  (test-end))
+(test "make-box"
+      (with-output-to-string (lambda () (write (make-box 10))))
+      "#&10")
+(test "make-constant-box"
+      (with-output-to-string (lambda () (write (make-constant-box 10))))
+      "#&10")
+
+(test "reader"
+      (eval-from-string "#&100")
+      (make-box 100))
+
+(test "equal?.1"
+      (equal? 100 (make-box 100))
+      #f)
+
+(test "equal?.2"
+      (equal? #&100 (make-box 100))
+      #t)
+
+(test-section-end)
+
+      

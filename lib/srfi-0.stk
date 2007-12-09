@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  9-Dec-2007 16:53 (eg)
+;;;; Last file update:  9-Dec-2007 21:29 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -80,7 +80,7 @@
     ;; srfi-42				; Eager Comprehensions
     ;; srfi-43				; Vector library
     ;; srfi-44				; Collections
-    ;; srfi-45				; primitives for lazy algorithms
+    (srfi-45 "srfi-45")			; primitives for lazy algorithms
     ;; srfi-46				; Basic Syntax-rules Extensions
     ;; srfi-47				; Array
     srfi-48				; Intermediate Format Strings
