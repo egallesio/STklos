@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  4-Jul-2007 14:53 (eg)
+;;;; Last file update:  7-Dec-2007 18:53 (eg)
 ;;;;
 
 (include "runtime.stk")	; Definition necessary for the bootstrap
@@ -195,8 +195,9 @@
   ;; Look at the debug flag
   (when (> debug 0)
     (compiler:warn-use-undefined #t)	; Signal usage of still undefined symbols
-    (compiler:gen-line-number #t))	; Generate line nuumbers
- 
+    (compiler:gen-line-number #t)	; Generate line nuumbers
+    (when (> debug 1)			; Load-verbose when debug >= 2 
+      (load-verbose 1)))
   ;; Try to load the user initialization file except if "--no-init-file"
   (unless no-init
     (try-load (expand-file-name "~/.stklos/stklosrc")))

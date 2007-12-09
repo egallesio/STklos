@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  4-Dec-2007 15:55 (eg)
+;;;; Last file update:  9-Dec-2007 16:53 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -123,8 +123,8 @@
     ;; srfi-85				; ....... withdrawn
     ;; srfi-86
     ;; srfi-87				; => in case clauses
-    ;; srfi-88
-    ;; srfi-89
+    srfi-88				; Keyword objects
+    (srfi-89 "srfi-89")			; Optional Positional and Named Parameters
     ;; srfi-90
     ;; srfi-91
     ;; srfi-92

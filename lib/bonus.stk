@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 13-Sep-2007 11:52 (eg)
+;;;; Last file update:  6-Dec-2007 15:08 (eg)
 ;;;;
 
 ;;
@@ -1646,6 +1646,22 @@ doc>
 		(else (error 'require-extension "bad clause ~S" ',x))))
 	    clauses)))
 
+;;
+;; SRFI-88: "keyword objects"
+;;
+#|
+<doc EXT string->keyword
+ * (string->keyword str)
+ *
+ * This function function has been added to be compatibe with SRFI-88.
+ * It is equivalent to make-keyword, except that the parameter cannot be
+ * a symbol.
+doc>
+|#
+(define (string->keyword str)
+  (unless (string? str)
+    (error "bad string ~S" str))
+  (make-keyword str))
 
 
 ;; LocalWords:  doc dotimes R5RS str SRFI optarg

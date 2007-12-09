@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  4-Dec-2007 15:21 (eg)
+# Last file update:  9-Dec-2007 16:56 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d @LURCDIR@
 
@@ -71,6 +71,7 @@ scheme_SRCS = STklos.init		\
 	      srfi-66.stk		\
 	      srfi-69.stk		\
 	      srfi-70.stk		\
+	      srfi-89.stk		\
 	      tar.stk			\
 	      trace.stk
 
@@ -107,6 +108,7 @@ scheme_OBJS = compfile.ostk		\
 	      srfi-66.ostk		\
 	      srfi-69.ostk		\
 	      srfi-70.ostk		\
+	      srfi-89.ostk		\
 	      tar.ostk			\
 	      trace.ostk	
 

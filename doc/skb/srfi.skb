@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 25-Oct-2006 17:40 (eg)
+;; Last file update:  9-Dec-2007 16:59 (eg)
 ;;
 ;; ======================================================================
 
@@ -483,6 +483,27 @@ following expression ])
 
 (p [,(quick-link-srfi 70) is fully supported.]))
 
+;; ----------------------------------------------------------------------
+;; SRFI 88 -- Keyword objects
+;; ----------------------------------------------------------------------   
+(srfi-section 88
 
+(p [,(quick-link-srfi 88) is fully supported. The only difference
+between the keywords defined in the SRFI document and the
+,(stklos) keywords is on the zero-length keyword: in ,(stklos),
+the keyword ,(tt ":") is equivalent to the keyword ,(tt "||:"),
+whereas the srfi considers that ,(tt ":") is not a keyword but a
+symbol.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 89 -- Optional positional and named parameters
+;; ----------------------------------------------------------------------   
+(srfi-section 89
+	      
+(p [,(quick-link-srfi 89) is fully supported.  To use SRFI-89,
+you need to insert the following expression])
+(fontified-code [(require "srfi-89")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+   
 ;; End of chapter   
 )

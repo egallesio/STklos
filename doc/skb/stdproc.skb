@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  6-Jun-2007 18:55 (eg)
+;; Last file update:  6-Dec-2007 15:09 (eg)
 ;;
 ;; ======================================================================
 
@@ -541,6 +541,7 @@ A keyword is a symbol whose first (or last) character is a colon
 (insertdoc 'keyword?)
 (insertdoc 'make-keyword)
 (insertdoc 'keyword->string)
+(insertdoc 'string->keyword)
 (insertdoc 'key-get)
 (insertdoc 'key-set!)
 (insertdoc 'key-delete!))
