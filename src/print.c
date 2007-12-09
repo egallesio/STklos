@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 18-Sep-2007 13:20 (eg)
+ * Last file update:  9-Dec-2007 18:47 (eg)
  *
  */
 #include <ctype.h>
@@ -193,10 +193,10 @@ void STk_print(SCM exp, SCM port, int mode)
     case tc_string:
       printstring(exp, port, mode);
       return;
-    case tc_box:		/* Should never occur in user code */
-      STk_putc('{', port);
+    case tc_box:
+      STk_putc('#', port);
+      STk_putc('&', port);
       STk_print(BOX_VALUE(exp), port, mode);
-      STk_putc('}', port);
       return;
     case tc_pointer:
       if (CPOINTER_TYPE(exp) == STk_void) {

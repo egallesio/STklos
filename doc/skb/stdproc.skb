@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  6-Dec-2007 15:09 (eg)
+;; Last file update:  9-Dec-2007 20:31 (eg)
 ;;
 ;; ======================================================================
 
@@ -632,6 +632,23 @@ also be represented with date structures.])
 (insertdoc 'date)
 )   
 
+   
+;;;
+;;; BOXES
+;;;
+(section :title "Boxes"
+   (p [Boxes are records that have a single field. A box may be constructed with 
+the ,(tt "make-box"), ,(tt "make-constant-box") or the ,(tt "read") primitives. 
+A box produced by read (using the ,(q (tt "#&")) notation) is mutable. Note that 
+two boxes  are ,(tt "equal?") ,(emph "iff") their content are ,(tt "equal?").])
+
+(insertdoc 'make-box)
+(insertdoc 'make-constant-box)
+(insertdoc 'box?)
+(insertdoc 'box-mutable?)
+(insertdoc 'box-set!)
+(insertdoc 'unbox))
+
 
 ;;;
 ;;; PROCESSES
@@ -756,6 +773,7 @@ use a |main| function in a Scheme program.])
 (insertdoc 'get-password)
 (insertdoc 'register-exit-function!)))
 
+
 ;;;
 ;;; SIGNALS 
 ;;;
@@ -775,7 +793,8 @@ See SRFI document for more information.])
 (insertdoc 'parameterize)
 (insertdoc 'parameter?))
 
-
+  
+   
 ;;;
 ;;; Misc
 ;;;

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  7-Dec-2007 23:38 (eg)
+ * Last file update:  9-Dec-2007 20:33 (eg)
  */
 
 
@@ -311,6 +311,29 @@ EXTERN_PRIMITIVE("equal?", equal, subr2, (SCM x,SCM y));
 
 int STk_init_boolean(void);
 
+
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ---- 				 B O X . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+struct box_obj {
+  stk_header header;
+  SCM value;
+};
+
+#define BOXP(p) 	(BOXED_TYPE_EQ((p), tc_box))
+#define BOX_VALUE(p)	(((struct box_obj *) (p))->value)
+
+#define BOX_CONST	(1 << 0)
+
+EXTERN_PRIMITIVE("make-box", make_box, subr1, (SCM x));
+
+int STk_init_box(void);
+
+
 /*
   ------------------------------------------------------------------------------
   ----
@@ -428,20 +451,14 @@ void STk_signal(char *str);
   ----
   ------------------------------------------------------------------------------
 */
-struct box_obj {	/* A simple box (used for global variables */
-  stk_header header;
-  SCM value;
-};
-#define BOXP(p) 	(BOXED_TYPE_EQ((p), tc_box))
-#define BOX_VALUE(p)	(((struct box_obj *) (p))->value)
-
-
 struct frame_obj {		
   stk_header header;
   SCM next_frame;
   SCM owner;
   SCM locals[1];	/* the values associated to the names */
 };
+
+/* Note: boxes are used for global variables */
 
 #define FRAME_LENGTH(p)		(BOXED_INFO(p))
 #define FRAME_NEXT(p)		(((struct frame_obj *) (p))->next_frame)

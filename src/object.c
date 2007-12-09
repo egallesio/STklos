@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update:  8-Nov-2007 23:18 (eg)
+ * Last file update:  9-Dec-2007 20:39 (eg)
  */
 
 #include "stklos.h"
@@ -61,7 +61,7 @@ static SCM Top, Object, Class, Generic, Method, Simple_method, Accessor,
            Procedure_class, Entity_class;
 static SCM Boolean, Char, Pair, Procedure, String, Symbol, Vector, Number, 
  	   Liste, Null, Real, Complex, Rational, Integer, Keyword, Eof, 
-	   Struct_type, Struct, Cond, Cond_type, UnknownClass;
+  Struct_type, Struct, Cond, Cond_type, Box, UnknownClass;
 
 
 int STk_oo_initialized = FALSE;
@@ -906,6 +906,7 @@ static void make_standard_classes(void)
   mk_cls(&Struct_type,  "<struct-type>",Class,           Top,       STk_nil);
   mk_cls(&Cond, 	"<condition>",  Class,		 Top,	    STk_nil);
   mk_cls(&Cond_type, 	"<condition-type>",Class,	 Top,	    STk_nil);
+  mk_cls(&Box, 		"<box>",	Class,	 	 Top,	    STk_nil);
   mk_cls(&UnknownClass, "<unknown>",    Class,           Top,       STk_nil);
   mk_cls(&Procedure,    "<procedure>",  Procedure_class, Top,       STk_nil);
 }  
@@ -1014,7 +1015,7 @@ DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
     case tc_keyword:	return Keyword;
     case tc_struct_type:return (COND_TYPEP(obj)) ? Cond_type: Struct_type;
     case tc_struct:	return (CONDP(obj)) ? Cond : Struct;
-    
+    case tc_box:	return Box;
     default: 		
 #ifdef FIXME
       //XX      if (EXTENDEDP(obj))

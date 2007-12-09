@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  6-Jul-2007 17:19 (eg)
+ * Last file update:  9-Dec-2007 18:56 (eg)
  */
 
 #include "stklos.h"
@@ -338,6 +338,10 @@ DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
     case tc_struct:
       if (STRUCTP(y) && (STRUCT_TYPE(x) == STRUCT_TYPE(y)))
 	return STk_equal(STk_struct2list(x), STk_struct2list(y));
+      break;
+    case tc_box:
+      if (BOXP(y))
+	return STk_equal(BOX_VALUE(x), BOX_VALUE(y));
       break;
 #ifdef FIXME
 //EG:       default:	

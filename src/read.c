@@ -20,7 +20,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update:  8-Dec-2007 00:15 (eg)
+ * Last file update:  9-Dec-2007 20:35 (eg)
  *
  */
 
@@ -646,6 +646,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
 			 goto unknown_sharp;
 		       }
 	  	    }
+	  case '&': return STk_make_box(read_rec(port, ctx, inlist));
 	  case 'p':
 	  case 'P': return read_address(port);
 	  case 'S':

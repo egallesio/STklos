@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 28-Aug-2007 15:00 (eg)
+# Last file update:  9-Dec-2007 18:49 (eg)
 
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -30,9 +30,10 @@ if NO_THREAD
   THREAD_FILES = thread-none.c mutex-none.c
 endif
 
-stklos_SOURCES = base64.c boolean.c boot.c char.c cond.c cpointer.c dynload.c \
- env.c error.c extend.c ffi.c fixnum.c fport.c gnu-getopt.c gnu-glob.c \
- hash.c keyword.c lib.c list.c misc.c md5.c number.c object.c parameter.c \
+stklos_SOURCES = base64.c boolean.c boot.c box.c char.c cond.c \
+ cpointer.c dynload.c env.c error.c extend.c ffi.c fixnum.c \
+ fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
+ list.c misc.c md5.c number.c object.c parameter.c \
  path.c port.c print.c proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
  symbol.c system.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)

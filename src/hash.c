@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 11-Apr-2007 17:57 (eg)
+ * Last file update:  9-Dec-2007 20:34 (eg)
  */
 
 #include "stklos.h"
@@ -361,9 +361,8 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value)
   } else {
     SCM z;
     
-    /* Create a new box or this value */
-    NEWCELL(z, box); BOX_VALUE(z) = value;
-
+    /* Create a new box for this value */
+    z = STk_make_box(value);
     
     /* Enter the new variable in table */
     HASH_BUCKETS(h)[index] = STk_cons(STk_cons(v, z),
