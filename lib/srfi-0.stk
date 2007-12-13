@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  9-Dec-2007 21:29 (eg)
+;;;; Last file update: 13-Dec-2007 12:26 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -94,7 +94,7 @@
     ;; srfi-56				; ....... withdrawn
     ;; srfi-57				; Records
     ;; srfi-58				; Array Notation
-    ;; srfi-59				; Vicinity
+    (srfi-59 "srfi-59")				; Vicinity
     (srfi-60 "srfi-60")			; Integers as Bits
     ;; srfi-61				; A more general cond clause
     srfi-62				; S-expression comments

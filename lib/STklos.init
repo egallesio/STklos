@@ -4,7 +4,7 @@
 ;;;
 ;;; This code is in the public domain.
 ;;;
-;;; Last file update:  6-Dec-2007 12:53 (eg)
+;;; Last file update: 13-Dec-2007 12:38 (eg)
 ;;; 
 
 
@@ -84,12 +84,8 @@
 (define vicinity:suffix?
   (let ((suffi
 	 (case (software-type)
-	   ((amiga)				'(#\: #\/))
-	   ((macos thinkc)			'(#\:))
 	   ((ms-dos windows atarist os/2)	'(#\\ #\/))
-	   ((nosve)				'(#\: #\.))
 	   ((unix coherent plan9)		'(#\/))
-	   ((vms)				'(#\: #\]))
 	   (else
 	    (slib:warn "require.scm" 'unknown 'software-type (software-type))
 	    "/"))))
@@ -101,29 +97,23 @@
 	  ((vicinity:suffix? (string-ref pathname i))
 	   (substring pathname 0 (+ i 1)))
 	  (else (loop (- i 1))))))
+
 (define (program-vicinity)
-  (if *load-pathname*
-      (pathname->vicinity *load-pathname*)
-      (slib:error 'program-vicinity " called; use slib:load to load")))
+  (let ((cur (current-loading-file)))
+    (and  cur
+	(pathname->vicinity cur))))
+
 ;@
 (define sub-vicinity
-  (case (software-type)
-    ((vms) (lambda
-	       (vic name)
-	     (let ((l (string-length vic)))
-	       (if (or (zero? (string-length vic))
-		       (not (char=? #\] (string-ref vic (- l 1)))))
-		   (string-append vic "[" name "]")
-		   (string-append (substring vic 0 (- l 1))
-				  "." name "]")))))
-    (else (let ((*vicinity-suffix*
-		 (case (software-type)
-		   ((nosve) ".")
-		   ((macos thinkc) ":")
-		   ((ms-dos windows atarist os/2) "\\")
-		   ((unix coherent plan9 amiga) "/"))))
-	    (lambda (vic name)
-	      (string-append vic name *vicinity-suffix*))))))
+  (let ((*vicinity-suffix*
+	 (case (software-type)
+	   ((nosve) ".")
+	   ((macos thinkc) ":")
+	   ((ms-dos windows atarist os/2) "\\")
+	   ((unix coherent plan9 amiga) "/"))))
+    (lambda (vic name)
+      (string-append vic name *vicinity-suffix*))))
+
 ;@
 (define (make-vicinity <pathname>) <pathname>)
 ;@
@@ -139,6 +129,7 @@
 	    (lambda () (set! old (exchange path)))
 	    thunk
 	    (lambda () (exchange old)))))))
+
 
 ;;@ SLIB:FEATURES is a list of symbols naming the (SLIB) features
 ;;; initially supported by this implementation.
@@ -216,6 +207,13 @@
 		  ;; Implementation Specific features
 
 	))
+
+
+;;; All the functions of srfi-59 are now defined. The following
+;;; provide ensures that the file "srfi-59" will be not loaded 
+(provide "srfi-59")
+
+
 
 ;;@ (OUTPUT-PORT-WIDTH <port>)
 (define (output-port-width . arg) 79)
@@ -421,6 +419,7 @@
 (define program-arguments argv)
 (define current-time current-seconds)
 
+
 ;;; 
 ;;; Retain original require/provide before loading "require.scm"
 ;;;
@@ -463,3 +462,4 @@
     (lambda (item)
       ((if (symbol? item) slib:provided? stklos:provided?) item))))
 
+(provide "STklos.init")

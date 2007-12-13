@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Aug-2004 12:43 (eg)
-;;;; Last file update:  9-Dec-2007 21:34 (eg)
+;;;; Last file update: 13-Dec-2007 12:40 (eg)
 ;;;;
 
 (define srfi-address "http://srfi.schemers.org/srfi-~A/srfi-~A.html")
@@ -57,6 +57,7 @@
      (45 . "Optional positional and named parameters")
      (48 . "Intermediate Format Strings")
      (55 . "Require-extension")
+     (59 . "Vicinity")
      (60 . "Integers as bits")
      (62 . "S-expression comments")
      (66 . "Octet Vectors")

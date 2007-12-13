@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  9-Dec-2007 21:33 (eg)
+;; Last file update: 13-Dec-2007 12:42 (eg)
 ;;
 ;; ======================================================================
 
@@ -443,6 +443,16 @@ figure ,(ref :figure "Feature identifiers") in a
 	 (tr (tdl "random")      (tdl "srfi-27"))
 	 (tr (tdl "conditions")  (tdl "srfi-34, srfi-35, srfi-36"))
 	 (tr (tdl "hash-tables") (tdl "srfi-69"))))))
+
+;; ----------------------------------------------------------------------
+;; SRFI 59 -- Vicinity 
+;; ----------------------------------------------------------------------   
+(srfi-section 59
+
+(p [,(quick-link-srfi 59) is fully supported.  To use SRFI-59,
+you need to insert the following expression])
+(fontified-code [(require "srfi-59")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
 
 ;; ----------------------------------------------------------------------
 ;; SRFI 60 -- Integers as Bits 
