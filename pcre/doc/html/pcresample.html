@@ -33,9 +33,10 @@ string. The logic is a little bit tricky because of the possibility of matching
 an empty string. Comments in the code explain what is going on.
 </P>
 <P>
-If PCRE is installed in the standard include and library directories for your
-system, you should be able to compile the demonstration program using this
-command:
+The demonstration program is automatically built if you use "./configure;make"
+to build PCRE. Otherwise, if PCRE is installed in the standard include and
+library directories for your system, you should be able to compile the
+demonstration program using this command:
 <pre>
   gcc -o pcredemo pcredemo.c -lpcre
 </pre>
@@ -72,10 +73,25 @@ need to add
 </pre>
 (for example) to the compile command to get round this problem.
 </P>
+<br><b>
+AUTHOR
+</b><br>
 <P>
-Last updated: 09 September 2004
+Philip Hazel
 <br>
-Copyright &copy; 1997-2004 University of Cambridge.
+University Computing Service
+<br>
+Cambridge CB2 3QH, England.
+<br>
+</P>
+<br><b>
+REVISION
+</b><br>
+<P>
+Last updated: 13 June 2007
+<br>
+Copyright &copy; 1997-2007 University of Cambridge.
+<br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

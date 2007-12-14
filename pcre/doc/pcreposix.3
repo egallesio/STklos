@@ -1,4 +1,4 @@
-.TH PCRE 3
+.TH PCREPOSIX 3
 .SH NAME
 PCRE - Perl-compatible regular expressions.
 .SH "SYNOPSIS OF POSIX API"
@@ -7,22 +7,18 @@ PCRE - Perl-compatible regular expressions.
 .B #include <pcreposix.h>
 .PP
 .SM
-.br
 .B int regcomp(regex_t *\fIpreg\fP, const char *\fIpattern\fP,
 .ti +5n
 .B int \fIcflags\fP);
 .PP
-.br
 .B int regexec(regex_t *\fIpreg\fP, const char *\fIstring\fP,
 .ti +5n
 .B size_t \fInmatch\fP, regmatch_t \fIpmatch\fP[], int \fIeflags\fP);
 .PP
-.br
 .B size_t regerror(int \fIerrcode\fP, const regex_t *\fIpreg\fP,
 .ti +5n
 .B char *\fIerrbuf\fP, size_t \fIerrbuf_size\fP);
 .PP
-.br
 .B void regfree(regex_t *\fIpreg\fP);
 .
 .SH DESCRIPTION
@@ -33,8 +29,8 @@ package. See the
 .\" HREF
 \fBpcreapi\fP
 .\"
-documentation for a description of PCRE's native API, which contains additional
-functionality.
+documentation for a description of PCRE's native API, which contains much
+additional functionality.
 .P
 The functions described here are just wrapper functions that ultimately call
 the PCRE native API. Their prototypes are defined in the \fBpcreposix.h\fP
@@ -44,10 +40,10 @@ command for linking an application that uses them. Because the POSIX functions
 call the native ones, it is also necessary to add \fB-lpcre\fP.
 .P
 I have implemented only those option bits that can be reasonably mapped to PCRE
-native options. In addition, the options REG_EXTENDED and REG_NOSUB are defined
-with the value zero. They have no effect, but since programs that are written
-to the POSIX interface often use them, this makes it easier to slot in PCRE as
-a replacement library. Other POSIX options are not even defined.
+native options. In addition, the option REG_EXTENDED is defined with the value
+zero. This has no effect, but since programs that are written to the POSIX
+interface often use it, this makes it easier to slot in PCRE as a replacement
+library. Other POSIX options are not even defined.
 .P
 When PCRE is called via these functions, it is only the API that is POSIX-like
 in style. The syntax and semantics of the regular expressions themselves are
@@ -71,21 +67,42 @@ The function \fBregcomp()\fP is called to compile a pattern into an
 internal form. The pattern is a C string terminated by a binary zero, and
 is passed in the argument \fIpattern\fP. The \fIpreg\fP argument is a pointer
 to a \fBregex_t\fP structure that is used as a base for storing information
-about the compiled expression.
+about the compiled regular expression.
 .P
 The argument \fIcflags\fP is either zero, or contains one or more of the bits
 defined by the following macros:
 .sp
+  REG_DOTALL
+.sp
+The PCRE_DOTALL option is set when the regular expression is passed for
+compilation to the native function. Note that REG_DOTALL is not part of the
+POSIX standard.
+.sp
   REG_ICASE
 .sp
-The PCRE_CASELESS option is set when the expression is passed for compilation
-to the native function.
+The PCRE_CASELESS option is set when the regular expression is passed for
+compilation to the native function.
 .sp
   REG_NEWLINE
 .sp
-The PCRE_MULTILINE option is set when the expression is passed for compilation
-to the native function. Note that this does \fInot\fP mimic the defined POSIX
-behaviour for REG_NEWLINE (see the following section).
+The PCRE_MULTILINE option is set when the regular expression is passed for
+compilation to the native function. Note that this does \fInot\fP mimic the
+defined POSIX behaviour for REG_NEWLINE (see the following section).
+.sp
+  REG_NOSUB
+.sp
+The PCRE_NO_AUTO_CAPTURE option is set when the regular expression is passed
+for compilation to the native function. In addition, when a pattern that is
+compiled with this flag is passed to \fBregexec()\fP for matching, the
+\fInmatch\fP and \fIpmatch\fP arguments are ignored, and no captured strings
+are returned.
+.sp
+  REG_UTF8
+.sp
+The PCRE_UTF8 option is set when the regular expression is passed for
+compilation to the native function. This causes the pattern itself and all data
+strings used for matching it to be treated as UTF-8 strings. Note that REG_UTF8
+is not part of the POSIX standard.
 .P
 In the absence of these flags, no options are passed to the native function.
 This means the the regex is compiled with PCRE default semantics. In
@@ -153,15 +170,19 @@ function.
 The PCRE_NOTEOL option is set when calling the underlying PCRE matching
 function.
 .P
-The portion of the string that was matched, and also any captured substrings,
-are returned via the \fIpmatch\fP argument, which points to an array of
-\fInmatch\fP structures of type \fIregmatch_t\fP, containing the members
-\fIrm_so\fP and \fIrm_eo\fP. These contain the offset to the first character of
-each substring and the offset to the first character after the end of each
-substring, respectively. The 0th element of the vector relates to the entire
-portion of \fIstring\fP that was matched; subsequent elements relate to the
-capturing subpatterns of the regular expression. Unused entries in the array
-have both structure members set to -1.
+If the pattern was compiled with the REG_NOSUB flag, no data about any matched
+strings is returned. The \fInmatch\fP and \fIpmatch\fP arguments of
+\fBregexec()\fP are ignored.
+.P
+Otherwise,the portion of the string that was matched, and also any captured
+substrings, are returned via the \fIpmatch\fP argument, which points to an
+array of \fInmatch\fP structures of type \fIregmatch_t\fP, containing the
+members \fIrm_so\fP and \fIrm_eo\fP. These contain the offset to the first
+character of each substring and the offset to the first character after the end
+of each substring, respectively. The 0th element of the vector relates to the
+entire portion of \fIstring\fP that was matched; subsequent elements relate to
+the capturing subpatterns of the regular expression. Unused entries in the
+array have both structure members set to -1.
 .P
 A successful match yields a zero return; various error codes are defined in the
 header file, of which REG_NOMATCH is the "expected" failure code.
@@ -189,13 +210,17 @@ memory, after which \fIpreg\fP may no longer be used as a compiled expression.
 .SH AUTHOR
 .rs
 .sp
-Philip Hazel <ph10@cam.ac.uk>
-.br
-University Computing Service,
-.br
-Cambridge CB2 3QG, England.
-.P
-.in 0
-Last updated: 07 September 2004
-.br
-Copyright (c) 1997-2004 University of Cambridge.
+.nf
+Philip Hazel
+University Computing Service
+Cambridge CB2 3QH, England.
+.fi
+.
+.
+.SH REVISION
+.rs
+.sp
+.nf
+Last updated: 06 March 2007
+Copyright (c) 1997-2007 University of Cambridge.
+.fi

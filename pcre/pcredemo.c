@@ -11,7 +11,8 @@ Compile thuswise:
     -R/usr/local/lib -lpcre
 
 Replace "/usr/local/include" and "/usr/local/lib" with wherever the include and
-library files for PCRE are installed on your system. Only some operating
+library files for PCRE are installed on your system. You don't need -I and -L
+if PCRE is installed in the standard system libraries. Only some operating
 systems (e.g. Solaris) use the -R option.
 */
 
@@ -117,7 +118,7 @@ if (rc < 0)
     */
     default: printf("Matching error %d\n", rc); break;
     }
-  free(re);     /* Release memory used for the compiled pattern */
+  pcre_free(re);     /* Release memory used for the compiled pattern */
   return 1;
   }
 
@@ -223,8 +224,8 @@ if (namecount <= 0) printf("No named substrings\n"); else
 
 if (!find_all)
   {
-  free(re);   /* Release the memory used for the compiled pattern */
-  return 0;   /* Finish unless -g was given */
+  pcre_free(re);   /* Release the memory used for the compiled pattern */
+  return 0;        /* Finish unless -g was given */
   }
 
 /* Loop for second and subsequent matches */
@@ -276,7 +277,7 @@ for (;;)
   if (rc < 0)
     {
     printf("Matching error %d\n", rc);
-    free(re);    /* Release memory used for the compiled pattern */
+    pcre_free(re);    /* Release memory used for the compiled pattern */
     return 1;
     }
 
@@ -317,7 +318,7 @@ for (;;)
   }      /* End of loop to find second and subsequent matches */
 
 printf("\n");
-free(re);       /* Release memory used for the compiled pattern */
+pcre_free(re);       /* Release memory used for the compiled pattern */
 return 0;
 }
 

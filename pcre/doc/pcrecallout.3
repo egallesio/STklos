@@ -1,4 +1,4 @@
-.TH PCRE 3
+.TH PCRECALLOUT 3
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE CALLOUTS"
@@ -17,7 +17,7 @@ function is to be called. Different callout points can be identified by putting
 a number less than 256 after the letter C. The default value is zero.
 For example, this pattern has two callout points:
 .sp
-  (?C1)\deabc(?C2)def
+  (?C1)abc(?C2)def
 .sp
 If the PCRE_AUTO_CALLOUT option bit is set when \fBpcre_compile()\fP is called,
 PCRE automatically inserts callouts, all with number 255, before each item in
@@ -58,9 +58,10 @@ no match, the callout is obeyed.
 .rs
 .sp
 During matching, when PCRE reaches a callout point, the external function
-defined by \fIpcre_callout\fP is called (if it is set). The only argument is a
-pointer to a \fBpcre_callout\fP block. This structure contains the following
-fields:
+defined by \fIpcre_callout\fP is called (if it is set). This applies to both
+the \fBpcre_exec()\fP and the \fBpcre_dfa_exec()\fP matching functions. The
+only argument to the callout function is a pointer to a \fBpcre_callout\fP
+block. This structure contains the following fields:
 .sp
   int          \fIversion\fP;
   int          \fIcallout_number\fP;
@@ -85,34 +86,41 @@ into the pattern (that is, the number after ?C for manual callouts, and 255 for
 automatically generated callouts).
 .P
 The \fIoffset_vector\fP field is a pointer to the vector of offsets that was
-passed by the caller to \fBpcre_exec()\fP. The contents can be inspected in
-order to extract substrings that have been matched so far, in the same way as
-for extracting substrings after a match has completed.
+passed by the caller to \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP. When
+\fBpcre_exec()\fP is used, the contents can be inspected in order to extract
+substrings that have been matched so far, in the same way as for extracting
+substrings after a match has completed. For \fBpcre_dfa_exec()\fP this field is
+not useful.
 .P
 The \fIsubject\fP and \fIsubject_length\fP fields contain copies of the values
 that were passed to \fBpcre_exec()\fP.
 .P
-The \fIstart_match\fP field contains the offset within the subject at which the
-current match attempt started. If the pattern is not anchored, the callout
-function may be called several times from the same point in the pattern for
-different starting points in the subject.
+The \fIstart_match\fP field normally contains the offset within the subject at
+which the current match attempt started. However, if the escape sequence \eK
+has been encountered, this value is changed to reflect the modified starting
+point. If the pattern is not anchored, the callout function may be called
+several times from the same point in the pattern for different starting points
+in the subject.
 .P
 The \fIcurrent_position\fP field contains the offset within the subject of the
 current match pointer.
 .P
-The \fIcapture_top\fP field contains one more than the number of the highest
-numbered captured substring so far. If no substrings have been captured,
-the value of \fIcapture_top\fP is one.
+When the \fBpcre_exec()\fP function is used, the \fIcapture_top\fP field
+contains one more than the number of the highest numbered captured substring so
+far. If no substrings have been captured, the value of \fIcapture_top\fP is
+one. This is always the case when \fBpcre_dfa_exec()\fP is used, because it
+does not support captured substrings.
 .P
 The \fIcapture_last\fP field contains the number of the most recently captured
-substring. If no substrings have been captured, its value is -1.
+substring. If no substrings have been captured, its value is -1. This is always
+the case when \fBpcre_dfa_exec()\fP is used.
 .P
 The \fIcallout_data\fP field contains a value that is passed to
-\fBpcre_exec()\fP by the caller specifically so that it can be passed back in
-callouts. It is passed in the \fIpcre_callout\fP field of the \fBpcre_extra\fP
-data structure. If no such data was passed, the value of \fIcallout_data\fP in
-a \fBpcre_callout\fP block is NULL. There is a description of the
-\fBpcre_extra\fP structure in the
+\fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP specifically so that it can be
+passed back in callouts. It is passed in the \fIpcre_callout\fP field of the
+\fBpcre_extra\fP data structure. If no such data was passed, the value of
+\fIcallout_data\fP in a \fBpcre_callout\fP block is NULL. There is a
+description of the \fBpcre_extra\fP structure in the
 .\" HREF
 \fBpcreapi\fP
 .\"
@@ -139,17 +147,31 @@ same callout number. However, they are set for all callouts.
 .sp
 The external callout function returns an integer to PCRE. If the value is zero,
 matching proceeds as normal. If the value is greater than zero, matching fails
-at the current point, but backtracking to test other matching possibilities
-goes ahead, just as if a lookahead assertion had failed. If the value is less
-than zero, the match is abandoned, and \fBpcre_exec()\fP returns the negative
-value.
+at the current point, but the testing of other matching possibilities goes
+ahead, just as if a lookahead assertion had failed. If the value is less than
+zero, the match is abandoned, and \fBpcre_exec()\fP (or \fBpcre_dfa_exec()\fP)
+returns the negative value.
 .P
 Negative values should normally be chosen from the set of PCRE_ERROR_xxx
 values. In particular, PCRE_ERROR_NOMATCH forces a standard "no match" failure.
 The error number PCRE_ERROR_CALLOUT is reserved for use by callout functions;
 it will never be used by PCRE itself.
-.P
-.in 0
-Last updated: 09 September 2004
-.br
-Copyright (c) 1997-2004 University of Cambridge.
+.
+.
+.SH AUTHOR
+.rs
+.sp
+.nf
+Philip Hazel
+University Computing Service
+Cambridge CB2 3QH, England.
+.fi
+.
+.
+.SH REVISION
+.rs
+.sp
+.nf
+Last updated: 29 May 2007
+Copyright (c) 1997-2007 University of Cambridge.
+.fi

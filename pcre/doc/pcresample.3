@@ -1,4 +1,4 @@
-.TH PCRE 3
+.TH PCRESAMPLE 3
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "PCRE SAMPLE PROGRAM"
@@ -18,9 +18,10 @@ check for further matches of the same regular expression in the same subject
 string. The logic is a little bit tricky because of the possibility of matching
 an empty string. Comments in the code explain what is going on.
 .P
-If PCRE is installed in the standard include and library directories for your
-system, you should be able to compile the demonstration program using this
-command:
+The demonstration program is automatically built if you use "./configure;make"
+to build PCRE. Otherwise, if PCRE is installed in the standard include and
+library directories for your system, you should be able to compile the
+demonstration program using this command:
 .sp
   gcc -o pcredemo pcredemo.c -lpcre
 .sp
@@ -59,8 +60,22 @@ need to add
   -R/usr/local/lib
 .sp
 (for example) to the compile command to get round this problem.
-.P
-.in 0
-Last updated: 09 September 2004
-.br
-Copyright (c) 1997-2004 University of Cambridge.
+.
+.
+.SH AUTHOR
+.rs
+.sp
+.nf
+Philip Hazel
+University Computing Service
+Cambridge CB2 3QH, England.
+.fi
+.
+.
+.SH REVISION
+.rs
+.sp
+.nf
+Last updated: 13 June 2007
+Copyright (c) 1997-2007 University of Cambridge.
+.fi

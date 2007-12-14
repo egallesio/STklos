@@ -67,7 +67,7 @@ State can be one of the following values
     
     -	43	Vector Library
     -   44	Collections
-    ?   45	Primitives for expressing iterative lazy algorithms
+    Y   45	Primitives for expressing iterative lazy algorithms
     ?	47	Array
     Y   48	Intermediate Format Strings
 
@@ -78,7 +78,7 @@ State can be one of the following values
     -   57	Records
 
     ?   58	Array Notation
-    -   59	Vicinity
+    Y   59	Vicinity
     Y   60	Integers as Bits
     -   61	A more general cond clause
     Y   62	S-expression comments
@@ -92,5 +92,15 @@ State can be one of the following values
     ?   71	LET-syntax for multiple values
     -   72	Simple hygienic macros
     -	74	Octet-Addressed Binary Blocks
+    ?	78	Lightweight testing
+    N   86	MU and NU simulating VALUES & CALL-WITH-VALUES, ... 
 
-Implemented SRFIs: 33/58
+    ?   87      => in case clauses
+    Y   88      Keyword Objects
+    Y   89	Optional and named parameters
+    ?   90	Extensible hash table constructor
+    ?   94	Type-Restricted Numerical Functions
+
+    ?   95	Sorting and Merging
+
+Implemented SRFIs: 37/66

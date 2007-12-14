@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 24-Sep-2007 14:35 (eg)
+dnl Last file update: 14-Dec-2007 15:47 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -363,7 +363,7 @@ then
    -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
 
    (cd pcre; CC=$CC CFLAGS="$CFLAGS $PCRE_FLAGS" sh ./configure \
-    --prefix=$prefix --disable-shared)
+    --prefix=$prefix --disable-shared --disable-cpp)
     PCRE=pcre
     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
     PCREINC="-I../pcre"

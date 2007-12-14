@@ -1,4 +1,4 @@
-.TH PCRE 3
+.TH PCREPRECOMPILE 3
 .SH NAME
 PCRE - Perl-compatible regular expressions
 .SH "SAVING AND RE-USING PRECOMPILED PCRE PATTERNS"
@@ -17,7 +17,9 @@ tables, it is a little bit more complicated.
 If you save compiled patterns to a file, you can copy them to a different host
 and run them there. This works even if the new host has the opposite endianness
 to the one on which the patterns were compiled. There may be a small
-performance penalty, but it should be insignificant.
+performance penalty, but it should be insignificant. However, compiling regular
+expressions with one version of PCRE for use with a different version is not
+guaranteed to work and may cause crashes.
 .
 .
 .SH "SAVING A COMPILED PATTERN"
@@ -79,15 +81,16 @@ return a non-NULL value before trying to save the study data.
 .rs
 .sp
 Re-using a precompiled pattern is straightforward. Having reloaded it into main
-memory, you pass its pointer to \fBpcre_exec()\fP in the usual way. This should
-work even on another host, and even if that host has the opposite endianness to
-the one where the pattern was compiled.
+memory, you pass its pointer to \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP in
+the usual way. This should work even on another host, and even if that host has
+the opposite endianness to the one where the pattern was compiled.
 .P
 However, if you passed a pointer to custom character tables when the pattern
 was compiled (the \fItableptr\fP argument of \fBpcre_compile()\fP), you must
-now pass a similar pointer to \fBpcre_exec()\fP, because the value saved with
-the compiled pattern will obviously be nonsense. A field in a
-\fBpcre_extra()\fP block is used to pass this data, as described in the
+now pass a similar pointer to \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP,
+because the value saved with the compiled pattern will obviously be nonsense. A
+field in a \fBpcre_extra()\fP block is used to pass this data, as described in
+the
 .\" HTML <a href="pcreapi.html#extradata">
 .\" </a>
 section on matching a pattern
@@ -107,19 +110,33 @@ If you saved study data with the compiled pattern, you need to create your own
 \fBpcre_extra\fP data block and set the \fIstudy_data\fP field to point to the
 reloaded study data. You must also set the PCRE_EXTRA_STUDY_DATA bit in the
 \fIflags\fP field to indicate that study data is present. Then pass the
-\fBpcre_extra\fP block to \fBpcre_exec()\fP in the usual way.
+\fBpcre_extra\fP block to \fBpcre_exec()\fP or \fBpcre_dfa_exec()\fP in the
+usual way.
 .
 .
 .SH "COMPATIBILITY WITH DIFFERENT PCRE RELEASES"
 .rs
 .sp
-The layout of the control block that is at the start of the data that makes up
-a compiled pattern was changed for release 5.0. If you have any saved patterns
-that were compiled with previous releases (not a facility that was previously
-advertised), you will have to recompile them for release 5.0. However, from now
-on, it should be possible to make changes in a compabible manner.
-.P
-.in 0
-Last updated: 10 September 2004
-.br
-Copyright (c) 1997-2004 University of Cambridge.
+In general, it is safest to recompile all saved patterns when you update to a
+new PCRE release, though not all updates actually require this. Recompiling is
+definitely needed for release 7.2.
+.
+.
+.
+.SH AUTHOR
+.rs
+.sp
+.nf
+Philip Hazel
+University Computing Service
+Cambridge CB2 3QH, England.
+.fi
+.
+.
+.SH REVISION
+.rs
+.sp
+.nf
+Last updated: 13 June 2007
+Copyright (c) 1997-2007 University of Cambridge.
+.fi

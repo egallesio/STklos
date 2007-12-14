@@ -1,6 +1,197 @@
 News about PCRE releases
 ------------------------
 
+
+Release 7.4 21-Sep-07
+---------------------
+
+The only change of specification is the addition of options to control whether
+\R matches any Unicode line ending (the default) or just CR, LF, and CRLF.
+Otherwise, the changes are bug fixes and a refactoring to reduce the number of
+relocations needed in a shared library. There have also been some documentation
+updates, in particular, some more information about using CMake to build PCRE
+has been added to the NON-UNIX-USE file.
+
+
+Release 7.3 28-Aug-07
+---------------------
+
+Most changes are bug fixes. Some that are not:
+
+1. There is some support for Perl 5.10's experimental "backtracking control
+   verbs" such as (*PRUNE).
+
+2. UTF-8 checking is now as per RFC 3629 instead of RFC 2279; this is more
+   restrictive in the strings it accepts.
+
+3. Checking for potential integer overflow has been made more dynamic, and as a
+   consequence there is no longer a hard limit on the size of a subpattern that
+   has a limited repeat count.
+
+4. When CRLF is a valid line-ending sequence, pcre_exec() and pcre_dfa_exec()
+   no longer advance by two characters instead of one when an unanchored match
+   fails at CRLF if there are explicit CR or LF matches within the pattern.
+   This gets rid of some anomalous effects that previously occurred.
+
+5. Some PCRE-specific settings for varying the newline options at the start of
+   a pattern have been added.
+
+
+Release 7.2 19-Jun-07
+---------------------
+
+WARNING: saved patterns that were compiled by earlier versions of PCRE must be
+recompiled for use with 7.2 (necessitated by the addition of \K, \h, \H, \v,
+and \V).
+
+Correction to the notes for 7.1: the note about shared libraries for Windows is
+wrong. Previously, three libraries were built, but each could function
+independently. For example, the pcreposix library also included all the
+functions from the basic pcre library. The change is that the three libraries
+are no longer independent. They are like the Unix libraries. To use the
+pcreposix functions, for example, you need to link with both the pcreposix and
+the basic pcre library.
+
+Some more features from Perl 5.10 have been added:
+
+  (?-n) and (?+n) relative references for recursion and subroutines.
+
+  (?(-n) and (?(+n) relative references as conditions.
+
+  \k{name} and \g{name} are synonyms for \k<name>.
+
+  \K to reset the start of the matched string; for example, (foo)\Kbar
+  matches bar preceded by foo, but only sets bar as the matched string.
+
+  (?| introduces a group where the capturing parentheses in each alternative
+  start from the same number; for example, (?|(abc)|(xyz)) sets capturing
+  parentheses number 1 in both cases.
+
+  \h, \H, \v, \V match horizontal and vertical whitespace, respectively.
+
+
+Release 7.1 24-Apr-07
+---------------------
+
+There is only one new feature in this release: a linebreak setting of
+PCRE_NEWLINE_ANYCRLF. It is a cut-down version of PCRE_NEWLINE_ANY, which
+recognizes only CRLF, CR, and LF as linebreaks.
+
+A few bugs are fixed (see ChangeLog for details), but the major change is a
+complete re-implementation of the build system. This now has full Autotools
+support and so is now "standard" in some sense. It should help with compiling
+PCRE in a wide variety of environments.
+
+NOTE: when building shared libraries for Windows, three dlls are now built,
+called libpcre, libpcreposix, and libpcrecpp. Previously, everything was
+included in a single dll.
+
+Another important change is that the dftables auxiliary program is no longer
+compiled and run at "make" time by default. Instead, a default set of character
+tables (assuming ASCII coding) is used. If you want to use dftables to generate
+the character tables as previously, add --enable-rebuild-chartables to the
+"configure" command. You must do this if you are compiling PCRE to run on a
+system that uses EBCDIC code.
+
+There is a discussion about character tables in the README file. The default is
+not to use dftables so that that there is no problem when cross-compiling.
+
+
+Release 7.0 19-Dec-06
+---------------------
+
+This release has a new major number because there have been some internal
+upheavals to facilitate the addition of new optimizations and other facilities,
+and to make subsequent maintenance and extension easier. Compilation is likely
+to be a bit slower, but there should be no major effect on runtime performance.
+Previously compiled patterns are NOT upwards compatible with this release. If
+you have saved compiled patterns from a previous release, you will have to
+re-compile them. Important changes that are visible to users are:
+
+1. The Unicode property tables have been updated to Unicode 5.0.0, which adds
+   some more scripts.
+
+2. The option PCRE_NEWLINE_ANY causes PCRE to recognize any Unicode newline
+   sequence as a newline.
+
+3. The \R escape matches a single Unicode newline sequence as a single unit.
+
+4. New features that will appear in Perl 5.10 are now in PCRE. These include
+   alternative Perl syntax for named parentheses, and Perl syntax for
+   recursion.
+
+5. The C++ wrapper interface has been extended by the addition of a
+   QuoteMeta function and the ability to allow copy construction and
+   assignment.
+
+For a complete list of changes, see the ChangeLog file.
+
+
+Release 6.7 04-Jul-06
+---------------------
+
+The main additions to this release are the ability to use the same name for
+multiple sets of parentheses, and support for CRLF line endings in both the
+library and pcregrep (and in pcretest for testing).
+
+Thanks to Ian Taylor, the stack usage for many kinds of pattern has been
+significantly reduced for certain subject strings.
+
+
+Release 6.5 01-Feb-06
+---------------------
+
+Important changes in this release:
+
+1. A number of new features have been added to pcregrep.
+
+2. The Unicode property tables have been updated to Unicode 4.1.0, and the
+   supported properties have been extended with script names such as "Arabic",
+   and the derived properties "Any" and "L&". This has necessitated a change to
+   the interal format of compiled patterns. Any saved compiled patterns that
+   use \p or \P must be recompiled.
+
+3. The specification of recursion in patterns has been changed so that all
+   recursive subpatterns are automatically treated as atomic groups. Thus, for
+   example, (?R) is treated as if it were (?>(?R)). This is necessary because
+   otherwise there are situations where recursion does not work.
+
+See the ChangeLog for a complete list of changes, which include a number of bug
+fixes and tidies.
+
+
+Release 6.0 07-Jun-05
+---------------------
+
+The release number has been increased to 6.0 because of the addition of several
+major new pieces of functionality.
+
+A new function, pcre_dfa_exec(), which implements pattern matching using a DFA
+algorithm, has been added. This has a number of advantages for certain cases,
+though it does run more slowly, and lacks the ability to capture substrings. On
+the other hand, it does find all matches, not just the first, and it works
+better for partial matching. The pcrematching man page discusses the
+differences.
+
+The pcretest program has been enhanced so that it can make use of the new
+pcre_dfa_exec() matching function and the extra features it provides.
+
+The distribution now includes a C++ wrapper library. This is built
+automatically if a C++ compiler is found. The pcrecpp man page discusses this
+interface.
+
+The code itself has been re-organized into many more files, one for each
+function, so it no longer requires everything to be linked in when static
+linkage is used. As a consequence, some internal functions have had to have
+their names exposed. These functions all have names starting with _pcre_. They
+are undocumented, and are not intended for use by outside callers.
+
+The pcregrep program has been enhanced with new functionality such as
+multiline-matching and options for output more matching context. See the
+ChangeLog for a complete list of changes to the library and the utility
+programs.
+
+
 Release 5.0 13-Sep-04
 ---------------------
 

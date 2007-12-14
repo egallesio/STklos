@@ -1,4 +1,181 @@
+2007-12-13  Erick Gallesio  <eg@essi.fr>
 
+	* doc/skb/srfi.skb, doc/skb/srfi.stk, lib/Makefile.am,
+	lib/Makefile.in, lib/STklos.init, lib/srfi-0.stk, src/boot.c,
+	src/boot.img:
+	Added SRFI-59
+	[855e75ba0959] [tip]
+
+2007-12-09  Erick Gallesio  <eg@essi.fr>
+
+	* doc/skb/srfi.skb, doc/skb/srfi.stk, lib/Makefile.am,
+	lib/Makefile.in, lib/srfi-0.stk, lib/srfi-45.stk, src/boot.c,
+	src/boot.img, src/box.c, tests/do-test.stk, tests/test-box.stk:
+	Added SRFI-45
+	[41f250f93948]
+
+	* doc/skb/stdproc.skb, src/Makefile.am, src/Makefile.in,
+	src/boolean.c, src/hash.c, src/lib.c, src/object.c, src/print.c,
+	src/read.c, src/stklos.h:
+	Addes BOXES: they were used by the system but unavailable to the
+	user.
+	[85e9a72bcc15]
+
+	* doc/skb/srfi.skb, doc/skb/srfi.stk, doc/skb/stdproc.skb,
+	lib/Makefile.am, lib/Makefile.in, lib/bonus.stk, lib/boot.stk,
+	lib/srfi-0.stk, lib/srfi-89.stk, src/boot.c, src/boot.img:
+	Added SRFI-88 and SRFI-89
+	[7267132359fd]
+
+2007-12-08  Erick Gallesio  <eg@essi.fr>
+
+	* src/misc.c:
+	Added a C backtrace function in Debug mode
+	[332d52456f5d]
+
+	* src/read.c, src/stklos.h:
+	Deleted the mutex in read which could conduct to deadlocks. Read
+	uses no more globals now.
+	[64f0f4a2dcbd]
+
+2007-12-05  Erick Gallesio  <eg@essi.fr>
+
+	* lib/Makefile.am, lib/Makefile.in, lib/STklos.init, lib/load.stk,
+	lib/recette.stk, lib/slib.stk, lib/srfi-0.stk, src/boot.c,
+	src/boot.img:
+	Adapted the STklos.init file for recent versions of SLIB (old code
+	didn't work anymore)
+	[976e64e75a13]
+
+2007-11-29  Erick Gallesio  <eg@essi.fr>
+
+	* cinvoke/Makefile.templ, extensions/Makefile.am,
+	extensions/Makefile.in, src/boot.c, src/boot.img:
+	Applied Makefiles patches given by Marijn Schouten.
+	[36fc18a2595c]
+
+2007-11-27  Erick Gallesio  <eg@essi.fr>
+
+	* src/boot.c, src/boot.img, src/read.c, src/stklos.h, src/vm.c:
+	Applied the patches sent by Michael South. These patches fix
+	problems with code modification (done at runtime in vm.c to optimize
+	access to globals) in presence of multiple threads. Thanks Michael
+	for this (non trivial) patch.
+	[8ec3aaa5152a]
+
+2007-11-19  Erick Gallesio  <eg@essi.fr>
+
+	* src/mutex-pthreads.c, src/system.c:
+	Fixed two minor timer bugs signaled by Michael South
+	[1138736dcc03]
+
+2007-11-08  Erick Gallesio  <eg@essi.fr>
+
+	* lib/object.stk, src/boot.c, src/boot.img, src/object.c:
+	Bug fix: Code for class redefinition was severely buggy.
+	[848996c4ae01]
+
+	* lib/object.stk, src/boot.c, src/boot.img:
+	Bug fix: Changing the class of an object was incorrect when the new
+	class has new slot with an init function
+	[e3c139b01bc5]
+
+2007-10-05  Erick Gallesio  <eg@essi.fr>
+
+	* src/boot.c, src/boot.img, src/fport.c, src/fport.h, src/socket.c:
+	Going back (once again) of socket.c. Previous modification
+	introduced a severe regression
+	[abfa5af45cfc]
+
+2007-09-24  Erick Gallesio  <eg@essi.fr>
+
+	* configure, configure.in, src/boot.img:
+	Added the suffix dev to version in developent tree
+	[45aae4534ddf]
+
+2007-09-19  Erick Gallesio  <eg@essi.fr>
+
+	* doc/skb/custom.skb, lib/object.stk, src/boot.c, src/boot.img,
+	src/lib.c, src/print.c, src/read.c, src/stklos.h:
+	Added the WRITE-PRETTY-QUOTES parameter. When false, quoted lists
+	are printed using list notation.
+	[f5a38074a4f3]
+
+2007-09-18  Erick Gallesio  <eg@essi.fr>
+
+	* lib/object.stk, src/boot.c, src/boot.img:
+	Fixed the fact that virtual and active slots could not use un-
+	exported procedures.
+	[d015707b4d41]
+
+2007-09-17  Erick Gallesio  <eg@essi.fr>
+
+	* lib/bonus.stk, src/boot.c, src/boot.img, src/cpointer.c:
+	Typo fix
+	[3c8b559db74e]
+
+2007-08-29  Erick Gallesio  <eg@essi.fr>
+
+	* src/Makefile.am, src/Makefile.in, src/boot.c, src/cpointer.c,
+	src/ffi.c, src/lib.c, src/print.c, src/stklos.h:
+	Extension of the Cpointer type to allow some typing and user data
+	embedding
+	[7403efbb0d7d]
+
+2007-08-22  Erick Gallesio  <eg@essi.fr>
+
+	* src/ffi.c:
+	When an :obj result is the NULL pointer, return STk_void.
+	[1dae6e42fbbf]
+
+2007-08-14  Erick Gallesio  <eg@essi.fr>
+
+	* src/fport.c, src/fport.h, src/socket.c:
+	One again, get rid of the dup in the socket.c code. When closing a
+	socket we use shutdown instead of close. This permits to close one
+	end of the socket while the other one stays open (and hence this
+	avoids the dup).
+	[ba1696f16126]
+
+2007-07-13  Erick Gallesio  <eg@essi.fr>
+
+	* pkgman/main.stk:
+	Fixed a typo which prevent the --install option of stklos-pkg
+	[de3f528cf55f]
+
+2007-07-06  Erick Gallesio  <eg@essi.fr>
+
+	* src/boolean.c, src/struct.h:
+	EQUAL? returns #t on structure with same types and same values now.
+	[c72c0c25e4de]
+
+	* lib/r5rs.stk, src/boot.c, src/boot.img:
+	Bib fix: call-with-input-xxx returned only the first value when
+	using multiple values
+	[9b1ad215464b]
+
+
+2007-07-05  Erick Gallesio  <eg@essi.fr>
+
+	* configure, doc/Makefile.in, extensions/Makefile.in,
+	gtklos/Makefile.in, src/Makefile.in, src/boot.c, src/boot.img:
+	Commit version stklos-0.96
+	[c600d02e0b5e]
+
+	* src/port.c:
+	Bug fix with format string ending with a ~
+	[a2160b23ff81]
+
+	* lib/boot.stk, lib/compiler.stk, lib/mbe.stk, lib/object.stk,
+	lib/repl.stk, lib/srfi-0.stk, src/env.c:
+	Better isolation of STklos internals through the usage of the SCHEME
+	module
+	[453c13b0eaef]
+
+	* configure.in, src/system.c:
+	Fix for Solaris (not unsetenv in Solaris)
+	[c9e85af0d3de]
+	
 2007-06-30  Erick Gallesio  <eg@essi.fr>
 
 	* STklos 0.96 Release

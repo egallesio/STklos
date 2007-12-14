@@ -17,6 +17,8 @@ man page, in case the conversion went wrong.
 <li><a name="TOC2" href="#SEC2">SAVING A COMPILED PATTERN</a>
 <li><a name="TOC3" href="#SEC3">RE-USING A PRECOMPILED PATTERN</a>
 <li><a name="TOC4" href="#SEC4">COMPATIBILITY WITH DIFFERENT PCRE RELEASES</a>
+<li><a name="TOC5" href="#SEC5">AUTHOR</a>
+<li><a name="TOC6" href="#SEC6">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">SAVING AND RE-USING PRECOMPILED PCRE PATTERNS</a><br>
 <P>
@@ -32,7 +34,9 @@ tables, it is a little bit more complicated.
 If you save compiled patterns to a file, you can copy them to a different host
 and run them there. This works even if the new host has the opposite endianness
 to the one on which the patterns were compiled. There may be a small
-performance penalty, but it should be insignificant.
+performance penalty, but it should be insignificant. However, compiling regular
+expressions with one version of PCRE for use with a different version is not
+guaranteed to work and may cause crashes.
 </P>
 <br><a name="SEC2" href="#TOC1">SAVING A COMPILED PATTERN</a><br>
 <P>
@@ -88,16 +92,17 @@ return a non-NULL value before trying to save the study data.
 <br><a name="SEC3" href="#TOC1">RE-USING A PRECOMPILED PATTERN</a><br>
 <P>
 Re-using a precompiled pattern is straightforward. Having reloaded it into main
-memory, you pass its pointer to <b>pcre_exec()</b> in the usual way. This should
-work even on another host, and even if that host has the opposite endianness to
-the one where the pattern was compiled.
+memory, you pass its pointer to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b> in
+the usual way. This should work even on another host, and even if that host has
+the opposite endianness to the one where the pattern was compiled.
 </P>
 <P>
 However, if you passed a pointer to custom character tables when the pattern
 was compiled (the <i>tableptr</i> argument of <b>pcre_compile()</b>), you must
-now pass a similar pointer to <b>pcre_exec()</b>, because the value saved with
-the compiled pattern will obviously be nonsense. A field in a
-<b>pcre_extra()</b> block is used to pass this data, as described in the
+now pass a similar pointer to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b>,
+because the value saved with the compiled pattern will obviously be nonsense. A
+field in a <b>pcre_extra()</b> block is used to pass this data, as described in
+the
 <a href="pcreapi.html#extradata">section on matching a pattern</a>
 in the
 <a href="pcreapi.html"><b>pcreapi</b></a>
@@ -114,20 +119,30 @@ If you saved study data with the compiled pattern, you need to create your own
 <b>pcre_extra</b> data block and set the <i>study_data</i> field to point to the
 reloaded study data. You must also set the PCRE_EXTRA_STUDY_DATA bit in the
 <i>flags</i> field to indicate that study data is present. Then pass the
-<b>pcre_extra</b> block to <b>pcre_exec()</b> in the usual way.
+<b>pcre_extra</b> block to <b>pcre_exec()</b> or <b>pcre_dfa_exec()</b> in the
+usual way.
 </P>
 <br><a name="SEC4" href="#TOC1">COMPATIBILITY WITH DIFFERENT PCRE RELEASES</a><br>
 <P>
-The layout of the control block that is at the start of the data that makes up
-a compiled pattern was changed for release 5.0. If you have any saved patterns
-that were compiled with previous releases (not a facility that was previously
-advertised), you will have to recompile them for release 5.0. However, from now
-on, it should be possible to make changes in a compabible manner.
+In general, it is safest to recompile all saved patterns when you update to a
+new PCRE release, though not all updates actually require this. Recompiling is
+definitely needed for release 7.2.
 </P>
+<br><a name="SEC5" href="#TOC1">AUTHOR</a><br>
 <P>
-Last updated: 10 September 2004
+Philip Hazel
 <br>
-Copyright &copy; 1997-2004 University of Cambridge.
+University Computing Service
+<br>
+Cambridge CB2 3QH, England.
+<br>
+</P>
+<br><a name="SEC6" href="#TOC1">REVISION</a><br>
+<P>
+Last updated: 13 June 2007
+<br>
+Copyright &copy; 1997-2007 University of Cambridge.
+<br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.
 </p>

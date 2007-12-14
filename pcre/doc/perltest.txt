@@ -29,5 +29,5 @@ make use of the special upper case modifiers and escapes that pcretest uses to
 test some features of PCRE. Some of these files also contains malformed regular
 expressions, in order to check that PCRE diagnoses them correctly.
 
-Philip Hazel <ph10@cam.ac.uk>
+Philip Hazel
 September 2004

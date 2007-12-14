@@ -6759,7 +6759,7 @@ then
    -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
 
    (cd pcre; CC=$CC CFLAGS="$CFLAGS $PCRE_FLAGS" sh ./configure \
-    --prefix=$prefix --disable-shared)
+    --prefix=$prefix --disable-shared --disable-cpp)
     PCRE=pcre
     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
     PCREINC="-I../pcre"
