@@ -7,7 +7,7 @@ dnl Last file update: 14-Dec-2007 15:47 (eg)
 
 AC_INIT(src/stklos.c)
 AC_PREREQ(2.52)
-AM_INIT_AUTOMAKE(stklos, 0.97dev)
+AM_INIT_AUTOMAKE(stklos, 0.97)
 AM_CONFIG_HEADER(src/stklosconf.h)
 AC_PROG_MAKE_SET
 

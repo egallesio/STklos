@@ -4,6 +4,20 @@
 				| NEWS |
 				+======+
 
+* version 0.97 (2007 12 16)
+    * Fixed support for recent versions of SLIB
+    * Added boxes: they were used by the system but unavailable to the user.
+    * Improved the stklos-pkg command
+    * Fixed several mutexes bugs
+    * Minor improvements of the FFI
+    * Updated PCRE to version 7.4
+    * New implemented SRFIs
+          o SRFI-45 (Primitives for expressing iterative lazy algorithms)
+          o SRFI-59 (Vicinity)
+          o SRFI-88 (Keyword Objects)
+          o SRFI-89 (Optional and named parameters)
+    * Bug fixes
+
 * version 0.96 (2007 06 30)
 This release introduces a simple FFI (Foreign Function Interface).
 

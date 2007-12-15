@@ -1,29 +1,33 @@
-2007-12-13  Erick Gallesio  <eg@essi.fr>
+2007-12-14  Erick Gallesio  <eg@essi.fr>
 
-	* doc/skb/srfi.skb, doc/skb/srfi.stk, lib/Makefile.am,
-	lib/Makefile.in, lib/STklos.init, lib/srfi-0.stk, src/boot.c,
-	src/boot.img:
+	* Updated PCRE to 7.4 (from 5.0)
+
+007-12-13  Erick Gallesio  <eg@essi.fr>
+
+	* doc/skb/srfi.skb, doc/skb/srfi.stk, lib/Makefile.am, 
+	  lib/Makefile.in, lib/STklos.init, lib/srfi-0.stk, src/boot.c,
+	  src/boot.img:
 	Added SRFI-59
-	[855e75ba0959] [tip]
+	[855e75ba0959]
 
 2007-12-09  Erick Gallesio  <eg@essi.fr>
 
 	* doc/skb/srfi.skb, doc/skb/srfi.stk, lib/Makefile.am,
-	lib/Makefile.in, lib/srfi-0.stk, lib/srfi-45.stk, src/boot.c,
-	src/boot.img, src/box.c, tests/do-test.stk, tests/test-box.stk:
+	  lib/Makefile.in, lib/srfi-0.stk, lib/srfi-45.stk, src/boot.c,
+	  src/boot.img, src/box.c, tests/do-test.stk, tests/test-box.stk:
 	Added SRFI-45
 	[41f250f93948]
 
 	* doc/skb/stdproc.skb, src/Makefile.am, src/Makefile.in,
-	src/boolean.c, src/hash.c, src/lib.c, src/object.c, src/print.c,
-	src/read.c, src/stklos.h:
-	Addes BOXES: they were used by the system but unavailable to the
+	  src/boolean.c, src/hash.c, src/lib.c, src/object.c, src/print.c,
+	  src/read.c, src/stklos.h:
+	Added BOXES: they were used by the system but unavailable to the
 	user.
 	[85e9a72bcc15]
 
 	* doc/skb/srfi.skb, doc/skb/srfi.stk, doc/skb/stdproc.skb,
-	lib/Makefile.am, lib/Makefile.in, lib/bonus.stk, lib/boot.stk,
-	lib/srfi-0.stk, lib/srfi-89.stk, src/boot.c, src/boot.img:
+	  lib/Makefile.am, lib/Makefile.in, lib/bonus.stk, lib/boot.stk,
+	  lib/srfi-0.stk, lib/srfi-89.stk, src/boot.c, src/boot.img:
 	Added SRFI-88 and SRFI-89
 	[7267132359fd]
 
@@ -34,15 +38,15 @@
 	[332d52456f5d]
 
 	* src/read.c, src/stklos.h:
-	Deleted the mutex in read which could conduct to deadlocks. Read
-	uses no more globals now.
+	  Deleted the mutex in read which could conduct to deadlocks. Read
+	  uses no more globals now.
 	[64f0f4a2dcbd]
 
 2007-12-05  Erick Gallesio  <eg@essi.fr>
 
 	* lib/Makefile.am, lib/Makefile.in, lib/STklos.init, lib/load.stk,
-	lib/recette.stk, lib/slib.stk, lib/srfi-0.stk, src/boot.c,
-	src/boot.img:
+	  lib/recette.stk, lib/slib.stk, lib/srfi-0.stk, src/boot.c,
+	  src/boot.img:
 	Adapted the STklos.init file for recent versions of SLIB (old code
 	didn't work anymore)
 	[976e64e75a13]
@@ -96,7 +100,7 @@
 2007-09-19  Erick Gallesio  <eg@essi.fr>
 
 	* doc/skb/custom.skb, lib/object.stk, src/boot.c, src/boot.img,
-	src/lib.c, src/print.c, src/read.c, src/stklos.h:
+	  src/lib.c, src/print.c, src/read.c, src/stklos.h:
 	Added the WRITE-PRETTY-QUOTES parameter. When false, quoted lists
 	are printed using list notation.
 	[f5a38074a4f3]
@@ -117,7 +121,7 @@
 2007-08-29  Erick Gallesio  <eg@essi.fr>
 
 	* src/Makefile.am, src/Makefile.in, src/boot.c, src/cpointer.c,
-	src/ffi.c, src/lib.c, src/print.c, src/stklos.h:
+	  src/ffi.c, src/lib.c, src/print.c, src/stklos.h:
 	Extension of the Cpointer type to allow some typing and user data
 	embedding
 	[7403efbb0d7d]
@@ -158,7 +162,7 @@
 2007-07-05  Erick Gallesio  <eg@essi.fr>
 
 	* configure, doc/Makefile.in, extensions/Makefile.in,
-	gtklos/Makefile.in, src/Makefile.in, src/boot.c, src/boot.img:
+	  gtklos/Makefile.in, src/Makefile.in, src/boot.c, src/boot.img:
 	Commit version stklos-0.96
 	[c600d02e0b5e]
 
@@ -167,7 +171,7 @@
 	[a2160b23ff81]
 
 	* lib/boot.stk, lib/compiler.stk, lib/mbe.stk, lib/object.stk,
-	lib/repl.stk, lib/srfi-0.stk, src/env.c:
+	  lib/repl.stk, lib/srfi-0.stk, src/env.c:
 	Better isolation of STklos internals through the usage of the SCHEME
 	module
 	[453c13b0eaef]
@@ -189,7 +193,7 @@
 	[7a8f008007e2]
 
 	* pkgman/etc/Makefile-scmpkg.tmpl, pkgman/extract.stk,
-	pkgman/install.stk, pkgman/misc.stk, pkgman/params.stk:
+	  pkgman/install.stk, pkgman/misc.stk, pkgman/params.stk:
 	stklos-pkg can be parameterized to use another make command
 	[66a370ea418f]
 
