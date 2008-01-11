@@ -1,7 +1,7 @@
 ;;;;
 ;;;; object.stk	-- -- A variation of the Gregor Kickzales Tiny CLOS for STklos
 ;;;; 
-;;;; Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1993-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update:  8-Nov-2007 23:16 (eg)
+;;;; Last file update: 11-Jan-2008 14:50 (eg)
 
 
 #|
@@ -56,6 +56,7 @@
     apply-generic apply-method apply-methods compute-applicable-methods 
     method-more-specific? sort-applicable-methods
     method-procedure method-specializers method-generic-function
+    method-specializers-equal?
     class-subclasses class-methods class-name class-direct-supers
     class-direct-subclasses class-precedence-list class-direct-methods
     class-direct-slots class-slots
@@ -406,29 +407,18 @@
 ;=============================================================================
 
 ; ==== Define-generic
-(define-macro (define-generic gf)
-  `(define ,gf (ensure-generic-function ',gf)))
+(define-macro (define-generic gf :optional (meta <generic>))
+  `(define ,gf (ensure-generic-function ',gf ,meta)))
 
 ;==== Ensure-generic-function
-(define (ensure-generic-function name)
+(define (ensure-generic-function name :optional (metaclass <generic>))
   (let ((old (symbol-value* name (current-module) #f)))
     (if (generic? old)
 	old
 	(%symbol-define name 
-			(make <generic> :name name 
+			(make metaclass :name name 
 			      		:default (and (procedure? old) old))
 			(current-module)))))
-
-;//(define (ensure-generic-function name)
-;//  (let ((old (symbol-value name (current-module) #f)))
-;//    (if (generic? old)
-;//	old
-;//	(eval `(begin
-;//		 (define ,name ,(make <generic>
-;//				  :name name 
-;//				  :default (and (procedure? old) old)))
-;//		 ,name)))))
-;//
 
 ;=============================================================================
 ;
@@ -437,6 +427,14 @@
 ;=============================================================================
 
 ;==== Add-method!
+(define (%method-specializers-equal? gf m1 m2)
+  (equal? (method-specializers m1)
+	  (method-specializers m2)))
+
+(define method-specializers-equal? ; will be redefined later as a method.
+    %method-specializers-equal?)
+
+
 (define (add-method-in-classes! m)
   ;; Add method in all the classes which appears in its specializers list
   (for-each* (lambda (x)
@@ -453,12 +451,11 @@
 	      (method-specializers m)))
 
 (define (compute-new-list-of-methods gf new)
-  (let ((new-spec (method-specializers new))
-	(methods  (generic-function-methods gf)))
+  (let ((methods  (generic-function-methods gf)))
     (let Loop ((l methods))
       (if (null? l)
 	  (cons new methods)
-	  (if (equal? (method-specializers (car l)) new-spec)
+	  (if (method-specializers-equal? gf (car l) new)
 	      (begin 
 		;; This spec. list already exists. Remove old method from dependents
 		(remove-method-in-classes! (car l))
@@ -786,7 +783,7 @@
 
 
 (define (compute-slot-accessors class slots)
-  ;; accessors are made her in-line using a light version of ensure-method
+  ;; accessors are made here in-line using a light version of ensure-method
   ;; in particular, the class of accessors is <accessor-method> and there
   ;; is no next method defined for them, since they are terminal.
 
@@ -1091,15 +1088,12 @@
  	(no-applicable-method gf args))))
 
 
-;// ;=============================================================================
-;// ;
-;// ;		     <Composite-metaclass> 
-;// ;=============================================================================
+; ======================================================================
+; 	Functions redefined as methods ...
+; ======================================================================
+(define-method method-specializers-equal? ((gf <generic>) m1 m2)
+  (%method-specializers-equal? gf m1 m2))
 
-
-;// 
-;// (export <Composite-metaclass> <Active-metaclass>)
-;// 
 
 ;=============================================================================
 ;
