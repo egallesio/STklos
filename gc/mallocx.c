@@ -250,9 +250,6 @@ volatile signed_word GC_bytes_allocd_tmp = 0;
                         /* expensive.)                                   */
 #endif /* PARALLEL_MARK */
 
-/* See reclaim.c: */
-extern ptr_t GC_reclaim_generic();
-
 /* Return a list of 1 or more objects of the indicated size, linked	*/
 /* through the first word in the object.  This has the advantage that	*/
 /* it acquires the allocation lock only once, and may greatly reduce	*/
@@ -275,7 +272,7 @@ void *p;
 void **opp;
 size_t lw;	/* Length in words.	*/
 size_t lg;	/* Length in granules.	*/
-word my_bytes_allocd = 0;
+signed_word my_bytes_allocd = 0;
 struct obj_kind * ok = &(GC_obj_kinds[k]);
 DCL_LOCK_STATE;
 

@@ -2,6 +2,7 @@
  * Copyright 1988, 1989 Hans-J. Boehm, Alan J. Demers
  * Copyright (c) 1991-1996 by Xerox Corporation.  All rights reserved.
  * Copyright (c) 1996-1999 by Silicon Graphics.  All rights reserved.
+ * Copyright (C) 2007 Free Software Foundation, Inc
 
  * THIS MATERIAL IS PROVIDED AS IS, WITH ABSOLUTELY NO WARRANTY EXPRESSED
  * OR IMPLIED.  ANY USE IS AT YOUR OWN RISK.
@@ -103,10 +104,10 @@ void GC_grow_table(struct hash_chain_entry ***table,
 {
     register word i;
     register struct hash_chain_entry *p;
-    int log_old_size = *log_size_ptr;
-    register int log_new_size = log_old_size + 1;
+    signed_word log_old_size = *log_size_ptr;
+    signed_word log_new_size = log_old_size + 1;
     word old_size = ((log_old_size == -1)? 0: (1 << log_old_size));
-    register word new_size = 1 << log_new_size;
+    word new_size = (word)1 << log_new_size;
     /* FIXME: Power of 2 size often gets rounded up to one more page. */
     struct hash_chain_entry **new_table = (struct hash_chain_entry **)
     	GC_INTERNAL_MALLOC_IGNORE_OFF_PAGE(
@@ -122,9 +123,9 @@ void GC_grow_table(struct hash_chain_entry ***table,
     for (i = 0; i < old_size; i++) {
       p = (*table)[i];
       while (p != 0) {
-        register ptr_t real_key = (ptr_t)REVEAL_POINTER(p -> hidden_key);
-        register struct hash_chain_entry *next = p -> next;
-        register int new_hash = HASH3(real_key, new_size, log_new_size);
+        ptr_t real_key = (ptr_t)REVEAL_POINTER(p -> hidden_key);
+        struct hash_chain_entry *next = p -> next;
+        size_t new_hash = HASH3(real_key, new_size, log_new_size);
         
         p -> next = new_table[new_hash];
         new_table[new_hash] = p;
@@ -148,7 +149,7 @@ int GC_register_disappearing_link(void * * link)
 int GC_general_register_disappearing_link(void * * link, void * obj)
 {
     struct disappearing_link *curr_dl;
-    int index;
+    size_t index;
     struct disappearing_link * new_dl;
     DCL_LOCK_STATE;
     
@@ -187,7 +188,7 @@ int GC_general_register_disappearing_link(void * * link, void * obj)
 	      GC_oom_fn(sizeof(struct disappearing_link));
       if (0 == new_dl) {
 	GC_finalization_failures++;
-	return(0);
+	return(2);
       }
       /* It's not likely we'll make it here, but ... */
 #     ifdef THREADS
@@ -208,12 +209,12 @@ int GC_general_register_disappearing_link(void * * link, void * obj)
 int GC_unregister_disappearing_link(void * * link)
 {
     struct disappearing_link *curr_dl, *prev_dl;
-    int index;
+    size_t index;
     DCL_LOCK_STATE;
     
     LOCK();
     index = HASH2(link, log_dl_table_size);
-    if (((unsigned long)link & (ALIGNMENT-1))) goto out;
+    if (((word)link & (ALIGNMENT-1))) goto out;
     prev_dl = 0; curr_dl = dl_head[index];
     while (curr_dl != 0) {
         if (curr_dl -> dl_hidden_link == HIDE_POINTER(link)) {
@@ -278,6 +279,19 @@ GC_API void GC_null_finalize_mark_proc(ptr_t p)
 {
 }
 
+/* Possible finalization_marker procedures.  Note that mark stack	*/
+/* overflow is handled by the caller, and is not a disaster.		*/
+
+/* GC_unreachable_finalize_mark_proc is an alias for normal marking,	*/
+/* but it is explicitly tested for, and triggers different		*/
+/* behavior.  Objects registered in this way are not finalized		*/
+/* if they are reachable by other finalizable objects, eve if those	*/
+/* other objects specify no ordering.					*/
+GC_API void GC_unreachable_finalize_mark_proc(ptr_t p)
+{
+    GC_normal_finalize_mark_proc(p);
+}
+
 
 
 /* Register a finalization function.  See gc.h for details.	*/
@@ -295,7 +309,7 @@ GC_API void GC_register_finalizer_inner(void * obj,
 {
     ptr_t base;
     struct finalizable_object * curr_fo, * prev_fo;
-    int index;
+    size_t index;
     struct finalizable_object *new_fo;
     hdr *hhdr;
     DCL_LOCK_STATE;
@@ -378,7 +392,6 @@ GC_API void GC_register_finalizer_inner(void * obj,
     }
     new_fo = (struct finalizable_object *)
     	GC_INTERNAL_MALLOC(sizeof(struct finalizable_object),NORMAL);
-    GC_ASSERT(GC_size(new_fo) >= sizeof(struct finalizable_object));
     if (EXPECT(0 == new_fo, FALSE)) {
 #     ifdef THREADS
 	UNLOCK();
@@ -394,6 +407,7 @@ GC_API void GC_register_finalizer_inner(void * obj,
 	LOCK();
 #     endif
     }
+    GC_ASSERT(GC_size(new_fo) >= sizeof(struct finalizable_object));
     new_fo -> fo_hidden_base = (word)HIDE_POINTER(base);
     new_fo -> fo_fn = fn;
     new_fo -> fo_client_data = (ptr_t)cd;
@@ -431,6 +445,19 @@ void GC_register_finalizer_no_order(void * obj,
     				ocd, GC_null_finalize_mark_proc);
 }
 
+static GC_bool need_unreachable_finalization = FALSE;
+	/* Avoid the work if this isn't used.	*/
+
+void GC_register_finalizer_unreachable(void * obj,
+			       GC_finalization_proc fn, void * cd,
+			       GC_finalization_proc *ofn, void ** ocd)
+{
+    need_unreachable_finalization = TRUE;
+    GC_ASSERT(GC_java_finalization);
+    GC_register_finalizer_inner(obj, fn, cd, ofn,
+    				ocd, GC_unreachable_finalize_mark_proc);
+}
+
 #ifndef NO_DEBUGGING
 void GC_dump_finalization(void)
 {
@@ -466,9 +493,9 @@ void GC_finalize(void)
     struct disappearing_link * curr_dl, * prev_dl, * next_dl;
     struct finalizable_object * curr_fo, * prev_fo, * next_fo;
     ptr_t real_ptr, real_link;
-    register int i;
-    int dl_size = (log_dl_table_size == -1 ) ? 0 : (1 << log_dl_table_size);
-    int fo_size = (log_fo_table_size == -1 ) ? 0 : (1 << log_fo_table_size);
+    size_t i;
+    size_t dl_size = (log_dl_table_size == -1 ) ? 0 : (1 << log_dl_table_size);
+    size_t fo_size = (log_fo_table_size == -1 ) ? 0 : (1 << log_fo_table_size);
     
   /* Make disappearing links disappear */
     for (i = 0; i < dl_size; i++) {
@@ -559,8 +586,44 @@ void GC_finalize(void)
   	    if (curr_fo -> fo_mark_proc == GC_null_finalize_mark_proc) {
   	        GC_MARK_FO(real_ptr, GC_normal_finalize_mark_proc);
   	    }
-  	    GC_set_mark_bit(real_ptr);
+	    if (curr_fo -> fo_mark_proc != GC_unreachable_finalize_mark_proc) {
+		GC_set_mark_bit(real_ptr);
+	    }
   	}
+      }
+
+    /* now revive finalize-when-unreachable objects reachable from
+       other finalizable objects */
+      if (need_unreachable_finalization) {
+        curr_fo = GC_finalize_now;
+        prev_fo = 0;
+        while (curr_fo != 0) {
+	  next_fo = fo_next(curr_fo);
+	  if (curr_fo -> fo_mark_proc == GC_unreachable_finalize_mark_proc) {
+	    real_ptr = (ptr_t)curr_fo -> fo_hidden_base;
+	    if (!GC_is_marked(real_ptr)) {
+	      GC_set_mark_bit(real_ptr);
+	    } else {
+	      if (prev_fo == 0)
+		GC_finalize_now = next_fo;
+	      else
+		fo_set_next(prev_fo, next_fo);
+
+              curr_fo -> fo_hidden_base =
+              		(word) HIDE_POINTER(curr_fo -> fo_hidden_base);
+              GC_bytes_finalized -=
+                 	curr_fo -> fo_object_size + sizeof(struct finalizable_object);
+
+	      i = HASH2(real_ptr, log_fo_table_size);
+	      fo_set_next (curr_fo, fo_head[i]);
+	      GC_fo_entries++;
+	      fo_head[i] = curr_fo;
+	      curr_fo = prev_fo;
+	    }
+	  }
+	  prev_fo = curr_fo;
+	  curr_fo = next_fo;
+        }
       }
   }
 
@@ -688,6 +751,7 @@ int GC_invoke_finalizers(void)
 #	endif
 	if (count == 0) {
 	    bytes_freed_before = GC_bytes_freed;
+	    /* Don't do this outside, since we need the lock. */
 	}
     	curr_fo = GC_finalize_now;
 #	ifdef THREADS
@@ -709,6 +773,7 @@ int GC_invoke_finalizers(void)
     	    GC_free((void *)curr_fo);
 #	endif
     }
+    /* bytes_freed_before is initialized whenever count != 0 */
     if (count != 0 && bytes_freed_before != GC_bytes_freed) {
         LOCK();
 	GC_finalizer_bytes_freed += (GC_bytes_freed - bytes_freed_before);

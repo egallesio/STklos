@@ -11,7 +11,8 @@ int main()
 	       "-Wl,--wrap -Wl,pthread_sigmask -Wl,--wrap -Wl,sleep\n");
 #   endif
 #   if defined(GC_LINUX_THREADS) || defined(GC_IRIX_THREADS) \
-	|| defined(GC_DARWIN_THREADS) || defined(GC_AIX_THREADS)
+	|| defined(GC_DARWIN_THREADS) || defined(GC_AIX_THREADS) \
+	|| defined(GC_GNU_THREADS)
 #       ifdef GC_USE_DLOPEN_WRAP
 	  printf("-ldl ");
 #	endif
@@ -40,6 +41,14 @@ int main()
 #   endif
 #   if defined(GC_WIN32_THREADS) && defined(CYGWIN32)
         printf("-lpthread\n");
+#   endif
+#   if defined(GC_WIN32_PTHREADS)
+#      ifdef PTW32_STATIC_LIB
+	 /* assume suffix s for static version of the win32 pthread library */
+         printf("-lpthreadGC2s -lws2_32\n");
+#      else
+         printf("-lpthreadGC2\n");
+#      endif
 #   endif
 #   if defined(GC_OSF1_THREADS)
 	printf("-pthread -lrt"); /* DOB: must be -pthread, not -lpthread */

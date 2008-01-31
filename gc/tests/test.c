@@ -63,6 +63,13 @@
 # include <stdarg.h>
 #endif
 
+/* Call GC_INIT only on platforms on which we think we really need it,	*/
+/* so that we can test automatic initialization on the rest.		*/
+#if defined(__CYGWIN32__) || defined (_AIX)
+#  define GC_COND_INIT() GC_INIT()
+#else
+#  define GC_COND_INIT()
+#endif
 
 /* Allocation Statistics */
 int stubborn_count = 0;
@@ -137,7 +144,8 @@ struct SEXPR {
 
 typedef struct SEXPR * sexpr;
 
-# define INT_TO_SEXPR(x) ((sexpr)(unsigned long)(x))
+# define INT_TO_SEXPR(x) ((sexpr)(GC_word)(x))
+# define SEXPR_TO_INT(x) ((int)(GC_word)(x))
 
 # undef nil
 # define nil (INT_TO_SEXPR(0))
@@ -153,13 +161,11 @@ int extra_count = 0;        /* Amount of space wasted in cons node */
 # ifdef VERY_SMALL_CONFIG
 #   define cons small_cons
 # else
-sexpr cons (x, y)
-sexpr x;
-sexpr y;
+sexpr cons (sexpr x, sexpr y)
 {
-    register sexpr r;
-    register int *p;
-    register int my_extra = extra_count;
+    sexpr r;
+    int *p;
+    int my_extra = extra_count;
     
     stubborn_count++;
     r = (sexpr) GC_MALLOC_STUBBORN(sizeof(struct SEXPR) + my_extra);
@@ -173,7 +179,7 @@ sexpr y;
 	    (void)GC_printf("Found nonzero at %p - allocator is broken\n", p);
 	    FAIL;
         }
-        *p = (13 << 12) + ((p - (int *)r) & 0xfff);
+        *p = (int)((13 << 12) + ((p - (int *)r) & 0xfff));
     }
 #   ifdef AT_END
 	r = (sexpr)((char *)r + (my_extra & ~7));
@@ -233,11 +239,9 @@ struct GC_ms_entry * fake_gcj_mark_proc(word * addr,
 #endif /* GC_GCJ_SUPPORT */
 
 
-sexpr small_cons (x, y)
-sexpr x;
-sexpr y;
+sexpr small_cons (sexpr x, sexpr y)
 {
-    register sexpr r;
+    sexpr r;
     
     collectable_count++;
     r = (sexpr) GC_MALLOC(sizeof(struct SEXPR));
@@ -250,11 +254,9 @@ sexpr y;
     return(r);
 }
 
-sexpr small_cons_uncollectable (x, y)
-sexpr x;
-sexpr y;
+sexpr small_cons_uncollectable (sexpr x, sexpr y)
 {
-    register sexpr r;
+    sexpr r;
     
     uncollectable_count++;
     r = (sexpr) GC_MALLOC_UNCOLLECTABLE(sizeof(struct SEXPR));
@@ -263,16 +265,14 @@ sexpr y;
         exit(1);
     }
     r -> sexpr_car = x;
-    r -> sexpr_cdr = (sexpr)(~(unsigned long)y);
+    r -> sexpr_cdr = (sexpr)(~(GC_word)y);
     return(r);
 }
 
 #ifdef GC_GCJ_SUPPORT
 
 
-sexpr gcj_cons(x, y)
-sexpr x;
-sexpr y;
+sexpr gcj_cons(sexpr x, sexpr y)
 {
     GC_word * r;
     sexpr result;
@@ -293,8 +293,7 @@ sexpr y;
 #endif
 
 /* Return reverse(x) concatenated with y */
-sexpr reverse1(x, y)
-sexpr x, y;
+sexpr reverse1(sexpr x, sexpr y)
 {
     if (is_nil(x)) {
         return(y);
@@ -303,8 +302,7 @@ sexpr x, y;
     }
 }
 
-sexpr reverse(x)
-sexpr x;
+sexpr reverse(sexpr x)
 {
 #   ifdef TEST_WITH_SYSTEM_MALLOC
       malloc(100000);
@@ -312,8 +310,7 @@ sexpr x;
     return( reverse1(x, nil) );
 }
 
-sexpr ints(low, up)
-int low, up;
+sexpr ints(int low, int up)
 {
     if (low > up) {
 	return(nil);
@@ -324,8 +321,7 @@ int low, up;
 
 #ifdef GC_GCJ_SUPPORT
 /* Return reverse(x) concatenated with y */
-sexpr gcj_reverse1(x, y)
-sexpr x, y;
+sexpr gcj_reverse1(sexpr x, sexpr y)
 {
     if (is_nil(x)) {
         return(y);
@@ -334,14 +330,12 @@ sexpr x, y;
     }
 }
 
-sexpr gcj_reverse(x)
-sexpr x;
+sexpr gcj_reverse(sexpr x)
 {
     return( gcj_reverse1(x, nil) );
 }
 
-sexpr gcj_ints(low, up)
-int low, up;
+sexpr gcj_ints(int low, int up)
 {
     if (low > up) {
 	return(nil);
@@ -353,8 +347,7 @@ int low, up;
 
 /* To check uncollectable allocation we build lists with disguised cdr	*/
 /* pointers, and make sure they don't go away.				*/
-sexpr uncollectable_ints(low, up)
-int low, up;
+sexpr uncollectable_ints(int low, int up)
 {
     if (low > up) {
 	return(nil);
@@ -364,11 +357,9 @@ int low, up;
     }
 }
 
-void check_ints(list, low, up)
-sexpr list;
-int low, up;
+void check_ints(sexpr list, int low, int up)
 {
-    if ((int)(GC_word)(car(car(list))) != low) {
+    if (SEXPR_TO_INT(car(car(list))) != low) {
         (void)GC_printf(
            "List reversal produced incorrect list - collector is broken\n");
         FAIL;
@@ -383,13 +374,11 @@ int low, up;
     }
 }
 
-# define UNCOLLECTABLE_CDR(x) (sexpr)(~(unsigned long)(cdr(x)))
+# define UNCOLLECTABLE_CDR(x) (sexpr)(~(GC_word)(cdr(x)))
 
-void check_uncollectable_ints(list, low, up)
-sexpr list;
-int low, up;
+void check_uncollectable_ints(sexpr list, int low, int up)
 {
-    if ((int)(GC_word)(car(car(list))) != low) {
+    if (SEXPR_TO_INT(car(car(list))) != low) {
         (void)GC_printf(
            "Uncollectable list corrupted - collector is broken\n");
         FAIL;
@@ -410,7 +399,7 @@ void print_int_list(sexpr x)
     if (is_nil(x)) {
         (void)GC_printf("NIL\n");
     } else {
-        (void)GC_printf("(%ld)", (long)(car(car(x))));
+        (void)GC_printf("(%d)", SEXPR_TO_INT(car(car(x))));
         if (!is_nil(cdr(x))) {
             (void)GC_printf(", ");
             (void)print_int_list(cdr(x));
@@ -431,7 +420,7 @@ void check_marks_int_list(sexpr x)
         (void)GC_printf("NIL\n");
     } else {
         if (!GC_is_marked((ptr_t)car(x))) GC_printf("[unm car:%p]", car(x));
-        (void)GC_printf("(%ld)", (long)(car(car(x))));
+        (void)GC_printf("(%d)", SEXPR_TO_INT(car(car(x))));
         if (!is_nil(cdr(x))) {
             (void)GC_printf(", ");
             (void)check_marks_int_list(cdr(x));
@@ -446,7 +435,7 @@ void check_marks_int_list(sexpr x)
  */
 #ifdef THREADS
 
-# if defined(GC_WIN32_THREADS) && !defined(CYGWIN32)
+# if defined(GC_WIN32_THREADS) && !defined(GC_PTHREADS)
     DWORD  __stdcall tiny_reverse_test(void * arg)
 # else
     void * tiny_reverse_test(void * arg)
@@ -692,8 +681,7 @@ size_t counter = 0;
 
 int live_indicators_count = 0;
 
-tn * mktree(n)
-int n;
+tn * mktree(int n)
 {
     tn * result = (tn *)GC_MALLOC(sizeof(tn));
     
@@ -773,13 +761,12 @@ int n;
          	GC_printf("GC_general_register_disappearing_link failed 2\n");
          	FAIL;
         }
+	GC_reachable_here(result);
     }
     return(result);
 }
 
-void chktree(t,n)
-tn *t;
-int n;
+void chktree(tn *t, int n)
 {
     if (n == 0 && t != 0) {
         (void)GC_printf("Clobbered a leaf - collector is broken\n");
@@ -843,10 +830,9 @@ void * alloc8bytes()
 #   define alloc8bytes() GC_MALLOC_ATOMIC(8)
 #endif
 
-void alloc_small(n)
-int n;
+void alloc_small(int n)
 {
-    register int i;
+    int i;
     
     for (i = 0; i < n; i += 8) {
         atomic_count++;
@@ -873,7 +859,7 @@ int n;
 void tree_test()
 {
     tn * root;
-    register int i;
+    int i;
     
     root = mktree(TREE_HEIGHT);
 #   ifndef VERY_SMALL_CONFIG
@@ -1037,6 +1023,7 @@ static void uniq(void *p, ...) {
 void run_one_test()
 {
     char *x;
+    char **z;
 #   ifdef LINT
     	char *y = 0;
 #   else
@@ -1091,9 +1078,15 @@ void run_one_test()
     	(void)GC_printf("GC_is_visible produced incorrect result\n");
 	FAIL;
       }
+      z = GC_malloc(8);
+      GC_PTR_STORE(z, x);
+      if (*z != x) {
+        (void)GC_printf("GC_PTR_STORE failed: %p != %p\n", *z, x);
+        FAIL;
+      }
       if (!TEST_FAIL_COUNT(1)) {
-#	if!(defined(RS6000) || defined(POWERPC) || defined(IA64)) || defined(M68K)
-	  /* ON RS6000s function pointers point to a descriptor in the	*/
+#	if!(defined(POWERPC) || defined(IA64)) || defined(M68K)
+	  /* On POWERPCs function pointers point to a descriptor in the	*/
 	  /* data segment, so there should have been no failures.	*/
 	  /* The same applies to IA64.  Something similar seems to	*/
 	  /* be going on with NetBSD/M68K.				*/
@@ -1134,9 +1127,19 @@ void run_one_test()
 #     endif
 #   endif /* DBG_HDRS_ALL */
     /* Test floating point alignment */
-   collectable_count += 2;
+        collectable_count += 2;
 	*(double *)GC_MALLOC(sizeof(double)) = 1.0;
 	*(double *)GC_MALLOC(sizeof(double)) = 1.0;
+    /* Test size 0 allocation a bit more */
+    	{
+	   size_t i;
+	   for (i = 0; i < 10000; ++i) {
+	     GC_MALLOC(0);
+	     GC_FREE(GC_MALLOC(0));
+	     GC_MALLOC_ATOMIC(0);
+	     GC_FREE(GC_MALLOC_ATOMIC(0));
+	   }
+	 }
 #   ifdef GC_GCJ_SUPPORT
       GC_REGISTER_DISPLACEMENT(sizeof(struct fake_vtable *));
       GC_init_gcj_malloc(0, (void *)fake_gcj_mark_proc);
@@ -1190,7 +1193,7 @@ void run_one_test()
 
 void check_heap_stats()
 {
-    unsigned long max_heap_sz;
+    size_t max_heap_sz;
     int i;
     int still_live;
     int late_finalize_count = 0;
@@ -1339,7 +1342,7 @@ void SetMinimumStack(long minSize)
 	/* Cheat and let stdio initialize toolbox for us.	*/
 	printf("Testing GC Macintosh port.\n");
 #   endif
-    GC_INIT();	/* Only needed on a few platforms.	*/
+    GC_COND_INIT();
     (void) GC_set_warn_proc(warn_proc);
 #   if (defined(MPROTECT_VDB) || defined(PROC_VDB) || defined(GWW_VDB)) \
           && !defined(MAKE_BACK_GRAPH) && !defined(NO_INCREMENTAL)
@@ -1384,7 +1387,7 @@ void SetMinimumStack(long minSize)
 }
 # endif
 
-#if defined(GC_WIN32_THREADS) && !defined(CYGWIN32)
+#if defined(GC_WIN32_THREADS) && !defined(GC_PTHREADS)
 
 DWORD __stdcall thr_run_one_test(void *arg)
 {
@@ -1481,7 +1484,12 @@ int APIENTRY WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR cmd, int n)
     HANDLE win_thr_h;
 # endif
   DWORD thread_id;
-  GC_INIT();
+
+# ifdef GC_DLL
+    GC_use_DllMain();  /* Test with implicit thread registration if possible. */
+    GC_printf("Using DllMain to track threads\n");
+# endif
+  GC_COND_INIT();
 # ifndef NO_INCREMENTAL
     GC_enable_incremental();
 # endif
@@ -1575,7 +1583,6 @@ int main()
     pthread_t th2;
     pthread_attr_t attr;
     int code;
-
 #   ifdef GC_IRIX_THREADS
 	/* Force a larger stack to be preallocated      */
 	/* Since the initial cant always grow later.	*/
@@ -1588,7 +1595,11 @@ int main()
           (void)GC_printf("pthread_default_stacksize_np failed.\n");
 	}
 #   endif	/* GC_HPUX_THREADS */
-    GC_INIT();
+#   ifdef PTW32_STATIC_LIB
+	pthread_win32_process_attach_np ();
+	pthread_win32_thread_attach_np ();
+#   endif
+    GC_COND_INIT();
 
     pthread_attr_init(&attr);
 #   if defined(GC_IRIX_THREADS) || defined(GC_FREEBSD_THREADS) \
@@ -1638,6 +1649,10 @@ int main()
     (void)fflush(stdout);
     pthread_attr_destroy(&attr);
     GC_printf("Completed %d collections\n", GC_gc_no);
+#   ifdef PTW32_STATIC_LIB
+	pthread_win32_thread_detach_np ();
+	pthread_win32_process_detach_np ();
+#   endif
     return(0);
 }
 #endif /* GC_PTHREADS */

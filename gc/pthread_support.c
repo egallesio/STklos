@@ -86,14 +86,12 @@
 #endif        /* GC_NETBSD_THREADS */
 
 /* Allocator lock definitions.		*/
-#if defined(USE_SPIN_LOCK)
-  pthread_t GC_lock_holder = NO_THREAD;
-#else
+#if !defined(USE_SPIN_LOCK)
   pthread_mutex_t GC_allocate_ml = PTHREAD_MUTEX_INITIALIZER;
-  pthread_t GC_lock_holder = NO_THREAD;
+#endif
+unsigned long GC_lock_holder = NO_THREAD;
 		/* Used only for assertions, and to prevent	 */
 		/* recursive reentry in the system call wrapper. */
-#endif
 
 #if defined(GC_DGUX386_THREADS)
 # include <sys/dg_sys_info.h>
@@ -101,10 +99,6 @@
   /* sem_t is an uint in DG/UX */
   typedef unsigned int  sem_t;
 #endif /* GC_DGUX386_THREADS */
-
-#ifdef GC_LURC_THREADS
-# include <lurc.h>
-#endif /* GC_LURC_THREADS */
 
 #ifndef __GNUC__
 #   define __inline__
@@ -378,7 +372,7 @@ static struct GC_Thread_Rep first_thread;
 /* Caller holds allocation lock.					*/
 GC_thread GC_new_thread(pthread_t id)
 {
-    int hv = ((word)id) % THREAD_TABLE_SZ;
+    int hv = NUMERIC_THREAD_ID(id) % THREAD_TABLE_SZ;
     GC_thread result;
     static GC_bool first_thread_used = FALSE;
     
@@ -403,12 +397,12 @@ GC_thread GC_new_thread(pthread_t id)
 /* (The code intentionally traps if it wasn't.)			*/
 void GC_delete_thread(pthread_t id)
 {
-    int hv = ((word)id) % THREAD_TABLE_SZ;
+    int hv = NUMERIC_THREAD_ID(id) % THREAD_TABLE_SZ;
     register GC_thread p = GC_threads[hv];
     register GC_thread prev = 0;
     
     GC_ASSERT(I_HOLD_LOCK());
-    while (!pthread_equal(p -> id, id)) {
+    while (!THREAD_EQUAL(p -> id, id)) {
         prev = p;
         p = p -> next;
     }
@@ -430,7 +424,7 @@ void GC_delete_thread(pthread_t id)
 void GC_delete_gc_thread(GC_thread gc_id)
 {
     pthread_t id = gc_id -> id;
-    int hv = ((word)id) % THREAD_TABLE_SZ;
+    int hv = NUMERIC_THREAD_ID(id) % THREAD_TABLE_SZ;
     register GC_thread p = GC_threads[hv];
     register GC_thread prev = 0;
 
@@ -458,10 +452,10 @@ void GC_delete_gc_thread(GC_thread gc_id)
 /* return the most recent one.					*/
 GC_thread GC_lookup_thread(pthread_t id)
 {
-    int hv = ((word)id) % THREAD_TABLE_SZ;
+    int hv = NUMERIC_THREAD_ID(id) % THREAD_TABLE_SZ;
     register GC_thread p = GC_threads[hv];
     
-    while (p != 0 && !pthread_equal(p -> id, id)) p = p -> next;
+    while (p != 0 && !THREAD_EQUAL(p -> id, id)) p = p -> next;
     return(p);
 }
 
@@ -480,7 +474,7 @@ void GC_remove_all_threads_but_me(void)
       me = 0;
       for (p = GC_threads[hv]; 0 != p; p = next) {
 	next = p -> next;
-	if (p -> id == self) {
+	if (THREAD_EQUAL(p -> id, self)) {
 	  me = p;
 	  p -> next = 0;
 	} else {
@@ -734,7 +728,7 @@ void GC_thr_init(void)
 #   endif /* HANDLE_FORK */
 #   if defined(INCLUDE_LINUX_THREAD_DESCR)
       /* Explicitly register the region including the address 		*/
-      /* of a thread local variable.  This should included thread	*/
+      /* of a thread local variable.  This should include thread	*/
       /* locals for the main thread, except for those allocated		*/
       /* in response to dlopen calls.					*/  
 	{
@@ -769,7 +763,7 @@ void GC_thr_init(void)
 	  GC_nprocs = pthread_num_processors_np();
 #       endif
 #	if defined(GC_OSF1_THREADS) || defined(GC_AIX_THREADS) \
-	   || defined(GC_SOLARIS_THREADS)
+	   || defined(GC_SOLARIS_THREADS) || defined(GC_GNU_THREADS)
 	  GC_nprocs = sysconf(_SC_NPROCESSORS_ONLN);
 	  if (GC_nprocs <= 0) GC_nprocs = 1;
 #	endif
@@ -827,12 +821,6 @@ void GC_thr_init(void)
       /* If we are using a parallel marker, actually start helper threads.  */
         if (GC_parallel) start_mark_threads();
 #   endif
-#ifdef GC_LURC_THREADS
-        /* initialize the lurc lib so that it calls the proper 
-           gc_pthread_create */
-        lurc_gc_init(&WRAP_FUNC(pthread_create),
-                     &GC_enable, &GC_disable);
-#endif /* GC_LURC_THREADS */
 }
 
 
@@ -1212,35 +1200,6 @@ WRAP_FUNC(pthread_create)(pthread_t *new_thread,
     return(result);
 }
 
-#ifdef GENERIC_COMPARE_AND_SWAP
-  pthread_mutex_t GC_compare_and_swap_lock = PTHREAD_MUTEX_INITIALIZER;
-
-  GC_bool GC_compare_and_exchange(volatile GC_word *addr,
-  			          GC_word old, GC_word new_val)
-  {
-    GC_bool result;
-    pthread_mutex_lock(&GC_compare_and_swap_lock);
-    if (*addr == old) {
-      *addr = new_val;
-      result = TRUE;
-    } else {
-      result = FALSE;
-    }
-    pthread_mutex_unlock(&GC_compare_and_swap_lock);
-    return result;
-  }
-  
-  GC_word GC_atomic_add(volatile GC_word *addr, GC_word how_much)
-  {
-    GC_word old;
-    pthread_mutex_lock(&GC_compare_and_swap_lock);
-    old = *addr;
-    *addr = old + how_much;
-    pthread_mutex_unlock(&GC_compare_and_swap_lock);
-    return old;
-  }
-
-#endif /* GENERIC_COMPARE_AND_SWAP */
 /* Spend a few cycles in a way that can't introduce contention with	*/
 /* othre threads.							*/
 void GC_pause(void)
@@ -1419,7 +1378,7 @@ void GC_lock(void)
 #if defined(PARALLEL_MARK) || defined(THREAD_LOCAL_ALLOC)
 
 #ifdef GC_ASSERTIONS
-  pthread_t GC_mark_lock_holder = NO_THREAD;
+  unsigned long GC_mark_lock_holder = NO_THREAD;
 #endif
 
 #if 0
@@ -1447,13 +1406,13 @@ void GC_acquire_mark_lock(void)
 */
     GC_generic_lock(&mark_mutex);
 #   ifdef GC_ASSERTIONS
-	GC_mark_lock_holder = pthread_self();
+	GC_mark_lock_holder = NUMERIC_THREAD_ID(pthread_self());
 #   endif
 }
 
 void GC_release_mark_lock(void)
 {
-    GC_ASSERT(GC_mark_lock_holder == pthread_self());
+    GC_ASSERT(GC_mark_lock_holder == NUMERIC_THREAD_ID(pthread_self()));
 #   ifdef GC_ASSERTIONS
 	GC_mark_lock_holder = NO_THREAD;
 #   endif
@@ -1469,7 +1428,7 @@ void GC_release_mark_lock(void)
 /*    free-list link may be ignored.					*/
 void GC_wait_builder(void)
 {
-    GC_ASSERT(GC_mark_lock_holder == pthread_self());
+    GC_ASSERT(GC_mark_lock_holder == NUMERIC_THREAD_ID(pthread_self()));
 #   ifdef GC_ASSERTIONS
 	GC_mark_lock_holder = NO_THREAD;
 #   endif
@@ -1478,7 +1437,7 @@ void GC_wait_builder(void)
     }
     GC_ASSERT(GC_mark_lock_holder == NO_THREAD);
 #   ifdef GC_ASSERTIONS
-	GC_mark_lock_holder = pthread_self();
+	GC_mark_lock_holder = NUMERIC_THREAD_ID(pthread_self());
 #   endif
 }
 
@@ -1493,7 +1452,7 @@ void GC_wait_for_reclaim(void)
 
 void GC_notify_all_builder(void)
 {
-    GC_ASSERT(GC_mark_lock_holder == pthread_self());
+    GC_ASSERT(GC_mark_lock_holder == NUMERIC_THREAD_ID(pthread_self()));
     if (pthread_cond_broadcast(&builder_cv) != 0) {
 	ABORT("pthread_cond_broadcast failed");
     }
@@ -1507,7 +1466,7 @@ static pthread_cond_t mark_cv = PTHREAD_COND_INITIALIZER;
 
 void GC_wait_marker(void)
 {
-    GC_ASSERT(GC_mark_lock_holder == pthread_self());
+    GC_ASSERT(GC_mark_lock_holder == NUMERIC_THREAD_ID(pthread_self()));
 #   ifdef GC_ASSERTIONS
 	GC_mark_lock_holder = NO_THREAD;
 #   endif
@@ -1516,7 +1475,7 @@ void GC_wait_marker(void)
     }
     GC_ASSERT(GC_mark_lock_holder == NO_THREAD);
 #   ifdef GC_ASSERTIONS
-	GC_mark_lock_holder = pthread_self();
+	GC_mark_lock_holder = NUMERIC_THREAD_ID(pthread_self());
 #   endif
 }
 

@@ -54,7 +54,7 @@ extern mark_proc GC_mark_procs[MAX_MARK_PROCS];
   	(((word)1 << (WORDSZ - GC_DS_TAG_BITS - GC_LOG_MAX_MARK_PROCS)) - 1)
 
 
-extern word GC_n_mark_procs;
+extern unsigned GC_n_mark_procs;
 
 /* Number of mark stack entries to discard on overflow.	*/
 #define GC_MARK_STACK_DISCARDS (INITIAL_MARK_STACK_SIZE/8)
@@ -244,10 +244,10 @@ exit_label: ; \
 /* push the contents of the object on the mark stack.  Current points	*/
 /* to the bginning of the object.  We rely on the fact that the 	*/
 /* preceding header calculation will succeed for a pointer past the 	*/
-/* forst page of an object, only if it is in fact a valid pointer	*/
+/* first page of an object, only if it is in fact a valid pointer	*/
 /* to the object.  Thus we can omit the otherwise necessary tests	*/
-/* here.  Note in particular tha the "displ" value is the displacement	*/
-/* from the beggining of the heap block, which may itself be in the	*/
+/* here.  Note in particular that the "displ" value is the displacement	*/
+/* from the beginning of the heap block, which may itself be in the	*/
 /* interior of a large object.						*/
 #ifdef MARK_BIT_PER_GRANULE
 # define PUSH_CONTENTS_HDR(current, mark_stack_top, mark_stack_limit, \

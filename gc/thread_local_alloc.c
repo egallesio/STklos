@@ -22,7 +22,7 @@
 #if defined(USE_COMPILER_TLS)
   __thread
 #elif defined(USE_WIN32_COMPILER_TLS)
-  declspec(thread)
+  __declspec(thread)
 #endif
 GC_key_t GC_thread_key;
 
@@ -53,7 +53,6 @@ static void return_single_freelist(void *fl, void **gfl)
 static void return_freelists(void **fl, void **gfl)
 {
     int i;
-    void *q, **qptr;
 
     for (i = 1; i < TINY_FREELISTS; ++i) {
 	if ((word)(fl[i]) >= HBLKSIZE) {
@@ -74,11 +73,11 @@ static void return_freelists(void **fl, void **gfl)
 
 /* Each thread structure must be initialized.	*/
 /* This call must be made from the new thread.	*/
-/* Caller holds allocation lock.		*/
 void GC_init_thread_local(GC_tlfs p)
 {
     int i;
 
+    GC_ASSERT(I_HOLD_LOCK());
     if (!keys_initialized) {
 	if (0 != GC_key_create(&GC_thread_key, 0)) {
 	    ABORT("Failed to create key for local allocator");
@@ -125,13 +124,13 @@ void GC_destroy_thread_local(GC_tlfs p)
 #   endif
 }
 
-#if defined(GC_ASSERTIONS) && defined(GC_PTHREADS) && !defined(CYGWIN32)
+#if defined(GC_ASSERTIONS) && defined(GC_PTHREADS) && !defined(CYGWIN32) \
+    && !defined(GC_WIN32_PTHREADS)
 # include <pthread.h>
   extern char * GC_lookup_thread(pthread_t id);
 #endif
 
 #if defined(GC_ASSERTIONS) && defined(GC_WIN32_THREADS)
-# include <pthread.h>
   extern char * GC_lookup_thread(int id);
 #endif
 
@@ -142,7 +141,7 @@ void * GC_malloc(size_t bytes)
     void *result;
     void **tiny_fl;
 
-#   if defined(REDIRECT_MALLOC) && !defined(USE_PTHREAD_SPECIFIC)
+#   if !defined(USE_PTHREAD_SPECIFIC) && !defined(USE_WIN32_SPECIFIC)
       GC_key_t k = GC_thread_key;
       if (EXPECT(0 == k, 0)) {
 	/* We haven't yet run GC_init_parallel.  That means	*/
@@ -153,11 +152,12 @@ void * GC_malloc(size_t bytes)
 #   else
       tsd = GC_getspecific(GC_thread_key);
 #   endif
-#   if defined(REDIRECT_MALLOC) && defined(USE_PTHREAD_SPECIFIC)
-      if (EXPECT(NULL == tsd, 0)) {
+#   if defined(USE_PTHREAD_SPECIFIC) || defined(USE_WIN32_SPECIFIC)
+      if (EXPECT(0 == tsd, 0)) {
 	return GC_core_malloc(bytes);
       }
 #   endif
+    GC_ASSERT(GC_is_initialized);
 #   ifdef GC_ASSERTIONS
       /* We can't check tsd correctly, since we don't have access to 	*/
       /* the right declarations.  But we can check that it's close.	*/
@@ -175,16 +175,38 @@ void * GC_malloc(size_t bytes)
     tiny_fl = ((GC_tlfs)tsd) -> normal_freelists;
     GC_FAST_MALLOC_GRANS(result, granules, tiny_fl, DIRECT_GRANULES,
 		         NORMAL, GC_core_malloc(bytes), obj_link(result)=0);
+#   ifdef LOG_ALLOCS
+      GC_err_printf("GC_malloc(%d) = %p : %d\n", bytes, result, GC_gc_no);
+#   endif
     return result;
 }
 
 void * GC_malloc_atomic(size_t bytes)
 {
     size_t granules = ROUNDED_UP_GRANULES(bytes);
+    void *tsd;
     void *result;
-    void **tiny_fl = ((GC_tlfs)GC_getspecific(GC_thread_key))
-		        		-> ptrfree_freelists;
-    GC_FAST_MALLOC_GRANS(result, bytes, tiny_fl, DIRECT_GRANULES,
+    void **tiny_fl;
+
+#   if !defined(USE_PTHREAD_SPECIFIC) && !defined(USE_WIN32_SPECIFIC)
+      GC_key_t k = GC_thread_key;
+      if (EXPECT(0 == k, 0)) {
+	/* We haven't yet run GC_init_parallel.  That means	*/
+	/* we also aren't locking, so this is fairly cheap.	*/
+	return GC_core_malloc(bytes);
+      }
+      tsd = GC_getspecific(k);
+#   else
+      tsd = GC_getspecific(GC_thread_key);
+#   endif
+#   if defined(USE_PTHREAD_SPECIFIC) || defined(USE_WIN32_SPECIFIC)
+      if (EXPECT(0 == tsd, 0)) {
+	return GC_core_malloc(bytes);
+      }
+#   endif
+    GC_ASSERT(GC_is_initialized);
+    tiny_fl = ((GC_tlfs)tsd) -> ptrfree_freelists;
+    GC_FAST_MALLOC_GRANS(result, granules, tiny_fl, DIRECT_GRANULES,
 		         PTRFREE, GC_core_malloc_atomic(bytes), 0/* no init */);
     return result;
 }
@@ -217,6 +239,8 @@ extern int GC_gcj_kind;
 /* are not necessarily free.  And there may be cache fill order issues.	*/
 /* For now, we punt with incremental GC.  This probably means that	*/
 /* incremental GC should be enabled before we fork a second thread.	*/
+/* Unlike the other thread local allocation calls, we assume that the	*/
+/* collector has been explicitly initialized.				*/
 void * GC_gcj_malloc(size_t bytes,
 		     void * ptr_to_struct_containing_descr)
 {
@@ -228,7 +252,7 @@ void * GC_gcj_malloc(size_t bytes,
     void **tiny_fl = ((GC_tlfs)GC_getspecific(GC_thread_key))
 		        		-> gcj_freelists;
     GC_ASSERT(GC_gcj_malloc_initialized);
-    GC_FAST_MALLOC_GRANS(result, bytes, tiny_fl, DIRECT_GRANULES,
+    GC_FAST_MALLOC_GRANS(result, granules, tiny_fl, DIRECT_GRANULES,
 		         GC_gcj_kind,
 			 GC_core_gcj_malloc(bytes,
 				 	    ptr_to_struct_containing_descr),

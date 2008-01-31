@@ -41,7 +41,7 @@ void GC_noop1(word x)
 
 /* mark_proc GC_mark_procs[MAX_MARK_PROCS] = {0} -- declared in gc_priv.h */
 
-word GC_n_mark_procs = GC_RESERVED_MARK_PROCS;
+unsigned GC_n_mark_procs = GC_RESERVED_MARK_PROCS;
 
 /* Initialize GC_obj_kinds properly and standard free lists properly.  	*/
 /* This must be done statically since they may be accessed before 	*/
@@ -69,15 +69,15 @@ struct obj_kind GC_obj_kinds[MAXOBJKINDS] = {
 
 # ifdef ATOMIC_UNCOLLECTABLE
 #   ifdef STUBBORN_ALLOC
-      int GC_n_kinds = 5;
+      unsigned GC_n_kinds = 5;
 #   else
-      int GC_n_kinds = 4;
+      unsigned GC_n_kinds = 4;
 #   endif
 # else
 #   ifdef STUBBORN_ALLOC
-      int GC_n_kinds = 4;
+      unsigned GC_n_kinds = 4;
 #   else
-      int GC_n_kinds = 3;
+      unsigned GC_n_kinds = 3;
 #   endif
 # endif
 
@@ -141,7 +141,7 @@ GC_bool GC_collection_in_progress(void)
 /* clear all mark bits in the header */
 void GC_clear_hdr_marks(hdr *hhdr)
 {
-    int last_bit = FINAL_MARK_BIT(hhdr -> hb_sz);
+    size_t last_bit = FINAL_MARK_BIT(hhdr -> hb_sz);
 
 #   ifdef USE_MARK_BYTES
       BZERO(hhdr -> hb_marks, MARK_BITS_SZ);
@@ -158,7 +158,7 @@ void GC_set_hdr_marks(hdr *hhdr)
 {
     unsigned i;
     size_t sz = hhdr -> hb_sz;
-    int n_marks = FINAL_MARK_BIT(sz);
+    size_t n_marks = FINAL_MARK_BIT(sz);
 
 #   ifdef USE_MARK_BYTES
       for (i = 0; i <= n_marks; i += MARK_BIT_OFFSET(sz)) {
@@ -196,7 +196,7 @@ void GC_set_mark_bit(ptr_t p)
 {
     struct hblk *h = HBLKPTR(p);
     hdr * hhdr = HDR(h);
-    int bit_no = MARK_BIT_NO(p - (ptr_t)h, hhdr -> hb_sz);
+    word bit_no = MARK_BIT_NO(p - (ptr_t)h, hhdr -> hb_sz);
     
     if (!mark_bit_from_hdr(hhdr, bit_no)) {
       set_mark_bit_from_hdr(hhdr, bit_no);
@@ -208,10 +208,10 @@ void GC_clear_mark_bit(ptr_t p)
 {
     struct hblk *h = HBLKPTR(p);
     hdr * hhdr = HDR(h);
-    int bit_no = MARK_BIT_NO(p - (ptr_t)h, hhdr -> hb_sz);
+    word bit_no = MARK_BIT_NO(p - (ptr_t)h, hhdr -> hb_sz);
     
     if (mark_bit_from_hdr(hhdr, bit_no)) {
-      int n_marks;
+      size_t n_marks;
       clear_mark_bit_from_hdr(hhdr, bit_no);
       n_marks = hhdr -> hb_n_marks - 1;
 #     ifdef PARALLEL_MARK
@@ -230,9 +230,9 @@ GC_bool GC_is_marked(ptr_t p)
 {
     struct hblk *h = HBLKPTR(p);
     hdr * hhdr = HDR(h);
-    int bit_no = MARK_BIT_NO(p - (ptr_t)h, hhdr -> hb_sz);
+    word bit_no = MARK_BIT_NO(p - (ptr_t)h, hhdr -> hb_sz);
     
-    return(mark_bit_from_hdr(hhdr, bit_no));
+    return((GC_bool)mark_bit_from_hdr(hhdr, bit_no));
 }
 
 
@@ -462,6 +462,11 @@ static void alloc_mark_stack(size_t);
     }
 # endif /* __GNUC__  && MSWIN32 */
 
+#ifdef GC_WIN32_THREADS
+  extern GC_bool GC_started_thread_while_stopped(void);
+  /* In win32_threads.c.  Did we invalidate mark phase with an	*/
+  /* unexpected thread start?					*/
+#endif
 
 # ifdef WRAP_MARK_SOME
   GC_bool GC_mark_some(ptr_t cold_gc_frame)
@@ -484,6 +489,21 @@ static void alloc_mark_stack(size_t);
       /* USE_PROC_FOR_LIBRARIES.				 */
 
       __try {
+          ret_val = GC_mark_some_inner(cold_gc_frame);
+      } __except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ?
+                EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
+	  goto handle_ex;
+      }
+#     ifdef GC_WIN32_THREADS
+	/* With DllMain-based thread tracking, a thread may have	*/
+	/* started while we were marking.  This is logically equivalent	*/
+	/* to the exception case; our results are invalid and we have	*/
+	/* to start over.  This cannot be prevented since we can't	*/
+	/* block in DllMain.						*/
+	if (GC_started_thread_while_stopped()) goto handle_ex;
+#     endif
+     rm_handler:
+      return ret_val;
 
 #    else /* __GNUC__ */
 
@@ -497,6 +517,15 @@ static void alloc_mark_stack(size_t);
       er.ex_reg.handler = mark_ex_handler;
       asm volatile ("movl %%fs:0, %0" : "=r" (er.ex_reg.prev));
       asm volatile ("movl %0, %%fs:0" : : "r" (&er));
+      ret_val = GC_mark_some_inner(cold_gc_frame);
+      /* Prevent GCC from considering the following code unreachable */
+      /* and thus eliminating it.                                    */
+        if (er.alt_path == 0)
+          goto handle_ex;
+    rm_handler:
+      /* Uninstall the exception handler */
+      asm volatile ("mov %0, %%fs:0" : : "r" (er.ex_reg.prev));
+      return ret_val;
 
 #    endif /* __GNUC__ */
 #   else /* !MSWIN32 */
@@ -510,63 +539,27 @@ static void alloc_mark_stack(size_t);
       	/* I'm not sure if this could still work ...	*/
       GC_setup_temporary_fault_handler();
       if(SETJMP(GC_jmp_buf) != 0) goto handle_ex;
+      ret_val = GC_mark_some_inner(cold_gc_frame);
+    rm_handler:
+      GC_reset_fault_handler();
+      return ret_val;
       
 #   endif /* !MSWIN32 */
 
-          ret_val = GC_mark_some_inner(cold_gc_frame);
-
-#   ifdef MSWIN32
-#    ifndef __GNUC__
-
-      } __except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ?
-                EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
-
-#    else /* __GNUC__ */
-
-          /* Prevent GCC from considering the following code unreachable */
-          /* and thus eliminating it.                                    */
-          if (er.alt_path != 0)
-              goto rm_handler;
-
 handle_ex:
-          /* Execution resumes from here on an access violation. */
-
-#    endif /* __GNUC__ */
-#   else /* !MSWIN32 */
-	  goto rm_handler;
-handle_ex:
-#   endif /* __GNUC__ */
-
-          if (GC_print_stats) {
-	      GC_log_printf("Caught ACCESS_VIOLATION in marker. "
-		            "Memory mapping disappeared.\n");
-          }
-
-          /* We have bad roots on the stack.  Discard mark stack.  */
-          /* Rescan from marked objects.  Redetermine roots.	 */
-          GC_invalidate_mark_state();	
-          scan_ptr = 0;
-
-          ret_val = FALSE;
-
-#   if defined(MSWIN32)
-#    if !defined(__GNUC__)
-
+    /* Exception handler starts here for all cases. */
+      if (GC_print_stats) {
+        GC_log_printf("Caught ACCESS_VIOLATION in marker. "
+		      "Memory mapping disappeared.\n");
       }
 
-#    else /* __GNUC__  && MSWIN32 */
+      /* We have bad roots on the stack.  Discard mark stack.	*/
+      /* Rescan from marked objects.  Redetermine roots.	*/
+      GC_invalidate_mark_state();	
+      scan_ptr = 0;
 
-rm_handler:
-      /* Uninstall the exception handler */
-      asm volatile ("mov %0, %%fs:0" : : "r" (er.ex_reg.prev));
-
-#    endif /* __GNUC__ */
-#   else /* !MSWIN32 */
-rm_handler:
-      GC_reset_fault_handler();
-#   endif /* !MSWIN32 */
-
-      return ret_val;
+      ret_val = FALSE;
+      goto rm_handler;  // Back to platform-specific code.
   }
 #endif /* WRAP_MARK_SOME */
 
@@ -609,7 +602,7 @@ mse * GC_signal_mark_stack_overflow(mse *msp)
  */
 mse * GC_mark_from(mse *mark_stack_top, mse *mark_stack, mse *mark_stack_limit)
 {
-  int credit = HBLKSIZE;	/* Remaining credit for marking work	*/
+  signed_word credit = HBLKSIZE;  /* Remaining credit for marking work	*/
   ptr_t current_p;	/* Pointer to current candidate ptr.	*/
   word current;	/* Candidate pointer.			*/
   ptr_t limit;	/* (Incl) limit of current candidate 	*/
@@ -1176,7 +1169,7 @@ static void alloc_mark_stack(size_t n)
 #   ifdef GWW_VDB
       /* Don't recycle a stack segment obtained with the wrong flags. 	*/
       /* Win32 GetWriteWatch requires the right kind of memory.		*/
-      static GC_incremental_at_stack_alloc = 0;
+      static GC_bool GC_incremental_at_stack_alloc = 0;
       GC_bool recycle_old = (!GC_incremental || GC_incremental_at_stack_alloc);
 
       GC_incremental_at_stack_alloc = GC_incremental;
@@ -1237,9 +1230,7 @@ void GC_mark_init()
  * Should only be used if there is no possibility of mark stack
  * overflow.
  */
-void GC_push_all(bottom, top)
-ptr_t bottom;
-ptr_t top;
+void GC_push_all(ptr_t bottom, ptr_t top)
 {
     register word length;
     
@@ -1275,8 +1266,8 @@ void GC_push_selected(ptr_t bottom, ptr_t top,
 {
     struct hblk * h;
 
-    bottom = (ptr_t)(((long) bottom + ALIGNMENT-1) & ~(ALIGNMENT-1));
-    top = (ptr_t)(((long) top) & ~(ALIGNMENT-1));
+    bottom = (ptr_t)(((word) bottom + ALIGNMENT-1) & ~(ALIGNMENT-1));
+    top = (ptr_t)(((word) top) & ~(ALIGNMENT-1));
 
     if (top == 0 || bottom == top) return;
     h = HBLKPTR(bottom + HBLKSIZE);
@@ -1740,10 +1731,10 @@ void GC_push_marked4(struct hblk *h, hdr *hhdr)
 /* Push all objects reachable from marked objects in the given block */
 void GC_push_marked(struct hblk *h, hdr *hhdr)
 {
-    int sz = hhdr -> hb_sz;
-    int descr = hhdr -> hb_descr;
+    size_t sz = hhdr -> hb_sz;
+    word descr = hhdr -> hb_descr;
     ptr_t p;
-    int bit_no;
+    word bit_no;
     ptr_t lim;
     mse * GC_mark_stack_top_reg;
     mse * mark_stack_limit = GC_mark_stack_limit;
@@ -1792,7 +1783,7 @@ void GC_push_marked(struct hblk *h, hdr *hhdr)
 /* Test whether any page in the given block is dirty	*/
 GC_bool GC_block_was_dirty(struct hblk *h, hdr *hhdr)
 {
-    int sz = hhdr -> hb_sz;
+    size_t sz = hhdr -> hb_sz;
     
     if (sz <= MAXOBJBYTES) {
          return(GC_page_was_dirty(h));

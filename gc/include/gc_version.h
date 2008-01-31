@@ -2,8 +2,8 @@
 /* Eventually this one may become unnecessary.  For now we need	*/
 /* it to keep the old-style build process working.		*/
 #define GC_TMP_VERSION_MAJOR 7
-#define GC_TMP_VERSION_MINOR 0
-#define GC_TMP_ALPHA_VERSION 7
+#define GC_TMP_VERSION_MINOR 1
+#define GC_TMP_ALPHA_VERSION 2
 
 #ifndef GC_NOT_ALPHA
 #   define GC_NOT_ALPHA 0xff
@@ -21,10 +21,3 @@
 # define GC_VERSION_MINOR GC_TMP_VERSION_MINOR
 # define GC_ALPHA_VERSION GC_TMP_ALPHA_VERSION
 #endif
-
-
-#ifndef GC_NO_VERSION_VAR
-
-unsigned GC_version = ((GC_VERSION_MAJOR << 16) | (GC_VERSION_MINOR << 8) | GC_TMP_ALPHA_VERSION);
-
-#endif /* GC_NO_VERSION_VAR */ 

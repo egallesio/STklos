@@ -32,8 +32,6 @@
 # endif
 SUBDIRS =
 
-SUBDIRS += .
-
 # Initialize variables so that we can declare files locally.
 EXTRA_DIST = 
 lib_LTLIBRARIES =
@@ -45,12 +43,6 @@ TESTS =
 
 pkgconfigdir = $(libdir)/pkgconfig
 dist_pkgconfig_DATA = bdw-gc.pc
-
-include include/include.am
-include cord/cord.am
-include tests/tests.am
-include doc/doc.am
-
 
 # C Library
 # ---------
@@ -75,27 +67,23 @@ if DARWIN_THREADS
 libgc_la_SOURCES += darwin_stop_world.c
 endif
 
-if LURC_THREADS
-libgc_la_SOURCES += lurc_support.c
-endif
-
 if WIN32_THREADS
 libgc_la_SOURCES += win32_threads.c
 endif
 
-if USE_INTERNAL_LIBATOMIC_OPS
-libgc_la_SOURCES += atomic_ops.c
-endif
-
-if NEED_ATOMIC_OPS_ASM
-libgc_la_SOURCES += atomic_ops_sysdeps.S
+if USE_INTERNAL_LIBATOMIC_OPS 	 
+nodist_libgc_la_SOURCES = ./atomic_ops.c 	 
+endif 	 
+  	 
+if NEED_ATOMIC_OPS_ASM 	 
+nodist_libgc_la_SOURCES = ./atomic_ops_sysdeps.S 	 
 endif
 
 # Include THREADDLLIBS here to ensure that the correct versions of
 # linuxthread semaphore functions get linked:
 libgc_la_LIBADD = @addobjs@ $(THREADDLLIBS) $(UNWINDLIBS)
 libgc_la_DEPENDENCIES = @addobjs@
-libgc_la_LDFLAGS = -version-info 1:2:0
+libgc_la_LDFLAGS = $(extra_ldflags_libgc) -version-info 1:3:0 -no-undefined
 
 EXTRA_libgc_la_SOURCES = alpha_mach_dep.S \
     mips_sgi_mach_dep.s mips_ultrix_mach_dep.s \
@@ -110,8 +98,8 @@ if CPLUSPLUS
 lib_LTLIBRARIES += libgccpp.la
 pkginclude_HEADERS += include/gc_cpp.h include/gc_allocator.h
 libgccpp_la_SOURCES = gc_cpp.cc
-libgccpp_la_LIBADD = $(THREADDLLIBS) $(UNWINDLIBS)
-libgccpp_la_LDFLAGS = -version-info 1:2:0
+libgccpp_la_LIBADD = ./libgc.la
+libgccpp_la_LDFLAGS = -version-info 1:3:0 -no-undefined
 endif
 
 # FIXME: If Visual C++ users use Makefile.am, this should go into
@@ -166,7 +154,6 @@ dist_noinst_SCRIPTS = callprocs configure.host
 # headers which are not installed
 # (see include/include.am for more)
 #
-dist_noinst_HEADERS += version.h
 
 # documentation which is not installed
 #
@@ -177,7 +164,9 @@ EXTRA_DIST += README.QUICK
 EXTRA_DIST += BCC_MAKEFILE NT_MAKEFILE NT_THREADS_MAKEFILE \
     OS2_MAKEFILE PCR-Makefile digimars.mak EMX_MAKEFILE	\
     Makefile.direct Makefile.dj	Makefile.DLLs SMakefile.amiga \
-    WCC_MAKEFILE
+    WCC_MAKEFILE configure_atomic_ops.sh \
+    NT_STATIC_THREADS_MAKEFILE NT_X64_STATIC_THREADS_MAKEFILE \
+    NT_X64_THREADS_MAKEFILE
 
 # files used by makefiles other than Makefile.am
 #
@@ -188,8 +177,10 @@ EXTRA_DIST += add_gc_prefix.c gcname.c if_mach.c if_not_there.c \
     Mac_files/datastart.c Mac_files/dataend.c \
     Mac_files/MacOS_config.h Mac_files/MacOS_Test_config.h \
     include/private/msvc_dbg.h msvc_dbg.c
-# :CHECK: If pc_excludes still around, re-add to EXTRA_DIST.
 
+# The libatomic_ops library.  This is not ideal, since we pick up junk from
+# there.  The hard-coded version number should also go.
+EXTRA_DIST += libatomic_ops-1.2
 
 # this is an auxiliary shell file used by Makefile and Makefile.direct
 #
@@ -204,3 +195,12 @@ EXTRA_DIST += libtool.m4
 # it will not remove dest if building fails
 .S.s:
 	if $(CPP) $< >$@ ; then :; else rm -f $@; fi
+
+include include/include.am
+include cord/cord.am
+include tests/tests.am
+include doc/doc.am
+# Putting these at the top causes cord to be built first, and not find libgc.a
+# on HP/UX.  There may be a better fix.
+
+

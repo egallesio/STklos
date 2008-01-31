@@ -3,10 +3,6 @@
 #if defined(GC_PTHREADS) && !defined(GC_WIN32_THREADS) && \
     !defined(GC_DARWIN_THREADS)
 
-#ifdef GC_LURC_THREADS
-# include <lurc.h>
-#endif /* GC_LURC_THREADS */
-
 #include <signal.h>
 #include <semaphore.h>
 #include <errno.h>
@@ -119,8 +115,12 @@ sem_t GC_suspend_ack_sem;
 
 void GC_suspend_handler_inner(ptr_t sig_arg, void *context);
 
-#if defined(IA64) || defined(HP_PA)
+#if defined(IA64) || defined(HP_PA) || defined(M68K)
+#ifdef SA_SIGINFO
 void GC_suspend_handler(int sig, siginfo_t *info, void *context)
+#else
+void GC_suspend_handler(int sig)
+#endif
 {
   int old_errno = errno;
   GC_with_callee_saves_pushed(GC_suspend_handler_inner, (ptr_t)(word)sig);
@@ -129,9 +129,16 @@ void GC_suspend_handler(int sig, siginfo_t *info, void *context)
 #else
 /* We believe that in all other cases the full context is already	*/
 /* in the signal handler frame.						*/
+#ifdef SA_SIGINFO
 void GC_suspend_handler(int sig, siginfo_t *info, void *context)
+#else
+void GC_suspend_handler(int sig)
+#endif
 {
   int old_errno = errno;
+# ifndef SA_SIGINFO
+    void *context = 0;
+# endif
   GC_suspend_handler_inner((ptr_t)(word)sig, context);
   errno = old_errno;
 }
@@ -246,16 +253,13 @@ void GC_restart_handler(int sig)
 void GC_push_all_stacks()
 {
     GC_bool found_me = FALSE;
+    size_t nthreads = 0;
     int i;
     GC_thread p;
     ptr_t lo, hi;
     /* On IA64, we also need to scan the register backing store. */
     IF_IA64(ptr_t bs_lo; ptr_t bs_hi;)
     pthread_t me = pthread_self();
-#   ifdef GC_LURC_THREADS
-      lurc_thread_t lt = NULL;
-      void *llo,*lhi;
-#   endif /* GC_LURC_THREADS */
     
     if (!GC_thr_initialized) GC_thr_init();
 #   if DEBUG_THREADS
@@ -264,7 +268,8 @@ void GC_push_all_stacks()
     for (i = 0; i < THREAD_TABLE_SZ; i++) {
       for (p = GC_threads[i]; p != 0; p = p -> next) {
         if (p -> flags & FINISHED) continue;
-        if (pthread_equal(p -> id, me)) {
+	++nthreads;
+        if (THREAD_EQUAL(p -> id, me)) {
 #  	    ifdef SPARC
 	        lo = (ptr_t)GC_save_regs_in_stack();
 #  	    else
@@ -289,10 +294,6 @@ void GC_push_all_stacks()
     	              (unsigned)(p -> id), lo, hi);
 #	endif
 	if (0 == lo) ABORT("GC_push_all_stacks: sp not set!\n");
-#       ifdef GC_LURC_THREADS
-        /* check wether the lurc lib wants us to push this now or later */
-          if (lurc_gc_is_lurc_thread(p -> id, lo, hi)) continue;
-#       endif /* GC_LURC_THREADS */
 #       ifdef STACK_GROWS_UP
 	  /* We got them backwards! */
           GC_push_all_stack(hi, lo);
@@ -304,7 +305,7 @@ void GC_push_all_stacks()
             GC_printf("Reg stack for thread 0x%x = [%lx,%lx)\n",
     	              (unsigned)p -> id, bs_lo, bs_hi);
 #	  endif
-          if (pthread_equal(p -> id, me)) {
+          if (THREAD_EQUAL(p -> id, me)) {
 	    /* FIXME:  This may add an unbounded number of entries,	*/
 	    /* and hence overflow the mark stack, which is bad.		*/
 	    GC_push_all_eager(bs_lo, bs_hi);
@@ -314,18 +315,9 @@ void GC_push_all_stacks()
 #	endif
       }
     }
-#   ifdef GC_LURC_THREADS
-    /* walk all those threads to ask for the roots */
-    while ((lt = lurc_get_next_thread(lt)) != NULL) {
-      lurc_gc_get_root(lt, &llo, &lhi);
-      if(llo != NULL)
-        GC_push_all_stack(llo, lhi);
+    if (GC_print_stats == VERBOSE) {
+	GC_log_printf("Pushed %d thread stacks\n", nthreads);
     }
-    /* does it have another part ? */
-    lurc_gc_get_additional_root(&llo, &lhi);
-    if (llo != NULL)
-      GC_push_all_stack(llo, lhi);
-#   endif /* GC_LURC_THREADS */
     if (!found_me && !GC_in_thread_creation)
       ABORT("Collecting from unknown thread.");
 }
@@ -350,13 +342,10 @@ int GC_suspend_all()
     GC_stopping_pid = getpid();                /* debugging only.      */
     for (i = 0; i < THREAD_TABLE_SZ; i++) {
       for (p = GC_threads[i]; p != 0; p = p -> next) {
-        if (p -> id != my_thread) {
+        if (!THREAD_EQUAL(p -> id, my_thread)) {
             if (p -> flags & FINISHED) continue;
             if (p -> stop_info.last_stop_count == GC_stop_count) continue;
 	    if (p -> thread_blocked) /* Will wait */ continue;
-#           ifdef GC_LURC_THREADS
-            if (!lurc_gc_can_stop_thread(p -> id)) continue;
-#           endif /* GC_LURC_THREADS */
             n_live_threads++;
 #	    if DEBUG_THREADS
 	      GC_printf("Sending suspend signal to 0x%x\n",
@@ -473,7 +462,7 @@ void GC_start_world()
     AO_store(&GC_world_is_stopped, FALSE);
     for (i = 0; i < THREAD_TABLE_SZ; i++) {
       for (p = GC_threads[i]; p != 0; p = p -> next) {
-        if (p -> id != my_thread) {
+        if (!THREAD_EQUAL(p -> id, my_thread)) {
             if (p -> flags & FINISHED) continue;
 	    if (p -> thread_blocked) continue;
             n_live_threads++;
@@ -520,19 +509,29 @@ void GC_stop_init() {
 	ABORT("sem_init failed");
 #   endif
 
-    act.sa_flags = SA_RESTART | SA_SIGINFO;
+    act.sa_flags = SA_RESTART
+#   ifdef SA_SIGINFO
+    	| SA_SIGINFO
+#   endif
+	;
     if (sigfillset(&act.sa_mask) != 0) {
     	ABORT("sigfillset() failed");
     }
     GC_remove_allowed_signals(&act.sa_mask);
     /* SIG_THR_RESTART is set in the resulting mask.		*/
     /* It is unmasked by the handler when necessary. 		*/
+#   ifdef SA_SIGINFO
     act.sa_sigaction = GC_suspend_handler;
+#   else
+    act.sa_handler = GC_suspend_handler;
+#   endif
     if (sigaction(SIG_SUSPEND, &act, NULL) != 0) {
     	ABORT("Cannot set SIG_SUSPEND handler");
     }
 
+#   ifdef SA_SIGINFO
     act.sa_flags &= ~ SA_SIGINFO;
+#   endif
     act.sa_handler = GC_restart_handler;
     if (sigaction(SIG_THR_RESTART, &act, NULL) != 0) {
     	ABORT("Cannot set SIG_THR_RESTART handler");

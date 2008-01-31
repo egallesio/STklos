@@ -354,9 +354,9 @@ void * GC_base(void * p)
     /* Make sure r points to the beginning of the object */
 	r = (ptr_t)((word)r & ~(WORDS_TO_BYTES(1) - 1));
         {
-	    int offset = HBLKDISPL(r);
+	    size_t offset = HBLKDISPL(r);
 	    signed_word sz = candidate_hdr -> hb_sz;
-	    int obj_displ = offset % sz;
+	    size_t obj_displ = offset % sz;
 
 	    r -= obj_displ;
             limit = r + sz;
@@ -401,47 +401,16 @@ size_t GC_get_total_bytes(void)
 
 GC_bool GC_is_initialized = FALSE;
 
+# if defined(PARALLEL_MARK) || defined(THREAD_LOCAL_ALLOC)
+  extern void GC_init_parallel(void);
+# endif /* PARALLEL_MARK || THREAD_LOCAL_ALLOC */
+
+/* FIXME: The GC_init/GC_init_inner distinction should go away. */
 void GC_init(void)
 {
-    DCL_LOCK_STATE;
-    
-#if defined(GC_WIN32_THREADS) && !defined(GC_PTHREADS)
-    if (!GC_is_initialized) {
-      BOOL (WINAPI *pfn) (LPCRITICAL_SECTION, DWORD) = NULL;
-      HMODULE hK32 = GetModuleHandleA("kernel32.dll");
-      if (hK32)
-	  pfn = (BOOL (WINAPI *) (LPCRITICAL_SECTION, DWORD))
-		GetProcAddress (hK32,
-				"InitializeCriticalSectionAndSpinCount");
-      if (pfn)
-          pfn(&GC_allocate_ml, 4000);
-      else
-	  InitializeCriticalSection (&GC_allocate_ml);
-    }
-#endif /* MSWIN32 */
-
-    LOCK();
+    /* LOCK(); -- no longer does anything this early. */
     GC_init_inner();
-    UNLOCK();
-
-#   if defined(PARALLEL_MARK) || defined(THREAD_LOCAL_ALLOC)
-	/* Make sure marker threads and started and thread local */
-	/* allocation is initialized, in case we didn't get 	 */
-	/* called from GC_init_parallel();			 */
-        {
-	  extern void GC_init_parallel(void);
-	  GC_init_parallel();
-	}
-#   endif /* PARALLEL_MARK || THREAD_LOCAL_ALLOC */
-
-#   if defined(DYNAMIC_LOADING) && defined(DARWIN)
-    {
-        /* This must be called WITHOUT the allocation lock held
-        and before any threads are created */
-        extern void GC_init_dyld();
-        GC_init_dyld();
-    }
-#   endif
+    /* UNLOCK(); */
 }
 
 #if defined(MSWIN32) || defined(MSWINCE)
@@ -507,6 +476,28 @@ void GC_init_inner()
     word initial_heap_sz = (word)MINHINCR;
     
     if (GC_is_initialized) return;
+
+    /* Note that although we are nominally called with the */
+    /* allocation lock held, the allocation lock is now	   */
+    /* only really acquired once a second thread is forked.*/
+    /* And the initialization code needs to run before     */
+    /* then.  Thus we really don't hold any locks, and can */
+    /* in fact safely initialize them here.		   */
+    GC_ASSERT(!GC_need_to_lock);
+#   if defined(GC_WIN32_THREADS) && !defined(GC_PTHREADS)
+      if (!GC_is_initialized) {
+        BOOL (WINAPI *pfn) (LPCRITICAL_SECTION, DWORD) = NULL;
+        HMODULE hK32 = GetModuleHandleA("kernel32.dll");
+        if (hK32)
+  	  pfn = (BOOL (WINAPI *) (LPCRITICAL_SECTION, DWORD))
+  		GetProcAddress (hK32,
+  				"InitializeCriticalSectionAndSpinCount");
+        if (pfn)
+            pfn(&GC_allocate_ml, 4000);
+        else
+  	  InitializeCriticalSection (&GC_allocate_ml);
+      }
+#endif /* MSWIN32 */
 #   if defined(MSWIN32) || defined(MSWINCE)
       InitializeCriticalSection(&GC_write_cs);
 #   endif
@@ -573,7 +564,7 @@ void GC_init_inner()
 	    long addr = strtoul(addr_string, NULL, 16);
 #	  endif
 	  if (addr < 0x1000)
-	      WARN("Unlikely trace address: 0x%lx", (unsigned long)addr);
+	      WARN("Unlikely trace address: 0x%lx\n", (GC_word)addr);
 	  GC_trace_addr = (ptr_t)addr;
 #	endif
       }
@@ -618,7 +609,7 @@ void GC_init_inner()
  	GC_init_win32();
 #   endif
 #   if defined(USE_PROC_FOR_LIBRARIES) && defined(GC_LINUX_THREADS)
-	WARN("USE_PROC_FOR_LIBRARIES + GC_LINUX_THREADS performs poorly.", 0);
+	WARN("USE_PROC_FOR_LIBRARIES + GC_LINUX_THREADS performs poorly.\n", 0);
 	/* If thread stacks are cached, they tend to be scanned in 	*/
 	/* entirety as part of the root set.  This wil grow them to	*/
 	/* maximum size, and is generally not desirable.		*/
@@ -629,12 +620,8 @@ void GC_init_inner()
 #   if (defined(NETBSD) || defined(OPENBSD)) && defined(__ELF__)
 	GC_init_netbsd_elf();
 #   endif
-#   if defined(GC_PTHREADS) || defined(GC_SOLARIS_THREADS) \
-       || defined(GC_WIN32_THREADS) || defined(GC_LURC_THREADS)
-        GC_thr_init();
-#   endif
 #   if !defined(THREADS) || defined(GC_PTHREADS) || defined(GC_WIN32_THREADS) \
-	|| defined(GC_SOLARIS_THREADS) || defined(GC_LURC_THREADS)
+	|| defined(GC_SOLARIS_THREADS)
       if (GC_stackbottom == 0) {
 	GC_stackbottom = GC_get_main_stack_base();
 #       if (defined(LINUX) || defined(HPUX)) && defined(IA64)
@@ -643,7 +630,7 @@ void GC_init_inner()
       } else {
 #       if (defined(LINUX) || defined(HPUX)) && defined(IA64)
 	  if (GC_register_stackbottom == 0) {
-	    WARN("GC_register_stackbottom should be set with GC_stackbottom", 0);
+	    WARN("GC_register_stackbottom should be set with GC_stackbottom\n", 0);
 	    /* The following may fail, since we may rely on	 	*/
 	    /* alignment properties that may not hold with a user set	*/
 	    /* GC_stackbottom.						*/
@@ -657,12 +644,6 @@ void GC_init_inner()
     GC_STATIC_ASSERT(sizeof (signed_word) == sizeof(word));
     GC_STATIC_ASSERT(sizeof (struct hblk) == HBLKSIZE);
 #   ifndef THREADS
-#     if defined(STACK_GROWS_UP) && defined(STACK_GROWS_DOWN)
-#       error "Only one of STACK_GROWS_UP and STACK_GROWS_DOWN should be defd"
-#     endif
-#     if !defined(STACK_GROWS_UP) && !defined(STACK_GROWS_DOWN)
-#       error "One of STACK_GROWS_UP and STACK_GROWS_DOWN should be defd"
-#     endif
 #     ifdef STACK_GROWS_DOWN
         GC_ASSERT((word)(&dummy) <= (word)GC_stackbottom);
 #     else
@@ -740,18 +721,15 @@ void GC_init_inner()
       PCR_IL_Unlock();
       GC_pcr_install();
 #   endif
+    GC_is_initialized = TRUE;
+#   if defined(GC_PTHREADS) || defined(GC_WIN32_THREADS)
+        GC_thr_init();
+#   endif
     COND_DUMP;
     /* Get black list set up and/or incremental GC started */
       if (!GC_dont_precollect || GC_incremental) GC_gcollect_inner();
-    GC_is_initialized = TRUE;
 #   ifdef STUBBORN_ALLOC
     	GC_stubborn_init();
-#   endif
-#   if defined(GC_LINUX_THREADS) && defined(REDIRECT_MALLOC)
-	{
-	  extern void GC_init_lib_bounds(void);
-	  GC_init_lib_bounds();
-	}
 #   endif
     /* Convince lint that some things are used */
 #   ifdef LINT
@@ -768,6 +746,26 @@ void GC_init_inner()
 #		  endif
                   GC_register_finalizer_no_order);
       }
+#   endif
+
+    /* The rest of this again assumes we don't really hold	*/
+    /* the allocation lock.					*/
+#   if defined(PARALLEL_MARK) || defined(THREAD_LOCAL_ALLOC)
+	/* Make sure marker threads and started and thread local */
+	/* allocation is initialized, in case we didn't get 	 */
+	/* called from GC_init_parallel();			 */
+        {
+	  GC_init_parallel();
+	}
+#   endif /* PARALLEL_MARK || THREAD_LOCAL_ALLOC */
+
+#   if defined(DYNAMIC_LOADING) && defined(DARWIN)
+    {
+        /* This must be called WITHOUT the allocation lock held
+        and before any threads are created */
+        extern void GC_init_dyld();
+        GC_init_dyld();
+    }
 #   endif
 }
 
@@ -832,16 +830,18 @@ out:
       }
   }
 
-  int GC_write(buf, len)
-  const char * buf;
-  size_t len;
+# ifndef THREADS
+#   define GC_need_to_lock 0  /* Not defined without threads */
+# endif
+  int GC_write(const char *buf, size_t len)
   {
       BOOL tmp;
       DWORD written;
       if (len == 0)
 	  return 0;
-      EnterCriticalSection(&GC_write_cs);
+      if (GC_need_to_lock) EnterCriticalSection(&GC_write_cs);
       if (GC_stdout == INVALID_HANDLE_VALUE) {
+          if (GC_need_to_lock) LeaveCriticalSection(&GC_write_cs);
 	  return -1;
       } else if (GC_stdout == 0) {
 	char * file_name = GETENV("GC_LOG_FILE");
@@ -863,15 +863,16 @@ out:
     	if (GC_stdout == INVALID_HANDLE_VALUE)
 	    ABORT("Open of log file failed");
       }
-      tmp = WriteFile(GC_stdout, buf, len, &written, NULL);
+      tmp = WriteFile(GC_stdout, buf, (DWORD)len, &written, NULL);
       if (!tmp)
 	  DebugBreak();
 #     if defined(_MSC_VER) && defined(_DEBUG)
 	  _CrtDbgReport(_CRT_WARN, NULL, 0, NULL, "%.*s", len, buf);
 #     endif
-      LeaveCriticalSection(&GC_write_cs);
+      if (GC_need_to_lock) LeaveCriticalSection(&GC_write_cs);
       return tmp ? (int)written : -1;
   }
+# undef GC_need_to_lock
 
 #endif
 
@@ -1007,8 +1008,7 @@ void GC_log_printf(const char *format, ...)
     if (WRITE(GC_log, buf, strlen(buf)) < 0) ABORT("write to log failed");
 }
 
-void GC_err_puts(s)
-const char *s;
+void GC_err_puts(const char *s)
 {
     if (WRITE(GC_stderr, s, strlen(s)) < 0) ABORT("write to stderr failed");
 }
@@ -1051,8 +1051,7 @@ GC_word GC_set_free_space_divisor (GC_word value)
 }
 
 #ifndef PCR
-void GC_abort(msg)
-const char * msg;
+void GC_abort(const char *msg)
 {
 #   if defined(MSWIN32)
       (void) MessageBoxA(NULL, msg, "Fatal error in gc", MB_ICONERROR|MB_OK);
@@ -1107,9 +1106,9 @@ void ** GC_new_free_list()
     return result;
 }
 
-int GC_new_kind_inner(void **fl, GC_word descr, int adjust, int clear)
+unsigned GC_new_kind_inner(void **fl, GC_word descr, int adjust, int clear)
 {
-    int result = GC_n_kinds++;
+    unsigned result = GC_n_kinds++;
 
     if (GC_n_kinds > MAXOBJKINDS) ABORT("Too many kinds");
     GC_obj_kinds[result].ok_freelist = fl;
@@ -1120,27 +1119,27 @@ int GC_new_kind_inner(void **fl, GC_word descr, int adjust, int clear)
     return result;
 }
 
-int GC_new_kind(void **fl, GC_word descr, int adjust, int clear)
+unsigned GC_new_kind(void **fl, GC_word descr, int adjust, int clear)
 {
-    int result;
+    unsigned result;
     LOCK();
     result = GC_new_kind_inner(fl, descr, adjust, clear);
     UNLOCK();
     return result;
 }
 
-int GC_new_proc_inner(GC_mark_proc proc)
+unsigned GC_new_proc_inner(GC_mark_proc proc)
 {
-    int result = GC_n_mark_procs++;
+    unsigned result = GC_n_mark_procs++;
 
     if (GC_n_mark_procs > MAX_MARK_PROCS) ABORT("Too many mark procedures");
     GC_mark_procs[result] = proc;
     return result;
 }
 
-int GC_new_proc(GC_mark_proc proc)
+unsigned GC_new_proc(GC_mark_proc proc)
 {
-    int result;
+    unsigned result;
     LOCK();
     result = GC_new_proc_inner(proc);
     UNLOCK();

@@ -39,8 +39,8 @@
 #     else
 #       define USE_WIN32_COMPILER_TLS
 #     endif /* !GNU */
-#   elif defined(LINUX) && \
-		 (__GNUC__ > 3 || (__GNUC == 3 && __GNUC_MINOR__ >=3))
+#   elif defined(LINUX) && !defined(ARM32) && \
+		 (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >=3))
 #     define USE_COMPILER_TLS
 #   elif (defined(GC_DGUX386_THREADS) || defined(GC_OSF1_THREADS) || \
          defined(GC_DARWIN_THREADS) || defined(GC_AIX_THREADS)) || \
@@ -109,7 +109,9 @@ typedef struct thread_local_freelists {
     	/* We assume 0 == success, msft does the opposite.	*/
 #   define GC_key_create(key, d)  \
 	((d) != 0? (ABORT("Destructor unsupported by TlsAlloc"),0) \
-	 	 : (*(key) = TlsAlloc(), 0))
+	 	 : ((*(key) = TlsAlloc()) == TLS_OUT_OF_INDEXES? \
+		       (ABORT("Out of tls"), 0): \
+		       0))
 #   define GC_remove_specific(key)  /* No need for cleanup on thread exit. */
     	/* Need TlsFree on process exit/detach ? */
     typedef DWORD GC_key_t;
@@ -139,7 +141,7 @@ extern
 #if defined(USE_COMPILER_TLS)
   __thread
 #elif defined(USE_WIN32_COMPILER_TLS)
-  declspec(thread)
+  __declspec(thread)
 #endif
 GC_key_t GC_thread_key;
 

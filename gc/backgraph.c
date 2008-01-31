@@ -86,6 +86,8 @@ static back_edges * new_back_edges(void)
   if (0 == back_edge_space) {
     back_edge_space = (back_edges *)
 	    		GET_MEM(MAX_BACK_EDGE_STRUCTS*sizeof(back_edges));
+    GC_add_to_our_memory((ptr_t)back_edge_space,
+    			 MAX_BACK_EDGE_STRUCTS*sizeof(back_edges));
   }
   if (0 != avail_back_edges) {
     back_edges * result = avail_back_edges;
@@ -125,11 +127,15 @@ static void push_in_progress(ptr_t p)
     if (in_progress_size == 0) {
       in_progress_size = INITIAL_IN_PROGRESS;
       in_progress_space = (ptr_t *)GET_MEM(in_progress_size * sizeof(ptr_t));
+      GC_add_to_our_memory((ptr_t)in_progress_space,
+      			   in_progress_size * sizeof(ptr_t));
     } else {
       ptr_t * new_in_progress_space;
       in_progress_size *= 2;
       new_in_progress_space = (ptr_t *)
 	      			GET_MEM(in_progress_size * sizeof(ptr_t));
+      GC_add_to_our_memory((ptr_t)new_in_progress_space,
+      			   in_progress_size * sizeof(ptr_t));
       BCOPY(in_progress_space, new_in_progress_space,
 	    n_in_progress * sizeof(ptr_t));
       in_progress_space = new_in_progress_space;
@@ -254,7 +260,7 @@ static void add_edge(ptr_t p,  ptr_t q)
     }
 }
 
-typedef void (*per_object_func)(ptr_t p, word n_bytes, word gc_descr);
+typedef void (*per_object_func)(ptr_t p, size_t n_bytes, word gc_descr);
 
 static void per_object_helper(struct hblk *h, word fn)
 {
@@ -275,7 +281,7 @@ void GC_apply_to_each_object(per_object_func f)
   GC_apply_to_all_blocks(per_object_helper, (word)f);
 }
 
-static void reset_back_edge(ptr_t p, word n_bytes, word gc_descr)
+static void reset_back_edge(ptr_t p, size_t n_bytes, word gc_descr)
 {
   /* Skip any free list links, or dropped blocks */
   if (GC_HAS_DEBUG_INFO(p)) {
@@ -392,7 +398,7 @@ ptr_t GC_deepest_obj;
 /* next GC.								*/
 /* Set GC_max_height to be the maximum height we encounter, and 	*/
 /* GC_deepest_obj to be the corresponding object.			*/
-static void update_max_height(ptr_t p, word n_bytes, word gc_descr)
+static void update_max_height(ptr_t p, size_t n_bytes, word gc_descr)
 {
   if (GC_is_marked(p) && GC_HAS_DEBUG_INFO(p)) {
     int i;
@@ -444,6 +450,8 @@ void GC_traverse_back_graph(void)
 {
   GC_max_height = 0;
   GC_apply_to_each_object(update_max_height);
+  if (0 != GC_deepest_obj)
+    GC_set_mark_bit(GC_deepest_obj);  /* Keep it until we can print it. */
 }
 
 void GC_print_back_graph_stats(void)

@@ -19,6 +19,8 @@
 
 signed_word GC_bytes_found = 0;
 			/* Number of bytes of memory reclaimed     */
+			/* minus the number of bytes originally	   */
+			/* on free lists which we had to drop.	   */
 
 #if defined(PARALLEL_MARK) || defined(THREAD_LOCAL_ALLOC)
   word GC_fl_builder_count = 0;
@@ -112,7 +114,7 @@ GC_bool GC_block_nearly_full(hdr *hhdr)
 ptr_t GC_reclaim_clear(struct hblk *hbp, hdr *hhdr, size_t sz,
 		       ptr_t list, signed_word *count)
 {
-    int bit_no = 0;
+    word bit_no = 0;
     word *p, *q, *plim;
     signed_word n_bytes_found = 0;
     
@@ -160,7 +162,7 @@ ptr_t GC_reclaim_clear(struct hblk *hbp, hdr *hhdr, size_t sz,
 ptr_t GC_reclaim_uninit(struct hblk *hbp, hdr *hhdr, size_t sz,
 			ptr_t list, signed_word *count)
 {
-    int bit_no = 0;
+    word bit_no = 0;
     word *p, *plim;
     signed_word n_bytes_found = 0;
     
@@ -187,7 +189,7 @@ ptr_t GC_reclaim_uninit(struct hblk *hbp, hdr *hhdr, size_t sz,
 /*ARGSUSED*/
 void GC_reclaim_check(struct hblk *hbp, hdr *hhdr, word sz)
 {
-    int bit_no = 0;
+    word bit_no = 0;
     ptr_t p, plim;
     
     GC_ASSERT(sz == hhdr -> hb_sz);
@@ -400,7 +402,7 @@ int GC_n_set_marks(hdr *hhdr)
 void GC_print_block_descr(struct hblk *h, word /* struct PrintStats */ raw_ps)
 {
     hdr * hhdr = HDR(h);
-    unsigned bytes = hhdr -> hb_sz;
+    size_t bytes = hhdr -> hb_sz;
     struct Print_stats *ps;
     unsigned n_marks = GC_n_set_marks(hhdr);
     
@@ -433,6 +435,25 @@ void GC_print_block_list()
     	      (unsigned long)pstats.total_bytes);
 }
 
+/* Currently for debugger use only: */
+void GC_print_free_list(int kind, size_t sz_in_granules)
+{
+    struct obj_kind * ok = &GC_obj_kinds[kind];
+    ptr_t flh = ok -> ok_freelist[sz_in_granules];
+    struct hblk *lastBlock = 0;
+    int n = 0;
+
+    while (flh){
+        struct hblk *block = HBLKPTR(flh);
+        if (block != lastBlock){
+            GC_printf("\nIn heap block at 0x%x:\n\t", block);
+            lastBlock = block;
+        }
+        GC_printf("%d: 0x%x;", ++n, flh);
+        flh = obj_link(flh);
+    }
+}
+
 #endif /* NO_DEBUGGING */
 
 /*
@@ -459,7 +480,7 @@ void GC_clear_fl_links(void **flp)
  */
 void GC_start_reclaim(GC_bool report_if_found)
 {
-    int kind;
+    unsigned kind;
     
 #   if defined(PARALLEL_MARK) || defined(THREAD_LOCAL_ALLOC)
       GC_ASSERT(0 == GC_fl_builder_count);
@@ -547,7 +568,7 @@ void GC_continue_reclaim(size_t sz /* granules */, int kind)
 GC_bool GC_reclaim_all(GC_stop_func stop_func, GC_bool ignore_old)
 {
     word sz;
-    int kind;
+    unsigned kind;
     hdr * hhdr;
     struct hblk * hbp;
     struct obj_kind * ok;

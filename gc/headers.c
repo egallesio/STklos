@@ -132,11 +132,13 @@ ptr_t GC_scratch_alloc(size_t bytes)
 		bytes_to_get &= ~(GC_page_size - 1);
 #	    endif
    	    result = (ptr_t)GET_MEM(bytes_to_get);
+	    GC_add_to_our_memory(result, bytes_to_get);
             scratch_free_ptr -= bytes;
 	    GC_scratch_last_end_ptr = result + bytes;
             return(result);
         }
         result = (ptr_t)GET_MEM(bytes_to_get);
+        GC_add_to_our_memory(result, bytes_to_get);
         if (result == 0) {
 	    if (GC_print_stats)
                 GC_printf("Out of memory - trying to allocate less\n");
@@ -146,7 +148,9 @@ ptr_t GC_scratch_alloc(size_t bytes)
 		bytes_to_get += GC_page_size - 1;
 		bytes_to_get &= ~(GC_page_size - 1);
 #	    endif
-            return((ptr_t)GET_MEM(bytes_to_get));
+            result = (ptr_t)GET_MEM(bytes_to_get);
+            GC_add_to_our_memory(result, bytes_to_get);
+	    return result;
         }
         scratch_free_ptr = result;
         GC_scratch_end_ptr = scratch_free_ptr + bytes_to_get;
@@ -204,7 +208,7 @@ static GC_bool get_index(word addr)
     bottom_index *pi;
     
 #   ifdef HASH_TL
-      unsigned i = TL_HASH(hi);
+      word i = TL_HASH(hi);
       bottom_index * old;
       
       old = p = GC_top_index[i];
@@ -262,8 +266,8 @@ struct hblkhdr * GC_install_header(struct hblk *h)
 /* Set up forwarding counts for block h of size sz */
 GC_bool GC_install_counts(struct hblk *h, size_t sz/* bytes */)
 {
-    register struct hblk * hbp;
-    register int i;
+    struct hblk * hbp;
+    word i;
     
     for (hbp = h; (char *)hbp < (char *)h + sz; hbp += BOTTOM_SZ) {
         if (!get_index((word) hbp)) return(FALSE);
@@ -301,7 +305,7 @@ void GC_remove_counts(struct hblk *h, size_t sz/* bytes */)
 void GC_apply_to_all_blocks(void (*fn)(struct hblk *h, word client_data),
 			    word client_data)
 {
-    int j;
+    signed_word j;
     bottom_index * index_p;
     
     for (index_p = GC_all_bottom_indices; index_p != 0;
@@ -318,7 +322,7 @@ void GC_apply_to_all_blocks(void (*fn)(struct hblk *h, word client_data),
              } else if (index_p->index[j] == 0) {
                 j--;
              } else {
-                j -= (word)(index_p->index[j]);
+                j -= (signed_word)(index_p->index[j]);
              }
          }
      }

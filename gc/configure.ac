@@ -17,12 +17,12 @@ dnl Process this file with autoconf to produce configure.
 # Initialization
 # ==============
 
-AC_INIT(gc,7.0alpha7,Hans.Boehm@hp.com) 
+AC_INIT(gc,7.1alpha2,Hans.Boehm@hp.com) 
     ## version must conform to [0-9]+[.][0-9]+(alpha[0-9]+)?
 AC_CONFIG_SRCDIR(gcj_mlc.c)
 AC_CANONICAL_TARGET 
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.14 $)
+AC_REVISION($Revision: 1.31 $)
 GC_SET_VERSION
 AM_INIT_AUTOMAKE([foreign dist-bzip2 subdir-objects nostdinc])
 AM_MAINTAINER_MODE
@@ -44,23 +44,6 @@ AC_PROG_INSTALL
 
 GC_CFLAGS=${gc_cflags}
 AC_SUBST(GC_CFLAGS)
-
-AC_LANG(C)
-AC_DEFUN(GC_CHECK_DEFINE, [
- dnl $1: header file
- dnl $2: CPP variable
- dnl $3: then
- dnl $4: else
- AC_PREPROC_IFELSE([
- #include <$1>
- #ifndef $2
- # error "$2 undefined"
- #else
-  ok
- #endif
- ],
-                   [$3], [$4])
-])
 
 AC_ARG_ENABLE(threads,
   [AC_HELP_STRING([--enable-threads=TYPE], [choose threading package])],
@@ -85,20 +68,6 @@ AC_ARG_ENABLE(parallel-mark,
 AC_ARG_ENABLE(cplusplus,
     [AC_HELP_STRING([--enable-cplusplus], [install C++ support])])
 
-if test "$THREADS" = lurc
-then
-  AC_CHECK_HEADER([lurc.h], [have_lurc_h=1], [AC_MSG_ERROR([Missing lurc.h])])
-  AC_MSG_CHECKING([for LURC GC support])
-  GC_CHECK_DEFINE([lurc.h], [LURC_ENABLE_GC],
-                  [have_lurc_gc=1; AC_MSG_RESULT(ok)],
-                  [AC_MSG_ERROR([LURC not compiled with GC support])])
-  AC_MSG_CHECKING([for LURC PThread support])
-  GC_CHECK_DEFINE([lurc.h], [LURC_ENABLE_PTHREAD],
-                  [AC_MSG_RESULT(yes); THREADS=pthreads; LURC=yes],
-                  [AC_MSG_RESULT(no)])
-fi
-
-
 INCLUDES=-I${srcdir}/include
 THREADDLLIBS=
 need_atomic_ops_asm=false
@@ -110,12 +79,6 @@ case "$THREADS" in
  posix | pthreads)
     THREADS=posix
     THREADDLLIBS=-lpthread
-    # check wether we want LURC support
-    if test "$LURC" = yes
-    then
-        THREADDLLIBS="$THREADLIBS -llurc"
-        AC_DEFINE(GC_LURC_THREADS)
-    fi
     case "$host" in
      x86-*-linux* | ia64-*-linux* | i586-*-linux* | i686-*-linux* | x86_64-*-linux* | alpha-*-linux*)
 	AC_DEFINE(GC_LINUX_THREADS)
@@ -166,6 +129,11 @@ case "$THREADS" in
 	AC_DEFINE(THREAD_LOCAL_ALLOC)
 	AC_DEFINE(USE_COMPILER_TLS)
       	;;
+     *-*-gnu*)
+	AC_DEFINE(GC_GNU_THREADS)
+	AC_DEFINE(_REENTRANT)
+	AC_DEFINE(THREAD_LOCAL_ALLOC)
+	;;
      *-*-netbsd*)
 	AC_MSG_WARN("Only on NetBSD 2.0 or later.")
 	AC_DEFINE(GC_NETBSD_THREADS)
@@ -187,15 +155,17 @@ case "$THREADS" in
 	;;
      *-*-cygwin*)
 	AC_DEFINE(GC_WIN32_THREADS)
+	AC_DEFINE(THREAD_LOCAL_ALLOC)
 	win32_threads=true
 	;;
      *-*-darwin*)
 	AC_DEFINE(GC_DARWIN_THREADS)
 	AC_DEFINE(THREAD_LOCAL_ALLOC)
 	AC_MSG_WARN("Explict GC_INIT() calls may be required.");
-	if test "${enable_parallel_mark}" = yes; then
-	  AC_DEFINE(PARALLEL_MARK)
-	fi
+	# Parallel-mark is currently unreliable on Darwin; ignore request
+	# if test "${enable_parallel_mark}" = yes; then
+	#   AC_DEFINE(PARALLEL_MARK)
+	# fi
 	darwin_threads=true
 	;;
      *-*-osf*)
@@ -214,16 +184,6 @@ case "$THREADS" in
 	AC_MSG_ERROR("Pthreads not supported by the GC on this platform.")
 	;;
     esac
-    ;;
- lurc)
-    if test "x$have_lurc_h" = x 
-    then AC_MSG_ERROR(Missing lurc.h)
-    fi
-    if test "x$have_lurc_gc" = x
-    then AC_MSG_ERROR(LURC not compiled with GC support)
-    fi
-    THREADDLLIBS=-llurc
-    AC_DEFINE(GC_LURC_THREADS)
     ;;
  win32)
     AC_DEFINE(GC_WIN32_THREADS)
@@ -261,7 +221,6 @@ esac
 AC_SUBST(THREADDLLIBS)
 AM_CONDITIONAL(THREADS, test x$THREADS != xnone)
 AM_CONDITIONAL(PTHREADS, test x$THREADS = xposix)
-AM_CONDITIONAL(LURC_THREADS, test x$THREADS = xlurc)
 AM_CONDITIONAL(DARWIN_THREADS, test x$darwin_threads = xtrue)
 AM_CONDITIONAL(WIN32_THREADS, test x$win32_threads = xtrue)
 
@@ -269,6 +228,54 @@ case "$host" in
    powerpc-*-darwin*)
       powerpc_darwin=true
       ;;
+esac
+
+# Darwin needs a few extra special tests to deal with variation in the
+# system headers.
+case "$host" in
+  powerpc*-*-darwin*)
+    AC_CHECK_MEMBER(ppc_thread_state_t.r0,
+      AC_DEFINE(HAS_PPC_THREAD_STATE_R0,1,
+	[ppc_thread_state_t has field r0]),,
+      [#include <mach/thread_status.h>])
+    AC_CHECK_MEMBER(ppc_thread_state_t.__r0,
+      AC_DEFINE(HAS_PPC_THREAD_STATE___R0,1,dnl
+	[ppc_thread_state_t has field __r0]),,
+      [#include <mach/thread_status.h>])
+    AC_CHECK_MEMBER(ppc_thread_state64_t.r0,
+      AC_DEFINE(HAS_PPC_THREAD_STATE64_R0,1,dnl
+	[ppc_thread_state64_t has field r0]),,
+      [#include <mach/thread_status.h>])
+    AC_CHECK_MEMBER(ppc_thread_state64_t.__r0,
+      AC_DEFINE(HAS_PPC_THREAD_STATE64___R0,1,dnl
+	[ppc_thread_state64_t has field __r0]),,
+      [#include <mach/thread_status.h>])
+    ;;
+  i?86*-*-darwin*)
+    AC_CHECK_MEMBER(x86_thread_state32_t.eax,
+      AC_DEFINE(HAS_X86_THREAD_STATE32_EAX,1,dnl
+	[x86_thread_state32_t has field eax]),,
+      [#include <sys/cdefs.h>
+      #include <mach/thread_status.h>])
+    AC_CHECK_MEMBER(x86_thread_state32_t.__eax,
+      AC_DEFINE(HAS_X86_THREAD_STATE32___EAX,1,dnl
+	[x86_thread_state32_t has field __eax]),,
+      [#include <sys/cdefs.h>
+      #include <mach/thread_status.h>])
+    ;;
+  x86_64-*-darwin*)
+    AC_CHECK_MEMBER(x86_thread_state64_t.rax,
+      AC_DEFINE(HAS_X86_THREAD_STATE64_RAX,1,dnl
+	[x86_thread_state64_t has field rax]),,
+      [#include <sys/cdefs.h>
+      #include <mach/thread_status.h>])
+    AC_CHECK_MEMBER(x86_thread_state64_t.__rax,
+      AC_DEFINE(HAS_X86_THREAD_STATE64___RAX,1,dnl
+	[x86_thread_state64_t has field __rax]),,
+      [#include <sys/cdefs.h>
+      #include <mach/thread_status.h>])
+     ;;
+  *) ;;
 esac
 
 AC_MSG_CHECKING(for xlc)
@@ -287,13 +294,19 @@ fi
 # We never want libdl on darwin. It is a fake libdl that just ends up making
 # dyld calls anyway
 case "$host" in
-  *-*-darwin*) 
-    CFLAGS="$CFLAGS -no-cpp-precomp"
-    ;;
-  *) 
+  *-*-darwin*) ;;
+  *)
     AC_CHECK_LIB(dl, dlopen, THREADDLLIBS="$THREADDLLIBS -ldl")
     ;;
 esac
+
+# extra LD Flags which are required for targets
+case "${host}" in
+  *-*-darwin*)
+    extra_ldflags_libgc=-Wl,-single_module
+    ;;
+esac
+AC_SUBST(extra_ldflags_libgc)
 
 AC_SUBST(EXTRA_TEST_LIBS)
 
@@ -376,7 +389,9 @@ case "$host" in
     ;; 
  mips-*-*)
     machdep="mach_dep.lo"
-    AC_DEFINE(NO_EXECUTE_PERMISSION)
+    dnl AC_DEFINE(NO_EXECUTE_PERMISSION)
+    dnl This is now redundant, but it is also important for incremental GC
+    dnl performance under Irix.
     ;;
  sparc-*-netbsd*)
     machdep="mach_dep.lo sparc_netbsd_mach_dep.lo"
@@ -513,6 +528,7 @@ if test "${enable_redirect_malloc}" = yes; then
     else
 	AC_DEFINE(REDIRECT_MALLOC, GC_malloc)
     fi
+    AC_DEFINE(GC_USE_DLOPEN_WRAP)
 fi
 
 AC_ARG_ENABLE(large-config,
@@ -574,6 +590,25 @@ if test "${enable_gc_assertions}" = yes; then
     AC_DEFINE(GC_ASSERTIONS)
 fi
 
+AC_ARG_ENABLE(munmap,
+    [AC_HELP_STRING([--enable-munmap=N],
+	[return page to the os if empty for N collections])],
+  MUNMAP_THRESHOLD=$enableval;
+   [case "$MMAP" in
+      no)
+        AC_MSG_ERROR([--enable-munmap requires --enable-mmap])
+        ;;
+    esac]
+   )
+if test "${enable_munmap}" != ""; then
+    AC_DEFINE(USE_MMAP)
+    AC_DEFINE(USE_MUNMAP)
+    if test "${MUNMAP_THRESHOLD}" = "yes"; then
+      MUNMAP_THRESHOLD=6
+    fi
+    AC_DEFINE_UNQUOTED(MUNMAP_THRESHOLD, ${MUNMAP_THRESHOLD})
+fi
+
 AM_CONDITIONAL(USE_LIBDIR, test -z "$with_cross_host")
 
 
@@ -605,22 +640,22 @@ AC_CHECK_HEADER(atomic_ops.h,
     AC_MSG_NOTICE([Using internal version of libatomic_ops])
 
     dnl Automake does not accept shell variables in AC_CONFIG_SUBDIRS
-    test -e ${srcdir}/libatomic_ops \
-	|| ln -s ${ao_dir} ${srcdir}/libatomic_ops
+    test -e libatomic_ops \
+	|| ln -s ${ao_dir} libatomic_ops
     AC_CONFIG_SUBDIRS(libatomic_ops)
 
     dnl Also copy the source files to be linked in.
-    test -e ${srcdir}/atomic_ops.c \
-    	|| ln -s ${srcdir}/libatomic_ops/src/atomic_ops.c \
-		 ${srcdir}/atomic_ops.c
+    test -e atomic_ops.c \
+    	|| ln -s libatomic_ops/src/atomic_ops.c \
+		 atomic_ops.c
 
-    test -e ${srcdir}/atomic_ops_sysdeps.S \
-    	|| ln -s ${srcdir}/libatomic_ops/src/atomic_ops_sysdeps.S \
-		 ${srcdir}/atomic_ops_sysdeps.S
+    test -e atomic_ops_sysdeps.S \
+    	|| ln -s libatomic_ops/src/atomic_ops_sysdeps.S \
+		 atomic_ops_sysdeps.S
 
     dnl This gets the source include files, which is often close enough.
     dnl It also makes atomic_ops_sysdeps.S assemble.
-    GC_CFLAGS="${GC_CFLAGS} -I \$(top_srcdir)/libatomic_ops/src"
+    GC_CFLAGS="${GC_CFLAGS} -I libatomic_ops/src"
     maybe_libatomic_ops="libatomic_ops"
   ])
 

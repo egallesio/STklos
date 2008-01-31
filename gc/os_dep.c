@@ -373,7 +373,9 @@ GC_bool GC_enclosing_mapping(ptr_t addr, ptr_t *startp, ptr_t *endp)
   return FALSE;
 }
 
-/* Find the text(code) mapping for the library whose name starts with nm. */
+#if defined(REDIRECT_MALLOC)
+/* Find the text(code) mapping for the library whose name, after 	*/
+/* stripping the directory part, starts with nm. 			*/
 GC_bool GC_text_mapping(char *nm, ptr_t *startp, ptr_t *endp)
 {
   size_t nm_len = strlen(nm);
@@ -390,15 +392,22 @@ GC_bool GC_text_mapping(char *nm, ptr_t *startp, ptr_t *endp)
 		    	         &prot, &maj_dev, &map_path);
 
     if (buf_ptr == NULL) return FALSE;
-    if (prot[0] == 'r' && prot[1] == '-' && prot[2] == 'x' &&
-	strncmp(nm, map_path, nm_len) == 0) {
+    if (prot[0] == 'r' && prot[1] == '-' && prot[2] == 'x') {
+	char *p = map_path;
+	/* Set p to point just past last slash, if any. */
+	  while (*p != '\0' && *p != '\n' && *p != ' ' && *p != '\t') ++p;
+	  while (*p != '/' && p >= map_path) --p;
+	  ++p;
+	if (strncmp(nm, p, nm_len) == 0) {
     	  *startp = my_start;
 	  *endp = my_end;
 	  return TRUE;
+	}
     }
   }
   return FALSE;
 }
+#endif /* REDIRECT_MALLOC */
 
 #ifdef IA64
 static ptr_t backing_store_base_from_proc(void)
@@ -422,7 +431,7 @@ static ptr_t backing_store_base_from_proc(void)
   /* for recent Linux versions.  This seems to be the easiest way to	*/
   /* cover all versions.						*/
 
-# ifdef LINUX
+# if defined(LINUX) || defined(HURD)
     /* Some Linux distributions arrange to define __data_start.  Some	*/
     /* define data_start as a weak symbol.  The latter is technically	*/
     /* broken, since the user program may define data_start, in which	*/
@@ -441,7 +450,7 @@ static ptr_t backing_store_base_from_proc(void)
   {
     extern ptr_t GC_find_limit(ptr_t, GC_bool);
 
-#   ifdef LINUX
+#   if defined(LINUX) || defined(HURD)
       /* Try the easy approaches first:	*/
       if ((ptr_t)__data_start != 0) {
 	  GC_data_start = (ptr_t)(__data_start);
@@ -1378,7 +1387,7 @@ void GC_register_data_segments(void)
                                     PAGE_READWRITE);
         if (page != NULL) {
           PVOID pages[16];
-          DWORD count = 16;
+          ULONG_PTR count = 16;
           DWORD page_size;
           /* Check that it actually works.  In spite of some 		*/
 	  /* documentation it actually seems to exist on W2K.		*/
@@ -1430,7 +1439,7 @@ void GC_register_data_segments(void)
   ptr_t GC_least_described_address(ptr_t start)
   {  
     MEMORY_BASIC_INFORMATION buf;
-    DWORD result;
+    size_t result;
     LPVOID limit;
     ptr_t p;
     LPVOID q;
@@ -1444,7 +1453,7 @@ void GC_register_data_segments(void)
     	if (result != sizeof(buf) || buf.AllocationBase == 0) break;
     	p = (ptr_t)(buf.AllocationBase);
     }
-    return(p);
+    return p;
   }
 # endif
 
@@ -1480,7 +1489,7 @@ void GC_register_data_segments(void)
   void *GC_get_allocation_base(void *p)
   {
     MEMORY_BASIC_INFORMATION buf;
-    DWORD result = VirtualQuery(p, &buf, sizeof(buf));
+    size_t result = VirtualQuery(p, &buf, sizeof(buf));
     if (result != sizeof(buf)) {
       ABORT("Weird VirtualQuery result");
     }
@@ -1528,12 +1537,6 @@ void GC_register_data_segments(void)
      unsigned i;
      
 #    ifndef REDIRECT_MALLOC
-       static word last_gc_no = -1;
-     
-       if (last_gc_no != GC_gc_no) {
-	 GC_add_current_malloc_heap();
-	 last_gc_no = GC_gc_no;
-       }
        if (GC_root_size > GC_max_root_size) GC_max_root_size = GC_root_size;
        if (GC_is_malloc_heap_base(p)) return TRUE;
 #    endif
@@ -1547,7 +1550,7 @@ void GC_register_data_segments(void)
   void GC_register_root_section(ptr_t static_root)
   {
       MEMORY_BASIC_INFORMATION buf;
-      DWORD result;
+      size_t result;
       DWORD protect;
       LPVOID p;
       char * base;
@@ -1620,7 +1623,7 @@ ptr_t GC_SysVGetDataStart(size_t max_page_size, ptr_t etext_addr)
 }
 # endif
 
-# if defined(FREEBSD) && (defined(I386) || defined(powerpc) || defined(__powerpc__)) && !defined(PCR)
+# if defined(FREEBSD) && (defined(I386) || defined(X86_64) || defined(powerpc) || defined(__powerpc__)) && !defined(PCR)
 /* Its unclear whether this should be identical to the above, or 	*/
 /* whether it should apply to non-X86 architectures.			*/
 /* For now we don't assume that there is always an empty page after	*/
@@ -1910,6 +1913,10 @@ SYSTEM_INFO GC_sysinfo;
 
 word GC_n_heap_bases = 0;
 
+word GC_mem_top_down = 0;  /* Change to MEM_TOP_DOWN  for better 64-bit */
+			   /* testing.  Otherwise all addresses tend to */
+			   /* end up in first 4GB, hiding bugs.		*/
+
 ptr_t GC_win32_get_mem(word bytes)
 {
     ptr_t result;
@@ -1938,7 +1945,8 @@ ptr_t GC_win32_get_mem(word bytes)
 #                                     ifdef GWW_VDB
                                         GetWriteWatch_alloc_flag |
 #                                     endif
-    				      MEM_COMMIT | MEM_RESERVE,
+    				      MEM_COMMIT | MEM_RESERVE
+				      | GC_mem_top_down,
     				      PAGE_EXECUTE_READWRITE);
     }
     if (HBLKDISPL(result) != 0) ABORT("Bad VirtualAlloc result");
@@ -2241,8 +2249,7 @@ void GC_default_push_other_roots(void)
 # endif /* PCR */
 
 
-# if defined(GC_PTHREADS) || defined(GC_WIN32_THREADS) \
-     || defined(GC_LURC_THREADS)
+# if defined(GC_PTHREADS) || defined(GC_WIN32_THREADS)
 
 extern void GC_push_all_stacks(void);
 
@@ -2340,7 +2347,7 @@ void GC_or_pages(page_hash_table pht1, page_hash_table pht2)
     BZERO(GC_grungy_pages, sizeof(GC_grungy_pages));
 
     for (i = 0; i != GC_n_heap_sects; ++i) {
-      DWORD count;
+      ULONG_PTR count;
 
       do {
         PVOID * pages, * pages_end;
@@ -2375,7 +2382,7 @@ void GC_or_pages(page_hash_table pht1, page_hash_table pht2)
           unsigned j;
           struct hblk * start = (struct hblk *)GC_heap_sects[i].hs_start;
           static struct hblk *last_warned = 0;
-          unsigned nblocks = divHBLKSZ(GC_heap_sects[i].hs_bytes);
+          size_t nblocks = divHBLKSZ(GC_heap_sects[i].hs_bytes);
 
           if ( i != 0 && last_warned != start && warn_count++ < 5) {
             last_warned = start;
@@ -2533,6 +2540,7 @@ GC_bool GC_page_was_ever_dirty(struct hblk *h)
 /* entire object.							*/
 void GC_dirty(ptr_t p)
 {
+    word index = PHT_HASH(p);
     async_set_pht_entry_from_index(GC_dirty_pages, index);
 }
 
@@ -2661,7 +2669,7 @@ GC_bool GC_old_segv_handler_used_si;
 /* correctly.								*/
 #ifdef AO_HAVE_test_and_set_acquire
   static volatile AO_TS_t fault_handler_lock = 0;
-  void async_set_pht_entry_from_index(volatile page_hash_table db, int index) {
+  void async_set_pht_entry_from_index(volatile page_hash_table db, size_t index) {
     while (AO_test_and_set_acquire(&fault_handler_lock) == AO_TS_SET) {}
     /* Could also revert to set_pht_entry_from_index_safe if initial	*/
     /* GC_test_and_set fails.						*/
@@ -2669,8 +2677,9 @@ GC_bool GC_old_segv_handler_used_si;
     AO_CLEAR(&fault_handler_lock);
   }
 #else /* !AO_have_test_and_set_acquire */
-# error No test-and_set operation: Introduces a race.
-  /* THIS IS INCORRECT! The dirty bit vector may be temporarily wrong,	*/
+# error No test_and_set operation: Introduces a race.
+  /* THIS WOULD BE INCORRECT!						*/
+  /* The dirty bit vector may be temporarily wrong,			*/
   /* just before we notice the conflict and correct it. We may end up   */
   /* looking at it while it's wrong.  But this requires contention	*/
   /* exactly when a GC is triggered, which seems far less likely to	*/
@@ -2678,7 +2687,7 @@ GC_bool GC_old_segv_handler_used_si;
   /* leave it this way while we think of something better, or support	*/
   /* GC_test_and_set on the remaining platforms.			*/
   static volatile word currently_updating = 0;
-  void async_set_pht_entry_from_index(volatile page_hash_table db, int index) {
+  void async_set_pht_entry_from_index(volatile page_hash_table db, size_t index) {
     unsigned int update_dummy;
     currently_updating = (word)(&update_dummy);
     set_pht_entry_from_index(db, index);
@@ -2831,7 +2840,7 @@ GC_bool GC_old_segv_handler_used_si;
 	/* and then to have the thread stopping code set the dirty	*/
 	/* flag, if necessary.						*/
         for (i = 0; i < divHBLKSZ(GC_page_size); i++) {
-            register int index = PHT_HASH(h+i);
+            size_t index = PHT_HASH(h+i);
             
             async_set_pht_entry_from_index(GC_dirty_pages, index);
         }
@@ -2874,7 +2883,7 @@ void GC_remove_protection(struct hblk *h, word nblocks, GC_bool is_ptrfree)
 	                    & ~(GC_page_size-1));
     found_clean = FALSE;
     for (current = h_trunc; current < h_end; ++current) {
-        int index = PHT_HASH(current);
+        size_t index = PHT_HASH(current);
             
         if (!is_ptrfree || current < h || current >= h + nblocks) {
             async_set_pht_entry_from_index(GC_dirty_pages, index);
@@ -3438,15 +3447,16 @@ void GC_remove_protection(struct hblk *h, word nblocks, GC_bool is_ptrfree)
    code:
       1. Apple's mach/xnu documentation
       2. Timothy J. Wood's "Mach Exception Handlers 101" post to the
-         omnigroup's macosx-dev list. 
-         www.omnigroup.com/mailman/archive/macosx-dev/2000-June/002030.html
+         omnigroup's macosx-dev list.
+         www.omnigroup.com/mailman/archive/macosx-dev/2000-June/014178.html
       3. macosx-nat.c from Apple's GDB source code.
 */
-   
+
 /* The bug that caused all this trouble should now be fixed. This should
    eventually be removed if all goes well. */
-/* define BROKEN_EXCEPTION_HANDLING */
-    
+
+/* #define BROKEN_EXCEPTION_HANDLING */
+
 #include <mach/mach.h>
 #include <mach/mach_error.h>
 #include <mach/thread_status.h>
@@ -3454,21 +3464,29 @@ void GC_remove_protection(struct hblk *h, word nblocks, GC_bool is_ptrfree)
 #include <mach/task.h>
 #include <pthread.h>
 
+extern void GC_darwin_register_mach_handler_thread(mach_port_t);
+
 /* These are not defined in any header, although they are documented */
-extern boolean_t exc_server(mach_msg_header_t *,mach_msg_header_t *);
-extern kern_return_t exception_raise(
-    mach_port_t,mach_port_t,mach_port_t,
-    exception_type_t,exception_data_t,mach_msg_type_number_t);
-extern kern_return_t exception_raise_state(
-    mach_port_t,mach_port_t,mach_port_t,
-    exception_type_t,exception_data_t,mach_msg_type_number_t,
-    thread_state_flavor_t*,thread_state_t,mach_msg_type_number_t,
-    thread_state_t,mach_msg_type_number_t*);
-extern kern_return_t exception_raise_state_identity(
-    mach_port_t,mach_port_t,mach_port_t,
-    exception_type_t,exception_data_t,mach_msg_type_number_t,
-    thread_state_flavor_t*,thread_state_t,mach_msg_type_number_t,
-    thread_state_t,mach_msg_type_number_t*);
+extern boolean_t
+exc_server(mach_msg_header_t *, mach_msg_header_t *);
+
+extern kern_return_t
+exception_raise(mach_port_t, mach_port_t, mach_port_t, exception_type_t,
+		exception_data_t, mach_msg_type_number_t);
+
+extern kern_return_t
+exception_raise_state(mach_port_t, mach_port_t, mach_port_t, exception_type_t,
+		      exception_data_t, mach_msg_type_number_t,
+		      thread_state_flavor_t*, thread_state_t,
+		      mach_msg_type_number_t, thread_state_t,
+		      mach_msg_type_number_t*);
+
+extern kern_return_t
+exception_raise_state_identity(mach_port_t, mach_port_t, mach_port_t,
+			       exception_type_t, exception_data_t,
+			       mach_msg_type_number_t, thread_state_flavor_t*,
+			       thread_state_t, mach_msg_type_number_t,
+			       thread_state_t, mach_msg_type_number_t*);
 
 
 #define MAX_EXCEPTION_PORTS 16
@@ -3510,63 +3528,57 @@ typedef enum {
 GC_mprotect_state_t GC_mprotect_state;
 
 /* The following should ONLY be called when the world is stopped  */
-static void GC_mprotect_thread_notify(mach_msg_id_t id) {
-    struct {
-        GC_msg_t msg;
-        mach_msg_trailer_t trailer;
-    } buf;
-    mach_msg_return_t r;
-    /* remote, local */
-    buf.msg.head.msgh_bits = 
-        MACH_MSGH_BITS(MACH_MSG_TYPE_MAKE_SEND,0);
-    buf.msg.head.msgh_size = sizeof(buf.msg);
-    buf.msg.head.msgh_remote_port = GC_ports.exception;
-    buf.msg.head.msgh_local_port = MACH_PORT_NULL;
-    buf.msg.head.msgh_id = id;
-            
-    r = mach_msg(
-        &buf.msg.head,
-        MACH_SEND_MSG|MACH_RCV_MSG|MACH_RCV_LARGE,
-        sizeof(buf.msg),
-        sizeof(buf),
-        GC_ports.reply,
-        MACH_MSG_TIMEOUT_NONE,
-        MACH_PORT_NULL);
-    if(r != MACH_MSG_SUCCESS)
-	ABORT("mach_msg failed in GC_mprotect_thread_notify");
-    if(buf.msg.head.msgh_id != ID_ACK)
-        ABORT("invalid ack in GC_mprotect_thread_notify");
+static void GC_mprotect_thread_notify(mach_msg_id_t id)
+{
+
+  struct {
+    GC_msg_t msg;
+    mach_msg_trailer_t trailer;
+  } buf;
+
+  mach_msg_return_t r;
+  /* remote, local */
+  buf.msg.head.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_MAKE_SEND, 0);
+  buf.msg.head.msgh_size = sizeof(buf.msg);
+  buf.msg.head.msgh_remote_port = GC_ports.exception;
+  buf.msg.head.msgh_local_port = MACH_PORT_NULL;
+  buf.msg.head.msgh_id = id;
+
+  r = mach_msg(&buf.msg.head, MACH_SEND_MSG | MACH_RCV_MSG | MACH_RCV_LARGE,
+	       sizeof(buf.msg), sizeof(buf), GC_ports.reply,
+	       MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
+  if(r != MACH_MSG_SUCCESS)
+    ABORT("mach_msg failed in GC_mprotect_thread_notify");
+  if(buf.msg.head.msgh_id != ID_ACK)
+    ABORT("invalid ack in GC_mprotect_thread_notify");
 }
 
 /* Should only be called by the mprotect thread */
-static void GC_mprotect_thread_reply(void) {
-    GC_msg_t msg;
-    mach_msg_return_t r;
-    /* remote, local */
-    msg.head.msgh_bits = 
-        MACH_MSGH_BITS(MACH_MSG_TYPE_MAKE_SEND,0);
-    msg.head.msgh_size = sizeof(msg);
-    msg.head.msgh_remote_port = GC_ports.reply;
-    msg.head.msgh_local_port = MACH_PORT_NULL;
-    msg.head.msgh_id = ID_ACK;
-            
-    r = mach_msg(
-        &msg.head,
-        MACH_SEND_MSG,
-        sizeof(msg),
-        0,
-        MACH_PORT_NULL,
-        MACH_MSG_TIMEOUT_NONE,
-        MACH_PORT_NULL);
-    if(r != MACH_MSG_SUCCESS)
-	ABORT("mach_msg failed in GC_mprotect_thread_reply");
+static void GC_mprotect_thread_reply(void)
+{
+
+  GC_msg_t msg;
+  mach_msg_return_t r;
+  /* remote, local */
+  msg.head.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_MAKE_SEND, 0);
+  msg.head.msgh_size = sizeof(msg);
+  msg.head.msgh_remote_port = GC_ports.reply;
+  msg.head.msgh_local_port = MACH_PORT_NULL;
+  msg.head.msgh_id = ID_ACK;
+
+  r = mach_msg(&msg.head, MACH_SEND_MSG, sizeof(msg), 0, MACH_PORT_NULL,
+	       MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
+  if(r != MACH_MSG_SUCCESS)
+    ABORT("mach_msg failed in GC_mprotect_thread_reply");
 }
 
-void GC_mprotect_stop(void) {
-    GC_mprotect_thread_notify(ID_STOP);
+void GC_mprotect_stop(void)
+{
+  GC_mprotect_thread_notify(ID_STOP);
 }
-void GC_mprotect_resume(void) {
-    GC_mprotect_thread_notify(ID_RESUME);
+void GC_mprotect_resume(void)
+{
+  GC_mprotect_thread_notify(ID_RESUME);
 }
 
 #else /* !THREADS */
@@ -3574,98 +3586,89 @@ void GC_mprotect_resume(void) {
 #define GC_mprotect_state GC_MP_NORMAL
 #endif
 
-static void *GC_mprotect_thread(void *arg) {
-    mach_msg_return_t r;
-    /* These two structures contain some private kernel data. We don't need to
-       access any of it so we don't bother defining a proper struct. The
-       correct definitions are in the xnu source code. */
-    struct {
-        mach_msg_header_t head;
-        char data[256];
-    } reply;
-    struct {
-        mach_msg_header_t head;
-        mach_msg_body_t msgh_body;
-        char data[1024];
-    } msg;
+static void *GC_mprotect_thread(void *arg)
+{
+  mach_msg_return_t r;
+  /* These two structures contain some private kernel data. We don't need to
+     access any of it so we don't bother defining a proper struct. The
+     correct definitions are in the xnu source code. */
+  struct {
+    mach_msg_header_t head;
+    char data[256];
+  } reply;
+  struct {
+    mach_msg_header_t head;
+    mach_msg_body_t msgh_body;
+    char data[1024];
+  } msg;
 
-    mach_msg_id_t id;
+  mach_msg_id_t id;
 
-    GC_darwin_register_mach_handler_thread(mach_thread_self());
-    
-    for(;;) {
-        r = mach_msg(
-            &msg.head,
-            MACH_RCV_MSG|MACH_RCV_LARGE|
-                (GC_mprotect_state == GC_MP_DISCARDING ? MACH_RCV_TIMEOUT : 0),
-            0,
-            sizeof(msg),
-            GC_ports.exception,
-            GC_mprotect_state == GC_MP_DISCARDING ? 0 : MACH_MSG_TIMEOUT_NONE,
-            MACH_PORT_NULL);
-        
-        id = r == MACH_MSG_SUCCESS ? msg.head.msgh_id : -1;
-        
-#       if defined(THREADS)
-          if(GC_mprotect_state == GC_MP_DISCARDING) {
-            if(r == MACH_RCV_TIMED_OUT) {
-                GC_mprotect_state = GC_MP_STOPPED;
-                GC_mprotect_thread_reply();
-                continue;
-            }
-            if(r == MACH_MSG_SUCCESS && (id == ID_STOP || id == ID_RESUME))
-                ABORT("out of order mprotect thread request");
-          }
-#       endif /* THREADS */
-        
-        if(r != MACH_MSG_SUCCESS) {
-            GC_err_printf("mach_msg failed with %d %s\n", 
-                (int)r, mach_error_string(r));
-            ABORT("mach_msg failed");
-        }
-        
-        switch(id) {
-#         if defined(THREADS)
-            case ID_STOP:
-                if(GC_mprotect_state != GC_MP_NORMAL)
-                    ABORT("Called mprotect_stop when state wasn't normal");
-                GC_mprotect_state = GC_MP_DISCARDING;
-                break;
-            case ID_RESUME:
-                if(GC_mprotect_state != GC_MP_STOPPED)
-                    ABORT("Called mprotect_resume when state wasn't stopped");
-                GC_mprotect_state = GC_MP_NORMAL;
-                GC_mprotect_thread_reply();
-                break;
-#         endif /* THREADS */
-            default:
-	            /* Handle the message (calls catch_exception_raise) */
-    	        if(!exc_server(&msg.head,&reply.head))
-                    ABORT("exc_server failed");
-                /* Send the reply */
-                r = mach_msg(
-                    &reply.head,
-                    MACH_SEND_MSG,
-                    reply.head.msgh_size,
-                    0,
-                    MACH_PORT_NULL,
-                    MACH_MSG_TIMEOUT_NONE,
-                    MACH_PORT_NULL);
-	        if(r != MACH_MSG_SUCCESS) {
-	            /* This will fail if the thread dies, but the thread */
-		    /* shouldn't die... */
-#		    ifdef BROKEN_EXCEPTION_HANDLING
-    	              GC_err_printf(
-                        "mach_msg failed with %d %s while sending exc reply\n",
-                        (int)r,mach_error_string(r));
-#  		    else
-    	        	ABORT("mach_msg failed while sending exception reply");
-#                   endif
-        	}
-        } /* switch */
-    } /* for(;;) */
+  GC_darwin_register_mach_handler_thread(mach_thread_self());
+
+  for(;;) {
+    r = mach_msg(&msg.head, MACH_RCV_MSG | MACH_RCV_LARGE |
+		 (GC_mprotect_state == GC_MP_DISCARDING ? MACH_RCV_TIMEOUT : 0),
+		 0, sizeof(msg), GC_ports.exception,
+		 GC_mprotect_state == GC_MP_DISCARDING ? 0
+		 : MACH_MSG_TIMEOUT_NONE, MACH_PORT_NULL);
+
+    id = r == MACH_MSG_SUCCESS ? msg.head.msgh_id : -1;
+
+#   if defined(THREADS)
+      if(GC_mprotect_state == GC_MP_DISCARDING) {
+	if(r == MACH_RCV_TIMED_OUT) {
+	  GC_mprotect_state = GC_MP_STOPPED;
+	  GC_mprotect_thread_reply();
+	  continue;
+	}
+	if(r == MACH_MSG_SUCCESS && (id == ID_STOP || id == ID_RESUME))
+	  ABORT("out of order mprotect thread request");
+      }
+#   endif /* THREADS */
+
+    if(r != MACH_MSG_SUCCESS) {
+      GC_err_printf("mach_msg failed with %d %s\n", (int)r,
+		    mach_error_string(r));
+      ABORT("mach_msg failed");
+    }
+
+    switch(id) {
+#     if defined(THREADS)
+        case ID_STOP:
+	  if(GC_mprotect_state != GC_MP_NORMAL)
+	    ABORT("Called mprotect_stop when state wasn't normal");
+	  GC_mprotect_state = GC_MP_DISCARDING;
+	  break;
+        case ID_RESUME:
+	  if(GC_mprotect_state != GC_MP_STOPPED)
+	    ABORT("Called mprotect_resume when state wasn't stopped");
+	  GC_mprotect_state = GC_MP_NORMAL;
+	  GC_mprotect_thread_reply();
+	  break;
+#     endif /* THREADS */
+        default:
+	  /* Handle the message (calls catch_exception_raise) */
+	  if(!exc_server(&msg.head, &reply.head))
+	    ABORT("exc_server failed");
+	  /* Send the reply */
+	  r = mach_msg(&reply.head, MACH_SEND_MSG, reply.head.msgh_size, 0,
+		       MACH_PORT_NULL, MACH_MSG_TIMEOUT_NONE,
+		       MACH_PORT_NULL);
+	  if(r != MACH_MSG_SUCCESS) {
+	    /* This will fail if the thread dies, but the thread */
+	    /* shouldn't die... */
+#           ifdef BROKEN_EXCEPTION_HANDLING
+	      GC_err_printf("mach_msg failed with %d %s while sending"
+			    "exc reply\n", (int)r,mach_error_string(r));
+#           else
+	      ABORT("mach_msg failed while sending exception reply");
+#           endif
+	  }
+    } /* switch */
+  } /* for(;;) */
     /* NOT REACHED */
-    return NULL;
+  return NULL;
 }
 
 /* All this SIGBUS code shouldn't be necessary. All protection faults should
@@ -3674,321 +3677,322 @@ static void *GC_mprotect_thread(void *arg) {
    meaningless and safe to ignore. */
 #ifdef BROKEN_EXCEPTION_HANDLING
 
-typedef void (* SIG_HNDLR_PTR)();
 static SIG_HNDLR_PTR GC_old_bus_handler;
 
 /* Updates to this aren't atomic, but the SIGBUSs seem pretty rare.
    Even if this doesn't get updated property, it isn't really a problem */
 static int GC_sigbus_count;
 
-static void GC_darwin_sigbus(int num,siginfo_t *sip,void *context) {
-    if(num != SIGBUS) ABORT("Got a non-sigbus signal in the sigbus handler");
-    
-    /* Ugh... some seem safe to ignore, but too many in a row probably means
-       trouble. GC_sigbus_count is reset for each mach exception that is
-       handled */
-    if(GC_sigbus_count >= 8) {
-        ABORT("Got more than 8 SIGBUSs in a row!");
-    } else {
-        GC_sigbus_count++;
-        GC_err_printf("GC: WARNING: Ignoring SIGBUS.\n");
-    }
+static void GC_darwin_sigbus(int num, siginfo_t *sip, void *context)
+{
+  if(num != SIGBUS)
+    ABORT("Got a non-sigbus signal in the sigbus handler");
+
+  /* Ugh... some seem safe to ignore, but too many in a row probably means
+     trouble. GC_sigbus_count is reset for each mach exception that is
+     handled */
+  if(GC_sigbus_count >= 8) {
+    ABORT("Got more than 8 SIGBUSs in a row!");
+  } else {
+    GC_sigbus_count++;
+    WARN("Ignoring SIGBUS.\n", 0);
+  }
 }
 #endif /* BROKEN_EXCEPTION_HANDLING */
 
-void GC_dirty_init(void) {
-    kern_return_t r;
-    mach_port_t me;
-    pthread_t thread;
-    pthread_attr_t attr;
-    exception_mask_t mask;
-    
-    if (GC_print_stats == VERBOSE)
-        GC_log_printf("Inititalizing mach/darwin mprotect virtual dirty bit "
-                      "implementation\n");
-#   ifdef BROKEN_EXCEPTION_HANDLING
-        GC_err_printf("GC: WARNING: Enabling workarounds for various darwin "
-            "exception handling bugs.\n");
-#   endif
-    GC_dirty_maintained = TRUE;
-    if (GC_page_size % HBLKSIZE != 0) {
-        GC_err_printf("Page size not multiple of HBLKSIZE\n");
-        ABORT("Page size not multiple of HBLKSIZE");
-    }
-    
-    GC_task_self = me = mach_task_self();
-    
-    r = mach_port_allocate(me,MACH_PORT_RIGHT_RECEIVE,&GC_ports.exception);
-    if(r != KERN_SUCCESS) ABORT("mach_port_allocate failed (exception port)");
-    
-    r = mach_port_insert_right(me,GC_ports.exception,GC_ports.exception,
-    	MACH_MSG_TYPE_MAKE_SEND);
-    if(r != KERN_SUCCESS)
-    	ABORT("mach_port_insert_right failed (exception port)");
+void GC_dirty_init(void)
+{
+  kern_return_t r;
+  mach_port_t me;
+  pthread_t thread;
+  pthread_attr_t attr;
+  exception_mask_t mask;
 
-    #if defined(THREADS)
-        r = mach_port_allocate(me,MACH_PORT_RIGHT_RECEIVE,&GC_ports.reply);
-        if(r != KERN_SUCCESS) ABORT("mach_port_allocate failed (reply port)");
-    #endif
+  if (GC_print_stats == VERBOSE)
+    GC_log_printf("Inititalizing mach/darwin mprotect virtual dirty bit "
+		  "implementation\n");
+# ifdef BROKEN_EXCEPTION_HANDLING
+    WARN("Enabling workarounds for various darwin "
+	 "exception handling bugs.\n", 0);
+# endif
+  GC_dirty_maintained = TRUE;
+  if (GC_page_size % HBLKSIZE != 0) {
+    GC_err_printf("Page size not multiple of HBLKSIZE\n");
+    ABORT("Page size not multiple of HBLKSIZE");
+  }
 
-    /* The exceptions we want to catch */  
-    mask = EXC_MASK_BAD_ACCESS;
+  GC_task_self = me = mach_task_self();
 
-    r = task_get_exception_ports(
-        me,
-        mask,
-        GC_old_exc_ports.masks,
-        &GC_old_exc_ports.count,
-        GC_old_exc_ports.ports,
-        GC_old_exc_ports.behaviors,
-        GC_old_exc_ports.flavors
-    );
-    if(r != KERN_SUCCESS) ABORT("task_get_exception_ports failed");
-        
-    r = task_set_exception_ports(
-        me,
-        mask,
-        GC_ports.exception,
-        EXCEPTION_DEFAULT,
-        MACHINE_THREAD_STATE
-    );
-    if(r != KERN_SUCCESS) ABORT("task_set_exception_ports failed");
+  r = mach_port_allocate(me, MACH_PORT_RIGHT_RECEIVE, &GC_ports.exception);
+  if(r != KERN_SUCCESS)
+    ABORT("mach_port_allocate failed (exception port)");
 
-    if(pthread_attr_init(&attr) != 0) ABORT("pthread_attr_init failed");
-    if(pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED) != 0) 
-        ABORT("pthread_attr_setdetachedstate failed");
+  r = mach_port_insert_right(me, GC_ports.exception, GC_ports.exception,
+			     MACH_MSG_TYPE_MAKE_SEND);
+  if(r != KERN_SUCCESS)
+    ABORT("mach_port_insert_right failed (exception port)");
 
-#	undef pthread_create
-    /* This will call the real pthread function, not our wrapper */
-    if(pthread_create(&thread,&attr,GC_mprotect_thread,NULL) != 0)
-        ABORT("pthread_create failed");
-    pthread_attr_destroy(&attr);
-    
-    /* Setup the sigbus handler for ignoring the meaningless SIGBUSs */
-    #ifdef BROKEN_EXCEPTION_HANDLING 
+#  if defined(THREADS)
+     r = mach_port_allocate(me, MACH_PORT_RIGHT_RECEIVE, &GC_ports.reply);
+     if(r != KERN_SUCCESS)
+       ABORT("mach_port_allocate failed (reply port)");
+#  endif
+
+  /* The exceptions we want to catch */
+  mask = EXC_MASK_BAD_ACCESS;
+
+  r = task_get_exception_ports(me, mask, GC_old_exc_ports.masks,
+			       &GC_old_exc_ports.count, GC_old_exc_ports.ports,
+			       GC_old_exc_ports.behaviors,
+			       GC_old_exc_ports.flavors);
+  if(r != KERN_SUCCESS)
+    ABORT("task_get_exception_ports failed");
+
+  r = task_set_exception_ports(me, mask, GC_ports.exception, EXCEPTION_DEFAULT,
+			       GC_MACH_THREAD_STATE);
+  if(r != KERN_SUCCESS)
+    ABORT("task_set_exception_ports failed");
+  if(pthread_attr_init(&attr) != 0)
+    ABORT("pthread_attr_init failed");
+  if(pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) != 0)
+    ABORT("pthread_attr_setdetachedstate failed");
+
+# undef pthread_create
+  /* This will call the real pthread function, not our wrapper */
+  if(pthread_create(&thread, &attr, GC_mprotect_thread, NULL) != 0)
+    ABORT("pthread_create failed");
+  pthread_attr_destroy(&attr);
+
+  /* Setup the sigbus handler for ignoring the meaningless SIGBUSs */
+# ifdef BROKEN_EXCEPTION_HANDLING
     {
-        struct sigaction sa, oldsa;
-        sa.sa_handler = (SIG_HNDLR_PTR)GC_darwin_sigbus;
-        sigemptyset(&sa.sa_mask);
-        sa.sa_flags = SA_RESTART|SA_SIGINFO;
-        if(sigaction(SIGBUS,&sa,&oldsa) < 0) ABORT("sigaction");
-        GC_old_bus_handler = (SIG_HNDLR_PTR)oldsa.sa_handler;
-        if (GC_old_bus_handler != SIG_DFL) {
- 	    if (GC_print_stats == VERBOSE)
-                GC_err_printf("Replaced other SIGBUS handler\n");
-        }
+      struct sigaction sa, oldsa;
+      sa.sa_handler = (SIG_HNDLR_PTR)GC_darwin_sigbus;
+      sigemptyset(&sa.sa_mask);
+      sa.sa_flags = SA_RESTART|SA_SIGINFO;
+      if(sigaction(SIGBUS, &sa, &oldsa) < 0)
+	ABORT("sigaction");
+      GC_old_bus_handler = (SIG_HNDLR_PTR)oldsa.sa_handler;
+      if (GC_old_bus_handler != SIG_DFL) {
+	if (GC_print_stats == VERBOSE)
+	  GC_err_printf("Replaced other SIGBUS handler\n");
+      }
     }
-    #endif /* BROKEN_EXCEPTION_HANDLING  */
+#  endif /* BROKEN_EXCEPTION_HANDLING  */
 }
- 
+
 /* The source code for Apple's GDB was used as a reference for the exception
-   forwarding code. This code is similar to be GDB code only because there is 
+   forwarding code. This code is similar to be GDB code only because there is
    only one way to do it. */
-static kern_return_t GC_forward_exception(
-        mach_port_t thread,
-        mach_port_t task,
-        exception_type_t exception,
-        exception_data_t data,
-        mach_msg_type_number_t data_count
-) {
-    int i;
-    kern_return_t r;
-    mach_port_t port;
-    exception_behavior_t behavior;
-    thread_state_flavor_t flavor;
-    
-    thread_state_t thread_state;
-    mach_msg_type_number_t thread_state_count = THREAD_STATE_MAX;
-        
-    for(i=0;i<GC_old_exc_ports.count;i++)
-        if(GC_old_exc_ports.masks[i] & (1 << exception))
-            break;
-    if(i==GC_old_exc_ports.count) ABORT("No handler for exception!");
-    
-    port = GC_old_exc_ports.ports[i];
-    behavior = GC_old_exc_ports.behaviors[i];
-    flavor = GC_old_exc_ports.flavors[i];
+static kern_return_t GC_forward_exception(mach_port_t thread, mach_port_t task,
+					  exception_type_t exception,
+					  exception_data_t data,
+					  mach_msg_type_number_t data_count)
+{
+  unsigned int i;
+  kern_return_t r;
+  mach_port_t port;
+  exception_behavior_t behavior;
+  thread_state_flavor_t flavor;
 
-    if(behavior != EXCEPTION_DEFAULT) {
-        r = thread_get_state(thread,flavor,thread_state,&thread_state_count);
-        if(r != KERN_SUCCESS)
-            ABORT("thread_get_state failed in forward_exception");
+  thread_state_t thread_state = NULL;
+  mach_msg_type_number_t thread_state_count = THREAD_STATE_MAX;
+
+  for(i=0; i < GC_old_exc_ports.count; i++)
+    if(GC_old_exc_ports.masks[i] & (1 << exception))
+      break;
+  if(i==GC_old_exc_ports.count)
+    ABORT("No handler for exception!");
+
+  port = GC_old_exc_ports.ports[i];
+  behavior = GC_old_exc_ports.behaviors[i];
+  flavor = GC_old_exc_ports.flavors[i];
+
+  if(behavior != EXCEPTION_DEFAULT) {
+    r = thread_get_state(thread, flavor, thread_state, &thread_state_count);
+    if(r != KERN_SUCCESS)
+      ABORT("thread_get_state failed in forward_exception");
     }
-    
-    switch(behavior) {
-        case EXCEPTION_DEFAULT:
-            r = exception_raise(port,thread,task,exception,data,data_count);
-            break;
-        case EXCEPTION_STATE:
-            r = exception_raise_state(port,thread,task,exception,data,
-                data_count,&flavor,thread_state,thread_state_count,
-                thread_state,&thread_state_count);
-            break;
-        case EXCEPTION_STATE_IDENTITY:
-            r = exception_raise_state_identity(port,thread,task,exception,data,
-                data_count,&flavor,thread_state,thread_state_count,
-                thread_state,&thread_state_count);
-            break;
-        default:
-            r = KERN_FAILURE; /* make gcc happy */
-            ABORT("forward_exception: unknown behavior");
-            break;
-    }
-    
-    if(behavior != EXCEPTION_DEFAULT) {
-        r = thread_set_state(thread,flavor,thread_state,thread_state_count);
-        if(r != KERN_SUCCESS)
-            ABORT("thread_set_state failed in forward_exception");
-    }
-    
-    return r;
+
+  switch(behavior) {
+    case EXCEPTION_DEFAULT:
+      r = exception_raise(port, thread, task, exception, data, data_count);
+      break;
+    case EXCEPTION_STATE:
+      r = exception_raise_state(port, thread, task, exception, data, data_count,
+				&flavor, thread_state, thread_state_count,
+				thread_state, &thread_state_count);
+      break;
+    case EXCEPTION_STATE_IDENTITY:
+      r = exception_raise_state_identity(port, thread, task, exception, data,
+					 data_count, &flavor, thread_state,
+					 thread_state_count, thread_state,
+					 &thread_state_count);
+      break;
+    default:
+      r = KERN_FAILURE; /* make gcc happy */
+      ABORT("forward_exception: unknown behavior");
+      break;
+  }
+
+  if(behavior != EXCEPTION_DEFAULT) {
+    r = thread_set_state(thread, flavor, thread_state, thread_state_count);
+    if(r != KERN_SUCCESS)
+      ABORT("thread_set_state failed in forward_exception");
+  }
+
+  return r;
 }
 
-#define FWD() GC_forward_exception(thread,task,exception,code,code_count)
+#define FWD() GC_forward_exception(thread, task, exception, code, code_count)
 
 /* This violates the namespace rules but there isn't anything that can be done
    about it. The exception handling stuff is hard coded to call this */
 kern_return_t
-catch_exception_raise(
-   mach_port_t exception_port,mach_port_t thread,mach_port_t task,
-   exception_type_t exception,exception_data_t code,
-   mach_msg_type_number_t code_count
-) {
-    kern_return_t r;
-    char *addr;
-    struct hblk *h;
-    int i;
-#   if defined(POWERPC)
-#     if CPP_WORDSZ == 32
-        thread_state_flavor_t flavor = PPC_EXCEPTION_STATE;
-        mach_msg_type_number_t exc_state_count = PPC_EXCEPTION_STATE_COUNT;
-        ppc_exception_state_t exc_state;
-#     else
-        thread_state_flavor_t flavor = PPC_EXCEPTION_STATE64;
-        mach_msg_type_number_t exc_state_count = PPC_EXCEPTION_STATE64_COUNT;
-        ppc_exception_state64_t exc_state;
-#     endif
-#   elif defined(I386)
-        thread_state_flavor_t flavor = i386_EXCEPTION_STATE;
-        mach_msg_type_number_t exc_state_count = i386_EXCEPTION_STATE_COUNT;
-        i386_exception_state_t exc_state;
+catch_exception_raise(mach_port_t exception_port, mach_port_t thread,
+		      mach_port_t task, exception_type_t exception,
+		      exception_data_t code, mach_msg_type_number_t code_count)
+{
+  kern_return_t r;
+  char *addr;
+  struct hblk *h;
+  unsigned int i;
+# if defined(POWERPC)
+#   if CPP_WORDSZ == 32
+      thread_state_flavor_t flavor = PPC_EXCEPTION_STATE;
+      mach_msg_type_number_t exc_state_count = PPC_EXCEPTION_STATE_COUNT;
+      ppc_exception_state_t exc_state;
 #   else
-#	error FIXME for non-ppc/x86 darwin
+      thread_state_flavor_t flavor = PPC_EXCEPTION_STATE64;
+      mach_msg_type_number_t exc_state_count = PPC_EXCEPTION_STATE64_COUNT;
+      ppc_exception_state64_t exc_state;
+#   endif
+# elif defined(I386) || defined(X86_64)
+#   if CPP_WORDSZ == 32
+      thread_state_flavor_t flavor = x86_EXCEPTION_STATE32;
+      mach_msg_type_number_t exc_state_count = x86_EXCEPTION_STATE32_COUNT;
+      x86_exception_state32_t exc_state;
+#   else
+      thread_state_flavor_t flavor = x86_EXCEPTION_STATE64;
+      mach_msg_type_number_t exc_state_count = x86_EXCEPTION_STATE64_COUNT;
+      x86_exception_state64_t exc_state;
+#   endif
+# else
+#   error FIXME for non-ppc/x86 darwin
+# endif
+
+
+  if(exception != EXC_BAD_ACCESS || code[0] != KERN_PROTECTION_FAILURE) {
+#   ifdef DEBUG_EXCEPTION_HANDLING
+      /* We aren't interested, pass it on to the old handler */
+      GC_printf("Exception: 0x%x Code: 0x%x 0x%x in catch....\n", exception,
+		code_count > 0 ? code[0] : -1, code_count > 1 ? code[1] : -1);
+#   endif
+    return FWD();
+  }
+
+  r = thread_get_state(thread, flavor, (natural_t*)&exc_state,
+		       &exc_state_count);
+  if(r != KERN_SUCCESS) {
+    /* The thread is supposed to be suspended while the exception handler
+       is called. This shouldn't fail. */
+#   ifdef BROKEN_EXCEPTION_HANDLING
+      GC_err_printf("thread_get_state failed in catch_exception_raise\n");
+      return KERN_SUCCESS;
+#   else
+      ABORT("thread_get_state failed in catch_exception_raise");
+#   endif
+  }
+
+    /* This is the address that caused the fault */
+# if defined(POWERPC)
+    addr = (char*) exc_state. THREAD_FLD(dar);
+# elif defined (I386) || defined (X86_64)
+    addr = (char*) exc_state. THREAD_FLD(faultvaddr);
+# else
+#   error FIXME for non POWERPC/I386
+# endif
+
+    if((HDR(addr)) == 0) {
+      /* Ugh... just like the SIGBUS problem above, it seems we get a bogus
+	 KERN_PROTECTION_FAILURE every once and a while. We wait till we get
+	 a bunch in a row before doing anything about it. If a "real" fault
+	 ever occurres it'll just keep faulting over and over and we'll hit
+	 the limit pretty quickly. */
+#     ifdef BROKEN_EXCEPTION_HANDLING
+        static char *last_fault;
+	static int last_fault_count;
+
+	if(addr != last_fault) {
+	  last_fault = addr;
+	  last_fault_count = 0;
+	}
+	if(++last_fault_count < 32) {
+	  if(last_fault_count == 1)
+	    WARN("Ignoring KERN_PROTECTION_FAILURE at %lx\n", (GC_word)addr);
+	  return KERN_SUCCESS;
+	}
+
+	GC_err_printf("Unexpected KERN_PROTECTION_FAILURE at %p\n",addr);
+	/* Can't pass it along to the signal handler because that is
+	   ignoring SIGBUS signals. We also shouldn't call ABORT here as
+	   signals don't always work too well from the exception handler. */
+	GC_err_printf("Aborting\n");
+	exit(EXIT_FAILURE);
+#     else /* BROKEN_EXCEPTION_HANDLING */
+	/* Pass it along to the next exception handler
+	   (which should call SIGBUS/SIGSEGV) */
+	return FWD();
+#     endif /* !BROKEN_EXCEPTION_HANDLING */
+    }
+
+#   ifdef BROKEN_EXCEPTION_HANDLING
+      /* Reset the number of consecutive SIGBUSs */
+      GC_sigbus_count = 0;
 #   endif
 
-    
-    if(exception != EXC_BAD_ACCESS || code[0] != KERN_PROTECTION_FAILURE) {
-        #ifdef DEBUG_EXCEPTION_HANDLING
-        /* We aren't interested, pass it on to the old handler */
-        GC_printf("Exception: 0x%x Code: 0x%x 0x%x in catch....\n",
-            exception,
-            code_count > 0 ? code[0] : -1,
-            code_count > 1 ? code[1] : -1); 
-        #endif
-        return FWD();
-    }
-
-    r = thread_get_state(thread,flavor,
-        (natural_t*)&exc_state,&exc_state_count);
-    if(r != KERN_SUCCESS) {
-        /* The thread is supposed to be suspended while the exception handler
-           is called. This shouldn't fail. */
-        #ifdef BROKEN_EXCEPTION_HANDLING
-            GC_err_printf("thread_get_state failed in "
-            		  "catch_exception_raise\n");
-            return KERN_SUCCESS;
-        #else
-            ABORT("thread_get_state failed in catch_exception_raise");
-        #endif
-    }
-    
-    /* This is the address that caused the fault */
-#if defined(POWERPC)
-    addr = (char*) exc_state.dar;
-#elif defined (I386)
-    addr = (char*) exc_state.faultvaddr;
-#else
-#   error FIXME for non POWERPC/I386
-#endif
-        
-    if((HDR(addr)) == 0) {
-        /* Ugh... just like the SIGBUS problem above, it seems we get a bogus 
-           KERN_PROTECTION_FAILURE every once and a while. We wait till we get
-           a bunch in a row before doing anything about it. If a "real" fault 
-           ever occurres it'll just keep faulting over and over and we'll hit
-           the limit pretty quickly. */
-        #ifdef BROKEN_EXCEPTION_HANDLING
-            static char *last_fault;
-            static int last_fault_count;
-            
-            if(addr != last_fault) {
-                last_fault = addr;
-                last_fault_count = 0;
-            }
-            if(++last_fault_count < 32) {
-                if(last_fault_count == 1)
-                    GC_err_printf(
-                        "GC: WARNING: Ignoring KERN_PROTECTION_FAILURE at %p\n",
-                        addr);
-                return KERN_SUCCESS;
-            }
-            
-            GC_err_printf("Unexpected KERN_PROTECTION_FAILURE at %p\n",addr);
-            /* Can't pass it along to the signal handler because that is
-               ignoring SIGBUS signals. We also shouldn't call ABORT here as
-               signals don't always work too well from the exception handler. */
-            GC_err_printf("Aborting\n");
-            exit(EXIT_FAILURE);
-        #else /* BROKEN_EXCEPTION_HANDLING */
-            /* Pass it along to the next exception handler 
-               (which should call SIGBUS/SIGSEGV) */
-            return FWD();
-        #endif /* !BROKEN_EXCEPTION_HANDLING */
-    }
-
-    #ifdef BROKEN_EXCEPTION_HANDLING
-        /* Reset the number of consecutive SIGBUSs */
-        GC_sigbus_count = 0;
-    #endif
-    
     if(GC_mprotect_state == GC_MP_NORMAL) { /* common case */
-        h = (struct hblk*)((word)addr & ~(GC_page_size-1));
-        UNPROTECT(h, GC_page_size);	
-        for (i = 0; i < divHBLKSZ(GC_page_size); i++) {
-            register int index = PHT_HASH(h+i);
-            async_set_pht_entry_from_index(GC_dirty_pages, index);
-        }
+      h = (struct hblk*)((word)addr & ~(GC_page_size-1));
+      UNPROTECT(h, GC_page_size);
+      for (i = 0; i < divHBLKSZ(GC_page_size); i++) {
+	register int index = PHT_HASH(h+i);
+	async_set_pht_entry_from_index(GC_dirty_pages, index);
+      }
     } else if(GC_mprotect_state == GC_MP_DISCARDING) {
-        /* Lie to the thread for now. No sense UNPROTECT()ing the memory
-           when we're just going to PROTECT() it again later. The thread
-           will just fault again once it resumes */
+      /* Lie to the thread for now. No sense UNPROTECT()ing the memory
+	 when we're just going to PROTECT() it again later. The thread
+	 will just fault again once it resumes */
     } else {
-        /* Shouldn't happen, i don't think */
-        GC_printf("KERN_PROTECTION_FAILURE while world is stopped\n");
-        return FWD();
+      /* Shouldn't happen, i don't think */
+      GC_printf("KERN_PROTECTION_FAILURE while world is stopped\n");
+      return FWD();
     }
     return KERN_SUCCESS;
 }
 #undef FWD
 
 /* These should never be called, but just in case...  */
-kern_return_t catch_exception_raise_state(mach_port_name_t exception_port,
-    int exception, exception_data_t code, mach_msg_type_number_t codeCnt,
-    int flavor, thread_state_t old_state, int old_stateCnt,
-    thread_state_t new_state, int new_stateCnt)
+kern_return_t
+catch_exception_raise_state(mach_port_name_t exception_port, int exception,
+			    exception_data_t code,
+			    mach_msg_type_number_t codeCnt, int flavor,
+			    thread_state_t old_state, int old_stateCnt,
+			    thread_state_t new_state, int new_stateCnt)
 {
-    ABORT("catch_exception_raise_state");
-    return(KERN_INVALID_ARGUMENT);
+  ABORT("catch_exception_raise_state");
+  return(KERN_INVALID_ARGUMENT);
 }
 
-kern_return_t catch_exception_raise_state_identity(
-    mach_port_name_t exception_port, mach_port_t thread, mach_port_t task,
-    int exception, exception_data_t code, mach_msg_type_number_t codeCnt,
-    int flavor, thread_state_t old_state, int old_stateCnt, 
-    thread_state_t new_state, int new_stateCnt)
+kern_return_t
+catch_exception_raise_state_identity(mach_port_name_t exception_port,
+				     mach_port_t thread, mach_port_t task,
+				     int exception, exception_data_t code,
+				     mach_msg_type_number_t codeCnt, int flavor,
+				     thread_state_t old_state, int old_stateCnt,
+				     thread_state_t new_state, int new_stateCnt)
 {
-    ABORT("catch_exception_raise_state_identity");
-    return(KERN_INVALID_ARGUMENT);
+  ABORT("catch_exception_raise_state_identity");
+  return(KERN_INVALID_ARGUMENT);
 }
 
 

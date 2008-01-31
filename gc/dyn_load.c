@@ -26,8 +26,9 @@
  * None of this is safe with dlclose and incremental collection.
  * But then not much of anything is safe in the presence of dlclose.
  */
-#if (defined(__linux__) || defined(__GLIBC__)) && !defined(_GNU_SOURCE)
-    /* Can't test LINUX, since this must be define before other includes */
+#if (defined(__linux__) || defined(__GLIBC__) || defined(__GNU__)) \
+     && !defined(_GNU_SOURCE)
+    /* Can't test LINUX, since this must be defined before other includes */
 #   define _GNU_SOURCE
 #endif
 #if !defined(MACOS) && !defined(_WIN32_WCE)
@@ -63,7 +64,7 @@ static int (*GC_has_static_roots)(const char *, void *, size_t);
     !defined(AIX) && !defined(SCO_ELF) && !defined(DGUX) && \
     !(defined(FREEBSD) && defined(__ELF__)) && \
     !(defined(NETBSD) && defined(__ELF__)) && !defined(HURD) && \
-    !defined(DARWIN)
+    !defined(DARWIN) && !defined(CYGWIN32)
  --> We only know how to find data segments of dynamic libraries for the
  --> above.  Additional SVR4 variants might not be too
  --> hard to add.
@@ -238,9 +239,39 @@ char *GC_parse_map_entry(char *buf_ptr, ptr_t *start, ptr_t *end,
 char *GC_get_maps(void);
 	/* From os_dep.c	*/
 
+/* Sort an array of HeapSects by start address.				*/
+/* Unfortunately at least some versions of				*/
+/* Linux qsort end up calling malloc by way of sysconf, and hence can't */
+/* be used in the colector.  Hence we roll our own.  Should be		*/
+/* reasonably fast if the array is already mostly sorted, as we expect	*/
+/* it to be.								*/
+void sort_heap_sects(struct HeapSect *base, size_t number_of_elements)
+{
+    signed_word n = (signed_word)number_of_elements;
+    signed_word nsorted = 1;
+    signed_word i;
+
+    while (nsorted < n) {
+      while (nsorted < n &&
+    	     base[nsorted-1].hs_start < base[nsorted].hs_start)
+          ++nsorted;
+      if (nsorted == n) break;
+      GC_ASSERT(base[nsorted-1].hs_start > base[nsorted].hs_start);
+      i = nsorted - 1;
+      while (i >= 0 && base[i].hs_start > base[i+1].hs_start) {
+        struct HeapSect tmp = base[i];
+	base[i] = base[i+1];
+	base[i+1] = tmp;
+	--i;
+      }
+      GC_ASSERT(base[nsorted-1].hs_start < base[nsorted].hs_start);
+      ++nsorted;
+    }
+}
+
 word GC_register_map_entries(char *maps)
 {
-    char *prot_buf;
+    char *prot;
     char *buf_ptr = maps;
     int count;
     ptr_t start, end;
@@ -249,18 +280,11 @@ word GC_register_map_entries(char *maps)
     unsigned i;
     ptr_t datastart = (ptr_t)(DATASTART);
 
-    /* Compute heap bounds. FIXME: Should work if heap and roots are 	*/
-    /* interleaved?							*/
-	least_ha = (ptr_t)(word)(-1);
-	greatest_ha = 0;
-	for (i = 0; i < GC_n_heap_sects; ++i) {
-	    ptr_t sect_start = GC_heap_sects[i].hs_start;
-	    ptr_t sect_end = sect_start + GC_heap_sects[i].hs_bytes;
-	    if (sect_start < least_ha) least_ha = sect_start;
-	    if (sect_end > greatest_ha) greatest_ha = sect_end;
-        }
-    	if (greatest_ha < (ptr_t)GC_scratch_last_end_ptr)
-	    greatest_ha = (ptr_t)GC_scratch_last_end_ptr; 
+    GC_ASSERT(I_HOLD_LOCK());
+    sort_heap_sects(GC_our_memory, GC_n_memory);
+    least_ha = GC_our_memory[0].hs_start;
+    greatest_ha = GC_our_memory[GC_n_memory-1].hs_start
+    		  + GC_our_memory[GC_n_memory-1].hs_bytes;
 
     for (;;) {
         buf_ptr = GC_parse_map_entry(buf_ptr, &start, &end, &prot, &maj_dev, 0);
@@ -279,25 +303,53 @@ word GC_register_map_entries(char *maps)
 	      /* That can fail because the stack may disappear while	*/
 	      /* we're marking.  Thus the marker is, and has to be	*/
 	      /* prepared to recover from segmentation faults.		*/
+
 	      if (GC_segment_is_thread_stack(start, end)) continue;
-	      /* FIXME: REDIRECT_MALLOC actually works with threads on	*/
-	      /* LINUX/IA64 if we omit this check.  The problem is that	*/
+
+	      /* FIXME: NPTL squirrels					*/
+	      /* away pointers in pieces of the stack segment that we	*/
+	      /* don't scan.  We work around this			*/
+	      /* by treating anything allocated by libpthread as	*/
+	      /* uncollectable, as we do in some other cases.		*/
+	      /* A specifically identified problem is that		*/ 
 	      /* thread stacks contain pointers to dynamic thread	*/
 	      /* vectors, which may be reused due to thread caching.	*/
-	      /* Currently they may not be marked if the thread is 	*/
-	      /* still live.						*/
-	      /* For dead threads, we trace the whole stack, which is	*/
+	      /* They may not be marked if the thread is still live.	*/
+	      /* This specific instance should be addressed by 		*/
+	      /* INCLUDE_LINUX_THREAD_DESCR, but that doesn't quite	*/
+	      /* seem to suffice.					*/
+	      /* We currently trace entire thread stacks, if they are	*/
+	      /* are currently cached but unused.  This is		*/
 	      /* very suboptimal for performance reasons.		*/
 #	    endif
 	    /* We no longer exclude the main data segment.		*/
-	    if (start < least_ha && end > least_ha) {
-		end = least_ha;
+	    if (end <= least_ha || start >= greatest_ha) {
+	      /* The easy case; just trace entire segment */
+	      GC_add_roots_inner((char *)start, (char *)end, TRUE);
+	      continue;
 	    }
-	    if (start < greatest_ha && end > greatest_ha) {
-		start = greatest_ha;
-	    }
-	    if (start >= least_ha && end <= greatest_ha) continue;
-	    GC_add_roots_inner((char *)start, (char *)end, TRUE);
+	    /* Add sections that dont belong to us. */
+	      i = 0;
+	      while (GC_our_memory[i].hs_start + GC_our_memory[i].hs_bytes
+	             < start)
+		  ++i;
+	      GC_ASSERT(i < GC_n_memory);
+	      if (GC_our_memory[i].hs_start <= start) {
+	          start = GC_our_memory[i].hs_start
+		  	  + GC_our_memory[i].hs_bytes;
+		  ++i;
+	      }
+	      while (i < GC_n_memory && GC_our_memory[i].hs_start < end
+		     && start < end) {
+		  if ((char *)start < GC_our_memory[i].hs_start)
+		    GC_add_roots_inner((char *)start,
+				       GC_our_memory[i].hs_start, TRUE);
+		  start = GC_our_memory[i].hs_start
+			  + GC_our_memory[i].hs_bytes;
+		  ++i;
+	      }
+	      if (start < end)
+	          GC_add_roots_inner((char *)start, (char *)end, TRUE);
 	}
     }
     return 1;
@@ -635,7 +687,7 @@ void GC_register_dynamic_libraries()
 
 # endif /* USE_PROC || IRIX5 */
 
-# if defined(MSWIN32) || defined(MSWINCE)
+# if defined(MSWIN32) || defined(MSWINCE) || defined(CYGWIN32)
 
 # define WIN32_LEAN_AND_MEAN
 # define NOSERVICE
@@ -715,7 +767,7 @@ void GC_register_dynamic_libraries()
   void GC_register_dynamic_libraries()
   {
     MEMORY_BASIC_INFORMATION buf;
-    DWORD result;
+    size_t result;
     DWORD protect;
     LPVOID p;
     char * base;
@@ -726,8 +778,8 @@ void GC_register_dynamic_libraries()
 #   endif
     base = limit = p = GC_sysinfo.lpMinimumApplicationAddress;
 #   if defined(MSWINCE) && !defined(_WIN32_WCE_EMULATION)
-    /* Only the first 32 MB of address space belongs to the current process */
-    while (p < (LPVOID)0x02000000) {
+      /* Only the first 32 MB of address space belongs to the current process */
+      while (p < (LPVOID)0x02000000) {
         result = VirtualQuery(p, &buf, sizeof(buf));
 	if (result == 0) {
 	    /* Page is free; advance to the next possible allocation base */
@@ -736,7 +788,7 @@ void GC_register_dynamic_libraries()
 		 & ~(GC_sysinfo.dwAllocationGranularity-1));
 	} else
 #   else
-    while (p < GC_sysinfo.lpMaximumApplicationAddress) {
+      while (p < GC_sysinfo.lpMaximumApplicationAddress) {
         result = VirtualQuery(p, &buf, sizeof(buf));
 #   endif
 	{
@@ -771,7 +823,7 @@ void GC_register_dynamic_libraries()
     GC_cond_add_roots(base, limit);
   }
 
-#endif /* MSWIN32 || MSWINCE */
+#endif /* MSWIN32 || MSWINCE || CYGWIN32 */
   
 #if defined(ALPHA) && defined(OSF1)
 
@@ -996,7 +1048,7 @@ const static struct {
 };
     
 #ifdef DARWIN_DEBUG
-static const char *GC_dyld_name_for_hdr(struct mach_header *hdr) {
+static const char *GC_dyld_name_for_hdr(const struct GC_MACH_HEADER *hdr) {
     unsigned long i,c;
     c = _dyld_image_count();
     for(i=0;i<c;i++) if(_dyld_get_image_header(i) == hdr)
@@ -1006,21 +1058,22 @@ static const char *GC_dyld_name_for_hdr(struct mach_header *hdr) {
 #endif
         
 /* This should never be called by a thread holding the lock */
-static void GC_dyld_image_add(struct mach_header* hdr, unsigned long slide) {
+static void GC_dyld_image_add(const struct GC_MACH_HEADER *hdr, intptr_t slide)
+{
     unsigned long start,end,i;
-    const struct section *sec;
+    const struct GC_MACH_SECTION *sec;
     if (GC_no_dls) return;
     for(i=0;i<sizeof(GC_dyld_sections)/sizeof(GC_dyld_sections[0]);i++) {
-        sec = getsectbynamefromheader(
-            hdr,GC_dyld_sections[i].seg,GC_dyld_sections[i].sect);
-        if(sec == NULL || sec->size == 0) continue;
-        start = slide + sec->addr;
-        end = start + sec->size;
-#	ifdef DARWIN_DEBUG
-            GC_printf("Adding section at %p-%p (%lu bytes) from image %s\n",
-                      start,end,sec->size,GC_dyld_name_for_hdr(hdr));
-#	endif
-        GC_add_roots((char*)start,(char*)end);
+      sec = GC_GETSECTBYNAME(hdr, GC_dyld_sections[i].seg,
+			     GC_dyld_sections[i].sect);
+      if(sec == NULL || sec->size == 0) continue;
+      start = slide + sec->addr;
+      end = start + sec->size;
+#   ifdef DARWIN_DEBUG
+      GC_printf("Adding section at %p-%p (%lu bytes) from image %s\n",
+		start,end,sec->size,GC_dyld_name_for_hdr(hdr));
+#   endif
+      GC_add_roots((char*)start,(char*)end);
     }
 #   ifdef DARWIN_DEBUG
        GC_print_static_roots();
@@ -1028,23 +1081,25 @@ static void GC_dyld_image_add(struct mach_header* hdr, unsigned long slide) {
 }
 
 /* This should never be called by a thread holding the lock */
-static void GC_dyld_image_remove(struct mach_header* hdr, unsigned long slide) {
+static void GC_dyld_image_remove(const struct GC_MACH_HEADER *hdr,
+				 intptr_t slide)
+{
     unsigned long start,end,i;
-    const struct section *sec;
+    const struct GC_MACH_SECTION *sec;
     for(i=0;i<sizeof(GC_dyld_sections)/sizeof(GC_dyld_sections[0]);i++) {
-        sec = getsectbynamefromheader(
-            hdr,GC_dyld_sections[i].seg,GC_dyld_sections[i].sect);
-        if(sec == NULL || sec->size == 0) continue;
-        start = slide + sec->addr;
-        end = start + sec->size;
-#	ifdef DARWIN_DEBUG
-            GC_printf("Removing section at %p-%p (%lu bytes) from image %s\n",
-                      start,end,sec->size,GC_dyld_name_for_hdr(hdr));
-#	endif
-        GC_remove_roots((char*)start,(char*)end);
+      sec = GC_GETSECTBYNAME(hdr, GC_dyld_sections[i].seg,
+			     GC_dyld_sections[i].sect);
+      if(sec == NULL || sec->size == 0) continue;
+      start = slide + sec->addr;
+      end = start + sec->size;
+#   ifdef DARWIN_DEBUG
+      GC_printf("Removing section at %p-%p (%lu bytes) from image %s\n",
+		start,end,sec->size,GC_dyld_name_for_hdr(hdr));
+#   endif
+      GC_remove_roots((char*)start,(char*)end);
     }
 #   ifdef DARWIN_DEBUG
-        GC_print_static_roots();
+	GC_print_static_roots();
 #   endif
 }
 

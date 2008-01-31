@@ -13,7 +13,7 @@ instead of the one provided in.
 
 GC: The Boehm's conservative garbage collector for C and C++
 ============================================================
-    - Version: 7.0alpha7
+    - Version: 7.1alpha2
     - License: Free (BSD-like)
     - Home Page: http://www.hpl.hp.com/personal/Hans_Boehm/gc
 

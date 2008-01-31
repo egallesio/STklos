@@ -90,7 +90,14 @@ char * GC_copyright[] =
 " EXPRESSED OR IMPLIED.  ANY USE IS AT YOUR OWN RISK.",
 "See source code for details." };
 
-# include "version.h"
+/* Version macros are now defined in gc_version.h, which is included by	*/
+/* gc.h, which is included by gc_priv.h".				*/
+
+#ifndef GC_NO_VERSION_VAR
+
+unsigned GC_version = ((GC_VERSION_MAJOR << 16) | (GC_VERSION_MINOR << 8) | GC_TMP_ALPHA_VERSION);
+
+#endif /* GC_NO_VERSION_VAR */
 
 /* some more variables */
 
@@ -157,7 +164,7 @@ static word min_bytes_allocd()
     
     if (stack_size < 0) stack_size = -stack_size;
     total_root_size = 2 * stack_size + GC_root_size;
-    scan_size = 2 * GC_composite_in_use + GC_atomic_in_use
+    scan_size = 2 * GC_composite_in_use + GC_atomic_in_use/4
 		+ total_root_size;
     if (TRUE_INCREMENTAL) {
         return scan_size / (2 * GC_free_space_divisor);
@@ -166,20 +173,22 @@ static word min_bytes_allocd()
     }
 }
 
-/* Return the number of words allocated, adjusted for explicit storage	*/
+/* Return the number of bytes allocated, adjusted for explicit storage	*/
 /* management, etc..  This number is used in deciding when to trigger	*/
 /* collections.								*/
 word GC_adj_bytes_allocd(void)
 {
     signed_word result;
     signed_word expl_managed =
-    		(long)GC_non_gc_bytes - (long)GC_non_gc_bytes_at_gc;
+    		(signed_word)GC_non_gc_bytes
+		- (signed_word)GC_non_gc_bytes_at_gc;
     
     /* Don't count what was explicitly freed, or newly allocated for	*/
     /* explicit management.  Note that deallocating an explicitly	*/
     /* managed object should not alter result, assuming the client	*/
     /* is playing by the rules.						*/
     result = (signed_word)GC_bytes_allocd
+    	     + (signed_word)GC_bytes_dropped
     	     - (signed_word)GC_bytes_freed 
 	     + (signed_word)GC_finalizer_bytes_freed
 	     - expl_managed;
@@ -213,7 +222,7 @@ void GC_clear_a_few_frames()
 {
 #   define NWORDS 64
     word frames[NWORDS];
-    register int i;
+    int i;
     
     for (i = 0; i < NWORDS; i++) frames[i] = 0;
 }
@@ -432,6 +441,9 @@ int GC_collect_a_little(void)
     return(result);
 }
 
+# if !defined(REDIRECT_MALLOC) && (defined(MSWIN32) || defined(MSWINCE))
+  void GC_add_current_malloc_heap();
+# endif
 /*
  * Assumes lock is held, signals are disabled.
  * We stop the world.
@@ -447,6 +459,9 @@ GC_bool GC_stopped_mark(GC_stop_func stop_func)
     if (GC_print_stats)
 	GET_TIME(start_time);
 
+#   if !defined(REDIRECT_MALLOC) && (defined(MSWIN32) || defined(MSWINCE))
+        GC_add_current_malloc_heap();
+#   endif
 #   if defined(REGISTER_LIBRARIES_EARLY)
         GC_cond_register_dynamic_libraries();
 #   endif
@@ -517,7 +532,7 @@ void GC_set_fl_marks(ptr_t q)
    struct hblk * h, * last_h = 0;
    hdr *hhdr;  /* gcc "might be uninitialized" warning is bogus. */
    IF_PER_OBJ(size_t sz;)
-   int bit_no;
+   unsigned bit_no;
 
    for (p = q; p != 0; p = obj_link(p)){
 	h = HBLKPTR(p);
@@ -558,7 +573,7 @@ void GC_clear_fl_marks(ptr_t q)
    struct hblk * h, * last_h = 0;
    hdr *hhdr;
    size_t sz;
-   int bit_no;
+   unsigned bit_no;
 
    for (p = q; p != 0; p = obj_link(p)){
 	h = HBLKPTR(p);
@@ -569,7 +584,7 @@ void GC_clear_fl_marks(ptr_t q)
 	}
 	bit_no = MARK_BIT_NO((ptr_t)p - (ptr_t)h, sz);
 	if (mark_bit_from_hdr(hhdr, bit_no)) {
-	  int n_marks = hhdr -> hb_n_marks - 1;
+	  size_t n_marks = hhdr -> hb_n_marks - 1;
       	  clear_mark_bit_from_hdr(hhdr, bit_no);
 #	  ifdef PARALLEL_MARK
 	    /* Appr. count, don't decrement to zero! */
@@ -584,7 +599,7 @@ void GC_clear_fl_marks(ptr_t q)
    }
 }
 
-#if defined(GC_ASSERTIONS) && defined(GC_LINUX_THREADS)
+#if defined(GC_ASSERTIONS) && defined(THREADS) && defined(THREAD_LOCAL_ALLOC)
 extern void GC_check_tls(void);
 #endif
 
@@ -596,7 +611,7 @@ void GC_finish_collection()
     CLOCK_TYPE finalize_time;
     CLOCK_TYPE done_time;
 	
-#   if defined(GC_ASSERTIONS) && defined(GC_LINUX_THREADS) \
+#   if defined(GC_ASSERTIONS) && defined(THREADS) \
        && defined(THREAD_LOCAL_ALLOC) && !defined(DBG_HDRS_ALL)
 	/* Check that we marked some of our own data.  		*/
         /* FIXME: Add more checks.				*/
@@ -617,8 +632,8 @@ void GC_finish_collection()
       /* Mark all objects on the free list.  All objects should be */
       /* marked when we're done.				   */
 	{
-	  register word size;		/* current object size		*/
-	  int kind;
+	  word size;		/* current object size		*/
+	  unsigned kind;
 	  ptr_t q;
 
 	  for (kind = 0; kind < GC_n_kinds; kind++) {
@@ -658,9 +673,9 @@ void GC_finish_collection()
     /* Thus accidentally marking a free list is not a problem;  only     */
     /* objects on the list itself will be marked, and that's fixed here. */
       {
-	register word size;		/* current object size		*/
-	register ptr_t q;	/* pointer to current object	*/
-	int kind;
+	word size;		/* current object size		*/
+	ptr_t q;	/* pointer to current object	*/
+	unsigned kind;
 
 	for (kind = 0; kind < GC_n_kinds; kind++) {
 	  for (size = 1; size <= MAXOBJGRANULES; size++) {
@@ -709,6 +724,7 @@ void GC_finish_collection()
       GC_bytes_allocd_before_gc += GC_bytes_allocd;
       GC_non_gc_bytes_at_gc = GC_non_gc_bytes;
       GC_bytes_allocd = 0;
+      GC_bytes_dropped = 0;
       GC_bytes_freed = 0;
       GC_finalizer_bytes_freed = 0;
       
@@ -729,6 +745,7 @@ int GC_try_to_collect(GC_stop_func stop_func)
     int result;
     DCL_LOCK_STATE;
     
+    if (!GC_is_initialized) GC_init();
     if (GC_debugging_started) GC_print_all_smashed();
     GC_INVOKE_FINALIZERS();
     LOCK();
@@ -754,6 +771,22 @@ void GC_gcollect(void)
 
 word GC_n_heap_sects = 0;	/* Number of sections currently in heap. */
 
+#ifdef USE_PROC_FOR_LIBRARIES
+  word GC_n_memory = 0;		/* Number of GET_MEM allocated memory	*/
+				/* sections.				*/
+#endif
+
+#ifdef USE_PROC_FOR_LIBRARIES
+  /* Add HBLKSIZE aligned, GET_MEM-generated block to GC_our_memory. */
+  /* Defined to do nothing if USE_PROC_FOR_LIBRARIES not set.	    */
+  void GC_add_to_our_memory(ptr_t p, size_t bytes)
+  {
+    if (0 == p) return;
+    GC_our_memory[GC_n_memory].hs_start = p;
+    GC_our_memory[GC_n_memory].hs_bytes = bytes;
+    GC_n_memory++;
+  }
+#endif
 /*
  * Use the chunk of memory starting at p of size bytes as part of the heap.
  * Assumes p is HBLKSIZE aligned, and bytes is a multiple of HBLKSIZE.
@@ -761,9 +794,23 @@ word GC_n_heap_sects = 0;	/* Number of sections currently in heap. */
 void GC_add_to_heap(struct hblk *p, size_t bytes)
 {
     hdr * phdr;
+    word endp;
     
     if (GC_n_heap_sects >= MAX_HEAP_SECTS) {
     	ABORT("Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS");
+    }
+    while ((word)p <= HBLKSIZE) {
+        /* Can't handle memory near address zero. */
+        ++p;
+	bytes -= HBLKSIZE;
+        if (0 == bytes) return;
+    }
+    endp = (word)p + bytes;
+    if (endp <= (word)p) {
+    	/* Address wrapped. */
+	bytes -= HBLKSIZE;
+        if (0 == bytes) return;
+	endp -= HBLKSIZE;
     }
     phdr = GC_install_header(p);
     if (0 == phdr) {
@@ -772,6 +819,7 @@ void GC_add_to_heap(struct hblk *p, size_t bytes)
     	/* which is entirely appropriate.				*/
     	return;
     }
+    GC_ASSERT(endp > (word)p && endp == (word)p + bytes);
     GC_heap_sects[GC_n_heap_sects].hs_start = (ptr_t)p;
     GC_heap_sects[GC_n_heap_sects].hs_bytes = bytes;
     GC_n_heap_sects++;
@@ -788,24 +836,24 @@ void GC_add_to_heap(struct hblk *p, size_t bytes)
         	/* here.						*/
     }
     if ((ptr_t)p + bytes >= (ptr_t)GC_greatest_plausible_heap_addr) {
-        GC_greatest_plausible_heap_addr = (void *)((ptr_t)p + bytes);
+        GC_greatest_plausible_heap_addr = (void *)endp;
     }
 }
 
 # if !defined(NO_DEBUGGING)
 void GC_print_heap_sects(void)
 {
-    register unsigned i;
+    unsigned i;
     
     GC_printf("Total heap size: %lu\n", (unsigned long) GC_heapsize);
     for (i = 0; i < GC_n_heap_sects; i++) {
         ptr_t start = GC_heap_sects[i].hs_start;
-        unsigned long len = (unsigned long) GC_heap_sects[i].hs_bytes;
+        size_t len = GC_heap_sects[i].hs_bytes;
         struct hblk *h;
         unsigned nbl = 0;
         
     	GC_printf("Section %d from %p to %p ", i,
-    		   start, (unsigned long)(start + len));
+    		   start, start + len);
     	for (h = (struct hblk *)start; h < (struct hblk *)(start + len); h++) {
     	    if (GC_is_black_listed(h, HBLKSIZE)) nbl++;
     	}
@@ -818,12 +866,12 @@ void GC_print_heap_sects(void)
 void * GC_least_plausible_heap_addr = (void *)ONES;
 void * GC_greatest_plausible_heap_addr = 0;
 
-static INLINE ptr_t GC_max(ptr_t x, ptr_t y)
+static INLINE word GC_max(word x, word y)
 {
     return(x > y? x : y);
 }
 
-static INLINE ptr_t GC_min(ptr_t x, ptr_t y)
+static INLINE word GC_min(word x, word y)
 {
     return(x < y? x : y);
 }
@@ -863,6 +911,7 @@ GC_bool GC_expand_hp_inner(word n)
         return(FALSE);
     }
     space = GET_MEM(bytes);
+    GC_add_to_our_memory((ptr_t)space, bytes);
     if( space == 0 ) {
 	if (GC_print_stats) {
 	    GC_log_printf("Failed to expand heap by %ld bytes\n",
@@ -875,27 +924,27 @@ GC_bool GC_expand_hp_inner(word n)
 	              (unsigned long)bytes,
 	              (unsigned long)GC_bytes_allocd);
     }
+    /* Adjust heap limits generously for blacklisting to work better.	*/
+    /* GC_add_to_heap performs minimal adjustment need for correctness.	*/
     expansion_slop = min_bytes_allocd() + 4*MAXHINCR*HBLKSIZE;
     if ((GC_last_heap_addr == 0 && !((word)space & SIGNB))
         || (GC_last_heap_addr != 0 && GC_last_heap_addr < (ptr_t)space)) {
         /* Assume the heap is growing up */
-        GC_greatest_plausible_heap_addr =
-            (void *)GC_max((ptr_t)GC_greatest_plausible_heap_addr,
-                           (ptr_t)space + bytes + expansion_slop);
+	word new_limit = (word)space + bytes + expansion_slop;
+	if (new_limit > (word)space) {
+          GC_greatest_plausible_heap_addr =
+            (void *)GC_max((word)GC_greatest_plausible_heap_addr,
+                           (word)new_limit);
+	}
     } else {
         /* Heap is growing down */
-        GC_least_plausible_heap_addr =
-            (void *)GC_min((ptr_t)GC_least_plausible_heap_addr,
-                           (ptr_t)space - expansion_slop);
+	word new_limit = (word)space - expansion_slop;
+	if (new_limit < (word)space) {
+          GC_least_plausible_heap_addr =
+            (void *)GC_min((word)GC_least_plausible_heap_addr,
+                           (word)space - expansion_slop);
+	}
     }
-#   if defined(LARGE_CONFIG)
-      if (((ptr_t)GC_greatest_plausible_heap_addr <= (ptr_t)space + bytes
-           || (ptr_t)GC_least_plausible_heap_addr >= (ptr_t)space)
-	  && GC_heapsize > 0) {
-	/* GC_add_to_heap will fix this, but ... */
-	WARN("Too close to address space limit: blacklisting ineffective\n", 0);
-      }
-#   endif
     GC_prev_heap_addr = GC_last_heap_addr;
     GC_last_heap_addr = (ptr_t)space;
     GC_add_to_heap(space, bytes);

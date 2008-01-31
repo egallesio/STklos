@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 20-Dec-2007 23:40 (eg)
+dnl Last file update: 31-Jan-2008 16:04 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -593,6 +593,16 @@ echo "     GNOME support: " $USE_GNOME
 echo "       FFI support: " $FFI
 echo "    Thread support: " $THREADS 
 echo " "
+if test "$THREADS" = "lurc" 
+then 
+     echo "*** WARNING: To use LURC threads, you need to replace (or install) "
+     echo "*** a special GC package (available at http://www.stklos.net/download)."
+     echo "*** You have to: "
+     echo "***    - Remove the current gc directory"
+     echo "***    - untar this package in this directory."
+     echo "***    - re-run configure"
+     echo "*** The GC for LURC probably doesn't work on MacOS 10.5"
+fi
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options." 
 echo " "
