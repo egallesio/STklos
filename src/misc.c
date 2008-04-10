@@ -1,7 +1,7 @@
 /*
  * m i s c . c					-- Misc. functions
  * 
- * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  7-Dec-2007 18:38 (eg)
+ * Last file update: 31-Mar-2008 09:50 (eg)
  */
 
 #include "stklos.h"
@@ -544,9 +544,7 @@ DEFINE_PRIMITIVE("%debug", set_debug, subr0, (void))
 DEFINE_PRIMITIVE("%test", test, subr1, (SCM s))
 {
   /* A special place for doing tests */
-  STk_eval_C_string("(display \"Hello, world!\")", STk_current_module());
-  STk_eval_C_string("(display (fact 200))", STk_current_module());
-  return STk_void;
+  return STk_C_apply(s, 0);
 }
 
 DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
