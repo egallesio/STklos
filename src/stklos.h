@@ -1,7 +1,7 @@
 /*
  * stklos.h	-- stklos.h
  * 
- * Copyright © 1999-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  9-Dec-2007 20:33 (eg)
+ * Last file update:  1-May-2008 18:44 (eg)
  */
 
 
@@ -1278,6 +1278,7 @@ SCM STk_C_apply(SCM func, int nargs, ...);
 SCM STk_C_apply_list(SCM func, SCM l);
 void STk_get_stack_pointer(void **addr);
 SCM STk_n_values(int n, ...);
+SCM STk_values2vector(SCM obj, SCM vect);
 
 EXTERN_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void));
 

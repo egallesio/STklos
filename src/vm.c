@@ -1,7 +1,7 @@
 /*
  * v m . c				-- The STklos Virtual Machine
  * 
- * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 27-Nov-2007 16:22 (eg)
+ * Last file update:  1-May-2008 18:43 (eg)
  */
 
 // INLINER values
@@ -699,6 +699,44 @@ SCM STk_n_values(int n, ...)
   }
   return vm->val;
 }
+
+
+
+SCM STk_values2vector(SCM obj, SCM vect)
+{  
+  vm_thread_t *vm = STk_get_current_vm();
+  SCM src, retval;
+  int len = vm->valc;
+
+  if (vect) {
+    /* User has provided a vector for storing result */
+    if (!VECTORP(vect) || VECTOR_SIZE(vect) != len) 
+      STk_error("bad vector ~S", vect);
+    retval = vect;
+  } else {
+    /* Allocate a new vector for result */
+    retval = STk_makevect(len, STk_void);
+  }
+
+  vm->val  = obj;
+  vm->valc = 1;
+
+  if (len > 1) { 		    /* multiple values */
+    if (len <= MAX_VALS)  {
+      vm->vals[0] = obj;
+      src = vm->vals;
+    } else {			    /* mono value */
+      src = VECTOR_DATA(vm->vals[0]);
+    }
+
+    memcpy(VECTOR_DATA(retval), src, len * sizeof(SCM));
+  } else if (len == 1) {
+    *VECTOR_DATA(retval) = vm->val;
+  }
+
+  return retval;
+}
+
 
 /*===========================================================================*\
  * 
