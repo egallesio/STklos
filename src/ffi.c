@@ -1,7 +1,7 @@
 /*
  * ffi.c	-- FFI support dor STklos
  * 
- * Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,13 +21,13 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update: 29-Aug-2007 12:25 (eg)
+ * Last file update:  2-May-2008 23:26 (eg)
  */
 
 #include <stklos.h>
 
 #ifdef HAVE_FFI
-#  include <cinvoke.h>
+#  include <../libffi/include/ffi.h>
 
 /* ------------------------------ *\
  * STklos C external functions
@@ -38,9 +38,9 @@ struct ext_func_obj {
   SCM params;
   SCM rettype; 
   SCM libname;
-  CInvContext* func_context;
-  CInvFunction* function;
   void * code;
+  ffi_cif cif;
+  ffi_type **cif_arg_types;
 };
 
 union any {
@@ -61,9 +61,10 @@ union any {
 #define EXTFUNC_PARAMS(f)	(((struct ext_func_obj *) (f))->params)
 #define EXTFUNC_RETTYPE(f)	(((struct ext_func_obj *) (f))->rettype)
 #define EXTFUNC_LIBNAME(f)	(((struct ext_func_obj *) (f))->libname)
-#define EXTFUNC_CONTEXT(f)	(((struct ext_func_obj *) (f))->func_context)
-#define EXTFUNC_FUNCTION(f)	(((struct ext_func_obj *) (f))->function)
-#define EXTFUNC_CODE(f)	(	((struct ext_func_obj *) (f))->code)
+#define EXTFUNC_CODE(f)		(((struct ext_func_obj *) (f))->code)
+#define EXTFUNC_CIF(f)		(((struct ext_func_obj *) (f))->cif)
+#define EXTFUNC_CIF_ARGS(f)	(((struct ext_func_obj *) (f))->cif_arg_types)
+
 
 #define EXTFUNCP(f)	 	(BOXED_TYPE_EQ((f), tc_ext_func))
 
@@ -86,28 +87,6 @@ struct callback_obj {
 
 /* ====================================================================== */
 
-static void signal_error(CInvContext *ctx)
-{
-  STk_error("error on external function: '%s'", cinv_context_geterrormsg(ctx));
-}
-
-
-static void ext_func_finalizer(SCM obj)
-{
-  cinv_status_t n;
-  CInvContext * ctx = EXTFUNC_CONTEXT(obj);
-
-  n = cinv_context_delete(ctx);
-  if (n == CINV_ERROR) signal_error(ctx);
-
-  n = cinv_function_delete(ctx, EXTFUNC_FUNCTION(obj));
-  if (n == CINV_ERROR) signal_error(ctx);
-  
-  EXTFUNC_CONTEXT(obj) = NULL;
-  EXTFUNC_FUNCTION(obj) = NULL;
-  EXTFUNC_CODE(obj) = NULL;
-}
-
 
 /* 
 ((:void 	0)  (:char 	1)  (:short 	2)   (:ushort 	3)
@@ -116,13 +95,37 @@ static void ext_func_finalizer(SCM obj)
  (:boolean 	12) (:pointer 	13) (:string	14)  (:int8	15)		 
  (:int16	16) (:int32	17) (:int64	18)  (:obj      19))
 */
+
+
+
 #define EXT_FUNC_MAX_TYPE 19		/* maximal value for types */
 #define EXT_FUNC_MAX_PARAMS 30		/* max # of parameters to an external func */
 
-static char conversion[] = "\0cssiilleefdippc248p";
+static ffi_type* conversion[] = {
+  &ffi_type_void,		/* :void */
+  &ffi_type_uchar,		/* :char */
+  &ffi_type_sshort,		/* :short */
+  &ffi_type_ushort,		/* :ushort */
+  &ffi_type_sint,		/* :int */
+  &ffi_type_uint,		/* :uint */
+  &ffi_type_slong,		/* :long */
+  &ffi_type_ulong,		/* :ulong */
+  &ffi_type_sint64,		/* :lonlong   !!!!!!!!!!!!! */
+  &ffi_type_uint64,		/* :lonlong   !!!!!!!!!!!!! */
+  &ffi_type_float,		/* :float */
+  &ffi_type_double,		/* :double */
+  &ffi_type_uint,		/* :boolean */
+  &ffi_type_pointer,		/* :pointer */
+  &ffi_type_pointer,		/* :string */
+  &ffi_type_sint8,		/* :int8 */
+  &ffi_type_sint16,		/* :int16 */
+  &ffi_type_sint32,		/* :int32 */
+  &ffi_type_sint64,		/* :int64 */
+  &ffi_type_pointer,		/* :obj */
+};
 
 
-static char convert(SCM obj)
+static ffi_type* convert(SCM obj)
 {
   int n = STk_integer_value(obj);
 
@@ -131,21 +134,6 @@ static char convert(SCM obj)
   return conversion[n];
 }
 
-static void fill_parameters_descr(char *str, SCM params)
-{
-  int i = 0;
-  
-  for (i = 0; i < EXT_FUNC_MAX_PARAMS; i++) {
-    if (NULLP(params)) {
-      str[i] = '\0';
-      return;
-    } else {
-      str[i] = convert(CAR(params));
-      params =CDR(params);
-    }
-  }
-  STk_error("too muchparameters. (# max = %d)", EXT_FUNC_MAX_PARAMS);
-}
 
 
 /* ======================================================================
@@ -299,57 +287,62 @@ SCM STk_ext_func_name(SCM fct)
 }
 
 
-
-
 /* ======================================================================
  * 	STk_make-ext_func primitive ... 
  * ====================================================================== */
 DEFINE_PRIMITIVE("%make-ext-func", make_ext_func, subr4, 
 		 (SCM name, SCM params, SCM rettype, SCM libname))
 {
-  SCM z;
+  SCM tmp, z;
+  void *fun;
+  ffi_cif cif;
+  ffi_type **args;
+  ffi_status n;
+  int i, len = STk_int_length(params);
 
-  if (! STRINGP(name))    STk_error("bad function name ~S", name);
-  if (! STRINGP(libname)) STk_error("bad library name ~S", libname);
-  if (! INTP(rettype))    STk_error("bad integer ~S", rettype);
+  if (! STRINGP(name))    	 STk_error("bad function name ~S", name);
+  if (! STRINGP(libname)) 	 STk_error("bad library name ~S", libname);
+  if (! INTP(rettype))    	 STk_error("bad integer ~S", rettype);
+  if (len < 0)            	 STk_error("bad parameter type list ~S", params);
 
-  NEWCELL(z, ext_func);
-  EXTFUNC_NAME(z)    = name;
-  EXTFUNC_PARAMS(z)  = params;
-  EXTFUNC_RETTYPE(z) = rettype;
-  EXTFUNC_LIBNAME(z) = libname;
+  /* find the function in library */
+  fun = STk_find_external_function(STRING_CHARS(libname), 
+				   STRING_CHARS(name), 
+				   TRUE);
 
-  /* Create a context for this function */
-  EXTFUNC_CONTEXT(z) = cinv_context_create();
-
-  /* Create a C/Invoke function */
-  {
-    char P[EXT_FUNC_MAX_PARAMS + 1];
-    char R[1];
-
-    fill_parameters_descr(P, params);
-    R[0] = (rettype == MAKE_INT(0)) ? '\0' : convert(rettype);
-
-    EXTFUNC_FUNCTION(z) = cinv_function_create(EXTFUNC_CONTEXT(z), 
-					       CINV_CC_DEFAULT,
-					       R,
-					       P);
+  /* Prepare the function descriptor */
+  args = STk_must_malloc(len * sizeof(ffi_type *));
+  for (i=0, tmp=params; i < len; i++, tmp=CDR(tmp)) {
+    args[i] = convert(CAR(tmp));
   }
-  /* Keep code */
-  EXTFUNC_CODE(z) =  STk_find_external_function(STRING_CHARS(libname),
-						STRING_CHARS(name),
-						TRUE);
 
-  STk_register_finalizer(z, ext_func_finalizer);
+  n = ffi_prep_cif(&cif, 
+		   FFI_DEFAULT_ABI, 
+		   len, 
+		   convert(rettype),
+		   args);
+  if (n != FFI_OK) STk_error("cannot create call descriptor for ~S", name);
+  
+  /* Create external function object */
+  NEWCELL(z, ext_func);
+  EXTFUNC_NAME(z)     = name;
+  EXTFUNC_PARAMS(z)   = params;
+  EXTFUNC_RETTYPE(z)  = rettype;
+  EXTFUNC_LIBNAME(z)  = libname;
+  EXTFUNC_CODE(z)     = fun;
+  EXTFUNC_CIF(z)      = cif;
+  EXTFUNC_CIF_ARGS(z) = args;
+
   return z;
 }
+
 
 /* ======================================================================
  *  	STk_call_ext_function ...
  * ====================================================================== */
 SCM STk_call_ext_function(SCM fct, int argc, SCM *argv)
 {
-  int i, n;
+  int i;
   union any retval;
   union any v_args[EXT_FUNC_MAX_PARAMS];
   void*     p_args[EXT_FUNC_MAX_PARAMS];
@@ -360,7 +353,7 @@ SCM STk_call_ext_function(SCM fct, int argc, SCM *argv)
 
   /* Build the parameter array */
   for (i = 0, params = EXTFUNC_PARAMS(fct);
-       i < argc; 
+       i < argc;
        i++, params = CDR(params)) {
     if (NULLP(params)) 
       STk_error("too much parameters in call");
@@ -371,13 +364,27 @@ SCM STk_call_ext_function(SCM fct, int argc, SCM *argv)
   if (! NULLP(params)) STk_error("not enough parameters in call");
   
   /* Perform the call */
-  n = cinv_function_invoke(EXTFUNC_CONTEXT(fct),
-			   EXTFUNC_FUNCTION(fct),
-			   EXTFUNC_CODE(fct),
-			   &retval,
-			   p_args);
-  if (n == CINV_ERROR) signal_error(EXTFUNC_CONTEXT(fct));
-  
+  STk_debug("On va faire l'appel ");
+
+  ffi_call(&EXTFUNC_CIF(fct),
+	   EXTFUNC_CODE(fct),
+	   &retval,
+	   p_args);
+
+#ifdef XXX
+  {
+    char *s = STRING_CHARS(argv[0]);
+    void *values[1];
+    
+
+    values[0] = &s;
+    ffi_call(&EXTFUNC_CIF(fct),
+	     EXTFUNC_CODE(fct),
+	     &retval,
+	     values);
+  }
+#endif
+  STk_debug("L'appel est fait ");
   return c2scheme(retval, EXTFUNC_RETTYPE(fct));
 }
 

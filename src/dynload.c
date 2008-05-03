@@ -1,7 +1,7 @@
 /*
  * dynload.c	-- Dynamic loading stuff
  * 
- * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Jan-1994 19:09
- * Last file update: 25-Jun-2007 15:20 (eg)
+ * Last file update:  2-May-2008 17:23 (eg)
  *
  */
 
@@ -29,13 +29,6 @@
 
 #define INIT_FUNC_NAME "STk_module_main"
 #define INFO_FUNC_NAME "STk_module_info"
-
-#if defined(DARWIN)
-#  include "dynload-macos.c"
-#  define HAVE_DLOPEN
-#endif
-
-
 
 #define INIT_FUNC_NAME_STRING(x) #x
 
