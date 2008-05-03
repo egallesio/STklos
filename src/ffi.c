@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update:  3-May-2008 20:02 (eg)
+ * Last file update:  3-May-2008 22:21 (eg)
  */
 
 #include <stklos.h>
