@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 31-Jan-2008 16:04 (eg)
+dnl Last file update:  3-May-2008 19:57 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -389,24 +389,23 @@ fi
 dnl
 dnl FFI support 
 dnl
-AC_CHECK_PROG(PERLINT, [perl], "yes", "no")
-
 AC_ARG_ENABLE(ffi, 
       [  --disable-ffi			disable FFI support],
       USER_FFI="no", USER_FFI="yes")
 
-if test "$PERLINT" = "yes" -a "$USER_FFI" = "yes" ;then
-  # We have perl and user did't disable FFI. We can try to configure C/invoke
-  echo "Configuring C/Invoke"
-  (cd cinvoke; perl configure.pl --prefix=$prefix)
-  LIBS="$LIBS ../cinvoke/lib/libcinvoke.a"
-  CFLAGS="$CFLAGS -I../cinvoke/lib"
-  CINVOKE="cinvoke"
+if test "$USER_FFI" = "yes" ;then
+  echo "Configuring libffi"
+  (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
+           --disable-structs --disable-raw-api --disable-shared \
+	   --prefix=$prefix)
+  LIBS="$LIBS ../ffi/.libs/libffi.a"
+  CFLAGS="$CFLAGS -I../ffi/include"
+  LIBFFI="ffi"
   HAVE_FFI="#define HAVE_FFI 1"
   FFI="yes"
 else
   echo "Disabling FFI support"
-  CINVOKE=""
+  LIBFFI=""
   HAVE_FFI=""
   FFI="no"
 fi
@@ -557,7 +556,7 @@ AC_SUBST(SVN_URL)
 AC_SUBST(THREADS)
 AC_SUBST(LURCDIR)
 AC_SUBST(CALLCC_STK)
-AC_SUBST(CINVOKE)
+AC_SUBST(LIBFFI)
 	
 AC_OUTPUT(Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile gtklos/Makefile gtklos/gtklosconf.h

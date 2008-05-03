@@ -701,7 +701,6 @@ NO_THREAD_FALSE
 GTK_CONFIG
 GNOME_CONFIG
 LIBOBJS
-PERLINT
 STKCFLAGS
 HAVE_DLOPEN
 HAVE_FFI
@@ -742,7 +741,7 @@ SVN_URL
 THREADS
 LURCDIR
 CALLCC_STK
-CINVOKE
+LIBFFI
 LTLIBOBJS'
 ac_subst_files=''
       ac_precious_vars='build_alias
@@ -6782,45 +6781,6 @@ fi
 
 
 
-# Extract the first word of "perl", so it can be a program name with args.
-set dummy perl; ac_word=$2
-{ echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
-if test "${ac_cv_prog_PERLINT+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if test -n "$PERLINT"; then
-  ac_cv_prog_PERLINT="$PERLINT" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_PERLINT=""yes""
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_prog_PERLINT" && ac_cv_prog_PERLINT=""no""
-fi
-fi
-PERLINT=$ac_cv_prog_PERLINT
-if test -n "$PERLINT"; then
-  { echo "$as_me:$LINENO: result: $PERLINT" >&5
-echo "${ECHO_T}$PERLINT" >&6; }
-else
-  { echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6; }
-fi
-
-
-
 # Check whether --enable-ffi was given.
 if test "${enable_ffi+set}" = set; then
   enableval=$enable_ffi; USER_FFI="no"
@@ -6829,18 +6789,19 @@ else
 fi
 
 
-if test "$PERLINT" = "yes" -a "$USER_FFI" = "yes" ;then
-  # We have perl and user did't disable FFI. We can try to configure C/invoke
-  echo "Configuring C/Invoke"
-  (cd cinvoke; perl configure.pl --prefix=$prefix)
-  LIBS="$LIBS ../cinvoke/lib/libcinvoke.a"
-  CFLAGS="$CFLAGS -I../cinvoke/lib"
-  CINVOKE="cinvoke"
+if test "$USER_FFI" = "yes" ;then
+  echo "Configuring libffi"
+  (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
+           --disable-structs --disable-raw-api --disable-shared \
+	   --prefix=$prefix)
+  LIBS="$LIBS ../ffi/.libs/libffi.a"
+  CFLAGS="$CFLAGS -I../ffi/include"
+  LIBFFI="ffi"
   HAVE_FFI="#define HAVE_FFI 1"
   FFI="yes"
 else
   echo "Disabling FFI support"
-  CINVOKE=""
+  LIBFFI=""
   HAVE_FFI=""
   FFI="no"
 fi
@@ -7761,7 +7722,6 @@ NO_THREAD_FALSE!$NO_THREAD_FALSE$ac_delim
 GTK_CONFIG!$GTK_CONFIG$ac_delim
 GNOME_CONFIG!$GNOME_CONFIG$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
-PERLINT!$PERLINT$ac_delim
 STKCFLAGS!$STKCFLAGS$ac_delim
 HAVE_DLOPEN!$HAVE_DLOPEN$ac_delim
 HAVE_FFI!$HAVE_FFI$ac_delim
@@ -7770,6 +7730,7 @@ GC!$GC$ac_delim
 GCLIB!$GCLIB$ac_delim
 GCINC!$GCINC$ac_delim
 GMP!$GMP$ac_delim
+GMPLIB!$GMPLIB$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -7811,7 +7772,6 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
-GMPLIB!$GMPLIB$ac_delim
 GMPINC!$GMPINC$ac_delim
 PREFIX!$PREFIX$ac_delim
 SCMDIR!$SCMDIR$ac_delim
@@ -7843,11 +7803,11 @@ SVN_URL!$SVN_URL$ac_delim
 THREADS!$THREADS$ac_delim
 LURCDIR!$LURCDIR$ac_delim
 CALLCC_STK!$CALLCC_STK$ac_delim
-CINVOKE!$CINVOKE$ac_delim
+LIBFFI!$LIBFFI$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 34; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 33; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

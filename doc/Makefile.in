@@ -40,7 +40,7 @@ subdir = doc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/stklos-compile.1.in $(srcdir)/stklos-config.1.in \
 	$(srcdir)/stklos-genlex.1.in $(srcdir)/stklos-install.1.in \
-	$(srcdir)/stklos-pkg.1.in $(srcdir)/stklos.1.in TODO
+	$(srcdir)/stklos-pkg.1.in $(srcdir)/stklos.1.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -81,7 +81,6 @@ CALLCC_STK = @CALLCC_STK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
-CINVOKE = @CINVOKE@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
 CPP = @CPP@
@@ -120,6 +119,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDAP_LIB = @LDAP_LIB@
 LDFLAGS = @LDFLAGS@
+LIBFFI = @LIBFFI@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
@@ -140,7 +140,6 @@ PCRE = @PCRE@
 PCREINC = @PCREINC@
 PCRELIB = @PCRELIB@
 PCRETARGET = @PCRETARGET@
-PERLINT = @PERLINT@
 PREFIX = @PREFIX@
 RANLIB = @RANLIB@
 SCMDIR = @SCMDIR@

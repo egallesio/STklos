@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 19-Jun-2007 11:55 (eg)
+# Last file update:  3-May-2008 19:58 (eg)
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -87,7 +87,6 @@ CALLCC_STK = @CALLCC_STK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
-CINVOKE = @CINVOKE@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
 CPP = @CPP@
@@ -126,6 +125,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDAP_LIB = @LDAP_LIB@
 LDFLAGS = @LDFLAGS@
+LIBFFI = @LIBFFI@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
@@ -146,7 +146,6 @@ PCRE = @PCRE@
 PCREINC = @PCREINC@
 PCRELIB = @PCRELIB@
 PCRETARGET = @PCRETARGET@
-PERLINT = @PERLINT@
 PREFIX = @PREFIX@
 RANLIB = @RANLIB@
 SCMDIR = @SCMDIR@
@@ -205,7 +204,7 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = 
-SUBDIRS = @PCRE@ @GC@ @GMP@ @CINVOKE@ src utils lib @GTKLOS@ \
+SUBDIRS = @PCRE@ @GC@ @GMP@ @LIBFFI@ src utils lib @GTKLOS@ \
 	        @EXAMPLES@ pkgman extensions tests doc
 
 VERSION_TAG = @PACKAGE@-@VERSION@

@@ -21,13 +21,13 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update:  2-May-2008 23:26 (eg)
+ * Last file update:  3-May-2008 20:02 (eg)
  */
 
 #include <stklos.h>
 
 #ifdef HAVE_FFI
-#  include <../libffi/include/ffi.h>
+#  include <ffi.h>
 
 /* ------------------------------ *\
  * STklos C external functions
