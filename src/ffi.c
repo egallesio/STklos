@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update:  3-May-2008 22:21 (eg)
+ * Last file update:  3-May-2008 22:39 (eg)
  */
 
 #include <stklos.h>
@@ -364,27 +364,11 @@ SCM STk_call_ext_function(SCM fct, int argc, SCM *argv)
   if (! NULLP(params)) STk_error("not enough parameters in call");
   
   /* Perform the call */
-  STk_debug("On va faire l'appel ");
-
   ffi_call(&EXTFUNC_CIF(fct),
 	   EXTFUNC_CODE(fct),
 	   &retval,
 	   p_args);
 
-#ifdef XXX
-  {
-    char *s = STRING_CHARS(argv[0]);
-    void *values[1];
-    
-
-    values[0] = &s;
-    ffi_call(&EXTFUNC_CIF(fct),
-	     EXTFUNC_CODE(fct),
-	     &retval,
-	     values);
-  }
-#endif
-  STk_debug("L'appel est fait ");
   return c2scheme(retval, EXTFUNC_RETTYPE(fct));
 }
 

@@ -2113,7 +2113,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=stklos
- VERSION=0.98dev
+ VERSION=0.98
 
 
 cat >>confdefs.h <<_ACEOF
