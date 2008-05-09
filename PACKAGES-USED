@@ -36,11 +36,12 @@ LALR: The Dominique Boucher LALR Package
     - Home Page: http://www.iro.umontreal.ca/~boucherd/Lalr/documentation/lalr.html
 
 
-C/INVOKE: a library for connecting to C libraries at runtime
-============================================================
-     - Version: 1.0
-     - License: 3 clauses BSD
-     - Home Page: http://www.nongnu.org/cinvoke/index.html
+libffi - a portable foreign function interface library
+======================================================
+	- Version 3.0.5
+	- License: Free (BSD like)
+	- Home Page: http://sourceware.org/libffi/
+
 
       	   	 +++++++++++++++++++++++++++++++++++
 
