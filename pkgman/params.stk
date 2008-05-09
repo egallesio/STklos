@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 16:23 (eg)
-;;;; Last file update: 15-Apr-2008 23:14 (eg)
+;;;; Last file update:  9-May-2008 10:08 (eg)
 ;;;;
 
 
@@ -52,6 +52,10 @@
 
 (define pkgball-suffix
   (make-parameter ".tar.gz"))
+
+(define stklos-pkg-default-url
+  (make-parameter (or (getenv "STKLOS_SCMPKG_URL")
+		      "http://www.stklos.org/ScmPkg/Packages")))
 
 (define stklos-pkg-sync-urls
   (make-parameter '(

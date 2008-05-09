@@ -1,7 +1,7 @@
 ;;;;
 ;;;; main.stk	-- Stklos-Pkg main program
 ;;;; 
-;;;; Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2006-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update: 13-Jul-2007 14:49 (eg)
+;;;; Last file update:  9-May-2008 10:50 (eg)
 ;;;;
 
 (include "../lib/http.stk")
@@ -74,6 +74,8 @@
 	(set! actions (cons 'clear-cache actions)))
        (("reset" :help "reset stklos-pkg repository. USE WITH CAUTION")
 	(set! actions (cons 'delete-repo actions)))
+       (("build-sync-file" :arg dir :help "Build a synchronization file from <dir>")
+	(set! actions (cons (list 'build-sync-file dir) actions)))
        
        "Informations"
        (("list" :alternate "l" :help "list available packages")
@@ -186,7 +188,7 @@
 	   (for-each (lambda (x) (printf "~a\n" x))
 		     (package-deps* (cadar actions))))
 	  ((add)
-	   (local-description-add!(cadar actions))
+	   (local-description-add! (cadar actions))
 	   (exit 0))
 
 	  ((cp)
@@ -197,6 +199,10 @@
 
 	  ((uninstall)
 	   (uninstall-package (cdar actions)))
+
+	  ((build-sync-file)
+	   (build-user-sync-file (cadar actions))
+	   (exit 0))
 
 	  (else (error-pkg "bad command ~S" (car actions))))
 	(loop (cdr actions))))))
