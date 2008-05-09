@@ -5,14 +5,11 @@ THIS IS VERY OBSOLETE AND SHOULD BE REWRITTEN.
 
 * THINGS TO DO (NEXT RELEASES PLAN)
 
-** Version 0.98 ... 
+** Version 0.99	
 	- Terminate canvas implementation
 	- Add new widgets that exist in 0.51 and have not been ported back
    	- Add GTk2 support
 	- Add STk Posix support
-	- ... 
-
-** Version 0.99
 	- autoload (and syntax-autoload) and modules as in STk?
 	- Use  packages in all the library to hide functions which
 	  should not be exported. Use a scheme similar to STk, such as

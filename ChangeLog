@@ -1,3 +1,60 @@
+2008-05-09  Erick Gallesio  <eg@unice.fr>
+
+	* pkgman/add.stk, pkgman/main.stk, pkgman/params.stk,
+	  pkgman/repository.stk:
+	Addded option --build-sync-file to ease personal
+	ScmPkg repository maintenance
+	[71f2f64945e1]
+
+2008-05-03  Erick Gallesio  <eg at unice.fr>
+
+	* src/boot.c:
+	Preparing version stklos-0.98dev-beta1
+	[ec88b34c7b78]
+
+	* Fixed Makefile machinery for libffi integration
+	[71ad3e93c3df]
+
+	* Replacement the C/invoke library by the libffi library: Now GTk2 
+	ScmPkg packages work on MacOs.
+	[3585c12f13c8]
+
+2008-05-01  Erick Gallesio  <eg@essi.fr>
+
+	* src/stklos.h, src/vm.c:
+	Added function STk_values2vector to ease the use of multiple values
+	from C.
+	[51e4843c1227]
+
+2008-04-15  Erick Gallesio  <eg@essi.fr>
+
+	* pkgman/install.stk, pkgman/params.stk:
+	Avoid the main ScmPkg repository which is out of order.
+	[58242d006904]
+
+2008-04-10  Erick Gallesio  <eg@essi.fr>
+
+	* pkgman/extract.stk, src/boot.c, src/misc.c:
+	Fixed a typo
+	[7da57ad45fb9]
+
+2008-01-31  Erick Gallesio  <eg@essi.fr>
+
+	* Updated GC to 7.1alpha2 version
+	[020563fd959a]
+
+2008-01-11  Erick Gallesio  <eg@essi.fr>
+
+	* configure, configure.in, lib/object.stk, lib/repl.stk, src/boot.c,
+	  src/boot.img:
+	Added and exported the method-specializers-equal? method
+	[d85ad4b0adeb]
+
+2007-12-16  Erick Gallesio  <eg@essi.fr>
+
+	* STklos 0.97 Release
+	=====================
+
 2007-12-14  Erick Gallesio  <eg@essi.fr>
 
 	* Updated PCRE to 7.4 (from 5.0)
