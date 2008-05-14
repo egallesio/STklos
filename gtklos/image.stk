@@ -1,7 +1,7 @@
 ;;;;
 ;;;; image.stk					-- GTK Image Widget
 ;;;; 
-;;;; Copyright © 2000-2001 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 13-Oct-2000 17:15 (eg)
-;;;; Last file update: 14-Aug-2001 17:24 (eg)
+;;;; Last file update:  9-May-2008 16:07 (eg)
 ;;;;
 
 
@@ -35,7 +35,7 @@
       '("xpm")))			;; with GTK only, accepts only XPMs
   
 (define *image-path* 
-  (let ((user-path (%build-path-from-shell-variable "STKLOS_IMAGE_PATH")))
+  (let ((user-path (build-path-from-shell-variable "STKLOS_IMAGE_PATH")))
     (if (null? user-path)
 	(list (string-append (%library-prefix) 
 			     "/share/stklos/"
