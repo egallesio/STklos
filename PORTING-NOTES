@@ -4,7 +4,7 @@ architectures.
 If you experience a new port or confirm/infirm/add informations which
 are specified here please send a mail to Erick Gallesio 'eg(at)essi.fr'
 
-Fr each entry below, you'll find the OS and the version of the C
+For each entry below, you'll find the OS and the version of the C
 compiler used for building the system. The entry Gtklos, tells if the
 GTklos has been built on this architecture. Canvases are set apart
 because, they are implemented in Gnome rather than GTk. Since Gnome,
@@ -32,8 +32,7 @@ GNU/Linux (alpha) ----------------------
      OS Version: Microway Linux release 6.2 (redhat based)
        Compiler: egcs-2.91
     Compilation: CC=gcc
-                 CFLAGS=-02
-		 --disable-gtklos
+                 CFLAGS=-O2 --disable-gtklos
     	    Who: Erick Gallesio  'eg(at)essi.fr'
   	 GTklos: Yes
 	 Canvas: No (see below)
@@ -58,7 +57,7 @@ FreeBSD (x86) -------------------------
        Compiler: gcc 
     Compilation:
 	         CC=gcc
-	         CFLAGS=-02
+	         CFLAGS=-O2
   	 GTklos: No (see below)
 	 Canvas: No (see below)
             Who: Erick Gallesio  'eg(at)essi.fr'
@@ -77,9 +76,7 @@ Win32/Cygwin ---------------------------
      OS Version: Win32 (XP pro)
        Compiler: gcc 3.2.1
     Compilation: CC=gcc
-    		 CFLAGS=-02
-		 --disable-gtk
-		 --disable-gnome
+    		 CFLAGS=-O2 --disable-gtk --disable-gnome
   	 GTklos: No (see below)
 	 Canvas: No (see below)
             Who: Erick Gallesio  'eg(at)essi.fr'
@@ -94,8 +91,7 @@ Apple OS-X -----------------------------
      OS Version: Darwin Kernel Version 6.3
        Compiler: Apple Computer, Inc. GCC version 1161, based on gcc 3.1
     Compilation: CC=gcc
-    		 CFLAGS=-02
-		 --disable-gnome
+    		 CFLAGS=-O2 --disable-gnome
   	 GTklos: Yes
 	 Canvas: No (see below)
             Who: Erick Gallesio  'eg(at)essi.fr'
@@ -103,9 +99,6 @@ Apple OS-X -----------------------------
 		 was not able to test, but since (nearly) everything
 		 went smoothly on this OS, it should work.
 
-Since 0.61+ there are problems with GC, which needs to be compiled
-without optimization. The configure script of 0.70+ takes into account
-this fact.
 
 Sun Solaris ----------------------------
 ----------------------------------------
@@ -113,9 +106,7 @@ Sun Solaris ----------------------------
      OS Version: Solaris 6
        Compiler: gcc 3.0.1
     Compilation: CC=gcc
-    		 CFLAGS=-02
-		 --disable-gnome
-		 --disable-gtk
+    		 CFLAGS=-O2 --disable-gnome --disable-gtk
   	 GTklos: No (libs not present)
 	 Canvas: No (libs not present)
             Who: Erick Gallesio  'eg(at)essi.fr'
@@ -133,8 +124,7 @@ SGI Irix -- ----------------------------
      OS Version: Irix 6.5.20f (Octane, MIPS R10,000)
        Compiler: gcc 3.3
     Compilation: CC=gcc
-    		 CFLAGS=-02
-		 --disable-gnome
+    		 CFLAGS=-O2 --disable-gnome
   	 GTklos: Yes 
 	 Canvas: No (libs not present)
             Who: Joshua Boyd jdboyd(at)jdboyd.net
