@@ -1,3 +1,13 @@
+2008-05-14  Erick Gallesio  <eg@unice.fr>
+
+	* STklos 0.98 Release
+	=====================
+
+	* gtklos/container.stk, gtklos/image.stk, gtklos/widget.stk,
+	lib/load.stk, src/boot.c, src/boot.img:
+	Small fixes
+	[ea56a2a04fd9]
+
 2008-05-09  Erick Gallesio  <eg@unice.fr>
 
 	* pkgman/add.stk, pkgman/main.stk, pkgman/params.stk,
