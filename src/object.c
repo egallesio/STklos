@@ -2,7 +2,7 @@
  *
  *  o b j e c t . c			-- Objects support
  *
- * Copyright © 1994-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update:  9-Dec-2007 20:39 (eg)
+ * Last file update:  2-Jun-2008 14:48 (eg)
  */
 
 #include "stklos.h"
@@ -906,7 +906,7 @@ static void make_standard_classes(void)
   mk_cls(&Struct_type,  "<struct-type>",Class,           Top,       STk_nil);
   mk_cls(&Cond, 	"<condition>",  Class,		 Top,	    STk_nil);
   mk_cls(&Cond_type, 	"<condition-type>",Class,	 Top,	    STk_nil);
-  mk_cls(&Box, 		"<box>",	Class,	 	 Top,	    STk_nil);
+  mk_cls(&Box, 		"<ref>",	Class,	 	 Top,	    STk_nil);
   mk_cls(&UnknownClass, "<unknown>",    Class,           Top,       STk_nil);
   mk_cls(&Procedure,    "<procedure>",  Procedure_class, Top,       STk_nil);
 }  

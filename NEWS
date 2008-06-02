@@ -6,7 +6,7 @@
 * version 0.98 (2008 04 15)
     * Replaced the C/invoke FFI library by libffi: Now GTk2 ScmPkg
       packages work on MacOs
-    * Addded option --build-sync-file to ease personal ScmPkg repository maintenance
+    * Added option --build-sync-file to ease personal ScmPkg repository maintenance
     * Bug fixes
 
 * version 0.97 (2007 12 16)
