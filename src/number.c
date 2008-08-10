@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 24-May-2007 09:28 (eg)
+ * Last file update: 10-Aug-2008 23:40 (eg)
  */
 
 
@@ -223,7 +223,7 @@ static SCM make_rational(SCM n, SCM d)
 
   if (zerop(d))
     STk_error("cannot make rational with null denominator");
-  
+
   /* Always keep sign in the denominator */
   if (negativep(d)) {
     n = mul2(n, MAKE_INT(-1));
@@ -800,7 +800,7 @@ static SCM int_quotient(SCM x, SCM y)
     if (INTP(y))
       return MAKE_INT(INT_VAL(x)/INT_VAL(y));
     else 
-      y = long2scheme_bignum(INT_VAL(y));
+      x = long2scheme_bignum(INT_VAL(x));
   } else {
     if (INTP(y))
       y = long2scheme_bignum(INT_VAL(y));
