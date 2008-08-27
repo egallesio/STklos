@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-0.stk 				-- SRFI-0 aka cond-expand
 ;;;; 
-;;;; Copyright © 1999-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1999-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 13-Dec-2007 12:26 (eg)
+;;;; Last file update: 27-Aug-2008 13:42 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -131,6 +131,7 @@
     ;; srfi-93				; ....... withdrawn
     ;; srfi-94
     ;; srfi-95
+    (srfi-96 "srfi-96")			; SLIB Prerequisites
     ))
 
 ;; ----------------------------------------------------------------------

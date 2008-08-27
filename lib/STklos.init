@@ -4,7 +4,7 @@
 ;;;
 ;;; This code is in the public domain.
 ;;;
-;;; Last file update: 27-Aug-2008 12:45 (eg)
+;;; Last file update: 27-Aug-2008 13:41 (eg)
 ;;; 
 
 
@@ -213,7 +213,11 @@
 ;;; provide ensures that the file "srfi-59" will be not loaded 
 (provide "srfi-59")
 
-
+;;@ (FILE-POSITION <port> . <k>)
+(define (file-position port . args)
+  (if (null? args)
+      (port-current-position port)
+      (port-seek port (car args) :start)))
 
 ;;@ (OUTPUT-PORT-WIDTH <port>)
 (define (output-port-width . arg) 79)
@@ -243,6 +247,9 @@
 ;;; use this definition if your system doesn't have such a procedure.
 ;;(define (force-output . arg) #t)
 (define force-output flush-output-port)
+
+
+
 
 ;;; CALL-WITH-INPUT-STRING and CALL-WITH-OUTPUT-STRING are the string
 ;;; port versions of CALL-WITH-*PUT-FILE.
@@ -347,7 +354,15 @@
 	  (apply error (format "~A" (car args)) (cdr args))))))
 ;@
 (define (make-exchanger obj)
-  (lambda (rep) (let ((old obj)) (set! obj rep) old)))
+  (lambda (rep)
+    (with-mutex (make-mutex 'make-exchanger)
+		(lambda ()
+		  (let ((old obj))
+		    (set! obj rep)
+		    old)))))
+
+
+
 (define (open-file filename modes)
   (case modes
     ((r rb) (open-input-file filename))
@@ -372,10 +387,11 @@
 ;@
 (define (browse-url url)
   (define (try cmd end) (zero? (system (string-append cmd url end))))
-  (or (try "netscape-remote -remote 'openURL(" ")'")
-      (try "netscape -remote 'openURL(" ")'")
-      (try "netscape '" "'&")
-      (try "netscape '" "'")))
+  (or (try (format "~A '" (getenv "BROWSER")) "'&")
+      (try "firefox-remote -remote 'openURL(" ")'")
+      (try "firefox -remote 'openURL(" ")'")
+      (try "firefox '" "'&")
+      (try "firefox '" "'")))
 
 ;;@ define these as appropriate for your system.
 (define slib:tab (integer->char 9))
