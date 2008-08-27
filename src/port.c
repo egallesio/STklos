@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 27-Aug-2008 12:45 (eg)
+ * Last file update: 27-Aug-2008 13:09 (eg)
  *
  */
 
@@ -1312,7 +1312,7 @@ DEFINE_PRIMITIVE("port-current-line", port_current_line, subr01, (SCM port))
  * (port-current-position)
  * (port-current-position port)
  *
- * Returns the position associated to the given input |port| as an
+ * Returns the position associated to the given |port| as an
  * integer (i.e. number of characters from the beginning of the port). 
  * The |port| argument may be omitted, in which case it defaults to
  * the value returned by |current-input-port|.
@@ -1320,7 +1320,10 @@ doc>
  */
 DEFINE_PRIMITIVE("port-current-position", port_position, subr01, (SCM port))
 {
-  if (!PORTP(port)) STk_error_bad_port(port);
+  if (!port) 
+    port = STk_current_input_port();
+  else
+    if (!PORTP(port)) STk_error_bad_port(port);
   return MAKE_INT(STk_tell(port));
 }
 
