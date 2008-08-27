@@ -1,7 +1,7 @@
 /*
  *  p o r t . c			-- ports implementation
  *
- * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  4-Jul-2007 12:36 (eg)
+ * Last file update: 27-Aug-2008 12:45 (eg)
  *
  */
 
@@ -115,6 +115,19 @@ DEFINE_PRIMITIVE("input-port?", input_portp, subr1, (SCM port))
 DEFINE_PRIMITIVE("output-port?", output_portp, subr1, (SCM port))
 {
   return MAKE_BOOLEAN(OPORTP(port));
+}
+
+/*
+<doc EXT port? 
+ * (port? obj)
+ *
+ * Returns |#t| if |obj| is an input port or an output port, 
+ * otherwise returns #f.
+doc>
+ */
+DEFINE_PRIMITIVE("port?", portp, subr1, (SCM port))
+{
+  return MAKE_BOOLEAN(PORTP(port));
 }
 
 
@@ -1483,6 +1496,7 @@ int STk_init_port(void)
   /* and its associated primitives */
   ADD_PRIMITIVE(input_portp);
   ADD_PRIMITIVE(output_portp);
+  ADD_PRIMITIVE(portp);
   ADD_PRIMITIVE(interactive_portp);
   ADD_PRIMITIVE(current_input_port);
   ADD_PRIMITIVE(current_output_port);

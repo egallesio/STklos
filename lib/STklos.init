@@ -4,7 +4,7 @@
 ;;;
 ;;; This code is in the public domain.
 ;;;
-;;; Last file update: 13-Dec-2007 12:38 (eg)
+;;; Last file update: 27-Aug-2008 12:45 (eg)
 ;;; 
 
 
@@ -259,7 +259,7 @@
 (define char-code-limit 256)
 
 ;;@ MOST-POSITIVE-FIXNUM is used in modular.scm
-(define most-positive-fixnum #x0FFFFFFF)
+(define most-positive-fixnum (greatest-fixnum))
 
 ;;@ Return argument
 (define (identity x) x)
@@ -353,7 +353,7 @@
     ((r rb) (open-input-file filename))
     ((w wb) (open-output-file filename))
     (else (slib:error 'open-file 'mode? modes))))
-(define (port? obj) (or (input-port? obj) (output-port? obj)))
+
 (define (call-with-open-ports . ports)
   (define proc (car ports))
   (cond ((procedure? proc) (set! ports (cdr ports)))
@@ -416,7 +416,9 @@
 ;;@ At this point SLIB:LOAD must be able to load SLIB files.
 (define slib:load slib:load-source)
 
-(define program-arguments argv)
+(define (program-arguments)
+  (cons (program-name)
+	(argv)))
 (define current-time current-seconds)
 
 
@@ -440,7 +442,9 @@
     (let* ((srfi-name (format "srfi-~a" i))
 	   (srfi      (string->symbol srfi-name)))
       (when (srfi-0-feature-implementation-file srfi)
-	(stklos:provide srfi-name)))))
+	(stklos:provide srfi-name))
+      ;; Clean result
+      (set! slib:features (filter symbol? slib:features)))))
 
 ;;;
 ;;; Redefine require/provide so that symbols use SLIB one and strings use STk one
