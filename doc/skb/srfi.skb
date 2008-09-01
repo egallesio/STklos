@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 13-Dec-2007 12:42 (eg)
+;; Last file update: 27-Aug-2008 13:44 (eg)
 ;;
 ;; ======================================================================
 
@@ -524,6 +524,17 @@ symbol.]))
 you need to insert the following expression])
 (fontified-code [(require "srfi-89")])
 (p [in your code or uses the ,(code "cond-expand") special form.]))
+
    
+;; ----------------------------------------------------------------------
+;; SRFI 96 -- SLIB Prerequisites
+;; ----------------------------------------------------------------------   
+(srfi-section 96
+	      
+(p [,(quick-link-srfi 96) is fully supported.  To use SRFI-96,
+you need to insert the following expression])
+(fontified-code [(require "srfi-96")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
 ;; End of chapter   
 )

@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  9-Dec-2007 20:31 (eg)
+;; Last file update: 27-Aug-2008 12:44 (eg)
 ;;
 ;; ======================================================================
 
@@ -449,6 +449,7 @@ be accessed as a normal port with the standard Scheme primitives.])
 (insertdoc 'call-with-input-string)
 (insertdoc 'call-with-output-string)
 (insertdoc 'output-port?)
+(insertdoc 'port?)
 (insertdoc 'output-string-port?)
 (insertdoc 'output-file-port?)
 (insertdoc 'output-virtual-port?)

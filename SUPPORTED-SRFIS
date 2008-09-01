@@ -102,5 +102,6 @@ State can be one of the following values
     ?   94	Type-Restricted Numerical Functions
 
     ?   95	Sorting and Merging
+    Y   96	SLIB Prerequisites
 
-Implemented SRFIs: 37/66
+Implemented SRFIs: 38/67
