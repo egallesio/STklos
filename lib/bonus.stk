@@ -1,7 +1,7 @@
 ;;;;
 ;;;; bonus.stk	-- Useful primitives not in R5RS
 ;;;; 
-;;;; Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  6-Dec-2007 15:08 (eg)
+;;;; Last file update: 22-Sep-2008 14:20 (eg)
 ;;;;
 
 ;;
@@ -1662,6 +1662,30 @@ doc>
   (unless (string? str)
     (error "bad string ~S" str))
   (make-keyword str))
+
+;;
+;; SRFI-98: "An interface to access environment variables"
+;;
+
+#| <doc EXT get-environment-variable
+ * (get-environment-variable name)
+ *
+ * Returns the value of the named environment variable as a string, or
+ * |¤f| if the named environment variable is not found. The name argument
+ * is expected to be a string. This function is similar to the |getenv|. It
+ * has been added to be  support ,(link-srfi 98).
+|#
+(define (get-environment-variable name)
+  (getenv name))
+
+#| <doc EXT get-environment-variables
+ * (get-environment-variables)
+ *
+ * Returns names and values of all the environment variables as an a-list.
+ * This function is defined by ,(link-srfi 98)
+|#
+(define (get-environment-variables)
+  (getenv))
 
 
 ;; LocalWords:  doc dotimes R5RS str SRFI optarg

@@ -103,5 +103,6 @@ State can be one of the following values
 
     ?   95	Sorting and Merging
     Y   96	SLIB Prerequisites
+    Y	98	An interface to access environment variables
 
-Implemented SRFIs: 38/67
+Implemented SRFIs: 39/68
