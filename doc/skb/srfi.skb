@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 27-Aug-2008 13:44 (eg)
+;; Last file update: 26-Sep-2008 08:10 (eg)
 ;;
 ;; ======================================================================
 
@@ -536,5 +536,18 @@ you need to insert the following expression])
 (fontified-code [(require "srfi-96")])
 (p [in your code or uses the ,(code "cond-expand") special form.]))
 
+   
+;; ----------------------------------------------------------------------
+;; SRFI 98 -- SAn interface to access environment variables
+;; ----------------------------------------------------------------------   
+(index "get-environment-variable")
+(index "get-environment-variables")
+
+(srfi-section 96
+(p [,(quick-link-srfi 96) is fully supported and is completely
+described in this document (procedures
+,(code "get-environment-variable"), and
+,(code "get-environment-variables")). ]))
+   
 ;; End of chapter   
 )

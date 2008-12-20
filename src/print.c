@@ -1,7 +1,7 @@
 /*
  * p r i n t . c				-- writing stuff
  *
- * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update:  9-Dec-2007 18:47 (eg)
+ * Last file update: 20-Dec-2008 15:55 (eg)
  *
  */
 #include <ctype.h>
@@ -200,11 +200,13 @@ void STk_print(SCM exp, SCM port, int mode)
       return;
     case tc_pointer:
       if (CPOINTER_TYPE(exp) == STk_void) {
-	sprintf(buffer, "#[C-pointer %lx]", (unsigned long) CPOINTER_VALUE(exp));
+	sprintf(buffer, "#[C-pointer %lx @ %lx]", 
+		(unsigned long) CPOINTER_VALUE(exp), (unsigned long) exp);
       } else {
 	STk_puts("#[", port);
 	STk_print(CPOINTER_TYPE(exp), port, mode);
-	sprintf(buffer, "-pointer %lx]", (unsigned long) CPOINTER_VALUE(exp));
+	sprintf(buffer, "-pointer %lx @ %lx]", (unsigned long) CPOINTER_VALUE(exp),
+		(unsigned long) exp);
       }
       STk_puts(buffer, port);
       return;
