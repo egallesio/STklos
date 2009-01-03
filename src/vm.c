@@ -1,7 +1,7 @@
 /*
  * v m . c				-- The STklos Virtual Machine
  * 
- * Copyright © 2000-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  1-May-2008 18:43 (eg)
+ * Last file update:  3-Jan-2009 22:22 (eg)
  */
 
 // INLINER values
@@ -502,7 +502,7 @@ DEFINE_PRIMITIVE("apply", scheme_apply, apply, (void))
  * an "excv" or an "execl" function. If nargs is > 0 it is as a Unix "execl" 
  * function: 
  *    STk_C_apply(STk_cons, 2, MAKE_INT(1), MAKE_INT(2)) => (1 . 2)
- * If nargs is < 0, we have something similar to an "execv function
+ * If nargs is < 0, we have something similar to an "execv" function
  *    STk_C_apply(...STk_intern("cons")..., -2, Argv)
  * where Argv[0] == MAKE_INT(1) and Argv[1] == MAKE_INT(2) ==> (1 . 2)
  *

@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  4-Nov-2006 12:44 (eg)
+ * Last file update:  3-Jan-2009 22:28 (eg)
  */
 
 
@@ -54,7 +54,9 @@ static void initialize_vm_key(void)
 
 vm_thread_t *STk_get_current_vm(void)
 {
-  return (vm_thread_t *) pthread_getspecific(vm_key);
+  vm_thread_t *vm = pthread_getspecific(vm_key);
+  
+  return vm? vm : THREAD_VM(STk_primordial_thread);
 }
 
 
