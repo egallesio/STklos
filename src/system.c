@@ -2,7 +2,7 @@
  *
  * s y s t e m . c				-- System relative primitives
  *
- * Copyright © 1994-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 19-Nov-2007 11:19 (eg)
+ * Last file update: 14-Jan-2009 11:26 (eg)
  */
 
 #include <unistd.h>
@@ -1088,6 +1088,14 @@ DEFINE_PRIMITIVE("hostname", hostname, subr0, (void))
 }
   
 
+DEFINE_PRIMITIVE("pause", pause, subr0, (void))
+{
+  pause();
+  return STk_void;
+}
+  
+	  
+
 /*
  * Undocumented primitives
  *
@@ -1183,6 +1191,7 @@ int STk_init_system(void)
 
   ADD_PRIMITIVE(winify_filename);
   ADD_PRIMITIVE(posixify_filename);
-
+  
+  ADD_PRIMITIVE(pause);
   return TRUE;
 }
