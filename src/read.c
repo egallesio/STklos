@@ -1,7 +1,7 @@
 /*
  * r e a d  . c				-- reading stuff
  *
- * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update:  9-Dec-2007 20:35 (eg)
+ * Last file update: 19-Apr-2009 11:42 (eg)
  *
  */
 
@@ -140,6 +140,7 @@ Top:
       return STk_nil;
     else {
       warning_parenthesis(port);
+      c = delim;
       goto Top;
     }
   }
@@ -528,6 +529,8 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
     c = flush_spaces(port, (char *) NULL, (SCM) NULL);
     
     switch (c) {
+      case EOF:
+	return STk_eof;
       case '(':
         return(read_list(port, ')', ctx));
 

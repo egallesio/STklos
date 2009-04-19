@@ -2,7 +2,7 @@
  *
  *  o b j e c t . c			-- Objects support
  *
- * Copyright © 1994-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update:  2-Jun-2008 14:48 (eg)
+ * Last file update: 19-Apr-2009 12:11 (eg)
  */
 
 #include "stklos.h"
@@ -213,6 +213,11 @@ static int more_specificp(SCM m1, SCM m2, SCM *targs)
   for (s1=SPEC_OF(m1), s2=SPEC_OF(m2); ; targs++,s1=CDR(s1),s2=CDR(s2)) {
     if (NULLP(s1)) return 1;
     if (NULLP(s2)) return 0;
+    
+    /* Variadic specializers aren't proper lists. */
+    if (!CONSP(s1)) return 0; 
+    if (!CONSP(s2)) return 1;
+
     if (CAR(s1) != CAR(s2)) {
       register SCM l, cs1 = CAR(s1), cs2 = CAR(s2);
       
