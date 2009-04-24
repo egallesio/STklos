@@ -281,7 +281,7 @@ static SCM read_here_string(SCM port)
   /* skip the end of line */
   line = STk_read_line(port);
   if (!STRINGP(line) || (STRING_SIZE(line) != 0)) 
-    STk_error("enf of line expected after the ~S delimiter", eof_token);
+    STk_error("end of line expected after the ~S delimiter", eof_token);
 
       
   res = STk_open_output_string();
@@ -524,6 +524,7 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
 static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
 {
   int c;
+  SCM quote_type;
 
   for ( ; ; ) {
     c = flush_spaces(port, (char *) NULL, (SCM) NULL);
@@ -564,11 +565,17 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
 	warning_parenthesis(port);
 	break;
       case '\'':
- 	return LIST2(sym_quote, 
-		     read_rec(port, ctx, inlist));
+	quote_type = sym_quote;
+	goto read_quoted;
       case '`':
- 	return LIST2(sym_quasiquote, 
-		     read_rec(port, ctx, inlist));
+	quote_type = sym_quasiquote;
+    read_quoted:
+	{
+	  SCM tmp = read_rec(port, ctx, inlist);
+	  if (tmp == STk_dot || tmp == STk_close_par)
+	    signal_error(port, "bad quote/quasiquote syntax", STk_nil);
+	  return LIST2(quote_type, tmp);
+	}
       case '#':
 	switch(c=STk_getc(port)) {
 	  case 't':
@@ -685,7 +692,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
 	  	    STk_ungetc(c, port); return read_token(port, '#', FALSE);
 	}
       case ',': {
-	SCM symb;
+	SCM symb, tmp;
 
 	c = STk_getc(port);
  	if (c == '@')
@@ -694,15 +701,21 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
  	  symb = sym_unquote; 
  	  STk_ungetc(c, port);
  	}
-	return LIST2(symb, read_rec(port, ctx, inlist));
+	tmp = read_rec(port, ctx, inlist);
+	if (tmp == STk_dot || tmp == STk_close_par)
+	  signal_error(port, "bad unquote/unquote-splice syntax", STk_nil);
+	return LIST2(symb, tmp);
       }
       case '"':
 	return read_string(port, ctx->constant);
       default:
     default_case: {
 	  SCM tmp = read_token(port, c, ctx->case_significant);
-
-	  return ((tmp == sym_dot) && inlist) ? STk_dot : tmp;
+	  if (tmp != sym_dot)
+	    return tmp;
+	  if (inlist)
+	    return STk_dot;
+	    signal_error(port, "dot outside of list", STk_nil);
 	}
     }
   }
