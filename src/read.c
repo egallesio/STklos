@@ -20,7 +20,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 19-Apr-2009 11:42 (eg)
+ * Last file update: 25-Apr-2009 00:28 (eg)
  *
  */
 
@@ -715,7 +715,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
 	    return tmp;
 	  if (inlist)
 	    return STk_dot;
-	    signal_error(port, "dot outside of list", STk_nil);
+	  signal_error(port, "dot outside of list", STk_nil);
 	}
     }
   }
