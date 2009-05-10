@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 18-May-2008 22:28 (eg)
+dnl Last file update: 28-Apr-2009 19:55 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -245,7 +245,6 @@ AC_ARG_WITH(gtk-config,
 if test "$GTK_CONFIG" = "no" ;then
   USE_GTK=no
 fi
-
 
 dnl
 dnl GNOME support
