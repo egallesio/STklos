@@ -1,7 +1,7 @@
 /*
  * ffi.c	-- FFI support dor STklos
  * 
- * Copyright © 2007-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,10 +21,11 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update:  3-May-2008 22:39 (eg)
+ * Last file update: 10-May-2009 23:06 (eg)
  */
 
 #include <stklos.h>
+#include <math.h>
 
 #ifdef HAVE_FFI
 #  include <ffi.h>
@@ -177,8 +178,8 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
       {
 	double d =  STk_number2double(obj);
 
-	if (d != STk_NaN) {
-	  if (type_needed == 7)
+	if (!isnan(d)) {
+	  if (type_needed == 10)
 	    res->fvalue = (float) d;
 	  else
 	    res->dvalue = d;

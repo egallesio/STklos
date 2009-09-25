@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Sep-2009 00:31 (eg)
+# Last file update: 26-Sep-2009 00:59 (eg)
 
 EXTRA_DIST   = 
 SUBDIRS      =  @PCRE@ @GC@ @GMP@ @LIBFFI@ src utils lib \

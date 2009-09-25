@@ -604,6 +604,10 @@ PCRETARGET
 LDAP_LIB
 HAVE_LDAP
 HAVE_GNOME
+<<<<<<< local
+=======
+EXAMPLES
+>>>>>>> other
 STACK_DIRECTION
 COMPSRC
 COMPOBJ
@@ -4987,7 +4991,11 @@ fi
 # 		   HAVE_LDAP="undef" && LDAP_LIB="")
 
 
+<<<<<<< local
 #1.0
+=======
+
+>>>>>>> other
 #1.0 dnl
 #1.0 dnl GTK support
 #1.0 dnl
@@ -5005,7 +5013,10 @@ fi
 #1.0   USE_GTK=no
 #1.0 fi
 #1.0
+<<<<<<< local
 #1.0
+=======
+>>>>>>> other
 #1.0 dnl
 #1.0 dnl GNOME support
 #1.0 dnl
@@ -5650,10 +5661,14 @@ fi
 
 
 
+<<<<<<< local
 #1.0 AC_SUBST(GTKLOS)
 #1.0 AC_SUBST(GTK_CONFIG_LIBS)
 #1.0 AC_SUBST(GTK_CONFIG_CFLAGS)
 #1.0 AC_SUBST(EXAMPLES)
+=======
+
+>>>>>>> other
 
 
 
@@ -7147,7 +7162,11 @@ echo " Compilation flags: " $CFLAGS
 echo "    Bignum library: " $biglib
 echo "    Regexp library: " $pcrelib
 echo "        GC library: " $gclib
+<<<<<<< local
 #1.0 echo "      LDAP support: " $USE_LDAP
+=======
+echo "      LDAP support: " $USE_LDAP
+>>>>>>> other
 #1.0 echo "      GTK+ support: " $USE_GTK
 #1.0 echo "     GNOME support: " $USE_GNOME
 echo "       FFI support: " $FFI

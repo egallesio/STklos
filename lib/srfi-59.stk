@@ -4,7 +4,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio using code from Aubrey Jaffer 
 ;;;;    Creation date:  8-Mar-2005 
-;;;; Last file update: 26-Sep-2009 00:25 (eg)
+;;;; Last file update: 26-Sep-2009 01:03 (eg)
 ;;;;
 
 (unless (provided? "STklos.init")

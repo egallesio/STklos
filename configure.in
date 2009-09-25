@@ -2,7 +2,7 @@ dnl configure.in for STklos
 dnl
 dnl           Author: Erick Gallesio [eg@unice.fr]
 dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 26-Sep-2009 00:32 (eg)
+dnl Last file update: 26-Sep-2009 01:01 (eg)
 
 
 AC_INIT(src/stklos.c)
@@ -228,7 +228,6 @@ fi
 # 		   HAVE_LDAP="undef" && LDAP_LIB="")
 
 
-#1.0 
 #1.0 dnl
 #1.0 dnl GTK support
 #1.0 dnl
@@ -245,7 +244,6 @@ fi
 #1.0 if test "$GTK_CONFIG" = "no" ;then
 #1.0   USE_GTK=no
 #1.0 fi
-#1.0 
 #1.0 
 #1.0 dnl
 #1.0 dnl GNOME support
