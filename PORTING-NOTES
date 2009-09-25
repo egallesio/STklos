@@ -1,8 +1,9 @@
-This file contains a set of informations for compiling STklos on various
-architectures.
+This file contains a set of informations for compiling STklos on
+various architectures.
 
 If you experience a new port or confirm/infirm/add informations which
-are specified here please send a mail to Erick Gallesio 'eg(at)essi.fr'
+are specified here please send a mail to Erick Gallesio
+'eg(at)unice.fr'
 
 For each entry below, you'll find the OS and the version of the C
 compiler used for building the system. The entry Gtklos, tells if the
