@@ -4,7 +4,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio using code from Aubrey Jaffer 
 ;;;;    Creation date:  8-Mar-2005 
-;;;; Last file update: 25-Sep-2009 23:33 (eg)
+;;;; Last file update: 25-Sep-2009 23:59 (eg)
 ;;;;
 
 (unless (provided? "STklos.init")
@@ -22,7 +22,7 @@
 	  (getenv "SCHEME_LIBRARY_PATH")
 	  ;; Use this path if your scheme does not support GETENV
 	  ;; or if SCHEME_LIBRARY_PATH is not set.
-	  (case (software-type)
+	  (case (machine-type)
 	    ((unix) (let ((perso (expand-file-name "~/.stklos/slib/require.scm")))
 		      (string-append
 		          (if (file-exists? perso)
@@ -40,7 +40,7 @@
 (define (home-vicinity)
   (let ((home (getenv "HOME")))
     (and home
-	 (case (software-type)
+	 (case (machine-type)
 	   ((unix coherent ms-dos)	;V7 unix has a / on HOME
 	    (if (eqv? #\/ (string-ref home (+ -1 (string-length home))))
 		home
@@ -50,13 +50,13 @@
 (define in-vicinity string-append)
 
 (define (user-vicinity)
-  (case (software-type)
+  (case (machine-type)
     ((vms)	"[.]")
     (else	"")))
 
 (define sub-vicinity
   (let ((*vicinity-suffix*
-	 (case (software-type)
+	 (case (machine-type)
 	   ((nosve) ".")
 	   ((macos thinkc) ":")
 	   ((ms-dos windows atarist os/2) "\\")
@@ -69,11 +69,11 @@
 
 (define vicinity:suffix?
   (let ((suffi
-	 (case (software-type)
+	 (case (machine-type)
 	   ((ms-dos windows atarist os/2)	'(#\\ #\/))
 	   ((unix coherent plan9)		'(#\/))
 	   (else
-	    (eprintf "Warning:  unknown 'software-type ~S " (software-type))
+	    (eprintf "Warning:  unknown 'machine-type ~S " (machine-type))
 	    "/"))))
     (lambda (chr) (and (memv chr suffi) #t))))
 
