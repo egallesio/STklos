@@ -19,11 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-<<<<<<< local
-# Last file update: 26-Sep-2009 00:31 (eg)
-=======
-# Last file update: 25-Sep-2009 23:28 (eg)
->>>>>>> other
+# Last file update: 26-Sep-2009 00:59 (eg)
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -236,11 +232,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = 
 SUBDIRS = @PCRE@ @GC@ @GMP@ @LIBFFI@ src utils lib \
-<<<<<<< local
 	        examples pkgman tests doc
-=======
-	        @EXAMPLES@ pkgman tests doc
->>>>>>> other
 
 VERSION_TAG = @PACKAGE@-@VERSION@
 VERSION_BETA = $(VERSION_TAG)-beta
