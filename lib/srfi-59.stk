@@ -4,13 +4,13 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio using code from Aubrey Jaffer 
 ;;;;    Creation date:  8-Mar-2005 
-;;;; Last file update: 13-Dec-2007 12:39 (eg)
+;;;; Last file update: 25-Sep-2009 23:33 (eg)
 ;;;;
 
 (unless (provided? "STklos.init")
   
 (define (implementation-vicinity)
-  (case (software-type)
+  (case (machine-type)
     ((unix)	 (string-append (getenv "HOME") "/.stklos/slib/"))
     (else 	 (error 'implementation-vicinity 
 			"unknown implementation on this system"))))
