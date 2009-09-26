@@ -1,7 +1,7 @@
 ;;;;
 ;;;; do-test.stk	-- The pilot of all tests
 ;;;; 
-;;;; Copyright © 2005-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update:  9-Dec-2007 21:03 (eg)
+;;;; Last file update: 26-Sep-2009 10:29 (eg)
 ;;;;
 
 (load "./test.stk")
@@ -38,6 +38,7 @@
   (load "test-md5.stk")
   (load "test-base64.stk")
   (load "test-box.stk")
+  (load "test-ffi.stk")
   (load "test-r5rs-pitfall.stk"))
 
   

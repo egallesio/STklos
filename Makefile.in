@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Sep-2009 00:59 (eg)
+# Last file update: 26-Sep-2009 09:04 (eg)
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -44,7 +44,7 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	ChangeLog INSTALL NEWS TODO config.guess config.sub depcomp \
 	install-sh ltmain.sh missing mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -107,6 +107,7 @@ GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
+ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
@@ -122,6 +123,9 @@ COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CXX = @CXX@
+CXXDEPMODE = @CXXDEPMODE@
+CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEF_PCRE = @DEF_PCRE@
@@ -142,7 +146,6 @@ GREP = @GREP@
 HAVE_DLOPEN = @HAVE_DLOPEN@
 HAVE_FFI = @HAVE_FFI@
 HAVE_GNOME = @HAVE_GNOME@
-HAVE_LDAP = @HAVE_LDAP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -150,9 +153,13 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDAP_LIB = @LDAP_LIB@
 LDFLAGS = @LDFLAGS@
+LEX = @LEX@
+LEXLIB = @LEXLIB@
+LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
 LIBFFI = @LIBFFI@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 LURCDIR = @LURCDIR@
 MAKEINFO = @MAKEINFO@
@@ -172,6 +179,7 @@ PCRE = @PCRE@
 PCREINC = @PCREINC@
 PCRELIB = @PCRELIB@
 PCRETARGET = @PCRETARGET@
+POW_LIB = @POW_LIB@
 PREFIX = @PREFIX@
 RANLIB = @RANLIB@
 SCMDIR = @SCMDIR@
@@ -185,7 +193,6 @@ SH_SUFFIX = @SH_SUFFIX@
 STACK_DIRECTION = @STACK_DIRECTION@
 STKCFLAGS = @STKCFLAGS@
 STRIP = @STRIP@
-SVN_URL = @SVN_URL@/STklos
 THREADS = @THREADS@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
@@ -193,6 +200,7 @@ abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
+ac_ct_CXX = @ac_ct_CXX@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
@@ -730,17 +738,6 @@ version: commit-version prep-version
 	hg tag $(VERSION_TAG)
 	( cd /usr/tmp; tar cvfz $(VERSION_TAG).tar.gz $(VERSION_TAG) )
 	ls -ls /usr/tmp/$(VERSION_TAG).tar.gz
-
-# oldversion: 
-# 	svn commit 
-# 	svn update
-# 	-svn rm  $(SVN_URL)/tags/$(VERSION_TAG) -m ''
-# 	svn copy . $(SVN_URL)/tags/$(VERSION_TAG) -m ''
-# 	rm -rf /usr/tmp/$(VERSION_TAG)
-# 	svn export $(SVN_URL)/tags/$(VERSION_TAG) /usr/tmp/$(VERSION_TAG)
-# 	clonedates `pwd` /usr/tmp/$(VERSION_TAG)
-# 	( cd /usr/tmp; tar cvfz $(VERSION_TAG).tar.gz $(VERSION_TAG) )
-# 	ls -ls /usr/tmp/$(VERSION_TAG).tar.gz
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

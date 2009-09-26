@@ -2,37 +2,16 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Sep-2009 00:59 (eg)
+# Last file update: 26-Sep-2009 09:04 (eg)
 
 EXTRA_DIST   = 
 SUBDIRS      =  @PCRE@ @GC@ @GMP@ @LIBFFI@ src utils lib \
 	        examples pkgman tests doc
-SVN_URL      = @SVN_URL@/STklos
 VERSION_TAG  = @PACKAGE@-@VERSION@
 VERSION_BETA = $(VERSION_TAG)-beta
 
 test:
 	(cd tests; $(MAKE) test)
-
-##prep-version: 
-##	svn commit 
-##	svn update
-##	rm -rf /usr/tmp/$(VERSION_BETA)
-##	svn export $(SVN_URL)/trunk /usr/tmp/$(VERSION_BETA)
-##	svnclonedates `pwd` /usr/tmp/$(VERSION_BETA)
-##
-##beta: prep-version
-##	( cd /usr/tmp; tar cvfz $(VERSION_BETA).tar.gz $(VERSION_BETA) )
-##	ls -ls /usr/tmp/$(VERSION_BETA).tar.gz
-##
-##version: prep-version
-##	-svn rm  $(SVN_URL)/tags/$(VERSION_TAG) -m ''
-##	svn copy . $(SVN_URL)/tags/$(VERSION_TAG) -m ''
-##	rm -rf /usr/tmp/$(VERSION_TAG)
-##	cp -a /usr/tmp/$(VERSION_BETA) /usr/tmp/$(VERSION_TAG)
-##	( cd /usr/tmp; tar cvfz $(VERSION_TAG).tar.gz $(VERSION_TAG) )
-##	ls -ls /usr/tmp/$(VERSION_TAG).tar.gz
-##
 
 commit-beta:
 	eval "expr `cat .beta-number` + 1" > .beta-number
@@ -58,15 +37,3 @@ version: commit-version prep-version
 	hg tag $(VERSION_TAG)
 	( cd /usr/tmp; tar cvfz $(VERSION_TAG).tar.gz $(VERSION_TAG) )
 	ls -ls /usr/tmp/$(VERSION_TAG).tar.gz
-
-
-# oldversion: 
-# 	svn commit 
-# 	svn update
-# 	-svn rm  $(SVN_URL)/tags/$(VERSION_TAG) -m ''
-# 	svn copy . $(SVN_URL)/tags/$(VERSION_TAG) -m ''
-# 	rm -rf /usr/tmp/$(VERSION_TAG)
-# 	svn export $(SVN_URL)/tags/$(VERSION_TAG) /usr/tmp/$(VERSION_TAG)
-# 	clonedates `pwd` /usr/tmp/$(VERSION_TAG)
-# 	( cd /usr/tmp; tar cvfz $(VERSION_TAG).tar.gz $(VERSION_TAG) )
-# 	ls -ls /usr/tmp/$(VERSION_TAG).tar.gz

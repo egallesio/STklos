@@ -1,0 +1,56 @@
+(set! *load-path* (cons "lib/" (cons "lib/Lurc.d/" *load-path*)))
+(load "thread")
+
+(print (%thread-system))
+
+(define (printer str)
+  (make-list 5 66)
+  (print str)
+  (thread-yield!)
+  (printer str))
+
+(define (thrower str iter)
+  (if (> iter 0)
+      (begin
+        (print str " iter " iter)
+        (with-exception-handler 
+         (lambda (exc) 
+           (print "handler " str " iter " iter)
+           (thread-yield!)
+           (raise exc))
+         (lambda ()
+           (thread-yield!)
+           (thrower str (- iter 1)))))
+      (error "damn damn damn" str)))
+
+(define thread1 (make-thread (lambda () (thrower "2lev" 2))))
+(define thread2 (make-thread (lambda () (thrower "4lev" 4))))
+
+(thread-start! thread1)
+(thread-start! thread2)
+
+(print "awaiting thread1")
+(with-handler
+ (lambda (c)
+   (print "got thread exception " c))
+ (thread-join! thread1))
+(print "awaiting thread2")
+(with-handler
+ (lambda (c)
+   (print "got thread exception " c))
+ (thread-join! thread2))
+(print "done")
+
+(if (eq? (%thread-system) 'lurc)
+    (load "lurc"))
+
+(when (eq? (%thread-system) 'lurc)
+      (print "testing lurc")
+      (let ((sig (lurc:signal "test")))
+        (lurc:watch 
+         sig
+         (lurc:emit sig)
+         (lurc:pause)
+         (print "ERROR")))
+      
+      (print "done"))

@@ -1,5 +1,5 @@
 ;;;;
-;;;; test-box.stk	-- Tests on boxes
+;;;; test-ffi.stk	-- Tests of FFI
 ;;;; 
 ;;;; Copyright © 2007-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -20,36 +20,41 @@
 ;;;; USA.
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
-;;;;    Creation date:  9-Dec-2007 21:02 (eg)
-;;;; Last file update: 26-Sep-2009 10:51 (eg)
+;;;;    Creation date: 26-Sep-2009 10:17 (eg)
+;;;; Last file update: 26-Sep-2009 10:59 (eg)
 ;;;;
 (require "test")
 
-(test-section "Boxes")
+(test-section "FFI")
+
+;;; RINDEX
+(define-external %rindex (:string :int)
+  :entry-name "rindex"
+  :return-type :string)
+
+(define (rindex str char)
+  (%rindex str (char->integer char)))
+
+;;; STRLEN
+(define-external strlen(:string)
+  :return-type :int)
 
 
-(test "make-box"
-      "#&10"
-      (with-output-to-string (lambda () (write (make-box 10)))))
-
-(test "make-constant-box"
-      "#&10"
-      (with-output-to-string (lambda () (write (make-constant-box 10)))))
-
-(test "reader"
-      (make-box 100)
-      (eval-from-string "#&100"))
+(test "rindex.1"
+      "/d"
+      (rindex "/a/b/c/d" #\/))
 
 
-(test "equal?.1"
-      #f
-      (equal? 100 (make-box 100)))
+(test "rindex.2"
+      (void)
+      (rindex "/a/b/c/d" #\A))
 
-(test "equal?.2"
-      #t
-      (equal? #&100 (make-box 100)))
+(test "strlen.1"
+      0
+      (strlen ""))
 
+(test "strlen.2"
+      5
+      (strlen "abcde"))
 
 (test-section-end)
-
-      

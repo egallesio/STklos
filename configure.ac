@@ -1,47 +1,65 @@
-dnl configure.in for STklos
-dnl
-dnl           Author: Erick Gallesio [eg@unice.fr]
-dnl    Creation date: 28-Dec-1999 21:19 (eg)
-dnl Last file update: 26-Sep-2009 01:01 (eg)
+### configure.in for STklos
+###
+###           Author: Erick Gallesio [eg@unice.fr]
+###    Creation date: 28-Dec-1999 21:19 (eg)
+### Last file update: 26-Sep-2009 09:23 (eg)
 
+AC_PREREQ(2.64)
+AC_INIT([stklos], [0.99dev])
+AM_INIT_AUTOMAKE
+AC_CONFIG_SRCDIR(src/stklos.c)
+AC_CONFIG_HEADERS(src/stklosconf.h)
 
-AC_INIT(src/stklos.c)
-AC_PREREQ(2.52)
-AM_INIT_AUTOMAKE(stklos, 0.99dev)
-AM_CONFIG_HEADER(src/stklosconf.h)
-AC_PROG_MAKE_SET
-
-USER_CFLAGS=$CFLAGS
-
-dnl Checks for programs.
-AC_PROG_INSTALL
+### Checks for programs.
+AC_PROG_CXX
 AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_AWK
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
 AC_PROG_RANLIB
+AC_PROG_LEX
+AC_PROG_MKDIR_P
 
-dnl AC_PROG_LIBTOOL
+### Checks for header files.
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h libintl.h limits.h malloc.h memory.h netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
 
+### Checks for typedefs, structures, and compiler characteristics.
+AC_C_INLINE
+AC_TYPE_MODE_T
+AC_TYPE_OFF_T
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
 
-dnl Checks for header files.
-AC_HEADER_STDC
-AC_CHECK_HEADERS(fcntl.h limits.h malloc.h sys/time.h unistd.h)
+### Checks for library functions.
+AC_FUNC_ALLOCA
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_FORK
+AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
+AC_FUNC_MALLOC
+AC_FUNC_MKTIME
+AC_FUNC_REALLOC
+AC_FUNC_STRCOLL
+AC_FUNC_STRTOD
+AC_CHECK_FUNCS([atexit dup2 endpwent floor getcwd gethostbyaddr gethostbyname gethostname getpass gettimeofday inet_ntoa isascii memchr memmove memset mkdir modf putenv rmdir select socket sqrt strcasecmp strchr strerror strrchr strstr strtoul])
 
-export CC
-
-
-dnl Initialize prefix
+### Initialize prefix
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
 
-dnl use -O3 if user has not specified something else and we are using GCC
+### use -O3 if user has not specified something else and we are using GCC
+USER_CFLAGS=$CFLAGS
 if test "X$USER_CFLAGS" = "X" -a "$CC" = "gcc"
 then
   CFLAGS="-O3 -fomit-frame-pointer"
 fi
 
-dnl
-dnl Checks for libraries.
-dnl
 
-dnl Check for dynamic loading
+###
+### Checks for libraries.
+###
+
+### Check for dynamic loading
 AC_CHECK_FUNC(dlopen, HAVE_DLOPEN="yes", AC_CHECK_LIB(dl, dlopen, LIBS="-ldl $LIBS"&&HAVE_DLOPEN="yes"))
 
 if test "X$HAVE_DLOPEN" = "Xyes"
@@ -49,23 +67,24 @@ then
   HAVE_DLOPEN="#define HAVE_DLOPEN 1"
 fi
 
-dnl
-dnl To thread or not to thread ?
-dnl
+
+###
+### To thread or not to thread ?
+###
 AC_CHECK_LIB(pthread, pthread_create, deflt_threads=pthreads, deflt_threads=none)
 
 AC_ARG_ENABLE(threads,
-  [AC_HELP_STRING([--enable-threads=TYPE], [choose threading package (none,pthread,lurc)])],
+  [AS_HELP_STRING([--enable-threads=TYPE],[choose threading package (none,pthread,lurc)])],
   THREADS=$enableval,
   THREADS=$deflt_threads)
 
 AC_LANG(C)
-dnl This checks for the presence of a given CPP define in a fiven header file
+### This checks for the presence of a given CPP define in a fiven header file
 AC_DEFUN(GC_CHECK_DEFINE, [
- dnl $1: header file
- dnl $2: CPP variable
- dnl $3: then
- dnl $4: else
+ ### $1: header file
+ ### $2: CPP variable
+ ### $3: then
+ ### $4: else
  AC_PREPROC_IFELSE([
  #include <$1>
  #ifndef $2
@@ -78,7 +97,7 @@ AC_DEFUN(GC_CHECK_DEFINE, [
 ])
 
 
-dnl Now look at what threads we want
+### Now look at what threads we want
 case "$THREADS" in
  no | none | single)
    THREADS=none
@@ -86,7 +105,7 @@ case "$THREADS" in
    AC_DEFINE(THREADS_NONE, [], [No thread support])
    ;;
  posix | pthreads)
-   dnl Check for pthreads
+   ### Check for pthreads
    AC_CHECK_LIB(pthread, pthread_create, LIBS="-lpthread $LIBS", 
                 [AC_MSG_ERROR([Missing PThread library])])
    THREADS=pthreads
@@ -94,16 +113,16 @@ case "$THREADS" in
    AC_DEFINE(THREADS_PTHREADS, [], [PThread support])
    ;;
  lurc)
-   dnl Check for lurc
+   ### Check for lurc
    AC_CHECK_LIB(lurc, lurc_thread_create, LIBS="-llurc $LIBS", 
                 [AC_MSG_ERROR([Missing LURC library])])
    AC_CHECK_HEADER([lurc.h], [], [AC_MSG_ERROR([Missing LURC header file])])
-   dnl Now check if it is compiled with GC support
+   ### Now check if it is compiled with GC support
    AC_MSG_CHECKING([for LURC GC support])
    GC_CHECK_DEFINE([lurc.h], [LURC_ENABLE_GC], 
                    [AC_MSG_RESULT([ok])],
                    [AC_MSG_ERROR([Missing GC support in LURC])])
-   dnl That should be good
+   ### That should be good
    AC_DEFINE(THREADS_LURC, [], [LURC threads support])
    CALLCC_STK='"dyn-wind-lurc.stk"'
    ;;
@@ -112,7 +131,7 @@ case "$THREADS" in
    ;;
 esac
 
-dnl Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
+### Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
 case "$THREADS" in
   none) true ;;
   lurc) true ;;
@@ -123,15 +142,15 @@ esac
 
 
 
-dnl Automake nightmare
+### Automake nightmare
 AM_CONDITIONAL(PTHREADS, test "$THREADS" = pthreads)
 AM_CONDITIONAL(LURC, test "$THREADS" = lurc)
 AM_CONDITIONAL(NO_THREAD, test "$THREADS" = none)
 
-dnl check for GMP pre-version 3.0
+### check for GMP pre-version 3.0
 AC_CHECK_LIB(gmp, mpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
 
-dnl check for GMP version post 3.0
+### check for GMP version post 3.0
 if test "$HAVE_GMP" = "no" ;then
   AC_CHECK_LIB(gmp, __gmpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
 fi
@@ -149,9 +168,9 @@ esac
 
 
 
-dnl
-dnl check for GC
-dnl
+###
+### check for GC
+###
 if test "$THREADS" = lurc
 then
   AC_MSG_WARN([Using the bundled GC for LURC support])
@@ -178,9 +197,9 @@ case `uname -s` in
 esac
 
 
-dnl
-dnl check for PCRE
-dnl
+###
+### check for PCRE
+###
 AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
 
 # Test if the user want to force with our PCRE lib
@@ -193,130 +212,9 @@ case $withval in
   "no")  HAVE_PCRE="yes";;
 esac
 
-
-dnl
-dnl check for LDAP library
-dnl
-USE_LDAP="no"
-LDAP_LIB=""
-
-AC_ARG_ENABLE(ldap, 
-     [  --enable-ldap			enable ldap],
-     USE_LDAP="$enableval")
-
-if test "$USE_LDAP" = "yes" ;then
-   AC_CHECK_HEADERS(ldap.h, USE_LDAP=yes, USE_LDAP=false)
-
-   AC_CHECK_LIB(lber, 
-	     ber_alloc, 
-	     LDAP_LIB="-lldap -llber",
-	     AC_CHECK_LIB(ldap, 
-		          ldap_simple_bind,
-			  LDAP_LIB="-lldap",
-			  USE_LDAP="no")
-   )
-fi
-
-if test "$USE_LDAP" = "yes" ;then
-  HAVE_LDAP=define
-else 
-  HAVE_LDAP=undef
-fi
-
-# AC_CHECK_LIB(ldap, ldap_simple_bind, 
-# 		   HAVE_LDAP="define" && LDAP_LIB="-lldap",
-# 		   HAVE_LDAP="undef" && LDAP_LIB="")
-
-
-#1.0 dnl
-#1.0 dnl GTK support
-#1.0 dnl
-#1.0 AC_ARG_ENABLE(gtk, 
-#1.0       [  --disable-gtk			disable gtk support],
-#1.0       USE_GTK="no", USE_GTK="yes")
-#1.0 
-#1.0 AC_PATH_PROG(GTK_CONFIG, gtk-config, "no")
-#1.0    
-#1.0 AC_ARG_WITH(gtk-config,
-#1.0        [  --with-gtk-config=<path>	full pathname of gtk-config script],
-#1.0        GTK_CONFIG=$withval)
-#1.0 
-#1.0 if test "$GTK_CONFIG" = "no" ;then
-#1.0   USE_GTK=no
-#1.0 fi
-#1.0 
-#1.0 dnl
-#1.0 dnl GNOME support
-#1.0 dnl
-#1.0 AC_ARG_ENABLE(gnome,
-#1.0 	[  --disable-gnome		disable gnome support],
-#1.0 	USE_GNOME="no", USE_GNOME="yes")
-#1.0 
-#1.0 
-#1.0 AC_PATH_PROG(GNOME_CONFIG, gnome-config, "no")
-#1.0 
-#1.0 AC_ARG_WITH(gnome-config,
-#1.0        [  --with-gnome-config=<path>	full pathname of gnome-config script],
-#1.0        GNOME_CONFIG=$withval)
-#1.0 
-#1.0 if test "$GNOME_CONFIG" = "no" ;then
-#1.0   USE_GNOME=no
-#1.0 fi
-
-dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_INLINE
-AC_C_BIGENDIAN
-AC_CHECK_SIZEOF(long)
-
-
-dnl Checks for library functions.
-AC_FUNC_MEMCMP
-AC_CHECK_FUNCS(getcwd getwd  putenv rmdir strstr  strtod strtol strtoul uname glob)
-
-
-
-dnl
-dnl See if we have GNU getopt_long or provide a replacement
-dnl
-##AC_CHECK_FUNCS(getopt_long, ,NEED_GETOPT=1)
-##
-##if test x$NEED_GETOPT = x1
-##then
-##  echo "=== No getopt_long. Using replacement function"
-##  COMPSRC="$COMPSRC getopt.c getopt1.c"
-##  COMPOBJ="$COMPOBJ getopt.o getopt1.o"
-##fi
-
-
-dnl
-dnl See in what direction the stack grows (code stolen from Sawfish)
-dnl 
-AC_TRY_RUN([ void inner (char *foo) { char bar; exit (!(foo >= &bar)); }
-	     void main () { char foo; inner (&foo); } ],
-   [STACK_DIRECTION="DOWN"],
-   [STACK_DIRECTION="UP"], 
-   echo "Stack direction is not detected when cros compiling for now")
-
-
-
-
-dnl #### AC_CHECK_HEADER(dlfcn.h, [AC_DEFINE(HAVE_DLFCN_H)])
-dnl #### AC_CHECK_HEADER(dl.h, [AC_DEFINE(HAVE_DL_H)])
-dnl #### dl_ok=no
-dnl #### AC_CHECK_FUNC(dlopen, [AC_DEFINE(HAVE_DLOPEN) dl_ok=dl],
-dnl ####     AC_CHECK_LIB(dl, dlopen, [AC_DEFINE(HAVE_DLOPEN) dl_ok=dl]))
-dnl #### AC_CHECK_FUNC(shl_load, [AC_DEFINE(HAVE_SHL_LOAD) dl_ok=shl],
-dnl ####     AC_CHECK_LIB(dld, shl_load, [AC_DEFINE(HAVE_DLOPEN) dl_ok=shl]))
-dnl #### 
-dnl #### if test $dl_ok != no; then
-dnl ####   AC_DEFINE(HAVE_DYNAMIC_LOADING)
-dnl #### else
-dnl ####   AC_MSG_ERROR([can't figure out how to do dynamic loading])
-dnl #### fi
-
-
-dnl configure libraries
-
+###
+### configure libraries
+###
 
 if test "$HAVE_GMP" = "no"
 then 
@@ -383,13 +281,13 @@ fi
 # esac
 
 
-
-dnl
-dnl FFI support 
-dnl
+#
+# FFI support 
+#
 AC_ARG_ENABLE(ffi, 
-      [  --disable-ffi			disable FFI support],
-      USER_FFI="no", USER_FFI="yes")
+		[  --disable-ffi			disable FFI support],
+		USER_FFI="no", 
+		USER_FFI="yes")
 
 if test "$USER_FFI" = "yes" ;then
   echo "Configuring libffi"
@@ -409,12 +307,12 @@ else
 fi
 
 
-dnl ======================================================================
-dnl Various stuff done by hand
-dnl ======================================================================
+### ======================================================================
+### Various stuff done by hand
+### ======================================================================
 
 
-dnl Determine the options necessary for dynamic loading
+### Determine the options necessary for dynamic loading
 eval `CC=$CC /bin/sh ./utils/shlib-options`
 
 case $OS in
@@ -431,20 +329,20 @@ case $OS in
 esac
 
 
-dnl Initilize the extra conf file in src
+### Initilize the extra conf file in src
 SCMDIR=$prefix/share/$PACKAGE/$VERSION
 EXECDIR=$prefix/lib/$PACKAGE/$VERSION
 PREFIX=$prefix
 
-dnl Determine the kind of the machine which is running this script
+### Determine the kind of the machine which is running this script
 BUILD_OS=$os-$version
 BUILD_ARCH=`uname -m`
 OS_NAME=$OS
 
-dnl Place version number in VERSION file
-dnl echo "VERSION=${VERSION}">VERSION
+### Place version number in VERSION file
+### echo "VERSION=${VERSION}">VERSION
 
-#1.0 dnl GTK+/GNOME support
+#1.0 ### GTK+/GNOME support
 #1.0 HAVE_GNOME="undef"
 #1.0 
 #1.0 if test "$USE_GTK" = "no" ;then
@@ -473,9 +371,9 @@ dnl echo "VERSION=${VERSION}">VERSION
 #1.0   GTK_CONFIG_CFLAGS=
 #1.0 fi
 
-dnl
-dnl display some informations for the user
-dnl 
+###
+### display some informations for the user
+### 
 
 if test "$HAVE_GMP" = "no"
 then
@@ -498,11 +396,11 @@ else
   pcrelib="use the system library"
 fi
 
-# Compute SVN_URL 
-SVN_URL=$SVN_REPOSITORY
-if test "$SVN_REPOSITORY" = "" ;then
-   SVN_URL="NOT_AVAILABLE"
-fi
+#1.0 # Compute SVN_URL 
+#1.0 SVN_URL=$SVN_REPOSITORY
+#1.0 if test "$SVN_REPOSITORY" = "" ;then
+#1.0    SVN_URL="NOT_AVAILABLE"
+#1.0 fi
 
 # LURC adjustment
 LURCDIR=""
@@ -512,7 +410,7 @@ fi
 
 
 
-dnl Output files 
+### Output files 
 AC_SUBST(STKCFLAGS)
 AC_SUBST(VERSION)
 AC_SUBST(HAVE_DLOPEN)
@@ -543,20 +441,20 @@ AC_SUBST(STACK_DIRECTION)
 #1.0 AC_SUBST(GTK_CONFIG_CFLAGS)
 #1.0 AC_SUBST(EXAMPLES)
 AC_SUBST(HAVE_GNOME)
-AC_SUBST(HAVE_LDAP)
+#1.0 AC_SUBST(HAVE_LDAP)
 AC_SUBST(LDAP_LIB)
 AC_SUBST(PCRETARGET)
 AC_SUBST(PCRE)
 AC_SUBST(PCRELIB)
 AC_SUBST(PCREINC)
 AC_SUBST(DEF_PCRE)
-AC_SUBST(SVN_URL)
+#1.0 AC_SUBST(SVN_URL)
 AC_SUBST(THREADS)
 AC_SUBST(LURCDIR)
 AC_SUBST(CALLCC_STK)
 AC_SUBST(LIBFFI)
 	
-AC_OUTPUT(Makefile src/Makefile src/extraconf.h doc/Makefile
+AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile lib/boot-callcc.stk
 	  utils/stklos-config utils/stklos-script
 	  examples/Makefile lib/Match.d/Makefile 
@@ -565,7 +463,8 @@ AC_OUTPUT(Makefile src/Makefile src/extraconf.h doc/Makefile
 	  doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 
 	  doc/stklos-genlex.1 doc/stklos-install.1 doc/stklos-pkg.1 
 	  doc/skb/stklos-version.stk
-	  pkgman/Makefile)
+	  pkgman/Makefile])
+AC_OUTPUT
 
 chmod 0755 utils/stklos-config utils/stklos-script
 
@@ -600,3 +499,4 @@ fi
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options." 
 echo " "
+
