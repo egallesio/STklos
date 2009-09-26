@@ -2,13 +2,20 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Sep-2009 09:04 (eg)
+# Last file update: 26-Sep-2009 16:55 (eg)
 
 EXTRA_DIST   = 
-SUBDIRS      =  @PCRE@ @GC@ @GMP@ @LIBFFI@ src utils lib \
-	        examples pkgman tests doc
+# INSTDIRS contains the dirs which need to be installed
+INSTDIRS     =  @GC@ src utils lib examples pkgman tests doc
+SUBDIRS      =  @PCRE@ @GMP@ @FFI@ $(INSTDIRS)
 VERSION_TAG  = @PACKAGE@-@VERSION@
 VERSION_BETA = $(VERSION_TAG)-beta
+
+install: 
+	@for i in $(INSTDIRS) ;do \
+	  echo "***** Installing directory $$i"; \
+	  (cd $$i && $(MAKE) $(AM_MAKEFLAGS) install); \
+	done
 
 test:
 	(cd tests; $(MAKE) test)

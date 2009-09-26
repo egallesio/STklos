@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 26-Sep-2009 09:23 (eg)
+### Last file update: 26-Sep-2009 13:46 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -280,31 +280,38 @@ fi
 #   *)       PCRETARGET="libpcre.la libpcreposix.la";;
 # esac
 
-
 #
 # FFI support 
 #
-AC_ARG_ENABLE(ffi, 
-		[  --disable-ffi			disable FFI support],
-		USER_FFI="no", 
-		USER_FFI="yes")
+AC_CHECK_LIB(ffi, ffi_prep_cif, HAVE_FFI="yes", HAVE_FFI="no", $LIBS)
 
-if test "$USER_FFI" = "yes" ;then
-  echo "Configuring libffi"
-  (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
+# Test if the user want to force with our FFI lib
+withval=
+AC_ARG_WITH(provided-ffi,
+       [  --with-provided-ffi	use the provided FFI library],
+       HAVE_FFI="no", HAVE_FFI="yes")
+
+case $HAVE_FFI in
+  no)
+       echo "*****"
+       echo "***** Configuring libffi"
+       echo "*****"
+       (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
            --disable-structs --disable-raw-api --disable-shared \
 	   --prefix=$prefix)
-  LIBS="$LIBS ../ffi/.libs/libffi.a"
-  CFLAGS="$CFLAGS -I../ffi/include"
-  LIBFFI="ffi"
-  HAVE_FFI="#define HAVE_FFI 1"
-  FFI="yes"
-else
-  echo "Disabling FFI support"
-  LIBFFI=""
-  HAVE_FFI=""
-  FFI="no"
-fi
+       CFLAGS="$CFLAGS -I../ffi/include"
+       LIBS="$LIBS ../ffi/.libs/libffi.a"
+       FFI="ffi"
+       ffilib="use provided library";;
+  yes)
+       echo "*****"
+       echo "***** Using system libffi library"
+       echo "*****"
+       CFLAGS="$CFLAGS `pkg-config libffi --cflags`"
+       LIBS="$LIBS `pkg-config libffi --libs`"
+       FFI=""
+       ffilib="use the system library";;
+esac
 
 
 ### ======================================================================
@@ -408,13 +415,20 @@ if test "$THREADS" = "lurc" ;then
    LURCDIR=Lurc.d
 fi
 
+###
+### See in what direction the stack grows (code stolen from Sawfish)
+###
+AC_TRY_RUN([ void inner (char *foo) { char bar; exit (!(foo >= &bar)); }
+             void main () { char foo; inner (&foo); } ],
+   [STACK_DIRECTION="DOWN"],
+   [STACK_DIRECTION="UP"],
+   echo "Stack direction is not detected when cross compiling for now")
 
 
 ### Output files 
 AC_SUBST(STKCFLAGS)
 AC_SUBST(VERSION)
 AC_SUBST(HAVE_DLOPEN)
-AC_SUBST(HAVE_FFI)
 AC_SUBST(OS_FLAVOUR)
 AC_SUBST(GC)
 AC_SUBST(GCLIB)
@@ -422,6 +436,7 @@ AC_SUBST(GCINC)
 AC_SUBST(GMP)
 AC_SUBST(GMPLIB)
 AC_SUBST(GMPINC)
+AC_SUBST(FFI)
 AC_SUBST(PREFIX)
 AC_SUBST(SCMDIR)
 AC_SUBST(EXECDIR)
@@ -452,7 +467,6 @@ AC_SUBST(DEF_PCRE)
 AC_SUBST(THREADS)
 AC_SUBST(LURCDIR)
 AC_SUBST(CALLCC_STK)
-AC_SUBST(LIBFFI)
 	
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile lib/boot-callcc.stk
@@ -483,7 +497,7 @@ echo "        GC library: " $gclib
 #1.0 echo "      LDAP support: " $USE_LDAP
 #1.0 echo "      GTK+ support: " $USE_GTK 
 #1.0 echo "     GNOME support: " $USE_GNOME 
-echo "       FFI support: " $FFI
+echo "       FFI library: " $ffilib
 echo "    Thread support: " $THREADS 
 echo " "
 if test "$THREADS" = "lurc" 

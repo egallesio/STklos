@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Sep-2009 09:04 (eg)
+# Last file update: 26-Sep-2009 16:55 (eg)
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -136,6 +136,7 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXECDIR = @EXECDIR@
 EXEEXT = @EXEEXT@
+FFI = @FFI@
 GC = @GC@
 GCINC = @GCINC@
 GCLIB = @GCLIB@
@@ -144,7 +145,6 @@ GMPINC = @GMPINC@
 GMPLIB = @GMPLIB@
 GREP = @GREP@
 HAVE_DLOPEN = @HAVE_DLOPEN@
-HAVE_FFI = @HAVE_FFI@
 HAVE_GNOME = @HAVE_GNOME@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -156,7 +156,6 @@ LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
-LIBFFI = @LIBFFI@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LN_S = @LN_S@
@@ -239,9 +238,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = 
-SUBDIRS = @PCRE@ @GC@ @GMP@ @LIBFFI@ src utils lib \
-	        examples pkgman tests doc
-
+# INSTDIRS contains the dirs which need to be installed
+INSTDIRS = @GC@ src utils lib examples pkgman tests doc
+SUBDIRS = @PCRE@ @GMP@ @FFI@ $(INSTDIRS)
 VERSION_TAG = @PACKAGE@-@VERSION@
 VERSION_BETA = $(VERSION_TAG)-beta
 all: all-recursive
@@ -598,7 +597,6 @@ check: check-recursive
 all-am: Makefile
 installdirs: installdirs-recursive
 installdirs-am:
-install: install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
 uninstall: uninstall-recursive
@@ -710,6 +708,12 @@ uninstall-am:
 	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
 	pdf-am ps ps-am tags tags-recursive uninstall uninstall-am
 
+
+install: 
+	@for i in $(INSTDIRS) ;do \
+	  echo "***** Installing directory $$i"; \
+	  (cd $$i && $(MAKE) $(AM_MAKEFLAGS) install); \
+	done
 
 test:
 	(cd tests; $(MAKE) test)

@@ -593,7 +593,6 @@ ac_func_list=
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
-LIBFFI
 CALLCC_STK
 LURCDIR
 THREADS
@@ -618,6 +617,7 @@ BUILD_OS
 EXECDIR
 SCMDIR
 PREFIX
+FFI
 GMPINC
 GMPLIB
 GMP
@@ -625,7 +625,6 @@ GCINC
 GCLIB
 GC
 OS_FLAVOUR
-HAVE_FFI
 HAVE_DLOPEN
 STKCFLAGS
 NO_THREAD_FALSE
@@ -736,7 +735,7 @@ enable_threads
 with_gmp_light
 with_provided_gc
 with_provided_regexp
-enable_ffi
+with_provided_ffi
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1368,7 +1367,6 @@ Optional Features:
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --enable-threads=TYPE   choose threading package (none,pthread,lurc)
-  --disable-ffi			disable FFI support
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1376,6 +1374,7 @@ Optional Packages:
   --with-gmp-light		use our GMP version even the system provides one
   --with-provided-gc		use our GC version even the system provides one
   --with-provided-regexp	use our PCRE regexp version
+  --with-provided-ffi	use the provided FFI library
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -6683,34 +6682,84 @@ fi
 #   *)       PCRETARGET="libpcre.la libpcreposix.la";;
 # esac
 
-
 #
 # FFI support
 #
-# Check whether --enable-ffi was given.
-if test "${enable_ffi+set}" = set; then :
-  enableval=$enable_ffi; USER_FFI="no"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ffi_prep_cif in -lffi" >&5
+$as_echo_n "checking for ffi_prep_cif in -lffi... " >&6; }
+if test "${ac_cv_lib_ffi_ffi_prep_cif+set}" = set; then :
+  $as_echo_n "(cached) " >&6
 else
-  USER_FFI="yes"
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lffi $LIBS $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char ffi_prep_cif ();
+int
+main ()
+{
+return ffi_prep_cif ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_ffi_ffi_prep_cif=yes
+else
+  ac_cv_lib_ffi_ffi_prep_cif=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ffi_ffi_prep_cif" >&5
+$as_echo "$ac_cv_lib_ffi_ffi_prep_cif" >&6; }
+if test "x$ac_cv_lib_ffi_ffi_prep_cif" = x""yes; then :
+  HAVE_FFI="yes"
+else
+  HAVE_FFI="no"
 fi
 
 
-if test "$USER_FFI" = "yes" ;then
-  echo "Configuring libffi"
-  (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
+# Test if the user want to force with our FFI lib
+withval=
+
+# Check whether --with-provided-ffi was given.
+if test "${with_provided_ffi+set}" = set; then :
+  withval=$with_provided_ffi; HAVE_FFI="no"
+else
+  HAVE_FFI="yes"
+fi
+
+
+case $HAVE_FFI in
+  no)
+       echo "*****"
+       echo "***** Configuring libffi"
+       echo "*****"
+       (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
            --disable-structs --disable-raw-api --disable-shared \
 	   --prefix=$prefix)
-  LIBS="$LIBS ../ffi/.libs/libffi.a"
-  CFLAGS="$CFLAGS -I../ffi/include"
-  LIBFFI="ffi"
-  HAVE_FFI="#define HAVE_FFI 1"
-  FFI="yes"
-else
-  echo "Disabling FFI support"
-  LIBFFI=""
-  HAVE_FFI=""
-  FFI="no"
-fi
+       CFLAGS="$CFLAGS -I../ffi/include"
+       LIBS="$LIBS ../ffi/.libs/libffi.a"
+       FFI="ffi"
+       ffilib="use provided library";;
+  yes)
+       echo "*****"
+       echo "***** Using system libffi library"
+       echo "*****"
+       CFLAGS="$CFLAGS `pkg-config libffi --cflags`"
+       LIBS="$LIBS `pkg-config libffi --libs`"
+       FFI=""
+       ffilib="use the system library";;
+esac
 
 
 ### ======================================================================
@@ -6814,6 +6863,26 @@ if test "$THREADS" = "lurc" ;then
    LURCDIR=Lurc.d
 fi
 
+###
+### See in what direction the stack grows (code stolen from Sawfish)
+###
+if test "$cross_compiling" = yes; then :
+  echo "Stack direction is not detected when cross compiling for now"
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+ void inner (char *foo) { char bar; exit (!(foo >= &bar)); }
+             void main () { char foo; inner (&foo); }
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  STACK_DIRECTION="DOWN"
+else
+  STACK_DIRECTION="UP"
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
 
 
 ### Output files
@@ -6855,7 +6924,6 @@ fi
 
 
 #1.0 AC_SUBST(SVN_URL)
-
 
 
 
@@ -8345,7 +8413,7 @@ echo "        GC library: " $gclib
 #1.0 echo "      LDAP support: " $USE_LDAP
 #1.0 echo "      GTK+ support: " $USE_GTK
 #1.0 echo "     GNOME support: " $USE_GNOME
-echo "       FFI support: " $FFI
+echo "       FFI library: " $ffilib
 echo "    Thread support: " $THREADS
 echo " "
 if test "$THREADS" = "lurc"
