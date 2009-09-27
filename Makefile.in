@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Sep-2009 16:55 (eg)
+# Last file update: 27-Sep-2009 19:39 (eg)
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -128,6 +128,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
+DEF_FFI = @DEF_FFI@
 DEF_PCRE = @DEF_PCRE@
 DEPDIR = @DEPDIR@
 ECHO_C = @ECHO_C@
@@ -137,6 +138,8 @@ EGREP = @EGREP@
 EXECDIR = @EXECDIR@
 EXEEXT = @EXEEXT@
 FFI = @FFI@
+FFIINC = @FFIINC@
+FFILIB = @FFILIB@
 GC = @GC@
 GCINC = @GCINC@
 GCLIB = @GCLIB@
@@ -714,7 +717,7 @@ install:
 	  (cd $$i && $(MAKE) $(AM_MAKEFLAGS) install); \
 	done
 
-test:
+test: all
 	(cd tests; $(MAKE) test)
 
 commit-beta:

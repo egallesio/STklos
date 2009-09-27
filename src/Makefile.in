@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  9-Dec-2007 18:49 (eg)
+# Last file update: 27-Sep-2009 19:33 (eg)
 
 
 VPATH = @srcdir@
@@ -89,7 +89,7 @@ am_stklos_OBJECTS = base64.$(OBJEXT) boolean.$(OBJEXT) boot.$(OBJEXT) \
 stklos_OBJECTS = $(am_stklos_OBJECTS)
 am__DEPENDENCIES_1 =
 stklos_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 stklos_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(stklos_LDFLAGS) \
 	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -149,6 +149,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
+DEF_FFI = @DEF_FFI@
 DEF_PCRE = @DEF_PCRE@
 DEPDIR = @DEPDIR@
 ECHO_C = @ECHO_C@
@@ -158,6 +159,8 @@ EGREP = @EGREP@
 EXECDIR = @EXECDIR@
 EXEEXT = @EXEEXT@
 FFI = @FFI@
+FFIINC = @FFIINC@
+FFILIB = @FFILIB@
 GC = @GC@
 GCINC = @GCINC@
 GCLIB = @GCLIB@
@@ -306,9 +309,14 @@ gmpinc = @GMPINC@
 pcre = @PCRE@
 pcrelib = @PCRELIB@
 pcreinc = @PCREINC@
-stklos_LDADD = $(compatlib) $(gmplib) $(pcrelib) $(gclib) -lm 
+
+# FFI LIBRARY
+ffi = @FFI@
+ffilib = @FFILIB@
+ffiinc = @FFIINC@
+stklos_LDADD = $(compatlib) $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm 
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
-INCLUDES = $(gmpinc) $(pcreinc) $(gcinc)
+INCLUDES = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
 all: stklosconf.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 

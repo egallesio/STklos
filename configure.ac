@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 27-Sep-2009 19:23 (eg)
+### Last file update: 27-Sep-2009 19:37 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -23,9 +23,7 @@ AC_PROG_LEX
 AC_PROG_MKDIR_P
 
 ### Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h libintl.h limits.h malloc.h memory.h 
-		     netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h 
-		     sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h libintl.h limits.h malloc.h memory.h netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
 
 ### Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -44,11 +42,7 @@ AC_FUNC_MKTIME
 AC_FUNC_REALLOC
 AC_FUNC_STRCOLL
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS([atexit dup2 endpwent floor getcwd gethostbyaddr 
-		   gethostbyname gethostname getpass gettimeofday 
-		   inet_ntoa isascii memchr memmove memset mkdir modf 
-		   putenv rmdir select socket sqrt strcasecmp strchr 
-		   strerror strrchr strstr strtoul])
+AC_CHECK_FUNCS([atexit dup2 endpwent floor getcwd gethostbyaddr gethostbyname gethostname getpass gettimeofday inet_ntoa isascii memchr memmove memset mkdir modf putenv rmdir select socket sqrt strcasecmp strchr strerror strrchr strstr strtoul])
 
 ### Initialize prefix
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
@@ -128,7 +122,7 @@ case "$THREADS" in
    GC_CHECK_DEFINE([lurc.h], [LURC_ENABLE_GC], 
                    [AC_MSG_RESULT([ok])],
                    [AC_MSG_ERROR([Missing GC support in LURC])])
-   ### That should be good
+   ### That shold be good
    AC_DEFINE(THREADS_LURC, [], [LURC threads support])
    CALLCC_STK='"dyn-wind-lurc.stk"'
    ;;
@@ -300,18 +294,19 @@ case $HAVE_FFI in
        (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
            --disable-structs --disable-raw-api --disable-shared \
 	   --prefix=$prefix)
-       CFLAGS="$CFLAGS -I../ffi/include"
-       LIBS="$LIBS ../ffi/.libs/libffi.a"
        FFI="ffi"
-       ffilib="use provided library";;
+       FFIINC="-I../ffi/include"
+       FFILIB="../ffi/.libs/libffi.a"
+       ffimsg="use provided library";;
   yes)
        echo "... Using system libffi library"
-       CFLAGS="$CFLAGS `pkg-config libffi --cflags`"
-       LIBS="$LIBS `pkg-config libffi --libs`"
        FFI=""
-       ffilib="use the system library";;
+       FFIINC="`pkg-config libffi --cflags`"
+       FFILIB="`pkg-config libffi --libs`"
+       ffimsg="use the system library";;
 esac
-
+DEF_FFI="#define HAVE_FFI 1" ; # We always want FFI. 
+		               # Should be modifiable in the future
 
 ### ======================================================================
 ### Various stuff done by hand
@@ -367,14 +362,6 @@ else
   gclib="use the system library"
 fi
 
-#1.0 if test "$HAVE_PCRE" = "no"
-#1.0 then
-#1.0   pcrelib="compile provided library"
-#1.0 else
-#1.0   pcrelib="use the system library"
-#1.0 fi
-
-
 # LURC adjustment
 LURCDIR=""
 if test "$THREADS" = "lurc" ;then
@@ -402,7 +389,6 @@ AC_SUBST(GCINC)
 AC_SUBST(GMP)
 AC_SUBST(GMPLIB)
 AC_SUBST(GMPINC)
-AC_SUBST(FFI)
 AC_SUBST(PREFIX)
 AC_SUBST(SCMDIR)
 AC_SUBST(EXECDIR)
@@ -419,11 +405,17 @@ AC_SUBST(COMPSRC)
 AC_SUBST(STACK_DIRECTION)
 AC_SUBST(HAVE_GNOME)
 AC_SUBST(LDAP_LIB)
-#1.0 AC_SUBST(PCRETARGET)
+# PCRE
 AC_SUBST(PCRE)
 AC_SUBST(PCRELIB)
 AC_SUBST(PCREINC)
 AC_SUBST(DEF_PCRE)
+# FFI
+AC_SUBST(FFI)
+AC_SUBST(FFILIB)
+AC_SUBST(FFIINC)
+AC_SUBST(DEF_FFI)
+
 AC_SUBST(THREADS)
 AC_SUBST(LURCDIR)
 AC_SUBST(CALLCC_STK)

@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Sep-2009 16:55 (eg)
+# Last file update: 27-Sep-2009 19:39 (eg)
 
 EXTRA_DIST   = 
 # INSTDIRS contains the dirs which need to be installed
@@ -17,7 +17,7 @@ install:
 	  (cd $$i && $(MAKE) $(AM_MAKEFLAGS) install); \
 	done
 
-test:
+test: all
 	(cd tests; $(MAKE) test)
 
 commit-beta:

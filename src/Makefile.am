@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  9-Dec-2007 18:49 (eg)
+# Last file update: 27-Sep-2009 19:33 (eg)
 
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -70,9 +70,14 @@ pcre		= @PCRE@
 pcrelib		= @PCRELIB@
 pcreinc		= @PCREINC@
 
-stklos_LDADD   = $(compatlib) $(gmplib) $(pcrelib) $(gclib) -lm 
+# FFI LIBRARY
+ffi		= @FFI@
+ffilib		= @FFILIB@
+ffiinc		= @FFIINC@
+
+stklos_LDADD   = $(compatlib) $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm 
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
-INCLUDES       = $(gmpinc) $(pcreinc) $(gcinc)
+INCLUDES       = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
 
 
 struct.o cond.o: struct.h
