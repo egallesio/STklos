@@ -55,7 +55,23 @@ static const int kMaxArgs = 16;
 static const int kVecSize = (1 + kMaxArgs) * 3;  // results + PCRE workspace
 
 // Special object that stands-in for no argument
-PCRECPP_EXP_DEFN Arg no_arg((void*)NULL);
+Arg RE::no_arg((void*)NULL);
+
+// This is for ABI compatibility with old versions of pcre (pre-7.6),
+// which defined a global no_arg variable instead of putting it in the
+// RE class.  This works on GCC >= 3, at least.  It definitely works
+// for ELF, but may not for other object formats (Mach-O, for
+// instance, does not support aliases.)  We could probably have a more
+// inclusive test if we ever needed it.  (Note that not only the
+// __attribute__ syntax, but also __USER_LABEL_PREFIX__, are
+// gnu-specific.)
+#if defined(__GNUC__) && __GNUC__ >= 3 && defined(__ELF__)
+# define ULP_AS_STRING(x)            ULP_AS_STRING_INTERNAL(x)
+# define ULP_AS_STRING_INTERNAL(x)   #x
+# define USER_LABEL_PREFIX_STR       ULP_AS_STRING(__USER_LABEL_PREFIX__)
+extern Arg no_arg
+  __attribute__((alias(USER_LABEL_PREFIX_STR "_ZN7pcrecpp2RE6no_argE")));
+#endif
 
 // If a regular expression has no error, its error_ field points here
 static const string empty_string;
@@ -356,7 +372,7 @@ static int NewlineMode(int pcre_options) {
     else if (newline == -2)
       newline_mode = PCRE_NEWLINE_ANYCRLF;
     else
-      assert("" == "Unexpected return value from pcre_config(NEWLINE)");
+      assert(NULL == "Unexpected return value from pcre_config(NEWLINE)");
   }
   return newline_mode;
 }
@@ -369,7 +385,7 @@ int RE::GlobalReplace(const StringPiece& rewrite,
   int start = 0;
   int lastend = -1;
 
-  for (; start <= static_cast<int>(str->length()); count++) {
+  while (start <= static_cast<int>(str->length())) {
     int matches = TryMatch(*str, start, UNANCHORED, vec, kVecSize);
     if (matches <= 0)
       break;
@@ -441,21 +457,27 @@ bool RE::Extract(const StringPiece& rewrite,
   // Note that it's legal to escape a character even if it has no
   // special meaning in a regular expression -- so this function does
   // that.  (This also makes it identical to the perl function of the
-  // same name; see `perldoc -f quotemeta`.)
+  // same name; see `perldoc -f quotemeta`.)  The one exception is
+  // escaping NUL: rather than doing backslash + NUL, like perl does,
+  // we do '\0', because pcre itself doesn't take embedded NUL chars.
   for (int ii = 0; ii < unquoted.size(); ++ii) {
     // Note that using 'isalnum' here raises the benchmark time from
     // 32ns to 58ns:
-    if ((unquoted[ii] < 'a' || unquoted[ii] > 'z') &&
-        (unquoted[ii] < 'A' || unquoted[ii] > 'Z') &&
-        (unquoted[ii] < '0' || unquoted[ii] > '9') &&
-        unquoted[ii] != '_' &&
-        // If this is the part of a UTF8 or Latin1 character, we need
-        // to copy this byte without escaping.  Experimentally this is
-        // what works correctly with the regexp library.
-        !(unquoted[ii] & 128)) {
+    if (unquoted[ii] == '\0') {
+      result += "\\0";
+    } else if ((unquoted[ii] < 'a' || unquoted[ii] > 'z') &&
+               (unquoted[ii] < 'A' || unquoted[ii] > 'Z') &&
+               (unquoted[ii] < '0' || unquoted[ii] > '9') &&
+               unquoted[ii] != '_' &&
+               // If this is the part of a UTF8 or Latin1 character, we need
+               // to copy this byte without escaping.  Experimentally this is
+               // what works correctly with the regexp library.
+               !(unquoted[ii] & 128)) {
       result += '\\';
+      result += unquoted[ii];
+    } else {
+      result += unquoted[ii];
     }
-    result += unquoted[ii];
   }
 
   return result;
@@ -583,14 +605,14 @@ bool RE::Rewrite(string *out, const StringPiece &rewrite,
         if (start >= 0)
           out->append(text.data() + start, vec[2 * n + 1] - start);
       } else if (c == '\\') {
-        out->push_back('\\');
+        *out += '\\';
       } else {
         //fprintf(stderr, "invalid rewrite pattern: %.*s\n",
         //        rewrite.size(), rewrite.data());
         return false;
       }
     } else {
-      out->push_back(c);
+      *out += c;
     }
   }
   return true;
@@ -618,23 +640,27 @@ bool Arg::parse_null(const char* str, int n, void* dest) {
 }
 
 bool Arg::parse_string(const char* str, int n, void* dest) {
+  if (dest == NULL) return true;
   reinterpret_cast<string*>(dest)->assign(str, n);
   return true;
 }
 
 bool Arg::parse_stringpiece(const char* str, int n, void* dest) {
+  if (dest == NULL) return true;
   reinterpret_cast<StringPiece*>(dest)->set(str, n);
   return true;
 }
 
 bool Arg::parse_char(const char* str, int n, void* dest) {
   if (n != 1) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<char*>(dest)) = str[0];
   return true;
 }
 
 bool Arg::parse_uchar(const char* str, int n, void* dest) {
   if (n != 1) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<unsigned char*>(dest)) = str[0];
   return true;
 }
@@ -683,6 +709,7 @@ bool Arg::parse_long_radix(const char* str,
   long r = strtol(str, &end, radix);
   if (end != str + n) return false;   // Leftover junk
   if (errno) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<long*>(dest)) = r;
   return true;
 }
@@ -700,6 +727,7 @@ bool Arg::parse_ulong_radix(const char* str,
   unsigned long r = strtoul(str, &end, radix);
   if (end != str + n) return false;   // Leftover junk
   if (errno) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<unsigned long*>(dest)) = r;
   return true;
 }
@@ -711,6 +739,7 @@ bool Arg::parse_short_radix(const char* str,
   long r;
   if (!parse_long_radix(str, n, &r, radix)) return false; // Could not parse
   if (r < SHRT_MIN || r > SHRT_MAX) return false;       // Out of range
+  if (dest == NULL) return true;
   *(reinterpret_cast<short*>(dest)) = static_cast<short>(r);
   return true;
 }
@@ -722,6 +751,7 @@ bool Arg::parse_ushort_radix(const char* str,
   unsigned long r;
   if (!parse_ulong_radix(str, n, &r, radix)) return false; // Could not parse
   if (r > USHRT_MAX) return false;                      // Out of range
+  if (dest == NULL) return true;
   *(reinterpret_cast<unsigned short*>(dest)) = static_cast<unsigned short>(r);
   return true;
 }
@@ -733,6 +763,7 @@ bool Arg::parse_int_radix(const char* str,
   long r;
   if (!parse_long_radix(str, n, &r, radix)) return false; // Could not parse
   if (r < INT_MIN || r > INT_MAX) return false;         // Out of range
+  if (dest == NULL) return true;
   *(reinterpret_cast<int*>(dest)) = r;
   return true;
 }
@@ -744,6 +775,7 @@ bool Arg::parse_uint_radix(const char* str,
   unsigned long r;
   if (!parse_ulong_radix(str, n, &r, radix)) return false; // Could not parse
   if (r > UINT_MAX) return false;                       // Out of range
+  if (dest == NULL) return true;
   *(reinterpret_cast<unsigned int*>(dest)) = r;
   return true;
 }
@@ -771,6 +803,7 @@ bool Arg::parse_longlong_radix(const char* str,
 #endif
   if (end != str + n) return false;   // Leftover junk
   if (errno) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<long long*>(dest)) = r;
   return true;
 #endif   /* HAVE_LONG_LONG */
@@ -800,6 +833,7 @@ bool Arg::parse_ulonglong_radix(const char* str,
 #endif
   if (end != str + n) return false;   // Leftover junk
   if (errno) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<unsigned long long*>(dest)) = r;
   return true;
 #endif   /* HAVE_UNSIGNED_LONG_LONG */
@@ -817,6 +851,7 @@ bool Arg::parse_double(const char* str, int n, void* dest) {
   double r = strtod(buf, &end);
   if (end != buf + n) return false;   // Leftover junk
   if (errno) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<double*>(dest)) = r;
   return true;
 }
@@ -824,6 +859,7 @@ bool Arg::parse_double(const char* str, int n, void* dest) {
 bool Arg::parse_float(const char* str, int n, void* dest) {
   double r;
   if (!parse_double(str, n, &r)) return false;
+  if (dest == NULL) return true;
   *(reinterpret_cast<float*>(dest)) = static_cast<float>(r);
   return true;
 }

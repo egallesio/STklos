@@ -77,6 +77,12 @@ Behave as if each regex has the <b>/I</b> modifier; information about the
 compiled pattern is given after compilation.
 </P>
 <P>
+<b>-M</b>
+Behave as if each data line contains the \M escape sequence; this causes
+PCRE to discover the minimum MATCH_LIMIT and MATCH_LIMIT_RECURSION settings by
+calling <b>pcre_exec()</b> repeatedly with different limits.
+</P>
+<P>
 <b>-m</b>
 Output the size of each compiled pattern after it has been compiled. This is
 equivalent to adding <b>/M</b> to each regular expression. For compatibility
@@ -128,6 +134,13 @@ writes to the second. If it is given only one filename argument, it reads from
 that file and writes to stdout. Otherwise, it reads from stdin and writes to
 stdout, and prompts for each line of input, using "re&#62;" to prompt for regular
 expressions, and "data&#62;" to prompt for data lines.
+</P>
+<P>
+When <b>pcretest</b> is built, a configuration option can specify that it should
+be linked with the <b>libreadline</b> library. When this is done, if the input
+is from a terminal, it is read using the <b>readline()</b> function. This
+provides line-editing and history facilities. The output from the <b>-help</b>
+option states whether or not <b>readline()</b> will be used.
 </P>
 <P>
 The program handles any number of sets of input on a single input file. Each
@@ -199,6 +212,7 @@ not correspond to anything in Perl:
   <b>/N</b>              PCRE_NO_AUTO_CAPTURE
   <b>/U</b>              PCRE_UNGREEDY
   <b>/X</b>              PCRE_EXTRA
+  <b>/&#60;JS&#62;</b>           PCRE_JAVASCRIPT_COMPAT
   <b>/&#60;cr&#62;</b>           PCRE_NEWLINE_CR
   <b>/&#60;lf&#62;</b>           PCRE_NEWLINE_LF
   <b>/&#60;crlf&#62;</b>         PCRE_NEWLINE_CRLF
@@ -454,6 +468,21 @@ of an interactive <b>pcretest</b> run.
   data&#62; xyz
   No match
 </pre>
+Note that unset capturing substrings that are not followed by one that is set
+are not returned by <b>pcre_exec()</b>, and are not shown by <b>pcretest</b>. In
+the following example, there are two capturing substrings, but when the first
+data line is matched, the second, unset substring is not shown. An "internal"
+unset substring is shown as "&#60;unset&#62;", as for the second data line.
+<pre>
+    re&#62; /(a)|(b)/
+  data&#62; a
+   0: a
+   1: a
+  data&#62; b
+   0: b
+   1: &#60;unset&#62;
+   2: b
+</pre>
 If the strings contain any non-printing characters, they are output as \0x
 escapes, or as \x{...} escapes if the <b>/8</b> modifier was present on the
 pattern. See below for the definition of non-printing characters. If the
@@ -674,9 +703,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC15" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 September 2007
+Last updated: 10 March 2009
 <br>
-Copyright &copy; 1997-2007 University of Cambridge.
+Copyright &copy; 1997-2009 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

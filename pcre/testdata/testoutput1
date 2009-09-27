@@ -5551,12 +5551,6 @@ No match
  0: b
  1: b
 
-/(?(1)a|b)/
-
-/(?(1)b|a)/
-    a
- 0: a
-
 /(x)?(?(1)a|b)/
     *** Failers
 No match
@@ -6591,6 +6585,65 @@ No match
 /(  (?(1)0|)*   )/x
     abcd
  0: 
+ 1: 
+
+/[[:abcd:xyz]]/
+    a]
+ 0: a]
+    :] 
+ 0: :]
+    
+/[abc[:x\]pqr]/
+    a
+ 0: a
+    [
+ 0: [
+    :
+ 0: :
+    ]
+ 0: ]
+    p    
+ 0: p
+
+/.*[op][xyz]/
+    fooabcfoo
+No match
+
+/(?(?=.*b)b|^)/
+   adc
+ 0: 
+   abc 
+ 0: b
+
+/(?(?=^.*b)b|^)/
+   adc
+ 0: 
+   abc 
+No match
+
+/(?(?=.*b)b|^)*/
+   adc
+ 0: 
+   abc 
+ 0: 
+
+/(?(?=.*b)b|^)+/
+   adc
+ 0: 
+   abc 
+ 0: b
+
+/(?(?=b).*b|^d)/
+    abc
+ 0: b
+
+/(?(?=.*b).*b|^d)/
+    abc
+ 0: ab
+
+/^%((?(?=[a])[^%])|b)*%$/
+    %ab%
+ 0: %ab%
  1: 
 
 / End of testinput1 /

@@ -19,9 +19,9 @@ GC: The Boehm's conservative garbage collector for C and C++
 
 PCRE: Perl-Compatible Regular Expression library
 ================================================
-    - Version: 7.4
-    - License: Free ("morphes" to (L)GPL when used in a (L)GPL program)
-    - Home: http://pcre.sourceforge.net/
+    - Version: 7.9
+    - License: BSD
+    - Home: http://www.pcre.org/
 
 SILex: The Dany Dubé Scheme Implementation of Lex
 =================================================

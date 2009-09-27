@@ -1,7 +1,7 @@
 ;;;;
 ;;;; regexp.stk				-- STklos Regular Expressions
 ;;;; 
-;;;; Copyright © 1994-2000 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1994-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  9-Nov-1994 13:24 (eg)
-;;;; Last file update: 26-Nov-2000 18:59 (eg)
+;;;; Last file update: 27-Sep-2009 18:55 (eg)
 ;;;;
 
 
@@ -51,11 +51,11 @@
  *                    => "Xbcccc"
  * (regexp-replace (string->regexp "a*b") "aaabbcccc" "X")
  *                    => "Xbcccc"
- * (regexp-replace "(a*)b" "aaabbcccc" "X\\1Y")
+ * (regexp-replace "(a*)b" "aaabbcccc" "X\\\\1Y")
  *                    => "XaaaYbcccc"
- * (regexp-replace "f(.*)r" "foobar" "\\1 \\1")
+ * (regexp-replace "f(.*)r" "foobar" "\\\\1 \\\\1")
  *                    => "ooba ooba"
- * (regexp-replace "f(.*)r" "foobar" "\\0 \\0")
+ * (regexp-replace "f(.*)r" "foobar" "\\\\0 \\\\0")
  *                    => "foobar foobar"
  *
  * (regexp-replace "a*b" "aaabbcccc" "X")

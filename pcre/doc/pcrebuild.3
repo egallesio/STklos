@@ -38,7 +38,7 @@ to the \fBconfigure\fP command.
 .SH "UTF-8 SUPPORT"
 .rs
 .sp
-To build PCRE with support for UTF-8 character strings, add
+To build PCRE with support for UTF-8 Unicode character strings, add
 .sp
   --enable-utf8
 .sp
@@ -46,6 +46,12 @@ to the \fBconfigure\fP command. Of itself, this does not make PCRE treat
 strings as UTF-8. As well as compiling PCRE with this option, you also have
 have to set the PCRE_UTF8 option when you call the \fBpcre_compile()\fP
 function.
+.P
+If you set --enable-utf8 when compiling in an EBCDIC environment, PCRE expects
+its input to be either ASCII or UTF-8 (depending on the runtime option). It is
+not possible to support both EBCDIC and UTF-8 codes in the same version of the
+library. Consequently, --enable-utf8 and --enable-ebcdic are mutually
+exclusive.
 .
 .SH "UNICODE CHARACTER PROPERTY SUPPORT"
 .rs
@@ -72,9 +78,9 @@ documentation.
 .SH "CODE VALUE OF NEWLINE"
 .rs
 .sp
-By default, PCRE interprets character 10 (linefeed, LF) as indicating the end
+By default, PCRE interprets the linefeed (LF) character as indicating the end
 of a line. This is the normal newline character on Unix-like systems. You can
-compile PCRE to use character 13 (carriage return, CR) instead, by adding
+compile PCRE to use carriage return (CR) instead, by adding
 .sp
   --enable-newline-is-cr
 .sp
@@ -254,7 +260,53 @@ EBCDIC environment by adding
 .sp
 to the \fBconfigure\fP command. This setting implies
 --enable-rebuild-chartables. You should only use it if you know that you are in
-an EBCDIC environment (for example, an IBM mainframe operating system).
+an EBCDIC environment (for example, an IBM mainframe operating system). The
+--enable-ebcdic option is incompatible with --enable-utf8.
+.
+.SH "PCREGREP OPTIONS FOR COMPRESSED FILE SUPPORT"
+.rs
+.sp
+By default, \fBpcregrep\fP reads all files as plain text. You can build it so
+that it recognizes files whose names end in \fB.gz\fP or \fB.bz2\fP, and reads
+them with \fBlibz\fP or \fBlibbz2\fP, respectively, by adding one or both of
+.sp
+  --enable-pcregrep-libz
+  --enable-pcregrep-libbz2
+.sp
+to the \fBconfigure\fP command. These options naturally require that the
+relevant libraries are installed on your system. Configuration will fail if
+they are not.
+.
+.SH "PCRETEST OPTION FOR LIBREADLINE SUPPORT"
+.rs
+.sp
+If you add
+.sp
+  --enable-pcretest-libreadline
+.sp
+to the \fBconfigure\fP command, \fBpcretest\fP is linked with the
+\fBlibreadline\fP library, and when its input is from a terminal, it reads it
+using the \fBreadline()\fP function. This provides line-editing and history
+facilities. Note that \fBlibreadline\fP is GPL-licenced, so if you distribute a
+binary of \fBpcretest\fP linked in this way, there may be licensing issues.
+.P
+Setting this option causes the \fB-lreadline\fP option to be added to the
+\fBpcretest\fP build. In many operating environments with a sytem-installed
+\fBlibreadline\fP this is sufficient. However, in some environments (e.g.
+if an unmodified distribution version of readline is in use), some extra
+configuration may be necessary. The INSTALL file for \fBlibreadline\fP says
+this:
+.sp
+  "Readline uses the termcap functions, but does not link with the
+  termcap or curses library itself, allowing applications which link
+  with readline the to choose an appropriate library."
+.sp
+If your environment has not been set up so that an appropriate library is
+automatically included, you may need to add something like
+.sp
+  LIBS="-ncurses"
+.sp
+immediately before the \fBconfigure\fP command.
 .
 .
 .SH "SEE ALSO"
@@ -277,6 +329,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 21 September 2007
-Copyright (c) 1997-2007 University of Cambridge.
+Last updated: 17 March 2009
+Copyright (c) 1997-2009 University of Cambridge.
 .fi

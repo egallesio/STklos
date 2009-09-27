@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2007 University of Cambridge
+           Copyright (c) 1997-2009 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -124,7 +124,10 @@ static const int eint[] = {
   REG_INVARG,  /* inconsistent NEWLINE options */
   REG_BADPAT,  /* \g is not followed followed by an (optionally braced) non-zero number */
   REG_BADPAT,  /* (?+ or (?- must be followed by a non-zero number */
-  REG_BADPAT   /* number is too big */
+  REG_BADPAT,  /* number is too big */
+  REG_BADPAT,  /* subpattern name expected */
+  REG_BADPAT,  /* digit expected after (?+ */
+  REG_BADPAT   /* ] is an invalid data character in JavaScript compatibility mode */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -157,7 +160,7 @@ static const char *const pstring[] = {
 *          Translate error code to string        *
 *************************************************/
 
-PCREPOSIX_EXP_DEFN size_t
+PCREPOSIX_EXP_DEFN size_t PCRE_CALL_CONVENTION
 regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
 {
 const char *message, *addmessage;
@@ -192,7 +195,7 @@ return length + addlength;
 *           Free store held by a regex           *
 *************************************************/
 
-PCREPOSIX_EXP_DEFN void
+PCREPOSIX_EXP_DEFN void PCRE_CALL_CONVENTION
 regfree(regex_t *preg)
 {
 (pcre_free)(preg->re_pcre);
@@ -215,7 +218,7 @@ Returns:      0 on success
               various non-zero codes on failure
 */
 
-PCREPOSIX_EXP_DEFN int
+PCREPOSIX_EXP_DEFN int PCRE_CALL_CONVENTION
 regcomp(regex_t *preg, const char *pattern, int cflags)
 {
 const char *errorptr;
@@ -257,11 +260,11 @@ If REG_NOSUB was specified at compile time, the PCRE_NO_AUTO_CAPTURE flag will
 be set. When this is the case, the nmatch and pmatch arguments are ignored, and
 the only result is yes/no/error. */
 
-PCREPOSIX_EXP_DEFN int
+PCREPOSIX_EXP_DEFN int PCRE_CALL_CONVENTION
 regexec(const regex_t *preg, const char *string, size_t nmatch,
   regmatch_t pmatch[], int eflags)
 {
-int rc;
+int rc, so, eo;
 int options = 0;
 int *ovector = NULL;
 int small_ovector[POSIX_MALLOC_THRESHOLD * 3];
@@ -271,6 +274,7 @@ BOOL nosub =
 
 if ((eflags & REG_NOTBOL) != 0) options |= PCRE_NOTBOL;
 if ((eflags & REG_NOTEOL) != 0) options |= PCRE_NOTEOL;
+if ((eflags & REG_NOTEMPTY) != 0) options |= PCRE_NOTEMPTY;
 
 ((regex_t *)preg)->re_erroffset = (size_t)(-1);  /* Only has meaning after compile */
 
@@ -294,7 +298,23 @@ else if (nmatch > 0)
     }
   }
 
-rc = pcre_exec((const pcre *)preg->re_pcre, NULL, string, (int)strlen(string),
+/* REG_STARTEND is a BSD extension, to allow for non-NUL-terminated strings.
+The man page from OS X says "REG_STARTEND affects only the location of the
+string, not how it is matched". That is why the "so" value is used to bump the
+start location rather than being passed as a PCRE "starting offset". */
+
+if ((eflags & REG_STARTEND) != 0)
+  {
+  so = pmatch[0].rm_so;
+  eo = pmatch[0].rm_eo;
+  }
+else
+  {
+  so = 0;
+  eo = strlen(string);
+  }
+
+rc = pcre_exec((const pcre *)preg->re_pcre, NULL, string + so, (eo - so),
   0, options, ovector, nmatch * 3);
 
 if (rc == 0) rc = nmatch;    /* All captured slots were filled in */

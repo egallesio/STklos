@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2007 University of Cambridge
+           Copyright (c) 1997-2009 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -158,13 +158,39 @@ printf("\n");
 
 if (length > md->end_subject - eptr) return FALSE;
 
-/* Separate the caselesss case for speed */
+/* Separate the caseless case for speed. In UTF-8 mode we can only do this
+properly if Unicode properties are supported. Otherwise, we can check only
+ASCII characters. */
 
 if ((ims & PCRE_CASELESS) != 0)
   {
+#ifdef SUPPORT_UTF8
+#ifdef SUPPORT_UCP
+  if (md->utf8)
+    {
+    USPTR endptr = eptr + length;
+    while (eptr < endptr)
+      {
+      int c, d;
+      GETCHARINC(c, eptr);
+      GETCHARINC(d, p);
+      if (c != d && c != UCD_OTHERCASE(d)) return FALSE;
+      }
+    }
+  else
+#endif
+#endif
+
+  /* The same code works when not in UTF-8 mode and in UTF-8 mode when there
+  is no UCP support. */
+
   while (length-- > 0)
-    if (md->lcc[*p++] != md->lcc[*eptr++]) return FALSE;
+    { if (md->lcc[*p++] != md->lcc[*eptr++]) return FALSE; }
   }
+
+/* In the caseful case, we can just compare the bytes, whether or not we
+are in UTF-8 mode. */
+
 else
   { while (length-- > 0) if (*p++ != *eptr++) return FALSE; }
 
@@ -296,9 +322,9 @@ typedef struct heapframe {
 
   /* Function arguments that may change */
 
-  const uschar *Xeptr;
+  USPTR Xeptr;
   const uschar *Xecode;
-  const uschar *Xmstart;
+  USPTR Xmstart;
   int Xoffset_top;
   long int Xims;
   eptrblock *Xeptrb;
@@ -307,13 +333,15 @@ typedef struct heapframe {
 
   /* Function local variables */
 
-  const uschar *Xcallpat;
-  const uschar *Xcharptr;
-  const uschar *Xdata;
-  const uschar *Xnext;
-  const uschar *Xpp;
-  const uschar *Xprev;
-  const uschar *Xsaved_eptr;
+  USPTR Xcallpat;
+#ifdef SUPPORT_UTF8
+  USPTR Xcharptr;
+#endif
+  USPTR Xdata;
+  USPTR Xnext;
+  USPTR Xpp;
+  USPTR Xprev;
+  USPTR Xsaved_eptr;
 
   recursion_info Xnew_recursive;
 
@@ -334,6 +362,7 @@ typedef struct heapframe {
   uschar Xocchars[8];
 #endif
 
+  int Xcodelink;
   int Xctype;
   unsigned int Xfc;
   int Xfi;
@@ -399,7 +428,7 @@ Returns:       MATCH_MATCH if matched            )  these values are >= 0
 */
 
 static int
-match(REGISTER USPTR eptr, REGISTER const uschar *ecode, const uschar *mstart,
+match(REGISTER USPTR eptr, REGISTER const uschar *ecode, USPTR mstart,
   int offset_top, match_data *md, unsigned long int ims, eptrblock *eptrb,
   int flags, unsigned int rdepth)
 {
@@ -413,6 +442,7 @@ register unsigned int c;   /* Character values not kept over RMATCH() calls */
 register BOOL utf8;        /* Local copy of UTF-8 flag for speed */
 
 BOOL minimize, possessive; /* Quantifier options */
+int condcode;
 
 /* When recursion is not being used, all "local" variables that have to be
 preserved over calls to RMATCH() are part of a "frame" which is obtained from
@@ -455,6 +485,7 @@ HEAP_RECURSE:
 #define charptr            frame->Xcharptr
 #endif
 #define callpat            frame->Xcallpat
+#define codelink           frame->Xcodelink
 #define data               frame->Xdata
 #define next               frame->Xnext
 #define pp                 frame->Xpp
@@ -535,6 +566,7 @@ int oclength;
 uschar occhars[8];
 #endif
 
+int codelink;
 int ctype;
 int length;
 int max;
@@ -761,7 +793,39 @@ for (;;)
 
     case OP_COND:
     case OP_SCOND:
-    if (ecode[LINK_SIZE+1] == OP_RREF)         /* Recursion test */
+    codelink= GET(ecode, 1);
+
+    /* Because of the way auto-callout works during compile, a callout item is
+    inserted between OP_COND and an assertion condition. */
+
+    if (ecode[LINK_SIZE+1] == OP_CALLOUT)
+      {
+      if (pcre_callout != NULL)
+        {
+        pcre_callout_block cb;
+        cb.version          = 1;   /* Version 1 of the callout block */
+        cb.callout_number   = ecode[LINK_SIZE+2];
+        cb.offset_vector    = md->offset_vector;
+        cb.subject          = (PCRE_SPTR)md->start_subject;
+        cb.subject_length   = md->end_subject - md->start_subject;
+        cb.start_match      = mstart - md->start_subject;
+        cb.current_position = eptr - md->start_subject;
+        cb.pattern_position = GET(ecode, LINK_SIZE + 3);
+        cb.next_item_length = GET(ecode, 3 + 2*LINK_SIZE);
+        cb.capture_top      = offset_top/2;
+        cb.capture_last     = md->capture_last;
+        cb.callout_data     = md->callout_data;
+        if ((rrc = (*pcre_callout)(&cb)) > 0) RRETURN(MATCH_NOMATCH);
+        if (rrc < 0) RRETURN(rrc);
+        }
+      ecode += _pcre_OP_lengths[OP_CALLOUT];
+      }
+
+    condcode = ecode[LINK_SIZE+1];
+
+    /* Now see what the actual condition is */
+
+    if (condcode == OP_RREF)         /* Recursion test */
       {
       offset = GET2(ecode, LINK_SIZE + 2);     /* Recursion group number*/
       condition = md->recursive != NULL &&
@@ -769,14 +833,14 @@ for (;;)
       ecode += condition? 3 : GET(ecode, 1);
       }
 
-    else if (ecode[LINK_SIZE+1] == OP_CREF)    /* Group used test */
+    else if (condcode == OP_CREF)    /* Group used test */
       {
       offset = GET2(ecode, LINK_SIZE+2) << 1;  /* Doubled ref number */
       condition = offset < offset_top && md->offset_vector[offset] >= 0;
       ecode += condition? 3 : GET(ecode, 1);
       }
 
-    else if (ecode[LINK_SIZE+1] == OP_DEF)     /* DEFINE - always false */
+    else if (condcode == OP_DEF)     /* DEFINE - always false */
       {
       condition = FALSE;
       ecode += GET(ecode, 1);
@@ -803,7 +867,7 @@ for (;;)
       else
         {
         condition = FALSE;
-        ecode += GET(ecode, 1);
+        ecode += codelink;
         }
       }
 
@@ -826,7 +890,7 @@ for (;;)
         goto TAIL_RECURSE;
         }
       }
-    else                         /* Condition false & no 2nd alternative */
+    else                         /* Condition false & no alternative */
       {
       ecode += 1 + LINK_SIZE;
       }
@@ -1049,6 +1113,8 @@ for (;;)
         else if (rrc != MATCH_NOMATCH && rrc != MATCH_THEN)
           {
           DPRINTF(("Recursion gave error %d\n", rrc));
+          if (new_recursive.offset_save != stacksave)
+            (pcre_free)(new_recursive.offset_save);
           RRETURN(rrc);
           }
 
@@ -1148,11 +1214,11 @@ for (;;)
     do ecode += GET(ecode,1); while (*ecode == OP_ALT);
     break;
 
-    /* BRAZERO and BRAMINZERO occur just before a bracket group, indicating
-    that it may occur zero times. It may repeat infinitely, or not at all -
-    i.e. it could be ()* or ()? in the pattern. Brackets with fixed upper
-    repeat limits are compiled as a number of copies, with the optional ones
-    preceded by BRAZERO or BRAMINZERO. */
+    /* BRAZERO, BRAMINZERO and SKIPZERO occur just before a bracket group,
+    indicating that it may occur zero times. It may repeat infinitely, or not
+    at all - i.e. it could be ()* or ()? or even (){0} in the pattern. Brackets
+    with fixed upper repeat limits are compiled as a number of copies, with the
+    optional ones preceded by BRAZERO or BRAMINZERO. */
 
     case OP_BRAZERO:
       {
@@ -1171,6 +1237,14 @@ for (;;)
       RMATCH(eptr, next + 1+LINK_SIZE, offset_top, md, ims, eptrb, 0, RM11);
       if (rrc != MATCH_NOMATCH) RRETURN(rrc);
       ecode++;
+      }
+    break;
+
+    case OP_SKIPZERO:
+      {
+      next = ecode+1;
+      do next += GET(next,1); while (*next == OP_ALT);
+      ecode = next + 1 + LINK_SIZE;
       }
     break;
 
@@ -1387,7 +1461,7 @@ for (;;)
         {
         if (eptr == md->start_subject) prev_is_word = FALSE; else
           {
-          const uschar *lastptr = eptr - 1;
+          USPTR lastptr = eptr - 1;
           while((*lastptr & 0xc0) == 0x80) lastptr--;
           GETCHAR(c, lastptr);
           prev_is_word = c < 256 && (md->ctypes[c] & ctype_word) != 0;
@@ -1421,13 +1495,12 @@ for (;;)
     /* Match a single character type; inline for speed */
 
     case OP_ANY:
-    if ((ims & PCRE_DOTALL) == 0)
-      {
-      if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
-      }
+    if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
+    /* Fall through */
+
+    case OP_ALLANY:
     if (eptr++ >= md->end_subject) RRETURN(MATCH_NOMATCH);
-    if (utf8)
-      while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
+    if (utf8) while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
     ecode++;
     break;
 
@@ -1646,8 +1719,7 @@ for (;;)
     if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
     GETCHARINCTEST(c, eptr);
       {
-      int chartype, script;
-      int category = _pcre_ucp_findprop(c, &chartype, &script);
+      const ucd_record *prop = GET_UCD(c);
 
       switch(ecode[1])
         {
@@ -1656,24 +1728,24 @@ for (;;)
         break;
 
         case PT_LAMP:
-        if ((chartype == ucp_Lu ||
-             chartype == ucp_Ll ||
-             chartype == ucp_Lt) == (op == OP_NOTPROP))
+        if ((prop->chartype == ucp_Lu ||
+             prop->chartype == ucp_Ll ||
+             prop->chartype == ucp_Lt) == (op == OP_NOTPROP))
           RRETURN(MATCH_NOMATCH);
          break;
 
         case PT_GC:
-        if ((ecode[2] != category) == (op == OP_PROP))
+        if ((ecode[2] != _pcre_ucp_gentype[prop->chartype]) == (op == OP_PROP))
           RRETURN(MATCH_NOMATCH);
         break;
 
         case PT_PC:
-        if ((ecode[2] != chartype) == (op == OP_PROP))
+        if ((ecode[2] != prop->chartype) == (op == OP_PROP))
           RRETURN(MATCH_NOMATCH);
         break;
 
         case PT_SC:
-        if ((ecode[2] != script) == (op == OP_PROP))
+        if ((ecode[2] != prop->script) == (op == OP_PROP))
           RRETURN(MATCH_NOMATCH);
         break;
 
@@ -1692,8 +1764,7 @@ for (;;)
     if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
     GETCHARINCTEST(c, eptr);
       {
-      int chartype, script;
-      int category = _pcre_ucp_findprop(c, &chartype, &script);
+      int category = UCD_CATEGORY(c);
       if (category == ucp_M) RRETURN(MATCH_NOMATCH);
       while (eptr < md->end_subject)
         {
@@ -1702,7 +1773,7 @@ for (;;)
           {
           GETCHARLEN(c, eptr, len);
           }
-        category = _pcre_ucp_findprop(c, &chartype, &script);
+        category = UCD_CATEGORY(c);
         if (category != ucp_M) break;
         eptr += len;
         }
@@ -1723,16 +1794,25 @@ for (;;)
     case OP_REF:
       {
       offset = GET2(ecode, 1) << 1;               /* Doubled ref number */
-      ecode += 3;                                 /* Advance past item */
+      ecode += 3;
 
-      /* If the reference is unset, set the length to be longer than the amount
-      of subject left; this ensures that every attempt at a match fails. We
-      can't just fail here, because of the possibility of quantifiers with zero
-      minima. */
+      /* If the reference is unset, there are two possibilities:
 
-      length = (offset >= offset_top || md->offset_vector[offset] < 0)?
-        md->end_subject - eptr + 1 :
-        md->offset_vector[offset+1] - md->offset_vector[offset];
+      (a) In the default, Perl-compatible state, set the length to be longer
+      than the amount of subject left; this ensures that every attempt at a
+      match fails. We can't just fail here, because of the possibility of
+      quantifiers with zero minima.
+
+      (b) If the JavaScript compatibility flag is set, set the length to zero
+      so that the back reference matches an empty string.
+
+      Otherwise, set the length to the length of what was matched by the
+      referenced subpattern. */
+
+      if (offset >= offset_top || md->offset_vector[offset] < 0)
+        length = (md->jscript_compat)? 0 : md->end_subject - eptr + 1;
+      else
+        length = md->offset_vector[offset+1] - md->offset_vector[offset];
 
       /* Set up for repetition, or handle the non-repeated case */
 
@@ -2007,7 +2087,8 @@ for (;;)
 
 
     /* Match an extended character class. This opcode is encountered only
-    in UTF-8 mode, because that's the only time it is compiled. */
+    when UTF-8 mode mode is supported. Nevertheless, we may not be in UTF-8
+    mode, because Unicode properties are supported in non-UTF-8 mode. */
 
 #ifdef SUPPORT_UTF8
     case OP_XCLASS:
@@ -2049,7 +2130,7 @@ for (;;)
       for (i = 1; i <= min; i++)
         {
         if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
-        GETCHARINC(c, eptr);
+        GETCHARINCTEST(c, eptr);
         if (!_pcre_xclass(c, data)) RRETURN(MATCH_NOMATCH);
         }
 
@@ -2068,7 +2149,7 @@ for (;;)
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM20);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
-          GETCHARINC(c, eptr);
+          GETCHARINCTEST(c, eptr);
           if (!_pcre_xclass(c, data)) RRETURN(MATCH_NOMATCH);
           }
         /* Control never gets here */
@@ -2083,7 +2164,7 @@ for (;;)
           {
           int len = 1;
           if (eptr >= md->end_subject) break;
-          GETCHARLEN(c, eptr, len);
+          GETCHARLENTEST(c, eptr, len);
           if (!_pcre_xclass(c, data)) break;
           eptr += len;
           }
@@ -2158,7 +2239,7 @@ for (;;)
         if (fc != dc)
           {
 #ifdef SUPPORT_UCP
-          if (dc != _pcre_ucp_othercase(fc))
+          if (dc != UCD_OTHERCASE(fc))
 #endif
             RRETURN(MATCH_NOMATCH);
           }
@@ -2249,7 +2330,7 @@ for (;;)
 #ifdef SUPPORT_UCP
         unsigned int othercase;
         if ((ims & PCRE_CASELESS) != 0 &&
-            (othercase = _pcre_ucp_othercase(fc)) != NOTACHAR)
+            (othercase = UCD_OTHERCASE(fc)) != fc)
           oclength = _pcre_ord2utf8(othercase, occhars);
         else oclength = 0;
 #endif  /* SUPPORT_UCP */
@@ -2569,10 +2650,11 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM28);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+            if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINC(d, eptr);
             if (d < 256) d = md->lcc[d];
-            if (fi >= max || eptr >= md->end_subject || fc == d)
-              RRETURN(MATCH_NOMATCH);
+            if (fc == d) RRETURN(MATCH_NOMATCH);
+
             }
           }
         else
@@ -2678,9 +2760,9 @@ for (;;)
             {
             RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM32);
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
+            if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINC(d, eptr);
-            if (fi >= max || eptr >= md->end_subject || fc == d)
-              RRETURN(MATCH_NOMATCH);
+            if (fc == d) RRETURN(MATCH_NOMATCH);
             }
           }
         else
@@ -2854,7 +2936,7 @@ for (;;)
             {
             if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINCTEST(c, eptr);
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == ucp_Lu ||
                  prop_chartype == ucp_Ll ||
                  prop_chartype == ucp_Lt) == prop_fail_result)
@@ -2867,7 +2949,7 @@ for (;;)
             {
             if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINCTEST(c, eptr);
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_category = UCD_CATEGORY(c);
             if ((prop_category == prop_value) == prop_fail_result)
               RRETURN(MATCH_NOMATCH);
             }
@@ -2878,7 +2960,7 @@ for (;;)
             {
             if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINCTEST(c, eptr);
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == prop_value) == prop_fail_result)
               RRETURN(MATCH_NOMATCH);
             }
@@ -2889,7 +2971,7 @@ for (;;)
             {
             if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINCTEST(c, eptr);
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_script = UCD_SCRIPT(c);
             if ((prop_script == prop_value) == prop_fail_result)
               RRETURN(MATCH_NOMATCH);
             }
@@ -2908,7 +2990,7 @@ for (;;)
         for (i = 1; i <= min; i++)
           {
           GETCHARINCTEST(c, eptr);
-          prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+          prop_category = UCD_CATEGORY(c);
           if (prop_category == ucp_M) RRETURN(MATCH_NOMATCH);
           while (eptr < md->end_subject)
             {
@@ -2917,7 +2999,7 @@ for (;;)
               {
               GETCHARLEN(c, eptr, len);
               }
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_category = UCD_CATEGORY(c);
             if (prop_category != ucp_M) break;
             eptr += len;
             }
@@ -2935,9 +3017,17 @@ for (;;)
         case OP_ANY:
         for (i = 1; i <= min; i++)
           {
-          if (eptr >= md->end_subject ||
-               ((ims & PCRE_DOTALL) == 0 && IS_NEWLINE(eptr)))
+          if (eptr >= md->end_subject || IS_NEWLINE(eptr))
             RRETURN(MATCH_NOMATCH);
+          eptr++;
+          while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
+          }
+        break;
+
+        case OP_ALLANY:
+        for (i = 1; i <= min; i++)
+          {
+          if (eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
           eptr++;
           while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
           }
@@ -3151,15 +3241,15 @@ for (;;)
       switch(ctype)
         {
         case OP_ANY:
-        if ((ims & PCRE_DOTALL) == 0)
+        for (i = 1; i <= min; i++)
           {
-          for (i = 1; i <= min; i++)
-            {
-            if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
-            eptr++;
-            }
+          if (IS_NEWLINE(eptr)) RRETURN(MATCH_NOMATCH);
+          eptr++;
           }
-        else eptr += min;
+        break;
+
+        case OP_ALLANY:
+        eptr += min;
         break;
 
         case OP_ANYBYTE:
@@ -3325,7 +3415,7 @@ for (;;)
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINC(c, eptr);
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == ucp_Lu ||
                  prop_chartype == ucp_Ll ||
                  prop_chartype == ucp_Lt) == prop_fail_result)
@@ -3340,7 +3430,7 @@ for (;;)
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINC(c, eptr);
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_category = UCD_CATEGORY(c);
             if ((prop_category == prop_value) == prop_fail_result)
               RRETURN(MATCH_NOMATCH);
             }
@@ -3353,7 +3443,7 @@ for (;;)
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINC(c, eptr);
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == prop_value) == prop_fail_result)
               RRETURN(MATCH_NOMATCH);
             }
@@ -3366,7 +3456,7 @@ for (;;)
             if (rrc != MATCH_NOMATCH) RRETURN(rrc);
             if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
             GETCHARINC(c, eptr);
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_script = UCD_SCRIPT(c);
             if ((prop_script == prop_value) == prop_fail_result)
               RRETURN(MATCH_NOMATCH);
             }
@@ -3388,7 +3478,7 @@ for (;;)
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max || eptr >= md->end_subject) RRETURN(MATCH_NOMATCH);
           GETCHARINCTEST(c, eptr);
-          prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+          prop_category = UCD_CATEGORY(c);
           if (prop_category == ucp_M) RRETURN(MATCH_NOMATCH);
           while (eptr < md->end_subject)
             {
@@ -3397,7 +3487,7 @@ for (;;)
               {
               GETCHARLEN(c, eptr, len);
               }
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_category = UCD_CATEGORY(c);
             if (prop_category != ucp_M) break;
             eptr += len;
             }
@@ -3416,16 +3506,14 @@ for (;;)
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM42);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max || eptr >= md->end_subject ||
-               (ctype == OP_ANY && (ims & PCRE_DOTALL) == 0 &&
-                IS_NEWLINE(eptr)))
+               (ctype == OP_ANY && IS_NEWLINE(eptr)))
             RRETURN(MATCH_NOMATCH);
 
           GETCHARINC(c, eptr);
           switch(ctype)
             {
-            case OP_ANY:        /* This is the DOTALL case */
-            break;
-
+            case OP_ANY:        /* This is the non-NL case */
+            case OP_ALLANY:
             case OP_ANYBYTE:
             break;
 
@@ -3577,15 +3665,14 @@ for (;;)
           RMATCH(eptr, ecode, offset_top, md, ims, eptrb, 0, RM43);
           if (rrc != MATCH_NOMATCH) RRETURN(rrc);
           if (fi >= max || eptr >= md->end_subject ||
-               ((ims & PCRE_DOTALL) == 0 && IS_NEWLINE(eptr)))
+               (ctype == OP_ANY && IS_NEWLINE(eptr)))
             RRETURN(MATCH_NOMATCH);
 
           c = *eptr++;
           switch(ctype)
             {
-            case OP_ANY:   /* This is the DOTALL case */
-            break;
-
+            case OP_ANY:     /* This is the non-NL case */
+            case OP_ALLANY:
             case OP_ANYBYTE:
             break;
 
@@ -3718,7 +3805,7 @@ for (;;)
             int len = 1;
             if (eptr >= md->end_subject) break;
             GETCHARLEN(c, eptr, len);
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == ucp_Lu ||
                  prop_chartype == ucp_Ll ||
                  prop_chartype == ucp_Lt) == prop_fail_result)
@@ -3733,7 +3820,7 @@ for (;;)
             int len = 1;
             if (eptr >= md->end_subject) break;
             GETCHARLEN(c, eptr, len);
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_category = UCD_CATEGORY(c);
             if ((prop_category == prop_value) == prop_fail_result)
               break;
             eptr+= len;
@@ -3746,7 +3833,7 @@ for (;;)
             int len = 1;
             if (eptr >= md->end_subject) break;
             GETCHARLEN(c, eptr, len);
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_chartype = UCD_CHARTYPE(c);
             if ((prop_chartype == prop_value) == prop_fail_result)
               break;
             eptr+= len;
@@ -3759,7 +3846,7 @@ for (;;)
             int len = 1;
             if (eptr >= md->end_subject) break;
             GETCHARLEN(c, eptr, len);
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_script = UCD_SCRIPT(c);
             if ((prop_script == prop_value) == prop_fail_result)
               break;
             eptr+= len;
@@ -3788,7 +3875,7 @@ for (;;)
           {
           if (eptr >= md->end_subject) break;
           GETCHARINCTEST(c, eptr);
-          prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+          prop_category = UCD_CATEGORY(c);
           if (prop_category == ucp_M) break;
           while (eptr < md->end_subject)
             {
@@ -3797,7 +3884,7 @@ for (;;)
               {
               GETCHARLEN(c, eptr, len);
               }
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_category = UCD_CATEGORY(c);
             if (prop_category != ucp_M) break;
             eptr += len;
             }
@@ -3819,7 +3906,7 @@ for (;;)
               BACKCHAR(eptr);
               GETCHARLEN(c, eptr, len);
               }
-            prop_category = _pcre_ucp_findprop(c, &prop_chartype, &prop_script);
+            prop_category = UCD_CATEGORY(c);
             if (prop_category != ucp_M) break;
             eptr--;
             }
@@ -3839,23 +3926,11 @@ for (;;)
           case OP_ANY:
           if (max < INT_MAX)
             {
-            if ((ims & PCRE_DOTALL) == 0)
+            for (i = min; i < max; i++)
               {
-              for (i = min; i < max; i++)
-                {
-                if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
-                eptr++;
-                while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
-                }
-              }
-            else
-              {
-              for (i = min; i < max; i++)
-                {
-                if (eptr >= md->end_subject) break;
-                eptr++;
-                while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
-                }
+              if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
+              eptr++;
+              while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
               }
             }
 
@@ -3863,20 +3938,26 @@ for (;;)
 
           else
             {
-            if ((ims & PCRE_DOTALL) == 0)
+            for (i = min; i < max; i++)
               {
-              for (i = min; i < max; i++)
-                {
-                if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
-                eptr++;
-                while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
-                }
-              }
-            else
-              {
-              eptr = md->end_subject;
+              if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
+              eptr++;
+              while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
               }
             }
+          break;
+
+          case OP_ALLANY:
+          if (max < INT_MAX)
+            {
+            for (i = min; i < max; i++)
+              {
+              if (eptr >= md->end_subject) break;
+              eptr++;
+              while (eptr < md->end_subject && (*eptr & 0xc0) == 0x80) eptr++;
+              }
+            }
+          else eptr = md->end_subject;   /* Unlimited UTF-8 repeat */
           break;
 
           /* The byte case is the same as non-UTF8 */
@@ -4064,17 +4145,14 @@ for (;;)
         switch(ctype)
           {
           case OP_ANY:
-          if ((ims & PCRE_DOTALL) == 0)
+          for (i = min; i < max; i++)
             {
-            for (i = min; i < max; i++)
-              {
-              if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
-              eptr++;
-              }
-            break;
+            if (eptr >= md->end_subject || IS_NEWLINE(eptr)) break;
+            eptr++;
             }
-          /* For DOTALL case, fall through and treat as \C */
+          break;
 
+          case OP_ALLANY:
           case OP_ANYBYTE:
           c = max - min;
           if (c > (unsigned int)(md->end_subject - eptr))
@@ -4348,7 +4426,7 @@ Returns:          > 0 => success; value is the number of elements filled in
                  < -1 => some kind of unexpected problem
 */
 
-PCRE_EXP_DEFN int
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_exec(const pcre *argument_re, const pcre_extra *extra_data,
   PCRE_SPTR subject, int length, int start_offset, int options, int *offsets,
   int offsetcount)
@@ -4450,6 +4528,7 @@ end_subject = md->end_subject;
 
 md->endonly = (re->options & PCRE_DOLLAR_ENDONLY) != 0;
 utf8 = md->utf8 = (re->options & PCRE_UTF8) != 0;
+md->jscript_compat = (re->options & PCRE_JAVASCRIPT_COMPAT) != 0;
 
 md->notbol = (options & PCRE_NOTBOL) != 0;
 md->noteol = (options & PCRE_NOTEOL) != 0;
@@ -4495,10 +4574,10 @@ switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options :
         (pcre_uint32)options) & PCRE_NEWLINE_BITS)
   {
   case 0: newline = NEWLINE; break;   /* Compile-time default */
-  case PCRE_NEWLINE_CR: newline = '\r'; break;
-  case PCRE_NEWLINE_LF: newline = '\n'; break;
+  case PCRE_NEWLINE_CR: newline = CHAR_CR; break;
+  case PCRE_NEWLINE_LF: newline = CHAR_NL; break;
   case PCRE_NEWLINE_CR+
-       PCRE_NEWLINE_LF: newline = ('\r' << 8) | '\n'; break;
+       PCRE_NEWLINE_LF: newline = (CHAR_CR << 8) | CHAR_NL; break;
   case PCRE_NEWLINE_ANY: newline = -1; break;
   case PCRE_NEWLINE_ANYCRLF: newline = -2; break;
   default: return PCRE_ERROR_BADNEWLINE;
@@ -4540,11 +4619,11 @@ back the character offset. */
 #ifdef SUPPORT_UTF8
 if (utf8 && (options & PCRE_NO_UTF8_CHECK) == 0)
   {
-  if (_pcre_valid_utf8((uschar *)subject, length) >= 0)
+  if (_pcre_valid_utf8((USPTR)subject, length) >= 0)
     return PCRE_ERROR_BADUTF8;
   if (start_offset > 0 && start_offset < length)
     {
-    int tb = ((uschar *)subject)[start_offset];
+    int tb = ((USPTR)subject)[start_offset];
     if (tb > 127)
       {
       tb &= 0xc0;
@@ -4650,63 +4729,94 @@ for(;;)
     while (iptr < iend) *iptr++ = -1;
     }
 
-  /* Advance to a unique first char if possible. If firstline is TRUE, the
-  start of the match is constrained to the first line of a multiline string.
-  That is, the match must be before or at the first newline. Implement this by
-  temporarily adjusting end_subject so that we stop scanning at a newline. If
-  the match fails at the newline, later code breaks this loop. */
+  /* If firstline is TRUE, the start of the match is constrained to the first
+  line of a multiline string. That is, the match must be before or at the first
+  newline. Implement this by temporarily adjusting end_subject so that we stop
+  scanning at a newline. If the match fails at the newline, later code breaks
+  this loop. */
 
   if (firstline)
     {
     USPTR t = start_match;
+#ifdef SUPPORT_UTF8
+    if (utf8)
+      {
+      while (t < md->end_subject && !IS_NEWLINE(t))
+        {
+        t++;
+        while (t < end_subject && (*t & 0xc0) == 0x80) t++;
+        }
+      }
+    else
+#endif
     while (t < md->end_subject && !IS_NEWLINE(t)) t++;
     end_subject = t;
     }
 
-  /* Now test for a unique first byte */
+  /* There are some optimizations that avoid running the match if a known
+  starting point is not found, or if a known later character is not present.
+  However, there is an option that disables these, for testing and for ensuring
+  that all callouts do actually occur. */
 
-  if (first_byte >= 0)
+  if ((options & PCRE_NO_START_OPTIMIZE) == 0)
     {
-    if (first_byte_caseless)
-      while (start_match < end_subject &&
-             md->lcc[*start_match] != first_byte)
-        start_match++;
-    else
-      while (start_match < end_subject && *start_match != first_byte)
-        start_match++;
-    }
+    /* Advance to a unique first byte if there is one. */
 
-  /* Or to just after a linebreak for a multiline match if possible */
-
-  else if (startline)
-    {
-    if (start_match > md->start_subject + start_offset)
+    if (first_byte >= 0)
       {
-      while (start_match <= end_subject && !WAS_NEWLINE(start_match))
-        start_match++;
-
-      /* If we have just passed a CR and the newline option is ANY or ANYCRLF,
-      and we are now at a LF, advance the match position by one more character.
-      */
-
-      if (start_match[-1] == '\r' &&
-           (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
-           start_match < end_subject &&
-           *start_match == '\n')
-        start_match++;
+      if (first_byte_caseless)
+        while (start_match < end_subject && md->lcc[*start_match] != first_byte)
+          start_match++;
+      else
+        while (start_match < end_subject && *start_match != first_byte)
+          start_match++;
       }
-    }
 
-  /* Or to a non-unique first char after study */
+    /* Or to just after a linebreak for a multiline match */
 
-  else if (start_bits != NULL)
-    {
-    while (start_match < end_subject)
+    else if (startline)
       {
-      register unsigned int c = *start_match;
-      if ((start_bits[c/8] & (1 << (c&7))) == 0) start_match++; else break;
+      if (start_match > md->start_subject + start_offset)
+        {
+#ifdef SUPPORT_UTF8
+        if (utf8)
+          {
+          while (start_match < end_subject && !WAS_NEWLINE(start_match))
+            {
+            start_match++;
+            while(start_match < end_subject && (*start_match & 0xc0) == 0x80)
+              start_match++;
+            }
+          }
+        else
+#endif
+        while (start_match < end_subject && !WAS_NEWLINE(start_match))
+          start_match++;
+
+        /* If we have just passed a CR and the newline option is ANY or ANYCRLF,
+        and we are now at a LF, advance the match position by one more character.
+        */
+
+        if (start_match[-1] == CHAR_CR &&
+             (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
+             start_match < end_subject &&
+             *start_match == CHAR_NL)
+          start_match++;
+        }
       }
-    }
+
+    /* Or to a non-unique first byte after study */
+
+    else if (start_bits != NULL)
+      {
+      while (start_match < end_subject)
+        {
+        register unsigned int c = *start_match;
+        if ((start_bits[c/8] & (1 << (c&7))) == 0) start_match++;
+          else break;
+        }
+      }
+    }   /* Starting optimizations */
 
   /* Restore fudged end_subject */
 
@@ -4718,23 +4828,25 @@ for(;;)
   printf("\n");
 #endif
 
-  /* If req_byte is set, we know that that character must appear in the subject
-  for the match to succeed. If the first character is set, req_byte must be
-  later in the subject; otherwise the test starts at the match point. This
-  optimization can save a huge amount of backtracking in patterns with nested
-  unlimited repeats that aren't going to match. Writing separate code for
-  cased/caseless versions makes it go faster, as does using an autoincrement
-  and backing off on a match.
+  /* If req_byte is set, we know that that character must appear in the
+  subject for the match to succeed. If the first character is set, req_byte
+  must be later in the subject; otherwise the test starts at the match point.
+  This optimization can save a huge amount of backtracking in patterns with
+  nested unlimited repeats that aren't going to match. Writing separate code
+  for cased/caseless versions makes it go faster, as does using an
+  autoincrement and backing off on a match.
 
-  HOWEVER: when the subject string is very, very long, searching to its end can
-  take a long time, and give bad performance on quite ordinary patterns. This
-  showed up when somebody was matching something like /^\d+C/ on a 32-megabyte
-  string... so we don't do this when the string is sufficiently long.
+  HOWEVER: when the subject string is very, very long, searching to its end
+  can take a long time, and give bad performance on quite ordinary patterns.
+  This showed up when somebody was matching something like /^\d+C/ on a
+  32-megabyte string... so we don't do this when the string is sufficiently
+  long.
 
-  ALSO: this processing is disabled when partial matching is requested.
-  */
+  ALSO: this processing is disabled when partial matching is requested, or if
+  disabling is explicitly requested. */
 
-  if (req_byte >= 0 &&
+  if ((options & PCRE_NO_START_OPTIMIZE) == 0 &&
+      req_byte >= 0 &&
       end_subject - start_match < REQ_BYTE_MAX &&
       !md->partial)
     {
@@ -4842,9 +4954,9 @@ for(;;)
   not contain any explicit matches for \r or \n, and the newline option is CRLF
   or ANY or ANYCRLF, advance the match position by one more character. */
 
-  if (start_match[-1] == '\r' &&
+  if (start_match[-1] == CHAR_CR &&
       start_match < end_subject &&
-      *start_match == '\n' &&
+      *start_match == CHAR_NL &&
       (re->flags & PCRE_HASCRORLF) == 0 &&
         (md->nltype == NLTYPE_ANY ||
          md->nltype == NLTYPE_ANYCRLF ||

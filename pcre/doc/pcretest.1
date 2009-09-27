@@ -49,6 +49,11 @@ Output a brief summary these options and then exit.
 Behave as if each regex has the \fB/I\fP modifier; information about the
 compiled pattern is given after compilation.
 .TP 10
+\fB-M\fP
+Behave as if each data line contains the \eM escape sequence; this causes
+PCRE to discover the minimum MATCH_LIMIT and MATCH_LIMIT_RECURSION settings by
+calling \fBpcre_exec()\fP repeatedly with different limits.
+.TP 10
 \fB-m\fP
 Output the size of each compiled pattern after it has been compiled. This is
 equivalent to adding \fB/M\fP to each regular expression. For compatibility
@@ -96,6 +101,12 @@ writes to the second. If it is given only one filename argument, it reads from
 that file and writes to stdout. Otherwise, it reads from stdin and writes to
 stdout, and prompts for each line of input, using "re>" to prompt for regular
 expressions, and "data>" to prompt for data lines.
+.P
+When \fBpcretest\fP is built, a configuration option can specify that it should
+be linked with the \fBlibreadline\fP library. When this is done, if the input
+is from a terminal, it is read using the \fBreadline()\fP function. This
+provides line-editing and history facilities. The output from the \fB-help\fP
+option states whether or not \fBreadline()\fP will be used.
 .P
 The program handles any number of sets of input on a single input file. Each
 set starts with a regular expression, and continues with any number of data
@@ -165,6 +176,7 @@ not correspond to anything in Perl:
   \fB/N\fP              PCRE_NO_AUTO_CAPTURE
   \fB/U\fP              PCRE_UNGREEDY
   \fB/X\fP              PCRE_EXTRA
+  \fB/<JS>\fP           PCRE_JAVASCRIPT_COMPAT
   \fB/<cr>\fP           PCRE_NEWLINE_CR
   \fB/<lf>\fP           PCRE_NEWLINE_LF
   \fB/<crlf>\fP         PCRE_NEWLINE_CRLF
@@ -463,6 +475,21 @@ of an interactive \fBpcretest\fP run.
   data> xyz
   No match
 .sp
+Note that unset capturing substrings that are not followed by one that is set
+are not returned by \fBpcre_exec()\fP, and are not shown by \fBpcretest\fP. In
+the following example, there are two capturing substrings, but when the first
+data line is matched, the second, unset substring is not shown. An "internal"
+unset substring is shown as "<unset>", as for the second data line.
+.sp
+    re> /(a)|(b)/
+  data> a
+   0: a
+   1: a
+  data> b
+   0: b
+   1: <unset>
+   2: b
+.sp
 If the strings contain any non-printing characters, they are output as \e0x
 escapes, or as \ex{...} escapes if the \fB/8\fP modifier was present on the
 pattern. See below for the definition of non-printing characters. If the
@@ -696,6 +723,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 11 September 2007
-Copyright (c) 1997-2007 University of Cambridge.
+Last updated: 10 March 2009
+Copyright (c) 1997-2009 University of Cambridge.
 .fi

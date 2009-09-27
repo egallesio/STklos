@@ -163,7 +163,8 @@ moves through the subject string one character at a time, for all active paths
 through the tree.
 </P>
 <P>
-8. None of the backtracking control verbs such as (*PRUNE) are supported.
+8. Except for (*FAIL), the backtracking control verbs such as (*PRUNE) are not
+supported. (*FAIL) is supported, and behaves like a failing negative assertion.
 </P>
 <br><a name="SEC5" href="#TOC1">ADVANTAGES OF THE ALTERNATIVE ALGORITHM</a><br>
 <P>
@@ -214,9 +215,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC8" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 08 August 2007
+Last updated: 19 April 2008
 <br>
-Copyright &copy; 1997-2007 University of Cambridge.
+Copyright &copy; 1997-2008 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 26-Sep-2009 13:46 (eg)
+### Last file update: 27-Sep-2009 13:19 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -197,20 +197,20 @@ case `uname -s` in
 esac
 
 
-###
-### check for PCRE
-###
-AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
-
-# Test if the user want to force with our PCRE lib
-withval=""
-AC_ARG_WITH(provided-regexp,
-       [  --with-provided-regexp	use our PCRE regexp version])
-
-case $withval in
-  "yes") HAVE_PCRE="no";;
-  "no")  HAVE_PCRE="yes";;
-esac
+#1.0###
+#1.0### check for PCRE
+#1.0###
+#1.0AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
+#1.0
+#1.0# Test if the user want to force with our PCRE lib
+#1.0withval=""
+#1.0AC_ARG_WITH(provided-regexp,
+#1.0       [  --with-provided-regexp	use our PCRE regexp version])
+#1.0
+#1.0case $withval in
+#1.0  "yes") HAVE_PCRE="no";;
+#1.0  "no")  HAVE_PCRE="yes";;
+#1.0esac
 
 ###
 ### configure libraries
@@ -252,25 +252,25 @@ else
   AC_DEFINE(HAVE_GC, [], [Use system GC])
 fi
 
-if test "$HAVE_PCRE" = "no"
-then 
-   echo "No PCRE library. Using the one provided with the package"
-   PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
-   -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
-
-   (cd pcre; CC=$CC CFLAGS="$CFLAGS $PCRE_FLAGS" sh ./configure \
-    --prefix=$prefix --disable-shared --disable-cpp)
-    PCRE=pcre
-    PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
-    PCREINC="-I../pcre"
-    DEF_PCRE=""
-else 
-      echo "Using the system PCRE library"
-     PCRE=""
-     PCRELIB="-lpcre -lpcreposix"
-     PCREINC=""
-     DEF_PCRE="#define HAVE_PCRE 1"
-fi
+#1.0 if test "$HAVE_PCRE" = "no"
+#1.0 then 
+#1.0    echo "No PCRE library. Using the one provided with the package"
+#1.0    PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
+#1.0    -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
+#1.0 
+#1.0    (cd pcre; CC=$CC CFLAGS="$CFLAGS $PCRE_FLAGS" sh ./configure \
+#1.0     --prefix=$prefix --disable-shared --disable-cpp)
+#1.0     PCRE=pcre
+#1.0     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
+#1.0     PCREINC="-I../pcre"
+#1.0     DEF_PCRE=""
+#1.0 else 
+#1.0       echo "Using the system PCRE library"
+#1.0      PCRE=""
+#1.0      PCRELIB="-lpcre -lpcreposix"
+#1.0      PCREINC=""
+#1.0      DEF_PCRE="#define HAVE_PCRE 1"
+#1.0 fi
 
 
 #PCRELIBS="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
@@ -280,22 +280,59 @@ fi
 #   *)       PCRETARGET="libpcre.la libpcreposix.la";;
 # esac
 
-#
+# ----------------------------------------------------------------------
+# PCRE support 
+# ----------------------------------------------------------------------
+echo "*****"
+echo "***** Regexp support"
+echo "*****"
+
+AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
+
+# Test if the user want to force with our PCRE lib
+AC_ARG_WITH(provided-regexp,
+       [  --with-provided-regexp	use the provided Regexp (PCRE) library],
+       HAVE_PCRE="no", HAVE_PCRE="yes")
+
+case $HAVE_PCRE in
+  no)
+       echo "... Configuring libpcre"
+       PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
+       	           -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
+       (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
+           --prefix=$prefix --disable-shared --disable-cpp)
+       PCRE=pcre
+       PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
+       PCREINC="-I../pcre"
+       DEF_PCRE=""
+       pcrelib="use provided library";;
+  yes)
+       echo "... Using system libpcre library"
+       PCRE=""
+       PCRELIB="-lpcre -lpcreposix"
+       PCREINC=""
+       DEF_PCRE="#define HAVE_PCRE 1"
+       pcrelib="use the system library";;
+esac
+
+
+# ----------------------------------------------------------------------
 # FFI support 
-#
+# ----------------------------------------------------------------------
+echo "*****"
+echo "***** FFI support"
+echo "*****"
+
 AC_CHECK_LIB(ffi, ffi_prep_cif, HAVE_FFI="yes", HAVE_FFI="no", $LIBS)
 
 # Test if the user want to force with our FFI lib
-withval=
 AC_ARG_WITH(provided-ffi,
        [  --with-provided-ffi	use the provided FFI library],
        HAVE_FFI="no", HAVE_FFI="yes")
 
 case $HAVE_FFI in
   no)
-       echo "*****"
-       echo "***** Configuring libffi"
-       echo "*****"
+       echo "... Configuring libffi"
        (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
            --disable-structs --disable-raw-api --disable-shared \
 	   --prefix=$prefix)
@@ -304,9 +341,7 @@ case $HAVE_FFI in
        FFI="ffi"
        ffilib="use provided library";;
   yes)
-       echo "*****"
-       echo "***** Using system libffi library"
-       echo "*****"
+       echo "... Using system libffi library"
        CFLAGS="$CFLAGS `pkg-config libffi --cflags`"
        LIBS="$LIBS `pkg-config libffi --libs`"
        FFI=""
@@ -349,34 +384,6 @@ OS_NAME=$OS
 ### Place version number in VERSION file
 ### echo "VERSION=${VERSION}">VERSION
 
-#1.0 ### GTK+/GNOME support
-#1.0 HAVE_GNOME="undef"
-#1.0 
-#1.0 if test "$USE_GTK" = "no" ;then
-#1.0    USE_GNOME="no"
-#1.0 fi
-#1.0 
-#1.0 
-#1.0 if test "$USE_GTK" = "yes"
-#1.0 then
-#1.0   GTKLOS=gtklos	
-#1.0   EXAMPLES="examples examples/images"
-#1.0 
-#1.0   if test "$USE_GNOME" = "yes"
-#1.0   then
-#1.0     HAVE_GNOME="define"
-#1.0     GTK_CONFIG_LIBS=`$GNOME_CONFIG --libs  gnomecanvaspixbuf`
-#1.0     GTK_CONFIG_CFLAGS=`$GNOME_CONFIG --cflags gnomeui gnomecanvaspixbuf`
-#1.0   else
-#1.0     GTK_CONFIG_LIBS=`$GTK_CONFIG --libs`
-#1.0     GTK_CONFIG_CFLAGS=`$GTK_CONFIG --cflags`
-#1.0   fi
-#1.0 else
-#1.0   GTKLOS=
-#1.0   EXAMPLES=
-#1.0   GTK_CONFIG_LIBS=
-#1.0   GTK_CONFIG_CFLAGS=
-#1.0 fi
 
 ###
 ### display some informations for the user
@@ -396,18 +403,13 @@ else
   gclib="use the system library"
 fi
 
-if test "$HAVE_PCRE" = "no"
-then
-  pcrelib="compile provided library"
-else
-  pcrelib="use the system library"
-fi
-
-#1.0 # Compute SVN_URL 
-#1.0 SVN_URL=$SVN_REPOSITORY
-#1.0 if test "$SVN_REPOSITORY" = "" ;then
-#1.0    SVN_URL="NOT_AVAILABLE"
+#1.0 if test "$HAVE_PCRE" = "no"
+#1.0 then
+#1.0   pcrelib="compile provided library"
+#1.0 else
+#1.0   pcrelib="use the system library"
 #1.0 fi
+
 
 # LURC adjustment
 LURCDIR=""
@@ -451,19 +453,13 @@ AC_SUBST(SH_MAIN_LOAD_FLAGS)
 AC_SUBST(COMPOBJ)
 AC_SUBST(COMPSRC)
 AC_SUBST(STACK_DIRECTION)
-#1.0 AC_SUBST(GTKLOS)
-#1.0 AC_SUBST(GTK_CONFIG_LIBS)
-#1.0 AC_SUBST(GTK_CONFIG_CFLAGS)
-#1.0 AC_SUBST(EXAMPLES)
 AC_SUBST(HAVE_GNOME)
-#1.0 AC_SUBST(HAVE_LDAP)
 AC_SUBST(LDAP_LIB)
-AC_SUBST(PCRETARGET)
+#1.0 AC_SUBST(PCRETARGET)
 AC_SUBST(PCRE)
 AC_SUBST(PCRELIB)
 AC_SUBST(PCREINC)
 AC_SUBST(DEF_PCRE)
-#1.0 AC_SUBST(SVN_URL)
 AC_SUBST(THREADS)
 AC_SUBST(LURCDIR)
 AC_SUBST(CALLCC_STK)
@@ -494,9 +490,6 @@ echo " Compilation flags: " $CFLAGS
 echo "    Bignum library: " $biglib
 echo "    Regexp library: " $pcrelib
 echo "        GC library: " $gclib
-#1.0 echo "      LDAP support: " $USE_LDAP
-#1.0 echo "      GTK+ support: " $USE_GTK 
-#1.0 echo "     GNOME support: " $USE_GNOME 
 echo "       FFI library: " $ffilib
 echo "    Thread support: " $THREADS 
 echo " "

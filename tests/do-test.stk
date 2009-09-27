@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update: 26-Sep-2009 10:29 (eg)
+;;;; Last file update: 27-Sep-2009 18:56 (eg)
 ;;;;
 
 (load "./test.stk")
@@ -38,6 +38,7 @@
   (load "test-md5.stk")
   (load "test-base64.stk")
   (load "test-box.stk")
+  (load "test-regexp.stk")
   (load "test-ffi.stk")
   (load "test-r5rs-pitfall.stk"))
 

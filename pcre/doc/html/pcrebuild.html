@@ -26,9 +26,11 @@ man page, in case the conversion went wrong.
 <li><a name="TOC11" href="#SEC11">LIMITING PCRE RESOURCE USAGE</a>
 <li><a name="TOC12" href="#SEC12">CREATING CHARACTER TABLES AT BUILD TIME</a>
 <li><a name="TOC13" href="#SEC13">USING EBCDIC CODE</a>
-<li><a name="TOC14" href="#SEC14">SEE ALSO</a>
-<li><a name="TOC15" href="#SEC15">AUTHOR</a>
-<li><a name="TOC16" href="#SEC16">REVISION</a>
+<li><a name="TOC14" href="#SEC14">PCREGREP OPTIONS FOR COMPRESSED FILE SUPPORT</a>
+<li><a name="TOC15" href="#SEC15">PCRETEST OPTION FOR LIBREADLINE SUPPORT</a>
+<li><a name="TOC16" href="#SEC16">SEE ALSO</a>
+<li><a name="TOC17" href="#SEC17">AUTHOR</a>
+<li><a name="TOC18" href="#SEC18">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE BUILD-TIME OPTIONS</a><br>
 <P>
@@ -65,7 +67,7 @@ to the <b>configure</b> command.
 </P>
 <br><a name="SEC3" href="#TOC1">UTF-8 SUPPORT</a><br>
 <P>
-To build PCRE with support for UTF-8 character strings, add
+To build PCRE with support for UTF-8 Unicode character strings, add
 <pre>
   --enable-utf8
 </pre>
@@ -73,6 +75,13 @@ to the <b>configure</b> command. Of itself, this does not make PCRE treat
 strings as UTF-8. As well as compiling PCRE with this option, you also have
 have to set the PCRE_UTF8 option when you call the <b>pcre_compile()</b>
 function.
+</P>
+<P>
+If you set --enable-utf8 when compiling in an EBCDIC environment, PCRE expects
+its input to be either ASCII or UTF-8 (depending on the runtime option). It is
+not possible to support both EBCDIC and UTF-8 codes in the same version of the
+library. Consequently, --enable-utf8 and --enable-ebcdic are mutually
+exclusive.
 </P>
 <br><a name="SEC4" href="#TOC1">UNICODE CHARACTER PROPERTY SUPPORT</a><br>
 <P>
@@ -96,9 +105,9 @@ documentation.
 </P>
 <br><a name="SEC5" href="#TOC1">CODE VALUE OF NEWLINE</a><br>
 <P>
-By default, PCRE interprets character 10 (linefeed, LF) as indicating the end
+By default, PCRE interprets the linefeed (LF) character as indicating the end
 of a line. This is the normal newline character on Unix-like systems. You can
-compile PCRE to use character 13 (carriage return, CR) instead, by adding
+compile PCRE to use carriage return (CR) instead, by adding
 <pre>
   --enable-newline-is-cr
 </pre>
@@ -268,13 +277,58 @@ EBCDIC environment by adding
 </pre>
 to the <b>configure</b> command. This setting implies
 --enable-rebuild-chartables. You should only use it if you know that you are in
-an EBCDIC environment (for example, an IBM mainframe operating system).
+an EBCDIC environment (for example, an IBM mainframe operating system). The
+--enable-ebcdic option is incompatible with --enable-utf8.
 </P>
-<br><a name="SEC14" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC14" href="#TOC1">PCREGREP OPTIONS FOR COMPRESSED FILE SUPPORT</a><br>
+<P>
+By default, <b>pcregrep</b> reads all files as plain text. You can build it so
+that it recognizes files whose names end in <b>.gz</b> or <b>.bz2</b>, and reads
+them with <b>libz</b> or <b>libbz2</b>, respectively, by adding one or both of
+<pre>
+  --enable-pcregrep-libz
+  --enable-pcregrep-libbz2
+</pre>
+to the <b>configure</b> command. These options naturally require that the
+relevant libraries are installed on your system. Configuration will fail if
+they are not.
+</P>
+<br><a name="SEC15" href="#TOC1">PCRETEST OPTION FOR LIBREADLINE SUPPORT</a><br>
+<P>
+If you add
+<pre>
+  --enable-pcretest-libreadline
+</pre>
+to the <b>configure</b> command, <b>pcretest</b> is linked with the
+<b>libreadline</b> library, and when its input is from a terminal, it reads it
+using the <b>readline()</b> function. This provides line-editing and history
+facilities. Note that <b>libreadline</b> is GPL-licenced, so if you distribute a
+binary of <b>pcretest</b> linked in this way, there may be licensing issues.
+</P>
+<P>
+Setting this option causes the <b>-lreadline</b> option to be added to the
+<b>pcretest</b> build. In many operating environments with a sytem-installed
+<b>libreadline</b> this is sufficient. However, in some environments (e.g.
+if an unmodified distribution version of readline is in use), some extra
+configuration may be necessary. The INSTALL file for <b>libreadline</b> says
+this:
+<pre>
+  "Readline uses the termcap functions, but does not link with the
+  termcap or curses library itself, allowing applications which link
+  with readline the to choose an appropriate library."
+</pre>
+If your environment has not been set up so that an appropriate library is
+automatically included, you may need to add something like
+<pre>
+  LIBS="-ncurses"
+</pre>
+immediately before the <b>configure</b> command.
+</P>
+<br><a name="SEC16" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcreapi</b>(3), <b>pcre_config</b>(3).
 </P>
-<br><a name="SEC15" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC17" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -283,11 +337,11 @@ University Computing Service
 Cambridge CB2 3QH, England.
 <br>
 </P>
-<br><a name="SEC16" href="#TOC1">REVISION</a><br>
+<br><a name="SEC18" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 21 September 2007
+Last updated: 17 March 2009
 <br>
-Copyright &copy; 1997-2007 University of Cambridge.
+Copyright &copy; 1997-2009 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

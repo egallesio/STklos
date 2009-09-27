@@ -213,87 +213,103 @@ static void TestReplace() {
     const char *original;
     const char *single;
     const char *global;
+    int global_count;         // the expected return value from ReplaceAll
   };
   static const ReplaceTest tests[] = {
     { "(qu|[b-df-hj-np-tv-z]*)([a-z]+)",
       "\\2\\1ay",
       "the quick brown fox jumps over the lazy dogs.",
       "ethay quick brown fox jumps over the lazy dogs.",
-      "ethay ickquay ownbray oxfay umpsjay overay ethay azylay ogsday." },
+      "ethay ickquay ownbray oxfay umpsjay overay ethay azylay ogsday.",
+      9 },
     { "\\w+",
       "\\0-NOSPAM",
       "paul.haahr@google.com",
       "paul-NOSPAM.haahr@google.com",
-      "paul-NOSPAM.haahr-NOSPAM@google-NOSPAM.com-NOSPAM" },
+      "paul-NOSPAM.haahr-NOSPAM@google-NOSPAM.com-NOSPAM",
+      4 },
     { "^",
       "(START)",
       "foo",
       "(START)foo",
-      "(START)foo" },
+      "(START)foo",
+      1 },
     { "^",
       "(START)",
       "",
       "(START)",
-      "(START)" },
+      "(START)",
+      1 },
     { "$",
       "(END)",
       "",
       "(END)",
-      "(END)" },
+      "(END)",
+      1 },
     { "b",
       "bb",
       "ababababab",
       "abbabababab",
-      "abbabbabbabbabb" },
+      "abbabbabbabbabb",
+       5 },
     { "b",
       "bb",
       "bbbbbb",
       "bbbbbbb",
-      "bbbbbbbbbbbb" },
+      "bbbbbbbbbbbb",
+      6 },
     { "b+",
       "bb",
       "bbbbbb",
       "bb",
-      "bb" },
+      "bb",
+      1 },
     { "b*",
       "bb",
       "bbbbbb",
       "bb",
-      "bb" },
+      "bb",
+      1 },
     { "b*",
       "bb",
       "aaaaa",
       "bbaaaaa",
-      "bbabbabbabbabbabb" },
+      "bbabbabbabbabbabb",
+      6 },
     { "b*",
       "bb",
       "aa\naa\n",
       "bbaa\naa\n",
-      "bbabbabb\nbbabbabb\nbb" },
+      "bbabbabb\nbbabbabb\nbb",
+      7 },
     { "b*",
       "bb",
       "aa\raa\r",
       "bbaa\raa\r",
-      "bbabbabb\rbbabbabb\rbb" },
+      "bbabbabb\rbbabbabb\rbb",
+      7 },
     { "b*",
       "bb",
       "aa\r\naa\r\n",
       "bbaa\r\naa\r\n",
-      "bbabbabb\r\nbbabbabb\r\nbb" },
+      "bbabbabb\r\nbbabbabb\r\nbb",
+      7 },
 #ifdef SUPPORT_UTF8
     { "b*",
       "bb",
       "\xE3\x83\x9B\xE3\x83\xBC\xE3\x83\xA0\xE3\x81\xB8",   // utf8
       "bb\xE3\x83\x9B\xE3\x83\xBC\xE3\x83\xA0\xE3\x81\xB8",
-      "bb\xE3\x83\x9B""bb""\xE3\x83\xBC""bb""\xE3\x83\xA0""bb""\xE3\x81\xB8""bb" },
+      "bb\xE3\x83\x9B""bb""\xE3\x83\xBC""bb""\xE3\x83\xA0""bb""\xE3\x81\xB8""bb",
+      5 },
     { "b*",
       "bb",
       "\xE3\x83\x9B\r\n\xE3\x83\xBC\r\xE3\x83\xA0\n\xE3\x81\xB8\r\n",   // utf8
       "bb\xE3\x83\x9B\r\n\xE3\x83\xBC\r\xE3\x83\xA0\n\xE3\x81\xB8\r\n",
       ("bb\xE3\x83\x9B""bb\r\nbb""\xE3\x83\xBC""bb\rbb""\xE3\x83\xA0"
-       "bb\nbb""\xE3\x81\xB8""bb\r\nbb") },
+       "bb\nbb""\xE3\x81\xB8""bb\r\nbb"),
+      9 },
 #endif
-    { "", NULL, NULL, NULL, NULL }
+    { "", NULL, NULL, NULL, NULL, 0 }
   };
 
 #ifdef SUPPORT_UTF8
@@ -309,8 +325,9 @@ static void TestReplace() {
     CHECK(re.Replace(t->rewrite, &one));
     CHECK_EQ(one, t->single);
     string all(t->original);
-    CHECK(re.GlobalReplace(t->rewrite, &all) > 0);
+    const int replace_count = re.GlobalReplace(t->rewrite, &all);
     CHECK_EQ(all, t->global);
+    CHECK_EQ(replace_count, t->global_count);
   }
 
   // One final test: test \r\n replacement when we're not in CRLF mode
@@ -318,14 +335,14 @@ static void TestReplace() {
     RE re("b*", RE_Options(PCRE_NEWLINE_CR).set_utf8(support_utf8));
     assert(re.error().empty());
     string all("aa\r\naa\r\n");
-    CHECK(re.GlobalReplace("bb", &all) > 0);
+    CHECK_EQ(re.GlobalReplace("bb", &all), 9);
     CHECK_EQ(all, string("bbabbabb\rbb\nbbabbabb\rbb\nbb"));
   }
   {
     RE re("b*", RE_Options(PCRE_NEWLINE_LF).set_utf8(support_utf8));
     assert(re.error().empty());
     string all("aa\r\naa\r\n");
-    CHECK(re.GlobalReplace("bb", &all) > 0);
+    CHECK_EQ(re.GlobalReplace("bb", &all), 9);
     CHECK_EQ(all, string("bbabbabb\rbb\nbbabbabb\rbb\nbb"));
   }
   // TODO: test what happens when no PCRE_NEWLINE_* flag is set.
@@ -480,6 +497,7 @@ static void TestQuotaMetaSimple() {
   TestQuoteMeta("((a|b)c?d*e+[f-h]i)");
   TestQuoteMeta("((?!)xxx).*yyy");
   TestQuoteMeta("([");
+  TestQuoteMeta(string("foo\0bar", 7));
 }
 
 static void TestQuoteMetaSimpleNegative() {
@@ -856,6 +874,24 @@ int main(int argc, char** argv) {
   CHECK(RE("(\\w+):(\\d+)").FullMatch("ruby:1234", &s, &i));
   CHECK_EQ(s, string("ruby"));
   CHECK_EQ(i, 1234);
+
+  // Ignore non-void* NULL arg
+  CHECK(RE("he(.*)lo").FullMatch("hello", (char*)NULL));
+  CHECK(RE("h(.*)o").FullMatch("hello", (string*)NULL));
+  CHECK(RE("h(.*)o").FullMatch("hello", (StringPiece*)NULL));
+  CHECK(RE("(.*)").FullMatch("1234", (int*)NULL));
+#ifdef HAVE_LONG_LONG
+  CHECK(RE("(.*)").FullMatch("1234567890123456", (long long*)NULL));
+#endif
+  CHECK(RE("(.*)").FullMatch("123.4567890123456", (double*)NULL));
+  CHECK(RE("(.*)").FullMatch("123.4567890123456", (float*)NULL));
+
+  // Fail on non-void* NULL arg if the match doesn't parse for the given type.
+  CHECK(!RE("h(.*)lo").FullMatch("hello", &s, (char*)NULL));
+  CHECK(!RE("(.*)").FullMatch("hello", (int*)NULL));
+  CHECK(!RE("(.*)").FullMatch("1234567890123456", (int*)NULL));
+  CHECK(!RE("(.*)").FullMatch("hello", (double*)NULL));
+  CHECK(!RE("(.*)").FullMatch("hello", (float*)NULL));
 
   // Ignored arg
   CHECK(RE("(\\w+)(:)(\\d+)").FullMatch("ruby:1234", &s, (void*)NULL, &i));

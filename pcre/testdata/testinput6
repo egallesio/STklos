@@ -763,7 +763,7 @@ of case for anything other than the ASCII letters. /
     \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
 
 /The next two are special cases where the lengths of the different cases of the 
-same character differ. The first went wrong with heap fram storage; the 2nd
+same character differ. The first went wrong with heap frame storage; the 2nd
 was broken in all cases./
 
 /^\x{023a}+?(\x{0130}+)/8i
@@ -831,5 +831,124 @@ was broken in all cases./
 /(\P{Yi}{0,3}?\277)*/
 
 /(\p{Yi}{0,3}+\277)*/
+
+/^[\p{Arabic}]/8
+    \x{60e} 
+    \x{656} 
+    \x{657} 
+    \x{658} 
+    \x{659} 
+    \x{65a} 
+    \x{65b} 
+    \x{65c} 
+    \x{65d} 
+    \x{65e} 
+    \x{66a} 
+    \x{6e9} 
+    \x{6ef}
+    \x{6fa}  
+    ** Failers
+    \x{600}
+    \x{650}
+    \x{651}  
+    \x{652}  
+    \x{653}  
+    \x{654} 
+    \x{655} 
+    \x{65f}  
+    
+/^\p{Cyrillic}/8
+    \x{1d2b} 
+    
+/^\p{Common}/8
+    \x{589}
+    \x{60c}
+    \x{61f}  
+    \x{964}
+    \x{965}  
+    \x{970}  
+
+/^\p{Inherited}/8
+    \x{64b}
+    \x{654}
+    \x{655}
+    \x{200c} 
+    ** Failers
+    \x{64a}
+    \x{656}     
+
+/^\p{Shavian}/8
+    \x{10450}
+    \x{1047f}
+    
+/^\p{Deseret}/8
+    \x{10400}
+    \x{1044f}
+    
+/^\p{Osmanya}/8
+    \x{10480}
+    \x{1049d}
+    \x{104a0}
+    \x{104a9}
+    ** Failers
+    \x{1049e}
+    \x{1049f}
+    \x{104aa}           
+
+/\p{Zl}{2,3}+/8BZ
+    \xe2\x80\xa8\xe2\x80\xa8
+    \x{2028}\x{2028}\x{2028}
+    
+/\p{Zl}/8BZ
+
+/\p{Lu}{3}+/8BZ
+
+/\pL{2}+/8BZ
+
+/\p{Cc}{2}+/8BZ
+
+/\x{c0}+\x{116}+/8i
+    \x{c0}\x{e0}\x{116}\x{117}
+
+/[\x{c0}\x{116}]+/8i
+    \x{c0}\x{e0}\x{116}\x{117}
+
+/\p{Carian}\p{Cham}\p{Kayah_Li}\p{Lepcha}\p{Lycian}\p{Lydian}\p{Ol_Chiki}\p{Rejang}\p{Saurashtra}\p{Sundanese}\p{Vai}/8
+    \x{102A4}\x{AA52}\x{A91D}\x{1C46}\x{10283}\x{1092E}\x{1C6B}\x{A93B}\x{A8BF}\x{1BA0}\x{A50A}====
+
+/\x{a77d}\x{1d79}/8i
+    \x{a77d}\x{1d79}
+    \x{1d79}\x{a77d} 
+
+/\x{a77d}\x{1d79}/8
+    \x{a77d}\x{1d79}
+    ** Failers 
+    \x{1d79}\x{a77d} 
+
+/(A)\1/8i
+    AA
+    Aa
+    aa
+    aA
+
+/(\x{de})\1/8i
+    \x{de}\x{de}
+    \x{de}\x{fe}
+    \x{fe}\x{fe}
+    \x{fe}\x{de}
+
+/(\x{10a})\1/8i
+    \x{10a}\x{10a}
+    \x{10a}\x{10b}
+    \x{10b}\x{10b}
+    \x{10b}\x{10a}
+    
+/The next two tests are for property support in non-UTF-8 mode/
+
+/(?:\p{Lu}|\x20)+/
+    \x41\x20\x50\xC2\x54\xC9\x20\x54\x4F\x44\x41\x59
+
+/[\p{Lu}\x20]+/
+    \x41\x20\x50\xC2\x54\xC9\x20\x54\x4F\x44\x41\x59
 
 / End of testinput6 /

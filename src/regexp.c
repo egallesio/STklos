@@ -1,7 +1,7 @@
 /*
  * regexp.c	-- STklos Regexps
  * 
- * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,14 +21,14 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 24-Nov-2000 10:35 (eg)
- * Last file update: 24-Mar-2007 22:19 (eg)
+ * Last file update: 27-Sep-2009 19:07 (eg)
  */
 
 #include "stklos.h"
 
 /* 
- * All the complexity comes from MAC OS. Idon't remember why I had to do
- * this, but I remeber the culprit !!!
+ * All the complexity comes from MAC OS. I don't remember why I had to do
+ * this, but I remember the culprit !!!
  */
 
 #ifdef HAVE_PCRE
@@ -52,7 +52,7 @@ struct regexp_obj {
 
 #define REGEXPP(p) 		(BOXED_TYPE_EQ((p), tc_regexp))
 #define REGEXP_BUFFER(p)	(((struct regexp_obj *) (p))->buffer)
-#define REGEXP_DEPTH(p)		((((struct regexp_obj *) (p))->buffer).re_nsub)
+#define REGEXP_DEPTH(p)	((((struct regexp_obj *) (p))->buffer).re_nsub)
 
 
 static void error_bad_string(SCM obj)
@@ -245,7 +245,7 @@ DEFINE_PRIMITIVE("regexp-quote", regexp_quote, subr1, (SCM str))
   for (s = STRING_CHARS(str), len=0; s < end; s++, len++)
     if (strchr(REGEXP_SPECIALS, *s)) len++;
   
-  if (len > STRING_SIZE(s)) {
+  if (len > STRING_SIZE(str)) {
     /* make new string */
     z = STk_makestring(len, NULL);
     for (s = STRING_CHARS(str), t = STRING_CHARS(z);

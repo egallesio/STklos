@@ -167,7 +167,7 @@ in a Perl-compatible manner. A sample program that demonstrates the simplest
 way of using them is provided in the file called <i>pcredemo.c</i> in the source
 distribution. The
 <a href="pcresample.html"><b>pcresample</b></a>
-documentation describes how to run it.
+documentation describes how to compile and run it.
 </P>
 <P>
 A second matching function, <b>pcre_dfa_exec()</b>, which is not
@@ -333,8 +333,10 @@ properties is available; otherwise it is set to zero.
 </pre>
 The output is an integer whose value specifies the default character sequence
 that is recognized as meaning "newline". The four values that are supported
-are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for ANYCRLF, and -1 for ANY. The
-default should normally be the standard sequence for your operating system.
+are: 10 for LF, 13 for CR, 3338 for CRLF, -2 for ANYCRLF, and -1 for ANY.
+Though they are derived from ASCII, the same values are returned in EBCDIC
+environments. The default should normally correspond to the standard sequence
+for your operating system.
 <pre>
   PCRE_CONFIG_BSR
 </pre>
@@ -361,13 +363,13 @@ documentation.
 <pre>
   PCRE_CONFIG_MATCH_LIMIT
 </pre>
-The output is an integer that gives the default limit for the number of
+The output is a long integer that gives the default limit for the number of
 internal matching function calls in a <b>pcre_exec()</b> execution. Further
 details are given with <b>pcre_exec()</b> below.
 <pre>
   PCRE_CONFIG_MATCH_LIMIT_RECURSION
 </pre>
-The output is an integer that gives the default limit for the depth of
+The output is a long integer that gives the default limit for the depth of
 recursion when calling the internal matching function in a <b>pcre_exec()</b>
 execution. Further details are given with <b>pcre_exec()</b> below.
 <pre>
@@ -414,14 +416,15 @@ argument, which is an address (see below).
 <P>
 The <i>options</i> argument contains various bit settings that affect the
 compilation. It should be zero if no options are required. The available
-options are described below. Some of them, in particular, those that are
-compatible with Perl, can also be set and unset from within the pattern (see
-the detailed description in the
+options are described below. Some of them (in particular, those that are
+compatible with Perl, but also some others) can also be set and unset from
+within the pattern (see the detailed description in the
 <a href="pcrepattern.html"><b>pcrepattern</b></a>
-documentation). For these options, the contents of the <i>options</i> argument
-specifies their initial settings at the start of compilation and execution. The
-PCRE_ANCHORED and PCRE_NEWLINE_<i>xxx</i> options can be set at the time of
-matching as well as at compile time.
+documentation). For those options that can be different in different parts of
+the pattern, the contents of the <i>options</i> argument specifies their initial
+settings at the start of compilation and execution. The PCRE_ANCHORED and
+PCRE_NEWLINE_<i>xxx</i> options can be set at the time of matching as well as at
+compile time.
 </P>
 <P>
 If <i>errptr</i> is NULL, <b>pcre_compile()</b> returns NULL immediately.
@@ -558,6 +561,22 @@ If this option is set, an unanchored pattern is required to match before or at
 the first newline in the subject string, though the matched text may continue
 over the newline.
 <pre>
+  PCRE_JAVASCRIPT_COMPAT
+</pre>
+If this option is set, PCRE's behaviour is changed in some ways so that it is
+compatible with JavaScript rather than Perl. The changes are as follows:
+</P>
+<P>
+(1) A lone closing square bracket in a pattern causes a compile-time error,
+because this is illegal in JavaScript (by default it is treated as a data
+character). Thus, the pattern AB]CD becomes illegal when this option is set.
+</P>
+<P>
+(2) At run time, a back reference to an unset subpattern group matches an empty
+string (by default this causes the current matching alternative to fail). A
+pattern such as (\1)(a) succeeds when this option is set (assuming it can find
+an "a" in the subject), whereas it fails by default, for Perl compatibility.
+<pre>
   PCRE_MULTILINE
 </pre>
 By default, PCRE treats the subject string as consisting of a single line of
@@ -673,7 +692,7 @@ out of use. To avoid confusion, they have not been re-used.
    9  nothing to repeat
   10  [this code is not in use]
   11  internal error: unexpected repeat
-  12  unrecognized character after (?
+  12  unrecognized character after (? or (?-
   13  POSIX named classes are supported only within a class
   14  missing )
   15  reference to non-existent subpattern
@@ -681,7 +700,7 @@ out of use. To avoid confusion, they have not been re-used.
   17  unknown option bit(s) set
   18  missing ) after comment
   19  [this code is not in use]
-  20  regular expression too large
+  20  regular expression is too large
   21  failed to get memory
   22  unmatched parentheses
   23  internal error: code overflow
@@ -710,7 +729,7 @@ out of use. To avoid confusion, they have not been re-used.
   46  malformed \P or \p sequence
   47  unknown property name after \P or \p
   48  subpattern name is too long (maximum 32 characters)
-  49  too many named subpatterns (maximum 10,000)
+  49  too many named subpatterns (maximum 10000)
   50  [this code is not in use]
   51  octal value is greater than \377 (not in UTF-8 mode)
   52  internal error: overran compiling workspace
@@ -718,10 +737,18 @@ out of use. To avoid confusion, they have not been re-used.
   54  DEFINE group contains more than one branch
   55  repeating a DEFINE group is not allowed
   56  inconsistent NEWLINE options
-  57  \g is not followed by a braced name or an optionally braced
-        non-zero number
-  58  (?+ or (?- or (?(+ or (?(- must be followed by a non-zero number
-</PRE>
+  57  \g is not followed by a braced, angle-bracketed, or quoted
+        name/number or by a plain number
+  58  a numbered reference must not be zero
+  59  (*VERB) with an argument is not supported
+  60  (*VERB) not recognized
+  61  number is too big
+  62  subpattern name expected
+  63  digit expected after (?+
+  64  ] is an invalid data character in JavaScript compatibility mode
+</pre>
+The numbers 32 and 10000 in errors 48 and 49 are defaults; different values may
+be used if the limits were changed when PCRE was built.
 </P>
 <br><a name="SEC9" href="#TOC1">STUDYING A PATTERN</a><br>
 <P>
@@ -931,9 +958,9 @@ explicit match is either a literal CR or LF character, or \r or \n.
 <pre>
   PCRE_INFO_JCHANGED
 </pre>
-Return 1 if the (?J) option setting is used in the pattern, otherwise 0. The
-fourth argument should point to an <b>int</b> variable. The (?J) internal option
-setting changes the local PCRE_DUPNAMES option.
+Return 1 if the (?J) or (?-J) option setting is used in the pattern, otherwise
+0. The fourth argument should point to an <b>int</b> variable. (?J) and
+(?-J) set and unset the local PCRE_DUPNAMES option, respectively.
 <pre>
   PCRE_INFO_LASTLITERAL
 </pre>
@@ -1218,7 +1245,8 @@ Option bits for <b>pcre_exec()</b>
 <P>
 The unused bits of the <i>options</i> argument for <b>pcre_exec()</b> must be
 zero. The only bits that may be set are PCRE_ANCHORED, PCRE_NEWLINE_<i>xxx</i>,
-PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_UTF8_CHECK and PCRE_PARTIAL.
+PCRE_NOTBOL, PCRE_NOTEOL, PCRE_NOTEMPTY, PCRE_NO_START_OPTIMIZE,
+PCRE_NO_UTF8_CHECK and PCRE_PARTIAL.
 <pre>
   PCRE_ANCHORED
 </pre>
@@ -1310,6 +1338,16 @@ PCRE_NOTEMPTY and PCRE_ANCHORED, and then if that fails by advancing the
 starting offset (see below) and trying an ordinary match again. There is some
 code that demonstrates how to do this in the <i>pcredemo.c</i> sample program.
 <pre>
+  PCRE_NO_START_OPTIMIZE
+</pre>
+There are a number of optimizations that <b>pcre_exec()</b> uses at the start of
+a match, in order to speed up the process. For example, if it is known that a
+match must start with a specific character, it searches the subject for that
+character, and fails immediately if it cannot find it, without actually running
+the main matching function. When callouts are in use, these optimizations can
+cause them to be skipped. This option disables the "start-up" optimizations,
+causing performance to suffer, but ensuring that the callouts do occur.
+<pre>
   PCRE_NO_UTF8_CHECK
 </pre>
 When PCRE_UTF8 is set at compile time, the validity of the subject as a UTF-8
@@ -1352,11 +1390,11 @@ The string to be matched by <b>pcre_exec()</b>
 </b><br>
 <P>
 The subject string is passed to <b>pcre_exec()</b> as a pointer in
-<i>subject</i>, a length in <i>length</i>, and a starting byte offset in
-<i>startoffset</i>. In UTF-8 mode, the byte offset must point to the start of a
-UTF-8 character. Unlike the pattern string, the subject may contain binary zero
-bytes. When the starting offset is zero, the search for a match starts at the
-beginning of the subject, and this is by far the most common case.
+<i>subject</i>, a length (in bytes) in <i>length</i>, and a starting byte offset
+in <i>startoffset</i>. In UTF-8 mode, the byte offset must point to the start of
+a UTF-8 character. Unlike the pattern string, the subject may contain binary
+zero bytes. When the starting offset is zero, the search for a match starts at
+the beginning of the subject, and this is by far the most common case.
 </P>
 <P>
 A non-zero starting offset is useful when searching for another match in the
@@ -1394,32 +1432,36 @@ a fragment of a pattern that picks out a substring. PCRE supports several other
 kinds of parenthesized subpattern that do not cause substrings to be captured.
 </P>
 <P>
-Captured substrings are returned to the caller via a vector of integer offsets
-whose address is passed in <i>ovector</i>. The number of elements in the vector
-is passed in <i>ovecsize</i>, which must be a non-negative number. <b>Note</b>:
-this argument is NOT the size of <i>ovector</i> in bytes.
+Captured substrings are returned to the caller via a vector of integers whose
+address is passed in <i>ovector</i>. The number of elements in the vector is
+passed in <i>ovecsize</i>, which must be a non-negative number. <b>Note</b>: this
+argument is NOT the size of <i>ovector</i> in bytes.
 </P>
 <P>
 The first two-thirds of the vector is used to pass back captured substrings,
 each substring using a pair of integers. The remaining third of the vector is
 used as workspace by <b>pcre_exec()</b> while matching capturing subpatterns,
-and is not available for passing back information. The length passed in
+and is not available for passing back information. The number passed in
 <i>ovecsize</i> should always be a multiple of three. If it is not, it is
 rounded down.
 </P>
 <P>
 When a match is successful, information about captured substrings is returned
 in pairs of integers, starting at the beginning of <i>ovector</i>, and
-continuing up to two-thirds of its length at the most. The first element of a
-pair is set to the offset of the first character in a substring, and the second
-is set to the offset of the first character after the end of a substring. The
-first pair, <i>ovector[0]</i> and <i>ovector[1]</i>, identify the portion of the
-subject string matched by the entire pattern. The next pair is used for the
-first capturing subpattern, and so on. The value returned by <b>pcre_exec()</b>
-is one more than the highest numbered pair that has been set. For example, if
-two substrings have been captured, the returned value is 3. If there are no
-capturing subpatterns, the return value from a successful match is 1,
-indicating that just the first pair of offsets has been set.
+continuing up to two-thirds of its length at the most. The first element of
+each pair is set to the byte offset of the first character in a substring, and
+the second is set to the byte offset of the first character after the end of a
+substring. <b>Note</b>: these values are always byte offsets, even in UTF-8
+mode. They are not character counts.
+</P>
+<P>
+The first pair of integers, <i>ovector[0]</i> and <i>ovector[1]</i>, identify the
+portion of the subject string matched by the entire pattern. The next pair is
+used for the first capturing subpattern, and so on. The value returned by
+<b>pcre_exec()</b> is one more than the highest numbered pair that has been set.
+For example, if two substrings have been captured, the returned value is 3. If
+there are no capturing subpatterns, the return value from a successful match is
+1, indicating that just the first pair of offsets has been set.
 </P>
 <P>
 If a capturing subpattern is matched repeatedly, it is the last portion of the
@@ -1428,8 +1470,8 @@ string that it matched that is returned.
 <P>
 If the vector is too small to hold all the captured substring offsets, it is
 used as far as possible (up to two-thirds of its length), and the function
-returns a value of zero. In particular, if the substring offsets are not of
-interest, <b>pcre_exec()</b> may be called with <i>ovector</i> passed as NULL and
+returns a value of zero. If the substring offsets are not of interest,
+<b>pcre_exec()</b> may be called with <i>ovector</i> passed as NULL and
 <i>ovecsize</i> as zero. However, if the pattern contains back references and
 the <i>ovector</i> is not big enough to remember the related substrings, PCRE
 has to get additional memory for use during matching. Thus it is usually
@@ -1715,6 +1757,12 @@ then call <b>pcre_copy_substring()</b> or <b>pcre_get_substring()</b>, as
 appropriate. <b>NOTE:</b> If PCRE_DUPNAMES is set and there are duplicate names,
 the behaviour may not be what you want (see the next section).
 </P>
+<P>
+<b>Warning:</b> If the pattern uses the "(?|" feature to set up multiple
+subpatterns with the same number, you cannot use names to distinguish them,
+because names are not included in the compiled code. The matching process uses
+only numbers.
+</P>
 <br><a name="SEC17" href="#TOC1">DUPLICATE SUBPATTERN NAMES</a><br>
 <P>
 <b>int pcre_get_stringtable_entries(const pcre *<i>code</i>,</b>
@@ -1948,9 +1996,9 @@ Cambridge CB2 3QH, England.
 </P>
 <br><a name="SEC22" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 11 September 2007
+Last updated: 11 April 2009
 <br>
-Copyright &copy; 1997-2007 University of Cambridge.
+Copyright &copy; 1997-2009 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

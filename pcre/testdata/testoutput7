@@ -4573,8 +4573,6 @@ No match
     abq
 No match
 
-/ab{1,}bc/
-
 /ab+bc/
     abbbbc
  0: abbbbc
@@ -6805,7 +6803,7 @@ No match
 No match
 
 /^abc./mgx<any>
-    abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 \x{2028}abc8 \x{2029}abc9 JUNK
+    abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x85abc7 JUNK
  0: abc1
  0: abc2
  0: abc3
@@ -6815,7 +6813,7 @@ No match
  0: abc7
 
 /abc.$/mgx<any>
-    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc7\x{2028} abc8\x{2029} abc9
+    abc1\x0a abc2\x0b abc3\x0c abc4\x0d abc5\x0d\x0a abc6\x85 abc9
  0: abc1
  0: abc2
  0: abc3
@@ -7211,5 +7209,165 @@ No match
 No match
     a\x0b\0bb\<bsr_anycrlf>
 No match
+    
+/a(?!)|\wbc/
+    abc 
+ 0: abc
+
+/a[]b/<JS>
+    ** Failers
+No match
+    ab
+No match
+
+/a[]+b/<JS>
+    ** Failers
+No match
+    ab 
+No match
+
+/a[]*+b/<JS>
+    ** Failers
+No match
+    ab 
+No match
+
+/a[^]b/<JS>
+    aXb
+ 0: aXb
+    a\nb 
+ 0: a\x0ab
+    ** Failers
+No match
+    ab  
+No match
+    
+/a[^]+b/<JS> 
+    aXb
+ 0: aXb
+    a\nX\nXb 
+ 0: a\x0aX\x0aXb
+    ** Failers
+No match
+    ab  
+No match
+
+/X$/E
+    X
+ 0: X
+    ** Failers 
+No match
+    X\n 
+No match
+
+/X$/
+    X
+ 0: X
+    X\n 
+ 0: X
+
+/xyz/C
+  xyz 
+--->xyz
+ +0 ^       x
+ +1 ^^      y
+ +2 ^ ^     z
+ +3 ^  ^    
+ 0: xyz
+  abcxyz 
+--->abcxyz
+ +0    ^       x
+ +1    ^^      y
+ +2    ^ ^     z
+ +3    ^  ^    
+ 0: xyz
+  abcxyz\Y
+--->abcxyz
+ +0 ^          x
+ +0  ^         x
+ +0   ^        x
+ +0    ^       x
+ +1    ^^      y
+ +2    ^ ^     z
+ +3    ^  ^    
+ 0: xyz
+  ** Failers 
+No match
+  abc
+No match
+  abc\Y
+--->abc
+ +0 ^       x
+ +0  ^      x
+ +0   ^     x
+ +0    ^    x
+No match
+  abcxypqr  
+No match
+  abcxypqr\Y  
+--->abcxypqr
+ +0 ^            x
+ +0  ^           x
+ +0   ^          x
+ +0    ^         x
+ +1    ^^        y
+ +2    ^ ^       z
+ +0     ^        x
+ +0      ^       x
+ +0       ^      x
+ +0        ^     x
+ +0         ^    x
+No match
+  
+/(?C)ab/
+  ab
+--->ab
+  0 ^      a
+ 0: ab
+  \C-ab
+ 0: ab
+  
+/ab/C
+  ab
+--->ab
+ +0 ^      a
+ +1 ^^     b
+ +2 ^ ^    
+ 0: ab
+  \C-ab    
+ 0: ab
+
+/^"((?(?=[a])[^"])|b)*"$/C
+    "ab"
+--->"ab"
+ +0 ^        ^
+ +1 ^        "
+ +2 ^^       ((?(?=[a])[^"])|b)*
++21 ^^       "
+ +3 ^^       (?(?=[a])[^"])
++18 ^^       b
+ +5 ^^       (?=[a])
+ +8  ^       [a]
++11  ^^      )
++12 ^^       [^"]
++16 ^ ^      )
++17 ^ ^      |
++21 ^ ^      "
+ +3 ^ ^      (?(?=[a])[^"])
++18 ^ ^      b
+ +5 ^ ^      (?=[a])
+ +8   ^      [a]
++19 ^  ^     )
++21 ^  ^     "
+ +3 ^  ^     (?(?=[a])[^"])
++18 ^  ^     b
+ +5 ^  ^     (?=[a])
+ +8    ^     [a]
++17 ^  ^     |
++22 ^   ^    $
++23 ^   ^    
+ 0: "ab"
+    \C-"ab"
+ 0: "ab"
 
 / End of testinput7 /

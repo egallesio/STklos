@@ -453,4 +453,36 @@ can't tell the difference.) --/
     a\x{85}b\<bsr_anycrlf>
     a\x0bb\<bsr_anycrlf>
  
+/.*a.*=.b.*/8<ANY>
+    QQQ\x{2029}ABCaXYZ=!bPQR
+    ** Failers
+    a\x{2029}b
+    \x61\xe2\x80\xa9\x62 
+
+/[[:a\x{100}b:]]/8
+
+/a[^]b/<JS>8
+    a\x{1234}b
+    a\nb 
+    ** Failers
+    ab  
+    
+/a[^]+b/<JS>8
+    aXb
+    a\nX\nX\x{1234}b 
+    ** Failers
+    ab  
+
+/(\x{de})\1/
+    \x{de}\x{de}
+    \x{123} 
+
+/X/8f<any> 
+    A\x{1ec5}ABCXYZ
+
+/(*UTF8)\x{1234}/
+  abcd\x{1234}pqr
+
+/(*CRLF)(*UTF8)(*BSR_UNICODE)a\Rb/I
+
 / End of testinput5 /

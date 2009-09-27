@@ -3,10 +3,11 @@
 *************************************************/
 
 /* PCRE is a library of functions to support regular expressions whose syntax
-and semantics are as close as possible to those of the Perl 5 language.
+and semantics are as close as possible to those of the Perl 5 language (but see
+below for why this module is different).
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2007 University of Cambridge
+           Copyright (c) 1997-2009 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -60,7 +61,6 @@ applications. */
 #define SP "                   "
 
 
-
 /*************************************************
 *      Code parameters and static tables         *
 *************************************************/
@@ -84,11 +84,11 @@ centralize the loading of these characters. In the case of Type * etc, the
 small value. ***NOTE*** If the start of this table is modified, the two tables
 that follow must also be modified. */
 
-static uschar coptable[] = {
+static const uschar coptable[] = {
   0,                             /* End                                    */
   0, 0, 0, 0, 0,                 /* \A, \G, \K, \B, \b                     */
   0, 0, 0, 0, 0, 0,              /* \D, \d, \S, \s, \W, \w                 */
-  0, 0,                          /* Any, Anybyte                           */
+  0, 0, 0,                       /* Any, AllAny, Anybyte                   */
   0, 0, 0,                       /* NOTPROP, PROP, EXTUNI                  */
   0, 0, 0, 0, 0,                 /* \R, \H, \h, \V, \v                     */
   0, 0, 0, 0, 0,                 /* \Z, \z, Opt, ^, $                      */
@@ -132,26 +132,26 @@ static uschar coptable[] = {
   0,                             /* DEF                                    */
   0, 0,                          /* BRAZERO, BRAMINZERO                    */
   0, 0, 0, 0,                    /* PRUNE, SKIP, THEN, COMMIT              */
-  0, 0                           /* FAIL, ACCEPT                           */
+  0, 0, 0                        /* FAIL, ACCEPT, SKIPZERO                 */
 };
 
 /* These 2 tables allow for compact code for testing for \D, \d, \S, \s, \W,
 and \w */
 
-static uschar toptable1[] = {
+static const uschar toptable1[] = {
   0, 0, 0, 0, 0, 0,
   ctype_digit, ctype_digit,
   ctype_space, ctype_space,
   ctype_word,  ctype_word,
-  0                               /* OP_ANY */
+  0, 0                            /* OP_ANY, OP_ALLANY */
 };
 
-static uschar toptable2[] = {
+static const uschar toptable2[] = {
   0, 0, 0, 0, 0, 0,
   ctype_digit, 0,
   ctype_space, 0,
   ctype_word,  0,
-  1                               /* OP_ANY */
+  1, 1                            /* OP_ANY, OP_ALLANY */
 };
 
 
@@ -223,8 +223,8 @@ Arguments:
   rlevel            function call recursion level
   recursing         regex recursive call level
 
-Returns:            > 0 =>
-                    = 0 =>
+Returns:            > 0 => number of match offset pairs placed in offsets
+                    = 0 => offsets overflowed; longest matches are present
                      -1 => failed to match
                    < -1 => some kind of unexpected problem
 
@@ -511,10 +511,7 @@ for (;;)
     stateblock *current_state = active_states + i;
     const uschar *code;
     int state_offset = current_state->offset;
-    int count, codevalue;
-#ifdef SUPPORT_UCP
-    int chartype, script;
-#endif
+    int count, codevalue, rrc;
 
 #ifdef DEBUG
     printf ("%.*sProcessing state %d c=", rlevel*2-2, SP, state_offset);
@@ -694,6 +691,13 @@ for (;;)
       break;
 
       /*-----------------------------------------------------------------*/
+      case OP_SKIPZERO:
+      code += 1 + GET(code, 2);
+      while (*code == OP_ALT) code += GET(code, 1);
+      ADD_ACTIVE(code - start_code + 1 + LINK_SIZE, 0);
+      break;
+
+      /*-----------------------------------------------------------------*/
       case OP_CIRC:
       if ((ptr == start_subject && (md->moptions & PCRE_NOTBOL) == 0) ||
           ((ims & PCRE_MULTILINE) != 0 &&
@@ -732,7 +736,13 @@ for (;;)
 
       /*-----------------------------------------------------------------*/
       case OP_ANY:
-      if (clen > 0 && ((ims & PCRE_DOTALL) != 0 || !IS_NEWLINE(ptr)))
+      if (clen > 0 && !IS_NEWLINE(ptr))
+        { ADD_NEW(state_offset + 1, 0); }
+      break;
+
+      /*-----------------------------------------------------------------*/
+      case OP_ALLANY:
+      if (clen > 0)
         { ADD_NEW(state_offset + 1, 0); }
       break;
 
@@ -747,7 +757,7 @@ for (;;)
       if ((md->moptions & PCRE_NOTEOL) == 0)
         {
         if (clen == 0 ||
-            (IS_NEWLINE(ptr) &&
+            ((md->poptions & PCRE_DOLLAR_ENDONLY) == 0 && IS_NEWLINE(ptr) &&
                ((ims & PCRE_MULTILINE) != 0 || ptr == end_subject - md->nllen)
             ))
           { ADD_ACTIVE(state_offset + 1, 0); }
@@ -812,7 +822,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
-        int category = _pcre_ucp_findprop(c, &chartype, &script);
+        const ucd_record * prop = GET_UCD(c);
         switch(code[1])
           {
           case PT_ANY:
@@ -820,19 +830,19 @@ for (;;)
           break;
 
           case PT_LAMP:
-          OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
+          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll || prop->chartype == ucp_Lt;
           break;
 
           case PT_GC:
-          OK = category == code[2];
+          OK = _pcre_ucp_gentype[prop->chartype] == code[2];
           break;
 
           case PT_PC:
-          OK = chartype == code[2];
+          OK = prop->chartype == code[2];
           break;
 
           case PT_SC:
-          OK = script == code[2];
+          OK = prop->script == code[2];
           break;
 
           /* Should never occur, but keep compilers from grumbling. */
@@ -852,8 +862,8 @@ for (;;)
 /* ========================================================================== */
       /* These opcodes likewise inspect the subject character, but have an
       argument that is not a data character. It is one of these opcodes:
-      OP_ANY, OP_DIGIT, OP_NOT_DIGIT, OP_WHITESPACE, OP_NOT_SPACE, OP_WORDCHAR,
-      OP_NOT_WORDCHAR. The value is loaded into d. */
+      OP_ANY, OP_ALLANY, OP_DIGIT, OP_NOT_DIGIT, OP_WHITESPACE, OP_NOT_SPACE,
+      OP_WORDCHAR, OP_NOT_WORDCHAR. The value is loaded into d. */
 
       case OP_TYPEPLUS:
       case OP_TYPEMINPLUS:
@@ -864,10 +874,7 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY ||
-               (ims & PCRE_DOTALL) != 0 ||
-               !IS_NEWLINE(ptr)
-              ) &&
+              (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           if (count > 0 && codevalue == OP_TYPEPOSPLUS)
@@ -890,10 +897,7 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY ||
-               (ims & PCRE_DOTALL) != 0 ||
-               !IS_NEWLINE(ptr)
-              ) &&
+              (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           if (codevalue == OP_TYPEPOSQUERY)
@@ -915,10 +919,7 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY ||
-               (ims & PCRE_DOTALL) != 0 ||
-               !IS_NEWLINE(ptr)
-              ) &&
+              (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           if (codevalue == OP_TYPEPOSSTAR)
@@ -938,10 +939,7 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY ||
-               (ims & PCRE_DOTALL) != 0 ||
-               !IS_NEWLINE(ptr)
-              ) &&
+              (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           if (++count >= GET2(code, 1))
@@ -962,10 +960,7 @@ for (;;)
         {
         if ((c >= 256 && d != OP_DIGIT && d != OP_WHITESPACE && d != OP_WORDCHAR) ||
             (c < 256 &&
-              (d != OP_ANY ||
-               (ims & PCRE_DOTALL) != 0 ||
-               !IS_NEWLINE(ptr)
-              ) &&
+              (d != OP_ANY || !IS_NEWLINE(ptr)) &&
               ((ctypes[c] & toptable1[d]) ^ toptable2[d]) != 0))
           {
           if (codevalue == OP_TYPEPOSUPTO)
@@ -996,7 +991,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
-        int category = _pcre_ucp_findprop(c, &chartype, &script);
+        const ucd_record * prop = GET_UCD(c);
         switch(code[2])
           {
           case PT_ANY:
@@ -1004,19 +999,19 @@ for (;;)
           break;
 
           case PT_LAMP:
-          OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
+          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll || prop->chartype == ucp_Lt;
           break;
 
           case PT_GC:
-          OK = category == code[3];
+          OK = _pcre_ucp_gentype[prop->chartype] == code[3];
           break;
 
           case PT_PC:
-          OK = chartype == code[3];
+          OK = prop->chartype == code[3];
           break;
 
           case PT_SC:
-          OK = script == code[3];
+          OK = prop->script == code[3];
           break;
 
           /* Should never occur, but keep compilers from grumbling. */
@@ -1045,7 +1040,7 @@ for (;;)
       case OP_EXTUNI_EXTRA + OP_TYPEPOSPLUS:
       count = current_state->count;  /* Already matched */
       if (count > 0) { ADD_ACTIVE(state_offset + 2, 0); }
-      if (clen > 0 && _pcre_ucp_findprop(c, &chartype, &script) != ucp_M)
+      if (clen > 0 && UCD_CATEGORY(c) != ucp_M)
         {
         const uschar *nptr = ptr + clen;
         int ncount = 0;
@@ -1059,7 +1054,7 @@ for (;;)
           int nd;
           int ndlen = 1;
           GETCHARLEN(nd, nptr, ndlen);
-          if (_pcre_ucp_findprop(nd, &chartype, &script) != ucp_M) break;
+          if (UCD_CATEGORY(nd) != ucp_M) break;
           ncount++;
           nptr += ndlen;
           }
@@ -1218,7 +1213,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
-        int category = _pcre_ucp_findprop(c, &chartype, &script);
+        const ucd_record * prop = GET_UCD(c);
         switch(code[2])
           {
           case PT_ANY:
@@ -1226,19 +1221,19 @@ for (;;)
           break;
 
           case PT_LAMP:
-          OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
+          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll || prop->chartype == ucp_Lt;
           break;
 
           case PT_GC:
-          OK = category == code[3];
+          OK = _pcre_ucp_gentype[prop->chartype] == code[3];
           break;
 
           case PT_PC:
-          OK = chartype == code[3];
+          OK = prop->chartype == code[3];
           break;
 
           case PT_SC:
-          OK = script == code[3];
+          OK = prop->script == code[3];
           break;
 
           /* Should never occur, but keep compilers from grumbling. */
@@ -1276,7 +1271,7 @@ for (;;)
       QS2:
 
       ADD_ACTIVE(state_offset + 2, 0);
-      if (clen > 0 && _pcre_ucp_findprop(c, &chartype, &script) != ucp_M)
+      if (clen > 0 && UCD_CATEGORY(c) != ucp_M)
         {
         const uschar *nptr = ptr + clen;
         int ncount = 0;
@@ -1291,7 +1286,7 @@ for (;;)
           int nd;
           int ndlen = 1;
           GETCHARLEN(nd, nptr, ndlen);
-          if (_pcre_ucp_findprop(nd, &chartype, &script) != ucp_M) break;
+          if (UCD_CATEGORY(nd) != ucp_M) break;
           ncount++;
           nptr += ndlen;
           }
@@ -1465,7 +1460,7 @@ for (;;)
       if (clen > 0)
         {
         BOOL OK;
-        int category = _pcre_ucp_findprop(c, &chartype, &script);
+        const ucd_record * prop = GET_UCD(c);
         switch(code[4])
           {
           case PT_ANY:
@@ -1473,19 +1468,19 @@ for (;;)
           break;
 
           case PT_LAMP:
-          OK = chartype == ucp_Lu || chartype == ucp_Ll || chartype == ucp_Lt;
+          OK = prop->chartype == ucp_Lu || prop->chartype == ucp_Ll || prop->chartype == ucp_Lt;
           break;
 
           case PT_GC:
-          OK = category == code[5];
+          OK = _pcre_ucp_gentype[prop->chartype] == code[5];
           break;
 
           case PT_PC:
-          OK = chartype == code[5];
+          OK = prop->chartype == code[5];
           break;
 
           case PT_SC:
-          OK = script == code[5];
+          OK = prop->script == code[5];
           break;
 
           /* Should never occur, but keep compilers from grumbling. */
@@ -1518,7 +1513,7 @@ for (;;)
       if (codevalue != OP_EXTUNI_EXTRA + OP_TYPEEXACT)
         { ADD_ACTIVE(state_offset + 4, 0); }
       count = current_state->count;  /* Number already matched */
-      if (clen > 0 && _pcre_ucp_findprop(c, &chartype, &script) != ucp_M)
+      if (clen > 0 && UCD_CATEGORY(c) != ucp_M)
         {
         const uschar *nptr = ptr + clen;
         int ncount = 0;
@@ -1532,7 +1527,7 @@ for (;;)
           int nd;
           int ndlen = 1;
           GETCHARLEN(nd, nptr, ndlen);
-          if (_pcre_ucp_findprop(nd, &chartype, &script) != ucp_M) break;
+          if (UCD_CATEGORY(nd) != ucp_M) break;
           ncount++;
           nptr += ndlen;
           }
@@ -1712,7 +1707,7 @@ for (;;)
           other case of the character. */
 
 #ifdef SUPPORT_UCP
-          othercase = _pcre_ucp_othercase(c);
+          othercase = UCD_OTHERCASE(c);
 #else
           othercase = NOTACHAR;
 #endif
@@ -1737,7 +1732,7 @@ for (;;)
       to wait for them to pass before continuing. */
 
       case OP_EXTUNI:
-      if (clen > 0 && _pcre_ucp_findprop(c, &chartype, &script) != ucp_M)
+      if (clen > 0 && UCD_CATEGORY(c) != ucp_M)
         {
         const uschar *nptr = ptr + clen;
         int ncount = 0;
@@ -1745,7 +1740,7 @@ for (;;)
           {
           int nclen = 1;
           GETCHARLEN(c, nptr, nclen);
-          if (_pcre_ucp_findprop(c, &chartype, &script) != ucp_M) break;
+          if (UCD_CATEGORY(c) != ucp_M) break;
           ncount++;
           nptr += nclen;
           }
@@ -1913,7 +1908,7 @@ for (;;)
           if (utf8 && d >= 128)
             {
 #ifdef SUPPORT_UCP
-            otherd = _pcre_ucp_othercase(d);
+            otherd = UCD_OTHERCASE(d);
 #endif  /* SUPPORT_UCP */
             }
           else
@@ -1951,7 +1946,7 @@ for (;;)
           if (utf8 && d >= 128)
             {
 #ifdef SUPPORT_UCP
-            otherd = _pcre_ucp_othercase(d);
+            otherd = UCD_OTHERCASE(d);
 #endif  /* SUPPORT_UCP */
             }
           else
@@ -1987,7 +1982,7 @@ for (;;)
           if (utf8 && d >= 128)
             {
 #ifdef SUPPORT_UCP
-            otherd = _pcre_ucp_othercase(d);
+            otherd = UCD_OTHERCASE(d);
 #endif  /* SUPPORT_UCP */
             }
           else
@@ -2019,7 +2014,7 @@ for (;;)
           if (utf8 && d >= 128)
             {
 #ifdef SUPPORT_UCP
-            otherd = _pcre_ucp_othercase(d);
+            otherd = UCD_OTHERCASE(d);
 #endif  /* SUPPORT_UCP */
             }
           else
@@ -2054,7 +2049,7 @@ for (;;)
           if (utf8 && d >= 128)
             {
 #ifdef SUPPORT_UCP
-            otherd = _pcre_ucp_othercase(d);
+            otherd = UCD_OTHERCASE(d);
 #endif  /* SUPPORT_UCP */
             }
           else
@@ -2162,7 +2157,12 @@ for (;;)
 
 /* ========================================================================== */
       /* These are the opcodes for fancy brackets of various kinds. We have
-      to use recursion in order to handle them. */
+      to use recursion in order to handle them. The "always failing" assersion
+      (?!) is optimised when compiling to OP_FAIL, so we have to support that,
+      though the other "backtracking verbs" are not supported. */
+
+      case OP_FAIL:
+      break;
 
       case OP_ASSERT:
       case OP_ASSERT_NOT:
@@ -2200,7 +2200,38 @@ for (;;)
         {
         int local_offsets[1000];
         int local_workspace[1000];
-        int condcode = code[LINK_SIZE+1];
+        int codelink = GET(code, 1);
+        int condcode;
+
+        /* Because of the way auto-callout works during compile, a callout item
+        is inserted between OP_COND and an assertion condition. This does not
+        happen for the other conditions. */
+
+        if (code[LINK_SIZE+1] == OP_CALLOUT)
+          {
+          rrc = 0;
+          if (pcre_callout != NULL)
+            {
+            pcre_callout_block cb;
+            cb.version          = 1;   /* Version 1 of the callout block */
+            cb.callout_number   = code[LINK_SIZE+2];
+            cb.offset_vector    = offsets;
+            cb.subject          = (PCRE_SPTR)start_subject;
+            cb.subject_length   = end_subject - start_subject;
+            cb.start_match      = current_subject - start_subject;
+            cb.current_position = ptr - start_subject;
+            cb.pattern_position = GET(code, LINK_SIZE + 3);
+            cb.next_item_length = GET(code, 3 + 2*LINK_SIZE);
+            cb.capture_top      = 1;
+            cb.capture_last     = -1;
+            cb.callout_data     = md->callout_data;
+            if ((rrc = (*pcre_callout)(&cb)) < 0) return rrc;   /* Abandon */
+            }
+          if (rrc > 0) break;                      /* Fail this thread */
+          code += _pcre_OP_lengths[OP_CALLOUT];    /* Skip callout data */
+          }
+
+        condcode = code[LINK_SIZE+1];
 
         /* Back reference conditions are not supported */
 
@@ -2209,9 +2240,7 @@ for (;;)
         /* The DEFINE condition is always false */
 
         if (condcode == OP_DEF)
-          {
-          ADD_ACTIVE(state_offset + GET(code, 1) + LINK_SIZE + 1, 0);
-          }
+          { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
 
         /* The only supported version of OP_RREF is for the value RREF_ANY,
         which means "test if in any recursion". We can't test for specifically
@@ -2221,8 +2250,9 @@ for (;;)
           {
           int value = GET2(code, LINK_SIZE+2);
           if (value != RREF_ANY) return PCRE_ERROR_DFA_UCOND;
-          if (recursing > 0) { ADD_ACTIVE(state_offset + LINK_SIZE + 4, 0); }
-            else { ADD_ACTIVE(state_offset + GET(code, 1) + LINK_SIZE + 1, 0); }
+          if (recursing > 0)
+            { ADD_ACTIVE(state_offset + LINK_SIZE + 4, 0); }
+          else { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
           }
 
         /* Otherwise, the condition is an assertion */
@@ -2252,7 +2282,7 @@ for (;;)
                 (condcode == OP_ASSERT || condcode == OP_ASSERTBACK))
             { ADD_ACTIVE(endasscode + LINK_SIZE + 1 - start_code, 0); }
           else
-            { ADD_ACTIVE(state_offset + GET(code, 1) + LINK_SIZE + 1, 0); }
+            { ADD_ACTIVE(state_offset + codelink + LINK_SIZE + 1, 0); }
           }
         }
       break;
@@ -2404,9 +2434,9 @@ for (;;)
       /* Handle callouts */
 
       case OP_CALLOUT:
+      rrc = 0;
       if (pcre_callout != NULL)
         {
-        int rrc;
         pcre_callout_block cb;
         cb.version          = 1;   /* Version 1 of the callout block */
         cb.callout_number   = code[1];
@@ -2421,8 +2451,9 @@ for (;;)
         cb.capture_last     = -1;
         cb.callout_data     = md->callout_data;
         if ((rrc = (*pcre_callout)(&cb)) < 0) return rrc;   /* Abandon */
-        if (rrc == 0) { ADD_ACTIVE(state_offset + 2 + 2*LINK_SIZE, 0); }
         }
+      if (rrc == 0)
+        { ADD_ACTIVE(state_offset + _pcre_OP_lengths[OP_CALLOUT], 0); }
       break;
 
 
@@ -2505,7 +2536,7 @@ Returns:          > 0 => number of match offset pairs placed in offsets
                  < -1 => some kind of unexpected problem
 */
 
-PCRE_EXP_DEFN int
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_dfa_exec(const pcre *argument_re, const pcre_extra *extra_data,
   const char *subject, int length, int start_offset, int options, int *offsets,
   int offsetcount, int *workspace, int wscount)
@@ -2614,10 +2645,10 @@ switch ((((options & PCRE_NEWLINE_BITS) == 0)? re->options : (pcre_uint32)option
          PCRE_NEWLINE_BITS)
   {
   case 0: newline = NEWLINE; break;   /* Compile-time default */
-  case PCRE_NEWLINE_CR: newline = '\r'; break;
-  case PCRE_NEWLINE_LF: newline = '\n'; break;
+  case PCRE_NEWLINE_CR: newline = CHAR_CR; break;
+  case PCRE_NEWLINE_LF: newline = CHAR_NL; break;
   case PCRE_NEWLINE_CR+
-       PCRE_NEWLINE_LF: newline = ('\r' << 8) | '\n'; break;
+       PCRE_NEWLINE_LF: newline = (CHAR_CR << 8) | CHAR_NL; break;
   case PCRE_NEWLINE_ANY: newline = -1; break;
   case PCRE_NEWLINE_ANYCRLF: newline = -2; break;
   default: return PCRE_ERROR_BADNEWLINE;
@@ -2713,9 +2744,8 @@ if ((re->flags & PCRE_REQCHSET) != 0)
   }
 
 /* Call the main matching function, looping for a non-anchored regex after a
-failed match. Unless restarting, optimize by moving to the first match
-character if possible, when not anchored. Then unless wanting a partial match,
-check for a required later character. */
+failed match. If not restarting, perform certain optimizations at the start of
+a match. */
 
 for (;;)
   {
@@ -2725,60 +2755,96 @@ for (;;)
     {
     const uschar *save_end_subject = end_subject;
 
-    /* Advance to a unique first char if possible. If firstline is TRUE, the
-    start of the match is constrained to the first line of a multiline string.
-    Implement this by temporarily adjusting end_subject so that we stop
-    scanning at a newline. If the match fails at the newline, later code breaks
-    this loop. */
+    /* If firstline is TRUE, the start of the match is constrained to the first
+    line of a multiline string. Implement this by temporarily adjusting
+    end_subject so that we stop scanning at a newline. If the match fails at
+    the newline, later code breaks this loop. */
 
     if (firstline)
       {
-      const uschar *t = current_subject;
+      USPTR t = current_subject;
+#ifdef SUPPORT_UTF8
+      if (utf8)
+        {
+        while (t < md->end_subject && !IS_NEWLINE(t))
+          {
+          t++;
+          while (t < end_subject && (*t & 0xc0) == 0x80) t++;
+          }
+        }
+      else
+#endif
       while (t < md->end_subject && !IS_NEWLINE(t)) t++;
       end_subject = t;
       }
 
-    if (first_byte >= 0)
-      {
-      if (first_byte_caseless)
-        while (current_subject < end_subject &&
-               lcc[*current_subject] != first_byte)
-          current_subject++;
-      else
-        while (current_subject < end_subject && *current_subject != first_byte)
-          current_subject++;
-      }
+    /* There are some optimizations that avoid running the match if a known
+    starting point is not found, or if a known later character is not present.
+    However, there is an option that disables these, for testing and for
+    ensuring that all callouts do actually occur. */
 
-    /* Or to just after a linebreak for a multiline match if possible */
-
-    else if (startline)
+    if ((options & PCRE_NO_START_OPTIMIZE) == 0)
       {
-      if (current_subject > md->start_subject + start_offset)
+
+      /* Advance to a known first byte. */
+
+      if (first_byte >= 0)
         {
-        while (current_subject <= end_subject && !WAS_NEWLINE(current_subject))
-          current_subject++;
-
-        /* If we have just passed a CR and the newline option is ANY or
-        ANYCRLF, and we are now at a LF, advance the match position by one more
-        character. */
-
-        if (current_subject[-1] == '\r' &&
-             (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
-             current_subject < end_subject &&
-             *current_subject == '\n')
-          current_subject++;
+        if (first_byte_caseless)
+          while (current_subject < end_subject &&
+                 lcc[*current_subject] != first_byte)
+            current_subject++;
+        else
+          while (current_subject < end_subject &&
+                 *current_subject != first_byte)
+            current_subject++;
         }
-      }
 
-    /* Or to a non-unique first char after study */
+      /* Or to just after a linebreak for a multiline match if possible */
 
-    else if (start_bits != NULL)
-      {
-      while (current_subject < end_subject)
+      else if (startline)
         {
-        register unsigned int c = *current_subject;
-        if ((start_bits[c/8] & (1 << (c&7))) == 0) current_subject++;
-          else break;
+        if (current_subject > md->start_subject + start_offset)
+          {
+#ifdef SUPPORT_UTF8
+          if (utf8)
+            {
+            while (current_subject < end_subject &&
+                   !WAS_NEWLINE(current_subject))
+              {
+              current_subject++;
+              while(current_subject < end_subject &&
+                    (*current_subject & 0xc0) == 0x80)
+                current_subject++;
+              }
+            }
+          else
+#endif
+          while (current_subject < end_subject && !WAS_NEWLINE(current_subject))
+            current_subject++;
+
+          /* If we have just passed a CR and the newline option is ANY or
+          ANYCRLF, and we are now at a LF, advance the match position by one
+          more character. */
+
+          if (current_subject[-1] == CHAR_CR &&
+               (md->nltype == NLTYPE_ANY || md->nltype == NLTYPE_ANYCRLF) &&
+               current_subject < end_subject &&
+               *current_subject == CHAR_NL)
+            current_subject++;
+          }
+        }
+
+      /* Or to a non-unique first char after study */
+
+      else if (start_bits != NULL)
+        {
+        while (current_subject < end_subject)
+          {
+          register unsigned int c = *current_subject;
+          if ((start_bits[c/8] & (1 << (c&7))) == 0) current_subject++;
+            else break;
+          }
         }
       }
 
@@ -2800,10 +2866,11 @@ for (;;)
   showed up when somebody was matching /^C/ on a 32-megabyte string... so we
   don't do this when the string is sufficiently long.
 
-  ALSO: this processing is disabled when partial matching is requested.
-  */
+  ALSO: this processing is disabled when partial matching is requested, and can
+  also be explicitly deactivated. */
 
-  if (req_byte >= 0 &&
+  if ((options & PCRE_NO_START_OPTIMIZE) == 0 &&
+      req_byte >= 0 &&
       end_subject - current_subject < REQ_BYTE_MAX &&
       (options & PCRE_PARTIAL) == 0)
     {
@@ -2879,9 +2946,9 @@ for (;;)
   not contain any explicit matches for \r or \n, and the newline option is CRLF
   or ANY or ANYCRLF, advance the match position by one more character. */
 
-  if (current_subject[-1] == '\r' &&
+  if (current_subject[-1] == CHAR_CR &&
       current_subject < end_subject &&
-      *current_subject == '\n' &&
+      *current_subject == CHAR_NL &&
       (re->flags & PCRE_HASCRORLF) == 0 &&
         (md->nltype == NLTYPE_ANY ||
          md->nltype == NLTYPE_ANYCRLF ||

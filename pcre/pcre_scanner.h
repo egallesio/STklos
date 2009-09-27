@@ -80,9 +80,9 @@ class PCRECPP_EXP_DEFN Scanner {
   // If it returns true, it skips over the matched input and any
   // following input that matches the "skip" regular expression.
   bool Consume(const RE& re,
-               const Arg& arg0 = no_arg,
-               const Arg& arg1 = no_arg,
-               const Arg& arg2 = no_arg
+               const Arg& arg0 = RE::no_arg,
+               const Arg& arg1 = RE::no_arg,
+               const Arg& arg2 = RE::no_arg
                // TODO: Allow more arguments?
                );
 

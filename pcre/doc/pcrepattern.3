@@ -9,7 +9,12 @@ are described in detail below. There is a quick-reference syntax summary in the
 .\" HREF
 \fBpcresyntax\fP
 .\"
-page. Perl's regular expressions are described in its own documentation, and
+page. PCRE tries to match Perl syntax and semantics as closely as it can. PCRE
+also supports some alternative regular expression syntax (which does not
+conflict with the Perl syntax) in order to provide some compatibility with
+regular expressions in Python, .NET, and Oniguruma.
+.P
+Perl's regular expressions are described in its own documentation, and
 regular expressions in general are covered in a number of books, some of which
 have copious examples. Jeffrey Friedl's "Mastering Regular Expressions",
 published by O'Reilly, covers regular expressions in great detail. This
@@ -18,8 +23,15 @@ description of PCRE's regular expressions is intended as reference material.
 The original operation of PCRE was on strings of one-byte characters. However,
 there is now also support for UTF-8 character strings. To use this, you must
 build PCRE to include UTF-8 support, and then call \fBpcre_compile()\fP with
-the PCRE_UTF8 option. How this affects pattern matching is mentioned in several
-places below. There is also a summary of UTF-8 features in the
+the PCRE_UTF8 option. There is also a special sequence that can be given at the
+start of a pattern:
+.sp
+  (*UTF8)
+.sp
+Starting a pattern with this sequence is equivalent to setting the PCRE_UTF8
+option. This feature is not Perl-compatible. How setting UTF-8 mode affects
+pattern matching is mentioned in several places below. There is also a summary
+of UTF-8 features in the
 .\" HTML <a href="pcre.html#utf8support">
 .\" </a>
 section on UTF-8 support
@@ -310,6 +322,20 @@ parenthesized subpatterns.
 .\"
 .
 .
+.SS "Absolute and relative subroutine calls"
+.rs
+.sp
+For compatibility with Oniguruma, the non-Perl syntax \eg followed by a name or
+a number enclosed either in angle brackets or single quotes, is an alternative
+syntax for referencing a subpattern as a "subroutine". Details are discussed
+.\" HTML <a href="#onigurumasubroutines">
+.\" </a>
+later.
+.\"
+Note that \eg{...} (Perl syntax) and \eg<...> (Oniguruma syntax) are \fInot\fP
+synonymous. The former is a back reference; the latter is a subroutine call.
+.
+.
 .SS "Generic character types"
 .rs
 .sp
@@ -345,7 +371,8 @@ In UTF-8 mode, characters with values greater than 128 never match \ed, \es, or
 \ew, and always match \eD, \eS, and \eW. This is true even when Unicode
 character property support is available. These sequences retain their original
 meanings from before UTF-8 support was available, mainly for efficiency
-reasons.
+reasons. Note that this also affects \eb, because it is defined in terms of \ew
+and \eW.
 .P
 The sequences \eh, \eH, \ev, and \eV are Perl 5.10 features. In contrast to the
 other sequences, these do match certain high-valued codepoints in UTF-8 mode.
@@ -1012,11 +1039,11 @@ The PCRE-specific options PCRE_DUPNAMES, PCRE_UNGREEDY, and PCRE_EXTRA can be
 changed in the same way as the Perl-compatible options by using the characters
 J, U and X respectively.
 .P
-When an option change occurs at top level (that is, not inside subpattern
-parentheses), the change applies to the remainder of the pattern that follows.
-If the change is placed right at the start of a pattern, PCRE extracts it into
-the global options (and it will therefore show up in data extracted by the
-\fBpcre_fullinfo()\fP function).
+When one of these option changes occurs at top level (that is, not inside
+subpattern parentheses), the change applies to the remainder of the pattern
+that follows. If the change is placed right at the start of a pattern, PCRE
+extracts it into the global options (and it will therefore show up in data
+extracted by the \fBpcre_fullinfo()\fP function).
 .P
 An option change within a subpattern (see below for a description of
 subpatterns) affects only that part of the current pattern that follows it, so
@@ -1037,13 +1064,15 @@ behaviour otherwise.
 .P
 \fBNote:\fP There are other PCRE-specific options that can be set by the
 application when the compile or match functions are called. In some cases the
-pattern can contain special leading sequences to override what the application
-has set or what has been defaulted. Details are given in the section entitled
+pattern can contain special leading sequences such as (*CRLF) to override what
+the application has set or what has been defaulted. Details are given in the
+section entitled
 .\" HTML <a href="#newlineseq">
 .\" </a>
 "Newline sequences"
 .\"
-above.
+above. There is also the (*UTF8) leading sequence that can be used to set UTF-8
+mode; this is equivalent to setting the PCRE_UTF8 option.
 .
 .
 .\" HTML <a name="subpattern"></a>
@@ -1192,6 +1221,10 @@ details of the interfaces for handling named subpatterns, see the
 \fBpcreapi\fP
 .\"
 documentation.
+.P
+\fBWarning:\fP You cannot use different names to distinguish between two
+subpatterns with the same number (see the previous section) because PCRE uses
+only the numbers when matching.
 .
 .
 .SH REPETITION
@@ -1240,7 +1273,14 @@ support is available, \eX{3} matches three Unicode extended sequences, each of
 which may be several bytes long (and they may be of different lengths).
 .P
 The quantifier {0} is permitted, causing the expression to behave as if the
-previous item and the quantifier were not present.
+previous item and the quantifier were not present. This may be useful for
+subpatterns that are referenced as
+.\" HTML <a href="#subpatternsassubroutines">
+.\" </a>
+subroutines
+.\"
+from elsewhere in the pattern. Items other than subpatterns that have a {0}
+quantifier are omitted from the compiled pattern.
 .P
 For convenience, the three most common quantifiers have single-character
 abbreviations:
@@ -2023,6 +2063,27 @@ It matches "abcabc". It does not match "abcABC" because the change of
 processing option does not affect the called subpattern.
 .
 .
+.\" HTML <a name="onigurumasubroutines"></a>
+.SH "ONIGURUMA SUBROUTINE SYNTAX"
+.rs
+.sp
+For compatibility with Oniguruma, the non-Perl syntax \eg followed by a name or
+a number enclosed either in angle brackets or single quotes, is an alternative
+syntax for referencing a subpattern as a subroutine, possibly recursively. Here
+are two of the examples used above, rewritten using this syntax:
+.sp
+  (?<pn> \e( ( (?>[^()]+) | \eg<pn> )* \e) )
+  (sens|respons)e and \eg'1'ibility
+.sp
+PCRE supports an extension to Oniguruma: if a number is preceded by a
+plus or a minus sign it is taken as a relative reference. For example:
+.sp
+  (abc)(?i:\eg<-1>)
+.sp
+Note that \eg{...} (Perl syntax) and \eg<...> (Oniguruma syntax) are \fInot\fP
+synonymous. The former is a back reference; the latter is a subroutine call.
+.
+.
 .SH CALLOUTS
 .rs
 .sp
@@ -2068,9 +2129,10 @@ or removal in a future version of Perl". It goes on to say: "Their usage in
 production code should be noted to avoid problems during upgrades." The same
 remarks apply to the PCRE features described in this section.
 .P
-Since these verbs are specifically related to backtracking, they can be used
-only when the pattern is to be matched using \fBpcre_exec()\fP, which uses a
-backtracking algorithm. They cause an error if encountered by
+Since these verbs are specifically related to backtracking, most of them can be
+used only when the pattern is to be matched using \fBpcre_exec()\fP, which uses
+a backtracking algorithm. With the exception of (*FAIL), which behaves like a
+failing negative assertion, they cause an error if encountered by
 \fBpcre_dfa_exec()\fP.
 .P
 The new verbs make use of what was previously invalid syntax: an opening
@@ -2192,6 +2254,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 17 September 2007
-Copyright (c) 1997-2007 University of Cambridge.
+Last updated: 11 April 2009
+Copyright (c) 1997-2009 University of Cambridge.
 .fi

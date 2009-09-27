@@ -1,9 +1,12 @@
 README file for PCRE (Perl-compatible regular expression library)
 -----------------------------------------------------------------
 
-The latest release of PCRE is always available from
+The latest release of PCRE is always available in three alternative formats
+from:
 
   ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.tar.gz
+  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.tar.bz2
+  ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-xxx.zip
 
 There is a mailing list for discussion about the development of PCRE at
 
@@ -82,6 +85,10 @@ documentation is supplied in two other forms:
      in various ways, and rooted in a file called index.html, is distributed in
      doc/html and installed in <prefix>/share/doc/pcre/html.
 
+Users of PCRE have contributed files containing the documentation for various
+releases in CHM format. These can be found in the Contrib directory of the FTP
+site (see next section).
+
 
 Contributions by users of PCRE
 ------------------------------
@@ -119,9 +126,9 @@ If you are using HP's ANSI C++ compiler (aCC), please see the special note
 in the section entitled "Using HP's ANSI C++ compiler (aCC)" below.
 
 The following instructions assume the use of the widely used "configure, make,
-make install" process. There is also some experimental support for "cmake" in
-the PCRE distribution, but it is incomplete and not documented. However, if you
-are a "cmake" user, you might want to try it.
+make install" process. There is also support for CMake in the PCRE
+distribution; there are some comments about using CMake in the NON-UNIX-USE
+file, though it can also be used in Unix-like systems.
 
 To build PCRE on a Unix-like system, first run the "configure" command from the
 PCRE distribution directory, with your current directory set to the directory
@@ -158,10 +165,13 @@ library. You can read more about them in the pcrebuild man page.
   it will try to find a C++ compiler and C++ header files, and if it succeeds,
   it will try to build the C++ wrapper.
 
-. If you want to make use of the support for UTF-8 character strings in PCRE,
-  you must add --enable-utf8 to the "configure" command. Without it, the code
-  for handling UTF-8 is not included in the library. (Even when included, it
-  still has to be enabled by an option at run time.)
+. If you want to make use of the support for UTF-8 Unicode character strings in
+  PCRE, you must add --enable-utf8 to the "configure" command. Without it, the
+  code for handling UTF-8 is not included in the library. Even when included,
+  it still has to be enabled by an option at run time. When PCRE is compiled
+  with this option, its input can only either be ASCII or UTF-8, even when
+  running on EBCDIC platforms. It is not possible to use both --enable-utf8 and
+  --enable-ebcdic at the same time.
 
 . If, in addition to support for UTF-8 character strings, you want to include
   support for the \P, \p, and \X sequences that recognize Unicode character
@@ -252,11 +262,42 @@ library. You can read more about them in the pcrebuild man page.
   pcre_chartables.c.dist. See "Character tables" below for further information.
 
 . It is possible to compile PCRE for use on systems that use EBCDIC as their
-  default character code (as opposed to ASCII) by specifying
+  character code (as opposed to ASCII) by specifying
 
   --enable-ebcdic
 
-  This automatically implies --enable-rebuild-chartables (see above).
+  This automatically implies --enable-rebuild-chartables (see above). However,
+  when PCRE is built this way, it always operates in EBCDIC. It cannot support
+  both EBCDIC and UTF-8.
+
+. It is possible to compile pcregrep to use libz and/or libbz2, in order to
+  read .gz and .bz2 files (respectively), by specifying one or both of
+
+  --enable-pcregrep-libz
+  --enable-pcregrep-libbz2
+
+  Of course, the relevant libraries must be installed on your system.
+
+. It is possible to compile pcretest so that it links with the libreadline
+  library, by specifying
+
+  --enable-pcretest-libreadline
+
+  If this is done, when pcretest's input is from a terminal, it reads it using
+  the readline() function. This provides line-editing and history facilities.
+  Note that libreadline is GPL-licenced, so if you distribute a binary of
+  pcretest linked in this way, there may be licensing issues.
+
+  Setting this option causes the -lreadline option to be added to the pcretest
+  build. In many operating environments with a sytem-installed readline
+  library this is sufficient. However, in some environments (e.g. if an
+  unmodified distribution version of readline is in use), it may be necessary
+  to specify something like LIBS="-lncurses" as well. This is because, to quote
+  the readline INSTALL, "Readline uses the termcap functions, but does not link
+  with the termcap or curses library itself, allowing applications which link
+  with readline the to choose an appropriate library." If you get error
+  messages about missing functions tgetstr, tgetent, tputs, tgetflag, or tgoto,
+  this is the problem, and linking with the ncurses library should fix it.
 
 The "configure" script builds the following files for the basic C library:
 
@@ -285,12 +326,12 @@ script that can be run to recreate the configuration, and config.log, which
 contains compiler output from tests that "configure" runs.
 
 Once "configure" has run, you can run "make". It builds two libraries, called
-libpcre and libpcreposix, a test program called pcretest, a demonstration
-program called pcredemo, and the pcregrep command. If a C++ compiler was found
-on your system, "make" also builds the C++ wrapper library, which is called
-libpcrecpp, and some test programs called pcrecpp_unittest,
-pcre_scanner_unittest, and pcre_stringpiece_unittest. Building the C++ wrapper
-can be disabled by adding --disable-cpp to the "configure" command.
+libpcre and libpcreposix, a test program called pcretest, and the pcregrep
+command. If a C++ compiler was found on your system, "make" also builds the C++
+wrapper library, which is called libpcrecpp, and some test programs called
+pcrecpp_unittest, pcre_scanner_unittest, and pcre_stringpiece_unittest.
+Building the C++ wrapper can be disabled by adding --disable-cpp to the
+"configure" command.
 
 The command "make check" runs all the appropriate tests. Details of the PCRE
 tests are given below in a separate section of this document.
@@ -341,9 +382,6 @@ system. The following are installed (file names are all relative to the
     pcre.txt       (a concatenation of the man(3) pages)
     pcretest.txt   the pcretest man page
     pcregrep.txt   the pcregrep man page
-
-Note that the pcredemo program that is built by "configure" is *not* installed
-anywhere. It is a demonstration for programmers wanting to use PCRE.
 
 If you want to remove PCRE from your system, you can run "make uninstall".
 This removes all the files that "make install" installed. However, it does not
@@ -616,7 +654,7 @@ The distribution should contain the following files:
   pcre_study.c            )
   pcre_tables.c           )
   pcre_try_flipped.c      )
-  pcre_ucp_searchfuncs.c  )
+  pcre_ucd.c              )
   pcre_valid_utf8.c       )
   pcre_version.c          )
   pcre_xclass.c           )
@@ -625,9 +663,7 @@ The distribution should contain the following files:
   pcre.h.in               template for pcre.h when built by "configure"
   pcreposix.h             header for the external POSIX wrapper API
   pcre_internal.h         header for internal use
-  ucp.h                   ) headers concerned with
-  ucpinternal.h           )   Unicode property handling
-  ucptable.h              ) (this one is the data table)
+  ucp.h                   header for Unicode property handling
 
   config.h.in             template for config.h, which is built by "configure"
 
@@ -701,6 +737,9 @@ The distribution should contain the following files:
 
 (D) Auxiliary files for cmake support
 
+  cmake/COPYING-CMAKE-SCRIPTS
+  cmake/FindPackageHandleStandardArgs.cmake
+  cmake/FindReadline.cmake
   CMakeLists.txt
   config-cmake.h.in
 
@@ -725,4 +764,4 @@ The distribution should contain the following files:
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 21 September 2007
+Last updated: 21 March 2009

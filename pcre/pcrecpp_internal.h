@@ -3,6 +3,9 @@
 *************************************************/
 
 /*
+Copyright (c) 2005, Google Inc.
+All rights reserved.
+
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -50,7 +53,7 @@ setting in pcre.h. We use:
 
 #ifndef PCRECPP_EXP_DECL
 #  ifdef _WIN32
-#    ifndef PCRECPP_STATIC
+#    ifndef PCRE_STATIC
 #      define PCRECPP_EXP_DECL       extern __declspec(dllexport)
 #      define PCRECPP_EXP_DEFN       __declspec(dllexport)
 #    else

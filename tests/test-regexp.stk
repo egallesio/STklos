@@ -1,0 +1,96 @@
+;;;;
+;;;; test-regexp.stk	-- Testing Regexps
+;;;; 
+;;;; Copyright © 2009 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 27-Sep-2009 13:23 (eg)
+;;;; Last file update: 27-Sep-2009 18:53 (eg)
+;;;;
+
+(require "test")
+
+(test-section "Regexps")
+
+
+;;------------------------------------------------------------------
+(test-subsection "Searches")
+
+(test "regexp-match-position.1"
+      '((4 6))
+      (regexp-match-positions "ca" "abracadabra"))
+(test "regexp-match-position.2"
+      #f
+      (regexp-match-positions "CA" "abracadabra"))
+(test "regexp-match-position.3"
+      '((4 6))
+      (regexp-match-positions "(?i)CA" "abracadabra"))
+(test "regexp-match-position.4"
+      '((0 3) (0 1) (1 2) (2 3))
+      (regexp-match-positions "(a*)(b*)(c*)" "abc"))
+(test "regexp-match-position.5"
+      '((0 1) (0 0) (0 0) (0 1))
+      (regexp-match-positions "(a*)(b*)(c*)" "c"))
+(test "regexp-match-position.6"
+      '((14 17)) 
+      (regexp-match-positions "(?<=\\d{3})(?<!999)foo" 
+			      "999foo and 123foo"))
+
+(test "regexp-match.1"
+      '("abc" "a" "b" "c")
+      (regexp-match "(a*)(b*)(c*)" "abc"))
+
+;;------------------------------------------------------------------
+(test-subsection "Replacements")
+
+(test "regexp-replace.1"
+      "Xbcccc"
+      (regexp-replace "a*b" "aaabbcccc" "X"))
+(test "regexp-replace.2"
+      "Xbcccc"
+      (regexp-replace (string->regexp "a*b") "aaabbcccc" "X"))
+(test "regexp-replace.3"
+      "XaaaYbcccc"
+      (regexp-replace "(a*)b" "aaabbcccc" "X\\1Y"))
+(test "regexp-replace.4"
+      "ooba ooba"
+      (regexp-replace "f(.*)r" "foobar" "\\1 \\1"))
+(test "regexp-replace.5"
+      "foobar foobar"
+      (regexp-replace "f(.*)r" "foobar" "\\0 \\0"))
+(test "regexp-replace.6"
+      "Xbcccc"
+      (regexp-replace "a*b" "aaabbcccc" "X"))
+(test "regexp-replace-all"
+      "XXcccc"
+      (regexp-replace-all "a*b" "aaabbcccc" "X"))
+
+
+;;------------------------------------------------------------------
+(test-subsection "Regexp misc")
+(test "string->regexp.1" #t (regexp? (string->regexp "a*b")))
+(test "string->regexp.2" #f (regexp? 42))
+
+(test "regexp-quote.1" "cons"  (regexp-quote "cons"))
+(test "regexp-quote.2" "list\\?" (regexp-quote "list?"))
+
+
+
+;;------------------------------------------------------------------
+(test-section-end)

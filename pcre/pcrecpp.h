@@ -346,9 +346,6 @@ namespace pcrecpp {
 #define PCRE_IS_SET(o)  \
         (all_options_ & o) == o
 
-// We convert user-passed pointers into special Arg objects
-PCRECPP_EXP_DECL Arg no_arg;
-
 /***** Compiling regular expressions: the RE class *****/
 
 // RE_Options allow you to set options to be passed along to pcre,
@@ -403,25 +400,25 @@ class PCRECPP_EXP_DEFN RE_Options {
     return PCRE_IS_SET(PCRE_DOTALL);
   }
   RE_Options &set_dotall(bool x) {
-    PCRE_SET_OR_CLEAR(x,PCRE_DOTALL);
+    PCRE_SET_OR_CLEAR(x, PCRE_DOTALL);
   }
 
   bool extended() const {
     return PCRE_IS_SET(PCRE_EXTENDED);
   }
   RE_Options &set_extended(bool x) {
-    PCRE_SET_OR_CLEAR(x,PCRE_EXTENDED);
+    PCRE_SET_OR_CLEAR(x, PCRE_EXTENDED);
   }
 
   bool dollar_endonly() const {
     return PCRE_IS_SET(PCRE_DOLLAR_ENDONLY);
   }
   RE_Options &set_dollar_endonly(bool x) {
-    PCRE_SET_OR_CLEAR(x,PCRE_DOLLAR_ENDONLY);
+    PCRE_SET_OR_CLEAR(x, PCRE_DOLLAR_ENDONLY);
   }
 
   bool extra() const {
-    return PCRE_IS_SET( PCRE_EXTRA);
+    return PCRE_IS_SET(PCRE_EXTRA);
   }
   RE_Options &set_extra(bool x) {
     PCRE_SET_OR_CLEAR(x, PCRE_EXTRA);
@@ -623,6 +620,9 @@ class PCRECPP_EXP_DEFN RE {
   //           1.5-2.0?
   // may become:
   //           1\.5\-2\.0\?
+  // Note QuoteMeta behaves the same as perl's QuoteMeta function,
+  // *except* that it escapes the NUL character (\0) as backslash + 0,
+  // rather than backslash + NUL.
   static string QuoteMeta(const StringPiece& unquoted);
 
 
@@ -645,6 +645,15 @@ class PCRECPP_EXP_DEFN RE {
   // Return the number of capturing subpatterns, or -1 if the
   // regexp wasn't valid on construction.
   int NumberOfCapturingGroups() const;
+
+  // The default value for an argument, to indicate the end of the argument
+  // list. This must be used only in optional argument defaults. It should NOT
+  // be passed explicitly. Some people have tried to use it like this:
+  //
+  //   FullMatch(x, y, &z, no_arg, &w);
+  //
+  // This is a mistake, and will not work.
+  static Arg no_arg;
 
  private:
 

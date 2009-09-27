@@ -178,13 +178,11 @@ libpcre_la_SOURCES = \
   pcre_study.c \
   pcre_tables.c \
   pcre_try_flipped.c \
-  pcre_ucp_searchfuncs.c \
+  pcre_ucd.c \
   pcre_valid_utf8.c \
   pcre_version.c \
   pcre_xclass.c \
-  ucp.h \
-  ucpinternal.h \
-  ucptable.h
+  ucp.h
 
 ## This file is generated as part of the building process, so don't distribute.
 nodist_libpcre_la_SOURCES = \
@@ -245,13 +243,13 @@ dist_noinst_SCRIPTS += RunTest
 EXTRA_DIST += RunTest.bat
 bin_PROGRAMS += pcretest
 pcretest_SOURCES = pcretest.c
-pcretest_LDADD = libpcreposix.la
+pcretest_LDADD = libpcreposix.la $(LIBREADLINE)
 
 TESTS += RunGrepTest
 dist_noinst_SCRIPTS += RunGrepTest
 bin_PROGRAMS += pcregrep
 pcregrep_SOURCES = pcregrep.c
-pcregrep_LDADD = libpcreposix.la
+pcregrep_LDADD = libpcreposix.la $(LIBZ) $(LIBBZ2)
 
 EXTRA_DIST += \
   testdata/grepinput \
@@ -292,15 +290,40 @@ CLEANFILES += \
 	testtry \
         testNinput
 
-# PCRE demonstration program
-noinst_PROGRAMS += pcredemo
-pcredemo_SOURCES = pcredemo.c
-pcredemo_LDADD = libpcre.la
+
+# PCRE demonstration program. No longer built automatcally. The point is that
+# the users should build it themselves. So just distribute the source.
+# noinst_PROGRAMS += pcredemo
+# pcredemo_SOURCES = pcredemo.c
+# pcredemo_LDADD = libpcre.la
+
+EXTRA_DIST += pcredemo.c
+
 
 ## Utility rules, documentation, etc.
 
 # A compatibility line, the old build system worked with 'make test'
 test: check ;
+
+
+# A PCRE user submitted the following addition, saying that it "will allow
+# anyone using the 'mingw32' compiler to simply type 'make pcre.dll' and get a
+# nice DLL for Windows use". (It is used by the pcre.dll target.)
+DLL_OBJS= pcre_compile.o pcre_config.o \
+	pcre_dfa_exec.o pcre_exec.o pcre_fullinfo.o pcre_get.o \
+	pcre_globals.o pcre_info.o pcre_maketables.o \
+	pcre_newline.o pcre_ord2utf8.o pcre_refcount.o \
+	pcre_study.o pcre_tables.o pcre_try_flipped.o \
+	pcre_ucd.o pcre_valid_utf8.o pcre_version.o \
+	pcre_chartables.o \
+	pcre_xclass.o
+
+# A PCRE user submitted the following addition, saying that it "will allow
+# anyone using the 'mingw32' compiler to simply type 'make pcre.dll' and get a
+# nice DLL for Windows use".
+pcre.dll: $(DLL_OBJS)
+	$(CC) -shared -o pcre.dll -Wl,"--strip-all" -Wl,"--export-all-symbols" $(DLL_OBJS)
+
 
 # We have .pc files for pkg-config users.
 pkgconfigdir = $(libdir)/pkgconfig
@@ -358,6 +381,9 @@ endif
 ## CMake support
 
 EXTRA_DIST += \
+  cmake/COPYING-CMAKE-SCRIPTS \
+  cmake/FindPackageHandleStandardArgs.cmake \
+  cmake/FindReadline.cmake \
   CMakeLists.txt \
   config-cmake.h.in
 

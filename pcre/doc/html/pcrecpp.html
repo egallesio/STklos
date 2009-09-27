@@ -101,7 +101,8 @@ The function returns true iff all of the following conditions are satisfied:
 
   c. The "i"th argument has a suitable type for holding the
      string captured as the "i"th sub-pattern. If you pass in
-     NULL for the "i"th argument, or pass fewer arguments than
+     void * NULL for the "i"th argument, or a non-void * NULL
+     of the correct type, or pass fewer arguments than the
      number of sub-patterns, "i"th captured sub-pattern is
      ignored.
 </pre>
@@ -116,6 +117,11 @@ The matching interface supports at most 16 arguments per call.
 If you need more, consider using the more general interface
 <b>pcrecpp::RE::DoMatch</b>. See <b>pcrecpp.h</b> for the signature for
 <b>DoMatch</b>.
+</P>
+<P>
+NOTE: Do not use <b>no_arg</b>, which is used internally to mark the end of a
+list of optional arguments, as a placeholder for missing arguments, as this can
+lead to segfaults.
 </P>
 <br><a name="SEC4" href="#TOC1">QUOTING METACHARACTERS</a><br>
 <P>
@@ -357,7 +363,7 @@ Copyright &copy; 2007 Google Inc.
 </P>
 <br><a name="SEC12" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 06 March 2007
+Last updated: 17 March 2009
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

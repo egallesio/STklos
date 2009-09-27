@@ -131,7 +131,8 @@ byte, even in UTF-8 mode, is not supported because the alternative algorithm
 moves through the subject string one character at a time, for all active paths
 through the tree.
 .P
-8. None of the backtracking control verbs such as (*PRUNE) are supported.
+8. Except for (*FAIL), the backtracking control verbs such as (*PRUNE) are not
+supported. (*FAIL) is supported, and behaves like a failing negative assertion.
 .
 .SH "ADVANTAGES OF THE ALTERNATIVE ALGORITHM"
 .rs
@@ -182,6 +183,6 @@ Cambridge CB2 3QH, England.
 .rs
 .sp
 .nf
-Last updated: 08 August 2007
-Copyright (c) 1997-2007 University of Cambridge.
+Last updated: 19 April 2008
+Copyright (c) 1997-2008 University of Cambridge.
 .fi

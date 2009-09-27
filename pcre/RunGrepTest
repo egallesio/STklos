@@ -147,11 +147,11 @@ echo "---------------------------- Test 34 -----------------------------" >>test
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 35 -----------------------------" >>testtry
-(cd $srcdir; $valgrind $pcregrep -L -r --include=grepinputx 'fox' ./testdata) >>testtry
+(cd $srcdir; $valgrind $pcregrep -L -r --include=grepinputx --exclude_dir='^\.' 'fox' ./testdata) >>testtry
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 36 -----------------------------" >>testtry
-(cd $srcdir; $valgrind $pcregrep -L -r --include=grepinput --exclude 'grepinput$' 'fox' ./testdata | sort) >>testtry
+(cd $srcdir; $valgrind $pcregrep -L -r --include=grepinput --exclude 'grepinput$' --exclude_dir='^\.' 'fox' ./testdata | sort) >>testtry
 echo "RC=$?" >>testtry
 
 echo "---------------------------- Test 37 -----------------------------" >>testtry
@@ -207,6 +207,15 @@ echo "---------------------------- Test 50 ------------------------------" >>tes
 
 echo "---------------------------- Test 51 ------------------------------" >>testtry
 (cd $srcdir; $valgrind $pcregrep --colour=always jumps ./testdata/grepinputv) >>testtry
+
+echo "---------------------------- Test 52 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --file-offsets 'before|zero|after' ./testdata/grepinput) >>testtry
+
+echo "---------------------------- Test 53 ------------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep --line-offsets 'before|zero|after' ./testdata/grepinput) >>testtry
+
+echo "---------------------------- Test 54 -----------------------------" >>testtry
+(cd $srcdir; $valgrind $pcregrep -f./testdata/greplist --color=always ./testdata/grepinputx) >>testtry
 
 # Now compare the results.
 

@@ -35,18 +35,25 @@ man page, in case the conversion went wrong.
 <li><a name="TOC20" href="#SEC20">COMMENTS</a>
 <li><a name="TOC21" href="#SEC21">RECURSIVE PATTERNS</a>
 <li><a name="TOC22" href="#SEC22">SUBPATTERNS AS SUBROUTINES</a>
-<li><a name="TOC23" href="#SEC23">CALLOUTS</a>
-<li><a name="TOC24" href="#SEC24">BACKTRACKING CONTROL</a>
-<li><a name="TOC25" href="#SEC25">SEE ALSO</a>
-<li><a name="TOC26" href="#SEC26">AUTHOR</a>
-<li><a name="TOC27" href="#SEC27">REVISION</a>
+<li><a name="TOC23" href="#SEC23">ONIGURUMA SUBROUTINE SYNTAX</a>
+<li><a name="TOC24" href="#SEC24">CALLOUTS</a>
+<li><a name="TOC25" href="#SEC25">BACKTRACKING CONTROL</a>
+<li><a name="TOC26" href="#SEC26">SEE ALSO</a>
+<li><a name="TOC27" href="#SEC27">AUTHOR</a>
+<li><a name="TOC28" href="#SEC28">REVISION</a>
 </ul>
 <br><a name="SEC1" href="#TOC1">PCRE REGULAR EXPRESSION DETAILS</a><br>
 <P>
 The syntax and semantics of the regular expressions that are supported by PCRE
 are described in detail below. There is a quick-reference syntax summary in the
 <a href="pcresyntax.html"><b>pcresyntax</b></a>
-page. Perl's regular expressions are described in its own documentation, and
+page. PCRE tries to match Perl syntax and semantics as closely as it can. PCRE
+also supports some alternative regular expression syntax (which does not
+conflict with the Perl syntax) in order to provide some compatibility with
+regular expressions in Python, .NET, and Oniguruma.
+</P>
+<P>
+Perl's regular expressions are described in its own documentation, and
 regular expressions in general are covered in a number of books, some of which
 have copious examples. Jeffrey Friedl's "Mastering Regular Expressions",
 published by O'Reilly, covers regular expressions in great detail. This
@@ -56,8 +63,15 @@ description of PCRE's regular expressions is intended as reference material.
 The original operation of PCRE was on strings of one-byte characters. However,
 there is now also support for UTF-8 character strings. To use this, you must
 build PCRE to include UTF-8 support, and then call <b>pcre_compile()</b> with
-the PCRE_UTF8 option. How this affects pattern matching is mentioned in several
-places below. There is also a summary of UTF-8 features in the
+the PCRE_UTF8 option. There is also a special sequence that can be given at the
+start of a pattern:
+<pre>
+  (*UTF8)
+</pre>
+Starting a pattern with this sequence is equivalent to setting the PCRE_UTF8
+option. This feature is not Perl-compatible. How setting UTF-8 mode affects
+pattern matching is mentioned in several places below. There is also a summary
+of UTF-8 features in the
 <a href="pcre.html#utf8support">section on UTF-8 support</a>
 in the main
 <a href="pcre.html"><b>pcre</b></a>
@@ -312,6 +326,17 @@ following the discussion of
 <a href="#subpattern">parenthesized subpatterns.</a>
 </P>
 <br><b>
+Absolute and relative subroutine calls
+</b><br>
+<P>
+For compatibility with Oniguruma, the non-Perl syntax \g followed by a name or
+a number enclosed either in angle brackets or single quotes, is an alternative
+syntax for referencing a subpattern as a "subroutine". Details are discussed
+<a href="#onigurumasubroutines">later.</a>
+Note that \g{...} (Perl syntax) and \g&#60;...&#62; (Oniguruma syntax) are <i>not</i>
+synonymous. The former is a back reference; the latter is a subroutine call.
+</P>
+<br><b>
 Generic character types
 </b><br>
 <P>
@@ -350,7 +375,8 @@ In UTF-8 mode, characters with values greater than 128 never match \d, \s, or
 \w, and always match \D, \S, and \W. This is true even when Unicode
 character property support is available. These sequences retain their original
 meanings from before UTF-8 support was available, mainly for efficiency
-reasons.
+reasons. Note that this also affects \b, because it is defined in terms of \w
+and \W.
 </P>
 <P>
 The sequences \h, \H, \v, and \V are Perl 5.10 features. In contrast to the
@@ -1012,11 +1038,11 @@ changed in the same way as the Perl-compatible options by using the characters
 J, U and X respectively.
 </P>
 <P>
-When an option change occurs at top level (that is, not inside subpattern
-parentheses), the change applies to the remainder of the pattern that follows.
-If the change is placed right at the start of a pattern, PCRE extracts it into
-the global options (and it will therefore show up in data extracted by the
-<b>pcre_fullinfo()</b> function).
+When one of these option changes occurs at top level (that is, not inside
+subpattern parentheses), the change applies to the remainder of the pattern
+that follows. If the change is placed right at the start of a pattern, PCRE
+extracts it into the global options (and it will therefore show up in data
+extracted by the <b>pcre_fullinfo()</b> function).
 </P>
 <P>
 An option change within a subpattern (see below for a description of
@@ -1039,10 +1065,12 @@ behaviour otherwise.
 <P>
 <b>Note:</b> There are other PCRE-specific options that can be set by the
 application when the compile or match functions are called. In some cases the
-pattern can contain special leading sequences to override what the application
-has set or what has been defaulted. Details are given in the section entitled
+pattern can contain special leading sequences such as (*CRLF) to override what
+the application has set or what has been defaulted. Details are given in the
+section entitled
 <a href="#newlineseq">"Newline sequences"</a>
-above.
+above. There is also the (*UTF8) leading sequence that can be used to set UTF-8
+mode; this is equivalent to setting the PCRE_UTF8 option.
 <a name="subpattern"></a></P>
 <br><a name="SEC12" href="#TOC1">SUBPATTERNS</a><br>
 <P>
@@ -1184,6 +1212,11 @@ details of the interfaces for handling named subpatterns, see the
 <a href="pcreapi.html"><b>pcreapi</b></a>
 documentation.
 </P>
+<P>
+<b>Warning:</b> You cannot use different names to distinguish between two
+subpatterns with the same number (see the previous section) because PCRE uses
+only the numbers when matching.
+</P>
 <br><a name="SEC15" href="#TOC1">REPETITION</a><br>
 <P>
 Repetition is specified by quantifiers, which can follow any of the following
@@ -1231,7 +1264,11 @@ which may be several bytes long (and they may be of different lengths).
 </P>
 <P>
 The quantifier {0} is permitted, causing the expression to behave as if the
-previous item and the quantifier were not present.
+previous item and the quantifier were not present. This may be useful for
+subpatterns that are referenced as
+<a href="#subpatternsassubroutines">subroutines</a>
+from elsewhere in the pattern. Items other than subpatterns that have a {0}
+quantifier are omitted from the compiled pattern.
 </P>
 <P>
 For convenience, the three most common quantifiers have single-character
@@ -2031,8 +2068,26 @@ changed for different calls. For example, consider this pattern:
 </pre>
 It matches "abcabc". It does not match "abcABC" because the change of
 processing option does not affect the called subpattern.
+<a name="onigurumasubroutines"></a></P>
+<br><a name="SEC23" href="#TOC1">ONIGURUMA SUBROUTINE SYNTAX</a><br>
+<P>
+For compatibility with Oniguruma, the non-Perl syntax \g followed by a name or
+a number enclosed either in angle brackets or single quotes, is an alternative
+syntax for referencing a subpattern as a subroutine, possibly recursively. Here
+are two of the examples used above, rewritten using this syntax:
+<pre>
+  (?&#60;pn&#62; \( ( (?&#62;[^()]+) | \g&#60;pn&#62; )* \) )
+  (sens|respons)e and \g'1'ibility
+</pre>
+PCRE supports an extension to Oniguruma: if a number is preceded by a
+plus or a minus sign it is taken as a relative reference. For example:
+<pre>
+  (abc)(?i:\g&#60;-1&#62;)
+</pre>
+Note that \g{...} (Perl syntax) and \g&#60;...&#62; (Oniguruma syntax) are <i>not</i>
+synonymous. The former is a back reference; the latter is a subroutine call.
 </P>
-<br><a name="SEC23" href="#TOC1">CALLOUTS</a><br>
+<br><a name="SEC24" href="#TOC1">CALLOUTS</a><br>
 <P>
 Perl has a feature whereby using the sequence (?{...}) causes arbitrary Perl
 code to be obeyed in the middle of matching a regular expression. This makes it
@@ -2067,7 +2122,7 @@ description of the interface to the callout function is given in the
 <a href="pcrecallout.html"><b>pcrecallout</b></a>
 documentation.
 </P>
-<br><a name="SEC24" href="#TOC1">BACKTRACKING CONTROL</a><br>
+<br><a name="SEC25" href="#TOC1">BACKTRACKING CONTROL</a><br>
 <P>
 Perl 5.10 introduced a number of "Special Backtracking Control Verbs", which
 are described in the Perl documentation as "experimental and subject to change
@@ -2076,9 +2131,10 @@ production code should be noted to avoid problems during upgrades." The same
 remarks apply to the PCRE features described in this section.
 </P>
 <P>
-Since these verbs are specifically related to backtracking, they can be used
-only when the pattern is to be matched using <b>pcre_exec()</b>, which uses a
-backtracking algorithm. They cause an error if encountered by
+Since these verbs are specifically related to backtracking, most of them can be
+used only when the pattern is to be matched using <b>pcre_exec()</b>, which uses
+a backtracking algorithm. With the exception of (*FAIL), which behaves like a
+failing negative assertion, they cause an error if encountered by
 <b>pcre_dfa_exec()</b>.
 </P>
 <P>
@@ -2182,11 +2238,11 @@ the end of the group if FOO succeeds); on failure the matcher skips to the
 second alternative and tries COND2, without backtracking into COND1. If (*THEN)
 is used outside of any alternation, it acts exactly like (*PRUNE).
 </P>
-<br><a name="SEC25" href="#TOC1">SEE ALSO</a><br>
+<br><a name="SEC26" href="#TOC1">SEE ALSO</a><br>
 <P>
 <b>pcreapi</b>(3), <b>pcrecallout</b>(3), <b>pcrematching</b>(3), <b>pcre</b>(3).
 </P>
-<br><a name="SEC26" href="#TOC1">AUTHOR</a><br>
+<br><a name="SEC27" href="#TOC1">AUTHOR</a><br>
 <P>
 Philip Hazel
 <br>
@@ -2195,11 +2251,11 @@ University Computing Service
 Cambridge CB2 3QH, England.
 <br>
 </P>
-<br><a name="SEC27" href="#TOC1">REVISION</a><br>
+<br><a name="SEC28" href="#TOC1">REVISION</a><br>
 <P>
-Last updated: 17 September 2007
+Last updated: 11 April 2009
 <br>
-Copyright &copy; 1997-2007 University of Cambridge.
+Copyright &copy; 1997-2009 University of Cambridge.
 <br>
 <p>
 Return to the <a href="index.html">PCRE index page</a>.

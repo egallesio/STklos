@@ -7,9 +7,9 @@ dnl be defined as -RC2, for example. For real releases, it should be defined
 dnl empty.
 
 m4_define(pcre_major, [7])
-m4_define(pcre_minor, [4])
+m4_define(pcre_minor, [9])
 m4_define(pcre_prerelease, [])
-m4_define(pcre_date, [2007-09-21])
+m4_define(pcre_date, [2009-04-11])
 
 # Libtool shared library interface versions (current:revision:age)
 m4_define(libpcre_version, [0:1:0])
@@ -60,6 +60,11 @@ then
   fi
 fi
 
+# AC_PROG_CXX will return "g++" even if no c++ compiler is installed.
+# Check for that case, and just disable c++ code if g++ doesn't run.
+AC_LANG_PUSH(C++)
+AC_COMPILE_IFELSE(AC_LANG_PROGRAM([],[]),, CXX=""; CXXCP=""; CXXFLAGS="")
+AC_LANG_POP
 
 AC_PROG_INSTALL
 AC_LIBTOOL_WIN32_DLL
@@ -97,7 +102,7 @@ AC_ARG_ENABLE(rebuild-chartables,
 # Handle --enable-utf8 (disabled by default)
 AC_ARG_ENABLE(utf8,
               AS_HELP_STRING([--enable-utf8],
-                             [enable UTF-8 support]),
+                             [enable UTF-8 support (incompatible with --enable-ebcdic)]),
               , enable_utf8=unset)
 
 # Handle --enable-unicode-properties
@@ -145,7 +150,7 @@ AC_ARG_ENABLE(bsr-anycrlf,
 # Handle --enable-ebcdic
 AC_ARG_ENABLE(ebcdic,
               AS_HELP_STRING([--enable-ebcdic],
-                             [assume EBCDIC coding rather than ASCII; use this only in (uncommon) EBCDIC environments; it implies --enable-rebuild-chartables]),
+                             [assume EBCDIC coding rather than ASCII; incompatible with --enable-utf8; use only in (uncommon) EBCDIC environments; it implies --enable-rebuild-chartables]),
               , enable_ebcdic=no)
 
 # Handle --disable-stack-for-recursion
@@ -153,6 +158,24 @@ AC_ARG_ENABLE(stack-for-recursion,
               AS_HELP_STRING([--disable-stack-for-recursion],
                              [don't use stack recursion when matching]),
               , enable_stack_for_recursion=yes)
+
+# Handle --enable-pcregrep-libz
+AC_ARG_ENABLE(pcregrep-libz,
+              AS_HELP_STRING([--enable-pcregrep-libz],
+                             [link pcregrep with libz to handle .gz files]),
+              , enable_pcregrep_libz=no)
+
+# Handle --enable-pcregrep-libbz2
+AC_ARG_ENABLE(pcregrep-libbz2,
+              AS_HELP_STRING([--enable-pcregrep-libbz2],
+                             [link pcregrep with libbz2 to handle .bz2 files]),
+              , enable_pcregrep_libbz2=no)
+
+# Handle --enable-pcretest-libreadline
+AC_ARG_ENABLE(pcretest-libreadline,
+              AS_HELP_STRING([--enable-pcretest-libreadline],
+                             [link pcretest with libreadline]),
+              , enable_pcretest_libreadline=no)
 
 # Handle --with-posix-malloc-threshold=NBYTES
 AC_ARG_WITH(posix-malloc-threshold,
@@ -203,10 +226,17 @@ then
 fi
 
 # Make sure that if enable_ebcdic is set, rebuild_chartables is also enabled.
+# Also check that UTF-8 support is not requested, because PCRE cannot handle
+# EBCDIC and UTF-8 in the same build. To do so it would need to use different
+# character constants depending on the mode.
 #
 if test "x$enable_ebcdic" = "xyes"
 then
   enable_rebuild_chartables=yes
+  if test "x$enable_utf8" = "xyes"
+  then
+    AC_MSG_ERROR([support for EBCDIC and UTF-8 cannot be enabled at the same time])
+  fi
 fi
 
 # Convert the newline identifier into the appropriate integer value.
@@ -259,6 +289,30 @@ if test "x$enable_cpp" = "xyes" -a -n "$CXX"
 then
 AC_LANG_PUSH(C++)
 
+# Older versions of pcre defined pcrecpp::no_arg, but in new versions
+# it's called pcrecpp::RE::no_arg.  For backwards ABI compatibility,
+# we want to make one an alias for the other.  Different systems do
+# this in different ways.  Some systems, for instance, can do it via
+# a linker flag: -alias (for os x 10.5) or -i (for os x <=10.4).
+OLD_LDFLAGS="$LDFLAGS"
+for flag in "-alias,__ZN7pcrecpp2RE6no_argE,__ZN7pcrecpp6no_argE" \
+            "-i__ZN7pcrecpp6no_argE:__ZN7pcrecpp2RE6no_argE"; do
+  AC_MSG_CHECKING([for alias support in the linker])
+  LDFLAGS="$OLD_LDFLAGS -Wl,$flag"
+  # We try to run the linker with this new ld flag.  If the link fails,
+  # we give up and remove the new flag from LDFLAGS.
+  AC_LINK_IFELSE(AC_LANG_PROGRAM([namespace pcrecpp {
+                                    class RE { static int no_arg; };
+                                    int RE::no_arg;
+                                  }],
+                                 []),
+                 [AC_MSG_RESULT([yes]);
+                  EXTRA_LIBPCRECPP_LDFLAGS="$EXTRA_LIBPCRECPP_LDFLAGS -Wl,$flag";
+                  break;],
+                 AC_MSG_RESULT([no]))
+done
+LDFLAGS="$OLD_LDFLAGS"
+
 # We could be more clever here, given we're doing AC_SUBST with this
 # (eg set a var to be the name of the include file we want). But we're not
 # so it's easy to change back to 'regular' autoconf vars if we needed to.
@@ -268,6 +322,7 @@ AC_CHECK_HEADERS(bits/type_traits.h, [pcre_have_bits_type_traits="1"],
                                      [pcre_have_bits_type_traits="0"])
 AC_CHECK_HEADERS(type_traits.h, [pcre_have_type_traits="1"],
                                 [pcre_have_type_traits="0"])
+
 AC_LANG_POP
 fi
 # Using AC_SUBST eliminates the need to include config.h in a public .h file
@@ -283,18 +338,43 @@ AM_CONDITIONAL(WITH_REBUILD_CHARTABLES, test "x$enable_rebuild_chartables" = "xy
 AC_C_CONST
 AC_TYPE_SIZE_T
 
-AC_CHECK_TYPES([long long],
-               [pcre_have_long_long="1"],
-               [pcre_have_long_long="0"])
-AC_CHECK_TYPES([unsigned long long],
-               [pcre_have_ulong_long="1"],
-               [pcre_have_ulong_long="0"])
+pcre_have_strotolonglong=0
+AC_CHECK_FUNCS(strtoq strtoll _strtoi64, [pcre_have_strotolonglong="1"; break])
+# If we can't convert a string to a long long, pretend we don't even
+# have a long long.
+if test $pcre_have_strotolonglong = "0"; then
+   pcre_have_long_long="0"
+   pcre_have_ulong_long="0"
+else
+  AC_CHECK_TYPES([long long],
+                 [pcre_have_long_long="1"],
+                 [pcre_have_long_long="0"])
+  AC_CHECK_TYPES([unsigned long long],
+                 [pcre_have_ulong_long="1"],
+                 [pcre_have_ulong_long="0"])
+fi
 AC_SUBST(pcre_have_long_long)
 AC_SUBST(pcre_have_ulong_long)
 
 # Checks for library functions.
 
-AC_CHECK_FUNCS(bcopy memmove strerror strtoq strtoll _strtoi64)
+AC_CHECK_FUNCS(bcopy memmove strerror)
+
+# Check for the availability of libz (aka zlib)
+
+AC_CHECK_HEADERS([zlib.h], [HAVE_ZLIB_H=1])
+AC_CHECK_LIB([z], [gzopen], [HAVE_LIBZ=1])
+
+# Check for the availability of libbz2
+
+AC_CHECK_HEADERS([bzlib.h], [HAVE_BZLIB_H=1])
+AC_CHECK_LIB([bz2], [BZ2_bzopen], [HAVE_LIBBZ2=1])
+
+# Check for the availabiity of libreadline
+
+AC_CHECK_HEADERS([readline/readline.h], [HAVE_READLINE_H=1])
+AC_CHECK_HEADERS([readline/history.h], [HAVE_HISTORY_H=1])
+AC_CHECK_LIB([readline], [readline], [HAVE_LIB_READLINE=1])
 
 # This facilitates -ansi builds under Linux
 dnl AC_DEFINE([_GNU_SOURCE], [], [Enable GNU extensions in glibc])
@@ -308,7 +388,10 @@ fi
 
 if test "$enable_utf8" = "yes"; then
   AC_DEFINE([SUPPORT_UTF8], [], [
-    Define to enable support for the UTF-8 Unicode encoding.])
+    Define to enable support for the UTF-8 Unicode encoding. This will
+    work even in an EBCDIC environment, but it is incompatible with
+    the EBCDIC macro. That is, PCRE can support *either* EBCDIC code
+    *or* ASCII/UTF-8, but not both at once.])
 fi
 
 if test "$enable_unicode_properties" = "yes"; then
@@ -327,6 +410,23 @@ if test "$enable_stack_for_recursion" = "no"; then
     just above the match() function. On systems that support it,
     "configure" can be used to set this in the Makefile
     (use --disable-stack-for-recursion).])
+fi
+
+if test "$enable_pcregrep_libz" = "yes"; then
+  AC_DEFINE([SUPPORT_LIBZ], [], [
+    Define to allow pcregrep to be linked with libz, so that it is
+    able to handle .gz files.])
+fi
+
+if test "$enable_pcregrep_libbz2" = "yes"; then
+  AC_DEFINE([SUPPORT_LIBBZ2], [], [
+    Define to allow pcregrep to be linked with libbz2, so that it is
+    able to handle .bz2 files.])
+fi
+
+if test "$enable_pcretest_libreadline" = "yes"; then
+  AC_DEFINE([SUPPORT_LIBREADLINE], [], [
+    Define to allow pcretest to be linked with libreadline.])
 fi
 
 AC_DEFINE_UNQUOTED([NEWLINE], [$ac_pcre_newline_value], [
@@ -412,7 +512,11 @@ if test "$enable_ebcdic" = "yes"; then
   AC_DEFINE_UNQUOTED([EBCDIC], [], [
     If you are compiling for a system that uses EBCDIC instead of ASCII
     character codes, define this macro as 1. On systems that can use
-    "configure", this can be done via --enable-ebcdic.])
+    "configure", this can be done via --enable-ebcdic. PCRE will then
+    assume that all input strings are in EBCDIC. If you do not define
+    this macro, PCRE will assume input strings are ASCII or UTF-8 Unicode.
+    It is not possible to build a version of PCRE that supports both
+    EBCDIC and UTF-8.])
 fi
 
 # Platform specific issues
@@ -430,11 +534,15 @@ esac
 # The extra LDFLAGS for each particular library
 # (Note: The libpcre*_version bits are m4 variables, assigned above)
 
-EXTRA_LIBPCRE_LDFLAGS="$NO_UNDEFINED -version-info libpcre_version"
+EXTRA_LIBPCRE_LDFLAGS="$EXTRA_LIBPCRE_LDFLAGS \
+                       $NO_UNDEFINED -version-info libpcre_version"
 
-EXTRA_LIBPCREPOSIX_LDFLAGS="$NO_UNDEFINED -version-info libpcreposix_version"
+EXTRA_LIBPCREPOSIX_LDFLAGS="$EXTRA_LIBPCREPOSIX_LDFLAGS \
+                            $NO_UNDEFINED -version-info libpcreposix_version"
 
-EXTRA_LIBPCRECPP_LDFLAGS="$NO_UNDEFINED $EXPORT_ALL_SYMBOLS -version-info libpcrecpp_version"
+EXTRA_LIBPCRECPP_LDFLAGS="$EXTRA_LIBPCRECPP_LDFLAGS \
+                          $NO_UNDEFINED -version-info libpcrecpp_version \
+                          $EXPORT_ALL_SYMBOLS"
 
 AC_SUBST(EXTRA_LIBPCRE_LDFLAGS)
 AC_SUBST(EXTRA_LIBPCREPOSIX_LDFLAGS)
@@ -443,6 +551,50 @@ AC_SUBST(EXTRA_LIBPCRECPP_LDFLAGS)
 # When we run 'make distcheck', use these arguments.
 DISTCHECK_CONFIGURE_FLAGS="--enable-cpp --enable-unicode-properties"
 AC_SUBST(DISTCHECK_CONFIGURE_FLAGS)
+
+# Check that, if --enable-pcregrep-libz or --enable-pcregrep-libbz2 is
+# specified, the relevant library is available.
+
+if test "$enable_pcregrep_libz" = "yes"; then
+  if test "$HAVE_ZLIB_H" != "1"; then
+    echo "** Cannot --enable-pcregrep-libz because zlib.h was not found"
+    exit 1
+  fi
+  if test "$HAVE_LIBZ" != "1"; then
+    echo "** Cannot --enable-pcregrep-libz because libz was not found"
+    exit 1
+  fi
+  LIBZ="-lz"
+fi
+AC_SUBST(LIBZ)
+
+if test "$enable_pcregrep_libbz2" = "yes"; then
+  if test "$HAVE_BZLIB_H" != "1"; then
+    echo "** Cannot --enable-pcregrep-libbz2 because bzlib.h was not found"
+    exit 1
+  fi
+  if test "$HAVE_LIBBZ2" != "1"; then
+    echo "** Cannot --enable-pcregrep-libbz2 because libbz2 was not found"
+    exit 1
+  fi
+  LIBBZ2="-lbz2"
+fi
+AC_SUBST(LIBBZ2)
+
+# Similarly for --enable-pcretest-readline
+
+if test "$enable_pcretest_libreadline" = "yes"; then
+  if test "$HAVE_READLINE_H" != "1"; then
+    echo "** Cannot --enable-pcretest-readline because readline/readline.h was not found."
+    exit 1
+  fi
+  if test "$HAVE_HISTORY_H" != "1"; then
+    echo "** Cannot --enable-pcretest-readline because readline/history.h was not found."
+    exit 1
+  fi
+  LIBREADLINE="-lreadline"
+fi
+AC_SUBST(LIBREADLINE)
 
 # Produce these files, in addition to config.h.
 AC_CONFIG_FILES(
@@ -466,37 +618,40 @@ AC_OUTPUT
 
 # Print out a nice little message after configure is run displaying your
 # chosen options.
-#
+
 cat <<EOF
 
 $PACKAGE-$VERSION configuration summary:
 
-    Install prefix ........... : ${prefix}
-    C preprocessor ........... : ${CPP}
-    C compiler ............... : ${CC}
-    C++ preprocessor ......... : ${CXXCPP}
-    C++ compiler ............. : ${CXX}
-    Linker ................... : ${LD}
-    C preprocessor flags ..... : ${CPPFLAGS}
-    C compiler flags ......... : ${CFLAGS}
-    C++ compiler flags ....... : ${CXXFLAGS}
-    Linker flags ............. : ${LDFLAGS}
-    Extra libraries .......... : ${LIBS}
+    Install prefix .................. : ${prefix}
+    C preprocessor .................. : ${CPP}
+    C compiler ...................... : ${CC}
+    C++ preprocessor ................ : ${CXXCPP}
+    C++ compiler .................... : ${CXX}
+    Linker .......................... : ${LD}
+    C preprocessor flags ............ : ${CPPFLAGS}
+    C compiler flags ................ : ${CFLAGS}
+    C++ compiler flags .............. : ${CXXFLAGS}
+    Linker flags .................... : ${LDFLAGS}
+    Extra libraries ................. : ${LIBS}
 
-    Build C++ library ........ : ${enable_cpp}
-    Enable UTF-8 support ..... : ${enable_utf8}
-    Unicode properties ....... : ${enable_unicode_properties}
-    Newline char/sequence .... : ${enable_newline}
-    \R matches only ANYCRLF .. : ${enable_bsr_anycrlf}
-    EBCDIC coding ............ : ${enable_ebcdic}
-    Rebuild char tables ...... : ${enable_rebuild_chartables}
-    Use stack recursion ...... : ${enable_stack_for_recursion}
-    POSIX mem threshold ...... : ${with_posix_malloc_threshold}
-    Internal link size ....... : ${with_link_size}
-    Match limit .............. : ${with_match_limit}
-    Match limit recursion .... : ${with_match_limit_recursion}
-    Build shared libs ........ : ${enable_shared}
-    Build static libs ........ : ${enable_static}
+    Build C++ library ............... : ${enable_cpp}
+    Enable UTF-8 support ............ : ${enable_utf8}
+    Unicode properties .............. : ${enable_unicode_properties}
+    Newline char/sequence ........... : ${enable_newline}
+    \R matches only ANYCRLF ......... : ${enable_bsr_anycrlf}
+    EBCDIC coding ................... : ${enable_ebcdic}
+    Rebuild char tables ............. : ${enable_rebuild_chartables}
+    Use stack recursion ............. : ${enable_stack_for_recursion}
+    POSIX mem threshold ............. : ${with_posix_malloc_threshold}
+    Internal link size .............. : ${with_link_size}
+    Match limit ..................... : ${with_match_limit}
+    Match limit recursion ........... : ${with_match_limit_recursion}
+    Build shared libs ............... : ${enable_shared}
+    Build static libs ............... : ${enable_static}
+    Link pcregrep with libz ......... : ${enable_pcregrep_libz}
+    Link pcregrep with libbz2 ....... : ${enable_pcregrep_libbz2}
+    Link pcretest with libreadline .. : ${enable_pcretest_libreadline}
 
 EOF
 

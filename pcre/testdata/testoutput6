@@ -1431,7 +1431,7 @@ of case for anything other than the ASCII letters. /
  0: \x{1b00}\x{12000}\x{7c0}\x{a840}\x{10900}
 
 /The next two are special cases where the lengths of the different cases of the 
-same character differ. The first went wrong with heap fram storage; the 2nd
+same character differ. The first went wrong with heap frame storage; the 2nd
 was broken in all cases./
 
 /^\x{023a}+?(\x{0130}+)/8i
@@ -1521,5 +1521,240 @@ No match
 /(\P{Yi}{0,3}?\277)*/
 
 /(\p{Yi}{0,3}+\277)*/
+
+/^[\p{Arabic}]/8
+    \x{60e} 
+ 0: \x{60e}
+    \x{656} 
+ 0: \x{656}
+    \x{657} 
+ 0: \x{657}
+    \x{658} 
+ 0: \x{658}
+    \x{659} 
+ 0: \x{659}
+    \x{65a} 
+ 0: \x{65a}
+    \x{65b} 
+ 0: \x{65b}
+    \x{65c} 
+ 0: \x{65c}
+    \x{65d} 
+ 0: \x{65d}
+    \x{65e} 
+ 0: \x{65e}
+    \x{66a} 
+ 0: \x{66a}
+    \x{6e9} 
+ 0: \x{6e9}
+    \x{6ef}
+ 0: \x{6ef}
+    \x{6fa}  
+ 0: \x{6fa}
+    ** Failers
+No match
+    \x{600}
+No match
+    \x{650}
+No match
+    \x{651}  
+No match
+    \x{652}  
+No match
+    \x{653}  
+No match
+    \x{654} 
+No match
+    \x{655} 
+No match
+    \x{65f}  
+No match
+    
+/^\p{Cyrillic}/8
+    \x{1d2b} 
+ 0: \x{1d2b}
+    
+/^\p{Common}/8
+    \x{589}
+ 0: \x{589}
+    \x{60c}
+ 0: \x{60c}
+    \x{61f}  
+ 0: \x{61f}
+    \x{964}
+ 0: \x{964}
+    \x{965}  
+ 0: \x{965}
+    \x{970}  
+ 0: \x{970}
+
+/^\p{Inherited}/8
+    \x{64b}
+ 0: \x{64b}
+    \x{654}
+ 0: \x{654}
+    \x{655}
+ 0: \x{655}
+    \x{200c} 
+ 0: \x{200c}
+    ** Failers
+No match
+    \x{64a}
+No match
+    \x{656}     
+No match
+
+/^\p{Shavian}/8
+    \x{10450}
+ 0: \x{10450}
+    \x{1047f}
+ 0: \x{1047f}
+    
+/^\p{Deseret}/8
+    \x{10400}
+ 0: \x{10400}
+    \x{1044f}
+ 0: \x{1044f}
+    
+/^\p{Osmanya}/8
+    \x{10480}
+ 0: \x{10480}
+    \x{1049d}
+ 0: \x{1049d}
+    \x{104a0}
+ 0: \x{104a0}
+    \x{104a9}
+ 0: \x{104a9}
+    ** Failers
+No match
+    \x{1049e}
+No match
+    \x{1049f}
+No match
+    \x{104aa}           
+No match
+
+/\p{Zl}{2,3}+/8BZ
+------------------------------------------------------------------
+        Bra
+        prop Zl {2}
+        prop Zl ?+
+        Ket
+        End
+------------------------------------------------------------------
+    \xe2\x80\xa8\xe2\x80\xa8
+ 0: \x{2028}\x{2028}
+    \x{2028}\x{2028}\x{2028}
+ 0: \x{2028}\x{2028}\x{2028}
+    
+/\p{Zl}/8BZ
+------------------------------------------------------------------
+        Bra
+        prop Zl
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Lu}{3}+/8BZ
+------------------------------------------------------------------
+        Bra
+        prop Lu {3}
+        Ket
+        End
+------------------------------------------------------------------
+
+/\pL{2}+/8BZ
+------------------------------------------------------------------
+        Bra
+        prop L {2}
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Cc}{2}+/8BZ
+------------------------------------------------------------------
+        Bra
+        prop Cc {2}
+        Ket
+        End
+------------------------------------------------------------------
+
+/\x{c0}+\x{116}+/8i
+    \x{c0}\x{e0}\x{116}\x{117}
+ 0: \x{c0}\x{e0}\x{116}\x{117}
+
+/[\x{c0}\x{116}]+/8i
+    \x{c0}\x{e0}\x{116}\x{117}
+ 0: \x{c0}\x{e0}\x{116}\x{117}
+
+/\p{Carian}\p{Cham}\p{Kayah_Li}\p{Lepcha}\p{Lycian}\p{Lydian}\p{Ol_Chiki}\p{Rejang}\p{Saurashtra}\p{Sundanese}\p{Vai}/8
+    \x{102A4}\x{AA52}\x{A91D}\x{1C46}\x{10283}\x{1092E}\x{1C6B}\x{A93B}\x{A8BF}\x{1BA0}\x{A50A}====
+ 0: \x{102a4}\x{aa52}\x{a91d}\x{1c46}\x{10283}\x{1092e}\x{1c6b}\x{a93b}\x{a8bf}\x{1ba0}\x{a50a}
+
+/\x{a77d}\x{1d79}/8i
+    \x{a77d}\x{1d79}
+ 0: \x{a77d}\x{1d79}
+    \x{1d79}\x{a77d} 
+ 0: \x{1d79}\x{a77d}
+
+/\x{a77d}\x{1d79}/8
+    \x{a77d}\x{1d79}
+ 0: \x{a77d}\x{1d79}
+    ** Failers 
+No match
+    \x{1d79}\x{a77d} 
+No match
+
+/(A)\1/8i
+    AA
+ 0: AA
+ 1: A
+    Aa
+ 0: Aa
+ 1: A
+    aa
+ 0: aa
+ 1: a
+    aA
+ 0: aA
+ 1: a
+
+/(\x{de})\1/8i
+    \x{de}\x{de}
+ 0: \x{de}\x{de}
+ 1: \x{de}
+    \x{de}\x{fe}
+ 0: \x{de}\x{fe}
+ 1: \x{de}
+    \x{fe}\x{fe}
+ 0: \x{fe}\x{fe}
+ 1: \x{fe}
+    \x{fe}\x{de}
+ 0: \x{fe}\x{de}
+ 1: \x{fe}
+
+/(\x{10a})\1/8i
+    \x{10a}\x{10a}
+ 0: \x{10a}\x{10a}
+ 1: \x{10a}
+    \x{10a}\x{10b}
+ 0: \x{10a}\x{10b}
+ 1: \x{10a}
+    \x{10b}\x{10b}
+ 0: \x{10b}\x{10b}
+ 1: \x{10b}
+    \x{10b}\x{10a}
+ 0: \x{10b}\x{10a}
+ 1: \x{10b}
+    
+/The next two tests are for property support in non-UTF-8 mode/
+
+/(?:\p{Lu}|\x20)+/
+    \x41\x20\x50\xC2\x54\xC9\x20\x54\x4F\x44\x41\x59
+ 0: A P\xc2T\xc9 TODAY
+
+/[\p{Lu}\x20]+/
+    \x41\x20\x50\xC2\x54\xC9\x20\x54\x4F\x44\x41\x59
+ 0: A P\xc2T\xc9 TODAY
 
 / End of testinput6 /
