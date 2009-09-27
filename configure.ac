@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 27-Sep-2009 13:19 (eg)
+### Last file update: 27-Sep-2009 19:23 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -23,7 +23,9 @@ AC_PROG_LEX
 AC_PROG_MKDIR_P
 
 ### Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h libintl.h limits.h malloc.h memory.h netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h libintl.h limits.h malloc.h memory.h 
+		     netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h 
+		     sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
 
 ### Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -42,7 +44,11 @@ AC_FUNC_MKTIME
 AC_FUNC_REALLOC
 AC_FUNC_STRCOLL
 AC_FUNC_STRTOD
-AC_CHECK_FUNCS([atexit dup2 endpwent floor getcwd gethostbyaddr gethostbyname gethostname getpass gettimeofday inet_ntoa isascii memchr memmove memset mkdir modf putenv rmdir select socket sqrt strcasecmp strchr strerror strrchr strstr strtoul])
+AC_CHECK_FUNCS([atexit dup2 endpwent floor getcwd gethostbyaddr 
+		   gethostbyname gethostname getpass gettimeofday 
+		   inet_ntoa isascii memchr memmove memset mkdir modf 
+		   putenv rmdir select socket sqrt strcasecmp strchr 
+		   strerror strrchr strstr strtoul])
 
 ### Initialize prefix
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
@@ -197,21 +203,6 @@ case `uname -s` in
 esac
 
 
-#1.0###
-#1.0### check for PCRE
-#1.0###
-#1.0AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
-#1.0
-#1.0# Test if the user want to force with our PCRE lib
-#1.0withval=""
-#1.0AC_ARG_WITH(provided-regexp,
-#1.0       [  --with-provided-regexp	use our PCRE regexp version])
-#1.0
-#1.0case $withval in
-#1.0  "yes") HAVE_PCRE="no";;
-#1.0  "no")  HAVE_PCRE="yes";;
-#1.0esac
-
 ###
 ### configure libraries
 ###
@@ -252,33 +243,6 @@ else
   AC_DEFINE(HAVE_GC, [], [Use system GC])
 fi
 
-#1.0 if test "$HAVE_PCRE" = "no"
-#1.0 then 
-#1.0    echo "No PCRE library. Using the one provided with the package"
-#1.0    PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
-#1.0    -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
-#1.0 
-#1.0    (cd pcre; CC=$CC CFLAGS="$CFLAGS $PCRE_FLAGS" sh ./configure \
-#1.0     --prefix=$prefix --disable-shared --disable-cpp)
-#1.0     PCRE=pcre
-#1.0     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
-#1.0     PCREINC="-I../pcre"
-#1.0     DEF_PCRE=""
-#1.0 else 
-#1.0       echo "Using the system PCRE library"
-#1.0      PCRE=""
-#1.0      PCRELIB="-lpcre -lpcreposix"
-#1.0      PCREINC=""
-#1.0      DEF_PCRE="#define HAVE_PCRE 1"
-#1.0 fi
-
-
-#PCRELIBS="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
-#
-# case `uname -s` in
-#   CYGWIN*) PCRETARGET="libpcre.la";;
-#   *)       PCRETARGET="libpcre.la libpcreposix.la";;
-# esac
 
 # ----------------------------------------------------------------------
 # PCRE support 
