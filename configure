@@ -6651,32 +6651,32 @@ fi
 
 # Check whether --with-provided-regexp was given.
 if test "${with_provided_regexp+set}" = set; then :
-  withval=$with_provided_regexp; HAVE_PCRE="no"
+  withval=$with_provided_regexp; PROV_PCRE="yes"
 else
-  HAVE_PCRE="yes"
+  PROV_PCRE="no"
 fi
 
 
-case $HAVE_PCRE in
-  no)
-       echo "... Configuring libpcre"
-       PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
-       	           -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
-       (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
+if test "$HAVE_PCRE" = "no" -o "$PROV_PCRE" = "yes"
+then
+     echo "... Configuring libpcre"
+     PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
+                 -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
+     (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
            --prefix=$prefix --disable-shared --disable-cpp)
-       PCRE=pcre
-       PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
-       PCREINC="-I../pcre"
-       DEF_PCRE=""
-       pcrelib="use provided library";;
-  yes)
-       echo "... Using system libpcre library"
-       PCRE=""
-       PCRELIB="-lpcre -lpcreposix"
-       PCREINC=""
-       DEF_PCRE="#define HAVE_PCRE 1"
-       pcrelib="use the system library";;
-esac
+     PCRE=pcre
+     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
+     PCREINC="-I../pcre"
+     DEF_PCRE=""
+     pcremsg="use provided library"
+else
+     echo "... Using system libpcre library"
+     PCRE=""
+     PCRELIB="-lpcre -lpcreposix"
+     PCREINC=""
+     DEF_PCRE="#define HAVE_PCRE 1"
+     pcrelib="use the system library"
+fi
 
 
 # ----------------------------------------------------------------------
@@ -6733,29 +6733,29 @@ fi
 
 # Check whether --with-provided-ffi was given.
 if test "${with_provided_ffi+set}" = set; then :
-  withval=$with_provided_ffi; HAVE_FFI="no"
+  withval=$with_provided_ffi; PROV_FFI="yes"
 else
-  HAVE_FFI="yes"
+  PROV_FFI="no"
 fi
 
 
-case $HAVE_FFI in
-  no)
-       echo "... Configuring libffi"
-       (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
+if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
+then
+     echo "... Configuring libffi"
+     (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
            --disable-structs --disable-raw-api --disable-shared \
 	   --prefix=$prefix)
-       FFI="ffi"
-       FFIINC="-I../ffi/include"
-       FFILIB="../ffi/.libs/libffi.a"
-       ffimsg="use provided library";;
-  yes)
-       echo "... Using system libffi library"
-       FFI=""
-       FFIINC="`pkg-config libffi --cflags`"
-       FFILIB="`pkg-config libffi --libs`"
-       ffimsg="use the system library";;
-esac
+     FFI="ffi"
+     FFIINC="-I../ffi/include"
+     FFILIB="../ffi/.libs/libffi.a"
+     ffimsg="use provided library"
+else
+     echo "... Using system libffi library"
+     FFI=""
+     FFIINC="`pkg-config libffi --cflags`"
+     FFILIB="`pkg-config libffi --libs`"
+     ffimsg="use the system library"
+fi
 DEF_FFI="#define HAVE_FFI 1" ; # We always want FFI.
 		               # Should be modifiable in the future
 
@@ -8365,7 +8365,7 @@ echo " Compilation flags: " $CFLAGS
 echo "    Bignum library: " $biglib
 echo "    Regexp library: " $pcrelib
 echo "        GC library: " $gclib
-echo "       FFI library: " $ffilib
+echo "       FFI library: " $ffimsg
 echo "    Thread support: " $THREADS
 echo " "
 if test "$THREADS" = "lurc"

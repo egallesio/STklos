@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 27-Sep-2009 19:37 (eg)
+### Last file update: 28-Sep-2009 13:02 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -250,28 +250,28 @@ AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
 # Test if the user want to force with our PCRE lib
 AC_ARG_WITH(provided-regexp,
        [  --with-provided-regexp	use the provided Regexp (PCRE) library],
-       HAVE_PCRE="no", HAVE_PCRE="yes")
+       PROV_PCRE="yes", PROV_PCRE="no")
 
-case $HAVE_PCRE in
-  no)
-       echo "... Configuring libpcre"
-       PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
-       	           -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
-       (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
+if test "$HAVE_PCRE" = "no" -o "$PROV_PCRE" = "yes"
+then 
+     echo "... Configuring libpcre"
+     PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
+                 -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
+     (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
            --prefix=$prefix --disable-shared --disable-cpp)
-       PCRE=pcre
-       PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
-       PCREINC="-I../pcre"
-       DEF_PCRE=""
-       pcrelib="use provided library";;
-  yes)
-       echo "... Using system libpcre library"
-       PCRE=""
-       PCRELIB="-lpcre -lpcreposix"
-       PCREINC=""
-       DEF_PCRE="#define HAVE_PCRE 1"
-       pcrelib="use the system library";;
-esac
+     PCRE=pcre
+     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
+     PCREINC="-I../pcre"
+     DEF_PCRE=""
+     pcremsg="use provided library"
+else
+     echo "... Using system libpcre library"
+     PCRE=""
+     PCRELIB="-lpcre -lpcreposix"
+     PCREINC=""
+     DEF_PCRE="#define HAVE_PCRE 1"
+     pcrelib="use the system library"
+fi
 
 
 # ----------------------------------------------------------------------
@@ -286,25 +286,25 @@ AC_CHECK_LIB(ffi, ffi_prep_cif, HAVE_FFI="yes", HAVE_FFI="no", $LIBS)
 # Test if the user want to force with our FFI lib
 AC_ARG_WITH(provided-ffi,
        [  --with-provided-ffi	use the provided FFI library],
-       HAVE_FFI="no", HAVE_FFI="yes")
+       PROV_FFI="yes", PROV_FFI="no")
 
-case $HAVE_FFI in
-  no)
-       echo "... Configuring libffi"
-       (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
+if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
+then 
+     echo "... Configuring libffi"
+     (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
            --disable-structs --disable-raw-api --disable-shared \
 	   --prefix=$prefix)
-       FFI="ffi"
-       FFIINC="-I../ffi/include"
-       FFILIB="../ffi/.libs/libffi.a"
-       ffimsg="use provided library";;
-  yes)
-       echo "... Using system libffi library"
-       FFI=""
-       FFIINC="`pkg-config libffi --cflags`"
-       FFILIB="`pkg-config libffi --libs`"
-       ffimsg="use the system library";;
-esac
+     FFI="ffi"
+     FFIINC="-I../ffi/include"
+     FFILIB="../ffi/.libs/libffi.a"
+     ffimsg="use provided library"
+else 
+     echo "... Using system libffi library"
+     FFI=""
+     FFIINC="`pkg-config libffi --cflags`"
+     FFILIB="`pkg-config libffi --libs`"
+     ffimsg="use the system library"
+fi
 DEF_FFI="#define HAVE_FFI 1" ; # We always want FFI. 
 		               # Should be modifiable in the future
 
@@ -446,7 +446,7 @@ echo " Compilation flags: " $CFLAGS
 echo "    Bignum library: " $biglib
 echo "    Regexp library: " $pcrelib
 echo "        GC library: " $gclib
-echo "       FFI library: " $ffilib
+echo "       FFI library: " $ffimsg
 echo "    Thread support: " $THREADS 
 echo " "
 if test "$THREADS" = "lurc" 
