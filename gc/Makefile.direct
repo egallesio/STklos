@@ -32,7 +32,8 @@ VPATH= $(srcdir)
 
 # Atomic_ops installation directory.  If this doesn't exist, we create
 # it from the included libatomic_ops distribution.
-AO_SRC_DIR=$(srcdir)/libatomic_ops
+AO_VERSION=1.2
+AO_SRC_DIR=$(srcdir)/libatomic_ops-$(AO_VERSION)
 AO_INSTALL_DIR=$(srcdir)/libatomic_ops-install
 
 CFLAGS= -O -I$(srcdir)/include -I$(AO_INSTALL_DIR)/include -DATOMIC_UNCOLLECTABLE -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS
@@ -94,8 +95,6 @@ HOSTCFLAGS=$(CFLAGS)
 #   threads.
 # -DPTW32_STATIC_LIB causes the static version of the Mingw pthreads library
 #   to be used.  Requires -DGC_WIN32_PTHREADS.
-# -DGC_PTHREADS_PARAMARK causes pthread-based parallel mark implementation
-#   to be used even if GC_WIN32_PTHREADS is undefined.  (Useful for WinCE.)
 #   
 # -DALL_INTERIOR_POINTERS allows all pointers to the interior
 #   of objects to be recognized.  (See gc_priv.h for consequences.)
@@ -105,9 +104,8 @@ HOSTCFLAGS=$(CFLAGS)
 #   usually causing it to use less space in such situations.
 #   Incremental collection no longer works in this case.
 # -DLARGE_CONFIG tunes the collector for unusually large heaps.
-#   Necessary for heaps larger than about 4 GiB on most (64-bit) machines.
-#   Recommended for heaps larger than about 500 MiB.  Not recommended for
-#   embedded systems.
+#   Necessary for heaps larger than about 500 MB on most machines.
+#   Recommended for heaps larger than about 64 MB.
 # -DDONT_ADD_BYTE_AT_END is meaningful only with -DALL_INTERIOR_POINTERS or
 #   GC_all_interior_pointers = 1.  Normally -DALL_INTERIOR_POINTERS
 #   causes all objects to be padded so that pointers just past the end of
@@ -171,7 +169,7 @@ HOSTCFLAGS=$(CFLAGS)
 #   cache footprint.  Normally it is best to let this decision be
 #   made automatically depending on platform.
 # -DMARK_BIT_PER_OBJ requests that a mark bit be allocated for each
-#   object instead of allocation granule.  The opposite of
+#   object instead of allocation granule.  The opposiet of
 #   MARK_BIT_PER_GRANULE.
 # -DHBLKSIZE=ddd, where ddd is a power of 2 between 512 and 16384, explicitly
 #   sets the heap block size.  Each heap block is devoted to a single size and
@@ -179,25 +177,18 @@ HOSTCFLAGS=$(CFLAGS)
 #   the most likely page size.  Otherwise large values result in more
 #   fragmentation, but generally better performance for large heaps.
 # -DUSE_MMAP use MMAP instead of sbrk to get new memory.
-#   Works for Linux, FreeBSD, Cygwin, Solaris and Irix.
+#   Works for Solaris and Irix.
 # -DUSE_MUNMAP causes memory to be returned to the OS under the right
-#   circumstances.  This currently disables VM-based incremental collection
-#   (except for Win32 with GetWriteWatch available).
-#   Works under some Unix, Linux and Windows versions.
-#   Requires -DUSE_MMAP except for Windows.
-# -DMUNMAP_THRESHOLD=<value> Set the desired memory blocks unmapping threshold
-#   (the number of sequential garbage collections for which a candidate block
-#   for unmapping should remain free).
-# -DGC_FORCE_UNMAP_ON_GCOLLECT Set "unmap as much as possible on explicit GC"
-#   mode on by default.  The mode could be changed at run-time.  Has no effect
-#   unless unmapping is turned on.  Has no effect on implicitly-initiated
-#   garbage collections.
+#   circumstances.  This currently disables VM-based incremental collection.
+#   This is currently experimental, and works only under some Unix,
+#   Linux and Windows versions.  Requires -DUSE_MMAP, even under Windows,
+#   where USE_MMAP doesn't do anything.
 # -DMMAP_STACKS (for Solaris threads) Use mmap from /dev/zero rather than
 #   GC_scratch_alloc() to get stack memory.
 # -DPRINT_BLACK_LIST Whenever a black list entry is added, i.e. whenever
 #   the garbage collector detects a value that looks almost, but not quite,
 #   like a pointer, print both the address containing the value, and the
-#   value of the near-bogus-pointer.  Can be used to identify regions of
+#   value of the near-bogus-pointer.  Can be used to identifiy regions of
 #   memory that are likely to contribute misidentified pointers.
 # -DKEEP_BACK_PTRS Add code to save back pointers in debugging headers
 #   for objects allocated with the debugging allocator.  If all objects
@@ -221,8 +212,6 @@ HOSTCFLAGS=$(CFLAGS)
 #   the GC_debug_ functions, or through the macros that expand to these,
 #   or by redirecting malloc to GC_debug_malloc_replacement.
 #   (Also eliminates the field for the requested object size.)
-#   Occasionally could be useful for debugging of client code.  Slows down the
-#   collector somewhat, but not drastically.
 # -DSAVE_CALL_COUNT=<n> Set the number of call frames saved with objects
 #   allocated through the debugging interface.  Affects the amount of
 #   information generated in leak reports.  Only matters on platforms
@@ -265,7 +254,8 @@ HOSTCFLAGS=$(CFLAGS)
 # -DTHREAD_LOCAL_ALLOC defines GC_malloc(), GC_malloc_atomic()
 #   and GC_gcj_malloc() to use a per-thread set of free-lists.
 #   These then allocate  in a way that usually does not involve
-#   acquisition of a global lock.  Recommended for multiprocessors.
+#   acquisition of a global lock.  Currently supported only on platforms
+#   such as Linux that use pthread_support.c.  Recommended for multiprocessors.
 #   Requires explicit GC_INIT() call, unless REDIRECT_MALLOC is
 #   defined and GC_malloc is used first.
 # -DUSE_COMPILER_TLS causes thread local allocation to use compiler-supported
@@ -273,24 +263,13 @@ HOSTCFLAGS=$(CFLAGS)
 #   may help performance on recent Linux installations.  (It failed for
 #   me on RedHat 8, but appears to work on RedHat 9.)
 # -DPARALLEL_MARK allows the marker to run in multiple threads.  Recommended
-#   for multiprocessors.
-# -DDONT_USE_SIGNALANDWAIT (Win32 only) Use an alternate implementation for
-#   marker threads (if PARALLEL_MARK defined) synchronization routines based
-#   on InterlockedExchange() (instead of AO_fetch_and_add()) and on multiple
-#   event objects (one per each marker instead of that based on Win32
-#   SignalObjectAndWait() using a single event object).  This is the default
-#   for WinCE.
-# -DGC_WINMAIN_REDIRECT (Win32 only) Redirect (rename) an application WinMain
-#   to GC_WinMain; implement the "real" WinMain which starts a new thread to
-#   call GC_WinMain after initializing the GC.  Useful for WinCE.
-#   Incompatible with GC_DLL.
+#   for multiprocessors.  Currently works only on some pthreads platforms,
+#   though support for other platforms should be fairly easy to add,
+#   if the thread implementation is otherwise supported.
 # -DNO_GETENV prevents the collector from looking at environment variables.
 #   These may otherwise alter its configuration, or turn off GC altogether.
 #   I don't know of a reason to disable this, except possibly if the
-#   resulting process runs as a privileged user.  (This is on by default for
-#   WinCE.)
-# -DEMPTY_GETENV_RESULTS Define to workaround a reputed Wine bug in getenv
-#   (getenv() may return an empty string instead of NULL for a missing entry).
+#   resulting process runs as a privileged user?
 # -DUSE_GLOBAL_ALLOC.  Win32 only.  Use GlobalAlloc instead of
 #   VirtualAlloc to allocate the heap.  May be needed to work around
 #   a Windows NT/2000 issue.  Incompatible with USE_MUNMAP.
@@ -333,7 +312,7 @@ HOSTCFLAGS=$(CFLAGS)
 #   for applications that don't support proper stack unwinding.
 # -DUSE_PROC_FOR_LIBRARIES Causes the Linux collector to treat writable
 #   memory mappings (as reported by /proc) as roots, if it doesn't have
-#   other information about them.  It no longer traverses dynamic loader
+#   otherinformation about them.  It no longer traverses dynamic loader
 #   data structures to find dynamic library static data.  This may be
 #   required for applications that store pointers in mmapped segments without
 #   informaing the collector.  But it typically performs poorly, especially
@@ -345,42 +324,9 @@ HOSTCFLAGS=$(CFLAGS)
 #   happens implicitly on Darwin, Hurd, or ARM or MIPS hardware.
 #   It is explicitly needed for some old versions of FreeBSD.
 # -DSTATIC=static Causes various GC_ symbols that could logically be
-#   declared static to be declared (this is the default if -DNO_DEBUGGING is
-#   specified).  Reduces the number of visible symbols (letting the optimizer
-#   do its work better), which is probably cleaner, but may make some kinds of
-#   debugging and profiling harder.
-# -DGC_DLL Build dynamic-link library (or dynamic shared object).
-#   For Unix this causes the exported symbols to have 'default' visibility
-#   (ignored unless GCC v4+, meaningful only if used together with
-#   GCC -fvisibility=hidden option).
-# -DDONT_USE_USER32_DLL (Win32 only) Don't use "user32" DLL import library
-#   (containing MessageBox() entry); useful for a static GC library.
-# -DGC_PREFER_MPROTECT_VDB Choose MPROTECT_VDB manually in case of multiple
-#   virtual dirty bit strategies are implemented (at present useful on Win32
-#   to force MPROTECT_VDB strategy instead of the default GWW_VDB one).
-# -DGC_NO_DLLMAIN (Win32+DLL only) Exclude DllMain-based thread registration
-#   support.
-# -DGC_IGNORE_GCJ_INFO Disable GCJ-style type information (useful for
-#   debugging on WinCE).
-# -DGC_PRINT_VERBOSE_STATS Permanently turn on verbose logging (useful for
-#   debugging and profiling on WinCE).
-# -DGC_DONT_EXPAND Dont expand the heap unless explicitly requested or
-#   forced to.
-# -DGC_INITIAL_HEAP_SIZE=<value> Set the desired default initial heap size
-#   in bytes.
-# -DGC_FREE_SPACE_DIVISOR=<value> Set alternate default GC_free_space_divisor
-#   value.
-# -DGC_TIME_LIMIT=<milliseconds> Set alternate default GC_time_limit value
-#   (setting this to GC_TIME_UNLIMITED will essentially disable incremental
-#   collection while leaving generational collection enabled).
-# -DGC_FULL_FREQ=<value> Set alternate default number of partial collections
-#   between full collections (matters only if incremental collection is on).
-# -DNO_CANCEL_SAFE (posix platforms with threads only) Don't bother trying
-#   to make the collector safe for thread cancellation; cancellation is
-#   not used.  (Note that if cancellation is used anyway, threads may end
-#   up getting cancelled in unexpected places.)  Even without this option,
-#   PTHREAD_CANCEL_ASYNCHRONOUS is never safe with the collector.  (We could
-#   argue about its safety without the collector.)
+#   declared static to be declared.  Reduces the number of visible symbols,
+#   which is probably cleaner, but may make some kinds of debugging and
+#   profiling harder.
 #
 
 CXXFLAGS= $(CFLAGS) 
@@ -409,9 +355,9 @@ SRCS= $(CSRCS) mips_sgi_mach_dep.s rs6000_mach_dep.s alpha_mach_dep.S \
     sparc_mach_dep.S include/gc.h include/gc_typed.h include/gc_tiny_fl.h \
     include/gc_version.h include/private/gc_hdrs.h include/private/gc_priv.h \
     include/private/gcconfig.h include/private/gc_pmark.h \
-    include/gc_inline.h include/gc_mark.h extra/threadlibs.c \
-    extra/if_mach.c extra/if_not_there.c gc_cpp.cc include/gc_cpp.h \
-    extra/gcname.c include/weakpointer.h include/private/gc_locks.h \
+    include/gc_inline.h include/gc_mark.h \
+    threadlibs.c if_mach.c if_not_there.c gc_cpp.cc include/gc_cpp.h \
+    gcname.c include/weakpointer.h include/private/gc_locks.h \
     mips_ultrix_mach_dep.s \
     include/new_gc_alloc.h include/gc_allocator.h \
     include/javaxfc.h sparc_sunos4_mach_dep.s sparc_netbsd_mach_dep.s \
@@ -443,27 +389,27 @@ TESTS= tests/test.c tests/test_cpp.cc tests/trace_test.c \
 	tests/leak_test.c tests/thread_leak_test.c tests/middle.c \
 	tests/smash_test.c tests/huge_test.c
 
-GNU_BUILD_FILES= configure.ac Makefile.am configure \
-		 install-sh configure.host Makefile.in \
+GNU_BUILD_FILES= configure.ac Makefile.am configure acinclude.m4 \
+		 libtool.m4 install-sh configure.host Makefile.in \
 		 aclocal.m4 config.sub config.guess \
 		 include/include.am doc/doc.am \
 		 ltmain.sh mkinstalldirs depcomp missing \
 		 cord/cord.am tests/tests.am autogen.sh \
 		 bdw-gc.pc.in compile
 
-OTHER_MAKEFILES= OS2_MAKEFILE NT_MAKEFILE gc.mak \
+OTHER_MAKEFILES= OS2_MAKEFILE NT_MAKEFILE NT_THREADS_MAKEFILE gc.mak \
 		 BCC_MAKEFILE EMX_MAKEFILE WCC_MAKEFILE Makefile.dj \
 		 PCR-Makefile SMakefile.amiga Makefile.DLLs \
 		 digimars.mak Makefile.direct NT_STATIC_THREADS_MAKEFILE \
 		 NT_X64_STATIC_THREADS_MAKEFILE NT_X64_THREADS_MAKEFILE \
 		 build_atomic_ops.sh build_atomic_ops.sh.cygwin 
 
-OTHER_FILES= Makefile extra/setjmp_t.c callprocs \
-           MacProjects.sit.hqx extra/MacOS.c \
+OTHER_FILES= Makefile setjmp_t.c callprocs \
+           MacProjects.sit.hqx MacOS.c \
            Mac_files/datastart.c Mac_files/dataend.c \
            Mac_files/MacOS_config.h Mac_files/MacOS_Test_config.h \
-           extra/add_gc_prefix.c gc_cpp.cpp \
-           extra/AmigaOS.c extra/msvc_dbg.c include/private/msvc_dbg.h \
+           add_gc_prefix.c gc_cpp.cpp \
+	   AmigaOS.c mscvc_dbg.c include/private/msvc_dbg.h \
 	   $(TESTS) $(GNU_BUILD_FILES) $(OTHER_MAKEFILES)
 
 CORD_INCLUDE_FILES= $(srcdir)/include/gc.h $(srcdir)/include/cord.h \
@@ -691,14 +637,14 @@ cord/de: $(srcdir)/cord/de.c cord/cordbscs.o cord/cordxtra.o gc.a $(UTILS)
 	./if_mach M68K AMIGA $(CC) $(CFLAGS) -UGC_AMIGA_MAKINGLIB -o cord/de $(srcdir)/cord/de.c cord/cordbscs.o cord/cordxtra.o gc.a -lcurses
 	./if_not_there cord/de $(CC) $(CFLAGS) -o cord/de $(srcdir)/cord/de.c cord/cordbscs.o cord/cordxtra.o gc.a $(CURSES) `./threadlibs`
 
-if_mach: $(srcdir)/extra/if_mach.c $(srcdir)/include/private/gcconfig.h
-	$(HOSTCC) $(HOSTCFLAGS) -o if_mach $(srcdir)/extra/if_mach.c
+if_mach: $(srcdir)/if_mach.c $(srcdir)/include/private/gcconfig.h
+	$(HOSTCC) $(HOSTCFLAGS) -o if_mach $(srcdir)/if_mach.c
 
-threadlibs: $(srcdir)/extra/threadlibs.c $(srcdir)/include/private/gcconfig.h Makefile
-	$(HOSTCC) $(HOSTCFLAGS) -o threadlibs $(srcdir)/extra/threadlibs.c
+threadlibs: $(srcdir)/threadlibs.c $(srcdir)/include/private/gcconfig.h Makefile
+	$(HOSTCC) $(HOSTCFLAGS) -o threadlibs $(srcdir)/threadlibs.c
 
-if_not_there: $(srcdir)/extra/if_not_there.c
-	$(HOSTCC) $(HOSTCFLAGS) -o if_not_there $(srcdir)/extra/if_not_there.c
+if_not_there: $(srcdir)/if_not_there.c
+	$(HOSTCC) $(HOSTCFLAGS) -o if_not_there $(srcdir)/if_not_there.c
 
 clean: 
 	rm -f gc.a *.o *.exe tests/*.o gctest gctest_dyn_link test_cpp \
@@ -716,8 +662,8 @@ gctest: tests/test.o gc.a $(UTILS)
 # If an optimized setjmp_test generates a segmentation fault,
 # odds are your compiler is broken.  Gctest may still work.
 # Try compiling setjmp_t.c unoptimized.
-setjmp_test: $(srcdir)/extra/setjmp_t.c $(srcdir)/include/gc.h $(UTILS) $(AO_INSTALL_DIR)
-	$(CC) $(CFLAGS) -o setjmp_test $(srcdir)/extra/setjmp_t.c
+setjmp_test: $(srcdir)/setjmp_t.c $(srcdir)/include/gc.h $(UTILS) $(AO_INSTALL_DIR)
+	$(CC) $(CFLAGS) -o setjmp_test $(srcdir)/setjmp_t.c
 
 test:  KandRtest cord/cordtest
 	cord/cordtest
@@ -727,11 +673,11 @@ KandRtest: setjmp_test gctest
 	./setjmp_test
 	./gctest
 
-add_gc_prefix: $(srcdir)/extra/add_gc_prefix.c $(srcdir)/include/gc_version.h
-	$(CC) -o add_gc_prefix $(srcdir)/extra/add_gc_prefix.c
+add_gc_prefix: $(srcdir)/add_gc_prefix.c $(srcdir)/include/gc_version.h
+	$(CC) -o add_gc_prefix $(srcdir)/add_gc_prefix.c
 
-gcname: $(srcdir)/extra/gcname.c $(srcdir)/include/gc_version.h
-	$(CC) -o gcname $(srcdir)/extra/gcname.c
+gcname: $(srcdir)/gcname.c $(srcdir)/include/gc_version.h
+	$(CC) -o gcname $(srcdir)/gcname.c
 
 #We assume this is being done from source directory.
 dist gc.tar: $(SRCS) $(DOC_FILES) $(OTHER_FILES) add_gc_prefix gcname
@@ -739,16 +685,16 @@ dist gc.tar: $(SRCS) $(DOC_FILES) $(OTHER_FILES) add_gc_prefix gcname
 	cp Makefile.direct Makefile
 	CC=$(CC) ./configure_atomic_ops.sh
 	cd $(AO_SRC_DIR); $(MAKE) dist
-	if test $(srcdir)/libatomic_ops = $(AO_SRC_DIR); \
+	if test $(srcdir)/libatomic_ops-$(AO_VERSION) = $(AO_SRC_DIR); \
 	then \
 	  mv $(AO_SRC_DIR) $(AO_SRC_DIR).bak ; \
-	  tar xvfz $(AO_SRC_DIR).bak/libatomic_ops.tar.gz ; \
+	  tar xvfz $(AO_SRC_DIR).bak/libatomic_ops-$(AO_VERSION).tar.gz ; \
 	else \
-	  tar xvfz $(AO_SRC_DIR)/libatomic_ops.tar.gz ; \
+	  tar xvfz $(AO_SRC_DIR)/libatomic_ops-$(AO_VERSION).tar.gz ; \
 	fi
 	rm -f `./gcname`
 	ln -s . `./gcname`
-	./add_gc_prefix $(SRCS) $(DOC_FILES) $(OTHER_FILES) libatomic_ops > /tmp/gc.tar-files
+	./add_gc_prefix $(SRCS) $(DOC_FILES) $(OTHER_FILES) libatomic_ops-$(AO_VERSION) > /tmp/gc.tar-files
 	tar cvfh gc.tar `cat /tmp/gc.tar-files`
 	cp gc.tar `./gcname`.tar
 	gzip `./gcname`.tar

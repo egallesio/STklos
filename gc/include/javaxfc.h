@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 1994 by Xerox Corporation.  All rights reserved.
- * Copyright (c) 1996 by Silicon Graphics.  All rights reserved.
- * Copyright (c) 1998 by Fergus Henderson.  All rights reserved.
- * Copyright (c) 2000-2009 by Hewlett-Packard Development Company.
- * All rights reserved.
- *
- * THIS MATERIAL IS PROVIDED AS IS, WITH ABSOLUTELY NO WARRANTY EXPRESSED
- * OR IMPLIED.  ANY USE IS AT YOUR OWN RISK.
- *
- * Permission is hereby granted to use or copy this program
- * for any purpose,  provided the above notices are retained on all copies.
- * Permission to modify the code and to distribute modified code is granted,
- * provided the above notices are retained, and a notice that the code was
- * modified is included with the above copyright notice.
- */
-
 # ifndef _GC_H
 #   include "gc.h"
 # endif
@@ -24,9 +7,9 @@
 # endif
 
 /*
- * Invoke all remaining finalizers that haven't yet been run.  (Since the
- * notifier is not called, this should be called from a separate thread.)
- * This function is needed for strict compliance with the Java standard,
+ * Invoke all remaining finalizers that haven't yet been run, or
+ * repeatedly notify that there are finalizers to be run.
+ * This is needed for strict compliance with the Java standard, 
  * which can make the runtime guarantee that all finalizers are run.
  * This is problematic for several reasons:
  * 1) It means that finalizers, and all methods called by them,

@@ -45,13 +45,13 @@
 #include <new> // for placement new
 
 #if defined(__GNUC__)
-#  define GC_ATTR_UNUSED __attribute__((__unused__))
+#  define GC_ATTR_UNUSED __attribute__((unused))
 #else
 #  define GC_ATTR_UNUSED
 #endif
 
 /* First some helpers to allow us to dispatch on whether or not a type
- * is known to be pointer-free.
+ * is known to be pointerfree.
  * These are private, except that the client may invoke the
  * GC_DECLARE_PTRFREE macro.
  */
@@ -79,10 +79,10 @@ GC_DECLARE_PTRFREE(unsigned long);
 GC_DECLARE_PTRFREE(float);
 GC_DECLARE_PTRFREE(double);
 GC_DECLARE_PTRFREE(long double);
-/* The client may want to add others.   */
+/* The client may want to add others.	*/
 
-// In the following GC_Tp is GC_true_type if we are allocating a
-// pointer-free object.
+// In the following GC_Tp is GC_true_type iff we are allocating a
+// pointerfree object.
 template <class GC_Tp>
 inline void * GC_selective_alloc(size_t n, GC_Tp, bool ignore_off_page) {
     return ignore_off_page?GC_MALLOC_IGNORE_OFF_PAGE(n):GC_MALLOC(n);
@@ -128,8 +128,8 @@ public:
   GC_Tp* allocate(size_type GC_n, const void* = 0) {
     GC_type_traits<GC_Tp> traits;
     return static_cast<GC_Tp *>
-            (GC_selective_alloc(GC_n * sizeof(GC_Tp),
-                                traits.GC_is_ptr_free, false));
+	    (GC_selective_alloc(GC_n * sizeof(GC_Tp),
+			        traits.GC_is_ptr_free, false));
   }
 
   // __p is not permitted to be a null pointer.
@@ -193,7 +193,7 @@ public:
   // MSVC++ 6.0 do not support member templates
   template <class GC_Tp1>
     gc_allocator_ignore_off_page(const gc_allocator_ignore_off_page<GC_Tp1>&)
-        throw() {}
+    	throw() {}
 # endif
   ~gc_allocator_ignore_off_page() throw() {}
 
@@ -205,8 +205,8 @@ public:
   GC_Tp* allocate(size_type GC_n, const void* = 0) {
     GC_type_traits<GC_Tp> traits;
     return static_cast<GC_Tp *>
-            (GC_selective_alloc(GC_n * sizeof(GC_Tp),
-                                traits.GC_is_ptr_free, true));
+	    (GC_selective_alloc(GC_n * sizeof(GC_Tp),
+			        traits.GC_is_ptr_free, true));
   }
 
   // __p is not permitted to be a null pointer.
@@ -272,7 +272,7 @@ public:
 # if !(GC_NO_MEMBER_TEMPLATES || 0 < _MSC_VER && _MSC_VER <= 1200)
   // MSVC++ 6.0 do not support member templates
   template <class GC_Tp1> traceable_allocator
-          (const traceable_allocator<GC_Tp1>&) throw() {}
+	  (const traceable_allocator<GC_Tp1>&) throw() {}
 # endif
   ~traceable_allocator() throw() {}
 

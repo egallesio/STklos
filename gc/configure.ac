@@ -17,15 +17,14 @@ dnl Process this file with autoconf to produce configure.
 # Initialization
 # ==============
 
-AC_INIT(gc,7.2alpha3,Hans.Boehm@hp.com) 
+AC_INIT(gc,7.2alpha2,Hans.Boehm@hp.com) 
     ## version must conform to [0-9]+[.][0-9]+(alpha[0-9]+)?
 AC_CONFIG_SRCDIR(gcj_mlc.c)
 AC_CANONICAL_TARGET 
 AC_PREREQ(2.53)
-AC_REVISION($Revision: 1.51 $)
+AC_REVISION($Revision: 1.42 $)
 GC_SET_VERSION
 AM_INIT_AUTOMAKE([foreign dist-bzip2 subdir-objects nostdinc])
-AM_CONFIG_HEADER([include/private/config.h])
 AM_MAINTAINER_MODE
 
 AC_SUBST(PACKAGE)
@@ -69,31 +68,7 @@ AC_ARG_ENABLE(parallel-mark,
 AC_ARG_ENABLE(cplusplus,
     [AC_HELP_STRING([--enable-cplusplus], [install C++ support])])
 
-dnl Features which may be selected in the following thread-detection switch.
-AH_TEMPLATE([PARALLEL_MARK], [Define to enable parallel marking.])
-AH_TEMPLATE([THREAD_LOCAL_ALLOC],
-	    [Define to enable thread-local allocation optimisation.])
-AH_TEMPLATE([USE_COMPILER_TLS],
-	    [Define to use of compiler-support for thread-local variables.])
-
-dnl Thread selection macros.
-AH_TEMPLATE([GC_THREADS],	    [Define to support threads.])
-AH_TEMPLATE([GC_AIX_THREADS],       [Define to support IBM AIX threads.])
-AH_TEMPLATE([GC_DARWIN_THREADS],    [Define to support Darwin pthreads.])
-AH_TEMPLATE([GC_FREEBSD_THREADS],   [Define to support FreeBSD pthreads.])
-AH_TEMPLATE([GC_GNU_THREADS],       [Define to support GNU pthreads.])
-AH_TEMPLATE([GC_HPUX_THREADS],      [Define to support HP/UX 11 pthreads.])
-AH_TEMPLATE([GC_IRIX_THREADS],      [Define to support Irix pthreads.])
-AH_TEMPLATE([GC_LINUX_THREADS],     [Define to support pthreads on Linux.])
-AH_TEMPLATE([GC_NETBSD_THREADS],    [Define to support NetBSD pthreads.])
-AH_TEMPLATE([GC_OSF1_THREADS],      [Define to support Tru64 pthreads.])
-AH_TEMPLATE([GC_SOLARIS_THREADS],   [Define to support Solaris pthreads.])
-AH_TEMPLATE([GC_WIN32_THREADS],     [Define to support win32 threads.])
-
-dnl System header feature requests.
-AH_TEMPLATE([_POSIX_C_SOURCE], [The POSIX feature macro.])
-AH_TEMPLATE([_PTHREADS], [Indicates the use of pthreads (NetBSD).])
-
+INCLUDES=-I${srcdir}/include
 THREADDLLIBS=
 need_atomic_ops_asm=false
 ## Libraries needed to support dynamic loading and/or threads.
@@ -112,7 +87,7 @@ case "$THREADS" in
 	  AC_DEFINE(PARALLEL_MARK)
 	fi
 	AC_DEFINE(THREAD_LOCAL_ALLOC)
-	AC_MSG_WARN("Explicit GC_INIT() calls may be required.");
+	AC_MSG_WARN("Explict GC_INIT() calls may be required.");
 	;;
      *-*-linux*)
 	AC_DEFINE(GC_LINUX_THREADS)
@@ -130,7 +105,7 @@ case "$THREADS" in
 	  AC_DEFINE(PARALLEL_MARK)
 	fi
 	AC_DEFINE(THREAD_LOCAL_ALLOC)
-	AC_MSG_WARN("Explicit GC_INIT() calls may be required.");
+	AC_MSG_WARN("Explict GC_INIT() calls may be required.");
 	THREADDLLIBS="-lpthread -lrt"
 	# HPUX needs REENTRANT for the _r calls.
 	AC_DEFINE(_REENTRANT, 1, [Required define if using POSIX threads])
@@ -179,20 +154,14 @@ case "$THREADS" in
 	AC_DEFINE(GC_IRIX_THREADS)
 	;;
      *-*-cygwin*)
-	AC_DEFINE(GC_THREADS)
-        if test "${enable_parallel_mark}" = yes; then
-	  AC_DEFINE(PARALLEL_MARK)
-	fi
+	AC_DEFINE(GC_WIN32_THREADS)
 	AC_DEFINE(THREAD_LOCAL_ALLOC)
-	# Cygwin doesn't have a real libpthread, so Libtool can't link
-	# against it.
-	THREADDLLIBS=""
 	win32_threads=true
 	;;
      *-*-darwin*)
 	AC_DEFINE(GC_DARWIN_THREADS)
 	AC_DEFINE(THREAD_LOCAL_ALLOC)
-	AC_MSG_WARN("Explicit GC_INIT() calls may be required.");
+	AC_MSG_WARN("Explict GC_INIT() calls may be required.");
 	# Parallel-mark is currently unreliable on Darwin; ignore request
 	# if test "${enable_parallel_mark}" = yes; then
 	#   AC_DEFINE(PARALLEL_MARK)
@@ -204,7 +173,7 @@ case "$THREADS" in
         if test "${enable_parallel_mark}" = yes; then
 	  AC_DEFINE(PARALLEL_MARK)
 	  AC_DEFINE(THREAD_LOCAL_ALLOC)
-	  AC_MSG_WARN("Explicit GC_INIT() calls may be required.");
+	  AC_MSG_WARN("Explict GC_INIT() calls may be required.");
 	  # May want to enable it in other cases, too.
 	  # Measurements havent yet been done.
 	fi
@@ -217,14 +186,10 @@ case "$THREADS" in
     esac
     ;;
  win32)
-    AC_DEFINE(GC_THREADS)
-    if test "${enable_parallel_mark}" = yes; then
-      AC_DEFINE(PARALLEL_MARK)
-      AC_DEFINE(THREAD_LOCAL_ALLOC)
-    fi
+    AC_DEFINE(GC_WIN32_THREADS)
     win32_threads=true
-    AC_DEFINE([EMPTY_GETENV_RESULTS], [1],
-	      [Wine getenv may not return NULL for missing entry])
+    dnl Wine getenv may not return NULL for missing entry
+    AC_DEFINE(NO_GETENV)
     ;;
  dgux386)
     THREADS=dgux386
@@ -235,11 +200,9 @@ case "$THREADS" in
         AC_DEFINE(PARALLEL_MARK)
     fi
     AC_DEFINE(THREAD_LOCAL_ALLOC)
-    AC_MSG_WARN("Explicit GC_INIT() calls may be required.");
-    AC_DEFINE([GC_DGUX386_THREADS], 1,
-	      [Define to enable support for DB/UX threads on i386.])
-    AC_DEFINE([DGUX_THREADS], 1,
-	      [Define to enable support for DB/UX threads.])
+    AC_MSG_WARN("Explict GC_INIT() calls may be required.");
+    AC_DEFINE(GC_DGUX386_THREADS)
+    AC_DEFINE(DGUX_THREADS)
     # Enable _POSIX4A_DRAFT10_SOURCE with flag -pthread
     INCLUDES="-pthread $INCLUDES"
     ;;
@@ -326,14 +289,13 @@ AC_MSG_RESULT($compiler_xlc)
 AM_CONDITIONAL(COMPILER_XLC,test $compiler_xlc = yes)
 if test $compiler_xlc = yes -a "$powerpc_darwin" = true; then
   # the darwin stack-frame-walking code is completely broken on xlc
-  AC_DEFINE([DARWIN_DONT_PARSE_STACK], 1, [See Makefile.direct])
+  AC_DEFINE(DARWIN_DONT_PARSE_STACK)
 fi
 
 # We never want libdl on darwin. It is a fake libdl that just ends up making
-# dyld calls anyway.  The same applies to Cygwin.
+# dyld calls anyway
 case "$host" in
   *-*-darwin*) ;;
-  *-*-cygwin*) ;;
   *)
     AC_CHECK_LIB(dl, dlopen, THREADDLLIBS="$THREADDLLIBS -ldl")
     ;;
@@ -378,7 +340,7 @@ case "$TARGET_ECOS" in
    no)
       ;;
    *)
-      AC_DEFINE([ECOS], 1, [Define to enable eCos target support.])
+      AC_DEFINE(ECOS)
       CXXINCLUDES="-I${TARGET_ECOS}/include"
       addobjs="$addobjs ecos.lo"
       ;;
@@ -421,10 +383,12 @@ case "$host" in
     machdep="mach_dep.lo"
     ;;
  i?86-*-solaris2.[[89]] | i?86-*-solaris2.1?)
-    AC_DEFINE([SOLARIS25_PROC_VDB_BUG_FIXED], 1, [See gcconfig.h])
+    AC_DEFINE(SOLARIS25_PROC_VDB_BUG_FIXED)
     ;;
  mipstx39-*-elf*)
     machdep="mach_dep.lo"
+    AC_DEFINE(STACKBASE, __stackbase)
+    AC_DEFINE(DATASTART_IS_ETEXT)
     ;;
  mips-dec-ultrix*)
     machdep="mach-dep.lo"
@@ -450,8 +414,7 @@ case "$host" in
     ;;
  sparc-sun-solaris2.3)
     machdep="mach_dep.lo sparc_mach_dep.lo"
-    AC_DEFINE(SUNOS53_SHARED_LIB, 1,
-	      [Define to work around a Solaris 5.3 bug (see dyn_load.c).])
+    AC_DEFINE(SUNOS53_SHARED_LIB)
     ;;
  sparc*-sun-solaris2*)
     machdep="mach_dep.lo sparc_mach_dep.lo"
@@ -537,10 +500,8 @@ esac
 
 dnl Include defines that have become de facto standard.
 dnl ALL_INTERIOR_POINTERS can be overridden in startup code.
-AC_DEFINE([NO_EXECUTE_PERMISSION], [1],
-	  [Define to allow the collector to disable execute permission of heap objects.])
-AC_DEFINE([ALL_INTERIOR_POINTERS], [1],
-	  [Define to recognise all pointers to the interior of objects.])
+AC_DEFINE(NO_EXECUTE_PERMISSION)
+AC_DEFINE(ALL_INTERIOR_POINTERS)
 
 
 dnl Interface Selection
@@ -560,23 +521,14 @@ fi
 dnl Debugging
 dnl ---------
 
-AH_TEMPLATE([GC_HAVE_BUILTIN_BACKTRACE],
-	    [Define if backtrace information is supported.])
-AH_TEMPLATE([MAKE_BACK_GRAPH], [See Makefile.direct.])
-AH_TEMPLATE([SAVE_CALL_COUNT],
-	    [The number of caller frames saved when allocating with the
-	     debugging API.])
 UNWINDLIBS=
 AC_ARG_ENABLE(gc-debug,
 [AC_HELP_STRING([--enable-gc-debug],
     [include full support for pointer backtracing etc.])],
 [ if test "$enable_gc_debug" = "yes"; then
     AC_MSG_WARN("Should define GC_DEBUG and use debug alloc. in clients.")
-    AC_DEFINE([KEEP_BACK_PTRS], 1,
-	      [Define to save back-pointers in debugging headers.])
-    keep_back_ptrs=true
-    AC_DEFINE([DBG_HDRS_ALL], 1,
-	      [Define to force debug headers on all objects.])
+    AC_DEFINE(KEEP_BACK_PTRS)
+    AC_DEFINE(DBG_HDRS_ALL)
     case $host in
       ia64-*-linux* )
 	AC_DEFINE(MAKE_BACK_GRAPH)
@@ -597,13 +549,12 @@ AC_ARG_ENABLE(gc-debug,
       ;;
     esac ]
   fi)
-AM_CONDITIONAL([KEEP_BACK_PTRS], [test x"$keep_back_ptrs" = xtrue])
 
 AC_ARG_ENABLE(java-finalization,
     [AC_HELP_STRING([--disable-java-finalization],
 	[Disable support for java finalization.])])
 if test x"$enable_java_finalization" != xno; then
-    AC_DEFINE([JAVA_FINALIZATION], 1, [See Makefile.direct.])
+    AC_DEFINE(JAVA_FINALIZATION)
 fi
 
 AC_ARG_ENABLE(atomic-uncollectable,
@@ -620,16 +571,13 @@ AC_ARG_ENABLE(redirect-malloc,
 
 if test "${enable_redirect_malloc}" = yes; then
     if test "${enable_gc_debug}" = yes; then
-	AC_DEFINE([REDIRECT_MALLOC], GC_debug_malloc_replacement,
-		  [If defined, redirect malloc to this function.])
-	AC_DEFINE([REDIRECT_REALLOC], GC_debug_realloc_replacement,
-		  [If defined, redirect GC_realloc to this function.])
-	AC_DEFINE([REDIRECT_FREE], GC_debug_free,
-		  [If defined, redirect free to this function.])
+	AC_DEFINE(REDIRECT_MALLOC, GC_debug_malloc_replacement)
+	AC_DEFINE(REDIRECT_REALLOC, GC_debug_realloc_replacement)
+	AC_DEFINE(REDIRECT_FREE, GC_debug_free)
     else
 	AC_DEFINE(REDIRECT_MALLOC, GC_malloc)
     fi
-    AC_DEFINE([GC_USE_DLOPEN_WRAP], 1, [See Makefile.direct.])
+    AC_DEFINE(GC_USE_DLOPEN_WRAP)
 fi
 
 AC_ARG_ENABLE(large-config,
@@ -644,11 +592,9 @@ dnl This is something of a hack.  When cross-compiling we turn off
 dnl some functionality.  We also enable the "small" configuration.
 dnl These is only correct when targetting an embedded system.  FIXME.
 if test -n "${with_cross_host}"; then
-   AC_DEFINE([NO_CLOCK], 1, [Define to not use system clock (cross compiling).])
-   AC_DEFINE([SMALL_CONFIG], 1,
-	     [Define to tune the collector for small heap sizes.])
-   AC_DEFINE([NO_DEBUGGING], 1,
-	     [Disable debugging, like GC_dump and its callees.])
+   AC_DEFINE(NO_CLOCK)
+   AC_DEFINE(SMALL_CONFIG)
+   AC_DEFINE(NO_DEBUGGING)
 fi
 
 
@@ -658,7 +604,7 @@ AC_ARG_ENABLE(gc-assertions,
     [AC_HELP_STRING([--enable-gc-assertions],
 	[collector-internal assertion checking])])
 if test "${enable_gc_assertions}" = yes; then
-    AC_DEFINE([GC_ASSERTIONS], 1, [Define to enable internal debug assertions.])
+    AC_DEFINE(GC_ASSERTIONS)
 fi
 
 AC_ARG_ENABLE(munmap,
@@ -672,52 +618,68 @@ AC_ARG_ENABLE(munmap,
     esac]
    )
 if test "${enable_munmap}" != ""; then
-    AC_DEFINE([USE_MMAP], 1,
-	      [Define to use mmap instead of sbrk to expand the heap.])
-    AC_DEFINE([USE_MUNMAP], 1,
-	      [Define to return memory to OS with munmap calls.
-	       See Makefile.direct.])
+    AC_DEFINE(USE_MMAP)
+    AC_DEFINE(USE_MUNMAP)
     if test "${MUNMAP_THRESHOLD}" = "yes"; then
       MUNMAP_THRESHOLD=6
     fi
-    AC_DEFINE_UNQUOTED([MUNMAP_THRESHOLD], [${MUNMAP_THRESHOLD}],
-	[Number of GC cycles to wait before unmapping an unused block.])
+    AC_DEFINE_UNQUOTED(MUNMAP_THRESHOLD, ${MUNMAP_THRESHOLD})
 fi
 
 AM_CONDITIONAL(USE_LIBDIR, test -z "$with_cross_host")
 
 
-# Atomic Ops
-# ----------
+dnl Atomic Ops
+dnl ----------
 
-# Do we want to use an external libatomic_ops?  By default use it if it's
-# found.
-AC_ARG_WITH([libatomic-ops],
-    [AS_HELP_STRING([--with-libatomic-ops[=yes|no|check]],
-		    [Use a pre-installed libatomic_ops? (default: check)])],
-    [], [with_libatomic_ops=check])
+atomic_ops_libs=-latomic_ops
+AC_CHECK_HEADER(atomic_ops.h,
+  [ AC_MSG_NOTICE([Using pre-installed libatomic_ops]) ],
+  [ ao_dir=
+    for candidate in ${srcdir}/libatomic_ops*; do
+	case $candidate in
+	    *.tar.gz)
+		;;
+	    *install)
+	    	dnl generated by alternate Makefile.
+		;;
+	    *)
+		if test -e "$candidate"; then
+		    ao_dir="$candidate"
+		fi
+		;;
+	esac
+    done
+    if test -z "$ao_dir"; then
+	AC_MSG_ERROR([Missig libatomic_ops.])
+    fi
+    ao_version="${ao_dir#*libatomic_ops-}"
+    AC_MSG_NOTICE([Using internal version of libatomic_ops])
 
-# Check for an external libatomic_ops if the answer was yes or check.  If not
-# found, fail on yes, and convert check to no.
-AS_IF([test x"$with_libatomic_ops" != xno],
-  [ AC_CHECK_HEADER([atomic_ops.h], [],
-      [ AS_IF([test x"$with_libatomic_ops" != xcheck],
-	      [AC_MSG_ERROR([A pre-installed libatomic_ops was not found.])])
-	with_libatomic_ops=no ]) ])
+    dnl Automake does not accept shell variables in AC_CONFIG_SUBDIRS
+    test -e libatomic_ops \
+	|| ln -s ${ao_dir} libatomic_ops
+    AC_CONFIG_SUBDIRS(libatomic_ops)
 
-# Finally, emit the definitions for bundled or pre-installed AO.
-AC_MSG_CHECKING([which libatomic_ops to use])
-AS_IF([test x"$with_libatomic_ops" != xno],
-  [ AC_MSG_RESULT([pre-installed])
-    ATOMIC_OPS_LIBS="-latomic_ops"
-    AC_SUBST([ATOMIC_OPS_LIBS]) ],
-  [ AC_MSG_RESULT([bundled])
-    AC_CONFIG_SUBDIRS([libatomic_ops])
+    dnl Also copy the source files to be linked in.
+    test -e atomic_ops.c \
+    	|| ln -s libatomic_ops/src/atomic_ops.c \
+		 atomic_ops.c
+
+    test -e atomic_ops_sysdeps.S \
+    	|| ln -s libatomic_ops/src/atomic_ops_sysdeps.S \
+		 atomic_ops_sysdeps.S
+
+    dnl This gets the source include files, which is often close enough.
+    dnl It also makes atomic_ops_sysdeps.S assemble.
+    GC_CFLAGS="${GC_CFLAGS} -I libatomic_ops/src"
+    maybe_libatomic_ops="libatomic_ops"
   ])
-AM_CONDITIONAL([USE_INTERNAL_LIBATOMIC_OPS],
-    [test x$with_libatomic_ops = xno -a x"$THREADS" != xnone])
-AM_CONDITIONAL([NEED_ATOMIC_OPS_ASM],
-    [test x$with_libatomic_ops = xno -a x$need_atomic_ops_asm = xtrue])
+
+AM_CONDITIONAL(USE_INTERNAL_LIBATOMIC_OPS,
+		test -n "$maybe_libatomic_ops" -a "$THREADS" != "none")
+AM_CONDITIONAL(NEED_ATOMIC_OPS_ASM, test -n "$maybe_libatomic_ops" -a x$need_atomic_ops_asm = xtrue)
+AC_SUBST(atomic_ops_libs)
 
 dnl Produce the Files
 dnl -----------------

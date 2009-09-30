@@ -23,7 +23,7 @@
 # use the internal version.  This is done since libatomic_ops doesn't
 # use libtool, since it has no real use for it.  But that seems to make
 # it hard to use either the resulting object files or libraries.
-# Thus there seems too be no real reason to recursively build in the
+# Thus there seems too be no real reason to recusively build in the
 # libatomic_ops directory.
 # if USE_INTERNAL_LIBATOMICS_OPS
 # SUBDIRS = @maybe_libatomic_ops@
@@ -31,12 +31,6 @@
 # SUBDIRS =
 # endif
 SUBDIRS =
-
-AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include
-if USE_INTERNAL_LIBATOMIC_OPS
-AM_CPPFLAGS += -I$(top_builddir)/libatomic_ops/src \
-	       -I$(top_srcdir)/libatomic_ops/src
-endif
 
 # Initialize variables so that we can declare files locally.
 EXTRA_DIST = 
@@ -48,7 +42,7 @@ check_PROGRAMS =
 TESTS =
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = bdw-gc.pc
+dist_pkgconfig_DATA = bdw-gc.pc
 
 # C Library
 # ---------
@@ -78,16 +72,16 @@ libgc_la_SOURCES += win32_threads.c
 endif
 
 if USE_INTERNAL_LIBATOMIC_OPS 	 
-nodist_libgc_la_SOURCES = libatomic_ops/src/atomic_ops.c
+nodist_libgc_la_SOURCES = ./atomic_ops.c 	 
 endif 	 
   	 
 if NEED_ATOMIC_OPS_ASM 	 
-nodist_libgc_la_SOURCES = libatomic_ops/src/atomic_ops_sysdeps.S
+nodist_libgc_la_SOURCES = ./atomic_ops_sysdeps.S 	 
 endif
 
 # Include THREADDLLIBS here to ensure that the correct versions of
 # linuxthread semaphore functions get linked:
-libgc_la_LIBADD = @addobjs@ $(THREADDLLIBS) $(UNWINDLIBS) $(ATOMIC_OPS_LIBS)
+libgc_la_LIBADD = @addobjs@ $(THREADDLLIBS) $(UNWINDLIBS)
 libgc_la_DEPENDENCIES = @addobjs@
 libgc_la_LDFLAGS = $(extra_ldflags_libgc) -version-info 1:3:0 -no-undefined
 
@@ -167,7 +161,7 @@ EXTRA_DIST += README.QUICK
 
 # other makefiles
 # :GOTCHA: deliberately we do not include 'Makefile'
-EXTRA_DIST += BCC_MAKEFILE NT_MAKEFILE \
+EXTRA_DIST += BCC_MAKEFILE NT_MAKEFILE NT_THREADS_MAKEFILE \
     OS2_MAKEFILE PCR-Makefile digimars.mak EMX_MAKEFILE	\
     Makefile.direct Makefile.dj	Makefile.DLLs SMakefile.amiga \
     WCC_MAKEFILE build_atomic_ops.sh build_atomic_ops.sh.cygwin \
@@ -176,21 +170,25 @@ EXTRA_DIST += BCC_MAKEFILE NT_MAKEFILE \
 
 # files used by makefiles other than Makefile.am
 #
-EXTRA_DIST += extra/add_gc_prefix.c extra/gcname.c extra/if_mach.c \
-    extra/if_not_there.c hpux_test_and_clear.s gc.mak extra/MacOS.c \
-    MacProjects.sit.hqx mach_dep.c extra/setjmp_t.c \
-    extra/threadlibs.c extra/AmigaOS.c \
+EXTRA_DIST += add_gc_prefix.c gcname.c if_mach.c if_not_there.c \
+    hpux_test_and_clear.s gc.mak MacOS.c \
+    MacProjects.sit.hqx mach_dep.c setjmp_t.c \
+    threadlibs.c AmigaOS.c \
     Mac_files/datastart.c Mac_files/dataend.c \
     Mac_files/MacOS_config.h Mac_files/MacOS_Test_config.h \
-    include/private/msvc_dbg.h extra/msvc_dbg.c
+    include/private/msvc_dbg.h msvc_dbg.c
 
 # The libatomic_ops library.  This is not ideal, since we pick up junk from
-# there.
-EXTRA_DIST += libatomic_ops
+# there.  The hard-coded version number should also go.
+EXTRA_DIST += libatomic_ops-1.2
 
 # this is an auxiliary shell file used by Makefile and Makefile.direct
 #
 CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.host
+
+# :FIXME: why do we distribute this one???
+#
+EXTRA_DIST += libtool.m4
 
 #
 # :GOTCHA: GNU make rule for making .s out of .S is flawed, 

@@ -640,6 +640,7 @@ LIBOBJS
 ALLOCA
 EGREP
 GREP
+PKGCONFIG
 LEXLIB
 LEX_OUTPUT_ROOT
 LEX
@@ -4582,6 +4583,44 @@ rm -f conftest.l $LEX_OUTPUT_ROOT.c
 
 fi
 
+# Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_prog_PKGCONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$PKGCONFIG"; then
+  ac_cv_prog_PKGCONFIG="$PKGCONFIG" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_PKGCONFIG=""pkg-config""
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_PKGCONFIG" && ac_cv_prog_PKGCONFIG=""false""
+fi
+fi
+PKGCONFIG=$ac_cv_prog_PKGCONFIG
+if test -n "$PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKGCONFIG" >&5
+$as_echo "$PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
 
 ### Checks for header files.
 
@@ -6559,7 +6598,11 @@ echo "*****"
 echo "***** GC support"
 echo "*****"
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GC_malloc in -lgc" >&5
+# Try to determine if libgc is installed
+if ${PKGCONFIG} --exists bdw-gc ;then
+   HAVE_GC="yes"
+else
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GC_malloc in -lgc" >&5
 $as_echo_n "checking for GC_malloc in -lgc... " >&6; }
 if test "${ac_cv_lib_gc_GC_malloc+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -6601,6 +6644,7 @@ else
   HAVE_GC="no"
 fi
 
+fi
 
 # Test if the user want to force with our GC lib
 
@@ -6619,20 +6663,30 @@ then
               --includedir=$prefix/include/stklos \
 	      --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
-     GCLIB="../gc/.libs/libgc.a"
      GCINC="-I../gc/include"
+     GCLIB="../gc/.libs/libgc.a"
      gcmsg="use provided library"
+
+     # MacOs kludge
+     case `uname -s` in
+        Darwin*) GC_INC="$GC_INC -D_XOPEN_SOURCE" ;;
+	*) true;;
+     esac
 else
      echo "... Using system libgc library"
      GC=""
-     GCLIB="-lgc"
-     GCINC=""
+     if test "$PKGCONFIG" != "false" ;then
+        GCINC=$(pkg-config  bdw-gc --cflags)
+        GCLIB=$(pkg-config  bdw-gc --libs)
+     else
+        GCINC=""
+        GCLIB="-lgc"
+     fi
 
 $as_echo "#define HAVE_GC 1" >>confdefs.h
 
      gcmsg="use the system library"
 fi
-
 
 
 # ----------------------------------------------------------------------
@@ -6642,7 +6696,11 @@ echo "*****"
 echo "***** Regexp support"
 echo "*****"
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pcre_fullinfo in -lpcre" >&5
+# Try to determine if libpcre is installed
+if ${PKGCONFIG} --exists libpcre ;then
+   HAVE_PCRE="yes"
+else
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pcre_fullinfo in -lpcre" >&5
 $as_echo_n "checking for pcre_fullinfo in -lpcre... " >&6; }
 if test "${ac_cv_lib_pcre_pcre_fullinfo+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -6684,6 +6742,7 @@ else
   HAVE_PCRE="no"
 fi
 
+fi
 
 # Test if the user want to force with our PCRE lib
 
@@ -6704,15 +6763,20 @@ then
            --prefix=$prefix --disable-shared --disable-cpp) || \
 	   { echo "Cannot configure PCRE"; exit; }
      PCRE=pcre
-     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
      PCREINC="-I../pcre"
+     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
      DEF_PCRE=""
      pcremsg="use provided library"
 else
      echo "... Using system libpcre library"
      PCRE=""
-     PCRELIB="-lpcre -lpcreposix"
-     PCREINC=""
+     if test "$PKGCONFIG" != "false" ;then
+        PCREINC="$($PKGCONFIG --cflags libpcre)"
+        PCRELIB="$($PKGCONFIG --libs libpcre) -lpcreposix"
+     else
+        PCREINC=""
+        PCRELIB="-lpcre -lpcreposix"
+     fi
      DEF_PCRE="#define HAVE_PCRE 1"
      pcremsg="use the system library"
 fi
@@ -6725,7 +6789,11 @@ echo "*****"
 echo "***** FFI support"
 echo "*****"
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ffi_prep_cif in -lffi" >&5
+# Try to determine if libffi is installed
+if ${PKGCONFIG} --exists libffi ;then
+   HAVE_FFI="yes"
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ffi_prep_cif in -lffi" >&5
 $as_echo_n "checking for ffi_prep_cif in -lffi... " >&6; }
 if test "${ac_cv_lib_ffi_ffi_prep_cif+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -6767,6 +6835,7 @@ else
   HAVE_FFI="no"
 fi
 
+fi
 
 # Test if the user want to force with our FFI lib
 
@@ -6791,8 +6860,13 @@ then
 else
      echo "... Using system libffi library"
      FFI=""
-     FFIINC="`pkg-config libffi --cflags`"
-     FFILIB="`pkg-config libffi --libs`"
+     if test "$PKGCONFIG" != "false" ;then
+       FFIINC=$($PKGCONFIG libffi --cflags)
+       FFILIB=$($PKGCONFIG libffi --libs)
+     else
+       FFIINC=""
+       FFILIB="-lffi"
+     fi
      ffimsg="use the system library"
 fi
 DEF_FFI="#define HAVE_FFI 1" ; # We always want FFI.

@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 30-Sep-2009 15:51 (eg)
+### Last file update: 30-Sep-2009 23:36 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -21,6 +21,7 @@ AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PROG_LEX
 AC_PROG_MKDIR_P
+AC_CHECK_PROG(PKGCONFIG, pkg-config, "pkg-config", "false")
 
 ### Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h libintl.h limits.h malloc.h memory.h netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
@@ -248,7 +249,12 @@ echo "*****"
 echo "***** GC support"
 echo "*****"
 
-AC_CHECK_LIB(gc, GC_malloc, HAVE_GC="yes", HAVE_GC="no", $LIBS)
+# Try to determine if libgc is installed
+if ${PKGCONFIG} --exists bdw-gc ;then 
+   HAVE_GC="yes"
+else 
+   AC_CHECK_LIB(gc, GC_malloc, HAVE_GC="yes", HAVE_GC="no", $LIBS)
+fi
 
 # Test if the user want to force with our GC lib
 AC_ARG_WITH(provided-gc,
@@ -262,18 +268,28 @@ then
               --includedir=$prefix/include/stklos \
 	      --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
-     GCLIB="../gc/.libs/libgc.a"
      GCINC="-I../gc/include"
+     GCLIB="../gc/.libs/libgc.a"
      gcmsg="use provided library"
+
+     # MacOs kludge
+     case `uname -s` in
+        Darwin*) GC_INC="$GC_INC -D_XOPEN_SOURCE" ;;
+	*) true;;
+     esac
 else
      echo "... Using system libgc library"
      GC=""
-     GCLIB="-lgc"
-     GCINC=""
+     if test "$PKGCONFIG" != "false" ;then
+        GCINC=$(pkg-config  bdw-gc --cflags)
+        GCLIB=$(pkg-config  bdw-gc --libs)
+     else
+        GCINC=""
+        GCLIB="-lgc"
+     fi
      AC_DEFINE(HAVE_GC, 1, [Use system GC])
      gcmsg="use the system library"
 fi
-
 
 
 # ----------------------------------------------------------------------
@@ -283,7 +299,12 @@ echo "*****"
 echo "***** Regexp support"
 echo "*****"
 
-AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
+# Try to determine if libpcre is installed
+if ${PKGCONFIG} --exists libpcre ;then 
+   HAVE_PCRE="yes"
+else 
+   AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
+fi
 
 # Test if the user want to force with our PCRE lib
 AC_ARG_WITH(provided-regexp,
@@ -299,15 +320,20 @@ then
            --prefix=$prefix --disable-shared --disable-cpp) || \
 	   { echo "Cannot configure PCRE"; exit; }
      PCRE=pcre
-     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
      PCREINC="-I../pcre"
+     PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
      DEF_PCRE=""
      pcremsg="use provided library"
 else
      echo "... Using system libpcre library"
      PCRE=""
-     PCRELIB="-lpcre -lpcreposix"
-     PCREINC=""
+     if test "$PKGCONFIG" != "false" ;then
+        PCREINC="$($PKGCONFIG --cflags libpcre)"
+        PCRELIB="$($PKGCONFIG --libs libpcre) -lpcreposix"
+     else 
+        PCREINC=""
+        PCRELIB="-lpcre -lpcreposix"
+     fi        
      DEF_PCRE="#define HAVE_PCRE 1"
      pcremsg="use the system library"
 fi
@@ -320,7 +346,12 @@ echo "*****"
 echo "***** FFI support"
 echo "*****"
 
-AC_CHECK_LIB(ffi, ffi_prep_cif, HAVE_FFI="yes", HAVE_FFI="no", $LIBS)
+# Try to determine if libffi is installed
+if ${PKGCONFIG} --exists libffi ;then 
+   HAVE_FFI="yes"
+else 
+  AC_CHECK_LIB(ffi, ffi_prep_cif, HAVE_FFI="yes", HAVE_FFI="no", $LIBS)
+fi
 
 # Test if the user want to force with our FFI lib
 AC_ARG_WITH(provided-ffi,
@@ -340,8 +371,13 @@ then
 else 
      echo "... Using system libffi library"
      FFI=""
-     FFIINC="`pkg-config libffi --cflags`"
-     FFILIB="`pkg-config libffi --libs`"
+     if test "$PKGCONFIG" != "false" ;then
+       FFIINC=$($PKGCONFIG libffi --cflags)
+       FFILIB=$($PKGCONFIG libffi --libs)
+     else
+       FFIINC=""
+       FFILIB="-lffi"
+     fi
      ffimsg="use the system library"
 fi
 DEF_FFI="#define HAVE_FFI 1" ; # We always want FFI. 
