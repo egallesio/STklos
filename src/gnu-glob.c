@@ -1,7 +1,7 @@
 /*
  * gnu-glob.c	-- Adaptation of GNU glob function for STklos
  * 
- * Copyright © 2003 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * The following code is constituted of the GNU glob implementation. 
  * Code is slightly modified (all modifications are tagged with the
@@ -9,7 +9,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 16-Jan-2003 18:42 (eg)
- * Last file update: 16-Jan-2003 21:39 (eg)
+ * Last file update: 30-Sep-2009 21:28 (eg)
  */
 
 /* Copyright (C) 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
@@ -270,7 +270,8 @@ glob (pattern, flags, errfunc, pglob)
     /* Sort the vector.  */
     qsort ((__ptr_t) &pglob->gl_pathv[oldcount],
 	   pglob->gl_pathc - oldcount,
-	   sizeof (char *), (__compar_fn_t)collated_compare);
+	   sizeof (char *), 
+	   (int(*)(const void *, const void *)) collated_compare);
 
   return 0;
 }
