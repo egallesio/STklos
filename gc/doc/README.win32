@@ -69,7 +69,7 @@ absence of thread support).
 GNU Tools
 ---------
 The collector should be buildable under Cygwin with either the old standard
-Makefile, or possibly with the "configure --diable-shared;make" machinery.
+Makefile, or possibly with the "configure --disable-shared;make" machinery.
 (For the latter use --enable-threads=posix for thread support.) The major issue
 here seems to be that dynamic library support is not currently enabled for
 Cygwin.  (This is probably fixable without a great deal of difficulty by
@@ -143,6 +143,17 @@ important, otherwise resulting programs will not run.
 
 Ivan Demakov (email: ivan@tgrad.nsk.su)
 
+Note from Ivan Maidanski:
+
+Special note for OpenWatcom users: the C (unlike the C++) compiler (of the
+latest stable release, not sure for older ones) doesn't force pointer global
+variables (i.e. not struct fields, not sure for locals) to be aligned unless
+optimizing for speed (eg. "-ot" option is set); the "-zp" option (or align
+pragma) only controls alignment for structs; I don't know whether it's a bug or
+a feature (see an old report of same kind -
+http://bugzilla.openwatcom.org/show_bug.cgi?id=664), so You are warned.
+
+
 Incremental Collection
 ----------------------
 There is some support for incremental collection.  By default, the
@@ -175,7 +186,7 @@ to the collector DLL still exists, but requires that both
 We generally recommend avoiding this if possible, since it seems to
 be less than 100% reliable.
 
-Use NT_THREADS_MAKEFILE (a.k.a gc.mak) instead of NT_MAKEFILE
+Use gc.mak (a.k.a NT_THREADS_MAKEFILE) instead of NT_MAKEFILE
 to build a version that supports both kinds of thread tracking.
 To build the garbage collector
 test with VC++ from the command line, use
@@ -190,10 +201,9 @@ enabled before any additional threads are created.
 
 Since 6.3alpha2, threads are also better supported in static library builds
 with Microsoft tools (use NT_STATIC_THREADS_MAKEFILE) and with the GNU
-tools.  In all cases,the collector must be built with GC_WIN32_THREADS
-defined, even if the Cygwin pthreads interface is used.
+tools.  The collector must be built with GC_THREADS defined.
 (NT_STATIC_THREADS_MAKEFILE does this implicitly.  Under Cygwin,
-./configure --enable-threads=posix defines GC_WIN32_THREADS.)
+./configure --enable-threads=posix should be used.)
 
 For the normal, non-dll-based thread tracking to work properly,
 threads should be created with GC_CreateThread or GC_beginthreadex,
@@ -218,4 +228,3 @@ explicitly set GC_WIN32_PTHREADS.  Use -DPTW32_STATIC_LIB for the static
 threads library.  Note that the DEBUG_WIN32_PTHREADS support in
 win32_threads.c is currently broken and looking for someone to debug it.
 (This information and the port came from Romano Paolo Tenca).
-

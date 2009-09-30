@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 28-Sep-2009 13:02 (eg)
+### Last file update: 30-Sep-2009 15:51 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -131,6 +131,7 @@ case "$THREADS" in
    ;;
 esac
 
+
 ### Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
 case "$THREADS" in
   none) true ;;
@@ -139,6 +140,8 @@ case "$THREADS" in
         Linux*) STKCFLAGS="-D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
      esac
 esac
+
+
 
 
 
@@ -168,34 +171,34 @@ esac
 
 
 
-###
-### check for GC
-###
-if test "$THREADS" = lurc
-then
-  AC_MSG_WARN([Using the bundled GC for LURC support])
-  HAVE_GC="no"
-else
-  AC_CHECK_LIB(gc, GC_malloc, HAVE_GC="yes", HAVE_GC="no", $LIBS)
-fi
+#1.0 ###
+#1.0 ### check for GC
+#1.0 ###
+#1.0 if test "$THREADS" = lurc
+#1.0 then
+#1.0   AC_MSG_WARN([Using the bundled GC for LURC support])
+#1.0   HAVE_GC="no"
+#1.0 else
+#1.0   AC_CHECK_LIB(gc, GC_malloc, HAVE_GC="yes", HAVE_GC="no", $LIBS)
+#1.0 fi
+#1.0 
+#1.0 # Test if the user want to force with our GC
+#1.0 withval=""
+#1.0 AC_ARG_WITH(provided-gc,
+#1.0        [  --with-provided-gc		use our GC version even the system provides one])
 
-# Test if the user want to force with our GC
-withval=""
-AC_ARG_WITH(provided-gc,
-       [  --with-provided-gc		use our GC version even the system provides one])
-
-case $withval in
-  "yes") HAVE_GC="no";;
-  "no")  HAVE_GC="yes";;
-esac
-
-# On Mac OS X use the given GC (to compile it without -Ox)
-case `uname -s` in
-  Darwin*) echo "Force '--with-provided-gc' on MacOS";
-           HAVE_GC="no" ;;
-  *) true;;
-esac
-
+#1.0 case $withval in
+#1.0   "yes") HAVE_GC="no";;
+#1.0   "no")  HAVE_GC="yes";;
+#1.0 esac
+#1.0 
+#1.0 # On Mac OS X use the given GC (to compile it without -Ox)
+#1.0 case `uname -s` in
+#1.0   Darwin*) echo "Force '--with-provided-gc' on MacOS";
+#1.0            HAVE_GC="no" ;;
+#1.0   *) true;;
+#1.0 esac
+#1.0 
 
 ###
 ### configure libraries
@@ -218,24 +221,59 @@ else
   GMPINC=""
 fi
 
-if test "$HAVE_GC" = "no"
-then
-  echo "No Boehm-Demers-Weiser GC library. Using the one provided with the package"
-  (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix \
-          --includedir=$prefix/include/stklos \
-          --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
-  
-  GC=gc
-  GCLIB="../gc/.libs/libgc.a"
-  GCINC="-I../gc/include"
-  # Eventually add a distclean target to the GC Makefile
+#1.0 if test "$HAVE_GC" = "no"
+#1.0 then
+#1.0   echo "No Boehm-Demers-Weiser GC library. Using the one provided with the package"
+#1.0  (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix \
+#1.0          --includedir=$prefix/include/stklos \
+#1.0          --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
+#1.0  
+#1.0  GC=gc
+#1.0  GCLIB="../gc/.libs/libgc.a"
+#1.0  GCINC="-I../gc/include"
+#1.0  # Eventually add a distclean target to the GC Makefile
+#1.0else
+#1.0  echo "Using the system Boehm-Demers-Weiser library"
+#1.0  GC=""
+#1.0  GCLIB="-lgc"
+#1.0  GCINC=""
+#1.0  AC_DEFINE(HAVE_GC, [], [Use system GC])
+#1.0fi
+
+
+# ----------------------------------------------------------------------
+# GC support 
+# ----------------------------------------------------------------------
+echo "*****"
+echo "***** GC support"
+echo "*****"
+
+AC_CHECK_LIB(gc, GC_malloc, HAVE_GC="yes", HAVE_GC="no", $LIBS)
+
+# Test if the user want to force with our GC lib
+AC_ARG_WITH(provided-gc,
+       [  --with-provided-gc	use the provided Boehm GC library],
+       PROV_GC="yes", PROV_GC="no")
+
+if test "$HAVE_GC" = "no" -o "$PROV_GC" = "yes"
+then 
+     echo "... Configuring libgc"
+     (cd gc; CC=${CC} CFLAGS=${CFLAGS} ./configure --prefix=$prefix \
+              --includedir=$prefix/include/stklos \
+	      --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
+     GC=gc
+     GCLIB="../gc/.libs/libgc.a"
+     GCINC="-I../gc/include"
+     gcmsg="use provided library"
 else
-  echo "Using the system Boehm-Demers-Weiser library"
-  GC=""
-  GCLIB="-lgc"
-  GCINC=""
-  AC_DEFINE(HAVE_GC, [], [Use system GC])
+     echo "... Using system libgc library"
+     GC=""
+     GCLIB="-lgc"
+     GCINC=""
+     AC_DEFINE(HAVE_GC, 1, [Use system GC])
+     gcmsg="use the system library"
 fi
+
 
 
 # ----------------------------------------------------------------------
@@ -258,7 +296,8 @@ then
      PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
                  -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
      (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
-           --prefix=$prefix --disable-shared --disable-cpp)
+           --prefix=$prefix --disable-shared --disable-cpp) || \
+	   { echo "Cannot configure PCRE"; exit; }
      PCRE=pcre
      PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
      PCREINC="-I../pcre"
@@ -270,7 +309,7 @@ else
      PCRELIB="-lpcre -lpcreposix"
      PCREINC=""
      DEF_PCRE="#define HAVE_PCRE 1"
-     pcrelib="use the system library"
+     pcremsg="use the system library"
 fi
 
 
@@ -293,7 +332,7 @@ then
      echo "... Configuring libffi"
      (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
            --disable-structs --disable-raw-api --disable-shared \
-	   --prefix=$prefix)
+	   --prefix=$prefix) || { echo "Cannot configure libffi"; exit; }
      FFI="ffi"
      FFIINC="-I../ffi/include"
      FFILIB="../ffi/.libs/libffi.a"
@@ -383,9 +422,6 @@ AC_SUBST(STKCFLAGS)
 AC_SUBST(VERSION)
 AC_SUBST(HAVE_DLOPEN)
 AC_SUBST(OS_FLAVOUR)
-AC_SUBST(GC)
-AC_SUBST(GCLIB)
-AC_SUBST(GCINC)
 AC_SUBST(GMP)
 AC_SUBST(GMPLIB)
 AC_SUBST(GMPINC)
@@ -405,6 +441,10 @@ AC_SUBST(COMPSRC)
 AC_SUBST(STACK_DIRECTION)
 AC_SUBST(HAVE_GNOME)
 AC_SUBST(LDAP_LIB)
+#GC
+AC_SUBST(GC)
+AC_SUBST(GCLIB)
+AC_SUBST(GCINC)
 # PCRE
 AC_SUBST(PCRE)
 AC_SUBST(PCRELIB)
@@ -444,8 +484,8 @@ echo "   Install prefix : " $prefix
 echo "        C compiler: " $CC
 echo " Compilation flags: " $CFLAGS
 echo "    Bignum library: " $biglib
-echo "    Regexp library: " $pcrelib
-echo "        GC library: " $gclib
+echo "    Regexp library: " $pcremsg
+echo "        GC library: " $gcmsg
 echo "       FFI library: " $ffimsg
 echo "    Thread support: " $THREADS 
 echo " "
