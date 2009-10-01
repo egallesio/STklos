@@ -42,7 +42,7 @@ POST_UNINSTALL = :
 bin_PROGRAMS = stklos$(EXEEXT)
 subdir = src
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/extraconf.h.in $(srcdir)/stklosconf.h.in TODO
+	$(srcdir)/extraconf.h.in $(srcdir)/stklosconf.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -190,6 +190,7 @@ MKDIR_P = @MKDIR_P@
 OBJEXT = @OBJEXT@
 OS_FLAVOUR = @OS_FLAVOUR@
 OS_NAME = @OS_NAME@
+OS_NAME_VERSION = @OS_NAME_VERSION@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@

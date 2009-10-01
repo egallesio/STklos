@@ -42,7 +42,11 @@ Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
-#include <malloc.h>
+#ifdef DARWIN_10
+#  include <sys/malloc.h>
+#else
+#  include <malloc.h>
+#endif
 #include <fnmatch.h>
 #ifdef STKLOS_CODE 
 #  include "gnu-glob.h"

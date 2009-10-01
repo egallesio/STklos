@@ -271,12 +271,6 @@ then
      GCINC="-I../gc/include"
      GCLIB="../gc/.libs/libgc.a"
      gcmsg="use provided library"
-
-     # MacOs kludge
-     case `uname -s` in
-        Darwin*) GC_INC="$GC_INC -D_XOPEN_SOURCE" ;;
-	*) true;;
-     esac
 else
      echo "... Using system libgc library"
      GC=""
@@ -391,17 +385,22 @@ DEF_FFI="#define HAVE_FFI 1" ; # We always want FFI.
 ### Determine the options necessary for dynamic loading
 eval `CC=$CC /bin/sh ./utils/shlib-options`
 
-case $OS in
-  SUNOS) 
+case $OS_NAME_VERSION in
+  SUNOS*) 
     CFLAGS="$CFLAGS -DSOLARIS";
-    LIBS="$LIBS -lsocket -lrt -lnsl -lpthread" ;;
-  UNKNOWN)
+    LIBS="$LIBS -lsocket -lrt -lnsl -lpthread"
+    ;;
+  DARWIN_10)
+     GC_INC="GC_INC -D_XOPEN_SOURCE"
+     ;;
+  UNKNOWN*)
     echo ""
     echo "**** STklos has no support for your system (`uname -s`)"
     echo "**** Please modify the script \"utils/shlib-options\" to add"
     echo "**** support for your system (it's easy) and restart installation process."
     echo "**** Thanks for sending your modifications to <bugs _at_ stklos.net>"
-    exit 1 ;;
+    exit 1 
+    ;;
 esac
 
 
@@ -414,6 +413,22 @@ PREFIX=$prefix
 BUILD_OS=$os-$version
 BUILD_ARCH=`uname -m`
 OS_NAME=$OS
+case $OS in 
+   LINUX) 
+      v=$(echo $version | sed -e 's/\([0-9]*\)\.\([0-9]*\).*/\1_\2/')
+      OS_NAME_VERSION=LINUX_$v
+      ;;
+   DARWIN)
+      case $version in
+         9*)  OS_NAME_VERSION=DARWIN_9;;
+	 10*) OS_NAME_VERSION=DARWIN_10;;
+	 *)   OS_NAME_VERSION=DARWIN_OLD;;
+      esac
+      ;;
+  *) 
+      v=$(echo $version | sed -e 's/[^0-9]/_/g')
+      OS_NAME_VERSION=$OS_$v;
+esac
 
 ### Place version number in VERSION file
 ### echo "VERSION=${VERSION}">VERSION
@@ -430,12 +445,12 @@ else
   biglib="use the system library"
 fi
 
-if test "$HAVE_GC" = "no"
-then
-  gclib="compile provided library"
-else 
-  gclib="use the system library"
-fi
+#1.0 if test "$HAVE_GC" = "no"
+#1.0 then
+#1.0   gclib="compile provided library"
+#1.0 else 
+#1.0   gclib="use the system library"
+#1.0 fi
 
 # LURC adjustment
 LURCDIR=""
@@ -467,6 +482,7 @@ AC_SUBST(EXECDIR)
 AC_SUBST(BUILD_OS)
 AC_SUBST(BUILD_ARCH)
 AC_SUBST(OS_NAME)
+AC_SUBST(OS_NAME_VERSION)
 AC_SUBST(SH_COMP_FLAGS)
 AC_SUBST(SH_LOAD_FLAGS)
 AC_SUBST(SH_LOADER)
@@ -495,7 +511,7 @@ AC_SUBST(DEF_FFI)
 AC_SUBST(THREADS)
 AC_SUBST(LURCDIR)
 AC_SUBST(CALLCC_STK)
-	
+
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile lib/boot-callcc.stk
 	  utils/stklos-config utils/stklos-script
@@ -516,6 +532,7 @@ echo "SUMMARY"
 echo "*******"
 echo "            System: " $BUILD_OS
 echo "           OS type: " $OS_FLAVOUR
+echo "           OS name: " $OS_NAME_VERSION
 echo "   Install prefix : " $prefix
 echo "        C compiler: " $CC
 echo " Compilation flags: " $CFLAGS

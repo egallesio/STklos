@@ -32,6 +32,7 @@
 #define BUILD_ARCH		"@BUILD_ARCH@"
 #define BUILD_MACHINE		"@BUILD_OS@-@BUILD_ARCH@"
 #define @OS_NAME@		1
+#define @OS_NAME_VERSION@       1
 #define STACK_GROWS_@STACK_DIRECTION@
 
 /* Various stuff */
