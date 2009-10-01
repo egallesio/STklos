@@ -6905,7 +6905,7 @@ BUILD_ARCH=`uname -m`
 OS_NAME=$OS
 case $OS in
    LINUX)
-      v=$(echo $version | sed -e 's/\(0-9*\)\.\(0-9*\).*/\1_\2/')
+      v=`echo $version | sed -e 's/\([0-9]*\)\.\([0-9\]*\).*/\1_\2/'`
       OS_NAME_VERSION=LINUX_$v
       ;;
    DARWIN)
@@ -6916,7 +6916,7 @@ case $OS in
       esac
       ;;
   *)
-      v=$(echo $version | sed -e 's/^0-9/_/g')
+      v=`echo $version | sed -e 's/[^0-9]/_/g'`
       OS_NAME_VERSION=$OS_$v;
 esac
 
@@ -8489,8 +8489,8 @@ echo " "
 echo "SUMMARY"
 echo "*******"
 echo "            System: " $BUILD_OS
+echo "           OS nick: " $OS_NAME_VERSION
 echo "           OS type: " $OS_FLAVOUR
-echo "           OS name: " $OS_NAME_VERSION
 echo "   Install prefix : " $prefix
 echo "        C compiler: " $CC
 echo " Compilation flags: " $CFLAGS

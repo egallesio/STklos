@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 30-Sep-2009 23:36 (eg)
+### Last file update:  1-Oct-2009 23:12 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -415,7 +415,7 @@ BUILD_ARCH=`uname -m`
 OS_NAME=$OS
 case $OS in 
    LINUX) 
-      v=$(echo $version | sed -e 's/\([0-9]*\)\.\([0-9]*\).*/\1_\2/')
+      v=`echo $version | sed -e 's/\([[0-9]]*\)\.\([[0-9\]]*\).*/\1_\2/'`
       OS_NAME_VERSION=LINUX_$v
       ;;
    DARWIN)
@@ -426,7 +426,7 @@ case $OS in
       esac
       ;;
   *) 
-      v=$(echo $version | sed -e 's/[^0-9]/_/g')
+      v=`echo $version | sed -e 's/[[^0-9]]/_/g'`
       OS_NAME_VERSION=$OS_$v;
 esac
 
@@ -531,8 +531,8 @@ echo " "
 echo "SUMMARY"
 echo "*******"
 echo "            System: " $BUILD_OS
+echo "           OS nick: " $OS_NAME_VERSION
 echo "           OS type: " $OS_FLAVOUR
-echo "           OS name: " $OS_NAME_VERSION
 echo "   Install prefix : " $prefix
 echo "        C compiler: " $CC
 echo " Compilation flags: " $CFLAGS
