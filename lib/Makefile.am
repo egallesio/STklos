@@ -2,9 +2,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 27-Aug-2008 13:43 (eg)
+# Last file update:  3-Oct-2009 21:53 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d @LURCDIR@
+SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
 SFLAGS=
 

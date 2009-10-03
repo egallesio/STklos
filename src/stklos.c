@@ -1,7 +1,7 @@
 /*
  * stklos.c	-- STklos interpreter main function
  * 
- * Copyright © 1999-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 23-Nov-2006 17:20 (eg)
+ * Last file update:  3-Oct-2009 21:43 (eg)
  */
 
 #include <stklos.h>
@@ -149,7 +149,7 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
 		      STk_STklos_module);
 }
 
-int mymain(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   int ret;
   char *argv0 = *argv;
@@ -192,13 +192,4 @@ int mymain(int argc, char *argv[])
 
   STk_pre_exit(MAKE_INT(ret));
   return ret;
-}
-
-int main(int argc, char *argv[])
-{
-#ifdef THREADS_LURC
-  return STk_thread_main(&mymain, argc, argv);
-#else
-  return mymain(argc, argv);
-#endif /* ! THREAD_LURC */
 }

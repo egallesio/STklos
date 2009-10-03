@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r5rs.stk	-- R5RS function written in Scheme
 ;;;; 
-;;;; Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 12:27 (eg)
-;;;; Last file update:  6-Jul-2007 16:57 (eg)
+;;;; Last file update:  3-Oct-2009 21:50 (eg)
 ;;;;
 
 
@@ -850,12 +850,71 @@ doc>
  * @end lisp
 doc>
 |#
+(define (%call/cc proc)
+  ;; A simple continuation without winding (accepts multiples values)
+  (let ((k  (%make-continuation)))
+    (if  (%fresh-continuation? k)
+        (proc (lambda v
+		(%restore-continuation k v)))
+        (apply values k))))
 
-;;; ********** N O T E **********
-;;; Implementation of call/cc and dynamic-wind is in file callcc.stk
-;;; if the thread system is not LURC. Otherwise, the implementation is
-;;; in file called dyn-wind-lurc.stk
-;;; 
+;(define %dynamic-wind-stack (make-parameter (list #f)))
+
+(define call/cc #f)
+(define dynamic-wind #f)
+
+(let ()
+  
+  (define (reroot! there)
+      (unless (eq? (%thread-dynwind-stack) there)
+	(reroot! (cdr there))
+	(let ((before (caar there))
+	      (after  (cdar there))
+	      (here   (%thread-dynwind-stack)))
+	  (set-car! here (cons after before))
+	  (set-cdr! here  there)
+	  (set-car! there #f)
+	  (set-cdr! there '())
+	  (%thread-dynwind-stack-set! there)
+	  (before))))
+
+  ;;
+  ;; call/cc
+  ;;
+  (set! call/cc
+    (lambda  (proc)
+      (let ((here (%thread-dynwind-stack)))
+	(%call/cc (lambda (cont)
+		    (proc (lambda results
+			    (reroot! here)
+			    (apply cont results))))))))
+  
+  ;;
+  ;; dynamic-wind
+  ;;
+  (set! dynamic-wind
+    (lambda (before during after)
+      (define (verify-proc p)
+	(unless (procedure? p)  ; Should test it is a thunk
+	  (error 'dynamic-wind "bad procedure ~S" p)))
+      
+      (verify-proc before)
+      (verify-proc during)
+      (verify-proc after)
+      
+      (let ((here (%thread-dynwind-stack)))
+	(reroot! (cons (cons before after) here))
+	(with-handler (lambda (c)
+			(reroot! here)
+			(raise c))
+		      (call-with-values during
+			(lambda results (reroot! here) (apply values results))))))))
+
+
+;;
+;; call-with-current-continuation
+;;
+(define call-with-current-continuation call/cc)
 
 
 #|

@@ -1,9 +1,6 @@
 # -*- conf -*-
 
 # Temporaries
-gc.old
-gc-patche
-gc-lurc
 benches/
 gtklos/paned.stk
 lib/GLOBS

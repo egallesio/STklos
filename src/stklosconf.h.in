@@ -231,9 +231,6 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* LURC threads support */
-#undef THREADS_LURC
-
 /* No thread support */
 #undef THREADS_NONE
 

@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 27-Aug-2008 13:43 (eg)
+# Last file update:  3-Oct-2009 21:53 (eg)
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -172,7 +172,6 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-LURCDIR = @LURCDIR@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 OBJEXT = @OBJEXT@
@@ -250,7 +249,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d @LURCDIR@
+SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 SFLAGS = 
 scheme_BOOT = assembler.stk		\
 	      bb.stk 			\

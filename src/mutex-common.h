@@ -1,7 +1,7 @@
 /*
  * mutex-common.h	-- Mutex support for STklos
  * 
- * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,22 +21,18 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update:  4-Feb-2006 11:04 (eg)
+ * Last file update:  3-Oct-2009 21:46 (eg)
  */
 #ifndef _STK_MUTEX_H
 #define _STK_MUTEX_H
 
 #include "stklos.h"
 
-#ifdef THREADS_LURC
-# include "mutex-lurc.h"
-#elif defined(THREADS_PTHREADS)
+#if defined(THREADS_PTHREADS)
 # include "mutex-pthreads.h"
 #else
 # include "mutex-none.h"
 #endif
-
-#ifndef THREADS_NONE
 
 /* ====================================================================== *\
  *
@@ -85,8 +81,5 @@ extern void STk_error_deadlock(void);
 extern void STk_error_bad_timeout(SCM tm);
 
 extern void STk_error_bad_condv(SCM obj);
-
-
-#endif /* ! THREADS_NONE */
 
 #endif /* ! _STK_MUTEX_H */

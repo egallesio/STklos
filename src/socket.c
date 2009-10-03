@@ -1,7 +1,7 @@
 /*
  * socket.c				-- Socket acess for STklos
  * 
- * Copyright © 2003-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update: 13-Apr-2007 18:36 (eg)
+ * Last file update:  3-Oct-2009 21:42 (eg)
  */
 
 #include <sys/types.h>
@@ -35,15 +35,6 @@
 #include <stklos.h>
 #include "socket.h"
 
-#ifdef THREADS_LURC
-# include <lurc.h>
-/* use the lurc IO wrapper */
-# define socket(d,t,p)   lurc_io_socket(d,t,p)
-# define connect(fd,a,l) lurc_io_connect(fd,a,l)
-# define accept(fd,a,l)  lurc_io_accept(fd,a,l)
-# define close(fd)       lurc_io_close(fd)
-# define shutdown(fd,f)  lurc_io_shutdown(fd,f)
-#endif
 
 /*===========================================================================*\
  * 

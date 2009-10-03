@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  3-Jan-2009 22:22 (eg)
+ * Last file update:  3-Oct-2009 21:45 (eg)
  */
 
 // INLINER values
@@ -33,9 +33,6 @@
 #include "vm.h"
 #include "vm-instr.h"
 #include "struct.h"
-#ifdef THREADS_LURC
-# include <lurc.h>
-#endif
 
 // #define DEBUG_VM
 /* #define STAT_VM  */
@@ -73,14 +70,9 @@ static int debug_level = 0;	/* 0 is quiet, 1, 2, ... are more verbose */
 #endif
 
 
-#ifdef THREADS_LURC
-# define MY_SETJMP(jb) \
-  (jb.blocked = get_signal_mask(), LURC_SAVE_CONTEXT(jb.j))
-# define MY_LONGJMP(jb, val)	(lurc_restore_context((jb).j, val))
-#else
-# define MY_SETJMP(jb) 		(jb.blocked = get_signal_mask(), setjmp(jb.j))
-# define MY_LONGJMP(jb, val)	(longjmp((jb).j, val))
-#endif
+#define MY_SETJMP(jb) 	(jb.blocked = get_signal_mask(), setjmp(jb.j))
+#define MY_LONGJMP(jb, val)	(longjmp((jb).j, val))
+
 
 static Inline sigset_t get_signal_mask(void)
 {
@@ -1922,9 +1914,6 @@ void STk_get_stack_pointer(void **addr)
   *addr = (void *) &c;
 }
 
-#ifndef THREADS_LURC
-
-
 DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 {
   SCM z;
@@ -2082,8 +2071,6 @@ static struct extended_type_descr xtype_continuation = {
   "continuation",		/* name */
   print_continuation		/* print function */
 };
-
-#endif /* ! THREADS_LURC */
 
 
 /*===========================================================================*\
@@ -2248,29 +2235,9 @@ SCM STk_execute_C_bytecode(SCM all_consts, STk_instr *instr)
 }
 
 
-#ifdef THREADS_LURC
-SCM *STk_save_vm(void){
-  vm_thread_t *vm = STk_get_current_vm();
-  
-  SAVE_HANDLER_STATE(vm->val, vm->pc);
-  SAVE_VM_STATE();
-
-  return vm->sp;
-}
-
-void STk_restore_vm(SCM *sp){
-  vm_thread_t *vm = STk_get_current_vm();
-  vm->sp = sp;
-  FULL_RESTORE_VM_STATE(vm->sp);
-  UNSAVE_HANDLER_STATE();
-}
-#endif
-
 int STk_init_vm()
 {
-#ifndef THREADS_LURC
   DEFINE_XTYPE(continuation, &xtype_continuation);
-#endif /* ! THREADS_LURC */
 
   /* Initialize the table of checked references */
   checked_globals = STk_must_malloc(checked_globals_len * sizeof(SCM));
@@ -2286,12 +2253,10 @@ int STk_init_vm()
 
   ADD_PRIMITIVE(current_handler);
 
-#ifndef THREADS_LURC
   ADD_PRIMITIVE(make_continuation);
   ADD_PRIMITIVE(restore_cont);
   ADD_PRIMITIVE(continuationp);
   ADD_PRIMITIVE(fresh_continuationp);
-#endif /* ! THREADS_LURC */
 
 #ifdef STK_DEBUG
   ADD_PRIMITIVE(set_vm_debug);

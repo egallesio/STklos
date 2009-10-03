@@ -594,7 +594,6 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 CALLCC_STK
-LURCDIR
 THREADS
 DEF_FFI
 FFIINC
@@ -632,8 +631,6 @@ HAVE_DLOPEN
 STKCFLAGS
 NO_THREAD_FALSE
 NO_THREAD_TRUE
-LURC_FALSE
-LURC_TRUE
 PTHREADS_FALSE
 PTHREADS_TRUE
 POW_LIB
@@ -1370,7 +1367,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
-  --enable-threads=TYPE   choose threading package (none,pthread,lurc)
+  --enable-threads=TYPE   choose threading package (none,pthread)
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -6222,9 +6219,6 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-### This checks for the presence of a given CPP define in a fiven header file
-
-
 
 ### Now look at what threads we want
 case "$THREADS" in
@@ -6285,91 +6279,6 @@ fi
 $as_echo "#define THREADS_PTHREADS /**/" >>confdefs.h
 
    ;;
- lurc)
-   ### Check for lurc
-   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for lurc_thread_create in -llurc" >&5
-$as_echo_n "checking for lurc_thread_create in -llurc... " >&6; }
-if test "${ac_cv_lib_lurc_lurc_thread_create+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-llurc  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char lurc_thread_create ();
-int
-main ()
-{
-return lurc_thread_create ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_lurc_lurc_thread_create=yes
-else
-  ac_cv_lib_lurc_lurc_thread_create=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_lurc_lurc_thread_create" >&5
-$as_echo "$ac_cv_lib_lurc_lurc_thread_create" >&6; }
-if test "x$ac_cv_lib_lurc_lurc_thread_create" = x""yes; then :
-  LIBS="-llurc $LIBS"
-else
-  as_fn_error "Missing LURC library" "$LINENO" 5
-fi
-
-   ac_fn_c_check_header_mongrel "$LINENO" "lurc.h" "ac_cv_header_lurc_h" "$ac_includes_default"
-if test "x$ac_cv_header_lurc_h" = x""yes; then :
-
-else
-  as_fn_error "Missing LURC header file" "$LINENO" 5
-fi
-
-
-   ### Now check if it is compiled with GC support
-   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LURC GC support" >&5
-$as_echo_n "checking for LURC GC support... " >&6; }
-
- ### lurc.h: header file
- ### LURC_ENABLE_GC: CPP variable
- ### AC_MSG_RESULT([ok]): then
- ### AC_MSG_ERROR([Missing GC support in LURC]): else
- cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
- #include <lurc.h>
- #ifndef LURC_ENABLE_GC
- # error "LURC_ENABLE_GC undefined"
- #else
-  ok
- #endif
-
-_ACEOF
-if ac_fn_c_try_cpp "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
-$as_echo "ok" >&6; }
-else
-  as_fn_error "Missing GC support in LURC" "$LINENO" 5
-fi
-rm -f conftest.err conftest.$ac_ext
-
-   ### That shold be good
-
-$as_echo "#define THREADS_LURC /**/" >>confdefs.h
-
-   CALLCC_STK='"dyn-wind-lurc.stk"'
-   ;;
  *)
    as_fn_error "Unknown thread system: $THREADS" "$LINENO" 5
    ;;
@@ -6379,7 +6288,6 @@ esac
 ### Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
 case "$THREADS" in
   none) true ;;
-  lurc) true ;;
   *) case `uname -s` in
         Linux*) STKCFLAGS="-D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
      esac
@@ -6396,14 +6304,6 @@ esac
 else
   PTHREADS_TRUE='#'
   PTHREADS_FALSE=
-fi
-
- if test "$THREADS" = lurc; then
-  LURC_TRUE=
-  LURC_FALSE='#'
-else
-  LURC_TRUE='#'
-  LURC_FALSE=
 fi
 
  if test "$THREADS" = none; then
@@ -6886,11 +6786,6 @@ else
 fi
 
 
-# LURC adjustment
-LURCDIR=""
-if test "$THREADS" = "lurc" ;then
-   LURCDIR=Lurc.d
-fi
 
 ###
 ### See in what direction the stack grows (code stolen from Sawfish)
@@ -6957,8 +6852,7 @@ fi
 
 
 
-
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile lib/boot-callcc.stk utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/Lurc.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-install.1 doc/stklos-pkg.1 doc/skb/stklos-version.stk pkgman/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile lib/boot-callcc.stk utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-install.1 doc/stklos-pkg.1 doc/skb/stklos-version.stk pkgman/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -7079,10 +6973,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${PTHREADS_TRUE}" && test -z "${PTHREADS_FALSE}"; then
   as_fn_error "conditional \"PTHREADS\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${LURC_TRUE}" && test -z "${LURC_FALSE}"; then
-  as_fn_error "conditional \"LURC\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${NO_THREAD_TRUE}" && test -z "${NO_THREAD_FALSE}"; then
@@ -7697,7 +7587,6 @@ do
     "lib/Match.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Match.d/Makefile" ;;
     "lib/SILex.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/SILex.d/Makefile" ;;
     "lib/Lalr.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Lalr.d/Makefile" ;;
-    "lib/Lurc.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Lurc.d/Makefile" ;;
     "lib/ScmPkg.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/ScmPkg.d/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "doc/stklos.1") CONFIG_FILES="$CONFIG_FILES doc/stklos.1" ;;
@@ -8444,16 +8333,7 @@ echo "        GC library: " $gcmsg
 echo "       FFI library: " $ffimsg
 echo "    Thread support: " $THREADS
 echo " "
-if test "$THREADS" = "lurc"
-then
-     echo "*** WARNING: To use LURC threads, you need to replace (or install) "
-     echo "*** a special GC package (available at http://www.stklos.net/download)."
-     echo "*** You have to: "
-     echo "***    - Remove the current gc directory"
-     echo "***    - untar this package in this directory."
-     echo "***    - re-run configure"
-     echo "*** The GC for LURC probably doesn't work on MacOS 10.5"
-fi
+
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options."
 echo " "

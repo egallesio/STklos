@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 27-Sep-2009 19:33 (eg)
+# Last file update:  3-Oct-2009 21:51 (eg)
 
 
 VPATH = @srcdir@
@@ -60,17 +60,15 @@ am__stklos_SOURCES_DIST = base64.c boolean.c boot.c box.c char.c \
 	port.c print.c proc.c process.c promise.c read.c regexp.c \
 	signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
 	symbol.c system.c uvector.c vector.c vm.c vport.c \
-	thread-common.c thread-lurc.c mutex-common.c mutex-lurc.c \
-	thread-none.c mutex-none.c thread-pthreads.c mutex-pthreads.c
-@LURC_FALSE@@NO_THREAD_FALSE@@PTHREADS_TRUE@am__objects_1 = thread-common.$(OBJEXT) \
-@LURC_FALSE@@NO_THREAD_FALSE@@PTHREADS_TRUE@	thread-pthreads.$(OBJEXT) \
-@LURC_FALSE@@NO_THREAD_FALSE@@PTHREADS_TRUE@	mutex-common.$(OBJEXT) \
-@LURC_FALSE@@NO_THREAD_FALSE@@PTHREADS_TRUE@	mutex-pthreads.$(OBJEXT)
-@LURC_FALSE@@NO_THREAD_TRUE@am__objects_1 = thread-none.$(OBJEXT) \
-@LURC_FALSE@@NO_THREAD_TRUE@	mutex-none.$(OBJEXT)
-@LURC_TRUE@am__objects_1 = thread-common.$(OBJEXT) \
-@LURC_TRUE@	thread-lurc.$(OBJEXT) mutex-common.$(OBJEXT) \
-@LURC_TRUE@	mutex-lurc.$(OBJEXT)
+	thread-none.c mutex-none.c thread-common.c thread-pthreads.c \
+	mutex-common.c mutex-pthreads.c
+@NO_THREAD_FALSE@@PTHREADS_TRUE@am__objects_1 =  \
+@NO_THREAD_FALSE@@PTHREADS_TRUE@	thread-common.$(OBJEXT) \
+@NO_THREAD_FALSE@@PTHREADS_TRUE@	thread-pthreads.$(OBJEXT) \
+@NO_THREAD_FALSE@@PTHREADS_TRUE@	mutex-common.$(OBJEXT) \
+@NO_THREAD_FALSE@@PTHREADS_TRUE@	mutex-pthreads.$(OBJEXT)
+@NO_THREAD_TRUE@am__objects_1 = thread-none.$(OBJEXT) \
+@NO_THREAD_TRUE@	mutex-none.$(OBJEXT)
 am_stklos_OBJECTS = base64.$(OBJEXT) boolean.$(OBJEXT) boot.$(OBJEXT) \
 	box.$(OBJEXT) char.$(OBJEXT) cond.$(OBJEXT) cpointer.$(OBJEXT) \
 	dynload.$(OBJEXT) env.$(OBJEXT) error.$(OBJEXT) \
@@ -184,7 +182,6 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
-LURCDIR = @LURCDIR@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 OBJEXT = @OBJEXT@
@@ -267,10 +264,9 @@ extraincdir = $(prefix)/include/@PACKAGE@
 #scheme_DATA     = boot.img
 extrainc_DATA = stklos.h extraconf.h stklosconf.h socket.h fport.h
 DOCDB = DOCDB
+@NO_THREAD_TRUE@THREAD_FILES = thread-none.c mutex-none.c
 
 # what thread support do we put in?
-@LURC_TRUE@THREAD_FILES = thread-common.c thread-lurc.c mutex-common.c mutex-lurc.c
-@NO_THREAD_TRUE@THREAD_FILES = thread-none.c mutex-none.c
 @PTHREADS_TRUE@THREAD_FILES = thread-common.c thread-pthreads.c mutex-common.c mutex-pthreads.c
 stklos_SOURCES = base64.c boolean.c boot.c box.c char.c cond.c \
  cpointer.c dynload.c env.c error.c extend.c ffi.c fixnum.c \
@@ -443,7 +439,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutex-common.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutex-lurc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutex-none.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutex-pthreads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/number.Po@am__quote@
@@ -467,7 +462,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symbol.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/system.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-common.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-lurc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-none.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-pthreads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/uvector.Po@am__quote@

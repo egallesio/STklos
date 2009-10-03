@@ -1,7 +1,7 @@
 /*
  * stklos.h	-- stklos.h
  * 
- * Copyright © 1999-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  1-May-2008 18:44 (eg)
+ * Last file update:  3-Oct-2009 21:46 (eg)
  */
 
 
@@ -1288,14 +1288,6 @@ int STk_boot_from_C(void);
 SCM STk_execute_C_bytecode(SCM consts, STk_instr *instr);
 
 int STk_init_vm();
-
-#ifdef THREADS_LURC
-typedef int (*STk_main_t)(int, char**);
-int STk_thread_main(STk_main_t themain, int argc, char **argv);
-
-SCM *STk_save_vm(void);
-void STk_restore_vm(SCM *sp);
-#endif /* ! THREADS_LURC */
 
 /*****************************************************************************/
 

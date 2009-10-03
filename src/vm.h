@@ -1,7 +1,7 @@
 /*
  * v m . h				-- The STklos Virtual Machine
  * 
- * Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 24-Oct-2006 17:15 (eg)
+ * Last file update:  3-Oct-2009 21:47 (eg)
  */
 
 
@@ -35,16 +35,9 @@
 \*===========================================================================*/
 #include <signal.h>
 #include "stklosconf.h"
-#ifdef THREADS_LURC
-# include <lurc.h>
-#endif
 
 typedef struct {	/* simple wrapper around jmp_buf */
-#ifdef THREADS_LURC
-  lurc_context_t j;
-#else
   jmp_buf j;
-#endif /* THREADS_LURC */
   sigset_t blocked;
 } jbuf;
 

@@ -1,7 +1,7 @@
 /*
  * thread-common.h	-- Thread support for STklos
  * 
- * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,16 +21,14 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update: 25-Oct-2006 10:19 (eg)
+ * Last file update:  3-Oct-2009 21:47 (eg)
  */
 #ifndef _STK_THREAD_H
 #define _STK_THREAD_H
 
 #include "stklos.h"
 
-#ifdef THREADS_LURC
-# include "thread-lurc.h"
-#elif defined(THREADS_PTHREADS)
+#if defined(THREADS_PTHREADS)
 # include "thread-pthreads.h"
 #else
 # include "thread-none.h"

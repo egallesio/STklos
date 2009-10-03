@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  3-Oct-2009 20:46 (eg)
+### Last file update:  3-Oct-2009 21:38 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -75,28 +75,11 @@ fi
 AC_CHECK_LIB(pthread, pthread_create, deflt_threads=pthreads, deflt_threads=none)
 
 AC_ARG_ENABLE(threads,
-  [AS_HELP_STRING([--enable-threads=TYPE],[choose threading package (none,pthread,lurc)])],
+  [AS_HELP_STRING([--enable-threads=TYPE],[choose threading package (none,pthread)])],
   THREADS=$enableval,
   THREADS=$deflt_threads)
 
 AC_LANG(C)
-### This checks for the presence of a given CPP define in a fiven header file
-AC_DEFUN(GC_CHECK_DEFINE, [
- ### $1: header file
- ### $2: CPP variable
- ### $3: then
- ### $4: else
- AC_PREPROC_IFELSE([
- #include <$1>
- #ifndef $2
- # error "$2 undefined"
- #else
-  ok
- #endif
- ],
- [$3], [$4])
-])
-
 
 ### Now look at what threads we want
 case "$THREADS" in
@@ -113,20 +96,6 @@ case "$THREADS" in
    CALLCC_STK='"callcc.stk"'
    AC_DEFINE(THREADS_PTHREADS, [], [PThread support])
    ;;
- lurc)
-   ### Check for lurc
-   AC_CHECK_LIB(lurc, lurc_thread_create, LIBS="-llurc $LIBS", 
-                [AC_MSG_ERROR([Missing LURC library])])
-   AC_CHECK_HEADER([lurc.h], [], [AC_MSG_ERROR([Missing LURC header file])])
-   ### Now check if it is compiled with GC support
-   AC_MSG_CHECKING([for LURC GC support])
-   GC_CHECK_DEFINE([lurc.h], [LURC_ENABLE_GC], 
-                   [AC_MSG_RESULT([ok])],
-                   [AC_MSG_ERROR([Missing GC support in LURC])])
-   ### That shold be good
-   AC_DEFINE(THREADS_LURC, [], [LURC threads support])
-   CALLCC_STK='"dyn-wind-lurc.stk"'
-   ;;
  *)
    AC_MSG_ERROR([Unknown thread system: $THREADS])
    ;;
@@ -136,7 +105,6 @@ esac
 ### Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
 case "$THREADS" in
   none) true ;;
-  lurc) true ;;
   *) case `uname -s` in
         Linux*) STKCFLAGS="-D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
      esac
@@ -148,7 +116,6 @@ esac
 
 ### Automake nightmare
 AM_CONDITIONAL(PTHREADS, test "$THREADS" = pthreads)
-AM_CONDITIONAL(LURC, test "$THREADS" = lurc)
 AM_CONDITIONAL(NO_THREAD, test "$THREADS" = none)
 
 ### check for GMP pre-version 3.0
@@ -396,11 +363,6 @@ else
 fi
 
 
-# LURC adjustment
-LURCDIR=""
-if test "$THREADS" = "lurc" ;then
-   LURCDIR=Lurc.d
-fi
 
 ###
 ### See in what direction the stack grows (code stolen from Sawfish)
@@ -453,14 +415,12 @@ AC_SUBST(FFIINC)
 AC_SUBST(DEF_FFI)
 
 AC_SUBST(THREADS)
-AC_SUBST(LURCDIR)
 AC_SUBST(CALLCC_STK)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile lib/boot-callcc.stk
-	  utils/stklos-config utils/stklos-script
-	  examples/Makefile lib/Match.d/Makefile 
-	  lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/Lurc.d/Makefile
+	  utils/stklos-config utils/stklos-script examples/Makefile 
+	  lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile 
 	  lib/ScmPkg.d/Makefile tests/Makefile  
 	  doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 
 	  doc/stklos-genlex.1 doc/stklos-install.1 doc/stklos-pkg.1 
@@ -486,16 +446,7 @@ echo "        GC library: " $gcmsg
 echo "       FFI library: " $ffimsg
 echo "    Thread support: " $THREADS 
 echo " "
-if test "$THREADS" = "lurc" 
-then 
-     echo "*** WARNING: To use LURC threads, you need to replace (or install) "
-     echo "*** a special GC package (available at http://www.stklos.net/download)."
-     echo "*** You have to: "
-     echo "***    - Remove the current gc directory"
-     echo "***    - untar this package in this directory."
-     echo "***    - re-run configure"
-     echo "*** The GC for LURC probably doesn't work on MacOS 10.5"
-fi
+
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options." 
 echo " "

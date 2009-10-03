@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 27-Sep-2009 19:33 (eg)
+# Last file update:  3-Oct-2009 21:51 (eg)
 
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -20,9 +20,6 @@ DOCDB	        = DOCDB
 THREADS     = @THREADS@
 
 # what thread support do we put in?
-if LURC
-  THREAD_FILES = thread-common.c thread-lurc.c mutex-common.c mutex-lurc.c
-endif
 if PTHREADS
   THREAD_FILES = thread-common.c thread-pthreads.c mutex-common.c mutex-pthreads.c
 endif

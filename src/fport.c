@@ -1,7 +1,7 @@
 /*
  * f p o r t . c				-- File ports
  *
- * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 29-Jun-2007 22:27 (eg)
+ * Last file update:  3-Oct-2009 21:41 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -33,17 +33,6 @@
 #include "stklos.h"
 #include "fport.h"
 #include "vm.h"
-
-#ifdef THREADS_LURC
-# include <lurc.h>
-/* use the lurc IO wrapper */
-# define read(fd,buf,n)  lurc_io_read(fd,buf,n)
-# define write(fd,buf,n) lurc_io_write(fd,buf,n)
-# define close(fd)       lurc_io_close(fd)
-# define release(fd)     lurc_io_release(fd)
-#else
-# define release(fd)
-#endif
 
 int STk_interactive = 0;		  /* We are in interactive mode */
 SCM STk_stdin, STk_stdout, STk_stderr;	  /* The unredirected ports */
@@ -268,8 +257,6 @@ static int Fclose_pipe(void *stream)	/* pipe version (used by "| cmd" files */
 {
   int ret = flush_buffer(stream);
 
-  /* release any associated data with this file descriptor */
-  release(PORT_FD(stream));
   return (ret == EOF) ? EOF : pclose(PORT_FILE(stream));
 }
 
