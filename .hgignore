@@ -86,16 +86,23 @@ ffi/stamp-h1
 
 # Gc directory
 gc/.*\.lo$
+gc/.dirstamp
 gc/.libs/
+gc/atomic_ops.c
+gc/atomic_ops_sysdeps.S
 gc/bdw-gc.pc
 gc/configure.lineno
 gc/cord/.dirstamp
+gc/gctest
+gc/hugetest
+gc/leaktest
+gc/libatomic_ops
 gc/libatomic_ops-1.*/src/config.h
+gc/middletest
+gc/smashtest
+gc/tests/.dirstamp
+gc/threadleaktest
 gc/windows-untested
-gc/atomic_ops.c
-gc/atomic_ops_sysdeps.S
-#gc/libatomic_ops
-gc/.dirstamp
 
 # GMP directory
 gmp/config.h

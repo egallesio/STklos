@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 27-Sep-2009 19:39 (eg)
+# Last file update:  3-Oct-2009 21:02 (eg)
 
 EXTRA_DIST   = 
 # INSTDIRS contains the dirs which need to be installed
@@ -31,7 +31,7 @@ commit-version:
 prep-version:
 	rm -rf /usr/tmp/$(VERSION_TAG) /usr/tmp/$(VERSION_BETA)* /usr/tmp/beta
 	hg clone . /usr/tmp/$(VERSION_TAG)
-	rm -rf /usr/tmp/$(VERSION_TAG)/.hg
+	rm -rf /usr/tmp/$(VERSION_TAG)/.hg*
 	hgclonedates `pwd` /usr/tmp/$(VERSION_TAG)
 
 beta: commit-beta prep-version

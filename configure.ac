@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  1-Oct-2009 23:12 (eg)
+### Last file update:  3-Oct-2009 20:46 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -171,36 +171,6 @@ case $withval in
 esac
 
 
-
-#1.0 ###
-#1.0 ### check for GC
-#1.0 ###
-#1.0 if test "$THREADS" = lurc
-#1.0 then
-#1.0   AC_MSG_WARN([Using the bundled GC for LURC support])
-#1.0   HAVE_GC="no"
-#1.0 else
-#1.0   AC_CHECK_LIB(gc, GC_malloc, HAVE_GC="yes", HAVE_GC="no", $LIBS)
-#1.0 fi
-#1.0 
-#1.0 # Test if the user want to force with our GC
-#1.0 withval=""
-#1.0 AC_ARG_WITH(provided-gc,
-#1.0        [  --with-provided-gc		use our GC version even the system provides one])
-
-#1.0 case $withval in
-#1.0   "yes") HAVE_GC="no";;
-#1.0   "no")  HAVE_GC="yes";;
-#1.0 esac
-#1.0 
-#1.0 # On Mac OS X use the given GC (to compile it without -Ox)
-#1.0 case `uname -s` in
-#1.0   Darwin*) echo "Force '--with-provided-gc' on MacOS";
-#1.0            HAVE_GC="no" ;;
-#1.0   *) true;;
-#1.0 esac
-#1.0 
-
 ###
 ### configure libraries
 ###
@@ -221,26 +191,6 @@ else
   GMPLIB="-lgmp"
   GMPINC=""
 fi
-
-#1.0 if test "$HAVE_GC" = "no"
-#1.0 then
-#1.0   echo "No Boehm-Demers-Weiser GC library. Using the one provided with the package"
-#1.0  (cd gc; CC="$CC" CFLAGS="$CFLAGS" sh ./configure --prefix=$prefix \
-#1.0          --includedir=$prefix/include/stklos \
-#1.0          --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
-#1.0  
-#1.0  GC=gc
-#1.0  GCLIB="../gc/.libs/libgc.a"
-#1.0  GCINC="-I../gc/include"
-#1.0  # Eventually add a distclean target to the GC Makefile
-#1.0else
-#1.0  echo "Using the system Boehm-Demers-Weiser library"
-#1.0  GC=""
-#1.0  GCLIB="-lgc"
-#1.0  GCINC=""
-#1.0  AC_DEFINE(HAVE_GC, [], [Use system GC])
-#1.0fi
-
 
 # ----------------------------------------------------------------------
 # GC support 
@@ -445,12 +395,6 @@ else
   biglib="use the system library"
 fi
 
-#1.0 if test "$HAVE_GC" = "no"
-#1.0 then
-#1.0   gclib="compile provided library"
-#1.0 else 
-#1.0   gclib="use the system library"
-#1.0 fi
 
 # LURC adjustment
 LURCDIR=""
