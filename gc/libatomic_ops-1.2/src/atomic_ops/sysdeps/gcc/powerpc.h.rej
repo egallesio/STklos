@@ -1,0 +1,17 @@
+***************
+*** 72,78 ****
+    /* registers.  I always got "impossible constraint" when I   */
+    /* tried the "y" constraint.                                 */
+    __asm__ __volatile__ (
+-     "lwz %0,%1\n"
+      "cmpw cr7,%0,%0\n"
+      "bne- cr7,1f\n"
+      "1: isync\n"
+--- 72,78 ----
+    /* registers.  I always got "impossible constraint" when I   */
+    /* tried the "y" constraint.                                 */
+    __asm__ __volatile__ (
++     "lwz%U1%X1 %0,%1\n"
+      "cmpw cr7,%0,%0\n"
+      "bne- cr7,1f\n"
+      "1: isync\n"
