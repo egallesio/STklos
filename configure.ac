@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  3-Oct-2009 21:38 (eg)
+### Last file update:  4-Oct-2009 12:00 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -45,6 +45,10 @@ AC_FUNC_STRCOLL
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([atexit dup2 endpwent floor getcwd gethostbyaddr gethostbyname gethostname getpass gettimeofday inet_ntoa isascii memchr memmove memset mkdir modf putenv rmdir select socket sqrt strcasecmp strchr strerror strrchr strstr strtoul])
 
+### ======================================================================
+### Various stuff done by hand
+### ======================================================================
+
 ### Initialize prefix
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
 
@@ -55,6 +59,56 @@ then
   CFLAGS="-O3 -fomit-frame-pointer"
 fi
 
+### Determine the options necessary for dynamic loading (even if disbaled later)
+eval `CC=$CC /bin/sh ./utils/shlib-options`
+
+case $OS_NAME_VERSION in
+  SUNOS*) 
+    CFLAGS="$CFLAGS -DSOLARIS";
+    LIBS="$LIBS -lsocket -lrt -lnsl -lpthread"
+    ;;
+  DARWIN_10)
+     GCINC="GCINC -D_XOPEN_SOURCE"
+     ;;
+  UNKNOWN*)
+    echo ""
+    echo "**** STklos has no support for your system (`uname -s`)"
+    echo "**** Please modify the script \"utils/shlib-options\" to add"
+    echo "**** support for your system (it's easy) and restart installation process."
+    echo "**** Thanks for sending your modifications to <bugs _at_ stklos.net>"
+    exit 1 
+    ;;
+esac
+
+
+### Initilize the extra conf file in src
+SCMDIR=$prefix/share/$PACKAGE/$VERSION
+EXECDIR=$prefix/lib/$PACKAGE/$VERSION
+PREFIX=$prefix
+
+### Determine the kind of the machine which is running this script
+BUILD_OS=$os-$version
+BUILD_ARCH=`uname -m`
+OS_NAME=$OS
+case $OS in 
+   LINUX) 
+      v=`echo $version | sed -e 's/\([[0-9]]*\)\.\([[0-9\]]*\).*/\1_\2/'`
+      OS_NAME_VERSION=LINUX_$v
+      ;;
+   DARWIN)
+      case $version in
+         9*)  OS_NAME_VERSION=DARWIN_9;;
+	 10*) OS_NAME_VERSION=DARWIN_10;;
+	 *)   OS_NAME_VERSION=DARWIN_OLD;;
+      esac
+      ;;
+  *) 
+      v=`echo $version | sed -e 's/[[^0-9]]/_/g'`
+      OS_NAME_VERSION=$OS_$v;
+esac
+
+### Place version number in VERSION file
+### echo "VERSION=${VERSION}">VERSION
 
 ###
 ### Checks for libraries.
@@ -181,7 +235,14 @@ AC_ARG_WITH(provided-gc,
 if test "$HAVE_GC" = "no" -o "$PROV_GC" = "yes"
 then 
      echo "... Configuring libgc"
-     (cd gc; CC=${CC} CFLAGS=${CFLAGS} ./configure --prefix=$prefix \
+
+     case $OS_NAME_VERSION in
+       DARWIN_10) 
+          cflags="${CFLAGS} -D_XOPEN_SOURCE";;
+       *)
+          cflags="${CFLAGS}";;
+     esac
+     (cd gc; CC=${CC} CFLAGS=${cflags} ./configure --prefix=$prefix \
               --includedir=$prefix/include/stklos \
 	      --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
@@ -293,62 +354,6 @@ else
 fi
 DEF_FFI="#define HAVE_FFI 1" ; # We always want FFI. 
 		               # Should be modifiable in the future
-
-### ======================================================================
-### Various stuff done by hand
-### ======================================================================
-
-
-### Determine the options necessary for dynamic loading
-eval `CC=$CC /bin/sh ./utils/shlib-options`
-
-case $OS_NAME_VERSION in
-  SUNOS*) 
-    CFLAGS="$CFLAGS -DSOLARIS";
-    LIBS="$LIBS -lsocket -lrt -lnsl -lpthread"
-    ;;
-  DARWIN_10)
-     GC_INC="GC_INC -D_XOPEN_SOURCE"
-     ;;
-  UNKNOWN*)
-    echo ""
-    echo "**** STklos has no support for your system (`uname -s`)"
-    echo "**** Please modify the script \"utils/shlib-options\" to add"
-    echo "**** support for your system (it's easy) and restart installation process."
-    echo "**** Thanks for sending your modifications to <bugs _at_ stklos.net>"
-    exit 1 
-    ;;
-esac
-
-
-### Initilize the extra conf file in src
-SCMDIR=$prefix/share/$PACKAGE/$VERSION
-EXECDIR=$prefix/lib/$PACKAGE/$VERSION
-PREFIX=$prefix
-
-### Determine the kind of the machine which is running this script
-BUILD_OS=$os-$version
-BUILD_ARCH=`uname -m`
-OS_NAME=$OS
-case $OS in 
-   LINUX) 
-      v=`echo $version | sed -e 's/\([[0-9]]*\)\.\([[0-9\]]*\).*/\1_\2/'`
-      OS_NAME_VERSION=LINUX_$v
-      ;;
-   DARWIN)
-      case $version in
-         9*)  OS_NAME_VERSION=DARWIN_9;;
-	 10*) OS_NAME_VERSION=DARWIN_10;;
-	 *)   OS_NAME_VERSION=DARWIN_OLD;;
-      esac
-      ;;
-  *) 
-      v=`echo $version | sed -e 's/[[^0-9]]/_/g'`
-      OS_NAME_VERSION=$OS_$v;
-esac
-
-### Place version number in VERSION file
-### echo "VERSION=${VERSION}">VERSION
 
 
 ###
