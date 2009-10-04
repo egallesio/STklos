@@ -42,7 +42,7 @@ subdir = doc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/stklos-compile.1.in $(srcdir)/stklos-config.1.in \
 	$(srcdir)/stklos-genlex.1.in $(srcdir)/stklos-install.1.in \
-	$(srcdir)/stklos-pkg.1.in $(srcdir)/stklos.1.in TODO
+	$(srcdir)/stklos-pkg.1.in $(srcdir)/stklos.1.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
