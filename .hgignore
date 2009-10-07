@@ -94,7 +94,7 @@ gc/gctest
 gc/hugetest
 gc/leaktest
 gc/libatomic_ops
-gc/libatomic_ops-1.*/src/config.h
+gc/libatomic_ops-1.*/src/config.h$
 gc/middletest
 gc/smashtest
 gc/tests/.dirstamp

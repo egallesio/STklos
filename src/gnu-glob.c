@@ -9,7 +9,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 16-Jan-2003 18:42 (eg)
- * Last file update: 30-Sep-2009 21:28 (eg)
+ * Last file update:  7-Oct-2009 11:02 (eg)
  */
 
 /* Copyright (C) 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
@@ -42,11 +42,7 @@ Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
-#ifdef DARWIN_10
-#  include <sys/malloc.h>
-#else
-#  include <malloc.h>
-#endif
+/* STklos: #include <malloc.h> */
 #include <fnmatch.h>
 #ifdef STKLOS_CODE 
 #  include "gnu-glob.h"
