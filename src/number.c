@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 10-Aug-2008 23:40 (eg)
+ * Last file update: 20-Oct-2009 23:20 (eg)
  */
 
 
@@ -42,6 +42,7 @@
 
 /* Real precision */
 static int real_precision = REAL_FORMAT_SIZE;
+static int log10_maxint; 
 
 #define FINITE_REALP(n) ((REAL_VAL(n) != minus_inf) && (REAL_VAL(n) != plus_inf))
 
@@ -807,7 +808,7 @@ static SCM int_quotient(SCM x, SCM y)
   }
   /* Here x and y are both bignum */
   mpz_init(q); mpz_init(r);
-  mpz_divmod(q, r, BIGNUM_VAL(x), BIGNUM_VAL(y)); 
+  mpz_tdiv_qr(q, r, BIGNUM_VAL(x), BIGNUM_VAL(y)); 
   return bignum2number(q);
 }
 
@@ -927,25 +928,36 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
 
   if (isint) {
     /* We are sure to have an integer. Read it as a bignum and see if we can 
-     * convert it in smallnum after that 
+     * convert it in smallnum after that. Small numbers (those with few 
+     * digits expressed in base 10) are not read as bignums. 
+     * This optimisation is easily missed (e.g. 000000000000000001 will be 
+     * read as a bignum), but it avoids allocation for current numbers 
+     * represented in an usual form.
      */
     mpz_t n;
      
     if (*str == '+') str+=1; /* mpz_init_set_str doesn't recognize +xyz !!! */
-    if (mpz_init_set_str(n, str, base) < 0) {
-      /* Bad syntax for a bignum */
-      res = STk_false;
-    } else if (BIGNUM_FITS_INTEGER(n)) {
-      /* Can be represented as a short integer */
-      long num = mpz_get_si(n);
+    if (strlen(str) <= log10_maxint && base == 10) {
+      long num = atol(str); 
       
       res = (exact_flag == 'i') ? double2real((double) num): MAKE_INT(num);
-    } else {
-      /* It's a bignum */
-      res = bignum2scheme_bignum(n);
-      if (exact_flag == 'i') res = scheme_bignum2real(res);
     }
-    mpz_clear(n);
+    else {
+      if (mpz_init_set_str(n, str, base) < 0) {
+	/* Bad syntax for a bignum */
+	res = STk_false;
+      } else if (BIGNUM_FITS_INTEGER(n)) {
+	/* Can be represented as a short integer */
+	long num = mpz_get_si(n);
+	
+	res = (exact_flag == 'i') ? double2real((double) num): MAKE_INT(num);
+      } else {
+	/* It's a bignum */
+	res = bignum2scheme_bignum(n);
+	if (exact_flag == 'i') res = scheme_bignum2real(res);
+      }
+      mpz_clear(n);
+    }
   } else {
     /* Number is a float */
     if (base == 10) {
@@ -1330,16 +1342,7 @@ static Inline int is_oddp(SCM n)
 {
   switch (TYPEOF(n)) {
     case tc_integer: return INT_VAL(n) & 1;
-    case tc_bignum:  {
-      		       mpz_t q, r;
-		       long res;
-		       
-		       mpz_init(q), mpz_init(r);
-		       mpz_divmod_ui(q, r, BIGNUM_VAL(n), 2L);
-		       res = mpz_cmp_ui(r, 0L);
-		       mpz_clear(q); mpz_clear(r);
-		       return res;
-    		     }
+    case tc_bignum:  return mpz_odd_p(BIGNUM_VAL(n));
     default:	     error_bad_number(n);
   }
   return FALSE;	/* never reached */
@@ -1842,9 +1845,11 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
     case tc_integer:  return (INT_VAL(x) < 0) ? MAKE_INT(-INT_VAL(x)) : x;
     case tc_bignum:   if (mpz_cmp_ui(BIGNUM_VAL(x), 0L) < 0) {
       			mpz_t tmp;
-			mpz_set(tmp, BIGNUM_VAL(x));
+
+			mpz_init(tmp);
 			mpz_neg(tmp, BIGNUM_VAL(x));
-			return bignum2scheme_bignum(tmp);
+			x = bignum2scheme_bignum(tmp);
+			mpz_clear(tmp);
 		      }
 		      return x;
     case tc_real:     return (REAL_VAL(x) < 0.0) ? double2real(-REAL_VAL(x)) : x;
@@ -1952,8 +1957,10 @@ static void integer_division(SCM x, SCM y, SCM *quotient, SCM* remainder)
     *quotient  = bignum2number(q);
     *remainder = bignum2number(r);
   } else {
-    *quotient  = double2real(mpz_get_d(q));
-    *remainder = double2real(mpz_get_d(r));
+    /*     *quotient  = double2real(mpz_get_d(q)); */
+    /*     *remainder = double2real(mpz_get_d(r)); */
+    *quotient  = double2real(bignum2double(q));
+    *remainder = double2real(bignum2double(r));
   }
   mpz_clear(q); mpz_clear(r);                          /* //FIXME: TESTER */
 }
@@ -2492,15 +2499,17 @@ static SCM my_sqrt_exact(SCM x)
     
     return ((int) d * (int) d == i)? MAKE_INT((int) d) : double2real(d);
   } else { /* This is a bignum */
-    mpz_t root, remainder;
+    mpz_t root, tmp;
     SCM res;
     
-    mpz_init(root); mpz_init(remainder);
-    mpz_sqrtrem(root, remainder, BIGNUM_VAL(x));
-
-    res = (mpz_cmp_si(remainder, 0L)==0) ? bignum2number(root) : 
-      					   STk_sqrt(scheme_bignum2real(x));
-    mpz_clear(root); mpz_clear(remainder);
+    mpz_init(root); 
+    mpz_sqrt(root, BIGNUM_VAL(x));
+    
+    mpz_init(tmp);
+    mpz_mul(tmp, root, root); 
+    res = (mpz_cmp(tmp, BIGNUM_VAL(x))==0) ? bignum2number(root) : 
+      					     STk_sqrt(scheme_bignum2real(x));
+    mpz_clear(root); mpz_clear(tmp);
     return res;
   }   
 }
@@ -2954,146 +2963,16 @@ DEFINE_PRIMITIVE("decode-float", decode_float, subr1, (SCM n))
 
 /*
  *
- * Bit Manipulation procedures 
- *
- */
-
-DEFINE_PRIMITIVE("%bit-or", bit_or, subr2, (SCM n1, SCM n2))
-{
-  mpz_t n;
-  SCM z;
-
-  if (INTP(n1) && INTP(n2)) {
-    return (SCM) ((long) n1 | (long) n2); /* tags are identical => no problem */
-  }
-
-  switch (TYPEOF(n1)) {
-    case tc_bignum:  /* nothing */ break;
-    case tc_integer: n1 = long2scheme_bignum(INT_VAL(n1)); break;
-    default:	     error_bad_number(n1);
-  }
-
-  switch (TYPEOF(n2)) {
-    case tc_bignum:  /* nothing */ break;
-    case tc_integer: n2 = long2scheme_bignum(INT_VAL(n2)); break;
-    default:	     error_bad_number(n2);
-  }
-
-  mpz_init(n);
-  mpz_ior(n, BIGNUM_VAL(n1), BIGNUM_VAL(n2));
-  z = bignum2number(n);
-  mpz_clear(n);
-
-  return z;
-}
-
-
-
-DEFINE_PRIMITIVE("%bit-and", bit_and, subr2, (SCM n1, SCM n2))
-{
-  mpz_t n;
-  SCM z;
-
-  if (INTP(n1) && INTP(n2)) {
-    return (SCM) ((long) n1 & (long) n2); /* tags are identical => no problem */
-  }
-
-  switch (TYPEOF(n1)) {
-    case tc_bignum:  /* nothing */ break;
-    case tc_integer: n1 = long2scheme_bignum(INT_VAL(n1)); break;
-    default:	     error_bad_number(n1);
-  }
-
-  switch (TYPEOF(n2)) {
-    case tc_bignum:  /* nothing */ break;
-    case tc_integer: n2 = long2scheme_bignum(INT_VAL(n2)); break;
-    default:	     error_bad_number(n2);
-  }
-  mpz_init(n);
-  mpz_and(n, BIGNUM_VAL(n1), BIGNUM_VAL(n2));
-  z = bignum2number(n);
-  mpz_clear(n);
-
-  return z;
-}
-
-
-DEFINE_PRIMITIVE("%bit-xor", bit_xor, subr2, (SCM n1, SCM n2))
-{
-  mpz_t tmp1, tmp2, tmp3;
-  SCM z;
-
-  if (INTP(n1) && INTP(n2)) { 
-    return MAKE_INT(INT_VAL(n1) ^ INT_VAL(n2));
-  }
-
-  switch (TYPEOF(n1)) {
-    case tc_bignum:  /* nothing */ break;
-    case tc_integer: n1 = long2scheme_bignum(INT_VAL(n1)); break;
-    default:	     error_bad_number(n1);
-  }
-
-  switch (TYPEOF(n2)) {
-    case tc_bignum:  /* nothing */ break;
-    case tc_integer: n2 = long2scheme_bignum(INT_VAL(n2)); break;
-    default:	     error_bad_number(n2);
-  }
-
-  /* mpz_xor exists only for version 3.x of GMP => do it by hand to allow 
-   * compilation with old versions of GMP
-   */
-  mpz_init(tmp1); mpz_init(tmp2); mpz_init(tmp3);
-  mpz_and(tmp1, BIGNUM_VAL(n1), BIGNUM_VAL(n2));
-  mpz_com(tmp2, tmp1);
-  mpz_ior(tmp1, BIGNUM_VAL(n1), BIGNUM_VAL(n2));
-  mpz_and(tmp3, tmp1, tmp2);
-  z = bignum2number(tmp3);
-  mpz_clear(tmp1); mpz_clear(tmp2); mpz_clear(tmp3);
-
-  return z;
-}
-
-
-DEFINE_PRIMITIVE("bit-not", bit_not, subr1, (SCM n))
-{
-  mpz_t z;
-
-  switch (TYPEOF(n)) {
-    case tc_integer: return MAKE_INT(~(INT_VAL(n)));
-    case tc_bignum:  mpz_init(z);  mpz_com(z, BIGNUM_VAL(n)); 
-                     return  bignum2number(z);
-    default:	     error_bad_number(n);
-  }
-
-  return STk_void; /* never reached */
-}
-
-
-DEFINE_PRIMITIVE("bit-rshift", bit_rshift, subr2, (SCM n, SCM m))
-{
-  if (INTP(n) && INTP(m))
-    return (MAKE_INT(INT_VAL(n) >> INT_VAL(m)));
-  STk_error("bad numbers ~S ~S", n, m);
-  return STk_void;
-}
-
-DEFINE_PRIMITIVE("bit-lshift", bit_lshift, subr2, (SCM n, SCM m))
-{
-  if (INTP(n) && INTP(m))
-    return (long2integer(INT_VAL(n) << INT_VAL(m)));
-  STk_error("bad numbers ~S ~S", n, m);
-  return STk_void;
-}
-
-
-/*
- *
  * Allocation functions for Bignums (i.e. use GC)
  *
  */
 static void * allocate_function(size_t sz)
 {
-  return STk_must_malloc(sz);
+  void *ptr = STk_must_malloc_atomic(sz);
+
+  if (ptr) 
+    memset(ptr, 0, sz);
+  return ptr;
 }
 
 static void * reallocate_function(void *ptr, size_t old, size_t new)
@@ -3131,6 +3010,9 @@ int STk_init_number(void)
   minus_inf = -plus_inf;
   STk_NaN   = plus_inf + minus_inf;
 #endif
+
+  /* Compute the log10 of INT_MAX_VAL to avoid to build a bignum for small int */
+  log10_maxint = (int) log10(INT_MAX_VAL);
 
   /* Register bignum allocation functions */
   mp_set_memory_functions(allocate_function, 
@@ -3218,12 +3100,11 @@ int STk_init_number(void)
 
   ADD_PRIMITIVE(decode_float);
 
-  ADD_PRIMITIVE(bit_or);
-  ADD_PRIMITIVE(bit_and);
-  ADD_PRIMITIVE(bit_xor);
-  ADD_PRIMITIVE(bit_not);
-  ADD_PRIMITIVE(bit_rshift);
-  ADD_PRIMITIVE(bit_lshift);
+//!   ADD_PRIMITIVE(bit_or);
+//!   ADD_PRIMITIVE(bit_and);
+//!   ADD_PRIMITIVE(bit_xor);
+//!   ADD_PRIMITIVE(bit_rshift);
+//!   ADD_PRIMITIVE(bit_lshift);
  
   /* Add parameter for float numbers precision */
   STk_make_C_parameter("real-precision",

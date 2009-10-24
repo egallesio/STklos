@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  7-Oct-2009 10:52 (eg)
+### Last file update: 18-Oct-2009 23:21 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -199,7 +199,8 @@ esac
 if test "$HAVE_GMP" = "no"
 then 
   echo "No GMP library. Using the one provided with the package"
-  cmd="CC=\"$CC\" CFLAGS=\"$CFLAGS\" ./configure --prefix=$prefix"
+  cmd="CC=\"$CC\" CFLAGS=\"$CFLAGS -I../src -DFOR_STKLOS=1\" ./configure \
+            --prefix=$prefix"
   echo "Configuring GMP"	
   echo $cmd		
   (cd gmp; eval $cmd)

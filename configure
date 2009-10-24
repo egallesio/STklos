@@ -6482,7 +6482,8 @@ esac
 if test "$HAVE_GMP" = "no"
 then
   echo "No GMP library. Using the one provided with the package"
-  cmd="CC=\"$CC\" CFLAGS=\"$CFLAGS\" ./configure --prefix=$prefix"
+  cmd="CC=\"$CC\" CFLAGS=\"$CFLAGS -I../src -DFOR_STKLOS=1\" ./configure \
+            --prefix=$prefix"
   echo "Configuring GMP"
   echo $cmd
   (cd gmp; eval $cmd)

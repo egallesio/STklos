@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-60.stk	-- SRFI-60: Integers as Bits
 ;;;; 
-;;;; Copyright © 2005-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  9-Mar-2005 19:43 (eg)
-;;;; Last file update: 17-Nov-2006 10:36 (eg)
+;;;; Last file update: 24-Oct-2009 19:49 (eg)
 ;;;;
 
 ;;;; This implementation is an adaptation of the code given in the reference
@@ -50,36 +50,15 @@
 
 
 ;; ----------------------------------------------------------------------
-;;	logand ...
+;;	logand, logior, logxor, lognot ...
 ;; ----------------------------------------------------------------------
-(define (logand  . l)
-  (if (null? l)
-      -1
-      (apply bit-and l)))
-
-;; ----------------------------------------------------------------------
-;;	logior ...
-;; ----------------------------------------------------------------------
-(define (logior  . l)
-  (if (null? l)
-      0
-      (apply bit-or l)))
-
-;; ----------------------------------------------------------------------
-;;	logxor ...
-;; ----------------------------------------------------------------------
-(define (logxor  . l)
-  (if (null? l)
-      0
-      (apply bit-xor l)))
-
-;; ----------------------------------------------------------------------
-;;	lognot ...
-;; ----------------------------------------------------------------------
+(define logand bit-and)
+(define logior  bit-or)
+(define logxor bit-xor)
 (define lognot bit-not)
 
 ;; ----------------------------------------------------------------------
-;;	lognot ...
+;;	bitwise-if ...
 ;; ----------------------------------------------------------------------
 (define (bitwise-if mask n0 n1)
   (bit-or (bit-and mask n0)
