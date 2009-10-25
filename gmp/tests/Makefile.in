@@ -1,0 +1,40 @@
+#           Author: Erick Gallesio [eg@unice.fr]
+#    Creation date: 20-Oct-2009 23:24 (eg)
+# Last file update: 25-Oct-2009 09:08 (eg)
+
+all: pi fact
+
+test: check
+
+check: pi-check fact-check
+
+pi-check: pi
+	./pi 2000 > pi.try 
+	@if cmp pi.try pi.ok ;then \
+	  echo "pi test is OK"; \
+	else \
+	  echo "error on pi test" ; exit 1; \
+	fi
+
+fact-check: fact
+	./fact 2000 > fact.try 
+	@if cmp fact.try fact.ok ;then \
+	  echo "fact test is OK"; \
+	else \
+	  echo "error on fact test" ; exit 1; \
+	fi
+
+
+pi: pi.c
+	$(CC) -I.. $(CFLAGS) -o pi pi.c ../mpi.c 
+
+fact: fact.c
+	$(CC) -I.. $(CFLAGS) -o fact fact.c ../mpi.c 
+
+clean:
+	rm -f pi fact *~ pi.try fact.try
+
+distclean: clean
+	rm -f Makefile
+
+install:
