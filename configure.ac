@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 18-Oct-2009 23:21 (eg)
+### Last file update: 25-Oct-2009 10:13 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -348,7 +348,7 @@ else
        FFIINC=$($PKGCONFIG libffi --cflags)
        FFILIB=$($PKGCONFIG libffi --libs)
      else
-       FFIINC=""
+       FFIINC="-I/usr/include/ffi"
        FFILIB="-lffi"
      fi
      ffimsg="use the system library"

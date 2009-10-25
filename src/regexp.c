@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 24-Nov-2000 10:35 (eg)
- * Last file update: 27-Sep-2009 19:07 (eg)
+ * Last file update: 25-Oct-2009 22:01 (eg)
  */
 
 #include "stklos.h"
@@ -42,8 +42,23 @@
 #  define regerror PCRE_regerror
 #  define regfree  PCRE_regfree
 #endif
-#include <pcreposix.h>
 
+/* ---------------------------------------------------------------------- */
+
+/* Here again Mac Os problems. 
+ * Here, we used to have a #include <pcreposix.h>
+ * However, on a fresh 10.6 install, there is a pcre lib which is
+ * installed, but the "pcreposix.h" file isn't.
+ * 
+ * So what we do here is potentially FALSE. However, it is unlikely
+ * that the code include in STklos is not compatible with the one 
+ * used to compile the installed library (this file seems to have 
+ * been always "semantically" compatible). The only point wehr we 
+ * can have difference shoul be the definition of regmatch_t type
+ */
+#include "../pcre/pcreposix.h"
+
+/* ---------------------------------------------------------------------- */
 
 struct regexp_obj {
   stk_header header;

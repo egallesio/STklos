@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  3-Oct-2009 21:45 (eg)
+ * Last file update: 25-Oct-2009 09:29 (eg)
  */
 
 // INLINER values
@@ -2101,7 +2101,8 @@ DEFINE_PRIMITIVE("%dump-code", dump_code, subr2, (SCM f, SCM v))
 
   /* Print the content of the vector as bytes */
   for (i = 0; i < size; i++) {
-    if (!INTP(*tmp)) STk_error("bad value in code vector ~S", v);
+    if (!INTP(*tmp)) 
+      STk_error("bad value (~S) at index %d in code vector ~S", *tmp, i, v);
    
     instr = (STk_instr) INT_VAL(*tmp++);
     STk_putc(FIRST_BYTE(instr), f);

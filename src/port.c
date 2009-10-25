@@ -1,7 +1,7 @@
 /*
  *  p o r t . c			-- ports implementation
  *
- * Copyright © 1993-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +20,13 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 27-Aug-2008 13:09 (eg)
+ * Last file update: 25-Oct-2009 21:41 (eg)
  *
  */
 
 #include <ctype.h>
 #include "stklos.h"
 #include "vm.h"
-#include "../pcre/pcreposix.h"
-
 
 
 #define INITIAL_LINE_SIZE 256		/* Initial size for readline */
