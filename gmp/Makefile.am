@@ -3,13 +3,17 @@ SUBDIRS=tests
 noinst_LIBRARIES = libgmp.a
 libgmp_a_SOURCES =  mpi.c gmp.c
 
+all-am: 
+	mkdir -p .libs
+	cp -a libgmp.a .libs
+
 test: all
 	(cd tests; $(MAKE) test)
 
 check: test
 
 clean: 
-	/bin/rm -f *.o *~ libgmp.a 
+	/bin/rm -f *.o *~ libgmp.a .libs/libgmp.a
 	(cd tests; make clean)
 
 distclean: clean

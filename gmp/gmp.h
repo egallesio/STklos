@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 12-Oct-2009 19:29 (eg)
- * Last file update: 21-Oct-2009 08:07 (eg)
+ * Last file update: 25-Oct-2009 23:04 (eg)
  */
 
 
@@ -85,7 +85,7 @@ char *mpz_get_str(char *str, int base, mpz_t bn);
  * ---------------------------------------------------------------------- */
 #ifndef GMP_USE_MACROS
 int mpz_cmp_si(mpz_t bn, long v);
-int mpz_cmp(mpz_t a, mpz_b b);
+int mpz_cmp(mpz_t a, mpz_t b);
 #else 
 #  define mpz_cmp_si(bn, v)	mp_cmp_int(bn, v)
 #  define mpz_cmp(a, b)	mp_cmp(a, b)
@@ -117,8 +117,8 @@ void mpz_ui_pow_ui(mpz_t bn, unsigned long int base, unsigned long int exp);
  * Misc 
  * ---------------------------------------------------------------------- */
 #ifndef GMP_USE_MACROS
-size_t mpz_sizeinbase(mpz_t bn, int base)
-int mpz_odd_p(mpz_t bn)
+size_t mpz_sizeinbase(mpz_t bn, int base);
+int mpz_odd_p(mpz_t bn);
 #else
 #  define  mpz_sizeinbase(bn, base)  mp_radix_size(bn, base)
 #  define  mpz_odd_p(bn)	    mp_isodd(bn)

@@ -6488,7 +6488,7 @@ then
   echo $cmd
   (cd gmp; eval $cmd)
   GMP=gmp
-  GMPLIB="../gmp/libgmp.a"
+  GMPLIB="../gmp/.libs/libgmp.a"
   GMPINC="-I../gmp"
 else
   echo "Using the system GMP library"

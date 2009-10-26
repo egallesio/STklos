@@ -1,10 +1,11 @@
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Oct-2009 23:24 (eg)
-# Last file update: 25-Oct-2009 09:08 (eg)
+# Last file update: 25-Oct-2009 22:23 (eg)
 
-all: pi fact
+all: 
+	@echo "Nothing to do"
 
-test: check
+test: check 
 
 check: pi-check fact-check
 

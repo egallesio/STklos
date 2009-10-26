@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 25-Oct-2009 10:13 (eg)
+### Last file update: 26-Oct-2009 10:15 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -205,7 +205,7 @@ then
   echo $cmd		
   (cd gmp; eval $cmd)
   GMP=gmp
-  GMPLIB="../gmp/libgmp.a"
+  GMPLIB="../gmp/.libs/libgmp.a"
   GMPINC="-I../gmp"
 else
   echo "Using the system GMP library"

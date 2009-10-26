@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 12-Oct-2009 19:27 (eg)
- * Last file update: 21-Oct-2009 22:36 (eg)
+ * Last file update: 25-Oct-2009 23:06 (eg)
  */
 
 #include <stdio.h>
@@ -150,14 +150,14 @@ int mpz_cmp_si(mpz_t bn, long v)
   return mp_cmp_int(bn, v);
 }
 
-int mpz_cmp(mpz_t a, mpz_b b)
+int mpz_cmp(mpz_t a, mpz_t b)
 {
   return mp_cmp(a, b);
 }
 
 int mpz_sgn(mpz_t a)
 {
-  return mpz_cmp_z(a);
+  return mp_cmp_z(a);
 }
 #endif
 
