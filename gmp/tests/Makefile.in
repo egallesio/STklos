@@ -1,13 +1,15 @@
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Oct-2009 23:24 (eg)
-# Last file update: 25-Oct-2009 22:23 (eg)
+# Last file update: 26-Oct-2009 17:02 (eg)
 
-all: 
-	@echo "Nothing to do"
+CC=@CC@
+CFLAGS=@CFLAGS@
+
+all: pi fact fact-gmp
 
 test: check 
 
-check: pi-check fact-check
+check: pi-check fact-check fact-gmp-check
 
 pi-check: pi
 	./pi 2000 > pi.try 
@@ -25,6 +27,14 @@ fact-check: fact
 	  echo "error on fact test" ; exit 1; \
 	fi
 
+fact-gmp--check: fact-gmp
+	./fact-gmp 2000 > fact-gmp.try 
+	@if cmp fact-gmp.try fact.ok ;then \
+	  echo "fact (GMP) test is OK"; \
+	else \
+	  echo "error on fact (GMP) test" ; exit 1; \
+	fi
+
 
 pi: pi.c
 	$(CC) -I.. $(CFLAGS) -o pi pi.c ../mpi.c 
@@ -32,8 +42,11 @@ pi: pi.c
 fact: fact.c
 	$(CC) -I.. $(CFLAGS) -o fact fact.c ../mpi.c 
 
+fact-gmp: fact-gmp.c
+	$(CC) -I.. $(CFLAGS) -o fact-gmp fact-gmp.c ../mpi.c 
+
 clean:
-	rm -f pi fact *~ pi.try fact.try
+	rm -f pi fact fact-gmp *~ pi.try fact.try fact-gmp.try
 
 distclean: clean
 	rm -f Makefile

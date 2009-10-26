@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 12-Oct-2009 19:29 (eg)
- * Last file update: 25-Oct-2009 23:04 (eg)
+ * Last file update: 26-Oct-2009 17:57 (eg)
  */
 
 
@@ -36,8 +36,8 @@
 
 typedef mp_int mpz_t[1];
 
-void *(*_gmp_alloc)(size_t);
-void (*_gmp_free)(void*, size_t);
+extern void *(*_gmp_alloc)(size_t);
+extern void (*_gmp_free)(void*, size_t);
 
 /* ----------------------------------------------------------------------
  * Memory functions
@@ -86,9 +86,11 @@ char *mpz_get_str(char *str, int base, mpz_t bn);
 #ifndef GMP_USE_MACROS
 int mpz_cmp_si(mpz_t bn, long v);
 int mpz_cmp(mpz_t a, mpz_t b);
+int mpz_sgn(mpz_t a)
 #else 
 #  define mpz_cmp_si(bn, v)	mp_cmp_int(bn, v)
 #  define mpz_cmp(a, b)	mp_cmp(a, b)
+#  define mpz_sgn(a)		mp_cmp_z(a)
 #endif
 int mpz_cmp_ui(mpz_t bn, unsigned long int ui);
 
