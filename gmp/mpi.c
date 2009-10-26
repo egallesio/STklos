@@ -14,6 +14,26 @@
 #include <string.h>
 #include <ctype.h>
 
+/* ---------------------------------------------------------------------- */
+#ifdef FOR_STKLOS
+/* Declaration of user allocator. By default standard malloc/free */
+
+static void *mpi_alloc(size_t sz)
+{
+  return calloc(sz, 1);
+}
+
+static void mpi_free(void *ptr, size_t ignored)
+{
+  free(ptr);
+}
+
+void *(*_gmp_alloc)(size_t) = mpi_alloc;
+void (*_gmp_free)(void*, size_t) = mpi_free;
+#endif
+/* ---------------------------------------------------------------------- */
+
+
 #if MP_DEBUG
 #include <stdio.h>
 
@@ -2589,7 +2609,7 @@ mp_err mp_toradix(mp_int *mp, unsigned char *str, int radix)
     str[1] = '\0';
   } else {
     mp_err   res;
-    mp_int   tmp;
+    mp_int   tmp = {0}; /* Added by eg to prevent a false GCC warning */
     mp_sign  sgn;
     mp_digit rem, rdx = (mp_digit)radix;
     char     ch;

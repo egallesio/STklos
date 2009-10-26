@@ -21,19 +21,13 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 12-Oct-2009 19:27 (eg)
- * Last file update: 26-Oct-2009 17:59 (eg)
+ * Last file update: 26-Oct-2009 18:40 (eg)
  */
 
 #include <stdio.h>
 #include <ctype.h>
 
 #include "gmp.h"
-
-/* Declaration of user allocator. By default standard malloc/free */
-void *(*_gmp_alloc)(size_t) = malloc;
-void (*_gmp_free)(void*, size_t) = free;
-
-
 
 #if 0
 static void trace_bignum(mpz_t bn)

@@ -1,6 +1,6 @@
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Oct-2009 23:24 (eg)
-# Last file update: 26-Oct-2009 17:02 (eg)
+# Last file update: 26-Oct-2009 18:49 (eg)
 
 CC=@CC@
 CFLAGS=@CFLAGS@
@@ -27,7 +27,7 @@ fact-check: fact
 	  echo "error on fact test" ; exit 1; \
 	fi
 
-fact-gmp--check: fact-gmp
+fact-gmp-check: fact-gmp
 	./fact-gmp 2000 > fact-gmp.try 
 	@if cmp fact-gmp.try fact.ok ;then \
 	  echo "fact (GMP) test is OK"; \
@@ -43,7 +43,7 @@ fact: fact.c
 	$(CC) -I.. $(CFLAGS) -o fact fact.c ../mpi.c 
 
 fact-gmp: fact-gmp.c
-	$(CC) -I.. $(CFLAGS) -o fact-gmp fact-gmp.c ../mpi.c 
+	$(CC) -I.. $(CFLAGS) -o fact-gmp fact-gmp.c ../mpi.c  ../gmp.c
 
 clean:
 	rm -f pi fact fact-gmp *~ pi.try fact.try fact-gmp.try

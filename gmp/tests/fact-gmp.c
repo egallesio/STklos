@@ -13,7 +13,7 @@
 
 #include "gmp.h"
 
-static void trace_bignum(char* msg, mpz_t bn)
+void trace_bignum(char* msg, mpz_t bn)
 {
   char *buffer = alloca(mp_radix_size(bn, 10) + 10);
   
@@ -45,11 +45,9 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  trace_bignum("a = ", a); 
   {
     char  *buf = mpz_get_str(NULL, 10, a);
     
-    printf("======%p\n", buf);
     puts(buf);
     free(buf);
   }
@@ -61,7 +59,6 @@ int main(int argc, char *argv[])
 int mp_fact(mpz_t a, mpz_t b)
 {
   mpz_t   ix, s, one;
-  int    res = 0;
 
   if(mpz_sgn(a) < 0)
     return -1;
@@ -77,8 +74,7 @@ int mp_fact(mpz_t a, mpz_t b)
   for(/*  */; mpz_cmp(ix, a) <= 0; mpz_add(ix, one, ix)) {
     mp_mul(s, ix, s);
     //trace_bignum("a = ", a); trace_bignum("ix = ", ix); printf("\n");
-    trace_bignum("fact(", ix); trace_bignum(") = ", s); printf("\n");
-    
+    //trace_bignum("fact(", ix); trace_bignum(") = ", s); printf("\n");
   }
   
   mpz_init_set(b, s);
