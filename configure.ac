@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 26-Oct-2009 10:15 (eg)
+### Last file update: 28-Oct-2009 15:10 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -107,19 +107,20 @@ case $OS in
       OS_NAME_VERSION=$OS_$v;
 esac
 
-### Place version number in VERSION file
-### echo "VERSION=${VERSION}">VERSION
 
 ###
 ### Checks for libraries.
 ###
+SYST_LIBS=""
+COMP_LIBS=""
+
 
 ### Check for dynamic loading
 AC_CHECK_FUNC(dlopen, HAVE_DLOPEN="yes", AC_CHECK_LIB(dl, dlopen, LIBS="-ldl $LIBS"&&HAVE_DLOPEN="yes"))
 
 if test "X$HAVE_DLOPEN" = "Xyes"
 then
-  HAVE_DLOPEN="#define HAVE_DLOPEN 1"
+  AC_DEFINE(HAVE_DLOPEN, 1, [System provides flopen])
 fi
 
 
@@ -172,48 +173,6 @@ esac
 AM_CONDITIONAL(PTHREADS, test "$THREADS" = pthreads)
 AM_CONDITIONAL(NO_THREAD, test "$THREADS" = none)
 
-### check for GMP pre-version 3.0
-AC_CHECK_LIB(gmp, mpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
-
-### check for GMP version post 3.0
-if test "$HAVE_GMP" = "no" ;then
-  AC_CHECK_LIB(gmp, __gmpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
-fi
-
-
-# Eventually force our gmp usage
-withval=""
-AC_ARG_WITH(gmp-light,
-	[  --with-gmp-light		use our GMP version even the system provides one])
-
-case $withval in
-  "yes") HAVE_GMP="no";;
-  "no")  HAVE_GMP="yes";;
-esac
-
-
-###
-### configure libraries
-###
-
-if test "$HAVE_GMP" = "no"
-then 
-  echo "No GMP library. Using the one provided with the package"
-  cmd="CC=\"$CC\" CFLAGS=\"$CFLAGS -I../src -DFOR_STKLOS=1\" ./configure \
-            --prefix=$prefix"
-  echo "Configuring GMP"	
-  echo $cmd		
-  (cd gmp; eval $cmd)
-  GMP=gmp
-  GMPLIB="../gmp/.libs/libgmp.a"
-  GMPINC="-I../gmp"
-else
-  echo "Using the system GMP library"
-  GMP=""
-  GMPLIB="-lgmp"
-  GMPINC=""
-fi
-
 # ----------------------------------------------------------------------
 # GC support 
 # ----------------------------------------------------------------------
@@ -230,7 +189,7 @@ fi
 
 # Test if the user want to force with our GC lib
 AC_ARG_WITH(provided-gc,
-       [  --with-provided-gc	use the provided Boehm GC library],
+       [  --with-provided-gc	  use the provided Boehm GC library],
        PROV_GC="yes", PROV_GC="no")
 
 if test "$HAVE_GC" = "no" -o "$PROV_GC" = "yes"
@@ -249,7 +208,7 @@ then
      GC=gc
      GCINC="-I../gc/include"
      GCLIB="../gc/.libs/libgc.a"
-     gcmsg="use provided library"
+     COMP_LIBS="libgc $COMP_LIBS"
 else
      echo "... Using system libgc library"
      GC=""
@@ -261,7 +220,54 @@ else
         GCLIB="-lgc"
      fi
      AC_DEFINE(HAVE_GC, 1, [Use system GC])
-     gcmsg="use the system library"
+     SYST_LIBS="libgc $SYST_LIBS"
+fi
+
+
+# ----------------------------------------------------------------------
+# GMP support 
+# ----------------------------------------------------------------------
+echo "*****"
+echo "***** GMP support"
+echo "*****"
+
+# Try to determine if libgmp is installed
+# No pkg-config for gmp yet
+
+# check for GMP pre-version 3.0
+AC_CHECK_LIB(gmp, mpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
+
+# check for GMP version post 3.0
+if test "$HAVE_GMP" = "no" ;then
+  AC_CHECK_LIB(gmp, __gmpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
+fi
+
+# Test if the user want to force with our GMP lib 
+# (2 names available for that  --with-provided-bignum or (legacy) --with-gmp-light
+AC_ARG_WITH(provided-bignum,
+       [  --with-provided-bignum  use the provided Bignum (GMPlite) library],
+       PROV_GMP="yes", PROV_GMP="no")
+
+AC_ARG_WITH(gmp-light,
+       [  --with-gmp-light	  a synonym for --with-provided-bignum],
+       PROV_GMP="yes", PROV_GMP="no")
+
+if test "$HAVE_GMP" = "no" -o "$PROV_GMP" = "yes"
+then 
+     echo "... Configuring libgmp"
+     (cd gmp; CC=${CC} CFLAGS="${cflags} -I../src -DFOR_STKLOS=1" ./configure \
+     	      --prefix=$prefix) || { echo "Cannot configure the GMP"; exit; }
+     GMP=gmp
+     GMPINC="-I../gmp"
+     GMPLIB="../gmp/.libs/libgmp.a"
+     COMP_LIBS="libgmp $COMP_LIBS"
+else
+     echo "... Using system libgmp library"
+     GMP=""
+     GMPINC=""
+     GMPLIB="-lgmp"
+     AC_DEFINE(HAVE_GMP, 1, [Use system GMP])
+     SYST_LIBS="libgmp $SYST_LIBS"
 fi
 
 
@@ -281,7 +287,7 @@ fi
 
 # Test if the user want to force with our PCRE lib
 AC_ARG_WITH(provided-regexp,
-       [  --with-provided-regexp	use the provided Regexp (PCRE) library],
+       [  --with-provided-regexp use the provided Regexp (PCRE) library],
        PROV_PCRE="yes", PROV_PCRE="no")
 
 if test "$HAVE_PCRE" = "no" -o "$PROV_PCRE" = "yes"
@@ -296,7 +302,7 @@ then
      PCREINC="-I../pcre"
      PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
      DEF_PCRE=""
-     pcremsg="use provided library"
+     COMP_LIBS="libpcre $COMP_LIBS"
 else
      echo "... Using system libpcre library"
      PCRE=""
@@ -306,9 +312,9 @@ else
      else 
         PCREINC=""
         PCRELIB="-lpcre -lpcreposix"
-     fi        
-     DEF_PCRE="#define HAVE_PCRE 1"
-     pcremsg="use the system library"
+     fi 
+     AC_DEFINE(HAVE_PCRE, 1 , [We use our version of pcre])
+     SYST_LIBS="libpcre $SYST_LIBS"
 fi
 
 
@@ -328,7 +334,7 @@ fi
 
 # Test if the user want to force with our FFI lib
 AC_ARG_WITH(provided-ffi,
-       [  --with-provided-ffi	use the provided FFI library],
+       [  --with-provided-ffi    use the provided FFI library],
        PROV_FFI="yes", PROV_FFI="no")
 
 if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
@@ -340,7 +346,7 @@ then
      FFI="ffi"
      FFIINC="-I../ffi/include"
      FFILIB="../ffi/.libs/libffi.a"
-     ffimsg="use provided library"
+     COMP_LIBS="libffi $COMP_LIBS"
 else 
      echo "... Using system libffi library"
      FFI=""
@@ -351,24 +357,10 @@ else
        FFIINC="-I/usr/include/ffi"
        FFILIB="-lffi"
      fi
-     ffimsg="use the system library"
+     SYST_LIBS="libffi $SYST_LIBS"
 fi
-DEF_FFI="#define HAVE_FFI 1" ; # We always want FFI. 
-		               # Should be modifiable in the future
-
-
-###
-### display some informations for the user
-### 
-
-if test "$HAVE_GMP" = "no"
-then
-  biglib="compile provided library (better perf. can be achieved with a recent GMP)"
-else 
-  biglib="use the system library"
-fi
-
-
+# We always want FFI. Should be modifiable in the future
+AC_DEFINE(HAVE_FFI, 1, [System provides FFI]) 
 
 ###
 ### See in what direction the stack grows (code stolen from Sawfish)
@@ -413,12 +405,10 @@ AC_SUBST(GCINC)
 AC_SUBST(PCRE)
 AC_SUBST(PCRELIB)
 AC_SUBST(PCREINC)
-AC_SUBST(DEF_PCRE)
 # FFI
 AC_SUBST(FFI)
 AC_SUBST(FFILIB)
 AC_SUBST(FFIINC)
-AC_SUBST(DEF_FFI)
 
 AC_SUBST(THREADS)
 AC_SUBST(CALLCC_STK)
@@ -440,17 +430,15 @@ echo " "
 echo " "
 echo "SUMMARY"
 echo "*******"
-echo "            System: " $BUILD_OS
-echo "           OS nick: " $OS_NAME_VERSION
-echo "           OS type: " $OS_FLAVOUR
-echo "   Install prefix : " $prefix
-echo "        C compiler: " $CC
-echo " Compilation flags: " $CFLAGS
-echo "    Bignum library: " $biglib
-echo "    Regexp library: " $pcremsg
-echo "        GC library: " $gcmsg
-echo "       FFI library: " $ffimsg
-echo "    Thread support: " $THREADS 
+echo "               System: " $BUILD_OS
+echo "              OS nick: " $OS_NAME_VERSION
+echo "              OS type: " $OS_FLAVOUR
+echo "      Install prefix : " $prefix
+echo "           C compiler: " $CC
+echo "    Compilation flags: " $CFLAGS
+echo "       Thread support: " $THREADS 
+echo "System libraries used: " $SYST_LIBS
+echo "   Compiled libraries: " $COMP_LIBS
 echo " "
 
 echo "If this is correct, you can just type 'make' now at your shell prompt."

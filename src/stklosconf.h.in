@@ -24,6 +24,9 @@
 /* Define to 1 if you have the `atexit' function. */
 #undef HAVE_ATEXIT
 
+/* System provides flopen */
+#undef HAVE_DLOPEN
+
 /* Define to 1 if you have the `dup2' function. */
 #undef HAVE_DUP2
 
@@ -32,6 +35,9 @@
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
+
+/* System provides FFI */
+#undef HAVE_FFI
 
 /* Define to 1 if you have the `floor' function. */
 #undef HAVE_FLOOR
@@ -62,6 +68,9 @@
 
 /* Define to 1 if you have the `glob' function. */
 #undef HAVE_GLOB
+
+/* Use system GMP */
+#undef HAVE_GMP
 
 /* Define to 1 if you have the `inet_ntoa' function. */
 #undef HAVE_INET_NTOA
@@ -111,6 +120,9 @@
 
 /* Define to 1 if you have the <nlist.h> header file. */
 #undef HAVE_NLIST_H
+
+/* We use our version of pcre */
+#undef HAVE_PCRE
 
 /* Define to 1 if you have the `putenv' function. */
 #undef HAVE_PUTENV

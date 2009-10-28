@@ -43,6 +43,20 @@
 #define  MP_LAST_CODE    MP_UNDEF
 
 /* ---------------------------------------------------------------------- */
+/* beginning of mpi-types.h file inclusion */
+/*
+  MPI doesn't work correctly with native 64 bits, as advertised. As a
+  consequence, the wrapper functions in gmp.c are 32 bits and use a
+  different strategy in presence of values which cannot be represented
+  with 32 bits (conversion to/from string). This is slow, but it works.
+
+  The following definitions come from the original mpi-types.h file
+  A mp_digit on 2 bytes and a mp_word on 4 bytes are convenient for 32 bits
+  (it should be 4 bytes on a 64 bits machine). However, we don't care here
+  and the wrapper functions located in gmp.c guarantees that functions 
+  that accepts or return an int as parameter will not be called with values
+  which dont fit in a 32 bits
+*/
 typedef char               mp_sign;
 typedef unsigned short     mp_digit;  /* 2 byte type */
 typedef unsigned int       mp_word;   /* 4 byte type */
@@ -58,7 +72,7 @@ typedef int                mp_err;
 
 #define MP_DIGIT_SIZE      2
 #define DIGIT_FMT          "%04X"
-
+/* end of mpi-types.h file inclusion */
 /* ---------------------------------------------------------------------- */
 
 /* Included for compatibility... */

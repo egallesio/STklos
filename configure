@@ -595,11 +595,9 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 CALLCC_STK
 THREADS
-DEF_FFI
 FFIINC
 FFILIB
 FFI
-DEF_PCRE
 PCREINC
 PCRELIB
 PCRE
@@ -733,8 +731,9 @@ ac_user_opts='
 enable_option_checking
 enable_dependency_tracking
 enable_threads
-with_gmp_light
 with_provided_gc
+with_provided_bignum
+with_gmp_light
 with_provided_regexp
 with_provided_ffi
 '
@@ -1372,10 +1371,11 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-gmp-light		use our GMP version even the system provides one
-  --with-provided-gc	use the provided Boehm GC library
-  --with-provided-regexp	use the provided Regexp (PCRE) library
-  --with-provided-ffi	use the provided FFI library
+  --with-provided-gc	  use the provided Boehm GC library
+  --with-provided-bignum  use the provided Bignum (GMPlite) library
+  --with-gmp-light	  a synonym for --with-provided-bignum
+  --with-provided-regexp use the provided Regexp (PCRE) library
+  --with-provided-ffi   use the provided FFI library
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -6152,12 +6152,13 @@ case $OS in
       OS_NAME_VERSION=$OS_$v;
 esac
 
-### Place version number in VERSION file
-### echo "VERSION=${VERSION}">VERSION
 
 ###
 ### Checks for libraries.
 ###
+SYST_LIBS=""
+COMP_LIBS=""
+
 
 ### Check for dynamic loading
 ac_fn_c_check_func "$LINENO" "dlopen" "ac_cv_func_dlopen"
@@ -6209,7 +6210,9 @@ fi
 
 if test "X$HAVE_DLOPEN" = "Xyes"
 then
-  HAVE_DLOPEN="#define HAVE_DLOPEN 1"
+
+$as_echo "#define HAVE_DLOPEN 1" >>confdefs.h
+
 fi
 
 
@@ -6369,134 +6372,6 @@ else
 fi
 
 
-### check for GMP pre-version 3.0
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for mpz_init_set in -lgmp" >&5
-$as_echo_n "checking for mpz_init_set in -lgmp... " >&6; }
-if test "${ac_cv_lib_gmp_mpz_init_set+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lgmp  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char mpz_init_set ();
-int
-main ()
-{
-return mpz_init_set ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_gmp_mpz_init_set=yes
-else
-  ac_cv_lib_gmp_mpz_init_set=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gmp_mpz_init_set" >&5
-$as_echo "$ac_cv_lib_gmp_mpz_init_set" >&6; }
-if test "x$ac_cv_lib_gmp_mpz_init_set" = x""yes; then :
-  HAVE_GMP="yes"
-else
-  HAVE_GMP="no"
-fi
-
-
-### check for GMP version post 3.0
-if test "$HAVE_GMP" = "no" ;then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __gmpz_init_set in -lgmp" >&5
-$as_echo_n "checking for __gmpz_init_set in -lgmp... " >&6; }
-if test "${ac_cv_lib_gmp___gmpz_init_set+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lgmp  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char __gmpz_init_set ();
-int
-main ()
-{
-return __gmpz_init_set ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_gmp___gmpz_init_set=yes
-else
-  ac_cv_lib_gmp___gmpz_init_set=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gmp___gmpz_init_set" >&5
-$as_echo "$ac_cv_lib_gmp___gmpz_init_set" >&6; }
-if test "x$ac_cv_lib_gmp___gmpz_init_set" = x""yes; then :
-  HAVE_GMP="yes"
-else
-  HAVE_GMP="no"
-fi
-
-fi
-
-
-# Eventually force our gmp usage
-withval=""
-
-# Check whether --with-gmp-light was given.
-if test "${with_gmp_light+set}" = set; then :
-  withval=$with_gmp_light;
-fi
-
-
-case $withval in
-  "yes") HAVE_GMP="no";;
-  "no")  HAVE_GMP="yes";;
-esac
-
-
-###
-### configure libraries
-###
-
-if test "$HAVE_GMP" = "no"
-then
-  echo "No GMP library. Using the one provided with the package"
-  cmd="CC=\"$CC\" CFLAGS=\"$CFLAGS -I../src -DFOR_STKLOS=1\" ./configure \
-            --prefix=$prefix"
-  echo "Configuring GMP"
-  echo $cmd
-  (cd gmp; eval $cmd)
-  GMP=gmp
-  GMPLIB="../gmp/.libs/libgmp.a"
-  GMPINC="-I../gmp"
-else
-  echo "Using the system GMP library"
-  GMP=""
-  GMPLIB="-lgmp"
-  GMPINC=""
-fi
-
 # ----------------------------------------------------------------------
 # GC support
 # ----------------------------------------------------------------------
@@ -6578,7 +6453,7 @@ then
      GC=gc
      GCINC="-I../gc/include"
      GCLIB="../gc/.libs/libgc.a"
-     gcmsg="use provided library"
+     COMP_LIBS="libgc $COMP_LIBS"
 else
      echo "... Using system libgc library"
      GC=""
@@ -6592,7 +6467,148 @@ else
 
 $as_echo "#define HAVE_GC 1" >>confdefs.h
 
-     gcmsg="use the system library"
+     SYST_LIBS="libgc $SYST_LIBS"
+fi
+
+
+# ----------------------------------------------------------------------
+# GMP support
+# ----------------------------------------------------------------------
+echo "*****"
+echo "***** GMP support"
+echo "*****"
+
+# Try to determine if libgmp is installed
+# No pkg-config for gmp yet
+
+# check for GMP pre-version 3.0
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for mpz_init_set in -lgmp" >&5
+$as_echo_n "checking for mpz_init_set in -lgmp... " >&6; }
+if test "${ac_cv_lib_gmp_mpz_init_set+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lgmp  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char mpz_init_set ();
+int
+main ()
+{
+return mpz_init_set ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_gmp_mpz_init_set=yes
+else
+  ac_cv_lib_gmp_mpz_init_set=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gmp_mpz_init_set" >&5
+$as_echo "$ac_cv_lib_gmp_mpz_init_set" >&6; }
+if test "x$ac_cv_lib_gmp_mpz_init_set" = x""yes; then :
+  HAVE_GMP="yes"
+else
+  HAVE_GMP="no"
+fi
+
+
+# check for GMP version post 3.0
+if test "$HAVE_GMP" = "no" ;then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __gmpz_init_set in -lgmp" >&5
+$as_echo_n "checking for __gmpz_init_set in -lgmp... " >&6; }
+if test "${ac_cv_lib_gmp___gmpz_init_set+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lgmp  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char __gmpz_init_set ();
+int
+main ()
+{
+return __gmpz_init_set ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_gmp___gmpz_init_set=yes
+else
+  ac_cv_lib_gmp___gmpz_init_set=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gmp___gmpz_init_set" >&5
+$as_echo "$ac_cv_lib_gmp___gmpz_init_set" >&6; }
+if test "x$ac_cv_lib_gmp___gmpz_init_set" = x""yes; then :
+  HAVE_GMP="yes"
+else
+  HAVE_GMP="no"
+fi
+
+fi
+
+# Test if the user want to force with our GMP lib
+# (2 names available for that  --with-provided-bignum or (legacy) --with-gmp-light
+
+# Check whether --with-provided-bignum was given.
+if test "${with_provided_bignum+set}" = set; then :
+  withval=$with_provided_bignum; PROV_GMP="yes"
+else
+  PROV_GMP="no"
+fi
+
+
+
+# Check whether --with-gmp-light was given.
+if test "${with_gmp_light+set}" = set; then :
+  withval=$with_gmp_light; PROV_GMP="yes"
+else
+  PROV_GMP="no"
+fi
+
+
+if test "$HAVE_GMP" = "no" -o "$PROV_GMP" = "yes"
+then
+     echo "... Configuring libgmp"
+     (cd gmp; CC=${CC} CFLAGS="${cflags} -I../src -DFOR_STKLOS=1" ./configure \
+     	      --prefix=$prefix) || { echo "Cannot configure the GMP"; exit; }
+     GMP=gmp
+     GMPINC="-I../gmp"
+     GMPLIB="../gmp/.libs/libgmp.a"
+     COMP_LIBS="libgmp $COMP_LIBS"
+else
+     echo "... Using system libgmp library"
+     GMP=""
+     GMPINC=""
+     GMPLIB="-lgmp"
+
+$as_echo "#define HAVE_GMP 1" >>confdefs.h
+
+     SYST_LIBS="libgmp $SYST_LIBS"
 fi
 
 
@@ -6673,7 +6689,7 @@ then
      PCREINC="-I../pcre"
      PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
      DEF_PCRE=""
-     pcremsg="use provided library"
+     COMP_LIBS="libpcre $COMP_LIBS"
 else
      echo "... Using system libpcre library"
      PCRE=""
@@ -6684,8 +6700,10 @@ else
         PCREINC=""
         PCRELIB="-lpcre -lpcreposix"
      fi
-     DEF_PCRE="#define HAVE_PCRE 1"
-     pcremsg="use the system library"
+
+$as_echo "#define HAVE_PCRE 1 " >>confdefs.h
+
+     SYST_LIBS="libpcre $SYST_LIBS"
 fi
 
 
@@ -6763,7 +6781,7 @@ then
      FFI="ffi"
      FFIINC="-I../ffi/include"
      FFILIB="../ffi/.libs/libffi.a"
-     ffimsg="use provided library"
+     COMP_LIBS="libffi $COMP_LIBS"
 else
      echo "... Using system libffi library"
      FFI=""
@@ -6774,23 +6792,11 @@ else
        FFIINC="-I/usr/include/ffi"
        FFILIB="-lffi"
      fi
-     ffimsg="use the system library"
+     SYST_LIBS="libffi $SYST_LIBS"
 fi
-DEF_FFI="#define HAVE_FFI 1" ; # We always want FFI.
-		               # Should be modifiable in the future
+# We always want FFI. Should be modifiable in the future
 
-
-###
-### display some informations for the user
-###
-
-if test "$HAVE_GMP" = "no"
-then
-  biglib="compile provided library (better perf. can be achieved with a recent GMP)"
-else
-  biglib="use the system library"
-fi
-
+$as_echo "#define HAVE_FFI 1" >>confdefs.h
 
 
 ###
@@ -6848,9 +6854,7 @@ fi
 
 
 
-
 # FFI
-
 
 
 
@@ -8327,17 +8331,15 @@ echo " "
 echo " "
 echo "SUMMARY"
 echo "*******"
-echo "            System: " $BUILD_OS
-echo "           OS nick: " $OS_NAME_VERSION
-echo "           OS type: " $OS_FLAVOUR
-echo "   Install prefix : " $prefix
-echo "        C compiler: " $CC
-echo " Compilation flags: " $CFLAGS
-echo "    Bignum library: " $biglib
-echo "    Regexp library: " $pcremsg
-echo "        GC library: " $gcmsg
-echo "       FFI library: " $ffimsg
-echo "    Thread support: " $THREADS
+echo "               System: " $BUILD_OS
+echo "              OS nick: " $OS_NAME_VERSION
+echo "              OS type: " $OS_FLAVOUR
+echo "      Install prefix : " $prefix
+echo "           C compiler: " $CC
+echo "    Compilation flags: " $CFLAGS
+echo "       Thread support: " $THREADS
+echo "System libraries used: " $SYST_LIBS
+echo "   Compiled libraries: " $COMP_LIBS
 echo " "
 
 echo "If this is correct, you can just type 'make' now at your shell prompt."

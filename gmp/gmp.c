@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 12-Oct-2009 19:27 (eg)
- * Last file update: 28-Oct-2009 10:13 (eg)
+ * Last file update: 28-Oct-2009 15:21 (eg)
  */
 
 #include <stdio.h>
@@ -30,6 +30,17 @@
 #include "gmp.h"
 
 #define MAXBUF		100   /* size for temporary string buffer */
+
+/*
+  MPI doesn't work correctly with native 64 bits, as advertised. As a
+  consequence, the wrapper functions in gmp.c are 32 bits and use a
+  different strategy in presence of values which cannot be represented
+  with 32 bits (conversion to/from string). This is slow, but it works.
+
+  We know that we have a 64 bits value when the value is ouside the
+  range [MIN32_SI, MAX32_SI]. In this case, we pass by the deciaml
+  representation of the number in a string
+ */
 
 #define MAX32_SI	2147483647
 #define MIN32_SI	(-MAX32_SI + -1)

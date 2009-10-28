@@ -14,3 +14,12 @@ In any case, GMPlite is a poor replacement of GMP and should not be
 used. It is a only used if there is no GMP library installed on the
 system at configure time (otherwise the system GMP is used).
 
+
+--------------------------------------------------------------------
+Note: 
+
+MPI doesn't work correctly with native 64 bits, as advertised. As a
+consequence, the wrapper functions in gmp.c are 32 bits and use a
+different strategy in presence of values which cannot be represented
+with 32 bits (conversion to/from string). This is slow, but it works.
+

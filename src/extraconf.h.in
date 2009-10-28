@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 19-May-2000 18:44 (eg)
- * Last file update: 27-Sep-2009 19:35 (eg)
+ * Last file update: 28-Oct-2009 13:17 (eg)
  */
 
 #define PREFIXDIR		"@PREFIX@"
@@ -36,7 +36,4 @@
 #define STACK_GROWS_@STACK_DIRECTION@
 
 /* Various stuff */
-@HAVE_DLOPEN@
-@DEF_PCRE@
-@DEF_FFI@
 #define @OS_FLAVOUR@ 1
