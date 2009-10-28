@@ -1375,7 +1375,7 @@ Optional Packages:
   --with-provided-bignum  use the provided Bignum (GMPlite) library
   --with-gmp-light	  a synonym for --with-provided-bignum
   --with-provided-regexp use the provided Regexp (PCRE) library
-  --with-provided-ffi   use the provided FFI library
+  --with-provided-ffi    use the provided FFI library
 
 Some influential environment variables:
   CXX         C++ compiler command
