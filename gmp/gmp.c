@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 12-Oct-2009 19:27 (eg)
- * Last file update: 26-Oct-2009 19:43 (eg)
+ * Last file update: 28-Oct-2009 10:13 (eg)
  */
 
 #include <stdio.h>
@@ -29,15 +29,27 @@
 
 #include "gmp.h"
 
-#if 0
-static void trace_bignum(mpz_t bn)
+#define MAXBUF		100   /* size for temporary string buffer */
+
+#define MAX32_SI	2147483647
+#define MIN32_SI	(-MAX32_SI + -1)
+#define MAX32_UI	4294967295UL
+
+#define bit64_si(si)	((si) < MIN32_SI || (si) > MAX32_SI)
+#define bit64_ui(si)	((ui) > MAX32_UI)
+
+
+
+#ifdef STK_DEBUG
+void mpz_trace_bignum(char *msg, mpz_t bn)
 {
   char *buffer = alloca(mp_radix_size(bn, 10) + 10);
   
   mp_toradix(bn, (unsigned char *)buffer, 10);
-  fprintf(stderr, " [%s] ", buffer);
+  fprintf(stderr, "%s[%s] ", msg, buffer);
 }
 #endif
+
 
 static void lowerstring(char *str)
 {
@@ -74,26 +86,36 @@ void mpz_init_set(mpz_t bn1, mpz_t bn2)
   mp_init(bn1); 
   mp_copy(bn2, bn1);
 }
+#endif
+
 
 void mpz_init_set_si(mpz_t bn, signed long int si)
 {
-  mp_init(bn); 
-  mp_set_int(bn, (long) si);
+  if (bit64_si(si)) {
+    char buffer[MAXBUF];    
+
+    snprintf(buffer, MAXBUF, "%ld", si);
+    mpz_init_set_str(bn, buffer, 10L);
+  } else {
+    mp_init(bn); 
+    mp_set_int(bn, (long) si);
+  }
 }
-#endif
+
+
+void mpz_init_set_ui(mpz_t bn, unsigned long int ui)
+{
+  char buffer[MAXBUF];
+
+  snprintf(buffer, MAXBUF, "%lu", ui);
+  mpz_init_set_str(bn, buffer, 10L);
+}
+
 
 int mpz_init_set_str(mpz_t bn, char *s, long base)
 {
   mp_init(bn);
   return (mp_read_radix(bn, (unsigned char *) s, (int) base) == MP_YES)? 0 : -1;
-}
-
-void mpz_init_set_ui(mpz_t bn, unsigned long int ui)
-{
-  char buffer[100];
-
-  snprintf(buffer, 100, "%ld", ui);
-  mpz_init_set_str(bn, buffer, 10L);
 }
 
 
@@ -113,18 +135,18 @@ void mpz_clear(mpz_t bn)
  * ---------------------------------------------------------------------- */
 signed long int mpz_get_si(mpz_t bn)
 {
-  char buffer[100];
+  char buffer[MAXBUF];
   
   mp_toradix(bn, (unsigned char *)buffer, 10);
-  return atol(buffer);
+  return strtol(buffer, NULL, 10);
 }
 
 unsigned long int mpz_get_ui(mpz_t bn)
 {
-  char buffer[100];
+  char buffer[MAXBUF];
    
   mp_toradix(bn, (unsigned char *)buffer, 10);
-  return atof(buffer);
+  return strtoul(buffer, NULL,10);
 }
 
 
@@ -144,11 +166,6 @@ char *mpz_get_str(char *str, int base, mpz_t bn)
  * Comparison
  * ---------------------------------------------------------------------- */
 #ifndef GMP_USE_MACROS
-int mpz_cmp_si(mpz_t bn, long v)
-{
-  return mp_cmp_int(bn, v);
-}
-
 int mpz_cmp(mpz_t a, mpz_t b)
 {
   return mp_cmp(a, b);
@@ -161,18 +178,41 @@ int mpz_sgn(mpz_t a)
 #endif
 
 
+int mpz_cmp_si(mpz_t bn, signed long si)
+{
+  if (bit64_si(si)) {
+    char buffer[MAXBUF];
+    mpz_t tmp;
+    int res;
+
+    snprintf(buffer, MAXBUF, "%ld", si);
+    mpz_init_set_str(tmp, buffer, 10);
+    res = mp_cmp(bn, tmp);
+    mp_clear(tmp);
+
+    return res;
+  } else {
+    return mp_cmp_int(bn, si);
+  }
+}
+
 int mpz_cmp_ui(mpz_t bn, unsigned long int ui)
 {
-  char buffer[100];
-  mpz_t tmp;
-  int res;
-
-  snprintf(buffer, 100, "%ld", ui);
-  mpz_init_set_str(tmp, buffer, 10);
-  res = mp_cmp(bn, tmp);
-  mp_clear(tmp);
-  
-  return res;
+  if (ui > (unsigned long int) MAX32_SI) {
+    char buffer[MAXBUF];
+    mpz_t tmp;
+    int res;
+    
+    snprintf(buffer, MAXBUF, "%lu", ui);
+    mpz_init_set_str(tmp, buffer, 10);
+    res = mp_cmp(bn, tmp);
+    mp_clear(tmp);
+    
+    return res;
+  } else {
+    /* this is a small unsigned value, we can use signed comparison */
+    return mp_cmp_int(bn, (signed long int) ui);
+  }
 }
 
 /* ----------------------------------------------------------------------

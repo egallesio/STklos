@@ -1,1 +1,2 @@
-Erick Gallesio by cut/paste from the original GMP 3.1.1 version
+Erick Gallesio for packaging and GMP wrapper. 
+Michael J. Fromberger  for mpi.{c,h}

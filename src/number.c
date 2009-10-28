@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 20-Oct-2009 23:20 (eg)
+ * Last file update: 27-Oct-2009 23:02 (eg)
  */
 
 
@@ -3100,12 +3100,6 @@ int STk_init_number(void)
 
   ADD_PRIMITIVE(decode_float);
 
-//!   ADD_PRIMITIVE(bit_or);
-//!   ADD_PRIMITIVE(bit_and);
-//!   ADD_PRIMITIVE(bit_xor);
-//!   ADD_PRIMITIVE(bit_rshift);
-//!   ADD_PRIMITIVE(bit_lshift);
- 
   /* Add parameter for float numbers precision */
   STk_make_C_parameter("real-precision",
 		       MAKE_INT(real_precision),

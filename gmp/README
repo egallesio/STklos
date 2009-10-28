@@ -1,8 +1,16 @@
 This is a GMPlite version.
 
-This version is built for STklos from the transitive closure of the
-functions used in src/numbers.c
+This version is a new version built as a wrapper around the MPI
+library (http://spinning-yarns.org/michael/mpi). It replaces the
+previous version built with starting from the sources of an old
+version of GMP (3.1.1) as transitive closure of the functions used in
+src/numbers.c.
 
-This version is used if there is no GMP library installed on the
-system at configure time (otherwise the system GMP is used). 
+The rewriting was necessary because old GMPlite was hard to maintain
+(it embeds asm code and is hard to understand). On the contrary MPI,
+is simpler (it is basically one source file).
+
+In any case, GMPlite is a poor replacement of GMP and should not be
+used. It is a only used if there is no GMP library installed on the
+system at configure time (otherwise the system GMP is used).
 

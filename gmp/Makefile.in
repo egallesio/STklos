@@ -457,7 +457,7 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: check-am
-all-am: Makefile $(LIBRARIES) config.h
+all-am: Makefile $(LIBRARIES) config.h all-local
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -552,8 +552,8 @@ uninstall-am:
 
 .MAKE: all install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am am--refresh check check-am clean \
-	clean-generic clean-noinstLIBRARIES ctags dist dist-all \
+.PHONY: CTAGS GTAGS all all-am all-local am--refresh check check-am \
+	clean clean-generic clean-noinstLIBRARIES ctags dist dist-all \
 	dist-bzip2 dist-gzip dist-lzma dist-shar dist-tarZ dist-xz \
 	dist-zip distcheck distclean distclean-compile \
 	distclean-generic distclean-hdr distclean-tags distcleancheck \
@@ -568,15 +568,9 @@ uninstall-am:
 	ps ps-am tags uninstall uninstall-am
 
 
-all: mpi-types.h libgmp.a
+all-local: libgmp.a
 	@mkdir -p .libs
 	cp libgmp.a ./.libs
-
-mpi-types.h: types
-	types > ./mpi-types.h
-
-types: types.c
-	$(CC) $(CFLAGS) -o types types.c
 
 test: all
 	(cd tests; $(MAKE) test)
@@ -589,7 +583,6 @@ clean:
 
 distclean: clean
 	(cd tests; make distclean)
-	/bin/rm -f types mpi-types.h
 	/bin/rm -f config.h stamp-h1
 	/bin/rm -f config.status config.cache config.log configure.lineno \
 		   config.status.lineno

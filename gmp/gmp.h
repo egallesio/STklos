@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 12-Oct-2009 19:29 (eg)
- * Last file update: 26-Oct-2009 19:54 (eg)
+ * Last file update: 28-Oct-2009 10:10 (eg)
  */
 
 
@@ -53,14 +53,12 @@ void mp_set_memory_functions(void *(*allocate) (size_t),
 #ifndef GMP_USE_MACROS
 void mpz_init(mpz_t bn);
 void mpz_init_set(mpz_t bn1, mpz_t bn2);
-void mpz_init_set_si(mpz_t bn, signed long int si);
 #else
 #  define mpz_init(bn)  		mp_init(bn)
 #  define mpz_init_set(bn1, bn2) 	{ mp_init(bn1); mp_copy(bn2, bn1); }
-#  define mpz_init_set_si(bn, si)   	{ mp_init(bn); mp_set_int(bn, (long) si); }
 #endif
 
-
+void mpz_init_set_si(mpz_t bn, signed long int si);
 int mpz_init_set_str(mpz_t bn, char *s, long base);
 void mpz_init_set_ui(mpz_t bn, unsigned long int ui);
 
@@ -84,7 +82,6 @@ char *mpz_get_str(char *str, int base, mpz_t bn);
  * Comparison
  * ---------------------------------------------------------------------- */
 #ifndef GMP_USE_MACROS
-int mpz_cmp_si(mpz_t bn, long v);
 int mpz_cmp(mpz_t a, mpz_t b);
 int mpz_sgn(mpz_t a);
 #else 
@@ -92,6 +89,7 @@ int mpz_sgn(mpz_t a);
 #  define mpz_cmp(a, b)		mp_cmp(a, b)
 #  define mpz_sgn(a)		mp_cmp_z(a)
 #endif
+int mpz_cmp_si(mpz_t bn, signed long v);
 int mpz_cmp_ui(mpz_t bn, unsigned long int ui);
 
 /* ----------------------------------------------------------------------
