@@ -593,6 +593,7 @@ ac_func_list=
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+LIB_SUMMARY
 CALLCC_STK
 THREADS
 FFIINC
@@ -6457,7 +6458,7 @@ then
 else
      echo "... Using system libgc library"
      GC=""
-     if test "$PKGCONFIG" != "false" ;then
+     if test $PKGCONFIG --exists bdw-gc ;then
         GCINC=$(pkg-config  bdw-gc --cflags)
         GCLIB=$(pkg-config  bdw-gc --libs)
      else
@@ -6582,6 +6583,7 @@ else
 fi
 
 
+if test "$PROV_GMP" = "no" ;then
 
 # Check whether --with-gmp-light was given.
 if test "${with_gmp_light+set}" = set; then :
@@ -6590,6 +6592,7 @@ else
   PROV_GMP="no"
 fi
 
+fi
 
 if test "$HAVE_GMP" = "no" -o "$PROV_GMP" = "yes"
 then
@@ -6693,7 +6696,7 @@ then
 else
      echo "... Using system libpcre library"
      PCRE=""
-     if test "$PKGCONFIG" != "false" ;then
+     if $PKGCONFIG --exists libpcre ;then
         PCREINC="$($PKGCONFIG --cflags libpcre)"
         PCRELIB="$($PKGCONFIG --libs libpcre) -lpcreposix"
      else
@@ -6785,7 +6788,7 @@ then
 else
      echo "... Using system libffi library"
      FFI=""
-     if test "$PKGCONFIG" != "false" ;then
+     if $PKGCONFIG --exists libffi ;then
        FFIINC=$($PKGCONFIG libffi --cflags)
        FFILIB=$($PKGCONFIG libffi --libs)
      else
@@ -6819,6 +6822,12 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
+
+
+###
+### Finishing ...
+###
+LIB_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS))"
 
 
 ### Output files
@@ -6855,6 +6864,7 @@ fi
 
 
 # FFI
+
 
 
 

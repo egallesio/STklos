@@ -22,7 +22,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 23:58 (eg)
-# Last file update: 10-Jun-2007 11:16 (eg)
+# Last file update: 28-Oct-2009 18:55 (eg)
 
 
 prefix=@prefix@
@@ -44,6 +44,8 @@ Options:
 				platform
         [--threads | -t ]	Display the name of the valiable thread
 				system
+        [--libraries |-L ]	Display a summary of used and compiled
+				libraries
 	[--help | -h | -?]	Show a list of options
 EOF
     exit $1
@@ -79,6 +81,9 @@ while test $# -gt 0; do
 	    ;;
 	--threads|-t)
 	    echo @THREADS@
+	    ;;
+	--libraries|-L)
+	    echo "@LIB_SUMMARY@"
 	    ;;
 	--help|-h|-\?)
 	    usage 0 1>&2

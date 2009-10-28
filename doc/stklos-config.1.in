@@ -47,6 +47,9 @@ The suffix for shared libraries.
 .IP "--threads | -t"
 The name thread system compiled in 
 .B stklos. 
+.IP "--libraries | -L"
+Display informations on the libraries which are compiled and the one
+which are used when the system was compiled
 .IP "--help | -h | -?"
 Show a list of options
 

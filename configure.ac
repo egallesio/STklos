@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 28-Oct-2009 15:10 (eg)
+### Last file update: 28-Oct-2009 18:58 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -212,7 +212,7 @@ then
 else
      echo "... Using system libgc library"
      GC=""
-     if test "$PKGCONFIG" != "false" ;then
+     if test $PKGCONFIG --exists bdw-gc ;then
         GCINC=$(pkg-config  bdw-gc --cflags)
         GCLIB=$(pkg-config  bdw-gc --libs)
      else
@@ -248,9 +248,11 @@ AC_ARG_WITH(provided-bignum,
        [  --with-provided-bignum  use the provided Bignum (GMPlite) library],
        PROV_GMP="yes", PROV_GMP="no")
 
-AC_ARG_WITH(gmp-light,
-       [  --with-gmp-light	  a synonym for --with-provided-bignum],
-       PROV_GMP="yes", PROV_GMP="no")
+if test "$PROV_GMP" = "no" ;then
+  AC_ARG_WITH(gmp-light,
+         [  --with-gmp-light	  a synonym for --with-provided-bignum],
+         PROV_GMP="yes", PROV_GMP="no")
+fi
 
 if test "$HAVE_GMP" = "no" -o "$PROV_GMP" = "yes"
 then 
@@ -306,7 +308,7 @@ then
 else
      echo "... Using system libpcre library"
      PCRE=""
-     if test "$PKGCONFIG" != "false" ;then
+     if $PKGCONFIG --exists libpcre ;then
         PCREINC="$($PKGCONFIG --cflags libpcre)"
         PCRELIB="$($PKGCONFIG --libs libpcre) -lpcreposix"
      else 
@@ -350,7 +352,7 @@ then
 else 
      echo "... Using system libffi library"
      FFI=""
-     if test "$PKGCONFIG" != "false" ;then
+     if $PKGCONFIG --exists libffi ;then
        FFIINC=$($PKGCONFIG libffi --cflags)
        FFILIB=$($PKGCONFIG libffi --libs)
      else
@@ -370,6 +372,12 @@ AC_TRY_RUN([ void inner (char *foo) { char bar; exit (!(foo >= &bar)); }
    [STACK_DIRECTION="DOWN"],
    [STACK_DIRECTION="UP"],
    echo "Stack direction is not detected when cross compiling for now")
+
+
+###
+### Finishing ...
+###
+LIB_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS))"
 
 
 ### Output files 
@@ -412,6 +420,7 @@ AC_SUBST(FFIINC)
 
 AC_SUBST(THREADS)
 AC_SUBST(CALLCC_STK)
+AC_SUBST(LIB_SUMMARY)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile lib/boot-callcc.stk

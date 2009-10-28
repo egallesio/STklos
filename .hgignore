@@ -72,6 +72,7 @@ examples/threads
 
 # FFI directory
 ffi/.libs/libffi.lai
+ffi/configure.lineno
 ffi/fficonfig.h
 ffi/include/ffi.h
 ffi/include/ffitarget.h
@@ -79,6 +80,8 @@ ffi/libffi.pc
 ffi/src/.dirstamp
 ffi/src/x86/.dirstamp
 ffi/stamp-h1
+ffi/testsuite/site.bak
+ffi/testsuite/site.exp
 
 
 # Gc directory
@@ -104,8 +107,7 @@ gc/windows-untested
 # GMP directory
 gmp/config.h
 gmp/gmp-stklos.h
-gmp/stamp-h
-
+gmp/stamp-h1
 # GTklos directory
 gtklos/TODO
 gtklos/gtklosconf.h
@@ -119,6 +121,7 @@ pcre/.libs
 pcre/RunTest
 pcre/chartables.c
 pcre/config.h
+pcre/configure.lineno
 pcre/dftables
 pcre/libpcre.pc
 pcre/libpcrecpp.pc
@@ -131,6 +134,10 @@ pcre/pcredemo
 pcre/pcregrep
 pcre/pcretest
 pcre/stamp-h1
+pcre/testNinput
+pcre/testsavedregex
+pcre/teststderr
+pcre/testtry
 
 # pkgman
 pkgman/stklos-pkg
