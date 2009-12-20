@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 28-Oct-2009 18:58 (eg)
+### Last file update: 20-Dec-2009 18:02 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [0.99dev])
@@ -212,7 +212,7 @@ then
 else
      echo "... Using system libgc library"
      GC=""
-     if test $PKGCONFIG --exists bdw-gc ;then
+     if $PKGCONFIG --exists bdw-gc ;then
         GCINC=$(pkg-config  bdw-gc --cflags)
         GCLIB=$(pkg-config  bdw-gc --libs)
      else

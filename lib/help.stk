@@ -1,0 +1,99 @@
+;;;;
+;;;; help.stk		-- Interactive help
+;;;; 
+;;;; Copyright © 2009 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 20-Dec-2009 18:26 (eg)
+;;;; Last file update: 20-Dec-2009 18:29 (eg)
+;;;;
+
+;; ----------------------------------------------------------------------
+;; Database reading
+;; ----------------------------------------------------------------------
+(define (read-database name)
+  (let ((f (open-file name "r")))
+    (if f
+	(let Loop ((res '())
+		   (item (read f)))
+	  (if (eof-object? item)
+	      (begin (close-port f) res)
+	      (Loop (cons item res) (read f))))
+	;; file cannot be opened
+	(begin
+	  (eprintf "Warning: cannot open ~S.\n" name)
+	  '()))))
+
+(define *the-doc*
+  (read-database (make-path (%library-prefix) "share" "stklos" (version) "DOCDB")))
+
+
+;; ----------------------------------------------------------------------
+;; pretty-doc ...
+;; ----------------------------------------------------------------------
+(define (pretty-doc str)
+  ;; suppress some common Skribe things from the doc string
+  (set! str (regexp-replace-all "£" str ""))
+  (set! str (regexp-replace-all "@lisp" str (do-color 'blue)))
+  (set! str (regexp-replace-all "@end lisp" str (do-color 'normal)))
+  str)
+	
+
+;; ----------------------------------------------------------------------
+;; find-documentation
+;; ----------------------------------------------------------------------
+(define-generic find-documentation)
+
+(define-method find-documentation ((self <symbol>))
+  (let* ((doc (assoc self *the-doc*))
+	 (see (and doc (key-get (cdr doc) :see #f))))
+    (cond
+      (see
+         ;; the symbol is indirectly documented 
+         (find-documentation see))
+      (doc
+         ;; found documentation. Format it a little bit
+         (pretty-doc (string-append (key-get (cdr doc) :synopsis)
+				    "\n\n"
+				    (key-get (cdr doc) :description)
+				    "\n")))
+      (else
+         ;; no documentation
+         (do-color 'red (format "no documentation found for ~S" self))))))
+
+
+(define-method find-documentation ((self <procedure>))
+  (let ((doc (%procedure-doc self)))
+    (or doc
+	(let ((name (%procedure-name self)))
+	  (and (string? name)
+	       (find-documentation (string->symbol name)))))))
+
+
+(define-method find-documentation (self obj)
+  #f)
+
+;; ----------------------------------------------------------------------
+;; help
+;; ----------------------------------------------------------------------
+(define-method help (obj)
+  (let ((doc (find-documentation obj)))
+    (if doc
+	(printf "~a\n" doc)
+	(printf "no documentation for ~s\n" obj))))

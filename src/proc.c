@@ -2,7 +2,7 @@
  *
  * p r o c . c				-- Things about procedures 
  *
- * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 28-Jun-2007 18:23 (eg)
+ * Last file update: 20-Dec-2009 15:10 (eg)
  */
 
 #include "stklos.h"
@@ -56,6 +56,7 @@ SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env)
   CLOSURE_CONST(z) = cst;
   CLOSURE_BCODE(z) = code;
   CLOSURE_SIZE(z)  = size;
+  CLOSURE_DOC(z)   = STk_false;
   return z;
 }
 
@@ -252,6 +253,11 @@ DEFINE_PRIMITIVE("%procedure-code", proc_code, subr1, (SCM proc))
   return v;
 }
 
+DEFINE_PRIMITIVE("%procedure-doc", proc_doc, subr1, (SCM proc))
+{
+  if (!CLOSUREP(proc)) return STk_false;
+  return CLOSURE_DOC(proc);
+}
 
 
 /*===========================================================================*\
@@ -380,6 +386,7 @@ int STk_init_proc(void)
   ADD_PRIMITIVE(proc_plist);
   ADD_PRIMITIVE(set_proc_plist);
   ADD_PRIMITIVE(proc_code);
+  ADD_PRIMITIVE(proc_doc);
   ADD_PRIMITIVE(proc_arity);
   ADD_PRIMITIVE(procedure_name);
 

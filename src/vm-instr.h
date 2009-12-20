@@ -77,7 +77,7 @@
 #  define IN_APPLY             72
 #  define MAKE_EXPANDER        73
 #  define SET_CUR_MOD          74
-#  define UNUSED_1             75
+#  define DOCSTRG              75
 #  define UNUSED_2             76
 #  define FALSE_PUSH           77
 #  define TRUE_PUSH            78
@@ -245,7 +245,7 @@ static void *jump_table[] = {
   &&lab_IN_APPLY            ,
   &&lab_MAKE_EXPANDER       ,
   &&lab_SET_CUR_MOD         ,
-  &&lab_UNUSED_1            ,
+  &&lab_DOCSTRG             ,
   &&lab_UNUSED_2            ,
   &&lab_FALSE_PUSH          ,
   &&lab_TRUE_PUSH           ,
@@ -413,7 +413,7 @@ static char *name_table[] = {
   "IN_APPLY            ",
   "MAKE_EXPANDER       ",
   "SET_CUR_MOD         ",
-  "UNUSED_1            ",
+  "DOCSTRG             ",
   "UNUSED_2            ",
   "FALSE_PUSH          ",
   "TRUE_PUSH           ",

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 18-Oct-2009 00:49 (eg)
+;;;; Last file update: 20-Dec-2009 17:43 (eg)
 ;;;;
 
 
@@ -866,6 +866,18 @@ doc>
 			      (if  str-prev? "\e[" ";")
 			      (code (car args)))))
 	(else (error 'ansi-color "bad command ~S" args)))))
+
+(define do-color
+  (if (and (not (key-get *%program-args* :interactive #f))
+	   (member (getenv "TERM")
+		   '("rxvt" "xterm" "xterm-color" "linux" "cygwin")))
+      ;; Terminal accepts color
+      ansi-color
+      ;; Provide a procedure which ignore color indications
+      (lambda args
+	(apply string-append
+	       (map (lambda (x) (if (string? x) x ""))
+		    args)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;

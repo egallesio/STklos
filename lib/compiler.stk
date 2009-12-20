@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 20-Dec-2009 12:00 (eg)
+;;;; Last file update: 20-Dec-2009 14:57 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -568,12 +568,21 @@ doc>
 
 
 (define (compile-user-lambda formals body arity env)	; i.e R5RS ones
-  (let ((env  (extend-env env formals))
-	(lab  (new-label)))
+  (let* ((env  (extend-env env formals))
+	 (lab  (new-label))
+	 (doc  (if (and (> (length body) 1) (string? (car body)))
+		   (car body)
+		   #f))
+	 (body (if doc (cdr body) body)))
+
     (emit 'CREATE-CLOSURE lab arity)
     (compile-body body env body #t)
     (emit 'RETURN)
-    (emit-label lab)))
+    (emit-label lab)
+    
+    (when doc
+      ;; emit the docstring
+      (emit 'DOCSTRG (fetch-constant doc)))))
 
 
 ;;; EXTENDED LAMBDAS
@@ -789,20 +798,28 @@ doc>
 	  (if (null? req)					; FIXME: simpl
 	      (set! req rest-name)
 	      (set-cdr! (last-pair req) rest-name))
-	  `(,req ,(build-let* opt key rest-name rest body)))
+	  `(,req  ,(build-let* opt key rest-name rest body)))
 	;; "Normal" lambda
 	(begin (if rest
 		   (if (null? req)
 		       (set! req rest)
 		       (set-cdr! (last-pair req) rest)))
-	       `(,req ,@body)))))
+	       `(,req  ,@body)))))
   
 (define (extended-lambda->lambda el)	;; STklos lambda => R5RS lambda
   (if (> (length el) 2)
-      (let ((method? (eq? (car el) 'method))
-	    (formals (cadr el))
-	    (body    (cddr el)))
-	(cons 'lambda (rewrite-params-and-body method? formals body)))
+      (let* ((method? (eq? (car el) 'method))
+	     (formals (cadr el))
+	     (body    (cddr el))
+	     (doc     (and (> (length body) 1) (string? (car body)) (car body)))
+	     (new     (rewrite-params-and-body method?
+					       formals
+					       (if doc (cdr body) body))))
+	(if doc
+	    `(lambda ,(car new)
+	       ,doc
+	       ,@(cdr new))
+	    `(lambda ,@new)))
       (compiler-error 'lambda el "bad definition ~S" el)))
 
 

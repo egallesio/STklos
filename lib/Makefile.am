@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 18-Oct-2009 00:16 (eg)
+# Last file update: 20-Dec-2009 17:56 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -46,6 +46,7 @@ scheme_SRCS = STklos.init		\
 	      full-syntax.stk		\
 	      full-conditions.stk 	\
 	      getopt.stk		\
+	      help.stk			\
 	      http.stk			\
 	      lex-rt.stk		\
 	      make-C-boot.stk		\
@@ -87,6 +88,7 @@ scheme_OBJS = compfile.ostk		\
 	      describe.ostk		\
 	      env.ostk			\
 	      getopt.ostk		\
+	      help.ostk			\
 	      http.ostk			\
 	      lex-rt.ostk		\
 	      pp.ostk			\

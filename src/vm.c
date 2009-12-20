@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 25-Oct-2009 09:29 (eg)
+ * Last file update: 20-Dec-2009 15:11 (eg)
  */
 
 // INLINER values
@@ -1477,11 +1477,18 @@ CASE(MAKE_EXPANDER) {
   NEXT;
 }
 
+CASE(DOCSTRG) {
+  SCM str = fetch_const();
+  
+  if (vm->valc == 1 && CLOSUREP(vm->val))
+    CLOSURE_DOC(vm->val) = str;
+  NEXT;
+}
+
 CASE(END_OF_CODE) { 
   return;
 }
 
-CASE(UNUSED_1)
 CASE(UNUSED_2)
 CASE(UNUSED_3)
 CASE(UNUSED_4)
