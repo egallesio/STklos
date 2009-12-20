@@ -43,6 +43,9 @@ defining new syntaxes).
 .IP "--line-info, -l"
 Generate line informations to ease debugging (incurs a small
 performance penalty).
+.IP "--show-instructions, -S"
+Produce the VM instructions in the generated file. Actually, 
+it is probably only useful if you want to hack the VM. 
 
 .IP "--prepend-load-path=<dir>, -L <dir>"
 Prepend the directory <dir> to the compiler loading path.

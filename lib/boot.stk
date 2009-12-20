@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 18-Oct-2009 00:06 (eg)
+;;;; Last file update: 20-Dec-2009 11:57 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -196,7 +196,7 @@
   ;; Look at the debug flag
   (when (> debug 0)
     (compiler:warn-use-undefined #t)	; Signal usage of still undefined symbols
-    (compiler:gen-line-number #t)	; Generate line nuumbers
+    (compiler:gen-line-number #t)	; Generate line numbers
     (when (> debug 1)			; Load-verbose when debug >= 2 
       (load-verbose 1)))
   ;; Try to load the user initialization file except if "--no-init-file"

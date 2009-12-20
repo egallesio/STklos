@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k			-- STklos Compiler
 ;;;; 
-;;;; Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  5-Aug-2007 18:29 (eg)
+;;;; Last file update: 20-Dec-2009 12:00 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -99,6 +99,8 @@
 (define compiler:gen-line-number		(make-parameter #f))
 (define compiler:warn-use-undefined  		(make-parameter #f))
 (define compiler:warn-use-undefined-postpone	(make-parameter #t))
+(define compiler:show-assemby-code		(make-parameter #f))
+
 (define compiler:inline-common-functions
   (let ((inlined *inline-symbols*))
     (make-parameter #t
