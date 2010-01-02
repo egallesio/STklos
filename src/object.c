@@ -2,7 +2,7 @@
  *
  *  o b j e c t . c			-- Objects support
  *
- * Copyright © 1994-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update: 19-Apr-2009 12:11 (eg)
+ * Last file update:  1-Jan-2010 13:24 (eg)
  */
 
 #include "stklos.h"
@@ -880,8 +880,9 @@ static void make_standard_classes(void)
   SCM tmp1 = LIST3(STk_intern("generic-function"), 
 		   STk_intern("specializers"), 
 		   STk_intern("procedure"));
-  SCM tmp2 = LIST2(STk_intern("name"),
-		   STk_intern("methods"));
+  SCM tmp2 = LIST3(STk_intern("name"),
+		   STk_intern("methods"),
+		   STk_intern("documentation"));
 
   /* Generic functions classes */
   mk_cls(&Procedure_class, "<procedure-class>", Class, Class,           STk_nil);
@@ -939,8 +940,9 @@ DEFINE_PRIMITIVE("%make", basic_make, subr3, (SCM classe, SCM kind, SCM l))
     z = make_instance(classe, 
 		      STk_int_length(INST_SLOT(classe, S_slots)),
 		      TYPE_GENERIC);
-    INST_SLOT(z, S_name)    = l;
-    INST_SLOT(z, S_methods) = STk_nil;
+    INST_SLOT(z, S_name)          = l;
+    INST_SLOT(z, S_methods)       = STk_nil;
+    INST_SLOT(z, S_documentation) = STk_false;
   } else if (kind == STk_intern("method")) {
     /* This is a <method>, <simple-method> or <accessor-method> */
     z = make_instance(classe, 

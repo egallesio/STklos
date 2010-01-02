@@ -2,7 +2,7 @@
  *
  *  o b j e c t . h			-- Objects support
  *
- * Copyright © 1994-2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update: 14-Nov-2003 15:30 (eg)
+ * Last file update:  1-Jan-2010 13:28 (eg)
  */
 
 
@@ -72,14 +72,14 @@ struct instance_obj {
 
 
 /*
- * Generic functions have a fixed position which is given below
+ * Generic functions slots have a fixed position which is given below
  *
  */
 #define S_methods		1	/* offset of methods slot in a <generic> */
-
+#define S_documentation		2	/* offset of doc. slot in a <generic> */
 
 /*
- * Methods have a fixed position which is given below
+ * Methods slots have a fixed position which is given below
  *
  */
 #define S_generic_function	0	/* offset of gf    slot in a <method> */

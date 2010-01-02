@@ -1,7 +1,7 @@
 ;;;;
 ;;;; help.stk		-- Interactive help
 ;;;; 
-;;;; Copyright © 2009 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2009-2010 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -18,10 +18,14 @@
 ;;;; along with this program; if not, write to the Free Software
 ;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
 ;;;; USA.
-;;;; 
+;;;;
+;;;; This file is the re-implementation of a code given to me by
+;;;; Michael Feyereisen [mfeyereisen@gmail.com]. Thanks to him for
+;;;; having pushed me to finally implement the help function. 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Dec-2009 18:26 (eg)
-;;;; Last file update: 20-Dec-2009 18:29 (eg)
+;;;; Last file update:  2-Jan-2010 16:55 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -73,9 +77,14 @@
 				    "\n\n"
 				    (key-get (cdr doc) :description)
 				    "\n")))
+      ((char=? (string-ref (symbol->string self) 0) #\%)
+        (string-append
+	  "Symbols beginning with '%' are intended for low-level use \n"
+	  "and have therefore been left undocumented.\n"
+	  "Furthermore, they can be changed without notice. Dont use them.\n"))
       (else
          ;; no documentation
-         (do-color 'red (format "no documentation found for ~S" self))))))
+         (format "No documentation for ~s\n" self)))))
 
 
 (define-method find-documentation ((self <procedure>))
@@ -85,15 +94,68 @@
 	  (and (string? name)
 	       (find-documentation (string->symbol name)))))))
 
+(define-method find-documentation ((self <generic>))
+  (or (generic-function-documentation self)
+      (find-documentation (generic-function-name self))))
 
-(define-method find-documentation (self obj)
+(define-method find-documentation ((self <method>))
+  (find-documentation (method-procedure self)))
+
+(define-method find-documentation (obj)
   #f)
 
 ;; ----------------------------------------------------------------------
 ;; help
 ;; ----------------------------------------------------------------------
+#|
+<doc EXT help
+ * (help obj)
+ * (help)
+ *
+ * When called with an argument, |help| tries to give some help on the
+ * given object, which could be a symbol, a procedure, a generic function
+ * or a method. Whe called called without arguments, |help| enters a
+ * read-help-print loop. The documentation for an object is searched in
+ * the object itself or, if absent, in STklos documentation.  Inserting
+ * the documentation in an objet is very similar to Emacs docstrings: a
+ * documentation string is defined among the code. Exemples of such
+ * strings are given below
+ * @lisp
+ * (define (foo n)
+ *   "If the function body starts with a string, it's a docstring"
+ *   (+ n 1))
+ * 
+ * (define-generic bar
+ *   :documentation "Generic function docsting for bar")
+ * 
+ * (define-method bar ((x <integer>))
+ *   "Probably less useful: as in functions, methods can have docstrings"
+ *   (- x 1))
+ * @end lisp
+doc>
+|#
 (define-method help (obj)
   (let ((doc (find-documentation obj)))
     (if doc
-	(printf "~a\n" doc)
-	(printf "no documentation for ~s\n" obj))))
+	(printf "Documentation for ~s:\n~a\n" obj doc)
+	(printf "No documentation for ~s\n" obj))))
+
+
+(define-method help ()
+  ;; Interactive help
+  (display (do-color 'blue "You are in the interactive STklos help. "
+		           "Enter an *eof* to exit\n"))
+  (let Loop ((prompt (do-color 'green "help> " 'none)))
+    (display prompt) (flush-output-port)
+    (let ((name (read)))
+      (unless (eof-object? name)
+	(if (symbol? name)
+	    (let ((val (symbol-value* name (current-module) #f)))
+	      (display (if val
+			   (find-documentation val)
+			   (do-color 'red (format "Symbol ~S is unbound\n" name)))))
+	    (display (do-color 'red "help only accepts symbols.\n")))
+	(Loop prompt))))
+  (display "done.\n"))
+
+(provide "help")

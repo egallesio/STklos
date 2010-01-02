@@ -1,7 +1,7 @@
 ;;;;
 ;;;; object.stk	-- -- A variation of the Gregor Kickzales Tiny CLOS for STklos
 ;;;; 
-;;;; Copyright © 1993-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1993-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update: 19-Apr-2009 00:00 (eg)
+;;;; Last file update:  1-Jan-2010 14:52 (eg)
 
 
 #|
@@ -61,6 +61,7 @@
     class-direct-subclasses class-precedence-list class-direct-methods
     class-direct-slots class-slots
     generic-function-name generic-function-methods
+    generic-function-documentation
     slot-value))
 
 (define-module STKLOS-COMPILER
@@ -237,6 +238,11 @@
       (slot-ref gf 'methods)
       (%error-bad-generic 'generic-function-methods gf)))
 
+(define (generic-function-documentation gf)
+  (if (generic? gf)
+      (slot-ref gf 'documentation)
+      (%error-bad-generic 'generic-function-documentation gf)))
+
 ;;;
 ;;; Methods
 ;;;
@@ -407,17 +413,21 @@
 ;=============================================================================
 
 ; ==== Define-generic
-(define-macro (define-generic gf :optional (meta '<generic>))
-  `(define ,gf (ensure-generic-function ',gf ,meta)))
+(define-macro (define-generic gf :optional (meta '<generic>)
+				 :key      (documentation #f))
+  `(define ,gf (ensure-generic-function ',gf ,meta ,documentation)))
+
 
 ;==== Ensure-generic-function
-(define (ensure-generic-function name :optional (metaclass <generic>))
+(define (ensure-generic-function name :optional (metaclass <generic>)
+				 		(documentation #f))
   (let ((old (symbol-value* name (current-module) #f)))
     (if (generic? old)
 	old
 	(%symbol-define name 
 			(make metaclass :name name 
-			      		:default (and (procedure? old) old))
+			      		:default (and (procedure? old) old)
+					:documentation documentation)
 			(current-module)))))
 
 ;=============================================================================
@@ -961,7 +971,8 @@
 
 
 (define-method initialize ((generic <generic>) initargs)
-  (let ((previous-definition (key-get initargs :default #f)))
+  (let ((previous-definition (key-get initargs :default #f))
+	(doc		     (key-get initargs :documentation #f)))
     (next-method)
     (slot-set! generic 'name    (key-get initargs :name '???))
     (slot-set! generic 'methods
@@ -972,7 +983,8 @@
 			   :procedure (let ((next-methhod #f))
 					(lambda l
 					  (apply previous-definition l)))))
-		   '()))))
+		   '()))
+    (slot-set! generic 'documentation doc)))
 
 (define-method initialize ((method <method>) initargs)
   (next-method)
