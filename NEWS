@@ -3,6 +3,9 @@
 				+======+
 				| NEWS |
 				+======+
+
+* version 1.00 (2010 01 04)
+
 * version 0.98 (2008 04 15)
     * Replaced the C/invoke FFI library by libffi: Now GTk2 ScmPkg
       packages work on MacOs

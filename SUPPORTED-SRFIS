@@ -41,7 +41,7 @@ State can be one of the following values
     Y	16	Syntax for procedures of variable arity
     Y	17	Generalized set!
 
-    -	18	Multithreading support
+    Y	18	Multithreading support
     -	19	Time Data Types and Procedures
     -	21	Real-time multithreading support
     Y	22	Running Scheme Scripts on Unix
@@ -101,8 +101,10 @@ State can be one of the following values
     ?   90	Extensible hash table constructor
     ?   94	Type-Restricted Numerical Functions
 
-    ?   95	Sorting and Merging
+    -   95	Sorting and Merging
     Y   96	SLIB Prerequisites
+    -   97	SRFI Libraries
     Y	98	An interface to access environment variables
+    ?   99	ERR5RS Records
 
-Implemented SRFIs: 39/68
+Implemented SRFIs: 40/70
