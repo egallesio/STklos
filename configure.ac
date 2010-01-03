@@ -2,10 +2,10 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 20-Dec-2009 18:02 (eg)
+### Last file update:  3-Jan-2010 08:15 (eg)
 
 AC_PREREQ(2.64)
-AC_INIT([stklos], [0.99dev])
+AC_INIT([stklos], [1.00])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR(src/stklos.c)
 AC_CONFIG_HEADERS(src/stklosconf.h)
@@ -140,7 +140,6 @@ AC_LANG(C)
 case "$THREADS" in
  no | none | single)
    THREADS=none
-   CALLCC_STK='"callcc.stk"'
    AC_DEFINE(THREADS_NONE, [], [No thread support])
    ;;
  posix | pthreads)
@@ -148,7 +147,6 @@ case "$THREADS" in
    AC_CHECK_LIB(pthread, pthread_create, LIBS="-lpthread $LIBS", 
                 [AC_MSG_ERROR([Missing PThread library])])
    THREADS=pthreads
-   CALLCC_STK='"callcc.stk"'
    AC_DEFINE(THREADS_PTHREADS, [], [PThread support])
    ;;
  *)
@@ -419,12 +417,11 @@ AC_SUBST(FFILIB)
 AC_SUBST(FFIINC)
 
 AC_SUBST(THREADS)
-AC_SUBST(CALLCC_STK)
 AC_SUBST(LIB_SUMMARY)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
-          lib/Makefile utils/Makefile lib/boot-callcc.stk
-	  utils/stklos-config utils/stklos-script examples/Makefile 
+          lib/Makefile utils/Makefile utils/stklos-config 
+	  utils/stklos-script examples/Makefile 
 	  lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile 
 	  lib/ScmPkg.d/Makefile tests/Makefile  
 	  doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 
