@@ -1,7 +1,7 @@
 ;;;;
 ;;;; bonus.stk	-- Useful primitives not in R5RS
 ;;;; 
-;;;; Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 20-Dec-2009 17:43 (eg)
+;;;; Last file update: 16-Mar-2010 08:20 (eg)
 ;;;;
 
 
@@ -870,7 +870,7 @@ doc>
 (define do-color
   (if (and (not (key-get *%program-args* :interactive #f))
 	   (member (getenv "TERM")
-		   '("rxvt" "xterm" "xterm-color" "linux" "cygwin")))
+		   '("rxvt" "xterm" "xterm-color" "linux" "cygwin" "cons25")))
       ;; Terminal accepts color
       ansi-color
       ;; Provide a procedure which ignore color indications

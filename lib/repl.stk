@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  3-Jan-2010 00:33 (eg)
+;;;; Last file update: 16-Mar-2010 08:20 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything 
@@ -41,18 +41,6 @@
 (define repl-level 0)
 (define repl-backtrace '())
   
-(define do-color
-  (if (and (not (key-get *%program-args* :interactive #f))
-	   (member (getenv "TERM")
-		   '("rxvt" "xterm" "xterm-color" "linux" "cygwin")))
-      ;; Terminal accepts color
-      ansi-color
-      ;; Provide a procedure which ignore color indications
-      (lambda args
-	(apply string-append
-	       (map (lambda (x) (if (string? x) x ""))
-		    args)))))
-
 (define (do-repl-command l)
   (case (car l)
     ((help ?)		(display

@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 20-Dec-2009 17:56 (eg)
+# Last file update:  4-Jan-2010 12:08 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -12,7 +12,6 @@ scheme_BOOT = assembler.stk		\
 	      bb.stk 			\
 	      bonus.stk 		\
 	      boot.stk 			\
-	      boot-callcc.stk		\
 	      callcc.stk		\
 	      compiler.stk 		\
 	      computils.stk		\
