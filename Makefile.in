@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  3-Oct-2009 21:02 (eg)
+# Last file update:  4-Apr-2010 12:29 (eg)
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -729,21 +729,21 @@ commit-version:
 	hg commit -m "Commit version $(VERSION_TAG)"
 
 prep-version:
-	rm -rf /usr/tmp/$(VERSION_TAG) /usr/tmp/$(VERSION_BETA)* /usr/tmp/beta
-	hg clone . /usr/tmp/$(VERSION_TAG)
-	rm -rf /usr/tmp/$(VERSION_TAG)/.hg*
-	hgclonedates `pwd` /usr/tmp/$(VERSION_TAG)
+	rm -rf /tmp/$(VERSION_TAG) /tmp/$(VERSION_BETA)* /tmp/beta
+	hg clone . /tmp/$(VERSION_TAG)
+	rm -rf /tmp/$(VERSION_TAG)/.hg*
+	hgclonedates `pwd` /tmp/$(VERSION_TAG)
 
 beta: commit-beta prep-version
-	(mv /usr/tmp/$(VERSION_TAG) /usr/tmp/$(VERSION_BETA)`cat .beta-number`;  \
-	 echo "$(VERSION_BETA)`cat .beta-number`" > /usr/tmp/beta ; \
-	 cd /usr/tmp; tar cvfz `cat beta`.tar.gz `cat beta` )
-	ls -ls /usr/tmp/$(VERSION_BETA)*.tar.gz
+	(mv /tmp/$(VERSION_TAG) /tmp/$(VERSION_BETA)`cat .beta-number`;  \
+	 echo "$(VERSION_BETA)`cat .beta-number`" > /tmp/beta ; \
+	 cd /tmp; tar cvfz `cat beta`.tar.gz `cat beta` )
+	ls -ls /tmp/$(VERSION_BETA)*.tar.gz
 
 version: commit-version prep-version
 	hg tag $(VERSION_TAG)
-	( cd /usr/tmp; tar cvfz $(VERSION_TAG).tar.gz $(VERSION_TAG) )
-	ls -ls /usr/tmp/$(VERSION_TAG).tar.gz
+	( cd /tmp; tar cvfz $(VERSION_TAG).tar.gz $(VERSION_TAG) )
+	ls -ls /tmp/$(VERSION_TAG).tar.gz
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
