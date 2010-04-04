@@ -1,7 +1,7 @@
 /*
  * regexp.c	-- STklos Regexps
  * 
- * Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 24-Nov-2000 10:35 (eg)
- * Last file update: 25-Oct-2009 22:01 (eg)
+ * Last file update:  4-Apr-2010 12:22 (eg)
  */
 
 #include "stklos.h"
@@ -44,7 +44,9 @@
 #endif
 
 /* ---------------------------------------------------------------------- */
-
+#ifdef PCRE_PKG_CONFIG
+#  include <pcreposix.h>
+#else 
 /* Here again Mac Os problems. 
  * Here, we used to have a #include <pcreposix.h>
  * However, on a fresh 10.6 install, there is a pcre lib which is
@@ -56,7 +58,8 @@
  * been always "semantically" compatible). The only point wehr we 
  * can have difference shoul be the definition of regmatch_t type
  */
-#include "../pcre/pcreposix.h"
+#  include "../pcre/pcreposix.h"
+#endif
 
 /* ---------------------------------------------------------------------- */
 

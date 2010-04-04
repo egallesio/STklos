@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  3-Jan-2010 08:15 (eg)
+### Last file update:  4-Apr-2010 12:20 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [1.00])
@@ -281,6 +281,7 @@ echo "*****"
 # Try to determine if libpcre is installed
 if ${PKGCONFIG} --exists libpcre ;then 
    HAVE_PCRE="yes"
+   PCREPKG="present"
 else 
    AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
 fi
@@ -411,6 +412,7 @@ AC_SUBST(GCINC)
 AC_SUBST(PCRE)
 AC_SUBST(PCRELIB)
 AC_SUBST(PCREINC)
+AC_SUBST(PCREPKG)
 # FFI
 AC_SUBST(FFI)
 AC_SUBST(FFILIB)
