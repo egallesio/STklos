@@ -2,7 +2,7 @@
  *
  * s y s t e m . c				-- System relative primitives
  *
- * Copyright © 1994-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 14-Jan-2009 11:26 (eg)
+ * Last file update:  4-Apr-2010 19:53 (eg)
  */
 
 #include <unistd.h>
@@ -1087,13 +1087,20 @@ DEFINE_PRIMITIVE("hostname", hostname, subr0, (void))
   return STk_Cstring2string(buff);
 }
   
-
+/*
+<doc EXT pause
+ * (pause)
+ *
+doc>
+*/
 DEFINE_PRIMITIVE("pause", pause, subr0, (void))
 {
   pause();
   return STk_void;
 }
   
+
+
 	  
 
 /*
@@ -1116,6 +1123,14 @@ DEFINE_PRIMITIVE("%chmod", change_mode, subr2, (SCM file, SCM value))
   return MAKE_BOOLEAN(chmod(STRING_CHARS(file), mode) == 0);
 }
 
+
+DEFINE_PRIMITIVE("%big-endian?", big_endianp, subr0, (void))
+{
+  int i = 1;
+  char *p = (char *)&i;
+  
+  return MAKE_BOOLEAN(p[0] != 1);
+}
 
 
 int STk_init_system(void)
@@ -1193,5 +1208,6 @@ int STk_init_system(void)
   ADD_PRIMITIVE(posixify_filename);
   
   ADD_PRIMITIVE(pause);
+  ADD_PRIMITIVE(big_endianp);
   return TRUE;
 }

@@ -91,7 +91,7 @@ State can be one of the following values
 
     ?   71	LET-syntax for multiple values
     -   72	Simple hygienic macros
-    -	74	Octet-Addressed Binary Blocks
+    Y	74	Octet-Addressed Binary Blocks
     ?	78	Lightweight testing
     N   86	MU and NU simulating VALUES & CALL-WITH-VALUES, ... 
 
@@ -107,4 +107,4 @@ State can be one of the following values
     Y	98	An interface to access environment variables
     ?   99	ERR5RS Records
 
-Implemented SRFIs: 40/70
+Implemented SRFIs: 41/70

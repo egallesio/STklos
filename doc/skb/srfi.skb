@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 26-Sep-2008 08:10 (eg)
+;; Last file update:  4-Apr-2010 20:05 (eg)
 ;;
 ;; ======================================================================
 
@@ -502,6 +502,16 @@ following expression ])
 (srfi-section 70
 
 (p [,(quick-link-srfi 70) is fully supported.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 74 -- Octet-Addressed Binary Blocks 
+;; ----------------------------------------------------------------------   
+(srfi-section 74
+	      
+(p [,(quick-link-srfi 74) is fully supported.  To use SRFI-74,
+you need to insert the following expression])
+(fontified-code [(require "srfi-74")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
 
 ;; ----------------------------------------------------------------------
 ;; SRFI 88 -- Keyword objects
