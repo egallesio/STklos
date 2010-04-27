@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k			-- STklos Compiler
 ;;;; 
-;;;; Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 20-Dec-2009 14:57 (eg)
+;;;; Last file update: 24-Apr-2010 23:34 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -537,28 +537,31 @@ doc>
   
   (define (rewrite-body body)
     (let Loop ((l body) (defs '()))
-      (cond
-	((and (pair? l) (pair? (car l)) (eq? (caar l) 'begin))
-	   ;; Delete useless begin
-	    (Loop (append (cdar l) (cdr l))
+      (let ((cur (if (and (pair? l) (pair? (car l)) (expander? (caar l)))
+		     (%macro-expand* (car l))
+		     (car l))))
+	(cond
+	  ((and (pair? cur) (eq? (car cur) 'begin))
+	    ;; Delete useless begin
+	    (Loop (append (cdr cur) (cdr l))
 		  defs))
-	((and (pair? l) (pair? (car l)) (eq? (caar l) 'define))
-	    ;; This is an internal define 
-	    (Loop (cdr l) (cons (cdr (define->lambda (car l))) defs)))
-	((and (pair? l) (pair? (car l)) (eq? (caar l) 'define-macro))
-	    ;; This is an internal define-macro. Add expander + skip expression
-	    (let ((name (compile-internal-define-macro (car l) env #f)))
-	      (set! internal-macros (cons name internal-macros))
-	      (Loop (cdr l) defs)))
+	((and (pair? cur) (eq? (car cur) 'define))
+	   ;; This is an internal define
+	   (Loop (cdr l) (cons (cdr (define->lambda cur)) defs)))
+	((and (pair? cur) (eq? (car cur) 'define-macro))
+	   ;; This is an internal define-macro. Add expander + skip expression
+	   (let ((name (compile-internal-define-macro cur env #f)))
+	     (set! internal-macros (cons name internal-macros))
+	     (Loop (cdr l) defs)))
 	(else
-	    ;; We have parsed all the (starting) definitions 
-	    (if (null? defs)
-	      `(begin ,@l)
-	      (let ((defs (reverse! defs)))
-		;; Generate "similar" to a letrec*
-		`(let ,(map (lambda (x) (list (car x) #f)) defs)
-		   ,@(map (lambda (x) `(set! ,@x)) defs)
-		   ,@l)))))))
+	   ;; We have parsed all the (starting) definitions 
+	   (if (null? defs)
+	       `(begin ,@l)
+	       (let ((defs (reverse! defs)))
+		 ;; Generate "similar" to a letrec*
+		 `(let ,(map (lambda (x) (list (car x) #f)) defs)
+		    ,@(map (lambda (x) `(set! ,@x)) defs)
+		    ,@l))))))))
 
   ;; rewrite the body to transform internal define to letrec
   (compile (rewrite-body body) env epair tail?)
