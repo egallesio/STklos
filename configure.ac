@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  4-Apr-2010 12:20 (eg)
+### Last file update:  8-May-2010 18:54 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [1.00])
@@ -24,7 +24,7 @@ AC_PROG_MKDIR_P
 AC_CHECK_PROG(PKGCONFIG, pkg-config, "pkg-config", "false")
 
 ### Checks for header files.
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h libintl.h limits.h malloc.h memory.h netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h malloc.h memory.h netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
 
 ### Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -104,7 +104,7 @@ case $OS in
       ;;
   *) 
       v=`echo $version | sed -e 's/[[^0-9]]/_/g'`
-      OS_NAME_VERSION=$OS_$v;
+      OS_NAME_VERSION=$OS\_$v;
 esac
 
 
