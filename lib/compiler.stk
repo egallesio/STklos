@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 24-Apr-2010 23:34 (eg)
+;;;; Last file update:  9-May-2010 23:22 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -537,9 +537,13 @@ doc>
   
   (define (rewrite-body body)
     (let Loop ((l body) (defs '()))
-      (let ((cur (if (and (pair? l) (pair? (car l)) (expander? (caar l)))
-		     (%macro-expand* (car l))
-		     (car l))))
+      (let ((cur (cond
+		   ((null? l)
+		      (error "body is empty"))
+		   ((and (pair? l) (pair? (car l)) (expander? (caar l)))
+		      (%macro-expand* (car l)))
+		   (else 
+		      (car l)))))
 	(cond
 	  ((and (pair? cur) (eq? (car cur) 'begin))
 	    ;; Delete useless begin
@@ -554,7 +558,7 @@ doc>
 	     (set! internal-macros (cons name internal-macros))
 	     (Loop (cdr l) defs)))
 	(else
-	   ;; We have parsed all the (starting) definitions 
+	   ;; We have parsed all the (starting) definitions
 	   (if (null? defs)
 	       `(begin ,@l)
 	       (let ((defs (reverse! defs)))
