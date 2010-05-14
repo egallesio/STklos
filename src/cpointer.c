@@ -1,7 +1,7 @@
 /*
  * cpointer.c	-- Pointers on C objects
  * 
- * Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 28-Aug-2007 14:35 (eg)
- * Last file update: 13-Sep-2007 10:32 (eg)
+ * Last file update: 14-May-2010 18:15 (eg)
  */
 
 #include <stklos.h>
@@ -76,6 +76,52 @@ DEFINE_PRIMITIVE("cpointer-data-set!", cpointer_data_set, subr2, (SCM obj, SCM v
 }
 
 
+/* ----------------------------------------------------------------------
+ * 	User interface allocation functions ...
+ * 
+ * Note: System functions which use malloc can use free-bytes to release 
+ * memory
+ *
+ * ---------------------------------------------------------------------- 
+ */
+#define ALLOCATED_WITH_BOEHM_GC 	0x1
+
+DEFINE_PRIMITIVE("allocate-bytes", allocate_bytes, subr1, (SCM sz))
+{
+  unsigned long int size = STk_uinteger_value(sz);
+  void * p;
+  SCM z;
+
+  if (size == ULONG_MAX) 
+    STk_error("bad size ~S", sz);
+  
+  p = STk_must_malloc(size);
+  if (!p)
+    STk_error("cannot allocate ~S bytes", sz);
+  
+  z = STk_make_Cpointer(p, STk_void, p);
+  BOXED_INFO(z) = ALLOCATED_WITH_BOEHM_GC;
+
+  return z;
+}
+
+DEFINE_PRIMITIVE("free-bytes", free_bytes, subr1, (SCM p))
+{
+  if (!CPOINTERP(p)) 
+    STk_error("bad pointer ~S", p);
+
+  if (CPOINTER_DATA(p)) {
+    if (BOXED_INFO(p) == ALLOCATED_WITH_BOEHM_GC)
+      STk_free(CPOINTER_DATA(p));
+    else
+      free(CPOINTER_DATA(p));
+    CPOINTER_DATA(p) = NULL;
+  }
+
+  return STk_void;
+}
+
+
 int STk_init_cpointer(void)
 {
   ADD_PRIMITIVE(cpointerp);
@@ -83,5 +129,8 @@ int STk_init_cpointer(void)
   ADD_PRIMITIVE(cpointer_type);
   ADD_PRIMITIVE(cpointer_data_set);
   ADD_PRIMITIVE(cpointer_type_set);
+
+  ADD_PRIMITIVE(scheme_malloc);
+  ADD_PRIMITIVE(scheme_free);
   return TRUE;
 }
