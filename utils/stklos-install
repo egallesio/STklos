@@ -2,7 +2,7 @@
 # 							-*- shell-script -*-
 # stklos-install		-- Install STklos extensions
 # 
-# Copyright © 2001-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2001-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 # 
 # 
 # This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 # 
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 18-Mar-2005 13:26 (eg)
-# Last file update: 12-Apr-2007 15:05 (eg)
+# Last file update: 14-May-2010 17:00 (eg)
 #
 
 DISTURL="http://www.stklos.net/download/extensions"
@@ -59,17 +59,49 @@ trace()
     echo "${begin}**** $1${end}" >&2
 }
 
+
+# ----------------------------------------------------------------------
+# 	find_in_path ...
+# ----------------------------------------------------------------------
+find_in_path() {
+    file=$1
+    res=""
+    for i in $(echo $PATH | sed -e 's/:/ /g') ;do
+	if [ -x $i/$file ] ;then
+	    res=$i/$file
+	    break;
+	fi
+    done
+    echo $res
+}
+
+
 # ----------------------------------------------------------------------
 # 	try-fetch ...
 # ----------------------------------------------------------------------
 try_fetch()
 {
+    # Try to fetch package with wget, then curl and finally fetch
     pkg=$1
     trace "Package $pkg is absent. Try to fetch it from $DISTURL" 
-    wget $DISTURL/${pkg}.stgz 2>/dev/null >&2
-    if [ $? = 0 ] ;then
-	trace "Download finished"
-    fi
+    for prog in "wget" "curl" "fetch" 
+    do
+	abs=$(find_in_path $prog)
+	if [ "$abs" != "" ] ;then
+	    case $prog in
+		wget|fetch) 
+		    $prog $DISTURL/${pkg}.stgz 2>/dev/null >&2 ;;
+		curl) 
+		    $prog -o ${pkg}.stgz $DISTURL/${pkg}.stgz 2>/dev/null >&2 ;;
+	    esac
+	    if [ $? = 0 ] ;then
+		trace "Download finished"
+	    else 
+		trace "Error while downloading $DISTURL/${pkg}.stgz" 
+	    fi
+	    return 0;
+	fi
+    done
 }
 
 # ----------------------------------------------------------------------
