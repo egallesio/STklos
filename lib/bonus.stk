@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 16-Mar-2010 08:20 (eg)
+;;;; Last file update: 15-May-2010 12:59 (eg)
 ;;;;
 
 
@@ -825,47 +825,62 @@ doc>
 	(error "cannot read file ~s" path))))
 
 ;; ======================================================================
-;;	ansi-color ...
+;;	ansi-color  & ansi-color-protect...
 ;; ======================================================================
-(define (ansi-color . args)
-   (define (code c)
-     (let ((alist '((normal	. "0")
-		    (bold 	. "1")  (no-bold 	. "21")
-		    (italic 	. "2")  (no-italic	. "22")
-		    (underline	. "4")  (no-undeline	. "24")
-		    (blink 	. "5")  (no-blink	. "25")
-		    (reverse 	. "7")  (no-reverse	. "27")
-		    (black 	. "30") (bg-black	. "40")
-		    (red 	. "31") (bg-red		. "41")
-		    (green 	. "32") (bg-green	. "42") 
-		    (yellow 	. "33") (bg-yellow	. "43")
-		    (blue 	. "34") (bg-blue	. "44")
-		    (magenta	. "35") (bg-magenta	. "45")
-		    (cyan 	. "36") (bg-cyan	. "46")
-		    (white 	. "37") (bg-white	. "47"))))
-       (let ((v (assoc c alist)))
-	 (if v (cdr v) ""))))
-  (let Loop ((args        args)
-	     (str-prev?  #t)
-	     (res         ""))
-       (cond 
-	((null? args)
-	 (if str-prev?
-	     res
-	     (string-append res "m")))
-	((string? (car args))
-	 (Loop (cdr args)
-	       #t
-	       (string-append res
-			      (if str-prev? "" "m")				 
-			      (car args))))
-	((symbol? (car args))
-	 (Loop (cdr args)
-	       #f
-	       (string-append res
-			      (if  str-prev? "\e[" ";")
-			      (code (car args)))))
-	(else (error 'ansi-color "bad command ~S" args)))))
+(define ansi-color 	   #f)
+(define ansi-color-protect #f)
+
+(let ((ansi-color-start   "\e[")
+      (ansi-color-stop    "m"))
+
+  (define (code c)
+    (let ((alist '((normal	. "0")
+		   (bold 	. "1")  (no-bold 	. "21")
+		   (italic 	. "2")  (no-italic	. "22")
+		   (underline	. "4")  (no-undeline	. "24")
+		   (blink 	. "5")  (no-blink	. "25")
+		   (reverse 	. "7")  (no-reverse	. "27")
+		   (black 	. "30") (bg-black	. "40")
+		   (red 	. "31") (bg-red		. "41")
+		   (green 	. "32") (bg-green	. "42") 
+		   (yellow 	. "33") (bg-yellow	. "43")
+		   (blue 	. "34") (bg-blue	. "44")
+		   (magenta	. "35") (bg-magenta	. "45")
+		   (cyan 	. "36") (bg-cyan	. "46")
+		   (white 	. "37") (bg-white	. "47"))))
+      (let ((v (assoc c alist)))
+	(if v (cdr v) ""))))
+
+  ;; ansi-color-protect ...
+  (set! ansi-color-protect
+    (lambda (start stop)
+      (set! ansi-color-start (string-append start "\e["))
+      (set! ansi-color-stop  (string-append "m" stop))))
+
+  ;; ansi-color ...
+  (set! ansi-color
+    (lambda  args
+      (let Loop ((args        args)
+		 (str-prev?  #t)
+		 (res         ""))
+	(cond 
+	  ((null? args)
+	     (if str-prev?
+		 res
+		 (string-append res ansi-color-stop)))
+	  ((string? (car args))
+	     (Loop (cdr args)
+		   #t
+		   (string-append res
+				  (if str-prev? "" ansi-color-stop)
+				  (car args))))
+	  ((symbol? (car args))
+	     (Loop (cdr args)
+		   #f
+		   (string-append res
+				  (if  str-prev? ansi-color-start ";")
+				  (code (car args)))))
+	  (else (error 'ansi-color "bad command ~S" args)))))))
 
 (define do-color
   (if (and (not (key-get *%program-args* :interactive #f))

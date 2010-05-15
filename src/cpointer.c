@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 28-Aug-2007 14:35 (eg)
- * Last file update: 14-May-2010 18:15 (eg)
+ * Last file update: 14-May-2010 20:21 (eg)
  */
 
 #include <stklos.h>
@@ -130,7 +130,7 @@ int STk_init_cpointer(void)
   ADD_PRIMITIVE(cpointer_data_set);
   ADD_PRIMITIVE(cpointer_type_set);
 
-  ADD_PRIMITIVE(scheme_malloc);
-  ADD_PRIMITIVE(scheme_free);
+  ADD_PRIMITIVE(allocate_bytes);
+  ADD_PRIMITIVE(free_bytes);
   return TRUE;
 }

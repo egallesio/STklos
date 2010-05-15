@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update: 16-Mar-2010 08:20 (eg)
+;;;; Last file update: 15-May-2010 23:25 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything 
@@ -32,7 +32,8 @@
 
 (define-module REPL
   (import SCHEME)
-  (export main-repl repl repl-display-prompt main-repl-hook)
+  (export main-repl repl repl-prompt repl-make-prompt repl-display-prompt
+	  repl-change-default-ports main-repl-hook)
 
 ;;; In module REPL
 
@@ -40,7 +41,12 @@
 
 (define repl-level 0)
 (define repl-backtrace '())
-  
+
+(define default-in  (current-input-port))
+(define default-out (current-output-port))
+(define default-err (current-error-port))
+
+
 (define (do-repl-command l)
   (case (car l)
     ((help ?)		(display
@@ -95,17 +101,35 @@
       ;; Value raised is not a condition. Display it
       (format port "**** The following non-condition was raised: ~S\n" c)))
 
+;; ----------------------------------------------------------------------
+;;	repl-prompt ...
+;; ----------------------------------------------------------------------
+(define repl-prompt (make-parameter ""))
+
+;; ----------------------------------------------------------------------
+;;	make-prompt ...
+;; ----------------------------------------------------------------------
+(define (make-prompt module)
+  (repl-prompt (string-append
+		   ;; repl-level if > 1
+		   (if (> repl-level 1)
+		       (do-color 'bold 'red
+				 (format "[~A] " repl-level))
+		       "")
+		   ;; prompt itself
+		   (do-color 'bold 'magenta
+			     (format "~A> " (module-name module))
+			     'black))))
+;; ----------------------------------------------------------------------
+;;	repl-make-prompt ...
+;; ----------------------------------------------------------------------
+(define repl-make-prompt (make-parameter make-prompt))
 
 ;; ----------------------------------------------------------------------
 ;;	display-prompt ...
 ;; ----------------------------------------------------------------------
-(define (display-prompt module port)
-  (when (> repl-level 1)
-    (display (do-color 'bold 'red (format "[~A] " repl-level)) port))
-  (display (do-color 'bold 'magenta
-		     (format "~A> " (module-name module))
-		     'black)
-	   port)
+(define (display-prompt port)
+  (display (repl-prompt))
   (flush-output-port port))
 
 ;; ----------------------------------------------------------------------
@@ -114,9 +138,19 @@
 (define repl-display-prompt (make-parameter display-prompt))
 
 ;; ----------------------------------------------------------------------
-;;	main-repl-start ...
+;;	main-repl-hook ...
 ;; ----------------------------------------------------------------------
 (define main-repl-hook (make-parameter void))
+
+;; ----------------------------------------------------------------------
+;;	repl-change-default-ports ...
+;; ----------------------------------------------------------------------
+(define (repl-change-default-ports :key  (in  default-in)
+				         (out default-out)
+					 (err default-err))
+  (set! default-in in)
+  (set! default-out out)
+  (set! default-err err))
 
 ;; ----------------------------------------------------------------------
 ;;	repl ...
@@ -133,16 +167,17 @@
  * |current-input-port|, |current-output-port| and |current-error-port|.
 doc>
 |#
-(define (repl :key (in  (current-input-port))
-	      	   (out (current-output-port))
-		   (err (current-error-port)))
+(define (repl :key (in  default-in)
+	      	   (out default-out)
+		   (err default-err))
   (let ((eof #f))
     (set! repl-level (+ repl-level 1))
     (let Loop ()
       (with-handler (lambda (c) (repl-handler c err))
 	 ;; display prompt
-	 (when interactive? 
-	   ( (repl-display-prompt) (current-module) err ))
+	 (when interactive?
+	   ( (repl-make-prompt) (current-module) )
+	   ( (repl-display-prompt) err ))
 
 	 (let ((e (%read in)))
 	   (display (do-color 'clear))
