@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  3-Jan-2010 08:12 (eg)
+;;;; Last file update: 16-May-2010 17:04 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -40,9 +40,11 @@
 (include "date.stk")		; Dates
 (include "logical.stk")		; Logical operations
 (include "thread.stk")		; Thread support
+(include "ffi.stk")		; FFI support
 (include "obsolete.stk")	; Obsolete functions. Candidates to disappear
 (include "repl.stk")		; Read Eval Print Loop
 (import REPL)
+
 
 ;==============================================================================
 (autoload	 "compfile"	  compile-file)
@@ -59,7 +61,6 @@
 		 		  http-parse-header http-find-body http-download)
 (autoload	 "lex-rt"	  lexer-next-token)
 (syntax-autoload "scmpkg-support" interface)
-(syntax-autoload "ffi"		  define-external)
 (autoload	 "srfi-27"        random-integer random-real)
 (syntax-autoload "srfi-34"        with-exception-handler guard)
 (syntax-autoload "srfi-35"        define-condition-type condition)

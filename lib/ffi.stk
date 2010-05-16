@@ -1,7 +1,7 @@
 ;;;;
 ;;;; ffi.stk			-- FFI support
 ;;;; 
-;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
-;;;; Last file update: 25-Jun-2007 14:21 (eg)
+;;;; Last file update: 16-May-2010 17:03 (eg)
 ;;;;
 
 (define ffi:arg-type->number
@@ -115,13 +115,12 @@ doc>
   (define (parse-parameters lst)
     (map (lambda (x)
 	   (cond
-	     ((keyword? x) (ffi:arg-type->number x #t))
+	     ((keyword? x)
+	      (ffi:arg-type->number x #t))
 	     ((pair? x)
-	      (match-case x
-		(((? symbol?) (? keyword?))
-		 (ffi:arg-type->number (cadr x) #t))
-		(else
-		 (error 'define-external "bad parameter description: ~S" x))))
+	      (if (and (symbol? (car x)) (keyword? (caar x)) (null? (cddr x)))
+		  (ffi:arg-type->number (cadr x) #t)
+		  (error 'define-external "bad parameter description: ~S" x)))
 	     (else
 	      (error 'define-external "bad parameter description: ~S" x))))
 	 lst))

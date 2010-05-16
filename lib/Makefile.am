@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  4-Apr-2010 20:15 (eg)
+# Last file update: 16-May-2010 17:05 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -17,6 +17,7 @@ scheme_BOOT = assembler.stk		\
 	      computils.stk		\
 	      date.stk			\
 	      expand.pp			\
+	      ffi.stk			\
 	      load.stk			\
 	      logical.stk		\
 	      mbe.stk			\
@@ -41,7 +42,6 @@ scheme_SRCS = STklos.init		\
 	      describe.stk		\
 	      env.stk			\
 	      expand.ss			\
-	      ffi.stk			\
 	      full-syntax.stk		\
 	      full-conditions.stk 	\
 	      getopt.stk		\
@@ -82,7 +82,6 @@ scheme_SRCS = STklos.init		\
 
 scheme_OBJS = compfile.ostk		\
 	      bigmatch.ostk		\
-	      ffi.ostk			\
 	      full-syntax.ostk		\
 	      full-conditions.ostk 	\
 	      describe.ostk		\
