@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 28-Aug-2007 14:35 (eg)
- * Last file update: 14-May-2010 20:21 (eg)
+ * Last file update: 15-May-2010 23:50 (eg)
  */
 
 #include <stklos.h>
@@ -76,6 +76,14 @@ DEFINE_PRIMITIVE("cpointer-data-set!", cpointer_data_set, subr2, (SCM obj, SCM v
 }
 
 
+DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr1, (SCM p))
+{
+  if (!CPOINTERP(p)) 
+    error_bad_cpointer(p);
+  
+  return STk_Cstring2string(CPOINTER_VALUE(p));
+}
+
 /* ----------------------------------------------------------------------
  * 	User interface allocation functions ...
  * 
@@ -108,14 +116,15 @@ DEFINE_PRIMITIVE("allocate-bytes", allocate_bytes, subr1, (SCM sz))
 DEFINE_PRIMITIVE("free-bytes", free_bytes, subr1, (SCM p))
 {
   if (!CPOINTERP(p)) 
-    STk_error("bad pointer ~S", p);
+    error_bad_cpointer(p);
 
-  if (CPOINTER_DATA(p)) {
+  if (CPOINTER_VALUE(p)) {
     if (BOXED_INFO(p) == ALLOCATED_WITH_BOEHM_GC)
-      STk_free(CPOINTER_DATA(p));
-    else
-      free(CPOINTER_DATA(p));
-    CPOINTER_DATA(p) = NULL;
+      STk_free(CPOINTER_VALUE(p));
+    else 
+      free(CPOINTER_VALUE(p));
+
+    CPOINTER_VALUE(p) = NULL;
   }
 
   return STk_void;
@@ -129,6 +138,7 @@ int STk_init_cpointer(void)
   ADD_PRIMITIVE(cpointer_type);
   ADD_PRIMITIVE(cpointer_data_set);
   ADD_PRIMITIVE(cpointer_type_set);
+  ADD_PRIMITIVE(cpointer2string);
 
   ADD_PRIMITIVE(allocate_bytes);
   ADD_PRIMITIVE(free_bytes);
