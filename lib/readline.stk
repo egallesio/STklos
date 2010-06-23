@@ -1,0 +1,90 @@
+;;;;
+;;;; readline.stk	-- Access to the GNU-readline lib.
+;;;;                       A FFI demonstration
+;;;; 
+;;;; Copyright © 2007-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 25-Jun-2007 11:48 (eg)
+;;;; Last file update: 23-Jun-2010 00:25 (eg)
+;;;;
+
+(define-module READLINE
+  (export try-initialize-readline
+	  readline add-history read-history
+	  write-history read-with-history)
+
+;;;; In module READLINE
+
+(define *readline-lib* "libreadline.so")
+
+(define readline     	     #f)
+(define add-history  	     #f)
+(define read-history 	     #f)
+(define write-history 	     #f)
+
+(define (read-with-history :optional (prompt "> "))
+  (let ((line (readline prompt)))
+    (unless (or (eq? line (void)) (equal? line ""))
+      (add-history line))
+    line))
+
+
+(define (try-initialize-readline)
+  ;; Try to define external functions
+  ;; Return #t if we were able to find the GNU readline library
+  (with-handler
+   (lambda (c)
+     ;; If we are here, this probably because *readline-lib* is not present
+     #f)
+   (let ((%readline (make-external-function "readline"
+					    '(:string)
+					    :pointer
+					    *readline-lib*)))
+     (set! readline  (lambda (prompt)
+		       (let ((ptr (%readline prompt)))
+			 (if (eq? ptr (void))
+			     (void)
+			     (let ((str (cpointer->string ptr)))
+			       ;; GNU/Readline always returns a string which is
+			       ;; dynamically allocated. Take care of that.
+			       (free-bytes ptr)
+			       str)))))
+
+     (set! add-history (make-external-function "add_history"
+					       '(:string)
+					       :void
+					       *readline-lib*))
+
+     (set! read-history (make-external-function "read_history"
+						'(:string)
+						:int
+						*readline-lib*))
+
+     (set! write-history (make-external-function  "write_history"
+						  '(:string)
+						  :int
+						  *readline-lib*))
+     ;; return #t to tell that everything is alright
+     #t)))
+
+;; End of module READLINE
+)
+
+(provide "readline")

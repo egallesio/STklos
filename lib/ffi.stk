@@ -21,13 +21,14 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
-;;;; Last file update: 16-May-2010 17:03 (eg)
+;;;; Last file update: 22-Jun-2010 09:36 (eg)
 ;;;;
 
-(define ffi:arg-type->number
-    (let ((table '((:void 	0)
+
+(define make-external-function
+  (let ((table '((:void 	0)
 		   (:char 	1)
-		   (:short 	2)
+`		   (:short 	2)
 		   (:ushort 	3)
 		   (:int 	4)
 		   (:uint 	5)
@@ -45,14 +46,38 @@
 		   (:int32	17)
 		   (:int64	18)
 		   (:obj	19))))
-      (lambda (k argument?)
-	(let ((info (assoc k table)))
-	  (if info
-	      (let ((r (cadr info)))
-		(if (and (zero? r) argument?)
-		    (error 'define-external "parameter of type :void are forbidden")
-		    (cadr info)))
-	      (error 'define-external "bad type name ~S" k))))))
+
+    (define (arg-type->number k argument?)
+      (let ((info (assoc k table)))
+	(if info
+	    (let ((r (cadr info)))
+	      (if (and (zero? r) argument?)
+		  (error 'define-external "parameter of type :void are forbidden")
+		  (cadr info)))
+	    (error 'define-external "bad type name ~S" k))))
+
+    (define (parse-parameters lst)
+      (map (lambda (x)
+	     (cond
+	       ((keyword? x)
+		(arg-type->number x #t))
+	       ((pair? x)
+		(if (and (symbol? (car x)) (keyword? (caar x)) (null? (cddr x)))
+		    (arg-type->number (cadr x) #t)
+		    (error 'make-external-function
+			   "bad parameter description: ~S" x)))
+	       (else
+		(error 'make-external-function "bad parameter description: ~S" x))))
+	   lst))
+
+    ;;; make-external-function lambda
+    (lambda (entry-name parameters return-type lib-name)
+      (%make-ext-func entry-name
+		      (parse-parameters parameters)
+		      (arg-type->number return-type #f)
+		      lib-name))))
+
+
 
 #|
 <doc EXT-SYNTAX define-external
@@ -111,29 +136,12 @@
 doc>
 |#
 (define-macro (define-external name parameters . args)
-
-  (define (parse-parameters lst)
-    (map (lambda (x)
-	   (cond
-	     ((keyword? x)
-	      (ffi:arg-type->number x #t))
-	     ((pair? x)
-	      (if (and (symbol? (car x)) (keyword? (caar x)) (null? (cddr x)))
-		  (ffi:arg-type->number (cadr x) #t)
-		  (error 'define-external "bad parameter description: ~S" x)))
-	     (else
-	      (error 'define-external "bad parameter description: ~S" x))))
-	 lst))
-
-  
-  (let ((args 	     (parse-parameters parameters))
-	(lib-name    (key-get args :library-name ""))
+  (let ((lib-name    (key-get args :library-name ""))
 	(entry-name  (key-get args :entry-name (symbol->string name)))
 	(return-type (key-get args :return-type :void)))
-    `(define ,name
-       (%make-ext-func ,entry-name
-		       ',args
-		       ,(ffi:arg-type->number return-type #f)
-		       ,lib-name))))
+    `(define ,name (make-external-function ,entry-name
+					   ',parameters
+					   ,return-type
+					   ,lib-name))))
 
 (provide "ffi")

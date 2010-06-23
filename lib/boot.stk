@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 16-May-2010 17:04 (eg)
+;;;; Last file update: 23-Jun-2010 00:14 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -43,8 +43,9 @@
 (include "ffi.stk")		; FFI support
 (include "obsolete.stk")	; Obsolete functions. Candidates to disappear
 (include "repl.stk")		; Read Eval Print Loop
-(import REPL)
-
+(include "readline.stk")	; Readline support
+(include "repl-readline.stk")	; REL + readline
+(import REPL REPL-READLINE)
 
 ;==============================================================================
 (autoload	 "compfile"	  compile-file)
@@ -225,7 +226,8 @@
 	    (lambda (c) (%simple-fatal-exception-handler "evaluating" expr c 4))
 	    (eval (read-from-string expr))
 	    0))
-    (else  ;; Starts the main REPL
+    (else  ;; Try to initialize GNU readline and starts the main REPL
+           (try-initialize-repl-with-readline)
            (main-repl))))
 
 

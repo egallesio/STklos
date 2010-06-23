@@ -1,0 +1,102 @@
+;;;;
+;;;; repl-readline.stk	-- REPL with GNU-Readline support
+;;;; 
+;;;; Copyright © 2010 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 15-May-2010 22:00 (eg)
+;;;; Last file update: 23-Jun-2010 00:16 (eg)
+;;;;
+
+(require "readline")
+
+(define-module REPL-READLINE
+  (import REPL READLINE)
+  (export try-initialize-repl-with-readline)
+
+;;;; In module REPL-READLINE
+
+(define (repl-readline-integration)
+  (let ((old-make-prompt (repl-make-prompt))
+	(history-file    (expand-file-name "~/.stklos/history"))
+	(buff 		 "")
+	(buff-index	 1)
+	(port 		 #f))
+
+    ;;
+    ;; Change the prompt mechanic:
+    ;; 	- the prompt is built with escape sequences between special delimiters
+    ;;	  which are specially treated by read line (\001 and \002)
+    ;;	- the prompt is noo more displayed (readline will display it)
+    ;;
+    (repl-make-prompt (lambda (module)
+			(ansi-color-protect "\x01" "\x02")
+			(old-make-prompt module)
+			(ansi-color-protect "" "")))
+  
+    (repl-display-prompt (lambda (port)
+			   'nothing))
+    ;;
+    ;; History management
+    ;;
+    (read-history history-file)
+    (register-exit-function! (lambda (_)
+			       (write-history history-file)))
+
+    ;;
+    ;; Build a virtual port for the input port of the REPL
+    ;;
+    (set! port (open-input-virtual
+		:read-char (lambda (port)
+			     (let Loop ()
+			       (cond
+				 ((eq? buff (void))
+				    ;; Read an eof 
+				    #eof)
+				 ((> buff-index (string-length buff))
+				    ;; No more character to read. Fill the
+				    ;; buffer with readline
+				    (set! buff (read-with-history (repl-prompt)))
+				    (set! buff-index 0)
+				    (set! (repl-prompt) "")
+				    (Loop))
+				 ((= buff-index (string-length buff))
+				    ;; last character read. return a newline char
+				    (set! buff-index (+ buff-index 1))
+				    #\newline)
+				 (else
+				    ;; take a character form the buffer
+				    (let ((c (string-ref buff buff-index)))
+				      (set! buff-index (+ buff-index 1))
+				      c)))))
+		:ready?    (lambda (port)
+			     (< buff-index (string-length buff)))
+		:eof?      (lambda (port)
+			     (eq? buff (void)))))
+
+    (repl-change-default-ports :in port)))
+
+(define (try-initialize-repl-with-readline)
+  (when (try-initialize-readline)
+    (main-repl-hook repl-readline-integration)))
+
+;; End of module REPL-READLINE
+)
+
+(provide "repl-readline")
