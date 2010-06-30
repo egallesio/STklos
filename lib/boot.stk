@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 23-Jun-2010 00:14 (eg)
+;;;; Last file update: 30-Jun-2010 18:08 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -194,6 +194,7 @@
       (ld      (key-get *%program-args* :load  #f))
       (file    (key-get *%program-args* :file #f))
       (expr    (key-get *%program-args* :sexpr #f))
+      (confdir (key-get *%program-args* :conf-dir #f))
       (debug   (key-get *%program-args* :debug 0)))
 
   ;; Look at the debug flag
@@ -202,9 +203,18 @@
     (compiler:gen-line-number #t)	; Generate line numbers
     (when (> debug 1)			; Load-verbose when debug >= 2 
       (load-verbose 1)))
+
+  ;; Eventually try to create the configuratioon directory
+  (let ((dir (%stklos-conf-dir)))
+    (unless (file-is-directory? dir)
+      (with-handler
+       (lambda (c)
+	 (eprintf "Warning: cannot create configuration directory ~S\n" dir))
+       (make-directories dir))))
+
   ;; Try to load the user initialization file except if "--no-init-file"
   (unless no-init
-    (try-load (expand-file-name "~/.stklos/stklosrc")))
+    (try-load (%stklos-conf-file "stklosrc")))
   
   (when ld
     ;; "--load" option

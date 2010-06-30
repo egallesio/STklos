@@ -4,7 +4,7 @@
 ;;;
 ;;; This code is in the public domain.
 ;;;
-;;; Last file update: 27-Aug-2008 13:41 (eg)
+;;; Last file update: 23-Jun-2010 12:12 (eg)
 ;;; 
 
 
@@ -30,7 +30,7 @@
 ;;; implementation reside.
 (define (implementation-vicinity)
   (case (software-type)
-    ((unix)	 (string-append (getenv "HOME") "/.stklos/slib/"))
+    ((unix)	 (%stklos-conf-file "slib"))
     (else 	 (error 'implementation-vicinity 
 			"unknown implementation on this system"))))
 
@@ -44,10 +44,11 @@
 	  ;; Use this path if your scheme does not support GETENV
 	  ;; or if SCHEME_LIBRARY_PATH is not set.
 	  (case (software-type)
-	    ((unix) (let ((perso (expand-file-name "~/.stklos/slib/require.scm")))
+	    ((unix) (let ((perso (%stklos-conf-file (make-path "slib"
+							       "require.scm"))))
 		      (string-append
 		          (if (file-exists? perso)
-			      (expand-file-name "~/.stklos/slib")
+			      (%stklos-conf-file "slib")
 			      (make-path (%library-prefix)
 					 "lib"
 					 "stklos"

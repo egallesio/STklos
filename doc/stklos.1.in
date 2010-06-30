@@ -65,6 +65,11 @@ use 'file' as program
 evaluate the given sexpr and exit
 .IP "-b file, --boot-file=file"
 use 'file' to boot the system instead of the default one
+.IP "-D directory, --conf-dir=directory"
+use the given directory to store the various configuration files. This
+directory is also used to store the packages installed with the
+\fIstklos-pkg(1)\fR command. Note that the shell variable
+\fISTKLOS_CONFDIR\fR can also be used to set this directory (see below).
 .IP "-q, --no-init-file"
 quiet: do not load the user init file
 .IP "-i, --interactive"
@@ -88,15 +93,7 @@ This special option signals the end of the \fBstklos\fR command. The
 arguments placed after this option are taken program arguments, 
 even if they start with a "-" character.
 
-
-.SH FILES
-
-.IP "~/.stklos/stklosrc" 
-This file is the user init file which is loaded when \fBstklos\fR
-starts. Use the \fB-q\fR to avoid the loading of this file 
-
-
-.SH VARIABLES
+.SH ENVIRONMENT VARIABLES
 
 .IP "STKLOS_LOAD_PATH"
 This is a colon-separated list of directories in which \fBstklos\fR
@@ -107,6 +104,17 @@ or \fBtry-load\fR.
 This variable must contains an integer which indicates the number of
 frames printed on an error. Use the value \fB0\fR for an unlimited
 back-trace.
+
+.IP "STKLOS_CONFDIR"
+This variable can be used to designate the directory used by \fBstklos\fR 
+to store its configuration or packages files. It not set, the default 
+\fBstklos\fR configuration directory is by default \fB~/.stklos\fR.
+
+.SH FILES
+
+.IP "~/<stklos-conf-dir>/stklosrc" 
+This file is the user init file which is loaded when \fBstklos\fR
+starts. Use the \fB-q\fR to avoid the loading of this file.
 
 
 .SH "SEE ALSO"

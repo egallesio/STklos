@@ -124,8 +124,11 @@ display the version of \fRstklos-pkg\fR and exit.
 Show a list of options
 
 .SH "FILES"
-.IP "~/.stklos/pkg"
-The \fISTklos\fR user ScmPkg repository 
+.IP "~/<stklos-conf-dir>/pkg"
+The \fISTklos\fR user ScmPkg repository. <stklos-conf-dir> is by
+default \fI~/.stklos\fR but can be set by the \fiSTKLOS_CONFDIR\fR 
+shell variable
+
 .IP "@PREFIX@/lib/stklos/pkg"
 The \fISTklos\fR system ScmPkg repository here 
 
