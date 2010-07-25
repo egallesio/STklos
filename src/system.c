@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  4-Apr-2010 19:53 (eg)
+ * Last file update: 30-Jun-2010 19:56 (eg)
  */
 
 #include <unistd.h>
@@ -1113,6 +1113,11 @@ DEFINE_PRIMITIVE("%library-prefix", library_prefix, subr0, (void))
   return STk_Cstring2string(PREFIXDIR);
 }
 
+DEFINE_PRIMITIVE("%shared-library-suffix", shared_library_suffix, subr0, (void))
+{
+  return STk_Cstring2string(SHARED_SUFFIX);
+}
+
 DEFINE_PRIMITIVE("%chmod", change_mode, subr2, (SCM file, SCM value))
 {
   long mode = STk_integer_value(value);
@@ -1174,6 +1179,7 @@ int STk_init_system(void)
   ADD_PRIMITIVE(unsetenv);
   ADD_PRIMITIVE(hostname);
   ADD_PRIMITIVE(library_prefix);
+  ADD_PRIMITIVE(shared_library_suffix);
   ADD_PRIMITIVE(change_mode);
 
   ADD_PRIMITIVE(getcwd);

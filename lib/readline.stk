@@ -1,6 +1,5 @@
 ;;;;
 ;;;; readline.stk	-- Access to the GNU-readline lib.
-;;;;                       A FFI demonstration
 ;;;; 
 ;;;; Copyright © 2007-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -22,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-Jun-2007 11:48 (eg)
-;;;; Last file update: 23-Jun-2010 00:25 (eg)
+;;;; Last file update: 25-Jul-2010 22:30 (eg)
 ;;;;
 
 (define-module READLINE
@@ -32,7 +31,8 @@
 
 ;;;; In module READLINE
 
-(define *readline-lib* "libreadline.so")
+(define *readline-lib* (string-append "libreadline."
+				      (%shared-library-suffix)))
 
 (define readline     	     #f)
 (define add-history  	     #f)
@@ -41,7 +41,7 @@
 
 (define (read-with-history :optional (prompt "> "))
   (let ((line (readline prompt)))
-    (unless (or (eq? line (void)) (equal? line ""))
+    (unless (or (eof-object? line) (equal? line ""))
       (add-history line))
     line))
 
@@ -51,6 +51,7 @@
   ;; Return #t if we were able to find the GNU readline library
   (with-handler
    (lambda (c)
+     (eprintf "No readline support ~S\n" *readline-lib*)
      ;; If we are here, this probably because *readline-lib* is not present
      #f)
    (let ((%readline (make-external-function "readline"
@@ -60,7 +61,7 @@
      (set! readline  (lambda (prompt)
 		       (let ((ptr (%readline prompt)))
 			 (if (eq? ptr (void))
-			     (void)
+			     #eof
 			     (let ((str (cpointer->string ptr)))
 			       ;; GNU/Readline always returns a string which is
 			       ;; dynamically allocated. Take care of that.

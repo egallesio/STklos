@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-May-2010 22:00 (eg)
-;;;; Last file update: 23-Jun-2010 10:29 (eg)
+;;;; Last file update: 25-Jul-2010 23:10 (eg)
 ;;;;
 
 (require "readline")
@@ -34,11 +34,7 @@
 
 (define (repl-readline-integration)
   (let ((old-make-prompt (repl-make-prompt))
-	(history-file    (%stklos-conf-file "history"))
-	(buff 		 "")
-	(buff-index	 1)
-	(port 		 #f))
-
+	(history-file    (%stklos-conf-file "history")))
     ;;
     ;; Change the prompt mechanic:
     ;; 	- the prompt is built with escape sequences between special delimiters
@@ -62,35 +58,41 @@
     ;;
     ;; Build a virtual port for the input port of the REPL
     ;;
-    (set! port (open-input-virtual
-		:read-char (lambda (port)
-			     (let Loop ()
-			       (cond
-				 ((eq? buff (void))
-				    ;; Read an eof 
-				    #eof)
-				 ((> buff-index (string-length buff))
-				    ;; No more character to read. Fill the
-				    ;; buffer with readline
-				    (set! buff (read-with-history (repl-prompt)))
-				    (set! buff-index 0)
-				    (set! (repl-prompt) "")
-				    (Loop))
-				 ((= buff-index (string-length buff))
-				    ;; last character read. return a newline char
-				    (set! buff-index (+ buff-index 1))
-				    #\newline)
-				 (else
-				    ;; take a character form the buffer
-				    (let ((c (string-ref buff buff-index)))
-				      (set! buff-index (+ buff-index 1))
-				      c)))))
-		:ready?    (lambda (port)
-			     (< buff-index (string-length buff)))
-		:eof?      (lambda (port)
-			     (eq? buff (void)))))
-
-    (repl-change-default-ports :in port)))
+    (let* ((buff       "")
+	   (buff-index -1)
+	   (fill-buff  (lambda () 
+			 ;; No more char. to read. Fill the buffer with readline
+			 (set! buff (read-with-history (repl-prompt)))
+			 (set! buff-index 0)
+			 (set! (repl-prompt) "")))
+	   (port       (open-input-virtual
+			:read-char
+			  (lambda (port)
+			    (let Loop ()
+			      (cond
+				((eof-object? buff)
+			           (set! buff       "")
+				   (set! buff-index -1)
+				   #eof)
+				((= buff-index (string-length buff))
+				   ;; last character read. return a newline char
+				   (set! buff-index (+ buff-index 1))
+				   #\newline)
+				((or (negative? buff-index)
+				     (> buff-index (string-length buff)))
+				   (fill-buff)
+				   (Loop))
+				(else
+				   (let ((c (string-ref buff buff-index)))
+				     (set! buff-index (+ buff-index 1))
+				     c)))))
+			  :eof?
+			    (lambda (port)
+			      (if (eof-object? buff)
+				  (begin (fill-buff) #eof)
+				  #f)))))
+      
+      (repl-change-default-ports :in port))))
 
 (define (try-initialize-repl-with-readline)
   (when (try-initialize-readline)
