@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  4-Apr-2010 20:05 (eg)
+;; Last file update:  2-Aug-2010 19:14 (eg)
 ;;
 ;; ======================================================================
 
@@ -548,7 +548,7 @@ you need to insert the following expression])
 
    
 ;; ----------------------------------------------------------------------
-;; SRFI 98 -- SAn interface to access environment variables
+;; SRFI 98 -- An interface to access environment variables
 ;; ----------------------------------------------------------------------   
 (index "get-environment-variable")
 (index "get-environment-variables")
@@ -558,6 +558,17 @@ you need to insert the following expression])
 described in this document (procedures
 ,(code "get-environment-variable"), and
 ,(code "get-environment-variables")). ]))
+
    
+;; ----------------------------------------------------------------------
+;; SRFI 100 -- define-lambda-object
+;; ----------------------------------------------------------------------   
+(srfi-section 100
+	      
+(p [,(quick-link-srfi 100) is fully supported.  To use SRFI-100,
+you need to insert the following expression])
+(fontified-code [(require "srfi-100")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
 ;; End of chapter   
 )

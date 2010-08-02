@@ -1,0 +1,391 @@
+;;;;
+;;;; srfi-100.stk	-- SRFI-100 implementation
+;;;;
+;;;; Copyright (c) 2009 Joo ChurlSoo.
+;;;; 
+;;;; Permission is hereby granted, free of charge, to any person obtaining a copy
+;;;; of this software and associated documentation files (the ``Software''), to
+;;;; deal in the Software without restriction, including without limitation the
+;;;; rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+;;;; sell copies of the Software, and to permit persons to whom the Software is
+;;;; furnished to do so, subject to the following conditions:
+;;;; 
+;;;; The above copyright notice and this permission notice shall be included in all
+;;;; copies or substantial portions of the Software.
+;;;; 
+;;;; THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;;;; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+;;;; FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+;;;; AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+;;;; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+;;;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+;;;; SOFTWARE.
+;;;;
+;;;;
+;;;; Adaptation for STklos are tagged **STklos**
+;;;;
+;;;;           Author: Joo ChurlSoo.
+;;;;    Creation date: ??-???-2009 ??:??
+;;;; Last file update:  2-Aug-2010 19:09 (eg)
+;;;;
+
+;; define-lambda-object --- define-macro
+
+(define-macro (unquote-get symbol args)
+  (if (null? args)
+      `(error 'define-lambda-object "absent field" ,symbol)
+      (let ((arg (car args)))
+	`(if (eq? ,symbol ',(car arg))
+	     ,(cdr arg)
+	     (unquote-get ,symbol ,(cdr args))))))
+
+(define-macro (unquote-get* symbol args)
+  (if (null? args)
+      `(error 'define-lambda-object "not available inspection" ,symbol)
+      (let ((arg (car args)))
+	`(if (eq? ,symbol ',arg)
+	     ,arg
+	     (unquote-get* ,symbol ,(cdr args))))))
+
+(define-macro (unquote-set! symbol new-val args iargs)
+  (define (lp args)
+    (if (null? args)
+	`(if (memq ,symbol ',iargs)
+	     (error 'define-lambda-object "read-only field" ,symbol)
+	     (error 'define-lambda-object "absent field" ,symbol))
+	(let ((arg (car args)))
+	  `(if (eq? ,symbol ',arg)
+	       (set! ,arg ,new-val)
+	       ,(lp (cdr args))))))
+  (lp args))
+
+(define-macro (seq-lambda r o body)
+  (define (opt-seq z cls body)
+    (if (null? cls)
+	`(if (null? ,z)
+	     ,body
+	     (error 'define-lambda-object "too many arguments" ,z))
+	(let ((cl (car cls)))
+	  `(let ((,(car cl) (if (null? ,z) ,(cadr cl) (car ,z)))
+		 (,z (if (null? ,z) ,z (cdr ,z))))
+	     ,(opt-seq z (cdr cls) body)))))
+  (if (null? o)
+      `(lambda ,r ,body)
+      (let ((z (gensym)))
+	`(lambda (,@r . ,z)
+	   ,(opt-seq z o body)))))
+
+;; Choose either procedure type or macro type according to your implementation.
+;; 1. procedure field-key
+(define (field-key z k d)
+  (let ((x (car z)) (y (cdr z)))
+    (if (null? y)
+	(cons d z)
+	(if (eq? k x)
+	    y
+	    (let lp ((head (list x (car y))) (tail (cdr y)))
+	      (if (null? tail)
+		  (cons d z)
+		  (let ((x (car tail)) (y (cdr tail)))
+		    (if (null? y)
+			(cons d z)
+			(if (eq? k x)
+			    (cons (car y) (append head (cdr y)))
+			    (lp (cons x (cons (car y) head)) (cdr y)))))))))))
+;; 2. macro field-key!
+(define-macro (field-key! z n d)
+  (let ((x (gensym)) (y (gensym)) (head (gensym)) (tail (gensym)))
+    `(let ((,x (car ,z)) (,y (cdr ,z)))
+       (if (null? ,y)
+	   ,d
+	   (if (eq? ',n ,x)
+	       (begin (set! ,z (cdr ,y)) (car ,y))
+	       (let lp ((,head (list ,x (car ,y)))
+			(,tail (cdr ,y)))
+		 (if (null? ,tail)
+		     ,d
+		     (let ((,x (car ,tail)) (,y (cdr ,tail)))
+		       (if (null? ,y)
+			   ,d
+			   (if (eq? ',n ,x)
+			       (begin (set! ,z (append ,head (cdr ,y)))
+				      (car ,y))
+			       (lp (cons ,x (cons (car ,y) ,head)) (cdr ,y))))))))))))
+
+(define-macro (key-lambda r o body)
+  (define (opt-key z cls body)
+    (if (null? cls)
+	`(if (null? ,z)
+	     ,body
+	     (error 'define-lambda-object "too many arguments" ,z))
+	(let ((cl (car cls)))
+	  (let ((var (car cl)) (val (cadr cl)))
+	    ;; 1. procedure field-key
+	    `(let* ((,z (if (null? ,z) (cons ,val ,z) (field-key ,z ',var ,val)))  
+	    	    (,var (car ,z))
+	    	    (,z (cdr ,z)))
+	    ;; 2. macro field-key!
+	    ;; `(let* ((,var (if (null? ,z) ,val (field-key! ,z ,var ,val))))
+	       ,(opt-key z (cdr cls) body))))))
+  (if (null? o)
+      `(lambda ,r ,body)
+      (let ((z (gensym)))
+	`(lambda (,@r . ,z) ,(opt-key z o body)))))
+
+(define (check-duplicate ls err-str)
+  (cond ((null? ls) #f)
+	((memq (car ls) (cdr ls)) (error 'define-lambda-object err-str (car ls)))
+	(else (check-duplicate (cdr ls) err-str))))
+
+(define (check-field part-list main-list cmp name err-str)
+  (let lp ((part part-list) (main main-list))
+    (if (null? part)
+	main
+	(if (null? main)
+	    (error 'define-lambda-object err-str name (car part))
+	    (let ((field (car part)))
+	      (if (cmp field (car main))
+		  (lp (cdr part) (cdr main))
+		  (let loop ((head (list (car main))) (tail (cdr main)))
+		    (if (null? tail)
+			(error 'define-lambda-object err-str name field)
+			(if (cmp field (car tail))
+			    (lp (cdr part) (append head (cdr tail)))
+			    (loop (cons (car tail) head) (cdr tail)))))))))))
+
+;; (define (number-alist ls)
+;;   (let loop ((ls ls) (n 0))
+;;     (if (null? ls)
+;; 	'()
+;; 	(cons (cons (car ls) n) (loop (cdr ls) (+ 1 n))))))
+
+(define-macro (define-object name gr gi fm fi r o a c v h)
+  (let ((safe-name (gensym))
+	(safe-parent (gensym))
+	(arg (gensym))
+	(args (gensym))
+	(makers (gensym))
+	;; (alist-a (gensym))
+	;; (alist-m (gensym))
+	;; (array (gensym))
+	;; (safe-eq (gensym))
+	;; (safe-arg (gensym))
+	(group-name (symbol->string name)))
+    (let ((make-object (string->symbol (string-append "make-" group-name)))
+	  (make-object-by-name (string->symbol (string-append "make-" group-name "-by-name")))
+	  (pred-object (string->symbol (string-append group-name "?"))))
+      `(begin
+	 (define ,safe-parent
+	   (begin
+	     ;; check duplication
+	     (check-duplicate (append (list ',name) ',gi ',gr) "duplicated group")
+	     (check-duplicate ',(append fm (map car fi) (map car h)) "duplicated field")
+	     ;; check field
+	     (for-each (lambda (g y)
+			 (check-field (g 'read-write-field) ',fm eq? y "incompatible read-write field")
+			 (check-field (g 'read-only-field) ',(map car fi) eq? y "incompatible read-only field")
+			 (check-field (g 'required-field) ',r eq? y "incompatible required field")
+			 (check-field (g 'optional-field) ',o equal? y "incompatible optional field")
+			 (check-field (g 'automatic-field) ',(append c v a) equal? y "incompatible automatic field")
+			 (check-field (map car (g 'common-field)) ',(map car c) eq? y "incompatible common field")
+			 (check-field (map car (g 'virtual-field)) ',(map car v) eq? y "incompatible virtual field")
+			 (check-field (map car (g 'hidden-field)) ',(map car h) eq? y "incompatible hidden field"))
+		       (list ,@gi) ',gi)
+	     (for-each (lambda (g y)
+			 (check-field (append (g 'read-write-field) (g 'read-only-field) (map car (g 'hidden-field))) ',(append fm (map car fi) (map car h)) eq? y "incompatible whole field"))
+		       (list ,@gr) ',gr)
+	     (list ,@gi ,@gr)))
+	 ;; Alist, vector/enum, vector/alist or hashtable can be used instead of
+	 ;; unquote-get & unquote-set! according to your implementation.
+	 ;; cf. (eval-variant expression implementation-specific-namespace)
+	 ;; An example of vector/alist:
+	 ;; (define ,alist-a (number-alist ',(append fm (map car fi))))
+	 ;; (define ,alist-m (number-alist ',fm))
+	 ;; (define ,makers
+	 ;;   (let* ,c
+	 ;;     (cons (seq-lambda ,r ,o
+	 ;; 		       (let* (,@a (,array (vector ,@(map (lambda (f) `(lambda (,safe-arg) (if (eq? ,safe-arg ',safe-eq) ,f (set! ,f ,safe-arg)))) fm)  ,@(map (lambda (f) `(lambda (,safe-arg) ,f)) (map cdr fi)))))
+	 ;; 			 (define *%lambda-object%*
+	 ;; 			   (lambda (,arg . ,args)
+	 ;; 			     (if (null? ,args)
+	 ;; 				 (let ((pair (assq ,arg ,alist-a)))
+	 ;; 				   (if pair
+	 ;; 				       ((vector-ref ,array (cdr pair)) ',safe-eq)
+	 ;; 				       (error 'define-lambda-object "absent field" ,arg)))
+	 ;; 				 (if (null? (cdr ,args))
+	 ;; 				     (let ((pair (assq ,arg ,alist-m)))
+	 ;; 				       (if pair
+	 ;; 					   ((vector-ref ,array (cdr pair)) (car ,args))
+	 ;; 					   (if (assq ,arg ',fi)
+	 ;; 					       (error 'define-lambda-object "read-only field" ,arg)
+	 ;; 					       (error 'define-lambda-object "absent field" ,arg))))
+	 ;; 				     ,safe-name))))
+	 ;; 			 *%lambda-object%*))
+	 ;; 	   (key-lambda ,r ,o
+	 ;; 		       (let* (,@a (,array (vector ,@(map (lambda (f) `(lambda (,safe-arg) (if (eq? ,safe-arg ',safe-eq) ,f (set! ,f ,safe-arg)))) fm)  ,@(map (lambda (f) `(lambda (,safe-arg) ,f)) (map cdr fi)))))
+	 ;; 			 (define *%lambda-object%*
+	 ;; 			   (lambda (,arg . ,args)
+	 ;; 			     (if (null? ,args)
+	 ;; 				 (let ((pair (assq ,arg ,alist-a)))
+	 ;; 				   (if pair
+	 ;; 				       ((vector-ref ,array (cdr pair)) ',safe-eq)
+	 ;; 				       (error 'define-lambda-object "absent field" ,arg)))
+	 ;; 				 (if (null? (cdr ,args))
+	 ;; 				     (let ((pair (assq ,arg ,alist-m)))
+	 ;; 				       (if pair
+	 ;; 					   ((vector-ref ,array (cdr pair)) (car ,args))
+	 ;; 					   (if (assq ,arg ',fi)
+	 ;; 					       (error 'define-lambda-object "read-only field" ,arg)
+	 ;; 					       (error 'define-lambda-object "absent field" ,arg))))
+	 ;; 				     ,safe-name))))
+	 ;; 			 *%lambda-object%*)))))
+	 (define ,makers
+	   (let* ,c
+	     (cons (seq-lambda ,r ,o
+			       (let* ,a
+				 (define *%lambda-object%*
+				   (lambda (,arg . ,args)
+				     (if (null? ,args)
+					 (unquote-get ,arg ,(append (map cons fm fm) fi))
+					 (if (null? (cdr ,args))
+					     (unquote-set! ,arg (car ,args) ,fm ,(map car fi))
+					     ,safe-name))))
+				 ;; **STklos**
+				 (%set-procedure-plist! *%lambda-object%* '*%lambda-object%*)		
+				 *%lambda-object%*))
+		   (key-lambda ,r ,o
+			       (let* ,a
+				 (define *%lambda-object%*
+				   (lambda (,arg . ,args)
+				     (if (null? ,args)
+					 (unquote-get ,arg ,(append (map cons fm fm) fi))
+					 (if (null? (cdr ,args))
+					     (unquote-set! ,arg (car ,args) ,fm ,(map car fi))
+					     ,safe-name))))
+				 ;; **STklos**
+				 (%set-procedure-plist! *%lambda-object%* '*%lambda-object%*)
+				 *%lambda-object%*)))))
+	 (define ,make-object (car ,makers))
+	 (define ,make-object-by-name (cdr ,makers))
+	 ;; The predicate procedure is implementation dependant.
+	 (define (,pred-object object)
+	   (and ;(eq? '*%lambda-object%* (object-name object)) ;mzscheme
+	        (eq? '*%lambda-object%* (%procedure-plist object))  ;; **STklos**
+		(let ((group (object #f #f #f)))
+		  (or (eq? ,safe-name group)
+		      (let lp ((group-list (group 'parent)))
+			(if (null? group-list)
+			    #f
+			    (or (eq? ,safe-name (car group-list))
+				(lp ((car group-list) 'parent))
+				(lp (cdr group-list)))))))))
+	 (define ,name
+	   (let ((parent ,safe-parent)
+		 (constructor ,makers)
+		 (predicate ,pred-object)
+		 (read-write-field ',fm)
+		 (read-only-field ',(map car fi))
+		 (required-field ',r)
+		 (optional-field ',o)
+		 (automatic-field ',(append c v a))
+		 (common-field ',c)
+		 (virtual-field ',v)
+		 (hidden-field ',h))
+	     (lambda (symbol)
+	       (unquote-get* symbol (parent constructor predicate
+					    read-write-field read-only-field
+					    required-field optional-field
+					    automatic-field common-field
+					    virtual-field hidden-field)))))
+	 (define ,safe-name ,name)))))
+
+(define-macro (define-lambda-object group . field)
+  (define (field-sort gr gi field fm fi r o a c v h)
+    (if (null? field)
+	`(define-object ,(car gi) ,gr ,(cdr gi) ,fm ,fi ,r ,o ,a ,c ,v ,h)
+	(let ((vars (car field)))
+	  (if (symbol? vars)		;r
+	      (if (and (null? o) (null? a) (null? c) (null? v))
+		  (field-sort gr gi (cdr field)
+			      fm (append fi (list (cons vars vars)))
+			      (append r (list vars)) o a c v h)
+		  (error 'define-lambda-object "required-field should precede optional-field and automatic-field" vars))
+	      (let ((var (car vars)))
+		(if (symbol? var)
+		    (if (null? (cdr vars)) ;(r)
+			(if (and (null? o) (null? a) (null? c) (null? v))
+			    (field-sort gr gi (cdr field)
+					(append fm vars) fi
+					(append r vars) o a c v h)
+			    (error 'define-lambda-object "required-field should precede optional-field and automatic-field" var))
+			(if (null? (cddr vars)) ;(o val)
+			    (if (and (null? a) (null? c) (null? v))
+				(field-sort gr gi (cdr field)
+					    fm (append fi (list (cons var var)))
+					    r (append o (list vars)) a c v h)
+				(error 'define-lambda-object "optional-field should precede automatic-field" var))
+			    (error 'define-lambda-object "incorrect syntax" vars)))
+		    (if (and (pair? (cdr vars)) (null? (cddr vars)))
+			(let ((b (car var)))
+			  (if (symbol? b)
+			      (if (null? (cdr var)) ;((o) val)
+				  (if (and (null? a) (null? c) (null? v))
+				      (field-sort gr gi (cdr field)
+						  (append fm var) fi
+						  r (append o (list (cons b (cdr vars)))) a c v h)
+				      (error 'define-lambda-object "optional-field should precede automatic-field" b))
+				  (if (null? (cddr var))
+				      (let ((d (cadr var)))
+					(if (symbol? d)
+					    (if (eq? 'unquote b) ;(,a val)
+						(field-sort gr gi (cdr field)
+							    fm (append fi (list (cons d d)))
+							    r o (append a (list (cons d (cdr vars)))) c v h)
+						(if (eq? 'quote b) ;('o val)
+						    (if (and (null? a) (null? c) (null? v))
+							(field-sort gr gi (cdr field)
+								    fm fi
+								    r (append o (list (cons d (cdr vars)))) a c v (append h (list (cons d (cdr vars)))))
+							(error 'define-lambda-object "optional-field should precede automatic-field" b))
+						    (error 'define-lambda-object "incorrect syntax" vars)))
+					    (if (and (eq? 'unquote (car d)) (symbol? (cadr d)) (null? (cddr d)))
+						(if (eq? 'unquote b) ;(,,a val)
+						    (field-sort gr gi (cdr field)
+								fm (append fi (list (cons (cadr d) (cadr d))))
+								r o a (append c (list (cons (cadr d) (cdr vars)))) v h)
+						    (if (eq? 'quote b) ;(',a val)
+							(field-sort gr gi (cdr field)
+								    fm fi
+								    r o (append a (list (cons (cadr d) (cdr vars)))) c v (append h (list (cons (cadr d) (cdr vars)))))
+							(if (eq? 'quasiquote b) ;(`,a val)
+							    (field-sort gr gi (cdr field)
+									fm (append fi (list (cons (cadr d) (cadr vars))))
+									r o a c (append v (list (cons (cadr d) (cdr vars)))) h)
+							    (error 'define-lambda-object "incorrect syntax" vars))))
+						(error 'define-lambda-object "incorrect syntax" vars))))
+				      (error 'define-lambda-object "incorrect syntax" vars)))
+			      (if (and (null? (cdr var)) (eq? 'unquote (car b)) (null? (cddr b)))
+				  (if (symbol? (cadr b)) ;((,a) val)
+				      (field-sort gr gi (cdr field)
+						  (append fm (cdr b)) fi
+						  r o (append a (list (cons (cadr b) (cdr vars)))) c v h)
+				      (let ((e (cadr b)))
+					(if (and (eq? 'unquote (car e)) (symbol? (cadr e)) (null? (cddr e))) ;((,,a) val)
+					    (field-sort gr gi (cdr field)
+							(append fm (cdr e)) fi
+							r o a (append c (list (cons (cadr e) (cdr vars)))) v h)
+					    (error 'define-lambda-object "incorrect syntax" vars))))
+				  (error 'define-lambda-object "incorrect syntax" vars))))
+			(error 'define-lambda-object "incorrect syntax" vars))))))))
+  (define (group-sort gr gi gg field)
+    (if (pair? gg)
+	(let ((g (car gg)))
+	  (if (pair? g)
+	      (group-sort (append gr g) gi (cdr gg) field)
+	      (group-sort gr (append gi (list g)) (cdr gg) field)))
+	(if (symbol? gg)
+	    (group-sort gr (cons gg gi) '() field)
+	    (field-sort gr gi field '() '() '() '() '() '() '() '()))))
+  (group-sort '() '() group field))
+
+;;; eof

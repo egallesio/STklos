@@ -107,4 +107,6 @@ State can be one of the following values
     Y	98	An interface to access environment variables
     ?   99	ERR5RS Records
 
-Implemented SRFIs: 41/70
+    Y  100	define-lambda-object 
+
+Implemented SRFIs: 42/71 (final SRFIs)
