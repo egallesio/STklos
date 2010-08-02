@@ -1,56 +1,68 @@
-(set! *load-path* (cons "lib/" (cons "lib/Lurc.d/" *load-path*)))
-(load "thread")
+#! /usr/bin/env stklos -f
+;;;;
+;;;; threads2.stk	-- A simple thread example
+;;;; 
+;;;; Copyright © 2010 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; 
+;;;; 
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;; 
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; USA.
+;;;; 
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  1-Aug-2010 18:45 (eg)
+;;;; Last file update:  2-Aug-2010 17:05 (eg)
+;;;;
 
-(print (%thread-system))
+(when (eq? (%thread-system) 'none)
+  (eprintf "Your system does not support threads. Sorry.\n")
+  (exit 1))
 
-(define (printer str)
-  (make-list 5 66)
-  (print str)
-  (thread-yield!)
-  (printer str))
+(define *global-count* 0)
+(define *global-mutex* (make-mutex) )   ; used to ensure that each thread
+					; alternates correctly
+(define (pretty n)
+  (cond
+    ((< n 10)  (format "  ~a" n))
+    ((< n 100) (format " ~a" n))
+    (else      (format "~a" n))))
+   
 
-(define (thrower str iter)
-  (if (> iter 0)
-      (begin
-        (print str " iter " iter)
-        (with-exception-handler 
-         (lambda (exc) 
-           (print "handler " str " iter " iter)
-           (thread-yield!)
-           (raise exc))
-         (lambda ()
-           (thread-yield!)
-           (thrower str (- iter 1)))))
-      (error "damn damn damn" str)))
+(define (thread-func)
+  (let ((name (thread-name (current-thread)))
+	(max  50))
+    (dotimes (i max)
+      (mutex-lock! *global-mutex*)
+      (set! *global-count* (+ *global-count* 1))
+      (printf "[in ~A: i=~a count=~a]" name (pretty i) (pretty *global-count*))
+      (when (= i (- max 1)) (printf " ** Terminated **"))
+      (newline)
+      (mutex-unlock! *global-mutex*)
+      ;; sleep a little to give the oppotunity to anotherthread to grab the mutex
+      (sleep 1))))
 
-(define thread1 (make-thread (lambda () (thrower "2lev" 2))))
-(define thread2 (make-thread (lambda () (thrower "4lev" 4))))
 
-(thread-start! thread1)
-(thread-start! thread2)
+(define (main argv)
+  (let ((thread1 (make-thread thread-func "A"))
+	(thread2 (make-thread thread-func "B"))
+	(thread3 (make-thread thread-func "C")))
+    ; start the threads
+    (thread-start! thread1) (thread-start! thread2) (thread-start! thread3)
+    ;; Wait the threads finish
+    (thread-join! thread1) (thread-join! thread2) (thread-join! thread3)
+    ;; Ok all the threads are terminated
+    (printf "All the threads are dead. Exit\n")
+    0))
 
-(print "awaiting thread1")
-(with-handler
- (lambda (c)
-   (print "got thread exception " c))
- (thread-join! thread1))
-(print "awaiting thread2")
-(with-handler
- (lambda (c)
-   (print "got thread exception " c))
- (thread-join! thread2))
-(print "done")
-
-(if (eq? (%thread-system) 'lurc)
-    (load "lurc"))
-
-(when (eq? (%thread-system) 'lurc)
-      (print "testing lurc")
-      (let ((sig (lurc:signal "test")))
-        (lurc:watch 
-         sig
-         (lurc:emit sig)
-         (lurc:pause)
-         (print "ERROR")))
-      
-      (print "done"))
+				

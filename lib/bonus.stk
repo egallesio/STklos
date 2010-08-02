@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 15-May-2010 12:59 (eg)
+;;;; Last file update:  1-Aug-2010 19:06 (eg)
 ;;;;
 
 
@@ -1342,7 +1342,7 @@ doc>
 (define (with-mutex mtx  proc)
   (dynamic-wind
       (lambda () (mutex-lock! mtx))
-      proc
+      (proc)
       (lambda () (mutex-unlock! mtx))))
 
 
