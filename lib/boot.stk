@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 30-Jun-2010 18:08 (eg)
+;;;; Last file update:  4-Aug-2010 11:46 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -183,6 +183,10 @@
 
 (let ((STklos (find-module 'STklos))
       (Scheme (find-module 'SCHEME)))
+
+  ;; Register the options given as program args in the system state plist
+  (set! *%system-state-plist* (append *%system-state-plist* *%program-args*))
+
   (%redefine-module-exports STklos Scheme)
   (%module-exports-set! Scheme (module-exports STklos)))
 
@@ -197,6 +201,7 @@
       (confdir (key-get *%program-args* :conf-dir #f))
       (debug   (key-get *%program-args* :debug 0)))
 
+  
   ;; Look at the debug flag
   (when (> debug 0)
     (compiler:warn-use-undefined #t)	; Signal usage of still undefined symbols

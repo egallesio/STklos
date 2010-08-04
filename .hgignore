@@ -107,6 +107,7 @@ gc/windows-untested
 
 # GMP directory
 gmp/config.h
+gmp/configure.lineno
 gmp/gmp-stklos.h
 gmp/stamp-h1
 # GTklos directory

@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update: 25-Apr-2010 00:20 (eg)
+;;;; Last file update:  4-Aug-2010 10:52 (eg)
 ;;;;
 
 
@@ -62,6 +62,11 @@
 	(string->symbol res)
 	(loop (cdr args)
 	      (string-append res (format "~a" (car args)))))))
+
+;; ----------------------------------------------------------------------
+;;	*%system-state-plist* ...
+;; ----------------------------------------------------------------------
+(define *%system-state-plist*  (list :name "STklos"))
 
 ;; ----------------------------------------------------------------------
 ;;	management of globals ...

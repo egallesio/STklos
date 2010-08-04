@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-Jun-2007 11:48 (eg)
-;;;; Last file update: 25-Jul-2010 22:30 (eg)
+;;;; Last file update:  4-Aug-2010 12:27 (eg)
 ;;;;
 
 (define-module READLINE
@@ -51,7 +51,6 @@
   ;; Return #t if we were able to find the GNU readline library
   (with-handler
    (lambda (c)
-     (eprintf "No readline support ~S\n" *readline-lib*)
      ;; If we are here, this probably because *readline-lib* is not present
      #f)
    (let ((%readline (make-external-function "readline"
@@ -75,13 +74,17 @@
 
      (set! read-history (make-external-function "read_history"
 						'(:string)
-						:int
+ 						:int
 						*readline-lib*))
 
      (set! write-history (make-external-function  "write_history"
 						  '(:string)
 						  :int
 						  *readline-lib*))
+
+     ;; Retain that we have readline support
+     (key-set! *%system-state-plist* :readline 'readline)
+
      ;; return #t to tell that everything is alright
      #t)))
 
