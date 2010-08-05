@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update:  5-Aug-2010 00:00 (eg)
+ * Last file update:  5-Aug-2010 18:05 (eg)
  */
 
 #include <stklos.h>
@@ -503,9 +503,9 @@ DEFINE_PRIMITIVE("%get-symbol-address", get_symbol_address, subr2,
   if (!STRINGP(name))  error_bad_string(name);
   if (!STRINGP(libname)) error_bad_string(libname);
   
-  var = STk_find_external_function(STRING_CHARS(libname), STRING_CHARS(name), TRUE);
+  var = STk_find_external_function(STRING_CHARS(libname), STRING_CHARS(name), FALSE);
   
-  return STk_make_Cpointer(var, STk_intern("extern-var"), STk_false);
+  return var? STk_make_Cpointer(var, STk_intern("extern-var"), STk_false): STk_false;
 }
 
 

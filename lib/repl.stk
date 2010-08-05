@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  4-Aug-2010 11:49 (eg)
+;;;; Last file update:  5-Aug-2010 18:50 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything 
@@ -33,7 +33,7 @@
 (define-module REPL
   (import SCHEME)
   (export main-repl repl repl-prompt repl-make-prompt repl-display-prompt
-	  repl-change-default-ports main-repl-hook)
+	  repl-prompt-use-color? repl-change-default-ports main-repl-hook)
 
 ;;; In module REPL
 
@@ -107,19 +107,34 @@
 (define repl-prompt (make-parameter ""))
 
 ;; ----------------------------------------------------------------------
+;;	repl-prompt-use-color? ...
+;; ----------------------------------------------------------------------
+(define repl-prompt-use-color? (make-parameter #t))
+
+;; ----------------------------------------------------------------------
 ;;	make-prompt ...
 ;; ----------------------------------------------------------------------
+;;(define (make-prompt module)
+;;  (repl-prompt (string-append
+;;		   ;; repl-level if > 1
+;;		   (if (> repl-level 1)
+;;		       (do-color 'bold 'red
+;;				 (format "[~A] " repl-level))
+;;		       "")
+;;		   ;; prompt itself
+;;		   (do-color 'bold 'magenta
+;;			     (format "~A> " (module-name module))
+;;			     'black))))
+
+
 (define (make-prompt module)
-  (repl-prompt (string-append
-		   ;; repl-level if > 1
-		   (if (> repl-level 1)
-		       (do-color 'bold 'red
-				 (format "[~A] " repl-level))
-		       "")
-		   ;; prompt itself
-		   (do-color 'bold 'magenta
-			     (format "~A> " (module-name module))
-			     'black))))
+  (let ((str1 (if (> repl-level 1) (format "[~A] " repl-level) ""))
+	(str2 (format "~A> " (module-name module))))
+    (repl-prompt (if (repl-prompt-use-color?)
+		     (string-append (do-color 'bold 'red str1)
+				    (do-color 'bold 'magenta str2 'black))
+		     (string-append str1 str2)))))
+
 ;; ----------------------------------------------------------------------
 ;;	repl-make-prompt ...
 ;; ----------------------------------------------------------------------
@@ -205,7 +220,8 @@ doc>
 			   (when (= (length v) 2)
 			     ;; Special convention for variable definition
 			     (display (do-color 'bold 'blue
-						(format ";; ~A\n" (cadr v)))
+						(format ";; ~A\n" (cadr v))
+						'clear)
 				      out)))
 			(else
 			   (for-each (lambda (x) (write* x out) (newline out))

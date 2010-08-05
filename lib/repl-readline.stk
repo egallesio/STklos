@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-May-2010 22:00 (eg)
-;;;; Last file update: 25-Jul-2010 23:10 (eg)
+;;;; Last file update:  5-Aug-2010 18:48 (eg)
 ;;;;
 
 (require "readline")
@@ -34,17 +34,25 @@
 
 (define (repl-readline-integration)
   (let ((old-make-prompt (repl-make-prompt))
-	(history-file    (%stklos-conf-file "history")))
+	(history-file    (%stklos-conf-file "history"))
+	(rl-support      (key-get *%system-state-plist* :readline #f)))
+
     ;;
     ;; Change the prompt mechanic:
     ;; 	- the prompt is built with escape sequences between special delimiters
     ;;	  which are specially treated by read line (\001 and \002)
-    ;;	- the prompt is noo more displayed (readline will display it)
+    ;;	- the prompt is no more displayed (readline will display it)
+    ;;  - For now, don't use colorfull prompts if readline support is offered
+    ;;    by libedit readline compatibility
     ;;
-    (repl-make-prompt (lambda (module)
-			(ansi-color-protect "\x01" "\x02")
-			(old-make-prompt module)
-			(ansi-color-protect "" "")))
+    (if (eq? rl-support 'libedit)
+	;;  Don't use color prompt (and use normal prompt function)
+	(repl-prompt-use-color? #f)
+	;; We use the readl GNU readline. Good
+	(repl-make-prompt (lambda (module)
+			  (ansi-color-protect "\x01" "\x02")
+			  (old-make-prompt module)
+			  (ansi-color-protect "" ""))))
   
     (repl-display-prompt (lambda (port)
 			   'nothing))

@@ -1,5 +1,6 @@
 ;;;;
-;;;; readline.stk	-- Access to the GNU-readline lib.
+;;;; readline.stk	-- Access to the GNU-readline lib
+;;;;			   (or libedit if absent :-<)
 ;;;; 
 ;;;; Copyright © 2007-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
@@ -21,7 +22,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-Jun-2007 11:48 (eg)
-;;;; Last file update:  4-Aug-2010 12:27 (eg)
+;;;; Last file update:  5-Aug-2010 18:52 (eg)
 ;;;;
 
 (define-module READLINE
@@ -30,10 +31,6 @@
 	  write-history read-with-history)
 
 ;;;; In module READLINE
-
-(define *readline-lib* (string-append "libreadline."
-				      (%shared-library-suffix)))
-
 (define readline     	     #f)
 (define add-history  	     #f)
 (define read-history 	     #f)
@@ -45,18 +42,16 @@
       (add-history line))
     line))
 
-
-(define (try-initialize-readline)
-  ;; Try to define external functions
-  ;; Return #t if we were able to find the GNU readline library
+(define (try-initialize libname)
+  ;; Return #t if we were able to find a readline library
   (with-handler
    (lambda (c)
-     ;; If we are here, this probably because *readline-lib* is not present
+     ;; If we are here, this probably because library is not present
      #f)
    (let ((%readline (make-external-function "readline"
 					    '(:string)
 					    :pointer
-					    *readline-lib*)))
+					    libname)))
      (set! readline  (lambda (prompt)
 		       (let ((ptr (%readline prompt)))
 			 (if (eq? ptr (void))
@@ -67,26 +62,40 @@
 			       (free-bytes ptr)
 			       str)))))
 
+
+     
      (set! add-history (make-external-function "add_history"
 					       '(:string)
 					       :void
-					       *readline-lib*))
+					       libname))
 
      (set! read-history (make-external-function "read_history"
 						'(:string)
  						:int
-						*readline-lib*))
+						libname))
 
      (set! write-history (make-external-function  "write_history"
 						  '(:string)
 						  :int
-						  *readline-lib*))
+						  libname))
 
-     ;; Retain that we have readline support
-     (key-set! *%system-state-plist* :readline 'readline)
+     (let ((support (if (%get-symbol-address "el_set" "")
+			;; We have found a realine library which is in fact
+			;; libedit (macos)
+			'libedit
+			'readline)))
+       ;; Retain that the kind of readline support we have
+       (key-set! *%system-state-plist* :readline support)))
 
      ;; return #t to tell that everything is alright
-     #t)))
+     #t))
+
+
+(define (try-initialize-readline)
+  (let ((suffix (%shared-library-suffix)))
+    ;; Try in sequence the GNU readline and BSD libedit (which has readline support)
+    (or (try-initialize (string-append "libreadline." suffix))
+	(try-initialize (string-append "libedit."  suffix)))))
 
 ;; End of module READLINE
 )
