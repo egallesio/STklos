@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  8-May-2010 18:54 (eg)
+### Last file update:  5-Aug-2010 23:58 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [1.00])
@@ -398,6 +398,7 @@ AC_SUBST(SH_COMP_FLAGS)
 AC_SUBST(SH_LOAD_FLAGS)
 AC_SUBST(SH_LOADER)
 AC_SUBST(SH_SUFFIX)
+AC_SUBST(SH_LIB_SUFFIX)
 AC_SUBST(SH_MAIN_LOAD_FLAGS)
 AC_SUBST(COMPOBJ)
 AC_SUBST(COMPSRC)

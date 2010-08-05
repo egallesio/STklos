@@ -21,7 +21,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 12:21 (eg)
-# Last file update:  3-Aug-2005 13:12 (eg)
+# Last file update:  5-Aug-2010 23:56 (eg)
 
 
 #
@@ -42,6 +42,7 @@ SH_COMP_FLAGS=""
 SH_LOAD_FLAGS=""
 SH_LOADER=":"
 SH_SUFFIX=""
+SH_LIB_SUFFIX=""
 SH_MAIN_LOAD_FLAGS=""
 
 #
@@ -64,6 +65,7 @@ case $os in
           SH_LOAD_FLAGS='-shared -o'
           SH_LOADER='ld'
           SH_SUFFIX='so'
+          SH_LIB_SUFFIX='so'
           SH_MAIN_LOAD_FLAGS="-rdynamic"
 	  ;;
   HP*)
@@ -72,6 +74,7 @@ case $os in
      	  SH_LOAD_FLAGS="-b -o"
      	  SH_LOADER="ld"
      	  SH_SUFFIX='sl'
+          SH_LIB_SUFFIX='sl'
 	  SH_MAIN_LOAD_FLAGS="-Wl,-E"
 	  ;;
   IRIX*)
@@ -85,6 +88,7 @@ case $os in
 	  SH_LOAD_FLAGS="-shared -o"
 	  SH_LOADER="$CC"
 	  SH_SUFFIX='so'
+          SH_LIB_SUFFIX='so'
 	  ;;
   Linux*) 
 	  case $version in
@@ -102,6 +106,7 @@ case $os in
           SH_LOAD_FLAGS='-shared -o'
           SH_LOADER='ld'
           SH_SUFFIX='so'
+          SH_LIB_SUFFIX='so'
           SH_MAIN_LOAD_FLAGS="-rdynamic"
 	  ;;
   NetBSD*) 
@@ -110,6 +115,7 @@ case $os in
           SH_LOAD_FLAGS="-Bshareable -o"
           SH_LOADER="ld"
           SH_SUFFIX='so'
+          SH_LIB_SUFFIX='so'
 	  ;;
   OSF*)
 	  OS=OSF
@@ -118,6 +124,7 @@ case $os in
              SH_LOAD_FLAGS="-shared -o"
              SH_LOADER="ld"
 	     SH_SUFFIX='so'
+             SH_LIB_SUFFIX='so'
 	   else
 	     die "I do not know how to dynamically load on $os with $CC"
 	   fi
@@ -133,6 +140,7 @@ case $os in
 	  SH_LOAD_FLAGS='-shared -o'
           SH_LOADER="ld"
           SH_SUFFIX='so'
+          SH_LIB_SUFFIX='so'
 	  ;;
   Darwin*)
 	  OS=DARWIN;
@@ -140,6 +148,7 @@ case $os in
 	  SH_LOAD_FLAGS='-bundle -flat_namespace -undefined suppress -o'
           SH_LOADER="$CC"
           SH_SUFFIX='so'
+          SH_LIB_SUFFIX='dylib'
 	  ;;
   CYGWIN*)
 	  # Since I cannot figure yet how to use shared libraries in Cygwin 
@@ -150,6 +159,7 @@ case $os in
           SH_LOAD_FLAGS='-shared -o'
           SH_LOADER='true'
           SH_SUFFIX='so'
+          SH_LIB_SUFFIX='so'
           SH_MAIN_LOAD_FLAGS=""
 	  ;;
   *)      OS=UNKNOWN;;
@@ -159,4 +169,4 @@ echo "os=\"$os\"; version=\"$version\"; machine=\"$machine\"; OS=\"$OS\"; \
 OS_FLAVOUR=\"$OS_FLAVOUR\";SH_COMP_FLAGS=\"$SH_COMP_FLAGS\"; \
 SH_LOAD_FLAGS=\"$SH_LOAD_FLAGS\"; \
 SH_LOADER=\"$SH_LOADER\"; SH_SUFFIX=\"$SH_SUFFIX\"; \
-SH_MAIN_LOAD_FLAGS=\"$SH_MAIN_LOAD_FLAGS\""
+SH_LIB_SUFFIX=\"$SH_LIB_SUFFIX\"; SH_MAIN_LOAD_FLAGS=\"$SH_MAIN_LOAD_FLAGS\""
