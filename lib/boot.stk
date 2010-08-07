@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  4-Aug-2010 11:46 (eg)
+;;;; Last file update:  7-Aug-2010 10:06 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -201,6 +201,10 @@
       (confdir (key-get *%program-args* :conf-dir #f))
       (debug   (key-get *%program-args* :debug 0)))
 
+  ;; Set the configuration if needed
+  (when confdir
+    (eprintf "CONFDIR ~S\n" confdir)
+    (%stklos-conf-dir confdir))
   
   ;; Look at the debug flag
   (when (> debug 0)

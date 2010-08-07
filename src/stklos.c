@@ -1,7 +1,7 @@
 /*
  * stklos.c	-- STklos interpreter main function
  * 
- * Copyright © 1999-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  3-Oct-2009 21:43 (eg)
+ * Last file update:  7-Aug-2010 10:02 (eg)
  */
 
 #include <stklos.h>
@@ -54,10 +54,12 @@
 static char *boot_file    = "";
 static char *program_file = "";
 static char *load_file    = "";
+static char *conf_dir	  = "";
 static char *sexpr        = "";
 static int  vanilla	  = 0;
 static int  stack_size    = DEFAULT_STACK_SIZE;
 static int  debug_mode    = 0;
+static int  line_editor   = 1;
 
 static struct option long_options [] = 
 {
@@ -66,8 +68,10 @@ static struct option long_options [] =
   {"load",         	required_argument, NULL, 'l'},
   {"execute",      	required_argument, NULL, 'e'},
   {"boot-file",    	required_argument, NULL, 'b'},
+  {"conf-dir",		required_argument, NULL, 'D'},
   {"no-init-file", 	no_argument,       NULL, 'q'},
   {"interactive",  	no_argument,	   NULL, 'i'},
+  {"no-line-editor",  	no_argument,	   NULL, 'n'},
   {"debug",		no_argument,	   NULL, 'd'},
   {"stack-size",   	required_argument, NULL, 's'},
   {"case-sensitive",	no_argument,	   NULL, 'c'},
@@ -79,20 +83,22 @@ static void Usage(char *progname, int only_version)
 {
   fprintf(stderr, "%s (version %s)\n", progname, VERSION);
   if (only_version) return;
-  fprintf(stderr, "Usage: %s [option ...] [arg ... ]", progname);
+  fprintf(stderr, "Usage: %s [option ...] [--] [arg ... ]", progname);
   fprintf(stderr, "\n"
 "Possible options:\n"
-"	-l file, --load=file		load 'file' before going interactive\n"
-"    	-f file, --file=file		use 'file' as program\n"
-"	-e sexpr, --execute=sexpr	evaluate the given sexpr and exit\n"
-"	-b file, --boot-file=file	use 'file' to boot the system\n"
-"	-q, --no-init-file		quiet: do not load the user init file\n"
-"	-i, --interactive		interactive mode\n"
-"	-d, --debug			add informations to ease debugging\n"
-"	-s, --stack-size=n		use a stack of size n (default %d)\n"
-"	-c, --case-sensitive		be case sensitive (default is #f)\n"
-"	-v, --version			print program version and exit\n"
-"	-h, --help			print this help and exit\n" 
+"   -l file, --load=file        load 'file' before going interactive\n"
+"   -f file, --file=file        use 'file' as program\n"
+"   -e sexpr, --execute=sexpr   evaluate the given sexpr and exit\n"
+"   -b file, --boot-file=file   use 'file' to boot the system\n"
+"   -D dir, --conf-dir=dir      change configuration dir (default: ~/.stklos)\n"
+"   -q, --no-init-file          quiet: do not load the user init file\n"
+"   -i, --interactive           interactive mode\n"
+"   -n, --no-line-editor        don't use line editor\n"
+"   -d, --debug                 add informations to ease debugging\n"
+"   -s, --stack-size=n          use a stack of size n (default %d)\n"
+"   -c, --case-sensitive        be case sensitive (default is #f)\n"
+"   -v, --version               print program version and exit\n"
+"   -h, --help                  print this help and exit\n" 
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
 }
@@ -105,7 +111,7 @@ static int process_program_arguments(int argc, char *argv[])
   int c;
 
   for ( ; ; ) {
-    c = getopt_long(argc, argv, "qidvhcf:l:e:b:s:", long_options, NULL);
+    c = getopt_long(argc, argv, "qidnvhcf:l:e:b:s:D:", long_options, NULL);
     if (c == -1) break;
     
     switch (c) {
@@ -114,7 +120,9 @@ static int process_program_arguments(int argc, char *argv[])
       case 'l': load_file       = optarg; 	break;
       case 'e': sexpr	        = optarg; 	break;
       case 'b': boot_file       = optarg; 	break;
+      case 'D': conf_dir        = optarg;	break;
       case 'i': STk_interactive = 1;      	break;
+      case 'n': line_editor     = 0;      	break;
       case 'd': debug_mode++;			break;
       case 'q': vanilla         = 1;	  	break;
       case 's': stack_size      = atoi(optarg); break;
@@ -141,8 +149,10 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   ADD_OPTION(program_file, 	   ":file");
   ADD_OPTION(load_file,    	   ":load");
   ADD_OPTION(sexpr, 	   	   ":sexpr");
+  ADD_OPTION(conf_dir,		   ":conf-dir");
   ADD_BOOL_OPTION(vanilla,	   ":no-init-file");
   ADD_BOOL_OPTION(STk_interactive, ":interactive");
+  ADD_BOOL_OPTION(line_editor,     ":line-editor");
   ADD_INT_OPTION(debug_mode,   	   ":debug");
 
   STk_define_variable(STk_intern("*%program-args*"), options, 

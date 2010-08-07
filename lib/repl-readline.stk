@@ -21,10 +21,9 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-May-2010 22:00 (eg)
-;;;; Last file update:  5-Aug-2010 18:48 (eg)
+;;;; Last file update:  6-Aug-2010 00:16 (eg)
 ;;;;
 
-(require "readline")
 
 (define-module REPL-READLINE
   (import REPL READLINE)
@@ -103,8 +102,9 @@
       (repl-change-default-ports :in port))))
 
 (define (try-initialize-repl-with-readline)
-  (when (try-initialize-readline)
-    (main-repl-hook repl-readline-integration)))
+  (let ((use-editor (key-get *%system-state-plist* :line-editor #t)))
+    (when (and use-editor (try-initialize-readline))
+      (main-repl-hook repl-readline-integration))))
 
 ;; End of module REPL-READLINE
 )

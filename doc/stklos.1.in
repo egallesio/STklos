@@ -76,9 +76,14 @@ quiet: do not load the user init file
 be interactive, even if the command finds it is not the case. This
 option is generally useful when used inside emacs since it permits to
 display the REPL prompts.
+.IP "-n, --no-line-editor"
+tell the REPL to not use the line editor even if GNU readline or BSD
+libedit libraries are found. This permit to use an external tool such 
+as rlwrap(1) instead of the internal line editor support.
 .IP "-d, --debug"
 insert informations to ease debugging (e.g, line numbers, signaling
-usage of undefined symbols, ...)
+usage of undefined symbols, ...). Can be used multiple times to
+increase the debugging level;
 .IP "-s, --stack-size=n"
 use a stack of \fBn\fR cells.
 .IP "-c, --case-sensitive"
