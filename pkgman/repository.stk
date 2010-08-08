@@ -1,7 +1,7 @@
 ;;;;
 ;;;; repository.stk		-- Local repository management
 ;;;; 
-;;;; Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2006-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 18:20 (eg)
-;;;; Last file update:  2-Jul-2007 13:57 (eg)
+;;;; Last file update:  8-Aug-2010 09:17 (eg)
 ;;;;
 
 
@@ -151,6 +151,8 @@
 	;; Save the informations of this server
 	(let* ((name (make-path (stklos-pkg-servers-directory) server-name))
 	       (out  (open-file name "w")))
+          (when (> (stklos-pkg-verbosity) 1)
+            (eprintf "\n   [sync file: ~S] ... " name))
 	  (unless out
 	    (error-pkg "cannot save server descriptions of ~s" server-name))
 	  (fprintf out ";; -*- Scheme -*-    Generated file DO NOT EDIT\n")

@@ -124,7 +124,8 @@ starts. Use the \fB-q\fR to avoid the loading of this file.
 
 .SH "SEE ALSO"
 .BR stklos-config (1),
-.BR stklos-compile (1)
+.BR stklos-compile (1),
+.BR stklos-pkg (1)
 
 .LP
 The full documentation for 

@@ -106,6 +106,12 @@ list the packages needed by the given package
 .IP "--installed" 
 list the packages which are locally installed
 
+.IP "--conf-dir=dir | -D dir"
+Use the specified directory  as stklos main configuration
+directory. This is useful if you use stklos(1) with the \fI-D\fR
+option. Note that you can use the \fI-STKLOS_CONFDIR\fR shell variable 
+for that too. 
+
 .IP "--directory=dir | -C dir"
 Use the specified directory for extracting file. If this option is not
 specified, files are extracted in the current directory.
@@ -118,7 +124,7 @@ stklos-pkg.
 flag used to indicate that (un-)installation must be system wide. 
 
 .IP "--version |-V"
-display the version of \fRstklos-pkg\fR and exit. 
+display the version of \fIstklos-pkg\fR and exit. 
 
 .IP "--help | -h"
 Show a list of options
@@ -131,6 +137,13 @@ shell variable
 
 .IP "@PREFIX@/lib/stklos/pkg"
 The \fISTklos\fR system ScmPkg repository here 
+
+.SH ENVIRONMENT VARIABLES
+
+.IP "STKLOS_CONFDIR"
+This variable can be used to designate the directory used by \fBstklos\fR 
+to store its configuration or packages files. It not set, the default 
+\fBstklos\fR configuration directory is by default \fB~/.stklos\fR.
 
 
 .SH "SEE ALSO"

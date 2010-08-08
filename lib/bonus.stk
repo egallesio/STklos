@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  1-Aug-2010 19:06 (eg)
+;;;; Last file update:  8-Aug-2010 09:06 (eg)
 ;;;;
 
 
@@ -335,6 +335,18 @@ doc>
     (unless (file-is-directory? dir)
       (make-directories dir))
     (make-directory path)))
+
+
+#|
+<doc EXT ensure-directories-exist
+ * (ensure-directories-exist path)
+ *
+ * ...
+doc>
+|#
+(define (ensure-directories-exist path)
+  (unless (file-is-directory? path)
+    (make-directories path)))
 
 ;;;;
 ;;;; Hash-tables functions

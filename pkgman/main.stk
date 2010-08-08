@@ -1,7 +1,7 @@
 ;;;;
 ;;;; main.stk	-- Stklos-Pkg main program
 ;;;; 
-;;;; Copyright © 2006-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2006-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update:  9-May-2008 10:50 (eg)
+;;;; Last file update:  8-Aug-2010 09:11 (eg)
 ;;;;
 
 (include "../lib/http.stk")
@@ -87,6 +87,9 @@
 
        
        "Misc"
+       (("conf-dir" :arg dir :alternate "D"
+	 :help "Use <dir> as stklos main configuration directory")
+	(stklos-pkg-directory (make-path (expand-file-name dir) "pkg")))
        (("directory" :arg dir :alternate "C"
 	 :help "Change to directory <dir> (extract/download)")
 	(stklos-pkg-extract-dir dir))
@@ -118,7 +121,7 @@
 ;;	load-user-rc ...
 ;; ----------------------------------------------------------------------
 (define (load-user-rc)
-  (let ((rc (expand-file-name "~/.stklos/pkgrc")))
+  (let ((rc (%stklos-conf-file "pkgrc")))
     (when (and (file-exists? rc)
 	       (file-is-readable? rc))
       (with-handler (lambda (c)
