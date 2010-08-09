@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Aug-2004 12:43 (eg)
-;;;; Last file update:  2-Aug-2010 19:13 (eg)
+;;;; Last file update:  9-Aug-2010 18:32 (eg)
 ;;;;
 
 (define srfi-address "http://srfi.schemers.org/srfi-~A/srfi-~A.html")
@@ -63,6 +63,7 @@
      (66 . "Octet Vectors")
      (69 . "Basic Hash Tables")
      (70 . "Numbers")
+     (74 . "Octet-Addressed Binary Blocks")
      (88 . "Keyword Objects")
      (89 . "Optional Positional and Named Parameters")
      (96 . "SLIB Prerequisites ")

@@ -1,3 +1,189 @@
+2010-08-09  Erick Gallesio  <eg@unice.fr>
+
+	* lib/boot.stk, src/boot.c, src/boot.img:
+	suppressed the http package autoload, since it is not used by the
+	distribution or ScmPkg packages
+	[1fec07f22ae9] [tip]
+
+	* src/sport.c, src/stklos.h, src/vport.c:
+	Bug fix: NULL for fileport names was a bad idea for virtual port,
+	use a constant C string instead
+	[e5c669381366]
+
+2010-08-08  Erick Gallesio  <eg@unice.fr>
+
+	* doc/stklos-pkg.1.in, doc/stklos.1.in, lib/bonus.stk, lib/boot.stk,
+	  pkgman/main.stk, pkgman/params.stk, pkgman/repository.stk,
+	src/boot.c, src/boot.img:
+	Added conf-dir option to stklos-pkg
+	[bf2b517bc0a4]
+
+2010-08-07  Erick Gallesio  <eg@unice.fr>
+
+	* doc/stklos.1.in, lib/boot.stk, lib/repl-readline.stk, src/boot.c,
+	  src/boot.img, src/stklos.c:
+	Fix of the -D option
+	[4184904a2606]
+
+2010-08-06  Erick Gallesio  <eg@unice.fr>
+
+	* Makefile.in, configure, configure.ac, doc/Makefile.in,
+	  examples/Makefile.in, lib/Lalr.d/Makefile.in, lib/Makefile.in,
+	  lib/Match.d/Makefile.in, lib/SILex.d/Makefile.in,
+	  lib/ScmPkg.d/Makefile.in, pkgman/Makefile.in, src/Makefile.in,
+	  src/extraconf.h.in, src/system.c, tests/Makefile.in,
+	  utils/Makefile.in, utils/shlib-options:
+	added %shared-suffix for MacOs which distinguishes libraries and
+	modules
+	[f2e7c60f0846]
+
+2010-08-05  Erick Gallesio  <eg@unice.fr>
+
+	* lib/readline.stk, lib/repl-readline.stk, lib/repl.stk, src/boot.c,
+	  src/boot.img, src/ffi.c:
+	Added readline support for libedit compatibility layer
+	[c7f25778e7a8]
+
+	* src/ffi.c:
+	Added support for accessing C variables from Scheme
+	[c8395068e215]
+
+2010-08-04  Erick Gallesio  <eg@unice.fr>
+
+	* .hgignore, lib/boot.stk, lib/readline.stk, lib/repl.stk,
+	  lib/runtime.stk, src/boot.c, src/boot.img:
+	Added an information telling if readline support is available
+	[06c7a6646c8b]
+
+2010-08-02  Erick Gallesio  <eg@unice.fr>
+
+	* SUPPORTED-SRFIS, doc/skb/srfi.skb, doc/skb/srfi.stk,
+	  lib/Makefile.am, lib/Makefile.in, lib/srfi-100.stk:
+	Added SRFI-100 support
+	[fd12b6f6b31b]
+
+	* examples/threads.stk, lib/bonus.stk, src/boot.c, src/boot.img:
+	Changed the thread demo
+	[23bf87bec3a1]
+
+2010-07-25  Erick Gallesio  <eg@unice.fr>
+
+	* lib/readline.stk, lib/repl-readline.stk, src/boot.c, src/boot.img,
+	  src/extraconf.h.in, src/system.c:
+	Bug fix: EOF on a recursive repl was incorrect
+	[d58d841e976e]
+
+2010-06-30  Erick Gallesio  <eg@unice.fr>
+
+	* doc/stklos-pkg.1.in, doc/stklos.1.in, lib/Makefile.am,
+	  lib/Makefile.in, lib/STklos.init, lib/boot.stk, lib/load.stk, 
+	  lib/repl-readline.stk, lib/srfi-59.stk, src/boot.c, src/boot.img:
+	Use the STKLOS_CONFDIR shell variable to set the configuration dir.
+	If unset the configuration directory is ~/.stklos
+	[f12856073c61]
+
+2010-06-23  Erick Gallesio  <eg@unice.fr>
+
+	* .hgignore, PACKAGES-USED, ffi/TODO, ffi/ltcf-c.sh, ffi/ltcf-cxx.sh,
+	  ffi/ltcf-gcj.sh, ffi/ltconfig, ffi/mkinstalldirs, lib/Makefile.am,
+	  lib/Makefile.in, lib/boot.stk, lib/ffi.stk, lib/readline.stk, 
+	  lib/repl-readline.stk, src/boot.c, src/boot.img:
+	Added GNU readline support in REPL if the readline lib can be loaded
+	dynamically
+	[5d1f0797e3d4]
+
+2010-05-16  Erick Gallesio  <eg@unice.fr>
+
+	* ffi/*:
+	FFI is now part of the bootstrap. libffi is now at version 3.0.9
+	[68fd2520b97e]
+
+2010-05-15  Erick Gallesio  <eg@unice.fr>
+
+	* lib/bonus.stk, lib/repl.stk, src/boot.c, src/boot.img,
+	  src/cpointer.c:
+	REPL customization: numerous parameters added to allow the
+	integration of readline or editline
+	[567be7a9f13a]
+
+2010-05-14  Erick Gallesio  <eg@unice.fr>
+
+	* src/cpointer.c:
+	Added fucntions allocate-bytes and free-bytes
+	[720165de720a]
+
+	* utils/stklos-install:
+	Permit old stklos-install command to use curl or fetch when wget is
+	not present in path
+	[0f755ef27230]
+
+	* lib/compiler.stk, src/boot.c, src/boot.img:
+	Forms like (let () (define a 0)) have now a decent error message
+	[a473a7eee615]
+
+2010-05-08  Erick Gallesio  <eg@unice.fr>
+
+	* Makefile.in, aclocal.m4, configure, configure.ac, doc/Makefile.in,
+	  examples/Makefile.in, lib/Lalr.d/Makefile.in, lib/Makefile.in,
+	  lib/Match.d/Makefile.in, lib/SILex.d/Makefile.in,
+	  lib/ScmPkg.d/Makefile.in, pkgman/Makefile.in, src/Makefile.in,
+	  src/stklosconf.h.in, tests/Makefile.in, utils/Makefile.in:
+	Preparing version stklos-1.00-beta4
+	[f93aef72ca60]
+
+2010-04-27  Erick Gallesio  <eg@unice.fr>
+
+	* lib/compiler.stk, lib/runtime.stk, src/boot.c, src/boot.img:
+	Fixed a bug in internal defines rewriting. Internal define rewriting
+	was done before macro-expanding conducting to issuing incorrect "bad
+	internal definition" when a macro expansion intoduce a DEFINE
+	symbol. Thanks to Emmanuel Medernach for signaling this bug
+	[2938e306dcf7]
+
+2010-04-05  Erick Gallesio  <eg@unice.fr>
+
+	* SUPPORTED-SRFIS, doc/skb/srfi.skb, lib/Makefile.am, lib/Makefile.in,
+	  lib/srfi-0.stk, lib/srfi-74.stk, src/boot.c, src/boot.img,
+	  src/system.c, tests/test-srfi.stk:
+	Added SRFI-74 support
+	[137638f06a9a]
+
+2010-04-04  Erick Gallesio  <eg@unice.fr>
+
+	* Makefile.am, Makefile.in:
+	Preparing version stklos-1.00-beta3
+	[43a557589eee]
+
+	* Makefile.in, aclocal.m4, configure, configure.ac, doc/Makefile.in,
+	  examples/Makefile.in, lib/Lalr.d/Makefile.in, lib/Makefile.in,
+	  lib/Match.d/Makefile.in, lib/SILex.d/Makefile.in,
+	  lib/ScmPkg.d/Makefile.in, pkgman/Makefile.in, src/Makefile.in,
+	  src/extraconf.h.in, src/regexp.c, tests/Makefile.in,
+	  utils/Makefile.in:
+	Fixed compilation problem on Ubuntu with regexp
+	[2add3d63ef03]
+
+2010-03-16  Erick Gallesio  <eg@unice.fr>
+
+	* lib/Makefile.am, lib/Makefile.in, lib/bonus.stk, lib/repl.stk,
+	  src/boot.c, src/boot.img:
+	Added cons25 as a terminal with color capabilities for FreeBSD
+	[69913357b935]
+
+2010-01-03  Erick Gallesio  <eg@unice.fr>
+
+	* NEWS, SUPPORTED-SRFIS:
+	Preparing version stklos-1.00-beta17
+	[e028f339c7a8]
+
+	* ChangeLog, Makefile.in, configure, configure.ac, doc/Makefile.in,
+	  examples/Makefile.in, lib/Lalr.d/Makefile.in, lib/Makefile.in,
+	  lib/Match.d/Makefile.in, lib/SILex.d/Makefile.in,
+	  lib/ScmPkg.d/Makefile.in, lib/boot-callcc.stk.in, lib/boot.stk,
+	  lib/repl.stk, pkgman/Makefile.in, src/Makefile.in, src/boot.c,
+	  src/boot.img, tests/Makefile.in, utils/Makefile.in:
+	Code cleaning and bumping version to 1.00
+	[8728d12527ab]
 
 2010-01-02  Erick Gallesio  <eg@unice.fr>
 

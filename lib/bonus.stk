@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  8-Aug-2010 09:06 (eg)
+;;;; Last file update:  9-Aug-2010 18:39 (eg)
 ;;;;
 
 
@@ -327,7 +327,8 @@ doc>
 <doc EXT make-directories
  * (make-directories str)
  *
- * .....
+ * Create a directory with name |dir|. No error is signaled if |dir| already exists,
+ * Parent directories of |dir| are created as needed.
 doc>
 |#
 (define (make-directories path)
@@ -341,7 +342,8 @@ doc>
 <doc EXT ensure-directories-exist
  * (ensure-directories-exist path)
  *
- * ...
+ * Create a directory with name |dir| (and its parent directories if needed), if it
+ * does not exist yet.
 doc>
 |#
 (define (ensure-directories-exist path)

@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  2-Jan-2010 16:57 (eg)
+;; Last file update:  9-Aug-2010 18:40 (eg)
 ;;
 ;; ======================================================================
 
@@ -718,6 +718,8 @@ applications.])
 (insertdoc 'chmod)
 (insertdoc 'chdir)
 (insertdoc 'make-directory)
+(insertdoc 'make-directories)
+(insertdoc 'ensure-directories-exist)
 (insertdoc 'remove-directory)
 (insertdoc 'directory-files)
 (index "tilde expansion")

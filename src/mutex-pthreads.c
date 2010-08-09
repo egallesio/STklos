@@ -1,7 +1,7 @@
 /*
  * mutex-pthreads.c	-- Pthread Mutexes in Scheme
  * 
- * Copyright © 2006-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 19-Nov-2007 11:10 (eg)
+ * Last file update:  9-Aug-2010 17:51 (eg)
  */
 
 #include <unistd.h>
@@ -43,12 +43,15 @@ static void mutex_finalizer(SCM mtx)
   pthread_cond_destroy(&MUTEX_MYCONDV(mtx));
 }
 
+
 void STk_make_sys_mutex(SCM z)
 {
   pthread_mutex_init(&MUTEX_MYMUTEX(z), NULL);
   pthread_cond_init(&MUTEX_MYCONDV(z), NULL);
 
-  // STk_register_finalizer(z, mutex_finalizer);
+#ifdef THREAD_FINALIZER_ISSUE
+   STk_register_finalizer(z, mutex_finalizer);
+#endif
 }
 
 /*
@@ -253,16 +256,20 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
  * 
 \* ====================================================================== */
 
+#ifdef THREAD_FINALIZER_ISSUE
 static void condv_finalizer(SCM cv)
 {
   pthread_cond_destroy(&CONDV_MYCONDV(cv));
 }
+#endif
 
 void STk_make_sys_condv(SCM z)
 {
   pthread_cond_init(&CONDV_MYCONDV(z), NULL);
 
-  //   STk_register_finalizer(z, condv_finalizer);
+#ifdef THREAD_FINALIZER_ISSUE  
+  STk_register_finalizer(z, condv_finalizer);
+#endif
 }
 
 

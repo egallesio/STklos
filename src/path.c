@@ -1,7 +1,7 @@
 /*
  * p a t h . c			-- Path names management
  * 
- * Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 14:25 (eg)
- * Last file update:  8-Nov-2005 20:20 (eg)
+ * Last file update:  9-Aug-2010 17:04 (eg)
  */
 
 #include "stklos.h"
@@ -93,7 +93,9 @@ static void absolute(char *s, char *pathname)
   char *t;
 
   if (!ISABSOLUTE(s)) {
-    getcwd(pathname, MAX_PATH_LENGTH);
+    if (! getcwd(pathname, MAX_PATH_LENGTH))
+      STk_panic("absolute: cannot compute cwd (MAX_PATH_LENGTH = %d)\n", 
+		MAX_PATH_LENGTH);
     p = &pathname[strlen(pathname)];     /* place p at end of pathname */ 
   }
 

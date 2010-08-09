@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  3-Jan-2009 22:28 (eg)
+ * Last file update:  9-Aug-2010 17:48 (eg)
  */
 
 
@@ -62,11 +62,13 @@ vm_thread_t *STk_get_current_vm(void)
 
 /* ====================================================================== */
 
+#ifdef THREAD_FINALIZER_ISSUE
 static void thread_finalizer(SCM thr)
 {
   pthread_mutex_destroy(&THREAD_MYMUTEX(thr));
   pthread_cond_destroy(&THREAD_MYCONDV(thr));
 }
+#endif
 
 static void terminate_scheme_thread(void *arg)
 {
@@ -111,8 +113,10 @@ void STk_do_make_sys_thread(SCM thr)
   pthread_mutex_init(&THREAD_MYMUTEX(thr), NULL);
   pthread_cond_init(&THREAD_MYCONDV(thr), NULL);
 
-  // now the finalizer
-  // STk_register_finalizer(thr, thread_finalizer);
+#ifdef THREAD_FINALIZER_ISSUE
+  /* now the finalizer */
+  STk_register_finalizer(thr, thread_gfinalizer);
+#endif
 }
 
 void STk_sys_thread_start(SCM thr)
