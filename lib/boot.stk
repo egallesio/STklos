@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  7-Aug-2010 10:53 (eg)
+;;;; Last file update:  9-Aug-2010 11:28 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -58,8 +58,6 @@
 (autoload	 "env"		  null-environment scheme-report-environment
 			          interaction-environment)
 (autoload	 "help"		  help)
-(autoload	 "http" 	  http-open http-parse-status-line
-		 		  http-parse-header http-find-body http-download)
 (autoload	 "lex-rt"	  lexer-next-token)
 (syntax-autoload "scmpkg-support" interface)
 (autoload	 "srfi-27"        random-integer random-real)
