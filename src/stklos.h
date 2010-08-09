@@ -1,7 +1,7 @@
 /*
  * stklos.h	-- stklos.h
  * 
- * Copyright © 1999-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 20-Dec-2009 15:10 (eg)
+ * Last file update:  9-Aug-2010 10:55 (eg)
  */
 
 
@@ -845,7 +845,7 @@ struct port_obj {
   void *stream;			/* stream descriptor != for strings, file, virt. */
   int  flags;			/* associated flags */
   int  ungetted_char;		/* character ungetted, EOF if none */
-  char *filename;		/* File name (NULL if not a file port) */
+  char *filename;		/* File name (for file port, a const otherwise) */
   int  line;			/* Line number  (unused when writing) */
   int  pos;			/* position from the start of file */
   SCM  close_hook;		/* hook called when a file is closed */

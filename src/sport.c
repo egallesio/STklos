@@ -1,7 +1,7 @@
 /*
  * s p o r t . c			-- String ports management
  *
- * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 14-May-2007 12:02 (eg)
+ * Last file update:  9-Aug-2010 10:59 (eg)
  *
  */
 
@@ -241,7 +241,7 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
   PORT_UNGETC(res) 	= EOF;
   PORT_LINE(res)	= 1;
   PORT_POS(res)		= 0;
-  PORT_FNAME(res)	= NULL;
+  PORT_FNAME(res)	= "string port";
   PORT_CLOSEHOOK(res)	= STk_false;
   
   PORT_PRINT(res)	= sport_print;
