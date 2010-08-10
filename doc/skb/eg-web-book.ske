@@ -4,7 +4,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Oct-2004 14:48 (eg)
-;;;; Last file update:  3-Mar-2005 16:27 (eg)
+;;;; Last file update: 10-Aug-2010 08:45 (eg)
 
 
 (define *html-engine* (environment-engine (skribe-environment)))
@@ -30,8 +30,8 @@
 (define (toc-browsing d c e)
   (let ((chaps (find-down chapter? (markup-body d))))
     (apply table :width 97. :border 1 :frame 'box :cellpadding 0 :cellspacing 0
-       (tr (th :align 'center :colspan 2 :bg "darkolivegreen" 
-	       (color :fg "white" "Contents")))
+       (tr (th :align 'center :colspan 2 :bg "#ACE919" 
+	       (color :fg "darkolivegreen" "Contents")))
        (tr :class "navnorm"
 	   (td "")
 	   (td :align 'left (ref :handle (handle d) :text "*Top*")))
@@ -53,7 +53,7 @@
 ;; ----------------------------------------------------------------------
 ;;	Environment Customization ...
 ;; ----------------------------------------------------------------------
-(define *border-bg* "#E6F2E6")
+(define *border-bg* "#8A8983")
 
 (customize-environment! 
  (html 
@@ -61,7 +61,9 @@
     :chapter-file #t
     :css "doc-style.css"
     :title-background *border-bg*
-    :section-title-background *border-bg*
+    :title-foreground "#FAFAFA"
+    :section-title-background #f
+    :section-title-foreground "darkolivegreen"
     :subsection-title-background #f
     :subsection-title-foreground "darkolivegreen"
     :subsubsection-title-background #f

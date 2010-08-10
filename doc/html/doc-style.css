@@ -3,30 +3,43 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 13-Oct-2004 11:42 (eg)
- * Last file update: 21-Oct-2004 14:27 (eg)
+ * Last file update: 10-Aug-2010 00:13 (eg)
  */
+
+html { 
+  background: #F1EEE0;
+}
+
+h3 { 
+  font-size: 150%;
+}
+
+h4 { 
+  font-size: 120%;
+}
 
 .skribetitle {
     padding: 10 0 20 0;
-    background: #E6F2E6;    		
+    background: #4B4C4C;
 }
 
 .navnorm {
-    background: white;
+    background: ivory;
 }
 
 .navsel {
-    background: #ffffd0;
+    background: #FAFAD2;
 }
 
 .code {
+
     border: 1px solid; 
     border-bottom: 2px solid;
     border-right: 2px solid;
 }
 
 A:link, A:visited {
-    color: #0000ff; 
+    color: #0B4796 ;
     text-decoration: none; 
 }
 

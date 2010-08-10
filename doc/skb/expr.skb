@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  8-Feb-2005 19:37 (eg)
+;; Last file update: 10-Aug-2010 00:22 (eg)
 ;;
 ;; ======================================================================
 
@@ -32,7 +32,7 @@
 
 (p [This chapter describes the main forms available in ,(stklos). ,(rfive)
 constructions are given
-very succinctly here for reference. See the (ref :bib "R5RS") for a complete
+very succinctly here for reference. See ,(ref :bib "R5RS") for a complete
 description.])
    
    

@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 22-Jun-2007 23:55 (eg)
+# Last file update: 10-Aug-2010 08:22 (eg)
 
 
 SOURCES  = biblio.skb cond.skb custom.skb expr.skb index.skb 		\

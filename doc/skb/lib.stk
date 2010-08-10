@@ -1,7 +1,7 @@
 ;;;;
 ;;;; lib.stk	-- Library for STklos Documentation Building 
 ;;;; 
-;;;; Copyright © 2003-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2003-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 20-Dec-2003 23:23 (eg)
-;;;; Last file update: 28-Feb-2005 16:42 (eg)
+;;;; Last file update: 10-Aug-2010 09:19 (eg)
 ;;;;
 
 (load "srfi.stk")
@@ -37,6 +37,7 @@
 
 (define *header-bg*     "#dddddd")      ;"#bbe1c9"
 (define *header-fg*     "#5151b9")
+(define *example-bg*    "#fafafa")
 (define *example-bg*    "#fafafa")
 (define *example-width* "90%")
 
@@ -237,7 +238,7 @@
 (cond
   ((skribe-env-has-prop? 'html)				;; HTML
      (set! doc doc-html)
-     (set! *example-bg*    "#eee8bf")
+     (set! *example-bg*    "ivory")
      (set! *example-width* "90%")
      (set! *engine-type* 'html))
   ((skribe-env-has-prop? 'context)			;; ConTeXt

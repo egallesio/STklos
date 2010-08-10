@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 26-Jun-2007 11:11 (eg)
+;; Last file update: 10-Aug-2010 09:20 (eg)
 ;;
 ;; ======================================================================
 
@@ -52,6 +52,11 @@
 ;;;
 (read-database "../DOCDB")
 
+(define *logo-for-tex* 
+  (case *engine-type*
+    ((tex) 
+     (! "\\position(7, 12){\\externalfigure[images/dice.png][frame=off,width=2cm]}"))
+    (else "")))
 ;;;
 ;;; Document
 ;;;
@@ -59,9 +64,10 @@
 	  :subtitle [(version ,(begin *stklos-version*))]
 	  :author (author :name (font :size "+2" (bold "Erick Gallesio"))
 		     :affiliation "Université de Nice - Sophia Antipolis"
-		     :address '("930 route des Colles, BP 145"
-				"F-06903 Sophia Antipolis, Cedex"
-				"France"))
+		     :address (list "930 route des Colles, BP 145"
+				    "F-06903 Sophia Antipolis, Cedex"
+				    "France"
+				    *logo-for-tex*))
 	   
    (linebreak 3)
    [This document provides a complete list of procedures and special
