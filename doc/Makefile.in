@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 28-Oct-2006 16:54 (eg)
+# Last file update: 10-Aug-2010 10:44 (eg)
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -41,8 +41,8 @@ POST_UNINSTALL = :
 subdir = doc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/stklos-compile.1.in $(srcdir)/stklos-config.1.in \
-	$(srcdir)/stklos-genlex.1.in $(srcdir)/stklos-install.1.in \
-	$(srcdir)/stklos-pkg.1.in $(srcdir)/stklos.1.in TODO
+	$(srcdir)/stklos-genlex.1.in $(srcdir)/stklos-pkg.1.in \
+	$(srcdir)/stklos.1.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -50,7 +50,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/stklosconf.h
 CONFIG_CLEAN_FILES = stklos.1 stklos-config.1 stklos-compile.1 \
-	stklos-genlex.1 stklos-install.1 stklos-pkg.1
+	stklos-genlex.1 stklos-pkg.1
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -217,9 +217,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-man_MANS = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1\
-		stklos-install.1
-
+man_MANS = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 
 EXTRA_DIST = $(man_MANS)
 DOCDB = DOCDB
 OTHERDB = ../src/$(DOCDB) ../lib/$(DOCDB)
@@ -273,8 +271,6 @@ stklos-config.1: $(top_builddir)/config.status $(srcdir)/stklos-config.1.in
 stklos-compile.1: $(top_builddir)/config.status $(srcdir)/stklos-compile.1.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 stklos-genlex.1: $(top_builddir)/config.status $(srcdir)/stklos-genlex.1.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-stklos-install.1: $(top_builddir)/config.status $(srcdir)/stklos-install.1.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 stklos-pkg.1: $(top_builddir)/config.status $(srcdir)/stklos-pkg.1.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
