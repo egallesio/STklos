@@ -54,9 +54,9 @@ libffi - a portable foreign function interface library
 
       	   	 +++++++++++++++++++++++++++++++++++
 
-The GC, PCRE and GMP libraries provided with STklos are only used if there
-are no identical (or higher) versions of these libraries already
-installed on the system at configuration time. 
+The GC, PCRE, LIBFFI and GMP libraries provided with STklos are only
+used if there are no identical (or higher) versions of these libraries
+already installed on the system at configuration time.
 
 
 

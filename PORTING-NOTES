@@ -1,5 +1,3 @@
-This file contains a set of informations for compiling STklos on
-various architectures.
 
 Version 1.0 is known to compile with the standard invocation 
      configure && make && sudo make install 
@@ -9,13 +7,14 @@ on the following architectures
     - MacOS 10.5+  (gcc-4.x 32 and 64 bits)
     - FreeBSD 8.x  (gcc-4.x 32 bits)
 
-
+======================================================================
 ======================================================================
 All the informations given below are for old versions (pre-1.0) of
 STklos. They are here for the record. 
 
 
-
+This file contains a set of informations for compiling STklos on
+various architectures.
 
 If you experience a new port or confirm/infirm/add informations which
 are specified here please send a mail to Erick Gallesio
