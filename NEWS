@@ -4,7 +4,34 @@
 				| NEWS |
 				+======+
 
-* version 1.00 (2010 01 04)
+* version 1.00 (2010 08 11)
+
+The version 1.00 is finally here (work on STklos started 10 years before ...).  
+The main difference with this version and the pre-1.0
+ones is that it does not integrate GTK+ 1.x support. In fact, GTK+
+support is now available through several ScmPkg packages. Otherwise:
+
+    * Complete rewriting of GMP-lite, the provided gmp compatible
+    package for system which does not provide it
+    * Remove the old extension intsallation mechanism (stklos-install).
+      Use the ScmPkg mechanism for extending STklos now
+    * functions, generic functions and methods cans now have documentation strings
+    * Added GNU readline support in REPL if the readline lib can be
+      loaded dynamically
+    * Configuration files location can now be changed
+    * Added an interactive help system
+    * libffi uptated to version 3.0.9
+    * New implemented SRFIs
+          o SRFI-74 (Octet-Addressed Binary Blocks)
+          o SRFI-96 (SLIB Prerequisites )
+          o SRFI-98 (Interface to access environment variables)
+          o SRFI-100 (define-lambda-object)
+    * New primitives
+          o port?
+          o help
+          o make-directories
+          o ensure-directories-exist
+    * Bug fixes
 
 * version 0.98 (2008 04 15)
     * Replaced the C/invoke FFI library by libffi: Now GTk2 ScmPkg

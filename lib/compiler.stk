@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  9-May-2010 23:22 (eg)
+;;;; Last file update: 10-Aug-2010 13:00 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -32,6 +32,7 @@
 	  compiler:gen-line-number
 	  compiler:warn-use-undefined
 	  compiler:warn-use-undefined-postpone
+	  compiler:show-assembly-code
 	  compiler:inline-common-functions))
   
 (select-module STKLOS-COMPILER)
@@ -99,7 +100,7 @@
 (define compiler:gen-line-number		(make-parameter #f))
 (define compiler:warn-use-undefined  		(make-parameter #f))
 (define compiler:warn-use-undefined-postpone	(make-parameter #t))
-(define compiler:show-assemby-code		(make-parameter #f))
+(define compiler:show-assembly-code		(make-parameter #f))
 
 (define compiler:inline-common-functions
   (let ((inlined *inline-symbols*))

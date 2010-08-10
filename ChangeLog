@@ -1,4 +1,22 @@
+2010-08-10  Erick Gallesio  <eg@unice.fr>
+
+	* configure, configure.ac, doc/Makefile.am, doc/Makefile.in,
+	  doc/skb/images/dice.png, doc/stklos-install.1.in, utils/Makefile.am,
+	  utils/Makefile.in, utils/doc2texi, utils/stklos-ext-install, 
+	  utils	/stklos-install:
+	Remove the old extension intsallation mechanism (stklos-install)
+	[edd3ad9d920b]
+
+	*_Generate documentation for 1.0
+	[580660004913]
+
 2010-08-09  Erick Gallesio  <eg@unice.fr>
+
+	* ChangeLog, doc/skb/srfi.stk, doc/skb/stdproc.skb, lib/bonus.stk, 
+	  src/mutex-pthreads.c, src/path.c, src/thread-pthreads.c:
+	Added documentention for MAKE-DIRECTORIES and ENSURE-DIRECTORIES-
+	EXIST
+	[bd2f6e887f05]
 
 	* lib/boot.stk, src/boot.c, src/boot.img:
 	suppressed the http package autoload, since it is not used by the
@@ -109,7 +127,7 @@
 2010-05-14  Erick Gallesio  <eg@unice.fr>
 
 	* src/cpointer.c:
-	Added fucntions allocate-bytes and free-bytes
+	Added functions allocate-bytes and free-bytes
 	[720165de720a]
 
 	* utils/stklos-install:
@@ -262,11 +280,6 @@
 
 2009-10-26  Erick Gallesio  <eg@unice.fr>
 
-	* gmp/gmp.c, gmp/mpi.c, gmp/tests/Makefile.in, gmp/tests/fact-gmp.c,
-	  src/boot.c, src/boot.img:
-	NOP
-	[39c1d035ac7f]
-
 	* gmp/gmp.c, gmp/gmp.h, gmp/tests/Makefile.in, gmp/tests/fact-gmp.c,
 	  src/boot.c, src/boot.img:
 	Added a check for gmp wrapper in gmp-light
@@ -318,17 +331,6 @@
 	absent
 	[b0ef2c965821]
 
-2009-10-04  Erick Gallesio <eg at unice.fr>  <eg at unice.fr>
-
-	* doc/Makefile.in, src/Makefile.in, src/boot.c:
-	  NOP
-	[619b24b72580]
-
-2009-10-04  Erick Gallesio  <eg@unice.fr>
-
-	* configure, configure.ac, src/boot.img:
-	  NOP
-	[0d6d1ad9db98]
 
 2009-10-03  Erick Gallesio  <eg@unice.fr>
 
@@ -418,10 +420,6 @@
 	Configure.ac cleaning
 	[7e9392d20767]
 
-	* configure.ac, src/boot.c, src/boot.img, tests/do-test.stk:
-	NOP
-	[21eaa6608cb1]
-
 	* Makefile.in, PACKAGES-USED, configure, configure.ac,
 	  doc/Makefile.in, examples/Makefile.in, lib/Lalr.d/Makefile.in,
 	  lib/Lurc.d/Makefile.in, lib/Makefile.in, lib/Match.d/Makefile.in,
@@ -470,16 +468,6 @@
 	[a8e7a31bca29]
 
 	* Makefile.am, Makefile.in, aclocal.m4, configure, configure.in,
-	  doc/Makefile.in, examples/Makefile.am, examples/Makefile.in,
-	  examples/checkbutton.stk, lib/Lalr.d/Makefile.in,
-	  lib/Lurc.d/Makefile.in, lib/Makefile.in, lib/Match.d/Makefile.in,
-	  lib/SILex.d/Makefile.in, lib/ScmPkg.d/Makefile.in, lib/srfi-59.stk,
-	  pkgman/Makefile.in, src/Makefile.in, src/stklosconf.h.in,
-	  tests/Makefile.in, utils/Makefile.in:
-	NOP
-	[ad624da25e3c]
-
-	* Makefile.am, Makefile.in, aclocal.m4, configure, configure.in,
 	  doc/Makefile.in, examples/*,  extensions/*, gtklos/*
 	  lib/Lalr.d/Makefile.in, lib/Lurc.d/Makefile.in, lib/Makefile.in,
 	  lib/Match.d/Makefile.in, lib/SILex.d/Makefile.in,
@@ -488,13 +476,6 @@
 	  utils/Makefile.in:
 	Big cleaning
 	[d8d70524783a]
-
-	* PORTING-NOTES:
-	.
-	[ed4f91b24cff]
-
-	* NOP
-	[ed1638489929]
 
 	* lib/srfi-59.stk, src/boot.c, src/boot.img:
 	fix in srfi-59
@@ -550,11 +531,6 @@
 	      method-more-specific?
 	[56cf0a2e035c]
 
-2009-04-18  Erick Gallesio  <eg@unice.fr>
-
-	* lib/bonus.stk, src/boot.c, src/boot.img, src/system.c:
-	NOP
-	[88f3da082eab]
 
 2009-01-03  Erick Gallesio  <eg@unice.fr>
 
@@ -572,26 +548,11 @@
 
 2008-09-22  Erick Gallesio  <eg@unice.fr>
 
-	* src/boot.c:
-	NOP
-	[52e14929c4e0]
-
 	* SUPPORTED-SRFIS, doc/skb/srfi.stk, lib/bonus.stk, lib/srfi-0.stk,
 	  src/boot.c, src/boot.img:
 	Added SRFI-98 support
 	[133133b15264]
 
-2008-09-01  Erick Gallesio  <eg@unice.fr>
-
-	* lib/STklos.init, src/boot.c, src/port.c:
-	merge
-	[9b2ed687fcab]
-
-	* SUPPORTED-SRFIS, doc/skb/srfi.skb, doc/skb/stdproc.skb,
-	  lib/Makefile.am, lib/Makefile.in, lib/STklos.init, lib/srfi-0.stk,
-	  src/boot.c, src/boot.img, src/port.c:
-	NOP
-	[13546d614fd1]
 
 2008-08-27  Erick Gallesio  <eg@unice.fr>
 
@@ -615,9 +576,6 @@
 	Corrected a bug when creating rational with N=0 and D being a bignum
 	[00018bec514b]
 
-	* lib/obsolete.stk, src/boot.c, src/boot.img:
-	NOP
-	[96848a916987]
 
 2008-06-02  Erick Gallesio  <eg@unice.fr>
 
@@ -654,9 +612,6 @@
 	Commit version stklos-0.98
 	[20e82874c4bb]
 
-	* PORTING-NOTES:
-	NOP
-	[d5209327cc56]
 
 2008-05-14  Erick Gallesio  <eg@unice.fr>
 
