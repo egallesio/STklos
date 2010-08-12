@@ -12,7 +12,7 @@ ones is that it does not integrate GTK+ 1.x support. In fact, GTK+
 support is now available through several ScmPkg packages. Otherwise:
 
     * Complete rewriting of GMP-lite, the provided gmp compatible
-    package for system which does not provide it
+      package for system which does not provide it
     * Remove the old extension intsallation mechanism (stklos-install).
       Use the ScmPkg mechanism for extending STklos now
     * functions, generic functions and methods cans now have documentation strings

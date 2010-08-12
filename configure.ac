@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 10-Aug-2010 10:36 (eg)
+### Last file update: 12-Aug-2010 22:57 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [1.00])
@@ -188,7 +188,7 @@ fi
 # Test if the user want to force with our GC lib
 AC_ARG_WITH(provided-gc,
        [  --with-provided-gc	  use the provided Boehm GC library],
-       PROV_GC="yes", PROV_GC="no")
+       PROV_GC="$withval", PROV_GC="no")
 
 if test "$HAVE_GC" = "no" -o "$PROV_GC" = "yes"
 then 
@@ -244,12 +244,12 @@ fi
 # (2 names available for that  --with-provided-bignum or (legacy) --with-gmp-light
 AC_ARG_WITH(provided-bignum,
        [  --with-provided-bignum  use the provided Bignum (GMPlite) library],
-       PROV_GMP="yes", PROV_GMP="no")
+       PROV_GMP="$withval", PROV_GMP="no")
 
 if test "$PROV_GMP" = "no" ;then
   AC_ARG_WITH(gmp-light,
          [  --with-gmp-light	  a synonym for --with-provided-bignum],
-         PROV_GMP="yes", PROV_GMP="no")
+         PROV_GMP="$withval", PROV_GMP="no")
 fi
 
 if test "$HAVE_GMP" = "no" -o "$PROV_GMP" = "yes"
@@ -289,7 +289,7 @@ fi
 # Test if the user want to force with our PCRE lib
 AC_ARG_WITH(provided-regexp,
        [  --with-provided-regexp use the provided Regexp (PCRE) library],
-       PROV_PCRE="yes", PROV_PCRE="no")
+       PROV_PCRE="$withval", PROV_PCRE="no")
 
 if test "$HAVE_PCRE" = "no" -o "$PROV_PCRE" = "yes"
 then 
@@ -336,7 +336,7 @@ fi
 # Test if the user want to force with our FFI lib
 AC_ARG_WITH(provided-ffi,
        [  --with-provided-ffi    use the provided FFI library],
-       PROV_FFI="yes", PROV_FFI="no")
+       PROV_FFI="$withval", PROV_FFI="no")
 
 if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
 then 

@@ -2,10 +2,11 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 10-Aug-2010 10:44 (eg)
+# Last file update: 12-Aug-2010 22:33 (eg)
 
 mandir	      = $(prefix)/share/man
-man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 
+man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
+	        stklos-pkg.1 
 EXTRA_DIST    = $(man_MANS)
 
 DOCDB       = DOCDB

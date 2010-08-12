@@ -6458,7 +6458,7 @@ fi
 
 # Check whether --with-provided-gc was given.
 if test "${with_provided_gc+set}" = set; then :
-  withval=$with_provided_gc; PROV_GC="yes"
+  withval=$with_provided_gc; PROV_GC="$withval"
 else
   PROV_GC="no"
 fi
@@ -6603,7 +6603,7 @@ fi
 
 # Check whether --with-provided-bignum was given.
 if test "${with_provided_bignum+set}" = set; then :
-  withval=$with_provided_bignum; PROV_GMP="yes"
+  withval=$with_provided_bignum; PROV_GMP="$withval"
 else
   PROV_GMP="no"
 fi
@@ -6613,7 +6613,7 @@ if test "$PROV_GMP" = "no" ;then
 
 # Check whether --with-gmp-light was given.
 if test "${with_gmp_light+set}" = set; then :
-  withval=$with_gmp_light; PROV_GMP="yes"
+  withval=$with_gmp_light; PROV_GMP="$withval"
 else
   PROV_GMP="no"
 fi
@@ -6701,7 +6701,7 @@ fi
 
 # Check whether --with-provided-regexp was given.
 if test "${with_provided_regexp+set}" = set; then :
-  withval=$with_provided_regexp; PROV_PCRE="yes"
+  withval=$with_provided_regexp; PROV_PCRE="$withval"
 else
   PROV_PCRE="no"
 fi
@@ -6796,7 +6796,7 @@ fi
 
 # Check whether --with-provided-ffi was given.
 if test "${with_provided_ffi+set}" = set; then :
-  withval=$with_provided_ffi; PROV_FFI="yes"
+  withval=$with_provided_ffi; PROV_FFI="$withval"
 else
   PROV_FFI="no"
 fi
