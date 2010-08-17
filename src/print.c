@@ -1,7 +1,7 @@
 /*
  * p r i n t . c				-- writing stuff
  *
- * Copyright © 1993-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 20-Dec-2008 15:55 (eg)
+ * Last file update: 17-Aug-2010 23:20 (eg)
  *
  */
 #include <ctype.h>
@@ -69,7 +69,7 @@ static void Inline printsymbol(SCM symb, SCM port, int mode)
        (!STk_read_case_sensitive && (BOXED_INFO(symb) & SYMBOL_HAS_UPPER)))) {
     STk_putc('|', port);  STk_puts(s, port); STk_putc('|', port);
   } else
-    STk_puts(s, port);
+    STk_puts(*s ? s: "||", port); /* print bars around the "null" symbol */
 }
 
 static void Inline printkeyword(SCM key, SCM port, int mode)
