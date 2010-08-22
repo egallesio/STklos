@@ -1,7 +1,7 @@
 ;;;;
 ;;;; extract.stk	-- Implementation of stklos-pkg extract option
 ;;;; 
-;;;; Copyright © 2007-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Jan-2007 12:10 (eg)
-;;;; Last file update: 10-Apr-2008 12:08 (eg)
+;;;; Last file update: 21-Aug-2010 15:18 (eg)
 ;;;;
 
 

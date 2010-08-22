@@ -21,7 +21,7 @@
  * 
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update:  5-Aug-2010 18:05 (eg)
+ * Last file update: 21-Aug-2010 14:10 (eg)
  */
 
 #include <stklos.h>
@@ -395,7 +395,7 @@ SCM STk_call_ext_function(SCM fct, int argc, SCM *argv)
 /* ======================================================================
  *  	make-callback ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("make-callback", make_callback, subr3, 
+DEFINE_PRIMITIVE("%make-callback", make_callback, subr3, 
 		 (SCM proc, SCM types, SCM data))
 {
   SCM z;

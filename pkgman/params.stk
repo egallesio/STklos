@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Dec-2006 16:23 (eg)
-;;;; Last file update:  8-Aug-2010 09:07 (eg)
+;;;; Last file update: 20-Aug-2010 17:45 (eg)
 ;;;;
 
 
@@ -37,7 +37,8 @@
 		    (let ((dir (expand-file-name d)))
 		      (ensure-directories-exist dir)
 		      (stklos-pkg-servers-directory (make-path dir "servers"))
-		      (stklos-pkg-cache-directory (make-path dir "cache"))))))
+		      (stklos-pkg-cache-directory (make-path dir "cache"))
+		      dir))))		    
 
 (define stklos-pkg-system-directory
   (make-parameter (make-path (%library-prefix) "lib" "stklos" "pkg")))

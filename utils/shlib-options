@@ -21,7 +21,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 12:21 (eg)
-# Last file update:  5-Aug-2010 23:56 (eg)
+# Last file update: 20-Aug-2010 16:52 (eg)
 
 
 #
@@ -102,7 +102,7 @@ case $os in
 	    i*86) machine=ix86;;
 	  esac
 	  OS=LINUX
-	  SH_COMP_FLAGS='-fpic'
+	  SH_COMP_FLAGS='-fpic -nostdlib'
           SH_LOAD_FLAGS='-shared -o'
           SH_LOADER='ld'
           SH_SUFFIX='so'

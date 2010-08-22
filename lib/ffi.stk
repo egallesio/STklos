@@ -21,61 +21,69 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
-;;;; Last file update: 22-Jun-2010 09:36 (eg)
+;;;; Last file update: 21-Aug-2010 14:16 (eg)
 ;;;;
 
+(define make-external-function #f)
+(define make-callback	       #f)
 
-(define make-external-function
-  (let ((table '((:void 	0)
-		   (:char 	1)
-`		   (:short 	2)
-		   (:ushort 	3)
-		   (:int 	4)
-		   (:uint 	5)
-		   (:long 	6)
-		   (:ulong 	7)
-		   (:lonlong	8)
-		   (:ulonlong	9)
-		   (:float 	10)
-		   (:double 	11)
-		   (:boolean 	12)
-		   (:pointer 	13)
-		   (:string	14)
-		   (:int8	15)		 
-		   (:int16	16)
-		   (:int32	17)
-		   (:int64	18)
-		   (:obj	19))))
+(let ((table '((:void 		0)
+	       (:char 		1)
+	       (:short 		2)
+	       (:ushort 	3)
+	       (:int 		4)
+	       (:uint 		5)
+	       (:long 		6)
+	       (:ulong 		7)
+	       (:lonlong	8)
+	       (:ulonlong	9)
+	       (:float 		10)
+	       (:double 	11)
+	       (:boolean 	12)
+	       (:pointer 	13)
+	       (:string		14)
+	       (:int8		15)		 
+	       (:int16		16)
+	       (:int32		17)
+	       (:int64		18)
+	       (:obj		19))))
 
-    (define (arg-type->number k argument?)
-      (let ((info (assoc k table)))
-	(if info
-	    (let ((r (cadr info)))
-	      (if (and (zero? r) argument?)
-		  (error 'define-external "parameter of type :void are forbidden")
-		  (cadr info)))
-	    (error 'define-external "bad type name ~S" k))))
+  (define (arg-type->number k argument?)
+    (let ((info (assoc k table)))
+      (if info
+	  (let ((r (cadr info)))
+	    (if (and (zero? r) argument?)
+		(error 'define-external "parameter of type :void are forbidden")
+		(cadr info)))
+	  (error 'define-external "bad type name ~S" k))))
+  
+  (define (parse-parameters lst)
+    (map (lambda (x)
+	   (cond
+	     ((keyword? x)
+	      (arg-type->number x #t))
+	     ((pair? x)
+	      (if (and (symbol? (car x)) (keyword? (cadr x)) (null? (cddr x)))
+		  (arg-type->number (cadr x) #t)
+		  (error 'make-external-function
+			 "bad parameter description: ~S" x)))
+	     (else
+	      (error 'make-external-function "bad parameter description: ~S" x))))
+	 lst))
 
-    (define (parse-parameters lst)
-      (map (lambda (x)
-	     (cond
-	       ((keyword? x)
-		(arg-type->number x #t))
-	       ((pair? x)
-		(if (and (symbol? (car x)) (keyword? (caar x)) (null? (cddr x)))
-		    (arg-type->number (cadr x) #t)
-		    (error 'make-external-function
-			   "bad parameter description: ~S" x)))
-	       (else
-		(error 'make-external-function "bad parameter description: ~S" x))))
-	   lst))
 
-    ;;; make-external-function lambda
+  ;; make-external-function
+  (set! make-external-function
     (lambda (entry-name parameters return-type lib-name)
       (%make-ext-func entry-name
 		      (parse-parameters parameters)
 		      (arg-type->number return-type #f)
-		      lib-name))))
+		      lib-name)))
+
+  ;; make-callback
+  (set! make-callback
+    (lambda (proc types data)
+      (%make-callback proc (parse-parameters types) data))))
 
 
 
