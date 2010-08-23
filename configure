@@ -619,6 +619,7 @@ SH_SUFFIX
 SH_LOADER
 SH_LOAD_FLAGS
 SH_COMP_FLAGS
+EXTRA_COMP_FLAGS
 OS_NAME_VERSION
 OS_NAME
 BUILD_ARCH
@@ -6143,6 +6144,7 @@ case $OS_NAME_VERSION in
     ;;
   DARWIN_10)
      GCINC="GCINC -D_XOPEN_SOURCE"
+     EXTRA_COMP_FLAGS="-I/opt/local/include"
      ;;
   UNKNOWN*)
     echo ""
@@ -6858,6 +6860,7 @@ LIB_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS))"
 
 
 ### Output files
+
 
 
 

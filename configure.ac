@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 20-Aug-2010 09:46 (eg)
+### Last file update: 23-Aug-2010 00:20 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [1.01dev])
@@ -69,6 +69,7 @@ case $OS_NAME_VERSION in
     ;;
   DARWIN_10)
      GCINC="GCINC -D_XOPEN_SOURCE"
+     EXTRA_COMP_FLAGS="-I/opt/local/include"
      ;;
   UNKNOWN*)
     echo ""
@@ -394,6 +395,7 @@ AC_SUBST(BUILD_OS)
 AC_SUBST(BUILD_ARCH)
 AC_SUBST(OS_NAME)
 AC_SUBST(OS_NAME_VERSION)
+AC_SUBST(EXTRA_COMP_FLAGS)
 AC_SUBST(SH_COMP_FLAGS)
 AC_SUBST(SH_LOAD_FLAGS)
 AC_SUBST(SH_LOADER)
