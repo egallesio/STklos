@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Jan-2007 12:10 (eg)
-;;;; Last file update: 21-Aug-2010 15:18 (eg)
+;;;; Last file update: 25-Aug-2010 23:57 (eg)
 ;;;;
 
 
@@ -92,7 +92,7 @@
 		    ;; if we have a configure or Makefile go in dir
 		    (when (or (file-exists? tuneconf)
 			      (file-exists? tunemake))
-		      (printf "\t(cd ~a; make ~ainstall)\n" tunedir prefix))
+		      (printf "\t(cd ~a; $(MAKE) ~ainstall)\n" tunedir prefix))
 		    ;; installing the object file
 		    (printf "\tstklos-pkg ~a --cp ~a ~a lib 0755 && \\\n"
 			    option x obj)

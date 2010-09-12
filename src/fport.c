@@ -1,7 +1,7 @@
 /*
  * f p o r t . c				-- File ports
  *
- * Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update:  3-Oct-2009 21:41 (eg)
+ * Last file update: 12-Sep-2010 10:59 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -139,7 +139,7 @@ static void fill_buffer(struct fstream *f)
   }
   while ((n == -1) && (errno == EINTR));
   
-  if (n == 0) {
+  if (n <= 0) {
     PORT_STREAM_FLAGS(f) |= STK_IOEOF;
   } else {
     PORT_CNT(f) = n;
