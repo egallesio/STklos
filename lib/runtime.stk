@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update:  4-Aug-2010 10:52 (eg)
+;;;; Last file update: 16-Oct-2010 15:56 (eg)
 ;;;;
 
 
@@ -64,6 +64,19 @@
 	      (string-append res (format "~a" (car args)))))))
 
 ;; ----------------------------------------------------------------------
+;; 	parameters
+;; ----------------------------------------------------------------------
+#|<doc EXT stklos-debug-level
+ * (stklos-debug-level)
+ *
+ * |stklos-debug-level| is a parameter objet. It permits to know the current
+ * debug level. The default value of this parameter is 0 (meaning "no debug").
+doc>
+|#
+(define stklos-debug-level
+  (make-parameter 0))
+
+;; ----------------------------------------------------------------------
 ;;	*%system-state-plist* ...
 ;; ----------------------------------------------------------------------
 (define *%system-state-plist*  (list :name "STklos"))
@@ -79,6 +92,7 @@
   (let ((lst (compiler-known-globals)))
     (unless (memq symbol lst)
       (compiler-known-globals (cons symbol lst)))))
+
 
 
 ;;; ----------------------------------------------------------------------

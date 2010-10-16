@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 30-Jun-2010 18:03 (eg)
+;;;; Last file update: 16-Oct-2010 16:07 (eg)
 ;;;;
 
 
@@ -142,7 +142,7 @@ doc>
  * (load-verbose value)
  * 
  * |load-verbose| is a parameter object. It permits to display the
- * path name of the files whch are loaded by |load| or |try-load| on
+ * path name of the files which are loaded by |load| or |try-load| on
  * the current error port, when set to a true value. If |load-verbose|
  * is set to |¤f|, no message is printed.
 doc>
@@ -174,7 +174,8 @@ doc>
 (define (%guess-pathname fn paths suffixes)
 
   (define (try f)
-    ; (eprintf "Try ~S\n" f)
+    (when (>= (stklos-debug-level) 2)
+      (eprintf "%guess-pathname: trying ~S\n" f))
     (and (file-exists? f)
 	 (file-is-readable? f)
 	 (not (file-is-directory? f))
