@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  2-Aug-2010 19:10 (eg)
+# Last file update: 23-Oct-2010 11:56 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -202,4 +202,7 @@ clean:
 	done
 
 distclean: clean
-	true
+	/bin/rm -f Makefile
+	@for i in $(SUBDIRS) ;do \
+	   (cd $$i; make distclean)\
+	done

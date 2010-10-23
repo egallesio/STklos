@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 25-Oct-2004 16:43 (eg)
-# Last file update: 13-Sep-2005 23:01 (eg)
+# Last file update: 23-Oct-2010 11:59 (eg)
 
 schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
 scheme_DATA = lalr.stk lalr.ostk
@@ -22,4 +22,3 @@ calc: calc.stk
 clean: 
 	/bin/rm -f *.ostk calc *~
 
-distclean: clean

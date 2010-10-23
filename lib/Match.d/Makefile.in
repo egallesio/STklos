@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 26-Nov-2001 10:10 (eg)
-# Last file update: 29-Nov-2004 11:03 (eg)
+# Last file update: 23-Oct-2010 11:56 (eg)
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@

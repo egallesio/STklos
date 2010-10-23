@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Dec-2006 10:09 (eg)
-# Last file update: 26-Apr-2007 17:29 (eg)
+# Last file update: 23-Oct-2010 12:02 (eg)
 
 SRCS =  scmpkg-interface.stk scmpkg-languages.stk
 OBJ  =  ../scmpkg-support.ostk
@@ -22,5 +22,3 @@ $(OBJ): scmpkg-support.stk $(SRCS)
 
 clean: 
 	/bin/rm -f $(OBJ) *~
-
-distclean: clean
