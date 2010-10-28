@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 28-Oct-2010 14:00 (eg)
+;; Last file update: 28-Oct-2010 14:56 (eg)
 ;;
 ;; ======================================================================
 
@@ -34,5 +34,6 @@ parmaters are listed below.])
    (insertdoc 'load-suffixes)
    (insertdoc 'load-verbose)
    (insertdoc 'thread-handler-error-show)
+   (insertdoc 'stklos-debug-level)
 )
 
