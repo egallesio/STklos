@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update: 12-Aug-2010 22:37 (eg)
+;;;; Last file update: 25-Oct-2010 20:39 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything 
@@ -94,6 +94,8 @@
 	     (set! repl-backtrace bt)))
 	((condition-has-type? c &message)		;; &message (e.g. ^C)
 	   (format port (condition-ref c 'message)))
+	((condition-has-type? c &uncaught-exception)
+	   (repl-handler (uncaught-exception-reason c) port))	
 	(else						;; Unknown
 	   (format port "**** Unknown condition raised.\n")
 	   (format port "Condition type: ~A\n" (struct-type-name (struct-type c)))

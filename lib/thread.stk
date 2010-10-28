@@ -1,7 +1,7 @@
 ;;;;
 ;;;; thread.stk				-- Threads support
 ;;;; 
-;;;; Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2006-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;; 
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Jan-2006 22:56 (eg)
-;;;; Last file update: 25-Oct-2006 17:06 (eg)
+;;;; Last file update: 28-Oct-2010 14:03 (eg)
 ;;;;
 (define (%thread-timeout->seconds timeout)
   (cond
@@ -61,14 +61,54 @@ doc>
 |#
 (define (make-thread thunk :optional (name (symbol->string (gensym "thread")))
 		                     stack-size)
+  
+  (define (show-thread-error c)
+    (when (and (condition? c)
+	       (condition-has-type? c &error-message))
+      (let* ((name (thread-name (current-thread)))
+	     (who  (condition-ref c 'location))
+	     (msg  (condition-ref c 'message))
+	     (bt   (condition-ref c 'backtrace))
+	     (loc  (%build-error-location who bt)))
+	(display (do-color 'bold 'red
+			   "**** Error "
+			   'blue
+			   (format "(in thread ~S):\n" name)
+			   'bold 'red
+			   (format "~A: ~A\n" (car loc) msg)
+			   'clear
+			   "    (this error may be signaled again later)\n")
+		 (current-error-port)))))
+    
   (define (thread-handler c)
     (%thread-end-exception-set! (current-thread) c)
+    (when (thread-handler-error-show)
+      ;; show a message as soon as the error occurs instead of postponing
+      ;; it until the thread is joined
+      (show-thread-error c))
     c)
+
   (%make-thread (lambda ()
 		  (with-handler thread-handler
 		       (thunk)))
 		  name
 		  stack-size))
+
+#|
+<doc EXT thread-handler-error-show
+ * (thread-handler-error-show)
+ * (thread-handler-error-show value)
+ * 
+ * When an untrapped error occurs in a thread, it produces an
+ * ,(ref :mark "make-thread" "uncaught exception") which can finally be
+ * trapped when the thread is ,(ref :mark "thread-join!" "joined").
+ * Setting the |thread-handler-error-show| parameter permits to see
+ * error message as soon as possible, even without joining the thread.
+ * This makes debugging easier. By default, this parameter is set to
+ * |¤t|.
+doc>
+|#
+(define thread-handler-error-show (make-parameter #t))
 
 
 (define (thread-sleep! timeout)
