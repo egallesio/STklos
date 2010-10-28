@@ -1,3 +1,85 @@
+2010-10-28  Erick Gallesio  <eg@unice.fr>
+
+	* doc/skb/custom.skb, lib/runtime.stk:
+	doc update
+	[68a83cdaec9f] [tip]
+
+	* doc/skb/custom.skb, lib/repl.stk, lib/thread.stk, src/boot.c,
+	  src/boot.img:
+	Permit to have error messages in threads even without joining them.
+	Adding the thread-handler-error-show parameter object
+	[fb84aa653d54]
+
+2010-10-23  Erick Gallesio  <eg@unice.fr>
+
+	* doc/Makefile.am, doc/Makefile.in, lib/Lalr.d/Makefile.am,
+	  lib/Lalr.d/Makefile.in, lib/Makefile.am, lib/Makefile.in,
+	  lib/Match.d/Makefile.am, lib/Match.d/Makefile.in,
+	  lib/ScmPkg.d/Makefile.am, lib/ScmPkg.d/Makefile.in,
+	  pkgman/Makefile.am, pkgman/Makefile.in, tests/Makefile.am,
+	  tests/Makefile.in:
+	Makefiles cleanup
+	[c7e28dbd6e10]
+
+2010-10-16  Erick Gallesio  <eg@unice.fr>
+
+	* lib/boot.stk, lib/load.stk, lib/runtime.stk, src/boot.c,
+	  src/boot.img:
+	Added the stklos-debug-level parameter
+	[b56393000edc]
+
+2010-09-12  Erick Gallesio  <eg@unice.fr>
+
+	* pkgman/extract.stk, src/fport.c:
+	Two bug fixes
+	[9e9a7f32ea24]
+
+2010-08-23  Erick Gallesio  <eg@unice.fr>
+
+	* Makefile.in, configure, configure.ac, doc/Makefile.in,
+	  examples/Makefile.in, lib/Lalr.d/Makefile.in, lib/Makefile.in,
+	  lib/Match.d/Makefile.in, lib/SILex.d/Makefile.in,
+	  lib/ScmPkg.d/Makefile.in, pkgman/Makefile.in, src/Makefile.in,
+	  tests/Makefile.in, utils/Makefile.in, utils/stklos-config.in:
+	Modifications to support ScmPkg on MacOs MacPorts
+	[e9c29ccc5714]
+
+2010-08-22  Erick Gallesio  <eg@unice.fr>
+
+	* lib/ffi.stk, pkgman/extract.stk, pkgman/params.stk, src/boot.c,
+	  src/boot.img, src/ffi.c, utils/shlib-options:
+	Fix incompatibilties in FFI introduced in 1.0
+	[8a515e9d31ea]
+
+2010-08-20  Erick Gallesio  <eg@unice.fr>
+
+	* configure, configure.ac, pkgman/repository.stk:
+	create ScmPkg description files if they don't exist to avoid repeated
+	warnings
+	[f73218a02c76]
+
+2010-08-17  Erick Gallesio  <eg@unice.fr>
+
+	* src/print.c:
+	 print bars around the "null" symbol
+	[ce42909f30ea]
+
+2010-08-12  Erick Gallesio  <eg@unice.fr>
+
+	* Makefile.in, NEWS, configure, configure.ac, doc/Makefile.am,
+	  doc/Makefile.in, lib/repl.stk, src/boot.c, src/boot.img:
+	Fixed several bugs signaled by Vitaly Magerya. Thanks to him
+	[707567e9395e]
+
+2010-08-11  Erick Gallesio  <eg@unice.fr>
+
+	* .hgtags:
+	Added tag stklos-1.00 for changeset f6f42a97b735
+	[08bed83c5ede]
+
+	* STklos 1.00 Release
+	=====================
+
 2010-08-10  Erick Gallesio  <eg@unice.fr>
 
 	* configure, configure.ac, doc/Makefile.am, doc/Makefile.in,

@@ -2,10 +2,10 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 23-Aug-2010 00:20 (eg)
+### Last file update: 28-Oct-2010 23:17 (eg)
 
 AC_PREREQ(2.64)
-AC_INIT([stklos], [1.01dev])
+AC_INIT([stklos], [1.01])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR(src/stklos.c)
 AC_CONFIG_HEADERS(src/stklosconf.h)
