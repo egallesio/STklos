@@ -31,7 +31,7 @@
 ;;; by Eugene Kohlbecker and in R4RS Appendix. 
 ;;;
 ;;;
-;;; Last file update:  6-Jul-2007 10:45 (eg)
+;;; Last file update: 30-Oct-2010 21:09 (eg)
 
 #|
 			STklos Implementation Notes
@@ -41,8 +41,8 @@ In particular,
   - all the function reside in the module MBE, the only binding which is
     visible from outside is DEFINE-SYNTAX (and the fake LET-SYNTAX and
     LETREC-SYNTAX).
-  - functions some and butlast used by the original code are added in the 
-    MBE module
+  - function some used by the original code and function split are added
+    in the MBE module
   - The macro define-syntax itself is expanded to a function call which 
     parses all the clauses rather than to a cond which tests all the 
     clauses. This conducts to code which is smaller than the original 
@@ -69,8 +69,14 @@ In particular,
 	(my-let ((|G156| a)) (set! a b) (set! b |G156|))
 
     which is correct.
+  - Tail patterns are handled as in SRFI-46. For example:
 
+        (define-syntax last-two
+	   (syntax-rules ()
+	     ((last-two skip ... x y) '(x y))))
 
+	(last-two 1 2 3 4)  ===>  (3 4)
+     Tail patterns support was done by Vitaly Magerya
 
 
 <doc SYNTAX define-syntax
@@ -136,21 +142,13 @@ doc>
 
 (define some any)		;; because of SRFI-1
 
-(define (butlast lst n)
-  (letrec ((l (- (length lst) n))
-	   (bl (lambda (lst n)
-		 (let build-until-zero ((lst lst)
-					(n n)
-					(result '()))
-		   (cond ((null? lst) (reverse result))
-			 ((positive? n)
-			  (build-until-zero (cdr lst) 
-					    (- n 1) 
-					    (cons (car lst) result)))
-			 (else (reverse result)))))))
-    (when (negative? n)
-      (error 'butlast "negative argument ~S" n))
-    (bl lst l)))
+;;; Splits lst into prefix of length n and the rest,
+;;; returs a cons of those two.
+(define (split lst n)
+  (let spl ((before '()) (after lst) (i n))
+    (cond ((<= i 0) (cons (reverse before) after))
+	  ((null? after) (error 'split "list is too short"))
+	  (else (spl (cons (car after) before) (cdr after) (- i 1))))))
 
 ;;; The following definition are here to avoid compiler warnings about 
 ;;; undefined symbol reference. They will be deleted with the new compiler
@@ -440,6 +438,7 @@ doc>
 		       (p-tail (cddr p))
 		       (e-head=e-tail (mbe:split-at-ellipsis e p-tail)))
 		  (and e-head=e-tail
+		       (not (memq '... p-tail)) ; fail on multiple ellipses
 		       (let ((e-head (car e-head=e-tail))
 			     (e-tail (cdr e-head=e-tail)))
 			 (and (every
@@ -542,11 +541,8 @@ doc>
 ;;; pattern p-tail
 (define mbe:split-at-ellipsis
   (lambda (e p-tail)
-    (if (null? p-tail) (cons e '())
-      (let ((i (mbe:position (car p-tail) e)))
-	(if i (cons (butlast e (- (length e) i))
-		    (list-tail e i))
-	    (error 'mbe:split-at-ellipsis "bad-arg"))))))
+    (let ((i (- (length e) (length p-tail))))
+      (and (>= i 0) (split e i)))))
 
 ;;; tests if x is an ellipsing pattern, i.e., of the form
 ;;; (blah ... . blah2)
