@@ -1,8 +1,8 @@
 /*
  * p r o c e s s . c 		-- Access to processes from STklos
  *
- * Copyright © 1994-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright © 1994-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  *
  * Permission to use, copy, modify, distribute,and license this
  * software and its documentation for any purpose is hereby granted,
@@ -15,11 +15,11 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update:  4-Sep-2006 15:35 (eg)
+ * Last file update:  7-Nov-2010 14:15 (eg)
  *
- * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and 
+ * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
- * reintroduced for a Win32 port. Look at file proces.c in Win32 for that. 
+ * reintroduced for a Win32 port. Look at file proces.c in Win32 for that.
  *
  */
 
@@ -38,17 +38,17 @@
 #include "fport.h"
 
 /*
- * Data 
+ * Data
  */
 static char *stdStreams[3] = {		/* Used for messages */
-  "input",	
-  "output",	
+  "input",
+  "output",
   "error",
 };
 
- 
+
 #define MAX_PROC_NUM      40 		/* (simultaneous processes) enough? */
- 
+
 struct process_obj {
   stk_header header;
   int pid;                      /* Process id */
@@ -58,7 +58,7 @@ struct process_obj {
   int waited_on;		/* non zero if the process is being
    				   waited on by a waitpid(..,..,0) */
 };
- 
+
 
 #define PROCESS_PID(p)		(((struct process_obj *) (p))->pid)
 #define PROCESS_STREAMS(p)	(((struct process_obj *) (p))->streams)
@@ -80,7 +80,7 @@ static SCM all_processes = STk_nil;
 #endif
 
 MUT_DECL(process_table_mutex);
- 
+
 /******************************************************************************/
 
 static void error_bad_process(SCM proc)
@@ -91,19 +91,19 @@ static void error_bad_process(SCM proc)
 
 static int process_alivep(SCM process)
 {
-   if (PROCESS_EXITED(process)) 
+   if (PROCESS_EXITED(process))
      return FALSE;
    else if (PROCESS_WAITED(process))
      return TRUE;
    else {
      int info, res;
-     
+
      /* Use waitpid to gain the info. */
      res = waitpid(PROCESS_PID(process), &info, WNOHANG);
      if (res == 0)
        /* process is still running */
        return TRUE;
-     else 
+     else
        if (res == PROCESS_PID(process)) {
 	 /* process has terminated and we must save this information */
 	 PROCESS_EXITED(process) = TRUE;
@@ -116,17 +116,17 @@ static int process_alivep(SCM process)
        }
    }
 }
- 
+
 static void process_terminate_handler(int sig) /* called when a child dies */
 {
   SCM prev, l;
- 
+
   /* Delete the processes which are not alive from the global list
    * This loop may delete nobody if this the process has been deleted
    * before (a previous call to this function may have deleted more than
-   * one process. 
+   * one process.
    * Note: No assumption is made on the process which has terminated;
-   * we act blindly here since it does not seem that there is a POSIX way 
+   * we act blindly here since it does not seem that there is a POSIX way
    * to find the id of the process which died.
    */
   MUT_LOCK(process_table_mutex);
@@ -148,7 +148,7 @@ static SCM make_process(void)
   SCM z;
 
   PURGE_PROCESS_TABLE();
-  
+
   NEWCELL(z, process);
   PROCESS_STREAMS(z)[0] = STk_false;
   PROCESS_STREAMS(z)[1] = STk_false;
@@ -160,7 +160,7 @@ static SCM make_process(void)
 
 static void close_all_files(int pipes[3][2])
 {
-  int i; 
+  int i;
 
   for (i = 0; i < 3; i++) {
     if (pipes[i][0] != -1) close(pipes[i][0]);
@@ -174,7 +174,7 @@ static int same_files(char* f1, char* f2)
 
   if (stat(f1, &s1) < 0) return FALSE;
   if (stat(f2, &s2) < 0) return FALSE;
-  
+
   return (s1.st_dev==s2.st_dev && s1.st_ino==s2.st_ino);
 }
 
@@ -188,7 +188,7 @@ static char *maybe_redirect_input(SCM in, int pipes[3][2])
 {
   char *name = "";
   int fd;
-  
+
   if (STRINGP(in)) {
     /* redirection in a file */
     name = STRING_CHARS(in);
@@ -198,7 +198,7 @@ static char *maybe_redirect_input(SCM in, int pipes[3][2])
       STk_error("cannot redirect input to ~S", in);
     }
     pipes[0][0] = fd;
-  } 
+  }
   else if (is_pipe_p(in)) {
     /* Redirection in a pipe*/
     if (pipe(pipes[0]) < 0) {
@@ -215,7 +215,7 @@ static char *maybe_redirect_input(SCM in, int pipes[3][2])
   return name;
 }
 
-static char *maybe_redirect_output(SCM out, int index, int pipes[3][2], 
+static char *maybe_redirect_output(SCM out, int index, int pipes[3][2],
 				   char *input, char *output)
 {
   char *name = "";
@@ -237,7 +237,7 @@ static char *maybe_redirect_output(SCM out, int index, int pipes[3][2],
       STk_error("cannot redirect input to ~S", out);
     }
     pipes[index][0] = fd;
-  } 
+  }
   else if (is_pipe_p(out)) {
     /* Redirection in a pipe*/
     if (pipe(pipes[index]) < 0) {
@@ -251,7 +251,7 @@ static char *maybe_redirect_output(SCM out, int index, int pipes[3][2],
     //    name = "output port";
     //pipes[index][0] = dup(PORT_FD(PORT_STREAM(out)));
   }
-  return name; 
+  return name;
 }
 
 /*===========================================================================*\
@@ -282,13 +282,13 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
   if (len < 0)
     STk_error("bad argument list ~S", args);
   argv = STk_must_malloc((len + 3) * sizeof(char *));
-  
+
   for (i=0, l=args; i < len; i++, l=CDR(l)) {
     if (!STRINGP(CAR(l))) STk_error("bad string ~S", CAR(l));
     argv[i] = STRING_CHARS(CAR(l));
   }
   argv[len] = NULL;
-  
+
   /* Do (eventually) redirections */
   in_name  = maybe_redirect_input (redir[0], pipes);
   out_name = maybe_redirect_output(redir[1], 1, pipes, in_name, "");
@@ -296,12 +296,12 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
 
   /* Build a process object */
   z   = make_process();
-  
+
   /* Fork another process */
   pid = (do_fork == STk_false) ? 0 : fork();
   switch (pid) {
     case -1:  close_all_files(pipes);
-	      STk_error("cannot create a new process");	
+	      STk_error("cannot create a new process");
 	      break;
     case 0:  /* CHILD */
       	     for(i = 0; i < 3; i++) {
@@ -316,7 +316,7 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
 		 close(pipes[i][1]);
 	       } else if (PORTP(redir[i])) {
 		 int fd= PORT_FD(PORT_STREAM(redir[i]));
-		 
+
 		 dup2(fd, i);
 		 close(fd);
 	       }
@@ -324,24 +324,24 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
 
 	     /* close all remaining files */
 	     for(i = 3; i < NOFILE; i++) close(i);
- 
+
  	     /*  And then, EXEC'ing...  */
   	     execvp(*argv, argv);
- 	     
+
  	     /* Cannot exec if we are here */
  	     STk_fprintf(STk_current_error_port(), "**** Cannot  exec %s!\n", *argv);
  	     _exit(1);
     default: /* PARENT */
       	     PROCESS_PID(z) = pid;
        	     for(i = 0; i < 3; i++) {
- 	       if (STRINGP(redir[i])) 
+ 	       if (STRINGP(redir[i]))
  		 /* Redirection in a file */
  		 close(pipes[i][0]);
  	       else if (is_pipe_p(redir[i])) {
 		 /* Redirection in a pipe */
 		 SCM port;
 		 char buffer[100];
-		 
+
 		 close(pipes[i][i == 0 ? 0 : 1]);
 		 /* Make a new file descriptor to access the pipe */
 		 sprintf(buffer, "pipe-%s-%d", stdStreams[i], pid);
@@ -371,7 +371,7 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
   all_processes = STk_cons(z, all_processes);
   MUT_UNLOCK(process_table_mutex);
   return z;
-} 
+}
 
 		/* ======================================== */
 
@@ -381,14 +381,14 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
  * (fork thunk)
  *
  * This procedure is a wrapper around the standard Unix |fork| system
- * call which permits to create a new (heavy) process. 
- * When called without parameter, this procedure returns two times 
- * (one time in the parent process and one time in the child process). 
- * The value returned in the parent process is a process object 
- * representing the child process and the value returned in the child 
+ * call which permits to create a new (heavy) process.
+ * When called without parameter, this procedure returns two times
+ * (one time in the parent process and one time in the child process).
+ * The value returned in the parent process is a process object
+ * representing the child process and the value returned in the child
  * process is always the value |¤f|.
  * When called with a parameter (which must be a thunk), the new process
- * excutes |thunk| and terminate it execution when |thunk| returns. The 
+ * excutes |thunk| and terminate it execution when |thunk| returns. The
  * value returned in the parent process is a process object representing
  * the child process.
 doc>
@@ -397,7 +397,7 @@ DEFINE_PRIMITIVE("fork", fork, subr01, (SCM thunk))
 {
   SCM z;
   pid_t pid;
- 
+
   if (thunk && STk_procedurep(thunk) == STk_false)
     STk_error("bad procedure", thunk);
 
@@ -405,7 +405,7 @@ DEFINE_PRIMITIVE("fork", fork, subr01, (SCM thunk))
   pid = fork();
   switch (pid) {
     case -1: 						      /* ERROR */
-      STk_error("cannot create a new process");	
+      STk_error("cannot create a new process");
     case 0:  						      /* CHILD */
       if (thunk) {
 	STk_C_apply(thunk, 0);
@@ -433,47 +433,47 @@ DEFINE_PRIMITIVE("fork", fork, subr01, (SCM thunk))
 //   int pipes[3][2];
 //   pid_t pid;
 //   SCM redir[3];
-// 
-// 
+//
+//
 //   ENTER_PRIMITIVE(fork);
-// 
+//
 //   /* Initialisations */
 //   for (i = 0; i < 3; i++)
 //     pipes[i][0] =  pipes[i][1] = -1;
-//   
+//
 //   redir[0] = in; redir[1] = out; redir[2] = err;
-// 
+//
 //   /* Do (eventually) redirections */
 //   in_name  = maybe_redirect_input (redir[0], pipes);
 //   out_name = maybe_redirect_output(redir[1], 1, pipes, in_name, "");
 //   err_name = maybe_redirect_output(redir[2], 2, pipes, in_name, out_name);
-// 
+//
 //   /* Fork another process */
 //   pid = fork();
 //   switch (pid) {
 //     case -1:  close_all_files(pipes);
-// 	      STk_error("cannot create a new process");	
-//     case 0:  
+// 	      STk_error("cannot create a new process");
+//     case 0:
 //       /* CHILD */
 //       {
 // 	char buffer[100], *str;
-// 
+//
 // 	for(i = 0; i < 3; i++) {
-// 	  if (STRINGP(redir[i])) { 
+// 	  if (STRINGP(redir[i])) {
 // 	    /* Redirection in a file */
 // 	    dup2(pipes[i][0], i);
 // 	    close(pipes[i][0]);
-// 	    
+//
 // 	    str = STk_expand_file_name(STRING_CHARS(redir[i]));
 // 	    switch (i) {
 // 	    case 0:   /* FIXME: STk_close_port(STk_curr_iport);*/
-// 		      STk_curr_iport = STk_fd2scheme_port(i, "r", str); 
+// 		      STk_curr_iport = STk_fd2scheme_port(i, "r", str);
 // 		      break;
 // 	      case 1: STk_close_port(STk_curr_oport);
-// 		      STk_curr_oport = STk_fd2scheme_port(i, "w", str); 
+// 		      STk_curr_oport = STk_fd2scheme_port(i, "w", str);
 // 		      break;
 // 	      case 2: STk_close_port(STk_curr_eport);
-// 		      STk_curr_eport = STk_fd2scheme_port(i, "w", str); 
+// 		      STk_curr_eport = STk_fd2scheme_port(i, "w", str);
 // 		      break;
 // 	    }
 // 	  } else if (is_pipe_p(redir[i])) {
@@ -481,50 +481,50 @@ DEFINE_PRIMITIVE("fork", fork, subr01, (SCM thunk))
 // 	    dup2(pipes[i][i==0? 0 : 1], i);
 // 	    close(pipes[i][0]);
 // 	    close(pipes[i][1]);
-// 
+//
 // 	    sprintf(buffer, "pipe-%s-%d", stdStreams[i], getpid());
 // 	    switch (i) {
 // 	      case 0: /* FIXME: STk_close_port(STk_curr_iport); */
-// 		      STk_curr_iport = STk_fd2scheme_port(i, "r", buffer); 
+// 		      STk_curr_iport = STk_fd2scheme_port(i, "r", buffer);
 // 		      break;
 // 	      case 1: STk_close_port(STk_curr_oport);
-// 		      STk_curr_oport = STk_fd2scheme_port(i, "w", buffer); 
+// 		      STk_curr_oport = STk_fd2scheme_port(i, "w", buffer);
 // 		      break;
 // 	      case 2: STk_close_port(STk_curr_eport);
-// 		      STk_curr_eport = STk_fd2scheme_port(i, "w", buffer); 
+// 		      STk_curr_eport = STk_fd2scheme_port(i, "w", buffer);
 // 		      break;
 // 	    }
 // 	  }
 // 	}
-// 
+//
 // 	/* close all remaining files */
 // 	for(i = 3; i < NOFILE; i++) close(i);
 // 	return STk_false;
 //       }
-//     default: 
+//     default:
 //       {
 // 	/* PARENT */
 // 	z  = make_process();
 // 	PROCESS_PID(z) = pid;
-// 	
+//
 // 	/* Chain new process in the list of all process */
 // 	all_processes = STk_cons(z, all_processes);
-// 	
+//
 // 	/* Do the redirections if necessary */
 // 	for(i = 0; i < 3; i++) {
-// 	  if (STRINGP(redir[i])) 
+// 	  if (STRINGP(redir[i]))
 // 	    /* Redirection in a file */
 // 	    close(pipes[i][0]);
 // 	  else if (is_pipe_p(redir[i])) {
 // 	    /* Redirection in a pipe */
 // 	    char buffer[100];
-// 	    
+//
 // 	    switch (i) {
-// 	      case 0: 
+// 	      case 0:
 // 		dup2(pipes[i][1], 1);
 // 		//STk_close_port(STk_curr_oport);
 // 		sprintf(buffer, "pipe-%s-%d", stdStreams[1], pid);
-// 		STk_curr_oport = STk_fd2scheme_port(1, "w", buffer); 
+// 		STk_curr_oport = STk_fd2scheme_port(1, "w", buffer);
 // 		break;
 // 	    case 1:
 // 	    case 2: ;
@@ -571,7 +571,7 @@ DEFINE_PRIMITIVE("process-alive?", proc_alivep, subr1, (SCM proc))
 <doc EXT process-pid
  * (process-pid proc)
  *
- * Returns an integer which represents the Unix identification (PID) of the 
+ * Returns an integer which represents the Unix identification (PID) of the
  * processus.
 doc>
 */
@@ -627,15 +627,15 @@ DEFINE_PRIMITIVE("process-error", proc_error, subr1, (SCM proc))
   if (!PROCESSP(proc)) error_bad_process(proc);
   return PROCESS_STREAMS(proc)[2];
 }
- 
+
 
 /*
 <doc EXT process-wait
  * (process-wait proc)
  *
- * Stops the current process (the Scheme process) until |proc| completion. 
+ * Stops the current process (the Scheme process) until |proc| completion.
  * |Process-wait| returns |¤f| when |proc| is already terminated; it returns
- * |¤t| otherwise. 
+ * |¤t| otherwise.
 doc>
 */
 DEFINE_PRIMITIVE("process-wait", proc_wait, subr1, (SCM proc))
@@ -643,12 +643,12 @@ DEFINE_PRIMITIVE("process-wait", proc_wait, subr1, (SCM proc))
   PURGE_PROCESS_TABLE();
 
   if (!PROCESSP(proc)) error_bad_process(proc);
-  
+
   if (PROCESS_EXITED(proc)) return STk_false;
   else {
     int res, info;
     SCM ret_val = STk_false;
-    
+
     PROCESS_WAITED(proc) = 1;
     res = waitpid(PROCESS_PID(proc), &info, 0);
     if (res == PROCESS_PID(proc)) {
@@ -661,15 +661,15 @@ DEFINE_PRIMITIVE("process-wait", proc_wait, subr1, (SCM proc))
     return ret_val;
   }
 }
- 
+
 /*
 <doc EXT process-exit-status
  * (process-exit-status proc)
  *
- * Returns the exit status of |proc| if it has finished its execution; 
+ * Returns the exit status of |proc| if it has finished its execution;
  * returns |¤f| otherwise.
 doc>
-*/ 
+*/
 DEFINE_PRIMITIVE("process-exit-status", proc_xstatus, subr1, (SCM proc))
 {
   int info, n, res;
@@ -677,7 +677,7 @@ DEFINE_PRIMITIVE("process-exit-status", proc_xstatus, subr1, (SCM proc))
   PURGE_PROCESS_TABLE();
 
   if (!PROCESSP(proc)) error_bad_process(proc);
-  
+
 
   if (PROCESS_EXITED(proc)) {
 #ifndef WIN32
@@ -704,15 +704,15 @@ DEFINE_PRIMITIVE("process-exit-status", proc_xstatus, subr1, (SCM proc))
 }
 
 /*
-<doc EXT process-send-signal
- * (process-send-signal proc sig)
+<doc EXT process-signal
+ * (process-signal proc sig)
  *
  * Sends the integer signal |sig| to |proc|. Since value of |sig| is system
- * dependant, use the symbolic defined signal constants to make your program 
- * independant of the running system (see ,(ref :mark "signals")). 
- * The result of |process-send-signal| is ,(emph "void").
+ * dependant, use the symbolic defined signal constants to make your program
+ * independant of the running system (see ,(ref :mark "signals")).
+ * The result of |process-signal| is ,(emph "void").
 doc>
-*/ 
+*/
 DEFINE_PRIMITIVE("process-signal", proc_signal, subr2, (SCM proc, SCM sig))
 {
   int S;
@@ -734,7 +734,7 @@ static void print_process(SCM p, SCM port, int mode)
   sprintf(buffer, "#<process PID=%d>", PROCESS_PID(p));
   STk_puts(buffer, port);
 }
- 
+
 
 
 static struct extended_type_descr xtype_process = {
@@ -743,10 +743,10 @@ static struct extended_type_descr xtype_process = {
 };
 
 
- 
+
 int STk_init_process(void)
 {
-  /* 
+  /*
    * On systems which support SIGCHLD, the processes table is cleaned up
    * as soon as a process terminate. On other systems this is done from time
    * to time to avoid a too long list of porcesses
