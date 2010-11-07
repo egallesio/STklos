@@ -1,27 +1,27 @@
 ;;;;
 ;;;; srfi-0.stk 				-- SRFI-0 aka cond-expand
-;;;; 
+;;;;
 ;;;; Copyright © 1999-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  4-Apr-2010 19:59 (eg)
+;;;; Last file update:  7-Nov-2010 16:14 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -30,7 +30,7 @@
 	  srfi-0-feature-implementation-file))
 
 (select-module SRFI-0)
-  
+
 (define *all-features*
   '(stklos				; Of course
     STklos				; In case of cases-sensitive reader
@@ -61,7 +61,7 @@
     ;; srfi-24				; ....... withdrawn
     ;; srfi-25				; Multi-dimensional Arrays
     (srfi-26 "srfi-26")			; Specialize Param without Currying
-    ((srfi-27 random))			; Sources of Random Bits
+    ((srfi-27 random) "srfi-27")	; Sources of Random Bits
     srfi-28				; Basic Format Strings
     ;; srfi-29				; Localization
     srfi-30				; Nested Multi-line Comments
@@ -144,7 +144,7 @@
 (define (srfi-0-feature-implementation-file x)
   (let Loop ((l *all-features*))
     (cond
-      ((null? l)			;; not found 
+      ((null? l)			;; not found
        #f)
       ((symbol? (car l))		; clause  srfi-x
        (if (eq? (car l) x)
@@ -166,7 +166,7 @@
 
   (let Loop ((l *all-features*))
     (cond
-      ((null? l)			;; not found 
+      ((null? l)			;; not found
        #f)
       ((symbol? (car l))		; clause  srfi-x
        (or (eq? (car l) x) (Loop (cdr l))))
@@ -177,7 +177,7 @@
       (else				; clause ((srfi-x foo bar) ...)
        (if (memq x (caar l))
            (req (cdar l))
-           (Loop (cdr l))))))) 
+           (Loop (cdr l)))))))
 ;; ----------------------------------------------------------------------
 (define (%srfi-0-expand  clauses)
   (cond
@@ -191,7 +191,7 @@
          ((eq? (car c) 'else)
           ;; Clause is (ELSE ...)
           `(begin ,@(cdr c)))
-         
+
          ((pair? (car c))
           ;; Clause is ((AND..)..) ((OR..)..) ((NOT...))
           (let ((test (car c)))
@@ -199,13 +199,13 @@
               ;; ---------- AND
               ((eq? (car test) 'and)
                (if (null? (cdr test))
-                  `(begin ,@(cdr c))		   
+                  `(begin ,@(cdr c))
                   `(cond-expand
                     (,(cadr test) (cond-expand
                                    ((and ,@(cddr test)) ,@(cdr c))
                                    ,@(cdr clauses)))
                     ,@(cdr clauses))))
-              
+
               ;; ---------- OR
               ((eq? (car test) 'or)
                (if (null? (cdr test))
@@ -214,8 +214,8 @@
                      (,(cadr test)       ,@(cdr c))
                      ((or ,@(cddr test)) ,@(cdr c))
                      ,@(cdr clauses))))
-               
-              ;; ---------- NOT 
+
+              ;; ---------- NOT
               ((eq? (car test) 'not)
                (if (or (null? (cdr test))
                        (not (null? (cddr test))))
@@ -246,7 +246,7 @@
 
 
 #|
-Examples 
+Examples
 
      (cond-expand
 	((and srfi-1 srfi-10)
