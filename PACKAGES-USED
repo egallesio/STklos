@@ -2,12 +2,12 @@ STklos uses some libraries developped by other people.
 These libraries are:
 
 
-GMP: The Gnu MP library  
-======================= 
-If you have a version of GMP installed, it will be used. Otherwise, 
-STklos uses a part of the MPI library which is provided in the package. 
+GMP: The Gnu MP library
+=======================
+If you have a version of GMP installed, it will be used. Otherwise,
+STklos uses a part of the MPI library which is provided in the package.
 A wrapper for the subset of the functions used by STklos is built on
-top of MPI to build a GMP API compatible library. 
+top of MPI to build a GMP API compatible library.
 Note that STklos sources use only the GMP API.
 
 for GMP:
