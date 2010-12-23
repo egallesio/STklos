@@ -1,27 +1,27 @@
 ;;;;
 ;;;; c o m p i l e r . s t k			-- STklos Compiler
-;;;; 
+;;;;
 ;;;; Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 10-Aug-2010 13:00 (eg)
+;;;; Last file update: 23-Dec-2010 20:16 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -34,7 +34,7 @@
 	  compiler:warn-use-undefined-postpone
 	  compiler:show-assembly-code
 	  compiler:inline-common-functions))
-  
+
 (select-module STKLOS-COMPILER)
 
 (define *compiler-port* #f)
@@ -46,7 +46,7 @@
 			 (fx+		 . ,fx+)
 			 (fx-		 . ,fx-)
 			 (fx*		 . ,fx*)
-			 (fxdiv		 . ,fxdiv)			 
+			 (fxdiv		 . ,fxdiv)
 			 (=		 . ,=)
 			 (<		 . ,<)
 			 (<=		 . ,<=)
@@ -69,7 +69,7 @@
 
 (define *inline-symbols* (map car *inline-table*))
 
-(define *always-inlined*   	'(%set-current-module %%set-current-module 
+(define *always-inlined*   	'(%set-current-module %%set-current-module
 				  %%execute %%execute-handler))
 
 (define *code-instr*		#f)
@@ -86,12 +86,12 @@
 ;; Debbugging support
 ;; ----------------------------------------------------------------------
 ;;= (export %compiler-debug)
-;;= 
+;;=
 ;;= (define %compiler-debug (make-parameter #f))
-;;= 
+;;=
 ;;= (define (dprintf . args)
 ;;=   (when  (%compiler-debug) (apply eprintf args)))
-;;= 
+;;=
 
 ;; ----------------------------------------------------------------------
 ;; 	Compiler parameters ...
@@ -142,9 +142,9 @@
       (and (integer? v)
 	   (exact? v)
 	   (<= min-int v max-int)))))
-      
+
 (define (compile-constant v env tail?)
-  (cond 
+  (cond
     ((eq? v #t)    		       (emit 'IM-TRUE))
     ((eq? v #f)    		       (emit 'IM-FALSE))
     ((eq? v '())   		       (emit 'IM-NIL))
@@ -161,8 +161,8 @@
  * (quote <datum>)
  * '<datum>
  *
- * The quoting mechanism is identical to R5RS, except that keywords 
- * constants  evaluate "to themselves" as numerical constants, string 
+ * The quoting mechanism is identical to R5RS, except that keywords
+ * constants  evaluate "to themselves" as numerical constants, string
  * constants, character constants, and boolean constants
  * @lisp
  * '"abc"     =>  "abc"
@@ -259,7 +259,7 @@ doc>
 
 (define (compile-access name env epair ref)
 
-  (define (make-word v1 v2)		  ;; FIXME: Add control 
+  (define (make-word v1 v2)		  ;; FIXME: Add control
     (+ (* v1 256) v2))
 
 
@@ -267,17 +267,17 @@ doc>
     (apply emit (if ref i1 i2) args))
 
   (let loop ((lev 0) (env env))
-    (if (null? env) 
+    (if (null? env)
 	;; name is a global variable
 	(begin
 	  (verify-global name epair)
 	  (em 'GLOBAL-REF 'GLOBAL-SET (fetch-constant name)))
-	;; name is a local variable 
+	;; name is a local variable
 	(let loop2 ((idx 0) (l (car env)))
-	  (cond 
-	    ((null? l) 	
+	  (cond
+	    ((null? l)
 	     (loop (+ lev 1) (cdr env)))
-	    ((eq? (car l) name) 
+	    ((eq? (car l) name)
 	     (if (zero? lev)
 		 ;; variable in  innermost block
 		 (case idx
@@ -309,7 +309,7 @@ doc>
 	      (compile `((setter ,(car var)) ,@(cdr var) ,val) env args tail?)
 	      ;; R5RS usage
 	      (if (symbol? var)
-		  (begin 
+		  (begin
 		    (compile val env args #f)
 		    (compile-access var env args #f))
 		  (compiler-error 'set! args "~S is a bad symbol" var))))
@@ -339,7 +339,7 @@ doc>
 ;; DEFINE-MACRO
 ;;
 (define (compile-define-macro e env tail?)
-  ;; Called for global macros. 
+  ;; Called for global macros.
   (if (null? env)
       (let ((l (define->lambda e)))
 	(when (= (length l) 3)
@@ -405,7 +405,7 @@ doc>
  * returned.  Any remaining expressions are not evaluated.  If all the
  * expressions evaluate to true values, the value of the last expression
  * is returned.  If there are no expressions then |¤t| is returned.
- * 
+ *
  * @lisp
  *   (and (= 2 2) (> 2 1))           =>  #t
  *   (and (= 2 2) (< 2 1))           =>  #f
@@ -422,7 +422,7 @@ doc>
       ;; code for (and x1 x2 .. xn) is
       ;;      x1; jump-false l1; x2; jump-false l1; ... goto l2; l1: im-false; L2:
       (let ((lab1 (new-label))
-	    (lab2 (new-label)))	  
+	    (lab2 (new-label)))
 	(let Loop ((l (cdr args)))
 	  (cond ((null? l) 	     #f)
 		((null? (cdr l))     (compile (car l) env args tail?))
@@ -435,7 +435,7 @@ doc>
 	(emit-label lab2))))
 
 #|
- 
+
 				O R
  *
 <doc syntax or
@@ -446,12 +446,12 @@ doc>
  * returned.  Any remaining expressions are not evaluated.  If all
  * expressions evaluate to false values, the value of the last expression
  * is returned.  If there are no expressions then |¤f| is returned.
- * 
+ *
  * @lisp
  *   (or (= 2 2) (> 2 1))            =>  #t
  *   (or (= 2 2) (< 2 1))            =>  #t
  *   (or #f #f #f)                   =>  #f
- *   (or (memq 'b '(a b c)) 
+ *   (or (memq 'b '(a b c))
  *       (/ 3 0))                    =>  (b c)
  * @end lisp
 doc>
@@ -468,7 +468,7 @@ doc>
 	(Loop (cdr l))))
     (emit 'IM-FALSE)
     (emit-label lab)))
-      
+
 
 ;;;;
 ;;;; BEGIN
@@ -495,7 +495,7 @@ doc>
 ;;;;
 (define (compute-arity l)
   (let loop ((l l) (n 0))
-    (cond 
+    (cond
        ((null? l) n)
        ((pair? l) (loop (cdr l) (+ n 1)))
        (else      (- (- n) 1)))))
@@ -516,7 +516,7 @@ doc>
 
 ;;  (define (valid-lambda? expr)
 ;;    (define (param-ok? l seen)
-;;      (cond 
+;;      (cond
 ;;       ((null? l)   #t)
 ;;       ((symbol? l) (if (memq l seen)
 ;;  		      (compile-error "duplicate parameter ~S" l)
@@ -525,17 +525,17 @@ doc>
 ;;  		       (param-ok? (car l) seen)
 ;;  		       (param-ok? (cdr l) (cons (car l) seen))))
 ;;       (else	      (compile-error "bad procedure parameter ~S" l))))
-;;    
+;;
 ;;    ;; code of valid-lambda? starts here
-;;    
+;;
 ;;    (and (> (length expr) 2)
 ;;         (param-ok? (cadr expr) '())))
-;;  
+;;
 
 (define (compile-body body env epair tail?)
 
   (define internal-macros '())
-  
+
   (define (rewrite-body body)
     (let Loop ((l body) (defs '()))
       (let ((cur (cond
@@ -543,7 +543,7 @@ doc>
 		      (error "body is empty"))
 		   ((and (pair? l) (pair? (car l)) (expander? (caar l)))
 		      (%macro-expand* (car l)))
-		   (else 
+		   (else
 		      (car l)))))
 	(cond
 	  ((and (pair? cur) (eq? (car cur) 'begin))
@@ -587,7 +587,7 @@ doc>
     (compile-body body env body #t)
     (emit 'RETURN)
     (emit-label lab)
-    
+
     (when doc
       ;; emit the docstring
       (emit 'DOCSTRG (fetch-constant doc)))))
@@ -595,7 +595,7 @@ doc>
 
 ;;; EXTENDED LAMBDAS
 ;;;
-;;; This code is an adaptation of the contribution of Ian Wild <imw@acm.org> 
+;;; This code is an adaptation of the contribution of Ian Wild <imw@acm.org>
 ;;; which provided Common Lisp style lambda lists for the original STk.
 (define ext-lambda-key-get key-get)
 
@@ -610,7 +610,7 @@ doc>
 
 
   (define (build-optional-let-header vars rest-name)
-    (apply append 
+    (apply append
 	   (map (lambda (x)
 		  (let ((var  (car x))
 			(init (cadr x))
@@ -645,7 +645,7 @@ doc>
 			  (else `((,var (and (pair? ,rest-name)
 					     ,(pop rest-name)))))))))
 		  vars)))
- 
+
    (define (constant? e)
      (cond
         ((symbol? e) #f)
@@ -653,7 +653,7 @@ doc>
 	(else 	     #t)))
 
    (define (build-keyword-let-header vars rest-name)
-     (apply append 
+     (apply append
 	    (map (lambda (x)
 		   (let* ((var  (car x))
 			  (init (cadr x))
@@ -670,7 +670,7 @@ doc>
 			    ;; if evaluating the initform is harmless, just
 			    ;; call key-get with it as default
 			    `((,var (key-get ,rest-name ,key ,init))))
-			(else 
+			(else
 			     ;; only evaluate initform if get-keyword returns
 			     ;; our newly gensym'ed symbol
 			     (let ((g (gensym)))
@@ -678,8 +678,8 @@ doc>
 				 (,var (if (eq? ,g ',g) ,init ,g))))))))
 		 vars)))
 
-  
-  (let ((error-check (if (or user-visible-rest key) 
+
+  (let ((error-check (if (or user-visible-rest key)
 			 '()
 			 `((if (pair? ,rest-name)
 			       (error "too many optional parameters: ~a"
@@ -704,12 +704,12 @@ doc>
 
 
   (define (normalise-parameter-list x optional?)
-    ;; Convert optional or keyword parameters to three-element lists: 
-    ;; (variable initform supplied-p), providing an  explicit #f 
+    ;; Convert optional or keyword parameters to three-element lists:
+    ;; (variable initform supplied-p), providing an  explicit #f
     ;; initform  if needed, and maybe another #f as supplied-p.
     (and (pair? x)
 	 (map (lambda (e)
-		(cond 
+		(cond
 		  ((symbol? e)		 	(list e #f #f))
 		  ((and (pair? e)
 			(= (length e) 2)
@@ -718,11 +718,11 @@ doc>
 			(= (length e) 3)
 			(symbol? (car e))
 			(symbol? (caddr e))) 	e)
-		  (else (compiler-error 'lambda epair "illegal ~a parameter: ~a" 
+		  (else (compiler-error 'lambda epair "illegal ~a parameter: ~a"
 					(if optional? "optional" "keyword") e)
 			(list (gensym) #f #f))))
 	      x)))
-  
+
   (define (collect-sequence)
     (let loop ((seq '()) (still-left x))
       (if (or (null? still-left) (memq (car still-left) '(:optional :key :rest)))
@@ -730,7 +730,7 @@ doc>
 	    (set! x still-left)
 	    (reverse seq))
 	  (loop (cons (car still-left) seq) (cdr still-left)))))
-  
+
   (define (collect-titled-sequence title)
     (if (and (not (null? x)) (eq? (car x) title))
 	(begin
@@ -769,7 +769,7 @@ doc>
   (set! optional (normalise-parameter-list (collect-titled-sequence :optional) #t))
   (set! rest 	 (collect-titled-sequence :rest))
   (set! keywords (normalise-parameter-list (collect-titled-sequence :key) #f))
-  
+
   ;; Do some checks on the arguments
   ;; 1. no un-analyzed parameter
   (unless (null? x)
@@ -813,7 +813,7 @@ doc>
 		       (set! req rest)
 		       (set-cdr! (last-pair req) rest)))
 	       `(,req  ,@body)))))
-  
+
 (define (extended-lambda->lambda el)	;; STklos lambda => R5RS lambda
   (if (> (length el) 2)
       (let* ((method? (eq? (car el) 'method))
@@ -893,7 +893,7 @@ doc>
 		     (begin
 		       (compile (car actuals) env epair #f)
 		       (emit mnemo))
-		     (compiler-error fct epair "1 argument required (~A provided)" 
+		     (compiler-error fct epair "1 argument required (~A provided)"
 				    len))))
 	(comp2 (lambda (mnemo)
 		 (if (= len 2)
@@ -914,7 +914,7 @@ doc>
 		 (emit mnemo)))
 	(comp3 (lambda (mnemo)
 		 (if (= len 3)
-		     (begin 
+		     (begin
 		       (compile (car actuals) env epair #f)
 		       (emit 'PUSH)
 		       (compile (cadr actuals) env epair #f)
@@ -933,7 +933,7 @@ doc>
       ((%%execute-handler)
        	      (comp3 'EXEC-HANDLER))
 
-      ;; User functions 
+      ;; User functions
       ((void) (emit 'IM-VOID))
       ((+)  (case len
 	      ((0)  (emit 'IM-ZERO))
@@ -1032,7 +1032,7 @@ doc>
 				     ((fxdiv) 'IN-FXDIV2)))))))
 		  (else
 		   (compile-normal-call fct actuals len env epair #f))))
-      
+
       ((= < > <= >=)
 		(case len
 		((O)   (compiler-error fct epair
@@ -1100,7 +1100,7 @@ doc>
     (if (and (pair? fct) (eq? (car fct) 'lambda))
 	;; fct is (lambda (...) ...)
 	;;    if fct is not an epair, it is probably because it has been
-	;;    built programmatically. Anyway its body is probably an epair 
+	;;    built programmatically. Anyway its body is probably an epair
 	(let ((ep (cond
 		    ((%epair? fct) fct)
 		    ((>= (length fct) 3) (cddr fct))
@@ -1114,12 +1114,12 @@ doc>
 ;;;; LET / LET* / LETREC
 ;;;;
 (define (valid-let-bindings? bindings unique?)
-  (letrec 
+  (letrec
       ((aux (lambda (l seen)
-	      (cond 
+	      (cond
 	       ((null? l) #t)
 	       ((pair? l) (let ((b (car l)))
-			    (if (and (list? b) 
+			    (if (and (list? b)
 				     (= (length b) 2)
 				     (symbol? (car b)))
 				(if (and unique? (memq (car b) seen))
@@ -1190,7 +1190,7 @@ doc>
 ;;
 
 ;; Here is a simple version (inefficient) of compile-let*
-;;    
+;;
 ;;    (define (compile-let* args env tail?)
 ;;      (let ((len (length args)))
 ;;        (if (< len 3)
@@ -1204,7 +1204,7 @@ doc>
 ;;     			    (let* ,(cdr bindings)
 ;;    			      ,@body)))
 ;;    		     env args tail?))))))
-;;    
+;;
 
 (define (compile-let* args env tail?)
   ;; This is a little bit tricky
@@ -1219,7 +1219,7 @@ doc>
   ;; in an environment without a, E2 must be evaluated in an environment with
   ;; a and without b
   ;; [3] must be evaluated in an environment where a and b are defined;
-  ;; 
+  ;;
   ;; If there are multiple definition of the same variable, it is multi-allocated
   ;; but only one slot will be used. Not a big deal, in general
   (let ((len (length args)))
@@ -1230,7 +1230,7 @@ doc>
 	  (when (valid-let-bindings? bindings #f)
 	    (if (<= (length bindings) 1)
 		(compile-let `(let ,bindings ,@body) env tail?)
-		(begin 
+		(begin
 		  (emit (if tail? 'ENTER-TAIL-LET-STAR 'ENTER-LET-STAR)
 			(length bindings))
 		  (let Loop ((l bindings)
@@ -1248,19 +1248,19 @@ doc>
 			  (compile-access var (extend-env env loc) args #f)
 			  (Loop (cdr l)
 				loc)))))))))))
-    
+
 ;;
 ;; COND
 ;;
 (define (rewrite-cond-clauses c)
-  (cond 
+  (cond
    ((null? c) 		      (void))
    ((not (pair? (car c)))     (compiler-error 'cond c "invalid clause ~S" (car c)))
    ((eq? (caar c) 'else)      (if (null? (cdr c))
 				  `(begin ,@(cdar c))
 				  (compiler-error 'cond
 						   c
-						   "else not in last clause ~S" 
+						   "else not in last clause ~S"
 						   c)))
    ((and (pair? (cdar c)) (eq? (cadar c) '=>))
     			      (if (and (list? (car c)) (= (length (car c)) 3))
@@ -1271,13 +1271,13 @@ doc>
 					   ,(rewrite-cond-clauses (cdr c)))))
 				  (compiler-error 'cond
 						   c
-						   "bad '=>' clause syntax ~S" 
+						   "bad '=>' clause syntax ~S"
 						   (car c))))
    ((null? (cdar c))	      (let ((test-var (gensym)))
 				`(let ((,test-var ,(caar c)))
 				   (or ,test-var
 				       ,(rewrite-cond-clauses (cdr c))))))
-   (else 		      `(if ,(caar c) 
+   (else 		      `(if ,(caar c)
 				   (begin ,@(cdar c))
 				   ,(rewrite-cond-clauses (cdr c))))))
 
@@ -1294,20 +1294,20 @@ doc>
   (let ((all-values '()))
     (for-each (lambda (clause)
 		(if (pair? clause)
-		    (cond 
-		      ((eq? (car clause) 'else) 
+		    (cond
+		      ((eq? (car clause) 'else)
 		       	   'ok)
-		      ((pair? (car clause))	
-		           ;; OK but verify that there are no duplicates 
+		      ((pair? (car clause))
+		           ;; OK but verify that there are no duplicates
 		       	   (for-each (lambda (x)
 				       (if (memv x all-values)
 					   (compiler-error
 					       'case clause
-					       "duplicate case value ~S in ~S" 
+					       "duplicate case value ~S in ~S"
 					       x clause)))
 				     (car clause))
 			   (set! all-values (append (car clause) all-values)))
-		      (else  
+		      (else
 		           (compiler-error 'case clause
 					   "ill formed case clause ~S" clause)))
 		    (compiler-error 'case clauses
@@ -1337,21 +1337,21 @@ doc>
 	     (clauses (cddr e))
 	     (new-form (if (pair? key)
 			   (let ((newkey (gensym)))
-			     `(let ((,newkey ,key)) 
+			     `(let ((,newkey ,key))
 				,(rewrite-case-clauses newkey clauses)))
 			   (rewrite-case-clauses key clauses))))
 	(compile new-form env e tail?))
       (compiler-error 'case e "no key given")))
 
 ;;
-;; DO 
+;; DO
 ;;
 (define (rewrite-do inits test body)
   (let ((loop-name (gensym)))
     `(letrec ((,loop-name
        (lambda ,(map car inits)
 	 (if ,(car test)
-	     (begin ,@(if (null? (cdr test)) 
+	     (begin ,@(if (null? (cdr test))
 			  (list (void))
 			  (cdr test)))
 	     (begin ,@body
@@ -1382,38 +1382,42 @@ doc>
 
 (define (backquotify e level)
   (cond
-     ((vector? e)     (list 'list->vector (backquotify (vector->list e) level)))
-     ((not (pair? e)) (list 'quote e))
-     ((eq? (car e) 'quasiquote)
-      		      (list 'list ''quasiquote 
-			    (backquotify (cadr e) (+ level 1))))
-     ((eq? (car e) 'unquote)
-      		      (if (= level 1)
-			  (cadr e)
-			  (list 'list ''unquote 
-				(backquotify (cadr e) (- level 1)))))
-     ((and (pair? (car e)) (eq? (caar e) 'unquote-splicing))
-      		       (if (null? (cdr e))
-			   (if (> level 1)
-			       (list 'quote e) 
-			       (cadar e))
-			   (list 'append (cadar e)
-				 (backquotify (cdr e) level))))
-    ((and  (list? e) (not (assv 'unquote-splicing  e)) (not (assv 'unquote e))
-	   (not (memv 'unquote e)) (not (memv 'unquote-splicing e)))
-     		      ;; This is an optimization to use list when possible
-     		      ;; instead of numerous cons For instance `(a ((b ,c)) d)
-     		      ;; will give (list 'a (list (list 'b c)) 'd) instead of
-     		      ;; (cons 'a (cons (cons (cons 'b (cons c '())) '())
-     		      ;;                (cons 'd '())))
-      		      (cons 'list (map (lambda (x) (backquotify x level)) e)))
-     (else	      (list 'cons 
-			    (backquotify (car e) level)
-			    (backquotify (cdr e) level)))))
+    ((pair? e)
+       (cond
+	 ((eq? (car e) 'quasiquote)
+	       (list 'list ''quasiquote
+		     (backquotify (cadr e) (+ level 1))))
+	 ((eq? (car e) 'unquote)
+	       (if (<= level 0)
+		   (cadr e)
+		   (list 'list ''unquote
+			 (backquotify (cadr e) (- level 1)))))
+	 ((eq? (car e) 'unquote-splicing)
+	      (if (<= level 0)
+		  (list 'cons
+			(backquotify (car e) level)
+			(backquotify (cdr e) level))
+		  (list 'list ''unquote-splicing
+			(backquotify (cadr e) (- level 1)))))
+	 ((and (<= level 0) (pair? (car e)) (eq? (caar e) 'unquote-splicing))
+	      (if (null? (cdr e))
+		  (cadar e)
+		  (list 'append (cadar e)
+			(backquotify (cdr e) level))))
+	 (else
+	      (list 'cons
+		    (backquotify (car e) level)
+		    (backquotify (cdr e) level)))))
+    ((vector? e)
+       (list 'list->vector (backquotify (vector->list e) level)))
+    ((symbol? e)
+       (list 'quote e))
+    (else
+       e)))
 
 (define (compile-quasiquote e env tail?)
   (if (= (length e) 2)
-      (compile (backquotify (cadr e) 1) env e tail?)
+      (compile (backquotify (cadr e) 0) env e tail?)
       (compiler-error 'quasiquote e "bad syntax")))
 
 
@@ -1440,7 +1444,7 @@ doc>
 #|
 <doc EXT-SYNTAX include
  * (include <file>)
- * 
+ *
  * TODO
 doc>
 |#
@@ -1449,11 +1453,11 @@ doc>
 	(old  *compiler-port*))
     (with-handler (lambda (c) (set! *compiler-port* old) (raise c))
 		  (set! *compiler-port* port)
-		  
+
 		  (do ((expr (%read port) (%read port)))
 		      ((eof-object? expr))
 		    (compile expr '() expr #f))
-		  
+
 		  (set! *compiler-port* old))
     (close-port port)))
 
@@ -1464,7 +1468,7 @@ doc>
 
 
 ;;
-;; Autoloads management 
+;; Autoloads management
 ;;
 (define (compiler-maybe-do-autoload symb)
   (let ((file (autoload-file symb)))
@@ -1479,13 +1483,13 @@ doc>
 
 ;;;;======================================================================
 ;;;;
-;;;; 		Special Calls 
-;;;; 
+;;;; 		Special Calls
+;;;;
 ;;;;======================================================================
 
 ;;;;
 ;;;; Utilities for REQUIRE / REQUIRE-FOR-SYNTAX
-;;;; 
+;;;;
 (define (find-file-informations file lib-only? eventually-compile?)
 
   (define (compile-and-find-infos path)
@@ -1616,8 +1620,8 @@ doc>
 
 ;;;;======================================================================
 ;;;;
-;;;; 		The bytecode compiler 
-;;;; 
+;;;; 		The bytecode compiler
+;;;;
 ;;;;======================================================================
 (define (compile e env epair tail?)
   (if (not (pair? e))
@@ -1645,7 +1649,7 @@ doc>
 	  ((with-handler) 	(compile-with-handler	e env tail?))
 	  ((define-macro) 	(compile-define-macro   e env tail?))
 	  ((%%set!)		(compile-set!		e env tail?))
-	  
+
 	  ;; Special calls
 	  ((%%require)		(compile-require	e env tail?))
 	  ((%%require4syntax)	(compile-require4syntax e env tail?))
@@ -1655,7 +1659,7 @@ doc>
 	  ((%%label)		(compile-%%label	e env tail?))
 	  ((%%goto)		(compile-%%goto		e env tail?))
 	  ((%%publish-syntax)	(compile-%%pubsyntax	e env tail?))
-	  
+
 	  ;; Unmatched cases
 	  (else			(let ((first (car e)))
 				  (compiler-maybe-do-autoload first)
