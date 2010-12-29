@@ -4,9 +4,17 @@
 				| NEWS |
 				+======+
 
+* version 1.01 (2010 12 29)
+
+This is mainly a maintenance version.
+     * Documentation update
+     * Modifications to support ScmPkg on MacOs MacPorts
+     * Fix incompatibilities in FFI introduced in 1.00
+     * Bug fixes
+
 * version 1.00 (2010 08 11)
 
-The version 1.00 is finally here (work on STklos started 10 years before ...).  
+The version 1.00 is finally here (work on STklos started 10 years before ...).
 The main difference with this version and the pre-1.0
 ones is that it does not integrate GTK+ 1.x support. In fact, GTK+
 support is now available through several ScmPkg packages. Otherwise:
@@ -71,7 +79,7 @@ This is a major version introducing support for the ScmPkg source packaging syst
     * Added some peephole optimizations
     * Added new options to the compiler
     * Added support for reading the tar files
-    * void and eof objects are now printed back as #void and #eof and can be 
+    * void and eof objects are now printed back as #void and #eof and can be
       read back
     * New primitives
           o signal-error
@@ -154,7 +162,7 @@ compile it on some architectures/systems.
     * The reader accepts now #eof to denote the eend of file object
     * Fix problems with SunOS support
     * Fix problems with gcc4 compilation
-    * Hash tables are now compliant to SRFI-69 (Basic Hash Tables). 
+    * Hash tables are now compliant to SRFI-69 (Basic Hash Tables).
       This implies some (compatible) changes in the hash-tables
       function names.
     * New primitives
@@ -168,19 +176,19 @@ compile it on some architectures/systems.
           o SRFI-70 (Numbers)
     * Bug fixes
 
-* version 0.70 (2005 05 27)	
+* version 0.70 (2005 05 27)
 
     The main changes in this release are: a new back-trace system, a
     conform call/cc/dynamic-wind implementation and some performance
-    enhancements.                                                    
+    enhancements.
     * Added a way to have a back-trace when an error occurs
     * call/cc has been completely implemented. Its interaction with
-      dynamic-wind is now conform to R5RS.                         
+      dynamic-wind is now conform to R5RS.
     * Perfomance improvements
     * Added some infrastructure for auto-testing a newly built system.
     * New primitives
 	 + port-rewind
-	 + port-seek  
+	 + port-seek
 	 + current-loading-file
 	 + decode-float
 	 + read/ss
@@ -198,7 +206,7 @@ compile it on some architectures/systems.
     * Describe shows more information for structures types and
       conditions.
     * The object system takes now into account conditions and
-      conditions types                                                             
+      conditions types
     * Documentation updated
     * Bug fixes
 
@@ -241,15 +249,15 @@ previous release
     * Implementation of SRFI-55 (Require-extension)
     * Bug fixes
 
-Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 10, 11, 13, 14, 16, 22, 23, 
+Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 10, 11, 13, 14, 16, 22, 23,
 	  26, 27, 28, 30, 31, 34, 35, 36, 38, 39, 48, 55.
 
 
 * version 0.59 (2004 11 04)
 
-    * Documentation has been rewritten in Skribe 
+    * Documentation has been rewritten in Skribe
       (http://www-sop.inria.fr/mimosa/fp/Skribe)
-    * Added Dominique Boucher LALR(1) parser generator. 
+    * Added Dominique Boucher LALR(1) parser generator.
       (http://www.iro.umontreal.ca/~boucherd/Lalr/documentation/lalr.html)
       Thanks to Dominique for allowing me to do so
     * Added the future R6RS comment syntax #;
@@ -265,7 +273,7 @@ Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 10, 11, 13, 14, 16, 22, 23,
           o SRFI-10 (Sharp Comma External Form)
     * Bug fixes
 
-Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 10, 11, 13, 14, 16, 22, 23, 
+Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 10, 11, 13, 14, 16, 22, 23,
 	  26, 27, 28, 30, 31, 34, 35, 36, 38, 39, 48.
 
 * version 0.58
@@ -295,7 +303,7 @@ Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 11, 13, 14, 16, 22, 23, 26,
 * version 0.57
 
     	  * Added support for non Finked Mac-OS X
-	  * Added the Danny Dubé SIlex lexical analyser generator 
+	  * Added the Danny Dubé SIlex lexical analyser generator
 	    to the distribution. Thanks to Danny for allowing me to do so
 	  * New primitives
               o fork
@@ -317,7 +325,7 @@ Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 11, 13, 14, 16, 22, 23, 26,
 	* New implemented SRFIs: 27 (random), 38 (external
 	  representation of shared structures) and 39 (parameter
 	  objects)
-	* New parameter: REAL-PRECISION allow to change the precision 
+	* New parameter: REAL-PRECISION allow to change the precision
 	  used when displaying a real number
 	* New primitives: HOSTNAME, REGEXP-QUOTE, MAKE-PATH,
           FILE-SEPARATOR, HASH-TABLE-UPDATE!, DATE,
@@ -332,11 +340,11 @@ Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 11, 13, 14, 16, 22, 23, 26,
 * version 0.55
 	* New PCRE vesion (4.3)
 	* New primitive: COPY-FILE
-	* Bug corrections	
+	* Bug corrections
 
 * version 0.54
   	* Evaluation of parameters is now from left to right rather
-  	  than the opposite. 
+  	  than the opposite.
   	* New primitives: PORT-IDLE-REGISTER!,	PORT-IDLE-UNREGISTER!,
   	  PORT-IDLE-RESET!, GLOB, CANONICAL-PATH-NAME,
   	  EXPAND-FILE-NAME, BASENAME, DIRNAME, DECOMPOSE-FILE-NAME
@@ -359,13 +367,13 @@ Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 11, 13, 14, 16, 22, 23, 26,
 	* Added support for SRFI-28
 	* Better LDAP support
 	* Added PRETTY-PRINTER
-	* Added TRACE 
+	* Added TRACE
 	* Added APROPOS
 	* A bunch of new primitives: DIE, PAIR-MUTABLE?,
 	  VECTOR-MUTABLE?, STRING-MUTABLE?, STRING-TITLECASE,
 	  STRING-TITLECASE!, SYMBOL-VALUE*
 	* New syntax: IN-MODULE
-	* Changed the Boehm GC version to 6.1 alpha5 
+	* Changed the Boehm GC version to 6.1 alpha5
 	* Code cleaning to be accepted by gcc-3.x
 	* Bug corrections
 	* ...
@@ -381,7 +389,7 @@ Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 11, 13, 14, 16, 22, 23, 26,
 	  - support of the Canvas widget (nearly completely finished)
 	  - more general event management
 	* All the demos have been rewritten
-	* Better error reporting 
+	* Better error reporting
 	* Errors can now be browsed with Emacs next-error previous-error
 	* Added support for SRFI-2
 	* Added support for SRFI-4
@@ -391,12 +399,12 @@ Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 11, 13, 14, 16, 22, 23, 26,
 	* new option: "--no-init-file"
 	* Added bitwise operations on bignums
 	* Virtual slots can now have an initial value
-	* New primitives: KEY-DELETE!, KEY-DELETE, PROGRAM-NAME, 
+	* New primitives: KEY-DELETE!, KEY-DELETE, PROGRAM-NAME,
 	  PORT-FILE-NAME, FULL-CURRENT-TIME, SECONDS->DATE
-	* Added the Bigloo MATCH-CASE and MATCH-LAMBDA 
+	* Added the Bigloo MATCH-CASE and MATCH-LAMBDA
 	* New form PARSE-ARGUMENTS to simplify argument parsing
 	* Better support of dynamic loading.
-	* Minimal support of LDAP. 
+	* Minimal support of LDAP.
 	* Support of active-slots (as in old STk)
 	* PCRE package used is now 3.7
 	* GC package used is now 6.0
@@ -412,13 +420,13 @@ Supported SRFIs: 0, 1, 2, 4, 6, 7, 8, 9, 11, 13, 14, 16, 22, 23, 26,
 	* New port on Alpha/Linux
 	* Added SRFI 0
 	* Added SRFI 1
-	* Some parts of the VM have been rewritten to integrate full CALL/CC 
+	* Some parts of the VM have been rewritten to integrate full CALL/CC
 	  (not yet finished)
 	* New primitives: CURRENT-TIME, RUNNING-OS, FIND-PATH, CALL/EC,
 	  LOAD-PATH, SET-LOAD-PATH!, LOAD-SUFFIXES and SET-LOAD-SUFFIXES!
 	* Exact reals can be read now (e.g #e3.14 => 157/50)
 	* New demo: edit.stk
-	* Bug corrections 
+	* Bug corrections
 
 * Version 0.50 (released on 2001-01-17)
 

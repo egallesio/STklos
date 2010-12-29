@@ -1,6 +1,6 @@
 
-Version 1.0 is known to compile with the standard invocation 
-     configure && make && sudo make install 
+Version 1.0 is known to compile with the standard invocation
+     configure && make && sudo make install
 on the following architectures
 
     - Linux 2.6    (gcc-4.x 32 and 64 bits)
@@ -10,7 +10,7 @@ on the following architectures
 ======================================================================
 ======================================================================
 All the informations given below are for old versions (pre-1.0) of
-STklos. They are here for the record. 
+STklos. They are here for the record.
 
 
 This file contains a set of informations for compiling STklos on
@@ -53,7 +53,7 @@ GNU/Linux (alpha) ----------------------
   	 GTklos: Yes
 	 Canvas: No (see below)
 	Remarks: I was not able to test canvases, because the machine I
-		 on which I have tested use an old distribution. 
+		 on which I have tested use an old distribution.
 
 GNU/Linux (itanium) --------------------
 ----------------------------------------
@@ -70,7 +70,7 @@ FreeBSD (x86) -------------------------
 ----------------------------------------
 
      OS Version: version 4.2
-       Compiler: gcc 
+       Compiler: gcc
     Compilation:
 	         CC=gcc
 	         CFLAGS=-O2
@@ -81,10 +81,10 @@ FreeBSD (x86) -------------------------
 		 tested was STklos v0.51. GTklos and Canvas where not
 		 tested because the machine didn't have X11 installed.
 
-		 A more recent log (04/08/03) of a port done by Kimura 
+		 A more recent log (04/08/03) of a port done by Kimura
 		 Fuyuki  is available at
 		 http://bento.freebsd.org/errorlogs/i386-5-full-logs/stklos-0.54.log
-		 Port works on x86 only. 
+		 Port works on x86 only.
 
 Win32/Cygwin ---------------------------
 ----------------------------------------
@@ -128,7 +128,7 @@ Sun Solaris ----------------------------
             Who: Erick Gallesio  'eg(at)essi.fr'
         Remarks: I had problems with gmp, which did not work in
 		 generic mode. I had to configure STklos and then
-		 I went in the gmp directory and did 
+		 I went in the gmp directory and did
 		     configure --disable-shared --target=sparc64
 		 and then, you can go back in the main directory and
 		 do a standard "make" and "make install"
@@ -141,7 +141,7 @@ SGI Irix -- ----------------------------
        Compiler: gcc 3.3
     Compilation: CC=gcc
     		 CFLAGS=-O2 --disable-gnome
-  	 GTklos: Yes 
+  	 GTklos: Yes
 	 Canvas: No (libs not present)
             Who: Joshua Boyd jdboyd(at)jdboyd.net
         Remarks: Some problems with the provided GMP, but it works
@@ -154,7 +154,7 @@ Open Darwin  (PPC) ---------------------
        Compiler: gcc 3.3
     Compilation: --disable-gnome --disable-gtk
   	 GTklos: No
-	 Canvas: No 
+	 Canvas: No
             Who: Markus W.Weissmann (mww (at) opendarwin.org)
         Remarks: The portfile is available from
                  http://darwinports.opendarwin.org/

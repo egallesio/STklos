@@ -15,10 +15,10 @@
 <td align="left" valign="top" width="20%" bgcolor="#8A8983">
 <br /><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen">Contents</font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-43269">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-43510">*Top*</a></td></tr>
 <tr class="navsel"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a><br /><table cellspacing="1" cellpadding="1" width="100%">
 <tbody>
- <tr><td valign="top" align="left">1.1</td><td colspan="4" width="100%"><a href="stklos-ref-1.html#-section-4874">Overview of <span style="font-variant: small-caps">STklos</span></td></tr>
+ <tr><td valign="top" align="left">1.1</td><td colspan="4" width="100%"><a href="stklos-ref-1.html#-section-5038">Overview of <span style="font-variant: small-caps">STklos</span></td></tr>
  <tr><td valign="top" align="left">1.2</td><td colspan="4" width="100%"><a href="stklos-ref-1.html#-Lexical-Conventions"> Lexical Conventions</td></tr>
  <tr><td valign="top" align="left">1.3</td><td colspan="4" width="100%"><a href="stklos-ref-1.html#Basic-Concepts">Basic Concepts</td></tr>
 </tbody>
@@ -42,9 +42,9 @@
 </tbody></table>
 </td>
 <td align="left" valign="top">
-<a name="-section-4874"></a>
+<a name="-section-5038"></a>
 <h3><font color="darkolivegreen">1.1 Overview of <span style="font-variant: small-caps">STklos</span></font></h3>
-<a name="--index-entry-4830"></a><a name="--index-entry-4835"></a><p> <span style="font-variant: small-caps">STklos</span> is the successor of <span style="font-variant: small-caps">STk</span>
+<a name="--index-entry-4994"></a><a name="--index-entry-4999"></a><p> <span style="font-variant: small-caps">STklos</span> is the successor of <span style="font-variant: small-caps">STk</span>
 [<a href="stklos-ref-16.html#Gallesio95-1a">6</a>], a Scheme interpreter which was tightly
 connected to the Tk graphical toolkit [<a href="stklos-ref-16.html#Ouster-Tk">11</a>].
 <span style="font-variant: small-caps">STk</span> had an object layer which was called <span style="font-variant: small-caps">STklos</span>. At this
@@ -54,7 +54,7 @@ extension.  For instance, when programming a GUI application,
 a user could access the widgets at the (low) Tk level, or access
 them using a neat hierarchy of classes wrapped in <span style="font-variant: small-caps">STklos</span>.</p><p> Since the object layer is now more closely integrated with
 the language, the new system has been renamed <span style="font-variant: small-caps">STklos</span> and
-<span style="font-variant: small-caps">STk</span> is now used to designate the old system. </p><a name="--index-entry-4858"></a><p> <strong>Compatibility with <span style="font-variant: small-caps">STk</span></strong>: <span style="font-variant: small-caps">STklos</span> has been
+<span style="font-variant: small-caps">STk</span> is now used to designate the old system. </p><a name="--index-entry-5022"></a><p> <strong>Compatibility with <span style="font-variant: small-caps">STk</span></strong>: <span style="font-variant: small-caps">STklos</span> has been
 completely rewritten and as a consequence, due to new
 implementation choices, old <span style="font-variant: small-caps">STk</span> programs are not fully
 compatible with the new system. However, these changes are very
@@ -68,13 +68,13 @@ identical in every points, share the same philosophy.</p><a name="-Lexical-Conve
 <h3 id="-Lexical-Conventions"><font color="darkolivegreen">1.2  Lexical Conventions</font></h3>
 <a name="Identifiers"></a>
 <h4 id="Identifiers"><font color="darkolivegreen">1.2.1 Identifiers</font></h4>
-<a name="--index-entry-4877"></a><p>In <span style="font-variant: small-caps">STklos</span>, identifiers which start (or end) with a colon
+<a name="--index-entry-5041"></a><p>In <span style="font-variant: small-caps">STklos</span>, identifiers which start (or end) with a colon
 "<code>:</code>" are considered as keywords.  For instance
 <code>:foo</code> and <code>bar:</code> are <span style="font-variant: small-caps">STklos</span> keywords, but
 <code>not:key</code> is not a keyword. See
 section&nbsp;<a href="stklos-ref-4.html#Keywords">Keywords</a> for more information</p><a name="Comments"></a>
 <h4 id="Comments"><font color="darkolivegreen">1.2.2 Comments</font></h4>
-<a name="--index-entry-4895"></a><a name="--index-entry-4899"></a><a name="--index-entry-4903"></a><a name="--index-entry-4907"></a><a name="--index-entry-4911"></a><p>There are four types of comments in <span style="font-variant: small-caps">STklos</span>:</p><ul><li>a semicolon "<code>;</code>" indicates the start of a
+<a name="--index-entry-5059"></a><a name="--index-entry-5063"></a><a name="--index-entry-5067"></a><a name="--index-entry-5071"></a><a name="--index-entry-5075"></a><p>There are four types of comments in <span style="font-variant: small-caps">STklos</span>:</p><ul><li>a semicolon "<code>;</code>" indicates the start of a
 comment. This kind of comment extends to the end of the line (as
 described in <span style="font-variant: small-caps">R<sup>5</sup>RS</span>).</li>
 <li> multi-lines comment use the classical Lisp convention:
@@ -103,7 +103,7 @@ accepts keywords and optional arguments, to be compatible with
 DSSSL lambdas [<a href="stklos-ref-16.html#dsssl-96">10</a>].</p></li>
 </ul><a name="Here-Strings"></a>
 <h4 id="Here-Strings"><font color="darkolivegreen">1.2.3 Here Strings</font></h4>
-<a name="--index-entry-4966"></a><a name="--index-entry-4970"></a><p>Here strings permit to easily enter multilines strings in programs. 
+<a name="--index-entry-5130"></a><a name="--index-entry-5134"></a><p>Here strings permit to easily enter multilines strings in programs. 
 The sequence of characters <em>#&lt;&lt;</em> starts a here string. The characters 
 following this sequence #&lt;&lt; until a newline character define a terminator for
 the here string. The content of the string includes all characters between 
@@ -149,6 +149,6 @@ can also be represented in this way:
 See the original <span style="font-variant: small-caps">R<sup>5</sup>RS</span> document for more informations on
 the basic concepts of the Scheme Programming Language.<p></p></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-				     <a href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Tue Aug 10 09:20:50 2010</em></small>
+				     <a href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Wed Dec 29 20:20:59 2010</em></small>
 </body>
 </html>

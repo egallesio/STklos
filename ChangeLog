@@ -1,3 +1,41 @@
+2010-12-29  Erick Gallesio  <eg@unice.fr>
+
+	* pkgman/params.stk:
+	Changed the sync URL for STklos ScmPkg packages
+	[b69f85c863ac] 
+
+2010-12-23  Erick Gallesio  <eg@unice.fr>
+
+	* lib/compiler.stk, src/boot.c, src/boot.img, tests/do-test.stk,
+	tests/test-r5.stk:
+	Bug fix in nested quasiquotes
+	[3f809d7fbe8c]
+
+2010-11-07  Erick Gallesio  <eg@unice.fr>
+
+	* lib/srfi-0.stk, src/boot.c, src/boot.img:
+	Bug Fix: srfi-27 was declared as directly available whereas it needs
+	to be loaded. Bug signaled by Vitaly Magerya
+	[3db9ce74e000]
+
+	* doc/skb/stdproc.skb, lib/process.stk, src/boot.img, src/process.c,
+	src/signal.c:
+	Bug fix: process-{kill,stop,continue} didn't work when used in a
+	case insensitive interpreter. Signal name is now searched in a case
+	insensitive manner. Bug signaled by Vitaly Magerya.
+	[6f1483fae132]
+
+2010-10-30  Erick Gallesio  <eg@unice.fr>
+
+	* lib/mbe.stk, src/boot.c, src/boot.img:
+	Applied Vitaly Magerya patch to permit tail patterns in syntax rules
+	[60c9cc53c309]
+
+	* tests/test-threads.stk:
+	Take into account the thread-handler-error-show parameter object in
+	the thread testing program
+	[f1363ef491e3]
+
 2010-10-28  Erick Gallesio  <eg@unice.fr>
 
 	* doc/skb/custom.skb, lib/runtime.stk:
@@ -7,7 +45,7 @@
 	* doc/skb/custom.skb, lib/repl.stk, lib/thread.stk, src/boot.c,
 	  src/boot.img:
 	Permit to have error messages in threads even without joining them.
-	Adding the thread-handler-error-show parameter object
+	Added the thread-handler-error-show parameter object
 	[fb84aa653d54]
 
 2010-10-23  Erick Gallesio  <eg@unice.fr>

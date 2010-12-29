@@ -8,17 +8,17 @@ code. It is a forum for people interested in coordinating libraries
 and other additions to the Scheme language between implementations.
 
 STklos tries to supports as much as possible the "Final" SRFIs. For a
-definition of what is a final SRFI, you should have a look at the 
+definition of what is a final SRFI, you should have a look at the
 SRFI home page at http://srfi.schemers.org/
 
 Hereafter is the list of final SRFIs, for the current release of
 STklos, and the state of their implementation in this release.
 
 State can be one of the following values
-   Y: completely implemented 
-   N: not implemented (and will probably not be implemented) 
+   Y: completely implemented
+   N: not implemented (and will probably not be implemented)
    -: not implemented yet, but on the TODO list
-   
+
 
 
   State	SRFI    Title
@@ -36,7 +36,7 @@ State can be one of the following values
     Y	10	Sharp-Comma External Form
 
     Y	11	Syntax for receiving multiple values
-    Y	13	String Library   
+    Y	13	String Library
     Y	14	Character-Set Library
     Y	16	Syntax for procedures of variable arity
     Y	17	Generalized set!
@@ -54,7 +54,7 @@ State can be one of the following values
     -	29	Localization
 
     Y	30	Nested Multi-line Comments
-    Y	31	A special form for recursive evaluation 
+    Y	31	A special form for recursive evaluation
     Y	34	Exception Handling for Programs
     Y	35	Conditions
     Y	36	I/O Conditions
@@ -64,7 +64,7 @@ State can be one of the following values
     Y	39	Parameter objects
     -   40	A Library of Streams
     ?	42	Eager Comprehension
-    
+
     -	43	Vector Library
     -   44	Collections
     Y   45	Primitives for expressing iterative lazy algorithms
@@ -93,7 +93,7 @@ State can be one of the following values
     -   72	Simple hygienic macros
     Y	74	Octet-Addressed Binary Blocks
     ?	78	Lightweight testing
-    N   86	MU and NU simulating VALUES & CALL-WITH-VALUES, ... 
+    N   86	MU and NU simulating VALUES & CALL-WITH-VALUES, ...
 
     ?   87      => in case clauses
     Y   88      Keyword Objects
@@ -107,6 +107,6 @@ State can be one of the following values
     Y	98	An interface to access environment variables
     ?   99	ERR5RS Records
 
-    Y  100	define-lambda-object 
+    Y  100	define-lambda-object
 
 Implemented SRFIs: 42/71 (final SRFIs)
