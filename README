@@ -1,4 +1,4 @@
-								-*- outline -*-	
+								-*- outline -*-
 
 		      S T k l o s   ( v e r s i o n   1 . 0 1 )
 		      =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
@@ -7,7 +7,7 @@
 				   <eg(at)unice.fr>
 
 
-* Purpose 
+* Purpose
 
 STklos is a free Scheme system compliant with the languages features
 defined in R5RS. The aim of this implementation is to be fast as well
@@ -33,7 +33,7 @@ The salient points of STklos are:
 * History
 
 STklos is the successor of STk, a Scheme interpreter tightly connected
-to the Tk toolkit, that I have developed since September 1993. 
+to the Tk toolkit, that I have developed since September 1993.
 
 STklos is very similar to STk, for the user, but very different in he
 implementation. Everything has been rewritten and STklos uses now a
@@ -83,7 +83,7 @@ More informations on supported platforms is available in the
 PORTING-NOTES file in the distribution.
 
 
-* Project Home 
+* Project Home
 
 STklos home page is is located at http://stklos.net
 
