@@ -1,27 +1,27 @@
 /*
  * ffi.c	-- FFI support dor STklos
- * 
+ *
  * Copyright © 2007-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
- * 
- * 
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update: 21-Aug-2010 14:10 (eg)
+ * Last file update: 30-Dec-2010 18:11 (eg)
  */
 
 #include <stklos.h>
@@ -37,7 +37,7 @@ struct ext_func_obj {
   stk_header header;
   SCM name;
   SCM params;
-  SCM rettype; 
+  SCM rettype;
   SCM libname;
   void * code;
   ffi_cif cif;
@@ -86,6 +86,9 @@ struct callback_obj {
 
 #define CALLBACKP(p)		(BOXED_TYPE_EQ((p), tc_callback))
 
+
+static SCM pointer_on_exec_callback;
+
 /* ====================================================================== */
 
 static void error_bad_cpointer(SCM obj)
@@ -107,11 +110,11 @@ static void error_bad_string(SCM obj)
 
 /* ====================================================================== */
 
-/* 
+/*
 ((:void 	0)  (:char 	1)  (:short 	2)   (:ushort 	3)
  (:int 		4)  (:uint 	5)  (:long 	6)   (:ulong 	7)
  (:lonlong	8)  (:ulonlong	9)  (:float 	10)  (:double 	11)
- (:boolean 	12) (:pointer 	13) (:string	14)  (:int8	15)		 
+ (:boolean 	12) (:pointer 	13) (:string	14)  (:int8	15)
  (:int16	16) (:int32	17) (:int64	18)  (:obj      19))
 */
 
@@ -149,7 +152,7 @@ static ffi_type* convert(SCM obj)
   int n = STk_integer_value(obj);
 
   if (n < 0 || n > EXT_FUNC_MAX_TYPE) STk_error("bad integer ~S", obj);
-  
+
   return conversion[n];
 }
 
@@ -173,7 +176,7 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
     case 7:						/* ulong */
       {
 	long val = STk_integer_value(obj);
-	if (val != LONG_MIN) { 
+	if (val != LONG_MIN) {
 	  switch (type_needed) {
 	    case 1: res->cvalue  = (unsigned char) val; break;
 	    case 2: res->svalue  = (short) val; break;
@@ -278,8 +281,8 @@ static SCM c2scheme(union any obj, SCM rettype)
     case 12:						/* boolean */
       return MAKE_BOOLEAN(obj.ivalue);
     case 13:						/* pointer */
-      return (obj.pvalue) ? 
-	STk_make_Cpointer(obj.pvalue, STk_void, STk_false) : 
+      return (obj.pvalue) ?
+	STk_make_Cpointer(obj.pvalue, STk_void, STk_false) :
         STk_void;
     case 14:						/* string */
       if (! obj.pvalue) return STk_void;
@@ -291,8 +294,8 @@ static SCM c2scheme(union any obj, SCM rettype)
       STk_error("returning intXX is not implemented yet");
     case 19: 						/* obj */
       return (obj.pvalue ? obj.pvalue : STk_void);
-    default: 
-      STk_panic("incorrect type number for FFI %d", rettype);
+    default:
+      STk_panic("incorrect type number for FFI ~S", rettype);
   }
   return STk_void;
 }
@@ -307,9 +310,9 @@ SCM STk_ext_func_name(SCM fct)
 
 
 /* ======================================================================
- * 	STk_make-ext_func primitive ... 
+ * 	STk_make-ext_func primitive ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("%make-ext-func", make_ext_func, subr4, 
+DEFINE_PRIMITIVE("%make-ext-func", make_ext_func, subr4,
 		 (SCM name, SCM params, SCM rettype, SCM libname))
 {
   SCM tmp, z;
@@ -325,8 +328,8 @@ DEFINE_PRIMITIVE("%make-ext-func", make_ext_func, subr4,
   if (len < 0)            	 STk_error("bad parameter type list ~S", params);
 
   /* find the function in library */
-  fun = STk_find_external_function(STRING_CHARS(libname), 
-				   STRING_CHARS(name), 
+  fun = STk_find_external_function(STRING_CHARS(libname),
+				   STRING_CHARS(name),
 				   TRUE);
 
   /* Prepare the function descriptor */
@@ -335,13 +338,13 @@ DEFINE_PRIMITIVE("%make-ext-func", make_ext_func, subr4,
     args[i] = convert(CAR(tmp));
   }
 
-  n = ffi_prep_cif(&cif, 
-		   FFI_DEFAULT_ABI, 
-		   len, 
+  n = ffi_prep_cif(&cif,
+		   FFI_DEFAULT_ABI,
+		   len,
 		   convert(rettype),
 		   args);
   if (n != FFI_OK) STk_error("cannot create call descriptor for ~S", name);
-  
+
   /* Create external function object */
   NEWCELL(z, ext_func);
   EXTFUNC_NAME(z)     = name;
@@ -367,21 +370,21 @@ SCM STk_call_ext_function(SCM fct, int argc, SCM *argv)
   void*     p_args[EXT_FUNC_MAX_PARAMS];
   SCM params;
 
-  if (! EXTFUNCP(fct)) 
+  if (! EXTFUNCP(fct))
     STk_error("bad external function descriptor ~S", fct);
 
   /* Build the parameter array */
   for (i = 0, params = EXTFUNC_PARAMS(fct);
        i < argc;
        i++, params = CDR(params)) {
-    if (NULLP(params)) 
+    if (NULLP(params))
       STk_error("too much parameters in call");
-    
+
     scheme2c(argv[-i], INT_VAL(CAR(params)), &v_args[i], i);
     p_args[i] = & (v_args[i]);
   }
   if (! NULLP(params)) STk_error("not enough parameters in call");
-  
+
   /* Perform the call */
   ffi_call(&EXTFUNC_CIF(fct),
 	   EXTFUNC_CODE(fct),
@@ -395,14 +398,14 @@ SCM STk_call_ext_function(SCM fct, int argc, SCM *argv)
 /* ======================================================================
  *  	make-callback ...
  * ====================================================================== */
-DEFINE_PRIMITIVE("%make-callback", make_callback, subr3, 
+DEFINE_PRIMITIVE("%make-callback", make_callback, subr3,
 		 (SCM proc, SCM types, SCM data))
 {
   SCM z;
 
   if (STk_procedurep(proc) == STk_false) STk_error("bad procedure ~S", proc);
   if (!CONSP(types)) STk_error("incorrect types description ~S", types);
-  
+
   NEWCELL(z, callback);
   CALLBACK_PROC(z) = proc;
   CALLBACK_TYPES(z) = types;
@@ -414,6 +417,13 @@ DEFINE_PRIMITIVE("%make-callback", make_callback, subr3,
 /* ======================================================================
  *  	STk_exec_callback ...
  * ====================================================================== */
+#ifdef LIB_FFI_CAN_HANDLE_VARARG_IN_CALLBACKS
+/* As stated in libffi documentation, libffi doesn't correctly handle
+ * varargs in callbacks. The code of the following exec_callback works
+ * on 32 bits Linux but fails miserably on 64bits. It seems that the
+ * ABI is different in these cas. As a consequence, this code is left
+ * here just in case a day libffi is corrected.x
+ */
 #define MAX_ARGS_CALLBACK 20
 
 static int exec_callback(SCM callback, ...)
@@ -465,17 +475,17 @@ static int exec_callback(SCM callback, ...)
 		  CAR(Cargs));
       case 19: 						/* obj */
 	param.pvalue = va_arg(ap, void *); break;
-      default: 
+      default:
 	STk_panic("incorrect type number for FFI ~s", (CAR(Cargs)));
     }
-    
+
     /* param contains the C argument */
-    if (i >= MAX_ARGS_CALLBACK - 1) 
+    if (i >= MAX_ARGS_CALLBACK - 1)
       STk_error("a callback cannot have more than %d arguments", MAX_ARGS_CALLBACK);
 
     Sargs[i++] = c2scheme(param, CAR(Cargs));
   }
-  
+
   /* Add the callback value as last parameter */
   Sargs[i++] = CALLBACK_DATA(callback);
   Sargs[i]= NULL;
@@ -483,11 +493,38 @@ static int exec_callback(SCM callback, ...)
   res = STk_C_apply(CALLBACK_PROC(callback), -i, Sargs);
   return (res != STk_false);
 }
+#else
+/* KLUDGE: Since libffi doesn't support callbacks with varargs, we
+ * used a special version of exec_calback which works only for the way
+ * it is used in the gtk-gtklos-base ScmPkg (a callback can be called
+ * with one or two pointers. Hopefully, callbacks were not documened
+ * in previous versions of STklos ;-)
+ */
+static int exec_callback(SCM callback, void *ptr1, void *ptr2)
+{
+  int len  = STk_int_length(CALLBACK_TYPES(callback));
+  SCM data = CALLBACK_DATA(callback);
+  SCM res  = STk_false;
+
+  switch (len) {
+    case 1: 
+      res = STk_C_apply(CALLBACK_PROC(callback), 2, ptr1, data);
+      break;
+    case 2:
+      res = STk_C_apply(CALLBACK_PROC(callback), 3, ptr1, ptr2, data);
+      break;
+    default:
+      STk_panic("ffi kludge is incorrect ~s", CALLBACK_TYPES(callback));
+      break;
+  }
+  return (res != STk_false);
+}
+#endif
 
 
 DEFINE_PRIMITIVE("%exec-callback-address", exec_cb_addr, subr0, (void))
 {
-  return STk_make_Cpointer(exec_callback, STk_void, STk_false);
+  return pointer_on_exec_callback;
 }
 
 
@@ -495,16 +532,16 @@ DEFINE_PRIMITIVE("%exec-callback-address", exec_cb_addr, subr0, (void))
  * 	Build a pointer to a C variable ...
  * ====================================================================== */
 
-DEFINE_PRIMITIVE("%get-symbol-address", get_symbol_address, subr2, 
+DEFINE_PRIMITIVE("%get-symbol-address", get_symbol_address, subr2,
 		 (SCM name, SCM libname))
 {
   void *var;
 
   if (!STRINGP(name))  error_bad_string(name);
   if (!STRINGP(libname)) error_bad_string(libname);
-  
+
   var = STk_find_external_function(STRING_CHARS(libname), STRING_CHARS(name), FALSE);
-  
+
   return var? STk_make_Cpointer(var, STk_intern("extern-var"), STk_false): STk_false;
 }
 
@@ -515,7 +552,7 @@ DEFINE_PRIMITIVE("%get-typed-ext-var", get_typed_ext_var, subr2, (SCM obj, SCM t
 
   if (!CPOINTERP(obj))  error_bad_cpointer(obj);
   if (kind == LONG_MIN) error_bad_type_number(obj);
- 
+
   switch (kind) {
     case 0: 						/* void */
       STk_error("cannot access a void variable");
@@ -545,15 +582,15 @@ DEFINE_PRIMITIVE("%get-typed-ext-var", get_typed_ext_var, subr2, (SCM obj, SCM t
     case 12:						/* boolean */
       return MAKE_BOOLEAN(* ((int *)CPOINTER_VALUE(obj)));
     case 13:						/* pointer */
-      { 
+      {
 	void *ptr = (* ((void**) CPOINTER_VALUE(obj)));
 
-	return (ptr) ? 
-	  STk_make_Cpointer(ptr, STk_void, STk_false) : 
+	return (ptr) ?
+	  STk_make_Cpointer(ptr, STk_void, STk_false) :
 	  STk_void;
       }
     case 14:						/* string */
-      { 
+      {
 	char *str = (* ((char **) CPOINTER_VALUE(obj)));
 
 	return (str) ? STk_Cstring2string(str): STk_void;
@@ -564,18 +601,18 @@ DEFINE_PRIMITIVE("%get-typed-ext-var", get_typed_ext_var, subr2, (SCM obj, SCM t
     case 18:						/* int64 */
       STk_error("returning intXX is not implemented yet");
     case 19: 						/* obj */
-      { 
+      {
 	void *ptr = (* (void**) CPOINTER_VALUE(obj));
 
 	return (ptr) ? ptr : STk_void;
       }
-    default: 
+    default:
       STk_panic("incorrect type number for external variable ~S", type);
   }
   return STk_void;
 }
 
-DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3, 
+DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
 		 (SCM obj, SCM val, SCM type))
 {
   long kind = STk_integer_value(type);
@@ -596,17 +633,17 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
     case 7:						/* ulong */
       {
 	long value = CHARACTERP(val) ? CHARACTER_VAL(val) : STk_integer_value(val);
-	if (value != LONG_MIN) { 
+	if (value != LONG_MIN) {
 	  switch (kind) {
 	    case 1: (* ((char *)CPOINTER_VALUE(obj))) = (char) value; break;
 	    case 2: (* ((short *)CPOINTER_VALUE(obj))) = (short) value; break;
-	    case 3: (* ((unsigned short *)CPOINTER_VALUE(obj))) 
+	    case 3: (* ((unsigned short *)CPOINTER_VALUE(obj)))
 	                     = (unsigned short) value; break;
 	    case 4: (* ((int *)CPOINTER_VALUE(obj))) = (int) value; break;
-	    case 5: (* ((unsigned int *)CPOINTER_VALUE(obj))) 
+	    case 5: (* ((unsigned int *)CPOINTER_VALUE(obj)))
 	                     = (unsigned int) value; break;
 	    case 6: (* ((long *)CPOINTER_VALUE(obj))) = (long) value; break;
-	    case 7: (* ((unsigned long *)CPOINTER_VALUE(obj))) 
+	    case 7: (* ((unsigned long *)CPOINTER_VALUE(obj)))
 	                     = (unsigned long) value; break;
 	  }
 	  return STk_void;
@@ -658,7 +695,7 @@ static void error_no_ffi(void)
 }
 
 
-DEFINE_PRIMITIVE("%make-ext-func", make_ext_func, subr4, 
+DEFINE_PRIMITIVE("%make-ext-func", make_ext_func, subr4,
 		 (SCM p1, SCM p2, SCM p3, SCM p4))
 { error_no_ffi(); return STk_void;}
 
@@ -669,7 +706,7 @@ DEFINE_PRIMITIVE("%exec-callback-address", exec_cb_addr, subr0, (void))
 { error_no_ffi(); return STk_void;}
 
 
-DEFINE_PRIMITIVE("%get-symbol-address", get_symbol_address, subr2, 
+DEFINE_PRIMITIVE("%get-symbol-address", get_symbol_address, subr2,
 		 (SCM name, SCM libname))
 { error_no_ffi(); return STk_void;}
 
@@ -677,7 +714,7 @@ DEFINE_PRIMITIVE("%get-typed-ext-var", get_typed_ext_var, subr2, (SCM obj, SCM t
 {error_no_ffi(); return STk_void;}
 
 
-DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3, 
+DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
 		 (SCM obj, SCM val, SCM type))
 { error_no_ffi(); return STk_void;}
 
@@ -688,6 +725,10 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
  * ====================================================================== */
 int STk_init_ffi(void)
 {
+  pointer_on_exec_callback = STk_make_Cpointer(exec_callback,
+					       STk_void,
+					       STk_false);
+
   ADD_PRIMITIVE(make_ext_func);
   ADD_PRIMITIVE(make_callback);
   ADD_PRIMITIVE(exec_cb_addr);
