@@ -1,4 +1,24 @@
+2010-12-30  Erick Gallesio  <eg@unice.fr>
+
+	* src/ffi.c:
+	Callbacks with varargs are not well supported by libffi (it doesn't
+	work on x86_64). The fix used here is an horrible kludge, but it
+	permits to use GTK+ ScmPkg packages.
+	[97bdf1f451f7] [tip]
+
 2010-12-29  Erick Gallesio  <eg@unice.fr>
+
+	* ChangeLog, NEWS, PORTING-NOTES, SUPPORTED-SRFIS, doc/html/stklos-
+	  ref-1.html, doc/html/stklos-ref-10.html, doc/html/stklos-
+	  ref-11.html, doc/html/stklos-ref-12.html, doc/html/stklos-
+	  ref-13.html, doc/html/stklos-ref-14.html, doc/html/stklos-
+	  ref-15.html, doc/html/stklos-ref-16.html, doc/html/stklos-
+	  ref-2.html, doc/html/stklos-ref-3.html, doc/html/stklos-ref-4.html,
+	  doc/html/stklos-ref-5.html, doc/html/stklos-ref-6.html, doc/html
+	  /stklos-ref-7.html, doc/html/stklos-ref-8.html, doc/html/stklos-
+	  ref-9.html, doc/html/stklos-ref.html, doc/pdf/stklos-ref.pdf:
+	Preparing version stklos-1.01-beta1
+	[6975ca636c27]
 
 	* pkgman/params.stk:
 	Changed the sync URL for STklos ScmPkg packages
