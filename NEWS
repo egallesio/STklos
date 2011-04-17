@@ -10,6 +10,7 @@ This is mainly a maintenance version.
      * Documentation update
      * Modifications to support ScmPkg on MacOs MacPorts
      * Fix incompatibilities in FFI introduced in 1.00
+     * Better x86_64 support
      * Bug fixes
 
 * version 1.00 (2010 08 11)

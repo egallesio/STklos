@@ -1,33 +1,33 @@
 ;;;;
 ;;;; repl.stk	-- STklos REPL
-;;;; 
-;;;; Copyright © 2000-2010 Erick Gallesio - Universite de Nice <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright © 2000-2011 Erick Gallesio - Universite de Nice <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update: 25-Oct-2010 20:39 (eg)
+;;;; Last file update:  5-Jan-2011 09:05 (eg)
 ;;;;
 
-;; This file defines the REPL module. This module does not export anything 
+;; This file defines the REPL module. This module does not export anything
 ;; and is completely self-contained. This is the module which is last loaded
-;; in the default boot file. 
-;; 
+;; in the default boot file.
+;;
 
 
 (define-module REPL
@@ -52,7 +52,7 @@
     ((help h ?)		(display
 			 (do-color 'blue 'bold
 				   (format "Available Commands:
-- ,backtrace ,bt   Show the stack when last error occurred	
+- ,backtrace ,bt   Show the stack when last error occurred
 - ,quit ,q	   Exit STklos
 - ,help ,? ,h	   This help\n")
 				   'clear)
@@ -83,7 +83,7 @@
 	     out)))
 
 
-(define (repl-handler c port) 
+(define (repl-handler c port)
   (if (condition? c)
       (cond
 	((condition-has-type? c &error-message)		;; &error-message
@@ -95,7 +95,7 @@
 	((condition-has-type? c &message)		;; &message (e.g. ^C)
 	   (format port (condition-ref c 'message)))
 	((condition-has-type? c &uncaught-exception)
-	   (repl-handler (uncaught-exception-reason c) port))	
+	   (repl-handler (uncaught-exception-reason c) port))
 	(else						;; Unknown
 	   (format port "**** Unknown condition raised.\n")
 	   (format port "Condition type: ~A\n" (struct-type-name (struct-type c)))
@@ -198,7 +198,7 @@ doc>
 
 	 (let ((e (%read in)))
 	   (display (do-color 'clear))
-	   (cond 
+	   (cond
 	     ((eof-object? e)
 		(set! repl-level (- repl-level 1))
 		(set! eof #t)
@@ -210,7 +210,7 @@ doc>
 		(do-repl-command (cdr e)))
 
 	     (else
-	        (call-with-values 
+	        (call-with-values
 		  (lambda () (eval e))
 		  (lambda v
 		    (when interactive?
@@ -240,13 +240,13 @@ doc>
   (%initialize-signals)
   (when interactive?
     (let ((line1 (format "STklos version ~A\n" (version)))
-	  (line2 "Copyright (C) 1999-2010 Erick Gallesio - Universite de Nice <eg@unice.fr>\n")
+	  (line2 "Copyright (C) 1999-2011 Erick Gallesio - Universite de Nice <eg@unice.fr>\n")
 	  (line3 (format "[~a/~a/~a]\n" (machine-type) (%thread-system)
 			 (key-get *%system-state-plist* :readline 'no-readline))))
       (display (do-color 'bold 'black "*   " 'bold 'blue line1))
       (display (do-color 'bold 'black " *  " 'bold 'blue line2))
       (display (do-color 'bold 'black "* * " 'bold 'blue line3 'normal))))
-  
+
   ((main-repl-hook))
   (repl)
   (%pre-exit 0))
