@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 23-Oct-2010 11:56 (eg)
+# Last file update: 17-Apr-2011 21:33 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -27,6 +27,7 @@ scheme_BOOT = assembler.stk		\
 	      peephole.stk		\
 	      process.stk		\
 	      r5rs.stk 			\
+	      r7rs.stk			\
 	      regexp.stk		\
 	      readline.stk		\
 	      repl.stk 			\
@@ -123,7 +124,7 @@ scheme_OBJS = compfile.ostk		\
 	      srfi-96.ostk		\
 	      srfi-100.ostk		\
 	      tar.ostk			\
-	      trace.ostk	
+	      trace.ostk
 
 DOCDB	    = DOCDB
 
@@ -144,9 +145,9 @@ SUFFIXES = .stk .ostk .scm
 
 all-recursive: boot compfile.ostk
 
-boot:	../src/boot.img 
+boot:	../src/boot.img
 
-../src/boot.img: $(scheme_BOOT) 
+../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \
 	(export STKLOS_BUILDING=1; \
 	../src/stklos -q -c -b ../src/boot.img -f bb.stk boot.img0 instr0)
@@ -179,7 +180,7 @@ boot:	../src/boot.img
 
 # Compile SRFI13 before SRFI14 to avoid 2 warnings
 
-$(SCHEME_OBJS): ../src/boot.img 
+$(SCHEME_OBJS): ../src/boot.img
 compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
 full-conditions: srfi-35.ostk srfi-36.stk

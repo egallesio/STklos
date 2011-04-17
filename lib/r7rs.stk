@@ -1,0 +1,188 @@
+;;;;
+;;;; r7rs.stk	-- R7RS support (Draft-1)
+;;;;
+;;;; Copyright © 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 17-Apr-2011 19:36 (eg)
+;;;; Last file update: 17-Apr-2011 21:55 (eg)
+;;;;
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.3 Other data types
+;;;; ----------------------------------------------------------------------
+
+;;;; ==== 6.3.2 Pairs and lists
+
+#|
+<doc r7rs-proc make-list
+ * (make-list k)
+ * (make-list k fill)
+ *
+ * Returns a newly allocated list of k elements. If a second
+ * argument is given, then each element is initialized to fill .
+ * Otherwise the initial contents of each element is unspecified.
+doc>
+|#
+(define (make-list k :optional (fill (void)))
+  (vector->list (make-vector k fill)))
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.4 Control features
+;;;; ----------------------------------------------------------------------
+
+#|
+<doc r7rs-proc string-map
+ * (string-map proc string1 string2 ...)
+ *
+ * The |strings| must be strings, and |proc| must be a procedure taking as
+ * many arguments as there are strings and returning a single
+ * value. If more than one string is given and not all strings have the
+ * same length, |string-map| terminates when the shortest list runs
+ * out. |String-map| applies |proc| element-wise to the elements of the
+ * strings and returns a string of the results, in order. The dynamic
+ * order in which proc is applied to the elements of the |strings| is
+ * unspecified.
+ * @lisp
+ * (string-map char-downcase "AbdEgH"")
+ *          => "abdegh"
+ *
+ * (string-map
+ *   (lambda (c)
+ *     (integer->char (+ 1 (char->integer c))))
+ *   "HAL")
+ *          => "IBM"
+ *
+ * (string-map (lambda (c k)
+ * 	      (if (eqv? k #\u)
+ * 		  (char-upcase c)
+ * 		  (char-downcase c)))
+ * 	    "studlycaps"
+ * 	    "ululululul")
+ * 	 => "StUdLyCaPs"
+doc>
+|#
+(define (string-map proc . strings)
+  (let* ((strs (map (lambda (x)
+		      (unless (string? x)
+			(error 'string-map "bad string ~S" x))
+		      (string->list x))
+		    strings))
+	 (res (apply map proc strs)))
+    ;; Verify that every compnent of the result is a character
+    (unless (every char? res)
+      (error 'string-map "bad character in ~S" res))
+    ;; Return result
+    (list->string res)))
+
+#|
+<doc r7rs-proc vector-map
+ * (vector-map proc vector1 vector2 ...)
+ *
+ * The |vectors| must be vectors, and |proc| must be a procedure
+ * taking as many arguments as there are vectors and returning a single
+ * value. If more than one vector is given and not all vectors have the
+ * same length, |vector-map| terminates when the shortest list runs
+ * out. |Vector-map| applies |proc| element-wise to the elements of the
+ * vectors and returns a vector of the results, in order. The dynamic
+ * order in which proc is applied to the elements of the |vectors| is
+ * unspecified.
+ * @lisp
+ * (vector-map cadr '#((a b) (d e) (g h)))
+ *     =>  #(b e h)
+ *
+ * (vector-map (lambda (n) (expt n n))
+ * 	    '#(1 2 3 4 5))
+ *     => #(1 4 27 256 3125)
+ *
+ * (vector-map + '#(1 2 3) '#(4 5 6))
+ *     => #(5 7 9)
+ *
+ * (let ((count 0))
+ *   (vector-map
+ *     (lambda (ignored)
+ *       (set! count (+ count 1))
+ *       count)
+ *     '#(a b)))
+ *     => #(1 2) or #(2 1)
+ * @end lisp
+doc>
+|#
+(define (vector-map proc . vectors)
+  (unless (every vector? vectors)
+    (error 'vector-map "bad list of vectors ~S" vectors))
+  (list->vector (apply map proc (map vector->list vectors))))
+
+#|
+<doc r7rs-proc string-for-each
+ * (string-for-each proc string1 string2 ...)
+ *
+ * The arguments to |string-for-each| are like the arguments to
+ * |string-map|, but |string-for-each| calls |proc| for its side effects
+ * rather than for its values. Unlike |string-map|, |string-for-each| is
+ * guaranteed to call |proc| on the elements of the lists in order from
+ * the first element(s) to the last, and the value returned by
+ * |string-for-each| is unspecified. If more than one string is given and
+ * not all strings have the same length, |string-for-each| terminates when
+ * the shortest string runs out.
+ * @lisp
+ * (let ((v (list)))
+ *   (string-for-each (lambda (c) (set! v (cons (char->integer c) v)))
+ * 	              "abcde")
+ *    v)
+ *        => (101 100 99 98 97)
+ * @end lisp
+doc>
+|#
+(define (string-for-each proc . strings)
+  (let ((strs (map (lambda (x)
+		     (unless (string? x)
+		       (error 'string-for-each "bad string ~S" x))
+		     (string->list x))
+		   strings)))
+    (apply map proc strs)
+    (void)))
+
+
+#|
+<doc r7rs-proc vector-for-each
+ * (vector-for-each proc vector1 vector2 ...) 
+ *
+ * The arguments to |vector-for-each| are like the arguments to
+ * |vector-map|, but |vector-for-each| calls |proc| for its side effects
+ * rather than for its values. Unlike |vector-map|, |vector-for-each| is
+ * guaranteed to call |proc| on the elements of the lists in order from
+ * the first element(s) to the last, and the value returned by
+ * |vector-for-each| is unspecified. If more than one vector is given and
+ * not all vectors have the same length, |vector-for-each| terminates when
+ * the shortest vector runs out.
+ * @lisp
+ * (let ((v (make-vector 5)))
+ *   (vector-for-each (lambda (i) (vector-set! v i (* i i)))
+ * 		   '#(0 1 2 3 4))
+ *   v)
+ *        => #(0 1 4 9 16)
+ * @end lisp
+doc>
+|#
+(define (vector-for-each proc . vectors)
+  (unless (every vector? vectors)
+    (error 'vector-for-each "bad list of vectors ~S" vectors))
+  (apply map proc (map vector->list vectors))
+  (void))

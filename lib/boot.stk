@@ -1,27 +1,27 @@
 ;;;;
 ;;;; boot.stk					-- Default boot file
-;;;; 
-;;;; Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 16-Oct-2010 15:56 (eg)
+;;;; Last file update: 17-Apr-2011 21:05 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
@@ -32,7 +32,7 @@
 (include "bonus.stk")		; Extended functions and syntaxes
 (include "load.stk")		; Extended load dealing with paths and suffixes
 (include "srfi-0.stk")		; Implementation of SRFI-0
-(include "mbe.stk")		; A simple R5RS macro system 
+(include "mbe.stk")		; A simple R5RS macro system
 (include "regexp.stk")		; Regular expressions
 (include "process.stk")		; Processes from Scheme
 (include "compiler.stk")	; VM Compiler
@@ -41,6 +41,7 @@
 (include "logical.stk")		; Logical operations
 (include "thread.stk")		; Thread support
 (include "ffi.stk")		; FFI support
+(include "r7rs.stk")		; Preliminary support of R7RS
 (include "obsolete.stk")	; Obsolete functions. Candidates to disappear
 (include "repl.stk")		; Read Eval Print Loop
 (include "readline.stk")	; Readline support
@@ -96,7 +97,7 @@
 	   (cons "  - ...\nSet shell variable STKLOS_FRAMES to set visible frames\n"
 		 (list-tail (reverse! bt) (- len depth))))
 	  bt)))
-  
+
   (let ((p (current-error-port)))
     (for-each (lambda (x)
 		(if (string? x)
@@ -148,7 +149,7 @@
 (define (%simple-fatal-exception-handler what who c useless-frames)
   (let ((port (current-error-port))
 	(bt   #f))
-    ;; Display the message 
+    ;; Display the message
     (format port "**** Error while ~A ~S\n" what who)
     (when (condition? c)
       (when (condition-has-type? c &error-message)
@@ -202,13 +203,13 @@
   ;; Set the configuration if needed
   (when confdir
     (%stklos-conf-dir confdir))
-  
+
   ;; Look at the debug flag
   (when (> debug 0)
     (stklos-debug-level debug)
     (compiler:warn-use-undefined #t)	; Signal usage of still undefined symbols
     (compiler:gen-line-number #t)	; Generate line numbers
-    (when (> debug 1)			; Load-verbose when debug >= 2 
+    (when (> debug 1)			; Load-verbose when debug >= 2
       (load-verbose debug)))
 
   ;; Eventually try to create the configuratioon directory
@@ -222,13 +223,13 @@
   ;; Try to load the user initialization file except if "--no-init-file"
   (unless no-init
     (try-load (%stklos-conf-file "stklosrc")))
-  
+
   (when ld
     ;; "--load" option
     (with-handler
       (lambda (c) (%simple-fatal-exception-handler "loading file" ld c 7))
       (load ld)))
-  
+
   (cond
     ;; "--file" option
     (file (with-handler
