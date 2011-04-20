@@ -1,7 +1,7 @@
 ;;;;
 ;;;; do-test.stk	-- The pilot of all tests
 ;;;;
-;;;; Copyright © 2005-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update: 23-Dec-2010 20:17 (eg)
+;;;; Last file update: 20-Apr-2011 09:50 (eg)
 ;;;;
 
 (load-path (cons "../lib"
@@ -43,7 +43,9 @@
   (load "test-regexp.stk")
   (load "test-ffi.stk")
   (load "test-r5.stk")
-  (load "test-r5rs-pitfall.stk"))
+  (load "test-r7rs.stk")  
+  (load "test-r5rs-pitfall.stk")
+  )
 
 
 (define (main _)

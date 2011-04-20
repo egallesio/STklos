@@ -22,12 +22,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 17-Apr-2011 21:48 (eg)
+;;;; Last file update: 20-Apr-2011 09:48 (eg)
 ;;;;
 
 (require "test")
 
 (test-section "R7RS")
+
 
 ;;------------------------------------------------------------------
 (test-subsection "Control features")
@@ -76,3 +77,6 @@
 	(vector-for-each (lambda (i) (vector-set! v i (* i i)))
 			 '#(0 1 2 3 4))
 	v))
+
+
+(test-section-end)

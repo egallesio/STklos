@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  3-Oct-2009 21:51 (eg)
+# Last file update: 18-Apr-2011 23:49 (eg)
 
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -27,7 +27,7 @@ if NO_THREAD
   THREAD_FILES = thread-none.c mutex-none.c
 endif
 
-stklos_SOURCES = base64.c boolean.c boot.c box.c char.c cond.c \
+stklos_SOURCES = base64.c blob.c boolean.c boot.c box.c char.c cond.c \
  cpointer.c dynload.c env.c error.c extend.c ffi.c fixnum.c \
  fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
  list.c misc.c md5.c number.c object.c parameter.c \
@@ -42,14 +42,14 @@ stklos_SOURCES = base64.c boolean.c boot.c box.c char.c cond.c \
 ### extend.c fport.c hash.c keyword.c lib.c list.c misc.c number.c \
 ### object.c path.c port.c print.c proc.c process.c promise.c read.c \
 ### regexp.c signal.c sio.c sport.c  str.c symbol.c system.c \
-### uvector.c vector.c  vm.c 
-### 
-### 
+### uvector.c vector.c  vm.c
+###
+###
 ### stklos_SOURCES = stklos.c
 
 # gtklib		= @GTK_CONFIG_LIBS@
 
-# COMPAT LIB 
+# COMPAT LIB
 #compatlib       = -L$(top_srcdir)/compat -lcompat
 
 # GC LIBRARY
@@ -57,7 +57,7 @@ gc              = @GC@
 gclib           = @GCLIB@
 gcinc           = @GCINC@
 
-# GMP LIBRARY 
+# GMP LIBRARY
 gmp	        = @GMP@
 gmplib          = @GMPLIB@
 gmpinc	        = @GMPINC@
@@ -72,7 +72,7 @@ ffi		= @FFI@
 ffilib		= @FFILIB@
 ffiinc		= @FFIINC@
 
-stklos_LDADD   = $(compatlib) $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm 
+stklos_LDADD   = $(compatlib) $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
 INCLUDES       = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
 
@@ -81,7 +81,7 @@ struct.o cond.o: struct.h
 
 doc:  $(DOCDB)
 
-$(DOCDB): $(stklos_SOURCES)	
+$(DOCDB): $(stklos_SOURCES)
 	./stklos -b boot.img -c -q -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
 
 clean:

@@ -1,27 +1,27 @@
 ;;;;
 ;;;; extract-doc.stk	-- Extrcat Documentation from STklos source files
-;;;; 
-;;;; Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Nov-2000 11:08 (eg)
-;;;; Last file update:  5-Apr-2005 21:38 (eg)
+;;;; Last file update: 20-Apr-2011 10:24 (eg)
 ;;;;
 
 (define start-doc-rgxp   	(string->regexp "^<doc "))
@@ -62,11 +62,11 @@
       ;; Determine the type (procedure, syntax, ..) of this header
       (let ((item (read in)))
 	(case  item
-	  ((ext EXT) 			(set! type 'extended))
-	  ((ext-syntax EXT-SYNTAX)	(set! type 'extended-syntax))
-	  ((syntax SYNTAX)		(set! type 'syntax))
-	  (else			(set! type 'procedure)
-				(set! l (list item)))))
+	  ((ext EXT R7RS) 			(set! type 'extended))
+	  ((ext-syntax EXT-SYNTAX SYNTAX-R7RS)	(set! type 'extended-syntax))
+	  ((syntax SYNTAX)			(set! type 'syntax))
+	  (else					(set! type 'procedure)
+						(set! l (list item)))))
       ;; Read all the item on the line
       (do ((proc (read in) (read in)))
 	  ((eof-object? proc))
@@ -77,12 +77,12 @@
 
   (define (parse-synopsys in)
     (parse-until in (lambda (l) (regexp-match end-synopsys-rgxp l))))
-  
-  (define (parse-description in) 
+
+  (define (parse-description in)
     (parse-until in (lambda (l) (regexp-match end-doc-rgxp l))))
 
   ;;
-  ;; parse-proc-starts here 
+  ;; parse-proc-starts here
   ;;
   (let* ((infos (analyse-documentation-header first-line))
 	 (type  (car infos))
@@ -111,7 +111,7 @@
 
 ;======================================================================
 ;
-; 			Program starts here 
+; 			Program starts here
 ;
 ;======================================================================
 (when (null? (argv))

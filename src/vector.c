@@ -217,6 +217,7 @@ DEFINE_PRIMITIVE("vector-set!", vector_set, subr3, (SCM v, SCM index, SCM value)
  * |Vector->list| returns a newly allocated list of the objects contained in
  * the elements of |vector|. |List->vector| returns a newly created vector
  * initialized to the elements of the list |list|.
+
  *
  * @lisp
  * (vector->list '#(dah dah didah))  =>  (dah dah didah)

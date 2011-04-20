@@ -1,27 +1,27 @@
 /*
- * l i b . c					-- Scheme library 
- * 
- * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
- * 
+ * l i b . c					-- Scheme library
+ *
+ * Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  5-Jan-2000 12:17 (eg)
- * Last file update:  9-Dec-2007 18:48 (eg)
+ * Last file update: 18-Apr-2011 23:46 (eg)
  */
 
 
@@ -38,7 +38,7 @@ STk_init_library(int *argc, char ***argv, int stack_size)
 
   STk_get_stack_pointer(&start_stack);
 
-  return 
+  return
     STk_init_env()				&&
     STk_init_symbol()				&&
     STk_late_init_env() 			&&
@@ -75,6 +75,7 @@ STk_init_library(int *argc, char ***argv, int stack_size)
     STk_init_md5()				&&
     STk_init_cpointer()				&&
     STk_init_box()				&&
+    STk_init_blob()				&&
     STk_init_ffi()				&&
     (STk_library_initialized = TRUE);
 }

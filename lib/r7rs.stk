@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 17-Apr-2011 22:23 (eg)
+;;;; Last file update: 20-Apr-2011 10:23 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -31,7 +31,7 @@
 ;;;; ==== 6.3.2 Pairs and lists
 
 #|
-<doc r7rs-proc make-list
+<doc R7RS make-list
  * (make-list k)
  * (make-list k fill)
  *
@@ -48,7 +48,7 @@ doc>
 ;;;; ----------------------------------------------------------------------
 
 #|
-<doc r7rs-proc string-map
+<doc R7RS string-map
  * (string-map proc string1 string2 ...)
  *
  * The |strings| must be strings, and |proc| must be a procedure taking as
@@ -92,7 +92,7 @@ doc>
     (list->string res)))
 
 #|
-<doc r7rs-proc vector-map
+<doc R7RS vector-map
  * (vector-map proc vector1 vector2 ...)
  *
  * The |vectors| must be vectors, and |proc| must be a procedure
@@ -130,7 +130,7 @@ doc>
   (list->vector (apply map proc (map vector->list vectors))))
 
 #|
-<doc r7rs-proc string-for-each
+<doc R7RS string-for-each
  * (string-for-each proc string1 string2 ...)
  *
  * The arguments to |string-for-each| are like the arguments to
@@ -161,7 +161,7 @@ doc>
 
 
 #|
-<doc r7rs-proc vector-for-each
+<doc R7RS vector-for-each
  * (vector-for-each proc vector1 vector2 ...) 
  *
  * The arguments to |vector-for-each| are like the arguments to

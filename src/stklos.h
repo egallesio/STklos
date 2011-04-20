@@ -1,27 +1,27 @@
 /*
  * stklos.h	-- stklos.h
- * 
- * Copyright © 1999-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
- * 
+ *
+ * Copyright © 1999-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  9-Aug-2010 10:55 (eg)
+ * Last file update: 20-Apr-2011 00:28 (eg)
  */
 
 
@@ -29,7 +29,7 @@
 #define STKLOS_H
 
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 
@@ -58,21 +58,21 @@ extern "C"
 # include <gc.h>
 #endif
 
-#ifndef THEADS_NONE 
+#ifndef THEADS_NONE
 #  include <pthread.h>
 #endif
 
 
 /*===========================================================================*\
- * 
- * 		Declaration of some constants (mainly maxima) 
+ *
+ * 		Declaration of some constants (mainly maxima)
  *
 \*===========================================================================*/
 
 #ifndef FALSE
 #  define FALSE 0
 #endif
-  
+
 #ifndef TRUE
 #  define TRUE (!FALSE)
 #endif
@@ -88,18 +88,18 @@ extern "C"
 
 
 #define CPP_CONCAT(x, y) 	x##y
-#define Inline inline 
+#define Inline inline
 
 #define AS_LONG(x)		((unsigned long) (x))
 #define AS_SCM(x)		((SCM) ((unsigned long) (x)))
 
 
 /*===========================================================================*\
- * 
+ *
  * 				Threads stuff
  *
 \*===========================================================================*/
-#ifdef THREADS_NONE 
+#ifdef THREADS_NONE
 #  define MUT_DECL(lck)
 #  define MUT_LOCK(lck)
 #  define MUT_UNLOCK(lck)
@@ -110,35 +110,35 @@ extern "C"
 #endif
 
 /*===========================================================================*\
- * 
+ *
  * 			Memory allocation
  *
 \*===========================================================================*/
-  /* 
-   * This code is an excerpt of the function used in Boehm GC (i.e. all the 
-   * functions of the GC used in the interpreter must be declared here since 
+  /*
+   * This code is an excerpt of the function used in Boehm GC (i.e. all the
+   * functions of the GC used in the interpreter must be declared here since
    * the file <gc.h> is not included in the source file in order to simplify
    * header file management (i.e. only this header file is necessary to use
    * the stklos library.
-   * Don't use the functions GC_* they can be changed. The only allocation 
+   * Don't use the functions GC_* they can be changed. The only allocation
    * functions that must be used are functions of the form STk_*
    */
 
   /* GC interface. *** DON'T USE IT DIRECTLY *** */
-// 
-// #define GC_API extern 
-// 
+//
+// #define GC_API extern
+//
 // typedef void (*GC_finalization_proc) (void * obj, void * client_data);
-// 
+//
 // GC_API void * GC_malloc(size_t size_in_bytes);
 // GC_API void * GC_malloc_atomic(size_t size_in_bytes);
 // GC_API void * GC_realloc(void * old_object, size_t new_size_in_bytes);
 // GC_API void GC_free(void * object_addr);
-// 
+//
 // GC_API void GC_register_finalizer(void * obj, GC_finalization_proc fn,
 // 				  void * cd, GC_finalization_proc *ofn,
 // 				  void * *ocd);
-// 
+//
 // GC_API void GC_gcollect(void);
 // GC_API void GC_init(void);
 
@@ -158,9 +158,9 @@ void STk_gc_init(void);
 
 
 /*===========================================================================*\
- * 
- * 		Declaration of the SCM type 
- * 
+ *
+ * 		Declaration of the SCM type
+ *
 \*===========================================================================*/
 
 #define MAX_CELL_TYPES		256
@@ -168,7 +168,7 @@ void STk_gc_init(void);
 typedef void* SCM;
 
 typedef enum {
-  tc_not_boxed=-1,						
+  tc_not_boxed=-1,
   tc_cons, tc_integer, tc_real, tc_bignum,  tc_rational, 		/* 0 */
   tc_complex, tc_symbol, tc_keyword, tc_string, tc_module, 		/* 5 */
   tc_instance, tc_closure, tc_subr0, tc_subr1, tc_subr2, 		/* 10 */
@@ -178,16 +178,17 @@ typedef enum {
   tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,	/* 30 */
   tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex, 		/* 35 */
   tc_condv, tc_box, tc_ext_func, tc_pointer, tc_callback,		/* 40 */
+  tc_blob,								/* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
 
   /*
    * Internal representation of SCM object. Object use the two least
-   * significant bit as tag. We have the following representation 
+   * significant bit as tag. We have the following representation
    *
    *     .........00		pointer on an object descriptor (a box)
-   *     .........01		integer 
+   *     .........01		integer
    *     .........10		small object (see below for more detail)
    *     .........11		small constant (#t #f '() ... see below for details)
    */
@@ -195,16 +196,16 @@ typedef enum {
 #define MAKE_SCONST(n)   (AS_SCM(n << 2 | 3))
 #define SCONSTP(n)       ((AS_LONG(n) & 0x3) == 3)
 
-  /* 
+  /*
    * Header which must always be put in front of the various boxed types
    * used by STklos. This field must be declared as the first field of
    * the structure.
    */
 
-typedef struct { 
-  /* Order is important, changing it can improve the perfomances depending 
+typedef struct {
+  /* Order is important, changing it can improve the perfomances depending
    * on the compiler. If you change this definition, change DEFINE_PRIMITIVE
-   * accordingly 
+   * accordingly
    */
   short type, cell_info;
 } stk_header;
@@ -238,14 +239,14 @@ typedef struct {
 
   /*
    * PRIMITIVES
-   * 
-   * Primitives are defined with the macro DEFINE_PRIMITIVE. An example of 
+   *
+   * Primitives are defined with the macro DEFINE_PRIMITIVE. An example of
    * usage of this  macro is given below:
    *    DEFINE_PRIMITIVE("pair?", pairp, subr1, (SCM obj)) {
    *       <body>
    *    }
    * It will be expansed in
-   *    SCM STk_pairp(SCM obj); 
+   *    SCM STk_pairp(SCM obj);
    *    static struct obj_primitive obj_pairp = { "pair?", tc_subr1, STk_pairp};
    *	SCM STk_pairp(SCM obj){
    *	  <body>
@@ -259,7 +260,7 @@ struct primitive_obj {
   SCM plist;
 };
 
-#define PRIMITIVE_NAME(p)	(((struct primitive_obj *) (p))->name)	
+#define PRIMITIVE_NAME(p)	(((struct primitive_obj *) (p))->name)
 #define PRIMITIVE_FUNC(p)	(((struct primitive_obj *) (p))->code)
 #define PRIMITIVE_PLIST(p)	(((struct primitive_obj *) (p))->plist)
 
@@ -290,6 +291,18 @@ struct primitive_obj {
   ------------------------------------------------------------------------------
 */
 int STk_init_base64(void);
+
+
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ---- 				 B L O B . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+SCM STk_blob2u8list(SCM obj);
+SCM STk_u8list2blob(SCM obj);
+int STk_init_blob(void);
 
 
 /*
@@ -343,7 +356,7 @@ int STk_init_box(void);
 */
 
   /*
-   * characters are coded as .....XXXXX110 where XXXXX is the code of the 
+   * characters are coded as .....XXXXX110 where XXXXX is the code of the
    * character. Consequently, we can have 29 bits long characters (on a 32 bits
    * machine)
    */
@@ -369,7 +382,7 @@ extern SCM STk_message_condition, STk_err_mess_condition;
 
 SCM STk_make_C_cond(SCM type, int nargs, ...);
 
-EXTERN_PRIMITIVE("make-condition-type", make_cond_type, subr3, 
+EXTERN_PRIMITIVE("make-condition-type", make_cond_type, subr3,
 		 (SCM name, SCM parent, SCM slots));
 
 SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module);
@@ -451,7 +464,7 @@ void STk_signal(char *str);
   ----
   ------------------------------------------------------------------------------
 */
-struct frame_obj {		
+struct frame_obj {
   stk_header header;
   SCM next_frame;
   SCM owner;
@@ -494,7 +507,7 @@ EXTERN_PRIMITIVE("%select-module", select_module, subr1, (SCM module));
   ------------------------------------------------------------------------------
 */
   /* The `extended_type_descr' structure is used for the types which need
-   *  more information (such as modules, ports, ....). All the extended 
+   *  more information (such as modules, ports, ....). All the extended
    * descriptors are stored in the STk_xtypes array.
    */
 struct extended_type_descr {
@@ -554,7 +567,7 @@ struct keyword_obj {
 #define KEYWORDP(p)		(BOXED_TYPE_EQ((p),tc_keyword))
 
 #define KEYWORD_NEEDS_BARS 	(1 << 0)	/* Info flag */
-#define KEYWORD_HAS_UPPER 	(1 << 1)	
+#define KEYWORD_HAS_UPPER 	(1 << 1)
 
 EXTERN_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val));
 EXTERN_PRIMITIVE("key-get", key_get, subr23, (SCM l, SCM key, SCM dflt));
@@ -690,7 +703,7 @@ unsigned long STk_uinteger_value(SCM x); /* Returns ULONG_MAX if not an ulong */
 
 
   /****
-   **** Real 
+   **** Real
    ****/
 
 #define REAL_FORMAT_SIZE         15 /* default format for real */
@@ -704,7 +717,7 @@ struct real_obj {
 #define REALP(p) 	(BOXED_TYPE_EQ((p), tc_real))
 
 extern double STk_NaN;		/* IEEE NaN special value */
-			 
+
   /****
    **** Bignum
    ****/
@@ -743,8 +756,8 @@ struct complex_obj {
 				 !REALP(COMPLEX_IMAG(p)))
 
 
-  /**** 
-   **** Conversions 
+  /****
+   **** Conversions
    ****/
 SCM    		STk_Cstr2number(char *str, long base);
 char  	       *STk_bignum2Cstring(SCM n, int base);
@@ -803,7 +816,7 @@ int STk_init_parameter(void);
 
 SCM STk_get_parameter(SCM param);
 SCM STk_set_parameter(SCM param, SCM value);
-SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value), 
+SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value),
 			 SCM module);
 SCM STk_make_C_parameter2(SCM symbol,SCM (*value)(void),SCM (*proc)(SCM new_value),
 			  SCM module);
@@ -832,12 +845,12 @@ SCM STk_resolve_link(char *path, int count);
 */
 
   /* Code for port is splitted in several files:
-   * 	- sio.c contains the low level IO functions which mimic the C IO. All 
+   * 	- sio.c contains the low level IO functions which mimic the C IO. All
    *      these functions take Scheme ports as parameter instead of FILE *
    *	- fport.c contains the specific code for port associated to files
    *	- sport.c contains the specific code for port associated to string ports
    *	- vport.c contains the specific code for port associated to virtual ports
-   *	- port.c contains the code which can be used on any kind of port 
+   *	- port.c contains the code which can be used on any kind of port
    */
 
 struct port_obj {
@@ -853,7 +866,7 @@ struct port_obj {
   /* virtual functions (in the object 'cause the # of ports should be low ) */
   void  (*print_it)  (SCM obj, SCM port);  /* used to display or print object */
   void  (*release_it)(SCM obj);
-  int   (*creadyp)   (void *stream); 
+  int   (*creadyp)   (void *stream);
   int   (*cgetc)     (void *stream);
   int   (*ceofp)     (void *stream);
   int   (*cclose)    (void *stream);
@@ -865,7 +878,7 @@ struct port_obj {
   int   (*read_buff) (void *stream, void *buf, int count);
   int   (*write_buff)(void *stream, void *buf, int count);
   off_t (*seek)	     (void *stream, off_t offset, int whence);
-}; 
+};
 
 #define PORT_MAX_PRINTF	1024	/* max size for sprintf buffer */
 
@@ -991,11 +1004,11 @@ int STk_init_port(void);
 
 
 
-/**** 
- **** 		Port global variables 
+/****
+ **** 		Port global variables
  ****/
 
-extern char *STk_current_filename;		 /* Name of the file we read */ 
+extern char *STk_current_filename;		 /* Name of the file we read */
 
 extern SCM STk_stdin, STk_stdout, STk_stderr;		  /* unredirected ports   */
 extern int STk_interactive;			/* We are in intearctive mode */
@@ -1059,7 +1072,7 @@ struct closure_obj {
 };
 
 /* FIXME:
-#define CLOSURE_FORMALS(p)	(((struct closure_obj *) (p))->formals) 
+#define CLOSURE_FORMALS(p)	(((struct closure_obj *) (p))->formals)
 #define CLOSURE_CODE(p)   	(((struct closure_obj *) (p))->code)
 */
 
