@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  5-Jan-2011 09:05 (eg)
+;;;; Last file update: 23-Apr-2011 19:01 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -241,8 +241,12 @@ doc>
   (when interactive?
     (let ((line1 (format "STklos version ~A\n" (version)))
 	  (line2 "Copyright (C) 1999-2011 Erick Gallesio - Universite de Nice <eg@unice.fr>\n")
-	  (line3 (format "[~a/~a/~a]\n" (machine-type) (%thread-system)
-			 (key-get *%system-state-plist* :readline 'no-readline))))
+	  (line3 (format "[~a/~a/~a/~a]\n"
+			 (machine-type)
+			 (%thread-system)
+			 (key-get *%system-state-plist* :readline 'no-readline)
+			 (if (key-get *%system-state-plist* :use-utf8 #f)
+			     'utf8 'no-utf8))))
       (display (do-color 'bold 'black "*   " 'bold 'blue line1))
       (display (do-color 'bold 'black " *  " 'bold 'blue line2))
       (display (do-color 'bold 'black "* * " 'bold 'blue line3 'normal))))

@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 28-Oct-2010 23:17 (eg)
+### Last file update: 23-Apr-2011 21:49 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [1.01])
@@ -11,7 +11,6 @@ AC_CONFIG_SRCDIR(src/stklos.c)
 AC_CONFIG_HEADERS(src/stklosconf.h)
 
 ### Checks for programs.
-AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_AWK

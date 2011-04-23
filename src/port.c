@@ -1,26 +1,26 @@
 /*
  *  p o r t . c			-- ports implementation
  *
- * Copyright © 1993-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 25-Oct-2009 21:41 (eg)
+ * Last file update: 22-Apr-2011 16:14 (eg)
  *
  */
 
@@ -34,7 +34,7 @@
 static SCM CrLf;			/* used in read-line only */
 
 static SCM io_error, io_port_error, io_read_error, io_write_error,
-  io_closed_error, io_fn_error, io_malformed, io_prot_error, 
+  io_closed_error, io_fn_error, io_malformed, io_prot_error,
   io_ro_error, io_exists_error, io_no_file_error, io_bad_param;
 
 
@@ -52,7 +52,12 @@ static void error_closed_port(SCM p)
 {
   general_io_error(io_closed_error, "port ~S is closed", p);
 }
-	    
+
+static void error_bad_utf8_character(int byte)
+{
+  general_io_error(io_read_error, "bad UTF-8 byte ~S", MAKE_INT(byte));
+}
+
 void STk_error_bad_io_param(char *fmt, SCM p)
 {
   general_io_error(io_bad_param, fmt, p);
@@ -101,7 +106,7 @@ static SCM verify_port(SCM port, int mode)
  * (input-port? obj)
  * (output-port? obj)
  *
- * Returns |#t| if |obj| is an input port or output port respectively, 
+ * Returns |#t| if |obj| is an input port or output port respectively,
  * otherwise returns #f.
 doc>
  */
@@ -116,10 +121,10 @@ DEFINE_PRIMITIVE("output-port?", output_portp, subr1, (SCM port))
 }
 
 /*
-<doc EXT port? 
+<doc EXT port?
  * (port? obj)
  *
- * Returns |#t| if |obj| is an input port or an output port, 
+ * Returns |#t| if |obj| is an input port or an output port,
  * otherwise returns #f.
 doc>
  */
@@ -210,14 +215,14 @@ badport:
  * that can begin an object, then an end of file object is returned. The port
  * remains open, and further attempts to read will also return an end of file
  * object. If an end of file is encountered after the beginning of an object's
- * external representation, but the external representation is incomplete 
+ * external representation, but the external representation is incomplete
  * and therefore not parsable, an error is signalled.
  * £
  * The port argument may be omitted, in which case it defaults to the value
  * returned by |current-input-port|. It is an error to read from a closed port.
  * £
  * ,(stklos) |read| supports the ,(link-srfi 10) |#,()| form that can be used
- * to denote values that do not have a convenient printed representation. See 
+ * to denote values that do not have a convenient printed representation. See
  * the SRFI document for more information.
 doc>
  */
@@ -228,17 +233,17 @@ doc>
  * (read/ss)
  * (read/ss port)
  *
- * |read-with-shared-structure| is identical to |read|. It has been added to 
- * be compatible with ,(link-srfi 38). STklos always knew how to deal with 
- * recursive input data. |read/ss| is only a shorter name for 
+ * |read-with-shared-structure| is identical to |read|. It has been added to
+ * be compatible with ,(link-srfi 38). STklos always knew how to deal with
+ * recursive input data. |read/ss| is only a shorter name for
  * |read-with-shared-structure|.
- * 
+ *
 doc>
 <doc EXT define-reader-ctor
  * (define-reader-ctor tag proc)
- * 
+ *
  * This procedure permits to define a new user to reader constructor procedure
- * at run-time. It is defined in ,(link-srfi 10) document. See  SRFI document 
+ * at run-time. It is defined in ,(link-srfi 10) document. See  SRFI document
  * for more information.
  * @lisp
  * (define-reader-ctor 'rev (lambda (x y) (cons y x)))
@@ -269,8 +274,8 @@ DEFINE_PRIMITIVE("%read", scheme_read_cst, subr01, (SCM port))
  * (read-char port)
  *
  * Returns the next character available from the input |port|, updating the |port|
- * to point to the following character. If no more characters are available, 
- * an end of file object is returned. |Port| may be omitted, in which case 
+ * to point to the following character. If no more characters are available,
+ * an end of file object is returned. |Port| may be omitted, in which case
  * it defaults to the value returned by |current-input-port|.
 doc>
  */
@@ -283,6 +288,40 @@ DEFINE_PRIMITIVE("read-char", read_char, subr01, (SCM port))
   return (c == EOF) ? STk_eof : MAKE_CHARACTER(c);
 }
 
+
+int _base_getc(SCM port)
+{
+  int res = STk_getc(port);
+  printf("LU: %d (0x%x 0%o) \n", res, res, res);
+  return res;
+}
+
+DEFINE_PRIMITIVE("read-utf8-char", read_utf8_char, subr01, (SCM port))
+{
+  int c;
+
+  port = verify_port(port, PORT_READ);
+  c = _base_getc(port);
+  if (c >= 0x80) {
+    if ((c < 0xc0) || (c > 0xf7))
+      error_bad_utf8_character(c);
+    else if (c < 0xe0)
+      c = ((c & 0x3f) << 6) +
+	  (_base_getc(port)  & 0x3F);
+    else if (c < 0xf0) {
+      c = ((c & 0x1f) << 12) +
+	  ((_base_getc(port) & 0x3f) << 6) +
+	  (_base_getc(port) & 0x3f);
+    } else {
+      c = ((c & 0x0F) << 16) +
+	  ((_base_getc(port) &0x3f) << 6) +
+	  ((_base_getc(port) &0x3f) << 6) +
+	  (_base_getc(port) &0x3F);
+    }
+  }
+  return MAKE_CHARACTER(c);
+}
+
 /*
 <doc EXT read-chars
  * (read-chars size)
@@ -290,7 +329,7 @@ DEFINE_PRIMITIVE("read-char", read_char, subr01, (SCM port))
  *
  * Returns a newly allocated string made of |size| characters read from |port|.
  * If less than |size| characters are available on the input port, the returned
- * string is smaller than |size| and its size is the number of available 
+ * string is smaller than |size| and its size is the number of available
  * characters. |Port| may be omitted, in which case it defaults to the
  * value returned by |current-input-port|.
 doc>
@@ -306,8 +345,8 @@ DEFINE_PRIMITIVE("read-chars", read_chars, subr12, (SCM size, SCM port))
   /* Allocate a new string for result  */
   z     = STk_makestring(n, NULL);
   count = STk_read_buffer(port, STRING_CHARS(z), n);
-  
-  if (count == 0) 
+
+  if (count == 0)
     return STk_eof;
   if (count < n) {
     /* String is shorter than the allocated one */
@@ -326,10 +365,10 @@ DEFINE_PRIMITIVE("read-chars", read_chars, subr12, (SCM size, SCM port))
  * by chuncks whose size is equal to the length of |str|.
  * The value returned by |read-chars!|is an integer indicating the number
  * of characters read. |Port| may be omitted, in which case it defaults to the
- * value returned by |current-input-port|. 
+ * value returned by |current-input-port|.
  * £
- * This function is similar to |read-chars| except that it avoids to allocate 
- * a new string for each read. 
+ * This function is similar to |read-chars| except that it avoids to allocate
+ * a new string for each read.
  * @lisp
  * (define (copy-file from to)
  *   (let* ((size 1024)
@@ -362,7 +401,7 @@ DEFINE_PRIMITIVE("read-chars!", d_read_chars, subr12, (SCM str, SCM port))
  * (read-byte port)
  *
  * Returns the next character available from the input |port| as an integer.
- * If the end of file is readched, thuis function returns the end of file 
+ * If the end of file is readched, thuis function returns the end of file
  * object.
 doc>
 */
@@ -372,7 +411,7 @@ DEFINE_PRIMITIVE("read-byte", read_byte, subr01, (SCM port))
 
   port = verify_port(port, PORT_READ);
   c = STk_getc(port);
-  return (c == EOF) ? STk_eof : MAKE_INT(c); 
+  return (c == EOF) ? STk_eof : MAKE_INT(c);
 }
 
 /*
@@ -380,14 +419,14 @@ DEFINE_PRIMITIVE("read-byte", read_byte, subr01, (SCM port))
  * (peek-char)
  * (peek-char port)
  *
- * Returns the next character available from the input |port|, without updating 
+ * Returns the next character available from the input |port|, without updating
  * the port to point to the following character. If no more characters are
  * available, an end of file object is returned. |Port| may be omitted, in
  * which case it defaults to the value returned by |current-input-port|.
  * £
  * ,(bold "Note:") The value returned by a call to |peek-char| is the same as the
  * value that would have been returned by a call to |read-char| with the same
- * port. The only difference is that the very next call to |read-char| or 
+ * port. The only difference is that the very next call to |read-char| or
  * |peek-char| on that port will return the value returned by the preceding
  * call to |peek-char|. In particular, a call to |peek-char| on an interactive
  * port will hang waiting for input whenever a call to |read-char| would have
@@ -410,9 +449,9 @@ DEFINE_PRIMITIVE("peek-char", peek_char, subr01, (SCM port))
  * (peek-byte)
  * (peek-byte port)
  *
- * Returns the next character available from the input |port|, without updating 
- * the port to point to the following character. Whereas |peek-char| 
- * returns a character, this function returns an integer between 0and 255. 
+ * Returns the next character available from the input |port|, without updating
+ * the port to point to the following character. Whereas |peek-char|
+ * returns a character, this function returns an integer between 0and 255.
 doc>
 */
 DEFINE_PRIMITIVE("peek-byte", peek_byte, subr01, (SCM port))
@@ -431,7 +470,7 @@ DEFINE_PRIMITIVE("peek-byte", peek_byte, subr01, (SCM port))
 <doc  eof-object?
  * (eof-object? obj)
  *
- * Returns |#t| if |obj| is an end of file object, otherwise returns |#f|. 
+ * Returns |#t| if |obj| is an end of file object, otherwise returns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("eof-object?", eof_objectp, subr1, (SCM obj))
@@ -443,9 +482,9 @@ DEFINE_PRIMITIVE("eof-object?", eof_objectp, subr1, (SCM obj))
 /*
 <doc EXT eof-object
  * (eof-object)
- * 
+ *
  * ,(index "#eof")
- * Returns an end of file object. Note that the special notation |#eof| is 
+ * Returns an end of file object. Note that the special notation |#eof| is
  * another way to return such an end of file object.
 doc>
  */
@@ -484,9 +523,9 @@ DEFINE_PRIMITIVE("char-ready?", char_readyp, subr01, (SCM port))
  * (write obj port)
  *
  * Writes a written representation of |obj| to the given |port|. Strings that
- * appear in the written representation are enclosed in doublequotes, and 
+ * appear in the written representation are enclosed in doublequotes, and
  * within those strings backslash and doublequote characters are escaped
- * by backslashes. Character objects are written using the ,(emph "#\\") notation. 
+ * by backslashes. Character objects are written using the ,(emph "#\\") notation.
  * |Write| returns an unspecified value. The |port| argument may be omitted, in
  * which case it defaults to the value returned by |current-output-port|.
 doc>
@@ -506,10 +545,10 @@ DEFINE_PRIMITIVE("write", write, subr12, (SCM expr, SCM port))
  *
  * Writes a written representation of |obj| to the given port.  The
  * main difference with the |write| procedure is that |write*|
- * handles data structures with cycles. Circular structure written by 
+ * handles data structures with cycles. Circular structure written by
  * this procedure use the ,(code (q "#n=")) and ,(code (q "#n#"))
  * notations (see ,(ref :mark "Circular structure")).
- * 
+ *
 doc>
 <doc EXT write-with-shared-structure
  * (write-with-shared-structure obj)
@@ -519,12 +558,12 @@ doc>
  * (write/ss obj port)
  * (write/ss obj port optarg)
  *
- * |write-with-shared-structure| has been added to be compatible with 
- * ,(link-srfi 38). It is is identical to |write*|, except that it accepts one 
- * more parameter (|optarg|). This parameter, which is not specified 
+ * |write-with-shared-structure| has been added to be compatible with
+ * ,(link-srfi 38). It is is identical to |write*|, except that it accepts one
+ * more parameter (|optarg|). This parameter, which is not specified
  * in ,(srfi 38), is always ignored. |write/ss| is only a shorter name for
  * |write-with-shared-structure|.
- * 
+ *
 doc>
 */
 DEFINE_PRIMITIVE("write*", write_star, subr12, (SCM expr, SCM port))
@@ -548,7 +587,7 @@ DEFINE_PRIMITIVE("write*", write_star, subr12, (SCM expr, SCM port))
  * case it defaults to the value returned by |current-output-port|.
  * £
  * ,(bold "Rationale:") |Write| is intended for producing machine-readable
- * output and |display| is for producing human-readable output. 
+ * output and |display| is for producing human-readable output.
 doc>
  */
 DEFINE_PRIMITIVE("display", display, subr12, (SCM expr, SCM port))
@@ -584,7 +623,7 @@ DEFINE_PRIMITIVE("newline", newline, subr01, (SCM port))
  * (write-char char port)
  *
  * Writes the character |char| (not an external representation of the
- * character) to the given |port| and returns an unspecified value. 
+ * character) to the given |port| and returns an unspecified value.
  * The |port| argument may be omitted, in which case it defaults to the
  * value returned by |current-output-port|.
 doc>
@@ -602,14 +641,14 @@ DEFINE_PRIMITIVE("write-char", write_char, subr12, (SCM c, SCM port))
 <doc EXT write-chars
  * (write-chars str)
  * (write-char str port)
- * 
+ *
  * Writes the character of string |str| to the given |port| and
  * returns an unspecified value.  The |port| argument may be omitted,
  * in which case it defaults to the value returned by
- * |current-output-port|. ,(bold "Note:") This function is generally 
- * faster than |display| for strings. Furthermore, this primitive does 
+ * |current-output-port|. ,(bold "Note:") This function is generally
+ * faster than |display| for strings. Furthermore, this primitive does
  * not use the buffer associated to |port|.
- * 
+ *
 doc>
  */
 DEFINE_PRIMITIVE("write-chars", write_chars, subr12, (SCM str, SCM port))
@@ -634,7 +673,7 @@ doc>
 DEFINE_PRIMITIVE("write-byte", write_byte, subr12, (SCM byte, SCM port))
 {
   int b = STk_integer_value(byte);
-  
+
   if (b == LONG_MIN) STk_error_bad_io_param("bad byte value ~S", byte);
   port = verify_port(port, PORT_WRITE);
   STk_putc(b, port);
@@ -644,7 +683,7 @@ DEFINE_PRIMITIVE("write-byte", write_byte, subr12, (SCM byte, SCM port))
 
 
 /*===========================================================================*\
- * 
+ *
  * 			S T k   b o n u s
  *
 \*===========================================================================*/
@@ -652,12 +691,12 @@ DEFINE_PRIMITIVE("write-byte", write_byte, subr12, (SCM byte, SCM port))
 
 
 static SCM internal_format(int argc, SCM *argv, int error)
-     /* a very simple and poor format */ 
+     /* a very simple and poor format */
 {
   SCM port, fmt;
   int format_in_string = 0;
   char *p, *start_fmt = "", prev_char;
-  
+
   if (error) {
     if (argc < 1) goto Bad_list;
     format_in_string = 1;
@@ -672,9 +711,9 @@ static SCM internal_format(int argc, SCM *argv, int error)
       argc -= 1;
     } else {
       if (argc < 2) goto Bad_list;
-      port = *argv--; 
+      port = *argv--;
       argc -= 2;
-      
+
       if (BOOLEANP(port)){
 	if (port == STk_true) port = STk_current_output_port();
 	else {
@@ -709,7 +748,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
 		    }
 		    else if (CHARACTERP(tmp))
 		      prev_char= CHARACTER_VAL(tmp);
-		    
+
 		    STk_print(tmp, port, DSP_MODE);
 		    continue;		/* because we set ourselves prev_char */
 		  }
@@ -722,24 +761,24 @@ static SCM internal_format(int argc, SCM *argv, int error)
 	  	  STk_print_star(*argv--, port);
 	          break;
         case 'X':
-        case 'x': if (argc-- <= 0) goto TooMuch; 
-	  	  STk_print(STk_number2string(*argv--, MAKE_INT(16)),port,DSP_MODE); 
+        case 'x': if (argc-- <= 0) goto TooMuch;
+	  	  STk_print(STk_number2string(*argv--, MAKE_INT(16)),port,DSP_MODE);
 		  break;
         case 'D':
-        case 'd': if (argc-- <= 0) goto TooMuch; 
-	  	  STk_print(STk_number2string(*argv--, MAKE_INT(10)),port,DSP_MODE); 
+        case 'd': if (argc-- <= 0) goto TooMuch;
+	  	  STk_print(STk_number2string(*argv--, MAKE_INT(10)),port,DSP_MODE);
 		  break;
-        case 'O': 
-        case 'o': if (argc-- <= 0) goto TooMuch; 
-	  	  STk_print(STk_number2string(*argv--, MAKE_INT(8)),port,DSP_MODE); 
+        case 'O':
+        case 'o': if (argc-- <= 0) goto TooMuch;
+	  	  STk_print(STk_number2string(*argv--, MAKE_INT(8)),port,DSP_MODE);
 		  break;
         case 'B':
-        case 'b': if (argc-- <= 0) goto TooMuch; 
-	  	  STk_print(STk_number2string(*argv--, MAKE_INT(2)),port,DSP_MODE); 
+        case 'b': if (argc-- <= 0) goto TooMuch;
+	  	  STk_print(STk_number2string(*argv--, MAKE_INT(2)),port,DSP_MODE);
 		  break;
         case 'C':
-        case 'c': if (argc-- <= 0) goto TooMuch; 
-	  	  if (!CHARACTERP(*argv)) 
+        case 'c': if (argc-- <= 0) goto TooMuch;
+	  	  if (!CHARACTERP(*argv))
 		    STk_error_bad_io_param("bad character ~S", *argv);
 		  prev_char = CHARACTER_VAL(*argv);
 		  STk_print(*argv--, port, DSP_MODE);
@@ -747,13 +786,13 @@ static SCM internal_format(int argc, SCM *argv, int error)
         case 'Y':
 	case 'y': {					/* Yuppify */
 		      SCM ref, pp;
-	  	      
+
 		      if (argc-- <= 0) goto TooMuch;
-		      pp = STk_lookup(STk_intern("pp"), 
-				      STk_current_module(), 
-				      &ref, 
+		      pp = STk_lookup(STk_intern("pp"),
+				      STk_current_module(),
+				      &ref,
 				      TRUE);
-		      STk_print(STk_C_apply(pp, 3, *argv--, 
+		      STk_print(STk_C_apply(pp, 3, *argv--,
 					    STk_makekey("port"),
 					    STk_false),
 				port,
@@ -766,9 +805,9 @@ static SCM internal_format(int argc, SCM *argv, int error)
 	  	  char width[FMT_SIZE], digits[FMT_SIZE];
 		  SCM ff, ref, tmp;
 		  int i;
-		  
+
 		  if (argc-- <= 0) goto TooMuch;
-		  
+
 		  for (i=0; isdigit(*p); i++) {
 		    if (i >= FMT_SIZE) goto Incorrect_format_width;
 		    width[i] = *p++;
@@ -785,15 +824,15 @@ static SCM internal_format(int argc, SCM *argv, int error)
 		  }
 		  if (*p != 'f' && *p != 'F') goto Incorrect_format_width;
 
-		  /* width and digits are strings which contains the width 
+		  /* width and digits are strings which contains the width
 		   * and the number of digits for the format
 		   * Call the Scheme routine srfi48:format-fixed
 		   */
-		  ff = STk_lookup(STk_intern("srfi48:format-fixed"), 
-				  STk_current_module(), 
-				  &ref, 
+		  ff = STk_lookup(STk_intern("srfi48:format-fixed"),
+				  STk_current_module(),
+				  &ref,
 				  TRUE);
-		  tmp = STk_C_apply(ff, 3, 
+		  tmp = STk_C_apply(ff, 3,
 					*argv--,
 					STk_Cstr2number(width, 10L),
 				    STk_Cstr2number(digits, 10L));
@@ -809,16 +848,16 @@ static SCM internal_format(int argc, SCM *argv, int error)
         case 'k': {
 	  	    SCM fmt, ref,args;
 		    int len;
-		    
+
 		    if (argc-- <= 0) goto TooMuch;
 		    fmt = *argv--;
-		    if (!STRINGP(fmt)) 
+		    if (!STRINGP(fmt))
 		      STk_error_bad_io_param("bad string for ~~? format ~S", fmt);
 
 		    if (argc-- <= 0) goto TooMuch;
 		    args = *argv--;
 		    len  = STk_int_length(args);
-		    if (len < 0) 
+		    if (len < 0)
 		      STk_error_bad_io_param("bad list for ~~? format ~S", args);
 
 		    /* Do (apply format port fmt args) */
@@ -830,22 +869,22 @@ static SCM internal_format(int argc, SCM *argv, int error)
         case 'H':
         case 'h': {					/* Help */
 	  	     SCM ref, help;
-	  	      
-		      help = STk_lookup(STk_intern("srfi48:help"), 
-					STk_current_module(), 
-					&ref, 
+
+		      help = STk_lookup(STk_intern("srfi48:help"),
+					STk_current_module(),
+					&ref,
 					TRUE);
 		      STk_C_apply(help, 1, port);
 		      break;
 	}
-        case 'T': 
+        case 'T':
       	case 't': STk_putc('\t', port);
 		  break;
         case '_': STk_putc(' ',port);
 		  break;
         case '&': if (prev_char == '\n') continue;
         case '%': STk_putc('\n', port);
-	  	  prev_char = '\n'; 
+	  	  prev_char = '\n';
                   continue;
         case '~': STk_putc('~', port);
                   break;
@@ -861,7 +900,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
   }
 
   /* Verify that it doesn't remain arguments on the list */
-  if (argc) 
+  if (argc)
     STk_error_bad_io_param("too few ``~~'' in format string %S", start_fmt);
 
   return format_in_string ? STk_get_output_string(port) : STk_void;
@@ -877,18 +916,18 @@ Incorrect_format_width:
 }
 
 /*
-<doc EXT format 
+<doc EXT format
  * (format port str obj ...)
  * (format str obj)
  *
  * Writes the |obj|s to the given |port|, according to the format
- * string |str|. |Str| is written literally, except for the following 
+ * string |str|. |Str| is written literally, except for the following
  * sequences:
  *
  * ,(itemize
  * (item [|~a| or |~A| is replaced by the printed representation
  * of the next |obj|.])
- * 
+ *
  * (item [|~s| or |~S| is replaced by the ``slashified'' printed
  * representation of the next |obj|.])
  *
@@ -901,24 +940,24 @@ Incorrect_format_width:
  *
  * (item [|~x| or |~X| is replaced by the hexadecimal printed representation
  * of the next |obj| (which must be a number).])
- * 
+ *
  * (item [|~o| or |~O| is replaced by the octal printed representation
  * of the next |obj| (which must be a number).])
- * 
+ *
  * (item [|~b| or |~B| is replaced by the binary printed representation
  * of the next |obj| (which must be a number).])
- * 
+ *
  * (item [|~c| or |~C| is replaced by the printed representation
  * of the next |obj| (which must be a character).])
- * 
+ *
  * (item [|~y| or |~Y| is replaced by the pretty-printed representation
  * of the next |obj|. The standard pretty-printer is used here.])
- * 
+ *
  * (item [|~?| is replaced by the result of the recursive call of |format|
  * with the two next |obj|.])
- * 
+ *
  * (item [|~k| or |~K| is another name for |~?|])
- * 
+ *
  * (item [|~\[w\[,d\]\]f| or |~\[w\[,d\]\]F| is replaced by the printed
  * representation of next |obj| (which must be a number) with width |w|
  * and |d| digits after the decimal. Eventually, |d| may be omitted.])
@@ -928,14 +967,14 @@ Incorrect_format_width:
  * (item [|~%| is replaced by a newline])
  *
  * (item [|~t| or |~t| is replaced by a tabulation character.])
- * 
+ *
  * (item [|~&| is replaced by a newline character if it is known that the
  * previous character was not a newline])
- * 
+ *
  * (item [|~_| is replaced by a space])
- * 
+ *
  * (item [|~h| or |~H| provides some help])
- * 
+ *
  * )
  *
  * |Port| can be a boolean or a port. If |port| is |#t|, output goes to
@@ -956,13 +995,13 @@ Incorrect_format_width:
  *    (format "~a ~? ~a" 'a "~s" '(new) 'test)
  *                                 => "a new test"
  * @end lisp
- * 
- * ,(bold "Note:") The second form of |format| is compliant with 
+ *
+ * ,(bold "Note:") The second form of |format| is compliant with
  * ,(link-srfi 28). That is, when
- * |port| is omitted, the output is returned as a string as if |port| was 
+ * |port| is omitted, the output is returned as a string as if |port| was
  * given the value |#f|.
  * £
- * ,(bold "Note:") Since version 0.58, |format| is also compliant with 
+ * ,(bold "Note:") Since version 0.58, |format| is also compliant with
  * ,(link-srfi 48).
 doc>
  */
@@ -977,24 +1016,24 @@ DEFINE_PRIMITIVE("format", format, vsubr, (int argc, SCM *argv))
  * (error str obj ...)
  * (error name str obj ...)
  *
- * |error| is used to signal an error to the user. The second form 
- * of |error| takes  a symbol as first parameter; it is generally used for the 
+ * |error| is used to signal an error to the user. The second form
+ * of |error| takes  a symbol as first parameter; it is generally used for the
  * name of the procedure which raises the error.
  * £
- * ,(bold "Note:") The specification string may follow the 
- * ,(emph "tilde conventions") 
- * of |format| (see ,(ref :mark "format")); in this case this procedure builds an 
- * error message according to the specification given in |str|. Otherwise, 
- * this procedure is conform to the |error| procedure defined in 
- * ,(link-srfi 23) and  |str| is printed with the |display| procedure, 
- * whereas the |obj|s are printed  with the |write| procedure. 
+ * ,(bold "Note:") The specification string may follow the
+ * ,(emph "tilde conventions")
+ * of |format| (see ,(ref :mark "format")); in this case this procedure builds an
+ * error message according to the specification given in |str|. Otherwise,
+ * this procedure is conform to the |error| procedure defined in
+ * ,(link-srfi 23) and  |str| is printed with the |display| procedure,
+ * whereas the |obj|s are printed  with the |write| procedure.
  *
  * £
  * Hereafter, are some calls of the |error| procedure using a formatted string
  * @lisp
  * (error "bad integer ~A" "a")
  *                      @print{} bad integer a
- * (error 'vector-ref "bad integer ~S" "a") 
+ * (error 'vector-ref "bad integer ~S" "a")
  *                      @print{} vector-ref: bad integer "a"
  * (error 'foo "~A is not between ~A and ~A" "bar" 0 5)
  *                      @print{} foo: bar is not between 0 and 5
@@ -1027,7 +1066,7 @@ static SCM srfi_23_error(int argc, SCM *argv)
 static int msg_use_tilde(char *s)
 {
   char *p;
-  
+
   p = strchr(s, '~');
   return p ? (p[1] && strchr("aAsSwW~", p[1]) != NULL): 0;
 }
@@ -1044,11 +1083,11 @@ static SCM do_error(SCM type, int argc, SCM *argv)
     }
     if (argc > 0) {
       SCM msg;
-      
+
       /* See if we have a formatted message or a plain SRFI-23 call */
       if (STRINGP(*argv) && !msg_use_tilde(STRING_CHARS(*argv)))
 	msg = srfi_23_error(argc, argv);
-      else 
+      else
 	msg = internal_format(argc, argv, TRUE);
       STk_signal_error(type, who, msg);
     }
@@ -1069,11 +1108,11 @@ DEFINE_PRIMITIVE("error", scheme_error, vsubr, (int argc, SCM *argv))
  * (signal-error cond str obj ...)
  * (signal-error cond name str obj ...)
  *
- * This procedure is similar to error, except that the type of the error 
- * can be passed as the first parameter. The type of the error must be a 
+ * This procedure is similar to error, except that the type of the error
+ * can be passed as the first parameter. The type of the error must be a
  * condition which inherits from |&error-message|.
  * £
- * Note that |(error arg ...)| is equivalent to 
+ * Note that |(error arg ...)| is equivalent to
  * @lisp
  * (signal-error &error-message arg ...)
  * @end lisp
@@ -1088,7 +1127,7 @@ DEFINE_PRIMITIVE("signal-error", scheme_signal_error, vsubr, (int argc, SCM *arg
   type_error = *argv;
   argc -= 1;
   argv -= 1;
-  
+
   if (STk_condition_type_is_a(type_error, STk_err_mess_condition) == STk_false)
     STk_error("bad &error-message ~S", type_error);
   return do_error(type_error, argc, argv);
@@ -1130,7 +1169,7 @@ doc>
 DEFINE_PRIMITIVE("close-port", close_port, subr1, (SCM port))
 {
   if (!PORTP(port)) STk_error_bad_port(port);
-  
+
   STk_close(port);
   return STk_void;
 }
@@ -1158,15 +1197,15 @@ DEFINE_PRIMITIVE("port-closed?", port_closed, subr1, (SCM port))
  * Reads the next line available from the input port |port|. This function
  * returns 2 values: the first one is is the string which contains the line
  * read, and the second one is the end of line delimiter. The end of line
- * delimiter can be an end of file object, a character or a string in case 
- * of a multiple character delimiter. If no more characters are available 
- * on |port|, an end of file object is returned.  |Port| may be omitted, 
+ * delimiter can be an end of file object, a character or a string in case
+ * of a multiple character delimiter. If no more characters are available
+ * on |port|, an end of file object is returned.  |Port| may be omitted,
  * in which case it defaults to the value returned by |current-input-port|.
  * £
  * ,(bold "Note:") As said in ,(ref :mark "values"), if |read-line| is not
- * used in  the context of |call-with-values|, the second value returned by 
+ * used in  the context of |call-with-values|, the second value returned by
  * this procedure is ignored.
-doc> 
+doc>
 */
 DEFINE_PRIMITIVE("read-line", read_line, subr01, (SCM port))
 {
@@ -1188,7 +1227,7 @@ DEFINE_PRIMITIVE("read-line", read_line, subr01, (SCM port))
 	buff = STk_must_malloc(size);
 	strncpy(buff, buffer, INITIAL_LINE_SIZE);
       }
-      else 
+      else
 	buff = STk_must_realloc(buff, size);
     }
     switch (c = STk_getc(port)) {
@@ -1196,16 +1235,16 @@ DEFINE_PRIMITIVE("read-line", read_line, subr01, (SCM port))
 		 if (buff != buffer) STk_free(buff);
 		 return STk_n_values(2, res, STk_eof);
 
-      case '\n': if (prev == '\r') 
+      case '\n': if (prev == '\r')
 		   { i -= 1; delim = CrLf; }
-      		 else 
+      		 else
 		   delim = MAKE_CHARACTER('\n');
-	
+
 		 res = STk_chars2string(buff, i);
 		 if (buff != buffer) STk_free(buff);
 		 return STk_n_values(2, res, delim);
 
-      default:  buff[i] = prev = c; 
+      default:  buff[i] = prev = c;
     }
   }
 }
@@ -1232,10 +1271,10 @@ DEFINE_PRIMITIVE("copy-port", copy_port, subr23, (SCM p1, SCM p2, SCM max))
   if (!OPORTP(p2)) STk_error_bad_port(p2);
   if (max) {
     sz = STk_integer_value(max);
-    if (sz < 0) 
+    if (sz < 0)
       STk_error("bad size ~S", max);
   }
-  
+
   /* Copy at most sz characters from p1 to p2 */
   for ( ; ; ) {
     if (sz < 0) {
@@ -1247,7 +1286,7 @@ DEFINE_PRIMITIVE("copy-port", copy_port, subr23, (SCM p1, SCM p2, SCM max))
       n = sz;
       sz = 0;
     }
-    
+
     if (n == 0) break;
     if ((n = STk_read_buffer(p1, buffer, n)) > 0) {
       m = STk_write_buffer(p2, buffer, n);
@@ -1258,8 +1297,8 @@ DEFINE_PRIMITIVE("copy-port", copy_port, subr23, (SCM p1, SCM p2, SCM max))
   if (n != 0) goto Error;
   return STk_void;
 
- Error: 
-  STk_error("problem while copying port ~S on port ~S (~S)", 
+ Error:
+  STk_error("problem while copying port ~S on port ~S (~S)",
 	    p1 , p2, STk_Cstring2string(strerror(errno)));
   return STk_void;
 }
@@ -1290,11 +1329,11 @@ DEFINE_PRIMITIVE("flush-output-port", port_flush, subr01, (SCM port))
  *
  * Returns the current line number associated to the given input |port| as an
  * integer. The |port| argument may be omitted, in which case it defaults to
- * the value returned by |current-input-port|. 
+ * the value returned by |current-input-port|.
  * £
  * ,(bold "Note"): The |port-seek|, |read-chars| and |read-chars!| procedures
- * generally break the line-number. After using one of theses procedures, the 
- * value returned by |port-current-line| will be |-1| (except a |port-seek| 
+ * generally break the line-number. After using one of theses procedures, the
+ * value returned by |port-current-line| will be |-1| (except a |port-seek|
  * at the beginning of the port reinitializes the line counter).
 doc>
  */
@@ -1311,14 +1350,14 @@ DEFINE_PRIMITIVE("port-current-line", port_current_line, subr01, (SCM port))
  * (port-current-position port)
  *
  * Returns the position associated to the given |port| as an
- * integer (i.e. number of characters from the beginning of the port). 
+ * integer (i.e. number of characters from the beginning of the port).
  * The |port| argument may be omitted, in which case it defaults to
  * the value returned by |current-input-port|.
 doc>
  */
 DEFINE_PRIMITIVE("port-current-position", port_position, subr01, (SCM port))
 {
-  if (!port) 
+  if (!port)
     port = STk_current_input_port();
   else
     if (!PORTP(port)) STk_error_bad_port(port);
@@ -1339,8 +1378,8 @@ DEFINE_PRIMITIVE("port-current-position", port_position, subr01, (SCM port))
  * indicator, or end-of-file, respectively. If |whence| is omitted, it
  * defaults to |:start|.
  * £
- * ,(bold "Note"): After using port-seek, the value returned by 
- * |port-current-line| may be incorrect. 
+ * ,(bold "Note"): After using port-seek, the value returned by
+ * |port-current-line| may be incorrect.
 doc>
  */
 DEFINE_PRIMITIVE("port-seek", port_seek, subr23, (SCM port, SCM pos, SCM w))
@@ -1354,25 +1393,25 @@ DEFINE_PRIMITIVE("port-seek", port_seek, subr23, (SCM port, SCM pos, SCM w))
   if (w) {
     if (KEYWORDP(w)) {
       char *s = KEYWORD_PNAME(w);
-      
+
       if (strcmp(s, "start") == 0) whence = SEEK_SET;
       else if (strcmp(s, "end") == 0) whence = SEEK_END;
       else if (strcmp(s, "current") == 0) whence = SEEK_CUR;
     }
-  } 
-  else 
+  }
+  else
     whence = SEEK_SET;
-  
+
   if (whence < 0)
      STk_error_bad_io_param("bad keyword position ~S", w);
-  
-  /* ----------*/ 
+
+  /* ----------*/
   STk_flush(port);
   n = STk_seek(port, (off_t) p, whence);
 
   if (n < 0)
     general_io_error(io_malformed, "cannot seek position ~S", pos);
-  
+
   return STk_long2integer((long) n);
 }
 
@@ -1380,7 +1419,7 @@ DEFINE_PRIMITIVE("port-seek", port_seek, subr23, (SCM port, SCM pos, SCM w))
 <doc EXT port-rewind
  * (port-rewind port)
  *
- * Sets the port position to the beginning of |port|. The value returned by 
+ * Sets the port position to the beginning of |port|. The value returned by
  * |port-rewind| is ,(emph "void").
 doc>
  */
@@ -1396,7 +1435,7 @@ DEFINE_PRIMITIVE("port-rewind", port_rewind, subr1, (SCM port))
  * (port-close-hook-set! port thunk)
  *
  * Associate the procedure |thunk| to |port|. The thunk will be called
- * the first time |port| is closed. 
+ * the first time |port| is closed.
  * @lisp
  * (let* ((tmp (temporary-file-name))
  *        (p   (open-output-file tmp))
@@ -1410,12 +1449,12 @@ DEFINE_PRIMITIVE("port-rewind", port_rewind, subr1, (SCM port))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("port-close-hook-set!", port_close_hook_set, subr2, 
+DEFINE_PRIMITIVE("port-close-hook-set!", port_close_hook_set, subr2,
 		 (SCM port, SCM thunk))
 {
   if (!PORTP(port)) STk_error_bad_port(port);
   if (!STk_procedurep(thunk)) STk_error("bad procedure ~S", thunk);
-  
+
   PORT_CLOSEHOOK(port) = thunk;
   return STk_void;
 }
@@ -1436,9 +1475,9 @@ DEFINE_PRIMITIVE("port-close-hook", port_close_hook, subr1, (SCM port))
 
 
 /*===========================================================================*\
- * 
+ *
  * Initializations
- * 
+ *
 \*===========================================================================*/
 static void initialize_io_conditions(void)
 {
@@ -1482,8 +1521,8 @@ static struct extended_type_descr xtype_port = {
 
 int STk_init_port(void)
 {
-  /* Define a constant for lines terminated by CR/LF to avoid multiple 
-   * allocations. Make it constant to avoid the user break it 
+  /* Define a constant for lines terminated by CR/LF to avoid multiple
+   * allocations. Make it constant to avoid the user break it
    */
   CrLf		       = STk_Cstring2string("\r\n");
   BOXED_INFO(CrLf)    |= STRING_CONST;
@@ -1506,6 +1545,7 @@ int STk_init_port(void)
   ADD_PRIMITIVE(scheme_read);
   ADD_PRIMITIVE(scheme_read_cst);
   ADD_PRIMITIVE(read_char);
+  ADD_PRIMITIVE(read_utf8_char);
   ADD_PRIMITIVE(read_chars);
   ADD_PRIMITIVE(d_read_chars);
   ADD_PRIMITIVE(peek_char);
@@ -1542,7 +1582,7 @@ int STk_init_port(void)
   ADD_PRIMITIVE(port_close_hook);
   ADD_PRIMITIVE(port_close_hook_set);
 
-  return STk_init_fport() && 
+  return STk_init_fport() &&
     	 STk_init_sport() &&
     	 STk_init_vport();
 }

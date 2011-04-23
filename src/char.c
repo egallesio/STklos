@@ -1,40 +1,44 @@
 /*
  *
- * c h a r . c				-- Characters management
+ * c h a r . c				-- Chaacters management
  *
- * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update:  6-Aug-2006 22:16 (eg)
+ * Last file update: 23-Apr-2011 18:53 (eg)
  */
 
 #include <ctype.h>
 #include "stklos.h"
+#include <wctype.h>
+
+
+int STk_use_utf8 = 1;
 
 struct charelem {
   char *name;
   unsigned char value;
 };
 
-static struct charelem chartable [] = { 
+static struct charelem chartable [] = {
   {"null",       '\000'},
   {"bell",       '\007'},
   {"backspace",  '\010'},
@@ -85,20 +89,20 @@ static struct charelem chartable [] = {
 
   {"sp",	'\040'},
   {"del",	'\177'},
-  
+
   {"",           '\000'}
 };
 
 
 /*===========================================================================*\
- * 
+ *
  * 				     Utilities
- * 
+ *
 \*===========================================================================*/
 
 static int my_strcmpi(register char *p1, register char *p2)
 {
-  for( ; tolower(*p1) == tolower(*p2); p1++, p2++) 
+  for( ; tolower(*p1) == tolower(*p2); p1++, p2++)
     if (!*p1) return 0;
   return tolower(*p1) - tolower(*p2);
 }
@@ -111,7 +115,7 @@ static void error_bad_char(SCM c)
 
 static int charcomp(SCM c1, SCM c2)
 {
-  if (!CHARACTERP(c1)) error_bad_char(c1); 
+  if (!CHARACTERP(c1)) error_bad_char(c1);
   if (!CHARACTERP(c2)) error_bad_char(c2);
   return (CHARACTER_VAL(c1) - CHARACTER_VAL(c2));
 }
@@ -119,23 +123,24 @@ static int charcomp(SCM c1, SCM c2)
 
 static int charcompi(SCM c1, SCM c2)
 {
-  if (!CHARACTERP(c1)) error_bad_char(c1); 
+  if (!CHARACTERP(c1)) error_bad_char(c1);
   if (!CHARACTERP(c2)) error_bad_char(c2);
-  return (tolower(CHARACTER_VAL(c1)) - tolower(CHARACTER_VAL(c2)));
+  return (towlower(CHARACTER_VAL(c1)) - towlower(CHARACTER_VAL(c2)));
 }
 
 
-unsigned char STk_string2char(char *s)
+int STk_string2char(char *s)
 /* converts a char name to a char */
 {
   register struct charelem *p;
-  
-  if (s[1] == '\0') return s[0];
+  int val = STk_utf82char((uint8_t *) s);
+
+  if (val >= 0) return val;
   for (p=chartable; *(p->name); p++) {
-    if (my_strcmpi(p->name, s) == 0) return p->value;
+    if (my_strcmpi(p->name, s) == 0) return (int) (p->value);
   }
   STk_error("bad char name %S", s);
-  return '\0'; /* never reached */
+  return 0; /* never reached */
 }
 
 
@@ -145,14 +150,67 @@ char *STk_char2string(char c)  		/* convert a char to it's */
 
   for (p=chartable; *(p->name); p++)
     if (p->value == c) return (char *) p->name;
-  
+
   /* If we are here it's a "normal" char */
   return NULL;
 }
 
+int STk_utf82char(uint8_t *buff)
+{
+  if (((buff[0] & 0x80) == 0) && (buff[1] == '\0'))
+    return buff[0];
+
+  if ((buff[0] < 0xc0) || (buff[0] > 0xf7))
+    return -1;
+
+  if ((buff[0] < 0xe0) && (buff[2] == '\0'))
+    return ((buff[0] & 0x3f) << 6) + (buff[1] & 0x3f);
+
+  if ((buff[0] < 0xf0) && buff[3] == '\0')
+    return ((buff[0] & 0x1f) << 12) +
+           ((buff[1] & 0x3f) <<  6) +
+	    (buff[2] & 0x3f);
+
+  if (buff[4] == '\0')
+    return ((buff[0] & 0x0f) << 16) +
+           ((buff[1] & 0x3f) <<  6) +
+           ((buff[2] & 0x3f) <<  6) +
+	    (buff[3] & 0x3f);
+
+  return -1;
+}
+
+char *STk_char2utf8(int ch, uint8_t *buff)
+{
+  register int n  = 0;
+  char *start = (char *) buff;
+
+  if (ch < 0x80) {
+    *buff++ = ch;
+    n = 1;
+  } else if (ch < 0x800) {
+    *buff++ = (ch >> 6) | 0xc0;
+    *buff++ = (ch & 0x3f) | 0x80;
+    n = 2;
+  } else if (ch < 0x10000) {
+    *buff++ = (ch >> 12) | 0xe0;
+    *buff++ = ((ch >> 6) & 0x3f) | 0x80;
+    *buff++ = (ch & 0x3f) | 0x80;
+    n = 3;
+  } else if (ch < 0x110000) {
+    *buff++ = (ch >> 18) | 0xF0;
+    *buff++ = ((ch >> 12) & 0x3F) | 0x80;
+    *buff++ = ((ch >> 6)  & 0x3F) | 0x80;
+    *buff++ = (ch & 0x3F) | 0x80;
+    n = 4;
+  }
+  *buff = '\0';
+  return start;
+}
+
 
 /*===========================================================================*\
- * 
+ *
  * 				     PRIMITIVES
  *
 \*===========================================================================*/
@@ -186,7 +244,7 @@ doc>
  * (char<=? char1 char2)
  * (char>=? char1 char2)
  *
- * These procedures impose a total ordering on the set of characters. 
+ * These procedures impose a total ordering on the set of characters.
  * It is guaranteed that under this ordering:
  * ,(itemize
  * (item [The upper case characters are in order.])
@@ -214,7 +272,7 @@ CHAR_COMPARE("char>=?", charge, (charcomp(c1,c2) >= 0))
  * (char-ci>=? char1 char2)
  *
  * These procedures are similar to |char=?| et cetera, but they treat
- * upper case and lower case letters as the same. For example, 
+ * upper case and lower case letters as the same. For example,
  * |(char-ci=? #\A #\a)| returns |#t|.
 doc>
  */
@@ -230,10 +288,10 @@ CHAR_COMPARE("char-ci>=?", chargei, (charcompi(c1,c2) >= 0))
 
 
 #define TEST_CTYPE(tst, name) 					  \
-   DEFINE_PRIMITIVE(name, CPP_CONCAT(char_, tst), subr1, (SCM c)) \
+   DEFINE_PRIMITIVE(name, CPP_CONCAT(char_is, tst), subr1, (SCM c)) \
    { 								  \
      if (!CHARACTERP(c)) error_bad_char(c);			  \
-     return MAKE_BOOLEAN(tst(CHARACTER_VAL(c)));		  \
+     return MAKE_BOOLEAN(CPP_CONCAT(isw, tst)(CHARACTER_VAL(c)));	\
    }
 
 /*
@@ -246,7 +304,7 @@ CHAR_COMPARE("char-ci>=?", chargei, (charcompi(c1,c2) >= 0))
  *
  * These procedures return |#t| if their arguments are alphabetic, numeric,
  * whitespace, upper case, or lower case characters, respectively, otherwise they
- * return |#f|. The following remarks, which are specific to the ASCII character 
+ * return |#f|. The following remarks, which are specific to the ASCII character
  * set, are intended only as a guide: The alphabetic characters are the 52
  * upper and lower case letters. The numeric characters are the ten decimal
  * digits. The whitespace characters are space, tab, line feed, form feed,
@@ -254,11 +312,11 @@ CHAR_COMPARE("char-ci>=?", chargei, (charcompi(c1,c2) >= 0))
 doc>
  */
 
-TEST_CTYPE(isalpha, "char-alphabetic?")
-TEST_CTYPE(isdigit, "char-numeric?")
-TEST_CTYPE(isspace, "char-whitespace?")
-TEST_CTYPE(isupper, "char-upper-case?")
-TEST_CTYPE(islower, "char-lower-case?")
+TEST_CTYPE(alpha, "char-alphabetic?")
+TEST_CTYPE(digit, "char-numeric?")
+TEST_CTYPE(space, "char-whitespace?")
+TEST_CTYPE(upper, "char-upper-case?")
+TEST_CTYPE(lower, "char-lower-case?")
 
 
 /*=============================================================================*/
@@ -307,25 +365,25 @@ DEFINE_PRIMITIVE("integer->char", integer2char, subr1, (SCM i))
 
 DEFINE_PRIMITIVE("char-upcase", char_upcase, subr1, (SCM c))
 /*
-<doc char-upcase char-downcase 
+<doc char-upcase char-downcase
  * (char-upcase char)
  * (char-downcase char)
  *
- * These procedures return a character |char2| such that 
- * |(char-ci=? char char2)|. In addition, if char is alphabetic, then the 
+ * These procedures return a character |char2| such that
+ * |(char-ci=? char char2)|. In addition, if char is alphabetic, then the
  * result of |char-upcase| is upper case and the result of |char-downcase| is
- * lower case. 
+ * lower case.
 doc>
  */
-{ 
+{
   if (!CHARACTERP(c)) error_bad_char(c);
-  return MAKE_CHARACTER(toupper(CHARACTER_VAL(c)));
+  return MAKE_CHARACTER(towupper(CHARACTER_VAL(c)));
 }
 
 DEFINE_PRIMITIVE("char-downcase", char_downcase, subr1, (SCM c))
 {
   if (!CHARACTERP(c)) error_bad_char(c);
-  return MAKE_CHARACTER(tolower(CHARACTER_VAL(c)));
+  return MAKE_CHARACTER(towlower(CHARACTER_VAL(c)));
 }
 
 int STk_init_char(void)
@@ -353,7 +411,7 @@ int STk_init_char(void)
 
   ADD_PRIMITIVE(char2integer);
   ADD_PRIMITIVE(integer2char);
-  
+
   ADD_PRIMITIVE(char_upcase);
   ADD_PRIMITIVE(char_downcase);
   return TRUE;

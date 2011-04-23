@@ -1,27 +1,27 @@
 /*
  * p r i n t . c				-- writing stuff
  *
- * Copyright © 1993-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *           Author: Erick Gallesio [eg@unice.fr]
- *    Creation date: ??-Oct-1993 ??:?? 
- * Last file update: 17-Aug-2010 23:20 (eg)
+ *    Creation date: ??-Oct-1993 ??:??
+ * Last file update: 22-Apr-2011 14:39 (eg)
  *
  */
 #include <ctype.h>
@@ -63,8 +63,8 @@ static void printlist(SCM exp, SCM port, int mode)
 static void Inline printsymbol(SCM symb, SCM port, int mode)
 {
   char *s = SYMBOL_PNAME(symb);
-  
-  if ((mode==WRT_MODE) && 
+
+  if ((mode==WRT_MODE) &&
       ((BOXED_INFO(symb) & SYMBOL_NEEDS_BARS) ||
        (!STk_read_case_sensitive && (BOXED_INFO(symb) & SYMBOL_HAS_UPPER)))) {
     STk_putc('|', port);  STk_puts(s, port); STk_putc('|', port);
@@ -101,7 +101,7 @@ static void printstring(SCM s, SCM port, int mode)
     register char *p    = STRING_CHARS(s);
     register size_t len = STRING_SIZE(s);
     char buffer[MAX_TOKEN_SIZE], *buff = buffer;
-    
+
     *buff++ = '"';
     for (   ; len; len--, p++) {
       if (buff >= buffer + MAX_TOKEN_SIZE - 7) { /* 7 because we can add \X" and */
@@ -120,7 +120,7 @@ static void printstring(SCM s, SCM port, int mode)
         case '\r' : *buff++ = '\\'; *buff++ = 'r'; break;
         case '\t' : *buff++ = '\\'; *buff++ = 't'; break;
         case '\v' : *buff++ = '\\'; *buff++ = 'v'; break;
-        case '"'  : 
+        case '"'  :
         case '\\' : *buff++ = '\\'; *buff++ = *p;  break;
       default   : if ((((unsigned char) *p) & 0177) < (unsigned char) ' ') {
 	  	      /* Non printable character (It works only for ISO 8859-x !!) */
@@ -128,7 +128,7 @@ static void printstring(SCM s, SCM port, int mode)
 	  	      *buff++ = 'x';
 		      *buff++ = printhexa((unsigned char) *p / 16);
 		      *buff++ = printhexa((unsigned char) *p % 16);
-		    } 
+		    }
 		    else *buff++ = *p;
       }
     }
@@ -155,7 +155,7 @@ void STk_print(SCM exp, SCM port, int mode)
       default:		       STk_panic("Bad small constant %d", exp); return;
     }
   }
-  
+
   if (INTP(exp)) {
     int len = sprintf(buffer, "%ld", INT_VAL(exp));
     STk_nputs(port, buffer, len);
@@ -163,16 +163,27 @@ void STk_print(SCM exp, SCM port, int mode)
   }
 
   if (CHARACTERP(exp)) {
+    uint8_t buffer[5];
+    int c = CHARACTER_VAL(exp);
+
     if (mode!=DSP_MODE){
-      char *s = STk_char2string(CHARACTER_VAL(exp));
+      char *s = STk_char2string(c);
 
       STk_puts("#\\", port);
-      if (s) 
-	STk_puts(STk_char2string(CHARACTER_VAL(exp)), port);
+      if (s)
+	STk_puts(s, port);
       else
-	STk_putc(CHARACTER_VAL(exp), port);
+	if (c < 0x80)
+	  STk_putc(c, port);
+	else {
+	  STk_char2utf8(c, buffer);
+	  STk_puts((char *) buffer, port);
+	}
     }
-    else STk_putc(CHARACTER_VAL(exp), port);
+    else {
+      STk_char2utf8(c, buffer);
+      STk_puts((char *) buffer, port);
+    }
     return;
   }
 
@@ -200,7 +211,7 @@ void STk_print(SCM exp, SCM port, int mode)
       return;
     case tc_pointer:
       if (CPOINTER_TYPE(exp) == STk_void) {
-	sprintf(buffer, "#[C-pointer %lx @ %lx]", 
+	sprintf(buffer, "#[C-pointer %lx @ %lx]",
 		(unsigned long) CPOINTER_VALUE(exp), (unsigned long) exp);
       } else {
 	STk_puts("#[", port);
@@ -239,7 +250,7 @@ void STk_print(SCM exp, SCM port, int mode)
     default:
       {
 	struct extended_type_descr *xdescr = BOXED_XTYPE(exp);
-	
+
 	if (xdescr) {
 	  void (*p)() = XTYPE_PRINT(xdescr);
 
@@ -260,9 +271,9 @@ void STk_print(SCM exp, SCM port, int mode)
 
 
 
-/*============================================================================= 
- * 
- *			Printing of circular structures 
+/*=============================================================================
+ *
+ *			Printing of circular structures
  *
  *=============================================================================*/
 
@@ -274,7 +285,7 @@ static void pass2(SCM exp, SCM port);	/* pass 2: print      */
 
 
 static void print_cycle(SCM exp, SCM port)
-{  
+{
   SCM value, tmp;
 
   if ((tmp = STk_assv(exp, cycles)) != STk_false) {
@@ -314,7 +325,7 @@ static void printlist_star(SCM exp, SCM port)
     if (NULLP(exp=CDR(exp))) break;
 
     if (!CONSP(exp) || (tmp = STk_assv(exp, cycles)) != STk_false) {
-      if (!CONSP(exp) || (value = CDR(tmp)) == STk_true || INTP(value)) { 
+      if (!CONSP(exp) || (value = CDR(tmp)) == STk_true || INTP(value)) {
 	/* either  ". X" or ". #0=(...)" or ". #0#" */
 	STk_nputs(port, " . ", 3);
 	print_cycle(exp, port);
@@ -330,7 +341,7 @@ static void printlist_star(SCM exp, SCM port)
 static void printvector_star(SCM exp, SCM port)
 {
   int j, n = VECTOR_SIZE(exp);
-  
+
   STk_nputs(port, "#(", 2);
   for(j=0; j < n; j++) {
     print_cycle(VECTOR_DATA(exp)[j], port);
@@ -353,7 +364,7 @@ Top:
 
     if (CONSP(exp)) {			/* it's a cons */
       pass1(CAR(exp));
-      exp = CDR(exp); 
+      exp = CDR(exp);
       goto Top;
     }
     else { 				/* it's a vector */
@@ -361,7 +372,7 @@ Top:
       for (i = 0; i < len; i++) pass1(VECTOR_DATA(exp)[i]);
       if (len >= 0) {exp = VECTOR_DATA(exp)[len]; goto Top;}
     }
-  } 
+  }
   else {
     /* This item was already seen. Note that this is the second time */
     CDR(tmp) = STk_true;
@@ -408,10 +419,10 @@ void STk_print_star(SCM exp, SCM port)
  * (write-pretty-quotes)
  * (write-pretty-quotes value)
  *
- * This parameter object permits to change the default behaviour of 
- * the |display| or |write| primitives when they write a list which starts with 
- *  the symbol quote,  quasiquote, unquote or unquote-splicing. If this parameter 
- * has a false value, the writer uses the list notation instead of a 
+ * This parameter object permits to change the default behaviour of
+ * the |display| or |write| primitives when they write a list which starts with
+ *  the symbol quote,  quasiquote, unquote or unquote-splicing. If this parameter
+ * has a false value, the writer uses the list notation instead of a
  * more human-readable value.
  * By default, this parameter value is set to |#t|.
  * @lisp
@@ -430,9 +441,9 @@ static SCM write_pretty_quotes_conv(SCM value)
 }
 
 /*===========================================================================*\
- * 
- *			I n i t i a l i z a t i o n 
- * 
+ *
+ *			I n i t i a l i z a t i o n
+ *
 \*===========================================================================*/
 int STk_init_printer(void)
 {

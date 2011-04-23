@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 20-Apr-2011 00:28 (eg)
+ * Last file update: 23-Apr-2011 18:52 (eg)
  */
 
 
@@ -36,6 +36,7 @@ extern "C"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <limits.h>
 #include <string.h>
 #include <unistd.h>
@@ -44,6 +45,7 @@ extern "C"
 #include <errno.h>
 #include <setjmp.h>
 #include <memory.h>
+#include <locale.h>
 
 #include "stklosconf.h"
 #include "extraconf.h"
@@ -84,7 +86,7 @@ extern "C"
 #endif
 
 #define MAX_TOKEN_SIZE 		1024		/* max size of a token */
-#define MAX_CHAR_CODE		255		/* Max code for a char */
+#define MAX_CHAR_CODE		0x10FFFF	/* Max code for a char */
 
 
 #define CPP_CONCAT(x, y) 	x##y
@@ -362,12 +364,17 @@ int STk_init_box(void);
    */
 
 #define MAKE_CHARACTER(n) (AS_SCM((n) << 3 | 0x6))
-#define CHARACTER_VAL(n)  ((unsigned char) (AS_LONG(n) >> 3))
+#define CHARACTER_VAL(n)  ((AS_LONG(n) >> 3))
 #define CHARACTERP(n)	  ((AS_LONG(n) & 7) == 6)
 
 char *STk_char2string(char c);
-unsigned char STk_string2char(char *s);
+int STk_string2char(char *s);
 int STk_init_char(void);
+
+char *STk_char2utf8(int ch, uint8_t *buff);
+int STk_utf82char(uint8_t *buff);
+
+extern int STk_use_utf8;
 
 
 /*
