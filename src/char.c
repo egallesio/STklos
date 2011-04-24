@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update: 23-Apr-2011 18:53 (eg)
+ * Last file update: 24-Apr-2011 14:58 (eg)
  */
 
 #include <ctype.h>
@@ -125,7 +125,10 @@ static int charcompi(SCM c1, SCM c2)
 {
   if (!CHARACTERP(c1)) error_bad_char(c1);
   if (!CHARACTERP(c2)) error_bad_char(c2);
-  return (towlower(CHARACTER_VAL(c1)) - towlower(CHARACTER_VAL(c2)));
+  return STk_use_utf8 ?
+         (towlower(CHARACTER_VAL(c1)) - towlower(CHARACTER_VAL(c2))):
+         (tolower((unsigned char) CHARACTER_VAL(c1)) -
+	  tolower((unsigned char) CHARACTER_VAL(c2)));
 }
 
 
@@ -287,11 +290,13 @@ CHAR_COMPARE("char-ci>=?", chargei, (charcompi(c1,c2) >= 0))
 /*=============================================================================*/
 
 
-#define TEST_CTYPE(tst, name) 					  \
-   DEFINE_PRIMITIVE(name, CPP_CONCAT(char_is, tst), subr1, (SCM c)) \
-   { 								  \
-     if (!CHARACTERP(c)) error_bad_char(c);			  \
-     return MAKE_BOOLEAN(CPP_CONCAT(isw, tst)(CHARACTER_VAL(c)));	\
+#define TEST_CTYPE(tst, name)                                                      \
+   DEFINE_PRIMITIVE(name, CPP_CONCAT(char_is, tst), subr1, (SCM c))                \
+   {                                                                               \
+     if (!CHARACTERP(c)) error_bad_char(c);                                        \
+     return STk_use_utf8 ?                                                         \
+              MAKE_BOOLEAN(CPP_CONCAT(isw, tst)(CHARACTER_VAL((unsigned char)c))): \
+              MAKE_BOOLEAN(CPP_CONCAT(is,  tst)(CHARACTER_VAL(c)));                \
    }
 
 /*
@@ -377,13 +382,17 @@ doc>
  */
 {
   if (!CHARACTERP(c)) error_bad_char(c);
-  return MAKE_CHARACTER(towupper(CHARACTER_VAL(c)));
+  return MAKE_CHARACTER(STk_use_utf8 ?
+			towupper(CHARACTER_VAL(c)): 
+			toupper((unsigned char) CHARACTER_VAL(c)));
 }
 
 DEFINE_PRIMITIVE("char-downcase", char_downcase, subr1, (SCM c))
 {
   if (!CHARACTERP(c)) error_bad_char(c);
-  return MAKE_CHARACTER(towlower(CHARACTER_VAL(c)));
+  return MAKE_CHARACTER(STk_use_utf8 ?
+			towlower(CHARACTER_VAL(c)) : 
+			tolower((unsigned char) CHARACTER_VAL(c)));
 }
 
 int STk_init_char(void)

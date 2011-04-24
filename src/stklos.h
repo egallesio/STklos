@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 23-Apr-2011 18:52 (eg)
+ * Last file update: 24-Apr-2011 11:30 (eg)
  */
 
 
@@ -948,8 +948,11 @@ struct port_obj {
  **** 		sio.h primitives
  ****/
 
+#define UTF8_INCORRECT_SEQUENCE	(-2)
+
 int STk_readyp(SCM port);
 int STk_getc(SCM port);
+int STk_get_character(SCM port); /* result may be a wide char */
 int STk_ungetc(int c, SCM port);
 int STk_close(SCM port);
 int STk_putc(int c, SCM port);

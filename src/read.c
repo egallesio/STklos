@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 22-Apr-2011 19:28 (eg)
+ * Last file update: 24-Apr-2011 15:00 (eg)
  *
  */
 
@@ -235,7 +235,7 @@ static SCM read_token(SCM port, int c, int case_significant)
 }
 
 static SCM read_char(SCM port, int c)
-/* read an char (or a char name) item whose 1st char is in c */
+/* read a char (or a char name) item whose 1st char is in c */
 {
   char tok[MAX_TOKEN_SIZE];
   register int j = 0;

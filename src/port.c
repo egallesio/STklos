@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 22-Apr-2011 16:14 (eg)
+ * Last file update: 24-Apr-2011 11:50 (eg)
  *
  */
 
@@ -284,43 +284,13 @@ DEFINE_PRIMITIVE("read-char", read_char, subr01, (SCM port))
   int c;
 
   port = verify_port(port, PORT_READ);
-  c = STk_getc(port);
+  c = STk_get_character(port);
+  if (c == UTF8_INCORRECT_SEQUENCE)
+    error_bad_utf8_character(c);
+
   return (c == EOF) ? STk_eof : MAKE_CHARACTER(c);
 }
 
-
-int _base_getc(SCM port)
-{
-  int res = STk_getc(port);
-  printf("LU: %d (0x%x 0%o) \n", res, res, res);
-  return res;
-}
-
-DEFINE_PRIMITIVE("read-utf8-char", read_utf8_char, subr01, (SCM port))
-{
-  int c;
-
-  port = verify_port(port, PORT_READ);
-  c = _base_getc(port);
-  if (c >= 0x80) {
-    if ((c < 0xc0) || (c > 0xf7))
-      error_bad_utf8_character(c);
-    else if (c < 0xe0)
-      c = ((c & 0x3f) << 6) +
-	  (_base_getc(port)  & 0x3F);
-    else if (c < 0xf0) {
-      c = ((c & 0x1f) << 12) +
-	  ((_base_getc(port) & 0x3f) << 6) +
-	  (_base_getc(port) & 0x3f);
-    } else {
-      c = ((c & 0x0F) << 16) +
-	  ((_base_getc(port) &0x3f) << 6) +
-	  ((_base_getc(port) &0x3f) << 6) +
-	  (_base_getc(port) &0x3F);
-    }
-  }
-  return MAKE_CHARACTER(c);
-}
 
 /*
 <doc EXT read-chars
@@ -438,7 +408,9 @@ DEFINE_PRIMITIVE("peek-char", peek_char, subr01, (SCM port))
   int c;
 
   port = verify_port(port, PORT_READ);
-  c = STk_getc(port);
+
+  c = STk_get_character(port);
+  if (c == UTF8_INCORRECT_SEQUENCE) error_bad_utf8_character(c);
   STk_ungetc(c, port);
 
   return (c == EOF) ? STk_eof : MAKE_CHARACTER(c);
@@ -674,7 +646,8 @@ DEFINE_PRIMITIVE("write-byte", write_byte, subr12, (SCM byte, SCM port))
 {
   int b = STk_integer_value(byte);
 
-  if (b == LONG_MIN) STk_error_bad_io_param("bad byte value ~S", byte);
+  if ((b < 0) || (b > 255)) 
+    STk_error_bad_io_param("bad byte value ~S", byte);
   port = verify_port(port, PORT_WRITE);
   STk_putc(b, port);
   return STk_void;
@@ -1545,7 +1518,6 @@ int STk_init_port(void)
   ADD_PRIMITIVE(scheme_read);
   ADD_PRIMITIVE(scheme_read_cst);
   ADD_PRIMITIVE(read_char);
-  ADD_PRIMITIVE(read_utf8_char);
   ADD_PRIMITIVE(read_chars);
   ADD_PRIMITIVE(d_read_chars);
   ADD_PRIMITIVE(peek_char);

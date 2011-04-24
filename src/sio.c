@@ -1,28 +1,28 @@
 /*
  * s i o . c					-- Low level I/O
- * 
- * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ *
+ * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
- * 
+ *
+ *
  *	     Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ????
- * Last file update: 14-May-2007 13:36 (eg)
+ * Last file update: 24-Apr-2011 11:31 (eg)
  *
  *
  * Completely rewritten for the STklos version (Jan. 2000)
@@ -31,15 +31,14 @@
 
 #include "stklos.h"
 
-int 
+int
 STk_readyp(SCM port)
 {
   if (PORT_UNGETC(port) != EOF) return 1;
   return PORT_READY(port)(PORT_STREAM(port));
 }
 
-
-int 
+int
 STk_getc(SCM port)
 {
   int result = PORT_UNGETC(port);
@@ -57,11 +56,43 @@ STk_getc(SCM port)
   return result;
 }
 
+
 int 
+STk_get_character(SCM port)  /* result may be a wide character */
+{
+  if (PORT_UNGETC(port) != EOF)
+    return STk_getc(port);
+  else {
+    int c = STk_getc(port);
+
+    if (STk_use_utf8 && (c >= 0x80)) {
+      /* Read an UTF-8 character */
+      if ((c < 0xc0) || (c > 0xf7))
+	return UTF8_INCORRECT_SEQUENCE;
+      else if (c < 0xe0)
+	c = ((c & 0x3f) << 6) +
+	    ((STk_getc(port)  & 0x3F));
+      else if (c < 0xf0) {
+	c = ((c & 0x1f) << 12) +
+	    ((STk_getc(port) & 0x3f) << 6) +
+	    ((STk_getc(port) & 0x3f));
+      } else {
+	c = ((c & 0x0F) << 16) +
+	    ((STk_getc(port) &0x3f) << 6) +
+	    ((STk_getc(port) &0x3f) << 6) +
+	    ((STk_getc(port) &0x3F));
+      }
+    }
+    return c;
+  }
+}
+
+
+int
 STk_ungetc(int c, SCM port)
 {
   int result = PORT_UNGETC(port);
-  
+
   if (result != EOF) STk_error("INTERNAL ERROR: cannot unget character");
   PORT_UNGETC(port) = c;
   if (c == '\n') PORT_LINE(port) -= 1;
@@ -69,9 +100,9 @@ STk_ungetc(int c, SCM port)
   return c;
 }
 
-int 
+int
 STk_close(SCM port)
-{ 
+{
   int res, exec_hook = FALSE;;
 
   if (! (PORT_FLAGS(port) & PORT_CLOSED)) {
@@ -82,7 +113,7 @@ STk_close(SCM port)
   STk_register_finalizer(port, NULL); /* Unregister (possible) finalizer */
   PORT_FLAGS(port) |= PORT_CLOSED;
   res = PORT_CLOSE(port)(PORT_STREAM(port));
-  
+
   /* Eventually call the close hook */
   if (exec_hook && (PORT_CLOSEHOOK(port) != STk_false))
     STk_C_apply(PORT_CLOSEHOOK(port), 0);
@@ -90,7 +121,7 @@ STk_close(SCM port)
   return res;
 }
 
-int 
+int
 STk_putc(int c, SCM port)
 {
   int n = PORT_PUTC(port)(c, PORT_STREAM(port));
@@ -122,7 +153,7 @@ int
 STk_nputs(SCM port, char *s, int len)
 {
   int n = PORT_NPUTS(port)(PORT_STREAM(port), s, len);
-  if (n >= 0) 
+  if (n >= 0)
      PORT_POS(port) += n;
   return n;
 }
@@ -140,7 +171,7 @@ STk_seek(SCM port, off_t offset, int whence)
     offset = PORT_POS(port) + offset;
     whence = SEEK_SET;
   }
-  
+
   PORT_UNGETC(port) = EOF;
   return  PORT_POS(port) = PORT_SEEK(port)(PORT_STREAM(port), offset, whence);
 }
@@ -167,7 +198,7 @@ STk_flush(SCM port)
   return PORT_FLUSH(port)(PORT_STREAM(port));
 }
 
-int 
+int
 STk_feof(SCM port)
 {
   return PORT_EOFP(port)(PORT_STREAM(port));
@@ -188,12 +219,12 @@ int
 STk_write_buffer(SCM port, void *buff, int count)
 {
   int n = PORT_BWRITE(port)(PORT_STREAM(port), buff, count);
-  if (n >= 0) 
+  if (n >= 0)
     PORT_POS(port) += n;
   return n;
 }
 
-int 
+int
 STk_fprintf(SCM port, char *format, ...)
 {
   va_list ap;
