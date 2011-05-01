@@ -22,7 +22,7 @@
  *
  *	     Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ????
- * Last file update: 24-Apr-2011 11:31 (eg)
+ * Last file update:  1-May-2011 22:30 (eg)
  *
  *
  * Completely rewritten for the STklos version (Jan. 2000)
@@ -60,31 +60,11 @@ STk_getc(SCM port)
 int 
 STk_get_character(SCM port)  /* result may be a wide character */
 {
-  if (PORT_UNGETC(port) != EOF)
-    return STk_getc(port);
-  else {
-    int c = STk_getc(port);
-
-    if (STk_use_utf8 && (c >= 0x80)) {
-      /* Read an UTF-8 character */
-      if ((c < 0xc0) || (c > 0xf7))
-	return UTF8_INCORRECT_SEQUENCE;
-      else if (c < 0xe0)
-	c = ((c & 0x3f) << 6) +
-	    ((STk_getc(port)  & 0x3F));
-      else if (c < 0xf0) {
-	c = ((c & 0x1f) << 12) +
-	    ((STk_getc(port) & 0x3f) << 6) +
-	    ((STk_getc(port) & 0x3f));
-      } else {
-	c = ((c & 0x0F) << 16) +
-	    ((STk_getc(port) &0x3f) << 6) +
-	    ((STk_getc(port) &0x3f) << 6) +
-	    ((STk_getc(port) &0x3F));
-      }
-    }
-    return c;
-  }
+  return (PORT_UNGETC(port) != EOF) ? 
+              /* we have an ungetted char, call normal getc */
+              STk_getc(port):
+              /* try to read it as an UTF-8 sequence */
+              STk_utf8_read_char(port);
 }
 
 

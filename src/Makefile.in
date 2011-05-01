@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 18-Apr-2011 23:49 (eg)
+# Last file update: 30-Apr-2011 23:54 (eg)
 
 
 VPATH = @srcdir@
@@ -59,9 +59,9 @@ am__stklos_SOURCES_DIST = base64.c blob.c boolean.c boot.c box.c \
 	keyword.c lib.c list.c misc.c md5.c number.c object.c \
 	parameter.c path.c port.c print.c proc.c process.c promise.c \
 	read.c regexp.c signal.c sio.c socket.c sport.c stklos.c str.c \
-	struct.c symbol.c system.c uvector.c vector.c vm.c vport.c \
-	thread-none.c mutex-none.c thread-common.c thread-pthreads.c \
-	mutex-common.c mutex-pthreads.c
+	struct.c symbol.c system.c utf8.c uvector.c vector.c vm.c \
+	vport.c thread-none.c mutex-none.c thread-common.c \
+	thread-pthreads.c mutex-common.c mutex-pthreads.c
 @NO_THREAD_FALSE@@PTHREADS_TRUE@am__objects_1 =  \
 @NO_THREAD_FALSE@@PTHREADS_TRUE@	thread-common.$(OBJEXT) \
 @NO_THREAD_FALSE@@PTHREADS_TRUE@	thread-pthreads.$(OBJEXT) \
@@ -82,8 +82,8 @@ am_stklos_OBJECTS = base64.$(OBJEXT) blob.$(OBJEXT) boolean.$(OBJEXT) \
 	regexp.$(OBJEXT) signal.$(OBJEXT) sio.$(OBJEXT) \
 	socket.$(OBJEXT) sport.$(OBJEXT) stklos.$(OBJEXT) \
 	str.$(OBJEXT) struct.$(OBJEXT) symbol.$(OBJEXT) \
-	system.$(OBJEXT) uvector.$(OBJEXT) vector.$(OBJEXT) \
-	vm.$(OBJEXT) vport.$(OBJEXT) $(am__objects_1)
+	system.$(OBJEXT) utf8.$(OBJEXT) uvector.$(OBJEXT) \
+	vector.$(OBJEXT) vm.$(OBJEXT) vport.$(OBJEXT) $(am__objects_1)
 stklos_OBJECTS = $(am_stklos_OBJECTS)
 am__DEPENDENCIES_1 =
 stklos_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -271,7 +271,7 @@ stklos_SOURCES = base64.c blob.c boolean.c boot.c box.c char.c cond.c \
  list.c misc.c md5.c number.c object.c parameter.c \
  path.c port.c print.c proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
- symbol.c system.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
+ symbol.c system.c utf8.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
 
 
 ### # The STklos library
@@ -462,6 +462,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-none.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread-pthreads.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utf8.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/uvector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vm.Po@am__quote@

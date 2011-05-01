@@ -23,15 +23,13 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update: 24-Apr-2011 14:58 (eg)
+ * Last file update:  1-May-2011 12:35 (eg)
  */
 
 #include <ctype.h>
 #include "stklos.h"
 #include <wctype.h>
 
-
-int STk_use_utf8 = 1;
 
 struct charelem {
   char *name;
@@ -132,13 +130,24 @@ static int charcompi(SCM c1, SCM c2)
 }
 
 
+static void dump_utf8_str(char *str)
+{
+  printf("Dump of '%s' (len = %d)\n", str, strlen(str));
+  while (*str) {
+    printf("%03d %02x ", (uint8_t) *str, (uint8_t) *str);
+    str++;
+  }
+  printf("---\n");
+}
+
 int STk_string2char(char *s)
 /* converts a char name to a char */
 {
   register struct charelem *p;
-  int val = STk_utf82char((uint8_t *) s);
+  int val;
 
-  if (val >= 0) return val;
+  if (* (STk_utf8_grab_char(s, &val)) == '\0') return val;
+
   for (p=chartable; *(p->name); p++) {
     if (my_strcmpi(p->name, s) == 0) return (int) (p->value);
   }
@@ -156,59 +165,6 @@ char *STk_char2string(char c)  		/* convert a char to it's */
 
   /* If we are here it's a "normal" char */
   return NULL;
-}
-
-int STk_utf82char(uint8_t *buff)
-{
-  if (((buff[0] & 0x80) == 0) && (buff[1] == '\0'))
-    return buff[0];
-
-  if ((buff[0] < 0xc0) || (buff[0] > 0xf7))
-    return -1;
-
-  if ((buff[0] < 0xe0) && (buff[2] == '\0'))
-    return ((buff[0] & 0x3f) << 6) + (buff[1] & 0x3f);
-
-  if ((buff[0] < 0xf0) && buff[3] == '\0')
-    return ((buff[0] & 0x1f) << 12) +
-           ((buff[1] & 0x3f) <<  6) +
-	    (buff[2] & 0x3f);
-
-  if (buff[4] == '\0')
-    return ((buff[0] & 0x0f) << 16) +
-           ((buff[1] & 0x3f) <<  6) +
-           ((buff[2] & 0x3f) <<  6) +
-	    (buff[3] & 0x3f);
-
-  return -1;
-}
-
-char *STk_char2utf8(int ch, uint8_t *buff)
-{
-  register int n  = 0;
-  char *start = (char *) buff;
-
-  if (ch < 0x80) {
-    *buff++ = ch;
-    n = 1;
-  } else if (ch < 0x800) {
-    *buff++ = (ch >> 6) | 0xc0;
-    *buff++ = (ch & 0x3f) | 0x80;
-    n = 2;
-  } else if (ch < 0x10000) {
-    *buff++ = (ch >> 12) | 0xe0;
-    *buff++ = ((ch >> 6) & 0x3f) | 0x80;
-    *buff++ = (ch & 0x3f) | 0x80;
-    n = 3;
-  } else if (ch < 0x110000) {
-    *buff++ = (ch >> 18) | 0xF0;
-    *buff++ = ((ch >> 12) & 0x3F) | 0x80;
-    *buff++ = ((ch >> 6)  & 0x3F) | 0x80;
-    *buff++ = (ch & 0x3F) | 0x80;
-    n = 4;
-  }
-  *buff = '\0';
-  return start;
 }
 
 
@@ -290,13 +246,13 @@ CHAR_COMPARE("char-ci>=?", chargei, (charcompi(c1,c2) >= 0))
 /*=============================================================================*/
 
 
-#define TEST_CTYPE(tst, name)                                                      \
-   DEFINE_PRIMITIVE(name, CPP_CONCAT(char_is, tst), subr1, (SCM c))                \
-   {                                                                               \
-     if (!CHARACTERP(c)) error_bad_char(c);                                        \
-     return STk_use_utf8 ?                                                         \
-              MAKE_BOOLEAN(CPP_CONCAT(isw, tst)(CHARACTER_VAL((unsigned char)c))): \
-              MAKE_BOOLEAN(CPP_CONCAT(is,  tst)(CHARACTER_VAL(c)));                \
+#define TEST_CTYPE(tst, name)                                                       \
+   DEFINE_PRIMITIVE(name, CPP_CONCAT(char_is, tst), subr1, (SCM c))                 \
+   {                                                                                \
+     if (!CHARACTERP(c)) error_bad_char(c);                                         \
+     return STk_use_utf8 ?                                                          \
+              MAKE_BOOLEAN(CPP_CONCAT(isw, tst)(CHARACTER_VAL(c))):                 \
+              MAKE_BOOLEAN(CPP_CONCAT(is,  tst)((unsigned char) CHARACTER_VAL(c))); \
    }
 
 /*
@@ -423,5 +379,6 @@ int STk_init_char(void)
 
   ADD_PRIMITIVE(char_upcase);
   ADD_PRIMITIVE(char_downcase);
+
   return TRUE;
 }

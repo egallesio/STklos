@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 24-Apr-2011 11:30 (eg)
+ * Last file update:  1-May-2011 22:29 (eg)
  */
 
 
@@ -370,11 +370,6 @@ int STk_init_box(void);
 char *STk_char2string(char c);
 int STk_string2char(char *s);
 int STk_init_char(void);
-
-char *STk_char2utf8(int ch, uint8_t *buff);
-int STk_utf82char(uint8_t *buff);
-
-extern int STk_use_utf8;
 
 
 /*
@@ -1245,6 +1240,25 @@ EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
 EXTERN_PRIMITIVE("current-thread", current_thread, subr0, (void));
 int STk_init_threads(int stack_size, void *start_stack);
 int STk_init_mutexes(void);
+
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ---- 				 U T F 8  . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+
+extern int STk_use_utf8;
+
+char *STk_utf8_grab_char(char *str, int *c); /* result = pos. after current one */
+int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
+int STk_utf8_char_length(int ch);
+int STk_utf8_read_char(SCM port);
+
+int STk_init_utf8(void);
+
+
 
 /*
   ------------------------------------------------------------------------------

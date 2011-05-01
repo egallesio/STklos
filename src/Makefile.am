@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 18-Apr-2011 23:49 (eg)
+# Last file update: 30-Apr-2011 23:54 (eg)
 
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -33,7 +33,7 @@ stklos_SOURCES = base64.c blob.c boolean.c boot.c box.c char.c cond.c \
  list.c misc.c md5.c number.c object.c parameter.c \
  path.c port.c print.c proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
- symbol.c system.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
+ symbol.c system.c utf8.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
 
 
 ### # The STklos library
