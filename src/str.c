@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  5-May-2011 18:00 (eg)
+ * Last file update:  5-May-2011 18:07 (eg)
  */
 
 #include <ctype.h>
@@ -137,8 +137,13 @@ SCM STk_makestring(int len, char *init)
   STRING_CHARS(z) = STk_must_malloc_atomic(len + 1);
   STRING_SPACE(z) = STRING_SIZE(z) = STRING_LENGTH(z) = len;
 
-  if (init) memcpy(STRING_CHARS(z), init, (size_t) len);
-  STRING_CHARS(z)[len] = '\0'; /* so that STRING_CHARS is compatible with C */
+  if (init) {
+    memcpy(STRING_CHARS(z), init, (size_t) len);
+    STRING_CHARS(z)[len] = '\0'; /* so that STRING_CHARS is compatible with C */
+  }
+  else
+    bzero(STRING_CHARS(z), len+1);
+
   return z;
 }
 
