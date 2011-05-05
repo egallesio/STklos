@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  5-May-2011 17:56 (eg)
+ * Last file update:  5-May-2011 23:35 (eg)
  */
 
 
@@ -1255,7 +1255,7 @@ extern int STk_use_utf8;
 
 char *STk_utf8_grab_char(char *str, int *c); /* result = pos. after current one */
 int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
-int STk_utf8_char_length(int ch);
+int STk_utf8_strlen(char *s, int max);
 int STk_utf8_read_char(SCM port);
 
 int STk_init_utf8(void);

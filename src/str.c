@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  5-May-2011 18:07 (eg)
+ * Last file update:  5-May-2011 23:53 (eg)
  */
 
 #include <ctype.h>
@@ -140,6 +140,10 @@ SCM STk_makestring(int len, char *init)
   if (init) {
     memcpy(STRING_CHARS(z), init, (size_t) len);
     STRING_CHARS(z)[len] = '\0'; /* so that STRING_CHARS is compatible with C */
+
+    if (STk_use_utf8)
+      /* Eventually correct the length to be in charcaters instead of bytes */
+      STRING_LENGTH(z) = STk_utf8_strlen(STRING_CHARS(z), len);
   }
   else
     bzero(STRING_CHARS(z), len+1);
@@ -200,24 +204,49 @@ doc>
 DEFINE_PRIMITIVE("make-string", make_string, subr12, (SCM len, SCM init_char))
 {
   long k = STk_integer_value(len);
-  SCM z;
 
   if (k < 0) STk_error("bad string length: ~S", len);
 
-  z = STk_makestring(k, NULL);
-
   if (init_char) {
-    if (CHARACTERP(init_char)) {
-      char c  = CHARACTER_VAL(init_char);
-      char *s = STRING_CHARS(z);
+    SCM z = STk_void;
 
-      while (k--) *s++ = c;
+    if (! CHARACTERP(init_char))
+      STk_error("initializing char ~S is not valid", init_char);
+    else {
+      char *s, buff[5];
+      int c = CHARACTER_VAL(init_char);
+
+      if (STk_use_utf8 && c >= 0x80) {
+	/* unicode character */
+	int n = STk_char2utf8(c, buff);
+
+	z = STk_makestring(k * n, NULL);
+	s = STRING_CHARS(z);
+	STRING_LENGTH(z) = k; /* incorrectly set to  k*n before */
+
+	while (k--) {
+	  *s++ = buff[0];
+	  if (!buff[1]) continue;
+	  *s++ = buff[1];
+	  if (!buff[2]) continue;
+	  *s++ = buff[2];
+	  if (!buff[3]) continue;
+	  *s++ = buff[3];
+	}
+      } else {
+	/* non unicode character */
+	z = STk_makestring(k, NULL);
+	s = STRING_CHARS(z);
+
+	while (k--) *s++ = c;
+      }
     }
-    else STk_error("initializing char ~S is not valid", init_char);
+    return z;
   }
-  return z;
+  else
+    /* No initialization character */
+    return STk_makestring(k, NULL);
 }
-
 
 /*
 <doc  string
@@ -230,14 +259,35 @@ DEFINE_PRIMITIVE("string", string, vsubr, (int argc, SCM* argv))
 {
   SCM z;
   char *s;
+  int i, space;
+  char buff[5];
 
-  z = STk_makestring(argc, NULL);
+  for (space = i = 0; i < argc; i++) {
+    if (!CHARACTERP(argv[-i])) error_bad_character(argv[-i]);
+    /* compute the size that must be allocated */
+    if (STk_use_utf8)
+      space += STk_char2utf8(CHARACTER_VAL(argv[-i]), buff);
+    else
+      if (CHARACTER_VAL(argv[-i]) > 255)
+	STk_error("character ~S is too big", argv[-i]);
+      else
+	space += 1;
+  }
+
+  z = STk_makestring(space, NULL);
+  STRING_LENGTH(z) = argc;	/* correct the length */
 
   /* copy element in newly allocated string */
-  for (s=STRING_CHARS(z); argc--; s++, argv--) {
-    if (!CHARACTERP(*argv)) error_bad_character(*argv);
-    *s = CHARACTER_VAL(*argv);
+  for (s=STRING_CHARS(z); argc--; argv--) {
+    if (STk_use_utf8) {
+      int n = STk_char2utf8(CHARACTER_VAL(*argv), buff);
+      memcpy(s, buff, n);
+      s += n;
+    } else
+      *s++ = CHARACTER_VAL(*argv);
   }
+  *s = '\0';
+
   return z;
 }
 
@@ -252,7 +302,7 @@ doc>
 DEFINE_PRIMITIVE("string-length", string_length, subr1, (SCM str))
 {
   if (!STRINGP(str)) error_bad_string(str);
-  return MAKE_INT(STRING_SIZE(str));
+  return MAKE_INT(STRING_LENGTH(str));
 }
 
 
