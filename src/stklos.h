@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  1-May-2011 22:29 (eg)
+ * Last file update:  5-May-2011 17:56 (eg)
  */
 
 
@@ -1154,17 +1154,19 @@ int STk_init_socket(void);
 */
 struct string_obj {
   stk_header header;
-  int size;
-  char chars[1];   /* will be sized to a different value when allocated */
+  int space;		/* allocated size  */
+  int size;		/* # of bytes used */
+  int length;		/* "external" length of the string */
+  char *chars;
 };
 
+#define STRING_SPACE(p)  (((struct string_obj *) (p))->space)
 #define STRING_SIZE(p)   (((struct string_obj *) (p))->size)
+#define STRING_LENGTH(p) (((struct string_obj *) (p))->length)
 #define STRING_CHARS(p)	 (((struct string_obj *) (p))->chars)
 #define STRINGP(p)	 (BOXED_TYPE_EQ((p), tc_string))
 
 #define STRING_CONST	 (1 << 0)
-
-#define BOX_CSTRING(s)	 STk_makestring(strlen(s), (s))
 
 
 SCM STk_makestring(int len, char *init);

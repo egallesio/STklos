@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  5-May-2011 15:55 (eg)
+ * Last file update:  5-May-2011 18:00 (eg)
  */
 
 #include <ctype.h>
@@ -133,8 +133,9 @@ SCM STk_makestring(int len, char *init)
 {
   register SCM z;
 
-  NEWCELL_ATOMIC(z, string, sizeof(struct string_obj) + len);
-  STRING_SIZE(z) = len;
+  NEWCELL(z, string);
+  STRING_CHARS(z) = STk_must_malloc_atomic(len + 1);
+  STRING_SPACE(z) = STRING_SIZE(z) = STRING_LENGTH(z) = len;
 
   if (init) memcpy(STRING_CHARS(z), init, (size_t) len);
   STRING_CHARS(z)[len] = '\0'; /* so that STRING_CHARS is compatible with C */
@@ -147,8 +148,9 @@ SCM STk_Cstring2string(char *str) /* Embed a C string in Scheme world  */
   SCM  z;
   size_t len = strlen(str);
 
-  NEWCELL_ATOMIC(z, string, sizeof(struct string_obj) + len);
-  STRING_SIZE(z) = len;
+  NEWCELL(z, string);
+  STRING_CHARS(z) = STk_must_malloc_atomic(len + 1);
+  STRING_SPACE(z) = STRING_SIZE(z) = STRING_LENGTH(z) = len;
   strcpy(STRING_CHARS(z), str);
 
   return z;
@@ -159,8 +161,9 @@ SCM STk_chars2string(char *str, size_t len)
 {
   SCM  z;
 
-  NEWCELL_ATOMIC(z, string, sizeof(struct string_obj) + len);
-  STRING_SIZE(z) = len;
+  NEWCELL(z, string);
+  STRING_CHARS(z) = STk_must_malloc_atomic(len + 1);
+  STRING_SPACE(z) = STRING_SIZE(z) = STRING_LENGTH(z) = len;
   memcpy(STRING_CHARS(z), str, len);
   STRING_CHARS(z)[len] = '\0'; /* so that STRING_CHARS is compatible with C */
   return z;
