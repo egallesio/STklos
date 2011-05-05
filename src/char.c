@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update:  1-May-2011 12:35 (eg)
+ * Last file update:  5-May-2011 17:50 (eg)
  */
 
 #include <ctype.h>
@@ -129,16 +129,6 @@ static int charcompi(SCM c1, SCM c2)
 	  tolower((unsigned char) CHARACTER_VAL(c2)));
 }
 
-
-static void dump_utf8_str(char *str)
-{
-  printf("Dump of '%s' (len = %d)\n", str, strlen(str));
-  while (*str) {
-    printf("%03d %02x ", (uint8_t) *str, (uint8_t) *str);
-    str++;
-  }
-  printf("---\n");
-}
 
 int STk_string2char(char *s)
 /* converts a char name to a char */

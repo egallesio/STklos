@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update:  5-May-2011 16:04 (eg)
+ * Last file update:  5-May-2011 17:51 (eg)
  */
 
 #include "stklos.h"
@@ -110,6 +110,7 @@ int STk_char2utf8(int ch, char *str) /* result = length of the UTF-8 repr. */
     *buff++ = (ch & 0x3F) | 0x80;
     n = 4;
   } else {
+    n = 0; /* to make gcc happy */
     STk_error("bad UTF-8 character %d", ch);
   }
   *buff = '\0';
@@ -138,6 +139,17 @@ int STk_utf8_strlen(char *s, int max)
 }
 
 
+#ifdef STK_DEBUG
+void STk_dump_utf8_str(char *str)
+{
+  printf("Dump of '%s' (len = %d)\n", str, strlen(str));
+  while (*str) {
+    printf("%03d %02x ", (uint8_t) *str, (uint8_t) *str);
+    str++;
+  }
+  printf("---\n");
+}
+#endif
 
 /* ======================================================================
  *	STklos Primitives

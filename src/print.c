@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 22-Apr-2011 14:39 (eg)
+ * Last file update:  5-May-2011 16:14 (eg)
  *
  */
 #include <ctype.h>
@@ -122,7 +122,10 @@ static void printstring(SCM s, SCM port, int mode)
         case '\v' : *buff++ = '\\'; *buff++ = 'v'; break;
         case '"'  :
         case '\\' : *buff++ = '\\'; *buff++ = *p;  break;
-      default   : if ((((unsigned char) *p) & 0177) < (unsigned char) ' ') {
+      default   : if (STk_use_utf8)
+		    *buff++ = *p;
+		  else {
+		    if ((((unsigned char) *p) & 0177) < (unsigned char) ' ') {
 	  	      /* Non printable character (It works only for ISO 8859-x !!) */
 	  	      *buff++ = '\\';
 	  	      *buff++ = 'x';
@@ -130,6 +133,7 @@ static void printstring(SCM s, SCM port, int mode)
 		      *buff++ = printhexa((unsigned char) *p % 16);
 		    }
 		    else *buff++ = *p;
+		  }
       }
     }
     *buff++ = '"';
@@ -163,7 +167,7 @@ void STk_print(SCM exp, SCM port, int mode)
   }
 
   if (CHARACTERP(exp)) {
-    uint8_t buffer[5];
+    char buffer[5];
     int c = CHARACTER_VAL(exp);
 
     if (mode!=DSP_MODE){
