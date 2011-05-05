@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update:  1-May-2011 22:29 (eg)
+ * Last file update:  5-May-2011 16:04 (eg)
  */
 
 #include "stklos.h"
@@ -88,7 +88,7 @@ int STk_utf8_read_char(SCM port)
 
 int STk_char2utf8(int ch, char *str) /* result = length of the UTF-8 repr. */
 {
-  uint8_t *buff = str;
+  uint8_t *buff = (uint8_t *)str;
   int n;
 
   if (ch < 0x80) {
@@ -117,13 +117,24 @@ int STk_char2utf8(int ch, char *str) /* result = length of the UTF-8 repr. */
   return n;
 }
 
-int STk_utf8_char_length(int ch)
+static int utf8_char_length(uint8_t ch)
 {
   if (ch < 0x80)	return 1;
   if (ch < 0x800)	return 2;
   if (ch < 0x10000)	return 3;
   if (ch < 0x110000)	return 4;
-  return -1;
+  return 1; /* to avoid infinite loop, but obiously incorrect */
+}
+
+int STk_utf8_strlen(char *s, int max)
+{
+  int len;
+  char *end = s + max;
+
+  for (len = 0;  (s < end) && *s; len++) {
+    s += utf8_char_length(*s);
+  }
+  return len;
 }
 
 
@@ -135,7 +146,7 @@ int STk_utf8_char_length(int ch)
 DEFINE_PRIMITIVE("%char-utf8-encoding", char_utf8_encoding, subr1, (SCM c))
 {
   SCM lst = STk_nil;
-  uint8_t buffer[5];
+  char buffer[5];
   int i;
 
   if (!CHARACTERP(c)) STk_error("bad char ~S", c);

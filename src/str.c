@@ -2,34 +2,34 @@
  *
  * s t r . c				-- Strings management
  *
- * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  2-Jan-2006 13:10 (eg)
+ * Last file update:  5-May-2011 15:55 (eg)
  */
 
 #include <ctype.h>
 #include "stklos.h"
 
 /*
- * Utilities 
+ * Utilities
  *
  */
 
@@ -54,15 +54,15 @@ static int stringcomp(SCM s1, SCM s2)
   register int l1, l2;
   register char *str1, *str2;
 
-  if (!STRINGP(s1)) error_bad_string(s1); 
+  if (!STRINGP(s1)) error_bad_string(s1);
   if (!STRINGP(s2)) error_bad_string(s2);
 
-  for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1), 
+  for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
 	 l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
        l1 && l2;
        l1--, str1++, l2--, str2++)
     if (*str1 != *str2) return ((unsigned char) *str1 - (unsigned char) *str2);
-  
+
   /* l1 == 0 || l2 == 0 */
   return l1 ? +1 : (l2 ? -1 : 0);
 }
@@ -73,10 +73,10 @@ static int stringcompi(SCM s1, SCM s2)
   register int l1, l2;
   register char *str1, *str2;
 
-  if (!STRINGP(s1)) error_bad_string(s1); 
+  if (!STRINGP(s1)) error_bad_string(s1);
   if (!STRINGP(s2)) error_bad_string(s2);
 
-  for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1), 
+  for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
 	 l2=STRING_SIZE(s2), str2=STRING_CHARS(s2);
        l1 && l2;
        l1--, str1++, l2--, str2++)
@@ -96,7 +96,7 @@ static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
   switch (argc) {
   case 1: s = argv[0]; break;
   case 2: s = argv[0]; start = STk_integer_value(argv[-1]); break;
-  case 3: s = argv[0]; start = STk_integer_value(argv[-1]); 
+  case 3: s = argv[0]; start = STk_integer_value(argv[-1]);
 	  end = STk_integer_value(argv[-2]); break;
   default: STk_error("incorrect number of argument (%d)", argc);
   }
@@ -109,7 +109,7 @@ static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
   if (start == LONG_MIN || start < 0 || start > len)
     /* argc cannot be 1 (start would be 0) */
     STk_error("bad starting index ~S", argv[(argc==2) ? 0 : -1]);
-	      
+
   /* controling end index */
   if (end == -1)
     end = len;
@@ -118,7 +118,7 @@ static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
       /* We have an end index ==> argc = 3 */
       STk_error("bad ending index ~S", argv[0]);
 
-  if (start > end) 
+  if (start > end)
     STk_error("low index is greater than high index");
 
   /* everything is correct, return values */
@@ -137,7 +137,7 @@ SCM STk_makestring(int len, char *init)
   STRING_SIZE(z) = len;
 
   if (init) memcpy(STRING_CHARS(z), init, (size_t) len);
-  STRING_CHARS(z)[len] = '\0'; /* so that STRING_CHARS is compatible with C */ 
+  STRING_CHARS(z)[len] = '\0'; /* so that STRING_CHARS is compatible with C */
   return z;
 }
 
@@ -162,7 +162,7 @@ SCM STk_chars2string(char *str, size_t len)
   NEWCELL_ATOMIC(z, string, sizeof(struct string_obj) + len);
   STRING_SIZE(z) = len;
   memcpy(STRING_CHARS(z), str, len);
-  STRING_CHARS(z)[len] = '\0'; /* so that STRING_CHARS is compatible with C */ 
+  STRING_CHARS(z)[len] = '\0'; /* so that STRING_CHARS is compatible with C */
   return z;
 }
 
@@ -173,7 +173,7 @@ DEFINE_PRIMITIVE("string?", stringp, subr1, (SCM obj))
  * (string? obj)
  *
  * Returns |#t| if |obj| is a string, otherwise returns |#f|.
-doc> 
+doc>
 */
 {
   return MAKE_BOOLEAN(STRINGP(obj));
@@ -193,18 +193,18 @@ DEFINE_PRIMITIVE("make-string", make_string, subr12, (SCM len, SCM init_char))
 {
   long k = STk_integer_value(len);
   SCM z;
- 
+
   if (k < 0) STk_error("bad string length: ~S", len);
-  
+
   z = STk_makestring(k, NULL);
-  
+
   if (init_char) {
     if (CHARACTERP(init_char)) {
       char c  = CHARACTER_VAL(init_char);
       char *s = STRING_CHARS(z);
-      
+
       while (k--) *s++ = c;
-    } 
+    }
     else STk_error("initializing char ~S is not valid", init_char);
   }
   return z;
@@ -222,9 +222,9 @@ DEFINE_PRIMITIVE("string", string, vsubr, (int argc, SCM* argv))
 {
   SCM z;
   char *s;
-  
+
   z = STk_makestring(argc, NULL);
- 
+
   /* copy element in newly allocated string */
   for (s=STRING_CHARS(z); argc--; s++, argv--) {
     if (!CHARACTERP(*argv)) error_bad_character(*argv);
@@ -260,11 +260,11 @@ DEFINE_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index))
 {
   long k = STk_integer_value(index);
 
-  if (!STRINGP(str)) 
+  if (!STRINGP(str))
     error_bad_string(str);
-  if (k < 0 || k >= STRING_SIZE(str)) 
+  if (k < 0 || k >= STRING_SIZE(str))
     STk_error("index ~S out of bound in string ~S", index, str);
-  
+
   return MAKE_CHARACTER(STRING_CHARS(str)[k]);
 }
 
@@ -273,15 +273,15 @@ DEFINE_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index))
 <doc  string-set!
  * (string-set! string k char)
  *
- * |String-set!| stores |char| in element |k| of |string| and returns 
- * ,(emph "void") (|k| must be a valid index of |string|). 
- * 
+ * |String-set!| stores |char| in element |k| of |string| and returns
+ * ,(emph "void") (|k| must be a valid index of |string|).
+ *
  * @lisp
  * (define (f) (make-string 3 #\*))
  * (define (g) "***")
  * (string-set! (f) 0 #\?)  =>  void
  * (string-set! (g) 0 #\?)  =>  error
- * (string-set! (symbol->string 'immutable) 0 #\?)  
+ * (string-set! (symbol->string 'immutable) 0 #\?)
  *                          =>  error
  * @end lisp
 doc>
@@ -293,7 +293,7 @@ DEFINE_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM valu
   if (!STRINGP(str))    	      error_bad_string(str);
   if (BOXED_INFO(str) & STRING_CONST) error_change_const_string(str);
 
-  if (k < 0 || k >= STRING_SIZE(str)) 
+  if (k < 0 || k >= STRING_SIZE(str))
     STk_error("index ~S out of bound in string ~S", index, str);
 
   STRING_CHARS(str)[k] = CHARACTER_VAL(value);
@@ -301,7 +301,7 @@ DEFINE_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM valu
 }
 
 /*
-<doc string=? string-ci=? 
+<doc string=? string-ci=?
  * (string=? string1 string2)
  * (string-ci=? string1 string2)
  *
@@ -371,7 +371,7 @@ DEFINE_PRIMITIVE("string-ci>=?", strgei, subr2, (SCM s1, SCM s2))
 <doc  substring
  * (substring string start end)
  *
- * |String| must be a string, and |start| and |end| must be exact integers 
+ * |String| must be a string, and |start| and |end| must be exact integers
  * satisfying
  * @lisp
  * 0 <= start <= end <= (string-length string).
@@ -388,7 +388,7 @@ DEFINE_PRIMITIVE("substring", substring, subr3, (SCM string, SCM start, SCM end)
 
   if (!STRINGP(string)) error_bad_string(string);
 
-  from = STk_integer_value(start); 
+  from = STk_integer_value(start);
   to   = STk_integer_value(end);
 
   if (from == LONG_MIN) STk_error("bad lower index ~S", start);
@@ -425,7 +425,7 @@ DEFINE_PRIMITIVE("string-append", string_append, vsubr, (int argc, SCM* argv))
   /* Allocate result */
   z = STk_makestring(total, NULL);
   p = STRING_CHARS(z);
-  
+
   /* copy strings */
   for (i = 0; i < argc; i++) {
     memcpy(p, STRING_CHARS(*argv), (unsigned int) STRING_SIZE(*argv));
@@ -442,7 +442,7 @@ DEFINE_PRIMITIVE("string-append", string_append, vsubr, (int argc, SCM* argv))
  * (list->string list)
  *
  * |String->list| returns a newly allocated list of the characters that make
- * up the given string. |List->string| returns a newly allocated string 
+ * up the given string. |List->string| returns a newly allocated string
  * formed from the characters in the list |list|, which must be a list of
  * characters. |String->list| and |list->string| are inverses so far as
  * |equal?| is concerned.
@@ -465,18 +465,18 @@ DEFINE_PRIMITIVE("string->list", string2list, subr1, (SCM str))
     tmp1 = STk_cons(MAKE_CHARACTER(*s++), STk_nil);
     if (z == STk_nil)
       tmp = z = tmp1;
-    else 
+    else
       tmp = CDR(tmp) = tmp1;
   }
   return z;
 }
- 
+
 DEFINE_PRIMITIVE("list->string", list2string, subr1, (SCM l))
 {
   int len = STk_int_length(l);
   register char *s;
   SCM z;
-  
+
   if (len < 0) STk_error("bad list ~S", l);
   z = STk_makestring(len, NULL);
   s = STRING_CHARS(z);
@@ -514,7 +514,7 @@ DEFINE_PRIMITIVE("string-fill!", string_fill, subr2, (SCM str, SCM c))
 {
   int len;
   char c_char, *s;
-  
+
   if (!STRINGP(str))  		      error_bad_string(str);
   if (!CHARACTERP(c)) 		      error_bad_character(c);
   if (BOXED_INFO(str) & STRING_CONST) error_change_const_string(str);
@@ -531,7 +531,7 @@ DEFINE_PRIMITIVE("string-fill!", string_fill, subr2, (SCM str, SCM c))
 
 
 /*
- * 
+ *
  * STk bonus
  *
  */
@@ -557,8 +557,8 @@ DEFINE_PRIMITIVE("string-find?", string_find, subr2, (SCM s1, SCM s2))
 {
   if (!STRINGP(s1)) error_bad_string(s1);
   if (!STRINGP(s2)) error_bad_string(s2);
-  
-  return MAKE_BOOLEAN(Memmem(STRING_CHARS(s2), STRING_SIZE(s2), 
+
+  return MAKE_BOOLEAN(Memmem(STRING_CHARS(s2), STRING_SIZE(s2),
 			     STRING_CHARS(s1), STRING_SIZE(s1)));
 }
 
@@ -580,7 +580,7 @@ DEFINE_PRIMITIVE("string-index", string_index, subr2, (SCM s1, SCM s2))
 
   if (!STRINGP(s1)) error_bad_string(s1);
   if (!STRINGP(s2)) error_bad_string(s2);
-  
+
   p = Memmem(STRING_CHARS(s2), STRING_SIZE(s2),
 	     STRING_CHARS(s1), STRING_SIZE(s1));
 
@@ -594,12 +594,12 @@ DEFINE_PRIMITIVE("string-index", string_index, subr2, (SCM s1, SCM s2))
  * (string-split str delimiters)
  *
  * parses |string| and returns a list of tokens ended by a character of the
- * |delimiters| string. If |delimiters| is omitted, it defaults to a string 
- * containing a space, a tabulation and a newline characters. 
+ * |delimiters| string. If |delimiters| is omitted, it defaults to a string
+ * containing a space, a tabulation and a newline characters.
  * @lisp
- * (string-split "/usr/local/bin" "/") 
+ * (string-split "/usr/local/bin" "/")
  *                        => ("usr" "local" "bin")
- * (string-split "once   upon a time") 
+ * (string-split "once   upon a time")
  *                        => ("once" "upon" "a" "time")
  * @end lisp
 doc>
@@ -609,7 +609,7 @@ DEFINE_PRIMITIVE("string-split", string_split, subr12, (SCM string, SCM delimite
   SCM result = STk_nil;
   char *c_string, *c_delimiters, *s;
   int i, l_string, l_delimiters;
-  
+
   if (!STRINGP(string)) error_bad_string(string);
   c_string = STRING_CHARS(string);
   l_string = STRING_SIZE(string);
@@ -626,12 +626,12 @@ DEFINE_PRIMITIVE("string-split", string_split, subr12, (SCM string, SCM delimite
   for (s=c_string, i=0; i < l_string; s++, i++) {
     if (memchr(c_delimiters, *s, l_delimiters)) {
       if (s > c_string)
-	result = STk_cons(STk_makestring(s-c_string, c_string), 
+	result = STk_cons(STk_makestring(s-c_string, c_string),
 			  result);
       c_string = s + 1;
     }
   }
-  if (s > c_string) 
+  if (s > c_string)
     result = STk_cons(STk_makestring(s-c_string, c_string),
 		      result);
 
@@ -641,8 +641,8 @@ DEFINE_PRIMITIVE("string-split", string_split, subr12, (SCM string, SCM delimite
 /*
 <doc EXT string-mutable?
  * (string-mutable? obj)
- * 
- * Returns |#t| if |obj| is a mutable string, otherwise returns |#f|. 
+ *
+ * Returns |#t| if |obj| is a mutable string, otherwise returns |#f|.
  * @lisp
  * (string-mutable? "abc")                => #f
  * (string-mutable? (string-copy "abc"))  => #t
@@ -663,10 +663,10 @@ DEFINE_PRIMITIVE("string-mutable?", string_mutable, subr1, (SCM obj))
  * (string-downcase str start)
  * (string-downcase str start end)
  *
- * Returns a string in which the upper case letters of string |str| between the 
+ * Returns a string in which the upper case letters of string |str| between the
  * |start| and |end| indices have been replaced by their lower case equivalent.
  * If |start| is omited, it defaults to 0. If |end| is omited, it defaults to
- * the length of |str|. 
+ * the length of |str|.
  * @lisp
  * (string-downcase "Foo BAR")        => "foo bar"
  * (string-downcase "Foo BAR" 4)      => "bar"
@@ -683,8 +683,8 @@ DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv
   s    = control_index(argc, argv, &start, &end);
   endp = STRING_CHARS(s) + end;
   z    = STk_makestring(end-start, NULL);
-  
-  for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++) 
+
+  for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
     *q = tolower(*p);
   return z;
 }
@@ -694,8 +694,8 @@ DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv
  * (string-downcase! str)
  * (string-downcase! str start)
  * (string-downcase! str start end)
- * 
- * This is the in-place side-effecting variant of |string-downcase|. 
+ *
+ * This is the in-place side-effecting variant of |string-downcase|.
  * @lisp
  * (string-downcase! (string-copy "Foo BAR") 4)    => "Foo bar"
  * (string-downcase! (string-copy "Foo BAR") 4 6)  => "Foo baR"
@@ -712,7 +712,7 @@ DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
   if (BOXED_INFO(s) & STRING_CONST) error_change_const_string(s);
 
   endp = STRING_CHARS(s) + end;
-  
+
   for (p=STRING_CHARS(s)+start; p < endp; p++) *p = tolower(*p);
   return s;
 }
@@ -723,10 +723,10 @@ DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
  * (string-upcase str start)
  * (string-upcase str start end)
  *
- * Returns a string in which the lower case letters of string |str| between the 
+ * Returns a string in which the lower case letters of string |str| between the
  * |start| and |end| indices have been replaced by their upper case equivalent.
  * If |start| is omited, it defaults to 0. If |end| is omited, it defaults to
- * the length of |str|. 
+ * the length of |str|.
 doc>
  */
 DEFINE_PRIMITIVE("string-upcase", string_upcase, vsubr, (int argc, SCM *argv))
@@ -738,8 +738,8 @@ DEFINE_PRIMITIVE("string-upcase", string_upcase, vsubr, (int argc, SCM *argv))
   s    = control_index(argc, argv, &start, &end);
   endp = STRING_CHARS(s) + end;
   z    = STk_makestring(end-start, NULL);
-  
-  for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++) 
+
+  for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
     *q = toupper(*p);
   return z;
 }
@@ -750,7 +750,7 @@ DEFINE_PRIMITIVE("string-upcase", string_upcase, vsubr, (int argc, SCM *argv))
  * (string-upcase! str start)
  * (string-upcase! str start end)
  *
- * This is the in-place side-effecting variant of |string-upcase|. 
+ * This is the in-place side-effecting variant of |string-upcase|.
 doc>
 */
 DEFINE_PRIMITIVE("string-upcase!", string_dupcase, vsubr, (int argc, SCM *argv))
@@ -763,7 +763,7 @@ DEFINE_PRIMITIVE("string-upcase!", string_dupcase, vsubr, (int argc, SCM *argv))
   if (BOXED_INFO(s) & STRING_CONST) error_change_const_string(s);
 
   endp = STRING_CHARS(s) + end;
-  
+
   for (p=STRING_CHARS(s)+start; p < endp; p++) *p = toupper(*p);
   return s;
 }
@@ -777,18 +777,18 @@ DEFINE_PRIMITIVE("string-upcase!", string_dupcase, vsubr, (int argc, SCM *argv))
  *
  * This function returns a string.  For every character |c| in the
  * selected range of |str|, if |c| is preceded by a cased character, it
- * is downcased; otherwise it is titlecased. If |start| is omited, it 
- * defaults to 0. If |end| is omited, it defaults to the length of |str|. 
+ * is downcased; otherwise it is titlecased. If |start| is omited, it
+ * defaults to 0. If |end| is omited, it defaults to the length of |str|.
  * Note that if a |start| index is specified, then the character preceding
  * |s[start]| has no effect on the titlecase decision for character |s[start]|.
  * @lisp
- * (string-titlecase "--capitalize tHIS sentence.") 
+ * (string-titlecase "--capitalize tHIS sentence.")
  *          =>  "--Capitalize This Sentence."
- * (string-titlecase "see Spot run. see Nix run.") 
+ * (string-titlecase "see Spot run. see Nix run.")
  *          =>  "See Spot Run. See Nix Run."
- * (string-titlecase "3com makes routers.") 
+ * (string-titlecase "3com makes routers.")
  *          =>  "3Com Makes Routers."
- * (string-titlecase "greasy fried chicken" 2) 
+ * (string-titlecase "greasy fried chicken" 2)
  *          => "Easy Fried Chicken"
  * @end lisp
 doc>
@@ -808,7 +808,7 @@ DEFINE_PRIMITIVE("string-titlecase", string_titlecase, vsubr, (int argc, SCM *ar
     curr_is_sep = !(isalpha(*p));
     if (curr_is_sep)
       *q = *p;
-    else 
+    else
       *q = (prev_is_sep) ? toupper(*p) : tolower(*p);
     prev_is_sep = curr_is_sep;
   }
@@ -821,7 +821,7 @@ DEFINE_PRIMITIVE("string-titlecase", string_titlecase, vsubr, (int argc, SCM *ar
  * (string-titlecase! str start)
  * (string-titlecase! str start end)
  *
- * This is the in-place side-effecting variant of |string-titlecase|. 
+ * This is the in-place side-effecting variant of |string-titlecase|.
 doc>
 */
 DEFINE_PRIMITIVE("string-titlecase!", string_dtitlecase,vsubr,(int argc, SCM *argv))
@@ -849,10 +849,10 @@ DEFINE_PRIMITIVE("string-titlecase!", string_dtitlecase,vsubr,(int argc, SCM *ar
 /*
 <doc EXT string-blit!
  * (string-blit! s1 s2 offset)
- * 
- * This function places the characters of string |s2| in the string |s1| 
- * starting at position |offset|. The result of |string-blit!| may modify 
- * the string |s1|. Note that the characters of |s2| can be written after 
+ *
+ * This function places the characters of string |s2| in the string |s1|
+ * starting at position |offset|. The result of |string-blit!| may modify
+ * the string |s1|. Note that the characters of |s2| can be written after
  * the end of |s1| (in which case a new string is allocated).
  * @lisp
  * (string-blit! (make-string 6 #\X) "abc" 2)
@@ -879,7 +879,7 @@ DEFINE_PRIMITIVE("string-blit!", string_blit, subr3,
 
   len1 = STRING_SIZE(str1);
   len2 = STRING_SIZE(str2);
-  
+
   if ((len1 == 0) && (off == 0))
     return str2;
   else if ((off + len2) < len1) {    /* str2 can be written in str1 */
@@ -890,7 +890,7 @@ DEFINE_PRIMITIVE("string-blit!", string_blit, subr3,
     int i, j = 0;
     SCM  new;
     char *snew, *sstr1, *sstr2;
-    
+
     new    = STk_makestring(newl, NULL);
     snew   = STRING_CHARS(new);
     sstr1  = STRING_CHARS(str1);
