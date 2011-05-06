@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  5-May-2011 23:35 (eg)
+ * Last file update:  6-May-2011 20:53 (eg)
  */
 
 
@@ -943,7 +943,6 @@ struct port_obj {
  **** 		sio.h primitives
  ****/
 
-#define UTF8_INCORRECT_SEQUENCE	(-2)
 
 int STk_readyp(SCM port);
 int STk_getc(SCM port);
@@ -1251,12 +1250,15 @@ int STk_init_mutexes(void);
   ------------------------------------------------------------------------------
 */
 
+#define UTF8_INCORRECT_SEQUENCE	(-2)
+
 extern int STk_use_utf8;
 
 char *STk_utf8_grab_char(char *str, int *c); /* result = pos. after current one */
 int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
 int STk_utf8_strlen(char *s, int max);
 int STk_utf8_read_char(SCM port);
+int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch*/
 
 int STk_init_utf8(void);
 

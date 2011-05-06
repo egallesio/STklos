@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  5-May-2011 23:53 (eg)
+ * Last file update:  6-May-2011 21:37 (eg)
  */
 
 #include <ctype.h>
@@ -323,7 +323,19 @@ DEFINE_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index))
   if (k < 0 || k >= STRING_SIZE(str))
     STk_error("index ~S out of bound in string ~S", index, str);
 
-  return MAKE_CHARACTER(STRING_CHARS(str)[k]);
+  if (STRING_SIZE(str) == STRING_LENGTH(str))
+    /* string doesn't contain multibytes chars */
+    return MAKE_CHARACTER(STRING_CHARS(str)[k]);
+  else {
+    /* We have multibytes chars */
+    int c;
+    char *s = STRING_CHARS(str);
+
+    do
+      s = STk_utf8_grab_char(s, &c);
+    while (k--);
+    return  MAKE_CHARACTER(c);
+  }
 }
 
 
@@ -509,18 +521,19 @@ doc>
 DEFINE_PRIMITIVE("string->list", string2list, subr1, (SCM str))
 {
   register char *s;
-  int len;
+  int len, c;
   SCM tmp, tmp1, z;
 
   if (!STRINGP(str)) error_bad_string(str);
 
-  len = STRING_SIZE(str);
+  len = STRING_LENGTH(str);
   s   = STRING_CHARS(str);
 
   tmp = z = STk_nil;
 
   while (len--) {
-    tmp1 = STk_cons(MAKE_CHARACTER(*s++), STk_nil);
+    s = STk_utf8_grab_char(s, &c);
+    tmp1 = STk_cons(MAKE_CHARACTER(c), STk_nil);
     if (z == STk_nil)
       tmp = z = tmp1;
     else
@@ -531,18 +544,26 @@ DEFINE_PRIMITIVE("string->list", string2list, subr1, (SCM str))
 
 DEFINE_PRIMITIVE("list->string", list2string, subr1, (SCM l))
 {
-  int len = STk_int_length(l);
+  int bytes = 0, len = STk_int_length(l);
   register char *s;
-  SCM z;
+  SCM z, tmp;
 
   if (len < 0) STk_error("bad list ~S", l);
-  z = STk_makestring(len, NULL);
+
+  /* compute the number of bytes needed */
+  for (tmp=l; !NULLP(tmp); tmp=CDR(tmp)) {
+    if (!CHARACTERP(CAR(tmp))) error_bad_character(CAR(tmp));
+    bytes += STk_utf8_char_bytes_needed(CHARACTER_VAL(CAR(tmp)));
+  }
+
+  z = STk_makestring(bytes, NULL);
   s = STRING_CHARS(z);
 
+  /* copy the characters in the newly allocated string */
   for ( ; !NULLP(l); l=CDR(l)) {
-    if (!CHARACTERP(CAR(l))) error_bad_character(CAR(l));
-    *s++ = CHARACTER_VAL(CAR(l));
+    s += STk_char2utf8(CHARACTER_VAL(CAR(l)), s);
   }
+  *s = '\0';
   return z;
 }
 

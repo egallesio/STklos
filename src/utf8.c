@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update:  5-May-2011 23:35 (eg)
+ * Last file update:  6-May-2011 20:52 (eg)
  */
 
 #include "stklos.h"
@@ -118,13 +118,24 @@ int STk_char2utf8(int ch, char *str) /* result = length of the UTF-8 repr. */
   return n;
 }
 
-static int utf8_char_length(uint8_t ch)
+int STk_utf8_char_bytes_needed(unsigned int ch)
 {
+  /* # of bytes needed ro represent character ch */
   if (ch < 0x80)	return 1;
   if (ch < 0x800)	return 2;
   if (ch < 0x10000)	return 3;
   if (ch < 0x110000)	return 4;
   return 1; /* to avoid infinite loop, but obiously incorrect */
+}
+
+static int utf8_sequence_length(uint8_t c)
+{
+  /* return length of a the UTF-8 sequence given its first byte */
+  if (c < 0x80)				return 1;
+  if ((c < 0xc0) || (c > 0xf7))		return UTF8_INCORRECT_SEQUENCE;
+  if (c < 0xe0)				return 2; 
+  if (c < 0xf0)				return 3;
+  return 4;
 }
 
 int STk_utf8_strlen(char *s, int max)
@@ -133,23 +144,11 @@ int STk_utf8_strlen(char *s, int max)
   char *end = s + max;
 
   for (len = 0;  (s < end) && *s; len++) {
-    s += utf8_char_length(*s);
+    s += utf8_sequence_length(*s);
   }
   return len;
 }
 
-
-#ifdef STK_DEBUG
-void STk_dump_utf8_str(char *str)
-{
-  printf("Dump of '%s' (len = %d)\n", str, strlen(str));
-  while (*str) {
-    printf("%03d %02x ", (uint8_t) *str, (uint8_t) *str);
-    str++;
-  }
-  printf("---\n");
-}
-#endif
 
 /* ======================================================================
  *	STklos Primitives
@@ -168,6 +167,31 @@ DEFINE_PRIMITIVE("%char-utf8-encoding", char_utf8_encoding, subr1, (SCM c))
     lst = STk_cons(MAKE_INT(buffer[i]), lst);
   return lst;
 }
+
+DEFINE_PRIMITIVE("%dump-string", dump_string, subr12, (SCM str, SCM index))
+{
+  int i, c;
+
+  STk_debug("String ~S. space=%d, size=%d, len =%d\n", str,
+	    STRING_SPACE(str), STRING_SIZE(str), STRING_LENGTH(str));
+
+  printf("[");
+  for (i=0; i < STRING_SIZE(str); i++)
+    printf(" %02x", (uint8_t) STRING_CHARS(str)[i]);
+  printf(" ]\n");
+
+  if (index) {
+    i = STk_integer_value(index);
+    printf("------\nChar starting at index %d\n", i);
+    STk_debug("  length of char = %d",
+	      utf8_sequence_length(STRING_CHARS(str)[i]));
+    STk_utf8_grab_char(STRING_CHARS(str)+i, &c);
+    STk_debug("   character is %d ~S", (unsigned) c, MAKE_CHARACTER(c));
+  }
+
+  return STk_void;
+}
+
 #endif
 
 
@@ -178,7 +202,7 @@ int STk_init_utf8(void)
 {
 #ifdef STK_DEBUG
   ADD_PRIMITIVE(char_utf8_encoding);
+  ADD_PRIMITIVE(dump_string);
 #endif
-
   return TRUE;
 }

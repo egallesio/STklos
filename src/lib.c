@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  5-Jan-2000 12:17 (eg)
- * Last file update: 18-Apr-2011 23:46 (eg)
+ * Last file update:  6-May-2011 20:01 (eg)
  */
 
 
@@ -37,6 +37,7 @@ STk_init_library(int *argc, char ***argv, int stack_size)
   void * start_stack;
 
   STk_get_stack_pointer(&start_stack);
+
 
   return
     STk_init_env()				&&
@@ -77,5 +78,8 @@ STk_init_library(int *argc, char ***argv, int stack_size)
     STk_init_box()				&&
     STk_init_blob()				&&
     STk_init_ffi()				&&
+#ifdef STK_DEBUG
+    STk_init_utf8()				&&
+#endif
     (STk_library_initialized = TRUE);
 }
