@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k			-- STklos Compiler
 ;;;;
-;;;; Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 23-Dec-2010 20:16 (eg)
+;;;; Last file update: 25-Jun-2011 09:54 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1015,7 +1015,7 @@ doc>
 				 (memq fct '(fx+ fx*)))	; commutative only
 			    (oper2 (if (eq? fct 'fx+)
 				       'IN-SINT-FXADD2
-				       'INT-SINT-FXMUL2)
+				       'IN-SINT-FXMUL2)
 				   b a))
 			   ((small-integer-constant? b)
 			    (oper2 (case fct
