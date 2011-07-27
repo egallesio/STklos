@@ -22,11 +22,17 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  6-May-2011 21:37 (eg)
+ * Last file update: 27-Jul-2011 17:02 (eg)
  */
 
 #include <ctype.h>
+#include <wctype.h>
 #include "stklos.h"
+
+/* min size added to a string when reallocated in a string-set! */
+#define UTF8_STRING_INCR	8
+
+#define STRING_MONOBYTE(str)	(STRING_LENGTH(str) == STRING_SIZE(str))
 
 /*
  * Utilities
@@ -48,6 +54,10 @@ static void error_change_const_string(SCM s)
   STk_error("changing the constant string ~s is not allowed", s);
 }
 
+static void error_index_out_of_bound(SCM str, SCM index)
+{
+  STk_error("index ~S out of bound in string ~S", index, str);
+}
 
 static int stringcomp(SCM s1, SCM s2)
 {
@@ -87,6 +97,7 @@ static int stringcompi(SCM s1, SCM s2)
   return l1 ? +1 : (l2 ? -1 : 0);
 }
 
+
 static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
 {
   SCM s = NULL;
@@ -103,7 +114,7 @@ static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
 
   /* Controlling s */
   if (!STRINGP(s)) error_bad_string(s);
-  len = STRING_SIZE(s);
+  len = STRING_LENGTH(s);
 
   /* Controling start index */
   if (start == LONG_MIN || start < 0 || start > len)
@@ -127,6 +138,47 @@ static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
   return s;
 }
 
+static uint32_t *string2int(char *s, int len, int *utf8_len, wint_t(*func)(wint_t))
+{
+  uint32_t ch, *tmp, *buff = STk_must_malloc_atomic(len * sizeof(uint32_t));
+  int space = 0;
+
+  for (tmp = buff; len--; tmp++) {
+    s      = STk_utf8_grab_char(s, &ch);
+    ch     = func(ch);
+    space += STk_utf8_char_bytes_needed(ch);
+    *tmp   = ch;
+  }
+
+  *utf8_len = space;
+  return buff;
+}
+
+static SCM make_string_from_int_array(uint32_t *buff, int len, int utf8_len)
+{
+  SCM z;
+  char *s, *end;
+
+  NEWCELL(z, string);
+  STRING_CHARS(z)  = s = STk_must_malloc_atomic(utf8_len + 1);
+  STRING_SPACE(z)  = STRING_SIZE(z) = utf8_len;
+  STRING_LENGTH(z) = len;
+
+  end = s + utf8_len;
+  while (s < end) {
+    s += STk_char2utf8(*buff++, s);
+  }
+  *s = '\0';
+
+ return z;
+}
+
+
+static void copy_array(uint32_t *buff, int len, char* from)
+{
+  while (len--)
+    from += STk_char2utf8(*buff++, from);
+}
 
 
 SCM STk_makestring(int len, char *init)
@@ -213,7 +265,7 @@ DEFINE_PRIMITIVE("make-string", make_string, subr12, (SCM len, SCM init_char))
     if (! CHARACTERP(init_char))
       STk_error("initializing char ~S is not valid", init_char);
     else {
-      char *s, buff[5];
+      char *s, buff[5] = {0};
       int c = CHARACTER_VAL(init_char);
 
       if (STk_use_utf8 && c >= 0x80) {
@@ -318,17 +370,15 @@ DEFINE_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index))
 {
   long k = STk_integer_value(index);
 
-  if (!STRINGP(str))
-    error_bad_string(str);
-  if (k < 0 || k >= STRING_SIZE(str))
-    STk_error("index ~S out of bound in string ~S", index, str);
+  if (!STRINGP(str))			error_bad_string(str);
+  if (k < 0 || k >= STRING_LENGTH(str)) error_index_out_of_bound(str, index);
 
-  if (STRING_SIZE(str) == STRING_LENGTH(str))
+  if (!STk_use_utf8 || (STRING_SIZE(str) == STRING_LENGTH(str)))
     /* string doesn't contain multibytes chars */
     return MAKE_CHARACTER(STRING_CHARS(str)[k]);
   else {
     /* We have multibytes chars */
-    int c;
+    uint32_t c;
     char *s = STRING_CHARS(str);
 
     do
@@ -359,14 +409,63 @@ doc>
 DEFINE_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM value))
 {
   long k = STk_integer_value(index);
+  int cval;
 
-  if (!STRINGP(str))    	      error_bad_string(str);
-  if (BOXED_INFO(str) & STRING_CONST) error_change_const_string(str);
+  if (!STRINGP(str))    	        error_bad_string(str);
+  if (BOXED_INFO(str) & STRING_CONST)   error_change_const_string(str);
+  if (!CHARACTERP(value))	        error_bad_character(value);
+  if (k < 0 || k >= STRING_LENGTH(str)) error_index_out_of_bound(str, index);
 
-  if (k < 0 || k >= STRING_SIZE(str))
-    STk_error("index ~S out of bound in string ~S", index, str);
 
-  STRING_CHARS(str)[k] = CHARACTER_VAL(value);
+  cval = CHARACTER_VAL(value);
+  if (!STk_use_utf8 || (STRING_MONOBYTE(str) &&
+			(STk_utf8_char_bytes_needed(cval) == 1)))
+    /* string doesn't contain multibytes chars and value is mono byte */
+    STRING_CHARS(str)[k] = cval;
+  else {
+    /* Multi bytes string. The following code could be better factorized */
+    char buffer[5];
+    char *start     = STRING_CHARS(str);
+    char *pos       = STk_utf8_index(start, k, STRING_SIZE(str));
+    int new_char_sz = STk_char2utf8(cval, buffer);
+    int old_char_sz = STk_utf8_sequence_length(pos);
+
+    if (old_char_sz < new_char_sz) {
+      /* new character has a longer representation than the old one */
+      if (STRING_LENGTH(str) + new_char_sz - old_char_sz >= STRING_SPACE(str)) {
+	/* not enough space; allocate some more bytes */
+	char *new = STk_must_malloc_atomic(STRING_SPACE(str) + UTF8_STRING_INCR + 1);
+
+	memcpy(new, start, pos - start);
+	memcpy(new + (pos - start), buffer, new_char_sz);
+	memcpy(new + (pos - start) + new_char_sz,
+	       pos + old_char_sz,
+	       start + STRING_SIZE(str) - pos + old_char_sz);
+	STRING_CHARS(str)  = new;
+	STRING_SPACE(str) += UTF8_STRING_INCR;
+      } else {
+	memmove(pos + new_char_sz,
+		pos + old_char_sz,
+		start + STRING_SIZE(str) - pos + old_char_sz);
+	memcpy(pos, buffer, new_char_sz);
+      }
+      STRING_SIZE(str) += new_char_sz - old_char_sz;
+    }
+    else if (old_char_sz > new_char_sz) {
+      /* old character has a longer representation than the old one */
+      memmove(pos + new_char_sz,
+	      pos + old_char_sz,
+	      start + STRING_SIZE(str) - pos + old_char_sz);
+      memcpy(pos, buffer, new_char_sz);
+      STRING_SIZE(str) += new_char_sz - old_char_sz;
+    }
+    else {
+      /* characters have the same number of bytes Replace character */
+      memcpy(pos, buffer, new_char_sz);
+    }
+    /* ensure that last character is a 0 for C compatibility */
+    STRING_CHARS(str)[STRING_SIZE(str)] = '\0';
+  }
   return STk_void;
 }
 
@@ -464,9 +563,25 @@ DEFINE_PRIMITIVE("substring", substring, subr3, (SCM string, SCM start, SCM end)
   if (from == LONG_MIN) STk_error("bad lower index ~S", start);
   if (to   == LONG_MIN) STk_error("bad upper index ~S", end);
 
-  if (0 <= from && from <= to && to <= STRING_SIZE(string))
-    return STk_makestring(to - from, STRING_CHARS(string)+from);
+  if (0 <= from && from <= to && to <= STRING_SIZE(string)) {
+    if (STRING_MONOBYTE(string))
+      return STk_makestring(to - from, STRING_CHARS(string)+from);
+    else {
+      /* multi-bytes string */
+      uint32_t c;
+      char *pfrom, *pto;
+      SCM z;
 
+      pto = pfrom = STk_utf8_index(STRING_CHARS(string), from, STRING_SIZE(string));
+
+      for ( ; from < to; from++)
+	pto = STk_utf8_grab_char(pto, &c);
+
+      z = STk_makestring(pto - pfrom, pfrom);
+      STRING_LENGTH(z) = STk_utf8_strlen(STRING_CHARS(z), pto-pfrom);
+      return z;
+    }
+  }
   STk_error("index ~S or ~S incorrect", start, end);
   return STk_void; /* cannot occur */
 }
@@ -497,11 +612,14 @@ DEFINE_PRIMITIVE("string-append", string_append, vsubr, (int argc, SCM* argv))
   p = STRING_CHARS(z);
 
   /* copy strings */
-  for (i = 0; i < argc; i++) {
+  for (total=0, i=0; i < argc; i++) {
     memcpy(p, STRING_CHARS(*argv), (unsigned int) STRING_SIZE(*argv));
-    p    += STRING_SIZE(*argv);
-    argv -=1;
+    p     += STRING_SIZE(*argv);
+    total += STRING_LENGTH(*argv);
+    argv  -=1;
   }
+  STRING_LENGTH(z) = total;
+
   return z;
 }
 
@@ -521,7 +639,8 @@ doc>
 DEFINE_PRIMITIVE("string->list", string2list, subr1, (SCM str))
 {
   register char *s;
-  int len, c;
+  int len;
+  uint32_t c;
   SCM tmp, tmp1, z;
 
   if (!STRINGP(str)) error_bad_string(str);
@@ -591,20 +710,40 @@ doc>
 */
 DEFINE_PRIMITIVE("string-fill!", string_fill, subr2, (SCM str, SCM c))
 {
-  int len;
-  char c_char, *s;
+  int bytes, len, c_char, c_len;
+  char *s;
 
   if (!STRINGP(str))  		      error_bad_string(str);
   if (!CHARACTERP(c)) 		      error_bad_character(c);
   if (BOXED_INFO(str) & STRING_CONST) error_change_const_string(str);
 
-  len    = STRING_SIZE(str);
+  len    = STRING_LENGTH(str);
   s      = STRING_CHARS(str);
   c_char = CHARACTER_VAL(c);
+  c_len  = STk_utf8_char_bytes_needed(c_char);
+  bytes  = len * c_len;
 
-  while (len--) {
-    *s++ = c_char;
+  if (c_len == 1) {	/* unibyte character */
+    while (len--) {
+      *s++ = c_char;
+    }
+  } else {		/* multibyte character */
+    char buffer[5];
+
+    if (bytes > STRING_SPACE(str)) {
+      STRING_CHARS(str) = s = STk_must_malloc_atomic(bytes + 1);
+      STRING_SPACE(str) = bytes;
+    }
+
+    STk_char2utf8(c_char, buffer);
+    while (len--) {
+      memcpy(s, buffer, c_len);
+      s += c_len;
+    }
+    *s = '\0';
   }
+
+  STRING_SIZE(str) = bytes;
   return STk_void;
 }
 
@@ -755,17 +894,30 @@ doc>
  */
 DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv))
 {
-  SCM s, z;
+  SCM s;
   int start, end;
-  char *endp, *p, *q;
 
-  s    = control_index(argc, argv, &start, &end);
-  endp = STRING_CHARS(s) + end;
-  z    = STk_makestring(end-start, NULL);
+  s = control_index(argc, argv, &start, &end);
 
-  for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
-    *q = tolower(*p);
-  return z;
+  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {
+    uint32_t *wchars;
+    int len;
+    char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
+
+    /* collect all characters in an allocated array of int and convert it */
+    wchars = string2int(startp, end-start, &len, towlower);
+
+    return make_string_from_int_array(wchars, end-start, len);
+  } else {
+    char *endp, *p, *q;
+    SCM  z =  STk_makestring(end-start, NULL);
+
+    endp = STRING_CHARS(s) + end;
+    for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
+      *q = tolower(*p);
+
+    return z;
+  }
 }
 
 /*
@@ -784,17 +936,39 @@ doc>
 DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *argv))
 {
   SCM s;
-  int start, end;
-  char *endp, *p;
+  int i, start, end;
 
   s    = control_index(argc, argv, &start, &end);
   if (BOXED_INFO(s) & STRING_CONST) error_change_const_string(s);
 
-  endp = STRING_CHARS(s) + end;
+  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {	    /* multibyte string */
+    uint32_t *wchars;
+    int len;
+    char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
+    char *endp   = STk_utf8_index(STRING_CHARS(s), end, STRING_SIZE(s));
 
-  for (p=STRING_CHARS(s)+start; p < endp; p++) *p = tolower(*p);
-  return s;
+    /* collect all characters in an allocated array of int and convert it */
+    wchars = string2int(startp, end-start, &len, towlower);
+    if (len == endp-startp) {
+      copy_array(wchars, end-start, startp);
+    }
+    else {
+      /* This code is inefficient, but it seems that that the converted case
+	 character always use the same length encoding. It is likely that this
+	 code is never used in practice
+      */
+      for (i= start; i < end; i++)
+	STk_string_set(s, MAKE_INT(i), MAKE_CHARACTER(*wchars++));
+    }
+  } else {				    /* monobyte string */
+    char *p , *endp = STRING_CHARS(s) + end;
+
+    for (p=STRING_CHARS(s)+start; p < endp; p++) *p = tolower(*p);
+  }
+
+  return STk_void;
 }
+
 
 /*
 <doc EXT string-upcase
@@ -802,7 +976,7 @@ DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
  * (string-upcase str start)
  * (string-upcase str start end)
  *
- * Returns a string in which the lower case letters of string |str| between the
+ * Returns a string in which the upper case letters of string |str| between the
  * |start| and |end| indices have been replaced by their upper case equivalent.
  * If |start| is omited, it defaults to 0. If |end| is omited, it defaults to
  * the length of |str|.
@@ -810,18 +984,32 @@ doc>
  */
 DEFINE_PRIMITIVE("string-upcase", string_upcase, vsubr, (int argc, SCM *argv))
 {
-  SCM s, z;
+  SCM s;
   int start, end;
-  char *endp, *p, *q;
 
-  s    = control_index(argc, argv, &start, &end);
-  endp = STRING_CHARS(s) + end;
-  z    = STk_makestring(end-start, NULL);
+  s = control_index(argc, argv, &start, &end);
 
-  for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
-    *q = toupper(*p);
-  return z;
+  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {
+    uint32_t *wchars;
+    int len;
+    char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
+
+    /* collect all characters in an allocated array of int and convert it */
+    wchars = string2int(startp, end-start, &len, towupper);
+
+    return make_string_from_int_array(wchars, end-start, len);
+  } else {
+    char *endp, *p, *q;
+    SCM  z =  STk_makestring(end-start, NULL);
+
+    endp = STRING_CHARS(s) + end;
+    for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
+      *q = toupper(*p);
+
+    return z;
+  }
 }
+
 
 /*
 <doc EXT string-upcase!
@@ -835,18 +1023,38 @@ doc>
 DEFINE_PRIMITIVE("string-upcase!", string_dupcase, vsubr, (int argc, SCM *argv))
 {
   SCM s;
-  int start, end;
-  char *endp, *p;
+  int i, start, end;
 
-  s = control_index(argc, argv, &start, &end);
+  s    = control_index(argc, argv, &start, &end);
   if (BOXED_INFO(s) & STRING_CONST) error_change_const_string(s);
 
-  endp = STRING_CHARS(s) + end;
+  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {	    /* multibyte string */
+    uint32_t *wchars;
+    int len;
+    char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
+    char *endp   = STk_utf8_index(STRING_CHARS(s), end, STRING_SIZE(s));
 
-  for (p=STRING_CHARS(s)+start; p < endp; p++) *p = toupper(*p);
-  return s;
+    /* collect all characters in an allocated array of int and convert it */
+    wchars = string2int(startp, end-start, &len, towupper);
+    if (len == endp-startp) {
+      copy_array(wchars, end-start, startp);
+    }
+    else {
+      /* This code is inefficient, but it seems that that the converted case
+	 character always use the same length encoding. It is likely that this
+	 code is never used in practice
+      */
+      for (i= start; i < end; i++)
+	STk_string_set(s, MAKE_INT(i), MAKE_CHARACTER(*wchars++));
+    }
+  } else {				    /* monobyte string */
+    char *p , *endp = STRING_CHARS(s) + end;
+
+    for (p=STRING_CHARS(s)+start; p < endp; p++) *p = toupper(*p);
+  }
+
+  return STk_void;
 }
-
 
 /*
 <doc EXT string-titlecase
@@ -937,7 +1145,7 @@ DEFINE_PRIMITIVE("string-titlecase!", string_dtitlecase,vsubr,(int argc, SCM *ar
  * (string-blit! (make-string 6 #\X) "abc" 2)
  *               => "XXabcX"
  * (string-blit! (make-string 10 #\X) "abc" 5)
- *               => "XXXXXabc"
+ *               => "XXXXXabcXX"
  * (string-blit! (make-string 6 #\X) "a" 10)
  *               => "XXXXXX\0\0\0\0a"
  * @end lisp
@@ -988,6 +1196,31 @@ DEFINE_PRIMITIVE("string-blit!", string_blit, subr3,
 }
 
 
+/*
+DEFINE_PRIMITIVE("string-pos", string_pos, subr2, (SCM str, SCM index))
+{
+  long k = STk_integer_value(index);
+  int n;
+
+  if (!STRINGP(str))			error_bad_string(str);
+  if (k < 0 || k >= STRING_LENGTH(str)) error_index_out_of_bound(str, index);
+
+  if (STk_use_utf8 && !STRING_MONOBYTE(str))
+    return MAKE_INT(STk_utf8_index(STRING_CHARS(str), STRING_SIZE(str)));
+  else
+    return index;
+}
+*/
+
+DEFINE_PRIMITIVE("%string-use-utf8?", string_use_utf8, subr1, (SCM str))
+{
+  if (!STRINGP(str)) error_bad_string(str);
+
+  return MAKE_BOOLEAN(STk_use_utf8 && !STRING_MONOBYTE(str));
+}
+
+
+
 int STk_init_string(void)
 {
   ADD_PRIMITIVE(stringp);
@@ -1024,5 +1257,7 @@ int STk_init_string(void)
   ADD_PRIMITIVE(string_titlecase);
   ADD_PRIMITIVE(string_dtitlecase);
   ADD_PRIMITIVE(string_blit);
+
+  ADD_PRIMITIVE(string_use_utf8);
   return TRUE;
 }

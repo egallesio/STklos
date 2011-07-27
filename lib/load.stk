@@ -1,27 +1,27 @@
 ;;;;
 ;;;; load.stk	-- Extended load function
-;;;; 
-;;;; Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 16-Oct-2010 16:07 (eg)
+;;;; Last file update: 27-May-2011 23:03 (eg)
 ;;;;
 
 
@@ -32,7 +32,7 @@
 (define *path-separator*  	(if (eqv? (running-os) 'windows) ";" ":"))
 (define *load-suffixes*   	(list "so" "ostk" "spi" "stk" "scm"))
 (define *load-verbose*    	#f)
-(define *load-path*      	'()) ;; initialized  later 
+(define *load-path*      	'()) ;; initialized  later
 
 
 ;;
@@ -42,7 +42,7 @@
   (make-parameter (or (getenv "STKLOS_CONFDIR")
 		      (make-path (getenv "HOME") ".stklos"))
 		  expand-file-name))
-  
+
 (define (%stklos-conf-file name)
   (make-path (%stklos-conf-dir) name))
 
@@ -61,7 +61,7 @@ doc>
 
 ;======================================================================
 ;
-; *load-path* construction 
+; *load-path* construction
 ;
 ;======================================================================
 (set! *load-path*
@@ -81,17 +81,17 @@ doc>
  * (load-path)
  * (load-path value)
  *
- * |load-path| is a parameter object. It 
- * returns the current load path. The load path is a list of strings 
- * which correspond to the directories in which a file must be searched for 
+ * |load-path| is a parameter object. It
+ * returns the current load path. The load path is a list of strings
+ * which correspond to the directories in which a file must be searched for
  * loading. Directories of the load path are ,(emph "prepended") (in
- * their apparition 
- * order) to the file name given to |load| or |try-load| until the file 
+ * their apparition
+ * order) to the file name given to |load| or |try-load| until the file
  * can be loaded.
- * £
- * The initial value of the current load path can be set from the shell, by 
+ * @l
+ * The initial value of the current load path can be set from the shell, by
  * setting the |STKLOS_LOAD_PATH| shell variable.
- * £
+ * @l
  * Giving a |value| to the parameter |load-path| permits to change the
  * current list of paths.
 doc>
@@ -102,8 +102,8 @@ doc>
 		    ;; Sanity check
 		    (unless (list? new-path)
 		      (error 'load-path "bad list of path names ~S" new-path))
-		    (for-each (lambda (x) 
-				(unless (string? x) 
+		    (for-each (lambda (x)
+				(unless (string? x)
 				  (error 'load-path "bad path name ~S" x)))
 			      new-path)
 		    ;; Set the load path
@@ -114,12 +114,12 @@ doc>
 <doc EXT load-suffixes
  * (load-suffixes)
  * (load-suffixes value)
- * 
+ *
  * |load-suffixes| is a parameter object. It
  * returns the list of possible suffixes for a Scheme file. Each suffix,
- * must be a string. Suffixes are appended (in their apparition order) 
- * to a file name  is appended to a file name given to |load| or |try-load| 
- * until the file can be loaded. 
+ * must be a string. Suffixes are appended (in their apparition order)
+ * to a file name  is appended to a file name given to |load| or |try-load|
+ * until the file can be loaded.
 doc>
 |#
 (define load-suffixes
@@ -128,8 +128,8 @@ doc>
 		    ;; Sanity check
 		    (unless (list? new)
 		      (error 'load-path "bad list of suffixes ~S" new))
-		    (for-each (lambda (x) 
-				(unless (string? x) 
+		    (for-each (lambda (x)
+				(unless (string? x)
 				  (error 'load-path "bad path name ~S" x)))
 			      new)
 		    ;; Set the load suffixes
@@ -140,11 +140,11 @@ doc>
 <doc EXT load-verbose
  * (load-verbose)
  * (load-verbose value)
- * 
+ *
  * |load-verbose| is a parameter object. It permits to display the
  * path name of the files which are loaded by |load| or |try-load| on
  * the current error port, when set to a true value. If |load-verbose|
- * is set to |¤f|, no message is printed.
+ * is set to |%f|, no message is printed.
 doc>
 |#
 (define load-verbose
@@ -166,8 +166,8 @@ doc>
 ;=============================================================================
 ;
 ; 				GUESS-PATHNAME
-; 		
-; Try to guess the full pathname of a scheme file using *load-path* and 
+;
+; Try to guess the full pathname of a scheme file using *load-path* and
 ; *load-suffix*
 ;=============================================================================
 
@@ -180,14 +180,14 @@ doc>
 	 (file-is-readable? f)
 	 (not (file-is-directory? f))
 	 f))
-  
+
   (define (try-load-with-suffixes name suffixes)
     (let Loop ((s suffixes))
       (if (null? s)
 	  #f
 	  (or (try (string-append name "." (car s)))
 	      (Loop (cdr s))))))
-  
+
   (define (try-load-from-path name paths suffixes)
     (let Loop ((dir paths))
       (if (null? dir)
@@ -208,7 +208,7 @@ doc>
 
 ;=============================================================================
 ;
-;  Rewriting of the TRY-LOAD primitive 
+;  Rewriting of the TRY-LOAD primitive
 ;
 ;=============================================================================
 (define %primitive-try-load try-load)
@@ -243,7 +243,7 @@ doc>
 
 ;=============================================================================
 ;
-;  Rewriting of the LOAD primitive 
+;  Rewriting of the LOAD primitive
 ;
 ;=============================================================================
 (define (%load fn load-path load-suffixes)
@@ -264,17 +264,17 @@ doc>
  * (find-path str)
  * (find-path str path)
  * (find-path str path suffixes)
- * 
+ *
  * In its first form, |find-path| returns the path name of the file
  * that should be loaded by the procedure  |load| given the name |str|.
  * The string returned depends of the current  load path and of the
  * currently accepted suffixes.
- * £
+ * @l
  * The other forms of |find-path| are more general and allow to give a path
  * list (a list of strings representing supposed directories) and a set
  * of suffixes (given as a list of strings too) to try for finding a file.
- * If no file is found, |find-path| returns |¤f|.
- * £
+ * If no file is found, |find-path| returns |%f|.
+ * @l
  * For instance, on a "classical" Unix box:
  * @lisp
  * (find-path "passwd" '("/bin" "/etc" "/tmp"))
@@ -305,8 +305,8 @@ doc>
  * previously ,(q (emph  "provided")). |Provide| permits to store |string| in
  * the list of already provided files. Providing a file permits to avoid
  * subsequent loads of this file. |Require/provide| is more or less equivalent to
- * a |require| followed by a |provide|. |Provided?| returns |¤t| if
- * |string| was already provided; it returns |¤f| otherwise.
+ * a |require| followed by a |provide|. |Provided?| returns |%t| if
+ * |string| was already provided; it returns |%f| otherwise.
 doc>
 |#
 (define %%require  	#f)
@@ -319,7 +319,7 @@ doc>
 
 (let ((provided '())
       (stklos-building? (getenv "STKLOS_BUILDING")))
-  
+
   (set! %%require  (lambda (what lib-only?)
 		     (when stklos-building?
 		       ;; When building STklos, require-library ==  require.
@@ -347,12 +347,12 @@ doc>
 		    (unless (member what provided)
 		      (%load what (load-path) (load-suffixes)))
 		    (provide what)))
-  
+
   (set! provide   (lambda (what)
 		    (unless (member what provided)
 		      (set! provided (cons what provided)))
 		    what))
-  
+
   (set! provided? (lambda (what)
 		    (and (member what provided) #t))))
 

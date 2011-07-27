@@ -1,27 +1,27 @@
 /*
  * struct.c			-- Low level support for structures
- * 
- * Copyright © 2004-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
- * 
- * 
+ *
+ * Copyright © 2004-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 12-May-2004 17:26 (eg)
- * Last file update: 30-Jan-2007 18:36 (eg)
+ * Last file update: 27-May-2011 22:46 (eg)
  */
 
 #include "stklos.h"
@@ -49,16 +49,16 @@ SCM STk_int_struct_ref(SCM s, SCM slot)
   SCM index = STk_int_assq(slot, STRUCT_TYPE_SLOTS(STRUCT_TYPE(s)));
 
   if (!SYMBOLP(slot) || index == STk_false) error_bad_slot(slot, s);
-    
+
   return STRUCT_SLOTS(s)[INT_VAL(CDR(index))];
 }
 
-SCM STk_int_struct_set(SCM s, SCM slot, SCM val)  
+SCM STk_int_struct_set(SCM s, SCM slot, SCM val)
 {
   SCM index = STk_int_assq(slot, STRUCT_TYPE_SLOTS(STRUCT_TYPE(s)));
 
   if (!SYMBOLP(slot) || index == STk_false) error_bad_slot(slot, s);
-    
+
   STRUCT_SLOTS(s)[INT_VAL(CDR(index))] = val;
   return STk_void;
 }
@@ -70,22 +70,22 @@ SCM STk_int_struct_set(SCM s, SCM slot, SCM val)
  *
  * 	               S T R U C T U R E   T Y P E S
  *
- * ======================================================================   
+ * ======================================================================
  */
 /*
 <doc EXT make-struct-type
  * (make-struct-type name parent slots)
- * 
- * This form which is more general than |define-struct| permits to define a 
- * new structure type whose name is |name|. Parent is the structure 
- * type from which is the new structure type is a subtype (or |¤f| is the 
- * new structure-type has no super type). |Slots| is the list of the slot 
- * names which constitute the structure tpe. 
- * £
- * When a structure type is s subtype of a previous type, its slots are added 
- * to the ones of the super type. 
+ *
+ * This form which is more general than |define-struct| permits to define a
+ * new structure type whose name is |name|. Parent is the structure
+ * type from which is the new structure type is a subtype (or |#f| is the
+ * new structure-type has no super type). |Slots| is the list of the slot
+ * names which constitute the structure tpe.
+ * @l
+ * When a structure type is s subtype of a previous type, its slots are added
+ * to the ones of the super type.
 doc>
-*/  
+*/
 DEFINE_PRIMITIVE("make-struct-type", make_struct_type, subr3,
 		 (SCM name, SCM parent, SCM slots))
 {
@@ -93,24 +93,24 @@ DEFINE_PRIMITIVE("make-struct-type", make_struct_type, subr3,
   int alloc = 0;
 
   if (STk_int_length(slots) < 0) STk_error("bad slot list ~S", slots);
-  
+
   if (parent != STk_false) {
     if (!STRUCT_TYPEP(parent)) STk_error("bad structure type for parent ~S",parent);
     all_slots  = STRUCT_TYPE_SLOTS(parent);
     alloc      = STRUCT_TYPE_SIZE(parent);
   }
-  
+
   for ( ; !NULLP(slots); slots = CDR(slots)) {
     if (STk_int_assq(CAR(slots), all_slots) == STk_false) {
       /* Add this slot to all_slots */
-      all_slots = STk_cons(STk_cons(CAR(slots), 
+      all_slots = STk_cons(STk_cons(CAR(slots),
 				     MAKE_INT(alloc++)),
 			    all_slots);
     }
   }
-  
+
   /* all_slots is of the form ((f1 . 0) (f2 . 1))
-   * The index is the slot-address 
+   * The index is the slot-address
    */
   NEWCELL(z, struct_type);
   STRUCT_TYPE_SLOTS(z)   = all_slots;
@@ -123,10 +123,10 @@ DEFINE_PRIMITIVE("make-struct-type", make_struct_type, subr3,
 
 
 /*
-<doc EXT struct-type? 
+<doc EXT struct-type?
  * (struct-type? obj)
- * 
- * Returns |¤t| if |obj| is a structure type, otherwise return |#f|.
+ *
+ * Returns |#t| if |obj| is a structure type, otherwise returns |#f|.
  * @lisp
  * (let ((type (make-struct-type 'point #f '(x y))))
  *   (struct-type? type))         => #t
@@ -147,7 +147,7 @@ DEFINE_PRIMITIVE("struct-type?", stp, subr1, (SCM obj))
  * @lisp
  * (define point  (make-struct-type 'point #f '(x y)))
  * (define circle (make-struct-type 'circle point '(r)))
- * (struct-type-slots point)   => (x y) 
+ * (struct-type-slots point)   => (x y)
  * (struct-type-slots circle)  => (x y r)
  * @end lisp
 doc>
@@ -160,7 +160,7 @@ DEFINE_PRIMITIVE("struct-type-slots", st_slots, subr1, (SCM obj))
 
   for (tmp = STRUCT_TYPE_SLOTS(obj); !NULLP(tmp); tmp = CDR(tmp))
     res = STk_cons(CAR(CAR(tmp)), res);
-  
+
   return res;
 }
 
@@ -168,7 +168,7 @@ DEFINE_PRIMITIVE("struct-type-slots", st_slots, subr1, (SCM obj))
 <doc EXT struct-type-parent
  * (struct-type-parent structype)
  *
- * Returns the super type of the structure type |structype|, if it exists 
+ * Returns the super type of the structure type |structype|, if it exists
  * or |#f| otherwise.
 doc>
 */
@@ -196,16 +196,16 @@ DEFINE_PRIMITIVE("struct-type-name", st_name, subr1, (SCM obj))
 <doc EXT struct-type-change-writer!
  * (struct-type-change-writer! structype proc)
  *
- * Change the default writer associated to structures of type |structype| to 
- * to the |proc| procedure. The |proc| procedure must accept 2 arguments 
- * (the structure to write and the port wher the structure must be written 
+ * Change the default writer associated to structures of type |structype| to
+ * to the |proc| procedure. The |proc| procedure must accept 2 arguments
+ * (the structure to write and the port wher the structure must be written
  * in that order). The value returned by |struct-type-change-writer!| is the
- * old writer associated to |structype|. To restore the standard wtructure 
+ * old writer associated to |structype|. To restore the standard wtructure
  * writer for |structype|, use the special value |#f|.
  *
  * @lisp
  * (define point (make-struct-type 'point #f '(x y)))
- * 
+ *
  * (struct-type-change-writer!
  *   point
  *   (lambda (s port)
@@ -220,19 +220,19 @@ DEFINE_PRIMITIVE("struct-type-name", st_name, subr1, (SCM obj))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("struct-type-change-writer!", 
+DEFINE_PRIMITIVE("struct-type-change-writer!",
 		 st_change_writer, subr2, (SCM st, SCM proc))
 {
   SCM res;
 
   if (!STRUCT_TYPEP(st)) error_bad_type(st);
-  if (proc != STk_false && (STk_procedurep(proc) == STk_true) && 
+  if (proc != STk_false && (STk_procedurep(proc) == STk_true) &&
       STk_proc_arity(proc) != MAKE_INT(2))
     STk_error("bad wrtiter procedure ~S", proc);
-  
+
   res 			  = STRUCT_TYPE_PRINTER(st);
   STRUCT_TYPE_PRINTER(st) = proc;
-  
+
   return res;
 }
 
@@ -240,7 +240,7 @@ DEFINE_PRIMITIVE("struct-type-change-writer!",
 static char *get_struct_type_name(SCM st)
 {
   SCM name = STRUCT_TYPE_NAME(st);
-  
+
   return (SYMBOLP(name))? SYMBOL_PNAME(name) :
          (KEYWORDP(name))? KEYWORD_PNAME(name) :
          "";
@@ -250,10 +250,10 @@ static char *get_struct_type_name(SCM st)
 static void print_struct_type(SCM expr, SCM port, int mode)
 {
   char buffer[1000];
-  
-  sprintf(buffer, "#[%s-type %s %ld]", 
+
+  sprintf(buffer, "#[%s-type %s %ld]",
 	  COND_TYPEP(expr) ? "condition": "struct",
-	  get_struct_type_name(expr), 
+	  get_struct_type_name(expr),
 	  (unsigned long) expr);
   STk_puts(buffer, port);
 }
@@ -263,35 +263,35 @@ static void print_struct_type(SCM expr, SCM port, int mode)
  *
  * 	                    S T R U C T U R E S
  *
- * ======================================================================   
+ * ======================================================================
  */
 
 /*
 <doc EXT make-struct
  * (make-struct structype expr ...)
  *
- * Returns a newly allocated instance of the structure type |structype|, 
- * whose slots are initialized to |expr| ... If fewer |expr| than the number of 
- * instances are given to |make-struct|, the remaining slots are inialized with 
+ * Returns a newly allocated instance of the structure type |structype|,
+ * whose slots are initialized to |expr| ... If fewer |expr| than the number of
+ * instances are given to |make-struct|, the remaining slots are inialized with
  * the special ,(emph "void") value.
 doc>
 */
 DEFINE_PRIMITIVE("make-struct", make_struct, vsubr, (int argc, SCM *argv))
 {
   SCM z, type;
-  int i, len; 
-  
+  int i, len;
+
   if (!argc) STk_error("no argument given");
   argc--;
   type = *argv--;
-  
+
   if (!STRUCT_TYPEP(type)) error_bad_type(type);
   len = STRUCT_TYPE_SIZE(type);
   if (argc > len) STk_error("too much initializers for ~S", type);
-  
+
   NEWCELL_WITH_LEN(z, struct, sizeof(struct struct_obj) + (len-1) * sizeof(SCM));
 
-  STRUCT_TYPE(z) = type;  
+  STRUCT_TYPE(z) = type;
   for (i = 0; i < len; i++) {
     STRUCT_SLOTS(z)[i] = (argc-- > 0) ? *argv-- : STk_void;
   }
@@ -299,10 +299,10 @@ DEFINE_PRIMITIVE("make-struct", make_struct, vsubr, (int argc, SCM *argv))
 }
 
 /*
-<doc EXT struct? 
+<doc EXT struct?
  * (struct? obj)
- * 
- * Returns |¤t| if |obj| is a structure, otherwise return |#f#|.
+ *
+ * Returns |#t| if |obj| is a structure, otherwise returns |#f|.
  * @lisp
  * (let* ((type (make-struct-type 'point #f '(x y)))
  *        (inst (make-struct type 1 2)))
@@ -317,9 +317,9 @@ DEFINE_PRIMITIVE("struct?", structp, subr1, (SCM obj))
 
 
 /*
-<doc EXT struct-type 
+<doc EXT struct-type
  * (struct-type s)
- * 
+ *
  * Returns the structure type of the |s| structure
 doc>
 */
@@ -330,9 +330,9 @@ DEFINE_PRIMITIVE("struct-type", struct_type, subr1, (SCM s))
 }
 
 /*
-<doc EXT struct-ref 
+<doc EXT struct-ref
  * (struct-ref s slot-name)
- * 
+ *
  * Returns the value associated to slot |slot-name| of the |s| structure.
  * @lisp
  * (define point  (make-struct-type 'point #f '(x y)))
@@ -352,10 +352,10 @@ DEFINE_PRIMITIVE("struct-ref", struct_ref, subr2, (SCM s, SCM slot))
 
 
 /*
-<doc EXT struct-set! 
+<doc EXT struct-set!
  * (struct-set! s slot-name value)
- * 
- * Stores value in the to slot |slot-name| of the |s| structure. The value 
+ *
+ * Stores value in the to slot |slot-name| of the |s| structure. The value
  * returned by |struct-set!| is ,(emph "void").
  *
  * @lisp
@@ -375,16 +375,16 @@ DEFINE_PRIMITIVE("struct-set!", struct_set, subr3, (SCM s, SCM slot, SCM val))
 
 
 /*
-<doc EXT struct-is-a? 
+<doc EXT struct-is-a?
  * (struct-is-a? s structype)
- * 
+ *
  * Return a boolean that indicates if the structure |s| is a of type |structype|.
  * Note that if |s| is an instance of a subtype of ,(emph "S"), it is considered
  * also as an instance of type ,(emph "S").
  *
  * @lisp
  * (define point  (make-struct-type 'point #f '(x y)))
- * (define circle (make-struct-type 'circle point '(r))) 
+ * (define circle (make-struct-type 'circle point '(r)))
  * (define p (make-struct point 1 2))
  * (define c (make-struct circle 10 20 30))
  * (struct-is-a? p point)   => #t
@@ -396,12 +396,12 @@ doc>
 */
 static SCM is_a(SCM type, SCM t)
 {
-  if (type == t) 
+  if (type == t)
     return STk_true;
   else {
     if (STRUCT_TYPE_PARENT(type) != STk_false)
       return is_a(STRUCT_TYPE_PARENT(type), t);
-    else 
+    else
       return STk_false;
   }
 }
@@ -416,10 +416,10 @@ DEFINE_PRIMITIVE("struct-is-a?", struct_isa, subr2, (SCM s, SCM t))
 
 
 /*
-<doc EXT struct->list 
+<doc EXT struct->list
  * (struct->list s)
- * 
- * Returns the content of structure |s| as an A-list whose keys are the 
+ *
+ * Returns the content of structure |s| as an A-list whose keys are the
  * slots of the structure type of |s|.
  * @lisp
  * (define point  (make-struct-type 'point #f '(x y)))
@@ -446,29 +446,29 @@ DEFINE_PRIMITIVE("struct->list", struct2list, subr1, (SCM s))
 }
 
 
-/* 
+/*
  * Fast getters & setters (used by define-struct)
- * 
+ *
  */
-DEFINE_PRIMITIVE("%fast-struct-ref", fast_struct_ref, subr4, 
+DEFINE_PRIMITIVE("%fast-struct-ref", fast_struct_ref, subr4,
 		 (SCM s, SCM st, SCM who, SCM offset))
 {
-  if (!STRUCTP(s)) 
+  if (!STRUCTP(s))
     STk_error("bad structure ~S in ~S", s, who);
   if (STRUCT_TYPE(s) != st)
     STk_error("bad ~S in ~S: ~S", STRUCT_TYPE_NAME(st), who, s);
-  
+
   return STRUCT_SLOTS(s)[INT_VAL(offset)];
 }
 
-DEFINE_PRIMITIVE("%fast-struct-set!", fast_struct_set, subr5, 
+DEFINE_PRIMITIVE("%fast-struct-set!", fast_struct_set, subr5,
 		 (SCM s, SCM st, SCM who, SCM offset, SCM val))
 {
-  if (!STRUCTP(s)) 
+  if (!STRUCTP(s))
         STk_error("bad structure ~S in setter of ~S", s, who);
   if (STRUCT_TYPE(s) != st)
     STk_error("bad ~S in setter of ~S: ~S", STRUCT_TYPE_NAME(st), who, s);
-  
+
    STRUCT_SLOTS(s)[INT_VAL(offset)] = val;
    return STk_void;
 }
@@ -485,9 +485,9 @@ static void print_struct(SCM expr, SCM port, int mode)
     STk_C_apply(STRUCT_TYPE_PRINTER(type), 2, expr, port);
   } else {
     /* Use the default writer */
-    sprintf(buffer, "#[%s %s %ld]", 
-	    (CONDP(expr) ? "condition" : "struct"), 
-	    get_struct_type_name(STRUCT_TYPE(expr)), 
+    sprintf(buffer, "#[%s %s %ld]",
+	    (CONDP(expr) ? "condition" : "struct"),
+	    get_struct_type_name(STRUCT_TYPE(expr)),
 	    (unsigned long) expr);
     STk_puts(buffer, port);
   }
@@ -496,7 +496,7 @@ static void print_struct(SCM expr, SCM port, int mode)
 
 /* ----------------------------------------------------------------------
  * 	Initialize ...
- * ----------------------------------------------------------------------   
+ * ----------------------------------------------------------------------
  */
 static struct extended_type_descr xtype_struct_type = {
   "struct-type",

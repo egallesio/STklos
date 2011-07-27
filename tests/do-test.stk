@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update: 20-Apr-2011 09:50 (eg)
+;;;; Last file update: 27-May-2011 23:38 (eg)
 ;;;;
 
 (load-path (cons "../lib"
@@ -43,7 +43,8 @@
   (load "test-regexp.stk")
   (load "test-ffi.stk")
   (load "test-r5.stk")
-  (load "test-r7rs.stk")  
+  (load "test-r7rs.stk")
+  (load "test-utf8.stk")
   (load "test-r5rs-pitfall.stk")
   )
 

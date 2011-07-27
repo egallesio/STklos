@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update:  5-May-2011 17:50 (eg)
+ * Last file update: 19-Jul-2011 20:12 (eg)
  */
 
 #include <ctype.h>
@@ -134,7 +134,7 @@ int STk_string2char(char *s)
 /* converts a char name to a char */
 {
   register struct charelem *p;
-  int val;
+  uint32_t val;
 
   if (* (STk_utf8_grab_char(s, &val)) == '\0') return val;
 
@@ -314,7 +314,6 @@ DEFINE_PRIMITIVE("integer->char", integer2char, subr1, (SCM i))
 
 /*=============================================================================*/
 
-DEFINE_PRIMITIVE("char-upcase", char_upcase, subr1, (SCM c))
 /*
 <doc char-upcase char-downcase
  * (char-upcase char)
@@ -326,6 +325,7 @@ DEFINE_PRIMITIVE("char-upcase", char_upcase, subr1, (SCM c))
  * lower case.
 doc>
  */
+DEFINE_PRIMITIVE("char-upcase", char_upcase, subr1, (SCM c))
 {
   if (!CHARACTERP(c)) error_bad_char(c);
   return MAKE_CHARACTER(STk_use_utf8 ?

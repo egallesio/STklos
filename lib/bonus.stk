@@ -1,27 +1,27 @@
 ;;;;
 ;;;; bonus.stk	-- Useful primitives not in R5RS
-;;;; 
-;;;; Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  9-Aug-2010 18:39 (eg)
+;;;; Last file update: 27-May-2011 22:58 (eg)
 ;;;;
 
 
@@ -30,9 +30,9 @@
  * (gensym)
  * (gensym prefix)
  *
- * Creates a new symbol. The print name of the generated symbol 
- * consists of a prefix (which defaults to ,(q [|G|])) followed by the decimal
- * representation of a number. If |prefix| is specified, it must be 
+ * Creates a new symbol. The print name of the generated symbol
+ * consists of a prefix (which defaults to ,(q [G|])) followed by the decimal
+ * representation of a number. If |prefix| is specified, it must be
  * either a string or a symbol.
  * @lisp
  * (gensym)        => @pipeG100@pipe
@@ -57,11 +57,11 @@ doc>
 <doc EXT remove remove!
  * (remove pred list)
  *
- * |Remove| returns |list| without the elements that satisfy predicate |pred|: 
- * £
+ * |Remove| returns |list| without the elements that satisfy predicate |pred|:
+ * @l
  * The list is not disordered -- elements that appear in the result list occur
  * in the same order as they occur in the argument list. |Remove!| does the
- * same job than |remove| by physically modifying its |list| argument 
+ * same job than |remove| by physically modifying its |list| argument
  * @lisp
  * (remove even? '(0 7 8 8 43 -4)) => (7 43)
  * @end lisp
@@ -80,10 +80,10 @@ doc>
  * |equal?|, to find all elements of |list| that are equal to |x|, and
  * deletes them from |list|. The dynamic order in which the various
  * applications of |=| are made is not specified.
- * £
+ * @l
  * The list is not disordered -- elements that appear in the result
  * list occur in the same order as they occur in the argument list.
- * £
+ * @l
  * The comparison procedure is used in this way: |(= x ei)|. That is,
  * |x| is always the first argument, and a list element is always the
  * second argument. The comparison procedure will be used to compare
@@ -91,18 +91,18 @@ doc>
  * to the various |ei| is not specified. Thus, one can reliably remove
  * all the numbers greater than five from a list with
  * @lisp
- * (delete 5 list <) 
+ * (delete 5 list <)
  * @end lisp
- * 
- * |delete!| is the linear-update variant of |delete|. It is allowed, 
- * but not required, to alter the cons cells in its argument |list| to 
- * construct the result.  
+ *
+ * |delete!| is the linear-update variant of |delete|. It is allowed,
+ * but not required, to alter the cons cells in its argument |list| to
+ * construct the result.
 doc>
 |#
-(define (delete  x l :optional (comp equal?)) 
+(define (delete  x l :optional (comp equal?))
   (filter  (lambda (y) (not (comp x y))) l))
 
-(define (delete! x l :optional (comp equal?)) 
+(define (delete! x l :optional (comp equal?))
   (filter! (lambda (y) (not (comp x y))) l))
 
 
@@ -112,31 +112,31 @@ doc>
  *
  * |every| applies the predicate |pred| across the lists, returning true if
  * the predicate returns true on every application.
- * £
+ * @l
  * If there are n list arguments |list1| ... |listn|, then |pred| must be
- * a procedure taking n arguments and returning a boolean result. 
- * £
+ * a procedure taking n arguments and returning a boolean result.
+ * @l
  * |every| applies pred to the first elements of the |listi| parameters. If
- * this application returns false, every immediately returns |¤f|. 
+ * this application returns false, every immediately returns |%f|.
  * Otherwise, it iterates, applying |pred| to the second elements of the |listi|
  * parameters, then the third, and so forth. The iteration stops when a
- * false value is produced or one of the lists runs out of values. 
+ * false value is produced or one of the lists runs out of values.
  * In the latter case, |every| returns the true value produced by its final
- * application of pred. The application of pred to the last element of the 
- * lists is a tail call. 
- * £
- * If one of the |listi| has no elements, |every| simply returns |¤t|.
- * £
+ * application of pred. The application of pred to the last element of the
+ * lists is a tail call.
+ * @l
+ * If one of the |listi| has no elements, |every| simply returns |%t|.
+ * @l
  * Like |any|, every's name does not end with a question mark -- this is to
- * indicate that it does not return a simple boolean (|¤t| or |¤f|), but a
- * general value. 
+ * indicate that it does not return a simple boolean (|%t| or |%f|), but a
+ * general value.
 doc>
 |#
 (define (every pred l . others)		;; compatible with SRFI-1
   (if (null? others)
       ;; EVERY called with mono argument predicate
       (letrec ((every (lambda (l)
-			(if (null? l) 
+			(if (null? l)
 			    #t
 			    (and (pred (car l)) (every (cdr l)))))))
 	(every l))
@@ -153,22 +153,22 @@ doc>
  * (any pred list1 list2 ...)
  *
  * |any| applies the predicate across the lists, returning true if the
- * predicate returns true on any application. 
- * £
+ * predicate returns true on any application.
+ * @l
  * If there are n list arguments |list1| ... |listn|, then |pred| must be
- * a procedure taking n arguments. 
- * £
+ * a procedure taking n arguments.
+ * @l
  * |any| applies |pred| to the first elements of the |listi| parameters. If
  * this application returns a true value, |any| immediately returns that value.
  * Otherwise, it iterates, applying |pred| to the second elements of the |listi|
  * parameters, then the third, and so forth. The iteration stops when a true
- * value is produced or one of the lists runs out of values; in the latter case, 
- * any returns |¤f|. The application of |pred| to the last element of the
- * lists is a tail call. 
- * £
- * Like every, |any|'s name does not end with a question mark -- this is 
- * to indicate that it does not return a simple boolean (|¤t| or |¤f|), but
- * a general value. 
+ * value is produced or one of the lists runs out of values; in the latter case,
+ * any returns |%f|. The application of |pred| to the last element of the
+ * lists is a tail call.
+ * @l
+ * Like every, |any|'s name does not end with a question mark -- this is
+ * to indicate that it does not return a simple boolean (|%t| or |%f|), but
+ * a general value.
  *
  * @lisp
  * (any integer? '(a 3 b 2.7))   => #t
@@ -182,7 +182,7 @@ doc>
   (if (null? others)
       ;; ANY called with mono argument predicate
       (letrec ((any (lambda (l)
-			(if (null? l) 
+			(if (null? l)
 			    #f
 			    (or (pred (car l)) (any (cdr l)))))))
 	(any l))
@@ -193,10 +193,10 @@ doc>
 			    (or (apply pred (map car l))
 				 (any (map cdr l)))))))
 	(any (cons l others)))))
-				 
+
 
 ;;;
-;;; String Port functions 
+;;; String Port functions
 ;;;
 #|
 <doc EXT call-with-input-string
@@ -205,7 +205,7 @@ doc>
  * behaves as |call-with-input-file| except that the port passed to |proc|
  * is the sting port obtained from |port|.
  * @lisp
- * (call-with-input-string "123 456" 
+ * (call-with-input-string "123 456"
  *   (lambda (x)
  *      (let* ((n1 (read x))
  *             (n2 (read x)))
@@ -220,8 +220,8 @@ doc>
 <doc EXT call-with-output-string
  * (call-with-output-string proc)
  *
- * |Proc| should be a procedure of one argument. |Call-with-output-string| 
- * calls |proc| with a freshly opened output string port. The result of 
+ * |Proc| should be a procedure of one argument. |Call-with-output-string|
+ * calls |proc| with a freshly opened output string port. The result of
  * this procedure is a string containing all the text that has been written
  * on the string port.
  * @lisp
@@ -237,7 +237,7 @@ doc>
     (get-output-string port)))
 
 ;;;
-;;; Virtual Port functions 
+;;; Virtual Port functions
 ;;;
 (define (open-input-virtual :key (read-char #f) (ready? #f) (eof? #f) (close #f))
   (%open-input-virtual (vector read-char ready? eof? close)))
@@ -254,7 +254,7 @@ doc>
 ;;;;
 
 #|
-<doc EXT read-from-string 
+<doc EXT read-from-string
  * (read-from-string str)
  *
  * Performs a read from the given |str|. If |str| is the empty string,
@@ -302,14 +302,14 @@ doc>
 ;;;;
 
 #|
-<doc EXT argv 
+<doc EXT argv
  * (argv)
  *
- * Returns a list of the arguments given on the shell command line. The 
+ * Returns a list of the arguments given on the shell command line. The
  * interpreter options are no included in the result
 doc>
 |#
-(define (argv) 
+(define (argv)
   (key-get *%program-args* :argv '()))
 
 #|
@@ -366,14 +366,14 @@ doc>
  * computes a hash code for an object and returns the hash code as a non
  * negative integer. Objets with the same hash code are stored in an A-list
  * registered in the bucket corresponding to the key.
- * £ 
- * If omitted, 
+ * @l
+ * If omitted,
  * ,(itemize
  * (item [|hash| defaults to the |hash-table-hash| procedure (see
  * ,(ref :mark "hash-table-hash")).])
  * (item [|comparison| defaults to the |eq?| procedure (see ,(ref :mark "eq?")).])
  * )
- * Consequently, 
+ * Consequently,
  * @lisp
  * (define h (make-hash-table))
  * @end lisp
@@ -381,30 +381,30 @@ doc>
  * @lisp
  * (define h (make-hash-table eq? hash-table-hash))
  * @end lisp
- * 
- * An interesting example is 
+ *
+ * An interesting example is
  * @lisp
  * (define h (make-hash-table string-ci=? string-length))
  * @end lisp
  * which defines a new hash table which uses |string-ci=?| for
- * comparing keys. Here, we use the string-length as a (very simple) 
- * hashing function. Of course, a function which gives a key depending 
+ * comparing keys. Here, we use the string-length as a (very simple)
+ * hashing function. Of course, a function which gives a key depending
  * of the characters composing the string gives a better repartition
  * and should probably enhance performances. For instance, the following
  * call to |make-hash-table| should return a more efficient, even if
  * not perfect, hash table:
  * @lisp
- * (make-hash-table 
- *    string-ci=? 
+ * (make-hash-table
+ *    string-ci=?
  *    (lambda (s)
  *      (let ((len (string-length s)))
  *        (do ((h 0)  (i 0 (+ i 1)))
  *            ((= i len) h)
  *          (set! h
- *                (+ h (char->integer 
+ *                (+ h (char->integer
  *                       (char-downcase (string-ref s i)))))))))
  * @end lisp
- * 
+ *
  * ,(bold "Note:") Hash tables with a comparison function equal to |eq?| or
  * |string=?| are handled in an more efficient way (in fact, they don't use
  * the |hash-table-hash| function to speed up hash table retrievals).
@@ -418,16 +418,16 @@ doc>
 <doc EXT hash-table->alist
  * (hash-table->alist hash)
  *
- * Returns an ``association list'' built from the entries in |hash|.  
+ * Returns an ``association list'' built from the entries in |hash|.
  * Each entry in |hash| will be represented as a pair whose |car| is the
  * entry's key and whose |cdr| is its value.
- * £
+ * @l
  * ,(bold "Note:") the order of pairs in the resulting list is unspecified.
- * @lisp 
+ * @lisp
  * (let ((h (make-hash-table)))
- *   (dotimes (i 5) 
+ *   (dotimes (i 5)
  *     (hash-table-set! h i (number->string i)))
- *   (hash-table->alist h))    
+ *   (hash-table->alist h))
  *        => ((3 . "3") (4 . "4") (0 . "0")
  *            (1 . "1") (2 . "2"))
  * @end lisp
@@ -447,7 +447,7 @@ doc>
  * to the |cdr| of corresponding elements in |alist|. the |comparison| and
  * |hash| functions are interpreted as in |make-hash-table|. If some key
  * occurs multiple times in |alist|, the value in the first
- * association will take precedence over later ones. 
+ * association will take precedence over later ones.
  *
 doc>
 |#
@@ -461,7 +461,7 @@ doc>
 
 
 #|
-<doc EXT  hash-table-update!/default hash-table-update! 
+<doc EXT  hash-table-update!/default hash-table-update!
  * (hash-table-update! hash key update-fun thunk)
  * (hash-table-update!/default hash key update-fun default)
  *
@@ -469,7 +469,7 @@ doc>
  * table with the value |(update-fun current-value)|. If no value is
  * associated to |key|, a new entry in the table is first inserted
  * before updating it (this new entry being the result of calling |thunk|).
- * £
+ * @l
  * Note that the expression
  * @lisp
  * (hash-table-update!/default hash key update-fun default)
@@ -500,11 +500,11 @@ doc>
 
 
 #|
-<doc EXT hash-table-values hash-table-keys 
+<doc EXT hash-table-values hash-table-keys
  * (hash-table-keys hash)
  * (hash-table-values hash)
  *
- * Returns the keys or the values of |hash|. 
+ * Returns the keys or the values of |hash|.
 doc>
 |#
 (define (hash-table-keys ht)
@@ -525,7 +525,7 @@ doc>
  * |func|. The value |final-value| returned by |hash-table-fold| is the
  * return value of the last invocation of |func|. The order in which |func| is
  * called for different associations is unspecified.
- * £
+ * @l
  * For instance, the following expression
  * @lisp
  * (hash-table-fold ht (lambda (k v acc) (+ acc 1)) 0)
@@ -534,7 +534,7 @@ doc>
 doc>
 |#
 (define (hash-table-fold ht func val)
-  (hash-table-for-each ht 
+  (hash-table-for-each ht
 		       (lambda (key value)
 			 (set! val (func key value val))))
   val)
@@ -574,26 +574,26 @@ doc>
  *
  * The |<bindings>| are evaluated in the current environment, in some
  * unspecified order, the current values of the variables present in
- * |<bindings>| are saved, and the new evaluated values are assigned to the 
+ * |<bindings>| are saved, and the new evaluated values are assigned to the
  * |<bindings>| variables. Once this is done, the expressions of |<body>|
  * are evaluated sequentially in the current environment; the value of the
  * last expression is the result of |fluid-let|. Upon exit, the stored
- * variables values are restored. An error is signalled if any of the 
+ * variables values are restored. An error is signalled if any of the
  * |<bindings>| variable is unbound.
  * @lisp
  * (let* ((a 'out)
  *        (f (lambda () a)))
- *   (list (f) 
+ *   (list (f)
  *         (fluid-let ((a 'in)) (f))
  *         (f))) => (out in out)
  * @end lisp
- * 
+ *
  * When the body of a |fluid-let| is exited by invoking a continuation,
- * the new variable values are saved, and the variables are set to their old 
+ * the new variable values are saved, and the variables are set to their old
  * values. Then, if the body is reentered by invoking a continuation, the old
  * values are saved and new values are restored. The following example illustrates
  * this behavior
- * 
+ *
  * @lisp
  * (let ((cont #f)
  *       (l    '())
@@ -603,7 +603,7 @@ doc>
  *     (set! cont (call-with-current-continuation (lambda (k) k)))
  *     (set! l (cons a l)))
  *   (set! l (cons a l))
- * 
+ *
  *   (if cont (cont #f) l)) =>  (out in out in out)
  * @end lisp
 doc>
@@ -628,7 +628,7 @@ doc>
  * Returns the setter associated to a |proc|. Setters are defined in the
  * ,(link-srfi 17) document. A setter proc, can be used in a generalized
  * assignment, as described in |set!|.
- * £
+ * @l
  * To associate |s| to the procedure |p|, use the following form:
  * @lisp
  * (set! (setter p) s)
@@ -637,15 +637,15 @@ doc>
  * @lisp
  * (set! (setter car) set-car!)
  * @end lisp
- * 
- * The following standard procedures have pre-defined setters: 
+ *
+ * The following standard procedures have pre-defined setters:
  * @lisp
  * (set! (car x) v)              == (set-car! x v)
  * (set! (cdr x) v)              == (set-cdr! x v)
  * (set! (string-ref x i) v)     == (string-set! x i v)
- * (set! (vector-ref x i) v)     == (vector-set! x i v)! 
+ * (set! (vector-ref x i) v)     == (vector-set! x i v)!
  * (set! (slot-ref x 'name) v)   == (slot-set! x 'name v)
- * (set! (struct-ref x 'name) v) == (struct-set! x 'name v) 
+ * (set! (struct-ref x 'name) v) == (struct-set! x 'name v)
  * @end lisp
  * Furhermore, ,(ref :section "Parameter Objects" :text "parameters objects")
  * are their own setter:
@@ -664,13 +664,13 @@ doc>
 
 
 ;; Initialize the setter of setter !!
-(%set-procedure-plist! 
-         setter 
+(%set-procedure-plist!
+         setter
 	 (list :setter
 	       (lambda (proc setter)
 		 (%set-procedure-plist! proc
-					(key-set! (%procedure-plist proc) 
-						  :setter 
+					(key-set! (%procedure-plist proc)
+						  :setter
 						  setter)))))
 
 ;; And now set some setter for primitive functions
@@ -706,7 +706,7 @@ doc>
 
 
 #|
-<doc EXT-SYNTAX dotimes 
+<doc EXT-SYNTAX dotimes
  * (dotimes [var count] <expression1> <expression2> ... )
  * (dotimes [var count result] <expression1> <expression2> ... )
  *
@@ -736,7 +736,7 @@ doc>
 	 bindings))
 
 #|
-<doc EXT-SYNTAX while 
+<doc EXT-SYNTAX while
  * (while <test> <expression1> <expression2> ...)
  *
  * |While| evaluates the |<expression>|s until |<test>| returns a false
@@ -749,7 +749,7 @@ doc>
 	  (when ,test ,@body (,lab)))))
 
 #|
-<doc EXT-SYNTAX until 
+<doc EXT-SYNTAX until
  * (until <test> <expression1> <expression2> ...)
  *
  * |Until| evaluates the |<expression>|s until |<while>| returns a false
@@ -769,16 +769,16 @@ doc>
  *
  * |call/ec| is an short name for |call-with-escape-continuation|. |call/ec|
  * calls |proc| with one parameter, which is the current escape continuation
- * (a continuation which can only be used to abort a computation and hence 
+ * (a continuation which can only be used to abort a computation and hence
  * cannot be "re-enterered".
- * 
+ *
  * @lisp
  * (list 1
  *       (call/ec (lambda (return) (list 'a (return 'b) 'c)))
  *       3)        => (1 b 3)
  * @end lisp
  * |call/ec| is cheaper than the full call/cc. It is particularily useful
- * when all the power of |call/cc| is not needded. 
+ * when all the power of |call/cc| is not needded.
 doc>
 |#
 (define (call/ec proc)
@@ -856,7 +856,7 @@ doc>
 		   (reverse 	. "7")  (no-reverse	. "27")
 		   (black 	. "30") (bg-black	. "40")
 		   (red 	. "31") (bg-red		. "41")
-		   (green 	. "32") (bg-green	. "42") 
+		   (green 	. "32") (bg-green	. "42")
 		   (yellow 	. "33") (bg-yellow	. "43")
 		   (blue 	. "34") (bg-blue	. "44")
 		   (magenta	. "35") (bg-magenta	. "45")
@@ -877,7 +877,7 @@ doc>
       (let Loop ((args        args)
 		 (str-prev?  #t)
 		 (res         ""))
-	(cond 
+	(cond
 	  ((null? args)
 	     (if str-prev?
 		 res
@@ -918,35 +918,35 @@ doc>
 <doc EXT port->string  port->sexp-list port->string-list
  * (port->string port)
  * (port->sexp-list port)
- * (port->string-list port) 
- * 
+ * (port->string-list port)
+ *
  * All these procedure take a port opened for reading. |Port->string| reads
- * |port| until the it reads an end of file object and returns all the 
- * characters read as a string. |Port->sexp-list)| and |port->string-list| 
+ * |port| until the it reads an end of file object and returns all the
+ * characters read as a string. |Port->sexp-list)| and |port->string-list|
  * do the same things except that they return a list of S-expressions and
- * a list of strings respectively. For the following example we suppose that 
- * file |"foo"| is formed of two lines which contains respectively the number 
+ * a list of strings respectively. For the following example we suppose that
+ * file |"foo"| is formed of two lines which contains respectively the number
  * |100| and the string |"bar"|.
  * @lisp
  * (port->sexp-list (open-input-file "foo"))   => (100 "bar")
  * (port->string-list (open-input-file "foo")) => ("100" "\"bar\"")
- * @end lisp 
+ * @end lisp
 doc>
 |#
 (define (%port->list reader p)
   (unless (input-port? p) (error 'port->list "bad port ~S" p))
   ;; Read all the lines of port and put them in a list
   (let loop ((res '()) (sexp (reader p)))
-    (if (eof-object? sexp) 
+    (if (eof-object? sexp)
 	(values (reverse res))
 	(loop (cons sexp res) (reader p)))))
- 
+
 (define (port->string p)
   (unless (input-port? p) (error "bad port ~S" p))
   (with-output-to-string
     (lambda () (copy-port p (current-output-port)))))
 
-(define (port->sexp-list p) 
+(define (port->sexp-list p)
   (%port->list read p))
 
 (define (port->string-list p)
@@ -1022,9 +1022,9 @@ doc>
 <doc EXT  exec exec-list
  * (exec str)
  * (exec-list str)
- * 
- * These procedures execute the command given in |str|. The command given 
- * in |str| is passed to |/bin/sh|. |Exec| returns a strings which contains 
+ *
+ * These procedures execute the command given in |str|. The command given
+ * in |str| is passed to |/bin/sh|. |Exec| returns a strings which contains
  * all the characters that the command |str| has printed on it's standard
  * output, whereas |exec-list| returns a list of the lines which constitute
  * the output of |str|.
@@ -1071,7 +1071,7 @@ doc>
       ((null? lst) res)
       ((memq (car lst) res) (list->set (cdr lst) res))
       (else (list->set (cdr lst) (cons (car lst) res)))))
-  
+
   (define (symbol<? s1 s2)
     (string<? (symbol->string s1) (symbol->string s2)))
 
@@ -1109,9 +1109,9 @@ doc>
 
 
 #|
-<doc EXT decompose-file-name 
+<doc EXT decompose-file-name
  * (decompose-file-name string)
- * 
+ *
  * Returns an ``exploded'' list of the path name components given in
  * |string|.
  * The first element in the list denotes if the given |string| is an
@@ -1147,7 +1147,7 @@ doc>
     [begin
       (define (decompose-file-name str)
 	(let ((str (posixify-file-name str)))
-	  (cons (if (and (> (string-length str) 0) 
+	  (cons (if (and (> (string-length str) 0)
 			 (char=? (string-ref str 0) #\/))
 		    "/"
 		    ".")
@@ -1167,7 +1167,7 @@ doc>
     ]
     [begin
       (define (decompose-file-name str)
-	(cons (if (and (> (string-length str) 0) 
+	(cons (if (and (> (string-length str) 0)
 		       (char=? (string-ref str 0) #\/))
 		  "/"
 		  ".")
@@ -1179,7 +1179,7 @@ doc>
 	    ((string=? res "")   "/")
 	    ((string=? res str)  ".")
 	    (else		 res))))
-      
+
       (define (basename str)
 	(regexp-replace "^(.*)/(.*)$" str "\\2"))
       ])
@@ -1188,13 +1188,13 @@ doc>
 <doc EXT file-separator
  * (file-separator)
  *
- * Retuns the operating system file separator as a character. This is typically 
+ * Retuns the operating system file separator as a character. This is typically
  * #\\/ on Unix (or Cygwin) systems and #\\\\ on Windows.
 doc>
 |#
 (define (file-separator)
   (case (running-os)
-    ((unix cygwin-windows)    #\/)    
+    ((unix cygwin-windows)    #\/)
     ((windows) 		      #\\)
     (else      		      #\?)))
 
@@ -1247,7 +1247,7 @@ doc>
 <doc EXT file-prefix
  * (file-prefix pathname)
  *
- * Returns the suffix of given |pathname|. 
+ * Returns the suffix of given |pathname|.
  * @lisp
  * (file-prefix "./foo.tar.gz") => "./foo.tar"
  * (file-prefix "./a.b/c")      => "./a.b/c"
@@ -1285,7 +1285,7 @@ doc>
  *
  * Hereafter is a (not too realistic) example: a message will be displayed
  * repeatedly until a ,(emph "sexpr") is read on the current input port.
- * 
+ *
  * @lisp
  * (let ((idle (lambda () (display "Nothing to read!\\n"))))
  *   (port-idle-register! (current-input-port) idle)
@@ -1316,11 +1316,11 @@ doc>
  * (chmod str)
  * (chmod str option1 ...)
  *
- * Change the access mode of the file whose path name is given in |string|. 
- * The options must be composed of either an integer or one of the 
+ * Change the access mode of the file whose path name is given in |string|.
+ * The options must be composed of either an integer or one of the
  * following symbols |read|, |write| or |execute|. Giving no option to |chmod|
- * is equivalent to pass it the integer |0|. If the operation succeeds, 
- * |chmod| returns |¤t|; otherwise it returns |¤f|.
+ * is equivalent to pass it the integer |0|. If the operation succeeds,
+ * |chmod| returns |%t|; otherwise it returns |%f|.
  *
  * @lisp
  * (chmod "~/.stklos/stklosrc" 'read 'execute)
@@ -1384,7 +1384,7 @@ doc>
  * The environment in which the
  * receive-expression is evaluated is extended by binding |<variable1>|, ...,
  * |<variablen>| to fresh locations.
- * £
+ * @l
  * The |<expression>| is evaluated, and its
  * values are stored into those locations. (It is an error if |<expression>|
  * does not have exactly n values.)
@@ -1407,7 +1407,7 @@ doc>
  * bound to |<variablen + 1>|. (It is an error if |<expression>| does not have
  * at least n values.)])
  * )
- * 
+ *
  * In any case, the expressions in |<body>| are evaluated sequentially in
  * the extended environment. The results of the last expression in the body
  * are the values of the receive-expression.
@@ -1431,10 +1431,10 @@ doc>
 <doc EXT-SYNTAX case-lambda
  * (case-lambda <clause> ...)
  *
- * Each |<clause>| should have the form |(<formals> <body>)|, where 
+ * Each |<clause>| should have the form |(<formals> <body>)|, where
  * |<formals>| is a formal arguments list as for |lambda|.
  * Each |<body>| is a |<tail-body>|, as defined in R5RS.
- * £
+ * @l
  * A |case-lambda| expression evaluates to a procedure that
  * accepts a variable number of arguments and is lexically scoped in
  * the same manner as procedures resulting from |lambda|
@@ -1446,15 +1446,15 @@ doc>
  * locations, the |<body>| is evaluated in the extended environment,
  * and the results of |<body>| are returned as the results of the
  * procedure call.
- * £   
+ * @l
  * It is an error for the arguments not to agree with the |<formals>|
  * of any |<clause>|.
- * £  
+ * @l
  * This form is defined in ,(link-srfi 16).
  *
  * @lisp
  *  (define plus
- *    (case-lambda 
+ *    (case-lambda
  *     (() 0)
  *     ((x) x)
  *     ((x y) (+ x y))
@@ -1465,7 +1465,7 @@ doc>
  *  (plus 1)                   => 1
  *  (plus 1 2 3)               => 6
  *
- *  ((case-lambda 
+ *  ((case-lambda
  *    ((a) a)
  *    ((a b) (* a b)))
  *   1 2 3)                    => error
@@ -1478,7 +1478,7 @@ doc>
 	(compute-arity (in-module STKLOS-COMPILER compute-arity)))
     `(lambda ,args
        (let ((,len (length ,args)))
-	 (cond 
+	 (cond
 	   ,@(map (lambda (x)
 		    (unless (>= (length x) 2)
 		      (error 'case-lambda "bad clause ~S" x))
@@ -1522,7 +1522,7 @@ doc>
        ;; define the predicate
        (define (,predicate ,obj)
 	 (and (condition? ,obj) (condition-has-type? ,obj ,name)))
-       ;; define the accessors 
+       ;; define the accessors
        ,@(map (lambda(x)
 		`(define (,(cadr x) ,obj)
 		   (unless (,predicate ,obj)
@@ -1535,9 +1535,9 @@ doc>
 ;;
 
 #|
-<doc EXT-SYNTAX parameterize 
+<doc EXT-SYNTAX parameterize
  * (parameterize ((expr1 expr2) ...) <body>)
- * 
+ *
  * The expressions |expr1| and |expr2| are evaluated in an unspecified order.
  * The value of the |expr1| expressions must be parameter objects.
  * For each |expr1| expression and in an unspecified order, the local
@@ -1554,9 +1554,9 @@ doc>
  * (radix)                                              =>  2
  * (parameterize ((radix 16)) (radix))                  =>  16
  * (radix)                                              =>  2
- * 
+ *
  * (define (f n) (number->string n (radix)))
- * 
+ *
  * (f 10)                                               =>  "1010"
  * (parameterize ((radix 8)) (f 10))                    =>  "12"
  * (parameterize ((radix 8) (prompt (f 10))) (prompt))  =>  "1010"
@@ -1597,11 +1597,11 @@ doc>
  *  (srfi <extension-argument> ...)
  * @end lisp
  * where |<extension-argument>|s may be any Scheme-values.
- * £
+ * @l
  * If an |<extension-argument>| is a nonnegative integer, the functionality
  * of the indicated SRFIs is made available in the context in
  * which the require-extension form appears. For instance,
- * @lisp 
+ * @lisp
  * (require-extension (srfi 1 2))
  *                ; Make the SRFI 1 and 2 available
  * @end lisp
@@ -1661,7 +1661,7 @@ doc>
  * (get-environment-variable name)
  *
  * Returns the value of the named environment variable as a string, or
- * |¤f| if the named environment variable is not found. The name argument
+ * |%f| if the named environment variable is not found. The name argument
  * is expected to be a string. This function is similar to the |getenv|. It
  * has been added to be  support ,(link-srfi 98).
 |#

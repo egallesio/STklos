@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 24-Apr-2011 15:00 (eg)
+ * Last file update: 27-Jul-2011 15:28 (eg)
  *
  */
 
@@ -442,6 +442,7 @@ static SCM read_string(SCM port, int constant)
 				    "eof encountered when reading char in string",
 				    STk_nil);
 
+		     c &= 0377;
 		     /* if hexa 2 digits max, if octal 3 digit max */
 		     if (hexa && isxdigit(c) && k < 2) {
 		       /* because of a GCC bug, factorisation is not possible */
@@ -843,13 +844,13 @@ static SCM read_srfi10(SCM port, SCM l)
  * (read-case-sensitive)        => |#f|
  * (define x 'Symbol)
  * (display x)             @print{} symbol
- * (read-case-sensitive ¤t)
+ * (read-case-sensitive #t)
  * (define y 'Symbol)
  * (display y)             @print{} Symbol
  * @end lisp
  * ,(bold "Note:")  Default behaviour can be changed for a whole execution
  * with the |--case-sensitive| option.
- * £
+ * @l
  * ,(bold "Note:") See also syntax for ,(ref :mark "bar-in-symbol" :text
  * [special characters]) in symbols.
  *

@@ -1,27 +1,27 @@
 /*
  * vport.c					-- Virtual Ports
- * 
- * Copyright © 2005-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
- * 
- * 
+ *
+ * Copyright © 2005-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 17-Aug-2005 08:31 (eg)
- * Last file update:  9-Aug-2010 11:01 (eg)
+ * Last file update: 27-May-2011 22:48 (eg)
  */
 
 #include "stklos.h"
@@ -46,8 +46,8 @@ static void error_bad_vector(SCM v, int sz)
 
 static void verify_proc(SCM proc, int arity)
 {
-  if ((proc != STk_false) && 
-      (STk_procedurep(proc) == STk_false || 
+  if ((proc != STk_false) &&
+      (STk_procedurep(proc) == STk_false ||
        STk_proc_arity(proc) != MAKE_INT(arity)))
     STk_error("bad procedure ~S", proc);
 }
@@ -57,7 +57,7 @@ static void vport_print(SCM obj, SCM port)   /* Generic printing of virtual port
 {
   char buffer[MAX_PATH_LENGTH + 20];
 
-  sprintf(buffer, "#[%s-virtual-port %lx%s]", 
+  sprintf(buffer, "#[%s-virtual-port %lx%s]",
 	  IVPORTP(obj) ? "input" : "output",
 	  (unsigned long) obj,
 	  PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
@@ -85,9 +85,9 @@ static int call_user_eofp(void *stream)
 }
 
 /*
- * READ 
+ * READ
  */
-static int call_user_getc(void *stream) 
+static int call_user_getc(void *stream)
 {
   struct vstream *vs = stream;
   SCM res;
@@ -146,7 +146,7 @@ static int call_user_putc(int c, void *stream)
 static int call_user_putstring(SCM s, void *stream)
 {
   struct vstream *vs = stream;
-  
+
   if (vs->putstring == STk_false) {
     if (vs->putc != STk_false) {
       return vport_nputs(stream, STRING_CHARS(s), STRING_SIZE(s));
@@ -156,7 +156,7 @@ static int call_user_putstring(SCM s, void *stream)
   STk_C_apply(vs->putstring, 2, s, vs->port);
   return STRING_SIZE(s);
 }
-  
+
 static int call_user_flush(void *stream)
 {
   struct vstream *vs = stream;
@@ -205,7 +205,7 @@ static off_t vport_seek(void *stream, off_t offset, int whence)
 static int vport_nputs(void *stream, char *s, int len)
 {
   int i;
-  
+
   for (i = 0; i < len; i++)
     if (call_user_putc(*s++, stream) == EOF) return EOF;
   return len;
@@ -225,24 +225,24 @@ static int vport_puts(char *s, void *stream)
 /*
 <doc EXT open-input-virtual
  * (open-input-virtual :key  (read-char #f) (ready? #f) (eof? #f) (close #f))
- * 
+ *
  * Returns a virtual port using the |read-char| procedure to read a
  * character from the port, |ready?| to know if there is any data to
  * read from the port, |eof?| to know if the end of file is reached
  * on the port and finally |close| to close the port. All theses
  * procedure takes one parameter which is the port from which the input
  * takes place.  |Open-input-virtual| accepts also the special value
- * |¤f| for the I/O procedures with the following conventions:
+ * |#f| for the I/O procedures with the following conventions:
  * ,(itemize
- *    (item [if |read-char| or |eof?| is |¤f|, any attempt to read
+ *    (item [if |read-char| or |eof?| is |#f|, any attempt to read
  * the virtual port will return an eof object;])
- *    (item [if |ready?| is |¤f|, the file is always  ready
+ *    (item [if |ready?| is |#f|, the file is always  ready
  * for reading;])
- *    (item [if |close| is |¤f|, no action is done when the port is
+ *    (item [if |close| is |#f|, no action is done when the port is
  * closed.]))
- * £
+ * @l
  * Hereafter is a possible implementation of |open-input-string|
- * using virtual ports: 
+ * using virtual ports:
  * @lisp
  * (define (open-input-string str)
  *   (let ((index 0))
@@ -280,7 +280,7 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
   PORT_POS(z)		= 0;
   PORT_FNAME(z)		= "virtual input port";
   PORT_CLOSEHOOK(z)	= STk_false;
-  
+
   PORT_PRINT(z)		= vport_print;
   PORT_RELEASE(z)	= vport_release;
   PORT_GETC(z)		= call_user_getc;
@@ -295,7 +295,7 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
   PORT_BREAD(z)		= vport_read;
   PORT_BWRITE(z)	= NULL;
   PORT_SEEK(z)		= vport_seek;
-  
+
   return (struct port_obj *) z;
 }
 
@@ -306,15 +306,15 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
  *
  * Returns a virtual port using the |write-char| procedure to write a
  * character to the port, |write-string| to write a string to the port,
- * |flush| to (eventuelly) flush the characters on the port and finally 
+ * |flush| to (eventuelly) flush the characters on the port and finally
  * |close|to close the port. |Write-char| takes two parameters: a character and
  * the port to which the output must be done. |write-string| takes two
  * parameters: a string and a port. |Flush| and |Close| take one
  * parameter which is the port on which the action must be done.
- * |Open-output-virtual| accepts also the special value |¤f|
- * for the I/O procedures. If a procedure is |¤f| nothing is done
+ * |Open-output-virtual| accepts also the special value |#f|
+ * for the I/O procedures. If a procedure is |#f| nothing is done
  * on the corresponding action.
- * £
+ * @l
  * Hereafter is an (very inefficient) implementation of a variant of
  * |open-output-string| using virtual ports. The value of the output
  * string is printed when the port is closed:
@@ -328,13 +328,13 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
  *                     (set! str (string-append str s)))
  *        :close (lambda (p) (write str) (newline)))))
  * @end lisp
- * ,(bold "Note:") |write-string| is mainly used for writing strings and is 
- * generally more efficient than writing the string character by character. 
- * However, if |write-string| is not provided, strings are printed with 
- * |write-char|.  On the other hand, if |write-char| is absent, 
- * characters are written by successive allocation of one character strings. 
- * £
- * Hereafter is another example: a virtual file port where all characters 
+ * ,(bold "Note:") |write-string| is mainly used for writing strings and is
+ * generally more efficient than writing the string character by character.
+ * However, if |write-string| is not provided, strings are printed with
+ * |write-char|.  On the other hand, if |write-char| is absent,
+ * characters are written by successive allocation of one character strings.
+ * @l
+ * Hereafter is another example: a virtual file port where all characters
  * are converted to upper case:
  * @lisp
  * (define (open-output-uppercase-file file)
@@ -348,7 +348,7 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
  * @end lisp
 doc>
 */
- 
+
 DEFINE_PRIMITIVE("%open-output-virtual", open_output_vport, subr1, (SCM v))
 {
   SCM z;
@@ -372,7 +372,7 @@ DEFINE_PRIMITIVE("%open-output-virtual", open_output_vport, subr1, (SCM v))
   PORT_LINE(z)		= 1;
   PORT_POS(z)		= 0;
   PORT_FNAME(z)		= "virtual output port";
-  
+
   PORT_PRINT(z)		= vport_print;
   PORT_RELEASE(z)	= vport_release;
   PORT_GETC(z)		= NULL;
@@ -387,7 +387,7 @@ DEFINE_PRIMITIVE("%open-output-virtual", open_output_vport, subr1, (SCM v))
   PORT_BREAD(z)		= NULL;
   PORT_BWRITE(z)	= vport_write;
   PORT_SEEK(z)		= vport_seek;
-  
+
   return (struct port_obj *) z;
 }
 
@@ -396,7 +396,7 @@ DEFINE_PRIMITIVE("%open-output-virtual", open_output_vport, subr1, (SCM v))
  * (input-virtual-port? obj)
  * (output-virtual-port? obj)
  *
- * Returns |#t| if |obj| is a virtual input port or a virtual output port 
+ * Returns |#t| if |obj| is a virtual input port or a virtual output port
  * respectively, otherwise returns #f.
 doc>
  */

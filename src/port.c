@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 24-Apr-2011 11:50 (eg)
+ * Last file update: 23-Jun-2011 23:47 (eg)
  *
  */
 
@@ -210,17 +210,17 @@ badport:
  * objects themselves. |Read| returns the next object parsable from the given
  * input port, updating port to point to the first character past the end of
  * the external representation of the object.
- * £
+ * @l
  * If an end of file is encountered in the input before any characters are found
  * that can begin an object, then an end of file object is returned. The port
  * remains open, and further attempts to read will also return an end of file
  * object. If an end of file is encountered after the beginning of an object's
  * external representation, but the external representation is incomplete
  * and therefore not parsable, an error is signalled.
- * £
+ * @l
  * The port argument may be omitted, in which case it defaults to the value
  * returned by |current-input-port|. It is an error to read from a closed port.
- * £
+ * @l
  * ,(stklos) |read| supports the ,(link-srfi 10) |#,()| form that can be used
  * to denote values that do not have a convenient printed representation. See
  * the SRFI document for more information.
@@ -336,7 +336,7 @@ DEFINE_PRIMITIVE("read-chars", read_chars, subr12, (SCM size, SCM port))
  * The value returned by |read-chars!|is an integer indicating the number
  * of characters read. |Port| may be omitted, in which case it defaults to the
  * value returned by |current-input-port|.
- * £
+ * @l
  * This function is similar to |read-chars| except that it avoids to allocate
  * a new string for each read.
  * @lisp
@@ -371,7 +371,7 @@ DEFINE_PRIMITIVE("read-chars!", d_read_chars, subr12, (SCM str, SCM port))
  * (read-byte port)
  *
  * Returns the next character available from the input |port| as an integer.
- * If the end of file is readched, thuis function returns the end of file
+ * If the end of file is reached, this function returns the end of file
  * object.
 doc>
 */
@@ -393,7 +393,7 @@ DEFINE_PRIMITIVE("read-byte", read_byte, subr01, (SCM port))
  * the port to point to the following character. If no more characters are
  * available, an end of file object is returned. |Port| may be omitted, in
  * which case it defaults to the value returned by |current-input-port|.
- * £
+ * @l
  * ,(bold "Note:") The value returned by a call to |peek-char| is the same as the
  * value that would have been returned by a call to |read-char| with the same
  * port. The only difference is that the very next call to |read-char| or
@@ -557,7 +557,7 @@ DEFINE_PRIMITIVE("write*", write_star, subr12, (SCM expr, SCM port))
  * written by |write-char| instead of by |write|. |Display| returns an
  * unspecified value. The |port| argument may be omitted, in which
  * case it defaults to the value returned by |current-output-port|.
- * £
+ * @l
  * ,(bold "Rationale:") |Write| is intended for producing machine-readable
  * output and |display| is for producing human-readable output.
 doc>
@@ -973,7 +973,7 @@ Incorrect_format_width:
  * ,(link-srfi 28). That is, when
  * |port| is omitted, the output is returned as a string as if |port| was
  * given the value |#f|.
- * £
+ * @l
  * ,(bold "Note:") Since version 0.58, |format| is also compliant with
  * ,(link-srfi 48).
 doc>
@@ -992,7 +992,7 @@ DEFINE_PRIMITIVE("format", format, vsubr, (int argc, SCM *argv))
  * |error| is used to signal an error to the user. The second form
  * of |error| takes  a symbol as first parameter; it is generally used for the
  * name of the procedure which raises the error.
- * £
+ * @l
  * ,(bold "Note:") The specification string may follow the
  * ,(emph "tilde conventions")
  * of |format| (see ,(ref :mark "format")); in this case this procedure builds an
@@ -1001,7 +1001,7 @@ DEFINE_PRIMITIVE("format", format, vsubr, (int argc, SCM *argv))
  * ,(link-srfi 23) and  |str| is printed with the |display| procedure,
  * whereas the |obj|s are printed  with the |write| procedure.
  *
- * £
+ * @l
  * Hereafter, are some calls of the |error| procedure using a formatted string
  * @lisp
  * (error "bad integer ~A" "a")
@@ -1084,7 +1084,7 @@ DEFINE_PRIMITIVE("error", scheme_error, vsubr, (int argc, SCM *argv))
  * This procedure is similar to error, except that the type of the error
  * can be passed as the first parameter. The type of the error must be a
  * condition which inherits from |&error-message|.
- * £
+ * @l
  * Note that |(error arg ...)| is equivalent to
  * @lisp
  * (signal-error &error-message arg ...)
@@ -1174,7 +1174,7 @@ DEFINE_PRIMITIVE("port-closed?", port_closed, subr1, (SCM port))
  * of a multiple character delimiter. If no more characters are available
  * on |port|, an end of file object is returned.  |Port| may be omitted,
  * in which case it defaults to the value returned by |current-input-port|.
- * £
+ * @l
  * ,(bold "Note:") As said in ,(ref :mark "values"), if |read-line| is not
  * used in  the context of |call-with-values|, the second value returned by
  * this procedure is ignored.
@@ -1303,7 +1303,7 @@ DEFINE_PRIMITIVE("flush-output-port", port_flush, subr01, (SCM port))
  * Returns the current line number associated to the given input |port| as an
  * integer. The |port| argument may be omitted, in which case it defaults to
  * the value returned by |current-input-port|.
- * £
+ * @l
  * ,(bold "Note"): The |port-seek|, |read-chars| and |read-chars!| procedures
  * generally break the line-number. After using one of theses procedures, the
  * value returned by |port-current-line| will be |-1| (except a |port-seek|
@@ -1350,7 +1350,7 @@ DEFINE_PRIMITIVE("port-current-position", port_position, subr01, (SCM port))
  * position is relative to the start of the file, the current position
  * indicator, or end-of-file, respectively. If |whence| is omitted, it
  * defaults to |:start|.
- * £
+ * @l
  * ,(bold "Note"): After using port-seek, the value returned by
  * |port-current-line| may be incorrect.
 doc>

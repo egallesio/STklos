@@ -28,28 +28,28 @@
 ;;;     pattern (see below)
 ;;;
 ;;; A vanilla implementation of hygienic macro-by-example as described
-;;; by Eugene Kohlbecker and in R4RS Appendix. 
+;;; by Eugene Kohlbecker and in R4RS Appendix.
 ;;;
 ;;;
-;;; Last file update: 30-Oct-2010 21:09 (eg)
+;;; Last file update: 27-May-2011 23:04 (eg)
 
 #|
 			STklos Implementation Notes
 
-This macro implementation has been slightly modified for STklos. 
-In particular, 
+This macro implementation has been slightly modified for STklos.
+In particular,
   - all the function reside in the module MBE, the only binding which is
     visible from outside is DEFINE-SYNTAX (and the fake LET-SYNTAX and
     LETREC-SYNTAX).
   - function some used by the original code and function split are added
     in the MBE module
-  - The macro define-syntax itself is expanded to a function call which 
-    parses all the clauses rather than to a cond which tests all the 
-    clauses. This conducts to code which is smaller than the original 
+  - The macro define-syntax itself is expanded to a function call which
+    parses all the clauses rather than to a cond which tests all the
+    clauses. This conducts to code which is smaller than the original
     solution (particularly for syntaxes with a lot of clauses).
   - Symbols which starts with %% never appear in the macro expansion
     (i.e. they are replaced by a gensymed symbol). The example below
-    illustrates the problem. Suppose we have defined 
+    illustrates the problem. Suppose we have defined
 
 	(define-syntax swap!
 	   (syntax-rules ()
@@ -82,8 +82,8 @@ In particular,
 <doc SYNTAX define-syntax
  * (define-syntax <identifier> <transformer-spec>)
  *
- * |<Define-syntax>|  extends the top-level syntactic environment by binding 
- * the |<identifier>| to the specified transformer. 
+ * |<Define-syntax>|  extends the top-level syntactic environment by binding
+ * the |<identifier>| to the specified transformer.
  *
  * ,(bold "Note:") |<transformer-spec>| should be an instance of |syntax-rules|.
  * @lisp
@@ -98,15 +98,15 @@ In particular,
  *          body1 body2 ...))))
  * @end lisp
 doc>
-<doc SYNTAX syntax-rules 
+<doc SYNTAX syntax-rules
  * (syntax-rules <literals> <syntax-rule> ...)
  *
  * |<literals>| is a list of identifiers, and each |<syntax-rule>| should be of
- * the form 
+ * the form
  * @lisp
  * (pattern template)
  * @end lisp
- * 
+ *
  * An instance of |<syntax-rules>| produces a new macro transformer by
  * specifying a sequence of hygienic rewrite rules. A use of a macro
  * whose name is associated with a transformer specified by
@@ -114,31 +114,31 @@ doc>
  * <syntax-rules>, beginning with the leftmost syntax-rule. When a match is
  * found, the macro use is transcribed hygienically according to the
  * template.
- * £
- * Each pattern begins with the name for the macro. This name is not 
+ * @l
+ * Each pattern begins with the name for the macro. This name is not
  * involved in the matching and is not considered a pattern variable or
  * literal identifier.
- * £
- * ,(bold "Note:") For a complete description of the Scheme pattern language, 
+ * @l
+ * ,(bold "Note:") For a complete description of the Scheme pattern language,
  * refer to R5RS.
-doc> 
+doc>
 |#
 
 (define-module MBE
   (import SCHEME)
-  
+
   (define (%not-implemented name args)
     (error name
       "cannot be used here. You must load the file \"full-syntax\" to access it:"
       (cons name args)))
-  
+
   (define-macro (let-syntax . args)   (%not-implemented 'let-syntax ',args))
   (define-macro (letrec-syntax . args)(%not-implemented 'letrec-syntax ',args))
 
-  
-;;; 
+
+;;;
 ;;; Scheme utilities
-;;; 
+;;;
 
 (define some any)		;; because of SRFI-1
 
@@ -150,7 +150,7 @@ doc>
 	  ((null? after) (error 'split "list is too short"))
 	  (else (spl (cons (car after) before) (cdr after) (- i 1))))))
 
-;;; The following definition are here to avoid compiler warnings about 
+;;; The following definition are here to avoid compiler warnings about
 ;;; undefined symbol reference. They will be deleted with the new compiler
 (define hyg:untag-no-tags 		#f)
 (define hyg:untag-vanilla 		#f)
@@ -391,7 +391,7 @@ doc>
 			;; This is a kludge which basically permits to
 			;; say that a symbol which starts with "%%" must
 			;; always be gensymed. This is used when the
-			;; output pattern introduces a new symbol since 
+			;; output pattern introduces a new symbol since
 			;; original MBE code does not deal well with
 			;; this case [eg]
 			(let ((str (symbol->string (cdr v))))
@@ -509,7 +509,7 @@ doc>
 ;;; variables in nestings
 (define mbe:ellipsis-sub-envs
   (lambda (nestings r)
-    (let ((sub-envs-list 
+    (let ((sub-envs-list
            (let loop ((r r) (sub-envs-list '()))
              (if (null? r) (reverse! sub-envs-list)
                  (let ((c (car r)))
@@ -575,7 +575,7 @@ doc>
                             (let ((tagged-out-pattern+alist
                                     (hyg:tag
                                       ',out-pattern
-                                      (append! (hyg:flatten ',in-pattern) keywords) 
+                                      (append! (hyg:flatten ',in-pattern) keywords)
 				      '())))
                               (hyg:untag
 			        (mbe:expand-pattern
@@ -598,17 +598,17 @@ doc>
 		(out-pattern (cadar l)))
 	    (if (mbe:matches-pattern? in-pattern macro-form keywords)
 		(let ((tmp (hyg:tag out-pattern
-				    (append! (hyg:flatten in-pattern) keywords) 
+				    (append! (hyg:flatten in-pattern) keywords)
 				    '())))
 		  (hyg:untag (mbe:expand-pattern (car tmp)
-						 (mbe:get-bindings in-pattern 
-								   macro-form 
+						 (mbe:get-bindings in-pattern
+								   macro-form
 								   keywords)
 						 keywords)
 			     (cdr tmp)
 			     '()))
 		(Loop (cdr l))))))))
-  
+
 )	;;; end of module definition of MBE
 
 
@@ -672,44 +672,44 @@ doc>
            (begin result1 result2 ...)
            (cond clause1 clause2 ...)))))
 
-(define-syntax case 
-  (syntax-rules (else) 
-     ((case (key ...) clauses ...) 
-          (let ((atom-key (key ...))) 
-	    (case atom-key clauses ...))) 
-     ((case key (else result1 result2 ...)) 
-          (begin result1 result2 ...)) 
-     ((case key ((atoms ...) result1 result2 ...)) 
-          (if (memv key '(atoms ...)) (begin result1 result2 ...))) 
-     ((case key ((atoms ...) result1 result2 ...) clause clauses ...) 
-          (if (memv key '(atoms ...)) 
-	      (begin result1 result2 ...) 
+(define-syntax case
+  (syntax-rules (else)
+     ((case (key ...) clauses ...)
+          (let ((atom-key (key ...)))
+	    (case atom-key clauses ...)))
+     ((case key (else result1 result2 ...))
+          (begin result1 result2 ...))
+     ((case key ((atoms ...) result1 result2 ...))
+          (if (memv key '(atoms ...)) (begin result1 result2 ...)))
+     ((case key ((atoms ...) result1 result2 ...) clause clauses ...)
+          (if (memv key '(atoms ...))
+	      (begin result1 result2 ...)
 	      (case key clause clauses ...)))))
 
-(define-syntax and 
-  (syntax-rules () 
-     ((and) #t) 
-     ((and test) test) 
+(define-syntax and
+  (syntax-rules ()
+     ((and) #t)
+     ((and test) test)
      ((and test1 test2 ...) (if test1 (and test2 ...) #f))))
 
-(define-syntax or 
-  (syntax-rules () 
-     ((or) #f) 
-     ((or test) test) 
+(define-syntax or
+  (syntax-rules ()
+     ((or) #f)
+     ((or test) test)
      ((or test1 test2 ...) (let ((x test1)) (if x x (or test2 ...))))))
 
-(define-syntax let 
+(define-syntax let
   (syntax-rules ()
-     ((let ((name val) ...) body1 body2 ...) 
-          ((lambda (name ...) body1 body2 ...) val ...)) 
-     ((let tag ((name val) ...) body1 body2 ...) 
+     ((let ((name val) ...) body1 body2 ...)
+          ((lambda (name ...) body1 body2 ...) val ...))
+     ((let tag ((name val) ...) body1 body2 ...)
           ((letrec ((tag (lambda (name ...) body1 body2 ...))) tag) val ...))))
 
-(define-syntax let* 
+(define-syntax let*
   (syntax-rules ()
-     ((let* () body1 body2 ...) 
+     ((let* () body1 body2 ...)
           (let () body1 body2 ...))
-     ((let* ((name1 val1) (name2 val2) ...) body1 body2 ...) 
+     ((let* ((name1 val1) (name2 val2) ...) body1 body2 ...)
           (let ((name1 val1)) (let* ((name2 val2) ...) body1 body2 ...)))))
 
 

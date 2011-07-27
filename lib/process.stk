@@ -1,7 +1,7 @@
 ;;;;
 ;;;; process.stk	-- Process management for STklos
 ;;;;
-;;;; Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can reistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 12-Dec-2000 14:04 (eg)
-;;;; Last file update:  7-Nov-2010 14:22 (eg)
+;;;; Last file update: 27-May-2011 23:05 (eg)
 ;;;;
 
 #|
@@ -52,7 +52,7 @@
  *
  * (item [|:wait| must be followed by a boolean value. This value
  * specifies if the process must be run asynchronously or not. By
- * default, the process is run asynchronously (i.e. |:wait| is |¤f|).])
+ * default, the process is run asynchronously (i.e. |:wait| is |%f|).])
  *
  * (item [|:host| must be followed by a string. This string represents
  * the name of the machine on which the command must be executed. This
@@ -65,7 +65,7 @@
  * the process. If the process is run without ,(emph "fork") the Scheme
  * program is lost. This feature mimics the ``|exec|'' primitive of the
  * Unix shells. By default, a fork is executed before running the process
- * (i.e. |:fork| is |¤t|). This option works on Unix implementations only.])
+ * (i.e. |:fork| is |%t|). This option works on Unix implementations only.])
  * )
  *
  * The following example launches a process which executes the

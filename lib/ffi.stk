@@ -1,27 +1,27 @@
 ;;;;
 ;;;; ffi.stk			-- FFI support
-;;;; 
-;;;; Copyright © 2007-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright © 2007-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
-;;;; Last file update: 21-Aug-2010 14:16 (eg)
+;;;; Last file update: 27-May-2011 23:21 (eg)
 ;;;;
 
 (define make-external-function #f)
@@ -42,7 +42,7 @@
 	       (:boolean 	12)
 	       (:pointer 	13)
 	       (:string		14)
-	       (:int8		15)		 
+	       (:int8		15)
 	       (:int16		16)
 	       (:int32		17)
 	       (:int64		18)
@@ -56,7 +56,7 @@
 		(error 'define-external "parameter of type :void are forbidden")
 		(cadr info)))
 	  (error 'define-external "bad type name ~S" k))))
-  
+
   (define (parse-parameters lst)
     (map (lambda (x)
 	   (cond
@@ -98,11 +98,11 @@
  * element is the name of the parameter, and the second one is a type
  * keyword.  All the types defined in the above table, except
  * |:void|, are allowed for the parameters of a foreign function.
- * £
+ * @linebreak
  * |Define-external| accepts several options:
  * ,(itemize
  * (item [
- * |:return-type| is used to define the type of the value returned 
+ * |:return-type| is used to define the type of the value returned
  * by the foreign function. The type returned must be chosen in the types specified
  * in the table. For instance:
  * @lisp
@@ -113,12 +113,12 @@
  * returns an integer result. Omitting this option default to a result
  * type equal to |:void| (i.e. the returned value is ,(emph "undefined")).
  * ])
- * 
+ *
  * (item [
  * |:entry-name| is used to specify the name of the foreign
  * function in the C world. If this option is omitted, the entry-name is
  * supposed to be |name|. For instance:
- * @lisp 
+ * @lisp
  * (define-external minimum((a :int) (b :int))
  *    :return-type :int
  *    :entry-name  "min")
@@ -127,15 +127,15 @@
  * executes the C function called |min|.
  * ])
  * (item [
- * |:library-name| is used to specify the library which contains the 
- * foreign-function. If necessary, the library is loaded before calling the 
- * C function. So, 
- * @lisp 
+ * |:library-name| is used to specify the library which contains the
+ * foreign-function. If necessary, the library is loaded before calling the
+ * C function. So,
+ * @lisp
  * (define-external minimum((a :int) (b :int))
  *    :return-type  :int
  *    :entry-name   "min"
  *     :library-name "libminmax")
- * @end lisp 
+ * @end lisp
  * defines a function which will execute the function |min|
  * located in the library |libminmax.xx| (where |xx| is the suffix used
  * for shared libraries on the running system (generally |so|))

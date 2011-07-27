@@ -1,27 +1,27 @@
 ;;;;
 ;;;; date.stk			-- Date and Time Operations
-;;;; 
-;;;; Copyright © 2002-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright © 2002-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2002 10:06 (eg)
-;;;; Last file update:  3-Feb-2006 17:47 (eg)
+;;;; Last file update: 27-May-2011 23:01 (eg)
 ;;;;
 
 ;;;; ======================================================================
@@ -31,10 +31,10 @@
 ;;;; ======================================================================
 
 #|
-<doc EXT time? 
+<doc EXT time?
  * (time? obj)
  *
- * Return |¤t| if |obj| is a time object, othererwise returns |¤f|.
+ * Return |%t| if |obj| is a time object, othererwise returns |%f|.
 doc>
 |#
 (define (time? obj)
@@ -46,7 +46,7 @@ doc>
  * (time->seconds time)
  *
  * Convert the time object |time| into an inexact real number representing
- * the number of seconds elapsed since the Epoch. 
+ * the number of seconds elapsed since the Epoch.
  * @lisp
  * (time->seconds (current-time))  ==>  1138983411.09337
  * @end lisp
@@ -92,7 +92,7 @@ doc>
 #|
 <doc EXT make-date
  * (make-date :key second minute hour day month year)
- * 
+ *
  * Build a date from its argument. |hour|, |minute|, |second| default to 0;
  * |day| and |month| default to 1; |year| defaults to 1970
 doc>
@@ -108,7 +108,7 @@ doc>
 <doc EXT date?
  * (date? obj)
  *
- * Return |¤t| if |obj| is a date, and otherwise returns |¤f|.
+ * Return |%t| if |obj| is a date, and otherwise returns |%f|.
 doc>
 |#
 (define (date? obj)
@@ -205,10 +205,10 @@ doc>
 #|
 <doc EXT seconds->list
  * (seconds->list sec)
- * 
- * Returns a keyword list for the date given by |sec| (a date based on the 
+ *
+ * Returns a keyword list for the date given by |sec| (a date based on the
  * Epoch). The keyed values returned are
- * ,(itemize 
+ * ,(itemize
  * (item [second : 0 to 59 (but can be up to 61 to allow for leap seconds)])
  * (item [minute : 0 to 59])
  * (item [hour : 0 to 23])
@@ -222,7 +222,7 @@ doc>
  * (UTC) and local standard time in seconds.])
  * )
  * @lisp
- * (seconds->list (current-second))   
+ * (seconds->list (current-second))
  *        => (:second 51 :minute 26 :hour 19
  *            :day 5 :month 11 :year 2004
  *            :week-day 5 :year-day 310
@@ -337,7 +337,7 @@ doc>
 (define (date->string format date)
   (unless (string? format)
     (error 'date->string "bad string ~S" format))
-  
+
   (seconds->string format (date->seconds date)))
 
 

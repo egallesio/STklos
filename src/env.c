@@ -2,27 +2,27 @@
  *
  * e n v . c			-- Environment management
  *
- * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  4-Jul-2007 14:50 (eg)
+ * Last file update: 27-May-2011 22:15 (eg)
  */
 
 #include "stklos.h"
@@ -62,16 +62,16 @@ static void error_bad_symbol(SCM symbol)
 
 
 /*===========================================================================*\
- * 
- * 				M O D U L E S 
- * 
+ *
+ * 				M O D U L E S
+ *
 \*===========================================================================*/
 struct module_obj {
   stk_header header;
   SCM name;			/* module name */
   SCM exported_symbols;		/* symbols declared as exported */
   SCM imports;			/* imported modules */
-  struct hash_table_obj hash;	/* The associated hash table */	
+  struct hash_table_obj hash;	/* The associated hash table */
 };
 
 
@@ -84,8 +84,8 @@ struct module_obj {
 				 (STk_memq((symb), MODULE_EXPORTS(mod))!=STk_false))
 
 
-SCM STk_STklos_module;		/* The module whose name is STklos */ 
-static SCM all_modules;		/* List of all knowm modules */		
+SCM STk_STklos_module;		/* The module whose name is STklos */
+static SCM all_modules;		/* List of all knowm modules */
 
 static void print_module(SCM module, SCM port, int mode)
 {
@@ -98,7 +98,7 @@ static void print_module(SCM module, SCM port, int mode)
 static SCM STk_makemodule(SCM name)
 {
   register SCM z;
-  
+
   NEWCELL(z, module);
   MODULE_NAME(z)	= name;
   MODULE_EXPORTS(z)	= STk_nil;
@@ -118,10 +118,10 @@ static SCM STk_makemodule(SCM name)
 static SCM find_module(SCM name, int create)
 {
   SCM tmp;
-  
-  if (name == STk_intern("STklos") || name == STk_intern("stklos")) 
+
+  if (name == STk_intern("STklos") || name == STk_intern("stklos"))
     return STk_STklos_module;
-  
+
   for (tmp = all_modules; !NULLP(tmp); tmp = CDR(tmp)) {
     if (MODULE_NAME(CAR(tmp)) == name)
       return CAR(tmp);
@@ -131,7 +131,7 @@ static SCM find_module(SCM name, int create)
 }
 
 /*===========================================================================*\
- * 
+ *
  * Module primitives
  *
 \*===========================================================================*/
@@ -153,26 +153,26 @@ DEFINE_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
   return STk_void;
 }
 
-DEFINE_PRIMITIVE("%module-imports-set!", module_imports_set, subr2, 
+DEFINE_PRIMITIVE("%module-imports-set!", module_imports_set, subr2,
 		 (SCM importer,SCM imported))
 {
   if (!MODULEP(importer)) error_bad_module(importer);
 
-  if (CONSP(imported)) 
+  if (CONSP(imported))
     MODULE_IMPORTS(importer) = STk_dappend2(imported, LIST1(STk_STklos_module));
   else if (NULLP(imported))
     MODULE_IMPORTS(importer) = STk_nil;
   else error_bad_list(imported);
-  
+
   return STk_void;
 }
 
-DEFINE_PRIMITIVE("%module-exports-set!", module_exports_set, subr2, 
+DEFINE_PRIMITIVE("%module-exports-set!", module_exports_set, subr2,
 		 (SCM exporter,SCM exported))
 {
   if (!MODULEP(exporter)) error_bad_module(exporter);
   if (!CONSP(exported))   error_bad_list(exported);
-  
+
   MODULE_EXPORTS(exporter) = exported;
   return STk_void;
 }
@@ -182,7 +182,7 @@ DEFINE_PRIMITIVE("%module-exports-set!", module_exports_set, subr2,
 <doc EXT module?
  * (module? object)
  *
- * Returns |¤t| if |object| is a module and |¤f| otherwise.
+ * Returns |#t| if |object| is a module and |#f| otherwise.
  * @lisp
  * (module? (find-module 'ST\klos))  => #t
  * (module? 'ST\klos)                => #f
@@ -203,7 +203,7 @@ DEFINE_PRIMITIVE("module?", modulep, subr1, (SCM obj))
  * STklos modules are first class objects and |find-module| returns the
  * module associated to |name| if it exists. If there is no module
  * associated to |name|, an error is signaled if no |default| is
- * provided, otherwise |find-module| returns |default|. 
+ * provided, otherwise |find-module| returns |default|.
 doc>
 */
 DEFINE_PRIMITIVE("find-module", scheme_find_module, subr12, (SCM name, SCM def))
@@ -227,7 +227,7 @@ DEFINE_PRIMITIVE("find-module", scheme_find_module, subr12, (SCM name, SCM def))
  * Returns the current module.
  * @lisp
  * (define-module M
- *   (display 
+ *   (display
  *       (cons (eq? (current-module) (find-module 'M))
  *             (eq? (current-module) (find-module 'STklos)))))
  *    @print{} (#t . #f)
@@ -263,7 +263,7 @@ DEFINE_PRIMITIVE("module-name", module_name, subr1, (SCM module))
 <doc EXT module-imports
  * (module-imports module)
  *
- * Returns the list of modules that |module| (fully) imports. 
+ * Returns the list of modules that |module| (fully) imports.
 doc>
  */
 DEFINE_PRIMITIVE("module-imports", module_imports, subr1, (SCM module))
@@ -278,7 +278,7 @@ DEFINE_PRIMITIVE("module-imports", module_imports, subr1, (SCM module))
  * (module-exports module)
  *
  * Returns the list of symbols exported by |module|. Note that this function
- * returns the list of symbols given in the module |export| clause and that 
+ * returns the list of symbols given in the module |export| clause and that
  * some of these symbols can be not yet defined.
 doc>
  */
@@ -320,16 +320,16 @@ DEFINE_PRIMITIVE("all-modules", all_modules, subr0, (void))
 
 
 /*
-<doc EXT symbol-value 
+<doc EXT symbol-value
  * (symbol-value symbol module)
  * (symbol-value symbol module default)
  *
  * Returns the value bound to |symbol| in |module|. If |symbol| is not bound,
- * an error is signaled if no |default| is provided, otherwise |symbol-value| 
+ * an error is signaled if no |default| is provided, otherwise |symbol-value|
  * returns |default|.
 doc>
  */
-DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23, 
+DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
 		 (SCM symbol, SCM module, SCM default_value))
 {
   SCM res;
@@ -357,13 +357,13 @@ DEFINE_PRIMITIVE("%redefine-module-exports", redefine_module_exports, subr12,
   if (!MODULEP(from)) error_bad_module(from);
   if (!to)
     to =  STk_current_module();
-  else 
+  else
     if (!MODULEP(to)) error_bad_module(to);
 
   /* Compute the list of exported symbols */
   if (from == STk_STklos_module)
     lst = STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module)); /* everybody */
-  else 
+  else
     lst = MODULE_EXPORTS(from);				/* explicitly exported */
 
   for (     ; !NULLP(lst); lst = CDR(lst)) {
@@ -374,11 +374,11 @@ DEFINE_PRIMITIVE("%redefine-module-exports", redefine_module_exports, subr12,
   }
   return STk_void;
 }
-  
+
 /*===========================================================================*\
- * 
+ *
  * 		E n v i r o n m e n t   M a n a g e m e n t
- * 
+ *
 \*===========================================================================*/
 
 #define FRAME_ALLOC_BYTES(len) (sizeof(struct frame_obj) + ((len)-1)*sizeof(SCM))
@@ -409,7 +409,7 @@ void STk_define_variable(SCM symbol, SCM value, SCM module)
 }
 
 
-DEFINE_PRIMITIVE("%symbol-define", symbol_define, subr3, 
+DEFINE_PRIMITIVE("%symbol-define", symbol_define, subr3,
 		 (SCM symbol, SCM value, SCM module))
 {
   if (!SYMBOLP(symbol)) error_bad_symbol(symbol);
@@ -419,17 +419,17 @@ DEFINE_PRIMITIVE("%symbol-define", symbol_define, subr3,
   return value;
 }
 
-DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23, 
+DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
 		 (SCM new, SCM old, SCM module))
 {
   SCM res, mod = STk_current_module();;
   int i;
-  
+
   if (!SYMBOLP(new)) error_bad_symbol(new);
   if (!SYMBOLP(old)) error_bad_symbol(old);
-  if (!module) 
+  if (!module)
     module = mod;
-  else 
+  else
     if (!MODULEP(module)) error_bad_module(module);
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), old, &i);
@@ -459,7 +459,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   }
   else {
     /* symbol was not found in the given env module. Try to find it in
-     * the  exported symbols of its imported modules. 
+     * the  exported symbols of its imported modules.
      */
     for (l = MODULE_IMPORTS(env)  ; !NULLP(l); l = CDR(l)) {
       module = CAR(l);
@@ -469,9 +469,9 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
 	return BOX_VALUE(CDR(res));
       }
     }
-    
+
     /* It definitively does not exists  :-< */
-    if (err_if_unbound) 
+    if (err_if_unbound)
       error_unbound_variable(symbol);
     return STk_void;
   }
@@ -479,9 +479,9 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
 
 
 /*===========================================================================*\
- * 
+ *
  * 		E n v i r o n m e n t   P r i m i t i v e s
- * 
+ *
 \*===========================================================================*/
 
 /* The stucture which describes the modules type */
@@ -494,7 +494,7 @@ static struct extended_type_descr xtype_module = {
 
 
 /* The stucture which describes the frame type */
-static struct extended_type_descr xtype_frame = { 
+static struct extended_type_descr xtype_frame = {
   "frame",			/* name */
   NULL				/* print function */
 };
@@ -506,7 +506,7 @@ int STk_init_env(void)
 
   /* Create the stklos module */
   STk_STklos_module  = STk_makemodule(STk_void); /* will be changed later */
-  
+
   /* Declare the extended types module_obj and frame_obj */
   DEFINE_XTYPE(module, &xtype_module);
   DEFINE_XTYPE(frame,  &xtype_frame);
@@ -521,7 +521,7 @@ int STk_late_init_env(void)
 
   /* Create the SCHEME module */
   STk_makemodule(STk_intern("SCHEME"));
-  
+
   /* ==== Undocumented primitives ==== */
   ADD_PRIMITIVE(create_module);
   ADD_PRIMITIVE(select_module);
@@ -542,7 +542,7 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(symbol_value);
   ADD_PRIMITIVE(symbol_define);
   ADD_PRIMITIVE(symbol_alias);
-  
+
 
   return TRUE;
 }

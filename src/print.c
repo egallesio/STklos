@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  5-May-2011 16:14 (eg)
+ * Last file update: 23-Jul-2011 12:12 (eg)
  *
  */
 #include <ctype.h>
@@ -167,7 +167,7 @@ void STk_print(SCM exp, SCM port, int mode)
   }
 
   if (CHARACTERP(exp)) {
-    char buffer[5];
+    char buffer[5] = {0};
     int c = CHARACTER_VAL(exp);
 
     if (mode!=DSP_MODE){

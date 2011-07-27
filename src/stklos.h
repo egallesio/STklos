@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  6-May-2011 20:53 (eg)
+ * Last file update: 19-Jul-2011 20:12 (eg)
  */
 
 
@@ -46,6 +46,7 @@ extern "C"
 #include <setjmp.h>
 #include <memory.h>
 #include <locale.h>
+#include <stdint.h>
 
 #include "stklosconf.h"
 #include "extraconf.h"
@@ -1254,12 +1255,13 @@ int STk_init_mutexes(void);
 
 extern int STk_use_utf8;
 
-char *STk_utf8_grab_char(char *str, int *c); /* result = pos. after current one */
+char *STk_utf8_grab_char(char *str, uint32_t *c);/* result = pos. after current one */
 int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
 int STk_utf8_strlen(char *s, int max);
 int STk_utf8_read_char(SCM port);
+int STk_utf8_sequence_length(char *str); /* # of bytes of sequence starting at str */
 int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch*/
-
+char *STk_utf8_index(char *s, int i, int max);/* return the address of ith char of s*/
 int STk_init_utf8(void);
 
 

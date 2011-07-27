@@ -1,7 +1,7 @@
 /*
  * p r o c e s s . c 		-- Access to processes from STklos
  *
- * Copyright © 1994-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -15,7 +15,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update:  7-Nov-2010 14:15 (eg)
+ * Last file update: 27-May-2011 22:36 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -386,7 +386,7 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
  * (one time in the parent process and one time in the child process).
  * The value returned in the parent process is a process object
  * representing the child process and the value returned in the child
- * process is always the value |¤f|.
+ * process is always the value |#f|.
  * When called with a parameter (which must be a thunk), the new process
  * excutes |thunk| and terminate it execution when |thunk| returns. The
  * value returned in the parent process is a process object representing
@@ -545,7 +545,7 @@ DEFINE_PRIMITIVE("fork", fork, subr01, (SCM thunk))
 <doc EXT process?
  * (process? obj)
  *
- * Returns |¤t| if |obj| is a process , otherwise returns |¤f|.
+ * Returns |#t| if |obj| is a process , otherwise returns |#f|.
 doc>
 */
 DEFINE_PRIMITIVE("process?", processp, subr1, (SCM obj))
@@ -557,7 +557,7 @@ DEFINE_PRIMITIVE("process?", processp, subr1, (SCM obj))
 <doc EXT process-alive?
  * (process-alive? proc)
  *
- * Returns |¤t| if process |proc| is currently running, otherwise returns |¤f|.
+ * Returns |#t| if process |proc| is currently running, otherwise returns |#f|.
 doc>
 */
 DEFINE_PRIMITIVE("process-alive?", proc_alivep, subr1, (SCM proc))
@@ -604,7 +604,7 @@ DEFINE_PRIMITIVE("process-list", proc_list, subr0, (void))
  *
  * Returns the file port associated to the standard input, output or error
  * of |proc|, if it is redirected in (or to) a pipe; otherwise
- * returns |¤f|. Note that the returned port is opened for reading
+ * returns |#f|. Note that the returned port is opened for reading
  * when calling |process-output| or |process-error|; it is opened
  * for writing when calling |process-input|.
 doc>
@@ -634,8 +634,8 @@ DEFINE_PRIMITIVE("process-error", proc_error, subr1, (SCM proc))
  * (process-wait proc)
  *
  * Stops the current process (the Scheme process) until |proc| completion.
- * |Process-wait| returns |¤f| when |proc| is already terminated; it returns
- * |¤t| otherwise.
+ * |Process-wait| returns |#f| when |proc| is already terminated; it returns
+ * |#t| otherwise.
 doc>
 */
 DEFINE_PRIMITIVE("process-wait", proc_wait, subr1, (SCM proc))
@@ -667,7 +667,7 @@ DEFINE_PRIMITIVE("process-wait", proc_wait, subr1, (SCM proc))
  * (process-exit-status proc)
  *
  * Returns the exit status of |proc| if it has finished its execution;
- * returns |¤f| otherwise.
+ * returns |#f| otherwise.
 doc>
 */
 DEFINE_PRIMITIVE("process-exit-status", proc_xstatus, subr1, (SCM proc))

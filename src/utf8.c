@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update:  6-May-2011 20:52 (eg)
+ * Last file update: 27-Jul-2011 14:49 (eg)
  */
 
 #include "stklos.h"
@@ -29,7 +29,7 @@
 int STk_use_utf8 = 1;
 
 
-char *STk_utf8_grab_char(char *str, int *c) /* result = pos. after current one */
+char *STk_utf8_grab_char(char *str, uint32_t *c) /* result = pos. after current one */
 {
   uint8_t *buff = (uint8_t *) str;
 
@@ -113,7 +113,7 @@ int STk_char2utf8(int ch, char *str) /* result = length of the UTF-8 repr. */
     n = 0; /* to make gcc happy */
     STk_error("bad UTF-8 character %d", ch);
   }
-  *buff = '\0';
+  /* *buff = '\0'; */
 
   return n;
 }
@@ -128,27 +128,39 @@ int STk_utf8_char_bytes_needed(unsigned int ch)
   return 1; /* to avoid infinite loop, but obiously incorrect */
 }
 
-static int utf8_sequence_length(uint8_t c)
+int STk_utf8_sequence_length(char *str)
 {
-  /* return length of a the UTF-8 sequence given its first byte */
+  /* return length of a the UTF-8 sequence starting at given address */
+  uint8_t c = *((uint8_t *) str);
+
   if (c < 0x80)				return 1;
   if ((c < 0xc0) || (c > 0xf7))		return UTF8_INCORRECT_SEQUENCE;
-  if (c < 0xe0)				return 2; 
+  if (c < 0xe0)				return 2;
   if (c < 0xf0)				return 3;
   return 4;
 }
+
 
 int STk_utf8_strlen(char *s, int max)
 {
   int len;
   char *end = s + max;
 
-  for (len = 0;  (s < end) && *s; len++) {
-    s += utf8_sequence_length(*s);
+  for (len = 0;  s < end; len++) {
+    s += STk_utf8_sequence_length(s);
   }
   return len;
 }
 
+char *STk_utf8_index(char *s, int i, int max) /* return the address of ith char of s*/
+{
+  char *end = s + max;
+
+  while ((s < end) && i--)
+    s += STk_utf8_sequence_length(s);
+
+  return s;
+}
 
 /* ======================================================================
  *	STklos Primitives
@@ -157,7 +169,7 @@ int STk_utf8_strlen(char *s, int max)
 DEFINE_PRIMITIVE("%char-utf8-encoding", char_utf8_encoding, subr1, (SCM c))
 {
   SCM lst = STk_nil;
-  char buffer[5];
+  char buffer[5] = {0};
   int i;
 
   if (!CHARACTERP(c)) STk_error("bad char ~S", c);
@@ -170,9 +182,9 @@ DEFINE_PRIMITIVE("%char-utf8-encoding", char_utf8_encoding, subr1, (SCM c))
 
 DEFINE_PRIMITIVE("%dump-string", dump_string, subr12, (SCM str, SCM index))
 {
-  int i, c;
+  int i, c=0;
 
-  STk_debug("String ~S. space=%d, size=%d, len =%d\n", str,
+  STk_debug("String ~S. space=%d, size=%d, len =%d", str,
 	    STRING_SPACE(str), STRING_SIZE(str), STRING_LENGTH(str));
 
   printf("[");
@@ -184,8 +196,9 @@ DEFINE_PRIMITIVE("%dump-string", dump_string, subr12, (SCM str, SCM index))
     i = STk_integer_value(index);
     printf("------\nChar starting at index %d\n", i);
     STk_debug("  length of char = %d",
-	      utf8_sequence_length(STRING_CHARS(str)[i]));
-    STk_utf8_grab_char(STRING_CHARS(str)+i, &c);
+	      STk_utf8_sequence_length(&(STRING_CHARS(str)[i])));
+    STk_utf8_grab_char(
+STRING_CHARS(str)+i, &c);
     STk_debug("   character is %d ~S", (unsigned) c, MAKE_CHARACTER(c));
   }
 

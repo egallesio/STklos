@@ -1,27 +1,27 @@
 ;;;;
-;;;; lib.stk	-- Library for STklos Documentation Building 
-;;;; 
-;;;; Copyright © 2003-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
-;;;; 
-;;;; 
+;;;; lib.stk	-- Library for STklos Documentation Building
+;;;;
+;;;; Copyright © 2003-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 20-Dec-2003 23:23 (eg)
-;;;; Last file update: 10-Aug-2010 09:19 (eg)
+;;;; Last file update: 27-May-2011 23:16 (eg)
 ;;;;
 
 (load "srfi.stk")
@@ -30,7 +30,7 @@
 
 ;;;;
 ;;;; Customization
-;;;; 
+;;;;
 (define *doc* '())			;; The documentation datbase when in memory
 (define *stderr* (current-error-port))
 (define *verbose* (getenv "DEBUG"))
@@ -43,7 +43,7 @@
 
 
 ;======================================================================
-; 
+;
 ; 				read-database
 ;
 ;======================================================================
@@ -57,7 +57,7 @@
   (when *verbose* (format *stderr* " Done\n")))
 
 ;======================================================================
-; 
+;
 ; 				rewrite-for-skribe
 ;
 ;======================================================================
@@ -71,7 +71,7 @@
 (define R4RS-rgxp     (string->regexp "R4RS"))
 (define R5RS-rgxp     (string->regexp "R5RS"))
 (define STklos-rgxp   (string->regexp "STklos"))
-(define linebrk-rgxp  (string->regexp "£"))
+(define linebrk-rgxp  (string->regexp "@l"))
 
 (define (fontified-code code)
   (blockquote
@@ -90,8 +90,8 @@
 
 
 (define (rewrite-for-skribe def)
-  ;; rewrite |¤f| and |¤t| 
-  (set! def (regexp-replace-all "\\|¤(f|t)\\|" def "|#\\1|"))
+  ;; rewrite |%f| and |%t|
+  (set! def (regexp-replace-all "\\|%(f|t)\\|" def "|#\\1|"))
   ;; rewrite |xxx| in @code{xxx}
   (set! def (regexp-replace-all var-rgxp def ",(code [\\1])"))
   ;; rewrite => in an arrow
@@ -112,13 +112,13 @@
   (set! def (regexp-replace-all STklos-rgxp def ",(stklos)"))
   ;; rewrite linebreak
   (set! def (regexp-replace-all linebrk-rgxp def ",(linebreak 2)"))
-  
+
   def)
 
 
 
 ;======================================================================
-; 
+;
 ; 			insert-documentation
 ;
 ;======================================================================
@@ -165,9 +165,9 @@
 		 ((extended-syntax) [,(stklos) ,(linebreak) syntax])
 		 ((procedure)	    [,(rfive)  ,(linebreak) procedure])
 		 ((extended)        [,(stklos) ,(linebreak) procedure])))))
- 
+
   (list
-   (color :width 100. :border 0 :bg *header-bg* :margin 3 
+   (color :width 100. :border 0 :bg *header-bg* :margin 3
 	  ;; Put marks for all the functions defined in this entry
 	  (map (lambda (x) (mark (format "~A" x)))
 	       (cons name similar))
@@ -184,7 +184,7 @@
 	      (else
 	       (Loop (cdr l) (cons (list (show-form (car l))
 					 (! "\\\\\n") )
-				   res))))))   
+				   res))))))
 	  ;; Display the description text
    (blockquote (eval (read-from-string
 		      (string-append "["
@@ -198,7 +198,7 @@
     (unless lst
       (format *stderr* "Error: no documentation for item ~S\n" item)
       (exit 1))
-    
+
     (when *verbose*
       (format *stderr* "Documentation of ~S\n" item))
     (let ((infos (cdr lst)))
@@ -216,7 +216,7 @@
 	    (doc item type syn sim desc))))))
 
 ;======================================================================
-; 
+;
 ; 			show-undocumented
 ;
 ;======================================================================

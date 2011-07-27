@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 24-Apr-2011 11:40 (eg)
+ * Last file update: 27-Jul-2011 15:36 (eg)
  */
 
 #include <stklos.h>
@@ -98,7 +98,7 @@ static void Usage(char *progname, int only_version)
 "   -d, --debug                 add informations to ease debugging\n"
 "   -s, --stack-size=n          use a stack of size n (default %d)\n"
 "   -c, --case-sensitive        be case sensitive (default is #f)\n"
-"   -u, --utf8-encoding=n       use/don't use UTF-8 encoding (default is #t)\n"
+"   -u, --utf8-encoding=n       use/don't use UTF-8 encoding (default is yes)\n"
 "   -v, --version               print program version and exit\n"
 "   -h, --help                  print this help and exit\n"
 "All the arguments given after options are passed to the Scheme program.\n",

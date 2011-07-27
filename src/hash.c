@@ -2,8 +2,8 @@
  *
  * h a s h  . c			-- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright © 1994-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
  ! distribution.  Current writing is more modular, independent of Tcl
@@ -11,32 +11,32 @@
  ! Tcl implementation have been droped here. Furthermore, current
  ! implementation of the API also takes into account the fact that we
  ! have a GC approach. In fact, the code is very different, the only thing
- ! which is kept is the Tcl strategy for sizing and hashing 
- ! The original code from which this file is derived was copyrighted 
+ ! which is kept is the Tcl strategy for sizing and hashing
+ ! The original code from which this file is derived was copyrighted
  ! as follow:
  !
  ! Copyright (c) 1991-1993 The Regents of the University of California.
  ! Copyright (c) 1994 Sun Microsystems, Inc.
  +=============================================================================
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update:  9-Dec-2007 20:34 (eg)
+ * Last file update: 27-May-2011 22:16 (eg)
  */
 
 #include "stklos.h"
@@ -59,7 +59,7 @@
 
 
 /*===========================================================================*\
- * 
+ *
  *  		       H a s h i n g - f u n c t i o n s
  *
 \*===========================================================================*/
@@ -83,7 +83,7 @@ static unsigned long hash_string(register char *string)
    *    the high-order bits to fill out the hash value.  This seems
    *    works well both for decimal and non-decimal strings.
    */
-  
+
   for (c = *string; c ; c = *string++) {
     result += (result<<3) + c;
   }
@@ -91,12 +91,12 @@ static unsigned long hash_string(register char *string)
 }
 
 
-static unsigned long hash_scheme_string(SCM str) 
+static unsigned long hash_scheme_string(SCM str)
 {					     /* The same one for Scheme strings */
   char *string;
   unsigned long result = 0;
   int i, l;
-  
+
   if (!STRINGP(str)) STk_error("bad string key ~S", str);
 
   string = STRING_CHARS(str);
@@ -116,7 +116,7 @@ static unsigned long sxhash(SCM obj)
   unsigned long h;
   SCM tmp;
   int i;
-  
+
   if (!BOXED_OBJP(obj)) return (AS_LONG(obj) >> 2);
 
   switch (BOXED_TYPE(obj)) {
@@ -135,21 +135,21 @@ static unsigned long sxhash(SCM obj)
     case tc_keyword:	return hash_string(KEYWORD_PNAME(obj));
     case tc_string:	return hash_scheme_string(obj);
     case tc_vector:	h = 0;
-			for (i=VECTOR_SIZE(obj)-1; i >= 0; i--) 
+			for (i=VECTOR_SIZE(obj)-1; i >= 0; i--)
 			  h = HASH_WORD(h, sxhash(VECTOR_DATA(obj)[i]));
 			return h;
     default:	        /* A complex type (STklos object, user defined type,
 			 * hashtable...). In this case we return the type of the
 			 * object. This is very  inneficient but it should be
-			 * rare to use a  structured object as a key. 
+			 * rare to use a  structured object as a key.
 			 */
       			 return (unsigned long) BOXED_TYPE(obj);
   }
 }
 
 /*===========================================================================*\
- * 
- * 				H a s h    S t a t s 
+ *
+ * 				H a s h    S t a t s
  *
 \*===========================================================================*/
 #define _MAX_COUNT 5
@@ -157,38 +157,38 @@ static unsigned long sxhash(SCM obj)
 static void hash_stats(struct hash_table_obj *h, SCM port)
 {
   int i, j, more, len, count[_MAX_COUNT] = {0};
-  
+
   STk_fprintf(port, "Hash table statistics\n");
-  more = 0; 
+  more = 0;
   for (i = 0; i < HASH_NBUCKETS(h); i++) {
     len = STk_int_length(HASH_BUCKETS(h)[i]);
-    
+
     STk_fprintf(port, "%d: ", i);
     for (j = 0; j < len; j++) STk_putc('#', port);
     STk_putc('\n', port);
-    
+
     if (len < _MAX_COUNT)
       count[len] += 1;
     else
       more += 1;
   }
 
-  STk_fprintf(port, "  %d entries in table, %d buckets (ratio %g)\n", 
-	      HASH_NENTRIES(h), HASH_NBUCKETS(h), 
+  STk_fprintf(port, "  %d entries in table, %d buckets (ratio %g)\n",
+	      HASH_NENTRIES(h), HASH_NBUCKETS(h),
 	      (double) HASH_NENTRIES(h)/ HASH_NBUCKETS(h));
   STk_fprintf(port, "Repartition\n");
 
   for (i = 0; i < _MAX_COUNT; i++) {
-    if (count[i]) 
+    if (count[i])
       STk_fprintf(port, "  %d buckets with %d entries\n", count[i], i);
   }
-  if (more) 
+  if (more)
     STk_fprintf(port, "  %d buckets with more than %d entries\n", more, _MAX_COUNT);
 }
 
 
 /*===========================================================================*\
- * 
+ *
  * 				E n l a r g e   t a b l e
  *
 \*===========================================================================*/
@@ -211,7 +211,7 @@ static void enlarge_table(register struct hash_table_obj *h)
   HASH_MASK(h)	    = (HASH_MASK(h) << 2) + 3;
 
   /* Allocate and initialize the new bucket array. */
-  HASH_BUCKETS(h)   = (SCM *) 
+  HASH_BUCKETS(h)   = (SCM *)
     		STk_must_malloc((size_t) (HASH_NBUCKETS(h) * sizeof(SCM)));
   for (i = 0; i < HASH_NBUCKETS(h); i++) {
     HASH_BUCKETS(h)[i] = STk_nil;
@@ -221,24 +221,24 @@ static void enlarge_table(register struct hash_table_obj *h)
   for (i = 0; i < old_size; i++) {
     for (tmp = old_buckets[i]; !NULLP(tmp); tmp = CDR(tmp)) {
       switch (BOXED_INFO(h)) {
-	case HASH_OBARRAY_FLAG: 
+	case HASH_OBARRAY_FLAG:
 	  index = hash_string(SYMBOL_PNAME(CAR(tmp))) & HASH_MASK(h);
 	  break;
-	case HASH_VAR_FLAG: 
+	case HASH_VAR_FLAG:
 	  index = hash_string(SYMBOL_PNAME(CAR(CAR(tmp)))) & HASH_MASK(h);
 	  break;
 	case HASH_SCM_FLAG: {
 	  SCM key = CAR(CAR(tmp));
 	  switch (HASH_TYPE(h)) {
-	    case hash_eqp: 
+	    case hash_eqp:
 	      index = RANDOM_INDEX(h, key);
 	      break;
 	    case hash_stringp:
 	      index = hash_scheme_string(key) & HASH_MASK(h);
 	      break;
 	    case hash_general:
-	      index = RANDOM_INDEX(h, STk_integer_value(STk_C_apply(HASH_HASH(h), 
-								    1, 
+	      index = RANDOM_INDEX(h, STk_integer_value(STk_C_apply(HASH_HASH(h),
+								    1,
 								    key)));
 	      break;
 	    default: ;
@@ -257,7 +257,7 @@ static void enlarge_table(register struct hash_table_obj *h)
 
 
 /*===========================================================================*\
- * 
+ *
  *  		       H a s h - t a b l e   c r e a t i o n
  *
 \*===========================================================================*/
@@ -282,11 +282,11 @@ void STk_hashtable_init(struct hash_table_obj *h, int flag)
 
 
 /*===========================================================================*\
- * 
+ *
  *  	          O b a r r a y   h a s h t a b l e   f u n t i o n s
  *
  *
- * Keys are symbols or keywords. The value associated to a bucket is a list 
+ * Keys are symbols or keywords. The value associated to a bucket is a list
  * of the  symbols (or keywords) with the same hash value
  *
 \*===========================================================================*/
@@ -308,7 +308,7 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s, SCM (*create) (cha
 {
   SCM z;
   int index;
-  
+
   z = hash_get_symbol(h, s, &index);
 
   if (!z) {
@@ -324,12 +324,12 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s, SCM (*create) (cha
 
 
 /*===========================================================================*\
- * 
+ *
  *  	       v a r i a b l e s    h a s h t a b l e   f u n t i o n s
  *
  *
- * Here variable are the variables defined in a module. Keys are symbols. 
- * The value associated to a bucket is an A-list (symbol . value) of all the 
+ * Here variable are the variables defined in a module. Keys are symbols.
+ * The value associated to a bucket is an A-list (symbol . value) of all the
  * symbols with the same hash value
  *
 \*===========================================================================*/
@@ -360,10 +360,10 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value)
     BOX_VALUE(CDR(z)) = value;
   } else {
     SCM z;
-    
+
     /* Create a new box for this value */
     z = STk_make_box(value);
-    
+
     /* Enter the new variable in table */
     HASH_BUCKETS(h)[index] = STk_cons(STk_cons(v, z),
 				      HASH_BUCKETS(h)[index]);
@@ -397,7 +397,7 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value)
 
 
 /*===========================================================================*\
- * 
+ *
  * 			Utilities on hash tables
  *
 \*===========================================================================*/
@@ -419,11 +419,11 @@ SCM STk_hash_keys(struct hash_table_obj *h)
 
 
 /*===========================================================================*\
- * 
+ *
  * 		H a s h - t a b l e s   i n   t h e
  *
  * 		      S c h e m e   W o r l d
- * 
+ *
 \*===========================================================================*/
 static void error_bad_hash_table(SCM obj)
 {
@@ -447,14 +447,14 @@ DEFINE_PRIMITIVE("%make-hash-table", make_hash, subr2, (SCM compar, SCM hashfct)
   SCM z;
   hash_type type = hash_general;
 
-  if (STk_procedurep(compar) == STk_false) 
+  if (STk_procedurep(compar) == STk_false)
     STk_error("bad comparison function ~S", compar);
-  if (STk_procedurep(hashfct) == STk_false) 
+  if (STk_procedurep(hashfct) == STk_false)
     STk_error("bad hash function ~S", hashfct);
 
   if (BOXED_TYPE(compar) == tc_subr2) {
     /* See if comparison function is 'eq?' or 'string?'.
-     * If so, we implement the hash table in the most efficient way. 
+     * If so, we implement the hash table in the most efficient way.
      */
     if (PRIMITIVE_FUNC(compar) == STk_eq)    type = hash_eqp;
     if (PRIMITIVE_FUNC(compar) == STk_streq) type = hash_stringp;
@@ -488,7 +488,7 @@ DEFINE_PRIMITIVE("hash-table?", hashtablep, subr1, (SCM obj))
 /*
 <doc EXT hash-table-size
  * (hash-table-size hash)
- * 
+ *
  * Returns the number of entries in the |hash|.
 doc>
 */
@@ -501,11 +501,11 @@ DEFINE_PRIMITIVE("hash-table-size", hash_table_size, subr1, (SCM ht))
 /*
 <doc EXT hash-table-equivalence-function
  * (hash-table-equivalence-function hash)
- * 
+ *
  * Returns the equivalence predicate used for keys in |hash|.
 doc>
 */
-DEFINE_PRIMITIVE("hash-table-equivalence-function", hash_table_eqv_func, 
+DEFINE_PRIMITIVE("hash-table-equivalence-function", hash_table_eqv_func,
 		 subr1, (SCM ht))
 {
   if(!HASHP(ht)) error_bad_hash_table(ht);
@@ -516,11 +516,11 @@ DEFINE_PRIMITIVE("hash-table-equivalence-function", hash_table_eqv_func,
 /*
 <doc EXT hash-table-hash-function
  * (hash-table-hash-function hash)
- * 
+ *
  * Returns the hash function used for keys in |hash|.
 doc>
 */
-DEFINE_PRIMITIVE("hash-table-hash-function", hash_table_hash_func, 
+DEFINE_PRIMITIVE("hash-table-hash-function", hash_table_hash_func,
 		 subr1, (SCM ht))
 {
   if(!HASHP(ht)) error_bad_hash_table(ht);
@@ -533,7 +533,7 @@ DEFINE_PRIMITIVE("hash-table-hash-function", hash_table_hash_func,
 <doc EXT hash-table-set!
  * (hash-table-set! hash key value)
  *
- * Enters an association between |key| and |value| in the|hash| table. 
+ * Enters an association between |key| and |value| in the|hash| table.
  * The value returned by |hash-table-set!| is ,(emph "void").
 doc>
 */
@@ -541,40 +541,40 @@ DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
 {
   int index = 0;
   SCM func, l = STk_nil;
-  
+
   if (!HASHP(ht)) error_bad_hash_table(ht);
 
   switch (HASH_TYPE(ht)) {
-    case hash_eqp: 
+    case hash_eqp:
       index = RANDOM_INDEX(ht, key);
-      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l)) 
+      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
 	if (CAR(CAR(l)) == key) break;
       break;
 
     case hash_stringp:
       index = hash_scheme_string(key) & HASH_MASK(ht);
 
-      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l)) 
+      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
 	if (STk_streq(CAR(CAR(l)), key) != STk_false) break;
       break;
     case hash_general:
       func  = HASH_COMPAR(ht);
-      index = RANDOM_INDEX(ht, 
+      index = RANDOM_INDEX(ht,
 			   STk_integer_value(STk_C_apply(HASH_HASH(ht), 1, key)));
 
-      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l)) 
+      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
 	if (STk_C_apply(func, 2, CAR(CAR(l)), key) != STk_false) break;
     default:  break;
   }
 
-  /* When we are here, index is on the good bucket list. if l is null, 
+  /* When we are here, index is on the good bucket list. if l is null,
    * the item was not in the given list otherwise CAR(l) = (key . old-value)
    */
   if (NULLP(l)) {
     HASH_BUCKETS(ht)[index] = STk_cons(STk_cons(key, val), HASH_BUCKETS(ht)[index]);
     HASH_NENTRIES(ht) += 1;
     /* If the table has exceeded a decent size, rebuild it */
-    if (HASH_NENTRIES(ht) >= HASH_NEWSIZE(ht)) 
+    if (HASH_NENTRIES(ht) >= HASH_NEWSIZE(ht))
       enlarge_table((struct hash_table_obj *) ht);
   }
   else
@@ -589,20 +589,20 @@ DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
  * (hash-table-ref hash key)
  * (hash-table-ref hash key thunk)
  *
- * Returns the value associated with |key| in the given |hash| table. If no 
- * value has been associated with |key| in |hash|, the specified |thunk| is 
+ * Returns the value associated with |key| in the given |hash| table. If no
+ * value has been associated with |key| in |hash|, the specified |thunk| is
  * called and its value is returned; otherwise an error is raised.
- * @lisp 
+ * @lisp
  * (define h1 (make-hash-table))
  * (hash-table-set! h1 'foo (list 1 2 3))
  * (hash-table-ref  h1 'foo)                 =>  (1 2 3)
- * (hash-table-ref  h1 'bar 
+ * (hash-table-ref  h1 'bar
                        (lambda () 'absent))  =>  absent
  * (hash-table-ref  h1 'bar)                 =>  error
  * (hash-table-set! h1 '(a b c) 'present)
- * (hash-table-ref  h1 '(a b c) 
+ * (hash-table-ref  h1 '(a b c)
                         (lambda () 'absent)) => absent
- * 
+ *
  * (define h2 (make-hash-table equal?))
  * (hash-table-set! h2 '(a b c) 'present)
  * (hash-table-ref  h2 '(a b c))             => present
@@ -613,29 +613,29 @@ static SCM Inline hash_table_search(SCM ht, SCM key)
 {
   int index = 0;
   SCM func, l = STk_nil;
-  
+
   if (!HASHP(ht)) error_bad_hash_table(ht);
 
   switch (HASH_TYPE(ht)) {
-    case hash_eqp: 
+    case hash_eqp:
       index = RANDOM_INDEX(ht, key);
-      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l)) 
+      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
 	if (CAR(CAR(l)) == key) return CDR(CAR(l));
       break;
 
     case hash_stringp:
       index = hash_scheme_string(key) & HASH_MASK(ht);
 
-      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l)) 
+      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
 	if (STk_streq(CAR(CAR(l)), key) != STk_false) return CDR(CAR(l));
       break;
 
     case hash_general:
       func = HASH_COMPAR(ht);
-      index = RANDOM_INDEX(ht, 
+      index = RANDOM_INDEX(ht,
 			   STk_integer_value(STk_C_apply(HASH_HASH(ht), 1, key)));
 
-      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l)) 
+      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
 	if (STk_C_apply(func, 2, CAR(CAR(l)), key) != STk_false) return CDR(CAR(l));
       break;
     default: break;
@@ -658,14 +658,14 @@ DEFINE_PRIMITIVE("hash-table-ref", hash_ref, subr23, (SCM ht, SCM key, SCM def))
 /*
 <doc EXT hash-table-ref/default
  * (hash-table-ref/default hash key)
- * 
- * This function is equivalent to 
+ *
+ * This function is equivalent to
  * @lisp
  * (hash-table-ref hash key (lambda () default))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("hash-table-ref/default", hash_ref_default, subr3, 
+DEFINE_PRIMITIVE("hash-table-ref/default", hash_ref_default, subr3,
 		 (SCM ht, SCM key, SCM def))
 {
   SCM res = hash_table_search(ht, key);
@@ -677,32 +677,32 @@ DEFINE_PRIMITIVE("hash-table-ref/default", hash_ref_default, subr3,
 }
 
 /*
-<doc EXT hash-table-exists? 
+<doc EXT hash-table-exists?
  * (hash-table-exists? hash key)
- * 
- * Returns |¤t| if there is any association of |key| in
- * |hash|. Returns |¤f| otherwise.
+ *
+ * Returns |#t| if there is any association of |key| in
+ * |hash|. Returns |#f| otherwise.
 doc>
 */
 DEFINE_PRIMITIVE("hash-table-exists?", hash_existp, subr2, (SCM ht, SCM key))
 {
   return MAKE_BOOLEAN(hash_table_search(ht,key) != NULL);
 }
-		 
+
 
 /*
 <doc EXT hash-table-delete!
  * (hash-table-delete! hash key)
  *
- * Deletes the entry for |key| in |hash|, if it exists. Result of 
+ * Deletes the entry for |key| in |hash|, if it exists. Result of
  * |hash-table-delete!| is ,(emph "void").
- * 
+ *
  * @lisp
  * (define h (make-hash-table))
  * (hash-table-set! h 'foo (list 1 2 3))
  * (hash-table-ref h 'foo)                => (1 2 3)
- * (hash-table-delete! h 'foo) 
- * (hash-table-ref h 'foo 
+ * (hash-table-delete! h 'foo)
+ * (hash-table-ref h 'foo
                      (lambda () 'absent)  => absent
  * @end lisp
 doc>
@@ -715,27 +715,27 @@ DEFINE_PRIMITIVE("hash-table-delete!", hash_delete, subr2, (SCM ht, SCM key))
   if (!HASHP(ht)) error_bad_hash_table(ht);
 
   l = prev = STk_nil;
-  
+
   switch (HASH_TYPE(ht)) {
-    case hash_eqp: 
+    case hash_eqp:
       index = RANDOM_INDEX(ht, key);
-      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); prev=l, l=CDR(l)) 
+      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); prev=l, l=CDR(l))
 	if (CAR(CAR(l)) == key) break;
       break;
 
     case hash_stringp:
       index = hash_scheme_string(key) & HASH_MASK(ht);
-      
-      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l);  prev=l, l=CDR(l)) 
+
+      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l);  prev=l, l=CDR(l))
 	if (STk_streq(CAR(CAR(l)), key) != STk_false) break;
       break;
 
     case hash_general:
       func = HASH_COMPAR(ht);
-      index = RANDOM_INDEX(ht, 
+      index = RANDOM_INDEX(ht,
 			   STk_integer_value(STk_C_apply(HASH_HASH(ht), 1, key)));
 
-      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); prev=l, l=CDR(l)) 
+      for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); prev=l, l=CDR(l))
 	if (STk_C_apply(func, 2, CAR(CAR(l)), key) != STk_false) break;
       break;
     default: break;
@@ -745,7 +745,7 @@ DEFINE_PRIMITIVE("hash-table-delete!", hash_delete, subr2, (SCM ht, SCM key))
     HASH_NENTRIES(ht) -= 1;
     if (NULLP(prev))
       HASH_BUCKETS(ht)[index] = CDR(l); /* somewhere in the chain */
-    else 
+    else
       CDR(prev) = CDR(l);		/* delete the first item of the chain */
   }
   return STk_void;
@@ -754,20 +754,20 @@ DEFINE_PRIMITIVE("hash-table-delete!", hash_delete, subr2, (SCM ht, SCM key))
 
 
 /*
-<doc EXT hash-table-walk hash-table-for-each 
+<doc EXT hash-table-walk hash-table-for-each
  * (hash-table-for-each hash proc)
  * (hash-table-walk hash proc)
  *
  * |Proc| must be a procedure taking two arguments. |Hash-table-for-each|
- * calls |proc| on each key/value association in |hash|, with the key as 
- * the first argument and the value as the second.  The value returned by 
- * |hash-table-for-each| is ,(emph "void"). 
+ * calls |proc| on each key/value association in |hash|, with the key as
+ * the first argument and the value as the second.  The value returned by
+ * |hash-table-for-each| is ,(emph "void").
  *  £
  * ,(bold "Note:") The order of application of |proc| is unspecified.
  *  £
  * ,(bold "Note:") |hash-table-walk| is another name for |hash-table-for-each|
  * (this is the name used in ,(link-srfi 69)).
- * 
+ *
  * @lisp
  * (let ((h   (make-hash-table))
  *       (sum 0))
@@ -775,15 +775,15 @@ DEFINE_PRIMITIVE("hash-table-delete!", hash_delete, subr2, (SCM ht, SCM key))
  *   (hash-table-set! h 'bar 3)
  *   (hash-table-for-each h (lambda (key value)
  *                            (set! sum (+ sum value))))
- *   sum)           =>  5 
+ *   sum)           =>  5
  * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("hash-table-for-each", hash_for_each, subr2, (SCM ht, SCM proc))
 {
-  int i, n; 
+  int i, n;
   SCM l = STk_nil;;
-  
+
   if (!HASHP(ht)) 			 error_bad_hash_table(ht);
   if (STk_procedurep(proc) == STk_false) error_bad_procedure(proc);
 
@@ -800,27 +800,27 @@ DEFINE_PRIMITIVE("hash-table-for-each", hash_for_each, subr2, (SCM ht, SCM proc)
  * (hash-table-map hash proc)
  *
  * |Proc| must be a procedure taking two arguments. |Hash-table-map|
- * calls |proc| on each key/value association in |hash|, with the key as 
- * the first argument and the value as the second.  The result of 
- * |hash-table-map| is a list of the values returned by |proc|, in an 
+ * calls |proc| on each key/value association in |hash|, with the key as
+ * the first argument and the value as the second.  The result of
+ * |hash-table-map| is a list of the values returned by |proc|, in an
  * unspecified order.
  * £
  * ,(bold "Note:") The order of application of |proc| is unspecified.
  * @lisp
  * (let ((h (make-hash-table)))
- *   (dotimes (i 5) 
+ *   (dotimes (i 5)
  *     (hash-table-set! h i (number->string i)))
  *   (hash-table-map h (lambda (key value)
- *                        (cons key value))))    
+ *                        (cons key value))))
  *              => ((3 . "3") (4 . "4") (0 . "0") (1 . "1") (2 . "2"))
  * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("hash-table-map", hash_map, subr2, (SCM ht, SCM proc))
 {
-  int i, n; 
+  int i, n;
   SCM res, l;
-  
+
   if (!HASHP(ht)) 			 error_bad_hash_table(ht);
   if (STk_procedurep(proc) == STk_false) error_bad_procedure(proc);
 
@@ -839,7 +839,7 @@ DEFINE_PRIMITIVE("hash-table-map", hash_map, subr2, (SCM ht, SCM proc))
  * (hash-table-hash obj)
  *
  * Computes a hash code for an object and returns this hash code as a
- * non negative integer. A property of |hash-table-hash| is that 
+ * non negative integer. A property of |hash-table-hash| is that
  * @lisp
  * (equal? x y) => (equal? (hash-table-hash x) (hash-table-hash y)
  * @end lisp
@@ -863,7 +863,7 @@ DEFINE_PRIMITIVE("hash-table-hash", hash_hash, subr1, (SCM obj))
  * Prints  overall information about |hash|, such as the number of entries
  * it contains, the number of buckets in its hash array, and the utilization
  * of the buckets. Informations are printed on |port|. If no |port| is given
- * to |hash-table-stats|, information are printed on the current output port 
+ * to |hash-table-stats|, information are printed on the current output port
  * (see ,(ref :mark "current-output-port")).
 doc>
 */
@@ -872,14 +872,14 @@ DEFINE_PRIMITIVE("hash-table-stats", hash_stats, subr12, (SCM ht, SCM port))
   if(!HASHP(ht)) error_bad_hash_table(ht);
   if (!port) port = STk_current_output_port();
   else if (!OPORTP(port)) STk_error("bad port ~S", port);
-  
+
   hash_stats((struct hash_table_obj *) ht, port);
   return STk_void;
 }
 
 
 /*===========================================================================*\
- * 
+ *
  * 	Initialization code
  *
 \*===========================================================================*/
@@ -904,7 +904,7 @@ int STk_init_hash(void)
   ADD_PRIMITIVE(hash_existp);
 
   ADD_PRIMITIVE(hash_delete);
-  
+
   ADD_PRIMITIVE(hash_for_each);
   ADD_PRIMITIVE(hash_map);
 

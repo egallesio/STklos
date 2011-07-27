@@ -1,44 +1,44 @@
 ;;;;
 ;;;; module.stk	-- Module stuff
-;;;; 
-;;;; Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 26-Apr-2007 17:47 (eg)
+;;;; Last file update: 27-May-2011 23:05 (eg)
 ;;;;
 
 
 ;;=============================================================================
 ;;
-;; 				SYMBOL-VALUE*	
+;; 				SYMBOL-VALUE*
 ;;
 ;;=============================================================================
 #|
-<doc EXT symbol-value* 
+<doc EXT symbol-value*
  * (symbol-value* symbol module)
  * (symbol-value* symbol module default)
  *
  * Returns the value bound to |symbol| in |module|. If |symbol| is not bound,
- * an error is signaled if no |default| is provided, otherwise |symbol-value| 
+ * an error is signaled if no |default| is provided, otherwise |symbol-value|
  * returns |default|.
- * £
+ * @l
  * Note that this function searches the value of |symbol| in |module|
  * ,(bold "and") all the modules it imports whereas |symbol-value| searches
  * only in |module|.
@@ -48,7 +48,7 @@ doc>
   (let ((absent (gensym)))
     (let Loop ((all-mods (cons module (module-imports module))))
       (if (null? all-mods)
-	  ;; Symbol was absent in the module and its imported modules 
+	  ;; Symbol was absent in the module and its imported modules
 	  (if default?
 	      default
 	      (error 'symbol-value* "symbol ``~S'' not found" name))
@@ -60,22 +60,22 @@ doc>
 
 ;;=============================================================================
 ;;
-;; 				SELECT-MODULE	
+;; 				SELECT-MODULE
 ;;
 ;;=============================================================================
 #|
 <doc EXT-SYNTAX select-module
  * (select-module <name>)
  *
- * Changes the value of the current module to the module with the given |name|. 
- * The expressions evaluated after |select-module| will take place in 
- * module |name| environment.  Module |name| must have been created 
+ * Changes the value of the current module to the module with the given |name|.
+ * The expressions evaluated after |select-module| will take place in
+ * module |name| environment.  Module |name| must have been created
  * previously by a |define-module|. The result of |select-module| is
  * ,(emph "void").
  * |Select-module| is particularly useful when debugging since it
  * allows to place toplevel evaluation in a particular module. The
  * following transcript shows an usage of |select-module|.
- * ,(footnote [This transcript uses the default toplevel loop 
+ * ,(footnote [This transcript uses the default toplevel loop
  * 	       which displays the name of the current module in the evaluator
  * 	       prompt.]):
  * @lisp
@@ -87,8 +87,8 @@ doc>
  * stklos> (select-module bar)
  * bar> foo
  * 2
- * bar> (select-module stklos) 
- * stklos> 
+ * bar> (select-module stklos)
+ * stklos>
  * @end lisp
 doc>
 |#
@@ -99,7 +99,7 @@ doc>
 
 ;;=============================================================================
 ;;
-;; 				DEFINE-MODULE	
+;; 				DEFINE-MODULE
 ;;
 ;;=============================================================================
 #|
@@ -114,29 +114,29 @@ doc>
  * the environment of the (old) module |<name>|
  * ,(footnote [In fact |define-module| on a given name
  * 	     defines a new module only the first time it is invoked on this name.
- * 	     By this way, interactively reloading a module does not define 
+ * 	     By this way, interactively reloading a module does not define
  * 	     a new entity, and the other modules which use it are not altered.]).
- * Definitions done in a module are local to the module and do not interact with 
+ * Definitions done in a module are local to the module and do not interact with
  * the definitions in other modules. Consider the following definitions,
  * @lisp
  * (define-module M1
  *    (define a 1))
- * 
+ *
  * (define-module M2
  *   (define a 2)
  *   (define b (* 2 x)))
  * @end lisp
- * 
- * Here, two modules are defined and they both bind the symbol |a| to a 
+ *
+ * Here, two modules are defined and they both bind the symbol |a| to a
  * value. However, since |a| has been defined in two distinct modules
- * they denote two different locations. 
- * £
+ * they denote two different locations.
+ * @l
  * The |STklos| module, which is predefined, is a special module which
  * contains all the ,(emph "global variables") of a R5RS program.  A symbol
  * defined in the |STklos| module, if not hidden by a local definition, is
  * always visible from inside a module. So, in the previous exemple, the
  * |x| symbol refers the |x| symbol defined in the |STklos| module.
- * £
+ * @l
  * The result of |define-module| is ,(emph "void").
 doc>
 |#
@@ -180,31 +180,31 @@ doc>
  *
  * Specifies the modules which are imported by the current module.
  * Importing a module makes the symbols it exports visible to the
- * importer, if not hidden by local definitions. When a symbol 
+ * importer, if not hidden by local definitions. When a symbol
  * is exported by several of the imported modules, the location denoted by
  * this symbol in the importer module correspond to the one of the first module
- * in the list 
+ * in the list
  * @lisp
- * (<module1> <module2> ...) 
+ * (<module1> <module2> ...)
  * @end lisp
- * which exports it. 
- * £
+ * which exports it.
+ * @l
  * If several |import| clauses appear in a module, the set of
- * imported modules  is determined by appending the various list of modules 
- * in their apparition order. 
+ * imported modules  is determined by appending the various list of modules
+ * in their apparition order.
  *
  * @lisp
  * (define-module M1
  *   (export a b)
  *   (define a 'M1-a)
  *   (define b 'M1-b))
- * 
+ *
  * (define-module M2
  *   (export b c d)
  *   (define b 'M2-b)
  *   (define c 'M2-c)
  *   (define d 'M2-d))
- * 
+ *
  * (define-module M3
  *   (import M1 M2)
  *   (display (list a b c d)))  @print{} (M1-a M1-b M2-c M2-d)
@@ -224,15 +224,15 @@ doc>
  * @end lisp
  * In this case, only the symbols |c| and |d| are imported from
  * module |M2|.
- * £
+ * @l
  * ,(bold "Note:") Importations are not ,(emph "transitive"): when
  * the module ,(emph "C") imports the module ,(emph "B") which is an importer
  * of module ,(emph "A") the symbols of ,(emph "A") are not visible
  * from ,(emph "C"), except  by explicitly importing the ,(emph "A")
  * module from ,(emph "C").
- * £
+ * @l
 * ,(bold "Note:") The module |STklos|, which contains the ,(emph "global
- * variables") is always implicitly imported from a module. Furthermore, 
+ * variables") is always implicitly imported from a module. Furthermore,
  * this module is always placed at the end of the list of imported modules.
 doc>
 |#
@@ -246,7 +246,7 @@ doc>
 	      (Loop (cdr l)
 		      (if (or (eq? mod importer) ; itself
 			      (memq mod res))    ; already imported
-			  res		   	
+			  res
 			  (cons mod res))) 	 ; add it to our result
 	      (error 'import "module `~S' does not exist" (car l)))))))
 
@@ -265,7 +265,7 @@ doc>
   ;; if export? is true, export the given symbols
   (when export?
     (%module-export (current-module) symbols)))
-    
+
 
 ;;(define-macro (import . modules)
 ;;  (if (null? modules)
@@ -297,7 +297,7 @@ doc>
 	       full
 	       (cons (car lst) part)))
 	(else (error 'import "bad import clause ~S" (car lst))))))
-  
+
   (if (null? modules)
       '()
       (receive (full part)
@@ -327,15 +327,15 @@ doc>
 <doc EXT-SYNTAX export
  * (export <symbol1> <symbol2> ...)
  *
- * Specifies the symbols which are exported (i.e. ,(emph "visible")) outside 
- * the current module. By default, symbols defined in a module are not 
+ * Specifies the symbols which are exported (i.e. ,(emph "visible")) outside
+ * the current module. By default, symbols defined in a module are not
  * visible outside this module, excepted if they appear in an |export|
- * clause. 
- * £
+ * clause.
+ * @l
  * If several |export| clauses appear in a module, the set of
  * exported symbols is determined by ``,(emph "unionizing")'' symbols exported
  * in all the |export| clauses.
- * £
+ * @l
  * The result of |export| is ,(emph "void").
 doc>
 |#
@@ -377,12 +377,12 @@ doc>
  * |mod|. If this symbol is not bound,  an error is signaled if no |default| is
  * provided, otherwise |in-module| returns |default|. Note that the value of |s|
  * is searched in |mod| and all the modules it imports.
- * £
- * This form is in fact a shortcut. In effect, 
+ * @l
+ * This form is in fact a shortcut. In effect,
  * @lisp
  * (in-module my-module foo)
  * @end lisp
- * £
+ * @l
  * is equivalent to
  * @lisp
  * (symbol-value* 'foo (find-module 'my-module))

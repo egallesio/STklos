@@ -2,8 +2,8 @@
  *
  * s y s t e m . c				-- System relative primitives
  *
- * Copyright © 1994-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright © 1994-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  *
  * Permission to use, copy, modify, distribute,and license this
  * software and its documentation for any purpose is hereby granted,
@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  6-Aug-2010 00:02 (eg)
+ * Last file update: 27-May-2011 22:47 (eg)
  */
 
 #include <unistd.h>
@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
-#include <time.h> 
+#include <time.h>
 #include "stklos.h"
 #include "struct.h"
 
@@ -35,7 +35,7 @@
 
 #ifdef WIN32
 #  define TIME_DIV_CONST 10000
-#else 
+#else
 #  define TIME_DIV_CONST 1000
 #endif
 
@@ -72,7 +72,7 @@ static void error_posix(SCM obj1, SCM obj2)
 {
   if (obj1 && obj2)
     STk_error("%s: ~A ~A", strerror(errno), obj1, obj2);
-  else 
+  else
     if (obj1)
       STk_error("%s: ~A", strerror(errno), obj1);
     else
@@ -102,8 +102,8 @@ static int my_lstat(SCM path, struct stat *s)
 int STk_dirp(const char *path)
 {
   struct stat buf;
-  
-  if (stat(path, &buf) >= 0) 
+
+  if (stat(path, &buf) >= 0)
     return S_ISDIR(buf.st_mode);
   return FALSE;
 }
@@ -115,12 +115,12 @@ int STk_dirp(const char *path)
 //EG: {
 //EG:   char *p, *q, dir[MAX_PATH_LENGTH];
 //EG:   struct stat buf;
-//EG:  
+//EG:
 //EG:   if (ISABSOLUTE(exec)) {
 //EG:     strncpy(path, exec, MAX_PATH_LENGTH);
 //EG:     return;
 //EG:   }
-//EG:   
+//EG:
 //EG:   /* the executable path may be specified by relative path from the cwd. */
 //EG:   /* Patch suggested by Shiro Kawai <shiro@squareusa.com> */
 //EG:   if (strchr(exec, DIRSEP) != NULL) {
@@ -129,39 +129,39 @@ int STk_dirp(const char *path)
 //EG:     absolute(dir, path);
 //EG:     return;
 //EG:   }
-//EG: 
-//EG: #ifdef FREEBSD 
+//EG:
+//EG: #ifdef FREEBSD
 //EG:   /* I don't understand why this is needed */
 //EG:   if (access(path, X_OK) == 0) {
 //EG:     stat(path, &buf);
 //EG:     if (!S_ISDIR(buf.st_mode)) return;
-//EG:   }  
+//EG:   }
 //EG: #endif
-//EG: 
+//EG:
 //EG:   p = getenv("PATH");
 //EG:   if (p == NULL) {
 //EG:     p = "/bin:/usr/bin";
 //EG:   }
-//EG: 
+//EG:
 //EG:   while (*p) {
 //EG:     /* Copy the stuck of path in dir */
 //EG:     for (q = dir; *p && *p != PATHSEP; p++, q++) *q = *p;
 //EG:     *q = '\000';
-//EG: 
-//EG:     if (!*dir) { 
+//EG:
+//EG:     if (!*dir) {
 //EG:       /* patch suggested by Erik Ostrom <eostrom@vesuvius.ccs.neu.edu> */
 //EG:       getcwd(path, MAX_PATH_LENGTH);
 //EG:       sprintf(path + strlen(path), "%c%s", DIRSEP, exec);
 //EG:     }
 //EG:     else
 //EG:       sprintf(path, "%s%c%s", dir, DIRSEP, exec);
-//EG: 
+//EG:
 //EG:     sprintf(path, "%s%c%s", dir, DIRSEP, exec);
 //EG:     if (access(path, X_OK) == 0) {
 //EG:       stat(path, &buf);
 //EG:       if (!S_ISDIR(buf.st_mode)) return;
 //EG:     }
-//EG: 	 
+//EG:
 //EG:     /* Try next path */
 //EG:     if (*p) p++;
 //EG:   }
@@ -182,7 +182,7 @@ int STk_dirp(const char *path)
  *
  * On Win32 system, when compiled with the Cygwin environment,
  * file names are internally represented in a POSIX-like internal form.
- * |Winify-file-bame| permits to obtain back the Win32 name of an interned 
+ * |Winify-file-bame| permits to obtain back the Win32 name of an interned
  * file name
  * @lisp
  * (winify-file-name "/tmp")
@@ -197,12 +197,12 @@ DEFINE_PRIMITIVE("winify-file-name", winify_filename, subr1, (SCM f))
 {
 #ifdef WIN32
   char expanded[2 * MAX_PATH_LENGTH];
-  
+
   if (!STRINGP(f)) error_bad_string(f);
-  
+
   cygwin_conv_to_win32_path(STRING_CHARS(f), expanded);
   return STk_Cstring2string(expanded);
-#else 
+#else
   error_win32_primitive();
   return STk_void;
 #endif
@@ -215,7 +215,7 @@ DEFINE_PRIMITIVE("winify-file-name", winify_filename, subr1, (SCM f))
  *
  * On Win32 system, when compiled with the Cygwin environment,
  * file names are internally represented in a POSIX-like internal form.
- * |posixify-file-bame| permits to obtain the interned file name from 
+ * |posixify-file-bame| permits to obtain the interned file name from
  * its external form.
  * file name
  * @lisp
@@ -228,7 +228,7 @@ DEFINE_PRIMITIVE("posixify-file-name", posixify_filename, subr1, (SCM f))
 {
 #ifdef WIN32
   char expanded[2 * MAX_PATH_LENGTH];
-  
+
   if (!STRINGP(f)) error_bad_string(f);
 
   cygwin_conv_to_posix_path(STRING_CHARS(f), expanded);
@@ -243,15 +243,15 @@ DEFINE_PRIMITIVE("posixify-file-name", posixify_filename, subr1, (SCM f))
 /*
 <doc EXT expand-file-name
  * (expand-file-name path)
- * 
+ *
  * |Expand-file-name| expands the filename given in |path| to
- * an absolute path. 
+ * an absolute path.
  * @lisp
  *   ;; Current directory is ~eg/stklos (i.e. /users/eg/stklos)
  *   (expand-file-name "..")            => "/users/eg"
  *   (expand-file-name "~eg/../eg/bin") => "/users/eg/bin"
  *   (expand-file-name "~/stklos)"      => "/users/eg/stk"
- * @end lisp 
+ * @end lisp
 doc>
 */
 
@@ -267,9 +267,9 @@ DEFINE_PRIMITIVE("expand-file-name", expand_fn, subr1, (SCM s))
  * (canonical-file-name path)
  *
  * Expands all symbolic links in |path| and returns its canonicalized
- * absolute path name. The resulting path does not have symbolic links. 
- * If |path| doesn't designate a valid path name, |canonical-file-name| 
- * returns |¤f|.
+ * absolute path name. The resulting path does not have symbolic links.
+ * If |path| doesn't designate a valid path name, |canonical-file-name|
+ * returns |#f|.
 doc>
 */
 DEFINE_PRIMITIVE("canonical-file-name", canonical_path, subr1, (SCM str))
@@ -291,7 +291,7 @@ DEFINE_PRIMITIVE("getcwd", getcwd, subr0, (void))
   SCM z;
 
   s = getcwd(buf, MAX_PATH_LENGTH);
-  if (!s) 
+  if (!s)
     error_posix(NULL, NULL);
   z = STk_Cstring2string(buf);
 
@@ -309,10 +309,10 @@ doc>
 DEFINE_PRIMITIVE("chdir", chdir, subr1, (SCM s))
 {
   if (!STRINGP(s)) error_bad_path(s);
-  
+
   if (chdir(STk_expand_file_name(STRING_CHARS(s))) != 0)
     error_posix(s, NULL);
- 
+
   return STk_void;
 }
 
@@ -440,7 +440,7 @@ DEFINE_PRIMITIVE("file-exists?", file_existsp, subr1, (SCM f))
  * (file-size string)
  *
  * Returns the size of the file whose path name is given in
- * |string|.If |string| denotes a file which does not exist, 
+ * |string|.If |string| denotes a file which does not exist,
  * |file-size| returns |#f|.
 doc>
  */
@@ -457,34 +457,34 @@ DEFINE_PRIMITIVE("file-size", file_size, subr1, (SCM f))
 <doc EXT glob
  * (glob pattern ...)
  *
- * |Glob| performs file name ``globbing'' in a fashion similar to the 
+ * |Glob| performs file name ``globbing'' in a fashion similar to the
  * csh shell. |Glob| returns a list of the filenames that match at least
  * one of |pattern| arguments.  The |pattern| arguments may contain
  * the following special characters:
- * ,(itemize 
+ * ,(itemize
  * (item [|?| Matches any single character.])
  * (item [|*| Matches any sequence of zero or more characters.])
- * (item [|\[chars\]| Matches any single character in |chars|. 
- * If chars contains a sequence of the form |a-b| then any character 
+ * (item [|\[chars\]| Matches any single character in |chars|.
+ * If chars contains a sequence of the form |a-b| then any character
  * between |a| and |b| (inclusive) will match.])
  * (item [|\\x| Matches the character |x|.])
  * (item [|{a,b,...}| Matches any of the strings |a|, |b|, etc.])
  * )
- * 
- * As with csh, a '.' at the beginning of a file's name or just after 
- * a '/ must be matched explicitly or with a |@{@}| construct.  
+ *
+ * As with csh, a '.' at the beginning of a file's name or just after
+ * a '/ must be matched explicitly or with a |@{@}| construct.
  * In addition, all '/' characters must be matched explicitly.
- * £
+ * @l
  * If the first character in a pattern is '~' then it refers to
  * the home directory of the user whose name follows the '~'.
  * If the '~' is followed immediately by `/' then the value of
  * the environment variable HOME is used.
- * £
+ * @l
  * |Glob| differs from csh globbing in two ways.  First, it does not
  * sort its result list (use the |sort| procedure if you want the list
  * sorted).
- * Second, |glob| only returns the names of files that actually exist; 
- * in csh no check for existence is made unless a pattern contains a 
+ * Second, |glob| only returns the names of files that actually exist;
+ * in csh no check for existence is made unless a pattern contains a
  * |?|, |*|, or |\[\]| construct.
 doc>
 */
@@ -509,7 +509,7 @@ DEFINE_PRIMITIVE("remove-file", remove_file, subr1, (SCM filename))
     error_posix(filename, NULL);
   return STk_void;
 }
- 
+
 
 /*
 <doc EXT rename-file
@@ -548,9 +548,9 @@ DEFINE_PRIMITIVE("directory-files", directory_files, subr1, (SCM dirname))
   path = STk_expand_file_name(STRING_CHARS(dirname));
   dir  = opendir(path);
   if (!dir) error_posix(dirname, NULL);
-  
+
   for (d = readdir(dir); d ; d = readdir(dir)) {
-    if (d->d_name[0] == '.') 
+    if (d->d_name[0] == '.')
       if ((d->d_name[1] == '\0') || (d->d_name[1] == '.' && d->d_name[2] == '\0'))
 	continue;
     res = STk_cons(STk_Cstring2string(d->d_name), res);
@@ -558,15 +558,15 @@ DEFINE_PRIMITIVE("directory-files", directory_files, subr1, (SCM dirname))
   closedir(dir);
   return STk_dreverse(res);
 }
-		   
-  
- 
+
+
+
 /*
 <doc EXT copy-file
  * (copy-file string1 string2)
  *
  * Copies the file whose path-name is |string1| to a file whose path-name is
- * |string2|. If the file |string2| already exists, its content prior 
+ * |string2|. If the file |string2| already exists, its content prior
  * the call to |copy-file| is lost. The result of |copy-file| is ,(emph "void").
 doc>
 */
@@ -578,7 +578,7 @@ DEFINE_PRIMITIVE("copy-file", copy_file, subr2, (SCM filename1, SCM filename2))
   /* Should I use sendfile on Linux here? */
   if (!STRINGP(filename1)) error_bad_string(filename1);
   if (!STRINGP(filename2)) error_bad_string(filename2);
-  
+
   f1 = open(STRING_CHARS(filename1), O_RDONLY);
   if (f1 == -1) error_posix(filename1, NULL);
   f2 = open(STRING_CHARS(filename2), O_WRONLY|O_CREAT|O_TRUNC, 0666);
@@ -586,11 +586,11 @@ DEFINE_PRIMITIVE("copy-file", copy_file, subr2, (SCM filename1, SCM filename2))
 
   while ((n = read(f1, buff, MAXBUFF)) > 0) {
     if ((n < 0) || (write(f2, buff, n) < n)) {
-      close(f1); close(f2); 
+      close(f1); close(f2);
       error_posix(filename1, filename2);
     }
   }
-  
+
   close(f1); close(f2);
   return STk_void;
 }
@@ -609,7 +609,7 @@ DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
 {
 #ifdef WIN32
   char buff[MAX_PATH_LENGTH], *s;
-  
+
   s = tmpnam(buff);
   return s ? STk_Cstring2string(s) : STk_false;
 #else
@@ -621,7 +621,7 @@ DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
   for ( ; ; ) {
     sprintf(buff, "/tmp/stklos%05x", cpt++);
     if (cpt > 100000)		/* arbitrary limit to avoid infinite search */
-      return STk_false; 
+      return STk_false;
     if (access(buff, F_OK) == -1) break;
   }
   MUT_UNLOCK(tmpnam_mutex);
@@ -635,11 +635,11 @@ DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
 <doc EXT register-exit-function!
  * (register-exit-function! proc)
  *
- * This function registers |proc| as an exit function. This function will 
- * be called when the program exits. When called, |proc| will be passed one 
- * parmater which is the status given to the |exit| function (or 0 if the 
- * programe terminates normally). The result of  |register-exit-function!| 
- * is undefined. 
+ * This function registers |proc| as an exit function. This function will
+ * be called when the program exits. When called, |proc| will be passed one
+ * parmater which is the status given to the |exit| function (or 0 if the
+ * programe terminates normally). The result of  |register-exit-function!|
+ * is undefined.
  * @lisp
  * (let* ((tmp (temporary-file-name))
  *        (out (open-output-file tmp)))
@@ -679,19 +679,19 @@ DEFINE_PRIMITIVE("%pre-exit", pre_exit, subr1, (SCM retcode))
 
 /*
 <doc EXT exit
- * (exit) 
+ * (exit)
  * (exit ret-code)
  *
  * Exits the program with the specified integer return code. If |ret-code|
  * is omitted, the program terminates with a return code of 0.
- * If  program has registered exit functions with |register-exit-function!|, 
+ * If  program has registered exit functions with |register-exit-function!|,
  * they are called (in an order which is the reverse of their call order).
 doc>
 */
 DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
 {
   long ret = 0;
-  
+
   if (retcode) {
     ret = STk_integer_value(retcode);
     if (ret == LONG_MIN) STk_error("bad return code ~S", retcode);
@@ -711,7 +711,7 @@ DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
  * (machine-type)
  *
  * Returns a string identifying the kind of machine which is running the
- * program. The result string is of the form 
+ * program. The result string is of the form
  * |[os-name]-[os-version]-[processor-type]|.
 doc>
 */
@@ -725,18 +725,18 @@ DEFINE_PRIMITIVE("machine-type", machine_type, subr0, (void))
 //EG: #ifndef HZ
 //EG: #define HZ 60.0
 //EG: #endif
-//EG: 
+//EG:
 //EG: #ifdef CLOCKS_PER_SEC
 //EG: #  define TIC CLOCKS_PER_SEC
-//EG: #else 
+//EG: #else
 //EG: #  define TIC HZ
 //EG: #endif
-//EG: 
+//EG:
 //EG: PRIMITIVE STk_get_internal_info(void)
 //EG: {
 //EG:   SCM z = STk_makevect(7, STk_nil);
 //EG:   long allocated, used, calls;
-//EG: 
+//EG:
 //EG:   /* The result is a vector which contains
 //EG:    *	0 The total cpu used in ms
 //EG:    *	1 The number of cells currently in use.
@@ -746,9 +746,9 @@ DEFINE_PRIMITIVE("machine-type", machine_type, subr0, (void))
 //EG:    *    5 Total time used in the gc
 //EG:    *	6 A boolean indicating if Tk is initialized
 //EG:    */
-//EG: 
+//EG:
 //EG:   STk_gc_count_cells(&allocated, &used, &calls);
-//EG: 
+//EG:
 //EG:   VECT(z)[0] = STk_makenumber(STk_my_time());
 //EG:   VECT(z)[1] = STk_makeinteger(used);
 //EG:   VECT(z)[2] = STk_makeinteger(allocated);
@@ -760,7 +760,7 @@ DEFINE_PRIMITIVE("machine-type", machine_type, subr0, (void))
 //EG: #else
 //EG:   VECT(z)[6] = STk_false;
 //EG: #endif
-//EG:   
+//EG:
 //EG:   STk_alloc_cells = 0;
 //EG:   return z;
 //EG: }
@@ -770,7 +770,7 @@ DEFINE_PRIMITIVE("machine-type", machine_type, subr0, (void))
 /*
 <doc EXT date
  * (date)
- * 
+ *
  * Returns the current date in a string
 doc>
 */
@@ -786,7 +786,7 @@ DEFINE_PRIMITIVE("date", date, subr0, (void))
 
 
 /*
-<doc EXT clock 
+<doc EXT clock
  * (clock)
  *
  * Returns an approximation of processor time, in milliseconds, used so far by the
@@ -795,15 +795,15 @@ doc>
  */
 DEFINE_PRIMITIVE("clock", clock, subr0, (void))
 {
-  return STk_double2real((double) clock() / 
+  return STk_double2real((double) clock() /
 			 CLOCKS_PER_SEC * (double) TIME_DIV_CONST);
 }
 
 /*
-<doc EXT current-seconds 
+<doc EXT current-seconds
  * (current-seconds)
  *
- * Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970), 
+ * Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970),
  * measured in seconds.
 doc>
  */
@@ -815,7 +815,7 @@ DEFINE_PRIMITIVE("current-seconds", current_seconds, subr0, (void))
 /*
 <doc current-time
  * (current-time)
- * 
+ *
  * Returns a time object corresponding to the current time.
 doc>
 */
@@ -824,8 +824,8 @@ DEFINE_PRIMITIVE("current-time", current_time, subr0, (void))
   struct timeval now;
   SCM argv[3];
 
-  gettimeofday(&now, NULL); 
-  
+  gettimeofday(&now, NULL);
+
   argv[2] = time_type;
   argv[1] =  STk_long2integer(now.tv_sec);
   argv[0] =  STk_long2integer(now.tv_usec);
@@ -837,11 +837,11 @@ DEFINE_PRIMITIVE("current-time", current_time, subr0, (void))
 /*
 <doc EXT sleep
  * (sleep n)
- * 
- * Suspend the execution of the program for at |ms| milliseconds. Note that due 
+ *
+ * Suspend the execution of the program for at |ms| milliseconds. Note that due
  * to system clock resolution, the pause may be a little bit longer. If a
- * signal arrives during the pause, the execution may be resumed. 
- * 
+ * signal arrives during the pause, the execution may be resumed.
+ *
 doc>
 */
 DEFINE_PRIMITIVE("sleep", sleep, subr1, (SCM ms))
@@ -849,9 +849,9 @@ DEFINE_PRIMITIVE("sleep", sleep, subr1, (SCM ms))
   long n = STk_integer_value(ms);
   struct timespec ts;
 
-  if (n == LONG_MIN) 
+  if (n == LONG_MIN)
     error_bad_int_or_out_of_bounds(ms);
-  
+
   ts.tv_sec  = n / 1000;
   ts.tv_nsec = (n % 1000) * 1000000;
 
@@ -863,22 +863,22 @@ DEFINE_PRIMITIVE("sleep", sleep, subr1, (SCM ms))
 /*
 <doc EXT seconds->date
  * (seconds->date n)
- * 
+ *
  * Convert the date |n| expressed as a number of seconds since the Epoch
  * to a date.
 doc>
-*/ 
+*/
 DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
 {
-  int overflow; 
+  int overflow;
   SCM argv[11];
   struct tm *t;
   time_t tt;
 
   tt = (time_t) STk_integer2int32(seconds, &overflow);
-  
+
   if (overflow) error_bad_int_or_out_of_bounds(seconds);
-  
+
   t = localtime(&tt);
   argv[10]  = date_type;
   argv[9]  = MAKE_INT(t->tm_sec);
@@ -892,7 +892,7 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
   argv[1]  = MAKE_INT(t->tm_isdst);
 #ifdef DARWIN
   argv[0]  = MAKE_INT(0);	/* Cannot figure how to find the timezone */
-#else 
+#else
   argv[0]  = STk_long2integer(timezone);
 #endif
   return STk_make_struct(11, &argv[10]);
@@ -902,10 +902,10 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
 /*
 <doc EXT date->seconds
  * (date->seconds d)
- * 
+ *
  * Convert the date |d| to the number of seconds since the ,(emph "Epoch").
 doc>
-*/ 
+*/
 DEFINE_PRIMITIVE("date->seconds", date2seconds, subr1, (SCM date))
 {
   struct tm t;
@@ -923,10 +923,10 @@ DEFINE_PRIMITIVE("date->seconds", date2seconds, subr1, (SCM date))
   t.tm_mon   = STk_integer_value(*p++) - 1;
   t.tm_year  = STk_integer_value(*p++) - 1900;
   t.tm_isdst = -1;			/* to ignore DST */
-  
+
   n = mktime(&t);
   if (n == (time_t)(-1)) STk_error("cannot convert date to seconds (~S)", date);
-  
+
   return STk_double2real((double) n);
 }
 
@@ -936,22 +936,22 @@ DEFINE_PRIMITIVE("%seconds->string", date2string, subr2, (SCM fmt, SCM seconds))
 {
   char buffer[1024];
   struct tm *p;
-  time_t tt;  
+  time_t tt;
   int len, overflow;
 
   tt = (time_t) STk_integer2int32(seconds, &overflow);
-  
+
   if (!STRINGP(fmt)) error_bad_string(fmt);
   if (overflow)      error_bad_int_or_out_of_bounds(seconds);
-  
+
   p   = localtime(&tt);
   len = strftime(buffer, 1023, STRING_CHARS(fmt), p);
 
   if (len > 0)
     return STk_Cstring2string(buffer);
-  else 
+  else
     STk_error("buffer too short!");
-  
+
   return STk_void; /* never reached */
 }
 
@@ -959,10 +959,10 @@ DEFINE_PRIMITIVE("%seconds->string", date2string, subr2, (SCM fmt, SCM seconds))
 /*
 <doc EXT running-os
  * (running-os)
- * 
- * Returns the name of the underlying Operating System which is running 
- * the program. 
- * The value returned by |runnin-os| is a symbol. For now, this procedure 
+ *
+ * Returns the name of the underlying Operating System which is running
+ * the program.
+ * The value returned by |runnin-os| is a symbol. For now, this procedure
  * returns either |unix|, |windows|, or |cygwin-windows|.
 doc>
 */
@@ -988,11 +988,11 @@ DEFINE_PRIMITIVE("running-os", running_os, subr0, (void))
  *
  * Looks for the environment variable named |str| and returns its
  * value as a string, if it exists. Otherwise, |getenv| returns |#f|.
- * If |getenv| is called without parameter, it returns the list of 
- * all the environment variables accessible from the program as an 
+ * If |getenv| is called without parameter, it returns the list of
+ * all the environment variables accessible from the program as an
  * A-list.
  * @lisp
- * (getenv "SHELL")   
+ * (getenv "SHELL")
  *      => "/bin/zsh"
  * (getenv)
  *      => (("TERM" . "xterm") ("PATH" . "/bin:/usr/bin") ...)
@@ -1017,10 +1017,10 @@ static SCM build_posix_environment(char **env)
 DEFINE_PRIMITIVE("getenv", getenv, subr01, (SCM str))
 {
   char *tmp;
-  
+
   if (str) {		/* One parameter: find the value of the given variable */
     if (!STRINGP(str)) error_bad_string(str);
-    
+
     tmp = getenv(STRING_CHARS(str));
     return tmp ? STk_Cstring2string(tmp) : STk_false;
   } else {		/* No parameter: give the complete environment */
@@ -1045,7 +1045,7 @@ DEFINE_PRIMITIVE("setenv!", setenv, subr2, (SCM var, SCM value))
   if (strchr(STRING_CHARS(var), '=')) STk_error("variable ~S contains a '='", var);
   if (!STRINGP(value)) 		      STk_error("value ~S is not a string", value);
 
-  s = STk_must_malloc(strlen(STRING_CHARS(var))   + 
+  s = STk_must_malloc(strlen(STRING_CHARS(var))   +
 		      strlen(STRING_CHARS(value)) + 2); /* 2 because of '=' & \0 */
   sprintf(s, "%s=%s", STRING_CHARS(var), STRING_CHARS(value));
   putenv(s);
@@ -1055,7 +1055,7 @@ DEFINE_PRIMITIVE("setenv!", setenv, subr2, (SCM var, SCM value))
 <doc EXT unsetenv!
  * (unsetenv! var)
  *
- * Unsets the environment variable |var|. |Var| must be a string. 
+ * Unsets the environment variable |var|. |Var| must be a string.
  * The result of |unsetenv!| is ,(emph "void").
 doc>
  */
@@ -1064,7 +1064,7 @@ DEFINE_PRIMITIVE("unsetenv!", unsetenv, subr1, (SCM var))
 #ifndef SOLARIS
   if (!STRINGP(var)) error_bad_string(var);
   unsetenv(STRING_CHARS(var));
-  return STk_void;  
+  return STk_void;
 #else
   /* not exactly the same since getenv will not return #f after that */
   return STk_setenv(var, STk_Cstring2string(""));
@@ -1081,12 +1081,12 @@ doc>
 DEFINE_PRIMITIVE("hostname", hostname, subr0, (void))
 {
   char buff[256];
-  
+
   if (gethostname(buff, 256) < 0)
     buff[255] = '0';
   return STk_Cstring2string(buff);
 }
-  
+
 /*
 <doc EXT pause
  * (pause)
@@ -1098,10 +1098,10 @@ DEFINE_PRIMITIVE("pause", pause, subr0, (void))
   pause();
   return STk_void;
 }
-  
 
 
-	  
+
+
 
 /*
  * Undocumented primitives
@@ -1129,7 +1129,7 @@ DEFINE_PRIMITIVE("%chmod", change_mode, subr2, (SCM file, SCM value))
 
   if (!STRINGP(file))   error_bad_path(file);
   if (mode < 0 || mode > 0777) error_bad_int_or_out_of_bounds(value);
-  
+
   return MAKE_BOOLEAN(chmod(STRING_CHARS(file), mode) == 0);
 }
 
@@ -1138,7 +1138,7 @@ DEFINE_PRIMITIVE("%big-endian?", big_endianp, subr0, (void))
 {
   int i = 1;
   char *p = (char *)&i;
-  
+
   return MAKE_BOOLEAN(p[0] != 1);
 }
 
@@ -1195,7 +1195,7 @@ int STk_init_system(void)
   ADD_PRIMITIVE(directory_files);
   ADD_PRIMITIVE(getpid);
   ADD_PRIMITIVE(system);
-    
+
   ADD_PRIMITIVE(file_is_directoryp);
   ADD_PRIMITIVE(file_is_regularp);
   ADD_PRIMITIVE(file_is_readablep);
@@ -1218,7 +1218,7 @@ int STk_init_system(void)
 
   ADD_PRIMITIVE(winify_filename);
   ADD_PRIMITIVE(posixify_filename);
-  
+
   ADD_PRIMITIVE(pause);
   ADD_PRIMITIVE(big_endianp);
   return TRUE;

@@ -1,27 +1,27 @@
 /*
  * cond.c	-- Condition implementation
- * 
- * Copyright © 2004-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
- * 
- * 
+ *
+ * Copyright © 2004-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 22-May-2004 08:57 (eg)
- * Last file update: 30-May-2007 17:18 (eg)
+ * Last file update: 27-May-2011 22:59 (eg)
  */
 
 #include "stklos.h"
@@ -36,7 +36,7 @@ static void error_bad_type(SCM obj)
 {
   STk_error("bad condition type ~S", obj);
 }
- 
+
 static void error_bad_cond(SCM obj)
 {
   STk_error("bad condition ~S", obj);
@@ -45,7 +45,7 @@ static void error_bad_cond(SCM obj)
 static void initialize_cond(SCM who, SCM from)
 {
   SCM s;
-  
+
   for (s = STRUCT_TYPE_SLOTS(STRUCT_TYPE(from)); !NULLP(s); s = CDR(s)) {
     STk_struct_set(who, CAR(CAR(s)), STk_int_struct_ref(from, CAR(CAR(s))));
   }
@@ -66,7 +66,7 @@ static SCM is_a(SCM type, SCM t)
 	  - parent is a condition type ==> (is-a? parent t)
 	  - A list ==> if (one of the list is a parent) #t else #f
     */
-    
+
     if (parent == STk_false)
       return STk_false;
     if (!CONSP(parent))
@@ -107,21 +107,21 @@ static SCM allocate_condition(SCM type)
  *
  * 	               C O N D I T I O N   T Y P E S
  *
- * ======================================================================   
+ * ======================================================================
  */
 
-/* 
+/*
 <doc EXT make-condition-type
  * (make-condition-type id  parent  slot-names)
- * 
- * |Make-condition-type| returns a new condition type. |Id| must be a symbol 
- * that serves as a symbolic name for the condition type. |Parent| must itself 
+ *
+ * |Make-condition-type| returns a new condition type. |Id| must be a symbol
+ * that serves as a symbolic name for the condition type. |Parent| must itself
  * be a condition type. |Slot-names| must be a list of symbols. It identifies
  * the slots of the conditions associated with the condition type.
  *
 doc>
 */
-DEFINE_PRIMITIVE("make-condition-type", make_cond_type, subr3, 
+DEFINE_PRIMITIVE("make-condition-type", make_cond_type, subr3,
 		 (SCM name, SCM parent, SCM slots))
 {
   SCM z;
@@ -135,26 +135,26 @@ DEFINE_PRIMITIVE("make-condition-type", make_cond_type, subr3,
   return z;
 }
 
-/* 
+/*
 <doc EXT make-compound-condition-type
  * (make-compound-condition-type id ct1 ...)
- * 
- * |Make-compound-condition-type| returns a new condition type, built 
+ *
+ * |Make-compound-condition-type| returns a new condition type, built
  * from the condition types |ct1|, ...
- * |Id| must be a symbol  that serves as a symbolic name for the 
- * condition type. The slots names of the new condition type is the 
+ * |Id| must be a symbol  that serves as a symbolic name for the
+ * condition type. The slots names of the new condition type is the
  * union of the slots of conditions |ct1| ...
- * £
+ * @l
  * ,(bold "Note:") This function is not defined in ,(srfi 34).
 doc>
 */
-DEFINE_PRIMITIVE("make-compound-condition-type", make_comp_cond_type, subr2, 
+DEFINE_PRIMITIVE("make-compound-condition-type", make_comp_cond_type, subr2,
 		 (SCM name, SCM parents))
 {
   SCM z, tmp, l = STk_nil;
 
   /* Collect the slots of all the parents */
-  if (STk_int_length(parents) < 0) 
+  if (STk_int_length(parents) < 0)
     STk_error("bad list of parents ~S", parents);
 
   for (tmp = parents; !NULLP(tmp); tmp = CDR(tmp)) {
@@ -189,7 +189,7 @@ DEFINE_PRIMITIVE("condition-type?", ctp, subr1, (SCM obj))
 SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module)
 {
   SCM res, tmp = STk_intern(name);
-  
+
   if (parent == STk_false) parent = root_condition;
   res = STk_make_cond_type(tmp, parent, slots);
   STk_define_variable(tmp, res, module);
@@ -208,7 +208,7 @@ SCM STk_condition_type_is_a(SCM type, SCM t)
  *
  * 	                     C O N D I T I O N S
  *
- * ======================================================================   
+ * ======================================================================
  */
 
 /*
@@ -224,12 +224,12 @@ DEFINE_PRIMITIVE("%allocate-condition", alloc_cond,  subr1, (SCM type))
 /*
 <doc EXT make-condition
  * (make-condition type slot-name value  ...)
- * 
- * |Make-condition| creates a condition value belonging condition type 
+ *
+ * |Make-condition| creates a condition value belonging condition type
  * |type|. The following arguments must be, in turn, a slot name and an
  * arbitrary value. There must be such a pair for each slot of |type| and
  * its direct and indirect supertypes. |Make-condition| returns the
- * condition value, with the argument values associated with their 
+ * condition value, with the argument values associated with their
  * respective slots.
  * @lisp
  * (let* ((ct (make-condition-type 'ct1 &condition '(a b)))
@@ -260,15 +260,15 @@ DEFINE_PRIMITIVE("make-condition", make_cond,  vsubr, (int argc, SCM *argv))
 	slots = STk_dremq(*argv, slots);
 	argv -= 2;
 	argc -= 2;
-      } 
+      }
       else
 	STk_error("bad slot name ~S", *argv);
-    } 
-    else 
+    }
+    else
       STk_error("bad symbol ~S", *argv);
   }
   /* We have finished to process the user passed list */
-  if (!NULLP(slots)) 
+  if (!NULLP(slots))
     STk_error("list of uninitialized slots for condition: ~S", slots);
 
   return z;
@@ -294,7 +294,7 @@ DEFINE_PRIMITIVE("condition?", condp, subr1, (SCM obj))
  *
  * |Make-compound-condition| returns a compound condition belonging to
  * all condition types that the |conditioni| belong to.
- * 
+ *
  * |Condition-ref|, when applied to a compound condition will return
  *  the value from the first of the |conditioni| that has such a slot.
 doc>
@@ -312,7 +312,7 @@ DEFINE_PRIMITIVE("make-compound-condition", make_comp_cond, vsubr,
     if (!CONDP(*argv)) error_bad_cond(*argv);
     cts = STk_cons(STRUCT_TYPE(*argv--), cts);
   }
-  
+
   /* Create a new type and and instance of it for the compound condition */
   sprintf(buff, "&cct-%d", counter++);
   type = STk_make_comp_cond_type(STk_make_uninterned_symbol(buff),
@@ -334,8 +334,8 @@ DEFINE_PRIMITIVE("make-compound-condition", make_comp_cond, vsubr,
 <doc EXT condition-ref
  * (condition-ref condition slot-name)
  *
- * |Condition| must be a condition, and |slot-name| a symbol. Moreover, 
- * |condition| must belong to a condition type which has a slot name called 
+ * |Condition| must be a condition, and |slot-name| a symbol. Moreover,
+ * |condition| must belong to a condition type which has a slot name called
  * |slot-name|, or one of its (direct or indirect) supertypes must have the
  * slot. |Condition-ref| returns the value associated with |slot-name|.
  * @lisp
@@ -352,18 +352,18 @@ DEFINE_PRIMITIVE("condition-ref", condition_ref, subr2, (SCM c, SCM slot))
   return STk_int_struct_ref(c, slot);
 }
 
-  
+
 /*
 <doc EXT condition-set!
  * (condition-set! condition slot-name obj)
  *
- * |Condition| must be a condition, and |slot-name| a symbol. Moreover, 
- * |condition| must belong to a condition type which has a slot name called 
+ * |Condition| must be a condition, and |slot-name| a symbol. Moreover,
+ * |condition| must belong to a condition type which has a slot name called
  * |slot-name|, or one of its (direct or indirect) supertypes must have the
  * slot. |Condition-set!| change the value associated with |slot-name| to |obj|.
- * £
- * ,(bold "Note"): Whereas |condition-ref| is defined in ,(srfi 35), 
- * |confition-set!| is not. 
+ * @l
+ * ,(bold "Note"): Whereas |condition-ref| is defined in ,(srfi 35),
+ * |confition-set!| is not.
 doc>
 */
 DEFINE_PRIMITIVE("condition-set!", condition_set, subr3, (SCM c, SCM slot, SCM val))
@@ -376,7 +376,7 @@ DEFINE_PRIMITIVE("condition-set!", condition_set, subr3, (SCM c, SCM slot, SCM v
 /*
 <doc EXT condition-has-type?
  * (condition-has-type? condition condition-type)
- * 
+ *
  * |Condition-has-type?| tests if |condition| belongs to |condition-type|.
  * It returns |#t| if any of condition 's types includes |condition-type|
  * either directly or as an ancestor and |#f| otherwise.
@@ -407,9 +407,9 @@ DEFINE_PRIMITIVE("condition-has-type?", cond_has_typep, subr2, (SCM c, SCM t))
 <doc EXT extract-condition
  * (extract-condition condition  condition-type)
  *
- * |Condition| must be a condition belonging to |condition-type|. 
+ * |Condition| must be a condition belonging to |condition-type|.
  * |Extract-condition| returns a condition of |condition-type|
- * with the slot values specified by |condition|. The new condition 
+ * with the slot values specified by |condition|. The new condition
  * is always allocated.
  * @lisp
  * (let* ((ct1 (make-condition-type 'ct1 &condition '(a b)))
@@ -428,7 +428,7 @@ DEFINE_PRIMITIVE("extract-condition", extract_cond, subr2, (SCM c, SCM t))
 
   if (!CONDP(c)) error_bad_cond(c);
   if (!COND_TYPEP(t)) error_bad_type(t);
-  if (is_a(STRUCT_TYPE(c), t) == STk_false) 
+  if (is_a(STRUCT_TYPE(c), t) == STk_false)
     STk_error("condition ~S is not of type ~S", c, t);
 
   z = allocate_condition(t);
@@ -437,24 +437,24 @@ DEFINE_PRIMITIVE("extract-condition", extract_cond, subr2, (SCM c, SCM t))
   }
   return z;
 }
-  
 
-      
+
+
 /* ======================================================================
  *
  * 	                     E X C E P T I O N S
  *
- * ======================================================================   
+ * ======================================================================
  */
 /*
 <doc EXT raise
  * (raise obj)
  *
- * Invokes the current exception handler on |obj|. The handler is called in 
- * the dynamic environment of the call to |raise|, except that the current 
+ * Invokes the current exception handler on |obj|. The handler is called in
+ * the dynamic environment of the call to |raise|, except that the current
  * exception handler is that in place for the call to |with-handler|
- * that installed the handler being called. 
- * 
+ * that installed the handler being called.
+ *
  * @lisp
  * (with-handler (lambda (c)
  * 		(format "value ~A was raised" c))
@@ -475,7 +475,7 @@ SCM STk_make_C_cond(SCM type, int nargs, ...)
   va_list ap;
   SCM z = allocate_condition(type);
   int i;
-  
+
   va_start(ap, nargs);
   for (i=0; i < nargs; i++) {
     STRUCT_SLOTS(z)[i] = va_arg(ap, SCM);
@@ -484,8 +484,8 @@ SCM STk_make_C_cond(SCM type, int nargs, ...)
 
   return z;
 }
-  
-  
+
+
 /* ======================================================================
  * 	Init ...
  * ====================================================================== */
@@ -507,14 +507,14 @@ int STk_init_cond(void)
   DEFVAR(root_condition, module);
 
   /* Build special-values SRFI-35 &message, &serious, &error */
-  STk_message_condition = STk_defcond_type("&message", root_condition, 
+  STk_message_condition = STk_defcond_type("&message", root_condition,
 					   LIST1(STk_intern("message")),
 					   module);
   location_condition    = STk_defcond_type("&location", root_condition,
-					   LIST2(STk_intern("location"), 
+					   LIST2(STk_intern("location"),
 						 STk_intern("backtrace")),
 					   module);
-  serious_condition     = STk_defcond_type("&serious", root_condition, 
+  serious_condition     = STk_defcond_type("&serious", root_condition,
 					   STk_nil,
 					   module);
   error_condition       = STk_defcond_type("&error", serious_condition,

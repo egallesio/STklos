@@ -1,33 +1,33 @@
 ;;;;
-;;;; getopt.stk				-- getopt 
-;;;; 
-;;;; Copyright © 2001-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;; getopt.stk				-- getopt
+;;;;
+;;;; Copyright © 2001-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Oct-2001 08:40 (eg)
-;;;; Last file update:  5-Dec-2006 13:50 (eg)
+;;;; Last file update: 27-May-2011 22:50 (eg)
 ;;;;
 
-;;;; 
+;;;;
 ;;;; %PRINT--USAGE
-;;;; 
-;;;; pretty print options usage 
+;;;;
+;;;; pretty print options usage
 ;;;;
 #|
 <doc EXT arg-usage
@@ -37,10 +37,10 @@
  * This procedure is only bound inside a |parse-arguments| form.
  * It pretty prints the help associated to the clauses of the
  * |parse-arguments| form on the given port. If the argument
- * |as-sexpr| is passed and is not |¤f|, the help strings are
+ * |as-sexpr| is passed and is not| #f|, the help strings are
  * printed on |port| as ,(emph "S-expr")s. This is useful if the help
  * strings need to be manipulated by a program.
- * 
+ *
 doc>
 |#
 (define (%print-usage port clauses sexpr)
@@ -93,7 +93,7 @@ doc>
 	     (len   (apply max (map (lambda (x)
 				      (if (pair? x) (string-length (car x)) 0))
 				    lines))))
-	
+
 	;; lines contains the line to be displayed and len is the length of the
 	;; longest option. Pretty print the options from those values
 	(for-each (lambda (x)
@@ -106,9 +106,9 @@ doc>
 		       (format port "~A\n" x))))
 		  lines))))
 
-;;;; 
+;;;;
 ;;;; PARSE-ARGUMENTS
-;;;; 
+;;;;
 ;;;; Do argument parsing using GNU getopt
 ;;;;
 
@@ -130,9 +130,9 @@ doc>
  * the arguments as it scans, so that eventually all the non-options are
  * at the end. However, if the shell environment variable |POSIXLY_CORRECT|
  * is set, then option processing stops as soon as a non-option argument
- * is encountered. 
+ * is encountered.
  * £
- * A clause must follow the syntax: 
+ * A clause must follow the syntax:
  * ,(raw-code [
  * <clause>       => string @pipe <list-clause>
  * <list clause>  => (<option descr> <expr> ...) @pipe (else <expr> ...)
@@ -140,7 +140,7 @@ doc>
  * <option name>  => string
  * <keyword>      => :alternate @pipe :arg @pipe :help
  * ])
- * 
+ *
  * A string clause is used to build the  help associated to the command.
  * A list clause must follow the syntax describes an option. The |<expr>|s
  * associated to a list clauses are executed when the option is recognized.
@@ -148,7 +148,7 @@ doc>
  * The |:alternate| key permits to have an alternate name for an option
  * (generally a short or long name if the option name is a
  * short or long name).  The |:help| is used to provide help about the
- * the option. The |:arg| is used when the option admit a parameter: 
+ * the option. The |:arg| is used when the option admit a parameter:
  * the symbol given after |:arg| will be bound to the value of the option
  * argument when the corresponding |<expr>|s will be executed.
  * £
@@ -157,10 +157,10 @@ doc>
  * £
  * The following example shows a rather complete usage of the
  * |parse-arguments| form
- * 
+ *
  * @lisp
  * #!/usr/bin/env stklos-script
- * 
+ *
  * (define (main args)
  *   (parse-arguments args
  *      "Usage: foo [options] [parameter ...]"
@@ -183,17 +183,17 @@ doc>
  *                 :help "provides help for the command")
  *          (arg-usage (current-error-port))
  *          (exit 1))
- *        (else 
+ *        (else
  *      (format #t
  *              "All options parsed. Remaining arguments are ~S~%"
  *              other-arguments))))
  * @end lisp
- * 
+ *
  * The following program invocation
  * @lisp
  * foo -vs --input in -o out arg1 arg2
  * @end lisp
- * 
+ *
  * produces the following output
  * ,(raw-code [
  * Seen the verbose option
@@ -202,7 +202,7 @@ doc>
  * Seen the output option with "out" argument
  * All options parsed. Remaining arguments are ("arg1" "arg2")
  * ])
- * 
+ *
  * Finally, the program invocation
  * @lisp
  * foo --help
@@ -235,7 +235,7 @@ doc>
  * an option, even if it starts with a '-' or '--'.])
  * (item [Option with a parameter can be written in several ways. For instance
  * to set the output in the |bar| file for the previous example can be expressed as
- * ,(itemize 
+ * ,(itemize
  * (item [|--output=bar|])
  * (item [|-o bar|])
  * (item [|-obar|]))])
@@ -252,13 +252,13 @@ doc>
 	  (opt2 (key-get (cdr descr) :alternate #f))
 	  (err  (lambda (o) (error 'parse-arguments "bad option name ~S" o))))
       (cond
-	 ((not (string? opt1)) 
+	 ((not (string? opt1))
 	  (err opt1))
 	 ((not opt2)
 	  (if (> (string-length opt1) 1)
 	      (cons opt1 opt2)
 	      (cons opt2 opt1)))
-	 ((not (string? opt2)) 
+	 ((not (string? opt2))
 	  (err opt2))
 	 (else
 	  (let ((len1 (string-length opt1))
@@ -273,10 +273,10 @@ doc>
 		     opt1 opt2))))))))
 
   (define (make-getopt-parameters clauses)
-    ;; This function is too much complicated ;-< 
+    ;; This function is too much complicated ;-<
     ;; It returns a list of length 3 whose elements are
-    ;;    - the value of the longopts parameter of the C function getopt 
-    ;;      Note: if the option is just a short opt, an entry is created but with 
+    ;;    - the value of the longopts parameter of the C function getopt
+    ;;      Note: if the option is just a short opt, an entry is created but with
     ;;      the key ""
     ;;    - the value of the optstring parameter of the C function getopt
     ;;    - an Alist for short options which maps them in the longopt parameter.
@@ -290,7 +290,7 @@ doc>
        ((or (null? l) (and (pair? (car l)) (eq? (caar l) 'else)))
 	  ;; We have finished; return  SHORT, ASSOC and LONG values in a list
 	  (list short (reverse! long) assoc))
-       
+
        ((string? (car l))
  	 ;; Skip this help string
 	 (Loop (cdr l) long short assoc pos))
@@ -299,11 +299,11 @@ doc>
 	  (let* ((descr (caar l))
 		 (names (option-names descr))
 		 (lg    (if (car names)
-			    ;; We had a long name 
+			    ;; We had a long name
 			    (cons (car names) (key-get (cdr descr) :arg #f))
 			    (cons "" #f)))
 		 (sht   (if (cdr names)
-			    ;; We had a short name 
+			    ;; We had a short name
 			    (string-append (cdr names)
 					   (if (key-get (cdr descr) :arg #f)
 					       ":"
@@ -315,16 +315,16 @@ doc>
 			    #f)))
 
 	    ;; We have new values for long and short for this item. Iterate
-	    (Loop (cdr l) 
-		  (cons lg long) 
+	    (Loop (cdr l)
+		  (cons lg long)
 		  (string-append short sht)
 		  (if ass (cons ass assoc) assoc)
 		  (+ pos 1))))
 
        (else (error 'parse-arguments "bad clause ~S" (car l))))))
-  
+
   ;;;
-  ;;; Macro body starts here 
+  ;;; Macro body starts here
   ;;;
   (let* ((actions   (gensym "actions"))
 	 (Loop      (gensym "Loop"))
@@ -332,7 +332,7 @@ doc>
 	 (opts      (make-getopt-parameters clauses))
 	 (clauses*  (map (lambda (z) (if (pair? z) (list (car z)) z))
 			  clauses)))  ;; clauses without code (=> shorter constant)
-	 
+
   `(let* ((arg-usage (lambda (port :optional sexpr)
 		       (%print-usage port ',clauses* sexpr)))
 	  (,alist    ',(caddr opts))
@@ -370,7 +370,7 @@ doc>
  	             ((vector-ref ,actions (car x)) (cdr x))
 		     (,Loop (%getopt)))
 		 (else
-		    ;; Special case for the ELSE clause (if it exists) 
+		    ;; Special case for the ELSE clause (if it exists)
 		    ,(let ((end (last-pair clauses)))
 		       (if (eq? (caar end) 'else)
 			   `((vector-ref ,actions (- (vector-length ,actions) 1))

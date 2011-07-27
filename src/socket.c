@@ -1,27 +1,27 @@
 /*
  * socket.c				-- Socket acess for STklos
- * 
- * Copyright © 2003-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
- * 
+ *
+ * Copyright © 2003-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update:  3-Oct-2009 21:42 (eg)
+ * Last file update: 27-May-2011 22:55 (eg)
  */
 
 #include <sys/types.h>
@@ -37,16 +37,16 @@
 
 
 /*===========================================================================*\
- * 
- *			Definition of the socket type 
+ *
+ *			Definition of the socket type
  *
 \*===========================================================================*/
 static void print_socket(SCM sock, SCM port, int mode)
 {
   char buffer[1000];
   SCM name = SOCKET_HOSTNAME(sock);
-  
-  sprintf(buffer, "#[%s-socket %s:%ld (%d)]", 
+
+  sprintf(buffer, "#[%s-socket %s:%ld (%d)]",
 	  (SOCKET_TYPE(sock) == SOCKET_SERVER) ? "server" : "client",
 	  ((name == STk_false) ?  "*none*" : (char *) STRING_CHARS(name)),
 	  SOCKET_PORTNUM(sock), SOCKET_FD(sock));
@@ -62,7 +62,7 @@ static struct extended_type_descr xtype_socket = {
 static void socket_finalizer(SCM socket);
 
 /*===========================================================================*\
- * 
+ *
  *				UTILITIES
  *
 \*===========================================================================*/
@@ -100,20 +100,20 @@ static void set_socket_io_ports(SCM sock, int line_buffered)
   SCM in, out;
 
   hostname = STRING_CHARS(SOCKET_HOSTNAME(sock));
-  fname    = STk_must_malloc_atomic(strlen(hostname) + 30);  
+  fname    = STk_must_malloc_atomic(strlen(hostname) + 30);
   sprintf(fname, "%s:%ld", hostname, SOCKET_PORTNUM(sock));
-  
+
   s   = SOCKET_FD(sock);
   t   = dup(s);
   in  = STk_fd2scheme_port(s, "r", fname);
   out = STk_fd2scheme_port(t, "w", fname);
 
-  if (NULLP(in) || NULLP(out)) 
+  if (NULLP(in) || NULLP(out))
     STk_error("cannot create socket IO ports");
 
   SOCKET_IN(sock)  = in;
   SOCKET_OUT(sock) = out;
-  
+
   /* Set line buffered mode (if needed) */
   if (line_buffered) {
     STk_set_line_buffered_mode(in); /* not really useful */
@@ -123,7 +123,7 @@ static void set_socket_io_ports(SCM sock, int line_buffered)
 
 
 /*===========================================================================*\
- * 
+ *
  *				MAKE-SERVER-SOCKET
  *
 \*===========================================================================*/
@@ -132,10 +132,10 @@ static void set_socket_io_ports(SCM sock, int line_buffered)
 <doc EXT make-server-socket
  * (make-server-socket)
  * (make-server-socket port-number)
- * 
+ *
  * |make-server-socket| returns a new socket object. If |port-number|
- * is specified, the socket is listening on the specified port; 
- * otherwise, the communication port is chosen by the system. 
+ * is specified, the socket is listening on the specified port;
+ * otherwise, the communication port is chosen by the system.
 doc>
 */
 DEFINE_PRIMITIVE("make-server-socket", make_server_socket, subr01, (SCM port))
@@ -145,7 +145,7 @@ DEFINE_PRIMITIVE("make-server-socket", make_server_socket, subr01, (SCM port))
   int long portnum;
   SCM z;
   int s, yes = 1;
-  
+
   /* Determine port to use */
   portnum = (port) ? STk_integer_value(port) : 0;
   if (portnum < 0)  error_bad_portnum(port);
@@ -153,7 +153,7 @@ DEFINE_PRIMITIVE("make-server-socket", make_server_socket, subr01, (SCM port))
   /* Create a socket */
   s = socket(AF_INET, SOCK_STREAM, 0);
   if (s < 0) STk_error("cannot create socket");
-  
+
   /* Allow reusing the socket port */
   if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) < 0) {
     close(s);
@@ -195,15 +195,15 @@ DEFINE_PRIMITIVE("make-server-socket", make_server_socket, subr01, (SCM port))
   SOCKET_READY(z)	= STk_false;
   SOCKET_CHILDREN(z)	= STk_nil;
   SOCKET_USER_DATA(z)	= NULL;
-  
+
   STk_register_finalizer(z, socket_finalizer);
-  
+
   return z;
 }
 
 
 /*===========================================================================*\
- * 
+ *
  *				MAKE-CLIENT-SOCKET
  *
 \*===========================================================================*/
@@ -211,16 +211,16 @@ DEFINE_PRIMITIVE("make-server-socket", make_server_socket, subr01, (SCM port))
 /*
 <doc EXT make-client-socket
  *  (make-client-socket hostname port-number)
- *  (make-client-socket hostname port_number line-buffered) 
- * 
+ *  (make-client-socket hostname port_number line-buffered)
+ *
  * |make-client-socket| returns a new socket object. This socket
  * establishes a link between the running program and the application
  * listening on port |port-number| of |hostname|.  If  the optional argument
- * |line-buffered| has a true value, a line buffered policy is used when writing 
- * to the client socket (i.e. characters on the socket are tranmitted as soon 
- * as a ,(code "#\\newline") character is encountered). The default value of 
+ * |line-buffered| has a true value, a line buffered policy is used when writing
+ * to the client socket (i.e. characters on the socket are tranmitted as soon
+ * as a ,(code "#\\newline") character is encountered). The default value of
  * |line-buffered| is |#t|.
- * 
+ *
 doc>
 */
 static SCM internal_init_client_socket(SCM hostname, SCM port)
@@ -230,7 +230,7 @@ static SCM internal_init_client_socket(SCM hostname, SCM port)
   int s, yes=1;
   SCM z;
   long val = STk_integer_value(port);
-  
+
   /* Verify arguments */
   if(!STRINGP(hostname)) error_bad_hostname(hostname);
   if(val == LONG_MIN)    error_bad_portnum(port);
@@ -241,7 +241,7 @@ static SCM internal_init_client_socket(SCM hostname, SCM port)
 
   /* Get a socket */
   if ((s=socket(AF_INET,SOCK_STREAM,0)) < 0) error_cannot_crate_socket();
-  
+
   /* Setup a connect address */
   memset(&server, 0, sizeof(server));
   memcpy((char*)&server.sin_addr, hp->h_addr, hp->h_length);
@@ -254,10 +254,10 @@ static SCM internal_init_client_socket(SCM hostname, SCM port)
     close(s);
     STk_error("system reported \"%s\"", strerror(errno));
   }
-  
+
   /* Create a new Scheme socket object */
   NEWCELL(z, socket);
-  
+
   SOCKET_PORTNUM(z)  = ntohs(server.sin_port); /* Query true value */
   SOCKET_HOSTNAME(z) = STk_Cstring2string((char *) hp->h_name);
   SOCKET_HOSTIP(z)   = STk_Cstring2string((char *) inet_ntoa(server.sin_addr));
@@ -297,7 +297,7 @@ DEFINE_PRIMITIVE("make-client-socket", make_client_socket, subr23,
 
 
 /*===========================================================================*\
- * 
+ *
  *				SOCKET-SHUTDOWN
  *
 \*===========================================================================*/
@@ -311,19 +311,19 @@ DEFINE_PRIMITIVE("make-client-socket", make_client_socket, subr23,
  * |socket|. If the socket is a server socket, |socket-shutdown| is called
  * on all the client sockets connected to this server.
  * |Close| indicates if the the socket must be closed or not, when
- * the connection is destroyed. Closing the socket forbids further 
+ * the connection is destroyed. Closing the socket forbids further
  * connections on the same port with the |socket-accept| procedure.
  * Omitting a value for |close| implies the closing of socket.
- * £
- * The following example shows a simple server: when there is 
- * a new connection on the port number 12345, the server displays 
+ * @l
+ * The following example shows a simple server: when there is
+ * a new connection on the port number 12345, the server displays
  * the first line sent to it by the client, discards the others and
  * go back waiting for further client connections.
  * @lisp
  * (let ((s (make-server-socket 12345)))
  *    (let loop ()
  *       (let ((ns (socket-accept s)))
- *         (format #t "I've read: ~A\\n" 
+ *         (format #t "I've read: ~A\\n"
  *                 (read-line (socket-input ns)))
  *         (socket-shutdown ns #f)
  *         (loop))))
@@ -350,8 +350,8 @@ DEFINE_PRIMITIVE("socket-shutdown", socket_shutdown, subr12, (SCM sock, SCM clos
       SOCKET_PARENT(sock) = STk_nil;
     }
   }
-    
-  /* 
+
+  /*
    * Warning: input and output can have already be garbaged: if the
    * socket is no more used, the input and output are not marked as
    * used and can (eventually) be released before the call to shutdown
@@ -385,8 +385,8 @@ static void socket_finalizer(SCM socket)
 }
 
 /*===========================================================================*\
- * 
- *				SOCKET-ACCEPT 
+ *
+ *				SOCKET-ACCEPT
  *
 \*===========================================================================*/
 
@@ -394,41 +394,41 @@ static void socket_finalizer(SCM socket)
 <doc EXT socket-accept
  * (socket-accept socket)
  * (socket-accept socket line-buffered)
- * 
+ *
  * |socket-accept| waits for a client connection on the given
  * |socket|. If no client is already waiting for a connection, this
- * procedure blocks its caller; otherwise, the first connection request 
- * on the queue of pending connections is connected and |socket-accept| 
- * returns a new client socket to serve this request. 
+ * procedure blocks its caller; otherwise, the first connection request
+ * on the queue of pending connections is connected and |socket-accept|
+ * returns a new client socket to serve this request.
  * This procedure must be called on a server socket created
- * with |make-server-socket|. The result of |socket-accept| is undefined. 
- * |Line-buffered| indicates if the port should be considered as a 
+ * with |make-server-socket|. The result of |socket-accept| is undefined.
+ * |Line-buffered| indicates if the port should be considered as a
  * line buffered. If |line-buffered| is omitted, it defaults to |#t|.
- * £
+ * @l
  * The following example is a simple server which waits for a connection
  * on the port 12345 ,(footnote [Under Unix, you can simply connect to
  * a listening socket with the |telnet| command. With the given
- * example, this can be achieved by typing the following command in a 
- * window shell: 
+ * example, this can be achieved by typing the following command in a
+ * window shell:
  * ,(raw-code "$ telnet localhost 12345")]).
  *  Once the connection with the
  * distant program is established, we read a line on the input port
  * associated to the socket and we write the length of this line on its
- * output port. 
+ * output port.
  * @lisp
  * (let* ((server (make-server-socket 13345))
  *        (client (socket-accept server))
  *        (l      (read-line (socket-input client))))
- *   (format (socket-output client) 
+ *   (format (socket-output client)
  *           "Length is: ~a\n" (string-length l))
  *   (socket-shutdown server))
  * @end lisp
  *
  *  Note that shutting down the |server| socket suffices here to close
- * also the connection to |client|. 
+ * also the connection to |client|.
 doc>
 */
-DEFINE_PRIMITIVE("socket-accept", socket_accept, subr12, 
+DEFINE_PRIMITIVE("socket-accept", socket_accept, subr12,
 		 (SCM serv, SCM line_buffered))
 {
   char *s;
@@ -440,7 +440,7 @@ DEFINE_PRIMITIVE("socket-accept", socket_accept, subr12,
 
   if (!SOCKETP(serv)) STk_error("bad socket ~S", serv);
   if (!line_buffered) line_buffered = STk_true;
- 
+
   /* Accept the connection */
   new_s = accept(SOCKET_FD(serv), (struct sockaddr *) &sin, &len);
   if (new_s < 0) STk_error(strerror(errno));
@@ -474,8 +474,8 @@ DEFINE_PRIMITIVE("socket-accept", socket_accept, subr12,
 
 
 /*===========================================================================*\
- * 
- *				SOCKET PRIMITIVES 
+ *
+ *				SOCKET PRIMITIVES
  *
 \*===========================================================================*/
 
@@ -577,7 +577,7 @@ DEFINE_PRIMITIVE("socket-output", socket_output, subr1, (SCM sock))
  * the distant machine used for connection. If |socket| has been
  * created with |make-server-socket|, this function returns the
 < * official name of the client connected to the socket. If no client
- * has used yet |socket|, this function returns |#f|.  
+ * has used yet |socket|, this function returns |#f|.
 doc>
 */
 DEFINE_PRIMITIVE("socket-host-name", socket_host_name, subr1, (SCM sock))
@@ -597,7 +597,7 @@ DEFINE_PRIMITIVE("socket-host-name", socket_host_name, subr1, (SCM sock))
  * distant machine used for connection. If |socket| has been created
  * with |make-server-socket|, this function returns the address of the
  * client connected to the socket.  If no client has used yet
- * |socket|, this function returns |#f|.  
+ * |socket|, this function returns |#f|.
 doc>
 */
 DEFINE_PRIMITIVE("socket-host-address", socket_host_address, subr1, (SCM sock))
@@ -618,28 +618,28 @@ DEFINE_PRIMITIVE("socket-down?", socket_downp, subr1, (SCM sock))
 <doc EXT socket-local-address
  * (socket-local-address socket)
  *
- * Returns a string which contains the IP number of the local host 
+ * Returns a string which contains the IP number of the local host
  * attached to |socket|.
 doc>
-*/ 
+*/
 DEFINE_PRIMITIVE("socket-local-address", socket_local_addr, subr1, (SCM sock))
 {
   struct sockaddr_in sin;
   socklen_t len = sizeof(sin);
-  
+
   if (!SOCKETP(sock)) error_bad_socket(sock);
 
   if (getsockname(SOCKET_FD(sock), (struct sockaddr *) &sin, &len))
     STk_error("cannot get socket name of ~S", sock);
-  
+
   return STk_Cstring2string((char *) inet_ntoa(sin.sin_addr));
 }
 
 
 /*===========================================================================*\
- * 
+ *
  *				Initialization
- * 
+ *
 \*===========================================================================*/
 int STk_init_socket(void)
 {

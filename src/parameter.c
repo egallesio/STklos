@@ -1,27 +1,27 @@
 /*
  * parameter.c	-- Parameter Objects (SRFI-39)
- * 
- * Copyright © 2003-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
- * 
+ *
+ * Copyright © 2003-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  1-Jul-2003 11:38 (eg)
- * Last file update: 23-May-2007 14:22 (eg)
+ * Last file update: 27-May-2011 22:34 (eg)
  */
 
 
@@ -46,7 +46,7 @@ struct parameter_obj {
 #define PARAMETER_DYNENV(p)	(((struct parameter_obj *) (p))->dynenv)
 
 /*===========================================================================*\
- * 
+ *
  * 	Utilities
  *
 \*===========================================================================*/
@@ -60,7 +60,7 @@ static void error_bad_parameter(SCM obj)
 SCM STk_get_parameter(SCM param)
 {
   SCM val, tmp;
-  
+
   if (!PARAMETERP(param)) error_bad_parameter(param);
 
   tmp = STk_int_assq(STk_current_thread(), PARAMETER_DYNENV(param));
@@ -74,9 +74,9 @@ SCM STk_set_parameter(SCM param, SCM value)
   SCM conv, tmp, new;
 
   if (!PARAMETERP(param)) error_bad_parameter(param);
-  
+
   conv = PARAMETER_CONV(param);
-  
+
   if (PARAMETER_C_TYPE(param)) {
     /* We have a C converter */
     new = (conv != STk_false) ? ((SCM (*) (SCM))conv)(value): value;
@@ -118,7 +118,7 @@ SCM STk_make_C_parameter2(SCM symbol, SCM (*value)(void), SCM (*proc)(SCM new_va
 			  SCM module)
 {
   SCM z = STk_make_C_parameter(symbol, (SCM) value, proc, module);
-  
+
   PARAMETER_C_TYPE(z) = 2;
   return z;
 }
@@ -126,7 +126,7 @@ SCM STk_make_C_parameter2(SCM symbol, SCM (*value)(void), SCM (*proc)(SCM new_va
 
 
 /*===========================================================================*\
- * 
+ *
  * 	Primitives
  *
 \*===========================================================================*/
@@ -135,22 +135,22 @@ SCM STk_make_C_parameter2(SCM symbol, SCM (*value)(void), SCM (*proc)(SCM new_va
 <doc EXT make-parameter
  * (make-parameter init)
  * (make-parameter init converter)
- * 
+ *
  * Returns a new parameter object which is bound in the global dynamic
  * environment to a cell containing the value returned by the call
  * |(converter init)|. If the conversion procedure |converter| is not
  * specified the identity function is used instead.
- * £
+ * @l
  * The parameter object is a procedure which accepts zero or one
  * argument. When it is called with no argument, the content of the
  * cell bound to this parameter object in the current dynamic
  * environment is returned. When it is called with one argument, the
  * content of the cell bound to this parameter object in the current
- * dynamic environment is set to the result of the call 
+ * dynamic environment is set to the result of the call
  * |(converter arg)|, where |arg| is the argument passed to the
  * parameter object, and
  * an unspecified value is returned.
- * 
+ *
  * @lisp
  * (define radix
  *     (make-parameter 10))
@@ -186,12 +186,12 @@ DEFINE_PRIMITIVE("make-parameter", make_parameter, subr12, (SCM value, SCM conv)
 {
   SCM z, v;
 
-  if (conv && STk_procedurep(conv) == STk_false) 
+  if (conv && STk_procedurep(conv) == STk_false)
     STk_error("bad conversion function ~S", conv);
-  
+
   /* initialize v with (conv value) */
   v = (conv) ? STk_C_apply(conv, 1, value): value;
-    
+
   NEWCELL(z, parameter);
   PARAMETER_VALUE(z)  = v;
   PARAMETER_CONV(z)   = (conv) ? conv : STk_false;
@@ -205,9 +205,9 @@ DEFINE_PRIMITIVE("make-parameter", make_parameter, subr12, (SCM value, SCM conv)
 /*
 <doc EXT parameter?
  * (parameter? obj)
- * 
+ *
  *  Returns |#t| if |obj| is a parameter object, otherwise returns |#f|.
-doc> 
+doc>
  */
 DEFINE_PRIMITIVE("parameter?", parameterp, subr1, (SCM obj))
 {
@@ -219,7 +219,7 @@ DEFINE_PRIMITIVE("parameter?", parameterp, subr1, (SCM obj))
 DEFINE_PRIMITIVE("%parameter-dynenv-push!", parameter_dynenv_push, subr1, (SCM param))
 {
   if (!PARAMETERP(param)) error_bad_parameter(param);
-  
+
   PARAMETER_DYNENV(param) = STk_cons(STk_cons(STk_current_thread(), STk_void),
 				     PARAMETER_DYNENV(param));
   return STk_void;
@@ -230,7 +230,7 @@ DEFINE_PRIMITIVE("%parameter-dynenv-pop!", parameter_dynenv_pop, subr1, (SCM par
   SCM prev, tmp, thr;
 
   if (!PARAMETERP(param)) error_bad_parameter(param);
-  
+
   thr = STk_current_thread();
   for (prev = tmp = PARAMETER_DYNENV(param); !NULLP(tmp); prev=tmp, tmp=CDR(tmp)) {
     if (CAR(CAR(tmp)) == thr) {
@@ -245,7 +245,7 @@ DEFINE_PRIMITIVE("%parameter-dynenv-pop!", parameter_dynenv_pop, subr1, (SCM par
 
 
 /*===========================================================================*\
- * 
+ *
  * 	Initialization code
  *
 \*===========================================================================*/

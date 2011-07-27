@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k			-- STklos Compiler
 ;;;;
-;;;; Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 23-Dec-2010 20:16 (eg)
+;;;; Last file update: 23-Jun-2011 20:21 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -404,7 +404,7 @@ doc>
  * value of the first expression that evaluates to a false value is
  * returned.  Any remaining expressions are not evaluated.  If all the
  * expressions evaluate to true values, the value of the last expression
- * is returned.  If there are no expressions then |¤t| is returned.
+ * is returned.  If there are no expressions then |%t| is returned.
  *
  * @lisp
  *   (and (= 2 2) (> 2 1))           =>  #t
@@ -445,7 +445,7 @@ doc>
  * value of the first expression that evaluates to a true value is
  * returned.  Any remaining expressions are not evaluated.  If all
  * expressions evaluate to false values, the value of the last expression
- * is returned.  If there are no expressions then |¤f| is returned.
+ * is returned.  If there are no expressions then |%f| is returned.
  *
  * @lisp
  *   (or (= 2 2) (> 2 1))            =>  #t
@@ -1015,7 +1015,7 @@ doc>
 				 (memq fct '(fx+ fx*)))	; commutative only
 			    (oper2 (if (eq? fct 'fx+)
 				       'IN-SINT-FXADD2
-				       'INT-SINT-FXMUL2)
+				       'IN-SINT-FXMUL2)
 				   b a))
 			   ((small-integer-constant? b)
 			    (oper2 (case fct

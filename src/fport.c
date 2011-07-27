@@ -1,7 +1,7 @@
 /*
  * f p o r t . c				-- File ports
  *
- * Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 12-Sep-2010 10:59 (eg)
+ * Last file update: 27-May-2011 22:33 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -58,7 +58,7 @@ static struct port_list {
 
 static void nop_release_port(SCM port)
 {
-  /* This function is used as a release procedure when closing all files 
+  /* This function is used as a release procedure when closing all files
    * at program exit. We use an empty procedure to avoid interferences
    * in all_file_ports management
    */
@@ -111,14 +111,14 @@ void STk_close_all_ports(void)
   MUT_UNLOCK(all_fports_mutex);
 
   /* Finally close error and output port (must be done last) */
-  STk_close(eport); 
+  STk_close(eport);
   STk_close(oport);
 }
 
 /*===========================================================================*\
- * 
+ *
  * 					Utils
- * 
+ *
 \*===========================================================================*/
 
 static void fill_buffer(struct fstream *f)
@@ -127,7 +127,7 @@ static void fill_buffer(struct fstream *f)
   unsigned char *ptr = PORT_BASE(f);
 
   /* Interactive ports can see multiple EOF, so clear EOF flag  */
-  PORT_STREAM_FLAGS(f) &= ~STK_IOEOF; 
+  PORT_STREAM_FLAGS(f) &= ~STK_IOEOF;
 
   /* Read */
   do {
@@ -138,7 +138,7 @@ static void fill_buffer(struct fstream *f)
       n = read(PORT_FD(f), ptr, PORT_BUFSIZE(f));
   }
   while ((n == -1) && (errno == EINTR));
-  
+
   if (n <= 0) {
     PORT_STREAM_FLAGS(f) |= STK_IOEOF;
   } else {
@@ -160,7 +160,7 @@ static int flush_buffer(struct fstream *f)
     /* Write buffer */
     if (PORT_USERDATA(f))
       ret = PORT_LOWWRITE(f)(f, PORT_BASE(f), n);
-    else 
+    else
       ret = write(PORT_FD(f), PORT_BASE(f), n);
   }
   /* Update structure */
@@ -200,7 +200,7 @@ static Inline int Fgetc(void *stream)
   if (PORT_IDLE(stream) != STk_nil) {
     /* There is at least an idle handler */
     SCM idle;
-    
+
     while (!Freadyp(stream))
       for (idle = PORT_IDLE(stream); !NULLP(idle); idle = CDR(idle))
 	STk_C_apply(CAR(idle), 0);
@@ -229,12 +229,12 @@ static Inline int Fread(void *stream, void *buff, int count)
      if (count <= avail) {
        memcpy(buff, PORT_PTR(stream), count);
        PORT_PTR(stream) += count;
-       PORT_CNT(stream) -= count; 
+       PORT_CNT(stream) -= count;
        return count;
      } else {
        memcpy(buff, PORT_PTR(stream), avail);
        PORT_PTR(stream) += avail;
-       PORT_CNT(stream) -= avail; 
+       PORT_CNT(stream) -= avail;
        buff += avail;
        count -= avail;
        copied = avail;
@@ -242,7 +242,7 @@ static Inline int Fread(void *stream, void *buff, int count)
    }
    if (PORT_USERDATA(stream))
      return copied + PORT_LOWREAD(stream)(stream, buff, count);
-   else 
+   else
      return copied + read(PORT_FD(stream), buff, count);
 }
 
@@ -302,7 +302,7 @@ static Inline int Fwrite(void *stream, void *buff, int count)
   /* Write buffer on stream */
   if (PORT_USERDATA(stream))
     return PORT_LOWWRITE(stream)(stream, buff, count);
-  else 
+  else
     return write(PORT_FD(stream), buff, count);
 }
 
@@ -316,10 +316,10 @@ static Inline int Fnputs(void *stream, char *s, int len)
     res = Fwrite(stream, s, len);
   } else {
     int free, count = len;
-    
+
     for ( ; ; ) {
       free = PORT_BUFSIZE(stream) - PORT_CNT(stream);
-     
+
       if (len <= free) {
 	memcpy(PORT_PTR(stream), s, len);
 	PORT_PTR(stream) += len;
@@ -332,18 +332,18 @@ static Inline int Fnputs(void *stream, char *s, int len)
 	PORT_CNT(stream) += free;
 	s += free;
 	len -= free;
-	if (flush_buffer(stream) != 0) 
+	if (flush_buffer(stream) != 0)
 	  { res = EOF; break; }
       }
     }
   }
-  if (res == EOF) 
+  if (res == EOF)
     return EOF;
   if (flush) {
-    if (flush_buffer(stream) != 0) 
+    if (flush_buffer(stream) != 0)
       return EOF;
-  }   
-  return res;  
+  }
+  return res;
 }
 
 
@@ -368,7 +368,7 @@ static void fport_print(SCM obj, SCM port) 	/* Generic printing of file ports */
 {
   char buffer[MAX_PATH_LENGTH + 40];
 
-  sprintf(buffer, "#[%s-port '%s' (%d)%s]", 
+  sprintf(buffer, "#[%s-port '%s' (%d)%s]",
 	  IPORTP(obj) ? "input" : "output",
 	  PORT_FNAME(obj), PORT_FD(PORT_STREAM(obj)),
 	  PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
@@ -401,7 +401,7 @@ make_fport(char *fname, FILE *f, int flags)
     n    = OTHER_BUFSIZE;
     mode = STK_IOFBF;
   }
-  
+
   /* keep the indication that file is opened in read in the steam part */
   if (flags & (PORT_READ | PORT_RW)) mode |= STK_IOREAD;
 
@@ -442,13 +442,13 @@ make_fport(char *fname, FILE *f, int flags)
   PORT_BREAD(res)	= Fread;
   PORT_BWRITE(res)	= Fwrite;
   PORT_SEEK(res)	= Fseek;
-  
+
   /* Add a finalizer on file to close it when the GC frees it */
   STk_register_finalizer(res, fport_finalizer);
 
-  /* Add res to the list of open ports */ 
+  /* Add res to the list of open ports */
   register_port(res);
-  
+
   return (struct port_obj *)res;
 }
 
@@ -456,8 +456,8 @@ make_fport(char *fname, FILE *f, int flags)
 #ifdef WIN32_0000
 static char *convert_for_win32(char *mode)
 {
-  /* Things are complicated on Win32 (as always). So we onvert all files 
-   * in binaries files. Note that this function is not called when we work 
+  /* Things are complicated on Win32 (as always). So we onvert all files
+   * in binaries files. Note that this function is not called when we work
    * on ports since they only accept version without "b" on Cygwin
    */
   switch (*mode) {
@@ -482,8 +482,8 @@ static SCM open_file_port(SCM filename, char *mode, int flags, int error)
   FILE *f;
   char *full_name, *name;
 
-  /* We use fopen (or popen) here to simplify problems with mode opening 
-   * But since we don't use the buffer, we say that we work in non buffered 
+  /* We use fopen (or popen) here to simplify problems with mode opening
+   * But since we don't use the buffer, we say that we work in non buffered
    * mode
    */
   name = STRING_CHARS(filename);
@@ -503,10 +503,10 @@ static SCM open_file_port(SCM filename, char *mode, int flags, int error)
     full_name  = name;
     flags     |= PORT_IS_PIPE;
     if ((f = popen(name+1, mode)) == NULL) {
-      if (error) 
-	STk_error_file_name("could not create pipe for ~S", 
+      if (error)
+	STk_error_file_name("could not create pipe for ~S",
 			    STk_Cstring2string(name+2));
-      else 
+      else
 	return STk_false;
     }
   }
@@ -527,7 +527,7 @@ SCM STk_fd2scheme_port(int fd, char *mode, char *identification)
 
   /* Don't use (and allocate) a buffer for this file */
   setvbuf(f, NULL, _IONBF, 0);
-  
+
   flags = PORT_IS_FILE | ((*mode == 'r') ? PORT_READ : PORT_WRITE);
   return (SCM) make_fport(identification, f, flags);
 }
@@ -544,14 +544,14 @@ SCM STk_open_file(char *filename, char *mode)
     default:  goto Error;
   }
   return open_file_port(STk_Cstring2string(filename), mode, type, FALSE);
-Error: 
+Error:
   STk_panic("bad opening mode %s", mode);
   return STk_void; /* for the compiler */
 }
 
 SCM STk_add_port_idle(SCM port, SCM idle_func)
 {
-  PORT_IDLE(PORT_STREAM(port)) = STk_cons(idle_func, 
+  PORT_IDLE(PORT_STREAM(port)) = STk_cons(idle_func,
 					  PORT_IDLE(PORT_STREAM(port)));
   return STk_void;
 }
@@ -579,10 +579,10 @@ void STk_set_line_buffered_mode(SCM port)
  * (open-input-file filename)
  *
  * Takes a string naming an existing file and returns an input port capable
- * of delivering characters from the file. If the file cannot be opened, 
+ * of delivering characters from the file. If the file cannot be opened,
  * an error is signalled.
- * £
- * ,(bold "Note:") if |filename| starts with the string ,(code  (q "| ")), 
+ * @l
+ * ,(bold "Note:") if |filename| starts with the string ,(code  (q "| ")),
  * this procedure returns a pipe port. Consequently, it is not possible to
  * open a file whose name starts with those two characters.
 doc>
@@ -598,11 +598,11 @@ DEFINE_PRIMITIVE("open-input-file", open_input_file, subr1, (SCM filename))
  * (open-output-file filename)
  *
  * Takes a string naming an output file to be created and returns an output
- * port capable of writing characters to a new file by that name. If the file 
- * cannot be opened, an error is signalled. If a file with the given name 
+ * port capable of writing characters to a new file by that name. If the file
+ * cannot be opened, an error is signalled. If a file with the given name
  * already exists, it is rewritten.
- * £
- * ,(bold "Note:") if |filename| starts with the string ,(code  (q "| ")), 
+ * @l
+ * ,(bold "Note:") if |filename| starts with the string ,(code  (q "| ")),
  * this procedure returns a pipe port. Consequently, it is not possible to
  * open a file whose name starts with those two characters.
 doc>
@@ -619,7 +619,7 @@ DEFINE_PRIMITIVE("open-output-file", open_output_file, subr1, (SCM filename))
  * (input-file-port? obj)
  * (output-file-port? obj)
  *
- * Returns |#t| if |obj| is a file input port or a file output port respectively, 
+ * Returns |#t| if |obj| is a file input port or a file output port respectively,
  * otherwise returns #f.
 doc>
  */
@@ -639,14 +639,14 @@ DEFINE_PRIMITIVE("output-file-port?", output_fportp, subr1, (SCM port))
  * (open-file filename mode)
  *
  * Opens the file whose name is |filename| with the specified string
- * |mode| which can be: 
+ * |mode| which can be:
  * ,(itemize
  * (item [|"r"| to open file for reading. The stream is positioned at
  * the beginning of the file.])
  *
  * (item [|"r+"| to open file for reading and writing.  The stream is
  * positioned at the beginning of the file.])
- * 
+ *
  * (item [|"w"| to truncate file to zero length or create file for writing.
  * The stream is positioned at the beginning of the file.])
  *
@@ -661,8 +661,8 @@ DEFINE_PRIMITIVE("output-file-port?", output_fportp, subr1, (SCM port))
  * if it does not exist. The stream is positioned at the end of the file.])
  * )
  * If the file can be opened, |open-file| returns the port associated with
- * the given file, otherwise it returns |#f|. Here again, the ``magic'' 
- * string "@pipe " permits to open a pipe port (in this case mode can only be 
+ * the given file, otherwise it returns |#f|. Here again, the ``magic''
+ * string "@pipe " permits to open a pipe port (in this case mode can only be
  * |"r"| or |"w"|).
 doc>
  */
@@ -670,10 +670,10 @@ doc>
 DEFINE_PRIMITIVE("open-file", scheme_open_file, subr2, (SCM filename, SCM mode))
 {
   int type;
-  
+
   if (!STRINGP(filename)) STk_error_bad_file_name(filename);
   if (!STRINGP(mode))     goto Error;
-  
+
   switch (STRING_CHARS(mode)[0]) {
     case 'r': type = (STRING_CHARS(mode)[1] == '+') ? PORT_RW : PORT_READ;  break;
     case 'a':
@@ -691,7 +691,7 @@ Error:
 <doc EXT port-file-name
  * (port-file-name port)
  *
- * Returns the file name used to open |port|; |port| must be a file port. 
+ * Returns the file name used to open |port|; |port| must be a file port.
 doc>
  */
 DEFINE_PRIMITIVE("port-file-name", port_file_name, subr1, (SCM port))
@@ -712,7 +712,7 @@ DEFINE_PRIMITIVE("%port-idle", port_idle, subr12, (SCM port, SCM val))
   if (!FPORTP(port)) STk_error_bad_port(port);
 
   if (val) {
-    /* Set the idle list to the given value. No control on the content of 
+    /* Set the idle list to the given value. No control on the content of
      * the procedure list (must be done in Scheme)
      */
     if (STk_int_length(val) < 0) STk_error_bad_io_param("bad list ~S", val);
@@ -743,9 +743,9 @@ static int find_file_nature(SCM f)
       return FILE_IS_OBJECT;
 
     tmp = STk_read(f, TRUE);
-    if (tmp == STk_intern("STklos")) 
+    if (tmp == STk_intern("STklos"))
       return FILE_IS_BCODE;
-    
+
     /* We'll suppose that this is a source file, but we have read the first sexpr */
     STk_rewind(f);
   }
@@ -757,7 +757,7 @@ SCM STk_load_source_file(SCM f)
 {
   SCM sexpr;
   SCM eval_symb, eval, ref;
-  
+
   /* //FIXME: eval devrait être connu sans faire de lookup(i.e. exporté par la VM)*/
   eval_symb = STk_intern("eval");
 
@@ -780,10 +780,10 @@ static SCM load_file(SCM filename)
 {
   SCM f;
   char *fname = STRING_CHARS(filename);
-  
+
   /* Verify that file is not a directory */
   if (STk_dirp(fname)) return STk_false;
-  
+
   /* It's Ok, try now to load file */
   f = STk_open_file(fname, "r");
   if (f != STk_false) {
@@ -801,13 +801,13 @@ static SCM load_file(SCM filename)
 <doc load
  * (load filename)
  *
- * |Filename| should be a string naming an existing file containing Scheme 
+ * |Filename| should be a string naming an existing file containing Scheme
  * expressions. |Load| has been extended in STklos to allow loading of
- * file containing Scheme compiled code as well as object files 
- * (,(emph "aka") shared objects). The loading of object files is not available on 
+ * file containing Scheme compiled code as well as object files
+ * (,(emph "aka") shared objects). The loading of object files is not available on
  * all architectures. The value returned by |load| is ,(emph "void").
- * £ 
- * If the file whose name is |filename| cannot be located, |load| will try 
+ * @l
+ * If the file whose name is |filename| cannot be located, |load| will try
  * to find it in one of the directories given by ,(code (ref :mark "load-path"))
  * with the suffixes given by ,(code (ref :mark "load-suffixes")).
 doc>
@@ -816,7 +816,7 @@ DEFINE_PRIMITIVE("load", scheme_load, subr1, (SCM filename))
 {
   if (!STRINGP(filename)) STk_error_bad_file_name(filename);
   if (load_file(filename) == STk_false)
-    STk_error_cannot_load(filename); 
+    STk_error_cannot_load(filename);
   return STk_void;
 }
 
@@ -825,10 +825,10 @@ DEFINE_PRIMITIVE("load", scheme_load, subr1, (SCM filename))
 <doc EXT try-load
  * (try-load filename)
  *
- * |try-load| tries to load the file named |filename|. As |load|, 
- * |try-load| tries to find the file given the current load path 
+ * |try-load| tries to load the file named |filename|. As |load|,
+ * |try-load| tries to find the file given the current load path
  * and a set of suffixes if |filename| cannot be loaded. If |try-load|
- * is able to find a readable file, it is loaded, and |try-load| returns 
+ * is able to find a readable file, it is loaded, and |try-load| returns
  * |#t|. Otherwise,  |try-load| retuns |#f|.
 doc>
  */
@@ -848,25 +848,25 @@ DEFINE_PRIMITIVE("%file-informations", file_informations, subr1, (SCM filename))
   if (!STRINGP(filename)) STk_error_bad_file_name(filename);
 
   fname = STRING_CHARS(filename);
-  
+
   /* Verify that file is not a directory */
   if (!STk_dirp(fname)) {
     f = STk_open_file(fname, "r");
     if (f != STk_false) {
       int type  = find_file_nature(f);
-      char* str = ""; 
+      char* str = "";
 
       switch (type) {
         case FILE_IS_SOURCE: str = "source"; break;
         case FILE_IS_BCODE:  str = "byte-code"; res = STk_read(f, TRUE); break;
-        case FILE_IS_OBJECT: str = "object"; 
-			     res = STk_info_object_file(STRING_CHARS(filename)); 
+        case FILE_IS_OBJECT: str = "object";
+			     res = STk_info_object_file(STRING_CHARS(filename));
 	  		     break;
       }
       STk_close_port(f);
       /* Add the file nature to result */
-      res = STk_cons(STk_makekey("nature"), 
-		     STk_cons(STk_intern(str), 
+      res = STk_cons(STk_makekey("nature"),
+		     STk_cons(STk_intern(str),
 			      res));
     }
   }
@@ -878,11 +878,11 @@ int STk_init_fport(void)
 {
   vm_thread_t *vm = STk_get_current_vm();
 
-  STk_stdin  = vm->iport = (SCM) make_fport("*stdin*",  stdin,  
-					    PORT_IS_FILE | PORT_READ); 
-  STk_stdout = vm->oport = (SCM) make_fport("*stdout*", stdout, 
+  STk_stdin  = vm->iport = (SCM) make_fport("*stdin*",  stdin,
+					    PORT_IS_FILE | PORT_READ);
+  STk_stdout = vm->oport = (SCM) make_fport("*stdout*", stdout,
 					    PORT_IS_FILE | PORT_WRITE);
-  STk_stderr = vm->eport = (SCM) make_fport("*stderr*", stderr, 
+  STk_stderr = vm->eport = (SCM) make_fport("*stderr*", stderr,
 					    PORT_IS_FILE | PORT_WRITE);
 
   ADD_PRIMITIVE(scheme_load);

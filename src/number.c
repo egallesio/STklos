@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  5-May-2011 17:52 (eg)
+ * Last file update: 27-May-2011 22:32 (eg)
  */
 
 
@@ -1266,9 +1266,9 @@ DEFINE_PRIMITIVE("inexact?", inexactp, subr1, (SCM z))
  * (= +inf.0 +inf.0)           =>  #t
  * (= -inf.0 +inf.0)           =>  #f
  * (= -inf.0 -inf.0)           =>  #t
- * £
+ * @l
  * For any finite real number x:
- * £
+ * @l
  * (< -inf.0 x +inf.0)         =>  #t
  * (> +inf.0 x -inf.0)         =>  #t
  * @end lisp
@@ -1459,7 +1459,7 @@ DEFINE_PRIMITIVE("even?", evenp, subr1, (SCM n))
  * (max +inf.0 x)         =>  +inf.0
  * (min -inf.0 x)         =>  -inf.0
  * @end lisp
- * £
+ * 
  * ,(bold "Note:") If any argument is inexact, then the result will also be
  * inexact
 doc>
@@ -1866,7 +1866,7 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
  *
  * These procedures implement number-theoretic (integer) division. n2 should
  * be non-zero. All three procedures return integers.
- * £
+ * @l
  * If |n1/n2| is an integer:
  *
  * @lisp
@@ -1886,7 +1886,7 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
  * where |nq| is |n1/n2| rounded towards zero, 0 < abs(nr) < abs(n2),
  * 0 < abs(nm) < abs(n2), |nr| and |nm| differ from n1 by a multiple of n2,
  * |nr| has the same sign as n1, and |nm| has the same sign as n2.
- * £
+ * @l
  * From this we can conclude that for integers |n1| and |n2| with |n2| not
  * equal to 0,
  * @lisp
@@ -2095,10 +2095,10 @@ DEFINE_PRIMITIVE("denominator", denominator, subr1, (SCM q))
  * |Truncate| returns the integer closest to |x| whose absolute value is not
  * larger than the absolute value of |x|. |Round| returns the closest integer
  * to |x|, rounding to even when |x| is halfway between two integers.
- * £
+ * @l
  * ,(bold "Rationale:") |Round| rounds to even for consistency with the default
  * rounding mode specified by the IEEE floating point standard.
- * £
+ * @l
  * ,(bold "Note:") If the argument to one of these procedures is inexact, then the
  * result will also be inexact. If an exact value is needed, the result should
  * be passed to the |inexact->exact| procedure.
@@ -2535,7 +2535,7 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
  * (expt z1 z2)
  *
  * Returns |z1| raised to the power |z2|.
- * £
+ * @l
  * ,(bold "Note:") |0,(sup "z")| is 1 if |z = 0| and |0| otherwise.
 doc>
  */
@@ -2592,9 +2592,9 @@ DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
  * (angle z)
  *
  * If x1, x2, x3, and x4 are real numbers and z is a complex number such that
- * £
+ * @l
  * |z = x1 + x2.i = x3 . e,(sup "i.x4")|
- * £
+ * @l
  * Then
  * @lisp
  * (make-rectangular x1 x2)       => z
@@ -2611,7 +2611,7 @@ DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
  * (angle +inf.0)                 => 0.0
  * (angle -inf.0)                 => 3.14159265358979
  * @end lisp
- * £
+ * @l
  * ,(bold "Note:") |Magnitude| is the same as |abs| for a real argument.
 doc>
  */
@@ -2753,19 +2753,19 @@ DEFINE_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z))
  *        (string->number (number->string number radix) radix)))
  * @end lisp
  * is true. It is an error if no possible result makes this expression true.
- * £
+ * @l
  * If |z| is inexact, the radix is 10, and the above expression can be
  * satisfied by a result that contains a decimal point, then the result
  * contains a decimal point and is expressed using the minimum number of digits
  * (exclusive of exponent and trailing zeroes) needed to make the above expression
  * true; otherwise the format of the result is unspecified.
- * £
+ * @l
  * The result returned by |number->string| never contains an explicit radix
  * prefix.
- * £
+ * @l
  * ,(bold "Note:") The error case can occur only when |z| is not a complex number or
  * is a complex number with a non-rational real or imaginary part.
- * £
+ * @l
  * ,(bold "Rationale:") If |z| is an inexact number represented using flonums, and
  * the radix is 10, then the above expression is normally satisfied by a result
  * containing a decimal point. The unspecified case allows for infinities,

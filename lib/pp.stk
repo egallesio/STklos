@@ -1,29 +1,29 @@
 ;;;;
 ;;;; pp.stk	-- Pretty Printer
-;;;; 
-;;;; Copyright © 2002-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright © 2002-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
 ;;;;
 ;;;; This code is an adaptation of the Marc Feeley pretty printer.
 ;;;;		Copyright (c) 1991, Marc Feeley
-;;;; 
+;;;;
 ;;;;    Creation date: 10-May-2002 16:22 (eg)
-;;;; Last file update: 30-Apr-2007 00:28 (eg)
+;;;; Last file update: 27-May-2011 22:52 (eg)
 ;;;;
 
 #|
@@ -34,11 +34,11 @@
  * This function tries to obtain a pretty-printed representation of |sexpr|.
  * The pretty-printed form is written on |port| with lines which are no
  * more long than |width| characters. If |port| is omitted if defaults to
- * the current error port. As a special convention, if |port| is |¤t|,
- * output goes to the current output port and if |port| is |¤f|, the output
+ * the current error port. As a special convention, if |port| is |%t|,
+ * output goes to the current output port and if |port| is |%f|, the output
  * is returned as a string by |pretty-print|.
  * Note that |pp| is another name for |pretty-print|.
- * 
+ *
 doc>
 |#
 
@@ -309,7 +309,7 @@ doc>
 
 ;;;
 ;;; In module STklos
-;;; 
+;;;
 (define (pp obj :key (port (current-error-port)) (width 79))
   (let ((p  (case port
 	      ((#t) (current-output-port))
@@ -317,7 +317,7 @@ doc>
 	      (else port)))
 	(gw (in-module pretty-print generic-write)))
     (gw obj #f width (lambda (s) (display s p) #t))
-    
+
     (if port
 	(void)
 	(get-output-string p))))
