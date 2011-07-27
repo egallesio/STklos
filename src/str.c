@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 27-Jul-2011 17:02 (eg)
+ * Last file update: 27-Jul-2011 23:27 (eg)
  */
 
 #include <ctype.h>
@@ -59,42 +59,90 @@ static void error_index_out_of_bound(SCM str, SCM index)
   STk_error("index ~S out of bound in string ~S", index, str);
 }
 
+static void error_bad_sequence(SCM str)
+{
+  STk_error("bad UTF-8 sequence in ~S", str);
+}
+
+
 static int stringcomp(SCM s1, SCM s2)
 {
-  register int l1, l2;
   register char *str1, *str2;
 
   if (!STRINGP(s1)) error_bad_string(s1);
   if (!STRINGP(s2)) error_bad_string(s2);
 
-  for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
-	 l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
-       l1 && l2;
-       l1--, str1++, l2--, str2++)
-    if (*str1 != *str2) return ((unsigned char) *str1 - (unsigned char) *str2);
+  if (STk_use_utf8 && (!STRING_MONOBYTE(s1) || !STRING_MONOBYTE(s2))) {
+    /* At least one string is multi-bytes */
+    uint32_t ch1, ch2;
+    char *end1, *end2;
 
-  /* l1 == 0 || l2 == 0 */
-  return l1 ? +1 : (l2 ? -1 : 0);
+    str1 = STRING_CHARS(s1); end1 = str1 + STRING_SIZE(s1);
+    str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
+
+    while ((str1 < end1) && (str2 < end2)) {
+      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL) error_bad_sequence(s1);
+      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL) error_bad_sequence(s2);
+
+      if (ch1 != ch2) return ch1 - ch2;
+    }
+
+    /* str1 < end1 || str2 < end2 */
+    return (str1 < end1) ? +1 : ((str2 < end2) ? -1 : 0);
+  } else {
+    /* fast-path for mono-byte strings */
+    register int l1, l2;
+
+    for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
+	 l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
+	 l1 && l2;
+	 l1--, str1++, l2--, str2++)
+      if (*str1 != *str2) return ((unsigned char) *str1 - (unsigned char) *str2);
+
+    /* l1 == 0 || l2 == 0 */
+    return l1 ? +1 : (l2 ? -1 : 0);
+  }
 }
 
 
 static int stringcompi(SCM s1, SCM s2)
 {
-  register int l1, l2;
   register char *str1, *str2;
 
   if (!STRINGP(s1)) error_bad_string(s1);
   if (!STRINGP(s2)) error_bad_string(s2);
 
-  for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
-	 l2=STRING_SIZE(s2), str2=STRING_CHARS(s2);
-       l1 && l2;
-       l1--, str1++, l2--, str2++)
-    if (tolower(*str1) != tolower(*str2))
+  if (STk_use_utf8 && (!STRING_MONOBYTE(s1) || !STRING_MONOBYTE(s2))) {
+    /* At least one string is multi-bytes */
+    uint32_t ch1, ch2;
+    char *end1, *end2;
+
+    str1 = STRING_CHARS(s1); end1 = str1 + STRING_SIZE(s1);
+    str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
+
+    while ((str1 < end1) && (str2 < end2)) {
+      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL) error_bad_sequence(s1);
+      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL) error_bad_sequence(s2);
+
+      if (towlower(ch1) != towlower(ch2)) return towlower(ch1) - towlower(ch2);
+    }
+
+    /* str1 < end1 || str2 < end2 */
+    return (str1 < end1) ? +1 : ((str2 < end2) ? -1 : 0);
+  } else {
+    /* fast-path for mono-byte strings */
+    register int l1, l2;
+
+    for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
+	 l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
+	 l1 && l2;
+	 l1--, str1++, l2--, str2++)
+      if (tolower(*str1) != tolower(*str2))
 	return (tolower(*str1) - tolower(*str2));
 
-  /* l1 == 0 || l2 == 0 */
-  return l1 ? +1 : (l2 ? -1 : 0);
+    /* l1 == 0 || l2 == 0 */
+    return l1 ? +1 : (l2 ? -1 : 0);
+  }
 }
 
 
