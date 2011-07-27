@@ -2,25 +2,25 @@
  *
  * k e y w o r d . c				-- Keywords management
  *
- * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 19-Nov-1993 16:12
- * Last file update: 20-Oct-2006 14:42 (eg)
+ * Last file update: 27-Jul-2011 22:53 (eg)
  */
 
 #include "stklos.h"
@@ -51,7 +51,7 @@ static void error_const_cell(SCM x)
 static SCM make_uninterned_keyword(char *name)
 {
   SCM z;
-  
+
   NEWCELL(z, keyword);
   SYMBOL_PNAME(z) = name;	/* already duplicated in STk_makekey */
   BOXED_INFO(z) |= STk_symbol_flags(name);
@@ -65,10 +65,10 @@ SCM STk_makekey(char *token)
   char *s;
   MUT_DECL(lck);
 
-  /* We accept two kinds of keywords :xy and xy:. In anycase, the value 
+  /* We accept two kinds of keywords :xy and xy:. In anycase, the value
    * stored does not contain the ':' char.
    */
-  if (*token == ':') 
+  if (*token == ':')
     s = STk_strdup(token + 1);
   else {
     int len = strlen(token);
@@ -82,12 +82,12 @@ SCM STk_makekey(char *token)
   MUT_LOCK(lck);
   res =  STk_hash_intern_symbol(&keyword_table, s, make_uninterned_keyword);
   MUT_UNLOCK(lck);
-  
+
   return res;
 }
 
 /*===========================================================================*\
- * 
+ *
  * 				PRIMITIVES
  *
 \*===========================================================================*/
@@ -97,7 +97,7 @@ SCM STk_makekey(char *token)
  * (make-keyword s)
  *
  * Builds a keyword from the given |s|. The parameter |s| must be a symbol
- * or a string. 
+ * or a string.
  * @lisp
  * (make-keyword "test")    => :test
  * (make-keyword 'test)     => :test
@@ -109,7 +109,7 @@ DEFINE_PRIMITIVE("make-keyword", make_keyword, subr1, (SCM str))
 {
   char *s = "";
 
-  if (STRINGP(str)) 
+  if (STRINGP(str))
     s = STRING_CHARS(str);
   else if (SYMBOLP(str))
     s = SYMBOL_PNAME(str);
@@ -155,7 +155,7 @@ DEFINE_PRIMITIVE("keyword->string", keyword2string, subr1, (SCM obj))
  return res;
 }
 
- 
+
 /*
 <doc EXT  key-get
  * (key-get list key)
@@ -203,13 +203,13 @@ DEFINE_PRIMITIVE("key-get", key_get, subr23, (SCM l, SCM key, SCM dflt))
  * (key-set! list key value)
  *
  * |List| must be a list of keywords and their respective values.
- * |key-set!| sets the value associated to |key| in the keyword list. 
- * If the key is already present in |list|, the keyword list is 
- * ,(emph "physically") changed. 
+ * |key-set!| sets the value associated to |key| in the keyword list.
+ * If the key is already present in |list|, the keyword list is
+ * ,(emph "physically") changed.
  * @lisp
  * (let ((l (list :one 1 :two 2)))
  *   (set! l (key-set! l :three 3))
- *   (cons (key-get l :one) 
+ *   (cons (key-get l :one)
  *         (key-get l :three)))            => (1 . 3)
  * @end lisp
 doc>
@@ -242,14 +242,14 @@ DEFINE_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val))
 }
 
 /*
-<doc EXT key-delete key-delete! 
+<doc EXT key-delete key-delete!
 *  (key-delete  list key)
  * (key-delete! list key)
  *
  * |List| must be a list of keywords and their respective values.
- * |key-delete| remove the |key| and its associated value of the keyword 
- * list. The key can be absent of the list. 
- * £
+ * |key-delete| remove the |key| and its associated value of the keyword
+ * list. The key can be absent of the list.
+ * ,(linebreak)
  * |key-delete!| does the
  * same job than |key-delete| by physically modifying its |list| argument.
  * @lisp
@@ -272,7 +272,7 @@ static SCM key_del(SCM l, SCM key)
       if (!KEYWORDP(CAR(l))) error_bad_keyword(CAR(l));
       if (strcmp(KEYWORD_PNAME(CAR(l)), KEYWORD_PNAME(key))==0) {
 	if (BOXED_INFO(l) & CONS_CONST) error_const_cell(l);
-	if (prev == l) 
+	if (prev == l)
 	  return CDR(CDR(l));
 	else {
 	  CDR(prev) = CDR(CDR(l));
@@ -288,7 +288,7 @@ static SCM key_del(SCM l, SCM key)
     return STk_void; /* never reached */
   }
 }
-  
+
 
 DEFINE_PRIMITIVE("key-delete!", dkey_delete, subr2, (SCM l, SCM key))
 {

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; b i g m a t c h  . s t k		-- The bigloo match-case and match-lambda
 ;;;;
-;;;; Copyright © 1997-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1997-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;; 
 ;;;; Permission to use, copy, modify, distribute,and license this
 ;;;; software and its documentation for any purpose is hereby granted,
@@ -14,7 +14,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@kaolin.unice.fr]
 ;;;;    Creation date: 28-Oct-1997 20:47
-;;;; Last file update: 25-Apr-2007 23:57 (eg)
+;;;; Last file update: 27-Jul-2011 22:49 (eg)
 ;;;;
 
 ;;;; This file implements code for loading the MATCH-CASE and MATCH-LAMBDA 
@@ -76,7 +76,7 @@ doc>
  * the result of the last is the result of the whole |match-case|
  * expression; otherwise the result of the |match-case| expression
  * is unspecified.
- * £
+ * ,(linebreak)
  * The equality predicate used for tests is |eq?|.
  * @lisp 
  * (match-case '(a b a)

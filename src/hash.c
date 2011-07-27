@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 27-May-2011 22:16 (eg)
+ * Last file update: 27-Jul-2011 22:48 (eg)
  */
 
 #include "stklos.h"
@@ -762,9 +762,9 @@ DEFINE_PRIMITIVE("hash-table-delete!", hash_delete, subr2, (SCM ht, SCM key))
  * calls |proc| on each key/value association in |hash|, with the key as
  * the first argument and the value as the second.  The value returned by
  * |hash-table-for-each| is ,(emph "void").
- *  £
+ *  ,(linebreak)
  * ,(bold "Note:") The order of application of |proc| is unspecified.
- *  £
+ *  ,(linebreak)
  * ,(bold "Note:") |hash-table-walk| is another name for |hash-table-for-each|
  * (this is the name used in ,(link-srfi 69)).
  *
@@ -804,7 +804,7 @@ DEFINE_PRIMITIVE("hash-table-for-each", hash_for_each, subr2, (SCM ht, SCM proc)
  * the first argument and the value as the second.  The result of
  * |hash-table-map| is a list of the values returned by |proc|, in an
  * unspecified order.
- * £
+ * ,(linebreak)
  * ,(bold "Note:") The order of application of |proc| is unspecified.
  * @lisp
  * (let ((h (make-hash-table)))

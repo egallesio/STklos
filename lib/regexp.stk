@@ -1,27 +1,27 @@
 ;;;;
 ;;;; regexp.stk				-- STklos Regular Expressions
-;;;; 
-;;;; Copyright © 1994-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright © 1994-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  9-Nov-1994 13:24 (eg)
-;;;; Last file update: 27-Sep-2009 18:55 (eg)
+;;;; Last file update: 27-Jul-2011 22:53 (eg)
 ;;;;
 
 
@@ -36,14 +36,14 @@
  * |pattern| is replaced by the |substitution| string. If there is no
  * match, |regexp-replace| returns |string| unmodified. Note that the
  * given |pattern| could be here either a string or a regular expression.
- * £
- * If |pattern| contains |\\n| where ,(bold "n") is a digit between 1 and 9, 
+ * ,(linebreak)
+ * If |pattern| contains |\\n| where ,(bold "n") is a digit between 1 and 9,
  * then it is replaced in the substitution with the portion of string that
  * matched the ,(bold "n")-th parenthesized subexpression of |pattern|. If
  * ,(bold "n") is equal to 0, then it is replaced in |substitution|
  * with the portion of |string| that matched |pattern|.
- * £
- * |Regexp-replace| replaces the first occurrence of |pattern| in |string|. 
+ * ,(linebreak)
+ * |Regexp-replace| replaces the first occurrence of |pattern| in |string|.
  * To replace ,(bold "all") the occurrences of |pattern|, use |regexp-replace-all|.
  *
  * @lisp
@@ -93,9 +93,9 @@ doc>
 		       (val   (string->number (substring subst index (+ index 1)))))
 		  (if (>= val (length match))
 		      (error 'regexp-replace "cannot match \\~A in model" val)
-		      ;; Build a new subst with the current \x remplaced by 
+		      ;; Build a new subst with the current \x remplaced by
 		      ;; its value. Iterate for further \x
-		      (Loop (replace-string subst 
+		      (Loop (replace-string subst
 					    (caar pos)
 					    (cadar pos)
 					    (apply substring string
@@ -112,7 +112,7 @@ doc>
 	    (if match
 		;; There was a match
 		(replace-string str
-				(caar match) 
+				(caar match)
 				(cadar match)
 				(replace-submodels str subst match))
 		;; No match, return the original string

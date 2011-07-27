@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update: 27-Jul-2011 14:49 (eg)
+ * Last file update: 27-Jul-2011 22:38 (eg)
  */
 
 #include "stklos.h"
@@ -147,7 +147,11 @@ int STk_utf8_strlen(char *s, int max)
   char *end = s + max;
 
   for (len = 0;  s < end; len++) {
-    s += STk_utf8_sequence_length(s);
+    int sz =  STk_utf8_sequence_length(s);
+
+    if (sz == UTF8_INCORRECT_SEQUENCE)
+      STk_error("bad UTF-8 sequence");
+    s += sz;
   }
   return len;
 }
@@ -156,8 +160,13 @@ char *STk_utf8_index(char *s, int i, int max) /* return the address of ith char 
 {
   char *end = s + max;
 
-  while ((s < end) && i--)
-    s += STk_utf8_sequence_length(s);
+  while ((s < end) && i--) {
+    int sz =  STk_utf8_sequence_length(s);
+
+    if (sz == UTF8_INCORRECT_SEQUENCE)
+      STk_error("bad UTF-8 sequence");
+    s += sz;
+  }
 
   return s;
 }

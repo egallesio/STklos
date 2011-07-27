@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 20-Apr-2011 00:33 (eg)
+ * Last file update: 27-Jul-2011 22:46 (eg)
  */
 
 #include "stklos.h"
@@ -135,7 +135,7 @@ doc>
  *
  * ,(bold "Note:") STklos extends R5RS |eqv?| to take into account
  * the keyword type.
- * £
+ * ,(linebreak)
  * Here are some examples:
  * @lisp
  * (eqv? 'a 'a)                     =>  #t
@@ -168,7 +168,7 @@ doc>
  * ,(bold "Note:") In fact, the value returned by STklos depends of
  * the way code is entered and can yield |#t| in some cases and |#f|
  * in others.
- * £
+ * ,(linebreak)
  * See R5RS for more details on |eqv?|.
 doc>
  */
@@ -224,7 +224,7 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
  *
  * |Eq?| is similar to |eqv?| except that in some cases it is capable of
  * discerning distinctions finer than those detectable by |eqv?|.
- * £
+ * ,(linebreak)
  * |Eq?| and |eqv?| are guaranteed to have the same behavior on symbols,
  * keywords, booleans, the empty list, pairs, procedures, and non-empty strings
  * and vectors. |Eq?|'s behavior on numbers and characters is
@@ -232,10 +232,10 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
  * and will return true only when |eqv?| would also return true.
  * |Eq?| may also behave differently from |eqv?| on empty vectors
  * and empty strings.
- * £
+ * ,(linebreak)
  * ,(bold "Note:") STklos extends R5RS |eq?| to take into account
  * the keyword type.
- * £
+ * ,(linebreak)
  * ,(bold "Note:") In STklos, comparison of character returns |#t| for identical
  * characters and |#f| otherwise.
  *

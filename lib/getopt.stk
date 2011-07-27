@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Oct-2001 08:40 (eg)
-;;;; Last file update: 27-May-2011 22:50 (eg)
+;;;; Last file update: 27-Jul-2011 22:53 (eg)
 ;;;;
 
 ;;;;
@@ -121,17 +121,17 @@ doc>
  * this form internally uses the GNU C |getopt| function. As a
  * consequence |parse-arguments| accepts options which start with
  * the '-' (short option) or '--' characters (long option).
- * £
+ * ,(linebreak)
  * The first argument of |parse-arguments| is a list of the arguments
  * given to the program (comprising the program name in the CAR of this
  * list). Following arguments are clauses. Clauses are described later.
- * £
+ * ,(linebreak)
  * By  default, |parse-arguments| permutes the contents of (a copy) of
  * the arguments as it scans, so that eventually all the non-options are
  * at the end. However, if the shell environment variable |POSIXLY_CORRECT|
  * is set, then option processing stops as soon as a non-option argument
  * is encountered.
- * £
+ * ,(linebreak)
  * A clause must follow the syntax:
  * ,(raw-code [
  * <clause>       => string @pipe <list-clause>
@@ -151,10 +151,10 @@ doc>
  * the option. The |:arg| is used when the option admit a parameter:
  * the symbol given after |:arg| will be bound to the value of the option
  * argument when the corresponding |<expr>|s will be executed.
- * £
+ * ,(linebreak)
  * In an |else| clause the symbol |other-arguments| is bound to the
  * list of the arguments which are not options.
- * £
+ * ,(linebreak)
  * The following example shows a rather complete usage of the
  * |parse-arguments| form
  *

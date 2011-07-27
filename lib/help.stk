@@ -1,7 +1,7 @@
 ;;;;
 ;;;; help.stk		-- Interactive help
 ;;;; 
-;;;; Copyright © 2009-2010 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2009-2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;; 
 ;;;; 
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Dec-2009 18:26 (eg)
-;;;; Last file update:  2-Jan-2010 16:55 (eg)
+;;;; Last file update: 27-Jul-2011 22:43 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -53,7 +53,7 @@
 ;; ----------------------------------------------------------------------
 (define (pretty-doc str)
   ;; suppress some common Skribe things from the doc string
-  (set! str (regexp-replace-all "£" str ""))
+  (set! str (regexp-replace-all ",(linebreak)" str ""))
   (set! str (regexp-replace-all "@lisp" str (do-color 'blue)))
   (set! str (regexp-replace-all "@end lisp" str (do-color 'normal)))
   str)
