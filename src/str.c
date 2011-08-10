@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 27-Jul-2011 23:27 (eg)
+ * Last file update: 10-Aug-2011 00:34 (eg)
  */
 
 #include <ctype.h>
@@ -802,14 +802,26 @@ DEFINE_PRIMITIVE("string-fill!", string_fill, subr2, (SCM str, SCM c))
  *
  */
 
-static char *Memmem(char *s1, int l1, char *s2, int l2)
+static int Memmem(char *s1, int l1, char *s2, int l2, int use_utf8)
 {
-  if (l2 == 0) return s1;
+  int pos;
 
-  for ( ; l1 >= l2 ; s1++, l1--)
-    if (memcmp(s1, s2, (unsigned int) l2) == 0) return s1;
+  if (l2 == 0) return 0;
 
-  return NULL;
+  for (pos=0; l1 >= l2 ; pos++, l1--) {
+    if (memcmp(s1, s2, (unsigned int) l2) == 0) return pos;
+
+    /* go to next character */
+    if (use_utf8) {
+      int len = STk_utf8_sequence_length(s1);
+
+      if (len == UTF8_INCORRECT_SEQUENCE) STk_error("bad UTF-8 sequence");
+      s1 += len;
+    } else {
+      s1++;
+    }
+  }
+  return -1; /* not found */
 }
 
 /*
@@ -821,11 +833,16 @@ doc>
 */
 DEFINE_PRIMITIVE("string-find?", string_find, subr2, (SCM s1, SCM s2))
 {
+  int pos;
+
   if (!STRINGP(s1)) error_bad_string(s1);
   if (!STRINGP(s2)) error_bad_string(s2);
 
-  return MAKE_BOOLEAN(Memmem(STRING_CHARS(s2), STRING_SIZE(s2),
-			     STRING_CHARS(s1), STRING_SIZE(s1)));
+  pos = Memmem(STRING_CHARS(s2), STRING_SIZE(s2),
+	       STRING_CHARS(s1), STRING_SIZE(s1),
+	       FALSE);
+
+  return MAKE_BOOLEAN(pos != -1);
 }
 
 /*
@@ -842,15 +859,16 @@ doc>
 */
 DEFINE_PRIMITIVE("string-index", string_index, subr2, (SCM s1, SCM s2))
 {
-  char *p;
+  int pos;
 
   if (!STRINGP(s1)) error_bad_string(s1);
   if (!STRINGP(s2)) error_bad_string(s2);
 
-  p = Memmem(STRING_CHARS(s2), STRING_SIZE(s2),
-	     STRING_CHARS(s1), STRING_SIZE(s1));
+  pos = Memmem(STRING_CHARS(s2), STRING_SIZE(s2),
+	       STRING_CHARS(s1), STRING_SIZE(s1),
+	       STk_use_utf8 && !STRING_MONOBYTE(s2));
 
-  return p ? STk_long2integer((p - (char*)STRING_CHARS(s2))) : STk_false;
+  return (pos != -1) ? STk_long2integer(pos) : STk_false;
 }
 
 
@@ -1260,13 +1278,18 @@ DEFINE_PRIMITIVE("string-pos", string_pos, subr2, (SCM str, SCM index))
 }
 */
 
+
+DEFINE_PRIMITIVE("%use-utf8?", using_utf8, subr0, (void))
+{
+  return MAKE_BOOLEAN(STk_use_utf8);
+}
+
 DEFINE_PRIMITIVE("%string-use-utf8?", string_use_utf8, subr1, (SCM str))
 {
   if (!STRINGP(str)) error_bad_string(str);
 
   return MAKE_BOOLEAN(STk_use_utf8 && !STRING_MONOBYTE(str));
 }
-
 
 
 int STk_init_string(void)
@@ -1306,6 +1329,7 @@ int STk_init_string(void)
   ADD_PRIMITIVE(string_dtitlecase);
   ADD_PRIMITIVE(string_blit);
 
+  ADD_PRIMITIVE(using_utf8);
   ADD_PRIMITIVE(string_use_utf8);
   return TRUE;
 }

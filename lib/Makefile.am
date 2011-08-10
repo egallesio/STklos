@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 17-Apr-2011 21:33 (eg)
+# Last file update: 10-Aug-2011 09:30 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -33,6 +33,7 @@ scheme_BOOT = assembler.stk		\
 	      repl.stk 			\
 	      repl-readline.stk		\
 	      runtime.stk		\
+	      str.stk			\
 	      srfi-0.stk		\
 	      struct.stk		\
 	      thread.stk

@@ -21,12 +21,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 23-Apr-2011 18:56 (eg)
+;;;; Last file update: 10-Aug-2011 00:15 (eg)
 ;;;;
 
 (include "runtime.stk")		; Definition necessary for the bootstrap
 (include "module.stk")		; All the macros for defining modules
 (include "r5rs.stk")		; R5RS stuff written in Scheme
+(include "str.stk")		; String functions UTF-8 aware
 (include "callcc.stk")		; Call/cc support
 (include "struct.stk")		; STklos structures
 (include "bonus.stk")		; Extended functions and syntaxes
