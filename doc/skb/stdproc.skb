@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  7-Nov-2010 14:23 (eg)
+;; Last file update: 14-Aug-2011 13:08 (eg)
 ;;
 ;; ======================================================================
 
@@ -231,7 +231,8 @@ which is also shown in this table.])
 (insertdoc 'char-ci>=?)
 (insertdoc 'char-lower-case?)
 (insertdoc 'integer->char)
-(insertdoc 'char-downcase))
+(insertdoc 'char-downcase)
+(insertdoc 'char-foldcase))
 
 
 ;;;
@@ -303,6 +304,10 @@ function listed below just don't need to load the full SRFI to be used])
 (insertdoc 'string-upcase!)
 (insertdoc 'string-titlecase)
 (insertdoc 'string-titlecase!))
+
+(p [These functions are inspired from R6RS and R7RS.])
+(insertdoc 'string-foldcase)
+(insertdoc 'string-foldcase!)
 
 
 ;;;

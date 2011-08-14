@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 19-Jul-2011 20:12 (eg)
+ * Last file update: 14-Aug-2011 12:28 (eg)
  */
 
 
@@ -87,7 +87,6 @@ extern "C"
 #endif
 
 #define MAX_TOKEN_SIZE 		1024		/* max size of a token */
-#define MAX_CHAR_CODE		0x10FFFF	/* Max code for a char */
 
 
 #define CPP_CONCAT(x, y) 	x##y
@@ -368,8 +367,9 @@ int STk_init_box(void);
 #define CHARACTER_VAL(n)  ((AS_LONG(n) >> 3))
 #define CHARACTERP(n)	  ((AS_LONG(n) & 7) == 6)
 
-char *STk_char2string(char c);
+char *STk_char2string(int c);
 int STk_string2char(char *s);
+int STk_casefold_char(int ch);
 int STk_init_char(void);
 
 

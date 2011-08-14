@@ -1,28 +1,28 @@
 ;; ======================================================================
-;; 
+;;
 ;; 			STklos Reference Manual
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 2 of the License, or
 ;; (at your option) any later version.
-;; 
+;;
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;; 
+;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
-;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 10-Aug-2010 09:20 (eg)
+;; Last file update: 14-Aug-2011 12:54 (eg)
 ;;
 ;; ======================================================================
 
-(customize-environment! 
+(customize-environment!
    (html :load "eg-web-book.ske")
    (pdf  :user-style "doc-style.tex"))
 
@@ -34,6 +34,8 @@
 (define (stk)      (sc "STk"))
 (define (rfour)    (sc [R,(sup "4")RS]))
 (define (rfive)    (sc [R,(sup "5")RS]))
+(define (rsix)     (sc [R,(sup "6")RS]))
+(define (rseven)   (sc [R,(sup "7")RS]))
 (define (srfi n)   (bold (format "SRFI-~a" n)))
 (define (TODO txt) (bold (color :bg "yellow" :fg "red" txt)) "")
 (define (~)        (symbol "nbs"))
@@ -52,9 +54,9 @@
 ;;;
 (read-database "../DOCDB")
 
-(define *logo-for-tex* 
+(define *logo-for-tex*
   (case *engine-type*
-    ((tex) 
+    ((tex)
      (! "\\position(7, 12){\\externalfigure[images/dice.png][frame=off,width=2cm]}"))
     (else "")))
 ;;;
@@ -68,7 +70,7 @@
 				    "F-06903 Sophia Antipolis, Cedex"
 				    "France"
 				    *logo-for-tex*))
-	   
+
    (linebreak 3)
    [This document provides a complete list of procedures and special
 forms implemented in version ,(bold *stklos-version*) of
@@ -80,7 +82,7 @@ document.]
 
 (skribe-include "intro.skb")
 (skribe-include "expr.skb")
-(skribe-include "progstruct.skb")   
+(skribe-include "progstruct.skb")
 (skribe-include "stdproc.skb")
 (skribe-include "regexp.skb")
 (skribe-include "match.skb")

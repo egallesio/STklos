@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 20-Dec-2003 23:23 (eg)
-;;;; Last file update: 27-May-2011 23:16 (eg)
+;;;; Last file update: 14-Aug-2011 12:51 (eg)
 ;;;;
 
 (load "srfi.stk")
@@ -70,6 +70,8 @@
 (define elisp-rgxp    (string->regexp "@end lisp"))
 (define R4RS-rgxp     (string->regexp "R4RS"))
 (define R5RS-rgxp     (string->regexp "R5RS"))
+(define R6RS-rgxp     (string->regexp "R6RS"))
+(define R7RS-rgxp     (string->regexp "R7RS"))
 (define STklos-rgxp   (string->regexp "STklos"))
 (define linebrk-rgxp  (string->regexp "@l"))
 
@@ -104,10 +106,14 @@
   (set! def (regexp-replace-all lisp-rgxp def ",(fontified-code ["))
   (set! def (regexp-replace-all elisp-rgxp def "])"))
 
-  ;; rewrite R5RS
-  (set! def (regexp-replace-all R5RS-rgxp def ",(rfive)"))
   ;; rewrite R4RS
   (set! def (regexp-replace-all R4RS-rgxp def ",(rfour)"))
+  ;; rewrite R5RS
+  (set! def (regexp-replace-all R5RS-rgxp def ",(rfive)"))
+  ;; rewrite R6RS
+  (set! def (regexp-replace-all R6RS-rgxp def ",(rsix)"))
+  ;; rewrite R5RS
+  (set! def (regexp-replace-all R7RS-rgxp def ",(rseven)"))
   ;; rewrite STklos
   (set! def (regexp-replace-all STklos-rgxp def ",(stklos)"))
   ;; rewrite linebreak

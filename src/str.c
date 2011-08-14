@@ -22,12 +22,13 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 10-Aug-2011 00:34 (eg)
+ * Last file update: 14-Aug-2011 12:32 (eg)
  */
 
 #include <ctype.h>
 #include <wctype.h>
 #include "stklos.h"
+
 
 /* min size added to a string when reallocated in a string-set! */
 #define UTF8_STRING_INCR	8
@@ -958,7 +959,8 @@ DEFINE_PRIMITIVE("string-mutable?", string_mutable, subr1, (SCM obj))
  * @end lisp
 doc>
  */
-DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv))
+static SCM string_xxcase(int argc, SCM *argv, int (*toxx)(int),
+			 wint_t (*towxx)(wint_t))
 {
   SCM s;
   int start, end;
@@ -971,7 +973,7 @@ DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv
     char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
 
     /* collect all characters in an allocated array of int and convert it */
-    wchars = string2int(startp, end-start, &len, towlower);
+    wchars = string2int(startp, end-start, &len, towxx);
 
     return make_string_from_int_array(wchars, end-start, len);
   } else {
@@ -980,11 +982,17 @@ DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv
 
     endp = STRING_CHARS(s) + end;
     for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
-      *q = tolower(*p);
+      *q = toxx(*p);
 
     return z;
   }
 }
+
+DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv))
+{
+  return string_xxcase(argc, *argv, tolower, towlower);
+}
+
 
 /*
 <doc EXT string-downcase!
@@ -999,7 +1007,8 @@ DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *argv))
+static SCM string_dxxcase(int argc, SCM *argv, int (*toxx)(int),
+			 wint_t (*towxx)(wint_t))
 {
   SCM s;
   int i, start, end;
@@ -1014,7 +1023,7 @@ DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
     char *endp   = STk_utf8_index(STRING_CHARS(s), end, STRING_SIZE(s));
 
     /* collect all characters in an allocated array of int and convert it */
-    wchars = string2int(startp, end-start, &len, towlower);
+    wchars = string2int(startp, end-start, &len, towxx);
     if (len == endp-startp) {
       copy_array(wchars, end-start, startp);
     }
@@ -1029,12 +1038,16 @@ DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
   } else {				    /* monobyte string */
     char *p , *endp = STRING_CHARS(s) + end;
 
-    for (p=STRING_CHARS(s)+start; p < endp; p++) *p = tolower(*p);
+    for (p=STRING_CHARS(s)+start; p < endp; p++) *p = toxx(*p);
   }
 
   return STk_void;
 }
 
+DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *argv))
+{
+  return string_dxxcase(argc, argv, tolower, towlower);
+}
 
 /*
 <doc EXT string-upcase
@@ -1042,7 +1055,7 @@ DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
  * (string-upcase str start)
  * (string-upcase str start end)
  *
- * Returns a string in which the upper case letters of string |str| between the
+ * Returns a string in which the lower case letters of string |str| between the
  * |start| and |end| indices have been replaced by their upper case equivalent.
  * If |start| is omited, it defaults to 0. If |end| is omited, it defaults to
  * the length of |str|.
@@ -1050,32 +1063,8 @@ doc>
  */
 DEFINE_PRIMITIVE("string-upcase", string_upcase, vsubr, (int argc, SCM *argv))
 {
-  SCM s;
-  int start, end;
-
-  s = control_index(argc, argv, &start, &end);
-
-  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {
-    uint32_t *wchars;
-    int len;
-    char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
-
-    /* collect all characters in an allocated array of int and convert it */
-    wchars = string2int(startp, end-start, &len, towupper);
-
-    return make_string_from_int_array(wchars, end-start, len);
-  } else {
-    char *endp, *p, *q;
-    SCM  z =  STk_makestring(end-start, NULL);
-
-    endp = STRING_CHARS(s) + end;
-    for (p=STRING_CHARS(s)+start, q=STRING_CHARS(z); p < endp; p++, q++)
-      *q = toupper(*p);
-
-    return z;
-  }
+  return string_xxcase(argc, argv, toupper, towupper);
 }
-
 
 /*
 <doc EXT string-upcase!
@@ -1088,39 +1077,42 @@ doc>
 */
 DEFINE_PRIMITIVE("string-upcase!", string_dupcase, vsubr, (int argc, SCM *argv))
 {
-  SCM s;
-  int i, start, end;
-
-  s    = control_index(argc, argv, &start, &end);
-  if (BOXED_INFO(s) & STRING_CONST) error_change_const_string(s);
-
-  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {	    /* multibyte string */
-    uint32_t *wchars;
-    int len;
-    char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
-    char *endp   = STk_utf8_index(STRING_CHARS(s), end, STRING_SIZE(s));
-
-    /* collect all characters in an allocated array of int and convert it */
-    wchars = string2int(startp, end-start, &len, towupper);
-    if (len == endp-startp) {
-      copy_array(wchars, end-start, startp);
-    }
-    else {
-      /* This code is inefficient, but it seems that that the converted case
-	 character always use the same length encoding. It is likely that this
-	 code is never used in practice
-      */
-      for (i= start; i < end; i++)
-	STk_string_set(s, MAKE_INT(i), MAKE_CHARACTER(*wchars++));
-    }
-  } else {				    /* monobyte string */
-    char *p , *endp = STRING_CHARS(s) + end;
-
-    for (p=STRING_CHARS(s)+start; p < endp; p++) *p = toupper(*p);
-  }
-
-  return STk_void;
+  return string_dxxcase(argc, argv, toupper, towupper);
 }
+
+
+/*
+<doc EXT string-foldcase
+ * (string-foldcase str)
+ * (string-foldcase str start)
+ * (string-foldcase str start end)
+ *
+ * Returns a string in which the Unicode simple case-folding algorithm has
+ * been applied on |str| between the |start| and |end| indices.
+ * If |start| is omited, it defaults to 0. If |end| is omited, it defaults to
+ * the length of |str|.
+doc>
+ */
+DEFINE_PRIMITIVE("string-foldcase", string_foldcase, vsubr, (int argc, SCM *argv))
+{
+  return string_xxcase(argc, argv, tolower, (wint_t (*) (wint_t))STk_casefold_char);
+}
+
+/*
+<doc EXT string-foldcase!
+ * (string-foldcase! str)
+ * (string-foldcase! str start)
+ * (string-foldcase! str start end)
+ *
+ * This is the in-place side-effecting variant of |string-foldcase|.
+doc>
+*/
+DEFINE_PRIMITIVE("string-foldcase!", string_dfoldcase, vsubr, (int argc, SCM *argv))
+{
+  return string_dxxcase(argc, argv, toupper,(wint_t (*) (wint_t))STk_casefold_char);
+}
+
+
 
 /*
 <doc EXT string-titlecase
@@ -1325,6 +1317,8 @@ int STk_init_string(void)
   ADD_PRIMITIVE(string_ddowncase);
   ADD_PRIMITIVE(string_upcase);
   ADD_PRIMITIVE(string_dupcase);
+  ADD_PRIMITIVE(string_foldcase);
+  ADD_PRIMITIVE(string_dfoldcase);
   ADD_PRIMITIVE(string_titlecase);
   ADD_PRIMITIVE(string_dtitlecase);
   ADD_PRIMITIVE(string_blit);

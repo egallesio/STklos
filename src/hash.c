@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 27-Jul-2011 22:48 (eg)
+ * Last file update: 11-Aug-2011 23:38 (eg)
  */
 
 #include "stklos.h"
@@ -657,7 +657,7 @@ DEFINE_PRIMITIVE("hash-table-ref", hash_ref, subr23, (SCM ht, SCM key, SCM def))
 
 /*
 <doc EXT hash-table-ref/default
- * (hash-table-ref/default hash key)
+ * (hash-table-ref/default hash key default)
  *
  * This function is equivalent to
  * @lisp

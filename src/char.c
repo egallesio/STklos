@@ -2,7 +2,7 @@
  *
  * c h a r . c				-- Chaacters management
  *
- * Copyright � 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update: 19-Jul-2011 20:12 (eg)
+ * Last file update: 14-Aug-2011 13:07 (eg)
  */
 
 #include <ctype.h>
@@ -92,6 +92,159 @@ static struct charelem chartable [] = {
 };
 
 
+static struct {
+  uint16_t ch;
+  uint16_t fold;
+} casefold_table [] = {
+  { 0xb5, 0x3bc },       /*  µ -> μ */
+  { 0x17f, 0x73 },       /* ſ -> s */
+  { 0x345, 0x3b9 },      /*  ͅ -> ι */
+  { 0x3c2, 0x3c3 },      /* ς -> σ */
+  { 0x3cf, 0x3d7 },      /*  Ϗ -> ϗ */
+  { 0x3d0, 0x3b2 },      /* ϐ -> β */
+  { 0x3d1, 0x3b8 },      /*  ϑ -> θ */
+  { 0x3d5, 0x3c6 },      /* ϕ -> φ */
+  { 0x3d6, 0x3c0 },      /*  ϖ -> π */
+  { 0x3f0, 0x3ba },      /* ϰ -> κ */
+  { 0x3f1, 0x3c1 },      /* ϱ -> ρ */
+  { 0x3f5, 0x3b5 },      /* ϵ -> ε */
+  { 0x524, 0x525 },      /* Ԥ -> ԥ */
+  { 0x526, 0x527 },      /* Ԧ -> ԧ */
+  { 0x1e9b, 0x1e61 },    /* ẛ -> ṡ */
+  { 0x1fbe, 0x3b9 },     /* ι -> ι */
+  { 0x2c70, 0x252 },     /* Ɒ -> ɒ */
+  { 0x2c7e, 0x23f },     /* Ȿ -> ȿ */
+  { 0x2c7f, 0x240 },     /* Ɀ -> ɀ */
+  { 0x2ceb, 0x2cec },    /* Ⳬ -> ⳬ */
+  { 0x2ced, 0x2cee },    /* Ⳮ -> ⳮ */
+  { 0xa640, 0xa641 },    /* Ꙁ -> ꙁ */
+  { 0xa642, 0xa643 },    /* Ꙃ -> ꙃ */
+  { 0xa644, 0xa645 },    /* Ꙅ -> ꙅ */
+  { 0xa646, 0xa647 },    /* Ꙇ -> ꙇ */
+  { 0xa648, 0xa649 },    /* Ꙉ -> ꙉ */
+  { 0xa64a, 0xa64b },    /* Ꙋ -> ꙋ */
+  { 0xa64c, 0xa64d },    /* Ꙍ -> ꙍ */
+  { 0xa64e, 0xa64f },    /* Ꙏ -> ꙏ */
+  { 0xa650, 0xa651 },    /* Ꙑ -> ꙑ */
+  { 0xa652, 0xa653 },    /* Ꙓ -> ꙓ */
+  { 0xa654, 0xa655 },    /* Ꙕ -> ꙕ */
+  { 0xa656, 0xa657 },    /* Ꙗ -> ꙗ */
+  { 0xa658, 0xa659 },    /* Ꙙ -> ꙙ */
+  { 0xa65a, 0xa65b },    /* Ꙛ -> ꙛ */
+  { 0xa65c, 0xa65d },    /* Ꙝ -> ꙝ */
+  { 0xa65e, 0xa65f },    /* Ꙟ -> ꙟ */
+  { 0xa660, 0xa661 },    /* Ꙡ -> ꙡ */
+  { 0xa662, 0xa663 },    /* Ꙣ -> ꙣ */
+  { 0xa664, 0xa665 },    /* Ꙥ -> ꙥ */
+  { 0xa666, 0xa667 },    /* Ꙧ -> ꙧ */
+  { 0xa668, 0xa669 },    /* Ꙩ -> ꙩ */
+  { 0xa66a, 0xa66b },    /* Ꙫ -> ꙫ */
+  { 0xa66c, 0xa66d },    /* Ꙭ -> ꙭ */
+  { 0xa680, 0xa681 },    /* Ꚁ -> ꚁ */
+  { 0xa682, 0xa683 },    /* Ꚃ -> ꚃ */
+  { 0xa684, 0xa685 },    /* Ꚅ -> ꚅ */
+  { 0xa686, 0xa687 },    /* Ꚇ -> ꚇ */
+  { 0xa688, 0xa689 },    /* Ꚉ -> ꚉ */
+  { 0xa68a, 0xa68b },    /* Ꚋ -> ꚋ */
+  { 0xa68c, 0xa68d },    /* Ꚍ -> ꚍ */
+  { 0xa68e, 0xa68f },    /* Ꚏ -> ꚏ */
+  { 0xa690, 0xa691 },    /* Ꚑ -> ꚑ */
+  { 0xa692, 0xa693 },    /* Ꚓ -> ꚓ */
+  { 0xa694, 0xa695 },    /* Ꚕ -> ꚕ */
+  { 0xa696, 0xa697 },    /* Ꚗ -> ꚗ */
+  { 0xa722, 0xa723 },    /* Ꜣ -> ꜣ */
+  { 0xa724, 0xa725 },    /* Ꜥ -> ꜥ */
+  { 0xa726, 0xa727 },    /* Ꜧ -> ꜧ */
+  { 0xa728, 0xa729 },    /* Ꜩ -> ꜩ */
+  { 0xa72a, 0xa72b },    /* Ꜫ -> ꜫ */
+  { 0xa72c, 0xa72d },    /* Ꜭ -> ꜭ */
+  { 0xa72e, 0xa72f },    /* Ꜯ -> ꜯ */
+  { 0xa732, 0xa733 },    /* Ꜳ -> ꜳ */
+  { 0xa734, 0xa735 },    /* Ꜵ -> ꜵ */
+  { 0xa736, 0xa737 },    /* Ꜷ -> ꜷ */
+  { 0xa738, 0xa739 },    /* Ꜹ -> ꜹ */
+  { 0xa73a, 0xa73b },    /* Ꜻ -> ꜻ */
+  { 0xa73c, 0xa73d },    /* Ꜽ -> ꜽ */
+  { 0xa73e, 0xa73f },    /* Ꜿ -> ꜿ */
+  { 0xa740, 0xa741 },    /* Ꝁ -> ꝁ */
+  { 0xa742, 0xa743 },    /* Ꝃ -> ꝃ */
+  { 0xa744, 0xa745 },    /* Ꝅ -> ꝅ */
+  { 0xa746, 0xa747 },    /* Ꝇ -> ꝇ */
+  { 0xa748, 0xa749 },    /* Ꝉ -> ꝉ */
+  { 0xa74a, 0xa74b },    /* Ꝋ -> ꝋ */
+  { 0xa74c, 0xa74d },    /* Ꝍ -> ꝍ */
+  { 0xa74e, 0xa74f },    /* Ꝏ -> ꝏ */
+  { 0xa750, 0xa751 },    /* Ꝑ -> ꝑ */
+  { 0xa752, 0xa753 },    /* Ꝓ -> ꝓ */
+  { 0xa754, 0xa755 },    /* Ꝕ -> ꝕ */
+  { 0xa756, 0xa757 },    /* Ꝗ -> ꝗ */
+  { 0xa758, 0xa759 },    /* Ꝙ -> ꝙ */
+  { 0xa75a, 0xa75b },    /* Ꝛ -> ꝛ */
+  { 0xa75c, 0xa75d },    /* Ꝝ -> ꝝ */
+  { 0xa75e, 0xa75f },    /* Ꝟ -> ꝟ */
+  { 0xa760, 0xa761 },    /* Ꝡ -> ꝡ */
+  { 0xa762, 0xa763 },    /* Ꝣ -> ꝣ */
+  { 0xa764, 0xa765 },    /* Ꝥ -> ꝥ */
+  { 0xa766, 0xa767 },    /* Ꝧ -> ꝧ */
+  { 0xa768, 0xa769 },    /* Ꝩ -> ꝩ */
+  { 0xa76a, 0xa76b },    /* Ꝫ -> ꝫ */
+  { 0xa76c, 0xa76d },    /* Ꝭ -> ꝭ */
+  { 0xa76e, 0xa76f },    /* Ꝯ -> ꝯ */
+  { 0xa779, 0xa77a },    /* Ꝺ -> ꝺ */
+  { 0xa77b, 0xa77c },    /* Ꝼ -> ꝼ */
+  { 0xa77d, 0x1d79 },    /* Ᵹ -> ᵹ */
+  { 0xa77e, 0xa77f },    /* Ꝿ -> ꝿ */
+  { 0xa780, 0xa781 },    /* Ꞁ -> ꞁ */
+  { 0xa782, 0xa783 },    /* Ꞃ -> ꞃ */
+  { 0xa784, 0xa785 },    /* Ꞅ -> ꞅ */
+  { 0xa786, 0xa787 },    /* Ꞇ -> ꞇ */
+  { 0xa78b, 0xa78c },    /* Ꞌ -> ꞌ */
+  { 0xa78d, 0x265 },     /* Ɥ -> ɥ */
+  { 0xa790, 0xa791 },    /* Ꞑ -> ꞑ */
+  { 0xa7a0, 0xa7a1 },    /* Ꞡ -> ꞡ */
+  { 0xa7a2, 0xa7a3 },    /* Ꞣ -> ꞣ */
+  { 0xa7a4, 0xa7a5 },    /* Ꞥ -> ꞥ */
+  { 0xa7a6, 0xa7a7 },    /* Ꞧ -> ꞧ */
+  { 0xa7a8, 0xa7a9 }     /* Ꞩ -> ꞩ */
+};
+
+
+int STk_casefold_char(int ch)
+{
+  static int min = -1, max= -1, len = -1;
+
+  if (len == -1)  {
+    /* Never run before. Initialize static variables */
+    len = sizeof(casefold_table) / sizeof(casefold_table[0]);
+    min = casefold_table[0].ch;
+    max = casefold_table[len-1].ch;
+  }
+
+  if (min <= ch && ch <= max) {
+    /* seach the value in the casefold_table by dichotomy */
+    int left, right, i;
+
+    left = 0; right = len-1;
+    do {
+      i = (left + right) / 2;
+      if (ch == casefold_table[i].ch)
+	return casefold_table[i].fold;
+      else
+	if (ch < casefold_table[i].ch)
+	  right = i -1;
+	else
+	  left = i +1;
+    }
+    while (left <= right);
+  }
+
+  /* not found of not in the interval of special character => return the
+   * corresponding lowercase character
+   */
+  return towlower(ch);
+}
+
+
 /*===========================================================================*\
  *
  * 				     Utilities
@@ -146,7 +299,7 @@ int STk_string2char(char *s)
 }
 
 
-char *STk_char2string(char c)  		/* convert a char to it's */
+char *STk_char2string(int c)  		/* convert a character to it's */
 {					/* external representation */
   register struct charelem *p;
 
@@ -308,7 +461,17 @@ DEFINE_PRIMITIVE("integer->char", integer2char, subr1, (SCM i))
 {
   int c = STk_integer_value(i);
 
-  if (c < 0 || c > MAX_CHAR_CODE) STk_error("bad integer ~S", i);
+  if (STk_use_utf8) {
+    /* Unicode defines characters in the range [0, #xd7FF] U [#xE000, #x10FFFF] */
+    if (! ((0 <= c  && c <=  0xd7ff) || (0xE000 <=c && c <= 0x10FFFF)))
+      STk_error("bad integer ~S (must be in range [0, #xd7FF] U [#xE000, #x10FFFF]",
+		i);
+  }
+  else
+    /* Monobyte character: use them in the range [0, #xFF] */
+    if (! (0 <= c  && c <=  0xff))
+      STk_error("bad integer ~S (must be in range [0, #xFF]", i);
+
   return MAKE_CHARACTER(c);
 }
 
@@ -329,7 +492,7 @@ DEFINE_PRIMITIVE("char-upcase", char_upcase, subr1, (SCM c))
 {
   if (!CHARACTERP(c)) error_bad_char(c);
   return MAKE_CHARACTER(STk_use_utf8 ?
-			towupper(CHARACTER_VAL(c)): 
+			towupper(CHARACTER_VAL(c)):
 			toupper((unsigned char) CHARACTER_VAL(c)));
 }
 
@@ -337,9 +500,28 @@ DEFINE_PRIMITIVE("char-downcase", char_downcase, subr1, (SCM c))
 {
   if (!CHARACTERP(c)) error_bad_char(c);
   return MAKE_CHARACTER(STk_use_utf8 ?
-			towlower(CHARACTER_VAL(c)) : 
+			towlower(CHARACTER_VAL(c)) :
 			tolower((unsigned char) CHARACTER_VAL(c)));
 }
+/*
+<doc char-foldcase
+ * (char-foldcase char)
+ *
+ * This procedure applies the Unicode simple case folding algorithm and returns
+ * the result. Note that language-sensitive folding is not used. If
+ * the argument is an uppercase letter, the result will be either a
+ * lowercase letter or the same as the argument if the lowercase letter
+ * does not exist.
+doc>
+ */
+DEFINE_PRIMITIVE("char-foldcase", char_foldcase, subr1, (SCM c))
+{
+  if (!CHARACTERP(c))  error_bad_char(c);
+  return MAKE_CHARACTER(STk_use_utf8 ?
+			STk_casefold_char(CHARACTER_VAL(c)):
+			tolower((unsigned char) CHARACTER_VAL(c)));
+}
+
 
 int STk_init_char(void)
 {
@@ -369,6 +551,7 @@ int STk_init_char(void)
 
   ADD_PRIMITIVE(char_upcase);
   ADD_PRIMITIVE(char_downcase);
+  ADD_PRIMITIVE(char_foldcase);
 
   return TRUE;
 }
