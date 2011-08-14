@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update: 14-Aug-2011 13:07 (eg)
+ * Last file update: 14-Aug-2011 13:26 (eg)
  */
 
 #include <ctype.h>
@@ -289,7 +289,17 @@ int STk_string2char(char *s)
   register struct charelem *p;
   uint32_t val;
 
+  /* Try to see if it is a multi-byte character */
   if (* (STk_utf8_grab_char(s, &val)) == '\0') return val;
+
+  if (*s == 'x') {
+    char *end; 
+    long int val = strtol(s+1, &end, 16);
+
+    if (val == LONG_MIN || val == LONG_MAX || *end)
+      STk_error("bad hexdecimal value '%s' when reading char", s);
+    return (int) val;
+  }
 
   for (p=chartable; *(p->name); p++) {
     if (my_strcmpi(p->name, s) == 0) return (int) (p->value);

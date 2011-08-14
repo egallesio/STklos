@@ -1,0 +1,75 @@
+;;;;
+;;;; make-table.stk	-- Make UTF-8 folding array
+;;;;
+;;;; Copyright © 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 11-Aug-2011 00:16 (eg)
+;;;; Last file update: 11-Aug-2011 23:18 (eg)
+;;;;
+
+(define *max-char* #x10428)
+
+(define (make-table port)
+  (let ((table (make-vector #x10428 #f)))
+    (let Loop ((l (read-line port)))
+;      (printf "Line = ~S\n" l)
+      (cond
+	((eof-object? l)
+	 'nothing)
+	((and (> (string-length l) 0) (char=? (string-ref l 0) #\#))
+	 (Loop (read-line port)))
+	(else
+	 (let* ((res (regexp-match "^([0-9A-Fa-f]+); (.); ([0-9A-Fa-f]+)" l))
+		(from (cadr res))
+		(type (caddr res))
+		(to   (cadddr res)))
+;	   (printf "from = ~S to = ~S type = ~S\n" from to type)
+	   (when (member type '("C" "S"))
+	     (vector-set! table
+			  (string->number from 16)
+			  (string->number to 16)))
+	   (Loop (read-line port))))))
+    table))
+
+(define (print-table table)
+  ;; print the table
+  (printf "(define *folding-table*\n")
+  (printf "  (alist->hash-table\n")
+  (printf "    (map (lambda (x)\n")
+  (printf "            (cons (integer->char (car x)) (integer->char (cdr x))))\n")
+  (printf "         '(\n")
+
+  (dotimes (i *max-char*)
+    (when (and (number? (vector-ref table i))
+	       (not (eq? (integer->char (vector-ref table i))
+			 (char-downcase (integer->char i)))))
+      (printf "\t    (#x~A . #x~A)    ; ~A -> ~A\n"
+	      (number->string i 16)
+	      (number->string (vector-ref table i) 16)
+	      (integer->char i)
+	      (integer->char (vector-ref table i)))))
+  (printf "))))\n"))
+
+(with-input-from-file "CaseFolding.txt"
+  (lambda ()
+    (let ((table (make-table (current-input-port))))
+      (with-output-to-file "casefold.stk"
+	(lambda ()
+	  (print-table table))))))
