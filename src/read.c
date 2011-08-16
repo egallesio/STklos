@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 27-Jul-2011 15:28 (eg)
+ * Last file update: 16-Aug-2011 00:15 (eg)
  *
  */
 
@@ -92,6 +92,10 @@ static void error_bad_dotted_list(SCM port)
   signal_error(port, "bad dotted list", STk_nil);
 }
 
+static void error_bad_inline_hexa_sequence(SCM port)
+{
+  signal_error(port, "bad inline hexa sequence", STk_nil);
+}
 
 static void warning_parenthesis(SCM port)
 {
@@ -113,6 +117,44 @@ static int flush_spaces(SCM port, char *message, SCM file)
     default:   if (!isspace((unsigned char) c)) return(c);
     }
   }
+}
+
+
+static int read_hex_sequence(SCM port, char* utf8_seq)
+{
+  char *end, buffer[30];   /* normally max value is 10FFFFF */
+  int c, i = 0;
+  long int val;
+
+  /* assert: current char is 'x' */
+  do
+    c = buffer[i++] = STk_getc(port);
+  while ((i < sizeof(buffer) - 1) && isxdigit(c) && (c != ';') && (c != EOF));
+  buffer[i] = '\0';
+
+  if (c != ';')
+    error_bad_inline_hexa_sequence(port);
+  else {
+    val = strtol(buffer, &end, 16);
+
+    if (val == LONG_MIN || val == LONG_MAX || *end != ';')
+      error_bad_inline_hexa_sequence(port);
+    else
+      if (STk_use_utf8) {
+	int len = STk_char2utf8(val, utf8_seq);
+
+	if (len) return len;
+      } else {
+	if (0 <= val && val <= 0xFF) {
+	  *utf8_seq = (char) val;
+	  return 1;
+	}
+      }
+  }
+
+  /* if we are here , we have an error */
+  error_bad_inline_hexa_sequence(port);
+  return 0;
 }
 
 
@@ -191,6 +233,25 @@ static int read_word(SCM port, int c, char *tok, int case_significant)
     allchars  ^= (c == '|');
     if (c != '|')
       tok[j++]  = (allchars || case_significant) ? c : tolower(c);
+
+    if (c == '\\') {
+      c = STk_getc(port);
+      if (c == 'x') {
+	/* This is an internal hexa sequence */
+	char buffer[5];
+	int len = read_hex_sequence(port, buffer);
+
+	if (j + len >= MAX_TOKEN_SIZE-1) {
+	  tok[j] = '\0';
+	  error_token_too_large(port, tok);
+	} else {
+	  memcpy(tok + j-1, buffer, len);
+	  j += len-1;
+	}
+      } else { /* c != 'x' */
+	STk_ungetc(c, port);
+      }
+    }
 
     c = STk_getc(port);
     if (c == EOF) break;
@@ -410,12 +471,11 @@ static void patch_references(SCM port, SCM l, SCM cycles)
 
 static SCM read_string(SCM port, int constant)
 {
-  int k ,c, n, hexa;
+  int k ,c, n;
   size_t j, len;
   char *p, *buffer;
   SCM z;
 
-  hexa = 0;
   j    = 0;
   len  = 100;
   p    = buffer = STk_must_malloc(len);
@@ -433,8 +493,34 @@ static SCM read_string(SCM port, int constant)
 	case 'r' : c = '\r'; break;	/* Cr   */
 	case 't' : c = '\t'; break;	/* Tab  */
 	case 'v' : c = '\v'; break;	/* VTab */
-        case '\n': continue;
-	case 'x' : hexa = 1;
+        case ' ' : do {
+			c = STk_getc(port);
+	           } while (c == ' ' || c == '\t');
+
+	          if (c != '\n') {
+		    signal_error(port, "bad line continuation sequence in string",
+				 STk_nil);
+		  } else {
+		    /* No break */;
+		  }
+        case '\n': do {
+			c = STk_getc(port);
+	           } while (c == ' ' || c == '\t');
+	           break;
+	case 'x' : {
+		     char seq[5];
+		     int seqlen = read_hex_sequence(port, seq);
+
+		     if ((j + seqlen) >= len) {
+		       len = len + len / 2;
+		       buffer = STk_must_realloc(buffer, len);
+		       p = buffer + j;
+		     }
+		     memcpy(p, seq, seqlen);
+		     p += seqlen;
+		     j += seqlen;
+		     continue;
+		   }
 	case '0' : for( k=n=0 ; ; k++ ) {
 		     c = STk_getc(port);
 		     if (c == EOF)
@@ -443,21 +529,15 @@ static SCM read_string(SCM port, int constant)
 				    STk_nil);
 
 		     c &= 0377;
-		     /* if hexa 2 digits max, if octal 3 digit max */
-		     if (hexa && isxdigit(c) && k < 2) {
-		       /* because of a GCC bug, factorisation is not possible */
-		       c = tolower(c);
-		       n = n * 16 + (isdigit(c) ? (c - '0'): (c - 'a' + 10));
-		     }
-		     else if (!hexa && isdigit(c) && (c < '8') && k < 3)
-		        n = n * 8 + c - '0';
+		     /* 3 digit max for bytes */
+		     if (isdigit(c) && (c < '8') && k < 3)
+		       n = n * 8 + c - '0';
 		     else {
 		       STk_ungetc(c, port);
 		       break;
 		     }
 		   }
-		   hexa = 0;
-	           c    = n & 0xff;
+	           c = n & 0xff;
       }
     }
 

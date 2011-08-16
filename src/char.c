@@ -1,4 +1,4 @@
-/*
+/*						-*- coding: utf-8 -*-
  *
  * c h a r . c				-- Chaacters management
  *
@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update: 14-Aug-2011 13:26 (eg)
+ * Last file update: 16-Aug-2011 19:53 (eg)
  */
 
 #include <ctype.h>
@@ -38,7 +38,8 @@ struct charelem {
 
 static struct charelem chartable [] = {
   {"null",       '\000'},
-  {"bell",       '\007'},
+  {"alarm",	 '\007'}, /* R7RS name */
+  {"bell",       '\007'}, /* old STklos name, for backward compatibility */
   {"backspace",  '\010'},
   {"tab", 	 '\011'},
   {"newline",    '\012'},
@@ -277,7 +278,8 @@ static int charcompi(SCM c1, SCM c2)
   if (!CHARACTERP(c1)) error_bad_char(c1);
   if (!CHARACTERP(c2)) error_bad_char(c2);
   return STk_use_utf8 ?
-         (towlower(CHARACTER_VAL(c1)) - towlower(CHARACTER_VAL(c2))):
+         (STk_casefold_char(CHARACTER_VAL(c1)) - 
+	  STk_casefold_char(CHARACTER_VAL(c2))):
          (tolower((unsigned char) CHARACTER_VAL(c1)) -
 	  tolower((unsigned char) CHARACTER_VAL(c2)));
 }
@@ -435,7 +437,6 @@ TEST_CTYPE(lower, "char-lower-case?")
 
 /*=============================================================================*/
 
-DEFINE_PRIMITIVE("char->integer", char2integer, subr1, (SCM c))
 /*
 <doc char->integer integer->char
  * (char->integer char)
@@ -459,8 +460,12 @@ DEFINE_PRIMITIVE("char->integer", char2integer, subr1, (SCM c))
  *   (char<=? (integer->char x)
  *            (integer->char y))     =>  #t
  * @end lisp
+ * |integer->char| accepts an exact number between 0 and #xD7FFF or between
+ * #xE000 and #x10FFFF, if UTF8 encoding is used. Otherwise it accepts a 
+ * number between0 and #xFF.
 doc>
  */
+DEFINE_PRIMITIVE("char->integer", char2integer, subr1, (SCM c))
 {
   if (!CHARACTERP(c)) error_bad_char(c);
   return MAKE_INT((long) CHARACTER_VAL(c));
@@ -473,7 +478,7 @@ DEFINE_PRIMITIVE("integer->char", integer2char, subr1, (SCM i))
 
   if (STk_use_utf8) {
     /* Unicode defines characters in the range [0, #xd7FF] U [#xE000, #x10FFFF] */
-    if (! ((0 <= c  && c <=  0xd7ff) || (0xE000 <=c && c <= 0x10FFFF)))
+    if (! VALID_UTF8_VALUE(c))
       STk_error("bad integer ~S (must be in range [0, #xd7FF] U [#xE000, #x10FFFF]",
 		i);
   }
@@ -514,7 +519,7 @@ DEFINE_PRIMITIVE("char-downcase", char_downcase, subr1, (SCM c))
 			tolower((unsigned char) CHARACTER_VAL(c)));
 }
 /*
-<doc char-foldcase
+<doc EXT char-foldcase
  * (char-foldcase char)
  *
  * This procedure applies the Unicode simple case folding algorithm and returns

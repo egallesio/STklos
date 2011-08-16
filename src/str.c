@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 14-Aug-2011 12:32 (eg)
+ * Last file update: 16-Aug-2011 18:02 (eg)
  */
 
 #include <ctype.h>
@@ -60,9 +60,9 @@ static void error_index_out_of_bound(SCM str, SCM index)
   STk_error("index ~S out of bound in string ~S", index, str);
 }
 
-static void error_bad_sequence(SCM str)
+static void error_bad_sequence(char *str)
 {
-  STk_error("bad UTF-8 sequence in ~S", str);
+  STk_error("bad UTF-8 sequence in '%s'", str);
 }
 
 
@@ -82,8 +82,10 @@ static int stringcomp(SCM s1, SCM s2)
     str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
 
     while ((str1 < end1) && (str2 < end2)) {
-      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL) error_bad_sequence(s1);
-      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL) error_bad_sequence(s2);
+      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL) 
+	error_bad_sequence(STRING_CHARS(s1));
+      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL) 
+	error_bad_sequence(STRING_CHARS(s2));
 
       if (ch1 != ch2) return ch1 - ch2;
     }
@@ -122,8 +124,10 @@ static int stringcompi(SCM s1, SCM s2)
     str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
 
     while ((str1 < end1) && (str2 < end2)) {
-      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL) error_bad_sequence(s1);
-      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL) error_bad_sequence(s2);
+      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL) 
+	error_bad_sequence(STRING_CHARS(s1));
+      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL) 
+	error_bad_sequence(STRING_CHARS(s2));
 
       if (towlower(ch1) != towlower(ch2)) return towlower(ch1) - towlower(ch2);
     }
@@ -806,6 +810,7 @@ DEFINE_PRIMITIVE("string-fill!", string_fill, subr2, (SCM str, SCM c))
 static int Memmem(char *s1, int l1, char *s2, int l2, int use_utf8)
 {
   int pos;
+  char *start_s1 = s1;
 
   if (l2 == 0) return 0;
 
@@ -816,7 +821,7 @@ static int Memmem(char *s1, int l1, char *s2, int l2, int use_utf8)
     if (use_utf8) {
       int len = STk_utf8_sequence_length(s1);
 
-      if (len == UTF8_INCORRECT_SEQUENCE) STk_error("bad UTF-8 sequence");
+      if (len == UTF8_INCORRECT_SEQUENCE) error_bad_sequence(start_s1);
       s1 += len;
     } else {
       s1++;

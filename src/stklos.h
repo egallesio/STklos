@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 14-Aug-2011 12:28 (eg)
+ * Last file update: 15-Aug-2011 19:43 (eg)
  */
 
 
@@ -1254,6 +1254,11 @@ int STk_init_mutexes(void);
 #define UTF8_INCORRECT_SEQUENCE	(-2)
 
 extern int STk_use_utf8;
+
+#define VALID_UTF8_VALUE(c)							  \
+  /* Unicode defines characters in the range [0, #xd7FF] U [#xE000, #x10FFFF] */  \
+  ((0 <= (c)  && (c) <=  0xd7ff) || (0xE000 <=(c) && (c) <= 0x10FFFF))
+
 
 char *STk_utf8_grab_char(char *str, uint32_t *c);/* result = pos. after current one */
 int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */

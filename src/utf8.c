@@ -21,12 +21,18 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update: 27-Jul-2011 22:38 (eg)
+ * Last file update: 16-Aug-2011 18:03 (eg)
  */
 
 #include "stklos.h"
 
 int STk_use_utf8 = 1;
+
+
+static void error_bad_sequence(char *str)
+{
+  STk_error("bad UTF-8 sequence in '%s'", str);
+}
 
 
 char *STk_utf8_grab_char(char *str, uint32_t *c) /* result = pos. after current one */
@@ -86,35 +92,36 @@ int STk_utf8_read_char(SCM port)
 }
 
 
+  
+
+
+
 int STk_char2utf8(int ch, char *str) /* result = length of the UTF-8 repr. */
 {
   uint8_t *buff = (uint8_t *)str;
-  int n;
+  int n = 0;
 
-  if (ch < 0x80) {
-    *buff++ = ch;
-    n = 1;
-  } else if (ch < 0x800) {
-    *buff++ = (ch >> 6) | 0xc0;
-    *buff++ = (ch & 0x3f) | 0x80;
-    n = 2;
-  } else if (ch < 0x10000) {
-    *buff++ = (ch >> 12) | 0xe0;
-    *buff++ = ((ch >> 6) & 0x3f) | 0x80;
-    *buff++ = (ch & 0x3f) | 0x80;
-    n = 3;
-  } else if (ch < 0x110000) {
-    *buff++ = (ch >> 18) | 0xF0;
-    *buff++ = ((ch >> 12) & 0x3F) | 0x80;
-    *buff++ = ((ch >> 6)  & 0x3F) | 0x80;
-    *buff++ = (ch & 0x3F) | 0x80;
-    n = 4;
-  } else {
-    n = 0; /* to make gcc happy */
-    STk_error("bad UTF-8 character %d", ch);
-  }
+  if (VALID_UTF8_VALUE(ch))
+    if (ch < 0x80) {
+      *buff++ = ch;
+      n = 1;
+    } else if (ch < 0x800) {
+      *buff++ = (ch >> 6) | 0xc0;
+      *buff++ = (ch & 0x3f) | 0x80;
+      n = 2;
+    } else if (ch < 0x10000) {
+      *buff++ = (ch >> 12) | 0xe0;
+      *buff++ = ((ch >> 6) & 0x3f) | 0x80;
+      *buff++ = (ch & 0x3f) | 0x80;
+      n = 3;
+    } else if (ch < 0x110000) {
+      *buff++ = (ch >> 18) | 0xf0;
+      *buff++ = ((ch >> 12) & 0x3f) | 0x80;
+      *buff++ = ((ch >> 6)  & 0x3f) | 0x80;
+      *buff++ = (ch & 0x3f) | 0x80;
+      n = 4;
+    }
   /* *buff = '\0'; */
-
   return n;
 }
 
@@ -144,13 +151,13 @@ int STk_utf8_sequence_length(char *str)
 int STk_utf8_strlen(char *s, int max)
 {
   int len;
-  char *end = s + max;
+  char *start = s, *end = s + max;
 
   for (len = 0;  s < end; len++) {
     int sz =  STk_utf8_sequence_length(s);
 
     if (sz == UTF8_INCORRECT_SEQUENCE)
-      STk_error("bad UTF-8 sequence");
+      error_bad_sequence(start);
     s += sz;
   }
   return len;
@@ -158,13 +165,13 @@ int STk_utf8_strlen(char *s, int max)
 
 char *STk_utf8_index(char *s, int i, int max) /* return the address of ith char of s*/
 {
-  char *end = s + max;
+  char *start = s, *end = s + max;
 
   while ((s < end) && i--) {
     int sz =  STk_utf8_sequence_length(s);
 
     if (sz == UTF8_INCORRECT_SEQUENCE)
-      STk_error("bad UTF-8 sequence");
+      error_bad_sequence(start);
     s += sz;
   }
 
