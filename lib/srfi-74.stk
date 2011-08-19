@@ -1,20 +1,20 @@
-;;;
+;;;;
 ;;;; srfi-74.stk			-- SRFI-74 implementation
-;;;;
-;;;; Copyright © 2010-2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
-;;;;
+;;;; 
+;;;; Copyright © 2010 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; 
 ;;;;           Author: Michael Sperber
 ;;;;      Modified by: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  2005
-;;;; Last file update: 20-Apr-2011 09:39 (eg)
+;;;; Last file update:  4-Apr-2010 19:55 (eg)
 ;;;;
-;;;; This code is an adaptation of the reference implementation provided
-;;;; with the SRFI document by Michael Sperber.
+;;;; This code is an adaptation of the reference implementation provided 
+;;;; with the SRFI document by Michael Sperber. 
 
 ; Octet-addressed binary objects
 
-; Copyright (C) Michael Sperber (2005). All Rights Reserved.
-;
+; Copyright (C) Michael Sperber (2005). All Rights Reserved. 
+; 
 ; Permission is hereby granted, free of charge, to any person
 ; obtaining a copy of this software and associated documentation files
 ; (the "Software"), to deal in the Software without restriction,
@@ -22,10 +22,10 @@
 ; publish, distribute, sublicense, and/or sell copies of the Software,
 ; and to permit persons to whom the Software is furnished to do so,
 ; subject to the following conditions:
-;
+; 
 ; The above copyright notice and this permission notice shall be
 ; included in all copies or substantial portions of the Software.
-;
+; 
 ; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 ; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 ; MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -42,8 +42,9 @@
 (require "srfi-66")
 
 (define-module SRFI-74
-  (export endianness 
-	  blob-s8-ref blob-s8-set!
+  (export endianness blob? make-blob blob-length
+	  blob-u8-ref blob-s8-ref
+	  blob-u8-set! blob-s8-set!
 	  blob-uint-ref blob-sint-ref
 	  blob-uint-set! blob-sint-set!
 
@@ -59,12 +60,10 @@
 	  blob-s64-native-ref blob-u64-set!  blob-s64-set!
 	  blob-u64-native-set! blob-s64-native-set!
 
-	  blob=? blob->u8-list u8-list->blob
+	  blob=? blob-copy! blob-copy blob->u8-list u8-list->blob
 	  blob->uint-list blob->sint-list uint-list->
-	  blob sint-list->blob
-
-	  srfi74-blob-copy!)
-
+	  blob sint-list->blob)
+  
 
 (define *endianness/little* (list 'little))
 (define *endianness/big* (list 'big))
@@ -77,8 +76,21 @@
     ((endianness big)    (in-module SRFI-74 *endianness/big*))
     ((endianness native) (in-module SRFI-74 *endianness/native*))))
 
+(define blob? u8vector?)
+
+(define (make-blob k)
+  (make-u8vector k 0))
+
+(define (blob-length b)
+  (u8vector-length b))
+
+(define (blob-u8-ref b k)
+  (u8vector-ref b k))
+(define (blob-u8-set! b k octet)
+  (u8vector-set! b k octet))
+
 (define (blob-s8-ref b k)
-  (u8->s8 (blob-u8-ref b k)))
+  (u8->s8 (u8vector-ref b k)))
 
 (define (u8->s8 octet)
   (if (> octet 127)
@@ -86,7 +98,7 @@
       octet))
 
 (define (blob-s8-set! b k val)
-  (blob-u8-set! b k (s8->u8 val)))
+  (u8vector-set! b k (s8->u8 val)))
 
 (define (s8->u8 val)
   (if (negative? val)
@@ -115,10 +127,10 @@
 		       (eq? (endianness big) endness)
 		       0
 		       (lambda (index acc)
-			 (+ (blob-u8-ref blob index) (arithmetic-shift acc 8)))))
+			 (+ (u8vector-ref blob index) (arithmetic-shift acc 8)))))
 
 (define (blob-sint-ref size endness blob index)
-  (let ((high-byte (blob-u8-ref blob
+  (let ((high-byte (u8vector-ref blob
 				 (if (eq? endness (endianness big))
 				     index
 				     (- (+ index size) 1)))))
@@ -129,13 +141,13 @@
 			     (eq? (endianness big) endness)
 			     0
 			     (lambda (index acc)
-			       (+ (- 255 (blob-u8-ref blob index))
+			       (+ (- 255 (u8vector-ref blob index))
 				  (arithmetic-shift acc 8))))))
 	(index-iterate index size
 		       (eq? (endianness big) endness)
 		       0
 		       (lambda (index acc)
-			 (+ (blob-u8-ref blob index) (arithmetic-shift acc 8)))))))
+			 (+ (u8vector-ref blob index) (arithmetic-shift acc 8)))))))
 
 (define (make-uint-ref size)
   (cut blob-uint-ref size <> <> <>))
@@ -147,7 +159,7 @@
   (index-iterate index size (eq? (endianness little) endness)
 		 val
 		 (lambda (index acc)
-		   (blob-u8-set! blob index (remainder acc 256))
+		   (u8vector-set! blob index (remainder acc 256))
 		   (quotient acc 256)))
   (values))
 
@@ -156,17 +168,17 @@
       (index-iterate index size (eq? (endianness little) endness)
 		     (- -1 val)
 		     (lambda (index acc)
-		       (blob-u8-set! blob index (- 255 (remainder acc 256)))
+		       (u8vector-set! blob index (- 255 (remainder acc 256)))
 		       (quotient acc 256)))
-
+      
       (index-iterate index size (eq? (endianness little) endness)
 		     val
 		     (lambda (index acc)
-		       (blob-u8-set! blob index (remainder acc 256))
+		       (u8vector-set! blob index (remainder acc 256))
 		       (quotient acc 256))))
-
+  
   (values))
-
+  
 (define (make-uint-set! size)
   (cut blob-uint-set! size <> <> <> <>))
 (define (make-sint-set! size)
@@ -215,19 +227,24 @@
 
 ; Auxiliary stuff
 
-(define (srfi74-blob-copy! source source-start target target-start count)
-  ;; SRFI-74 defines a blob-copy! which is incompatible with R7RS.
-  (partial-blob-copy! source source-start (+ source-start count) target target-start))
+(define (blob-copy! source source-start target target-start count)
+  (u8vector-copy! source source-start target target-start count))
 
+(define (blob-copy b)
+  (u8vector-copy b))
 
 (define (blob=? b1 b2)
-  (equal? b1 b2))
+  (u8vector=? b1 b2))
 
+(define (blob->u8-list b)
+  (u8vector->list b))
 (define (blob->s8-list b)
-  (map u8->s8 (blob->u8-list b)))
+  (map u8->s8 (u8vector->list b)))
 
+(define (u8-list->blob l)
+  (list->u8vector l))
 (define (s8-list->blob l)
-  (u8-list->blob (map s8->u8 l)))
+  (list->u8vector (map s8->u8 l)))
 
 (define (make-blob->int-list blob-ref)
   (lambda (size endness b)
@@ -259,17 +276,5 @@
 )
 ;; ----------------------------------------------------------------------
 (select-module stklos)
-
-;; Redefine blob-copy! to accept either 2 or 5 parameters to comply both R7RS and
-;; SRFI-74
-(let ((r7rs-blob-copy! (in-module |SCHEME| blob-copy!)))
-  (set! blob-copy!
-    (lambda args
-      (case (length args)
-	((2) (apply r7rs-blob-copy args))
-	((5) (apply srfi74-blob-copy! args))
-	(else (error 'blob-copy! "number of parameters must be 2 or 5."))))))
-
-
 (import SRFI-74)
 (provide "srfi-74")
