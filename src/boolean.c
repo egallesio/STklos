@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 27-Jul-2011 22:46 (eg)
+ * Last file update: 19-Aug-2011 11:26 (eg)
  */
 
 #include "stklos.h"
@@ -340,13 +340,13 @@ DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
       if (STRUCTP(y) && (STRUCT_TYPE(x) == STRUCT_TYPE(y)))
 	return STk_equal(STk_struct2list(x), STk_struct2list(y));
       break;
-    case tc_blob:
-      if (STYPE(y) == tc_blob)
-	return STk_equal(STk_blob2u8list(x), STk_blob2u8list(y));
-      break;
     case tc_box:
       if (BOXP(y))
 	return STk_equal(BOX_VALUE(x), BOX_VALUE(y));
+      break;
+    case tc_uvector:
+      if (BOXED_TYPE_EQ(y, tc_uvector))
+	return MAKE_BOOLEAN(STk_uvector_equal(x, y));
       break;
 #ifdef FIXME
 //EG:       default:

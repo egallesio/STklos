@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 15-Aug-2011 19:43 (eg)
+ * Last file update: 19-Aug-2011 11:22 (eg)
  */
 
 
@@ -180,7 +180,6 @@ typedef enum {
   tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,	/* 30 */
   tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex, 		/* 35 */
   tc_condv, tc_box, tc_ext_func, tc_pointer, tc_callback,		/* 40 */
-  tc_blob,								/* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -295,17 +294,6 @@ struct primitive_obj {
 int STk_init_base64(void);
 
 
-/*
-  ------------------------------------------------------------------------------
-  ----
-  ---- 				 B L O B . C
-  ----
-  ------------------------------------------------------------------------------
-*/
-SCM STk_blob2u8list(SCM obj);
-SCM STk_u8list2blob(SCM obj);
-int STk_init_blob(void);
-
 
 /*
   ------------------------------------------------------------------------------
@@ -347,6 +335,18 @@ struct box_obj {
 EXTERN_PRIMITIVE("make-box", make_box, subr1, (SCM x));
 
 int STk_init_box(void);
+
+
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ---- 			    B Y T E V E C T O R . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+SCM STk_bytevector2u8list(SCM obj);
+SCM STk_u8list2bytevector(SCM obj);
+int STk_init_bytevector(void);
 
 
 /*
@@ -1282,6 +1282,7 @@ int STk_init_utf8(void);
 extern int STk_uvectors_allowed;
 
 int STk_uniform_vector_tag(char *s);
+int STk_uvector_equal(SCM u1, SCM u2);
 SCM STk_list2uvector(int type, SCM l);
 int STk_init_uniform_vector(void);
 

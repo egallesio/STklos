@@ -1,44 +1,35 @@
 ;;;;
 ;;;; srfi-4.stk	-- Implementation of SRFI-4 (Uniform Vectors)
-;;;; 
-;;;; Copyright © 2001-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright © 2001-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Apr-2001 11:36 (eg)
-;;;; Last file update: 27-Sep-2006 13:57 (eg)
+;;;; Last file update: 19-Aug-2011 11:03 (eg)
 ;;;;
 
 
 ;; This implementation is built on the uniform layer present in the file
-;; src/vector.c. Nearly everything is written in Scheme
+;; src/uvector.c. Nearly everything is written in Scheme
 
-;; define the C primitives to avoid warnings
-(define %list->uvector  #f)
-(define %uvector->list  #f)
-(define %uvector-set!   #f)
-(define %uvector-ref    #f)
-(define %uvector-length #f)
-(define %uvector	#f)
-(define %uvector?	#f)
-(define %make-uvector	#f)
 
-;; Internal coding (don't change it without modifying file vector.c
+;; Internal coding (don't change it without modifying file uvector.c
 ;; 	UVECT_S8	0
 ;; 	UVECT_U8	1
 ;; 	UVECT_S16	2

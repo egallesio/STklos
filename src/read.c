@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 16-Aug-2011 00:15 (eg)
+ * Last file update: 19-Aug-2011 10:55 (eg)
  *
  */
 
@@ -580,7 +580,8 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
     /* This is the #f constant */
     return STk_false;
   } else {
-    if (len == 2 || len == 3) {
+    if ((!STk_uvectors_allowed &&  (strcmp(tok, "u8") == 0)) ||
+	(STk_uvectors_allowed && (len == 2 || len == 3))) {
       c = STk_getc(port);
       if (c != '(') goto bad_spec;
       tag = STk_uniform_vector_tag(tok);
@@ -743,11 +744,11 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
 	  case 'S':
 	  case 's':
 	  case 'U':
-	  case 'u': if (STk_uvectors_allowed)
+	  case 'u': if (STk_uvectors_allowed || c == 'u')
+		      /* For R7RS #u8 is always valid (bytevectors) */
 		      return maybe_read_uniform_vector(port, c, ctx);
-	  	    else
+	            else 
 		      goto unknown_sharp;
-
 	 case ';': /* R6RS comments */
 	   	   read_rec(port, ctx, FALSE);
 		   c = flush_spaces(port, NULL, NULL);

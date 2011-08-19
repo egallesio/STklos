@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 27-Jul-2011 22:57 (eg)
+ * Last file update: 19-Aug-2011 11:27 (eg)
  */
 
 #include "stklos.h"
@@ -117,6 +117,28 @@ static char* type_vector(SCM vect)
   }
 }
 
+static int vector_element_size(int type)
+{
+  /* compute len of one element depending of type.  We assume here
+   * that characters use 8 bits and that we are at least on a 32 bits
+   * architecture. Consquenetly, S8, S16 and S32 are represented
+   * without boxing whereas S64 are represeneted by a bignum
+   * (even on 64 machines where we can do better). Furthermore, we
+   * suppose that C floats and doubles correspond to single and
+   * double IEEE-754 reals
+   */
+  switch (type) {
+    case UVECT_S8:  case UVECT_U8:  return 1;
+    case UVECT_S16: case UVECT_U16: return 2;
+    case UVECT_S32: case UVECT_U32: return 4;
+    case UVECT_S64: case UVECT_U64: return sizeof(SCM);
+    case UVECT_F32: 		    return 4;
+    case UVECT_F64: 		    return 8;
+  }
+  return 0; /* never reached */
+}
+
+
 
 /* Return the type of an uniform vector given its tag */
 int STk_uniform_vector_tag(char *s)
@@ -131,6 +153,18 @@ int STk_uniform_vector_tag(char *s)
   return -1;
 }
 
+
+int STk_uvector_equal(SCM u1, SCM u2)
+{
+  if ((UVECTOR_TYPE(u1) != UVECTOR_TYPE(u2)) ||
+      (UVECTOR_SIZE(u1) != UVECTOR_SIZE(u2)))
+    return 0;
+
+  /* same length and same tyep, compare the bytes */
+  int len = vector_element_size(UVECTOR_TYPE(u1)) * UVECTOR_SIZE(u1);
+
+  return (memcmp(UVECTOR_DATA(u1), UVECTOR_DATA(u2), len) == 0);
+}
 
 /*
  * Basic accessors to an uniform vector
@@ -390,12 +424,7 @@ DEFINE_PRIMITIVE("%list->uvector", list_uvector, subr2, (SCM type, SCM l))
 
 DEFINE_PRIMITIVE("%allow-uvectors", allow_uvectors, subr0, (void))
 {
-  ADD_PRIMITIVE(make_uvector);
-  ADD_PRIMITIVE(uvectorp);
   ADD_PRIMITIVE(uvector);
-  ADD_PRIMITIVE(uvector_length);
-  ADD_PRIMITIVE(uvector_ref);
-  ADD_PRIMITIVE(uvector_set);
   ADD_PRIMITIVE(uvector_list);
   ADD_PRIMITIVE(list_uvector);
 
@@ -443,6 +472,18 @@ static struct extended_type_descr xtype_uvector = {
 int STk_init_uniform_vector(void)
 {
   DEFINE_XTYPE(uvector, &xtype_uvector);
+
+  /* Useful primitives for bytevectors. Other primitves will be defined when
+   * SRFI-4 is required
+   */
+  ADD_PRIMITIVE(make_uvector);
+  ADD_PRIMITIVE(uvectorp);
+  ADD_PRIMITIVE(uvector_length);
+  ADD_PRIMITIVE(uvector_ref);
+  ADD_PRIMITIVE(uvector_set);
+
+  /* A pseudo primitive to launch the definition of  all the function of SRFI-4 */
   ADD_PRIMITIVE(allow_uvectors);
+
   return TRUE;
 }

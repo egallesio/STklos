@@ -1,27 +1,27 @@
 ;;;;
-;;;; compfile.stk	-- STklos File Compiler 
-;;;; 
-;;;; Copyright © 2001-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;; compfile.stk	-- STklos File Compiler
+;;;;
+;;;; Copyright © 2001-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
-;;;; Last file update: 10-Aug-2010 12:27 (eg)
+;;;; Last file update: 19-Aug-2011 13:51 (eg)
 ;;;;
 
 (select-module STKLOS-COMPILER)
@@ -43,7 +43,7 @@
       (list :version   (version)
 	    :globals   globs
 	    :expanders (expander-published-sources))))
-  
+
   (let ((out      (open-output-file output))
 	(globs    (compiler-known-globals))
 	(tm       (clock))
@@ -51,7 +51,7 @@
 
     ;; Clear the list containing  macros sources
     (expander-published-reset!)
-    
+
     ;; Defer warning til the end of the compilation of file
     ;(compiler:warn-use-undefined-postpone #t)
 
@@ -65,31 +65,31 @@
       (format out "#!/usr/bin/env stklos-script\n")
       (format out "; A -*- Scheme -*- generated file *DO NOT EDIT**\n")
       (format out "STklos ~S\n" (compute-file-informations globs))
-      
+
       (let ((code (assemble (reverse! *code-instr*))))
 	(when (compiler:show-assembly-code)
 	  ;;Write the assembly code and code vector
-	  (format out "\n#|\n") 
+	  (format out "\n#|\n")
 	  (disassemble-code code out)
 	  (format out "\n~S\n|\#\n" code))
-	
+
 	;; Write new constants as a vector
 	(format out "#~S\n" *code-constants*)
-	
+
 	;; Write byte-code
 	(%dump-code out code))
-      
+
       ;; Close file
       (close-output-port out))
-    
+
     ;; Show undefined symbols
     (compiler-show-undefined-symbols)
-    
+
     ;; Display time used to compile file
     (when (and (interactive-port? (current-input-port))
 	       (compiler:time-display))
-      (format #t "Compilation time ~S\n" (- (clock) tm)))
-    
+      (format #t "Compilation time ~Sms\n" (- (clock) tm)))
+
     ;; Restore Compiler flags
     (compiler:warn-use-undefined-postpone copts)))
 

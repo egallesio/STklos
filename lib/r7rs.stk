@@ -1,5 +1,5 @@
 ;;;;
-;;;; r7rs.stk	-- R7RS support (Draft-1)
+;;;; r7rs.stk	-- R7RS support (Draft-3)
 ;;;;
 ;;;; Copyright © 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
@@ -21,14 +21,12 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 20-Apr-2011 10:23 (eg)
+;;;; Last file update: 19-Aug-2011 13:49 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
-;;;; 6.3 Other data types
+;;;; 6.4 Pairs and lists
 ;;;; ----------------------------------------------------------------------
-
-;;;; ==== 6.3.2 Pairs and lists
 
 #|
 <doc R7RS make-list
@@ -43,8 +41,201 @@ doc>
 (define (make-list k :optional (fill (void)))
   (vector->list (make-vector k fill)))
 
+
+
 ;;;; ----------------------------------------------------------------------
-;;;; 6.4 Control features
+;;;; 6.8 Vectors
+;;;; ----------------------------------------------------------------------
+#|
+<doc R7RS vector->string string->vector
+ * (vector->string string)
+ * (string->vector vector)
+ *
+ * |Vector->string| returns a newly allocated string of the
+ * objects contained in the elements of |vector|, which must
+ * be characters allowed in a string. |String->vector| returns
+ * a newly created vector initialized to the elements of the
+ * string |string|.
+doc>
+|#
+(define (vector->string v)
+  (unless (vector? v)
+    (error "bad vector ~S" v))
+  (let ((l (vector->list v)))
+    (unless (every char? l)
+      (error "all elements of the vector ~S must be characters" v))
+    (list->string l)))
+
+(define (string->vector str)
+  (unless (string? str)
+    (error "bad string ~S" str))
+  (list->vector (string->list str)))
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.9 Bytevectors
+;;;; ----------------------------------------------------------------------
+#|
+<doc R7RS make-bytevector
+ * (make-bytevector)
+ *
+ * Returns a newly allocated bytevector of k bytes. The initial
+ * contents of each element is 0.
+doc>
+|#
+(define (make-bytevector size :optional (default 0))
+  (%make-uvector 1 size default))
+
+#|
+<doc R7RS bytevector?
+ * (bytevector? obj)
+ *
+ * Returns |!t| if |obj| is a bytevector and returns |!f| otherwise.
+doc>
+|#
+(define (bytevector? obj)
+  (%uvector? 1 obj))
+
+#|
+<doc R7RS bytevector-length
+ * (bytevector-length bytevector)
+ *
+ * Returns the length of |bytevector| in bytes as an exact integer.
+doc>
+|#
+(define (bytevector-length bv)
+  (%uvector-length 1 bv))
+
+#|
+<doc R7RS bytevector-u8-ref
+ * (bytevector-u8-ref bytevector k)
+ *
+ * Returns the byte at index |k| of |bytevector| as an exact integer in the
+ * range [0..255].
+doc>
+|#
+(define (bytevector-u8-ref bv idx)
+  (%uvector-ref 1 bv idx))
+
+#|
+<doc EXT bytevector-u8-set!
+ * (bytevector-u8-ref bytevector k u8)
+ *
+ * Stores |u8| in  the byte at index |k| of |bytevector|. |u8| must be an
+ * exact integer in the range [0..255].  The value returned by
+ * |bytevector-u8-set!| is ,(emph "void").
+doc>
+|#
+(define (bytevector-u8-set! bv idx val)
+  (%uvector-set! 1 bv idx val))
+
+#|
+<doc R7RS bytevector-copy
+ * (bytevector-copy bytevector)
+ *
+ * Returns a newly allocated bytevector containing the same bytes as |bytevector|.
+doc>
+|#
+(define (bytevector-copy bv)
+  (unless (bytevector? bv)
+    (error "bad bytevector ~S" bv))
+
+  (let* ((len (bytevector-length bv))
+	 (new (make-bytevector len)))
+    (dotimes (i len)
+      (bytevector-u8-set! new i (bytevector-u8-ref bv i)))
+    new))
+
+#|
+<doc R7RS bytevector-copy!
+ * (bytevector-copy! from to)
+ *
+ * Copy the bytes of bytevector |from| to bytevector |to|, which must not be shorter.
+ * The value returned by |bytevector-copy!| is ,(emph "void").
+doc>
+|#
+(define (bytevector-copy! from to)
+  (unless (bytevector? from)
+    (error "bad bytevector ~S" from))
+  (unless (bytevector? to)
+    (error "bad bytevector ~S" to))
+  (let ((len-from (bytevector-length from))
+	(len-to   (bytevector-length to)))
+    (when (> len-from len-to)
+      (error "bytevector ~S is too long for copying it in ~S" from to))
+    (dotimes (i len-from)
+      (bytevector-u8-set! to i (bytevector-u8-ref from i)))))
+
+
+#|
+<doc R7RS bytevector-copy-partial
+ * (bytevector-copy-partial bytevector start end)
+ *
+ * Returns a newly allocated bytevector containing the bytes in |bytevector|
+ * between |start| (inclusive) and |end| (exclusive).
+doc>
+|#
+(define (bytevector-copy-partial bv start end)
+  (unless (bytevector? bv)
+    (error "bad bytevector ~S" bv))
+  (unless (integer? start)
+    (error "bad starting index ~S" start))
+  (unless (integer? end)
+    (error "bad ending intex ~S" end))
+
+  (let* ((len (- end start))
+	 (new (make-bytevector len)))
+    (dotimes (i len)
+      (bytevector-u8-set! new i (bytevector-u8-ref bv (+ start i))))
+    new))
+
+
+#|
+<doc R7RS bytevector-copy-partial!
+ * (bytevector-copy-partial! from start end to at)
+ *
+ * Copy the bytes of |bytevector| from between |start| and |end| to bytevector
+ * |to|, starting at |at|. The order in which bytes are copied
+ * is unspecified, except that if the source and destination
+ * overlap, copying takes place as if the source is first copied
+ * into a temporary bytevector and then into the destination.
+ * The value returned by |partial-bytevector-copy!| is ,(emph "void").
+doc>
+|#
+(define (bytevector-copy-partial! from start end to at)
+  (unless (bytevector? from)
+    (error "bad bytevector ~S" from))
+  (unless (bytevector? to)
+    (error "bad bytevector ~S" to))
+  (unless (integer? start)
+    (error "bad starting index ~S" start))
+  (unless (integer? end)
+    (error "bad ending index ~S" end))
+  (unless (integer? at)
+    (error "bad destination index ~S" at))
+
+  (let ((len    (- end start))
+	(to-len (bytevector-length to)))
+    (when (> (+ at len) to-len)
+      (error "cannot copy ~S bytes in ~S starting at index ~S" len to at))
+
+    (cond
+      ((and (eq? from to) (= start at))
+       ;; nothing to do
+       (void))
+      ((and (eq? from to) (> (+ at len) end))
+       ;; may overlap => copy in reverse
+       (let ((j (- (+ at len) 1))
+	     (k (- end 1)))
+	 (dotimes (i len)
+	   (bytevector-u8-set! to (- j i) (bytevector-u8-ref from (- k i ))))))
+      (else
+       ;; normal copy
+       (dotimes (i len)
+	 (bytevector-u8-set! to (+ at i) (bytevector-u8-ref from (+ start i))))))))
+
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.10 Control features
 ;;;; ----------------------------------------------------------------------
 
 #|
