@@ -6279,6 +6279,7 @@ then
      PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
                  -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
      (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
+           --enable-utf8 \
            --prefix=$prefix --disable-shared --disable-cpp) || \
 	   { echo "Cannot configure PCRE"; exit; }
      PCRE=pcre

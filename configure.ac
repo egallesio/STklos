@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 27-Jul-2011 23:01 (eg)
+### Last file update: 21-Aug-2011 12:56 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [1.10])
@@ -62,7 +62,7 @@ fi
 eval `CC=$CC /bin/sh ./utils/shlib-options`
 
 case $OS_NAME_VERSION in
-  SUNOS*) 
+  SUNOS*)
     CFLAGS="$CFLAGS -DSOLARIS";
     LIBS="$LIBS -lsocket -lrt -lnsl -lpthread"
     ;;
@@ -76,7 +76,7 @@ case $OS_NAME_VERSION in
     echo "**** Please modify the script \"utils/shlib-options\" to add"
     echo "**** support for your system (it's easy) and restart installation process."
     echo "**** Thanks for sending your modifications to <bugs _at_ stklos.net>"
-    exit 1 
+    exit 1
     ;;
 esac
 
@@ -90,8 +90,8 @@ PREFIX=$prefix
 BUILD_OS=$os-$version
 BUILD_ARCH=`uname -m`
 OS_NAME=$OS
-case $OS in 
-   LINUX) 
+case $OS in
+   LINUX)
       v=`echo $version | sed -e 's/\([[0-9]]*\)\.\([[0-9\]]*\).*/\1_\2/'`
       OS_NAME_VERSION=LINUX_$v
       ;;
@@ -102,7 +102,7 @@ case $OS in
 	 *)   OS_NAME_VERSION=DARWIN_OLD;;
       esac
       ;;
-  *) 
+  *)
       v=`echo $version | sed -e 's/[[^0-9]]/_/g'`
       OS_NAME_VERSION=$OS\_$v;
 esac
@@ -144,7 +144,7 @@ case "$THREADS" in
    ;;
  posix | pthreads)
    ### Check for pthreads
-   AC_CHECK_LIB(pthread, pthread_create, LIBS="-lpthread $LIBS", 
+   AC_CHECK_LIB(pthread, pthread_create, LIBS="-lpthread $LIBS",
                 [AC_MSG_ERROR([Missing PThread library])])
    THREADS=pthreads
    AC_DEFINE(THREADS_PTHREADS, [], [PThread support])
@@ -172,16 +172,16 @@ AM_CONDITIONAL(PTHREADS, test "$THREADS" = pthreads)
 AM_CONDITIONAL(NO_THREAD, test "$THREADS" = none)
 
 # ----------------------------------------------------------------------
-# GC support 
+# GC support
 # ----------------------------------------------------------------------
 echo "*****"
 echo "***** GC support"
 echo "*****"
 
 # Try to determine if libgc is installed
-if ${PKGCONFIG} --exists bdw-gc ;then 
+if ${PKGCONFIG} --exists bdw-gc ;then
    HAVE_GC="yes"
-else 
+else
    AC_CHECK_LIB(gc, GC_malloc, HAVE_GC="yes", HAVE_GC="no", $LIBS)
 fi
 
@@ -191,11 +191,11 @@ AC_ARG_WITH(provided-gc,
        PROV_GC="$withval", PROV_GC="no")
 
 if test "$HAVE_GC" = "no" -o "$PROV_GC" = "yes"
-then 
+then
      echo "... Configuring libgc"
 
      case $OS_NAME_VERSION in
-       DARWIN_10) 
+       DARWIN_10)
           cflags="${CFLAGS} -D_XOPEN_SOURCE";;
        *)
           cflags="${CFLAGS}";;
@@ -223,7 +223,7 @@ fi
 
 
 # ----------------------------------------------------------------------
-# GMP support 
+# GMP support
 # ----------------------------------------------------------------------
 echo "*****"
 echo "***** GMP support"
@@ -240,7 +240,7 @@ if test "$HAVE_GMP" = "no" ;then
   AC_CHECK_LIB(gmp, __gmpz_init_set, HAVE_GMP="yes", HAVE_GMP="no")
 fi
 
-# Test if the user want to force with our GMP lib 
+# Test if the user want to force with our GMP lib
 # (2 names available for that  --with-provided-bignum or (legacy) --with-gmp-light
 AC_ARG_WITH(provided-bignum,
        [  --with-provided-bignum  use the provided Bignum (GMPlite) library],
@@ -253,7 +253,7 @@ if test "$PROV_GMP" = "no" ;then
 fi
 
 if test "$HAVE_GMP" = "no" -o "$PROV_GMP" = "yes"
-then 
+then
      echo "... Configuring libgmp"
      (cd gmp; CC=${CC} CFLAGS="${cflags} -I../src -DFOR_STKLOS=1" ./configure \
      	      --prefix=$prefix) || { echo "Cannot configure the GMP"; exit; }
@@ -272,17 +272,17 @@ fi
 
 
 # ----------------------------------------------------------------------
-# PCRE support 
+# PCRE support
 # ----------------------------------------------------------------------
 echo "*****"
 echo "***** Regexp support"
 echo "*****"
 
 # Try to determine if libpcre is installed
-if ${PKGCONFIG} --exists libpcre ;then 
+if ${PKGCONFIG} --exists libpcre ;then
    HAVE_PCRE="yes"
    PCREPKG="present"
-else 
+else
    AC_CHECK_LIB(pcre, pcre_fullinfo, HAVE_PCRE="yes", HAVE_PCRE="no", $LIBS)
 fi
 
@@ -292,11 +292,12 @@ AC_ARG_WITH(provided-regexp,
        PROV_PCRE="$withval", PROV_PCRE="no")
 
 if test "$HAVE_PCRE" = "no" -o "$PROV_PCRE" = "yes"
-then 
+then
      echo "... Configuring libpcre"
      PCRE_FLAGS="-Dregexec=PCRE_regexec -Dregcomp=PCRE_regcomp \
                  -Dregerror=PCRE_regerror -Dregfree=PCRE_regfree"
      (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
+           --enable-utf8 \
            --prefix=$prefix --disable-shared --disable-cpp) || \
 	   { echo "Cannot configure PCRE"; exit; }
      PCRE=pcre
@@ -310,26 +311,26 @@ else
      if $PKGCONFIG --exists libpcre ;then
         PCREINC="$($PKGCONFIG --cflags libpcre)"
         PCRELIB="$($PKGCONFIG --libs libpcre) -lpcreposix"
-     else 
+     else
         PCREINC=""
         PCRELIB="-lpcre -lpcreposix"
-     fi 
+     fi
      AC_DEFINE(HAVE_PCRE, 1 , [We use our version of pcre])
      SYST_LIBS="libpcre $SYST_LIBS"
 fi
 
 
 # ----------------------------------------------------------------------
-# FFI support 
+# FFI support
 # ----------------------------------------------------------------------
 echo "*****"
 echo "***** FFI support"
 echo "*****"
 
 # Try to determine if libffi is installed
-if ${PKGCONFIG} --exists libffi ;then 
+if ${PKGCONFIG} --exists libffi ;then
    HAVE_FFI="yes"
-else 
+else
   AC_CHECK_LIB(ffi, ffi_prep_cif, HAVE_FFI="yes", HAVE_FFI="no", $LIBS)
 fi
 
@@ -339,7 +340,7 @@ AC_ARG_WITH(provided-ffi,
        PROV_FFI="$withval", PROV_FFI="no")
 
 if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
-then 
+then
      echo "... Configuring libffi"
      (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
            --disable-structs --disable-raw-api --disable-shared \
@@ -348,7 +349,7 @@ then
      FFIINC="-I../ffi/include"
      FFILIB="../ffi/.libs/libffi.a"
      COMP_LIBS="libffi $COMP_LIBS"
-else 
+else
      echo "... Using system libffi library"
      FFI=""
      if $PKGCONFIG --exists libffi ;then
@@ -361,7 +362,7 @@ else
      SYST_LIBS="libffi $SYST_LIBS"
 fi
 # We always want FFI. Should be modifiable in the future
-AC_DEFINE(HAVE_FFI, 1, [System provides FFI]) 
+AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
 
 ###
 ### See in what direction the stack grows (code stolen from Sawfish)
@@ -379,7 +380,7 @@ AC_TRY_RUN([ void inner (char *foo) { char bar; exit (!(foo >= &bar)); }
 LIB_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS))"
 
 
-### Output files 
+### Output files
 AC_SUBST(STKCFLAGS)
 AC_SUBST(VERSION)
 AC_SUBST(HAVE_DLOPEN)
@@ -424,11 +425,11 @@ AC_SUBST(THREADS)
 AC_SUBST(LIB_SUMMARY)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
-          lib/Makefile utils/Makefile utils/stklos-config 
-	  utils/stklos-script examples/Makefile 
-	  lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile 
-	  lib/ScmPkg.d/Makefile tests/Makefile  
-	  doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 
+          lib/Makefile utils/Makefile utils/stklos-config
+	  utils/stklos-script examples/Makefile
+	  lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
+	  lib/ScmPkg.d/Makefile tests/Makefile
+	  doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
 	  doc/stklos-genlex.1 doc/stklos-pkg.1 doc/skb/stklos-version.stk
 	  pkgman/Makefile])
 AC_OUTPUT
@@ -445,12 +446,12 @@ echo "              OS type: " $OS_FLAVOUR
 echo "      Install prefix : " $prefix
 echo "           C compiler: " $CC
 echo "    Compilation flags: " $CFLAGS
-echo "       Thread support: " $THREADS 
+echo "       Thread support: " $THREADS
 echo "System libraries used: " $SYST_LIBS
 echo "   Compiled libraries: " $COMP_LIBS
 echo " "
 
 echo "If this is correct, you can just type 'make' now at your shell prompt."
-echo "Otherwise, re-run 'configure' with correct options." 
+echo "Otherwise, re-run 'configure' with correct options."
 echo " "
 

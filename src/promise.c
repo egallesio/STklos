@@ -1,28 +1,28 @@
 /*
  * promise.c	-- Implementation of promises
- * 
- * Copyright © 2000-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
- * 
+ *
+ * Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@unice.fr]
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date:  2-Jun-1993 12:27 (eg)
- * Last file update: 24-Apr-2005 21:55 (eg)
+ * Last file update: 19-Aug-2011 18:01 (eg)
  */
 #include <stklos.h>
 
@@ -57,19 +57,19 @@ DEFINE_PRIMITIVE("%make-promise", make_promise, subr1, (SCM expr))
  * returned. The value of the promise is cached (or "memoized") so
  * that if it is forced a second time, the previously computed value
  * is returned.
- * 
+ *
  * @lisp
  * (force (delay (+ 1 2)))        =>  3
  * (let ((p (delay (+ 1 2))))
  *   (list (force p) (force p)))  =>  (3 3)
- * 
+ *
  * (define a-stream
  *   (letrec ((next (lambda (n)
  *                    (cons n (delay (next (+ n 1)))))))
  *     (next 0)))
  * (define head car)
  * (define tail (lambda (stream) (force (cdr stream))))
- * 
+ *
  * (head (tail (tail a-stream)))  =>  2
  * @end lisp
  *
@@ -91,8 +91,8 @@ DEFINE_PRIMITIVE("%make-promise", make_promise, subr1, (SCM expr))
  * (begin (set! x 10)
  *        (force p))     =>  6
  * @end lisp
- * ,(bold "Note:") See R5RS for details on a posssible way to implement 
- * |force| and |delay|. 
+ * ,(bold "Note:") See R5RS for details on a posssible way to implement
+ * |force| and |delay|.
 doc>
 */
 DEFINE_PRIMITIVE("force", force, subr1, (SCM promise))
@@ -102,7 +102,7 @@ DEFINE_PRIMITIVE("force", force, subr1, (SCM promise))
   if (!PROMISEP(promise)) return promise;
 
   if (RESULT_READYP(promise))
-    /* promise was already evaluated. It's expr field contains the result */    
+    /* promise was already evaluated. It's expr field contains the result */
     return PROMISE_EXPR(promise);
 
   z = STk_C_apply(PROMISE_EXPR(promise), 0);
@@ -146,7 +146,7 @@ static void print_promise(SCM promise, SCM port, int mode)
 }
 
 
-struct extended_type_descr xtype_promise = {
+static struct extended_type_descr xtype_promise = {
   "promise",
   print_promise
 };

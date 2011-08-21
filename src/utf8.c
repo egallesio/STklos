@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update: 16-Aug-2011 18:03 (eg)
+ * Last file update: 19-Aug-2011 18:05 (eg)
  */
 
 #include "stklos.h"
@@ -92,16 +92,12 @@ int STk_utf8_read_char(SCM port)
 }
 
 
-  
-
-
-
 int STk_char2utf8(int ch, char *str) /* result = length of the UTF-8 repr. */
 {
   uint8_t *buff = (uint8_t *)str;
   int n = 0;
 
-  if (VALID_UTF8_VALUE(ch))
+  if (VALID_UTF8_VALUE(ch)) {
     if (ch < 0x80) {
       *buff++ = ch;
       n = 1;
@@ -121,6 +117,7 @@ int STk_char2utf8(int ch, char *str) /* result = length of the UTF-8 repr. */
       *buff++ = (ch & 0x3f) | 0x80;
       n = 4;
     }
+  }
   /* *buff = '\0'; */
   return n;
 }
@@ -198,7 +195,8 @@ DEFINE_PRIMITIVE("%char-utf8-encoding", char_utf8_encoding, subr1, (SCM c))
 
 DEFINE_PRIMITIVE("%dump-string", dump_string, subr12, (SCM str, SCM index))
 {
-  int i, c=0;
+  int i;
+  uint32_t c = 0;
 
   STk_debug("String ~S. space=%d, size=%d, len =%d", str,
 	    STRING_SPACE(str), STRING_SIZE(str), STRING_LENGTH(str));
@@ -213,8 +211,7 @@ DEFINE_PRIMITIVE("%dump-string", dump_string, subr12, (SCM str, SCM index))
     printf("------\nChar starting at index %d\n", i);
     STk_debug("  length of char = %d",
 	      STk_utf8_sequence_length(&(STRING_CHARS(str)[i])));
-    STk_utf8_grab_char(
-STRING_CHARS(str)+i, &c);
+    STk_utf8_grab_char(STRING_CHARS(str)+i, &c);
     STk_debug("   character is %d ~S", (unsigned) c, MAKE_CHARACTER(c));
   }
 

@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  1-Jul-2003 11:38 (eg)
- * Last file update: 27-May-2011 22:34 (eg)
+ * Last file update: 19-Aug-2011 18:00 (eg)
  */
 
 
@@ -250,7 +250,7 @@ DEFINE_PRIMITIVE("%parameter-dynenv-pop!", parameter_dynenv_pop, subr1, (SCM par
  *
 \*===========================================================================*/
 
-struct extended_type_descr xtype_parameter = { "parameter", NULL };
+static struct extended_type_descr xtype_parameter = { "parameter", NULL };
 
 int STk_init_parameter(void)
 {

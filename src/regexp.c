@@ -1,32 +1,32 @@
 /*
  * regexp.c	-- STklos Regexps
- * 
- * Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
- * 
+ *
+ * Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 24-Nov-2000 10:35 (eg)
- * Last file update:  4-Apr-2010 12:22 (eg)
+ * Last file update: 21-Aug-2011 13:33 (eg)
  */
 
 #include "stklos.h"
 
-/* 
+/*
  * All the complexity comes from MAC OS. I don't remember why I had to do
  * this, but I remember the culprit !!!
  */
@@ -36,7 +36,7 @@
 #  define PCRE_regcomp  regcomp
 #  define PCRE_regerror regerror
 #  define PCRE_regfree  regfree
-#else 
+#else
 #  define regexec  PCRE_regexec
 #  define regcomp  PCRE_regcomp
 #  define regerror PCRE_regerror
@@ -46,29 +46,38 @@
 /* ---------------------------------------------------------------------- */
 #ifdef PCRE_PKG_CONFIG
 #  include <pcreposix.h>
-#else 
-/* Here again Mac Os problems. 
+#else
+/* Here again Mac Os problems.
  * Here, we used to have a #include <pcreposix.h>
  * However, on a fresh 10.6 install, there is a pcre lib which is
  * installed, but the "pcreposix.h" file isn't.
- * 
+ *
  * So what we do here is potentially FALSE. However, it is unlikely
- * that the code include in STklos is not compatible with the one 
- * used to compile the installed library (this file seems to have 
- * been always "semantically" compatible). The only point wehr we 
- * can have difference shoul be the definition of regmatch_t type
+ * that the code include in STklos is not compatible with the one
+ * used to compile the installed library (this file seems to have
+ * been always "semantically" compatible). The only point where we
+ * can have difference should be the definition of regmatch_t type
  */
 #  include "../pcre/pcreposix.h"
 #endif
+
+#ifdef REG_UTF8
+#  define PCRE_COMP_FLAG REG_UTF8
+#else
+#  define PCRE_COMP_FLAG 0
+#endif
+
 
 /* ---------------------------------------------------------------------- */
 
 struct regexp_obj {
   stk_header header;
+  SCM src;
   regex_t buffer;
 };
 
 #define REGEXPP(p) 		(BOXED_TYPE_EQ((p), tc_regexp))
+#define REGEXP_SRC(p)		(((struct regexp_obj *) (p))->src)
 #define REGEXP_BUFFER(p)	(((struct regexp_obj *) (p))->buffer)
 #define REGEXP_DEPTH(p)	((((struct regexp_obj *) (p))->buffer).re_nsub)
 
@@ -99,7 +108,14 @@ static void regexp_finalizer(SCM re)
   PCRE_regfree(&REGEXP_BUFFER(re));
 }
 
-       
+static void print_regexp(SCM obj, SCM port, int mode)
+{
+  STk_fprintf(port,
+	      "#[regexp '%s' @ %lx]",
+	      STRING_CHARS(REGEXP_SRC(obj)),
+	      (unsigned long) obj);
+}
+
 /*
 <doc EXT string->regexp
  * (string->regexp string)
@@ -110,8 +126,8 @@ static void regexp_finalizer(SCM re)
  * the matching pattern. If a regular expression string is used
  * multiple times, it is faster to compile the string once to a regexp
  * value and use it for repeated matches instead of using the string
- * each time.  
-doc> 
+ * each time.
+doc>
  */
 DEFINE_PRIMITIVE("string->regexp", str2regexp, subr1, (SCM re))
 {
@@ -119,10 +135,12 @@ DEFINE_PRIMITIVE("string->regexp", str2regexp, subr1, (SCM re))
   int ret;
 
   if (!STRINGP(re)) error_bad_string(re);
-  NEWCELL_ATOMIC(z, regexp, sizeof(struct regexp_obj) ); 
+  NEWCELL(z, regexp);
 
-  ret = PCRE_regcomp(&REGEXP_BUFFER(z), STRING_CHARS(re), 0);
-
+  ret = PCRE_regcomp(&REGEXP_BUFFER(z),
+		     STRING_CHARS(re),
+		     STk_use_utf8? PCRE_COMP_FLAG: 0);
+  REGEXP_SRC(z) = re;
   if (ret) signal_regexp_error(ret, &REGEXP_BUFFER(z));
   STk_register_finalizer(z, regexp_finalizer);
 
@@ -131,9 +149,9 @@ DEFINE_PRIMITIVE("string->regexp", str2regexp, subr1, (SCM re))
 
 /*
 <doc EXT regexp?
- * (regexp? obj) 
+ * (regexp? obj)
  *
- * |Regexp| returns |#t| if |obj| is a regexp value created by the |regexp|, 
+ * |Regexp| returns |#t| if |obj| is a regexp value created by the |regexp|,
  * otherwise |regexp| returns |#f|.
 doc>
  */
@@ -148,17 +166,17 @@ DEFINE_PRIMITIVE("regexp?", regexpp, subr1, (SCM obj))
  * (regexp-match pattern str)
  * (regexp-match-positions pattern str)
  *
- * These functions attempt to match |pattern| (a string or a regexp value) 
- * to |str|. If the match fails, |#f| is returned. If the match succeeds, 
- * a list (containing strings for |regexp-match| and positions for 
+ * These functions attempt to match |pattern| (a string or a regexp value)
+ * to |str|. If the match fails, |#f| is returned. If the match succeeds,
+ * a list (containing strings for |regexp-match| and positions for
  * |regexp-match-positions| is returned. The first string (or positions) in
- * this list is the portion of string that matched pattern. If two portions 
+ * this list is the portion of string that matched pattern. If two portions
  * of string can match pattern, then the earliest and longest match is found,
- * by default. 
- * 
+ * by default.
+ *
  * Additional strings or positions are returned in the list if pattern contains
  * parenthesized sub-expressions; matches for the sub-expressions are provided
- * in the order of the opening parentheses in pattern. 
+ * in the order of the opening parentheses in pattern.
  * @lisp
  * (regexp-match-positions "ca" "abracadabra")
  *                  => ((4 6))
@@ -172,9 +190,9 @@ DEFINE_PRIMITIVE("regexp?", regexpp, subr1, (SCM obj))
  *                  => ((0 3) (0 1) (1 2) (2 3))
  * (regexp-match-positions "(a*)(b*)(c*)" "c")
  *                  => ((0 1) (0 0) (0 0) (0 1))
- * (regexp-match-positions "(?<=\\\\d{3})(?<!999)foo" 
+ * (regexp-match-positions "(?<=\\\\d{3})(?<!999)foo"
  *                         "999foo and 123foo")
- *      => ((14 17)) 
+ *      => ((14 17))
  * @end lisp
 doc>
 */
@@ -186,6 +204,7 @@ static SCM regexec_helper(SCM re, SCM str, int pos_only)
   int i, ret, depth, max;
   SCM result;
 
+  STk_debug("regexec helper ~S ~S", re, str);
   /* RE can be a string or a already compiled regexp */
   if (STRINGP(re)) re = STk_str2regexp(re);
   else if (!REGEXPP(re)) STk_error("bad compiled regexp ~S", re);
@@ -202,7 +221,7 @@ static SCM regexec_helper(SCM re, SCM str, int pos_only)
   result = STk_nil;
   depth  = REGEXP_DEPTH(re);
   max    = (depth < MAX_PMATCH) ? (depth + 1) : MAX_PMATCH;
-  
+
   for(i=0; i < max; i++) {
     int from = pmatch[i].rm_so;
     int to   = pmatch[i].rm_eo;
@@ -212,12 +231,13 @@ static SCM regexec_helper(SCM re, SCM str, int pos_only)
 			    LIST2(MAKE_INT(0), MAKE_INT(0)) :
 			    STk_false,
 			result);
-    else 
-      result = STk_cons((pos_only)? 
+    else
+      result = STk_cons((pos_only)?
 		            LIST2(STk_long2integer(from), STk_long2integer(to)) :
 		            STk_makestring(to-from, STRING_CHARS(str)+from),
 			result);
   }
+  STk_debug("regexec helper ~S ~S => ", re, str, STk_reverse(result));
   return STk_dreverse(result);
 }
 
@@ -245,7 +265,7 @@ DEFINE_PRIMITIVE("regexp-match-positions", regmatch_pos, subr2, (SCM re, SCM str
  * (regexp-quote "list?")      => "list\\\\?"
  * @end lisp
  * |regexp-quote| is useful when building a composite regexp from
- * a mix of regexp strings and verbatim strings. 
+ * a mix of regexp strings and verbatim strings.
 doc>
 */
 #define REGEXP_SPECIALS "\\.?*+|[]{}()"
@@ -262,12 +282,12 @@ DEFINE_PRIMITIVE("regexp-quote", regexp_quote, subr1, (SCM str))
   /* compute length of new string */
   for (s = STRING_CHARS(str), len=0; s < end; s++, len++)
     if (strchr(REGEXP_SPECIALS, *s)) len++;
-  
+
   if (len > STRING_SIZE(str)) {
     /* make new string */
     z = STk_makestring(len, NULL);
     for (s = STRING_CHARS(str), t = STRING_CHARS(z);
-	 s < end; 
+	 s < end;
 	 s++, t++) {
       if (strchr(REGEXP_SPECIALS, *s)) *t++ = '\\';
       *t = *s;
@@ -280,15 +300,15 @@ DEFINE_PRIMITIVE("regexp-quote", regexp_quote, subr1, (SCM str))
 }
 
 /*===========================================================================*\
- * 
+ *
  * 				Initialization
- * 
+ *
 \*===========================================================================*/
 
 /* The stucture which describes the regexp type */
 static struct extended_type_descr xtype_regexp = {
   "regexp",			/* name */
-  NULL				/* print function */
+  print_regexp			/* print function */
 };
 
 
