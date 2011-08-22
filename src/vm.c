@@ -1,24 +1,24 @@
 /*
  * v m . c				-- The STklos Virtual Machine
- * 
- * Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
- * 
+ *
+ * Copyright Â© 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
  * Last file update: 20-Dec-2009 15:11 (eg)
@@ -37,7 +37,7 @@
 // #define DEBUG_VM
 /* #define STAT_VM  */
 
-#ifdef STAT_VM 
+#ifdef STAT_VM
 #  define DEBUG_VM
 static int couple_instr[NB_VM_INSTR][NB_VM_INSTR];
 static int cpt_inst[NB_VM_INSTR];
@@ -53,7 +53,7 @@ static int debug_level = 0;	/* 0 is quiet, 1, 2, ... are more verbose */
 #  define USE_COMPUTED_GOTO
 #  define CASE(x) 	lab_##x:
 #  define NEXT		goto *jump_table[fetch_next()]
-#else 
+#else
    /* Standard C compiler. Use the classic switch statement */
 #  define CASE(x)	case x:
 #  define NEXT		continue;/* Be sure to not use continue elsewhere */
@@ -92,11 +92,11 @@ static void error_unbound_variable(SCM symbol)
 {
   STk_error("variable ~S unbound", symbol);
 }
- 
+
 
 /*===========================================================================*\
- * 
- * 			V M   S T A C K   &   C O D E 
+ *
+ * 			V M   S T A C K   &   C O D E
  *
 \*===========================================================================*/
 
@@ -116,7 +116,7 @@ static void error_unbound_variable(SCM symbol)
 
 
 /*===========================================================================*\
- * 
+ *
  * 			V M   T H R E A D
  *
 \*===========================================================================*/
@@ -132,12 +132,12 @@ vm_thread_t *STk_allocate_vm(int stack_size)
     fflush(stderr);
     STk_exit(MAKE_INT(1));
   }
- 
+
   /* Initialize the VM registers */
   vm->sp             = vm->stack + vm->stack_len;
   vm->fp             = vm->sp;
   vm->val            = STk_void;
-  vm->current_module = STk_current_module(); 
+  vm->current_module = STk_current_module();
   vm->env            = vm->current_module;
   vm->handlers       = NULL;
   vm->top_jmp_buf    = NULL;
@@ -150,8 +150,8 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 
 
 /*
- * Activation records 
- * 
+ * Activation records
+ *
  */
 
 #define ACT_RECORD_SIZE	   7
@@ -167,7 +167,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 /*
  * VM state
  *
- */ 
+ */
 #define VM_STATE_SIZE 5
 #define VM_STATE_PC(reg)	((reg)[0])
 #define VM_STATE_CST(reg)	((reg)[1])
@@ -227,7 +227,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 
 
 /*===========================================================================*\
- * 
+ *
  * 			C A L L S
  *
 \*===========================================================================*/
@@ -254,7 +254,7 @@ vm_thread_t *STk_allocate_vm(int stack_size)
 }
 
 
-/* 
+/*
  * 		         M i s c .
  */
 
@@ -305,9 +305,9 @@ static void run_vm(vm_thread_t *vm);
 
 
 /*===========================================================================*\
- * 
+ *
  * 				Utilities
- * 
+ *
 \*===========================================================================*/
 
 #ifdef DEBUG_VM
@@ -315,14 +315,14 @@ void STk_print_vm_registers(char *msg, STk_instr *code)
 {
   vm_thread_t *vm = STk_get_current_vm();
   if (IS_IN_STACKP(vm->env))
-    STk_fprintf(STk_stderr, "%s VAL=~S PC=%d SP=%d FP=%d CST=%x ENV=%x (%d)\n", 
+    STk_fprintf(STk_stderr, "%s VAL=~S PC=%d SP=%d FP=%d CST=%x ENV=%x (%d)\n",
 		msg, vm->val, vm->pc - code, vm->sp - vm->stack,
-                vm->fp - vm->stack, vm->constants, vm->env, 
+                vm->fp - vm->stack, vm->constants, vm->env,
 		(SCM*)vm->env - vm->stack);
   else
-    STk_fprintf(STk_stderr, "%s VAL=~S PC=%d SP=%d FP=%d CST=%x ENV=%x (%d)", 
-		msg, vm->val, vm->pc - code, vm->sp - vm->stack, 
-                vm->fp - vm->stack, vm->constants, vm->env, 
+    STk_fprintf(STk_stderr, "%s VAL=~S PC=%d SP=%d FP=%d CST=%x ENV=%x (%d)",
+		msg, vm->val, vm->pc - code, vm->sp - vm->stack,
+                vm->fp - vm->stack, vm->constants, vm->env,
 		(SCM*)vm->env - vm->stack);
 }
 
@@ -350,7 +350,7 @@ static Inline SCM clone_env(SCM e, vm_thread_t *vm)
 }
 
 static void verif_environment(vm_thread_t *vm)
-{  
+{
   SCM *lfp, *env;
 
   //STk_debug("<<<<<<VVVVVVVV<<<<");
@@ -363,7 +363,7 @@ static void verif_environment(vm_thread_t *vm)
     for (env = ACT_SAVE_ENV(lfp); FRAMEP(env); env = FRAME_NEXT(env)){
       //STk_debug("    On a l'environment ~S (%d)", (SCM) env,
       //IS_IN_STACKP(env));
-      
+
     }
     //STk_debug("---");
   }
@@ -371,7 +371,7 @@ static void verif_environment(vm_thread_t *vm)
 }
 
 static void patch_environment(vm_thread_t *vm)
-{  
+{
   SCM *lfp;
 
   //STk_debug("<<<<<<<<<<");
@@ -405,7 +405,7 @@ static Inline short adjust_arity(SCM func, short nargs, vm_thread_t *vm)
   short arity = CLOSURE_ARITY(func);
 
   if (arity != nargs) {
-    if (arity >= 0) 
+    if (arity >= 0)
       error_bad_arity(func, arity, nargs, vm);
     else {						/* nary procedure call */
       short min_arity = -arity-1;
@@ -414,7 +414,7 @@ static Inline short adjust_arity(SCM func, short nargs, vm_thread_t *vm)
 	error_bad_arity(func, arity, nargs, vm);
       else { /* Make a list from the arguments which are on the stack. */
 	SCM res = STk_nil;
-	
+
 	while (nargs-- > min_arity) res = STk_cons(pop(), res);
 	push(res);
       }
@@ -435,11 +435,11 @@ static int add_global(SCM ref)
   for (i = 0; i <  checked_globals_used; i++) {
     if (checked_globals[i] == addr) return i;
   }
-  
+
   /* Not present yet */
   if (checked_globals_used >= checked_globals_len) { /* resize the checked  array */
     checked_globals_len += checked_globals_len / 2;
-    checked_globals      = STk_must_realloc(checked_globals, 
+    checked_globals      = STk_must_realloc(checked_globals,
 					    checked_globals_len * sizeof(SCM*));
   }
   checked_globals[checked_globals_used] = addr;
@@ -448,7 +448,7 @@ static int add_global(SCM ref)
 
 
 /*===========================================================================*\
- * 
+ *
  * 				      C A L L S
  *
 \*===========================================================================*/
@@ -458,10 +458,10 @@ static int add_global(SCM ref)
  * (apply proc arg1 ... args)
  *
  * |Proc| must be a procedure and |args| must be a list. Calls |proc| with the
- * elements of the list 
+ * elements of the list
  * @lisp
  * (append (list arg1 ...) args)
- * @end lisp 
+ * @end lisp
  * as the actual arguments.
  * @lisp
  * (apply + (list 3 4))              =>  7
@@ -470,14 +470,14 @@ static int add_global(SCM ref)
  *   (lambda (f g)
  *      (lambda args
  *        (f (apply g args)))))
- * 
+ *
  * ((compose sqrt *) 12 75)          =>  30
  * @end lisp
 doc>
  */
 DEFINE_PRIMITIVE("apply", scheme_apply, apply, (void))
 {
-  /* This function is never called. It is just here to declare the primitive 
+  /* This function is never called. It is just here to declare the primitive
    * apply, as a primitive of type tc_apply
    */
   STk_panic("Inside apply. Should not occur");
@@ -490,16 +490,16 @@ DEFINE_PRIMITIVE("apply", scheme_apply, apply, (void))
  * 				S T k _ C _ a p p l y
  *
  *
- * Execute a Scheme function from C. This function can be used as a 
- * an "excv" or an "execl" function. If nargs is > 0 it is as a Unix "execl" 
- * function: 
+ * Execute a Scheme function from C. This function can be used as a
+ * an "excv" or an "execl" function. If nargs is > 0 it is as a Unix "execl"
+ * function:
  *    STk_C_apply(STk_cons, 2, MAKE_INT(1), MAKE_INT(2)) => (1 . 2)
  * If nargs is < 0, we have something similar to an "execv" function
  *    STk_C_apply(...STk_intern("cons")..., -2, Argv)
  * where Argv[0] == MAKE_INT(1) and Argv[1] == MAKE_INT(2) ==> (1 . 2)
  *
 \*===========================================================================*/
-SCM STk_C_apply(SCM func, int nargs, ...) 
+SCM STk_C_apply(SCM func, int nargs, ...)
 {
   STk_instr code[]= {INVOKE, 0, END_OF_CODE};
   va_list ap;
@@ -516,7 +516,7 @@ SCM STk_C_apply(SCM func, int nargs, ...)
     SCM *argv = va_arg(ap, SCM*);
 
     nargs = -nargs;
-    
+
     for (i = 0; i < nargs; i++) push(*argv++);
   } else {
     /* We have nargs SCM parameters to read */
@@ -530,7 +530,7 @@ SCM STk_C_apply(SCM func, int nargs, ...)
   run_vm(vm);
 
   FULL_RESTORE_VM_STATE(vm->sp);
-  
+
   return (vm->valc) ? vm->val : STk_void;
 }
 
@@ -539,7 +539,7 @@ SCM STk_C_apply_list(SCM func, SCM l)
 {
   int i, argc = STk_int_length(l);
   SCM *argv = NULL;
-  
+
   if (argc > 0) {
     argv = STk_must_malloc(argc * sizeof (SCM *));
     for (i = 0; i < argc; i++) {
@@ -558,11 +558,11 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
   vm_thread_t *vm = STk_get_current_vm();
 
   if (!envt) envt = vm->current_module;
-  
+
   if (!VECTORP(code)) 	STk_error("bad code vector ~S", code);
   if (!VECTORP(consts)) STk_error("bad constant list ~S", consts);
   if (!MODULEP(envt))   STk_error("bad module for evaluation ~S", envt);
-  
+
   /* convert code to a vector of instructions */
   len = VECTOR_SIZE(code);
   vinstr = p = STk_must_malloc(len * sizeof(STk_instr));
@@ -582,7 +582,7 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
 
 
 /*===========================================================================*\
- * 
+ *
  * 				V A L U E S
  *
 \*===========================================================================*/
@@ -590,10 +590,10 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
 <doc values
  * (values obj ...)
  *
- * Delivers all of its arguments to its continuation. 
- * ,(bold "Note:") R5RS imposes to use multiple values in the context of 
- * of a |call-with-values|. In STklos, if |values| is not used with 
- * |call-with-values|, only the first value is used (i.e. others values are 
+ * Delivers all of its arguments to its continuation.
+ * ,(bold "Note:") R5RS imposes to use multiple values in the context of
+ * of a |call-with-values|. In STklos, if |values| is not used with
+ * |call-with-values|, only the first value is used (i.e. others values are
  * ,(emph "ignored")).
  *
 doc>
@@ -613,12 +613,12 @@ DEFINE_PRIMITIVE("values", values, vsubr, (int argc, SCM *argv))
     } else {
       /* More than MAX_VALS values. Use a vector and store it in vals[0] */
       SCM tmp = STk_makevect(argc, (SCM) NULL);
-      
+
       for (i = 0; i < argc; i++) VECTOR_DATA(tmp)[i] = *argv--;
       vm->vals[0] = tmp;
     }
   }
-  
+
   /* Retain in valc the number of values */
   vm->valc = argc;
   return vm->val;
@@ -628,10 +628,10 @@ DEFINE_PRIMITIVE("values", values, vsubr, (int argc, SCM *argv))
 <doc call-with-values
  * (call-with-values producer consumer)
  *
- * Calls its producer argument with no values and a continuation that, 
- * when passed some values, calls the consumer procedure with those values 
- * as arguments. The continuation for the call to consumer is the 
- * continuation of the call to call-with-values. 
+ * Calls its producer argument with no values and a continuation that,
+ * when passed some values, calls the consumer procedure with those values
+ * as arguments. The continuation for the call to consumer is the
+ * continuation of the call to call-with-values.
  * @lisp
  * (call-with-values (lambda () (values 4 5))
  *                   (lambda (a b) b))                =>  5
@@ -668,7 +668,7 @@ SCM STk_n_values(int n, ...)
   vm_thread_t *vm = STk_get_current_vm();
 
   vm->valc = n;
-  
+
   if (!n)
     vm->val = STk_void;
   else {
@@ -684,7 +684,7 @@ SCM STk_n_values(int n, ...)
     } else {
       /* More than MAX_VALS values. Use a vector and store it in vals[0] */
       SCM tmp = STk_makevect(n, (SCM) NULL);
-      
+
       for (i = 0; i < n; i++) VECTOR_DATA(tmp)[i] = va_arg(ap, SCM);
       vm->vals[0] = tmp;
     }
@@ -695,14 +695,14 @@ SCM STk_n_values(int n, ...)
 
 
 SCM STk_values2vector(SCM obj, SCM vect)
-{  
+{
   vm_thread_t *vm = STk_get_current_vm();
   SCM src, retval;
   int len = vm->valc;
 
   if (vect) {
     /* User has provided a vector for storing result */
-    if (!VECTORP(vect) || VECTOR_SIZE(vect) != len) 
+    if (!VECTORP(vect) || VECTOR_SIZE(vect) != len)
       STk_error("bad vector ~S", vect);
     retval = vect;
   } else {
@@ -731,13 +731,13 @@ SCM STk_values2vector(SCM obj, SCM vect)
 
 
 /*===========================================================================*\
- * 
+ *
  * 				V M _ D E B U G
  *
 \*===========================================================================*/
 
-/* Add support for debugging 
- * vm_debug is called with the kind of desired support and sp. It returns 
+/* Add support for debugging
+ * vm_debug is called with the kind of desired support and sp. It returns
  * the number of elements used on the stack
  */
 
@@ -755,25 +755,25 @@ static void vm_debug(int kind, vm_thread_t *vm)
   case 1: /* Embed line information in a procedure call */
     {
       SCM line = vm->val;
-      
+
       ACT_SAVE_INFO(vm->fp) = STk_cons(pop(), line);
-      break; 
+      break;
     }
   }
 }
 
 DEFINE_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void))
-{  
+{
   SCM res, *lfp;
   vm_thread_t *vm = STk_get_current_vm();
 
   res = STk_nil;
   for (lfp = vm->fp; lfp; lfp = ACT_SAVE_FP(lfp)) {
     SCM self = (SCM) (ACT_SAVE_PROC(lfp));
-    
+
     if (!self) break;
 
-    res = STk_cons(STk_cons(self, ACT_SAVE_INFO(lfp)), 
+    res = STk_cons(STk_cons(self, ACT_SAVE_INFO(lfp)),
 		   res);
   }
   return STk_dreverse(res);
@@ -810,9 +810,9 @@ static void dump_couple_instr(void)
 static void patch_environment(vm_thread_t *vm);
 DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int argc, SCM *argv))
 {
-  /* 
-   * This function is just a placeholder for debugging the VM. It's body is 
-   * changed depending of the current bug to track 
+  /*
+   * This function is just a placeholder for debugging the VM. It's body is
+   * changed depending of the current bug to track
    */
 
   patch_environment(STk_get_current_vm());
@@ -840,12 +840,12 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int argc, SCM *argv))
 //    }
 //  }
 //}
-#endif 
+#endif
 
 
 /*===========================================================================*\
- * 
- *	 	       S T k l o s   V i r t u a l   M a c h i n e 
+ *
+ *	 	       S T k l o s   V i r t u a l   M a c h i n e
  *
 \*===========================================================================*/
 
@@ -885,27 +885,27 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int argc, SCM *argv))
     (vm->pc)--;					\
     NEXT;					\
   }
- 
+
 #define RELEASE_LOCK				\
    {						\
     MUT_UNLOCK(global_lock);			\
     have_global_lock=0;				\
    }
- 
+
 #define RELEASE_POSSIBLE_LOCK			\
   if (have_global_lock) {			\
     MUT_UNLOCK(global_lock);			\
     have_global_lock=0;				\
   }
- 
+
 static void run_vm(vm_thread_t *vm)
 {
-  jbuf jb; 
+  jbuf jb;
   jbuf *old_jb = NULL; 		/* to make Gcc happy */
   short offset, nargs=0;
   short tailp;
   int have_global_lock = 0;     /* if true, we're patching the code */
-#if defined(USE_COMPUTED_GOTO) 
+#if defined(USE_COMPUTED_GOTO)
 #  define DEFINE_JUMP_TABLE
 #  include "vm-instr.h"
 #else
@@ -923,16 +923,16 @@ static void run_vm(vm_thread_t *vm)
 #if defined(USE_COMPUTED_GOTO)
   NEXT;
 #else
-  for ( ; ; ) {		
+  for ( ; ; ) {
     /* Execution loop */
     byteop = fetch_next();
 #  ifdef DEBUG_VM
     if (debug_level > 1)
-      fprintf(stderr, "%08x [%03d]: %20s  sp=%-6d fp=%-6d env=%p\n", 
+      fprintf(stderr, "%08x [%03d]: %20s  sp=%-6d fp=%-6d env=%p\n",
 	      vm->pc - 1,
-	      vm->pc - code_base-1, 
-	      name_table[(int)byteop], 
-              vm->sp - vm->stack, 
+	      vm->pc - code_base-1,
+	      name_table[(int)byteop],
+              vm->sp - vm->stack,
               vm->fp - vm->stack, vm->env);
 #    ifdef STAT_VM
     couple_instr[previous_op][byteop]++;
@@ -976,14 +976,14 @@ CASE(GLOBAL_REF) {
   SCM ref = NULL;
   short orig_opcode;
   SCM orig_operand;
- 
+
   LOCK_AND_RESTART;
   orig_opcode  = vm->pc[-1];
   orig_operand = fetch_const();
- 
+
   if (orig_opcode == PUSH_GLOBAL_REF)
     push(vm->val);
- 
+
   vm->val= STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
@@ -1002,7 +1002,7 @@ CASE(PUSH_UGLOBAL_REF)
 CASE(UGLOBAL_REF) {     /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
   RELEASE_POSSIBLE_LOCK;
- 
+
   vm->val = fetch_global();
   NEXT1;
 }
@@ -1012,7 +1012,7 @@ CASE(GLOBAL_REF_PUSH) {
   short orig_opcode;
   SCM orig_operand;
   SCM res;
- 
+
   LOCK_AND_RESTART;
   orig_opcode  = vm->pc[-1];
   orig_operand = fetch_const();
@@ -1024,7 +1024,7 @@ CASE(GLOBAL_REF_PUSH) {
   }
 
   push(res);
- 
+
   /* patch the code for optimize next accesses */
   vm->pc[-1]  = add_global(CDR(ref));
   vm->pc[-2]  = UGLOBAL_REF_PUSH;
@@ -1032,11 +1032,11 @@ CASE(GLOBAL_REF_PUSH) {
   NEXT1;
 }
 
-CASE(UGLOBAL_REF_PUSH) { /* Never produced by compiler */ 
+CASE(UGLOBAL_REF_PUSH) { /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
   RELEASE_POSSIBLE_LOCK;
- 
-  push(fetch_global()); 
+
+  push(fetch_global());
   NEXT1;
 }
 
@@ -1046,20 +1046,20 @@ CASE(GREF_INVOKE) {
   SCM ref = NULL;
   short orig_opcode;
   SCM orig_operand;
- 
+
   LOCK_AND_RESTART;
   orig_opcode  = vm->pc[-1];
   orig_operand = fetch_const();
- 
+
   if (orig_opcode == PUSH_GREF_INVOKE)
     push(vm->val);
- 
+
   vm->val = STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
     error_unbound_variable(orig_operand);
   }
- 
+
   nargs = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
   vm->pc[-2]  = add_global(CDR(ref));
@@ -1071,15 +1071,15 @@ CASE(GREF_INVOKE) {
 }
 
 CASE(PUSH_UGREF_INVOKE)
-  push(vm->val);	/* Fall through */	
-CASE(UGREF_INVOKE) { /* Never produced by compiler */ 
- 
+  push(vm->val);	/* Fall through */
+CASE(UGREF_INVOKE) { /* Never produced by compiler */
+
   /* Because of optimization, we may get re-dispatched to here. */
   RELEASE_POSSIBLE_LOCK;
- 
+
   vm->val = fetch_global();
   nargs   = fetch_next();
-  
+
   /* invoke */
   tailp = FALSE; goto FUNCALL;
 }
@@ -1089,14 +1089,14 @@ CASE(GREF_TAIL_INVOKE) {
   SCM ref = NULL;
   short orig_opcode;
   SCM orig_operand;
- 
+
   LOCK_AND_RESTART;
   orig_opcode  = vm->pc[-1];
   orig_operand = fetch_const();
- 
+
   if (orig_opcode == PUSH_GREF_TAIL_INV)
     push(vm->val);
- 
+
   vm->val = STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
@@ -1106,7 +1106,7 @@ CASE(GREF_TAIL_INVOKE) {
   nargs = fetch_next();
   /* patch the code for optimize next accesses (pc[-1] is already equal to nargs)*/
   vm->pc[-2]  = add_global(CDR(ref));
-  vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ? 
+  vm->pc[-3]  = (vm->pc[-3] == GREF_TAIL_INVOKE) ?
     			UGREF_TAIL_INVOKE: PUSH_UGREF_TAIL_INV;
   RELEASE_LOCK;
 
@@ -1115,14 +1115,14 @@ CASE(GREF_TAIL_INVOKE) {
 }
 
 CASE(PUSH_UGREF_TAIL_INV)
-  push(vm->val);	/* Fall through */	
+  push(vm->val);	/* Fall through */
 CASE(UGREF_TAIL_INVOKE) { /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
   RELEASE_POSSIBLE_LOCK;
- 
+
   vm->val = fetch_global();
   nargs   = fetch_next();
-  
+
   /* invoke */
   tailp = TRUE; goto FUNCALL;
 }
@@ -1189,11 +1189,11 @@ CASE(GLOBAL_SET) {
   SCM ref = NULL;
   short orig_opcode;
   SCM orig_operand;
- 
+
   LOCK_AND_RESTART;
   orig_opcode  = vm->pc[-1];
   orig_operand = fetch_const();
- 
+
   STk_lookup(orig_operand, vm->env, &ref, FALSE);
   if (!ref) {
     RELEASE_LOCK;
@@ -1207,11 +1207,11 @@ CASE(GLOBAL_SET) {
   RELEASE_LOCK;
   NEXT0;
 }
- 
+
 CASE(UGLOBAL_SET) { /* Never produced by compiler */
   /* Because of optimization, we may get re-dispatched to here. */
   RELEASE_POSSIBLE_LOCK;
- 
+
   fetch_global() = vm->val; NEXT0;
 }
 
@@ -1256,8 +1256,8 @@ CASE(DEEP_LOC_SET_FAR) {
 
 
 CASE(GOTO) { offset = fetch_next(); vm->pc += offset; NEXT;}
-CASE(JUMP_FALSE) { 
-  offset = fetch_next(); 
+CASE(JUMP_FALSE) {
+  offset = fetch_next();
   if (vm->val == STk_false) vm->pc += offset;
   NEXT;
 }
@@ -1289,12 +1289,12 @@ CASE(JUMP_NOT_EQ) {
   offset = fetch_next(); if ((pop() != vm->val)) vm->pc += offset; NEXT;
 }
 CASE(JUMP_NOT_EQV) {
-  offset = fetch_next(); 
+  offset = fetch_next();
   if ((STk_eqv(pop(), vm->val) == STk_false)) vm->pc += offset;
   NEXT;
 }
 CASE(JUMP_NOT_EQUAL) {
-  offset = fetch_next(); 
+  offset = fetch_next();
   if ((STk_equal(pop(), vm->val)==STk_false)) vm->pc += offset;
   NEXT;
 }
@@ -1302,9 +1302,9 @@ CASE(JUMP_NOT_EQUAL) {
 
 CASE(DEFINE_SYMBOL) {
   SCM var = fetch_const();
-  
+
   STk_define_variable(var, vm->val, vm->env);
-  if (CLOSUREP(vm->val) && CLOSURE_NAME(vm->val) == STk_false) 
+  if (CLOSUREP(vm->val) && CLOSURE_NAME(vm->val) == STk_false)
     CLOSURE_NAME(vm->val) = var;
   vm->val     = STk_void;
   vm->vals[1] = var;
@@ -1329,7 +1329,7 @@ CASE(DBG_VM)  { vm_debug(fetch_next(), vm); NEXT; }
 CASE(CREATE_CLOSURE) {
   /* pc[0] = offset; pc[1] = arity ; code of the routine starts in pc+2 */
   vm->env    = clone_env(vm->env, vm);
-  vm->val    = STk_make_closure(vm->pc+2, vm->pc[0]-1, vm->pc[1], 
+  vm->val    = STk_make_closure(vm->pc+2, vm->pc[0]-1, vm->pc[1],
 				vm->constants, vm->env);
   vm->pc    += vm->pc[0] + 1;
   NEXT1;
@@ -1364,7 +1364,7 @@ CASE(PUSH_PREPARE_CALL) {push(vm->val); PREP_CALL(); NEXT; }
 
 CASE(ENTER_LET_STAR) {
   nargs = fetch_next();
-  
+
   /* roughly equivalent to PREPARE_CALL; nargs * PUSH; ENTER_LET */
   PREP_CALL();
   vm->sp -= nargs + (sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM);
@@ -1391,7 +1391,7 @@ CASE(LEAVE_LET) {
 }
 
 
-CASE(ENTER_TAIL_LET_STAR) { 
+CASE(ENTER_TAIL_LET_STAR) {
   nargs = fetch_next();
 
   /* roughly equivalent to PREPARE_CALL; nargs * PUSH; ENTER_TAIL_LET */
@@ -1405,12 +1405,12 @@ CASE(ENTER_TAIL_LET) {
  enter_tail_let:
   {
     SCM *old_fp = (SCM *) ACT_SAVE_FP(vm->fp);
-    
+
     /* Move the arguments of the function to the old_fp as in TAIL_INVOKE */
     if (IS_IN_STACKP(vm->env)) {
       if (nargs) memmove(((SCM*)vm->env)-nargs, vm->sp, nargs*sizeof(SCM));
       vm->fp = old_fp;
-      
+
       /* Push a new environment on the stack */
       vm->sp = ((SCM*)vm->env) - nargs-
 		     ((sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM));
@@ -1418,10 +1418,10 @@ CASE(ENTER_TAIL_LET) {
     else {
       if (nargs) memmove(old_fp-nargs, vm->sp, nargs*sizeof(SCM));
       vm->fp = old_fp;
-      vm->sp = vm->fp - nargs - 
+      vm->sp = vm->fp - nargs -
 		  ((sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM));
     }
-    
+
     PUSH_ENV(nargs, vm->val, vm->env);
     vm->env  = (SCM) vm->sp;
     NEXT;
@@ -1442,7 +1442,7 @@ CASE(PUSH_HANDLER) {
   if (MY_SETJMP(jb)) {
     /* We come back from an error. */
     set_signal_mask(jb.blocked);
-  } 
+  }
   else {
     SAVE_VM_STATE();
     SAVE_HANDLER_STATE(vm->val, vm->pc+offset);
@@ -1464,10 +1464,10 @@ CASE(MAKE_EXPANDER) {
 
   val = STk_lookup(STk_intern("*expander-list*"), STk_current_module(), &ref, TRUE);
   if ( ! (CONSP(val) &&CONSP(CDR(val)) && (CAR(CAR(val)) == name)) ) {
-    /* We are just compiling this macro, so it is already entered in the 
-     * table of expanders by the compiler. Don't add it twice. 
-     * Note: if this test is false, this is probably that wa are reading 
-     * back a bytecode file and the macro must be entered in the table 
+    /* We are just compiling this macro, so it is already entered in the
+     * table of expanders by the compiler. Don't add it twice.
+     * Note: if this test is false, this is probably that wa are reading
+     * back a bytecode file and the macro must be entered in the table
      */
     BOX_VALUE(CDR(ref)) = STk_cons(STk_cons(name, vm->val), val);
   }
@@ -1479,13 +1479,13 @@ CASE(MAKE_EXPANDER) {
 
 CASE(DOCSTRG) {
   SCM str = fetch_const();
-  
+
   if (vm->valc == 1 && CLOSUREP(vm->val))
     CLOSURE_DOC(vm->val) = str;
   NEXT;
 }
 
-CASE(END_OF_CODE) { 
+CASE(END_OF_CODE) {
   return;
 }
 
@@ -1499,24 +1499,24 @@ CASE(UNUSED_8)
 CASE(UNUSED_9)
 CASE(UNUSED_10)
 CASE(UNUSED_11)
-CASE(UNUSED_12) 
-CASE(UNUSED_13) 
-CASE(UNUSED_14) 
-CASE(UNUSED_15) 
-CASE(UNUSED_16) 
-CASE(UNUSED_17) 
-CASE(UNUSED_18) 
-CASE(UNUSED_19) 
+CASE(UNUSED_12)
+CASE(UNUSED_13)
+CASE(UNUSED_14)
+CASE(UNUSED_15)
+CASE(UNUSED_16)
+CASE(UNUSED_17)
+CASE(UNUSED_18)
+CASE(UNUSED_19)
 CASE(UNUSED_20)
 CASE(UNUSED_21)
-CASE(UNUSED_22) 
-CASE(UNUSED_23) 
-CASE(UNUSED_24) 
-CASE(UNUSED_25) 
-CASE(UNUSED_26) 
-CASE(UNUSED_27) 
-CASE(UNUSED_28) 
-CASE(UNUSED_29) 
+CASE(UNUSED_22)
+CASE(UNUSED_23)
+CASE(UNUSED_24)
+CASE(UNUSED_25)
+CASE(UNUSED_26)
+CASE(UNUSED_27)
+CASE(UNUSED_28)
+CASE(UNUSED_29)
 
 {
   ;
@@ -1524,7 +1524,7 @@ CASE(UNUSED_29)
 
 
 
- 
+
 /******************************************************************************
  *
  * 			     I n l i n e d   F u n c t i o n s
@@ -1537,7 +1537,7 @@ CASE(IN_ADD2)   { REG_CALL_PRIM(plus);
   		  vm->val = STk_add2(pop(), vm->val); NEXT1;}
 CASE(IN_SUB2)   { REG_CALL_PRIM(difference);
   		  vm->val = STk_sub2(pop(), vm->val); NEXT1;}
-CASE(IN_MUL2)   { REG_CALL_PRIM(multiplication); 
+CASE(IN_MUL2)   { REG_CALL_PRIM(multiplication);
   		  vm->val = STk_mul2(pop(), vm->val); NEXT1;}
 CASE(IN_DIV2)   { REG_CALL_PRIM(division);
   		  vm->val = STk_div2(pop(), vm->val); NEXT1;}
@@ -1546,7 +1546,7 @@ CASE(IN_FXADD2)   { REG_CALL_PRIM(fxplus);
   		  vm->val = STk_fxplus(pop(), vm->val); NEXT1;}
 CASE(IN_FXSUB2)   { REG_CALL_PRIM(fxminus);
   		  vm->val = STk_fxminus(pop(), vm->val); NEXT1;}
-CASE(IN_FXMUL2)   { REG_CALL_PRIM(fxtime); 
+CASE(IN_FXMUL2)   { REG_CALL_PRIM(fxtime);
   		  vm->val = STk_fxtime(pop(), vm->val); NEXT1;}
 CASE(IN_FXDIV2)   { REG_CALL_PRIM(fxdiv);
   		  vm->val = STk_fxdiv(pop(), vm->val); NEXT1;}
@@ -1572,20 +1572,20 @@ CASE(IN_SINT_FXDIV2) { REG_CALL_PRIM(fxdiv);
   		     vm->val = STk_fxdiv(vm->val, MAKE_INT(fetch_next())); NEXT1;}
 
 
-CASE(IN_NUMEQ)  { REG_CALL_PRIM(numeq); 
+CASE(IN_NUMEQ)  { REG_CALL_PRIM(numeq);
   		  vm->val = MAKE_BOOLEAN(STk_numeq2(pop(), vm->val));      NEXT1;}
 CASE(IN_NUMDIFF){ REG_CALL_PRIM(numeq);
   		  vm->val = MAKE_BOOLEAN(!STk_numeq2(pop(), vm->val));     NEXT1;}
-CASE(IN_NUMLT)  { REG_CALL_PRIM(numlt); 
+CASE(IN_NUMLT)  { REG_CALL_PRIM(numlt);
   		  vm->val = MAKE_BOOLEAN(STk_numlt2(pop(), vm->val));      NEXT1;}
-CASE(IN_NUMGT)  { REG_CALL_PRIM(numgt); 
+CASE(IN_NUMGT)  { REG_CALL_PRIM(numgt);
   		  vm->val = MAKE_BOOLEAN(STk_numgt2(pop(), vm->val));      NEXT1;}
 CASE(IN_NUMLE)  { REG_CALL_PRIM(numle);
   		  vm->val = MAKE_BOOLEAN(STk_numle2(pop(), vm->val));      NEXT1;}
 CASE(IN_NUMGE)  { REG_CALL_PRIM(numge);
 		  vm->val = MAKE_BOOLEAN(STk_numge2(pop(), vm->val));      NEXT1;}
 
-CASE(IN_INCR)   { REG_CALL_PRIM(plus);      
+CASE(IN_INCR)   { REG_CALL_PRIM(plus);
   		  vm->val = STk_add2(vm->val, MAKE_INT(1)); NEXT1;}
 CASE(IN_DECR)   { REG_CALL_PRIM(difference);
                   vm->val = STk_sub2(vm->val, MAKE_INT(1)); NEXT1;}
@@ -1605,7 +1605,7 @@ CASE(IN_NOT_EQUAL) { vm->val = SCHEME_NOT(STk_equal(pop(), vm->val)); 	   NEXT1;
 CASE(IN_NOT_EQV)   { vm->val = SCHEME_NOT(STk_eqv(pop(), vm->val)); 	   NEXT1; }
 CASE(IN_NOT_EQ)    { vm->val = MAKE_BOOLEAN(pop() != vm->val);		   NEXT1; }
 
-CASE(IN_VREF) { 
+CASE(IN_VREF) {
   REG_CALL_PRIM(vector_ref);
   vm->val = STk_vector_ref(pop(), vm->val);
   NEXT1;
@@ -1621,7 +1621,7 @@ CASE(IN_VSET)   {
   STk_vector_set(pop(), index, vm->val);
   NEXT0;
 }
-CASE(IN_SSET)   { 
+CASE(IN_SSET)   {
   SCM index = pop();
   REG_CALL_PRIM(string_set);
   STk_string_set(pop(), index, vm->val);
@@ -1641,18 +1641,18 @@ FUNCALL:  /* (int nargs, int tailp) */
     case tc_instance: {
       if (PUREGENERICP(vm->val)) {
 	SCM *argv = vm->sp+nargs-1;
-	SCM methods, nm; 
-	
+	SCM methods, nm;
+
 	/* methods is the list of applicable methods. Apply the first
 	 * one with the tail of the list as first parameter
 	 * (next-method). If methods is STk_nil, that's because the
-	 * no-applicable-method triggered didn't yield an error.  
+	 * no-applicable-method triggered didn't yield an error.
 	 */
 	methods = STk_compute_applicable_methods(vm->val, nargs, argv, FALSE);
 	if (NULLP(methods)) { vm->val = STk_void; return; }
-	
+
 	/* Place the procedure of the first method in the VAL register and
-	 * store the next method in the ``next-method'' variable. 
+	 * store the next method in the ``next-method'' variable.
 	 */
 	nm       = STk_make_next_method(vm->val, nargs, argv, methods);
 	vm->val  = INST_SLOT(CAR(methods), S_procedure);
@@ -1663,9 +1663,9 @@ FUNCALL:  /* (int nargs, int tailp) */
 
 	/* Use the MOP and do the call (apply-generic gf args) */
 	args = listify_top(nargs, vm);
-	push(vm->val); 
+	push(vm->val);
 	push(args);
-	vm->val = STk_lookup(STk_intern("apply-generic"), vm->current_module, 
+	vm->val = STk_lookup(STk_intern("apply-generic"), vm->current_module,
 			     &gf, FALSE);
 	nargs = 2;
 	goto FUNCALL;
@@ -1678,20 +1678,20 @@ FUNCALL:  /* (int nargs, int tailp) */
       if (tailp) {
 	/* Tail call: Reuse the old frame for this call.*/
 	SCM *old_fp = (SCM *) ACT_SAVE_FP(vm->fp);
-	
+
 	/* Move the arguments of the function to the old_fp */
 	if (nargs) memmove(old_fp-nargs, vm->sp, nargs*sizeof(SCM));
 	vm->fp = old_fp;
-	
+
 	/* Push a new environment on the stack */
-	vm->sp = vm->fp - nargs - 
+	vm->sp = vm->fp - nargs -
 	         ((sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM));
 	PUSH_ENV(nargs, vm->val, CLOSURE_ENV(vm->val));
       } else {
 	/* Push a new environment on the stack */
 	vm->sp -= (sizeof(struct frame_obj) - sizeof(SCM)) / sizeof(SCM);
 	PUSH_ENV(nargs, vm->val, CLOSURE_ENV(vm->val));
-      
+
 	/* Finish initialisation of current activation record */
 	ACT_SAVE_ENV(vm->fp)  = vm->env;
 	ACT_SAVE_PC(vm->fp)   = vm->pc;
@@ -1699,7 +1699,7 @@ FUNCALL:  /* (int nargs, int tailp) */
       }
 
       ACT_SAVE_PROC(vm->fp) = vm->val;
-      
+
       /* Do the call */
       CALL_CLOSURE(vm->val);
       goto end_funcall;;
@@ -1708,18 +1708,18 @@ FUNCALL:  /* (int nargs, int tailp) */
     case tc_next_method: {
       SCM methods, nm, *argv, proc;
       int i;
-      
+
       methods = NXT_MTHD_METHODS(vm->val);
-      
+
       if (nargs == 0) {
 	/* no argument given, place the ones of the original call on top of stack */
 	nargs = NXT_MTHD_ARGC(vm->val);
 	argv  = NXT_MTHD_ARGV(vm->val);
 
-	for (i = 0; i < nargs; i++) 
+	for (i = 0; i < nargs; i++)
 	  push(argv[i]);
       }
-      
+
       argv  = vm->sp+nargs-1;
 
       if (NULLP(methods)) {
@@ -1729,7 +1729,7 @@ FUNCALL:  /* (int nargs, int tailp) */
 	push(NXT_MTHD_METHOD(vm->val));
 	push(argv);
 	nargs = 3;
-	vm->val   = STk_lookup(STk_intern("no-next-method"), vm->current_module, 
+	vm->val   = STk_lookup(STk_intern("no-next-method"), vm->current_module,
 			       &proc, FALSE);
       } else {
 	/* Call the next method after creating a new next-method */
@@ -1743,7 +1743,7 @@ FUNCALL:  /* (int nargs, int tailp) */
     case tc_apply: {
       SCM l, func, *tmp, *argv;
       int len;
-      
+
       if (nargs == 0) STk_error("no function given to apply");
 
       nargs -= 1;
@@ -1754,15 +1754,15 @@ FUNCALL:  /* (int nargs, int tailp) */
 	/* look at last argument */
 	l   = *vm->sp;
 	len = STk_int_length(l);
-	
+
 	if (len < 0)
 	  STk_error("last argument of apply is not a list: ~S", l);
 	else {
-	  /* move all the arguments, except the last one, one cell lower in the 
+	  /* move all the arguments, except the last one, one cell lower in the
 	   * stack (i.e. overwrite the function to call) */
 	  for (tmp = argv-1; tmp > vm->sp; tmp--)
 	    *(tmp+1) = *tmp;
-	  
+
 	  vm->sp = tmp + 2;
 	  if (len != 0) {
 	    /* Unfold the last argument in place */
@@ -1774,7 +1774,7 @@ FUNCALL:  /* (int nargs, int tailp) */
 	  nargs += len-1;
 	}
       }
-      
+
       /* Now we can call call "func" with "nargs" arguments */
       vm->val = func;
       goto FUNCALL;
@@ -1790,7 +1790,7 @@ FUNCALL:  /* (int nargs, int tailp) */
       if (nargs == 2) { CALL_PRIM(vm->val, (vm->sp[1], vm->sp[0]));	 break;}
       goto error_invoke;
     case tc_subr3:
-      if (nargs == 3) { CALL_PRIM(vm->val, (vm->sp[2], vm->sp[1], 
+      if (nargs == 3) { CALL_PRIM(vm->val, (vm->sp[2], vm->sp[1],
 					    vm->sp[0]));		 break;}
       goto error_invoke;
     case tc_subr4:
@@ -1812,7 +1812,7 @@ FUNCALL:  /* (int nargs, int tailp) */
       if (nargs == 2) { CALL_PRIM(vm->val, (vm->sp[1], vm->sp[0]));	 break;}
       goto error_invoke;
     case tc_subr23:
-      if (nargs == 2) { CALL_PRIM(vm->val, (vm->sp[1], vm->sp[0], 
+      if (nargs == 2) { CALL_PRIM(vm->val, (vm->sp[1], vm->sp[0],
 					    (SCM)NULL));	 	 break;}
       if (nargs == 3) { CALL_PRIM(vm->val, (vm->sp[2], vm->sp[1],
 					    vm->sp[0]));		 break;}
@@ -1830,7 +1830,7 @@ FUNCALL:  /* (int nargs, int tailp) */
       vm->val = STk_call_ext_function(vm->val, nargs, vm->sp+nargs-1);	break;
 #endif
 
-    default: 
+    default:
       STk_error("bad function ~S. Cannot be applied", vm->val);
     error_invoke:
       ACT_SAVE_PROC(vm->fp) = vm->val;
@@ -1857,36 +1857,36 @@ void STk_raise_exception(SCM cond)
 {
   SCM proc, *save_vm_state;
   vm_thread_t *vm = STk_get_current_vm();
-  
+
   save_vm_state = (vm->handlers) + EXCEPTION_HANDLER_SIZE;
 
   if (vm->handlers == NULL) {
     STk_print(cond, STk_stderr, DSP_MODE);
     STk_fprintf(STk_stderr, ": ");
-    STk_print(STk_int_struct_ref(cond, STk_intern("message")), 
-	      STk_stderr, 
+    STk_print(STk_int_struct_ref(cond, STk_intern("message")),
+	      STk_stderr,
 	      DSP_MODE);
     STk_fprintf(STk_stderr, "\n**** FATAL ERROR: no handler present!\nABORT\n");
     exit(1);
   }
 
   /*
-   * Grab the handler infos 
+   * Grab the handler infos
    */
   proc   = (SCM) 	 HANDLER_PROC(vm->handlers);
   vm->pc = (STk_instr *) HANDLER_END(vm->handlers);
 
   UNSAVE_HANDLER_STATE();
-  
+
   RESTORE_VM_STATE(save_vm_state);
 
-  /* Execute the procedure handler on behalf of the old handler (since the 
-   * procedure can be itself erroneous). 
+  /* Execute the procedure handler on behalf of the old handler (since the
+   * procedure can be itself erroneous).
    */
   vm->val = STk_C_apply(proc, 1, cond);
 
-  /* 
-   * Return in the good "run_vm" incarnation 
+  /*
+   * Return in the good "run_vm" incarnation
    */
   MY_LONGJMP(*(vm->top_jmp_buf), 1);
 }
@@ -1895,23 +1895,23 @@ void STk_raise_exception(SCM cond)
 <doc EXT current-exception-handler
  * (current-exception-handler)
  *
- * Returns the current exception handler. This procedure is defined in 
+ * Returns the current exception handler. This procedure is defined in
  * ,(link-srfi 18).
 doc>
 */
 DEFINE_PRIMITIVE("current-exception-handler", current_handler, subr0, (void))
 {
   vm_thread_t *vm = STk_get_current_vm();
-  
+
   if (vm->handlers == NULL)
     return STk_false;
-  else 
+  else
     return (SCM) HANDLER_PROC(vm->handlers);
 }
 
 
 /*===========================================================================*\
- * 
+ *
  *			   C O N T I N U A T I O N S
  *
 \*===========================================================================*/
@@ -1991,7 +1991,7 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   } else {
     /* We come back and restore the continuation */
     /* Since we are not sure of the way locals are allocated by the compiler
-     * we cannot be sure that vm has kept its value. So we  get back another 
+     * we cannot be sure that vm has kept its value. So we  get back another
      * time the current vm data*/
     return STk_get_current_vm()->val;
   }
@@ -2005,17 +2005,17 @@ static void restore_cont_jump(struct continuation_obj *k, void* addr){
   int cur_stack_size;
 
   cur_stack_size = vm->start_stack - addr;
-  
+
   buf[42] = 0x2a;
 
   if (cur_stack_size < 0) cur_stack_size = -cur_stack_size;
-  if (cur_stack_size <= (k->csize + CALL_CC_SPACE)) { 
+  if (cur_stack_size <= (k->csize + CALL_CC_SPACE)) {
     /* Not enough space, recurse */
     STk_get_stack_pointer(&addr);
     restore_cont_jump(k, &addr);
   } else {
     memcpy(k->cstart, k->stacks + k->ssize, k->csize);
-    
+
     /* Return */
     MY_LONGJMP(k->state, 1);
   }
@@ -2041,7 +2041,7 @@ DEFINE_PRIMITIVE("%restore-continuation", restore_cont, subr2, (SCM cont, SCM va
   vm->constants		= k->constants;
   vm->handlers		= k->handlers;
   vm->top_jmp_buf	= k->jb;
-  
+
   k->fresh = 0;
   /* Restore the Scheme stack */
   memcpy(k->sstart, k->stacks, k->ssize);
@@ -2068,7 +2068,7 @@ DEFINE_PRIMITIVE("%fresh-continuation?", fresh_continuationp, subr1, (SCM obj))
 
 static void print_continuation(SCM cont, SCM port, int mode)
 {
-  STk_fprintf(port, "#[continuation (C=%d S=%d) %x]", 
+  STk_fprintf(port, "#[continuation (C=%d S=%d) %x]",
 	      ((struct continuation_obj *)cont)->csize,
 	      ((struct continuation_obj *)cont)->ssize,
 	      (unsigned long) cont);
@@ -2081,8 +2081,8 @@ static struct extended_type_descr xtype_continuation = {
 
 
 /*===========================================================================*\
- * 
- *			   Bytecode file dump/load stuff 
+ *
+ *			   Bytecode file dump/load stuff
  *
 \*===========================================================================*/
 
@@ -2096,7 +2096,7 @@ DEFINE_PRIMITIVE("%dump-code", dump_code, subr2, (SCM f, SCM v))
   int size, i;
   SCM *tmp;
   STk_instr instr;
-  
+
   if (!FPORTP(f))  STk_error("bad file port ~S", f);
   if (!VECTORP(v)) STk_error("bad code vector ~S", v);
 
@@ -2108,13 +2108,13 @@ DEFINE_PRIMITIVE("%dump-code", dump_code, subr2, (SCM f, SCM v))
 
   /* Print the content of the vector as bytes */
   for (i = 0; i < size; i++) {
-    if (!INTP(*tmp)) 
+    if (!INTP(*tmp))
       STk_error("bad value (~S) at index %d in code vector ~S", *tmp, i, v);
-   
+
     instr = (STk_instr) INT_VAL(*tmp++);
     STk_putc(FIRST_BYTE(instr), f);
     STk_putc(SECOND_BYTE(instr), f);
-  
+
   }
   STk_putc('\n', f);
   return STk_void;
@@ -2137,11 +2137,11 @@ static Inline STk_instr* read_code(SCM f, int len) /* read a code phrase */
     c2 = STk_getc(f);
     if (c2 == EOF) /* not useful to test c1 */
       STk_error("truncated bytecode file ~S", f);
-    
+
     *tmp++ = (STk_instr) (c1 << 8 | c2);
   }
 
-  return res;  
+  return res;
 }
 
 SCM STk_load_bcode_file(SCM f)
@@ -2166,7 +2166,7 @@ SCM STk_load_bcode_file(SCM f)
     if (size < 0) {
       if (system_has_booted)
 	STk_error("Bad bytecode file ~S", f);
-      else 
+      else
 	return STk_false;
     }
 
@@ -2175,7 +2175,7 @@ SCM STk_load_bcode_file(SCM f)
     vm->env       = vm->current_module;
     run_vm(vm);
   }
-  
+
   /* restore machine state */
   vm->pc = save_pc; vm->constants = save_constants, vm->env = save_env;
   return STk_true;
@@ -2192,10 +2192,10 @@ int STk_load_boot(char *filename)
   /* Verify that the file is a bytecode file */
   tmp = STk_read(f, TRUE);
   if (tmp != STk_intern("STklos")) return -2;
-  
+
   tmp = STk_load_bcode_file(f);
   if (tmp == STk_false) return -3;
-   
+
   /* The system has booted on the given file */
   system_has_booted = 1;
   return 0;
@@ -2230,13 +2230,13 @@ SCM STk_execute_C_bytecode(SCM all_consts, STk_instr *instr)
   consts = STk_read(STk_open_C_string(all_consts), TRUE);
   /* Save machine state */
   save_pc = vm->pc; save_constants = vm->constants; save_env = vm->env;
-  
+
   /* Go */
   vm->pc = instr;
   vm->constants = VECTOR_DATA(consts);
   vm->env	= vm->current_module;
   run_vm(vm);
- 
+
   /* restore machine state */
   vm->pc = save_pc; vm->constants = save_constants, vm->env = save_env;
   return STk_void;

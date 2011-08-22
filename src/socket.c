@@ -1,7 +1,7 @@
 /*
  * socket.c				-- Socket acess for STklos
  *
- * Copyright © 2003-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 2003-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify

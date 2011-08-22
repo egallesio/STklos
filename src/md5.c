@@ -1,24 +1,24 @@
 /*
- * md5.c			-- MD5 algorithm 
- * 
- * Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
- * 
- * 
+ * md5.c			-- MD5 algorithm
+ *
+ * Copyright Â© 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 13-May-2007 22:21 (eg)
  * Last file update: 14-May-2007 10:35 (eg)
@@ -134,7 +134,7 @@ void md5_process( struct md5_context *ctx, uint8 data[64] )
     P( B, C, D, A, 12, 20, 0x8D2A4C8A );
 
 #undef F
-    
+
 #define F(x,y,z) (x ^ y ^ z)
 
     P( A, B, C, D,  5,  4, 0xFFFA3942 );
@@ -249,7 +249,7 @@ void md5_finish( struct md5_context *ctx, uint8 digest[16] )
 }
 
 /*===========================================================================*\
- * 
+ *
  * 	Scheme Primitive ...
  *
 \*===========================================================================*/
@@ -261,7 +261,7 @@ void md5_finish( struct md5_context *ctx, uint8 digest[16] )
 <doc EXT md5sum
  * (md5sum obj)
  *
- * Return a string contening the md5 dum of |obj|. The given parameter can 
+ * Return a string contening the md5 dum of |obj|. The given parameter can
  * be a string or an open input port.
 doc>
 */
@@ -271,26 +271,26 @@ DEFINE_PRIMITIVE("md5sum", md5sum, subr1, (SCM obj))
   unsigned char md5sum[16];
   char output[33];
   int i;
-    
+
 
   md5_starts(&ctx);
-  
-  if (STRINGP(obj)) {					/* string */	
+
+  if (STRINGP(obj)) {					/* string */
     md5_update(&ctx, (uint8 *) STRING_CHARS(obj), STRING_SIZE(obj));
   }
   else if (IPORTP(obj)) {				/* input port */
     char buffer[MD5BUFSIZ];
     int n;
-    
+
     while((n = STk_read_buffer(obj, buffer, MD5BUFSIZ)) > 0 ) {
       md5_update(&ctx, (uint8 *)buffer, n);
     }
-  } 
+  }
   else 					/* neither string or port => error */
     STk_error("bad object ~S", obj);
-  
+
   md5_finish(&ctx, md5sum);
-  
+
   /* Build the Scheme result */
   for(i = 0; i < 16; i++) {
     sprintf(output + i * 2, "%02x", md5sum[i]);
@@ -299,7 +299,7 @@ DEFINE_PRIMITIVE("md5sum", md5sum, subr1, (SCM obj))
 }
 
 /*===========================================================================*\
- * 
+ *
  * 	Initialization code
  *
 \*===========================================================================*/

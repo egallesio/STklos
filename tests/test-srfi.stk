@@ -1,24 +1,24 @@
 ;;;;
 ;;;; test-srfi.stk	-- Test of various SRFIs
-;;;; 
-;;;; Copyright © 2005-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2005-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
 ;;;; Last file update:  5-Apr-2010 00:29 (eg)
@@ -131,7 +131,7 @@
 (test "blob-uint-ref.2"
       -3
       (blob-sint-ref 16 (endianness little) b1 0))
-		
+
 (test "blob->u8-list"
       '(253 255 255 255 255 255 255 255 255 255 255 255 255 255 255 255)
       (blob->u8-list b1))
@@ -250,6 +250,6 @@
 (test "(blob->sint-list 2 (endianness little) b4)"
       '(0 0 0 14640 -1 -1 -1 -513)
       (blob->sint-list 2 (endianness little) b4))
-		       
+
 ;; ----------------------------------------------------------------------
 (test-section-end)

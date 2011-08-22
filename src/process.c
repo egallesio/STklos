@@ -1,7 +1,7 @@
 /*
  * p r o c e s s . c 		-- Access to processes from STklos
  *
- * Copyright © 1994-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 1994-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -278,7 +278,7 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
   redir = VECTOR_DATA(redirections);
 
   /* Build an argv array for exec system call */
-  len = STk_int_length(args);		  /* //FIXME:  Pas traité le rsh */
+  len = STk_int_length(args);		  /* //FIXME:  Pas traitÃ© le rsh */
   if (len < 0)
     STk_error("bad argument list ~S", args);
   argv = STk_must_malloc((len + 3) * sizeof(char *));

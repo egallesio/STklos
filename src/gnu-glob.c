@@ -1,11 +1,11 @@
 /*
  * gnu-glob.c	-- Adaptation of GNU glob function for STklos
- * 
- * Copyright © 2003-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
- * The following code is constituted of the GNU glob implementation. 
+ *
+ * Copyright Â© 2003-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
+ * The following code is constituted of the GNU glob implementation.
  * Code is slightly modified (all modifications are tagged with the
- * string "STKLOS_CODE"). 
+ * string "STKLOS_CODE").
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 16-Jan-2003 18:42 (eg)
@@ -44,9 +44,9 @@ Cambridge, MA 02139, USA.  */
 #include <dirent.h>
 /* STklos: #include <malloc.h> */
 #include <fnmatch.h>
-#ifdef STKLOS_CODE 
+#ifdef STKLOS_CODE
 #  include "gnu-glob.h"
-#else 
+#else
 #  include <glob.h>
 
 extern __ptr_t (*__glob_opendir_hook) __P ((const char *directory));
@@ -228,7 +228,7 @@ glob (pattern, flags, errfunc, pglob)
 	    pglob->gl_pathv[pglob->gl_pathc] = NULL;
 	    pglob->gl_flags = flags;
 	}
-	else 
+	else
 	{
 	  return GLOB_NOMATCH;
 	}
@@ -270,7 +270,7 @@ glob (pattern, flags, errfunc, pglob)
     /* Sort the vector.  */
     qsort ((__ptr_t) &pglob->gl_pathv[oldcount],
 	   pglob->gl_pathc - oldcount,
-	   sizeof (char *), 
+	   sizeof (char *),
 	   (int(*)(const void *, const void *)) collated_compare);
 
   return 0;
@@ -460,7 +460,7 @@ glob_in_dir (pattern, directory, flags, errfunc, pglob)
 	  len = 0;
 #endif
 	}
-		
+
       if ((!meta && strcmp (pattern, name) == 0)
 	  || fnmatch (pattern, name,
 		      (!(flags & GLOB_PERIOD) ? FNM_PERIOD : 0) |

@@ -16,7 +16,7 @@ SRC     = ../lib/http.stk \
 	  main.stk add.stk copy.stk extract.stk install.stk lang.stk \
 	  params.stk pkgball.stk \
 	  repository.stk rewrite.stk misc.stk tune.stk types.stk
-SFLAGS  =  
+SFLAGS  =
 RM      = /bin/rm
 SCC	= ../utils/stklos-compile
 

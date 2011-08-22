@@ -1,8 +1,8 @@
 ;;; expand.ss						-*- Scheme -*-
 ;;; Robert Hieb & Kent Dybvig
 ;;; 92/06/18
- 
-;;; Modified by Erick Gallesio for STklos 
+
+;;; Modified by Erick Gallesio for STklos
 ;;; Last file update: 27-Jan-2001 12:55 (eg)
 
 
@@ -567,7 +567,7 @@
 
 (define ellipsis?
    (lambda (x)
-;[EG] Commented the following line 
+;[EG] Commented the following line
 ;     (when (and (top-level-bound? 'dp) dp) (break))
       (and (identifier? x)
            (free-id=? x (syntax (... ...))))))

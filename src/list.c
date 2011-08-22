@@ -2,7 +2,7 @@
  *
  * l i s t . c			-- Lists procedures
  *
- * Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,7 +75,7 @@ int STk_int_length(SCM l)
 SCM STk_argv2list(int argc, SCM *argv)
 {
   SCM res = STk_nil;
-  
+
   while (argc--) {
     res = STk_cons(argv[-argc], res);
   }
@@ -199,7 +199,7 @@ DEFINE_PRIMITIVE("set-cdr!", setcdr, subr2, (SCM cell, SCM value))
  *
  * Stores |obj| in the cdr field of |pair|.
  * The value returned by |set-cdr!| is ,(emph "void").
- * 
+ *
 doc>
  */
 {
@@ -580,8 +580,8 @@ DEFINE_PRIMITIVE("assoc", assoc, subr2, (SCM obj, SCM alist))
 /*
 <doc EXT pair-mutable?
  * (pair-mutable? obj)
- * 
- * Returns |#t| if |obj| is a mutable pair, otherwise returns |#f|. 
+ *
+ * Returns |#t| if |obj| is a mutable pair, otherwise returns |#f|.
  * @lisp
  * (pair-mutable? '(1 . 2))    => #f
  * (pair-mutable? (cons 1 2))  => #t
@@ -654,7 +654,7 @@ doc>
 DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
 {
   SCM tmp;
-  
+
   if (!CONSP(l)) error_wrong_type(l);
   for (tmp=l; CONSP(CDR(l)); l = CDR(l))
     /* Nothing */;
@@ -662,15 +662,15 @@ DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
 }
 
 /*
-<doc EXT filter filter! 
+<doc EXT filter filter!
  * (filter  pred list)
  * (filter! pred list)
  *
  * |Filter| returns all the elements of |list| that satisfy predicate
  * |pred|. The |list| is not disordered: elements that appear in the
  * result list occur in the same order as they occur in the argument
- * list. |Filter!| does the same job than |filter| by physically 
- * modifying its |list| argument 
+ * list. |Filter!| does the same job than |filter| by physically
+ * modifying its |list| argument
  * @lisp
  * (filter even? '(0 7 8 8 43 -4)) => (0 8 8 -4)
  * (let* ((l1 (list 0 7 8 8 43 -4))
@@ -690,7 +690,7 @@ DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
 
   for (ptr=l=list, result=STk_nil; !NULLP(l); ) {
     if (!CONSP(l)) error_bad_list(list);
-    
+
     if (STk_C_apply(pred, 1, CAR(l)) != STk_false) {
       if (NULLP(result)) {
 	NEWCELL(result, cons);
@@ -723,7 +723,7 @@ DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
     if (STk_C_apply(pred, 1, CAR(l)) == STk_false) {
       if (previous == STk_nil)
 	list = CDR(list);
-      else 
+      else
 	CDR(previous) = CDR(l);
     } else {
       previous = l;
@@ -739,8 +739,8 @@ DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
  *
  * Returns a list consisting of the elements of the first list
  * followed by the elements of the other lists.
- * Contrarily to |append|, the parameter lists (except the last one) are 
- * physically modified: their last pair is changed to the value of the next 
+ * Contrarily to |append|, the parameter lists (except the last one) are
+ * physically modified: their last pair is changed to the value of the next
  * list in the |append!| formal parameter list.
  * @lisp
  * (let* ((l1 (list 1 2))
@@ -825,7 +825,7 @@ SCM STk_dremq(SCM obj, SCM list)
     if (obj == CAR(l)) {
       if (previous == STk_nil)
 	list = CDR(list);
-      else 
+      else
 	CDR(previous) = CDR(l);
     } else {
       previous = l;
@@ -843,7 +843,7 @@ SCM STk_dremq(SCM obj, SCM list)
 SCM STk_int_assq(SCM obj, SCM alist)
 {
   register SCM l;
-  
+
   for(l=alist; !NULLP(l); l = CDR(l)) {
     if (CAR(CAR(l)) == obj) return CAR(l);
   }
@@ -854,7 +854,7 @@ SCM STk_int_assq(SCM obj, SCM alist)
 
 /* ======================================================================
  *
- * Extended pairs 
+ * Extended pairs
  *
  * ======================================================================
  */
@@ -885,7 +885,7 @@ SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos)
   ECONS_LINE(z) = line;
   ECONS_POS(z)  = pos;
   BOXED_INFO(z) |= CONS_ECONS;
-  
+
   return z;
 }
 
@@ -953,8 +953,8 @@ int STk_init_list(void)
 
   ADD_PRIMITIVE(epairp);
   ADD_PRIMITIVE(epair_file);
-  ADD_PRIMITIVE(epair_line);    
-  ADD_PRIMITIVE(epair_position);    
+  ADD_PRIMITIVE(epair_line);
+  ADD_PRIMITIVE(epair_position);
 
   return TRUE;
 }

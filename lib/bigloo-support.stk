@@ -1,8 +1,8 @@
 ;;;;
 ;;;; b i g l o o -s u p p o r t. s t k		-- Bigloo compatibility file
 ;;;;
-;;;; Copyright © 1997-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
+;;;; Copyright Â© 1997-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
 ;;;; Permission to use, copy, modify, distribute,and license this
 ;;;; software and its documentation for any purpose is hereby granted,
 ;;;; provided that existing copyright notices are retained in all
@@ -18,7 +18,7 @@
 
 
 ;;;
-;;; define-inline 
+;;; define-inline
 ;;;
 
 (define-macro (define-inline args . body)
@@ -62,13 +62,13 @@
     `(import ,@(map (lambda (x) (if (pair? x) (car x) x)) x)))
 
   (define (export-directive x)
-    `(export ,@(map (lambda (x) 
-		      (if (pair? x) 
+    `(export ,@(map (lambda (x)
+		      (if (pair? x)
 			  ( (if (eq? (car x) 'inline) cadr car)  x)
-			  x)) 
+			  x))
 		    x)))
 
-  `(begin 
+  `(begin
      (define-module ,name
        ,@(map (lambda (clause)
 		(case (car clause)

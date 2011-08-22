@@ -1,7 +1,7 @@
 /*
  * r e a d  . c				-- reading stuff
  *
- * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -747,7 +747,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
 	  case 'u': if (STk_uvectors_allowed || c == 'u')
 		      /* For R7RS #u8 is always valid (bytevectors) */
 		      return maybe_read_uniform_vector(port, c, ctx);
-	            else 
+	            else
 		      goto unknown_sharp;
 	 case ';': /* R6RS comments */
 	   	   read_rec(port, ctx, FALSE);

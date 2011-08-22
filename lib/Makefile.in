@@ -246,7 +246,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
-SFLAGS = 
+SFLAGS =
 scheme_BOOT = assembler.stk		\
 	      bb.stk 			\
 	      bonus.stk 		\

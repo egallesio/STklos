@@ -2,21 +2,21 @@
  *
  *  o b j e c t . h			-- Objects support
  *
- * Copyright © 1994-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright Â© 1994-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *            Author: Erick Gallesio [eg@unice.fr]
@@ -89,8 +89,8 @@ struct instance_obj {
 #define SUBCLASSP(c1, c2)   	(STk_memq(c2, INST_SLOT(c1, S_cpl)) != STk_false)
 
 
-/* Next-method is always the first variable of the surrounding environment 
- * of the closure which implement method body. 
+/* Next-method is always the first variable of the surrounding environment
+ * of the closure which implement method body.
  */
 #define SET_NEXT_METHOD(closure, value) \
 		{FRAME_LOCAL(CLOSURE_ENV(closure),0) = (value);}
@@ -102,9 +102,9 @@ SCM STk_compute_applicable_methods(SCM gf, int argc, SCM *argv, int find_method)
 
 
 /*===========================================================================*\
- * 
+ *
  * 			N E X T - M E T H O D S   s t u f f
- * 
+ *
 \*===========================================================================*/
 struct next_method_obj {
   stk_header header;
@@ -129,7 +129,7 @@ struct next_method_obj {
 
 SCM STk_make_next_method(SCM gf, int argc, SCM *argv, SCM methods);
 
-SCM STk_int_call_gf(char *name, SCM val, int nargs); /* FIXME: Utilisée encore? */
+SCM STk_int_call_gf(char *name, SCM val, int nargs); /* FIXME: UtilisÃ©e encore? */
 
 
 extern int STk_oo_initialized;			     /* FIXME: */

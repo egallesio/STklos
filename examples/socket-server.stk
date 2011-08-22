@@ -1,24 +1,24 @@
 ;;;;
-;;;; socket-server.stk	-- A simple socket server 
-;;;; 
-;;;; Copyright © 2003 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;; socket-server.stk	-- A simple socket server
+;;;;
+;;;; Copyright Â© 2003 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 31-Jan-2003 13:58 (eg)
 ;;;; Last file update: 20-Jun-2003 20:15 (eg)
@@ -31,11 +31,11 @@
     (format #t "     telnet localhost ~S\n" (socket-port-number p))
     (format #t "and you can type a line in in your telnet session\n")
     (format #t "Type 'exit' to quit the server\n\n")
-  
+
     (let ((s (socket-accept p)))
       (let Loop ((line (read-line (socket-input s))))
 	(unless (or (eof-object? line) (string=? line "exit"))
 	  (format #t "You have typed ~S\n" line)
 	  (Loop (read-line (socket-input s)))))
-      
+
       (socket-shutdown s))))

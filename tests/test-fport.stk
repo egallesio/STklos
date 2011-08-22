@@ -1,24 +1,24 @@
 ;;;;
 ;;;; test-sport.stk	-- Testing String Ports
-;;;; 
-;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 20-May-2005 15:45 (eg)
 ;;;; Last file update:  5-Sep-2005 15:43 (eg)
@@ -80,14 +80,14 @@
   (test "Go back char 5" #\6 (begin (port-seek p 5) (peek-char p)))
   (test "Where I am.1" 5 (port-current-position p))
   (test "Where I am.2" 5 (port-current-position p))
-  
+
   (test "Go to Char 2 (rel) " #\3
 	(begin (port-seek p -3 :current) (peek-char p)))
   (test "Where I am.3" 2 (port-current-position p))
   (test "Go to Char 5 (rel) " #\6
 	(begin (port-seek p +3 :current) (peek-char p)))
   (test "Where I am.4" 5 (port-current-position p))
-  
+
   (test "Go to last character" #\9
 	(begin (port-seek p -1 :end) (peek-char p)))
   (test "Where I am.5" 18 (port-current-position p))
@@ -126,7 +126,7 @@
   (test "Go to last character.2"  10 (port-seek p 0 :end))
   (test "Add 5 characters" "123AB67CD0abcde"
 	(begin (display "abcde" p) (gos)))
-  
+
   (test "Seek outside port.1" 20 (port-seek p 20))
   ;; Reopen file in mode a
   (close-port p)
@@ -145,7 +145,7 @@
   (test "Add a character after eof" "X\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0Y"
 	(begin (display #\Y p) (gos)))
   (close-port p))
-  
+
 ;;------------------------------------------------------------------
 
 ;; Remove test file

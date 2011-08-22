@@ -18,6 +18,6 @@ clean:
 distclean: clean
 	rm -f Makefile
 
-install: 
+install:
 
 

@@ -8,7 +8,7 @@
 #\\\"			"#\\\""
 
 ;; Strings
-\"([^\\\"]|\\.)*\"	yytext		;|; 
+\"([^\\\"]|\\.)*\"	yytext		;|;
 
 ;;Comment
 \;.*			yytext
@@ -24,5 +24,5 @@
 
 
 <<EOF>>			'eof
-<<ERROR>>		(error 'chicken-preprocessor "parse error ~S (line ~a)" 
+<<ERROR>>		(error 'chicken-preprocessor "parse error ~S (line ~a)"
 			       yytext (lexer-get-line))

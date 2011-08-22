@@ -1,22 +1,22 @@
 /*
  *
- * p r o c . c				-- Things about procedures 
+ * p r o c . c				-- Things about procedures
  *
- * Copyright © 1993-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright Â© 1993-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
@@ -28,13 +28,13 @@
 #include "object.h"
 
 /*===========================================================================*\
- * 
- * 				    Utilities 
- * 
+ *
+ * 				    Utilities
+ *
 \*===========================================================================*/
 
 static void error_malformed_list(SCM obj)
-{ 
+{
   STk_error("malformed list ~S", obj);
 }
 
@@ -70,7 +70,7 @@ static void print_lambda(SCM closure, SCM port, int mode)
 }
 
 
-/* 
+/*
  * The stucture which describes the closure type
  */
 static struct extended_type_descr xtype_closure = {
@@ -105,7 +105,7 @@ DEFINE_PRIMITIVE("procedure?", procedurep, subr1, (SCM obj))
     case tc_subr3:
     case tc_subr4:
     case tc_subr5:
-    case tc_subr01:	
+    case tc_subr01:
     case tc_subr12:
     case tc_subr23:
     case tc_vsubr:
@@ -114,16 +114,16 @@ DEFINE_PRIMITIVE("procedure?", procedurep, subr1, (SCM obj))
     case tc_continuation:
     case tc_parameter:
     case tc_closure:
-    case tc_ext_func:    return STk_true;	
+    case tc_ext_func:    return STk_true;
     case tc_instance:    return (STk_methodp(obj) != STk_false) ?
-			   	   STk_true: 
+			   	   STk_true:
       				   STk_genericp(obj);
 #ifdef FIXME
 //     case tc_call_cc:
 //     case tc_dynwind:    return STk_true;
 //     default: 		if (EXTENDEDP(obj))
 //       			  return STk_extended_procedurep(obj) ? STk_true : STk_false;
-// 			else 
+// 			else
 // 			  return STk_false;
 #endif
     default: return STk_false;
@@ -139,7 +139,7 @@ DEFINE_PRIMITIVE("%procedure-name", procedure_name, subr1, (SCM obj))
     case tc_subr3:
     case tc_subr4:
     case tc_subr5:
-    case tc_subr01:	
+    case tc_subr01:
     case tc_subr12:
     case tc_subr23:
     case tc_vsubr:
@@ -159,7 +159,7 @@ DEFINE_PRIMITIVE("%procedure-name", procedure_name, subr1, (SCM obj))
 <doc EXT closure?
  * (closure? obj)
  *
- * Returns |#t| if |obj| is a procedure created with the |lambda| syntax and 
+ * Returns |#t| if |obj| is a procedure created with the |lambda| syntax and
  * |#f| otherwise.
 doc>
  */
@@ -182,7 +182,7 @@ DEFINE_PRIMITIVE("%procedure-plist", proc_plist, subr1, (SCM obj))
     case tc_subr12:
     case tc_subr23:
     case tc_vsubr:   return PRIMITIVE_PLIST(obj);
-    case tc_closure: return CLOSURE_PLIST(obj);	
+    case tc_closure: return CLOSURE_PLIST(obj);
     default:         error_bad_procedure(obj);
   }
   return STk_void;
@@ -211,7 +211,7 @@ DEFINE_PRIMITIVE("%set-procedure-plist!", set_proc_plist, subr2, (SCM obj, SCM v
 DEFINE_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc))
 {
   int res;
-  
+
   switch (STYPE(proc)) {
     case tc_subr0:  	  res = 0;  break;
     case tc_subr1:  	  res = 1;  break;
@@ -219,17 +219,17 @@ DEFINE_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc))
     case tc_subr3:  	  res = 3;  break;
     case tc_subr4:  	  res = 4;  break;
     case tc_subr5:  	  res = 5;  break;
-    case tc_subr01: 	  res = -1; break; 	
-    case tc_subr12: 	  res = -2; break; 	
-    case tc_subr23: 	  res = -3; break; 
+    case tc_subr01: 	  res = -1; break;
+    case tc_subr12: 	  res = -2; break;
+    case tc_subr23: 	  res = -3; break;
     case tc_vsubr:  	  res = -1; break;
-    case tc_apply:  	  res = -1; break; 
+    case tc_apply:  	  res = -1; break;
       /*  case tc_next_method: */
     case tc_continuation: res = 1;  break;
     case tc_parameter:    res = -1; break;
     case tc_closure:      res = CLOSURE_ARITY(proc); break;
       /* case tc_instance: */
-    default : return STk_false; 
+    default : return STk_false;
   }
   return MAKE_INT(res);
 }
@@ -246,10 +246,10 @@ DEFINE_PRIMITIVE("%procedure-code", proc_code, subr1, (SCM proc))
   /* Make a copy of the code */
   len = CLOSURE_SIZE(proc);
   v   = STk_makevect(len, (SCM) NULL);
-    
+
   for (i=0, p=CLOSURE_BCODE(proc); i < len; i++, p++)
     VECTOR_DATA(v)[i] = MAKE_INT(*p);
-  
+
   return v;
 }
 
@@ -261,9 +261,9 @@ DEFINE_PRIMITIVE("%procedure-doc", proc_doc, subr1, (SCM proc))
 
 
 /*===========================================================================*\
- * 
+ *
  * 			M A P   &   F O R - E A C H
- * 
+ *
 \*===========================================================================*/
 static SCM map(int argc, SCM *argv, int in_map)
 {
@@ -271,7 +271,7 @@ static SCM map(int argc, SCM *argv, int in_map)
   int i, j;
 
   if (argc <= 1) STk_error("expected at least 2 arguments (given %d)", argc);
-  
+
   fct   = *argv--;
   argc -= 1;
   res   = STk_nil;
@@ -289,7 +289,7 @@ static SCM map(int argc, SCM *argv, int in_map)
     /* General case */
     v    = STk_makevect(argc, (SCM) NULL);
     args = VECTOR_DATA(v);
-    
+
     for ( ; ; ) {
       /* Build the parameter list */
       for (i=0, j=0; i < argc; i++,j--) {
@@ -299,7 +299,7 @@ static SCM map(int argc, SCM *argv, int in_map)
 	args[i] = CAR(argv[j]);
 	argv[j] = CDR(argv[j]);
       }
-      
+
       tmp = STk_C_apply(fct, -argc, args);
       if (in_map)
 	res = STk_cons(tmp, res);
@@ -313,19 +313,19 @@ static SCM map(int argc, SCM *argv, int in_map)
  * (map proc list1 list2 ...)
  *
  * The |list|s must be lists, and |proc| must be a procedure taking as many
- * arguments as there are lists and returning a single value.  
- * If more than one list is given, then they must all be the same length.  
- * |Map| applies |proc| element-wise to the elements of the |list|s and returns 
+ * arguments as there are lists and returning a single value.
+ * If more than one list is given, then they must all be the same length.
+ * |Map| applies |proc| element-wise to the elements of the |list|s and returns
  * a list of the results, in order.  The dynamic order in which proc is applied
  * to the elements of the lists is unspecified.
  * @lisp
  * (map cadr '((a b) (d e) (g h)))   =>  (b e h)
- * 
+ *
  * (map (lambda (n) (expt n n))
  *      '(1 2 3 4 5))                =>  (1 4 27 256 3125)
- * 
+ *
  * (map + '(1 2 3) '(4 5 6))         =>  (5 7 9)
- * 
+ *
  * (let ((count 0))
  *   (map (lambda (ignored)
  *       (set! count (+ count 1))
@@ -347,8 +347,8 @@ DEFINE_PRIMITIVE("map", map, vsubr, (int argc, SCM* argv))
  *
  * The arguments to |for-each| are like the arguments to |map|, but |for-each|
  * calls proc for its side effects rather than for its values.
- * Unlike |map|, |for-each| is guaranteed to call proc on the elements of 
- * the lists in order from the first element(s) to the last, and the value 
+ * Unlike |map|, |for-each| is guaranteed to call proc on the elements of
+ * the lists in order from the first element(s) to the last, and the value
  * returned by |for-each| is ,(emph "void").
  * @lisp
  * (let ((v (make-vector 5)))
@@ -370,10 +370,10 @@ DEFINE_PRIMITIVE("for-each", for_each, vsubr, (int argc, SCM* argv))
 // DEFINE_PRIMITIVE("make-expander", make_expander, subr1, (SCM form))
 // {
 //   SCM eval, compiled_form, ref;
-// 
+//
 //   eval 		= STk_lookup(STk_intern("eval"), STk_current_module, &ref);
 //   compiled_form = STk_C_apply(eval, 1 , form);
-// 
+//
 //   return compiled_form;
 // }
 #endif

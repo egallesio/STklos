@@ -1,22 +1,22 @@
 ;;;;
 ;;;; srfi-13.stk		-- Implementation of SRFI-13
-;;;; 
-;;;; Copyright © 2002-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2002-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
 ;;;;
 ;;;; This file is a derivative work from the Olin Shivers implementation of
@@ -56,8 +56,8 @@
 	  string-hash string-hash-ci
 	  ;; Prefixes & suffixes
 	  string-prefix-length string-suffix-length string-prefix-length-ci
-	  string-suffix-length-ci string-prefix? string-suffix?    
-	  string-prefix-ci? string-suffix-ci? 
+	  string-suffix-length-ci string-prefix? string-suffix?
+	  string-prefix-ci? string-suffix-ci?
 
 	  ;; Searching
 	  string-index string-index-right string-skip string-skip-right
@@ -83,12 +83,12 @@
 	  substring-spec-ok? check-substring-spec
 	  ;; Knuth Morris Pratt Searching
 	  make-kmp-restart-vector kmp-step string-kmp-partial-search
-	  
+
   )
 
   (define-macro (check-arg pred val caller)
-    `(if (,pred ,val) 
-	 ,val 
+    `(if (,pred ,val)
+	 ,val
 	 (error ,caller "bad argument ~S" ,val)))
 
   ;;
@@ -106,7 +106,7 @@
       (unless (<= start end)
 	(error proc "low index is greater than high index on ~S" str))
       end))
-  
+
   (define-macro (%check-indexes str start end proc :optional (off 0))
     `(set! ,end (%%check-indexes-func ,str ,start ,end ,proc ,off)))
 
@@ -115,7 +115,7 @@
 		 (<= 0 start end (string-length s)))
       (error proc "illegal substring specification for ~S (~S ~S)" s start end)))
 
-  
+
 
 ;;;; ======================================================================
 ;;;;
@@ -149,7 +149,7 @@
 		 (i1 (+ i 1)))
 	     (if (= i1 end) (criterion c)	; Tail call.
 		 (and (criterion c) (Loop i1)))))))
-    
+
     (else (error 'string-every "bad critrion ~S" criterion))))
 
 
@@ -161,13 +161,13 @@
        (and (< i end)
 	    (or (char=? criterion (string-ref str i))
 		(Loop (+ i 1))))))
-    
+
     ((char-set? criterion)
      (let Loop ((i start))
        (and (< i end)
 	    (or (char-set-contains? criterion (string-ref str i))
 		(Loop (+ i 1))))))
-    
+
     ((procedure? criterion)		; Slightly funky loop so that
      (and (< start end)			; final (PRED S[END-1]) call
 	  (let Loop ((i start))		; is a tail call.
@@ -175,7 +175,7 @@
 		  (i1 (+ i 1)))
 	      (if (= i1 end) (criterion c)	; Tail call
 		  (or (criterion c) (Loop i1)))))))
-    
+
     (else (error 'string-any "bad critrion ~S" criterion))))
 
 ;;;; ======================================================================
@@ -200,7 +200,7 @@
   (do ((i (- end 1) (- i 1))
        (res '() (cons (string-ref str i) res)))
       ((< i start) res)))
-      
+
 (define (reverse-list->string char-list)
   (list->string (reverse char-list)))
 
@@ -224,7 +224,7 @@
 	  (else (error 'string-join "illegal join grammar ~S" grammar)))))
       ((not (null? strings))
        (error 'string-join "bad list ~S" strings))
-      
+
       ;; STRINGS is ()
       ((eq? grammar 'strict-infix)
        (error 'string-join
@@ -239,7 +239,7 @@
 
 (define (%substring/shared str start end)
   (if (and (= start 0) (= end (string-length str)))
-      str			; here (and only here) we share 
+      str			; here (and only here) we share
       (substring str start end)))
 
 (define (%string-copy! to tstart from fstart fend)
@@ -256,7 +256,7 @@
 
 ;;;
 ;;; Exported procedures
-;;; 
+;;;
 (define (string-copy str :optional (start 0) (end -1))
   (%check-indexes str start end 'string-copy)
   (substring str start end))
@@ -402,7 +402,7 @@
   (%check-indexes s1 start1 end1 'string-compare -1)
   (%check-indexes s2 start2 end2 'string-compare -1)
   (%string-compare s1 s2 proc< proc= proc> start1 end1 start2 end2 char<? char>?))
-   
+
 (define (string-compare-ci s1 s2 proc< proc= proc>
 			   :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
   (%check-indexes s1 start1 end1 'string-compare-ci -1)
@@ -653,19 +653,19 @@
 		       (+ count 1)
 		       count)))
 	 ((>= i end) count)))
-    
+
     ((char-set? criterion)
      (do ((i start (+ i 1))
 	  (count 0 (if (char-set-contains? criterion (string-ref s i))
 		       (+ count 1)
 		       count)))
 	 ((>= i end) count)))
-    
+
     ((procedure? criterion)
      (do ((i start (+ i 1))
 	  (count 0 (if (criterion (string-ref s i)) (+ count 1) count)))
 	 ((>= i end) count)))
-    
+
     (else (error 'string-count "bad criterion ~S" criterion))))
 
 
@@ -747,18 +747,18 @@
   (let Loop ((strings strings) (nchars 0) (first #f))
     (cond
       ((pair? strings)			; Scan the args, add up total
-       (let* ((string  (car strings))	; length, remember 1st 
+       (let* ((string  (car strings))	; length, remember 1st
 	      (tail (cdr strings))	; non-empty string.
 	      (slen (string-length string)))
 	 (if (zero? slen)
 	     (Loop tail nchars first)
 	     (Loop tail (+ nchars slen) (or first strings)))))
-      
+
       ((zero? nchars) "")
-      
+
       ;; Just one non-empty string! Return it.
       ((= nchars (string-length (car first))) (car first))
-      
+
       (else (let ((res (make-string nchars)))
 	      (let Loop ((strings first) (i 0))
 		(if (pair? strings)
@@ -792,7 +792,7 @@
 	  (Loop (+ len slen)
 		(if (or nzlist (zero? slen)) nzlist lis)
 		(cdr lis)))
-	
+
 	(cond ((zero? len) (substring/shared final 0 end))
 	      ;; LEN > 0, so NZLIST is non-empty.
 	      ((and (zero? end) (= len (string-length (car nzlist))))
@@ -803,8 +803,8 @@
 ;;;;
 ;;;;		       F O L D ,   U N F O L D   &   M A P
 ;;;;
-;;;; ======================================================================  
-(define (%string-map proc s start end)	
+;;;; ======================================================================
+(define (%string-map proc s start end)
   (let* ((len (- end start))
 	 (res (make-string len)))
     (do ((i start (+ i 1))
@@ -883,7 +883,7 @@
   (%check-indexes s start end 'string-for-each)
   (let Loop ((i start))
     (when (< i end)
-      (proc (string-ref s i)) 
+      (proc (string-ref s i))
       (Loop (+ i 1)))))
 
 
@@ -897,9 +897,9 @@
 
 ;;;; ======================================================================
 ;;;;
-;;;;		     R E P L I C A T E   &   R O T A T E     
+;;;;		     R E P L I C A T E   &   R O T A T E
 ;;;;
-;;;; ======================================================================  
+;;;; ======================================================================
 (define (%multispan-repcopy! target tstart s sfrom sto start end)
   (let* ((slen	      (- end start))
 	 (i0	      (+ start (modulo sfrom slen)))
@@ -907,11 +907,11 @@
 
     ;; Copy the partial span @ the beginning
     (%string-copy! target tstart s i0 end)
-    
+
     (let* ((ncopied (- end i0))			; We've copied this many.
 	   (nleft   (- total-chars ncopied))	; # chars left to copy.
 	   (nspans  (quotient nleft slen)))	; # whole spans to copy
-			   
+
       ;; Copy the whole spans in the middle.
       (do ((i (+ tstart ncopied) (+ i slen))	; Current target index.
 	   (nspans nspans (- nspans 1)))	; # spans to copy
@@ -938,16 +938,16 @@
 	  ((zero? slen) (error 'xsubstring
 			       "Cannot replicate empty (sub)string ~S ~S ~S ~S ~S"
 			       s from to start end))
-	  
+
 	  ((= 1 slen)		; Fast path for 1-char replication.
 	   (make-string anslen (string-ref s start)))
-	  
+
 	  ;; Selected text falls entirely within one span.
 	  ((= (floor (/ from slen)) (floor (/ to slen)))
 	   (substring s
 		      (+ start (modulo from slen))
 		      (+ start (modulo to   slen))))
-	  
+
 	  ;; Selected text requires multiple spans.
 	  (else (let ((ans (make-string anslen)))
 		  (%multispan-repcopy! ans 0 s from to start end)
@@ -962,7 +962,7 @@
       (check-arg (lambda (val) (and (integer? val) (exact? val) (<= sfrom val)))
 		 sto 'string-xcopy!)
       (set! sto (+ sfrom (string-length s))))
-  
+
   (let* ((tocopy (- sto sfrom))
 	 (tend (+ tstart tocopy))
 	 (slen (- end start)))
@@ -972,13 +972,13 @@
 			       "cannot replicate empty (sub)string"))
 	  ((= 1 slen)			; Fast path for 1-char replication.
 	   (string-fill! target (string-ref s start) tstart tend))
-	  
+
 	  ;; Selected text falls entirely within one span.
 	  ((= (floor (/ sfrom slen)) (floor (/ sto slen)))
-	   (%string-copy! target tstart s 
+	   (%string-copy! target tstart s
 			  (+ start (modulo sfrom slen))
 			  (+ start (modulo sto   slen))))
-	  
+
 	  ;; Multi-span copy.
 	  (else (%multispan-repcopy! target tstart s sfrom sto start end)))))
 
@@ -986,7 +986,7 @@
 ;;;;
 ;;;;	M I S C E L L A N E O U S :   I N S E R T I O N ,   P A R S I N G
 ;;;;
-;;;; ======================================================================  
+;;;; ======================================================================
 (define (string-replace s1 s2 start1 end1 :optional (start2 0) (end2 -1))
   (%check-indexes s1 start1 end1 'string-replace)
   (%check-indexes s2 start2 end2 'string-replace)
@@ -1127,7 +1127,7 @@
 ;;;     Alfred V. Aho
 ;;;     Formal Language Theory - Perspectives and Open Problems
 ;;;     Ronald V. Brook (editor)
-;;; This algorithm is O(m + n) where m and n are the 
+;;; This algorithm is O(m + n) where m and n are the
 ;;; lengths of the pattern and string respectively
 
 
@@ -1168,40 +1168,40 @@
     (if (> rvlen 0)
 	(let ((rvlen-1 (- rvlen 1))
 	      (c0 (string-ref pattern start)))
-	  
+
 	  ;; Here's the main loop. We have set rv[0] ... rv[i].
 	  ;; K = I + START -- it is the corresponding index into PATTERN.
-	  (let Loop1 ((i 0) (j -1) (k start))	
+	  (let Loop1 ((i 0) (j -1) (k start))
 	    (if (< i rvlen-1)
-		
+
 		(let ((ck (string-ref pattern k)))
 		  ;; Loop2 invariant:
 		  ;;   pat[(k-j) .. k-1] matches pat[start .. start+j-1]
 		  ;;   or j = -1.
 		  (let Loop2 ((j j))
-		    
+
 		    (cond ((= j -1)
 			   (let ((i1 (+ i 1)))
 			     (vector-set! rv i1 (if (c= ck c0) -1 0))
 			     (Loop1 i1 0 (+ k 1))))
-			  
+
 			  ;; pat[(k-j) .. k] matches pat[start..start+j].
 			  ((c= ck (string-ref pattern (+ j start)))
 			   (let* ((i1 (+ 1 i))
 				  (j1 (+ 1 j)))
 			     (vector-set! rv i1 j1)
 			     (Loop1 i1 j1 (+ k 1))))
-			  
+
 			  (else (Loop2 (vector-ref rv j))))))))))
     rv))
 
 
 ;;; We've matched I chars from PAT. C is the next char from the search string.
-;;; Return the new I after handling C. 
+;;; Return the new I after handling C.
 ;;;
 ;;; The pattern is (VECTOR-LENGTH RV) chars long, beginning at index PAT-START
 ;;; in PAT (PAT-START is usually 0). The I chars of the pattern we've matched
-;;; are 
+;;; are
 ;;;     PAT[PAT-START .. PAT-START + I].
 ;;;
 ;;; It's *not* an oversight that there is no friendly error checking or
@@ -1235,11 +1235,11 @@
   (check-arg (lambda (x) (and (integer? x) (exact? x) (<= 0 x))) c=
 	     'string-kmp-partial-search)
   (%check-indexes s s-start s-end 'string-kmp-partial-search -1)
-  
+
   (let ((patlen (vector-length rv)))
     (check-arg (lambda (i) (and (integer? i) (exact? i) (<= 0 i) (< i patlen)))
 	       i 'string-kmp-partial-search)
-    
+
     ;; Enough prelude. Here's the actual code.
     (let Loop ((si s-start)		; An index into S.
 	       (vi i))			; An index into RV.
@@ -1247,7 +1247,7 @@
 	    ((= si s-end) vi)		; Ran off the end.
 	    (else			; Match s[si] & loop.
 	     (let ((c (string-ref s si)))
-	       (Loop (+ si 1)	
+	       (Loop (+ si 1)
 		     (let Loop2 ((vi vi))	; This is just KMP-STEP.
 		       (if (c= c (string-ref pat (+ vi p-start)))
 			   (+ vi 1)
@@ -1281,23 +1281,23 @@
 ;;; redistribute either the original software or a modified version, and
 ;;; to use this software for any purpose is granted, subject to the
 ;;; following restrictions and understandings.
-;;; 
+;;;
 ;;; 1. Any copy made of this software must include this copyright notice
 ;;; in full.
-;;; 
+;;;
 ;;; 2. Users of this software agree to make their best efforts (a) to
 ;;; return to the MIT Scheme project any improvements or extensions that
 ;;; they make, so that these may be included in future releases; and (b)
 ;;; to inform MIT of noteworthy uses of this software.
-;;; 
+;;;
 ;;; 3. All materials developed as a consequence of the use of this
 ;;; software shall duly acknowledge such use, in accordance with the usual
 ;;; standards of acknowledging credit in academic research.
-;;; 
+;;;
 ;;; 4. MIT has made no warrantee or representation that the operation of
 ;;; this software will be error-free, and MIT is under no obligation to
 ;;; provide any services, by way of maintenance, update, or otherwise.
-;;; 
+;;;
 ;;; 5. In conjunction with products arising from the use of this material,
 ;;; there shall be no use of the name of the Massachusetts Institute of
 ;;; Technology nor of any adaptation thereof in any advertising,
@@ -1307,7 +1307,7 @@
 ;;; Scsh copyright terms
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; All rights reserved.
-;;; 
+;;;
 ;;; Redistribution and use in source and binary forms, with or without
 ;;; modification, are permitted provided that the following conditions
 ;;; are met:
@@ -1318,7 +1318,7 @@
 ;;;    documentation and/or other materials provided with the distribution.
 ;;; 3. The name of the authors may not be used to endorse or promote products
 ;;;    derived from this software without specific prior written permission.
-;;; 
+;;;
 ;;; THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS OR
 ;;; IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 ;;; OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.

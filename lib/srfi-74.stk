@@ -1,20 +1,20 @@
 ;;;;
 ;;;; srfi-74.stk			-- SRFI-74 implementation
-;;;; 
-;;;; Copyright © 2010 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
-;;;; 
+;;;;
+;;;; Copyright Â© 2010 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;;
 ;;;;           Author: Michael Sperber
 ;;;;      Modified by: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  2005
 ;;;; Last file update:  4-Apr-2010 19:55 (eg)
 ;;;;
-;;;; This code is an adaptation of the reference implementation provided 
-;;;; with the SRFI document by Michael Sperber. 
+;;;; This code is an adaptation of the reference implementation provided
+;;;; with the SRFI document by Michael Sperber.
 
 ; Octet-addressed binary objects
 
-; Copyright (C) Michael Sperber (2005). All Rights Reserved. 
-; 
+; Copyright (C) Michael Sperber (2005). All Rights Reserved.
+;
 ; Permission is hereby granted, free of charge, to any person
 ; obtaining a copy of this software and associated documentation files
 ; (the "Software"), to deal in the Software without restriction,
@@ -22,10 +22,10 @@
 ; publish, distribute, sublicense, and/or sell copies of the Software,
 ; and to permit persons to whom the Software is furnished to do so,
 ; subject to the following conditions:
-; 
+;
 ; The above copyright notice and this permission notice shall be
 ; included in all copies or substantial portions of the Software.
-; 
+;
 ; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 ; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 ; MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -63,7 +63,7 @@
 	  blob=? blob-copy! blob-copy blob->u8-list u8-list->blob
 	  blob->uint-list blob->sint-list uint-list->
 	  blob sint-list->blob)
-  
+
 
 (define *endianness/little* (list 'little))
 (define *endianness/big* (list 'big))
@@ -170,15 +170,15 @@
 		     (lambda (index acc)
 		       (u8vector-set! blob index (- 255 (remainder acc 256)))
 		       (quotient acc 256)))
-      
+
       (index-iterate index size (eq? (endianness little) endness)
 		     val
 		     (lambda (index acc)
 		       (u8vector-set! blob index (remainder acc 256))
 		       (quotient acc 256))))
-  
+
   (values))
-  
+
 (define (make-uint-set! size)
   (cut blob-uint-set! size <> <> <> <>))
 (define (make-sint-set! size)

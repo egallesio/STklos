@@ -1,7 +1,8 @@
-/*
+/*							-*- coding: utf-8 -*-
  *
- * n u m b e r . c				-- Numbers management
+ * n u m b e r . c	-- Numbers management
  *
+ * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 27-May-2011 22:32 (eg)
+ * Last file update: 22-Aug-2011 11:23 (eg)
  */
 
 
@@ -1459,7 +1460,7 @@ DEFINE_PRIMITIVE("even?", evenp, subr1, (SCM n))
  * (max +inf.0 x)         =>  +inf.0
  * (min -inf.0 x)         =>  -inf.0
  * @end lisp
- * 
+ *
  * ,(bold "Note:") If any argument is inexact, then the result will also be
  * inexact
 doc>

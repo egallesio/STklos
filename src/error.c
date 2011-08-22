@@ -2,22 +2,22 @@
  *
  * e r r o r . c 			-- The error procedure
  *
- * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright Â© 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *           Author: Erick Gallesio [eg@unice.fr]
@@ -29,21 +29,21 @@
 
 
 /*===========================================================================*\
- * 
+ *
  * A simplified (and very ad hoc) version of printf for error messages.
  * Recognized formats:
  *       %c for character
  *       %s for string
  *       %S for string (surrounded by a pair of quotes)
- *       %d for decimal print 
+ *       %d for decimal print
  *       %x for hexadecimal print
  *       %% for printing a '%'
  *       ~A for printing a Scheme object in display mode
  *       ~S for printing a Scheme object in write mode
  *	 ~W for printing a Scheme object in write mode (circular)
- *	 ~% for printing a newline 
+ *	 ~% for printing a newline
  *       ~~ for printing a tilde character
- * 
+ *
 \*===========================================================================*/
 
 
@@ -65,9 +65,9 @@ static void print_format(SCM port,char *format, va_list ap)
       /* % format (C-like) */
       switch (*++s) {
 	case '%': STk_putc('%', port); break;
-	  
+
 	case 'S': STk_putc('`', port); /* No break */
-	case 's': for (str = va_arg(ap, char *); *str; str++) 
+	case 's': for (str = va_arg(ap, char *); *str; str++)
 		    STk_putc(*str, port);
 		  if (*s == 'S') STk_putc('\'', port);
 		  break;
@@ -79,12 +79,12 @@ static void print_format(SCM port,char *format, va_list ap)
 		    if (val < 0) {
 		      STk_putc('-', port);
 		      print_int(port, -val, 10);
-		    } 
-		    else  
+		    }
+		    else
 		      print_int(port, val, 10);
 		    break;
 		  }
-	default:  STk_putc('%', port); 
+	default:  STk_putc('%', port);
 		  if (*s) STk_putc(*s, port);
 		  break;
       }
@@ -92,20 +92,20 @@ static void print_format(SCM port,char *format, va_list ap)
       /* ~ format (CL like) */
       switch (*++s) {
 	case 'A': STk_putc('`', port); /* No break */
-	case 'a': STk_print(va_arg(ap, SCM), port, DSP_MODE); 
+	case 'a': STk_print(va_arg(ap, SCM), port, DSP_MODE);
 		  if (*s == 'A') STk_putc('\'', port);
 		  break;
 	case 'W': STk_putc('`', port);	/* No break */
 	case 'w': STk_print_star(va_arg(ap, SCM), port);
 	  	  if (*s == 'W') STk_putc('\'', port);
-		  break;	
+		  break;
 	case 'S': STk_putc('`', port);	/* No break */
-	case 's': STk_print(va_arg(ap, SCM), port, WRT_MODE); 
+	case 's': STk_print(va_arg(ap, SCM), port, WRT_MODE);
 		  if (*s == 'S') STk_putc('\'', port);
 		  break;
 	case '~': STk_putc('~', port);  break;
 	case '%': STk_putc('\n', port); break;
-	default:  STk_putc('~', port); 
+	default:  STk_putc('~', port);
 	  	  if (*s) STk_putc(*s, port);
 		  break;
       }
@@ -119,7 +119,7 @@ static void print_format(SCM port,char *format, va_list ap)
 void STk_signal_error(SCM type, SCM where, SCM str)
 {
   SCM bt = STk_vm_bt();
-  
+
   STk_raise_exception(STk_make_C_cond(type, 3, where, bt, str));
 }
 
@@ -144,10 +144,10 @@ SCM STk_format_error(char *format, ...)
 static SCM make_error_condition(char *format, va_list ap)
 {
   SCM out, bt;
-  
+
   /* Grab a baktrace */
   bt = STk_vm_bt();
-  
+
   /* Open a string port */
   out = STk_open_output_string();
 
@@ -161,7 +161,7 @@ static SCM make_error_condition(char *format, va_list ap)
                          bt,
                          STk_get_output_string(out));
 
-}  
+}
 
 
 SCM STk_make_error(char *format, ...)
@@ -172,7 +172,7 @@ SCM STk_make_error(char *format, ...)
   va_start(ap, format);
   cond = make_error_condition(format, ap);
   va_end(ap);
-  
+
   /* Return the error condition */
   return cond;
 }
@@ -185,8 +185,8 @@ void STk_error(char *format, ...)
   va_list ap;
   SCM cond;
 
-  va_start(ap, format); 
-  cond = make_error_condition(format, ap); 
+  va_start(ap, format);
+  cond = make_error_condition(format, ap);
   va_end(ap);
 
   /* Signal error */
@@ -236,7 +236,7 @@ void STk_panic(char *format, ...)
 
 void STk_signal(char *str)
 {
-  STk_raise_exception(STk_make_C_cond(STk_message_condition, 
+  STk_raise_exception(STk_make_C_cond(STk_message_condition,
 				      1,
 				      STk_Cstring2string(str)));
 }
@@ -251,11 +251,11 @@ void STk_debug(char *format, ...)
 
   /* Print the prologue */
   STk_fprintf(eport, "**** Debug: ");
-  
+
   va_start(ap, format);
   print_format(eport, format, ap);
   va_end(ap);
-  
+
   STk_putc('\n', eport);
   STk_flush(eport);
 }

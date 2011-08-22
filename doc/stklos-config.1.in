@@ -22,12 +22,12 @@ stklos-config \- stklos libraries and component information retrieval.
 The
 .B stklos-config
 permits to obtain informations about the
-.B stklos 
+.B stklos
 version installed on a system. The values returned by this command
-are hard-coded when the system is configured. 
+are hard-coded when the system is configured.
 
 .SH OPTIONS
-Here are the options available in the version @VERSION@ of 
+Here are the options available in the version @VERSION@ of
 .B stklos.
 
 .IP "--prefix | -p"
@@ -45,8 +45,8 @@ Value of LDFLAGS used to compile STklos
 .IP "--shared-suffix | -s"
 The suffix for shared libraries.
 .IP "--threads | -t"
-The name thread system compiled in 
-.B stklos. 
+The name thread system compiled in
+.B stklos.
 .IP "--libraries | -L"
 Display informations on the libraries which are compiled and the one
 which are used when the system was compiled

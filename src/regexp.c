@@ -1,7 +1,7 @@
 /*
  * regexp.c	-- STklos Regexps
  *
- * Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 24-Nov-2000 10:35 (eg)
- * Last file update: 21-Aug-2011 13:33 (eg)
+ * Last file update: 22-Aug-2011 00:35 (eg)
  */
 
 #include "stklos.h"
@@ -204,7 +204,6 @@ static SCM regexec_helper(SCM re, SCM str, int pos_only)
   int i, ret, depth, max;
   SCM result;
 
-  STk_debug("regexec helper ~S ~S", re, str);
   /* RE can be a string or a already compiled regexp */
   if (STRINGP(re)) re = STk_str2regexp(re);
   else if (!REGEXPP(re)) STk_error("bad compiled regexp ~S", re);
@@ -237,7 +236,7 @@ static SCM regexec_helper(SCM re, SCM str, int pos_only)
 		            STk_makestring(to-from, STRING_CHARS(str)+from),
 			result);
   }
-  STk_debug("regexec helper ~S ~S => ", re, str, STk_reverse(result));
+
   return STk_dreverse(result);
 }
 

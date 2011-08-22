@@ -1,37 +1,37 @@
 ;;;;
 ;;;; tar.stk	-- Implementation of untar for STklos
-;;;; 
-;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
-;;;;           Author: Manuel Serrano 
+;;;;
+;;;;           Author: Manuel Serrano
 ;;;;    Creation date:  8-Jan-2007 11:33 (eg)
 ;;;; Last file update: 10-May-2007 17:03 (eg)
 ;;;;
 ;;;;
-;;;;   Based on Chicken's tar implementation (Felix L. Winkelmann). 
+;;;;   Based on Chicken's tar implementation (Felix L. Winkelmann).
 
 ;(define-module TAR
   (export tar-header
 	  tar-read-header
 	  tar-read-block
 	  tar-round-up-to-record-size)
-  
+
 
 (define-struct tar-header
   name mode uid gid size mtime checksum type linkname magic uname gname
@@ -122,12 +122,12 @@
 		      sub))
 		   (else
 		    (loop (+ 1 i)))))))))
-    
+
     (define (fetch)
       (let ((c (string-ref data ptr)))
 	(set! ptr (+ 1 ptr))
 	c))
-    
+
     (let ((name (if (or (not (string? data)) (= (string-length data) 0))
 		    ""
 		    (extract (tar-name-size)))))
@@ -144,7 +144,7 @@
 	       (uname    (extract (tar-tunmlen)))
 	       (gname    (extract (tar-tgnmlen)))
 	       (devmajor (str->octal (extract 8) #f))
-	       (devminor (str->octal (extract 8) #f)) 
+	       (devminor (str->octal (extract 8) #f))
 	       (csum2    (checksum data)))
 	  (cond
 	    ((not (or (string=? (tar-tmagic) magic)
@@ -156,7 +156,7 @@
 	      (format "invalid checksum (expected: ~s)" chksum)
 	      csum2))
 	    (else
-	     (make-struct tar-header 
+	     (make-struct tar-header
 			  name
 			  mode
 			  uid

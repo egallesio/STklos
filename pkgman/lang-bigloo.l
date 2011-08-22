@@ -8,7 +8,7 @@
 #\\\"			"#\\\""
 
 ;; Strings
-\"([^\\\"]|\\.)*\"	yytext		;|; 
+\"([^\\\"]|\\.)*\"	yytext		;|;
 
 ;;Comment
 \;.*			yytext
@@ -20,7 +20,7 @@
 #unspecified		"#void"
 
 ;; Ascii characters notation #aXXX
-#a[0-9][0-9][0-9]	(format "(integer->char ~a)" 
+#a[0-9][0-9][0-9]	(format "(integer->char ~a)"
 				(substring yytext 2 5))
 
 ;; Other characters
@@ -31,5 +31,5 @@
 
 
 <<EOF>>			'eof
-<<ERROR>>		(error 'bigloo-preprocessor "parse error ~S (line ~a)" 
+<<ERROR>>		(error 'bigloo-preprocessor "parse error ~S (line ~a)"
 			       yytext (lexer-get-line))

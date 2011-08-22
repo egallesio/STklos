@@ -1,18 +1,18 @@
 ;;;;
 ;;;; srfi-59.stk	-- Implementation of SRFI 59
-;;;; 
-;;;; 
-;;;;           Author: Erick Gallesio using code from Aubrey Jaffer 
-;;;;    Creation date:  8-Mar-2005 
+;;;;
+;;;;
+;;;;           Author: Erick Gallesio using code from Aubrey Jaffer
+;;;;    Creation date:  8-Mar-2005
 ;;;; Last file update: 23-Jun-2010 10:33 (eg)
 ;;;;
 
 (unless (provided? "STklos.init")
-  
+
 (define (implementation-vicinity)
   (case (machine-type)
     ((unix)	 (%stklos-conf-file "slib"))
-    (else 	 (error 'implementation-vicinity 
+    (else 	 (error 'implementation-vicinity
 			"unknown implementation on this system"))))
 
 (define library-vicinity

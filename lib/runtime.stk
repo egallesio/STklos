@@ -1,38 +1,38 @@
 ;;;;
 ;;;; runtime.stk	-- Stuff necessary for bootstaping the system
-;;;; 
-;;;; Copyright © 2001-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2001-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
 ;;;; Last file update: 28-Oct-2010 15:18 (eg)
 ;;;;
 
 
-(define (map* fn . l) 		; A map which accepts dotted lists (arg lists  
+(define (map* fn . l) 		; A map which accepts dotted lists (arg lists
   (cond 			; must be "isomorph"
    ((null? (car l)) '())
    ((pair? (car l)) (cons (apply fn      (map car l))
 			  (apply map* fn (map cdr l))))
    (else            (apply fn l))))
 
-(define (for-each* fn . l) 	; A for-each which accepts dotted lists (arg lists  
+(define (for-each* fn . l) 	; A for-each which accepts dotted lists (arg lists
   (cond 			; must be "isomorph"
    ((null? (car l)) '())
    ((pair? (car l)) (apply fn (map car l)) (apply for-each* fn (map cdr l)))
@@ -45,7 +45,7 @@
 #| example
   (filter-map (lambda (x) (and (number? x) (+ x 1)))
 	    '(1 2 foo "bar" 7))
-                 
+
 |#
 
 (define (append-map proc . args)
@@ -87,7 +87,7 @@ doc>
 ;; ----------------------------------------------------------------------
 ;;	management of globals ...
 ;; ----------------------------------------------------------------------
-;; This should be in compiler module but it a nightmare with bootstrap. 
+;; This should be in compiler module but it a nightmare with bootstrap.
 (define compiler-known-globals
   (make-parameter '()))
 
@@ -100,11 +100,11 @@ doc>
 
 ;;; ----------------------------------------------------------------------
 ;;;
-;;; 				E x p a n d e r s 
+;;; 				E x p a n d e r s
 ;;;
 ;;; ----------------------------------------------------------------------
 (define *expander-list*     '())	; the macros
-(define *expander-list-src* '())	; their source code 	
+(define *expander-list-src* '())	; their source code
 (define *expander-published* '())	; names of the macro to "publish"
 
 (define (expander? x)
@@ -116,11 +116,11 @@ doc>
 
 
 (define (initial-expander x e)
- (cond 
+ (cond
    ((not (pair? x))   	      x)
    ((not (symbol? (car x)))  (application-expander x e))
    (else  (let ((functor (car x)))
-	    (cond 
+	    (cond
 	       ((expander? functor) ((cdr (assq functor *expander-list*)) x e))
 	       (else (application-expander x e)))))))
 
@@ -179,7 +179,7 @@ doc>
 
 (define (expander-published-add! name)
   (unless (memq name *expander-published*)
-    (set! *expander-published* (cons name *expander-published*))))  
+    (set! *expander-published* (cons name *expander-published*))))
 
 ;;;
 ;;; Runtime support for R5RS macro

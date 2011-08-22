@@ -1,7 +1,7 @@
 /*
  * thread-pthreads.c			-- Threads support in STklos
  *
- * Copyright  2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -268,7 +268,7 @@ DEFINE_PRIMITIVE("%thread-sleep!", thread_sleep, subr1, (SCM tm))
     struct timeval tv = STk_thread_abstime_to_reltime(REAL_VAL(tm));
     struct timespec ts;
 
-    /* convert a timeval (in �s) to a timesepc (in ns) */
+    /* convert a timeval (in µs) to a timesepc (in ns) */
     ts.tv_sec  = (time_t) tv.tv_sec;
     ts.tv_nsec = (long) tv.tv_usec * 1000;
     nanosleep(&ts, NULL);

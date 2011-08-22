@@ -1,25 +1,25 @@
 ;;;;
-;;;; b b . s t k 	-- Build the distribution boot file 
+;;;; b b . s t k 	-- Build the distribution boot file
 ;;;;			   (Not necessary in the boot itself)
-;;;; 
-;;;; Copyright © 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2000-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  6-Jun-2000 22:05 (eg)
 ;;;; Last file update:  8-Nov-2006 11:08 (eg)
@@ -31,9 +31,9 @@
 (define (generate-C-header file INSTRUCTION-SET)
   (let ((out 	    (open-output-file file))
 	(last-mnemo ""))
-    ;; Generation of the mnemonics equivalences 
+    ;; Generation of the mnemonics equivalences
     (format out "/* This file was generated automatically. DO NOT EDIT */\n\n")
-    
+
     (format out "#ifndef _VM_H\n")
     (format out "#define _VM_H\n")
     (for-each (lambda (x)
@@ -51,7 +51,7 @@
     (format out "\n#  define NB_VM_INSTR (~A+1)\n" last-mnemo)
     (format out "#endif\n\n")
 
-    ;; Generation of the jump table for GCC 
+    ;; Generation of the jump table for GCC
     (format out "\n\n#ifdef DEFINE_JUMP_TABLE\n")
     (format out "static void *jump_table[] = {\n")
     (for-each (lambda (x)
@@ -62,13 +62,13 @@
 		      ((= i len))
 		    (if (char=? (string-ref mnemo i) #\-)
 			(string-set! mnemo i #\_)))
-		  ;; Write a GCC address 
+		  ;; Write a GCC address
 		  (format out "  &&lab_~A,\n" mnemo)))
 	      INSTRUCTION-SET)
     (format out "  NULL};\n")
     (format out "#endif\n")
     (format out "#undef DEFINE_JUMP_TABLE\n\n")
-    
+
     ;; Generation of the jump table for GCC
     (format out "\n\n#ifdef DEFINE_NAME_TABLE\n")
     (format out "static char *name_table[] = {\n")
@@ -80,7 +80,7 @@
 		      ((= i len))
 		    (if (char=? (string-ref mnemo i) #\-)
 			(string-set! mnemo i #\_)))
-		  ;; Write a C string 
+		  ;; Write a C string
 		  (format out "  \"~A\",\n" mnemo)))
 	      INSTRUCTION-SET)
     (format out "  NULL};\n")

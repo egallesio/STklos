@@ -6,7 +6,7 @@
 
 mandir	      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
-	        stklos-pkg.1 
+	        stklos-pkg.1
 EXTRA_DIST    = $(man_MANS)
 
 DOCDB       = DOCDB
@@ -39,7 +39,7 @@ skribe:
 $(DOCDB): $(OTHERDB)
 	cat $(OTHERDB) > $(DOCDB)
 
-../src/$(DOCDB): 
+../src/$(DOCDB):
 	(cd ../src; $(MAKE) doc)
 
 ../lib/$(DOCDB):

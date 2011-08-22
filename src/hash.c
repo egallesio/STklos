@@ -2,7 +2,7 @@
  *
  * h a s h  . c			-- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 1994-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -108,7 +108,7 @@ static unsigned long hash_scheme_string(SCM str)
 
 
 /*
- * sxhash calculates a "universal" hash value à la CL sxhash  function
+ * sxhash calculates a "universal" hash value Ã  la CL sxhash  function
  *
  */
 static unsigned long sxhash(SCM obj)

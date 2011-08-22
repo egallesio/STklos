@@ -1,20 +1,20 @@
 ;; ======================================================================
-;; 
+;;
 ;; 			STklos Reference Manual
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 2 of the License, or
 ;; (at your option) any later version.
-;; 
+;;
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;; 
+;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
-;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date:  6-Jun-2007 15:47 (eg)
@@ -27,7 +27,7 @@
 
 (define (stklos-pkg-help)
   (raw-code (exec "stklos-pkg --help 2>&1")))
-	 
+
 
 (chapter :title "The ScmPkg Package System"
 (index "ScmPkg")
@@ -38,7 +38,7 @@ currently supported by Bigloo and Stklos. This package system
 provides new APIs to Scheme (e.g., network programming,
 cryptography, encoding, ...) and it manages automatic package
 installation, deinstallation and testing.])
-   
+
 (section :title [,(scmpkg) "tutorial"]
 
    (p [,(stklos-pkg) is the command which gives access to
@@ -46,8 +46,8 @@ installation, deinstallation and testing.])
 manage ,(scmpkg) packages. For instance, this command manages a
 local cache of the ,(scmpkg) server, permits (de)installation of
 ,(scmpkg) packages, the test of packages, ...])
-   
-(p [To start, we can synchronize our local repository with the 
+
+(p [To start, we can synchronize our local repository with the
 ,(scmpkg) servers. This can be done by the following command:])
 
 (raw-code "$ stklos-pkg --sync")
@@ -66,21 +66,21 @@ rfc3339-0.2.0
 srfi1-0.0.1 (tuning)
 $])
 
-(p [Packages whose name start by an underscore are packages needed for 
-alien language support (e.g. the package "_bigloo" is necessary to 
-run a package written in the Bigloo Scheme dialect, or the package 
+(p [Packages whose name start by an underscore are packages needed for
+alien language support (e.g. the package "_bigloo" is necessary to
+run a package written in the Bigloo Scheme dialect, or the package
 "_chicken-net" is necessary for the packages using the network
 primitives of the Chicken Scheme dialect). Some packages my offer
 a tuning. A tuned package is a package which has been specially
 tuned for STklos (e.g. the generic "srfi1" package which
 implement SRFI-1 has been tuned to be more efficient in STklos)])
-   
 
-(p [To download a new package (and all its dependencies), one can simply 
+
+(p [To download a new package (and all its dependencies), one can simply
 issue the following command:])
 
 (raw-code "$ stklos-pkg --extract PKG --directory /tmp/Test")
-   
+
 (p [This command downloads the package PKG, it dependencies
 and (eventually) its tuning. It also creates a ,(tt "Makefile")
 for compiling the package.  The ,(tt "--directory") option
@@ -94,17 +94,17 @@ offers the following main targets]
 user])
       (item [,(bold "system-install:") to install the package
 system wide (privilegied access rights are probably needed)])))
-   
+
 (p [To test a package, one can also use the following command:])
 (raw-code "$ stklos-pkg --test PKG")
-(p [This downloads the necessary files in a temporary directory, 
+(p [This downloads the necessary files in a temporary directory,
 and launches the tests of the package ,(emph "PKG")])
-   
+
 (p [To install a package, one can also use the following command:])
 (raw-code "$ stklos-pkg --install PKG")
-(p [This downloads the necessary files in a temporary directory, 
+(p [This downloads the necessary files in a temporary directory,
 and installs the package ,(emph "PKG")])
-   
+
 (p [This completes the basis ,(scmpkg) tutorial. See below for
 the list of all ,(stklos-pkg) options]))
 

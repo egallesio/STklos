@@ -45,6 +45,6 @@ clean:
 	rm -rf ./stklos-ref.* *~ *.mp html/* $(PDF)
 
 install: Html Pdf
-	rm -rf ../html/*.html ../html/images/*; 
+	rm -rf ../html/*.html ../html/images/*;
 	cp -a html/* ../html
 	cp -a $(PDF) ../pdf

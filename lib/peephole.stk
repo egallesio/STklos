@@ -1,33 +1,33 @@
 ;;;;
 ;;;; peephole.stk	-- Peephole Optimiser fro the STklos VM
-;;;; 
-;;;; Copyright © 2001-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2001-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 20:32 (eg)
 ;;;; Last file update: 22-Feb-2007 20:06 (eg)
 ;;;;
 
 ; ======================================================================
-; 
+;
 ; 			    PEEPHOLE OPTIMIZER
-; 
+;
 ; ======================================================================
 
 (define (label? code)      (integer? (car code)))
@@ -40,7 +40,7 @@
 
 
 (define (peephole all-code)
-  
+
   (define (replace-1-instr code instr)
     (set-car! code instr))
 
@@ -49,9 +49,9 @@
     (set-cdr! code (cddr code)))
 
   (define (optimize-goto code)
-    ;;//FIXME: normallement all-code ===> mais c'est très lent 
+    ;;//FIXME: normallement all-code ===> mais c'est trÃ¨s lent
     ;// on devrait avoir (memq (this-arg1 code) code) pour chercher au-dessus.
-    (let ((new-code (memq (this-arg1 code) code)))	
+    (let ((new-code (memq (this-arg1 code) code)))
       (if new-code
 	  (case (next-instr new-code)
 	    ((GOTO)   (replace-1-instr code (copy-tree (cadr new-code))))
@@ -102,13 +102,13 @@
 	     ;; [DEEP-LOCAL-REF, PUSH] => DEEP-LOC-REF-PUSH
 	     ((and (eq? i1 'DEEP-LOCAL-REF) (eq? i2 'PUSH))
 	      (replace-2-instr code (list 'DEEP-LOC-REF-PUSH (this-arg1 code))))
-	     
+
 
 	     ;; [GOTO x], ... ,x: GOTO y => GOTO y
 	     ;; [GOTO x], ... ,x: RETURN => RETURN
 	     ((eq? i1 'GOTO)
 	      (set! code (optimize-goto code)))
-     
+
 	     ;; [IN-NUMEQ ; IN-NOT] 	=> IN-NUMDIFF
 	     ;; [IN-NUMDIFF; IN-NOT]	=> IN-EQ
 	     ;; [IN-NUMLT ; IN-NOT] 	=> IN-NUMGE
@@ -120,7 +120,7 @@
 	     ;; [IN-EQUAL; IN-NOT]	=> IN-NOT-EQUAL
 	     ((and (eq? i2 'IN-NOT) (memq i1 '(IN-NUMEQ IN-NUMDIFF
 					       IN-NUMLT IN-NUMGT
-					       IN-NUMLE IN-NUMGE 
+					       IN-NUMLE IN-NUMGE
 					       IN-EQ IN-EQV IN-EQUAL)))
 	      (replace-2-instr code
 			       (list (case i1
@@ -133,7 +133,7 @@
 				       ((IN-EQ)      'IN-NOT-EQ)
 				       ((IN-EQV)     'IN-NOT-EQV)
 				       ((IN-EQUAL)   'IN-NOT-EQUAL)))))
-   
+
 	     ;; [IN-NUMEQ ; JUMP-FALSE] 	=> JUMP-NUMDIFF
 	     ;; [IN-NUMDIFF; JUMP-FALSE]	=> JUMP-NUMEQ
 	     ;; [IN-NUMLT ; JUMP-FALSE] 	=> JUMP-NUMGE
@@ -147,7 +147,7 @@
 	     ((and (eq? i2 'JUMP-FALSE) (memq i1 '(IN-NUMEQ ; IN-NUMDIFF
 						   IN-NUMLT IN-NUMGT
 						   IN-NUMLE IN-NUMGE
-						   IN-EQ IN-EQV IN-EQUAL 
+						   IN-EQ IN-EQV IN-EQUAL
 						   IN-NOT)))
 	      (replace-2-instr code
 			       (list (case i1
@@ -184,26 +184,26 @@
 	      (replace-2-instr code (list 'PUSH-GREF-TAIL-INV
 					  (this-arg1 code)
 					  (next-arg1 code))))
-	     
+
 
 	     ;; [PUSH, PREPARE-CALL] => PUSH-PREPARE-CALL
 	     ((and (eq? i1 'PUSH) (eq? i2 'PREPARE-CALL))
 	      (replace-2-instr code (list 'PUSH-PREPARE-CALL)))
-			       
-	     
-	     
+
+
+
 	     ;; [GLOBAL-REF, INVOKE] => GREF-INVOKE
 	     ((and (eq? i1 'GLOBAL-REF) (eq? i2 'INVOKE))
-	      (replace-2-instr code (list 'GREF-INVOKE 
+	      (replace-2-instr code (list 'GREF-INVOKE
 					  (this-arg1 code)
 					  (next-arg1 code))))
 
 	     ;; [GLOBAL-REF, TAIL-INVOKE] => GREF-TAIL(INVOKE
 	     ((and (eq? i1 'GLOBAL-REF) (eq? i2 'TAIL-INVOKE))
-	      (replace-2-instr code (list 'GREF-TAIL-INVOKE 
+	      (replace-2-instr code (list 'GREF-TAIL-INVOKE
 					  (this-arg1 code)
 					  (next-arg1 code))))
-	     
+
 	     ;; [LOCAL-REFx, PUSH] => LOCAL-REFx-PUSH
 	     ((and (eq? i2 'PUSH) (memq i1 '(LOCAL-REF0 LOCAL-REF1
 					     LOCAL-REF2 LOCAL-REF3
@@ -219,12 +219,12 @@
 	     ;; [RETURN; RETURN] => [RETURN]
 	     ((and (eq? i1 'RETURN) (eq? i2 'RETURN))
 	      (replace-2-instr code (list 'RETURN)))
-	     
+
 	     (else ;; No optimization; goto next instruction
 	      (set! code (cdr code))))))
       ;; Loop again on the same instruction
       (unless (null? code) (Loop code))))
-  
+
   ;; return the optimized code
   all-code)
 

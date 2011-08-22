@@ -1,7 +1,7 @@
 /*
  * f p o r t . c				-- File ports
  *
- * Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -758,7 +758,7 @@ SCM STk_load_source_file(SCM f)
   SCM sexpr;
   SCM eval_symb, eval, ref;
 
-  /* //FIXME: eval devrait être connu sans faire de lookup(i.e. exporté par la VM)*/
+  /* //FIXME: eval devrait Ãªtre connu sans faire de lookup(i.e. exportÃ© par la VM)*/
   eval_symb = STk_intern("eval");
 
   for ( ; ; ) {

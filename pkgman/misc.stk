@@ -1,24 +1,24 @@
 ;;;;
 ;;;; misc.stk	-- Misc functions for stklos-pkg
-;;;; 
-;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Jan-2007 13:37 (eg)
 ;;;; Last file update: 29-Jun-2007 18:06 (eg)
@@ -66,13 +66,13 @@
       ((< n 100) (format "00~a" n))
       ((< n 1000) (format "0~a" n))
       (else  (number->string n))))
-  
+
   (let ((r (or release 9999))
 	(v (map string->number (string-split str "."))))
     (if (and (= (length v) 3)
 	     (every integer? v))
 	(string->number (format "~A~A~A~A" (car v) (fmt (cadr v)) (fmt (caddr v))
-				(fmt r)))			
+				(fmt r)))
 	-1)))
 
 ;; ----------------------------------------------------------------------
@@ -111,7 +111,7 @@
     (let ((main (car lang)))
       (cons (format "_~a" main)
 	    (map (lambda (x) (format "_~a-~a" main x)) (cdr lang)))))
-    
+
   (define (deps* package)
     (let ((pkg  (find-package package)))
       (unless pkg
@@ -136,7 +136,7 @@
   ;; package-deps* starts here
   ;;
   (list->set (deps* package) '()))
-	     
+
 ;; ----------------------------------------------------------------------
 ;;	package-sans-version ...
 ;; ----------------------------------------------------------------------

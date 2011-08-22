@@ -1,20 +1,20 @@
 ;; ======================================================================
-;; 
+;;
 ;; 			STklos Reference Manual
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 2 of the License, or
 ;; (at your option) any later version.
-;; 
+;;
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;; 
+;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
-;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
@@ -27,7 +27,7 @@
 languages since it allows clean and secure code to be
 written. Internally, ,(q "pattern-matching forms") should be translated
 (compiled) into cascades of ,(q "elementary tests") where code is made as
-efficient as possible, avoiding redundant tests; ,(stklos) 
+efficient as possible, avoiding redundant tests; ,(stklos)
 ,(q "pattern matching compiler") provides this ,(footnote
   [The ,(q "pattern matching compiler") has been written by Jean-Marie Geffroy
   and is part of the Manuel Serrano's Bigloo compiler ,(ref :bib "Bigloo-home")
@@ -35,25 +35,25 @@ efficient as possible, avoiding redundant tests; ,(stklos)
   has been stolen from the Bigloo package v2.4 (the only difference
   between both package is the pattern matching of structures which is
   absent in ,(stklos)).]).])
- 
+
    (p [The technique used is described in details in
 ,(ref :bib "Queinnec-Geffroy92"), and the code generated can be
 considered optimal])
 
-   (p [The ,(q "pattern language") allows the expression of a wide variety 
+   (p [The ,(q "pattern language") allows the expression of a wide variety
 of patterns, including:])
-   
-(itemize 
+
+(itemize
 (item [Non-linear patterns: pattern variables can appear more than
 once, allowing comparison of subparts of the datum (through ,(ref :mark "eq?"))])
 
 (item [Recursive patterns on lists: for example, checking that the
-datum is a list of zero or more ,(code "a")s followed by zero or more 
+datum is a list of zero or more ,(code "a")s followed by zero or more
 ,(code "b")s.])
 
 (item [Pattern matching on lists as well as on vectors.]))
 
-   
+
 ;;;
 ;;; STKLOS PATTEN MATCHING FACILITIES
 ;;;
@@ -64,11 +64,11 @@ and ,(code "match-lambda").])
 
 (insertdoc 'match-case)
 (insertdoc 'match-lambda))
-   
+
 
 ;;;
 ;;; THE PATTEN LANGUAGE
-;;;   
+;;;
 (section :title "The Pattern Language"
 (index "pattern language")
 
@@ -100,7 +100,7 @@ and ,(code "match-lambda").])
 and ,(code "kwote") must be quoted in order to be treated as
 literals. This is the only justification for having the
 ,(code "kwote") pattern since, by convention, any atom which is
-not a keyword is quoted.])  
+not a keyword is quoted.])
 
 
 (subsection :number #f :title "Explanations Through Examples"
@@ -126,7 +126,7 @@ sequence of anything: ,(code"(a ??- b)") matches any list whose
 
 (item [,(code "(a ...)") matches any list of ,(code "a")'s, possibly empty.])
 
-(item [,(code "(?x ?x)") matches any list of length 2 whose ,(code"car") is 
+(item [,(code "(?x ?x)") matches any list of length 2 whose ,(code"car") is
  ,(emph "eq") to its ,(code"cadr").])
 
 (item [,(code "((and (not a) ?x) ?x)") matches any list of length

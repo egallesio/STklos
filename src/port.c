@@ -1,7 +1,7 @@
 /*
  *  p o r t . c			-- ports implementation
  *
- * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -646,7 +646,7 @@ DEFINE_PRIMITIVE("write-byte", write_byte, subr12, (SCM byte, SCM port))
 {
   int b = STk_integer_value(byte);
 
-  if ((b < 0) || (b > 255)) 
+  if ((b < 0) || (b > 255))
     STk_error_bad_io_param("bad byte value ~S", byte);
   port = verify_port(port, PORT_WRITE);
   STk_putc(b, port);

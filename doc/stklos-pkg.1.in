@@ -25,44 +25,44 @@ stklos-pkg \- ScmPkg packages management
 The
 .B stklos-pkg
 command is the general tool for downloading, installing and  uninstalling
-.B ScmPkg 
-packages in STklos. 
+.B ScmPkg
+packages in STklos.
 .LP
 The first time you use stklos-pkg you must synchronize your local
 repository with the ScmPkg server. This is done using the
-\fI--setup\fR option. The other options of stklos-pkg are described 
-below. 
+\fI--setup\fR option. The other options of stklos-pkg are described
+below.
 
 .SH OPTIONS
-Here are the options available in the version @VERSION@ of 
+Here are the options available in the version @VERSION@ of
 .B stklos.
 
-.IP "--extract package | -e package" 
+.IP "--extract package | -e package"
 extract the files of  \fIpackage\fR (and all its dependencies) and build a
 Unix Makefile for compiling the package. The files are extracted in the
 directory specified with option \fI--directory\fR (or the current
 directory if the option is unused. The generated Makefile offers the
-following targets: 
+following targets:
 .RS
-.IP  "all" 
+.IP  "all"
 to build the package dependencies nd the package itself
-.IP "test" 
+.IP "test"
 to run package tests
-.IP "install" 
+.IP "install"
 to install the package (and its dependencies) for the current user
-.IP "   system-install" 
-to install the package (and its dependencies) system-wide 
+.IP "   system-install"
+to install the package (and its dependencies) system-wide
 .RE
 
 .IP "--test=package | -t package"
-extract and test the given package in a temporary directory. If the 
-test succeeds, the \fIstklos-pkg\fR command returns 0. 
+extract and test the given package in a temporary directory. If the
+test succeeds, the \fIstklos-pkg\fR command returns 0.
 
 .IP "--install=package| -i package"
 install the given package and its dependencies in the standard
 installation directory. If the \fI--system-wide\fR flag is not used, files
-are installed in the user directory. Otherwise, files are installed in 
-a shared directory available to all users. 
+are installed in the user directory. Otherwise, files are installed in
+a shared directory available to all users.
 
 .IP "--uninstall package"
 un-install the files which were copied during the installation of the
@@ -70,61 +70,61 @@ given package. Use the \fI--system-wide\fR option to un-install shared files.
 
 .IP "--sync | -s"
 synchronize the local repository on the ScmPkg server(s). This will
-download the description of all the packages which are available on 
+download the description of all the packages which are available on
 the server(s). The packages themselves are downloaded, only when
-needed. 
+needed.
 
 .IP "--add=package| -a package"
-adds the given package to the repository. 
+adds the given package to the repository.
 
 .IP "--download=package"
 download the tarball associated to given package and copy it in the
 current directory or the directory specified by the "--directory"
 option.
 
-.IP "--fill-cache" 
+.IP "--fill-cache"
 downloads all the package which are available on the server(s). This
 can be used for copying all remote packages, when the net connection
 is not permanent for instance.
 
-.IP "--clear-cache" 
-remove all the packages from the cache. This can be used when packages 
-files take too much place. Packages will be downloaded when needed 
+.IP "--clear-cache"
+remove all the packages from the cache. This can be used when packages
+files take too much place. Packages will be downloaded when needed
 
 .IP "--reset"
 remove all the files needed by ScmPkg, that is the cache of packages,
 but also the binary of installed packages, their documentation, and
-all the meta-data of ScmPkg. 
+all the meta-data of ScmPkg.
 
 .IP "--list |-l"
 list all the packages which are available from server(s) and from the
-current repository. 
+current repository.
 
 .IP "--depends=package"
 list the packages needed by the given package
 
-.IP "--installed" 
+.IP "--installed"
 list the packages which are locally installed
 
 .IP "--conf-dir=dir | -D dir"
 Use the specified directory  as stklos main configuration
 directory. This is useful if you use stklos(1) with the \fI-D\fR
-option. Note that you can use the \fI-STKLOS_CONFDIR\fR shell variable 
-for that too. 
+option. Note that you can use the \fI-STKLOS_CONFDIR\fR shell variable
+for that too.
 
 .IP "--directory=dir | -C dir"
 Use the specified directory for extracting file. If this option is not
 specified, files are extracted in the current directory.
 
 .IP "--verbose | -v"
-be more verbose. Several usage of this flag increase the verbosity of 
+be more verbose. Several usage of this flag increase the verbosity of
 stklos-pkg.
 
 .IP "--system-wide | -S"
-flag used to indicate that (un-)installation must be system wide. 
+flag used to indicate that (un-)installation must be system wide.
 
 .IP "--version |-V"
-display the version of \fIstklos-pkg\fR and exit. 
+display the version of \fIstklos-pkg\fR and exit.
 
 .IP "--help | -h"
 Show a list of options
@@ -132,17 +132,17 @@ Show a list of options
 .SH "FILES"
 .IP "~/<stklos-conf-dir>/pkg"
 The \fISTklos\fR user ScmPkg repository. <stklos-conf-dir> is by
-default \fI~/.stklos\fR but can be set by the \fiSTKLOS_CONFDIR\fR 
+default \fI~/.stklos\fR but can be set by the \fiSTKLOS_CONFDIR\fR
 shell variable
 
 .IP "@PREFIX@/lib/stklos/pkg"
-The \fISTklos\fR system ScmPkg repository here 
+The \fISTklos\fR system ScmPkg repository here
 
 .SH ENVIRONMENT VARIABLES
 
 .IP "STKLOS_CONFDIR"
-This variable can be used to designate the directory used by \fBstklos\fR 
-to store its configuration or packages files. It not set, the default 
+This variable can be used to designate the directory used by \fBstklos\fR
+to store its configuration or packages files. It not set, the default
 \fBstklos\fR configuration directory is by default \fB~/.stklos\fR.
 
 

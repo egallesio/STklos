@@ -2,25 +2,25 @@
 ;;;;							-*- scheme -*-
 ;;;;
 ;;;; m a k e - d o c			-- Build the documentation file
-;;;; 
-;;;; Copyright © 2000 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2000 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Feb-2000 18:02 (eg)
 ;;;; Last file update: 11-Apr-2000 12:32 (eg)
@@ -44,7 +44,7 @@
   (let ((result '()))
     (do ((l (read-line in) (read-line in)))
 	((or (eof-object? l) (rgxp l)))
-      (set! result (if (null? result) 
+      (set! result (if (null? result)
 		       (list (end-of-string l 3))
 		       `(,(end-of-string l 3) "\n" ,@result))))
     (apply string-append (reverse result))))
@@ -57,17 +57,17 @@
   (define (parse-synopsys in)
     (parse-until-regexp in end-synopsys-rgxp))
 
-  (define (parse-description in) 
+  (define (parse-description in)
     (parse-until-regexp in end-comment-rgxp))
 
   ;;
-  ;; parse-proc-starts here 
+  ;; parse-proc-starts here
   ;;
   (let* ((procs (parse-proc-names first-line))
 	 (syn   (parse-synopsys in))
 	 (descr (parse-description in)))
     (for-each  (lambda(p)
-		 (format #t 
+		 (format #t
 			 "(~S :type procedure :synopsys ~S :description ~S)\n"
 			 p syn descr))
 	      procs)))
@@ -75,7 +75,7 @@
 (define (parse in)
   (do ((l (read-line in) (read-line in)))
       ((eof-object? l))
-    (cond 
+    (cond
      ((start-proc-rgxp l) (parse-proc-doc l in))
      (else 'just-skip-it)))
   (close-input-port in))
@@ -90,5 +90,5 @@
 (main *argv*)
 
 
-      
-  
+
+

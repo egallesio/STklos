@@ -1,24 +1,24 @@
 ;;;;
 ;;;; test-threads.stk			-- Testing Threads
-;;;; 
-;;;; Copyright © 2006-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2006-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 16-Apr-2006 12:54 (eg)
 ;;;; Last file update: 29-Oct-2010 08:55 (eg)
@@ -176,10 +176,10 @@
        (list 'not-abandoned (current-thread) 'not-owned 'not-abandoned)
        (let ((m (make-mutex)))
 	 (list (mutex-state m)
-	       (begin 
+	       (begin
 		 (mutex-lock! m)
 		 (mutex-state m))
-	       (begin 
+	       (begin
 		 (mutex-unlock! m)
 		 (mutex-lock! m #f #f)
 		 (mutex-state m))
@@ -193,7 +193,7 @@
 	(define (put! msg)
 	  (mutex-lock! m)
 	  (if cell
-	      (begin (mutex-unlock! m) 
+	      (begin (mutex-unlock! m)
                      (thread-yield!)
                      (put! msg))
 	      (begin (set! cell msg)
@@ -207,7 +207,7 @@
 		(set! log `((get ,r) ,@log))
 		(mutex-unlock! m)
 		r)
-	      (begin (mutex-unlock! m) 
+	      (begin (mutex-unlock! m)
                      (thread-yield!)
                      (get!))))
 	(define (producer)
@@ -239,7 +239,7 @@
           (mutex-unlock! m)
           (list r0 r1 r2 r3 r4 r5 r6))))
 
-(test "recursive mutex" 
+(test "recursive mutex"
       (list (current-thread) 0 'not-abandoned)
       (letrec ()
 	(define (mutex-lock-recursively! mutex)
@@ -249,7 +249,7 @@
 	      (begin
 		(mutex-lock! mutex)
 		(mutex-specific-set! mutex 0))))
-	
+
 	(define (mutex-unlock-recursively! mutex)
 	  (let ((n (mutex-specific mutex)))
 	    (if (= n 0)
@@ -319,7 +319,7 @@
 	  (get!)
 	  (get!)
 	  (get!))
-	
+
 	(let ((tp (thread-start! (make-thread producer 'producer)))
 	      (tc (thread-start! (make-thread consumer 'consumer))))
 	  (thread-join! tp)

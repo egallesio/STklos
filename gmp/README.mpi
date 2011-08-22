@@ -236,9 +236,9 @@ The mp_div_2d() function efficiently computes division by powers of
 two.  Either the q or r parameter may be NULL, in which case that
 portion of the computation will be discarded.
 
-The mp_sqr() function squares its input argument.  A call to 
+The mp_sqr() function squares its input argument.  A call to
 
-	mp_sqr(a, c) 
+	mp_sqr(a, c)
 
 ... is identical in meaning to mp_mul(a, a, c); however, if the
 MP_SQUARE variable is set true in mpi-config.h (see below), then it
@@ -319,7 +319,7 @@ All these functions return the least non-negative representative of
 their result, modulo m.
 
 The mp_mod_d() function computes a modular reduction around a single
-digit d.  The resut is a single digit c.  
+digit d.  The resut is a single digit c.
 
 See the file 'redux.txt' for a description of the modular reduction
 algorithm used by mp_exptmod().
@@ -352,7 +352,7 @@ returns values of x and y satisfying Bezout's identity.  This is used
 by mp_invmod() to find modular inverses.  However, if you do not need
 these values, you will find that mp_gcd() is MUCH more efficient,
 since it doesn't need all the intermediate values that mp_xgcd()
-requires in order to compute x and y. 
+requires in order to compute x and y.
 
 The mp_gcd() (and mp_xgcd()) functions use the binary (extended) GCD
 algorithm due to Josef Stein.
@@ -394,7 +394,7 @@ mp_char2value(ch, r)       - convert ch to its value when taken as
 mp_value_radix_size(n, q, r)
                            - return the number of bytes that would be required
 			     to express a number in radix r, if it were stored
-			     as n units of q bits each.  (Not including sign 
+			     as n units of q bits each.  (Not including sign
 			     or terminator bytes)
 
 mp_strerror(err)           - get a string describing mp_err value 'err'
@@ -419,7 +419,7 @@ The mp_read_radix() and mp_toradix() functions support bases from 2 to
 than this, you will need to write them yourself (that's why mp_div_d()
 is provided, after all).
 
-Note:   mp_read_radix() will accept as digits either capital or 
+Note:   mp_read_radix() will accept as digits either capital or
 ----    lower-case letters.  However, the current implementation of
         mp_toradix() only outputs upper-case letters, when writing
         bases betwee 10 and 36.  The underlying code supports using
@@ -476,14 +476,14 @@ Note:  The mpp_random() and mpp_random_size() functions use the C
        to change.
 
 mpp_divis_vector(a, v, s, w)  - is a divisible by any of the s digits
-                                in v?  If so, let w be the index of 
+                                in v?  If so, let w be the index of
                                 that digit
 
 mpp_divis_primes(a, np)       - is a divisible by any of the first np
-                                primes?  If so, set np to the prime 
+                                primes?  If so, set np to the prime
                                 which divided a.
 
-mpp_fermat(a, w)              - test if w^a = w (mod a).  If so, 
+mpp_fermat(a, w)              - test if w^a = w (mod a).  If so,
                                 returns MP_YES, otherwise MP_NO.
 
 mpp_pprime(a, nt)             - perform nt iterations of the Rabin-
@@ -506,7 +506,7 @@ Building the Library
 For the impatient among us, you should be able to build the MPI
 library using the following simple steps:
 
-	- Edit "Makefile.base" to set the compiler and its 
+	- Edit "Makefile.base" to set the compiler and its
 	  options appropriately for your system.  If you're
 	  not sure, the default GCC settings are probably fine.
 
@@ -514,7 +514,7 @@ library using the following simple steps:
 
 	- You can run unit tests by typing 'make test'
 
-	- You can build the utility programs (in the 'utils' 
+	- You can build the utility programs (in the 'utils'
 	  subdirectory) by typing 'make tools'
 
 If you are interested in integrating MPI with your own application,
@@ -531,7 +531,7 @@ The file 'mpi-config.h' defines several configurable parameters for
 the library, which you can adjust to suit your application.  At the
 time of this writing, the available options are:
 
-MP_IOFUNC       - Define true to include the mp_print() function, 
+MP_IOFUNC       - Define true to include the mp_print() function,
                   which is moderately useful for debugging.  This
                   implicitly includes <stdio.h>.  For most I/O, you
 		  probably should leave this off, and use the built
@@ -568,12 +568,12 @@ MP_CRYPTO       - If true, whenever arrays of digits are free'd, they
                   buffers, set this to false.
 
 MP_ARGCHK       - Set to 0, 1, or 2.  This defines how the argument
-                  checking macro, ARGCHK(), gets expanded.  If this 
-                  is set to zero, ARGCHK() expands to nothing; no 
+                  checking macro, ARGCHK(), gets expanded.  If this
+                  is set to zero, ARGCHK() expands to nothing; no
                   argument checks are performed.  If this is 1, the
                   ARGCHK() macro expands to code that returns MP_BADARG
-                  or similar at runtime.  If it is 2, ARGCHK() expands 
-                  to an assert() call that aborts the program on a 
+                  or similar at runtime.  If it is 2, ARGCHK() expands
+                  to an assert() call that aborts the program on a
                   bad input (this is the default, and is recommended)
 
 MP_DEBUG        - Turns on debugging output.  This is probably not at
@@ -609,7 +609,7 @@ MP_SQUARE       - If this is set to a nonzero value, the mp_sqr()
 
 MP_PTAB_SIZE    - When compiling mpprime.c, the code includes a set
                   of small prime integers, used to quickly eliminate
-                  obviously non-prime values.  This directive sets 
+                  obviously non-prime values.  This directive sets
                   how big that table will be.  If you set it to zero,
                   all the primes less than 2^16 will be included,
                   so it is best to set this to something "reasonable".
@@ -622,7 +622,7 @@ driver 'mpi-test' doesn't need it)
 
 If all goes well, the library should compile without warnings using
 this combination.  You should, of course, make whatever adjustments
-you find necessary.  
+you find necessary.
 
 The MPI library distribution comes with several additional programs
 which are intended to demonstrate the use of the library, and provide
@@ -658,7 +658,7 @@ makeprime.c	Finds the first prime number greater than or equal
 
 metime.c	Performs modular exponentiation timing tests.
 
-mpicalc.c	Stacking calculator implemented around MPI (can be 
+mpicalc.c	Stacking calculator implemented around MPI (can be
 		used to build automatic testing scripts that compare
 		against known-good implementations like 'dc' or 'bc')
 
@@ -730,8 +730,8 @@ all-tests               A Bourne shell script which runs all the
                         tests in the mpi-test suite
 
 Note:   Several of the tests hard-wired into 'mpi-test' operate under
-----    the assumption that you are using at least a 16-bit mp_digit 
-        type.  If that is not true, several tests might fail, because 
+----    the assumption that you are using at least a 16-bit mp_digit
+        type.  If that is not true, several tests might fail, because
         of range problems with the maximum digit value.
 
 	Former versions of the library required modifications to the
@@ -743,7 +743,7 @@ Acknowledgements:
 ----------------
 
 The algorithms used in this library were drawn primarily from Volume
-2 of Donald Knuth's magnum opus, _The Art of Computer Programming_, 
+2 of Donald Knuth's magnum opus, _The Art of Computer Programming_,
 "Semi-Numerical Methods".  Barrett's algorithm for modular reduction
 came from Menezes, Oorschot, and Vanstone's _Handbook of Applied
 Cryptography_, Chapter 14.
@@ -753,7 +753,7 @@ helped find and get rid of bugs in the library:
 
 - Tom St. Denis has found and reported lots and lots of bugs of
   various severity, and generally tests the code heavily.  Kudos
-  and thanks to Tom for his persistence, and his patience with 
+  and thanks to Tom for his persistence, and his patience with
   my mistakes. :)
 
 - Bryan Olson helped fix a subtle bug in s_mp_div() that was making
@@ -762,7 +762,7 @@ helped find and get rid of bugs in the library:
 - Nelson Bolyard <nelsonb@netscape.com> found a subtle division bug
   in s_mp_div() that was badly hurting performance in some cases.
 
-- scroussette@yahoo.com spotted a NULL pointer indirection bug in 
+- scroussette@yahoo.com spotted a NULL pointer indirection bug in
   mp_div_d() when the quotient was zero.
 
 - Tushar Udeshi <tudeshi@zyvex.com> found a sign-related bug in the

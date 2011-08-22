@@ -1,20 +1,20 @@
 ;; ======================================================================
-;; 
+;;
 ;; 			STklos Reference Manual
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 2 of the License, or
 ;; (at your option) any later version.
-;; 
+;;
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;; 
+;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
-;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
@@ -22,7 +22,7 @@
 ;;
 ;; ======================================================================
 
-  
+
 ;; ======================================================================
 ;;
 ;;			Expressions
@@ -34,8 +34,8 @@
 constructions are given
 very succinctly here for reference. See ,(ref :bib "R5RS") for a complete
 description.])
-   
-   
+
+
 ;;
 ;; LITERAL EXPRESSIONS
 ;;
@@ -44,7 +44,7 @@ description.])
 
 ;;
 ;; PROCEDURES
-;;  
+;;
 (section :title "Procedures"
 (index ":optional parameter")
 (index ":rest parameter")
@@ -64,7 +64,7 @@ description.])
 
  ;;
 ;; ASSIGNMENTS
-;; 
+;;
 (section :title "Assignments"
 (index "assignment")
 (insertdoc 'set!)
@@ -72,7 +72,7 @@ description.])
 
 ;;
 ;; CONDITIONALS
-;;     
+;;
 (section :title "Conditionals"
 (index "conditional")
 
@@ -86,13 +86,13 @@ description.])
 (insertdoc 'unless))
 
 ;;
-;; BINDING constructs 
-;; 
+;; BINDING constructs
+;;
 (section :title "Binding Constructs"
 (index "binding constructs")
-   
-[The three binding constructs ,(code "let"), ,(code "let*"), and 
-,(code "letrec") are available in STklos.  
+
+[The three binding constructs ,(code "let"), ,(code "let*"), and
+,(code "letrec") are available in STklos.
 These constructs differ in the regions they establish for
 their variable bindings.  In a ,(code "let") expression, the initial values are
 computed before any of the variables become bound; in a ,(code "let*")
@@ -133,13 +133,13 @@ values are being computed, thus allowing mutually recursive definitions.
 (index "call by need")
 (index "lazy evaluation")
 (index "promise")
-   
+
 (insertdoc 'delay)
 (insertdoc 'promise?))
 
 ;;
 ;; QUASIQUOTE
-;; 
+;;
 (section :title "Quasiquotation"
 (index "quasiquote")
 (index "backquote")
@@ -148,8 +148,8 @@ values are being computed, thus allowing mutually recursive definitions.
 (index ", in quasiquote")
 (index ",@ in quasiquote")
 (insertdoc 'quasiquote))
-   
-   
+
+
 ;;
 ;; MACROS
 ;;
@@ -171,7 +171,7 @@ called ,(emph "Macro by Example") (Eugene Kohlbecker, R4RS) done by Dorai
 Sitaram. This implementation generates low level STklos
 macros. This implementation of hygienic macros is not expensive.])
 
- (index "macros" :note "referentially transparent") 
+ (index "macros" :note "referentially transparent")
 (p [The major drawback of this implementation is that the macros are
  not ,(emph "referentially transparent") (see section `Macros' in
  R4RS for details). Lexically scoped macros
@@ -182,11 +182,11 @@ macros. This implementation of hygienic macros is not expensive.])
  large-scale disaster unless you're using system-function names as
  local variables with unintuitive bindings that the macro can't
  use. However, if you must have the full R5RS macro
- functionality, you can do 
+ functionality, you can do
  ,(fontified-code [(require "full-syntax")])
- to have access to the more featureful (but also more expensive) 
- versions of ,(code "syntax-rules"). Requiring ,(code "\"full-syntax\"") 
- loads the version 2.1 of an implementation of hygienic macros by 
+ to have access to the more featureful (but also more expensive)
+ versions of ,(code "syntax-rules"). Requiring ,(code "\"full-syntax\"")
+ loads the version 2.1 of an implementation of hygienic macros by
  Robert Hieb and R. Kent Dybvig.])
 
 (TODO "DOCUMENT THE LOW LEVEL EXPANDER MECHANISM")
@@ -199,6 +199,6 @@ macros. This implementation of hygienic macros is not expensive.])
 (index "Macros" :note "expansion")
 (insertdoc 'macro-expand)
 )
-   
+
 )
 

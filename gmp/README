@@ -16,7 +16,7 @@ system at configure time (otherwise the system GMP is used).
 
 
 --------------------------------------------------------------------
-Note: 
+Note:
 
 MPI doesn't work correctly with native 64 bits, as advertised. As a
 consequence, the wrapper functions in gmp.c are 32 bits and use a

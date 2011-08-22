@@ -1,7 +1,7 @@
 /*
  * utf8.c		-- UTF-8 support functions
  *
- * Copyright © 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+ * Copyright Â© 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify

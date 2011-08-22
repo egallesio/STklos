@@ -1,27 +1,27 @@
 ;;;;
 ;;;; help.stk		-- Interactive help
-;;;; 
-;;;; Copyright © 2009-2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2009-2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
 ;;;;
 ;;;; This file is the re-implementation of a code given to me by
 ;;;; Michael Feyereisen [mfeyereisen@gmail.com]. Thanks to him for
-;;;; having pushed me to finally implement the help function. 
+;;;; having pushed me to finally implement the help function.
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Dec-2009 18:26 (eg)
@@ -57,7 +57,7 @@
   (set! str (regexp-replace-all "@lisp" str (do-color 'blue)))
   (set! str (regexp-replace-all "@end lisp" str (do-color 'normal)))
   str)
-	
+
 
 ;; ----------------------------------------------------------------------
 ;; find-documentation
@@ -69,7 +69,7 @@
 	 (see (and doc (key-get (cdr doc) :see #f))))
     (cond
       (see
-         ;; the symbol is indirectly documented 
+         ;; the symbol is indirectly documented
          (find-documentation see))
       (doc
          ;; found documentation. Format it a little bit
@@ -124,10 +124,10 @@
  * (define (foo n)
  *   "If the function body starts with a string, it's a docstring"
  *   (+ n 1))
- * 
+ *
  * (define-generic bar
  *   :documentation "Generic function docsting for bar")
- * 
+ *
  * (define-method bar ((x <integer>))
  *   "Probably less useful: as in functions, methods can have docstrings"
  *   (- x 1))

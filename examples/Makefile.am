@@ -13,8 +13,8 @@ SUFFIXES            = .stk
 	../utils/tmpcomp $*.stk $*
 
 clean:
-	   /bin/rm -f $(schemedemo_SCRIPTS) *~ 
+	   /bin/rm -f $(schemedemo_SCRIPTS) *~
 
 distclean: clean
-	/bin/rm -f Makefile 
+	/bin/rm -f Makefile
 	/bin/rm -rf .deps

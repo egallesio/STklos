@@ -1,24 +1,24 @@
 /*
  * gmp.h	-- A look like GMP library
- * 
- * Copyright © 2009 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
- * 
- * 
+ *
+ * Copyright Â© 2009 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 12-Oct-2009 19:29 (eg)
  * Last file update: 28-Oct-2009 10:10 (eg)
@@ -67,7 +67,7 @@ void mpz_init_set_ui(mpz_t bn, unsigned long int ui);
  * ---------------------------------------------------------------------- */
 #ifndef GMP_USE_MACROS
 void mpz_clear(mpz_t bn);
-#else 
+#else
 #  define  mpz_clear(bn) 	mp_clear(bn)
 #endif
 
@@ -84,7 +84,7 @@ char *mpz_get_str(char *str, int base, mpz_t bn);
 #ifndef GMP_USE_MACROS
 int mpz_cmp(mpz_t a, mpz_t b);
 int mpz_sgn(mpz_t a);
-#else 
+#else
 #  define mpz_cmp_si(bn, v)	mp_cmp_int(bn, v)
 #  define mpz_cmp(a, b)		mp_cmp(a, b)
 #  define mpz_sgn(a)		mp_cmp_z(a)
@@ -93,7 +93,7 @@ int mpz_cmp_si(mpz_t bn, signed long v);
 int mpz_cmp_ui(mpz_t bn, unsigned long int ui);
 
 /* ----------------------------------------------------------------------
- * Operations 
+ * Operations
  * ---------------------------------------------------------------------- */
 #ifndef GMP_USE_MACROS
 void mpz_add(mpz_t res, mpz_t a, mpz_t b);
@@ -114,7 +114,7 @@ void mpz_sqrt(mpz_t res, mpz_t a);
 void mpz_ui_pow_ui(mpz_t bn, unsigned long int base, unsigned long int exp);
 
 /* ----------------------------------------------------------------------
- * Misc 
+ * Misc
  * ---------------------------------------------------------------------- */
 #ifndef GMP_USE_MACROS
 size_t mpz_sizeinbase(mpz_t bn, int base);

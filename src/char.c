@@ -278,7 +278,7 @@ static int charcompi(SCM c1, SCM c2)
   if (!CHARACTERP(c1)) error_bad_char(c1);
   if (!CHARACTERP(c2)) error_bad_char(c2);
   return STk_use_utf8 ?
-         (STk_casefold_char(CHARACTER_VAL(c1)) - 
+         (STk_casefold_char(CHARACTER_VAL(c1)) -
 	  STk_casefold_char(CHARACTER_VAL(c2))):
          (tolower((unsigned char) CHARACTER_VAL(c1)) -
 	  tolower((unsigned char) CHARACTER_VAL(c2)));
@@ -295,7 +295,7 @@ int STk_string2char(char *s)
   if (* (STk_utf8_grab_char(s, &val)) == '\0') return val;
 
   if (*s == 'x') {
-    char *end; 
+    char *end;
     long int val = strtol(s+1, &end, 16);
 
     if (val == LONG_MIN || val == LONG_MAX || *end)
@@ -461,7 +461,7 @@ TEST_CTYPE(lower, "char-lower-case?")
  *            (integer->char y))     =>  #t
  * @end lisp
  * |integer->char| accepts an exact number between 0 and #xD7FFF or between
- * #xE000 and #x10FFFF, if UTF8 encoding is used. Otherwise it accepts a 
+ * #xE000 and #x10FFFF, if UTF8 encoding is used. Otherwise it accepts a
  * number between0 and #xFF.
 doc>
  */

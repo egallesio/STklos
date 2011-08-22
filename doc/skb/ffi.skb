@@ -1,24 +1,24 @@
 ;;;;
 ;;;; ffi.skb			-- FFI documentation
-;;;; 
+;;;;
 ;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
-;;;; 
-;;;; 
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Jun-2007 23:45 (eg)
 ;;;; Last file update: 25-Jun-2007 14:49 (eg)
@@ -35,7 +35,7 @@ system should works on the following architectures/systems:
 gcc_ppc_osx, gcc_sparc_unix, gcc_x64_unix, gcc_x86_unix.]). Moreover,
 since FFI allows very low level access, it is easy to crash the
 ,(stklos) VM when using an external C function.])
-   
+
    (p (bold [Note that the support for FFI is still minimal and that it will
 evolve in future versions.]))
 
@@ -51,8 +51,8 @@ between the C and the Scheme worlds.])
 (figure :legend "FFI types"
    (center
     (table  :rules 'cols :frame 'border :width 90.
-       (tr :bg "#eeeeee" 
-	   (th :align "left" "Name") 
+       (tr :bg "#eeeeee"
+	   (th :align "left" "Name")
 	   (th :align "left" "Corresponding C type")
 	   (th :align "left" "Corresponding Scheme Type"))
        (tr (tdl (bold ":void")) (tdl "void") (tdl "none"))
@@ -76,13 +76,13 @@ between the C and the Scheme worlds.])
 ;       (tr (tdl (bold ":int64")) (tdl "") (tdl ""))
        (tr (tdl (bold ":obj")) (tdl "void *") (tdl "Any Scheme object passed as is")))))
 
-   
-(insertdoc 'define-external)   
+
+(insertdoc 'define-external)
 
 (p [Hereafter, there are some commented definitions of external functions:])
-  
+
 (fontified-code [
- (define-external isatty ((fd :int))  
+ (define-external isatty ((fd :int))
      :return-type :boolean)
 
   (define-external system ((cmd :string))
@@ -94,19 +94,19 @@ between the C and the Scheme worlds.])
 
 (p [All these functions are defined in the C standard library, hence it is not
 necessary to specify the ,(tt ":library-name") option.])
-   
-(itemize 
+
+(itemize
    (item [,(emph "istty") is declared here as a function which takes an
 integer and returns a boolean (in fact, the value returned by the
 C function ,(emph "isatty") is an ,(emph "int"), but we ask here to the FFI
 system to translate this result as a boolean value in the Scheme
 world).])
-   
+
    (item [,(emph "system") is a function which takes a string as parameter
 and returns an ,(emph "int").])
-   
-   (item [,(emph "ttyname") is a function whih takes an int and returns a string. 
-Note that in this function the name of the parameter has been omitted 
+
+   (item [,(emph "ttyname") is a function whih takes an int and returns a string.
+Note that in this function the name of the parameter has been omitted
 as within C prototypes.]))
 
    (bold "TODO: describe malloc and malloc_atomic and their

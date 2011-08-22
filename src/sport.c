@@ -1,21 +1,21 @@
 /*
  * s p o r t . c			-- String ports management
  *
- * Copyright © 1993-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright Â© 1993-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *            Author: Erick Gallesio [eg@unice.fr]
@@ -27,9 +27,9 @@
 #include "stklos.h"
 
 /*===========================================================================*\
- * 
+ *
  * 			Utilities
- * 
+ *
 \*===========================================================================*/
 
 static void error_bad_string(SCM s)
@@ -38,9 +38,9 @@ static void error_bad_string(SCM s)
 }
 
 /*===========================================================================*\
- * 
+ *
  * Low level plugins
- * 
+ *
 \*===========================================================================*/
 
 #define START_ALLOC_SIZE  100	/* Initial size of an ouput string port */
@@ -61,7 +61,7 @@ struct sstream {
 
 static Inline int Sgetc(void *stream)
 {
-  return (PORT_PTR(stream) < PORT_END(stream)) ? 
+  return (PORT_PTR(stream) < PORT_END(stream)) ?
     ((unsigned char) *PORT_PTR(stream)++) : EOF;
 }
 
@@ -158,17 +158,17 @@ static off_t Sseek(void *stream, off_t offset, int whence)
   char* p;
 
   switch (whence) {
-  case SEEK_SET: 
+  case SEEK_SET:
     p = PORT_BASE(stream) + offset;
     break;
-  case SEEK_CUR: 
+  case SEEK_CUR:
     p = PORT_PTR(stream) + offset;
     break;
   default: /* SEEK_END */
     p = PORT_END(stream) + offset;
     break;
   }
-  
+
   if ((PORT_BASE(stream) <= p) && (p <= PORT_END(stream))) {
     PORT_PTR(stream) = p;
     return p - PORT_BASE(stream);
@@ -182,7 +182,7 @@ static void sport_print(SCM obj, SCM port)   /* Generic printing of string ports
 {
   char buffer[MAX_PATH_LENGTH + 20];
 
-  sprintf(buffer, "#[%s-string-port %lx%s]", 
+  sprintf(buffer, "#[%s-string-port %lx%s]",
 	  ISPORTP(obj) ? "input" : "output",
 	  (unsigned long) obj,
 	  PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
@@ -196,9 +196,9 @@ static void sport_release(SCM port)
 
 
 /*===========================================================================*\
- * 
+ *
  * 			Input ports
- * 
+ *
 \*===========================================================================*/
 enum kind_port {SREAD_C, SREAD, SWRITE};
 
@@ -213,7 +213,7 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
     case SREAD:   /* this is a input string */
 		  {
 		    char *s = STRING_CHARS(str);
-		    
+
 		    PORT_BASE(ss) = s;
 		    PORT_END(ss)  = s + init_len;
 		    PORT_STR(ss)  = str;
@@ -229,7 +229,7 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
 		  PORT_STR(ss)  = STk_false;
 		  break;
   }
-  
+
   PORT_PTR(ss)     = PORT_BASE(ss);
   PORT_BUFSIZE(ss) = init_len;
 
@@ -243,7 +243,7 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
   PORT_POS(res)		= 0;
   PORT_FNAME(res)	= "string port";
   PORT_CLOSEHOOK(res)	= STk_false;
-  
+
   PORT_PRINT(res)	= sport_print;
   PORT_RELEASE(res)	= sport_release;
   PORT_GETC(res)	= Sgetc;
@@ -258,9 +258,9 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
   PORT_BREAD(res)	= Sread;
   PORT_BWRITE(res)	= Swrite;
   PORT_SEEK(res)	= Sseek;
-  
+
   return (struct port_obj *) res;
-} 
+}
 
 /*
  * open-input-string with a C string ...
@@ -330,7 +330,7 @@ DEFINE_PRIMITIVE("get-output-string", get_output_string, subr1, (SCM port))
  * (input-string-port? obj)
  * (output-string-port? obj)
  *
- * Returns |#t| if |obj| is an input string port or output string port 
+ * Returns |#t| if |obj| is an input string port or output string port
  * respectively, otherwise returns #f.
 doc>
  */

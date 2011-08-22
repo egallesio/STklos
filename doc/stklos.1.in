@@ -26,9 +26,9 @@ System
 .B STklos
 is a free Scheme System (nearly) conform to R5RS. The aim of this
 implementation is to be fast as well as light. The implementation is
-based on an ad-hoc Virtual Machine. 
-.B STklos 
-can also be compiled as a library, so that one can easily embed it 
+based on an ad-hoc Virtual Machine.
+.B STklos
+can also be compiled as a library, so that one can easily embed it
 in an application.
 .LP
 The salient points of STklos are:
@@ -54,7 +54,7 @@ The salient points of STklos are:
 - tail recursive calls are properly implemented
 
 .SH OPTIONS
-Here are the options available in the version @VERSION@ of 
+Here are the options available in the version @VERSION@ of
 .B stklos.
 
 .IP "-l file, --load=file"
@@ -78,7 +78,7 @@ option is generally useful when used inside emacs since it permits to
 display the REPL prompts.
 .IP "-n, --no-line-editor"
 tell the REPL to not use the line editor even if GNU readline or BSD
-libedit libraries are found. This permit to use an external tool such 
+libedit libraries are found. This permit to use an external tool such
 as rlwrap(1) instead of the internal line editor support.
 .IP "-d, --debug"
 insert informations to ease debugging (e.g, line numbers, signaling
@@ -95,7 +95,7 @@ print program version and exit
 print this help and exit
 .IP "--"
 This special option signals the end of the \fBstklos\fR command. The
-arguments placed after this option are taken program arguments, 
+arguments placed after this option are taken program arguments,
 even if they start with a "-" character.
 
 .SH ENVIRONMENT VARIABLES
@@ -111,13 +111,13 @@ frames printed on an error. Use the value \fB0\fR for an unlimited
 back-trace.
 
 .IP "STKLOS_CONFDIR"
-This variable can be used to designate the directory used by \fBstklos\fR 
-to store its configuration or packages files. It not set, the default 
+This variable can be used to designate the directory used by \fBstklos\fR
+to store its configuration or packages files. It not set, the default
 \fBstklos\fR configuration directory is by default \fB~/.stklos\fR.
 
 .SH FILES
 
-.IP "~/<stklos-conf-dir>/stklosrc" 
+.IP "~/<stklos-conf-dir>/stklosrc"
 This file is the user init file which is loaded when \fBstklos\fR
 starts. Use the \fB-q\fR to avoid the loading of this file.
 
@@ -128,6 +128,6 @@ starts. Use the \fB-q\fR to avoid the loading of this file.
 .BR stklos-pkg (1)
 
 .LP
-The full documentation for 
+The full documentation for
 .B stkos
 is available at http://www.stklos.net/documentation.html

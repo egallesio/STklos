@@ -1,7 +1,7 @@
 /*
  * vport.c					-- Virtual Ports
  *
- * Copyright © 2005-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright Â© 2005-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify

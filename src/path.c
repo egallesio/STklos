@@ -1,24 +1,24 @@
 /*
  * p a t h . c			-- Path names management
- * 
- * Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
- * 
+ *
+ * Copyright Â© 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 14:25 (eg)
  * Last file update:  9-Aug-2010 17:04 (eg)
@@ -34,9 +34,9 @@
 
 
 /*===========================================================================*\
- * 
+ *
  * tilde-expand		-- expand '~' and '~user' string prefix
- * 
+ *
 \*===========================================================================*/
 
 static char *tilde_expand(char *name, char *result)
@@ -44,12 +44,12 @@ static char *tilde_expand(char *name, char *result)
   char *p;
   struct passwd *pwPtr;
   register int len;
-  
+
   if (name[0] != '~') {
     strcpy(result, name);
     return name;
   }
-  
+
   if (ISDIRSEP(name[1]) || name[1] == '\0') {
     char *dir;
 
@@ -57,11 +57,11 @@ static char *tilde_expand(char *name, char *result)
     if (pwPtr==NULL) {
       char *h = getenv("HOME");
       dir = (h == NULL)? "": h;
-    } else 
+    } else
       dir =  pwPtr->pw_dir;
-    
+
     sprintf(result, "%s%s", dir, name+1);
-  } 
+  }
   else {
     for (p=&name[1]; (*p != 0) && (*p != '/'); p++) {
       /* Null body;  just find end of name. */
@@ -81,32 +81,32 @@ static char *tilde_expand(char *name, char *result)
 
 
 /*===========================================================================*\
- * 
- * absolute	-- Given a file name, return its (mostly clean) 
+ *
+ * absolute	-- Given a file name, return its (mostly clean)
  *		   absolute path name
  *
 \*===========================================================================*/
 
-static void absolute(char *s, char *pathname)	
+static void absolute(char *s, char *pathname)
 {
   char *p = pathname;
   char *t;
 
   if (!ISABSOLUTE(s)) {
     if (! getcwd(pathname, MAX_PATH_LENGTH))
-      STk_panic("absolute: cannot compute cwd (MAX_PATH_LENGTH = %d)\n", 
+      STk_panic("absolute: cannot compute cwd (MAX_PATH_LENGTH = %d)\n",
 		MAX_PATH_LENGTH);
-    p = &pathname[strlen(pathname)];     /* place p at end of pathname */ 
+    p = &pathname[strlen(pathname)];     /* place p at end of pathname */
   }
 
   *p = DIRSEP;
-  
+
   for ( ; *s; s++) {
     t = s;
     switch (*s) {
       case '.' : if (*(s+1)) {
 		   switch (*++s) {
-		     case '.' : if (ISDIRSEP(*p) && (*(s+1)=='\0' || 
+		     case '.' : if (ISDIRSEP(*p) && (*(s+1)=='\0' ||
 						     ISDIRSEP(*(s+1)))) {
 		                  /* We must go back to the parent */
 		                  if (ISDIRSEP(*p) && p > pathname)    p --;
@@ -134,15 +134,15 @@ static void absolute(char *s, char *pathname)
       default  : *++p = *s;
     }
   }
-  
+
   /* Place a \0 at end. If path ends with a "/", delete it */
   if (p == pathname || !ISDIRSEP(*p)) p++;
   *p = '\0';
 }
 
 /*===========================================================================*\
- * 
- * resolve_link	-- Given a file name, return its (mostly clean) 
+ *
+ * resolve_link	-- Given a file name, return its (mostly clean)
  *		   absolute path name taking into account symbolic links
  *
 \*===========================================================================*/
@@ -155,16 +155,16 @@ SCM STk_resolve_link(char *path, int count)
 #else
   char link[MAX_PATH_LENGTH], dst[MAX_PATH_LENGTH], *s, *d=dst;
   int n;
-  
+
   s = STk_expand_file_name(path);
-  
+
   for (s++, *d++='/' ;       ; s++, d++) {
     switch (*s) {
       case '\0':
       case '/' : *d = '\0';
 	if ((n=readlink(dst, link, MAX_PATH_LENGTH-1)) > 0) {
 	  link[n] = '\0';
-	  if (link[0] == '/') 
+	  if (link[0] == '/')
 	    /* link is absolute */
 	    d = dst;
 	  else {
@@ -173,24 +173,24 @@ SCM STk_resolve_link(char *path, int count)
 	    }
 	    d += 1;
 	  }
-		   
+
 	  /* d points the place where the link must be placed */
 	  if (d - dst + strlen(link) + strlen(s) < MAX_PATH_LENGTH - 1) {
 	    /* we have enough room */
-	    sprintf(d, "%s%s", link, s); 
+	    sprintf(d, "%s%s", link, s);
 	    /* Recurse. Be careful for loops (a->b and b->a) */
-	    if (count < MAXLINK) 
+	    if (count < MAXLINK)
 	      return STk_resolve_link(dst, count+1);
 	  }
 	  return STk_false;
 	}
 	else {
-	  if (errno != EINVAL) 
+	  if (errno != EINVAL)
 	    /* EINVAL = file is not a symlink (i.e. it's a true error) */
 	    return STk_false;
 	  else
-	    if (*s) *d = '/'; 
-	    else return STk_Cstring2string(dst);		       
+	    if (*s) *d = '/';
+	    else return STk_Cstring2string(dst);
 	}
       default:   *d = *s;
     }
@@ -199,13 +199,13 @@ SCM STk_resolve_link(char *path, int count)
 }
 
 /*===========================================================================*\
- * 
- * STk_expand_file_name  
+ *
+ * STk_expand_file_name
  *
 \*===========================================================================*/
 char *STk_expand_file_name(char *s)
 {
-  char expanded[2 * MAX_PATH_LENGTH], abs[2 * MAX_PATH_LENGTH];  
+  char expanded[2 * MAX_PATH_LENGTH], abs[2 * MAX_PATH_LENGTH];
   /* Warning: absolute makes no control about path overflow. Hence the "2 *" */
 
 #ifdef WIN32
@@ -220,7 +220,7 @@ char *STk_expand_file_name(char *s)
 
 
 /*===========================================================================*\
- * 
+ *
  * STk_do_glob
  *
 \*===========================================================================*/
@@ -245,9 +245,9 @@ SCM STk_do_glob(int argc, SCM *argv)
     glob(expanded, flags, NULL, &buff);
     /* ignore the return value of glob */
   }
-  
+
   /* Transform the argv array of C strings in a list of Scheme strings */
-  n   = buff.gl_pathc; 
+  n   = buff.gl_pathc;
   res = STk_nil;
   while (n--)
     res = STk_cons(STk_Cstring2string(buff.gl_pathv[n]), res);

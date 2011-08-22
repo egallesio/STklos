@@ -10,7 +10,7 @@ test: all
 
 check: test
 
-clean: 
+clean:
 	/bin/rm -f *.o *~ libgmp.a .libs/libgmp.a
 	(cd tests; make clean)
 

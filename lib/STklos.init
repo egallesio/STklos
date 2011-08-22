@@ -5,7 +5,7 @@
 ;;; This code is in the public domain.
 ;;;
 ;;; Last file update: 23-Jun-2010 12:12 (eg)
-;;; 
+;;;
 
 
 ;;@ (software-type) should be set to the generic operating system type.
@@ -31,7 +31,7 @@
 (define (implementation-vicinity)
   (case (software-type)
     ((unix)	 (%stklos-conf-file "slib"))
-    (else 	 (error 'implementation-vicinity 
+    (else 	 (error 'implementation-vicinity
 			"unknown implementation on this system"))))
 
 ;;@ (library-vicinity) should be defined to be the pathname of the
@@ -211,7 +211,7 @@
 
 
 ;;; All the functions of srfi-59 are now defined. The following
-;;; provide ensures that the file "srfi-59" will be not loaded 
+;;; provide ensures that the file "srfi-59" will be not loaded
 (provide "srfi-59")
 
 ;;@ (FILE-POSITION <port> . <k>)
@@ -439,7 +439,7 @@
 (define current-time current-seconds)
 
 
-;;; 
+;;;
 ;;; Retain original require/provide before loading "require.scm"
 ;;;
 (define stklos:require   %%require)

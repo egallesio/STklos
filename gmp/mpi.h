@@ -53,7 +53,7 @@
   The following definitions come from the original mpi-types.h file
   A mp_digit on 2 bytes and a mp_word on 4 bytes are convenient for 32 bits
   (it should be 4 bytes on a 64 bits machine). However, we don't care here
-  and the wrapper functions located in gmp.c guarantees that functions 
+  and the wrapper functions located in gmp.c guarantees that functions
   that accepts or return an int as parameter will not be called with values
   which dont fit in a 32 bits
 */

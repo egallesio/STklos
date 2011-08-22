@@ -1,24 +1,24 @@
 ;;;;
-;;;; logical.stk	-- Logical operations 
-;;;; 
-;;;; Copyright © 2009 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
-;;;; 
-;;;; 
+;;;; logical.stk	-- Logical operations
+;;;;
+;;;; Copyright Â© 2009 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Oct-2009 23:46 (eg)
 ;;;; Last file update: 18-Oct-2009 00:43 (eg)
@@ -68,7 +68,7 @@
  * @lisp
  * (bit-or 5 3)       => 7
  * (bit-xor 5 3)      => 6
- * (bit-and 5 3)      => 1 
+ * (bit-and 5 3)      => 1
  * (bit-not 5)        => -6
  * (bit-or 1 2 4 8)   => 15
  * (bit-shift 5 3)    => 40
@@ -99,7 +99,7 @@ doc>
        #(13 12 15 14 9 8 11 10 5 4 7 6 1 0 3 2)
        #(14 15 12 13 10 11 8 9 6 7 4 5 2 3 0 1)
        #(15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0)))
-  
+
   (define logical:boole-and
     '#(#(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
        #(0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1)
@@ -117,12 +117,12 @@ doc>
        #(0 1 0 1 4 5 4 5 8 9 8 9 12 13 12 13)
        #(0 0 2 2 4 4 6 6 8 8 10 10 12 12 14 14)
        #(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)))
-  
+
   (define (logical:ash-4 x)
     (if (negative? x)
 	(+ -1 (quotient (+ 1 x) 16))
 	(quotient x 16)))
-  
+
   (define (logical:reduce op4 ident)
     (lambda args
       (do ((res ident (op4 res (car rgs) 1 0))
@@ -133,7 +133,7 @@ doc>
   ;; ----------------------------------------------------------------------
   ;; bit-and
   ;; ----------------------------------------------------------------------
-  (set! bit-and 
+  (set! bit-and
     (letrec
 	((lgand
 	  (lambda (n2 n1 scl acc)

@@ -2,22 +2,22 @@
  *
  * v e c t o r . c 			-- vectors management
  *
- * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright Â© 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *           Author: Erick Gallesio [eg@unice.fr]
@@ -64,7 +64,7 @@ SCM STk_makevect(int len, SCM init)
 {
   register long i;
   SCM  z;
- 
+
   NEWCELL_WITH_LEN(z, vector, sizeof(struct vector_obj) + (len-1)* sizeof(SCM));
   VECTOR_SIZE(z) = len;
 
@@ -72,7 +72,7 @@ SCM STk_makevect(int len, SCM init)
     register SCM *tmp = VECTOR_DATA(z);
     for(i=0; i < len; i++) *tmp++ = init;
   }
-  
+
   return z;
 }
 
@@ -98,7 +98,7 @@ DEFINE_PRIMITIVE("vector?", vectorp, subr1, (SCM obj))
  * (make-vector k fill)
  *
  * Returns a newly allocated vector of |k| elements. If a second argument is
- * given, then each element is initialized to |fill|. Otherwise the initial 
+ * given, then each element is initialized to |fill|. Otherwise the initial
  * contents of each element is unspecified.
 doc>
  */
@@ -115,7 +115,7 @@ DEFINE_PRIMITIVE("make-vector", make_vector, subr12, (SCM len, SCM init))
 <doc  vector
  * (vector obj ...)
  *
- * Returns a newly allocated vector whose elements contain the given arguments. 
+ * Returns a newly allocated vector whose elements contain the given arguments.
  * Analogous to |list|.
  *
  * @lisp
@@ -231,7 +231,7 @@ DEFINE_PRIMITIVE("vector->list", vector2list, subr1, (SCM v))
   SCM z, tmp;
 
   if (!VECTORP(v)) error_bad_vector(v);
-    
+
   len = VECTOR_SIZE(v);
   if (!len) return STk_nil;
 
@@ -248,8 +248,8 @@ DEFINE_PRIMITIVE("list->vector", list2vector, subr1, (SCM l))
 {
   long len;
   register long i;
-  register SCM z; 
-    
+  register SCM z;
+
   if ((len = STk_int_length(l)) < 0) error_bad_list(l);
 
   z = STk_makevect(len, (SCM) NULL);
@@ -273,19 +273,19 @@ DEFINE_PRIMITIVE("vector-fill!", vector_fill, subr2, (SCM v, SCM fill))
 {
   int j, len;
   SCM *p;
-  
+
   if (!VECTORP(v)) 		    error_bad_vector(v);
   if (BOXED_INFO(v) & VECTOR_CONST) error_change_const_vector(v);
-   
-  for (j=0, len=VECTOR_SIZE(v), p=VECTOR_DATA(v); j < len; j++) 
+
+  for (j=0, len=VECTOR_SIZE(v), p=VECTOR_DATA(v); j < len; j++)
     *p++ = fill;
-  
+
   return STk_void;
 }
- 
+
 
 /*
- * 
+ *
  * STk bonus
  *
  */
@@ -294,15 +294,15 @@ DEFINE_PRIMITIVE("vector-fill!", vector_fill, subr2, (SCM v, SCM fill))
 <doc EXT vector-copy
  * (vector-copy v)
  *
- * Return a copy of vector |v|. Note that, if |v| is a constant vector, 
- * its copy is not constant. 
+ * Return a copy of vector |v|. Note that, if |v| is a constant vector,
+ * its copy is not constant.
 doc>
  */
 DEFINE_PRIMITIVE("vector-copy", vector_copy, subr1, (SCM vect))
 {
   SCM z;
   int n;
-  
+
   if (!VECTORP(vect)) error_bad_vector(vect);
 
   n = VECTOR_SIZE(vect);
@@ -318,7 +318,7 @@ DEFINE_PRIMITIVE("vector-copy", vector_copy, subr1, (SCM vect))
  *
  * Returns a copy of v of the given |size|. If |size| is greater
  * than the vector size of |v|, the contents of the newly allocated vector cells
- * is  set to the value of |fill|. If |fill| is omitted the content of the 
+ * is  set to the value of |fill|. If |fill| is omitted the content of the
  * new cells is ,(emph "void").
 doc>
  */
@@ -327,10 +327,10 @@ DEFINE_PRIMITIVE("vector-resize", vector_resize, subr23,(SCM vect,SCM size,SCM v
   long old_size, new_size = STk_integer_value(size);
   SCM new, *p1, *p2;
   int i;
-  
+
   if (!VECTORP(vect)) 		       error_bad_vector(vect);
   if (new_size<0)     		       STk_error("bad new size ~S", size);
-  
+
   old_size = VECTOR_SIZE(vect);
   new      = STk_makevect(new_size, (SCM) NULL);
   p1 	   = VECTOR_DATA(new);
@@ -350,8 +350,8 @@ DEFINE_PRIMITIVE("vector-resize", vector_resize, subr23,(SCM vect,SCM size,SCM v
 /*
 <doc EXT vector-mutable?
  * (vector-mutable? obj)
- * 
- * Returns |#t| if |obj| is a mutable vector, otherwise returns |#f|. 
+ *
+ * Returns |#t| if |obj| is a mutable vector, otherwise returns |#f|.
  * @lisp
  * (vector-mutable? '#(1 2 a b))            => #f
  * (vector-mutable? (vector-copy '#(1 2)))  => #t
@@ -376,9 +376,9 @@ DEFINE_PRIMITIVE("vector-mutable?", vector_mutable, subr1, (SCM obj))
  * ``before'' the second.
  *
  * @lisp
- * (sort '(1 2 -4 12 9 -1 2 3) <) 
+ * (sort '(1 2 -4 12 9 -1 2 3) <)
  *                => (-4 -1 1 2 2 3 9 12)
- * (sort '#("one" "two" "three" "four") 
+ * (sort '#("one" "two" "three" "four")
  *       (lambda (x y) (> (string-length x) (string-length y))))
  *                => '#("three" "four" "one" "two")
  * @end lisp
@@ -390,14 +390,14 @@ DEFINE_PRIMITIVE("sort", sort, subr2, (SCM obj, SCM test))
   register int i, j, incr, n;
   int list = 0;
 
-  if (NULLP(obj))        { return STk_nil; 			     } 
-  else if (CONSP(obj))   { obj  = STk_list2vector(obj); list = 1;    } 
-  else if (VECTORP(obj)) { obj  = STk_vector_copy(obj); 	     } 
+  if (NULLP(obj))        { return STk_nil; 			     }
+  else if (CONSP(obj))   { obj  = STk_list2vector(obj); list = 1;    }
+  else if (VECTORP(obj)) { obj  = STk_vector_copy(obj); 	     }
   else 			 { STk_error("bad object to sort: ~S", obj); }
-  
-  /* 
-   * Use a shell sort. It has good performances on small arrays 
-   * This sort should have better performances than a cleverer one 
+
+  /*
+   * Use a shell sort. It has good performances on small arrays
+   * This sort should have better performances than a cleverer one
    * for the sorts we'll have to do in practice (which are often small
    * arrays).
    */
@@ -422,9 +422,9 @@ DEFINE_PRIMITIVE("sort", sort, subr2, (SCM obj, SCM test))
 
 
 /*===========================================================================*\
- * 
+ *
  *  Vector extended type definition
- * 
+ *
 \*===========================================================================*/
 
 static void print_vector(SCM vect, SCM port, int mode)

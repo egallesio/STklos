@@ -1,20 +1,20 @@
 ;; ======================================================================
-;; 
+;;
 ;; 			STklos Reference Manual
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 2 of the License, or
 ;; (at your option) any later version.
-;; 
+;;
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;; 
+;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
-;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
@@ -27,20 +27,20 @@
 (index "mutex")
 (index "lock")
 (index "condition variable")
-   
+
 
 (p [The thread system provides the following data types:]
-   (itemize 
+   (itemize
       (item [ Thread (a virtual processor which shares object
 			space with all other threads)])
       (item [Mutex (a mutual exclusion device,
 		      also known as a lock and binary semaphore)])
       (item [Condition variable (a set of blocked threads)])))
-(p [The ,(stklos) thread system is conform to ,(link-srfi 18), and implement 
-all the SRFI mechanisms. See this SRFI documentation for a more complete 
+(p [The ,(stklos) thread system is conform to ,(link-srfi 18), and implement
+all the SRFI mechanisms. See this SRFI documentation for a more complete
 description])
-   
-(section :title "Threads" 
+
+(section :title "Threads"
    (insertdoc 'make-thread)
    (insertdoc 'current-thread)
    (insertdoc 'thread-start!)
@@ -53,7 +53,7 @@ description])
    (insertdoc 'thread-stack-size)
    (insertdoc 'thread-specific)
    (insertdoc 'thread-specific-set!))
-   
+
 (section :title "Mutexes"
    (insertdoc 'make-mutex)
    (insertdoc 'mutex?)
@@ -63,7 +63,7 @@ description])
    (insertdoc 'mutex-state)
    (insertdoc 'mutex-lock!)
    (insertdoc 'mutex-unlock!))
-   
+
 (section :title "Condition Variables"
    (insertdoc 'make-condition-variable)
    (insertdoc 'condition-variable?)
@@ -72,7 +72,7 @@ description])
    (insertdoc 'condition-variable-specific-set!)
    (insertdoc 'condition-variable-signal!)
    (insertdoc 'condition-variable-broadcast!))
-   
+
 (section :title "Conditions"
    (insertdoc 'join-timeout-exception?)
    (insertdoc 'abandoned-mutex-exception?)

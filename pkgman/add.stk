@@ -1,24 +1,24 @@
 ;;;;
 ;;;; add.stk			-- Adding a file to local server
-;;;; 
-;;;; Copyright © 2007-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2007-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Jan-2007 16:59 (eg)
 ;;;; Last file update:  9-May-2008 11:31 (eg)
@@ -43,7 +43,7 @@
        (untar pkgball dirname)
 
        ;; Adding a package or a tuning?
-       (if tuning 
+       (if tuning
 	   (local-description-add-tuning!  pkgball package version tuning dirname
 					   show-only)
 	   (local-description-add-package! pkgball package version dirname
@@ -69,7 +69,7 @@
 	    (add-description-to-local-repository! descr)
 	    (copy-file pkgball (make-path (stklos-pkg-cache-directory)
 					  (basename pkgball))))))))
-      
+
 
 ;; ----------------------------------------------------------------------
 ;; 	local-description-add-tuning! ...
@@ -113,7 +113,7 @@
 	(map (lambda (x) (list (symbol->string x) "*"))
 	     (cdr val))
 	'())))
-  
+
   (let ((lang   (get-value 'language 'r5rs))
 	(cat    (get-value 'category "misc"))
 	(descr  (get-value 'description "N/A"))
@@ -144,7 +144,7 @@
 		(local-description-add! x #t))
 	      pkgs)
     (printf ")\n;; EOF\n")))
-  
+
 
 ;; ----------------------------------------------------------------------
 ;; 	display-description ...

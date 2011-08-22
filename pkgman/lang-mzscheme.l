@@ -8,7 +8,7 @@
 #\\\"			"#\\\""
 
 ;; Strings
-\"([^\\\"]|\\.)*\"	yytext		;|; 
+\"([^\\\"]|\\.)*\"	yytext		;|;
 
 ;;Comment
 \;.*			yytext
@@ -26,5 +26,5 @@
 
 
 <<EOF>>			'eof
-<<ERROR>>		(error 'mzscheme-preprocessor "parse error ~S (line ~a)" 
+<<ERROR>>		(error 'mzscheme-preprocessor "parse error ~S (line ~a)"
 			       yytext (lexer-get-line))

@@ -1,15 +1,15 @@
 ;;;;
 ;;;; full-syntax.stk	-- Robert Hieb and R. Kent Dybvig syntax-case macros
-;;;; 
+;;;;
 ;;;; Scheme macro system Version 2.1
 ;;;; Robert Hieb and R. Kent Dybvig
 ;;;;
-;;;; This a port for STklos of the Robert Hieb and  R. Kent Dybvig 
+;;;; This a port for STklos of the Robert Hieb and  R. Kent Dybvig
 ;;;; implementation of define-syntax.
 ;;;;
-;;;; This file is the entry point of the system. It is inspired from 
-;;;; the file "scainit.scm" present in the SLIB whose author is 
-;;;; Harald Hanche-Olsen <hanche@imf.unit.no>. 
+;;;; This file is the entry point of the system. It is inspired from
+;;;; the file "scainit.scm" present in the SLIB whose author is
+;;;; Harald Hanche-Olsen <hanche@imf.unit.no>.
 ;;;; The copyright assocaited to this file is
 ;;;;
 ;;;; Permission to copy this software, in whole or in part, to use this
@@ -55,7 +55,7 @@
  *   (let ((if #t))
  *     (when if (set! if 'now))
  *     if))                           =>  now
- * 
+ *
  * (let ((x 'outer))
  *   (let-syntax ((m (syntax-rules () ((m) x))))
  *     (let ((x 'inner))
@@ -64,7 +64,7 @@
 doc>
 <doc SYNTAX letrec-syntax
  * (letrec-syntax <bindings> <body>)
- * 
+ *
  * Syntax of |letrec-syntax| is the same as for |let-syntax|.
  * ,(linebreak)
  * The |<body>| is expanded in the syntactic environment obtained by
@@ -77,7 +77,7 @@ doc>
  * ,(linebreak)
  * ,(bold "Note:") |letrec-syntax| is available only after having required the file
  * |"full-syntax"|.
- * 
+ *
  * @lisp
  * (letrec-syntax
  *   ((my-or (syntax-rules ()
@@ -107,7 +107,7 @@ doc>
 (when (find-module 'SYNTAX-CASE #f)
   (error "full syntax is already loaded"))
 
-(define-module SYNTAX-CASE)	;; Empty module just to know that we have 
+(define-module SYNTAX-CASE)	;; Empty module just to know that we have
 				;; already loaded this file
 
 
@@ -118,7 +118,7 @@ doc>
 (define sc:eval-hook	eval)
 (define sc:andmap    	every)
 
-(define (sc:error-hook who why what) 
+(define (sc:error-hook who why what)
   (error who "~a ~s" why what))
 
 (define (sc:new-symbol-hook string)
@@ -140,8 +140,8 @@ doc>
 	(lambda (symbol)
 	  (let ((pair (assq symbol *macros*)))
 	    (and pair (cdr pair)))))
-  
-  (set! sc:syntax-case-macro? 
+
+  (set! sc:syntax-case-macro?
 	(lambda (symbol)
 	  (assq symbol *macros*))))
 
@@ -243,9 +243,9 @@ doc>
   (lambda (x :optional env)
     (sc:eval-hook (sc:expand-syntax x) env)))
 
-;;;; 
+;;;;
 ;;;; Evaluate new syntaxes with our brand new eval
-;;;; 
+;;;;
 (eval '(begin
 	 (define-syntax with-syntax
 	   (lambda (x)
@@ -257,7 +257,7 @@ doc>
 		((_ ((out in) ...) e1 e2 ...)
 		 (syntax (syntax-case (list in ...) ()
 			    ((out ...) (begin e1 e2 ...))))))))
-	 
+
 	 (define-syntax syntax-rules
 	   (lambda (x)
 	     (syntax-case x ()

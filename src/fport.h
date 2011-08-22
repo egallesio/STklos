@@ -1,7 +1,7 @@
 /*
  * f p o r t . h				-- File ports
  *
- * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,7 +44,7 @@ struct fstream {
   unsigned char *ptr;   /* ptr on the current character in buffer  */
   int	cnt;	        /* # of chars in the buffer */
   int	bufsize;        /* buffer size */
-  int   stream_flags;   /* flags */ 
+  int   stream_flags;   /* flags */
   FILE  *f;             /* the file itself */
   short fd;	        /* file descriptor */
   SCM  read_event;

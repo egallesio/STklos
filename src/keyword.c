@@ -2,7 +2,7 @@
  *
  * k e y w o r d . c				-- Keywords management
  *
- * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or

@@ -215,7 +215,7 @@ SRC = ../lib/http.stk \
 	  params.stk pkgball.stk \
 	  repository.stk rewrite.stk misc.stk tune.stk types.stk
 
-SFLAGS = 
+SFLAGS =
 RM = /bin/rm
 SCC = ../utils/stklos-compile
 all: all-am

@@ -1,7 +1,7 @@
 /*
  * mutex-pthreads.c	-- Pthread Mutexes in Scheme
  *
- * Copyright © 2006-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright Â© 2006-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify

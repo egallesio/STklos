@@ -1,24 +1,24 @@
 /*
  * gmp.c	-- The GMP wrapper
- * 
- * Copyright © 2009 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
- * 
- * 
+ *
+ * Copyright Â© 2009 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 12-Oct-2009 19:27 (eg)
  * Last file update: 28-Oct-2009 15:21 (eg)
@@ -55,7 +55,7 @@
 void mpz_trace_bignum(char *msg, mpz_t bn)
 {
   char *buffer = alloca(mp_radix_size(bn, 10) + 10);
-  
+
   mp_toradix(bn, (unsigned char *)buffer, 10);
   fprintf(stderr, "%s[%s] ", msg, buffer);
 }
@@ -94,7 +94,7 @@ void mpz_init(mpz_t bn)
 
 void mpz_init_set(mpz_t bn1, mpz_t bn2)
 {
-  mp_init(bn1); 
+  mp_init(bn1);
   mp_copy(bn2, bn1);
 }
 #endif
@@ -103,12 +103,12 @@ void mpz_init_set(mpz_t bn1, mpz_t bn2)
 void mpz_init_set_si(mpz_t bn, signed long int si)
 {
   if (bit64_si(si)) {
-    char buffer[MAXBUF];    
+    char buffer[MAXBUF];
 
     snprintf(buffer, MAXBUF, "%ld", si);
     mpz_init_set_str(bn, buffer, 10L);
   } else {
-    mp_init(bn); 
+    mp_init(bn);
     mp_set_int(bn, (long) si);
   }
 }
@@ -147,7 +147,7 @@ void mpz_clear(mpz_t bn)
 signed long int mpz_get_si(mpz_t bn)
 {
   char buffer[MAXBUF];
-  
+
   mp_toradix(bn, (unsigned char *)buffer, 10);
   return strtol(buffer, NULL, 10);
 }
@@ -155,7 +155,7 @@ signed long int mpz_get_si(mpz_t bn)
 unsigned long int mpz_get_ui(mpz_t bn)
 {
   char buffer[MAXBUF];
-   
+
   mp_toradix(bn, (unsigned char *)buffer, 10);
   return strtoul(buffer, NULL,10);
 }
@@ -165,7 +165,7 @@ char *mpz_get_str(char *str, int base, mpz_t bn)
 {
   if (!str)
     str = _gmp_alloc(mp_radix_size(bn, base) + 2);
-  
+
   mp_toradix(bn, (unsigned char *)str, base);
   lowerstring(str);
 
@@ -213,12 +213,12 @@ int mpz_cmp_ui(mpz_t bn, unsigned long int ui)
     char buffer[MAXBUF];
     mpz_t tmp;
     int res;
-    
+
     snprintf(buffer, MAXBUF, "%lu", ui);
     mpz_init_set_str(tmp, buffer, 10);
     res = mp_cmp(bn, tmp);
     mp_clear(tmp);
-    
+
     return res;
   } else {
     /* this is a small unsigned value, we can use signed comparison */
@@ -227,7 +227,7 @@ int mpz_cmp_ui(mpz_t bn, unsigned long int ui)
 }
 
 /* ----------------------------------------------------------------------
- * Operations 
+ * Operations
  * ---------------------------------------------------------------------- */
 #ifndef GMP_USE_MACROS
 void mpz_add(mpz_t res, mpz_t a, mpz_t b)
@@ -271,14 +271,14 @@ void mpz_ui_pow_ui(mpz_t bn, unsigned long int base, unsigned long int exp)
   /* convert base and exp to bignums */
   mpz_init_set_ui(exp_bn, exp);
   mpz_init_set_ui(base_bn, base);
-  
+
   /* compute result */
   mp_expt(base_bn, exp_bn, bn);
 }
 
 
 /* ----------------------------------------------------------------------
- * Misc 
+ * Misc
  * ---------------------------------------------------------------------- */
 #ifndef GMP_USE_MACROS
 size_t mpz_sizeinbase(mpz_t bn, int base)

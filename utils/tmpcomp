@@ -1,25 +1,25 @@
 #!/bin/sh
 #
 # tmpcomp	-- A temporary script to bootstrap the system
-# 
-# Copyright © 2002-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-# 
-# 
+#
+# Copyright Â© 2002-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+#
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 # USA.
-# 
+#
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  1-Jan-2002 18:57 (eg)
 # Last file update: 26-Apr-2007 16:15 (eg)
@@ -38,7 +38,7 @@ in=$1
 out=$2
 
 # Sep is now also ":"  on CYGWIN
-sep=":" 
+sep=":"
 
 if test -f ../src/boot.img ;then
     prefix=".."
@@ -46,7 +46,7 @@ else
     prefix="../.."
 fi
 
-STKLOS_LOAD_PATH="${prefix}/lib${sep}${prefix}/gtklos" 
+STKLOS_LOAD_PATH="${prefix}/lib${sep}${prefix}/gtklos"
 STKLOS_BUILDING=1
 export STKLOS_LOAD_PATH STKLOS_BUILDING
 

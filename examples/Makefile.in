@@ -450,10 +450,10 @@ uninstall-am: uninstall-schemedemoDATA uninstall-schemedemoSCRIPTS
 	../utils/tmpcomp $*.stk $*
 
 clean:
-	   /bin/rm -f $(schemedemo_SCRIPTS) *~ 
+	   /bin/rm -f $(schemedemo_SCRIPTS) *~
 
 distclean: clean
-	/bin/rm -f Makefile 
+	/bin/rm -f Makefile
 	/bin/rm -rf .deps
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

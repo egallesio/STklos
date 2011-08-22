@@ -1,8 +1,8 @@
 
 2003-06-04  Erick Gallesio  <eg@unice.fr>
 
-	* This is a GMPlite version. 
+	* This is a GMPlite version.
 	  This version is built for STklos from the transitive closure of the
 	  functions used in src/numbers.c
 	  This version is used if there is no GMP library installed on the
-	  system at configure time (otherwise the system GMP is used). 
+	  system at configure time (otherwise the system GMP is used).

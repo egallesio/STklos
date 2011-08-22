@@ -30,11 +30,11 @@ can be used to make  lexical analyzers with
 .B STklos.
 It is a simple front-end to the Danny Dubé
 .B SILex
-tool. 
+tool.
 
-.PP 
-When this command is called with three parameters, it takes 
-a standard SILex input file as input and generate an analyzer. 
+.PP
+When this command is called with three parameters, it takes
+a standard SILex input file as input and generate an analyzer.
 These parameters are described below:
 .IP "\fIlex-file\fR"
 is the input file which contains the lex-like rules describing the
@@ -82,7 +82,7 @@ The following piece of code show how to use the produced analyzer.
 .fi
 .PP
 This example uses the second form of  \fBstklos-genlex\fR
-usage. Here is an analyzer which skips lines starting with 
+usage. Here is an analyzer which skips lines starting with
 2 slashes. Suppose that we have a file \fIlex.stk\fR which is:
 .nf
 (define-regular-grammar skip-//-lines
@@ -117,7 +117,7 @@ The following command will produce an analyzer in file \fIana.stk\fR
 
 .SH "SEE ALSO"
 .BR stklos (1)
-.BR lex (1) 
+.BR lex (1)
 and the \fBSILex\fR documentation
 
-	
+

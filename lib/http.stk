@@ -1,27 +1,27 @@
 ;;;;
 ;;;; http.stk			-- HTTP utilities
-;;;; 
-;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
 ;;;;
 ;;;;
 ;;;; This code is a rewriting of several ScmPkg package written by
-;;;; Manuel Serrano. 
+;;;; Manuel Serrano.
 ;;;;
 ;;;;    Creation date: 14-May-2007 19:12 (eg)
 ;;;; Last file update:  8-Jun-2007 14:44 (eg)
@@ -36,7 +36,7 @@
 
 ;; -----------------------------------------------------------------------
 ;;	display-line ...
-;; ---------------------------------------------------------------------- 
+;; ----------------------------------------------------------------------
 ;;(define debug #t)
 ;;(define (%display x port)
 ;;  (when debug (display x (current-error-port)))
@@ -185,7 +185,7 @@
 	(authorization #f)
 	(proxy-authorization #f)
 	(connection #f))
-    
+
     (let loop ((line    (read-line ip))
 	       (header '()))
       (if (or (eof-object? line) (string=? line ""))
@@ -275,7 +275,7 @@
   (define (get-username str)
     (let ((lst (string-split str ":")))
       (and (= (length lst) 2) (car lst))))
-  
+
   (define (get-password str)
     (let ((lst (string-split str ":")))
       (and (= (length lst) 2) (cadr lst))))
@@ -310,7 +310,7 @@
 	       (open-url url))))
 	  (else
 	   (error 'http-download "unexpected result ~S" pt))))))
-  
+
   (let ((port (open-url url)))
     (cond
       ((string? dest)
@@ -330,13 +330,13 @@
 ;;	form-urlencode ...
 ;; ----------------------------------------------------------------------
 (define (form-urlencode args sep)
-  
+
   (define (encode-char c port)
     (let ((n (char->integer c)))
       (if (fx< n 16)
 	  (fprintf port "%0~x" n)
 	  (fprintf port "%~x" n))))
-  
+
   (define (encode-string str port)
     (dotimes (i (string-length str))
       (let ((c (string-ref str i)))
@@ -349,14 +349,14 @@
 	   (if (or (char>=? c (integer->char 128)) (char<? c (integer->char 032)))
 	       (encode-char c port)
 	       (write-char c port)))))))
-  
+
   (define (encode-arg arg port)
     (encode-string (car arg) port)
     (unless  (or (null? (cdr arg))
 		 (eq? (cadr arg) (void)))
       (write-char #\= port)
       (encode-string (cadr arg) port)))
- 
+
   (let ((port (open-output-string)))
     (let loop ((a args))
       (if (null? a)
@@ -378,7 +378,7 @@
 ;; ----------------------------------------------------------------------
 (define (x-www-form-urlencode args)
   (form-urlencode args #\&))
-	    
+
 ;; End of HTTP-MODULE
 )
 

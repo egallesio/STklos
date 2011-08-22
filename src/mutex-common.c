@@ -1,24 +1,24 @@
 /*
  * mutex-common.c	-- Common Mutexes in Scheme
- * 
- * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
- * 
- * 
+ *
+ * Copyright Â© 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
  * Last file update: 25-Oct-2006 16:22 (eg)
@@ -33,7 +33,7 @@
 /* ====================================================================== *\
  *
  * 			       M U T E X E S
- * 
+ *
 \* ====================================================================== */
 
 SCM STk_sym_not_owned, STk_sym_abandoned, STk_sym_not_abandoned;
@@ -59,10 +59,10 @@ void STk_error_bad_timeout(SCM tm)
 <doc EXT make-mutex
  * (make-mutex)
  * (make-mutex name)
- * 
- *  Returns a new mutex in the unlocked/not-abandoned state. The optional |name| 
- * is an arbitrary Scheme object which identifies the mutex 
- * (useful for debugging); it defaults to an unspecified value. 
+ *
+ *  Returns a new mutex in the unlocked/not-abandoned state. The optional |name|
+ * is an arbitrary Scheme object which identifies the mutex
+ * (useful for debugging); it defaults to an unspecified value.
  * The mutex's specific field is set to an unspecified value.
 doc>
 */
@@ -77,14 +77,14 @@ DEFINE_PRIMITIVE("make-mutex", make_mutex, subr01, (SCM name))
   MUTEX_LOCKED(z)   = FALSE;
 
   STk_make_sys_mutex(z);
-  
+
   return z;
 }
 
 /*
 <doc EXT mutex?
  * (mutex? obj)
- * 
+ *
  * Returns |#t| if obj is a mutex, otherwise returns |#f|.
 doc>
 */
@@ -96,7 +96,7 @@ DEFINE_PRIMITIVE("mutex?", mutexp, subr1, (SCM obj))
 /*
 <doc EXT mutex-name
  * (mutex-name mutex)
- * 
+ *
  * Returns the name of the |mutex|.
  * @lisp
  * (mutex-name (make-mutex 'foo))  =>  foo
@@ -112,7 +112,7 @@ DEFINE_PRIMITIVE("mutex-name", mutex_name, subr1, (SCM mtx))
 /*
 <doc EXT mutex-specific
  * (mutex-specific mutex)
- * 
+ *
  * Returns the content of the |mutex|'s specific field.
 doc>
 */
@@ -126,7 +126,7 @@ DEFINE_PRIMITIVE("mutex-specific", mutex_specific, subr1, (SCM mtx))
 /*
 <doc EXT mutex-specific-set!
  * (mutex-specific! mutex obj)
- * 
+ *
  * Stores |obj| into the |mutex|'s specific field and eturns an unspecified value.
  * @lisp
  * (define m (make-mutex))
@@ -159,7 +159,7 @@ DEFINE_PRIMITIVE("mutex-specific-set!", mutex_specific_set, subr2, (SCM mtx, SCM
 /* ====================================================================== *\
  *
  * 			       C O N D   V A R S
- * 
+ *
 \* ====================================================================== */
 
 
@@ -173,10 +173,10 @@ void STk_error_bad_condv(SCM obj)
 <doc EXT make-condition-variable
  * (make-conditon-variable)
  * (make-conditon-variable name)
- * 
- * Returns a new empty condition variable. The optional |name| is an arbitrary 
- * Scheme object which identifies the condition variable (useful for debugging); 
- * it defaults to an unspecified value. The condition variable's specific 
+ *
+ * Returns a new empty condition variable. The optional |name| is an arbitrary
+ * Scheme object which identifies the condition variable (useful for debugging);
+ * it defaults to an unspecified value. The condition variable's specific
  * field is set to an unspecified value.
 doc>
 */
@@ -197,7 +197,7 @@ DEFINE_PRIMITIVE("make-condition-variable", make_condv, subr01, (SCM name))
 /*
 <doc EXT condition-variable?
  * (conditon-variable? obj)
- * 
+ *
  * Returns |#t| if |obj| is a condition variable, otherwise returns |#f|.
 doc>
 */
@@ -209,7 +209,7 @@ DEFINE_PRIMITIVE("condition-variable?", condvp, subr1, (SCM obj))
 /*
 <doc EXT condition-variable-name
  * (conditon-variable-name conditon-variable)
- * 
+ *
  *Returns the name of the |condition-variable|.
 doc>
 */
@@ -223,7 +223,7 @@ DEFINE_PRIMITIVE("condition-variable-name", condv_name, subr1, (SCM cv))
 /*
 <doc EXT condition-variable-specific
  * (conditon-variable-specific conditon-variable)
- * 
+ *
  * Returns the content of the |condition-variable|'s specific field.
 doc>
 */
@@ -237,11 +237,11 @@ DEFINE_PRIMITIVE("condition-variable-specific", condv_specific, subr1, (SCM cv))
 /*
 <doc EXT condition-variable-specific-set!
  * (conditon-variable-specific-set! conditon-variable obj)
- * 
- * Stores |obj| into the |condition-variable|'s specific field. 
+ *
+ * Stores |obj| into the |condition-variable|'s specific field.
 doc>
 */
-DEFINE_PRIMITIVE("condition-variable-specific-set!", condv_specific_set, subr2, 
+DEFINE_PRIMITIVE("condition-variable-specific-set!", condv_specific_set, subr2,
 		 (SCM cv, SCM v))
 {
   if (! CONDVP(cv)) STk_error_bad_condv(cv);
@@ -287,7 +287,7 @@ int STk_init_mutexes(void)
   STk_sym_not_owned     = STk_intern("not-owned");
   STk_sym_abandoned     = STk_intern("abandoned");
   STk_sym_not_abandoned = STk_intern("not-abandoned");
-  
+
   /* Mutex and condv type declarations */
   DEFINE_XTYPE(mutex, &xtype_mutex);
   DEFINE_XTYPE(condv, &xtype_condv);

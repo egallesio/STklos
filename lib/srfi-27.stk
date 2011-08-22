@@ -1,23 +1,23 @@
 ;;;;
 ;;;; random.stk	-- Random numbers (SRFI-27)
 ;;;;
-;;;; Copyright © 2002-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
+;;;; Copyright Â© 2002-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;; This implementation is an adaptation of the reference implementation
 ;;;; given in the SRFI-27 document made by Sebastian Egner.
 ;;;;
@@ -165,8 +165,8 @@ doc>
 ; Generator
 ; =========
 ;
-; Pierre L'Ecuyer's MRG32k3a generator is a Combined Multiple Recursive 
-; Generator. It produces the sequence {(x[1,n] - x[2,n]) mod m1 : n} 
+; Pierre L'Ecuyer's MRG32k3a generator is a Combined Multiple Recursive
+; Generator. It produces the sequence {(x[1,n] - x[2,n]) mod m1 : n}
 ; defined by the two recursive generators
 ;
 ;   x[1,n] = (               a12 x[1,n-2] + a13 x[1,n-3]) mod m1,
@@ -194,15 +194,15 @@ doc>
 ; publication provides detailed information on how to do that:
 ;
 ;    [1] P. L'Ecuyer, R. Simard, E. J. Chen, W. D. Kelton:
-;        An Object-Oriented Random-Number Package With Many Long 
+;        An Object-Oriented Random-Number Package With Many Long
 ;        Streams and Substreams. 2001.
 ;        To appear in Operations Research.
 ;
 ; Arithmetics
 ; ===========
 ;
-; The MRG32k3a generator produces values in {0..2^32-209-1}. All 
-; subexpressions of the actual generator fit into {-2^53..2^53-1}. 
+; The MRG32k3a generator produces values in {0..2^32-209-1}. All
+; subexpressions of the actual generator fit into {-2^53..2^53-1}.
 ; The code below assumes that Scheme's "integer" covers this range.
 ; In addition, it is assumed that floating point literals can be
 ; read and there is some arithmetics with inexact numbers.
@@ -222,16 +222,16 @@ doc>
 ;      pack/unpack a state of the generator. The core generator works
 ;      on packed states, passed as an explicit argument, only. This
 ;      allows native code implementations to store their state in a
-;      suitable form. Unpacked states are #(x10 x11 x12 x20 x21 x22) 
+;      suitable form. Unpacked states are #(x10 x11 x12 x20 x21 x22)
 ;      with integer x_ij. Pack/unpack need not allocate new objects
 ;      in case packed and unpacked states are identical.
 ;
 ;   (mrg32k3a-random-range) -> m-max
 ;   (mrg32k3a-random-integer packed-state range) -> x in {0..range-1}
 ;      advance the state of the generator and return the next random
-;      range-limited integer. 
-;        Note that the state is not necessarily advanced by just one 
-;      step because we use the rejection method to avoid any problems 
+;      range-limited integer.
+;        Note that the state is not necessarily advanced by just one
+;      step because we use the rejection method to avoid any problems
 ;      with distribution anomalies.
 ;        The range argument must be an exact integer in {1..m-max}.
 ;      It can be assumed that range is a fixnum if the Scheme system
@@ -249,7 +249,7 @@ doc>
 ; to be defined to create and access a new record data type:
 ;
 ;   (%random-source-make a0 a1 a2 a3 a4 a5) -> s
-;     constructs a new random source object s consisting of the 
+;     constructs a new random source object s consisting of the
 ;     objects a0 .. a5 in this order.
 ;
 ;   (%random-source? obj) -> bool
@@ -279,7 +279,7 @@ doc>
 ; ===================
 
 (define (mrg32k3a-state-ref packed-state)
-  (cons 'lecuyer-mrg32k3a 
+  (cons 'lecuyer-mrg32k3a
         (vector->list (mrg32k3a-unpack-state packed-state))))
 
 (define (mrg32k3a-state-set external-state)
@@ -311,7 +311,7 @@ doc>
 ; Pseudo-Randomization
 ; ====================
 ;
-; Reference [1] above shows how to obtain many long streams and 
+; Reference [1] above shows how to obtain many long streams and
 ; substream from the backbone generator.
 ;
 ; The idea is that the generator is a linear operation on the state.
@@ -324,7 +324,7 @@ doc>
 ; For the implementation it is necessary to compute with matrices in
 ; the ring (Z/(m1*m1)*Z)^(3x3). By the Chinese-Remainder Theorem, this
 ; is isomorphic to ((Z/m1*Z) x (Z/m2*Z))^(3x3). We represent such a pair
-; of matrices 
+; of matrices
 ;   [ [[x00 x01 x02],
 ;      [x10 x11 x12],
 ;      [x20 x21 x22]], mod m1
@@ -336,9 +336,9 @@ doc>
 ;     y00 y01 y02 y10 y11 y12 y20 y21 y22)
 ;
 ; As the implementation should only use the range {-2^53..2^53-1}, the
-; fundamental operation (x*y) mod m, where x, y, m are nearly 2^32, 
-; is computed by breaking up x and y as x = x1*w + x0 and y = y1*w + y0 
-; where w = 2^16. In this case, all operations fit the range because 
+; fundamental operation (x*y) mod m, where x, y, m are nearly 2^32,
+; is computed by breaking up x and y as x = x1*w + x0 and y = y1*w + y0
+; where w = 2^16. In this case, all operations fit the range because
 ; w^2 mod m is a small number. If proper multiprecision integers are
 ; available this is not necessary, but pseudo-randomize! is an expected
 ; to be called only occasionally so we do not provide this implementation.
@@ -348,10 +348,10 @@ doc>
 
 (define mrg32k3a-initial-state ; 0 3 6 9 12 15 of A^16, see below
   '#( 1062452522
-      2961816100 
-       342112271 
-      2854655037 
-      3321940838 
+      2961816100
+       342112271
+      2854655037
+      3321940838
       3542344109))
 
 (define mrg32k3a-generators #f) ; computed when needed
@@ -378,22 +378,22 @@ doc>
             (b2h (quotient (vector-ref B j2) w))
             (b2l (modulo   (vector-ref B j2) w)))
         (modulo
-         (+ (* (+ (* a0h b0h) 
-                  (* a1h b1h) 
-                  (* a2h b2h)) 
+         (+ (* (+ (* a0h b0h)
+                  (* a1h b1h)
+                  (* a2h b2h))
                w-sqr)
-            (* (+ (* a0h b0l) 
+            (* (+ (* a0h b0l)
                   (* a0l b0h)
-                  (* a1h b1l) 
+                  (* a1h b1l)
                   (* a1l b1h)
-                  (* a2h b2l) 
+                  (* a2h b2l)
                   (* a2l b2h))
                w)
             (* a0l b0l)
             (* a1l b1l)
             (* a2l b2l))
          m)))
-    
+
     (vector
      (lc  0  1  2   0  3  6  mrg32k3a-m1 w-sqr1) ; (A*B)_00 mod m1
      (lc  0  1  2   1  4  7  mrg32k3a-m1 w-sqr1) ; (A*B)_01
@@ -439,7 +439,7 @@ doc>
             0       1          0))
 
   ; check arguments
-  (if (not (and (integer? i) 
+  (if (not (and (integer? i)
                 (exact? i)
                 (integer? j)
                 (exact? j)))
@@ -454,12 +454,12 @@ doc>
                   (power A 16))))
 
   ; compute M = A^(16 + i*2^127 + j*2^76)
-  (let ((M (product 
+  (let ((M (product
             (list-ref mrg32k3a-generators 2)
             (product
              (power (list-ref mrg32k3a-generators 0)
                     (modulo i (expt 2 28)))
-             (power (list-ref mrg32k3a-generators 1) 
+             (power (list-ref mrg32k3a-generators 1)
                     (modulo j (expt 2 28)))))))
     (mrg32k3a-pack-state
      (vector
@@ -507,8 +507,8 @@ doc>
 ; Large Integers
 ; ==============
 ;
-; To produce large integer random deviates, for n > m-max, we first 
-; construct large random numbers in the range {0..m-max^k-1} for some 
+; To produce large integer random deviates, for n > m-max, we first
+; construct large random numbers in the range {0..m-max^k-1} for some
 ; k such that m-max^k >= n and then use the rejection method to choose
 ; uniformly from the range {0..n-1}.
 
@@ -572,7 +572,7 @@ doc>
        (lambda (n)
          (cond
           ((not (and (integer? n) (exact? n) (positive? n)))
-           (error "range must be exact positive integer" n))           
+           (error "range must be exact positive integer" n))
           ((<= n mrg32k3a-m-max)
            (mrg32k3a-random-integer state n))
           (else
@@ -580,7 +580,7 @@ doc>
      (lambda args
        (cond
         ((null? args)
-         (lambda () 
+         (lambda ()
            (mrg32k3a-random-real state)))
         ((null? (cdr args))
          (let ((unit (car args)))
@@ -588,15 +588,15 @@ doc>
             ((not (and (real? unit) (< 0 unit 1)))
              (error "unit must be real in (0,1)" unit))
             ((<= (- (/ 1 unit) 1) mrg32k3a-m1)
-             (lambda () 
+             (lambda ()
                (mrg32k3a-random-real state)))
             (else
-             (lambda () 
+             (lambda ()
                (mrg32k3a-random-real-mp state unit))))))
         (else
          (error "illegal arguments" args)))))))
 
-(define random-source? 
+(define random-source?
   %random-source?)
 
 (define (random-source-state-ref s)
@@ -621,7 +621,7 @@ doc>
 
 ; ---
 
-(define default-random-source 
+(define default-random-source
   (make-random-source))
 
 (define random-integer
@@ -636,7 +636,7 @@ doc>
 (select-module STklos)
 (import RANDOM-MODULE)
 
-;; define the autoloads in case this file is auto-loaded 
+;; define the autoloads in case this file is auto-loaded
 (define random-integer (in-module RANDOM-MODULE random-integer))
 (define random-real    (in-module RANDOM-MODULE random-real))
 (provide "srfi-27")

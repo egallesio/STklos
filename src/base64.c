@@ -1,9 +1,9 @@
-/*
+/*					-*- coding: utf-8 -*-
  *
  * b a s e 6 4 . c			-- Base64 support for STk
  *
- * Copyright © 1998-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright Â© 1998-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  *
  * Permission to use, copy, modify, distribute,and license this
  * software and its documentation for any purpose is hereby granted,
@@ -21,7 +21,7 @@
 
 #include <stklos.h>
 
-static char table[] =  
+static char table[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 static char rev_table[128] = {
@@ -61,9 +61,9 @@ static void encode(SCM f, SCM g)
   state = old = count = 0;
   while ((c = STk_getc(f)) != EOF) {
     switch (++state) {
-      case 1: OutChar(table[(c>>2) & 0x3f], g); 
+      case 1: OutChar(table[(c>>2) & 0x3f], g);
 	      break;
-      case 2: OutChar(table[((old<<4) & 0x30) | ((c>>4) & 0x0f)], g); 
+      case 2: OutChar(table[((old<<4) & 0x30) | ((c>>4) & 0x0f)], g);
 	      break;
       case 3: OutChar(table[((old<<2) & 0x3c) | ((c>>6) & 0x03)], g);
 	      OutChar(table[c & 0x3f], g);
@@ -94,11 +94,11 @@ static void decode(SCM f, SCM g)
       if (c != '=') {
 	bits = rev_table[c];
 	group |= bits << j;
-      } 
+      }
       else equal += 1;
-      
+
       j -= 6;
-      
+
       if (j < 0) {
 	c = (group&0xff0000) >> 16; STk_putc(c, g);
 	c = (group&0x00ff00) >> 8;  if (equal < 2) STk_putc(c, g);
@@ -114,8 +114,8 @@ static void decode(SCM f, SCM g)
 <doc EXT base64-encode
  * (base64-encode in)
  * (base64-encode in out)
- * 
- * Encode in Base64 the characters from input port |in| to the output port 
+ *
+ * Encode in Base64 the characters from input port |in| to the output port
  * |out|. If |out| is not specified, it defaults to the current output port.
 doc>
 */
@@ -126,7 +126,7 @@ DEFINE_PRIMITIVE("base64-encode", base64_encode, subr12, (SCM f, SCM g))
     g = STk_current_output_port();
   else
     if (!OPORTP(g)) error_bad_output_port(g);
-  
+
   encode(f, g);
   return STk_void;
 }
@@ -135,8 +135,8 @@ DEFINE_PRIMITIVE("base64-encode", base64_encode, subr12, (SCM f, SCM g))
 <doc EXT base64-decode
  * (base64-decode in)
  * (base64-decode in out)
- * 
- * Decode the Base64 characters from input port |in| to the output port 
+ *
+ * Decode the Base64 characters from input port |in| to the output port
  * |out|. If |out| is not specified, it defaults to the current output port.
 doc>
 */
@@ -147,13 +147,13 @@ DEFINE_PRIMITIVE("base64-decode", base64_decode, subr12, (SCM f, SCM g))
     g = STk_current_output_port();
   else
     if (!OPORTP(g)) error_bad_output_port(g);
-  
+
   decode(f, g);
   return STk_void;
 }
 
 /*===========================================================================*\
- * 
+ *
  * 	Initialization code
  *
 \*===========================================================================*/

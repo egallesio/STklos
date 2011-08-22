@@ -1,22 +1,22 @@
 #!/bin/sh
 #							-*- shell-script -*-
 #
-# s h l i b - o p t i o n s		--  Determine the options to use 
+# s h l i b - o p t i o n s		--  Determine the options to use
 #					    for compiling with dynamic loading
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 # USA.
 #
 #           Author: Erick Gallesio [eg@unice.fr]
@@ -28,7 +28,7 @@
 # Utilities
 #
 die() {
- echo ERROR: $* 1>&2  
+ echo ERROR: $* 1>&2
  exit 1
 }
 
@@ -80,7 +80,7 @@ case $os in
   IRIX*)
 	  OS=IRIX;
 	  if test "$CC" = "gcc"
-	  then 
+	  then
 	    SH_COMP_FLAGS="-fpic"
 	  else
 	    SH_COMP_FLAGS="-KPIC"
@@ -90,7 +90,7 @@ case $os in
 	  SH_SUFFIX='so'
           SH_LIB_SUFFIX='so'
 	  ;;
-  Linux*) 
+  Linux*)
 	  case $version in
             2.0.*) version=2.0.x;;
 	    2.1.*) version=2.1.x;;
@@ -109,7 +109,7 @@ case $os in
           SH_LIB_SUFFIX='so'
           SH_MAIN_LOAD_FLAGS="-rdynamic"
 	  ;;
-  NetBSD*) 
+  NetBSD*)
 	  OS=NETBSD
 	  SH_COMP_FLAGS="-fpic"
           SH_LOAD_FLAGS="-Bshareable -o"
@@ -151,7 +151,7 @@ case $os in
           SH_LIB_SUFFIX='dylib'
 	  ;;
   CYGWIN*)
-	  # Since I cannot figure yet how to use shared libraries in Cygwin 
+	  # Since I cannot figure yet how to use shared libraries in Cygwin
 	  # And since they are not used yet. Just don't do it;-)
 	  OS=CYGWIN;
 	  OS_FLAVOUR=WIN32;

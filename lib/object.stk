@@ -1,24 +1,24 @@
 ;;;;
 ;;;; object.stk	-- -- A variation of the Gregor Kickzales Tiny CLOS for STklos
-;;;; 
-;;;; Copyright © 1993-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 1993-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
 ;;;; Last file update:  1-Jan-2010 14:52 (eg)
@@ -29,7 +29,7 @@
 
 * decoupage du source
 * methods rapides
-* Vérification que tous les points du mop sont implémentés
+* VÃ©rification que tous les points du mop sont implÃ©mentÃ©s
 
 |#
 
@@ -46,14 +46,14 @@
     slot-unbound slot-missing
     slot-definition-name  slot-definition-options slot-definition-allocation
     slot-definition-getter slot-definition-setter slot-definition-accessor
-    slot-definition-init-form slot-definition-init-keyword 
+    slot-definition-init-form slot-definition-init-keyword
     slot-init-function class-slot-definition
     compute-get-n-set
     allocate-instance initialize make-instance make
     no-next-method  no-applicable-method no-method ;; next-method-exists?
-    change-class change-object-class 
+    change-class change-object-class
     shallow-clone deep-clone
-    apply-generic apply-method apply-methods compute-applicable-methods 
+    apply-generic apply-method apply-methods compute-applicable-methods
     method-more-specific? sort-applicable-methods
     method-procedure method-specializers method-generic-function
     method-specializers-equal?
@@ -95,12 +95,12 @@
    ((pair? l) (cons (if (pair? (car l)) (cadar l) '<top>)
  		    (specializers (cdr l))))
    (else      '<top>)))
- 
+
 (define (formals l)
   (if (pair? l)
       (cons (if (pair? (car l)) (caar l) (car l)) (formals (cdr l)))
       l))
- 
+
 
 (define (declare-slots slots)
   ;; This is a *HUGE* *HACK*. Since STklos compiler displays the
@@ -109,7 +109,7 @@
   ;; In the abolute this code is false, since the keywords :accessor
   ;; :getter and :setter can have a different meaning than the usual
   ;; one for a peculiar meta-class. Anyway, the only risk is to
-  ;; trust that a symbol is defined whereas it is not. 
+  ;; trust that a symbol is defined whereas it is not.
   (for-each (lambda (s)
 	      (let ((getter   (slot-definition-getter   s))
 		    (setter   (slot-definition-setter   s))
@@ -122,7 +122,7 @@
 
 
 ;--------------------------------------------------
-(define (make class . l)	;; A temporary version used for bootstrapping 
+(define (make class . l)	;; A temporary version used for bootstrapping
   (cond
     ((eq? class <generic>) (%make class
 				  'generic
@@ -149,7 +149,7 @@
 ;// 	 (args (cdadr proc))
 ;// 	 (body (cddr proc)))
 ;//     (list* 'method (map list args spec) body)))
-;// 
+;//
 
 ;;;
 ;;; Classes
@@ -158,23 +158,23 @@
   (if (class? C) (slot-ref C 'name) (%error-bad-class 'class-name C)))
 
 (define (class-direct-supers C)
-  (if (class? C) 
-      (slot-ref C 'direct-supers) 
+  (if (class? C)
+      (slot-ref C 'direct-supers)
       (%error-bad-class 'class-direct-supers C)))
 
 (define (class-direct-slots C)
-  (if (class? C) 
-      (slot-ref C 'direct-slots) 
+  (if (class? C)
+      (slot-ref C 'direct-slots)
       (%error-bad-class 'class-direct-slots C)))
 
 (define (class-direct-subclasses C)
-  (if (class? C) 
-      (slot-ref C 'direct-subclasses) 
+  (if (class? C)
+      (slot-ref C 'direct-subclasses)
       (%error-bad-class 'class-direct-subclasses C)))
 
 (define (class-direct-methods C)
-  (if (class? C) 
-      (slot-ref C 'direct-methods) 
+  (if (class? C)
+      (slot-ref C 'direct-methods)
       (%error-bad-class 'class-direct-methods C)))
 
 (define (class-precedence-list C)
@@ -230,7 +230,7 @@
 ;;;
 (define (generic-function-name gf)
   (if (generic? gf)
-      (slot-ref gf 'name) 
+      (slot-ref gf 'name)
       (%error-bad-generic 'generic-function-name gf)))
 
 (define (generic-function-methods gf)
@@ -287,18 +287,18 @@
 ;;
 (define (%compute-slots C)
   (define (remove-duplicate-slots l res)
-    (if (null? l) 
+    (if (null? l)
 	res
 	(let ((s (slot-definition-name (car l))))
 	  (unless (symbol? s)
 	    (error 'compute-slots "bad slot name ~S" s))
-	  (remove-duplicate-slots (cdr l) 
+	  (remove-duplicate-slots (cdr l)
 				  (if (assq s res) res (cons (car l) res))))))
 
   (define (build-slots-list cpl res)
-    (if (null? cpl) 
+    (if (null? cpl)
 	(remove-duplicate-slots (reverse res) '())
-	(build-slots-list (cdr cpl) 
+	(build-slots-list (cdr cpl)
 			  (append (class-direct-slots (car cpl)) res))))
   (define (sort-slots l)
     ;; Slots are sorted such that instance slots are always before other slots.
@@ -315,7 +315,7 @@
 	   (Loop (cdr l) (cons (car l) instance) other))
 	(else
 	   (Loop (cdr l) instance (cons (car l) other))))))
-  
+
   (sort-slots (build-slots-list (class-precedence-list C) '())))
 
 
@@ -347,7 +347,7 @@
 				   (class-of (find-class x))))
 			     supers))
 	     (all-cpls  (apply append
-			       (map (lambda (m) (cdr (class-precedence-list m))) 
+			       (map (lambda (m) (cdr (class-precedence-list m)))
 				    all-metas)))
 	     (needed-metas '()))
 	;; Find the most specific metaclasses.  The new metaclass will be
@@ -369,11 +369,11 @@
 ;=============================================================================
 ;==== Define-class
 (define-macro (define-class name supers slots . options)
-  `(define ,name 
+  `(define ,name
       (ensure-class
         ',name					; name
 	',supers				; supers
-	',(declare-slots slots)			; slots 
+	',(declare-slots slots)			; slots
 	,(or (key-get options :metaclass #f)	; metaclass
 	     `(ensure-metaclass ',supers))
 	,@options)))
@@ -386,8 +386,8 @@
        ((null? l)		#f)
        ((memq (car l) (cdr l))	(car l))
        (else 			(find-duplicate (cdr l)))))
- 
-  (let ((supers (if (null? supers) 
+
+  (let ((supers (if (null? supers)
 		    (list <object>)
 		    (map find-class supers))))
     ;; Verify that all direct slots are different and that we don't inherit
@@ -401,7 +401,7 @@
 
     ;; Everything seems correct, build the class
     (let ((old (find-class name #f))
-	  (cls (apply make metaclass :dsupers supers :slots slots 
+	  (cls (apply make metaclass :dsupers supers :slots slots
 		      		     :name name options)))
       (when old (class-redefinition old cls))
       cls)))
@@ -424,8 +424,8 @@
   (let ((old (symbol-value* name (current-module) #f)))
     (if (generic? old)
 	old
-	(%symbol-define name 
-			(make metaclass :name name 
+	(%symbol-define name
+			(make metaclass :name name
 			      		:default (and (procedure? old) old)
 					:documentation documentation)
 			(current-module)))))
@@ -466,10 +466,10 @@
       (if (null? l)
 	  (cons new methods)
 	  (if (method-specializers-equal? gf (car l) new)
-	      (begin 
+	      (begin
 		;; This spec. list already exists. Remove old method from dependents
 		(remove-method-in-classes! (car l))
-		(set-car! l new) 
+		(set-car! l new)
 		methods)
 	      (Loop (cdr l)))))))
 
@@ -509,7 +509,7 @@
 
 ;=============================================================================
 ;
-; 			    Standard methods   
+; 			    Standard methods
 ; 			used by the C runtime
 ;
 ;=============================================================================
@@ -518,27 +518,27 @@
 (define-method object-eqv?   (x y) #f)
 (define-method object-equal? (x y) (eqv? x y))
 
- 
+
 ;==== Methods to display/write an object
- 
+
 ;     Code for writing objects must test that the slots they use are
-;     bound. Otherwise a slot-unbound method will be called and will 
+;     bound. Otherwise a slot-unbound method will be called and will
 ;     conduct to an infinite loop.
- 
+
 ;; Write
 (define-method write-object (o file)
   (format file "#[instance ~A]" (number->string (address-of o) 16)))
- 
+
 (define-method write-object ((o <object>) file)
   (let ((class (class-of o)))
-    (if (slot-bound? class 'name) 
-	(format file "#[~A ~A]" (class-name class) 
+    (if (slot-bound? class 'name)
+	(format file "#[~A ~A]" (class-name class)
 		(number->string (address-of o) 16))
 	(next-method))))
 
 (define-method write-object((class <class>) file)
   (let ((meta (class-of class)))
-    (if (and (slot-bound? class 'name) (slot-bound? meta 'name)) 
+    (if (and (slot-bound? class 'name) (slot-bound? meta 'name))
 	(format file "#[~A ~A ~A]" (class-name meta) (class-name class)
 		(number->string (address-of class) 16))
 	(next-method))))
@@ -547,14 +547,14 @@
   (let ((meta (class-of gf)))
     (if (and (slot-bound? gf 'name) (slot-bound? meta 'name)
 	     (slot-bound? gf 'methods))
-	(format file "#[~A ~A (~A)]" 
+	(format file "#[~A ~A (~A)]"
 		(class-name meta)
 		(generic-function-name gf)
 		(length (generic-function-methods gf)))
 	(next-method))))
 
 ;; Display (do the same thing as write by default)
-(define-method display-object (o file) 
+(define-method display-object (o file)
   (write-object o file))
 
 ;==== Slot access
@@ -574,7 +574,7 @@
 ; ==== Methods for the possible error we can encounter when calling a gf
 
 (define-method no-next-method ((gf <generic>) method args)
-  (error "no next method for ~S in call ~S" 
+  (error "no next method for ~S in call ~S"
 	 method (cons (generic-function-name gf) args)))
 
 (define-method no-applicable-method ((gf <generic>) args)
@@ -627,7 +627,7 @@
 
 ;==== Remove-class-accessors
 (define-method remove-class-accessors ((c <class>))
-  (for-each 
+  (for-each
      (lambda (m) (if (is-a? m <accessor-method>) (remove-method-in-classes! m)))
      (class-direct-methods c)))
 
@@ -635,7 +635,7 @@
 ;==== Update-direct-method
 (define-method update-direct-method ((m  <method>) (old <class>) (new <class>))
   (let Loop ((l (method-specializers m)))
-    (when (pair? l)       	; Note: the <top> in dotted list is never used. 
+    (when (pair? l)       	; Note: the <top> in dotted list is never used.
       (if (eq? (car l) old)     ; So we can work if we had only proper lists.
 	(set-car! l new))
       (Loop (cdr l)))))
@@ -644,7 +644,7 @@
 (define-method update-direct-subclass ((c <class>) (old <class>) (new <class>))
   (let ((new-supers (map (lambda (cls) (if (eq? cls old) new cls))
 			 (class-direct-supers c))))
-    ;; Create a new class with same name as c. This will automagically call 
+    ;; Create a new class with same name as c. This will automagically call
     ;; class-redefinition on this subclass and redefine all its descent
     (ensure-class (class-name c)
 		  new-supers
@@ -654,7 +654,7 @@
 ;==== Class-redefinition
 (define-method class-redefinition ((old <class>) (new <class>))
   ;; Work on direct methods:
-  ;;		1. Remove accessor methods from the old class 
+  ;;		1. Remove accessor methods from the old class
   ;;		2. Patch the occurences of old in the specializers by new
   ;;		3. Displace the methods from old to new
   (remove-class-accessors old)					;; -1-
@@ -664,12 +664,12 @@
     (slot-set! new 'direct-methods methods))			;; -3-
 
   ;; Remove the old class from the direct-subclasses list of its super classes
-  (for-each (lambda (c) (slot-set! c 'direct-subclasses 
+  (for-each (lambda (c) (slot-set! c 'direct-subclasses
 				   (delete! old (class-direct-subclasses c) eq?)))
 	    (class-direct-supers old))
 
   ;; Redefine all the subclasses of old to take into account modification
-  (for-each 
+  (for-each
        (lambda (c) (update-direct-subclass c old new))
        (class-direct-subclasses old))
 
@@ -743,7 +743,7 @@
 		     already-allocated))
 
       ((:class)  ;; Class slot
-       		 ;; Class-slots accessors are implemented as 2 closures around 
+       		 ;; Class-slots accessors are implemented as 2 closures around
        		 ;; a Scheme variable.
        		 (if (%direct-slot? name class)
 		     ;; This slot is direct; create a new shared cell
@@ -752,7 +752,7 @@
 			     (lambda (o v) (set! shared-cell v))))
 		     ;; Slot is inherited. Find its definition in superclass
 		     (%find-inherited-get-n-set name class)))
-      
+
       ((:each-subclass) ;; slot shared by instances of direct subclass only.
        			;; (Thomas Buerger, April 1998)
        			(let ((shared-cell (void)))
@@ -831,7 +831,7 @@
 
 ;;;
 ;;; compute-getters-n-setters
-;;; 
+;;;
 
 (define (compute-getters-n-setters class slots)
 
@@ -855,7 +855,7 @@
 
   (define (verify-accessors slot l)
     (if (pair? l)
-	(let ((get (car l)) 
+	(let ((get (car l))
 	      (set (cadr l)))
 	  (unless (and (closure? get) (= (%procedure-arity get) 1))
 	    (error "bad getter closure for slot `~S' in ~S: ~S" slot class get))
@@ -877,15 +877,15 @@
 ;;;
 ;;; compute-cpl
 ;;;
-;;; The current implementation was provided by Anthony Beurivé
-;;; <beurive@labri.u-bordeaux.fr>. This implementation is monotonic and 
-;;; works "by level". For more information on monotonic superclass 
-;;; linearization  algorithm look at the paper 
-;;; 	A Monotonic Superclass Linearization for Dylan, 
-;;;     K. Barrett, B. Cassels, P. Haahr, D. A. Moon, K. Playford, 
-;;;     P. Tucker Withington, 
+;;; The current implementation was provided by Anthony BeurivÃ©
+;;; <beurive@labri.u-bordeaux.fr>. This implementation is monotonic and
+;;; works "by level". For more information on monotonic superclass
+;;; linearization  algorithm look at the paper
+;;; 	A Monotonic Superclass Linearization for Dylan,
+;;;     K. Barrett, B. Cassels, P. Haahr, D. A. Moon, K. Playford,
+;;;     P. Tucker Withington,
 ;;;     OOPSLA 96.
-;;; also available at 
+;;; also available at
 ;;;	http://www.webcom.com/~haahr/dylan/linearization-oopsla96.html
 ;;;
 (define (compute-cpl class)
@@ -995,7 +995,7 @@
 
 ;=============================================================================
 ;
-; 				     M a k e 
+; 				     M a k e
 ;
 ;     A new definition which overwrite the previous one which was built-in
 ;
@@ -1022,19 +1022,19 @@
     ;; Initalize the slot of the new instance
     (for-each (lambda (slot)
 		(if (slot-exists-using-class? old-class old-instance slot)
-		    ;; Slot was present in old instance; set it 
+		    ;; Slot was present in old instance; set it
 		    (when (slot-bound-using-class? old-class old-instance slot)
 		      (slot-set-using-class!
-			     new-class 
-			     new-instance 
-			     slot 
+			     new-class
+			     new-instance
+			     slot
 			     (slot-ref-using-class old-class old-instance slot)))
 		    ;; slot was absent; initialize it with its default value
 		    (let ((init (slot-init-function new-class slot)))
 		      (when init
 			  (slot-set-using-class!
-			       new-class 
-			       new-instance 
+			       new-class
+			       new-instance
 			       slot
 			       (init new-instance))))))
 	      (map slot-definition-name (class-slots new-class)))
@@ -1052,18 +1052,18 @@
 ;
 ; Protocol for calling standard generic functions.
 ; This protocol is  not used for real <generic> functions (in this case we use
-; a completely C hard-coded protocol). 
+; a completely C hard-coded protocol).
 ; Apply-generic is used by STklos for calls to subclasses of <generic>.
 ;
 ; The code below is similar to the first MOP described in AMOP. In particular,
-; it doesn't used the currified approach to gf call. There are 3 reasons for 
-; that: 
+; it doesn't used the currified approach to gf call. There are 3 reasons for
+; that:
 ;   - the protocol below is exposed to mimic completely the one written in C
 ;   - the currified protocol would be imho inefficient in C.
-;   - nobody (except persons really interested with playing with a MOP) will 
+;   - nobody (except persons really interested with playing with a MOP) will
 ;     probably use the following code
 ;=============================================================================
- 
+
 (define-method compute-applicable-methods ((gf <generic>) args)
   (apply find-method gf args))
 
@@ -1073,7 +1073,7 @@
 (define-method sort-applicable-methods ((gf <generic>) methods args)
   (let ((targs (map class-of args)))
     (sort methods (lambda (m1 m2) (method-more-specific? m1 m2 targs)))))
- 
+
 (define-method apply-method ((gf <generic>) methods build-next args)
   (let ((proc (method-procedure (car methods))))
     (%set-next-method! proc (build-next methods args))
@@ -1128,24 +1128,24 @@
 	'()
 	(append (apply func (map car args))
 		(apply mapappend func (map cdr args)))))
- 
-  ;; ==== class-subclasses  
-  (set! class-subclasses 
+
+  ;; ==== class-subclasses
+  (set! class-subclasses
 	(lambda (c)
 	  (letrec ((allsubs (lambda (c)
-			      (cons c (mapappend allsubs 
+			      (cons c (mapappend allsubs
 						 (class-direct-subclasses c))))))
 	    (list2set (cdr (allsubs c))))))
   ;; ==== class-methods
-  (set! class-methods 
+  (set! class-methods
 	(lambda (c)
-	  (list2set (mapappend class-direct-methods 
+	  (list2set (mapappend class-direct-methods
 			       (cons c (class-subclasses c)))))))
 
-;==== CLOS like slot-value (but as a gf instead of proc as slot-ref or slot-set!) 
+;==== CLOS like slot-value (but as a gf instead of proc as slot-ref or slot-set!)
 (define-method slot-value ((o <object>) s) 		;; The getter
   (slot-ref o s))
- 
+
 (define-method slot-value ((o <object>) s v)		;; The setter
   (slot-set! o s v))
 

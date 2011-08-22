@@ -2,22 +2,22 @@
  *
  * s y m b o l . c			-- Symbols management
  *
- * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright Â© 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
@@ -53,7 +53,7 @@ int STk_symbol_flags(register char *s)
     }
     if (!strchr(valid_symbol_chars, *s)) {
       res |= SYMBOL_NEEDS_BARS;
-      break;      
+      break;
     }
   }
   return res;
@@ -62,7 +62,7 @@ int STk_symbol_flags(register char *s)
 SCM STk_make_uninterned_symbol(char *name)
 {
   SCM z;
-  
+
   NEWCELL(z, symbol);
   SYMBOL_PNAME(z) = STk_strdup(name);
   BOXED_INFO(z) |= STk_symbol_flags(name);
@@ -88,7 +88,7 @@ SCM STk_intern_ci(char *name)
     for (s= name; *s; s++) *s=tolower(*s);
   return STk_intern(name);
 }
-  
+
 
 #ifdef FIXME
 //EG: SCM STk_global_env2list(void)
@@ -96,20 +96,20 @@ SCM STk_intern_ci(char *name)
 //EG:   register SCM symbol, res = STk_nil;
 //EG:   Tcl_HashEntry *ent;
 //EG:   Tcl_HashSearch tmp;
-//EG: 
+//EG:
 //EG:   for (ent=Tcl_FirstHashEntry(&obarray, &tmp); ent;  ent=Tcl_NextHashEntry(&tmp)) {
 //EG:     symbol = (SCM)Tcl_GetHashValue(ent);
 //EG:     res    = Cons(Cons(symbol, VCELL(symbol)), res);
 //EG:   }
 //EG:   return res;
 //EG: }
-//EG: 
+//EG:
 //EG: SCM STk_global_symbols(void)
 //EG: {
 //EG:   register SCM symbol, res = STk_nil;
 //EG:   Tcl_HashEntry *ent;
 //EG:   Tcl_HashSearch tmp;
-//EG: 
+//EG:
 //EG:   for (ent=Tcl_FirstHashEntry(&obarray, &tmp); ent;  ent=Tcl_NextHashEntry(&tmp)) {
 //EG:     symbol = (SCM)Tcl_GetHashValue(ent);
 //EG:     if (VCELL(symbol) != UNBOUND) res = Cons(symbol, res);
@@ -144,13 +144,13 @@ doc>
  * (symbol->string string)
  *
  * Returns the name of |symbol| as a string. If the symbol was part of an
- * object returned as the value of a literal expression or by a call to the 
+ * object returned as the value of a literal expression or by a call to the
  * |read| procedure, and its name contains alphabetic characters, then the
- * string returned will contain characters in the implementation's preferred 
- * standard case -- STklos prefers lower case. If the symbol was returned 
+ * string returned will contain characters in the implementation's preferred
+ * standard case -- STklos prefers lower case. If the symbol was returned
  * by |string->symbol|, the case of characters in the string returned will be
  * the same as the case in the string that was passed to |string->symbol|. It
- * is an error to apply mutation procedures like |string-set!| to strings 
+ * is an error to apply mutation procedures like |string-set!| to strings
  * returned by this procedure.
  * @lisp
  *    (symbol->string 'flying-fish)  =>  "flying-fish"
@@ -162,12 +162,12 @@ doc>
  */
 
 DEFINE_PRIMITIVE("symbol->string", symbol2string, subr1, (SCM symbol))
-{  
+{
   SCM str;
   char *s;
 
   if (!SYMBOLP(symbol)) STk_error("bad symbol ~S", symbol);
-  
+
   s   = SYMBOL_PNAME(symbol);
   str = STk_makestring(strlen(s), s);
   BOXED_INFO(str) |= STRING_CONST;   /* This string is a constant */
@@ -175,13 +175,13 @@ DEFINE_PRIMITIVE("symbol->string", symbol2string, subr1, (SCM symbol))
 }
 
 /*
-<doc  string->symbol 
+<doc  string->symbol
  * (string->symbol string)
  *
- * Returns the symbol whose name is |string|. This procedure can create 
- * symbols with names containing special characters or letters in the 
- * non-standard case, but it is usually a bad idea to create such symbols 
- * because in some implementations of Scheme they cannot be read as themselves. 
+ * Returns the symbol whose name is |string|. This procedure can create
+ * symbols with names containing special characters or letters in the
+ * non-standard case, but it is usually a bad idea to create such symbols
+ * because in some implementations of Scheme they cannot be read as themselves.
  *
  * @lisp
  *    (eq? 'mISSISSIppi 'mississippi)     =>  #t
@@ -206,7 +206,7 @@ DEFINE_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string))
 
 
 /*
-<doc EXT  string->uninterned-symbol 
+<doc EXT  string->uninterned-symbol
  * (string->unterned-symbol string)
  *
  * Returns the symbol whose print name is made from the characters of

@@ -2,7 +2,7 @@
  *
  * s t r . c				-- Strings management
  *
- * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -82,9 +82,9 @@ static int stringcomp(SCM s1, SCM s2)
     str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
 
     while ((str1 < end1) && (str2 < end2)) {
-      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL) 
+      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL)
 	error_bad_sequence(STRING_CHARS(s1));
-      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL) 
+      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL)
 	error_bad_sequence(STRING_CHARS(s2));
 
       if (ch1 != ch2) return ch1 - ch2;
@@ -124,9 +124,9 @@ static int stringcompi(SCM s1, SCM s2)
     str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
 
     while ((str1 < end1) && (str2 < end2)) {
-      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL) 
+      if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL)
 	error_bad_sequence(STRING_CHARS(s1));
-      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL) 
+      if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL)
 	error_bad_sequence(STRING_CHARS(s2));
 
       if (towlower(ch1) != towlower(ch2)) return towlower(ch1) - towlower(ch2);

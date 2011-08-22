@@ -1,20 +1,20 @@
 ;; ======================================================================
-;; 
+;;
 ;; 			STklos Reference Manual
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 2 of the License, or
 ;; (at your option) any later version.
-;; 
+;;
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;; 
+;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
-;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
@@ -27,11 +27,11 @@
     ((html) "100%")
     ((tex)  "broad")
     (else   (error 'max-line "In object.skb: no length defined"))))
-     
+
 
 (chapter :title "STklos Object System"
 
-;;; 
+;;;
 ;;; Introduction
 ;;;
 (section :title "Introduction" :ident "obj:introduction"
@@ -63,11 +63,11 @@ quite different audience in mind:])
 informally; it is intended to be a tutorial of the language and is
 for people who want to have an idea of the ,(emph "look and feel") of
 ,(stklos).])
-   
+
    (item [The second part describes the ,(stklos) object system at
   the ,(emph "external") level (i.e.  without requiring the use of the
   Meta Object Protocol).])
-   
+
    (item [The third and last part describes the ,(stklos) Meta
   Object Protocol.  It is intended for people whio want to play with
   meta programming.])))
@@ -80,7 +80,7 @@ for people who want to have an idea of the ,(emph "look and feel") of
 ;;;; ======================================================================
 
 (section :title "Object System Tutorial"
-   
+
 (p [The ,(stklos) object system relies on classes like most of
 the current OO languages.  Furthermore, ,(stklos) provides
 meta-classes, multiple inheritance, generic functions and
@@ -92,7 +92,7 @@ give the reader an idea of the ,(q (emph"look and feel")) of
 has some basic notions of OO programming, and is familiar with
 terms such as ,(emph "classes, instances") or ,(emph "methods.")])
 
-;;; 
+;;;
 ;;; Class definition and instantiation
 ;;;
 (subsection :title "Class definition and instantiation"
@@ -101,7 +101,7 @@ terms such as ,(emph "classes, instances") or ,(emph "methods.")])
 (index "define-class")
 
 (subsubsection :title "Class definition"
-   
+
    (p [A new class is defined with the ,(code "define-class") form.
 The syntax of ,(code "define-class") is close to CLOS ,(code "defclass"):])
 
@@ -112,7 +112,7 @@ The syntax of ,(code "define-class") is close to CLOS ,(code "defclass"):])
    ...)
   metaclass option)
 ])
-   
+
    (p [The ,(emph "metaclass option") will not be discussed here.
 The ,(emph "superclass")es list specifies the super classes of
 ,(emph "class")
@@ -138,20 +138,20 @@ definition:])
 new class whose instances contain two slots. These slots are
 called ,(code "x") an ,(code "y") and we suppose here that they
 contain the coordinates of a 2D point.])
-   
+
    (p [Let us define now a circle, as a 2D point and a radius:])
-   
+
    (fontified-code [
 (define-class <circle> (<point>)
   (radius))
 ])
-   
+
    (p [As we can see here, the class ,(code "<circle>") is
 constructed by inheriting from the class ,(code "<point>") and
 adding a new slot (the ,(code "radius") slot).]))
 
 
-   
+
 (subsubsection :title "Instance creation and slot access"
 (index "instance")
 (index "make")
@@ -170,7 +170,7 @@ newly created instance. For instance, the following form:])
 ,(code "c") Scheme variable.])
 
 (index "slot-ref")
-(index "slot-set!") 
+(index "slot-set!")
 (index "slot" :note "accessing")
 (p [Accessing the slots of the newly created circle can be done
 with the ,(code "slot-ref") and the ,(code "slot-set!")
@@ -193,17 +193,17 @@ instance, the expression:])
 (fontified-code [
 (describe c)
 ])
-   
+
 (p [prints the following informations on the standard output:])
 
 (raw-code [
 #\[<circle> 81aa1f8\] is an an instance of class <circle>.
-Slots are: 
+Slots are:
      radius = #\[unbound\]
      x = 10
      y = 3
 ]))
-   
+
 (subsubsection :title "Slot Definition"
    (mark "slot-definition")
    (index "slot" :note "definition")
@@ -212,27 +212,27 @@ the system.  Each option is specified with a keyword. For
 instance, ])
 
 (itemize
-   (item 
+   (item
       (index "slot" :note "initialization")
       [,(bold ":init-form") can be used to supply a default
 value for the slot.])
-   (item 
+   (item
       [,(bold ":init-keyword") can be used to specify the
 keyword used for initializing a slot.])
-   (item 
+   (item
       (index "slot" :note "getter")
       [,(bold ":getter") can be used to define the name of the
 slot getter])
-   (item 
+   (item
       (index "slot" :note "setter")
       [,(bold ":setter") can be used to define the name of the
 slot setter]))
-   (item 
+   (item
       (index "slot" :note "accessor")
       [,(bold ":accessor") can be used to define the name of the
 slot accessor (see below)]))
 
-   
+
    (p [To illustrate slot description, we redefine here the
 ,(code "<point>") class seen before. A new definition of this
 class could be:])
@@ -254,10 +254,10 @@ defined by the system to read and write the ,(code "x") (resp.
    (fontified-code [
 (define p1 (make <point> :x 1 :y 2))
 (get-x p1)        ,(symbol-arrow) 1
-(set-x! p1  12) 
+(set-x! p1  12)
 (get-x p1)        ,(symbol-arrow) 2
 
-(define p2 (make <point> :x 2)) 
+(define p2 (make <point> :x 2))
 (get-x p2)         ,(symbol-arrow) 2
 (get-y p2)        ,(symbol-arrow) 0
 ])
@@ -275,28 +275,28 @@ description.  Hereafter, is another definition of our
   ((x :init-form 0 :accessor x-of :init-keyword :x)
    (y :init-form 0 :accessor y-of :init-keyword :y)))
 ])
-   
+
 
    (p [Using this class definition, reading the x coordinate of the
 ,(code "p") point can be done with:])
-   
+
    (fontified-code [(x-of p)])
 
    (p [and setting it to 100 can be done using the extended ,(code "set!")])
-   
+
    (fontified-code [(set! (x-of p) 100)])
 
-   (p [,(bold "Note:") ,(stklos) also define ,(code "slot-set!") as the setter 
-function of ,(code "slot-ref") (see ,(ref :mark "setter" :text "setter")). 
+   (p [,(bold "Note:") ,(stklos) also define ,(code "slot-set!") as the setter
+function of ,(code "slot-ref") (see ,(ref :mark "setter" :text "setter")).
 As a consequence, we have:])
-   
+
    (fontified-code [
 (set! (slot-ref p 'y) 100)
 (slot-ref p 'y)       ,(symbol-arrow) 100
 ])
-   
+
 (subsubsection :title "Virtual Slots"
-   
+
 (index "slot" :note "virtual")
 (index "virtual slot")
 
@@ -307,7 +307,7 @@ initialisation form for this slot which takes into account the
 radius of the circle. The problem with this approach is that if
 the ,(code "radius") slot is changed, we need to change
 ,(code "area") (and vice-versa). This is something which is hard
-to manage and if we don't care, it is easy to have a ,(code "area") 
+to manage and if we don't care, it is easy to have a ,(code "area")
 and ,(code "radius") in an instance which are ,(q "un-synchronized").
 The virtual slot mechanism avoid this problem.])
 
@@ -315,7 +315,7 @@ The virtual slot mechanism avoid this problem.])
 rather than stored in an object.  The way to read and write such
 a slot must be given when the slot is defined with the
 ,(code ":slot-ref") and ,(code ":slot-set!") slot options.])
-   
+
 (p [A complete definition of the ,(code "<circle>") class
 using virtual slots could be:])
    (fontified-code [
@@ -328,9 +328,9 @@ using virtual slots could be:])
 	 :slot-set! (lambda (o v)
 		      (set! (radius o) (sqrt (/ v 3.14)))))))
 ])
-   
+
 (p [Here is an example using this definition of ,(code "<circle>")])
-   
+
    (fontified-code [
 (define c (make <circle> :radius 1))
 (radius c)   ,(symbol-arrow) 1
@@ -339,13 +339,13 @@ using virtual slots could be:])
 (area c)     ,(symbol-arrow) 12.56   ; (i.e. 4 * Pi)
 (radius c)   ,(symbol-arrow) 2.0
 ])
-   
+
 (p [Of course, we can also used the fucntion ,(code "describe") to visualize
 the slots of a given object. Applied to the prvious ,(code "c"), it prints:])
-  
+
    (raw-code [
 #\[<circle> 81b2348\] is an an instance of class <circle>.
-Slots are: 
+Slots are:
      area = 12.56
      radius = 2.0
      x = 0
@@ -366,7 +366,7 @@ Slots are:
    (p [Inheritance is specified upon class definition. As said in
 the introduction, ,(stklos) supports multiple inheritance.
 Hereafter are some classes definition: ])
-   
+
    (fontified-code [
 (define-class A () (a))
 (define-class B () (b))
@@ -384,17 +384,17 @@ classes defined by ,(code "define-class"). ,(code "D"),
 ,(code "E"), and ,(code "F") use multiple inheritance: each class
 inherits from two previously defined classes.  Those class
 definitions define a hierarchy which is shown in figure
-,(ref :figure "a class hierarchy").  
+,(ref :figure "a class hierarchy").
 In this figure, the class ,(code "<top>") is also shown; this
 class is the super class of all Scheme objects. In particular,
 ,(code "<top>") is the super class of all standard Scheme
 types.])
 
-   (figure :legend "a class hierarchy" 
+   (figure :legend "a class hierarchy"
       (case *engine-type*
         ((tex) (image :width 80. :url "images/hierarchy.jpg"))
         (else  (center (image :url "images/hierarchy.jpg")))))
-	 
+
 
     (p [The set of slots of a given class is calculated by
 ,(q "unioning") the slots of all its super class. For instance,
@@ -428,13 +428,13 @@ rule:])
 (blockquote (frame :width (max-line)
    (bold [Rule 1: Each class is more specific than
 its superclasses.])))
-   
+
    (p [With multiple inheritance, ordering is harder.  Suppose we
 have])
 
 (fontified-code [
 (define-class X ()
-   ((x :init-form 1))) 
+   ((x :init-form 1)))
 
 (define-class Y ()
    ((x :init-form 2)))
@@ -452,7 +452,7 @@ default initial value of the ,(code "x") slot of a ,(code "Z")
 instance.  The rule in ,(stklos), as in CLOS, is that the
 superclasses listed earlier are more specific than those listed
 later.  So: ])
-   
+
 (blockquote (frame :width (max-line)
    (bold [Rule 2: For a given class, superclasses listed earlier
 are more specific than those listed later.])))
@@ -461,7 +461,7 @@ are more specific than those listed later.])))
 class and all its superclasses, from most specific to least
 specific.  This order is called the ,(q (emph [class precedence
 list])) of the class.  Given these two rules, we can claim that
-the initial form for the ,(code "x") slot of previous example 
+the initial form for the ,(code "x") slot of previous example
 is 1 since the class ,(code "X") is placed before ,(code "Y") in the
 super classes of ,(code "Z").  These two rules are not always
 sufficient to determine a unique order.  However, they give an
@@ -471,9 +471,9 @@ simpler than the CLOS one described in (ref :bib "AMOP") for breaking
 ties.  Consequently, the calculated class precedence list by
 ,(stklos) algorithm can be different than the one given by
 the CLOS one in some subtle situations.  Taking
-the ,(code "F") class shown in Figure ,(ref :figure "a class hierarchy"), 
+the ,(code "F") class shown in Figure ,(ref :figure "a class hierarchy"),
 the ,(stklos) calculated class precedence list is])
-   
+
 (raw-code [(f d e a b c <object> <top>)])
 
 (p [whereas it would be the following list with a CLOS-like
@@ -494,7 +494,7 @@ class.  For instance,])
     (raw-code [
 (class-precedence-list D)
     ,(symbol-arrow) (#\[<class> d 81aebb8\] #\[<class> a 81aab88\]
-  #\[<class> b 81aa720\] #\[<class> <object> 80eff90\] 
+  #\[<class> b 81aa720\] #\[<class> <object> 80eff90\]
   #\[<class> <top> 80effa8\])
 ])
 
@@ -506,9 +506,9 @@ function ,(code "class-name") yields a clearer result:])
 (map class-name (class-precedence-list D))
   ,(symbol-arrow) (d a b <object> <top>)
 ])))
-   
 
-   
+
+
 ;;;;
 ;;;; Generic functions
 ;;;;
@@ -528,13 +528,13 @@ evaluator requests the application of a generic function, all the
 applicable methods of this generic function will be grabbed and
 the most specific among them will be applied.  We say that a
 method ,(code "M") is ,(emph "more specific") than a method ,(code "M'")
-if the class of its parameters are more specific than the ,(code "M'") 
+if the class of its parameters are more specific than the ,(code "M'")
 ones.  To be more precise, when a generic function must be
 ,(q (emph "called")) the system])
-   
+
 (enumerate
-   (item [searchs among all the generic function methods those which 
-are applicable (i.e.  the ones which filter on types which are 
+   (item [searchs among all the generic function methods those which
+are applicable (i.e.  the ones which filter on types which are
 ,(emph "compatible") with the actual argument list),])
    (item [sorts the list of applicable methods in the ,(q (emph "most specific"))
 order,])
@@ -546,16 +546,16 @@ first of the list of sorted methods).]))
    (p [The definition of a generic function is done with the
 ,(code "define-generic") macro. Definition of a new method is
 done with the ,(code "define-method") macro.])
-   
+
    (p [Consider the following definitions:])
-   
+
    (fontified-code [
 (define-generic M)
 (define-method M((a <integer>) b) 'integer)
 (define-method M((a <real>)    b) 'real)
 (define-method M(a b)             'top)
 ])
-   
+
    (p [The ,(code "define-generic") call defines ,(code "M") as a
 generic function.  Note that the signature of the generic
 function is not given upon definition, contrarily to CLOS.  This
@@ -568,14 +568,14 @@ indicate the class a parameter must belong (directly or
 indirectly) to be applicable.  If no specializer is given, the
 system defaults it to ,(code "<top>")>.  Thus, the first method
 definition is equivalent to])
-   
+
    (fontified-code [
 (define-method M((a <integer>) (b <top>)) 'integer)
 ])
 
    (p [Now, let us look at some possible calls to generic
 function ,(code "M"):])
-   
+
    (fontified-code [
 (M 2 3)      ,(symbol-arrow) integer
 (M 2 #t)     ,(symbol-arrow) integer
@@ -590,13 +590,13 @@ case, the parameter list is scanned from left to right to
 determine the applicability of a method.  Suppose we declare now])
 
 (fontified-code [
-(define-method M ((a <integer>) (b <number>)) 
+(define-method M ((a <integer>) (b <number>))
     'integer-number)
 
-(define-method M ((a <integer>) (b <real>)) 
+(define-method M ((a <integer>) (b <real>))
     'integer-real)
 
-(define-method M (a (b <number>)) 
+(define-method M (a (b <number>))
     'top-number)
 
 (define-method M (a b c)
@@ -604,7 +604,7 @@ determine the applicability of a method.  Suppose we declare now])
 ])
 
    (p [In this case,])
-   
+
    (fontified-code [
 (M 1 2)     ,(symbol-arrow) integer-integer
 (M 1 1.0)   ,(symbol-arrow) integer-real
@@ -612,7 +612,7 @@ determine the applicability of a method.  Suppose we declare now])
 (M 1 2 3)   ,(symbol-arrow) three-parameters
 ])
 
-   
+
 (p (bold "Notes: ")
 (enumerate
    (item [Before defining a new generic
@@ -623,7 +623,7 @@ newly created generic function.
 For instance:
 ,(fontified-code [
 (define-generic log)  ; transform "log" in a generic function
-(define-method log ((s <string>) . l) 
+(define-method log ((s <string>) . l)
    (apply format  (current-error-port) s l)
    (newline (current-error-port)))
 (log "Hello, ~a" "world")      ,(symbol-print) Hello, world
@@ -637,24 +637,24 @@ not needed.]))))
 
 (index "Method" :note "next")
 (index "next-method")
-(subsubsection :title "Next-method" 
-   
+(subsubsection :title "Next-method"
+
    (p [When a generic function is called, the list of applicable
 methods is built.  As mentioned before, the most specific method
-of this list is applied (see 
+of this list is applied (see
 ,(ref :subsubsection "Generic functions and methods")).
 This method may call, if needed, the next method in the list of
 applicable methods.  This is done by using the special form
 ,(code "next-method").  Consider the following definitions])
 
       (fontified-code [
-(define-method Test((a <integer>))  
+(define-method Test((a <integer>))
    (cons 'integer (next-method)))
 
-(define-method Test((a <number>)) 
+(define-method Test((a <number>))
    (cons 'number  (next-method)))
 
-(define-method Test(a)   
+(define-method Test(a)
    (list 'top))
 ])
 
@@ -665,8 +665,8 @@ applicable methods.  This is done by using the special form
 (Test 1.0)   ,(symbol-arrow) (number top)
 (Test #t)    ,(symbol-arrow) (top)
 ]))
-   
-   
+
+
 (subsubsection :title "Standard  generic functions"
 
 (index "write") (index "display")
@@ -683,14 +683,14 @@ defining a new method for this class.  So, defining a new
 printing method overloads the standard printing method
 (which just prints the class of the object and its hexadecimal
 address).])
-   
+
 (p [For instance, we can define a customized printing for the ,(code "<point>")
 used before as:])
    (fontified-code [
 (define-method display-object ((p <point>) port)
   (format port "{Point x=~S y=~S}" (slot-ref p 'x) (slot-ref p 'y)))
 ])
-   
+
 (p [With this definition, we have])
 (fontified-code [
 (define p (make <point> :x 1 :y 2))
@@ -704,43 +704,43 @@ as a form which, when read, will build back this point:])
 
   (fontified-code [
 (define-method write-object ((p <point>) port)
- (format port "#,(make <point> :x ~S :y ~S" 
+ (format port "#,(make <point> :x ~S :y ~S"
               (get-x p) (get-y p)))
 ])
 
   (p [With this method, writing the ,(code "p") point defined before
 prints the following text on the output port:])
-  
+
   (fontified-code "#,(make <point> :x 1 :y 2)")
 
 (p [Note here the usage of the ,(q (code "#,"))  notation of ,(link-srfi 10)
-to ,(q "evaluate") the form when reading it,(footnote [We suppose here that 
+to ,(q "evaluate") the form when reading it,(footnote [We suppose here that
 we are in a context where ,(fontified-code [(define-reader-ctor 'make make)])
 as already been evaluated]).])
 
 ;;;; Comparing Objects ..................
 (p (bold "Comparing objects"))
-   
+
 (p [When objects are compared with the ,(code "eqv?")  or
 ,(code "equal?")  Scheme standard primitives, ,(stklos)
-calls the ,(code "object-eqv?")  or ,(code "object-equal?") 
+calls the ,(code "object-eqv?")  or ,(code "object-equal?")
 generic functions.  This facility permits to define a
 customized comparison function for a class of objects by simply
 defining a new method for this class.  Defining a new
 comparison method overloads the standard comparaison method
 (which always returns ,(code "#f")).  For instance we could
 define the following method to compare points:])
-   
+
 (fontified-code [
 (define-method object-eqv? ((a <point>) (b <point>))
   (and (= (point-x a) (point-x b))
        (= (point-y a) (point-y b))))
 ]))))
-   
+
 (section :title "Object System Reference"
-   
+
    (subsection :title "Class Definition")))
 
 
-   
+
 

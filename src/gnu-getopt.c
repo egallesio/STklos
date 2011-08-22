@@ -1,8 +1,8 @@
 /*
  * gnu-getopt.c		-- Adaptation of the GNU getopt function for STklos
- * 
- * Copyright © 2001-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ *
+ * Copyright Â© 2001-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Nov-2001 23:40 (eg)
  * Last file update: 12-Apr-2006 12:43 (eg)
@@ -60,7 +60,7 @@
 
 
 /*===========================================================================*\
- * 
+ *
  * 				STklos adaptation
  *
 \*===========================================================================*/
@@ -71,12 +71,12 @@ static int we_are_in_scheme = 0;
 
 static void getopt_fprintf(FILE* f, const char *format, ...)
 {
-  char buffer[GETOPT_BUF_SIZE]; 
+  char buffer[GETOPT_BUF_SIZE];
   va_list ap;
-  
+
   va_start(ap, format);
   vsnprintf(buffer, GETOPT_BUF_SIZE, format, ap);
-  
+
   if (we_are_in_scheme) {
     STk_puts(buffer, STk_current_output_port());
   } else {
@@ -1039,8 +1039,8 @@ getopt (argc, argv, optstring)
 
 /*===========================================================================*/
 
-/* 
- * STklos: The following code is normally in a file name getopt1.c. 
+/*
+ * STklos: The following code is normally in a file name getopt1.c.
  * It has been placed here for commodity
  */
 

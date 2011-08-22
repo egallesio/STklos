@@ -1,4 +1,4 @@
-;; This -*- scheme -*- file has been generated. (DON'T EDIT) 
+;; This -*- scheme -*- file has been generated. (DON'T EDIT)
 ;; generated on Wed Apr 25 18:49:30 2007
 
 (require "lex-rt")

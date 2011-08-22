@@ -1,7 +1,7 @@
 /*
  * stklos.c	-- STklos interpreter main function
  *
- * Copyright © 1999-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 1999-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify

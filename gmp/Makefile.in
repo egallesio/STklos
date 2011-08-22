@@ -217,7 +217,7 @@ config.h: stamp-h1
 stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status config.h
-$(srcdir)/config.h.in:  $(am__configure_deps) 
+$(srcdir)/config.h.in:  $(am__configure_deps)
 	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
 	rm -f stamp-h1
 	touch $@
@@ -229,7 +229,7 @@ tests/Makefile: $(top_builddir)/config.status $(top_srcdir)/tests/Makefile.in
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libgmp.a: $(libgmp_a_OBJECTS) $(libgmp_a_DEPENDENCIES) 
+libgmp.a: $(libgmp_a_OBJECTS) $(libgmp_a_DEPENDENCIES)
 	-rm -f libgmp.a
 	$(libgmp_a_AR) libgmp.a $(libgmp_a_OBJECTS) $(libgmp_a_LIBADD)
 	$(RANLIB) libgmp.a
@@ -577,7 +577,7 @@ test: all
 
 check: test
 
-clean: 
+clean:
 	/bin/rm -f *.o *~ libgmp.a .libs/libgmp.a
 	(cd tests; make clean)
 

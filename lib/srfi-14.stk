@@ -1,24 +1,24 @@
 ;;;;
 ;;;; srfi-14.stk	-- Implementation of SRFI-14
-;;;; 
-;;;; Copyright © 2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;; This file uses some work from the Olin Shivers implementation of
 ;;;; this SRFI. See the end of this file for the tedious details of the
 ;;;; original copyright
@@ -29,7 +29,7 @@
 ;;;;
 
 ;;;
-;;; This implementation uses a bignum to represent a character set. Union 
+;;; This implementation uses a bignum to represent a character set. Union
 ;;; Intersection (and so on) on character sets is implemented with STklos
 ;;; bit operations on integers.
 
@@ -40,7 +40,7 @@
 	   char-set? char-set= char-set<= char-set-hash
 
 	   ;; Iterating over character sets
-	   char-set-cursor char-set-ref char-set-cursor-next end-of-char-set? 
+	   char-set-cursor char-set-ref char-set-cursor-next end-of-char-set?
 	   char-set-fold char-set-unfold char-set-unfold!
 	   char-set-for-each char-set-map
 
@@ -49,8 +49,8 @@
 
 	   list->char-set  string->char-set
 	   list->char-set! string->char-set!
-    
-	   char-set-filter  ucs-range->char-set 
+
+	   char-set-filter  ucs-range->char-set
 	   char-set-filter! ucs-range->char-set!
 
 	   ->char-set
@@ -69,9 +69,9 @@
 
 	   char-set-difference  char-set-xor  char-set-diff+intersection
 	   char-set-difference! char-set-xor! char-set-diff+intersection!
-	   
+
 	   ;; Standard character sets
-	   
+
 	   char-set:lower-case  char-set:upper-case  char-set:title-case
 	   char-set:letter      char-set:digit       char-set:letter+digit
 	   char-set:graphic     char-set:printing    char-set:whitespace
@@ -81,13 +81,13 @@
 
 
 (define-macro (check-arg pred val caller)
-  `(if (,pred ,val) 
-       ,val 
+  `(if (,pred ,val)
+       ,val
        (error ,caller "bad argument ~S" ,val)))
 
 ;;;
 ;;; The class which defines a character set
-;;; 
+;;;
 (define-class <char-set> ()
   ((value :init-form 0 :init-keyword :value)))
 
@@ -325,11 +325,11 @@
 		     'char-set-filter!)
   base-set)
 
-  
+
 (define (%ucs-range->char-set! lower upper error? bs proc)
   (check-arg (lambda (x) (and (integer? x) (exact? x) (<= 0 x))) lower proc)
   (check-arg (lambda (x) (and (integer? x) (exact? x) (<= lower x))) upper proc)
-  
+
   (when (and error? (< lower upper) (< 256 upper))
     (error proc
 	   (string-append "Requested UCS range contains unavailable characters"
@@ -419,7 +419,7 @@
 
 ;;;; ======================================================================
 ;;;;
-;;;;		C H A R A C T E R - S E T   A L G E B R A 
+;;;;		C H A R A C T E R - S E T   A L G E B R A
 ;;;;
 ;;;; ======================================================================
 
@@ -550,7 +550,7 @@
 
 (define char-set:whitespace
   (list->char-set (map %latin1->char '(#x09 ; HORIZONTAL TABULATION
-				       #x0A ; LINE FEED		
+				       #x0A ; LINE FEED
 				       #x0B ; VERTICAL TABULATION
 				       #x0C ; FORM FEED
 				       #x0D ; CARRIAGE RETURN
@@ -616,30 +616,30 @@
 ;;; Copyright notice
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Copyright (c) 1988-1995 Massachusetts Institute of Technology
-;;; 
+;;;
 ;;; This material was developed by the Scheme project at the Massachusetts
 ;;; Institute of Technology, Department of Electrical Engineering and
 ;;; Computer Science.  Permission to copy and modify this software, to
 ;;; redistribute either the original software or a modified version, and
 ;;; to use this software for any purpose is granted, subject to the
 ;;; following restrictions and understandings.
-;;; 
+;;;
 ;;; 1. Any copy made of this software must include this copyright notice
 ;;; in full.
-;;; 
+;;;
 ;;; 2. Users of this software agree to make their best efforts (a) to
 ;;; return to the MIT Scheme project any improvements or extensions that
 ;;; they make, so that these may be included in future releases; and (b)
 ;;; to inform MIT of noteworthy uses of this software.
-;;; 
+;;;
 ;;; 3. All materials developed as a consequence of the use of this
 ;;; software shall duly acknowledge such use, in accordance with the usual
 ;;; standards of acknowledging credit in academic research.
-;;; 
+;;;
 ;;; 4. MIT has made no warrantee or representation that the operation of
 ;;; this software will be error-free, and MIT is under no obligation to
 ;;; provide any services, by way of maintenance, update, or otherwise.
-;;; 
+;;;
 ;;; 5. In conjunction with products arising from the use of this material,
 ;;; there shall be no use of the name of the Massachusetts Institute of
 ;;; Technology nor of any adaptation thereof in any advertising,

@@ -1,9 +1,9 @@
 /*
  *
- * h a s h  . h			-- Hash Tables 
+ * h a s h  . h			-- Hash Tables
  *
- * Copyright © 1994-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
- * 
+ * Copyright Â© 1994-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
  ! distribution.  Current writing is more modular, independent of Tcl
@@ -16,20 +16,20 @@
  ! Copyright (c) 1991-1993 The Regents of the University of California.
  ! Copyright (c) 1994 Sun Microsystems, Inc.
  +=============================================================================
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
@@ -38,7 +38,7 @@
  */
 
 
-#define SMALL_HASH_TABLE   4	
+#define SMALL_HASH_TABLE   4
 #define REBUILD_MULTIPLIER 3	/* When there are this many entries per bucket, */
 				/* on average,  make the table larger		*/
 
@@ -50,8 +50,8 @@ typedef enum {hash_system, hash_eqp, hash_stringp, hash_general} hash_type;
 
 struct hash_table_obj {
   stk_header header;
-  SCM *buckets;				
-  SCM static_buckets[SMALL_HASH_TABLE]; 
+  SCM *buckets;
+  SCM static_buckets[SMALL_HASH_TABLE];
   int num_buckets;
   int num_entries;
   int rebuild_size;
@@ -81,16 +81,16 @@ void STk_hashtable_init(struct hash_table_obj *h, int flag);
 
 
 
-/* 
+/*
  * Function for accessing symbol/keyword hash table. This function is of
- * little interest except for the obarrays. Don't use it but the 
+ * little interest except for the obarrays. Don't use it but the
  * higher level interface instead.
  */
-SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s, 
+SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s,
 			   SCM (*create)(char *s));
 
-/* 
- * Function for accessing module hash table. Don't use them but the 
+/*
+ * Function for accessing module hash table. Don't use them but the
  * higher level interface instead.
  */
 SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v, int *index);

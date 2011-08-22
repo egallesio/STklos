@@ -1,24 +1,24 @@
 ;;;;
 ;;;; trace.stk				-- Trace & Untrace
-;;;; 
-;;;; Copyright © 1997-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;; 
-;;;; 
+;;;;
+;;;; Copyright Â© 1997-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
 ;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
-;;;; 
+;;;;
 ;;;; This program is distributed in the hope that it will be useful,
 ;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;;;; GNU General Public License for more details.
-;;;; 
+;;;;
 ;;;; You should have received a copy of the GNU General Public License
 ;;;; along with this program; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
-;;;; 
+;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Apr-1997 16:02 (eg)
 ;;;; Last file update: 22-Nov-2006 15:55 (eg)
@@ -44,8 +44,8 @@ doc>
  *
  * Invoking |untrace| with one or more function names causes the functions
  * named not to be traced anymore.
- * 
- * Calling |untrace| with no argument will untrace all the functions 
+ *
+ * Calling |untrace| with no argument will untrace all the functions
  * currently traced.
 doc>
 |#
@@ -72,7 +72,7 @@ doc>
 				   (format *err-port* ">>\n")))
 			     ;; Return all the values as "normal" result
 			     (apply values l)))
-  
+
 
   ;;=============================================================================
   :;
@@ -88,20 +88,20 @@ doc>
 
   ;;
   ;; How to apply the methods of a <traced-generic>
-  ;; 
+  ;;
   (define-method apply-method ((gf <traced-generic>) methods-list build-next args)
     (let* ((name (generic-function-name gf))
 	   (m    (car methods-list))
 	   (spec (method-specializers m)))
       ;; Trace the closure application in a dynamic wind to restore indentation
-      ;; on error. 
-      (dynamic-wind 
+      ;; on error.
+      (dynamic-wind
 	  indent-more
 	  (lambda ()
 	    (let ((I   (indent))
 		  (res #f))
 	      (format *err-port* "~A -> generic function ~S\n" I name)
-	      (format *err-port* "~A    spec = ~S\n~A    args = ~S\n" 
+	      (format *err-port* "~A    spec = ~S\n~A    args = ~S\n"
 		      I (map* class-name spec) I args)
 	      (call-with-values
 		  (lambda () (apply (method-procedure (car methods-list))
@@ -117,14 +117,14 @@ doc>
   ;; 				T R A C E
   ;;
   ;; ======================================================================
-  
+
   ;;
   ;; Trace-closure
   ;;
   (define (trace-closure symbol value)
     (lambda l
       ;; We trace the closure in a dynamic-wind to restore indentation on error
-      (dynamic-wind 
+      (dynamic-wind
 	  indent-more
 	  (lambda ()
 	    (format *err-port* "~A -> ~A with args = ~S\n" (indent) symbol l)
@@ -145,7 +145,7 @@ doc>
       (error 'trace "cannot trace ~S (descendant of <generic>)" symbol))
     (change-class gf <traced-generic>)
     gf)
-  
+
   ;;
   ;; Trace-symbol
   ;;
@@ -178,7 +178,7 @@ doc>
 				   (lambda (x y) (list 'quote x))))
 	  ;; We have arguments. Trace them
 	  `(begin
-	     ,@(map (lambda (x) 
+	     ,@(map (lambda (x)
 		      `(set! ,x (,trace-symbol ',x ,x (current-module))))
 		    args)))))
 
@@ -187,11 +187,11 @@ doc>
   ;; 				U N T R A C E
   ;;
   ;; ======================================================================
-  
-  
+
+
   ;;
   ;; Untrace-symbol
-  ;; 
+  ;;
   (define (untrace-symbol symbol mod)
     (unless (symbol? symbol)
       (error 'untrace "bad symbol: ~S" symbol))
@@ -205,7 +205,7 @@ doc>
 	    (when (is-a? res <traced-generic>) (change-class res <generic>))
 	    res)
 	  (error 'untrace "~S is not traced" symbol))))
-  
+
 
   ;;
   ;; The UNTRACE macro
@@ -221,7 +221,7 @@ doc>
 		`(untrace ,@traced-symbols)))
 	  ;; Normal case, trace only the specified arguments
 	  `(begin
-	     ,@(map (lambda (x) 
+	     ,@(map (lambda (x)
 		      `(set! ,x (,untrace-symbol ',x (current-module))))
 		    args)))))
 )

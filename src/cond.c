@@ -1,7 +1,7 @@
-/*
- * cond.c	-- Condition implementation
+/*							-*- coding: utf-8 -*-
+ * c o n d . c		-- Condition implementation
  *
- * Copyright © 2004-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright Â© 2004-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify

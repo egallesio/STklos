@@ -1,5 +1,5 @@
 ;;;;
-;;;; eg-web-book		-- A variation of Manuel Web-book 
+;;;; eg-web-book		-- A variation of Manuel Web-book
 ;;;;
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
@@ -10,14 +10,14 @@
 (define *html-engine* (environment-engine (skribe-environment)))
 
 ;;
-;; Change default chapter title builder 
+;; Change default chapter title builder
 ;;
 (define (html-build-chapter-n-*section-title type n e)
   (let* ((doc     (ast-document n))
 	 (tparent (markup-ref doc 'title))
 	 (tnode   (markup-ref n 'title))
 	 (tnum    (markup-ref n 'number)))
-    (list tparent 
+    (list tparent
 	  (hrule :width 10. :align 'center)
 	  tnum
 	  (if tnum ". " "")
@@ -30,33 +30,33 @@
 (define (toc-browsing d c e)
   (let ((chaps (find-down chapter? (markup-body d))))
     (apply table :width 97. :border 1 :frame 'box :cellpadding 0 :cellspacing 0
-       (tr (th :align 'center :colspan 2 :bg "#ACE919" 
+       (tr (th :align 'center :colspan 2 :bg "#ACE919"
 	       (color :fg "darkolivegreen" "Contents")))
        (tr :class "navnorm"
 	   (td "")
 	   (td :align 'left (ref :handle (handle d) :text "*Top*")))
        (map (lambda (x)
 	      (tr :class  (if (eq? x c) "navsel" "navnorm")
-		  (td :width 8. :align 'left :valign 'top 
+		  (td :width 8. :align 'left :valign 'top
 		      (html-container-number (chapter-number x) e)
 		      (symbol "nbs"))
 		  (if (eq? x c)
-		      (td :align 'left 
+		      (td :align 'left
 			 (ref :handle (handle x))
 			 (linebreak)
 			 (toc :chapter #t :class "truc" :section #t :subsection #f
 			      (handle c)))
 		      (td :align 'left (ref :handle (handle x))))))
 	    chaps))))
-   
+
 
 ;; ----------------------------------------------------------------------
 ;;	Environment Customization ...
 ;; ----------------------------------------------------------------------
 (define *border-bg* "#8A8983")
 
-(customize-environment! 
- (html 
+(customize-environment!
+ (html
     :main-browing-extra #f
     :chapter-file #t
     :css "doc-style.css"

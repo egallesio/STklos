@@ -1,7 +1,7 @@
 /*
  * p r i n t . c				-- writing stuff
  *
- * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright Â© 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -225,7 +225,7 @@ void STk_print(SCM exp, SCM port, int mode)
       }
       STk_puts(buffer, port);
       return;
-    case tc_subr0:       /* ==================> Utiliser un type étendu //FIXME */
+    case tc_subr0:       /* ==================> Utiliser un type Ã©tendu //FIXME */
     case tc_subr1:
     case tc_subr2:
     case tc_subr3:

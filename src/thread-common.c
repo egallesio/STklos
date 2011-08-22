@@ -1,24 +1,24 @@
 /*
  * thread-common.c			-- Threads support in STklos
- * 
- * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
- * 
- * 
+ *
+ * Copyright Â© 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ *
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, 
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
- * 
+ *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
  * Last file update: 27-Oct-2006 14:49 (eg)
@@ -66,13 +66,13 @@ struct timeval STk_thread_abstime_to_reltime(double abs_secs)
 
 
 /*
-<doc EXT current-thread 
+<doc EXT current-thread
  * (current-thread)
  *
  *  Returns the current thread.
  * @lisp
  * (eq? (current-thread) (current-thread))  =>  #t
- * @end lisp 
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("current-thread", current_thread, subr0, (void))
@@ -87,13 +87,13 @@ DEFINE_PRIMITIVE("%thread-dynwind-stack", thread_dynwind_stack, subr0, (void))
   return vm->dynwind_stack;
 }
 
-DEFINE_PRIMITIVE("%thread-dynwind-stack-set!", thread_dynwind_stack_set, subr1, 
+DEFINE_PRIMITIVE("%thread-dynwind-stack-set!", thread_dynwind_stack_set, subr1,
 		 (SCM value))
 {
   vm_thread_t *vm = STk_get_current_vm();
   vm->dynwind_stack = value;
   return STk_void;
-    
+
 }
 
 
@@ -103,9 +103,9 @@ DEFINE_PRIMITIVE("%thread-dynwind-stack-set!", thread_dynwind_stack_set, subr1,
 static SCM do_make_thread(SCM thunk, SCM name, int stack_size)
 {
   SCM z;
-  
+
   NEWCELL(z, thread);
-  
+
   THREAD_THUNK(z)      = thunk;
   THREAD_NAME(z)       = name;
   THREAD_SPECIFIC(z)   = STk_void;
@@ -126,9 +126,9 @@ DEFINE_PRIMITIVE("%make-thread", make_thread, subr3,(SCM thunk, SCM name, SCM ss
   SCM z;
   int stack_size;
 
-  if (STk_procedurep(thunk) == STk_false) 
+  if (STk_procedurep(thunk) == STk_false)
     STk_error("bad thunk ~S", thunk);
-  if (ssize == STk_false) 
+  if (ssize == STk_false)
     /* If no size is specified, use primordial thread stack size */
     stack_size = THREAD_STACK_SIZE(STk_primordial_thread);
   else {
@@ -136,20 +136,20 @@ DEFINE_PRIMITIVE("%make-thread", make_thread, subr3,(SCM thunk, SCM name, SCM ss
     if (stack_size < 0)
       STk_error("bad stack size ~S", ssize);
   }
-  
+
   z = do_make_thread(thunk, (name ? name : STk_false), stack_size);
   return z;
 }
 
 /*
-<doc EXT thread? 
+<doc EXT thread?
  * (thread? obj)
- * 
+ *
  * Returns |#t| if |obj| is a thread, otherwise returns |#f|.
  * @lisp
  * (thread? (current-thread))  => #t
    (thread? 'foo)              => #f
- * @end lisp 
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("thread?", threadp, subr1, (SCM obj))
@@ -159,9 +159,9 @@ DEFINE_PRIMITIVE("thread?", threadp, subr1, (SCM obj))
 
 
 /*
-<doc EXT thread-name 
+<doc EXT thread-name
  * (thread-name thread)
- * 
+ *
  * Returns the name of the |thread|.
  * @lisp
  * (thread-name (make-thread (lambda () #f) 'foo))  =>  foo
@@ -175,9 +175,9 @@ DEFINE_PRIMITIVE("thread-name", thread_name, subr1, (SCM thr))
 }
 
 /*
-<doc EXT thread-stack-size 
+<doc EXT thread-stack-size
  * (thread-stack-size thread)
- * 
+ *
  * Returns the allocated stack size for |thread|.
  * Note that this procedure is not present in ,(quick-link-srfi 18).
 doc>
@@ -194,7 +194,7 @@ DEFINE_PRIMITIVE("%thread-end-exception", thread_end_exception, subr1, (SCM thr)
   return THREAD_EXCEPTION(thr);
 }
 
-DEFINE_PRIMITIVE("%thread-end-exception-set!", thread_end_exception_set, 
+DEFINE_PRIMITIVE("%thread-end-exception-set!", thread_end_exception_set,
 		 subr2, (SCM thr, SCM val))
 {
   if (!THREADP(thr)) STk_error_bad_thread(thr);
@@ -208,7 +208,7 @@ DEFINE_PRIMITIVE("%thread-end-result", thread_end_result, subr1, (SCM thr))
   return THREAD_RESULT(thr);
 }
 
-DEFINE_PRIMITIVE("%thread-end-result-set!", thread_end_result_set, 
+DEFINE_PRIMITIVE("%thread-end-result-set!", thread_end_result_set,
 		 subr2, (SCM thr, SCM val))
 {
   if (!THREADP(thr)) STk_error_bad_thread(thr);
@@ -219,7 +219,7 @@ DEFINE_PRIMITIVE("%thread-end-result-set!", thread_end_result_set,
 /*
 <doc EXT thread-specific
  * (thread-specific thread)
- * 
+ *
  * Returns the content of the |thread|'s specific field.
 doc>
 */
@@ -232,18 +232,18 @@ DEFINE_PRIMITIVE("thread-specific", thread_specific, subr1, (SCM thr))
 /*
 <doc EXT thread-specific-set!
  * (thread-specific-set! thread)
- * 
- * Stores |obj| into the |thread|'s specific field. |Thread-specific-set!| 
+ *
+ * Stores |obj| into the |thread|'s specific field. |Thread-specific-set!|
  * returns an unspecified value.
  * @lisp
- * (thread-specific-set! (current-thread) "hello")  
+ * (thread-specific-set! (current-thread) "hello")
  *            =>  unspecified
  * (thread-specific (current-thread))
  *            =>  "hello"
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("thread-specific-set!", thread_specific_set, subr2, 
+DEFINE_PRIMITIVE("thread-specific-set!", thread_specific_set, subr2,
 		 (SCM thr, SCM value))
 {
   if (!THREADP(thr)) STk_error_bad_thread(thr);
@@ -255,11 +255,11 @@ DEFINE_PRIMITIVE("thread-specific-set!", thread_specific_set, subr2,
 /*
 <doc EXT thread-start!
  * (thread-start! thread)
- * 
- * Makes |thread| runnable. The |thread| must be a new thread. 
+ *
+ * Makes |thread| runnable. The |thread| must be a new thread.
  * |Thread-start!| returns the thread.
  * @lisp
- * (let ((t (thread-start! (make-thread 
+ * (let ((t (thread-start! (make-thread
  *                            (lambda () (write 'a))))))
  *    (write 'b)
  *    (thread-join! t))       =>  unspecified
@@ -270,9 +270,9 @@ doc>
 DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
 {
   vm_thread_t *vm, *new;
-  
+
   if (!THREADP(thr)) STk_error_bad_thread(thr);
-  if (THREAD_STATE(thr) != th_new) 
+  if (THREAD_STATE(thr) != th_new)
     STk_error("thread has already been started ~S", thr);
 
   vm  = STk_get_current_vm();
@@ -283,27 +283,27 @@ DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
   new->oport          = vm->oport;
   new->eport          = vm->eport;
   new->scheme_thread  = thr;
-  
-  THREAD_VM(thr)      = new; 
-  THREAD_STATE(thr)   = th_runnable;  
+
+  THREAD_VM(thr)      = new;
+  THREAD_STATE(thr)   = th_runnable;
 
   STk_sys_thread_start(thr);
-  
+
   return thr;
 }
 
 /* ======================================================================
  * 	Initialization ...
- * ====================================================================== 
+ * ======================================================================
  */
 
 static void print_thread(SCM thread, SCM port, int mode)
 {
   char *s;
   SCM name = THREAD_NAME(thread);
-  
+
   STk_puts("#[thread ", port);
-  if (name != STk_false) 
+  if (name != STk_false)
     STk_print(name, port, DSP_MODE);
   else
     STk_fprintf(port, "%lx", (unsigned long) thread);
@@ -335,7 +335,7 @@ int STk_init_threads(int stack_size, void *start_stack)
   /* Thread Type declaration */
   DEFINE_XTYPE(thread, &xtype_thread);
 
-  /* Specific thread initialisation */ 
+  /* Specific thread initialisation */
   if (STk_init_sys_threads(vm) != TRUE)
     return FALSE;
 
@@ -344,7 +344,7 @@ int STk_init_threads(int stack_size, void *start_stack)
     STk_defcond_type("&thread-terminated", STk_false,
                      LIST1(STk_intern("canceller")),
                      STk_STklos_module);
-  cond_thread_abandonned_mutex =  STk_defcond_type("&thread-abandonned-mutex", 
+  cond_thread_abandonned_mutex =  STk_defcond_type("&thread-abandonned-mutex",
                                                    STk_false,
                                                    STk_nil,
                                                    STk_STklos_module);
@@ -352,7 +352,7 @@ int STk_init_threads(int stack_size, void *start_stack)
                                        STk_nil, STk_STklos_module);
 
   /* Wrap the main thread in a thread called "primordial" */
-  primordial = do_make_thread(STk_false, 
+  primordial = do_make_thread(STk_false,
 			      STk_Cstring2string("primordial"),
 			      stack_size);
   THREAD_STATE(primordial) = th_runnable;

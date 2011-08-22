@@ -25,7 +25,7 @@ compiles a STklos file to byte-codes. For now, this command is very
 poor, it should be extended in the future.
 
 .SH OPTIONS
-Here are the options available in the version @VERSION@ of 
+Here are the options available in the version @VERSION@ of
 .B stklos.
 
 .IP "--case-sensitive, -c"
@@ -38,14 +38,14 @@ Produce the byte-code in a C file instead of a ".ostk" file.
 
 .IP "--evalute=<expr>, e <expr>"
 Evaluate the Sexpr <expr> before starting compilation. This is useful,
-for loading files which are needed for the compilation (e.g. files 
+for loading files which are needed for the compilation (e.g. files
 defining new syntaxes).
 .IP "--line-info, -l"
 Generate line informations to ease debugging (incurs a small
 performance penalty).
 .IP "--show-instructions, -S"
-Produce the VM instructions in the generated file. Actually, 
-it is probably only useful if you want to hack the VM. 
+Produce the VM instructions in the generated file. Actually,
+it is probably only useful if you want to hack the VM.
 
 .IP "--prepend-load-path=<dir>, -L <dir>"
 Prepend the directory <dir> to the compiler loading path.

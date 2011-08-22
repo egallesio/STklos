@@ -1,7 +1,7 @@
 /*
  * ffi.c	-- FFI support dor STklos
  *
- * Copyright © 2007-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright Â© 2007-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -507,7 +507,7 @@ static int exec_callback(SCM callback, void *ptr1, void *ptr2)
   SCM res  = STk_false;
 
   switch (len) {
-    case 1: 
+    case 1:
       res = STk_C_apply(CALLBACK_PROC(callback), 2, ptr1, data);
       break;
     case 2:
