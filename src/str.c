@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 28-Aug-2011 17:50 (eg)
+ * Last file update: 28-Aug-2011 18:12 (eg)
  */
 
 #include <ctype.h>
@@ -263,8 +263,9 @@ SCM STk_Cstring2string(char *str) /* Embed a C string in Scheme world  */
   size_t len = strlen(str);
 
   NEWCELL(z, string);
-  STRING_CHARS(z) = STk_must_malloc_atomic(len + 1);
-  STRING_SPACE(z) = STRING_SIZE(z) = STRING_LENGTH(z) = len;
+  STRING_CHARS(z)  = STk_must_malloc_atomic(len + 1);
+  STRING_SPACE(z)  = STRING_SIZE(z) = len;
+  STRING_LENGTH(z) = STk_use_utf8 ? STk_utf8_strlen(str, len): len;
   strcpy(STRING_CHARS(z), str);
 
   return z;
