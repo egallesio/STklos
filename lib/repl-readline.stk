@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-May-2010 22:00 (eg)
-;;;; Last file update: 16-Aug-2011 00:09 (eg)
+;;;; Last file update: 22-Aug-2011 11:44 (eg)
 ;;;;
 
 
@@ -49,7 +49,7 @@
 	(repl-prompt-use-color? #f)
 	;; We use the readl GNU readline. Good
 	(repl-make-prompt (lambda (module)
-			  (ansi-color-protect "\x01;" "\x02;")
+			  (ansi-color-protect "\001" "\002")
 			  (old-make-prompt module)
 			  (ansi-color-protect "" ""))))
 

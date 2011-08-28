@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update: 16-Aug-2011 19:53 (eg)
+ * Last file update: 22-Aug-2011 15:58 (eg)
  */
 
 #include <ctype.h>

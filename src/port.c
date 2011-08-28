@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 16-Aug-2011 18:07 (eg)
+ * Last file update: 28-Aug-2011 14:02 (eg)
  *
  */
 
@@ -1204,7 +1204,7 @@ DEFINE_PRIMITIVE("read-line", read_line, subr01, (SCM port))
 	buff = STk_must_realloc(buff, size);
     }
     switch (c = STk_getc(port)) {
-      case EOF:  res = (i == 0) ? STk_eof : STk_chars2string(buff, i);
+      case EOF:  res = (i == 0) ? STk_eof : STk_makestring(i, buff);
 		 if (buff != buffer) STk_free(buff);
 		 return STk_n_values(2, res, STk_eof);
 
@@ -1213,7 +1213,7 @@ DEFINE_PRIMITIVE("read-line", read_line, subr01, (SCM port))
       		 else
 		   delim = MAKE_CHARACTER('\n');
 
-		 res = STk_chars2string(buff, i);
+		 res = STk_makestring(i, buff);
 		 if (buff != buffer) STk_free(buff);
 		 return STk_n_values(2, res, delim);
 

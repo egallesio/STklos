@@ -89,6 +89,8 @@ use a stack of \fBn\fR cells.
 .IP "-c, --case-sensitive"
 be case sensitive. The default is to be case insensitive as specified
 by R5RS.
+.IP "-u yes|no, --utf8-encoding=yes|no"
+use UTF-8 encoding for representing strings. The default for this option is "yes".
 .IP "-v, --version"
 print program version and exit
 .IP "-h, --help"

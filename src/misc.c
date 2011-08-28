@@ -1,7 +1,7 @@
 /*
  * m i s c . c					-- Misc. functions
  *
- * Copyright © 2000-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 31-Mar-2008 09:50 (eg)
+ * Last file update: 28-Aug-2011 16:41 (eg)
  */
 
 #include "stklos.h"
@@ -347,8 +347,9 @@ DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
     }
     if (strncmp(url, "://", 3) != 0) goto Error;
     tmp    = STk_makestring(url-start, start);
-    scheme = STk_string_ddowncase(1, &tmp);
-
+    STk_debug("tmp = ~s", tmp);
+    scheme = STk_string_downcase(1, &tmp);
+    STk_debug("scheme = ~S", scheme);
     if ((STk_equal(scheme, file) != STk_false) && (strncmp(url, ":///", 4) != 0))
       /* URI such as file://tmp/X produce host="tmp" and file "/X"
        * (as mozilla). It is incorrect, but this is a common mistake,
@@ -375,6 +376,7 @@ DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
       user = STk_Cstring2string("");
     }
 
+    STk_debug("Hi ~S\n", scheme);
     /* Port */
     if (*url == ':') {
       url += 1;

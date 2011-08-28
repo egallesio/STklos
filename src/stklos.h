@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 19-Aug-2011 11:22 (eg)
+ * Last file update: 28-Aug-2011 15:04 (eg)
  */
 
 
@@ -1171,7 +1171,6 @@ struct string_obj {
 
 SCM STk_makestring(int len, char *init);
 SCM STk_Cstring2string(char *str); 	     /* Embed a C string in Scheme world  */
-SCM STk_chars2string(char *str, size_t len); /* Original can have null characters */
 
 
 EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));

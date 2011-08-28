@@ -21,14 +21,19 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2011 23:35 (eg)
-;;;; Last file update: 27-May-2011 23:55 (eg)
+;;;; Last file update: 22-Aug-2011 18:50 (eg)
 ;;;;
 
 (require "test")
 
+(define *lang-is-utf8?* (let ((lang (getenv "LANG")))
+			  (and lang
+			       (or (string-find? "UTF8" lang)
+				   (string-find? "utf8" lang)))))
+
+
+
 (test-section "Unicode Characters")
-
-
 ;;------------------------------------------------------------------
 (test-subsection "basic functions")
 
@@ -74,6 +79,163 @@
       (let ((s (make-string 3)))
         (string-fill! s #\字)
         s))
+
+;; Following tests come from
+;;http://www.smyles.com/projects/r6gambit/darcs/test/r6rs/unicode.sls
+
+(test "gambit.1" #\I (char-upcase #\i))
+(test "gambit.2" #\i (char-downcase #\i))
+#;(test "gambit.3" #\I (char-titlecase #\i))		;; not R7
+(test "gambit.4" #\i (char-foldcase #\i))
+
+
+(test "gambit.5" #\xDF (char-upcase #\xDF))
+(test "gambit.6" #\xDF (char-downcase #\xDF))
+#;(test "gambit.7" #\xDF (char-titlecase #\xDF))	;; not R7
+(test "gambit.8" #\xDF (char-foldcase #\xDF))
+
+(test "gambit.9" #\x3A3 (char-upcase #\x3A3))
+(when *lang-is-utf8?* (test "gambit.10" #\x3C3 (char-downcase #\x3A3)))
+#;(test "gambit.11" #\x3A3 (char-titlecase #\x3A3))	;; not R7
+(when *lang-is-utf8?* (test "gambit.12" #\x3C3 (char-foldcase #\x3A3)))
+
+(when *lang-is-utf8?* (test "gambit.13" #\x3A3 (char-upcase #\x3C2)))
+(test "gambit.14" #\x3C2 (char-downcase #\x3C2))
+#;(test "gambit.15" #\x3A3 (char-titlecase #\x3C2))	;; not R7
+(test "gambit.16" #\x3C3 (char-foldcase #\x3C2))
+
+(test "gambit.17" #f  (char-ci<? #\z #\Z))
+(test "gambit.18" #f  (char-ci<? #\Z #\z))
+(test "gambit.19" #t  (char-ci<? #\a #\Z))
+(test "gambit.20" #f  (char-ci<? #\Z #\a))
+(test "gambit.21" #t  (char-ci<=? #\z #\Z))
+(test "gambit.22" #t  (char-ci<=? #\Z #\z))
+(test "gambit.23" #t  (char-ci<=? #\a #\Z))
+(test "gambit.24" #f  (char-ci<=? #\Z #\a))
+(test "gambit.25" #f  (char-ci=? #\z #\a))
+(test "gambit.26" #t  (char-ci=? #\z #\Z))
+(test "gambit.27" #t  (char-ci=? #\x3C2 #\x3C3))
+(test "gambit.28" #f  (char-ci>? #\z #\Z))
+(test "gambit.29" #f  (char-ci>? #\Z #\z))
+(test "gambit.30" #f  (char-ci>? #\a #\Z))
+(test "gambit.31" #t  (char-ci>? #\Z #\a))
+(test "gambit.32" #t  (char-ci>=? #\Z #\z))
+(test "gambit.33" #t  (char-ci>=? #\z #\Z))
+(test "gambit.34" #t  (char-ci>=? #\z #\Z))
+(test "gambit.35" #f  (char-ci>=? #\a #\z))
+
+(test "gambit.36" #t (char-alphabetic? #\a))
+(test "gambit.37" #f (char-alphabetic? #\1))
+(test "gambit.38" #t (char-numeric? #\1))
+(test "gambit.39" #f (char-numeric? #\a))
+(test "gambit.40" #t (char-whitespace? #\space))
+#;(test "gambit.41" #t (char-whitespace? #\x00A0))	;; not clear
+(test "gambit.42" #f (char-whitespace? #\a))
+(test "gambit.43" #f (char-upper-case? #\a))
+(test "gambit.44" #t (char-upper-case? #\A))
+(when *lang-is-utf8?* (test "gambit.45" #t (char-upper-case? #\x3A3)))
+(test "gambit.46" #t (char-lower-case? #\a))
+(test "gambit.47" #f (char-lower-case? #\A))
+(when *lang-is-utf8?* (test "gambit.48" #t (char-lower-case? #\x3C3)))
+#;(test "gambit.49" #t (char-lower-case? #\x00AA))	;; not clear
+#;(test "gambit.50" #f (char-title-case? #\a))		;; Not R7
+#;(test "gambit.51" #f (char-title-case? #\A))		;; Not R7
+#;(test "gambit.52" #f (char-title-case? #\I))		;; Not R7
+#;(test "gambit.53" #t (char-title-case? #\x01C5))	;; Not R7
+
+#;(test "gambit.54" 'Ll (char-general-category #\a))	   ;; Not R7
+#;(test "gambit.55" 'Zs (char-general-category #\space))   ;; Not R7
+#;(test "gambit.56" 'Cn (char-general-category #\x10FFFF)) ;; Not R7
+
+(test "gambit.57" "HI" (string-upcase "Hi"))
+(test "gambit.58" "HI" (string-upcase "HI"))
+(test "gambit.59" "hi" (string-downcase "Hi"))
+(test "gambit.60" "hi" (string-downcase "hi"))
+(test "gambit.61" "hi" (string-foldcase "Hi"))
+(test "gambit.G2" "hi" (string-foldcase "HI"))
+(test "gambit.63" "hi" (string-foldcase "hi"))
+
+#; (test "gambit.64" "STRASSE" (string-upcase "Stra\xDF;e"))	;; not R7
+(test "gambit.65" "stra\xDF;e" (string-downcase "Stra\xDF;e"))
+#;(test "gambit.66" "strasse" (string-foldcase "Stra\xDF;e"))	;; not R7
+(test "gambit.67" "strasse" (string-downcase "STRASSE"))
+
+(when *lang-is-utf8?* (test "gambit.68" "\x3C3;" (string-downcase "\x3A3;")))
+
+(test "gambit.69" "\x39E;\x391;\x39F;\x3A3;"
+      (string-upcase "\x39E;\x391;\x39F;\x3A3;"))
+#;(test "gambit.70"  "\x3BE;\x3B1;\x3BF;\x3C2;"			;; not R7
+      (string-downcase "\x39E;\x391;\x39F;\x3A3;"))
+#;(test "gambit.71" "\x3BE;\x3B1;\x3BF;\x3C3;\x3C2;"		;; not R7
+      (string-downcase "\x39E;\x391;\x39F;\x3A3;\x3A3;"))
+#;(test "gambit.72" "\x3BE;\x3B1;\x3BF;\x3C2; \x3C3;"
+      (string-downcase "\x39E;\x391;\x39F;\x3A3; \x3A3;"))	;; not R7
+(when *lang-is-utf8?*
+  (test "gambit.73" "\x3BE;\x3B1;\x3BF;\x3C3;"
+	(string-foldcase "\x39E;\x391;\x39F;\x3A3;"))
+  (test "gambit.74" "\x39E;\x391;\x39F;\x3A3;"
+	(string-upcase "\x3BE;\x3B1;\x3BF;\x3C3;"))
+  (test "gambit.75" "\x39E;\x391;\x39F;\x3A3;"
+	(string-upcase "\x3BE;\x3B1;\x3BF;\x3C2;"))
+)
+
+
+(test "gambit.76" "Knock Knock" (string-titlecase "kNock KNoCK"))
+#;(test "gambit.77" "Who's There?"			;; not clear
+      (string-titlecase "who's there?") equal?)
+(test "gambit.78" "R6Rs" (string-titlecase "r6rs"))
+(test "gambit.79" "R6Rs" (string-titlecase "R6RS"))
+
+(test "gambit.80" (string-downcase "A\x3A3;'x") "a\x3C3;'x") ; ' is a MidLetter
+
+(test "gambit.81"  #t (string-ci<? "a" "Z"))
+(test "gambit.82"  #t (string-ci<? "A" "z"))
+(test "gambit.83"  #f (string-ci<? "Z" "a"))
+(test "gambit.84"  #f (string-ci<? "z" "A"))
+(test "gambit.85"  #f (string-ci<? "z" "Z"))
+(test "gambit.86"  #f (string-ci<? "Z" "z"))
+(test "gambit.87"  #f (string-ci>? "a" "Z"))
+(test "gambit.88"  #f (string-ci>? "A" "z"))
+(test "gambit.89"  #t (string-ci>? "Z" "a"))
+(test "gambit.90"  #t (string-ci>? "z" "A"))
+(test "gambit.91"  #f (string-ci>? "z" "Z"))
+(test "gambit.92"  #f (string-ci>? "Z" "z"))
+(test "gambit.93"  #t (string-ci=? "z" "Z"))
+(test "gambit.94"  #f (string-ci=? "z" "a"))
+#;(test "gambit.95"  #t (string-ci=? "Stra\xDF;e" "Strasse"))		;; Not R7
+#;(test "gambit.96"  #t (string-ci=? "Stra\xDF;e" "STRASSE"))		;; Not R7
+#;(test "gambit.97"  #t (string-ci=? "\x39E;\x391;\x39F;\x3A3;"		;; Not R7
+				   "\x3BE;\x3B1;\x3BF;\x3C2;"))
+(when *lang-is-utf8?*
+  (test "gambit.98"  #t (string-ci=? "\x39E;\x391;\x39F;\x3A3;"
+				     "\x3BE;\x3B1;\x3BF;\x3C3;")))
+
+(test "gambit.99"  #t (string-ci<=? "a" "Z"))
+(test "gambit.100"  #t (string-ci<=? "A" "z"))
+(test "gambit.101"  #f (string-ci<=? "Z" "a"))
+(test "gambit.102"  #f (string-ci<=? "z" "A"))
+(test "gambit.103"  #t (string-ci<=? "z" "Z"))
+(test "gambit.104"  #t (string-ci<=? "Z" "z"))
+(test "gambit.105"  #f (string-ci>=? "a" "Z"))
+(test "gambit.106"  #f (string-ci>=? "A" "z"))
+(test "gambit.107"  #t (string-ci>=? "Z" "a"))
+(test "gambit.108"  #t (string-ci>=? "z" "A"))
+(test "gambit.109"  #t (string-ci>=? "z" "Z"))
+(test "gambit.110"  #t (string-ci>=? "Z" "z"))
+
+;;//
+;;// (test (string-normalize-nfd "\xE9;") "\x65;\x301;")
+;;// (test (string-normalize-nfc "\xE9;") "\xE9;")
+;;// (test (string-normalize-nfd "\x65;\x301;") "\x65;\x301;")
+;;// (test (string-normalize-nfc "\x65;\x301;") "\xE9;")
+;;//
+;;// (test (string-normalize-nfkd "\xE9;") "\x65;\x301;")
+;;// (test (string-normalize-nfkc "\xE9;") "\xE9;")
+;;// (test (string-normalize-nfkd "\x65;\x301;") "\x65;\x301;")
+;;// (test (string-normalize-nfkc "\x65;\x301;") "\xE9;")
+;;//
+
+
 
 ;;------------------------------------------------------------------
 (test-section-end)
