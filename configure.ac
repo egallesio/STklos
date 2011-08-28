@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 21-Aug-2011 12:56 (eg)
+### Last file update: 28-Aug-2011 23:45 (eg)
 
 AC_PREREQ(2.64)
 AC_INIT([stklos], [1.10])
@@ -130,7 +130,7 @@ fi
 AC_CHECK_LIB(pthread, pthread_create, deflt_threads=pthreads, deflt_threads=none)
 
 AC_ARG_ENABLE(threads,
-  [AS_HELP_STRING([--enable-threads=TYPE],[choose threading package (none,pthread)])],
+  [AS_HELP_STRING([--enable-threads=TYPE],[choose threading package (none,pthreads)])],
   THREADS=$enableval,
   THREADS=$deflt_threads)
 
