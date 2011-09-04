@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-May-2010 22:00 (eg)
-;;;; Last file update: 22-Aug-2011 11:44 (eg)
+;;;; Last file update:  4-Sep-2011 21:01 (eg)
 ;;;;
 
 
@@ -65,34 +65,37 @@
     ;;
     ;; Build a virtual port for the input port of the REPL
     ;;
-    (let* ((buff       "")
+    (let* ((buff       #())
 	   (buff-index -1)
 	   (fill-buff  (lambda ()
 			 ;; No more char. to read. Fill the buffer with readline
-			 (set! buff (read-with-history (repl-prompt)))
-			 (set! buff-index 0)
-			 (set! (repl-prompt) "")))
+			 (let ((line (read-with-history (repl-prompt))))
+			   (set! buff (if (eof-object? line)
+					  line
+					  (%string->bytes line)))
+			   (set! buff-index 0)
+			   (set! (repl-prompt) ""))))
 	   (port       (open-input-virtual
 			:read-char
 			  (lambda (port)
 			    (let Loop ()
 			      (cond
 				((eof-object? buff)
-			           (set! buff       "")
+			           (set! buff       #())
 				   (set! buff-index -1)
 				   #eof)
-				((= buff-index (string-length buff))
+				((= buff-index (vector-length buff))
 				   ;; last character read. return a newline char
 				   (set! buff-index (+ buff-index 1))
 				   #\newline)
 				((or (negative? buff-index)
-				     (> buff-index (string-length buff)))
+				     (> buff-index (vector-length buff)))
 				   (fill-buff)
 				   (Loop))
 				(else
-				   (let ((c (string-ref buff buff-index)))
+				   (let ((c (vector-ref buff buff-index)))
 				     (set! buff-index (+ buff-index 1))
-				     c)))))
+				     (integer->char c))))))
 			  :eof?
 			    (lambda (port)
 			      (if (eof-object? buff)

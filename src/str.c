@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 28-Aug-2011 18:12 (eg)
+ * Last file update:  4-Sep-2011 22:16 (eg)
  */
 
 #include <ctype.h>
@@ -983,7 +983,7 @@ static SCM string_xxcase(int argc, SCM *argv, int (*toxx)(int),
 
 DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv))
 {
-  return string_xxcase(argc, *argv, tolower, towlower);
+  return string_xxcase(argc, argv, tolower, towlower);
 }
 
 
@@ -1276,6 +1276,22 @@ DEFINE_PRIMITIVE("%string-use-utf8?", string_use_utf8, subr1, (SCM str))
   return MAKE_BOOLEAN(STk_use_utf8 && !STRING_MONOBYTE(str));
 }
 
+DEFINE_PRIMITIVE("%string->bytes", string2bytes, subr1, (SCM str))
+{
+  SCM z;
+  int i, len;
+
+  if (!STRINGP(str)) error_bad_string(str);
+
+  len = STRING_SIZE(str);
+  z   = STk_makevect(len, NULL);
+
+  for (i = 0; i < len; i++)
+    VECTOR_DATA(z)[i] = MAKE_INT((uint8_t) (STRING_CHARS(str)[i]));
+
+  return z;
+}
+
 
 int STk_init_string(void)
 {
@@ -1318,5 +1334,6 @@ int STk_init_string(void)
 
   ADD_PRIMITIVE(using_utf8);
   ADD_PRIMITIVE(string_use_utf8);
+  ADD_PRIMITIVE(string2bytes);
   return TRUE;
 }

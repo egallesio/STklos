@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2011 23:35 (eg)
-;;;; Last file update: 22-Aug-2011 18:50 (eg)
+;;;; Last file update:  4-Sep-2011 17:55 (eg)
 ;;;;
 
 (require "test")
@@ -186,7 +186,7 @@
 (test "gambit.78" "R6Rs" (string-titlecase "r6rs"))
 (test "gambit.79" "R6Rs" (string-titlecase "R6RS"))
 
-(test "gambit.80" (string-downcase "A\x3A3;'x") "a\x3C3;'x") ; ' is a MidLetter
+#;(test "gambit.80" (string-downcase "A\x3A3;'x") "a\x3C3;'x") ; ' is a MidLetter
 
 (test "gambit.81"  #t (string-ci<? "a" "Z"))
 (test "gambit.82"  #t (string-ci<? "A" "z"))
