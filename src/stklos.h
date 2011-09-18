@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 28-Aug-2011 15:04 (eg)
+ * Last file update:  9-Sep-2011 15:37 (eg)
  */
 
 
@@ -1168,6 +1168,7 @@ struct string_obj {
 
 #define STRING_CONST	 (1 << 0)
 
+#define STRING_MONOBYTE(str)	(STRING_LENGTH(str) == STRING_SIZE(str))
 
 SCM STk_makestring(int len, char *init);
 SCM STk_Cstring2string(char *str); 	     /* Embed a C string in Scheme world  */
@@ -1266,6 +1267,8 @@ int STk_utf8_read_char(SCM port);
 int STk_utf8_sequence_length(char *str); /* # of bytes of sequence starting at str */
 int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch*/
 char *STk_utf8_index(char *s, int i, int max);/* return the address of ith char of s*/
+int STk_utf8_char_from_byte(char *s, int i, int max); /*  byte index => char index */
+
 int STk_init_utf8(void);
 
 

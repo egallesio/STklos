@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  4-Sep-2011 22:16 (eg)
+ * Last file update:  9-Sep-2011 15:37 (eg)
  */
 
 #include <ctype.h>
@@ -33,7 +33,6 @@
 /* min size added to a string when reallocated in a string-set! */
 #define UTF8_STRING_INCR	8
 
-#define STRING_MONOBYTE(str)	(STRING_LENGTH(str) == STRING_SIZE(str))
 
 /*
  * Utilities

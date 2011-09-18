@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 24-Nov-2000 10:35 (eg)
- * Last file update: 22-Aug-2011 00:35 (eg)
+ * Last file update: 18-Sep-2011 21:47 (eg)
  */
 
 #include "stklos.h"
@@ -230,11 +230,24 @@ static SCM regexec_helper(SCM re, SCM str, int pos_only)
 			    LIST2(MAKE_INT(0), MAKE_INT(0)) :
 			    STk_false,
 			result);
-    else
+    else {
+      int ifrom, ito;
+      char *s = STRING_CHARS(str);
+      int size = STRING_SIZE(str);
+
+      if (STRING_MONOBYTE(str)) {
+	ifrom = from;
+	ito = to;
+      } else {
+	ifrom = STk_utf8_char_from_byte(s, from, size);
+	ito   = STk_utf8_char_from_byte(s, to, size);
+      }
+
       result = STk_cons((pos_only)?
-		            LIST2(STk_long2integer(from), STk_long2integer(to)) :
-		            STk_makestring(to-from, STRING_CHARS(str)+from),
+		            LIST2(STk_long2integer(ifrom), STk_long2integer(ito)) :
+		            STk_makestring(to-from, s+from),
 			result);
+    }
   }
 
   return STk_dreverse(result);
@@ -309,7 +322,6 @@ static struct extended_type_descr xtype_regexp = {
   "regexp",			/* name */
   print_regexp			/* print function */
 };
-
 
 
 int STk_init_regexp(void)
