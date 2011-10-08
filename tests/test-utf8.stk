@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2011 23:35 (eg)
-;;;; Last file update:  4-Sep-2011 17:55 (eg)
+;;;; Last file update:  5-Oct-2011 22:15 (eg)
 ;;;;
 
 (require "test")
@@ -45,6 +45,8 @@
 
 (test-subsection "Chibi Scheme unicode tests")
 
+(test "prechibi.1" '(1056 1056 1091 1089 1089 1082 1080 1081)
+      (map char->integer (cons #\Р (string->list "Русский"))))
 (test "chibi.1" #\Р (string-ref "Русский" 0))
 (test "chibi.2" #\и (string-ref "Русский" 5))
 (test "chibi.3" #\й (string-ref "Русский" 6))

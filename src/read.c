@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 19-Aug-2011 10:55 (eg)
+ * Last file update:  8-Oct-2011 16:09 (eg)
  *
  */
 
@@ -304,7 +304,9 @@ static SCM read_char(SCM port, int c)
   for( ; ; ) {
     tok[j++] = c;
     c = STk_getc(port);
-    if (c == EOF || isspace((unsigned char)c)) break;
+    if (c == EOF || ((c <=0x80) && isspace((unsigned char)c))) 
+      /* (c < 0x80) is for MacOs */
+      break;
     if (strchr("()[]'`,;\"", c)) {
       STk_ungetc(c, port);
       break;
