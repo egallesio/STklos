@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2011 23:35 (eg)
-;;;; Last file update:  5-Oct-2011 22:15 (eg)
+;;;; Last file update:  8-Oct-2011 22:13 (eg)
 ;;;;
 
 (require "test")
@@ -30,8 +30,6 @@
 			  (and lang
 			       (or (string-find? "UTF8" lang)
 				   (string-find? "utf8" lang)))))
-
-
 
 (test-section "Unicode Characters")
 ;;------------------------------------------------------------------
