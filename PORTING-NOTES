@@ -7,6 +7,18 @@ on the following architectures
     - MacOS 10.5+  (gcc-4.x 32 and 64 bits)
     - FreeBSD 8.x  (gcc-4.x 32 bits)
 
+
+MacOs X Lion
+
+   To compile stklos on MacOs X Lion, you the following
+   configuration line is known to work:
+
+   $ CFLAGS="-Wl,-no_pie,-no_compact_unwind" ./configure \
+                 --with-provided-gc --with-provided-regexp \
+	         --with-provided-ffi --with-provided-bignum
+
+
+
 ======================================================================
 ======================================================================
 All the informations given below are for old versions (pre-1.0) of

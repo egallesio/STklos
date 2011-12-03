@@ -5739,6 +5739,7 @@ case $OS in
       case $version in
          9*)  OS_NAME_VERSION=DARWIN_9;;
 	 10*) OS_NAME_VERSION=DARWIN_10;;
+	 11*) OS_NAME_VERSION=DARWIN_11;;
 	 *)   OS_NAME_VERSION=DARWIN_OLD;;
       esac
       ;;
@@ -5971,6 +5972,19 @@ fi
 echo "*****"
 echo "***** GC support"
 echo "*****"
+
+# Patch code for OSX Lion
+case $OS_NAME_VERSION in
+     DARWIN_11)
+       if test ! -f gc/stklos-patch-applied
+       then
+              echo "**** Patching GC library";
+	      patch -p1 < etc/lion.patch
+	      touch  gc/stklos-patch-applied
+       fi
+       ;;
+esac
+
 
 # Try to determine if libgc is installed
 if ${PKGCONFIG} --exists bdw-gc ;then
