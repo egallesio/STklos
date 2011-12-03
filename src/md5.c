@@ -1,7 +1,7 @@
 /*
  * md5.c			-- MD5 algorithm
  *
- * Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 13-May-2007 22:21 (eg)
- * Last file update: 14-May-2007 10:35 (eg)
+ * Last file update:  3-Dec-2011 15:11 (eg)
  */
 
 /*
@@ -31,7 +31,18 @@
  */
 
 #include <string.h>
-#include "md5.h"
+
+typedef unsigned char uint8;
+typedef unsigned int uint32;
+
+
+struct md5_context
+{
+    uint32 total[2];
+    uint32 state[4];
+    uint8 buffer[64];
+};
+
 
 
 #define GET_UINT32(n,b,i)                                       \
@@ -50,7 +61,7 @@
     (((uint8 *) b)[(i)+3]) = (uint8) (((n) >> 24) & 0xFF);      \
 }
 
-void md5_starts( struct md5_context *ctx )
+static void md5_starts( struct md5_context *ctx )
 {
     ctx->total[0] = 0;
     ctx->total[1] = 0;
@@ -60,7 +71,7 @@ void md5_starts( struct md5_context *ctx )
     ctx->state[3] = 0x10325476;
 }
 
-void md5_process( struct md5_context *ctx, uint8 data[64] )
+static void md5_process( struct md5_context *ctx, uint8 data[64] )
 {
     uint32 A, B, C, D, X[16];
 
@@ -183,7 +194,7 @@ void md5_process( struct md5_context *ctx, uint8 data[64] )
     ctx->state[3] += D;
 }
 
-void md5_update( struct md5_context *ctx, uint8 *input, uint32 length )
+static void md5_update( struct md5_context *ctx, uint8 *input, uint32 length )
 {
     uint32 left, fill;
 
@@ -228,7 +239,7 @@ static uint8 md5_padding[64] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-void md5_finish( struct md5_context *ctx, uint8 digest[16] )
+static void md5_finish( struct md5_context *ctx, uint8 digest[16] )
 {
     uint32 last, padn;
     uint8 msglen[8];

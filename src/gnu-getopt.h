@@ -1,11 +1,11 @@
 /*
  * gnu-getopt.h		-- Adaptation of the GNU getopt function for STklos
  *
- * Copyright © 2001-2003 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2001-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Nov-2001 23:40 (eg)
- * Last file update: 10-Feb-2003 10:46 (eg)
+ * Last file update:  3-Dec-2011 15:56 (eg)
  *
  * The following code is constituted of the GNU getopt, getopt_long
  * and getopt_long_only implementation. Code is slightly modified (all
@@ -22,15 +22,11 @@ void STk_start_getopt_from_scheme(void);
 #define optind STk_optind
 #define opterr STk_opterr
 #define optopt STk_optopt
-
-#ifdef WIN32
-/* getopt is always defined under WIN32 (since it is included in
- * unistd.h, leading to a double  definition of 'struct option'
- */
-#  define option STk_option
-#  define getopt STk_getopt
-#  define getopt_long STk_getopt_long
-#endif
+#define option STk_option
+#define getopt STk_getopt
+#define getopt_long STk_getopt_long
+#define getopt_long_only STk_getopt_long_only
+#define _getopt_internal STk_getopt_internal
 
 /* Original file starts here */
 
