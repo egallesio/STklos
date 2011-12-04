@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Bun-2007 09:24 (eg)
-;;;; Last file update: 27-May-2011 23:21 (eg)
+;;;; Last file update:  4-Dec-2011 18:10 (eg)
 ;;;;
 
 (define make-external-function #f)
@@ -144,9 +144,14 @@
 doc>
 |#
 (define-macro (define-external name parameters . args)
-  (let ((lib-name    (key-get args :library-name ""))
-	(entry-name  (key-get args :entry-name (symbol->string name)))
-	(return-type (key-get args :return-type :void)))
+  (let* ((lib	     (key-get args :library-name ""))
+	 (lib-name   (if (and (equal? lib "")
+			      (equal? (running-os) 'cygwin-windows))
+			 "cygwin1.dll"
+			 lib))
+	 (entry-name  (key-get args :entry-name (symbol->string name)))
+	 (return-type (key-get args :return-type :void)))
+
     `(define ,name (make-external-function ,entry-name
 					   ',parameters
 					   ,return-type
