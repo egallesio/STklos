@@ -1,7 +1,7 @@
 # Makefile for stklos-pkgman
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 22-Dec-2006 12:00 (eg)
-# Last file update: 23-Oct-2010 11:53 (eg)
+# Last file update:  4-Dec-2011 16:48 (eg)
 
 
 makefiledir=  $(prefix)/etc/stklos
@@ -39,6 +39,3 @@ clean:
 
 distclean: clean
 	$(RM) -f Makefile
-
-egclean: distclean
-	$(RM) -f  $(LEXOBJS)
