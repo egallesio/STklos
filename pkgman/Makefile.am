@@ -18,21 +18,21 @@ SRC     = ../lib/http.stk \
 	  repository.stk rewrite.stk misc.stk tune.stk types.stk
 SFLAGS  =
 RM      = /bin/rm
-SCC	= ../utils/stklos-compile
+COMP	= ../utils/tmpcomp
+GENLEX  = ../utils/tmpgenlex 
 
 lang-bigloo.inc: lang-bigloo.l
-	stklos-genlex lang-bigloo.l lang-bigloo.inc lang-bigloo
+	$(GENLEX) lang-bigloo.l lang-bigloo.inc lang-bigloo
 
 lang-chicken.inc: lang-chicken.l
-	stklos-genlex lang-chicken.l lang-chicken.inc lang-chicken
+	$(GENLEX) lang-chicken.l lang-chicken.inc lang-chicken
 
 lang-mzscheme.inc: lang-mzscheme.l
-	stklos-genlex lang-mzscheme.l lang-mzscheme.inc lang-mzscheme
+	$(GENLEX) lang-mzscheme.l lang-mzscheme.inc lang-mzscheme
 
 
 $(bin_SCRIPTS): $(LEXOBJS) $(SRC)
-	../utils/tmpcomp main.stk $(bin_SCRIPTS)
-#	$(SCC) $(SFLAGS) -o $(bin_SCRIPTS) main.stk
+	$(COMP) main.stk $(bin_SCRIPTS)
 
 clean:
 	$(RM) -f $(bin_SCRIPTS) *~
