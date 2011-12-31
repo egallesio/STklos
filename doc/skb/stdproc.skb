@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 16-Aug-2011 20:25 (eg)
+;; Last file update: 31-Dec-2011 15:16 (eg)
 ;;
 ;; ======================================================================
 
@@ -144,6 +144,7 @@ quoted in programs.])
 (insertdoc 'null?)
 (insertdoc 'pair-mutable?)
 (insertdoc 'list?)
+(insertdoc 'make-list)
 (insertdoc 'list)
 (insertdoc 'list*)
 (insertdoc 'length)
@@ -381,6 +382,7 @@ following: ,(fontified-code [#(0 (2 2 2 2) "Anna")])])
 (insertdoc 'vector-ref)
 (insertdoc 'vector-set!)
 (insertdoc 'list->vector)
+(insertdoc 'string->vector)
 (insertdoc 'vector-fill!)
 (insertdoc 'vector-copy)
 (insertdoc 'vector-resize)
@@ -418,6 +420,34 @@ to build and access the internals of a structure.])
 (insertdoc 'struct-is-a?)
 (insertdoc 'struct->list))
 
+;;;
+;;; BYTEVECTORS
+;;;
+(section :title "Bytevectors"
+(index "bytevectors")
+
+   (p [,(emph" Bytevectors") represent blocks of binary data.  They
+are fixed-length sequences of bytes, where a ,(emph "byte") is an
+exact integer in the range [0, 255]. A bytevector is typically more
+space-efficient than a vector containing the same values.])
+
+   (p [The ,(emph "length") of a bytevector is the number of elements
+that it contains. This number is a non-negative integer that is fixed
+when the bytevector is created. The ,(emph "valid indexes") of a
+bytevector are the exact non-negative integers less than the length of
+the bytevector, starting at index zero as with vectors.])
+
+(insertdoc 'bytevector?)
+(insertdoc 'make-bytevector)
+(insertdoc 'bytevector-length)
+(insertdoc 'bytevector-u8-ref)
+(insertdoc 'bytevector-u8-set!)
+(insertdoc 'bytevector-copy)
+(insertdoc 'bytevector-copy!)
+(insertdoc 'bytevector-copy-partial)
+(insertdoc 'bytevector-copy-partial!)
+   )
+
 
 ;;;
 ;;; CONTROL FEATURES
@@ -427,7 +457,11 @@ to build and access the internals of a structure.])
 (insertdoc 'procedure?)
 (insertdoc 'apply)
 (insertdoc 'map)
+(insertdoc 'string-map)
+(insertdoc 'vector-map)
 (insertdoc 'for-each)
+(insertdoc 'string-for-each)
+(insertdoc 'vector-for-each)
 (insertdoc 'every)
 (insertdoc 'any)
 

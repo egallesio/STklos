@@ -1,6 +1,6 @@
 								-*- outline -*-
 
-		      S T k l o s   ( v e r s i o n   1 . 0 1 )
+		      S T k l o s   ( v e r s i o n   1 . 1 0 )
 		      =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 
 				   Erick Gallesio
@@ -64,6 +64,7 @@ STklos is known to work on the following architectures:
     * Linux 1.6.x (i386/gcc 32 and 64bits)
     * Mac OS X 10.5+ (i386/gcc 32 and 64 bits)
     * FreeBSD 8.x (i386/gcc 32 bits and 64 bits)
+    * Win32 (using Cygwin 1.7.x)
 
 
 Previous versions of STklos have run on various architectures. All

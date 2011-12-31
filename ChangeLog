@@ -1,3 +1,298 @@
+2011-12-04  Erick Gallesio <eg at unice.fr>  <eg at unice.fr>
+
+	* doc/Makefile.in, lib/ffi.stk, src/Makefile.in, src/boot.c,
+	  src/boot.img:
+	Fixed compilation problem with Cygwin. Now all tests are running on
+	Windows
+	[78b3362ddd8b] [tip]
+
+2011-12-04  Erick Gallesio <eg at unice.fr>  <eg at unice.fr>
+
+	* aclocal.m4, configure, doc/Makefile.in, pkgman/Makefile.am,
+	  pkgman/Makefile.in, pkgman/lang-bigloo.inc, pkgman/lang-chicken.inc,
+	  pkgman/lang-mzscheme.inc, src/Makefile.in, utils/stklos-genlex.stk,
+	  utils/tmpgenlex:
+	Code adaptation for Win32
+	[76c31923b156]
+
+2011-12-03  Erick Gallesio  <eg@unice.fr>
+
+	* lib/describe.stk, src/gnu-getopt.h, src/md5.c, src/md5.h:
+	Prefix md5 and getopt function with "STk_" to avoid name space
+	pollution.
+	[f2611bbc4ded]
+
+	* PORTING-NOTES, configure, configure.ac, etc/lion.patch:
+	Adding a patch for building on MacOs X Lion
+	[45124ff049e6]
+
+
+2011-10-08  Erick Gallesio  <eg@unice.fr>
+
+	* src/read.c, tests/test-utf8.stk:
+	MacOs X Bug fix: isspace returns true for bytes beyond 0x80 even if
+	we use UTF-8 encoding.
+	[4a01e33d2e5d]
+
+2011-09-18  Erick Gallesio  <eg@unice.fr>
+
+	* src/regexp.c, src/stklos.h, src/str.c, src/utf8.c:
+	Fixed a bug with indices of regexp-match-position with UTF-8 encoded
+	strings
+	[5297cdf417eb]
+
+2011-09-04  Erick Gallesio  <eg@unice.fr>
+
+	* lib/repl-readline.stk, src/boot.c, src/boot.img, src/str.c, tests
+	  /test-utf8.stk:
+	Bug fix with read-line and UTF-8 strings
+	[0062015a4dfe]
+
+2011-08-28  Erick Gallesio  <eg@unice.fr>
+
+	* configure, configure.ac, lib/Makefile.in, pkgman/Makefile.in:
+	Corrected a typo in configure.ac
+	[600e1c10a12b]
+
+	* doc/stklos.1.in, lib/repl-readline.stk, src/boot.c, src/boot.img,
+	  src/char.c, src/misc.c, src/port.c, src/stklos.h, src/str.c, 
+	  tests/test-utf8.stk:
+	Bug fix: read-line built bad UTF-8 strings
+	[ee299be2ff09]
+
+2011-08-22  Erick Gallesio  <eg@unice.fr>
+
+	* doc/Makefile.am, doc/Makefile.in, doc/skb/Makefile,
+	  doc/skb/biblio.skb, doc/skb/biblio.skbib, doc/skb/cond.skb,
+	  doc/skb/custom.skb, doc/skb/doc-style.css, doc/skb/doc-style.tex,
+	  doc/skb/eg-web-book.ske, doc/skb/expr.skb, doc/skb/ffi.skb,
+	  doc/skb/index.skb, doc/skb/intro.skb, doc/skb/match.skb,
+	  doc/skb/object.skb, doc/skb/overview.skb, doc/skb/progstruct.skb,
+	  doc/skb/regexp.skb, doc/skb/scmpkg.skb, doc/skb/slib.skb,
+	  doc/skb/srfi.skb, doc/skb/srfi.stk, doc/skb/stklos-version.stk.in,
+	  doc/skb/threads.skb, doc/stklos-compile.1.in, doc/stklos-
+	  config.1.in, doc/stklos-genlex.1.in, doc/stklos-pkg.1.in,
+	  doc/stklos.1.in, etc/README, etc/simple-module.c, etc/simple-
+	  stklos.c, etc/stk-dynload.c, examples/Makefile.am,
+	  examples/Makefile.in, examples/fork-test.stk, examples/hello.stk,
+	  examples/secho.stk, examples/socket-client.stk, examples/socket-
+	  server.stk, examples/threads.stk, gmp/AUTHORS, gmp/ChangeLog,
+	  gmp/Makefile.am, gmp/Makefile.in, gmp/NEWS, gmp/README,
+	  gmp/README.mpi, gmp/gmp.c, gmp/gmp.h, gmp/mpi-config.h, gmp/mpi.c,
+	  gmp/mpi.h, lib/Makefile.in, lib/STklos.init, lib/ScmPkg.d/scmpkg-
+	  interface.stk, lib/ScmPkg.d/scmpkg-languages.stk, lib/ScmPkg.d
+	  /scmpkg-support.stk, lib/assembler.stk, lib/bb.stk, lib/bigloo-
+	  support.stk, lib/bigmatch.stk, lib/bonus.stk, lib/boot.stk,
+	  lib/callcc.stk, lib/compfile.stk, lib/compiler.stk,
+	  lib/computils.stk, lib/date.stk, lib/describe.stk, lib/env.stk,
+	  lib/expand.ss, lib/ffi.stk, lib/full-conditions.stk, lib/full-
+	  syntax.stk, lib/getopt.stk, lib/help.stk, lib/http.stk, lib/lex-
+	  rt.stk, lib/load.stk, lib/logical.stk, lib/make-C-boot.stk,
+	  lib/module.stk, lib/object.stk, lib/obsolete.stk, lib/peephole.stk,
+	  lib/pp.stk, lib/process.stk, lib/r5rs.stk, lib/r7rs.stk,
+	  lib/readline.stk, lib/recette.stk, lib/regexp.stk, lib/repl-
+	  readline.stk, lib/repl.stk, lib/runtime.stk, lib/slib.stk,
+	  lib/srfi-0.stk, lib/srfi-1.stk, lib/srfi-100.stk, lib/srfi-11.stk,
+	  lib/srfi-13.stk, lib/srfi-14.stk, lib/srfi-17.stk, lib/srfi-2.stk,
+	  lib/srfi-26.stk, lib/srfi-27.stk, lib/srfi-31.stk, lib/srfi-34.stk,
+	  lib/srfi-35.stk, lib/srfi-36.stk, lib/srfi-4.stk, lib/srfi-45.stk,
+	  lib/srfi-48.stk, lib/srfi-59.stk, lib/srfi-60.stk, lib/srfi-66.stk,
+	  lib/srfi-69.stk, lib/srfi-7.stk, lib/srfi-70.stk, lib/srfi-74.stk,
+	  lib/srfi-89.stk, lib/srfi-9.stk, lib/srfi-96.stk, lib/str.stk,
+	  lib/struct.stk, lib/tar.stk, lib/thread.stk, lib/trace.stk,
+	  pkgman/Makefile.am, pkgman/Makefile.in, pkgman/add.stk,
+	  pkgman/copy.stk, pkgman/etc/Makefile-scmpkg.tmpl,
+	  pkgman/extract.stk, pkgman/install.stk, pkgman/lang-bigloo.inc,
+	  pkgman/lang-bigloo.l, pkgman/lang-chicken.inc, pkgman/lang-
+	  chicken.l, pkgman/lang-mzscheme.inc, pkgman/lang-mzscheme.l,
+	  pkgman/lang.stk, pkgman/main.stk, pkgman/misc.stk,
+	  pkgman/params.stk, pkgman/pkgball.stk, pkgman/repository.stk,
+	  pkgman/rewrite.stk, pkgman/tune.stk, pkgman/types.stk, src/base64.c,
+	  src/boolean.c, src/boot.c, src/boot.img, src/box.c, src/char.c,
+	  src/cond.c, src/cpointer.c, src/dynload.c, src/env.c, src/error.c,
+	  src/extend.c, src/ffi.c, src/fixnum.c, src/fport.c, src/fport.h, src
+	  /gnu-getopt.c, src/gnu-getopt.h, src/gnu-glob.c, src/hash.c,
+	  src/hash.h, src/keyword.c, src/lib.c, src/list.c, src/md5.c,
+	  src/md5.h, src/misc.c, src/mutex-common.c, src/mutex-common.h, src
+	  /mutex-none.c, src/mutex-pthreads.c, src/mutex-pthreads.h,
+	  src/number.c, src/object.c, src/object.h, src/parameter.c,
+	  src/path.c, src/path.h, src/port.c, src/print.c, src/proc.c,
+	  src/process.c, src/promise.c, src/read.c, src/regexp.c,
+	  src/signal.c, src/sio.c, src/socket.c, src/socket.h, src/sport.c,
+	  src/stklos.c, src/stklos.h, src/str.c, src/struct.c, src/struct.h,
+	  src/symbol.c, src/system.c, src/thread-common.c, src/thread-
+	  common.h, src/thread-none.c, src/thread-none.h, src/thread-
+	  pthreads.c, src/thread-pthreads.h, src/utf8.c, src/uvector.c,
+	  src/vector.c, src/vm.c, src/vm.h, src/vport.c, tests/Makefile.am,
+	  tests/Makefile.in, tests/do-test.stk, tests/test-base64.stk, tests
+	  /test-box.stk, tests/test-callcc.stk, tests/test-ffi.stk, tests
+	  /test-fport.stk, tests/test-keyword.stk, tests/test-md5.stk, tests
+	  /test-number.stk, tests/test-r5.stk, tests/test-r5rs-pitfall.stk,
+	  tests/test-r7rs.stk, tests/test-regexp.stk, tests/test-sport.stk,
+	  tests/test-srfi.stk, tests/test-threads.stk, tests/test.stk, utils
+	  /make-doc, utils/shlib-options, utils/stklos-compile.stk, 
+	  utils/stklos-config.in, utils/stklos-genlex.stk, 
+	  utils/stklos-script.in, utils/tmpcomp:
+	Big source code patch with no modification: files are now encoded in
+	UTF-8
+	[4cd936478aa3]
+
+2011-08-21  Erick Gallesio  <eg@unice.fr>
+
+	* configure, configure.ac, src/parameter.c, src/promise.c,
+	  src/regexp.c, src/utf8.c:
+	Recognize UTF-8 strings in regexps
+	[39f976ea7fb8]
+
+2011-08-19  Erick Gallesio  <eg@unice.fr>
+
+	* lib/srfi-74.stk:
+	Going back to the original implementation of SRFI-74, since there
+	are no more conflicting names
+	[efcd1746ca7a]
+
+	* lib/compfile.stk, lib/r7rs.stk, lib/srfi-4.stk, src/Makefile.am,
+	  src/Makefile.in, src/blob.c, src/boolean.c, src/boot.c,
+	  src/boot.img, src/lib.c, src/read.c, src/stklos.h, src/uvector.c:
+	Moved R7RS (draft-1) blobs to R7RS bytevectors (Draft-3). The
+	implementation is now in Scheme and fully compatible with u8vectors.
+	[9a269ab500b2]
+
+2011-08-16  Erick Gallesio  <eg@unice.fr>
+
+	* doc/skb/stdproc.skb, lib/repl-readline.stk, src/char.c, src/port.c,
+	  src/read.c, src/stklos.h, src/str.c, src/utf8.c:
+	- Added the possibility
+	      * to insert hexadecimal character in symbols as in R6RS
+	      * to specify characters in hexadecimal
+	- Changed the syntax of hexadecimal escape sequence in strings. (Octal
+	bytes are now deprecated)
+	- Added Continuation lines in strings compatible with R6RS
+	[2db7e5964220]
+
+2011-08-14  Erick Gallesio  <eg@unice.fr>
+
+	* etc/Unicode/CaseFolding-6.0.0.txt, etc/Unicode/make-table.stk,
+ 	  src/char.c:
+	Added the syntax #\x... to read character in hexadecimal
+	[4aa61d5580b7]
+
+	* doc/skb/lib.stk, doc/skb/stdproc.skb, doc/skb/stklos.skb,
+	  src/char.c, src/hash.c, src/stklos.h, src/str.c:
+	Added new primitives: char-foldcase, string-foldcase, 
+	string-foldcase!
+	[2447af70bb41]
+
+2011-08-10  Erick Gallesio  <eg@unice.fr>
+
+	* lib/Makefile.am, lib/Makefile.in, lib/boot.stk, lib/srfi-0.stk,
+	  lib/str.stk, src/boot.c, src/boot.img, src/stklos.c, src/str.c:
+	All string-* functions are now able to manage string encoded in
+	UTF-8
+	[c5b8fc4ea419]
+
+2011-07-27  Erick Gallesio  <eg@unice.fr>
+
+	* configure, configure.ac, src/str.c:
+	Added comparison functions for UTF-8 strings
+	[27e88fbd9cee]
+
+	* src/uvector.c:
+	Weird: fix on s64/u64 patch disappeared.
+	[dc908643c386]
+
+	* lib/make-C-boot.stk, src/boot.c, src/boot.img:
+	Use read-byte instead of read-char when making the C boot file.
+	[5e9edbdd4c8a]
+
+2011-07-24  Erick Gallesio  <eg@unice.fr>
+
+	* src/uvector.c:
+	Bug fix: u64 and s64 types were inverted
+	[2d9d0dcb6734]
+
+2011-06-25  Erick Gallesio <eg at unice.fr>  <eg at unice.fr>
+
+	* lib/compiler.stk, src/boot.c, src/boot.img:
+	Typo Fix leading to an illegal instruction on INT-SINT-FXMUL2
+	[7761db05ed07]
+
+2011-07-27  Erick Gallesio  <eg@unice.fr>
+
+	* doc/skb/lib.stk, lib/bonus.stk, lib/compiler.stk, lib/date.stk,
+	  lib/ffi.stk, lib/getopt.stk, lib/load.stk, lib/mbe.stk,
+	  lib/module.stk, lib/pp.stk, lib/process.stk, lib/r5rs.stk,
+	  lib/struct.stk, lib/thread.stk, src/boolean.c, src/boot.c,
+	  src/boot.img, src/char.c, src/cond.c, src/env.c, src/fport.c,
+	  src/hash.c, src/mutex-pthreads.c, src/number.c, src/parameter.c,
+	  src/port.c, src/print.c, src/process.c, src/read.c, src/socket.c,
+	  src/stklos.c, src/stklos.h, src/str.c, src/struct.c, src/system.c,
+	  src/thread-pthreads.c, src/utf8.c, src/vport.c, tests/do-test.stk,
+	  tests/test-utf8.stk:
+	Added UTF-8 support to most of the string functions (string-ref
+	string-set!, string-upcase, string-downcase, ...). Comparisons are
+	not done yet
+	[99f89e3625bd]
+
+2011-05-06  Erick Gallesio  <eg@unice.fr>
+
+	* src/lib.c, src/stklos.h, src/str.c, src/utf8.c:
+	Added UTF-8 support to string-ref, string<->list
+	[c532fed16b13]
+
+2011-05-05  Erick Gallesio  <eg@unice.fr>
+
+	* src/stklos.h, src/str.c, src/utf8.c:
+	started implementation of multi-bytes strings
+	[cfa72908efa7]
+
+
+	* src/stklos.h, src/str.c:
+	Changed the internal representation of strings to support multibytes
+	strings No real support for now
+	[0c983684e5e9]
+
+2011-05-01  Erick Gallesio  <eg@unice.fr>
+
+	* src/Makefile.am, src/Makefile.in, src/char.c, src/sio.c,
+	src/stklos.h, src/utf8.c:
+	Added the utf8.c file
+	[6617ae7519dd]
+
+2011-04-23  Erick Gallesio  <eg@unice.fr>
+
+	* Makefile.in, configure, configure.ac, doc/Makefile.in,
+	  examples/Makefile.in, lib/Lalr.d/Makefile.in, lib/Makefile.in,
+	  lib/Match.d/Makefile.in, lib/SILex.d/Makefile.in,
+	  lib/ScmPkg.d/Makefile.in, lib/boot.stk, lib/repl.stk,
+	  pkgman/Makefile.in, src/Makefile.in, src/boot.c, src/boot.img,
+	  src/char.c, src/port.c, src/print.c, src/read.c, src/stklos.c,
+	  src/stklos.h, tests/Makefile.in, utils/Makefile.in:
+	Start adding support for UTF-8. See below for details:
+	      - Implementation is far form complete
+	      - Unicode characters are recognized but strings are not yet in UTF-8
+	      - Unicode characters are printed in UTF-8
+	      - added a new option to enable/disable UTF-8
+	[0848c16be70e]
+
+2011-04-20  Erick Gallesio  <eg@unice.fr>
+
+	* doc/extract-doc.stk, lib/r7rs.stk, lib/srfi-74.stk, src/Makefile.am,
+	  src/Makefile.in, src/blob.c, src/boolean.c, src/boot.c,
+	  src/boot.img, src/lib.c, src/stklos.h, src/vector.c, tests/do-
+	  test.stk, tests/test-r7rs.stk:
+	Added R7RS blobs
+	[f692bd102e36]
+
+2011-04-17  Erick Gallesio  <eg@unice.fr>
+
+
+	* lib/Makefile.am, lib/Makefile.in, lib/boot.stk, lib/r7rs.stk,
+	  src/boot.c, src/boot.img, tests/test-r7rs.stk:
+	Added support for R7RS. New primitives: make-list, string-map,
+	string-for-each, vector-for-each, vector-map
+	[139b3ea334d1]
+
 2010-12-30  Erick Gallesio  <eg@unice.fr>
 
 	* STklos 1.01 Release

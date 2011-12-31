@@ -4,6 +4,32 @@
 				| NEWS |
 				+======+
 
+
+* version 1.10
+
+This version brings the support of UTF-8 encoding and begins to support some (future) R7RS traits:
+
+    * Added full support for UTF-8 strings and symbols
+    * Added support for Win32 support under Cygwin
+    * Added some support for R7RS traits:
+        o bytesvectors
+        o hexadecimal chars in strings and symbols
+        o continuations lines in strings
+        o New primitives
+            - char-foldcase
+            - string-foldcase
+            - string-foldcase!
+            - make-list
+            - string-map
+            - string-for-each
+            - vector-for-each
+            - vector-map
+    * Added support for MacOs X Lion
+    * Added back support for Win32 using Cygwin (this support has still rough
+      edges. See the file PORTING-NOTES in the distribution directory for
+      details)
+    * Bug Fixes
+
 * version 1.01 (2010 12 29)
 
 This is mainly a maintenance version.

@@ -1,23 +1,34 @@
-
-Version 1.0 is known to compile with the standard invocation
+Version 1.x is known to compile with the standard invocation
      configure && make && sudo make install
 on the following architectures
 
     - Linux 2.6    (gcc-4.x 32 and 64 bits)
     - MacOS 10.5+  (gcc-4.x 32 and 64 bits)
     - FreeBSD 8.x  (gcc-4.x 32 bits)
-
+    - Win32   	   (cygwin 1.7.x)
 
 MacOs X Lion
 
-   To compile stklos on MacOs X Lion, you the following
+   To compile stklos on MacOs X Lion, the following
    configuration line is known to work:
 
    $ CFLAGS="-Wl,-no_pie,-no_compact_unwind" ./configure \
                  --with-provided-gc --with-provided-regexp \
-	         --with-provided-ffi --with-provided-bignum
+		 --with-provided-ffi --with-provided-bignum
 
+Win32
 
+    The Cygwin version of Boehm GC doesn't work with STklos. Consequently,
+    you need at least a configuration such as
+
+    $ ./configure --with-provided-gc
+
+    to have a working version of STklos.
+    Note that the current version is a rather direct port of STklos and
+    has rough edges (in particular thers is no real support for the DOS
+    drives and the functions using pathnames use a Unixy syntax, rather
+    than the more conventional DOS one). Dynamic loading works, but GTK
+    support has not been tested.
 
 ======================================================================
 ======================================================================
