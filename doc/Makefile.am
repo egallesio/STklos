@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 23-Oct-2010 11:52 (eg)
+# Last file update:  1-Jan-2012 18:28 (eg)
 
 mandir	      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
@@ -31,7 +31,7 @@ docimg_DATA = $(wildcard html/images/*)
 all: $(DOCDB)
 
 skribe:
-	(cd skb; make $(HTML) $(PDF))
+	(cd skb; $(MAKE) $(HTML) $(PDF))
 
 #
 # Database construction

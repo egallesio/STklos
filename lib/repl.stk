@@ -1,7 +1,7 @@
 ;;;;
 ;;;; repl.stk	-- STklos REPL
 ;;;;
-;;;; Copyright © 2000-2011 Erick Gallesio - Universite de Nice <eg@unice.fr>
+;;;; Copyright © 2000-2012 Erick Gallesio - Universite de Nice <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update: 23-Apr-2011 19:01 (eg)
+;;;; Last file update:  1-Jan-2012 18:43 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -240,7 +240,7 @@ doc>
   (%initialize-signals)
   (when interactive?
     (let ((line1 (format "STklos version ~A\n" (version)))
-	  (line2 "Copyright (C) 1999-2011 Erick Gallesio - Universite de Nice <eg@unice.fr>\n")
+	  (line2 "Copyright (C) 1999-2012 Erick Gallesio - Universite de Nice <eg@unice.fr>\n")
 	  (line3 (format "[~a/~a/~a/~a]\n"
 			 (machine-type)
 			 (%thread-system)

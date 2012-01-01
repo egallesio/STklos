@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 23-Oct-2010 11:52 (eg)
+# Last file update:  1-Jan-2012 18:28 (eg)
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -42,7 +42,7 @@ subdir = doc
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/stklos-compile.1.in $(srcdir)/stklos-config.1.in \
 	$(srcdir)/stklos-genlex.1.in $(srcdir)/stklos-pkg.1.in \
-	$(srcdir)/stklos.1.in
+	$(srcdir)/stklos.1.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -559,7 +559,7 @@ uninstall-man: uninstall-man1
 all: $(DOCDB)
 
 skribe:
-	(cd skb; make $(HTML) $(PDF))
+	(cd skb; $(MAKE) $(HTML) $(PDF))
 
 #
 # Database construction

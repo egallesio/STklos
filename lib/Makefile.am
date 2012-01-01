@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 10-Aug-2011 09:30 (eg)
+# Last file update:  1-Jan-2012 18:30 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -171,7 +171,7 @@ boot:	../src/boot.img
 	    ../src/stklos $(SFLAGS) -q -c -b ../src/boot.img  		\
 		-f make-C-boot.stk -- boot.img3 ../src/boot.c);		\
 	   echo "*** Recompile STklos";					\
-	   (cd ../src; make stklos);					\
+	   (cd ../src; $(MAKE) stklos);					\
 	   echo "*** Cleaning useless images";				\
 	   /bin/rm boot.img[0-3] instr[0-3];  				\
 	else 								\
@@ -200,11 +200,11 @@ $(DOCDB): $(scheme_SRCS) $(scheme_BOOT)
 clean:
 	/bin/rm -f $(scheme_OBJS)
 	@for i in $(SUBDIRS) ;do \
-	   (cd $$i; make clean)\
+	   (cd $$i; $(MAKE) clean)\
 	done
 
 distclean: clean
 	/bin/rm -f Makefile
 	@for i in $(SUBDIRS) ;do \
-	   (cd $$i; make distclean)\
+	   (cd $$i; $(MAKE) distclean)\
 	done
