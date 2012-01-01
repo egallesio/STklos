@@ -1,7 +1,7 @@
 /*
  * stklos.c	-- STklos interpreter main function
  *
- * Copyright © 1999-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,10 +21,11 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 10-Aug-2011 00:27 (eg)
+ * Last file update:  1-Jan-2012 19:33 (eg)
  */
 
 #include <stklos.h>
+#include <langinfo.h>
 #include "gnu-getopt.h"
 
 
@@ -98,7 +99,7 @@ static void Usage(char *progname, int only_version)
 "   -d, --debug                 add informations to ease debugging\n"
 "   -s, --stack-size=n          use a stack of size n (default %d)\n"
 "   -c, --case-sensitive        be case sensitive (default is #f)\n"
-"   -u, --utf8-encoding=yes|no  use/don't use UTF-8 encoding (default is yes)\n"
+"   -u, --utf8-encoding=yes|no  use/don't use UTF-8 encoding (instead of default)\n"
 "   -v, --version               print program version and exit\n"
 "   -h, --help                  print this help and exit\n"
 "All the arguments given after options are passed to the Scheme program.\n",
@@ -129,7 +130,7 @@ static int process_program_arguments(int argc, char *argv[])
       case 'q': vanilla         = 1;				break;
       case 's': stack_size      = atoi(optarg);			break;
       case 'c': STk_read_case_sensitive = 1;			break;
-      case 'u': STk_use_utf8    = (int) strspn(optarg, "yY1");	break;
+      case 'u': STk_use_utf8    = strspn(optarg, "yY1");	break;
       case '?': /* message error is printed by getopt */
 		fprintf(stderr, "Try `%s --help' for more information\n", *argv);
 		exit(1);
@@ -168,12 +169,6 @@ int main(int argc, char *argv[])
   int ret;
   char *argv0 = *argv;
 
-  if (!setlocale(LC_CTYPE, "")) {
-    fprintf(stderr, "Can't set the specified locale! "
-	    "Check LANG, LC_CTYPE, LC_ALL.\n");
-    return 1;
-  }
-
   /* Initialize the Garbage Collector */
 #if (defined(__CYGWIN32__) &&  defined(GC_DLL)) || defined(_AIX)
 # error GC problem
@@ -184,6 +179,18 @@ int main(int argc, char *argv[])
   ret = process_program_arguments(argc, argv);
   argc -= ret;
   argv += ret;
+
+  /* See if we use UTF8 encoding */
+  if (!setlocale(LC_CTYPE, "")) {
+    fprintf(stderr, "Can't set the specified locale! "
+	    "Check LANG, LC_CTYPE, LC_ALL.\n");
+    return 1;
+  } else {
+    if (STk_use_utf8 == -1) {
+      /* user didn't force the encoding. Determine it from environment */
+      STk_use_utf8 = (strcmp(nl_langinfo(CODESET), "UTF-8") == 0);
+    }
+  }
 
   /* Hack: to give the illusion that there is no VM under the scene */
   if (*program_file) argv0 = program_file;

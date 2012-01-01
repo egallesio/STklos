@@ -1,7 +1,7 @@
 /*
  * utf8.c		-- UTF-8 support functions
  *
- * Copyright © 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+ * Copyright © 2011-2012 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,12 +21,12 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update:  9-Sep-2011 14:43 (eg)
+ * Last file update:  1-Jan-2012 19:07 (eg)
  */
 
 #include "stklos.h"
 
-int STk_use_utf8 = 1;
+int STk_use_utf8 = -1;
 
 
 static void error_bad_sequence(char *str)
