@@ -18,7 +18,7 @@
 # Makefile for stklos-pkgman
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 22-Dec-2006 12:00 (eg)
-# Last file update:  4-Dec-2011 16:48 (eg)
+# Last file update:  2-Jan-2012 13:21 (eg)
 
 
 VPATH = @srcdir@
@@ -218,7 +218,7 @@ SRC = ../lib/http.stk \
 SFLAGS = 
 RM = /bin/rm
 COMP = ../utils/tmpcomp
-GENLEX = ../utils/tmpgenlex 
+GENLEX = ../utils/tmpgenlex
 all: all-am
 
 .SUFFIXES:
@@ -452,6 +452,8 @@ uninstall-am: uninstall-binSCRIPTS uninstall-makefileDATA
 	uninstall-makefileDATA
 
 
+all: $(bin_SCRIPTS)
+
 lang-bigloo.inc: lang-bigloo.l
 	$(GENLEX) lang-bigloo.l lang-bigloo.inc lang-bigloo
 
@@ -461,11 +463,11 @@ lang-chicken.inc: lang-chicken.l
 lang-mzscheme.inc: lang-mzscheme.l
 	$(GENLEX) lang-mzscheme.l lang-mzscheme.inc lang-mzscheme
 
-$(bin_SCRIPTS): $(LEXOBJS) $(SRC)
+$(bin_SCRIPTS):  $(LEXOBJS) $(SRC)
 	$(COMP) main.stk $(bin_SCRIPTS)
 
 clean:
-	$(RM) -f $(bin_SCRIPTS) *~
+	$(RM) -f $(bin_SCRIPTS) $(LEXOBJS) *~
 
 distclean: clean
 	$(RM) -f Makefile

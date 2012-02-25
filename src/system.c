@@ -2,7 +2,7 @@
  *
  * s y s t e m . c				-- System relative primitives
  *
- * Copyright © 1994-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 27-May-2011 22:47 (eg)
+ * Last file update:  2-Jan-2012 13:23 (eg)
  */
 
 #include <unistd.h>
@@ -614,12 +614,13 @@ DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
   return s ? STk_Cstring2string(s) : STk_false;
 #else
   static int cpt=0;
+  int pid = (int) getpid();
   char buff[MAX_PATH_LENGTH];
   MUT_DECL(tmpnam_mutex);
 
   MUT_LOCK(tmpnam_mutex);
   for ( ; ; ) {
-    sprintf(buff, "/tmp/stklos%05x", cpt++);
+    sprintf(buff, "/tmp/stklos%05d-%05x", pid, cpt++);
     if (cpt > 100000)		/* arbitrary limit to avoid infinite search */
       return STk_false;
     if (access(buff, F_OK) == -1) break;

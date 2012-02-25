@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 28-Nov-2006 23:57 (eg)
+;; Last file update: 15-Jan-2012 22:52 (eg)
 ;;
 ;; ======================================================================
 
@@ -704,7 +704,7 @@ as a form which, when read, will build back this point:])
 
   (fontified-code [
 (define-method write-object ((p <point>) port)
- (format port "#,(make <point> :x ~S :y ~S"
+ (format port "#,(make <point> :x ~S :y ~S)"
               (get-x p) (get-y p)))
 ])
 
@@ -715,7 +715,8 @@ prints the following text on the output port:])
 
 (p [Note here the usage of the ,(q (code "#,"))  notation of ,(link-srfi 10)
 to ,(q "evaluate") the form when reading it,(footnote [We suppose here that
-we are in a context where ,(fontified-code [(define-reader-ctor 'make make)])
+we are in a context where 
+,(fontified-code [(define-reader-ctor 'make (lambda l (eval `(make ,@l))))])
 as already been evaluated]).])
 
 ;;;; Comparing Objects ..................
