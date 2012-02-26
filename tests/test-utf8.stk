@@ -1,7 +1,7 @@
 ;;;;							-*- coding utf-8 -*-
 ;;;; test-utf8.stk	-- Test of UTF-8 strings
 ;;;;
-;;;; Copyright © 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2012 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,15 +21,22 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2011 23:35 (eg)
-;;;; Last file update:  8-Oct-2011 22:13 (eg)
+;;;; Last file update: 26-Feb-2012 23:33 (eg)
 ;;;;
 
 (require "test")
 
-(define *lang-is-utf8?* (let ((lang (getenv "LANG")))
-			  (and lang
-			       (or (string-find? "UTF8" lang)
-				   (string-find? "utf8" lang)))))
+;;(define *lang-is-utf8?* (let ((lang (getenv "LANG")))
+;;			  (and lang
+;;			       (or (string-find? "UTF8" lang)
+;;				   (string-find? "utf8" lang)))))
+
+
+(define *lang-is-utf8?* #t) ;; In fact, we force it, since it must work even if
+			    ;; user doesn't use UTF-8 when launch the test.
+			    ;; STklos is now called with with -u=1 option
+
+(define *is-C?* (equal? (%get-locale) "C"))
 
 (test-section "Unicode Characters")
 ;;------------------------------------------------------------------
@@ -95,11 +102,11 @@
 (test "gambit.8" #\xDF (char-foldcase #\xDF))
 
 (test "gambit.9" #\x3A3 (char-upcase #\x3A3))
-(when *lang-is-utf8?* (test "gambit.10" #\x3C3 (char-downcase #\x3A3)))
+(unless *is-C?* (test "gambit.10" #\x3C3 (char-downcase #\x3A3)))
 #;(test "gambit.11" #\x3A3 (char-titlecase #\x3A3))	;; not R7
-(when *lang-is-utf8?* (test "gambit.12" #\x3C3 (char-foldcase #\x3A3)))
-
-(when *lang-is-utf8?* (test "gambit.13" #\x3A3 (char-upcase #\x3C2)))
+(unless *is-C?*
+  (test "gambit.12" #\x3C3 (char-foldcase #\x3A3))
+  (test "gambit.13" #\x3A3 (char-upcase #\x3C2)))
 (test "gambit.14" #\x3C2 (char-downcase #\x3C2))
 #;(test "gambit.15" #\x3A3 (char-titlecase #\x3C2))	;; not R7
 (test "gambit.16" #\x3C3 (char-foldcase #\x3C2))
@@ -133,10 +140,13 @@
 (test "gambit.42" #f (char-whitespace? #\a))
 (test "gambit.43" #f (char-upper-case? #\a))
 (test "gambit.44" #t (char-upper-case? #\A))
-(when *lang-is-utf8?* (test "gambit.45" #t (char-upper-case? #\x3A3)))
+(unless *is-C?*
+  (test "gambit.45" #t (char-upper-case? #\x3A3)))
+
 (test "gambit.46" #t (char-lower-case? #\a))
 (test "gambit.47" #f (char-lower-case? #\A))
-(when *lang-is-utf8?* (test "gambit.48" #t (char-lower-case? #\x3C3)))
+(unless *is-C?*
+  (test "gambit.48" #t (char-lower-case? #\x3C3)))
 #;(test "gambit.49" #t (char-lower-case? #\x00AA))	;; not clear
 #;(test "gambit.50" #f (char-title-case? #\a))		;; Not R7
 #;(test "gambit.51" #f (char-title-case? #\A))		;; Not R7
@@ -160,7 +170,8 @@
 #;(test "gambit.66" "strasse" (string-foldcase "Stra\xDF;e"))	;; not R7
 (test "gambit.67" "strasse" (string-downcase "STRASSE"))
 
-(when *lang-is-utf8?* (test "gambit.68" "\x3C3;" (string-downcase "\x3A3;")))
+(unless *is-C?*
+  (test "gambit.68" "\x3C3;" (string-downcase "\x3A3;")))
 
 (test "gambit.69" "\x39E;\x391;\x39F;\x3A3;"
       (string-upcase "\x39E;\x391;\x39F;\x3A3;"))
@@ -170,7 +181,7 @@
       (string-downcase "\x39E;\x391;\x39F;\x3A3;\x3A3;"))
 #;(test "gambit.72" "\x3BE;\x3B1;\x3BF;\x3C2; \x3C3;"
       (string-downcase "\x39E;\x391;\x39F;\x3A3; \x3A3;"))	;; not R7
-(when *lang-is-utf8?*
+(unless *is-C?*
   (test "gambit.73" "\x3BE;\x3B1;\x3BF;\x3C3;"
 	(string-foldcase "\x39E;\x391;\x39F;\x3A3;"))
   (test "gambit.74" "\x39E;\x391;\x39F;\x3A3;"
@@ -206,7 +217,7 @@
 #;(test "gambit.96"  #t (string-ci=? "Stra\xDF;e" "STRASSE"))		;; Not R7
 #;(test "gambit.97"  #t (string-ci=? "\x39E;\x391;\x39F;\x3A3;"		;; Not R7
 				   "\x3BE;\x3B1;\x3BF;\x3C2;"))
-(when *lang-is-utf8?*
+(unless *is-C?*
   (test "gambit.98"  #t (string-ci=? "\x39E;\x391;\x39F;\x3A3;"
 				     "\x3BE;\x3B1;\x3BF;\x3C3;")))
 

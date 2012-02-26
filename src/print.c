@@ -1,7 +1,7 @@
 /*
  * p r i n t . c				-- writing stuff
  *
- * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 23-Jul-2011 12:12 (eg)
+ * Last file update: 26-Feb-2012 18:25 (eg)
  *
  */
 #include <ctype.h>
@@ -88,10 +88,11 @@ static void Inline printkeyword(SCM key, SCM port, int mode)
 }
 
 
-static char printhexa(int x)
+static Inline char printhexa(int x)
 {
   return (x >= 10) ? (x - 10 + 'a') : (x + '0');
 }
+
 
 static void printstring(SCM s, SCM port, int mode)
 {
@@ -122,18 +123,27 @@ static void printstring(SCM s, SCM port, int mode)
         case '\v' : *buff++ = '\\'; *buff++ = 'v'; break;
         case '"'  :
         case '\\' : *buff++ = '\\'; *buff++ = *p;  break;
-      default   : if (STk_use_utf8)
-		    *buff++ = *p;
-		  else {
-		    if ((((unsigned char) *p) & 0177) < (unsigned char) ' ') {
-	  	      /* Non printable character (It works only for ISO 8859-x !!) */
-	  	      *buff++ = '\\';
-	  	      *buff++ = 'x';
-		      *buff++ = printhexa((unsigned char) *p / 16);
-		      *buff++ = printhexa((unsigned char) *p % 16);
+        default   : {
+		      int printable;
+
+		      if (STk_use_utf8)
+			printable =
+			  (((unsigned) *p) >= (unsigned) ' ');
+		      else
+			printable =
+			  ((((unsigned char) *p) & 0177) >= (unsigned char) ' ');
+
+		      if (printable)
+			*buff++ = *p;
+		      else {
+			/* Non printable char. (It works only for char < 0xFF !!) */
+			*buff++ = '\\';
+			*buff++ = 'x';
+			*buff++ = printhexa((unsigned char) *p / 16);
+			*buff++ = printhexa((unsigned char) *p % 16);
+			*buff++ = ';';
+		      }
 		    }
-		    else *buff++ = *p;
-		  }
       }
     }
     *buff++ = '"';

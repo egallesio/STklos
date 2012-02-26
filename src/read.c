@@ -1,7 +1,7 @@
 /*
  * r e a d  . c				-- reading stuff
  *
- * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  8-Oct-2011 16:09 (eg)
+ * Last file update: 26-Feb-2012 18:51 (eg)
  *
  */
 
@@ -92,9 +92,12 @@ static void error_bad_dotted_list(SCM port)
   signal_error(port, "bad dotted list", STk_nil);
 }
 
-static void error_bad_inline_hexa_sequence(SCM port)
+static void error_bad_inline_hexa_sequence(SCM port, char *buffer, int x)
 {
-  signal_error(port, "bad inline hexa sequence", STk_nil);
+  char message[200];
+
+  snprintf(message, 200, "bad inline hexa sequence (%s %d) on port ~S", buffer, x);
+  signal_error(port, message, port);
 }
 
 static void warning_parenthesis(SCM port)
@@ -133,12 +136,12 @@ static int read_hex_sequence(SCM port, char* utf8_seq)
   buffer[i] = '\0';
 
   if (c != ';')
-    error_bad_inline_hexa_sequence(port);
+    error_bad_inline_hexa_sequence(port, buffer, 1);
   else {
     val = strtol(buffer, &end, 16);
 
     if (val == LONG_MIN || val == LONG_MAX || *end != ';')
-      error_bad_inline_hexa_sequence(port);
+      error_bad_inline_hexa_sequence(port, buffer, 2);
     else
       if (STk_use_utf8) {
 	int len = STk_char2utf8(val, utf8_seq);
@@ -153,7 +156,7 @@ static int read_hex_sequence(SCM port, char* utf8_seq)
   }
 
   /* if we are here , we have an error */
-  error_bad_inline_hexa_sequence(port);
+  error_bad_inline_hexa_sequence(port, buffer,3);
   return 0;
 }
 
@@ -304,7 +307,7 @@ static SCM read_char(SCM port, int c)
   for( ; ; ) {
     tok[j++] = c;
     c = STk_getc(port);
-    if (c == EOF || ((c <=0x80) && isspace((unsigned char)c))) 
+    if (c == EOF || ((c <=0x80) && isspace((unsigned char)c)))
       /* (c < 0x80) is for MacOs */
       break;
     if (strchr("()[]'`,;\"", c)) {

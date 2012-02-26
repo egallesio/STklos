@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  1-Jan-2012 19:33 (eg)
+ * Last file update: 26-Feb-2012 23:32 (eg)
  */
 
 #include <stklos.h>
@@ -181,15 +181,15 @@ int main(int argc, char *argv[])
   argv += ret;
 
   /* See if we use UTF8 encoding */
-  if (!setlocale(LC_CTYPE, "")) {
+  if (!setlocale(LC_ALL, "")) {
     fprintf(stderr, "Can't set the specified locale! "
 	    "Check LANG, LC_CTYPE, LC_ALL.\n");
     return 1;
-  } else {
-    if (STk_use_utf8 == -1) {
-      /* user didn't force the encoding. Determine it from environment */
-      STk_use_utf8 = (strcmp(nl_langinfo(CODESET), "UTF-8") == 0);
-    }
+  }
+
+  if (STk_use_utf8 == -1) {
+    /* user didn't force the encoding. Determine it from environment */
+    STk_use_utf8 = (strcmp(nl_langinfo(CODESET), "UTF-8") == 0);
   }
 
   /* Hack: to give the illusion that there is no VM under the scene */

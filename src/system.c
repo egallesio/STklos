@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  2-Jan-2012 13:23 (eg)
+ * Last file update: 26-Feb-2012 23:14 (eg)
  */
 
 #include <unistd.h>
@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <time.h>
+#include <locale.h>
 #include "stklos.h"
 #include "struct.h"
 
@@ -1144,6 +1145,14 @@ DEFINE_PRIMITIVE("%big-endian?", big_endianp, subr0, (void))
 }
 
 
+DEFINE_PRIMITIVE("%get-locale", get_locale, subr0, (void))
+{
+  char *str = setlocale(LC_ALL, NULL);
+
+  return str? STk_Cstring2string(str) : STk_false;
+}
+
+
 int STk_init_system(void)
 {
   SCM current_module = STk_STklos_module;
@@ -1222,5 +1231,6 @@ int STk_init_system(void)
 
   ADD_PRIMITIVE(pause);
   ADD_PRIMITIVE(big_endianp);
+  ADD_PRIMITIVE(get_locale);
   return TRUE;
 }
