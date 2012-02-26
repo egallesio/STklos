@@ -2,7 +2,7 @@
  *
  * l i s t . c			-- Lists procedures
  *
- * Copyright © 1993-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-Oct-1993 21:37
- * Last file update: 10-Oct-2005 19:08 (eg)
+ * Last file update: 26-Feb-2012 23:37 (eg)
  */
 
 #include "stklos.h"
@@ -653,11 +653,11 @@ doc>
  */
 DEFINE_PRIMITIVE("last-pair", last_pair, subr1, (SCM l))
 {
-  SCM tmp;
-
   if (!CONSP(l)) error_wrong_type(l);
-  for (tmp=l; CONSP(CDR(l)); l = CDR(l))
-    /* Nothing */;
+
+  while (CONSP(CDR(l)))
+    l = CDR(l);
+
   return l;
 }
 

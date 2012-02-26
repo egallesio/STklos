@@ -1,7 +1,7 @@
 /*
  * v m . c				-- The STklos Virtual Machine
  *
- * Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 20-Dec-2009 15:11 (eg)
+ * Last file update: 26-Feb-2012 23:39 (eg)
  */
 
 // INLINER values
@@ -1009,12 +1009,10 @@ CASE(UGLOBAL_REF) {     /* Never produced by compiler */
 
 CASE(GLOBAL_REF_PUSH) {
   SCM ref = NULL;
-  short orig_opcode;
   SCM orig_operand;
   SCM res;
 
   LOCK_AND_RESTART;
-  orig_opcode  = vm->pc[-1];
   orig_operand = fetch_const();
 
   res = STk_lookup(orig_operand, vm->env, &ref, FALSE);
@@ -1187,11 +1185,9 @@ CASE(LOCAL_REF4_PUSH) {push(FRAME_LOCAL(vm->env, 4));  NEXT1;}
 
 CASE(GLOBAL_SET) {
   SCM ref = NULL;
-  short orig_opcode;
   SCM orig_operand;
 
   LOCK_AND_RESTART;
-  orig_opcode  = vm->pc[-1];
   orig_operand = fetch_const();
 
   STk_lookup(orig_operand, vm->env, &ref, FALSE);
@@ -2000,13 +1996,13 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
 #define CALL_CC_SPACE	1024	/* Add some space for restoration bookeepping */
 
 static void restore_cont_jump(struct continuation_obj *k, void* addr){
-  char buf[1024];
+  char unused_buf[1024];  /* needed here to arbitrarily use some stack space */
   vm_thread_t *vm = STk_get_current_vm();
   int cur_stack_size;
 
   cur_stack_size = vm->start_stack - addr;
 
-  buf[42] = 0x2a;
+  unused_buf[42] = 0x2a;
 
   if (cur_stack_size < 0) cur_stack_size = -cur_stack_size;
   if (cur_stack_size <= (k->csize + CALL_CC_SPACE)) {
