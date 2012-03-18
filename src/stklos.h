@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 18-Mar-2012 18:08 (eg)
+ * Last file update: 18-Mar-2012 19:06 (eg)
  */
 
 
@@ -1211,7 +1211,6 @@ EXTERN_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string));
 
 int STk_symbol_flags(register char *s);
 SCM STk_intern(char *name);
-SCM STk_intern_ci(char *name);
 SCM STk_make_uninterned_symbol(char *name);
 int STk_init_symbol(void);
 

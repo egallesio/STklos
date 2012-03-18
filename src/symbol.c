@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 20-Nov-1993 12:12
- * Last file update: 18-Mar-2012 18:11 (eg)
+ * Last file update: 18-Mar-2012 19:07 (eg)
  */
 
 #include <ctype.h>
@@ -80,6 +80,10 @@ SCM STk_intern(char *name)
   return res;
 }
 
+
+#ifdef FIXME
+
+/* Devenue inutile */
 SCM STk_intern_ci(char *name)
 {
   char *s;
@@ -89,8 +93,6 @@ SCM STk_intern_ci(char *name)
   return STk_intern(name);
 }
 
-
-#ifdef FIXME
 //EG: SCM STk_global_env2list(void)
 //EG: {
 //EG:   register SCM symbol, res = STk_nil;
