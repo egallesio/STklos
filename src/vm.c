@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 26-Feb-2012 23:39 (eg)
+ * Last file update: 18-Mar-2012 18:13 (eg)
  */
 
 // INLINER values
@@ -2157,7 +2157,7 @@ SCM STk_load_bcode_file(SCM f)
     consts = STk_read_constant(f, TRUE); 		   /* Read  the constants */
     if (consts == STk_eof) break;
 
-    code_size = STk_read(f, STk_read_case_sensitive);	    /* Read the code size */
+    code_size = STk_read(f, PORT_CASE_SENSITIVEP(f));	   /* Read the code size */
     size      = STk_integer_value(code_size);
     if (size < 0) {
       if (system_has_booted)

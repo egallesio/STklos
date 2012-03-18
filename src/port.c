@@ -1,7 +1,7 @@
 /*
  *  p o r t . c			-- ports implementation
  *
- * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 28-Aug-2011 14:02 (eg)
+ * Last file update: 18-Mar-2012 18:08 (eg)
  *
  */
 
@@ -255,7 +255,7 @@ doc>
 DEFINE_PRIMITIVE("read", scheme_read, subr01, (SCM port))
 {
   port = verify_port(port, PORT_READ);
-  return STk_read(port, STk_read_case_sensitive);
+  return STk_read(port, PORT_CASE_SENSITIVEP(port));
 }
 
 
@@ -264,7 +264,7 @@ DEFINE_PRIMITIVE("read", scheme_read, subr01, (SCM port))
 DEFINE_PRIMITIVE("%read", scheme_read_cst, subr01, (SCM port))
 {
   port = verify_port(port, PORT_READ);
-  return STk_read_constant(port, STk_read_case_sensitive);
+  return STk_read_constant(port, PORT_CASE_SENSITIVEP(port));
 }
 
 

@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 26-Feb-2012 18:51 (eg)
+ * Last file update: 18-Mar-2012 18:25 (eg)
  *
  */
 
@@ -674,18 +674,33 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
 		       return STk_false;
  	  case '\\': return read_char(port, STk_getc(port));
 	  case '(' : return read_vector(port, ctx);
-	  case '!' : { /* This can be a comment or a DSSSL keyword */
+	  case '!' : { /* This can be a comment, a DSSSL keyword, or fold-case */
 	    	       c = STk_getc(port);
-		       if (c == 'o' || c == 'k' || c == 'r') {
+		       if (c == 'o' || c == 'k' || c == 'r' || c == 'n' || c == 'f') {
 			 SCM word = read_token(port, c, FALSE);
 
 			 if (SYMBOLP(word)) {
 			   char *s = SYMBOL_PNAME(word);
 
+			   /* Try to see if it is a DSSL keyword */
 			   if ((strcmp(s, "optional") == 0) ||
 			       (strcmp(s, "key")      == 0) ||
 			       (strcmp(s, "rest")     == 0))
 			     return STk_makekey(s);
+
+			   /* Treat fold-case and no-fold-case */
+			   if ((strcmp(s, "fold-case") == 0) ||
+			       (strcmp(s, "no-fold-case") == 0)) {
+			     if (c == 'n') {
+			       PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
+			       ctx->case_significant = TRUE;
+			     }
+			     else {
+			       PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
+			       ctx->case_significant = FALSE;
+			     }
+			     continue;
+			   }
 			 }
 		       }
 		       /* if we are here, consider the rest of the line

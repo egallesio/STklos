@@ -1,7 +1,7 @@
 /*
  * stklos.h	-- stklos.h
  *
- * Copyright © 1999-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  9-Sep-2011 15:37 (eg)
+ * Last file update: 18-Mar-2012 18:08 (eg)
  */
 
 
@@ -894,7 +894,7 @@ struct port_obj {
 #define PORT_IS_STRING		(1<<6)
 #define PORT_IS_VIRTUAL 	(1<<7)
 #define PORT_IS_INTERACTIVE	(1<<8)
-
+#define PORT_CASE_SENSITIVE	(1<<9)
 
 #define PORT_STREAM(x)	  (((struct port_obj *) (x))->stream)
 #define PORT_FLAGS(x)     (((struct port_obj *) (x))->flags)
@@ -935,10 +935,9 @@ struct port_obj {
 #define IVPORTP(x) (VPORTP(x) && (PORT_FLAGS(x) & (PORT_READ|PORT_RW)))
 #define OVPORTP(x) (VPORTP(x) && (PORT_FLAGS(x) & (PORT_WRITE|PORT_RW)))
 
-
-
-
 #define PORT_IS_CLOSEDP(x)	(PORT_FLAGS(x) & PORT_CLOSED)
+#define PORT_CASE_SENSITIVEP(x)	(PORT_FLAGS(x) & PORT_CASE_SENSITIVE)
+
 
 /****
  **** 		sio.h primitives

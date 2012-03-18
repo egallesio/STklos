@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 26-Feb-2012 18:25 (eg)
+ * Last file update: 18-Mar-2012 18:10 (eg)
  *
  */
 #include <ctype.h>
@@ -66,7 +66,7 @@ static void Inline printsymbol(SCM symb, SCM port, int mode)
 
   if ((mode==WRT_MODE) &&
       ((BOXED_INFO(symb) & SYMBOL_NEEDS_BARS) ||
-       (!STk_read_case_sensitive && (BOXED_INFO(symb) & SYMBOL_HAS_UPPER)))) {
+       ((!PORT_CASE_SENSITIVEP(port)) && (BOXED_INFO(symb) & SYMBOL_HAS_UPPER)))) {
     STk_putc('|', port);  STk_puts(s, port); STk_putc('|', port);
   } else
     STk_puts(*s ? s: "||", port); /* print bars around the "null" symbol */
@@ -78,7 +78,7 @@ static void Inline printkeyword(SCM key, SCM port, int mode)
 
   if (mode==WRT_MODE) {
     if ((BOXED_INFO(key) & SYMBOL_NEEDS_BARS) ||
-	(!STk_read_case_sensitive && (BOXED_INFO(key) & SYMBOL_HAS_UPPER))) {
+	((!PORT_CASE_SENSITIVEP(port)) && (BOXED_INFO(key) & SYMBOL_HAS_UPPER))) {
       STk_nputs(port, "|:", 2);  STk_puts(s, port); STk_putc('|', port);
       return;
     }

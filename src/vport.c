@@ -1,7 +1,7 @@
 /*
  * vport.c					-- Virtual Ports
  *
- * Copyright © 2005-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2005-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 17-Aug-2005 08:31 (eg)
- * Last file update: 27-May-2011 22:48 (eg)
+ * Last file update: 18-Mar-2012 18:47 (eg)
  */
 
 #include "stklos.h"
@@ -260,6 +260,7 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
 {
   SCM z;
   struct vstream  *vs;
+  int flag = (STk_read_case_sensitive) ? PORT_CASE_SENSITIVE : 0;
 
   if (!VECTORP(v) || VECTOR_SIZE(v) != 4) error_bad_vector(v, 4);
 
@@ -274,7 +275,7 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
   vs->putc = vs->putstring = vs->flush = NULL;
 
   PORT_STREAM(z) 	= vs;
-  PORT_FLAGS(z)         = PORT_READ | PORT_IS_VIRTUAL;
+  PORT_FLAGS(z)         = PORT_READ | PORT_IS_VIRTUAL | flag;
   PORT_UNGETC(z) 	= EOF;
   PORT_LINE(z)		= 1;
   PORT_POS(z)		= 0;
@@ -353,6 +354,7 @@ DEFINE_PRIMITIVE("%open-output-virtual", open_output_vport, subr1, (SCM v))
 {
   SCM z;
   struct vstream  *vs;
+  int flag = (STk_read_case_sensitive) ? PORT_CASE_SENSITIVE : 0;
 
   if (!VECTORP(v) || VECTOR_SIZE(v) != 4) error_bad_vector(v, 4);
 
@@ -367,7 +369,7 @@ DEFINE_PRIMITIVE("%open-output-virtual", open_output_vport, subr1, (SCM v))
   vs->getc = vs->readyp = vs->eofp = NULL;
 
   PORT_STREAM(z) 	= vs;
-  PORT_FLAGS(z)         = PORT_WRITE | PORT_IS_VIRTUAL;
+  PORT_FLAGS(z)         = PORT_WRITE | PORT_IS_VIRTUAL | flag;
   PORT_UNGETC(z) 	= EOF;
   PORT_LINE(z)		= 1;
   PORT_POS(z)		= 0;

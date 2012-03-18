@@ -2,7 +2,7 @@
  *
  * s y m b o l . c			-- Symbols management
  *
- * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 20-Nov-1993 12:12
- * Last file update:  6-Aug-2006 23:19 (eg)
+ * Last file update: 18-Mar-2012 18:11 (eg)
  */
 
 #include <ctype.h>

@@ -1,7 +1,7 @@
 /*
  * f p o r t . c				-- File ports
  *
- * Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 27-May-2011 22:33 (eg)
+ * Last file update: 18-Mar-2012 18:46 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -405,6 +405,9 @@ make_fport(char *fname, FILE *f, int flags)
   /* keep the indication that file is opened in read in the steam part */
   if (flags & (PORT_READ | PORT_RW)) mode |= STK_IOREAD;
 
+  /* Set the case sensitive bit */
+  if (STk_read_case_sensitive) flags |= PORT_CASE_SENSITIVE;
+
   /* Initialize the stream part */
   PORT_BASE(fs)    	 = STk_must_malloc_atomic(n);
   PORT_PTR(fs)           = PORT_BASE(fs);
@@ -766,7 +769,7 @@ SCM STk_load_source_file(SCM f)
      * change while loading the file (with R5RS macro for instance, it
      * is the case)
      */
-    sexpr = STk_read_constant(f, STk_read_case_sensitive);
+    sexpr = STk_read_constant(f, PORT_CASE_SENSITIVEP(f));
     if (sexpr == STk_eof) break;
     eval  = STk_lookup(eval_symb, STk_current_module(), &ref, TRUE);
     STk_C_apply(eval, 1, sexpr);
