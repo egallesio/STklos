@@ -1,7 +1,7 @@
 ;;;;
 ;;;; bonus.stk	-- Useful primitives not in R5RS
 ;;;;
-;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2014 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 27-May-2011 22:58 (eg)
+;;;; Last file update:  2-Jan-2014 23:16 (eg)
 ;;;;
 
 
@@ -897,16 +897,17 @@ doc>
 	  (else (error 'ansi-color "bad command ~S" args)))))))
 
 (define do-color
-  (if (and (not (key-get *%program-args* :interactive #f))
-	   (member (getenv "TERM")
-		   '("rxvt" "xterm" "xterm-color" "linux" "cygwin" "cons25")))
-      ;; Terminal accepts color
-      ansi-color
-      ;; Provide a procedure which ignore color indications
-      (lambda args
-	(apply string-append
-	       (map (lambda (x) (if (string? x) x ""))
-		    args)))))
+  (let ((term (getenv "TERM")))
+    (if (and (not (key-get *%program-args* :interactive #f))
+	     (any (lambda(x) (regexp-match x term))
+		  '("rxvt" "xterm" "xterm-color" "linux" "cygwin" "cons25")))
+	;; Terminal accepts color
+	ansi-color
+	;; Provide a procedure which ignore color indications
+	(lambda args
+	  (apply string-append
+		 (map (lambda (x) (if (string? x) x ""))
+		      args))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
