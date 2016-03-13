@@ -1,0 +1,170 @@
+# -*- conf -*-
+
+# Temporaries
+benches/
+gtklos/paned.stk
+lib/GLOBS
+lib/serialize.stk
+lib/simplify.stk
+lib/srfi-19.stk
+
+
+# General rules 
+#\.hgignore$
+.*~$
+.svn
+\+DEV\+
+^Web/
+/\.deps/
+.*\.o$
+.*\.ostk$
+.*\.a$
+.*\.la$
+.*\.so$
+Makefile$
+config.log$
+config.status$
+\.gdb_history
+\.gdbinit
+libtool$
+DOCDB
+STklos.prj
+autom4te.cache
+^tmp/
+.*\.lo$
+/CVS/
+TODO.org
+.beta-number
+bootstrap
+
+Python
+
+# Doc directory 
+doc/TODO
+doc/GO
+doc/SOURCE
+doc/skb/html
+doc/skb/TODO
+doc/skb/stklos-ref.ctex
+doc/skb/stklos-ref.log
+doc/skb/stklos-ref.pdf
+doc/skb/stklos-ref.tmp
+doc/skb/stklos-ref.tui
+doc/skb/stklos-ref.tuo
+doc/skb/stklos-version.stk
+doc/skb.old
+doc/skb/GO
+doc/skb/SOURCE
+doc/stklos-compile.1
+doc/stklos-config.1
+doc/stklos-genlex.1
+doc/stklos-install.1
+doc/stklos-pkg.1
+doc/stklos.1
+doc/skb/mpgraph.mp
+doc/skb/mprun.mp
+doc/skb/stklos-ref-mpgraph.mp
+
+# Examples directory 
+examples/socket-client
+examples/socket-server
+examples/fork-test
+examples/hello
+examples/secho
+examples/threads
+
+# FFI directory
+ffi/.libs/libffi.lai
+ffi/configure.lineno
+ffi/fficonfig.h
+ffi/include/ffi.h
+ffi/include/ffitarget.h
+ffi/libffi.pc
+ffi/src/.dirstamp
+ffi/src/x86/.dirstamp
+ffi/stamp-h1
+ffi/testsuite/site.bak
+ffi/testsuite/site.exp
+
+
+# Gc directory
+gc/.*\.lo$
+gc/.dirstamp
+gc/.libs/
+gc/atomic_ops.c
+gc/atomic_ops_sysdeps.S
+gc/bdw-gc.pc
+gc/configure.lineno
+gc/cord/.dirstamp
+gc/gctest
+gc/hugetest
+gc/leaktest
+gc/libatomic_ops
+gc/libatomic_ops-1.*/src/config.h$
+gc/middletest
+gc/smashtest
+gc/tests/.dirstamp
+gc/threadleaktest
+gc/windows-untested
+
+# GMP directory
+gmp/config.h
+gmp/configure.lineno
+gmp/gmp-stklos.h
+gmp/stamp-h1
+# GTklos directory
+gtklos/TODO
+gtklos/gtklosconf.h
+
+# Lib directory
+lib/Lalr.d/calc
+lib/boot-callcc.stk
+
+# Pcre directory
+pcre/.libs
+pcre/RunTest
+pcre/chartables.c
+pcre/config.h
+pcre/configure.lineno
+pcre/dftables
+pcre/libpcre.pc
+pcre/libpcrecpp.pc
+pcre/pcre-config
+pcre/pcre.h
+pcre/pcre_chartables.c
+pcre/pcre_stringpiece.h
+pcre/pcrecpparg.h
+pcre/pcredemo
+pcre/pcregrep
+pcre/pcretest
+pcre/stamp-h1
+pcre/testNinput
+pcre/testsavedregex
+pcre/teststderr
+pcre/testtry
+
+# pkgman
+pkgman/stklos-pkg
+
+# Src directory
+src/.STklos.prcs_aux
+src/HOWTO-WIN32
+src/TODO
+src/boot.ok
+src/extraconf.h
+src/stamp-h1
+src/stklos
+src/stklosconf.h
+
+# Test directory
+tests/TEST.LOG
+
+# Utils directory
+utils/lisp-lex.l-BUG
+utils/stklos-compile
+utils/stklos-config
+utils/stklos-genlex
+utils/stklos-script
+
+# Snowman directory
+snowman/stklos-snowman
