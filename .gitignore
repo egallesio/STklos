@@ -11,28 +11,28 @@ lib/srfi-19.stk
 
 # General rules 
 #\.hgignore$
-.*~$
+.*~
 .svn
-\+DEV\+
-^Web/
-/\.deps/
-.*\.o$
-.*\.ostk$
-.*\.a$
-.*\.la$
-.*\.so$
-Makefile$
-config.log$
-config.status$
-\.gdb_history
-\.gdbinit
-libtool$
++DEV+
+Web
+.deps
+*.o
+*.ostk
+*.a
+*.la
+*.so
+Makefile
+config.log
+config.status
+.gdb_history
+.gdbinit
+libtool
 DOCDB
 STklos.prj
 autom4te.cache
 ^tmp/
-.*\.lo$
-/CVS/
+*.lo
+CVS
 TODO.org
 .beta-number
 bootstrap
@@ -88,7 +88,7 @@ ffi/testsuite/site.exp
 
 
 # Gc directory
-gc/.*\.lo$
+gc/*.lo
 gc/.dirstamp
 gc/.libs/
 gc/atomic_ops.c
@@ -100,7 +100,7 @@ gc/gctest
 gc/hugetest
 gc/leaktest
 gc/libatomic_ops
-gc/libatomic_ops-1.*/src/config.h$
+gc/libatomic_ops-1.*/src/config.h
 gc/middletest
 gc/smashtest
 gc/tests/.dirstamp
