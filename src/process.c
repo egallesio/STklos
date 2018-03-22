@@ -1,7 +1,7 @@
 /*
- * p r o c e s s . c 		-- Access to processes from STklos
+ * p r o c e s s . c            -- Access to processes from STklos
  *
- * Copyright © 1994-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -15,7 +15,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 27-May-2011 22:36 (eg)
+ * Last file update: 21-Mar-2018 11:30 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -40,32 +40,32 @@
 /*
  * Data
  */
-static char *stdStreams[3] = {		/* Used for messages */
+static char *stdStreams[3] = {          /* Used for messages */
   "input",
   "output",
   "error",
 };
 
 
-#define MAX_PROC_NUM      40 		/* (simultaneous processes) enough? */
+#define MAX_PROC_NUM      40            /* (simultaneous processes) enough? */
 
 struct process_obj {
   stk_header header;
   int pid;                      /* Process id */
-  SCM streams[3];		/* standard ports for the process */
-  int exited;			/* Process is terminated */
-  int exit_status;		/* Exit status of the processus */
-  int waited_on;		/* non zero if the process is being
-   				   waited on by a waitpid(..,..,0) */
+  SCM streams[3];               /* standard ports for the process */
+  int exited;                   /* Process is terminated */
+  int exit_status;              /* Exit status of the processus */
+  int waited_on;                /* non zero if the process is being
+                                   waited on by a waitpid(..,..,0) */
 };
 
 
-#define PROCESS_PID(p)		(((struct process_obj *) (p))->pid)
-#define PROCESS_STREAMS(p)	(((struct process_obj *) (p))->streams)
-#define PROCESS_EXITED(p)	(((struct process_obj *) (p))->exited)
-#define PROCESS_STATUS(p)	(((struct process_obj *) (p))->exit_status)
-#define PROCESS_WAITED(p)	(((struct process_obj *) (p))->waited_on)
-#define PROCESSP(p)		(BOXED_TYPE_EQ((p), tc_process))
+#define PROCESS_PID(p)          (((struct process_obj *) (p))->pid)
+#define PROCESS_STREAMS(p)      (((struct process_obj *) (p))->streams)
+#define PROCESS_EXITED(p)       (((struct process_obj *) (p))->exited)
+#define PROCESS_STATUS(p)       (((struct process_obj *) (p))->exit_status)
+#define PROCESS_WAITED(p)       (((struct process_obj *) (p))->waited_on)
+#define PROCESSP(p)             (BOXED_TYPE_EQ((p), tc_process))
 
 static SCM all_processes = STk_nil;
 
@@ -74,7 +74,7 @@ static SCM all_processes = STk_nil;
 #endif
 
 #ifdef USE_SIGCHLD
-#  define PURGE_PROCESS_TABLE()				    /* Nothing to do */
+#  define PURGE_PROCESS_TABLE()                             /* Nothing to do */
 #else
 #  define PURGE_PROCESS_TABLE() process_terminate_handler(0)/* Simulate a SIGCHLD */
 #endif
@@ -105,14 +105,14 @@ static int process_alivep(SCM process)
        return TRUE;
      else
        if (res == PROCESS_PID(process)) {
-	 /* process has terminated and we must save this information */
-	 PROCESS_EXITED(process) = TRUE;
-	 PROCESS_STATUS(process) = info;
-	 return FALSE;
+         /* process has terminated and we must save this information */
+         PROCESS_EXITED(process) = TRUE;
+         PROCESS_STATUS(process) = info;
+         return FALSE;
        } else {
-	 /* might not have found process because we've already waited for it */
-	 /* if so, then status has already been updated */
-	 return FALSE;
+         /* might not have found process because we've already waited for it */
+         /* if so, then status has already been updated */
+         return FALSE;
        }
    }
 }
@@ -134,9 +134,9 @@ static void process_terminate_handler(int sig) /* called when a child dies */
     if (!process_alivep(CAR(l))) {
       /* Process died. delete it from the list */
       if (l == all_processes)
-	all_processes = CDR(l);
+        all_processes = CDR(l);
       else
-	CDR(prev) = CDR(l);
+        CDR(prev) = CDR(l);
     }
   }
   MUT_UNLOCK(process_table_mutex);
@@ -216,7 +216,7 @@ static char *maybe_redirect_input(SCM in, int pipes[3][2])
 }
 
 static char *maybe_redirect_output(SCM out, int index, int pipes[3][2],
-				   char *input, char *output)
+                                   char *input, char *output)
 {
   char *name = "";
   int fd;
@@ -256,16 +256,16 @@ static char *maybe_redirect_output(SCM out, int index, int pipes[3][2],
 
 /*===========================================================================*\
  *
- * 		Implementation of run-process and fork for Unix
+ *              Implementation of run-process and fork for Unix
  *
 \*==========================================================================*/
 
 DEFINE_PRIMITIVE("%run-process", run_process, subr4,
-		 (SCM redirections, SCM do_wait, SCM do_fork, SCM args))
+                 (SCM redirections, SCM do_wait, SCM do_fork, SCM args))
 {
   SCM z, l;
   char **argv;
-  char *in_name, *out_name, *err_name;
+  char *in_name, *out_name; // *err_name;
   int i, len;
   int pipes[3][2];
   SCM *redir;
@@ -278,7 +278,7 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
   redir = VECTOR_DATA(redirections);
 
   /* Build an argv array for exec system call */
-  len = STk_int_length(args);		  /* //FIXME:  Pas traité le rsh */
+  len = STk_int_length(args);             /* //FIXME:  Pas traité le rsh */
   if (len < 0)
     STk_error("bad argument list ~S", args);
   argv = STk_must_malloc((len + 3) * sizeof(char *));
@@ -292,7 +292,7 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
   /* Do (eventually) redirections */
   in_name  = maybe_redirect_input (redir[0], pipes);
   out_name = maybe_redirect_output(redir[1], 1, pipes, in_name, "");
-  err_name = maybe_redirect_output(redir[2], 2, pipes, in_name, out_name);
+  maybe_redirect_output(redir[2], 2, pipes, in_name, out_name);
 
   /* Build a process object */
   z   = make_process();
@@ -301,70 +301,70 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
   pid = (do_fork == STk_false) ? 0 : fork();
   switch (pid) {
     case -1:  close_all_files(pipes);
-	      STk_error("cannot create a new process");
-	      break;
+              STk_error("cannot create a new process");
+              break;
     case 0:  /* CHILD */
-      	     for(i = 0; i < 3; i++) {
- 	       if (STRINGP(redir[i])) {
-		 /* Redirection in a file */
- 		 dup2(pipes[i][0], i);
- 		 close(pipes[i][0]);
- 	       } else if (is_pipe_p(redir[i])) {
-		 /* Redirection in a pipe */
-		 dup2(pipes[i][(i==0)? 0 : 1], i);
-		 close(pipes[i][0]);
-		 close(pipes[i][1]);
-	       } else if (PORTP(redir[i])) {
-		 int fd= PORT_FD(PORT_STREAM(redir[i]));
+             for(i = 0; i < 3; i++) {
+               if (STRINGP(redir[i])) {
+                 /* Redirection in a file */
+                 dup2(pipes[i][0], i);
+                 close(pipes[i][0]);
+               } else if (is_pipe_p(redir[i])) {
+                 /* Redirection in a pipe */
+                 dup2(pipes[i][(i==0)? 0 : 1], i);
+                 close(pipes[i][0]);
+                 close(pipes[i][1]);
+               } else if (PORTP(redir[i])) {
+                 int fd= PORT_FD(PORT_STREAM(redir[i]));
 
-		 dup2(fd, i);
-		 close(fd);
-	       }
- 	     }
+                 dup2(fd, i);
+                 close(fd);
+               }
+             }
 
-	     /* close all remaining files */
-	     for(i = 3; i < NOFILE; i++) close(i);
+             /* close all remaining files */
+             for(i = 3; i < NOFILE; i++) close(i);
 
- 	     /*  And then, EXEC'ing...  */
-  	     execvp(*argv, argv);
+             /*  And then, EXEC'ing...  */
+             execvp(*argv, argv);
 
- 	     /* Cannot exec if we are here */
- 	     STk_fprintf(STk_current_error_port(), "**** Cannot  exec %s!\n", *argv);
- 	     _exit(1);
+             /* Cannot exec if we are here */
+             STk_fprintf(STk_current_error_port(), "**** Cannot  exec %s!\n", *argv);
+             _exit(1);
     default: /* PARENT */
-      	     PROCESS_PID(z) = pid;
-       	     for(i = 0; i < 3; i++) {
- 	       if (STRINGP(redir[i]))
- 		 /* Redirection in a file */
- 		 close(pipes[i][0]);
- 	       else if (is_pipe_p(redir[i])) {
-		 /* Redirection in a pipe */
-		 SCM port;
-		 char buffer[100];
+             PROCESS_PID(z) = pid;
+             for(i = 0; i < 3; i++) {
+               if (STRINGP(redir[i]))
+                 /* Redirection in a file */
+                 close(pipes[i][0]);
+               else if (is_pipe_p(redir[i])) {
+                 /* Redirection in a pipe */
+                 SCM port;
+                 char buffer[100];
 
-		 close(pipes[i][i == 0 ? 0 : 1]);
-		 /* Make a new file descriptor to access the pipe */
-		 sprintf(buffer, "pipe-%s-%d", stdStreams[i], pid);
-		 port = (i == 0) ?
-		   		STk_fd2scheme_port(pipes[i][1], "w", buffer) :
-		   		STk_fd2scheme_port(pipes[i][0], "r", buffer);
-		 if (!port) {
-		   close_all_files(pipes);
-		   STk_error("cannot reopen pipe %d for process %d", i, pid);
-		 }
-		 PROCESS_STREAMS(z)[i] = port;
-	       } else if (PORTP(redir[i])) {
-		 /* Redirection in a port */
-		 PROCESS_STREAMS(z)[i]= redir[i];
-	       }
+                 close(pipes[i][i == 0 ? 0 : 1]);
+                 /* Make a new file descriptor to access the pipe */
+                 sprintf(buffer, "pipe-%s-%d", stdStreams[i], pid);
+                 port = (i == 0) ?
+                                STk_fd2scheme_port(pipes[i][1], "w", buffer) :
+                                STk_fd2scheme_port(pipes[i][0], "r", buffer);
+                 if (!port) {
+                   close_all_files(pipes);
+                   STk_error("cannot reopen pipe %d for process %d", i, pid);
+                 }
+                 PROCESS_STREAMS(z)[i] = port;
+               } else if (PORTP(redir[i])) {
+                 /* Redirection in a port */
+                 PROCESS_STREAMS(z)[i]= redir[i];
+               }
 
-	       if (do_wait != STk_false) {
-		 PROCESS_WAITED(z) = 1;
-		 waitpid(pid, &(PROCESS_STATUS(z)), 0);
-		 PROCESS_WAITED(z) = 0;
-		 PROCESS_EXITED(z) = TRUE;
-	       }
-	     }
+               if (do_wait != STk_false) {
+                 PROCESS_WAITED(z) = 1;
+                 waitpid(pid, &(PROCESS_STATUS(z)), 0);
+                 PROCESS_WAITED(z) = 0;
+                 PROCESS_EXITED(z) = TRUE;
+               }
+             }
   }
   /* Chain new process in the list of all process */
   MUT_LOCK(process_table_mutex);
@@ -373,7 +373,7 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
   return z;
 }
 
-		/* ======================================== */
+                /* ======================================== */
 
 /*
 <doc EXT fork
@@ -404,15 +404,15 @@ DEFINE_PRIMITIVE("fork", fork, subr01, (SCM thunk))
   /* Fork another process */
   pid = fork();
   switch (pid) {
-    case -1: 						      /* ERROR */
+    case -1:                                                  /* ERROR */
       STk_error("cannot create a new process");
-    case 0:  						      /* CHILD */
+    case 0:                                                   /* CHILD */
       if (thunk) {
-	STk_C_apply(thunk, 0);
-	STk_exit(0);
+        STk_C_apply(thunk, 0);
+        STk_exit(0);
       }
       return STk_false;
-    default: 						      /* PARENT */
+    default:                                                  /* PARENT */
       z  = make_process();
       PROCESS_PID(z) = pid;
       /* Chain new process in the list of all process */
@@ -452,88 +452,88 @@ DEFINE_PRIMITIVE("fork", fork, subr01, (SCM thunk))
 //   pid = fork();
 //   switch (pid) {
 //     case -1:  close_all_files(pipes);
-// 	      STk_error("cannot create a new process");
+//            STk_error("cannot create a new process");
 //     case 0:
 //       /* CHILD */
 //       {
-// 	char buffer[100], *str;
+//      char buffer[100], *str;
 //
-// 	for(i = 0; i < 3; i++) {
-// 	  if (STRINGP(redir[i])) {
-// 	    /* Redirection in a file */
-// 	    dup2(pipes[i][0], i);
-// 	    close(pipes[i][0]);
+//      for(i = 0; i < 3; i++) {
+//        if (STRINGP(redir[i])) {
+//          /* Redirection in a file */
+//          dup2(pipes[i][0], i);
+//          close(pipes[i][0]);
 //
-// 	    str = STk_expand_file_name(STRING_CHARS(redir[i]));
-// 	    switch (i) {
-// 	    case 0:   /* FIXME: STk_close_port(STk_curr_iport);*/
-// 		      STk_curr_iport = STk_fd2scheme_port(i, "r", str);
-// 		      break;
-// 	      case 1: STk_close_port(STk_curr_oport);
-// 		      STk_curr_oport = STk_fd2scheme_port(i, "w", str);
-// 		      break;
-// 	      case 2: STk_close_port(STk_curr_eport);
-// 		      STk_curr_eport = STk_fd2scheme_port(i, "w", str);
-// 		      break;
-// 	    }
-// 	  } else if (is_pipe_p(redir[i])) {
-// 	    /* Redirection in a pipe */
-// 	    dup2(pipes[i][i==0? 0 : 1], i);
-// 	    close(pipes[i][0]);
-// 	    close(pipes[i][1]);
+//          str = STk_expand_file_name(STRING_CHARS(redir[i]));
+//          switch (i) {
+//          case 0:   /* FIXME: STk_close_port(STk_curr_iport);*/
+//                    STk_curr_iport = STk_fd2scheme_port(i, "r", str);
+//                    break;
+//            case 1: STk_close_port(STk_curr_oport);
+//                    STk_curr_oport = STk_fd2scheme_port(i, "w", str);
+//                    break;
+//            case 2: STk_close_port(STk_curr_eport);
+//                    STk_curr_eport = STk_fd2scheme_port(i, "w", str);
+//                    break;
+//          }
+//        } else if (is_pipe_p(redir[i])) {
+//          /* Redirection in a pipe */
+//          dup2(pipes[i][i==0? 0 : 1], i);
+//          close(pipes[i][0]);
+//          close(pipes[i][1]);
 //
-// 	    sprintf(buffer, "pipe-%s-%d", stdStreams[i], getpid());
-// 	    switch (i) {
-// 	      case 0: /* FIXME: STk_close_port(STk_curr_iport); */
-// 		      STk_curr_iport = STk_fd2scheme_port(i, "r", buffer);
-// 		      break;
-// 	      case 1: STk_close_port(STk_curr_oport);
-// 		      STk_curr_oport = STk_fd2scheme_port(i, "w", buffer);
-// 		      break;
-// 	      case 2: STk_close_port(STk_curr_eport);
-// 		      STk_curr_eport = STk_fd2scheme_port(i, "w", buffer);
-// 		      break;
-// 	    }
-// 	  }
-// 	}
+//          sprintf(buffer, "pipe-%s-%d", stdStreams[i], getpid());
+//          switch (i) {
+//            case 0: /* FIXME: STk_close_port(STk_curr_iport); */
+//                    STk_curr_iport = STk_fd2scheme_port(i, "r", buffer);
+//                    break;
+//            case 1: STk_close_port(STk_curr_oport);
+//                    STk_curr_oport = STk_fd2scheme_port(i, "w", buffer);
+//                    break;
+//            case 2: STk_close_port(STk_curr_eport);
+//                    STk_curr_eport = STk_fd2scheme_port(i, "w", buffer);
+//                    break;
+//          }
+//        }
+//      }
 //
-// 	/* close all remaining files */
-// 	for(i = 3; i < NOFILE; i++) close(i);
-// 	return STk_false;
+//      /* close all remaining files */
+//      for(i = 3; i < NOFILE; i++) close(i);
+//      return STk_false;
 //       }
 //     default:
 //       {
-// 	/* PARENT */
-// 	z  = make_process();
-// 	PROCESS_PID(z) = pid;
+//      /* PARENT */
+//      z  = make_process();
+//      PROCESS_PID(z) = pid;
 //
-// 	/* Chain new process in the list of all process */
-// 	all_processes = STk_cons(z, all_processes);
+//      /* Chain new process in the list of all process */
+//      all_processes = STk_cons(z, all_processes);
 //
-// 	/* Do the redirections if necessary */
-// 	for(i = 0; i < 3; i++) {
-// 	  if (STRINGP(redir[i]))
-// 	    /* Redirection in a file */
-// 	    close(pipes[i][0]);
-// 	  else if (is_pipe_p(redir[i])) {
-// 	    /* Redirection in a pipe */
-// 	    char buffer[100];
+//      /* Do the redirections if necessary */
+//      for(i = 0; i < 3; i++) {
+//        if (STRINGP(redir[i]))
+//          /* Redirection in a file */
+//          close(pipes[i][0]);
+//        else if (is_pipe_p(redir[i])) {
+//          /* Redirection in a pipe */
+//          char buffer[100];
 //
-// 	    switch (i) {
-// 	      case 0:
-// 		dup2(pipes[i][1], 1);
-// 		//STk_close_port(STk_curr_oport);
-// 		sprintf(buffer, "pipe-%s-%d", stdStreams[1], pid);
-// 		STk_curr_oport = STk_fd2scheme_port(1, "w", buffer);
-// 		break;
-// 	    case 1:
-// 	    case 2: ;
-// 	    }
-// 	    close(pipes[i][0]);
-// 	    close(pipes[i][1]);
-// 	  }
-// 	}
-// 	return z;
+//          switch (i) {
+//            case 0:
+//              dup2(pipes[i][1], 1);
+//              //STk_close_port(STk_curr_oport);
+//              sprintf(buffer, "pipe-%s-%d", stdStreams[1], pid);
+//              STk_curr_oport = STk_fd2scheme_port(1, "w", buffer);
+//              break;
+//          case 1:
+//          case 2: ;
+//          }
+//          close(pipes[i][0]);
+//          close(pipes[i][1]);
+//        }
+//      }
+//      return z;
 //       }
 //   }
 //   return STk_false;

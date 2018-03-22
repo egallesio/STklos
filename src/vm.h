@@ -1,7 +1,7 @@
 /*
- * v m . h				-- The STklos Virtual Machine
+ * v m . h                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  3-Oct-2009 21:47 (eg)
+ * Last file update: 21-Mar-2018 11:26 (eg)
  */
 
 
@@ -36,7 +36,7 @@
 #include <signal.h>
 #include "stklosconf.h"
 
-typedef struct {	/* simple wrapper around jmp_buf */
+typedef struct {        /* simple wrapper around jmp_buf */
   jmp_buf j;
   sigset_t blocked;
 } jbuf;
@@ -44,20 +44,20 @@ typedef struct {	/* simple wrapper around jmp_buf */
 
 /*===========================================================================*\
  *
- * 			 C O N T I N U A T I O N S
+ *                       C O N T I N U A T I O N S
  *
 \*===========================================================================*/
 
 struct continuation_obj {
   stk_header header;
-  int csize;			/* C stack size */
-  void *cstart, *cend;		/* Start and end of the C stack */
-  int ssize;			/* Scheme stack size */
-  void *sstart, *send;		/* Start and end of the Scheme stack */
+  int csize;                    /* C stack size */
+  void *cstart, *cend;          /* Start and end of the C stack */
+  int ssize;                    /* Scheme stack size */
+  void *sstart, *send;          /* Start and end of the Scheme stack */
 
   jbuf state;
   int fresh;
-  STk_instr *pc;		/* VM registers */
+  STk_instr *pc;                /* VM registers */
   SCM *fp;
   SCM *sp;
   SCM env;
@@ -69,7 +69,7 @@ struct continuation_obj {
   char stacks[1];
 };
 
-#define CONTP(k) 	(BOXED_TYPE_EQ((k), tc_continuation))
+#define CONTP(k)        (BOXED_TYPE_EQ((k), tc_continuation))
 
 SCM STk_make_continuation(void);
 SCM STk_restore_continuation(SCM cont, SCM val);
@@ -77,25 +77,25 @@ SCM STk_restore_continuation(SCM cont, SCM val);
 
 /*===========================================================================*\
  *
- *  			T H R E A D   S U P P O R T
+ *                      T H R E A D   S U P P O R T
  *
 \*===========================================================================*/
 
-#define MAX_VALS 8	/* static number of values	*/
+#define MAX_VALS 8      /* static number of values      */
 
 typedef struct {
-  STk_instr *pc;	/* Program Counter		*/
-  SCM *fp;		/* Frame pointer		*/
-  SCM *sp;		/* Stack pointer		*/
-  SCM val;		/* Current value register 	*/
-  SCM env;		/* Current environment register */
-  SCM *constants;	/* Constants of current code 	*/
-  SCM *handlers;	/* Exceptions handlers		*/
+  STk_instr *pc;        /* Program Counter              */
+  SCM *fp;              /* Frame pointer                */
+  SCM *sp;              /* Stack pointer                */
+  SCM val;              /* Current value register       */
+  SCM env;              /* Current environment register */
+  SCM *constants;       /* Constants of current code    */
+  SCM *handlers;        /* Exceptions handlers          */
 
-  SCM r1, r2;		/* general registers		 */
+  SCM r1, r2;           /* general registers             */
 
-  SCM vals[MAX_VALS];	/* registers for multiple values */
-  int valc;		/* # of multiple values 	 */
+  SCM vals[MAX_VALS];   /* registers for multiple values */
+  int valc;             /* # of multiple values          */
 
   jbuf *top_jmp_buf;
   void *start_stack;
@@ -104,11 +104,11 @@ typedef struct {
   int stack_len;
   SCM current_module;
   SCM iport, oport,eport; /* Standard ports */
-  SCM scheme_thread; 	  /* Scheme associated thread 	*/
+  SCM scheme_thread;      /* Scheme associated thread   */
   SCM dynwind_stack;
 } vm_thread_t;
 
 
 vm_thread_t *STk_allocate_vm(int stack_size);
-vm_thread_t inline *STk_get_current_vm(void);
+vm_thread_t *STk_get_current_vm(void);
 
