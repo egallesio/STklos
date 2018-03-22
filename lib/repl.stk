@@ -1,7 +1,7 @@
 ;;;;
-;;;; repl.stk	-- STklos REPL
+;;;; repl.stk   -- STklos REPL
 ;;;;
-;;;; Copyright © 2000-2014 Erick Gallesio - Universite de Nice <eg@unice.fr>
+;;;; Copyright © 2000-2018 Erick Gallesio - Universite de Nice <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  2-Jan-2014 23:18 (eg)
+;;;; Last file update: 21-Mar-2018 12:17 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -33,7 +33,7 @@
 (define-module REPL
   (import SCHEME)
   (export main-repl repl repl-prompt repl-make-prompt repl-display-prompt
-	  repl-prompt-use-color? repl-change-default-ports main-repl-hook)
+          repl-prompt-use-color? repl-change-default-ports main-repl-hook)
 
 ;;; In module REPL
 
@@ -49,128 +49,128 @@
 
 (define (do-repl-command l)
   (case (car l)
-    ((help h ?)		(display
-			 (do-color 'blue 'bold
-				   (format "Available Commands:
+    ((help h ?)         (display
+                         (do-color 'blue 'bold
+                                   (format "Available Commands:
 - ,backtrace ,bt   Show the stack when last error occurred
-- ,quit ,q	   Exit STklos
-- ,help ,? ,h	   This help\n")
-				   'clear)
-			 (current-error-port))
-     			(flush-output-port (current-error-port)))
-    ((quit q)	    	(exit 0))
-    ((backtrace bt) 	(%display-backtrace repl-backtrace 6))
-    (else		(format (current-error-port)
-				"bad command name: ~S. Type ,help for some help\n"
-				(car l)))))
+- ,quit ,q         Exit STklos
+- ,help ,? ,h      This help\n")
+                                   'clear)
+                         (current-error-port))
+                        (flush-output-port (current-error-port)))
+    ((quit q)           (exit 0))
+    ((backtrace bt)     (%display-backtrace repl-backtrace 6))
+    (else               (format (current-error-port)
+                                "bad command name: ~S. Type ,help for some help\n"
+                                (car l)))))
 
 
 ;; ----------------------------------------------------------------------
-;;	repl-handler ...
-;;	   -- The error handler for the REPL
+;;      repl-handler ...
+;;         -- The error handler for the REPL
 ;; ----------------------------------------------------------------------
 (define (display-error-message who msg bt out)
   (let* ((loc (%build-error-location who bt))
-	 (from (if (cadr loc)
-		   (format " (near line ~a in file ~s)" (cdadr loc) (caadr loc))
-		   "")))
+         (from (if (cadr loc)
+                   (format " (near line ~a in file ~s)" (cdadr loc) (caadr loc))
+                   "")))
     (display (do-color 'bold 'red
-		       (format "**** Error~A:\n~A: ~A\n" from (car loc) msg)
-		       'clear
-		       "\t(type \""
-		       'underline ",help" 'clear
-		       "\" for more information)\n")
-	     out)))
+                       (format "**** Error~A:\n~A: ~A\n" from (car loc) msg)
+                       'clear
+                       "\t(type \""
+                       'underline ",help" 'clear
+                       "\" for more information)\n")
+             out)))
 
 
 (define (repl-handler c port)
   (if (condition? c)
       (cond
-	((condition-has-type? c &error-message)		;; &error-message
-	   (let ((who (condition-ref c 'location))
-		 (msg (condition-ref c 'message))
-		 (bt  (condition-ref c 'backtrace)))
-	     (display-error-message who msg bt port)
-	     (set! repl-backtrace bt)))
-	((condition-has-type? c &message)		;; &message (e.g. ^C)
-	   (format port (condition-ref c 'message)))
-	((condition-has-type? c &uncaught-exception)
-	   (repl-handler (uncaught-exception-reason c) port))
-	(else						;; Unknown
-	   (format port "**** Unknown condition raised.\n")
-	   (format port "Condition type: ~A\n" (struct-type-name (struct-type c)))
-	   (format port "Condition slots: ~S\n" (struct->list c))))
+        ((condition-has-type? c &error-message)         ;; &error-message
+           (let ((who (condition-ref c 'location))
+                 (msg (condition-ref c 'message))
+                 (bt  (condition-ref c 'backtrace)))
+             (display-error-message who msg bt port)
+             (set! repl-backtrace bt)))
+        ((condition-has-type? c &message)               ;; &message (e.g. ^C)
+           (format port (condition-ref c 'message)))
+        ((condition-has-type? c &uncaught-exception)
+           (repl-handler (uncaught-exception-reason c) port))
+        (else                                           ;; Unknown
+           (format port "**** Unknown condition raised.\n")
+           (format port "Condition type: ~A\n" (struct-type-name (struct-type c)))
+           (format port "Condition slots: ~S\n" (struct->list c))))
       ;; Value raised is not a condition. Display it
       (format port "**** The following non-condition was raised: ~S\n" c)))
 
 ;; ----------------------------------------------------------------------
-;;	repl-prompt ...
+;;      repl-prompt ...
 ;; ----------------------------------------------------------------------
 (define repl-prompt (make-parameter ""))
 
 ;; ----------------------------------------------------------------------
-;;	repl-prompt-use-color? ...
+;;      repl-prompt-use-color? ...
 ;; ----------------------------------------------------------------------
 (define repl-prompt-use-color? (make-parameter #t))
 
 ;; ----------------------------------------------------------------------
-;;	make-prompt ...
+;;      make-prompt ...
 ;; ----------------------------------------------------------------------
 ;;(define (make-prompt module)
 ;;  (repl-prompt (string-append
-;;		   ;; repl-level if > 1
-;;		   (if (> repl-level 1)
-;;		       (do-color 'bold 'red
-;;				 (format "[~A] " repl-level))
-;;		       "")
-;;		   ;; prompt itself
-;;		   (do-color 'bold 'magenta
-;;			     (format "~A> " (module-name module))
-;;			     'black))))
+;;                 ;; repl-level if > 1
+;;                 (if (> repl-level 1)
+;;                     (do-color 'bold 'red
+;;                               (format "[~A] " repl-level))
+;;                     "")
+;;                 ;; prompt itself
+;;                 (do-color 'bold 'magenta
+;;                           (format "~A> " (module-name module))
+;;                           'black))))
 
 
 (define (make-prompt module)
   (let ((str1 (if (> repl-level 1) (format "[~A] " repl-level) ""))
-	(str2 (format "~A> " (module-name module))))
+        (str2 (format "~A> " (module-name module))))
     (repl-prompt (if (repl-prompt-use-color?)
-		     (string-append (do-color 'bold 'red str1)
-				    (do-color 'bold 'magenta str2 'black))
-		     (string-append str1 str2)))))
+                     (string-append (do-color 'bold 'red str1)
+                                    (do-color 'bold 'magenta str2 'black))
+                     (string-append str1 str2)))))
 
 ;; ----------------------------------------------------------------------
-;;	repl-make-prompt ...
+;;      repl-make-prompt ...
 ;; ----------------------------------------------------------------------
 (define repl-make-prompt (make-parameter make-prompt))
 
 ;; ----------------------------------------------------------------------
-;;	display-prompt ...
+;;      display-prompt ...
 ;; ----------------------------------------------------------------------
 (define (display-prompt port)
   (display (repl-prompt))
   (flush-output-port port))
 
 ;; ----------------------------------------------------------------------
-;;	repl-display-prompt ...
+;;      repl-display-prompt ...
 ;; ----------------------------------------------------------------------
 (define repl-display-prompt (make-parameter display-prompt))
 
 ;; ----------------------------------------------------------------------
-;;	main-repl-hook ...
+;;      main-repl-hook ...
 ;; ----------------------------------------------------------------------
 (define main-repl-hook (make-parameter void))
 
 ;; ----------------------------------------------------------------------
-;;	repl-change-default-ports ...
+;;      repl-change-default-ports ...
 ;; ----------------------------------------------------------------------
 (define (repl-change-default-ports :key  (in  default-in)
-				         (out default-out)
-					 (err default-err))
+                                         (out default-out)
+                                         (err default-err))
   (set! default-in in)
   (set! default-out out)
   (set! default-err err))
 
 ;; ----------------------------------------------------------------------
-;;	repl ...
+;;      repl ...
 ;; ----------------------------------------------------------------------
 
 #|
@@ -185,71 +185,73 @@
 doc>
 |#
 (define (repl :key (in  default-in)
-	      	   (out default-out)
-		   (err default-err))
+                   (out default-out)
+                   (err default-err))
   (let ((eof #f))
     (set! repl-level (+ repl-level 1))
     (let Loop ()
       (with-handler (lambda (c) (repl-handler c err))
-	 ;; display prompt
-	 (when interactive?
-	   ( (repl-make-prompt) (current-module) )
-	   ( (repl-display-prompt) err ))
+         ;; display prompt
+         (when interactive?
+           ( (repl-make-prompt) (current-module) )
+           ( (repl-display-prompt) err ))
 
-	 (let ((e (%read in)))
-	   (display (do-color 'clear))
-	   (cond
-	     ((eof-object? e)
-		(set! repl-level (- repl-level 1))
-		(set! eof #t)
-		(display "\n")
-		(flush-output-port err)
-		(flush-output-port out))
+         (let ((e (%read in)))
+           (display (do-color 'clear))
+           (cond
+             ((eof-object? e)
+                (set! repl-level (- repl-level 1))
+                (set! eof #t)
+                (display "\n")
+                (flush-output-port err)
+                (flush-output-port out))
 
-	     ((and (pair? e) (eq? (car e) 'unquote))
-		(do-repl-command (cdr e)))
+             ((and (pair? e) (eq? (car e) 'unquote))
+                (do-repl-command (cdr e)))
 
-	     (else
-	        (call-with-values
-		  (lambda () (eval e))
-		  (lambda v
-		    (when interactive?
-		      (cond
-			((null? v)
-			   ;; (values)
-			   #f)
-			((eq? (car v) (void))
-			   (when (= (length v) 2)
-			     ;; Special convention for variable definition
-			     (display (do-color 'bold 'blue
-						(format ";; ~A\n" (cadr v))
-						'clear)
-				      out)))
-			(else
-			   (for-each (lambda (x) (write* x out) (newline out))
-				     v)))
-		      (flush-output-port out))))))))
+             (else
+                (call-with-values
+                  (lambda () (eval e))
+                  (lambda v
+                    (when interactive?
+                      (cond
+                        ((null? v)
+                           ;; (values)
+                           #f)
+                        ((eq? (car v) (void))
+                           (when (= (length v) 2)
+                             ;; Special convention for variable definition
+                             (display (do-color 'bold 'blue
+                                                (format ";; ~A\n" (cadr v))
+                                                'clear)
+                                      out)))
+                        (else
+                           (for-each (lambda (x) (write* x out) (newline out))
+                                     v)))
+                      (flush-output-port out))))))))
       ;; Loop if we have not meet an EOF
       (unless eof (Loop)))))
 
 ;; ----------------------------------------------------------------------
-;;	main-repl ...
+;;      main-repl ...
 ;; ----------------------------------------------------------------------
 (define (main-repl)
   ;; Initialize signals suitable for  a REPL session (e.g.be immune to ^C)
   (%initialize-signals)
   (when interactive?
     (let ((line1 (format "STklos version ~A\n" (version)))
-	  (line2 "Copyright (C) 1999-2014 Erick Gallesio - Universite de Nice <eg@unice.fr>\n")
-	  (line3 (format "[~a/~a/~a/~a]\n"
-			 (machine-type)
-			 (%thread-system)
-			 (key-get *%system-state-plist* :readline 'no-readline)
-			 (if (key-get *%system-state-plist* :use-utf8 #f)
-			     'utf8 'no-utf8))))
-      (display (do-color 'bold 'black "*   " 'bold 'blue line1))
-      (display (do-color 'bold 'black " *  " 'bold 'blue line2))
-      (display (do-color 'bold 'black "* * " 'bold 'blue line3 'normal))))
+          (line2 "Copyright (C) 1999-2018 Erick Gallesio <eg@unice.fr>\n")
+          (line3 "Université Nice Sophia Antipolis - UCA\n")
+          (line4 (format "[~a/~a/~a/~a]\n"
+                         (machine-type)
+                         (%thread-system)
+                         (key-get *%system-state-plist* :readline 'no-readline)
+                         (if (key-get *%system-state-plist* :use-utf8 #f)
+                             'utf8 'no-utf8))))
+      (display (do-color 'bold 'black " *     " 'bold 'blue line1))
+      (display (do-color 'bold 'black "  *    " 'bold 'blue line2))
+      (display (do-color 'bold 'black " * *   " 'bold 'blue line3))
+      (display (do-color 'bold 'black " *  *  " 'bold 'blue line4 'normal))))
 
   ((main-repl-hook))
   (repl)
