@@ -1,7 +1,7 @@
 ;;;;
-;;;; test-r5.stk	-- Test various exemaples of R5RS
+;;;; test-r5.stk        -- Test various exemaples of R5RS
 ;;;;
-;;;; Copyright © 2010 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2010-2018 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 23-Dec-2010 18:47 (eg)
-;;;; Last file update: 23-Dec-2010 20:17 (eg)
+;;;; Last file update: 23-Mar-2018 17:42 (eg)
 ;;;;
 (require "test")
 
@@ -33,26 +33,37 @@
 
 (test "Quasiquote.1" '(list 3 4) `(list ,(+ 1 2) 4))
 (test "Quasiquote.2" '(list a (quote a))
-		     (let ((name 'a)) `(list ,name ',name)))
+                     (let ((name 'a)) `(list ,name ',name)))
 (test "Quasiquote.3" '(a 3 4 5 6 b)
-		     `(a ,(+ 1 2) ,@(map abs '(4 -5 6)) b))
+                     `(a ,(+ 1 2) ,@(map abs '(4 -5 6)) b))
 (test "Quasiquote.4" '((foo 7) . cons)
-		     `(( foo ,(- 10 3)) ,@(cdr '(c)) . ,(car '(cons))))
+                     `(( foo ,(- 10 3)) ,@(cdr '(c)) . ,(car '(cons))))
 (test "Quasiquote.5" '#(10 5 2 4 3 8)
-		     `#(10 5 ,(sqrt 4) ,@(map sqrt '(16 9)) 8))
+                     `#(10 5 ,(sqrt 4) ,@(map sqrt '(16 9)) 8))
 
 (test "Quasiquote.6" '(a `(b ,(+ 1 2) ,(foo 4 d) e) f)
-		     `(a `(b ,(+ 1 2) ,(foo ,(+ 1 3) d) e) f))
+                     `(a `(b ,(+ 1 2) ,(foo ,(+ 1 3) d) e) f))
 
 (test "Quasiquote.7" '(a `(b ,x ,'y d) e)
-		     (let ((name1 'x)
-			   (name2 'y))
-		       `(a `(b ,,name1 ,',name2 d) e)))
+                     (let ((name1 'x)
+                           (name2 'y))
+                       `(a `(b ,,name1 ,',name2 d) e)))
 
 ;;---- tests added for STklos
 (test "Quasiquote.stklos.1"
       '(quasiquote ((unquote-splicing (append (list 2 3) (list 5 7)))))
       ``(,@(append ,@'((list 2 3) (list 5 7)))))
+
+
+;;---- Test the lambda form with λ symbol
+(test "lambda symbol.1"
+      '(1 2 3)
+      ( (λ l l) 1 2 3))
+
+(test "lambda symbol.2"
+      '(1 2 3)
+      ( (λ λ λ) 1 2 3))
+
 
 ;;------------------------------------------------------------------
 (test-section-end)

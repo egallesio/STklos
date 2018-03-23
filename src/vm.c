@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 21-Mar-2018 11:36 (eg)
+ * Last file update: 23-Mar-2018 17:28 (eg)
  */
 
 // INLINER values
@@ -1922,7 +1922,7 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   SCM z;
   struct continuation_obj *k;
   vm_thread_t *vm = STk_get_current_vm();
-  int csize, ssize;
+  unsigned int csize, ssize;
   void *cstart, *sstart, *cend, *send;
   void *addr, *start_stack;
 
@@ -1946,6 +1946,11 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   sstart = vm->sp;
   send   = vm->stack + vm->stack_len;
   ssize  = (send - sstart) * sizeof(SCM);
+
+  printf("ssize = %d else %d\n", ssize, vm->stack_len *sizeof(SCM));
+  sstart = vm->stack;
+  ssize  = vm->stack_len *sizeof(SCM);
+
 
   /* Allocate a continuation object */
   NEWCELL_WITH_LEN(z, continuation, sizeof(struct continuation_obj) + ssize + csize);
