@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 23-Mar-2018 17:28 (eg)
+ * Last file update: 26-Mar-2018 09:31 (eg)
  */
 
 // INLINER values
@@ -70,7 +70,7 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #endif
 
 
-#define MY_SETJMP(jb)   (jb.blocked = get_signal_mask(), setjmp(jb.j))
+#define MY_SETJMP(jb)           (jb.blocked = get_signal_mask(), setjmp(jb.j))
 #define MY_LONGJMP(jb, val)     (longjmp((jb).j, val))
 
 
@@ -1926,8 +1926,6 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   void *cstart, *sstart, *cend, *send;
   void *addr, *start_stack;
 
-
-
   /* Determine the size of the C stack and the start address */
   STk_get_stack_pointer(&addr);
   start_stack = vm->start_stack;
@@ -1945,12 +1943,7 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   /* Determine the size of the Scheme stack */
   sstart = vm->sp;
   send   = vm->stack + vm->stack_len;
-  ssize  = (send - sstart) * sizeof(SCM);
-
-  printf("ssize = %d else %d\n", ssize, vm->stack_len *sizeof(SCM));
-  sstart = vm->stack;
-  ssize  = vm->stack_len *sizeof(SCM);
-
+  ssize  = (unsigned long) send - (unsigned long) sstart;
 
   /* Allocate a continuation object */
   NEWCELL_WITH_LEN(z, continuation, sizeof(struct continuation_obj) + ssize + csize);
@@ -1975,14 +1968,12 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   k->jb          = vm->top_jmp_buf;
 
   /* Save the Scheme stack */
-  //  k->sstack = STk_must_malloc(ssize);
-  //  k->stacks = STk_must_malloc(ssize + csize);
-  memcpy(k->stacks, sstart, ssize);
+  k->sstack = STk_must_malloc(ssize);
+  memcpy(k->sstack, k->sp, ssize);
 
   /* Save the C stack */
-  //  k->cstack = STk_must_malloc(csize);
-  //memcpy(k->cstack, cstart, csize);
-  memcpy(k->stacks + ssize, cstart, csize);
+  k->cstack = STk_must_malloc(csize);
+  memcpy(k->cstack, cstart, csize);
 
   k->fresh = 1;
 
@@ -2016,7 +2007,7 @@ static void restore_cont_jump(struct continuation_obj *k, void* addr){
     STk_get_stack_pointer(&addr);
     restore_cont_jump(k, &addr);
   } else {
-    memcpy(k->cstart, k->stacks + k->ssize, k->csize);
+    memcpy(k->cstart, k->cstack, k->csize);
 
     /* Return */
     MY_LONGJMP(k->state, 1);
@@ -2047,7 +2038,7 @@ DEFINE_PRIMITIVE("%restore-continuation", restore_cont, subr2, (SCM cont, SCM va
 
   k->fresh = 0;
   /* Restore the Scheme stack */
-  memcpy(k->sstart, k->stacks, k->ssize);
+  memcpy(k->sp, k->sstack, k->ssize);
 
   /* Restore the C stack */
   STk_get_stack_pointer(&addr);

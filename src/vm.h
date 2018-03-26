@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 21-Mar-2018 11:26 (eg)
+ * Last file update: 26-Mar-2018 09:30 (eg)
  */
 
 
@@ -64,9 +64,8 @@ struct continuation_obj {
   SCM *constants;
   SCM *handlers;
   jbuf *jb;
-  //  void *cstack;
-  //  void *sstack;
-  char stacks[1];
+  void *cstack;
+  void *sstack;
 };
 
 #define CONTP(k)        (BOXED_TYPE_EQ((k), tc_continuation))
