@@ -1,8 +1,8 @@
-/*					-*- coding: utf-8 -*-
+/*                                      -*- coding: utf-8 -*-
  *
- * b o o l e a n . c			-- Booleans and Equivalence predicates
+ * b o o l e a n . c                    -- Booleans and Equivalence predicates
  *
- * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 19-Aug-2011 11:26 (eg)
+ * Last file update: 26-Mar-2018 10:06 (eg)
  */
 
 #include "stklos.h"
@@ -177,37 +177,37 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
 
   switch (STYPE(x)) {
     case tc_symbol:
-      	if (SYMBOLP(y) && strcmp(SYMBOL_PNAME(x), SYMBOL_PNAME(y)) == 0)
-	  return STk_true;
-	break;
+        if (SYMBOLP(y) && strcmp(SYMBOL_PNAME(x), SYMBOL_PNAME(y)) == 0)
+          return STk_true;
+        break;
 
     case tc_real:
     case tc_bignum:
     case tc_complex:
     case tc_rational:
       if (NUMBERP(y)) {
-	if (EXACTP(x) != EXACTP(y))
-	  return STk_false;
-	return MAKE_BOOLEAN(STk_numeq2(x, y));
+        if (EXACTP(x) != EXACTP(y))
+          return STk_false;
+        return MAKE_BOOLEAN(STk_numeq2(x, y));
       }
       break;
     case tc_instance:
       if (STk_oo_initialized) {
-	SCM fg, res;
+        SCM fg, res;
 
-	fg = STk_lookup(STk_intern("object-eqv?"), STk_current_module(),
-			&res, FALSE);
-	res = STk_C_apply(fg, 2, x, y);
-	return res;
+        fg = STk_lookup(STk_intern("object-eqv?"), STk_current_module(),
+                        &res, FALSE);
+        res = STk_C_apply(fg, 2, x, y);
+        return res;
       }
       break;
     case tc_pointer:
       if (CPOINTERP(y) && (CPOINTER_VALUE(x) == CPOINTER_VALUE(y)))
-	return STk_true;
+        return STk_true;
       break;
 #ifdef FIXME
 //EG:       default: if (EXTENDEDP(x) && EXTENDEDP(y) && TYPE(x) == TYPE(y))
-//EG: 		  return STk_extended_compare(x, y, FALSE);
+//EG:             return STk_extended_compare(x, y, FALSE);
 #endif
     default: break;
   }
@@ -299,58 +299,59 @@ DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
 
   switch (STYPE(x)) {
     case tc_cons:
-      	if (CONSP(y)) {
-	  if (STk_equal(CAR(x), CAR(y)) == STk_false) return STk_false;
-	  x = CDR(x); y = CDR(y);
-	  goto Top;
-	}
-	break;
+      if (CONSP(y)) {
+        if (STk_equal(CAR(x), CAR(y)) == STk_false) return STk_false;
+        x = CDR(x); y = CDR(y);
+        goto Top;
+      }
+      break;
     case tc_string:
-      if (STRINGP(y))
-	return STk_streq(x, y);
-      	break;
+      if (STRINGP(y)) {
+        return STk_streq(x, y);
+      }
+      break;
     case tc_vector:
       if (VECTORP(y)) {
-	long lx, ly, i;
-	SCM *vx, *vy;
+        long lx, ly, i;
+        SCM *vx, *vy;
 
-	lx = VECTOR_SIZE(x); ly = VECTOR_SIZE(y);
-	if (lx == ly) {
-	  vx = VECTOR_DATA(x);
-	  vy = VECTOR_DATA(y);
-	  for (i=0; i < lx;  i++) {
-	    if (STk_equal(vx[i], vy[i]) == STk_false) return STk_false;
-	  }
-	  return STk_true;
-	}
+        lx = VECTOR_SIZE(x); ly = VECTOR_SIZE(y);
+        if (lx == ly) {
+          vx = VECTOR_DATA(x);
+          vy = VECTOR_DATA(y);
+          for (i=0; i < lx;  i++) {
+            if (STk_equal(vx[i], vy[i]) == STk_false) return STk_false;
+          }
+          return STk_true;
+        }
       }
       break;
     case tc_instance:
       if (STk_oo_initialized) {
-	SCM fg, res;
+        SCM fg, res;
 
-	fg = STk_lookup(STk_intern("object-equal?"),STk_current_module(),
-			&res,FALSE);
-	res = STk_C_apply(fg, 2, x, y);
-	return res;
+        fg = STk_lookup(STk_intern("object-equal?"),STk_current_module(),
+                        &res,FALSE);
+        res = STk_C_apply(fg, 2, x, y);
+        return res;
       }
       break;
     case tc_struct:
       if (STRUCTP(y) && (STRUCT_TYPE(x) == STRUCT_TYPE(y)))
-	return STk_equal(STk_struct2list(x), STk_struct2list(y));
+        return STk_equal(STk_struct2list(x), STk_struct2list(y));
       break;
     case tc_box:
       if (BOXP(y))
-	return STk_equal(BOX_VALUE(x), BOX_VALUE(y));
+        return STk_equal(BOX_VALUE(x), BOX_VALUE(y));
       break;
     case tc_uvector:
       if (BOXED_TYPE_EQ(y, tc_uvector))
-	return MAKE_BOOLEAN(STk_uvector_equal(x, y));
+        return MAKE_BOOLEAN(STk_uvector_equal(x, y));
       break;
 #ifdef FIXME
 //EG:       default:
-//EG: 		if (EXTENDEDP(x) && EXTENDEDP(y) && TYPE(x) == TYPE(y))
-//EG: 		  return STk_extended_compare(x, y, TRUE);
+//EG:           if (EXTENDEDP(x) && EXTENDEDP(y) && TYPE(x) == TYPE(y))
+//EG:             return STk_extended_compare(x, y, TRUE);
 #endif
     default: break;
   }
