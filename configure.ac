@@ -2,10 +2,10 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  1-Jan-2012 18:44 (eg)
+### Last file update: 26-Mar-2018 10:15 (eg)
 
-AC_PREREQ(2.64)
-AC_INIT([stklos], [1.11])
+AC_PREREQ([2.69])
+AC_INIT([stklos],[1.20])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR(src/stklos.c)
 AC_CONFIG_HEADERS(src/stklosconf.h)
@@ -98,9 +98,9 @@ case $OS in
    DARWIN)
       case $version in
          9*)  OS_NAME_VERSION=DARWIN_9;;
-	 10*) OS_NAME_VERSION=DARWIN_10;;
-	 11*) OS_NAME_VERSION=DARWIN_11;;
-	 *)   OS_NAME_VERSION=DARWIN_OLD;;
+         10*) OS_NAME_VERSION=DARWIN_10;;
+         11*) OS_NAME_VERSION=DARWIN_11;;
+         *)   OS_NAME_VERSION=DARWIN_OLD;;
       esac
       ;;
   *)
@@ -185,8 +185,8 @@ case $OS_NAME_VERSION in
        if test ! -f gc/stklos-patch-applied
        then
               echo "**** Patching GC library";
-	      patch -p1 < etc/lion.patch
-	      touch  gc/stklos-patch-applied
+              patch -p1 < etc/lion.patch
+              touch  gc/stklos-patch-applied
        fi
        ;;
 esac
@@ -201,7 +201,7 @@ fi
 
 # Test if the user want to force with our GC lib
 AC_ARG_WITH(provided-gc,
-       [  --with-provided-gc	  use the provided Boehm GC library],
+       [  --with-provided-gc      use the provided Boehm GC library],
        PROV_GC="$withval", PROV_GC="no")
 
 if test "$HAVE_GC" = "no" -o "$PROV_GC" = "yes"
@@ -216,7 +216,7 @@ then
      esac
      (cd gc; CC=${CC} CFLAGS=${cflags} ./configure --prefix=$prefix \
               --includedir=$prefix/include/stklos \
-	      --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
+              --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
      GCINC="-I../gc/include"
      GCLIB="../gc/.libs/libgc.a"
@@ -262,7 +262,7 @@ AC_ARG_WITH(provided-bignum,
 
 if test "$PROV_GMP" = "no" ;then
   AC_ARG_WITH(gmp-light,
-         [  --with-gmp-light	  a synonym for --with-provided-bignum],
+         [  --with-gmp-light      a synonym for --with-provided-bignum],
          PROV_GMP="$withval", PROV_GMP="no")
 fi
 
@@ -270,7 +270,7 @@ if test "$HAVE_GMP" = "no" -o "$PROV_GMP" = "yes"
 then
      echo "... Configuring libgmp"
      (cd gmp; CC=${CC} CFLAGS="${cflags} -I../src -DFOR_STKLOS=1" ./configure \
-     	      --prefix=$prefix) || { echo "Cannot configure the GMP"; exit; }
+              --prefix=$prefix) || { echo "Cannot configure the GMP"; exit; }
      GMP=gmp
      GMPINC="-I../gmp"
      GMPLIB="../gmp/.libs/libgmp.a"
@@ -313,7 +313,7 @@ then
      (cd pcre; CC=${CC} CFLAGS="${CFLAGS} $PCRE_FLAGS" ./configure \
            --enable-utf8 \
            --prefix=$prefix --disable-shared --disable-cpp) || \
-	   { echo "Cannot configure PCRE"; exit; }
+           { echo "Cannot configure PCRE"; exit; }
      PCRE=pcre
      PCREINC="-I../pcre"
      PCRELIB="../pcre/.libs/libpcreposix.a ../pcre/.libs/libpcre.a"
@@ -358,7 +358,7 @@ then
      echo "... Configuring libffi"
      (cd ffi; CC=${CC} CFLAGS=${CFLAGS} ./configure \
            --disable-structs --disable-raw-api --disable-shared \
-	   --prefix=$prefix) || { echo "Cannot configure libffi"; exit; }
+           --prefix=$prefix) || { echo "Cannot configure libffi"; exit; }
      FFI="ffi"
      FFIINC="-I../ffi/include"
      FFILIB="../ffi/.libs/libffi.a"
@@ -381,11 +381,8 @@ AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
 ###
 ### See in what direction the stack grows (code stolen from Sawfish)
 ###
-AC_TRY_RUN([ void inner (char *foo) { char bar; exit (!(foo >= &bar)); }
-             void main () { char foo; inner (&foo); } ],
-   [STACK_DIRECTION="DOWN"],
-   [STACK_DIRECTION="UP"],
-   echo "Stack direction is not detected when cross compiling for now")
+AC_RUN_IFELSE([AC_LANG_SOURCE([[ void inner (char *foo) { char bar; exit (!(foo >= &bar)); }
+             void main () { char foo; inner (&foo); } ]])],[STACK_DIRECTION="DOWN"],[STACK_DIRECTION="UP"],[echo "Stack direction is not detected when cross compiling for now"])
 
 
 ###
@@ -440,12 +437,12 @@ AC_SUBST(LIB_SUMMARY)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
-	  utils/stklos-script examples/Makefile
-	  lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
-	  lib/ScmPkg.d/Makefile tests/Makefile
-	  doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
-	  doc/stklos-genlex.1 doc/stklos-pkg.1 doc/skb/stklos-version.stk
-	  pkgman/Makefile])
+          utils/stklos-script examples/Makefile
+          lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
+          lib/ScmPkg.d/Makefile tests/Makefile
+          doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
+          doc/stklos-genlex.1 doc/stklos-pkg.1 doc/skb/stklos-version.stk
+          pkgman/Makefile])
 AC_OUTPUT
 
 chmod 0755 utils/stklos-config utils/stklos-script

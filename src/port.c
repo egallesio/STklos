@@ -1,7 +1,7 @@
 /*
- *  p o r t . c			-- ports implementation
+ *  p o r t . c                 -- ports implementation
  *
- * Copyright © 1993-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 18-Mar-2012 18:08 (eg)
+ * Last file update: 10-Apr-2018 16:38 (eg)
  *
  */
 
@@ -29,9 +29,9 @@
 #include "vm.h"
 
 
-#define INITIAL_LINE_SIZE 256		/* Initial size for readline */
+#define INITIAL_LINE_SIZE 256           /* Initial size for readline */
 
-static SCM CrLf;			/* used in read-line only */
+static SCM CrLf;                        /* used in read-line only */
 
 static SCM io_error, io_port_error, io_read_error, io_write_error,
   io_closed_error, io_fn_error, io_malformed, io_prot_error,
@@ -41,11 +41,11 @@ static SCM io_error, io_port_error, io_read_error, io_write_error,
 static void general_io_error(SCM type, char *format, SCM f)
 {
   STk_raise_exception(STk_make_C_cond(type,
-				      4,
-				      STk_false,
-				      STk_vm_bt(),
-				      STk_format_error(format, f),
-				      f));
+                                      4,
+                                      STk_false,
+                                      STk_vm_bt(),
+                                      STk_format_error(format, f),
+                                      f));
 }
 
 static void error_closed_port(SCM p)
@@ -55,7 +55,7 @@ static void error_closed_port(SCM p)
 
 static void error_bad_utf8_character(int byte)
 {
-  general_io_error(io_read_error, "bad UTF-8 byte ~S", MAKE_INT(byte));
+  general_io_error(io_read_error, "bad UTF-8 byte %S", MAKE_INT(byte));
 }
 
 void STk_error_bad_io_param(char *fmt, SCM p)
@@ -198,7 +198,7 @@ badport:
 
 
 /*=============================================================================*\
- * 				Read
+ *                              Read
 \*=============================================================================*/
 
 /*
@@ -485,7 +485,7 @@ DEFINE_PRIMITIVE("char-ready?", char_readyp, subr01, (SCM port))
 }
 
 /*=============================================================================*\
- * 				Write
+ *                              Write
 \*=============================================================================*/
 
 
@@ -657,7 +657,7 @@ DEFINE_PRIMITIVE("write-byte", write_byte, subr12, (SCM byte, SCM port))
 
 /*===========================================================================*\
  *
- * 			S T k   b o n u s
+ *                      S T k   b o n u s
  *
 \*===========================================================================*/
 #define FMT_SIZE 7
@@ -688,13 +688,13 @@ static SCM internal_format(int argc, SCM *argv, int error)
       argc -= 2;
 
       if (BOOLEANP(port)){
-	if (port == STk_true) port = STk_current_output_port();
-	else {
-	  format_in_string = 1;
-	  port = STk_open_output_string();
-	}
+        if (port == STk_true) port = STk_current_output_port();
+        else {
+          format_in_string = 1;
+          port = STk_open_output_string();
+        }
       } else {
-	verify_port(port, PORT_WRITE);
+        verify_port(port, PORT_WRITE);
       }
     }
   }
@@ -710,159 +710,159 @@ static SCM internal_format(int argc, SCM *argv, int error)
     if (*p == '~') {
       switch(*(++p)) {
         case 'A':
-	case 'a': {
-		    SCM tmp;
+        case 'a': {
+                    SCM tmp;
 
-		    if (argc-- <= 0) goto TooMuch;
-		    tmp = *argv--;
-		    if (STRINGP(tmp)) {
-		      if (STRING_SIZE(tmp) > 0)
-			prev_char = STRING_CHARS(tmp)[STRING_SIZE(tmp) - 1];
-		    }
-		    else if (CHARACTERP(tmp))
-		      prev_char= CHARACTER_VAL(tmp);
+                    if (argc-- <= 0) goto TooMuch;
+                    tmp = *argv--;
+                    if (STRINGP(tmp)) {
+                      if (STRING_SIZE(tmp) > 0)
+                        prev_char = STRING_CHARS(tmp)[STRING_SIZE(tmp) - 1];
+                    }
+                    else if (CHARACTERP(tmp))
+                      prev_char= CHARACTER_VAL(tmp);
 
-		    STk_print(tmp, port, DSP_MODE);
-		    continue;		/* because we set ourselves prev_char */
-		  }
+                    STk_print(tmp, port, DSP_MODE);
+                    continue;           /* because we set ourselves prev_char */
+                  }
         case 'S':
         case 's': if (argc-- <= 0) goto TooMuch;
                   STk_print(*argv--, port, WRT_MODE);
-	          break;
+                  break;
         case 'W':
         case 'w': if (argc-- <= 0) goto TooMuch;
-	  	  STk_print_star(*argv--, port);
-	          break;
+                  STk_print_star(*argv--, port);
+                  break;
         case 'X':
         case 'x': if (argc-- <= 0) goto TooMuch;
-	  	  STk_print(STk_number2string(*argv--, MAKE_INT(16)),port,DSP_MODE);
-		  break;
+                  STk_print(STk_number2string(*argv--, MAKE_INT(16)),port,DSP_MODE);
+                  break;
         case 'D':
         case 'd': if (argc-- <= 0) goto TooMuch;
-	  	  STk_print(STk_number2string(*argv--, MAKE_INT(10)),port,DSP_MODE);
-		  break;
+                  STk_print(STk_number2string(*argv--, MAKE_INT(10)),port,DSP_MODE);
+                  break;
         case 'O':
         case 'o': if (argc-- <= 0) goto TooMuch;
-	  	  STk_print(STk_number2string(*argv--, MAKE_INT(8)),port,DSP_MODE);
-		  break;
+                  STk_print(STk_number2string(*argv--, MAKE_INT(8)),port,DSP_MODE);
+                  break;
         case 'B':
         case 'b': if (argc-- <= 0) goto TooMuch;
-	  	  STk_print(STk_number2string(*argv--, MAKE_INT(2)),port,DSP_MODE);
-		  break;
+                  STk_print(STk_number2string(*argv--, MAKE_INT(2)),port,DSP_MODE);
+                  break;
         case 'C':
         case 'c': if (argc-- <= 0) goto TooMuch;
-	  	  if (!CHARACTERP(*argv))
-		    STk_error_bad_io_param("bad character ~S", *argv);
-		  prev_char = CHARACTER_VAL(*argv);
-		  STk_print(*argv--, port, DSP_MODE);
-		  continue;	/* because we set ourselves prev_char */
+                  if (!CHARACTERP(*argv))
+                    STk_error_bad_io_param("bad character ~S", *argv);
+                  prev_char = CHARACTER_VAL(*argv);
+                  STk_print(*argv--, port, DSP_MODE);
+                  continue;     /* because we set ourselves prev_char */
         case 'Y':
-	case 'y': {					/* Yuppify */
-		      SCM ref, pp;
+        case 'y': {                                     /* Yuppify */
+                      SCM ref, pp;
 
-		      if (argc-- <= 0) goto TooMuch;
-		      pp = STk_lookup(STk_intern("pp"),
-				      STk_current_module(),
-				      &ref,
-				      TRUE);
-		      STk_print(STk_C_apply(pp, 3, *argv--,
-					    STk_makekey("port"),
-					    STk_false),
-				port,
-				WRT_MODE);
-		      prev_char = '\n'; /* since our pp always add a newline */
-		      continue;		/* because we set ourselves prev_char */
-	}
+                      if (argc-- <= 0) goto TooMuch;
+                      pp = STk_lookup(STk_intern("pp"),
+                                      STk_current_module(),
+                                      &ref,
+                                      TRUE);
+                      STk_print(STk_C_apply(pp, 3, *argv--,
+                                            STk_makekey("port"),
+                                            STk_false),
+                                port,
+                                WRT_MODE);
+                      prev_char = '\n'; /* since our pp always add a newline */
+                      continue;         /* because we set ourselves prev_char */
+        }
         case '0': case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9': {
-	  	  char width[FMT_SIZE], digits[FMT_SIZE];
-		  SCM ff, ref, tmp;
-		  int i;
+                  char width[FMT_SIZE], digits[FMT_SIZE];
+                  SCM ff, ref, tmp;
+                  int i;
 
-		  if (argc-- <= 0) goto TooMuch;
+                  if (argc-- <= 0) goto TooMuch;
 
-		  for (i=0; isdigit(*p); i++) {
-		    if (i >= FMT_SIZE) goto Incorrect_format_width;
-		    width[i] = *p++;
-		  }
-		  width[i] = '\0';
+                  for (i=0; isdigit(*p); i++) {
+                    if (i >= FMT_SIZE) goto Incorrect_format_width;
+                    width[i] = *p++;
+                  }
+                  width[i] = '\0';
 
-		  if (*p == ',') {
-		    p++;
-		    for (i=0; isdigit(*p); i++) {
-		      if (i >= FMT_SIZE) goto Incorrect_format_width;
-		      digits[i] = *p++;
-		    }
-		    digits[i] = '\0';
-		  }
-		  if (*p != 'f' && *p != 'F') goto Incorrect_format_width;
+                  if (*p == ',') {
+                    p++;
+                    for (i=0; isdigit(*p); i++) {
+                      if (i >= FMT_SIZE) goto Incorrect_format_width;
+                      digits[i] = *p++;
+                    }
+                    digits[i] = '\0';
+                  }
+                  if (*p != 'f' && *p != 'F') goto Incorrect_format_width;
 
-		  /* width and digits are strings which contains the width
-		   * and the number of digits for the format
-		   * Call the Scheme routine srfi48:format-fixed
-		   */
-		  ff = STk_lookup(STk_intern("srfi48:format-fixed"),
-				  STk_current_module(),
-				  &ref,
-				  TRUE);
-		  tmp = STk_C_apply(ff, 3,
-					*argv--,
-					STk_Cstr2number(width, 10L),
-				    STk_Cstr2number(digits, 10L));
-		  if (STRINGP(tmp)) {
-		    if (STRING_SIZE(tmp) > 0)
-		      prev_char = STRING_CHARS(tmp)[STRING_SIZE(tmp) - 1];
-		  }
-		  STk_print(tmp, port, DSP_MODE);
-		  continue;
-	}
-	case '?':
+                  /* width and digits are strings which contains the width
+                   * and the number of digits for the format
+                   * Call the Scheme routine srfi48:format-fixed
+                   */
+                  ff = STk_lookup(STk_intern("srfi48:format-fixed"),
+                                  STk_current_module(),
+                                  &ref,
+                                  TRUE);
+                  tmp = STk_C_apply(ff, 3,
+                                        *argv--,
+                                        STk_Cstr2number(width, 10L),
+                                    STk_Cstr2number(digits, 10L));
+                  if (STRINGP(tmp)) {
+                    if (STRING_SIZE(tmp) > 0)
+                      prev_char = STRING_CHARS(tmp)[STRING_SIZE(tmp) - 1];
+                  }
+                  STk_print(tmp, port, DSP_MODE);
+                  continue;
+        }
+        case '?':
         case 'K':
         case 'k': {
-	  	    SCM fmt, ref,args;
-		    int len;
+                    SCM fmt, ref,args;
+                    int len;
 
-		    if (argc-- <= 0) goto TooMuch;
-		    fmt = *argv--;
-		    if (!STRINGP(fmt))
-		      STk_error_bad_io_param("bad string for ~~? format ~S", fmt);
+                    if (argc-- <= 0) goto TooMuch;
+                    fmt = *argv--;
+                    if (!STRINGP(fmt))
+                      STk_error_bad_io_param("bad string for ~~? format ~S", fmt);
 
-		    if (argc-- <= 0) goto TooMuch;
-		    args = *argv--;
-		    len  = STk_int_length(args);
-		    if (len < 0)
-		      STk_error_bad_io_param("bad list for ~~? format ~S", args);
+                    if (argc-- <= 0) goto TooMuch;
+                    args = *argv--;
+                    len  = STk_int_length(args);
+                    if (len < 0)
+                      STk_error_bad_io_param("bad list for ~~? format ~S", args);
 
-		    /* Do (apply format port fmt args) */
-		    STk_C_apply_list(STk_lookup(STk_intern("format"),
-						STk_current_module(), &ref, TRUE),
-				     STk_cons(port, STk_cons(fmt, args)));
-		    break;
-		  }
+                    /* Do (apply format port fmt args) */
+                    STk_C_apply_list(STk_lookup(STk_intern("format"),
+                                                STk_current_module(), &ref, TRUE),
+                                     STk_cons(port, STk_cons(fmt, args)));
+                    break;
+                  }
         case 'H':
-        case 'h': {					/* Help */
-	  	     SCM ref, help;
+        case 'h': {                                     /* Help */
+                     SCM ref, help;
 
-		      help = STk_lookup(STk_intern("srfi48:help"),
-					STk_current_module(),
-					&ref,
-					TRUE);
-		      STk_C_apply(help, 1, port);
-		      break;
-	}
+                      help = STk_lookup(STk_intern("srfi48:help"),
+                                        STk_current_module(),
+                                        &ref,
+                                        TRUE);
+                      STk_C_apply(help, 1, port);
+                      break;
+        }
         case 'T':
-      	case 't': STk_putc('\t', port);
-		  break;
+        case 't': STk_putc('\t', port);
+                  break;
         case '_': STk_putc(' ',port);
-		  break;
+                  break;
         case '&': if (prev_char == '\n') continue;
         case '%': STk_putc('\n', port);
-	  	  prev_char = '\n';
+                  prev_char = '\n';
                   continue;
         case '~': STk_putc('~', port);
                   break;
         default:  STk_putc('~',  port);
-	  	  if (*p) STk_putc(*p, port);
+                  if (*p) STk_putc(*p, port);
       }
       prev_char = '?';
     } else {
@@ -1059,9 +1059,9 @@ static SCM do_error(SCM type, int argc, SCM *argv)
 
       /* See if we have a formatted message or a plain SRFI-23 call */
       if (STRINGP(*argv) && !msg_use_tilde(STRING_CHARS(*argv)))
-	msg = srfi_23_error(argc, argv);
+        msg = srfi_23_error(argc, argv);
       else
-	msg = internal_format(argc, argv, TRUE);
+        msg = internal_format(argc, argv, TRUE);
       STk_signal_error(type, who, msg);
     }
   }
@@ -1196,26 +1196,26 @@ DEFINE_PRIMITIVE("read-line", read_line, subr01, (SCM port))
       /* We must enlarge the buffer */
       size += size / 2;
       if (i == INITIAL_LINE_SIZE) {
-	/* This is the first resize. Pass from static to dynamic allocation */
-	buff = STk_must_malloc(size);
-	strncpy(buff, buffer, INITIAL_LINE_SIZE);
+        /* This is the first resize. Pass from static to dynamic allocation */
+        buff = STk_must_malloc(size);
+        strncpy(buff, buffer, INITIAL_LINE_SIZE);
       }
       else
-	buff = STk_must_realloc(buff, size);
+        buff = STk_must_realloc(buff, size);
     }
     switch (c = STk_getc(port)) {
       case EOF:  res = (i == 0) ? STk_eof : STk_makestring(i, buff);
-		 if (buff != buffer) STk_free(buff);
-		 return STk_n_values(2, res, STk_eof);
+                 if (buff != buffer) STk_free(buff);
+                 return STk_n_values(2, res, STk_eof);
 
       case '\n': if (prev == '\r')
-		   { i -= 1; delim = CrLf; }
-      		 else
-		   delim = MAKE_CHARACTER('\n');
+                   { i -= 1; delim = CrLf; }
+                 else
+                   delim = MAKE_CHARACTER('\n');
 
-		 res = STk_makestring(i, buff);
-		 if (buff != buffer) STk_free(buff);
-		 return STk_n_values(2, res, delim);
+                 res = STk_makestring(i, buff);
+                 if (buff != buffer) STk_free(buff);
+                 return STk_n_values(2, res, delim);
 
       default:  buff[i] = prev = c;
     }
@@ -1272,7 +1272,7 @@ DEFINE_PRIMITIVE("copy-port", copy_port, subr23, (SCM p1, SCM p2, SCM max))
 
  Error:
   STk_error("problem while copying port ~S on port ~S (~S)",
-	    p1 , p2, STk_Cstring2string(strerror(errno)));
+            p1 , p2, STk_Cstring2string(strerror(errno)));
   return STk_void;
 }
 
@@ -1414,16 +1414,16 @@ DEFINE_PRIMITIVE("port-rewind", port_rewind, subr1, (SCM port))
  *        (p   (open-output-file tmp))
  *        (foo #t))
  *   (port-close-hook-set! p
- * 			(lambda()
- * 			  (remove-file tmp)
- * 			  (set! foo #t)))
+ *                      (lambda()
+ *                        (remove-file tmp)
+ *                        (set! foo #t)))
  *   (close-port p)
  *   foo)
  * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("port-close-hook-set!", port_close_hook_set, subr2,
-		 (SCM port, SCM thunk))
+                 (SCM port, SCM thunk))
 {
   if (!PORTP(port)) STk_error_bad_port(port);
   if (!STk_procedurep(thunk)) STk_error("bad procedure ~S", thunk);
@@ -1456,7 +1456,7 @@ static void initialize_io_conditions(void)
 {
   SCM module = STk_STklos_module;
 
-#define DEFCOND(x, name, parent, slots)			\
+#define DEFCOND(x, name, parent, slots)                 \
   x = STk_defcond_type(name, parent, slots, module)
 
   DEFCOND(io_error, "&i/o-error", STk_err_mess_condition, STk_nil);
@@ -1484,8 +1484,8 @@ static void print_port(SCM obj, SCM port, int mode)
 
 /* The stucture which describes the port type */
 static struct extended_type_descr xtype_port = {
-  "port",			/* name */
-  print_port			/* print function */
+  "port",                       /* name */
+  print_port                    /* print function */
 };
 
 
@@ -1497,7 +1497,7 @@ int STk_init_port(void)
   /* Define a constant for lines terminated by CR/LF to avoid multiple
    * allocations. Make it constant to avoid the user break it
    */
-  CrLf		       = STk_Cstring2string("\r\n");
+  CrLf                 = STk_Cstring2string("\r\n");
   BOXED_INFO(CrLf)    |= STRING_CONST;
 
   /* Define the port file */
@@ -1555,6 +1555,6 @@ int STk_init_port(void)
   ADD_PRIMITIVE(port_close_hook_set);
 
   return STk_init_fport() &&
-    	 STk_init_sport() &&
-    	 STk_init_vport();
+         STk_init_sport() &&
+         STk_init_vport();
 }

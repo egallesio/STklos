@@ -168,3 +168,5 @@ utils/stklos-script
 
 # Snowman directory
 snowman/stklos-snowman
+/.autoenv-in
+/.autoenv-out

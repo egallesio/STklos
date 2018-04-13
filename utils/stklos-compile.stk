@@ -1,7 +1,7 @@
 ;;;;
-;;;; stklos-compile.stk	-- Call the stklos compiler
+;;;; stklos-compile.stk -- Call the stklos compiler
 ;;;;
-;;;; Copyright © 2001-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 10-Aug-2010 13:02 (eg)
+;;;; Last file update: 10-Apr-2018 16:42 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -31,7 +31,7 @@
 (define *expr* #f)
 
 ;; ----------------------------------------------------------------------
-;;	convert-to-C ...
+;;      convert-to-C ...
 ;; ----------------------------------------------------------------------
 (define (convert-to-C src dst module-name)
   (define (header in out)
@@ -53,63 +53,62 @@
 
 
   (let ((in   (open-input-file src))
-	(out  (open-output-file dst)))
+        (out  (open-output-file dst)))
     ;; Output the header
     (header in out)
     ;; Skip the symbol STklos
     (read in)
     ;; Write file informations
     (let ((info (read in))
-	  (str  (open-output-string)))
+          (str  (open-output-string)))
       (write info str)
       (format out "static char* __module_infos = ~S;\n\n" (get-output-string str)))
     ;; Write constants
     (let ((v   (read in))
-	  (str (open-output-string)))
+          (str (open-output-string)))
       (write v str)
       (format out "static char* __module_consts = ~S;\n\n" (get-output-string str)))
     ;; Write the code
     (let ((sz (read in)))
       (format out "static STk_instr __module_code [] = { \n")
-      (read-char in)  ; To skip the newline after size
+      (read-byte in)  ; To skip the newline after size
       (dotimes (i sz)
-	(let* ((c1 (read-char in))
-	       (c2 (read-char in)))
-	  (format out
-		  "~5f"
-		  (string-append
-		   "0x"
-		   (number->string (bit-or (bit-shift (char->integer c1) 8)
-					   (char->integer c2))
-				   16)))
-	  (when (< i (- sz 1))
-	    (display ", " out))
-	  (when (= (modulo i 10) 9)
-	    (newline out))))
+        (let* ((c1 (read-byte in))
+               (c2 (read-byte in)))
+          (format out
+                  "~5f"
+                  (string-append
+                   "0x"
+                   (number->string (bit-or (bit-shift c1 8) c2)
+                                   16)))
+          (when (< i (- sz 1))
+            (display ", " out))
+          (when (= (modulo i 10) 9)
+            (newline out))))
       (display "};\n\n" out))
     (footer out module-name)
     (flush-output-port out)
     (close-port out)))
 
 ;; ----------------------------------------------------------------------
-;;	compile-to-bytecode ...
+;;      compile-to-bytecode ...
 ;; ----------------------------------------------------------------------
 (define (compile-to-bytecode file out)
   (compile-file file out)
   (chmod out #o755))
 
 ;; ----------------------------------------------------------------------
-;;	compile-to-C-code ...
+;;      compile-to-C-code ...
 ;; ----------------------------------------------------------------------
 (define (compile-to-C-code file out)
   (let ((tmp  (temporary-file-name))
-	(name (file-prefix (basename file))))
+        (name (file-prefix (basename file))))
     (compile-to-bytecode file tmp)
     (convert-to-C tmp out name)
     (remove-file tmp)))
 
 ;; ----------------------------------------------------------------------
-;;	main ...
+;;      main ...
 ;; ----------------------------------------------------------------------
 (define (main args)
   (parse-arguments args
@@ -148,22 +147,22 @@
         (compiler:time-display #f))
      (("help" :alternate "h" :help "This help")
         (arg-usage (current-error-port))
-	(exit 1))
+        (exit 1))
 
      (else
       (cond
-	((= (length other-arguments) 1)
-	 ;; Evaluate prelude code
-	 (when (string? *expr*)
-	   (with-handler (lambda (c)
-			   (die (format "Error in --evaluate ~A option" *expr*)))
-	      (eval (read-from-string *expr*)
-		    (interaction-environment))))
-	 ;; Produce code
-	 (if *c-code*
-	     (compile-to-C-code (car other-arguments) *output*)
-	     (compile-to-bytecode (car other-arguments) *output*))
-	 (exit 0))
-	(else
-	  (arg-usage (current-error-port))
-	  (exit 1))))))
+        ((= (length other-arguments) 1)
+         ;; Evaluate prelude code
+         (when (string? *expr*)
+           (with-handler (lambda (c)
+                           (die (format "Error in --evaluate ~A option" *expr*)))
+              (eval (read-from-string *expr*)
+                    (interaction-environment))))
+         ;; Produce code
+         (if *c-code*
+             (compile-to-C-code (car other-arguments) *output*)
+             (compile-to-bytecode (car other-arguments) *output*))
+         (exit 0))
+        (else
+          (arg-usage (current-error-port))
+          (exit 1))))))

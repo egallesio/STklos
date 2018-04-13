@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update: 21-Mar-2018 12:17 (eg)
+;;;; Last file update: 26-Mar-2018 10:09 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -248,10 +248,10 @@ doc>
                          (key-get *%system-state-plist* :readline 'no-readline)
                          (if (key-get *%system-state-plist* :use-utf8 #f)
                              'utf8 'no-utf8))))
-      (display (do-color 'bold 'black " *     " 'bold 'blue line1))
-      (display (do-color 'bold 'black "  *    " 'bold 'blue line2))
-      (display (do-color 'bold 'black " * *   " 'bold 'blue line3))
-      (display (do-color 'bold 'black " *  *  " 'bold 'blue line4 'normal))))
+      (display (do-color 'bold 'black "  \\    " 'bold 'blue line1))
+      (display (do-color 'bold 'black "   \\   " 'bold 'blue line2))
+      (display (do-color 'bold 'black "  / \\  " 'bold 'blue line3))
+      (display (do-color 'bold 'black " /   \\ " 'bold 'blue line4 'normal))))
 
   ((main-repl-hook))
   (repl)
