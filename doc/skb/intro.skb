@@ -1,6 +1,6 @@
 ;; ======================================================================
 ;;
-;; 			STklos Reference Manual
+;;                      STklos Reference Manual
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 20-Apr-2007 16:00 (eg)
+;; Last file update: 20-Apr-2018 17:35 (eg)
 ;;
 ;; ======================================================================
 
@@ -27,14 +27,14 @@
 
 ;; ======================================================================
 ;;
-;;			Introduction
+;;                      Introduction
 ;;
 ;; ======================================================================
 (chapter :title "Introduction" :file #f
 
 ;;; ======================================================================
 ;;;
-;;; 	Section "Overview of STklos"
+;;;     Section "Overview of STklos"
 ;;;
 ;;; ======================================================================
 (section :title [Overview of ,(stklos)]
@@ -70,26 +70,44 @@ identical in every points, share the same philosophy.]))
 
 ;;; ======================================================================
 ;;;
-;;; 	Section "Lexical Conventions"
+;;;     Section "Lexical Conventions"
 ;;;
 ;;; ======================================================================
 (section :title " Lexical Conventions"
 
 
 ;; ----------------------------------------------------------------------
-;; 	Subsection "Identifiers"
+;;      Subsection "Identifiers"
 ;; ----------------------------------------------------------------------
 (subsection :title "Identifiers"
 (index "keyword")
+(index "#!fold-case")
+(index "#!no-fold-case")
 
 (p [In ,(stklos), identifiers which start (or end) with a colon
 ,(q (code ":")) are considered as keywords.  For instance
 ,(code ":foo") and ,(code "bar:") are ,(stklos) keywords, but
 ,(code "not:key") is not a keyword. See
-section,(~),(ref :section "Keywords") for more information]))
+section,(~),(ref :section "Keywords") for more information])
+
+(p [Note that, by default, ,(stklos) is case insensitive as specified
+         by R5RS. This behavior can be changed by]
+   (itemize
+    (item [the ,(code "--case-sensitive") option used for the commands
+               ,(code "stklos") or ,(code "stklos-compile")])
+    (item [the directive ,(code "#!no-fold-case"). This directive can
+               appear anywhere comments are permitted but must be followed by a
+               delimiter. This directive (and the ,(code "#!fold-case")) are treated as
+               comments, except that they affect the reading of subsequent data from
+               the same port. The ,(code "#!fold-case") directive causes subsequent
+               identifiers and character names to be case-folded as if by
+               ,(code "string-foldcase"). It has no effect on character
+               literals. The ,(code "#!no-fold-case") directive causes the reader
+               to a non-folding behavior.]))))
+
 
 ;; ----------------------------------------------------------------------
-;; 	Subsection "Comments"
+;;      Subsection "Comments"
 ;; ----------------------------------------------------------------------
 (subsection :title "Comments"
    (index "comments")
@@ -123,7 +141,7 @@ then the script can be started directly as if it was a binary
 program. ,(stklos) is loaded behind the scene and
 executes the script as a Scheme program. This form is compatible with
 the notation introduced in ,(link-srfi 22)]
-	 (p [Note that, as a special case, that the sequences
+         (p [Note that, as a special case, that the sequences
 ,(q (code "#!key")), ,(q (code "#!optional")) and
 ,(q (code "#!rest")) are respectively converted to the ,(stklos)
 keywords ,(q (code ":key")), ,(q (code ":optional")) and
@@ -132,7 +150,7 @@ accepts keywords and optional arguments, to be compatible with
 DSSSL lambdas ,(ref :bib "dsssl:96").]))  ))
 
 ;; ----------------------------------------------------------------------
-;; 	Here Strings
+;;      Here Strings
 ;; ----------------------------------------------------------------------
 (subsection :title "Here Strings"
    (index "here string")
@@ -199,7 +217,7 @@ can also be represented in this way:
       )))
 ;;; ======================================================================
 ;;;
-;;; 	Section "Basic Concepts"
+;;;     Section "Basic Concepts"
 ;;;
 ;;; ======================================================================
 (section :title "Basic Concepts"
@@ -210,4 +228,3 @@ the basic concepts of the Scheme Programming Language.]
 
 
 )
-

@@ -1,11 +1,11 @@
-;;;;								-*- Scheme -*-
-;;;; biblio.skbib	-- The biblio Data File STklos Doc
+;;;;                                            -*- mode: Scheme; coding: utf-8 -*-
+;;;; biblio.skbib       -- The biblio Data File STklos Doc
 ;;;;
-;;;; Copyright © 2004-2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright Â© 2004-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  1-Sep-2004 18:01 (eg)
-;;;; Last file update:  3-Mar-2005 18:43 (eg)
+;;;; Last file update: 20-Apr-2018 19:22 (eg)
 ;;;;
 
 
@@ -23,7 +23,7 @@
 (techreport "Gallesio95-1a"
    (author "Erick Gallesio")
    (title "Reference Manual")
-   (institution "I3S CNRS / Université de Nice - Sophia Antipolis")
+   (institution "I3S CNRS / UniversitÃ© de Nice - Sophia Antipolis")
    (year "1995")
    (month "juillet")
    (number "RT 95-31a")
@@ -95,7 +95,7 @@
 
 
 (book "AMOP"
-  (author  "Gregor Kickzales, Jim de Rivières and Daniel G. Bobrow")
+  (author  "Gregor Kickzales, Jim de RiviÃ¨res and Daniel G. Bobrow")
   (title  "The Art of Meta Object Protocol")
   (year  "1991")
   (publisher  "MIT Press")
