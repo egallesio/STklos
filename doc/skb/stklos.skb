@@ -65,7 +65,7 @@
 (document :title [STklos Reference Manual]
 	  :subtitle [(version ,(begin *stklos-version*))]
 	  :author (author :name (font :size "+2" (bold "Erick Gallesio"))
-		     :affiliation "Université de Nice - Sophia Antipolis"
+		     :affiliation "UniversitÃ© de Nice - Sophia Antipolis"
 		     :address (list "930 route des Colles, BP 145"
 				    "F-06903 Sophia Antipolis, Cedex"
 				    "France"
