@@ -1,3 +1,61 @@
+2018-04-20 Erick Gallesio <eg@unice.fr>
+
+    - Updated documentation for version 1.20
+
+2018-04-13 Erick Gallesio <eg@unice.fr>
+
+    - Bug fix in stklos-compile
+      Using read-byte instead of read-char to be UTF8 reading independant
+
+2018-03-27 Erick Gallesio <eg@unice.fr>
+
+    - Bug Fix: the detection of bad UTF sequences could lead to a loop
+
+2018-03-26 Erick Gallesio <eg@unice.fr>
+
+    - Bug fix of a long standing bug on call/cc.
+      The bug was not systematic and showed up sometimes when running the tests
+
+2018-03-23 Erick Gallesio <eg@unice.fr>
+
+    - Added tests on functions declared with 'Î»' symbol
+
+2018-03-22 Erick Gallesio <eg@unice.fr>
+
+    - Changed source to avoid GCC warnings
+
+2016-03-13 Erick Gallesio <eg@unice.fr>
+
+    - Added the  unicode character 'Î»' as a synonym of lambda
+
+2014-01-02 Erick Gallesio <eg@unice.fr>
+
+    - Now when TERM vraiable is of the form xterm-xxxcolor, it is
+     recognized as a color terminal
+
+2012-03-18 Erick Gallesio <eg@unice.fr>
+
+    - Added #!fold-case and #!no-fold-case
+
+2012-02-26 Erick Gallesio <eg@unice.fr>
+
+    - Fixed  some problems on character encoding depending of the SHELL
+      LC_* varisables
+
+2012-01-01 Erick Gallesio <eg@unice.fr>
+
+    - Use the LANG variable to determine if we use utf8 (rather
+      than fixing it to true by default as before)
+
+2012-01-01 Erick Gallesio <eg@unice.fr>
+
+    - Replaced some calls to "make" by "$(MAKE)" in various Makefiles
+
+2011-12-31 Erick Gallesio <eg@unice.fr>
+
+     - STklos 1.10 Release
+       ===================
+
 2011-12-04  Erick Gallesio <eg at unice.fr>  <eg at unice.fr>
 
 	* doc/Makefile.in, lib/ffi.stk, src/Makefile.in, src/boot.c,
@@ -2429,7 +2487,7 @@
 	Current-{input,output,error}-port are now thread specific.
 
 	* src/stklosconf.h.in, src/thread.c, src/thread.h, src/vm.h,
-	* lib/Lurc.d: Start the integration of Stephane Épardaud LURC stuff.
+	* lib/Lurc.d: Start the integration of Stephane Ã‰pardaud LURC stuff.
 
 
 2006-04-06  Erick Gallesio  <eg@essi.fr>
@@ -3452,7 +3510,7 @@ n
 
 2003-12-13  Erick Gallesio  <eg@essi.fr>
 
-	* Added SILex to the distribution. Thanks to Danny Dubé for
+	* Added SILex to the distribution. Thanks to Danny DubÃ© for
 	allowing me to include it in STklos.
 
 2003-11-14  Erick Gallesio  <eg@essi.fr>
@@ -3849,7 +3907,7 @@ n
 	* STklos.prj: New GC: 6.1 alpha5
 
 	* gc/: Upgraded GC to 6.1 alpha5. STklos didn't work with RedHat
-	7.3. Bug signaled by Gérard Milmeister <gemi@bluewin.ch>
+	7.3. Bug signaled by GÃ©rard Milmeister <gemi@bluewin.ch>
 
 
 2002-06-12  Erick Gallesio  <eg@essi.fr>
@@ -4039,7 +4097,7 @@ n
 
 	* lib/: Added support for SRFI-9 and SRFI-8
 
-	* src/system.c: New primitives FULL-CURRENT-TIME (resolution is µs)
+	* src/system.c: New primitives FULL-CURRENT-TIME (resolution is Âµs)
 	and SECONDS->DATE
 
 	* lib/srfi-9.stk: Added records (aka SRFI-9)
