@@ -1,7 +1,7 @@
 ;;;;
-;;;; r5rs.stk	-- R5RS function written in Scheme
+;;;; r5rs.stk   -- R5RS function written in Scheme
 ;;;;
-;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 12:27 (eg)
-;;;; Last file update: 27-May-2011 23:08 (eg)
+;;;; Last file update:  1-Jun-2018 15:46 (eg)
 ;;;;
 
 
@@ -600,8 +600,8 @@ doc>
  *    ((null? exprs)        #t)
  *    ((= (length exprs) 1) (car exprs))
  *    (else                 `(if \,(car exprs)
- * 			      (my-and ,@(cdr exprs))
- * 			      #f))))
+ *                            (my-and ,@(cdr exprs))
+ *                            #f))))
  * (macro-expand '(my-and a b c))
  *                           => (if a (my-and b c) #f)
  * @end lisp
@@ -855,7 +855,7 @@ doc>
   (let ((k  (%make-continuation)))
     (if  (%fresh-continuation? k)
         (proc (lambda v
-		(%restore-continuation k v)))
+                (%restore-continuation k v)))
         (apply values k))))
 
 ;(define %dynamic-wind-stack (make-parameter (list #f)))
@@ -867,16 +867,16 @@ doc>
 
   (define (reroot! there)
       (unless (eq? (%thread-dynwind-stack) there)
-	(reroot! (cdr there))
-	(let ((before (caar there))
-	      (after  (cdar there))
-	      (here   (%thread-dynwind-stack)))
-	  (set-car! here (cons after before))
-	  (set-cdr! here  there)
-	  (set-car! there #f)
-	  (set-cdr! there '())
-	  (%thread-dynwind-stack-set! there)
-	  (before))))
+        (reroot! (cdr there))
+        (let ((before (caar there))
+              (after  (cdar there))
+              (here   (%thread-dynwind-stack)))
+          (set-car! here (cons after before))
+          (set-cdr! here  there)
+          (set-car! there #f)
+          (set-cdr! there '())
+          (%thread-dynwind-stack-set! there)
+          (before))))
 
   ;;
   ;; call/cc
@@ -884,10 +884,10 @@ doc>
   (set! call/cc
     (lambda  (proc)
       (let ((here (%thread-dynwind-stack)))
-	(%call/cc (lambda (cont)
-		    (proc (lambda results
-			    (reroot! here)
-			    (apply cont results))))))))
+        (%call/cc (lambda (cont)
+                    (proc (lambda results
+                            (reroot! here)
+                            (apply cont results))))))))
 
   ;;
   ;; dynamic-wind
@@ -895,20 +895,20 @@ doc>
   (set! dynamic-wind
     (lambda (before during after)
       (define (verify-proc p)
-	(unless (procedure? p)  ; Should test it is a thunk
-	  (error 'dynamic-wind "bad procedure ~S" p)))
+        (unless (procedure? p)  ; Should test it is a thunk
+          (error 'dynamic-wind "bad procedure ~S" p)))
 
       (verify-proc before)
       (verify-proc during)
       (verify-proc after)
 
       (let ((here (%thread-dynwind-stack)))
-	(reroot! (cons (cons before after) here))
-	(with-handler (lambda (c)
-			(reroot! here)
-			(raise c))
-		      (call-with-values during
-			(lambda results (reroot! here) (apply values results))))))))
+        (reroot! (cons (cons before after) here))
+        (with-handler (lambda (c)
+                        (reroot! here)
+                        (raise c))
+                      (call-with-values during
+                        (lambda results (reroot! here) (apply values results))))))))
 
 
 ;;
@@ -965,17 +965,17 @@ doc>
 (define (%make-with-file name get-port fd mode)
   (lambda (string thunk)
     (let ((old-port (get-port))
-	  (port	    (open-file string mode)))
+          (port     (open-file string mode)))
       (unless port
-	(raise (make-condition &i/o-filename-error
-			       'location name
-			       'message  (format "cannot open file ~S" string)
-			       'backtrace (%vm-backtrace)
-			       'filename string)))
+        (raise (make-condition &i/o-filename-error
+                               'location name
+                               'message  (format "cannot open file ~S" string)
+                               'backtrace (%vm-backtrace)
+                               'filename string)))
       (dynamic-wind
          (lambda () (%set-std-port! fd port))
-	 (lambda () (thunk))
-	 (lambda () (close-port (get-port))  (%set-std-port! fd old-port))))))
+         (lambda () (thunk))
+         (lambda () (close-port (get-port))  (%set-std-port! fd old-port))))))
 
 
 (define with-input-from-file
@@ -1005,7 +1005,7 @@ doc>
 |#
 (define (with-input-from-string string thunk)
   (let ((old-port (current-input-port))
-	(port     (open-input-string string)))
+        (port     (open-input-string string)))
     (dynamic-wind
        (lambda () (%set-std-port! 0 port))
        (lambda () (thunk))
@@ -1027,7 +1027,7 @@ doc>
 |#
 (define (with-output-to-string thunk)
   (let ((old-port (current-output-port))
-	(port     (open-output-string)))
+        (port     (open-output-string)))
     (dynamic-wind
        (lambda () (%set-std-port! 1 port))
        (lambda () (thunk) (get-output-string port))
@@ -1049,16 +1049,15 @@ doc>
 (define (%make-with-port get-port fd mode)
   (lambda (port thunk)
     (let ((old-port (get-port))
-	  (port-fd  (%port-file-fd port)))
+          (port-fd  (%port-file-fd port)))
       (if (equal? (%port-file-fd old-port) port-fd) ;; Yes! equal?
-	  ;; useless redirection
-	  (thunk)
-	  ;; useful one
-	  (dynamic-wind
-	    (lambda () (%set-std-port! fd port))
-	    (lambda () (thunk))
-	    (lambda () (when (> 2 port-fd) (close-port (get-port)))
-		       (%set-std-port! fd old-port)))))))
+          ;; useless redirection
+          (thunk)
+          ;; useful one
+          (dynamic-wind
+            (lambda () (%set-std-port! fd port))
+            (lambda () (thunk))
+            (lambda () (%set-std-port! fd old-port)))))))
 
 (define with-input-from-port
   (%make-with-port current-input-port 0 "r"))
@@ -1094,9 +1093,9 @@ doc>
 (define (%call-with open-proc)
   (lambda (string proc)
     (let* ((port (open-proc string))
-	   (res  (call-with-values
-		     (lambda () (proc port))
-		   list)))
+           (res  (call-with-values
+                     (lambda () (proc port))
+                   list)))
       (close-port port)
       (apply values res))))
 
@@ -1132,7 +1131,7 @@ doc>
 
   (define (sr x y)
     (let ((fx (floor x))
-	  (fy (floor y)))
+          (fy (floor y)))
       (cond
        ((>= fx x) fx)
        ((= fx fy) (+ fx (/ (sr (/ (- y fy)) (/ (- x fx))))))
@@ -1151,10 +1150,10 @@ doc>
   (unless (rational? x)(error-bad-rational x))
   (unless (rational? e)(error-bad-rational e))
    (let ((x (- x e))
-	 (y (+ x e)))
+         (y (+ x e)))
      (if (< y x)
-	 (simplest-rational y x)
-	 (simplest-rational x y))))
+         (simplest-rational y x)
+         (simplest-rational x y))))
 
 #|
 <doc delay
