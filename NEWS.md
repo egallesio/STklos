@@ -1,6 +1,25 @@
 NEWS
 ====
 
+version 1.20
+------------
+
+Even if previous version was released more than seven years ago,
+STklos is not completely dead.
+
+Now the developement tree of STklos is available on
+[Gitlab](https://gitlab.com/Gallesio/STklos) and
+[Github](https://github.com/egallesio/STklos).
+
+Changes in this version are:
+
+  - Corrected some problems on UTF8 encoding
+  - Bug fix of a long standing bug on `call/cc`.
+  - Function can now be created with the UTF8 symbol `λ`
+  - Added the #!fold-case and #!no-fold-case  special notations
+    of R7RScomments
+  - Updated documentation
+  - Bug fixes
 
 version 1.10
 ------------

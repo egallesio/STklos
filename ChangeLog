@@ -1,62 +1,99 @@
+2018-06-04 Erick Gallesio <eg@unice.fr>	
+
+     - STklos 1.20 Release
+       ===================
+
+2018-06-01 Erick Gallesio <eg@unice.fr>
+
+        - Bug fix: with-xxx-yyy-port do not work with string port
+
+	Bug arrives when the port was closed (whereas the port should not
+	be closed!)
+
 2018-04-20 Erick Gallesio <eg@unice.fr>
 
-    - Updated documentation for version 1.20
+        - Fixed some character encoding.
+
+
+2018-04-20 Erick Gallesio <eg@unice.fr>
+
+        - Updated documentation for version 1.20
+
 
 2018-04-13 Erick Gallesio <eg@unice.fr>
 
-    - Bug fix in stklos-compile
-      Using read-byte instead of read-char to be UTF8 reading independant
+        - Bug fix in stklos-compile
+
+	Using read-byte instead of read-char to be UTF8 reading independant
 
 2018-03-27 Erick Gallesio <eg@unice.fr>
 
-    - Bug Fix: the detection of bad UTF sequences could lead to a loop
+        - Bug Fix: the detection of bad UTF sequences could lead to a loop
+
 
 2018-03-26 Erick Gallesio <eg@unice.fr>
 
-    - Bug fix of a long standing bug on call/cc.
-      The bug was not systematic and showed up sometimes when running the tests
+        - Bug fix of a long standing bug on call/cc.
+
+	The bug was not systematic and showed up sometimes when running
+	the tests
+
 
 2018-03-23 Erick Gallesio <eg@unice.fr>
 
-    - Added tests on functions declared with 'λ' symbol
+        - Added tests on functions declared with 'λ' symbol
+
+
+2018-03-23 Erick Gallesio <eg@unice.fr>
+
+        - Convert NEWS file in markdown
+
 
 2018-03-22 Erick Gallesio <eg@unice.fr>
 
-    - Changed source to avoid GCC warnings
+        - Changed copyright date in interactive banner
+
+
+2018-03-22 Erick Gallesio <eg@unice.fr>
+
+        - Changed source to avoid GCC warnings
 
 2016-03-13 Erick Gallesio <eg@unice.fr>
-
-    - Added the  unicode character 'λ' as a synonym of lambda
+        - Added the  unicode character 'λ' as a synonym of lambda
 
 2014-01-02 Erick Gallesio <eg@unice.fr>
 
-    - Now when TERM vraiable is of the form xterm-xxxcolor, it is
-     recognized as a color terminal
+        - now when TERM is of the form xterm-xxxcolor, it is recognized as
+	a color terminal
 
 2012-03-18 Erick Gallesio <eg@unice.fr>
 
-    - Added #!fold-case and #!no-fold-case
+        - Added #!fold-case and #!no-fold-case special comments
+
 
 2012-02-26 Erick Gallesio <eg@unice.fr>
 
-    - Fixed  some problems on character encoding depending of the SHELL
-      LC_* varisables
+        - Corrected some problems on character encoding depending of the
+	SHELL LC_* variables
+
 
 2012-01-01 Erick Gallesio <eg@unice.fr>
 
-    - Use the LANG variable to determine if we use utf8 (rather
-      than fixing it to true by default as before)
+        - use the LANG variable to determine if we use utf8 (rather than
+	fixing it to true by default as before)
+
 
 2012-01-01 Erick Gallesio <eg@unice.fr>
 
-    - Replaced some calls to "make" by "$(MAKE)" in various Makefiles
+	- replaced some calls to "make" by "$(MAKE)" in various Makefiles
+
 
 2011-12-31 Erick Gallesio <eg@unice.fr>
 
      - STklos 1.10 Release
        ===================
 
-2011-12-04  Erick Gallesio <eg at unice.fr>  <eg at unice.fr>
+2011-12-04  Erick Gallesio <eg@unice.fr>  <eg@unice.fr>
 
 	* doc/Makefile.in, lib/ffi.stk, src/Makefile.in, src/boot.c,
 	  src/boot.img:
@@ -64,7 +101,7 @@
 	Windows
 	[78b3362ddd8b] [tip]
 
-2011-12-04  Erick Gallesio <eg at unice.fr>  <eg at unice.fr>
+2011-12-04  Erick Gallesio <eg@unice.fr>  <eg@unice.fr>
 
 	* aclocal.m4, configure, doc/Makefile.in, pkgman/Makefile.am,
 	  pkgman/Makefile.in, pkgman/lang-bigloo.inc, pkgman/lang-chicken.inc,
@@ -113,7 +150,7 @@
 	[600e1c10a12b]
 
 	* doc/stklos.1.in, lib/repl-readline.stk, src/boot.c, src/boot.img,
-	  src/char.c, src/misc.c, src/port.c, src/stklos.h, src/str.c, 
+	  src/char.c, src/misc.c, src/port.c, src/stklos.h, src/str.c,
 	  tests/test-utf8.stk:
 	Bug fix: read-line built bad UTF-8 strings
 	[ee299be2ff09]
@@ -188,8 +225,8 @@
 	  /test-number.stk, tests/test-r5.stk, tests/test-r5rs-pitfall.stk,
 	  tests/test-r7rs.stk, tests/test-regexp.stk, tests/test-sport.stk,
 	  tests/test-srfi.stk, tests/test-threads.stk, tests/test.stk, utils
-	  /make-doc, utils/shlib-options, utils/stklos-compile.stk, 
-	  utils/stklos-config.in, utils/stklos-genlex.stk, 
+	  /make-doc, utils/shlib-options, utils/stklos-compile.stk,
+	  utils/stklos-config.in, utils/stklos-genlex.stk,
 	  utils/stklos-script.in, utils/tmpcomp:
 	Big source code patch with no modification: files are now encoded in
 	UTF-8
@@ -237,7 +274,7 @@
 
 	* doc/skb/lib.stk, doc/skb/stdproc.skb, doc/skb/stklos.skb,
 	  src/char.c, src/hash.c, src/stklos.h, src/str.c:
-	Added new primitives: char-foldcase, string-foldcase, 
+	Added new primitives: char-foldcase, string-foldcase,
 	string-foldcase!
 	[2447af70bb41]
 
@@ -269,7 +306,7 @@
 	Bug fix: u64 and s64 types were inverted
 	[2d9d0dcb6734]
 
-2011-06-25  Erick Gallesio <eg at unice.fr>  <eg at unice.fr>
+2011-06-25  Erick Gallesio <eg@unice.fr>  <eg@unice.fr>
 
 	* lib/compiler.stk, src/boot.c, src/boot.img:
 	Typo Fix leading to an illegal instruction on INT-SINT-FXMUL2
@@ -4707,4 +4744,3 @@ than the 2.x version but it works on a broader range of machines
 ==============================================================================
 
 LocalWords:  metaclass UNTRACE fr stk sexpr
-
