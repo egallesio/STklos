@@ -17,7 +17,7 @@ Changes in this version are:
   - Bug fix of a long standing bug on `call/cc`.
   - Function can now be created with the UTF8 symbol `λ`
   - Added the #!fold-case and #!no-fold-case  special notations
-    of R7RScomments
+    of R7RS
   - Updated documentation
   - Bug fixes
 
