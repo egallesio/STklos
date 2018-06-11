@@ -1,6 +1,6 @@
 // -*- coding: utf-8 -*-
 //
-// Copyright (c) 2005 - 2006, Google Inc.
+// Copyright (c) 2005 - 2010, Google Inc.
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -38,10 +38,12 @@
 #endif
 
 #include <stdio.h>
+#include <string.h>      /* for memset and strcmp */
 #include <cassert>
 #include <vector>
 #include "pcrecpp.h"
 
+using std::string;
 using pcrecpp::StringPiece;
 using pcrecpp::RE;
 using pcrecpp::RE_Options;
@@ -268,8 +270,8 @@ static void TestReplace() {
       "bb",
       "bbbbbb",
       "bb",
-      "bb",
-      1 },
+      "bbbb",
+      2 },
     { "b*",
       "bb",
       "aaaaa",
@@ -294,6 +296,19 @@ static void TestReplace() {
       "bbaa\r\naa\r\n",
       "bbabbabb\r\nbbabbabb\r\nbb",
       7 },
+    // Check empty-string matching (it's tricky!)
+    { "aa|b*",
+      "@",
+      "aa",
+      "@",
+      "@@",
+      2 },
+    { "b*|aa",
+      "@",
+      "aa",
+      "@aa",
+      "@@@",
+      3 },
 #ifdef SUPPORT_UTF8
     { "b*",
       "bb",
@@ -399,7 +414,7 @@ static void TestFindAndConsume() {
 }
 
 static void TestMatchNumberPeculiarity() {
-  printf("Testing match-number peculiaraity\n");
+  printf("Testing match-number peculiarity\n");
 
   string word1;
   string word2;
@@ -819,6 +834,7 @@ int main(int argc, char** argv) {
     return 0;
   }
 
+  printf("PCRE C++ wrapper tests\n");
   printf("Testing FullMatch\n");
 
   int i;
