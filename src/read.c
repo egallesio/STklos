@@ -1,7 +1,7 @@
 /*
- * r e a d  . c				-- reading stuff
+ * r e a d  . c                         -- reading stuff
  *
- * Copyright © 1993-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 18-Mar-2012 18:25 (eg)
+ * Last file update: 11-Jun-2018 09:34 (eg)
  *
  */
 
@@ -29,6 +29,7 @@
 
 struct read_context {
   SCM cycles;
+  SCM inner_refs;
   int comment_level;
   int case_significant;
   int constant;
@@ -38,19 +39,16 @@ struct read_context {
 static SCM read_srfi10(SCM port, SCM l);
 static SCM read_rec(SCM port, struct read_context *ctx, int inlist);
 
-
-//static SCM cycles;		/* used for reading circular data */
 static SCM sym_quote, sym_quasiquote, sym_unquote, sym_unquote_splicing, sym_dot;
 static SCM sym_read_brace, sym_read_bracket, read_error;
 
-//static int comment_level;
 int STk_read_case_sensitive = 0;
 
 
-#define PLACEHOLDERP(x) 	(CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
-#define PLACEHOLDER_VAL(x)	(CDR(x))
+#define PLACEHOLDERP(x)         (CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
+#define PLACEHOLDER_VAL(x)      (CDR(x))
 
-#define SYMBOL_VALUE(x,ref)	STk_lookup((x), STk_current_module(), &(ref), FALSE)
+#define SYMBOL_VALUE(x,ref)     STk_lookup((x), STk_current_module(), &(ref), FALSE)
 
 /*===========================================================================*\
  *
@@ -60,14 +58,14 @@ int STk_read_case_sensitive = 0;
 static void signal_error(SCM port, char *format, SCM param)
 {
   STk_raise_exception(STk_make_C_cond(read_error,
-				      7,
-				      STk_false,
-				      STk_vm_bt(),
-				      STk_format_error(format, param),
-				      MAKE_INT(PORT_LINE(port)),    /* line */
-				      STk_false,		    /* column */
-				      MAKE_INT(PORT_POS(port)),	    /* position */
-				      STk_false));		    /* span */
+                                      7,
+                                      STk_false,
+                                      STk_vm_bt(),
+                                      STk_format_error(format, param),
+                                      MAKE_INT(PORT_LINE(port)),    /* line */
+                                      STk_false,                    /* column */
+                                      MAKE_INT(PORT_POS(port)),     /* position */
+                                      STk_false));                  /* span */
 }
 
 
@@ -114,9 +112,9 @@ static int flush_spaces(SCM port, char *message, SCM file)
     switch (c = STk_getc(port)) {
       case EOF:  if (message) signal_error(port, message, file); else return(c);
       case ';':  do
-		   c = STk_getc(port);
-		 while (c != '\n' && c != EOF);
-		 continue;
+                   c = STk_getc(port);
+                 while (c != '\n' && c != EOF);
+                 continue;
     default:   if (!isspace((unsigned char) c)) return(c);
     }
   }
@@ -144,14 +142,14 @@ static int read_hex_sequence(SCM port, char* utf8_seq)
       error_bad_inline_hexa_sequence(port, buffer, 2);
     else
       if (STk_use_utf8) {
-	int len = STk_char2utf8(val, utf8_seq);
+        int len = STk_char2utf8(val, utf8_seq);
 
-	if (len) return len;
+        if (len) return len;
       } else {
-	if (0 <= val && val <= 0xFF) {
-	  *utf8_seq = (char) val;
-	  return 1;
-	}
+        if (0 <= val && val <= 0xFF) {
+          *utf8_seq = (char) val;
+          return 1;
+        }
       }
   }
 
@@ -240,19 +238,19 @@ static int read_word(SCM port, int c, char *tok, int case_significant)
     if (c == '\\') {
       c = STk_getc(port);
       if (c == 'x') {
-	/* This is an internal hexa sequence */
-	char buffer[5];
-	int len = read_hex_sequence(port, buffer);
+        /* This is an internal hexa sequence */
+        char buffer[5];
+        int len = read_hex_sequence(port, buffer);
 
-	if (j + len >= MAX_TOKEN_SIZE-1) {
-	  tok[j] = '\0';
-	  error_token_too_large(port, tok);
-	} else {
-	  memcpy(tok + j-1, buffer, len);
-	  j += len-1;
-	}
+        if (j + len >= MAX_TOKEN_SIZE-1) {
+          tok[j] = '\0';
+          error_token_too_large(port, tok);
+        } else {
+          memcpy(tok + j-1, buffer, len);
+          j += len-1;
+        }
       } else { /* c != 'x' */
-	STk_ungetc(c, port);
+        STk_ungetc(c, port);
       }
     }
 
@@ -260,8 +258,8 @@ static int read_word(SCM port, int c, char *tok, int case_significant)
     if (c == EOF) break;
     if (!allchars) {
       if (strchr("()[]{}'`,;\"\n\r \t\f", c)) {
-	STk_ungetc(c, port);
-	break;
+        STk_ungetc(c, port);
+        break;
       }
       //      if (isspace(c)) break; //FIXME:
     }
@@ -286,11 +284,11 @@ static SCM read_token(SCM port, int c, int case_significant)
     switch (*tok) {
       case ':': return STk_makekey(tok);
       case '#': if (strcasecmp(tok+1, "eof") == 0)
-	          return STk_eof;
+                  return STk_eof;
                 else if (strcasecmp(tok+1, "void") == 0)
-		  return STk_void;
-      		else
-		  error_bad_sharp_syntax(port, tok);
+                  return STk_void;
+                else
+                  error_bad_sharp_syntax(port, tok);
       default : return (tok[len-1] == ':') ? STk_makekey(tok) : STk_intern(tok);
     }
   }
@@ -357,7 +355,7 @@ static SCM read_here_string(SCM port)
       STk_error("eof seen while reading an here-string");
     else
       if (strcmp(STRING_CHARS(line), SYMBOL_PNAME(eof_token)) == 0)
-	break;
+        break;
     /* Append the read string to the result */
     if (first_line)
       first_line = FALSE;
@@ -368,6 +366,45 @@ static SCM read_here_string(SCM port)
 
   return STk_get_output_string(res);
 }
+
+
+static SCM add_inner_references(SCM *obj, SCM to_correct) {
+  /* *obj contains inner references that must be replaced later. Find them */
+  if (PLACEHOLDERP(*obj)) {
+    /* place it in the list of references to correct */
+    if (STk_memq((SCM) obj, to_correct) == STk_false) {
+      to_correct = STk_cons((SCM) obj, to_correct);
+    }
+  } else if (CONSP(*obj)) {
+    to_correct = add_inner_references(&CAR(*obj), to_correct);
+    to_correct = add_inner_references(&CDR(*obj), to_correct);
+  } else if (VECTORP(*obj)) {
+    int i, l = VECTOR_SIZE(*obj);
+    SCM *p;
+
+    for (i=0, p=VECTOR_DATA(*obj); i < l; i++, p++) {
+      to_correct = add_inner_references(p, to_correct);
+    }
+  }
+  return to_correct;
+}
+
+
+static void patch_references(SCM port, SCM l, SCM cycles)
+{
+  for ( ; !NULLP(l); l = CDR(l)) {
+    SCM k, tmp;
+
+    tmp = *((SCM *) CAR(l));
+    k   = PLACEHOLDER_VAL(tmp);
+    if ((tmp = STk_assv(k, cycles)) != STk_false) {
+      *((SCM *) CAR(l)) = CDR(tmp);
+    }
+    else
+      error_key_not_defined(port, k);
+  }
+}
+
 
 static SCM read_cycle(SCM port, int c, struct read_context *ctx)
 /* read a #xx# or #xx= cycle item whose 1st char is in c. */
@@ -386,91 +423,59 @@ static SCM read_cycle(SCM port, int c, struct read_context *ctx)
   k = MAKE_INT(atoi(buffer));
 
   switch (c) {
-    case '#': if ((tmp = STk_assv(k, ctx->cycles)) != STk_false)
-		return CDR(tmp);
-	      else
-		error_key_not_defined(port, k);
+    case '#': if ((tmp = STk_assv(k, ctx->cycles)) != STk_false) {
+                val = CDR(tmp);
+                if (PLACEHOLDERP(val))
+                  CAR(val) = STk_true; /* Mark  the placeholder as read */
+                return val;
+              }
+              else
+                error_key_not_defined(port, k);
 
     case '=': if ((tmp = STk_assv(k, ctx->cycles)) == STk_false) {
-      		/* This is a little bit tricky here: We create a fake cell
-		 * that serves as a place-holder. In some cases this is not
-		 * useful (e.g. (#0=(1 2) 3 4 . #0#) ), but in some other
-		 * cases such as
-		 *    (#0=(1 2 . #0#) #0#)
-		 * the first reference will use the placeholder cell, whereas
-		 * the second one will be correct.
-		 * The function "patch_references" will correct all the
-		 * remaining references that musr be modified.
-		 */
+                /* This is a little bit tricky here: We create a fake cell
+                 * that serves as a place-holder. In some cases this is not
+                 * useful (e.g. (#0=(1 2) 3 4 . #0#) ), but in some other
+                 * cases such as
+                 *    (#0=(1 2 . #0#) #0#)
+                 * the first reference will use the placeholder cell, whereas
+                 * the second one will be correct.
+                 * We call here the function find_inner_references to capture
+                 * the reference which are in the second case.
+                 *
+                 * At the end, of the entire read (and only at the end to 
+                 * avoid  a long time calculation, or even infinite loops),
+                 * the function "patch_references" will correct all the
+                 * remaining references that must be modified.
+                 */
 
-      		 /* create the fake cell */
-      		 tmp      = STk_cons(STk_void, k);
-		 BOXED_INFO(tmp) |= CONS_PLACEHOLDER;
+                 /* create the fake cell */
+                 SCM fake = STk_cons(STk_void, k);
+                 BOXED_INFO(fake) |= CONS_PLACEHOLDER;
 
-		 /* Add the couple (k . <fake-cell>) to the cycles list */
-		 tmp         = STk_cons(k, tmp);
-		 ctx->cycles = STk_cons(tmp, ctx->cycles);
+                 /* Add the couple (k . <fake-cell>) to the cycles list */
+                 tmp         = STk_cons(k, fake);
+                 ctx->cycles = STk_cons(tmp, ctx->cycles);
 
-		 /* Read item */
-		 val         = read_rec(port, ctx, FALSE);
+                 /* Read item */
+                 val         = read_rec(port, ctx, FALSE);
 
-		 /* Patch the list of cycles with the correct value */
-		 CDR(tmp) = val;
+                 if (CAR(fake) != STk_void) {
+                   /* we have an inner reference on k */
+                   ctx->inner_refs = add_inner_references(&val, ctx->inner_refs);
+                 }
 
-		 return val;
-    	       }
-    	       else
-		 signal_error(port, "key ``#~a='' already defined", k);
+                 /* Patch the list of cycles with the correct value */
+                 CDR(tmp) = val;
+                 return val;
+               }
+               else
+                 signal_error(port, "key ``#~a='' already defined", k);
 
   default:  STk_ungetc(c, port); error_bad_sharp_syntax(port, buffer);
   }
 
   return STk_void; /* for the compiler */
-}
-
-
-
-static SCM find_references(SCM *obj, SCM to_correct)
-{
-  if (PLACEHOLDERP(*obj)) {
-    /* place it in the list of references to correct */
-    if (STk_memq((SCM) obj, to_correct) == STk_false){
-      to_correct = STk_cons((SCM) obj, to_correct);
-    }
-    return to_correct;
-  }
-
-  if (CONSP(*obj)) {
-    to_correct = find_references(&CAR(*obj), to_correct);
-    to_correct = find_references(&CDR(*obj), to_correct);
-    return to_correct;
-  }
-
-  if (VECTORP(*obj)) {
-    int i, l = VECTOR_SIZE(*obj);
-    SCM *p;
-
-    for (i=0, p=VECTOR_DATA(*obj); i < l; i++, p++) {
-      to_correct = find_references(p, to_correct);
-    }
-    return to_correct;
-  }
-
-  return to_correct;
-}
-
-static void patch_references(SCM port, SCM l, SCM cycles)
-{
-  for ( ; !NULLP(l); l = CDR(l)) {
-    SCM k, tmp;
-
-    tmp = *((SCM *) CAR(l));
-    k   = PLACEHOLDER_VAL(tmp);
-    if ((tmp = STk_assv(k, cycles)) != STk_false)
-      *((SCM *) CAR(l)) = CDR(tmp);
-    else
-      error_key_not_defined(port, k);
-  }
 }
 
 
@@ -491,58 +496,58 @@ static SCM read_string(SCM port, int constant)
       if (c == EOF) signal_error(port, "eof encountered after \\", STk_nil);
       switch(c) {
         case 'a' : c = '\a'; break;     /* Bell */
-        case 'b' : c = '\b'; break;	/* Bs   */
-	case 'e' : c = 0x1b; break;	/* Esc  */
-	case 'f' : c = '\f'; break;	/* FF   */
-	case 'n' : c = '\n'; break;	/* Lf   */
-	case 'r' : c = '\r'; break;	/* Cr   */
-	case 't' : c = '\t'; break;	/* Tab  */
-	case 'v' : c = '\v'; break;	/* VTab */
+        case 'b' : c = '\b'; break;     /* Bs   */
+        case 'e' : c = 0x1b; break;     /* Esc  */
+        case 'f' : c = '\f'; break;     /* FF   */
+        case 'n' : c = '\n'; break;     /* Lf   */
+        case 'r' : c = '\r'; break;     /* Cr   */
+        case 't' : c = '\t'; break;     /* Tab  */
+        case 'v' : c = '\v'; break;     /* VTab */
         case ' ' : do {
-			c = STk_getc(port);
-	           } while (c == ' ' || c == '\t');
+                        c = STk_getc(port);
+                   } while (c == ' ' || c == '\t');
 
-	          if (c != '\n') {
-		    signal_error(port, "bad line continuation sequence in string",
-				 STk_nil);
-		  } else {
-		    /* No break */;
-		  }
+                  if (c != '\n') {
+                    signal_error(port, "bad line continuation sequence in string",
+                                 STk_nil);
+                  } else {
+                    /* No break */;
+                  }
         case '\n': do {
-			c = STk_getc(port);
-	           } while (c == ' ' || c == '\t');
-	           break;
-	case 'x' : {
-		     char seq[5];
-		     int seqlen = read_hex_sequence(port, seq);
+                        c = STk_getc(port);
+                   } while (c == ' ' || c == '\t');
+                   break;
+        case 'x' : {
+                     char seq[5];
+                     int seqlen = read_hex_sequence(port, seq);
 
-		     if ((j + seqlen) >= len) {
-		       len = len + len / 2;
-		       buffer = STk_must_realloc(buffer, len);
-		       p = buffer + j;
-		     }
-		     memcpy(p, seq, seqlen);
-		     p += seqlen;
-		     j += seqlen;
-		     continue;
-		   }
-	case '0' : for( k=n=0 ; ; k++ ) {
-		     c = STk_getc(port);
-		     if (c == EOF)
-		       signal_error(port,
-				    "eof encountered when reading char in string",
-				    STk_nil);
+                     if ((j + seqlen) >= len) {
+                       len = len + len / 2;
+                       buffer = STk_must_realloc(buffer, len);
+                       p = buffer + j;
+                     }
+                     memcpy(p, seq, seqlen);
+                     p += seqlen;
+                     j += seqlen;
+                     continue;
+                   }
+        case '0' : for( k=n=0 ; ; k++ ) {
+                     c = STk_getc(port);
+                     if (c == EOF)
+                       signal_error(port,
+                                    "eof encountered when reading char in string",
+                                    STk_nil);
 
-		     c &= 0377;
-		     /* 3 digit max for bytes */
-		     if (isdigit(c) && (c < '8') && k < 3)
-		       n = n * 8 + c - '0';
-		     else {
-		       STk_ungetc(c, port);
-		       break;
-		     }
-		   }
-	           c = n & 0xff;
+                     c &= 0377;
+                     /* 3 digit max for bytes */
+                     if (isdigit(c) && (c < '8') && k < 3)
+                       n = n * 8 + c - '0';
+                     else {
+                       STk_ungetc(c, port);
+                       break;
+                     }
+                   }
+                   c = n & 0xff;
       }
     }
 
@@ -586,19 +591,19 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
     return STk_false;
   } else {
     if ((!STk_uvectors_allowed &&  (strcmp(tok, "u8") == 0)) ||
-	(STk_uvectors_allowed && (len == 2 || len == 3))) {
+        (STk_uvectors_allowed && (len == 2 || len == 3))) {
       c = STk_getc(port);
       if (c != '(') goto bad_spec;
       tag = STk_uniform_vector_tag(tok);
       if (tag >= 0) {
-	int konst = ctx->constant;
+        int konst = ctx->constant;
 
-	/* Ok that's seems correct read the list of values (this IS a constant) */
-	ctx->constant = TRUE;
-	v =  STk_list2uvector(tag, read_list(port, ')', ctx));
-	ctx->constant = konst;
-	BOXED_INFO(v) |= VECTOR_CONST;
-	return v;
+        /* Ok that's seems correct read the list of values (this IS a constant) */
+        ctx->constant = TRUE;
+        v =  STk_list2uvector(tag, read_list(port, ')', ctx));
+        ctx->constant = konst;
+        BOXED_INFO(v) |= VECTOR_CONST;
+        return v;
       }
     }
   }
@@ -618,207 +623,207 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
 
     switch (c) {
       case EOF:
-	return STk_eof;
+        return STk_eof;
       case '(':
         return(read_list(port, ')', ctx));
 
       case '[': {
-	SCM ref, read_bracket_func = SYMBOL_VALUE(sym_read_bracket, ref);
+        SCM ref, read_bracket_func = SYMBOL_VALUE(sym_read_bracket, ref);
 
-	if (read_bracket_func != STk_void) {
-	  STk_ungetc(c, port);
-	  return STk_C_apply(read_bracket_func, 1, port);
-	}
-	return(read_list(port, ']', ctx));
+        if (read_bracket_func != STk_void) {
+          STk_ungetc(c, port);
+          return STk_C_apply(read_bracket_func, 1, port);
+        }
+        return(read_list(port, ']', ctx));
       }
 
     case '{': {
       SCM ref, read_brace_func = SYMBOL_VALUE(sym_read_brace, ref);
 
-	if (read_brace_func != STk_void) {
-	  STk_ungetc(c, port);
-	  return STk_C_apply(read_brace_func, 1, port);
-	}
-	goto default_case;
+        if (read_brace_func != STk_void) {
+          STk_ungetc(c, port);
+          return STk_C_apply(read_brace_func, 1, port);
+        }
+        goto default_case;
       }
 
       case ')':
       case ']':
       case '}':
-	if (inlist) {
-	  STk_ungetc(c, port);
-	  return STk_close_par;
-	}
-	warning_parenthesis(port);
-	break;
+        if (inlist) {
+          STk_ungetc(c, port);
+          return STk_close_par;
+        }
+        warning_parenthesis(port);
+        break;
       case '\'':
-	quote_type = sym_quote;
-	goto read_quoted;
+        quote_type = sym_quote;
+        goto read_quoted;
       case '`':
-	quote_type = sym_quasiquote;
+        quote_type = sym_quasiquote;
     read_quoted:
-	{
-	  SCM tmp = read_rec(port, ctx, inlist);
-	  if (tmp == STk_dot || tmp == STk_close_par)
-	    signal_error(port, "bad quote/quasiquote syntax", STk_nil);
-	  return LIST2(quote_type, tmp);
-	}
+        {
+          SCM tmp = read_rec(port, ctx, inlist);
+          if (tmp == STk_dot || tmp == STk_close_par)
+            signal_error(port, "bad quote/quasiquote syntax", STk_nil);
+          return LIST2(quote_type, tmp);
+        }
       case '#':
-	switch(c=STk_getc(port)) {
-	  case 't':
+        switch(c=STk_getc(port)) {
+          case 't':
           case 'T':  return STk_true;
-	  case 'f':
- 	  case 'F':  if (STk_uvectors_allowed)
-	    	       return maybe_read_uniform_vector(port, c, ctx);
-	  	     else
-		       return STk_false;
- 	  case '\\': return read_char(port, STk_getc(port));
-	  case '(' : return read_vector(port, ctx);
-	  case '!' : { /* This can be a comment, a DSSSL keyword, or fold-case */
-	    	       c = STk_getc(port);
-		       if (c == 'o' || c == 'k' || c == 'r' || c == 'n' || c == 'f') {
-			 SCM word = read_token(port, c, FALSE);
+          case 'f':
+          case 'F':  if (STk_uvectors_allowed)
+                       return maybe_read_uniform_vector(port, c, ctx);
+                     else
+                       return STk_false;
+          case '\\': return read_char(port, STk_getc(port));
+          case '(' : return read_vector(port, ctx);
+          case '!' : { /* This can be a comment, a DSSSL keyword, or fold-case */
+                       c = STk_getc(port);
+                       if (c == 'o' || c == 'k' || c == 'r' || c == 'n' || c == 'f') {
+                         SCM word = read_token(port, c, FALSE);
 
-			 if (SYMBOLP(word)) {
-			   char *s = SYMBOL_PNAME(word);
+                         if (SYMBOLP(word)) {
+                           char *s = SYMBOL_PNAME(word);
 
-			   /* Try to see if it is a DSSL keyword */
-			   if ((strcmp(s, "optional") == 0) ||
-			       (strcmp(s, "key")      == 0) ||
-			       (strcmp(s, "rest")     == 0))
-			     return STk_makekey(s);
+                           /* Try to see if it is a DSSL keyword */
+                           if ((strcmp(s, "optional") == 0) ||
+                               (strcmp(s, "key")      == 0) ||
+                               (strcmp(s, "rest")     == 0))
+                             return STk_makekey(s);
 
-			   /* Treat fold-case and no-fold-case */
-			   if ((strcmp(s, "fold-case") == 0) ||
-			       (strcmp(s, "no-fold-case") == 0)) {
-			     if (c == 'n') {
-			       PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
-			       ctx->case_significant = TRUE;
-			     }
-			     else {
-			       PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
-			       ctx->case_significant = FALSE;
-			     }
-			     continue;
-			   }
-			 }
-		       }
-		       /* if we are here, consider the rest of the line
-			* as a comment*/
-		       do {
-			 if (c == EOF) return STk_eof;
-		       } while ((c=STk_getc(port)) != '\n');
-		       STk_ungetc(c, port);
-		       continue;
-	  	     }
-	  case '|':  {
-		       char prev = ' ';
+                           /* Treat fold-case and no-fold-case */
+                           if ((strcmp(s, "fold-case") == 0) ||
+                               (strcmp(s, "no-fold-case") == 0)) {
+                             if (c == 'n') {
+                               PORT_FLAGS(port) |= PORT_CASE_SENSITIVE;
+                               ctx->case_significant = TRUE;
+                             }
+                             else {
+                               PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
+                               ctx->case_significant = FALSE;
+                             }
+                             continue;
+                           }
+                         }
+                       }
+                       /* if we are here, consider the rest of the line
+                        * as a comment*/
+                       do {
+                         if (c == EOF) return STk_eof;
+                       } while ((c=STk_getc(port)) != '\n');
+                       STk_ungetc(c, port);
+                       continue;
+                     }
+          case '|':  {
+                       char prev = ' ';
 
-		       ctx->comment_level += 1;
-		       for ( ; ; ) {
-			 switch (c = STk_getc(port)) {
-			   case EOF:
-			     goto end_comment;
-			   case '\n':
-			     break;
-			   case '#':
-			     if (prev == '|') {
-			       ctx->comment_level -= 1;
-			       if (!ctx->comment_level) goto end_comment;
-			     }
-			     break;
-			   case '|':
-			     if (prev == '#')
-			       ctx->comment_level += 1;
-			     break;
-			   default: ;
-			 }
-			 prev = c;
-		       }
-		       end_comment:
-		       c = flush_spaces(port, (char *) NULL, (SCM) NULL);
-		       if (c == EOF) {
-			 if (ctx->comment_level)
-			   signal_error(port,
-					"eof encountered when reading a comment",
-					STk_nil);
-			 else
-			   return STk_eof;
-		       } else {
-			 STk_ungetc(c,port);
-			 continue;
-		       }
-		    }
-  	  case '<': {
-	    	       char c2 = STk_getc(port);
-		       if (c2 == '<' )
-			 return read_here_string(port);
-		       else  {
-			 STk_ungetc(c2, port);
-			 goto unknown_sharp;
-		       }
-	  	    }
-	  case '&': return STk_make_box(read_rec(port, ctx, inlist));
-	  case 'p':
-	  case 'P': return read_address(port);
-	  case 'S':
-	  case 's':
-	  case 'U':
-	  case 'u': if (STk_uvectors_allowed || c == 'u')
-		      /* For R7RS #u8 is always valid (bytevectors) */
-		      return maybe_read_uniform_vector(port, c, ctx);
-	            else
-		      goto unknown_sharp;
-	 case ';': /* R6RS comments */
-	   	   read_rec(port, ctx, FALSE);
-		   c = flush_spaces(port, NULL, NULL);
-		   STk_ungetc(c, port);
-		   if (inlist && (c == ')' || c == ']' || c == '}'))
-		     return STk_close_par;
-		   continue;
-	  case ',': /* SRFI-10 */
-	    	    return read_srfi10(port,
-				       read_rec(port, ctx, inlist));
-	  case '0':
-	  case '1':
-	  case '2':
-	  case '3':
-	  case '4':
-	  case '5':
-	  case '6':
-	  case '7':
-	  case '8':
-	  case '9': return read_cycle(port, c, ctx);
-	  default:
-	unknown_sharp:
-	  	    STk_ungetc(c, port); return read_token(port, '#', FALSE);
-	}
+                       ctx->comment_level += 1;
+                       for ( ; ; ) {
+                         switch (c = STk_getc(port)) {
+                           case EOF:
+                             goto end_comment;
+                           case '\n':
+                             break;
+                           case '#':
+                             if (prev == '|') {
+                               ctx->comment_level -= 1;
+                               if (!ctx->comment_level) goto end_comment;
+                             }
+                             break;
+                           case '|':
+                             if (prev == '#')
+                               ctx->comment_level += 1;
+                             break;
+                           default: ;
+                         }
+                         prev = c;
+                       }
+                       end_comment:
+                       c = flush_spaces(port, (char *) NULL, (SCM) NULL);
+                       if (c == EOF) {
+                         if (ctx->comment_level)
+                           signal_error(port,
+                                        "eof encountered when reading a comment",
+                                        STk_nil);
+                         else
+                           return STk_eof;
+                       } else {
+                         STk_ungetc(c,port);
+                         continue;
+                       }
+                    }
+          case '<': {
+                       char c2 = STk_getc(port);
+                       if (c2 == '<' )
+                         return read_here_string(port);
+                       else  {
+                         STk_ungetc(c2, port);
+                         goto unknown_sharp;
+                       }
+                    }
+          case '&': return STk_make_box(read_rec(port, ctx, inlist));
+          case 'p':
+          case 'P': return read_address(port);
+          case 'S':
+          case 's':
+          case 'U':
+          case 'u': if (STk_uvectors_allowed || c == 'u')
+                      /* For R7RS #u8 is always valid (bytevectors) */
+                      return maybe_read_uniform_vector(port, c, ctx);
+                    else
+                      goto unknown_sharp;
+         case ';': /* R6RS comments */
+                   read_rec(port, ctx, FALSE);
+                   c = flush_spaces(port, NULL, NULL);
+                   STk_ungetc(c, port);
+                   if (inlist && (c == ')' || c == ']' || c == '}'))
+                     return STk_close_par;
+                   continue;
+          case ',': /* SRFI-10 */
+                    return read_srfi10(port,
+                                       read_rec(port, ctx, inlist));
+          case '0':
+          case '1':
+          case '2':
+          case '3':
+          case '4':
+          case '5':
+          case '6':
+          case '7':
+          case '8':
+          case '9': return read_cycle(port, c, ctx);
+          default:
+        unknown_sharp:
+                    STk_ungetc(c, port); return read_token(port, '#', FALSE);
+        }
       case ',': {
-	SCM symb, tmp;
+        SCM symb, tmp;
 
-	c = STk_getc(port);
- 	if (c == '@')
-	  symb = sym_unquote_splicing;
- 	else {
- 	  symb = sym_unquote;
- 	  STk_ungetc(c, port);
- 	}
-	tmp = read_rec(port, ctx, inlist);
-	if (tmp == STk_dot || tmp == STk_close_par)
-	  signal_error(port, "bad unquote/unquote-splice syntax", STk_nil);
-	return LIST2(symb, tmp);
+        c = STk_getc(port);
+        if (c == '@')
+          symb = sym_unquote_splicing;
+        else {
+          symb = sym_unquote;
+          STk_ungetc(c, port);
+        }
+        tmp = read_rec(port, ctx, inlist);
+        if (tmp == STk_dot || tmp == STk_close_par)
+          signal_error(port, "bad unquote/unquote-splice syntax", STk_nil);
+        return LIST2(symb, tmp);
       }
       case '"':
-	return read_string(port, ctx->constant);
+        return read_string(port, ctx->constant);
       default:
     default_case: {
-	  SCM tmp = read_token(port, c, ctx->case_significant);
-	  if (tmp != sym_dot)
-	    return tmp;
-	  if (inlist)
-	    return STk_dot;
-	  signal_error(port, "dot outside of list", STk_nil);
-	}
+          SCM tmp = read_token(port, c, ctx->case_significant);
+          if (tmp != sym_dot)
+            return tmp;
+          if (inlist)
+            return STk_dot;
+          signal_error(port, "dot outside of list", STk_nil);
+        }
     }
   }
 }
@@ -828,23 +833,24 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
  * STk_read
  * STk_read_constant
  *
- * 	The two entry points of the reader. STk_read_constant just set a
+ *      The two entry points of the reader. STk_read_constant just set a
  *      flag to say that the object read (for strings, lists and vectors) is a
- * 	constant
+ *      constant
  *
 \*===========================================================================*/
 static SCM read_it(SCM port, int case_significant, int constant)
 {
   int c;
-  SCM l, res;
+  SCM res;
   struct read_context ctx;
 
   c = flush_spaces(port, (char *) NULL, (SCM) NULL);
 
-  ctx.cycles 	       = STk_nil;
+  ctx.cycles           = STk_nil;
+  ctx.inner_refs       = STk_nil;
   ctx.comment_level    = 0;
   ctx.case_significant = case_significant;
-  ctx.constant	       = constant;
+  ctx.constant         = constant;
 
   if (c == EOF)
     return STk_eof;
@@ -853,9 +859,8 @@ static SCM read_it(SCM port, int case_significant, int constant)
 
   res = read_rec(port, &ctx, FALSE);
 
-  if (!NULLP(ctx.cycles)) {
-    l = find_references(&res, STk_nil);
-    patch_references(port, l, ctx.cycles);
+  if (!NULLP(ctx.inner_refs)) {
+    patch_references(port, ctx.inner_refs, ctx.cycles);
   }
   return res;
 }
@@ -875,10 +880,10 @@ SCM STk_read_constant(SCM port, int case_significant)
 
 char *STk_quote2str(SCM symb)
 {
-  if (symb == sym_quote) 		return "\'";
-  if (symb == sym_quasiquote) 		return "`";
-  if (symb == sym_unquote) 		return ",";
-  if (symb == sym_unquote_splicing) 	return ",@";
+  if (symb == sym_quote)                return "\'";
+  if (symb == sym_quasiquote)           return "`";
+  if (symb == sym_unquote)              return ",";
+  if (symb == sym_unquote_splicing)     return ",@";
   return NULL;
 }
 
@@ -927,7 +932,7 @@ static SCM read_srfi10(SCM port, SCM l)
     return STk_C_apply_list(CDR(tmp), CDR (l));
   }
 
-  return STk_void;	/* For the C compiler */
+  return STk_void;      /* For the C compiler */
 }
 
 
@@ -967,26 +972,26 @@ static SCM read_case_sensitive_conv(SCM value)
 
 /*===========================================================================*\
  *
- *			I n i t i a l i z a t i o n
+ *                      I n i t i a l i z a t i o n
  *
 \*===========================================================================*/
 int STk_init_reader(void)
 {
   sym_quote            = STk_intern("quote");
   sym_quasiquote       = STk_intern("quasiquote");
-  sym_unquote	       = STk_intern("unquote");
+  sym_unquote          = STk_intern("unquote");
   sym_unquote_splicing = STk_intern("unquote-splicing");
-  sym_dot	       = STk_intern(".");
+  sym_dot              = STk_intern(".");
   sym_read_bracket     = STk_intern("%read-bracket");
   sym_read_brace       = STk_intern("%read-brace");
 
   /* read-error condition */
   read_error = STk_defcond_type("&read-error", STk_err_mess_condition,
-				LIST4(STk_intern("line"),
-				      STk_intern("column"),
-				      STk_intern("position"),
-				      STk_intern("span")),
-				STk_STklos_module);
+                                LIST4(STk_intern("line"),
+                                      STk_intern("column"),
+                                      STk_intern("position"),
+                                      STk_intern("span")),
+                                STk_STklos_module);
 
 
   /* Declare SRFI-10 support function */
@@ -994,8 +999,8 @@ int STk_init_reader(void)
 
   /* Declare parameter read-case-sensitve */
   STk_make_C_parameter("read-case-sensitive",
-		       MAKE_BOOLEAN(STk_read_case_sensitive),
-		       read_case_sensitive_conv,
-		       STk_STklos_module);
+                       MAKE_BOOLEAN(STk_read_case_sensitive),
+                       read_case_sensitive_conv,
+                       STk_STklos_module);
   return TRUE;
 }
