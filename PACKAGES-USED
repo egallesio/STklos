@@ -22,7 +22,7 @@ for MPI
 
 GC: The Boehm's conservative garbage collector for C and C++
 ============================================================
-    - Version: 7.2alpha2
+    - Version: 7.6.4
     - License: Free (BSD-like)
     - Home Page: http://www.hpl.hp.com/personal/Hans_Boehm/gc
 
@@ -47,12 +47,12 @@ LALR: The Dominique Boucher LALR Package
 
 libffi - a portable foreign function interface library
 ======================================================
-	- Version 3.0.9
-	- License: Free (BSD like)
-	- Home Page: http://sourceware.org/libffi/
+        - Version 3.0.9
+        - License: Free (BSD like)
+        - Home Page: http://sourceware.org/libffi/
 
 
-      	   	 +++++++++++++++++++++++++++++++++++
+                 +++++++++++++++++++++++++++++++++++
 
 The GC, PCRE, LIBFFI and GMP libraries provided with STklos are only
 used if there are no identical (or higher) versions of these libraries

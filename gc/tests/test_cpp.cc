@@ -1,17 +1,15 @@
 /****************************************************************************
 Copyright (c) 1994 by Xerox Corporation.  All rights reserved.
- 
+
 THIS MATERIAL IS PROVIDED AS IS, WITH ABSOLUTELY NO WARRANTY EXPRESSED
 OR IMPLIED.  ANY USE IS AT YOUR OWN RISK.
- 
+
 Permission is hereby granted to use or copy this program for any
 purpose, provided the above notices are retained on all copies.
 Permission to modify the code and to distribute modified code is
 granted, provided the above notices are retained, and a notice that
 the code was modified is included with the above copyright notice.
 ****************************************************************************
-Last modified on Mon Jul 10 21:06:03 PDT 1995 by ellis
-     modified on December 20, 1994 7:27 pm PST by boehm
 
 usage: test_cpp number-of-iterations
 
@@ -24,35 +22,47 @@ few minutes to complete.
 
 ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#undef GC_BUILD
+
 #include "gc_cpp.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define USE_STD_ALLOCATOR
-#ifdef USE_STD_ALLOCATOR
-#   include "gc_allocator.h"
-#elif __GNUC__
-#   include "new_gc_alloc.h"
+
+#ifndef DONT_USE_STD_ALLOCATOR
+# include "gc_allocator.h"
 #else
-#   include "gc_alloc.h"
-#endif
-extern "C" {
-# include "private/gcconfig.h"
-  GC_API void GC_printf(const char *format, ...);
-  /* Use GC private output to reach the same log file.  */
-  /* Don't include gc_priv.h, since that may include Windows system	*/
-  /* header files that don't take kindly to this context.		*/
-}
-#ifdef MSWIN32
-#   include <windows.h>
-#endif
-#ifdef GC_NAME_CONFLICT
-#   define USE_GC UseGC
-    struct foo * GC;
-#else
-#   define USE_GC GC
+  /* Note: This works only for ancient STL versions.    */
+# include "new_gc_alloc.h"
 #endif
 
+extern "C" {
+# include "private/gcconfig.h"
+
+# ifndef GC_API_PRIV
+#   define GC_API_PRIV GC_API
+# endif
+  GC_API_PRIV void GC_printf(const char * format, ...);
+  /* Use GC private output to reach the same log file.  */
+  /* Don't include gc_priv.h, since that may include Windows system     */
+  /* header files that don't take kindly to this context.               */
+}
+
+#ifdef MSWIN32
+# include <windows.h>
+#endif
+
+#ifdef GC_NAME_CONFLICT
+# define USE_GC GC_NS_QUALIFY(UseGC)
+  struct foo * GC;
+#else
+# define USE_GC GC_NS_QUALIFY(GC)
+#endif
 
 #define my_assert( e ) \
     if (! (e)) { \
@@ -60,21 +70,28 @@ extern "C" {
                     __LINE__ ); \
         exit( 1 ); }
 
+#ifndef GC_ATTR_EXPLICIT
+# if (__cplusplus >= 201103L) || defined(CPPCHECK)
+#   define GC_ATTR_EXPLICIT explicit
+# else
+#   define GC_ATTR_EXPLICIT /* empty */
+# endif
+#endif
 
 class A {public:
-    /* An uncollectable class. */
+    /* An uncollectible class. */
 
-    A( int iArg ): i( iArg ) {}
+    GC_ATTR_EXPLICIT A( int iArg ): i( iArg ) {}
     void Test( int iArg ) {
-        my_assert( i == iArg );} 
+        my_assert( i == iArg );}
     int i;};
 
 
-class B: public gc, public A {public:
-    /* A collectable class. */
+class B: public GC_NS_QUALIFY(gc), public A { public:
+    /* A collectible class. */
 
-    B( int j ): A( j ) {}
-    ~B() {
+    GC_ATTR_EXPLICIT B( int j ): A( j ) {}
+    virtual ~B() {
         my_assert( deleting );}
     static void Deleting( int on ) {
         deleting = on;}
@@ -83,10 +100,10 @@ class B: public gc, public A {public:
 int B::deleting = 0;
 
 
-class C: public gc_cleanup, public A {public:
-    /* A collectable class with cleanup and virtual multiple inheritance. */
+class C: public GC_NS_QUALIFY(gc_cleanup), public A { public:
+    /* A collectible class with cleanup and virtual multiple inheritance. */
 
-    C( int levelArg ): A( levelArg ), level( levelArg ) {
+    GC_ATTR_EXPLICIT C( int levelArg ): A( levelArg ), level( levelArg ) {
         nAllocated++;
         if (level > 0) {
             left = new C( level - 1 );
@@ -96,7 +113,7 @@ class C: public gc_cleanup, public A {public:
     ~C() {
         this->A::Test( level );
         nFreed++;
-        my_assert( level == 0 ? 
+        my_assert( level == 0 ?
                    left == 0 && right == 0 :
                    level == left->level + 1 && level == right->level + 1 );
         left = right = 0;
@@ -114,19 +131,19 @@ int C::nFreed = 0;
 int C::nAllocated = 0;
 
 
-class D: public gc {public:
-    /* A collectable class with a static member function to be used as
+class D: public GC_NS_QUALIFY(gc) { public:
+    /* A collectible class with a static member function to be used as
     an explicit clean-up function supplied to ::new. */
 
-    D( int iArg ): i( iArg ) {
+    GC_ATTR_EXPLICIT D( int iArg ): i( iArg ) {
         nAllocated++;}
     static void CleanUp( void* obj, void* data ) {
-        D* self = (D*) obj;
+        D* self = static_cast<D*>(obj);
         nFreed++;
-        my_assert( self->i == (int) (GC_word) data );}
+        my_assert( (GC_word)self->i == (GC_word)data );}
     static void Test() {
         my_assert( nFreed >= .8 * nAllocated );}
-       
+
     int i;
     static int nFreed;
     static int nAllocated;};
@@ -135,8 +152,8 @@ int D::nFreed = 0;
 int D::nAllocated = 0;
 
 
-class E: public gc_cleanup {public:
-    /* A collectable class with clean-up for use by F. */
+class E: public GC_NS_QUALIFY(gc_cleanup) { public:
+    /* A collectible class with clean-up for use by F. */
 
     E() {
         nAllocated++;}
@@ -145,30 +162,36 @@ class E: public gc_cleanup {public:
 
     static int nFreed;
     static int nAllocated;};
-    
+
 int E::nFreed = 0;
 int E::nAllocated = 0;
-   
+
 
 class F: public E {public:
-    /* A collectable class with clean-up, a base with clean-up, and a
+    /* A collectible class with clean-up, a base with clean-up, and a
     member with clean-up. */
 
     F() {
-        nAllocated++;}
+        nAllocatedF++;
+    }
+
     ~F() {
-        nFreed++;}
+        nFreedF++;
+    }
+
     static void Test() {
-        my_assert( nFreed >= .8 * nAllocated );
-        my_assert( 2 * nFreed == E::nFreed );}
-       
+        my_assert(nFreedF >= .8 * nAllocatedF);
+        my_assert(2 * nFreedF == nFreed);
+    }
+
     E e;
-    static int nFreed;
-    static int nAllocated;};
-    
-int F::nFreed = 0;
-int F::nAllocated = 0;
-   
+    static int nFreedF;
+    static int nAllocatedF;
+};
+
+int F::nFreedF = 0;
+int F::nAllocatedF = 0;
+
 
 GC_word Disguise( void* p ) {
     return ~ (GC_word) p;}
@@ -176,106 +199,156 @@ GC_word Disguise( void* p ) {
 void* Undisguise( GC_word i ) {
     return (void*) ~ i;}
 
-
-#ifdef MSWIN32
-int APIENTRY WinMain(
-    HINSTANCE instance, HINSTANCE prev, LPSTR cmd, int cmdShow ) 
-{
-    int argc;
+#if ((defined(MSWIN32) && !defined(__MINGW32__)) || defined(MSWINCE)) \
+    && !defined(NO_WINMAIN_ENTRY)
+  int APIENTRY WinMain( HINSTANCE /* instance */, HINSTANCE /* prev */,
+                       LPSTR cmd, int /* cmdShow */)
+  {
+    int argc = 0;
     char* argv[ 3 ];
 
-    for (argc = 1; argc < sizeof( argv ) / sizeof( argv[ 0 ] ); argc++) {
-        argv[ argc ] = strtok( argc == 1 ? cmd : 0, " \t" );
-        if (0 == argv[ argc ]) break;}
-
+#   if defined(CPPCHECK)
+      GC_noop1((GC_word)&WinMain);
+#   endif
+    if (cmd != 0)
+      for (argc = 1; argc < (int)(sizeof(argv) / sizeof(argv[0])); argc++) {
+        // Parse the command-line string.  Non-reentrant strtok() is not used
+        // to avoid complains of static analysis tools.  (And, strtok_r() is
+        // not available on some platforms.)  The code is equivalent to:
+        //   if (!(argv[argc] = strtok(argc == 1 ? cmd : 0, " \t"))) break;
+        if (NULL == cmd) {
+          argv[argc] = NULL;
+          break;
+        }
+        argv[argc] = cmd;
+        for (; *cmd != '\0'; cmd++) {
+          if (*cmd != ' ' && *cmd != '\t')
+            break;
+        }
+        if ('\0' == *cmd) {
+          argv[argc] = NULL;
+          break;
+        }
+        argv[argc] = cmd;
+        while (*(++cmd) != '\0') {
+          if (*cmd == ' ' || *cmd == '\t')
+            break;
+        }
+        if (*cmd != '\0') {
+          *(cmd++) = '\0';
+        } else {
+          cmd = NULL;
+        }
+      }
+#elif defined(MACOS)
+  int main() {
+    char* argv_[] = {"test_cpp", "10"}; // MacOS doesn't have a command line
+    argv = argv_;
+    argc = sizeof(argv_)/sizeof(argv_[0]);
 #else
-# ifdef MACOS
-    int main() {
-# else
-    int main( int argc, char* argv[] ) {
-# endif
+  int main( int argc, char* argv[] ) {
 #endif
 
-   GC_INIT();
+    GC_set_all_interior_pointers(1);
+                        /* needed due to C++ multiple inheritance used  */
 
-#  if defined(MACOS)                        // MacOS
-    char* argv_[] = {"test_cpp", "10"};     //   doesn't
-    argv = argv_;                           //     have a
-    argc = sizeof(argv_)/sizeof(argv_[0]);  //       commandline
-#  endif 
+    GC_INIT();
+
     int i, iters, n;
-#   ifdef USE_STD_ALLOCATOR
+#   ifndef DONT_USE_STD_ALLOCATOR
       int *x = gc_allocator<int>().allocate(1);
-      int *xio = gc_allocator_ignore_off_page<int>().allocate(1);
+      int *xio;
+      xio = gc_allocator_ignore_off_page<int>().allocate(1);
+      (void)xio;
       int **xptr = traceable_allocator<int *>().allocate(1);
-#   else 
-#     ifdef __GNUC__
-          int *x = (int *)gc_alloc::allocate(sizeof(int));
-#     else
-          int *x = (int *)alloc::allocate(sizeof(int));
-#     endif
+#   else
+      int *x = (int *)gc_alloc::allocate(sizeof(int));
 #   endif
     *x = 29;
-#   ifdef USE_STD_ALLOCATOR
+#   ifndef DONT_USE_STD_ALLOCATOR
+      if (!xptr) {
+        fprintf(stderr, "Out of memory!\n");
+        exit(3);
+      }
       *xptr = x;
       x = 0;
 #   endif
-    if (argc != 2 || (0 >= (n = atoi( argv[ 1 ] )))) {
-        GC_printf( "usage: test_cpp number-of-iterations\nAssuming 10 iters\n" );
-        n = 10;}
-        
+    if (argc != 2
+        || (n = (int)COVERT_DATAFLOW(atoi(argv[1]))) <= 0) {
+      GC_printf("usage: test_cpp number-of-iterations\n"
+                "Assuming 10 iters\n");
+      n = 10;
+    }
+
     for (iters = 1; iters <= n; iters++) {
         GC_printf( "Starting iteration %d\n", iters );
 
-            /* Allocate some uncollectable As and disguise their pointers.
+            /* Allocate some uncollectible As and disguise their pointers.
             Later we'll check to see if the objects are still there.  We're
-            checking to make sure these objects really are uncollectable. */
+            checking to make sure these objects really are uncollectible. */
         GC_word as[ 1000 ];
         GC_word bs[ 1000 ];
         for (i = 0; i < 1000; i++) {
-            as[ i ] = Disguise( new (NoGC) A( i ) );
-            bs[ i ] = Disguise( new (NoGC) B( i ) );}
+            as[ i ] = Disguise( new (GC_NS_QUALIFY(NoGC)) A(i) );
+            bs[ i ] = Disguise( new (GC_NS_QUALIFY(NoGC)) B(i) ); }
 
             /* Allocate a fair number of finalizable Cs, Ds, and Fs.
             Later we'll check to make sure they've gone away. */
         for (i = 0; i < 1000; i++) {
             C* c = new C( 2 );
             C c1( 2 );           /* stack allocation should work too */
-            D* d = ::new (USE_GC, D::CleanUp, (void*)(GC_word)i) D( i );
-            F* f = new F;
+            D* d;
+            F* f;
+            d = ::new (USE_GC, D::CleanUp, (void*)(GC_word)i) D( i );
+            (void)d;
+            f = new F;
+            F** fa = new F*[1];
+            fa[0] = f;
+            (void)fa;
+            delete[] fa;
             if (0 == i % 10) delete c;}
 
-            /* Allocate a very large number of collectable As and Bs and
+            /* Allocate a very large number of collectible As and Bs and
             drop the references to them immediately, forcing many
             collections. */
         for (i = 0; i < 1000000; i++) {
-            A* a = new (USE_GC) A( i );
-            B* b = new B( i );
+            A* a;
+            a = new (USE_GC) A( i );
+            (void)a;
+            B* b;
+            b = new B( i );
+            (void)b;
             b = new (USE_GC) B( i );
             if (0 == i % 10) {
                 B::Deleting( 1 );
                 delete b;
                 B::Deleting( 0 );}
-#	    ifdef FINALIZE_ON_DEMAND
-	      GC_invoke_finalizers();
-#	    endif
-	    }
+#           ifdef FINALIZE_ON_DEMAND
+              GC_invoke_finalizers();
+#           endif
+            }
 
-            /* Make sure the uncollectable As and Bs are still there. */
+            /* Make sure the uncollectible As and Bs are still there. */
         for (i = 0; i < 1000; i++) {
-            A* a = (A*) Undisguise( as[ i ] );
-            B* b = (B*) Undisguise( bs[ i ] );
+            A* a = static_cast<A*>(Undisguise(as[i]));
+            B* b = static_cast<B*>(Undisguise(bs[i]));
             a->Test( i );
-            delete a;
+#           if defined(ADDRESS_SANITIZER) || defined(MEMORY_SANITIZER)
+              // Workaround for ASan/MSan: the linker uses operator delete
+              // implementation from libclang_rt instead of gc_cpp (thus
+              // causing incompatible alloc/free).
+              GC_FREE(a);
+#           else
+              delete a;
+#           endif
             b->Test( i );
             B::Deleting( 1 );
             delete b;
             B::Deleting( 0 );
-#	    ifdef FINALIZE_ON_DEMAND
-	   	 GC_invoke_finalizers();
-#	    endif
-
-	    }
+#           ifdef FINALIZE_ON_DEMAND
+                 GC_invoke_finalizers();
+#           endif
+            }
 
             /* Make sure most of the finalizable Cs, Ds, and Fs have
             gone away. */
@@ -283,11 +356,10 @@ int APIENTRY WinMain(
         D::Test();
         F::Test();}
 
-#   ifdef USE_STD_ALLOCATOR
+#   ifndef DONT_USE_STD_ALLOCATOR
       x = *xptr;
 #   endif
     my_assert (29 == x[0]);
     GC_printf( "The test appears to have succeeded.\n" );
-    return( 0 );}
-    
-
+    return( 0 );
+}

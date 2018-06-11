@@ -1,17 +1,16 @@
 See README.alpha for Linux on DEC AXP info.
 
-This file applies mostly to Linux/Intel IA32.  Ports to Linux on an M68K, IA64,
-SPARC, MIPS, Alpha and PowerPC are also integrated.  They should behave
+This file applies mostly to Linux/Intel IA32.  Ports to Linux on an M68K,
+IA64, SPARC, MIPS, Alpha and PowerPC are integrated too.  They should behave
 similarly, except that the PowerPC port lacks incremental GC support, and
 it is unknown to what extent the Linux threads code is functional.
 See below for M68K specific notes.
 
 Incremental GC is generally supported.
 
-Dynamic libraries are supported on an ELF system.  A static executable
-should be linked with the gcc option "-Wl,-defsym,_DYNAMIC=0".
+Dynamic libraries are supported on an ELF system.
 
-The collector appears to work reliably with Linux threads, but beware 
+The collector appears to work reliably with Linux threads, but beware
 of older versions of glibc and gdb.
 
 The garbage collector uses SIGPWR and SIGXCPU if it is used with
@@ -29,7 +28,7 @@ To use threads, you need to abide by the following requirements:
 2) You must compile the collector with -DGC_LINUX_THREADS (or
    just -DGC_THREADS) and -D_REENTRANT specified in the Makefile.
 
-3a) Every file that makes thread calls should define GC_LINUX_THREADS and 
+3a) Every file that makes thread calls should define GC_LINUX_THREADS and
    _REENTRANT and then include gc.h.  Gc.h redefines some of the
    pthread primitives as macros which also provide the collector with
    information it requires.
@@ -37,14 +36,14 @@ To use threads, you need to abide by the following requirements:
 3b) A new alternative to (3a) is to build the collector and compile GC clients
    with -DGC_USE_LD_WRAP, and to link the final program with
 
-   (for ld) --wrap read --wrap dlopen --wrap pthread_create \
-	    --wrap pthread_join --wrap pthread_detach \
-	    --wrap pthread_sigmask --wrap sleep
+   (for ld) --wrap dlopen --wrap pthread_create \
+            --wrap pthread_join --wrap pthread_detach \
+            --wrap pthread_sigmask --wrap pthread_exit --wrap pthread_cancel
 
-   (for gcc) -Wl,--wrap -Wl,read -Wl,--wrap -Wl,dlopen -Wl,--wrap \
-	     -Wl,pthread_create -Wl,--wrap -Wl,pthread_join -Wl,--wrap \
-	     -Wl,pthread_detach -Wl,--wrap -Wl,pthread_sigmask \
-	     -Wl,--wrap -Wl,sleep
+   (for gcc) -Wl,--wrap -Wl,dlopen -Wl,--wrap -Wl,pthread_create \
+             -Wl,--wrap -Wl,pthread_join -Wl,--wrap -Wl,pthread_detach \
+             -Wl,--wrap -Wl,pthread_sigmask -Wl,--wrap -Wl,pthread_exit \
+             -Wl,--wrap -Wl,pthread_cancel
 
    In any case, _REENTRANT should be defined during compilation.
 
@@ -60,8 +59,8 @@ To use threads, you need to abide by the following requirements:
 
 6) Thread local storage may not be viewed as part of the root set by the
    collector.  This probably depends on the linuxthreads version.  For the
-   time being, any collectable memory referenced by thread local storage should
-   also be referenced from elsewhere, or be allocated as uncollectable.
+   time being, any collectible memory referenced by thread local storage
+   should also be referenced from elsewhere, or be allocated as uncollectible.
    (This is really a bug that should be fixed somehow.  The current GC
    version probably gets things right if there are not too many tls locations
    and if dlopen is not used.)
@@ -75,7 +74,7 @@ patches to correct the problem in 68040 buserror handler but it is not
 yet in any standard kernel.
 
 Here is a simple test program to detect whether the kernel has the
-problem. It could be run as a separate check in configure or tested 
+problem. It could be run as a separate check in configure or tested
 upon startup. If it fails (return !0) than mprotect can't be used
 on that system.
 
@@ -127,5 +126,3 @@ main()
   fprintf(stderr,"vmtest Ok\n");
   exit(0);
 }
-
-
