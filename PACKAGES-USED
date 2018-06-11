@@ -47,7 +47,7 @@ LALR: The Dominique Boucher LALR Package
 
 libffi - a portable foreign function interface library
 ======================================================
-        - Version 3.0.9
+        - Version 3.2.1
         - License: Free (BSD like)
         - Home Page: http://sourceware.org/libffi/
 
