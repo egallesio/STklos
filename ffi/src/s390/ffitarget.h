@@ -1,5 +1,6 @@
 /* -----------------------------------------------------------------*-C-*-
-   ffitarget.h - Copyright (c) 1996-2003  Red Hat, Inc.
+   ffitarget.h - Copyright (c) 2012  Anthony Green
+                 Copyright (c) 1996-2003  Red Hat, Inc.
    Target configuration macros for S390.
 
    Permission is hereby granted, free of charge, to any person obtaining
@@ -27,8 +28,14 @@
 #ifndef LIBFFI_TARGET_H
 #define LIBFFI_TARGET_H
 
+#ifndef LIBFFI_H
+#error "Please do not include ffitarget.h directly into your source.  Use ffi.h instead."
+#endif
+
 #if defined (__s390x__)
+#ifndef S390X
 #define S390X
+#endif
 #endif
 
 /* ---- System specific configurations ----------------------------------- */
@@ -40,11 +47,13 @@ typedef signed long            ffi_sarg;
 typedef enum ffi_abi {
   FFI_FIRST_ABI = 0,
   FFI_SYSV,
-  FFI_DEFAULT_ABI = FFI_SYSV,
-  FFI_LAST_ABI = FFI_DEFAULT_ABI + 1
+  FFI_LAST_ABI,
+  FFI_DEFAULT_ABI = FFI_SYSV
 } ffi_abi;
 #endif
 
+#define FFI_TARGET_SPECIFIC_STACK_SPACE_ALLOCATION
+#define FFI_TARGET_HAS_COMPLEX_TYPE
 
 /* ---- Definitions for closures ----------------------------------------- */
 

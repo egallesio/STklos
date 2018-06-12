@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 26-Mar-2018 10:15 (eg)
+### Last file update: 11-Jun-2018 15:02 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.20])
@@ -360,8 +360,8 @@ then
            --disable-structs --disable-raw-api --disable-shared \
            --prefix=$prefix) || { echo "Cannot configure libffi"; exit; }
      FFI="ffi"
-     FFIINC="-I../ffi/include"
-     FFILIB="../ffi/.libs/libffi.a"
+     FFIINC="-I../ffi/$(./config.guess)/include"
+     FFILIB="../ffi/$(./config.guess)/.libs/libffi.a"
      COMP_LIBS="libffi $COMP_LIBS"
 else
      echo "... Using system libffi library"
