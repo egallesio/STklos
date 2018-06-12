@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 11-Jun-2018 09:34 (eg)
+ * Last file update: 12-Jun-2018 09:26 (eg)
  *
  */
 
@@ -432,7 +432,7 @@ static SCM read_cycle(SCM port, int c, struct read_context *ctx)
               else
                 error_key_not_defined(port, k);
 
-    case '=': if ((tmp = STk_assv(k, ctx->cycles)) == STk_false) {
+    case '=': {
                 /* This is a little bit tricky here: We create a fake cell
                  * that serves as a place-holder. In some cases this is not
                  * useful (e.g. (#0=(1 2) 3 4 . #0#) ), but in some other
@@ -469,10 +469,8 @@ static SCM read_cycle(SCM port, int c, struct read_context *ctx)
                  CDR(tmp) = val;
                  return val;
                }
-               else
-                 signal_error(port, "key ``#~a='' already defined", k);
 
-  default:  STk_ungetc(c, port); error_bad_sharp_syntax(port, buffer);
+  default:     STk_ungetc(c, port); error_bad_sharp_syntax(port, buffer);
   }
 
   return STk_void; /* for the compiler */
