@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 23-Dec-2010 18:47 (eg)
-;;;; Last file update: 15-Jun-2018 19:40 (eg)
+;;;; Last file update: 23-Mar-2018 17:42 (eg)
 ;;;;
 (require "test")
 
@@ -53,6 +53,16 @@
 (test "Quasiquote.stklos.1"
       '(quasiquote ((unquote-splicing (append (list 2 3) (list 5 7)))))
       ``(,@(append ,@'((list 2 3) (list 5 7)))))
+
+
+;;---- Test the lambda form with λ symbol
+(test "lambda symbol.1"
+      '(1 2 3)
+      ( (λ l l) 1 2 3))
+
+(test "lambda symbol.2"
+      '(1 2 3)
+      ( (λ λ λ) 1 2 3))
 
 
 ;;------------------------------------------------------------------
