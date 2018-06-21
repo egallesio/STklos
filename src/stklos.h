@@ -1,7 +1,7 @@
 /*
- * stklos.h	-- stklos.h
+ * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 18-Mar-2012 19:06 (eg)
+ * Last file update: 21-Jun-2018 13:51 (eg)
  */
 
 
@@ -68,7 +68,7 @@ extern "C"
 
 /*===========================================================================*\
  *
- * 		Declaration of some constants (mainly maxima)
+ *              Declaration of some constants (mainly maxima)
  *
 \*===========================================================================*/
 
@@ -81,24 +81,24 @@ extern "C"
 #endif
 
 #ifdef _POSIX_PATH_MAX
-#  define MAX_PATH_LENGTH	 _POSIX_PATH_MAX
+#  define MAX_PATH_LENGTH        _POSIX_PATH_MAX
 #else
-#  define MAX_PATH_LENGTH	 256
+#  define MAX_PATH_LENGTH        256
 #endif
 
-#define MAX_TOKEN_SIZE 		1024		/* max size of a token */
+#define MAX_TOKEN_SIZE          1024            /* max size of a token */
 
 
-#define CPP_CONCAT(x, y) 	x##y
+#define CPP_CONCAT(x, y)        x##y
 #define Inline inline
 
-#define AS_LONG(x)		((unsigned long) (x))
-#define AS_SCM(x)		((SCM) ((unsigned long) (x)))
+#define AS_LONG(x)              ((unsigned long) (x))
+#define AS_SCM(x)               ((SCM) ((unsigned long) (x)))
 
 
 /*===========================================================================*\
  *
- * 				Threads stuff
+ *                              Threads stuff
  *
 \*===========================================================================*/
 #ifdef THREADS_NONE
@@ -113,7 +113,7 @@ extern "C"
 
 /*===========================================================================*\
  *
- * 			Memory allocation
+ *                      Memory allocation
  *
 \*===========================================================================*/
   /*
@@ -138,8 +138,8 @@ extern "C"
 // GC_API void GC_free(void * object_addr);
 //
 // GC_API void GC_register_finalizer(void * obj, GC_finalization_proc fn,
-// 				  void * cd, GC_finalization_proc *ofn,
-// 				  void * *ocd);
+//                                void * cd, GC_finalization_proc *ofn,
+//                                void * *ocd);
 //
 // GC_API void GC_gcollect(void);
 // GC_API void GC_init(void);
@@ -147,13 +147,13 @@ extern "C"
   /* Scheme interface. *** THIS IS THE INTERFACE TO USE ***  */
 
 
-#define STk_must_malloc(size) 		GC_MALLOC(size)
-#define STk_must_malloc_atomic(size)	GC_MALLOC_ATOMIC(size)
-#define STk_must_realloc(ptr, size) 	GC_REALLOC((ptr), (size))
-#define STk_free(ptr)			GC_FREE(ptr)
+#define STk_must_malloc(size)           GC_MALLOC(size)
+#define STk_must_malloc_atomic(size)    GC_MALLOC_ATOMIC(size)
+#define STk_must_realloc(ptr, size)     GC_REALLOC((ptr), (size))
+#define STk_free(ptr)                   GC_FREE(ptr)
 #define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER((void *) (ptr), \
-					    (GC_finalization_proc)(f), 0, 0, 0)
-#define STk_gc()			GC_gcollect()
+                                            (GC_finalization_proc)(f), 0, 0, 0)
+#define STk_gc()                        GC_gcollect()
 
 void STk_gc_init(void);
 
@@ -161,25 +161,25 @@ void STk_gc_init(void);
 
 /*===========================================================================*\
  *
- * 		Declaration of the SCM type
+ *              Declaration of the SCM type
  *
 \*===========================================================================*/
 
-#define MAX_CELL_TYPES		256
+#define MAX_CELL_TYPES          256
 
 typedef void* SCM;
 
 typedef enum {
   tc_not_boxed=-1,
-  tc_cons, tc_integer, tc_real, tc_bignum,  tc_rational, 		/* 0 */
-  tc_complex, tc_symbol, tc_keyword, tc_string, tc_module, 		/* 5 */
-  tc_instance, tc_closure, tc_subr0, tc_subr1, tc_subr2, 		/* 10 */
-  tc_subr3, tc_subr4, tc_subr5, tc_subr01, tc_subr12,  			/* 15 */
-  tc_subr23, tc_vsubr, tc_apply, tc_vector, tc_uvector,			/* 20 */
-  tc_hash_table, tc_port, tc_frame, tc_next_method, tc_promise, 	/* 25 */
-  tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,	/* 30 */
-  tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex, 		/* 35 */
-  tc_condv, tc_box, tc_ext_func, tc_pointer, tc_callback,		/* 40 */
+  tc_cons, tc_integer, tc_real, tc_bignum,  tc_rational,                /* 0 */
+  tc_complex, tc_symbol, tc_keyword, tc_string, tc_module,              /* 5 */
+  tc_instance, tc_closure, tc_subr0, tc_subr1, tc_subr2,                /* 10 */
+  tc_subr3, tc_subr4, tc_subr5, tc_subr01, tc_subr12,                   /* 15 */
+  tc_subr23, tc_vsubr, tc_apply, tc_vector, tc_uvector,                 /* 20 */
+  tc_hash_table, tc_port, tc_frame, tc_next_method, tc_promise,         /* 25 */
+  tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,      /* 30 */
+  tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex,            /* 35 */
+  tc_condv, tc_box, tc_ext_func, tc_pointer, tc_callback,               /* 40 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -188,10 +188,10 @@ typedef enum {
    * Internal representation of SCM object. Object use the two least
    * significant bit as tag. We have the following representation
    *
-   *     .........00		pointer on an object descriptor (a box)
-   *     .........01		integer
-   *     .........10		small object (see below for more detail)
-   *     .........11		small constant (#t #f '() ... see below for details)
+   *     .........00            pointer on an object descriptor (a box)
+   *     .........01            integer
+   *     .........10            small object (see below for more detail)
+   *     .........11            small constant (#t #f '() ... see below for details)
    */
 
 #define MAKE_SCONST(n)   (AS_SCM(n << 2 | 3))
@@ -212,31 +212,31 @@ typedef struct {
 } stk_header;
 
 
-#define BOXED_TYPE(x)	 	(((stk_header *) x)->type)
-#define BOXED_INFO(x)	 	(((stk_header *) x)->cell_info)
-#define BOXED_OBJP(x)		(!(AS_LONG(x) & 3))
-#define BOXED_TYPE_EQ(x, y)	(BOXED_OBJP(x) && BOXED_TYPE(x) == y)
+#define BOXED_TYPE(x)           (((stk_header *) x)->type)
+#define BOXED_INFO(x)           (((stk_header *) x)->cell_info)
+#define BOXED_OBJP(x)           (!(AS_LONG(x) & 3))
+#define BOXED_TYPE_EQ(x, y)     (BOXED_OBJP(x) && BOXED_TYPE(x) == y)
 
-#define STYPE(x)		(BOXED_OBJP(x)? BOXED_TYPE(x): tc_not_boxed)
+#define STYPE(x)                (BOXED_OBJP(x)? BOXED_TYPE(x): tc_not_boxed)
 
 
-#define NEWCELL(_var, _type) 	{ 						\
- 	_var = (SCM) STk_must_malloc(sizeof(struct CPP_CONCAT(_type,_obj)));	\
-    	BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);				\
-    	BOXED_INFO(_var) = 0;							\
-	}
+#define NEWCELL(_var, _type)    {                                               \
+        _var = (SCM) STk_must_malloc(sizeof(struct CPP_CONCAT(_type,_obj)));    \
+        BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);                              \
+        BOXED_INFO(_var) = 0;                                                   \
+        }
 
-#define NEWCELL_WITH_LEN(_var, _type, _len)	{ 	\
- 	_var = (SCM) STk_must_malloc(_len);		\
-    	BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);	\
-    	BOXED_INFO(_var) = 0;				\
-	}
+#define NEWCELL_WITH_LEN(_var, _type, _len)     {       \
+        _var = (SCM) STk_must_malloc(_len);             \
+        BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);      \
+        BOXED_INFO(_var) = 0;                           \
+        }
 
-#define NEWCELL_ATOMIC(_var, _type, _len) 	{ 	\
- 	_var = (SCM) STk_must_malloc_atomic(_len);	\
-    	BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);	\
-    	BOXED_INFO(_var) = 0;				\
-	}
+#define NEWCELL_ATOMIC(_var, _type, _len)       {       \
+        _var = (SCM) STk_must_malloc_atomic(_len);      \
+        BOXED_TYPE(_var) = CPP_CONCAT(tc_, _type);      \
+        BOXED_INFO(_var) = 0;                           \
+        }
 
   /*
    * PRIMITIVES
@@ -249,8 +249,8 @@ typedef struct {
    * It will be expansed in
    *    SCM STk_pairp(SCM obj);
    *    static struct obj_primitive obj_pairp = { "pair?", tc_subr1, STk_pairp};
-   *	SCM STk_pairp(SCM obj){
-   *	  <body>
+   *    SCM STk_pairp(SCM obj){
+   *      <body>
    *    }
    */
 
@@ -261,18 +261,18 @@ struct primitive_obj {
   SCM plist;
 };
 
-#define PRIMITIVE_NAME(p)	(((struct primitive_obj *) (p))->name)
-#define PRIMITIVE_FUNC(p)	(((struct primitive_obj *) (p))->code)
-#define PRIMITIVE_PLIST(p)	(((struct primitive_obj *) (p))->plist)
+#define PRIMITIVE_NAME(p)       (((struct primitive_obj *) (p))->name)
+#define PRIMITIVE_FUNC(p)       (((struct primitive_obj *) (p))->code)
+#define PRIMITIVE_PLIST(p)      (((struct primitive_obj *) (p))->plist)
 
-#define DEFINE_PRIMITIVE(_sname, _cname, _type, _params)	\
-  SCM CPP_CONCAT(STk_, _cname) _params;				\
-  struct primitive_obj CPP_CONCAT(STk_o_, _cname) = { 	\
-	{CPP_CONCAT(tc_, _type), 0},				\
-      	_sname, CPP_CONCAT(STk_, _cname), STk_nil};		\
+#define DEFINE_PRIMITIVE(_sname, _cname, _type, _params)        \
+  SCM CPP_CONCAT(STk_, _cname) _params;                         \
+  struct primitive_obj CPP_CONCAT(STk_o_, _cname) = {   \
+        {CPP_CONCAT(tc_, _type), 0},                            \
+        _sname, CPP_CONCAT(STk_, _cname), STk_nil};             \
   SCM CPP_CONCAT(STk_, _cname) _params
 
-#define EXTERN_PRIMITIVE(_sname, _cname, _type, _params)	\
+#define EXTERN_PRIMITIVE(_sname, _cname, _type, _params)        \
   /* the same one as before but without function definition */  \
   extern SCM CPP_CONCAT(STk_, _cname) _params;                  \
   extern struct primitive_obj CPP_CONCAT(STk_o_, _cname)
@@ -282,12 +282,12 @@ struct primitive_obj {
 #define THE_PRIMITIVE(_name)   ((SCM) CPP_CONCAT(&STk_o_, _name))
 #define ADD_PRIMITIVE(_name)   STk_add_primitive(CPP_CONCAT(&STk_o_, _name))
 #define ADD_PRIMITIVE_IN_MODULE(_name, _mod) \
-  		 STk_add_primitive_in_module(CPP_CONCAT(&STk_o_, _name), _mod)
+                 STk_add_primitive_in_module(CPP_CONCAT(&STk_o_, _name), _mod)
 
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 B A S E 6 4 . C
+  ----                           B A S E 6 4 . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -298,13 +298,13 @@ int STk_init_base64(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 B O O L E A N . C
+  ----                           B O O L E A N . C
   ----
   ------------------------------------------------------------------------------
 */
 
-#define MAKE_BOOLEAN(_cond) 	((_cond) ? STk_true : STk_false)
-#define BOOLEANP(o)		(((o) == STk_true) || ((o) == STk_false))
+#define MAKE_BOOLEAN(_cond)     ((_cond) ? STk_true : STk_false)
+#define BOOLEANP(o)             (((o) == STk_true) || ((o) == STk_false))
 
 
 EXTERN_PRIMITIVE("eq?",    eq,    subr2, (SCM x,SCM y));
@@ -318,7 +318,7 @@ int STk_init_boolean(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 B O X . C
+  ----                           B O X . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -327,10 +327,10 @@ struct box_obj {
   SCM value;
 };
 
-#define BOXP(p) 	(BOXED_TYPE_EQ((p), tc_box))
-#define BOX_VALUE(p)	(((struct box_obj *) (p))->value)
+#define BOXP(p)         (BOXED_TYPE_EQ((p), tc_box))
+#define BOX_VALUE(p)    (((struct box_obj *) (p))->value)
 
-#define BOX_CONST	(1 << 0)
+#define BOX_CONST       (1 << 0)
 
 EXTERN_PRIMITIVE("make-box", make_box, subr1, (SCM x));
 
@@ -340,7 +340,7 @@ int STk_init_box(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 			    B Y T E V E C T O R . C
+  ----                      B Y T E V E C T O R . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -352,7 +352,7 @@ int STk_init_bytevector(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				  C H A R  . C
+  ----                            C H A R  . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -365,7 +365,7 @@ int STk_init_bytevector(void);
 
 #define MAKE_CHARACTER(n) (AS_SCM((n) << 3 | 0x6))
 #define CHARACTER_VAL(n)  ((AS_LONG(n) >> 3))
-#define CHARACTERP(n)	  ((AS_LONG(n) & 7) == 6)
+#define CHARACTERP(n)     ((AS_LONG(n) & 7) == 6)
 
 char *STk_char2string(int c);
 int STk_string2char(char *s);
@@ -376,7 +376,7 @@ int STk_init_char(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 C O N D  . C
+  ----                           C O N D  . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -386,7 +386,7 @@ extern SCM STk_message_condition, STk_err_mess_condition;
 SCM STk_make_C_cond(SCM type, int nargs, ...);
 
 EXTERN_PRIMITIVE("make-condition-type", make_cond_type, subr3,
-		 (SCM name, SCM parent, SCM slots));
+                 (SCM name, SCM parent, SCM slots));
 
 SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module);
 SCM STk_condition_type_is_a(SCM type, SCM t);
@@ -395,7 +395,7 @@ int STk_init_cond(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 C P O I N T E R  . C
+  ----                           C P O I N T E R  . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -406,10 +406,10 @@ struct pointer_obj {
   SCM  data;
 };
 
-#define CPOINTERP(p)		(BOXED_TYPE_EQ((p), tc_pointer))
-#define CPOINTER_VALUE(p)	(((struct pointer_obj *) (p))->value)
-#define CPOINTER_TYPE(p)	(((struct pointer_obj *) (p))->type)
-#define CPOINTER_DATA(p)	(((struct pointer_obj *) (p))->data)
+#define CPOINTERP(p)            (BOXED_TYPE_EQ((p), tc_pointer))
+#define CPOINTER_VALUE(p)       (((struct pointer_obj *) (p))->value)
+#define CPOINTER_TYPE(p)        (((struct pointer_obj *) (p))->type)
+#define CPOINTER_DATA(p)        (((struct pointer_obj *) (p))->data)
 
 SCM STk_make_Cpointer(void *ptr, SCM type, SCM data);
 int STk_init_cpointer(void);
@@ -417,20 +417,20 @@ int STk_init_cpointer(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				  D Y N L O A D . C
+  ----                            D Y N L O A D . C
   ----
   ------------------------------------------------------------------------------
 */
 
-#define MODULE_ENTRY_START(_name)  				\
-    void STk_module_main(void)	{				\
-      static int __already_loaded = 0;				\
-      if (__already_loaded++) {					\
-	STk_error("module %S already loaded", (_name));		\
-	return;							\
+#define MODULE_ENTRY_START(_name)                               \
+    void STk_module_main(void)  {                               \
+      static int __already_loaded = 0;                          \
+      if (__already_loaded++) {                                 \
+        STk_error("module %S already loaded", (_name));         \
+        return;                                                 \
       } {
 
-#define MODULE_ENTRY_END	} }
+#define MODULE_ENTRY_END        } }
 
 #define MODULE_ENTRY_INFO() SCM STk_module_info(void)
 
@@ -441,7 +441,7 @@ SCM STk_info_object_file(char *fname);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				  E R R O R . C
+  ----                            E R R O R . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -463,7 +463,7 @@ void STk_signal(char *str);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				  E N V . C
+  ----                            E N V . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -471,20 +471,20 @@ struct frame_obj {
   stk_header header;
   SCM next_frame;
   SCM owner;
-  SCM locals[1];	/* the values associated to the names */
+  SCM locals[1];        /* the values associated to the names */
 };
 
 /* Note: boxes are used for global variables */
 
-#define FRAME_LENGTH(p)		(BOXED_INFO(p))
-#define FRAME_NEXT(p)		(((struct frame_obj *) (p))->next_frame)
-#define FRAME_OWNER(p)		(((struct frame_obj *) (p))->owner)
-#define FRAME_LOCALS(p)		(((struct frame_obj *) (p))->locals)
-#define FRAME_LOCAL(p, i)	(FRAME_LOCALS(p)[i])
-#define FRAMEP(p)		(BOXED_TYPE_EQ((p), tc_frame))
+#define FRAME_LENGTH(p)         (BOXED_INFO(p))
+#define FRAME_NEXT(p)           (((struct frame_obj *) (p))->next_frame)
+#define FRAME_OWNER(p)          (((struct frame_obj *) (p))->owner)
+#define FRAME_LOCALS(p)         (((struct frame_obj *) (p))->locals)
+#define FRAME_LOCAL(p, i)       (FRAME_LOCALS(p)[i])
+#define FRAMEP(p)               (BOXED_TYPE_EQ((p), tc_frame))
 
 /* modules are defined in env.c but are private */
-#define MODULEP(p)		(BOXED_TYPE_EQ((p), tc_module))
+#define MODULEP(p)              (BOXED_TYPE_EQ((p), tc_module))
 
 SCM STk_make_frame(int len);
 SCM STk_clone_frame(SCM f);
@@ -505,7 +505,7 @@ EXTERN_PRIMITIVE("%select-module", select_module, subr1, (SCM module));
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				E X T E N D . C
+  ----                          E X T E N D . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -520,10 +520,10 @@ struct extended_type_descr {
 
 extern struct extended_type_descr *STk_xtypes[];
 
-#define BOXED_XTYPE(o)	     	    	 (STk_xtypes[((stk_header *) o)->type])
-#define XTYPE_NAME(d)		    	 (d->name)
-#define XTYPE_PRINT(d)		    	 (d->print)
-#define DEFINE_XTYPE(_type, _descr) 	 (STk_xtypes[CPP_CONCAT(tc_, _type)]=_descr)
+#define BOXED_XTYPE(o)                   (STk_xtypes[((stk_header *) o)->type])
+#define XTYPE_NAME(d)                    (d->name)
+#define XTYPE_PRINT(d)                   (d->print)
+#define DEFINE_XTYPE(_type, _descr)      (STk_xtypes[CPP_CONCAT(tc_, _type)]=_descr)
 #define DEFINE_USER_TYPE(_type, _descr)  { _type = STk_new_user_type(_descr); }
 
 int STk_new_user_type(struct extended_type_descr *);
@@ -531,7 +531,7 @@ int STk_init_extend(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				F F I . C
+  ----                          F F I . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -543,7 +543,7 @@ int STk_init_ffi(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				F I X N U M . C
+  ----                          F I X N U M . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -557,20 +557,20 @@ int STk_init_fixnum(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 K E Y W O R D . C
+  ----                           K E Y W O R D . C
   ----
   ------------------------------------------------------------------------------
 */
 struct keyword_obj {
   stk_header header;
-  char *pname;			/* must be at the same offset than for symbols */
+  char *pname;                  /* must be at the same offset than for symbols */
 };
 
-#define KEYWORD_PNAME(p) 	(((struct keyword_obj *) (p))->pname)
-#define KEYWORDP(p)		(BOXED_TYPE_EQ((p),tc_keyword))
+#define KEYWORD_PNAME(p)        (((struct keyword_obj *) (p))->pname)
+#define KEYWORDP(p)             (BOXED_TYPE_EQ((p),tc_keyword))
 
-#define KEYWORD_NEEDS_BARS 	(1 << 0)	/* Info flag */
-#define KEYWORD_HAS_UPPER 	(1 << 1)
+#define KEYWORD_NEEDS_BARS      (1 << 0)        /* Info flag */
+#define KEYWORD_HAS_UPPER       (1 << 1)
 
 EXTERN_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val));
 EXTERN_PRIMITIVE("key-get", key_get, subr23, (SCM l, SCM key, SCM dflt));
@@ -581,7 +581,7 @@ int STk_init_keyword(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 					L I B . C
+  ----                                  L I B . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -592,7 +592,7 @@ int STk_init_library(int *argc, char ***argv, int stack_size);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				      L I S T . C
+  ----                                L I S T . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -603,35 +603,35 @@ struct cons_obj {
   SCM cdr;
 };
 
-#define CAR(p) 		(((struct cons_obj *) (p))->car)
-#define CDR(p) 		(((struct cons_obj *) (p))->cdr)
-#define CONSP(p)	(BOXED_TYPE_EQ((p), tc_cons))
-#define NULLP(p)	((p) == STk_nil)
+#define CAR(p)          (((struct cons_obj *) (p))->car)
+#define CDR(p)          (((struct cons_obj *) (p))->cdr)
+#define CONSP(p)        (BOXED_TYPE_EQ((p), tc_cons))
+#define NULLP(p)        ((p) == STk_nil)
 
-#define CONS_CONST		(1 << 0)
-#define CONS_PLACEHOLDER	(1 << 1)	/* used for #n= and #n# notation */
-#define CONS_ECONS		(1 << 2)	/* used for extended conses      */
+#define CONS_CONST              (1 << 0)
+#define CONS_PLACEHOLDER        (1 << 1)        /* used for #n= and #n# notation */
+#define CONS_ECONS              (1 << 2)        /* used for extended conses      */
 
-#define LIST1(a)		 STk_cons((a), STk_nil)
-#define LIST2(a,b) 		 STk_cons((a), LIST1(b))
-#define LIST3(a,b,c)		 STk_cons((a), LIST2((b),(c)))
-#define LIST4(a,b,c,d)		 STk_cons((a), LIST3((b),(c),(d)))
-#define LIST5(a,b,c,d,e)	 STk_cons((a), LIST4((b),(c),(d),(e)))
-#define LIST6(a,b,c,d,e,f)	 STk_cons((a), LIST5((b),(c),(d),(e),(f)))
-#define LIST7(a,b,c,d,e,f,g)	 STk_cons((a), LIST6((b),(c),(d),(e),(f),(g)))
-#define LIST8(a,b,c,d,e,f,g,h)	 STk_cons((a), LIST7((b),(c),(d),(e),(f),(g),(h)))
+#define LIST1(a)                 STk_cons((a), STk_nil)
+#define LIST2(a,b)               STk_cons((a), LIST1(b))
+#define LIST3(a,b,c)             STk_cons((a), LIST2((b),(c)))
+#define LIST4(a,b,c,d)           STk_cons((a), LIST3((b),(c),(d)))
+#define LIST5(a,b,c,d,e)         STk_cons((a), LIST4((b),(c),(d),(e)))
+#define LIST6(a,b,c,d,e,f)       STk_cons((a), LIST5((b),(c),(d),(e),(f)))
+#define LIST7(a,b,c,d,e,f,g)     STk_cons((a), LIST6((b),(c),(d),(e),(f),(g)))
+#define LIST8(a,b,c,d,e,f,g,h)   STk_cons((a), LIST7((b),(c),(d),(e),(f),(g),(h)))
 #define LIST9(a,b,c,d,e,f,g,h,i) \
   STk_cons((a), LIST8((b),(c),(d),(e),(f),(g),(h),(i)))
 #define LIST10(a,b,c,d,e,f,g,h,i,j) \
   STk_cons((a), LIST9((b),(c),(d),(e),(f),(g),(h),(i),(j)))
 
 
-int STk_int_length(SCM l); 		/* len of a list -1 if badly formed */
+int STk_int_length(SCM l);              /* len of a list -1 if badly formed */
 SCM STk_int_assq(SCM obj, SCM alist);   /* internal version of assq */
 SCM STk_argv2list(int argc, SCM *argv);
 SCM STk_append2(SCM l1, SCM l2);
-SCM STk_dappend2(SCM l1, SCM l2);	/* destructive append */
-SCM STk_dremq(SCM obj, SCM list);	/* destructive remove with eq? */
+SCM STk_dappend2(SCM l1, SCM l2);       /* destructive append */
+SCM STk_dremq(SCM obj, SCM list);       /* destructive remove with eq? */
 SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos);
 
 EXTERN_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y));
@@ -644,7 +644,7 @@ EXTERN_PRIMITIVE("reverse!", dreverse, subr1, (SCM l));
 EXTERN_PRIMITIVE("copy-tree", copy_tree, subr1, (SCM l));
 EXTERN_PRIMITIVE("assq", assq, subr2, (SCM obj, SCM alist));
 EXTERN_PRIMITIVE("assv", assv, subr2, (SCM obj, SCM alist));
-EXTERN_PRIMITIVE("assoc", assoc, subr2, (SCM obj, SCM alist));
+EXTERN_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp));
 
 
 int STk_init_list(void);
@@ -652,7 +652,7 @@ int STk_init_list(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 					M D 5 . C
+  ----                                  M D 5 . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -662,7 +662,7 @@ int STk_init_md5(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 					M I S C . C
+  ----                                  M I S C . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -683,7 +683,7 @@ int STk_init_misc(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				     N U M B E R . C
+  ----                               N U M B E R . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -694,12 +694,12 @@ int STk_init_misc(void);
    * least significant bits set to 01.
    */
 
-#define INT_VAL(p)	(((long) p) >> 2)
-#define INTP(p)		((((unsigned long) p) & 3) == 1)
-#define SCM_LONG(n)	(((n) << 2) | 1)
-#define MAKE_INT(n)	(AS_SCM(SCM_LONG(n)))
-#define INT_MIN_VAL	((LONG_MIN & ~3) >> 2)
-#define INT_MAX_VAL	((LONG_MAX & ~3) >> 2)
+#define INT_VAL(p)      (((long) p) >> 2)
+#define INTP(p)         ((((unsigned long) p) & 3) == 1)
+#define SCM_LONG(n)     (((n) << 2) | 1)
+#define MAKE_INT(n)     (AS_SCM(SCM_LONG(n)))
+#define INT_MIN_VAL     ((LONG_MIN & ~3) >> 2)
+#define INT_MAX_VAL     ((LONG_MAX & ~3) >> 2)
 
 long STk_integer_value(SCM x); /* Returns LONG_MIN if not representable as long */
 unsigned long STk_uinteger_value(SCM x); /* Returns ULONG_MAX if not an ulong */
@@ -716,17 +716,17 @@ struct real_obj {
   double val;
 };
 
-#define REAL_VAL(p) 	(((struct real_obj *) (p))->val)
-#define REALP(p) 	(BOXED_TYPE_EQ((p), tc_real))
+#define REAL_VAL(p)     (((struct real_obj *) (p))->val)
+#define REALP(p)        (BOXED_TYPE_EQ((p), tc_real))
 
-extern double STk_NaN;		/* IEEE NaN special value */
+extern double STk_NaN;          /* IEEE NaN special value */
 
   /****
    **** Bignum
    ****/
-struct bignum_obj; 	/* complete deflaration is in number.c */
+struct bignum_obj;      /* complete deflaration is in number.c */
 
-#define BIGNUMP(p) 	(BOXED_TYPE_EQ((p), tc_bignum))
+#define BIGNUMP(p)      (BOXED_TYPE_EQ((p), tc_bignum))
 
   /****
    **** Rational
@@ -736,12 +736,12 @@ struct rational_obj {
   SCM num, den;
 };
 
-#define RATIONAL_NUM(p)		(((struct rational_obj *) (p))->num)
-#define RATIONAL_DEN(p)		(((struct rational_obj *) (p))->den)
-#define RATIONALP(p) 		(BOXED_TYPE_EQ((p), tc_rational))
-#define EXACT_RATIONALP(p)	(RATIONALP(p) 		  && \
-				 !REALP(RATIONAL_NUM(p))  && \
-				 !REALP(RATIONAL_DEN(p)))
+#define RATIONAL_NUM(p)         (((struct rational_obj *) (p))->num)
+#define RATIONAL_DEN(p)         (((struct rational_obj *) (p))->den)
+#define RATIONALP(p)            (BOXED_TYPE_EQ((p), tc_rational))
+#define EXACT_RATIONALP(p)      (RATIONALP(p)             && \
+                                 !REALP(RATIONAL_NUM(p))  && \
+                                 !REALP(RATIONAL_DEN(p)))
 
   /****
    **** Complex
@@ -751,25 +751,25 @@ struct complex_obj {
   SCM real, imag;
 };
 
-#define COMPLEX_REAL(p)		(((struct complex_obj *) (p))->real)
-#define COMPLEX_IMAG(p)		(((struct complex_obj *) (p))->imag)
-#define COMPLEXP(p) 		(BOXED_TYPE_EQ((p), tc_complex))
-#define EXACT_COMPLEXP(p)	(COMPLEXP(p) 		  && \
-				 !REALP(COMPLEX_REAL(p))  && \
-				 !REALP(COMPLEX_IMAG(p)))
+#define COMPLEX_REAL(p)         (((struct complex_obj *) (p))->real)
+#define COMPLEX_IMAG(p)         (((struct complex_obj *) (p))->imag)
+#define COMPLEXP(p)             (BOXED_TYPE_EQ((p), tc_complex))
+#define EXACT_COMPLEXP(p)       (COMPLEXP(p)              && \
+                                 !REALP(COMPLEX_REAL(p))  && \
+                                 !REALP(COMPLEX_IMAG(p)))
 
 
   /****
    **** Conversions
    ****/
-SCM    		STk_Cstr2number(char *str, long base);
-char  	       *STk_bignum2Cstring(SCM n, int base);
-SCM    		STk_long2integer(long n);
-SCM    		STk_ulong2integer(unsigned long n);
-SCM    		STk_double2real(double d);
-double 		STk_number2double(SCM n);
-long   	      	STk_integer2int32(SCM n, int *overflow);
-unsigned long 	STk_integer2uint32(SCM n, int *overflow);
+SCM             STk_Cstr2number(char *str, long base);
+char           *STk_bignum2Cstring(SCM n, int base);
+SCM             STk_long2integer(long n);
+SCM             STk_ulong2integer(unsigned long n);
+SCM             STk_double2real(double d);
+double          STk_number2double(SCM n);
+long            STk_integer2int32(SCM n, int *overflow);
+unsigned long   STk_integer2uint32(SCM n, int *overflow);
 
   /****
    **** Arithmetic
@@ -791,15 +791,15 @@ EXTERN_PRIMITIVE("number->string", number2string, subr12, (SCM n, SCM base));
 int    STk_init_number(void);
 
 
-#define NUMBERP(x)	(INTP(x) || BIGNUMP(x) || REALP(x) || RATIONALP(x) || \
-		         COMPLEXP(x))
-#define EXACTP(x)	(INTP(x) || BIGNUMP(x) || EXACT_RATIONALP(x) || \
-			 EXACT_COMPLEXP(x))
+#define NUMBERP(x)      (INTP(x) || BIGNUMP(x) || REALP(x) || RATIONALP(x) || \
+                         COMPLEXP(x))
+#define EXACTP(x)       (INTP(x) || BIGNUMP(x) || EXACT_RATIONALP(x) || \
+                         EXACT_COMPLEXP(x))
 
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				     O B J E C T . C
+  ----                               O B J E C T . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -810,7 +810,7 @@ int STk_init_object(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				   P A R A M E T E R . C
+  ----                             P A R A M E T E R . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -820,15 +820,15 @@ int STk_init_parameter(void);
 SCM STk_get_parameter(SCM param);
 SCM STk_set_parameter(SCM param, SCM value);
 SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value),
-			 SCM module);
+                         SCM module);
 SCM STk_make_C_parameter2(SCM symbol,SCM (*value)(void),SCM (*proc)(SCM new_value),
-			  SCM module);
+                          SCM module);
 
 
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 					P A T H . C
+  ----                                  P A T H . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -840,7 +840,7 @@ SCM STk_resolve_link(char *path, int count);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 					P O R T . C
+  ----                                  P O R T . C
   ----
   ---- (and sio.c, fport.c, sport.c, vport.c)
   ----
@@ -848,23 +848,23 @@ SCM STk_resolve_link(char *path, int count);
 */
 
   /* Code for port is splitted in several files:
-   * 	- sio.c contains the low level IO functions which mimic the C IO. All
+   *    - sio.c contains the low level IO functions which mimic the C IO. All
    *      these functions take Scheme ports as parameter instead of FILE *
-   *	- fport.c contains the specific code for port associated to files
-   *	- sport.c contains the specific code for port associated to string ports
-   *	- vport.c contains the specific code for port associated to virtual ports
-   *	- port.c contains the code which can be used on any kind of port
+   *    - fport.c contains the specific code for port associated to files
+   *    - sport.c contains the specific code for port associated to string ports
+   *    - vport.c contains the specific code for port associated to virtual ports
+   *    - port.c contains the code which can be used on any kind of port
    */
 
 struct port_obj {
   stk_header header;
-  void *stream;			/* stream descriptor != for strings, file, virt. */
-  int  flags;			/* associated flags */
-  int  ungetted_char;		/* character ungetted, EOF if none */
-  char *filename;		/* File name (for file port, a const otherwise) */
-  int  line;			/* Line number  (unused when writing) */
-  int  pos;			/* position from the start of file */
-  SCM  close_hook;		/* hook called when a file is closed */
+  void *stream;                 /* stream descriptor != for strings, file, virt. */
+  int  flags;                   /* associated flags */
+  int  ungetted_char;           /* character ungetted, EOF if none */
+  char *filename;               /* File name (for file port, a const otherwise) */
+  int  line;                    /* Line number  (unused when writing) */
+  int  pos;                     /* position from the start of file */
+  SCM  close_hook;              /* hook called when a file is closed */
 
   /* virtual functions (in the object 'cause the # of ports should be low ) */
   void  (*print_it)  (SCM obj, SCM port);  /* used to display or print object */
@@ -880,44 +880,44 @@ struct port_obj {
   int   (*cflush)    (void *stream);
   int   (*read_buff) (void *stream, void *buf, int count);
   int   (*write_buff)(void *stream, void *buf, int count);
-  off_t (*seek)	     (void *stream, off_t offset, int whence);
+  off_t (*seek)      (void *stream, off_t offset, int whence);
 };
 
-#define PORT_MAX_PRINTF	1024	/* max size for sprintf buffer */
+#define PORT_MAX_PRINTF 1024    /* max size for sprintf buffer */
 
-#define PORT_READ		(1<<0)
-#define PORT_WRITE		(1<<1)
-#define PORT_RW			(1<<2)
-#define PORT_CLOSED 		(1<<3)
-#define PORT_IS_PIPE		(1<<4)
-#define PORT_IS_FILE		(1<<5)
-#define PORT_IS_STRING		(1<<6)
-#define PORT_IS_VIRTUAL 	(1<<7)
-#define PORT_IS_INTERACTIVE	(1<<8)
-#define PORT_CASE_SENSITIVE	(1<<9)
+#define PORT_READ               (1<<0)
+#define PORT_WRITE              (1<<1)
+#define PORT_RW                 (1<<2)
+#define PORT_CLOSED             (1<<3)
+#define PORT_IS_PIPE            (1<<4)
+#define PORT_IS_FILE            (1<<5)
+#define PORT_IS_STRING          (1<<6)
+#define PORT_IS_VIRTUAL         (1<<7)
+#define PORT_IS_INTERACTIVE     (1<<8)
+#define PORT_CASE_SENSITIVE     (1<<9)
 
-#define PORT_STREAM(x)	  (((struct port_obj *) (x))->stream)
+#define PORT_STREAM(x)    (((struct port_obj *) (x))->stream)
 #define PORT_FLAGS(x)     (((struct port_obj *) (x))->flags)
 #define PORT_UNGETC(x)    (((struct port_obj *) (x))->ungetted_char)
-#define PORT_LINE(x)	  (((struct port_obj *) (x))->line)
-#define PORT_POS(x)	  (((struct port_obj *) (x))->pos)
-#define PORT_FNAME(x)	  (((struct port_obj *) (x))->filename)
+#define PORT_LINE(x)      (((struct port_obj *) (x))->line)
+#define PORT_POS(x)       (((struct port_obj *) (x))->pos)
+#define PORT_FNAME(x)     (((struct port_obj *) (x))->filename)
 #define PORT_CLOSEHOOK(x) (((struct port_obj *) (x))->close_hook)
 
 #define PORT_PRINT(x)     (((struct port_obj *) (x))->print_it)
 #define PORT_RELEASE(x)   (((struct port_obj *) (x))->release_it)
-#define PORT_READY(x)	  (((struct port_obj *) (x))->creadyp)
-#define PORT_GETC(x)	  (((struct port_obj *) (x))->cgetc)
-#define PORT_EOFP(x)	  (((struct port_obj *) (x))->ceofp)
-#define PORT_CLOSE(x)	  (((struct port_obj *) (x))->cclose)
-#define PORT_PUTC(x)	  (((struct port_obj *) (x))->cputc)
-#define PORT_PUTS(x)	  (((struct port_obj *) (x))->cputs)
+#define PORT_READY(x)     (((struct port_obj *) (x))->creadyp)
+#define PORT_GETC(x)      (((struct port_obj *) (x))->cgetc)
+#define PORT_EOFP(x)      (((struct port_obj *) (x))->ceofp)
+#define PORT_CLOSE(x)     (((struct port_obj *) (x))->cclose)
+#define PORT_PUTC(x)      (((struct port_obj *) (x))->cputc)
+#define PORT_PUTS(x)      (((struct port_obj *) (x))->cputs)
 #define PORT_PUTSTRING(x) (((struct port_obj *) (x))->cputstring)
-#define PORT_NPUTS(x)	  (((struct port_obj *) (x))->cnputs)
-#define PORT_FLUSH(x)	  (((struct port_obj *) (x))->cflush)
-#define PORT_BREAD(x)	  (((struct port_obj *) (x))->read_buff)
-#define PORT_BWRITE(x)	  (((struct port_obj *) (x))->write_buff)
-#define PORT_SEEK(x)	  (((struct port_obj *) (x))->seek)
+#define PORT_NPUTS(x)     (((struct port_obj *) (x))->cnputs)
+#define PORT_FLUSH(x)     (((struct port_obj *) (x))->cflush)
+#define PORT_BREAD(x)     (((struct port_obj *) (x))->read_buff)
+#define PORT_BWRITE(x)    (((struct port_obj *) (x))->write_buff)
+#define PORT_SEEK(x)      (((struct port_obj *) (x))->seek)
 
 #define PORTP(x)   (BOXED_TYPE_EQ((x), tc_port))
 #define IPORTP(x)  (PORTP(x) && (PORT_FLAGS(x) & (PORT_READ|PORT_RW)))
@@ -935,12 +935,12 @@ struct port_obj {
 #define IVPORTP(x) (VPORTP(x) && (PORT_FLAGS(x) & (PORT_READ|PORT_RW)))
 #define OVPORTP(x) (VPORTP(x) && (PORT_FLAGS(x) & (PORT_WRITE|PORT_RW)))
 
-#define PORT_IS_CLOSEDP(x)	(PORT_FLAGS(x) & PORT_CLOSED)
-#define PORT_CASE_SENSITIVEP(x)	(PORT_FLAGS(x) & PORT_CASE_SENSITIVE)
+#define PORT_IS_CLOSEDP(x)      (PORT_FLAGS(x) & PORT_CLOSED)
+#define PORT_CASE_SENSITIVEP(x) (PORT_FLAGS(x) & PORT_CASE_SENSITIVE)
 
 
 /****
- **** 		sio.h primitives
+ ****           sio.h primitives
  ****/
 
 
@@ -964,7 +964,7 @@ int STk_write_buffer(SCM port, void *buff, int count);
 
 
 /****
- ****		fport.h primitives
+ ****           fport.h primitives
  ****/
 SCM STk_rewind_file_port(SCM port);
 SCM STk_open_file(char *filename, char *mode);
@@ -979,7 +979,7 @@ void STk_close_all_ports(void);
 
 
 /****
- ****		sport.h primitives
+ ****           sport.h primitives
  ****/
 EXTERN_PRIMITIVE("open-output-string", open_output_string, subr0, (void));
 SCM STk_get_output_string(SCM port);
@@ -987,13 +987,13 @@ SCM STk_open_C_string(char *str);
 int STk_init_sport(void);
 
 /****
- ****		vport.h primitives
+ ****           vport.h primitives
  ****/
 int STk_init_vport(void);
 
 
 /****
- **** 		port.h primitives
+ ****           port.h primitives
  ****/
 EXTERN_PRIMITIVE("close-port", close_port, subr1, (SCM port));
 EXTERN_PRIMITIVE("read-line", read_line, subr01, (SCM port));
@@ -1009,33 +1009,33 @@ int STk_init_port(void);
 
 
 /****
- **** 		Port global variables
+ ****           Port global variables
  ****/
 
-extern char *STk_current_filename;		 /* Name of the file we read */
+extern char *STk_current_filename;               /* Name of the file we read */
 
-extern SCM STk_stdin, STk_stdout, STk_stderr;		  /* unredirected ports   */
-extern int STk_interactive;			/* We are in intearctive mode */
+extern SCM STk_stdin, STk_stdout, STk_stderr;             /* unredirected ports   */
+extern int STk_interactive;                     /* We are in intearctive mode */
 
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				  P R I N T . C
+  ----                            P R I N T . C
   ----
   ------------------------------------------------------------------------------
 */
 void STk_print(SCM exp, SCM port, int mode);
   void STk_print_star(SCM exp, SCM port);
 
-#define DSP_MODE		0
-#define WRT_MODE		1
+#define DSP_MODE                0
+#define WRT_MODE                1
 
 int STk_init_printer(void);
 
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				P R O C E S S . C
+  ----                          P R O C E S S . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -1045,7 +1045,7 @@ int STk_init_process(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				P R O M I S E . C
+  ----                          P R O M I S E . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -1055,7 +1055,7 @@ int STk_init_promise(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 					P R O C . C
+  ----                                  P R O C . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -1076,19 +1076,19 @@ struct closure_obj {
 };
 
 /* FIXME:
-#define CLOSURE_FORMALS(p)	(((struct closure_obj *) (p))->formals)
-#define CLOSURE_CODE(p)   	(((struct closure_obj *) (p))->code)
+#define CLOSURE_FORMALS(p)      (((struct closure_obj *) (p))->formals)
+#define CLOSURE_CODE(p)         (((struct closure_obj *) (p))->code)
 */
 
-#define CLOSURE_ARITY(p)	(((struct closure_obj *) (p))->arity)
-#define CLOSURE_SIZE(p)		(((struct closure_obj *) (p))->code_size)
-#define CLOSURE_ENV(p)		(((struct closure_obj *) (p))->env)
-#define CLOSURE_PLIST(p)	(((struct closure_obj *) (p))->plist)
-#define CLOSURE_NAME(p)		(((struct closure_obj *) (p))->name)
-#define CLOSURE_CONST(p)	(((struct closure_obj *) (p))->constants)
-#define CLOSURE_DOC(p)		(((struct closure_obj *) (p))->doc)
-#define CLOSURE_BCODE(p)	(((struct closure_obj *) (p))->bcode)
-#define CLOSUREP(p)		(BOXED_TYPE_EQ((p), tc_closure))
+#define CLOSURE_ARITY(p)        (((struct closure_obj *) (p))->arity)
+#define CLOSURE_SIZE(p)         (((struct closure_obj *) (p))->code_size)
+#define CLOSURE_ENV(p)          (((struct closure_obj *) (p))->env)
+#define CLOSURE_PLIST(p)        (((struct closure_obj *) (p))->plist)
+#define CLOSURE_NAME(p)         (((struct closure_obj *) (p))->name)
+#define CLOSURE_CONST(p)        (((struct closure_obj *) (p))->constants)
+#define CLOSURE_DOC(p)          (((struct closure_obj *) (p))->doc)
+#define CLOSURE_BCODE(p)        (((struct closure_obj *) (p))->bcode)
+#define CLOSUREP(p)             (BOXED_TYPE_EQ((p), tc_closure))
 
 EXTERN_PRIMITIVE("procedure?", procedurep, subr1, (SCM obj));
 EXTERN_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc));
@@ -1101,7 +1101,7 @@ int STk_init_proc(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				  R E A D . C
+  ----                            R E A D . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -1115,7 +1115,7 @@ extern int STk_read_case_sensitive;
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				  R E G E X P . C
+  ----                            R E G E X P . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -1127,7 +1127,7 @@ EXTERN_PRIMITIVE("regexp-match", regexec, subr2, (SCM re, SCM str));
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				S I G N A L  . C
+  ----                          S I G N A L  . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -1137,7 +1137,7 @@ int STk_init_signal(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				S O C K E T . C
+  ----                          S O C K E T . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -1147,30 +1147,30 @@ int STk_init_socket(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				  S T R  . C
+  ----                            S T R  . C
   ----
   ------------------------------------------------------------------------------
 */
 struct string_obj {
   stk_header header;
-  int space;		/* allocated size  */
-  int size;		/* # of bytes used */
-  int length;		/* "external" length of the string */
+  int space;            /* allocated size  */
+  int size;             /* # of bytes used */
+  int length;           /* "external" length of the string */
   char *chars;
 };
 
 #define STRING_SPACE(p)  (((struct string_obj *) (p))->space)
 #define STRING_SIZE(p)   (((struct string_obj *) (p))->size)
 #define STRING_LENGTH(p) (((struct string_obj *) (p))->length)
-#define STRING_CHARS(p)	 (((struct string_obj *) (p))->chars)
-#define STRINGP(p)	 (BOXED_TYPE_EQ((p), tc_string))
+#define STRING_CHARS(p)  (((struct string_obj *) (p))->chars)
+#define STRINGP(p)       (BOXED_TYPE_EQ((p), tc_string))
 
-#define STRING_CONST	 (1 << 0)
+#define STRING_CONST     (1 << 0)
 
-#define STRING_MONOBYTE(str)	(STRING_LENGTH(str) == STRING_SIZE(str))
+#define STRING_MONOBYTE(str)    (STRING_LENGTH(str) == STRING_SIZE(str))
 
 SCM STk_makestring(int len, char *init);
-SCM STk_Cstring2string(char *str); 	     /* Embed a C string in Scheme world  */
+SCM STk_Cstring2string(char *str);           /* Embed a C string in Scheme world  */
 
 
 EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));
@@ -1182,7 +1182,7 @@ int STk_init_string(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 S T R U C T  . C
+  ----                           S T R U C T  . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -1192,20 +1192,20 @@ int STk_init_struct(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 S Y M B O L . C
+  ----                           S Y M B O L . C
   ----
   ------------------------------------------------------------------------------
 */
 struct symbol_obj {
-  stk_header header;	/* must be at the same offset than for keywords */
+  stk_header header;    /* must be at the same offset than for keywords */
   char *pname;
 };
 
 #define SYMBOL_PNAME(p) (((struct symbol_obj *) (p))->pname)
-#define SYMBOLP(p)	(BOXED_TYPE_EQ((p),tc_symbol))
+#define SYMBOLP(p)      (BOXED_TYPE_EQ((p),tc_symbol))
 
-#define SYMBOL_NEEDS_BARS 	(1 << 0)	/* Info flag */
-#define SYMBOL_HAS_UPPER	(1 << 1)
+#define SYMBOL_NEEDS_BARS       (1 << 0)        /* Info flag */
+#define SYMBOL_HAS_UPPER        (1 << 1)
 
 EXTERN_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string));
 
@@ -1218,7 +1218,7 @@ int STk_init_symbol(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 S Y S T E M . C
+  ----                           S Y S T E M . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -1233,7 +1233,7 @@ EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 T H R E A D . C
+  ----                           T H R E A D . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -1244,16 +1244,16 @@ int STk_init_mutexes(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 U T F 8  . C
+  ----                           U T F 8  . C
   ----
   ------------------------------------------------------------------------------
 */
 
-#define UTF8_INCORRECT_SEQUENCE	(-2)
+#define UTF8_INCORRECT_SEQUENCE (-2)
 
 extern int STk_use_utf8;
 
-#define VALID_UTF8_VALUE(c)							  \
+#define VALID_UTF8_VALUE(c)                                                       \
   /* Unicode defines characters in the range [0, #xd7FF] U [#xE000, #x10FFFF] */  \
   ((0 <= (c)  && (c) <=  0xd7ff) || (0xE000 <=(c) && (c) <= 0x10FFFF))
 
@@ -1317,7 +1317,7 @@ int STk_init_vector(void);
 /*
   ------------------------------------------------------------------------------
   ----
-  ---- 				 V M . C
+  ----                           V M . C
   ----
   ------------------------------------------------------------------------------
 */
@@ -1349,14 +1349,14 @@ extern STk_instr STk_boot_code[];
 
 /* Special constants */
 
-#define STk_nil		((SCM) MAKE_SCONST(0))
-#define STk_false 	((SCM) MAKE_SCONST(1))
-#define STk_true	((SCM) MAKE_SCONST(2))
-#define STk_eof   	((SCM) MAKE_SCONST(3))
-#define STk_void 	((SCM) MAKE_SCONST(4))
+#define STk_nil         ((SCM) MAKE_SCONST(0))
+#define STk_false       ((SCM) MAKE_SCONST(1))
+#define STk_true        ((SCM) MAKE_SCONST(2))
+#define STk_eof         ((SCM) MAKE_SCONST(3))
+#define STk_void        ((SCM) MAKE_SCONST(4))
 
-#define STk_dot		((SCM) MAKE_SCONST(5)) /* special pupose value see read.c */
-#define STk_close_par	((SCM) MAKE_SCONST(6)) /* special pupose value see read.c */
+#define STk_dot         ((SCM) MAKE_SCONST(5)) /* special pupose value see read.c */
+#define STk_close_par   ((SCM) MAKE_SCONST(6)) /* special pupose value see read.c */
 
 
 /* Misc */

@@ -1,8 +1,8 @@
 /*
  *
- * l i s t . c			-- Lists procedures
+ * l i s t . c                  -- Lists procedures
  *
- * Copyright © 1993-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,14 +22,14 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-Oct-1993 21:37
- * Last file update: 26-Feb-2012 23:37 (eg)
+ * Last file update: 21-Jun-2018 13:49 (eg)
  */
 
 #include "stklos.h"
 
 /*===========================================================================*\
  *
- * 				Utilities
+ *                              Utilities
  *
 \*===========================================================================*/
 
@@ -45,7 +45,7 @@ static void error_const_cell(SCM x)
 
 static void error_bad_list(SCM x)
 {
-  STk_error("bad list ~S", x);
+  STk_error("bad list ~W", x);
 }
 
 static void error_bad_proc(SCM x)
@@ -55,7 +55,7 @@ static void error_bad_proc(SCM x)
 
 static void error_circular_list(SCM x)
 {
-  STk_error("list ~S is circular", x);
+  STk_error("list ~W is circular", x);
 }
 
 
@@ -184,7 +184,7 @@ DEFINE_PRIMITIVE("set-car!", setcar, subr2, (SCM cell, SCM value))
 doc>
  */
 {
-  if (!CONSP(cell)) 		     error_wrong_type(cell);
+  if (!CONSP(cell))                  error_wrong_type(cell);
   if (BOXED_INFO(cell) & CONS_CONST) error_const_cell(cell);
 
   CAR(cell) = value;
@@ -372,7 +372,7 @@ DEFINE_PRIMITIVE("reverse", reverse, subr1, (SCM l))
   SCM p, n = STk_nil;
 
   for(p=l; !NULLP(p); p=CDR(p)) {
-    if (!CONSP(p)) STk_error("bad list ~W", l);
+    if (!CONSP(p)) error_bad_list(l);
     n = STk_cons(CAR(p), n);
   }
   return n;
@@ -399,7 +399,7 @@ DEFINE_PRIMITIVE("list-tail", list_tail, subr2, (SCM list, SCM k))
   register long x;
   SCM l;
 
-  if (!CONSP(list) && !NULLP(list)) STk_error("bad list ~W", list);
+  if (!CONSP(list) && !NULLP(list)) error_bad_list(list);
 
   x = STk_integer_value(k);
   if (x >= 0) {
@@ -435,7 +435,7 @@ DEFINE_PRIMITIVE("list-ref", list_ref, subr2, (SCM list, SCM k))
   register long x;
   SCM l = list;
 
-  if (!CONSP(list)) STk_error("bad list ~W", list);
+  if (!CONSP(list)) error_bad_list(list);
 
   x = STk_integer_value(k);
   if (x >= 0) {
@@ -453,17 +453,19 @@ DEFINE_PRIMITIVE("list-ref", list_ref, subr2, (SCM list, SCM k))
 
 
 /*
-<doc memq memv member
+<doc R7RS memq memv member
  * (memq obj list)
  * (memv obj list)
  * (member obj list)
+ * (member obj list compare)
  *
  * These procedures return the first sublist of list whose car is |obj|,
  * where the sublists of list are the non-empty lists returned by
  * |(list-tail list k)| for |k| less than the length of list.
  * If |obj| does not occur in |list|, then |#f| (not the empty list) is
  * returned. |Memq| uses |eq?| to compare obj with the elements of list,
- * while |memv| uses |eqv?| and |member| uses |equal?|.
+ * while |memv| uses |eqv?| and |member| uses |compare|, if given, and 
+ * |equal?| otherwise.
  *
  * @lisp
  *    (memq 'a '(a b c))              =>  (a b c)
@@ -472,52 +474,66 @@ DEFINE_PRIMITIVE("list-ref", list_ref, subr2, (SCM list, SCM k))
  *    (memq (list 'a) '(b (a) c))     =>  #f
  *    (member (list 'a)
  *            '(b (a) c))             =>  ((a) c)
+ *    (member "B"
+ *            ’("a" "b" "c")
+ *            string-ci=?)            => ("b" "c")
  *    (memv 101 '(100 101 102))       =>  (101 102)
  * @end lisp
+ *
+ * Note that, as in R7RS, the |member| function accepts also a
+ * comparison function.
 doc>
  */
 
-#define PTR_EQ(x, y)    	((x) == (y))
-#define PTR_EQV(x, y)   	(STk_eqv((x), (y)) != STk_false)
-#define PTR_EQUAL(x, y)   	(STk_equal((x), (y)) != STk_false)
+#define PTR_EQ(x, y)            ((x) == (y))
+#define PTR_EQV(x, y)           (STk_eqv((x), (y)) != STk_false)
+#define PTR_EQUAL(x, y)         (STk_equal((x), (y)) != STk_false)
+#define PTR_CMPGEN(x, y)        (STk_C_apply(cmp, 2, (x), (y)) != STk_false)
 
 
-#define LMEMBER(compare, prim)		 			\
-{								\
-  register SCM ptr;						\
-								\
-  if (!CONSP(list) && !NULLP(list)) goto Error;			\
-  for (ptr=list; !NULLP(ptr); ) { 				\
-    if (CONSP(ptr)) {						\
-      if (compare(CAR(ptr), obj)) return ptr;			\
-    }								\
-    else 							\
-      /* end of a dotted list */				\
-      return (compare(ptr, obj)) ? ptr : STk_false;		\
-    if ((ptr=CDR(ptr)) == list) STk_error("circular list");	\
-  }								\
-  return STk_false;						\
-Error:								\
-  STk_error("bad list ~S", list);				\
-  return STk_void; /* never reached */			\
+#define LMEMBER(compare)                                        \
+{                                                               \
+  register SCM ptr;                                             \
+                                                                \
+  if (!CONSP(list) && !NULLP(list)) error_bad_list(list);       \
+                                                                \
+  for (ptr=list; !NULLP(ptr); ) {                               \
+    if (CONSP(ptr)) {                                           \
+      if (compare(CAR(ptr), obj)) return ptr;                   \
+    }                                                           \
+    else                                                        \
+      break; /* end of a dotted list */                         \
+    if ((ptr=CDR(ptr)) == list) error_circular_list(ptr);       \
+  }                                                             \
+  return STk_false;                                             \
 }
 
 
 DEFINE_PRIMITIVE("memq", memq, subr2, (SCM obj, SCM list))
-     LMEMBER(PTR_EQ, memq)
+     LMEMBER(PTR_EQ)
 
 DEFINE_PRIMITIVE("memv", memv, subr2, (SCM obj, SCM list))
-     LMEMBER(PTR_EQV, memv)
+     LMEMBER(PTR_EQV)
 
-DEFINE_PRIMITIVE("member", member, subr2, (SCM obj, SCM list))
-     LMEMBER(PTR_EQUAL, member)
+DEFINE_PRIMITIVE("member", member, subr23, (SCM obj, SCM list, SCM cmp))
+{
+  if (cmp) {
+    if (STk_procedurep(cmp) != STk_true)
+      STk_error("bad comparison function ~S", cmp);
+
+    LMEMBER(PTR_CMPGEN);
+  } else {
+    LMEMBER(PTR_EQUAL);
+  }
+}
 
 
 /*
-<doc assq assv assoc
+<doc R7RS assq assv assoc
  * (assq obj alist)
  * (assv obj alist)
  * (assoc obj alist)
+ * (assoc obj alist compare)
  *
  * |Alist| (for "association list") must be a list of pairs. These procedures
  * find the first pair in |alist| whose car field is |obj|, and returns that
@@ -533,7 +549,9 @@ DEFINE_PRIMITIVE("member", member, subr2, (SCM obj, SCM list))
  *    (assq (list 'a) '(((a)) ((b)) ((c))))
  *                               =>  #f
  *    (assoc (list 'a) '(((a)) ((b)) ((c))))
- *                               =>  ((a))
+ *                               => ((a))
+ *    (assoc 2.0 '((1 1) (2 4) (3 9)) =)
+ *                               => (2 4)
  *    (assv 5 '((2 3) (5 7) (11 13)))
  *                               =>  (5 7)
  * @end lisp
@@ -545,29 +563,37 @@ DEFINE_PRIMITIVE("member", member, subr2, (SCM obj, SCM list))
 doc>
  */
 
-#define LASSOC(compare, prim)					\
-{								\
-  register SCM l,tmp;						\
-								\
-  for(l=alist; CONSP(l); ) {					\
-    tmp = CAR(l);						\
-    if (CONSP(tmp) && compare(CAR(tmp), obj)) return tmp;	\
-    if ((l=CDR(l)) == alist) goto Error;			\
-  }								\
-  if (NULLP(l)) return(STk_false);				\
-Error:								\
-  STk_error("improper list ~W", alist);				\
-  return STk_void; /* never reached */			\
+#define LASSOC(compare)                                         \
+{                                                               \
+  register SCM l,tmp;                                           \
+                                                                \
+  for(l=alist; CONSP(l); ) {                                    \
+    tmp = CAR(l);                                               \
+    if (CONSP(tmp) && compare(CAR(tmp), obj)) return tmp;       \
+    if ((l=CDR(l)) == alist) break;                             \
+  }                                                             \
+  if (NULLP(l)) return(STk_false);                              \
+  STk_error("improper list ~W", alist);                         \
+  return STk_void; /* never reached */                          \
 }
 
 DEFINE_PRIMITIVE("assq", assq, subr2, (SCM obj, SCM alist))
-     LASSOC(PTR_EQ, assq)
+     LASSOC(PTR_EQ)
 
 DEFINE_PRIMITIVE("assv", assv, subr2, (SCM obj, SCM alist))
-     LASSOC(PTR_EQV, assv)
+     LASSOC(PTR_EQV)
 
-DEFINE_PRIMITIVE("assoc", assoc, subr2, (SCM obj, SCM alist))
-     LASSOC(PTR_EQUAL, assoc)
+DEFINE_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp))
+{
+  if (cmp) {
+    if (STk_procedurep(cmp) != STk_true)
+      STk_error("bad comparison function ~S", cmp);
+
+    LASSOC(PTR_CMPGEN);
+ } else {
+   LASSOC(PTR_EQUAL);
+ }
+}
 
 
 /***
@@ -693,12 +719,12 @@ DEFINE_PRIMITIVE("filter", filter, subr2, (SCM pred, SCM list))
 
     if (STk_C_apply(pred, 1, CAR(l)) != STk_false) {
       if (NULLP(result)) {
-	NEWCELL(result, cons);
-	ptr = result;
+        NEWCELL(result, cons);
+        ptr = result;
       }
       else {
-	NEWCELL(CDR(ptr), cons);
-	ptr = CDR(ptr);
+        NEWCELL(CDR(ptr), cons);
+        ptr = CDR(ptr);
       }
       CAR(ptr) = CAR(l);
       CDR(ptr) = STk_nil;
@@ -722,9 +748,9 @@ DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
 
     if (STk_C_apply(pred, 1, CAR(l)) == STk_false) {
       if (previous == STk_nil)
-	list = CDR(list);
+        list = CDR(list);
       else
-	CDR(previous) = CDR(l);
+        CDR(previous) = CDR(l);
     } else {
       previous = l;
     }
@@ -824,9 +850,9 @@ SCM STk_dremq(SCM obj, SCM list)
 
     if (obj == CAR(l)) {
       if (previous == STk_nil)
-	list = CDR(list);
+        list = CDR(list);
       else
-	CDR(previous) = CDR(l);
+        CDR(previous) = CDR(l);
     } else {
       previous = l;
     }
@@ -859,7 +885,7 @@ SCM STk_int_assq(SCM obj, SCM alist)
  * ======================================================================
  */
 
-struct econs_obj {		/* Use a mapping wchich is identical to cons */
+struct econs_obj {              /* Use a mapping wchich is identical to cons */
   stk_header header;
   SCM car;
   SCM cdr;
@@ -868,10 +894,10 @@ struct econs_obj {		/* Use a mapping wchich is identical to cons */
   int pos;
 };
 
-#define ECONS_FILE(p)	(((struct econs_obj *) (p))->file)
-#define ECONS_LINE(p)	(((struct econs_obj *) (p))->line)
-#define ECONS_POS(p)	(((struct econs_obj *) (p))->pos)
-#define ECONSP(obj)	(CONSP(obj) && (BOXED_INFO(obj) & CONS_ECONS))
+#define ECONS_FILE(p)   (((struct econs_obj *) (p))->file)
+#define ECONS_LINE(p)   (((struct econs_obj *) (p))->line)
+#define ECONS_POS(p)    (((struct econs_obj *) (p))->pos)
+#define ECONSP(obj)     (CONSP(obj) && (BOXED_INFO(obj) & CONS_ECONS))
 
 
 SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos)
@@ -879,8 +905,8 @@ SCM STk_econs(SCM car, SCM cdr, char *file, int line, int pos)
   SCM z;
 
   NEWCELL_WITH_LEN(z, cons, sizeof(struct econs_obj));
-  CAR(z) 	= car;
-  CDR(z) 	= cdr;
+  CAR(z)        = car;
+  CDR(z)        = cdr;
   ECONS_FILE(z) = file;
   ECONS_LINE(z) = line;
   ECONS_POS(z)  = pos;
