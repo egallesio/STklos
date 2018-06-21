@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-Oct-1993 21:37
- * Last file update: 21-Jun-2018 13:49 (eg)
+ * Last file update: 21-Jun-2018 14:54 (eg)
  */
 
 #include "stklos.h"
@@ -58,6 +58,15 @@ static void error_circular_list(SCM x)
   STk_error("list ~W is circular", x);
 }
 
+static void error_too_short(SCM x)
+{
+  STk_error("list ~W too short", x);
+}
+
+static void error_not_exact_positive(SCM x)
+{
+  STk_error("index ~W is not an exact positive integer", x);
+}
 
 int STk_int_length(SCM l)
 {
@@ -445,9 +454,48 @@ DEFINE_PRIMITIVE("list-ref", list_ref, subr2, (SCM list, SCM k))
     }
     if (CONSP(l)) return CAR(l);
   Error:
-    STk_error("list ~S too short", list);
+    error_too_short(list);
   }
-  STk_error("index ~S is not an exact positive integer", k);
+  error_not_exact_positive(k);
+  return STk_void; /* never reached */
+}
+
+/*
+<doc R7RS list-set!
+ * (list-set! list k obj)
+ *
+ * The |list-set!| procedure stores |obj| in element |k| of |list|.
+ * It is an error if |k| is not a valid index of |list|.
+ * @lisp
+ * (let ((ls (list 'one 'two 'five!)))
+ *    (list-set! ls 2 'three)
+ *    ls)                              => (one two three)
+ * (list-set! ’(0 1 2) 1 "oops")       => error (constant list)
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj))
+{
+  register long x;
+  SCM l = list;
+
+  if (!CONSP(list)) error_bad_list(list);
+
+  x = STk_integer_value(k);
+  if (x >= 0) {
+    for ( ; x > 0; x--) {
+      if (NULLP(l) || !CONSP(l)) goto Error;
+      l = CDR(l);
+    }
+    if (CONSP(l)) {
+      if (BOXED_INFO(l) & CONS_CONST) error_const_cell(list);
+      CAR(l) = obj;
+      return STk_void;
+    }
+  Error:
+    error_too_short(list);
+  }
+  error_not_exact_positive(k);
   return STk_void; /* never reached */
 }
 
@@ -961,6 +1009,7 @@ int STk_init_list(void)
   ADD_PRIMITIVE(reverse);
   ADD_PRIMITIVE(list_tail);
   ADD_PRIMITIVE(list_ref);
+  ADD_PRIMITIVE(list_set);
   ADD_PRIMITIVE(memq);
   ADD_PRIMITIVE(memv);
   ADD_PRIMITIVE(member);
