@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-Oct-1993 21:37
- * Last file update: 21-Jun-2018 14:54 (eg)
+ * Last file update: 22-Jun-2018 13:12 (eg)
  */
 
 #include "stklos.h"
@@ -501,7 +501,7 @@ DEFINE_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj))
 
 
 /*
-<doc R7RS memq memv member
+<doc R57RS memq memv member
  * (memq obj list)
  * (memv obj list)
  * (member obj list)
@@ -528,7 +528,7 @@ DEFINE_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj))
  *    (memv 101 '(100 101 102))       =>  (101 102)
  * @end lisp
  *
- * Note that, as in R7RS, the |member| function accepts also a
+ * ,(bold "Note:") As in R7RS, the |member| function accepts also a
  * comparison function.
 doc>
  */
@@ -577,7 +577,7 @@ DEFINE_PRIMITIVE("member", member, subr23, (SCM obj, SCM list, SCM cmp))
 
 
 /*
-<doc R7RS assq assv assoc
+<doc R57RS assq assv assoc
  * (assq obj alist)
  * (assv obj alist)
  * (assoc obj alist)
@@ -608,6 +608,9 @@ DEFINE_PRIMITIVE("member", member, subr23, (SCM obj, SCM list, SCM cmp))
  * |memq|, |memv|, |member|, |assq|, |assv|, and |assoc| do not have question
  * marks in their names because they return useful values rather than just
  * |#t| or #|f|.
+ *
+ * ,(bold "Note:") As in R7RS, the |assoc| function accepts also a
+ * comparison function.
 doc>
  */
 

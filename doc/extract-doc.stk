@@ -1,7 +1,7 @@
 ;;;;
-;;;; extract-doc.stk	-- Extrcat Documentation from STklos source files
+;;;; extract-doc.stk    -- Extrcat Documentation from STklos source files
 ;;;;
-;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,16 +21,16 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Nov-2000 11:08 (eg)
-;;;; Last file update: 20-Apr-2011 10:24 (eg)
+;;;; Last file update: 22-Jun-2018 13:04 (eg)
 ;;;;
 
-(define start-doc-rgxp   	(string->regexp "^<doc "))
-(define end-synopsys-rgxp 	(string->regexp "^ \\* *$"))
-(define end-doc-rgxp		(string->regexp "^doc>"))
+(define start-doc-rgxp          (string->regexp "^<doc "))
+(define end-synopsys-rgxp       (string->regexp "^ \\* *$"))
+(define end-doc-rgxp            (string->regexp "^doc>"))
 
 ;======================================================================
 ;
-;			parse-until-regexp
+;                       parse-until-regexp
 ;
 ;======================================================================
 (define (end-of-string s from)
@@ -40,37 +40,40 @@
 (define (parse-until in proc)
   (let ((result '()))
     (do ((l (read-line in) (read-line in)))
-	((or (eof-object? l) (proc l)))
+        ((or (eof-object? l) (proc l)))
       (set! result (if (null? result)
-		       (list (end-of-string l 3))
-		       `(,(end-of-string l 3) "\n" ,@result))))
+                       (list (end-of-string l 3))
+                       `(,(end-of-string l 3) "\n" ,@result))))
     (apply string-append (reverse! result))))
 
 ;======================================================================
 ;
-; 			parse-documentation-item
+;                       parse-documentation-item
 ;
 ;======================================================================
 (define (parse-documentation-item first-line in)
 
   (define (analyse-documentation-header first-line)
-    (let ((in 	(open-input-string first-line))
-	  (type #f)
-	  (l    '()))
+    (let ((in   (open-input-string first-line))
+          (type #f)
+          (l    '()))
       (read in) ;; to skip "<doc"
 
       ;; Determine the type (procedure, syntax, ..) of this header
       (let ((item (read in)))
-	(case  item
-	  ((ext EXT R7RS) 			(set! type 'extended))
-	  ((ext-syntax EXT-SYNTAX SYNTAX-R7RS)	(set! type 'extended-syntax))
-	  ((syntax SYNTAX)			(set! type 'syntax))
-	  (else					(set! type 'procedure)
-						(set! l (list item)))))
+        (case  item
+          ((ext EXT)                            (set! type 'extended))
+          ((R57RS)                              (set! type 'r57rs-procedure))
+          ((R7RS)                               (set! type 'r7rs-procedure))
+          ((ext-syntax EXT-SYNTAX)              (set! type 'extended-syntax))
+          ((SYNTAX-R7RS)                        (set! type 'r7rs-syntax))
+          ((syntax SYNTAX)                      (set! type 'syntax))
+          (else                                 (set! type 'procedure)
+                                                (set! l (list item)))))
       ;; Read all the item on the line
       (do ((proc (read in) (read in)))
-	  ((eof-object? proc))
-	(set! l (cons proc l)))
+          ((eof-object? proc))
+        (set! l (cons proc l)))
 
       ;; return a pair with the type in the car and the names in cdr.
       (cons type l)))
@@ -85,33 +88,33 @@
   ;; parse-proc-starts here
   ;;
   (let* ((infos (analyse-documentation-header first-line))
-	 (type  (car infos))
-	 (procs (cdr infos))
-	 (syn   (parse-synopsys in))
-	 (descr (parse-description in)))
+         (type  (car infos))
+         (procs (cdr infos))
+         (syn   (parse-synopsys in))
+         (descr (parse-description in)))
     ;; Generate an entry for the first procedure of the list
     (format #t "(~S :type ~S :synopsis ~S :description ~S :similar ~S)\n\n"
-	    (car procs) type syn descr (cdr procs))
+            (car procs) type syn descr (cdr procs))
     ;; Other procedures will use a :see entry
     (for-each (lambda(p) (format #t "(~S :see ~S)\n" p (car procs)))
-	      (cdr procs))))
+              (cdr procs))))
 
 ;======================================================================
 ;
-; 			extract-doc-from-file
+;                       extract-doc-from-file
 ;
 ;======================================================================
 (define (extract-doc-from-file f)
   (let ((in (open-input-file f)))
     (do ((l (read-line in) (read-line in)))
-	((eof-object? l))
+        ((eof-object? l))
       (when (regexp-match start-doc-rgxp l)
-	(parse-documentation-item l in)))
+        (parse-documentation-item l in)))
     (close-input-port in)))
 
 ;======================================================================
 ;
-; 			Program starts here
+;                       Program starts here
 ;
 ;======================================================================
 (when (null? (argv))
@@ -126,9 +129,9 @@
 
 
 (for-each (lambda (f)
-	    (format (current-error-port) "Extracting documentation from ~A\n" f)
-	    (format #t "\n;; Source file ~S\n\n" f)
-	    (extract-doc-from-file f))
-	  (argv))
+            (format (current-error-port) "Extracting documentation from ~A\n" f)
+            (format #t "\n;; Source file ~S\n\n" f)
+            (extract-doc-from-file f))
+          (argv))
 (flush)
 (exit 0)
