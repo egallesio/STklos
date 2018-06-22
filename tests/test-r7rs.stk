@@ -1,6 +1,6 @@
-;;;;							-*- coding: latin-1 -*-
+;;;;                                                    -*- coding: latin-1 -*-
 ;;;;
-;;;; test-r7rs.stk	-- Testing R7RS constructs/primitives
+;;;; test-r7rs.stk      -- Testing R7RS constructs/primitives
 ;;;;
 ;;;; Copyright © 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 20-Apr-2011 09:48 (eg)
+;;;; Last file update: 22-Jun-2018 14:11 (eg)
 ;;;;
 
 (require "test")
@@ -35,14 +35,15 @@
 
 (test "string-map 1"  "abdegh"  (string-map char-downcase "AbdEgH"))
 (test "string-map 2"  "IBM"     (string-map (lambda (c)
-					      (integer->char (+ 1 (char->integer c))))
-					    "HAL"))
+                                              (integer->char (+ 1 (char->integer c))))
+                                            "HAL"))
 (test "string-map 3"  "StUdLyCaPs"  (string-map (lambda (c k)
-						  (if (eqv? k #\u)
-						      (char-upcase c)
-						      (char-downcase c)))
-						"studlycaps"
-						"ululululul"))
+                                                  (if (eqv? k #\u)
+                                                      (char-upcase c)
+                                                      (char-downcase c)))
+                                                "studlycaps"
+                                                "ululululul"))
+
 ;; **********
 (test "vector-map 1"
       #(b e h)
@@ -50,33 +51,66 @@
 
 (test "vector-map 2" #(1 4 27 256 3125)
       (vector-map (lambda (n) (expt n n))
-		  '#(1 2 3 4 5)))
+                  '#(1 2 3 4 5)))
 
 (test "vector-map 3" #(5 7 9)
       (vector-map + '#(1 2 3) '#(4 5 6)))
 
 (test "vector-map 4"  #(1 2)
       (let ((count 0))
-	(vector-map (lambda (ignored)
-		      (set! count (+ count 1))
-		      count)
-		    '#(a b))))
+        (vector-map (lambda (ignored)
+                      (set! count (+ count 1))
+                      count)
+                    '#(a b))))
 
 ;; **********
 (test "string-for-each"
       '(101 100 99 98 97)
       (let ((v (list)))
-	(string-for-each (lambda (c) (set! v (cons (char->integer c) v)))
-			 "abcde")
-	 v))
+        (string-for-each (lambda (c) (set! v (cons (char->integer c) v)))
+                         "abcde")
+         v))
 
 ;; **********
 (test "vector-for-each"
       '#(0 1 4 9 16)
       (let ((v (make-vector 5)))
-	(vector-for-each (lambda (i) (vector-set! v i (* i i)))
-			 '#(0 1 2 3 4))
-	v))
+        (vector-for-each (lambda (i) (vector-set! v i (* i i)))
+                         '#(0 1 2 3 4))
+        v))
 
+;;------------------------------------------------------------------
+(test-subsection "Lists and Pairs")
+
+(test "member with 3d parameter.1"
+      '("b" "c")
+      (member "B" '("a" "b" "c") string-ci=?))
+
+(test "member with 3d parameter.2"
+      '(2.0 3.0)
+      (member 1.99 '(1.0 2.0 3.0) (lambda (x y) (< (abs (- x y)) 0.1))))
+
+(test "assoc with 3d parameter.1"
+      '(2 4)
+      (assoc 2.0 '((1 1) (2 4) (3 9)) =))
+
+(test "assoc with 3d parameter.2"
+      '("b" 4)
+      (assoc "B" '(("a" 1) ("b" 4) ("c" 9)) string-ci=?))
+
+(test "list-set!.1"
+      '("foo" 2 3)
+      (let ((l (list 1 2 3)))
+        (list-set! l 0 "foo")
+        l))
+
+(test "make-list.1"
+      '(#void #void #void)
+      (make-list 3))
+
+(test "make-list.2"
+      '(42 42 42 42)
+      (make-list 4 42))
 
 (test-section-end)
+
