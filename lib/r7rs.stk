@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 26-Jun-2018 12:14 (eg)
+;;;; Last file update: 26-Jun-2018 14:41 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -42,21 +42,23 @@ doc>
   (vector->list (make-vector k fill)))
 
 ;;;; ----------------------------------------------------------------------
-;;;; 6.7 Stings
+;;;; 6.7 Strings
 ;;;; ----------------------------------------------------------------------
 
 (define-macro (%generalize-string-compare func func2)
   `(begin
-     ;; Keep the old function since it is faster than the general one
+     ;; Keep the old function since it is twice faster than the general one
      (define ,func2 ,func)
-     ;; Use define instead of set! her to keep a clean procedure name for errors
-     (define (,func first . l)
-       (letrec ((compare (lambda (first . l)
-                           (or (null? l)
-                              (and (,func2 first (car l))
-                                 (apply compare l))))))
-         (unless (string? first) (error "bad string ~W" first))
-         (apply compare first l)))))
+     ;; define the generalized function
+     (set! ,func (lambda (first . l)
+                   (letrec ((compare (lambda (first . l)
+                                       (or (null? l)
+                                          (and (,func2 first (car l))
+                                             (apply compare l))))))
+                     (unless (string? first) (error "bad string ~W" first))
+                     (apply compare first l))))
+     ;; Set the name of the new function to the old one for better error messages
+     (%set-procedure-name! ,func ',func)))
 
 (%generalize-string-compare string=? string2=?)
 (%generalize-string-compare string<? string2<?)
@@ -71,6 +73,13 @@ doc>
 (%generalize-string-compare string-ci>=? string-ci2>=?)
 
 
+(define (s->l s :optional (start 0 start?) (end 0 end?))
+  (if (or start? end?)
+      (let ((end (if end? end (string-length s))))
+        (with-handler (lambda (x)
+                        (error 'string->list (condition-ref x 'message)))
+                      (string->list (substring s start end))))
+      (string->list s)))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.8 Vectors

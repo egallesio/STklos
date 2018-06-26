@@ -1,8 +1,8 @@
 /*
  *
- * p r o c . c				-- Things about procedures
+ * p r o c . c                          -- Things about procedures
  *
- * Copyright © 1993-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 20-Dec-2009 15:10 (eg)
+ * Last file update: 26-Jun-2018 14:34 (eg)
  */
 
 #include "stklos.h"
@@ -29,7 +29,7 @@
 
 /*===========================================================================*\
  *
- * 				    Utilities
+ *                                  Utilities
  *
 \*===========================================================================*/
 
@@ -74,8 +74,8 @@ static void print_lambda(SCM closure, SCM port, int mode)
  * The stucture which describes the closure type
  */
 static struct extended_type_descr xtype_closure = {
-  "closure",			/* name */
-  print_lambda			/* print function */
+  "closure",                    /* name */
+  print_lambda                  /* print function */
 };
 
 
@@ -116,15 +116,15 @@ DEFINE_PRIMITIVE("procedure?", procedurep, subr1, (SCM obj))
     case tc_closure:
     case tc_ext_func:    return STk_true;
     case tc_instance:    return (STk_methodp(obj) != STk_false) ?
-			   	   STk_true:
-      				   STk_genericp(obj);
+                                   STk_true:
+                                   STk_genericp(obj);
 #ifdef FIXME
 //     case tc_call_cc:
 //     case tc_dynwind:    return STk_true;
-//     default: 		if (EXTENDEDP(obj))
-//       			  return STk_extended_procedurep(obj) ? STk_true : STk_false;
-// 			else
-// 			  return STk_false;
+//     default:                 if (EXTENDEDP(obj))
+//                                return STk_extended_procedurep(obj) ? STk_true : STk_false;
+//                      else
+//                        return STk_false;
 #endif
     default: return STk_false;
   }
@@ -148,11 +148,20 @@ DEFINE_PRIMITIVE("%procedure-name", procedure_name, subr1, (SCM obj))
     case tc_ext_func: return STk_ext_func_name(obj);
 #endif
     case tc_closure:  if (CLOSURE_NAME(obj) != STk_false)
-		         return STk_Cstring2string(SYMBOL_PNAME(CLOSURE_NAME(obj)));
+                         return STk_Cstring2string(SYMBOL_PNAME(CLOSURE_NAME(obj)));
                          /* NO BREAK */
     default:         return obj;
   }
 }
+
+DEFINE_PRIMITIVE("%set-procedure-name!", set_procedure_name, subr2, (SCM obj, SCM v))
+{
+  if (!CLOSUREP(obj)) error_bad_procedure(obj);
+  if (!SYMBOLP(v))    STk_error("bad symbol ~S", v);
+  CLOSURE_NAME(obj) = v;
+  return STk_void;
+}
+
 
 
 /*
@@ -202,7 +211,7 @@ DEFINE_PRIMITIVE("%set-procedure-plist!", set_proc_plist, subr2, (SCM obj, SCM v
     case tc_subr23:
     case tc_vsubr:   PRIMITIVE_PLIST(obj) = v; break;
     case tc_closure: CLOSURE_PLIST(obj)   = v; break;
-    default: 	     error_bad_procedure(obj);
+    default:         error_bad_procedure(obj);
   }
   return STk_void;
 }
@@ -213,17 +222,17 @@ DEFINE_PRIMITIVE("%procedure-arity", proc_arity, subr1, (SCM proc))
   int res;
 
   switch (STYPE(proc)) {
-    case tc_subr0:  	  res = 0;  break;
-    case tc_subr1:  	  res = 1;  break;
-    case tc_subr2:  	  res = 2;  break;
-    case tc_subr3:  	  res = 3;  break;
-    case tc_subr4:  	  res = 4;  break;
-    case tc_subr5:  	  res = 5;  break;
-    case tc_subr01: 	  res = -1; break;
-    case tc_subr12: 	  res = -2; break;
-    case tc_subr23: 	  res = -3; break;
-    case tc_vsubr:  	  res = -1; break;
-    case tc_apply:  	  res = -1; break;
+    case tc_subr0:        res = 0;  break;
+    case tc_subr1:        res = 1;  break;
+    case tc_subr2:        res = 2;  break;
+    case tc_subr3:        res = 3;  break;
+    case tc_subr4:        res = 4;  break;
+    case tc_subr5:        res = 5;  break;
+    case tc_subr01:       res = -1; break;
+    case tc_subr12:       res = -2; break;
+    case tc_subr23:       res = -3; break;
+    case tc_vsubr:        res = -1; break;
+    case tc_apply:        res = -1; break;
       /*  case tc_next_method: */
     case tc_continuation: res = 1;  break;
     case tc_parameter:    res = -1; break;
@@ -262,7 +271,7 @@ DEFINE_PRIMITIVE("%procedure-doc", proc_doc, subr1, (SCM proc))
 
 /*===========================================================================*\
  *
- * 			M A P   &   F O R - E A C H
+ *                      M A P   &   F O R - E A C H
  *
 \*===========================================================================*/
 static SCM map(int argc, SCM *argv, int in_map)
@@ -282,7 +291,7 @@ static SCM map(int argc, SCM *argv, int in_map)
       if (!CONSP(v)) error_malformed_list(v);
       tmp = STk_C_apply(fct, 1, CAR(v));
       if (in_map)
-	res = STk_cons(tmp, res);
+        res = STk_cons(tmp, res);
     }
     return STk_dreverse(res);
   } else {
@@ -293,19 +302,19 @@ static SCM map(int argc, SCM *argv, int in_map)
     for ( ; ; ) {
       /* Build the parameter list */
       for (i=0, j=0; i < argc; i++,j--) {
-	if (NULLP(argv[j]))
-	  return STk_dreverse(res); /* // FIXME: verifier longueurs */
-	if (!CONSP(argv[j])) error_malformed_list(argv[j]);
-	args[i] = CAR(argv[j]);
-	argv[j] = CDR(argv[j]);
+        if (NULLP(argv[j]))
+          return STk_dreverse(res); /* // FIXME: verifier longueurs */
+        if (!CONSP(argv[j])) error_malformed_list(argv[j]);
+        args[i] = CAR(argv[j]);
+        argv[j] = CDR(argv[j]);
       }
 
       tmp = STk_C_apply(fct, -argc, args);
       if (in_map)
-	res = STk_cons(tmp, res);
+        res = STk_cons(tmp, res);
     }
   }
-  return STk_void;	/* never reached */
+  return STk_void;      /* never reached */
 }
 
 /*
@@ -371,7 +380,7 @@ DEFINE_PRIMITIVE("for-each", for_each, vsubr, (int argc, SCM* argv))
 // {
 //   SCM eval, compiled_form, ref;
 //
-//   eval 		= STk_lookup(STk_intern("eval"), STk_current_module, &ref);
+//   eval               = STk_lookup(STk_intern("eval"), STk_current_module, &ref);
 //   compiled_form = STk_C_apply(eval, 1 , form);
 //
 //   return compiled_form;
@@ -389,6 +398,7 @@ int STk_init_proc(void)
   ADD_PRIMITIVE(proc_doc);
   ADD_PRIMITIVE(proc_arity);
   ADD_PRIMITIVE(procedure_name);
+  ADD_PRIMITIVE(set_procedure_name);
 
   ADD_PRIMITIVE(map);
   ADD_PRIMITIVE(for_each);
