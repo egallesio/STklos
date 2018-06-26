@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 26-Jun-2018 11:50 (eg)
+ * Last file update: 26-Jun-2018 15:23 (eg)
  */
 
 #include <ctype.h>
@@ -518,7 +518,7 @@ DEFINE_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM valu
  * characters in the same positions, otherwise returns |#f|. |String-ci=?|
  * treats upper and lower case letters as though they were the same character,
  * but |string=?| treats upper and lower case as distinct characters.
- * 
+ *
  * ,@(bold "Note"): R5RS version of these functions accept only two arguments.
 doc>
  */
@@ -668,15 +668,20 @@ DEFINE_PRIMITIVE("string-append", string_append, vsubr, (int argc, SCM* argv))
 
 
 /*
-<doc  string->list list->string
+<doc R57RS string->list list->string
  * (string->list string)
+ * (string->list string start)
+ * (string->list string start end)
  * (list->string list)
  *
- * |String->list| returns a newly allocated list of the characters that make
- * up the given string. |List->string| returns a newly allocated string
- * formed from the characters in the list |list|, which must be a list of
- * characters. |String->list| and |list->string| are inverses so far as
- * |equal?| is concerned.
+ * |String->list| returns a newly allocated list of the characters of
+ * |string| between |start| and |end|. |List->string| returns a newly
+ * allocated string formed from the characters in the list |list|,
+ * which must be a list of characters. |String->list| and
+ * |list->string| are inverses so far as |equal?| is concerned.
+ *
+ * ,@("Note"): The R5RS version of |string->list| accepts only one
+ * parameter.
 doc>
  */
 DEFINE_PRIMITIVE("string->list", string2list, subr1, (SCM str))
@@ -952,7 +957,7 @@ DEFINE_PRIMITIVE("string-mutable?", string_mutable, subr1, (SCM obj))
  * (string-downcase "Foo BAR" 4)      => "bar"
  * (string-downcase "Foo BAR" 4 6)    => "ba"
  * @end lisp
- * 
+ *
  * ,@(bold "Note"): In R7RS, |string-downcase| accepts only one argument.
 doc>
  */
@@ -1056,7 +1061,7 @@ DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
  * |start| and |end| indices have been replaced by their upper case equivalent.
  * If |start| is omited, it defaults to 0. If |end| is omited, it defaults to
  * the length of |str|.
- * 
+ *
  * ,@(bold "Note"): In R7RS, |string-upcase| accepts only one argument.
 doc>
  */

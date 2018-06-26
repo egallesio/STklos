@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 26-Jun-2018 14:41 (eg)
+;;;; Last file update: 26-Jun-2018 14:57 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -45,6 +45,9 @@ doc>
 ;;;; 6.7 Strings
 ;;;; ----------------------------------------------------------------------
 
+;;
+;; Generalized string comparison functions
+;;
 (define-macro (%generalize-string-compare func func2)
   `(begin
      ;; Keep the old function since it is twice faster than the general one
@@ -72,7 +75,6 @@ doc>
 (%generalize-string-compare string-ci>? string-ci2>?)
 (%generalize-string-compare string-ci>=? string-ci2>=?)
 
-
 (define (s->l s :optional (start 0 start?) (end 0 end?))
   (if (or start? end?)
       (let ((end (if end? end (string-length s))))
@@ -80,6 +82,22 @@ doc>
                         (error 'string->list (condition-ref x 'message)))
                       (string->list (substring s start end))))
       (string->list s)))
+
+;;
+;; Generalized string->list
+;;
+(let ((s->l string->list)) ;; s->l is the R5RS function
+  (set! string->list
+        (lambda (str :optional (start 0 start?) (end 0 end?))
+          (if (or start? end?)
+              (let ((end (if end? end (string-length str))))
+                (with-handler (lambda (x)
+                                (error 'string->list
+                                       (condition-ref x 'message)))
+                              (s->l (substring str start end))))
+              (s->l str))))
+  (%set-procedure-name! string->list 'string->list))
+
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.8 Vectors
