@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 22-Jun-2018 14:11 (eg)
+;;;; Last file update: 26-Jun-2018 11:58 (eg)
 ;;;;
 
 (require "test")
@@ -78,6 +78,29 @@
         (vector-for-each (lambda (i) (vector-set! v i (* i i)))
                          '#(0 1 2 3 4))
         v))
+
+;;------------------------------------------------------------------
+(test-subsection "Strings")
+
+(test "Extended string=?.1" #t (string=? "a"))
+(test "Extended string=?.2" #t (string=? "a" "a" "a" "a"))
+(test "Extended string=?.3" #f (string=? "a" "a" "A" "a"))
+
+(test "Extended string-ci=?.1" #t (string-ci=? "a"))
+(test "Extended string-ci=?.2" #t (string-ci=? "a" "a" "a" "a"))
+(test "Extended string-ci=?.3" #t (string-ci=? "a" "a" "A" "a"))
+(test "Extended string-ci=?.4" #f (string-ci=? "a" "a" "A" "b"))
+
+(test "Extended string<?.1" #t (string<? "a"))
+(test "Extended string<?.2" #t (string<? "a" "b" "c" "d"))
+(test "Extended string<?.3" #f (string<? "a" "B" "c" "D"))
+(test "Extended string<?.4" #f (string<? "a" "a" "A" "b"))
+
+(test "Extended string-ci<?.1" #t (string-ci<? "a"))
+(test "Extended string-ci<?.2" #t (string-ci<? "a" "b" "c" "d"))
+(test "Extended string-ci<?.3" #t (string-ci<? "a" "B" "c" "D"))
+(test "Extended string-ci<?.4" #f (string-ci<? "a" "a" "A" "b"))
+
 
 ;;------------------------------------------------------------------
 (test-subsection "Lists and Pairs")

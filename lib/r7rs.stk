@@ -1,7 +1,7 @@
 ;;;;
-;;;; r7rs.stk	-- R7RS support (Draft-3)
+;;;; r7rs.stk   -- R7RS support (Draft-3)
 ;;;;
-;;;; Copyright © 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2018 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 31-Dec-2011 15:02 (eg)
+;;;; Last file update: 26-Jun-2018 12:14 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -40,6 +40,35 @@ doc>
 |#
 (define (make-list k :optional (fill (void)))
   (vector->list (make-vector k fill)))
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.7 Stings
+;;;; ----------------------------------------------------------------------
+
+(define-macro (%generalize-string-compare func func2)
+  `(begin
+     ;; Keep the old function since it is faster than the general one
+     (define ,func2 ,func)
+     ;; Use define instead of set! her to keep a clean procedure name for errors
+     (define (,func first . l)
+       (letrec ((compare (lambda (first . l)
+                           (or (null? l)
+                              (and (,func2 first (car l))
+                                 (apply compare l))))))
+         (unless (string? first) (error "bad string ~W" first))
+         (apply compare first l)))))
+
+(%generalize-string-compare string=? string2=?)
+(%generalize-string-compare string<? string2<?)
+(%generalize-string-compare string<=? string2<=?)
+(%generalize-string-compare string>? string2>?)
+(%generalize-string-compare string>=? string2>=?)
+
+(%generalize-string-compare string-ci=? string-ci2=?)
+(%generalize-string-compare string-ci<? string-ci2<?)
+(%generalize-string-compare string-ci<=? string-ci2<=?)
+(%generalize-string-compare string-ci>? string-ci2>?)
+(%generalize-string-compare string-ci>=? string-ci2>=?)
 
 
 
@@ -140,7 +169,7 @@ doc>
     (error "bad bytevector ~S" bv))
 
   (let* ((len (bytevector-length bv))
-	 (new (make-bytevector len)))
+         (new (make-bytevector len)))
     (dotimes (i len)
       (bytevector-u8-set! new i (bytevector-u8-ref bv i)))
     new))
@@ -159,7 +188,7 @@ doc>
   (unless (bytevector? to)
     (error "bad bytevector ~S" to))
   (let ((len-from (bytevector-length from))
-	(len-to   (bytevector-length to)))
+        (len-to   (bytevector-length to)))
     (when (> len-from len-to)
       (error "bytevector ~S is too long for copying it in ~S" from to))
     (dotimes (i len-from)
@@ -183,7 +212,7 @@ doc>
     (error "bad ending intex ~S" end))
 
   (let* ((len (- end start))
-	 (new (make-bytevector len)))
+         (new (make-bytevector len)))
     (dotimes (i len)
       (bytevector-u8-set! new i (bytevector-u8-ref bv (+ start i))))
     new))
@@ -214,7 +243,7 @@ doc>
     (error "bad destination index ~S" at))
 
   (let ((len    (- end start))
-	(to-len (bytevector-length to)))
+        (to-len (bytevector-length to)))
     (when (> (+ at len) to-len)
       (error "cannot copy ~S bytes in ~S starting at index ~S" len to at))
 
@@ -225,13 +254,13 @@ doc>
       ((and (eq? from to) (> (+ at len) end))
        ;; may overlap => copy in reverse
        (let ((j (- (+ at len) 1))
-	     (k (- end 1)))
-	 (dotimes (i len)
-	   (bytevector-u8-set! to (- j i) (bytevector-u8-ref from (- k i ))))))
+             (k (- end 1)))
+         (dotimes (i len)
+           (bytevector-u8-set! to (- j i) (bytevector-u8-ref from (- k i ))))))
       (else
        ;; normal copy
        (dotimes (i len)
-	 (bytevector-u8-set! to (+ at i) (bytevector-u8-ref from (+ start i))))))))
+         (bytevector-u8-set! to (+ at i) (bytevector-u8-ref from (+ start i))))))))
 
 
 ;;;; ----------------------------------------------------------------------
@@ -261,23 +290,23 @@ doc>
  *          => "IBM"
  *
  * (string-map (lambda (c k)
- * 	      (if (eqv? k #\u)
- * 		  (char-upcase c)
- * 		  (char-downcase c)))
- * 	    "studlycaps"
- * 	    "ululululul")
- * 	 => "StUdLyCaPs"
+ *            (if (eqv? k #\u)
+ *                (char-upcase c)
+ *                (char-downcase c)))
+ *          "studlycaps"
+ *          "ululululul")
+ *       => "StUdLyCaPs"
  * @end lisp
 
 doc>
 |#
 (define (string-map proc . strings)
   (let* ((strs (map (lambda (x)
-		      (unless (string? x)
-			(error 'string-map "bad string ~S" x))
-		      (string->list x))
-		    strings))
-	 (res (apply map proc strs)))
+                      (unless (string? x)
+                        (error 'string-map "bad string ~S" x))
+                      (string->list x))
+                    strings))
+         (res (apply map proc strs)))
     ;; Verify that every compnent of the result is a character
     (unless (every char? res)
       (error 'string-map "bad character in ~S" res))
@@ -301,7 +330,7 @@ doc>
  *     =>  #(b e h)
  *
  * (vector-map (lambda (n) (expt n n))
- * 	    '#(1 2 3 4 5))
+ *          '#(1 2 3 4 5))
  *     => #(1 4 27 256 3125)
  *
  * (vector-map + '#(1 2 3) '#(4 5 6))
@@ -337,7 +366,7 @@ doc>
  * @lisp
  * (let ((v (list)))
  *   (string-for-each (lambda (c) (set! v (cons (char->integer c) v)))
- * 	              "abcde")
+ *                    "abcde")
  *    v)
  *        => (101 100 99 98 97)
  * @end lisp
@@ -345,10 +374,10 @@ doc>
 |#
 (define (string-for-each proc . strings)
   (let ((strs (map (lambda (x)
-		     (unless (string? x)
-		       (error 'string-for-each "bad string ~S" x))
-		     (string->list x))
-		   strings)))
+                     (unless (string? x)
+                       (error 'string-for-each "bad string ~S" x))
+                     (string->list x))
+                   strings)))
     (apply map proc strs)
     (void)))
 
@@ -368,7 +397,7 @@ doc>
  * @lisp
  * (let ((v (make-vector 5)))
  *   (vector-for-each (lambda (i) (vector-set! v i (* i i)))
- * 		   '#(0 1 2 3 4))
+ *                 '#(0 1 2 3 4))
  *   v)
  *        => #(0 1 4 9 16)
  * @end lisp

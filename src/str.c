@@ -1,8 +1,8 @@
 /*
  *
- * s t r . c				-- Strings management
+ * s t r . c                            -- Strings management
  *
- * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  9-Sep-2011 15:37 (eg)
+ * Last file update: 26-Jun-2018 11:50 (eg)
  */
 
 #include <ctype.h>
@@ -31,7 +31,7 @@
 
 
 /* min size added to a string when reallocated in a string-set! */
-#define UTF8_STRING_INCR	8
+#define UTF8_STRING_INCR        8
 
 
 /*
@@ -82,9 +82,9 @@ static int stringcomp(SCM s1, SCM s2)
 
     while ((str1 < end1) && (str2 < end2)) {
       if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL)
-	error_bad_sequence(STRING_CHARS(s1));
+        error_bad_sequence(STRING_CHARS(s1));
       if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL)
-	error_bad_sequence(STRING_CHARS(s2));
+        error_bad_sequence(STRING_CHARS(s2));
 
       if (ch1 != ch2) return ch1 - ch2;
     }
@@ -96,9 +96,9 @@ static int stringcomp(SCM s1, SCM s2)
     register int l1, l2;
 
     for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
-	 l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
-	 l1 && l2;
-	 l1--, str1++, l2--, str2++)
+         l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
+         l1 && l2;
+         l1--, str1++, l2--, str2++)
       if (*str1 != *str2) return ((unsigned char) *str1 - (unsigned char) *str2);
 
     /* l1 == 0 || l2 == 0 */
@@ -124,9 +124,9 @@ static int stringcompi(SCM s1, SCM s2)
 
     while ((str1 < end1) && (str2 < end2)) {
       if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL)
-	error_bad_sequence(STRING_CHARS(s1));
+        error_bad_sequence(STRING_CHARS(s1));
       if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL)
-	error_bad_sequence(STRING_CHARS(s2));
+        error_bad_sequence(STRING_CHARS(s2));
 
       if (towlower(ch1) != towlower(ch2)) return towlower(ch1) - towlower(ch2);
     }
@@ -138,11 +138,11 @@ static int stringcompi(SCM s1, SCM s2)
     register int l1, l2;
 
     for (l1=STRING_SIZE(s1), str1=STRING_CHARS(s1),
-	 l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
-	 l1 && l2;
-	 l1--, str1++, l2--, str2++)
+         l2=STRING_SIZE(s2),str2=STRING_CHARS(s2);
+         l1 && l2;
+         l1--, str1++, l2--, str2++)
       if (tolower(*str1) != tolower(*str2))
-	return (tolower(*str1) - tolower(*str2));
+        return (tolower(*str1) - tolower(*str2));
 
     /* l1 == 0 || l2 == 0 */
     return l1 ? +1 : (l2 ? -1 : 0);
@@ -160,7 +160,7 @@ static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
   case 1: s = argv[0]; break;
   case 2: s = argv[0]; start = STk_integer_value(argv[-1]); break;
   case 3: s = argv[0]; start = STk_integer_value(argv[-1]);
-	  end = STk_integer_value(argv[-2]); break;
+          end = STk_integer_value(argv[-2]); break;
   default: STk_error("incorrect number of argument (%d)", argc);
   }
 
@@ -309,28 +309,28 @@ DEFINE_PRIMITIVE("make-string", make_string, subr12, (SCM len, SCM init_char))
       int c = CHARACTER_VAL(init_char);
 
       if (STk_use_utf8 && c >= 0x80) {
-	/* unicode character */
-	int n = STk_char2utf8(c, buff);
+        /* unicode character */
+        int n = STk_char2utf8(c, buff);
 
-	z = STk_makestring(k * n, NULL);
-	s = STRING_CHARS(z);
-	STRING_LENGTH(z) = k; /* incorrectly set to  k*n before */
+        z = STk_makestring(k * n, NULL);
+        s = STRING_CHARS(z);
+        STRING_LENGTH(z) = k; /* incorrectly set to  k*n before */
 
-	while (k--) {
-	  *s++ = buff[0];
-	  if (!buff[1]) continue;
-	  *s++ = buff[1];
-	  if (!buff[2]) continue;
-	  *s++ = buff[2];
-	  if (!buff[3]) continue;
-	  *s++ = buff[3];
-	}
+        while (k--) {
+          *s++ = buff[0];
+          if (!buff[1]) continue;
+          *s++ = buff[1];
+          if (!buff[2]) continue;
+          *s++ = buff[2];
+          if (!buff[3]) continue;
+          *s++ = buff[3];
+        }
       } else {
-	/* non unicode character */
-	z = STk_makestring(k, NULL);
-	s = STRING_CHARS(z);
+        /* non unicode character */
+        z = STk_makestring(k, NULL);
+        s = STRING_CHARS(z);
 
-	while (k--) *s++ = c;
+        while (k--) *s++ = c;
       }
     }
     return z;
@@ -361,13 +361,13 @@ DEFINE_PRIMITIVE("string", string, vsubr, (int argc, SCM* argv))
       space += STk_char2utf8(CHARACTER_VAL(argv[-i]), buff);
     else
       if (CHARACTER_VAL(argv[-i]) > 255)
-	STk_error("character ~S is too big", argv[-i]);
+        STk_error("character ~S is too big", argv[-i]);
       else
-	space += 1;
+        space += 1;
   }
 
   z = STk_makestring(space, NULL);
-  STRING_LENGTH(z) = argc;	/* correct the length */
+  STRING_LENGTH(z) = argc;      /* correct the length */
 
   /* copy element in newly allocated string */
   for (s=STRING_CHARS(z); argc--; argv--) {
@@ -410,7 +410,7 @@ DEFINE_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index))
 {
   long k = STk_integer_value(index);
 
-  if (!STRINGP(str))			error_bad_string(str);
+  if (!STRINGP(str))                    error_bad_string(str);
   if (k < 0 || k >= STRING_LENGTH(str)) error_index_out_of_bound(str, index);
 
   if (!STk_use_utf8 || (STRING_SIZE(str) == STRING_LENGTH(str)))
@@ -451,15 +451,15 @@ DEFINE_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM valu
   long k = STk_integer_value(index);
   int cval;
 
-  if (!STRINGP(str))    	        error_bad_string(str);
+  if (!STRINGP(str))                    error_bad_string(str);
   if (BOXED_INFO(str) & STRING_CONST)   error_change_const_string(str);
-  if (!CHARACTERP(value))	        error_bad_character(value);
+  if (!CHARACTERP(value))               error_bad_character(value);
   if (k < 0 || k >= STRING_LENGTH(str)) error_index_out_of_bound(str, index);
 
 
   cval = CHARACTER_VAL(value);
   if (!STk_use_utf8 || (STRING_MONOBYTE(str) &&
-			(STk_utf8_char_bytes_needed(cval) == 1)))
+                        (STk_utf8_char_bytes_needed(cval) == 1)))
     /* string doesn't contain multibytes chars and value is mono byte */
     STRING_CHARS(str)[k] = cval;
   else {
@@ -473,29 +473,29 @@ DEFINE_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM valu
     if (old_char_sz < new_char_sz) {
       /* new character has a longer representation than the old one */
       if (STRING_LENGTH(str) + new_char_sz - old_char_sz >= STRING_SPACE(str)) {
-	/* not enough space; allocate some more bytes */
-	char *new = STk_must_malloc_atomic(STRING_SPACE(str) + UTF8_STRING_INCR + 1);
+        /* not enough space; allocate some more bytes */
+        char *new = STk_must_malloc_atomic(STRING_SPACE(str) + UTF8_STRING_INCR + 1);
 
-	memcpy(new, start, pos - start);
-	memcpy(new + (pos - start), buffer, new_char_sz);
-	memcpy(new + (pos - start) + new_char_sz,
-	       pos + old_char_sz,
-	       start + STRING_SIZE(str) - pos + old_char_sz);
-	STRING_CHARS(str)  = new;
-	STRING_SPACE(str) += UTF8_STRING_INCR;
+        memcpy(new, start, pos - start);
+        memcpy(new + (pos - start), buffer, new_char_sz);
+        memcpy(new + (pos - start) + new_char_sz,
+               pos + old_char_sz,
+               start + STRING_SIZE(str) - pos + old_char_sz);
+        STRING_CHARS(str)  = new;
+        STRING_SPACE(str) += UTF8_STRING_INCR;
       } else {
-	memmove(pos + new_char_sz,
-		pos + old_char_sz,
-		start + STRING_SIZE(str) - pos + old_char_sz);
-	memcpy(pos, buffer, new_char_sz);
+        memmove(pos + new_char_sz,
+                pos + old_char_sz,
+                start + STRING_SIZE(str) - pos + old_char_sz);
+        memcpy(pos, buffer, new_char_sz);
       }
       STRING_SIZE(str) += new_char_sz - old_char_sz;
     }
     else if (old_char_sz > new_char_sz) {
       /* old character has a longer representation than the old one */
       memmove(pos + new_char_sz,
-	      pos + old_char_sz,
-	      start + STRING_SIZE(str) - pos + old_char_sz);
+              pos + old_char_sz,
+              start + STRING_SIZE(str) - pos + old_char_sz);
       memcpy(pos, buffer, new_char_sz);
       STRING_SIZE(str) += new_char_sz - old_char_sz;
     }
@@ -510,26 +510,28 @@ DEFINE_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM valu
 }
 
 /*
-<doc string=? string-ci=?
- * (string=? string1 string2)
- * (string-ci=? string1 string2)
+<doc R57RS string=? string-ci=?
+ * (string=? string1 string2 ...)
+ * (string-ci=? string1 string2 ...)
  *
- * Returns |#t| if the two strings are the same length and contain the same
+ * Returns |#t| if all the strings are the same length and contain the same
  * characters in the same positions, otherwise returns |#f|. |String-ci=?|
  * treats upper and lower case letters as though they were the same character,
  * but |string=?| treats upper and lower case as distinct characters.
+ * 
+ * ,@(bold "Note"): R5RS version of these functions accept only two arguments.
 doc>
  */
 
 /*
-<doc  string<? string<=? string>? string>=? string-ci<? string-ci<=? string-ci>? string-ci>=?
- * (string<? string1 string2)
- * (string>? string1 string2)
- * (string<=? string1 string2)
- * (string>=? string1 string2)
- * (string-ci<? string1 string2)
- * (string-ci>? string1 string2)
- * (string-ci<=? string1 string2)
+<doc  R57RS string<? string<=? string>? string>=? string-ci<? string-ci<=? string-ci>? string-ci>=?
+ * (string<? string1 string2 ...)
+ * (string>? string1 string2 ...)
+ * (string<=? string1 string2 ...)
+ * (string>=? string1 string2 ...)
+ * (string-ci<? string1 string2 ...)
+ * (string-ci>? string1 string2 ...)
+ * (string-ci<=? string1 string2 ...)
  * (string-ci>=? string1 string2)
  *
  * These procedures are the lexicographic extensions to strings of the
@@ -539,6 +541,7 @@ doc>
  * length of the shorter string, the shorter string is considered to be
  * lexicographically less than the longer string.
  *
+ * ,@(bold "Note"): R5RS version of these functions accept only two arguments.
 doc>
  */
 
@@ -615,7 +618,7 @@ DEFINE_PRIMITIVE("substring", substring, subr3, (SCM string, SCM start, SCM end)
       pto = pfrom = STk_utf8_index(STRING_CHARS(string), from, STRING_SIZE(string));
 
       for ( ; from < to; from++)
-	pto = STk_utf8_grab_char(pto, &c);
+        pto = STk_utf8_grab_char(pto, &c);
 
       z = STk_makestring(pto - pfrom, pfrom);
       STRING_LENGTH(z) = STk_utf8_strlen(STRING_CHARS(z), pto-pfrom);
@@ -753,8 +756,8 @@ DEFINE_PRIMITIVE("string-fill!", string_fill, subr2, (SCM str, SCM c))
   int bytes, len, c_char, c_len;
   char *s;
 
-  if (!STRINGP(str))  		      error_bad_string(str);
-  if (!CHARACTERP(c)) 		      error_bad_character(c);
+  if (!STRINGP(str))                  error_bad_string(str);
+  if (!CHARACTERP(c))                 error_bad_character(c);
   if (BOXED_INFO(str) & STRING_CONST) error_change_const_string(str);
 
   len    = STRING_LENGTH(str);
@@ -763,11 +766,11 @@ DEFINE_PRIMITIVE("string-fill!", string_fill, subr2, (SCM str, SCM c))
   c_len  = STk_utf8_char_bytes_needed(c_char);
   bytes  = len * c_len;
 
-  if (c_len == 1) {	/* unibyte character */
+  if (c_len == 1) {     /* unibyte character */
     while (len--) {
       *s++ = c_char;
     }
-  } else {		/* multibyte character */
+  } else {              /* multibyte character */
     char buffer[5];
 
     if (bytes > STRING_SPACE(str)) {
@@ -832,8 +835,8 @@ DEFINE_PRIMITIVE("string-find?", string_find, subr2, (SCM s1, SCM s2))
   if (!STRINGP(s2)) error_bad_string(s2);
 
   pos = Memmem(STRING_CHARS(s2), STRING_SIZE(s2),
-	       STRING_CHARS(s1), STRING_SIZE(s1),
-	       FALSE);
+               STRING_CHARS(s1), STRING_SIZE(s1),
+               FALSE);
 
   return MAKE_BOOLEAN(pos != -1);
 }
@@ -858,8 +861,8 @@ DEFINE_PRIMITIVE("string-index", string_index, subr2, (SCM s1, SCM s2))
   if (!STRINGP(s2)) error_bad_string(s2);
 
   pos = Memmem(STRING_CHARS(s2), STRING_SIZE(s2),
-	       STRING_CHARS(s1), STRING_SIZE(s1),
-	       STk_use_utf8 && !STRING_MONOBYTE(s2));
+               STRING_CHARS(s1), STRING_SIZE(s1),
+               STk_use_utf8 && !STRING_MONOBYTE(s2));
 
   return (pos != -1) ? STk_long2integer(pos) : STk_false;
 }
@@ -903,14 +906,14 @@ DEFINE_PRIMITIVE("string-split", string_split, subr12, (SCM string, SCM delimite
   for (s=c_string, i=0; i < l_string; s++, i++) {
     if (memchr(c_delimiters, *s, l_delimiters)) {
       if (s > c_string)
-	result = STk_cons(STk_makestring(s-c_string, c_string),
-			  result);
+        result = STk_cons(STk_makestring(s-c_string, c_string),
+                          result);
       c_string = s + 1;
     }
   }
   if (s > c_string)
     result = STk_cons(STk_makestring(s-c_string, c_string),
-		      result);
+                      result);
 
   return STk_dreverse(result);
 }
@@ -949,10 +952,12 @@ DEFINE_PRIMITIVE("string-mutable?", string_mutable, subr1, (SCM obj))
  * (string-downcase "Foo BAR" 4)      => "bar"
  * (string-downcase "Foo BAR" 4 6)    => "ba"
  * @end lisp
+ * 
+ * ,@(bold "Note"): In R7RS, |string-downcase| accepts only one argument.
 doc>
  */
 static SCM string_xxcase(int argc, SCM *argv, int (*toxx)(int),
-			 wint_t (*towxx)(wint_t))
+                         wint_t (*towxx)(wint_t))
 {
   SCM s;
   int start, end;
@@ -1000,7 +1005,7 @@ DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv
 doc>
 */
 static SCM string_dxxcase(int argc, SCM *argv, int (*toxx)(int),
-			 wint_t (*towxx)(wint_t))
+                         wint_t (*towxx)(wint_t))
 {
   SCM s;
   int i, start, end;
@@ -1008,7 +1013,7 @@ static SCM string_dxxcase(int argc, SCM *argv, int (*toxx)(int),
   s    = control_index(argc, argv, &start, &end);
   if (BOXED_INFO(s) & STRING_CONST) error_change_const_string(s);
 
-  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {	    /* multibyte string */
+  if (STk_use_utf8 && !STRING_MONOBYTE(s)) {        /* multibyte string */
     uint32_t *wchars;
     int len;
     char *startp = STk_utf8_index(STRING_CHARS(s), start, STRING_SIZE(s));
@@ -1021,13 +1026,13 @@ static SCM string_dxxcase(int argc, SCM *argv, int (*toxx)(int),
     }
     else {
       /* This code is inefficient, but it seems that that the converted case
-	 character always use the same length encoding. It is likely that this
-	 code is never used in practice
+         character always use the same length encoding. It is likely that this
+         code is never used in practice
       */
       for (i= start; i < end; i++)
-	STk_string_set(s, MAKE_INT(i), MAKE_CHARACTER(*wchars++));
+        STk_string_set(s, MAKE_INT(i), MAKE_CHARACTER(*wchars++));
     }
-  } else {				    /* monobyte string */
+  } else {                                  /* monobyte string */
     char *p , *endp = STRING_CHARS(s) + end;
 
     for (p=STRING_CHARS(s)+start; p < endp; p++) *p = toxx(*p);
@@ -1051,6 +1056,8 @@ DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
  * |start| and |end| indices have been replaced by their upper case equivalent.
  * If |start| is omited, it defaults to 0. If |end| is omited, it defaults to
  * the length of |str|.
+ * 
+ * ,@(bold "Note"): In R7RS, |string-upcase| accepts only one argument.
 doc>
  */
 DEFINE_PRIMITIVE("string-upcase", string_upcase, vsubr, (int argc, SCM *argv))
@@ -1083,6 +1090,8 @@ DEFINE_PRIMITIVE("string-upcase!", string_dupcase, vsubr, (int argc, SCM *argv))
  * been applied on |str| between the |start| and |end| indices.
  * If |start| is omited, it defaults to 0. If |end| is omited, it defaults to
  * the length of |str|.
+ *
+ * ,@(bold "Note"): In R7RS, |string-foldcase| accepts only one argument.
 doc>
  */
 DEFINE_PRIMITIVE("string-foldcase", string_foldcase, vsubr, (int argc, SCM *argv))
@@ -1202,7 +1211,7 @@ DEFINE_PRIMITIVE("string-titlecase!", string_dtitlecase,vsubr,(int argc, SCM *ar
 doc>
 */
 DEFINE_PRIMITIVE("string-blit!", string_blit, subr3,
-		 (SCM str1, SCM str2, SCM offset))
+                 (SCM str1, SCM str2, SCM offset))
 {
   long off = STk_integer_value(offset);
   int len1, len2;
@@ -1235,11 +1244,11 @@ DEFINE_PRIMITIVE("string-blit!", string_blit, subr3,
 
     for (i = 0; i < newl; i++) {
       if ((i >= off) && (i < (off + len2)))
-	*snew++ = sstr2[j++];
+        *snew++ = sstr2[j++];
       else if (i < len1)
-	*snew++ =  sstr1[i];
+        *snew++ =  sstr1[i];
       else
-	snew++;
+        snew++;
     }
     return new;
   }
@@ -1252,7 +1261,7 @@ DEFINE_PRIMITIVE("string-pos", string_pos, subr2, (SCM str, SCM index))
   long k = STk_integer_value(index);
   int n;
 
-  if (!STRINGP(str))			error_bad_string(str);
+  if (!STRINGP(str))                    error_bad_string(str);
   if (k < 0 || k >= STRING_LENGTH(str)) error_index_out_of_bound(str, index);
 
   if (STk_use_utf8 && !STRING_MONOBYTE(str))
