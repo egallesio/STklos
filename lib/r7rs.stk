@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 26-Jun-2018 14:57 (eg)
+;;;; Last file update: 28-Jun-2018 10:36 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -98,6 +98,62 @@ doc>
               (s->l str))))
   (%set-procedure-name! string->list 'string->list))
 
+
+#|
+<doc R7RS string-copy! 
+ * (string-copy! to at from)
+ * (string-copy! to at from start)
+ * (string-copy! to at from start end)
+ *
+ *  Copies the characters of |string| from between |start| and |end|
+ * to string |to|, starting at |at|. The order in which characters are copied
+ * is unspecified, except that if the source and destination overlap,
+ * copying takes place as if the source is first copied into a temporary
+ * string and then into the destination. This can be achieved without
+ * allocating storage by making sure to copy in the correct direction in
+ * such circumstances.
+ * 
+ * It is an error if |at| is less than zero or greater than the length
+ * of |to|. It is also an error if |(- (string-length to) at)| is less
+ * than |(- end start)|.
+doc>
+|#
+(define (string-copy! to at from :optional (start 0 start?) (end 0 end?))
+  (define (err . l)
+    (apply error 'string-copy! l))
+
+  (define (%string-copy! to tstart from fstart fend)
+    (if (> fstart tstart)
+        (do ((i fstart (+ i 1))
+             (j tstart (+ j 1)))
+            ((>= i fend))
+          (string-set! to j (string-ref from i)))
+
+        (do ((i (- fend 1)                    (- i 1))
+             (j (+ -1 tstart (- fend fstart)) (- j 1)))
+            ((< i fstart))
+          (string-set! to j (string-ref from i)))))
+
+  ;; body starts here
+  (unless (string? to)   (err "bad string ~S" to))
+  (unless (string? from) (err "bad string ~S" from))
+  (let ((length-from (string-length from))
+        (length-to   (string-length to)))
+    (unless (and (integer? at) (>= at 0) (< at length-to))
+      (err "bad destination index ~S" at))
+    (when start?
+      (unless (and (integer? start) (>= start 0) (<= start length-from))
+        (err "bad integer for start index ~S" start)))
+    (if end?
+        (unless (and (integer? end) (>= end 0) (<= end length-from))
+          (err "bad integer for end index ~S" end))
+        (set! end (string-length from)))
+    (when (< (- length-to at) (- end start))
+      (err "not enough room in destination string ~S" to))
+
+    ;; do the copy
+    (with-handler (lambda (x) (err (condition-ref x 'message)))
+                  (%string-copy! to at from start end))))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.8 Vectors

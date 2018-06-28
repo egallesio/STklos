@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 26-Jun-2018 14:57 (eg)
+;;;; Last file update: 28-Jun-2018 10:39 (eg)
 ;;;;
 
 (require "test")
@@ -105,7 +105,49 @@
   (test "Extended string->list.1" '(#\a #\b #\c #\d #\e #\f) (string->list str))
   (test "Extended string->list.2" '(#\c #\d #\e #\f) (string->list str 2))
   (test "Extended string->list.3" '(#\c #\d #\e) (string->list str 2 5))
-  (test "Extended string->list.4" *test-failed* (string->list str 2 100)))
+  (test "Extended string->list.4" *test-failed* (string->list str 2 100))
+
+  (test "Extended string-copy.1" "abcdef" (string-copy str))
+  (test "Extended string-copy.2" "cdef" (string-copy str 2))
+  (test "Extended string-copy.3" "cde" (string-copy str 2 5))
+  (test "Extended string-copy.4" *test-failed* (string-copy str 2 100)))
+
+
+(test "string-copy!.1"
+      "abc12f"
+      (let ((s (string-copy "abcdef"))) (string-copy! s 3 "12") s))
+(test "string-copy!.2"
+      *test-failed*
+      (let ((s (string-copy "abcdef"))) (string-copy! s 5 "12") s))
+(test "string-copy!.3"
+      "a23def"
+      (let ((s (string-copy "abcdef"))) (string-copy! s 1 "123" 1) s))
+(test "string-copy!.4"
+      "a23def"
+      (let ((s (string-copy "abcdef"))) (string-copy! s 1 "123" 1) s))
+(test "string-copy!.5"
+      "a3cdef"
+      (let ((s (string-copy "abcdef"))) (string-copy! s 1 "123" 2) s))
+(test "string-copy!.6"
+      "abcdef"
+      (let ((s (string-copy "abcdef"))) (string-copy! s 1 "123" 3) s))
+(test "string-copy!.7"
+      "a12def"
+      (let ((s (string-copy "abcdef"))) (string-copy! s 1 "123" 0 2) s))
+(test "string-copy!.8"
+      "a123ef"
+      (let ((s (string-copy "abcdef"))) (string-copy! s 1 "123" 0 3) s))
+(test "string-copy!.9"
+      *test-failed*
+      (let ((s (string-copy "abcdef"))) (string-copy! s 1 "123" 0 4) s))
+
+(test "string-copy! overlap.1"
+      "ababcfg"
+      (let ((s (string-copy "abcdefg")))   (string-copy! s 2 s 0 3) s))
+
+(test "string-copy! overlap.2"
+      "efcdefg"
+      (let ((s (string-copy "abcdefg")))   (string-copy! s 0 s 4 6) s))
 
 ;;------------------------------------------------------------------
 (test-subsection "Lists and Pairs")

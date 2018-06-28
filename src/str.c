@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 26-Jun-2018 15:23 (eg)
+ * Last file update: 28-Jun-2018 10:42 (eg)
  */
 
 #include <ctype.h>
@@ -161,25 +161,25 @@ static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
   case 2: s = argv[0]; start = STk_integer_value(argv[-1]); break;
   case 3: s = argv[0]; start = STk_integer_value(argv[-1]);
           end = STk_integer_value(argv[-2]); break;
-  default: STk_error("incorrect number of argument (%d)", argc);
+  default: STk_error("incorrect number of arguments (%d)", argc);
   }
 
   /* Controlling s */
   if (!STRINGP(s)) error_bad_string(s);
   len = STRING_LENGTH(s);
 
-  /* Controling start index */
+  /* Controlling start index */
   if (start == LONG_MIN || start < 0 || start > len)
     /* argc cannot be 1 (start would be 0) */
-    STk_error("bad starting index ~S", argv[(argc==2) ? 0 : -1]);
+    STk_error("bad starting index ~S", argv[-1]);
 
-  /* controling end index */
+  /* Controlling end index */
   if (end == -1)
     end = len;
   else
     if (end == LONG_MIN  || end < 0 || end > len)
       /* We have an end index ==> argc = 3 */
-      STk_error("bad ending index ~S", argv[0]);
+      STk_error("bad ending index ~S", argv[-2]);
 
   if (start > end)
     STk_error("low index is greater than high index");
@@ -230,6 +230,28 @@ static void copy_array(uint32_t *buff, int len, char* from)
 {
   while (len--)
     from += STk_char2utf8(*buff++, from);
+}
+
+static SCM make_substring(SCM string, long from, long to)
+{
+  /* from and to must be checked bay caller */
+  if (STRING_MONOBYTE(string))
+    return STk_makestring(to - from, STRING_CHARS(string)+from);
+  else {
+    /* multi-bytes string */
+    uint32_t c;
+    char *pfrom, *pto;
+    SCM z;
+
+    pto = pfrom = STk_utf8_index(STRING_CHARS(string), from, STRING_SIZE(string));
+
+    for ( ; from < to; from++)
+      pto = STk_utf8_grab_char(pto, &c);
+
+    z = STk_makestring(pto - pfrom, pfrom);
+    STRING_LENGTH(z) = STk_utf8_strlen(STRING_CHARS(z), pto-pfrom);
+    return z;
+  }
 }
 
 
@@ -580,7 +602,7 @@ DEFINE_PRIMITIVE("string-ci>=?", strgei, subr2, (SCM s1, SCM s2))
 
 
 /*
-<doc  substring
+<doc substring
  * (substring string start end)
  *
  * |String| must be a string, and |start| and |end| must be exact integers
@@ -593,7 +615,6 @@ DEFINE_PRIMITIVE("string-ci>=?", strgei, subr2, (SCM s1, SCM s2))
  * index |end| (exclusive).
 doc>
  */
-
 DEFINE_PRIMITIVE("substring", substring, subr3, (SCM string, SCM start, SCM end))
 {
   long from, to;
@@ -606,25 +627,9 @@ DEFINE_PRIMITIVE("substring", substring, subr3, (SCM string, SCM start, SCM end)
   if (from == LONG_MIN) STk_error("bad lower index ~S", start);
   if (to   == LONG_MIN) STk_error("bad upper index ~S", end);
 
-  if (0 <= from && from <= to && to <= STRING_SIZE(string)) {
-    if (STRING_MONOBYTE(string))
-      return STk_makestring(to - from, STRING_CHARS(string)+from);
-    else {
-      /* multi-bytes string */
-      uint32_t c;
-      char *pfrom, *pto;
-      SCM z;
+  if (0 <= from && from <= to && to <= STRING_SIZE(string))
+    return make_substring(string, from, to);
 
-      pto = pfrom = STk_utf8_index(STRING_CHARS(string), from, STRING_SIZE(string));
-
-      for ( ; from < to; from++)
-        pto = STk_utf8_grab_char(pto, &c);
-
-      z = STk_makestring(pto - pfrom, pfrom);
-      STRING_LENGTH(z) = STk_utf8_strlen(STRING_CHARS(z), pto-pfrom);
-      return z;
-    }
-  }
   STk_error("index ~S or ~S incorrect", start, end);
   return STk_void; /* cannot occur */
 }
@@ -736,16 +741,26 @@ DEFINE_PRIMITIVE("list->string", list2string, subr1, (SCM l))
 
 
 /*
-<doc string-copy
+<doc R57RS string-copy
  * (string-copy string)
+ * (string-copy string start)
+ * (string-copy string start stop)
  *
- * Returns a newly allocated copy of the given |string|.
-doc>
+ * Returns a newly allocated copy of the part of the given |string|
+ * between |start| and |stop|.
+ *
+ * ,@(bold "Note"): The R5RS version of |string-copy| accepts only one argument.
+ doc>
 */
-DEFINE_PRIMITIVE("string-copy", string_copy, subr1, (SCM str))
+DEFINE_PRIMITIVE("string-copy", string_copy, vsubr, (int argc, SCM *argv))
 {
-  if (!STRINGP(str)) error_bad_string(str);
-  return STk_makestring(STRING_SIZE(str), STRING_CHARS(str));
+  int start, end;
+
+  control_index(argc, argv, &start, &end);
+  if (start == -1)
+    return STk_makestring(STRING_SIZE(*argv), STRING_CHARS(*argv));
+  else
+    return make_substring(*argv, start, end);
 }
 
 
