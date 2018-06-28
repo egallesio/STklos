@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 28-Jun-2018 10:36 (eg)
+;;;; Last file update: 28-Jun-2018 17:27 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -63,25 +63,17 @@ doc>
      ;; Set the name of the new function to the old one for better error messages
      (%set-procedure-name! ,func ',func)))
 
-(%generalize-string-compare string=? string2=?)
-(%generalize-string-compare string<? string2<?)
-(%generalize-string-compare string<=? string2<=?)
-(%generalize-string-compare string>? string2>?)
-(%generalize-string-compare string>=? string2>=?)
+(%generalize-string-compare string=?     %string2=?)
+(%generalize-string-compare string<?     %string2<?)
+(%generalize-string-compare string<=?    %string2<=?)
+(%generalize-string-compare string>?     %string2>?)
+(%generalize-string-compare string>=?    %string2>=?)
 
-(%generalize-string-compare string-ci=? string-ci2=?)
-(%generalize-string-compare string-ci<? string-ci2<?)
-(%generalize-string-compare string-ci<=? string-ci2<=?)
-(%generalize-string-compare string-ci>? string-ci2>?)
-(%generalize-string-compare string-ci>=? string-ci2>=?)
-
-(define (s->l s :optional (start 0 start?) (end 0 end?))
-  (if (or start? end?)
-      (let ((end (if end? end (string-length s))))
-        (with-handler (lambda (x)
-                        (error 'string->list (condition-ref x 'message)))
-                      (string->list (substring s start end))))
-      (string->list s)))
+(%generalize-string-compare string-ci=?  %string-ci2=?)
+(%generalize-string-compare string-ci<?  %string-ci2<?)
+(%generalize-string-compare string-ci<=? %string-ci2<=?)
+(%generalize-string-compare string-ci>?  %string-ci2>?)
+(%generalize-string-compare string-ci>=? %string-ci2>=?)
 
 ;;
 ;; Generalized string->list
@@ -100,7 +92,7 @@ doc>
 
 
 #|
-<doc R7RS string-copy! 
+<doc R7RS string-copy!
  * (string-copy! to at from)
  * (string-copy! to at from start)
  * (string-copy! to at from start end)
@@ -112,7 +104,7 @@ doc>
  * string and then into the destination. This can be achieved without
  * allocating storage by making sure to copy in the correct direction in
  * such circumstances.
- * 
+ *
  * It is an error if |at| is less than zero or greater than the length
  * of |to|. It is also an error if |(- (string-length to) at)| is less
  * than |(- end start)|.
@@ -154,6 +146,32 @@ doc>
     ;; do the copy
     (with-handler (lambda (x) (err (condition-ref x 'message)))
                   (%string-copy! to at from start end))))
+
+;;
+;; R7RS string-fill!
+;;
+
+; Keep the R5RS version available
+(define %string-fill2! string-fill!)
+;; Implement the one with 2 to 4 parameters
+(let ((fill (lambda (str char :optional (start 0 start?) (end 0 end?))
+              (with-handler (lambda (x) (error 'string-fill! (condition-ref x 'message)))
+                (if start?
+                    ;; R7RS string-fill!
+                    (begin
+                      (unless end?
+                        (set! end (string-length str)))
+                      (let Loop ((i start))
+                        (when (< i end)
+                          (string-set! str i char)
+                          (Loop (+ i 1)))))
+                    ;; R5RS string-fill!
+                    (%string-fill2! str char))))))
+  (set! string-fill! fill)
+  (%set-procedure-name! string-fill! 'string-fill!))
+
+
+
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.8 Vectors

@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 28-Jun-2018 10:42 (eg)
+ * Last file update: 28-Jun-2018 17:01 (eg)
  */
 
 #include <ctype.h>
@@ -767,12 +767,20 @@ DEFINE_PRIMITIVE("string-copy", string_copy, vsubr, (int argc, SCM *argv))
 /*
 <doc EXT string-fill!
  * (string-fill! string char)
+ * (string-fill! string char start)
+ * (string-fill! string char start end)
  *
- * Stores |char| in every element of the given |string| and returns ,(emph "void").
+ * Stores |char| in every element of the given |string| between |start| and |end|.
+ *
+ * ,@(bold "Note"): The R5RS version of |string-fill!| accepts only one argument.
 doc>
 */
 DEFINE_PRIMITIVE("string-fill!", string_fill, subr2, (SCM str, SCM c))
 {
+  /*
+   * The following function implements the R5RS version of string-fill!
+   * The R7RS version is written in Scheme in file r7rs.stk.
+   */
   int bytes, len, c_char, c_len;
   char *s;
 

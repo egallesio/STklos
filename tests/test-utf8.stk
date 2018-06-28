@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2011 23:35 (eg)
-;;;; Last file update: 15-Jun-2018 19:41 (eg)
+;;;; Last file update: 28-Jun-2018 17:47 (eg)
 ;;;;
 
 (require "test")
@@ -248,6 +248,17 @@
 
 
 (unless *is-C?*
+  (test "string-fill! with char of different lengths.1"
+        " λλλλλ "
+        (let ((x (make-string 7 #\space)))
+          (string-fill! x #\λ 1 6)
+          x))
+  (test "string-fill! with char of different lengths.2"
+        "λ     λ"
+        (let ((x (make-string 7 #\λ)))
+          (string-fill! x #\space 1 6)
+          x))
+  
   ;;---- Test the lambda form with λ symbol
   (test "lambda symbol.1"
         '(1 2 3)
