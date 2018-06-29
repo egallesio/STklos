@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 28-Jun-2018 17:01 (eg)
+ * Last file update: 29-Jun-2018 12:26 (eg)
  */
 
 #include <ctype.h>
@@ -234,7 +234,7 @@ static void copy_array(uint32_t *buff, int len, char* from)
 
 static SCM make_substring(SCM string, long from, long to)
 {
-  /* from and to must be checked bay caller */
+  /* WARNING: from and to must be checked by caller */
   if (STRING_MONOBYTE(string))
     return STk_makestring(to - from, STRING_CHARS(string)+from);
   else {

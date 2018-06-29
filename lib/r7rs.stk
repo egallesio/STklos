@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 28-Jun-2018 17:27 (eg)
+;;;; Last file update: 29-Jun-2018 12:19 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -81,11 +81,9 @@ doc>
 (let ((s->l string->list)) ;; s->l is the R5RS function
   (set! string->list
         (lambda (str :optional (start 0 start?) (end 0 end?))
-          (if (or start? end?)
+          (if start?
               (let ((end (if end? end (string-length str))))
-                (with-handler (lambda (x)
-                                (error 'string->list
-                                       (condition-ref x 'message)))
+                (%claim-error 'string->list
                               (s->l (substring str start end))))
               (s->l str))))
   (%set-procedure-name! string->list 'string->list))
@@ -144,7 +142,7 @@ doc>
       (err "not enough room in destination string ~S" to))
 
     ;; do the copy
-    (with-handler (lambda (x) (err (condition-ref x 'message)))
+    (%claim-error 'string-copy!
                   (%string-copy! to at from start end))))
 
 ;;
@@ -155,22 +153,21 @@ doc>
 (define %string-fill2! string-fill!)
 ;; Implement the one with 2 to 4 parameters
 (let ((fill (lambda (str char :optional (start 0 start?) (end 0 end?))
-              (with-handler (lambda (x) (error 'string-fill! (condition-ref x 'message)))
-                (if start?
-                    ;; R7RS string-fill!
-                    (begin
-                      (unless end?
-                        (set! end (string-length str)))
-                      (let Loop ((i start))
-                        (when (< i end)
-                          (string-set! str i char)
-                          (Loop (+ i 1)))))
-                    ;; R5RS string-fill!
-                    (%string-fill2! str char))))))
+              (%claim-error
+                 'string-fill!
+                 (if start?
+                     ;; R7RS string-fill!
+                     (begin
+                       (unless end?
+                         (set! end (string-length str)))
+                       (let Loop ((i start))
+                         (when (< i end)
+                           (string-set! str i char)
+                           (Loop (+ i 1)))))
+                     ;; R5RS string-fill!
+                     (%string-fill2! str char))))))
   (set! string-fill! fill)
   (%set-procedure-name! string-fill! 'string-fill!))
-
-
 
 
 ;;;; ----------------------------------------------------------------------

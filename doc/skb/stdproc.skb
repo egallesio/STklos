@@ -1,6 +1,6 @@
 ;; ======================================================================
 ;;
-;; 			STklos Reference Manual
+;;                      STklos Reference Manual
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,13 +18,13 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 31-Dec-2011 15:16 (eg)
+;; Last file update: 28-Jun-2018 10:47 (eg)
 ;;
 ;; ======================================================================
 
 ;; ======================================================================
 ;;
-;;			Standard Procedures
+;;                      Standard Procedures
 ;;
 ;; ======================================================================
 (chapter :title "Standard Procedures"
@@ -239,9 +239,9 @@ which is also shown in this table.])
 
 (p [,(stklos) supports the complete Unicode character set, if UTF-8 encoding is used. Hereafter, are some examples of characters:])
 (fontified-code [
-#\A		   ,(symbol-arrow) uppercase A
-#\a		   ,(symbol-arrow) lowercase a
-#\x41\;		   ,(symbol-arrow) the U+0041 character (uppercase A)
+#\A                ,(symbol-arrow) uppercase A
+#\a                ,(symbol-arrow) lowercase a
+#\x41\;            ,(symbol-arrow) the U+0041 character (uppercase A)
 #\x03BB\;            ,(symbol-arrow) ,(symbol "lambda")
 ])
 
@@ -268,29 +268,29 @@ the following table.])
    (table :rules 'cols :frame 'border
       (tr :bg "#eeeeee" (th "Sequence") (th "Character inserted"))
       (tr (td "\\a")
-	  (td "Alarm"))
+          (td "Alarm"))
       (tr (td "\\b")
-	  (td "Backspace"))
+          (td "Backspace"))
       (tr (td "\\e")
-	  (td " Escape"))
+          (td " Escape"))
       (tr (td "\\n")
-	  (td " Newline"))
+          (td " Newline"))
       (tr (td "\\t")
-	  (td " Horizontal Tab"))
+          (td " Horizontal Tab"))
       (tr (td "\\r")
-	  (td " Carriage Return"))
+          (td " Carriage Return"))
       (tr (td "\\\"")
-	  (td " doublequote U+0022"))
+          (td " doublequote U+0022"))
       (tr (td "\\\\")
-	  (td " backslash U+005C"))
+          (td " backslash U+005C"))
       (tr (td "\\0abc")
-	  (td " ASCII character with octal value abc"))
+          (td " ASCII character with octal value abc"))
       (tr (td "\\x<hexa value>;")
-	  (td " ASCII character with given hexadecimal value"))
+          (td " ASCII character with given hexadecimal value"))
       (tr (td "\\<intraline whitespace><newline><intraline whitespace>")
-	  (td " None (permits to enter a string on several lines)"))
+          (td " None (permits to enter a string on several lines)"))
       (tr (td "\\<other>")
-	  (td " <other>"))))
+          (td " <other>"))))
 (p [For instance, the string])
 (fontified-code ["ab\\040\\x20;c\\nd\
          e"])
@@ -321,6 +321,7 @@ legibility.])))
 (insertdoc 'string-append)
 (insertdoc 'list->string)
 (insertdoc 'string-copy)
+(insertdoc 'string-copy!)
 (insertdoc 'string-split)
 (insertdoc 'string-index)
 (insertdoc 'string-find?)

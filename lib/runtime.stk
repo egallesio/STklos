@@ -1,7 +1,7 @@
 ;;;;
-;;;; runtime.stk	-- Stuff necessary for bootstaping the system
+;;;; runtime.stk        -- Stuff necessary for bootstaping the system
 ;;;;
-;;;; Copyright © 2001-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,19 +21,19 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update: 28-Oct-2010 15:18 (eg)
+;;;; Last file update: 29-Jun-2018 12:16 (eg)
 ;;;;
 
 
-(define (map* fn . l) 		; A map which accepts dotted lists (arg lists
-  (cond 			; must be "isomorph"
+(define (map* fn . l)           ; A map which accepts dotted lists (arg lists
+  (cond                         ; must be "isomorph"
    ((null? (car l)) '())
    ((pair? (car l)) (cons (apply fn      (map car l))
-			  (apply map* fn (map cdr l))))
+                          (apply map* fn (map cdr l))))
    (else            (apply fn l))))
 
-(define (for-each* fn . l) 	; A for-each which accepts dotted lists (arg lists
-  (cond 			; must be "isomorph"
+(define (for-each* fn . l)      ; A for-each which accepts dotted lists (arg lists
+  (cond                         ; must be "isomorph"
    ((null? (car l)) '())
    ((pair? (car l)) (apply fn (map car l)) (apply for-each* fn (map cdr l)))
    (else            (apply fn l))))
@@ -41,10 +41,10 @@
 
 (define (filter-map func . args)
   (filter (lambda (x) x)
-	  (apply map func args)))
+          (apply map func args)))
 #| example
   (filter-map (lambda (x) (and (number? x) (+ x 1)))
-	    '(1 2 foo "bar" 7))
+            '(1 2 foo "bar" 7))
 
 |#
 
@@ -57,14 +57,15 @@
 
 (define (symbol-append . args)
   (let loop ((args args)
-	     (res  ""))
+             (res  ""))
     (if (null? args)
-	(string->symbol res)
-	(loop (cdr args)
-	      (string-append res (format "~a" (car args)))))))
+        (string->symbol res)
+        (loop (cdr args)
+              (string-append res (format "~a" (car args)))))))
+
 
 ;; ----------------------------------------------------------------------
-;; 	parameters
+;;      parameters
 ;; ----------------------------------------------------------------------
 #|
 <doc EXT stklos-debug-level
@@ -80,12 +81,12 @@ doc>
   (make-parameter 0))
 
 ;; ----------------------------------------------------------------------
-;;	*%system-state-plist* ...
+;;      *%system-state-plist* ...
 ;; ----------------------------------------------------------------------
 (define *%system-state-plist*  (list :name "STklos"))
 
 ;; ----------------------------------------------------------------------
-;;	management of globals ...
+;;      management of globals ...
 ;; ----------------------------------------------------------------------
 ;; This should be in compiler module but it a nightmare with bootstrap.
 (define compiler-known-globals
@@ -100,12 +101,12 @@ doc>
 
 ;;; ----------------------------------------------------------------------
 ;;;
-;;; 				E x p a n d e r s
+;;;                             E x p a n d e r s
 ;;;
 ;;; ----------------------------------------------------------------------
-(define *expander-list*     '())	; the macros
-(define *expander-list-src* '())	; their source code
-(define *expander-published* '())	; names of the macro to "publish"
+(define *expander-list*     '())  ; the macros
+(define *expander-list-src* '())  ; their source code
+(define *expander-published* '()) ; names of the macro to "publish"
 
 (define (expander? x)
   (assq x *expander-list*))
@@ -117,12 +118,12 @@ doc>
 
 (define (initial-expander x e)
  (cond
-   ((not (pair? x))   	      x)
+   ((not (pair? x))             x)
    ((not (symbol? (car x)))  (application-expander x e))
    (else  (let ((functor (car x)))
-	    (cond
-	       ((expander? functor) ((cdr (assq functor *expander-list*)) x e))
-	       (else (application-expander x e)))))))
+            (cond
+               ((expander? functor) ((cdr (assq functor *expander-list*)) x e))
+               (else (application-expander x e)))))))
 
 
 (define (install-expander! id proc code)
@@ -145,14 +146,14 @@ doc>
 
 (define (delete-expander! id)
   (let loop ((lst *expander-list*)
-	     (prv #f))
+             (prv #f))
     (cond
       ((null? lst)
          (void))
       ((eq? (caar lst) id)
          (if prv
-	   (set-cdr! prv (cdr lst))
-	   (set! *expander-list* (cdr lst))))
+           (set-cdr! prv (cdr lst))
+           (set! *expander-list* (cdr lst))))
       (else
          (loop (cdr lst) lst)))))
 
@@ -166,16 +167,16 @@ doc>
 (define (expander-published-sources)
   (let ((warning (in-module |STKLOS-COMPILER| compiler-warning)))
     (let Loop ((lst *expander-published*)
-	       (res '()))
+               (res '()))
       (if (null? lst)
-	  (reverse! res)
-	  (let ((mac (assoc (car lst) *expander-list-src*)))
-	    (if mac
-		(Loop (cdr lst) (cons mac res))
-		(begin
-		  (warning (void) 'export-syntax
-			   "cannot find source of syntax named ~S" (car lst))
-		  (Loop (cdr lst) res))))))))
+          (reverse! res)
+          (let ((mac (assoc (car lst) *expander-list-src*)))
+            (if mac
+                (Loop (cdr lst) (cons mac res))
+                (begin
+                  (warning (void) 'export-syntax
+                           "cannot find source of syntax named ~S" (car lst))
+                  (Loop (cdr lst) res))))))))
 
 (define (expander-published-add! name)
   (unless (memq name *expander-published*)
@@ -198,10 +199,29 @@ doc>
 ;; ======================================================================
 (define %macro-expand*
   (let ((expand (lambda (x)
-		  ;; as macro-expand without syntax expand (used by full-syntax)
-		  (initial-expander x (lambda (x e) x)))))
+                  ;; as macro-expand without syntax expand (used by full-syntax)
+                  (initial-expander x (lambda (x e) x)))))
     (lambda (exp)
       (let ((new (expand exp)))
-	(if (equal? new exp)
-	    new
-	    (%macro-expand* new))))))
+        (if (equal? new exp)
+            new
+            (%macro-expand* new))))))
+
+
+;; ======================================================================
+;;
+;; %claim-error
+;;
+;; Permit to claim that a function as detected an error
+;; For instance
+;;   (define (change-first-char! str char)
+;;      (%claim-error 'change-first-char! (string-set! str 0 char)))
+;;   > (change-first-char! (string-copy "abc") 10)
+;;   **** Error:
+;;  change-first-char!: bad character `10'
+;;
+;; Here the error is claimed by change-first-char! instead of string-set!
+(define-macro (%claim-error owner . body)
+  (let ((x (gensym)))
+    `(with-handler (lambda (,x) (error ,owner (condition-ref ,x 'message)))
+                   ,@body)))
