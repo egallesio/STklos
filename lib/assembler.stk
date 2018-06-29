@@ -1,7 +1,7 @@
 ;;;;
-;;;; assembler.stk	-- Assember stuff
+;;;; assembler.stk      -- Assember stuff
 ;;;;
-;;;; Copyright © 2000-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,224 +21,225 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 20-Dec-2009 12:20 (eg)
+;;;; Last file update: 29-Jun-2018 16:43 (eg)
 ;;;;
 
 ;;;
 ;;; The VM instructions. The list is formed of 3-uples
-;;;		(<mnemonic> <code> <#of parameters>)
+;;;             (<mnemonic> <code> <#of parameters>)
 ;;; where <code> is automatically computed
 ;;;
 (define INSTRUCTION-SET
   (let ((cpt 0))
     (map (lambda (x)
-	   (let ((r (list (car x) cpt (cadr x))))
-	     (set! cpt (+ cpt 1))
-	     r))
-	 '(
-	   ;; Mnemonic		params
-	   (NOP			0)
+           (let ((r (list (car x) cpt (cadr x))))
+             (set! cpt (+ cpt 1))
+             r))
+         '(
+           ;; Mnemonic          params
+           (NOP                 0)
 
-	   (IM-FALSE		0)
-	   (IM-TRUE		0)
-	   (IM-NIL		0)
-	   (IM-MINUS1		0)
-	   (IM-ZERO		0)
-	   (IM-ONE		0)
-	   (IM-VOID		0)
-	   (SMALL-INT		1)
-	   (CONSTANT		1)
+           (IM-FALSE            0)
+           (IM-TRUE             0)
+           (IM-NIL              0)
+           (IM-MINUS1           0)
+           (IM-ZERO             0)
+           (IM-ONE              0)
+           (IM-VOID             0)
+           (SMALL-INT           1)
+           (CONSTANT            1)
 
-	   (GLOBAL-REF		1)
-	   (UGLOBAL-REF		1)	;; Never generated
-	   (LOCAL-REF0		0)
-	   (LOCAL-REF1		0)
-	   (LOCAL-REF2		0)
-	   (LOCAL-REF3		0)
-	   (LOCAL-REF4		0)
-	   (LOCAL-REF		1)
-	   (DEEP-LOCAL-REF	1)
+           (GLOBAL-REF          1)
+           (UGLOBAL-REF         1)      ;; Never generated
+           (LOCAL-REF0          0)
+           (LOCAL-REF1          0)
+           (LOCAL-REF2          0)
+           (LOCAL-REF3          0)
+           (LOCAL-REF4          0)
+           (LOCAL-REF           1)
+           (DEEP-LOCAL-REF      1)
 
-	   (GLOBAL-SET		1)
-	   (UGLOBAL-SET		1)	;; Never generated
-	   (LOCAL-SET0		0)
-	   (LOCAL-SET1		0)
-	   (LOCAL-SET2		0)
-	   (LOCAL-SET3		0)
-	   (LOCAL-SET4		0)
-	   (LOCAL-SET		1)
-	   (DEEP-LOCAL-SET	1)
+           (GLOBAL-SET          1)
+           (UGLOBAL-SET         1)      ;; Never generated
+           (LOCAL-SET0          0)
+           (LOCAL-SET1          0)
+           (LOCAL-SET2          0)
+           (LOCAL-SET3          0)
+           (LOCAL-SET4          0)
+           (LOCAL-SET           1)
+           (DEEP-LOCAL-SET      1)
 
-	   (GOTO		1)
-	   (JUMP-FALSE		1)
-	   (JUMP-TRUE		1)
+           (GOTO                1)
+           (JUMP-FALSE          1)
+           (JUMP-TRUE           1)
 
-	   (DEFINE-SYMBOL	1)
+           (DEFINE-SYMBOL       1)
 
-	   (POP			0)
-	   (PUSH		0)
+           (POP                 0)
+           (PUSH                0)
 
-	   (DBG-VM		1)
+           (DBG-VM              1)
 
-	   (CREATE-CLOSURE	2)
-	   (RETURN		0)
+           (CREATE-CLOSURE      2)
+           (RETURN              0)
 
-	   (PREPARE-CALL	0)
+           (PREPARE-CALL        0)
 
-	   (INVOKE		1)
-	   (TAIL-INVOKE		1)
-	   (ENTER-LET-STAR	1)
-	   (ENTER-LET		1)
-	   (ENTER-TAIL-LET-STAR 1)
-	   (ENTER-TAIL-LET	1)
-	   (LEAVE-LET		0)
+           (INVOKE              1)
+           (TAIL-INVOKE         1)
+           (ENTER-LET-STAR      1)
+           (ENTER-LET           1)
+           (ENTER-TAIL-LET-STAR 1)
+           (ENTER-TAIL-LET      1)
+           (LEAVE-LET           0)
 
-	   (PUSH-HANDLER	1)
-	   (POP-HANDLER		0)
+           (PUSH-HANDLER        1)
+           (POP-HANDLER         0)
 
-	   (END-OF-CODE		0)
+           (END-OF-CODE         0)
 
-	   ;; INLINED FUNCTIONS
-	   (IN-ADD2		0)
-	   (IN-SUB2		0)
-	   (IN-MUL2		0)
-	   (IN-DIV2		0)
+           ;; INLINED FUNCTIONS
+           (IN-ADD2             0)
+           (IN-SUB2             0)
+           (IN-MUL2             0)
+           (IN-DIV2             0)
 
-	   (IN-NUMEQ		0)
-	   (IN-NUMLT		0)
-	   (IN-NUMGT		0)
-	   (IN-NUMLE		0)
-	   (IN-NUMGE		0)
+           (IN-NUMEQ            0)
+           (IN-NUMLT            0)
+           (IN-NUMGT            0)
+           (IN-NUMLE            0)
+           (IN-NUMGE            0)
 
-	   (IN-INCR		0)
-	   (IN-DECR		0)
+           (IN-INCR             0)
+           (IN-DECR             0)
 
-	   (IN-CONS		0)
-	   (IN-NULLP		0)
-	   (IN-CAR		0)
-	   (IN-CDR		0)
-	   (IN-LIST		1)
-	   (IN-NOT		0)
-	   (IN-VREF		0)
-	   (IN-VSET		0)
-	   (IN-SREF		0)
-	   (IN-SSET		0)
-	   (IN-EQ		0)
-	   (IN-EQV		0)
-	   (IN-EQUAL		0)
-	   (IN-APPLY		2)
-	   (MAKE-EXPANDER	1)
-	   (SET-CUR-MOD		0)
+           (IN-CONS             0)
+           (IN-NULLP            0)
+           (IN-CAR              0)
+           (IN-CDR              0)
+           (IN-LIST             1)
+           (IN-NOT              0)
+           (IN-VREF             0)
+           (IN-VSET             0)
+           (IN-SREF             0)
+           (IN-SSET             0)
+           (IN-EQ               0)
+           (IN-EQV              0)
+           (IN-EQUAL            0)
+           (IN-APPLY            2)
+           (MAKE-EXPANDER       1)
+           (SET-CUR-MOD         0)
 
-	   ;; Documentation string
-	   (DOCSTRG		1)
+           ;; Documentation string
+           (DOCSTRG             1)
 
-	   (UNUSED-2		0)
+           (UNUSED-2            0)
 
-	   ;; The following instructions are not generated by the compiler
-	   ;; but by the peephole optimizer
-	   (FALSE-PUSH		0)	;; peephole: IM-FALSE  + PUSH
-	   (TRUE-PUSH		0)	;; peephole: IM-TRUE   + PUSH
-	   (NIL-PUSH		0)	;; peephole: IM-NIL    + PUSH
-	   (MINUS1-PUSH		0)	;; peephole: IM-MINUS1 + PUSH
-	   (ZERO-PUSH		0)	;; peephole: IM-ZERO   + PUSH
-	   (ONE-PUSH		0)	;; peephole: IM-ONE    + PUSH
-	   (VOID-PUSH		0)	;; peephole: IM-VOID   + PUSH
+           ;; The following instructions are not generated by the compiler
+           ;; but by the peephole optimizer
+           (FALSE-PUSH          0)      ;; peephole: IM-FALSE  + PUSH
+           (TRUE-PUSH           0)      ;; peephole: IM-TRUE   + PUSH
+           (NIL-PUSH            0)      ;; peephole: IM-NIL    + PUSH
+           (MINUS1-PUSH         0)      ;; peephole: IM-MINUS1 + PUSH
+           (ZERO-PUSH           0)      ;; peephole: IM-ZERO   + PUSH
+           (ONE-PUSH            0)      ;; peephole: IM-ONE    + PUSH
+           (VOID-PUSH           0)      ;; peephole: IM-VOID   + PUSH
 
-	   (INT-PUSH		1)	;; peephole: SMALL-INT + PUSH
-	   (CONSTANT-PUSH	1)	;; peephole: CONSTANT  + PUSH
+           (INT-PUSH            1)      ;; peephole: SMALL-INT + PUSH
+           (CONSTANT-PUSH       1)      ;; peephole: CONSTANT  + PUSH
 
-	   (GREF-INVOKE		2)	;; peephole: GLOBAL_REF + INVOKE
-	   (UGREF-INVOKE	2)	;; Never produced by the compiler
+           (GREF-INVOKE         2)      ;; peephole: GLOBAL_REF + INVOKE
+           (UGREF-INVOKE        2)      ;; Never produced by the compiler
 
-	   (IN-NUMDIFF		0)	;; peephole: IN-NUMEQ + NOT
-	   (IN-NOT-EQ		0)	;; peephole: IN-EQ    + NOT
-	   (IN-NOT-EQV		0)	;; peephole: IN-EQV   + NOT
-	   (IN-NOT-EQUAL	0)	;; peephole: IN-EQUAL + NOT
+           (IN-NUMDIFF          0)      ;; peephole: IN-NUMEQ + NOT
+           (IN-NOT-EQ           0)      ;; peephole: IN-EQ    + NOT
+           (IN-NOT-EQV          0)      ;; peephole: IN-EQV   + NOT
+           (IN-NOT-EQUAL        0)      ;; peephole: IN-EQUAL + NOT
 
-	   (JUMP-NUMDIFF	1)	;; peephole: IN-NUMEQ   + JUMP-FALSE
-	   (JUMP-NUMEQ		1)	;; peephole: IN-NUMDIFF + JUMP-FALSE
-	   (JUMP-NUMLT		1)	;; peephole: IN-NUMGE   + JUMP-FALSE
-	   (JUMP-NUMLE		1)	;; peephole: IN-NUMGT   + JUMP-FALSE
-	   (JUMP-NUMGT		1)	;; peephole: IN-NUMLE   + JUMP-FALSE
-	   (JUMP-NUMGE		1)	;; peephole: IN-NUMLT   + JUMP-FALSE
+           (JUMP-NUMDIFF        1)      ;; peephole: IN-NUMEQ   + JUMP-FALSE
+           (JUMP-NUMEQ          1)      ;; peephole: IN-NUMDIFF + JUMP-FALSE
+           (JUMP-NUMLT          1)      ;; peephole: IN-NUMGE   + JUMP-FALSE
+           (JUMP-NUMLE          1)      ;; peephole: IN-NUMGT   + JUMP-FALSE
+           (JUMP-NUMGT          1)      ;; peephole: IN-NUMLE   + JUMP-FALSE
+           (JUMP-NUMGE          1)      ;; peephole: IN-NUMLT   + JUMP-FALSE
 
-	   (JUMP-NOT-EQ		1)	;; peephole: IN-EQ	+ JUMP-FALSE
-	   (JUMP-NOT-EQV	1)	;; peephole: IN-EQV	+ JUMP-FALSE
-	   (JUMP-NOT-EQUAL	1)	;; peephole: IN-EQUAL	+ JUMP-FALSE
+           (JUMP-NOT-EQ         1)      ;; peephole: IN-EQ      + JUMP-FALSE
+           (JUMP-NOT-EQV        1)      ;; peephole: IN-EQV     + JUMP-FALSE
+           (JUMP-NOT-EQUAL      1)      ;; peephole: IN-EQUAL   + JUMP-FALSE
 
-	   (LOCAL-REF0-PUSH	0)	;; peephole: LOCAL-REF0 + PUSH
-	   (LOCAL-REF1-PUSH	0)	;; peephole: LOCAL-REF1 + PUSH
-	   (LOCAL-REF2-PUSH	0)	;; peephole: LOCAL-REF2 + PUSH
-	   (LOCAL-REF3-PUSH	0)	;; peephole: LOCAL-REF3 + PUSH
-	   (LOCAL-REF4-PUSH	0)	;; peephole: LOCAL-REF4 + PUSH
-
-
-	   (GLOBAL-REF-PUSH	1)	;; peephole: GLOBAL-REF + PUSH
-	   (UGLOBAL-REF-PUSH	1)	;; Never produced by the compiler
-	   (GREF-TAIL-INVOKE	2)	;; peephole: PUSH + GLOBAL_REF + INVOKE
-	   (UGREF-TAIL-INVOKE   2)	;; Never produced by the compiler
-
-	   (PUSH-PREPARE-CALL   0)	;; PUSH + PREPARE-CALL
-
-	   (PUSH-GLOBAL-REF	1)	;; peephole: PUSH + GLOBAL-REF
-	   (PUSH-UGLOBAL-REF	1)	;; Never produced by the compiler
-	   (PUSH-GREF-INVOKE	2)	;; PUSH + GLOBAL-REF +INVOKE
-	   (PUSH-UGREF-INVOKE	2)	;; Never produced by the compiler
-	   (PUSH-GREF-TAIL-INV  2)	;; PUSH + GLOBAL-REF + TAIL-INVOKE
-	   (PUSH-UGREF-TAIL-INV	2)	;; Never produced by the compiler
-
-	   (DEEP-LOC-REF-PUSH   1)	;; peephole: DEEP-LOCAL-SET + PUSH
-	   (UNUSED-19		0)
-	   (UNUSED-18		0)
-	   (UNUSED-17		0)
-	   (UNUSED-16		0)
-	   (UNUSED-15		0)
-	   (UNUSED-14		0)
-	   (UNUSED-13		0)
-	   (UNUSED-12		0)
-	   (UNUSED-11		0)
-	   (UNUSED-10		0)
-	   (UNUSED-9		0)
-	   (UNUSED-8		0)
-	   (UNUSED-7		0)
-	   (UNUSED-6		0)
-	   (UNUSED-5		0)
-	   (UNUSED-4		0)
-	   (UNUSED-3		0)
+           (LOCAL-REF0-PUSH     0)      ;; peephole: LOCAL-REF0 + PUSH
+           (LOCAL-REF1-PUSH     0)      ;; peephole: LOCAL-REF1 + PUSH
+           (LOCAL-REF2-PUSH     0)      ;; peephole: LOCAL-REF2 + PUSH
+           (LOCAL-REF3-PUSH     0)      ;; peephole: LOCAL-REF3 + PUSH
+           (LOCAL-REF4-PUSH     0)      ;; peephole: LOCAL-REF4 + PUSH
 
 
-	   ;; INLINED FUNCTIONS (again)
-	   (IN-SINT-ADD2	1)
-	   (IN-SINT-SUB2	1)
-	   (IN-SINT-MUL2	1)
-	   (IN-SINT-DIV2	1)
-	   (UNUSED-29		0)
-	   (UNUSED-28		0)
-	   (UNUSED-27		0)
-	   (UNUSED-26		0)
-	   (UNUSED-25		0)
-	   (UNUSED-24		0)
-	   (UNUSED-23		0)
-	   (UNUSED-22		0)
-	   (UNUSED-21		0)
-	   (UNUSED-20 	        0)
+           (GLOBAL-REF-PUSH     1)      ;; peephole: GLOBAL-REF + PUSH
+           (UGLOBAL-REF-PUSH    1)      ;; Never produced by the compiler
+           (GREF-TAIL-INVOKE    2)      ;; peephole: PUSH + GLOBAL_REF + INVOKE
+           (UGREF-TAIL-INVOKE   2)      ;; Never produced by the compiler
+
+           (PUSH-PREPARE-CALL   0)      ;; PUSH + PREPARE-CALL
+
+           (PUSH-GLOBAL-REF     1)      ;; peephole: PUSH + GLOBAL-REF
+           (PUSH-UGLOBAL-REF    1)      ;; Never produced by the compiler
+           (PUSH-GREF-INVOKE    2)      ;; PUSH + GLOBAL-REF +INVOKE
+           (PUSH-UGREF-INVOKE   2)      ;; Never produced by the compiler
+           (PUSH-GREF-TAIL-INV  2)      ;; PUSH + GLOBAL-REF + TAIL-INVOKE
+           (PUSH-UGREF-TAIL-INV 2)      ;; Never produced by the compiler
+
+           (DEEP-LOC-REF-PUSH   1)      ;; peephole: DEEP-LOCAL-SET + PUSH
+           (UNUSED-19           0)
+           (UNUSED-18           0)
+           (UNUSED-17           0)
+           (UNUSED-16           0)
+           (UNUSED-15           0)
+           (UNUSED-14           0)
+           (UNUSED-13           0)
+           (UNUSED-12           0)
+           (UNUSED-11           0)
+           (UNUSED-10           0)
+           (UNUSED-9            0)
+           (UNUSED-8            0)
+           (UNUSED-7            0)
+           (UNUSED-6            0)
+           (UNUSED-5            0)
+           (UNUSED-4            0)
+           (UNUSED-3            0)
 
 
-	   ;; FAR instructions
-	   (DEEP-LOC-REF-FAR	1)
-	   (DEEP-LOC-SET-FAR	1)
-	   (CREATE-CLOSURE-FAR	2)
+           ;; INLINED FUNCTIONS (again)
+           (IN-SINT-ADD2        1)
+           (IN-SINT-SUB2        1)
+           (IN-SINT-MUL2        1)
+           (IN-SINT-DIV2        1)
+           (UNUSED-29           0)
+           (UNUSED-28           0)
+           (UNUSED-27           0)
+           (UNUSED-26           0)
+           (UNUSED-25           0)
+           (UNUSED-24           0)
+           (UNUSED-23           0)
+           (UNUSED-22           0)
+           (UNUSED-21           0)
+           (UNUSED-20           0)
 
-	   ;; Fixnum
-	   (IN-FXADD2		0)
-	   (IN-FXSUB2		0)
-	   (IN-FXMUL2		0)
-	   (IN-FXDIV2		0)
-	   (IN-SINT-FXADD2	1)
-	   (IN-SINT-FXSUB2	1)
-	   (IN-SINT-FXMUL2	1)
-	   (IN-SINT-FXDIV2	1)
+
+           ;; FAR instructions
+           (DEEP-LOC-REF-FAR    1)
+           (DEEP-LOC-SET-FAR    1)
+           (CREATE-CLOSURE-FAR  2)
+           (PUSH-HANDLER-FAR    1)
+
+           ;; Fixnum
+           (IN-FXADD2           0)
+           (IN-FXSUB2           0)
+           (IN-FXMUL2           0)
+           (IN-FXDIV2           0)
+           (IN-SINT-FXADD2      1)
+           (IN-SINT-FXSUB2      1)
+           (IN-SINT-FXMUL2      1)
+           (IN-SINT-FXDIV2      1)
 
 
 ))))
@@ -249,40 +250,41 @@
 (define (info-opcode name)
   (let ((v (assq name INSTRUCTION-SET)))
     (if v
-	(cdr v)
-	(panic "non existent opcode ~S" name))))
+        (cdr v)
+        (panic "non existent opcode ~S" name))))
 
 
 (define use-address?
   (let ((instr-with-address (map (lambda (x) (car (info-opcode x)))
-				 '(GOTO JUMP-FALSE JUMP-TRUE
-				   JUMP-NUMDIFF JUMP-NUMGE
-				   JUMP-NUMGT JUMP-NUMGE
-				   JUMP-NUMLT JUMP-NUMLE
-				   JUMP-NOT-EQ JUMP-NOT-EQV JUMP-NOT-EQUAL
-				   CREATE-CLOSURE CREATE-CLOSURE-FAR
-				   PUSH-HANDLER))))
+                                 '(GOTO JUMP-FALSE JUMP-TRUE
+                                   JUMP-NUMDIFF JUMP-NUMGE
+                                   JUMP-NUMGT JUMP-NUMGE
+                                   JUMP-NUMLT JUMP-NUMLE
+                                   JUMP-NOT-EQ JUMP-NOT-EQV JUMP-NOT-EQUAL
+                                   CREATE-CLOSURE CREATE-CLOSURE-FAR
+                                   PUSH-HANDLER PUSH-HANDLER-FAR))))
     (lambda (instr)
       (memq instr instr-with-address))))
 
 (define (pretty-mnemonic mnemonic)
   (let* ((m      (string-upcase (symbol->string mnemonic)))
-	 (filler (make-string (- 20 (string-length m)) #\space)))
+         (filler (make-string (- 20 (string-length m)) #\space)))
     (string-append m filler)))
 
 
 (define (find-instruction-infos opcode)
   (let Loop ((l INSTRUCTION-SET))
     (cond
-       ((null? l) 	     (panic "Cannot decode ~S opcode" opcode))
+       ((null? l)            (panic "Cannot decode ~S opcode" opcode))
        ((= (cadar l) opcode) (car l))
-       (else		     (Loop (cdr l))))))
+       (else                 (Loop (cdr l))))))
 
 
 (define (find-far-codeop opcode)
   (let ((old-mnemo (car (find-instruction-infos opcode))))
     (case old-mnemo
       ((CREATE-CLOSURE) 'CREATE-CLOSURE-FAR)
+      ((PUSH-HANDLER)   'PUSH-HANDLER-FAR)
       (else (panic "No FAR version of instruction ~S" old-mnemo)))))
 
 ;;;;======================================================================
@@ -296,23 +298,23 @@
 
 (define (assemble code)
   (let ((pc    0)
-	(labs '())
-	(code  (peephole code)))
+        (labs '())
+        (code  (peephole code)))
     ;;
     ;; Pass 1
     ;;
     (for-each
       (lambda (x)
-	(if (integer? x)
-	    ;; We have a label
-	    (set! labs (cons (cons x pc) labs))
-	    ;; We have an instruction
-	    (let* ((token (car x))
-		   (info  (info-opcode token)))
-	      ;; Replace the op-code in (car x) by its code
-	      (set-car! x (car info))
-	      ;; Compute new PC
-	      (set! pc (+ pc (length x))))))
+        (if (integer? x)
+            ;; We have a label
+            (set! labs (cons (cons x pc) labs))
+            ;; We have an instruction
+            (let* ((token (car x))
+                   (info  (info-opcode token)))
+              ;; Replace the op-code in (car x) by its code
+              (set-car! x (car info))
+              ;; Compute new PC
+              (set! pc (+ pc (length x))))))
       code)
     ;(eprintf "A l'issue de la passe 1 pc=~S labs=~S\n" pc labs)
 
@@ -320,45 +322,45 @@
     ;; Pass2
     ;;
     (let ((vect (make-vector pc))
-	  (pos  0))
+          (pos  0))
       (for-each
          (lambda (x)
-	   (when (pair? x)	     ;; This is an instruction
-	     (let ((len (length x)))
-	       ;; ----------
-	       ;; Place the op-code in the code vector
-	       (vector-set! vect pos (car x))
+           (when (pair? x)           ;; This is an instruction
+             (let ((len (length x)))
+               ;; ----------
+               ;; Place the op-code in the code vector
+               (vector-set! vect pos (car x))
 
-	       ;; ----------
-	       ;; Place (eventually) the first parameter in the code vector
-	       (when (> len 1)
-		 (let ((instr  (car x))
-		       (param1 (cadr x)))
-		   ;; If this instruction has a parameter which is an label,
-		   ;; replace it with the offset to the destination
-		   (when (use-address? instr)
-		     (set! param1 (- (cdr (assq param1 labs)) pos 2)))
-		   (vector-set! vect (+ pos 1) param1)
+               ;; ----------
+               ;; Place (eventually) the first parameter in the code vector
+               (when (> len 1)
+                 (let ((instr  (car x))
+                       (param1 (cadr x)))
+                   ;; If this instruction has a parameter which is an label,
+                   ;; replace it with the offset to the destination
+                   (when (use-address? instr)
+                     (set! param1 (- (cdr (assq param1 labs)) pos 2)))
+                   (vector-set! vect (+ pos 1) param1)
 
-		   ;;  For instructions using big constants use their FAR version
-		   (unless (small-integer-constant? param1)
-		     (let ((new (find-far-codeop instr)))
-		       (case new
-			 ((CREATE-CLOSURE-FAR)
-			  (vector-set! vect pos (car (info-opcode new)))
-			  (vector-set! vect (+ pos 1) (fetch-constant param1))))))))
+                   ;;  For instructions using big constants use their FAR version
+                   (unless (small-integer-constant? param1)
+                     (let ((new (find-far-codeop instr)))
+                       (case new
+                         ((CREATE-CLOSURE-FAR PUSH-HANDLER-FAR)
+                          (vector-set! vect pos (car (info-opcode new)))
+                          (vector-set! vect (+ pos 1) (fetch-constant param1))))))))
 
-	       ;; ----------
-	       ;; Place (eventually) the second parameter in the code vector
-	       (when (> len 2)
-		 (unless (small-integer-constant? (caddr x))
-		   (panic "Instr. using a big constant as 2nd operand ~S" x))
-		 (vector-set! vect (+ pos 2) (caddr x)))
+               ;; ----------
+               ;; Place (eventually) the second parameter in the code vector
+               (when (> len 2)
+                 (unless (small-integer-constant? (caddr x))
+                   (panic "Instr. using a big constant as 2nd operand ~S" x))
+                 (vector-set! vect (+ pos 2) (caddr x)))
 
-	       (when (> len 3)
-		 (panic "Instruction with more than 2 parameters ~S" x))
-	       (set! pos (+ pos len)))))
-	 code)
+               (when (> len 3)
+                 (panic "Instruction with more than 2 parameters ~S" x))
+               (set! pos (+ pos len)))))
+         code)
 ;      (eprintf "A LA FIN pos=~S vector=~S\n" pos (vector-length vect))
       vect)))
 
@@ -366,10 +368,10 @@
 ;;
 ;;(define (display-code c)
 ;;  (for-each (lambda (x)
-;;	      (if (integer? x)
-;;		  (format #t "L~A:" x)
-;;		  (format #t "\t~A\n" x)))
-;;	    c)
+;;            (if (integer? x)
+;;                (format #t "L~A:" x)
+;;                (format #t "\t~A\n" x)))
+;;          c)
 ;;  (newline))
 
 ;;;; ======================================================================
@@ -380,9 +382,9 @@
 (define (disassemble-code v out)
   (define (show x)
     (format #f "~A~A~A"
-	    (quotient x 100)
-	    (quotient (remainder x 100) 10)
-	    (remainder x 10)))
+            (quotient x 100)
+            (quotient (remainder x 100) 10)
+            (remainder x 10)))
 
   (define (show-dest mnemonic pos)
     (when (use-address? mnemonic)
@@ -391,28 +393,28 @@
   (let ((len (vector-length v)))
     (let Loop ((pos 0))
       (if (< pos len)
-	  ;; Disassemble an instruction
-	  (let* ((instr    (find-instruction-infos (vector-ref v pos)))
-		 (mnemonic (car instr))
-		 (params   (caddr instr)))
-	    (format out "\n~A:  ~A" (show pos) (pretty-mnemonic mnemonic))
-	    (case params
-	      ((0) (Loop (+ pos 1)))
-	      ((1) (format out " ~A"
-			   (vector-ref v (+ pos 1)))
-	           (show-dest  (vector-ref v pos) (+ pos 1))
-	           (Loop  (+ pos 2)))
-	      ((2) (format out " ~S ~S"
-			   (vector-ref v (+ pos 1))
-			   (vector-ref v (+ pos 2)))
-	           (show-dest (vector-ref v pos) (+ pos 1))
-	           (Loop  (+ pos 3)))
-	      (else (panic "cannot disassemble instruction (~S)" mnemonic))))
-	  ;; Last instruction
-	  (format out "\n~A:\n" (show pos))))))
+          ;; Disassemble an instruction
+          (let* ((instr    (find-instruction-infos (vector-ref v pos)))
+                 (mnemonic (car instr))
+                 (params   (caddr instr)))
+            (format out "\n~A:  ~A" (show pos) (pretty-mnemonic mnemonic))
+            (case params
+              ((0) (Loop (+ pos 1)))
+              ((1) (format out " ~A"
+                           (vector-ref v (+ pos 1)))
+                   (show-dest  (vector-ref v pos) (+ pos 1))
+                   (Loop  (+ pos 2)))
+              ((2) (format out " ~S ~S"
+                           (vector-ref v (+ pos 1))
+                           (vector-ref v (+ pos 2)))
+                   (show-dest (vector-ref v pos) (+ pos 1))
+                   (Loop  (+ pos 3)))
+              (else (panic "cannot disassemble instruction (~S)" mnemonic))))
+          ;; Last instruction
+          (format out "\n~A:\n" (show pos))))))
 
 (define (disassemble proc)
   (let ((code (%procedure-code proc)))
     (if code
-	(disassemble-code code (current-output-port))
-	(error 'disassemble "cannot disassemble ~S" proc))))
+        (disassemble-code code (current-output-port))
+        (error 'disassemble "cannot disassemble ~S" proc))))

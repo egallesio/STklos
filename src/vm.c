@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 26-Mar-2018 09:31 (eg)
+ * Last file update: 29-Jun-2018 17:09 (eg)
  */
 
 // INLINER values
@@ -902,7 +902,7 @@ static void run_vm(vm_thread_t *vm)
 {
   jbuf jb;
   jbuf *old_jb = NULL;          /* to make Gcc happy */
-  short offset, nargs=0;
+  int offset, nargs=0;
   short tailp;
   int have_global_lock = 0;     /* if true, we're patching the code */
 #if defined(USE_COMPUTED_GOTO)
@@ -1426,7 +1426,9 @@ CASE(ENTER_TAIL_LET) {
 
 
 CASE(PUSH_HANDLER) {
-  int offset = fetch_next();
+  offset = fetch_next();
+
+do_push_handler:
 
   /* place the value in val on the stack as well as the value of handlers */
   if (STk_procedurep(vm->val) == STk_false)
@@ -1444,6 +1446,11 @@ CASE(PUSH_HANDLER) {
     SAVE_HANDLER_STATE(vm->val, vm->pc+offset);
   }
   NEXT;
+}
+
+CASE(PUSH_HANDLER_FAR) {
+  offset = INT_VAL(fetch_const());   // Read a FAR offset in constants */
+  goto do_push_handler;
 }
 
 CASE(POP_HANDLER) {
