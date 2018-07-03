@@ -1,7 +1,7 @@
-/*							-*- coding: utf-8 -*-
- * m i s c . c		-- Misc. functions
+/*                                                      -*- coding: utf-8 -*-
+ * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 28-Aug-2011 18:18 (eg)
+ * Last file update:  3-Jul-2018 18:22 (eg)
  */
 
 #include "stklos.h"
@@ -73,9 +73,9 @@ void STk_add_primitive_in_module(struct primitive_obj *o, SCM module)
 SCM STk_eval_C_string(char *str, SCM module)
 {
   SCM ref, eval = STk_lookup(STk_intern("eval-from-string"),
-			     module,
-			     &ref,
-			     TRUE);
+                             module,
+                             &ref,
+                             TRUE);
   return STk_C_apply(eval, 2, STk_Cstring2string(str), module);
 }
 
@@ -103,6 +103,11 @@ doc>
 DEFINE_PRIMITIVE("version", version, subr0, (void))
 {
   return STk_Cstring2string(VERSION);
+}
+
+DEFINE_PRIMITIVE("%push-id", push_id, subr0, (void))
+{
+  return STk_Cstring2string(GIT_PUSH_ID);
 }
 
 
@@ -176,7 +181,7 @@ DEFINE_PRIMITIVE("gc", scheme_gc, subr0, (void))
 
 /*===========================================================================*\
  *
- * 			Argument parsing
+ *                      Argument parsing
  *
 \*===========================================================================*/
 static int Argc;
@@ -191,8 +196,8 @@ DEFINE_PRIMITIVE("%initialize-getopt", init_getopt, subr3, (SCM argv, SCM s, SCM
 
   STk_start_getopt_from_scheme();
   optind = 1;    /* Initialize optind, since it has already be used
-		  * by ouserlves  before initializing the VM.
-		  */
+                  * by ouserlves  before initializing the VM.
+                  */
 
   /*
    * Argv processing
@@ -230,7 +235,7 @@ DEFINE_PRIMITIVE("%initialize-getopt", init_getopt, subr3, (SCM argv, SCM s, SCM
 
     long_options[i].name    = STRING_CHARS(CAR(VECTOR_DATA(v)[i]));
     long_options[i].has_arg = (CDR(VECTOR_DATA(v)[i]) == STk_false) ? no_argument
-      							        : required_argument;
+                                                                : required_argument;
     long_options[i].flag    = 0;
     long_options[i].val     = 0;
   }
@@ -250,31 +255,31 @@ DEFINE_PRIMITIVE("%getopt", getopt, subr0, (void))
   switch (n) {
     case -1:
       {
-	/* We are at the end. Collect all the remaining parameters in a list */
-	SCM l = STk_nil;
-	while (optind < Argc)
-	  l = STk_cons(STk_Cstring2string(Argv[optind++]), l);
+        /* We are at the end. Collect all the remaining parameters in a list */
+        SCM l = STk_nil;
+        while (optind < Argc)
+          l = STk_cons(STk_Cstring2string(Argv[optind++]), l);
 
-	return STk_cons(MAKE_INT((long) -1), STk_dreverse(l));
+        return STk_cons(MAKE_INT((long) -1), STk_dreverse(l));
       }
     case '?': /* Error or argument missing */
     case ':': return STk_false;
     case 0  : /* Long option */
       {
-	SCM str = (optarg)? STk_Cstring2string(optarg): STk_void;
-	return STk_cons(MAKE_INT(longindex),str);
+        SCM str = (optarg)? STk_Cstring2string(optarg): STk_void;
+        return STk_cons(MAKE_INT(longindex),str);
       }
     default: /* short option */
       {
-	SCM str = (optarg)? STk_Cstring2string(optarg): STk_void;
-	return STk_cons(MAKE_CHARACTER(n),  str);
+        SCM str = (optarg)? STk_Cstring2string(optarg): STk_void;
+        return STk_cons(MAKE_CHARACTER(n),  str);
       }
   }
 }
 
 /*===========================================================================*\
  *
- * 			HTML stuff
+ *                      HTML stuff
  *
 \*===========================================================================*/
 
@@ -336,11 +341,11 @@ DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
   scheme = file = STk_Cstring2string("file");
   url    = STRING_CHARS(url_str);
 
-  if (!strstr(url,"://")) {			/* No :// => this is a file */
+  if (!strstr(url,"://")) {                     /* No :// => this is a file */
     port   = MAKE_INT(0);
     path   = url_str;
     host = query = fragment = user = STk_Cstring2string("");
-  } else {					/* general URI */
+  } else {                                      /* general URI */
     char *start;
     /* Scheme */
     for (start = url; *url && *url != ':'; url++) {
@@ -382,7 +387,7 @@ DEFINE_PRIMITIVE("uri-parse", uri_parse, subr1, (SCM url_str))
       tmp  = STk_makestring(url-start, start);
       port = STk_Cstr2number(STRING_CHARS(tmp), 10);
       if (port == STk_false)
-	STk_error("bad port number in URL ~S", url_str);
+        STk_error("bad port number in URL ~S", url_str);
     } else {
       char *scm = STRING_CHARS(scheme);
 
@@ -477,23 +482,23 @@ DEFINE_PRIMITIVE("string->html", str2html, subr1, (SCM str))
     for (s = STRING_CHARS(str); len--; s++) {
       switch (*s) {
       case '\'':
-	d[0]='&'; d[1]='q'; d[2]='u'; d[3]='o'; d[4]='t'; d[5]=';';
-	d += 6;
-	break;
+        d[0]='&'; d[1]='q'; d[2]='u'; d[3]='o'; d[4]='t'; d[5]=';';
+        d += 6;
+        break;
       case '<':
-	d[0]='&'; d[1]='l'; d[2]='t'; d[3]=';';
-	d += 4;
-	break;
+        d[0]='&'; d[1]='l'; d[2]='t'; d[3]=';';
+        d += 4;
+        break;
       case '>':
-	d[0]='&'; d[1]='g'; d[2]='t'; d[3]=';';
-	d += 4;
-	break;
+        d[0]='&'; d[1]='g'; d[2]='t'; d[3]=';';
+        d += 4;
+        break;
       case '&':
-	d[0]='&'; d[1]='a'; d[2]='m'; d[3]='p'; d[4]=';';
-	d += 5;
-	break;
+        d[0]='&'; d[1]='a'; d[2]='m'; d[3]='p'; d[4]=';';
+        d += 5;
+        break;
       default:
-	*d++ = *s;
+        *d++ = *s;
       }
     }
 
@@ -526,7 +531,7 @@ DEFINE_PRIMITIVE("get-password", getpass, subr0, (void))
 
 /*===========================================================================*\
  *
- * 			Debugging Code
+ *                      Debugging Code
  *
 \*===========================================================================*/
 #ifdef STK_DEBUG
@@ -563,12 +568,13 @@ DEFINE_PRIMITIVE("%c-backtrace", c_backtrace, subr0, (void))
 
 /*===========================================================================*\
  *
- * 				Initialization
+ *                              Initialization
  *
 \*===========================================================================*/
 int STk_init_misc(void)
 {
   ADD_PRIMITIVE(version);
+  ADD_PRIMITIVE(push_id);
   ADD_PRIMITIVE(scheme_void);
   ADD_PRIMITIVE(address_of);
   ADD_PRIMITIVE(scheme_gc);
@@ -587,4 +593,3 @@ int STk_init_misc(void)
 #endif
   return TRUE;
 }
-

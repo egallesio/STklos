@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update: 26-Mar-2018 10:09 (eg)
+;;;; Last file update:  3-Jul-2018 18:25 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -239,7 +239,7 @@ doc>
   ;; Initialize signals suitable for  a REPL session (e.g.be immune to ^C)
   (%initialize-signals)
   (when interactive?
-    (let ((line1 (format "STklos version ~A\n" (version)))
+    (let ((line1 (format "STklos version ~A  (id=~A)\n" (version) (%push-id)))
           (line2 "Copyright (C) 1999-2018 Erick Gallesio <eg@unice.fr>\n")
           (line3 "Université Nice Sophia Antipolis - UCA\n")
           (line4 (format "[~a/~a/~a/~a]\n"
