@@ -21,8 +21,28 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 29-Jun-2018 12:19 (eg)
+;;;; Last file update:  3-Jul-2018 15:23 (eg)
 ;;;;
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.3 Booleans
+;;;; ----------------------------------------------------------------------
+
+#|
+<doc boolean=?
+ * (boolean=? boolean1 boolean2  ...)
+ *
+ * Returns #t if all the arguments are booleans and all are #t or all are #f.
+ *
+doc>
+|#
+(define (boolean=? e1 . rest)
+  (letrec ((verify (lambda (val lst)
+                  (or (null? lst)
+                     (and (boolean? (car lst))
+                        (eq? (car lst) val)
+                        (verify val (cdr lst)))))))
+    (verify e1 rest)))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.4 Pairs and lists

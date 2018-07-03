@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 20-Apr-2018 17:35 (eg)
+;; Last file update:  3-Jul-2018 15:33 (eg)
 ;;
 ;; ======================================================================
 
@@ -177,10 +177,17 @@ EOF])
 ;; Subsection "Other Notations"
 ;; ----------------------------------------------------------------------
 (subsection :title "Other Notations"
+(index "#t")
+(index "#f")
+(index "#true")
+(index "#false")
 
    (p [,(stk) accepts all the notations defined in ,(rfive) plus])
 
    (itemize
+      (item [,(code "#true") and ,(code "#false") are other names for
+the constants ,(code "#t") and ,(code "#f") as proposed by ,(rseven).])
+      
       (item [,(q (code "[]")) Brackets are equivalent to
 parentheses. They are used for grouping and to build lists. A
 list opened with a left square bracket must be closed with a

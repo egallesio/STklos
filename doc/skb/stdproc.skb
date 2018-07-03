@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 28-Jun-2018 10:47 (eg)
+;; Last file update:  3-Jul-2018 15:30 (eg)
 ;;
 ;; ======================================================================
 
@@ -124,7 +124,8 @@ vectors, and procedures, count as true.])
 quoted in programs.])
 
 (insertdoc 'not)
-(insertdoc 'boolean?))
+(insertdoc 'boolean?)
+(insertdoc 'boolean=?))
 
 ;;;
 ;;; PAIRS AND LISTS
@@ -155,6 +156,7 @@ quoted in programs.])
 (insertdoc 'list-tail)
 (insertdoc 'last-pair)
 (insertdoc 'list-ref)
+(insertdoc 'list-set!)
 (insertdoc 'member)
 (insertdoc 'assoc)
 (insertdoc 'copy-tree)

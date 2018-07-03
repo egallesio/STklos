@@ -20,12 +20,13 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 12-Jun-2018 09:26 (eg)
+ * Last file update:  2-Jul-2018 16:32 (eg)
  *
  */
 
 #include <ctype.h>
 #include "stklos.h"
+
 
 struct read_context {
   SCM cycles;
@@ -283,7 +284,15 @@ static SCM read_token(SCM port, int c, int case_significant)
     /* It is not a number */
     switch (*tok) {
       case ':': return STk_makekey(tok);
-      case '#': if (strcasecmp(tok+1, "eof") == 0)
+      case '#': if (len == 2) {
+                  if (tok[1] == 't') return STk_true;
+                  if (tok[1] == 'f') return STk_false;
+                }
+                if (strcasecmp(tok+1, "true") == 0)
+                  return STk_true;
+                else if (strcasecmp(tok+1, "false") == 0)
+                  return STk_false;
+                else if (strcasecmp(tok+1, "eof") == 0)
                   return STk_eof;
                 else if (strcasecmp(tok+1, "void") == 0)
                   return STk_void;
@@ -443,7 +452,7 @@ static SCM read_cycle(SCM port, int c, struct read_context *ctx)
                  * We call here the function find_inner_references to capture
                  * the reference which are in the second case.
                  *
-                 * At the end, of the entire read (and only at the end to 
+                 * At the end, of the entire read (and only at the end to
                  * avoid  a long time calculation, or even infinite loops),
                  * the function "patch_references" will correct all the
                  * remaining references that must be modified.
@@ -584,7 +593,8 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
   SCM v;
 
   len = read_word(port, c, tok, ctx->case_significant);
-  if (len == 1 && (*tok == 'F' || *tok == 'f')) {
+
+  if (strcasecmp(tok, "f") ==0 || strcasecmp(tok, "false") ==0) {
     /* This is the #f constant */
     return STk_false;
   } else {
@@ -668,13 +678,11 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         }
       case '#':
         switch(c=STk_getc(port)) {
-          case 't':
-          case 'T':  return STk_true;
-          case 'f':
-          case 'F':  if (STk_uvectors_allowed)
+          // FIXME:
+          case 'F' :
+          case 'f' : if (STk_uvectors_allowed)
                        return maybe_read_uniform_vector(port, c, ctx);
-                     else
-                       return STk_false;
+                     goto default_sharp;
           case '\\': return read_char(port, STk_getc(port));
           case '(' : return read_vector(port, ctx);
           case '!' : { /* This can be a comment, a DSSSL keyword, or fold-case */
@@ -758,7 +766,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
                          return read_here_string(port);
                        else  {
                          STk_ungetc(c2, port);
-                         goto unknown_sharp;
+                         goto default_sharp;
                        }
                     }
           case '&': return STk_make_box(read_rec(port, ctx, inlist));
@@ -771,7 +779,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
                       /* For R7RS #u8 is always valid (bytevectors) */
                       return maybe_read_uniform_vector(port, c, ctx);
                     else
-                      goto unknown_sharp;
+                      goto default_sharp;
          case ';': /* R6RS comments */
                    read_rec(port, ctx, FALSE);
                    c = flush_spaces(port, NULL, NULL);
@@ -793,8 +801,9 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           case '8':
           case '9': return read_cycle(port, c, ctx);
           default:
-        unknown_sharp:
-                    STk_ungetc(c, port); return read_token(port, '#', FALSE);
+            default_sharp:
+                    STk_ungetc(c, port);
+                    return read_token(port, '#', ctx->case_significant);
         }
       case ',': {
         SCM symb, tmp;
