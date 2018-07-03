@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 29-Jun-2018 12:26 (eg)
+ * Last file update:  3-Jul-2018 15:28 (eg)
  */
 
 #include <ctype.h>
@@ -750,7 +750,7 @@ DEFINE_PRIMITIVE("list->string", list2string, subr1, (SCM l))
  * between |start| and |stop|.
  *
  * ,@(bold "Note"): The R5RS version of |string-copy| accepts only one argument.
- doc>
+doc>
 */
 DEFINE_PRIMITIVE("string-copy", string_copy, vsubr, (int argc, SCM *argv))
 {
@@ -765,7 +765,7 @@ DEFINE_PRIMITIVE("string-copy", string_copy, vsubr, (int argc, SCM *argv))
 
 
 /*
-<doc EXT string-fill!
+<doc R7RS string-fill!
  * (string-fill! string char)
  * (string-fill! string char start)
  * (string-fill! string char start end)
