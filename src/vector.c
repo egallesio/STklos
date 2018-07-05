@@ -1,8 +1,8 @@
 /*
  *
- * v e c t o r . c 			-- vectors management
+ * v e c t o r . c                      -- vectors management
  *
- * Copyright © 1993-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??? 1993
- * Last file update:  5-Nov-2006 11:27 (eg)
+ * Last file update:  5-Jul-2018 17:20 (eg)
  */
 
 #include <string.h>
@@ -200,7 +200,7 @@ DEFINE_PRIMITIVE("vector-set!", vector_set, subr3, (SCM v, SCM index, SCM value)
 {
   long i = STk_integer_value(index);
 
-  if (!VECTORP(v)) 		    error_bad_vector(v);
+  if (!VECTORP(v))                  error_bad_vector(v);
   if (BOXED_INFO(v) & VECTOR_CONST) error_change_const_vector(v);
 
   if (i < 0 || i >= VECTOR_SIZE(v)) error_bad_index(index);
@@ -210,21 +210,27 @@ DEFINE_PRIMITIVE("vector-set!", vector_set, subr3, (SCM v, SCM index, SCM value)
 
 
 /*
-<doc  vector->list list->vector
+<doc R57RS vector->list list->vector
  * (vector->list vector)
+ * (vector->list vector start)
+ * (vector->list vector start end)
  * (list->vector list)
  *
  * |Vector->list| returns a newly allocated list of the objects contained in
- * the elements of |vector|. |List->vector| returns a newly created vector
- * initialized to the elements of the list |list|.
-
+ * the elements of |vector| between start an end. |List->vector| returns a
+ * newly created vector initialized to the elements of the list |list|.
  *
+ * In both procedures, order is preserved.
+ * 
  * @lisp
- * (vector->list '#(dah dah didah))  =>  (dah dah didah)
- * (list->vector '(dididit dah))     =>  #(dididit dah)
+ * (vector->list '#(dah dah didah))     =>  (dah dah didah)
+ * (vector->list '#(dah dah didah) 1 2) =>  (dah)
+ * (list->vector '(dididit dah))        =>  #(dididit dah)
  * @end lisp
 doc>
  */
+
+/* Following version implements only the R5RS version of vector->list (1 arg only) */
 DEFINE_PRIMITIVE("vector->list", vector2list, subr1, (SCM v))
 {
   int j, len;
@@ -274,7 +280,7 @@ DEFINE_PRIMITIVE("vector-fill!", vector_fill, subr2, (SCM v, SCM fill))
   int j, len;
   SCM *p;
 
-  if (!VECTORP(v)) 		    error_bad_vector(v);
+  if (!VECTORP(v))                  error_bad_vector(v);
   if (BOXED_INFO(v) & VECTOR_CONST) error_change_const_vector(v);
 
   for (j=0, len=VECTOR_SIZE(v), p=VECTOR_DATA(v); j < len; j++)
@@ -328,13 +334,13 @@ DEFINE_PRIMITIVE("vector-resize", vector_resize, subr23,(SCM vect,SCM size,SCM v
   SCM new, *p1, *p2;
   int i;
 
-  if (!VECTORP(vect)) 		       error_bad_vector(vect);
-  if (new_size<0)     		       STk_error("bad new size ~S", size);
+  if (!VECTORP(vect))                  error_bad_vector(vect);
+  if (new_size<0)                      STk_error("bad new size ~S", size);
 
   old_size = VECTOR_SIZE(vect);
   new      = STk_makevect(new_size, (SCM) NULL);
-  p1 	   = VECTOR_DATA(new);
-  p2	   = VECTOR_DATA(vect);
+  p1       = VECTOR_DATA(new);
+  p2       = VECTOR_DATA(vect);
 
   /* Copy the elements of the old vector in the new one */
   if (new_size < old_size) {
@@ -390,10 +396,10 @@ DEFINE_PRIMITIVE("sort", sort, subr2, (SCM obj, SCM test))
   register int i, j, incr, n;
   int list = 0;
 
-  if (NULLP(obj))        { return STk_nil; 			     }
+  if (NULLP(obj))        { return STk_nil;                           }
   else if (CONSP(obj))   { obj  = STk_list2vector(obj); list = 1;    }
-  else if (VECTORP(obj)) { obj  = STk_vector_copy(obj); 	     }
-  else 			 { STk_error("bad object to sort: ~S", obj); }
+  else if (VECTORP(obj)) { obj  = STk_vector_copy(obj);              }
+  else                   { STk_error("bad object to sort: ~S", obj); }
 
   /*
    * Use a shell sort. It has good performances on small arrays
@@ -407,13 +413,13 @@ DEFINE_PRIMITIVE("sort", sort, subr2, (SCM obj, SCM test))
   for (incr = n / 2; incr; incr /= 2) {
     for (i = incr; i < n; i++) {
       for (j = i-incr; j >= 0; j -= incr) {
-	if (STk_C_apply(test, 2, v[j], v[j+incr]) != STk_false)
-	  break;
-	else {
-	  SCM tmp   = v[j+incr];
-	  v[j+incr] = v[j];
-	  v[j]	    = tmp;
-	}
+        if (STk_C_apply(test, 2, v[j], v[j+incr]) != STk_false)
+          break;
+        else {
+          SCM tmp   = v[j+incr];
+          v[j+incr] = v[j];
+          v[j]      = tmp;
+        }
       }
     }
   }

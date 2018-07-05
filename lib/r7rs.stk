@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  5-Jul-2018 16:49 (eg)
+;;;; Last file update:  5-Jul-2018 17:34 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -213,6 +213,25 @@ doc>
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.8 Vectors
 ;;;; ----------------------------------------------------------------------
+
+;;
+;; Generalized string->list
+;;
+(let ((v->l vector->list)) ;; v->l is the R5RS function
+  (set! vector->list
+        (lambda (v :optional (start 0 start?) (end 0 end?))
+          (if start?
+              (let ((end (if end? end (vector-length v))))
+                (%claim-error
+                 'vector->list
+                 (do ((i (- end 1) (- i 1))
+                      (result '() (cons (vector-ref v i) result)))
+                     ((< i start) result))))
+              ;; R5RS function (without start or endà
+              (v->l v))))
+  (%set-procedure-name! vector->list 'vector->list))
+
+
 #|
 <doc R7RS vector->string string->vector
  * (vector->string string)

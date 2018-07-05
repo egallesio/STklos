@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  3-Jul-2018 15:28 (eg)
+ * Last file update:  5-Jul-2018 17:20 (eg)
  */
 
 #include <ctype.h>
@@ -689,6 +689,8 @@ DEFINE_PRIMITIVE("string-append", string_append, vsubr, (int argc, SCM* argv))
  * parameter.
 doc>
  */
+
+/* Following version implements only the R5RS version of string->list (1 arg only) */
 DEFINE_PRIMITIVE("string->list", string2list, subr1, (SCM str))
 {
   register char *s;
