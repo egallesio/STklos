@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  3-Jul-2018 15:23 (eg)
+;;;; Last file update:  5-Jul-2018 16:49 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -60,6 +60,26 @@ doc>
 |#
 (define (make-list k :optional (fill (void)))
   (vector->list (make-vector k fill)))
+
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.5 Symbols
+;;;; ----------------------------------------------------------------------
+#|
+<doc symbol=?
+ * (symbol=? symbol1 symbol2  ...)
+ *
+ * Returns #t if all the arguments are symbols and all have the same name in
+ * the sense of |string=?|.
+doc>
+|#
+(define (symbol=? e1 . rest)
+  (letrec ((verify (lambda (val lst)
+                  (or (null? lst)
+                     (and (symbol? (car lst))
+                        (eq? (car lst) val)
+                        (verify val (cdr lst)))))))
+    (verify e1 rest)))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.7 Strings

@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  3-Jul-2018 15:30 (eg)
+;; Last file update:  5-Jul-2018 16:50 (eg)
 ;;
 ;; ======================================================================
 
@@ -200,6 +200,7 @@ the identifier ,(symbol "lambda").])
 ])
 
 (insertdoc 'symbol?)
+(insertdoc 'symbol=?)
 (insertdoc 'symbol->string)
 (insertdoc 'string->symbol)
 (insertdoc 'string->uninterned-symbol)
