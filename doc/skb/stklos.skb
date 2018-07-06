@@ -1,6 +1,6 @@
 ;; ======================================================================
 ;;
-;; 			STklos Reference Manual
+;;                      STklos Reference Manual
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 14-Aug-2011 12:54 (eg)
+;; Last file update:  6-Jul-2018 18:57 (eg)
 ;;
 ;; ======================================================================
 
@@ -28,7 +28,7 @@
 
 ;; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-(define stklos-language stklos)		;; Save stklos which will be redefined
+(define stklos-language stklos)         ;; Save stklos which will be redefined
 
 (define (stklos)   (sc "STklos"))
 (define (stk)      (sc "STk"))
@@ -63,13 +63,13 @@
 ;;; Document
 ;;;
 (document :title [STklos Reference Manual]
-	  :subtitle [(version ,(begin *stklos-version*))]
-	  :author (author :name (font :size "+2" (bold "Erick Gallesio"))
-		     :affiliation "Université de Nice - Sophia Antipolis"
-		     :address (list "930 route des Colles, BP 145"
-				    "F-06903 Sophia Antipolis, Cedex"
-				    "France"
-				    *logo-for-tex*))
+          :subtitle [(version ,(begin *stklos-version*))]
+          :author (author :name (font :size "+2" (bold "Erick Gallesio"))
+                     :affiliation "Université de Nice - Sophia Antipolis"
+                     :address (list "930 route des Colles, BP 145"
+                                    "F-06903 Sophia Antipolis, Cedex"
+                                    "France"
+                                    *logo-for-tex*))
 
    (linebreak 3)
    [This document provides a complete list of procedures and special

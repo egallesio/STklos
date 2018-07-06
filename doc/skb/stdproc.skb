@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  6-Jul-2018 15:41 (eg)
+;; Last file update:  6-Jul-2018 19:22 (eg)
 ;;
 ;; ======================================================================
 
@@ -335,20 +335,26 @@ legibility.])))
 (index  "SRFI-13")
 (p [The following string primitives are compatible with ,(link-srfi 13)
 and their documentation comes from the SRFI document.])
-(p [,(bold "Note:") The string SRFI is supported by ,(stklos). The
-function listed below just don't need to load the full SRFI to be used])
+(p [,(bold "Notes:")
+    ,(itemize
+     (item [The string SRFI is supported by ,(stklos). The
+                function listed below just don't need to load the full SRFI to be
+                used])
+     (item [The functions ,(code "string-upcase"), ,(code "string-downcase") and
+                ,(code "string-foldcase") are also defined in ,(rseven).]))])
 
 (insertdoc 'string-downcase)
 (insertdoc 'string-downcase!)
 (insertdoc 'string-upcase)
 (insertdoc 'string-upcase!)
 (insertdoc 'string-titlecase)
-(insertdoc 'string-titlecase!))
+(insertdoc 'string-titlecase!)
 
 (p [The functions ,(tt "string-foldcase") and ,(tt "string-foldcase!") described
 below are inspired from R6RS.])
 (insertdoc 'string-foldcase)
 (insertdoc 'string-foldcase!)
+)
 
 
 ;;;
@@ -387,13 +393,15 @@ following: ,(fontified-code [#(0 (2 2 2 2) "Anna")])])
 (insertdoc 'vector-set!)
 (insertdoc 'list->vector)
 (insertdoc 'string->vector)
+
 (insertdoc 'vector-append)
 (insertdoc 'vector-fill!)
 (insertdoc 'vector-copy)
 (insertdoc 'vector-copy!)
 (insertdoc 'vector-resize)
 (insertdoc 'vector-mutable?)
-(insertdoc 'sort))
+(insertdoc 'sort)
+)
 
 
 ;;;
@@ -443,8 +451,18 @@ when the bytevector is created. The ,(emph "valid indexes") of a
 bytevector are the exact non-negative integers less than the length of
 the bytevector, starting at index zero as with vectors.])
 
+    (p [Bytevectors are written using the notation ,(code "#u8(byte ...").
+For example, a bytevector of length 3 containing the byte
+0 in element 0, the byte 10 in element 1, and the byte 5 in
+element 2 can be written as follows: ,(code "#u8(0 10 5)")])
+
+    (p [Bytevector constants are self-evaluating, so they do not
+need to be quoted in programs.])
+
+
 (insertdoc 'bytevector?)
 (insertdoc 'make-bytevector)
+(insertdoc 'bytevector)
 (insertdoc 'bytevector-length)
 (insertdoc 'bytevector-u8-ref)
 (insertdoc 'bytevector-u8-set!)
@@ -452,7 +470,7 @@ the bytevector, starting at index zero as with vectors.])
 (insertdoc 'bytevector-copy!)
 (insertdoc 'bytevector-copy-partial)
 (insertdoc 'bytevector-copy-partial!)
-   )
+)
 
 
 ;;;

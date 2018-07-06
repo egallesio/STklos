@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  5-Jul-2018 17:20 (eg)
+ * Last file update:  6-Jul-2018 19:38 (eg)
  */
 
 #include <ctype.h>
@@ -540,8 +540,8 @@ DEFINE_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM valu
  * characters in the same positions, otherwise returns |#f|. |String-ci=?|
  * treats upper and lower case letters as though they were the same character,
  * but |string=?| treats upper and lower case as distinct characters.
- *
- * ,@(bold "Note"): R5RS version of these functions accept only two arguments.
+ * @l
+ * ,(bold "Note"): R5RS version of these functions accept only two arguments.
 doc>
  */
 
@@ -562,8 +562,8 @@ doc>
  * characters. If two strings differ in length but are the same up to the
  * length of the shorter string, the shorter string is considered to be
  * lexicographically less than the longer string.
- *
- * ,@(bold "Note"): R5RS version of these functions accept only two arguments.
+ * @l
+ * ,(bold "Note"): R5RS version of these functions accept only two arguments.
 doc>
  */
 
@@ -685,7 +685,8 @@ DEFINE_PRIMITIVE("string-append", string_append, vsubr, (int argc, SCM* argv))
  * which must be a list of characters. |String->list| and
  * |list->string| are inverses so far as |equal?| is concerned.
  *
- * ,@("Note"): The R5RS version of |string->list| accepts only one
+ * @l
+ * ,(bold "Note"): The R5RS version of |string->list| accepts only one
  * parameter.
 doc>
  */
@@ -750,8 +751,8 @@ DEFINE_PRIMITIVE("list->string", list2string, subr1, (SCM l))
  *
  * Returns a newly allocated copy of the part of the given |string|
  * between |start| and |stop|.
- *
- * ,@(bold "Note"): The R5RS version of |string-copy| accepts only one argument.
+ * @l
+ * ,(bold "Note"): The R5RS version of |string-copy| accepts only one argument.
 doc>
 */
 DEFINE_PRIMITIVE("string-copy", string_copy, vsubr, (int argc, SCM *argv))
@@ -773,8 +774,8 @@ DEFINE_PRIMITIVE("string-copy", string_copy, vsubr, (int argc, SCM *argv))
  * (string-fill! string char start end)
  *
  * Stores |char| in every element of the given |string| between |start| and |end|.
- *
- * ,@(bold "Note"): The R5RS version of |string-fill!| accepts only one argument.
+ * @l
+ * ,(bold "Note"): The R5RS version of |string-fill!| accepts only one argument.
 doc>
 */
 DEFINE_PRIMITIVE("string-fill!", string_fill, subr2, (SCM str, SCM c))
@@ -968,7 +969,7 @@ DEFINE_PRIMITIVE("string-mutable?", string_mutable, subr1, (SCM obj))
 
 
 /*
-<doc EXT string-downcase
+<doc R7RS string-downcase
  * (string-downcase str)
  * (string-downcase str start)
  * (string-downcase str start end)
@@ -983,7 +984,7 @@ DEFINE_PRIMITIVE("string-mutable?", string_mutable, subr1, (SCM obj))
  * (string-downcase "Foo BAR" 4 6)    => "ba"
  * @end lisp
  *
- * ,@(bold "Note"): In R7RS, |string-downcase| accepts only one argument.
+ * ,(bold "Note"): In R7RS, |string-downcase| accepts only one argument.
 doc>
  */
 static SCM string_xxcase(int argc, SCM *argv, int (*toxx)(int),
@@ -1077,7 +1078,7 @@ DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
 }
 
 /*
-<doc EXT string-upcase
+<doc R7RS string-upcase
  * (string-upcase str)
  * (string-upcase str start)
  * (string-upcase str start end)
@@ -1086,8 +1087,8 @@ DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
  * |start| and |end| indices have been replaced by their upper case equivalent.
  * If |start| is omited, it defaults to 0. If |end| is omited, it defaults to
  * the length of |str|.
- *
- * ,@(bold "Note"): In R7RS, |string-upcase| accepts only one argument.
+ * @l
+ * ,(bold "Note"): In R7RS, |string-upcase| accepts only one argument.
 doc>
  */
 DEFINE_PRIMITIVE("string-upcase", string_upcase, vsubr, (int argc, SCM *argv))
@@ -1111,7 +1112,7 @@ DEFINE_PRIMITIVE("string-upcase!", string_dupcase, vsubr, (int argc, SCM *argv))
 
 
 /*
-<doc EXT string-foldcase
+<doc R7RS string-foldcase
  * (string-foldcase str)
  * (string-foldcase str start)
  * (string-foldcase str start end)
@@ -1120,8 +1121,8 @@ DEFINE_PRIMITIVE("string-upcase!", string_dupcase, vsubr, (int argc, SCM *argv))
  * been applied on |str| between the |start| and |end| indices.
  * If |start| is omited, it defaults to 0. If |end| is omited, it defaults to
  * the length of |str|.
- *
- * ,@(bold "Note"): In R7RS, |string-foldcase| accepts only one argument.
+ * @l
+ * ,(bold "Note"): In R7RS, |string-foldcase| accepts only one argument.
 doc>
  */
 DEFINE_PRIMITIVE("string-foldcase", string_foldcase, vsubr, (int argc, SCM *argv))

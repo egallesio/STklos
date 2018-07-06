@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??? 1993
- * Last file update:  6-Jul-2018 16:20 (eg)
+ * Last file update:  6-Jul-2018 19:39 (eg)
  */
 
 #include <string.h>
@@ -295,7 +295,7 @@ DEFINE_PRIMITIVE("vector-set!", vector_set, subr3, (SCM v, SCM index, SCM value)
  * (list->vector '(dididit dah))        =>  #(dididit dah)
  * @end lisp
  *
- *,@("Note"): The R5RS version of |vector->list| accepts only one
+ * ,(bold "Note"): The R5RS version of |vector->list| accepts only one
  * parameter.
 doc>
  */
@@ -415,8 +415,8 @@ DEFINE_PRIMITIVE("vector-append", vector_append, vsubr, (int argc, SCM *argv))
  * (vector-fill! vector fill start end)
  *
  * Stores |fill| in every element of |vector| between |start| and |end|.
- *
- * ,@("Note"): The R5RS version of |vector-fill!| accepts only one
+ * @l
+ * ,(bold "Note"): The R5RS version of |vector-fill!| accepts only one
  * parameter.
 doc>
  */
