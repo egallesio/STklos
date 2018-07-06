@@ -923,3 +923,7 @@ See SRFI document for more information.])
 (insertdoc 'base64-encode-string)
 (insertdoc 'base64-decode-string) )
 )
+
+;; Local Variables:
+;; mode: scheme
+;; End:

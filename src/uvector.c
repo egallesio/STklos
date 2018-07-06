@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update:  6-Jul-2018 17:46 (eg)
+ * Last file update:  6-Jul-2018 21:48 (eg)
  */
 
 #include "stklos.h"
@@ -69,6 +69,24 @@ static SCM u64_max, s64_min, s64_max;
  *
  */
 
+static char* type_vector(int tip)
+{
+  switch (tip) {
+    case UVECT_S8:  return "s8";
+    case UVECT_U8:  return "u8";
+    case UVECT_S16: return "s16";
+    case UVECT_U16: return "u16";
+    case UVECT_S32: return "s32";
+    case UVECT_U32: return "u32";
+    case UVECT_S64: return "s64";
+    case UVECT_U64: return "u64";
+    case UVECT_F32: return "f32";
+    case UVECT_F64: return "f64";
+    default:        return ""; /* never reached */
+  }
+}
+
+
 static void error_change_const_vector(SCM v)
 {
   STk_error("changing the constant vector ~s is not allowed", v);
@@ -77,6 +95,11 @@ static void error_change_const_vector(SCM v)
 static void error_bad_vector(SCM v)
 {
   STk_error("bad vector ~s", v);
+}
+
+static void error_bad_uvector(SCM v, int tip)
+{
+  STk_error("bad #%s vector ~s", type_vector(tip), v);
 }
 
 static void error_bad_index(SCM index)
@@ -99,23 +122,6 @@ static void error_bad_list(SCM l)
   STk_error("bad list ~s", l);
 }
 
-
-static char* type_vector(SCM vect)
-{
-  switch (UVECTOR_TYPE(vect)) {
-    case UVECT_S8:  return "s8";
-    case UVECT_U8:  return "u8";
-    case UVECT_S16: return "s16";
-    case UVECT_U16: return "u16";
-    case UVECT_S32: return "s32";
-    case UVECT_U32: return "u32";
-    case UVECT_S64: return "s64";
-    case UVECT_U64: return "u64";
-    case UVECT_F32: return "f32";
-    case UVECT_F64: return "f64";
-    default:        return ""; /* never reached */
-  }
-}
 
 static int vector_element_size(int type)
 {
@@ -250,7 +256,7 @@ static void uvector_set(int type, SCM v, long i, SCM value)
 
   /* If we arrive here we are sure that we have a value which is out of bounds */
   STk_error("value ~S is out of bounds or incorrect for a %svector",
-            value, type_vector(v));
+            value, type_vector(UVECTOR_TYPE(v)));
 }
 
 static SCM uvector_ref(int type, SCM v, long i)
@@ -363,7 +369,7 @@ DEFINE_PRIMITIVE("%uvector-length", uvector_length, subr2, (SCM type, SCM v))
   long tip = STk_integer_value(type);
 
   if (tip < UVECT_S8 || tip > UVECT_F64)        error_bad_uniform_type(type);
-  if (!UVECTORP(v) || (UVECTOR_TYPE(v) != tip)) error_bad_vector(v);
+  if (!UVECTORP(v) || (UVECTOR_TYPE(v) != tip)) error_bad_uvector(v, tip);
 
   return MAKE_INT(UVECTOR_SIZE(v));
 }
@@ -452,7 +458,7 @@ static void print_uvector(SCM vect, SCM port, int mode)
   int n = UVECTOR_SIZE(vect);
   int t = UVECTOR_TYPE(vect);
 
-  STk_fprintf(port, "#%s(", type_vector(vect));
+  STk_fprintf(port, "#%s(", type_vector(UVECTOR_TYPE(vect)));
   for (i = 0; i < n; i++) {
     STk_print(uvector_ref(t, vect, i), port, mode);
     if (i < n - 1) STk_putc(' ', port);
