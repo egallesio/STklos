@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 10-Apr-2018 16:38 (eg)
+ * Last file update:  6-Jul-2018 19:29 (eg)
  *
  */
 
@@ -617,7 +617,9 @@ DEFINE_PRIMITIVE("write-char", write_char, subr12, (SCM c, SCM port))
  * Writes the character of string |str| to the given |port| and
  * returns an unspecified value.  The |port| argument may be omitted,
  * in which case it defaults to the value returned by
- * |current-output-port|. ,(bold "Note:") This function is generally
+ * |current-output-port|. 
+ * @l
+ * ,(bold "Note:") This function is generally
  * faster than |display| for strings. Furthermore, this primitive does
  * not use the buffer associated to |port|.
  *

@@ -1,7 +1,7 @@
 /*
- * u v e c t o r . c			-- Uniform Vectors Implementation
+ * u v e c t o r . c                    -- Uniform Vectors Implementation
  *
- * Copyright © 2001-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2001-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,22 +21,22 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 19-Aug-2011 11:27 (eg)
+ * Last file update:  6-Jul-2018 17:46 (eg)
  */
 
 #include "stklos.h"
 
-#define UVECT_S8	0
-#define UVECT_U8	1
-#define UVECT_S16	2
-#define UVECT_U16	3
-#define UVECT_S32	4
-#define UVECT_U32	5
-#define UVECT_S64	6
-#define UVECT_U64	7
+#define UVECT_S8        0
+#define UVECT_U8        1
+#define UVECT_S16       2
+#define UVECT_U16       3
+#define UVECT_S32       4
+#define UVECT_U32       5
+#define UVECT_S64       6
+#define UVECT_U64       7
 
-#define UVECT_F32	8
-#define UVECT_F64	9
+#define UVECT_F32       8
+#define UVECT_F64       9
 
 /*
  * 64 bits values are always represeneted with bignums even on 64 bits machines
@@ -44,7 +44,7 @@
  */
 #define S64_MIN "-9223372036854775808"
 #define S64_MAX  "9223372036854775807"
-#define U64_MAX	"18446744073709551615"
+#define U64_MAX "18446744073709551615"
 
 
 struct uvector_obj {
@@ -57,9 +57,9 @@ struct uvector_obj {
 int STk_uvectors_allowed = 0;
 
 #define UVECTOR_TYPE(p) (((struct uvector_obj *) (p))->vect_type)
-#define UVECTOR_SIZE(p)	(((struct uvector_obj *) (p))->size)
+#define UVECTOR_SIZE(p) (((struct uvector_obj *) (p))->size)
 #define UVECTOR_DATA(p) (((struct uvector_obj *) (p))->data)
-#define UVECTORP(p)	(BOXED_TYPE_EQ((p), tc_uvector))
+#define UVECTORP(p)     (BOXED_TYPE_EQ((p), tc_uvector))
 
 static SCM u64_max, s64_min, s64_max;
 
@@ -132,8 +132,8 @@ static int vector_element_size(int type)
     case UVECT_S16: case UVECT_U16: return 2;
     case UVECT_S32: case UVECT_U32: return 4;
     case UVECT_S64: case UVECT_U64: return sizeof(SCM);
-    case UVECT_F32: 		    return 4;
-    case UVECT_F64: 		    return 8;
+    case UVECT_F32:                 return 4;
+    case UVECT_F64:                 return 8;
   }
   return 0; /* never reached */
 }
@@ -172,84 +172,85 @@ int STk_uvector_equal(SCM u1, SCM u2)
  */
 static void uvector_set(int type, SCM v, long i, SCM value)
 {
-  int vali, overflow;
+  long vali;
+  int overflow;
 
   /* First see if the value is correct for this type of vector */
   switch (UVECTOR_TYPE(v)) {
     case UVECT_S8:
-      vali = STk_integer_value(value); // FIXME : nocheck
+      vali = STk_integer_value(value);
       if (-128 <= vali && vali < +128) {
-	((char *) UVECTOR_DATA(v))[i] = (char) vali;
-	return;
+        ((char *) UVECTOR_DATA(v))[i] = (char) vali;
+        return;
       }
       break;
     case UVECT_U8:
-      vali = STk_integer_value(value); // FIXME : nocheck
+      vali = STk_integer_value(value);
       if (0 <= vali && vali < +256) {
-	((unsigned char *) UVECTOR_DATA(v))[i] = (unsigned char) vali;
-	return;
+        ((unsigned char *) UVECTOR_DATA(v))[i] = (unsigned char) vali;
+        return;
       }
       break;
     case UVECT_S16:
-      vali = STk_integer_value(value); // FIXME : nocheck
+      vali = STk_integer_value(value);
       if (-32768 <= vali && vali < +32768) {
-	((short *) UVECTOR_DATA(v))[i] = (short) vali;
-	return;
+        ((short *) UVECTOR_DATA(v))[i] = (short) vali;
+        return;
       }
       break;
     case UVECT_U16:
-      vali = STk_integer_value(value); // FIXME : nocheck
+      vali = STk_integer_value(value);
       if (0 <= vali && vali < 65536) {
-	((unsigned short *) UVECTOR_DATA(v))[i] = (unsigned short) vali;
-	return;
+        ((unsigned short *) UVECTOR_DATA(v))[i] = (unsigned short) vali;
+        return;
       }
       break;
 
     case UVECT_S32:
       vali = STk_integer2int32(value, &overflow);
       if (!overflow) {
-	((int *) UVECTOR_DATA(v))[i] = (int) vali;
-	return;
+        ((int *) UVECTOR_DATA(v))[i] = (int) vali;
+        return;
       }
       break;
     case UVECT_U32:
       vali = STk_integer2uint32(value, &overflow);
       if (!overflow) {
-	((unsigned int *) UVECTOR_DATA(v))[i] = (unsigned int) vali;
-	return;
+        ((unsigned int *) UVECTOR_DATA(v))[i] = (unsigned int) vali;
+        return;
       }
       break;
     case UVECT_S64:
       if (INTP(value) || BIGNUMP(value))
-	if (STk_numle2(MAKE_INT(0), value) && STk_numle2(value, u64_max)) {
-	  ((SCM *) UVECTOR_DATA(v))[i] = value;
-	  return;
-	}
+        if (STk_numle2(MAKE_INT(0), value) && STk_numle2(value, u64_max)) {
+          ((SCM *) UVECTOR_DATA(v))[i] = value;
+          return;
+        }
       break;
     case UVECT_U64:
       if (INTP(value) || BIGNUMP(value))
-	if (STk_numle2(s64_min, value) && STk_numle2(value, s64_max)) {
-	  ((SCM *) UVECTOR_DATA(v))[i] = value;
-	  return;
-	}
+        if (STk_numle2(s64_min, value) && STk_numle2(value, s64_max)) {
+          ((SCM *) UVECTOR_DATA(v))[i] = value;
+          return;
+        }
       break;
     case UVECT_F32:
       if (REALP(value)) {
-	((float *) UVECTOR_DATA(v))[i] = (float) REAL_VAL(value);
-	return;
+        ((float *) UVECTOR_DATA(v))[i] = (float) REAL_VAL(value);
+        return;
       }
       break;
     case UVECT_F64:
       if (REALP(value)) {
-	((double *) UVECTOR_DATA(v))[i] = (double) REAL_VAL(value);
-	return;
+        ((double *) UVECTOR_DATA(v))[i] = (double) REAL_VAL(value);
+        return;
       }
       break;
   }
 
   /* If we arrive here we are sure that we have a value which is out of bounds */
   STk_error("value ~S is out of bounds or incorrect for a %svector",
-	    value, type_vector(v));
+            value, type_vector(v));
 }
 
 static SCM uvector_ref(int type, SCM v, long i)
@@ -292,12 +293,12 @@ static SCM makeuvect(int type, int len, SCM init)
    * double IEEE-754 reals
    */
   switch (type) {
-    case UVECT_S8:  case UVECT_U8:  size = 1; 		break;
-    case UVECT_S16: case UVECT_U16: size = 2; 		break;
-    case UVECT_S32: case UVECT_U32: size = 4; 		break;
+    case UVECT_S8:  case UVECT_U8:  size = 1;           break;
+    case UVECT_S16: case UVECT_U16: size = 2;           break;
+    case UVECT_S32: case UVECT_U32: size = 4;           break;
     case UVECT_S64: case UVECT_U64: size = sizeof(SCM); break;
-    case UVECT_F32: 		    size = 4; 		break;
-    case UVECT_F64: 		    size = 8; 		break;
+    case UVECT_F32:                 size = 4;           break;
+    case UVECT_F64:                 size = 8;           break;
   }
   NEWCELL_WITH_LEN(z, uvector, sizeof(struct vector_obj) + size*len - 1);
   UVECTOR_TYPE(z) = type;
@@ -337,7 +338,7 @@ DEFINE_PRIMITIVE("%make-uvector", make_uvector, subr3,(SCM type, SCM len, SCM in
   long l   = STk_integer_value(len);
   long tip = STk_integer_value(type);
 
-  if (l < 0) 				 error_bad_length(len);
+  if (l < 0)                             error_bad_length(len);
   if (tip < UVECT_S8 || tip > UVECT_F64) error_bad_uniform_type(type);
 
   return makeuvect(tip, l, init);
@@ -380,15 +381,15 @@ DEFINE_PRIMITIVE("%uvector-ref", uvector_ref, subr3, (SCM type, SCM v, SCM index
 }
 
 DEFINE_PRIMITIVE("%uvector-set!", uvector_set, subr4,
-		 (SCM type, SCM v, SCM index, SCM value))
+                 (SCM type, SCM v, SCM index, SCM value))
 {
   long i   = STk_integer_value(index);
   long tip = STk_integer_value(type);
 
   if (!UVECTORP(v) || (UVECTOR_TYPE(v) != tip)) error_bad_vector(v);
-  if (tip < UVECT_S8 || tip > UVECT_F64) 	error_bad_uniform_type(type);
-  if (BOXED_INFO(v) & VECTOR_CONST) 		error_change_const_vector(v);
-  if (i < 0 || i >= UVECTOR_SIZE(v)) 		error_bad_index(index);
+  if (tip < UVECT_S8 || tip > UVECT_F64)        error_bad_uniform_type(type);
+  if (BOXED_INFO(v) & VECTOR_CONST)             error_change_const_vector(v);
+  if (i < 0 || i >= UVECTOR_SIZE(v))            error_bad_index(index);
 
   uvector_set(tip, v, i, value);
   return STk_void;
@@ -424,7 +425,6 @@ DEFINE_PRIMITIVE("%list->uvector", list_uvector, subr2, (SCM type, SCM l))
 
 DEFINE_PRIMITIVE("%allow-uvectors", allow_uvectors, subr0, (void))
 {
-  ADD_PRIMITIVE(uvector);
   ADD_PRIMITIVE(uvector_list);
   ADD_PRIMITIVE(list_uvector);
 
@@ -477,6 +477,7 @@ int STk_init_uniform_vector(void)
    * SRFI-4 is required
    */
   ADD_PRIMITIVE(make_uvector);
+  ADD_PRIMITIVE(uvector);
   ADD_PRIMITIVE(uvectorp);
   ADD_PRIMITIVE(uvector_length);
   ADD_PRIMITIVE(uvector_ref);

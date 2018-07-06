@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  6-Jul-2018 15:12 (eg)
+;;;; Last file update:  6-Jul-2018 19:11 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -298,10 +298,11 @@ doc>
  * initialized to the elements of |string| between |start| and |end|.
  *
  * In both procedures, order is preserved.
- * @lisp
- * (string->vector "ABC")          => #(#\A #\B #\C)
- * (vector->string #(#\1 #\2 #\3)  => "123"
  *
+ * @lisp
+ * (string->vector "ABC")           => #(#\A #\B #\C)
+ * (vector->string #(#\1 #\2 #\3))  => "123"
+ * @end lisp
 doc>
 |#
 (define (vector->string vect :optional (start 0) (end 0 end?))
@@ -339,14 +340,21 @@ doc>
 ;;;; ----------------------------------------------------------------------
 #|
 <doc R7RS make-bytevector
- * (make-bytevector)
+ * (make-bytevector k)
+ * (make-bytevector k byte)
  *
- * Returns a newly allocated bytevector of k bytes. The initial
- * contents of each element is 0.
+ * Returns a newly allocated bytevector of k bytes. If If |byte| is given,
+ * then all elements of the bytevector are initialized to |byte|, otherwise
+ * the contents of each element is 0.
+ * @lisp
+ * (make-bytevector 2 12) => #u8(12 12)
+ * (make-bytevector 3)    => #u8(0 0 0)
+ * @end lisp
 doc>
 |#
 (define (make-bytevector size :optional (default 0))
-  (%make-uvector 1 size default))
+  (%claim-error 'make-bytevector 
+                (%make-uvector 1 size default)))
 
 #|
 <doc R7RS bytevector?
@@ -367,6 +375,20 @@ doc>
 |#
 (define (bytevector-length bv)
   (%uvector-length 1 bv))
+
+#|
+<doc R7RS bytevector
+ * (bytevector byte ...)
+ *
+ * Returns a newly allocated bytevector containing its arguments.
+ * @lisp
+ * (bytevector 1 3 5 1 3 5)   => #u8(1 3 5 1 3 5)
+ * (bytevector)               => #u8()
+ * @end lisp
+doc>
+|#
+(define (bytevector . lst)
+  (%claim-error 'bytevector (%uvector 1 lst)))
 
 #|
 <doc R7RS bytevector-u8-ref

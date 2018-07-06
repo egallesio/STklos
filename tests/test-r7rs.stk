@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update:  6-Jul-2018 16:55 (eg)
+;;;; Last file update:  6-Jul-2018 19:50 (eg)
 ;;;;
 
 (require "test")
@@ -254,6 +254,28 @@
     (let ((vec (vector 1 2 3 4 5))) (vector-fill! vec 'x 2 6) vec))
 (test "vector-fill!.7" #(1 2 3 4 5)
     (let ((vec (vector 1 2 3 4 5))) (vector-fill! vec 'x 2 2) vec))
+
+;;------------------------------------------------------------------
+(test-subsection "Bytevectors")
+
+(test "bytevector?.1" #t (bytevector? #u8()))
+(test "bytevector?.2" #t (bytevector? #u8(0 1 2)))
+(test "bytevector?.3" #f (bytevector? #()))
+(test "bytevector?.4" #f (bytevector? #(0 1 2)))
+(test "bytevector?.5" #f (bytevector? '()))
+(test "bytevector?.6" #t (bytevector? (make-bytevector 0)))
+
+(test "make-bytevector.1" #u8(0 0 0) (make-bytevector 3))
+(test "make-bytevector.2" #u8(1 1 1) (make-bytevector 3 1))
+(test "make-bytevector.3" *test-failed* (make-bytevector 3 2000))
+(test "make-bytevector.3" *test-failed* (make-bytevector 3 #f))
+
+(test "bytevector.1" #u8(1 2 3) (bytevector 1 2 3))
+(test "bytevector.2" #u8() (bytevector))
+(test "bytevector.3" *test-failed* (bytevector 1 2 300))
+(test "bytevector.4" *test-failed* (bytevector 1 2 -1))
+(test "bytevector.5" *test-failed* (bytevector 1 2 'a))
+
 
 
 ;;------------------------------------------------------------------
