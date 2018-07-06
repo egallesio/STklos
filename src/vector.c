@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??? 1993
- * Last file update:  6-Jul-2018 15:39 (eg)
+ * Last file update:  6-Jul-2018 16:20 (eg)
  */
 
 #include <string.h>
@@ -59,18 +59,32 @@ static void error_bad_list(SCM l)
 }
 
 
-static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
+static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfill)
 {
   SCM v = NULL;
   long len, start=0, end=-1;
 
   /* Controling number of arguments */
-  switch (argc) {
-  case 1: v = argv[0]; break;
-  case 2: v = argv[0]; start = STk_integer_value(argv[-1]); break;
-  case 3: v = argv[0]; start = STk_integer_value(argv[-1]);
-          end = STk_integer_value(argv[-2]); break;
-  default: STk_error("incorrect number of arguments (%d)", argc);
+  if (!pfill) {
+    /* We do not have a fill parameter => vect at 0, start at -1 and end at -2 */
+    switch (argc) {
+      case 3: end   = STk_integer_value(argv[-2]);  /* no break */
+      case 2: start = STk_integer_value(argv[-1]);  /* no break */
+      case 1: v = argv[0]; break;
+      default: goto bad_number_of_args;
+    }
+  } else {
+    /* We have a fill param. => vect at 0, fill at -1, start at -2 and end at -3 */
+    switch (argc) {
+      case 4: end   = STk_integer_value(argv[-3]);  /* no break */
+      case 3: start = STk_integer_value(argv[-2]);  /* no break */
+      case 2: if (pfill) *pfill  = argv[-1];
+              v = argv[0];
+              break;
+      default:
+      bad_number_of_args:
+        STk_error("incorrect number of arguments (%d)", argc);
+    }
   }
 
   /* Controlling s */
@@ -80,7 +94,7 @@ static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
   /* Controlling start index */
   if (start == LONG_MIN || start < 0 || start > len)
     /* argc cannot be 1 (start would be 0) */
-    STk_error("bad starting index ~S", argv[-1]);
+    STk_error("bad starting index ~S", argv[pfill ? -2: -1]);
 
   /* Controlling end index */
   if (end == -1)
@@ -88,7 +102,7 @@ static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
   else
     if (end == LONG_MIN  || end < 0 || end > len)
       /* We have an end index ==> argc = 3 */
-      STk_error("bad ending index ~S", argv[-2]);
+      STk_error("bad ending index ~S", argv[pfill? -3: -2]);
 
   if (start > end)
     STk_error("low index is greater than high index");
@@ -349,10 +363,10 @@ doc>
  */
 DEFINE_PRIMITIVE("vector-copy", vector_copy, vsubr, (int argc, SCM *argv))
 {
-  int start, end, n;
+  long start, end, n;
   SCM z, vect;
 
-  vect = control_index(argc, argv, &start, &end);
+  vect = control_index(argc, argv, &start, &end, NULL);
   n = end-start;
   z = STk_makevect(n, (SCM) NULL);
   memcpy(VECTOR_DATA(z), VECTOR_DATA(vect)+start, n * sizeof(SCM));
@@ -395,23 +409,27 @@ DEFINE_PRIMITIVE("vector-append", vector_append, vsubr, (int argc, SCM *argv))
 }
 
 /*
-<doc  vector-fill!
+<doc R57RS vector-fill!
  * (vector-fill! vector fill)
+ * (vector-fill! vector fill start)
+ * (vector-fill! vector fill start end)
  *
- * Stores |fill| in every element of |vector|. The value returned by
- * |vector-fill!| is ,(emph "void").
+ * Stores |fill| in every element of |vector| between |start| and |end|.
+ *
+ * ,@("Note"): The R5RS version of |vector-fill!| accepts only one
+ * parameter.
 doc>
  */
-DEFINE_PRIMITIVE("vector-fill!", vector_fill, subr2, (SCM v, SCM fill))
+DEFINE_PRIMITIVE("vector-fill!", vector_fill,  vsubr, (int argc, SCM *argv))
 {
-  int j, len;
-  SCM *p;
+  SCM fill, v;
+  long start, end;
 
-  if (!VECTORP(v))                  error_bad_vector(v);
+  v = control_index(argc, argv, &start, &end, &fill);
   if (BOXED_INFO(v) & VECTOR_CONST) error_change_const_vector(v);
 
-  for (j=0, len=VECTOR_SIZE(v), p=VECTOR_DATA(v); j < len; j++)
-    *p++ = fill;
+  while (start < end)
+    VECTOR_DATA(v)[start++]= fill;
 
   return STk_void;
 }
