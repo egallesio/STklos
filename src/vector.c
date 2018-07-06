@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??? 1993
- * Last file update:  5-Jul-2018 17:20 (eg)
+ * Last file update:  6-Jul-2018 08:45 (eg)
  */
 
 #include <string.h>
@@ -58,6 +58,59 @@ static void error_bad_list(SCM l)
   STk_error("bad list ~s", l);
 }
 
+
+static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
+{
+  SCM v = NULL;
+  long len, start=0, end=-1;
+
+  /* Controling number of arguments */
+  switch (argc) {
+  case 1: v = argv[0]; break;
+  case 2: v = argv[0]; start = STk_integer_value(argv[-1]); break;
+  case 3: v = argv[0]; start = STk_integer_value(argv[-1]);
+          end = STk_integer_value(argv[-2]); break;
+  default: STk_error("incorrect number of arguments (%d)", argc);
+  }
+
+  /* Controlling s */
+  if (!VECTORP(v)) error_bad_vector(v);
+  len = VECTOR_SIZE(v);
+
+  /* Controlling start index */
+  if (start == LONG_MIN || start < 0 || start > len)
+    /* argc cannot be 1 (start would be 0) */
+    STk_error("bad starting index ~S", argv[-1]);
+
+  /* Controlling end index */
+  if (end == -1)
+    end = len;
+  else
+    if (end == LONG_MIN  || end < 0 || end > len)
+      /* We have an end index ==> argc = 3 */
+      STk_error("bad ending index ~S", argv[-2]);
+
+  if (start > end)
+    STk_error("low index is greater than high index");
+
+  /* everything is correct, return values */
+  *pstart = start;
+  *pend   = end;
+  return v;
+}
+
+static SCM r5rs_vector_copy(SCM vect)
+{
+  SCM z;
+  int n;
+
+  if (!VECTORP(vect)) error_bad_vector(vect);
+
+  n = VECTOR_SIZE(vect);
+  z = STk_makevect(n, (SCM) NULL);
+  memcpy(VECTOR_DATA(z), VECTOR_DATA(vect), n * sizeof(SCM));
+  return z;
+}
 
 
 SCM STk_makevect(int len, SCM init)
@@ -221,12 +274,15 @@ DEFINE_PRIMITIVE("vector-set!", vector_set, subr3, (SCM v, SCM index, SCM value)
  * newly created vector initialized to the elements of the list |list|.
  *
  * In both procedures, order is preserved.
- * 
+ *
  * @lisp
  * (vector->list '#(dah dah didah))     =>  (dah dah didah)
  * (vector->list '#(dah dah didah) 1 2) =>  (dah)
  * (list->vector '(dididit dah))        =>  #(dididit dah)
  * @end lisp
+ *
+ *,@("Note"): The R5RS version of |vector->list| accepts only one
+ * parameter.
 doc>
  */
 
@@ -267,6 +323,42 @@ DEFINE_PRIMITIVE("list->vector", list2vector, subr1, (SCM l))
 }
 
 
+
+/*
+<doc R57RS vector-copy
+ * (vector-copy v)
+ * (vector-copy string start)
+ * (vector-copy string start stop)
+ *
+ * Return a newly allocated copy of the elements of the given
+ * vector between |start| and |end| . The elements of the new
+ * vector are the same (in the sense of eqv?) as the elements
+ * of the old.
+ *
+ * Note that, if |v| is a constant vector, its copy is not constant.
+ *
+ * @lisp
+ * (define a #(1 8 2 8))         ; a is immutable
+ * (define b (vector-copy a))    ; b is mutable
+ * (vector-set! b 0 3)
+ * b                            => #(3 8 2 8)
+ * (define c (vector-copy b 1 3))
+ * c                            => #(8 2)
+ * @end lisp
+doc>
+ */
+DEFINE_PRIMITIVE("vector-copy", vector_copy, vsubr, (int argc, SCM *argv))
+{
+  int start, end, n;
+  SCM z, vect;
+
+  vect = control_index(argc, argv, &start, &end);
+  n = end-start;
+  z = STk_makevect(n, (SCM) NULL);
+  memcpy(VECTOR_DATA(z), VECTOR_DATA(vect)+start, n * sizeof(SCM));
+  return z;
+}
+
 /*
 <doc  vector-fill!
  * (vector-fill! vector fill)
@@ -296,26 +388,6 @@ DEFINE_PRIMITIVE("vector-fill!", vector_fill, subr2, (SCM v, SCM fill))
  *
  */
 
-/*
-<doc EXT vector-copy
- * (vector-copy v)
- *
- * Return a copy of vector |v|. Note that, if |v| is a constant vector,
- * its copy is not constant.
-doc>
- */
-DEFINE_PRIMITIVE("vector-copy", vector_copy, subr1, (SCM vect))
-{
-  SCM z;
-  int n;
-
-  if (!VECTORP(vect)) error_bad_vector(vect);
-
-  n = VECTOR_SIZE(vect);
-  z = STk_makevect(n, (SCM) NULL);
-  memcpy(VECTOR_DATA(z), VECTOR_DATA(vect), n * sizeof(SCM));
-  return z;
-}
 
 /*
 <doc EXT vector-resize
@@ -398,7 +470,7 @@ DEFINE_PRIMITIVE("sort", sort, subr2, (SCM obj, SCM test))
 
   if (NULLP(obj))        { return STk_nil;                           }
   else if (CONSP(obj))   { obj  = STk_list2vector(obj); list = 1;    }
-  else if (VECTORP(obj)) { obj  = STk_vector_copy(obj);              }
+  else if (VECTORP(obj)) { obj  = r5rs_vector_copy(obj);             }
   else                   { STk_error("bad object to sort: ~S", obj); }
 
   /*

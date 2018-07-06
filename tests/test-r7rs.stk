@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update:  5-Jul-2018 17:41 (eg)
+;;;; Last file update:  6-Jul-2018 09:16 (eg)
 ;;;;
 
 (require "test")
@@ -178,7 +178,49 @@
 (test "Extended vector->list.3" '(1 2)          (vector->list '#(1 2 3) 0 2))
 (test "Extended vector->list.4" *test-failed*   (vector->list '#(1 2 3) 0 7))
 
+(let ((v #(a b c d e f)))
+  (test "Extended vector-copy.1" #(a b c d e f) (vector-copy v))
+  (test "Extended vector-copy.2" #(c d e f)     (vector-copy v 2))
+  (test "Extended vector-copy.3" #(c d e)       (vector-copy v 2 5))
+  (test "Extended vector-copy.4" *test-failed*  (vector-copy v 2 100)))
 
+(let ((vect #(a b c d e f)))
+  (test "vector-copy!.1"
+        #(a b c 1 2 f)
+        (let ((v (vector-copy vect))) (vector-copy! v 3 #(1 2)) v))
+  (test "vector-copy!.2"
+        *test-failed*
+        (let ((v (vector-copy vect))) (vector-copy! v 5 #(1 2)) v))
+  (test "vector-copy!.3"
+        #(a 2 3 d e f)
+        (let ((v (vector-copy vect))) (vector-copy! v 1 #(1 2 3)  1) v))
+  (test "vector-copy!.4"
+        #(a 2 3 d e f)
+        (let ((v (vector-copy vect))) (vector-copy! v 1 #(1 2 3) 1) v))
+  (test "vector-copy!.5"
+        #(a 3 c d e f)
+        (let ((v (vector-copy vect))) (vector-copy! v 1 #(1 2 3) 2) v))
+  (test "vector-copy!.6"
+        #(a b c d e f)
+        (let ((v (vector-copy vect))) (vector-copy! v 1 #(1 2 3) 3) v))
+  (test "vector-copy!.7"
+        #(a 1 2 d e f)
+        (let ((v (vector-copy vect))) (vector-copy! v 1 #(1 2 3) 0 2) v))
+  (test "vector-copy!.8"
+        #(a 1 2 3 e f)
+        (let ((v (vector-copy vect))) (vector-copy! v 1 #(1 2 3) 0 3) v))
+  (test "vector-copy!.9"
+        *test-failed*
+        (let ((v (vector-copy vect))) (vector-copy! v 1 #(1 2 3) 0 4) v))
+
+  (test "vector-copy!overlap.1"
+        #(a b a b c f g)
+        (let ((v (vector 'a 'b 'c 'd 'e 'f 'g)))
+          (vector-copy! v 2 v 0 3) v))
+  (test "vector-copy!overlap.2"
+        #(e f c d e f g)
+        (let ((v (vector 'a 'b 'c 'd 'e 'f 'g)))
+          (vector-copy! v 0 v 4 6) v)))
 
 ;;------------------------------------------------------------------
 (test-subsection "Lists and Pairs")

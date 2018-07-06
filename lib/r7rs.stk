@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  5-Jul-2018 17:34 (eg)
+;;;; Last file update:  6-Jul-2018 08:56 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -230,6 +230,54 @@ doc>
               ;; R5RS function (without start or endà
               (v->l v))))
   (%set-procedure-name! vector->list 'vector->list))
+
+
+
+#|
+<doc R7RS vector-copy!
+ * (vector-copy! to at from)
+ * (vector-copy! to at from start)
+ * (vector-copy! to at from start end)
+ *
+doc>
+|#
+(define (vector-copy! to at from :optional (start 0 start?) (end 0 end?))
+  (define (err . l)
+    (apply error 'vector-copy! l))
+
+  (define (%vector-copy! to tstart from fstart fend)
+    (if (> fstart tstart)
+        (do ((i fstart (+ i 1))
+             (j tstart (+ j 1)))
+            ((>= i fend))
+          (vector-set! to j (vector-ref from i)))
+
+        (do ((i (- fend 1)                    (- i 1))
+             (j (+ -1 tstart (- fend fstart)) (- j 1)))
+            ((< i fstart))
+          (vector-set! to j (vector-ref from i)))))
+
+  ;; body starts here
+  (unless (vector? to)   (err "bad vector ~S" to))
+  (unless (vector? from) (err "bad vector ~S" from))
+  (let ((length-from (vector-length from))
+        (length-to   (vector-length to)))
+    (unless (and (integer? at) (>= at 0) (< at length-to))
+      (err "bad destination index ~S" at))
+    (when start?
+      (unless (and (integer? start) (>= start 0) (<= start length-from))
+        (err "bad integer for start index ~S" start)))
+    (if end?
+        (unless (and (integer? end) (>= end 0) (<= end length-from))
+          (err "bad integer for end index ~S" end))
+        (set! end (vector-length from)))
+    (when (< (- length-to at) (- end start))
+      (err "not enough room in destination vector ~S" to))
+
+    ;; do the copy
+    (%claim-error 'vector-copy!
+                  (%vector-copy! to at from start end))))
+
 
 
 #|
