@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  6-Jul-2018 08:56 (eg)
+;;;; Last file update:  6-Jul-2018 15:12 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -283,27 +283,56 @@ doc>
 #|
 <doc R7RS vector->string string->vector
  * (vector->string string)
+ * (vector->string string start)
+ * (vector->string string start end)
  * (string->vector vector)
+ * (string->vector vector start)
+ * (string->vector vector start end)
  *
- * |Vector->string| returns a newly allocated string of the
- * objects contained in the elements of |vector|, which must
- * be characters allowed in a string. |String->vector| returns
- * a newly created vector initialized to the elements of the
- * string |string|.
+ * The |vector->string| procedure returns a newly allocated
+ * string of the objects contained in the elements of |vector|
+ * between |start| and |end|. It is an error if any element of |vector|
+ * between |start| and |end| is not a character.
+ *
+ * The |string->vector| procedure returns a newly created vector
+ * initialized to the elements of |string| between |start| and |end|.
+ *
+ * In both procedures, order is preserved.
+ * @lisp
+ * (string->vector "ABC")          => #(#\A #\B #\C)
+ * (vector->string #(#\1 #\2 #\3)  => "123"
+ *
 doc>
 |#
-(define (vector->string v)
-  (unless (vector? v)
-    (error "bad vector ~S" v))
-  (let ((l (vector->list v)))
-    (unless (every char? l)
-      (error "all elements of the vector ~S must be characters" v))
-    (list->string l)))
+(define (vector->string vect :optional (start 0) (end 0 end?))
+  (unless (vector? vect)    (error "bad vector ~S" vect))
+  (unless end?              (set! end (vector-length vect)))
+  (%claim-error
+     'vector->string
+     (let loop ((res   (make-string (- end start)))
+                (i     0)
+                (start start))
+       (if (< start end)
+           (let ((c (vector-ref vect start)))
+             (unless (char? c)
+               (error "element at index ~S of ~S must be a character" start vect))
+             (string-set! res i c)
+             (loop res (+ i 1) (+ start 1)))
+           res))))
 
-(define (string->vector str)
-  (unless (string? str)
-    (error "bad string ~S" str))
-  (list->vector (string->list str)))
+(define (string->vector str :optional (start 0) (end 0 end?))
+  (unless (string? str)    (error "bad string ~S" str))
+  (unless end?             (set! end (string-length str)))
+  (%claim-error
+     'string->vector
+     (let loop ((res   (make-vector (- end start)))
+                (i     0)
+                (start start))
+       (if (< start end)
+           (begin
+             (vector-set! res i (string-ref str start))
+             (loop res (+ i 1) (+ start 1)))
+           res))))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.9 Bytevectors

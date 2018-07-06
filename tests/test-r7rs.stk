@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update:  6-Jul-2018 09:16 (eg)
+;;;; Last file update:  6-Jul-2018 15:17 (eg)
 ;;;;
 
 (require "test")
@@ -221,6 +221,16 @@
         #(e f c d e f g)
         (let ((v (vector 'a 'b 'c 'd 'e 'f 'g)))
           (vector-copy! v 0 v 4 6) v)))
+
+
+(test "vector->string.1" "" (vector->string #()))
+(test "vector->string.2" "123" (vector->string #(#\1 #\2 #\3)))
+(test "vector->string.3" "23" (vector->string #(#\1 #\2 #\3) 1))
+(test "vector->string.4" "2" (vector->string #(#\1 #\2 #\3) 1 2))
+(test "string->vector.1" #() (string->vector ""))
+(test "string->vector.2" #(#\A #\B #\C) (string->vector "ABC"))
+(test "string->vector.3" #(#\B #\C) (string->vector "ABC" 1))
+(test "string->vector.4" #(#\B) (string->vector "ABC" 1 2))
 
 ;;------------------------------------------------------------------
 (test-subsection "Lists and Pairs")
