@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  6-Jul-2018 08:57 (eg)
+;; Last file update:  6-Jul-2018 15:41 (eg)
 ;;
 ;; ======================================================================
 
@@ -387,6 +387,7 @@ following: ,(fontified-code [#(0 (2 2 2 2) "Anna")])])
 (insertdoc 'vector-set!)
 (insertdoc 'list->vector)
 (insertdoc 'string->vector)
+(insertdoc 'vector-append)
 (insertdoc 'vector-fill!)
 (insertdoc 'vector-copy)
 (insertdoc 'vector-copy!)

@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??? 1993
- * Last file update:  6-Jul-2018 08:45 (eg)
+ * Last file update:  6-Jul-2018 15:39 (eg)
  */
 
 #include <string.h>
@@ -359,6 +359,41 @@ DEFINE_PRIMITIVE("vector-copy", vector_copy, vsubr, (int argc, SCM *argv))
   return z;
 }
 
+
+/*
+<doc  vector-append
+ * (vector-append vector ...)
+ *
+ * Returns a newly allocated vector whose elements are the
+ * concatenation of the elements of the given vectors.
+ *
+ * @lisp
+ * (vector-append #(a b c) #(d e f)) => #(a b c d e f)
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("vector-append", vector_append, vsubr, (int argc, SCM *argv))
+{
+  int i, len = 0, start = 0;
+  SCM z;
+
+  /* compute length of final result */
+  for (i = 0; i < argc; i++) {
+    if (!VECTORP(argv[-i])) error_bad_vector(argv[-i]);
+    len += VECTOR_SIZE(argv[-i]);
+  }
+
+  /* copy vectors */
+  z = STk_makevect(len, (SCM) NULL);
+
+  for (i = 0; i < argc; i++) {
+    int sz = VECTOR_SIZE(argv[-i]);
+    memcpy(VECTOR_DATA(z+start), VECTOR_DATA(argv[-i]), sz * sizeof(SCM));
+    start += sz *sizeof(SCM);
+  }
+  return z;
+}
+
 /*
 <doc  vector-fill!
  * (vector-fill! vector fill)
@@ -538,6 +573,7 @@ int STk_init_vector(void)
   ADD_PRIMITIVE(vector_set);
   ADD_PRIMITIVE(vector2list);
   ADD_PRIMITIVE(list2vector);
+  ADD_PRIMITIVE(vector_append);
   ADD_PRIMITIVE(vector_fill);
 
   ADD_PRIMITIVE(vector_copy);
