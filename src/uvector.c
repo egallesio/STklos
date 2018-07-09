@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update:  6-Jul-2018 21:48 (eg)
+ * Last file update:  9-Jul-2018 19:34 (eg)
  */
 
 #include "stklos.h"
@@ -144,6 +144,60 @@ static int vector_element_size(int type)
   return 0; /* never reached */
 }
 
+
+static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfill)
+{
+  SCM v = NULL;
+  long len, start=0, end=-1;
+
+  /* Controling number of arguments */
+  if (!pfill) {
+    /* We do not have a fill parameter => vect at 0, start at -1 and end at -2 */
+    switch (argc) {
+      case 3: end   = STk_integer_value(argv[-2]);  /* no break */
+      case 2: start = STk_integer_value(argv[-1]);  /* no break */
+      case 1: v = argv[0]; break;
+      default: goto bad_number_of_args;
+    }
+  } else {
+    /* We have a fill param. => vect at 0, fill at -1, start at -2 and end at -3 */
+    switch (argc) {
+      case 4: end   = STk_integer_value(argv[-3]);  /* no break */
+      case 3: start = STk_integer_value(argv[-2]);  /* no break */
+      case 2: if (pfill) *pfill  = argv[-1];
+              v = argv[0];
+              break;
+      default:
+      bad_number_of_args:
+        STk_error("incorrect number of arguments (%d)", argc);
+    }
+  }
+
+  /* Controlling s */
+  if (!UVECTORP(v)) error_bad_uvector(v, UVECT_U8);
+  len = UVECTOR_SIZE(v);
+
+  /* Controlling start index */
+  if (start == LONG_MIN || start < 0 || start > len)
+    /* argc cannot be 1 (start would be 0) */
+    STk_error("bad starting index ~S", argv[pfill ? -2: -1]);
+
+  /* Controlling end index */
+  if (end == -1)
+    end = len;
+  else
+    if (end == LONG_MIN  || end < 0 || end > len)
+      /* We have an end index ==> argc = 3 */
+      STk_error("bad ending index ~S", argv[pfill? -3: -2]);
+
+  if (start > end)
+    STk_error("low index is greater than high index");
+
+  /* everything is correct, return values */
+  *pstart = start;
+  *pend   = end;
+  return v;
+}
 
 
 /* Return the type of an uniform vector given its tag */
@@ -473,6 +527,37 @@ static struct extended_type_descr xtype_uvector = {
 };
 
 /*==========================================================================*/
+/*                                                                          */
+/*                              B Y T E V E C T O R S                       */
+/*                                                                          */
+/*==========================================================================*/
+/*
+<doc R7RS bytevector-copy
+ * (bytevector-copy bytevector)
+ * (bytevector-copy bytevector start)
+ * (bytevector-copy bytevector start end)
+ *
+ * Returns a newly allocated bytevector containing the bytes in |bytevector|
+ * between |start| and |end|.
+ * @lisp
+ * (define a #u8(1 2 3 4 5))
+ * (bytevector-copy a 2 4))       =>  #u8(3 4)
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("bytevector-copy", bytevector_copy, vsubr, (int argc, SCM *argv))
+{
+  long start, end, n;
+  SCM z, bvect;
+
+  bvect = control_index(argc, argv, &start, &end, NULL);
+  n = end-start;
+  z = makeuvect(UVECT_U8, n, (SCM) NULL);
+  memcpy(UVECTOR_DATA(z),
+         (unsigned char *)UVECTOR_DATA(bvect)+start,
+         n * sizeof(unsigned char));
+  return z;
+}
 
 
 int STk_init_uniform_vector(void)
@@ -488,6 +573,9 @@ int STk_init_uniform_vector(void)
   ADD_PRIMITIVE(uvector_length);
   ADD_PRIMITIVE(uvector_ref);
   ADD_PRIMITIVE(uvector_set);
+
+  /* R7RS specific bytevectors primitives */
+  ADD_PRIMITIVE(bytevector_copy);
 
   /* A pseudo primitive to launch the definition of  all the function of SRFI-4 */
   ADD_PRIMITIVE(allow_uvectors);

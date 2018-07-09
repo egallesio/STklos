@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update:  6-Jul-2018 22:11 (eg)
+;;;; Last file update:  9-Jul-2018 19:40 (eg)
 ;;;;
 
 (require "test")
@@ -281,7 +281,6 @@
 (test "bytevector-length.3" 100 (bytevector-length (make-bytevector 100)))
 (test "bytevector-length.4" 100 (bytevector-length (make-bytevector 100 42)))
 
-
 (test "bytevector-u8-ref.1" 0 (bytevector-u8-ref (bytevector 0 1 2) 0))
 (test "bytevector-u8-ref.2" 1 (bytevector-u8-ref (bytevector 0 1 2) 1))
 (test "bytevector-u8-ref.3" 2 (bytevector-u8-ref (bytevector 0 1 2) 2))
@@ -296,6 +295,11 @@
       (let ((bv (bytevector)))  (bytevector-u8-set! bv 0 100) bv))
 (test "bytevector-u8-set!.4" *test-failed*
       (let ((bv #u8(1 2 3)))  (bytevector-u8-set! bv 0 100) bv))
+
+(test "bytevector-copy.1" #u8() (bytevector-copy #u8()))
+(test "bytevector-copy.2" #u8(0 1 2 3 4 5) (bytevector-copy #u8(0 1 2 3 4 5)))
+(test "bytevector-copy.3" #u8(2 3 4 5) (bytevector-copy #u8(0 1 2 3 4 5) 2))
+(test "bytevector-copy.4" #u8(2 3) (bytevector-copy #u8(0 1 2 3 4 5) 2 4))
 
 ;;------------------------------------------------------------------
 (test-subsection "Lists and Pairs")

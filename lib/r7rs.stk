@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  6-Jul-2018 22:03 (eg)
+;;;; Last file update:  9-Jul-2018 19:32 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -425,22 +425,6 @@ doc>
 (define (bytevector-u8-set! bv idx val)
   (%claim-error 'bytevector-u8-set! (%uvector-set! 1 bv idx val)))
 
-#|
-<doc R7RS bytevector-copy
- * (bytevector-copy bytevector)
- *
- * Returns a newly allocated bytevector containing the same bytes as |bytevector|.
-doc>
-|#
-(define (bytevector-copy bv)
-  (unless (bytevector? bv)
-    (error "bad bytevector ~S" bv))
-
-  (let* ((len (bytevector-length bv))
-         (new (make-bytevector len)))
-    (dotimes (i len)
-      (bytevector-u8-set! new i (bytevector-u8-ref bv i)))
-    new))
 
 #|
 <doc R7RS bytevector-copy!
