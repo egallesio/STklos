@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 10-Jul-2018 15:40 (eg)
+;;;; Last file update: 10-Jul-2018 16:06 (eg)
 ;;;;
 
 (require "test")
@@ -338,6 +338,17 @@
         #u8(4 5 2 3 4 5 6 7 8 9)
         (let ((v (bytevector 0 1 2 3 4 5 6 7 8 9)))
           (bytevector-copy! v 0 v 4 6) v)))
+
+
+(test "byte-vector-append.1" #u8() (bytevector-append))
+(test "byte-vector-append.2" #u8() (bytevector-append #u8()))
+(test "byte-vector-append.3" #u8() (bytevector-append #u8() #u8()))
+(test "byte-vector-append.4" #u8(0 1 2 3) (bytevector-append #u8() #u8(0 1 2 3)))
+(test "byte-vector-append.5" #u8(0 1 2 3) (bytevector-append #u8(0 1 2 3) #u8()))
+(test "byte-vector-append.6" #u8(0 1 2 3) (bytevector-append #u8(0 1) #u8(2 3)))
+(test "byte-vector-append.7" #u8(0 1 2 3) (bytevector-append #u8(0) #u8(1)
+                                                             #u8() #u8(2) #u8(3)))
+
 
 ;;------------------------------------------------------------------
 (test-subsection "Lists and Pairs")

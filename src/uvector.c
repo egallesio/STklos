@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update:  9-Jul-2018 19:34 (eg)
+ * Last file update: 10-Jul-2018 16:10 (eg)
  */
 
 #include "stklos.h"
@@ -559,7 +559,45 @@ DEFINE_PRIMITIVE("bytevector-copy", bytevector_copy, vsubr, (int argc, SCM *argv
   return z;
 }
 
+/*
+<doc  bytevector-append
+ * (bytevector-append bytevector ...)
+ *
+ * Returns a newly allocated bytevector whose elements are
+ * the concatenation of the elements in the given bytevectors.
+ * @lisp
+ * (bytevector-append #u8(0 1 2) #u8(3 4 5))
+ *                     =>  #u8(0 1 2 3 4 5)
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("bytevector-append", bytevector_append, vsubr,(int argc, SCM *argv))
+{
+  int i, len = 0, start = 0;
+  SCM z;
 
+  /* compute length of final result */
+  for (i = 0; i < argc; i++) {
+    if (!UVECTORP(argv[-i]) || UVECTOR_TYPE(argv[-i]) != UVECT_U8)
+      error_bad_uvector(argv[-i], UVECT_U8);
+    len += UVECTOR_SIZE(argv[-i]);
+  }
+
+  /* copy bytevectors */
+  z = makeuvect(UVECT_U8, len, (SCM) NULL);
+
+  for (i = 0; i < argc; i++) {
+    int sz = UVECTOR_SIZE(argv[-i]);
+    memcpy(UVECTOR_DATA(z+start),
+           (unsigned char *) UVECTOR_DATA(argv[-i]),
+           sz * sizeof(unsigned char));
+    start += sz * sizeof(unsigned char);
+  }
+  return z;
+}
+
+
+/* ====================================================================== */
 int STk_init_uniform_vector(void)
 {
   DEFINE_XTYPE(uvector, &xtype_uvector);
@@ -576,6 +614,7 @@ int STk_init_uniform_vector(void)
 
   /* R7RS specific bytevectors primitives */
   ADD_PRIMITIVE(bytevector_copy);
+  ADD_PRIMITIVE(bytevector_append);
 
   /* A pseudo primitive to launch the definition of  all the function of SRFI-4 */
   ADD_PRIMITIVE(allow_uvectors);

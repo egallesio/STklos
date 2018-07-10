@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 10-Jul-2018 15:49 (eg)
+;; Last file update: 10-Jul-2018 16:11 (eg)
 ;;
 ;; ======================================================================
 
@@ -468,6 +468,7 @@ need to be quoted in programs.])
 (insertdoc 'bytevector-u8-set!)
 (insertdoc 'bytevector-copy)
 (insertdoc 'bytevector-copy!)
+(insertdoc 'bytevector-append)
 )
 
 
