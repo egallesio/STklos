@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  9-Jul-2018 19:32 (eg)
+;;;; Last file update: 10-Jul-2018 15:31 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -353,7 +353,7 @@ doc>
 doc>
 |#
 (define (make-bytevector size :optional (default 0))
-  (%claim-error 'make-bytevector 
+  (%claim-error 'make-bytevector
                 (%make-uvector 1 size default)))
 
 #|
@@ -384,13 +384,12 @@ doc>
 #|
 <doc R7RS bytevector-length
  * (bytevector-length bytevector)
- * 
+ *
  * Returns the length of |bytevector| in bytes as an exact integer.
 doc>
 |#
 (define (bytevector-length bv)
   (%claim-error 'bytevector-length (%uvector-length 1 bv)))
-
 
 
 #|
@@ -402,11 +401,12 @@ doc>
  *
  * @lisp
  * (bytevector-u8-ref ’#u8(1 1 2 3 5 8 13 21) 5    => 8
- * @end lisp 
+ * @end lisp
 doc>
 |#
 (define (bytevector-u8-ref bv idx)
   (%claim-error 'bytevector-u8-ref (%uvector-ref 1 bv idx)))
+
 
 #|
 <doc EXT bytevector-u8-set!
@@ -428,92 +428,66 @@ doc>
 
 #|
 <doc R7RS bytevector-copy!
- * (bytevector-copy! from to)
+ * (bytevector-copy! to at from)
+ * (bytevector-copy! to at from start)
+ * (bytevector-copy! to at from start end)
  *
- * Copy the bytes of bytevector |from| to bytevector |to|, which must not be shorter.
- * The value returned by |bytevector-copy!| is ,(emph "void").
+ * Copies the bytes of bytevector |from| between |start| and |end|
+ * to bytevector |to|, starting at |at|. The order in which bytes
+ * are copied is unspecified, except that if the source and
+ * destination overlap, copying takes place as if the source is first
+ * copied into a temporary bytevector and then into the destination.
+ * This can be achieved without allocating storage by making sure
+ * to copy in the correct direction in such circumstances.
+ *
+ * It is an error if |at| is less than zero or greater than the length
+ * of |to|. It is also an error if |(- (bytevector-length to) at)| is
+ * less than |(- end start)|.
+ *
+ * @lisp
+ * (define a (bytevector 1 2 3 4 5))
+ * (define b (bytevector 10 20 30 40 50))
+ * (bytevector-copy! b 1 a 0 2)
+ * b                                  =>  #u8(10 1 2 40 50
+ * @end lisp
 doc>
 |#
-(define (bytevector-copy! from to)
-  (unless (bytevector? from)
-    (error "bad bytevector ~S" from))
-  (unless (bytevector? to)
-    (error "bad bytevector ~S" to))
-  (let ((len-from (bytevector-length from))
-        (len-to   (bytevector-length to)))
-    (when (> len-from len-to)
-      (error "bytevector ~S is too long for copying it in ~S" from to))
-    (dotimes (i len-from)
-      (bytevector-u8-set! to i (bytevector-u8-ref from i)))))
+(define (bytevector-copy! to at from :optional (start 0 start?) (end 0 end?))
+  (define (err . l)
+    (apply error 'bytevector-copy! l))
 
+  (define (%bytevector-copy! to tstart from fstart fend)
+    (if (> fstart tstart)
+        (do ((i fstart (+ i 1))
+             (j tstart (+ j 1)))
+            ((>= i fend))
+          (bytevector-u8-set! to j (bytevector-u8-ref from i)))
 
-#|
-<doc R7RS bytevector-copy-partial
- * (bytevector-copy-partial bytevector start end)
- *
- * Returns a newly allocated bytevector containing the bytes in |bytevector|
- * between |start| (inclusive) and |end| (exclusive).
-doc>
-|#
-(define (bytevector-copy-partial bv start end)
-  (unless (bytevector? bv)
-    (error "bad bytevector ~S" bv))
-  (unless (integer? start)
-    (error "bad starting index ~S" start))
-  (unless (integer? end)
-    (error "bad ending intex ~S" end))
+        (do ((i (- fend 1)                    (- i 1))
+             (j (+ -1 tstart (- fend fstart)) (- j 1)))
+            ((< i fstart))
+          (bytevector-u8-set! to j (bytevector-u8-ref from i)))))
 
-  (let* ((len (- end start))
-         (new (make-bytevector len)))
-    (dotimes (i len)
-      (bytevector-u8-set! new i (bytevector-u8-ref bv (+ start i))))
-    new))
+  ;; body starts here
+  (unless (bytevector? to)   (err "bad bytevector ~S" to))
+  (unless (bytevector? from) (err "bad bytevector ~S" from))
+  (let ((length-from (bytevector-length from))
+        (length-to   (bytevector-length to)))
+    (unless (and (integer? at) (>= at 0) (< at length-to))
+      (err "bad destination index ~S" at))
+    (when start?
+      (unless (and (integer? start) (>= start 0) (<= start length-from))
+        (err "bad integer for start index ~S" start)))
+    (if end?
+        (unless (and (integer? end) (>= end 0) (<= end length-from))
+          (err "bad integer for end index ~S" end))
+        (set! end (bytevector-length from)))
+    (when (< (- length-to at) (- end start))
+      (err "not enough room in destination bytevector ~S" to))
 
-
-#|
-<doc R7RS bytevector-copy-partial!
- * (bytevector-copy-partial! from start end to at)
- *
- * Copy the bytes of |bytevector| from between |start| and |end| to bytevector
- * |to|, starting at |at|. The order in which bytes are copied
- * is unspecified, except that if the source and destination
- * overlap, copying takes place as if the source is first copied
- * into a temporary bytevector and then into the destination.
- * The value returned by |partial-bytevector-copy!| is ,(emph "void").
-doc>
-|#
-(define (bytevector-copy-partial! from start end to at)
-  (unless (bytevector? from)
-    (error "bad bytevector ~S" from))
-  (unless (bytevector? to)
-    (error "bad bytevector ~S" to))
-  (unless (integer? start)
-    (error "bad starting index ~S" start))
-  (unless (integer? end)
-    (error "bad ending index ~S" end))
-  (unless (integer? at)
-    (error "bad destination index ~S" at))
-
-  (let ((len    (- end start))
-        (to-len (bytevector-length to)))
-    (when (> (+ at len) to-len)
-      (error "cannot copy ~S bytes in ~S starting at index ~S" len to at))
-
-    (cond
-      ((and (eq? from to) (= start at))
-       ;; nothing to do
-       (void))
-      ((and (eq? from to) (> (+ at len) end))
-       ;; may overlap => copy in reverse
-       (let ((j (- (+ at len) 1))
-             (k (- end 1)))
-         (dotimes (i len)
-           (bytevector-u8-set! to (- j i) (bytevector-u8-ref from (- k i ))))))
-      (else
-       ;; normal copy
-       (dotimes (i len)
-         (bytevector-u8-set! to (+ at i) (bytevector-u8-ref from (+ start i))))))))
-
+    ;; do the copy
+    (%claim-error 'bytevector-copy!
+                  (%bytevector-copy! to at from start end))))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.10 Control features
