@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 21-Jun-2018 13:51 (eg)
+ * Last file update: 11-Jul-2018 16:30 (eg)
  */
 
 
@@ -1264,6 +1264,7 @@ int STk_utf8_strlen(char *s, int max);
 int STk_utf8_read_char(SCM port);
 int STk_utf8_sequence_length(char *str); /* # of bytes of sequence starting at str */
 int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch*/
+int STk_utf8_verify_sequence(char *s, int len); /* s constitutes a valid UTF8? */
 char *STk_utf8_index(char *s, int i, int max);/* return the address of ith char of s*/
 int STk_utf8_char_from_byte(char *s, int i, int max); /*  byte index => char index */
 

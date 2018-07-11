@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update: 27-Mar-2018 14:04 (eg)
+ * Last file update: 11-Jul-2018 16:36 (eg)
  */
 
 #include "stklos.h"
@@ -166,6 +166,20 @@ int STk_utf8_strlen(char *s, int max)
     s += sz;
   }
   return len;
+}
+
+int STk_utf8_verify_sequence(char *s, int len)
+/* Are the len bytes starting at s constitute a valid UTF8 sequence? */
+{
+  char *end = s + len;
+
+  while (s < end) {
+    int sz =  STk_utf8_sequence_length(s);
+
+    if (sz == UTF8_INCORRECT_SEQUENCE) return 0;
+    s += sz;
+  }
+  return (s == end);
 }
 
 char *STk_utf8_index(char *s, int i, int max) /* return the address of ith char of s*/

@@ -22,12 +22,15 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  6-Jul-2018 19:38 (eg)
+ * Last file update: 10-Jul-2018 20:33 (eg)
  */
 
 #include <ctype.h>
 #include <wctype.h>
 #include "stklos.h"
+
+
+extern SCM STk_make_bytevector_from_string(char *str, long len);
 
 
 /* min size added to a string when reallocated in a string-set! */
@@ -150,7 +153,7 @@ static int stringcompi(SCM s1, SCM s2)
 }
 
 
-static SCM control_index(int argc, SCM *argv, int *pstart, int *pend)
+static SCM control_index(int argc, SCM *argv, long *pstart, long *pend)
 {
   SCM s = NULL;
   long len, start=0, end=-1;
@@ -757,7 +760,7 @@ doc>
 */
 DEFINE_PRIMITIVE("string-copy", string_copy, vsubr, (int argc, SCM *argv))
 {
-  int start, end;
+  long start, end;
 
   control_index(argc, argv, &start, &end);
   if (start == -1)
@@ -991,7 +994,7 @@ static SCM string_xxcase(int argc, SCM *argv, int (*toxx)(int),
                          wint_t (*towxx)(wint_t))
 {
   SCM s;
-  int start, end;
+  long start, end;
 
   s = control_index(argc, argv, &start, &end);
 
@@ -1039,7 +1042,7 @@ static SCM string_dxxcase(int argc, SCM *argv, int (*toxx)(int),
                          wint_t (*towxx)(wint_t))
 {
   SCM s;
-  int i, start, end;
+  long i, start, end;
 
   s    = control_index(argc, argv, &start, &end);
   if (BOXED_INFO(s) & STRING_CONST) error_change_const_string(s);
@@ -1173,7 +1176,7 @@ doc>
 DEFINE_PRIMITIVE("string-titlecase", string_titlecase, vsubr, (int argc, SCM *argv))
 {
   SCM s, z;
-  int start, end;
+  long start, end;
   char *endp, *p, *q;
   char prev_is_sep = 1, curr_is_sep;
 
@@ -1204,7 +1207,7 @@ doc>
 DEFINE_PRIMITIVE("string-titlecase!", string_dtitlecase,vsubr,(int argc, SCM *argv))
 {
   SCM s;
-  int start, end;
+  long start, end;
   char *endp, *p;
   char prev_is_sep = 1, curr_is_sep;
 
@@ -1303,6 +1306,22 @@ DEFINE_PRIMITIVE("string-pos", string_pos, subr2, (SCM str, SCM index))
 */
 
 
+DEFINE_PRIMITIVE("string->utf8", string2utf8, vsubr, (int argc, SCM *argv))
+{
+  long start, end;
+  SCM str;
+  char *start_addr, *end_addr;
+
+
+  str           = control_index(argc, argv, &start, &end);
+  start_addr    = STk_utf8_index(STRING_CHARS(str), (int) start, STRING_SIZE(str));
+  end_addr      = STk_utf8_index(STRING_CHARS(str), (int) end, STRING_SIZE(str));
+
+  return STk_make_bytevector_from_string(start_addr, end_addr - start_addr);
+}
+
+
+
 DEFINE_PRIMITIVE("%use-utf8?", using_utf8, subr0, (void))
 {
   return MAKE_BOOLEAN(STk_use_utf8);
@@ -1371,6 +1390,7 @@ int STk_init_string(void)
   ADD_PRIMITIVE(string_dtitlecase);
   ADD_PRIMITIVE(string_blit);
 
+  ADD_PRIMITIVE(string2utf8);
   ADD_PRIMITIVE(using_utf8);
   ADD_PRIMITIVE(string_use_utf8);
   ADD_PRIMITIVE(string2bytes);

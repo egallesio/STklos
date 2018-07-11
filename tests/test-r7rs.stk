@@ -1,8 +1,8 @@
-;;;;                                                    -*- coding: latin-1 -*-
+;;;;                                                    -*- coding: utf-8 -*-
 ;;;;
 ;;;; test-r7rs.stk      -- Testing R7RS constructs/primitives
 ;;;;
-;;;; Copyright © 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright Â© 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 10-Jul-2018 16:06 (eg)
+;;;; Last file update: 11-Jul-2018 18:22 (eg)
 ;;;;
 
 (require "test")
@@ -349,6 +349,16 @@
 (test "byte-vector-append.7" #u8(0 1 2 3) (bytevector-append #u8(0) #u8(1)
                                                              #u8() #u8(2) #u8(3)))
 
+(test "chibi utf8->string.1" "ABC" (utf8->string #u8(#x41 #x42 #x43)))
+(test "chibi utf8->string.2" "ABC" (utf8->string #u8(0 #x41 #x42 #x43) 1))
+(test "chibi utf8->string.3""ABC" (utf8->string #u8(0 #x41  #x42 #x43 0) 1 4))
+(test "chibi utf8->string.4" "λ" (utf8->string #u8(0 #xCE #xBB 0) 1 3))
+(test "utf8->string.5" *test-failed*  (utf8->string #u8(0 #xCE)))
+
+(test "chibi string->utf8.1" #u8(#x41 #x42 #x43) (string->utf8 "ABC"))
+(test "chibi string->utf8.2" #u8(#x42 #x43) (string->utf8 "ABC" 1))
+(test "chibi string->utf8.3" #u8(#x42) (string->utf8 "ABC" 1 2))
+(test "chibi string->utf8.4" #u8(#xCE #xBB) (string->utf8 "λ"))
 
 ;;------------------------------------------------------------------
 (test-subsection "Lists and Pairs")

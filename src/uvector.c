@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 10-Jul-2018 16:10 (eg)
+ * Last file update: 11-Jul-2018 16:25 (eg)
  */
 
 #include "stklos.h"
@@ -596,6 +596,62 @@ DEFINE_PRIMITIVE("bytevector-append", bytevector_append, vsubr,(int argc, SCM *a
   return z;
 }
 
+/*
+<doc R7RS utf8->string string->utf8
+ * (utf8->string bytevector)
+ * (utf8->string bytevector start)
+ * (utf8->string bytevector start end)
+ * (string->utf8 string)
+ * (string->utf8 string start)
+ * (string->utf8 string start end)
+ *
+ * These procedures translate between strings and bytevectors
+ * that encode those strings using the UTF-8 encoding.
+ * The |utf8->string| procedure decodes the bytes of
+ * a bytevector between |start| and |end| and returns the
+ * corresponding string; the |string->utf8| procedure encodes the
+ * characters of a string between |start| and |end| and returns
+ * the corresponding bytevector.
+ *
+ * It is an error for |bytevector| to contain invalid UTF-8 byte
+ * sequences.
+ * @lisp
+ * (utf8->string #u8(#x41))   => "A"
+ * (string->utf8 "λ")         => #u8((#xce #xbb)
+ * @end lisp
+doc>
+*/
+SCM STk_make_bytevector_from_string(char *str, long len)
+{
+  SCM z  = makeuvect(UVECT_U8, len, (SCM) NULL);
+  memcpy(UVECTOR_DATA(z),str, len);
+  return z;
+}
+
+DEFINE_PRIMITIVE("utf8->string", utf82string, vsubr, (int argc, SCM *argv))
+{
+  long start, end, len;
+  SCM v;
+  unsigned char *start_addr, *end_addr;
+
+  v          = control_index(argc, argv, &start, &end, NULL);
+  start_addr = (unsigned char*) UVECTOR_DATA(v) + start;
+  end_addr   = (unsigned char*) UVECTOR_DATA(v) + end;
+  len        = end_addr - start_addr;
+
+  /* Verify that the sub-vector denotes a correct string */
+  if (STk_utf8_verify_sequence(start_addr, len)) {
+    SCM z = STk_makestring(len, NULL);
+    memcpy(STRING_CHARS(z), start_addr, end_addr - start_addr);
+    return z;
+  }
+  else
+    STk_error("bad UTF8 sequence between %d and %d in ~S", start, end, v);
+
+  return STk_void;  /* for the compiler */
+}
+
+
 
 /* ====================================================================== */
 int STk_init_uniform_vector(void)
@@ -615,6 +671,7 @@ int STk_init_uniform_vector(void)
   /* R7RS specific bytevectors primitives */
   ADD_PRIMITIVE(bytevector_copy);
   ADD_PRIMITIVE(bytevector_append);
+  ADD_PRIMITIVE(utf82string);
 
   /* A pseudo primitive to launch the definition of  all the function of SRFI-4 */
   ADD_PRIMITIVE(allow_uvectors);
