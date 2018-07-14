@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  6-Jul-2018 19:29 (eg)
+ * Last file update: 14-Jul-2018 19:38 (eg)
  *
  */
 
@@ -121,7 +121,27 @@ DEFINE_PRIMITIVE("output-port?", output_portp, subr1, (SCM port))
 }
 
 /*
-<doc EXT port?
+<doc R7RS textual-port? binary-port?
+ * (textual-port? obj)
+ * (binary-port? obj)
+ *
+ * Returns |#t| if |obj| is an textual port or binary port respectively,
+ * otherwise returns #f.
+doc>
+ */
+DEFINE_PRIMITIVE("textual-port?", textual_portp, subr1, (SCM port))
+{
+  return MAKE_BOOLEAN(PORTP(port) && (PORT_FLAGS(port) & PORT_TEXTUAL));
+}
+
+DEFINE_PRIMITIVE("binary-port?", binary_portp, subr1, (SCM port))
+{
+  return MAKE_BOOLEAN(PORTP(port) && (PORT_FLAGS(port) & PORT_BINARY));
+}
+
+
+/*
+<doc R7RS port?
  * (port? obj)
  *
  * Returns |#t| if |obj| is an input port or an output port,
@@ -617,7 +637,7 @@ DEFINE_PRIMITIVE("write-char", write_char, subr12, (SCM c, SCM port))
  * Writes the character of string |str| to the given |port| and
  * returns an unspecified value.  The |port| argument may be omitted,
  * in which case it defaults to the value returned by
- * |current-output-port|. 
+ * |current-output-port|.
  * @l
  * ,(bold "Note:") This function is generally
  * faster than |display| for strings. Furthermore, this primitive does
@@ -1135,7 +1155,7 @@ DEFINE_PRIMITIVE("close-output-port", close_output_port, subr1, (SCM port))
 
 
 /*
-<doc EXT close-port
+<doc R7RS close-port
  * (close-port port)
  *
  * Closes the port associated with |port|.
@@ -1150,10 +1170,17 @@ DEFINE_PRIMITIVE("close-port", close_port, subr1, (SCM port))
 }
 
 /*
-<doc EXT port-closed?
+<doc EXT port-closed? port-open?
  * (port-closed? port)
+ * (port-open?  port)
  *
- * Returns |#t| if |port| is closed and |#f| otherwise.
+ * |port-closed| returns |#t| if |port| is closed and |#f| otherwise.
+ * On the contrary, |port-open?| returns |#t| if |port| is open and
+ * |#f| otherwise.
+ * @l
+ * ,(bold "Note:") |port-closed?| was the usual STklos function to
+ * test if a port is closed. |port-open?| has been added to be the companion
+ * of the ,(rseven) functions |input-port-open?| and |output-port-open?|
 doc>
 */
 DEFINE_PRIMITIVE("port-closed?", port_closed, subr1, (SCM port))
@@ -1161,6 +1188,13 @@ DEFINE_PRIMITIVE("port-closed?", port_closed, subr1, (SCM port))
   if (!PORTP(port)) STk_error_bad_port(port);
 
   return MAKE_BOOLEAN(PORT_IS_CLOSEDP(port));
+}
+
+DEFINE_PRIMITIVE("port-open?", port_open, subr1, (SCM port))
+{
+  if (!PORTP(port)) STk_error_bad_port(port);
+
+  return MAKE_BOOLEAN(!PORT_IS_CLOSEDP(port));
 }
 
 
@@ -1511,6 +1545,8 @@ int STk_init_port(void)
   /* and its associated primitives */
   ADD_PRIMITIVE(input_portp);
   ADD_PRIMITIVE(output_portp);
+  ADD_PRIMITIVE(binary_portp);
+  ADD_PRIMITIVE(textual_portp);
   ADD_PRIMITIVE(portp);
   ADD_PRIMITIVE(interactive_portp);
   ADD_PRIMITIVE(current_input_port);
@@ -1545,6 +1581,7 @@ int STk_init_port(void)
   ADD_PRIMITIVE(close_output_port);
   ADD_PRIMITIVE(close_port);
   ADD_PRIMITIVE(port_closed);
+  ADD_PRIMITIVE(port_open);
   ADD_PRIMITIVE(copy_port);
 
   ADD_PRIMITIVE(read_line);

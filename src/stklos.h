@@ -842,13 +842,13 @@ SCM STk_resolve_link(char *path, int count);
   ----
   ----                                  P O R T . C
   ----
-  ---- (and sio.c, fport.c, sport.c, vport.c)
+  ---- (and s, fport.c, sport.c, vport.c)
   ----
   ------------------------------------------------------------------------------
 */
 
   /* Code for port is splitted in several files:
-   *    - sio.c contains the low level IO functions which mimic the C IO. All
+   *    - s contains the low level IO functions which mimic the C IO. All
    *      these functions take Scheme ports as parameter instead of FILE *
    *    - fport.c contains the specific code for port associated to files
    *    - sport.c contains the specific code for port associated to string ports
@@ -892,9 +892,12 @@ struct port_obj {
 #define PORT_IS_PIPE            (1<<4)
 #define PORT_IS_FILE            (1<<5)
 #define PORT_IS_STRING          (1<<6)
-#define PORT_IS_VIRTUAL         (1<<7)
-#define PORT_IS_INTERACTIVE     (1<<8)
-#define PORT_CASE_SENSITIVE     (1<<9)
+#define PORT_IS_BYTEVECTOR      (1<<7)
+#define PORT_IS_VIRTUAL         (1<<8)
+#define PORT_IS_INTERACTIVE     (1<<9)
+#define PORT_CASE_SENSITIVE     (1<<10)
+#define PORT_TEXTUAL            (1<<11)
+#define PORT_BINARY             (1<<12)
 
 #define PORT_STREAM(x)    (((struct port_obj *) (x))->stream)
 #define PORT_FLAGS(x)     (((struct port_obj *) (x))->flags)

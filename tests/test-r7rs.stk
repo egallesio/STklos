@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 11-Jul-2018 18:22 (eg)
+;;;; Last file update: 13-Jul-2018 15:06 (eg)
 ;;;;
 
 (require "test")
@@ -392,5 +392,17 @@
 (test "make-list.2"
       '(42 42 42 42)
       (make-list 4 42))
+
+
+;;------------------------------------------------------------------
+(test-subsection "Input and Output")
+
+(test "call-with-port"
+      '(123 . #t)
+      (let* ((p (open-input-string "123 456"))
+             (v (call-with-port p read)))
+        (cons v (port-closed? p))))
+
+
 
 (test-section-end)

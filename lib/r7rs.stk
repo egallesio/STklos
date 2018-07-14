@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 10-Jul-2018 15:31 (eg)
+;;;; Last file update: 14-Jul-2018 19:29 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -634,3 +634,55 @@ doc>
     (error 'vector-for-each "bad list of vectors ~S" vectors))
   (apply map proc (map vector->list vectors))
   (void))
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.13 Input and Output
+;;;; ----------------------------------------------------------------------
+
+;;;
+;;; 6.13.1 Ports
+;;;
+
+#|
+<doc R7RS call-with-port
+ * (call-with-port port proc)
+ *
+ * The |call-with-port| procedure calls |proc| with |port| as an
+ * argument. If |proc| returns, then the |port| is closed automatically
+ * and the values yielded by the |proc| are returned.
+ * If |proc| does not return, then the |port| must not be closed
+ * automatically unless it is possible to prove that the port
+ * will never again be used for a read or write operation.
+ *
+ * It is an error if proc does not accept one argument.
+|#
+(define (call-with-port port proc)
+  #;(unless (port? port)
+    (error 'call-with-port  "bad port ~S" port))
+  #;(unless (and (procedure? proc) (memq (%procedure-arity proc) '(-2 -1 1)))
+    (error 'call-with-port "bad procedure ~S" proc))
+  (%claim-error 'call-with-port
+                (let ((res (proc port)))
+                  (close-port port)
+                  res)))
+
+
+#|
+<doc R7RS input-port-open? output-port-open?
+ * (input-port-open? port)
+ * (output-port-open? port)
+ *
+ * Returns #t if port is still open and capable of performing
+ * input or output, respectively, and #f otherwise.
+doc>
+|#
+(define (input-port-open? port)
+  (unless (input-port? port)
+    (error "bad input port ~S" port))
+  (not (port-closed? port)))
+
+(define (output-port-open? port)
+  (unless (output-port? port)
+    (error "bad output port ~S" port))
+  (not (port-closed? port)))
+

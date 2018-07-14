@@ -1,7 +1,7 @@
 /*
- * f p o r t . c				-- File ports
+ * f p o r t . c                                -- File ports
  *
- * Copyright © 2000-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 18-Mar-2012 18:46 (eg)
+ * Last file update: 14-Jul-2018 19:13 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -34,8 +34,8 @@
 #include "fport.h"
 #include "vm.h"
 
-int STk_interactive = 0;		  /* We are in interactive mode */
-SCM STk_stdin, STk_stdout, STk_stderr;	  /* The unredirected ports */
+int STk_interactive = 0;                  /* We are in interactive mode */
+SCM STk_stdin, STk_stdout, STk_stderr;    /* The unredirected ports */
 MUT_DECL(all_fports_mutex);
 
 
@@ -84,9 +84,9 @@ static void unregister_port(SCM port)
   for (prev = cur = all_file_ports; cur ; prev=cur, cur=cur->next) {
     if (GET_FAKE_POINTER(cur->port) == port) {
       if (cur == prev)
-	all_file_ports = all_file_ports->next;
+        all_file_ports = all_file_ports->next;
       else
-	prev->next = cur->next;
+        prev->next = cur->next;
       break;
     }
   }
@@ -105,7 +105,7 @@ void STk_close_all_ports(void)
     PORT_RELEASE(tmp) = nop_release_port;
     if (OPORTP(tmp)) {
       if (tmp != eport && tmp != oport)
-	STk_close(tmp);
+        STk_close(tmp);
     }
   }
   MUT_UNLOCK(all_fports_mutex);
@@ -117,13 +117,13 @@ void STk_close_all_ports(void)
 
 /*===========================================================================*\
  *
- * 					Utils
+ *                                      Utils
  *
 \*===========================================================================*/
 
 static void fill_buffer(struct fstream *f)
 {
-  int n = 0; 				/* to avoid gcc warning */
+  int n = 0;                            /* to avoid gcc warning */
   unsigned char *ptr = PORT_BASE(f);
 
   /* Interactive ports can see multiple EOF, so clear EOF flag  */
@@ -203,7 +203,7 @@ static Inline int Fgetc(void *stream)
 
     while (!Freadyp(stream))
       for (idle = PORT_IDLE(stream); !NULLP(idle); idle = CDR(idle))
-	STk_C_apply(CAR(idle), 0);
+        STk_C_apply(CAR(idle), 0);
   }
 
   for ( ; ; ) {
@@ -246,14 +246,14 @@ static Inline int Fread(void *stream, void *buff, int count)
      return copied + read(PORT_FD(stream), buff, count);
 }
 
-static int Fclose(void *stream)		/* File version */
+static int Fclose(void *stream)         /* File version */
 {
   int ret = flush_buffer(stream);
 
   return (ret == EOF) ? EOF : close(PORT_FD(stream));
 }
 
-static int Fclose_pipe(void *stream)	/* pipe version (used by "| cmd" files */
+static int Fclose_pipe(void *stream)    /* pipe version (used by "| cmd" files */
 {
   int ret = flush_buffer(stream);
 
@@ -276,15 +276,15 @@ static Inline int Fputc(int c, void *stream)
       *PORT_PTR(stream)++ = (unsigned char) c;
       PORT_CNT(stream)   += 1;
       if (c == '\n' && PORT_STREAM_FLAGS(stream) & STK_IOLBF) {
-	if (flush_buffer(stream) != 0)
-	  return EOF;
+        if (flush_buffer(stream) != 0)
+          return EOF;
       }
       break;
     }
     else {
       /* buffer is full */
       if (flush_buffer(stream) != 0)
-	return EOF;
+        return EOF;
     }
   }
   return ret;
@@ -321,19 +321,19 @@ static Inline int Fnputs(void *stream, char *s, int len)
       free = PORT_BUFSIZE(stream) - PORT_CNT(stream);
 
       if (len <= free) {
-	memcpy(PORT_PTR(stream), s, len);
-	PORT_PTR(stream) += len;
-	PORT_CNT(stream) += len;
-	res = count;
-	break;
+        memcpy(PORT_PTR(stream), s, len);
+        PORT_PTR(stream) += len;
+        PORT_CNT(stream) += len;
+        res = count;
+        break;
       } else {
-	memcpy(PORT_PTR(stream), s, free);
-	PORT_PTR(stream) += free;
-	PORT_CNT(stream) += free;
-	s += free;
-	len -= free;
-	if (flush_buffer(stream) != 0)
-	  { res = EOF; break; }
+        memcpy(PORT_PTR(stream), s, free);
+        PORT_PTR(stream) += free;
+        PORT_CNT(stream) += free;
+        s += free;
+        len -= free;
+        if (flush_buffer(stream) != 0)
+          { res = EOF; break; }
       }
     }
   }
@@ -360,18 +360,18 @@ static Inline int Fputstring(SCM s, void *stream)
 
 static int Inline Fflush(void *stream)
 {
-  return flush_buffer(stream);		/* Problem if file opened for reading */
+  return flush_buffer(stream);          /* Problem if file opened for reading */
 }
 
 
-static void fport_print(SCM obj, SCM port) 	/* Generic printing of file ports */
+static void fport_print(SCM obj, SCM port)      /* Generic printing of file ports */
 {
   char buffer[MAX_PATH_LENGTH + 40];
 
   sprintf(buffer, "#[%s-port '%s' (%d)%s]",
-	  IPORTP(obj) ? "input" : "output",
-	  PORT_FNAME(obj), PORT_FD(PORT_STREAM(obj)),
-	  PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
+          IPORTP(obj) ? "input" : "output",
+          PORT_FNAME(obj), PORT_FD(PORT_STREAM(obj)),
+          PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
   STk_puts(buffer, port);
 }
 
@@ -409,42 +409,42 @@ make_fport(char *fname, FILE *f, int flags)
   if (STk_read_case_sensitive) flags |= PORT_CASE_SENSITIVE;
 
   /* Initialize the stream part */
-  PORT_BASE(fs)    	 = STk_must_malloc_atomic(n);
+  PORT_BASE(fs)          = STk_must_malloc_atomic(n);
   PORT_PTR(fs)           = PORT_BASE(fs);
-  PORT_CNT(fs)		 = 0;
-  PORT_BUFSIZE(fs) 	 = n;
+  PORT_CNT(fs)           = 0;
+  PORT_BUFSIZE(fs)       = n;
   PORT_STREAM_FLAGS(fs)  = mode;
-  PORT_FILE(fs)		 = f;
-  PORT_FD(fs)		 = fd;
-  PORT_REVENT(fs)	 = STk_false;
-  PORT_WEVENT(fs)	 = STk_false;
-  PORT_IDLE(fs)		 = STk_nil;
+  PORT_FILE(fs)          = f;
+  PORT_FD(fs)            = fd;
+  PORT_REVENT(fs)        = STk_false;
+  PORT_WEVENT(fs)        = STk_false;
+  PORT_IDLE(fs)          = STk_nil;
 
   /* Initialize now the port itsef */
   NEWCELL(res, port);
 
-  PORT_STREAM(res)	= fs;
-  PORT_FLAGS(res)	= flags;
-  PORT_UNGETC(res) 	= EOF;
-  PORT_FNAME(res)	= STk_strdup(fname);
-  PORT_LINE(res)	= 1;
-  PORT_POS(res)		= 0;
-  PORT_CLOSEHOOK(res)	= STk_false;
+  PORT_STREAM(res)      = fs;
+  PORT_FLAGS(res)       = flags;
+  PORT_UNGETC(res)      = EOF;
+  PORT_FNAME(res)       = STk_strdup(fname);
+  PORT_LINE(res)        = 1;
+  PORT_POS(res)         = 0;
+  PORT_CLOSEHOOK(res)   = STk_false;
 
-  PORT_PRINT(res)	= fport_print;
-  PORT_RELEASE(res)	= unregister_port;
-  PORT_GETC(res)	= Fgetc;
-  PORT_READY(res)	= Freadyp;
-  PORT_EOFP(res)	= Feof;
-  PORT_CLOSE(res)	= (flags & PORT_IS_PIPE) ? Fclose_pipe: Fclose;
-  PORT_PUTC(res)	= Fputc;
-  PORT_PUTS(res)	= Fputs;
-  PORT_PUTSTRING(res)	= Fputstring;
-  PORT_NPUTS(res)	= Fnputs;
-  PORT_FLUSH(res)	= Fflush;
-  PORT_BREAD(res)	= Fread;
-  PORT_BWRITE(res)	= Fwrite;
-  PORT_SEEK(res)	= Fseek;
+  PORT_PRINT(res)       = fport_print;
+  PORT_RELEASE(res)     = unregister_port;
+  PORT_GETC(res)        = Fgetc;
+  PORT_READY(res)       = Freadyp;
+  PORT_EOFP(res)        = Feof;
+  PORT_CLOSE(res)       = (flags & PORT_IS_PIPE) ? Fclose_pipe: Fclose;
+  PORT_PUTC(res)        = Fputc;
+  PORT_PUTS(res)        = Fputs;
+  PORT_PUTSTRING(res)   = Fputstring;
+  PORT_NPUTS(res)       = Fnputs;
+  PORT_FLUSH(res)       = Fflush;
+  PORT_BREAD(res)       = Fread;
+  PORT_BWRITE(res)      = Fwrite;
+  PORT_SEEK(res)        = Fseek;
 
   /* Add a finalizer on file to close it when the GC frees it */
   STk_register_finalizer(res, fport_finalizer);
@@ -465,14 +465,14 @@ static char *convert_for_win32(char *mode)
    */
   switch (*mode) {
     case 'r': if (mode[1] == '\0') return "rb";
-      	      if (mode[1] == '+')  return "rb+";
-	      break;
+              if (mode[1] == '+')  return "rb+";
+              break;
     case 'w': if (mode[1] == '\0') return "wb";
-      	      if (mode[1] == '+')  return "wb+";
-	      break;
+              if (mode[1] == '+')  return "wb+";
+              break;
     case 'a': if (mode[1] == '\0') return "ab";
-      	      if (mode[1] == '+')  return "ab+";
-	      break;
+              if (mode[1] == '+')  return "ab+";
+              break;
   }
   return mode;
 }
@@ -497,9 +497,9 @@ static SCM open_file_port(SCM filename, char *mode, int flags, int error)
 
     if ((f = fopen(full_name, mode)) == NULL) {
       if (error)
-	STk_error_file_name("could not open file ~S", filename);
+        STk_error_file_name("could not open file ~S", filename);
       else
-	return STk_false;
+        return STk_false;
     }
   }
   else {
@@ -507,10 +507,10 @@ static SCM open_file_port(SCM filename, char *mode, int flags, int error)
     flags     |= PORT_IS_PIPE;
     if ((f = popen(name+1, mode)) == NULL) {
       if (error)
-	STk_error_file_name("could not create pipe for ~S",
-			    STk_Cstring2string(name+2));
+        STk_error_file_name("could not create pipe for ~S",
+                            STk_Cstring2string(name+2));
       else
-	return STk_false;
+        return STk_false;
     }
   }
 
@@ -555,7 +555,7 @@ Error:
 SCM STk_add_port_idle(SCM port, SCM idle_func)
 {
   PORT_IDLE(PORT_STREAM(port)) = STk_cons(idle_func,
-					  PORT_IDLE(PORT_STREAM(port)));
+                                          PORT_IDLE(PORT_STREAM(port)));
   return STk_void;
 }
 
@@ -593,7 +593,13 @@ doc>
 DEFINE_PRIMITIVE("open-input-file", open_input_file, subr1, (SCM filename))
 {
   if (!STRINGP(filename)) STk_error_bad_file_name(filename);
-  return open_file_port(filename, "r", PORT_READ, TRUE);
+  return open_file_port(filename, "r", PORT_READ|PORT_TEXTUAL, TRUE);
+}
+
+DEFINE_PRIMITIVE("open-binary-input-file", open_binary_ifile, subr1, (SCM filename))
+{
+  if (!STRINGP(filename)) STk_error_bad_file_name(filename);
+  return open_file_port(filename, "r", PORT_READ|PORT_BINARY, TRUE);
 }
 
 /*
@@ -613,7 +619,13 @@ doc>
 DEFINE_PRIMITIVE("open-output-file", open_output_file, subr1, (SCM filename))
 {
   if (!STRINGP(filename)) STk_error_bad_file_name(filename);
-  return open_file_port(filename, "w", PORT_WRITE, TRUE);
+  return open_file_port(filename, "w", PORT_WRITE|PORT_TEXTUAL, TRUE);
+}
+
+DEFINE_PRIMITIVE("open-binary-output-file", open_binary_ofile, subr1, (SCM filename))
+{
+  if (!STRINGP(filename)) STk_error_bad_file_name(filename);
+  return open_file_port(filename, "w", PORT_WRITE|PORT_BINARY, TRUE);
 }
 
 
@@ -725,14 +737,14 @@ DEFINE_PRIMITIVE("%port-idle", port_idle, subr12, (SCM port, SCM val))
 }
 
 /*=============================================================================*\
- * 				Load
+ *                              Load
 \*=============================================================================*/
 
-#define FILE_IS_SOURCE		0
-#define FILE_IS_BCODE 		1
-#define FILE_IS_OBJECT		2
-#define FILE_IS_DIRECTORY	3
-#define FILE_DOES_NOT_EXISTS	4
+#define FILE_IS_SOURCE          0
+#define FILE_IS_BCODE           1
+#define FILE_IS_OBJECT          2
+#define FILE_IS_DIRECTORY       3
+#define FILE_DOES_NOT_EXISTS    4
 
 static int find_file_nature(SCM f)
 {
@@ -863,14 +875,14 @@ DEFINE_PRIMITIVE("%file-informations", file_informations, subr1, (SCM filename))
         case FILE_IS_SOURCE: str = "source"; break;
         case FILE_IS_BCODE:  str = "byte-code"; res = STk_read(f, TRUE); break;
         case FILE_IS_OBJECT: str = "object";
-			     res = STk_info_object_file(STRING_CHARS(filename));
-	  		     break;
+                             res = STk_info_object_file(STRING_CHARS(filename));
+                             break;
       }
       STk_close_port(f);
       /* Add the file nature to result */
       res = STk_cons(STk_makekey("nature"),
-		     STk_cons(STk_intern(str),
-			      res));
+                     STk_cons(STk_intern(str),
+                              res));
     }
   }
   return res;
@@ -882,11 +894,11 @@ int STk_init_fport(void)
   vm_thread_t *vm = STk_get_current_vm();
 
   STk_stdin  = vm->iport = (SCM) make_fport("*stdin*",  stdin,
-					    PORT_IS_FILE | PORT_READ);
+                                            PORT_IS_FILE | PORT_READ);
   STk_stdout = vm->oport = (SCM) make_fport("*stdout*", stdout,
-					    PORT_IS_FILE | PORT_WRITE);
+                                            PORT_IS_FILE | PORT_WRITE);
   STk_stderr = vm->eport = (SCM) make_fport("*stderr*", stderr,
-					    PORT_IS_FILE | PORT_WRITE);
+                                            PORT_IS_FILE | PORT_WRITE);
 
   ADD_PRIMITIVE(scheme_load);
   ADD_PRIMITIVE(scheme_try_load);
@@ -894,6 +906,8 @@ int STk_init_fport(void)
 
   ADD_PRIMITIVE(open_input_file);
   ADD_PRIMITIVE(open_output_file);
+  ADD_PRIMITIVE(open_binary_ifile);
+  ADD_PRIMITIVE(open_binary_ofile);
 
   ADD_PRIMITIVE(input_fportp);
   ADD_PRIMITIVE(output_fportp);
