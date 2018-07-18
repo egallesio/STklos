@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 11-Jul-2018 16:30 (eg)
+ * Last file update: 18-Jul-2018 16:17 (eg)
  */
 
 
@@ -953,6 +953,7 @@ int STk_get_character(SCM port); /* result may be a wide char */
 int STk_ungetc(int c, SCM port);
 int STk_close(SCM port);
 int STk_putc(int c, SCM port);
+int STk_put_character(int c, SCM port);   /* c may be a wide char */
 int STk_puts(char *s, SCM port);
 int STk_putstring(SCM s, SCM port);
 int STk_nputs(SCM port, char *s, int len);

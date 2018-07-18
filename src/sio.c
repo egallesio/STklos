@@ -1,7 +1,7 @@
 /*
- * s i o . c					-- Low level I/O
+ * s i o . c                                    -- Low level I/O
  *
- * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,9 +20,9 @@
  * USA.
  *
  *
- *	     Author: Erick Gallesio [eg@kaolin.unice.fr]
+ *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ????
- * Last file update:  1-May-2011 22:49 (eg)
+ * Last file update: 18-Jul-2018 16:24 (eg)
  *
  *
  * Completely rewritten for the STklos version (Jan. 2000)
@@ -60,11 +60,15 @@ STk_getc(SCM port)
 int
 STk_get_character(SCM port)  /* result may be a wide character */
 {
-  return (PORT_UNGETC(port) != EOF) ?
-              /* we have an ungetted char, call normal getc */
-              STk_getc(port):
-              /* try to read it as an UTF-8 sequence */
-              STk_utf8_read_char(port);
+  if (STk_use_utf8)
+    return (PORT_UNGETC(port) != EOF) ?
+                  /* we have an ungetted char, call normal getc */
+                  STk_getc(port):
+                  /* try to read it as an UTF-8 sequence */
+                  // FIXME: on ne gère pas la ligne ici!!!
+                  STk_utf8_read_char(port);
+  else
+    return STk_getc(port);
 }
 
 
@@ -109,6 +113,30 @@ STk_putc(int c, SCM port)
     PORT_POS(port) += 1;
   return n;
 }
+
+int
+STk_put_character(int c, SCM port)       /* c may be a wide char */
+{
+  if (!STk_use_utf8)
+    return STk_putc(c, port);
+  else {
+    char str[5] = {}, *s;
+    int n = STk_char2utf8(c, str);
+
+    str[n] = '\0';
+
+    n = 0; 
+    for (s = str; *s; s++)
+      n += PORT_PUTC(port)(*s, PORT_STREAM(port));
+
+    if (n >= 0)
+      PORT_POS(port) += 1;
+    return n;
+  }
+}
+
+
+
 
 int
 STk_puts(char *s, SCM port)

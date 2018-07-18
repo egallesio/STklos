@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 14-Jul-2018 19:38 (eg)
+ * Last file update: 18-Jul-2018 16:14 (eg)
  *
  */
 
@@ -208,7 +208,7 @@ DEFINE_PRIMITIVE("%set-std-port!", set_std_port, subr2, (SCM index, SCM port))
     case SCM_LONG(0): if (!IPORTP(port)) goto badport; vm->iport = port; break;
     case SCM_LONG(1): if (!OPORTP(port)) goto badport; vm->oport = port; break;
     case SCM_LONG(2): if (!OPORTP(port)) goto badport; vm->eport = port; break;
-    default: STk_error_bad_io_param("bad code ~S", index);
+    default: STk_error_bad_io_param("bad port number ~S", index);
   }
   return STk_void;
 badport:
@@ -307,7 +307,6 @@ DEFINE_PRIMITIVE("read-char", read_char, subr01, (SCM port))
   c = STk_get_character(port);
   if (c == UTF8_INCORRECT_SEQUENCE)
     error_bad_utf8_character(c);
-
   return (c == EOF) ? STk_eof : MAKE_CHARACTER(c);
 }
 
@@ -624,7 +623,7 @@ DEFINE_PRIMITIVE("write-char", write_char, subr12, (SCM c, SCM port))
 {
   if (!CHARACTERP(c)) STk_error_bad_io_param("bad character ~S", c);
   port = verify_port(port, PORT_WRITE);
-  STk_putc(CHARACTER_VAL(c), port);
+  STk_put_character(CHARACTER_VAL(c), port);
   return STk_void;
 }
 
