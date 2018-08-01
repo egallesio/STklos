@@ -1,7 +1,7 @@
 /*
- * s p o r t . c			-- String ports management
+ * s p o r t . c                        -- String ports management
  *
- * Copyright © 1993-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 18-Mar-2012 18:47 (eg)
+ * Last file update:  1-Aug-2018 18:28 (eg)
  *
  */
 
@@ -28,7 +28,7 @@
 
 /*===========================================================================*\
  *
- * 			Utilities
+ *                      Utilities
  *
 \*===========================================================================*/
 
@@ -43,21 +43,21 @@ static void error_bad_string(SCM s)
  *
 \*===========================================================================*/
 
-#define START_ALLOC_SIZE  100	/* Initial size of an ouput string port */
+#define START_ALLOC_SIZE  100   /* Initial size of an ouput string port */
 
 struct sstream {
   char *ptr;
   char *base;
   char *end;
   int  bufsize;
-  SCM  str;	/* keep a ref on original string to avoid GC problems */
+  SCM  str;     /* keep a ref on original string to avoid GC problems */
 };
 
-#define PORT_BASE(x)	(((struct sstream *) (x))->base)
-#define PORT_PTR(x)	(((struct sstream *) (x))->ptr)
-#define PORT_END(x)	(((struct sstream *) (x))->end)
+#define PORT_BASE(x)    (((struct sstream *) (x))->base)
+#define PORT_PTR(x)     (((struct sstream *) (x))->ptr)
+#define PORT_END(x)     (((struct sstream *) (x))->end)
 #define PORT_BUFSIZE(x) (((struct sstream *) (x))->bufsize)
-#define PORT_STR(x)	(((struct sstream *) (x))->str)
+#define PORT_STR(x)     (((struct sstream *) (x))->str)
 
 static Inline int Sgetc(void *stream)
 {
@@ -100,8 +100,8 @@ static Inline int Sputc(int c, void *stream)
   if (PORT_PTR(stream) >= PORT_END(stream)) {
     if (PORT_END(stream) == PORT_BASE(stream) + PORT_BUFSIZE(stream)) {
       /* No more room => allocate a new buffer */
-      tmp	  = PORT_BUFSIZE(stream);
-      tmp	 += tmp/2;
+      tmp         = PORT_BUFSIZE(stream);
+      tmp        += tmp/2;
       PORT_BASE(stream)= STk_must_realloc(PORT_BASE(stream), tmp);
       PORT_PTR(stream) = PORT_BASE(stream) + PORT_BUFSIZE(stream);/*base can move*/
       PORT_BUFSIZE(stream) = tmp;
@@ -183,9 +183,9 @@ static void sport_print(SCM obj, SCM port)   /* Generic printing of string ports
   char buffer[MAX_PATH_LENGTH + 20];
 
   sprintf(buffer, "#[%s-string-port %lx%s]",
-	  ISPORTP(obj) ? "input" : "output",
-	  (unsigned long) obj,
-	  PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
+          ISPORTP(obj) ? "input" : "output",
+          (unsigned long) obj,
+          PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
   STk_puts(buffer, port);
 }
 
@@ -197,7 +197,7 @@ static void sport_release(SCM port)
 
 /*===========================================================================*\
  *
- * 			Input ports
+ *                      Input ports
  *
 \*===========================================================================*/
 enum kind_port {SREAD_C, SREAD, SWRITE};
@@ -211,23 +211,23 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
   /* Initialize the stream part */
   switch (kind) {
     case SREAD:   /* this is a input string */
-		  {
-		    char *s = STRING_CHARS(str);
+                  {
+                    char *s = STRING_CHARS(str);
 
-		    PORT_BASE(ss) = s;
-		    PORT_END(ss)  = s + init_len;
-		    PORT_STR(ss)  = str;
-		    break;
-		  }
+                    PORT_BASE(ss) = s;
+                    PORT_END(ss)  = s + init_len;
+                    PORT_STR(ss)  = str;
+                    break;
+                  }
     case SREAD_C: /* this is a input string (from a C string) */
-      		  PORT_BASE(ss) = (char *) str;
-		  PORT_END(ss)  = (char *) str + init_len;
-		  PORT_STR(ss)  = str;
-		  break;
+                  PORT_BASE(ss) = (char *) str;
+                  PORT_END(ss)  = (char *) str + init_len;
+                  PORT_STR(ss)  = str;
+                  break;
     case SWRITE:  /* This is an output string */
-      		  PORT_BASE(ss) = PORT_END(ss) = STk_must_malloc_atomic(init_len);
-		  PORT_STR(ss)  = STk_false;
-		  break;
+                  PORT_BASE(ss) = PORT_END(ss) = STk_must_malloc_atomic(init_len);
+                  PORT_STR(ss)  = STk_false;
+                  break;
   }
 
   PORT_PTR(ss)     = PORT_BASE(ss);
@@ -238,28 +238,28 @@ make_sport(enum kind_port kind,  SCM str, int init_len, int flags)
 
   /* Initialize now the port itsef */
   NEWCELL(res, port);
-  PORT_STREAM(res)	= ss;
-  PORT_FLAGS(res)	= flags | PORT_IS_STRING;
-  PORT_UNGETC(res) 	= EOF;
-  PORT_LINE(res)	= 1;
-  PORT_POS(res)		= 0;
-  PORT_FNAME(res)	= "string port";
-  PORT_CLOSEHOOK(res)	= STk_false;
+  PORT_STREAM(res)      = ss;
+  PORT_FLAGS(res)       = flags | PORT_IS_STRING | PORT_TEXTUAL;
+  PORT_UNGETC(res)      = EOF;
+  PORT_LINE(res)        = 1;
+  PORT_POS(res)         = 0;
+  PORT_FNAME(res)       = "string port";
+  PORT_CLOSEHOOK(res)   = STk_false;
 
-  PORT_PRINT(res)	= sport_print;
-  PORT_RELEASE(res)	= sport_release;
-  PORT_GETC(res)	= Sgetc;
-  PORT_READY(res)	= Sreadyp;
-  PORT_EOFP(res)	= Seof;
-  PORT_CLOSE(res)	= Sclose;
-  PORT_PUTC(res)	= Sputc;
-  PORT_PUTS(res)	= Sputs;
-  PORT_PUTSTRING(res)	= Sputstring;
-  PORT_NPUTS(res)	= Snputs;
-  PORT_FLUSH(res)	= Sflush;
-  PORT_BREAD(res)	= Sread;
-  PORT_BWRITE(res)	= Swrite;
-  PORT_SEEK(res)	= Sseek;
+  PORT_PRINT(res)       = sport_print;
+  PORT_RELEASE(res)     = sport_release;
+  PORT_GETC(res)        = Sgetc;
+  PORT_READY(res)       = Sreadyp;
+  PORT_EOFP(res)        = Seof;
+  PORT_CLOSE(res)       = Sclose;
+  PORT_PUTC(res)        = Sputc;
+  PORT_PUTS(res)        = Sputs;
+  PORT_PUTSTRING(res)   = Sputstring;
+  PORT_NPUTS(res)       = Snputs;
+  PORT_FLUSH(res)       = Sflush;
+  PORT_BREAD(res)       = Sread;
+  PORT_BWRITE(res)      = Swrite;
+  PORT_SEEK(res)        = Sseek;
 
   return (struct port_obj *) res;
 }

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2011 23:35 (eg)
-;;;; Last file update: 28-Jun-2018 17:47 (eg)
+;;;; Last file update:  1-Aug-2018 18:40 (eg)
 ;;;;
 
 (require "test")
@@ -258,6 +258,17 @@
         (let ((x (make-string 7 #\λ)))
           (string-fill! x #\space 1 6)
           x))
+
+  (test "peek-char  and read-char on UTF8 chars"
+        '(#\x2264 #\x2264 #\xab #\xbb #eof #eof)
+        (let ((p (open-input-string (string #\x2264 #\xab #\xbb))))
+          (let* ((c0 (peek-char p))
+                 (c1 (read-char p))
+                 (c2 (read-char p))
+                 (c3 (read-char p))
+                 (c4 (peek-char p))
+                 (c5 (read-char p)))
+            (list c0 c1 c2 c3 c4 c5))))
   
   ;;---- Test the lambda form with λ symbol
   (test "lambda symbol.1"

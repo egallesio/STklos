@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 18-Jul-2018 14:16 (eg)
+;;;; Last file update:  1-Aug-2018 18:17 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -688,3 +688,35 @@ doc>
     (error "bad output port ~S" port))
   (not (port-closed? port)))
 
+
+#|
+<doc R7RS read-string
+ * (read-string k)
+ * (read-string k port)
+ *
+ * Reads the next |k| characters, or as many as are available
+ * before the end of file, from the textual input |port| into a
+ * newly allocated string in left-to-right order and returns the
+ * string. If no characters are available before the end of file,
+ * an end-of-file object is returned.
+doc>
+|#
+(define (read-string k :optional (port (current-input-port)))
+  (%claim-error
+    'read-string
+    (unless (positive? k)
+      (error "parameter must be a positive integer. It was: ~S" k))
+    (unless (and (input-port? port) (textual-port? port))
+      (error "bad textual input port ~S" port))
+
+    (let ((buffer (make-string k)))
+      (let Loop ((i 0)
+                 (c (read-char port)))
+        (cond
+          ((eof-object? c) (if (zero? i)
+                               (eof-object)
+                               (substring buffer 0 i)))
+          ((= i (- k 1))   (string-set! buffer i c)
+                           buffer)
+          (else            (string-set! buffer i c)
+                           (Loop (+ i 1) (read-char port))))))))

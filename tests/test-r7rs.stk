@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 13-Jul-2018 15:06 (eg)
+;;;; Last file update:  1-Aug-2018 18:29 (eg)
 ;;;;
 
 (require "test")
@@ -403,6 +403,10 @@
              (v (call-with-port p read)))
         (cons v (port-closed? p))))
 
+(let ((p (open-input-string "ABCDE")))
+  (test "read-string.1" "ABCD" (read-string 4 p))
+  (test "read-string.2" "E"    (read-string 4 p))
+  (test "read-string.3" #eof   (read-string 4 p)))
 
 
 (test-section-end)
