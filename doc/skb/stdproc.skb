@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  1-Aug-2018 18:11 (eg)
+;; Last file update:  1-Aug-2018 19:09 (eg)
 ;;
 ;; ======================================================================
 
@@ -597,6 +597,9 @@ be accessed as a normal port with the standard Scheme primitives.])
 (insertdoc 'eof-object)
 (insertdoc 'char-ready?)
 (insertdoc 'read-string)
+(insertdoc 'read-u8)
+(insertdoc 'peek-u8)
+(insertdoc 'u8-ready?)
 (insertdoc 'read-line)
 (insertdoc 'read-from-string)
 (insertdoc 'port->string-list))

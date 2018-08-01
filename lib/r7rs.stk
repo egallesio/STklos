@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  1-Aug-2018 18:17 (eg)
+;;;; Last file update:  1-Aug-2018 19:08 (eg)
 ;;;;
 
 ;;;; ----------------------------------------------------------------------
@@ -720,3 +720,67 @@ doc>
                            buffer)
           (else            (string-set! buffer i c)
                            (Loop (+ i 1) (read-char port))))))))
+
+#|
+<doc R7RS read-u8
+ * (read-u8)
+ * (read-u8 port)
+ *
+ * Returns the next byte available from the binary input |port|,
+ * updating the |port| to point to the following byte. If no more
+ * bytes are available, an end-of-file object is returned.
+ *
+ * @l
+ * ,(bold "Note"): This function is similar to the |read-byte|
+ * function, excepted that it can be used only on  a binary port.
+doc>
+|#
+
+(define (read-u8 :optional (port (current-input-port)))
+  (%claim-error
+    'read-u8
+    (unless (binary-port? port)
+      (error "bad binary port ~S" port))
+    (read-byte port)))
+
+#|
+<doc R7RS peek-u8
+ * (peek-u8)
+ * (peek-u8 port)
+ *
+ * Returns the next byte available from the binary input |port|,
+ * but without updating the |port| to point to the following
+ * byte. If no more bytes are available, an end-of-file object
+ * is returned.
+ *
+ * @l
+ * ,(bold "Note"): This function is similar to the |peek-byte|
+ * function, excepted that it can be used only on  a binary port.
+doc>
+|#
+(define (peek-u8 :optional (port (current-input-port)))
+  (%claim-error
+    'peek-u8
+    (unless (binary-port? port)
+      (error "bad binary port ~S" port))
+    (peek-byte port)))
+
+#|
+<doc R7RS u8-ready?
+ * (u8-ready?)
+ * (u8-ready? port)
+ *
+ * Returns #t if a byte is ready on the binary input |port| and
+ * returns #f otherwise. If |u8-ready?| returns #t then the
+ * next read-u8 operation on the given port is guaranteed
+ * not to hang. If the |port| is at end of file then |u8-ready?|
+ * returns #t.
+doc>
+|#
+(define (u8-ready? :optional (port (current-input-port)))
+  (%claim-error
+    'u8-ready?
+    (unless (binary-port? port)
+      (error "bad binary port ~S" port))
+    (char-ready? port)))
+
