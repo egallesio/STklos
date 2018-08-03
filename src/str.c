@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 10-Jul-2018 20:33 (eg)
+ * Last file update:  2-Aug-2018 23:04 (eg)
  */
 
 #include <ctype.h>
@@ -1317,7 +1317,7 @@ DEFINE_PRIMITIVE("string->utf8", string2utf8, vsubr, (int argc, SCM *argv))
   start_addr    = STk_utf8_index(STRING_CHARS(str), (int) start, STRING_SIZE(str));
   end_addr      = STk_utf8_index(STRING_CHARS(str), (int) end, STRING_SIZE(str));
 
-  return STk_make_bytevector_from_string(start_addr, end_addr - start_addr);
+  return STk_make_bytevector_from_C_string(start_addr, end_addr - start_addr);
 }
 
 

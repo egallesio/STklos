@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 18-Jul-2018 16:17 (eg)
+ * Last file update:  2-Aug-2018 23:03 (eg)
  */
 
 
@@ -934,6 +934,10 @@ struct port_obj {
 #define ISPORTP(x) (SPORTP(x) && (PORT_FLAGS(x) & (PORT_READ|PORT_RW)))
 #define OSPORTP(x) (SPORTP(x) && (PORT_FLAGS(x) & (PORT_WRITE|PORT_RW)))
 
+#define BPORTP(x)  (PORTP(x)  && (PORT_FLAGS(x) & PORT_IS_BYTEVECTOR))
+#define IBPORTP(x) (BPORTP(x) && (PORT_FLAGS(x) & (PORT_READ|PORT_RW)))
+#define OBPORTP(x) (BPORTP(x) && (PORT_FLAGS(x) & (PORT_WRITE|PORT_RW)))
+
 #define VPORTP(x)  (PORTP(x)  && (PORT_FLAGS(x) & PORT_IS_VIRTUAL))
 #define IVPORTP(x) (VPORTP(x) && (PORT_FLAGS(x) & (PORT_READ|PORT_RW)))
 #define OVPORTP(x) (VPORTP(x) && (PORT_FLAGS(x) & (PORT_WRITE|PORT_RW)))
@@ -1275,7 +1279,6 @@ int STk_utf8_char_from_byte(char *s, int i, int max); /*  byte index => char ind
 int STk_init_utf8(void);
 
 
-
 /*
   ------------------------------------------------------------------------------
   ----
@@ -1284,12 +1287,49 @@ int STk_init_utf8(void);
   ------------------------------------------------------------------------------
 */
 
+struct uvector_obj {
+  stk_header header;
+  int vect_type;
+  int size;
+  char data[1];
+};
+
+#define UVECT_S8        0
+#define UVECT_U8        1
+#define UVECT_S16       2
+#define UVECT_U16       3
+#define UVECT_S32       4
+#define UVECT_U32       5
+#define UVECT_S64       6
+#define UVECT_U64       7
+#define UVECT_F32       8
+#define UVECT_F64       9
+
+/*
+ * 64 bits values are always represented with bignums even on 64 bits machines
+ * Here are the intersting maxima for 64 bits.
+ */
+#define S64_MIN "-9223372036854775808"
+#define S64_MAX  "9223372036854775807"
+#define U64_MAX "18446744073709551615"
+
+
+#define UVECTOR_TYPE(p) (((struct uvector_obj *) (p))->vect_type)
+#define UVECTOR_SIZE(p) (((struct uvector_obj *) (p))->size)
+#define UVECTOR_DATA(p) (((struct uvector_obj *) (p))->data)
+#define UVECTORP(p)     (BOXED_TYPE_EQ((p), tc_uvector))
+
+#define BYTEVECTORP(p)  (UVECTORP(p) && UVECTOR_TYPE(p) == UVECT_U8)
+
 extern int STk_uvectors_allowed;
 
 int STk_uniform_vector_tag(char *s);
 int STk_uvector_equal(SCM u1, SCM u2);
 SCM STk_list2uvector(int type, SCM l);
 int STk_init_uniform_vector(void);
+
+SCM STk_make_bytevector_from_C_string(char *str, long len);
+
 
 /*
   ------------------------------------------------------------------------------

@@ -21,46 +21,12 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 11-Jul-2018 16:25 (eg)
+ * Last file update:  2-Aug-2018 23:00 (eg)
  */
 
 #include "stklos.h"
 
-#define UVECT_S8        0
-#define UVECT_U8        1
-#define UVECT_S16       2
-#define UVECT_U16       3
-#define UVECT_S32       4
-#define UVECT_U32       5
-#define UVECT_S64       6
-#define UVECT_U64       7
-
-#define UVECT_F32       8
-#define UVECT_F64       9
-
-/*
- * 64 bits values are always represeneted with bignums even on 64 bits machines
- * Here are the intersting maxima for 64 bits.
- */
-#define S64_MIN "-9223372036854775808"
-#define S64_MAX  "9223372036854775807"
-#define U64_MAX "18446744073709551615"
-
-
-struct uvector_obj {
-  stk_header header;
-  int vect_type;
-  int size;
-  char data[1];
-};
-
 int STk_uvectors_allowed = 0;
-
-#define UVECTOR_TYPE(p) (((struct uvector_obj *) (p))->vect_type)
-#define UVECTOR_SIZE(p) (((struct uvector_obj *) (p))->size)
-#define UVECTOR_DATA(p) (((struct uvector_obj *) (p))->data)
-#define UVECTORP(p)     (BOXED_TYPE_EQ((p), tc_uvector))
-
 static SCM u64_max, s64_min, s64_max;
 
 
@@ -531,6 +497,13 @@ static struct extended_type_descr xtype_uvector = {
 /*                              B Y T E V E C T O R S                       */
 /*                                                                          */
 /*==========================================================================*/
+
+SCM STk_make_C_bytevector(int len, char *init)
+{
+  return makeuvect(UVECT_U8, len, init);
+}
+
+
 /*
 <doc R7RS bytevector-copy
  * (bytevector-copy bytevector)
@@ -621,7 +594,7 @@ DEFINE_PRIMITIVE("bytevector-append", bytevector_append, vsubr,(int argc, SCM *a
  * @end lisp
 doc>
 */
-SCM STk_make_bytevector_from_string(char *str, long len)
+SCM STk_make_bytevector_from_C_string(char *str, long len)
 {
   SCM z  = makeuvect(UVECT_U8, len, (SCM) NULL);
   memcpy(UVECTOR_DATA(z),str, len);
@@ -640,7 +613,7 @@ DEFINE_PRIMITIVE("utf8->string", utf82string, vsubr, (int argc, SCM *argv))
   len        = end_addr - start_addr;
 
   /* Verify that the sub-vector denotes a correct string */
-  if (STk_utf8_verify_sequence(start_addr, len)) {
+  if (STk_utf8_verify_sequence((char *) start_addr, len)) {
     SCM z = STk_makestring(len, NULL);
     memcpy(STRING_CHARS(z), start_addr, end_addr - start_addr);
     return z;
