@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 18-Jul-2018 16:14 (eg)
+ * Last file update:  3-Aug-2018 17:35 (eg)
  *
  */
 
@@ -312,18 +312,21 @@ DEFINE_PRIMITIVE("read-char", read_char, subr01, (SCM port))
 
 
 /*
-<doc EXT read-chars
- * (read-chars size)
- * (read-chars size port)
+<doc EXT read-bytes read-chars
+ * (read-bytes size)
+ * (read-bytes size port)
  *
  * Returns a newly allocated string made of |size| characters read from |port|.
  * If less than |size| characters are available on the input port, the returned
  * string is smaller than |size| and its size is the number of available
  * characters. |Port| may be omitted, in which case it defaults to the
  * value returned by |current-input-port|.
-doc>
+ * @l
+ * ,(bold "Note:") This function was previously called |read-chars|. Usage
+ * of the old name is deprecated.
+ doc>
  */
-DEFINE_PRIMITIVE("read-chars", read_chars, subr12, (SCM size, SCM port))
+DEFINE_PRIMITIVE("read-bytes", read_chars, subr12, (SCM size, SCM port))
 {
   int count, n = STk_integer_value(size);
   SCM z;

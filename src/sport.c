@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  3-Aug-2018 16:09 (eg)
+ * Last file update:  3-Aug-2018 17:59 (eg)
  *
  */
 
@@ -295,11 +295,10 @@ make_bport(enum kind_port kind,  SCM str, int init_len, int flags)
                     PORT_STR(ss)  = str;
                     break;
                   }
-//    case PREAD_C: /* this is a input string (from a C string) */
-//                  PORT_BASE(ss) = (char *) str;
-//                  PORT_END(ss)  = (char *) str + init_len;
-//                  PORT_STR(ss)  = str;
-//                  break;
+    case PREAD_C:  /* not used for bytevector port */
+                  STk_error("Problem: PREAD_C used for a bytecode vector.");
+                  exit(1);
+                  break;
     case PWRITE:  /* This is an output bytevector */
                   PORT_BASE(ss) = PORT_END(ss) = STk_must_malloc_atomic(init_len);
                   PORT_STR(ss)  = STk_false;
