@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update:  2-Aug-2018 23:00 (eg)
+ * Last file update:  3-Aug-2018 19:25 (eg)
  */
 
 #include "stklos.h"
@@ -498,9 +498,16 @@ static struct extended_type_descr xtype_uvector = {
 /*                                                                          */
 /*==========================================================================*/
 
-SCM STk_make_C_bytevector(int len, char *init)
+SCM STk_make_C_bytevector(int len)
 {
-  return makeuvect(UVECT_U8, len, init);
+  return makeuvect(UVECT_U8, len, NULL);
+}
+
+SCM STk_make_bytevector_from_C_string(char *str, long len)
+{
+  SCM z  = makeuvect(UVECT_U8, len, (SCM) NULL);
+  memcpy(UVECTOR_DATA(z),str, len);
+  return z;
 }
 
 
@@ -594,13 +601,6 @@ DEFINE_PRIMITIVE("bytevector-append", bytevector_append, vsubr,(int argc, SCM *a
  * @end lisp
 doc>
 */
-SCM STk_make_bytevector_from_C_string(char *str, long len)
-{
-  SCM z  = makeuvect(UVECT_U8, len, (SCM) NULL);
-  memcpy(UVECTOR_DATA(z),str, len);
-  return z;
-}
-
 DEFINE_PRIMITIVE("utf8->string", utf82string, vsubr, (int argc, SCM *argv))
 {
   long start, end, len;

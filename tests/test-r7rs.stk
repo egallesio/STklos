@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update:  3-Aug-2018 17:12 (eg)
+;;;; Last file update:  5-Aug-2018 17:45 (eg)
 ;;;;
 
 (require "test")
@@ -466,6 +466,37 @@
                (val     (get-output-bytevector p)))
           (close-port p)
           (list closed? val (port-closed? p)))))
+
+; --------------------------------------------------
+
+(let ((p (open-input-bytevector #u8(0 1 2 3))))
+  (test "read-bytevector.1"
+        '(#u8(0 1 2 3) . #eof)
+        (let* ((c0 (read-bytevector 2 p))
+               (c1 (read-bytevector 3 p))
+               (c2 (read-bytevector 1 p)))
+          (cons (bytevector-append c0 c1) c2))))
+
+(test "read-bytevector.2"
+      #t
+      (eof-object? (read-bytevector 3 (open-input-bytevector #u8()))))
+(test "read-bytevector.3"
+      #t (u8-ready? (open-input-bytevector #u8(1))))
+(test "read-bytevector.4"
+      #u8(0)
+      (read-bytevector 3 (open-input-bytevector #u8(0))))
+(test "read-bytevector.4"
+      #u8(0 1)
+      (read-bytevector 3 (open-input-bytevector #u8(0 1))))
+(test "read-bytevector.4"
+      #u8(0 1 2)
+      (read-bytevector 3 (open-input-bytevector #u8(0 1 2))))
+(test "read-bytevector.5"
+      #u8(0 1 2)
+      (read-bytevector 3 (open-input-bytevector #u8(0 1 2 3))))
+(test "read-bytevector.6"
+      #u8(0 1 2)
+      (read-bytevector 10 (open-input-bytevector #u8(0 1 2 ))))
 
 
 (test-section-end)

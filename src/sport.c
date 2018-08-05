@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  3-Aug-2018 17:59 (eg)
+ * Last file update:  3-Aug-2018 18:16 (eg)
  *
  */
 
@@ -318,7 +318,7 @@ make_bport(enum kind_port kind,  SCM str, int init_len, int flags)
   PORT_FNAME(res)       = "bytevector port";
   PORT_CLOSEHOOK(res)   = STk_false;
 
-  PORT_PRINT(res)       = NULL;
+  PORT_PRINT(res)       = sport_print;
   PORT_RELEASE(res)     = sport_release;
   PORT_GETC(res)        = Sgetc;
   PORT_READY(res)       = Sreadyp;

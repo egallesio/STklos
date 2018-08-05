@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  2-Aug-2018 23:03 (eg)
+ * Last file update:  5-Aug-2018 17:23 (eg)
  */
 
 
@@ -944,6 +944,8 @@ struct port_obj {
 
 #define PORT_IS_CLOSEDP(x)      (PORT_FLAGS(x) & PORT_CLOSED)
 #define PORT_CASE_SENSITIVEP(x) (PORT_FLAGS(x) & PORT_CASE_SENSITIVE)
+#define PORT_BINARYP(x)         (PORT_FLAGS(x) & PORT_BINARY)
+#define PORT_TEXTUALP(x)        (PORT_FLAGS(x) & PORT_TEXTUAL)
 
 
 /****
@@ -1328,6 +1330,7 @@ int STk_uvector_equal(SCM u1, SCM u2);
 SCM STk_list2uvector(int type, SCM l);
 int STk_init_uniform_vector(void);
 
+  SCM STk_make_C_bytevector(int len);  
 SCM STk_make_bytevector_from_C_string(char *str, long len);
 
 

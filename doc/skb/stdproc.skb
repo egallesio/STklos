@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  2-Aug-2018 23:21 (eg)
+;; Last file update:  5-Aug-2018 17:34 (eg)
 ;;
 ;; ======================================================================
 
@@ -593,6 +593,7 @@ be accessed as a normal port with the standard Scheme primitives.])
 (insertdoc 'define-reader-ctor)
 (insertdoc 'read-char)
 (insertdoc 'read-chars)
+(insertdoc 'read-bytevector)
 (insertdoc 'read-chars!)
 (insertdoc 'read-byte)
 (insertdoc 'peek-char)

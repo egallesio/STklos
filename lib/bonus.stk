@@ -1,7 +1,7 @@
 ;;;;
-;;;; bonus.stk	-- Useful primitives not in R5RS
+;;;; bonus.stk  -- Useful primitives not in R5RS
 ;;;;
-;;;; Copyright © 2000-2014 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,9 +21,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  2-Jan-2014 23:16 (eg)
+;;;; Last file update:  3-Aug-2018 18:48 (eg)
 ;;;;
 
+
+;;;; Deprecated names
+(define read-chars read-bytes)
+(define read-chars! read-bytes!)
 
 #|
 <doc EXT gensym
@@ -45,12 +49,12 @@ doc>
   (let ((counter 0))
     (lambda (:optional (prefix "G"))
       (when (symbol? prefix)
-	(set! prefix (symbol->string prefix))
-	(unless (string? prefix)
-	  (error 'gensym "bad gensym prefix ~S" prefix)))
+        (set! prefix (symbol->string prefix))
+        (unless (string? prefix)
+          (error 'gensym "bad gensym prefix ~S" prefix)))
       (set! counter (+ counter 1))
       (string->uninterned-symbol (string-append prefix
-						(number->string counter))))))
+                                                (number->string counter))))))
 
 
 #|
@@ -132,21 +136,21 @@ doc>
  * general value.
 doc>
 |#
-(define (every pred l . others)		;; compatible with SRFI-1
+(define (every pred l . others)         ;; compatible with SRFI-1
   (if (null? others)
       ;; EVERY called with mono argument predicate
       (letrec ((every (lambda (l)
-			(if (null? l)
-			    #t
-			    (and (pred (car l)) (every (cdr l)))))))
-	(every l))
+                        (if (null? l)
+                            #t
+                            (and (pred (car l)) (every (cdr l)))))))
+        (every l))
       ;; General case
       (letrec ((every (lambda (l)
-			(if (memq '() l)
-			    #t
-			    (and (apply pred (map car l))
-				 (every (map cdr l)))))))
-	(every (cons l others)))))
+                        (if (memq '() l)
+                            #t
+                            (and (apply pred (map car l))
+                                 (every (map cdr l)))))))
+        (every (cons l others)))))
 
 #|
 <doc EXT any
@@ -178,21 +182,21 @@ doc>
  * @end lisp
 doc>
 |#
-(define (any pred l . others)		;; compatible with SRFI-1
+(define (any pred l . others)           ;; compatible with SRFI-1
   (if (null? others)
       ;; ANY called with mono argument predicate
       (letrec ((any (lambda (l)
-			(if (null? l)
-			    #f
-			    (or (pred (car l)) (any (cdr l)))))))
-	(any l))
+                        (if (null? l)
+                            #f
+                            (or (pred (car l)) (any (cdr l)))))))
+        (any l))
       ;; General case
       (letrec ((any (lambda (l)
-			(if (memq '() l)
-			    #f
-			    (or (apply pred (map car l))
-				 (any (map cdr l)))))))
-	(any (cons l others)))))
+                        (if (memq '() l)
+                            #f
+                            (or (apply pred (map car l))
+                                 (any (map cdr l)))))))
+        (any (cons l others)))))
 
 
 ;;;
@@ -244,7 +248,7 @@ doc>
 
 
 (define (open-output-virtual :key (write-char #f) (write-string #f)
-			     (flush #f) (close #f))
+                             (flush #f) (close #f))
   (%open-output-virtual (vector write-char write-string flush close)))
 
 
@@ -268,7 +272,7 @@ doc>
 |#
 (define (read-from-string s)
   (let* ((p    (open-input-string s))
-	 (expr (read p)))
+         (expr (read p)))
     (close-port p)
     expr))
 
@@ -292,7 +296,7 @@ doc>
 |#
 (define (eval-from-string str :optional env)
   (eval (read-from-string str)
-	env))
+        env))
 
 
 
@@ -454,9 +458,9 @@ doc>
 (define (alist->hash-table lst :optional (comp eq?) (hash hash-table-hash))
   (let ((ht (make-hash-table comp hash)))
     (for-each (lambda (x)
-		(if (not (hash-table-exists? ht (car x)))
-		    (hash-table-set! ht (car x) (cdr x))))
-	      lst)
+                (if (not (hash-table-exists? ht (car x)))
+                    (hash-table-set! ht (car x) (cdr x))))
+              lst)
     ht))
 
 
@@ -490,8 +494,8 @@ doc>
 |#
 (define (hash-table-update! hash key func :optional (thunk #f thunk?))
   (let ((value (if thunk?
-		   (hash-table-ref hash key thunk)
-		   (hash-table-ref hash key))))
+                   (hash-table-ref hash key thunk)
+                   (hash-table-ref hash key))))
     (hash-table-set! hash key (func value))))
 
 (define (hash-table-update!/default hash key func default)
@@ -535,8 +539,8 @@ doc>
 |#
 (define (hash-table-fold ht func val)
   (hash-table-for-each ht
-		       (lambda (key value)
-			 (set! val (func key value val))))
+                       (lambda (key value)
+                         (set! val (func key value val))))
   val)
 
 #|
@@ -561,7 +565,7 @@ doc>
 |#
 (define (hash-table-copy ht)
   (let ((new (make-hash-table (hash-table-equivalence-function ht)
-			      (hash-table-hash-function ht))))
+                              (hash-table-hash-function ht))))
     (hash-table-merge! new ht)))
 
 ;; ======================================================================
@@ -610,13 +614,13 @@ doc>
 |#
 (define-macro (fluid-let bindings . body)
   (let* ((vars (map car bindings))
-	 (vals (map cadr bindings))
-	 (tmps (map (lambda (x) (gensym)) vars)))
+         (vals (map cadr bindings))
+         (tmps (map (lambda (x) (gensym)) vars)))
     `(let ,(map list tmps vars)
        (dynamic-wind
-	  (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars vals))
-	  (lambda () ,@body)
-	  (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars tmps))))))
+          (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars vals))
+          (lambda () ,@body)
+          (lambda () ,@(map (lambda (x y) `(set! ,x ,y)) vars tmps))))))
 
 ;;;;
 ;;;; SETTERS
@@ -660,26 +664,26 @@ doc>
   (if (or (generic? proc) (parameter? proc))
       proc
       (or (key-get (%procedure-plist proc) :setter #f)
-	  (error 'setter "no setter defined for ~S" proc))))
+          (error 'setter "no setter defined for ~S" proc))))
 
 
 ;; Initialize the setter of setter !!
 (%set-procedure-plist!
          setter
-	 (list :setter
-	       (lambda (proc setter)
-		 (%set-procedure-plist! proc
-					(key-set! (%procedure-plist proc)
-						  :setter
-						  setter)))))
+         (list :setter
+               (lambda (proc setter)
+                 (%set-procedure-plist! proc
+                                        (key-set! (%procedure-plist proc)
+                                                  :setter
+                                                  setter)))))
 
 ;; And now set some setter for primitive functions
-(set! (setter car) 	  	set-car!)
-(set! (setter cdr) 	  	set-cdr!)
-(set! (setter vector-ref) 	vector-set!)
-(set! (setter string-ref) 	string-set!)
-(set! (setter slot-ref) 	slot-set!)
-(set! (setter struct-ref) 	struct-set!)
+(set! (setter car)              set-car!)
+(set! (setter cdr)              set-cdr!)
+(set! (setter vector-ref)       vector-set!)
+(set! (setter string-ref)       string-set!)
+(set! (setter slot-ref)         slot-set!)
+(set! (setter struct-ref)       struct-set!)
 
 
 ;=============================================================================
@@ -696,11 +700,11 @@ doc>
 (define-macro time
   (lambda args
     (let ((tmp1 (gensym))
-	  (tmp2 (gensym)))
+          (tmp2 (gensym)))
       `(let* ((,tmp1 (clock))
-	      (,tmp2 (begin ,@args)))
-	 (format (current-error-port) "Elapsed time: ~S ms\n" (- (clock) ,tmp1))
-	 ,tmp2))))
+              (,tmp2 (begin ,@args)))
+         (format (current-error-port) "Elapsed time: ~S ms\n" (- (clock) ,tmp1))
+         ,tmp2))))
 
 
 
@@ -727,13 +731,13 @@ doc>
 |#
 (define-macro (dotimes bindings . body)
   (apply (lambda (var count . result)
-	   (let ((limit  (gensym))
-		 (result (if (null? result) (list '(void)) result)))
-	     `(let ((,limit ,count))
-		(do ((,var 0 (+ ,var 1)))
-		    ((>= ,var ,limit) ,@result)
-		  ,@body))))
-	 bindings))
+           (let ((limit  (gensym))
+                 (result (if (null? result) (list '(void)) result)))
+             `(let ((,limit ,count))
+                (do ((,var 0 (+ ,var 1)))
+                    ((>= ,var ,limit) ,@result)
+                  ,@body))))
+         bindings))
 
 #|
 <doc EXT-SYNTAX while
@@ -746,7 +750,7 @@ doc>
 (define-macro (while test . body)
   (let ((lab (gensym)))
     `(let ,lab ()
-	  (when ,test ,@body (,lab)))))
+          (when ,test ,@body (,lab)))))
 
 #|
 <doc EXT-SYNTAX until
@@ -759,7 +763,7 @@ doc>
 (define-macro (until test . body)
   (let ((lab (gensym)))
     `(let ,lab ()
-	  (unless ,test ,@body (,lab)))))
+          (unless ,test ,@body (,lab)))))
 
 
 
@@ -785,14 +789,14 @@ doc>
   (let ((tag   (gensym "call/ec")))
     (with-handler
         (lambda (c)
-	  (if (and (pair? c) (eq? (car c) tag))
-	      (apply values (cdr c))
-	      (raise c)))
-	(proc (lambda l (raise (cons tag l)))))))
+          (if (and (pair? c) (eq? (car c) tag))
+              (apply values (cdr c))
+              (raise c)))
+        (proc (lambda l (raise (cons tag l)))))))
 
 
 ;; ======================================================================
-;;	base64 ...
+;;      base64 ...
 ;; ======================================================================
 #|
 <doc EXT base64-encode-string
@@ -811,17 +815,17 @@ doc>
 (define base64-encode-string #f)
 (define base64-decode-string #f)
 (let ((encode/decode (lambda (op)
-		       (lambda (str)
-			 (let ((in  (open-input-string str))
-			       (out (open-output-string)))
-			   (op in out)
-			   (get-output-string out))))))
+                       (lambda (str)
+                         (let ((in  (open-input-string str))
+                               (out (open-output-string)))
+                           (op in out)
+                           (get-output-string out))))))
 
   (set! base64-encode-string (encode/decode base64-encode))
   (set! base64-decode-string (encode/decode base64-decode)))
 
 ;; ======================================================================
-;;	md5sum ...
+;;      md5sum ...
 ;; ======================================================================
 #|
 <doc EXT md5sum-file
@@ -833,37 +837,37 @@ doc>
 (define (md5sum-file path)
   (let ((port (open-file path "r")))
     (if port
-	(let ((res (md5sum port)))
-	  (close-input-port port)
-	  res)
-	(error "cannot read file ~s" path))))
+        (let ((res (md5sum port)))
+          (close-input-port port)
+          res)
+        (error "cannot read file ~s" path))))
 
 ;; ======================================================================
-;;	ansi-color  & ansi-color-protect...
+;;      ansi-color  & ansi-color-protect...
 ;; ======================================================================
-(define ansi-color 	   #f)
+(define ansi-color         #f)
 (define ansi-color-protect #f)
 
 (let ((ansi-color-start   "\e[")
       (ansi-color-stop    "m"))
 
   (define (code c)
-    (let ((alist '((normal	. "0")
-		   (bold 	. "1")  (no-bold 	. "21")
-		   (italic 	. "2")  (no-italic	. "22")
-		   (underline	. "4")  (no-undeline	. "24")
-		   (blink 	. "5")  (no-blink	. "25")
-		   (reverse 	. "7")  (no-reverse	. "27")
-		   (black 	. "30") (bg-black	. "40")
-		   (red 	. "31") (bg-red		. "41")
-		   (green 	. "32") (bg-green	. "42")
-		   (yellow 	. "33") (bg-yellow	. "43")
-		   (blue 	. "34") (bg-blue	. "44")
-		   (magenta	. "35") (bg-magenta	. "45")
-		   (cyan 	. "36") (bg-cyan	. "46")
-		   (white 	. "37") (bg-white	. "47"))))
+    (let ((alist '((normal      . "0")
+                   (bold        . "1")  (no-bold        . "21")
+                   (italic      . "2")  (no-italic      . "22")
+                   (underline   . "4")  (no-undeline    . "24")
+                   (blink       . "5")  (no-blink       . "25")
+                   (reverse     . "7")  (no-reverse     . "27")
+                   (black       . "30") (bg-black       . "40")
+                   (red         . "31") (bg-red         . "41")
+                   (green       . "32") (bg-green       . "42")
+                   (yellow      . "33") (bg-yellow      . "43")
+                   (blue        . "34") (bg-blue        . "44")
+                   (magenta     . "35") (bg-magenta     . "45")
+                   (cyan        . "36") (bg-cyan        . "46")
+                   (white       . "37") (bg-white       . "47"))))
       (let ((v (assoc c alist)))
-	(if v (cdr v) ""))))
+        (if v (cdr v) ""))))
 
   ;; ansi-color-protect ...
   (set! ansi-color-protect
@@ -875,39 +879,39 @@ doc>
   (set! ansi-color
     (lambda  args
       (let Loop ((args        args)
-		 (str-prev?  #t)
-		 (res         ""))
-	(cond
-	  ((null? args)
-	     (if str-prev?
-		 res
-		 (string-append res ansi-color-stop)))
-	  ((string? (car args))
-	     (Loop (cdr args)
-		   #t
-		   (string-append res
-				  (if str-prev? "" ansi-color-stop)
-				  (car args))))
-	  ((symbol? (car args))
-	     (Loop (cdr args)
-		   #f
-		   (string-append res
-				  (if  str-prev? ansi-color-start ";")
-				  (code (car args)))))
-	  (else (error 'ansi-color "bad command ~S" args)))))))
+                 (str-prev?  #t)
+                 (res         ""))
+        (cond
+          ((null? args)
+             (if str-prev?
+                 res
+                 (string-append res ansi-color-stop)))
+          ((string? (car args))
+             (Loop (cdr args)
+                   #t
+                   (string-append res
+                                  (if str-prev? "" ansi-color-stop)
+                                  (car args))))
+          ((symbol? (car args))
+             (Loop (cdr args)
+                   #f
+                   (string-append res
+                                  (if  str-prev? ansi-color-start ";")
+                                  (code (car args)))))
+          (else (error 'ansi-color "bad command ~S" args)))))))
 
 (define do-color
   (let ((term (getenv "TERM")))
     (if (and (not (key-get *%program-args* :interactive #f))
-	     (any (lambda(x) (regexp-match x term))
-		  '("rxvt" "xterm" "xterm-color" "linux" "cygwin" "cons25")))
-	;; Terminal accepts color
-	ansi-color
-	;; Provide a procedure which ignore color indications
-	(lambda args
-	  (apply string-append
-		 (map (lambda (x) (if (string? x) x ""))
-		      args))))))
+             (any (lambda(x) (regexp-match x term))
+                  '("rxvt" "xterm" "xterm-color" "linux" "cygwin" "cons25")))
+        ;; Terminal accepts color
+        ansi-color
+        ;; Provide a procedure which ignore color indications
+        (lambda args
+          (apply string-append
+                 (map (lambda (x) (if (string? x) x ""))
+                      args))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;
@@ -939,8 +943,8 @@ doc>
   ;; Read all the lines of port and put them in a list
   (let loop ((res '()) (sexp (reader p)))
     (if (eof-object? sexp)
-	(values (reverse res))
-	(loop (cons sexp res) (reader p)))))
+        (values (reverse res))
+        (loop (cons sexp res) (reader p)))))
 
 (define (port->string p)
   (unless (input-port? p) (error "bad port ~S" p))
@@ -1009,15 +1013,15 @@ doc>
 |#
 (define-macro (declare-new-error name)
   (let ((cond-name (string->symbol (format "&~a" name)))
-	(predicate (string->symbol (format "&~a?" name)))
-	(args      (gensym)))
+        (predicate (string->symbol (format "&~a?" name)))
+        (args      (gensym)))
     `(begin
        (define-condition-type ,cond-name &error-message ,predicate)
        (define (,name . ,args)
-	 (if (and (not (null? ,args))
-		  (symbol? (car ,args)))
-	     (apply signal-error ,cond-name ,args)
-	     (apply signal-error ,cond-name ',name ,args))))))
+         (if (and (not (null? ,args))
+                  (symbol? (car ,args)))
+             (apply signal-error ,cond-name ,args)
+             (apply signal-error ,cond-name ',name ,args))))))
 
 #|
 <doc EXT  exec exec-list
@@ -1082,17 +1086,17 @@ doc>
 
   ;; Here we go
   (let ((s        (if (symbol? str) (symbol->string str) str))
-	(external (apply append (map module-exports (module-imports module))))
-	(internal (module-symbols module)))
+        (external (apply append (map module-exports (module-imports module))))
+        (internal (module-symbols module)))
     (let Loop ((symbs (list->set (append internal external) '()))
-	       (res   '()))
+               (res   '()))
       (cond
-	((null? symbs)
-	   (and (not (null? res)) (sort res symbol<?)))
-	((string-find? s (symbol->string (car symbs)))
-	   (Loop (cdr symbs) (cons (car symbs) res)))
-	(else
-	   (Loop (cdr symbs) res))))))
+        ((null? symbs)
+           (and (not (null? res)) (sort res symbol<?)))
+        ((string-find? s (symbol->string (car symbs)))
+           (Loop (cdr symbs) (cons (car symbs) res)))
+        (else
+           (Loop (cdr symbs) res))))))
 
 #|
 <doc EXT die
@@ -1147,42 +1151,42 @@ doc>
 (if (eq? (running-os) 'cygwin-windows)
     [begin
       (define (decompose-file-name str)
-	(let ((str (posixify-file-name str)))
-	  (cons (if (and (> (string-length str) 0)
-			 (char=? (string-ref str 0) #\/))
-		    "/"
-		    ".")
-		(string-split str "/"))))
+        (let ((str (posixify-file-name str)))
+          (cons (if (and (> (string-length str) 0)
+                         (char=? (string-ref str 0) #\/))
+                    "/"
+                    ".")
+                (string-split str "/"))))
 
       (define (dirname str)
-	(let ((str (posixify-file-name str)))
-	  (let ((res (regexp-replace "^(.*)/(.+)$" str "\\1")))
-	    (cond
-	      ((string=? res "")   "/")
-	      ((string=? res str)  ".")
-	      (else		 res)))))
+        (let ((str (posixify-file-name str)))
+          (let ((res (regexp-replace "^(.*)/(.+)$" str "\\1")))
+            (cond
+              ((string=? res "")   "/")
+              ((string=? res str)  ".")
+              (else              res)))))
 
       (define (basename str)
-	(let ((str (posixify-file-name str)))
-	  (regexp-replace "^(.*)/(.*)$" str "\\2")))
+        (let ((str (posixify-file-name str)))
+          (regexp-replace "^(.*)/(.*)$" str "\\2")))
     ]
     [begin
       (define (decompose-file-name str)
-	(cons (if (and (> (string-length str) 0)
-		       (char=? (string-ref str 0) #\/))
-		  "/"
-		  ".")
-	      (string-split str "/")))
+        (cons (if (and (> (string-length str) 0)
+                       (char=? (string-ref str 0) #\/))
+                  "/"
+                  ".")
+              (string-split str "/")))
 
       (define (dirname str)
-	(let ((res (regexp-replace "^(.*)/(.+)$" str "\\1")))
-	  (cond
-	    ((string=? res "")   "/")
-	    ((string=? res str)  ".")
-	    (else		 res))))
+        (let ((res (regexp-replace "^(.*)/(.+)$" str "\\1")))
+          (cond
+            ((string=? res "")   "/")
+            ((string=? res str)  ".")
+            (else                res))))
 
       (define (basename str)
-	(regexp-replace "^(.*)/(.*)$" str "\\2"))
+        (regexp-replace "^(.*)/(.*)$" str "\\2"))
       ])
 
 #|
@@ -1196,8 +1200,8 @@ doc>
 (define (file-separator)
   (case (running-os)
     ((unix cygwin-windows)    #\/)
-    ((windows) 		      #\\)
-    (else      		      #\?)))
+    ((windows)                #\\)
+    (else                     #\?)))
 
 #|
 <doc EXT make-path
@@ -1214,8 +1218,8 @@ doc>
   (if (null? names)
       dirname
       (apply make-path
-	     (format "~A~A~A" dirname (file-separator) (car names))
-	     (cdr names))))
+             (format "~A~A~A" dirname (file-separator) (car names))
+             (cdr names))))
 
 
 #|
@@ -1237,12 +1241,12 @@ doc>
           ""
           (let ((c (string-ref pathname i)))
             (cond
-	      ((char=? c #\.)
-	       (substring pathname (+ i 1) end))
-	      ((char=? c (file-separator))
-	       "")
-	      (else
-	       (loop (- i 1)))))))))
+              ((char=? c #\.)
+               (substring pathname (+ i 1) end))
+              ((char=? c (file-separator))
+               "")
+              (else
+               (loop (- i 1)))))))))
 
 #|
 <doc EXT file-prefix
@@ -1262,12 +1266,12 @@ doc>
           pathname
           (let ((c (string-ref pathname i)))
             (cond
-	      ((char=? c #\.)
-	       (substring pathname 0 i))
-	      ((char=? c (file-separator))
-	       pathname)
-	      (else
-	       (loop (- i 1)))))))))
+              ((char=? c #\.)
+               (substring pathname 0 i))
+              ((char=? c (file-separator))
+               pathname)
+              (else
+               (loop (- i 1)))))))))
 
 
 #|
@@ -1331,22 +1335,22 @@ doc>
 |#
 (define (chmod file . opt)
   (let ((file (if (string? file) (expand-file-name file) file))
-	(mode 0))
+        (mode 0))
     (let Loop ((opt opt))
       (cond
-	((null? opt)
-	   (%chmod file mode))
-	((symbol? (car opt))
-	   (case (car opt)
-	     ((read)    (set! mode (bit-or mode #o400)))
-	     ((write)   (set! mode (bit-or mode #o200)))
-	     ((execute) (set! mode (bit-or mode #o100)))
-	     (else      (error 'chmod "bad option ~S" (car opt))))
-	   (Loop (cdr opt)))
-	((integer? (car opt))
-	 (%chmod file (car opt)))
-	(else
-	   (error 'chmod "bad option ~S" (car opt)))))))
+        ((null? opt)
+           (%chmod file mode))
+        ((symbol? (car opt))
+           (case (car opt)
+             ((read)    (set! mode (bit-or mode #o400)))
+             ((write)   (set! mode (bit-or mode #o200)))
+             ((execute) (set! mode (bit-or mode #o100)))
+             (else      (error 'chmod "bad option ~S" (car opt))))
+           (Loop (cdr opt)))
+        ((integer? (car opt))
+         (%chmod file (car opt)))
+        (else
+           (error 'chmod "bad option ~S" (car opt)))))))
 
 #|
 <doc EXT with-mutex
@@ -1423,7 +1427,7 @@ doc>
 |#
 (define-macro (receive vars producer . body)
   `(call-with-values (lambda () ,producer)
-		     (lambda ,vars ,@body)))
+                     (lambda ,vars ,@body)))
 
 ;;
 ;; SRFI-16: "Syntax for procedures of variable arity"
@@ -1475,30 +1479,30 @@ doc>
 |#
 (define-macro (case-lambda . clauses)
   (let ((len  (gensym))
-	(args (gensym))
-	(compute-arity (in-module STKLOS-COMPILER compute-arity)))
+        (args (gensym))
+        (compute-arity (in-module STKLOS-COMPILER compute-arity)))
     `(lambda ,args
        (let ((,len (length ,args)))
-	 (cond
-	   ,@(map (lambda (x)
-		    (unless (>= (length x) 2)
-		      (error 'case-lambda "bad clause ~S" x))
-		    (let* ((formals (car x))
-			   (body    (cdr x))
-			   (arity   (compute-arity formals)))
-		      (cond
-			((positive? arity)
-			    `((= ,len ,arity)
-			      (apply (lambda ,formals ,@body) ,args)))
-			((zero? arity)
-			    `((= ,len ,arity)
-			      ,@body))
-			(else
-			    `((>= ,len ,(- (- arity) 1))
-			        (apply (lambda ,formals ,@body) ,args))))))
-		  clauses)
-	   (else (error 'case-lambda "no matching clause in list ~S for ~S"
-			',(map car clauses) ,args)))))))
+         (cond
+           ,@(map (lambda (x)
+                    (unless (>= (length x) 2)
+                      (error 'case-lambda "bad clause ~S" x))
+                    (let* ((formals (car x))
+                           (body    (cdr x))
+                           (arity   (compute-arity formals)))
+                      (cond
+                        ((positive? arity)
+                            `((= ,len ,arity)
+                              (apply (lambda ,formals ,@body) ,args)))
+                        ((zero? arity)
+                            `((= ,len ,arity)
+                              ,@body))
+                        (else
+                            `((>= ,len ,(- (- arity) 1))
+                                (apply (lambda ,formals ,@body) ,args))))))
+                  clauses)
+           (else (error 'case-lambda "no matching clause in list ~S for ~S"
+                        ',(map car clauses) ,args)))))))
 
 ;;
 ;; SRFI-38: "External Representation for Data With Shared Structure"
@@ -1506,7 +1510,7 @@ doc>
 (define read-with-shared-structure read)
 
 (define (write-with-shared-structure obj :optional (port (current-output-port))
-				     		   (optarg #f))
+                                                   (optarg #f))
   ;; optarg is unspecified in SRFI-38, it is a hook for implementation
   ;; We don't use it
   (write* obj port))
@@ -1522,14 +1526,14 @@ doc>
     `(begin
        ;; define the predicate
        (define (,predicate ,obj)
-	 (and (condition? ,obj) (condition-has-type? ,obj ,name)))
+         (and (condition? ,obj) (condition-has-type? ,obj ,name)))
        ;; define the accessors
        ,@(map (lambda(x)
-		`(define (,(cadr x) ,obj)
-		   (unless (,predicate ,obj)
-		     (error ',(cadr x) "bad type for condition ~S" ,obj))
-		   (condition-ref ,obj ',(car x))))
-	      slots))))
+                `(define (,(cadr x) ,obj)
+                   (unless (,predicate ,obj)
+                     (error ',(cadr x) "bad type for condition ~S" ,obj))
+                   (condition-ref ,obj ',(car x))))
+              slots))))
 
 ;;
 ;; SRFI-39: "Parameter Objects"
@@ -1567,20 +1571,20 @@ doc>
 (define-macro (parameterize bindings . body)
   (let ((tmp (map (lambda (_) (gensym)) bindings)))
     `(let ,(map (lambda (x y) (list y (cadr x)))
-		 bindings tmp)
+                 bindings tmp)
        (dynamic-wind
-	   (lambda ()
-	     ;; First push all the current parameter values
-	     ,@(map (lambda (x) `(%parameter-dynenv-push! ,(car x)))
-		    bindings)
-	     ;; Change all parameters values
-	     ,@(map (lambda (x y) `(,(car x) ,y))
-		    bindings tmp))
-	   (lambda ()
-	     ,@body)
-	   (lambda ()
-	     ,@(map (lambda (x) `(%parameter-dynenv-pop! ,(car x)))
-		   bindings))))))
+           (lambda ()
+             ;; First push all the current parameter values
+             ,@(map (lambda (x) `(%parameter-dynenv-push! ,(car x)))
+                    bindings)
+             ;; Change all parameters values
+             ,@(map (lambda (x y) `(,(car x) ,y))
+                    bindings tmp))
+           (lambda ()
+             ,@body)
+           (lambda ()
+             ,@(map (lambda (x) `(%parameter-dynenv-pop! ,(car x)))
+                   bindings))))))
 
 ;;
 ;; SRFI-55: "require-extension"
@@ -1622,20 +1626,20 @@ doc>
     (error 'require-extension "requires at least one clause"))
   `(let ((%has-feature? (in-module SRFI-0 %has-feature?)))
      ,@(map (lambda (x)
-	      `(cond
-		((and (pair? ',x) (eq? (car ',x) 'srfi) (not (null? (cdr ',x))))
-		 (let ((ok? (lambda (x)
-			      (let ((x (if (integer? x)
-					   (string->symbol (format "srfi-~a" x))
-					   x)))
-				(or (%has-feature? x)
-				    (error 'require-extension
-					   "extension ~S is absent" x))))))
-		   (and ,@(map (lambda (x) `(ok? ',x))
-			       (cdr x))
-			(void))))
-		(else (error 'require-extension "bad clause ~S" ',x))))
-	    clauses)))
+              `(cond
+                ((and (pair? ',x) (eq? (car ',x) 'srfi) (not (null? (cdr ',x))))
+                 (let ((ok? (lambda (x)
+                              (let ((x (if (integer? x)
+                                           (string->symbol (format "srfi-~a" x))
+                                           x)))
+                                (or (%has-feature? x)
+                                    (error 'require-extension
+                                           "extension ~S is absent" x))))))
+                   (and ,@(map (lambda (x) `(ok? ',x))
+                               (cdr x))
+                        (void))))
+                (else (error 'require-extension "bad clause ~S" ',x))))
+            clauses)))
 
 ;;
 ;; SRFI-88: "keyword objects"

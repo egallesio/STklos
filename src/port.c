@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  3-Aug-2018 17:35 (eg)
+ * Last file update:  5-Aug-2018 17:20 (eg)
  *
  */
 
@@ -326,7 +326,7 @@ DEFINE_PRIMITIVE("read-char", read_char, subr01, (SCM port))
  * of the old name is deprecated.
  doc>
  */
-DEFINE_PRIMITIVE("read-bytes", read_chars, subr12, (SCM size, SCM port))
+DEFINE_PRIMITIVE("read-bytes", read_bytes, subr12, (SCM size, SCM port))
 {
   int count, n = STk_integer_value(size);
   SCM z;
@@ -348,18 +348,57 @@ DEFINE_PRIMITIVE("read-bytes", read_chars, subr12, (SCM size, SCM port))
   return z;
 }
 
+
+
 /*
-<doc EXT read-chars!
- * (read-chars! str)
- * (read-chars! str port)
+<doc R7RS read-bytevector
+ * (read-bytevector k)
+ * (read-bytevector k port)
+ *
+ * Reads the next |k| bytes, or as many as are available
+ * before the end of file, from the textual input |port| into a
+ * newly allocated string in left-to-right order and returns the
+ * string. If no characters are available before the end of file,
+ * an end-of-file object is returned.
+doc>
+*/
+DEFINE_PRIMITIVE("read-bytevector", read_bytevector, subr12, (SCM size, SCM port))
+{
+  int count, n = STk_integer_value(size);
+  SCM z;
+
+  port = verify_port(port, PORT_READ);
+  if (!PORT_BINARYP(port))
+    STk_error("bad binary input port ~S", port);
+
+  if (n < 0) STk_error("bad length");
+
+  /* Allocate a new bytevector for result */
+  z     = STk_make_C_bytevector(n);
+  count = STk_read_buffer(port, UVECTOR_DATA(z), n);
+
+  if (count == 0)
+    return STk_eof;
+  if (count < n) {
+    /* result is shorter than the allocated bytevector */
+    return STk_make_bytevector_from_C_string(UVECTOR_DATA(z), count);
+  }
+  return z;
+}
+
+
+/*
+<doc EXT read-bytes read-chars!
+ * (read-bytes! str)
+ * (read-bytes! str port)
  *
  * This function reads the characters available from |port| in the string |str|
  * by chuncks whose size is equal to the length of |str|.
- * The value returned by |read-chars!|is an integer indicating the number
+ * The value returned by |read-bytes!|is an integer indicating the number
  * of characters read. |Port| may be omitted, in which case it defaults to the
  * value returned by |current-input-port|.
  * @l
- * This function is similar to |read-chars| except that it avoids to allocate
+ * This function is similar to |read-bytes| except that it avoids to allocate
  * a new string for each read.
  * @lisp
  * (define (copy-file from to)
@@ -368,7 +407,7 @@ DEFINE_PRIMITIVE("read-bytes", read_chars, subr12, (SCM size, SCM port))
  *          (out (open-output-file to))
  *          (s   (make-string size)))
  *     (let Loop ()
- *       (let ((n (read-chars! s in)))
+ *       (let ((n (read-bytes! s in)))
  *         (cond
  *           ((= n size)
  *              (write-chars s out)
@@ -379,13 +418,33 @@ DEFINE_PRIMITIVE("read-bytes", read_chars, subr12, (SCM size, SCM port))
  * @end lisp
 doc>
  */
-DEFINE_PRIMITIVE("read-chars!", d_read_chars, subr12, (SCM str, SCM port))
+DEFINE_PRIMITIVE("read-bytes!", d_read_bytes, subr12, (SCM str, SCM port))
 {
   port = verify_port(port, PORT_READ);
   if (!STRINGP(str)) STk_error("bad string ~S", str);
 
-  return MAKE_INT(STk_read_buffer(port, STRING_CHARS(str), STRING_SIZE(str)));
+  return MAKE_INT(STk_read_buffer(port, STRING_CHARS(str), STRING_LENGTH(str)));
 }
+
+
+DEFINE_PRIMITIVE("%read-bytevector!", d_read_bytevector, subr4,
+                 (SCM str, SCM port, SCM start, SCM end))
+{
+  long vstart = STk_integer_value(start);
+  long vend   = STk_integer_value(end);
+
+  port = verify_port(port, PORT_READ);
+  if (!STRINGP(str)) STk_error("bad string ~S", str);
+
+  if (vstart < 0) STk_error("bad start value ~S", start);
+  if (vend == LONG_MIN || vend > STRING_LENGTH(str))
+    STk_error("bad end value ~S", start);
+  if (vend > vstart) STk_error("start index is bigger than end index");
+
+  STk_read_buffer(port, STRING_CHARS(str)+ vstart, vend - vstart);
+  return STk_void;
+}
+
 
 /*
 <doc EXT read-byte
@@ -1558,8 +1617,9 @@ int STk_init_port(void)
   ADD_PRIMITIVE(scheme_read);
   ADD_PRIMITIVE(scheme_read_cst);
   ADD_PRIMITIVE(read_char);
-  ADD_PRIMITIVE(read_chars);
-  ADD_PRIMITIVE(d_read_chars);
+  ADD_PRIMITIVE(read_bytes);
+  ADD_PRIMITIVE(read_bytevector);
+  ADD_PRIMITIVE(d_read_bytes);
   ADD_PRIMITIVE(peek_char);
   ADD_PRIMITIVE(peek_byte);
   ADD_PRIMITIVE(read_byte);
