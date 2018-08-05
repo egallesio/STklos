@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  5-Aug-2018 17:20 (eg)
+ * Last file update:  5-Aug-2018 18:28 (eg)
  *
  */
 
@@ -349,44 +349,6 @@ DEFINE_PRIMITIVE("read-bytes", read_bytes, subr12, (SCM size, SCM port))
 }
 
 
-
-/*
-<doc R7RS read-bytevector
- * (read-bytevector k)
- * (read-bytevector k port)
- *
- * Reads the next |k| bytes, or as many as are available
- * before the end of file, from the textual input |port| into a
- * newly allocated string in left-to-right order and returns the
- * string. If no characters are available before the end of file,
- * an end-of-file object is returned.
-doc>
-*/
-DEFINE_PRIMITIVE("read-bytevector", read_bytevector, subr12, (SCM size, SCM port))
-{
-  int count, n = STk_integer_value(size);
-  SCM z;
-
-  port = verify_port(port, PORT_READ);
-  if (!PORT_BINARYP(port))
-    STk_error("bad binary input port ~S", port);
-
-  if (n < 0) STk_error("bad length");
-
-  /* Allocate a new bytevector for result */
-  z     = STk_make_C_bytevector(n);
-  count = STk_read_buffer(port, UVECTOR_DATA(z), n);
-
-  if (count == 0)
-    return STk_eof;
-  if (count < n) {
-    /* result is shorter than the allocated bytevector */
-    return STk_make_bytevector_from_C_string(UVECTOR_DATA(z), count);
-  }
-  return z;
-}
-
-
 /*
 <doc EXT read-bytes read-chars!
  * (read-bytes! str)
@@ -427,23 +389,66 @@ DEFINE_PRIMITIVE("read-bytes!", d_read_bytes, subr12, (SCM str, SCM port))
 }
 
 
+/*
+<doc R7RS read-bytevector
+ * (read-bytevector k)
+ * (read-bytevector k port)
+ *
+ * Reads the next |k| bytes, or as many as are available
+ * before the end of file, from the textual input |port| into a
+ * newly allocated string in left-to-right order and returns the
+ * string. If no characters are available before the end of file,
+ * an end-of-file object is returned.
+doc>
+*/
+DEFINE_PRIMITIVE("read-bytevector", read_bytevector, subr12, (SCM size, SCM port))
+{
+  long count, n = STk_integer_value(size);
+  SCM z;
+
+  port = verify_port(port, PORT_READ);
+  if (!PORT_BINARYP(port))
+    STk_error("bad binary input port ~S", port);
+
+  if (n < 0) STk_error("bad length");
+
+  /* Allocate a new bytevector for result */
+  z     = STk_make_C_bytevector(n);
+  count = STk_read_buffer(port, UVECTOR_DATA(z), n);
+
+  if (n && !count)
+    return STk_eof;
+  if (count < n) {
+    /* result is shorter than the allocated bytevector */
+    return STk_make_bytevector_from_C_string(UVECTOR_DATA(z), count);
+  }
+  return z;
+}
+
+
 DEFINE_PRIMITIVE("%read-bytevector!", d_read_bytevector, subr4,
-                 (SCM str, SCM port, SCM start, SCM end))
+                 (SCM bv, SCM port, SCM start, SCM end))
 {
   long vstart = STk_integer_value(start);
   long vend   = STk_integer_value(end);
+  long count, n;
 
   port = verify_port(port, PORT_READ);
-  if (!STRINGP(str)) STk_error("bad string ~S", str);
+  if (!BYTEVECTORP(bv)) STk_error("bad bytevector ~S", bv);
 
   if (vstart < 0) STk_error("bad start value ~S", start);
-  if (vend == LONG_MIN || vend > STRING_LENGTH(str))
+  if (vend == LONG_MIN || vend > UVECTOR_SIZE(bv))
     STk_error("bad end value ~S", start);
-  if (vend > vstart) STk_error("start index is bigger than end index");
+  if (vstart > vend) STk_error("start index is bigger than end index");
 
-  STk_read_buffer(port, STRING_CHARS(str)+ vstart, vend - vstart);
-  return STk_void;
+  n     = vend - vstart;
+  count = STk_read_buffer(port, UVECTOR_DATA(bv)+ vstart, vend - vstart);
+
+  if (n && !count)
+    return STk_eof;
+  return MAKE_INT(n);
 }
+
 
 
 /*
@@ -1618,8 +1623,9 @@ int STk_init_port(void)
   ADD_PRIMITIVE(scheme_read_cst);
   ADD_PRIMITIVE(read_char);
   ADD_PRIMITIVE(read_bytes);
-  ADD_PRIMITIVE(read_bytevector);
   ADD_PRIMITIVE(d_read_bytes);
+  ADD_PRIMITIVE(read_bytevector);
+  ADD_PRIMITIVE(d_read_bytevector);
   ADD_PRIMITIVE(peek_char);
   ADD_PRIMITIVE(peek_byte);
   ADD_PRIMITIVE(read_byte);
