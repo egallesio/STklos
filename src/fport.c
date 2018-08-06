@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 14-Jul-2018 19:13 (eg)
+ * Last file update:  5-Aug-2018 19:20 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -894,11 +894,14 @@ int STk_init_fport(void)
   vm_thread_t *vm = STk_get_current_vm();
 
   STk_stdin  = vm->iport = (SCM) make_fport("*stdin*",  stdin,
-                                            PORT_IS_FILE | PORT_READ);
+                                            PORT_IS_FILE | PORT_READ |
+                                            PORT_BINARY | PORT_TEXTUAL);
   STk_stdout = vm->oport = (SCM) make_fport("*stdout*", stdout,
-                                            PORT_IS_FILE | PORT_WRITE);
+                                            PORT_IS_FILE | PORT_WRITE |
+                                            PORT_BINARY | PORT_TEXTUAL);
   STk_stderr = vm->eport = (SCM) make_fport("*stderr*", stderr,
-                                            PORT_IS_FILE | PORT_WRITE);
+                                            PORT_IS_FILE | PORT_WRITE |
+                                            PORT_BINARY | PORT_TEXTUAL);
 
   ADD_PRIMITIVE(scheme_load);
   ADD_PRIMITIVE(scheme_try_load);
