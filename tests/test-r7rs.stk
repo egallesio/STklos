@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update:  5-Aug-2018 18:38 (eg)
+;;;; Last file update:  5-Aug-2018 19:40 (eg)
 ;;;;
 
 (require "test")
@@ -526,5 +526,48 @@
   (let ((bv (make-bytevector 5 255)))
     (read-bytevector! bv (open-input-bytevector #u8(0 1 2 3 4)) 3 4)
     bv))
+
+;; --------------------------------------------------
+(let ((p (open-output-bytevector)))
+  (test "write-u8.1"
+        #u8(1 2)
+        (begin
+          (write-u8 1 p)
+          (write-u8 2 p)
+          (get-output-bytevector p)))
+
+  (test "write-u8.2"
+        #u8(1 2 3 4)
+        (begin
+          (write-byte 3 p)
+          (write-byte 4 p)
+          (get-output-bytevector p))))
+
+;; --------------------------------------------------
+(test "write-bytevector!.1"
+      #u8(0 1 2 3 4 5 6 7 8 9)
+      (let ((p (open-output-bytevector)))
+        (write-bytevector #u8(0 1 2 3 4 5 6 7 8 9) p)
+        (get-output-bytevector p)))
+
+(test "write-bytevector!.2"
+      #u8(5 6 7 8 9)
+      (let ((p (open-output-bytevector)))
+        (write-bytevector #u8(0 1 2 3 4 5 6 7 8 9) p 5)
+        (get-output-bytevector p)))
+
+(test "write-bytevector!.3"
+      #u8(5 6)
+      (let ((p (open-output-bytevector)))
+        (write-bytevector #u8(0 1 2 3 4 5 6 7 8 9) p 5 7)
+        (get-output-bytevector p)))
+
+;; --------------------------------------------------
+(test "flush-output-port on binary port"
+      #u8()
+      (let ((p (open-output-bytevector)))
+        (flush-output-port p)
+        (get-output-bytevector p)))
+
 
 (test-section-end)
