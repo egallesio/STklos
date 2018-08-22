@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update:  5-Aug-2018 19:20 (eg)
+ * Last file update: 18-Aug-2018 19:51 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -675,8 +675,8 @@ DEFINE_PRIMITIVE("output-file-port?", output_fportp, subr1, (SCM port))
  * (item [|"a+"| to open file for reading and writing. The file is created
  * if it does not exist. The stream is positioned at the end of the file.])
  * )
- * If the file can be opened, |open-file| returns the port associated with
- * the given file, otherwise it returns |#f|. Here again, the ``magic''
+ * If the file can be opened, |open-file| returns the textual port associated 
+ * with the given file, otherwise it returns |#f|. Here again, the ``magic''
  * string "@pipe " permits to open a pipe port (in this case mode can only be
  * |"r"| or |"w"|).
 doc>
@@ -695,7 +695,7 @@ DEFINE_PRIMITIVE("open-file", scheme_open_file, subr2, (SCM filename, SCM mode))
     case 'w': type = (STRING_CHARS(mode)[1] == '+') ? PORT_RW : PORT_WRITE; break;
     default:  goto Error;
   }
-  return open_file_port(filename, STRING_CHARS(mode), type, FALSE);
+  return open_file_port(filename, STRING_CHARS(mode), type | PORT_TEXTUAL, FALSE);
 Error:
   STk_error_bad_io_param("bad opening mode ~S", mode);
   return STk_void; /* for the compiler */

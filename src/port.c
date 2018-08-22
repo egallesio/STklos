@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  5-Aug-2018 18:28 (eg)
+ * Last file update: 19-Aug-2018 09:38 (eg)
  *
  */
 
@@ -85,11 +85,21 @@ void STk_error_cannot_load(SCM f)
   general_io_error(io_prot_error, "cannot load file ~S", f);
 }
 
+static void error_bad_binary_port(SCM port)
+{
+  general_io_error(io_malformed, "bad binary port ~S", port);
+}
+
+static void error_bad_textual_port(SCM port)
+{
+  general_io_error(io_malformed, "bad textual port ~S", port);
+}
+
 
 
 static SCM verify_port(SCM port, int mode)
 {
-  if (mode == PORT_WRITE) {
+  if (mode & PORT_WRITE) {
     if (!port) return STk_current_output_port();
     if (!OPORTP(port)) STk_error_bad_port(port);
   } else {
@@ -97,6 +107,9 @@ static SCM verify_port(SCM port, int mode)
     if (!IPORTP(port)) STk_error_bad_port(port);
   }
   if (PORT_IS_CLOSEDP(port)) error_closed_port(port);
+  if ((mode & PORT_BINARY)  && !PORT_BINARYP(port))  error_bad_binary_port(port);
+  if ((mode & PORT_TEXTUAL) && !PORT_TEXTUALP(port)) error_bad_textual_port(port);
+
   return port;
 }
 
@@ -274,7 +287,7 @@ doc>
  */
 DEFINE_PRIMITIVE("read", scheme_read, subr01, (SCM port))
 {
-  port = verify_port(port, PORT_READ);
+  port = verify_port(port, PORT_READ | PORT_TEXTUAL);
   return STk_read(port, PORT_CASE_SENSITIVEP(port));
 }
 
@@ -283,7 +296,7 @@ DEFINE_PRIMITIVE("read", scheme_read, subr01, (SCM port))
 /* The same one but for reading code => code is really constant */
 DEFINE_PRIMITIVE("%read", scheme_read_cst, subr01, (SCM port))
 {
-  port = verify_port(port, PORT_READ);
+  port = verify_port(port, PORT_READ | PORT_TEXTUAL);
   return STk_read_constant(port, PORT_CASE_SENSITIVEP(port));
 }
 
@@ -303,7 +316,7 @@ DEFINE_PRIMITIVE("read-char", read_char, subr01, (SCM port))
 {
   int c;
 
-  port = verify_port(port, PORT_READ);
+  port = verify_port(port, PORT_READ | PORT_TEXTUAL);
   c = STk_get_character(port);
   if (c == UTF8_INCORRECT_SEQUENCE)
     error_bad_utf8_character(c);
@@ -406,10 +419,7 @@ DEFINE_PRIMITIVE("read-bytevector", read_bytevector, subr12, (SCM size, SCM port
   long count, n = STk_integer_value(size);
   SCM z;
 
-  port = verify_port(port, PORT_READ);
-  if (!PORT_BINARYP(port))
-    STk_error("bad binary input port ~S", port);
-
+  port = verify_port(port, PORT_READ | PORT_BINARY);
   if (n < 0) STk_error("bad length");
 
   /* Allocate a new bytevector for result */
@@ -433,7 +443,7 @@ DEFINE_PRIMITIVE("%read-bytevector!", d_read_bytevector, subr4,
   long vend   = STk_integer_value(end);
   long count, n;
 
-  port = verify_port(port, PORT_READ);
+  port = verify_port(port, PORT_READ | PORT_BINARY);
   if (!BYTEVECTORP(bv)) STk_error("bad bytevector ~S", bv);
 
   if (vstart < 0) STk_error("bad start value ~S", start);
@@ -493,7 +503,7 @@ DEFINE_PRIMITIVE("peek-char", peek_char, subr01, (SCM port))
 {
   int c;
 
-  port = verify_port(port, PORT_READ);
+  port = verify_port(port, PORT_READ | PORT_TEXTUAL);
 
   c = STk_get_character(port);
   if (c == UTF8_INCORRECT_SEQUENCE) error_bad_utf8_character(c);
@@ -566,9 +576,29 @@ doc>
  */
 DEFINE_PRIMITIVE("char-ready?", char_readyp, subr01, (SCM port))
 {
-  port = verify_port(port, PORT_READ);
+  port = verify_port(port, PORT_READ | PORT_TEXTUAL);
   return MAKE_BOOLEAN(STk_readyp(port));
 }
+
+
+/*
+<doc R7RS u8-ready?
+ * (u8-ready?)
+ * (u8-ready? port)
+ *
+ * Returns #t if a byte is ready on the binary input |port| and
+ * returns #f otherwise. If |u8-ready?| returns #t then the
+ * next read-u8 operation on the given port is guaranteed
+ * not to hang. If the |port| is at end of file then |u8-ready?|
+ * returns #t.
+doc>
+*/
+DEFINE_PRIMITIVE("u8-ready?", u8_readyp, subr01, (SCM port))
+{
+  port = verify_port(port, PORT_READ | PORT_BINARY);
+  return MAKE_BOOLEAN(STk_readyp(port));
+}
+
 
 /*=============================================================================*\
  *                              Write
@@ -626,7 +656,7 @@ doc>
 */
 DEFINE_PRIMITIVE("write*", write_star, subr12, (SCM expr, SCM port))
 {
-  port = verify_port(port, PORT_WRITE);
+  port = verify_port(port, PORT_WRITE | PORT_TEXTUAL);
   STk_print_star(expr, port);
   return STk_void;
 }
@@ -650,7 +680,7 @@ doc>
  */
 DEFINE_PRIMITIVE("display", display, subr12, (SCM expr, SCM port))
 {
-  port = verify_port(port, PORT_WRITE);
+  port = verify_port(port, PORT_WRITE | PORT_TEXTUAL);
   STk_print(expr, port, DSP_MODE);
   return STk_void;
 }
@@ -668,7 +698,7 @@ doc>
  */
 DEFINE_PRIMITIVE("newline", newline, subr01, (SCM port))
 {
-  port = verify_port(port, PORT_WRITE);
+  port = verify_port(port, PORT_WRITE | PORT_TEXTUAL);
   STk_putc('\n', port);
   return STk_void;
 }
@@ -689,7 +719,7 @@ doc>
 DEFINE_PRIMITIVE("write-char", write_char, subr12, (SCM c, SCM port))
 {
   if (!CHARACTERP(c)) STk_error_bad_io_param("bad character ~S", c);
-  port = verify_port(port, PORT_WRITE);
+  port = verify_port(port, PORT_WRITE | PORT_TEXTUAL);
   STk_put_character(CHARACTER_VAL(c), port);
   return STk_void;
 }
@@ -782,7 +812,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
           port = STk_open_output_string();
         }
       } else {
-        verify_port(port, PORT_WRITE);
+        verify_port(port, PORT_WRITE | PORT_TEXTUAL);
       }
     }
   }
@@ -1289,7 +1319,7 @@ DEFINE_PRIMITIVE("read-line", read_line, subr01, (SCM port))
   size_t i, size = INITIAL_LINE_SIZE;
   SCM res, delim;
 
-  port = verify_port(port, PORT_READ);
+  port = verify_port(port, PORT_READ | PORT_TEXTUAL);
   buff = buffer;
   prev = ' ';
 
@@ -1414,7 +1444,7 @@ doc>
  */
 DEFINE_PRIMITIVE("port-current-line", port_current_line, subr01, (SCM port))
 {
-  port = verify_port(port, PORT_READ);
+  port = verify_port(port, PORT_READ | PORT_TEXTUAL);
   return MAKE_INT(PORT_LINE(port));
 }
 
@@ -1632,6 +1662,7 @@ int STk_init_port(void)
   ADD_PRIMITIVE(eof_objectp);
   ADD_PRIMITIVE(eof_object);
   ADD_PRIMITIVE(char_readyp);
+  ADD_PRIMITIVE(u8_readyp);
 
   ADD_PRIMITIVE(write);
   ADD_PRIMITIVE(display);
