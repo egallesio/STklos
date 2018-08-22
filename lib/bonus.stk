@@ -21,13 +21,14 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  3-Aug-2018 18:48 (eg)
+;;;; Last file update: 22-Aug-2018 13:03 (eg)
 ;;;;
 
 
 ;;;; Deprecated names
 (define read-chars read-bytes)
 (define read-chars! read-bytes!)
+
 
 #|
 <doc EXT gensym

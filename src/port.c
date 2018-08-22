@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 19-Aug-2018 09:38 (eg)
+ * Last file update: 22-Aug-2018 12:59 (eg)
  *
  */
 
@@ -627,15 +627,19 @@ DEFINE_PRIMITIVE("write", write, subr12, (SCM expr, SCM port))
 
 
 /*
-<doc EXT write*
- * (write* obj)
- * (write* obj port)
+<doc R7RS write* write-shared
+ * (write-shared obj)
+ * (write-shared obj port)
  *
  * Writes a written representation of |obj| to the given port.  The
  * main difference with the |write| procedure is that |write*|
  * handles data structures with cycles. Circular structure written by
  * this procedure use the ,(code (q "#n=")) and ,(code (q "#n#"))
  * notations (see ,(ref :mark "Circular structure")).
+ * @l
+ * ,(bold "Note:") This function is also called |write*|.
+ * The name |write*| was the name used by ,(stklos) for
+ * |write-shared| before it was introduced in ,(rseven).
  *
 doc>
 <doc EXT write-with-shared-structure

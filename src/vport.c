@@ -1,7 +1,7 @@
 /*
- * vport.c					-- Virtual Ports
+ * vport.c                                      -- Virtual Ports
  *
- * Copyright © 2005-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2005-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,16 +21,16 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 17-Aug-2005 08:31 (eg)
- * Last file update: 18-Mar-2012 18:47 (eg)
+ * Last file update: 20-Aug-2018 11:23 (eg)
  */
 
 #include "stklos.h"
 
 struct vstream {
-  SCM port;			/* circular reference to find back the port */
-  SCM getc, readyp, eofp;	/* input port */
-  SCM putc, putstring, flush;	/* output port */
-  SCM close;			/* input & output port */
+  SCM port;                     /* circular reference to find back the port */
+  SCM getc, readyp, eofp;       /* input port */
+  SCM putc, putstring, flush;   /* output port */
+  SCM close;                    /* input & output port */
 };
 
 
@@ -58,9 +58,9 @@ static void vport_print(SCM obj, SCM port)   /* Generic printing of virtual port
   char buffer[MAX_PATH_LENGTH + 20];
 
   sprintf(buffer, "#[%s-virtual-port %lx%s]",
-	  IVPORTP(obj) ? "input" : "output",
-	  (unsigned long) obj,
-	  PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
+          IVPORTP(obj) ? "input" : "output",
+          (unsigned long) obj,
+          PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
   STk_puts(buffer, port);
 }
 
@@ -274,28 +274,28 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
   vs->port = z;
   vs->putc = vs->putstring = vs->flush = NULL;
 
-  PORT_STREAM(z) 	= vs;
-  PORT_FLAGS(z)         = PORT_READ | PORT_IS_VIRTUAL | flag;
-  PORT_UNGETC(z) 	= EOF;
-  PORT_LINE(z)		= 1;
-  PORT_POS(z)		= 0;
-  PORT_FNAME(z)		= "virtual input port";
-  PORT_CLOSEHOOK(z)	= STk_false;
+  PORT_STREAM(z)        = vs;
+  PORT_FLAGS(z)         = PORT_READ | PORT_IS_VIRTUAL | PORT_TEXTUAL | flag;
+  PORT_UNGETC(z)        = EOF;
+  PORT_LINE(z)          = 1;
+  PORT_POS(z)           = 0;
+  PORT_FNAME(z)         = "virtual input port";
+  PORT_CLOSEHOOK(z)     = STk_false;
 
-  PORT_PRINT(z)		= vport_print;
-  PORT_RELEASE(z)	= vport_release;
-  PORT_GETC(z)		= call_user_getc;
-  PORT_READY(z)		= call_user_ready;
-  PORT_EOFP(z)		= call_user_eofp;
-  PORT_CLOSE(z)		= call_user_close;
-  PORT_PUTC(z)		= NULL;
-  PORT_PUTS(z)		= NULL;
-  PORT_PUTSTRING(z)	= NULL;
-  PORT_NPUTS(z)		= NULL;
-  PORT_FLUSH(z)		= NULL;
-  PORT_BREAD(z)		= vport_read;
-  PORT_BWRITE(z)	= NULL;
-  PORT_SEEK(z)		= vport_seek;
+  PORT_PRINT(z)         = vport_print;
+  PORT_RELEASE(z)       = vport_release;
+  PORT_GETC(z)          = call_user_getc;
+  PORT_READY(z)         = call_user_ready;
+  PORT_EOFP(z)          = call_user_eofp;
+  PORT_CLOSE(z)         = call_user_close;
+  PORT_PUTC(z)          = NULL;
+  PORT_PUTS(z)          = NULL;
+  PORT_PUTSTRING(z)     = NULL;
+  PORT_NPUTS(z)         = NULL;
+  PORT_FLUSH(z)         = NULL;
+  PORT_BREAD(z)         = vport_read;
+  PORT_BWRITE(z)        = NULL;
+  PORT_SEEK(z)          = vport_seek;
 
   return (struct port_obj *) z;
 }
@@ -368,27 +368,27 @@ DEFINE_PRIMITIVE("%open-output-virtual", open_output_vport, subr1, (SCM v))
   vs->port = z;
   vs->getc = vs->readyp = vs->eofp = NULL;
 
-  PORT_STREAM(z) 	= vs;
-  PORT_FLAGS(z)         = PORT_WRITE | PORT_IS_VIRTUAL | flag;
-  PORT_UNGETC(z) 	= EOF;
-  PORT_LINE(z)		= 1;
-  PORT_POS(z)		= 0;
-  PORT_FNAME(z)		= "virtual output port";
+  PORT_STREAM(z)        = vs;
+  PORT_FLAGS(z)         = PORT_WRITE | PORT_IS_VIRTUAL | PORT_TEXTUAL | flag;
+  PORT_UNGETC(z)        = EOF;
+  PORT_LINE(z)          = 1;
+  PORT_POS(z)           = 0;
+  PORT_FNAME(z)         = "virtual output port";
 
-  PORT_PRINT(z)		= vport_print;
-  PORT_RELEASE(z)	= vport_release;
-  PORT_GETC(z)		= NULL;
-  PORT_READY(z)		= NULL;
-  PORT_EOFP(z)		= NULL;
-  PORT_CLOSE(z)		= call_user_close;
-  PORT_PUTC(z)		= call_user_putc;
-  PORT_PUTS(z)		= vport_puts;
-  PORT_PUTSTRING(z)	= call_user_putstring;
-  PORT_NPUTS(z)		= vport_nputs;
-  PORT_FLUSH(z)		= call_user_flush;
-  PORT_BREAD(z)		= NULL;
-  PORT_BWRITE(z)	= vport_write;
-  PORT_SEEK(z)		= vport_seek;
+  PORT_PRINT(z)         = vport_print;
+  PORT_RELEASE(z)       = vport_release;
+  PORT_GETC(z)          = NULL;
+  PORT_READY(z)         = NULL;
+  PORT_EOFP(z)          = NULL;
+  PORT_CLOSE(z)         = call_user_close;
+  PORT_PUTC(z)          = call_user_putc;
+  PORT_PUTS(z)          = vport_puts;
+  PORT_PUTSTRING(z)     = call_user_putstring;
+  PORT_NPUTS(z)         = vport_nputs;
+  PORT_FLUSH(z)         = call_user_flush;
+  PORT_BREAD(z)         = NULL;
+  PORT_BWRITE(z)        = vport_write;
+  PORT_SEEK(z)          = vport_seek;
 
   return (struct port_obj *) z;
 }

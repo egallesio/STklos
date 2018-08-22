@@ -21,8 +21,15 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 19-Aug-2018 09:38 (eg)
+;;;; Last file update: 22-Aug-2018 13:03 (eg)
 ;;;;
+
+
+;;;; Aliases
+(define write-shared write*)
+(define write-simple write)
+
+
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.3 Booleans
