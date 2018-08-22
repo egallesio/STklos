@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  3-Jul-2018 19:03 (eg)
+;;;; Last file update: 22-Aug-2018 13:51 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -226,7 +226,7 @@ doc>
                                                 'clear)
                                       out)))
                         (else
-                           (for-each (lambda (x) (write* x out) (newline out))
+                           (for-each (lambda (x) (write-shared x out) (newline out))
                                      v)))
                       (flush-output-port out))))))))
       ;; Loop if we have not meet an EOF

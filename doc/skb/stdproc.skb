@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  5-Aug-2018 19:25 (eg)
+;; Last file update: 22-Aug-2018 14:15 (eg)
 ;;
 ;; ======================================================================
 
@@ -617,8 +617,9 @@ be accessed as a normal port with the standard Scheme primitives.])
 (insertdoc 'write-with-shared-structure)
 (insertdoc 'display)
 (insertdoc 'newline)
+(insertdoc 'write-string)
 (insertdoc 'write-u8)
-(insertdoc 'writ-bytevector)
+(insertdoc 'write-bytevector)
 (insertdoc 'write-char)
 (insertdoc 'write-chars)
 (insertdoc 'write-byte)

@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 22-Aug-2018 13:20 (eg)
+;;;; Last file update: 22-Aug-2018 16:23 (eg)
 ;;;;
 
 (require "test")
@@ -544,6 +544,24 @@
           (write-shared y out)
           (get-output-string out))))
 
+;; --------------------------------------------------
+(test "chibi write-string.1"
+      "abc def"
+      (let ((out (open-output-string)))
+        (write-string "abc def" out)
+        (get-output-string out)))
+
+(test "chibi write-string.2"
+      "def"
+      (let ((out (open-output-string)))
+        (write-string "abc def" out 4)
+        (get-output-string out)))
+
+(test "chibi write-string.3"
+      "c d"
+      (let ((out (open-output-string)))
+        (write-string "abc def" out 2 5)
+        (get-output-string out)))
 
 ;; --------------------------------------------------
 (let ((p (open-output-bytevector)))

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 22-Aug-2018 13:03 (eg)
+;;;; Last file update: 22-Aug-2018 14:15 (eg)
 ;;;;
 
 
@@ -801,6 +801,25 @@ doc>
    (%read-bytevector! bv port start end)))
 
 #|
+<doc R7RS write-string
+ * (write-string string)
+ * (write-string string port)
+ * (write-string string port start)
+ * (write-string string port start end)
+ *
+ * Writes the characters of |string| from |start| to |end| in
+ * left-to-right order to the textual output |port|.
+doc>
+|#
+(define (write-string str :optional (port (current-output-port))
+                                    (start 0)
+                                    (end -1 end?))
+  (%claim-error
+   'write-string
+   (%write-string str port start (if end? end (string-length str)))))
+
+
+#|
 <doc R7RS write-u8
  * (write-u8 byte)
  * (write-u8 byte port)
@@ -826,7 +845,6 @@ doc>
  * left-to-right order to the binary output |port|.
 doc>
 |#
-
 (define (write-bytevector bv :optional (port (current-output-port))
                                        (start 0)
                                        (end -1 end?))

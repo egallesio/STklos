@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 22-Aug-2018 12:59 (eg)
+ * Last file update: 22-Aug-2018 16:14 (eg)
  *
  */
 
@@ -95,6 +95,10 @@ static void error_bad_textual_port(SCM port)
   general_io_error(io_malformed, "bad textual port ~S", port);
 }
 
+static void error_bad_string(SCM obj)
+{
+  general_io_error(io_bad_param, "bad string ~S", obj);
+}
 
 
 static SCM verify_port(SCM port, int mode)
@@ -396,7 +400,7 @@ doc>
 DEFINE_PRIMITIVE("read-bytes!", d_read_bytes, subr12, (SCM str, SCM port))
 {
   port = verify_port(port, PORT_READ);
-  if (!STRINGP(str)) STk_error("bad string ~S", str);
+  if (!STRINGP(str)) error_bad_string(str);
 
   return MAKE_INT(STk_read_buffer(port, STRING_CHARS(str), STRING_LENGTH(str)));
 }
@@ -448,7 +452,7 @@ DEFINE_PRIMITIVE("%read-bytevector!", d_read_bytevector, subr4,
 
   if (vstart < 0) STk_error("bad start value ~S", start);
   if (vend == LONG_MIN || vend > UVECTOR_SIZE(bv))
-    STk_error("bad end value ~S", start);
+    STk_error("bad end value ~S", end);
   if (vstart > vend) STk_error("start index is bigger than end index");
 
   n     = vend - vstart;
@@ -728,6 +732,32 @@ DEFINE_PRIMITIVE("write-char", write_char, subr12, (SCM c, SCM port))
   return STk_void;
 }
 
+DEFINE_PRIMITIVE("%write-string", write_string, subr4, (SCM str, SCM port,
+                                                        SCM start, SCM end))
+{
+  long vstart = STk_integer_value(start);
+  long vend   = STk_integer_value(end);
+
+  if (!STRINGP(str)) error_bad_string(str);
+  verify_port(port, PORT_WRITE | PORT_TEXTUAL);
+
+  if (vstart < 0) STk_error("bad start value ~S", start);
+  if (vend == LONG_MIN || vend > STRING_LENGTH(str))
+    STk_error("bad end value ~S", end);
+  if (vstart > vend) STk_error("start index is bigger than end index");
+
+  if (STk_use_utf8 && !STRING_MONOBYTE(str)) {
+    char *adr_start = STk_utf8_index(STRING_CHARS(str), vstart, STRING_SIZE(str));
+    char *adr_end   = STk_utf8_index(STRING_CHARS(str), vend,   STRING_SIZE(str));
+
+    STk_write_buffer(port, adr_start, adr_end - adr_start);
+  }
+  else {
+    STk_write_buffer(port, STRING_CHARS(str)+vstart, vend -vstart);
+  }
+  return STk_void;
+}
+
 
 /*
 <doc EXT write-chars
@@ -747,7 +777,7 @@ doc>
  */
 DEFINE_PRIMITIVE("write-chars", write_chars, subr12, (SCM str, SCM port))
 {
-  if (!STRINGP(str)) STk_error_bad_io_param("bad string ~S", str);
+  if (!STRINGP(str)) error_bad_string(str);
   port = verify_port(port, PORT_WRITE);
   STk_write_buffer(port, STRING_CHARS(str), STRING_SIZE(str));
   return STk_void;
@@ -1672,6 +1702,7 @@ int STk_init_port(void)
   ADD_PRIMITIVE(display);
   ADD_PRIMITIVE(newline);
   ADD_PRIMITIVE(write_char);
+  ADD_PRIMITIVE(write_string);
   ADD_PRIMITIVE(write_chars);
   ADD_PRIMITIVE(write_byte);
 
