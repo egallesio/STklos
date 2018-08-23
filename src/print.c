@@ -1,7 +1,7 @@
 /*
- * p r i n t . c				-- writing stuff
+ * p r i n t . c                                -- writing stuff
  *
- * Copyright © 1993-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 18-Mar-2012 18:10 (eg)
+ * Last file update: 23-Aug-2018 13:01 (eg)
  *
  */
 #include <ctype.h>
@@ -78,7 +78,7 @@ static void Inline printkeyword(SCM key, SCM port, int mode)
 
   if (mode==WRT_MODE) {
     if ((BOXED_INFO(key) & SYMBOL_NEEDS_BARS) ||
-	((!PORT_CASE_SENSITIVEP(port)) && (BOXED_INFO(key) & SYMBOL_HAS_UPPER))) {
+        ((!PORT_CASE_SENSITIVEP(port)) && (BOXED_INFO(key) & SYMBOL_HAS_UPPER))) {
       STk_nputs(port, "|:", 2);  STk_puts(s, port); STk_putc('|', port);
       return;
     }
@@ -106,10 +106,10 @@ static void printstring(SCM s, SCM port, int mode)
     *buff++ = '"';
     for (   ; len; len--, p++) {
       if (buff >= buffer + MAX_TOKEN_SIZE - 7) { /* 7 because we can add \X" and */
-	/* buffer is full. Flush it */		 /* a null char at this positon  */
-	*buff = '\0';
-	STk_puts(buffer, port);
-	buff = buffer;
+        /* buffer is full. Flush it */           /* a null char at this positon  */
+        *buff = '\0';
+        STk_puts(buffer, port);
+        buff = buffer;
       }
 
       switch (*p) {
@@ -124,26 +124,26 @@ static void printstring(SCM s, SCM port, int mode)
         case '"'  :
         case '\\' : *buff++ = '\\'; *buff++ = *p;  break;
         default   : {
-		      int printable;
+                      int printable;
 
-		      if (STk_use_utf8)
-			printable =
-			  (((unsigned) *p) >= (unsigned) ' ');
-		      else
-			printable =
-			  ((((unsigned char) *p) & 0177) >= (unsigned char) ' ');
+                      if (STk_use_utf8)
+                        printable =
+                          (((unsigned) *p) >= (unsigned) ' ');
+                      else
+                        printable =
+                          ((((unsigned char) *p) & 0177) >= (unsigned char) ' ');
 
-		      if (printable)
-			*buff++ = *p;
-		      else {
-			/* Non printable char. (It works only for char < 0xFF !!) */
-			*buff++ = '\\';
-			*buff++ = 'x';
-			*buff++ = printhexa((unsigned char) *p / 16);
-			*buff++ = printhexa((unsigned char) *p % 16);
-			*buff++ = ';';
-		      }
-		    }
+                      if (printable)
+                        *buff++ = *p;
+                      else {
+                        /* Non printable char. (It works only for char < 0xFF !!) */
+                        *buff++ = '\\';
+                        *buff++ = 'x';
+                        *buff++ = printhexa((unsigned char) *p / 16);
+                        *buff++ = printhexa((unsigned char) *p % 16);
+                        *buff++ = ';';
+                      }
+                    }
       }
     }
     *buff++ = '"';
@@ -161,12 +161,12 @@ void STk_print(SCM exp, SCM port, int mode)
   if (SCONSTP(exp)) {
     /* Expression is a small constant */
     switch (AS_LONG(exp)) {
-      case AS_LONG(STk_nil):   STk_nputs(port, "()", 2); 	  	return;
-      case AS_LONG(STk_false): STk_nputs(port, "#f", 2); 	  	return;
-      case AS_LONG(STk_true):  STk_nputs(port, "#t", 2); 	  	return;
-      case AS_LONG(STk_eof):   STk_nputs(port, "#eof", 4);	  	return;
-      case AS_LONG(STk_void):  STk_nputs(port, "#void", 5);	 	return;
-      default:		       STk_panic("Bad small constant %d", exp); return;
+      case AS_LONG(STk_nil):   STk_nputs(port, "()", 2);                return;
+      case AS_LONG(STk_false): STk_nputs(port, "#f", 2);                return;
+      case AS_LONG(STk_true):  STk_nputs(port, "#t", 2);                return;
+      case AS_LONG(STk_eof):   STk_nputs(port, "#eof", 4);              return;
+      case AS_LONG(STk_void):  STk_nputs(port, "#void", 5);             return;
+      default:                 STk_panic("Bad small constant %d", exp); return;
     }
   }
 
@@ -185,14 +185,14 @@ void STk_print(SCM exp, SCM port, int mode)
 
       STk_puts("#\\", port);
       if (s)
-	STk_puts(s, port);
+        STk_puts(s, port);
       else
-	if (c < 0x80)
-	  STk_putc(c, port);
-	else {
-	  STk_char2utf8(c, buffer);
-	  STk_puts((char *) buffer, port);
-	}
+        if (c < 0x80)
+          STk_putc(c, port);
+        else {
+          STk_char2utf8(c, buffer);
+          STk_puts((char *) buffer, port);
+        }
     }
     else {
       STk_char2utf8(c, buffer);
@@ -225,13 +225,13 @@ void STk_print(SCM exp, SCM port, int mode)
       return;
     case tc_pointer:
       if (CPOINTER_TYPE(exp) == STk_void) {
-	sprintf(buffer, "#[C-pointer %lx @ %lx]",
-		(unsigned long) CPOINTER_VALUE(exp), (unsigned long) exp);
+        sprintf(buffer, "#[C-pointer %lx @ %lx]",
+                (unsigned long) CPOINTER_VALUE(exp), (unsigned long) exp);
       } else {
-	STk_puts("#[", port);
-	STk_print(CPOINTER_TYPE(exp), port, mode);
-	sprintf(buffer, "-pointer %lx @ %lx]", (unsigned long) CPOINTER_VALUE(exp),
-		(unsigned long) exp);
+        STk_puts("#[", port);
+        STk_print(CPOINTER_TYPE(exp), port, mode);
+        sprintf(buffer, "-pointer %lx @ %lx]", (unsigned long) CPOINTER_VALUE(exp),
+                (unsigned long) exp);
       }
       STk_puts(buffer, port);
       return;
@@ -263,22 +263,22 @@ void STk_print(SCM exp, SCM port, int mode)
 #endif
     default:
       {
-	struct extended_type_descr *xdescr = BOXED_XTYPE(exp);
+        struct extended_type_descr *xdescr = BOXED_XTYPE(exp);
 
-	if (xdescr) {
-	  void (*p)() = XTYPE_PRINT(xdescr);
+        if (xdescr) {
+          void (*p)() = XTYPE_PRINT(xdescr);
 
-	  if (p)
-	    /* Use the defined function */
-	    p(exp, port, mode);
-	  else {
-	    /* No print function. Try to display something useful */
-	    sprintf(buffer, "#[%s %lx]", XTYPE_NAME(xdescr), (unsigned long) exp);
-	    STk_puts(buffer, port);
-	  }
-	}
-	else
-	  STk_panic("no extended type descriptor for %d", BOXED_TYPE(exp));
+          if (p)
+            /* Use the defined function */
+            p(exp, port, mode);
+          else {
+            /* No print function. Try to display something useful */
+            sprintf(buffer, "#[%s %lx]", XTYPE_NAME(xdescr), (unsigned long) exp);
+            STk_puts(buffer, port);
+          }
+        }
+        else
+          STk_panic("no extended type descriptor for %d", BOXED_TYPE(exp));
       }
   }
 }
@@ -287,18 +287,18 @@ void STk_print(SCM exp, SCM port, int mode)
 
 /*=============================================================================
  *
- *			Printing of circular structures
+ *                      Printing of circular structures
  *
  *=============================================================================*/
 
 static SCM cycles      = STk_nil;;
 static int index_label = 0;
 
-static void pass1(SCM exp);		/* pass 1: mark cells */
-static void pass2(SCM exp, SCM port);	/* pass 2: print      */
+static void pass1(SCM exp);                       /* pass 1: mark cells */
+static void pass2(SCM exp, SCM port, int mode);   /* pass 2: print      */
 
 
-static void print_cycle(SCM exp, SCM port)
+static void print_cycle(SCM exp, SCM port, int mode)
 {
   SCM value, tmp;
 
@@ -310,23 +310,23 @@ static void print_cycle(SCM exp, SCM port)
     }
   }
   /* This is not a cycle. Do a normal print */
-  pass2(exp, port);
+  pass2(exp, port, mode);
 }
 
 
-static void printlist_star(SCM exp, SCM port)
+static void printlist_star(SCM exp, SCM port, int mode)
 {
   SCM value, tmp;
   char *s;
 
-  tmp = STk_nil;		/* for GCC */
+  tmp = STk_nil;                /* for GCC */
 
   if (pretty_quotes) {
     /* Special case for pretty printing of quoted expressions */
     s = STk_quote2str(CAR(exp));
     if (s && !NULLP(CDR(exp)) && NULLP(CDR(CDR(exp)))) {
       STk_puts(s, port);
-      print_cycle(CAR(CDR(exp)), port);
+      print_cycle(CAR(CDR(exp)), port, mode);
       return;
     }
   }
@@ -334,16 +334,16 @@ static void printlist_star(SCM exp, SCM port)
   STk_putc('(', port);
 
   for ( ; ; ) {
-    print_cycle(CAR(exp), port);
+    print_cycle(CAR(exp), port, mode);
 
     if (NULLP(exp=CDR(exp))) break;
 
     if (!CONSP(exp) || (tmp = STk_assv(exp, cycles)) != STk_false) {
       if (!CONSP(exp) || (value = CDR(tmp)) == STk_true || INTP(value)) {
-	/* either  ". X" or ". #0=(...)" or ". #0#" */
-	STk_nputs(port, " . ", 3);
-	print_cycle(exp, port);
-	break;
+        /* either  ". X" or ". #0=(...)" or ". #0#" */
+        STk_nputs(port, " . ", 3);
+        print_cycle(exp, port, mode);
+        break;
       }
     }
     STk_putc(' ', port);
@@ -352,13 +352,13 @@ static void printlist_star(SCM exp, SCM port)
 }
 
 
-static void printvector_star(SCM exp, SCM port)
+static void printvector_star(SCM exp, SCM port, int mode)
 {
   int j, n = VECTOR_SIZE(exp);
 
   STk_nputs(port, "#(", 2);
   for(j=0; j < n; j++) {
-    print_cycle(VECTOR_DATA(exp)[j], port);
+    print_cycle(VECTOR_DATA(exp)[j], port, mode);
     if ((j + 1) < n) STk_putc(' ', port);
   }
   STk_putc(')', port);
@@ -376,12 +376,12 @@ Top:
     /* We have never seen this cell so far */
     cycles = STk_cons(STk_cons(exp, STk_false), cycles);
 
-    if (CONSP(exp)) {			/* it's a cons */
+    if (CONSP(exp)) {                   /* it's a cons */
       pass1(CAR(exp));
       exp = CDR(exp);
       goto Top;
     }
-    else { 				/* it's a vector */
+    else {                              /* it's a vector */
       int i, len = VECTOR_SIZE(exp)-1;
       for (i = 0; i < len; i++) pass1(VECTOR_DATA(exp)[i]);
       if (len >= 0) {exp = VECTOR_DATA(exp)[len]; goto Top;}
@@ -394,37 +394,37 @@ Top:
 }
 
 
-static void pass2(SCM exp, SCM port)
+static void pass2(SCM exp, SCM port, int mode)
 {
   if (!CONSP(exp) && !VECTORP(exp))
-    STk_print(exp, port, WRT_MODE); 	/* Normal print */
+    STk_print(exp, port, mode);     /* Normal print */
   else {
     SCM value, tmp;
 
     /* Eventually print a definition label */
     if ((tmp = STk_assv(exp, cycles)) != STk_false) {
       if ((value=CDR(tmp)) == STk_true) {
-	/* First use of this label. Assign it a value */
-	STk_fprintf(port, "#%d=", index_label);
-	CDR(tmp) = MAKE_INT(index_label++);
+        /* First use of this label. Assign it a value */
+        STk_fprintf(port, "#%d=", index_label);
+        CDR(tmp) = MAKE_INT(index_label++);
       }
     }
 
-    if (CONSP(exp)) printlist_star(exp, port);
-    else            printvector_star(exp, port);
+    if (CONSP(exp)) printlist_star(exp, port, mode);
+    else            printvector_star(exp, port, mode);
   }
 }
 
-void STk_print_star(SCM exp, SCM port)
+void STk_print_star(SCM exp, SCM port, int mode)
 {
   MUT_DECL(lck);
 
-  if (!CONSP(exp) &&  !VECTORP(exp)) return STk_print(exp, port, WRT_MODE);
+  if (!CONSP(exp) &&  !VECTORP(exp)) return STk_print(exp, port, mode);
   MUT_LOCK(lck);
   cycles      = STk_nil;
   index_label = 0;
 
-  pass1(exp); pass2(exp, port);
+  pass1(exp); pass2(exp, port, mode);
   MUT_UNLOCK(lck);
 }
 
@@ -456,14 +456,14 @@ static SCM write_pretty_quotes_conv(SCM value)
 
 /*===========================================================================*\
  *
- *			I n i t i a l i z a t i o n
+ *                      I n i t i a l i z a t i o n
  *
 \*===========================================================================*/
 int STk_init_printer(void)
 {
   STk_make_C_parameter("write-pretty-quotes",
-		       MAKE_BOOLEAN(pretty_quotes),
-		       write_pretty_quotes_conv,
-		       STk_STklos_module);
+                       MAKE_BOOLEAN(pretty_quotes),
+                       write_pretty_quotes_conv,
+                       STk_STklos_module);
   return TRUE;
 }

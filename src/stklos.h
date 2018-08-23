@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  5-Aug-2018 17:23 (eg)
+ * Last file update: 23-Aug-2018 15:06 (eg)
  */
 
 
@@ -1034,11 +1034,11 @@ extern int STk_interactive;                     /* We are in intearctive mode */
   ----
   ------------------------------------------------------------------------------
 */
-void STk_print(SCM exp, SCM port, int mode);
-  void STk_print_star(SCM exp, SCM port);
-
 #define DSP_MODE                0
 #define WRT_MODE                1
+
+void STk_print(SCM exp, SCM port, int mode);
+void STk_print_star(SCM exp, SCM port, int mode);
 
 int STk_init_printer(void);
 

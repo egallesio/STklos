@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 22-Aug-2018 16:14 (eg)
+ * Last file update: 23-Aug-2018 15:45 (eg)
  *
  */
 
@@ -665,12 +665,12 @@ doc>
 DEFINE_PRIMITIVE("write*", write_star, subr12, (SCM expr, SCM port))
 {
   port = verify_port(port, PORT_WRITE | PORT_TEXTUAL);
-  STk_print_star(expr, port);
+  STk_print_star(expr, port, WRT_MODE);
   return STk_void;
 }
 
 /*
-<doc  display
+<doc display
  * (display obj)
  * (display obj port)
  *
@@ -684,14 +684,18 @@ DEFINE_PRIMITIVE("write*", write_star, subr12, (SCM expr, SCM port))
  * @l
  * ,(bold "Rationale:") |Write| is intended for producing machine-readable
  * output and |display| is for producing human-readable output.
+ * @l
+ * ,(bold "Note:") As required by ,(rseven) does not loop forever when 
+ * |obj| contains self-references.
 doc>
  */
 DEFINE_PRIMITIVE("display", display, subr12, (SCM expr, SCM port))
 {
   port = verify_port(port, PORT_WRITE | PORT_TEXTUAL);
-  STk_print(expr, port, DSP_MODE);
+  STk_print_star(expr, port, DSP_MODE);
   return STk_void;
 }
+
 
 /*
 <doc  newline
@@ -883,7 +887,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
                   break;
         case 'W':
         case 'w': if (argc-- <= 0) goto TooMuch;
-                  STk_print_star(*argv--, port);
+          STk_print_star(*argv--, port, WRT_MODE);
                   break;
         case 'X':
         case 'x': if (argc-- <= 0) goto TooMuch;

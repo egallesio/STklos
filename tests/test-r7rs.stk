@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 22-Aug-2018 16:23 (eg)
+;;;; Last file update: 23-Aug-2018 15:52 (eg)
 ;;;;
 
 (require "test")
@@ -528,21 +528,38 @@
     bv))
 
 ;; --------------------------------------------------
-(let* ((x '(a b c d))
-       (y (list x x)))
-  (test "write-simple"
-        "((a b c d) (a b c d))"
-        (let ((out (open-output-string)))
+(test "write-simple"
+      "((a b c d) (a b c d))"
+      (let* ((x '(a b c d))
+             (y (list x x))
+             (out (open-output-string)))
           (write-simple y out)
-          (get-output-string out))))
+          (get-output-string out)))
 
-(let* ((x '(a b c d))
-       (y (list x x)))
-  (test "write-shared"
-        "(#0=(a b c d) #0#)"
-        (let ((out (open-output-string)))
-          (write-shared y out)
-          (get-output-string out))))
+(test "write-shared"
+      "(#0=(a b c d) #0#)"
+      (let* ((x '(a b c d))
+             (y (list x x))
+             (out (open-output-string)))
+        (write-shared y out)
+        (get-output-string out)))
+
+(test "display (cyclic list).1"
+      "(#0=(abc def A foo) #0#)"
+      (let* ((x '("abc" "def" #\A foo))
+             (y (list x x))
+             (out (open-output-string)))
+        (display y out)
+        (get-output-string out)))
+
+(test "write-shared (cyclic list).1"
+      "(#0=(\"abc\" \"def\" #\\A foo) #0#)"
+      (let* ((x '("abc" "def" #\A foo))
+             (y (list x x))
+             (out (open-output-string)))
+        (write-shared y out)
+        (get-output-string out)))
+
 
 ;; --------------------------------------------------
 (test "chibi write-string.1"

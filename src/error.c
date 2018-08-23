@@ -1,8 +1,8 @@
 /*
  *
- * e r r o r . c 			-- The error procedure
+ * e r r o r . c                        -- The error procedure
  *
- * Copyright © 1993-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 14-Nov-1993 14:58
- * Last file update: 30-May-2007 16:27 (eg)
+ * Last file update: 23-Aug-2018 15:07 (eg)
  */
 
 #include "stklos.h"
@@ -40,8 +40,8 @@
  *       %% for printing a '%'
  *       ~A for printing a Scheme object in display mode
  *       ~S for printing a Scheme object in write mode
- *	 ~W for printing a Scheme object in write mode (circular)
- *	 ~% for printing a newline
+ *       ~W for printing a Scheme object in write mode (circular)
+ *       ~% for printing a newline
  *       ~~ for printing a tilde character
  *
 \*===========================================================================*/
@@ -64,50 +64,50 @@ static void print_format(SCM port,char *format, va_list ap)
     if (*s == '%') {
       /* % format (C-like) */
       switch (*++s) {
-	case '%': STk_putc('%', port); break;
+        case '%': STk_putc('%', port); break;
 
-	case 'S': STk_putc('`', port); /* No break */
-	case 's': for (str = va_arg(ap, char *); *str; str++)
-		    STk_putc(*str, port);
-		  if (*s == 'S') STk_putc('\'', port);
-		  break;
-	case 'c': STk_putc(va_arg(ap, int), port); break;
-	case 'x': print_int(port, va_arg(ap, unsigned int), 16); break;
-	case 'd': {
-	  	    int val =  va_arg(ap, unsigned int);
+        case 'S': STk_putc('`', port); /* No break */
+        case 's': for (str = va_arg(ap, char *); *str; str++)
+                    STk_putc(*str, port);
+                  if (*s == 'S') STk_putc('\'', port);
+                  break;
+        case 'c': STk_putc(va_arg(ap, int), port); break;
+        case 'x': print_int(port, va_arg(ap, unsigned int), 16); break;
+        case 'd': {
+                    int val =  va_arg(ap, unsigned int);
 
-		    if (val < 0) {
-		      STk_putc('-', port);
-		      print_int(port, -val, 10);
-		    }
-		    else
-		      print_int(port, val, 10);
-		    break;
-		  }
-	default:  STk_putc('%', port);
-		  if (*s) STk_putc(*s, port);
-		  break;
+                    if (val < 0) {
+                      STk_putc('-', port);
+                      print_int(port, -val, 10);
+                    }
+                    else
+                      print_int(port, val, 10);
+                    break;
+                  }
+        default:  STk_putc('%', port);
+                  if (*s) STk_putc(*s, port);
+                  break;
       }
     } else if (*s == '~') {
       /* ~ format (CL like) */
       switch (*++s) {
-	case 'A': STk_putc('`', port); /* No break */
-	case 'a': STk_print(va_arg(ap, SCM), port, DSP_MODE);
-		  if (*s == 'A') STk_putc('\'', port);
-		  break;
-	case 'W': STk_putc('`', port);	/* No break */
-	case 'w': STk_print_star(va_arg(ap, SCM), port);
-	  	  if (*s == 'W') STk_putc('\'', port);
-		  break;
-	case 'S': STk_putc('`', port);	/* No break */
-	case 's': STk_print(va_arg(ap, SCM), port, WRT_MODE);
-		  if (*s == 'S') STk_putc('\'', port);
-		  break;
-	case '~': STk_putc('~', port);  break;
-	case '%': STk_putc('\n', port); break;
-	default:  STk_putc('~', port);
-	  	  if (*s) STk_putc(*s, port);
-		  break;
+        case 'A': STk_putc('`', port); /* No break */
+        case 'a': STk_print(va_arg(ap, SCM), port, DSP_MODE);
+                  if (*s == 'A') STk_putc('\'', port);
+                  break;
+        case 'W': STk_putc('`', port);  /* No break */
+        case 'w': STk_print_star(va_arg(ap, SCM), port,WRT_MODE);
+                  if (*s == 'W') STk_putc('\'', port);
+                  break;
+        case 'S': STk_putc('`', port);  /* No break */
+        case 's': STk_print(va_arg(ap, SCM), port, WRT_MODE);
+                  if (*s == 'S') STk_putc('\'', port);
+                  break;
+        case '~': STk_putc('~', port);  break;
+        case '%': STk_putc('\n', port); break;
+        default:  STk_putc('~', port);
+                  if (*s) STk_putc(*s, port);
+                  break;
       }
     } else {
       /* Normal character */
@@ -237,8 +237,8 @@ void STk_panic(char *format, ...)
 void STk_signal(char *str)
 {
   STk_raise_exception(STk_make_C_cond(STk_message_condition,
-				      1,
-				      STk_Cstring2string(str)));
+                                      1,
+                                      STk_Cstring2string(str)));
 }
 
 
@@ -260,7 +260,7 @@ void STk_debug(char *format, ...)
   STk_flush(eport);
 }
 
-void STk_gdb(SCM obj)		/* associated to the  gdb write function */
+void STk_gdb(SCM obj)           /* associated to the  gdb write function */
 {
   STk_debug("Object 0x%lx value = ~s", (unsigned long) obj, obj);
 }
