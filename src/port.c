@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 23-Aug-2018 15:45 (eg)
+ * Last file update: 24-Aug-2018 15:21 (eg)
  *
  */
 
@@ -695,6 +695,36 @@ DEFINE_PRIMITIVE("display", display, subr12, (SCM expr, SCM port))
   STk_print_star(expr, port, DSP_MODE);
   return STk_void;
 }
+
+
+/*
+<doc EXT display-simple
+ * (display-simple obj)
+ * (display-simple obj port)
+ *
+ * The |display-simple| procedure is the same as |display|, except
+ * that shared structure is never represented using datum labels. 
+ * This can cause |display-simple| not to terminate if |obj|
+ * contains circular structure.
+doc>
+ */
+DEFINE_PRIMITIVE("display-simple", display_simple, subr12, (SCM expr, SCM port))
+{
+  port = verify_port(port, PORT_WRITE | PORT_TEXTUAL);
+  STk_print(expr, port, DSP_MODE);
+  return STk_void;
+}
+/*
+<doc EXT display-shared
+ * (display-shared obj)
+ * (display-shared obj port)
+ *
+ * The |display-shared| procedure is the same as |display|, except
+ * that shared structure are represented using datum labels.
+doc>
+ */
+
+/* Aliased to display in lib/bonus.stk */
 
 
 /*
@@ -1704,6 +1734,7 @@ int STk_init_port(void)
 
   ADD_PRIMITIVE(write);
   ADD_PRIMITIVE(display);
+  ADD_PRIMITIVE(display_simple);
   ADD_PRIMITIVE(newline);
   ADD_PRIMITIVE(write_char);
   ADD_PRIMITIVE(write_string);

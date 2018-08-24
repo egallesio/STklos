@@ -21,13 +21,17 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 22-Aug-2018 13:03 (eg)
+;;;; Last file update: 24-Aug-2018 15:20 (eg)
 ;;;;
 
 
 ;;;; Deprecated names
 (define read-chars read-bytes)
 (define read-chars! read-bytes!)
+
+
+;;;; Aliases
+(define display-shared display)
 
 
 #|
