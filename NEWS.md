@@ -1,6 +1,43 @@
 NEWS
 ====
 
+Dev version
+-----------
+
+The goal of this version consists to be more R7RS compliant. All the
+R5RS functions which have been extended in R7RS are now conform to
+R7RS (for instance `assoc` and `member` accept now an optional
+parameter which is a compare function, vector->list accepts the
+`start` and `end` parameters, ...)
+
+
+Changes in this version are:
+  - Implementations R7RS I/O  
+      - Ports can now be binary or textual (standard ports are both)
+      - New functions:
+          - `write-string`
+          - `wite-shared` & `write-simple`
+          - functions to input and output bytevectors
+          - `read-u8` `peek-u8` and `u8-ready?`
+          - `call-with-port`
+          - `textual-port?`
+          - `binary-port?`
+          - `open-binary-input-file`
+          - `open-binary-output-file`
+          - `utf8->string` & `string->utf8`
+ - Updated various functions to be R7RS compliant. 
+ - Added the R7RS functions on bytevectors
+ - Added  R7RS `#true` and `#false` constants
+ - Upgraded the libraries embedded in STklos source tree
+ - Optimization of circular structure reading
+ - New primitives
+       - `display-simple` & `display-shared`
+       - R7RS `symbol=?`
+       - R7RS `boolean=?`
+ - Updated documentation
+ - Bug fixes
+
+
 version 1.20
 ------------
 

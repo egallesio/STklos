@@ -1,3 +1,242 @@
+2018-08-24 Erick Gallesio <eg@unice.fr>
+        - Updated Documentation
+
+2018-08-24 Erick Gallesio <eg@unice.fr>
+        - Added extended functions display-simple display-shared
+
+2018-08-23 Erick Gallesio <eg@unice.fr>
+        - Modified display to be R7RS (no loop on cyclic structures).
+
+2018-08-22 Erick Gallesio <eg@unice.fr>
+        - Added R7RS function write-string
+
+2018-08-22 Erick Gallesio <eg@unice.fr>
+        - Added the R7RS function write-shared & write-simple
+
+2018-08-22 Erick Gallesio <eg@unice.fr>
+        - Added controls on binary vs textual ports
+
+2018-08-06 Erick Gallesio <eg@unice.fr>
+        - Make standard IO port both binary and textual.
+
+2018-08-06 Erick Gallesio <eg@unice.fr>
+        - Added R7RS primitive write-bytevector
+
+2018-08-05 Erick Gallesio <eg@unice.fr>
+        - Added the R7RS function read-bytecode!
+
+2018-08-05 Erick Gallesio <eg@unice.fr>
+        - Added R7RS primitive read-bytevector
+
+2018-08-03 Erick Gallesio <eg@unice.fr>
+        - Modification: the extended function read-chars is renamed in read-bytes
+
+2018-08-03 Erick Gallesio <eg@unice.fr>
+        - Added input and output bytecode vectors
+
+2018-08-01 Erick Gallesio <eg@unice.fr>
+        - Added the R7RS primitives read-u8 peek-u8 and u8-ready?
+
+2018-08-01 Erick Gallesio <eg@unice.fr>
+        - Added the R7RS function read-char
+
+2018-07-18 Erick Gallesio <eg@unice.fr>
+        - Bug fix on write-char  with UTF8 characters
+
+2018-07-18 Erick Gallesio <eg@unice.fr>
+        - Bug Fix: multiples values lost on call-with-port
+
+2018-07-14 Erick Gallesio <eg@unice.fr>
+        - Starting implementation of R7 RS functions.
+
+	Added the flags to distinguish textual and binary ports
+	(a port can be both too)
+        R7RS functions implemented:
+		- call-with-port
+		- textual-port?
+		- binary-port?
+		- open-binary-input-file
+		- open-binary-output-file
+
+
+2018-07-11 Erick Gallesio <eg@unice.fr>
+        - Added the R7RS utf8->string & string->utf8 functions
+
+2018-07-10 Erick Gallesio <eg@unice.fr>
+        - Added R7RS function bytevector-append.
+
+2018-07-10 Erick Gallesio <eg@unice.fr>
+        - Re-implementation of R7RS bytecode-copy!
+
+2018-07-09 Erick Gallesio <eg@unice.fr>
+        - Re-implementation of R7RS bytevector-copy
+
+2018-07-06 Erick Gallesio <eg@unice.fr>
+        - Code cleaning of R7RS bytevector-{length,u8-ref,u8-set!} primitives
+
+2018-07-06 Erick Gallesio <eg@unice.fr>
+        - Added R7RS function `bytevector`
+        We have now 1100 regression tests.
+
+
+2018-07-06 Erick Gallesio <eg@unice.fr>
+        - Fixed typos in Doc
+
+2018-07-06 Erick Gallesio <eg@unice.fr>
+        - Added `start` and `end` parameters to R7RS `vector-fill!`
+
+2018-07-06 Erick Gallesio <eg@unice.fr>
+        - Added the R7RS function vector-append
+
+2018-07-06 Erick Gallesio <eg@unice.fr>
+        - Updated string->vector & vector->string to the final version of R7RS
+
+2018-07-06 Erick Gallesio <eg@unice.fr>
+        - Merge branch 'master' of gitlab.com:Gallesio/STklos (but why?)
+
+2018-07-06 Erick Gallesio <eg@unice.fr>
+        - Extended vector-copy to be R7RS and added the R7RS vector-copy!
+
+2018-07-05 Erick Gallesio <eg@unice.fr>
+        - Extended the vector->list to be R7RS compliant
+
+2018-07-05 Erick Gallesio <eg@unice.fr>
+        - Added the R7RS function `symbol=?`
+
+2018-07-03 Erick Gallesio <eg@unice.fr>
+        - Integration of the git hash in the source (more or less)
+
+2018-07-03 Erick Gallesio <eg@unice.fr>
+        - Integration of the git hash in the source (more or less)
+
+2018-07-03 Erick Gallesio <eg@unice.fr>
+        - Display a Git hash when intaractive.
+
+2018-07-03 Erick Gallesio <eg@unice.fr>
+        - Modified the makefile to permit a unique beta version number.
+
+2018-07-03 Erick Gallesio <eg@unice.fr>
+        - Modified the makefile to permit a unique beta version number
+
+2018-07-03 Erick Gallesio <eg@unice.fr>
+        - Typo fix for documentation
+
+2018-07-03 Erick Gallesio <eg@unice.fr>
+        - Added  R7RS #true and #false constants and the boolean=? primitive.
+
+2018-06-29 Erick Gallesio <eg@unice.fr>
+        - Added a new instruction in the VM: PUSH-HANDLER-FAR
+        A version of PUSH-HANDLER where handler body size
+	cannot be expressed with an small integer.
+
+2018-06-29 Erick Gallesio <eg@unice.fr>
+        - Code cleaning in R7RS strings
+
+2018-06-28 Erick Gallesio <eg@unice.fr>
+        - Extended the string-fill! function to be R7RS
+
+2018-06-28 Erick Gallesio <eg@unice.fr>
+        - Make string-copy R7RS compliant and added R7RS string-copy! function
+
+2018-06-26 Erick Gallesio <eg@unice.fr>
+        - Extended the string->list function to be R7RS compliant
+
+2018-06-26 Erick Gallesio <eg@unice.fr>
+        - Added function %set-procedure-name!
+        This function permits to force the associated name of a closure
+	to ensure better error messages. This is useful when overloading a
+        primitive with a closure.
+
+
+2018-06-26 Erick Gallesio <eg@unice.fr>
+        - String comparison functions are extended to be R7RS
+
+	The function are string=?, string<?, string>?, string<=?,
+        string>=? (and their -ci counterpart) accept now more than
+        two parameters.
+
+2018-06-22 Erick Gallesio <eg@unice.fr>
+        - Added tests for R7RS traits of list fucntions
+        We have now more than 1000 tests!
+
+2018-06-22 Erick Gallesio <eg@unice.fr>
+        - Updated documentation to show R7RS extensions as such.
+
+2018-06-21 Erick Gallesio <eg@unice.fr>
+        - Added the  R7RS list-set! primitive
+
+2018-06-21 Erick Gallesio <eg@unice.fr>
+        - Make the assoc and member primitive R7RS compliant
+        Assoc and member accept now an optional parameter which is
+	a compare function.
+
+2018-06-21 Erick Gallesio <eg@unice.fr>
+        - Fixed the tests again...
+
+2018-06-21 Erick Gallesio <eg@unice.fr>
+        - Fix tests
+
+2018-06-15 Erick Gallesio <eg@unice.fr>
+        - Moved the tests with UTF8 lambda symbols to test-utf8
+
+2018-06-13 Erick Gallesio <eg@unice.fr>
+        - Force LC_NUMERIC locale to always be "C"
+        Scheme R5RS imposes that real use a '.'.  To avoid problems with POSIX
+        locale aware function (as `strtod`) to interact with Scheme number,
+	we force it during number module initialization.
+
+2018-06-12 Erick Gallesio <eg@unice.fr>
+        - Merge branch 'dev' (updated used libraries)
+
+2018-06-12 Erick Gallesio <eg@unice.fr>
+        - Added tests for circular lists
+
+2018-06-12 Erick Gallesio <eg@unice.fr>
+        - Allow item redefinition in circular structures
+
+        Before the following list was forbidden
+            (#0=(1 2) #1=(3 4) #0# #1# #2=(5 6) #2# #1#)
+        since item 0 was redefined.
+
+        Now (as in emacs) it produces the list
+        (#0=(1 2) #1=(3 4) #0# #1# #2=(5 6) #2# #1#)
+
+        This allows things like:
+
+	(let* ((l1 '(#0=(1 2 3) #0# #1=(2 #0#) #1#))
+	       (l2 '(#0=(1 2 3) #0# #1=(2 #0#) #1#)))
+	    (equal? l1 l2))
+
+
+2018-06-11 Erick Gallesio <eg@unice.fr>
+        - Upgraded version of libffi to version 3.2
+
+2018-06-11 Erick Gallesio <eg@unice.fr>
+        - Upgraded the PCRE regular expression library to version 8.42
+
+2018-06-11 Erick Gallesio <eg@unice.fr>
+        - Upgraded the Boehm GC library to version 7.6.4
+
+2018-06-11 Erick Gallesio <eg@unice.fr>
+        - Optimization of circular structure reading
+
+        Tremendous optimization, since the execution time grow exponentially
+        with the number of references.
+
+        Before the patch, for instance, reading
+
+'((#0=(24 . #0#) #1=((#2=(23 . #2#) #3=((#4=(22 . #4#) #5=((#6=(21 . #6#) #7=((#8=(20 . #8#) #9=((#10=(19 . #10#) #11=((#12=(18 . #12#) #13=((#14=(17 . #14#) #15=((#16=(16 . #16#) #17=((#18=(15 . #18#) #19=((#20=(14 . #20#) #21=((#22=(13 . #22#) #23=((#24=(12 . #24#) #25=((#26=(11 . #26#) #27=((#28=(10 . #28#) #29=((#30=(9 . #30#) #31=((#32=(8 . #32#) #33=((#34=(7 . #34#) #35=((#36=(6 . #36#) #37=((#38=(5 . #38#) #39=((#40=(4 . #40#) #41=((#42=(3 . #42#) #43=((#44=(2 . #44#) #45=((#46=(1 . #46#) #47=((#48=(0 . #48#) #49=(void) ()) . #49#) #49#) . #47#) #47#) . #45#) #45#) . #43#) #43#) . #41#) #41#) . #39#) #39#) . #37#) #37#) . #35#) #35#) . #33#) #33#) . #31#) #31#) . #29#) #29#) . #27#) #27#) . #25#) #25#) . #23#) #23#) . #21#) #21#) . #19#) #19#) . #17#) #17#) . #15#) #15#) . #13#) #13#) . #11#) #11#) . #9#) #9#) . #7#) #7#) . #5#) #5#) . #3#) #3#) . #1#)
+
+         took a minute.
+         It takes 10ms now!
+
+
+2018-06-06 Erick Gallesio <eg@unice.fr>
+        - Moved the ScmPkg template Makefile in the share dir (instead of etc)
+
+2018-06-06 Erick Gallesio <eg@unice.fr>
+        - Typo correction
+
 2018-06-04 Erick Gallesio <eg@unice.fr>	
 
      - STklos 1.20 Release
