@@ -1,0 +1,308 @@
+/*
+ * parameter.c  -- Parameter Objects (SRFI-39)
+ *
+ * Copyright © 2003-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ *
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ *
+ *           Author: Erick Gallesio [eg@essi.fr]
+ *    Creation date:  1-Jul-2003 11:38 (eg)
+ * Last file update: 18-Jul-2018 19:41 (eg)
+ */
+
+
+#include "stklos.h"
+#include "vm.h"
+
+
+struct parameter_obj {
+  stk_header header;
+  SCM value;
+  SCM converter;
+  SCM dynenv;     /* an A-list ((thr1 . val) ...) to look before returning value */
+  int C_type;     /* 0: parameter is expressed in Scheme
+                     1: Converter is expressed in C rather than in Scheme
+                     2: idem and value is a procedure to call to get value
+                     3: A Scheme parameter whose value is a thunk to be called
+                  */
+};
+
+#define PARAMETERP(o)           (BOXED_TYPE_EQ((o), tc_parameter))
+#define PARAMETER_VALUE(p)      (((struct parameter_obj *) (p))->value)
+#define PARAMETER_CONV(p)       (((struct parameter_obj *) (p))->converter)
+#define PARAMETER_C_TYPE(p)     (((struct parameter_obj *) (p))->C_type)
+#define PARAMETER_DYNENV(p)     (((struct parameter_obj *) (p))->dynenv)
+
+/*===========================================================================*\
+ *
+ *      Utilities
+ *
+\*===========================================================================*/
+
+static void error_bad_parameter(SCM obj)
+{
+  STk_error("bad parameter ~S", obj);
+}
+
+
+SCM STk_get_parameter(SCM param)
+{
+  SCM val, tmp;
+
+  if (!PARAMETERP(param)) error_bad_parameter(param);
+
+  tmp = STk_int_assq(STk_current_thread(), PARAMETER_DYNENV(param));
+  val =  (tmp != STk_false) ? CDR(tmp) : PARAMETER_VALUE(param);
+
+  switch (PARAMETER_C_TYPE(param)) {
+    case 2:  return ((SCM (*)(void)) val)();
+    case 3:  return STk_C_apply(val, 0);
+    default: return val;
+  }
+}
+
+SCM STk_set_parameter(SCM param, SCM value)
+{
+  SCM conv, tmp, new;
+
+  if (!PARAMETERP(param)) error_bad_parameter(param);
+
+  conv = PARAMETER_CONV(param);
+
+  switch (PARAMETER_C_TYPE(param)) {
+    case 0:
+    case 3:
+      new = (conv != STk_false) ? STk_C_apply(conv,1,value): value;
+      break;
+    default:
+      new = (conv != STk_false) ? ((SCM (*) (SCM))conv)(value): value;
+      break;
+  }
+  
+        
+
+
+//    
+//  if (PARAMETER_C_TYPE(param)) {
+//    /* We have a C converter */
+//    new = (conv != STk_false) ? ((SCM (*) (SCM))conv)(value): value;
+//  } else {
+//    /* We have a Scheme converter */
+//    new = (conv != STk_false) ? STk_C_apply(conv,1,value): value;
+//  }
+
+  tmp  = STk_int_assq(STk_current_thread(), PARAMETER_DYNENV(param));
+  if (tmp != STk_false)
+    CDR(tmp) = new;
+  else {
+    if (PARAMETER_C_TYPE(param) != 2)
+      PARAMETER_VALUE(param) = new;
+  }
+
+  return STk_void;
+}
+
+SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value),
+                         SCM module)
+{
+  SCM z;
+
+  /* Define the parameter */
+  NEWCELL(z, parameter);
+  PARAMETER_VALUE(z)  = value;
+  PARAMETER_CONV(z)   = (SCM) proc;
+  PARAMETER_C_TYPE(z) = 1;
+  PARAMETER_DYNENV(z) = STk_nil;
+
+  /* Bind it to the given symbol */
+  STk_define_variable(STk_intern(symbol), z, module);
+
+  return z;
+}
+
+SCM STk_make_C_parameter2(SCM symbol, SCM (*value)(void), SCM (*proc)(SCM new_value),
+                          SCM module)
+{
+  SCM z = STk_make_C_parameter(symbol, (SCM) value, proc, module);
+
+  PARAMETER_C_TYPE(z) = 2;
+  return z;
+}
+
+
+
+/*===========================================================================*\
+ *
+ *      Primitives
+ *
+\*===========================================================================*/
+
+/*
+<doc EXT make-parameter
+ * (make-parameter init)
+ * (make-parameter init converter)
+ *
+ * Returns a new parameter object which is bound in the global dynamic
+ * environment to a cell containing the value returned by the call
+ * |(converter init)|. If the conversion procedure |converter| is not
+ * specified the identity function is used instead.
+ * @l
+ * The parameter object is a procedure which accepts zero or one
+ * argument. When it is called with no argument, the content of the
+ * cell bound to this parameter object in the current dynamic
+ * environment is returned. When it is called with one argument, the
+ * content of the cell bound to this parameter object in the current
+ * dynamic environment is set to the result of the call
+ * |(converter arg)|, where |arg| is the argument passed to the
+ * parameter object, and
+ * an unspecified value is returned.
+ *
+ * @lisp
+ * (define radix
+ *     (make-parameter 10))
+ *
+ * (define write-shared
+ *    (make-parameter
+ *       #f
+ *       (lambda (x)
+ *         (if (boolean? x)
+ *             x
+ *             (error 'write-shared "bad boolean ~S" x)))))
+ *
+ *  (radix)           =>  10
+ *  (radix 2)
+ *  (radix)           =>  2
+ *  (write-shared 0)  => error
+ *
+ *  (define prompt
+ *    (make-parameter
+ *      123
+ *      (lambda (x)
+ *        (if (string? x)
+ *            x
+ *            (with-output-to-string (lambda () (write x)))))))
+ *
+ *  (prompt)       =>  "123"
+ *  (prompt ">")
+ *  (prompt)       =>  ">"
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("make-parameter", make_parameter, subr12, (SCM value, SCM conv))
+{
+  SCM z, v;
+
+  if (conv && STk_procedurep(conv) == STk_false)
+    STk_error("bad conversion function ~S", conv);
+
+  /* initialize v with (conv value) */
+  v = (conv) ? STk_C_apply(conv, 1, value): value;
+
+  NEWCELL(z, parameter);
+  PARAMETER_VALUE(z)  = v;
+  PARAMETER_CONV(z)   = (conv) ? conv : STk_false;
+  PARAMETER_C_TYPE(z) = 0;
+  PARAMETER_DYNENV(z) = STk_nil;
+
+  return z;
+}
+
+DEFINE_PRIMITIVE("make-thunk-parameter", make_thunk_parameter, subr12,
+                 (SCM value, SCM conv))
+{
+  SCM z;
+
+  if (conv && STk_procedurep(conv) == STk_false)
+    STk_error("bad conversion function ~S", conv);
+
+  if (STk_procedurep(value) != STk_true)
+    STk_error("bad thunk ~S", value);
+
+  NEWCELL(z, parameter);
+  PARAMETER_VALUE(z)  = value;
+  PARAMETER_CONV(z)   = (conv) ? conv : STk_false;
+  PARAMETER_C_TYPE(z) = 3;
+  PARAMETER_DYNENV(z) = STk_nil;
+  return z;
+}
+
+/*
+<doc EXT parameter?
+ * (parameter? obj)
+ *
+ *  Returns |#t| if |obj| is a parameter object, otherwise returns |#f|.
+doc>
+ */
+DEFINE_PRIMITIVE("parameter?", parameterp, subr1, (SCM obj))
+{
+  return MAKE_BOOLEAN(PARAMETERP(obj));
+}
+
+
+
+DEFINE_PRIMITIVE("%parameter-dynenv-push!", parameter_dynenv_push, subr1, (SCM param))
+{
+  if (!PARAMETERP(param)) error_bad_parameter(param);
+
+  PARAMETER_DYNENV(param) = STk_cons(STk_cons(STk_current_thread(), STk_void),
+                                     PARAMETER_DYNENV(param));
+  return STk_void;
+}
+
+DEFINE_PRIMITIVE("%parameter-dynenv-pop!", parameter_dynenv_pop, subr1, (SCM param))
+{
+  SCM prev, tmp, thr;
+
+  if (!PARAMETERP(param)) error_bad_parameter(param);
+
+  thr = STk_current_thread();
+  STk_debug("IΝDYN = ~S th = ~S ~S param = ~S\n", PARAMETER_DYNENV(param), thr, param);
+  for (prev = tmp = PARAMETER_DYNENV(param); !NULLP(tmp); prev=tmp, tmp=CDR(tmp)) {
+    if (CAR(CAR(tmp)) == thr) {
+      if (tmp ==  prev) PARAMETER_DYNENV(param) = CDR(tmp);
+      else CDR(prev) = CDR(tmp);
+      break;
+    }
+  }
+  STk_debug("OUT DYN = ~S th = ~S ~S \n", PARAMETER_DYNENV(param), thr), param;
+  return STk_void;
+}
+
+
+
+/*===========================================================================*\
+ *
+ *      Initialization code
+ *
+\*===========================================================================*/
+
+static struct extended_type_descr xtype_parameter = { "parameter", NULL };
+
+int STk_init_parameter(void)
+{
+  /* Define type for parameters */
+  DEFINE_XTYPE(parameter, &xtype_parameter);
+
+  /* Define primitives */
+  ADD_PRIMITIVE(make_parameter);
+  ADD_PRIMITIVE(make_thunk_parameter);
+  ADD_PRIMITIVE(parameterp);
+  ADD_PRIMITIVE(parameter_dynenv_push);
+  ADD_PRIMITIVE(parameter_dynenv_pop);
+
+  return TRUE;
+}

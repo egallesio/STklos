@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 24-Aug-2018 15:43 (eg)
+;; Last file update: 24-Aug-2018 16:32 (eg)
 ;;
 ;; ======================================================================
 
@@ -469,6 +469,7 @@ need to be quoted in programs.])
 (insertdoc 'bytevector-copy)
 (insertdoc 'bytevector-copy!)
 (insertdoc 'bytevector-append)
+(insertdoc 'string->utf8)
 )
 
 
@@ -543,10 +544,12 @@ be accessed as a normal port with the standard Scheme primitives.])
 
 (subsection :title "Ports"
 
+(insertdoc 'call-with-port)
 (insertdoc 'call-with-output-file)
 (insertdoc 'call-with-input-string)
 (insertdoc 'call-with-output-string)
 (insertdoc 'output-port?)
+(insertdoc 'binary-port?)
 (insertdoc 'port?)
 (insertdoc 'output-string-port?)
 (insertdoc 'output-bytevector-port?)
@@ -592,10 +595,10 @@ be accessed as a normal port with the standard Scheme primitives.])
 (index "SRFI-10")
 (insertdoc 'define-reader-ctor)
 (insertdoc 'read-char)
-(insertdoc 'read-chars)
+(insertdoc 'read-bytes)
 (insertdoc 'read-bytevector)
 (insertdoc 'read-bytevector!)
-(insertdoc 'read-chars!)
+(insertdoc 'read-bytes!)
 (insertdoc 'read-byte)
 (insertdoc 'peek-char)
 (insertdoc 'peek-byte)

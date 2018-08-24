@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 24-Aug-2018 15:21 (eg)
+ * Last file update: 24-Aug-2018 16:25 (eg)
  *
  */
 
@@ -329,7 +329,7 @@ DEFINE_PRIMITIVE("read-char", read_char, subr01, (SCM port))
 
 
 /*
-<doc EXT read-bytes read-chars
+<doc EXT read-chars read-bytes
  * (read-bytes size)
  * (read-bytes size port)
  *
@@ -341,7 +341,7 @@ DEFINE_PRIMITIVE("read-char", read_char, subr01, (SCM port))
  * @l
  * ,(bold "Note:") This function was previously called |read-chars|. Usage
  * of the old name is deprecated.
- doc>
+doc>
  */
 DEFINE_PRIMITIVE("read-bytes", read_bytes, subr12, (SCM size, SCM port))
 {
@@ -367,7 +367,7 @@ DEFINE_PRIMITIVE("read-bytes", read_bytes, subr12, (SCM size, SCM port))
 
 
 /*
-<doc EXT read-bytes read-chars!
+<doc EXT read-chars! read-bytes!
  * (read-bytes! str)
  * (read-bytes! str port)
  *
@@ -395,6 +395,9 @@ DEFINE_PRIMITIVE("read-bytes", read_bytes, subr12, (SCM size, SCM port))
  *              (write-chars (substring s 0 n) out)
  *              (close-port out)))))))
  * @end lisp
+ *
+ * ,(bold "Note:") This function was previously called |read-chars!|. Usage
+ * of the old name is deprecated.
 doc>
  */
 DEFINE_PRIMITIVE("read-bytes!", d_read_bytes, subr12, (SCM str, SCM port))
@@ -631,7 +634,7 @@ DEFINE_PRIMITIVE("write", write, subr12, (SCM expr, SCM port))
 
 
 /*
-<doc R7RS write* write-shared
+<doc R7RS write-shared write*
  * (write-shared obj)
  * (write-shared obj port)
  *
@@ -685,7 +688,7 @@ DEFINE_PRIMITIVE("write*", write_star, subr12, (SCM expr, SCM port))
  * ,(bold "Rationale:") |Write| is intended for producing machine-readable
  * output and |display| is for producing human-readable output.
  * @l
- * ,(bold "Note:") As required by ,(rseven) does not loop forever when 
+ * ,(bold "Note:") As required by ,(rseven) does not loop forever when
  * |obj| contains self-references.
 doc>
  */
@@ -703,7 +706,7 @@ DEFINE_PRIMITIVE("display", display, subr12, (SCM expr, SCM port))
  * (display-simple obj port)
  *
  * The |display-simple| procedure is the same as |display|, except
- * that shared structure is never represented using datum labels. 
+ * that shared structure is never represented using datum labels.
  * This can cause |display-simple| not to terminate if |obj|
  * contains circular structure.
 doc>
@@ -1334,7 +1337,7 @@ DEFINE_PRIMITIVE("close-port", close_port, subr1, (SCM port))
 }
 
 /*
-<doc EXT port-closed? port-open?
+<doc EXT port-open? port-closed?
  * (port-closed? port)
  * (port-open?  port)
  *
