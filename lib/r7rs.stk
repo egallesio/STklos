@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 22-Aug-2018 14:15 (eg)
+;;;; Last file update: 27-Aug-2018 08:10 (eg)
 ;;;;
 
 
@@ -858,3 +858,33 @@ doc>
      (when (< i end)
        (write-byte (bytevector-u8-ref bv i) port)
        (Loop (+ i 1))))))
+
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.14 System Interface
+;;;; ----------------------------------------------------------------------
+
+#|
+<doc R7RS features
+ * (features)
+ *
+ * Returns a list of the feature identifiers which |cond-expand|
+ * treats as true. It is an error to modify this list. Here is an
+ * example of what |features| might return:
+ *
+ * @lisp
+ * (features) => (STklos STklos-1.20  almost-r7rs
+ *                exact-complex ieee-float full-unicode
+ *                ratios little-endian)
+ * @end lisp
+doc>
+|#
+(define (features)
+  (let ((all (in-module |SRFI-0| *all-features*)))
+    (apply append
+           (map (lambda (x)
+                  (cond
+                    ((symbol? x)     (list x))
+                    ((pair? (car x)) (car x))
+                    (else            (list (car x)))))
+                all))))
