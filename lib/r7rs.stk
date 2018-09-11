@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 27-Aug-2018 08:10 (eg)
+;;;; Last file update: 11-Sep-2018 09:55 (eg)
 ;;;;
 
 
@@ -865,6 +865,50 @@ doc>
 ;;;; ----------------------------------------------------------------------
 
 #|
+<doc R7RS current-jiffy
+ * (current-jiffy)
+ * 
+ * Returns the number of ,(emph "jiffies") as an exact integer that
+ * have elapsed since an arbitrary, implementation-defined
+ * epoch. A jiffy is an implementation-defined fraction of
+ * a second which is defined by the return value of the
+ * |jiffies-per-second| procedure. The starting epoch is
+ * guaranteed to be constant during a run of the program,
+ * but may vary between runs.
+doc>
+|#
+(define current-jiffy
+  ;; This implementation probably allocates bignums on 32 bits machines
+  ;; Therefore, the resolution should be lowered on these architectures. 
+  (let ((initial-time (current-time))
+        (time->jiffy  (lambda (t)
+                        (+ (* (struct-ref t 'second) #e1e9)
+                           (struct-ref t 'nanosecond)))))
+    (lambda ()
+      (- (time->jiffy (current-time))
+         (time->jiffy initial-time)))))
+
+#|
+<doc R7RS jiffies-per-second
+ * (jiffies-per-seconds)
+ * 
+ * Returns an exact integer representing the number of jiffies
+ * per SI second. This value is an implementation-specified
+ * constant.
+ * @lisp
+ * (define (time-length)
+ *   (let ((list (make-list 100000))
+ *         (start (current-jiffy)))
+ *     (length list)
+ *     (/ (- (current-jiffy) start)
+ *        (jiffies-per-second))))
+ * @end lisp
+doc>
+|#
+(define (jiffies-per-second) #e1e9)
+
+
+#|
 <doc R7RS features
  * (features)
  *
@@ -888,3 +932,4 @@ doc>
                     ((pair? (car x)) (car x))
                     (else            (list (car x)))))
                 all))))
+

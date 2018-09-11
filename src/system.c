@@ -1,8 +1,8 @@
 /*
  *
- * s y s t e m . c				-- System relative primitives
+ * s y s t e m . c                              -- System relative primitives
  *
- * Copyright © 1994-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 26-Feb-2012 23:14 (eg)
+ * Last file update: 10-Sep-2018 19:22 (eg)
  */
 
 #include <unistd.h>
@@ -380,13 +380,12 @@ DEFINE_PRIMITIVE("system", system, subr1, (SCM com))
 }
 
 /*
-<doc EXT file-is-directory? file-is-regular? file-is-writable? file-is-readable? file-is-executable? file-exists?
+<doc EXT file-is-directory? file-is-regular? file-is-writable? file-is-readable? file-is-executable?
  * (file-is-directory?  string)
  * (file-is-regular?    string)
  * (file-is-readable?   string)
  * (file-is-writable?   string)
  * (file-is-executable? string)
- * (file-exists?        string)
  *
  * Returns |#t| if the predicate is true for the path name given in
  * |string|; returns |#f| otherwise (or if |string| denotes a file
@@ -429,6 +428,15 @@ DEFINE_PRIMITIVE("file-is-executable?", file_is_executablep, subr1, (SCM f))
 }
 
 
+
+/*
+<doc R7RS file-exists?
+ * (file-exists? string)
+ *
+ * Returns |#t| if the path name given in |string| denotes an existing file;
+ * returns |#f| otherwise.
+doc>
+ */
 DEFINE_PRIMITIVE("file-exists?", file_existsp, subr1, (SCM f))
 {
   struct stat info;
@@ -553,7 +561,7 @@ DEFINE_PRIMITIVE("directory-files", directory_files, subr1, (SCM dirname))
   for (d = readdir(dir); d ; d = readdir(dir)) {
     if (d->d_name[0] == '.')
       if ((d->d_name[1] == '\0') || (d->d_name[1] == '.' && d->d_name[2] == '\0'))
-	continue;
+        continue;
     res = STk_cons(STk_Cstring2string(d->d_name), res);
   }
   closedir(dir);
@@ -622,7 +630,7 @@ DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
   MUT_LOCK(tmpnam_mutex);
   for ( ; ; ) {
     sprintf(buff, "/tmp/stklos%05d-%05x", pid, cpt++);
-    if (cpt > 100000)		/* arbitrary limit to avoid infinite search */
+    if (cpt > 100000)           /* arbitrary limit to avoid infinite search */
       return STk_false;
     if (access(buff, F_OK) == -1) break;
   }
@@ -652,7 +660,7 @@ DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
  * @end lisp
 doc>
 */
-MUT_DECL(at_exit_mutex);	 /* The exit mutex */
+MUT_DECL(at_exit_mutex);         /* The exit mutex */
 
 DEFINE_PRIMITIVE("register-exit-function!", at_exit, subr1, (SCM proc))
 {
@@ -740,13 +748,13 @@ DEFINE_PRIMITIVE("machine-type", machine_type, subr0, (void))
 //EG:   long allocated, used, calls;
 //EG:
 //EG:   /* The result is a vector which contains
-//EG:    *	0 The total cpu used in ms
-//EG:    *	1 The number of cells currently in use.
+//EG:    *      0 The total cpu used in ms
+//EG:    *      1 The number of cells currently in use.
 //EG:    *    2 Total number of allocated cells
-//EG:    *	3 The number of cells used since the last call to get-internal-info
-//EG:    *	4 Number of gc calls
+//EG:    *      3 The number of cells used since the last call to get-internal-info
+//EG:    *      4 Number of gc calls
 //EG:    *    5 Total time used in the gc
-//EG:    *	6 A boolean indicating if Tk is initialized
+//EG:    *      6 A boolean indicating if Tk is initialized
 //EG:    */
 //EG:
 //EG:   STk_gc_count_cells(&allocated, &used, &calls);
@@ -798,8 +806,9 @@ doc>
 DEFINE_PRIMITIVE("clock", clock, subr0, (void))
 {
   return STk_double2real((double) clock() /
-			 CLOCKS_PER_SEC * (double) TIME_DIV_CONST);
+                         CLOCKS_PER_SEC * (double) TIME_DIV_CONST);
 }
+
 
 /*
 <doc EXT current-seconds
@@ -807,12 +816,48 @@ DEFINE_PRIMITIVE("clock", clock, subr0, (void))
  *
  * Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970),
  * measured in seconds.
+ * @l
+ * @bold("Note"): This ,(stklos) function should not be confused with
+ * the ,(rseven)  primitive |current-second| which returns an inexact number
+ * and whose result is expressed using  the International Atomic Time
+ * instead of UTC.
+ *
 doc>
  */
 DEFINE_PRIMITIVE("current-seconds", current_seconds, subr0, (void))
 {
   return STk_ulong2integer(time(NULL));
 }
+
+/*
+<doc R7RS current-second
+ * (current-second)
+ *
+ * Returns an inexact number representing the current time on the
+ * International Atomic Time (TAI) scale.  The value 0.0 represents
+ * midnight on January 1, 1970 TAI (equivalent to ten seconds before
+ * midnight Universal Time) and the value 1.0 represents one TAI
+ * second later.
+ * doc>
+ */
+
+/* Offset: https://fr.wikipedia.org/wiki/Temps_atomique_international */
+#define TAI_OFFSET +37.0L
+
+DEFINE_PRIMITIVE("current-second", current_second, subr0, (void))
+{
+  /* R7RS states: Neither high accuracy nor high precision are
+   * required; in particular, returning Coordinated Universal Time plus
+   * a suitable constant might be the best an implementation can do.
+   */
+  struct timespec now;
+
+  clock_gettime(CLOCK_REALTIME, &now);
+  return STk_double2real(TAI_OFFSET +
+                         (double) now.tv_sec +
+                         1.0E-9 * (double) now.tv_nsec);
+}
+
 
 /*
 <doc current-time
@@ -823,14 +868,14 @@ doc>
 */
 DEFINE_PRIMITIVE("current-time", current_time, subr0, (void))
 {
-  struct timeval now;
+  struct timespec now;
   SCM argv[3];
 
-  gettimeofday(&now, NULL);
+  clock_gettime(CLOCK_REALTIME, &now);
 
   argv[2] = time_type;
   argv[1] =  STk_long2integer(now.tv_sec);
-  argv[0] =  STk_long2integer(now.tv_usec);
+  argv[0] =  STk_long2integer(now.tv_nsec);
   return STk_make_struct(3, &argv[2]);
 }
 
@@ -893,7 +938,7 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
   argv[2]  = MAKE_INT(t->tm_yday + 1);
   argv[1]  = MAKE_INT(t->tm_isdst);
 #ifdef DARWIN
-  argv[0]  = MAKE_INT(0);	/* Cannot figure how to find the timezone */
+  argv[0]  = MAKE_INT(0);       /* Cannot figure how to find the timezone */
 #else
   argv[0]  = STk_long2integer(timezone);
 #endif
@@ -924,7 +969,7 @@ DEFINE_PRIMITIVE("date->seconds", date2seconds, subr1, (SCM date))
   t.tm_mday  = STk_integer_value(*p++);
   t.tm_mon   = STk_integer_value(*p++) - 1;
   t.tm_year  = STk_integer_value(*p++) - 1900;
-  t.tm_isdst = -1;			/* to ignore DST */
+  t.tm_isdst = -1;                      /* to ignore DST */
 
   n = mktime(&t);
   if (n == (time_t)(-1)) STk_error("cannot convert date to seconds (~S)", date);
@@ -1020,12 +1065,12 @@ DEFINE_PRIMITIVE("getenv", getenv, subr01, (SCM str))
 {
   char *tmp;
 
-  if (str) {		/* One parameter: find the value of the given variable */
+  if (str) {            /* One parameter: find the value of the given variable */
     if (!STRINGP(str)) error_bad_string(str);
 
     tmp = getenv(STRING_CHARS(str));
     return tmp ? STk_Cstring2string(tmp) : STk_false;
-  } else {		/* No parameter: give the complete environment */
+  } else {              /* No parameter: give the complete environment */
     extern char **environ;
     return build_posix_environment(environ);
   }
@@ -1043,12 +1088,12 @@ DEFINE_PRIMITIVE("setenv!", setenv, subr2, (SCM var, SCM value))
 {
   char *s;
 
-  if (!STRINGP(var)) 		      error_bad_string(var);
+  if (!STRINGP(var))                  error_bad_string(var);
   if (strchr(STRING_CHARS(var), '=')) STk_error("variable ~S contains a '='", var);
-  if (!STRINGP(value)) 		      STk_error("value ~S is not a string", value);
+  if (!STRINGP(value))                STk_error("value ~S is not a string", value);
 
   s = STk_must_malloc(strlen(STRING_CHARS(var))   +
-		      strlen(STRING_CHARS(value)) + 2); /* 2 because of '=' & \0 */
+                      strlen(STRING_CHARS(value)) + 2); /* 2 because of '=' & \0 */
   sprintf(s, "%s=%s", STRING_CHARS(var), STRING_CHARS(value));
   putenv(s);
   return STk_void;
@@ -1159,30 +1204,31 @@ int STk_init_system(void)
 
   /* Create the system-date structure-type */
   date_type =  STk_make_struct_type(STk_intern("%date"),
-				    STk_false,
-				    LIST10(STk_intern("second"),
-					   STk_intern("minute"),
-					   STk_intern("hour"),
-					   STk_intern("day"),
-					   STk_intern("month"),
-					   STk_intern("year"),
-					   STk_intern("week-day"),
-					   STk_intern("year-day"),
-					   STk_intern("dst"),
-					   STk_intern("tz")));
+                                    STk_false,
+                                    LIST10(STk_intern("second"),
+                                           STk_intern("minute"),
+                                           STk_intern("hour"),
+                                           STk_intern("day"),
+                                           STk_intern("month"),
+                                           STk_intern("year"),
+                                           STk_intern("week-day"),
+                                           STk_intern("year-day"),
+                                           STk_intern("dst"),
+                                           STk_intern("tz")));
   STk_define_variable(STk_intern("%date"), date_type, current_module);
 
   /* Create the time structure-type */
   time_type =  STk_make_struct_type(STk_intern("%time"),
-				    STk_false,
-				    LIST2(STk_intern("second"),
-					  STk_intern("microsecond")));
+                                    STk_false,
+                                    LIST2(STk_intern("second"),
+                                          STk_intern("nanosecond")));
   STk_define_variable(STk_intern("%time"), time_type, current_module);
 
   /* Declare primitives */
   ADD_PRIMITIVE(clock);
   ADD_PRIMITIVE(date);
   ADD_PRIMITIVE(current_seconds);
+  ADD_PRIMITIVE(current_second);
   ADD_PRIMITIVE(current_time);
   ADD_PRIMITIVE(sleep);
   ADD_PRIMITIVE(seconds2date);

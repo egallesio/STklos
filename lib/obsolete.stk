@@ -1,8 +1,8 @@
 ;;;;
-;;;; obsolete.stk	-- Definition of functions which are obsolete.
-;;;;			   Function defined here are candidate to disappear.
+;;;; obsolete.stk       -- Definition of functions which are obsolete.
+;;;;                       Function defined here are candidate to disappear.
 ;;;;
-;;;; Copyright © 2002-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update:  4-Jun-2008 12:28 (eg)
+;;;; Last file update: 10-Sep-2018 17:18 (eg)
 ;;;;
 
 
@@ -34,12 +34,12 @@
 ;;; 29-Aug-2004
 (define (set-load-path! new-path)
   (format (current-error-port)
-	  "*** Obsolete function set-load-path!. Use load-path instead.\n")
+          "*** Obsolete function set-load-path!. Use load-path instead.\n")
   (load-path new-path))
 
 (define (set-load-suffixes! suffixes)
   (format (current-error-port)
-	  "*** Obsolete function set-load-suffixes!. Use load-suffixes instead.\n")
+          "*** Obsolete function set-load-suffixes!. Use load-suffixes instead.\n")
   (load-suffixes suffixes))
 
 ;; 23-Sep-2004 (v 0.59)
@@ -69,7 +69,8 @@
 (define delete-directory remove-directory)
 
 ;; 05-May-2007 (v0.83)
-(define current-second current-seconds)
+;; current-second is now R7RS
+;(define current-second current-seconds) 
 
 ;; 04-Jun-2008 (v0.99)
 (define %build-path-from-shell-variable build-path-from-shell-variable)

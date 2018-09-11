@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 24-Aug-2018 16:32 (eg)
+;; Last file update: 11-Sep-2018 10:13 (eg)
 ;;
 ;; ======================================================================
 
@@ -633,16 +633,103 @@ be accessed as a normal port with the standard Scheme primitives.])
 (insertdoc 'flush-output-port)
 (insertdoc 'printerr)
 (insertdoc 'eprintf))
+)
 
-(subsection :title "System interface"
+
+;;;
+;;; SYSTEM INTERFACE
+;;;
+(section :title "System interface"
+
+(subsection :title "Loading code"
 (index "STKLOS_LOAD_PATH")
 (insertdoc 'load)
 (insertdoc 'try-load)
 (insertdoc 'find-path)
 (insertdoc 'current-loading-file)
 (insertdoc 'provided?)
+
 (TODO "Document here autoload functions"))
-)
+
+;;; File Primitives.
+(subsection :title "File Primitives"
+(insertdoc 'temporary-file-name)
+(insertdoc 'rename-file)
+(insertdoc 'remove-file)
+(insertdoc 'copy-file)
+(insertdoc 'copy-port)
+(insertdoc 'file-exists?)
+(insertdoc 'file-is-executable?)
+(insertdoc 'file-size)
+(insertdoc 'getcwd)
+(insertdoc 'chmod)
+(insertdoc 'chdir)
+(insertdoc 'make-directory)
+(insertdoc 'make-directories)
+(insertdoc 'ensure-directories-exist)
+(insertdoc 'remove-directory)
+(insertdoc 'directory-files)
+(index "tilde expansion")
+(insertdoc 'expand-file-name)
+(insertdoc 'canonical-file-name)
+(insertdoc 'decompose-file-name)
+(insertdoc 'winify-file-name)
+(insertdoc 'posixify-file-name)
+(insertdoc 'basename)
+(insertdoc 'dirname)
+(insertdoc 'file-suffix)
+(insertdoc 'file-prefix)
+(insertdoc 'file-separator)
+(insertdoc 'make-path)
+(insertdoc 'glob))
+
+;;; Environment.
+(subsection :title "Environment"
+(insertdoc 'getenv)
+(insertdoc 'setenv!)
+(insertdoc 'unsetenv!))
+
+;;; Time
+(subsection :title "Time"
+(insertdoc 'current-second)
+(insertdoc 'current-jiffy)
+(insert-doc 'jiffies-per-second)
+(insertdoc 'clock)
+(insertdoc 'sleep)
+(insertdoc 'time))
+
+
+(subsection :title "System Informations"
+(insertdoc 'features)
+(insertdoc 'running-os)
+(insertdoc 'hostname)
+(insertdoc 'argc)
+(insertdoc 'argv)
+(insertdoc 'program-name)
+(insertdoc 'version)
+(insertdoc 'machine-type)
+(insertdoc 'getpid))
+
+(subsection :title "Program Arguments Parsing"
+(index "SRFI-22")
+
+(p [,(stklos) provides a simple way to parse program arguments with the
+|parse-arguments| special form. This form is generally used into
+the |main| function in a Scheme script. See ,(link-srfi 22) on how to
+use a |main| function in a Scheme program.])
+
+(insertdoc 'parse-arguments)
+(insertdoc 'arg-usage))
+
+(subsection :title "Misc. System Procedures"
+
+(insertdoc 'system)
+(insertdoc 'exec-list)
+(insertdoc 'address-of)
+(insertdoc 'exit)
+(insertdoc 'die)
+(insertdoc 'get-password)
+(insertdoc 'register-exit-function!)))
 
 
 ;;;
@@ -720,6 +807,8 @@ representation which consists is an integer which represents the
 number of seconds elapsed since the ,(emph "Epoch") (00:00:00 on
 January 1, 1970, Coordinated Universal Time --UTC). Dates can
 also be represented with date structures.])
+
+(insertdoc 'current-second)
 (insertdoc 'current-seconds)
 (insertdoc 'current-time)
 (insertdoc 'time?)
@@ -815,83 +904,6 @@ applications.])
 (insertdoc 'socket-local-address)
 (insertdoc 'socket-port-number)
 (insertdoc 'socket-output))
-
-;;;
-;;; SYSTEM PROCEDURES
-;;
-(section :title "System Procedures"
-
-;;; File Primitives.
-(subsection :title "File Primitives"
-(insertdoc 'temporary-file-name)
-(insertdoc 'rename-file)
-(insertdoc 'remove-file)
-(insertdoc 'copy-file)
-(insertdoc 'copy-port)
-(insertdoc 'file-exists?)
-(insertdoc 'file-size)
-(insertdoc 'getcwd)
-(insertdoc 'chmod)
-(insertdoc 'chdir)
-(insertdoc 'make-directory)
-(insertdoc 'make-directories)
-(insertdoc 'ensure-directories-exist)
-(insertdoc 'remove-directory)
-(insertdoc 'directory-files)
-(index "tilde expansion")
-(insertdoc 'expand-file-name)
-(insertdoc 'canonical-file-name)
-(insertdoc 'decompose-file-name)
-(insertdoc 'winify-file-name)
-(insertdoc 'posixify-file-name)
-(insertdoc 'basename)
-(insertdoc 'dirname)
-(insertdoc 'file-suffix)
-(insertdoc 'file-prefix)
-(insertdoc 'file-separator)
-(insertdoc 'make-path)
-(insertdoc 'glob))
-
-;;; Environment.
-(subsection :title "Environment"
-(insertdoc 'getenv)
-(insertdoc 'setenv!)
-(insertdoc 'unsetenv!))
-
-(subsection :title "System Informations"
-(insertdoc 'running-os)
-(insertdoc 'hostname)
-(insertdoc 'argc)
-(insertdoc 'argv)
-(insertdoc 'program-name)
-(insertdoc 'version)
-(insertdoc 'machine-type)
-(insertdoc 'clock)
-(insertdoc 'sleep)
-(insertdoc 'time)
-(insertdoc 'getpid))
-
-(subsection :title "Program Arguments Parsing"
-(index "SRFI-22")
-
-(p [,(stklos) provides a simple way to parse program arguments with the
-|parse-arguments| special form. This form is generally used into
-the |main| function in a Scheme script. See ,(link-srfi 22) on how to
-use a |main| function in a Scheme program.])
-
-(insertdoc 'parse-arguments)
-(insertdoc 'arg-usage))
-
-(subsection :title "Misc. System Procedures"
-
-(insertdoc 'system)
-(insertdoc 'exec-list)
-(insertdoc 'address-of)
-(insertdoc 'exit)
-(insertdoc 'die)
-(insertdoc 'get-password)
-(insertdoc 'register-exit-function!)))
-
 
 ;;;
 ;;; SIGNALS
