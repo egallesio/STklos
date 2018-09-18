@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 10-Sep-2018 19:22 (eg)
+ * Last file update: 18-Sep-2018 12:23 (eg)
  */
 
 #include <unistd.h>
@@ -696,21 +696,58 @@ DEFINE_PRIMITIVE("%pre-exit", pre_exit, subr1, (SCM retcode))
  * is omitted, the program terminates with a return code of 0.
  * If  program has registered exit functions with |register-exit-function!|,
  * they are called (in an order which is the reverse of their call order).
+ * @l
+ * ,(bold "Note:") The ,(stklos) |exit| primitive accepts also an
+ * integer value as parameter (,(rseven) accepts only a boolean).
 doc>
 */
 DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
 {
   long ret = 0;
+  SCM cond;
 
   if (retcode) {
-    ret = STk_integer_value(retcode);
-    if (ret == LONG_MIN) STk_error("bad return code ~S", retcode);
-  } else {
-    retcode = MAKE_INT(0);
+    if (BOOLEANP(retcode)) {
+      ret = (retcode != STk_true);
+    } else {
+      ret = STk_integer_value(retcode);
+      if (ret == LONG_MIN) STk_error("bad return code ~S", retcode);
+    }
   }
 
-  STk_pre_exit(retcode);
-  exit(ret);
+  /* Raise a &exit-r7rs condition  with the numeric value of the exit code*/
+  cond = STk_make_C_cond(STk_exit_condition, 1, MAKE_INT(ret));
+  STk_raise(cond); 
+
+  return STk_void; /* never reached */
+}
+
+/*
+<doc EXT emergency-exit
+ * (emergency-exit)
+ * (emergency-exit ret-code)
+ *
+ * Terminates the program without running any outstanding
+ * dynamic-wind ,(emph "after") procedures and communicates an exit
+ * value to the operating system in the same manner as |exit|.
+ * @l
+ * ,(bold "Note:") The ,(stklos) |emergency-exit| primitive accepts also an
+ * integer value as parameter (,(rseven) accepts only a boolean).
+doc>
+*/
+DEFINE_PRIMITIVE("emergency-exit", emergency_exit, subr01, (SCM retcode))
+{
+  long ret = 0;
+
+  if (retcode) {
+    if (BOOLEANP(retcode)) {
+      ret = (retcode != STk_true);
+    } else {
+      ret = STk_integer_value(retcode);
+      if (ret == LONG_MIN) STk_error("bad return code ~S", retcode);
+    }
+  }
+  _exit(ret);
 
   return STk_void; /* never reached */
 }
@@ -1269,6 +1306,7 @@ int STk_init_system(void)
   ADD_PRIMITIVE(tmp_file);
   ADD_PRIMITIVE(pre_exit);
   ADD_PRIMITIVE(exit);
+  ADD_PRIMITIVE(emergency_exit);
   ADD_PRIMITIVE(at_exit);
   ADD_PRIMITIVE(machine_type);
 

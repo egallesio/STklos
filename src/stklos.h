@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 23-Aug-2018 15:06 (eg)
+ * Last file update: 13-Sep-2018 15:41 (eg)
  */
 
 
@@ -381,12 +381,13 @@ int STk_init_char(void);
   ------------------------------------------------------------------------------
 */
 
-extern SCM STk_message_condition, STk_err_mess_condition;
+extern SCM STk_message_condition, STk_err_mess_condition, STk_exit_condition;
 
 SCM STk_make_C_cond(SCM type, int nargs, ...);
 
 EXTERN_PRIMITIVE("make-condition-type", make_cond_type, subr3,
                  (SCM name, SCM parent, SCM slots));
+EXTERN_PRIMITIVE("raise", raise, subr1, (SCM obj));
 
 SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module);
 SCM STk_condition_type_is_a(SCM type, SCM t);

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update: 22-Aug-2018 13:51 (eg)
+;;;; Last file update: 13-Sep-2018 15:53 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -96,6 +96,10 @@
            (format port (condition-ref c 'message)))
         ((condition-has-type? c &uncaught-exception)
            (repl-handler (uncaught-exception-reason c) port))
+        ((condition-has-type? c &exit-r7rs)             ;; R7RS exit function
+         (let ((retcode (condition-ref c 'retcode)))
+           (%pre-exit retcode)
+           (emergency-exit retcode)))
         (else                                           ;; Unknown
            (format port "**** Unknown condition raised.\n")
            (format port "Condition type: ~A\n" (struct-type-name (struct-type c)))

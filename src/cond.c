@@ -1,7 +1,7 @@
-/*							-*- coding: utf-8 -*-
- * c o n d . c		-- Condition implementation
+/*                                                      -*- coding: utf-8 -*-
+ * c o n d . c          -- Condition implementation
  *
- * Copyright © 2004-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 22-May-2004 08:57 (eg)
- * Last file update: 27-May-2011 22:59 (eg)
+ * Last file update: 13-Sep-2018 15:26 (eg)
  */
 
 #include "stklos.h"
@@ -30,7 +30,7 @@
 static SCM root_condition, location_condition, serious_condition, error_condition;
 SCM STk_message_condition;
 SCM STk_err_mess_condition;
-
+SCM STk_exit_condition;
 
 static void error_bad_type(SCM obj)
 {
@@ -52,7 +52,7 @@ static void initialize_cond(SCM who, SCM from)
 }
 
 /* ----------------------------------------------------------------------
- * 	is_a ...
+ *      is_a ...
  * ---------------------------------------------------------------------- */
 static SCM is_a(SCM type, SCM t)
 {
@@ -63,8 +63,8 @@ static SCM is_a(SCM type, SCM t)
 
     /* We can have:
           - no parent ==> #f
-	  - parent is a condition type ==> (is-a? parent t)
-	  - A list ==> if (one of the list is a parent) #t else #f
+          - parent is a condition type ==> (is-a? parent t)
+          - A list ==> if (one of the list is a parent) #t else #f
     */
 
     if (parent == STk_false)
@@ -82,7 +82,7 @@ static SCM is_a(SCM type, SCM t)
 
 
 /* ----------------------------------------------------------------------
- * 	allocate_condition ...
+ *      allocate_condition ...
  * ---------------------------------------------------------------------- */
 static SCM allocate_condition(SCM type)
 {
@@ -105,7 +105,7 @@ static SCM allocate_condition(SCM type)
 
 /* ======================================================================
  *
- * 	               C O N D I T I O N   T Y P E S
+ *                     C O N D I T I O N   T Y P E S
  *
  * ======================================================================
  */
@@ -122,7 +122,7 @@ static SCM allocate_condition(SCM type)
 doc>
 */
 DEFINE_PRIMITIVE("make-condition-type", make_cond_type, subr3,
-		 (SCM name, SCM parent, SCM slots))
+                 (SCM name, SCM parent, SCM slots))
 {
   SCM z;
 
@@ -149,7 +149,7 @@ DEFINE_PRIMITIVE("make-condition-type", make_cond_type, subr3,
 doc>
 */
 DEFINE_PRIMITIVE("make-compound-condition-type", make_comp_cond_type, subr2,
-		 (SCM name, SCM parents))
+                 (SCM name, SCM parents))
 {
   SCM z, tmp, l = STk_nil;
 
@@ -164,7 +164,7 @@ DEFINE_PRIMITIVE("make-compound-condition-type", make_comp_cond_type, subr2,
   }
 
   z = STk_make_struct_type(name, STk_false, l);
-  STRUCT_TYPE_PARENT(z) = parents;	/* Here we cheat a little bit */
+  STRUCT_TYPE_PARENT(z) = parents;      /* Here we cheat a little bit */
   SET_COND_FLAG(z);
 
   return z;
@@ -184,7 +184,7 @@ DEFINE_PRIMITIVE("condition-type?", ctp, subr1, (SCM obj))
 }
 
 /* ======================================================================
- * 	STk_defcond_type ...
+ *      STk_defcond_type ...
  * ====================================================================== */
 SCM STk_defcond_type(char *name, SCM parent, SCM slots, SCM module)
 {
@@ -206,7 +206,7 @@ SCM STk_condition_type_is_a(SCM type, SCM t)
 
 /* ======================================================================
  *
- * 	                     C O N D I T I O N S
+ *                           C O N D I T I O N S
  *
  * ======================================================================
  */
@@ -255,14 +255,14 @@ DEFINE_PRIMITIVE("make-condition", make_cond,  vsubr, (int argc, SCM *argv))
     if (argc == 1) STk_error("no value provided for ~S" , *argv);
     if (SYMBOLP(*argv)) {
       if (STk_memq(*argv, slots) != STk_false) {
-	/* This is a valid slot initialize it */
-	STk_struct_set(z, *argv, *(argv - 1));
-	slots = STk_dremq(*argv, slots);
-	argv -= 2;
-	argc -= 2;
+        /* This is a valid slot initialize it */
+        STk_struct_set(z, *argv, *(argv - 1));
+        slots = STk_dremq(*argv, slots);
+        argv -= 2;
+        argc -= 2;
       }
       else
-	STk_error("bad slot name ~S", *argv);
+        STk_error("bad slot name ~S", *argv);
     }
     else
       STk_error("bad symbol ~S", *argv);
@@ -300,7 +300,7 @@ DEFINE_PRIMITIVE("condition?", condp, subr1, (SCM obj))
 doc>
 */
 DEFINE_PRIMITIVE("make-compound-condition", make_comp_cond, vsubr,
-		 (int argc, SCM *argv))
+                 (int argc, SCM *argv))
 {
   static int counter = 0;
   SCM type, z, cts = STk_nil;
@@ -316,7 +316,7 @@ DEFINE_PRIMITIVE("make-compound-condition", make_comp_cond, vsubr,
   /* Create a new type and and instance of it for the compound condition */
   sprintf(buff, "&cct-%d", counter++);
   type = STk_make_comp_cond_type(STk_make_uninterned_symbol(buff),
-				 cts);
+                                 cts);
   z = allocate_condition(type);
 
   /* Rewind args ... */
@@ -386,8 +386,8 @@ DEFINE_PRIMITIVE("condition-set!", condition_set, subr3, (SCM c, SCM slot, SCM v
  *         (ct3 (make-condition-type 'ct3 &condition '(x y z)))
  *         (c   (make-condition ct2 'a 1 'b 2 'c 3)))
  *   (list (condition-has-type? c ct1)
- * 	(condition-has-type? c ct2)
- * 	(condition-has-type? c ct3)))
+ *      (condition-has-type? c ct2)
+ *      (condition-has-type? c ct3)))
  *     => (#t #t #f)
  * @end lisp
 doc>
@@ -417,7 +417,7 @@ DEFINE_PRIMITIVE("condition-has-type?", cond_has_typep, subr2, (SCM c, SCM t))
  *        (c2  (make-condition ct2 'a 1 ' b 2 'c 3))
  *        (c1  (extract-condition c2 ct1)))
  *   (list (condition-has-type? c1 ct2)
- * 	(condition-has-type? c1 ct1)))
+ *      (condition-has-type? c1 ct1)))
  *       => (#f #t)
  * @end lisp
 doc>
@@ -442,7 +442,7 @@ DEFINE_PRIMITIVE("extract-condition", extract_cond, subr2, (SCM c, SCM t))
 
 /* ======================================================================
  *
- * 	                     E X C E P T I O N S
+ *                           E X C E P T I O N S
  *
  * ======================================================================
  */
@@ -457,7 +457,7 @@ DEFINE_PRIMITIVE("extract-condition", extract_cond, subr2, (SCM c, SCM t))
  *
  * @lisp
  * (with-handler (lambda (c)
- * 		(format "value ~A was raised" c))
+ *              (format "value ~A was raised" c))
  *    (raise 'foo)
  *    (format #t "never printed\\n"))
  *           => "value foo was raised"
@@ -487,7 +487,7 @@ SCM STk_make_C_cond(SCM type, int nargs, ...)
 
 
 /* ======================================================================
- * 	Init ...
+ *      Init ...
  * ====================================================================== */
 
 #define DEFVAR(x, mod) STk_define_variable(STRUCT_TYPE_NAME(x), x, mod)
@@ -508,26 +508,31 @@ int STk_init_cond(void)
 
   /* Build special-values SRFI-35 &message, &serious, &error */
   STk_message_condition = STk_defcond_type("&message", root_condition,
-					   LIST1(STk_intern("message")),
-					   module);
+                                           LIST1(STk_intern("message")),
+                                           module);
   location_condition    = STk_defcond_type("&location", root_condition,
-					   LIST2(STk_intern("location"),
-						 STk_intern("backtrace")),
-					   module);
+                                           LIST2(STk_intern("location"),
+                                                 STk_intern("backtrace")),
+                                           module);
   serious_condition     = STk_defcond_type("&serious", root_condition,
-					   STk_nil,
-					   module);
+                                           STk_nil,
+                                           module);
   error_condition       = STk_defcond_type("&error", serious_condition,
-					   LIST1(STk_intern("location")),
-					   module);
+                                           LIST1(STk_intern("location")),
+                                           module);
 
   /* Define STklos &error-message condition (used for error messages) */
   STk_err_mess_condition = STk_make_comp_cond_type(STk_intern("&error-message"),
-						   LIST3(error_condition,
-							 location_condition,
-							 STk_message_condition));
+                                                   LIST3(error_condition,
+                                                         location_condition,
+                                                         STk_message_condition));
+
   DEFVAR(STk_err_mess_condition, module);
 
+  /* Define the exit-condition used for R7RS exit primitive */
+  STk_exit_condition = STk_defcond_type("&exit-r7rs", root_condition,
+                                        LIST1(STk_intern("retcode")),
+                                        module);
 
   /* Conditions types */
   ADD_PRIMITIVE(alloc_cond);
@@ -549,4 +554,3 @@ int STk_init_cond(void)
 
   return TRUE;
 }
-
