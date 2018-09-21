@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 24-Aug-2018 15:41 (eg)
+;;;; Last file update: 21-Sep-2018 10:01 (eg)
 ;;;;
 
 (require "test")
@@ -633,6 +633,29 @@
       (let ((p (open-output-bytevector)))
         (flush-output-port p)
         (get-output-bytevector p)))
+
+;;======================================================================
+(test-subsection "System Interface")
+
+(test "command-line"
+      #t
+      (pair? (command-line)))
+
+(test "get-enviroment-variables"
+      #t
+      (pair? (get-environment-variables)))
+
+(test "get-environment-variable"
+      #t
+      (let ((path (get-environment-variable "PATH")))
+        (if path
+            (equal? (cdr (assoc "PATH" (get-environment-variables)))
+                    path)
+            #t)))
+
+(test "current-second" #t (real? (current-second)))
+(test "current-jiffy"  #t (exact? (current-jiffy)))
+(test "jiffies-per-second"  #t (exact? (jiffies-per-second)))
 
 
 (test-section-end)

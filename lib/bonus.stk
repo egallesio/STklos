@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 21-Sep-2018 09:32 (eg)
+;;;; Last file update: 21-Sep-2018 09:47 (eg)
 ;;;;
 
 
@@ -331,6 +331,18 @@ doc>
 (define (program-name)
   (key-get *%program-args* :program-name))
 
+#|
+<doc R7RS command-line
+ * (command-line)
+ *
+ * Returns the command line passed to the process as a list
+ * of strings. The first string corresponds to the command
+ * name.
+doc>
+|#
+(define (command-line)
+  (cons (key-get *%program-args* :program-name)
+        (key-get *%program-args* :argv '())))
 
 #|
 <doc EXT make-directories
