@@ -1,7 +1,7 @@
 /*
- * mutex-pthreads.c	-- Pthread Mutexes in Scheme
+ * mutex-pthreads.c     -- Pthread Mutexes in Scheme
  *
- * Copyright © 2006-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 27-May-2011 22:56 (eg)
+ * Last file update: 21-Sep-2018 08:47 (eg)
  */
 
 #include <unistd.h>
@@ -33,7 +33,7 @@
 
 /* ====================================================================== *\
  *
- * 			       M U T E X E S
+ *                             M U T E X E S
  *
 \* ====================================================================== */
 
@@ -140,17 +140,14 @@ doc>
 DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread))
 {
   struct timespec ts;
-  double tmd;
   SCM res = STk_true;
 
   if (! MUTEXP(mtx)) STk_error_bad_mutex(mtx);
-  if (REALP(tm)) {
-    tmd = REAL_VAL(tm);
+  if (!BOOLEANP(tm)) {
+    double tmd = STk_verify_timeout(tm);
     ts.tv_sec  = (time_t) tmd;
     ts.tv_nsec = (suseconds_t) ((tmd - ts.tv_sec) * 1000000);
   }
-  else if (!BOOLEANP(tm))
-    STk_error_bad_timeout(tm);
 
   pthread_cleanup_push((void (*)(void*))mutex_finalizer, mtx);
 
@@ -159,7 +156,7 @@ DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread
 
   while (MUTEX_LOCKED(mtx)) {
     if ((MUTEX_OWNER(mtx) != STk_false) &&
- 	(THREAD_STATE(MUTEX_OWNER(mtx)) == th_terminated)) {
+        (THREAD_STATE(MUTEX_OWNER(mtx)) == th_terminated)) {
       MUTEX_LOCKED(mtx) = FALSE;
       MUTEX_OWNER(mtx)  = STk_false;
       res = MUTEX_OWNER(mtx);
@@ -211,18 +208,16 @@ doc>
 DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm))
 {
   struct timespec ts;
-  double tmd;
   SCM res = STk_true;
 
   if (! MUTEXP(mtx)) STk_error_bad_mutex(mtx);
   if ((cv != STk_false) && (!CONDVP(cv))) STk_error_bad_condv(cv);
-  if (REALP(tm)) {
-    tmd = REAL_VAL(tm);
+
+  if (!BOOLEANP(tm)) {
+    double tmd = STk_verify_timeout(tm);
     ts.tv_sec  = (time_t) tmd;
     ts.tv_nsec = (suseconds_t) ((tmd - ts.tv_sec) * 1000000000);
   }
-  else if (!BOOLEANP(tm))
-    STk_error_bad_timeout(tm);
 
   pthread_cleanup_push((void (*)(void*))mutex_finalizer, mtx);
 
@@ -252,7 +247,7 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
 
 /* ====================================================================== *\
  *
- * 			       C O N D   V A R S
+ *                             C O N D   V A R S
  *
 \* ====================================================================== */
 

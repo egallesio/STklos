@@ -1,7 +1,7 @@
 /*
- * thread-pthreads.c			-- Threads support in STklos
+ * thread-pthreads.c                    -- Threads support in STklos
  *
- * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 27-May-2011 22:55 (eg)
+ * Last file update: 21-Sep-2018 09:15 (eg)
  */
 
 
@@ -190,10 +190,10 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
     }
     /* Terminate effectively the thread */
     if (thr == STk_get_current_vm()->scheme_thread)
-      pthread_exit(0); 				/* Suicide */
+      pthread_exit(0);                          /* Suicide */
     else {
       if (saved_state != th_new)
-	pthread_cancel(THREAD_PTHREAD(thr));	/* terminate an other thread */
+        pthread_cancel(THREAD_PTHREAD(thr));    /* terminate an other thread */
     }
     pthread_mutex_unlock(&THREAD_MYMUTEX(thr));
   }
@@ -225,25 +225,22 @@ DEFINE_PRIMITIVE("%thread-join!", thread_join, subr2, (SCM thr, SCM tm))
 {
   struct timespec ts;
   SCM res = STk_false;
-  double tmd;
 
 
   if (!THREADP(thr)) STk_error_bad_thread(thr);
 
-  if (REALP(tm)) {
-    tmd = REAL_VAL(tm);
+  if (!BOOLEANP(tm)) {
+    double tmd = STk_verify_timeout(tm);
     ts.tv_sec  = (time_t) tmd;
     ts.tv_nsec = (suseconds_t) ((tmd - ts.tv_sec) * 1000000);
   }
-  else if (!BOOLEANP(tm))
-    STk_error("bad timeout ~S", tm);
 
   pthread_mutex_lock(&THREAD_MYMUTEX(thr));
   while (THREAD_STATE(thr) != th_terminated) {
     if (tm != STk_false) {
       int n = pthread_cond_timedwait(&THREAD_MYCONDV(thr),
-				     &THREAD_MYMUTEX(thr),
-				     &ts);
+                                     &THREAD_MYMUTEX(thr),
+                                     &ts);
       if (n == ETIMEDOUT) { res = STk_true; break; }
     }
     else
@@ -264,8 +261,10 @@ doc>
 */
 DEFINE_PRIMITIVE("%thread-sleep!", thread_sleep, subr1, (SCM tm))
 {
-  if (REALP(tm)) {
-    struct timeval tv = STk_thread_abstime_to_reltime(REAL_VAL(tm));
+  double tmd = STk_number2double(tm);
+
+  if (isnan(tmd)) {
+    struct timeval tv = STk_thread_abstime_to_reltime(tmd);
     struct timespec ts;
 
     /* convert a timeval (in µs) to a timesepc (in ns) */
@@ -285,7 +284,7 @@ DEFINE_PRIMITIVE("%thread-system", thread_system, subr0, (void))
 }
 
 /* ======================================================================
- * 	Initialization ...
+ *      Initialization ...
  * ======================================================================
  */
 

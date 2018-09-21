@@ -1,5 +1,5 @@
 /*
- * mutex-common.c	-- Common Mutexes in Scheme
+ * mutex-common.c       -- Common Mutexes in Scheme
  *
  * Copyright Â© 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 25-Oct-2006 16:22 (eg)
+ * Last file update: 21-Sep-2018 08:54 (eg)
  */
 
 #include <unistd.h>
@@ -32,7 +32,7 @@
 
 /* ====================================================================== *\
  *
- * 			       M U T E X E S
+ *                             M U T E X E S
  *
 \* ====================================================================== */
 
@@ -46,11 +46,6 @@ void STk_error_bad_mutex(SCM obj)
 void STk_error_deadlock(void)
 {
   STk_error("cannot lock mutex (deadlock will occur)");
-}
-
-void STk_error_bad_timeout(SCM tm)
-{
-  STk_error("bad timeout ~S", tm);
 }
 
 /* ====================================================================== */
@@ -158,7 +153,7 @@ DEFINE_PRIMITIVE("mutex-specific-set!", mutex_specific_set, subr2, (SCM mtx, SCM
 
 /* ====================================================================== *\
  *
- * 			       C O N D   V A R S
+ *                             C O N D   V A R S
  *
 \* ====================================================================== */
 
@@ -242,7 +237,7 @@ DEFINE_PRIMITIVE("condition-variable-specific", condv_specific, subr1, (SCM cv))
 doc>
 */
 DEFINE_PRIMITIVE("condition-variable-specific-set!", condv_specific_set, subr2,
-		 (SCM cv, SCM v))
+                 (SCM cv, SCM v))
 {
   if (! CONDVP(cv)) STk_error_bad_condv(cv);
   CONDV_SPECIFIC(cv) = v;
@@ -250,7 +245,7 @@ DEFINE_PRIMITIVE("condition-variable-specific-set!", condv_specific_set, subr2,
 }
 
 /* ====================================================================== *\
- * 	Initialization ...
+ *      Initialization ...
 \* ====================================================================== */
 
 static void print_mutex(SCM mutex, SCM port, int mode)
@@ -270,14 +265,14 @@ static void print_condv(SCM condv, SCM port, int mode)
 
 /* The stucture which describes the mutex type */
 static struct extended_type_descr xtype_mutex = {
-  "mutex",			/* name */
-  print_mutex			/* print function */
+  "mutex",                      /* name */
+  print_mutex                   /* print function */
 };
 
 /* The stucture which describes the condv type */
 static struct extended_type_descr xtype_condv = {
-  "condv",			/* name */
-  print_condv			/* print function */
+  "condv",                      /* name */
+  print_condv                   /* print function */
 };
 
 

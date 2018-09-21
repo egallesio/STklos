@@ -1,5 +1,5 @@
 /*
- * mutex-common.h	-- Mutex support for STklos
+ * mutex-common.h       -- Mutex support for STklos
  *
  * Copyright Â© 2006-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update:  3-Oct-2009 21:46 (eg)
+ * Last file update: 21-Sep-2018 08:56 (eg)
  */
 #ifndef _STK_MUTEX_H
 #define _STK_MUTEX_H
@@ -36,7 +36,7 @@
 
 /* ====================================================================== *\
  *
- * 			       M U T E X E S
+ *                             M U T E X E S
  *
 \* ====================================================================== */
 
@@ -49,15 +49,15 @@ struct mutex_obj {
   struct sys_mutex_obj sys_mutex;
 };
 
-#define MUTEXP(p)		(BOXED_TYPE_EQ((p), tc_mutex))
-#define MUTEX_NAME(p)		(((struct mutex_obj *) (p))->name)
-#define MUTEX_SPECIFIC(p)	(((struct mutex_obj *) (p))->specific)
-#define MUTEX_OWNER(p)		(((struct mutex_obj *) (p))->owner)
-#define MUTEX_LOCKED(p)		(((struct mutex_obj *) (p))->locked)
+#define MUTEXP(p)               (BOXED_TYPE_EQ((p), tc_mutex))
+#define MUTEX_NAME(p)           (((struct mutex_obj *) (p))->name)
+#define MUTEX_SPECIFIC(p)       (((struct mutex_obj *) (p))->specific)
+#define MUTEX_OWNER(p)          (((struct mutex_obj *) (p))->owner)
+#define MUTEX_LOCKED(p)         (((struct mutex_obj *) (p))->locked)
 
 /* ====================================================================== *\
  *
- * 			       C O N D   V A R S
+ *                             C O N D   V A R S
  *
 \* ====================================================================== */
 
@@ -68,9 +68,9 @@ struct condv_obj {
   struct sys_condv_obj sys_condv;
 };
 
-#define CONDVP(p)		(BOXED_TYPE_EQ((p), tc_condv))
-#define CONDV_NAME(p)		(((struct condv_obj *) (p))->name)
-#define CONDV_SPECIFIC(p)	(((struct condv_obj *) (p))->specific)
+#define CONDVP(p)               (BOXED_TYPE_EQ((p), tc_condv))
+#define CONDV_NAME(p)           (((struct condv_obj *) (p))->name)
+#define CONDV_SPECIFIC(p)       (((struct condv_obj *) (p))->specific)
 
 /* ====================================================================== */
 
@@ -78,7 +78,6 @@ extern SCM STk_sym_not_owned, STk_sym_abandoned, STk_sym_not_abandoned;
 
 extern void STk_error_bad_mutex(SCM obj);
 extern void STk_error_deadlock(void);
-extern void STk_error_bad_timeout(SCM tm);
 
 extern void STk_error_bad_condv(SCM obj);
 

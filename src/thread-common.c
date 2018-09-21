@@ -1,13 +1,13 @@
 /*
- * thread-common.c			-- Threads support in STklos
+ * thread-common.c                      -- Threads support in STklos
  *
- * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * (at your option) any later version.mu
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 27-Oct-2006 14:49 (eg)
+ * Last file update: 21-Sep-2018 09:15 (eg)
  */
 #include <unistd.h>
 #include "stklos.h"
@@ -37,6 +37,13 @@ static SCM cond_thread_abandonned_mutex, cond_join_timeout;
 void STk_error_bad_thread(SCM obj)
 {
   STk_error("bad thread ~S", obj);
+}
+
+double STk_verify_timeout(SCM tm) {
+  double res = STk_number2double(tm);
+
+  if (isnan(res)) STk_error("bad timeout ~S", tm);
+  return res;
 }
 
 
@@ -88,7 +95,7 @@ DEFINE_PRIMITIVE("%thread-dynwind-stack", thread_dynwind_stack, subr0, (void))
 }
 
 DEFINE_PRIMITIVE("%thread-dynwind-stack-set!", thread_dynwind_stack_set, subr1,
-		 (SCM value))
+                 (SCM value))
 {
   vm_thread_t *vm = STk_get_current_vm();
   vm->dynwind_stack = value;
@@ -195,7 +202,7 @@ DEFINE_PRIMITIVE("%thread-end-exception", thread_end_exception, subr1, (SCM thr)
 }
 
 DEFINE_PRIMITIVE("%thread-end-exception-set!", thread_end_exception_set,
-		 subr2, (SCM thr, SCM val))
+                 subr2, (SCM thr, SCM val))
 {
   if (!THREADP(thr)) STk_error_bad_thread(thr);
   THREAD_EXCEPTION(thr) = val;
@@ -209,7 +216,7 @@ DEFINE_PRIMITIVE("%thread-end-result", thread_end_result, subr1, (SCM thr))
 }
 
 DEFINE_PRIMITIVE("%thread-end-result-set!", thread_end_result_set,
-		 subr2, (SCM thr, SCM val))
+                 subr2, (SCM thr, SCM val))
 {
   if (!THREADP(thr)) STk_error_bad_thread(thr);
   THREAD_RESULT(thr) = val;
@@ -244,7 +251,7 @@ DEFINE_PRIMITIVE("thread-specific", thread_specific, subr1, (SCM thr))
 doc>
 */
 DEFINE_PRIMITIVE("thread-specific-set!", thread_specific_set, subr2,
-		 (SCM thr, SCM value))
+                 (SCM thr, SCM value))
 {
   if (!THREADP(thr)) STk_error_bad_thread(thr);
   THREAD_SPECIFIC(thr) = value;
@@ -293,7 +300,7 @@ DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
 }
 
 /* ======================================================================
- * 	Initialization ...
+ *      Initialization ...
  * ======================================================================
  */
 
@@ -321,8 +328,8 @@ static void print_thread(SCM thread, SCM port, int mode)
 
 /* The stucture which describes the thread type */
 static struct extended_type_descr xtype_thread = {
-  "thread",			/* name */
-  print_thread			/* print function */
+  "thread",                     /* name */
+  print_thread                  /* print function */
 };
 
 /* ---------------------------------------------------------------------- */
@@ -353,12 +360,12 @@ int STk_init_threads(int stack_size, void *start_stack)
 
   /* Wrap the main thread in a thread called "primordial" */
   primordial = do_make_thread(STk_false,
-			      STk_Cstring2string("primordial"),
-			      stack_size);
+                              STk_Cstring2string("primordial"),
+                              stack_size);
   THREAD_STATE(primordial) = th_runnable;
   THREAD_VM(primordial)    = vm;
   vm->scheme_thread        = primordial;
-  vm->start_stack	   = start_stack;
+  vm->start_stack          = start_stack;
   STk_primordial_thread    = primordial;
 
   /* Thread primitives */

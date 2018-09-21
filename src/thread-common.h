@@ -1,7 +1,7 @@
 /*
- * thread-common.h	-- Thread support for STklos
+ * thread-common.h      -- Thread support for STklos
  *
- * Copyright © 2006-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,11 +21,12 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update:  3-Oct-2009 21:47 (eg)
+ * Last file update: 21-Sep-2018 09:19 (eg)
  */
 #ifndef _STK_THREAD_H
 #define _STK_THREAD_H
 
+#include <math.h>    /* for isnan */
 #include "stklos.h"
 
 #if defined(THREADS_PTHREADS)
@@ -52,17 +53,18 @@ struct thread_obj {
 };
 
 
-#define THREADP(p)		(BOXED_TYPE_EQ((p), tc_thread))
-#define THREAD_THUNK(p)		(((struct thread_obj *) (p))->thunk)
-#define THREAD_NAME(p)		(((struct thread_obj *) (p))->name)
-#define THREAD_SPECIFIC(p)	(((struct thread_obj *) (p))->specific)
-#define THREAD_RESULT(p)	(((struct thread_obj *) (p))->end_result)
-#define THREAD_EXCEPTION(p)	(((struct thread_obj *) (p))->end_exception)
-#define THREAD_STATE(p)		(((struct thread_obj *) (p))->state)
-#define THREAD_STACK_SIZE(p)	(((struct thread_obj *) (p))->stack_stize)
-#define THREAD_VM(p)		(((struct thread_obj *) (p))->vm)
+#define THREADP(p)              (BOXED_TYPE_EQ((p), tc_thread))
+#define THREAD_THUNK(p)         (((struct thread_obj *) (p))->thunk)
+#define THREAD_NAME(p)          (((struct thread_obj *) (p))->name)
+#define THREAD_SPECIFIC(p)      (((struct thread_obj *) (p))->specific)
+#define THREAD_RESULT(p)        (((struct thread_obj *) (p))->end_result)
+#define THREAD_EXCEPTION(p)     (((struct thread_obj *) (p))->end_exception)
+#define THREAD_STATE(p)         (((struct thread_obj *) (p))->state)
+#define THREAD_STACK_SIZE(p)    (((struct thread_obj *) (p))->stack_stize)
+#define THREAD_VM(p)            (((struct thread_obj *) (p))->vm)
 
 extern void STk_error_bad_thread(SCM obj);
+double STk_verify_timeout(SCM tm);
 
 extern SCM STk_cond_thread_terminated;
 
