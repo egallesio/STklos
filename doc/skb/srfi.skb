@@ -1,6 +1,6 @@
 ;; ======================================================================
 ;;
-;; 			STklos Reference Manual
+;;                      STklos Reference Manual
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  2-Aug-2010 19:14 (eg)
+;; Last file update: 21-Sep-2018 09:40 (eg)
 ;;
 ;; ======================================================================
 
@@ -252,7 +252,7 @@ running Scheme programs as Unix scripts in a uniform
 way. Specifically, it describes: ,(itemize
     (item [the syntax of Unix scripts written in Scheme,])
     (item [a uniform convention for calling the Scheme script interpreter,
-	     and])
+             and])
     (item [a method for accessing the Unix command line arguments from
 within the Scheme script.]))])
 
@@ -430,19 +430,19 @@ figure ,(ref :figure "Feature identifiers") in a
  (figure :legend "Feature identifiers"
    (center
       (table  :rules 'cols :frame 'border :width 60.
-	 (tr :bg "#eeeeee" (th "Symbol") (th "require SRFI(s)"))
-	 (tr (tdl "lists")       (tdl "srfi-1"))
-	 (tr (tdl "and-let*")    (tdl "srfi-2"))
-	 (tr (tdl "hvectors")    (tdl "srfi-4"))
-	 (tr (tdl "program")     (tdl "srfi-7"))
-	 (tr (tdl "records")     (tdl "srfi-9"))
-	 (tr (tdl "strings")     (tdl "srfi-13"))
-	 (tr (tdl "charsets")    (tdl "srfi-14"))
-	 (tr (tdl "case-lambda") (tdl "srfi-16"))
-	 (tr (tdl "error")       (tdl "srfi-23"))
-	 (tr (tdl "random")      (tdl "srfi-27"))
-	 (tr (tdl "conditions")  (tdl "srfi-34, srfi-35, srfi-36"))
-	 (tr (tdl "hash-tables") (tdl "srfi-69"))))))
+         (tr :bg "#eeeeee" (th "Symbol") (th "require SRFI(s)"))
+         (tr (tdl "lists")       (tdl "srfi-1"))
+         (tr (tdl "and-let*")    (tdl "srfi-2"))
+         (tr (tdl "hvectors")    (tdl "srfi-4"))
+         (tr (tdl "program")     (tdl "srfi-7"))
+         (tr (tdl "records")     (tdl "srfi-9"))
+         (tr (tdl "strings")     (tdl "srfi-13"))
+         (tr (tdl "charsets")    (tdl "srfi-14"))
+         (tr (tdl "case-lambda") (tdl "srfi-16"))
+         (tr (tdl "error")       (tdl "srfi-23"))
+         (tr (tdl "random")      (tdl "srfi-27"))
+         (tr (tdl "conditions")  (tdl "srfi-34, srfi-35, srfi-36"))
+         (tr (tdl "hash-tables") (tdl "srfi-69"))))))
 
 ;; ----------------------------------------------------------------------
 ;; SRFI 59 -- Vicinity
@@ -557,7 +557,8 @@ you need to insert the following expression])
 (p [,(quick-link-srfi 96) is fully supported and is completely
 described in this document (procedures
 ,(code "get-environment-variable"), and
-,(code "get-environment-variables")). ]))
+,(code "get-environment-variables")). ]
+(p [Note that both primitives are now defined in ,(rseven).])))
 
 
 ;; ----------------------------------------------------------------------

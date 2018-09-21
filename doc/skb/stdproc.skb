@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 11-Sep-2018 10:13 (eg)
+;; Last file update: 21-Sep-2018 09:38 (eg)
 ;;
 ;; ======================================================================
 
@@ -687,7 +687,14 @@ be accessed as a normal port with the standard Scheme primitives.])
 (subsection :title "Environment"
 (insertdoc 'getenv)
 (insertdoc 'setenv!)
-(insertdoc 'unsetenv!))
+(insertdoc 'unsetenv!)
+
+,(stklos) defines also the ,(rseven) (and ,(quick-link-srfi 96)))
+standard primivitives to acess environment variables.
+
+(insertdoc 'get-environment-variable)
+(insertdoc 'get-environment-variables)
+)
 
 ;;; Time
 (subsection :title "Time"

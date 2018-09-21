@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 24-Aug-2018 15:20 (eg)
+;;;; Last file update: 21-Sep-2018 09:32 (eg)
 ;;;;
 
 
@@ -1667,7 +1667,7 @@ doc>
 ;; SRFI-98: "An interface to access environment variables"
 ;;
 
-#| <doc EXT get-environment-variable
+#| <doc R7RS get-environment-variable
  * (get-environment-variable name)
  *
  * Returns the value of the named environment variable as a string, or
@@ -1678,7 +1678,7 @@ doc>
 (define (get-environment-variable name)
   (getenv name))
 
-#| <doc EXT get-environment-variables
+#| <doc R7RS get-environment-variables
  * (get-environment-variables)
  *
  * Returns names and values of all the environment variables as an a-list.
