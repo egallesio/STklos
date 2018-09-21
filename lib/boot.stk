@@ -1,7 +1,7 @@
 ;;;;
-;;;; boot.stk					-- Default boot file
+;;;; boot.stk                                   -- Default boot file
 ;;;;
-;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,51 +21,51 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 10-Aug-2011 00:15 (eg)
+;;;; Last file update: 13-Sep-2018 16:42 (eg)
 ;;;;
 
-(include "runtime.stk")		; Definition necessary for the bootstrap
-(include "module.stk")		; All the macros for defining modules
-(include "r5rs.stk")		; R5RS stuff written in Scheme
-(include "str.stk")		; String functions UTF-8 aware
-(include "callcc.stk")		; Call/cc support
-(include "struct.stk")		; STklos structures
-(include "bonus.stk")		; Extended functions and syntaxes
-(include "load.stk")		; Extended load dealing with paths and suffixes
-(include "srfi-0.stk")		; Implementation of SRFI-0
-(include "mbe.stk")		; A simple R5RS macro system
-(include "regexp.stk")		; Regular expressions
-(include "process.stk")		; Processes from Scheme
-(include "compiler.stk")	; VM Compiler
-(include "object.stk")		; CLOS like object system
-(include "date.stk")		; Dates
-(include "logical.stk")		; Logical operations
-(include "thread.stk")		; Thread support
-(include "ffi.stk")		; FFI support
-(include "r7rs.stk")		; Preliminary support of R7RS
-(include "obsolete.stk")	; Obsolete functions. Candidates to disappear
-(include "repl.stk")		; Read Eval Print Loop
-(include "readline.stk")	; Readline support
-(include "repl-readline.stk")	; REL + readline
+(include "runtime.stk")         ; Definition necessary for the bootstrap
+(include "module.stk")          ; All the macros for defining modules
+(include "r5rs.stk")            ; R5RS stuff written in Scheme
+(include "str.stk")             ; String functions UTF-8 aware
+(include "callcc.stk")          ; Call/cc support
+(include "struct.stk")          ; STklos structures
+(include "bonus.stk")           ; Extended functions and syntaxes
+(include "load.stk")            ; Extended load dealing with paths and suffixes
+(include "srfi-0.stk")          ; Implementation of SRFI-0
+(include "mbe.stk")             ; A simple R5RS macro system
+(include "regexp.stk")          ; Regular expressions
+(include "process.stk")         ; Processes from Scheme
+(include "compiler.stk")        ; VM Compiler
+(include "object.stk")          ; CLOS like object system
+(include "date.stk")            ; Dates
+(include "logical.stk")         ; Logical operations
+(include "thread.stk")          ; Thread support
+(include "ffi.stk")             ; FFI support
+(include "r7rs.stk")            ; Preliminary support of R7RS
+(include "obsolete.stk")        ; Obsolete functions. Candidates to disappear
+(include "repl.stk")            ; Read Eval Print Loop
+(include "readline.stk")        ; Readline support
+(include "repl-readline.stk")   ; REL + readline
 (import REPL REPL-READLINE)
 
 ;==============================================================================
-(autoload	 "compfile"	  compile-file)
-(autoload	 "describe"	  describe)
-(syntax-autoload "bigmatch"	  match-case match-lambda)
-(autoload	 "getopt"	  %print-usage)
-(syntax-autoload "getopt"	  parse-arguments)
-(syntax-autoload "trace"	  trace untrace)
-(autoload	 "pp"		  pp pretty-print)
-(autoload	 "env"		  null-environment scheme-report-environment
-			          interaction-environment)
-(autoload	 "help"		  help)
-(autoload	 "lex-rt"	  lexer-next-token)
+(autoload        "compfile"       compile-file)
+(autoload        "describe"       describe)
+(syntax-autoload "bigmatch"       match-case match-lambda)
+(autoload        "getopt"         %print-usage)
+(syntax-autoload "getopt"         parse-arguments)
+(syntax-autoload "trace"          trace untrace)
+(autoload        "pp"             pp pretty-print)
+(autoload        "env"            null-environment scheme-report-environment
+                                  interaction-environment)
+(autoload        "help"           help)
+(autoload        "lex-rt"         lexer-next-token)
 (syntax-autoload "scmpkg-support" interface)
-(autoload	 "srfi-27"        random-integer random-real)
+(autoload        "srfi-27"        random-integer random-real)
 (syntax-autoload "srfi-34"        with-exception-handler guard)
 (syntax-autoload "srfi-35"        define-condition-type condition)
-(autoload	 "srfi-48"        srfi48:help srfi48:format-fixed)
+(autoload        "srfi-48"        srfi48:help srfi48:format-fixed)
 
 ;==============================================================================
 ;; Execute the REPL only if a file was not given on the command line
@@ -76,7 +76,7 @@
 
 
 ;; ----------------------------------------------------------------------
-;; 	%display-backtrace ...
+;;      %display-backtrace ...
 ;; ----------------------------------------------------------------------
 (define (%display-backtrace bt useless-frames)
   (define (hack-bt)
@@ -84,84 +84,97 @@
     ;; (the internal of the repl in particular. Delete the bottom of the stack
     ;; and replace it by EVAL
     (if (>= (length bt) useless-frames)
-	(let ((bt (list-tail (reverse bt) useless-frames)))
-	  (reverse! (cons (cons eval #f) bt)))
-	bt))
+        (let ((bt (list-tail (reverse bt) useless-frames)))
+          (reverse! (cons (cons eval #f) bt)))
+        bt))
 
   (define (limit-bt bt)
     (let ((depth (or (let ((x (getenv "STKLOS_FRAMES")))
-		       (and x (string->number x)))
-		     10))
-	  (len (length bt)))
+                       (and x (string->number x)))
+                     10))
+          (len (length bt)))
       (if (and (> depth 0) (> len depth))
-	  (reverse!
-	   (cons "  - ...\nSet shell variable STKLOS_FRAMES to set visible frames\n"
-		 (list-tail (reverse! bt) (- len depth))))
-	  bt)))
+          (reverse!
+           (cons "  - ...\nSet shell variable STKLOS_FRAMES to set visible frames\n"
+                 (list-tail (reverse! bt) (- len depth))))
+          bt)))
 
   (let ((p (current-error-port)))
     (for-each (lambda (x)
-		(if (string? x)
-		    (display x p)
-		    (begin
-		      (display "  - " p)
-		      ;; Print the procedure name
-		      (let ((who (car x)))
-			(display (cond
-				   ((procedure? who) (%procedure-name who))
-				   ((not who)        "<<let/call>>")
-				   (else             who))
-				 p))
-		      ;; Print (eventually) the position
-		      (if (cdr x)
-			  (format p " @ [~S:~S]\n" (cadr x) (cddr x))
-			  (newline p)))))
-	      (limit-bt (hack-bt)))
+                (if (string? x)
+                    (display x p)
+                    (begin
+                      (display "  - " p)
+                      ;; Print the procedure name
+                      (let ((who (car x)))
+                        (display (cond
+                                   ((procedure? who) (%procedure-name who))
+                                   ((not who)        "<<let/call>>")
+                                   (else             who))
+                                 p))
+                      ;; Print (eventually) the position
+                      (if (cdr x)
+                          (format p " @ [~S:~S]\n" (cadr x) (cddr x))
+                          (newline p)))))
+              (limit-bt (hack-bt)))
     (flush-output-port p)))
 
 ;; ----------------------------------------------------------------------
-;; 	%build-error-location ...
+;;      %build-error-location ...
 ;; ----------------------------------------------------------------------
 (define (%build-error-location who bt)
   (if who
       (list who
-	    (if (null? bt) #f (cdar bt)))
+            (if (null? bt) #f (cdar bt)))
       (let Loop ((bt bt) (info #f))
-	(cond
-	  ((null? bt)
-	   (list "???" #f))
-	  ((procedure? (caar bt))
-	   (let ((name (%procedure-name (caar bt))))
-	     (if (or (string? name) (cdar bt))
-		 ;; We have either a "pretty name" or a line information
-		 (list name
-		       (or info (cdar bt)))
-		 ;; Nothing interesting, continue to go down the stack
-		 (Loop (cdr bt) info))))
-	  ((not (caar bt))
-	   ;; We have a let. Go down the stack (but keep the info -- if this
-	   ;; is the first time we have an info)
-	   (Loop (cdr bt)
-		 (or info (cdar bt))))))))
+        (cond
+          ((null? bt)
+           (list "???" #f))
+          ((procedure? (caar bt))
+           (let ((name (%procedure-name (caar bt))))
+             (if (or (string? name) (cdar bt))
+                 ;; We have either a "pretty name" or a line information
+                 (list name
+                       (or info (cdar bt)))
+                 ;; Nothing interesting, continue to go down the stack
+                 (Loop (cdr bt) info))))
+          ((not (caar bt))
+           ;; We have a let. Go down the stack (but keep the info -- if this
+           ;; is the first time we have an info)
+           (Loop (cdr bt)
+                 (or info (cdar bt))))))))
 
 ;; ----------------------------------------------------------------------
-;; 	%simple-fatal-exception-handler ...
+;;      %simple-fatal-exception-handler ...
 ;; ----------------------------------------------------------------------
 (define (%simple-fatal-exception-handler what who c useless-frames)
+  ;; We arrive her when we have an exception not catched.
+  ;; Two cases:
+  ;;  - if condition is of type &exit-r7rs, we come form a call to exit
+  ;;    => run the %pre-exit functions and exit
+  ;;  - else we are in serious trouble => display an message and abort
+
+  ;;  Case 1: Is it a simple R7RS exit call
+  (when (and (condition? c) (condition-has-type? c &exit-r7rs))
+    (let ((retcode (condition-ref c 'retcode)))
+      (%pre-exit retcode)
+      (emergency-exit retcode)))
+
+  ;; Case 2: A really unattended condition
   (let ((port (current-error-port))
-	(bt   #f))
+        (bt   #f))
     ;; Display the message
     (format port "**** Error while ~A ~S\n" what who)
     (when (condition? c)
       (when (condition-has-type? c &error-message)
-	(set! bt (condition-ref c 'backtrace)) ;; will be displayed later
-	(let ((loc (%build-error-location #f bt)))
-	  (format port "\t Where: in ~A" (car loc))
-	  (when (cadr loc)
-	    (format port " (near line ~a in file ~s)" (cdadr loc) (caadr loc)))
-	  (newline port)))
+        (set! bt (condition-ref c 'backtrace)) ;; will be displayed later
+        (let ((loc (%build-error-location #f bt)))
+          (format port "\t Where: in ~A" (car loc))
+          (when (cadr loc)
+            (format port " (near line ~a in file ~s)" (cdadr loc) (caadr loc)))
+          (newline port)))
       (when (condition-has-type? c &message)
-	(format port "\tReason: ~A\n" (condition-ref c 'message))))
+        (format port "\tReason: ~A\n" (condition-ref c 'message))))
     ;; Show a backtrace
     (newline port)
     (when bt
@@ -171,7 +184,7 @@
 
 
 ;; ----------------------------------------------------------------------
-;;	Scheme Module
+;;      Scheme Module
 ;; ----------------------------------------------------------------------
 ;; The SCHEME module is a copy of the STklos module before the user
 ;;; may have the possibility to modify standard bindings.
@@ -192,7 +205,7 @@
 
 
 ;; ----------------------------------------------------------------------
-;;	option analysis and REPL launching
+;;      option analysis and REPL launching
 ;; ----------------------------------------------------------------------
 (let ((no-init (key-get *%program-args* :no-init-file #f))
       (ld      (key-get *%program-args* :load  #f))
@@ -208,9 +221,9 @@
   ;; Look at the debug flag
   (when (> debug 0)
     (stklos-debug-level debug)
-    (compiler:warn-use-undefined #t)	; Signal usage of still undefined symbols
-    (compiler:gen-line-number #t)	; Generate line numbers
-    (when (> debug 1)			; Load-verbose when debug >= 2
+    (compiler:warn-use-undefined #t)    ; Signal usage of still undefined symbols
+    (compiler:gen-line-number #t)       ; Generate line numbers
+    (when (> debug 1)                   ; Load-verbose when debug >= 2
       (load-verbose debug)))
 
   ;; Eventually try to create the configuratioon directory
@@ -218,7 +231,7 @@
     (unless (file-is-directory? dir)
       (with-handler
        (lambda (c)
-	 (eprintf "Warning: cannot create configuration directory ~S\n" dir))
+         (eprintf "Warning: cannot create configuration directory ~S\n" dir))
        (make-directories dir))))
 
   ;; Try to load the user initialization file except if "--no-init-file"
@@ -234,17 +247,17 @@
   (cond
     ;; "--file" option
     (file (with-handler
-	    (lambda (c) (%simple-fatal-exception-handler "executing file" file c 2))
-	    (load file)
-	    ;; Try to execute the main procedure with the given arguments
-	    (let ((ret-code (main (cons (program-name) (argv)))))
-	      (%before-exit-hook)
-	      (if (integer? ret-code) ret-code 0))))
+            (lambda (c) (%simple-fatal-exception-handler "executing file" file c 2))
+            (load file)
+            ;; Try to execute the main procedure with the given arguments
+            (let ((ret-code (main (cons (program-name) (argv)))))
+              (%before-exit-hook)
+              (if (integer? ret-code) ret-code 0))))
     ;; "--expression" option
     (expr (with-handler
-	    (lambda (c) (%simple-fatal-exception-handler "evaluating" expr c 4))
-	    (eval (read-from-string expr))
-	    0))
+            (lambda (c) (%simple-fatal-exception-handler "evaluating" expr c 4))
+            (eval (read-from-string expr))
+            0))
     (else  ;; Try to initialize GNU readline and starts the main REPL
            (try-initialize-repl-with-readline)
            (main-repl))))
