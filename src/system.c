@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 18-Sep-2018 12:23 (eg)
+ * Last file update:  5-Oct-2018 12:44 (eg)
  */
 
 #include <unistd.h>
@@ -336,10 +336,13 @@ DEFINE_PRIMITIVE("make-directory", make_directory, subr1, (SCM path))
 }
 
 /*
-<doc EXT remove-directory
+<doc EXT delete-directory remove-directory
  * (remove-directory dir)
+ * (delete-directory dir)
  *
  * Delete the directory with name |dir|.
+ * @l
+ * ,(bold "Note:") The name |remove-directory| is kept for compatibility.
 doc>
 */
 DEFINE_PRIMITIVE("remove-directory", remove_directory, subr1, (SCM path))
@@ -349,7 +352,6 @@ DEFINE_PRIMITIVE("remove-directory", remove_directory, subr1, (SCM path))
     error_posix(path, NULL);
   return STk_void;
 }
-
 
 /*
 <doc EXT getpid
@@ -504,19 +506,30 @@ DEFINE_PRIMITIVE("glob", glob, vsubr, (int argc, SCM *argv))
 
 
 /*
-<doc EXT remove-file
- * (remove-file string)
+<doc R7RS delete-file
+ * (delete-file string)
  *
  * Removes the file whose path name is given in |string|.
- * The result of |remove-file| is ,(emph "void").
+ * The result of |delete-file| is ,(emph "void").
+ * @l
+ * This function is also called |remove-file| for compatibility 
+ * reasons. ,(index "remove-file")
 doc>
 */
+#define do_remove(filename)                             \
+  if (!STRINGP(filename)) error_bad_string(filename);   \
+  if (remove(STRING_CHARS(filename)) != 0)              \
+    error_posix(filename, NULL);                        \
+  return STk_void;                                      \
+
+DEFINE_PRIMITIVE("delete-file", delete_file, subr1, (SCM filename))
+{
+  do_remove(filename);
+}
+
 DEFINE_PRIMITIVE("remove-file", remove_file, subr1, (SCM filename))
 {
-  if (!STRINGP(filename)) error_bad_string(filename);
-  if (remove(STRING_CHARS(filename)) != 0)
-    error_posix(filename, NULL);
-  return STk_void;
+  do_remove(filename);
 }
 
 
@@ -655,7 +668,7 @@ DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
  *        (out (open-output-file tmp)))
  *   (register-exit-function! (lambda (n)
  *                              (when (zero? n)
- *                                (remove-file tmp))))
+ *                                (delete-file tmp))))
  *   out)
  * @end lisp
 doc>
@@ -717,7 +730,7 @@ DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
 
   /* Raise a &exit-r7rs condition  with the numeric value of the exit code*/
   cond = STk_make_C_cond(STk_exit_condition, 1, MAKE_INT(ret));
-  STk_raise(cond); 
+  STk_raise(cond);
 
   return STk_void; /* never reached */
 }
