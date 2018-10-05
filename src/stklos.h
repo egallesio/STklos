@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 13-Sep-2018 15:41 (eg)
+ * Last file update:  5-Oct-2018 18:03 (eg)
  */
 
 
@@ -642,7 +642,7 @@ EXTERN_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv));
 EXTERN_PRIMITIVE("memq", memq, subr2, (SCM obj, SCM list));
 EXTERN_PRIMITIVE("reverse", reverse, subr1, (SCM l));
 EXTERN_PRIMITIVE("reverse!", dreverse, subr1, (SCM l));
-EXTERN_PRIMITIVE("copy-tree", copy_tree, subr1, (SCM l));
+EXTERN_PRIMITIVE("list-copy", list_copy, subr1, (SCM l));
 EXTERN_PRIMITIVE("assq", assq, subr2, (SCM obj, SCM alist));
 EXTERN_PRIMITIVE("assv", assv, subr2, (SCM obj, SCM alist));
 EXTERN_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp));

@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 21-Sep-2018 09:49 (eg)
+;; Last file update:  5-Oct-2018 18:10 (eg)
 ;;
 ;; ======================================================================
 
@@ -159,7 +159,7 @@ quoted in programs.])
 (insertdoc 'list-set!)
 (insertdoc 'member)
 (insertdoc 'assoc)
-(insertdoc 'copy-tree)
+(insertdoc 'list-copy)
 (insertdoc 'filter!)
 (insertdoc 'remove!)
 (insertdoc 'delete!))

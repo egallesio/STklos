@@ -1,8 +1,8 @@
 /*
  *
- * k e y w o r d . c				-- Keywords management
+ * k e y w o r d . c                            -- Keywords management
  *
- * Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -20,17 +20,17 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 19-Nov-1993 16:12
- * Last file update: 27-Jul-2011 22:53 (eg)
+ * Last file update:  5-Oct-2018 18:04 (eg)
  */
 
 #include "stklos.h"
 #include "hash.h"
 
-static struct hash_table_obj keyword_table;	/* The keyword "obarray" */
+static struct hash_table_obj keyword_table;     /* The keyword "obarray" */
 
 
 /*===========================================================================*\
- * 				Utilities
+ *                              Utilities
 \*===========================================================================*/
 
 static void error_bad_keyword(SCM obj)
@@ -53,7 +53,7 @@ static SCM make_uninterned_keyword(char *name)
   SCM z;
 
   NEWCELL(z, keyword);
-  SYMBOL_PNAME(z) = name;	/* already duplicated in STk_makekey */
+  SYMBOL_PNAME(z) = name;       /* already duplicated in STk_makekey */
   BOXED_INFO(z) |= STk_symbol_flags(name);
   return z;
 }
@@ -88,7 +88,7 @@ SCM STk_makekey(char *token)
 
 /*===========================================================================*\
  *
- * 				PRIMITIVES
+ *                              PRIMITIVES
  *
 \*===========================================================================*/
 
@@ -227,9 +227,9 @@ DEFINE_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val))
     for (i = 0; i < len; i+=2) {
       if (!KEYWORDP(CAR(l))) error_bad_keyword(CAR(l));
       if (strcmp(KEYWORD_PNAME(CAR(l)), KEYWORD_PNAME(key))==0) {
-	if (BOXED_INFO(l) & CONS_CONST) error_const_cell(l);
-	CAR(CDR(l)) = val;
-	return save;
+        if (BOXED_INFO(l) & CONS_CONST) error_const_cell(l);
+        CAR(CDR(l)) = val;
+        return save;
       }
       l = CDR(CDR(l));
     }
@@ -271,13 +271,13 @@ static SCM key_del(SCM l, SCM key)
     for (i = 0; i < len; i+=2) {
       if (!KEYWORDP(CAR(l))) error_bad_keyword(CAR(l));
       if (strcmp(KEYWORD_PNAME(CAR(l)), KEYWORD_PNAME(key))==0) {
-	if (BOXED_INFO(l) & CONS_CONST) error_const_cell(l);
-	if (prev == l)
-	  return CDR(CDR(l));
-	else {
-	  CDR(prev) = CDR(CDR(l));
-	  return save;
-	}
+        if (BOXED_INFO(l) & CONS_CONST) error_const_cell(l);
+        if (prev == l)
+          return CDR(CDR(l));
+        else {
+          CDR(prev) = CDR(CDR(l));
+          return save;
+        }
       }
       prev = CDR(l); l = CDR(prev);
     }
@@ -297,7 +297,7 @@ DEFINE_PRIMITIVE("key-delete!", dkey_delete, subr2, (SCM l, SCM key))
 
 DEFINE_PRIMITIVE("key-delete", key_delete, subr2, (SCM l, SCM key))
 {
-  return key_del(STk_copy_tree(l), key);
+  return key_del(STk_list_copy(l), key);
 }
 
 

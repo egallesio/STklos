@@ -15,7 +15,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 21-Mar-2018 11:30 (eg)
+ * Last file update:  5-Oct-2018 18:03 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -592,7 +592,7 @@ doc>
 DEFINE_PRIMITIVE("process-list", proc_list, subr0, (void))
 {
   PURGE_PROCESS_TABLE();
-  return STk_copy_tree(all_processes);
+  return STk_list_copy(all_processes);
 }
 
 

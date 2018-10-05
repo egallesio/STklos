@@ -1,7 +1,7 @@
 /*
- * socket.c				-- Socket acess for STklos
+ * socket.c                             -- Socket acess for STklos
  *
- * Copyright © 2003-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update: 27-May-2011 22:55 (eg)
+ * Last file update:  5-Oct-2018 18:02 (eg)
  */
 
 #include <sys/types.h>
@@ -38,7 +38,7 @@
 
 /*===========================================================================*\
  *
- *			Definition of the socket type
+ *                      Definition of the socket type
  *
 \*===========================================================================*/
 static void print_socket(SCM sock, SCM port, int mode)
@@ -47,9 +47,9 @@ static void print_socket(SCM sock, SCM port, int mode)
   SCM name = SOCKET_HOSTNAME(sock);
 
   sprintf(buffer, "#[%s-socket %s:%ld (%d)]",
-	  (SOCKET_TYPE(sock) == SOCKET_SERVER) ? "server" : "client",
-	  ((name == STk_false) ?  "*none*" : (char *) STRING_CHARS(name)),
-	  SOCKET_PORTNUM(sock), SOCKET_FD(sock));
+          (SOCKET_TYPE(sock) == SOCKET_SERVER) ? "server" : "client",
+          ((name == STk_false) ?  "*none*" : (char *) STRING_CHARS(name)),
+          SOCKET_PORTNUM(sock), SOCKET_FD(sock));
   STk_puts(buffer, port);
 }
 
@@ -63,7 +63,7 @@ static void socket_finalizer(SCM socket);
 
 /*===========================================================================*\
  *
- *				UTILITIES
+ *                              UTILITIES
  *
 \*===========================================================================*/
 
@@ -124,7 +124,7 @@ static void set_socket_io_ports(SCM sock, int line_buffered)
 
 /*===========================================================================*\
  *
- *				MAKE-SERVER-SOCKET
+ *                              MAKE-SERVER-SOCKET
  *
 \*===========================================================================*/
 
@@ -162,7 +162,7 @@ DEFINE_PRIMITIVE("make-server-socket", make_server_socket, subr01, (SCM port))
 
   /* Bind the socket to a name */
   sin.sin_family      = AF_INET;
-  sin.sin_port 	      = htons(portnum);
+  sin.sin_port        = htons(portnum);
   sin.sin_addr.s_addr = INADDR_ANY;
 
   if (bind(s, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
@@ -185,16 +185,16 @@ DEFINE_PRIMITIVE("make-server-socket", make_server_socket, subr01, (SCM port))
 
   /* Now we can create the socket object */
   NEWCELL(z, socket);
-  SOCKET_PORTNUM(z)	= ntohs(sin.sin_port);
+  SOCKET_PORTNUM(z)     = ntohs(sin.sin_port);
   SOCKET_HOSTNAME(z)    = STk_false;
   SOCKET_HOSTIP(z)      = STk_false;
-  SOCKET_FD(z)	 	= s;
-  SOCKET_TYPE(z)	= SOCKET_SERVER;
-  SOCKET_IN(z)		= STk_false;
-  SOCKET_OUT(z)		= STk_false;
-  SOCKET_READY(z)	= STk_false;
-  SOCKET_CHILDREN(z)	= STk_nil;
-  SOCKET_USER_DATA(z)	= NULL;
+  SOCKET_FD(z)          = s;
+  SOCKET_TYPE(z)        = SOCKET_SERVER;
+  SOCKET_IN(z)          = STk_false;
+  SOCKET_OUT(z)         = STk_false;
+  SOCKET_READY(z)       = STk_false;
+  SOCKET_CHILDREN(z)    = STk_nil;
+  SOCKET_USER_DATA(z)   = NULL;
 
   STk_register_finalizer(z, socket_finalizer);
 
@@ -204,7 +204,7 @@ DEFINE_PRIMITIVE("make-server-socket", make_server_socket, subr01, (SCM port))
 
 /*===========================================================================*\
  *
- *				MAKE-CLIENT-SOCKET
+ *                              MAKE-CLIENT-SOCKET
  *
 \*===========================================================================*/
 
@@ -261,10 +261,10 @@ static SCM internal_init_client_socket(SCM hostname, SCM port)
   SOCKET_PORTNUM(z)  = ntohs(server.sin_port); /* Query true value */
   SOCKET_HOSTNAME(z) = STk_Cstring2string((char *) hp->h_name);
   SOCKET_HOSTIP(z)   = STk_Cstring2string((char *) inet_ntoa(server.sin_addr));
-  SOCKET_FD(z)	     = s;
+  SOCKET_FD(z)       = s;
   SOCKET_TYPE(z)     = SOCKET_CLIENT;
-  SOCKET_IN(z)	     = STk_false;
-  SOCKET_OUT(z)	     = STk_false;
+  SOCKET_IN(z)       = STk_false;
+  SOCKET_OUT(z)      = STk_false;
   SOCKET_READY(z)    = STk_false;
   SOCKET_PARENT(z)   = STk_nil;
   SOCKET_USER_DATA(z)= NULL;
@@ -276,14 +276,14 @@ static SCM internal_init_client_socket(SCM hostname, SCM port)
 
 
 DEFINE_PRIMITIVE("%initialize-client-socket", init_client_socket, subr2,
-				 (SCM hostname, SCM port))
+                                 (SCM hostname, SCM port))
 {
   return internal_init_client_socket(hostname, port);
 }
 
 
 DEFINE_PRIMITIVE("make-client-socket", make_client_socket, subr23,
-		 (SCM hostname, SCM port, SCM line_buffered))
+                 (SCM hostname, SCM port, SCM line_buffered))
 {
  SCM sock;
 
@@ -298,7 +298,7 @@ DEFINE_PRIMITIVE("make-client-socket", make_client_socket, subr23,
 
 /*===========================================================================*\
  *
- *				SOCKET-SHUTDOWN
+ *                              SOCKET-SHUTDOWN
  *
 \*===========================================================================*/
 
@@ -339,7 +339,7 @@ DEFINE_PRIMITIVE("socket-shutdown", socket_shutdown, subr12, (SCM sock, SCM clos
   if (SOCKET_TYPE(sock) == SOCKET_SERVER) { /* Shutdown associated client sockets */
     SCM tmp;
 
-    for (tmp = STk_copy_tree(SOCKET_CHILDREN(sock)); !NULLP(tmp); tmp = CDR(tmp)){
+    for (tmp = STk_list_copy(SOCKET_CHILDREN(sock)); !NULLP(tmp); tmp = CDR(tmp)){
       STk_socket_shutdown(CAR(tmp), closeit);
     }
   } else {    /* Delete this socket from the server socket (if needed) */
@@ -386,7 +386,7 @@ static void socket_finalizer(SCM socket)
 
 /*===========================================================================*\
  *
- *				SOCKET-ACCEPT
+ *                              SOCKET-ACCEPT
  *
 \*===========================================================================*/
 
@@ -429,7 +429,7 @@ static void socket_finalizer(SCM socket)
 doc>
 */
 DEFINE_PRIMITIVE("socket-accept", socket_accept, subr12,
-		 (SCM serv, SCM line_buffered))
+                 (SCM serv, SCM line_buffered))
 {
   char *s;
   struct sockaddr_in sin;
@@ -454,10 +454,10 @@ DEFINE_PRIMITIVE("socket-accept", socket_accept, subr12,
   SOCKET_PORTNUM(z)  = SOCKET_PORTNUM(serv);
   SOCKET_HOSTNAME(z) = STk_Cstring2string(host ? (char*)host->h_name : s);
   SOCKET_HOSTIP(z)   = STk_Cstring2string(s);
-  SOCKET_FD(z)	     = new_s;
+  SOCKET_FD(z)       = new_s;
   SOCKET_TYPE(z)     = SOCKET_CLIENT;
-  SOCKET_IN(z)	     = STk_false;
-  SOCKET_OUT(z)	     = STk_false;
+  SOCKET_IN(z)       = STk_false;
+  SOCKET_OUT(z)      = STk_false;
   SOCKET_READY(z)    = STk_false;
   SOCKET_PARENT(z)   = serv;
   SOCKET_USER_DATA(z)= NULL;
@@ -475,7 +475,7 @@ DEFINE_PRIMITIVE("socket-accept", socket_accept, subr12,
 
 /*===========================================================================*\
  *
- *				SOCKET PRIMITIVES
+ *                              SOCKET PRIMITIVES
  *
 \*===========================================================================*/
 
@@ -638,7 +638,7 @@ DEFINE_PRIMITIVE("socket-local-address", socket_local_addr, subr1, (SCM sock))
 
 /*===========================================================================*\
  *
- *				Initialization
+ *                              Initialization
  *
 \*===========================================================================*/
 int STk_init_socket(void)

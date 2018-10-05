@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update: 10-Sep-2018 17:18 (eg)
+;;;; Last file update:  5-Oct-2018 18:01 (eg)
 ;;;;
 
 
@@ -70,7 +70,10 @@
 
 ;; 05-May-2007 (v0.83)
 ;; current-second is now R7RS
-;(define current-second current-seconds) 
+;(define current-second current-seconds)
 
 ;; 04-Jun-2008 (v0.99)
 (define %build-path-from-shell-variable build-path-from-shell-variable)
+
+;; 05-Oct-2017 (v1.21)
+(define copy-tree list-copy)

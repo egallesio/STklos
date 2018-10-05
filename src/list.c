@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-Oct-1993 21:37
- * Last file update: 22-Jun-2018 13:12 (eg)
+ * Last file update:  5-Oct-2018 18:08 (eg)
  */
 
 #include "stklos.h"
@@ -647,6 +647,22 @@ DEFINE_PRIMITIVE("assoc", assoc, subr23, (SCM obj, SCM alist, SCM cmp))
 }
 
 
+/*
+<doc R7RS list-copy
+ * (list-copy obj)
+ *
+ * |list-copy| recursively copies trees of pairs. If |obj| is
+ * not a pair, it is returned; otherwise the result is a new pair whose
+ * |car| and |cdr| are obtained by calling |list-copy| on
+ * the |car| and |cdr| of |obj|, respectively.
+doc>
+ */
+DEFINE_PRIMITIVE("list-copy", list_copy, subr1, (SCM l))
+{
+  return CONSP(l) ? STk_cons(STk_list_copy(CAR(l)), STk_list_copy(CDR(l))): l;
+}
+
+
 /***
  *
  * Non standard functions
@@ -700,21 +716,6 @@ DEFINE_PRIMITIVE("list*", list_star, vsubr, (int argc, SCM *argv))
   return l;
 }
 
-
-/*
-<doc EXT copy-tree
- * (copy-tree obj)
- *
- * |Copy-tree| recursively copies trees of pairs. If |obj| is
- * not a pair, it is returned; otherwise the result is a new pair whose
- * |car| and |cdr| are obtained by calling |copy-tree| on
- * the |car| and |cdr| of |obj|, respectively.
-doc>
- */
-DEFINE_PRIMITIVE("copy-tree", copy_tree, subr1, (SCM l))
-{
-  return CONSP(l) ? STk_cons(STk_copy_tree(CAR(l)), STk_copy_tree(CDR(l))): l;
-}
 
 
 /*
@@ -1019,10 +1020,10 @@ int STk_init_list(void)
   ADD_PRIMITIVE(assq);
   ADD_PRIMITIVE(assv);
   ADD_PRIMITIVE(assoc);
-
+  ADD_PRIMITIVE(list_copy);
+ 
   ADD_PRIMITIVE(pair_mutable);
   ADD_PRIMITIVE(list_star);
-  ADD_PRIMITIVE(copy_tree);
   ADD_PRIMITIVE(last_pair);
   ADD_PRIMITIVE(filter);
   ADD_PRIMITIVE(dfilter);
