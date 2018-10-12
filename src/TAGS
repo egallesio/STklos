@@ -1,0 +1,1961 @@
+
+misc.c,889
+int STk_interactive_debug 33,1149
+static void error_bad_string(37,1189
+char *STk_strdup(STk_strdup43,1268
+void STk_add_primitive(54,1451
+void STk_add_primitive_in_module(62,1610
+SCM STk_eval_C_string(73,1783
+SCM STk_read_from_C_string(83,2067
+DEFINE_PRIMITIVE(103,2615
+DEFINE_PRIMITIVE(108,2710
+DEFINE_PRIMITIVE(123,2990
+DEFINE_PRIMITIVE(136,3191
+static void stklos_GC_warning(150,3620
+void STk_gc_init(161,3832
+DEFINE_PRIMITIVE(175,4001
+static int Argc;187,4294
+static char * optstring;188,4311
+static char **Argv;Argv189,4336
+static struct option *long_options;long_options190,4356
+DEFINE_PRIMITIVE(193,4394
+DEFINE_PRIMITIVE(249,6088
+DEFINE_PRIMITIVE(333,8747
+DEFINE_PRIMITIVE(453,12426
+DEFINE_PRIMITIVE(518,13823
+#define BACKTRACE_SIZE 539,14290
+DEFINE_PRIMITIVE(541,14319
+DEFINE_PRIMITIVE(548,14499
+DEFINE_PRIMITIVE(554,14620
+int STk_init_misc(574,15143
+
+print.c,581
+static int pretty_quotes 30,1048
+static void printlist(33,1080
+static void Inline printsymbol(63,1726
+static void Inline printkeyword(75,2135
+static Inline char printhexa(91,2534
+static void printstring(97,2625
+void STk_print(157,4674
+static SCM cycles 294,8485
+static int index_label 295,8520
+static void print_cycle(301,8701
+static void printlist_star(317,9022
+static void printvector_star(355,9904
+static void pass1(368,10172
+static void pass2(397,10888
+void STk_print_star(418,11479
+static SCM write_pretty_quotes_conv(451,12380
+int STk_init_printer(462,12728
+
+stklos.c,602
+#define ADD_OPTION(32,1062
+#define ADD_BOOL_OPTION(37,1194
+#define ADD_INT_OPTION(42,1314
+static char *boot_file boot_file55,1622
+static char *program_file program_file56,1654
+static char *load_file load_file57,1686
+static char *conf_dir	conf_dir58,1718
+static char *sexpr sexpr59,1748
+static int  vanilla	60,1780
+static int  stack_size 61,1807
+static int  debug_mode 62,1855
+static int  line_editor 63,1886
+static struct option long_options 65,1918
+static void Usage(84,2667
+static int process_program_arguments(110,3972
+static void  build_scheme_args(143,5092
+int main(167,5875
+
+sport.c,1419
+static void error_bad_string(35,1231
+static void error_bad_bytevector(40,1305
+#define START_ALLOC_SIZE 51,1577
+struct sstream 53,1653
+  char *ptr;ptr54,1670
+  char *base;base55,1683
+  char *end;end56,1697
+  int  bufsize;57,1710
+  SCM  str;58,1726
+#define PORT_BASE(61,1803
+#define PORT_PTR(62,1860
+#define PORT_END(63,1916
+#define PORT_BUFSIZE(64,1972
+#define PORT_STR(65,2032
+static Inline int Sgetc(67,2089
+static Inline int Seof(74,2231
+static Inline int Sreadyp(79,2323
+static Inline int Sclose(84,2392
+static Inline int Sread(89,2449
+static Inline int Sputc(101,2716
+static Inline int Swrite(122,3330
+static Inline int Sputs(140,3885
+static Inline int Sputstring(145,3976
+static Inline int Snputs(150,4089
+static Inline int Sflush(155,4184
+static off_t Sseek(161,4241
+static void sport_print(186,4689
+static void sport_release(199,5111
+enum kind_port 212,5380
+enum kind_port {PREAD_C,PREAD_C212,5380
+enum kind_port {PREAD_C, PREAD,212,5380
+enum kind_port {PREAD_C, PREAD, PWRITE}PWRITE212,5380
+make_sport(215,5447
+make_bport(282,7596
+SCM STk_open_C_string(343,9417
+DEFINE_PRIMITIVE(358,9734
+DEFINE_PRIMITIVE(374,10155
+DEFINE_PRIMITIVE(389,10569
+DEFINE_PRIMITIVE(403,10963
+DEFINE_PRIMITIVE(425,11507
+DEFINE_PRIMITIVE(452,12144
+DEFINE_PRIMITIVE(474,12672
+DEFINE_PRIMITIVE(479,12793
+DEFINE_PRIMITIVE(493,13170
+DEFINE_PRIMITIVE(498,13299
+int STk_init_sport(504,13429
+
+fport.c,1996
+int STk_interactive 37,1377
+SCM STk_stdin,38,1452
+SCM STk_stdin, STk_stdout,38,1452
+SCM STk_stdin, STk_stdout, STk_stderr;38,1452
+#define MAKE_FAKE_POINTER(50,1856
+#define GET_FAKE_POINTER(51,1927
+static struct port_list 53,1999
+  SCM port;54,2025
+  struct port_list *next;next55,2037
+} *all_file_ports all_file_ports56,2063
+static void nop_release_port(59,2091
+static void register_port(67,2319
+static void unregister_port(79,2613
+void STk_close_all_ports(96,3003
+static void fill_buffer(124,3764
+static int flush_buffer(152,4463
+static Inline int Feof(176,4986
+static Inline int Freadyp(182,5077
+static Inline int Fgetc(198,5448
+static Inline int Fread(220,5900
+static int Fclose(249,6657
+static int Fclose_pipe(256,6810
+static off_t Fseek(264,6990
+static Inline int Fputc(270,7104
+static Inline int Fwrite(294,7587
+static Inline int Fnputs(310,7990
+static Inline int Fputs(350,8916
+static Inline int Fputstring(355,9007
+static int Inline Fflush(361,9121
+static void fport_print(367,9247
+static void fport_finalizer(379,9596
+make_fport(388,9773
+static char *convert_for_win32(convert_for_win32460,11849
+static SCM open_file_port(483,12519
+SCM STk_fd2scheme_port(523,13547
+SCM STk_open_file(539,13906
+SCM STk_add_port_idle(555,14338
+void STk_set_line_buffered_mode(562,14535
+DEFINE_PRIMITIVE(593,15471
+DEFINE_PRIMITIVE(599,15683
+DEFINE_PRIMITIVE(619,16451
+DEFINE_PRIMITIVE(625,16666
+DEFINE_PRIMITIVE(641,17108
+DEFINE_PRIMITIVE(647,17222
+DEFINE_PRIMITIVE(685,18610
+DEFINE_PRIMITIVE(712,19380
+DEFINE_PRIMITIVE(719,19550
+DEFINE_PRIMITIVE(725,19696
+#define FILE_IS_SOURCE 743,20329
+#define FILE_IS_BCODE 744,20363
+#define FILE_IS_OBJECT 745,20397
+#define FILE_IS_DIRECTORY 746,20431
+#define FILE_DOES_NOT_EXISTS 747,20465
+static int find_file_nature(749,20500
+SCM STk_load_source_file(771,20937
+static SCM load_file(794,21561
+DEFINE_PRIMITIVE(830,22717
+DEFINE_PRIMITIVE(850,23317
+DEFINE_PRIMITIVE(858,23484
+int STk_init_fport(892,24444
+
+symbol.c,402
+static struct hash_table_obj obarray;33,1079
+static char valid_symbol_chars[valid_symbol_chars34,1117
+static void error_bad_string(40,1235
+int STk_symbol_flags(45,1313
+SCM STk_make_uninterned_symbol(62,1610
+SCM STk_intern(72,1783
+SCM STk_intern_ci(87,2038
+DEFINE_PRIMITIVE(123,2974
+DEFINE_PRIMITIVE(166,4383
+DEFINE_PRIMITIVE(203,5557
+DEFINE_PRIMITIVE(227,6240
+int STk_init_symbol(233,6437
+
+mutex-common.c,735
+SCM STk_sym_not_owned,39,1309
+SCM STk_sym_not_owned, STk_sym_abandoned,39,1309
+SCM STk_sym_not_owned, STk_sym_abandoned, STk_sym_not_abandoned;39,1309
+void STk_error_bad_mutex(41,1375
+void STk_error_deadlock(46,1448
+DEFINE_PRIMITIVE(64,1955
+DEFINE_PRIMITIVE(86,2341
+DEFINE_PRIMITIVE(101,2592
+DEFINE_PRIMITIVE(114,2851
+DEFINE_PRIMITIVE(147,3778
+void STk_error_bad_condv(161,4172
+DEFINE_PRIMITIVE(178,4643
+DEFINE_PRIMITIVE(199,5021
+DEFINE_PRIMITIVE(211,5269
+DEFINE_PRIMITIVE(225,5588
+DEFINE_PRIMITIVE(239,5928
+static void print_mutex(251,6319
+static void print_condv(258,6480
+static struct extended_type_descr xtype_mutex 267,6705
+static struct extended_type_descr xtype_condv 273,6905
+int STk_init_mutexes(279,7056
+
+ffi.c,2076
+struct ext_func_obj 36,1159
+  stk_header header;37,1181
+  SCM name;38,1202
+  SCM params;39,1214
+  SCM rettype;40,1228
+  SCM libname;41,1243
+  void * code;42,1258
+  ffi_cif cif;43,1273
+  ffi_type **cif_arg_types;cif_arg_types44,1288
+union any 47,1320
+  unsigned char  cvalue;48,1332
+  short          svalue;49,1357
+  unsigned short usvalue;50,1382
+  int 	         ivalue;51,1408
+  unsigned int   uivalue;52,1432
+  long 	         lvalue;53,1458
+  unsigned long  ulvalue;54,1483
+  long long      evalue;55,1509
+  float          fvalue;56,1534
+  double         dvalue;57,1559
+  void *         pvalue;58,1584
+#define EXTFUNC_NAME(61,1613
+#define EXTFUNC_PARAMS(62,1676
+#define EXTFUNC_RETTYPE(63,1742
+#define EXTFUNC_LIBNAME(64,1810
+#define EXTFUNC_CODE(65,1878
+#define EXTFUNC_CIF(66,1941
+#define EXTFUNC_CIF_ARGS(67,2002
+#define EXTFUNCP(70,2079
+struct callback_obj 76,2231
+  stk_header header;77,2253
+  SCM proc;78,2274
+  SCM types;79,2286
+  SCM data;80,2299
+#define CALLBACK_PROC(83,2315
+#define CALLBACK_TYPES(84,2378
+#define CALLBACK_DATA(85,2443
+#define CALLBACKP(87,2507
+static SCM pointer_on_exec_callback;90,2565
+static void error_bad_cpointer(94,2681
+static void error_bad_type_number(99,2771
+static void error_bad_string(104,2859
+#define EXT_FUNC_MAX_TYPE 123,3296
+#define EXT_FUNC_MAX_PARAMS 124,3356
+static ffi_type* conversion[conversion126,3435
+static ffi_type* convert(150,4178
+static void scheme2c(164,4520
+static SCM c2scheme(254,6931
+SCM STk_ext_func_name(306,8715
+DEFINE_PRIMITIVE(315,8967
+SCM STk_call_ext_function(365,10449
+DEFINE_PRIMITIVE(401,11415
+#define MAX_ARGS_CALLBACK 427,12352
+static int exec_callback(429,12382
+static int exec_callback(503,14886
+DEFINE_PRIMITIVE(525,15415
+DEFINE_PRIMITIVE(535,15720
+DEFINE_PRIMITIVE(549,16108
+DEFINE_PRIMITIVE(615,18281
+static void error_no_ffi(692,20651
+DEFINE_PRIMITIVE(698,20740
+DEFINE_PRIMITIVE(702,20871
+DEFINE_PRIMITIVE(705,20990
+DEFINE_PRIMITIVE(709,21100
+DEFINE_PRIMITIVE(713,21232
+DEFINE_PRIMITIVE(717,21355
+int STk_init_ffi(726,21665
+
+fixnum.c,396
+static void error_bad_fixnum(29,993
+static void error_division_by_0(34,1071
+DEFINE_PRIMITIVE(48,1280
+DEFINE_PRIMITIVE(60,1492
+DEFINE_PRIMITIVE(74,1781
+DEFINE_PRIMITIVE(79,1880
+DEFINE_PRIMITIVE(100,2395
+DEFINE_PRIMITIVE(107,2581
+DEFINE_PRIMITIVE(116,2815
+DEFINE_PRIMITIVE(123,3001
+DEFINE_PRIMITIVE(136,3242
+DEFINE_PRIMITIVE(150,3484
+#define SIMPLE_COMP(183,4168
+SIMPLE_COMP(191,4419
+
+signal.c,313
+struct signal_info 32,1028
+  char *name;name33,1049
+  int value;34,1063
+static struct signal_info signal_set[signal_set38,1081
+static void sigint(118,2520
+static void sigsegv(123,2590
+static void sighup(133,2826
+int STk_get_signal_value(141,2972
+DEFINE_PRIMITIVE(158,3326
+int STk_init_signal(188,3987
+
+process.c,1434
+static char *stdStreams[stdStreams43,1343
+#define MAX_PROC_NUM 50,1446
+struct process_obj 52,1526
+  stk_header header;53,1547
+  int pid;54,1568
+  SCM streams[streams55,1617
+  int exited;56,1686
+  int exit_status;57,1746
+  int waited_on;58,1813
+#define PROCESS_PID(63,1956
+#define PROCESS_STREAMS(64,2024
+#define PROCESS_EXITED(65,2096
+#define PROCESS_STATUS(66,2167
+#define PROCESS_WAITED(67,2243
+#define PROCESSP(68,2317
+static SCM all_processes 70,2383
+#  define USE_SIGCHLD 73,2459
+#  define PURGE_PROCESS_TABLE(77,2544
+#  define PURGE_PROCESS_TABLE(79,2630
+static void error_bad_process(86,2837
+static int process_alivep(92,2920
+static void process_terminate_handler(120,3698
+static SCM make_process(146,4547
+static void close_all_files(161,4814
+static int same_files(171,5000
+static int is_pipe_p(181,5206
+static char *maybe_redirect_input(maybe_redirect_input187,5311
+static char *maybe_redirect_output(maybe_redirect_output218,6082
+DEFINE_PRIMITIVE(263,7414
+DEFINE_PRIMITIVE(396,12021
+DEFINE_PRIMITIVE(551,16682
+DEFINE_PRIMITIVE(563,16925
+DEFINE_PRIMITIVE(578,17239
+DEFINE_PRIMITIVE(592,17536
+DEFINE_PRIMITIVE(613,18121
+DEFINE_PRIMITIVE(619,18274
+DEFINE_PRIMITIVE(625,18429
+DEFINE_PRIMITIVE(641,18813
+DEFINE_PRIMITIVE(673,19502
+DEFINE_PRIMITIVE(716,20614
+static void print_process(730,20943
+static struct extended_type_descr xtype_process 740,21106
+int STk_init_process(747,21193
+
+hash.c,1190
+#define RANDOM_INDEX(54,2185
+#define HASH_WORD(57,2284
+static unsigned long hash_string(67,2584
+static unsigned long hash_scheme_string(94,3579
+static unsigned long sxhash(114,4016
+#define _MAX_COUNT 155,5506
+static void hash_stats(157,5528
+static void enlarge_table(197,6662
+void STk_hashtable_init(265,8499
+static Inline SCM hash_get_symbol(294,9459
+SCM STk_hash_intern_symbol(307,9750
+SCM STk_hash_get_variable(337,10637
+void STk_hash_set_variable(351,10952
+void STk_hash_set_alias(376,11570
+SCM STk_hash_keys(406,12341
+static void error_bad_hash_table(428,12861
+static void error_bad_procedure(434,12948
+static void error_not_present(439,13032
+DEFINE_PRIMITIVE(445,13151
+DEFINE_PRIMITIVE(482,14116
+DEFINE_PRIMITIVE(495,14332
+DEFINE_PRIMITIVE(508,14647
+DEFINE_PRIMITIVE(523,14952
+DEFINE_PRIMITIVE(540,15321
+static SCM Inline hash_table_search(612,17579
+DEFINE_PRIMITIVE(648,18509
+DEFINE_PRIMITIVE(668,18966
+DEFINE_PRIMITIVE(687,19394
+DEFINE_PRIMITIVE(710,19980
+DEFINE_PRIMITIVE(782,22055
+DEFINE_PRIMITIVE(819,23211
+DEFINE_PRIMITIVE(851,24034
+DEFINE_PRIMITIVE(870,24628
+static struct extended_type_descr xtype_hash 887,25120
+int STk_init_hash(889,25192
+
+cpointer.c,353
+static void error_bad_cpointer(30,1045
+SCM STk_make_Cpointer(36,1136
+DEFINE_PRIMITIVE(48,1323
+DEFINE_PRIMITIVE(53,1426
+DEFINE_PRIMITIVE(59,1576
+DEFINE_PRIMITIVE(65,1726
+DEFINE_PRIMITIVE(72,1912
+DEFINE_PRIMITIVE(80,2099
+#define ALLOCATED_WITH_BOEHM_GC 96,2555
+DEFINE_PRIMITIVE(98,2593
+DEFINE_PRIMITIVE(117,2983
+int STk_init_cpointer(135,3304
+
+regexp.c,995
+#  define PCRE_regexec 35,1136
+#  define PCRE_regcomp 36,1168
+#  define PCRE_regerror 37,1200
+#  define PCRE_regfree 38,1233
+#  define regexec 40,1271
+#  define regcomp 41,1303
+#  define regerror 42,1335
+#  define regfree 43,1368
+#  define PCRE_COMP_FLAG 65,2132
+#  define PCRE_COMP_FLAG 67,2172
+struct regexp_obj 73,2286
+  stk_header header;74,2306
+  SCM src;75,2327
+  regex_t buffer;76,2338
+#define REGEXPP(79,2360
+#define REGEXP_SRC(80,2413
+#define REGEXP_BUFFER(81,2471
+#define REGEXP_DEPTH(82,2534
+static void error_bad_string(85,2608
+static void signal_regexp_error(91,2687
+static void regexp_finalizer(106,3076
+static void print_regexp(111,3154
+DEFINE_PRIMITIVE(132,3812
+DEFINE_PRIMITIVE(158,4373
+#define MAX_PMATCH 199,5932
+static SCM regexec_helper(201,5955
+DEFINE_PRIMITIVE(257,7347
+DEFINE_PRIMITIVE(262,7462
+#define REGEXP_SPECIALS 283,8070
+DEFINE_PRIMITIVE(284,8110
+static struct extended_type_descr xtype_regexp 321,9020
+int STk_init_regexp(327,9139
+
+vm.c,5528
+#  define DEBUG_VM41,1207
+static int couple_instr[couple_instr42,1226
+static int cpt_inst[cpt_inst43,1277
+static int debug_level 47,1335
+#  define USE_COMPUTED_GOTO53,1521
+#  define CASE(54,1549
+#  define NEXT 55,1582
+#  define CASE(58,1706
+#  define NEXT 59,1738
+#define NEXT0 62,1823
+#define NEXT1 63,1889
+#  define FLUSH_REGISTERS_WINDOW(67,1950
+#  define FLUSH_REGISTERS_WINDOW(69,2040
+#define MY_SETJMP(73,2084
+#define MY_LONGJMP(74,2163
+static Inline sigset_t get_signal_mask(77,2220
+static Inline void set_signal_mask(86,2365
+static void error_unbound_variable(91,2461
+#define push(104,2815
+#define pop(105,2861
+#define IS_IN_STACKP(107,2924
+#define fetch_next(111,3098
+#define fetch_const(112,3136
+#define look_const(113,3190
+#define fetch_global(114,3241
+vm_thread_t *STk_allocate_vm(STk_allocate_vm123,3522
+#define ACT_RECORD_SIZE 157,4398
+#define ACT_VARARG(159,4428
+#define ACT_SAVE_ENV(160,4506
+#define ACT_SAVE_PC(161,4544
+#define ACT_SAVE_CST(162,4582
+#define ACT_SAVE_FP(163,4620
+#define ACT_SAVE_PROC(164,4658
+#define ACT_SAVE_INFO(165,4696
+#define VM_STATE_SIZE 171,4757
+#define VM_STATE_PC(172,4781
+#define VM_STATE_CST(173,4824
+#define VM_STATE_ENV(174,4867
+#define VM_STATE_FP(175,4910
+#define VM_STATE_JUMP_BUF(176,4953
+#define SAVE_VM_STATE(178,4997
+#define FULL_RESTORE_VM_STATE(187,5406
+#define RESTORE_VM_STATE(192,5607
+#define EXCEPTION_HANDLER_SIZE 206,6095
+#define HANDLER_PROC(208,6129
+#define HANDLER_END(209,6172
+#define HANDLER_PREV(210,6215
+#define SAVE_HANDLER_STATE(213,6260
+#define UNSAVE_HANDLER_STATE(221,6611
+#define PREP_CALL(235,7106
+#define RET_CALL(248,7690
+#define CHECK_GLOBAL_INIT_SIZE 261,8085
+static SCM** checked_globals;262,8120
+static int   checked_globals_len 263,8150
+static int   checked_globals_used 264,8210
+#define FIRST_BYTE(269,8325
+#define SECOND_BYTE(270,8359
+#define PUSH_ENV(275,8399
+#define CALL_CLOSURE(282,8652
+#define CALL_PRIM(288,8855
+#define REG_CALL_PRIM(293,9008
+#define RETURN_FROM_PRIMITIVE(299,9194
+void STk_print_vm_registers(314,9611
+static Inline SCM listify_top(332,10255
+static Inline SCM clone_env(342,10431
+static void verif_environment(352,10689
+static void patch_environment(373,11249
+static void error_bad_arity(391,11620
+static Inline short adjust_arity(403,12030
+static int add_global(429,12741
+DEFINE_PRIMITIVE(478,14030
+SCM STk_C_apply(502,14930
+SCM STk_C_apply_list(538,15967
+DEFINE_PRIMITIVE(554,16262
+DEFINE_PRIMITIVE(601,17629
+DEFINE_PRIMITIVE(643,18766
+SCM STk_n_values(666,19357
+SCM STk_values2vector(697,19928
+static void vm_debug(744,21114
+DEFINE_PRIMITIVE(765,21602
+#    define DEFINE_NAME_TABLE786,22006
+static void dump_couple_instr(789,22063
+DEFINE_PRIMITIVE(811,22540
+#define LOCK_AND_RESTART 881,24914
+#define RELEASE_LOCK 889,25219
+#define RELEASE_POSSIBLE_LOCK 895,25425
+static void run_vm(901,25630
+#  define DEFINE_JUMP_TABLE909,25875
+#    define DEFINE_NAME_TABLE915,25979
+CASE(1000,28320
+CASE(1010,28576
+CASE(1033,29002
+CASE(1042,29190
+CASE(1071,29869
+CASE(1085,30188
+CASE(1115,30912
+CASE(1130,31238
+CASE(1131,31307
+CASE(1132,31376
+CASE(1133,31445
+CASE(1134,31514
+CASE(1135,31583
+CASE(1136,31656
+CASE(1148,31914
+CASE(1166,32376
+CASE(1180,32645
+CASE(1181,32708
+CASE(1182,32771
+CASE(1183,32834
+CASE(1184,32897
+CASE(1186,32961
+CASE(1207,33377
+CASE(1214,33561
+CASE(1215,33633
+CASE(1216,33705
+CASE(1217,33777
+CASE(1218,33849
+CASE(1219,33921
+CASE(1222,33995
+CASE(1235,34254
+CASE(1254,34716
+CASE(1255,34777
+CASE(1260,34877
+CASE(1266,34977
+CASE(1269,35082
+CASE(1272,35184
+CASE(1275,35286
+CASE(1278,35388
+CASE(1281,35490
+CASE(1284,35592
+CASE(1287,35687
+CASE(1292,35807
+CASE(1299,35931
+CASE(1312,36201
+CASE(1319,36285
+CASE(1320,36327
+CASE(1322,36369
+CASE(1325,36423
+CASE(1333,36724
+CASE(1346,37140
+CASE(1347,37182
+CASE(1348,37224
+CASE(1353,37303
+CASE(1359,37382
+CASE(1361,37444
+CASE(1372,37725
+CASE(1382,37995
+CASE(1390,38129
+CASE(1399,38315
+CASE(1428,39116
+CASE(1451,39609
+CASE(1456,39735
+CASE(1464,39849
+CASE(1483,40508
+CASE(1491,40637
+CASE(1495,40670
+#define SCHEME_NOT(1536,41353
+CASE(1539,41420
+CASE(1541,41521
+CASE(1543,41628
+CASE(1545,41739
+CASE(1548,41845
+CASE(1550,41952
+CASE(1552,42061
+CASE(1554,42168
+CASE(1558,42275
+CASE(1560,42399
+CASE(1562,42529
+CASE(1564,42663
+CASE(1568,42793
+CASE(1570,42923
+CASE(1572,43055
+CASE(1574,43185
+CASE(1578,43315
+CASE(1580,43438
+CASE(1582,43561
+CASE(1584,43684
+CASE(1586,43807
+CASE(1588,43930
+CASE(1591,44054
+CASE(1593,44161
+CASE(1596,44275
+CASE(1597,44358
+CASE(1598,44441
+CASE(1599,44524
+CASE(1600,44607
+CASE(1601,44690
+CASE(1603,44774
+CASE(1604,44857
+CASE(1605,44940
+CASE(1607,45024
+CASE(1608,45108
+CASE(1609,45192
+CASE(1611,45277
+CASE(1616,45377
+CASE(1621,45477
+CASE(1627,45597
+CASE(1634,45718
+void STk_raise_exception(1859,53247
+DEFINE_PRIMITIVE(1905,54374
+void STk_get_stack_pointer(1921,54822
+DEFINE_PRIMITIVE(1927,54900
+#define CALL_CC_SPACE 1999,56943
+static void restore_cont_jump(2004,57105
+DEFINE_PRIMITIVE(2026,57719
+DEFINE_PRIMITIVE(2059,58500
+DEFINE_PRIMITIVE(2064,58608
+static void print_continuation(2070,58775
+static struct extended_type_descr xtype_continuation 2078,59044
+static int system_has_booted 2090,59426
+DEFINE_PRIMITIVE(2095,59518
+static Inline STk_instr* read_code(2125,60232
+SCM STk_load_bcode_file(2148,60744
+int STk_load_boot(2186,61842
+int STk_boot_from_C(2205,62242
+SCM STk_execute_C_bytecode(2225,62623
+int STk_init_vm(2247,63196
+
+struct.c,902
+static void error_bad_type(31,1036
+static void error_bad_struct(36,1120
+static void error_bad_slot(41,1201
+SCM STk_int_struct_ref(47,1304
+SCM STk_int_struct_set(56,1536
+DEFINE_PRIMITIVE(89,2540
+DEFINE_PRIMITIVE(136,3776
+DEFINE_PRIMITIVE(155,4236
+DEFINE_PRIMITIVE(175,4675
+DEFINE_PRIMITIVE(188,4967
+DEFINE_PRIMITIVE(223,6131
+static char *get_struct_type_name(get_struct_type_name240,6534
+static void print_struct_type(250,6727
+DEFINE_PRIMITIVE(279,7526
+DEFINE_PRIMITIVE(313,8337
+DEFINE_PRIMITIVE(326,8540
+DEFINE_PRIMITIVE(347,9076
+DEFINE_PRIMITIVE(370,9616
+static SCM is_a(397,10412
+DEFINE_PRIMITIVE(409,10629
+DEFINE_PRIMITIVE(431,11218
+DEFINE_PRIMITIVE(453,11660
+DEFINE_PRIMITIVE(464,11972
+static void print_struct(478,12340
+static struct extended_type_descr xtype_struct_type 501,13004
+static struct extended_type_descr xtype_struct 506,13101
+int STk_init_struct(512,13184
+
+boot.c,63
+char* STk_boot_consts 9,182
+STk_instr STk_boot_code 11,32030
+
+path.c,219
+static char *tilde_expand(tilde_expand42,1326
+static void absolute(90,2418
+#define MAXLINK 149,4147
+SCM STk_resolve_link(151,4224
+char *STk_expand_file_name(STk_expand_file_name206,5588
+SCM STk_do_glob(227,6137
+
+dynload.c,545
+#define INIT_FUNC_NAME 30,1010
+#define INFO_FUNC_NAME 31,1051
+#define INIT_FUNC_NAME_STRING(33,1093
+#     define FLAG1 39,1190
+#     define FLAG1 41,1227
+#    define FLAG2 45,1279
+#    define FLAG2 47,1317
+#  define DYN_FLAG 50,1347
+typedef void (*InitFunc)InitFunc52,1381
+typedef SCM  (*InfoFunc)InfoFunc53,1413
+static SCM files_already_loaded 57,1448
+static void initialize_dynload(61,1521
+void *STk_find_external_function(STk_find_external_function74,1851
+SCM STk_load_object_file(111,2955
+SCM STk_info_object_file(123,3196
+
+stklosconf.h.in,2579
+#undef CRAY_STACKSEG_END6,232
+#undef C_ALLOCA9,297
+#undef HAVE_ALARM12,366
+#undef HAVE_ALLOCA15,449
+#undef HAVE_ALLOCA_H19,552
+#undef HAVE_ARPA_INET_H22,635
+#undef HAVE_ATEXIT25,713
+#undef HAVE_DLOPEN28,762
+#undef HAVE_DUP231,833
+#undef HAVE_ENDPWENT34,906
+#undef HAVE_FCNTL_H37,985
+#undef HAVE_FFI40,1032
+#undef HAVE_FLOOR43,1101
+#undef HAVE_FORK46,1171
+#undef HAVE_GC49,1209
+#undef HAVE_GETCWD52,1278
+#undef HAVE_GETHOSTBYADDR55,1358
+#undef HAVE_GETHOSTBYNAME58,1445
+#undef HAVE_GETHOSTNAME61,1530
+#undef HAVE_GETPASS64,1609
+#undef HAVE_GETTIMEOFDAY67,1689
+#undef HAVE_GLOB70,1766
+#undef HAVE_GMP73,1805
+#undef HAVE_INET_NTOA76,1878
+#undef HAVE_INTTYPES_H79,1961
+#undef HAVE_ISASCII82,2039
+#undef HAVE_LIMITS_H85,2118
+#undef HAVE_MALLOC89,2241
+#undef HAVE_MALLOC_H92,2319
+#undef HAVE_MEMCHR95,2394
+#undef HAVE_MEMMOVE98,2468
+#undef HAVE_MEMORY_H101,2547
+#undef HAVE_MEMSET104,2622
+#undef HAVE_MKDIR107,2694
+#undef HAVE_MODF110,2764
+#undef HAVE_NETDB_H113,2839
+#undef HAVE_NETINET_IN_H116,2922
+#undef HAVE_NLIST_H119,3005
+#undef HAVE_PCRE122,3059
+#undef HAVE_PUTENV125,3130
+#undef HAVE_REALLOC129,3252
+#undef HAVE_RMDIR132,3325
+#undef HAVE_SELECT135,3397
+#undef HAVE_SOCKET138,3470
+#undef HAVE_SQRT141,3541
+#undef HAVE_STDINT_H144,3617
+#undef HAVE_STDLIB_H147,3697
+#undef HAVE_STRCASECMP150,3776
+#undef HAVE_STRCHR153,3853
+#undef HAVE_STRCOLL157,3957
+#undef HAVE_STRERROR160,4033
+#undef HAVE_STRINGS_H163,4114
+#undef HAVE_STRING_H166,4195
+#undef HAVE_STRRCHR169,4271
+#undef HAVE_STRSTR172,4345
+#undef HAVE_STRTOUL175,4419
+#undef HAVE_SYSLOG_H178,4498
+#undef HAVE_SYS_PARAM_H181,4581
+#undef HAVE_SYS_SOCKET_H184,4668
+#undef HAVE_SYS_STAT_H187,4754
+#undef HAVE_SYS_TIME_H190,4838
+#undef HAVE_SYS_TYPES_H193,4923
+#undef HAVE_UNISTD_H196,5006
+#undef HAVE_VFORK199,5080
+#undef HAVE_VFORK_H202,5156
+#undef HAVE_WORKING_FORK205,5212
+#undef HAVE_WORKING_VFORK208,5274
+#undef LSTAT_FOLLOWS_SLASHED_SYMLINK212,5389
+#undef PACKAGE215,5449
+#undef PACKAGE_BUGREPORT218,5544
+#undef PACKAGE_NAME221,5617
+#undef PACKAGE_STRING224,5697
+#undef PACKAGE_TARNAME227,5779
+#undef PACKAGE_URL230,5851
+#undef PACKAGE_VERSION233,5916
+#undef STACK_DIRECTION241,6273
+#undef STDC_HEADERS244,6352
+#undef THREADS_NONE247,6397
+#undef THREADS_PTHREADS250,6440
+#undef TIME_WITH_SYS_TIME253,6541
+#undef VERSION256,6600
+#undef YYTEXT_POINTER260,6706
+#undef inline265,6895
+#undef malloc269,6988
+#undef mode_t272,7059
+#undef off_t275,7135
+#undef pid_t278,7205
+#undef realloc281,7291
+#undef size_t284,7372
+#undef vfork287,7436
+
+error.c,350
+static void print_int(50,1748
+static void print_format(57,1921
+void STk_signal_error(119,3996
+SCM STk_format_error(126,4143
+static SCM make_error_condition(144,4487
+SCM STk_make_error(167,5000
+void STk_error(183,5205
+void STk_warning(197,5404
+void STk_panic(215,5717
+void STk_signal(237,6104
+void STk_debug(247,6322
+void STk_gdb(263,6601
+
+mutex-pthreads.c,276
+static void mutex_finalizer(40,1314
+void STk_make_sys_mutex(47,1448
+DEFINE_PRIMITIVE(84,2524
+DEFINE_PRIMITIVE(140,4352
+DEFINE_PRIMITIVE(208,6662
+static void condv_finalizer(255,7998
+void STk_make_sys_condv(261,8090
+DEFINE_PRIMITIVE(280,8533
+DEFINE_PRIMITIVE(295,8963
+
+promise.c,431
+struct promise_obj 29,1067
+  stk_header header;30,1088
+  SCM expr;31,1109
+#define PFORCED 34,1125
+#define PROMISEP(36,1144
+#define PROMISE_EXPR(37,1200
+#define PROMISE_RESULT_READY(38,1264
+#define RESULT_READYP(40,1313
+DEFINE_PRIMITIVE(43,1370
+DEFINE_PRIMITIVE(98,3042
+DEFINE_PRIMITIVE(131,3818
+static void print_promise(139,3997
+static struct extended_type_descr xtype_promise 149,4222
+int STk_init_promise(155,4308
+
+vport.c,938
+struct vstream 29,1030
+  SCM port;30,1047
+  SCM getc,31,1126
+  SCM getc, readyp,31,1126
+  SCM getc, readyp, eofp;31,1126
+  SCM putc,32,1175
+  SCM putc, putstring,32,1175
+  SCM putc, putstring, flush;32,1175
+  SCM close;33,1225
+static void error_bad_vector(41,1453
+static void verify_proc(47,1573
+static void vport_print(56,1787
+static void vport_release(68,2116
+static int call_user_eofp(77,2368
+static int call_user_getc(90,2585
+static int call_user_ready(101,2841
+static int call_user_close(112,3049
+static int call_user_putc(128,3337
+static int call_user_putstring(146,3745
+static int call_user_flush(160,4065
+static int vport_read(173,4261
+static int vport_write(187,4488
+static off_t vport_seek(199,4707
+static int vport_nputs(205,4831
+static int vport_puts(214,5000
+DEFINE_PRIMITIVE(259,6639
+DEFINE_PRIMITIVE(353,10202
+DEFINE_PRIMITIVE(405,11845
+DEFINE_PRIMITIVE(410,11959
+int STk_init_vport(417,12153
+
+keyword.c,483
+static struct hash_table_obj keyword_table;29,1055
+static void error_bad_keyword(36,1336
+static void error_bad_list(41,1416
+static void error_const_cell(46,1502
+static SCM make_uninterned_keyword(51,1602
+SCM STk_makekey(62,1815
+DEFINE_PRIMITIVE(108,2857
+DEFINE_PRIMITIVE(136,3407
+DEFINE_PRIMITIVE(149,3652
+DEFINE_PRIMITIVE(177,4397
+DEFINE_PRIMITIVE(217,5495
+static SCM key_del(261,6826
+DEFINE_PRIMITIVE(293,7578
+DEFINE_PRIMITIVE(298,7679
+int STk_init_keyword(306,7877
+
+char.c,693
+struct charelem 34,1073
+  char *name;name35,1091
+  unsigned char value;36,1105
+static struct charelem chartable 39,1132
+  uint16_t ch;97,2461
+  uint16_t fold;98,2476
+} casefold_table 99,2493
+int STk_casefold_char(213,7113
+static int my_strcmpi(255,8109
+static void error_bad_char(263,8288
+static int charcomp(268,8355
+static int charcompi(276,8533
+int STk_string2char(288,8880
+char *STk_char2string(STk_char2string314,9507
+DEFINE_PRIMITIVE(332,9980
+#define CHAR_COMPARE(347,10266
+CHAR_COMPARE(373,11054
+#define TEST_CTYPE(404,12109
+DEFINE_PRIMITIVE(475,14871
+DEFINE_PRIMITIVE(506,15802
+DEFINE_PRIMITIVE(514,16026
+DEFINE_PRIMITIVE(532,16623
+int STk_init_char(541,16862
+
+thread-common.c,850
+SCM STk_primordial_thread 31,1098
+SCM STk_cond_thread_terminated;33,1133
+static SCM cond_thread_abandonned_mutex,34,1165
+static SCM cond_thread_abandonned_mutex, cond_join_timeout;34,1165
+void STk_error_bad_thread(37,1227
+double STk_verify_timeout(42,1302
+struct timeval STk_thread_abstime_to_reltime(50,1446
+DEFINE_PRIMITIVE(85,2165
+DEFINE_PRIMITIVE(91,2306
+DEFINE_PRIMITIVE(97,2460
+static SCM do_make_thread(110,2746
+DEFINE_PRIMITIVE(131,3161
+DEFINE_PRIMITIVE(162,3925
+DEFINE_PRIMITIVE(178,4201
+DEFINE_PRIMITIVE(192,4535
+DEFINE_PRIMITIVE(198,4702
+DEFINE_PRIMITIVE(204,4869
+DEFINE_PRIMITIVE(212,5089
+DEFINE_PRIMITIVE(218,5247
+DEFINE_PRIMITIVE(233,5582
+DEFINE_PRIMITIVE(253,6090
+DEFINE_PRIMITIVE(277,6707
+static void print_thread(307,7496
+static struct extended_type_descr xtype_thread 330,8130
+int STk_init_threads(337,8359
+
+system.c,2047
+#  define MAXBUFF 34,975
+#  define TIME_DIV_CONST 38,1019
+#  define TIME_DIV_CONST 40,1056
+static SCM exit_procs 44,1095
+static SCM date_type,45,1151
+static SCM date_type, time_type;45,1151
+static void error_bad_path(52,1365
+static void error_bad_string(57,1450
+static void error_bad_int_or_out_of_bounds(62,1535
+static void error_win32_primitive(67,1646
+static void error_posix(72,1752
+static SCM my_access(83,1998
+static int my_stat(89,2172
+static int my_lstat(95,2326
+int STk_dirp(103,2484
+DEFINE_PRIMITIVE(197,5048
+DEFINE_PRIMITIVE(228,5768
+DEFINE_PRIMITIVE(259,6505
+DEFINE_PRIMITIVE(276,6987
+DEFINE_PRIMITIVE(289,7263
+DEFINE_PRIMITIVE(310,7598
+DEFINE_PRIMITIVE(327,7895
+DEFINE_PRIMITIVE(348,8378
+DEFINE_PRIMITIVE(364,8737
+DEFINE_PRIMITIVE(378,9010
+DEFINE_PRIMITIVE(397,9595
+DEFINE_PRIMITIVE(406,9793
+DEFINE_PRIMITIVE(415,9987
+DEFINE_PRIMITIVE(421,10095
+DEFINE_PRIMITIVE(427,10203
+DEFINE_PRIMITIVE(442,10483
+DEFINE_PRIMITIVE(459,10827
+DEFINE_PRIMITIVE(502,12493
+#define do_remove(519,12868
+DEFINE_PRIMITIVE(525,13159
+DEFINE_PRIMITIVE(530,13255
+DEFINE_PRIMITIVE(544,13559
+DEFINE_PRIMITIVE(562,14077
+DEFINE_PRIMITIVE(595,14974
+DEFINE_PRIMITIVE(630,15917
+DEFINE_PRIMITIVE(678,17238
+DEFINE_PRIMITIVE(689,17513
+DEFINE_PRIMITIVE(717,18336
+DEFINE_PRIMITIVE(751,19262
+DEFINE_PRIMITIVE(778,19844
+DEFINE_PRIMITIVE(837,21381
+DEFINE_PRIMITIVE(856,21740
+DEFINE_PRIMITIVE(877,22313
+#define TAI_OFFSET 895,22848
+DEFINE_PRIMITIVE(897,22875
+DEFINE_PRIMITIVE(919,23472
+DEFINE_PRIMITIVE(944,24034
+DEFINE_PRIMITIVE(968,24460
+DEFINE_PRIMITIVE(1006,25408
+DEFINE_PRIMITIVE(1032,26100
+DEFINE_PRIMITIVE(1066,26908
+static SCM build_posix_environment(1099,27614
+DEFINE_PRIMITIVE(1114,27870
+DEFINE_PRIMITIVE(1137,28500
+DEFINE_PRIMITIVE(1159,29209
+DEFINE_PRIMITIVE(1178,29626
+DEFINE_PRIMITIVE(1193,29834
+DEFINE_PRIMITIVE(1208,29959
+DEFINE_PRIMITIVE(1213,30071
+DEFINE_PRIMITIVE(1218,30185
+DEFINE_PRIMITIVE(1223,30319
+DEFINE_PRIMITIVE(1234,30614
+DEFINE_PRIMITIVE(1243,30753
+int STk_init_system(1251,30909
+
+vector.c,802
+static void error_change_const_vector(36,1062
+static void error_bad_vector(41,1178
+static void error_bad_index(46,1252
+static void error_bad_length(51,1356
+static void error_bad_list(56,1451
+static SCM control_index(62,1522
+static SCM r5rs_vector_copy(116,3161
+SCM STk_makevect(130,3405
+DEFINE_PRIMITIVE(156,3885
+DEFINE_PRIMITIVE(172,4256
+DEFINE_PRIMITIVE(193,4683
+DEFINE_PRIMITIVE(212,5003
+DEFINE_PRIMITIVE(237,5596
+DEFINE_PRIMITIVE(266,6286
+DEFINE_PRIMITIVE(304,7449
+DEFINE_PRIMITIVE(323,7838
+DEFINE_PRIMITIVE(364,8808
+DEFINE_PRIMITIVE(389,9373
+DEFINE_PRIMITIVE(423,10217
+DEFINE_PRIMITIVE(456,10909
+DEFINE_PRIMITIVE(494,12012
+DEFINE_PRIMITIVE(518,12723
+static void print_vector(561,13988
+static struct extended_type_descr xtype_vector 575,14273
+int STk_init_vector(582,14357
+
+base64.c,322
+static char table[table24,768
+static char rev_table[rev_table27,860
+#define OutChar(38,1454
+static void error_bad_input_port(46,1608
+static void error_bad_output_port(51,1694
+static void encode(57,1783
+static void decode(87,2493
+DEFINE_PRIMITIVE(122,3219
+DEFINE_PRIMITIVE(143,3709
+int STk_init_base64(160,4155
+
+parameter.c,684
+struct parameter_obj 32,1030
+  stk_header header;33,1053
+  SCM value;34,1074
+  SCM converter;35,1087
+  SCM dynenv;36,1104
+  int C_type;37,1187
+#define PARAMETERP(42,1370
+#define PARAMETER_VALUE(43,1429
+#define PARAMETER_CONV(44,1496
+#define PARAMETER_C_TYPE(45,1566
+#define PARAMETER_DYNENV(46,1635
+static void error_bad_parameter(54,1886
+SCM STk_get_parameter(60,1971
+SCM STk_set_parameter(72,2288
+SCM STk_make_C_parameter(99,2922
+SCM STk_make_C_parameter2(117,3314
+DEFINE_PRIMITIVE(185,5212
+DEFINE_PRIMITIVE(212,5809
+DEFINE_PRIMITIVE(219,5917
+DEFINE_PRIMITIVE(228,6197
+static struct extended_type_descr xtype_parameter 253,6839
+int STk_init_parameter(255,6915
+
+sio.c,387
+STk_readyp(35,1096
+STk_getc(42,1214
+STk_get_character(61,1554
+STk_ungetc(76,1989
+STk_close(88,2233
+STk_putc(109,2704
+STk_put_character(118,2839
+STk_puts(142,3213
+STk_putstring(151,3351
+STk_nputs(161,3498
+STk_seek(171,3655
+STk_rewind(189,4197
+STk_tell(197,4308
+STk_flush(204,4362
+STk_feof(210,4437
+STk_read_buffer(216,4510
+STk_write_buffer(227,4711
+STk_fprintf(236,4882
+
+extend.c,158
+struct extended_type_descr *STk_xtypes[STk_xtypes33,1094
+static int user_extended_type 35,1160
+int STk_new_user_type(38,1212
+int STk_init_extend(51,1427
+
+gnu-getopt.c,1302
+# define _NO_PROTO44,1790
+#  define const55,2051
+#define GETOPT_BUF_SIZE 68,2315
+static int we_are_in_scheme 70,2344
+static void getopt_fprintf(72,2378
+#define fprintf 89,2754
+void STk_start_getopt_from_scheme(91,2786
+#define GETOPT_INTERFACE_VERSION 109,3508
+#  define ELIDE_CODE113,3691
+#  define _(141,4345
+#  define _(143,4387
+char *optarg;optarg170,5418
+int optind 185,5969
+int __getopt_initialized;191,6141
+static char *nextchar;nextchar200,6450
+int opterr 205,6564
+int optopt 211,6747
+  REQUIRE_ORDER,244,8171
+  REQUIRE_ORDER, PERMUTE,244,8171
+  REQUIRE_ORDER, PERMUTE, RETURN_IN_ORDER244,8171
+} ordering;245,8213
+static char *posixly_correct;posixly_correct248,8280
+# define my_index	256,8558
+my_index 273,8818
+static int first_nonopt;306,9773
+static int last_nonopt;307,9798
+static int nonoption_flags_max_len;316,10044
+static int nonoption_flags_len;317,10080
+static int original_argc;319,10113
+static char *const *original_argv;original_argv320,10139
+store_args_and_env 327,10406
+# define SWAP_FLAGS(338,10762
+# define SWAP_FLAGS(346,11078
+exchange 363,11662
+_getopt_initialize 448,14113
+_getopt_internal 570,18508
+# define NONOPTION_P 593,19254
+# define NONOPTION_P 597,19441
+getopt 1026,30226
+getopt_long 1049,30689
+getopt_long_only 1065,31192
+
+md5.c,704
+typedef unsigned char uint8;35,1128
+typedef unsigned int uint32;36,1157
+struct md5_context39,1188
+    uint32 total[total41,1209
+    uint32 state[state42,1230
+    uint8 buffer[buffer43,1251
+#define GET_UINT32(48,1279
+#define PUT_UINT32(56,1678
+static void md5_starts(64,2077
+static void md5_process(74,2306
+#define S(95,2967
+#define P(97,3027
+#define F(107,3297
+#undef F126,3992
+#define F(128,4002
+#undef F147,4697
+#define F(149,4707
+#undef F168,5394
+#define F(170,5404
+#undef F189,6094
+static void md5_update(197,6203
+static uint8 md5_padding[md5_padding234,7007
+static void md5_finish(242,7251
+#define MD5BUFSIZ 269,8029
+DEFINE_PRIMITIVE(279,8212
+int STk_init_md5(317,9147
+
+cond.c,1014
+static SCM root_condition,30,1112
+static SCM root_condition, location_condition,30,1112
+static SCM root_condition, location_condition, serious_condition,30,1112
+static SCM root_condition, location_condition, serious_condition, error_condition;30,1112
+SCM STk_message_condition;31,1195
+SCM STk_err_mess_condition;32,1222
+SCM STk_exit_condition;33,1250
+static void error_bad_type(35,1275
+static void error_bad_cond(40,1359
+static void initialize_cond(45,1438
+static SCM is_a(57,1823
+static SCM allocate_condition(87,2611
+DEFINE_PRIMITIVE(124,3531
+DEFINE_PRIMITIVE(151,4350
+DEFINE_PRIMITIVE(181,5117
+SCM STk_defcond_type(189,5401
+SCM STk_condition_type_is_a(200,5666
+DEFINE_PRIMITIVE(217,6112
+DEFINE_PRIMITIVE(242,6909
+DEFINE_PRIMITIVE(284,7932
+DEFINE_PRIMITIVE(302,8402
+DEFINE_PRIMITIVE(349,9735
+DEFINE_PRIMITIVE(369,10380
+DEFINE_PRIMITIVE(396,11239
+DEFINE_PRIMITIVE(425,12079
+DEFINE_PRIMITIVE(467,13255
+SCM STk_make_C_cond(473,13358
+#define DEFVAR(493,13766
+int STk_init_cond(495,13839
+
+uvector.c,1288
+int STk_uvectors_allowed 29,1041
+static SCM u64_max,30,1071
+static SCM u64_max, s64_min,30,1071
+static SCM u64_max, s64_min, s64_max;30,1071
+static char* type_vector(38,1135
+static void error_change_const_vector(56,1585
+static void error_bad_vector(61,1701
+static void error_bad_uvector(66,1775
+static void error_bad_index(71,1881
+static void error_bad_length(76,1985
+static void error_bad_uniform_type(81,2080
+static void error_bad_list(86,2186
+static int vector_element_size(92,2257
+static SCM control_index(114,3071
+int STk_uniform_vector_tag(170,4781
+int STk_uvector_equal(183,5033
+static void uvector_set(199,5424
+static SCM uvector_ref(282,7747
+static SCM makeuvect(308,8613
+SCM STk_list2uvector(340,9746
+DEFINE_PRIMITIVE(362,10282
+DEFINE_PRIMITIVE(373,10618
+DEFINE_PRIMITIVE(379,10798
+DEFINE_PRIMITIVE(387,11022
+DEFINE_PRIMITIVE(397,11334
+DEFINE_PRIMITIVE(409,11756
+DEFINE_PRIMITIVE(425,12302
+DEFINE_PRIMITIVE(444,12855
+DEFINE_PRIMITIVE(452,13080
+static void print_uvector(475,13700
+static struct extended_type_descr xtype_uvector 490,14041
+SCM STk_make_C_bytevector(501,14522
+SCM STk_make_bytevector_from_C_string(506,14603
+DEFINE_PRIMITIVE(528,15122
+DEFINE_PRIMITIVE(554,15802
+DEFINE_PRIMITIVE(604,17302
+int STk_init_uniform_vector(630,18116
+
+boolean.c,165
+DEFINE_PRIMITIVE(32,1150
+DEFINE_PRIMITIVE(54,1569
+DEFINE_PRIMITIVE(174,4831
+DEFINE_PRIMITIVE(268,7775
+DEFINE_PRIMITIVE(295,8547
+int STk_init_boolean(361,10245
+
+box.c,220
+static void error_bad_box(30,1023
+DEFINE_PRIMITIVE(47,1303
+DEFINE_PRIMITIVE(64,1557
+DEFINE_PRIMITIVE(82,1809
+DEFINE_PRIMITIVE(95,2008
+DEFINE_PRIMITIVE(109,2276
+DEFINE_PRIMITIVE(124,2504
+int STk_init_box(133,2720
+
+env.c,1494
+static void error_bad_module_name(33,1084
+static void error_bad_module(38,1172
+static void error_not_exist(43,1250
+static void error_bad_list(48,1348
+static void error_unbound_variable(53,1422
+static void error_bad_symbol(58,1518
+struct module_obj 69,1815
+  stk_header header;70,1835
+  SCM name;71,1856
+  SCM exported_symbols;72,1906
+  SCM imports;73,1973
+  struct hash_table_obj hash;74,2028
+#define MODULE_NAME(78,2097
+#define MODULE_EXPORTS(79,2165
+#define MODULE_IMPORTS(80,2245
+#define MODULE_HASH_TABLE(81,2316
+#define VISIBLE_P(83,2385
+SCM STk_STklos_module;87,2546
+static SCM all_modules;88,2616
+static void print_module(90,2681
+static SCM STk_makemodule(98,2848
+static SCM find_module(118,3345
+DEFINE_PRIMITIVE(141,3942
+DEFINE_PRIMITIVE(147,4101
+DEFINE_PRIMITIVE(156,4319
+DEFINE_PRIMITIVE(170,4718
+DEFINE_PRIMITIVE(193,5264
+DEFINE_PRIMITIVE(209,5708
+DEFINE_PRIMITIVE(237,6289
+DEFINE_PRIMITIVE(255,6629
+DEFINE_PRIMITIVE(269,6909
+DEFINE_PRIMITIVE(285,7338
+DEFINE_PRIMITIVE(303,7810
+DEFINE_PRIMITIVE(316,8090
+DEFINE_PRIMITIVE(332,8480
+DEFINE_PRIMITIVE(351,8938
+#define FRAME_ALLOC_BYTES(384,9995
+SCM STk_make_frame(386,10078
+SCM STk_clone_frame(395,10212
+void STk_define_variable(406,10441
+DEFINE_PRIMITIVE(412,10575
+DEFINE_PRIMITIVE(422,10854
+SCM STk_lookup(448,11595
+static struct extended_type_descr xtype_module 488,12712
+static struct extended_type_descr xtype_frame 497,12916
+int STk_init_env(503,13067
+int STk_late_init_env(516,13384
+
+object.c,3778
+#define GF_VAL(31,1044
+#define CALL_GF1(33,1145
+#define CALL_GF2(34,1206
+#define CALL_GF3(35,1274
+#define CALL_GF4(36,1349
+#define CLASS_REDEF(38,1432
+#define CLASSP(41,1484
+#define GENERICP(42,1555
+#define METHODP(43,1634
+#define SPEC_OF(46,1714
+static SCM unused;51,1770
+static SCM Top,60,2022
+static SCM Top, Object,60,2022
+static SCM Top, Object, Class,60,2022
+static SCM Top, Object, Class, Generic,60,2022
+static SCM Top, Object, Class, Generic, Method,60,2022
+static SCM Top, Object, Class, Generic, Method, Simple_method,60,2022
+static SCM Top, Object, Class, Generic, Method, Simple_method, Accessor,60,2022
+           Procedure_class,61,2095
+           Procedure_class, Entity_class;61,2095
+static SCM Boolean,62,2137
+static SCM Boolean, Char,62,2137
+static SCM Boolean, Char, Pair,62,2137
+static SCM Boolean, Char, Pair, Procedure,62,2137
+static SCM Boolean, Char, Pair, Procedure, String,62,2137
+static SCM Boolean, Char, Pair, Procedure, String, Symbol,62,2137
+static SCM Boolean, Char, Pair, Procedure, String, Symbol, Vector,62,2137
+static SCM Boolean, Char, Pair, Procedure, String, Symbol, Vector, Number,62,2137
+ 	   Liste,63,2212
+ 	   Liste, Null,63,2212
+ 	   Liste, Null, Real,63,2212
+ 	   Liste, Null, Real, Complex,63,2212
+ 	   Liste, Null, Real, Complex, Rational,63,2212
+ 	   Liste, Null, Real, Complex, Rational, Integer,63,2212
+ 	   Liste, Null, Real, Complex, Rational, Integer, Keyword,63,2212
+ 	   Liste, Null, Real, Complex, Rational, Integer, Keyword, Eof,63,2212
+  Struct_type,64,2278
+  Struct_type, Struct,64,2278
+  Struct_type, Struct, Cond,64,2278
+  Struct_type, Struct, Cond, Cond_type,64,2278
+  Struct_type, Struct, Cond, Cond_type, Box,64,2278
+  Struct_type, Struct, Cond, Cond_type, Box, UnknownClass;64,2278
+int STk_oo_initialized 67,2339
+static void error_bad_instance(70,2454
+static void error_bad_class(75,2539
+static void error_bad_slot_name(80,2620
+static void error_bad_index(85,2709
+static void error_bad_generic(90,2810
+static void error_no_method(95,2897
+static void error_bad_method(100,2993
+static void error_bad_list(105,3071
+SCM STk_make_next_method(127,3691
+DEFINE_PRIMITIVE(147,4206
+static int applicablep(180,5362
+static int more_specificp(194,5719
+#define BUFFSIZE 234,6860
+static SCM sort_applicable_methods(236,6913
+SCM STk_compute_applicable_methods(292,8511
+DEFINE_PRIMITIVE(339,9907
+DEFINE_PRIMITIVE(353,10253
+static Inline SCM test_change_class(414,11922
+static Inline SCM get_slot_value(425,12138
+static Inline SCM set_slot_value(446,12740
+DEFINE_PRIMITIVE(469,13408
+DEFINE_PRIMITIVE(482,13721
+DEFINE_PRIMITIVE(493,13966
+DEFINE_PRIMITIVE(505,14321
+DEFINE_PRIMITIVE(514,14614
+DEFINE_PRIMITIVE(523,14904
+DEFINE_PRIMITIVE(535,15230
+static void Inline set_slot_value_if_unbound553,15717
+DEFINE_PRIMITIVE(565,15982
+static SCM test_slot_existence(617,17489
+DEFINE_PRIMITIVE(631,17755
+DEFINE_PRIMITIVE(643,18070
+DEFINE_PRIMITIVE(656,18367
+DEFINE_PRIMITIVE(666,18728
+static SCM basic_compute_cpl(689,19375
+static SCM basic_compute_slots(704,19710
+static SCM basic_make_class(718,20096
+static SCM make_instance(762,21499
+static SCM compute_getters_n_setters(788,22108
+static void create_Top_Object_Class(809,22657
+static void mk_cls(870,24772
+static void make_standard_classes(878,24996
+DEFINE_PRIMITIVE(934,27871
+DEFINE_PRIMITIVE(968,28985
+DEFINE_PRIMITIVE(973,29088
+DEFINE_PRIMITIVE(978,29182
+DEFINE_PRIMITIVE(983,29282
+DEFINE_PRIMITIVE(988,29379
+DEFINE_PRIMITIVE(1040,30794
+DEFINE_PRIMITIVE(1061,31444
+DEFINE_PRIMITIVE(1081,31994
+static void print_instance(1094,32329
+static struct extended_type_descr xtype_instance 1112,32783
+static struct extended_type_descr xtype_next_method 1117,32871
+int STk_init_object(1125,33040
+
+gnu-glob.c,265
+#define STKLOS_CODE 35,1281
+glob 75,2682
+globfree 282,7492
+collated_compare 298,7821
+prefix_array 322,8524
+glob_pattern_p 361,9496
+glob_in_dir 399,10128
+  struct globlink408,10342
+      struct globlink *next;next410,10366
+      char *name;name411,10395
+
+thread-pthreads.c,587
+static pthread_key_t vm_key;37,1158
+static void *cleanup_vm_specific(cleanup_vm_specific39,1188
+static void initialize_vm_key(44,1281
+vm_thread_t *STk_get_current_vm(STk_get_current_vm55,1519
+static void thread_finalizer(66,1773
+static void terminate_scheme_thread(73,1916
+static void *start_scheme_thread(start_scheme_thread86,2234
+void STk_do_make_sys_thread(111,2855
+void STk_sys_thread_start(122,3110
+DEFINE_PRIMITIVE(147,3707
+DEFINE_PRIMITIVE(176,4833
+DEFINE_PRIMITIVE(224,6484
+DEFINE_PRIMITIVE(262,7588
+DEFINE_PRIMITIVE(281,8035
+int STk_init_sys_threads(291,8317
+
+socket.c,875
+static void print_socket(44,1427
+static struct extended_type_descr xtype_socket 56,1812
+static void error_bad_hostname(70,2147
+static void error_bad_portnum(75,2229
+static void error_unknown_hostname(80,2313
+static void error_cannot_crate_socket(85,2418
+static void error_bad_socket(90,2504
+static void set_socket_io_ports(96,2583
+DEFINE_PRIMITIVE(141,3818
+static SCM internal_init_client_socket(226,6328
+DEFINE_PRIMITIVE(278,7883
+DEFINE_PRIMITIVE(285,8075
+DEFINE_PRIMITIVE(333,9683
+static void socket_finalizer(382,11159
+DEFINE_PRIMITIVE(431,13087
+DEFINE_PRIMITIVE(489,14814
+DEFINE_PRIMITIVE(502,15046
+DEFINE_PRIMITIVE(515,15329
+DEFINE_PRIMITIVE(528,15612
+DEFINE_PRIMITIVE(556,16518
+DEFINE_PRIMITIVE(563,16662
+DEFINE_PRIMITIVE(583,17322
+DEFINE_PRIMITIVE(603,17994
+DEFINE_PRIMITIVE(610,18156
+DEFINE_PRIMITIVE(625,18489
+int STk_init_socket(644,19077
+
+utf8.c,494
+int STk_use_utf8 29,1025
+static void error_bad_sequence(32,1050
+char *STk_utf8_grab_char(STk_utf8_grab_char46,1331
+int STk_utf8_read_char(77,1991
+int STk_char2utf8(103,2599
+int STk_utf8_char_bytes_needed(133,3332
+int STk_utf8_sequence_length(143,3638
+int STk_utf8_strlen(156,4025
+int STk_utf8_verify_sequence(171,4297
+char *STk_utf8_index(STk_utf8_index185,4596
+int STk_utf8_char_from_byte(200,4899
+DEFINE_PRIMITIVE(223,5483
+DEFINE_PRIMITIVE(237,5824
+int STk_init_utf8(268,6725
+
+number.c,6064
+#define __NO_MATH_INLINES32,1179
+#undef sinc39,1284
+static int real_precision 46,1393
+static int log10_maxint;47,1439
+#define FINITE_REALP(49,1465
+struct bignum_obj 61,1892
+  stk_header header;62,1912
+  mpz_t val;63,1933
+#define BIGNUM_VAL(66,1950
+#define MY_PI 71,2095
+#define BIGNUM_FITS_INTEGER(73,2168
+#define LONG_FITS_INTEGER(75,2321
+#define TYPEOF(76,2399
+#define MINUS_INF 79,2466
+#define PLUS_INF 80,2493
+#define NaN 81,2520
+static double plus_inf,85,2574
+static double plus_inf, minus_inf;85,2574
+double STk_NaN;86,2609
+#define add2 105,3265
+#define mul2 106,3287
+#define div2 107,3309
+#define sub2 108,3331
+#define absolute 109,3353
+#define exact2inexact 110,3378
+#define inexact2exact 111,3412
+static void error_bad_number(125,3724
+static void error_at_least_1(130,3803
+static void error_not_on_a_complex(135,3889
+static void error_cannot_operate(140,3999
+static void error_divide_by_0(145,4136
+static void error_incorrect_radix(150,4219
+static SCM real_precision_conv(172,4697
+static Inline SCM Cmake_complex(189,5169
+static Inline SCM make_complex(199,5311
+static Inline SCM make_polar(204,5408
+static Inline SCM Cmake_rational(212,5522
+static SCM make_rational(223,5667
+static void print_bignum(257,6470
+static void print_rational(268,6682
+static void print_complex(275,6848
+static struct extended_type_descr xtype_bignum 288,7083
+static struct extended_type_descr xtype_complex 293,7165
+static struct extended_type_descr xtype_rational 298,7250
+static Inline SCM long2scheme_bignum(310,7531
+static Inline SCM long2integer(320,7663
+static Inline SCM double2real(326,7791
+static SCM double2integer(335,7897
+static SCM double2rational(371,8822
+static Inline SCM bignum2scheme_bignum(400,9440
+static Inline SCM bignum2integer(409,9571
+static Inline SCM bignum2number(414,9652
+static Inline double bignum2double(419,9802
+static Inline double scheme_bignum2double(429,10086
+static Inline SCM scheme_bignum2real(435,10180
+static double rational2double(441,10279
+static Inline SCM rational2real(454,10667
+static Inline SCM real2integer(459,10753
+void STk_double2Cstr(470,10991
+static char *number2Cstr(number2Cstr483,11465
+static type_cell convert(547,13244
+long STk_integer_value(610,16073
+unsigned long STk_uinteger_value(621,16369
+SCM STk_long2integer(633,16707
+SCM STk_ulong2integer(639,16768
+long STk_integer2int32(654,17005
+unsigned long STk_integer2uint32(682,17616
+SCM STk_double2real(713,18257
+double STk_number2double(719,18349
+static long do_compare(738,18882
+static SCM int_quotient(794,20634
+static int digitp(814,21123
+static SCM compute_exact_real(831,21558
+static SCM read_integer_or_real(889,23118
+static SCM read_rational(986,25951
+SCM STk_Cstr2number(1002,26442
+DEFINE_PRIMITIVE(1139,30817
+DEFINE_PRIMITIVE(1152,31062
+DEFINE_PRIMITIVE(1158,31148
+DEFINE_PRIMITIVE(1171,31433
+DEFINE_PRIMITIVE(1196,32014
+DEFINE_PRIMITIVE(1202,32108
+static int isexactp(1229,32788
+DEFINE_PRIMITIVE(1243,33125
+DEFINE_PRIMITIVE(1249,33218
+#define COMPARE_NUM(1279,33906
+#define COMPARE_NUM2(1295,34928
+COMPARE_NUM(1304,35404
+static int zerop(1350,36601
+static int positivep(1363,37034
+static int negativep(1377,37450
+static int finitep(1391,37866
+DEFINE_PRIMITIVE(1406,38244
+DEFINE_PRIMITIVE(1412,38338
+DEFINE_PRIMITIVE(1418,38437
+DEFINE_PRIMITIVE(1424,38525
+DEFINE_PRIMITIVE(1430,38625
+DEFINE_PRIMITIVE(1436,38725
+DEFINE_PRIMITIVE(1442,38813
+DEFINE_PRIMITIVE(1469,39366
+DEFINE_PRIMITIVE(1496,40016
+SCM STk_add2(1550,41382
+DEFINE_PRIMITIVE(1601,42626
+SCM STk_mul2(1618,42902
+DEFINE_PRIMITIVE(1673,44247
+SCM STk_sub2(1709,45130
+DEFINE_PRIMITIVE(1760,46343
+SCM STk_div2(1776,46621
+DEFINE_PRIMITIVE(1817,47806
+DEFINE_PRIMITIVE(1841,48235
+static void integer_division(1917,50384
+DEFINE_PRIMITIVE(1967,51855
+DEFINE_PRIMITIVE(1976,51986
+DEFINE_PRIMITIVE(1985,52119
+static SCM gcd2(2014,52754
+DEFINE_PRIMITIVE(2019,52847
+DEFINE_PRIMITIVE(2032,53102
+DEFINE_PRIMITIVE(2063,53884
+DEFINE_PRIMITIVE(2076,54284
+DEFINE_PRIMITIVE(2125,55888
+DEFINE_PRIMITIVE(2145,56553
+DEFINE_PRIMITIVE(2166,57219
+DEFINE_PRIMITIVE(2182,57687
+static SCM my_exp(2237,59488
+static SCM my_log(2253,60074
+static SCM my_cos(2274,60882
+static SCM my_sin(2296,61861
+static SCM my_tan(2317,62867
+static SCM asin_complex(2347,64221
+static SCM asin_real(2356,64566
+static SCM my_asin(2369,64951
+static Inline SCM acos_complex(2392,65794
+static SCM acos_real(2401,66115
+static SCM my_acos(2408,66235
+static SCM my_atan(2424,66798
+static SCM my_atan2(2449,67868
+#define transcendental(2460,68241
+transcendental(2466,68478
+static SCM my_sqrt_exact(2490,68992
+DEFINE_PRIMITIVE(2516,69739
+static Inline SCM exact_expt(2545,70662
+static SCM my_expt(2563,71025
+DEFINE_PRIMITIVE(2580,71534
+DEFINE_PRIMITIVE(2621,72638
+DEFINE_PRIMITIVE(2639,73131
+DEFINE_PRIMITIVE(2654,73558
+DEFINE_PRIMITIVE(2667,73864
+DEFINE_PRIMITIVE(2681,74181
+DEFINE_PRIMITIVE(2689,74402
+DEFINE_PRIMITIVE(2711,75003
+DEFINE_PRIMITIVE(2727,75621
+DEFINE_PRIMITIVE(2778,77662
+DEFINE_PRIMITIVE(2817,78922
+union ieee_double 2846,79837
+    double d;2847,79857
+        unsigned int sign:sign2851,79928
+        unsigned int exp:exp2852,79957
+        unsigned long mant:mant2853,79986
+        unsigned int sign:sign2855,80044
+        unsigned int exp:exp2856,80073
+        unsigned long mant0:mant02857,80102
+        unsigned long mant1:mant12858,80134
+        unsigned long mant:mant2862,80242
+        unsigned int  exp:exp2863,80273
+        unsigned int  sign:sign2864,80303
+        unsigned long mant1:mant12866,80360
+        unsigned long mant0:mant02867,80392
+        unsigned int  exp:exp2868,80424
+        unsigned int  sign:sign2869,80454
+    } components;2872,80539
+static SCM decode_flonum(2875,80561
+DEFINE_PRIMITIVE(2946,82242
+static void * allocate_function(2968,82730
+static void * reallocate_function(2977,82870
+static void deallocate_function(2982,82981
+int STk_init_number(2994,83091
+    unsigned char a[a2998,83181
+    float f;2999,83205
+
+read.c,1890
+struct read_context 31,1039
+  SCM cycles;32,1061
+  SCM inner_refs;33,1075
+  int comment_level;34,1093
+  int case_significant;35,1114
+  int constant;36,1138
+static SCM sym_quote,43,1270
+static SCM sym_quote, sym_quasiquote,43,1270
+static SCM sym_quote, sym_quasiquote, sym_unquote,43,1270
+static SCM sym_quote, sym_quasiquote, sym_unquote, sym_unquote_splicing,43,1270
+static SCM sym_quote, sym_quasiquote, sym_unquote, sym_unquote_splicing, sym_dot;43,1270
+static SCM sym_read_brace,44,1352
+static SCM sym_read_brace, sym_read_bracket,44,1352
+static SCM sym_read_brace, sym_read_bracket, read_error;44,1352
+int STk_read_case_sensitive 46,1410
+#define PLACEHOLDERP(49,1445
+#define PLACEHOLDER_VAL(50,1526
+#define SYMBOL_VALUE(52,1568
+static void signal_error(59,1833
+static void error_token_too_large(73,2483
+static void error_bad_sharp_syntax(79,2694
+static void error_key_not_defined(84,2828
+static void error_bad_dotted_list(89,2941
+static void error_bad_inline_hexa_sequence(94,3040
+static void warning_parenthesis(102,3262
+static int flush_spaces(108,3392
+static int read_hex_sequence(125,3801
+static SCM read_list(163,4714
+static int read_word(228,6296
+static SCM read_token(274,7399
+static SCM read_char(308,8445
+static SCM read_address(333,9051
+static SCM read_here_string(346,9348
+static SCM add_inner_references(380,10216
+static void patch_references(402,10928
+static SCM read_cycle(418,11250
+static SCM read_string(489,13828
+static SCM read_vector(581,16666
+static SCM maybe_read_uniform_vector(589,16849
+static SCM read_rec(624,17860
+static SCM read_it(848,25786
+SCM STk_read(876,26339
+SCM STk_read_constant(882,26439
+char *STk_quote2str(STk_quote2str888,26547
+static SCM ctor_table 902,26984
+DEFINE_PRIMITIVE(904,27018
+static SCM read_srfi10(926,27506
+static SCM read_case_sensitive_conv(972,28836
+int STk_init_reader(985,29206
+
+port.c,2918
+#define INITIAL_LINE_SIZE 32,1055
+static SCM CrLf;34,1128
+static SCM io_error,36,1198
+static SCM io_error, io_port_error,36,1198
+static SCM io_error, io_port_error, io_read_error,36,1198
+static SCM io_error, io_port_error, io_read_error, io_write_error,36,1198
+  io_closed_error,37,1265
+  io_closed_error, io_fn_error,37,1265
+  io_closed_error, io_fn_error, io_malformed,37,1265
+  io_closed_error, io_fn_error, io_malformed, io_prot_error,37,1265
+  io_ro_error,38,1326
+  io_ro_error, io_exists_error,38,1326
+  io_ro_error, io_exists_error, io_no_file_error,38,1326
+  io_ro_error, io_exists_error, io_no_file_error, io_bad_param;38,1326
+static void general_io_error(41,1392
+static void error_closed_port(51,1752
+static void error_bad_utf8_character(56,1855
+void STk_error_bad_io_param(61,1979
+void STk_error_file_name(66,2072
+void STk_error_bad_port(72,2164
+void STk_error_bad_file_name(78,2254
+void STk_error_cannot_load(83,2352
+static void error_bad_binary_port(88,2452
+static void error_bad_textual_port(93,2563
+static void error_bad_string(98,2676
+static SCM verify_port(104,2776
+DEFINE_PRIMITIVE(130,3482
+DEFINE_PRIMITIVE(135,3588
+DEFINE_PRIMITIVE(149,3891
+DEFINE_PRIMITIVE(154,4037
+DEFINE_PRIMITIVE(168,4313
+DEFINE_PRIMITIVE(181,4550
+DEFINE_PRIMITIVE(197,4912
+DEFINE_PRIMITIVE(202,5028
+DEFINE_PRIMITIVE(214,5260
+DEFINE_PRIMITIVE(220,5377
+DEFINE_PRIMITIVE(292,8079
+DEFINE_PRIMITIVE(301,8318
+DEFINE_PRIMITIVE(319,8866
+DEFINE_PRIMITIVE(346,9703
+DEFINE_PRIMITIVE(403,11377
+DEFINE_PRIMITIVE(424,12004
+DEFINE_PRIMITIVE(446,12575
+DEFINE_PRIMITIVE(481,13528
+DEFINE_PRIMITIVE(509,14561
+DEFINE_PRIMITIVE(532,15155
+DEFINE_PRIMITIVE(551,15491
+DEFINE_PRIMITIVE(566,15797
+DEFINE_PRIMITIVE(584,16312
+DEFINE_PRIMITIVE(603,16809
+DEFINE_PRIMITIVE(628,17698
+DEFINE_PRIMITIVE(668,19029
+DEFINE_PRIMITIVE(695,20002
+DEFINE_PRIMITIVE(714,20507
+DEFINE_PRIMITIVE(744,21282
+DEFINE_PRIMITIVE(764,21777
+DEFINE_PRIMITIVE(772,22040
+DEFINE_PRIMITIVE(815,23442
+DEFINE_PRIMITIVE(834,23855
+#define FMT_SIZE 852,24342
+static SCM internal_format(855,24363
+DEFINE_PRIMITIVE(1170,35782
+static SCM srfi_23_error(1215,37383
+static int msg_use_tilde(1228,37717
+static SCM do_error(1236,37849
+DEFINE_PRIMITIVE(1262,38430
+DEFINE_PRIMITIVE(1283,38986
+DEFINE_PRIMITIVE(1309,39704
+DEFINE_PRIMITIVE(1316,39868
+DEFINE_PRIMITIVE(1331,40135
+DEFINE_PRIMITIVE(1353,40759
+DEFINE_PRIMITIVE(1360,40922
+DEFINE_PRIMITIVE(1386,41861
+#define COPY_PORT_SIZE 1440,43499
+DEFINE_PRIMITIVE(1441,43527
+DEFINE_PRIMITIVE(1492,44745
+DEFINE_PRIMITIVE(1516,45569
+DEFINE_PRIMITIVE(1534,46094
+DEFINE_PRIMITIVE(1561,46959
+DEFINE_PRIMITIVE(1602,47949
+DEFINE_PRIMITIVE(1628,48589
+DEFINE_PRIMITIVE(1646,49003
+static void initialize_io_conditions(1658,49343
+#define DEFCOND(1662,49423
+static void print_port(1682,50474
+static struct extended_type_descr xtype_port 1689,50611
+int STk_init_port(1698,50843
+
+list.c,1739
+static void error_wrong_type(36,1233
+static void error_const_cell(41,1319
+static void error_bad_list(46,1419
+static void error_bad_proc(51,1489
+static void error_circular_list(56,1564
+static void error_too_short(61,1647
+static void error_not_exact_positive(66,1724
+int STk_int_length(71,1834
+SCM STk_argv2list(84,2051
+DEFINE_PRIMITIVE(96,2194
+DEFINE_PRIMITIVE(110,2405
+DEFINE_PRIMITIVE(137,2994
+DEFINE_PRIMITIVE(159,3467
+DEFINE_PRIMITIVE(180,3907
+DEFINE_PRIMITIVE(204,4467
+DEFINE_PRIMITIVE(223,4840
+DEFINE_PRIMITIVE(236,5041
+DEFINE_PRIMITIVE(257,5536
+DEFINE_PRIMITIVE(278,5936
+SCM STk_append2(325,7088
+DEFINE_PRIMITIVE(354,7613
+DEFINE_PRIMITIVE(379,8160
+DEFINE_PRIMITIVE(406,8734
+DEFINE_PRIMITIVE(442,9543
+DEFINE_PRIMITIVE(477,10374
+#define PTR_EQ(536,12021
+#define PTR_EQV(537,12066
+#define PTR_EQUAL(538,12131
+#define PTR_CMPGEN(539,12198
+#define LMEMBER(542,12277
+DEFINE_PRIMITIVE(560,13271
+#define LASSOC(617,15071
+DEFINE_PRIMITIVE(631,15866
+DEFINE_PRIMITIVE(660,16566
+DEFINE_PRIMITIVE(685,17014
+DEFINE_PRIMITIVE(704,17471
+DEFINE_PRIMITIVE(732,17896
+DEFINE_PRIMITIVE(761,18699
+DEFINE_PRIMITIVE(790,19372
+SCM STk_dappend2(834,20629
+DEFINE_PRIMITIVE(852,20963
+DEFINE_PRIMITIVE(877,21607
+SCM STk_dremq(895,21973
+SCM STk_int_assq(921,22517
+struct econs_obj 940,22864
+  stk_header header;941,22944
+  SCM car;942,22965
+  SCM cdr;943,22976
+  char *file;file944,22987
+  int line;945,23001
+  int pos;946,23013
+#define ECONS_FILE(949,23028
+#define ECONS_LINE(950,23087
+#define ECONS_POS(951,23146
+#define ECONSP(952,23204
+SCM STk_econs(955,23277
+DEFINE_PRIMITIVE(970,23571
+DEFINE_PRIMITIVE(975,23666
+DEFINE_PRIMITIVE(983,23861
+DEFINE_PRIMITIVE(991,24046
+int STk_init_list(1000,24239
+
+proc.c,554
+static void error_malformed_list(36,1269
+static void error_bad_procedure(41,1355
+SCM STk_make_closure(47,1440
+static void print_lambda(64,1797
+static struct extended_type_descr xtype_closure 76,2109
+DEFINE_PRIMITIVE(99,2757
+DEFINE_PRIMITIVE(133,3703
+DEFINE_PRIMITIVE(157,4361
+DEFINE_PRIMITIVE(175,4746
+DEFINE_PRIMITIVE(181,4847
+DEFINE_PRIMITIVE(200,5285
+DEFINE_PRIMITIVE(220,5750
+DEFINE_PRIMITIVE(247,6604
+DEFINE_PRIMITIVE(265,6962
+static SCM map(277,7319
+DEFINE_PRIMITIVE(347,9296
+DEFINE_PRIMITIVE(371,9998
+int STk_init_proc(390,10418
+
+str.c,1810
+#define UTF8_STRING_INCR 37,1190
+static void error_bad_string(45,1250
+static void error_bad_character(50,1324
+static void error_change_const_string(55,1404
+static void error_index_out_of_bound(60,1520
+static void error_bad_sequence(65,1645
+static int stringcomp(71,1741
+static int stringcompi(113,2974
+static SCM control_index(156,4260
+static uint32_t *string2int(string2int196,5375
+static SCM make_string_from_int_array(212,5761
+static void copy_array(232,6138
+static SCM make_substring(238,6261
+SCM STk_makestring(261,6852
+SCM STk_Cstring2string(284,7423
+DEFINE_PRIMITIVE(299,7774
+DEFINE_PRIMITIVE(321,8257
+DEFINE_PRIMITIVE(375,9515
+DEFINE_PRIMITIVE(419,10516
+DEFINE_PRIMITIVE(434,10844
+DEFINE_PRIMITIVE(474,11896
+DEFINE_PRIMITIVE(573,15804
+DEFINE_PRIMITIVE(576,15916
+DEFINE_PRIMITIVE(579,16027
+DEFINE_PRIMITIVE(582,16138
+DEFINE_PRIMITIVE(585,16251
+DEFINE_PRIMITIVE(590,16366
+DEFINE_PRIMITIVE(593,16483
+DEFINE_PRIMITIVE(596,16599
+DEFINE_PRIMITIVE(599,16715
+DEFINE_PRIMITIVE(602,16833
+DEFINE_PRIMITIVE(621,17349
+DEFINE_PRIMITIVE(648,18064
+DEFINE_PRIMITIVE(698,19379
+DEFINE_PRIMITIVE(723,19837
+DEFINE_PRIMITIVE(761,20786
+DEFINE_PRIMITIVE(784,21383
+static int Memmem(834,22518
+DEFINE_PRIMITIVE(864,23147
+DEFINE_PRIMITIVE(890,23759
+DEFINE_PRIMITIVE(921,24659
+DEFINE_PRIMITIVE(968,25948
+static SCM string_xxcase(993,26734
+DEFINE_PRIMITIVE(1022,27514
+static SCM string_dxxcase(1041,28011
+DEFINE_PRIMITIVE(1078,29278
+DEFINE_PRIMITIVE(1097,29887
+DEFINE_PRIMITIVE(1111,30219
+DEFINE_PRIMITIVE(1131,30814
+DEFINE_PRIMITIVE(1145,31190
+DEFINE_PRIMITIVE(1176,32320
+DEFINE_PRIMITIVE(1207,33087
+DEFINE_PRIMITIVE(1247,34228
+DEFINE_PRIMITIVE(1309,35855
+DEFINE_PRIMITIVE(1325,36306
+DEFINE_PRIMITIVE(1330,36406
+DEFINE_PRIMITIVE(1337,36591
+int STk_init_string(1354,36902
+
+lib.c,63
+int STk_library_initialized 32,1022
+STk_init_library(35,1106

@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  5-Oct-2018 12:44 (eg)
+ * Last file update: 12-Oct-2018 17:04 (eg)
  */
 
 #include <unistd.h>
@@ -506,7 +506,7 @@ DEFINE_PRIMITIVE("glob", glob, vsubr, (int argc, SCM *argv))
 
 
 /*
-<doc R7RS delete-file
+<doc R7RS delete-file remove-file
  * (delete-file string)
  *
  * Removes the file whose path name is given in |string|.
@@ -888,7 +888,7 @@ DEFINE_PRIMITIVE("current-seconds", current_seconds, subr0, (void))
  * midnight on January 1, 1970 TAI (equivalent to ten seconds before
  * midnight Universal Time) and the value 1.0 represents one TAI
  * second later.
- * doc>
+doc>
  */
 
 /* Offset: https://fr.wikipedia.org/wiki/Temps_atomique_international */
@@ -910,7 +910,7 @@ DEFINE_PRIMITIVE("current-second", current_second, subr0, (void))
 
 
 /*
-<doc current-time
+<doc EXT current-time
  * (current-time)
  *
  * Returns a time object corresponding to the current time.

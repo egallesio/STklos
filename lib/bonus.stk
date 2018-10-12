@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 21-Sep-2018 09:47 (eg)
+;;;; Last file update: 12-Oct-2018 16:58 (eg)
 ;;;;
 
 
@@ -1679,22 +1679,26 @@ doc>
 ;; SRFI-98: "An interface to access environment variables"
 ;;
 
-#| <doc R7RS get-environment-variable
+#|
+<doc R7RS get-environment-variable
  * (get-environment-variable name)
  *
  * Returns the value of the named environment variable as a string, or
  * |%f| if the named environment variable is not found. The name argument
  * is expected to be a string. This function is similar to the |getenv|. It
  * has been added to be  support ,(link-srfi 98).
+doc>
 |#
 (define (get-environment-variable name)
   (getenv name))
 
-#| <doc R7RS get-environment-variables
+#|
+<doc R7RS get-environment-variables
  * (get-environment-variables)
  *
  * Returns names and values of all the environment variables as an a-list.
  * This function is defined by ,(link-srfi 98)
+doc>
 |#
 (define (get-environment-variables)
   (getenv))

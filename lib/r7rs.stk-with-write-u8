@@ -21,15 +21,8 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 12-Oct-2018 17:19 (eg)
+;;;; Last file update:  2-Aug-2018 23:40 (eg)
 ;;;;
-
-
-;;;; Aliases
-(define write-shared write*)
-(define write-simple write)
-
-
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.3 Booleans
@@ -611,7 +604,8 @@ doc>
                        (error 'string-for-each "bad string ~S" x))
                      (string->list x))
                    strings)))
-    (apply for-each proc strs)))
+    (apply map proc strs)
+    (void)))
 
 
 #|
@@ -638,8 +632,8 @@ doc>
 (define (vector-for-each proc . vectors)
   (unless (every vector? vectors)
     (error 'vector-for-each "bad list of vectors ~S" vectors))
-  (apply for-each proc (map vector->list vectors)))
-
+  (apply map proc (map vector->list vectors))
+  (void))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.13 Input and Output
@@ -741,7 +735,6 @@ doc>
  * function, excepted that it can be used only on  a binary port.
 doc>
 |#
-
 (define (read-u8 :optional (port (current-input-port)))
   (%claim-error
     'read-u8
@@ -771,163 +764,40 @@ doc>
       (error "bad binary port ~S" port))
     (peek-byte port)))
 
-
 #|
-<doc R7RS read-bytevector!
- * (read-bytevector! k)
- * (read-bytevector! k port)
- * (read-bytevector! k port start)
- * (read-bytevector! k port start end)
+<doc R7RS u8-ready?
+ * (u8-ready?)
+ * (u8-ready? port)
  *
- * Reads the next |end - start| bytes, or as many as are available
- * before the end of file, from the binary input port
- * into |bytevector| in left-to-right order beginning at the start
- * position. If |end| is not supplied, reads until the end of
- * |bytevector| has been reached. If |start| is not supplied, reads
- * beginning at position 0. Returns the number of bytes read.
- * If no bytes are available, an end-of-file object is returned.
+ * Returns #t if a byte is ready on the binary input |port| and
+ * returns #f otherwise. If |u8-ready?| returns #t then the
+ * next read-u8 operation on the given port is guaranteed
+ * not to hang. If the |port| is at end of file then |u8-ready?|
+ * returns #t.
 doc>
 |#
-(define (read-bytevector! bv :optional (port (current-input-port))
-                                       (start 0)
-                                       (end -1 end?))
+(define (u8-ready? :optional (port (current-input-port)))
   (%claim-error
-   'read-bytevector!
-   (unless (bytevector? bv)
-     (error "bad bytevector ~S" bv))
-   (unless end?
-     (set! end (bytevector-length bv)))
-   (%read-bytevector! bv port start end)))
-
-#|
-<doc R7RS write-string
- * (write-string string)
- * (write-string string port)
- * (write-string string port start)
- * (write-string string port start end)
- *
- * Writes the characters of |string| from |start| to |end| in
- * left-to-right order to the textual output |port|.
-doc>
-|#
-(define (write-string str :optional (port (current-output-port))
-                                    (start 0)
-                                    (end -1 end?))
-  (%claim-error
-   'write-string
-   (%write-string str port start (if end? end (string-length str)))))
-
+    'u8-ready?
+    (unless (binary-port? port)
+      (error "bad binary port ~S" port))
+    (char-ready? port)))
 
 #|
 <doc R7RS write-u8
  * (write-u8 byte)
  * (write-u8 byte port)
  *
- * Writes the |byte| to the given binary output port.
+ * Writes the |byte| to the given binary output |port| and returns
+ * an unspecified value.
+ * @l
+ * ,(bold "Note"): This function is similar to the |write-byte|
+ * function, excepted that it can be used only on  a binary port.
 doc>
 |#
 (define (write-u8 byte :optional (port (current-output-port)))
   (%claim-error
-   'write-u8
-   (unless (binary-port? port)
-     (error "bad binary port ~S" port))
-   (write-byte byte port)))
-
-#|
-<doc R7RS write-bytevector
- * (write-bytevector bytevector)
- * (write-bytevector bytevector port)
- * (write-bytevector bytevector port start)
- * (write-bytevector bytevector port start end)
- *
- * Writes the bytes of |bytevector| from |start| to |end| in
- * left-to-right order to the binary output |port|.
-doc>
-|#
-(define (write-bytevector bv :optional (port (current-output-port))
-                                       (start 0)
-                                       (end -1 end?))
-  (%claim-error
-   'write-bytevector
-   (unless (bytevector? bv)     (error "bad bytevector ~S" bv))
-   (unless (binary-port? port)  (error "bad binary port ~S" port))
-   (unless end?                 (set! end (bytevector-length bv)))
-
-   (let Loop ((i start))
-     (when (< i end)
-       (write-byte (bytevector-u8-ref bv i) port)
-       (Loop (+ i 1))))))
-
-
-;;;; ----------------------------------------------------------------------
-;;;; 6.14 System Interface
-;;;; ----------------------------------------------------------------------
-
-#|
-<doc R7RS current-jiffy
- * (current-jiffy)
- *
- * Returns the number of ,(emph "jiffies") as an exact integer that
- * have elapsed since an arbitrary, implementation-defined
- * epoch. A jiffy is an implementation-defined fraction of
- * a second which is defined by the return value of the
- * |jiffies-per-second| procedure. The starting epoch is
- * guaranteed to be constant during a run of the program,
- * but may vary between runs.
-doc>
-|#
-(define current-jiffy
-  ;; This implementation probably allocates bignums on 32 bits machines
-  ;; Therefore, the resolution should be lowered on these architectures.
-  (let ((initial-time (current-time))
-        (time->jiffy  (lambda (t)
-                        (+ (* (struct-ref t 'second) #e1e9)
-                           (struct-ref t 'nanosecond)))))
-    (lambda ()
-      (- (time->jiffy (current-time))
-         (time->jiffy initial-time)))))
-
-#|
-<doc R7RS jiffies-per-second
- * (jiffies-per-seconds)
- *
- * Returns an exact integer representing the number of jiffies
- * per second.
- *
- * @lisp
- * (define (time-length)
- *   (let ((list (make-list 100000))
- *         (start (current-jiffy)))
- *     (length list)
- *     (/ (- (current-jiffy) start)
- *        (jiffies-per-second))))
- * @end lisp
-doc>
-|#
-(define (jiffies-per-second) #e1e9)
-
-
-#|
-<doc R7RS features
- * (features)
- *
- * Returns a list of the feature identifiers which |cond-expand|
- * treats as true. It is an error to modify this list. Here is an
- * example of what |features| might return:
- *
- * @lisp
- * (features) => (STklos STklos-1.20  almost-r7rs
- *                exact-complex ieee-float full-unicode
- *                ratios little-endian)
- * @end lisp
-doc>
-|#
-(define (features)
-  (let ((all (in-module |SRFI-0| *all-features*)))
-    (apply append
-           (map (lambda (x)
-                  (cond
-                    ((symbol? x)     (list x))
-                    ((pair? (car x)) (car x))
-                    (else            (list (car x)))))
-                all))))
+    'write-u8
+    (unless (binary-port? port)
+      (error "bad binary port ~S" port))
+    (write-byte byte port)))

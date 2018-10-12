@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  5-Oct-2018 18:10 (eg)
+;; Last file update: 12-Oct-2018 17:18 (eg)
 ;;
 ;; ======================================================================
 
@@ -689,8 +689,8 @@ be accessed as a normal port with the standard Scheme primitives.])
 (insertdoc 'setenv!)
 (insertdoc 'unsetenv!)
 
-,(stklos) defines also the ,(rseven) (and ,(quick-link-srfi 96)))
-standard primivitives to acess environment variables.
+(p [,(stklos) defines also the ,(rseven) (and ,(quick-link-srfi 96))
+standard primivitives to acess environment variables.])
 
 (insertdoc 'get-environment-variable)
 (insertdoc 'get-environment-variables)
@@ -700,10 +700,11 @@ standard primivitives to acess environment variables.
 (subsection :title "Time"
 (insertdoc 'current-second)
 (insertdoc 'current-jiffy)
-(insert-doc 'jiffies-per-second)
+(insertdoc 'jiffies-per-second)
 (insertdoc 'clock)
 (insertdoc 'sleep)
-(insertdoc 'time))
+(insertdoc 'time)
+)
 
 
 (subsection :title "System Informations"
@@ -735,9 +736,11 @@ use a |main| function in a Scheme program.])
 (insertdoc 'exec-list)
 (insertdoc 'address-of)
 (insertdoc 'exit)
+(insertdoc 'emergency-exit)
 (insertdoc 'die)
 (insertdoc 'get-password)
-(insertdoc 'register-exit-function!)))
+(insertdoc 'register-exit-function!))
+)
 
 
 ;;;
