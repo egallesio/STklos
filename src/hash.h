@@ -1,8 +1,8 @@
 /*
  *
- * h a s h  . h			-- Hash Tables
+ * h a s h  . h                 -- Hash Tables
  *
- * Copyright © 1994-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -34,17 +34,17 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 11-Apr-2007 17:58 (eg)
+ * Last file update: 19-Oct-2018 19:13 (eg)
  */
 
 
 #define SMALL_HASH_TABLE   4
-#define REBUILD_MULTIPLIER 3	/* When there are this many entries per bucket, */
-				/* on average,  make the table larger		*/
+#define REBUILD_MULTIPLIER 3    /* When there are this many entries per bucket, */
+                                /* on average,  make the table larger           */
 
-#define HASH_OBARRAY_FLAG   1	/* Only for the symbol table 	  */
-#define HASH_VAR_FLAG	    2 	/* For modules (keys are symbols) */
-#define HASH_SCM_FLAG	    3	/* For secheme hash tables   	  */
+#define HASH_OBARRAY_FLAG   1   /* Only for the symbol table      */
+#define HASH_VAR_FLAG       2   /* For modules (keys are symbols) */
+#define HASH_SCM_FLAG       3   /* For secheme hash tables        */
 
 typedef enum {hash_system, hash_eqp, hash_stringp, hash_general} hash_type;
 
@@ -63,18 +63,18 @@ struct hash_table_obj {
   SCM hash_fct;
 };
 
-#define HASHP(o) 		(BOXED_TYPE_EQ((o), tc_hash_table))
-#define HASH_BUCKETS(h)		(((struct hash_table_obj *) (h))->buckets)
-#define HASH_SBUCKETS(h)	(((struct hash_table_obj *) (h))->static_buckets)
-#define HASH_NBUCKETS(h)	(((struct hash_table_obj *) (h))->num_buckets)
-#define HASH_NENTRIES(h)	(((struct hash_table_obj *) (h))->num_entries)
-#define HASH_NEWSIZE(h)		(((struct hash_table_obj *) (h))->rebuild_size)
-#define HASH_SHIFT(h)		(((struct hash_table_obj *) (h))->down_shift)
-#define HASH_MASK(h)		(((struct hash_table_obj *) (h))->mask)
+#define HASHP(o)                (BOXED_TYPE_EQ((o), tc_hash_table))
+#define HASH_BUCKETS(h)         (((struct hash_table_obj *) (h))->buckets)
+#define HASH_SBUCKETS(h)        (((struct hash_table_obj *) (h))->static_buckets)
+#define HASH_NBUCKETS(h)        (((struct hash_table_obj *) (h))->num_buckets)
+#define HASH_NENTRIES(h)        (((struct hash_table_obj *) (h))->num_entries)
+#define HASH_NEWSIZE(h)         (((struct hash_table_obj *) (h))->rebuild_size)
+#define HASH_SHIFT(h)           (((struct hash_table_obj *) (h))->down_shift)
+#define HASH_MASK(h)            (((struct hash_table_obj *) (h))->mask)
 
-#define HASH_TYPE(h)		(((struct hash_table_obj *) (h))->type)
-#define HASH_COMPAR(h)		(((struct hash_table_obj *) (h))->comparison)
-#define HASH_HASH(h)		(((struct hash_table_obj *) (h))->hash_fct)
+#define HASH_TYPE(h)            (((struct hash_table_obj *) (h))->type)
+#define HASH_COMPAR(h)          (((struct hash_table_obj *) (h))->comparison)
+#define HASH_HASH(h)            (((struct hash_table_obj *) (h))->hash_fct)
 
 
 void STk_hashtable_init(struct hash_table_obj *h, int flag);
@@ -87,7 +87,7 @@ void STk_hashtable_init(struct hash_table_obj *h, int flag);
  * higher level interface instead.
  */
 SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s,
-			   SCM (*create)(char *s));
+                           SCM (*create)(char *s));
 
 /*
  * Function for accessing module hash table. Don't use them but the
@@ -101,6 +101,14 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value);
  * Utilities on hash tables
  */
 SCM STk_hash_keys(struct hash_table_obj *h);
+SCM STk_make_basic_hash_table(void);
+SCM STk_hash_table_search(SCM ht, SCM key);
 
+/*
+ * Scheme interface
+ */
+EXTERN_PRIMITIVE("hash-table-ref/default", hash_ref_default, subr3,
+                 (SCM ht, SCM key, SCM def));
+EXTERN_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val));
 
 int STk_init_hash(void);

@@ -1,8 +1,8 @@
 /*
  *
- * h a s h  . c			-- Hash Tables (mostly SRFI-69)
+ * h a s h  . c                 -- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 11-Aug-2011 23:38 (eg)
+ * Last file update: 19-Oct-2018 19:08 (eg)
  */
 
 #include "stklos.h"
@@ -60,7 +60,7 @@
 
 /*===========================================================================*\
  *
- *  		       H a s h i n g - f u n c t i o n s
+ *                     H a s h i n g - f u n c t i o n s
  *
 \*===========================================================================*/
 
@@ -92,7 +92,7 @@ static unsigned long hash_string(register char *string)
 
 
 static unsigned long hash_scheme_string(SCM str)
-{					     /* The same one for Scheme strings */
+{                                            /* The same one for Scheme strings */
   char *string;
   unsigned long result = 0;
   int i, l;
@@ -121,35 +121,35 @@ static unsigned long sxhash(SCM obj)
 
   switch (BOXED_TYPE(obj)) {
     case tc_cons:       h = sxhash(CAR(obj));
-      			for(tmp=CDR(obj); CONSP(tmp); tmp=CDR(tmp))
-			  h = HASH_WORD(h, sxhash(CAR(tmp)));
-			h = HASH_WORD(h, sxhash(tmp));
-			return h;
-    case tc_bignum:	return sxhash(STk_number2string(obj, MAKE_INT(16)));
-    case tc_real:	return (unsigned long) REAL_VAL(obj);
+                        for(tmp=CDR(obj); CONSP(tmp); tmp=CDR(tmp))
+                          h = HASH_WORD(h, sxhash(CAR(tmp)));
+                        h = HASH_WORD(h, sxhash(tmp));
+                        return h;
+    case tc_bignum:     return sxhash(STk_number2string(obj, MAKE_INT(16)));
+    case tc_real:       return (unsigned long) REAL_VAL(obj);
     case tc_rational:   return HASH_WORD(sxhash(RATIONAL_NUM(obj)),
-					 sxhash(RATIONAL_DEN(obj)));
+                                         sxhash(RATIONAL_DEN(obj)));
     case tc_complex:    return HASH_WORD(sxhash(COMPLEX_REAL(obj)),
-					 sxhash(COMPLEX_IMAG(obj)));
+                                         sxhash(COMPLEX_IMAG(obj)));
     case tc_symbol:     return hash_string(SYMBOL_PNAME(obj));
-    case tc_keyword:	return hash_string(KEYWORD_PNAME(obj));
-    case tc_string:	return hash_scheme_string(obj);
-    case tc_vector:	h = 0;
-			for (i=VECTOR_SIZE(obj)-1; i >= 0; i--)
-			  h = HASH_WORD(h, sxhash(VECTOR_DATA(obj)[i]));
-			return h;
-    default:	        /* A complex type (STklos object, user defined type,
-			 * hashtable...). In this case we return the type of the
-			 * object. This is very  inneficient but it should be
-			 * rare to use a  structured object as a key.
-			 */
-      			 return (unsigned long) BOXED_TYPE(obj);
+    case tc_keyword:    return hash_string(KEYWORD_PNAME(obj));
+    case tc_string:     return hash_scheme_string(obj);
+    case tc_vector:     h = 0;
+                        for (i=VECTOR_SIZE(obj)-1; i >= 0; i--)
+                          h = HASH_WORD(h, sxhash(VECTOR_DATA(obj)[i]));
+                        return h;
+    default:            /* A complex type (STklos object, user defined type,
+                         * hashtable...). In this case we return the type of the
+                         * object. This is very  inneficient but it should be
+                         * rare to use a  structured object as a key.
+                         */
+                         return (unsigned long) BOXED_TYPE(obj);
   }
 }
 
 /*===========================================================================*\
  *
- * 				H a s h    S t a t s
+ *                              H a s h    S t a t s
  *
 \*===========================================================================*/
 #define _MAX_COUNT 5
@@ -174,8 +174,8 @@ static void hash_stats(struct hash_table_obj *h, SCM port)
   }
 
   STk_fprintf(port, "  %d entries in table, %d buckets (ratio %g)\n",
-	      HASH_NENTRIES(h), HASH_NBUCKETS(h),
-	      (double) HASH_NENTRIES(h)/ HASH_NBUCKETS(h));
+              HASH_NENTRIES(h), HASH_NBUCKETS(h),
+              (double) HASH_NENTRIES(h)/ HASH_NBUCKETS(h));
   STk_fprintf(port, "Repartition\n");
 
   for (i = 0; i < _MAX_COUNT; i++) {
@@ -189,7 +189,7 @@ static void hash_stats(struct hash_table_obj *h, SCM port)
 
 /*===========================================================================*\
  *
- * 				E n l a r g e   t a b l e
+ *                              E n l a r g e   t a b l e
  *
 \*===========================================================================*/
 
@@ -207,12 +207,12 @@ static void enlarge_table(register struct hash_table_obj *h)
   /* Set up hashing constants for new array size. */
   HASH_NBUCKETS(h) *= 4;
   HASH_NEWSIZE(h)  *= 4;
-  HASH_SHIFT(h)	   -= 2;
-  HASH_MASK(h)	    = (HASH_MASK(h) << 2) + 3;
+  HASH_SHIFT(h)    -= 2;
+  HASH_MASK(h)      = (HASH_MASK(h) << 2) + 3;
 
   /* Allocate and initialize the new bucket array. */
   HASH_BUCKETS(h)   = (SCM *)
-    		STk_must_malloc((size_t) (HASH_NBUCKETS(h) * sizeof(SCM)));
+                STk_must_malloc((size_t) (HASH_NBUCKETS(h) * sizeof(SCM)));
   for (i = 0; i < HASH_NBUCKETS(h); i++) {
     HASH_BUCKETS(h)[i] = STk_nil;
   }
@@ -221,30 +221,30 @@ static void enlarge_table(register struct hash_table_obj *h)
   for (i = 0; i < old_size; i++) {
     for (tmp = old_buckets[i]; !NULLP(tmp); tmp = CDR(tmp)) {
       switch (BOXED_INFO(h)) {
-	case HASH_OBARRAY_FLAG:
-	  index = hash_string(SYMBOL_PNAME(CAR(tmp))) & HASH_MASK(h);
-	  break;
-	case HASH_VAR_FLAG:
-	  index = hash_string(SYMBOL_PNAME(CAR(CAR(tmp)))) & HASH_MASK(h);
-	  break;
-	case HASH_SCM_FLAG: {
-	  SCM key = CAR(CAR(tmp));
-	  switch (HASH_TYPE(h)) {
-	    case hash_eqp:
-	      index = RANDOM_INDEX(h, key);
-	      break;
-	    case hash_stringp:
-	      index = hash_scheme_string(key) & HASH_MASK(h);
-	      break;
-	    case hash_general:
-	      index = RANDOM_INDEX(h, STk_integer_value(STk_C_apply(HASH_HASH(h),
-								    1,
-								    key)));
-	      break;
-	    default: ;
-	  }
-	}
-	break;
+        case HASH_OBARRAY_FLAG:
+          index = hash_string(SYMBOL_PNAME(CAR(tmp))) & HASH_MASK(h);
+          break;
+        case HASH_VAR_FLAG:
+          index = hash_string(SYMBOL_PNAME(CAR(CAR(tmp)))) & HASH_MASK(h);
+          break;
+        case HASH_SCM_FLAG: {
+          SCM key = CAR(CAR(tmp));
+          switch (HASH_TYPE(h)) {
+            case hash_eqp:
+              index = RANDOM_INDEX(h, key);
+              break;
+            case hash_stringp:
+              index = hash_scheme_string(key) & HASH_MASK(h);
+              break;
+            case hash_general:
+              index = RANDOM_INDEX(h, STk_integer_value(STk_C_apply(HASH_HASH(h),
+                                                                    1,
+                                                                    key)));
+              break;
+            default: ;
+          }
+        }
+        break;
       }
       /* Place the old value at new index */
       HASH_BUCKETS(h)[index] = STk_cons(CAR(tmp), HASH_BUCKETS(h)[index]);
@@ -258,32 +258,32 @@ static void enlarge_table(register struct hash_table_obj *h)
 
 /*===========================================================================*\
  *
- *  		       H a s h - t a b l e   c r e a t i o n
+ *                     H a s h - t a b l e   c r e a t i o n
  *
 \*===========================================================================*/
 
 void STk_hashtable_init(struct hash_table_obj *h, int flag)
 {
   /* Initialization of hash table. Only the system part is initialized here */
-  BOXED_INFO(h)		   = flag;
-  BOXED_TYPE(h)		   = tc_hash_table;
-  HASH_BUCKETS(h) 	   = HASH_SBUCKETS(h);
-  HASH_SBUCKETS(h)[0] 	   = STk_nil;
-  HASH_SBUCKETS(h)[1] 	   = STk_nil;
-  HASH_SBUCKETS(h)[2] 	   = STk_nil;
-  HASH_SBUCKETS(h)[3] 	   = STk_nil;
-  HASH_NBUCKETS(h) 	   = SMALL_HASH_TABLE;
-  HASH_NENTRIES(h) 	   = 0;
-  HASH_NEWSIZE(h) 	   = SMALL_HASH_TABLE * REBUILD_MULTIPLIER;
-  HASH_SHIFT(h) 	   = 28;
-  HASH_MASK(h) 		   = 3;
+  BOXED_INFO(h)            = flag;
+  BOXED_TYPE(h)            = tc_hash_table;
+  HASH_BUCKETS(h)          = HASH_SBUCKETS(h);
+  HASH_SBUCKETS(h)[0]      = STk_nil;
+  HASH_SBUCKETS(h)[1]      = STk_nil;
+  HASH_SBUCKETS(h)[2]      = STk_nil;
+  HASH_SBUCKETS(h)[3]      = STk_nil;
+  HASH_NBUCKETS(h)         = SMALL_HASH_TABLE;
+  HASH_NENTRIES(h)         = 0;
+  HASH_NEWSIZE(h)          = SMALL_HASH_TABLE * REBUILD_MULTIPLIER;
+  HASH_SHIFT(h)            = 28;
+  HASH_MASK(h)             = 3;
 }
 
 
 
 /*===========================================================================*\
  *
- *  	          O b a r r a y   h a s h t a b l e   f u n t i o n s
+ *                O b a r r a y   h a s h t a b l e   f u n t i o n s
  *
  *
  * Keys are symbols or keywords. The value associated to a bucket is a list
@@ -325,7 +325,7 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s, SCM (*create) (cha
 
 /*===========================================================================*\
  *
- *  	       v a r i a b l e s    h a s h t a b l e   f u n t i o n s
+ *             v a r i a b l e s    h a s h t a b l e   f u n t i o n s
  *
  *
  * Here variable are the variables defined in a module. Keys are symbols.
@@ -366,7 +366,7 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value)
 
     /* Enter the new variable in table */
     HASH_BUCKETS(h)[index] = STk_cons(STk_cons(v, z),
-				      HASH_BUCKETS(h)[index]);
+                                      HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
     /* If the table has exceeded a decent size, rebuild it */
     if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
@@ -386,7 +386,7 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value)
   } else {
     /* Enter the new variable in table */
     HASH_BUCKETS(h)[index] = STk_cons(STk_cons(v, value),
-				      HASH_BUCKETS(h)[index]);
+                                      HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
     /* If the table has exceeded a decent size, rebuild it */
     if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);
@@ -398,7 +398,7 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value)
 
 /*===========================================================================*\
  *
- * 			Utilities on hash tables
+ *                      Utilities on hash tables
  *
 \*===========================================================================*/
 
@@ -420,9 +420,9 @@ SCM STk_hash_keys(struct hash_table_obj *h)
 
 /*===========================================================================*\
  *
- * 		H a s h - t a b l e s   i n   t h e
+ *              H a s h - t a b l e s   i n   t h e
  *
- * 		      S c h e m e   W o r l d
+ *                    S c h e m e   W o r l d
  *
 \*===========================================================================*/
 static void error_bad_hash_table(SCM obj)
@@ -471,6 +471,14 @@ DEFINE_PRIMITIVE("%make-hash-table", make_hash, subr2, (SCM compar, SCM hashfct)
   return z;
 }
 
+SCM STk_make_basic_hash_table(void) {
+  SCM z;
+
+  NEWCELL(z, hash_table);
+  STk_hashtable_init((struct hash_table_obj *) z, HASH_SCM_FLAG);
+  HASH_TYPE(z)   = hash_eqp;
+  return z;
+}
 
 /*
 <doc EXT hash-table?
@@ -506,7 +514,7 @@ DEFINE_PRIMITIVE("hash-table-size", hash_table_size, subr1, (SCM ht))
 doc>
 */
 DEFINE_PRIMITIVE("hash-table-equivalence-function", hash_table_eqv_func,
-		 subr1, (SCM ht))
+                 subr1, (SCM ht))
 {
   if(!HASHP(ht)) error_bad_hash_table(ht);
   return HASH_COMPAR(ht);
@@ -521,7 +529,7 @@ DEFINE_PRIMITIVE("hash-table-equivalence-function", hash_table_eqv_func,
 doc>
 */
 DEFINE_PRIMITIVE("hash-table-hash-function", hash_table_hash_func,
-		 subr1, (SCM ht))
+                 subr1, (SCM ht))
 {
   if(!HASHP(ht)) error_bad_hash_table(ht);
   return HASH_HASH(ht);
@@ -548,22 +556,22 @@ DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
     case hash_eqp:
       index = RANDOM_INDEX(ht, key);
       for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
-	if (CAR(CAR(l)) == key) break;
+        if (CAR(CAR(l)) == key) break;
       break;
 
     case hash_stringp:
       index = hash_scheme_string(key) & HASH_MASK(ht);
 
       for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
-	if (STk_streq(CAR(CAR(l)), key) != STk_false) break;
+        if (STk_streq(CAR(CAR(l)), key) != STk_false) break;
       break;
     case hash_general:
       func  = HASH_COMPAR(ht);
       index = RANDOM_INDEX(ht,
-			   STk_integer_value(STk_C_apply(HASH_HASH(ht), 1, key)));
+                           STk_integer_value(STk_C_apply(HASH_HASH(ht), 1, key)));
 
       for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
-	if (STk_C_apply(func, 2, CAR(CAR(l)), key) != STk_false) break;
+        if (STk_C_apply(func, 2, CAR(CAR(l)), key) != STk_false) break;
     default:  break;
   }
 
@@ -620,23 +628,23 @@ static SCM Inline hash_table_search(SCM ht, SCM key)
     case hash_eqp:
       index = RANDOM_INDEX(ht, key);
       for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
-	if (CAR(CAR(l)) == key) return CDR(CAR(l));
+        if (CAR(CAR(l)) == key) return CDR(CAR(l));
       break;
 
     case hash_stringp:
       index = hash_scheme_string(key) & HASH_MASK(ht);
 
       for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
-	if (STk_streq(CAR(CAR(l)), key) != STk_false) return CDR(CAR(l));
+        if (STk_streq(CAR(CAR(l)), key) != STk_false) return CDR(CAR(l));
       break;
 
     case hash_general:
       func = HASH_COMPAR(ht);
       index = RANDOM_INDEX(ht,
-			   STk_integer_value(STk_C_apply(HASH_HASH(ht), 1, key)));
+                           STk_integer_value(STk_C_apply(HASH_HASH(ht), 1, key)));
 
       for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); l = CDR(l))
-	if (STk_C_apply(func, 2, CAR(CAR(l)), key) != STk_false) return CDR(CAR(l));
+        if (STk_C_apply(func, 2, CAR(CAR(l)), key) != STk_false) return CDR(CAR(l));
       break;
     default: break;
   }
@@ -652,7 +660,7 @@ DEFINE_PRIMITIVE("hash-table-ref", hash_ref, subr23, (SCM ht, SCM key, SCM def))
   if (res) return res;
   if (def) return STk_C_apply(def, 0);
   error_not_present(key, ht);
-  return STk_void; 			/* never reached */
+  return STk_void;                      /* never reached */
 }
 
 /*
@@ -666,14 +674,14 @@ DEFINE_PRIMITIVE("hash-table-ref", hash_ref, subr23, (SCM ht, SCM key, SCM def))
 doc>
 */
 DEFINE_PRIMITIVE("hash-table-ref/default", hash_ref_default, subr3,
-		 (SCM ht, SCM key, SCM def))
+                 (SCM ht, SCM key, SCM def))
 {
   SCM res = hash_table_search(ht, key);
 
   if (res) return res;
   if (def) return def;
   error_not_present(key,ht);
-  return STk_void; 			/* never reached */
+  return STk_void;                      /* never reached */
 }
 
 /*
@@ -720,33 +728,33 @@ DEFINE_PRIMITIVE("hash-table-delete!", hash_delete, subr2, (SCM ht, SCM key))
     case hash_eqp:
       index = RANDOM_INDEX(ht, key);
       for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); prev=l, l=CDR(l))
-	if (CAR(CAR(l)) == key) break;
+        if (CAR(CAR(l)) == key) break;
       break;
 
     case hash_stringp:
       index = hash_scheme_string(key) & HASH_MASK(ht);
 
       for(l = HASH_BUCKETS(ht)[index]; !NULLP(l);  prev=l, l=CDR(l))
-	if (STk_streq(CAR(CAR(l)), key) != STk_false) break;
+        if (STk_streq(CAR(CAR(l)), key) != STk_false) break;
       break;
 
     case hash_general:
       func = HASH_COMPAR(ht);
       index = RANDOM_INDEX(ht,
-			   STk_integer_value(STk_C_apply(HASH_HASH(ht), 1, key)));
+                           STk_integer_value(STk_C_apply(HASH_HASH(ht), 1, key)));
 
       for(l = HASH_BUCKETS(ht)[index]; !NULLP(l); prev=l, l=CDR(l))
-	if (STk_C_apply(func, 2, CAR(CAR(l)), key) != STk_false) break;
+        if (STk_C_apply(func, 2, CAR(CAR(l)), key) != STk_false) break;
       break;
     default: break;
   }
 
-  if (!NULLP(l)) {     			/* found item */
+  if (!NULLP(l)) {                      /* found item */
     HASH_NENTRIES(ht) -= 1;
     if (NULLP(prev))
       HASH_BUCKETS(ht)[index] = CDR(l); /* somewhere in the chain */
     else
-      CDR(prev) = CDR(l);		/* delete the first item of the chain */
+      CDR(prev) = CDR(l);               /* delete the first item of the chain */
   }
   return STk_void;
 }
@@ -784,7 +792,7 @@ DEFINE_PRIMITIVE("hash-table-for-each", hash_for_each, subr2, (SCM ht, SCM proc)
   int i, n;
   SCM l = STk_nil;;
 
-  if (!HASHP(ht)) 			 error_bad_hash_table(ht);
+  if (!HASHP(ht))                        error_bad_hash_table(ht);
   if (STk_procedurep(proc) == STk_false) error_bad_procedure(proc);
 
   n = HASH_NBUCKETS(ht);
@@ -821,7 +829,7 @@ DEFINE_PRIMITIVE("hash-table-map", hash_map, subr2, (SCM ht, SCM proc))
   int i, n;
   SCM res, l;
 
-  if (!HASHP(ht)) 			 error_bad_hash_table(ht);
+  if (!HASHP(ht))                        error_bad_hash_table(ht);
   if (STk_procedurep(proc) == STk_false) error_bad_procedure(proc);
 
   n = HASH_NBUCKETS(ht);
@@ -830,7 +838,7 @@ DEFINE_PRIMITIVE("hash-table-map", hash_map, subr2, (SCM ht, SCM proc))
   for (i = 0; i < n; i++)
     for (l = HASH_BUCKETS(ht)[i]; !NULLP(l); l = CDR(l))
       res = STk_cons(STk_C_apply(proc, 2, CAR(CAR(l)), CDR(CAR(l))),
-		     res);
+                     res);
   return res;
 }
 
@@ -880,7 +888,7 @@ DEFINE_PRIMITIVE("hash-table-stats", hash_stats, subr12, (SCM ht, SCM port))
 
 /*===========================================================================*\
  *
- * 	Initialization code
+ *      Initialization code
  *
 \*===========================================================================*/
 

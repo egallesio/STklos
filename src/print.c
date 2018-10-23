@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 19-Oct-2018 08:42 (eg)
+ * Last file update: 19-Oct-2018 21:22 (eg)
  *
  */
 #include <ctype.h>
@@ -290,29 +290,35 @@ void STk_print(SCM exp, SCM port, int mode)
  *                      Printing of circular structures
  *
  *=============================================================================*/
-static void pass1(SCM exp, SCM *cycles);                   /* pass 1: mark cells */
-static void pass2(SCM exp, SCM port, int mode, SCM cycles);/* pass 2: print      */
+#include "hash.h"
+
+typedef struct {
+  SCM seen;
+  int label;
+} cycles;
+
+static void pass1(SCM exp, cycles *c);                     /* pass 1: mark cells */
+static void pass2(SCM exp, SCM port, int mode, cycles *c); /* pass 2: print      */
 
 
-static void print_cycle(SCM exp, SCM port, int mode, SCM cycles)
+static void print_cycle(SCM exp, SCM port, int mode, cycles *c)
 {
-  SCM value, tmp;
+  SCM value;
 
-  if ((tmp = STk_assv(exp, cycles)) != STk_false) {
-    value= CDR(tmp);
-    if (INTP(value)) {
-      STk_fprintf(port, "#%ld#", INT_VAL(value));
-      return;
-    }
+  value =  STk_hash_ref_default(c->seen, exp, STk_void);
+  if (INTP(value)) {
+    // value= CDR(tmp);
+    STk_fprintf(port, "#%ld#", INT_VAL(value));
+    return;
   }
   /* This is not a cycle. Do a normal print */
-  pass2(exp, port, mode, cycles);                       // FIXME: pass2?
+  pass2(exp, port, mode, c);
 }
 
 
-static void printlist_star(SCM exp, SCM port, int mode, SCM cycles)
+static void printlist_star(SCM exp, SCM port, int mode, cycles *c)
 {
-  SCM value, tmp;
+  SCM value;
   char *s;
 
   if (pretty_quotes) {
@@ -320,7 +326,7 @@ static void printlist_star(SCM exp, SCM port, int mode, SCM cycles)
     s = STk_quote2str(CAR(exp));
     if (s && !NULLP(CDR(exp)) && NULLP(CDR(CDR(exp)))) {
       STk_puts(s, port);
-      print_cycle(CAR(CDR(exp)), port, mode, cycles);
+      print_cycle(CAR(CDR(exp)), port, mode, c);
       return;
     }
   }
@@ -328,15 +334,16 @@ static void printlist_star(SCM exp, SCM port, int mode, SCM cycles)
   STk_putc('(', port);
 
   for ( ; ; ) {
-    print_cycle(CAR(exp), port, mode, cycles);
+    print_cycle(CAR(exp), port, mode, c);
 
     if (NULLP(exp=CDR(exp))) break;
 
-    if (!CONSP(exp) || (tmp = STk_assv(exp, cycles)) != STk_false) {
-      if (!CONSP(exp) || (value = CDR(tmp)) == STk_true || INTP(value)) {
+    value = STk_hash_ref_default(c->seen, exp, STk_false);
+    if (!CONSP(exp) || value != STk_false) {
+      if (!CONSP(exp) || value == STk_true || INTP(value)) {  //FIXME: value == #t??
         /* either  ". X" or ". #0=(...)" or ". #0#" */
         STk_nputs(port, " . ", 3);
-        print_cycle(exp, port, mode, cycles);
+        print_cycle(exp, port, mode, c);
         break;
       }
     }
@@ -346,79 +353,76 @@ static void printlist_star(SCM exp, SCM port, int mode, SCM cycles)
 }
 
 
-static void printvector_star(SCM exp, SCM port, int mode, SCM cycles)
+static void printvector_star(SCM exp, SCM port, int mode, cycles *c)
 {
   int j, n = VECTOR_SIZE(exp);
 
   STk_nputs(port, "#(", 2);
   for(j=0; j < n; j++) {
-    print_cycle(VECTOR_DATA(exp)[j], port, mode, cycles);
+    print_cycle(VECTOR_DATA(exp)[j], port, mode, c);
     if ((j + 1) < n) STk_putc(' ', port);
   }
   STk_putc(')', port);
 }
 
 
-static void pass1(SCM exp, SCM *cycles)
+static void pass1(SCM exp, cycles *c)
 {
-  SCM tmp;
-
 Top:
   if (!CONSP(exp) && !VECTORP(exp)) return;
 
-  if ((tmp = STk_assv(exp, *cycles)) == STk_false) {
+  if ((STk_hash_ref_default(c->seen, exp, STk_void)) == STk_void) {
     /* We have never seen this cell so far */
-    *cycles = STk_cons(STk_cons(exp, STk_false), *cycles);
+    STk_hash_set(c->seen, exp, STk_false);
 
     if (CONSP(exp)) {                   /* it's a cons */
-      pass1(CAR(exp), cycles);
+      pass1(CAR(exp), c);
       exp = CDR(exp);
       goto Top;
     }
     else {                              /* it's a vector */
       int i, len = VECTOR_SIZE(exp)-1;
-      for (i = 0; i < len; i++) pass1(VECTOR_DATA(exp)[i], cycles);
+      for (i = 0; i < len; i++) pass1(VECTOR_DATA(exp)[i], c);
       if (len >= 0) {exp = VECTOR_DATA(exp)[len]; goto Top;}
     }
   }
   else {
     /* This item was already seen. Note that this is the second time */
-    CDR(tmp) = STk_true;
+    STk_hash_set(c->seen, exp, STk_true);
   }
 }
 
 
-static void pass2(SCM exp, SCM port, int mode, SCM cycles)
+static void pass2(SCM exp, SCM port, int mode, cycles *c)
 {
-  int label = 0;
-
   if (!CONSP(exp) && !VECTORP(exp))
     STk_print(exp, port, mode);     /* Normal print */
   else {
-    SCM value, tmp;
-
     /* Eventually print a definition label */
-    if ((tmp = STk_assv(exp, cycles)) != STk_false) {
-      if ((value=CDR(tmp)) == STk_true) {
-        /* First use of this label. Assign it a value */
-        STk_fprintf(port, "#%d=", label);
-        CDR(tmp) = MAKE_INT(label++);
-      }
+    if (STk_hash_ref_default(c->seen, exp, STk_void) == STk_true) {
+      /* First use of this label. Assign it a value */
+      STk_fprintf(port, "#%d=", c->label);
+      STk_hash_set(c->seen, exp, MAKE_INT(c->label++));
     }
 
-    if (CONSP(exp)) printlist_star(exp, port, mode, cycles);
-    else            printvector_star(exp, port, mode, cycles);
+    if (CONSP(exp)) printlist_star(exp, port, mode, c);
+    else            printvector_star(exp, port, mode, c);
   }
 }
 
+
 void STk_print_star(SCM exp, SCM port, int mode)
 {
-  SCM cycles = STk_nil;
+  cycles c;
 
   if (!CONSP(exp) &&  !VECTORP(exp)) return STk_print(exp, port, mode);
 
-  pass1(exp, &cycles);
-  pass2(exp, port, mode, cycles);
+  /* Initialize the cycle structure */
+  c.seen = STk_make_basic_hash_table();
+  c.label = 0;
+
+  pass1(exp, &c);
+  pass2(exp, port, mode, &c);
 }
 
 /*
