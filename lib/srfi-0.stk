@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 25-Aug-2018 19:08 (eg)
+;;;; Last file update:  6-Nov-2018 12:29 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -153,6 +153,28 @@
     (srfi-96 "srfi-96")                 ; SLIB Prerequisites
     ;; srfi-97
     srfi-98                             ; Interface to access environment variables
+    ;; srfi-99
+    (srfi-100 "srfi-100")               ; define-lambda-object
+    ;; srfi-101
+    ;; srfi-102                         ; ....... withdrawn
+    ;; srfi-103                         ; ....... withdrawn
+    ;; srfi-104                         ; ....... withdrawn
+    ;; srfi-105
+    ;; srfi-106
+    ;; srfi-107
+    ;; srfi-108
+    ;; srfi-109
+    ;; srfi-110
+    ((srfi-111 boxes) "srfi-111")       ; Boxes
+    ;; srfi-112
+    ;; srfi-113
+    ;; srfi-114
+    ;; srfi-115
+    ;; srfi-116
+    ;; srfi-117
+    ;; srfi-118
+    ;; srfi-119
+    ;; srfi-120
     ))
 
 ;; ----------------------------------------------------------------------

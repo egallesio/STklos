@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 21-Sep-2018 09:40 (eg)
+;; Last file update:  6-Nov-2018 12:27 (eg)
 ;;
 ;; ======================================================================
 
@@ -569,6 +569,16 @@ described in this document (procedures
 (p [,(quick-link-srfi 100) is fully supported.  To use SRFI-100,
 you need to insert the following expression])
 (fontified-code [(require "srfi-100")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 111 -- Boxes
+;; ----------------------------------------------------------------------
+(srfi-section 111
+
+(p [,(quick-link-srfi 111) is fully supported.  To use SRFI-111, 
+you need to insert the following expression])
+(fontified-code [(require "srfi-111")])
 (p [in your code or uses the ,(code "cond-expand") special form.]))
 
 ;; End of chapter
