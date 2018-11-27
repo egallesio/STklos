@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  5-Oct-2018 18:09 (eg)
+;;;; Last file update: 27-Nov-2018 14:34 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -128,7 +128,7 @@
 ; ======================================================================
 
 (define (fetch-constant c)
-  (let ((x (member c *code-constants*)))
+  (let ((x (memq c *code-constants*)))
     (unless x
       ;; This constant was not in the table; add it.
       (set! x (list c))
