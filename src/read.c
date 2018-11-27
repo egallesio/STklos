@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  2-Jul-2018 16:32 (eg)
+ * Last file update: 27-Nov-2018 10:38 (eg)
  *
  */
 
@@ -406,7 +406,7 @@ static void patch_references(SCM port, SCM l, SCM cycles)
 
     tmp = *((SCM *) CAR(l));
     k   = PLACEHOLDER_VAL(tmp);
-    if ((tmp = STk_assv(k, cycles)) != STk_false) {
+    if ((tmp = STk_assq(k, cycles)) != STk_false) {
       *((SCM *) CAR(l)) = CDR(tmp);
     }
     else
@@ -432,7 +432,7 @@ static SCM read_cycle(SCM port, int c, struct read_context *ctx)
   k = MAKE_INT(atoi(buffer));
 
   switch (c) {
-    case '#': if ((tmp = STk_assv(k, ctx->cycles)) != STk_false) {
+    case '#': if ((tmp = STk_assq(k, ctx->cycles)) != STk_false) {
                 val = CDR(tmp);
                 if (PLACEHOLDERP(val))
                   CAR(val) = STk_true; /* Mark  the placeholder as read */
@@ -449,10 +449,10 @@ static SCM read_cycle(SCM port, int c, struct read_context *ctx)
                  *    (#0=(1 2 . #0#) #0#)
                  * the first reference will use the placeholder cell, whereas
                  * the second one will be correct.
-                 * We call here the function find_inner_references to capture
+                 * We call here the function add_inner_references to capture
                  * the reference which are in the second case.
                  *
-                 * At the end, of the entire read (and only at the end to
+                 * At the end of the entire read (and only at the end to
                  * avoid  a long time calculation, or even infinite loops),
                  * the function "patch_references" will correct all the
                  * remaining references that must be modified.

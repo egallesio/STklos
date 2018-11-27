@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 19-Oct-2018 21:22 (eg)
+ * Last file update: 22-Oct-2018 17:35 (eg)
  *
  */
 #include <ctype.h>
@@ -339,13 +339,11 @@ static void printlist_star(SCM exp, SCM port, int mode, cycles *c)
     if (NULLP(exp=CDR(exp))) break;
 
     value = STk_hash_ref_default(c->seen, exp, STk_false);
-    if (!CONSP(exp) || value != STk_false) {
-      if (!CONSP(exp) || value == STk_true || INTP(value)) {  //FIXME: value == #t??
+    if (!CONSP(exp) || value != STk_false) { /* value is #t or an integer */
         /* either  ". X" or ". #0=(...)" or ". #0#" */
         STk_nputs(port, " . ", 3);
         print_cycle(exp, port, mode, c);
         break;
-      }
     }
     STk_putc(' ', port);
   }
