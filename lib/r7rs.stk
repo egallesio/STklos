@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 12-Oct-2018 17:19 (eg)
+;;;; Last file update: 27-Nov-2018 17:46 (eg)
 ;;;;
 
 
@@ -29,6 +29,13 @@
 (define write-shared write*)
 (define write-simple write)
 
+
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.1 Equivalence predicate 
+;;;; ----------------------------------------------------------------------
+(define equal-simple? equal?)
+(set! equal? %equiv?)   ;; equiv? is defined in equiv.stk
 
 
 ;;;; ----------------------------------------------------------------------
@@ -67,6 +74,15 @@ doc>
 |#
 (define (make-list k :optional (fill (void)))
   (vector->list (make-vector k fill)))
+
+;;
+;; Define versions of member and assoc which use equiv? instead of equal?
+;;
+(define member-simple member)
+(define assoc-simple  assoc)
+
+(define (member x y :optional (compar %equiv?)) (member-simple x y compar))
+(define (assoc  x y :optional (compar %equiv?)) (assoc-simple  x y compar))
 
 
 ;;;; ----------------------------------------------------------------------

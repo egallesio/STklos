@@ -22,12 +22,84 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 21-Sep-2018 10:01 (eg)
+;;;; Last file update: 27-Nov-2018 17:48 (eg)
 ;;;;
 
 (require "test")
 
 (test-section "R7RS")
+
+(test-subsection "Equivalence Predicates")
+
+(test "eqv?.1" #t (eqv? 'a 'a))
+(test "eqv?.2" #f (eqv? 'a 'b))
+(test "eqv?.3" #t (eqv? 2 2))
+(test "eqv?.4" #f (eqv? 2 2.0))
+(test "eqv?.5" #t (eqv? '() '()))
+(test "eqv?.6" #t (eqv? 100000000 100000000))
+(test "eqv?.7" #f (eqv? 0.0 +nan.0))
+(test "eqv?.8" #f (eqv? (cons 1 2) (cons 1 2)))
+(test "eqv?.9" #f (eqv? (lambda () 1)
+                        (lambda () 2)))
+(test "eqv?.10" #t (let ((p (lambda (x) x)))
+                     (eqv? p p)))
+(test "eqv?.11" #f (eqv? #f 'nil))
+
+(let ()
+  (define gen-counter
+    (lambda ()
+      (let ((n 0))
+        (lambda () (set! n (+ n 1)) n))))
+
+  (define gen-loser
+    (lambda ()
+      (let ((n 0))
+        (lambda () (set! n (+ n 1)) 27))))
+
+  (test "gen-counter.1"  #t
+        (let ((g (gen-counter)))
+          (eqv? g g)))
+  (test "gen-counter.2"  #f
+        (eqv? (gen-counter) (gen-counter)))
+
+  (test "gen-loser" #t
+        (let ((g (gen-loser)))
+          (eqv? g g))))
+
+(test "eqv?12" #f
+      (letrec ((f (lambda () (if (eqv? f g) 'f 'both)))
+               (g (lambda () (if (eqv? f g) 'g 'both))))
+        (eqv? f g)))
+
+(test "eq?.1" #t (eq? 'a 'a))
+(test "eq?.2" #t (boolean? (eq? '(a) '(a))))
+(test "eq?.3" #f (eq? (list 'a) (list 'a)))
+(test "eq?.4" #t (boolean? (eq? "a" "a")))
+(test "eq?.5" #t (boolean? (eq? "" "")))
+(test "eq?.6" #t (eq? '() '()))
+(test "eq?.7" #t (eq? 2 2))
+(test "eq?.8" #t (eq? #\A #\A))
+(test "eq?.9" #t (eq? car car))
+(test "eq?.10" #t (let ((n (+ 2 3)))
+                    (eq? n n)))
+(test "eq?.11" #t (let ((x '(a)))
+                    (eq? x x)))
+(test "eq?.12" #t (let ((x '#()))
+                    (eq? x x)))
+(test "eq?.13" #t (let ((p (lambda (x) x)))
+                    (eq? p p)))
+
+(test "equal?.1" #t (equal? '(a (b) c)
+                            '(a (b) c)))
+(test "equal?.2" #t (equal? (make-vector 5 'a)
+                            (make-vector 5 'a)))
+
+(test "equal?.3" #t (equal? '#0=(a b . #0#)
+                            '#1=(a b a b . #1#)))
+
+(test "equal?.4" #f (equal? '#0=(a b a . #0#)
+                            '#1=(a b a b . #1#)))
+
 
 
 ;;------------------------------------------------------------------

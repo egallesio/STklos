@@ -22,12 +22,15 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 26-Mar-2018 10:06 (eg)
+ * Last file update: 26-Nov-2018 16:20 (eg)
  */
 
 #include "stklos.h"
 #include "object.h"
 #include "struct.h"
+
+#define MAX_EQUAL_CALLS 100000   // Maximum calls of %try-equal
+
 
 DEFINE_PRIMITIVE("not", not, subr1, (SCM x))
 /*
@@ -358,6 +361,90 @@ DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
   return STk_false;
 }
 
+/*
+ * The equal-count function is a variant of equal which is bounded in
+ * recursion calls. This function returns a boolean (AND a boolean
+ * which tells the caller if a cycle was detected) 
+ */
+static SCM equal_count(SCM x, SCM y, int max, int *cycle)
+{
+ Top:
+  if (STk_eqv(x, y) == STk_true) return STk_true;
+
+  if (!max--) { *cycle = 1; return STk_false; }
+
+  switch (STYPE(x)) {
+    case tc_cons:
+      if (CONSP(y)) {
+        if (equal_count(CAR(x), CAR(y), max, cycle) == STk_false) return STk_false;
+        x = CDR(x); y = CDR(y);
+        goto Top;
+      }
+      break;
+    case tc_string:
+      if (STRINGP(y)) {
+        return STk_streq(x, y);
+      }
+      break;
+    case tc_vector:
+      if (VECTORP(y)) {
+        long lx, ly, i;
+        SCM *vx, *vy;
+
+        lx = VECTOR_SIZE(x); ly = VECTOR_SIZE(y);
+        if (lx == ly) {
+          vx = VECTOR_DATA(x);
+          vy = VECTOR_DATA(y);
+          for (i=0; i < lx;  i++) {
+            if (equal_count(vx[i], vy[i], max, cycle) == STk_false) return STk_false;
+          }
+          return STk_true;
+        }
+      }
+      break;
+    case tc_instance:
+      if (STk_oo_initialized) {
+        SCM fg, res;
+
+        fg = STk_lookup(STk_intern("object-equal?"),STk_current_module(),
+                        &res,FALSE);
+        res = STk_C_apply(fg, 2, x, y);
+        return res;
+      }
+      break;
+    case tc_struct:
+      if (STRUCTP(y) && (STRUCT_TYPE(x) == STRUCT_TYPE(y)))
+        return equal_count(STk_struct2list(x), STk_struct2list(y), max, cycle);
+      break;
+    case tc_box:
+      if (BOXP(y))
+        return equal_count(BOX_VALUE(x), BOX_VALUE(y), max, cycle);
+      break;
+    case tc_uvector:
+      if (BOXED_TYPE_EQ(y, tc_uvector))
+        return MAKE_BOOLEAN(STk_uvector_equal(x, y));
+      break;
+#ifdef FIXME
+//EG:       default:
+//EG:           if (EXTENDEDP(x) && EXTENDEDP(y) && TYPE(x) == TYPE(y))
+//EG:             return STk_extended_compare(x, y, TRUE);
+#endif
+    default: break;
+  }
+  return STk_false;
+}
+
+/* %equal-try returns a boolean when it doesn't detect a cycle (in a
+ * given amount of calls). It returns '() when it suspects a cycle.
+ */
+DEFINE_PRIMITIVE("%equal-try", equal_try, subr2, (SCM x, SCM y))
+{
+  int cycle = 0;
+  SCM res = equal_count(x, y, MAX_EQUAL_CALLS, &cycle);
+  return (cycle) ? STk_nil : res;
+}
+
+
 int STk_init_boolean(void)
 {
   ADD_PRIMITIVE(not);
@@ -365,5 +452,6 @@ int STk_init_boolean(void)
   ADD_PRIMITIVE(eq);
   ADD_PRIMITIVE(eqv);
   ADD_PRIMITIVE(equal);
+  ADD_PRIMITIVE(equal_try);
   return TRUE;
 }
