@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  1-Jan-2012 18:30 (eg)
+# Last file update: 27-Nov-2018 13:58 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -16,6 +16,7 @@ scheme_BOOT = assembler.stk		\
 	      compiler.stk 		\
 	      computils.stk		\
 	      date.stk			\
+	      equiv.stk			\
 	      expand.pp			\
 	      ffi.stk			\
 	      load.stk			\

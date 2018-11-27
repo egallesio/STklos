@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 13-Sep-2018 16:42 (eg)
+;;;; Last file update: 27-Nov-2018 14:16 (eg)
 ;;;;
 
 (include "runtime.stk")         ; Definition necessary for the bootstrap
@@ -36,6 +36,7 @@
 (include "mbe.stk")             ; A simple R5RS macro system
 (include "regexp.stk")          ; Regular expressions
 (include "process.stk")         ; Processes from Scheme
+(include "equiv.stk")           ; equivalence of circular structures
 (include "compiler.stk")        ; VM Compiler
 (include "object.stk")          ; CLOS like object system
 (include "date.stk")            ; Dates
