@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 26-Nov-2018 16:20 (eg)
+ * Last file update: 27-Nov-2018 20:53 (eg)
  */
 
 #include "stklos.h"
@@ -281,7 +281,7 @@ DEFINE_PRIMITIVE("eq?", eq, subr2, (SCM x,SCM y))
  * |Equal?| recursively compares the contents of pairs, vectors, and
  * strings, applying |eqv?| on other objects such as numbers and symbols.
  * A rule of thumb is that objects are generally |equal?| if they print the
- * same. |Equal?| may fail to terminate if its arguments are circular
+ * same. |Equal?| always terminates even if its arguments are circular
  * data structures.
  * @lisp
  * (equal? 'a 'a)                  =>  #t
@@ -292,7 +292,12 @@ DEFINE_PRIMITIVE("eq?", eq, subr2, (SCM x,SCM y))
  * (equal? 2 2)                    =>  #t
  * (equal? (make-vector 5 'a)
  *         (make-vector 5 'a))     =>  #t
+ * (equal? '\#1=(a b . \#1\#)
+ *         '\#2=(a b a b . \#2\#)) =>  #t
  * @end lisp
+ *
+ * ,(bold "Note:") A rule of thumb is that objects are generally
+ * |equal?| if they print the same.
 doc>
  */
 DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
@@ -364,7 +369,7 @@ DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
 /*
  * The equal-count function is a variant of equal which is bounded in
  * recursion calls. This function returns a boolean (AND a boolean
- * which tells the caller if a cycle was detected) 
+ * which tells the caller if a cycle was detected)
  */
 static SCM equal_count(SCM x, SCM y, int max, int *cycle)
 {
