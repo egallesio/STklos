@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-Oct-1993 21:37
- * Last file update:  5-Oct-2018 18:08 (eg)
+ * Last file update: 27-Nov-2018 17:22 (eg)
  */
 
 #include "stklos.h"
@@ -293,7 +293,7 @@ doc>
   int len = STk_int_length(l);
 
   if (len >= 0) return MAKE_INT(len);
-  STk_error("length of ~S is not calculable", l);
+  STk_error("length of ~W is not calculable", l);
   return STk_void; /* never reached */
 }
 
