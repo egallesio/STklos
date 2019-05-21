@@ -1,7 +1,7 @@
 /*
- * promise.c	-- Implementation of promises
+ * promise.c    -- Implementation of promises
  *
- * Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,9 +22,9 @@
  *           Author: Erick Gallesio [eg@unice.fr]
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date:  2-Jun-1993 12:27 (eg)
- * Last file update: 19-Aug-2011 18:01 (eg)
+ * Last file update: 13-Dec-2018 13:53 (eg)
  */
-#include <stklos.h>
+#include "stklos.h"
 
 struct promise_obj {
   stk_header header;
@@ -33,11 +33,11 @@ struct promise_obj {
 
 #define PFORCED 1
 
-#define PROMISEP(x)	  	(BOXED_TYPE_EQ((x), tc_promise))
-#define PROMISE_EXPR(x)   	(((struct promise_obj *) (x))->expr)
+#define PROMISEP(x)             (BOXED_TYPE_EQ((x), tc_promise))
+#define PROMISE_EXPR(x)         (((struct promise_obj *) (x))->expr)
 #define PROMISE_RESULT_READY(x) (BOXED_INFO(x))
 
-#define RESULT_READYP(x)	(PROMISE_RESULT_READY(x) & 1)
+#define RESULT_READYP(x)        (PROMISE_RESULT_READY(x) & 1)
 
 
 DEFINE_PRIMITIVE("%make-promise", make_promise, subr1, (SCM expr))
@@ -141,7 +141,7 @@ static void print_promise(SCM promise, SCM port, int mode)
   char buffer[100];
 
   sprintf(buffer, "#[promise %lx (%sforced)]", (unsigned long) promise,
-	  RESULT_READYP(promise)? "" : "not ");
+          RESULT_READYP(promise)? "" : "not ");
   STk_puts(buffer, port);
 }
 

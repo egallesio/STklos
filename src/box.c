@@ -1,8 +1,8 @@
-/*							-*- coding: utf-8 -*-
+/*                                                      -*- coding: utf-8 -*-
  *
- * b o x . c				-- The box type
+ * b o x . c                            -- The box type
  *
- * Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,10 +22,10 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-Dec-2007 18:04 (eg)
- * Last file update:  9-Dec-2007 20:28 (eg)
+ * Last file update: 13-Dec-2018 13:52 (eg)
  */
 
-#include <stklos.h>
+#include "stklos.h"
 
 static void error_bad_box(SCM obj)
 {

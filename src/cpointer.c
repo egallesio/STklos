@@ -1,8 +1,8 @@
-/*							-*- coding: utf-8 -*-
+/*                                                      -*- coding: utf-8 -*-
  *
- * c p o i n t e r . c		-- Pointers on C objects
+ * c p o i n t e r . c          -- Pointers on C objects
  *
- * Copyright © 2007-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,10 +22,10 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 28-Aug-2007 14:35 (eg)
- * Last file update: 15-May-2010 23:50 (eg)
+ * Last file update: 13-Dec-2018 13:52 (eg)
  */
 
-#include <stklos.h>
+#include "stklos.h"
 
 static void error_bad_cpointer(SCM obj)
 {
@@ -86,14 +86,14 @@ DEFINE_PRIMITIVE("cpointer->string",cpointer2string, subr1, (SCM p))
 }
 
 /* ----------------------------------------------------------------------
- * 	User interface allocation functions ...
+ *      User interface allocation functions ...
  *
  * Note: System functions which use malloc can use free-bytes to release
  * memory
  *
  * ----------------------------------------------------------------------
  */
-#define ALLOCATED_WITH_BOEHM_GC 	0x1
+#define ALLOCATED_WITH_BOEHM_GC         0x1
 
 DEFINE_PRIMITIVE("allocate-bytes", allocate_bytes, subr1, (SCM sz))
 {

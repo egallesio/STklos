@@ -1,5 +1,5 @@
 ;;;;
-;;;; lib.stk    -- Library for STklos Documentation Building
+;;;; lib.stk	-- Library for STklos Documentation Building
 ;;;;
 ;;;; Copyright © 2003-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
@@ -31,7 +31,7 @@
 ;;;;
 ;;;; Customization
 ;;;;
-(define *doc* '())                        ;; The documentation datbase when in memory
+(define *doc* '())			;; The documentation datbase when in memory
 (define *stderr* (current-error-port))
 (define *verbose* (getenv "DEBUG"))
 
@@ -44,21 +44,21 @@
 
 ;======================================================================
 ;
-;                               read-database
+; 				read-database
 ;
 ;======================================================================
 (define (read-database f)
   (when *verbose* (format *stderr* "Reading database ..."))
   (let ((in (open-input-file f)))
     (do ((proc (read in) (read in)))
-        ((eof-object? proc))
+	((eof-object? proc))
 ;      (format *stderr* "~A " (car proc))
       (set! *doc* (cons (append proc (list :seen #f)) *doc*))))
   (when *verbose* (format *stderr* " Done\n")))
 
 ;======================================================================
 ;
-;                               rewrite-for-skribe
+; 				rewrite-for-skribe
 ;
 ;======================================================================
 
@@ -78,13 +78,13 @@
 (define (fontified-code code)
   (blockquote
    (color :class "code" :bg *example-bg* :width *example-width*  :margin 4
-          (prog :line #f
-                (source :language stklos-language code)))))
+	  (prog :line #f
+		(source :language stklos-language code)))))
 (define (raw-code code)
   (blockquote
    (color :bg *example-bg* :width *example-width* :margin 4
-          (prog :line #f
-                (source code)))))
+	  (prog :line #f
+		(source code)))))
 
 (define (symbol-print)  (symbol 'dashv))
 (define (symbol-arrow)  (symbol '=>))
@@ -125,7 +125,7 @@
 
 ;======================================================================
 ;
-;                       insert-documentation
+; 			insert-documentation
 ;
 ;======================================================================
 (define (doc-html name type synopsis similar txt)
@@ -133,76 +133,76 @@
     (code (bold (color :fg "IndianRed" x))))
   (define (show-type x)
     (color :fg "darkolivegreen"
-           (it (case x
-                 ((syntax)          [,(rfive) syntax])
+	   (it (case x
+		 ((syntax)          [,(rfive) syntax])
                  ((r57rs-procedure) [,(rfive)/,(rseven) procedure])
                  ((r7rs-procedure)  [,(rseven) procedure])
                  ((r7rs-syntax)     [,(rseven) syntax])
-                 ((extended-syntax) [,(stklos) syntax])
-                 ((procedure)       [,(rfive) procedure])
-                 ((extended)        [,(stklos) procedure])))))
+		 ((extended-syntax) [,(stklos) syntax])
+		 ((procedure)	    [,(rfive) procedure])
+		 ((extended)        [,(stklos) procedure])))))
   (list
    (linebreak)
    (color :bg "#dddddd" :width 100.
-          ;; Put marks for all the functions defined in this entry
-          (map (lambda (x) (mark (format "~A" x)))
-               (cons name similar))
-          ;; Add all this function in the index
-          (map (lambda (x) (index (format "~A" x)))
-               (cons name similar))
-          ;; Display first line of synopsis
-          (table :width 100.
-                 (tr (td :align 'left  (show-form (car synopsis)))
-                     (td :align 'right (show-type type))))
-          ;; Display (eventually) the other lines of synopsis
-          (map (lambda (x) (list (show-form x) (linebreak)))
-               (cdr synopsis))
-          ;; Display the description text
-          (linebreak)
-          (eval (read-from-string
-                 (string-append "["
-                                (rewrite-for-skribe txt)
-                                "]"))))))
+	  ;; Put marks for all the functions defined in this entry
+	  (map (lambda (x) (mark (format "~A" x)))
+	       (cons name similar))
+	  ;; Add all this function in the index
+	  (map (lambda (x) (index (format "~A" x)))
+	       (cons name similar))
+	  ;; Display first line of synopsis
+	  (table :width 100.
+		 (tr (td :align 'left  (show-form (car synopsis)))
+		     (td :align 'right (show-type type))))
+	  ;; Display (eventually) the other lines of synopsis
+	  (map (lambda (x) (list (show-form x) (linebreak)))
+	       (cdr synopsis))
+	  ;; Display the description text
+	  (linebreak)
+	  (eval (read-from-string
+		 (string-append "["
+				(rewrite-for-skribe txt)
+				"]"))))))
 
 (define (doc-context name type synopsis similar txt)
   (define (show-form x)
     (code (bold (color :fg *header-fg* x))))
   (define (show-type x)
     (color :fg "peru"
-           (it (case x
-                 ((syntax)          [,(rfive)  ,(linebreak) syntax])
+	   (it (case x
+		 ((syntax)          [,(rfive)  ,(linebreak) syntax])
                  ((r57rs-procedure) [,(rfive) ,(linebreak) (rseven)
                                      ,(linebreak) procedure])
                  ((r7rs-procedure)  [,(rseven) ,(linebreak) procedure])
                  ((r7rs-syntax)     [,(rseven) ,(linebreak) syntax])
-                 ((extended-syntax) [,(stklos) ,(linebreak) syntax])
-                 ((procedure)       [,(rfive)  ,(linebreak) procedure])
-                 ((extended)        [,(stklos) ,(linebreak) procedure])))))
+		 ((extended-syntax) [,(stklos) ,(linebreak) syntax])
+		 ((procedure)	    [,(rfive)  ,(linebreak) procedure])
+		 ((extended)        [,(stklos) ,(linebreak) procedure])))))
 
   (list
    (color :width 100. :border 0 :bg *header-bg* :margin 3
-          ;; Put marks for all the functions defined in this entry
-          (map (lambda (x) (mark (format "~A" x)))
-               (cons name similar))
-          ;; Add all this function in the index
-          (map (lambda (x) (index (format "~A" x)))
-               (cons name similar))
-          (let Loop ((l   synopsis)
-                     (res (list (context-margin :text (show-type type)))))
-            (cond
-              ((null? l)
-               (reverse! res))
-              ((null? (cdr l))
-               (Loop (cdr l) (cons (show-form (car l)) res)))
-              (else
-               (Loop (cdr l) (cons (list (show-form (car l))
-                                         (! "\\\\\n") )
-                                   res))))))
-          ;; Display the description text
+	  ;; Put marks for all the functions defined in this entry
+	  (map (lambda (x) (mark (format "~A" x)))
+	       (cons name similar))
+	  ;; Add all this function in the index
+	  (map (lambda (x) (index (format "~A" x)))
+	       (cons name similar))
+	  (let Loop ((l   synopsis)
+		     (res (list (context-margin :text (show-type type)))))
+	    (cond
+	      ((null? l)
+	       (reverse! res))
+	      ((null? (cdr l))
+	       (Loop (cdr l) (cons (show-form (car l)) res)))
+	      (else
+	       (Loop (cdr l) (cons (list (show-form (car l))
+					 (! "\\\\\n") )
+				   res))))))
+	  ;; Display the description text
    (blockquote (eval (read-from-string
-                      (string-append "["
-                                     (rewrite-for-skribe txt)
-                                     "]"))))))
+		      (string-append "["
+				     (rewrite-for-skribe txt)
+				     "]"))))))
 (define doc #f)
 
 
@@ -216,30 +216,30 @@
       (format *stderr* "Documentation of ~S\n" item))
     (let ((infos (cdr lst)))
       (if (key-get infos :see #f)
-          ;; Asked for an item which is not a main entry
-          (format *stderr* "doc for ~S requested whereas main entry is ~S\n"
-                  item (key-get infos :see))
-          ;; Generate a definition
-          (let ((type (key-get infos :type))
-                (syn  (string-split (key-get infos :synopsis) "\n"))
-                (desc (key-get infos :description))
-                (sim  (key-get infos :similar '())))
-            ;; Retain that we have document
-            (key-set! (cdr lst) :seen #t)
-            (doc item type syn sim desc))))))
+	  ;; Asked for an item which is not a main entry
+	  (format *stderr* "doc for ~S requested whereas main entry is ~S\n"
+		  item (key-get infos :see))
+	  ;; Generate a definition
+	  (let ((type (key-get infos :type))
+		(syn  (string-split (key-get infos :synopsis) "\n"))
+		(desc (key-get infos :description))
+		(sim  (key-get infos :similar '())))
+	    ;; Retain that we have document
+	    (key-set! (cdr lst) :seen #t)
+	    (doc item type syn sim desc))))))
 
 ;======================================================================
 ;
-;                       show-undocumented
+; 			show-undocumented
 ;
 ;======================================================================
 (define (show-undocumented)
   (format *stderr* "\n\n**** Undocumented procedures:\n")
   (for-each (lambda (x)
-;             (write x)
-              (unless (or (key-get (cdr x) :see #f) (key-get (cdr x) :seen))
-                (format *stderr* "\t~S\n" (car x))))
-            *doc*)
+;	      (write x)
+	      (unless (or (key-get (cdr x) :see #f) (key-get (cdr x) :seen))
+		(format *stderr* "\t~S\n" (car x))))
+	    *doc*)
   (format *stderr* "****\n"))
 
 
@@ -249,12 +249,12 @@
 (define *engine-type* #f)
 
 (cond
-  ((skribe-env-has-prop? 'html)                         ;; HTML
+  ((skribe-env-has-prop? 'html)				;; HTML
      (set! doc doc-html)
      (set! *example-bg*    "ivory")
      (set! *example-width* "90%")
      (set! *engine-type* 'html))
-  ((skribe-env-has-prop? 'context)                      ;; ConTeXt
+  ((skribe-env-has-prop? 'context)			;; ConTeXt
      (set! doc doc-context)
      (set! *example-width* "broad")
      (set! *engine-type* 'tex)))

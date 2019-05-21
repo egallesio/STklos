@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 12-Oct-2018 17:18 (eg)
+;; Last file update: 20-May-2019 16:02 (eg)
 ;;
 ;; ======================================================================
 
@@ -63,12 +63,16 @@ infinity), ,(code "+nan.0") (not a number), and
 
 (insertdoc 'integer?)
 (insertdoc 'inexact?)
+(insertdoc 'inexact)
+(insertdoc 'exact-integer?)
 (insertdoc 'bignum?)
 
 (insertdoc '>=)
 
 (insertdoc 'even?)
+(insertdoc 'nan?)
 (insertdoc 'min)
+(insertdoc 'truncate-remainder)
 (insertdoc '*)
 (insertdoc '/)
 (insertdoc 'abs)
@@ -79,9 +83,12 @@ infinity), ,(code "+nan.0") (not a number), and
 (insertdoc 'rationalize)
 (insertdoc 'atan)
 (insertdoc 'sqrt)
+(insertdoc 'square)
+(insertdoc 'exact-integer-sqrt)
 (insertdoc 'expt)
 (insertdoc 'angle)
 (insertdoc 'inexact->exact)
+(insertdoc 'exact)
 (insertdoc 'number->string)
 (insertdoc 'string->number)
 
@@ -470,7 +477,7 @@ need to be quoted in programs.])
 (insertdoc 'bytevector-copy!)
 (insertdoc 'bytevector-append)
 (insertdoc 'string->utf8)
-)
+   )
 
 
 ;;;
@@ -915,6 +922,83 @@ applications.])
 (insertdoc 'socket-local-address)
 (insertdoc 'socket-port-number)
 (insertdoc 'socket-output))
+
+;;;
+;;; SYSTEM PROCEDURES
+;;
+(section :title "System Procedures"
+
+;;; File Primitives.
+(subsection :title "File Primitives"
+(insertdoc 'temporary-file-name)
+(insertdoc 'rename-file)
+(insertdoc 'remove-file)
+(insertdoc 'copy-file)
+(insertdoc 'copy-port)
+(insertdoc 'file-exists?)
+(insertdoc 'file-size)
+(insertdoc 'getcwd)
+(insertdoc 'chmod)
+(insertdoc 'chdir)
+(insertdoc 'make-directory)
+(insertdoc 'make-directories)
+(insertdoc 'ensure-directories-exist)
+(insertdoc 'remove-directory)
+(insertdoc 'directory-files)
+(index "tilde expansion")
+(insertdoc 'expand-file-name)
+(insertdoc 'canonical-file-name)
+(insertdoc 'decompose-file-name)
+(insertdoc 'winify-file-name)
+(insertdoc 'posixify-file-name)
+(insertdoc 'basename)
+(insertdoc 'dirname)
+(insertdoc 'file-suffix)
+(insertdoc 'file-prefix)
+(insertdoc 'file-separator)
+(insertdoc 'make-path)
+(insertdoc 'glob))
+
+;;; Environment.
+(subsection :title "Environment"
+(insertdoc 'getenv)
+(insertdoc 'setenv!)
+(insertdoc 'unsetenv!))
+
+(subsection :title "System Informations"
+(insertdoc 'running-os)
+(insertdoc 'hostname)
+(insertdoc 'argc)
+(insertdoc 'argv)
+(insertdoc 'program-name)
+(insertdoc 'version)
+(insertdoc 'machine-type)
+(insertdoc 'clock)
+(insertdoc 'sleep)
+(insertdoc 'time)
+(insertdoc 'getpid))
+
+(subsection :title "Program Arguments Parsing"
+(index "SRFI-22")
+
+(p [,(stklos) provides a simple way to parse program arguments with the
+|parse-arguments| special form. This form is generally used into
+the |main| function in a Scheme script. See ,(link-srfi 22) on how to
+use a |main| function in a Scheme program.])
+
+(insertdoc 'parse-arguments)
+(insertdoc 'arg-usage))
+
+(subsection :title "Misc. System Procedures"
+
+(insertdoc 'system)
+(insertdoc 'exec-list)
+(insertdoc 'address-of)
+(insertdoc 'exit)
+(insertdoc 'die)
+(insertdoc 'get-password)
+(insertdoc 'register-exit-function!)))
+
 
 ;;;
 ;;; SIGNALS

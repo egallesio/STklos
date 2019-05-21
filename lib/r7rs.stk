@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r7rs.stk   -- R7RS support (Draft-3)
 ;;;;
-;;;; Copyright © 2011-2018 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2019 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 27-Nov-2018 17:46 (eg)
+;;;; Last file update: 21-May-2019 08:53 (eg)
 ;;;;
 
 
@@ -32,10 +32,133 @@
 
 
 ;;;; ----------------------------------------------------------------------
-;;;; 6.1 Equivalence predicate 
+;;;; 6.1 Equivalence predicate
 ;;;; ----------------------------------------------------------------------
 (define equal-simple? equal?)
 (set! equal? %equiv?)   ;; equiv? is defined in equiv.stk
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.2 Numbers
+;;;; ----------------------------------------------------------------------
+
+#|
+<doc R7RS exact-integer?
+ * (exact->integer? z)
+ *
+ * Returns  #t if z is both exact and an integer; otherwise returns #f.
+ *
+ * @lisp
+ * (exact-integer? 32)   => #t
+ * (exact-integer? 32.0) => #f
+ * (exact-integer? 32/5) => #f
+ * @end lisp
+doc>
+|#
+
+(define (exact-integer? n) (and (exact? n) (integer? n)))
+
+
+#|
+<doc R7RS floor/ floor-quotient floor-remainder truncate/ truncate-quotient truncate-remainder
+ * (floor/ n1 n2)
+ * (floor-quotient n1 n2)
+ * (floor-remainder n1 n2)
+ * (truncate/ n1 n2)
+ * (truncate-quotient n1 n2)
+ * (truncate-remainder n1 n2)
+ *
+ * These procedures implement number-theoretic (integer) division.  It is
+ * an error if |n2| is zero. The procedures ending in '/' return two integers;
+ * the other procedures return an integer.  All the procedures compute a
+ * quotient |q| and remainder |r| such that |n1=n2*q+r|.
+ *
+ *  See \rseven{} for more information.
+ *
+ * @lisp
+ * (floor/ 5 2)         => 2 1
+ * (floor/ -5 2)        => -3 1
+ * (floor/ 5 -2)        => -3 -1
+ * (floor/ -5 -2)       => 2 -1
+ * (truncate/ 5 2)      => 2 1
+ * (truncate/ -5 2)     => -2 -1
+ * (truncate/ 5 -2)     => -2 1
+ * (truncate/ -5 -2)    => 2 -1
+ * (truncate/ -5.0 -2)  => 2.0 -1.0%
+ * @end lisp
+doc>
+|#
+(define (floor-quotient n m)
+  (let ((res (floor (/ n m))))
+    (if (and (exact? n) (exact? m))
+        (inexact->exact res)
+        res)))
+
+(define (floor/ n m)
+  (values (floor-quotient n m)
+          (floor-remainder n m)))
+
+(define (truncate/ n m)
+  (values (quotient n m)
+          (remainder n m)))
+
+(define truncate-quotient  quotient)
+(define truncate-remainder remainder)
+(define floor-remainder    modulo)
+
+#|
+<doc R7RS square
+ * (square z)
+ *
+ * Returns the square of |z|. This is equivalent to |(* z z)|.
+ *
+ * @lisp
+ * (square 42)     => 1764
+ * (square 2.0)    => 4.0
+ * @end lisp
+doc>
+|#
+(define (square z) (* z z))
+
+#|
+<doc R7RS exact-integer-sqrt
+ * (exact-integer-sqrt k)
+ *
+ * Returns two non negatives integers |s| and |r| where
+ * |k=s**2+r| and |k<(s+1)**2|.
+ *
+ * @lisp
+ * (exact-integer-sqrt 4)     => 2 0
+ * (exact-integer-sqrt 5)     => 2 1
+ * @end lisp
+doc>
+|#
+(define (exact-integer-sqrt k)
+  (define (isqrt n)
+    (let loop ((xn 1))
+      (let ((xn1 (quotient (+ xn (quotient n xn)) 2)))
+        (if (= xn1 xn)
+            xn1
+            (loop xn1)))))
+
+  (unless (and (exact-integer? k)(>= k 0))
+    (error "non negative integer expected. It was: ~S" k))
+  (let ((s (if (fixnum? k)
+               (let ((v (sqrt k)))
+                 (if (exact? v) v (inexact->exact (floor v))))
+               (isqrt k))))
+    (values s (- k (* s s)))))
+
+#|
+<doc R7RS exact inexact
+ * (inexact z)
+ * (exact z)
+ *
+ * These \rseven{} procedures correspond to the \rfive{} |exact->inexact|
+ * and |inexact->exact| procedure respectively
+doc>
+|#
+(define inexact exact->inexact)
+(define exact  inexact->exact)
 
 
 ;;;; ----------------------------------------------------------------------

@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 1993-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 13-Jun-2018 17:37 (eg)
+ * Last file update: 15-Mar-2019 16:00 (eg)
  */
 
 
@@ -1316,7 +1316,6 @@ COMPARE_NUM2(numle,   STk_realp,    <=)
 COMPARE_NUM2(numge,   STk_realp,    >=)
 
 
-
 /*
 <doc finite? infinite?  zero? positive? negative? odd? even?
  * (finite? z)
@@ -1443,6 +1442,36 @@ DEFINE_PRIMITIVE("even?", evenp, subr1, (SCM n))
 {
   return MAKE_BOOLEAN(!is_oddp(n));
 }
+
+/*
+<doc R7RS nan?
+ * (nan? z)
+ *
+ * The |nan?| procedure returns #t on |+nan.0|, and on complex
+ * numbers if their real or imaginary parts or both are |+nan.0|.
+ * Otherwise it returns #f.
+ *
+ * @lisp
+ * (nan? +nan.0)          =>  #t
+ * (nan? 32)              =>  #f
+ * (nan? +nan.0+5.0i)     =>  #t
+ * (nan? 1+2i)            =>  #f
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("nan?", nanp, subr1, (SCM z))
+{
+  switch (TYPEOF(z)) {
+    case tc_complex: return MAKE_BOOLEAN(STk_nanp(COMPLEX_REAL(z)) == STk_true ||
+                                         STk_nanp(COMPLEX_IMAG(z)) == STk_true); 
+    case tc_real:     return MAKE_BOOLEAN(isnan(REAL_VAL(z)));
+    case tc_rational:
+    case tc_bignum:
+    case tc_integer:  return STk_false;
+    default:          error_bad_number(z); return STk_void;
+  }
+}
+
 
 
 /*
@@ -3014,7 +3043,7 @@ int STk_init_number(void)
      imposes that decimal numbers use a '.'
   */
   setlocale(LC_NUMERIC, "C");
-  
+
   /* Compute the log10 of INT_MAX_VAL to avoid to build a bignum for small int */
   log10_maxint = (int) log10(INT_MAX_VAL);
 
@@ -3029,6 +3058,7 @@ int STk_init_number(void)
   DEFINE_XTYPE(complex,  &xtype_complex);
 
   /* Add new primitives */
+  ADD_PRIMITIVE(nanp);
   ADD_PRIMITIVE(numberp);
   ADD_PRIMITIVE(complexp);
   ADD_PRIMITIVE(realp);

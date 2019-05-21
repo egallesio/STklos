@@ -1,7 +1,7 @@
 /*
- * stklos.c	-- STklos interpreter main function
+ * stklos.c     -- STklos interpreter main function
  *
- * Copyright © 1999-2014 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,28 +21,28 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  2-Jan-2014 19:46 (eg)
+ * Last file update: 13-Dec-2018 13:53 (eg)
  */
 
-#include <stklos.h>
+#include "stklos.h"
 #include <langinfo.h>
 #include "gnu-getopt.h"
 
 
-#define ADD_OPTION(o, k)  					\
-  if (*o) options = STk_key_set(options, 			\
-				STk_makekey(k), 		\
-				STk_Cstring2string(o));
+#define ADD_OPTION(o, k)                                        \
+  if (*o) options = STk_key_set(options,                        \
+                                STk_makekey(k),                 \
+                                STk_Cstring2string(o));
 
-#define ADD_BOOL_OPTION(o, k)  				\
-  options = STk_key_set(options, 			\
-			STk_makekey(k), 		\
-			MAKE_BOOLEAN(o));
+#define ADD_BOOL_OPTION(o, k)                           \
+  options = STk_key_set(options,                        \
+                        STk_makekey(k),                 \
+                        MAKE_BOOLEAN(o));
 
-#define ADD_INT_OPTION(o, k)  				\
-  options = STk_key_set(options, 			\
-			STk_makekey(k), 		\
-			MAKE_INT(o));
+#define ADD_INT_OPTION(o, k)                            \
+  options = STk_key_set(options,                        \
+                        STk_makekey(k),                 \
+                        MAKE_INT(o));
 
 
 /*=============================================================================
@@ -55,29 +55,29 @@
 static char *boot_file    = "";
 static char *program_file = "";
 static char *load_file    = "";
-static char *conf_dir	  = "";
+static char *conf_dir     = "";
 static char *sexpr        = "";
-static int  vanilla	  = 0;
+static int  vanilla       = 0;
 static int  stack_size    = DEFAULT_STACK_SIZE;
 static int  debug_mode    = 0;
 static int  line_editor   = 1;
 
 static struct option long_options [] =
 {
-  {"version",      	no_argument,       NULL, 'v'},
-  {"file",         	required_argument, NULL, 'f'},
-  {"load",         	required_argument, NULL, 'l'},
-  {"execute",      	required_argument, NULL, 'e'},
-  {"boot-file",    	required_argument, NULL, 'b'},
-  {"conf-dir",		required_argument, NULL, 'D'},
-  {"no-init-file", 	no_argument,       NULL, 'q'},
-  {"interactive",  	no_argument,	   NULL, 'i'},
-  {"no-line-editor",  	no_argument,	   NULL, 'n'},
-  {"debug",		no_argument,	   NULL, 'd'},
-  {"stack-size",   	required_argument, NULL, 's'},
-  {"case-sensitive",	no_argument,	   NULL, 'c'},
-  {"utf8-encoding",	required_argument, NULL, 'u'},
-  {"help",         	no_argument,       NULL, 'h'},
+  {"version",           no_argument,       NULL, 'v'},
+  {"file",              required_argument, NULL, 'f'},
+  {"load",              required_argument, NULL, 'l'},
+  {"execute",           required_argument, NULL, 'e'},
+  {"boot-file",         required_argument, NULL, 'b'},
+  {"conf-dir",          required_argument, NULL, 'D'},
+  {"no-init-file",      no_argument,       NULL, 'q'},
+  {"interactive",       no_argument,       NULL, 'i'},
+  {"no-line-editor",    no_argument,       NULL, 'n'},
+  {"debug",             no_argument,       NULL, 'd'},
+  {"stack-size",        required_argument, NULL, 's'},
+  {"case-sensitive",    no_argument,       NULL, 'c'},
+  {"utf8-encoding",     required_argument, NULL, 'u'},
+  {"help",              no_argument,       NULL, 'h'},
   {NULL}
 };
 
@@ -119,21 +119,21 @@ static int process_program_arguments(int argc, char *argv[])
 
     switch (c) {
       case 'v': Usage(*argv, 1); exit(0);
-      case 'f': program_file    = optarg;			break;
-      case 'l': load_file       = optarg;			break;
-      case 'e': sexpr	        = optarg;			break;
-      case 'b': boot_file       = optarg;			break;
-      case 'D': conf_dir        = optarg;			break;
-      case 'i': STk_interactive = 1;				break;
-      case 'n': line_editor     = 0;				break;
-      case 'd': debug_mode++;					break;
-      case 'q': vanilla         = 1;				break;
-      case 's': stack_size      = atoi(optarg);			break;
-      case 'c': STk_read_case_sensitive = 1;			break;
-      case 'u': STk_use_utf8    = strspn(optarg, "yY1");	break;
+      case 'f': program_file    = optarg;                       break;
+      case 'l': load_file       = optarg;                       break;
+      case 'e': sexpr           = optarg;                       break;
+      case 'b': boot_file       = optarg;                       break;
+      case 'D': conf_dir        = optarg;                       break;
+      case 'i': STk_interactive = 1;                            break;
+      case 'n': line_editor     = 0;                            break;
+      case 'd': debug_mode++;                                   break;
+      case 'q': vanilla         = 1;                            break;
+      case 's': stack_size      = atoi(optarg);                 break;
+      case 'c': STk_read_case_sensitive = 1;                    break;
+      case 'u': STk_use_utf8    = strspn(optarg, "yY1");        break;
       case '?': /* message error is printed by getopt */
-		fprintf(stderr, "Try `%s --help' for more information\n", *argv);
-		exit(1);
+                fprintf(stderr, "Try `%s --help' for more information\n", *argv);
+                exit(1);
       default:  Usage(*argv, 0); exit(c != 'h');
     }
   }
@@ -149,19 +149,19 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
     l = STk_cons(STk_Cstring2string(argv[i]), l);
 
   options = LIST2(STk_makekey(":argv"), l);
-  ADD_OPTION(argv0,	   	   ":program-name");
-  ADD_OPTION(program_file, 	   ":file");
-  ADD_OPTION(load_file,    	   ":load");
-  ADD_OPTION(sexpr, 	   	   ":sexpr");
-  ADD_OPTION(conf_dir,		   ":conf-dir");
-  ADD_BOOL_OPTION(vanilla,	   ":no-init-file");
+  ADD_OPTION(argv0,                ":program-name");
+  ADD_OPTION(program_file,         ":file");
+  ADD_OPTION(load_file,            ":load");
+  ADD_OPTION(sexpr,                ":sexpr");
+  ADD_OPTION(conf_dir,             ":conf-dir");
+  ADD_BOOL_OPTION(vanilla,         ":no-init-file");
   ADD_BOOL_OPTION(STk_interactive, ":interactive");
   ADD_BOOL_OPTION(line_editor,     ":line-editor");
-  ADD_INT_OPTION(debug_mode,   	   ":debug");
-  ADD_BOOL_OPTION(STk_use_utf8,	   ":use-utf8");
+  ADD_INT_OPTION(debug_mode,       ":debug");
+  ADD_BOOL_OPTION(STk_use_utf8,    ":use-utf8");
 
   STk_define_variable(STk_intern("*%program-args*"), options,
-		      STk_STklos_module);
+                      STk_STklos_module);
 }
 
 int main(int argc, char *argv[])
@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
   /* See if we use UTF8 encoding */
   if (!setlocale(LC_ALL, "")) {
     fprintf(stderr, "Can't set the specified locale! "
-	    "Check LANG, LC_CTYPE, LC_ALL.\n");
+            "Check LANG, LC_CTYPE, LC_ALL.\n");
     return 1;
   }
 

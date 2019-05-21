@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi.stk   -- List of implemented SRFI in STklos
+;;;; srfi.stk	-- List of implemented SRFI in STklos
 ;;;;
 ;;;; Copyright © 2004-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
@@ -77,20 +77,20 @@
 
 (define (link-srfi n)
   (let* ((info (assoc n *srfis*))
-         (txt  (if info (cdr info) (error "SRFI ~S not in database!!" n)))
-         (url (format srfi-address n n)))
+	 (txt  (if info (cdr info) (error "SRFI ~S not in database!!" n)))
+	 (url (format srfi-address n n)))
     [,(bold (ref :text (format "SRFI-~a" n) :url url))
      (,(emph txt))]))
 
 (define (quick-link-srfi n)
   (let* ((info (assoc n *srfis*))
-         (txt  (if info (cdr info) (error "SRFI ~S not in database!!" n)))
-         (url (format srfi-address n n)))
+	 (txt  (if info (cdr info) (error "SRFI ~S not in database!!" n)))
+	 (url (format srfi-address n n)))
     (ref :text (format "SRFI-~a" n) :url url)))
 
 (define (title-srfi n)
   (let* ((info (assoc n *srfis*))
-         (txt  (if info (cdr info) (error "SRFI ~S not in database!!" n)))
-         (url (format srfi-address n n)))
+	 (txt  (if info (cdr info) (error "SRFI ~S not in database!!" n)))
+	 (url (format srfi-address n n)))
     (format "SRFI-~A -- ~A" n txt)))
 

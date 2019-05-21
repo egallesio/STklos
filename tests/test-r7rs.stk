@@ -2,7 +2,7 @@
 ;;;;
 ;;;; test-r7rs.stk      -- Testing R7RS constructs/primitives
 ;;;;
-;;;; Copyright Â© 2011 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2019 Erick Gallesio - Polytech Nice Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 27-Nov-2018 17:48 (eg)
+;;;; Last file update: 20-May-2019 15:57 (eg)
 ;;;;
 
 (require "test")
@@ -100,6 +100,50 @@
 (test "equal?.4" #f (equal? '#0=(a b a . #0#)
                             '#1=(a b a b . #1#)))
 
+;; ----------------------------------------------------------------
+(test-subsection "Numbers")
+
+(test "exact-integer?.1" #t (exact-integer? 32))
+(test "exact-integer?.2" #t (exact-integer? #e3.0))
+(test "exact-integer?.3" #f (exact-integer? 32/5))
+
+(test "finite?.1" #t (finite? 3))
+(test "finite?.2" #f (finite? +inf.0))
+(test "finite?.3" #f (finite? -inf.0))
+(test "finite?.4" #f (finite? (make-rectangular 3.0 +inf.0)))
+
+(test "infinite?.1" #f (infinite? 3))
+(test "infinite?.2" #t (infinite? +inf.0))
+(test "infinite?.3" #f (infinite? +nan.0))
+(test "infinite?.4" #t (infinite? (make-rectangular 3.0 +inf.0)))
+
+(test "nan?.1" #t (nan? +nan.0))
+(test "nan?.2" #f (nan? 32))
+(test "nan?.3" #t (nan? (make-rectangular +nan.0 5.0)))
+(test "nan?.4" #f (nan? 1+2i))
+
+(test "floor/.1" '( 2 .  1) (call-with-values (lambda() (floor/  5  2)) cons))
+(test "floor/.2" '(-3 .  1) (call-with-values (lambda() (floor/ -5  2)) cons))
+(test "floor/.3" '(-3 . -1) (call-with-values (lambda() (floor/  5 -2)) cons))
+(test "floor/.4" '( 2 . -1) (call-with-values (lambda() (floor/ -5 -2)) cons))
+
+(test "truncate/.1" '(   2 .  1)   (call-with-values (lambda() (truncate/  5  2)) cons))
+(test "truncate/.2" '(  -2 . -1)   (call-with-values (lambda() (truncate/ -5  2)) cons))
+(test "truncate/.3" '(  -2 .  1)   (call-with-values (lambda() (truncate/  5 -2)) cons))
+(test "truncate/.4" '( 2.0 . -1.0) (call-with-values (lambda() (truncate/ -5.0 -2)) cons))
+
+(test "square.1" 1764 (square 42))
+(test "square.2" 4.0  (square 2.0))
+(test "square.2" -1   (square +i))
+
+(test "exact-integer-sqrt.1" '(2 0)  (receive (q r) (exact-integer-sqrt 4) (list q r)))
+(test "exact-integer-sqrt.2" '(2 1)  (receive (q r) (exact-integer-sqrt 5) (list q r)))
+(test "exact-integer-sqrt.3" '(33333333333333333333
+                               22222222222222222222)
+                              (receive (q r)
+                                  (exact-integer-sqrt 1111111111111111111111111111111111111111)
+                                (list q r))
+                              equal?)
 
 
 ;;------------------------------------------------------------------

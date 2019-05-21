@@ -1,7 +1,7 @@
 /*
- * fixnum.c	-- Fixnum operations
+ * fixnum.c     -- Fixnum operations
  *
- * Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,10 +21,10 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update:  6-Jun-2007 09:21 (eg)
+ * Last file update: 13-Dec-2018 13:53 (eg)
  */
 
-#include <stklos.h>
+#include "stklos.h"
 
 static void error_bad_fixnum(SCM obj)
 {
@@ -161,7 +161,7 @@ DEFINE_PRIMITIVE("fxmod", fxmod, subr2, (SCM o1, SCM o2))
 
     /* (negativep(n1) != negativep(n2) && !zerop(r)) */
     if ((((n1 < 0) && (n2 >= 0)) || ((n1 >= 0) && (n2 < 0))) &&
-	r)
+        r)
       r += n2;
 
     return MAKE_INT(r);
@@ -181,11 +181,11 @@ DEFINE_PRIMITIVE("fxmod", fxmod, subr2, (SCM o1, SCM o2))
 doc>
  */
 #define SIMPLE_COMP(name, func, op) \
-DEFINE_PRIMITIVE(name, func, subr2, (SCM o1, SCM o2))		\
-{								\
-  if (!INTP(o1)) error_bad_fixnum(o1);				\
-  if (!INTP(o2)) error_bad_fixnum(o2);				\
-  return MAKE_BOOLEAN(INT_VAL(o1) op INT_VAL(o2));		\
+DEFINE_PRIMITIVE(name, func, subr2, (SCM o1, SCM o2))           \
+{                                                               \
+  if (!INTP(o1)) error_bad_fixnum(o1);                          \
+  if (!INTP(o2)) error_bad_fixnum(o2);                          \
+  return MAKE_BOOLEAN(INT_VAL(o1) op INT_VAL(o2));              \
 }
 
 SIMPLE_COMP("fx<",  fxlt, <)

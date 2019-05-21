@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update:  5-Oct-2018 18:02 (eg)
+ * Last file update: 13-Dec-2018 13:53 (eg)
  */
 
 #include <sys/types.h>
@@ -32,7 +32,7 @@
 #include <memory.h>
 #include <errno.h>
 
-#include <stklos.h>
+#include "stklos.h"
 #include "socket.h"
 
 
