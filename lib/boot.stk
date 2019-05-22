@@ -1,7 +1,7 @@
 ;;;;
 ;;;; boot.stk                                   -- Default boot file
 ;;;;
-;;;; Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 27-Nov-2018 14:16 (eg)
+;;;; Last file update: 22-May-2019 13:07 (eg)
 ;;;;
 
 (include "runtime.stk")         ; Definition necessary for the bootstrap
@@ -149,11 +149,11 @@
 ;;      %simple-fatal-exception-handler ...
 ;; ----------------------------------------------------------------------
 (define (%simple-fatal-exception-handler what who c useless-frames)
-  ;; We arrive her when we have an exception not catched.
+  ;; We arrive here when we have a not caught exception
   ;; Two cases:
-  ;;  - if condition is of type &exit-r7rs, we come form a call to exit
+  ;;  - if condition is of type &exit-r7rs, we come from a call to exit
   ;;    => run the %pre-exit functions and exit
-  ;;  - else we are in serious trouble => display an message and abort
+  ;;  - else we are in serious trouble => display a message and abort
 
   ;;  Case 1: Is it a simple R7RS exit call
   (when (and (condition? c) (condition-has-type? c &exit-r7rs))
@@ -181,7 +181,7 @@
     (when bt
       (%display-backtrace bt useless-frames))
     (format port "EXIT\n")
-    (exit 70)))   ; 70 seems to be required by SRFI-22
+    (emergency-exit 70)))   ; 70 seems to be required by SRFI-22
 
 
 ;; ----------------------------------------------------------------------
