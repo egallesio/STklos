@@ -90,7 +90,14 @@ use a stack of \fBn\fR cells.
 be case sensitive. The default is to be case insensitive as specified
 by R5RS.
 .IP "-u yes|no, --utf8-encoding=yes|no"
-use UTF-8 encoding for representing strings. The default for this option is "yes".
+At ininitialisation time, \fBSTklos\fR infers the current locale from the
+\fILC_ALL\fR variable. From the character encoding used in the selected
+locale, \fBSTklos\fR determines if UTF-8 should be used for representing
+strings.
+
+The \fI--utf8-encoding\fR permits to force the encoding used. Note
+that if \fILC_ALL\fR is unset and this option is not used, UTF-8
+encoding will be used.
 .IP "-v, --version"
 print program version and exit
 .IP "-h, --help"
