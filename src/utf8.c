@@ -1,7 +1,7 @@
 /*
  * utf8.c               -- UTF-8 support functions
  *
- * Copyright © 2011-2018 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+ * Copyright © 2011-2019 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update: 11-Jul-2018 16:36 (eg)
+ * Last file update:  9-Jun-2019 19:51 (eg)
  */
 
 #include "stklos.h"
@@ -47,13 +47,14 @@ char *STk_utf8_grab_char(char *str, uint32_t *c) /* result = pos. after current 
 {
   uint8_t *buff = (uint8_t *) str;
 
-  if ((buff[0] & 0x80) == 0) {
+  if (!STk_use_utf8 || (buff[0] & 0x80) == 0) {
     *c = buff[0];
     return str + 1;
   }
 
   if ((buff[0] < 0xc0) || (buff[0] > 0xf7))
     return NULL;
+
 
   if (buff[0] < 0xe0) {
     *c = ((buff[0] & 0x3f) << 6) + (buff[1] & 0x3f);

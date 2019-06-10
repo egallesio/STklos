@@ -440,7 +440,7 @@ DEFINE_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index))
 
   if (!STk_use_utf8 || (STRING_SIZE(str) == STRING_LENGTH(str)))
     /* string doesn't contain multibytes chars */
-    return MAKE_CHARACTER(STRING_CHARS(str)[k]);
+    return MAKE_CHARACTER((unsigned char)STRING_CHARS(str)[k]);
   else {
     /* We have multibytes chars */
     uint32_t c;
