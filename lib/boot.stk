@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 22-May-2019 13:07 (eg)
+;;;; Last file update: 10-Jun-2019 12:12 (eg)
 ;;;;
 
 (include "runtime.stk")         ; Definition necessary for the bootstrap
@@ -57,7 +57,7 @@
 (autoload        "getopt"         %print-usage)
 (syntax-autoload "getopt"         parse-arguments)
 (syntax-autoload "trace"          trace untrace)
-(autoload        "pp"             pp pretty-print)
+(autoload        "pretty-print"   pp pretty-print)
 (autoload        "env"            null-environment scheme-report-environment
                                   interaction-environment)
 (autoload        "help"           help)

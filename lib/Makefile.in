@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 27-Nov-2018 13:58 (eg)
+# Last file update: 10-Jun-2019 12:15 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -392,7 +392,7 @@ scheme_SRCS = STklos.init		\
 	      http.stk			\
 	      lex-rt.stk		\
 	      make-C-boot.stk		\
-	      pp.stk			\
+	      pretty-print.stk		\
 	      recette.stk		\
 	      slib.stk			\
 	      srfi-1.stk		\
@@ -434,7 +434,7 @@ scheme_OBJS = compfile.ostk		\
 	      help.ostk			\
 	      http.ostk			\
 	      lex-rt.ostk		\
-	      pp.ostk			\
+	      pretty-print.ostk		\
 	      recette.ostk		\
 	      slib.ostk			\
 	      srfi-1.ostk 		\
@@ -852,7 +852,7 @@ $(SCHEME_OBJS): ../src/boot.img
 compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
 full-conditions: srfi-35.ostk srfi-36.stk
-recette.ostk: pp.ostk
+recette.ostk: pretty-print.ostk
 srfi-13.ostk: srfi-14.ostk
 srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
