@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 19-Aug-2011 11:07 (eg)
+# Last file update: 14-Jun-2019 13:31 (eg)
 
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -78,6 +78,7 @@ INCLUDES       = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
 
 
 struct.o cond.o: struct.h
+chars.c: utf8-tables.in
 
 doc:  $(DOCDB)
 

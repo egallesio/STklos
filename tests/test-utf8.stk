@@ -1,7 +1,7 @@
 ;;;;                                                    -*- coding utf-8 -*-
 ;;;; test-utf8.stk      -- Test of UTF-8 strings
 ;;;;
-;;;; Copyright © 2011-2018 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2019 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2011 23:35 (eg)
-;;;; Last file update:  1-Aug-2018 18:40 (eg)
+;;;; Last file update: 17-Jun-2019 17:10 (eg)
 ;;;;
 
 (require "test")
@@ -136,7 +136,8 @@
 (test "gambit.38" #t (char-numeric? #\1))
 (test "gambit.39" #f (char-numeric? #\a))
 (test "gambit.40" #t (char-whitespace? #\space))
-#;(test "gambit.41" #t (char-whitespace? #\x00A0))      ;; not clear
+(test "gambit.41" #t (char-whitespace? #\x00A0))
+
 (test "gambit.42" #f (char-whitespace? #\a))
 (test "gambit.43" #f (char-upper-case? #\a))
 (test "gambit.44" #t (char-upper-case? #\A))
@@ -147,7 +148,7 @@
 (test "gambit.47" #f (char-lower-case? #\A))
 (unless *is-C?*
   (test "gambit.48" #t (char-lower-case? #\x3C3)))
-#;(test "gambit.49" #t (char-lower-case? #\x00AA))      ;; not clear
+(test "gambit.49" #t (char-lower-case? #\x00AA))
 #;(test "gambit.50" #f (char-title-case? #\a))          ;; Not R7
 #;(test "gambit.51" #f (char-title-case? #\A))          ;; Not R7
 #;(test "gambit.52" #f (char-title-case? #\I))          ;; Not R7
@@ -245,6 +246,27 @@
 ;;// (test (string-normalize-nfkd "\x65;\x301;") "\x65;\x301;")
 ;;// (test (string-normalize-nfkc "\x65;\x301;") "\xE9;")
 ;;//
+
+(test "up-down-fold.1"
+      (list #\A #\a #\a)
+      (let ((ch #\a))
+        (list (char-upcase ch) (char-downcase ch) (char-foldcase ch))))
+
+(test "up-down-fold.2"
+      (list #\A #\a #\a)
+      (let ((ch #\A))
+        (list (char-upcase ch) (char-downcase ch) (char-foldcase ch))))
+
+(test "up-down-fold.3"
+      (list #\Σ #\σ #\σ)
+      (let ((ch #\Σ))
+        (list (char-upcase ch) (char-downcase ch) (char-foldcase ch))))
+
+(test "up-down-fold.4"
+      (list #\Σ #\σ #\σ)
+      (let ((ch #\σ))
+        (list (char-upcase ch) (char-downcase ch) (char-foldcase ch))))
+
 
 
 (unless *is-C?*

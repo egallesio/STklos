@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 20-May-2019 15:57 (eg)
+;;;; Last file update: 18-Jun-2019 09:36 (eg)
 ;;;;
 
 (require "test")
@@ -202,6 +202,103 @@
 (test "symbol=?.2" #t (symbol=? '|A| (string->symbol "A")))
 (test "symbol=?.3" #f (symbol=? '|A| (string->symbol "a")))
 (test "symbol=?.4" #f (symbol=? 'a 'a "a"))
+
+;;-------------------------------------------------------------------
+(test-subsection "Characters")
+
+(test "Chibi char.1" #t  (char? #\a))
+(test "Chibi char.2" #f (char? "a"))
+(test "Chibi char.3" #f (char? 'a))
+(test "Chibi char.4" #f (char? 0))
+
+(test "Chibi charcmp.1" #t (char=? #\a #\a #\a))
+(test "Chibi charcmp.2" #f (char=? #\a #\A))
+(test "Chibi charcmp.3" #t (char<? #\a #\b #\c))
+(test "Chibi charcmp.4" #f (char<? #\a #\a))
+(test "Chibi charcmp.5" #f (char<? #\b #\a))
+(test "Chibi charcmp.6" #f (char>? #\a #\b))
+(test "Chibi charcmp.7" #f (char>? #\a #\a))
+(test "Chibi charcmp.8" #t (char>? #\c #\b #\a))
+(test "Chibi charcmp.9" #t (char<=? #\a #\b #\b))
+(test "Chibi charcmp.10" #t (char<=? #\a #\a))
+(test "Chibi charcmp.11" #f (char<=? #\b #\a))
+(test "Chibi charcmp.12" #f (char>=? #\a #\b))
+(test "Chibi charcmp.13" #t (char>=? #\a #\a))
+(test "Chibi charcmp.14" #t (char>=? #\b #\b #\a))
+
+(test "Chibi charcmpci.1" #t (char-ci=? #\a #\a))
+(test "Chibi charcmpci.2" #t (char-ci=? #\a #\A #\a))
+(test "Chibi charcmpci.3" #f (char-ci=? #\a #\b))
+(test "Chibi charcmpci.4" #t (char-ci<? #\a #\B #\c))
+(test "Chibi charcmpci.5" #f (char-ci<? #\A #\a))
+(test "Chibi charcmpci.6" #f (char-ci<? #\b #\A))
+(test "Chibi charcmpci.7" #f (char-ci>? #\A #\b))
+(test "Chibi charcmpci.8" #f (char-ci>? #\a #\A))
+(test "Chibi charcmpci.9" #t (char-ci>? #\c #\B #\a))
+(test "Chibi charcmpci.10" #t (char-ci<=? #\a #\B #\b))
+(test "Chibi charcmpci.11" #t (char-ci<=? #\A #\a))
+(test "Chibi charcmpci.12" #f (char-ci<=? #\b #\A))
+(test "Chibi charcmpci.13" #f (char-ci>=? #\A #\b))
+(test "Chibi charcmpci.14" #t (char-ci>=? #\a #\A))
+(test "Chibi charcmpci.15" #t (char-ci>=? #\b #\B #\a))
+
+(test "Chibi char-alphabetic?.1" #t (char-alphabetic? #\a))
+(test "Chibi char-alphabetic?.2" #f (char-alphabetic? #\space))
+(test "Chibi char-alphabetic?.3" #t (char-alphabetic? #\Λ))
+(test "Chibi char-alphabetic?.4" #f (char-alphabetic? #\x0E50))
+
+(test "Chibi char-numeric?.1" #t (char-numeric? #\0))
+(test "Chibi char-numeric?.2" #f (char-numeric? #\.))
+(test "Chibi char-numeric?.3" #f (char-numeric? #\a))
+(test "Chibi char-numeric?.4" #f (char-numeric? #\Λ))
+(test "Chibi char-numeric?.5" #t (char-numeric? #\x0E50))
+
+(test "Chibi char-whitespace?.1" #t (char-whitespace? #\space))
+(test "Chibi char-whitespace?.2" #t (char-whitespace? #\tab))
+(test "Chibi char-whitespace?.3" #t (char-whitespace? #\newline))
+(test "Chibi char-whitespace?.4" #f (char-whitespace? #\_))
+(test "Chibi char-whitespace?.5" #f (char-whitespace? #\a))
+(test "Chibi char-whitespace?.6" #t (char-whitespace? #\x1680))
+
+(test "Chibi char-upper-case?.1" #t (char-upper-case? #\A))
+(test "Chibi char-upper-case?.2" #f (char-upper-case? #\a))
+(test "Chibi char-upper-case?.3" #f (char-upper-case? #\3))
+(test "Chibi char-upper-case?.4" #t (char-upper-case? #\Λ))
+(test "Chibi char-upper-case?.5" #f (char-upper-case? #\λ))
+
+
+(test "Chibi char-lower-case?.1" #t (char-lower-case? #\a))
+(test "Chibi char-lower-case?.2" #f (char-lower-case? #\A))
+(test "Chibi char-lower-case?.3" #f (char-lower-case? #\3))
+(test "Chibi char-lower-case?.4" #f (char-lower-case? #\Λ))
+(test "Chibi char-lower-case?.5" #t (char-lower-case? #\λ))
+
+
+(test "Chibi digit-value.1" 0 (digit-value #\0))
+(test "Chibi digit-value.2" 3 (digit-value #\3))
+(test "Chibi digit-value.3" 9 (digit-value #\9))
+(test "Chibi digit-value.4" 4 (digit-value #\x0664))
+(test "Chibi digit-value.5" 0 (digit-value #\x0AE6))
+(test "Chibi digit-value.6" #f (digit-value #\.))
+(test "Chibi digit-value.7" #f (digit-value #\-))
+
+(test "Chibi char->integer" 97 (char->integer #\a))
+(test "Chibi integer->char" #\a (integer->char 97))
+
+(test "Chibi char-upcase.1" #\A (char-upcase #\a))
+(test "Chibi char-upcase.2" #\A (char-upcase #\A))
+(test "Chibi char-upcase.3" #\Λ (char-upcase #\λ))
+(test "Chibi char-upcase.4" #\Λ (char-upcase #\Λ))
+
+(test "Chibi char-downcase.1" #\a (char-downcase #\a))
+(test "Chibi char-downcase.2" #\a (char-downcase #\A))
+(test "Chibi char-downcase.3" #\λ (char-downcase #\λ))
+(test "Chibi char-downcase.4" #\λ (char-downcase #\Λ))
+
+(test "Chibi char-foldcase.1" #\a (char-foldcase #\a))
+(test "Chibi char-foldcase.2" #\a (char-foldcase #\A))
+(test "Chibi char-foldcase.3" #\λ (char-foldcase #\λ))
+(test "Chibi char-foldcase.4" #\λ (char-foldcase #\Λ))
 
 
 ;;------------------------------------------------------------------

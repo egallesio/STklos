@@ -2,7 +2,7 @@
  *
  * s t r . c                            -- Strings management
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  2-Aug-2018 23:04 (eg)
+ * Last file update: 14-Jun-2019 18:09 (eg)
  */
 
 #include <ctype.h>
@@ -1130,7 +1130,8 @@ doc>
  */
 DEFINE_PRIMITIVE("string-foldcase", string_foldcase, vsubr, (int argc, SCM *argv))
 {
-  return string_xxcase(argc, argv, tolower, (wint_t (*) (wint_t))STk_casefold_char);
+  //BUG: return string_xxcase(argc, argv, tolower, (wint_t (*) (wint_t))STk_casefold_char);
+  return STk_void; 
 }
 
 /*
@@ -1144,7 +1145,8 @@ doc>
 */
 DEFINE_PRIMITIVE("string-foldcase!", string_dfoldcase, vsubr, (int argc, SCM *argv))
 {
-  return string_dxxcase(argc, argv, toupper,(wint_t (*) (wint_t))STk_casefold_char);
+  //BUG: return string_dxxcase(argc, argv, toupper,(wint_t (*) (wint_t))STk_casefold_char);
+   return STk_void; 
 }
 
 

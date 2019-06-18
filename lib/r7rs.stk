@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 21-May-2019 08:53 (eg)
+;;;; Last file update: 13-Jun-2019 16:47 (eg)
 ;;;;
 
 
@@ -226,6 +226,29 @@ doc>
                         (eq? (car lst) val)
                         (verify val (cdr lst)))))))
     (verify e1 rest)))
+
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.6 Characters
+;;;;
+;;;; Functions defined here work for ASCII characters only. If the used
+;;;; encoding is UTF-8 (and the character is greater than #xff) a UTF-8
+;;;; aware version is loaded. The idea is to avoid the loading of the full
+;;;; version since the data for it are pretty big.
+;;;; ----------------------------------------------------------------------
+
+;;//(define (char-alphabetic? char)
+;;//  (if (%use-utf8
+;;//      (%char-alphabetic? char)
+;;//      (begin
+;;//        (unless (char? char) (error "bad character ~S" char))
+;;//          (if (and %use-utf8? (char>=? char #\xff))
+;;//       (
+;;//        
+;;//                    (or (char<= 'a' char 'z') (char<= 'A' char 'Z'))
+;;//                    (%char-alphabetic? char)))
+;;//      ))
+;;//
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.7 Strings

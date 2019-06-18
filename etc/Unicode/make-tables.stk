@@ -1,0 +1,168 @@
+;;;;
+;;;; make-tables.stk    -- Make UTF-8 tables
+;;;;
+;;;; Copyright © 2011-2019 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 11-Aug-2011 00:16 (eg)
+;;;; Last file update: 17-Jun-2019 17:09 (eg)
+;;;;
+
+(define digits   '())
+(define lower    '())
+(define upper    '())
+(define letters  '())
+(define spaces   '())
+(define folds    '())
+
+;;; ======================================================================
+;;;  print-assoc & print-list
+;;; ======================================================================
+(define (print-assoc lst name)
+  (printf "static struct utf8_conversion_char ~A[] = {\n" name)
+  (for-each (lambda (x)
+              (let ((key (car x))
+                    (value (cdr x)))
+                (if (string? value)
+                    (printf "      { 0x~A,\t 0x~A},\t /* '~A' -> '~A' */\n"
+                            key
+                            value
+                            (integer->char (string->number key 16))
+                            (integer->char (string->number value 16)))
+                    (printf "      { 0x~A,\t ~A},\t /* '~A' */\n"
+                            key value (integer->char (string->number key 16))))))
+            (reverse lst))                                                      ;; BUG: si on met reverse!
+  (printf "};\n")
+  (printf "static int ~A_length = ~A;\n\n" name (length lst)))
+
+(define (print-list lst name)
+  (printf "static utf8_char ~A[] = {" name)
+  (let Loop ((i 0)
+             (l (reverse lst)))
+    (unless (null? l)
+      (when (zero? (modulo i 8))
+        (newline))
+      (printf"  0x~A," (car l))
+      (Loop (+ i 1) (cdr l))))
+  (printf "};\n")
+  (printf "static int ~A_length = ~A;\n\n" name (length lst)))
+
+;;; ======================================================================
+;;; UnicodeData.txt`
+;;; ======================================================================
+(define (split str)                     ;; split a line on the ";"
+  (let ((max (string-length str)))
+    (let Loop ((i 0)
+               (res '())
+               (cur ""))
+      (cond
+        ((= i max)
+         (list->vector (reverse (cons cur res))))
+        ((eq? (string-ref str i) #\;)
+         (Loop (+ i 1) (cons cur res) ""))
+        (else
+         (Loop (+ i 1) res (format #f "~A~A" cur (string-ref str i))))))))
+
+
+(define (read-UnicodeData)
+  (with-input-from-file "UnicodeData.txt"
+    (lambda ()
+      (let Loop ((l (read-line)))
+        ;;(eprintf "Line = ~S\n" l)
+        (unless (eof-object? l)
+          (let* ((res      (split l))
+                 (char     (vector-ref res 0))
+                 (category (vector-ref res 2))
+                 (bidir    (vector-ref res 4))
+                 (decomp   (vector-ref res 5))
+                 (dvalue   (vector-ref res 6))
+                 (up       (vector-ref res 12))
+                 (low      (vector-ref res 13)))
+            ;; (eprintf "res = ~S\n" res)
+            (cond
+              ((equal? category "Lu")                 ;; Letter, Uppercase
+               (let ((v (if (string=? low "") "0" low)))
+                 (set! upper (cons (cons char v) upper))
+                 (set! letters (cons char letters))))
+
+              ((equal? category "Ll")                  ;; Letter, Lowercase
+               (let ((v (if (string=? up "") "0" up)))
+                 (set! lower (cons (cons char v) lower))
+                 (set! letters (cons char letters))))
+
+              ((equal? category "Lo")                  ;; Letter, Other
+               (when (or (string-find? "<super>" decomp)
+                         (string-find? "<sub>"   decomp))
+                 ;; FIXME: Sufficient?
+                 (set! lower (cons (cons char "0") lower)))
+               (set! letters (cons char letters)))
+
+              ((member category '("Lt" "Lm"))        ;; Titlecase, Modifier
+               (set! letters (cons char letters)))
+
+              ((equal? category "Nd")
+               (set! digits (cons (cons char (string->number dvalue)) digits)))
+
+              ((or (equal? category "Zs")               ;; White Space
+                   (member bidir '("B" "WS" "S")))
+               (set! spaces (cons char spaces))))
+            (Loop (read-line)))))
+
+      ;; Print hash-tables
+      (print-assoc upper "upper_table")
+      (print-assoc lower "lower_table")
+      (print-assoc digits "digits_table")
+      (print-list letters "letters_table")
+      (print-list spaces  "spaces_table"))))
+
+
+;;; ======================================================================
+;;;  CaseFolding.txt
+;;; ======================================================================
+(define (read-CaseFolding)
+  (with-input-from-file "CaseFolding.txt"
+    (lambda ()
+      (let Loop ((l (read-line)))
+        ;; (printf "Line = ~S\n" l)
+        (cond
+          ((eof-object? l)
+           'nothing)
+          ((or (zero? (string-length l)) (char=? (string-ref l 0) #\#))
+           ;; This is a comment line
+           (Loop (read-line)))
+          (else
+           (let* ((res (regexp-match "^([0-9A-Fa-f]+); (.); ([0-9A-Fa-f]+)" l))
+                  (from (cadr res))
+                  (type (caddr res))
+                  (to   (cadddr res)))
+             ;;(printf "From = ~S to = ~S type = ~S\n" from to type)
+             (when (member type '("C" "S"))
+               (let ((low (assoc from lower)))
+                 (unless (and low (string=? (cdr low) to))
+                   (set! folds (cons (cons from to) folds)))))
+             (Loop (read-line))))))
+      (print-assoc folds "fold_table"))))
+
+
+(define (main argv)
+  (with-output-to-file "../../src/utf8-tables.inc"
+    (lambda ()
+      (printf "/* WARNING: This file was generated!!! Do not modify it. -*- mode: c -*- */\n\n")
+      (read-UnicodeData)
+      (read-CaseFolding))))
