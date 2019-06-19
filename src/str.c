@@ -22,11 +22,10 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 14-Jun-2019 18:09 (eg)
+ * Last file update: 19-Jun-2019 17:04 (eg)
  */
 
 #include <ctype.h>
-#include <wctype.h>
 #include "stklos.h"
 
 
@@ -126,12 +125,16 @@ static int stringcompi(SCM s1, SCM s2)
     str2 = STRING_CHARS(s2); end2 = str2 + STRING_SIZE(s2);
 
     while ((str1 < end1) && (str2 < end2)) {
+      char c1low, c2low;
       if ((str1 = STk_utf8_grab_char(str1, &ch1)) == NULL)
         error_bad_sequence(STRING_CHARS(s1));
       if ((str2 = STk_utf8_grab_char(str2, &ch2)) == NULL)
         error_bad_sequence(STRING_CHARS(s2));
 
-      if (towlower(ch1) != towlower(ch2)) return towlower(ch1) - towlower(ch2);
+      c1low = STk_to_lower(ch1);
+      c2low = STk_to_lower(ch2);
+      
+      if (c1low != c2low) return c1low - c2low;
     }
 
     /* str1 < end1 || str2 < end2 */
@@ -193,7 +196,7 @@ static SCM control_index(int argc, SCM *argv, long *pstart, long *pend)
   return s;
 }
 
-static uint32_t *string2int(char *s, int len, int *utf8_len, wint_t(*func)(wint_t))
+static uint32_t *string2int(char *s, int len, int *utf8_len, uint32_t(*func)(uint32_t))
 {
   uint32_t ch, *tmp, *buff = STk_must_malloc_atomic(len * sizeof(uint32_t));
   int space = 0;
@@ -990,8 +993,9 @@ DEFINE_PRIMITIVE("string-mutable?", string_mutable, subr1, (SCM obj))
  * ,(bold "Note"): In R7RS, |string-downcase| accepts only one argument.
 doc>
  */
-static SCM string_xxcase(int argc, SCM *argv, int (*toxx)(int),
-                         wint_t (*towxx)(wint_t))
+static SCM string_xxcase(int argc, SCM *argv,
+                         int (*toxx)(int),
+                         uint32_t (*towxx)(uint32_t))
 {
   SCM s;
   long start, end;
@@ -1021,7 +1025,7 @@ static SCM string_xxcase(int argc, SCM *argv, int (*toxx)(int),
 
 DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv))
 {
-  return string_xxcase(argc, argv, tolower, towlower);
+  return string_xxcase(argc, argv, tolower, STk_to_lower);
 }
 
 
@@ -1038,8 +1042,9 @@ DEFINE_PRIMITIVE("string-downcase", string_downcase, vsubr, (int argc, SCM *argv
  * @end lisp
 doc>
 */
-static SCM string_dxxcase(int argc, SCM *argv, int (*toxx)(int),
-                         wint_t (*towxx)(wint_t))
+static SCM string_dxxcase(int argc, SCM *argv,
+                          int (*toxx)(int),
+                          uint32_t (*towxx)(uint32_t))
 {
   SCM s;
   long i, start, end;
@@ -1077,7 +1082,7 @@ static SCM string_dxxcase(int argc, SCM *argv, int (*toxx)(int),
 
 DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *argv))
 {
-  return string_dxxcase(argc, argv, tolower, towlower);
+  return string_dxxcase(argc, argv, tolower, STk_to_lower);
 }
 
 /*
@@ -1096,7 +1101,7 @@ doc>
  */
 DEFINE_PRIMITIVE("string-upcase", string_upcase, vsubr, (int argc, SCM *argv))
 {
-  return string_xxcase(argc, argv, toupper, towupper);
+  return string_xxcase(argc, argv, toupper, STk_to_upper);
 }
 
 /*
@@ -1110,7 +1115,7 @@ doc>
 */
 DEFINE_PRIMITIVE("string-upcase!", string_dupcase, vsubr, (int argc, SCM *argv))
 {
-  return string_dxxcase(argc, argv, toupper, towupper);
+  return string_dxxcase(argc, argv, toupper, STk_to_upper);
 }
 
 
@@ -1130,8 +1135,7 @@ doc>
  */
 DEFINE_PRIMITIVE("string-foldcase", string_foldcase, vsubr, (int argc, SCM *argv))
 {
-  //BUG: return string_xxcase(argc, argv, tolower, (wint_t (*) (wint_t))STk_casefold_char);
-  return STk_void; 
+  return string_xxcase(argc, argv, tolower, STk_to_fold);
 }
 
 /*
@@ -1145,8 +1149,8 @@ doc>
 */
 DEFINE_PRIMITIVE("string-foldcase!", string_dfoldcase, vsubr, (int argc, SCM *argv))
 {
-  //BUG: return string_dxxcase(argc, argv, toupper,(wint_t (*) (wint_t))STk_casefold_char);
-   return STk_void; 
+  return string_dxxcase(argc, argv, toupper, STk_to_fold);
+  
 }
 
 

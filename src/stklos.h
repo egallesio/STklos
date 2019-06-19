@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  5-Oct-2018 18:03 (eg)
+ * Last file update: 19-Jun-2019 17:26 (eg)
  */
 
 
@@ -367,9 +367,19 @@ int STk_init_bytevector(void);
 #define CHARACTER_VAL(n)  ((AS_LONG(n) >> 3))
 #define CHARACTERP(n)     ((AS_LONG(n) & 7) == 6)
 
+
+/* Comparison of characters. No test on types */
+int STk_charcomp(SCM c1, SCM c2);
+int STk_charcompi(SCM c1, SCM c2);
+
+/* Simple  character conversion functions */
+uint32_t STk_to_upper(uint32_t c);
+uint32_t STk_to_lower(uint32_t c);
+uint32_t STk_to_fold(uint32_t c);
+
+
 char *STk_char2string(int c);
 int STk_string2char(char *s);
-int STk_casefold_char(int ch);
 int STk_init_char(void);
 
 
@@ -1183,7 +1193,6 @@ struct string_obj {
 SCM STk_makestring(int len, char *init);
 SCM STk_Cstring2string(char *str);           /* Embed a C string in Scheme world  */
 
-
 EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));
 EXTERN_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index));
 EXTERN_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM value));
@@ -1220,7 +1229,7 @@ struct symbol_obj {
 
 EXTERN_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string));
 
-int STk_symbol_flags(register char *s);
+int STk_symbol_flags(char *s);
 SCM STk_intern(char *name);
 SCM STk_make_uninterned_symbol(char *name);
 int STk_init_symbol(void);
@@ -1331,7 +1340,7 @@ int STk_uvector_equal(SCM u1, SCM u2);
 SCM STk_list2uvector(int type, SCM l);
 int STk_init_uniform_vector(void);
 
-  SCM STk_make_C_bytevector(int len);  
+  SCM STk_make_C_bytevector(int len);
 SCM STk_make_bytevector_from_C_string(char *str, long len);
 
 

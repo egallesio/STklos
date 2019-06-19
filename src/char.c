@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update: 18-Jun-2019 09:50 (eg)
+ * Last file update: 19-Jun-2019 17:25 (eg)
  */
 
 #include <ctype.h>
@@ -161,14 +161,6 @@ static int search_ordered_list(utf8_char ch,  utf8_char table[], int len) {
  *
 \*===========================================================================*/
 
-static int my_strcmpi(register char *p1, register char *p2)
-{
-  for( ; tolower(*p1) == tolower(*p2); p1++, p2++)
-    if (!*p1) return 0;
-  return tolower(*p1) - tolower(*p2);
-}
-
-
 static void error_bad_char(SCM c)
 {
   STk_error("bad char", c);
@@ -183,11 +175,15 @@ static int inline charcomp(SCM c1, SCM c2)
 static int charcompi(SCM c1, SCM c2)
 {
   return STk_use_utf8 ?
-    (CHARACTER_VAL(STk_char_foldcase(c1)) -
-     CHARACTER_VAL(STk_char_foldcase(c2))):
+    (STk_to_fold(CHARACTER_VAL(c1)) -
+     STk_to_fold(CHARACTER_VAL(c2))):
     (tolower((unsigned char) CHARACTER_VAL(c1)) -
      tolower((unsigned char) CHARACTER_VAL(c2)));
 }
+
+/* Comparison of characters. No test on types */
+int STk_charcomp(SCM c1, SCM c2)  { return charcomp(c1,  c2);  }
+int STk_charcompi(SCM c1, SCM c2) { return charcompi(c1,  c2); }
 
 
 int STk_string2char(char *s)
@@ -209,7 +205,7 @@ int STk_string2char(char *s)
   }
 
   for (p=chartable; *(p->name); p++) {
-    if (my_strcmpi(p->name, s) == 0) return (int) (p->value);
+    if (strcasecmp(p->name, s) == 0) return (int) (p->value);
   }
   STk_error("bad char name %S", s);
   return 0; /* never reached */
@@ -479,28 +475,33 @@ DEFINE_PRIMITIVE("integer->char", integer2char, subr1, (SCM i))
  * lower case.
 doc>
  */
+uint32_t STk_to_upper(uint32_t c) {
+  if (STk_use_utf8) {
+    int res = search_conversion_table(c, lower_table, lower_table_length);
+    return (res <=0) ? c : res;      // -1: not a lowercase, 0 lower without upper
+  } else
+    return toupper(c);
+}
+
+uint32_t STk_to_lower(uint32_t c) {
+  if (STk_use_utf8) {
+    int res = search_conversion_table(c, upper_table, upper_table_length);
+    return (res <=0) ? c : res;      // -1: not a lowercase, 0 lower without lower
+  } else
+    return tolower(c);
+}
+
 DEFINE_PRIMITIVE("char-upcase", char_upcase, subr1, (SCM c))
 {
   if (!CHARACTERP(c)) error_bad_char(c);
-  if (STk_use_utf8) {
-    int res = search_conversion_table(CHARACTER_VAL(c),
-                                      lower_table,
-                                      lower_table_length);
-    return (res <=0) ? c : MAKE_CHARACTER(res);      // -1: not a lowercase, 0 lower without upper
-  } else
-    return MAKE_CHARACTER(toupper(CHARACTER_VAL(c)));
+  return MAKE_CHARACTER(STk_to_upper((uint32_t) CHARACTER_VAL(c)));
 }
+
 
 DEFINE_PRIMITIVE("char-downcase", char_downcase, subr1, (SCM c))
 {
   if (!CHARACTERP(c)) error_bad_char(c);
-  if (STk_use_utf8) {
-    int res = search_conversion_table(CHARACTER_VAL(c),
-                                      upper_table,
-                                      upper_table_length);
-    return (res <= 0) ? c : MAKE_CHARACTER(res);     // -1: not a uppercase, 0 upper without lower
-  } else
-    return MAKE_CHARACTER(tolower(CHARACTER_VAL(c)));
+  return MAKE_CHARACTER(STk_to_lower((uint32_t) CHARACTER_VAL(c)));
 }
 /*
 <doc EXT char-foldcase
@@ -513,17 +514,20 @@ DEFINE_PRIMITIVE("char-downcase", char_downcase, subr1, (SCM c))
  * does not exist.
 doc>
  */
+uint32_t STk_to_fold(uint32_t c) {
+  if (STk_use_utf8) {
+    int res = search_conversion_table(c, fold_table, fold_table_length);
+    return (res <=0) ? STk_to_lower(c) : res; 
+  } else
+    return tolower(c);
+}
+
 DEFINE_PRIMITIVE("char-foldcase", char_foldcase, subr1, (SCM c))
 {
   if (!CHARACTERP(c))  error_bad_char(c);
-  if (STk_use_utf8) {
-    int res = search_conversion_table(CHARACTER_VAL(c),
-                                      fold_table,
-                                      fold_table_length);
-    return (res <= 0) ? STk_char_downcase(c) : MAKE_CHARACTER(res);
-  } else
-    return MAKE_CHARACTER(tolower(CHARACTER_VAL(c)));
+  return MAKE_CHARACTER(STk_to_fold((uint32_t) CHARACTER_VAL(c)));
 }
+
 
 int STk_init_char(void)
 {
