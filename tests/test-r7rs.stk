@@ -22,14 +22,14 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 18-Jun-2019 09:36 (eg)
+;;;; Last file update: 24-Jun-2019 14:44 (eg)
 ;;;;
 
 (require "test")
 
 (test-section "R7RS")
 
-(test-subsection "Equivalence Predicates")
+(test-subsection "6.1 Equivalence Predicates")
 
 (test "eqv?.1" #t (eqv? 'a 'a))
 (test "eqv?.2" #f (eqv? 'a 'b))
@@ -101,7 +101,7 @@
                             '#1=(a b a b . #1#)))
 
 ;; ----------------------------------------------------------------
-(test-subsection "Numbers")
+(test-subsection "6.2 Numbers")
 
 (test "exact-integer?.1" #t (exact-integer? 32))
 (test "exact-integer?.2" #t (exact-integer? #e3.0))
@@ -145,66 +145,59 @@
                                 (list q r))
                               equal?)
 
+;; -----------------------------------------------------------------
+(test-subsection "6.3 Booleans")
+
+(test "boolean=?.1" #t (boolean=? #true #t #t (= 2 2)))
+(test "boolean=?.2" #f (boolean=? #true #t #t (= 2 2) #false))
+(test "boolean=?.3" #t (boolean=? #t))
+(test "boolean=?.4" #t (boolean=? #f))
+
 
 ;;------------------------------------------------------------------
-(test-subsection "Control features")
+(test-subsection "6.4 Pairs and lists")
 
-(test "string-map 1"  "abdegh"  (string-map char-downcase "AbdEgH"))
-(test "string-map 2"  "IBM"     (string-map (lambda (c)
-                                              (integer->char (+ 1 (char->integer c))))
-                                            "HAL"))
-(test "string-map 3"  "StUdLyCaPs"  (string-map (lambda (c k)
-                                                  (if (eqv? k #\u)
-                                                      (char-upcase c)
-                                                      (char-downcase c)))
-                                                "studlycaps"
-                                                "ululululul"))
+(test "member with 3d parameter.1"
+      '("b" "c")
+      (member "B" '("a" "b" "c") string-ci=?))
 
-;; **********
-(test "vector-map 1"
-      #(b e h)
-      (vector-map cadr '#((a b) (d e) (g h))))
+(test "member with 3d parameter.2"
+      '(2.0 3.0)
+      (member 1.99 '(1.0 2.0 3.0) (lambda (x y) (< (abs (- x y)) 0.1))))
 
-(test "vector-map 2" #(1 4 27 256 3125)
-      (vector-map (lambda (n) (expt n n))
-                  '#(1 2 3 4 5)))
+(test "assoc with 3d parameter.1"
+      '(2 4)
+      (assoc 2.0 '((1 1) (2 4) (3 9)) =))
 
-(test "vector-map 3" #(5 7 9)
-      (vector-map + '#(1 2 3) '#(4 5 6)))
+(test "assoc with 3d parameter.2"
+      '("b" 4)
+      (assoc "B" '(("a" 1) ("b" 4) ("c" 9)) string-ci=?))
 
-(test "vector-map 4"  #(1 2)
-      (let ((count 0))
-        (vector-map (lambda (ignored)
-                      (set! count (+ count 1))
-                      count)
-                    '#(a b))))
+(test "list-set!.1"
+      '("foo" 2 3)
+      (let ((l (list 1 2 3)))
+        (list-set! l 0 "foo")
+        l))
 
-;; **********
-(test "string-for-each"
-      '(101 100 99 98 97)
-      (let ((v (list)))
-        (string-for-each (lambda (c) (set! v (cons (char->integer c) v)))
-                         "abcde")
-         v))
+(test "make-list.1"
+      '(#void #void #void)
+      (make-list 3))
 
-;; **********
-(test "vector-for-each"
-      '#(0 1 4 9 16)
-      (let ((v (make-vector 5)))
-        (vector-for-each (lambda (i) (vector-set! v i (* i i)))
-                         '#(0 1 2 3 4))
-        v))
+(test "make-list.2"
+      '(42 42 42 42)
+      (make-list 4 42))
 
 ;;------------------------------------------------------------------
-(test-subsection "Symbols")
+(test-subsection "6.5 Symbols")
 
 (test "symbol=?.1" #t (symbol=? 'a 'a (string->symbol "a")))
 (test "symbol=?.2" #t (symbol=? '|A| (string->symbol "A")))
 (test "symbol=?.3" #f (symbol=? '|A| (string->symbol "a")))
 (test "symbol=?.4" #f (symbol=? 'a 'a "a"))
 
+
 ;;-------------------------------------------------------------------
-(test-subsection "Characters")
+(test-subsection "6.6 Characters")
 
 (test "Chibi char.1" #t  (char? #\a))
 (test "Chibi char.2" #f (char? "a"))
@@ -302,7 +295,7 @@
 
 
 ;;------------------------------------------------------------------
-(test-subsection "Strings")
+(test-subsection "6.7 Strings")
 
 (test "Extended string=?.1" #t (string=? "a"))
 (test "Extended string=?.2" #t (string=? "a" "a" "a" "a"))
@@ -384,7 +377,7 @@
       (let ((x (string-copy "abcde"))) (string-fill! x #\1 2 6) x))
 
 ;;------------------------------------------------------------------
-(test-subsection "vector")
+(test-subsection "6.8 Vectors")
 
 (test "Extended vector->list.1" '(1 2 3)        (vector->list '#(1 2 3)))
 (test "Extended vector->list.2" '(2 3)          (vector->list '#(1 2 3) 1))
@@ -469,7 +462,7 @@
     (let ((vec (vector 1 2 3 4 5))) (vector-fill! vec 'x 2 2) vec))
 
 ;;------------------------------------------------------------------
-(test-subsection "Bytevectors")
+(test-subsection "6.9 Bytevectors")
 
 (test "bytevector?.1" #t (bytevector? #u8()))
 (test "bytevector?.2" #t (bytevector? #u8(0 1 2)))
@@ -574,41 +567,62 @@
 (test "chibi string->utf8.4" #u8(#xCE #xBB) (string->utf8 "λ"))
 
 ;;------------------------------------------------------------------
-(test-subsection "Lists and Pairs")
+(test-subsection "6.10 Control features")
 
-(test "member with 3d parameter.1"
-      '("b" "c")
-      (member "B" '("a" "b" "c") string-ci=?))
+(test "string-map 1"  "abdegh"  (string-map char-downcase "AbdEgH"))
+(test "string-map 2"  "IBM"     (string-map (lambda (c)
+                                              (integer->char (+ 1 (char->integer c))))
+                                            "HAL"))
+(test "string-map 3"  "StUdLyCaPs"  (string-map (lambda (c k)
+                                                  (if (eqv? k #\u)
+                                                      (char-upcase c)
+                                                      (char-downcase c)))
+                                                "studlycaps"
+                                                "ululululul"))
 
-(test "member with 3d parameter.2"
-      '(2.0 3.0)
-      (member 1.99 '(1.0 2.0 3.0) (lambda (x y) (< (abs (- x y)) 0.1))))
+;; **********
+(test "vector-map 1"
+      #(b e h)
+      (vector-map cadr '#((a b) (d e) (g h))))
 
-(test "assoc with 3d parameter.1"
-      '(2 4)
-      (assoc 2.0 '((1 1) (2 4) (3 9)) =))
+(test "vector-map 2" #(1 4 27 256 3125)
+      (vector-map (lambda (n) (expt n n))
+                  '#(1 2 3 4 5)))
 
-(test "assoc with 3d parameter.2"
-      '("b" 4)
-      (assoc "B" '(("a" 1) ("b" 4) ("c" 9)) string-ci=?))
+(test "vector-map 3" #(5 7 9)
+      (vector-map + '#(1 2 3) '#(4 5 6)))
 
-(test "list-set!.1"
-      '("foo" 2 3)
-      (let ((l (list 1 2 3)))
-        (list-set! l 0 "foo")
-        l))
+(test "vector-map 4"  #(1 2)
+      (let ((count 0))
+        (vector-map (lambda (ignored)
+                      (set! count (+ count 1))
+                      count)
+                    '#(a b))))
 
-(test "make-list.1"
-      '(#void #void #void)
-      (make-list 3))
+;; **********
+(test "string-for-each"
+      '(101 100 99 98 97)
+      (let ((v (list)))
+        (string-for-each (lambda (c) (set! v (cons (char->integer c) v)))
+                         "abcde")
+         v))
 
-(test "make-list.2"
-      '(42 42 42 42)
-      (make-list 4 42))
+;; **********
+(test "vector-for-each"
+      '#(0 1 4 9 16)
+      (let ((v (make-vector 5)))
+        (vector-for-each (lambda (i) (vector-set! v i (* i i)))
+                         '#(0 1 2 3 4))
+        v))
+
 
 
 ;;======================================================================
-(test-subsection "Input and Output")
+(test-subsection "6.11 Exceptions")
+
+
+;;======================================================================
+(test-subsection "6.13 Input and Output")
 
 (test "call-with-port"
       '(123 . #t)
@@ -847,8 +861,10 @@
         (flush-output-port p)
         (get-output-bytevector p)))
 
+
+
 ;;======================================================================
-(test-subsection "System Interface")
+(test-subsection "6.14 System Interface")
 
 (test "command-line"
       #t
