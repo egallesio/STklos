@@ -1,6 +1,6 @@
 ;; ======================================================================
 ;;
-;; 			STklos Reference Manual
+;;                      STklos Reference Manual
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,13 +18,13 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  6-Jun-2007 19:19 (eg)
+;; Last file update: 25-Jun-2019 15:34 (eg)
 ;;
 ;; ======================================================================
 
 ;; ======================================================================
 ;;
-;;			EXCEPTIONS AND CONDITIONS
+;;                      EXCEPTIONS AND CONDITIONS
 ;;
 ;; ======================================================================
 (chapter :title "Exceptions and Conditions"
@@ -34,7 +34,7 @@
 (section :title "Exceptions"
 
 (p [The following text is extracted from ,(link-srfi 34), from which ,(stklos)
-exceptions are derived.])
+exceptions are derived. Note that exceptions are part of R7RS.])
 
 (p [Exception handlers are one-argument procedures that determine the
 action the program takes when an exceptional situation is
@@ -58,6 +58,7 @@ exception handler.])
 (insertdoc 'with-handler)
 (insertdoc 'with-exception-handler)
 (insertdoc 'raise)
+(insertdoc 'raise-continuable)
 (insertdoc 'guard)
 (insertdoc 'current-exception-handler))
 

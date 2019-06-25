@@ -1,7 +1,7 @@
 ;;;;
-;;;; srfi-34.stk	-- SRFI-34 support
+;;;; srfi-34.stk        -- SRFI-34 support
 ;;;;
-;;;; Copyright © 2004-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2004-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 27-May-2004 22:00 (eg)
-;;;; Last file update:  4-May-2007 19:43 (eg)
+;;;; Last file update: 25-Jun-2019 15:15 (eg)
 ;;;;
 
 
@@ -43,7 +43,7 @@
  * @end lisp
 doc>
 
-<doc EXT-SYNTAX with-exception-handler
+<doc R7RS with-exception-handler
  * (with-exception-handler <handler> <thunk>)
  *
  * This form is similar to |with-handler|. It uses a ,(emph "thunk") instead of
@@ -65,7 +65,7 @@ doc>
 
 
 #|
-<doc EXT-SYNTAX guard
+<doc R7RS guard
  * (guard (<var> <clause1 > <clause2 > ...)  <body>)
  *
  * Evaluating a guard form evaluates |<body>| with an exception handler
@@ -93,24 +93,24 @@ doc>
  *
  * (with-handler (lambda (c) (format "value ~A was raised" c))
  *   (guard (condition
- * 	  ((assq 'a condition) =\> cdr)
- * 	  ((assq 'b condition)))
- * 	 (raise (list (cons 'x 0)))))
+ *        ((assq 'a condition) =\> cdr)
+ *        ((assq 'b condition)))
+ *       (raise (list (cons 'x 0)))))
  *          => "value ((x . 0)) was raised"
  * @end lisp
 doc>
 |#
 (define-macro (guard clauses . body)
   (let* ((var  (car clauses))
-	 (last (last-pair clauses))
-	 (hdlr (if (and (pair? last) (pair? (car last)) (eq? (caar last) 'else))
-		   `(lambda (,var)
-		      (cond
-			,@(cdr clauses)))
-		   `(lambda (,var)
-			 (cond
-			   ,@(cdr clauses)
-			   (else (raise ,var)))))))
+         (last (last-pair clauses))
+         (hdlr (if (and (pair? last) (pair? (car last)) (eq? (caar last) 'else))
+                   `(lambda (,var)
+                      (cond
+                        ,@(cdr clauses)))
+                   `(lambda (,var)
+                         (cond
+                           ,@(cdr clauses)
+                           (else (raise ,var)))))))
     `(with-handler ,hdlr ,@body)))
 
 

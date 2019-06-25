@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * c o n d . c          -- Condition implementation
  *
- * Copyright © 2004-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 22-May-2004 08:57 (eg)
- * Last file update: 13-Sep-2018 15:26 (eg)
+ * Last file update: 25-Jun-2019 15:02 (eg)
  */
 
 #include "stklos.h"
@@ -447,7 +447,7 @@ DEFINE_PRIMITIVE("extract-condition", extract_cond, subr2, (SCM c, SCM t))
  * ======================================================================
  */
 /*
-<doc EXT raise
+<doc R7RS raise
  * (raise obj)
  *
  * Invokes the current exception handler on |obj|. The handler is called in

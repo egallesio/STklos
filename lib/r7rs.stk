@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 13-Jun-2019 16:47 (eg)
+;;;; Last file update: 25-Jun-2019 15:16 (eg)
 ;;;;
 
 
@@ -244,7 +244,7 @@ doc>
 ;;//        (unless (char? char) (error "bad character ~S" char))
 ;;//          (if (and %use-utf8? (char>=? char #\xff))
 ;;//       (
-;;//        
+;;//
 ;;//                    (or (char<= 'a' char 'z') (char<= 'A' char 'Z'))
 ;;//                    (%char-alphabetic? char)))
 ;;//      ))
@@ -1019,6 +1019,47 @@ doc>
      (when (< i end)
        (write-byte (bytevector-u8-ref bv i) port)
        (Loop (+ i 1))))))
+
+;;;; ----------------------------------------------------------------------
+;;;; 6.11 Exceptions
+;;;;
+;;;; R7RS exceptions are mainly defined in SRFI-34 (which is autoload)
+;;;; ----------------------------------------------------------------------
+
+
+#|
+<doc R7RS raise-continuable
+ * (raise-continauble obj)
+ *
+ * Raises an exception by invoking the current exception handler on
+ * |obj|. The handler is called with the same dynamic environment as the
+ * call to |raise-continuable|, except that: (1) the current exception
+ * handler is the one that was in place when the handler being called was
+ * installed, and (2) if the handler being called returns, then it will again
+ * become the current exception handler.  If the handler returns, the values
+ * it returns become the values returned by the call to |raise-continuable|.
+ * @lisp
+ * (with-exception-handler
+ *   (lambda (con)
+ *     (cond
+ *       ((string? con)
+ *        (display con))
+ *       (else
+ *        (display "a warning has been issued")))
+ *     42)
+ *   (lambda ()
+ *     (+ (raise-continuable "should be a number")
+ *        23)))
+ *   ;; prints should be a number
+ *                 => 65
+ * @end lisp
+doc>
+|#
+;; FIXME: This implementation is not efficient (it uses a new exception handler
+;; instead of avoiding the longjmp at the end of the handler execution.  
+(define (raise-continuable val)
+  (let ((hdlr (current-exception-handler)))
+    (with-handler (lambda (x) x) (hdlr val))))
 
 
 ;;;; ----------------------------------------------------------------------

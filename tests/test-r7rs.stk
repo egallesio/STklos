@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 24-Jun-2019 14:44 (eg)
+;;;; Last file update: 25-Jun-2019 15:30 (eg)
 ;;;;
 
 (require "test")
@@ -620,6 +620,150 @@
 ;;======================================================================
 (test-subsection "6.11 Exceptions")
 
+(test "srfi-34.1"
+      '("condition: an-error" exception)
+      (let* ((out (open-output-string))
+             (res (call-with-current-continuation
+                   (lambda (k)
+                     (with-exception-handler (lambda (x)
+                                               (display "condition: " out)
+                                               (write x out)
+                                               (k 'exception))
+                                             (lambda ()
+                                               (+ 1 (raise 'an-error))))))))
+        (list (get-output-string out) res)))
+
+(test "srfi-34.2"
+      "something went wrong"
+      (call-with-output-string
+       (lambda (p)
+         (with-exception-handler (lambda (x)
+                                   (display "something went wrong" p)
+                                   'dont-care)
+                                 (lambda ()
+                                   (+ 1 (raise 'an-error)))))))
+
+(test "srfi-34.3"
+      '("condition: an-error" exception)
+      (let* ((out (open-output-string))
+             (res (guard (condition
+                          (else
+                           (display "condition: " out)
+                           (write condition out)
+                           'exception))
+                         (+ 1 (raise 'an-error)))))
+       (list (get-output-string out) res)))
+
+(test "srfi-34.4"
+      '("something went wrong" dont-care)
+      (let* ((out (open-output-string))
+             (res (guard (condition
+                          (else
+                           (display "something went wrong" out)
+                           'dont-care))
+                         (+ 1 (raise 'an-error)))))
+        (list (get-output-string out) res)))
+
+(test "srfi-34.5"
+      '("" positive)
+      (let* ((out (open-output-string))
+             (res (call-with-current-continuation
+                   (lambda (k)
+                     (with-exception-handler (lambda (x)
+                                               (display "reraised " out)
+                                               (write x out)
+                                               (k 'zero))
+                                             (lambda ()
+                                               (guard (condition
+                                                       ((positive? condition)
+                                                        'positive)
+                                                       ((negative? condition)
+                                                        'negative))
+                                                      (raise 1))))))))
+        (list (get-output-string out) res)))
+
+(test "srfi-34.6"
+      '("" negative)
+      (let* ((out (open-output-string))
+             (res (call-with-current-continuation
+                   (lambda (k)
+                     (with-exception-handler (lambda (x)
+                                               (display "reraised " out)
+                                               (write x out)
+                                               (k 'zero))
+                                             (lambda ()
+                                               (guard (condition
+                                                       ((positive? condition)
+                                                        'positive)
+                                                       ((negative? condition)
+                                                        'negative))
+                                                      (raise -1))))))))
+        (list (get-output-string out) res)))
+
+(test "srfi-34.7"
+      '("reraised 0" zero)
+      (let* ((out (open-output-string))
+             (res (call-with-current-continuation
+                   (lambda (k)
+                     (with-exception-handler (lambda (x)
+                                               (display "reraised " out)
+                                               (write x out)
+                                               (k 'zero))
+                                             (lambda ()
+                                               (guard (condition
+                                                       ((positive? condition)
+                                                        'positive)
+                                                       ((negative? condition)
+                                                        'negative))
+                                                      (raise 0))))))))
+        (list (get-output-string out) res)))
+
+(test "srfi-34.8"
+      42
+      (guard (condition
+              ((assq 'a condition) => cdr)
+              ((assq 'b condition)))
+             (raise (list (cons 'a 42)))))
+
+(test "srfi-34.9"
+      '(b . 23)
+      (guard (condition
+              ((assq 'a condition) => cdr)
+              ((assq 'b condition)))
+             (raise (list (cons 'b 23)))))
+
+(test "raise-continuable.1"
+      65
+      (with-exception-handler
+       (lambda (c) 42)
+       (lambda ()
+         (+ (raise-continuable "should be a number")
+            23))))
+
+(test "raise-continuable.2"
+      '("should be a number" 65)
+      (let* ((out (open-output-string))
+             (res (with-exception-handler
+                   (lambda (con)
+                     (cond
+                       ((not (list? con))
+                        (raise con))
+                       ((list? con)
+                        (display (car con) out))
+                       (else
+                        (display "a warning has been issued" out)))
+                     42)
+                   (lambda ()
+                     (+ (raise-continuable
+                         (list "should be a number"))
+                        23)))))
+        (list (get-output-string out) res)))
+
+(test "raise-continuable.3"
+      62
+      (with-exception-handler
+       (lambda (x) (* x 2))
+       (lambda () (+ 2 (raise-continuable 10) (raise-continuable 20)))))
 
 ;;======================================================================
 (test-subsection "6.13 Input and Output")
