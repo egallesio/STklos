@@ -1,7 +1,7 @@
 ;;;;
 ;;;; bonus.stk  -- Useful primitives not in R5RS
 ;;;;
-;;;; Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 12-Oct-2018 16:58 (eg)
+;;;; Last file update: 28-Jun-2019 10:08 (eg)
 ;;;;
 
 
@@ -1380,6 +1380,26 @@ doc>
       (lambda () (mutex-lock! mtx))
       (proc)
       (lambda () (mutex-unlock! mtx))))
+
+
+#|
+<doc EXT error-object-location
+ * (error-object-location error-object)
+ *
+ * Returns the location encapsulated by |error-object| if it exists.
+ * Returns #f otherwise. The location corresponds generally to the name
+ * of the procedure which raised the error.
+ * @lisp
+ * (guard (cnd
+ *          (else (error-object-location cnd)))
+ *   (error 'foo "error message"))  => foo
+ * @end lisp 
+doc>
+|#
+(define (error-object-location obj)
+  (if (error-object? obj)
+      (condition-ref obj 'location)
+      (error "bad error object: ~S" obj)))
 
 
 ;;;; ======================================================================
