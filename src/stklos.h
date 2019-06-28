@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 19-Jun-2019 17:26 (eg)
+ * Last file update: 28-Jun-2019 09:12 (eg)
  */
 
 
@@ -457,7 +457,7 @@ SCM STk_info_object_file(char *fname);
   ------------------------------------------------------------------------------
 */
 
-void STk_signal_error(SCM type, SCM who, SCM str);
+void STk_signal_error(SCM type, SCM who, SCM str, SCM msg, SCM irritants);
 void STk_error(char *format, ...);
 SCM  STk_make_error(char *format, ...);
 SCM  STk_format_error(char *format, ...);
@@ -1021,7 +1021,6 @@ EXTERN_PRIMITIVE("read-line", read_line, subr01, (SCM port));
 
 void STk_error_bad_port(SCM p);
 void STk_error_bad_file_name(SCM f);
-void STk_error_cannot_load(SCM f);
 void STk_error_bad_io_param(char *fmt, SCM p);
 void STk_error_file_name(char *fmt, SCM fn);
 

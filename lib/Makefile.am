@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 13-Jun-2019 09:28 (eg)
+# Last file update: 28-Jun-2019 08:47 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -55,7 +55,6 @@ scheme_SRCS = STklos.init		\
 	      lex-rt.stk		\
 	      make-C-boot.stk		\
 	      pretty-print.stk		\
-	      r7rs-unicode.stk		\
 	      recette.stk		\
 	      slib.stk			\
 	      srfi-1.stk		\
@@ -98,7 +97,6 @@ scheme_OBJS = compfile.ostk		\
 	      http.ostk			\
 	      lex-rt.ostk		\
 	      pretty-print.ostk		\
-	      r7rs-unicode.ostk		\
 	      recette.ostk		\
 	      slib.ostk			\
 	      srfi-1.ostk 		\

@@ -2,7 +2,7 @@
  *
  * s y s t e m . c                              -- System relative primitives
  *
- * Copyright © 1994-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 12-Oct-2018 17:04 (eg)
+ * Last file update: 27-Jun-2019 19:15 (eg)
  */
 
 #include <unistd.h>
@@ -1314,6 +1314,7 @@ int STk_init_system(void)
   ADD_PRIMITIVE(canonical_path);
 
   ADD_PRIMITIVE(remove_file);
+  ADD_PRIMITIVE(delete_file);
   ADD_PRIMITIVE(rename_file);
   ADD_PRIMITIVE(copy_file);
   ADD_PRIMITIVE(tmp_file);

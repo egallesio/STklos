@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 22-May-2004 08:57 (eg)
- * Last file update: 25-Jun-2019 15:02 (eg)
+ * Last file update: 27-Jun-2019 14:05 (eg)
  */
 
 #include "stklos.h"
@@ -508,7 +508,9 @@ int STk_init_cond(void)
 
   /* Build special-values SRFI-35 &message, &serious, &error */
   STk_message_condition = STk_defcond_type("&message", root_condition,
-                                           LIST1(STk_intern("message")),
+                                           LIST3(STk_intern("message"),
+                                                 STk_intern("r7rs-msg"),
+                                                 STk_intern("r7rs-irritants")),
                                            module);
   location_condition    = STk_defcond_type("&location", root_condition,
                                            LIST2(STk_intern("location"),

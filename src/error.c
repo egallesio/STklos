@@ -2,7 +2,7 @@
  *
  * e r r o r . c                        -- The error procedure
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 14-Nov-1993 14:58
- * Last file update: 23-Aug-2018 15:07 (eg)
+ * Last file update: 27-Jun-2019 14:14 (eg)
  */
 
 #include "stklos.h"
@@ -116,11 +116,12 @@ static void print_format(SCM port,char *format, va_list ap)
   }
 }
 
-void STk_signal_error(SCM type, SCM where, SCM str)
+void STk_signal_error(SCM type, SCM where, SCM str, SCM msg, SCM irritants)
 {
   SCM bt = STk_vm_bt();
 
-  STk_raise_exception(STk_make_C_cond(type, 3, where, bt, str));
+  STk_raise_exception(STk_make_C_cond(type, 5, where, bt, str,
+                                      msg, irritants));
 }
 
 SCM STk_format_error(char *format, ...)
@@ -145,7 +146,7 @@ static SCM make_error_condition(char *format, va_list ap)
 {
   SCM out, bt;
 
-  /* Grab a baktrace */
+  /* Grab a backtrace */
   bt = STk_vm_bt();
 
   /* Open a string port */
@@ -155,12 +156,14 @@ static SCM make_error_condition(char *format, va_list ap)
   print_format(out, format, ap);
 
   /* and return error */
+  out =  STk_get_output_string(out);
   return STk_make_C_cond(STk_err_mess_condition,
-                         3,
+                         5,
                          STk_false, /* no location */
                          bt,
-                         STk_get_output_string(out));
-
+                         out,       /* formatted output */
+                         out,       /* here too (because a C error */
+                         STk_nil);  /* may contain C objects */
 }
 
 

@@ -1,7 +1,7 @@
 ;;;;
-;;;; load.stk	-- Extended load function
+;;;; load.stk   -- Extended load function
 ;;;;
-;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 27-May-2011 23:03 (eg)
+;;;; Last file update: 28-Jun-2019 09:08 (eg)
 ;;;;
 
 
@@ -29,10 +29,10 @@
 (define %try-load-tmp '())   ;; Use a global when restoring environment
 
 
-(define *path-separator*  	(if (eqv? (running-os) 'windows) ";" ":"))
-(define *load-suffixes*   	(list "so" "ostk" "spi" "stk" "scm"))
-(define *load-verbose*    	#f)
-(define *load-path*      	'()) ;; initialized  later
+(define *path-separator*        (if (eqv? (running-os) 'windows) ";" ":"))
+(define *load-suffixes*         (list "so" "ostk" "spi" "stk" "scm"))
+(define *load-verbose*          #f)
+(define *load-path*             '()) ;; initialized  later
 
 
 ;;
@@ -40,8 +40,8 @@
 ;;
 (define %stklos-conf-dir
   (make-parameter (or (getenv "STKLOS_CONFDIR")
-		      (make-path (getenv "HOME") ".stklos"))
-		  expand-file-name))
+                      (make-path (getenv "HOME") ".stklos"))
+                  expand-file-name))
 
 (define (%stklos-conf-file name)
   (make-path (%stklos-conf-dir) name))
@@ -56,8 +56,8 @@ doc>
 (define (build-path-from-shell-variable var)
   (let ((path (getenv var)))
     (if path
-	(string-split path *path-separator*)
-	'())))
+        (string-split path *path-separator*)
+        '())))
 
 ;======================================================================
 ;
@@ -66,15 +66,15 @@ doc>
 ;======================================================================
 (set! *load-path*
       (let ((user-path (build-path-from-shell-variable "STKLOS_LOAD_PATH")))
-	(if (null? user-path)
-	    (let ((prefix  (%library-prefix))
-		  (release (version)))
-	      (list "."
-		    (%stklos-conf-file (make-path "pkg" "lib"))
-		    (%stklos-conf-file "ext")
-		    (make-path prefix "share" "stklos" release)
-		    (make-path prefix "lib"   "stklos" release)))
-	    user-path)))
+        (if (null? user-path)
+            (let ((prefix  (%library-prefix))
+                  (release (version)))
+              (list "."
+                    (%stklos-conf-file (make-path "pkg" "lib"))
+                    (%stklos-conf-file "ext")
+                    (make-path prefix "share" "stklos" release)
+                    (make-path prefix "lib"   "stklos" release)))
+            user-path)))
 
 #|
 <doc EXT load-path
@@ -98,17 +98,17 @@ doc>
 |#
 (define load-path
   (make-parameter *load-path*
-		  (lambda (new-path)
-		    ;; Sanity check
-		    (unless (list? new-path)
-		      (error 'load-path "bad list of path names ~S" new-path))
-		    (for-each (lambda (x)
-				(unless (string? x)
-				  (error 'load-path "bad path name ~S" x)))
-			      new-path)
-		    ;; Set the load path
-		    (set! *load-path* new-path)
-		    new-path)))
+                  (lambda (new-path)
+                    ;; Sanity check
+                    (unless (list? new-path)
+                      (error 'load-path "bad list of path names ~S" new-path))
+                    (for-each (lambda (x)
+                                (unless (string? x)
+                                  (error 'load-path "bad path name ~S" x)))
+                              new-path)
+                    ;; Set the load path
+                    (set! *load-path* new-path)
+                    new-path)))
 
 #|
 <doc EXT load-suffixes
@@ -124,17 +124,17 @@ doc>
 |#
 (define load-suffixes
   (make-parameter *load-suffixes*
-		  (lambda (new)
-		    ;; Sanity check
-		    (unless (list? new)
-		      (error 'load-path "bad list of suffixes ~S" new))
-		    (for-each (lambda (x)
-				(unless (string? x)
-				  (error 'load-path "bad path name ~S" x)))
-			      new)
-		    ;; Set the load suffixes
-		    (set! *load-suffixes* new)
-		    new)))
+                  (lambda (new)
+                    ;; Sanity check
+                    (unless (list? new)
+                      (error 'load-path "bad list of suffixes ~S" new))
+                    (for-each (lambda (x)
+                                (unless (string? x)
+                                  (error 'load-path "bad path name ~S" x)))
+                              new)
+                    ;; Set the load suffixes
+                    (set! *load-suffixes* new)
+                    new)))
 
 #|
 <doc EXT load-verbose
@@ -149,7 +149,7 @@ doc>
 |#
 (define load-verbose
   (make-parameter *load-verbose*
-		  (lambda (x) (set! *load-verbose* (and x #t)) *load-verbose*)))
+                  (lambda (x) (set! *load-verbose* (and x #t)) *load-verbose*)))
 
 
 #|
@@ -165,7 +165,7 @@ doc>
 
 ;=============================================================================
 ;
-; 				GUESS-PATHNAME
+;                               GUESS-PATHNAME
 ;
 ; Try to guess the full pathname of a scheme file using *load-path* and
 ; *load-suffix*
@@ -177,32 +177,32 @@ doc>
     (when (>= (stklos-debug-level) 2)
       (eprintf "%guess-pathname: trying ~S\n" f))
     (and (file-exists? f)
-	 (file-is-readable? f)
-	 (not (file-is-directory? f))
-	 f))
+         (file-is-readable? f)
+         (not (file-is-directory? f))
+         f))
 
   (define (try-load-with-suffixes name suffixes)
     (let Loop ((s suffixes))
       (if (null? s)
-	  #f
-	  (or (try (string-append name "." (car s)))
-	      (Loop (cdr s))))))
+          #f
+          (or (try (string-append name "." (car s)))
+              (Loop (cdr s))))))
 
   (define (try-load-from-path name paths suffixes)
     (let Loop ((dir paths))
       (if (null? dir)
-	  #f
-	  (let ((fn (string-append (car dir) "/" name)))
-	    (or (try fn)
-		(try-load-with-suffixes fn suffixes)
-		(Loop (cdr dir)))))))
+          #f
+          (let ((fn (string-append (car dir) "/" name)))
+            (or (try fn)
+                (try-load-with-suffixes fn suffixes)
+                (Loop (cdr dir)))))))
   (if (regexp-match "\.?\.?/" fn)
       (or ;; First try to load file as given by user
-	  (try fn)
-	  ;; try to load file with suffix
-	  (try-load-with-suffixes fn suffixes)
-	  ;; try to load file in path
-	  (try-load-from-path fn paths suffixes))
+          (try fn)
+          ;; try to load file with suffix
+          (try-load-with-suffixes fn suffixes)
+          ;; try to load file in path
+          (try-load-from-path fn paths suffixes))
       ;; Not a file which starts with './' '../' or '/'. Use the path
       (try-load-from-path fn paths suffixes)))
 
@@ -215,27 +215,27 @@ doc>
 
 (define (%try-load fn load-path load-suffixes)
   (let ((path (%guess-pathname fn load-path load-suffixes))
-	(oldp (current-loading-file))
-	(res  #f)
-	(out  (current-error-port))
-	(mod  (current-module)))
+        (oldp (current-loading-file))
+        (res  #f)
+        (out  (current-error-port))
+        (mod  (current-module)))
     (when (and path (not (file-is-directory? path)))
       (current-loading-file path)
       (with-handler (lambda (c)
-		      (set! %try-load-tmp (cons c %try-load-tmp))
-		      (current-loading-file oldp)
-		      (%%set-current-module mod)
-		      ;; We have lost current environment :-<
-		      (let ((c (car %try-load-tmp)))
-			(set! %try-load-tmp (cdr %try-load-tmp))
-			(raise c)))
-		    (when *load-verbose* (format out ";; Loading file ~S.\n" path))
-		    (set! res 	          (%primitive-try-load path))
-		    (when *load-verbose* (format out ";; File ~S loaded.\n" path))
-		    ;; Restore current-load-path
-		    (current-loading-file oldp)
-		    ;; Restore the module we had when entering
-		    (%%set-current-module mod)))
+                      (set! %try-load-tmp (cons c %try-load-tmp))
+                      (current-loading-file oldp)
+                      (%%set-current-module mod)
+                      ;; We have lost current environment :-<
+                      (let ((c (car %try-load-tmp)))
+                        (set! %try-load-tmp (cdr %try-load-tmp))
+                        (raise c)))
+                    (when *load-verbose* (format out ";; Loading file ~S.\n" path))
+                    (set! res             (%primitive-try-load path))
+                    (when *load-verbose* (format out ";; File ~S loaded.\n" path))
+                    ;; Restore current-load-path
+                    (current-loading-file oldp)
+                    ;; Restore the module we had when entering
+                    (%%set-current-module mod)))
     res))
 
 (define (try-load fn)
@@ -250,10 +250,12 @@ doc>
   (if (%try-load fn load-path load-suffixes)
     (values (void)) ;; To be sure to have only 1 value (for repl printing defines)
     (raise (make-condition &i/o-filename-error
-			   'location 'load
-			   'message  (format "cannot load file ~S" fn)
-			   'backtrace (%vm-backtrace)
-			   'filename fn))))
+                           'location 'load
+                           'message  (format "cannot load file ~S" fn)
+                           'backtrace (%vm-backtrace)
+                           'filename fn
+                           'r7rs-msg "cannot load file"
+                           'r7rs-irritants (list fn)))))
 
 (define (load fn)
   (%load fn (load-path) (load-suffixes)))
@@ -309,10 +311,10 @@ doc>
  * |string| was already provided; it returns |%f| otherwise.
 doc>
 |#
-(define %%require  	#f)
-(define require		#f)
-(define provide		#f)
-(define provided? 	#f)
+(define %%require       #f)
+(define require         #f)
+(define provide         #f)
+(define provided?       #f)
 (define require/provide #f)
 
 (define warning-when-not-provided (make-parameter #t))
@@ -321,40 +323,40 @@ doc>
       (stklos-building? (getenv "STKLOS_BUILDING")))
 
   (set! %%require  (lambda (what lib-only?)
-		     (when stklos-building?
-		       ;; When building STklos, require-library ==  require.
-		       ;; Otherwise, we need an already installed  STklos
-		       (set! lib-only? #f))
-		     (unless (member what provided)
-		       (%load what
-			      (if lib-only?
-				  (list (make-path (%library-prefix)
-						   "share" "stklos"
-						   (version)))
-				  (load-path))
-			      (load-suffixes)))
-		     (when (and (warning-when-not-provided)
-				(not (member what provided)))
-		       (format (current-error-port)
-			       "WARNING: ~S was not provided~%" what))
-		     what))
+                     (when stklos-building?
+                       ;; When building STklos, require-library ==  require.
+                       ;; Otherwise, we need an already installed  STklos
+                       (set! lib-only? #f))
+                     (unless (member what provided)
+                       (%load what
+                              (if lib-only?
+                                  (list (make-path (%library-prefix)
+                                                   "share" "stklos"
+                                                   (version)))
+                                  (load-path))
+                              (load-suffixes)))
+                     (when (and (warning-when-not-provided)
+                                (not (member what provided)))
+                       (format (current-error-port)
+                               "WARNING: ~S was not provided~%" what))
+                     what))
 
   (set! require   (lambda (what)
-		    (%%require what (load-path))))
+                    (%%require what (load-path))))
 
   (set! require/provide
-    		  (lambda (what)
-		    (unless (member what provided)
-		      (%load what (load-path) (load-suffixes)))
-		    (provide what)))
+                  (lambda (what)
+                    (unless (member what provided)
+                      (%load what (load-path) (load-suffixes)))
+                    (provide what)))
 
   (set! provide   (lambda (what)
-		    (unless (member what provided)
-		      (set! provided (cons what provided)))
-		    what))
+                    (unless (member what provided)
+                      (set! provided (cons what provided)))
+                    what))
 
   (set! provided? (lambda (what)
-		    (and (member what provided) #t))))
+                    (and (member what provided) #t))))
 
 ;; Overload require with a macro to let the compiler deal with globals
 (define-macro (require what)
@@ -415,17 +417,17 @@ doc>
 |#
 (define-macro (autoload file . symbols)
   (let ((args (gensym))
-	(old  (gensym)))
+        (old  (gensym)))
     `(begin
        ,@(map (lambda (x)
-		`(define ,x (lambda ,args
-			      (let ((,old ,x))
-				(require-library ,file)
-				(if (eq? ,old ,x)
-				    (error 'autoload "~S has not been defined in ~S"
-					   ',x ,file)
-				    (apply ,x ,args))))))
-	      symbols))))
+                `(define ,x (lambda ,args
+                              (let ((,old ,x))
+                                (require-library ,file)
+                                (if (eq? ,old ,x)
+                                    (error 'autoload "~S has not been defined in ~S"
+                                           ',x ,file)
+                                    (apply ,x ,args))))))
+              symbols))))
 
 
 #|
@@ -438,7 +440,7 @@ doc>
 |#
 (define-macro (syntax-autoload file . symbols)
   `(set! *%autoloads* (append ',(map (lambda (s) (cons s file)) symbols)
-			      *%autoloads*)))
+                              *%autoloads*)))
 
 
 

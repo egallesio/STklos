@@ -1,7 +1,7 @@
 /*
  *  p o r t . c                 -- ports implementation
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 24-Aug-2018 16:25 (eg)
+ * Last file update: 28-Jun-2019 09:12 (eg)
  *
  */
 
@@ -64,8 +64,14 @@ void STk_error_bad_io_param(char *fmt, SCM p)
 }
 
 void STk_error_file_name(char *fmt, SCM fn)
-{
-  general_io_error(io_fn_error, fmt, fn);
+{ STk_raise_exception(STk_make_C_cond(io_fn_error,
+                                      6,
+                                      STk_false,
+                                      STk_vm_bt(),
+                                      STk_format_error(fmt, fn),
+                                      fn,
+                                      STk_Cstring2string(fmt),
+                                      LIST1(fn)));
 }
 
 
@@ -78,11 +84,6 @@ void STk_error_bad_port(SCM p)
 void STk_error_bad_file_name(SCM f)
 {
   general_io_error(io_malformed, "bad file name ~S", f);
-}
-
-void STk_error_cannot_load(SCM f)
-{
-  general_io_error(io_prot_error, "cannot load file ~S", f);
 }
 
 static void error_bad_binary_port(SCM port)
@@ -1235,7 +1236,9 @@ static int msg_use_tilde(char *s)
 
 static SCM do_error(SCM type, int argc, SCM *argv)
 {
-  SCM who = STk_false;
+  SCM who            = STk_false;
+  SCM r7rs_msg       = STk_false;
+  SCM r7rs_irritants = STk_nil;
 
   if (argc > 0) {
     if (SYMBOLP(*argv)) {
@@ -1245,16 +1248,21 @@ static SCM do_error(SCM type, int argc, SCM *argv)
     }
     if (argc > 0) {
       SCM msg;
+      // R7RS specifies that the message and the irritants must be
+      // available as such. Build these values explicitly.
+      r7rs_msg = *argv;
+      r7rs_irritants = STk_list(argc-1, argv-1);
 
       /* See if we have a formatted message or a plain SRFI-23 call */
       if (STRINGP(*argv) && !msg_use_tilde(STRING_CHARS(*argv)))
         msg = srfi_23_error(argc, argv);
       else
         msg = internal_format(argc, argv, TRUE);
-      STk_signal_error(type, who, msg);
+      STk_signal_error(type, who, msg, r7rs_msg, r7rs_irritants);
     }
   }
-  STk_signal_error(type, who, STk_Cstring2string(""));
+  r7rs_msg = STk_Cstring2string("");
+  STk_signal_error(type, who, r7rs_msg, r7rs_msg, r7rs_irritants);
   return STk_void;
 }
 

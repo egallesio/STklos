@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 25-Jun-2019 15:30 (eg)
+;;;; Last file update: 28-Jun-2019 09:21 (eg)
 ;;;;
 
 (require "test")
@@ -764,6 +764,112 @@
       (with-exception-handler
        (lambda (x) (* x 2))
        (lambda () (+ 2 (raise-continuable 10) (raise-continuable 20)))))
+
+(test "error-object?.1"
+      #t
+      (error-object? (guard (condition (else condition)) (error "BAD" 'foo :bar 42)))) 
+
+(test "error-object?.2"
+      #f
+      (error-object? (guard (condition (else condition)) (raise 42))))
+
+(test "error-object?.3"
+      #f
+      (error-object? (guard (condition (else condition)) 'normal)))
+
+(test "error-object?.4"
+      '(:cont #f :err #t)
+      (let ((cont #f)
+            (err #f))
+        (with-exception-handler
+         (lambda (c)
+           (if (error-object? c)
+               (set! err #t)
+               (set! cont #t)))
+         (lambda()
+           (error "BAD")
+           (raise-continuable 100)))
+        `(cont: ,cont err: ,err)))
+
+(test "error-object?.5"
+      '(:cont #t :err #t)
+      (let ((cont #f)
+            (err #f))
+        (with-exception-handler
+         (lambda (c)
+           (if (error-object? c)
+               (set! err #t)
+               (set! cont #t)))
+         (lambda()
+           (raise-continuable 100)
+           (error "BAD")))
+        `(cont: ,cont err: ,err)))
+
+
+(test "error-object-message.1"
+      "Oops"
+      (guard (condition
+              ((error-object? condition)
+                  (error-object-message condition))
+               (else
+                  "Oops"))
+             (raise 42)))
+
+(test "error-object-message.2"
+      "BAD"
+      (error-object-message (guard (condition (else condition))
+                                   (error "BAD" 'foo :bar 42))))
+
+(test "error-object-irritants.1"
+      '(foo :bar 42) 
+      (error-object-irritants (guard (condition (else condition))
+                                     (error "BAD" 'foo :bar 42))))
+
+(test "error-object-irritants.2"
+      '() 
+      (error-object-irritants (guard (condition (else condition))
+                                     (error "BAD"))))
+
+
+(test "read-error?.1"
+      #f
+      (read-error? (guard (condition (else condition))
+                          (error "BAD"))))
+
+(test "read-error?.2"
+      #t
+      (read-error? (guard (condition (else condition))
+                          (read-from-string "("))))
+
+(test "read-error?.3"
+      #t
+      (read-error? (guard (condition (else condition))
+                          (read-from-string "\"abc"))))
+(test "read-error?.3"
+      #t
+      (read-error? (guard (condition (else condition))
+                          (read-from-string "\"abc"))))
+(test "read-error?.4"
+      #t
+      (read-error? (guard (condition (else condition))
+                          (read-from-string "(a . )"))))
+
+
+(test "file-error?.1"
+      #t
+      (file-error? (guard (condition (else condition))
+                           (open-input-file "**This file doesn't exist**"))))
+
+(test "file-error?.2"
+      #f
+      (file-error? (guard (condition (else condition))
+                          (error "BAD"))))
+
+(test "file-error?.3"
+      #t
+      (file-error?
+       (guard (exn (else exn))
+              (load "**This file doesn't exist**"))))
 
 ;;======================================================================
 (test-subsection "6.13 Input and Output")

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 25-Jun-2019 15:16 (eg)
+;;;; Last file update: 27-Jun-2019 17:56 (eg)
 ;;;;
 
 
@@ -230,25 +230,10 @@ doc>
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.6 Characters
-;;;;
-;;;; Functions defined here work for ASCII characters only. If the used
-;;;; encoding is UTF-8 (and the character is greater than #xff) a UTF-8
-;;;; aware version is loaded. The idea is to avoid the loading of the full
-;;;; version since the data for it are pretty big.
 ;;;; ----------------------------------------------------------------------
 
-;;//(define (char-alphabetic? char)
-;;//  (if (%use-utf8
-;;//      (%char-alphabetic? char)
-;;//      (begin
-;;//        (unless (char? char) (error "bad character ~S" char))
-;;//          (if (and %use-utf8? (char>=? char #\xff))
-;;//       (
-;;//
-;;//                    (or (char<= 'a' char 'z') (char<= 'A' char 'Z'))
-;;//                    (%char-alphabetic? char)))
-;;//      ))
-;;//
+;; Nothing here
+
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.7 Strings
@@ -802,6 +787,68 @@ doc>
     (error 'vector-for-each "bad list of vectors ~S" vectors))
   (apply for-each proc (map vector->list vectors)))
 
+;;;; ----------------------------------------------------------------------
+;;;; 6.11 Exceptions
+;;;; ----------------------------------------------------------------------
+#|
+<doc R7RS error-object?
+ * (error-object? obj )
+ *
+ * Returns #t if obj is an object created by error. Otherwise,
+ * it returns #f.
+doc>
+|#
+(define (error-object? obj)
+  (and (condition? obj)
+       (condition-has-type? obj &error-message)))
+
+
+#|
+<doc R7RS error-object-message
+ * (error-object-message error-object)
+ *
+ * Returns the message encapsulated by |error-object|.
+ *
+doc>
+|#
+(define (error-object-message obj)
+  (if (error-object? obj)
+      (condition-ref obj 'r7rs-msg)
+      (error "bad error object: ~S" obj)))
+
+#|
+<doc R7RS error-object-irritants
+ * (error-object-irritants error-object)
+ *
+ * Returns the message encapsulated by |error-object|.
+ *
+doc>
+|#
+(define (error-object-irritants obj)
+  (if (error-object? obj)
+      (condition-ref obj 'r7rs-irritants)
+      (error "bad error object: ~S" obj)))
+
+#|
+<doc R7RS read-error? file-error?
+ * (read-error? obj)
+ * (file-error? obj)
+ *
+
+ * Error type predicates. Returns #t if |obj| is an object raised
+ * by the read procedure or by the inability to open an input or 
+ * output port on a file, respectively. Otherwise, it returns #f.
+  *
+doc>
+|#
+(define (read-error? obj)
+  (and (condition? obj)
+       (condition-has-type? obj &read-error)))
+
+(define (file-error? obj)
+  (and (condition? obj)
+       (condition-has-type? obj &i/o-filename-error)))
+
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.13 Input and Output
@@ -1056,7 +1103,7 @@ doc>
 doc>
 |#
 ;; FIXME: This implementation is not efficient (it uses a new exception handler
-;; instead of avoiding the longjmp at the end of the handler execution.  
+;; instead of avoiding the longjmp at the end of the handler execution.
 (define (raise-continuable val)
   (let ((hdlr (current-exception-handler)))
     (with-handler (lambda (x) x) (hdlr val))))
