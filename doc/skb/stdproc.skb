@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 28-Jun-2019 10:10 (eg)
+;; Last file update: 28-Jun-2019 17:38 (eg)
 ;;
 ;; ======================================================================
 
@@ -88,7 +88,7 @@ infinity), ,(code "+nan.0") (not a number), and
 (insertdoc 'expt)
 (insertdoc 'angle)
 (insertdoc 'inexact->exact)
-(insertdoc 'exact)
+;(insertdoc 'exact)
 (insertdoc 'number->string)
 (insertdoc 'string->number)
 
@@ -262,7 +262,7 @@ which is also shown in this table.])
 (insertdoc 'integer->char)
 (insertdoc 'char-downcase)
 (insertdoc 'char-foldcase))
-
+(insertdoc 'digit-value)
 
 ;;;
 ;;; STRINGS
@@ -1030,6 +1030,7 @@ See SRFI document for more information.])
 (index "SRFI-23")
 (insertdoc 'error)
 (insertdoc 'signal-error)
+(insertdoc 'file-error?)
 (insertdoc 'error-object?)
 (insertdoc 'error-object-message)
 (insertdoc 'error-object-irritants)

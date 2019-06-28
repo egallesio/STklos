@@ -15,7 +15,7 @@
 <td align="left" valign="top" width="20%" bgcolor="#8A8983">
 <br /><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen">Contents</font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-47017">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-50155">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -42,11 +42,11 @@
 </tbody></table>
 </td>
 <td align="left" valign="top">
-<a name="--index-entry-39970"></a><a name="--index-entry-39974"></a><a name="Exceptions"></a>
+<a name="--index-entry-43038"></a><a name="--index-entry-43042"></a><a name="Exceptions"></a>
 <h3 id="Exceptions"><font color="darkolivegreen">7.1 Exceptions</font></h3>
 <p>The following text is extracted from <strong><a href="http://srfi.schemers.org/srfi-34/srfi-34.html">SRFI-34</a></strong>
      (<em>Exception Handling for Programs</em>), from which <span style="font-variant: small-caps">STklos</span>
-exceptions are derived.</p><p>Exception handlers are one-argument procedures that determine the
+exceptions are derived. Note that exceptions are part of R7RS.</p><p>Exception handlers are one-argument procedures that determine the
 action the program takes when an exceptional situation is
 signalled. The system implicitly maintains a current exception
 handler.</p><p>The program raises an exception by invoking the current exception
@@ -60,7 +60,7 @@ can be thought of as that part of a continuation that does not specify
 the destination of any returned values. It includes the current input
 and output ports, the dynamic-wind context, and this SRFI's current
 exception handler.</p><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="with-handler"></a><a name="--index-entry-39989"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="with-handler"></a><a name="--index-entry-43057"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(with-handler &lt;handler&gt; &lt;expr1&gt; ... &lt;exprn&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />Evaluates the sequences of expressions <code>&lt;expr1&gt;</code> to <code>&lt;exprn&gt;</code>.
@@ -78,8 +78,8 @@ dynamic-wind) of the evaluations of the expressions
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="with-exception-handler"></a><a name="--index-entry-40048"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
-<tr><td align="left"><code><strong><font color="IndianRed">(with-exception-handler &lt;handler&gt; &lt;thunk&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
+<tr><td bgcolor="#dddddd"><a name="with-exception-handler"></a><a name="--index-entry-43116"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(with-exception-handler &lt;handler&gt; &lt;thunk&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This form is similar to <code>with-handler</code>. It uses a <em>thunk</em> instead of
 a sequence of expressions. It is conform to <strong><a href="http://srfi.schemers.org/srfi-34/srfi-34.html">SRFI-34</a></strong>
@@ -98,8 +98,8 @@ is equivalent to
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="raise"></a><a name="--index-entry-40108"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
-<tr><td align="left"><code><strong><font color="IndianRed">(raise obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+<tr><td bgcolor="#dddddd"><a name="raise"></a><a name="--index-entry-43177"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(raise obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Invokes the current exception handler on <code>obj</code>. The handler is called in
 the dynamic environment of the call to <code>raise</code>, except that the current
@@ -116,8 +116,36 @@ that installed the handler being called.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="guard"></a><a name="--index-entry-40163"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
-<tr><td align="left"><code><strong><font color="IndianRed">(guard (&lt;var&gt; &lt;clause1 &gt; &lt;clause2 &gt; ...)  &lt;body&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
+<tr><td bgcolor="#dddddd"><a name="raise-continuable"></a><a name="--index-entry-43233"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(raise-continauble obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Raises an exception by invoking the current exception handler on
+<code>obj</code>. The handler is called with the same dynamic environment as the
+call to <code>raise-continuable</code>, except that: (1) the current exception
+handler is the one that was in place when the handler being called was
+installed, and (2) if the handler being called returns, then it will again
+become the current exception handler.  If the handler returns, the values
+it returns become the values returned by the call to <code>raise-continuable</code>.
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="ivory"><pre>(with-exception-handler
+  (<strong>lambda</strong> (con)
+    (<strong>cond</strong>
+      ((string? con)
+       (display con))
+      (<strong>else</strong>
+       (display <font color="red">&quot;a warning has been issued&quot;</font>)))
+    42)
+  (<strong>lambda</strong> ()
+    (+ (raise-continuable <font color="red">&quot;should be a number&quot;</font>)
+       23)))
+  <font color="#ffa600"><i>;; prints should be a number</i></font>
+                &#8658; 65
+</pre></td></tr>
+</tbody></table></blockquote>
+</td></tr>
+</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="guard"></a><a name="--index-entry-43300"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="left"><code><strong><font color="IndianRed">(guard (&lt;var&gt; &lt;clause1 &gt; &lt;clause2 &gt; ...)  &lt;body&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Evaluating a guard form evaluates <code>&lt;body&gt;</code> with an exception handler
 that binds the raised object to <code>&lt;var&gt;</code> and within the scope of that
@@ -144,15 +172,15 @@ current exception handler is that of the <code>guard</code> expression.
 
 (with-handler (<strong>lambda</strong> (c) (format <font color="red">&quot;value ~A was raised&quot;</font> c))
   (guard (condition
-	  ((assq 'a condition) =&gt; cdr)
-	  ((assq 'b condition)))
-	 (raise (list (cons 'x 0)))))
+       ((assq 'a condition) =&gt; cdr)
+       ((assq 'b condition)))
+      (raise (list (cons 'x 0)))))
          &#8658; <font color="red">&quot;value ((x . 0)) was raised&quot;</font>
 </pre></td></tr>
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="current-exception-handler"></a><a name="--index-entry-40265"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="current-exception-handler"></a><a name="--index-entry-43403"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(current-exception-handler)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the current exception handler. This procedure is defined in
@@ -181,7 +209,7 @@ one condition type (a condition type can be made from several
 condition types). Each condition type specifies a set of
 slot names. A condition belonging to a condition type includes a
 value for each of the type's slot names. These values can be
-extracted from the condition by using the appropriate slot name.</p><a name="--index-entry-40306"></a><p>There is a tree of condition types with the distinguished <code>&amp;condition</code>
+extracted from the condition by using the appropriate slot name.</p><a name="--index-entry-43444"></a><p>There is a tree of condition types with the distinguished <code>&amp;condition</code>
 as its root. All other condition types have a parent condition type.</p><p>Conditions are implemented with <span style="font-variant: small-caps">STklos</span> structures (with a special bit
 indicating that there are conditions). Of course, condition types are
 implemented with structure types. As a consequence, functions on
@@ -192,7 +220,7 @@ condition, the expression</p><blockquote><table cellspacing="0" class="code" cel
 </pre></td></tr>
 </tbody></table></blockquote>
 <p>is a simple way to see it's slots and their associated value.</p><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-condition-type"></a><a name="--index-entry-40322"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-condition-type"></a><a name="--index-entry-43460"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-condition-type id  parent  slot-names)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Make-condition-type</code> returns a new condition type. <code>Id</code> must be a symbol
@@ -201,12 +229,12 @@ be a condition type. <code>Slot-names</code> must be a list of symbols. It ident
 the slots of the conditions associated with the condition type.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="condition-type-"></a><a name="--index-entry-40361"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="condition-type-"></a><a name="--index-entry-43499"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(condition-type? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>obj</code> is a condition type, and <code>#f</code> otherwise</td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-compound-condition-type"></a><a name="--index-entry-40395"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-compound-condition-type"></a><a name="--index-entry-43533"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-compound-condition-type id ct1 ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Make-compound-condition-type</code> returns a new condition type, built
@@ -217,7 +245,7 @@ union of the slots of conditions <code>ct1</code> ...
 <br /><br />
 <strong>Note:</strong> This function is not defined in <strong>SRFI-34</strong> (Exception Handling for Programs).</td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-condition"></a><a name="--index-entry-40446"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-condition"></a><a name="--index-entry-43584"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-condition type slot-name value  ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Make-condition</code> creates a condition value belonging condition type
@@ -235,12 +263,12 @@ respective slots.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="condition-"></a><a name="--index-entry-40502"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="condition-"></a><a name="--index-entry-43640"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(condition? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>obj</code> is a condition, and <code>#f</code> otherwise</td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="condition-has-type-"></a><a name="--index-entry-40536"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="condition-has-type-"></a><a name="--index-entry-43674"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(condition-has-type? condition condition-type)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Condition-has-type?</code> tests if <code>condition</code> belongs to <code>condition-type</code>.
@@ -259,7 +287,7 @@ either directly or as an ancestor and <code>#f</code> otherwise.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="condition-ref"></a><a name="--index-entry-40606"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="condition-ref"></a><a name="--index-entry-43744"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(condition-ref condition slot-name)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Condition</code> must be a condition, and <code>slot-name</code> a symbol. Moreover,
@@ -275,7 +303,7 @@ slot. <code>Condition-ref</code> returns the value associated with <code>slot-na
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="condition-set-"></a><a name="--index-entry-40672"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="condition-set-"></a><a name="--index-entry-43810"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(condition-set! condition slot-name obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Condition</code> must be a condition, and <code>slot-name</code> a symbol. Moreover,
@@ -286,7 +314,7 @@ slot. <code>Condition-set!</code> change the value associated with <code>slot-na
 <strong>Note</strong>: Whereas <code>condition-ref</code> is defined in <strong>SRFI-35</strong> (Conditions),
 <code>confition-set!</code> is not.</td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-compound-condition"></a><a name="--index-entry-40748"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-compound-condition"></a><a name="--index-entry-43886"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-compound-condition condition0 condition1 ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Make-compound-condition</code> returns a compound condition belonging to
@@ -295,7 +323,7 @@ all condition types that the <code>conditioni</code> belong to.
 <code>Condition-ref</code>, when applied to a compound condition will return
  the value from the first of the <code>conditioni</code> that has such a slot.</td></tr>
 </tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="extract-condition"></a><a name="--index-entry-40787"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="extract-condition"></a><a name="--index-entry-43925"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(extract-condition condition  condition-type)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Condition</code> must be a condition belonging to <code>condition-type</code>.
@@ -315,7 +343,7 @@ is always allocated.
 </td></tr>
 </tbody></table><a name="Predefined-Conditions"></a>
 <h3 id="Predefined-Conditions"><font color="darkolivegreen">7.3 Predefined Conditions</font></h3>
-<a name="--index-entry-40852"></a><a name="--index-entry-40856"></a><p><span style="font-variant: small-caps">STklos</span> implements all the conditions types which are defined in
+<a name="--index-entry-43990"></a><a name="--index-entry-43994"></a><p><span style="font-variant: small-caps">STklos</span> implements all the conditions types which are defined in
 <strong><a href="http://srfi.schemers.org/srfi-35/srfi-35.html">SRFI-35</a></strong>
      (<em>Conditions</em>) and <strong><a href="http://srfi.schemers.org/srfi-36/srfi-36.html">SRFI-36</a></strong>
      (<em>I/O Conditions</em>).
@@ -347,6 +375,6 @@ loaded. This can be done with the following call</p><blockquote><table cellspaci
 </tbody></table></blockquote>
 </td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Tue Nov 27 20:54:11 2018</em></small>
+                                     <a href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Fri Jun 28 17:43:39 2019</em></small>
 </body>
 </html>
