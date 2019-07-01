@@ -1,7 +1,7 @@
 ;;;;
-;;;; main.stk	-- Stklos-Pkg main program
+;;;; main.stk   -- Stklos-Pkg main program
 ;;;;
-;;;; Copyright © 2006-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2006-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update:  8-Aug-2010 09:11 (eg)
+;;;; Last file update:  1-Jul-2019 12:47 (eg)
 ;;;;
 
 (include "../lib/http.stk")
@@ -41,114 +41,140 @@
 
 
 ;; ----------------------------------------------------------------------
-;;	stklos-pkg-arguments ...
+;;      stklos-pkg-arguments ...
 ;; ----------------------------------------------------------------------
 (define (stklos-pkg-arguments argv)
   (let ((actions '())
-	(cp #f))
+        (cp #f))
 
     (parse-arguments argv
        "Usage: stklos-pkg [options] [parameter ...]"
 
        "Actions"
        (("extract" :arg pkg :alternate "e" :help "Extract <pkg>. Don't install it")
-	(set! actions (cons (list 'extract pkg) actions)))
+        (set! actions (cons (list 'extract pkg) actions)))
        (("test" :arg pkg :alternate "t" :help "Test <pkg>.")
-	 (set! actions (cons (list 'test pkg) actions)))
+         (set! actions (cons (list 'test pkg) actions)))
        (("install" :arg pkg :alternate "i" :help "Extract, compile, Install <pkg>.")
-	 (set! actions (cons (list 'install pkg) actions)))
+         (set! actions (cons (list 'install pkg) actions)))
        (("uninstall" :arg pkg :help "un-install package <pkg>")
-	(set! actions (cons (cons 'uninstall pkg) actions)))
+        (set! actions (cons (cons 'uninstall pkg) actions)))
 
        "Repository administration"
        (("sync" :alternate "s" :help "synchronize with remote server servers")
-	(set! actions (cons 'sync actions)))
+        (set! actions (cons 'sync actions)))
        (("add" :alternate "a" :arg sb
-	 :help "Add <sb> pkgball to the local repository")
-	(set! actions (cons (list 'add sb) actions)))
+         :help "Add <sb> pkgball to the local repository")
+        (set! actions (cons (list 'add sb) actions)))
        (("download" :arg pkg :help "download <pkg>")
-	 (set! actions (cons (list 'download pkg) actions)))
+         (set! actions (cons (list 'download pkg) actions)))
        (("fill-cache" :help "fill cache with available distant packages")
-	(set! actions (cons 'fill-cache actions)))
+        (set! actions (cons 'fill-cache actions)))
        (("clear-cache" :help "delete packages present in cache")
-	(set! actions (cons 'clear-cache actions)))
+        (set! actions (cons 'clear-cache actions)))
        (("reset" :help "reset stklos-pkg repository. USE WITH CAUTION")
-	(set! actions (cons 'delete-repo actions)))
+        (set! actions (cons 'delete-repo actions)))
        (("build-sync-file" :arg dir :help "Build a synchronization file from <dir>")
-	(set! actions (cons (list 'build-sync-file dir) actions)))
+        (set! actions (cons (list 'build-sync-file dir) actions)))
 
        "Informations"
        (("list" :alternate "l" :help "list available packages")
-	(set! actions (cons 'list actions)))
+        (set! actions (cons 'list actions)))
        (("depends" :arg pkg :help "Show all the dependencies of <pkg>")
-	(set! actions (cons (list 'package-deps pkg) actions)))
+        (set! actions (cons (list 'package-deps pkg) actions)))
        (("installed" :help "Show installed packages")
-	(set! actions (cons 'installed actions)))
+        (set! actions (cons 'installed actions)))
 
 
        "Misc"
        (("conf-dir" :arg dir :alternate "D"
-	 :help "Use <dir> as stklos main configuration directory")
-	(stklos-pkg-directory (make-path (expand-file-name dir) "pkg")))
+         :help "Use <dir> as stklos main configuration directory")
+        (stklos-pkg-directory (make-path (expand-file-name dir) "pkg")))
        (("directory" :arg dir :alternate "C"
-	 :help "Change to directory <dir> (extract/download)")
-	(stklos-pkg-extract-dir dir))
+         :help "Change to directory <dir> (extract/download)")
+        (stklos-pkg-extract-dir dir))
        (("verbose" :alternate "v" :help "be verbose (can be cumulated)")
-	(stklos-pkg-verbosity (+ (stklos-pkg-verbosity) 1)))
+        (stklos-pkg-verbosity (+ (stklos-pkg-verbosity) 1)))
        (("system-wide" :alternate "S" :help "do a system wide (de)installation")
-	(stklos-pkg-swide #t))
+        (stklos-pkg-swide #t))
        (("version" :alternate "V" :help "print the version and exit")
-	(eprintf "stklos-pkg shipped with STklos (version ~A)\n" (version))
-	(exit 0))
+        (eprintf "stklos-pkg shipped with STklos (version ~A)\n" (version))
+        (exit 0))
        (("help" :alternate "h" :help "display this help")
-	(arg-usage (current-error-port))
-	(exit 0))
+        (arg-usage (current-error-port))
+        (exit 0))
        (("options" :help "display program options")
-	(arg-usage (current-error-port) #t)
-	(exit 0))
+        (arg-usage (current-error-port) #t)
+        (exit 0))
        (("cp" :help "INTERNAL USE ONLY. Do not use this option")
-	(set! cp #t))
+        (set! cp #t))
        (else
-	(when cp
-	  (set! actions (cons (cons 'cp other-arguments) actions)))))
+        (when cp
+          (set! actions (cons (cons 'cp other-arguments) actions)))))
 
     (if (null? actions)
-	'(list)
-	(reverse actions))))
+        '(list)
+        (reverse actions))))
 
 
 ;; ----------------------------------------------------------------------
-;;	load-user-rc ...
+;;      load-user-rc ...
 ;; ----------------------------------------------------------------------
 (define (load-user-rc)
   (let ((rc (%stklos-conf-file "pkgrc")))
     (when (and (file-exists? rc)
-	       (file-is-readable? rc))
+               (file-is-readable? rc))
       (with-handler (lambda (c)
-		      (eprintf "**** Error while loading RC file ~S\n" rc)
-		      (raise c))
-	(load rc)))))
+                      (eprintf "**** Error while loading RC file ~S\n" rc)
+                      (raise c))
+        (load rc)))))
 
 ;; ----------------------------------------------------------------------
-;;	global-handler ...
+;;      global-handler ...
 ;; ----------------------------------------------------------------------
 (declare-new-error error-pkg)
 
+;;//(define (global-handler c)
+;;//  (if  (and (condition? c) (condition-has-type? c &error-message))
+;;//    (let ((who (condition-ref c 'location))
+;;//          (msg (condition-ref c 'message)))
+;;//      (unless (condition-has-type? c &error-pkg)
+;;//        (describe c))
+;;//      (format (current-error-port)
+;;//              "**** ERROR: ~a~a\n"
+;;//              msg
+;;//              (if who (format " (in procedure ~a)" who) "")))
+;;//    (begin
+;;//      (format (current-error-port) "UNKNOWN error ~S!!!\n" c)
+;;//      (describe c)))
+;;//  (exit 70))
+
 (define (global-handler c)
-  (if  (and (condition? c) (condition-has-type? c &error-message))
-    (let ((who (condition-ref c 'location))
-	  (msg (condition-ref c 'message)))
-      (unless (condition-has-type? c &error-pkg)
-	(describe c))
-      (format (current-error-port)
-	      "**** ERROR: ~a~a\n"
-	      msg
-	      (if who (format " (in procedure ~a)" who) "")))
-    (format (current-error-port) "UNKNOWN error!!!\n"))
-  (exit 70))
+  (when (condition? c)
+      (cond
+        ((condition-has-type? c &error-message)
+             (let ((who (condition-ref c 'location))
+                   (msg (condition-ref c 'message)))
+               (unless (condition-has-type? c &error-pkg)
+                 (describe c))
+               (format (current-error-port)
+                       "**** ERROR: ~a~a\n"
+                       msg
+                       (if who (format " (in procedure ~a)" who) ""))))
+        ((condition-has-type? c &exit-r7rs)
+            (let ((retcode (condition-ref c 'retcode)))
+              (%pre-exit retcode)
+              (emergency-exit retcode)))
+        (else
+         (format (current-error-port) "UNKNOWN condition ~S!!!\n" c)
+         (describe c)))
+      (emergency-exit 70))
+  (format (current-error-port) "UNKNOWN error ~S!!!\n" c)
+  (describe c)
+  (emergency-exit 70))
 
 ;; ----------------------------------------------------------------------
-;;	main ...
+;;      main ...
 ;; ----------------------------------------------------------------------
 (define (main argv)
   (with-handler global-handler
@@ -161,51 +187,51 @@
     ;; Parse the program arguments
     (let loop ((actions (stklos-pkg-arguments argv)))
       (unless (null? actions)
-	(case ((if (pair? (car actions)) caar car) actions)
-	  ((list)
-	     (list-repository-packages))
-	  ((sync)
-	     (synchronize-servers))
-	  ((delete-repo)
-	     (rm-rf (stklos-pkg-cache-directory))
-	     (rm-rf (stklos-pkg-servers-directory))
-	     (exit 0))
-	  ((fill-cache)
-	     (fill-cache))
-	  ((clear-cache)
-	     (clear-cache))
-	  ((extract)
-	     (find-and-extract-package (cadar actions)
-				       (stklos-pkg-extract-dir)))
-	  ((test)
-	     (exit (find-extract-and-test-package (cadar actions)
-						  (temporary-file-name))))
-	  ((install)
-	     (exit (find-extract-and-install-package (cadar actions)
-						     (temporary-file-name))))
-	  ((download)
-	     (download-package-only (cadar actions))
-	     (exit 0))
+        (case ((if (pair? (car actions)) caar car) actions)
+          ((list)
+             (list-repository-packages))
+          ((sync)
+             (synchronize-servers))
+          ((delete-repo)
+             (rm-rf (stklos-pkg-cache-directory))
+             (rm-rf (stklos-pkg-servers-directory))
+             (exit 0))
+          ((fill-cache)
+             (fill-cache))
+          ((clear-cache)
+             (clear-cache))
+          ((extract)
+             (find-and-extract-package (cadar actions)
+                                       (stklos-pkg-extract-dir)))
+          ((test)
+             (exit (find-extract-and-test-package (cadar actions)
+                                                  (temporary-file-name))))
+          ((install)
+             (exit (find-extract-and-install-package (cadar actions)
+                                                     (temporary-file-name))))
+          ((download)
+             (download-package-only (cadar actions))
+             (exit 0))
 
-	  ((package-deps)
-	   (for-each (lambda (x) (printf "~a\n" x))
-		     (package-deps* (cadar actions))))
-	  ((add)
-	   (local-description-add! (cadar actions))
-	   (exit 0))
+          ((package-deps)
+           (for-each (lambda (x) (printf "~a\n" x))
+                     (package-deps* (cadar actions))))
+          ((add)
+           (local-description-add! (cadar actions))
+           (exit 0))
 
-	  ((cp)
-	   (do-copy (cdar actions)))
+          ((cp)
+           (do-copy (cdar actions)))
 
-	  ((installed)
-	   (show-installed-packages))
+          ((installed)
+           (show-installed-packages))
 
-	  ((uninstall)
-	   (uninstall-package (cdar actions)))
+          ((uninstall)
+           (uninstall-package (cdar actions)))
 
-	  ((build-sync-file)
-	   (build-user-sync-file (cadar actions))
-	   (exit 0))
+          ((build-sync-file)
+           (build-user-sync-file (cadar actions))
+           (exit 0))
 
-	  (else (error-pkg "bad command ~S" (car actions))))
-	(loop (cdr actions))))))
+          (else (error-pkg "bad command ~S" (car actions))))
+        (loop (cdr actions))))))
