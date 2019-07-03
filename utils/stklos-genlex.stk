@@ -1,7 +1,7 @@
 ;;;;
-;;;; stklos-genlex.stk	-- generate a lexical analyser using SIlex
+;;;; stklos-genlex.stk  -- generate a lexical analyser using SIlex
 ;;;;
-;;;; Copyright © 2003-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2003-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,16 +21,16 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 12-Dec-2003 11:29 (eg)
-;;;; Last file update:  2-Jun-2007 10:38 (eg)
+;;;; Last file update:  3-Jul-2019 18:15 (eg)
 ;;;;
 
-(require "pp")
+(require "pretty-print")
 (include "../lib/SILex.d/silex.scm")
 
 (define *runtime-file* "lex-rt")
 
 ;; ----------------------------------------------------------------------
-;; 	generate-header ...
+;;      generate-header ...
 ;; ----------------------------------------------------------------------
 (define (generate-header out)
   (format out ";; This file has been generated. (DON'T EDIT)\n")
@@ -38,27 +38,27 @@
   (format out "(require ~S)\n\n" *runtime-file*))
 
 ;; ----------------------------------------------------------------------
-;; 	build-constructor ...
+;;      build-constructor ...
 ;; ----------------------------------------------------------------------
 (define (build-constructor name expr)
   (let ((name (if (string? name) (string->symbol name) name)))
     `(define ,name
        (lambda (%%input)
-	 (letrec ((%%self (make <lex> :input %%input :table ,(caddr expr)))
-		  (lexer-get-line #f)
-		  (lexer-getc     #f)
-		  (lexer-ungetc   #f))
-	   (set! lexer-get-line (slot-ref %%self 'line))
-	   (set! lexer-getc     (slot-ref %%self 'line))
-	   (set! lexer-ungetc   (slot-ref %%self 'line))
-	   %%self)))))
+         (letrec ((%%self (make <lex> :input %%input :table ,(caddr expr)))
+                  (lexer-get-line #f)
+                  (lexer-getc     #f)
+                  (lexer-ungetc   #f))
+           (set! lexer-get-line (slot-ref %%self 'line))
+           (set! lexer-getc     (slot-ref %%self 'line))
+           (set! lexer-ungetc   (slot-ref %%self 'line))
+           %%self)))))
 
 ;; ----------------------------------------------------------------------
-;; 	lex-generate ...
+;;      lex-generate ...
 ;; ----------------------------------------------------------------------
 (define (lex-generate input output name)
   (let ((tmp (temporary-file-name))
-	(out (open-file output "w")))
+        (out (open-file output "w")))
     (unless out
       (error "cannot open output file ~S" output))
 
@@ -66,19 +66,19 @@
     (let ((res (lex-tables input (format "~A" name) tmp 'code 'counters 'line)))
 
       (when res
-	;; Generate the header of the output file
-	(generate-header out)
+        ;; Generate the header of the output file
+        (generate-header out)
 
-	;; Copy the content of the temporary file
-	(let* ((in   (open-input-file tmp))
-	       (expr (read in))
-	       (res  (build-constructor name expr)))
+        ;; Copy the content of the temporary file
+        (let* ((in   (open-input-file tmp))
+               (expr (read in))
+               (res  (build-constructor name expr)))
 
-	  (pp res :port out)
-	  (newline out))
+          (pp res :port out)
+          (newline out))
 
-	;; Remove temporary file
-	(remove-file tmp))
+        ;; Remove temporary file
+        (remove-file tmp))
       ;; Close output
       (close-port out)
 
@@ -86,41 +86,41 @@
       (if res 0 1))))
 
 ;; ----------------------------------------------------------------------
-;; 	lex-expand ...
+;;      lex-expand ...
 ;; ----------------------------------------------------------------------
 (define (lex-expand input output)
   (let ((in  (open-file input "r"))
-	(out (open-file output "w")))
+        (out (open-file output "w")))
     (unless in  (error "cannot open input file ~S" input))
     (unless out (error "cannot open output file ~S" output))
 
     ;; Copy the input file and expand only the define-regular-grammar calls
     (let Loop ((expr (read in)))
       (cond
-	((eof-object? expr)
-	   (close-output-port out))
-	((and (list? expr)
-	      (eq? (car expr) 'define-regular-grammar)
-	      (= (length expr) 5))
-	   (pp (macro-expand expr) :port out)
-	   (newline out)
-	   (Loop (read in)))
-	(else
-	 (write expr out)
-	 (newline out)
-	 (Loop (read in)))))))
+        ((eof-object? expr)
+           (close-output-port out))
+        ((and (list? expr)
+              (eq? (car expr) 'define-regular-grammar)
+              (= (length expr) 5))
+           (pp (macro-expand expr) :port out)
+           (newline out)
+           (Loop (read in)))
+        (else
+         (write expr out)
+         (newline out)
+         (Loop (read in)))))))
 
 ;; ----------------------------------------------------------------------
-;; 	main ...
+;;      main ...
 ;; ----------------------------------------------------------------------
 (define (main args)
   (case (length args)
     ((3) (begin (lex-expand (cadr args) (caddr args))
-		0))
+                0))
     ((4) (lex-generate (cadr args)
-		       (caddr args)
-		       (cadddr args)))
+                       (caddr args)
+                       (cadddr args)))
     (else (let ((prog (basename (program-name))))
-	    (die (string-append
-		  "Usage: " prog "<lex-file> <output-file> <constructor>\n"
-		  "       " prog "<src-file> <output-file>\n"))))))
+            (die (string-append
+                  "Usage: " prog "<lex-file> <output-file> <constructor>\n"
+                  "       " prog "<src-file> <output-file>\n"))))))
