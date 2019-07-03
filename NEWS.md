@@ -27,14 +27,17 @@ Changes in this version are:
           - `utf8->string` & `string->utf8`
  - Updated various functions to be R7RS compliant. 
  - Added the R7RS functions on bytevectors
- - Added  R7RS `#true` and `#false` constants
+ - Added R7RS `#true` and `#false` constants
+ - Added R7RS exceptions
+ - Added R7RS system functions
  - Upgraded the libraries embedded in STklos source tree
- - Optimization of circular structure reading
+ - Optimization of circular structure reading & writing
  - New primitives
        - `display-simple` & `display-shared`
        - R7RS `symbol=?`
        - R7RS `boolean=?`
  - Updated documentation
+ - Added SRFI-111
  - Bug fixes
 
 
