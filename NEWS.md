@@ -1,8 +1,8 @@
 NEWS
 ====
 
-Dev version
------------
+version 1.30
+------------
 
 The goal of this version consists to be more R7RS compliant. All the
 R5RS functions which have been extended in R7RS are now conform to
