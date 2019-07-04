@@ -21,22 +21,20 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2011 23:35 (eg)
-;;;; Last file update: 19-Jun-2019 17:17 (eg)
+;;;; Last file update:  4-Jul-2019 14:45 (eg)
 ;;;;
 
 (require "test")
 
-;;(define *lang-is-utf8?* (let ((lang (getenv "LANG")))
-;;                        (and lang
-;;                             (or (string-find? "UTF8" lang)
-;;                                 (string-find? "utf8" lang)))))
+;; In fact, we force the interpreter to be UTF-8, since it must work even if
+;; user doesn't use UTF-8 when the tests is launcher the test.
+;; STklos is now called with with -u=1 option
 
+(define *is-C?* (or (equal? (%get-locale) "C")
+                    (let ((lang (or (getenv "LC_ALL") "")))
+                      (not (string-find? "utf8"
+                                         (string-downcase lang))))))
 
-(define *lang-is-utf8?* #t) ;; In fact, we force it, since it must work even if
-                            ;; user doesn't use UTF-8 when launch the test.
-                            ;; STklos is now called with with -u=1 option
-
-(define *is-C?* (equal? (%get-locale) "C"))
 
 (test-section "Unicode Characters")
 ;;------------------------------------------------------------------
