@@ -1,7 +1,7 @@
 /*
  * stklos.c     -- STklos interpreter main function
  *
- * Copyright © 1999-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 13-Dec-2018 13:53 (eg)
+ * Last file update:  5-Jul-2019 16:29 (eg)
  */
 
 #include "stklos.h"
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
 
   if (STk_use_utf8 == -1) {
     /* user didn't force the encoding. Determine it from environment */
-    STk_use_utf8 = (strcmp(nl_langinfo(CODESET), "UTF-8") == 0);
+    STk_use_utf8 = (strcasecmp(nl_langinfo(CODESET), "UTF-8") == 0);
   }
 
   /* Hack: to give the illusion that there is no VM under the scene */
