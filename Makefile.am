@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  7-Jul-2019 15:47 (eg)
+# Last file update:  7-Jul-2019 17:30 (eg)
 
 EXTRA_DIST   =
 # INSTDIRS contains the dirs which need to be installed
@@ -33,7 +33,7 @@ _git-pre-push:
 	find `git ls-files`             \
 	     -printf 'chmod %#m "%p"; ' \
 	     -printf 'touch -c -d "%TY-%Tm-%Td %TT" "%p"\n' | \
-	  sed -E -e "s/\.[0-9]+//" > $(GIT_META)
+	  sed -E -e "s/[0-9]{2}:\.[0-9]+//" > $(GIT_META)
 	git add $(GIT_META)
 
 #commit-beta:

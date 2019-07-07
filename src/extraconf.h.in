@@ -41,4 +41,4 @@
 #define @OS_FLAVOUR@ 1
 #define SHARED_SUFFIX           "@SH_SUFFIX@"
 #define SHARED_LIB_SUFFIX       "@SH_LIB_SUFFIX@"
-#define GIT_PUSH_ID             "3b9e112"
+#define GIT_PUSH_ID             "3b9e152"
