@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 17-Jun-2019 16:03 (eg)
+# Last file update:  7-Jul-2019 15:47 (eg)
 
 EXTRA_DIST   =
 # INSTDIRS contains the dirs which need to be installed
@@ -10,6 +10,7 @@ INSTDIRS     =  @GC@ src utils lib examples pkgman tests doc
 SUBDIRS      =  @PCRE@ @GMP@ @FFI@ $(INSTDIRS)
 VERSION_TAG  = @PACKAGE@-@VERSION@
 VERSION_BETA = $(VERSION_TAG)-beta
+GIT_META     = ./.git_meta
 
 .PHONY:  test push 
 
@@ -23,13 +24,17 @@ test tests: all
 	(cd tests; $(MAKE) test)
 
 push: _git-pre-push
+	git commit --amend
 	git push
 
 _git-pre-push:
 	./utils/make-push-id
 	git add src/extraconf.h.in
-	git commit --amend
-
+	find `git ls-files`             \
+	     -printf 'chmod %#m "%p"; ' \
+	     -printf 'touch -c -d "%TY-%Tm-%Td %TT" "%p"\n' | \
+	  sed -E -e "s/\.[0-9]+//" > $(GIT_META)
+	git add $(GIT_META)
 
 #commit-beta:
 #	eval "expr `cat .beta-number` + 1" > .beta-number
