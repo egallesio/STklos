@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  7-Jul-2019 17:38 (eg)
+# Last file update:  7-Jul-2019 17:45 (eg)
 
 
 EXTRA_DIST   =
@@ -13,7 +13,7 @@ VERSION_TAG  = @PACKAGE@-@VERSION@
 VERSION_BETA = $(VERSION_TAG)-beta
 GIT_META     = ./.git_meta
 
-.PHONY:  test push 
+.PHONY:  test tests push 
 
 install:
 	@for i in $(INSTDIRS) ;do \
@@ -25,7 +25,6 @@ test tests: all
 	(cd tests; $(MAKE) test)
 
 push: _git-pre-push
-	git commit --amend
 	git push
 
 _git-pre-push:
@@ -36,6 +35,7 @@ _git-pre-push:
 	     -printf 'touch -c -d "%TY-%Tm-%Td %TT" "%p"\n' | \
 	  sed -E -e "s/[0-9]{2}:\.[0-9]+//" > $(GIT_META)
 	git add $(GIT_META)
+	git commit
 
 #commit-beta:
 #	eval "expr `cat .beta-number` + 1" > .beta-number
