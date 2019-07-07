@@ -18,7 +18,8 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  7-Jul-2019 17:30 (eg)
+# Last file update:  7-Jul-2019 17:40 (eg)
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \

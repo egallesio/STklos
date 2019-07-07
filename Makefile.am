@@ -2,7 +2,8 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  7-Jul-2019 17:30 (eg)
+# Last file update:  7-Jul-2019 17:38 (eg)
+
 
 EXTRA_DIST   =
 # INSTDIRS contains the dirs which need to be installed
