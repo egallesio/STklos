@@ -14,6 +14,8 @@
 
 #include "private/gc_priv.h"
 
+#if !defined(SN_TARGET_ORBIS) && !defined(SN_TARGET_PSP2)
+
 #include <stdio.h>
 
 #ifdef AMIGA
@@ -226,7 +228,7 @@ GC_INNER void GC_with_callee_saves_pushed(void (*fn)(ptr_t, void *),
                                           volatile ptr_t arg)
 {
   volatile int dummy;
-  void * volatile context = 0;
+  volatile ptr_t context = 0;
 
 # if defined(HAVE_PUSH_REGS)
     GC_push_regs();
@@ -235,6 +237,7 @@ GC_INNER void GC_with_callee_saves_pushed(void (*fn)(ptr_t, void *),
       /* Older versions of Darwin seem to lack getcontext().    */
       /* ARM and MIPS Linux often doesn't support a real        */
       /* getcontext().                                          */
+      static signed char getcontext_works = 0; /* (-1) - broken, 1 - works */
       ucontext_t ctxt;
 #     ifdef GETCONTEXT_FPU_EXCMASK_BUG
         /* Workaround a bug (clearing the FPU exception mask) in        */
@@ -253,12 +256,17 @@ GC_INNER void GC_with_callee_saves_pushed(void (*fn)(ptr_t, void *),
 #       endif
 #     endif
 
-      if (getcontext(&ctxt) < 0) {
-        WARN("getcontext failed:"
-             " using another register retrieval method...\n", 0);
-        /* E.g., to workaround a bug in Docker ubuntu_32bit.    */
-      } else {
-        context = &ctxt;
+      if (getcontext_works >= 0) {
+        if (getcontext(&ctxt) < 0) {
+          WARN("getcontext failed:"
+               " using another register retrieval method...\n", 0);
+          /* getcontext() is broken, do not try again.          */
+          /* E.g., to workaround a bug in Docker ubuntu_32bit.  */
+        } else {
+          context = (ptr_t)&ctxt;
+        }
+        if (EXPECT(0 == getcontext_works, FALSE))
+          getcontext_works = context != NULL ? 1 : -1;
       }
 #     ifdef GETCONTEXT_FPU_EXCMASK_BUG
 #       ifdef X86_64
@@ -296,8 +304,8 @@ GC_INNER void GC_with_callee_saves_pushed(void (*fn)(ptr_t, void *),
         /* We're not sure whether he would like  */
         /* to be acknowledged for it or not.     */
         jmp_buf regs;
-        register word * i = (word *) &regs;
-        register ptr_t lim = (ptr_t)(&regs) + (sizeof regs);
+        word * i = (word *)&regs;
+        ptr_t lim = (ptr_t)(&regs) + sizeof(regs);
 
         /* Setjmp doesn't always clear all of the buffer.               */
         /* That tends to preserve garbage.  Clear it.                   */
@@ -317,21 +325,13 @@ GC_INNER void GC_with_callee_saves_pushed(void (*fn)(ptr_t, void *),
 #     endif /* !HAVE_BUILTIN_UNWIND_INIT */
     }
 # endif /* !HAVE_PUSH_REGS */
-  /* FIXME: context here is sometimes just zero.  At the moment the     */
+  /* TODO: context here is sometimes just zero.  At the moment, the     */
   /* callees don't really need it.                                      */
-  fn(arg, context);
+  fn(arg, (/* no volatile */ void *)context);
   /* Strongly discourage the compiler from treating the above   */
   /* as a tail-call, since that would pop the register          */
   /* contents before we get a chance to look at them.           */
-  GC_noop1((word)(&dummy));
+  GC_noop1(COVERT_DATAFLOW(&dummy));
 }
 
-#if defined(ASM_CLEAR_CODE)
-# ifdef LINT
-    ptr_t GC_clear_stack_inner(ptr_t arg, word limit)
-    {
-      return limit ? arg : 0; /* use both arguments */
-    }
-    /* The real version is in a .S file */
-# endif
-#endif /* ASM_CLEAR_CODE */
+#endif /* !SN_TARGET_ORBIS && !SN_TARGET_PSP2 */

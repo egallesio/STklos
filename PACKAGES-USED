@@ -22,7 +22,7 @@ for MPI
 
 GC: The Boehm's conservative garbage collector for C and C++
 ============================================================
-    - Version: 7.6.4
+    - Version: 8.0.4
     - License: Free (BSD-like)
     - Home Page: http://www.hpl.hp.com/personal/Hans_Boehm/gc
 

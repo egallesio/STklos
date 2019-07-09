@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  3-Jul-2019 16:28 (eg)
+### Last file update:  9-Jul-2019 16:32 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.30])
@@ -214,7 +214,7 @@ then
        *)
           cflags="${CFLAGS}";;
      esac
-     (cd gc; CC=${CC} CFLAGS=${cflags} ./configure --prefix=$prefix \
+     (cd gc; CC=${CC} CFLAGS=${cflags} ./configure --prefix=$prefix --enable-static \
               --includedir=$prefix/include/stklos \
               --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc

@@ -67,7 +67,9 @@ STATIC struct GC_ms_entry * GC_gcj_fake_mark_proc(word * addr GC_ATTR_UNUSED,
 GC_API void GC_CALL GC_init_gcj_malloc(int mp_index,
                                        void * /* really GC_mark_proc */mp)
 {
-    GC_bool ignore_gcj_info;
+#   ifndef GC_IGNORE_GCJ_INFO
+      GC_bool ignore_gcj_info;
+#   endif
     DCL_LOCK_STATE;
 
     if (mp == 0)        /* In case GC_DS_PROC is unused.        */
@@ -82,7 +84,7 @@ GC_API void GC_CALL GC_init_gcj_malloc(int mp_index,
     GC_gcj_malloc_initialized = TRUE;
 #   ifdef GC_IGNORE_GCJ_INFO
       /* This is useful for debugging on platforms with missing getenv(). */
-      ignore_gcj_info = 1;
+#     define ignore_gcj_info TRUE
 #   else
       ignore_gcj_info = (0 != GETENV("GC_IGNORE_GCJ_INFO"));
 #   endif
@@ -119,6 +121,7 @@ GC_API void GC_CALL GC_init_gcj_malloc(int mp_index,
                                 FALSE, TRUE);
       }
     UNLOCK();
+#   undef ignore_gcj_info
 }
 
 #define GENERAL_MALLOC_INNER(lb,k) \
@@ -133,7 +136,7 @@ GC_API void GC_CALL GC_init_gcj_malloc(int mp_index,
 /* rarely executed point at which it is safe to release the lock.       */
 /* We do this even where we could just call GC_INVOKE_FINALIZERS,       */
 /* since it's probably cheaper and certainly more uniform.              */
-/* FIXME - Consider doing the same elsewhere?                           */
+/* TODO: Consider doing the same elsewhere? */
 static void maybe_finalize(void)
 {
    static word last_finalized_no = 0;
@@ -163,9 +166,10 @@ static void maybe_finalize(void)
 
     GC_DBG_COLLECT_AT_MALLOC(lb);
     if(SMALL_OBJ(lb)) {
-        word lg = GC_size_map[lb];
+        word lg;
 
         LOCK();
+        lg = GC_size_map[lb];
         op = GC_gcjobjfreelist[lg];
         if(EXPECT(0 == op, FALSE)) {
             maybe_finalize();
@@ -176,12 +180,10 @@ static void maybe_finalize(void)
                 return((*oom_fn)(lb));
             }
         } else {
-            GC_gcjobjfreelist[lg] = obj_link(op);
+            GC_gcjobjfreelist[lg] = (ptr_t)obj_link(op);
             GC_bytes_allocd += GRANULES_TO_BYTES((word)lg);
         }
-        *(void **)op = ptr_to_struct_containing_descr;
         GC_ASSERT(((void **)op)[1] == 0);
-        UNLOCK();
     } else {
         LOCK();
         maybe_finalize();
@@ -191,10 +193,12 @@ static void maybe_finalize(void)
             UNLOCK();
             return((*oom_fn)(lb));
         }
-        *(void **)op = ptr_to_struct_containing_descr;
-        UNLOCK();
     }
-    return((void *) op);
+    *(void **)op = ptr_to_struct_containing_descr;
+    UNLOCK();
+    GC_dirty(op);
+    REACHABLE_AFTER_DIRTY(ptr_to_struct_containing_descr);
+    return (void *)op;
 }
 
 /* Similar to GC_gcj_malloc, but add debug info.  This is allocated     */
@@ -219,12 +223,15 @@ GC_API GC_ATTR_MALLOC void * GC_CALL GC_debug_gcj_malloc(size_t lb,
         return((*oom_fn)(lb));
     }
     *((void **)((ptr_t)result + sizeof(oh))) = ptr_to_struct_containing_descr;
-    UNLOCK();
     if (!GC_debugging_started) {
-        GC_start_debugging();
+        GC_start_debugging_inner();
     }
     ADD_CALL_CHAIN(result, ra);
-    return (GC_store_debug_info(result, (word)lb, s, i));
+    result = GC_store_debug_info_inner(result, (word)lb, s, i);
+    UNLOCK();
+    GC_dirty(result);
+    REACHABLE_AFTER_DIRTY(ptr_to_struct_containing_descr);
+    return result;
 }
 
 /* There is no THREAD_LOCAL_ALLOC for GC_gcj_malloc_ignore_off_page().  */
@@ -236,9 +243,10 @@ GC_API GC_ATTR_MALLOC void * GC_CALL GC_gcj_malloc_ignore_off_page(size_t lb,
 
     GC_DBG_COLLECT_AT_MALLOC(lb);
     if(SMALL_OBJ(lb)) {
-        word lg = GC_size_map[lb];
+        word lg;
 
         LOCK();
+        lg = GC_size_map[lb];
         op = GC_gcjobjfreelist[lg];
         if (EXPECT(0 == op, FALSE)) {
             maybe_finalize();
@@ -249,7 +257,7 @@ GC_API GC_ATTR_MALLOC void * GC_CALL GC_gcj_malloc_ignore_off_page(size_t lb,
                 return((*oom_fn)(lb));
             }
         } else {
-            GC_gcjobjfreelist[lg] = obj_link(op);
+            GC_gcjobjfreelist[lg] = (ptr_t)obj_link(op);
             GC_bytes_allocd += GRANULES_TO_BYTES((word)lg);
         }
     } else {
@@ -264,7 +272,9 @@ GC_API GC_ATTR_MALLOC void * GC_CALL GC_gcj_malloc_ignore_off_page(size_t lb,
     }
     *(void **)op = ptr_to_struct_containing_descr;
     UNLOCK();
-    return((void *) op);
+    GC_dirty(op);
+    REACHABLE_AFTER_DIRTY(ptr_to_struct_containing_descr);
+    return (void *)op;
 }
 
 #endif  /* GC_GCJ_SUPPORT */

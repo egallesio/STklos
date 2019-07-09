@@ -15,7 +15,7 @@
  * A really simple-minded text editor based on cords.
  * Things it does right:
  *      No size bounds.
- *      Inbounded undo.
+ *      Unbounded undo.
  *      Shouldn't crash no matter what file you invoke it on (e.g. /vmunix)
  *              (Make sure /vmunix is not writable before you try this.)
  *      Scrolls horizontally.
@@ -37,13 +37,18 @@
 #endif
 #include <ctype.h>
 
-#if (defined(__BORLANDC__) || defined(__CYGWIN__)) && !defined(WIN32)
+#if (defined(__BORLANDC__) || defined(__CYGWIN__) || defined(__MINGW32__) \
+     || defined(__NT__) || defined(_WIN32)) && !defined(WIN32)
     /* If this is DOS or win16, we'll fail anyway.      */
     /* Might as well assume win32.                      */
 #   define WIN32
 #endif
 
 #if defined(WIN32)
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN 1
+#  endif
+#  define NOSERVICE
 #  include <windows.h>
 #  include "de_win.h"
 #elif defined(MACINTOSH)
@@ -133,22 +138,26 @@ void prune_map(void)
     do {
         current_map_size++;
         if (map -> line < start_line - LINES && map -> previous != 0) {
-            map -> previous = map -> previous -> previous;
+            line_map pred = map -> previous -> previous;
+
+            GC_PTR_STORE_AND_DIRTY(&map->previous, pred);
         }
         map = map -> previous;
     } while (map != 0);
 }
 
 /* Add mapping entry */
-void add_map(int line, size_t pos)
+void add_map(int line_arg, size_t pos)
 {
     line_map new_map = GC_NEW(struct LineMapRep);
+    line_map cur_map;
 
     if (NULL == new_map) OUT_OF_MEMORY;
     if (current_map_size >= MAX_MAP_SIZE) prune_map();
-    new_map -> line = line;
+    new_map -> line = line_arg;
     new_map -> pos = pos;
-    new_map -> previous = current_map;
+    cur_map = current_map;
+    GC_PTR_STORE_AND_DIRTY(&new_map->previous, cur_map);
     current_map = new_map;
     current_map_size++;
 }
@@ -194,7 +203,11 @@ void add_hist(CORD s)
     new_file -> file_contents = current = s;
     current_len = CORD_len(s);
     new_file -> previous = now;
-    if (now != 0) now -> map = current_map;
+    GC_END_STUBBORN_CHANGE(new_file);
+    if (now != NULL) {
+        now -> map = current_map;
+        GC_END_STUBBORN_CHANGE(now);
+    }
     now = new_file;
 }
 
@@ -244,7 +257,7 @@ void replace_line(int i, CORD s)
                 addch(c);
             }
         }
-        screen[i] = s;
+        GC_PTR_STORE_AND_DIRTY(screen + i, s);
     }
 }
 #else
@@ -271,7 +284,7 @@ CORD retrieve_line(CORD s, size_t pos, unsigned column)
 
     CORD retrieve_screen_line(int i)
     {
-        register size_t pos;
+        size_t pos;
 
         invalidate_map(dis_line + LINES);       /* Prune search */
         pos = line_pos(dis_line + i, 0);
@@ -283,12 +296,12 @@ CORD retrieve_line(CORD s, size_t pos, unsigned column)
 /* Display the visible section of the current file       */
 void redisplay(void)
 {
-    register int i;
+    int i;
 
     invalidate_map(dis_line + LINES);   /* Prune search */
     for (i = 0; i < LINES; i++) {
         if (need_redisplay == ALL || need_redisplay == i) {
-            register size_t pos = line_pos(dis_line + i, 0);
+            size_t pos = line_pos(dis_line + i, 0);
 
             if (pos == CORD_NOT_FOUND) break;
             replace_line(i, retrieve_line(current, pos, dis_col));
@@ -566,6 +579,7 @@ void generic_init(void)
     add_hist(initial);
     now -> map = current_map;
     now -> previous = now;  /* Can't back up further: beginning of the world */
+    GC_END_STUBBORN_CHANGE(now);
     need_redisplay = ALL;
     fix_cursor();
 }
@@ -582,7 +596,11 @@ int main(int argc, char **argv)
         cshow(stdout);
         argc = ccommand(&argv);
 #   endif
+    GC_set_find_leak(0); /* app is not for testing leak detection mode */
     GC_INIT();
+#   ifndef NO_INCREMENTAL
+      GC_enable_incremental();
+#   endif
 
     if (argc != 2) {
         fprintf(stderr, "Usage: %s file\n", argv[0]);
@@ -595,7 +613,7 @@ int main(int argc, char **argv)
     arg_file_name = argv[1];
     buf = GC_MALLOC_ATOMIC(8192);
     if (NULL == buf) OUT_OF_MEMORY;
-    setvbuf(stdout, buf, _IOFBF, 8192);
+    setvbuf(stdout, (char *)buf, _IOFBF, 8192);
     initscr();
     noecho(); nonl(); cbreak();
     generic_init();

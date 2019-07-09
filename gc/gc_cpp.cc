@@ -27,50 +27,69 @@ built-in "new" and "delete".
 # define GC_BUILD
 #endif
 
-#include "gc_cpp.h"
+#define GC_DONT_INCL_WINDOWS_H
+#include "gc.h"
 
-#if !defined(GC_NEW_DELETE_NEED_THROW) && defined(__GNUC__) \
-    && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2))
-# define GC_NEW_DELETE_NEED_THROW
+#include <new> // for bad_alloc, precedes include of gc_cpp.h
+
+#include "gc_cpp.h" // for GC_OPERATOR_NEW_ARRAY, GC_NOEXCEPT
+
+#if defined(GC_NEW_ABORTS_ON_OOM) || defined(_LIBCPP_NO_EXCEPTIONS)
+# define GC_ALLOCATOR_THROW_OR_ABORT() GC_abort_on_oom()
+#else
+# define GC_ALLOCATOR_THROW_OR_ABORT() throw std::bad_alloc()
 #endif
 
-#ifdef GC_NEW_DELETE_NEED_THROW
-# include <new> /* for std::bad_alloc */
-# define GC_DECL_NEW_THROW throw(std::bad_alloc)
-# define GC_DECL_DELETE_THROW throw()
-#else
-# define GC_DECL_NEW_THROW /* empty */
-# define GC_DECL_DELETE_THROW /* empty */
-#endif // !GC_NEW_DELETE_NEED_THROW
+GC_API void GC_CALL GC_throw_bad_alloc() {
+  GC_ALLOCATOR_THROW_OR_ABORT();
+}
 
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) && !defined(__DMC__)
+
+# if !defined(GC_NEW_DELETE_THROW_NOT_NEEDED) \
+    && !defined(GC_NEW_DELETE_NEED_THROW) && GC_GNUC_PREREQ(4, 2) \
+    && (__cplusplus < 201103L || defined(__clang__))
+#   define GC_NEW_DELETE_NEED_THROW
+# endif
+
+# ifdef GC_NEW_DELETE_NEED_THROW
+#   define GC_DECL_NEW_THROW throw(std::bad_alloc)
+# else
+#   define GC_DECL_NEW_THROW /* empty */
+# endif
 
   void* operator new(size_t size) GC_DECL_NEW_THROW {
-    return GC_MALLOC_UNCOLLECTABLE(size);
+    void* obj = GC_MALLOC_UNCOLLECTABLE(size);
+    if (0 == obj)
+      GC_ALLOCATOR_THROW_OR_ABORT();
+    return obj;
   }
 
-  void operator delete(void* obj) GC_DECL_DELETE_THROW {
+  void operator delete(void* obj) GC_NOEXCEPT {
     GC_FREE(obj);
   }
 
 # if defined(GC_OPERATOR_NEW_ARRAY) && !defined(CPPCHECK)
     void* operator new[](size_t size) GC_DECL_NEW_THROW {
-      return GC_MALLOC_UNCOLLECTABLE(size);
+      void* obj = GC_MALLOC_UNCOLLECTABLE(size);
+      if (0 == obj)
+        GC_ALLOCATOR_THROW_OR_ABORT();
+      return obj;
     }
 
-    void operator delete[](void* obj) GC_DECL_DELETE_THROW {
+    void operator delete[](void* obj) GC_NOEXCEPT {
       GC_FREE(obj);
     }
 # endif // GC_OPERATOR_NEW_ARRAY
 
 # if __cplusplus > 201103L // C++14
-    void operator delete(void* obj, size_t size) GC_DECL_DELETE_THROW {
+    void operator delete(void* obj, size_t size) GC_NOEXCEPT {
       (void)size; // size is ignored
       GC_FREE(obj);
     }
 
 #   if defined(GC_OPERATOR_NEW_ARRAY) && !defined(CPPCHECK)
-      void operator delete[](void* obj, size_t size) GC_DECL_DELETE_THROW {
+      void operator delete[](void* obj, size_t size) GC_NOEXCEPT {
         (void)size;
         GC_FREE(obj);
       }

@@ -250,7 +250,7 @@ static GC_bool setup_header(hdr * hhdr, struct hblk *block, size_t byte_sz,
 
 #   ifdef MARK_BIT_PER_OBJ
      /* Set hb_inv_sz as portably as possible.                          */
-     /* We set it to the smallest value such that sz * inv_sz > 2**32    */
+     /* We set it to the smallest value such that sz * inv_sz >= 2**32  */
      /* This may be more precision than necessary.                      */
       if (byte_sz > MAXOBJBYTES) {
          hhdr -> hb_inv_sz = LARGE_INV_SZ;
@@ -266,9 +266,13 @@ static GC_bool setup_header(hdr * hhdr, struct hblk *block, size_t byte_sz,
           inv_sz *= 2;
           while (inv_sz*byte_sz > byte_sz) ++inv_sz;
 #       endif
+#       ifdef INV_SZ_COMPUTATION_CHECK
+          GC_ASSERT(((1ULL << 32) + byte_sz - 1) / byte_sz == inv_sz);
+#       endif
         hhdr -> hb_inv_sz = inv_sz;
       }
-#   else /* MARK_BIT_PER_GRANULE */
+#   endif
+#   ifdef MARK_BIT_PER_GRANULE
     {
       size_t granules = BYTES_TO_GRANULES(byte_sz);
 
@@ -412,12 +416,30 @@ GC_INNER void GC_unmap_old(void)
         /* truncated counter value wrapping is handled correctly).      */
         if ((unsigned short)(GC_gc_no - hhdr->hb_last_reclaimed) >
                 (unsigned short)GC_unmap_threshold) {
-          GC_unmap((ptr_t)h, hhdr -> hb_sz);
+          GC_unmap((ptr_t)h, (size_t)hhdr->hb_sz);
           hhdr -> hb_flags |= WAS_UNMAPPED;
         }
       }
     }
 }
+
+# ifdef MPROTECT_VDB
+    GC_INNER GC_bool GC_has_unmapped_memory(void)
+    {
+      int i;
+
+      for (i = 0; i <= N_HBLK_FLS; ++i) {
+        struct hblk * h;
+        hdr * hhdr;
+
+        for (h = GC_hblkfreelist[i]; h != NULL; h = hhdr -> hb_next) {
+          hhdr = HDR(h);
+          if (!IS_MAPPED(hhdr)) return TRUE;
+        }
+      }
+      return FALSE;
+    }
+# endif /* MPROTECT_VDB */
 
 /* Merge all unmapped blocks that are adjacent to other free            */
 /* blocks.  This may involve remapping, since all blocks are either     */
@@ -661,7 +683,7 @@ GC_allochblk_nth(size_t sz, int kind, unsigned flags, int n, int may_split)
 
             if (NULL == hbp) return NULL;
             GET_HDR(hbp, hhdr); /* set hhdr value */
-            size_avail = hhdr->hb_sz;
+            size_avail = (signed_word)hhdr->hb_sz;
             if (size_avail < size_needed) continue;
             if (size_avail != size_needed) {
               if (!may_split) continue;
@@ -709,7 +731,7 @@ GC_allochblk_nth(size_t sz, int kind, unsigned flags, int n, int may_split)
                   /* Make sure it's mapped before we mangle it. */
 #                   ifdef USE_MUNMAP
                       if (!IS_MAPPED(hhdr)) {
-                        GC_remap((ptr_t)hbp, hhdr -> hb_sz);
+                        GC_remap((ptr_t)hbp, (size_t)hhdr->hb_sz);
                         hhdr -> hb_flags &= ~WAS_UNMAPPED;
                       }
 #                   endif
@@ -735,7 +757,8 @@ GC_allochblk_nth(size_t sz, int kind, unsigned flags, int n, int may_split)
                   GC_large_alloc_warn_suppressed = 0;
                 }
                 size_avail = orig_avail;
-              } else if (size_avail == 0 && size_needed == HBLKSIZE
+              } else if (size_avail == 0
+                         && size_needed == (signed_word)HBLKSIZE
                          && IS_MAPPED(hhdr)) {
                 if (!GC_find_leak) {
                   static unsigned count = 0;
@@ -782,7 +805,7 @@ GC_allochblk_nth(size_t sz, int kind, unsigned flags, int n, int may_split)
             if( size_avail >= size_needed ) {
 #               ifdef USE_MUNMAP
                   if (!IS_MAPPED(hhdr)) {
-                    GC_remap((ptr_t)hbp, hhdr -> hb_sz);
+                    GC_remap((ptr_t)hbp, (size_t)hhdr->hb_sz);
                     hhdr -> hb_flags &= ~WAS_UNMAPPED;
                     /* Note: This may leave adjacent, mapped free blocks. */
                   }

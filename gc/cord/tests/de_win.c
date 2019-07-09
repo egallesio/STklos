@@ -18,8 +18,15 @@
  *
  * This was written by a nonexpert windows programmer.
  */
+#if defined(__BORLANDC__) || defined(__CYGWIN__) || defined(__MINGW32__) \
+    || defined(__NT__) || defined(_WIN32) || defined(WIN32)
 
-#include "windows.h"
+#ifndef WIN32_LEAN_AND_MEAN
+# define WIN32_LEAN_AND_MEAN 1
+#endif
+#define NOSERVICE
+#include <windows.h>
+
 #include "gc.h"
 #include "cord.h"
 #include "de_cmds.h"
@@ -32,7 +39,7 @@ int COLS = 0;
 
 HWND        hwnd;
 
-void de_error(char *s)
+void de_error(const char *s)
 {
     (void)MessageBoxA(hwnd, s, "Demonstration Editor",
                       MB_ICONINFORMATION | MB_OK);
@@ -44,9 +51,13 @@ int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 {
    MSG         msg;
    WNDCLASS    wndclass;
-   HANDLE      hAccel;
+   HACCEL      hAccel;
 
+   GC_set_find_leak(0);
    GC_INIT();
+#  ifndef NO_INCREMENTAL
+     GC_enable_incremental();
+#  endif
 #  if defined(CPPCHECK)
      GC_noop1((GC_word)&WinMain);
 #  endif
@@ -60,7 +71,7 @@ int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
       wndclass.hInstance      = hInstance;
       wndclass.hIcon          = LoadIcon (hInstance, szAppName);
       wndclass.hCursor        = LoadCursor (NULL, IDC_ARROW);
-      wndclass.hbrBackground  = GetStockObject(WHITE_BRUSH);
+      wndclass.hbrBackground  = (HBRUSH)GetStockObject(WHITE_BRUSH);
       wndclass.lpszMenuName   = TEXT("DE");
       wndclass.lpszClassName  = szAppName;
 
@@ -120,8 +131,8 @@ int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 /* Return the argument with all control characters replaced by blanks.  */
 char * plain_chars(char * text, size_t len)
 {
-    char * result = GC_MALLOC_ATOMIC(len + 1);
-    register size_t i;
+    char * result = (char *)GC_MALLOC_ATOMIC(len + 1);
+    size_t i;
 
     if (NULL == result) return NULL;
     for (i = 0; i < len; i++) {
@@ -139,8 +150,8 @@ char * plain_chars(char * text, size_t len)
 /* blank, and all control characters c replaced by c + 32.              */
 char * control_chars(char * text, size_t len)
 {
-    char * result = GC_MALLOC_ATOMIC(len + 1);
-    register size_t i;
+    char * result = (char *)GC_MALLOC_ATOMIC(len + 1);
+    size_t i;
 
     if (NULL == result) return NULL;
     for (i = 0; i < len; i++) {
@@ -157,9 +168,9 @@ char * control_chars(char * text, size_t len)
 int char_width;
 int char_height;
 
-void get_line_rect(int line, int win_width, RECT * rectp)
+void get_line_rect(int line_arg, int win_width, RECT * rectp)
 {
-    rectp -> top = line * (LONG)char_height;
+    rectp -> top = line_arg * (LONG)char_height;
     rectp -> bottom = rectp->top + char_height;
     rectp -> left = 0;
     rectp -> right = win_width;
@@ -198,30 +209,30 @@ INT_PTR CALLBACK AboutBoxCallback( HWND hDlg, UINT message,
    return FALSE;
 }
 
-LRESULT CALLBACK WndProc (HWND hwnd, UINT message,
+LRESULT CALLBACK WndProc (HWND hwnd_arg, UINT message,
                           WPARAM wParam, LPARAM lParam)
 {
-   static HANDLE  hInstance;
+   static HINSTANCE hInstance;
    HDC dc;
    PAINTSTRUCT ps;
    RECT client_area;
    RECT this_line;
    RECT dummy;
    TEXTMETRIC tm;
-   register int i;
+   int i;
    int id;
 
    switch (message)
    {
       case WM_CREATE:
            hInstance = ( (LPCREATESTRUCT) lParam)->hInstance;
-           dc = GetDC(hwnd);
+           dc = GetDC(hwnd_arg);
            SelectObject(dc, GetStockObject(SYSTEM_FIXED_FONT));
            GetTextMetrics(dc, &tm);
-           ReleaseDC(hwnd, dc);
+           ReleaseDC(hwnd_arg, dc);
            char_width = tm.tmAveCharWidth;
            char_height = tm.tmHeight + tm.tmExternalLeading;
-           GetClientRect(hwnd, &client_area);
+           GetClientRect(hwnd_arg, &client_area);
            COLS = (client_area.right - client_area.left)/char_width;
            LINES = (client_area.bottom - client_area.top)/char_height;
            generic_init();
@@ -229,21 +240,21 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message,
 
       case WM_CHAR:
            if (wParam == QUIT) {
-               SendMessage( hwnd, WM_CLOSE, 0, 0L );
+               SendMessage(hwnd_arg, WM_CLOSE, 0, 0L);
            } else {
                do_command((int)wParam);
            }
            return(0);
 
       case WM_SETFOCUS:
-           CreateCaret(hwnd, NULL, char_width, char_height);
-           ShowCaret(hwnd);
+           CreateCaret(hwnd_arg, NULL, char_width, char_height);
+           ShowCaret(hwnd_arg);
            caret_visible = 1;
            update_cursor();
            return(0);
 
       case WM_KILLFOCUS:
-           HideCaret(hwnd);
+           HideCaret(hwnd_arg);
            DestroyCaret();
            caret_visible = 0;
            return(0);
@@ -267,13 +278,13 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message,
            } else {
              switch(id) {
                case IDM_FILEEXIT:
-                  SendMessage( hwnd, WM_CLOSE, 0, 0L );
+                  SendMessage(hwnd_arg, WM_CLOSE, 0, 0L);
                   return( 0 );
 
                case IDM_HELPABOUT:
                   if( DialogBox( hInstance, TEXT("ABOUTBOX"),
-                                 hwnd, AboutBoxCallback ) )
-                     InvalidateRect( hwnd, NULL, TRUE );
+                                 hwnd_arg, AboutBoxCallback ) )
+                     InvalidateRect(hwnd_arg, NULL, TRUE);
                   return( 0 );
                case IDM_HELPCONTENTS:
                   de_error(
@@ -286,7 +297,7 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message,
            break;
 
       case WM_CLOSE:
-           DestroyWindow( hwnd );
+           DestroyWindow(hwnd_arg);
            return 0;
 
       case WM_DESTROY:
@@ -295,8 +306,8 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message,
            return 0;
 
       case WM_PAINT:
-           dc = BeginPaint(hwnd, &ps);
-           GetClientRect(hwnd, &client_area);
+           dc = BeginPaint(hwnd_arg, &ps);
+           GetClientRect(hwnd_arg, &client_area);
            COLS = (client_area.right - client_area.left)/char_width;
            LINES = (client_area.bottom - client_area.top)/char_height;
            SelectObject(dc, GetStockObject(SYSTEM_FIXED_FONT));
@@ -332,11 +343,11 @@ LRESULT CALLBACK WndProc (HWND hwnd, UINT message,
                                 control, (int)strlen(control));
                }
            }
-           EndPaint(hwnd, &ps);
+           EndPaint(hwnd_arg, &ps);
            screen_was_painted = 1;
            return 0;
    }
-   return DefWindowProc (hwnd, message, wParam, lParam);
+   return DefWindowProc(hwnd_arg, message, wParam, lParam);
 }
 
 int last_col;
@@ -358,11 +369,19 @@ void update_cursor(void)
 
 void invalidate_line(int i)
 {
-    RECT line;
+    RECT line_r;
 
     if (!screen_was_painted) return;
         /* Invalidating a rectangle before painting seems result in a   */
         /* major performance problem.                                   */
-    get_line_rect(i, COLS*char_width, &line);
-    InvalidateRect(hwnd, &line, FALSE);
+    get_line_rect(i, COLS*char_width, &line_r);
+    InvalidateRect(hwnd, &line_r, FALSE);
 }
+
+#else
+
+  extern int GC_quiet;
+        /* ANSI C doesn't allow translation units to be empty.  */
+        /* So we guarantee this one is nonempty.                */
+
+#endif /* !WIN32 */

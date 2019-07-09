@@ -6250,7 +6250,7 @@ then
        *)
           cflags="${CFLAGS}";;
      esac
-     (cd gc; CC=${CC} CFLAGS=${cflags} ./configure --prefix=$prefix \
+     (cd gc; CC=${CC} CFLAGS=${cflags} ./configure --prefix=$prefix --enable-static \
               --includedir=$prefix/include/stklos \
               --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc

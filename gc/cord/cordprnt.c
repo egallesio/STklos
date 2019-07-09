@@ -70,12 +70,12 @@ static int ec_len(CORD_ec x)
 static int extract_conv_spec(CORD_pos source, char *buf,
                              int * width, int *prec, int *left, int * long_arg)
 {
-    register int result = 0;
-    register int current_number = 0;
-    register int saw_period = 0;
-    register int saw_number = 0;
-    register int chars_so_far = 0;
-    register char current;
+    int result = 0;
+    int current_number = 0;
+    int saw_period = 0;
+    int saw_number = 0;
+    int chars_so_far = 0;
+    char current;
 
     *width = NONE;
     buf[chars_so_far++] = '%';
@@ -174,11 +174,11 @@ static int extract_conv_spec(CORD_pos source, char *buf,
     return(result);
 }
 
-#if defined(DJGPP) || defined(__STRICT_ANSI__)
+#if defined(__DJGPP__) || defined(__STRICT_ANSI__)
   /* vsnprintf is missing in DJGPP (v2.0.3) */
 # define GC_VSNPRINTF(buf, bufsz, format, args) vsprintf(buf, format, args)
 #elif defined(_MSC_VER)
-# ifdef MSWINCE
+# if defined(_WIN32_WCE)
     /* _vsnprintf is deprecated in WinCE */
 #   define GC_VSNPRINTF StringCchVPrintfA
 # else
@@ -191,8 +191,8 @@ static int extract_conv_spec(CORD_pos source, char *buf,
 int CORD_vsprintf(CORD * out, CORD format, va_list args)
 {
     CORD_ec result;
-    register int count;
-    register char current;
+    int count;
+    char current;
     CORD_pos pos;
     char conv_spec[CONV_SPEC_LEN + 1];
 
@@ -241,17 +241,18 @@ int CORD_vsprintf(CORD * out, CORD format, va_list args)
                         if (prec == VARIABLE) prec = va_arg(args, int);
                         arg = va_arg(args, CORD);
                         len = CORD_len(arg);
-                        if (prec != NONE && len > (size_t)prec) {
+                        if (prec != NONE && len > (unsigned)prec) {
                           if (prec < 0) return(-1);
-                          arg = CORD_substr(arg, 0, prec);
+                          arg = CORD_substr(arg, 0, (unsigned)prec);
                           len = (unsigned)prec;
                         }
-                        if (width != NONE && len < (size_t)width) {
-                          char * blanks = GC_MALLOC_ATOMIC(width-len+1);
+                        if (width != NONE && len < (unsigned)width) {
+                          char * blanks = (char *)GC_MALLOC_ATOMIC(
+                                                (unsigned)width - len + 1);
 
                           if (NULL == blanks) OUT_OF_MEMORY;
-                          memset(blanks, ' ', width-len);
-                          blanks[width-len] = '\0';
+                          memset(blanks, ' ', (unsigned)width - len);
+                          blanks[(unsigned)width - len] = '\0';
                           if (left_adj) {
                             arg = CORD_cat(arg, blanks);
                           } else {
@@ -262,7 +263,7 @@ int CORD_vsprintf(CORD * out, CORD format, va_list args)
                         goto done;
                     case 'c':
                         if (width == NONE && prec == NONE) {
-                            register char c;
+                            char c;
 
                             c = (char)va_arg(args, int);
                             CORD_ec_append(result, c);
@@ -272,9 +273,9 @@ int CORD_vsprintf(CORD * out, CORD format, va_list args)
                     case 's':
                         if (width == NONE && prec == NONE) {
                             char * str = va_arg(args, char *);
-                            register char c;
+                            char c;
 
-                            while ((c = *str++)) {
+                            while ((c = *str++) != '\0') {
                                 CORD_ec_append(result, c);
                             }
                             goto done;
@@ -285,7 +286,7 @@ int CORD_vsprintf(CORD * out, CORD format, va_list args)
                 }
                 /* Use standard sprintf to perform conversion */
                 {
-                    register char * buf;
+                    char * buf;
                     va_list vsprintf_args;
                     int max_size = 0;
                     int res = 0;
@@ -306,7 +307,7 @@ int CORD_vsprintf(CORD * out, CORD format, va_list args)
                     if (prec != NONE && prec > max_size) max_size = prec;
                     max_size += CONV_RESULT_LEN;
                     if (max_size >= CORD_BUFSZ) {
-                        buf = GC_MALLOC_ATOMIC(max_size + 1);
+                        buf = (char *)GC_MALLOC_ATOMIC((unsigned)max_size + 1);
                         if (NULL == buf) OUT_OF_MEMORY;
                     } else {
                         if (CORD_BUFSZ - (result[0].ec_bufptr-result[0].ec_buf)
@@ -351,7 +352,7 @@ int CORD_vsprintf(CORD * out, CORD format, va_list args)
                            && !defined(__EMX__))
                       va_end(vsprintf_args);
 #                   endif
-                    len = (size_t)res;
+                    len = (unsigned)res;
                     if ((char *)(GC_word)res == buf) {
                         /* old style vsprintf */
                         len = strlen(buf);
@@ -359,9 +360,9 @@ int CORD_vsprintf(CORD * out, CORD format, va_list args)
                         return(-1);
                     }
                     if (buf != result[0].ec_bufptr) {
-                        register char c;
+                        char c;
 
-                        while ((c = *buf++)) {
+                        while ((c = *buf++) != '\0') {
                             CORD_ec_append(result, c);
                         }
                     } else {
