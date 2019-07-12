@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-0.stk                                 -- SRFI-0 aka cond-expand
 ;;;;
-;;;; Copyright © 1999-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1999-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  6-Nov-2018 12:29 (eg)
+;;;; Last file update: 11-Jul-2019 15:56 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -166,7 +166,7 @@
     ;; srfi-109
     ;; srfi-110
     ((srfi-111 boxes) "srfi-111")       ; Boxes
-    ;; srfi-112
+    srfi-112                            ; Environment Inquiry
     ;; srfi-113
     ;; srfi-114
     ;; srfi-115

@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  3-Jul-2018 18:22 (eg)
+ * Last file update: 11-Jul-2019 16:13 (eg)
  */
 
 #include "stklos.h"
@@ -88,16 +88,18 @@ SCM STk_read_from_C_string(char *str)
 
 /*===========================================================================*\
  *
- * Primitives that feet anywhere else
+ * Primitives that don't feet anywhere else
  *
 \*===========================================================================*/
 /*
-<doc EXT version
+<doc EXT version implementation-version
  * (version)
+ * (implementation-version)
  *
- * Returns a string identifying the current version of the system. A version is
- * constituted of three numbers separated by a point: the version, the release
- * and sub-release numbers.
+ * Returns a string identifying the current version of the system. A
+ * version is constituted of two numbers separated by a point: the version
+ * and the release numbers. Note that |implementation-version| corresponds
+ * to the ,(srfi 112) name of this function.
 doc>
  */
 DEFINE_PRIMITIVE("version", version, subr0, (void))

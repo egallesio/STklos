@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 28-Jun-2019 10:08 (eg)
+;;;; Last file update: 11-Jul-2019 16:28 (eg)
 ;;;;
 
 
@@ -1393,7 +1393,7 @@ doc>
  * (guard (cnd
  *          (else (error-object-location cnd)))
  *   (error 'foo "error message"))  => foo
- * @end lisp 
+ * @end lisp
 doc>
 |#
 (define (error-object-location obj)
@@ -1723,5 +1723,68 @@ doc>
 (define (get-environment-variables)
   (getenv))
 
+;;
+;; SRFI-112: "Environment Inquiry"
+;;
+
+#|
+<doc EXT implementation-name
+ * (implementation-name)
+ *
+ * This function is defined in ,(srfi 112); it returns the Scheme
+ * implementation (i.e. "STklos").
+doc>
+|#
+(define (implementation-name) "STklos")
+(define implementation-version version)
+
+#|
+<doc EXT cpu-architecture
+ * (cpu-architecture)
+ *
+ * This function is defined in ,(srfi 112); it returns the CPU
+ * architecture, real or virtual, on which this implementation
+ * is executing.
+doc>
+|#
+(define (cpu-architecture) (vector-ref (%uname) 4)) ; Posix machine field
+
+#|
+<doc EXT machine-name
+ * (machine-name)
+ *
+ * This function is defined in ,(srfi 112); it returns a name for the
+ * particular machine on which the implementation is running.
+doc>
+|#
+(define (machine-name)     (vector-ref (%uname) 1)) ; Posix nodename field
+
+
+#|
+<doc EXT os-name
+ * (os-name)
+ *
+ * This function is defined in ,(srfi 112); it returns the name for
+ * the operating system, platform, or equivalent on which the
+ * implementation is running.
+doc>
+|#
+(define (os-name)          (vector-ref (%uname) 0)) ; Posix sysname field
+
+
+#|
+<doc EXT os-version
+ * (os-version)
+ *
+ * This function is defined in ,(srfi 112); it returns the version for
+ * the operating system, platform, or equivalent on which the
+ * implementation is running.
+doc>
+|#
+(define (os-version)
+  (let ((u (%uname)))
+    (string-append (vector-ref u 2)                 ; Posix version field
+                   " "
+                   (vector-ref u 3))))              ; Posix release field
 
 ;; LocalWords:  doc dotimes R5RS str SRFI optarg

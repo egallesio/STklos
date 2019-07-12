@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 11-Aug-2011 00:16 (eg)
-;;;; Last file update: 17-Jun-2019 17:09 (eg)
+;;;; Last file update:  9-Jul-2019 17:34 (eg)
 ;;;;
 
 (define digits   '())
@@ -47,7 +47,7 @@
                             (integer->char (string->number value 16)))
                     (printf "      { 0x~A,\t ~A},\t /* '~A' */\n"
                             key value (integer->char (string->number key 16))))))
-            (reverse lst))                                                      ;; BUG: si on met reverse!
+            (reverse lst))
   (printf "};\n")
   (printf "static int ~A_length = ~A;\n\n" name (length lst)))
 

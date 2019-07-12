@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 28-Jun-2019 17:38 (eg)
+;; Last file update: 11-Jul-2019 16:33 (eg)
 ;;
 ;; ======================================================================
 
@@ -724,6 +724,11 @@ standard primivitives to acess environment variables.])
 (insertdoc 'program-name)
 (insertdoc 'version)
 (insertdoc 'machine-type)
+(insertdoc 'implementation-name)
+(insertdoc 'cpu-architecture)
+(insertdoc 'machine-name)
+(insertdoc 'os-name)
+(insertdoc 'os-version)
 (insertdoc 'getpid))
 
 (subsection :title "Program Arguments Parsing"

@@ -16,13 +16,14 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 27-Jun-2019 19:15 (eg)
+ * Last file update: 11-Jul-2019 15:54 (eg)
  */
 
 #include <unistd.h>
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/utsname.h>
 #include <fcntl.h>
 #include <dirent.h>
 #include <time.h>
@@ -512,7 +513,7 @@ DEFINE_PRIMITIVE("glob", glob, vsubr, (int argc, SCM *argv))
  * Removes the file whose path name is given in |string|.
  * The result of |delete-file| is ,(emph "void").
  * @l
- * This function is also called |remove-file| for compatibility 
+ * This function is also called |remove-file| for compatibility
  * reasons. ,(index "remove-file")
 doc>
 */
@@ -1248,6 +1249,25 @@ DEFINE_PRIMITIVE("%get-locale", get_locale, subr0, (void))
 }
 
 
+DEFINE_PRIMITIVE("%uname", uname, subr0, (void))
+{
+  struct utsname name;
+  SCM z;
+
+  if (uname(&name) != 0) {
+    error_posix(NULL, NULL);
+  }
+  z = STk_makevect(5, STk_void);
+  VECTOR_DATA(z)[0] = STk_Cstring2string(name.sysname);
+  VECTOR_DATA(z)[1] = STk_Cstring2string(name.nodename);
+  VECTOR_DATA(z)[2] = STk_Cstring2string(name.release);
+  VECTOR_DATA(z)[3] = STk_Cstring2string(name.version);
+  VECTOR_DATA(z)[4] = STk_Cstring2string(name.machine);
+  
+  return z;
+}
+
+
 int STk_init_system(void)
 {
   SCM current_module = STk_STklos_module;
@@ -1330,5 +1350,6 @@ int STk_init_system(void)
   ADD_PRIMITIVE(pause);
   ADD_PRIMITIVE(big_endianp);
   ADD_PRIMITIVE(get_locale);
+  ADD_PRIMITIVE(uname);
   return TRUE;
 }
