@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  7-Jul-2019 17:45 (eg)
+# Last file update: 12-Jul-2019 17:52 (eg)
 
 
 EXTRA_DIST   =
@@ -24,10 +24,11 @@ install:
 test tests: all
 	(cd tests; $(MAKE) test)
 
-push: _git-pre-push
+push: pre-push
+	-git commit
 	git push
 
-_git-pre-push:
+pre-push:
 	./utils/make-push-id
 	git add src/extraconf.h.in
 	find `git ls-files`             \
@@ -35,7 +36,7 @@ _git-pre-push:
 	     -printf 'touch -c -d "%TY-%Tm-%Td %TT" "%p"\n' | \
 	  sed -E -e "s/[0-9]{2}:\.[0-9]+//" > $(GIT_META)
 	git add $(GIT_META)
-	git commit
+
 
 #commit-beta:
 #	eval "expr `cat .beta-number` + 1" > .beta-number
