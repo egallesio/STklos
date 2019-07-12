@@ -1,7 +1,29 @@
+2019-07-12 Erick Gallesio <eg@unice.fr>
+	- Added SRFI-112: Environment Inquiry
+
+2019-07-09 Erick Gallesio <eg@unice.fr>
+	- Do not use user configuration file when doing distribution tests
+	- Updated the internal PCRE library to 8.43
+	- Updated the internal GC library to 8.0.4
+
+2019-07-07 Erick Gallesio <eg@unice.fr>
+	- Oops: pcre/missing was a link on the automake file instaead of a copy
+	- Fix in the generation of the .git_meta file
+	- Added meta informations of the source distrbution files in Git
+	- Fix: On OSX nl_langinfo returns a codeset in lower case
+
+2019-07-04 Erick Gallesio <eg@unice.fr>
+	- Fix the NEWS file
+	- Fix: added the correct version of the automake 'missing' script
+	- Fix again the test of functions defined using the lambda character
+	- FIX: Use "pretty-print" instead of "pp" in stklos-genlex.
+
+
+
 2019-07-04 Erick Gallesio <eg@unice.fr>
 	- STklos 1.30 Release
 	=====================
-	
+
 2019-07-03 Erick Gallesio <eg@unice.fr>
 	- Fixed a bug with R7RS exit
 

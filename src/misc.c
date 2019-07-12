@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 11-Jul-2019 16:13 (eg)
+ * Last file update: 12-Jul-2019 17:26 (eg)
  */
 
 #include "stklos.h"
@@ -92,7 +92,7 @@ SCM STk_read_from_C_string(char *str)
  *
 \*===========================================================================*/
 /*
-<doc EXT version implementation-version
+<doc EXT implementation-version version
  * (version)
  * (implementation-version)
  *

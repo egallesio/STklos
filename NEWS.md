@@ -1,6 +1,20 @@
 NEWS
 ====
 
+version 1.31
+------------
+
+Bug fix version. 
+
+Changes in this version are:
+
+  - Updated the version of the libraries included in the distribution
+  - Bug fix of various problems when installing STklos
+  - Bug fix for MacOs UTF8 detection
+  - Added SRFI-112
+  - Updated documentation
+  
+
 version 1.30
 ------------
 
