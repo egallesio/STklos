@@ -1,4 +1,4 @@
-STklos   (version 1.20)
+STklos   (version 1.3x)
 =======================
 
 **Erick Gallesio** <eg(at)unice.fr>
@@ -8,7 +8,7 @@ Purpose
 -------
  
 STklos is a free Scheme system compliant with the languages features
-defined in R5RS. The aim of this implementation is to be fast as well
+defined in R7RS. The aim of this implementation is to be fast as well
 as light. The implementation is based on an ad-hoc Virtual
 Machine. STklos can also be compiled as a library and embedded in an
 application.
@@ -52,7 +52,12 @@ administrative tasks in my University. However, Ι still use it for
 personal scripts and, since Ι was asked for, the source tree is now
 publicly available. The DVCS used is now **git** instead of mercurial.
 
-
+**July 2019**
+The 1.3x versions try to be more R7RS compliant. All the
+R5RS functions which have been extended in R7RS are now conform to
+R7RS (for instance `assoc` and `member` accept now an optional
+parameter which is a compare function, vector->list accepts the
+`start` and `end` parameters, ...)
 
 SRFI Support
 ------------
@@ -65,9 +70,14 @@ SRFIs. Any help on implementing other SRFIs on STklos is welcome.
 Supported architectures
 ----------------------
 
-STklos current version works on GNU/Linux 4.15 64 bits. 
+STklos current version works on
+- GNU/Linux 4.x and 5.0  (64 bits).
+- Mac OS X 10.13 High Sierra
+- Win32 (using WSL - Windows Subsystem for Linux)
 
-The previous version of STklos (1.10) was known to work on the following architectures:
+
+The previous version of STklos (1.10) was known to work on the following
+architectures:
 
 - GNU/Linux 1.6.x (i386/gcc 32 and 64bits)
 - Mac OS X 10.5+ (i386/gcc 32 and 64 bits)
