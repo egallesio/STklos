@@ -22,12 +22,60 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 28-Jun-2019 09:21 (eg)
+;;;; Last file update: 19-Jul-2019 17:51 (eg)
 ;;;;
 
 (require "test")
 
 (test-section "R7RS")
+
+
+(test-subsection "4.2 Derived expression types")
+
+(test "R7RS cond.1"
+      'greater
+      (cond ((> 3 2) 'greater)
+            ((< 3 2) 'less)))
+
+(test "R7RS cond.2"
+      'equal
+      (cond ((> 3 3) 'greater)
+            ((< 3 3) 'less)
+            (else 'equal)))
+
+(test "R7RS cond.3"
+      2
+      (cond ((assv 'b '((a 1) (b 2))) => cadr)
+            (else #f)))
+
+(test "R7RS case.1"
+      'composite
+      (case (* 2 3)
+        ((2 3 5 7) 'prime)
+        ((1 4 6 8 9) 'composite)))
+
+
+(test "R7RS case.2"
+      'c
+      (case (car '(c d))
+        ((a e i o u) 'vowel)
+        ((w y) 'semivowel)
+        (else => (lambda (x) x))))
+
+
+(test "Chibi case" 
+      #t
+      (equal?
+       '((other . z) (semivowel . y) (other . x)
+         (semivowel . w) (vowel . u))
+       (map (lambda (x)
+             (case x
+               ((a e i o u) => (lambda (w) (cons 'vowel w)))
+               ((w y) (cons 'semivowel x))
+               (else => (lambda (w) (cons 'other w)))))
+           '(z y x w u))))
+
+
 
 (test-subsection "6.1 Equivalence Predicates")
 

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k                    -- STklos Compiler
 ;;;;
-;;;; Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 27-Nov-2018 14:34 (eg)
+;;;; Last file update: 19-Jul-2019 18:57 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1320,16 +1320,38 @@ doc>
                   ;; We are not sure it is a well formed clause since
                   ;; previous checks may not call error (file compilation)
                   (if (pair? clause)
-                      (let ((case  (car clause))
-                            (exprs (cdr clause)))
+                      (let* ((case   (car clause))
+                             (imply? (and (pair? (cdr clause))
+                                          (eqv? (cadr clause) '=>)))
+                             (exprs  (if imply? (cddr clause) (cdr clause)))
+                             (len    (length exprs)))
                         (if (eq? case 'else)
-                            `(else ,@exprs)
-                            (if (pair? case)
-                                (if (= (length case) 1)
-                                    `((eqv? ,key ',(car case)) ,@exprs)
-                                    `((memv ,key ',case) ,@exprs))
-                                `(#t (error "invalid case clause")))))
-                      `(#t (error "invalid case"))))
+                            ;; else clause
+                            (cond
+                              ((and imply? (= len 1))     ;; (else => f)
+                               `(else (,(car exprs) ,key)))
+                              (imply?                     ;; (else => f ...)
+                               (compiler-error 'case
+                                               '=>
+                                               "ill formed else clause ~S"
+                                               `(else => ,@exprs)))
+                               (else
+                                `(else ,@exprs)))
+                            ;; normal clause
+                            (cond
+                              ((and imply? (= len 1))     ;; ((x y) => f)
+                               (if (= (length case) 1)
+                                    `((eqv? ,key ',(car case)) (,(car exprs) ,key))
+                                    `((memv ,key ',case)       (,(car exprs) ,key))))
+                              (imply?                     ;; (else => ....)
+                               (compiler-error 'case
+                                               '=>
+                                               "ill formed clause ~S"
+                                               `(=> ,@exprs)))
+                              (else
+                               (if (= (length case) 1)
+                                   `((eqv? ,key ',(car case)) ,@exprs)
+                                   `((memv ,key ',case) ,@exprs))))))))
                 clauses)))
 
 (define (compile-case e env tail?)

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r5rs.stk   -- R5RS function written in Scheme
 ;;;;
-;;;; Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 12:27 (eg)
-;;;; Last file update:  1-Jun-2018 15:46 (eg)
+;;;; Last file update: 19-Jul-2019 19:10 (eg)
 ;;;;
 
 
@@ -271,8 +271,11 @@ doc>
 doc>
 |#
 
+
+;;FIXME: mv case documentation in r7rs??
+
 #|
-<doc syntax case
+<doc r7rs-syntax case
  * (case <key> <clause1> <clause2> ...)
  *
  * In a |case|, each |<clause>| should have the form
@@ -300,6 +303,13 @@ doc>
  * evaluated and the result(s) of the last is(are) the result(s) of the
  * case expression; otherwise the result of the case expression is ,(emph "void").
  *
+ * If the selected |<clause>| or else clause uses the |=>| alternate
+ * form, then the |expression| is evaluated. It is an error if
+ * its value is not a procedure accepting one argument. This
+ * procedure is then called on the value of the hkeyi and the
+ * values returned by this procedure are returned by the case
+ * expression.
+ *
  * @lisp
  *   (case (* 2 3)
  *     ((2 3 5 7) 'prime)
@@ -311,7 +321,12 @@ doc>
  *     ((a e i o u) 'vowel)
  *     ((w y) 'semivowel)
  *     (else 'consonant))            =>  consonant
+ *   (case (car '(c d))
+ *     ((a e i o u) 'vowel)
+ *     ((w y) 'semivowel)
+ *     (else  => (lambda (x) (x))))  =>  c
  * @end lisp
+ *
 doc>
 |#
 
