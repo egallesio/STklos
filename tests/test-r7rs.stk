@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 19-Jul-2019 17:51 (eg)
+;;;; Last file update: 19-Jul-2019 20:29 (eg)
 ;;;;
 
 (require "test")
@@ -75,6 +75,28 @@
                (else => (lambda (w) (cons 'other w)))))
            '(z y x w u))))
 
+(test "R7RS and.1" #t           (and (= 2 2) (> 2 1)))
+(test "R7RS and.2" #f           (and (= 2 2) (< 2 1)))
+(test "R7RS and.3" '(f g)       (and 1 2 'c '(f g)))
+(test "R7RS and.4" #t           (and))
+
+(test "or"        #f            (or))
+(test "R7RS or.1" #t            (or (= 2 2) (> 2 1)))
+(test "R7RS or.1" #t            (or (= 2 2) (< 2 1)))
+(test "R7RS or.1" #f            (or #f #f #f))
+                                ;; (/ 3 0) produce an error during compilation
+                                ;; => test rewritten
+(test "R7RS or.1" '(b c)        (let ((zero 0))
+                                  (or (memq 'b '(a b c)) (/ 3 zero))))
+
+(test "when" "12" (call-with-output-string (lambda(port)
+                                             (when (= 1 1.0)
+                                               (display "1" port)
+                                               (display "2" port)))))
+(test "unless" "" (call-with-output-string (lambda(port)
+                                             (unless (= 1 1.0)
+                                               (display "1" port)
+                                               (display "2" port)))))
 
 
 (test-subsection "6.1 Equivalence Predicates")
