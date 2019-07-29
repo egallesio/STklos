@@ -1,7 +1,7 @@
 ;;;;
-;;;; random.stk	-- Random numbers (SRFI-27)
+;;;; random.stk -- Random numbers (SRFI-27)
 ;;;;
-;;;; Copyright © 2002-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -23,20 +23,20 @@
 ;;;;
 ;;;;           Author: Sebastian Egner (reference implementation of SRFI-27)
 ;;;;    Creation date: 10-Aug-2002 17:03 (eg)
-;;;; Last file update: 22-Mar-2006 21:23 (eg)
+;;;; Last file update: 24-Jul-2019 22:52 (eg)
 ;;;;
 
 
 (define-module RANDOM-MODULE
   (export random-integer random-real default-random-source
-	  make-random-source random-source?
-	  random-source-state-ref random-source-state-set!
-	  random-source-randomize! random-source-pseudo-randomize!
-	  random-source-make-integers random-source-make-reals
-	  random-source-make-reals)
+          make-random-source random-source?
+          random-source-state-ref random-source-state-set!
+          random-source-randomize! random-source-pseudo-randomize!
+          random-source-make-integers random-source-make-reals
+          random-source-make-reals)
 
-(define mrg32k3a-m1 #f) 		; will be redefined later
-(define mrg32k3a-m2 #f) 		; ditto
+(define mrg32k3a-m1 #f)                 ; will be redefined later
+(define mrg32k3a-m2 #f)                 ; ditto
 (define %random-source? #f)
 
 #|
@@ -66,15 +66,15 @@ doc>
 ;;;
 ;;; ======================================================================
 (define-class <random-source> ()
-  ((state-ref 		:getter %random-source-state-ref)
-   (state-set! 		:getter %random-source-state-set!)
-   (randomize! 		:getter %random-source-randomize!)
+  ((state-ref           :getter %random-source-state-ref)
+   (state-set!          :getter %random-source-state-set!)
+   (randomize!          :getter %random-source-randomize!)
    (pseudo-randomize!   :getter %random-source-pseudo-randomize!)
    (make-integers       :getter %random-source-make-integers)
-   (make-reals 		:getter %random-source-make-reals)))
+   (make-reals          :getter %random-source-make-reals)))
 
 (define (%random-source-make state-ref state-set! randomize! pseudo-randomize!
-			     make-integers make-reals)
+                             make-integers make-reals)
   (let ((res (make <random-source>)))
     (slot-set! res 'state-ref state-ref)
     (slot-set! res 'state-set! state-set!)
@@ -90,7 +90,7 @@ doc>
 (define-method %random-source? (x139) #f)
 
 
-(define %random-source-current-time current-second)
+(define %random-source-current-time current-seconds)
 
 ;;; ======================================================================
 ;;;
@@ -99,13 +99,13 @@ doc>
 ;;; ======================================================================
 (define (mrg32k3a-random-m1 state)
   (let ((x11 (vector-ref state 0))
-	(x12 (vector-ref state 1))
-	(x13 (vector-ref state 2))
-	(x21 (vector-ref state 3))
-	(x22 (vector-ref state 4))
-	(x23 (vector-ref state 5)))
+        (x12 (vector-ref state 1))
+        (x13 (vector-ref state 2))
+        (x21 (vector-ref state 3))
+        (x22 (vector-ref state 4))
+        (x23 (vector-ref state 5)))
     (let ((x10 (modulo (- (* 1403580 x12) (* 810728 x13)) 4294967087))
-	  (x20 (modulo (- (* 527612 x21) (* 1370589 x23)) 4294944443)))
+          (x20 (modulo (- (* 527612 x21) (* 1370589 x23)) 4294944443)))
       (vector-set! state 0 x10)
       (vector-set! state 1 x11)
       (vector-set! state 2 x12)
@@ -127,9 +127,9 @@ doc>
 
 (define (mrg32k3a-random-integer state range) ; rejection method
   (let* ((q (quotient 4294967087 range))
-	 (qn (* q range)))
+         (qn (* q range)))
     (do ((x (mrg32k3a-random-m1 state) (mrg32k3a-random-m1 state)))
-	((< x qn) (quotient x q)))))
+        ((< x qn) (quotient x q)))))
 
 (define (mrg32k3a-random-real state) ; normalization is 1/(m1+1)
   (* 0.0000000002328306549295728 (+ 1.0 (mrg32k3a-random-m1 state))))
