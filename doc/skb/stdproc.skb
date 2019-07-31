@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 11-Jul-2019 16:33 (eg)
+;; Last file update: 31-Jul-2019 12:26 (eg)
 ;;
 ;; ======================================================================
 
@@ -763,7 +763,9 @@ use a |main| function in a Scheme program.])
 
 (p [Keywords are symbolic constants which evaluate to themselves.
 A keyword is a symbol whose first (or last) character is a colon
-(,(emph (q ":"))).])
+(,(emph (q ":"))). Alternatively, to be compatible with other Scheme
+implementations, the notation ,(code "#:foo") is also available to denote
+the keyword of name ,(code "foo")])
 
 (insertdoc 'keyword?)
 (insertdoc 'make-keyword)

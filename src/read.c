@@ -1,7 +1,7 @@
 /*
  * r e a d  . c                         -- reading stuff
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 27-Nov-2018 10:38 (eg)
+ * Last file update: 29-Jul-2019 15:30 (eg)
  *
  */
 
@@ -284,20 +284,23 @@ static SCM read_token(SCM port, int c, int case_significant)
     /* It is not a number */
     switch (*tok) {
       case ':': return STk_makekey(tok);
-      case '#': if (len == 2) {
-                  if (tok[1] == 't') return STk_true;
-                  if (tok[1] == 'f') return STk_false;
+      case '#': if (len > 1) {
+                  if (len == 2) {
+                    if (tok[1] == 't') return STk_true;
+                    if (tok[1] == 'f') return STk_false;
+                  }
+                  if (tok[1] == ':')
+                    return STk_makekey(tok+1);
+                  else if (strcasecmp(tok+1, "true") == 0)
+                    return STk_true;
+                  else if (strcasecmp(tok+1, "false") == 0)
+                    return STk_false;
+                  else if (strcasecmp(tok+1, "eof") == 0)
+                    return STk_eof;
+                  else if (strcasecmp(tok+1, "void") == 0)
+                    return STk_void;
                 }
-                if (strcasecmp(tok+1, "true") == 0)
-                  return STk_true;
-                else if (strcasecmp(tok+1, "false") == 0)
-                  return STk_false;
-                else if (strcasecmp(tok+1, "eof") == 0)
-                  return STk_eof;
-                else if (strcasecmp(tok+1, "void") == 0)
-                  return STk_void;
-                else
-                  error_bad_sharp_syntax(port, tok);
+                error_bad_sharp_syntax(port, tok);
       default : return (tok[len-1] == ':') ? STk_makekey(tok) : STk_intern(tok);
     }
   }

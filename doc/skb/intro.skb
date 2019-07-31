@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  3-Jul-2018 15:33 (eg)
+;; Last file update: 31-Jul-2019 12:28 (eg)
 ;;
 ;; ======================================================================
 
@@ -84,11 +84,13 @@ identical in every points, share the same philosophy.]))
 (index "#!fold-case")
 (index "#!no-fold-case")
 
-(p [In ,(stklos), identifiers which start (or end) with a colon
-,(q (code ":")) are considered as keywords.  For instance
-,(code ":foo") and ,(code "bar:") are ,(stklos) keywords, but
-,(code "not:key") is not a keyword. See
-section,(~),(ref :section "Keywords") for more information])
+(p [In ,(stklos), identifiers which start (or end) with a colon ,(q (code
+":")) are considered as keywords.  For instance ,(code ":foo") and ,(code
+"bar:") are ,(stklos) keywords, but ,(code "not:key") is not a
+keyword. Alternatively, to be compatible with other Scheme implementations,
+the notation ,(code "#:foo") is also available to denote the keyword of
+name ,(code "foo"). See section,(~),(ref :section "Keywords") for more
+information])
 
 (p [Note that, by default, ,(stklos) is case insensitive as specified
          by R5RS. This behavior can be changed by]
