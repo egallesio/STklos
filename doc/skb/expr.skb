@@ -1,6 +1,6 @@
 ;; ======================================================================
 ;;
-;; 			STklos Reference Manual
+;;                      STklos Reference Manual
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -18,14 +18,14 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 10-Aug-2010 00:22 (eg)
+;; Last file update: 22-Aug-2019 11:34 (eg)
 ;;
 ;; ======================================================================
 
 
 ;; ======================================================================
 ;;
-;;			Expressions
+;;                      Expressions
 ;;
 ;; ======================================================================
 (chapter :title "Expressions"
@@ -105,6 +105,8 @@ values are being computed, thus allowing mutually recursive definitions.
 (insertdoc 'let)
 (insertdoc 'let*)
 (insertdoc 'letrec)
+(insertdoc 'letrec*)
+
 (insertdoc 'fluid-let))
 
 ;;

@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 19-Jul-2019 20:29 (eg)
+;;;; Last file update:  4-Aug-2019 14:32 (eg)
 ;;;;
 
 (require "test")
@@ -97,6 +97,43 @@
                                              (unless (= 1 1.0)
                                                (display "1" port)
                                                (display "2" port)))))
+
+;;;
+;;; 4.2.2 BINDING CONSTRUCTS
+;;;
+(test "let.1" 6 (let ((x 2) (y 3))
+                  (* x y)))
+(test "let.2" 35 (let ((x 2) (y 3))
+                   (let ((x 7)
+                         (z (+ x y)))
+                     (* z x))))
+(test "let*" 70 (let ((x 2) (y 3))
+                  (let* ((x 7)
+                         (z (+ x y)))
+                    (* z x)))  )
+(test "letrec" '(#t #f) (letrec ((even?
+                                  (lambda (n)
+                                    (if (zero? n)
+                                        #t
+                                        (odd? (- n 1)))))
+                                 (odd?
+                                  (lambda (n)
+                                    (if (zero? n)
+                                        #f
+                                        (even? (- n 1))))))
+                          (list (even? 88) (odd? 88))))
+
+(test "letrec*" 5 (letrec* ((p
+                             (lambda (x)
+                               (+ 1 (q (- x 1)))))
+                            (q
+                             (lambda (y)
+                               (if (zero? y)
+                                   0
+                                   (+ 1 (p (- y 1))))))
+                            (x (p 5))
+                            (y x))
+                    y))
 
 
 (test-subsection "6.1 Equivalence Predicates")

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 27-Jun-2019 17:56 (eg)
+;;;; Last file update: 22-Aug-2019 11:42 (eg)
 ;;;;
 
 
@@ -30,6 +30,52 @@
 (define write-simple write)
 
 
+;;;; ----------------------------------------------------------------------
+;;;; 4.2 Derived expression types
+;;;; ----------------------------------------------------------------------
+
+#|
+<doc r7rs-syntax letrec*
+ * (letrec* <bindings> <body>)
+ *
+ * <bindings> should have the form as in |let| and body is a sequence
+ * of zero or more definitions followed by one or more expressions.
+
+ * The |<variable>|s are bound to fresh locations, each |variable| is
+ * assigned in left-to-right order to the result of evaluating the
+ * corresponding |init|, the |body| is evaluated in the resulting
+ * environment, and the values of the last expression in |body| are
+ * returned. Despite the left-to-right evaluation and assignment order,
+ * each binding of a |variable| has the entire |letrec*| expression as its
+ * region, making it possible to define mutually recursive procedures.
+ * If it is not possible to evaluate each |init| without assigning or
+ * referring to the value of the corresponding |variable| or the
+ * |variable| of any of the bindings that follow it in |bindings|, it is
+ * an error.
+ *
+ * @lisp
+ * (letrec* ((p (lambda (x)
+ *                (+ 1 (q (- x 1)))))
+ *           (q(lambda (y)
+ *               (if (zero? y)
+ *                   0
+ *                   (+ 1 (p (- y 1))))))
+ *           (x (p 5))
+ *           (y x))
+ *   y)  => 5
+ * @end lisp
+doc>
+|#
+(define-macro (letrec* bindings . body)
+  (if (list? bindings)
+      (for-each (lambda (x)
+                  (unless (and (list? x) (= (length x) 2))
+                    (error 'letrec* "incorrect binding ~S" x)))
+                bindings)
+      (error 'letrec* "incorrect bindings ~S" bindings))
+  `(let ,(map (lambda (x) (list (car x) #f)) bindings)
+     ,@(map (lambda (x) `(set! ,@x))  bindings)
+     (let () ,@body)))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.1 Equivalence predicate
@@ -836,7 +882,7 @@ doc>
  *
 
  * Error type predicates. Returns #t if |obj| is an object raised
- * by the read procedure or by the inability to open an input or 
+ * by the read procedure or by the inability to open an input or
  * output port on a file, respectively. Otherwise, it returns #f.
   *
 doc>
