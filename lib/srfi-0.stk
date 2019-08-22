@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 11-Jul-2019 15:56 (eg)
+;;;; Last file update: 22-Aug-2019 17:20 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -64,7 +64,7 @@
     srfi-8                              ; RECEIVE
     ((srfi-9 records)   "srfi-9")       ; Records
     srfi-10                             ; Sharp-Comma External Form
-    (srfi-11             "srfi-11")     ; LET-VALUES and LET*-VALUES
+    srfi-11                             ; LET-VALUES and LET*-VALUES
     ;; srfi-12                          ; ....... withdrawn
     ((srfi-13 strings)  "srfi-13")      ; String Library
     ((srfi-14 charsets) "srfi-14")      ; Character-Set Library
