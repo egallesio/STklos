@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update:  4-Aug-2019 14:32 (eg)
+;;;; Last file update: 22-Aug-2019 16:23 (eg)
 ;;;;
 
 (require "test")
@@ -134,6 +134,60 @@
                             (x (p 5))
                             (y x))
                     y))
+
+;;;
+;;; let-values
+;;;
+(test "let-values.1" 35
+      (let-values (((root rem) (exact-integer-sqrt 32)))
+        (* root rem)))
+(test "let-values.2" '(3 2 1)
+      (let-values (((a b c) (values 1 2 3)))
+        (list c b a)))
+(test "let-values.3" '((3 4) 2 1)
+      (let-values (((a b . c) (values 1 2 3 4)))
+        (list c b a)))
+(test "let-values.4" '(() 2 1)
+      (let-values (((a b . c) (values 1 2)))
+        (list c b a)))
+(test "let-values.5"
+      '(x y a b)
+      (let ((a 'a) (b 'b) (x 'x) (y 'y))
+        (let-values (((a b) (values x y))
+                     ((x y) (values a b)))
+          (list a b x y))))
+(test "let-values.6"
+      1
+      (let-values () 1))
+;;;; ----------
+(test "let*-values.1" 35
+      (let*-values (((root rem) (exact-integer-sqrt 32)))
+        (* root rem)))
+(test "let*-values.2" '(3 2 1)
+      (let*-values (((a b c) (values 1 2 3)))
+        (list c b a)))
+(test "let*-values.3" '((3 4) 2 1)
+      (let*-values (((a b . c) (values 1 2 3 4)))
+        (list c b a)))
+(test "let*-values.4" '(() 2 1)
+      (let*-values (((a b . c) (values 1 2)))
+        (list c b a)))
+(test "let*-values.5"
+      '(x y x y)
+      (let ((a 'a) (b 'b) (x 'x) (y 'y))
+        (let*-values (((a b) (values x y))
+                      ((x y) (values a b)))
+          (list a b x y))))
+(test "let*-values.6"
+      1
+      (let*-values () 1))
+(test "let*-values.7" 'out
+      (let ((x 'out))
+        (let*-values ()
+          (define x 'in)
+          x)
+        x))
+
 
 
 (test-subsection "6.1 Equivalence Predicates")

@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 22-Aug-2019 11:34 (eg)
+;; Last file update: 22-Aug-2019 16:55 (eg)
 ;;
 ;; ======================================================================
 
@@ -106,6 +106,8 @@ values are being computed, thus allowing mutually recursive definitions.
 (insertdoc 'let*)
 (insertdoc 'letrec)
 (insertdoc 'letrec*)
+(insertdoc 'let-values)
+(insertdoc 'let*-values)
 
 (insertdoc 'fluid-let))
 

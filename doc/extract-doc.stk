@@ -1,7 +1,7 @@
 ;;;;
 ;;;; extract-doc.stk    -- Extrcat Documentation from STklos source files
 ;;;;
-;;;; Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Nov-2000 11:08 (eg)
-;;;; Last file update: 22-Jun-2018 13:04 (eg)
+;;;; Last file update: 22-Aug-2019 17:12 (eg)
 ;;;;
 
 (define start-doc-rgxp          (string->regexp "^<doc "))
@@ -66,7 +66,7 @@
           ((R57RS)                              (set! type 'r57rs-procedure))
           ((R7RS)                               (set! type 'r7rs-procedure))
           ((ext-syntax EXT-SYNTAX)              (set! type 'extended-syntax))
-          ((SYNTAX-R7RS)                        (set! type 'r7rs-syntax))
+          ((r7rs-syntax R7RS-SYNTAX)            (set! type 'r7rs-syntax))
           ((syntax SYNTAX)                      (set! type 'syntax))
           (else                                 (set! type 'procedure)
                                                 (set! l (list item)))))
