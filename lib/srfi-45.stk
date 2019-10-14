@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-45.stk	-- Implementation of SRFI-45
+;;;; srfi-45.stk        -- Implementation of SRFI-45
 ;;;;
 ;;;; Copyright (C) André van Tonder (2003). All Rights Reserved.
 ;;;;
@@ -25,35 +25,47 @@
 ;;;; OTHER DEALINGS IN THE SOFTWARE.
 ;;;;
 ;;;;    Creation date:  9-Dec-2007 21:15 (eg)
-;;;; Last file update:  9-Dec-2007 21:28 (eg)
+;;;; Last file update: 14-Oct-2019 16:10 (eg)
 ;;;;
 
 ;; Code adapted for STklos boxes
 
-(define-syntax lazy
-  (syntax-rules ()
-    ((lazy exp)
-     (make-box (cons 'lazy (lambda () exp))))))
+;;(define-syntax lazy
+;;  (syntax-rules ()
+;;    ((lazy exp)
+;;     (make-box (cons 'lazy (lambda () exp))))))
+;;
+;;(define (eager x)
+;;  (make-box (cons 'eager x)))
+;;
+;;(define-syntax delay
+;;  (syntax-rules ()
+;;    ((delay exp) (lazy (eager exp)))))
+;;
+;;(define (force promise)
+;;  (let ((content (unbox promise)))
+;;    (case (car content)
+;;      ((eager) (cdr content))
+;;      ((lazy)  (let* ((promise* ((cdr content)))
+;;                      (content  (unbox promise)))                      ; *
+;;                 (if (not (eqv? (car content) 'eager))                 ; *
+;;                     (begin (set-car! content (car (unbox promise*)))
+;;                            (set-cdr! content (cdr (unbox promise*)))
+;;                            (box-set! promise* content)))
+;;                 (force promise))))))
+;;
+;;; (*) These two lines re-fetch and check the original promise in case
+;;;     the first line of the let* caused it to be forced.  For an example
+;;                                        ;     where this happens, see reentrancy test 3 below.
+;;
 
-(define (eager x)
-  (make-box (cons 'eager x)))
 
-(define-syntax delay
-  (syntax-rules ()
-    ((delay exp) (lazy (eager exp)))))
+;; lazy and eager are now present in R7RS with names delay-force and make-promise
+;; So ...
 
-(define (force promise)
-  (let ((content (unbox promise)))
-    (case (car content)
-      ((eager) (cdr content))
-      ((lazy)  (let* ((promise* ((cdr content)))
-                      (content  (unbox promise)))                      ; *
-                 (if (not (eqv? (car content) 'eager))                 ; *
-                     (begin (set-car! content (car (unbox promise*)))
-                            (set-cdr! content (cdr (unbox promise*)))
-                            (box-set! promise* content)))
-                 (force promise))))))
+(define-macro (lazy expr)
+  `(delay-force ,expr))
 
-; (*) These two lines re-fetch and check the original promise in case
-;     the first line of the let* caused it to be forced.  For an example
-;     where this happens, see reentrancy test 3 below.
+(define eager make-promise)
+
+(provide "srfi-45")
