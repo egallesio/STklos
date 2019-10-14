@@ -22,7 +22,7 @@
  *           Author: Erick Gallesio [eg@unice.fr]
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date:  2-Jun-1993 12:27 (eg)
- * Last file update: 14-Oct-2019 15:53 (eg)
+ * Last file update: 14-Oct-2019 16:03 (eg)
  */
 #include "stklos.h"
 
@@ -189,6 +189,7 @@ DEFINE_PRIMITIVE("force", force, subr1, (SCM promise))
   } else if (CONSP(p)) {
     return CAR(p);
   } else if (PROMISEP(p)) {
+    promise = p;
     goto Top;
   }
   STk_error("bad promise content: ~S", p);
