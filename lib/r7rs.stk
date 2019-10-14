@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 22-Aug-2019 17:14 (eg)
+;;;; Last file update: 14-Oct-2019 15:23 (eg)
 ;;;;
 
 
@@ -178,6 +178,61 @@ doc>
       `(let-values (,(car bindings))
          (let*-values ,(cdr bindings) ,@body))
       `(let-values ,bindings ,@body)))
+
+
+;;;
+;;; Delayed devaluation
+;;;
+
+#|
+<doc syntax delay
+ * (delay <expression>)
+ *
+ * The |delay| construct is used together with the procedure |force|
+ * to implement ,(emph "lazy evaluation") or ,(emph "call by need"). |(delay
+ * <expression>)| returns an object called a ,(emph "promise") which at some
+ * point in the future may be asked (by the |force| procedure) to
+ * evaluate |<expression>|, and deliver the resulting value.
+ * The effect of |<expression>| returning multiple values is unpredictable.
+ *
+ * See the description of |force| (@pxref{force}) for a more complete
+ * description of |delay|.
+doc>
+|#
+(define-macro (delay exp)
+  `(delay-force (%make-promise (list ,exp))))
+
+#|
+<doc r7rs-syntax delay-force
+ * (delay-force <expression>)
+ *
+ * The expression |(delay-force expression)| is conceptually similar
+ * to |(delay (force expression))|, with the difference that forcing the result
+ * of |delay-force| will in effect result in a tail call to |(force expression)|,
+ * while forcing the result of |(delay (force expression))| might not. Thus
+ * iterative lazy algorithms that might result in a long series of chains of
+ * |delay| and |force| can be rewritten using |delay-force| to prevent consuming
+ * unbounded space during evaluation.
+doc>
+|#
+(define-macro (delay-force exp)
+  `(%make-promise (lambda () ,exp)))
+
+#|
+<doc r7rs make-promise
+ * (make-promise obj)
+ *
+ * The |make-promise| procedure returns a promise which,
+ * when forced, will return |obj| . It is similar to |delay|, but
+ * does not delay its argument: it is a procedure rather than
+ * syntax. If |obj| is already a promise, it is returned.
+doc>
+|#
+(define (make-promise expr)
+  (if (promise? expr)
+      expr
+      (delay expr)))
+
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.1 Equivalence predicate

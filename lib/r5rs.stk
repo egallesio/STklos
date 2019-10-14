@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 12:27 (eg)
-;;;; Last file update: 19-Jul-2019 19:10 (eg)
+;;;; Last file update: 14-Oct-2019 15:02 (eg)
 ;;;;
 
 
@@ -1169,24 +1169,5 @@ doc>
      (if (< y x)
          (simplest-rational y x)
          (simplest-rational x y))))
-
-#|
-<doc delay
- * (delay <expression>)
- *
- * The |delay| construct is used together with the procedure |force|
- * to implement ,(emph "lazy evaluation") or ,(emph "call by need"). |(delay
- * <expression>)| returns an object called a ,(emph "promise") which at some
- * point in the future may be asked (by the |force| procedure) to
- * evaluate |<expression>|, and deliver the resulting value.
- * The effect of |<expression>| returning multiple values is unpredictable.
- *
- * See the description of |force| (@pxref{force}) for a more complete
- * description of |delay|.
-doc>
-|#
-(define-macro (delay expr)
-  `(%make-promise (lambda () ,expr)))
-
 
 ; LocalWords:  noindent EXT

@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 22-Aug-2019 17:49 (eg)
+;;;; Last file update: 14-Oct-2019 09:58 (eg)
 ;;;;
 
 (require "test")
@@ -63,7 +63,7 @@
         (else => (lambda (x) x))))
 
 
-(test "Chibi case" 
+(test "Chibi case"
       #t
       (equal?
        '((other . z) (semivowel . y) (other . x)
@@ -192,7 +192,6 @@
 ;;;
 ;;; 4.2.3 ITERATION
 ;;;
-
 (test "do.1"
       #(0 1 2 3 4)
       (do ((vec (make-vector 5))
@@ -221,7 +220,151 @@
                      nonneg
                      (cons (car numbers) neg))))))
 
- 
+;;;
+;;; 4.2.4 DELAYED EVALUATION
+;;;
+
+(test "force.1" 3 (force (delay (+ 1 2))))
+(test "force.2" '(3 3)
+      (let ((p (delay (+ 1 2))))
+        (list (force p) (force p))))
+
+(let ()
+  (define head (lambda (stream) (car (force stream))))
+  (define tail (lambda (stream) (cdr (force stream))))
+  (define integers
+    (letrec ((next (lambda (n)
+                     (delay (cons n (next (+ n 1)))))))
+      (next 0)))
+
+  (test "force.3"
+        2
+        (head (tail (tail integers))))
+
+  (test "force.4"
+        5
+        (let ()
+          (define (stream-filter p? s)
+            (delay-force
+             (if (null? (force s))
+                 (delay '())
+                 (let ((h (car (force s)))
+                       (t (cdr (force s))))
+                   (if (p? h)
+                       (delay (cons h (stream-filter p? t)))
+                       (stream-filter p? t))))))
+          (head (tail (tail (stream-filter odd? integers)))))))
+
+(let ()
+  (define count 0)
+  (define p (delay (begin (set! count (+ count 1))
+                          (if (> count x)
+                              count
+                              (force p)))))
+  (define x 5)
+  (test "promise?.1" #t (promise? p))
+  (test "force.5"   6  (force p))
+  (test "force.6" 6 (begin (set! x 10) (force p))))
+
+(test "force.7" 100 (force 100))
+
+(test "promise?.2" #t (promise? (delay (sqrt 100))))
+(test "promise?.3" #t (promise? (make-promise (+ 2 2))))
+(test "promise?.4" #t (let ((x (delay (+ 2 2))))
+                        (force x)
+                        (promise? x)))
+(test "promise?.5" #t (let ((x (make-promise (+ 2 2))))
+                        (force x)
+                        (promise? x)))
+(test "promise?.6" #f (promise? 'foo))
+(test "promise?.7" #f (promise? (force (delay 100))))
+
+;; Tests from the SRFI-45
+
+(test "memoization.1"
+      "hello"
+      (let ((out ""))
+        (define s (delay (begin (set! out (string-append out "hello")) 1)))
+        (force s)
+        (force s)
+        out))
+
+(test "memoization.2"
+      '(4 . "bonjour")
+      (let ((out ""))
+        (define s (delay (begin (set! out (string-append out "bonjour")) 2)))
+        (cons (+ (force s) (force s)) out)))
+
+(test  "memoization.3"
+        '("hi" 1 #f 1 #f)
+        (let ((out ""))
+          (define r (delay (begin (set! out (string-append out "hi")) 1)))
+          (define s (make-promise r))
+          (define t (make-promise s))
+          (let* ((x (force t))
+                 (y (force r)))
+            (list out x (promise? x) y (promise? y)))))
+
+
+(test "memoization.4"
+      '("hohohohoho" 1 1)
+      (let ()
+        (define out "")
+
+        (define (stream-drop s index)
+          (make-promise
+           (if (zero? index)
+               s
+               (stream-drop (cdr (force s)) (- index 1)))))
+
+        (define (ones)
+          (delay (begin
+                   (set! out (string-append out "ho"))
+                   (cons 1 (ones)))))
+
+        (define s (ones))
+
+        (let* ((x (car (force (stream-drop s 4))))
+               (y (car (force (stream-drop s 4)))))
+          (list out x y))))
+
+
+(test "reentrancy.2"
+      'second
+      (let ()
+        (define f
+          (let ((first? #t))
+            (delay
+              (if first?
+                  (begin
+                    (set! first? #f)
+                    (force f))
+                  'second))))
+        (force f)))
+
+(test "reentrancy.3"
+  '(5 0 10)
+  (let ()
+    (define q
+      (let ((count 5))
+        (define (get-count) count)
+        (define p (delay (if (<= count 0)
+                             count
+                             (begin (set! count (- count 1))
+                                    (force p)
+                                    (set! count (+ count 2))
+                                    count))))
+      (list get-count p)))
+
+    (define get-count (car q))
+    (define p (cadr q))
+    (let* ((a (get-count))
+           (b (force p))
+           (c (get-count)))
+      (list a b c))))
+
+
+;; ======================================================================
 
 (test-subsection "6.1 Equivalence Predicates")
 
@@ -961,7 +1104,7 @@
 
 (test "error-object?.1"
       #t
-      (error-object? (guard (condition (else condition)) (error "BAD" 'foo :bar 42)))) 
+      (error-object? (guard (condition (else condition)) (error "BAD" 'foo :bar 42))))
 
 (test "error-object?.2"
       #f
@@ -1015,12 +1158,12 @@
                                    (error "BAD" 'foo :bar 42))))
 
 (test "error-object-irritants.1"
-      '(foo :bar 42) 
+      '(foo :bar 42)
       (error-object-irritants (guard (condition (else condition))
                                      (error "BAD" 'foo :bar 42))))
 
 (test "error-object-irritants.2"
-      '() 
+      '()
       (error-object-irritants (guard (condition (else condition))
                                      (error "BAD"))))
 

@@ -1,7 +1,7 @@
 /*
  * promise.c    -- Implementation of promises
  *
- * Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,31 +22,100 @@
  *           Author: Erick Gallesio [eg@unice.fr]
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date:  2-Jun-1993 12:27 (eg)
- * Last file update: 13-Dec-2018 13:53 (eg)
+ * Last file update: 14-Oct-2019 15:27 (eg)
  */
 #include "stklos.h"
 
+/*======================================================================
+ He is a complete implementation in Scheme (adapted from Eli Barzilay one)
+
+(define-struct promise p)
+(define (set-promise-p! p v) (set! (promise-p p) v))
+(define %make-promise make-promise)
+
+(define promise-p      %promise-value)
+(define set-promise-p! %promise-value-set!)
+
+(define-syntax delay-force
+  (syntax-rules ()
+    [(delay-force exp) (%make-promise (lambda () exp))]))
+
+(define-syntax delay
+  (syntax-rules ()
+    [(delay exp) (delay-force (%make-promise (list exp)))]))
+
+(define (make-promise expr)    ;; R7RS one
+  (if (promise? expr)
+      expr
+      (delay expr)))
+
+(define (force promise)
+  (if (promise? promise)
+      (let ([p (promise-p promise)])
+        (cond
+          [(procedure? p)
+           (let ([promise* (p)])
+             (unless (pair? (promise-p promise))
+               (if (promise? promise*)
+                   (begin (set-promise-p! promise (promise-p promise*))
+                          (set-promise-p! promise* promise))
+                   (set-promise-p! promise (list promise*))))
+             (force promise))]
+          [(pair? p)
+           (car p)]
+          [(promise? p)   ;; <---
+           (force p)]
+          [else
+           (error "Invalid promise, contains" p)]))
+      promise))
+
+Note:
+   https://srfi-email.schemers.org/srfi-45/msg/2762169/ indicate an optimisation:
+   replace  the code signaled by ; <--- by
+   [(promise? p)
+     (let* ((v (force p)))
+       (if (not (pair? (promise-p prom)))
+         (set-promise-p! prom (list v)))
+       (car (promise-p prom)))]
+
+Since I don't understand the problem and its solution, I stick with Eli solution.
+
+**********************************************************************/
+
 struct promise_obj {
   stk_header header;
-  SCM expr;
+  SCM val;
 };
 
-#define PFORCED 1
 
-#define PROMISEP(x)             (BOXED_TYPE_EQ((x), tc_promise))
-#define PROMISE_EXPR(x)         (((struct promise_obj *) (x))->expr)
-#define PROMISE_RESULT_READY(x) (BOXED_INFO(x))
-
-#define RESULT_READYP(x)        (PROMISE_RESULT_READY(x) & 1)
+#define PROMISEP(x)            (BOXED_TYPE_EQ((x), tc_promise))
+#define PROMISE_VAL(x)         (((struct promise_obj *) (x))->val)
 
 
-DEFINE_PRIMITIVE("%make-promise", make_promise, subr1, (SCM expr))
+DEFINE_PRIMITIVE("%make-promise", make_promise, subr1, (SCM proc))
 {
   SCM z;
   NEWCELL(z, promise);
-  PROMISE_EXPR(z) = expr;
+  //  PROMISE_DONEP(z) = donep;
+  PROMISE_VAL(z)  = proc;
   return z;
 }
+
+#ifdef STK_DEBUG
+DEFINE_PRIMITIVE("%promise-value", promise_val, subr1, (SCM p))
+{
+  if (!PROMISEP(p)) STk_error("bad promise ~S", p);
+  return PROMISE_VAL(p);
+}
+
+DEFINE_PRIMITIVE("%promise-value-set!", promise_val_set, subr2, (SCM p, SCM v))
+{
+  if (!PROMISEP(p)) STk_error("bad promise ~S", p);
+  PROMISE_VAL(p) = v;
+  return STk_void;
+}
+#endif
+
 
 /*
 <doc force
@@ -95,34 +164,39 @@ DEFINE_PRIMITIVE("%make-promise", make_promise, subr1, (SCM expr))
  * |force| and |delay|.
 doc>
 */
+
+
 DEFINE_PRIMITIVE("force", force, subr1, (SCM promise))
 {
-  SCM z;
-
+  SCM p;
+ Top:
   if (!PROMISEP(promise)) return promise;
 
-  if (RESULT_READYP(promise))
-    /* promise was already evaluated. It's expr field contains the result */
-    return PROMISE_EXPR(promise);
+  p = PROMISE_VAL(promise);
 
-  z = STk_C_apply(PROMISE_EXPR(promise), 0);
+  if (CLOSUREP(p)) {
+    SCM pstar = STk_C_apply(p, 0);
 
-  if (RESULT_READYP(promise))
-    /* R5RS: "A promise may refer to its own value.... Forcing such
-     * a promise may cause the promise to be forced a second time before
-     * the first value has been computed.
-     */
-    return PROMISE_EXPR(promise);
-  else {
-    PROMISE_EXPR(promise)         = z;
-    PROMISE_RESULT_READY(promise) = 1;
-    return z;
+    if (!CONSP(PROMISE_VAL(promise))) {
+      if (PROMISEP(pstar)) {
+        PROMISE_VAL(promise) = PROMISE_VAL(pstar);
+        PROMISE_VAL(pstar)   = promise;
+      } else {
+        PROMISE_VAL(promise) = LIST1(pstar);
+      }
+    }
+    goto Top;
+  } else if (CONSP(p)) {
+    return CAR(p);
+  } else if (PROMISEP(p)) {
+    goto Top;
   }
+  STk_error("bad promise content: ~S", p);
+  return STk_void;              /* for the compiler */
 }
 
-
 /*
-<doc EXT promise?
+<doc r7rs promise?
  * (promise? obj)
  *
  *  Returns |#t| if |obj| is a promise, otherwise returns |#f|.
@@ -133,18 +207,13 @@ DEFINE_PRIMITIVE("promise?", promisep, subr1, (SCM obj))
   return MAKE_BOOLEAN(PROMISEP(obj));
 }
 
-
 /* ====================================================================== */
 
 static void print_promise(SCM promise, SCM port, int mode)
 {
   char buffer[100];
-
-  sprintf(buffer, "#[promise %lx (%sforced)]", (unsigned long) promise,
-          RESULT_READYP(promise)? "" : "not ");
-  STk_puts(buffer, port);
+  sprintf(buffer, "#[promise %lx]", (unsigned long) promise);
 }
-
 
 static struct extended_type_descr xtype_promise = {
   "promise",
@@ -159,8 +228,13 @@ int STk_init_promise(void)
 
   /* Add primitives */
   ADD_PRIMITIVE(make_promise);
-  ADD_PRIMITIVE(force);
   ADD_PRIMITIVE(promisep);
+  ADD_PRIMITIVE(force);
+
+#ifdef STK_DEBUG
+  ADD_PRIMITIVE(promise_val);
+  ADD_PRIMITIVE(promise_val_set);
+#endif
 
   return TRUE;
 }
