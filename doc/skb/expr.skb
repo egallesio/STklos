@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 22-Aug-2019 16:55 (eg)
+;; Last file update: 14-Oct-2019 15:13 (eg)
 ;;
 ;; ======================================================================
 
@@ -139,7 +139,10 @@ values are being computed, thus allowing mutually recursive definitions.
 (index "promise")
 
 (insertdoc 'delay)
-(insertdoc 'promise?))
+(insertdoc 'delay-force)
+(insertdoc 'force)
+(insertdoc 'promise?)
+(insertdoc 'make-promise))
 
 ;;
 ;; QUASIQUOTE

@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 31-Jul-2019 12:26 (eg)
+;; Last file update: 14-Oct-2019 15:13 (eg)
 ;;
 ;; ======================================================================
 
@@ -495,8 +495,6 @@ need to be quoted in programs.])
 (insertdoc 'vector-for-each)
 (insertdoc 'every)
 (insertdoc 'any)
-
-(insertdoc 'force)
 
 (insertdoc 'call/cc)
 (insertdoc 'call/ec)

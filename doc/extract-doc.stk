@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Nov-2000 11:08 (eg)
-;;;; Last file update: 22-Aug-2019 17:12 (eg)
+;;;; Last file update: 14-Oct-2019 15:31 (eg)
 ;;;;
 
 (define start-doc-rgxp          (string->regexp "^<doc "))
@@ -63,8 +63,8 @@
       (let ((item (read in)))
         (case  item
           ((ext EXT)                            (set! type 'extended))
-          ((R57RS)                              (set! type 'r57rs-procedure))
-          ((R7RS)                               (set! type 'r7rs-procedure))
+          ((r57rs R57RS)                        (set! type 'r57rs-procedure))
+          ((r7rs R7RS)                          (set! type 'r7rs-procedure))
           ((ext-syntax EXT-SYNTAX)              (set! type 'extended-syntax))
           ((r7rs-syntax R7RS-SYNTAX)            (set! type 'r7rs-syntax))
           ((syntax SYNTAX)                      (set! type 'syntax))
