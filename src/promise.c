@@ -22,7 +22,7 @@
  *           Author: Erick Gallesio [eg@unice.fr]
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date:  2-Jun-1993 12:27 (eg)
- * Last file update: 14-Oct-2019 15:27 (eg)
+ * Last file update: 14-Oct-2019 15:53 (eg)
  */
 #include "stklos.h"
 
@@ -213,6 +213,7 @@ static void print_promise(SCM promise, SCM port, int mode)
 {
   char buffer[100];
   sprintf(buffer, "#[promise %lx]", (unsigned long) promise);
+  STk_puts(buffer, port);
 }
 
 static struct extended_type_descr xtype_promise = {
