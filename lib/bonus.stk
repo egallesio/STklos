@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 11-Jul-2019 16:28 (eg)
+;;;; Last file update:  3-Sep-2019 09:53 (eg)
 ;;;;
 
 
@@ -918,7 +918,7 @@ doc>
           (else (error 'ansi-color "bad command ~S" args)))))))
 
 (define do-color
-  (let ((term (getenv "TERM")))
+  (let ((term (or (getenv "TERM") "")))
     (if (and (not (key-get *%program-args* :interactive #f))
              (any (lambda(x) (regexp-match x term))
                   '("rxvt" "xterm" "xterm-color" "linux" "cygwin" "cons25")))
