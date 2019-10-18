@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 11-Jul-2019 16:07 (eg)
+;; Last file update: 18-Oct-2019 11:42 (eg)
 ;;
 ;; ======================================================================
 
@@ -202,7 +202,8 @@ need to insert the following expression])
 (srfi-section 16
 
 (p [,(quick-link-srfi 16) is fully supported and is completely
-described in this document (procedure ,(code "case-lambda")).]))
+described in this document (procedure ,(code "case-lambda")).
+Note ,(code "case-lambda") is now defined in ,(rseven).]))
 
 
 ;; ----------------------------------------------------------------------
@@ -348,7 +349,7 @@ you need to insert the following expression])
 
 (p [,(quick-link-srfi 34) is fully supported and is completely
 described in this document (see ,(code "with-exception-handler")
-and ,(code "guard")).]))
+and ,(code "guard")). Note that this SRFI is now part of ,(rseven).]))
 
 ;; ----------------------------------------------------------------------
 ;; SRFI 35 -- Conditions

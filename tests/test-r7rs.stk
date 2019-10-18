@@ -1,4 +1,4 @@
-;;;;                                                    -*- coding: utf-8 -*-
+ ;;;;                                                    -*- coding: utf-8 -*-
 ;;;;
 ;;;; test-r7rs.stk      -- Testing R7RS constructs/primitives
 ;;;;
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 14-Oct-2019 18:15 (eg)
+;;;; Last file update: 18-Oct-2019 11:40 (eg)
 ;;;;
 
 (require "test")
@@ -365,7 +365,6 @@
 ;;;
 ;;; 4.2.6 DYNAMIC BINDINGS
 ;;;
-
 (test "make-parameter.1"
       '(1 . 2)
       (let ((x (make-parameter 1)))
@@ -420,9 +419,107 @@
                  (c (f 12)))
             (list a b c)))))
 
+;;;
+;;; 4.2.7 EXCEPTION HANDLING
+;;;
 
+;; all tests are in 6.11 (Exceptions)
 
+;;;
+;;; 4.2.8 QUASIQUOTATION
+;;;
+(test "qq.1"
+      '(list 3 4)
+      `(list ,(+ 1 2) 4))
 
+(test "qq.2"
+      '(list a (quote a))
+      (let ((name 'a))
+        `(list ,name ',name)))
+
+(test "qq.3"
+      '(a 3 4 5 6 b)
+      `(a ,(+ 1 2) ,@(map abs '(4 -5 6)) b))
+
+(test "qq.4"
+       '((foo 7) . cons)
+       `((foo ,(- 10 3)) ,@(cdr '(c)) . ,(car '(cons))))
+
+(test "qq.5"
+       #(10 5 2 4 3 8)
+       `#(10 5 ,(sqrt 4) ,@(map sqrt '(16 9)) 8))
+
+(test "qq.6"
+      ' (list foo bar baz)
+        (let ((foo '(foo bar))
+              (@baz 'baz))
+          `(list ,@foo , @baz)))
+
+(test "qq.7"
+      '(a `(b ,(+ 1 2) ,(foo 4 d) e) f)
+      `(a `(b ,(+ 1 2) ,(foo ,(+ 1 3) d) e) f))
+
+(test "qq.8"
+      '(a `(b ,x ,'y d) e)
+      (let ((name1 'x)
+            (name2 'y))
+        `(a `(b ,,name1 ,',name2 d) e)))
+
+(test "qq.9"
+      '(list 3 4)
+      (quasiquote (list (unquote (+ 1 2)) 4)))
+
+(test "qq.10"
+       '`(list ,(+ 1 2) 4)
+       '(quasiquote (list (unquote (+ 1 2)) 4)))
+
+;;;
+;;; 4.2.9 CASE-LAMBDA
+;;;
+
+(let ()
+  (define range
+    (case-lambda
+     ((e) (range 0 e))
+     ((b e) (do ((r '() (cons e r))
+                 (e (- e 1) (- e 1)))
+                ((< e b) r)))))
+
+  (test "case-lambda.1"
+        '(0 1 2)
+        (range 3))
+  (test "case-lambda.2"
+        '(3 4)
+        (range 3 5)))
+
+(let ()
+  (define plus
+    (case-lambda
+     (() 0)
+     ((x) x)
+     ((x y) (+ x y))
+     ((x y z) (+ (+ x y) z))
+     (args (apply + args))))
+
+  (test "case-lambda.3"
+        0
+        (plus))
+  (test "case-lambda.4"
+        1
+        (plus 1))
+  (test "case-lambda.5"
+        6
+        (plus 1 2 3))
+  (test "case-lambda.6"
+        10
+        (plus 1 2 3 4)))
+
+(test "case-lambda.7"
+      *test-failed*
+      ( (case-lambda
+         ((a) a)
+         ((a b) (* a b)))
+       1 2 3))
 
 ;; ======================================================================
 
