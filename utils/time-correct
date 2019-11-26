@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# Date correction of important files to avoid the need of automake GNU/tools.
+#
+#           Author: Erick Gallesio [eg@unice.fr]
+#    Creation date: 26-Nov-2019 17:56
+# Last file update: 26-Nov-2019 18:33 (eg)
+
+echo -n "Touching some files ... "
+find . -name aclocal.m4  -exec touch {} \;
+find . -name Makefile.am -exec touch {} \;
+find . -name Makefile.in -exec touch {} \;
+find . -name configure  -exec touch {} \;
+echo "done."

@@ -9,6 +9,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+    - name: timestamp correction
+      run:  ./utils/time-correct
     - name: configure
       run: ./configure
     - name: make
