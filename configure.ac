@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 12-Jul-2019 17:21 (eg)
+### Last file update: 26-Nov-2019 16:07 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.31])
@@ -445,7 +445,10 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           pkgman/Makefile])
 AC_OUTPUT
 
-chmod 0755 utils/stklos-config utils/stklos-script
+# chmod 0755 utils/stklos-config utils/stklos-script
+echo -n "Setting files meta-informations ... "
+source ./.git_meta
+echo "done."
 
 echo " "
 echo " "

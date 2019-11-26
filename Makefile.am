@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 12-Jul-2019 17:52 (eg)
+# Last file update: 26-Nov-2019 15:57 (eg)
 
 
 EXTRA_DIST   =
@@ -31,10 +31,10 @@ push: pre-push
 pre-push:
 	./utils/make-push-id
 	git add src/extraconf.h.in
-	find `git ls-files`             \
-	     -printf 'chmod %#m "%p"; ' \
-	     -printf 'touch -c -d "%TY-%Tm-%Td %TT" "%p"\n' | \
-	  sed -E -e "s/[0-9]{2}:\.[0-9]+//" > $(GIT_META)
+	find `git ls-files`					   \
+             -printf 'chmod %#m "%p"; '				   \
+             -printf 'touch -c -t "%TY%Tm%Td%TH%TM.%TS" "%p"\n'  | \
+	   sed -E -e "s/\.[0-9]{3,}//" > $(GIT_META)
 	git add $(GIT_META)
 
 
