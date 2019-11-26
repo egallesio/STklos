@@ -8164,10 +8164,8 @@ $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
 
-# chmod 0755 utils/stklos-config utils/stklos-script
-echo -n "Setting files meta-informations ... "
-source ./.git_meta
-echo "done."
+chmod 0755 utils/stklos-config utils/stklos-script
+
 
 echo " "
 echo " "
