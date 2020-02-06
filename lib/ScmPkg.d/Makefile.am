@@ -7,7 +7,7 @@
 SRCS =  scmpkg-interface.stk scmpkg-languages.stk
 OBJ  =  ../scmpkg-support.ostk
 
-
+COMP ?= ../utils/tmpcomp
 
 scheme_libdir      = $(prefix)/share/@PACKAGE@/@VERSION@
 scheme_lib_DATA    = scmpkg-support.stk $(OBJ)
@@ -18,7 +18,7 @@ scheme_scmpkg_DATA = $(SRCS)
 all: $(OBJ)
 
 $(OBJ): scmpkg-support.stk $(SRCS)
-	(cd ..; ../utils/tmpcomp ScmPkg.d/scmpkg-support.stk scmpkg-support.ostk)
+	(cd ..; $(COMP) ScmPkg.d/scmpkg-support.stk -o scmpkg-support.ostk)
 
 clean: 
 	/bin/rm -f $(OBJ) *~

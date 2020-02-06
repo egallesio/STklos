@@ -7,6 +7,8 @@
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
 
+STKLOS_BINARY ?= ./stklos
+
 schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
 extraincdir = $(prefix)/include/@PACKAGE@
 
@@ -83,7 +85,7 @@ chars.c: utf8-tables.in
 doc:  $(DOCDB)
 
 $(DOCDB): $(stklos_SOURCES)
-	./stklos -b boot.img -c -q -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
+	$(STKLOS_BINARY) -b boot.img -c -q -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
 
 clean:
 	/bin/rm -f *.o $(DOCDB)
