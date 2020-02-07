@@ -1,7 +1,7 @@
 ;;;;
 ;;;; bonus.stk  -- Useful primitives not in R5RS
 ;;;;
-;;;; Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  3-Sep-2019 09:53 (eg)
+;;;; Last file update:  7-Feb-2020 12:16 (eg)
 ;;;;
 
 
@@ -915,6 +915,10 @@ doc>
                    (string-append res
                                   (if  str-prev? ansi-color-start ";")
                                   (code (car args)))))
+          ((pair? (car args))
+             (Loop (append (car args) (cdr args))
+                   res
+                   res))
           (else (error 'ansi-color "bad command ~S" args)))))))
 
 (define do-color

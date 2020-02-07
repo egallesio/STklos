@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  2-Jan-2020 21:29 (eg)
+;;;; Last file update:  7-Feb-2020 18:10 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -33,7 +33,8 @@
 (define-module REPL
   (import SCHEME)
   (export main-repl repl repl-prompt repl-make-prompt repl-display-prompt
-          repl-prompt-use-color? repl-change-default-ports main-repl-hook)
+          repl-prompt-use-color? repl-change-default-ports main-repl-hook
+          repl-theme get-repl-color)
 
 ;;; In module REPL
 
@@ -47,10 +48,57 @@
 (define default-err (current-error-port))
 
 
+;; ======================================================================
+;; REPL themes and colors
+;;
+;; The parameter function `repl-theme` returns the list of color
+;; associations currently in use.
+;;
+;; To change the REPL theme, you can just use
+;;     - (repl-theme 'xxx) where xxx is one of classic, monochrome or
+;;       minimal,
+;;     - (rep-theme `(:error red :prompt (bold red) ...)) to fix a
+;;       personal theme
+;;
+;; To change only one color in the current theme, you can do
+;;      (key-set! (repl-theme) :prompt '(bold green))
+;;
+;; A good place to change your theme is the .stklosrc file
+;; (or interactively)
+;;
+;; ======================================================================
+(define *repl-themes* `(
+     (classic     .  (:error       (bold red)         ;; error messages
+                      :input       (normal bold)      ;; normal input
+                      :prompt      (bold magenta)     ;; prompt color
+                      :help-prompt (bold green)       ;; help prompt color
+                      :help        (bold blue)        ;; help messages
+                      :repl-depth  yellow             ;; REPL depth
+                      :info        (bold blue)))      ;; informations
+
+     (monochrome  .  ())
+
+     (minimal     . (:error  (bold red)
+                     :prompt  underline))))
+
+(define repl-theme
+  (make-parameter #f
+                  (lambda (theme)
+                    (if (symbol? theme)
+                        (let ((val (assoc theme *repl-themes*)))
+                          (if val (cdr val) '()))
+                        theme))))
+
+(define (get-repl-color key)
+  (key-get (repl-theme) key ""))
+
+
+;;; ======================================================================
+
 (define (do-repl-command l)
   (case (car l)
     ((help h ?)         (display
-                         (do-color 'blue 'bold
+                         (do-color (get-repl-color :help)
                                    (format "Available Commands:
 - ,backtrace ,bt   Show the stack when last error occurred
 - ,quit ,q         Exit STklos
@@ -74,7 +122,7 @@
          (from (if (cadr loc)
                    (format " (near line ~a in file ~s)" (cdadr loc) (caadr loc))
                    "")))
-    (display (do-color 'bold 'red
+    (display (do-color (get-repl-color :error)
                        (format "**** Error~A:\n~A: ~A\n" from (car loc) msg)
                        'clear
                        "\t(type \""
@@ -120,26 +168,16 @@
 ;; ----------------------------------------------------------------------
 ;;      make-prompt ...
 ;; ----------------------------------------------------------------------
-;;(define (make-prompt module)
-;;  (repl-prompt (string-append
-;;                 ;; repl-level if > 1
-;;                 (if (> repl-level 1)
-;;                     (do-color 'bold 'red
-;;                               (format "[~A] " repl-level))
-;;                     "")
-;;                 ;; prompt itself
-;;                 (do-color 'bold 'magenta
-;;                           (format "~A> " (module-name module))
-;;                           'black))))
-
-
 (define (make-prompt module)
   (let ((str1 (if (> repl-level 1) (format "[~A] " repl-level) ""))
-        (str2 (format "~A> " (module-name module))))
+        (str2 (format "~A>" (module-name module))))
     (repl-prompt (if (repl-prompt-use-color?)
-                     (string-append (do-color 'bold 'red str1)
-                                    (do-color 'bold 'magenta str2 'black))
-                     (string-append str1 str2)))))
+                     (string-append
+                        (do-color (get-repl-color :repl-level) str1 'clear)
+                        (do-color (get-repl-color :prompt) str2 'clear
+                                  (get-repl-color :input))
+                        " ")
+                     (string-append str1 str2 " ")))))
 
 ;; ----------------------------------------------------------------------
 ;;      repl-make-prompt ...
@@ -225,7 +263,7 @@ doc>
                         ((eq? (car v) (void))
                            (when (= (length v) 2)
                              ;; Special convention for variable definition
-                             (display (do-color 'bold 'blue
+                             (display (do-color (get-repl-color :info)
                                                 (format ";; ~A\n" (cadr v))
                                                 'clear)
                                       out)))
@@ -243,6 +281,10 @@ doc>
   ;; Initialize signals suitable for  a REPL session (e.g.be immune to ^C)
   (%initialize-signals)
   (when interactive?
+    ;; Use classic theme if the user has not set a theme in his/her init file
+    (unless (repl-theme)
+      (repl-theme 'classic))
+    ;; Show banner
     (let ((line1 (format "STklos version ~A  (Id: ~A)\n" (version) (%push-id)))
           (line2 "Copyright (C) 1999-2020 Erick Gallesio <eg@unice.fr>\n")
           (line3 "Université Nice Sophia Antipolis - UCA\n")
@@ -251,12 +293,14 @@ doc>
                          (%thread-system)
                          (key-get *%system-state-plist* :readline 'no-readline)
                          (if (key-get *%system-state-plist* :use-utf8 #f)
-                             'utf8 'no-utf8))))
-      (display (do-color 'bold 'black "  \\    " 'bold 'blue line1))
-      (display (do-color 'bold 'black "   \\   " 'bold 'blue line2))
-      (display (do-color 'bold 'black "  / \\  " 'bold 'blue line3))
-      (display (do-color 'bold 'black " /   \\ " 'bold 'blue line4 'normal))))
-
+                             'utf8 'no-utf8)))
+          (col1  (get-repl-color :input))
+          (col2  (get-repl-color :info)))
+      (display (do-color 'normal col1 "  \\    " col2 line1 'clear))
+      (display (do-color 'normal col1 "   \\   " col2 line2 'clear))
+      (display (do-color 'normal col1 "  / \\  " col2 line3 'clear))
+      (display (do-color 'normal col1 " /   \\ " col2 line4 'clear))))
+  ;; Lauch the REPL
   ((main-repl-hook))
   (repl)
   (%pre-exit 0))
