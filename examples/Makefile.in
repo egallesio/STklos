@@ -538,8 +538,10 @@ uninstall-am: uninstall-schemedemoDATA uninstall-schemedemoSCRIPTS
 .PRECIOUS: Makefile
 
 
+COMP ?= ../utils/tmpcomp
+
 .stk:
-	../utils/tmpcomp $*.stk $*
+	$(COMP) -o $* $*.stk 
 
 clean:
 	   /bin/rm -f $(schemedemo_SCRIPTS) *~

@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 25-Oct-2004 16:43 (eg)
-# Last file update: 23-Oct-2010 11:59 (eg)
+# Last file update: 10-Feb-2020 16:37 (eg)
 
 schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
 scheme_DATA = lalr.stk lalr.ostk
@@ -12,8 +12,7 @@ COMP ?= ../utils/tmpcomp
 #======================================================================
 SUFFIXES = .stk .ostk .scm
 .stk.ostk:
-	echo "COMP = $(COMP)"
-	(cd ..; $(COMP) Lalr.d/$*.stk -o Lalr.d/$*.ostk)
+	(cd ..; $(COMP) -o Lalr.d/$*.ostk Lalr.d/$*.stk)
 #======================================================================
 all: lalr.ostk calc
 

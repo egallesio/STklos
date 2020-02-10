@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Dec-2006 10:09 (eg)
-# Last file update: 23-Oct-2010 12:02 (eg)
+# Last file update: 10-Feb-2020 16:36 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -525,10 +525,12 @@ uninstall-am: uninstall-scheme_libDATA uninstall-scheme_scmpkgDATA
 .PRECIOUS: Makefile
 
 
+COMP ?= ../utils/tmpcomp
+
 all: $(OBJ)
 
 $(OBJ): scmpkg-support.stk $(SRCS)
-	(cd ..; ../utils/tmpcomp ScmPkg.d/scmpkg-support.stk scmpkg-support.ostk)
+	(cd ..; $(COMP) -o scmpkg-support.ostk ScmPkg.d/scmpkg-support.stk )
 
 clean: 
 	/bin/rm -f $(OBJ) *~

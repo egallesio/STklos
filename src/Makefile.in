@@ -953,13 +953,15 @@ uninstall-am: uninstall-binPROGRAMS uninstall-extraincDATA
 .PRECIOUS: Makefile
 
 
+STKLOS_BINARY ?= ./stklos
+
 struct.o cond.o: struct.h
 chars.c: utf8-tables.in
 
 doc:  $(DOCDB)
 
 $(DOCDB): $(stklos_SOURCES)
-	./stklos -b boot.img -c -q -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
+	$(STKLOS_BINARY) -b boot.img -c -q -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
 
 clean:
 	/bin/rm -f *.o $(DOCDB)

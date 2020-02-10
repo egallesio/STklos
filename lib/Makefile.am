@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 28-Jun-2019 08:47 (eg)
+# Last file update: 10-Feb-2020 16:35 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -141,10 +141,10 @@ scheme_DATA = $(scheme_SRCS) $(scheme_OBJS) $(scheme_BOOT)
 
 SUFFIXES = .stk .ostk .scm
 .stk.ostk:
-	$(COMP) $*.stk -o $*.ostk
+	$(COMP) -o $*.ostk $*.stk
 
 .scm.ostk:
-	$(COMP) $*.scm -o $*.ostk
+	$(COMP) -o $*.ostk $*.scm
 
 #======================================================================
 

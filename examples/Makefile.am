@@ -12,7 +12,7 @@ SUFFIXES            = .stk
 COMP ?= ../utils/tmpcomp
 
 .stk:
-	$(COMP) $*.stk -o $*
+	$(COMP) -o $* $*.stk 
 
 clean:
 	   /bin/rm -f $(schemedemo_SCRIPTS) *~
