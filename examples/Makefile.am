@@ -9,8 +9,10 @@ schemedemo_SCRIPTS  = fork-test hello secho \
 
 SUFFIXES            = .stk
 
+COMP ?= ../utils/tmpcomp
+
 .stk:
-	../utils/tmpcomp $*.stk $*
+	$(COMP) $*.stk -o $*
 
 clean:
 	   /bin/rm -f $(schemedemo_SCRIPTS) *~

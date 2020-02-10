@@ -29,13 +29,19 @@
 # system which need compilation. It will not be installed since the
 # user version is the stklos-compile script.
 
-if [ $# != 2 ] ;then
+if [ $# = 2 ] ;then
+  in=$1
+  out=$2
+elif [ $# = 3 ] ;then
+  in=$1
+  out=$3
+else
   echo "Usage: $0 src bytecode-file "
   exit 1
 fi
 
-in=$1
-out=$2
+#in=$1
+#out=$2
 
 # Sep is now also ":"  on CYGWIN
 sep=":"

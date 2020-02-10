@@ -8,6 +8,9 @@ SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
 SFLAGS=
 
+COMP ?= ../utils/tmpcomp
+STKLOS_BINARY ?= ../src/stklos
+
 scheme_BOOT = assembler.stk		\
 	      bb.stk 			\
 	      bonus.stk 		\
@@ -138,10 +141,10 @@ scheme_DATA = $(scheme_SRCS) $(scheme_OBJS) $(scheme_BOOT)
 
 SUFFIXES = .stk .ostk .scm
 .stk.ostk:
-	../utils/tmpcomp $*.stk $*.ostk
+	$(COMP) $*.stk -o $*.ostk
 
 .scm.ostk:
-	../utils/tmpcomp $*.scm $*.ostk
+	$(COMP) $*.scm -o $*.ostk
 
 #======================================================================
 
@@ -152,16 +155,16 @@ boot:	../src/boot.img
 ../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \
 	(export STKLOS_BUILDING=1; \
-	../src/stklos -q -c -b ../src/boot.img -f bb.stk boot.img0 instr0)
+	$(STKLOS_BINARY) -q -c -b ../src/boot.img -f bb.stk boot.img0 instr0)
 	@echo "*** Boot 1"; \
 	(export STKLOS_BUILDING=1; \
-	../src/stklos $(SFLAGS) -q -c -b ./boot.img0     -f bb.stk boot.img1 instr1)
+	$(STKLOS_BINARY) $(SFLAGS) -q -c -b ./boot.img0     -f bb.stk boot.img1 instr1)
 	@echo "*** Boot 2"; \
 	(export STKLOS_BUILDING=1; \
-	 ../src/stklos $(SFLAGS) -q -c -b ./boot.img1    -f bb.stk boot.img2 instr2)
+	 $(STKLOS_BINARY) $(SFLAGS) -q -c -b ./boot.img1    -f bb.stk boot.img2 instr2)
 	@echo "*** Boot 3"; \
 	(export STKLOS_BUILDING=1; \
-	../src/stklos $(SFLAGS) -q -c -b ./boot.img2     -f bb.stk boot.img3 instr3)
+	$(STKLOS_BINARY) $(SFLAGS) -q -c -b ./boot.img2     -f bb.stk boot.img3 instr3)
 	@if cmp ./boot.img2 ./boot.img3 ;then 				\
 	   echo "*** New boot file created";  				\
 	   cp ../src/boot.img ../src/boot.ok; 				\
@@ -169,7 +172,7 @@ boot:	../src/boot.img
 	   cp ./instr3    ../src/vm-instr.h;  				\
 	   echo "*** Create new boot.c";				\
 	   (export STKLOS_BUILDING=1;					\
-	    ../src/stklos $(SFLAGS) -q -c -b ../src/boot.img  		\
+	    $(STKLOS_BINARY) $(SFLAGS) -q -c -b ../src/boot.img  		\
 		-f make-C-boot.stk -- boot.img3 ../src/boot.c);		\
 	   echo "*** Recompile STklos";					\
 	   (cd ../src; $(MAKE) stklos);					\
@@ -195,7 +198,7 @@ slib.ostk: slib.stk STklos.init
 doc: $(DOCDB)
 
 $(DOCDB): $(scheme_SRCS) $(scheme_BOOT)
-	../src/stklos -q -c -b ../src/boot.img -f ../doc/extract-doc \
+	$(STKLOS_BINARY) -q -c -b ../src/boot.img -f ../doc/extract-doc \
 	$(scheme_SRCS) $(scheme_BOOT) > $(DOCDB)
 
 clean:

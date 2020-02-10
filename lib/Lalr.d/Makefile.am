@@ -7,10 +7,13 @@
 schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
 scheme_DATA = lalr.stk lalr.ostk
 
+COMP ?= ../utils/tmpcomp
+
 #======================================================================
 SUFFIXES = .stk .ostk .scm
 .stk.ostk:
-	(cd ..; ../utils/tmpcomp Lalr.d/$*.stk Lalr.d/$*.ostk)
+	echo "COMP = $(COMP)"
+	(cd ..; $(COMP) Lalr.d/$*.stk -o Lalr.d/$*.ostk)
 #======================================================================
 all: lalr.ostk calc
 

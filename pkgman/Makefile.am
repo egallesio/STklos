@@ -17,8 +17,8 @@ SRC     = ../lib/http.stk \
 	  repository.stk rewrite.stk misc.stk tune.stk types.stk
 SFLAGS  =
 RM      = /bin/rm
-COMP	= ../utils/tmpcomp
-GENLEX  = ../utils/tmpgenlex
+COMP	?= ../utils/tmpcomp
+GENLEX  ?= ../utils/tmpgenlex
 
 all: $(bin_SCRIPTS)
 
@@ -32,7 +32,7 @@ lang-mzscheme.inc: lang-mzscheme.l
 	$(GENLEX) lang-mzscheme.l lang-mzscheme.inc lang-mzscheme
 
 $(bin_SCRIPTS):  $(LEXOBJS) $(SRC)
-	$(COMP) main.stk $(bin_SCRIPTS)
+	$(COMP) main.stk -o $(bin_SCRIPTS)
 
 clean:
 	$(RM) -f $(bin_SCRIPTS) $(LEXOBJS) *~

@@ -7,12 +7,13 @@
 scmbin      = stklos-compile stklos-genlex
 bin_SCRIPTS = stklos-config  stklos-script $(scmbin)
 
+COMP ?= ./tmpcomp
 
 stklos-compile: stklos-compile.stk
-	./tmpcomp stklos-compile.stk stklos-compile
+	$(COMP) stklos-compile.stk -o stklos-compile
 
 stklos-genlex: stklos-genlex.stk
-	./tmpcomp stklos-genlex.stk stklos-genlex
+	$(COMP) stklos-genlex.stk -o stklos-genlex
 
 clean:
 	rm -f $(scmbin)
