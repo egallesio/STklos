@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  5-Mar-2020 12:12 (eg)
+### Last file update:  6-Mar-2020 17:08 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.31])
@@ -134,7 +134,6 @@ AC_ARG_ENABLE(case-insensitive,
   CASE_SENSITIVE=false,
   CASE_SENSITIVE=true)
 
-echo "=============================== $CASE_SENSITIVE"
 case "$CASE_SENSITIVE" in
   false | 0 |off| yes)
      DEFAULT_CS=0

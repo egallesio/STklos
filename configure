@@ -6024,7 +6024,6 @@ else
 fi
 
 
-echo "=============================== $CASE_SENSITIVE"
 case "$CASE_SENSITIVE" in
   false | 0 |off| yes)
      DEFAULT_CS=0
