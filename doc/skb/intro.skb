@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 31-Jul-2019 12:28 (eg)
+;; Last file update:  5-Mar-2020 14:42 (eg)
 ;;
 ;; ======================================================================
 
@@ -92,14 +92,14 @@ the notation ,(code "#:foo") is also available to denote the keyword of
 name ,(code "foo"). See section,(~),(ref :section "Keywords") for more
 information])
 
-(p [Note that, by default, ,(stklos) is case insensitive as specified
-         by R5RS. This behavior can be changed by]
+(p [Note that, by default, ,(stklos) is case sensitive as specified
+         by R7RS. This behavior can be changed by]
    (itemize
-    (item [the ,(code "--case-sensitive") option used for the commands
+    (item [the ,(code "--case-insensitive") option used for the commands
                ,(code "stklos") or ,(code "stklos-compile")])
-    (item [the directive ,(code "#!no-fold-case"). This directive can
+    (item [the directive ,(code "#!fold-case"). This directive can
                appear anywhere comments are permitted but must be followed by a
-               delimiter. This directive (and the ,(code "#!fold-case")) are treated as
+               delimiter. This directive (and the ,(code "#!no-fold-case")) are treated as
                comments, except that they affect the reading of subsequent data from
                the same port. The ,(code "#!fold-case") directive causes subsequent
                identifiers and character names to be case-folded as if by

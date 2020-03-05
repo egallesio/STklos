@@ -1,7 +1,7 @@
 /*
  * stklos.c     -- STklos interpreter main function
  *
- * Copyright © 1999-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  5-Jul-2019 16:29 (eg)
+ * Last file update:  5-Mar-2020 13:45 (eg)
  */
 
 #include "stklos.h"
@@ -76,6 +76,7 @@ static struct option long_options [] =
   {"debug",             no_argument,       NULL, 'd'},
   {"stack-size",        required_argument, NULL, 's'},
   {"case-sensitive",    no_argument,       NULL, 'c'},
+  {"case-insensitive",  no_argument,       NULL, 'z'},
   {"utf8-encoding",     required_argument, NULL, 'u'},
   {"help",              no_argument,       NULL, 'h'},
   {NULL}
@@ -98,7 +99,8 @@ static void Usage(char *progname, int only_version)
 "   -n, --no-line-editor        don't use line editor\n"
 "   -d, --debug                 add informations to ease debugging\n"
 "   -s, --stack-size=n          use a stack of size n (default %d)\n"
-"   -c, --case-sensitive        be case sensitive (default is #f)\n"
+"   -c, --case-sensitive        be case sensitive by default\n"
+"       --case-insensitive      be case incensitive by default\n"
 "   -u, --utf8-encoding=yes|no  use/don't use UTF-8 encoding (instead of default)\n"
 "   -v, --version               print program version and exit\n"
 "   -h, --help                  print this help and exit\n"
@@ -130,6 +132,7 @@ static int process_program_arguments(int argc, char *argv[])
       case 'q': vanilla         = 1;                            break;
       case 's': stack_size      = atoi(optarg);                 break;
       case 'c': STk_read_case_sensitive = 1;                    break;
+      case 'z': STk_read_case_sensitive = 0;                    break;
       case 'u': STk_use_utf8    = strspn(optarg, "yY1");        break;
       case '?': /* message error is printed by getopt */
                 fprintf(stderr, "Try `%s --help' for more information\n", *argv);

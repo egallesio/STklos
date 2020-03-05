@@ -1,8 +1,8 @@
 /*
  *
- * s y m b o l . c			-- Symbols management
+ * s y m b o l . c                      -- Symbols management
  *
- * Copyright © 1993-2012 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 20-Nov-1993 12:12
- * Last file update: 18-Mar-2012 19:07 (eg)
+ * Last file update:  5-Mar-2020 14:45 (eg)
  */
 
 #include <ctype.h>
@@ -83,15 +83,15 @@ SCM STk_intern(char *name)
 
 #ifdef FIXME
 
-/* Devenue inutile */
-SCM STk_intern_ci(char *name)
-{
-  char *s;
-
-  if (!STk_read_case_sensitive)
-    for (s= name; *s; s++) *s=tolower(*s);
-  return STk_intern(name);
-}
+//EG: /* Devenue inutile */
+//EG: SCM STk_intern_ci(char *name)
+//EG: {
+//EG:   char *s;
+//EG: 
+//EG:   if (!STk_read_case_sensitive)
+//EG:     for (s= name; *s; s++) *s=tolower(*s);
+//EG:   return STk_intern(name);
+//EG: }
 
 //EG: SCM STk_global_env2list(void)
 //EG: {
@@ -236,6 +236,6 @@ int STk_init_symbol(void)
   ADD_PRIMITIVE(symbolp);
   ADD_PRIMITIVE(symbol2string);
   ADD_PRIMITIVE(string2symbol);
-  ADD_PRIMITIVE(string2usymbol);		/* + */
+  ADD_PRIMITIVE(string2usymbol);                /* + */
   return TRUE;
 }

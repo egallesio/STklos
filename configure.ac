@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 26-Nov-2019 18:07 (eg)
+### Last file update:  5-Mar-2020 12:12 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.31])
@@ -123,6 +123,26 @@ if test "X$HAVE_DLOPEN" = "Xyes"
 then
   AC_DEFINE(HAVE_DLOPEN, 1, [System provides flopen])
 fi
+
+###
+### Be case sensitive or not
+###
+CASE_SENSITIVE=true
+
+AC_ARG_ENABLE(case-insensitive,
+  [AS_HELP_STRING([--enable-case-insensitive],[Be case insensitive by default as in R5RS])],
+  CASE_SENSITIVE=false,
+  CASE_SENSITIVE=true)
+
+echo "=============================== $CASE_SENSITIVE"
+case "$CASE_SENSITIVE" in
+  false | 0 |off| yes)
+     DEFAULT_CS=0
+     ;;
+  *)
+     DEFAULT_CS=1
+     ;;
+esac
 
 
 ###
@@ -434,6 +454,7 @@ AC_SUBST(FFIINC)
 
 AC_SUBST(THREADS)
 AC_SUBST(LIB_SUMMARY)
+AC_SUBST(DEFAULT_CS)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
@@ -459,6 +480,7 @@ echo "      Install prefix : " $prefix
 echo "           C compiler: " $CC
 echo "    Compilation flags: " $CFLAGS
 echo "       Thread support: " $THREADS
+echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "System libraries used: " $SYST_LIBS
 echo "   Compiled libraries: " $COMP_LIBS
 echo " "
@@ -466,4 +488,3 @@ echo " "
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options."
 echo " "
-

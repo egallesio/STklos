@@ -624,6 +624,7 @@ ac_func_list=
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+DEFAULT_CS
 LIB_SUMMARY
 THREADS
 FFIINC
@@ -764,6 +765,7 @@ ac_user_opts='
 enable_option_checking
 enable_silent_rules
 enable_dependency_tracking
+enable_case_insensitive
 enable_threads
 with_provided_gc
 with_provided_bignum
@@ -1400,6 +1402,8 @@ Optional Features:
                           do not reject slow dependency extractors
   --disable-dependency-tracking
                           speeds up one-time build
+  --enable-case-insensitive
+                          Be case insensitive by default as in R5RS
   --enable-threads=TYPE   choose threading package (none,pthreads)
 
 Optional Packages:
@@ -6007,6 +6011,29 @@ $as_echo "#define HAVE_DLOPEN 1" >>confdefs.h
 
 fi
 
+###
+### Be case sensitive or not
+###
+CASE_SENSITIVE=true
+
+# Check whether --enable-case-insensitive was given.
+if test "${enable_case_insensitive+set}" = set; then :
+  enableval=$enable_case_insensitive; CASE_SENSITIVE=false
+else
+  CASE_SENSITIVE=true
+fi
+
+
+echo "=============================== $CASE_SENSITIVE"
+case "$CASE_SENSITIVE" in
+  false | 0 |off| yes)
+     DEFAULT_CS=0
+     ;;
+  *)
+     DEFAULT_CS=1
+     ;;
+esac
+
 
 ###
 ### To thread or not to thread ?
@@ -6671,6 +6698,7 @@ LIB_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS))"
 
 
 # FFI
+
 
 
 
@@ -8178,6 +8206,7 @@ echo "      Install prefix : " $prefix
 echo "           C compiler: " $CC
 echo "    Compilation flags: " $CFLAGS
 echo "       Thread support: " $THREADS
+echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "System libraries used: " $SYST_LIBS
 echo "   Compiled libraries: " $COMP_LIBS
 echo " "
@@ -8185,4 +8214,3 @@ echo " "
 echo "If this is correct, you can just type 'make' now at your shell prompt."
 echo "Otherwise, re-run 'configure' with correct options."
 echo " "
-

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r7rs.stk   -- R7RS support (Draft-3)
 ;;;;
-;;;; Copyright © 2011-2019 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2020 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 14-Oct-2019 15:23 (eg)
+;;;; Last file update:  5-Mar-2020 15:00 (eg)
 ;;;;
 
 
@@ -275,7 +275,7 @@ doc>
  * the other procedures return an integer.  All the procedures compute a
  * quotient |q| and remainder |r| such that |n1=n2*q+r|.
  *
- *  See \rseven{} for more information.
+ *  See R7RS for more information.
  *
  * @lisp
  * (floor/ 5 2)         => 2 1
@@ -356,7 +356,7 @@ doc>
  * (inexact z)
  * (exact z)
  *
- * These \rseven{} procedures correspond to the \rfive{} |exact->inexact|
+ * These R7RS procedures correspond to the R5RS |exact->inexact|
  * and |inexact->exact| procedure respectively
 doc>
 |#

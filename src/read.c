@@ -1,7 +1,7 @@
 /*
  * r e a d  . c                         -- reading stuff
  *
- * Copyright © 1993-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 29-Jul-2019 15:30 (eg)
+ * Last file update:  5-Mar-2020 14:40 (eg)
  *
  */
 
@@ -43,7 +43,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist);
 static SCM sym_quote, sym_quasiquote, sym_unquote, sym_unquote_splicing, sym_dot;
 static SCM sym_read_brace, sym_read_bracket, read_error;
 
-int STk_read_case_sensitive = 0;
+int STk_read_case_sensitive = DEFAULT_CASE_SENSITIVE;
 
 
 #define PLACEHOLDERP(x)         (CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
@@ -286,8 +286,8 @@ static SCM read_token(SCM port, int c, int case_significant)
       case ':': return STk_makekey(tok);
       case '#': if (len > 1) {
                   if (len == 2) {
-                    if (tok[1] == 't') return STk_true;
-                    if (tok[1] == 'f') return STk_false;
+                    if (tok[1] == 't' || tok[1] == 'T') return STk_true;
+                    if (tok[1] == 'f' || tok[1] == 'f') return STk_false;
                   }
                   if (tok[1] == ':')
                     return STk_makekey(tok+1);
@@ -954,18 +954,16 @@ static SCM read_srfi10(SCM port, SCM l)
  * This parameter object permits to change the default behaviour of
  * the |read| primitive when reading a symbol. If this parameter has a
  * a true value a symbol is not converted to a default case when interned.
- * Since ,(rfive) requires that symbol are case insignificant, the default
- * value  of this parameter is |#f|.
+ * Since ,(rseven) requires that symbol are case insignificant, the default
+ * value  of this parameter is |#t|.
  * @lisp
- * (read-case-sensitive)        => |#f|
- * (define x 'Symbol)
- * (display x)             @print{} symbol
- * (read-case-sensitive #t)
- * (define y 'Symbol)
- * (display y)             @print{} Symbol
+ * (read-case-sensitive)        => |#t|
+ * (read-from-string "ABC")     => ABC
+ * (read-case-sensitive #f)
+ * (read-from-string "ABC")     => abc 
  * @end lisp
  * ,(bold "Note:")  Default behaviour can be changed for a whole execution
- * with the |--case-sensitive| option.
+ * with the |--case-sensitive| or |case-insensitive| options.
  * @l
  * ,(bold "Note:") See also syntax for ,(ref :mark "bar-in-symbol" :text
  * [special characters]) in symbols.
