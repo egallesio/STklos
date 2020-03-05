@@ -1,8 +1,8 @@
 /*
  *
- *  o b j e c t . c			-- Objects support
+ *  o b j e c t . c                     -- Objects support
  *
- * Copyright © 1994-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,34 +21,34 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update:  1-Jan-2010 13:24 (eg)
+ * Last file update: 10-Feb-2020 18:05 (eg)
  */
 
 #include "stklos.h"
 #include "object.h"
 #include "struct.h"
 
-#define GF_VAL(name)		(STk_lookup(STk_intern(name), \
-					    STk_current_module(), &unused, TRUE))
-#define CALL_GF1(name,a)	(STk_C_apply(GF_VAL(name), 1, (a)))
-#define CALL_GF2(name,a,b)	(STk_C_apply(GF_VAL(name), 2, (a), (b)))
-#define CALL_GF3(name,a,b,c)	(STk_C_apply(GF_VAL(name), 3, (a), (b), (c)))
-#define CALL_GF4(name,a,b,c,d)	(STk_C_apply(GF_VAL(name), 4, (a), (b), (c), (d)))
+#define GF_VAL(name)            (STk_lookup(STk_intern(name), \
+                                            STk_current_module(), &unused, TRUE))
+#define CALL_GF1(name,a)        (STk_C_apply(GF_VAL(name), 1, (a)))
+#define CALL_GF2(name,a,b)      (STk_C_apply(GF_VAL(name), 2, (a), (b)))
+#define CALL_GF3(name,a,b,c)    (STk_C_apply(GF_VAL(name), 3, (a), (b), (c)))
+#define CALL_GF4(name,a,b,c,d)  (STk_C_apply(GF_VAL(name), 4, (a), (b), (c), (d)))
 
-#define CLASS_REDEF(c) 	INST_SLOT(c, S_redefined)
-
-
-#define CLASSP(x)	(INSTANCEP(x) && SUBCLASSP(INST_CLASS_OF(x), Class))
-#define GENERICP(x)    	(INSTANCEP(x) && SUBCLASSP(INST_CLASS_OF(x), Generic))
-#define METHODP(x)     	(INSTANCEP(x) && SUBCLASSP(INST_CLASS_OF(x), Method))
+#define CLASS_REDEF(c)  INST_SLOT(c, S_redefined)
 
 
-#define SPEC_OF(x)	(INST_SLOT((x), S_specializers))
+#define CLASSP(x)       (INSTANCEP(x) && SUBCLASSP(INST_CLASS_OF(x), Class))
+#define GENERICP(x)     (INSTANCEP(x) && SUBCLASSP(INST_CLASS_OF(x), Generic))
+#define METHODP(x)      (INSTANCEP(x) && SUBCLASSP(INST_CLASS_OF(x), Method))
+
+
+#define SPEC_OF(x)      (INST_SLOT((x), S_specializers))
 
 
 
 
-static SCM unused; 	/* for the (useless here) reference returned by lookup */
+static SCM unused;      /* for the (useless here) reference returned by lookup */
 
 
 static SCM make_instance(SCM classe, short size, short type);
@@ -60,7 +60,7 @@ EXTERN_PRIMITIVE("class-of", class_of, subr1, (SCM obj));
 static SCM Top, Object, Class, Generic, Method, Simple_method, Accessor,
            Procedure_class, Entity_class;
 static SCM Boolean, Char, Pair, Procedure, String, Symbol, Vector, Number,
- 	   Liste, Null, Real, Complex, Rational, Integer, Keyword, Eof,
+           Liste, Null, Real, Complex, Rational, Integer, Keyword, Eof,
   Struct_type, Struct, Cond, Cond_type, Box, UnknownClass;
 
 
@@ -117,10 +117,10 @@ static void error_bad_list(SCM obj)
  *   GGG  E N E R I C    F    U N C T I O N S
  *
  * This implementation provides
- *	- generic functions (with class specializers)
- *	- multi-methods
- *	- next-method
- *	- a hard-coded MOP for standard gf, which can be overloaded for non-std gf
+ *      - generic functions (with class specializers)
+ *      - multi-methods
+ *      - next-method
+ *      - a hard-coded MOP for standard gf, which can be overloaded for non-std gf
  *
  ******************************************************************************/
 
@@ -167,10 +167,10 @@ DEFINE_PRIMITIVE("%set-next-method!", set_next_method, subr2,(SCM closure, SCM v
  * This protocol is roughly equivalent to (parameter are a little bit different
  * for efficiency reasons):
  *
- * 	+ apply-generic (gf args)
- *		+ compute-applicable-methods (gf args ...)
- *			+ sort-applicable-methods (methods args)
- *		+ apply-methods (gf methods args)
+ *      + apply-generic (gf args)
+ *              + compute-applicable-methods (gf args ...)
+ *                      + sort-applicable-methods (methods args)
+ *              + apply-methods (gf methods args)
  *
  * apply-methods calls make-next-method to build the "continuation" of a a
  * method.  Applying a next-method will call apply-next-method which in
@@ -222,8 +222,8 @@ static int more_specificp(SCM m1, SCM m2, SCM *targs)
       register SCM l, cs1 = CAR(s1), cs2 = CAR(s2);
 
       for (l = INST_SLOT(*targs, S_cpl);   ; l = CDR(l)) {
-	if (cs1 == CAR(l)) return 1;
-	if (cs2 == CAR(l)) return 0;
+        if (cs1 == CAR(l)) return 1;
+        if (cs2 == CAR(l)) return 0;
       }
       return 0;/* should not occur! */
     }
@@ -231,7 +231,7 @@ static int more_specificp(SCM m1, SCM m2, SCM *targs)
   return 0; /* should not occur! */
 }
 
-#define BUFFSIZE 32		/* big enough for most uses */
+#define BUFFSIZE 32             /* big enough for most uses */
 
 static SCM sort_applicable_methods(SCM method_list, int size, SCM *targs)
 {
@@ -249,7 +249,7 @@ static SCM sort_applicable_methods(SCM method_list, int size, SCM *targs)
       buffer[i]   = CAR(method_list);
       method_list = CDR(method_list);
     }
-    vector = STk_nil;		/* for GCC */
+    vector = STk_nil;           /* for GCC */
     v      = buffer;
   }
   else {
@@ -266,12 +266,12 @@ static SCM sort_applicable_methods(SCM method_list, int size, SCM *targs)
   for (incr = size / 2; incr; incr /= 2) {
     for (i = incr; i < size; i++) {
       for (j = i-incr ;j >= 0; j -= incr) {
-	if (more_specificp(v[j], v[j+incr], targs)) break;
-	else {
-	  SCM tmp   = v[j+incr];
-	  v[j+incr] = v[j];
-	  v[j]	    = tmp;
-	}
+        if (more_specificp(v[j], v[j+incr], targs)) break;
+        else {
+          SCM tmp   = v[j+incr];
+          v[j+incr] = v[j];
+          v[j]      = tmp;
+        }
       }
     }
   }
@@ -315,11 +315,11 @@ SCM STk_compute_applicable_methods(SCM gf, int argc, SCM *argv, int find_method)
   /* Build a list of all applicable methods */
   for (l = INST_SLOT(gf, S_methods); !NULLP(l); l = CDR(l)) {
     for (i=0, fl=SPEC_OF(CAR(l));  ; i++, fl=CDR(fl)) {
-      if (INSTANCEP(fl) || 	  	/* We have a dotted argument list */
-	  (i >= argc && NULLP(fl))) {	/* both list exhausted */
-	applicable = STk_cons(CAR(l), applicable);
-	count     += 1;
-	break;
+      if (INSTANCEP(fl) ||              /* We have a dotted argument list */
+          (i >= argc && NULLP(fl))) {   /* both list exhausted */
+        applicable = STk_cons(CAR(l), applicable);
+        count     += 1;
+        break;
       }
       if (i >= argc || NULLP(fl) || !applicablep(types[i], CAR(fl))) break;
     }
@@ -332,7 +332,7 @@ SCM STk_compute_applicable_methods(SCM gf, int argc, SCM *argv, int find_method)
     return STk_nil;
   }
   return (count == 1) ? applicable :
-    			sort_applicable_methods(applicable, count, types);
+                        sort_applicable_methods(applicable, count, types);
 }
 
 
@@ -343,7 +343,7 @@ DEFINE_PRIMITIVE("find-method", find_method, vsubr, (int argc, SCM *argv))
   if (argc == 0) STk_error("no generic function given");
 
   gf = argv[0];
-  if (!GENERICP(gf))		       error_bad_generic(gf);
+  if (!GENERICP(gf))                   error_bad_generic(gf);
   if (NULLP(INST_SLOT(gf, S_methods))) error_no_method(gf);
 
   return STk_compute_applicable_methods(gf, --argc, --argv, TRUE);
@@ -351,7 +351,7 @@ DEFINE_PRIMITIVE("find-method", find_method, vsubr, (int argc, SCM *argv))
 
 
 DEFINE_PRIMITIVE("%method-more-specific?", method_more_specificp, subr3,
-		 (SCM m1, SCM m2, SCM targs))
+                 (SCM m1, SCM m2, SCM targs))
 {
   SCM l, v;
   int i, len;
@@ -360,7 +360,7 @@ DEFINE_PRIMITIVE("%method-more-specific?", method_more_specificp, subr3,
 
   if (!METHODP(m1)) error_bad_method(m1);
   if (!METHODP(m2)) error_bad_method(m2);
-  if (len < 0) 	    error_bad_list(targs);
+  if (len < 0)      error_bad_list(targs);
 
   /* Verify that all the arguments of targs are classes and place them in a vector*/
   v = STk_makevect(len, (SCM) NULL);
@@ -407,7 +407,7 @@ DEFINE_PRIMITIVE("%method-more-specific?", method_more_specificp, subr3,
 
 /*===========================================================================*\
  *
- * 				S L O T   A C C E S S
+ *                              S L O T   A C C E S S
  *
 \*===========================================================================*/
 
@@ -430,13 +430,13 @@ static Inline SCM get_slot_value(SCM classe, SCM obj, SCM slot_name)
     if (CAR(CAR(l)) == slot_name) {
       l = CDR(CDR(CAR(l)));
       /* Two cases here:
-       *	- l is an integer (the offset of this slot in the slots vector)
-       *	- otherwise (car l) is the getter function to apply
+       *        - l is an integer (the offset of this slot in the slots vector)
+       *        - otherwise (car l) is the getter function to apply
        */
       if (INTP(l))
-	return INST_SLOT(obj, INT_VAL(l));
-      else {	/* We must evaluate (apply (car l) (list obj)) */
-	return STk_C_apply(CAR(l), 1, obj);
+        return INST_SLOT(obj, INT_VAL(l));
+      else {    /* We must evaluate (apply (car l) (list obj)) */
+        return STk_C_apply(CAR(l), 1, obj);
       }
     }
   }
@@ -451,13 +451,13 @@ static Inline SCM set_slot_value(SCM classe, SCM obj, SCM slot_name, SCM value)
     if (CAR(CAR(l)) == slot_name) {
       l = CDR(CDR(CAR(l)));
       /* Two cases here:
-       *	- l is an integer (the offset of this slot in the slots vector)
-       *	- otherwise (cadr l) is the setter function to apply
+       *        - l is an integer (the offset of this slot in the slots vector)
+       *        - otherwise (cadr l) is the setter function to apply
        */
       if (INTP(l))
-	INST_SLOT(obj, INT_VAL(l)) = value;
+        INST_SLOT(obj, INT_VAL(l)) = value;
       else {  /* We must evaluate (apply (cadr l) (list obj value)) */
-	STk_C_apply(CAR(CDR(l)), 2, obj, value);
+        STk_C_apply(CAR(CDR(l)), 2, obj, value);
       }
       return STk_void;
     }
@@ -491,7 +491,7 @@ DEFINE_PRIMITIVE("slot-set!", slot_set, subr3, (SCM obj, SCM slot_name, SCM valu
 
 
 DEFINE_PRIMITIVE("slot-ref-using-class", slot_ref_using_class, subr3,
-		 (SCM classe, SCM obj, SCM slot_name))
+                 (SCM classe, SCM obj, SCM slot_name))
 {
   SCM res;
 
@@ -503,7 +503,7 @@ DEFINE_PRIMITIVE("slot-ref-using-class", slot_ref_using_class, subr3,
 }
 
 DEFINE_PRIMITIVE("slot-set-using-class!", slot_set_using_class, subr4,
-		 (SCM klass, SCM object, SCM slot_name, SCM value))
+                 (SCM klass, SCM object, SCM slot_name, SCM value))
 {
   if (!CLASSP(klass))     error_bad_class(klass);
   if (!INSTANCEP(object)) error_bad_instance(object);
@@ -515,17 +515,17 @@ DEFINE_PRIMITIVE("%fast-slot-ref", fast_slot_ref, subr2, (SCM obj, SCM index))
 {
   register long i = STk_integer_value(index);
 
-  if (!INSTANCEP(obj))    		  error_bad_instance(obj);
+  if (!INSTANCEP(obj))                    error_bad_instance(obj);
   if (i < 0 || i >= INST_NUMBER_OF_SLOTS(obj)) error_bad_index(index, obj);
   return INST_SLOT(obj, i);
 }
 
 DEFINE_PRIMITIVE("%fast-slot-set!", fast_slot_set, subr3,
-		 (SCM obj, SCM index, SCM value))
+                 (SCM obj, SCM index, SCM value))
 {
   register long i = STk_integer_value(index);
 
-  if (!INSTANCEP(obj))    		  error_bad_instance(obj);
+  if (!INSTANCEP(obj))                    error_bad_instance(obj);
   if (i < 0 || i >= INST_NUMBER_OF_SLOTS(obj)) error_bad_index(index, obj);
 
   INST_SLOT(obj, i) = value;
@@ -550,16 +550,16 @@ DEFINE_PRIMITIVE("%slot-ref", undoc_slot_ref, subr2, (SCM obj, SCM slot_name))
  * initialize-object
  *
  ******************************************************************************/
-static void Inline set_slot_value_if_unbound
-			(SCM classe, SCM obj, SCM slot_name, SCM val)
-{
-#ifdef FIXME
-   SCM old_val = get_slot_value(classe, obj, slot_name);
-
-  //FIXMOI:  if (old_val == STk_void)
-#endif
-    set_slot_value(classe, obj, slot_name, val);
-}
+// static void Inline set_slot_value_if_unbound
+//                      (SCM classe, SCM obj, SCM slot_name, SCM val)
+// {
+// #ifdef FIXME
+//    SCM old_val = get_slot_value(classe, obj, slot_name);
+// 
+//   //FIXMOI:  if (old_val == STk_void)
+// #endif
+//     set_slot_value(classe, obj, slot_name, val);
+// }
 
 
 DEFINE_PRIMITIVE("%initialize-object", initialize_obj, subr2,(SCM obj,SCM initargs))
@@ -570,9 +570,9 @@ DEFINE_PRIMITIVE("%initialize-object", initialize_obj, subr2,(SCM obj,SCM initar
   SCM classe       = INST_CLASS_OF(obj);
 
 
-  if (!INSTANCEP(obj)) 			    error_bad_instance(obj);
+  if (!INSTANCEP(obj))                      error_bad_instance(obj);
   if (!CONSP(initargs) && !NULLP(initargs)) STk_error("bad initialization list",
-						      initargs);
+                                                      initargs);
 
   get_n_set = INST_SLOT(classe, S_getters_n_setters);
   slots     = INST_SLOT(classe, S_slots);
@@ -588,12 +588,12 @@ DEFINE_PRIMITIVE("%initialize-object", initialize_obj, subr2,(SCM obj,SCM initar
       slot_name  = CAR(slot_name);
 
       if (tmp != STk_void) {
-	/* an initarg was provided for this slot */
+        /* an initarg was provided for this slot */
 #ifdef FIXME
-	//VIRER
-	//if (!KEYWORDP(tmp)) STk_error("initarg must be a keyword. It was", tmp);
+        //VIRER
+        //if (!KEYWORDP(tmp)) STk_error("initarg must be a keyword. It was", tmp);
 #endif
-	slot_value = STk_key_get(initargs, tmp, STk_void);
+        slot_value = STk_key_get(initargs, tmp, STk_void);
       }
     }
 
@@ -604,7 +604,7 @@ DEFINE_PRIMITIVE("%initialize-object", initialize_obj, subr2,(SCM obj,SCM initar
       /* set slot to its :init-form if it exists */
       tmp = CAR(CDR(CAR(get_n_set)));
       if (tmp != STk_false)
-	set_slot_value(classe, obj, slot_name, STk_C_apply(tmp, 1, obj));
+        set_slot_value(classe, obj, slot_name, STk_C_apply(tmp, 1, obj));
     }
   }
   return obj;
@@ -625,7 +625,7 @@ static SCM test_slot_existence(SCM classe, SCM obj, SCM slot_name)
 }
 
 
-		/* ======================================== */
+                /* ======================================== */
 
 
 DEFINE_PRIMITIVE("slot-bound?", slot_boundp, subr2, (SCM obj, SCM slot_name))
@@ -654,7 +654,7 @@ DEFINE_PRIMITIVE("slot-exists?", slot_existsp, subr2, (SCM obj, SCM slot_name))
 
 
 DEFINE_PRIMITIVE("slot-bound-using-class?", slot_boundp_using_class, subr3,
-		 (SCM classe, SCM obj, SCM slot_name))
+                 (SCM classe, SCM obj, SCM slot_name))
 {
   if (!CLASSP(classe))     error_bad_class(classe);
   if (!INSTANCEP(obj))     error_bad_instance(obj);
@@ -664,7 +664,7 @@ DEFINE_PRIMITIVE("slot-bound-using-class?", slot_boundp_using_class, subr3,
 }
 
 DEFINE_PRIMITIVE("slot-exists-using-class?", slot_existsp_using_class, subr3,
-		 (SCM classe, SCM obj, SCM slot_name))
+                 (SCM classe, SCM obj, SCM slot_name))
 {
   if (!CLASSP(classe))     error_bad_class(classe);
   if (!INSTANCEP(obj))     error_bad_instance(obj);
@@ -677,28 +677,28 @@ DEFINE_PRIMITIVE("slot-exists-using-class?", slot_existsp_using_class, subr3,
 
 /*===========================================================================*\
  *
- * 				C L A S S E S
+ *                              C L A S S E S
  *
 \*===========================================================================*/
 
 /*
  * basic-compute-cpl
- *	Basic version unable to manage multiple inheritance. Used only
- *	during boot phase
+ *      Basic version unable to manage multiple inheritance. Used only
+ *      during boot phase
  */
 static SCM basic_compute_cpl(SCM supers, SCM res)
 {
   return NULLP(supers) ?
-    	     STk_reverse(res) :
+             STk_reverse(res) :
              basic_compute_cpl(INST_SLOT(CAR(supers), S_direct_supers),
-			       STk_cons(CAR(supers), res));
+                               STk_cons(CAR(supers), res));
 }
 
 
 /*
  * basic-compute-slots
- *	Basic version which does not handle slots which are inherited
- *	several time
+ *      Basic version which does not handle slots which are inherited
+ *      several time
  *
  */
 static SCM basic_compute_slots(SCM slots, SCM cpl)
@@ -711,9 +711,9 @@ static SCM basic_compute_slots(SCM slots, SCM cpl)
 
 /*
  * basic_make_class
- *	Create a classe (basic version, unable to manage fancy features such
- *	as multiple inheritance or class redefinition). This version is used
- *	during boot only.
+ *      Create a classe (basic version, unable to manage fancy features such
+ *      as multiple inheritance or class redefinition). This version is used
+ *      during boot only.
  */
 static SCM basic_make_class(SCM classe, SCM name, SCM dsupers, SCM dslots)
 {
@@ -727,16 +727,16 @@ static SCM basic_make_class(SCM classe, SCM name, SCM dsupers, SCM dslots)
   slots = basic_compute_slots(dslots, cpl);
   g_n_s = compute_getters_n_setters(slots);
 
-  INST_SLOT(z, S_name)	      	    = name;
+  INST_SLOT(z, S_name)              = name;
   INST_SLOT(z, S_direct_supers)     = dsupers;
   INST_SLOT(z, S_direct_slots)      = dslots;
   INST_SLOT(z, S_direct_subclasses) = STk_nil;
   INST_SLOT(z, S_direct_methods)    = STk_nil;
-  INST_SLOT(z, S_cpl)		    = cpl;
-  INST_SLOT(z, S_slots)	      	    = slots;
-  INST_SLOT(z, S_nfields)	    = MAKE_INT(STk_int_length(slots));
+  INST_SLOT(z, S_cpl)               = cpl;
+  INST_SLOT(z, S_slots)             = slots;
+  INST_SLOT(z, S_nfields)           = MAKE_INT(STk_int_length(slots));
   INST_SLOT(z, S_getters_n_setters) = g_n_s;
-  INST_SLOT(z, S_redefined) 	    = STk_false;
+  INST_SLOT(z, S_redefined)         = STk_false;
 
   /* Don't forget to set the accessors list of the object */
   INST_ACCESSORS(z) = INST_SLOT(classe, S_getters_n_setters);
@@ -754,7 +754,7 @@ static SCM basic_make_class(SCM classe, SCM name, SCM dsupers, SCM dslots)
 
 /*===========================================================================*\
  *
- * 				I N S T A N C E S
+ *                              I N S T A N C E S
  *
 \*===========================================================================*/
 
@@ -766,10 +766,10 @@ static SCM make_instance(SCM classe, short size, short type)
 
   NEWCELL(z, instance);
   INST_NUMBER_OF_SLOTS(z) = size;
-  INST_TYPE(z)		  = type;
-  INST_CLASS_OF(z)	  = classe;
-  INST_ACCESSORS(z)	  = classe? INST_SLOT(classe, S_getters_n_setters): STk_nil;
-  INST_SLOTS(z)		  = STk_must_malloc(size * sizeof(SCM));
+  INST_TYPE(z)            = type;
+  INST_CLASS_OF(z)        = classe;
+  INST_ACCESSORS(z)       = classe? INST_SLOT(classe, S_getters_n_setters): STk_nil;
+  INST_SLOTS(z)           = STk_must_malloc(size * sizeof(SCM));
 
   /* Set all the slots to unbound */
   for (i = 0; i < size; i++)
@@ -781,8 +781,8 @@ static SCM make_instance(SCM classe, short size, short type)
 
 /*
  * compute-getters-n-setters
- *	This version doesn't handle slot options. It serves only for booting
- * 	classes and will be overloaded in Scheme.
+ *      This version doesn't handle slot options. It serves only for booting
+ *      classes and will be overloaded in Scheme.
  *
  */
 static SCM compute_getters_n_setters(SCM slots)
@@ -797,49 +797,49 @@ static SCM compute_getters_n_setters(SCM slots)
    */
   for (  ; !NULLP(slots); slots = CDR(slots))
     res = STk_cons(STk_cons(CAR(slots),
-			    STk_cons(STk_false, MAKE_INT(i++))),
-		   res);
+                            STk_cons(STk_false, MAKE_INT(i++))),
+                   res);
   return res;
 }
 
 /*
  * create_Top_Object_Class
- *	Creation of the base classes: <Top> <Object> and <Class>.
+ *      Creation of the base classes: <Top> <Object> and <Class>.
  */
 static void create_Top_Object_Class(void)
 {
   SCM tmp, slots_of_class = STk_cons(STk_intern("name"),
-			    STk_cons(STk_intern("direct-supers"),
-			    STk_cons(STk_intern("direct-slots"),
-			    STk_cons(STk_intern("direct-subclasses"),
-			    STk_cons(STk_intern("direct-methods"),
-			    STk_cons(STk_intern("cpl"),
-			    STk_cons(STk_intern("slots"),
-			    STk_cons(STk_intern("nfields"),
-			    STk_cons(STk_intern("getters-n-setters"),
-			    STk_cons(STk_intern("redefined"),
-				     STk_nil))))))))));
+                            STk_cons(STk_intern("direct-supers"),
+                            STk_cons(STk_intern("direct-slots"),
+                            STk_cons(STk_intern("direct-subclasses"),
+                            STk_cons(STk_intern("direct-methods"),
+                            STk_cons(STk_intern("cpl"),
+                            STk_cons(STk_intern("slots"),
+                            STk_cons(STk_intern("nfields"),
+                            STk_cons(STk_intern("getters-n-setters"),
+                            STk_cons(STk_intern("redefined"),
+                                     STk_nil))))))))));
   SCM current_module = STk_STklos_module;
 
 
   /* ========== Creation of the <Class> class  ========== */
-  tmp 	= STk_intern("<class>");
+  tmp   = STk_intern("<class>");
   Class = make_instance((SCM) NULL, NUMBER_OF_CLASS_SLOTS, TYPE_INSTANCE);
 
 
   INST_CLASS_OF(Class)  = Class;
   INST_ACCESSORS(Class) = compute_getters_n_setters(slots_of_class);
 
-  INST_SLOT(Class, S_name) 		 = tmp;
-  INST_SLOT(Class, S_direct_supers)	 = STk_nil;  /* will be changed */
-  INST_SLOT(Class, S_direct_slots)	 = slots_of_class;
+  INST_SLOT(Class, S_name)               = tmp;
+  INST_SLOT(Class, S_direct_supers)      = STk_nil;  /* will be changed */
+  INST_SLOT(Class, S_direct_slots)       = slots_of_class;
   INST_SLOT(Class, S_direct_subclasses)  = STk_nil;
-  INST_SLOT(Class, S_direct_methods)	 = STk_nil;
-  INST_SLOT(Class, S_cpl)		 = STk_nil;  /* will be changed */
-  INST_SLOT(Class, S_slots)		 = slots_of_class;
-  INST_SLOT(Class, S_nfields)		 = MAKE_INT(NUMBER_OF_CLASS_SLOTS);
+  INST_SLOT(Class, S_direct_methods)     = STk_nil;
+  INST_SLOT(Class, S_cpl)                = STk_nil;  /* will be changed */
+  INST_SLOT(Class, S_slots)              = slots_of_class;
+  INST_SLOT(Class, S_nfields)            = MAKE_INT(NUMBER_OF_CLASS_SLOTS);
   INST_SLOT(Class, S_getters_n_setters)  = INST_ACCESSORS(Class);
-  INST_SLOT(Class, S_redefined) 	 = STk_false;
+  INST_SLOT(Class, S_redefined)          = STk_false;
 
   STk_define_variable(tmp, Class, current_module);
 
@@ -852,7 +852,7 @@ static void create_Top_Object_Class(void)
 
 
   /* ========== Creation of the <Object> class  ========== */
-  tmp	 = STk_intern("<object>");
+  tmp    = STk_intern("<object>");
   Object = basic_make_class(Class, tmp, LIST1(Top), STk_nil);
 
   STk_define_variable(tmp, Object, current_module);
@@ -863,7 +863,7 @@ static void create_Top_Object_Class(void)
    */
   INST_SLOT(Object, S_direct_subclasses) = LIST1(Class);
   INST_SLOT(Class, S_direct_supers)      = LIST1(Object);
-  INST_SLOT(Class, S_cpl)		 = LIST3(Class, Object, Top);
+  INST_SLOT(Class, S_cpl)                = LIST3(Class, Object, Top);
 }
 
 
@@ -878,11 +878,11 @@ static void mk_cls(SCM *var, char *name, SCM meta, SCM super, SCM slots)
 static void make_standard_classes(void)
 {
   SCM tmp1 = LIST3(STk_intern("generic-function"),
-		   STk_intern("specializers"),
-		   STk_intern("procedure"));
+                   STk_intern("specializers"),
+                   STk_intern("procedure"));
   SCM tmp2 = LIST3(STk_intern("name"),
-		   STk_intern("methods"),
-		   STk_intern("documentation"));
+                   STk_intern("methods"),
+                   STk_intern("documentation"));
 
   /* Generic functions classes */
   mk_cls(&Procedure_class, "<procedure-class>", Class, Class,           STk_nil);
@@ -904,15 +904,15 @@ static void make_standard_classes(void)
   mk_cls(&Number,       "<number>",     Class,           Top,       STk_nil);
   mk_cls(&Complex,      "<complex>",    Class,           Number,    STk_nil);
   mk_cls(&Real,         "<real>",       Class,           Complex,   STk_nil);
-  mk_cls(&Rational,	"<rational>",	Class,		 Real,	    STk_nil);
+  mk_cls(&Rational,     "<rational>",   Class,           Real,      STk_nil);
   mk_cls(&Integer,      "<integer>",    Class,           Rational,  STk_nil);
   mk_cls(&Keyword,      "<keyword>",    Class,           Top,       STk_nil);
   mk_cls(&Eof,          "<eof>",        Class,           Top,       STk_nil);
   mk_cls(&Struct,       "<struct>",     Class,           Top,       STk_nil);
   mk_cls(&Struct_type,  "<struct-type>",Class,           Top,       STk_nil);
-  mk_cls(&Cond, 	"<condition>",  Class,		 Top,	    STk_nil);
-  mk_cls(&Cond_type, 	"<condition-type>",Class,	 Top,	    STk_nil);
-  mk_cls(&Box, 		"<ref>",	Class,	 	 Top,	    STk_nil);
+  mk_cls(&Cond,         "<condition>",  Class,           Top,       STk_nil);
+  mk_cls(&Cond_type,    "<condition-type>",Class,        Top,       STk_nil);
+  mk_cls(&Box,          "<ref>",        Class,           Top,       STk_nil);
   mk_cls(&UnknownClass, "<unknown>",    Class,           Top,       STk_nil);
   mk_cls(&Procedure,    "<procedure>",  Procedure_class, Top,       STk_nil);
 }
@@ -923,7 +923,7 @@ static void make_standard_classes(void)
 
 /*===========================================================================*\
  *
- * 			  U S E R   F U N C T I O N S
+ *                        U S E R   F U N C T I O N S
  *
 \*===========================================================================*/
 
@@ -938,25 +938,25 @@ DEFINE_PRIMITIVE("%make", basic_make, subr3, (SCM classe, SCM kind, SCM l))
   if (kind == STk_intern("generic")) {
     /* This is a <generic> */
     z = make_instance(classe,
-		      STk_int_length(INST_SLOT(classe, S_slots)),
-		      TYPE_GENERIC);
+                      STk_int_length(INST_SLOT(classe, S_slots)),
+                      TYPE_GENERIC);
     INST_SLOT(z, S_name)          = l;
     INST_SLOT(z, S_methods)       = STk_nil;
     INST_SLOT(z, S_documentation) = STk_false;
   } else if (kind == STk_intern("method")) {
     /* This is a <method>, <simple-method> or <accessor-method> */
     z = make_instance(classe,
-		      STk_int_length(INST_SLOT(classe, S_slots)),
-		      TYPE_INSTANCE);
+                      STk_int_length(INST_SLOT(classe, S_slots)),
+                      TYPE_INSTANCE);
     INST_SLOT(z, S_generic_function) = CAR(l);
     INST_SLOT(z, S_specializers)     = CAR(CDR(l));
-    INST_SLOT(z, S_procedure) 	     = CAR(CDR(CDR(l)));
+    INST_SLOT(z, S_procedure)        = CAR(CDR(CDR(l)));
   } else {
     /* This is a <class> */
     z = make_instance(classe,
-		      STk_int_length(INST_SLOT(classe, S_slots)),
-		      TYPE_INSTANCE);
-    INST_SLOT(z, S_name) 	  = CAR(l);
+                      STk_int_length(INST_SLOT(classe, S_slots)),
+                      TYPE_INSTANCE);
+    INST_SLOT(z, S_name)          = CAR(l);
     INST_SLOT(z, S_direct_supers) = CAR(CDR(l));
     INST_SLOT(z, S_direct_slots)  = CAR(CDR(CDR(l)));
   }
@@ -996,11 +996,11 @@ DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
   if (SCONSTP(obj)) {
     /* Expression is a small constant */
     switch (AS_LONG(obj)) {
-      case AS_LONG(STk_nil):   	return Null;
+      case AS_LONG(STk_nil):    return Null;
       case AS_LONG(STk_false):
-      case AS_LONG(STk_true): 	return Boolean;
-      case AS_LONG(STk_eof): 	return Eof;
-      default:			return UnknownClass;
+      case AS_LONG(STk_true):   return Boolean;
+      case AS_LONG(STk_eof):    return Eof;
+      default:                  return UnknownClass;
     }
   }
 
@@ -1011,26 +1011,26 @@ DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
     return Char;
 
   switch (BOXED_TYPE(obj)) {
-    case tc_cons:	return Pair;
-    case tc_string:	return String;
-    case tc_symbol:	return Symbol;
-    case tc_vector:	return Vector;
+    case tc_cons:       return Pair;
+    case tc_string:     return String;
+    case tc_symbol:     return Symbol;
+    case tc_vector:     return Vector;
     case tc_real:       return Real;
     case tc_complex:    return Complex;
-    case tc_rational:	return Rational;
-    case tc_bignum:	return Integer;
-    case tc_keyword:	return Keyword;
+    case tc_rational:   return Rational;
+    case tc_bignum:     return Integer;
+    case tc_keyword:    return Keyword;
     case tc_struct_type:return (COND_TYPEP(obj)) ? Cond_type: Struct_type;
-    case tc_struct:	return (CONDP(obj)) ? Cond : Struct;
-    case tc_box:	return Box;
+    case tc_struct:     return (CONDP(obj)) ? Cond : Struct;
+    case tc_box:        return Box;
     default:
 #ifdef FIXME
       //XX      if (EXTENDEDP(obj))
       //XX          return STk_extended_class_of(obj);
       //XX    else
 #endif
-      			return (STk_procedurep(obj) == STk_true)? Procedure :
-			  					  UnknownClass;
+                        return (STk_procedurep(obj) == STk_true)? Procedure :
+                                                                  UnknownClass;
   }
 }
 
@@ -1043,10 +1043,10 @@ DEFINE_PRIMITIVE("%allocate-instance", allocate_instance, subr1, (SCM classe))
 
   if (!CLASSP(classe)) error_bad_class(classe);
 
-  type = (classe == Generic)       ? TYPE_GENERIC 	:
-	 (classe == Accessor)      ? TYPE_ACCESSOR 	:
-    	 (classe == Simple_method) ? TYPE_SIMPLE_METHOD:
-				     TYPE_INSTANCE;
+  type = (classe == Generic)       ? TYPE_GENERIC       :
+         (classe == Accessor)      ? TYPE_ACCESSOR      :
+         (classe == Simple_method) ? TYPE_SIMPLE_METHOD:
+                                     TYPE_INSTANCE;
   return make_instance(classe, INT_VAL(INST_SLOT(classe, S_nfields)), type);
   // FIXME:HORROR
 }
@@ -1159,6 +1159,6 @@ int STk_init_object(void)
   ADD_PRIMITIVE(initialize_obj);
   ADD_PRIMITIVE(modify_instance);
 
-  ADD_PRIMITIVE(oo_init_done);		/* //FIXME */
+  ADD_PRIMITIVE(oo_init_done);          /* //FIXME */
   return TRUE;
 }
