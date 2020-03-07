@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 29-Jun-2018 17:09 (eg)
+ * Last file update:  6-Mar-2020 18:55 (eg)
  */
 
 // INLINER values
@@ -950,7 +950,7 @@ CASE(NOP) { NEXT; }
 CASE(IM_FALSE)  { vm->val = STk_false;       NEXT1;}
 CASE(IM_TRUE)   { vm->val = STk_true;        NEXT1;}
 CASE(IM_NIL)    { vm->val = STk_nil;         NEXT1;}
-CASE(IM_MINUS1) { vm->val = MAKE_INT(-1);    NEXT1;}
+CASE(IM_MINUS1) { vm->val = MAKE_INT(-1UL);  NEXT1;}
 CASE(IM_ZERO)   { vm->val = MAKE_INT(0);     NEXT1;}
 CASE(IM_ONE)    { vm->val = MAKE_INT(1);     NEXT1;}
 CASE(IM_VOID)   { vm->val = STk_void;        NEXT1;}
@@ -961,9 +961,9 @@ CASE(CONSTANT)  { vm->val = fetch_const();                      NEXT1;}
 CASE(FALSE_PUSH)  { push(STk_false);       NEXT;}
 CASE(TRUE_PUSH)   { push(STk_true);        NEXT;}
 CASE(NIL_PUSH)    { push(STk_nil);         NEXT;}
-CASE(MINUS1_PUSH) { push(MAKE_INT(-1));    NEXT;}
-CASE(ZERO_PUSH)   { push(MAKE_INT( 0));    NEXT;}
-CASE(ONE_PUSH)    { push(MAKE_INT(+1));    NEXT;}
+CASE(MINUS1_PUSH) { push(MAKE_INT(-1UL));  NEXT;}
+CASE(ZERO_PUSH)   { push(MAKE_INT( 0UL));  NEXT;}
+CASE(ONE_PUSH)    { push(MAKE_INT(+1UL));  NEXT;}
 CASE(VOID_PUSH)   { push(STk_void);        NEXT;}
 
 
@@ -1953,7 +1953,7 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   ssize  = (unsigned long) send - (unsigned long) sstart;
 
   /* Allocate a continuation object */
-  NEWCELL_WITH_LEN(z, continuation, sizeof(struct continuation_obj) + ssize + csize);
+  NEWCELL_WITH_LEN(z, continuation, sizeof(struct continuation_obj));
   k = (struct continuation_obj *) z;
 
   k->csize      = csize;

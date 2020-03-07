@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 15-Mar-2019 16:00 (eg)
+ * Last file update:  6-Mar-2020 10:42 (eg)
  */
 
 
@@ -229,8 +229,8 @@ static SCM make_rational(SCM n, SCM d)
 
   /* Always keep sign in the denominator */
   if (negativep(d)) {
-    n = mul2(n, MAKE_INT(-1));
-    d = mul2(d, MAKE_INT(-1));
+    n = mul2(n, MAKE_INT((unsigned long) -1));
+    d = mul2(d, MAKE_INT((unsigned long) -1));
   }
 
   /* Simplify rational */
@@ -394,7 +394,7 @@ static SCM double2rational(double d)
     res = add2(int_part, div2(num, den));
   }
 
-  return negative? mul2(res, MAKE_INT(-1)): res;
+  return negative? mul2(res, MAKE_INT((unsigned long) -1)): res;
 }
 
 static Inline SCM bignum2scheme_bignum(mpz_t n)
@@ -1015,8 +1015,8 @@ SCM STk_Cstr2number(char *str, long base)
       if (strcmp(str, MINUS_INF)==0) return double2real(minus_inf);
       if (strcmp(str, PLUS_INF)==0)  return double2real(plus_inf);
       if (strcmp(str+1, NaN)==0)     return double2real(STk_NaN);
-      if (strcmp(str, "+i")==0)      return make_complex(MAKE_INT(0), MAKE_INT(+1));
-      if (strcmp(str, "-i")==0)      return make_complex(MAKE_INT(0), MAKE_INT(-1));
+      if (strcmp(str, "+i")==0)      return make_complex(MAKE_INT(0), MAKE_INT(+1UL));
+      if (strcmp(str, "-i")==0)      return make_complex(MAKE_INT(0), MAKE_INT(-1UL));
     }
   }
 
@@ -1048,11 +1048,11 @@ SCM STk_Cstr2number(char *str, long base)
     /* Start to read a complex number */
     if (*p == '+' && p[1] == 'i') {
       p   += 2;
-      num1 = make_complex(num1, MAKE_INT(1));   /* special case ...+i */
+      num1 = make_complex(num1, MAKE_INT(1UL));   /* special case ...+i */
     }
     else if (*p == '-' && p[1] == 'i') {
       p    += 2;
-      num1  = make_complex(num1, MAKE_INT(-1)); /* special case ...-i */
+      num1  = make_complex(num1, MAKE_INT(-1UL)); /* special case ...-i */
     }
     else {                                      /* general case ....[+-@]... */
       polar = (*p == '@') ? (p++,1) : 0;
@@ -2375,8 +2375,8 @@ static SCM my_tan(SCM z)
 
 static SCM asin_complex(SCM z)
 {
-  return mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(-1)),                  /* -i */
-              my_log(add2(mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(+1)), /* +i */
+  return mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(-1UL)),                  /* -i */
+              my_log(add2(mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(+1UL)), /* +i */
                                z),
                           STk_sqrt(sub2(MAKE_INT(1),
                                         mul2(z, z))))));
@@ -2387,8 +2387,8 @@ static SCM asin_real(double d)
   if (d < -1)
     return sub2(MAKE_INT(0), asin_real(-d));
   if (d > 1)
-    return mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(-1)),
-                my_log(add2(mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(1)),
+    return mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(-1UL)),
+                my_log(add2(mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(1UL)),
                                  double2real(d)),
                             STk_sqrt(double2real(1 - d*d)))));
   return double2real(asin(d));
@@ -2420,10 +2420,10 @@ static SCM my_asin(SCM z)
 
 static Inline SCM acos_complex(SCM z)
 {
-  return mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(-1)),
+  return mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(-1UL)),
               my_log(add2(z,
-                          mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(1)),
-                               STk_sqrt(sub2(MAKE_INT(1),
+                          mul2(Cmake_complex(MAKE_INT(0), MAKE_INT(1UL)),
+                               STk_sqrt(sub2(MAKE_INT(1UL),
                                              mul2(z, z)))))));
 }
 
@@ -2520,7 +2520,7 @@ static SCM my_sqrt_exact(SCM x)
 {
   if (zerop(x))     return MAKE_INT(0);
   if (negativep(x)) return Cmake_complex(MAKE_INT(0),
-                                         my_sqrt_exact(mul2(MAKE_INT(-1), x)));
+                                         my_sqrt_exact(mul2(MAKE_INT(-1UL), x)));
   if (INTP(x)) {
     int    i = INT_VAL(x);
     double d = (double) sqrt((double) i);

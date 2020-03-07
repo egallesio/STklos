@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 12-Jul-2019 17:26 (eg)
+ * Last file update:  7-Mar-2020 12:20 (eg)
  */
 
 #include "stklos.h"
@@ -262,7 +262,7 @@ DEFINE_PRIMITIVE("%getopt", getopt, subr0, (void))
         while (optind < Argc)
           l = STk_cons(STk_Cstring2string(Argv[optind++]), l);
 
-        return STk_cons(MAKE_INT((long) -1), STk_dreverse(l));
+        return STk_cons(MAKE_INT(-1UL), STk_dreverse(l));
       }
     case '?': /* Error or argument missing */
     case ':': return STk_false;

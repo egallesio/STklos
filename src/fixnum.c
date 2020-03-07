@@ -1,7 +1,7 @@
 /*
  * fixnum.c     -- Fixnum operations
  *
- * Copyright © 2007-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 13-Dec-2018 13:53 (eg)
+ * Last file update:  6-Mar-2020 10:33 (eg)
  */
 
 #include "stklos.h"
@@ -73,7 +73,7 @@ doc>
 */
 DEFINE_PRIMITIVE("least-fixnum", least_fixnum, subr0, (void))
 {
-  return MAKE_INT(INT_MIN_VAL);
+  return MAKE_INT((unsigned long)INT_MIN_VAL);
 }
 
 DEFINE_PRIMITIVE("greatest-fixnum", greatest_fixnum, subr0, (void))
