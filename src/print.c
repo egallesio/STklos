@@ -413,7 +413,10 @@ void STk_print_star(SCM exp, SCM port, int mode)
 {
   cycles c;
 
-  if (!CONSP(exp) &&  !VECTORP(exp)) return STk_print(exp, port, mode);
+  if (!CONSP(exp) &&  !VECTORP(exp)) {
+      STk_print(exp, port, mode);
+      return;
+  }
 
   /* Initialize the cycle structure */
   c.seen = STk_make_basic_hash_table();
