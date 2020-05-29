@@ -464,7 +464,7 @@ DEFINE_PRIMITIVE("%read-bytevector!", d_read_bytevector, subr4,
 
   if (n && !count)
     return STk_eof;
-  return MAKE_INT(n);
+  return MAKE_INT(count);
 }
 
 
