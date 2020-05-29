@@ -55,7 +55,7 @@ typedef SCM  (*InfoFunc)(void);
 
 
 static SCM files_already_loaded = (SCM) NULL;
-MUT_DECL(dynload_mutex);
+MUT_DECL(dynload_mutex)
 
 
 static void initialize_dynload(void)

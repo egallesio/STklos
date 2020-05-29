@@ -240,5 +240,6 @@ STk_fprintf(SCM port, char *format, ...)
 
   va_start(ap, format);
   vsprintf(buffer, format, ap);
+  va_end(ap);
   return STk_puts(buffer, port);
 }

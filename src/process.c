@@ -79,7 +79,7 @@ static SCM all_processes = STk_nil;
 #  define PURGE_PROCESS_TABLE() process_terminate_handler(0)/* Simulate a SIGCHLD */
 #endif
 
-MUT_DECL(process_table_mutex);
+MUT_DECL(process_table_mutex)
 
 /******************************************************************************/
 

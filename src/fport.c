@@ -36,7 +36,7 @@
 
 int STk_interactive = 0;                  /* We are in interactive mode */
 SCM STk_stdin, STk_stdout, STk_stderr;    /* The unredirected ports */
-MUT_DECL(all_fports_mutex);
+MUT_DECL(all_fports_mutex)
 
 
 /*

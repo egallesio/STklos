@@ -82,6 +82,7 @@ static void getopt_fprintf(FILE* f, const char *format, ...)
   } else {
     fprintf(f, "%s", buffer);
   }
+  va_end(ap);
 }
 
 

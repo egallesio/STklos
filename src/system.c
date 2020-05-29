@@ -674,7 +674,7 @@ DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
  * @end lisp
 doc>
 */
-MUT_DECL(at_exit_mutex);         /* The exit mutex */
+MUT_DECL(at_exit_mutex)         /* The exit mutex */
 
 DEFINE_PRIMITIVE("register-exit-function!", at_exit, subr1, (SCM proc))
 {
