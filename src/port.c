@@ -1,7 +1,7 @@
 /*
  *  p o r t . c                 -- ports implementation
  *
- * Copyright © 1993-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 28-Jun-2019 09:12 (eg)
+ * Last file update: 29-May-2020 19:00 (eg)
  *
  */
 
@@ -460,7 +460,7 @@ DEFINE_PRIMITIVE("%read-bytevector!", d_read_bytevector, subr4,
   if (vstart > vend) STk_error("start index is bigger than end index");
 
   n     = vend - vstart;
-  count = STk_read_buffer(port, UVECTOR_DATA(bv)+ vstart, vend - vstart);
+  count = STk_read_buffer(port, UVECTOR_DATA(bv)+ vstart, n);
 
   if (n && !count)
     return STk_eof;
