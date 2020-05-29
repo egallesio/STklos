@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  6-Mar-2020 18:55 (eg)
+ * Last file update:  7-Mar-2020 12:16 (eg)
  */
 
 // INLINER values
@@ -1953,7 +1953,7 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   ssize  = (unsigned long) send - (unsigned long) sstart;
 
   /* Allocate a continuation object */
-  NEWCELL_WITH_LEN(z, continuation, sizeof(struct continuation_obj));
+  NEWCELL_WITH_LEN(z, continuation, sizeof(struct continuation_obj) + ssize + csize);
   k = (struct continuation_obj *) z;
 
   k->csize      = csize;
