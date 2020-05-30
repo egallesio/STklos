@@ -9,6 +9,8 @@ AC_INIT([stklos],[1.31])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR(src/stklos.c)
 AC_CONFIG_HEADERS(src/stklosconf.h)
+AC_CANONICAL_HOST
+
 
 ### Checks for programs.
 AC_PROG_CC
