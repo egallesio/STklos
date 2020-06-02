@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  7-Feb-2020 19:04 (eg)
+ * Last file update:  2-Jun-2020 12:52 (eg)
  */
 
 
@@ -36,14 +36,14 @@
  */
 static pthread_key_t vm_key;
 
-static void *cleanup_vm_specific(void *p)    /* Nothing to do for now */
+static void cleanup_vm_specific(void _UNUSED(*p))    /* Nothing to do for now */
 {
-  return NULL;
+  /* Do nothing */;
 }
 
 static void initialize_vm_key(void)
 {
-  int n =  pthread_key_create(&vm_key, (void (*) (void *)) cleanup_vm_specific);
+  int n =  pthread_key_create(&vm_key, cleanup_vm_specific);
 
   if (n) {
     fprintf(stderr, "Cannot initialize the VM specific data\n");

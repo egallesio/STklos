@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 21-Sep-2018 08:54 (eg)
+ * Last file update:  2-Jun-2020 12:31 (eg)
  */
 
 #include <unistd.h>
@@ -248,14 +248,14 @@ DEFINE_PRIMITIVE("condition-variable-specific-set!", condv_specific_set, subr2,
  *      Initialization ...
 \* ====================================================================== */
 
-static void print_mutex(SCM mutex, SCM port, int mode)
+static void print_mutex(SCM mutex, SCM port, int _UNUSED(mode))
 {
   STk_puts("#[mutex ", port);
   STk_print(MUTEX_NAME(mutex), port, DSP_MODE);
   STk_putc(']', port);
 }
 
-static void print_condv(SCM condv, SCM port, int mode)
+static void print_condv(SCM condv, SCM port, int _UNUSED(mode))
 {
   STk_puts("#[condition-variable ", port);
   STk_print(CONDV_NAME(condv), port, DSP_MODE);

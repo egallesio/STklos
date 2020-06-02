@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 30-May-2020 19:03 (eg)
+ * Last file update: 30-May-2020 20:04 (eg)
  *
  */
 
@@ -464,7 +464,7 @@ DEFINE_PRIMITIVE("%read-bytevector!", d_read_bytevector, subr4,
 
   if (n && !count)
     return STk_eof;
-  return MAKE_INT(count);
+  return MAKE_INT(n);
 }
 
 
@@ -1045,7 +1045,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
                   break;
         case '_': STk_putc(' ',port);
                   break;
-        case '&': if (prev_char == '\n') continue;
+      case '&': if (prev_char == '\n') continue; /* FALLTHROUGH */
         case '%': STk_putc('\n', port);
                   prev_char = '\n';
                   continue;
@@ -1687,7 +1687,7 @@ static void initialize_io_conditions(void)
 }
 
 
-static void print_port(SCM obj, SCM port, int mode)
+static void print_port(SCM obj, SCM port, int _UNUSED(mode))
 {
   PORT_PRINT(obj)(obj, port);
 }

@@ -1,7 +1,7 @@
 /*
  * p r i n t . c                                -- writing stuff
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 22-Oct-2018 17:35 (eg)
+ * Last file update: 30-May-2020 17:27 (eg)
  *
  */
 #include <ctype.h>
@@ -60,7 +60,7 @@ static void printlist(SCM exp, SCM port, int mode)
 }
 
 
-static void Inline printsymbol(SCM symb, SCM port, int mode)
+static Inline void printsymbol(SCM symb, SCM port, int mode)
 {
   char *s = SYMBOL_PNAME(symb);
 
@@ -72,7 +72,7 @@ static void Inline printsymbol(SCM symb, SCM port, int mode)
     STk_puts(*s ? s: "||", port); /* print bars around the "null" symbol */
 }
 
-static void Inline printkeyword(SCM key, SCM port, int mode)
+static Inline void printkeyword(SCM key, SCM port, int mode)
 {
   char *s = KEYWORD_PNAME(key);
 

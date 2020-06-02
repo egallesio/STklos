@@ -1,7 +1,7 @@
 /*
  * vport.c                                      -- Virtual Ports
  *
- * Copyright © 2005-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2005-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 17-Aug-2005 08:31 (eg)
- * Last file update: 20-Aug-2018 11:23 (eg)
+ * Last file update:  2-Jun-2020 10:19 (eg)
  */
 
 #include "stklos.h"
@@ -65,7 +65,7 @@ static void vport_print(SCM obj, SCM port)   /* Generic printing of virtual port
 }
 
 
-static void vport_release(SCM port)
+static void vport_release(SCM _UNUSED(port))
 {
   /* Nothing to do */
 }
@@ -196,7 +196,9 @@ static int vport_write(void *stream, void *buf, int count)
   return s - (char*)buf;
 }
 
-static off_t vport_seek(void *stream, off_t offset, int whence)
+static off_t vport_seek(void  _UNUSED(*stream),
+                        off_t _UNUSED(offset),
+                        int   _UNUSED(whence))
 {
   STk_error("cannot seek a virtual port");
   return 0;

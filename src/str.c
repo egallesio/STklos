@@ -2,7 +2,7 @@
  *
  * s t r . c                            -- Strings management
  *
- * Copyright © 1993-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 19-Jun-2019 17:04 (eg)
+ * Last file update:  2-Jun-2020 12:45 (eg)
  */
 
 #include <ctype.h>
@@ -292,7 +292,7 @@ SCM STk_Cstring2string(char *str) /* Embed a C string in Scheme world  */
   NEWCELL(z, string);
   STRING_CHARS(z)  = STk_must_malloc_atomic(len + 1);
   STRING_SPACE(z)  = STRING_SIZE(z) = len;
-  STRING_LENGTH(z) = STk_use_utf8 ? STk_utf8_strlen(str, len): len;
+  STRING_LENGTH(z) = STk_use_utf8 ? (size_t) STk_utf8_strlen(str, len): len;
   strcpy(STRING_CHARS(z), str);
 
   return z;

@@ -1,7 +1,7 @@
 /*
  * s p o r t . c                        -- String ports management
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  3-Aug-2018 18:16 (eg)
+ * Last file update: 30-May-2020 18:49 (eg)
  *
  */
 
@@ -81,7 +81,7 @@ static Inline int Sreadyp(void *stream)
   return !Seof(stream);
 }
 
-static Inline int Sclose(void * stream)
+static Inline int Sclose(void _UNUSED(*stream))
 {
   return 0;
 }
@@ -152,7 +152,7 @@ static Inline int Snputs(void *stream, char *s, int len)
   return Swrite(stream, s, len);
 }
 
-static Inline int Sflush(void *stream)
+static Inline int Sflush(void _UNUSED(*stream))
 {
   return 0;
 }
@@ -196,7 +196,7 @@ static void sport_print(SCM obj, SCM port)   /* Generic printing of string ports
   STk_puts(buffer, port);
 }
 
-static void sport_release(SCM port)
+static void sport_release(SCM _UNUSED(port))
 {
   /* Nothing to do */
 }

@@ -1,7 +1,7 @@
 /*
- * regexp.c	-- STklos Regexps
+ * regexp.c -- STklos Regexps
  *
- * Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 24-Nov-2000 10:35 (eg)
- * Last file update: 18-Sep-2011 21:47 (eg)
+ * Last file update:  2-Jun-2020 12:19 (eg)
  */
 
 #include "stklos.h"
@@ -76,10 +76,10 @@ struct regexp_obj {
   regex_t buffer;
 };
 
-#define REGEXPP(p) 		(BOXED_TYPE_EQ((p), tc_regexp))
-#define REGEXP_SRC(p)		(((struct regexp_obj *) (p))->src)
-#define REGEXP_BUFFER(p)	(((struct regexp_obj *) (p))->buffer)
-#define REGEXP_DEPTH(p)	((((struct regexp_obj *) (p))->buffer).re_nsub)
+#define REGEXPP(p)      (BOXED_TYPE_EQ((p), tc_regexp))
+#define REGEXP_SRC(p)       (((struct regexp_obj *) (p))->src)
+#define REGEXP_BUFFER(p)    (((struct regexp_obj *) (p))->buffer)
+#define REGEXP_DEPTH(p) ((((struct regexp_obj *) (p))->buffer).re_nsub)
 
 
 static void error_bad_string(SCM obj)
@@ -103,17 +103,17 @@ static void signal_regexp_error(int code, regex_t *buffer)
   STk_error("%s", msg);
 }
 
-static void regexp_finalizer(SCM re)
+static void regexp_finalizer(SCM re, void _UNUSED(*client_data))
 {
   PCRE_regfree(&REGEXP_BUFFER(re));
 }
 
-static void print_regexp(SCM obj, SCM port, int mode)
+static void print_regexp(SCM obj, SCM port, int _UNUSED(mode))
 {
   STk_fprintf(port,
-	      "#[regexp '%s' @ %lx]",
-	      STRING_CHARS(REGEXP_SRC(obj)),
-	      (unsigned long) obj);
+          "#[regexp '%s' @ %lx]",
+          STRING_CHARS(REGEXP_SRC(obj)),
+          (unsigned long) obj);
 }
 
 /*
@@ -138,8 +138,8 @@ DEFINE_PRIMITIVE("string->regexp", str2regexp, subr1, (SCM re))
   NEWCELL(z, regexp);
 
   ret = PCRE_regcomp(&REGEXP_BUFFER(z),
-		     STRING_CHARS(re),
-		     STk_use_utf8? PCRE_COMP_FLAG: 0);
+             STRING_CHARS(re),
+             STk_use_utf8? PCRE_COMP_FLAG: 0);
   REGEXP_SRC(z) = re;
   if (ret) signal_regexp_error(ret, &REGEXP_BUFFER(z));
   STk_register_finalizer(z, regexp_finalizer);
@@ -227,26 +227,26 @@ static SCM regexec_helper(SCM re, SCM str, int pos_only)
 
     if (from == -1)
       result = STk_cons((pos_only)?
-			    LIST2(MAKE_INT(0), MAKE_INT(0)) :
-			    STk_false,
-			result);
+                LIST2(MAKE_INT(0), MAKE_INT(0)) :
+                STk_false,
+            result);
     else {
       int ifrom, ito;
       char *s = STRING_CHARS(str);
       int size = STRING_SIZE(str);
 
       if (STRING_MONOBYTE(str)) {
-	ifrom = from;
-	ito = to;
+    ifrom = from;
+    ito = to;
       } else {
-	ifrom = STk_utf8_char_from_byte(s, from, size);
-	ito   = STk_utf8_char_from_byte(s, to, size);
+    ifrom = STk_utf8_char_from_byte(s, from, size);
+    ito   = STk_utf8_char_from_byte(s, to, size);
       }
 
       result = STk_cons((pos_only)?
-		            LIST2(STk_long2integer(ifrom), STk_long2integer(ito)) :
-		            STk_makestring(to-from, s+from),
-			result);
+                    LIST2(STk_long2integer(ifrom), STk_long2integer(ito)) :
+                    STk_makestring(to-from, s+from),
+            result);
     }
   }
 
@@ -299,8 +299,8 @@ DEFINE_PRIMITIVE("regexp-quote", regexp_quote, subr1, (SCM str))
     /* make new string */
     z = STk_makestring(len, NULL);
     for (s = STRING_CHARS(str), t = STRING_CHARS(z);
-	 s < end;
-	 s++, t++) {
+     s < end;
+     s++, t++) {
       if (strchr(REGEXP_SPECIALS, *s)) *t++ = '\\';
       *t = *s;
     }
@@ -313,14 +313,14 @@ DEFINE_PRIMITIVE("regexp-quote", regexp_quote, subr1, (SCM str))
 
 /*===========================================================================*\
  *
- * 				Initialization
+ *              Initialization
  *
 \*===========================================================================*/
 
 /* The stucture which describes the regexp type */
 static struct extended_type_descr xtype_regexp = {
-  "regexp",			/* name */
-  print_regexp			/* print function */
+  "regexp",         /* name */
+  print_regexp          /* print function */
 };
 
 

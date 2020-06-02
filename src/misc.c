@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  7-Mar-2020 12:20 (eg)
+ * Last file update: 30-May-2020 17:22 (eg)
  */
 
 #include "stklos.h"
@@ -122,7 +122,7 @@ DEFINE_PRIMITIVE("%push-id", push_id, subr0, (void))
  * they are evalued and simply ignored.
 doc>
  */
-DEFINE_PRIMITIVE("void", scheme_void, vsubr, (int argc, SCM *argv))
+DEFINE_PRIMITIVE("void", scheme_void, vsubr, (int _UNUSED(argc), SCM _UNUSED(*argv)))
 {
   return STk_void;
 }

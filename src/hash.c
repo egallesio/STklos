@@ -2,7 +2,7 @@
  *
  * h a s h  . c                 -- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 19-Oct-2018 19:08 (eg)
+ * Last file update: 30-May-2020 17:19 (eg)
  */
 
 #include "stklos.h"
@@ -617,7 +617,7 @@ DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
  * @end lisp
 doc>
 */
-static SCM Inline hash_table_search(SCM ht, SCM key)
+static Inline SCM hash_table_search(SCM ht, SCM key)
 {
   int index = 0;
   SCM func, l = STk_nil;

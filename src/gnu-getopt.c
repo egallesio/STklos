@@ -1,11 +1,11 @@
 /*
  * gnu-getopt.c         -- Adaptation of the GNU getopt function for STklos
  *
- * Copyright © 2001-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2001-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Nov-2001 23:40 (eg)
- * Last file update: 13-Dec-2018 13:53 (eg)
+ * Last file update:  2-Jun-2020 12:55 (eg)
  *
  * The following code is constituted of the GNU getopt, getopt_long
  * and getopt_long_only implementation. Code is slightly modified (all
@@ -451,6 +451,9 @@ _getopt_initialize (argc, argv, optstring)
      char *const *argv;
      const char *optstring;
 {
+  (void) (argc);
+  (void) (argv);
+
   /* Start processing options with ARGV-element 1 (since ARGV-element 0
      is the program name); the sequence of previously skipped
      non-option ARGV-elements is empty.  */

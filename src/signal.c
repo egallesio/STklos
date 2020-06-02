@@ -1,8 +1,8 @@
 /*
  *
- * s i g n a l . c			-- Signal handling
+ * s i g n a l . c          -- Signal handling
  *
- * Copyright © 1993-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 10-Oct-1995 07:55
- * Last file update:  7-Nov-2010 13:16 (eg)
+ * Last file update:  2-Jun-2020 12:26 (eg)
  *
  */
 
@@ -37,100 +37,100 @@ struct signal_info {
 
 static struct signal_info signal_set[] = {
   /* Posix.1 signals */
-  {"sighup", 	SIGHUP},
-  {"sigint", 	SIGINT},
-  {"sigquit", 	SIGQUIT},
-  {"sigill", 	SIGILL},
-  {"sigabrt", 	SIGABRT},
-  {"sigfpe", 	SIGFPE},
-  {"sigkill", 	SIGKILL},
-  {"sigsegv", 	SIGSEGV},
-  {"sigpipe", 	SIGPIPE},
-  {"sigalrm", 	SIGALRM},
-  {"sigterm", 	SIGTERM},
-  {"sigusr1", 	SIGUSR1},
-  {"sigusr2", 	SIGUSR2},
-  {"sigchld",	SIGCHLD},
-  {"sigcont", 	SIGCONT},
-  {"sigstop", 	SIGSTOP},
-  {"sigtstp", 	SIGTSTP},
-  {"sigttin", 	SIGTTIN},
+  {"sighup",    SIGHUP},
+  {"sigint",    SIGINT},
+  {"sigquit",   SIGQUIT},
+  {"sigill",    SIGILL},
+  {"sigabrt",   SIGABRT},
+  {"sigfpe",    SIGFPE},
+  {"sigkill",   SIGKILL},
+  {"sigsegv",   SIGSEGV},
+  {"sigpipe",   SIGPIPE},
+  {"sigalrm",   SIGALRM},
+  {"sigterm",   SIGTERM},
+  {"sigusr1",   SIGUSR1},
+  {"sigusr2",   SIGUSR2},
+  {"sigchld",   SIGCHLD},
+  {"sigcont",   SIGCONT},
+  {"sigstop",   SIGSTOP},
+  {"sigtstp",   SIGTSTP},
+  {"sigttin",   SIGTTIN},
   {"sigttou",   SIGTTOU},
   /* Non Posix.1 signals stolen on Linux and Solaris */
 #ifdef SIGBUS
-  {"sigbus", 	SIGBUS},
+  {"sigbus",    SIGBUS},
 #endif
 #ifdef SIGPOLL
-  {"sigpoll", 	SIGPOLL},
+  {"sigpoll",   SIGPOLL},
 #endif
 #ifdef SIGPROF
-  {"sigprof", 	SIGPROF},
+  {"sigprof",   SIGPROF},
 #endif
 #ifdef SIGSYS
-  {"sigsys", 	SIGSYS},
+  {"sigsys",    SIGSYS},
 #endif
 #ifdef SIGTRAP
-  {"sigtrap", 	SIGTRAP},
+  {"sigtrap",   SIGTRAP},
 #endif
 #ifdef SIGURG
-  {"sigurg", 	SIGURG},
+  {"sigurg",    SIGURG},
 #endif
 #ifdef SIGVTALRM
-  {"sigvtalrm",	SIGVTALRM},
+  {"sigvtalrm", SIGVTALRM},
 #endif
 #ifdef SIGXCPU
-  {"sigxcpu", 	SIGXCPU},
+  {"sigxcpu",   SIGXCPU},
 #endif
 #ifdef SIGXFSZ
-  {"sigxfsz", 	SIGXFSZ},
+  {"sigxfsz",   SIGXFSZ},
 #endif
 #ifdef SIGIOT
-  {"sigiot", 	SIGIOT},
+  {"sigiot",    SIGIOT},
 #endif
 #ifdef SIGEMT
-  {"sigemt", 	SIGEMT},
+  {"sigemt",    SIGEMT},
 #endif
 #ifdef SIGSTKFLT
   {"sigstkflt", SIGSTKFLT},
 #endif
 #ifdef SIGIO
-  {"sigio", 	SIGIO},
+  {"sigio",     SIGIO},
 #endif
 #ifdef SIGCLD
-  {"sigcld", 	SIGCLD},
+  {"sigcld",    SIGCLD},
 #endif
 #ifdef SIGPWR
-  {"sigpwr", 	SIGPWR},
+  {"sigpwr",    SIGPWR},
 #endif
 #ifdef SIGINFO
-  {"siginfo", 	SIGINFO},
+  {"siginfo",   SIGINFO},
 #endif
 #ifdef SIGLOST
-  {"siglost", 	SIGLOST},
+  {"siglost",   SIGLOST},
 #endif
 #ifdef SIGWINCH
-  {"sigwinch", 	SIGWINCH},
+  {"sigwinch",  SIGWINCH},
 #endif
   {NULL, 0}
 };
 
 
-static void sigint(int i)
+static void sigint(int _UNUSED(i))
 {
   STk_signal("\n*** Interrupt ***\n");
 }
 
-static void sigsegv(int i)
+static void sigsegv(int _UNUSED(i))
 {
   fprintf(stderr,
-	  "Received a SIGSGV signal.\n"
-	  "Try to augment stack size (--stack-size option).\n"
-	  "If the problem persists, send a mail to <bugs@stklos.net>\n");
+      "Received a SIGSGV signal.\n"
+      "Try to augment stack size (--stack-size option).\n"
+      "If the problem persists, send a mail to <bugs@stklos.net>\n");
   fflush(stderr);
   _exit(1);
 }
 
-static void sighup(int i)
+static void sighup(int _UNUSED(i))
 {
   /* FIXME: perhaps we should be more verbose */
   fprintf(stderr, "Received a SIGHUP signal.\n");
@@ -151,7 +151,7 @@ int STk_get_signal_value(SCM sig)
     if (strcasecmp(s, p->name) == 0) return p->value;
 Error:
   STk_error("bad signal name ~S", sig);
-  return 0;	/* never reached */
+  return 0; /* never reached */
 }
 
 

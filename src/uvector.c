@@ -1,7 +1,7 @@
 /*
  * u v e c t o r . c                    -- Uniform Vectors Implementation
  *
- * Copyright © 2001-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2001-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update:  3-Aug-2018 19:25 (eg)
+ * Last file update: 30-May-2020 18:46 (eg)
  */
 
 #include "stklos.h"
@@ -120,16 +120,16 @@ static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfi
   if (!pfill) {
     /* We do not have a fill parameter => vect at 0, start at -1 and end at -2 */
     switch (argc) {
-      case 3: end   = STk_integer_value(argv[-2]);  /* no break */
-      case 2: start = STk_integer_value(argv[-1]);  /* no break */
+      case 3: end   = STk_integer_value(argv[-2]);  /* FALLTHROUGH */
+      case 2: start = STk_integer_value(argv[-1]);  /* FALLTHROUGH */
       case 1: v = argv[0]; break;
       default: goto bad_number_of_args;
     }
   } else {
     /* We have a fill param. => vect at 0, fill at -1, start at -2 and end at -3 */
     switch (argc) {
-      case 4: end   = STk_integer_value(argv[-3]);  /* no break */
-      case 3: start = STk_integer_value(argv[-2]);  /* no break */
+      case 4: end   = STk_integer_value(argv[-3]);  /* FALLTHROUGH */
+      case 3: start = STk_integer_value(argv[-2]);  /* FALLTHROUGH */
       case 2: if (pfill) *pfill  = argv[-1];
               v = argv[0];
               break;
@@ -196,7 +196,7 @@ int STk_uvector_equal(SCM u1, SCM u2)
  * Basic accessors to an uniform vector
  *
  */
-static void uvector_set(int type, SCM v, long i, SCM value)
+static void uvector_set(int _UNUSED(type), SCM v, long i, SCM value)
 {
   long vali;
   int overflow;
@@ -279,7 +279,7 @@ static void uvector_set(int type, SCM v, long i, SCM value)
             value, type_vector(UVECTOR_TYPE(v)));
 }
 
-static SCM uvector_ref(int type, SCM v, long i)
+static SCM uvector_ref(int _UNUSED(type), SCM v, long i)
 {
   switch (UVECTOR_TYPE(v)) {
     case UVECT_S8: return MAKE_INT(((char *) UVECTOR_DATA(v))[i]);

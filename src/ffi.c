@@ -1,7 +1,7 @@
 /*
  * ffi.c        -- FFI support dor STklos
  *
- * Copyright © 2007-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update: 13-Dec-2018 13:53 (eg)
+ * Last file update: 30-May-2020 18:03 (eg)
  */
 
 #include "stklos.h"
@@ -240,6 +240,7 @@ static void scheme2c(SCM obj, int type_needed, union any *res, int index)
     case 17:                                            /* int32 */
     case 18:                                            /* int64 */
       STk_error("passing intXX is not implemented yet");
+      break;
     case 19:                                            /* obj */
       res->pvalue = obj;
       return;
@@ -292,6 +293,7 @@ static SCM c2scheme(union any obj, SCM rettype)
     case 17:                                            /* int32 */
     case 18:                                            /* int64 */
       STk_error("returning intXX is not implemented yet");
+      break;
     case 19:                                            /* obj */
       return (obj.pvalue ? obj.pvalue : STk_void);
     default:
@@ -600,6 +602,7 @@ DEFINE_PRIMITIVE("%get-typed-ext-var", get_typed_ext_var, subr2, (SCM obj, SCM t
     case 17:                                            /* int32 */
     case 18:                                            /* int64 */
       STk_error("returning intXX is not implemented yet");
+      break;
     case 19:                                            /* obj */
       {
         void *ptr = (* (void**) CPOINTER_VALUE(obj));
@@ -632,7 +635,9 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
     case 6:                                             /* long */
     case 7:                                             /* ulong */
       {
-        long value = CHARACTERP(val) ? CHARACTER_VAL(val) : STk_integer_value(val);
+        long value = CHARACTERP(val) ?
+                         (long) CHARACTER_VAL(val) :
+                         STk_integer_value(val);
         if (value != LONG_MIN) {
           switch (kind) {
             case 1: (* ((char *)CPOINTER_VALUE(obj))) = (char) value; break;
@@ -678,6 +683,7 @@ DEFINE_PRIMITIVE("%set-typed-ext-var!", set_typed_ext_var, subr3,
     case 17:                                            /* int32 */
     case 18:                                            /* int64 */
       STk_error("passing argument of type ~S is not implemented yet", type);
+      break;
     case 19:                                            /* obj */
       (* ((void **)CPOINTER_VALUE(obj))) = CPOINTER_VALUE(val);
       return STk_void;

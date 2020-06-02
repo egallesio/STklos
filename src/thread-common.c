@@ -1,7 +1,7 @@
 /*
  * thread-common.c                      -- Threads support in STklos
  *
- * Copyright © 2006-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 21-Sep-2018 09:15 (eg)
+ * Last file update:  2-Jun-2020 10:49 (eg)
  */
 #include <unistd.h>
 #include "stklos.h"
@@ -304,7 +304,7 @@ DEFINE_PRIMITIVE("thread-start!", thread_start, subr1, (SCM thr))
  * ======================================================================
  */
 
-static void print_thread(SCM thread, SCM port, int mode)
+static void print_thread(SCM thread, SCM port, int _UNUSED(mode))
 {
   char *s;
   SCM name = THREAD_NAME(thread);

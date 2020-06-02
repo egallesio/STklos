@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update: 10-Feb-2020 18:05 (eg)
+ * Last file update: 30-May-2020 17:26 (eg)
  */
 
 #include "stklos.h"
@@ -614,7 +614,7 @@ DEFINE_PRIMITIVE("%initialize-object", initialize_obj, subr2,(SCM obj,SCM initar
 
 
 
-static SCM test_slot_existence(SCM classe, SCM obj, SCM slot_name)
+static SCM test_slot_existence(SCM _UNUSED(classe), SCM obj, SCM slot_name)
 {
   register SCM l;
 

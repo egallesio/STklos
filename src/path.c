@@ -1,7 +1,7 @@
 /*
- * p a t h . c			-- Path names management
+ * p a t h . c          -- Path names management
  *
- * Copyright © 2000-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 14:25 (eg)
- * Last file update:  9-Aug-2010 17:04 (eg)
+ * Last file update:  2-Jun-2020 09:49 (eg)
  */
 
 #include "stklos.h"
@@ -35,7 +35,7 @@
 
 /*===========================================================================*\
  *
- * tilde-expand		-- expand '~' and '~user' string prefix
+ * tilde-expand     -- expand '~' and '~user' string prefix
  *
 \*===========================================================================*/
 
@@ -82,8 +82,8 @@ static char *tilde_expand(char *name, char *result)
 
 /*===========================================================================*\
  *
- * absolute	-- Given a file name, return its (mostly clean)
- *		   absolute path name
+ * absolute -- Given a file name, return its (mostly clean)
+ *         absolute path name
  *
 \*===========================================================================*/
 
@@ -95,7 +95,7 @@ static void absolute(char *s, char *pathname)
   if (!ISABSOLUTE(s)) {
     if (! getcwd(pathname, MAX_PATH_LENGTH))
       STk_panic("absolute: cannot compute cwd (MAX_PATH_LENGTH = %d)\n",
-		MAX_PATH_LENGTH);
+        MAX_PATH_LENGTH);
     p = &pathname[strlen(pathname)];     /* place p at end of pathname */
   }
 
@@ -105,30 +105,30 @@ static void absolute(char *s, char *pathname)
     t = s;
     switch (*s) {
       case '.' : if (*(s+1)) {
-		   switch (*++s) {
-		     case '.' : if (ISDIRSEP(*p) && (*(s+1)=='\0' ||
-						     ISDIRSEP(*(s+1)))) {
-		                  /* We must go back to the parent */
-		                  if (ISDIRSEP(*p) && p > pathname)    p --;
-				  while (p > pathname && !ISDIRSEP(*p)) p--;
-		                }
-		                else {
-				  /* There are several dots. Copy them */
-				  for (s = t; *s == '.'; s++) *++p = '.';
-				  s -= 1;
-				}
-		                break;
-		     case '/' : if (!ISDIRSEP(*p)) {
-		                   *++p = '.';
-		       		   *++p = DIRSEP;
-		     	        }
-		                break;
-		     default  : *++p = '.'; *++p = *s; break;
-		   }
+           switch (*++s) {
+             case '.' : if (ISDIRSEP(*p) && (*(s+1)=='\0' ||
+                             ISDIRSEP(*(s+1)))) {
+                          /* We must go back to the parent */
+                          if (ISDIRSEP(*p) && p > pathname)    p --;
+                  while (p > pathname && !ISDIRSEP(*p)) p--;
+                        }
+                        else {
+                  /* There are several dots. Copy them */
+                  for (s = t; *s == '.'; s++) *++p = '.';
+                  s -= 1;
+                }
+                        break;
+             case '/' : if (!ISDIRSEP(*p)) {
+                           *++p = '.';
+                       *++p = DIRSEP;
+                        }
+                        break;
+             default  : *++p = '.'; *++p = *s; break;
+           }
                  }
                  else { /* We have a final (single) dot */
-		   if (!ISDIRSEP(*p)) *++p = '.';
-		 }
+           if (!ISDIRSEP(*p)) *++p = '.';
+         }
                  break;
       case '/' : if (!ISDIRSEP(*p)) *++p = DIRSEP; break;
       default  : *++p = *s;
@@ -142,11 +142,11 @@ static void absolute(char *s, char *pathname)
 
 /*===========================================================================*\
  *
- * resolve_link	-- Given a file name, return its (mostly clean)
- *		   absolute path name taking into account symbolic links
+ * resolve_link -- Given a file name, return its (mostly clean)
+ *         absolute path name taking into account symbolic links
  *
 \*===========================================================================*/
-#define MAXLINK 50	/* Number max of link before declaring we have a loop */
+#define MAXLINK 50  /* Number max of link before declaring we have a loop */
 
 SCM STk_resolve_link(char *path, int count)
 {
@@ -160,39 +160,43 @@ SCM STk_resolve_link(char *path, int count)
 
   for (s++, *d++='/' ;       ; s++, d++) {
     switch (*s) {
-      case '\0':
-      case '/' : *d = '\0';
-	if ((n=readlink(dst, link, MAX_PATH_LENGTH-1)) > 0) {
-	  link[n] = '\0';
-	  if (link[0] == '/')
-	    /* link is absolute */
-	    d = dst;
-	  else {
-	    /* relative link. Delete last item */
-	    while (*--d != '/') {
-	    }
-	    d += 1;
-	  }
+    case '\0':
+    case '/' : *d = '\0';
+               if ((n=readlink(dst, link, MAX_PATH_LENGTH-1)) > 0) {
+                 link[n] = '\0';
+                 if (link[0] == '/')
+                   /* link is absolute */
+                   d = dst;
+                 else {
+                   /* relative link. Delete last item */
+                   while (*--d != '/') {
+                   }
+                   d += 1;
+                 }
 
-	  /* d points the place where the link must be placed */
-	  if (d - dst + strlen(link) + strlen(s) < MAX_PATH_LENGTH - 1) {
-	    /* we have enough room */
-	    sprintf(d, "%s%s", link, s);
-	    /* Recurse. Be careful for loops (a->b and b->a) */
-	    if (count < MAXLINK)
-	      return STk_resolve_link(dst, count+1);
-	  }
-	  return STk_false;
-	}
-	else {
-	  if (errno != EINVAL)
-	    /* EINVAL = file is not a symlink (i.e. it's a true error) */
-	    return STk_false;
-	  else
-	    if (*s) *d = '/';
-	    else return STk_Cstring2string(dst);
-	}
-      default:   *d = *s;
+                 /* d points the place where the link must be placed */
+                 if (d - dst + strlen(link) + strlen(s) < MAX_PATH_LENGTH - 1) {
+                   /* we have enough room */
+                   sprintf(d, "%s%s", link, s);
+                   /* Recurse. Be careful for loops (a->b and b->a) */
+                   if (count < MAXLINK)
+                     return STk_resolve_link(dst, count+1);
+                 }
+                 return STk_false;
+               }
+               else {
+                 if (errno != EINVAL)
+                   /* EINVAL = file is not a symlink (i.e. it's a true error) */
+                   return STk_false;
+                 else {
+                   if (*s)
+                     *d = '/';
+                   else
+                     return STk_Cstring2string(dst);
+                 }
+               }
+               break;
+    default:   *d = *s;
     }
   }
 #endif

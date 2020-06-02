@@ -1,7 +1,7 @@
 /*
  * socket.c                             -- Socket acess for STklos
  *
- * Copyright © 2003-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update: 11-Jun-2019 20:12 (eg)
+ * Last file update:  2-Jun-2020 12:29 (eg)
  */
 
 #include <sys/types.h>
@@ -41,7 +41,7 @@
  *                      Definition of the socket type
  *
 \*===========================================================================*/
-static void print_socket(SCM sock, SCM port, int mode)
+static void print_socket(SCM sock, SCM port, int _UNUSED(mode))
 {
   char buffer[1000];
   SCM name = SOCKET_HOSTNAME(sock);
@@ -59,7 +59,7 @@ static struct extended_type_descr xtype_socket = {
 };
 
 
-static void socket_finalizer(SCM socket);
+static void socket_finalizer(SCM socket, void *client_data);
 
 /*===========================================================================*\
  *
@@ -108,10 +108,10 @@ static void set_socket_io_ports(SCM sock, int line_buffered)
 
   in  = STk_fd2scheme_port(s, "r", fname);
   PORT_FLAGS(in) |= PORT_TEXTUAL;
-  
+
   out = STk_fd2scheme_port(t, "w", fname);
   PORT_FLAGS(out) |= PORT_TEXTUAL;
- 
+
   if (NULLP(in) || NULLP(out))
     STk_error("cannot create socket IO ports");
 
@@ -383,7 +383,7 @@ DEFINE_PRIMITIVE("socket-shutdown", socket_shutdown, subr12, (SCM sock, SCM clos
 }
 
 
-static void socket_finalizer(SCM socket)
+static void socket_finalizer(SCM socket, void _UNUSED(*client_data))
 {
   STk_socket_shutdown(socket, STk_true);
 }

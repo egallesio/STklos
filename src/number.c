@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  6-Mar-2020 10:42 (eg)
+ * Last file update: 30-May-2020 18:22 (eg)
  */
 
 
@@ -44,7 +44,7 @@
 
 /* Real precision */
 static int real_precision = REAL_FORMAT_SIZE;
-static int log10_maxint;
+static unsigned int log10_maxint;
 
 #define FINITE_REALP(n) ((REAL_VAL(n) != minus_inf) && (REAL_VAL(n) != plus_inf))
 
@@ -254,7 +254,7 @@ static SCM make_rational(SCM n, SCM d)
  * Types declaration
  *
  ******************************************************************************/
-static void print_bignum(SCM n, SCM port, int mode)
+static void print_bignum(SCM n, SCM port, int _UNUSED(mode))
 {
   char *s;
 
@@ -334,7 +334,7 @@ static Inline SCM double2real(double x)
 
 static SCM double2integer(double n)     /* small or big depending of n's size */
 {
-  int i, j;
+  unsigned int i, j;
   size_t size = 20;
   char *tmp = NULL;
   SCM z;
@@ -620,7 +620,7 @@ long STk_integer_value(SCM x) /* Returns LONG_MIN if not representable as long *
 
 unsigned long STk_uinteger_value(SCM x) /* Returns ULONG_MAX if not an ulong */
 {
-  if (INTP(x) && (x > 0)) return INT_VAL(x); /* sign(INTEGER_VAL(x)) == sign(x) */
+  if (INTP(x) && ((long)x > 0)) return INT_VAL(x); /* sign(INTEGER_VAL(x))==sign(x) */
   if (BIGNUMP(x)) {
     mpz_t *v = &BIGNUM_VAL(x);
     if (mpz_cmp_ui(*v, 0) >= 0 && mpz_cmp_ui(*v, ULONG_MAX) < 0)
@@ -751,6 +751,7 @@ static long do_compare(SCM x, SCM y)
                                 goto double_diff;
               default:          break;
             }
+            break;
     case tc_integer:
             switch (TYPEOF(y)) {
               case tc_complex:  goto general_diff;
@@ -761,6 +762,7 @@ static long do_compare(SCM x, SCM y)
               case tc_integer:  return (INT_VAL(x) - INT_VAL(y));
               default:          break;
             }
+            break;
     case tc_complex:
     case tc_rational:
     case tc_bignum:
@@ -772,7 +774,9 @@ static long do_compare(SCM x, SCM y)
               case tc_integer:  goto general_diff;
               default:          break;
             }
-    default: break;
+            break;
+    default:
+            break;
   }
   /* if we are here, it s that x and y cannot be compared */
   STk_error("comparison between ~S and ~S impossible", x,  y);
@@ -1463,7 +1467,7 @@ DEFINE_PRIMITIVE("nan?", nanp, subr1, (SCM z))
 {
   switch (TYPEOF(z)) {
     case tc_complex: return MAKE_BOOLEAN(STk_nanp(COMPLEX_REAL(z)) == STk_true ||
-                                         STk_nanp(COMPLEX_IMAG(z)) == STk_true); 
+                                         STk_nanp(COMPLEX_IMAG(z)) == STk_true);
     case tc_real:     return MAKE_BOOLEAN(isnan(REAL_VAL(z)));
     case tc_rational:
     case tc_bignum:
@@ -2598,7 +2602,7 @@ static SCM my_expt(SCM x, SCM y)
     case tc_rational:
     case tc_real:     if (zerop(y)) return double2real(1.0);
                       if (zerop(x)) return (x==MAKE_INT(0)) ? x : double2real(0.0);
-                      /* NO BREAK */
+                      /* FALLTHROUGH */
     case tc_complex:  return my_exp(mul2(my_log(x),y));
     default:          error_cannot_operate("expt", x, y);
   }
@@ -3003,12 +3007,12 @@ static void * allocate_function(size_t sz)
   return ptr;
 }
 
-static void * reallocate_function(void *ptr, size_t old, size_t new)
+static void * reallocate_function(void *ptr, size_t _UNUSED(old), size_t new)
 {
   return STk_must_realloc(ptr, new);
 }
 
-static void deallocate_function(void * ptr, size_t sz)
+static void deallocate_function(void * ptr, size_t _UNUSED(sz))
 {
   STk_free(ptr);
 }
@@ -3045,7 +3049,7 @@ int STk_init_number(void)
   setlocale(LC_NUMERIC, "C");
 
   /* Compute the log10 of INT_MAX_VAL to avoid to build a bignum for small int */
-  log10_maxint = (int) log10(INT_MAX_VAL);
+  log10_maxint = (unsigned int) log10(INT_MAX_VAL);
 
   /* Register bignum allocation functions */
   mp_set_memory_functions(allocate_function,

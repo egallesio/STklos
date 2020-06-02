@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  7-Mar-2020 12:16 (eg)
+ * Last file update:  2-Jun-2020 12:42 (eg)
  */
 
 // INLINER values
@@ -808,7 +808,7 @@ static void dump_couple_instr(void)
 
 #ifdef STK_DEBUG
 static void patch_environment(vm_thread_t *vm);
-DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int argc, SCM *argv))
+DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*argv)))
 {
   /*
    * This function is just a placeholder for debugging the VM. It's body is
@@ -902,9 +902,11 @@ static void run_vm(vm_thread_t *vm)
 {
   jbuf jb;
   jbuf *old_jb = NULL;          /* to make Gcc happy */
-  int offset, nargs=0;
   short tailp;
-  int have_global_lock = 0;     /* if true, we're patching the code */
+  volatile int offset,
+               have_global_lock = 0;     /* if true, we're patching the code */
+  int nargs=0;
+
 #if defined(USE_COMPUTED_GOTO)
 #  define DEFINE_JUMP_TABLE
 #  include "vm-instr.h"
@@ -1660,7 +1662,7 @@ FUNCALL:  /* (int nargs, int tailp) */
         nm       = STk_make_next_method(vm->val, nargs, argv, methods);
         vm->val  = INST_SLOT(CAR(methods), S_procedure);
         SET_NEXT_METHOD(vm->val, nm);
-        /* NO BREAK */
+        /* FALLTHROUGH */
       } else {
         SCM gf, args;
 
@@ -1674,6 +1676,7 @@ FUNCALL:  /* (int nargs, int tailp) */
         goto FUNCALL;
       }
     }
+    /* FALLTHROUGH */
 
     case tc_closure: {
       nargs = adjust_arity(vm->val, nargs, vm);
@@ -2067,7 +2070,7 @@ DEFINE_PRIMITIVE("%fresh-continuation?", fresh_continuationp, subr1, (SCM obj))
 }
 
 
-static void print_continuation(SCM cont, SCM port, int mode)
+static void print_continuation(SCM cont, SCM port, int _UNUSED(mode))
 {
   STk_fprintf(port, "#[continuation (C=%d S=%d) %x]",
               ((struct continuation_obj *)cont)->csize,

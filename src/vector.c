@@ -2,7 +2,7 @@
  *
  * v e c t o r . c                      -- vectors management
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??? 1993
- * Last file update:  6-Jul-2018 19:39 (eg)
+ * Last file update: 30-May-2020 18:30 (eg)
  */
 
 #include <string.h>
@@ -68,16 +68,16 @@ static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfi
   if (!pfill) {
     /* We do not have a fill parameter => vect at 0, start at -1 and end at -2 */
     switch (argc) {
-      case 3: end   = STk_integer_value(argv[-2]);  /* no break */
-      case 2: start = STk_integer_value(argv[-1]);  /* no break */
+      case 3: end   = STk_integer_value(argv[-2]);  /* FALLTHROUGH */
+      case 2: start = STk_integer_value(argv[-1]);  /* FALLTHROUGH */
       case 1: v = argv[0]; break;
       default: goto bad_number_of_args;
     }
   } else {
     /* We have a fill param. => vect at 0, fill at -1, start at -2 and end at -3 */
     switch (argc) {
-      case 4: end   = STk_integer_value(argv[-3]);  /* no break */
-      case 3: start = STk_integer_value(argv[-2]);  /* no break */
+      case 4: end   = STk_integer_value(argv[-3]);  /* FALLTHROUGH */
+      case 3: start = STk_integer_value(argv[-2]);  /* FALLTHROUGH */
       case 2: if (pfill) *pfill  = argv[-1];
               v = argv[0];
               break;
