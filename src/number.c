@@ -22,14 +22,16 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 30-May-2020 18:22 (eg)
+ * Last file update:  2-Jun-2020 18:24 (eg)
  */
 
 
 /* workaround for bad optimisations done in glibc2.1. Thanks to  Andreas Jaeger
  * <aj@suse.de> for it
  */
-#define __NO_MATH_INLINES
+#ifndef __NO_MATH_INLINES
+#  define __NO_MATH_INLINES
+#endif
 
 #include <math.h>
 #include <ctype.h>
@@ -3049,7 +3051,12 @@ int STk_init_number(void)
   setlocale(LC_NUMERIC, "C");
 
   /* Compute the log10 of INT_MAX_VAL to avoid to build a bignum for small int */
-  log10_maxint = (unsigned int) log10(INT_MAX_VAL);
+  {
+    char buffer[100];
+    snprintf(buffer, sizeof(buffer), "%ld", INT_MAX_VAL);
+
+    log10_maxint = strlen(buffer)-1;
+  }
 
   /* Register bignum allocation functions */
   mp_set_memory_functions(allocate_function,

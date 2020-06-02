@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  5-Mar-2020 13:45 (eg)
+ * Last file update:  2-Jun-2020 18:27 (eg)
  */
 
 #include "stklos.h"
@@ -79,7 +79,7 @@ static struct option long_options [] =
   {"case-insensitive",  no_argument,       NULL, 'z'},
   {"utf8-encoding",     required_argument, NULL, 'u'},
   {"help",              no_argument,       NULL, 'h'},
-  {NULL}
+  {NULL,                0,                 NULL, 0  }     /* for Clang */
 };
 
 static void Usage(char *progname, int only_version)
