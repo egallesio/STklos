@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  2-Jun-2020 12:42 (eg)
+ * Last file update:  3-Jun-2020 12:42 (eg)
  */
 
 // INLINER values
@@ -349,27 +349,6 @@ static Inline SCM clone_env(SCM e, vm_thread_t *vm)
   return e;
 }
 
-static void verif_environment(vm_thread_t *vm)
-{
-  SCM *lfp, *env;
-
-  //STk_debug("<<<<<<VVVVVVVV<<<<");
-  for (lfp = vm->fp; lfp; lfp = ACT_SAVE_FP(lfp)) {
-    SCM self = (SCM) (ACT_SAVE_PROC(lfp));
-    //STk_debug("self = ~S", self);
-    if (!self || !ACT_SAVE_ENV(lfp)) break;
-
-    //STk_debug("++++ %d", ACT_SAVE_ENV(lfp));
-    for (env = ACT_SAVE_ENV(lfp); FRAMEP(env); env = FRAME_NEXT(env)){
-      //STk_debug("    On a l'environment ~S (%d)", (SCM) env,
-      //IS_IN_STACKP(env));
-
-    }
-    //STk_debug("---");
-  }
-  //STk_debug(">>>VVV>>>>>>>");
-}
-
 static void patch_environment(vm_thread_t *vm)
 {
   SCM *lfp;
@@ -383,10 +362,7 @@ static void patch_environment(vm_thread_t *vm)
     //STk_debug("---");
   }
   //STk_debug(">>>>>>>>>>");
-  verif_environment(vm);
 }
-
-
 
 static void error_bad_arity(SCM func, int arity, short given_args, vm_thread_t *vm)
 {
@@ -815,7 +791,9 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
    * changed depending of the current bug to track
    */
 
-  patch_environment(STk_get_current_vm());
+  //  patch_environment(STk_get_current_vm());
+  STk_debug("Value %d = ~s", 1, MAKE_INT(1));
+
   return STk_void;
 }
 
