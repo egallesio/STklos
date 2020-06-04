@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  2-Jun-2020 12:45 (eg)
+ * Last file update:  3-Jun-2020 20:23 (eg)
  */
 
 #include <ctype.h>
@@ -158,15 +158,15 @@ static int stringcompi(SCM s1, SCM s2)
 
 static SCM control_index(int argc, SCM *argv, long *pstart, long *pend)
 {
-  SCM s = NULL;
+  SCM s = STk_void;   /* value chosen to avoid a warning of gcc static analysis */
   long len, start=0, end=-1;
 
   /* Controling number of arguments */
   switch (argc) {
-  case 1: s = argv[0]; break;
-  case 2: s = argv[0]; start = STk_integer_value(argv[-1]); break;
-  case 3: s = argv[0]; start = STk_integer_value(argv[-1]);
-          end = STk_integer_value(argv[-2]); break;
+  case 1:  s = argv[0]; break;
+  case 2:  s = argv[0]; start = STk_integer_value(argv[-1]); break;
+  case 3:  s = argv[0]; start = STk_integer_value(argv[-1]);
+           end = STk_integer_value(argv[-2]); break;
   default: STk_error("incorrect number of arguments (%d)", argc);
   }
 

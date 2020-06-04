@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  2-Jun-2020 18:24 (eg)
+ * Last file update:  3-Jun-2020 19:16 (eg)
  */
 
 
@@ -539,7 +539,7 @@ static char *number2Cstr(SCM n, long base, char buffer[])
       STk_double2Cstr(buffer, REAL_VAL(n));
       return buffer;
 
-    default: return NULL; /* never reached */
+    default: return STk_void; /* never reached (for the gcc static analyzer)  */
   }
 }
 

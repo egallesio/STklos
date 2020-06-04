@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update: 30-May-2020 18:46 (eg)
+ * Last file update:  3-Jun-2020 20:29 (eg)
  */
 
 #include "stklos.h"
@@ -113,7 +113,7 @@ static int vector_element_size(int type)
 
 static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfill)
 {
-  SCM v = NULL;
+  SCM v = STk_void; /* value chosen to avoid a warning from the gcc static analyzer */
   long len, start=0, end=-1;
 
   /* Controling number of arguments */
