@@ -1,3 +1,67 @@
+2020-05-30 Erick Gallesio <eg@unice.fr>
+	- STklos 1.40 Release
+	===================
+	
+2020-05-30 Erick Gallesio <eg@unice.fr>
+	- Upgraded the automake companion scripts
+
+2020-05-29 Erick Gallesio <eg@unice.fr>
+	- Fix: Continuations allocate too much space.
+
+2020-05-15 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Remove comma after MUT_DECL
+	- Use va_end() after va_start()
+
+2020-05-14 okuoku <mjt@cltn.org>
+	- Fix read-bytevector! to return actual read count
+
+2020-03-05 Erick Gallesio <eg@unice.fr>
+	- Changed the default case sensitivity for STklos.
+
+2020-02-21 Erick Gallesio <eg@unice.fr>
+	- Fix: stklos-script uses now the --bindir configure option
+
+2020-02-10 Erick Gallesio <eg@unice.fr>
+	- Make the tmpcomp command closer to the real stklos-compile command
+
+2020-02-07 Erick Gallesio <eg@unice.fr>
+	- Fix: thread-sleep! complains about bad timeout
+	- New: repl-theme function permits to customize REPL prompt colors
+
+2020-02-06 Jeronimo Pellegrini <j_p@aleph0.info>
+	- make cross-compilation easier
+
+2019-10-18 Erick Gallesio <eg@unice.fr>
+	- Added R7RS tests for quasiquote and case-lambda
+
+2019-10-14 Erick Gallesio <eg@unice.fr>
+	- Added tests for sect. 4.2.6 of RSRS (dynamic binding)
+	- Fix bug when lauching stklos without TERM (docker build)
+	- Bug fix in `force` procedure
+	- Adapted SRFI-45 for R7RS
+	- Fix a bug  promise printing
+	- Fix in documentation build & Updated documentation commit
+	- Implementation of R7RS delayed evaluation procedures
+
+2019-08-22 Erick Gallesio <eg@unice.fr>
+	- Added test for R7RS section 4.2.4 Iteration
+	- Added the R7RS syntaxes letrec*, let-values & let*-values
+
+2019-07-31 Erick Gallesio <eg@unice.fr>
+	- Added the #:xxx syntax for keywords for compatibility with
+	  other implementations
+
+2019-07-29 Erick Gallesio <eg@unice.fr>
+	- Bug fix in the initialisation of %random-source-current-time
+
+2019-07-19 Erick Gallesio <eg@unice.fr>
+	- Added tests for section 4.2.1
+	- R7RS: Added the the => in case form
+
+2019-07-12 Erick Gallesio <eg@unice.fr>
+	- STklos 1.31 release
+	  ===================
+
 2019-07-12 Erick Gallesio <eg@unice.fr>
 	- Added SRFI-112: Environment Inquiry
 
