@@ -1,7 +1,19 @@
-2020-05-30 Erick Gallesio <eg@unice.fr>
-	- STklos 1.40 Release
-	===================
-	
+2020-06-05 Erick Gallesio <eg@unice.fr>
+	- STklos 1.40 release
+	  ===================
+	- Added a Dockerfile
+
+2020-06-04 Erick Gallesio <eg@unice.fr>
+	- Code rewriting to suppress some (false positive) warnings
+
+2020-06-03 Erick Gallesio <eg@unice.fr>
+	- Deleted a used (but useless) func for managing environments in VM
+
+2020-06-02 Erick Gallesio <eg@unice.fr>
+	- Fixed various warning issued only by CLANG
+	- Fixed a CLANG problem when compiling without any optimisation.
+	- Elimination of gcc -Wextra warnings
+
 2020-05-30 Erick Gallesio <eg@unice.fr>
 	- Upgraded the automake companion scripts
 
