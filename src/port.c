@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 30-May-2020 20:04 (eg)
+ * Last file update:  7-Jun-2020 18:58 (eg)
  *
  */
 
@@ -464,7 +464,7 @@ DEFINE_PRIMITIVE("%read-bytevector!", d_read_bytevector, subr4,
 
   if (n && !count)
     return STk_eof;
-  return MAKE_INT(n);
+  return MAKE_INT(count);
 }
 
 
