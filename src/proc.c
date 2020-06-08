@@ -2,7 +2,7 @@
  *
  * p r o c . c                          -- Things about procedures
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 26-Jun-2018 14:34 (eg)
+ * Last file update: 30-May-2020 18:25 (eg)
  */
 
 #include "stklos.h"
@@ -61,7 +61,7 @@ SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env)
 }
 
 
-static void print_lambda(SCM closure, SCM port, int mode)
+static void print_lambda(SCM closure, SCM port, int _UNUSED(mode))
 {
   if (CLOSURE_NAME(closure) != STk_false)
     STk_fprintf(port, "#[closure %s]", SYMBOL_PNAME(CLOSURE_NAME(closure)));
@@ -149,7 +149,7 @@ DEFINE_PRIMITIVE("%procedure-name", procedure_name, subr1, (SCM obj))
 #endif
     case tc_closure:  if (CLOSURE_NAME(obj) != STk_false)
                          return STk_Cstring2string(SYMBOL_PNAME(CLOSURE_NAME(obj)));
-                         /* NO BREAK */
+                      /* FALLTHROUGH */
     default:         return obj;
   }
 }

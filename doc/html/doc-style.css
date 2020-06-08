@@ -3,24 +3,46 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 13-Oct-2004 11:42 (eg)
- * Last file update: 10-Aug-2010 00:13 (eg)
+ * Last file update:  8-Jun-2020 16:55 (eg)
  */
 
 html {
-  background: #F1EEE0;
+    background: #fafafa;
+    color: #454545;
+    font-size: 16px;
 }
 
-h3 {
-  font-size: 150%;
-}
+h1 { margin: 2em; }
+h3 { font-size: 150%; }
+h4 { font-size: 120%; }
 
-h4 {
-  font-size: 120%;
-}
 
+/*
 .skribetitle {
     padding: 10 0 20 0;
     background: #4B4C4C;
+}
+*/
+
+#doc-title {
+    text-align: center;
+    background:#204875 ;
+    color: white;
+    font-size: 220%;
+    padding: 30px;
+    font-weight: bold;
+}
+
+#doc-title.strong {
+    background: red;
+}
+
+#doc-author {
+    background:#204875 ;
+    color: white;
+}
+
+.navbar {
 }
 
 .navnorm {
@@ -31,12 +53,62 @@ h4 {
     background: #FAFAD2;
 }
 
-.code {
+.navnorm td, .navsel td {
+    text-align: left;
+}
 
+.navcontent {
+    margin: 10px 0;
+}
+
+
+
+.chapterbody {
+    margin: 0 30px;
+    max-width: 750px;
+
+}
+
+p, li, td {
+    line-height: 1.5;
+    text-align: justify;
+}
+
+.code {
     border: 1px solid;
     border-bottom: 2px solid;
     border-right: 2px solid;
 }
+
+.source-key          { color: green; }
+.source-string       { color: #ff4040; }
+.source-error        { color: red; font-weight: bold; }
+.source-comment      { color: #ccc; }
+.source-line-comment { color: #ccc; }
+.source-define       { color: blue; font-weight: bold; }
+.source-module       { color: #FF6666; font-weight: bold;}
+
+
+.doc-box {
+    border: 2px solid #aaaaaa;
+    border-radius: 5px;
+    box-shadow: 8px 8px 10px #aaaaaa;
+}
+
+.doc-box td {
+    padding: 10px;
+}
+.doc-box td td {
+    padding: 0px;
+}
+
+.footnotes {
+    margin: 2em 1em;
+    padding: 10px;
+    max-width: 600px;
+    font-size: 80%;
+}
+
 
 A:link, A:visited {
     color: #0B4796 ;
@@ -47,4 +119,3 @@ A:hover {
     background: #aaaaff;
     text-decoration: none;
 }
-

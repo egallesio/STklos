@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  6-Mar-2020 18:55 (eg)
+ * Last file update:  3-Jun-2020 12:42 (eg)
  */
 
 // INLINER values
@@ -349,27 +349,6 @@ static Inline SCM clone_env(SCM e, vm_thread_t *vm)
   return e;
 }
 
-static void verif_environment(vm_thread_t *vm)
-{
-  SCM *lfp, *env;
-
-  //STk_debug("<<<<<<VVVVVVVV<<<<");
-  for (lfp = vm->fp; lfp; lfp = ACT_SAVE_FP(lfp)) {
-    SCM self = (SCM) (ACT_SAVE_PROC(lfp));
-    //STk_debug("self = ~S", self);
-    if (!self || !ACT_SAVE_ENV(lfp)) break;
-
-    //STk_debug("++++ %d", ACT_SAVE_ENV(lfp));
-    for (env = ACT_SAVE_ENV(lfp); FRAMEP(env); env = FRAME_NEXT(env)){
-      //STk_debug("    On a l'environment ~S (%d)", (SCM) env,
-      //IS_IN_STACKP(env));
-
-    }
-    //STk_debug("---");
-  }
-  //STk_debug(">>>VVV>>>>>>>");
-}
-
 static void patch_environment(vm_thread_t *vm)
 {
   SCM *lfp;
@@ -383,10 +362,7 @@ static void patch_environment(vm_thread_t *vm)
     //STk_debug("---");
   }
   //STk_debug(">>>>>>>>>>");
-  verif_environment(vm);
 }
-
-
 
 static void error_bad_arity(SCM func, int arity, short given_args, vm_thread_t *vm)
 {
@@ -808,14 +784,16 @@ static void dump_couple_instr(void)
 
 #ifdef STK_DEBUG
 static void patch_environment(vm_thread_t *vm);
-DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int argc, SCM *argv))
+DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*argv)))
 {
   /*
    * This function is just a placeholder for debugging the VM. It's body is
    * changed depending of the current bug to track
    */
 
-  patch_environment(STk_get_current_vm());
+  //  patch_environment(STk_get_current_vm());
+  STk_debug("Value %d = ~s", 1, MAKE_INT(1));
+
   return STk_void;
 }
 
@@ -902,9 +880,11 @@ static void run_vm(vm_thread_t *vm)
 {
   jbuf jb;
   jbuf *old_jb = NULL;          /* to make Gcc happy */
-  int offset, nargs=0;
   short tailp;
-  int have_global_lock = 0;     /* if true, we're patching the code */
+  volatile int offset,
+               have_global_lock = 0;     /* if true, we're patching the code */
+  int nargs=0;
+
 #if defined(USE_COMPUTED_GOTO)
 #  define DEFINE_JUMP_TABLE
 #  include "vm-instr.h"
@@ -1660,7 +1640,7 @@ FUNCALL:  /* (int nargs, int tailp) */
         nm       = STk_make_next_method(vm->val, nargs, argv, methods);
         vm->val  = INST_SLOT(CAR(methods), S_procedure);
         SET_NEXT_METHOD(vm->val, nm);
-        /* NO BREAK */
+        /* FALLTHROUGH */
       } else {
         SCM gf, args;
 
@@ -1674,6 +1654,7 @@ FUNCALL:  /* (int nargs, int tailp) */
         goto FUNCALL;
       }
     }
+    /* FALLTHROUGH */
 
     case tc_closure: {
       nargs = adjust_arity(vm->val, nargs, vm);
@@ -1953,7 +1934,7 @@ DEFINE_PRIMITIVE("%make-continuation", make_continuation, subr0, (void))
   ssize  = (unsigned long) send - (unsigned long) sstart;
 
   /* Allocate a continuation object */
-  NEWCELL_WITH_LEN(z, continuation, sizeof(struct continuation_obj));
+  NEWCELL_WITH_LEN(z, continuation, sizeof(struct continuation_obj) + ssize + csize);
   k = (struct continuation_obj *) z;
 
   k->csize      = csize;
@@ -2067,7 +2048,7 @@ DEFINE_PRIMITIVE("%fresh-continuation?", fresh_continuationp, subr1, (SCM obj))
 }
 
 
-static void print_continuation(SCM cont, SCM port, int mode)
+static void print_continuation(SCM cont, SCM port, int _UNUSED(mode))
 {
   STk_fprintf(port, "#[continuation (C=%d S=%d) %x]",
               ((struct continuation_obj *)cont)->csize,

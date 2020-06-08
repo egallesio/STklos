@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  7-Feb-2020 18:10 (eg)
+;;;; Last file update:  5-Jun-2020 19:33 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -287,7 +287,7 @@ doc>
     ;; Show banner
     (let ((line1 (format "STklos version ~A  (Id: ~A)\n" (version) (%push-id)))
           (line2 "Copyright (C) 1999-2020 Erick Gallesio <eg@unice.fr>\n")
-          (line3 "Université Nice Sophia Antipolis - UCA\n")
+          (line3 "Université Côte d'Azur\n")
           (line4 (format "[~a/~a/~a/~a]\n"
                          (machine-type)
                          (%thread-system)

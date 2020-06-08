@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 28-Jun-2019 09:12 (eg)
+ * Last file update:  2-Jun-2020 10:45 (eg)
  */
 
 
@@ -1243,7 +1243,7 @@ int STk_init_symbol(void);
 */
 
 int STk_dirp(const char *path);
-int STk_init_system();
+int STk_init_system(void);
 
 EXTERN_PRIMITIVE("%pre-exit", pre_exit, subr1, (SCM retcode));
 EXTERN_PRIMITIVE("exit", exit, subr01, (SCM retcode));
@@ -1395,7 +1395,7 @@ int STk_load_boot(char *s);
 int STk_boot_from_C(void);
 SCM STk_execute_C_bytecode(SCM consts, STk_instr *instr);
 
-int STk_init_vm();
+int STk_init_vm(void);
 
 /*****************************************************************************/
 
@@ -1417,7 +1417,10 @@ extern STk_instr STk_boot_code[];
 
 
 /* Misc */
-
+#if defined(__GNUC__) || defined(__clang__)
+#  define _UNUSED(x) __attribute__((__unused__)) x
+#endif
+  
 #ifdef __cplusplus
 }
 #endif

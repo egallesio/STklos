@@ -2,7 +2,7 @@
  *
  * s t r . c                            -- Strings management
  *
- * Copyright © 1993-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 19-Jun-2019 17:04 (eg)
+ * Last file update:  3-Jun-2020 20:23 (eg)
  */
 
 #include <ctype.h>
@@ -158,15 +158,15 @@ static int stringcompi(SCM s1, SCM s2)
 
 static SCM control_index(int argc, SCM *argv, long *pstart, long *pend)
 {
-  SCM s = NULL;
+  SCM s = STk_void;   /* value chosen to avoid a warning of gcc static analysis */
   long len, start=0, end=-1;
 
   /* Controling number of arguments */
   switch (argc) {
-  case 1: s = argv[0]; break;
-  case 2: s = argv[0]; start = STk_integer_value(argv[-1]); break;
-  case 3: s = argv[0]; start = STk_integer_value(argv[-1]);
-          end = STk_integer_value(argv[-2]); break;
+  case 1:  s = argv[0]; break;
+  case 2:  s = argv[0]; start = STk_integer_value(argv[-1]); break;
+  case 3:  s = argv[0]; start = STk_integer_value(argv[-1]);
+           end = STk_integer_value(argv[-2]); break;
   default: STk_error("incorrect number of arguments (%d)", argc);
   }
 
@@ -292,7 +292,7 @@ SCM STk_Cstring2string(char *str) /* Embed a C string in Scheme world  */
   NEWCELL(z, string);
   STRING_CHARS(z)  = STk_must_malloc_atomic(len + 1);
   STRING_SPACE(z)  = STRING_SIZE(z) = len;
-  STRING_LENGTH(z) = STk_use_utf8 ? STk_utf8_strlen(str, len): len;
+  STRING_LENGTH(z) = STk_use_utf8 ? (size_t) STk_utf8_strlen(str, len): len;
   strcpy(STRING_CHARS(z), str);
 
   return z;

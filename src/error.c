@@ -2,7 +2,7 @@
  *
  * e r r o r . c                        -- The error procedure
  *
- * Copyright © 1993-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 14-Nov-1993 14:58
- * Last file update: 27-Jun-2019 14:14 (eg)
+ * Last file update: 30-May-2020 17:44 (eg)
  */
 
 #include "stklos.h"
@@ -46,7 +46,7 @@
 \*===========================================================================*/
 
 
-static void print_int(SCM port, unsigned int x, int base)
+static void print_int(SCM port, unsigned int x, unsigned int base)
 {
   if (x >= base) print_int(port, x / base, base);
   x %= base;
@@ -65,7 +65,7 @@ static void print_format(SCM port,char *format, va_list ap)
       switch (*++s) {
         case '%': STk_putc('%', port); break;
 
-        case 'S': STk_putc('`', port); /* No break */
+        case 'S': STk_putc('`', port); /* FALLTHROUGH */
         case 's': for (str = va_arg(ap, char *); *str; str++)
                     STk_putc(*str, port);
                   if (*s == 'S') STk_putc('\'', port);
@@ -90,15 +90,15 @@ static void print_format(SCM port,char *format, va_list ap)
     } else if (*s == '~') {
       /* ~ format (CL like) */
       switch (*++s) {
-        case 'A': STk_putc('`', port); /* No break */
+        case 'A': STk_putc('`', port); /* FALLTHROUGH */
         case 'a': STk_print(va_arg(ap, SCM), port, DSP_MODE);
                   if (*s == 'A') STk_putc('\'', port);
                   break;
-        case 'W': STk_putc('`', port);  /* No break */
+        case 'W': STk_putc('`', port);  /* FALLTHROUGH */
         case 'w': STk_print_star(va_arg(ap, SCM), port,WRT_MODE);
                   if (*s == 'W') STk_putc('\'', port);
                   break;
-        case 'S': STk_putc('`', port);  /* No break */
+        case 'S': STk_putc('`', port);  /* FALLTHROUGH */
         case 's': STk_print(va_arg(ap, SCM), port, WRT_MODE);
                   if (*s == 'S') STk_putc('\'', port);
                   break;

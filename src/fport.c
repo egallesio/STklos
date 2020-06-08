@@ -1,7 +1,7 @@
 /*
  * f p o r t . c                                -- File ports
  *
- * Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 28-Jun-2019 08:50 (eg)
+ * Last file update:  2-Jun-2020 12:16 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -56,7 +56,7 @@ static struct port_list {
 } *all_file_ports = NULL;
 
 
-static void nop_release_port(SCM port)
+static void nop_release_port(SCM _UNUSED(port))
 {
   /* This function is used as a release procedure when closing all files
    * at program exit. We use an empty procedure to avoid interferences
@@ -358,7 +358,7 @@ static Inline int Fputstring(SCM s, void *stream)
 }
 
 
-static int Inline Fflush(void *stream)
+static Inline int  Fflush(void *stream)
 {
   return flush_buffer(stream);          /* Problem if file opened for reading */
 }
@@ -376,7 +376,7 @@ static void fport_print(SCM obj, SCM port)      /* Generic printing of file port
 }
 
 
-static void fport_finalizer(struct port_obj *port)
+static void fport_finalizer(struct port_obj *port, void _UNUSED(*client_data))
 {
   if (!PORT_IS_CLOSEDP(port))
     /* Close the associated stream */

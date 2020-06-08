@@ -2,7 +2,7 @@
  *
  * b o o l e a n . c                    -- Booleans and Equivalence predicates
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,15 +22,22 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 27-Nov-2018 20:53 (eg)
+ * Last file update:  2-Jun-2020 17:35 (eg)
  */
 
 #include "stklos.h"
 #include "object.h"
 #include "struct.h"
 
-#define MAX_EQUAL_CALLS 100000   // Maximum calls of %try-equal
-
+/* Define the maximum calls for equal-count (a version of equal bounded in
+  recursive calls). The value depends of the compiler used , since CLANG
+  produces code which crashes when STklos is compiled without any
+  optimization. */
+#if defined(__clang__) && !defined(__OPTIMIZE__)
+# define MAX_EQUAL_CALLS   50000
+#else
+#  define MAX_EQUAL_CALLS 100000
+#endif
 
 DEFINE_PRIMITIVE("not", not, subr1, (SCM x))
 /*

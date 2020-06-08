@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  7-Feb-2020 19:04 (eg)
+ * Last file update:  2-Jun-2020 19:30 (eg)
  */
 
 
@@ -36,14 +36,14 @@
  */
 static pthread_key_t vm_key;
 
-static void *cleanup_vm_specific(void *p)    /* Nothing to do for now */
+static void cleanup_vm_specific(void _UNUSED(*p))    /* Nothing to do for now */
 {
-  return NULL;
+  /* Do nothing */;
 }
 
 static void initialize_vm_key(void)
 {
-  int n =  pthread_key_create(&vm_key, (void (*) (void *)) cleanup_vm_specific);
+  int n =  pthread_key_create(&vm_key, cleanup_vm_specific);
 
   if (n) {
     fprintf(stderr, "Cannot initialize the VM specific data\n");
@@ -119,6 +119,11 @@ void STk_do_make_sys_thread(SCM thr)
 #endif
 }
 
+/* FIXME: This prototype should not lie here (but since we dont include gc.h
+   clang on MacOS Mojave issue a warning)  */
+extern int GC_pthread_create(pthread_t *, const pthread_attr_t *,
+                             void *(*)(void *), void *);
+
 void STk_sys_thread_start(SCM thr)
 {
   pthread_attr_t attr;
@@ -128,7 +133,7 @@ void STk_sys_thread_start(SCM thr)
 
   // pthread_mutex_lock(&THREAD_MYMUTEX(thr));
 
-  /* !!!!! Use the GC_pthread_create instaed of pthread_create !!!!! */
+  /* !!!!! Use the GC_pthread_create instead of pthread_create !!!!! */
   if (GC_pthread_create(&THREAD_PTHREAD(thr), NULL, start_scheme_thread, thr))
     STk_error("cannot start thread ~S", thr);
 

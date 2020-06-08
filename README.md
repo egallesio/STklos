@@ -1,4 +1,4 @@
-STklos   (version 1.3x)
+STklos   (version 1.4x)
 =======================
 
 **Erick Gallesio** <eg(at)unice.fr>

@@ -41,5 +41,5 @@
 #define @OS_FLAVOUR@ 1
 #define SHARED_SUFFIX           "@SH_SUFFIX@"
 #define SHARED_LIB_SUFFIX       "@SH_LIB_SUFFIX@"
-#define GIT_PUSH_ID             "4f8de44"
+#define GIT_PUSH_ID             "5762983"
 #define DEFAULT_CASE_SENSITIVE  @DEFAULT_CS@

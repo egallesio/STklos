@@ -10,12 +10,14 @@
  </style>
 <link href="doc-style.css" rel="stylesheet" type="text/css">
 </head>
-<body >
-<table width='100%' cellpadding='0' cellspacing='0'><tr><td bgcolor="#8A8983"><font color="#FAFAFA"><center><h1>STklos Reference Manual<hr align="center" width="10%">5. Regular Expressions</h1></center></font></table><table cellpadding="3" cellspacing="0" width="100%"><tr>
-<td align="left" valign="top" width="20%" bgcolor="#8A8983">
-<br /><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
-<tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen">Contents</font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-50783">*Top*</a></td></tr>
+<body>
+<div id='doc-title'>
+STklos Reference Manual<hr align="center" width="10%">5. Regular Expressions</div>
+<table cellpadding="3" cellspacing="0" width="100%"><tr>
+<td align="left" valign="top" width="20%" bgcolor="#204875">
+<table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
+<tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-50995">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -56,7 +58,7 @@
 </tbody></table>
 </td>
 <td align="left" valign="top">
-<a name="--index-entry-41671"></a><p><span style="font-variant: small-caps">STklos</span> uses the Philip Hazel's Perl-compatible Regular Expression
+<div class="chapterbody"><a name="--index-entry-41883"></a><p><span style="font-variant: small-caps">STklos</span> uses the Philip Hazel's Perl-compatible Regular Expression
 (PCRE) library for implementing regexps [<a href="stklos-ref-16.html#PCRE">13</a>].
 Consequently, the <span style="font-variant: small-caps">STklos</span> regular expression syntax is the same
 as PCRE, and Perl by the way.</p><p>The following text is extracted from the PCRE package. However, to make
@@ -64,7 +66,7 @@ things shorter, some of the original documentation as not been reported
 here. In particular some possibilities of PCRE have been completely
 occulted (those whose description was too long and which seems (at least
 to me), not too important). Read the documentation provided with PCRE
-for a complete description <a href="#fn--footnote-41684"><sup><small>1</small></sup></a></p><p>A regular expression is a pattern that is matched against a
+for a complete description <a href="#fn--footnote-41896"><sup><small>1</small></sup></a></p><p>A regular expression is a pattern that is matched against a
 subject string from left to right. Most characters stand for
 themselves in a pattern, and match the corresponding characters
 in the subject. As a trivial example, the pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
@@ -106,9 +108,10 @@ class&quot;. In a character class the only meta-characters are:</p><center><tabl
 <tr><td width="50" align="center">  ]  </td><td align="left">terminates the character class</td></tr>
 </tbody></table>
 </center>
-<p>The following sections describe the use of each of the meta-characters.</p><a name="Backslash"></a>
-<h3 id="Backslash"><font color="darkolivegreen">5.1 Backslash</font></h3>
-<p>The backslash character has several uses. Firstly, if it is followed by a
+<p>The following sections describe the use of each of the meta-characters.</p><div class="sectiondiv"><div class="sectiontitle"><a name="Backslash"></a>
+<h3 id="Backslash">5.1 Backslash</h3>
+</div>
+<div class="sectionbody"><p>The backslash character has several uses. Firstly, if it is followed by a
 non-alphameric character, it takes away any special meaning that character may
 have. This use of backslash as an escape character applies both inside and
 outside character classes.</p><p>For example, if you want to match a * character, you write
@@ -219,9 +222,10 @@ of each pair.</p><p>A &quot;word&quot; character is any letter or digit or the u
 that is, any character which can be part of a <em>"word"</em>.</p><p>These character type sequences can appear both inside and outside
 character classes. They each match one character of the appropriate
 type. If the current matching point is at the end of the subject string,
-all of them fail, since there is no character to match.</p><a name="Circumflex-and-Dollar"></a>
-<h3 id="Circumflex-and-Dollar"><font color="darkolivegreen">5.2 Circumflex and Dollar</font></h3>
-<p>Outside a character class, in the default matching mode, the
+all of them fail, since there is no character to match.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Circumflex-and-Dollar"></a>
+<h3 id="Circumflex-and-Dollar">5.2 Circumflex and Dollar</h3>
+</div>
+<div class="sectionbody"><p>Outside a character class, in the default matching mode, the
 circumflex character is an assertion which is true only if the
 current matching point is at the start of the subject
 string. Inside a character class, circumflex has an entirely
@@ -246,17 +250,19 @@ the pattern ^abc$ matches the subject string &quot;def\nabc&quot; in multiline m
 but not otherwise.</p><p>Note that the sequences \A, \Z, and \z can be used to
 match the start and end of the subject in both modes, and if all
 branches of a pattern start with \A it is always anchored,
-whether <span style="font-variant: small-caps">multiline</span> is set or not.</p><a name="Full-Stop--period--dot-"></a>
-<h3 id="Full-Stop--period--dot-"><font color="darkolivegreen">5.3 Full Stop (period, dot)</font></h3>
-<p>Outside a character class, a dot in the pattern matches any
+whether <span style="font-variant: small-caps">multiline</span> is set or not.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Full-Stop--period--dot-"></a>
+<h3 id="Full-Stop--period--dot-">5.3 Full Stop (period, dot)</h3>
+</div>
+<div class="sectionbody"><p>Outside a character class, a dot in the pattern matches any
 one character in the subject, including a non-printing character,
 but not (by default) newline. If the <span style="font-variant: small-caps">dotall</span> option is
 set, dots match newlines as well. The handling of dot is entirely
 independent of the handling of circumflex and dollar, the only
 relationship being that they both involve newline characters. Dot
-has no special meaning in a character class.</p><a name="Square-Brackets"></a>
-<h3 id="Square-Brackets"><font color="darkolivegreen">5.4 Square Brackets</font></h3>
-<p>An opening square bracket introduces a character class,
+has no special meaning in a character class.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Square-Brackets"></a>
+<h3 id="Square-Brackets">5.4 Square Brackets</h3>
+</div>
+<div class="sectionbody"><p>An opening square bracket introduces a character class,
 terminated by a closing square bracket. A closing square bracket
 on its own is not special. If a closing square bracket is
 required as a member of the class, it should be the first data
@@ -298,9 +304,10 @@ conveniently be used with the upper case character types to specify a more
 restricted set of characters than the matching lower case type. For example,
 the class [^\W_] matches any letter or digit, but not underscore.</p><p>All non-alphameric characters other than \, -, ^ (at the start) and the
 terminating ] are non-special in character classes, but it does no harm if they
-are escaped.</p><a name="POSIX-character-classes"></a>
-<h3 id="POSIX-character-classes"><font color="darkolivegreen">5.5 POSIX character classes</font></h3>
-<p>Perl supports the POSIX notation for character classes, which
+are escaped.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="POSIX-character-classes"></a>
+<h3 id="POSIX-character-classes">5.5 POSIX character classes</h3>
+</div>
+<div class="sectionbody"><p>Perl supports the POSIX notation for character classes, which
 uses names enclosed by [: and :] within the enclosing square
 brackets. <span style="font-variant: small-caps">STklos</span> , thanks to PCRE, also supports this
 notation. For example,</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
@@ -337,9 +344,10 @@ after the colon. For example,</p><blockquote><table cellspacing="0" cellpadding=
 <p>matches &quot;1&quot;, &quot;2&quot;, or any non-digit. <span style="font-variant: small-caps">STklos</span> (and Perl) also
 recognize the POSIX syntax [.ch.] and [=ch=] where &quot;ch&quot; is
 a &quot;collating element&quot;, but these are not supported, and an error
-is given if they are encountered.</p><a name="Vertical-Bar"></a>
-<h3 id="Vertical-Bar"><font color="darkolivegreen">5.6 Vertical Bar</font></h3>
-<p>Vertical bar characters are used to separate alternative patterns. For example,
+is given if they are encountered.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Vertical-Bar"></a>
+<h3 id="Vertical-Bar">5.6 Vertical Bar</h3>
+</div>
+<div class="sectionbody"><p>Vertical bar characters are used to separate alternative patterns. For example,
 the pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="ivory"><pre>gilbert|sullivan
 </pre></td></tr>
@@ -349,9 +357,10 @@ and an empty alternative is permitted (matching the empty string).
 The matching process tries each alternative in turn, from left to right,
 and the first one that succeeds is used. If the alternatives are within a
 subpattern (defined below), &quot;succeeds&quot; means matching the rest of the main
-pattern as well as the alternative in the subpattern.</p><a name="Internal-Option-Setting"></a>
-<h3 id="Internal-Option-Setting"><font color="darkolivegreen">5.7 Internal Option Setting</font></h3>
-<p>The settings of the <span style="font-variant: small-caps">caseless</span>, <span style="font-variant: small-caps">multiline</span>, <span style="font-variant: small-caps">dotall</span>, and
+pattern as well as the alternative in the subpattern.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Internal-Option-Setting"></a>
+<h3 id="Internal-Option-Setting">5.7 Internal Option Setting</h3>
+</div>
+<div class="sectionbody"><p>The settings of the <span style="font-variant: small-caps">caseless</span>, <span style="font-variant: small-caps">multiline</span>, <span style="font-variant: small-caps">dotall</span>, and
 <span style="font-variant: small-caps">EXTENDED</span> options can be changed from within the pattern by a sequence of
 Perl option letters enclosed between &quot;(?&quot; and &quot;)&quot;. The option letters are</p><center><table style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td width="50" align="center">i</td><td align="left">for <span style="font-variant: small-caps">caseless</span></td></tr>
@@ -389,9 +398,10 @@ can be changed in the same way as the Perl-compatible options by
 using the characters U and X respectively. The (?X) flag setting
 is special in that it must always occur earlier in the pattern
 than any of the additional features it turns on, even when it is
-at top level. It is best put at the start.</p><a name="Subpatterns"></a>
-<h3 id="Subpatterns"><font color="darkolivegreen">5.8 Subpatterns</font></h3>
-<p>Subpatterns are delimited by parentheses (round brackets), which can be nested.
+at top level. It is best put at the start.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Subpatterns"></a>
+<h3 id="Subpatterns">5.8 Subpatterns</h3>
+</div>
+<div class="sectionbody"><p>Subpatterns are delimited by parentheses (round brackets), which can be nested.
 Marking part of a pattern as a subpattern does two things:</p><ol><li>It localizes a set of alternatives. For example, the pattern<blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="ivory"><pre>cat(aract|erpillar|)
 </pre></td></tr>
@@ -434,16 +444,18 @@ the &quot;:&quot;. Thus the two patterns</p><blockquote><table cellspacing="0" c
 <p>match exactly the same set of strings. Because alternative branches are tried
 from left to right, and options are not reset until the end of the subpattern
 is reached, an option setting in one branch does affect subsequent branches, so
-the above patterns match &quot;SUNDAY&quot; as well as &quot;Saturday&quot;.</p><a name="Named-Subpatterns"></a>
-<h3 id="Named-Subpatterns"><font color="darkolivegreen">5.9 Named Subpatterns</font></h3>
-<p>Identifying capturing parentheses by number is simple, but it can be very hard
+the above patterns match &quot;SUNDAY&quot; as well as &quot;Saturday&quot;.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Named-Subpatterns"></a>
+<h3 id="Named-Subpatterns">5.9 Named Subpatterns</h3>
+</div>
+<div class="sectionbody"><p>Identifying capturing parentheses by number is simple, but it can be very hard
 to keep track of the numbers in complicated regular expressions. Furthermore,
 if an expression is modified, the numbers may change. To help with the
 difficulty, PCRE supports the naming of subpatterns, something that Perl does
 not provide. The Python syntax (?P&lt;name&gt;...) is used. Names consist of
-alphanumeric characters and underscores, and must be unique within a pattern.</p><a name="Repetition"></a>
-<h3 id="Repetition"><font color="darkolivegreen">5.10 Repetition</font></h3>
-<p>Repetition is specified by quantifiers, which can follow any of the following
+alphanumeric characters and underscores, and must be unique within a pattern.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Repetition"></a>
+<h3 id="Repetition">5.10 Repetition</h3>
+</div>
+<div class="sectionbody"><p>Repetition is specified by quantifiers, which can follow any of the following
 items:</p><ul><li>a literal data character</li>
 <li>the . metacharacter</li>
 <li>the \C escape sequence</li>
@@ -545,9 +557,10 @@ example, after</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"
 <tr><td bgcolor="ivory"><pre>(a|(b))+
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>matches &quot;aba&quot; the value of the second captured substring is &quot;b&quot;.</p><a name="Atomic-Grouping-And-Possessive-Quantifiers"></a>
-<h3 id="Atomic-Grouping-And-Possessive-Quantifiers"><font color="darkolivegreen">5.11 Atomic Grouping And Possessive Quantifiers</font></h3>
-<p>With both maximizing and minimizing repetition, failure of what follows
+<p>matches &quot;aba&quot; the value of the second captured substring is &quot;b&quot;.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Atomic-Grouping-And-Possessive-Quantifiers"></a>
+<h3 id="Atomic-Grouping-And-Possessive-Quantifiers">5.11 Atomic Grouping And Possessive Quantifiers</h3>
+</div>
+<div class="sectionbody"><p>With both maximizing and minimizing repetition, failure of what follows
 normally causes the repeated item to be re-evaluated to see if a different
 number of repeats allows the rest of the pattern to match. Sometimes it is
 useful to prevent this, either to change the nature of the match, or to cause
@@ -611,9 +624,10 @@ If the pattern is changed to</p><blockquote><table cellspacing="0" cellpadding="
 <tr><td bgcolor="ivory"><pre>((?&gt;\D+)|&lt;\d+&gt;)*[!?]
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>sequences of non-digits cannot be broken, and failure happens quickly.</p><a name="Back-References"></a>
-<h3 id="Back-References"><font color="darkolivegreen">5.12 Back References</font></h3>
-<p>Outside a character class, a backslash followed by a digit greater than 0 (and
+<p>sequences of non-digits cannot be broken, and failure happens quickly.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Back-References"></a>
+<h3 id="Back-References">5.12 Back References</h3>
+</div>
+<div class="sectionbody"><p>Outside a character class, a backslash followed by a digit greater than 0 (and
 possibly further digits) is a back reference to a capturing subpattern earlier
 (that is, to its left) in the pattern, provided there have been that many
 previous capturing left parentheses.</p><p>However, if the decimal number following the backslash is less than 10, it is
@@ -664,9 +678,10 @@ the subpattern, the back reference matches the character string corresponding
 to the previous iteration. In order for this to work, the pattern must be such
 that the first iteration does not need to match the back reference. This can be
 done using alternation, as in the example above, or by a quantifier with a
-minimum of zero.</p><a name="Assertions"></a>
-<h3 id="Assertions"><font color="darkolivegreen">5.13 Assertions</font></h3>
-<p>An assertion is a test on the characters following or preceding the current
+minimum of zero.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Assertions"></a>
+<h3 id="Assertions">5.13 Assertions</h3>
+</div>
+<div class="sectionbody"><p>An assertion is a test on the characters following or preceding the current
 matching point that does not actually consume any characters. The simple
 assertions coded as \b, \B, \A, \G, \Z, \z, ^ and $ are described above.
 More complicated assertions are coded as subpatterns. There are two kinds:
@@ -781,9 +796,10 @@ because it makes no sense to assert the same thing several times. If any kind
 of assertion contains capturing subpatterns within it, these are counted for
 the purposes of numbering the capturing subpatterns in the whole pattern.
 However, substring capturing is carried out only for positive assertions,
-because it does not make sense for negative assertions.</p><a name="Conditional-Subpatterns"></a>
-<h3 id="Conditional-Subpatterns"><font color="darkolivegreen">5.14 Conditional Subpatterns</font></h3>
-<p>It is possible to cause the matching process to obey a subpattern
+because it does not make sense for negative assertions.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Conditional-Subpatterns"></a>
+<h3 id="Conditional-Subpatterns">5.14 Conditional Subpatterns</h3>
+</div>
+<div class="sectionbody"><p>It is possible to cause the matching process to obey a subpattern
 conditionally or to choose between two alternative subpatterns, depending on
 the result of an assertion, or whether a previous capturing subpattern matched
 or not. The two possible forms of conditional subpattern are</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
@@ -825,15 +841,17 @@ sequence of non-letters followed by a letter. In other words, it tests for the
 presence of at least one letter in the subject. If a letter is found, the
 subject is matched against the first alternative; otherwise it is matched
 against the second. This pattern matches strings in one of the two forms
-dd-aaa-dd or dd-dd-dd, where aaa are letters and dd are digits.</p><a name="pcre-comment"></a>
-<h3 id="pcre:comment"><font color="darkolivegreen">5.15 Comments</font></h3>
-<p>The sequence (?# marks the start of a comment which continues up to the next
+dd-aaa-dd or dd-dd-dd, where aaa are letters and dd are digits.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="pcre-comment"></a>
+<h3 id="pcre:comment">5.15 Comments</h3>
+</div>
+<div class="sectionbody"><p>The sequence (?# marks the start of a comment which continues up to the next
 closing parenthesis. Nested parentheses are not permitted. The characters
 that make up a comment play no part in the pattern matching at all.</p><p>If the <span style="font-variant: small-caps">extended</span> option is set, an unescaped # character outside a
 character class introduces a comment that continues up to the next newline
-character in the pattern.</p><a name="Subpatterns-As-Subroutines"></a>
-<h3 id="Subpatterns-As-Subroutines"><font color="darkolivegreen">5.16 Subpatterns As Subroutines</font></h3>
-<p>If the syntax for a recursive subpattern reference (either by number or by
+character in the pattern.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Subpatterns-As-Subroutines"></a>
+<h3 id="Subpatterns-As-Subroutines">5.16 Subpatterns As Subroutines</h3>
+</div>
+<div class="sectionbody"><p>If the syntax for a recursive subpattern reference (either by number or by
 name) is used outside the parentheses to which it refers, it operates like a
 subroutine in a programming language. An earlier example pointed out that the
 pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
@@ -847,11 +865,12 @@ pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody
 </tbody></table></blockquote>
 <p>is used, it does match &quot;sense and responsibility&quot; as well as the other two
 strings. Such references must, however, follow the subpattern to which they
-refer.</p><a name="Regexp-Procedures"></a>
-<h3 id="Regexp-Procedures"><font color="darkolivegreen">5.17 Regexp Procedures</font></h3>
-<p>This section lists the Scheme functions that can use PCRE regexpr described
-before</p><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="string--regexp"></a><a name="--index-entry-42439"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+refer.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Regexp-Procedures"></a>
+<h3 id="Regexp-Procedures">5.17 Regexp Procedures</h3>
+</div>
+<div class="sectionbody"><p>This section lists the Scheme functions that can use PCRE regexpr described
+before</p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="string--regexp"></a><a name="--index-entry-42651"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(string-&gt;regexp string)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>String-&gt;regexp</code> takes a string representation of a regular
@@ -861,14 +880,14 @@ the matching pattern. If a regular expression string is used
 multiple times, it is faster to compile the string once to a regexp
 value and use it for repeated matches instead of using the string
 each time.</td></tr>
-</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="regexp-"></a><a name="--index-entry-42463"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+</tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="regexp-"></a><a name="--index-entry-42675"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(regexp? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Regexp</code> returns <code>#t</code> if <code>obj</code> is a regexp value created by the <code>regexp</code>,
 otherwise <code>regexp</code> returns <code>#f</code>.</td></tr>
-</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="regexp-match-positions"></a><a name="regexp-match"></a><a name="--index-entry-42513"></a><a name="--index-entry-42517"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+</tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="regexp-match-positions"></a><a name="regexp-match"></a><a name="--index-entry-42725"></a><a name="--index-entry-42729"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(regexp-match pattern str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(regexp-match-positions pattern str)</font></strong></code><br /><br />These functions attempt to match <code>pattern</code> (a string or a regexp value)
@@ -883,26 +902,26 @@ Additional strings or positions are returned in the list if pattern contains
 parenthesized sub-expressions; matches for the sub-expressions are provided
 in the order of the opening parentheses in pattern.
 <blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
-<tr><td bgcolor="ivory"><pre>(regexp-match-positions <font color="red">&quot;ca&quot;</font> <font color="red">&quot;abracadabra&quot;</font>)
+<tr><td bgcolor="ivory"><pre>(regexp-match-positions <span class="source-string">&quot;ca&quot;</span> <span class="source-string">&quot;abracadabra&quot;</span>)
                  &#8658; ((4 6))
-(regexp-match-positions <font color="red">&quot;CA&quot;</font> <font color="red">&quot;abracadabra&quot;</font>)
+(regexp-match-positions <span class="source-string">&quot;CA&quot;</span> <span class="source-string">&quot;abracadabra&quot;</span>)
                  &#8658; #f
-(regexp-match-positions <font color="red">&quot;(?i)CA&quot;</font> <font color="red">&quot;abracadabra&quot;</font>)
+(regexp-match-positions <span class="source-string">&quot;(?i)CA&quot;</span> <span class="source-string">&quot;abracadabra&quot;</span>)
                  &#8658; ((4 6))
-(regexp-match <font color="red">&quot;(a*)(b*)(c*)&quot;</font> <font color="red">&quot;abc&quot;</font>)
-                 &#8658; (<font color="red">&quot;abc&quot;</font> <font color="red">&quot;a&quot;</font> <font color="red">&quot;b&quot;</font> <font color="red">&quot;c&quot;</font>)
-(regexp-match-positions <font color="red">&quot;(a*)(b*)(c*)&quot;</font> <font color="red">&quot;abc&quot;</font>)
+(regexp-match <span class="source-string">&quot;(a*)(b*)(c*)&quot;</span> <span class="source-string">&quot;abc&quot;</span>)
+                 &#8658; (<span class="source-string">&quot;abc&quot;</span> <span class="source-string">&quot;a&quot;</span> <span class="source-string">&quot;b&quot;</span> <span class="source-string">&quot;c&quot;</span>)
+(regexp-match-positions <span class="source-string">&quot;(a*)(b*)(c*)&quot;</span> <span class="source-string">&quot;abc&quot;</span>)
                  &#8658; ((0 3) (0 1) (1 2) (2 3))
-(regexp-match-positions <font color="red">&quot;(a*)(b*)(c*)&quot;</font> <font color="red">&quot;c&quot;</font>)
+(regexp-match-positions <span class="source-string">&quot;(a*)(b*)(c*)&quot;</span> <span class="source-string">&quot;c&quot;</span>)
                  &#8658; ((0 1) (0 0) (0 0) (0 1))
-(regexp-match-positions <font color="red">&quot;(?&lt;=\\d{3})(?&lt;!999)foo&quot;</font>
-                        <font color="red">&quot;999foo and 123foo&quot;</font>)
+(regexp-match-positions <span class="source-string">&quot;(?&lt;=\\d{3})(?&lt;!999)foo&quot;</span>
+                        <span class="source-string">&quot;999foo and 123foo&quot;</span>)
      &#8658; ((14 17))
 </pre></td></tr>
 </tbody></table></blockquote>
 </td></tr>
-</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="regexp-replace-all"></a><a name="regexp-replace"></a><a name="--index-entry-42641"></a><a name="--index-entry-42645"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+</tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="regexp-replace-all"></a><a name="regexp-replace"></a><a name="--index-entry-42853"></a><a name="--index-entry-42857"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(regexp-replace pattern string substitution)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(regexp-replace-all pattern string substitution)</font></strong></code><br /><br /><code>Regexp-replace</code> matches the regular expression <code>pattern</code> against
@@ -921,45 +940,47 @@ with the portion of <code>string</code> that matched <code>pattern</code>.
 To replace <strong>all</strong> the occurrences of <code>pattern</code>, use <code>regexp-replace-all</code>.
 
 <blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
-<tr><td bgcolor="ivory"><pre>(regexp-replace <font color="red">&quot;a*b&quot;</font> <font color="red">&quot;aaabbcccc&quot;</font> <font color="red">&quot;X&quot;</font>)
-                   &#8658; <font color="red">&quot;Xbcccc&quot;</font>
-(regexp-replace (string-&gt;regexp <font color="red">&quot;a*b&quot;</font>) <font color="red">&quot;aaabbcccc&quot;</font> <font color="red">&quot;X&quot;</font>)
-                   &#8658; <font color="red">&quot;Xbcccc&quot;</font>
-(regexp-replace <font color="red">&quot;(a*)b&quot;</font> <font color="red">&quot;aaabbcccc&quot;</font> <font color="red">&quot;X\\1Y&quot;</font>)
-                   &#8658; <font color="red">&quot;XaaaYbcccc&quot;</font>
-(regexp-replace <font color="red">&quot;f(.*)r&quot;</font> <font color="red">&quot;foobar&quot;</font> <font color="red">&quot;\\1 \\1&quot;</font>)
-                   &#8658; <font color="red">&quot;ooba ooba&quot;</font>
-(regexp-replace <font color="red">&quot;f(.*)r&quot;</font> <font color="red">&quot;foobar&quot;</font> <font color="red">&quot;\\0 \\0&quot;</font>)
-                   &#8658; <font color="red">&quot;foobar foobar&quot;</font>
+<tr><td bgcolor="ivory"><pre>(regexp-replace <span class="source-string">&quot;a*b&quot;</span> <span class="source-string">&quot;aaabbcccc&quot;</span> <span class="source-string">&quot;X&quot;</span>)
+                   &#8658; <span class="source-string">&quot;Xbcccc&quot;</span>
+(regexp-replace (string-&gt;regexp <span class="source-string">&quot;a*b&quot;</span>) <span class="source-string">&quot;aaabbcccc&quot;</span> <span class="source-string">&quot;X&quot;</span>)
+                   &#8658; <span class="source-string">&quot;Xbcccc&quot;</span>
+(regexp-replace <span class="source-string">&quot;(a*)b&quot;</span> <span class="source-string">&quot;aaabbcccc&quot;</span> <span class="source-string">&quot;X\\1Y&quot;</span>)
+                   &#8658; <span class="source-string">&quot;XaaaYbcccc&quot;</span>
+(regexp-replace <span class="source-string">&quot;f(.*)r&quot;</span> <span class="source-string">&quot;foobar&quot;</span> <span class="source-string">&quot;\\1 \\1&quot;</span>)
+                   &#8658; <span class="source-string">&quot;ooba ooba&quot;</span>
+(regexp-replace <span class="source-string">&quot;f(.*)r&quot;</span> <span class="source-string">&quot;foobar&quot;</span> <span class="source-string">&quot;\\0 \\0&quot;</span>)
+                   &#8658; <span class="source-string">&quot;foobar foobar&quot;</span>
 
-(regexp-replace <font color="red">&quot;a*b&quot;</font> <font color="red">&quot;aaabbcccc&quot;</font> <font color="red">&quot;X&quot;</font>)
-                   &#8658; <font color="red">&quot;Xbcccc&quot;</font>
-(regexp-replace-all <font color="red">&quot;a*b&quot;</font> <font color="red">&quot;aaabbcccc&quot;</font> <font color="red">&quot;X&quot;</font>)
-                   &#8658; <font color="red">&quot;XXcccc&quot;</font>
+(regexp-replace <span class="source-string">&quot;a*b&quot;</span> <span class="source-string">&quot;aaabbcccc&quot;</span> <span class="source-string">&quot;X&quot;</span>)
+                   &#8658; <span class="source-string">&quot;Xbcccc&quot;</span>
+(regexp-replace-all <span class="source-string">&quot;a*b&quot;</span> <span class="source-string">&quot;aaabbcccc&quot;</span> <span class="source-string">&quot;X&quot;</span>)
+                   &#8658; <span class="source-string">&quot;XXcccc&quot;</span>
 </pre></td></tr>
 </tbody></table></blockquote>
 </td></tr>
-</tbody></table><br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="regexp-quote"></a><a name="--index-entry-42877"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+</tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="regexp-quote"></a><a name="--index-entry-43089"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(regexp-quote str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Takes an arbitrary string and returns a string where characters of
 <code>str</code> that could serve as regexp metacharacters are escaped with a
 backslash, so that they safely match only themselves.
 <blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
-<tr><td bgcolor="ivory"><pre>(regexp-quote <font color="red">&quot;cons&quot;</font>)       &#8658; <font color="red">&quot;cons&quot;</font>
-(regexp-quote <font color="red">&quot;list?&quot;</font>)      &#8658; <font color="red">&quot;list\\?&quot;</font>
+<tr><td bgcolor="ivory"><pre>(regexp-quote <span class="source-string">&quot;cons&quot;</span>)       &#8658; <span class="source-string">&quot;cons&quot;</span>
+(regexp-quote <span class="source-string">&quot;list?&quot;</span>)      &#8658; <span class="source-string">&quot;list\\?&quot;</span>
 </pre></td></tr>
 </tbody></table></blockquote>
 
 <code>regexp-quote</code> is useful when building a composite regexp from
 a mix of regexp strings and verbatim strings.</td></tr>
-</tbody></table><br><br><hr width='20%' size='2' align='left'>
-<a name="fn--footnote-41684"><sup><small>1</small></sup></a>: The latest release of PCRE is
-available from <a href="http://www.pcre.org/">http://www.pcre.org/</a>
+</tbody></table></div></div></div><div class='footnotes'>
+<hr>
+<b>Note:</b><br>
+<a name="fn--footnote-41896"><sup><small>1</small></sup></a>: The latest release of PCRE is
+available from <a  class="http" href="http://www.pcre.org/">http://www.pcre.org/</a>
 <br>
-</td>
+</div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Thu Mar  5 14:54:59 2020</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Mon Jun  8 17:11:37 2020</em></small>
 </body>
 </html>

@@ -2,7 +2,7 @@
  *
  * v e c t o r . c                      -- vectors management
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??? 1993
- * Last file update:  6-Jul-2018 19:39 (eg)
+ * Last file update:  3-Jun-2020 20:45 (eg)
  */
 
 #include <string.h>
@@ -61,25 +61,25 @@ static void error_bad_list(SCM l)
 
 static SCM control_index(int argc, SCM *argv, long *pstart, long *pend, SCM *pfill)
 {
-  SCM v = NULL;
+  SCM v = STk_void;    /* value chosen to avoid a warning with gcc static analysis */
   long len, start=0, end=-1;
 
   /* Controling number of arguments */
   if (!pfill) {
     /* We do not have a fill parameter => vect at 0, start at -1 and end at -2 */
     switch (argc) {
-      case 3: end   = STk_integer_value(argv[-2]);  /* no break */
-      case 2: start = STk_integer_value(argv[-1]);  /* no break */
-      case 1: v = argv[0]; break;
+      case 3: end   = STk_integer_value(argv[-2]);  /* FALLTHROUGH */
+      case 2: start = STk_integer_value(argv[-1]);  /* FALLTHROUGH */
+      case 1: v     = argv[0]; break;
       default: goto bad_number_of_args;
     }
   } else {
     /* We have a fill param. => vect at 0, fill at -1, start at -2 and end at -3 */
     switch (argc) {
-      case 4: end   = STk_integer_value(argv[-3]);  /* no break */
-      case 3: start = STk_integer_value(argv[-2]);  /* no break */
-      case 2: if (pfill) *pfill  = argv[-1];
-              v = argv[0];
+      case 4: end     = STk_integer_value(argv[-3]);  /* FALLTHROUGH */
+      case 3: start   = STk_integer_value(argv[-2]);  /* FALLTHROUGH */
+      case 2: *pfill  = argv[-1];
+              v       = argv[0];
               break;
       default:
       bad_number_of_args:
@@ -422,7 +422,7 @@ doc>
  */
 DEFINE_PRIMITIVE("vector-fill!", vector_fill,  vsubr, (int argc, SCM *argv))
 {
-  SCM fill, v;
+  SCM v, fill = STk_void;  /* initialization for the compiler */
   long start, end;
 
   v = control_index(argc, argv, &start, &end, &fill);

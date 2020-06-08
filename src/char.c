@@ -2,7 +2,7 @@
  *
  * c h a r . c                          -- Characters management
  *
- * Copyright © 1993-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update: 19-Jun-2019 17:25 (eg)
+ * Last file update:  2-Jun-2020 10:47 (eg)
  */
 
 #include <ctype.h>
@@ -103,10 +103,10 @@ typedef uint32_t utf8_char;
 
 #include "utf8-tables.inc"
 
-static int search_conversion_table(int ch, struct utf8_conversion_char table[],
+static int search_conversion_table(unsigned int ch, struct utf8_conversion_char table[],
                                    int len) {
-  int min = table[0].key;
-  int max = table[len-1].key;
+  unsigned int min = table[0].key;
+  unsigned int max = table[len-1].key;
 
   if (min <= ch && ch <= max) {
     /* seach the value in the table by dichotomy */
@@ -130,8 +130,8 @@ static int search_conversion_table(int ch, struct utf8_conversion_char table[],
 }
 
 static int search_ordered_list(utf8_char ch,  utf8_char table[], int len) {
-  int min = table[0];
-  int max = table[len-1];
+  unsigned int min = table[0];
+  unsigned int max = table[len-1];
 
   if (min <= ch && ch <= max) {
     /* seach the value in the table by dichotomy */
@@ -166,7 +166,7 @@ static void error_bad_char(SCM c)
   STk_error("bad char", c);
 }
 
-static int inline charcomp(SCM c1, SCM c2)
+static Inline int charcomp(SCM c1, SCM c2)
 {
   return (CHARACTER_VAL(c1) - CHARACTER_VAL(c2));
 }
@@ -175,10 +175,10 @@ static int inline charcomp(SCM c1, SCM c2)
 static int charcompi(SCM c1, SCM c2)
 {
   return STk_use_utf8 ?
-    (STk_to_fold(CHARACTER_VAL(c1)) -
-     STk_to_fold(CHARACTER_VAL(c2))):
-    (tolower((unsigned char) CHARACTER_VAL(c1)) -
-     tolower((unsigned char) CHARACTER_VAL(c2)));
+    (int) (STk_to_fold(CHARACTER_VAL(c1)) -
+           STk_to_fold(CHARACTER_VAL(c2))):
+    (int) (tolower((unsigned char) CHARACTER_VAL(c1)) -
+           tolower((unsigned char) CHARACTER_VAL(c2)));
 }
 
 /* Comparison of characters. No test on types */
@@ -478,7 +478,7 @@ doc>
 uint32_t STk_to_upper(uint32_t c) {
   if (STk_use_utf8) {
     int res = search_conversion_table(c, lower_table, lower_table_length);
-    return (res <=0) ? c : res;      // -1: not a lowercase, 0 lower without upper
+    return (res <= 0) ? c : (uint32_t) res;   // -1: not a lowercase, 0 lower without upper
   } else
     return toupper(c);
 }
@@ -486,7 +486,7 @@ uint32_t STk_to_upper(uint32_t c) {
 uint32_t STk_to_lower(uint32_t c) {
   if (STk_use_utf8) {
     int res = search_conversion_table(c, upper_table, upper_table_length);
-    return (res <=0) ? c : res;      // -1: not a lowercase, 0 lower without lower
+    return (res <=0) ? c : (uint32_t) res;    // -1: not a lowercase, 0 lower without lower
   } else
     return tolower(c);
 }
@@ -517,7 +517,7 @@ doc>
 uint32_t STk_to_fold(uint32_t c) {
   if (STk_use_utf8) {
     int res = search_conversion_table(c, fold_table, fold_table_length);
-    return (res <=0) ? STk_to_lower(c) : res; 
+    return (res <=0) ? STk_to_lower(c) : (uint32_t) res; 
   } else
     return tolower(c);
 }

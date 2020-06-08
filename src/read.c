@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  5-Mar-2020 14:40 (eg)
+ * Last file update: 30-May-2020 20:09 (eg)
  *
  */
 
@@ -112,6 +112,7 @@ static int flush_spaces(SCM port, char *message, SCM file)
   for ( ; ; ) {
     switch (c = STk_getc(port)) {
       case EOF:  if (message) signal_error(port, message, file); else return(c);
+                 break; /* for the compiler */
       case ';':  do
                    c = STk_getc(port);
                  while (c != '\n' && c != EOF);
@@ -125,7 +126,8 @@ static int flush_spaces(SCM port, char *message, SCM file)
 static int read_hex_sequence(SCM port, char* utf8_seq)
 {
   char *end, buffer[30];   /* normally max value is 10FFFFF */
-  int c, i = 0;
+  int c;
+  unsigned i = 0;
   long int val;
 
   /* assert: current char is 'x' */
@@ -301,6 +303,7 @@ static SCM read_token(SCM port, int c, int case_significant)
                     return STk_void;
                 }
                 error_bad_sharp_syntax(port, tok);
+                break; /* for the compiler */
       default : return (tok[len-1] == ':') ? STk_makekey(tok) : STk_intern(tok);
     }
   }
@@ -443,7 +446,7 @@ static SCM read_cycle(SCM port, int c, struct read_context *ctx)
               }
               else
                 error_key_not_defined(port, k);
-
+              break;
     case '=': {
                 /* This is a little bit tricky here: We create a fake cell
                  * that serves as a place-holder. In some cases this is not
@@ -520,9 +523,8 @@ static SCM read_string(SCM port, int constant)
                   if (c != '\n') {
                     signal_error(port, "bad line continuation sequence in string",
                                  STk_nil);
-                  } else {
-                    /* No break */;
                   }
+                  /* FALLTHROUGH */
         case '\n': do {
                         c = STk_getc(port);
                    } while (c == ' ' || c == '\t');
@@ -762,6 +764,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
                          STk_ungetc(c,port);
                          continue;
                        }
+                       break;   /* for the compiler */
                     }
           case '<': {
                        char c2 = STk_getc(port);
@@ -808,6 +811,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
                     STk_ungetc(c, port);
                     return read_token(port, '#', ctx->case_significant);
         }
+        break; /* for the compiler */
       case ',': {
         SCM symb, tmp;
 

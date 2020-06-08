@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  7-Mar-2020 12:20 (eg)
+ * Last file update:  2-Jun-2020 17:43 (eg)
  */
 
 #include "stklos.h"
@@ -122,7 +122,7 @@ DEFINE_PRIMITIVE("%push-id", push_id, subr0, (void))
  * they are evalued and simply ignored.
 doc>
  */
-DEFINE_PRIMITIVE("void", scheme_void, vsubr, (int argc, SCM *argv))
+DEFINE_PRIMITIVE("void", scheme_void, vsubr, (int _UNUSED(argc), SCM _UNUSED(*argv)))
 {
   return STk_void;
 }
@@ -149,21 +149,21 @@ DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
  * GC stuff
  *
 \*===========================================================================*/
+#ifdef STK_DEBUG
 static void stklos_GC_warning(char *msg, GC_word arg)
 {
-#ifdef STK_DEBUG
   fprintf(stderr, msg, arg);
   STk_debug("arg=~S", (SCM) arg);
-#else
-  /* No warning when on production. Is this reasonable? */
-#endif
 }
+#endif
 
 
 void STk_gc_init(void)
 {
   GC_init();
+#ifdef STK_DEBUG 
   GC_set_warn_proc(stklos_GC_warning);
+#endif
 }
 
 

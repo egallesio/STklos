@@ -1,7 +1,7 @@
 /*
  * p r o c e s s . c            -- Access to processes from STklos
  *
- * Copyright © 1994-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -15,7 +15,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update:  5-Oct-2018 18:03 (eg)
+ * Last file update: 30-May-2020 17:46 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -117,7 +117,7 @@ static int process_alivep(SCM process)
    }
 }
 
-static void process_terminate_handler(int sig) /* called when a child dies */
+static void process_terminate_handler(int _UNUSED(sig)) /* called when a child dies */
 {
   SCM prev, l;
 
@@ -406,6 +406,7 @@ DEFINE_PRIMITIVE("fork", fork, subr01, (SCM thunk))
   switch (pid) {
     case -1:                                                  /* ERROR */
       STk_error("cannot create a new process");
+      /* FALLTHRU */
     case 0:                                                   /* CHILD */
       if (thunk) {
         STk_C_apply(thunk, 0);
@@ -727,7 +728,7 @@ DEFINE_PRIMITIVE("process-signal", proc_signal, subr2, (SCM proc, SCM sig))
 
 
 /******************************************************************************/
-static void print_process(SCM p, SCM port, int mode)
+static void print_process(SCM p, SCM port, int _UNUSED(mode))
 {
   char buffer[100];
 

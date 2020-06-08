@@ -1,7 +1,7 @@
 /*
  * mutex-pthreads.c     -- Pthread Mutexes in Scheme
  *
- * Copyright © 2006-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 21-Sep-2018 08:47 (eg)
+ * Last file update:  2-Jun-2020 12:49 (eg)
  */
 
 #include <unistd.h>
@@ -140,7 +140,7 @@ doc>
 DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread))
 {
   struct timespec ts;
-  SCM res = STk_true;
+  volatile SCM res = STk_true;
 
   if (! MUTEXP(mtx)) STk_error_bad_mutex(mtx);
   if (!BOOLEANP(tm)) {
@@ -208,7 +208,7 @@ doc>
 DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm))
 {
   struct timespec ts;
-  SCM res = STk_true;
+  volatile SCM res = STk_true;
 
   if (! MUTEXP(mtx)) STk_error_bad_mutex(mtx);
   if ((cv != STk_false) && (!CONDVP(cv))) STk_error_bad_condv(cv);

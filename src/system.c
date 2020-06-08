@@ -2,7 +2,7 @@
  *
  * s y s t e m . c                              -- System relative primitives
  *
- * Copyright © 1994-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * Permission to use, copy, modify, distribute,and license this
@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 11-Jul-2019 15:54 (eg)
+ * Last file update: 30-May-2020 20:42 (eg)
  */
 
 #include <unistd.h>
@@ -195,7 +195,7 @@ int STk_dirp(const char *path)
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("winify-file-name", winify_filename, subr1, (SCM f))
+DEFINE_PRIMITIVE("winify-file-name", winify_filename, subr1, (SCM _UNUSED(f)))
 {
 #ifdef WIN32
   char expanded[2 * MAX_PATH_LENGTH];
@@ -226,7 +226,7 @@ DEFINE_PRIMITIVE("winify-file-name", winify_filename, subr1, (SCM f))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("posixify-file-name", posixify_filename, subr1, (SCM f))
+DEFINE_PRIMITIVE("posixify-file-name", posixify_filename, subr1, (SCM _UNUSED(f)))
 {
 #ifdef WIN32
   char expanded[2 * MAX_PATH_LENGTH];

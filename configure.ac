@@ -2,13 +2,15 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  6-Mar-2020 17:08 (eg)
+### Last file update:  5-Jun-2020 17:25 (eg)
 
 AC_PREREQ([2.69])
-AC_INIT([stklos],[1.31])
+AC_INIT([stklos],[1.40])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR(src/stklos.c)
 AC_CONFIG_HEADERS(src/stklosconf.h)
+AC_CANONICAL_HOST
+
 
 ### Checks for programs.
 AC_PROG_CC

@@ -1,7 +1,7 @@
 /*
- * l i b . c					-- Scheme library
+ * l i b . c                    -- Scheme library
  *
- * Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  5-Jan-2000 12:17 (eg)
- * Last file update: 19-Aug-2011 11:07 (eg)
+ * Last file update: 30-May-2020 17:22 (eg)
  */
 
 
@@ -32,7 +32,7 @@
 int STk_library_initialized = FALSE;  /* True when successfully initialized */
 
 int
-STk_init_library(int *argc, char ***argv, int stack_size)
+STk_init_library(int _UNUSED(*argc), char _UNUSED(***argv), int stack_size)
 {
   void * start_stack;
 
@@ -40,45 +40,45 @@ STk_init_library(int *argc, char ***argv, int stack_size)
 
 
   return
-    STk_init_env()				&&
-    STk_init_symbol()				&&
-    STk_late_init_env() 			&&
-    STk_init_struct()				&&
-    STk_init_cond()				&&
-    STk_init_vm()				&&
-    STk_init_threads(stack_size, start_stack)	&&
-    STk_init_port() 				&&
-    STk_init_extend()				&&
-    STk_init_list() 				&&
-    STk_init_vector() 				&&
-    STk_init_uniform_vector()			&&
-    STk_init_char()				&&
-    STk_init_keyword()				&&
-    STk_init_string()   			&&
-    STk_init_parameter()			&&
-    STk_init_proc()				&&
-    STk_init_boolean()				&&
-    STk_init_reader()   			&&
-    STk_init_printer()				&&
-    STk_init_system()   			&&
-    STk_init_mutexes()				&&
-    STk_init_number()				&&
-    STk_init_fixnum()				&&
-    STk_init_hash()				&&
-    STk_init_misc()				&&
-    STk_init_signal()				&&
-    STk_init_promise()				&&
-    STk_init_regexp()				&&
-    STk_init_process()				&&
-    STk_init_socket()				&&
-    STk_init_object()				&&
-    STk_init_base64()				&&
-    STk_init_md5()				&&
-    STk_init_cpointer()				&&
-    STk_init_box()				&&
-    STk_init_ffi()				&&
+    STk_init_env()                              &&
+    STk_init_symbol()                           &&
+    STk_late_init_env()                         &&
+    STk_init_struct()                           &&
+    STk_init_cond()                             &&
+    STk_init_vm()                               &&
+    STk_init_threads(stack_size, start_stack)   &&
+    STk_init_port()                             &&
+    STk_init_extend()                           &&
+    STk_init_list()                             &&
+    STk_init_vector()                           &&
+    STk_init_uniform_vector()                   &&
+    STk_init_char()                             &&
+    STk_init_keyword()                          &&
+    STk_init_string()                           &&
+    STk_init_parameter()                        &&
+    STk_init_proc()                             &&
+    STk_init_boolean()                          &&
+    STk_init_reader()                           &&
+    STk_init_printer()                          &&
+    STk_init_system()                           &&
+    STk_init_mutexes()                          &&
+    STk_init_number()                           &&
+    STk_init_fixnum()                           &&
+    STk_init_hash()                             &&
+    STk_init_misc()                             &&
+    STk_init_signal()                           &&
+    STk_init_promise()                          &&
+    STk_init_regexp()                           &&
+    STk_init_process()                          &&
+    STk_init_socket()                           &&
+    STk_init_object()                           &&
+    STk_init_base64()                           &&
+    STk_init_md5()                              &&
+    STk_init_cpointer()                         &&
+    STk_init_box()                              &&
+    STk_init_ffi()                              &&
 #ifdef STK_DEBUG
-    STk_init_utf8()				&&
+    STk_init_utf8()                             &&
 #endif
     (STk_library_initialized = TRUE);
 }
