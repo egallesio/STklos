@@ -3,7 +3,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 13-Oct-2004 11:42 (eg)
- * Last file update:  8-Jun-2020 13:02 (eg)
+ * Last file update:  8-Jun-2020 16:55 (eg)
  */
 
 html {
@@ -53,6 +53,10 @@ h4 { font-size: 120%; }
     background: #FAFAD2;
 }
 
+.navnorm td, .navsel td {
+    text-align: left;
+}
+
 .navcontent {
     margin: 10px 0;
 }
@@ -68,7 +72,6 @@ h4 { font-size: 120%; }
 p, li, td {
     line-height: 1.5;
     text-align: justify;
-    
 }
 
 .code {
@@ -97,6 +100,13 @@ p, li, td {
 }
 .doc-box td td {
     padding: 0px;
+}
+
+.footnotes {
+    margin: 2em 1em;
+    padding: 10px;
+    max-width: 600px;
+    font-size: 80%;
 }
 
 

@@ -4,7 +4,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Oct-2004 14:48 (eg)
-;;;; Last file update:  8-Jun-2020 13:05 (eg)
+;;;; Last file update:  8-Jun-2020 16:56 (eg)
 
 
 (define *html-engine* (environment-engine (skribe-environment)))
@@ -83,6 +83,7 @@
   :action (lambda (n e) (output (&html-author :parent n (markup-body n)) e))
   :after "</div>")
 
+
 (define-writer author *html-engine*
   :action (lambda (n e)
             (output (author-name n) e)
@@ -93,7 +94,23 @@
                       (author-address n))))
 
 
-
 (define-writer  &html-title  *html-engine*
   :before "<div id='doc-title'>\n"
   :after  "</div>\n")
+
+(define-writer &html-footnotes *html-engine*    ;; This should be simpler !!!! 
+  :action (lambda (n e)
+            (let ((fs (env-ref e 'footnotes-seen)))
+              (when (pair? fs)
+                (let ((lst (reverse! (car fs))))
+                  (unless (null? lst) 
+                    ;; display the footnotes on the top of the footnotes-seen stack
+                    (display "<div class='footnotes'>\n<hr>\n")
+                    (printf "<b>Note~A:</b><br>\n" (if (> (length lst) 1) "s" ""))
+                    (let Loop ((lst lst))
+                      (output (&html-do-footnote :parent n (car lst)) e)
+                      (unless (null? (cdr lst))
+                        (Loop (cdr lst))))
+                    (display "</div>")))
+                ;; pop these footnotes from footnotes-seen 
+                (env-set! e 'footnotes-seen (cdr fs))))))
