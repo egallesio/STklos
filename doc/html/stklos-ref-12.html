@@ -10,12 +10,14 @@
  </style>
 <link href="doc-style.css" rel="stylesheet" type="text/css">
 </head>
-<body >
-<table width='100%' cellpadding='0' cellspacing='0'><tr><td bgcolor="#8A8983"><font color="#FAFAFA"><center><h1>STklos Reference Manual<hr align="center" width="10%">12. Foreign Function Interface</h1></center></font></table><table cellpadding="3" cellspacing="0" width="100%"><tr>
-<td align="left" valign="top" width="20%" bgcolor="#8A8983">
-<br /><table width="97%" border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
-<tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen">Contents</font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-50798">*Top*</a></td></tr>
+<body>
+<div id='doc-title'>
+STklos Reference Manual<hr align="center" width="10%">12. Foreign Function Interface</div>
+<table cellpadding="3" cellspacing="0" width="100%"><tr>
+<td align="left" valign="top" width="20%" bgcolor="#204875">
+<table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
+<tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-50995">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -35,11 +37,11 @@
 </tbody></table>
 </td>
 <td align="left" valign="top">
-<p>The <span style="font-variant: small-caps">STklos</span> Foreign Function Interface (FFI for short) has been
+<div class="chapterbody"><p>The <span style="font-variant: small-caps">STklos</span> Foreign Function Interface (FFI for short) has been
 defined to allow an easy access to functions written in C without
 needing to build C-wrappers and, consequently, without any need to
 write C code.  Note that the FFI is very machine dependent and that it
-works only on a limited set of architectures/systems <a href="#fn--footnote-48786"><sup><small>1</small></sup></a>. Moreover,
+works only on a limited set of architectures/systems <a href="#fn--footnote-48983"><sup><small>1</small></sup></a>. Moreover,
 since FFI allows very low level access, it is easy to crash the
 <span style="font-variant: small-caps">STklos</span> VM when using an external C function.</p><p><strong>Note that the support for FFI is still minimal and that it will
 evolve in future versions.</strong></p><p>The definition of an external function is done with the
@@ -71,8 +73,8 @@ between the C and the Scheme worlds.</p><br id="FFI-types"><a name="FFI-types"><
 <center>
 <strong>Fig. 2:</strong> FFI types</center>
 <br>
-<br /><table cellspacing="0" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="define-external"></a><a name="--index-entry-48875"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="define-external"></a><a name="--index-entry-49072"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(define-external name parameters option)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />The form <code>define-external</code> binds a new procedure to <code>name</code>.
@@ -89,8 +91,8 @@ keyword.  All the types defined in the above table, except
 by the foreign function. The type returned must be chosen in the types specified
 in the table. For instance:
 <blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
-<tr><td bgcolor="ivory"><pre>(define-external maximum(<font color="#00cf00">:int</font> <font color="#00cf00">:int</font>)
-   <font color="#00cf00">:return-type</font> <font color="#00cf00">:int</font>)
+<tr><td bgcolor="ivory"><pre>(define-external maximum(<span class="source-key">:int</span> <span class="source-key">:int</span>)
+   <span class="source-key">:return-type</span> <span class="source-key">:int</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
 
@@ -103,9 +105,9 @@ type equal to <code>:void</code> (i.e. the returned value is <em>undefined</em>)
 function in the C world. If this option is omitted, the entry-name is
 supposed to be <code>name</code>. For instance:
 <blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
-<tr><td bgcolor="ivory"><pre>(define-external minimum((a <font color="#00cf00">:int</font>) (b <font color="#00cf00">:int</font>))
-   <font color="#00cf00">:return-type</font> <font color="#00cf00">:int</font>
-   <font color="#00cf00">:entry-name</font>  <font color="red">&quot;min&quot;</font>)
+<tr><td bgcolor="ivory"><pre>(define-external minimum((a <span class="source-key">:int</span>) (b <span class="source-key">:int</span>))
+   <span class="source-key">:return-type</span> <span class="source-key">:int</span>
+   <span class="source-key">:entry-name</span>  <span class="source-string">&quot;min&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
 
@@ -117,10 +119,10 @@ executes the C function called <code>min</code>.
 foreign-function. If necessary, the library is loaded before calling the
 C function. So,
 <blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
-<tr><td bgcolor="ivory"><pre>(define-external minimum((a <font color="#00cf00">:int</font>) (b <font color="#00cf00">:int</font>))
-   <font color="#00cf00">:return-type</font>  <font color="#00cf00">:int</font>
-   <font color="#00cf00">:entry-name</font>   <font color="red">&quot;min&quot;</font>
-    <font color="#00cf00">:library-name</font> <font color="red">&quot;libminmax&quot;</font>)
+<tr><td bgcolor="ivory"><pre>(define-external minimum((a <span class="source-key">:int</span>) (b <span class="source-key">:int</span>))
+   <span class="source-key">:return-type</span>  <span class="source-key">:int</span>
+   <span class="source-key">:entry-name</span>   <span class="source-string">&quot;min&quot;</span>
+    <span class="source-key">:library-name</span> <span class="source-string">&quot;libminmax&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
 
@@ -130,14 +132,14 @@ for shared libraries on the running system (generally <code>so</code>))
 </li>
 </ul></td></tr>
 </tbody></table><p>Hereafter, there are some commented definitions of external functions:</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
-<tr><td bgcolor="ivory"><pre> (define-external isatty ((fd <font color="#00cf00">:int</font>))
-     <font color="#00cf00">:return-type</font> <font color="#00cf00">:boolean</font>)
+<tr><td bgcolor="ivory"><pre> (define-external isatty ((fd <span class="source-key">:int</span>))
+     <span class="source-key">:return-type</span> <span class="source-key">:boolean</span>)
 
-  (define-external system ((cmd <font color="#00cf00">:string</font>))
-    <font color="#00cf00">:return-type</font> <font color="#00cf00">:int</font>)
+  (define-external system ((cmd <span class="source-key">:string</span>))
+    <span class="source-key">:return-type</span> <span class="source-key">:int</span>)
 
-  (define-external ttyname (<font color="#00cf00">:int</font>)
-    <font color="#00cf00">:return-type</font> <font color="#00cf00">:string</font>)
+  (define-external ttyname (<span class="source-key">:int</span>)
+    <span class="source-key">:return-type</span> <span class="source-key">:string</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
 <p>All these functions are defined in the C standard library, hence it is not
@@ -152,13 +154,15 @@ and returns an <em>int</em>.</li>
 Note that in this function the name of the parameter has been omitted
 as within C prototypes.</li>
 </ul><strong>TODO: describe malloc and malloc_atomic and their
-interaction with the GC</strong><br><br><hr width='20%' size='2' align='left'>
-<a name="fn--footnote-48786"><sup><small>1</small></sup></a>: FFI
+interaction with the GC</strong></div><div class='footnotes'>
+<hr>
+<b>Note:</b><br>
+<a name="fn--footnote-48983"><sup><small>1</small></sup></a>: FFI
 system should works on the following architectures/systems:
 gcc_ppc_osx, gcc_sparc_unix, gcc_x64_unix, gcc_x86_unix.
 <br>
-</td>
+</div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Fri Jun  5 20:32:01 2020</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Mon Jun  8 17:11:37 2020</em></small>
 </body>
 </html>
