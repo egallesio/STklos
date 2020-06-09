@@ -342,10 +342,11 @@ static Inline SCM listify_top(int n, vm_thread_t *vm)
 static Inline SCM clone_env(SCM e, vm_thread_t *vm)
 {
   /* clone environment til we find one which is in the heap */
-  if (FRAMEP(e) && IS_IN_STACKP(e)) {
-    e = STk_clone_frame(e);
-    FRAME_NEXT(e) = clone_env((SCM) FRAME_NEXT(e), vm);
-  }
+  if (IS_IN_STACKP(e))
+      if (FRAMEP(e)){
+          e = STk_clone_frame(e);
+          FRAME_NEXT(e) = clone_env((SCM) FRAME_NEXT(e), vm);
+      }
   return e;
 }
 
