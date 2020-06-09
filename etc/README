@@ -1,5 +1,9 @@
 This directory contains
 
+  - Docker:          A directory containing two Docker files for STklos
+                     (one for building STklos with the sources coming from
+		     the git tree and anotehr one to built it froma stable
+		     release).
   - simple-stklos.c: A simple main program which uses the STklos library
   - simple-module.c: A simple module which adds 2 primitives written in C
   		     to the interpreter. This module must be compiled and

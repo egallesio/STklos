@@ -4,16 +4,22 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  3-Jun-2019 11:28
-# Last file update:  5-Jun-2020 16:33 (eg)
+# Last file update:  9-Jun-2020 13:39 (eg)
+
+# The image is created from the git version of STklos
+#
+# To build an image on your machine, place yourself in this directory
+# and type (don't forget the final dot)
+#    $ docker build -f Dockerfile.latest -t stklos:latest .
+# 
 
 # ---------- Build stage
-
 FROM alpine:latest AS build
 RUN apk update && \
     apk add build-base gc-dev gmp-dev libffi-dev pcre-dev git
 
 WORKDIR /build
-RUN git clone https://github.com/egallesio/STklos.git stklos
+RUN git clone https://gitlab.com/Gallesio/STklos.git stklos
 WORKDIR /build/stklos
 RUN env CFLAGS=-O3 ./configure \
     --without-provided-bignum \
