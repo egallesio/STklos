@@ -252,4 +252,55 @@
       (blob->sint-list 2 (endianness little) b4))
 
 ;; ----------------------------------------------------------------------
+;; 	SRFI 158 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 158 - generators")
+
+(require "srfi-158")
+	
+
+(test "iota-simple" (generator->list (make-iota-generator 3 8)) '(8 9 10))
+(test "iota-step" (generator->list (make-iota-generator 3 8 2)) '(8 10 12))
+(test "range-simple" (generator->list (make-range-generator 3) 4) '(3 4 5 6))
+(test "range-upper-limit" (generator->list (make-range-generator 3 8)) '(3 4 5 6 7))
+(test "range-upper-limit-step" (generator->list (make-range-generator 3 8 2)) '(3 5 7))
+
+(define g
+  (make-coroutine-generator
+   (lambda (yield) (let loop ((i 0))
+                (when (< i 3) (yield i) (loop (+ i 1)))))))
+(test "coroutine-generator" (generator->list g) '(0 1 2))
+
+(test "list->generator" (generator->list (list->generator '(1 2 3 4 5))) '(1 2 3 4 5))
+(test "vector->generator" (generator->list (vector->generator '#(1 2 3 4 5))) '(1 2 3 4 5))
+(test "reverse-vector->generator" (generator->list (reverse-vector->generator '#(1 2 3 4 5))) '(5 4 3 2 1))
+(test "string->generator" (generator->list (string->generator "abcde")) '(#\a #\b #\c #\d #\e))
+(test "vector->generator-start" (generator->list (vector->generator '#(a b c d e) 2)) '(c d e))
+(test "vector->generator-start-end" (generator->list (vector->generator '#(a b c d e) 2 4)) '(c d))
+(test "reverse-vector->generator-start" (generator->list (reverse-vector->generator '#(a b c d e) 2)) '(e d c))
+(test "reverse-vector->generator-start-end" (generator->list (reverse-vector->generator '#(a b c d e) 2 4)) '(d c))
+(test "reverse-vector->generator-start-end-2" (generator->list (reverse-vector->generator '#(a b c d e) 0 2)) '(b a))
+
+(test "make-unfold-generator" (generator->list (make-unfold-generator
+                                                (lambda (s) (> s 5))
+                                                (lambda (s) (* s 2))
+                                                (lambda (s) (+ s 1))
+                                                0))
+      '(0 2 4 6 8 10))
+
+(test "gcons*" (generator->list (gcons* 'a 'b (make-range-generator 0 2))) '(a b 0 1))
+(test "gappend" (generator->list (gappend (make-range-generator 0 3) (make-range-generator 0 2))) '(0 1 2 0 1))
+(test "gappend-2" (generator->list (gappend)) '())
+(test "gmap"    (generator->list (gmap - (make-range-generator 0 3))) '(0 -1 -2))
+(test "gmap-2"  (generator->list (gmap cons (generator 1 2 3) (generator 4 5))) '((1 . 4) (2 . 5)))
+(test "gdelete" (generator->list (gdelete 3 (generator 1 2 3 4 5 3 6 7))) '(1 2 4 5 6 7))
+(test "gdelete-neighbor-dups" (generator->list (gdelete-neighbor-dups (list->generator '(a a b c a a a d c)))) '(a b c a d c))
+(test "gindex" (generator->list (gindex (list->generator '(a b c d e f))
+                                        (list->generator '(0 2 4))))
+      '(a c e))
+(test "gselect" (generator->list (gselect (list->generator '(a b c d e f))
+                                          (list->generator '(#t #f #f #t #t #f))))
+      '(a d e))
+
+;; ----------------------------------------------------------------------
 (test-section-end)
