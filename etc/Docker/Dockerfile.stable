@@ -4,7 +4,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  3-Jun-2019 11:28
-# Last file update: 11-Jun-2020 18:43 (eg)
+# Last file update: 16-Jun-2020 11:50 (eg)
 
 # The image is created from a released version of STklos
 # The version number must be passed on the command line
@@ -34,7 +34,7 @@ RUN env CFLAGS=-O3 ./configure \
     --without-provided-gc     \
     --without-provided-regexp \
     --without-provided-ffi
-RUN env TERM="dumb" make all install
+RUN env TERM="dumb" make all tests install
 
 # ---------- Running stage
 FROM alpine:latest
