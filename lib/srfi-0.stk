@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-0.stk                                 -- SRFI-0 aka cond-expand
 ;;;;
-;;;; Copyright © 1999-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1999-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 22-Aug-2019 17:20 (eg)
+;;;; Last file update: 17-Jun-2020 19:34 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -133,48 +133,126 @@
     ;; srfi-76                          ; ....... withdrawn
     ;; srfi-77                          ; ....... withdrawn
     ;; srfi-78                          ; Lightweight testing
-    ;; srfi-79
-    ;; srfi-80
-    ;; srfi-81
-    ;; srfi-82
+    ;; srfi-79                          ; ....... withdrawn
+    ;; srfi-80                          ; ....... withdrawn
+    ;; srfi-81                          ; ....... withdrawn
+    ;; srfi-82                          ; ....... withdrawn
     ;; srfi-83                          ; ....... withdrawn
-    ;; srfi-84
+    ;; srfi-84                          ; ....... withdrawn
     ;; srfi-85                          ; ....... withdrawn
-    ;; srfi-86
+    ;; srfi-86                          ; MU and NU simulating VALUES & CALL-WITH-VALUES
     ;; srfi-87                          ; => in case clauses
     srfi-88                             ; Keyword objects
     (srfi-89 "srfi-89")                 ; Optional Positional and Named Parameters
-    ;; srfi-90
-    ;; srfi-91
-    ;; srfi-92
+    ;; srfi-90                          ; Extensible hash table constructor
+    ;; srfi-91                          ; ....... withdrawn
+    ;; srfi-92                          ; ....... withdrawn
     ;; srfi-93                          ; ....... withdrawn
-    ;; srfi-94
-    ;; srfi-95
+    ;; srfi-94                          ; Type-Restricted Numerical Functions
+    ;; srfi-95                          ; Sorting and Merging
     (srfi-96 "srfi-96")                 ; SLIB Prerequisites
-    ;; srfi-97
+    ;; srfi-97                          ; SRFI Libraries
     srfi-98                             ; Interface to access environment variables
-    ;; srfi-99
+    ;; srfi-99                          ; ERR5RS Records
     (srfi-100 "srfi-100")               ; define-lambda-object
-    ;; srfi-101
+    ;; srfi-101                         ; Purely Functional Random-Access Pairs and Lists
     ;; srfi-102                         ; ....... withdrawn
     ;; srfi-103                         ; ....... withdrawn
     ;; srfi-104                         ; ....... withdrawn
-    ;; srfi-105
-    ;; srfi-106
-    ;; srfi-107
-    ;; srfi-108
-    ;; srfi-109
-    ;; srfi-110
+    ;; srfi-105                         ; Curly-infix-expressions
+    ;; srfi-106                         ; Basic socket interface
+    ;; srfi-107                         ; XML reader syntax
+    ;; srfi-108                         ; Named quasi-literal constructors
+    ;; srfi-109                         ; Extended string quasi-literals
+    ;; srfi-110                         ; Sweet-expressions (t-expressions)
     ((srfi-111 boxes) "srfi-111")       ; Boxes
     srfi-112                            ; Environment Inquiry
-    ;; srfi-113
-    ;; srfi-114
-    ;; srfi-115
-    ;; srfi-116
-    ;; srfi-117
-    ;; srfi-118
-    ;; srfi-119
-    ;; srfi-120
+    ;; srfi-113                         ; Sets and bags
+    ;; srfi-114                         ; ....... withdrawn
+    ;; srfi-115                         ; Scheme Regular Expressions
+    ;; srfi-116                         ; Immutable List Library
+    ;; srfi-117                         ; Queues based on lists
+    ;; srfi-118                         ; Simple adjustable-size strings
+    ;; srfi-119                         ; wisp: simpler indentation-sensitive scheme
+    ;; srfi-120                         ; Timer APIs
+    ;; srfi-121                         ; ....... withdrawn
+    ;; srfi-122                         ; Nonempty Intervals and Generalized Arrays
+    ;; srfi-123                         ; Generic accessor and modifier operators
+    ;; srfi-124                         ; Ephemerons
+    ;; srfi-125                         ; Intermediate hash tables
+    ;; srfi-126                         ; R6RS-based hashtables
+    ;; srfi-127                         ; Lazy Sequences
+    ;; srfi-128                         ; Comparators (reduced)
+    ;; srfi-129                         ; Titlecase procedures
+    ;; srfi-130                         ; Cursor-based string library
+    ;; srfi-131                         ; ERR5RS Record Syntax (reduced)
+    ;; srfi-132                         ; Sort Libraries
+    ;; srfi-133                         ; Vector Library (R7RS-compatible)
+    ;; srfi-134                         ; Immutable Deques
+    ;; srfi-135                         ; Immutable Texts
+    ;; srfi-136                         ; Extensible record types
+    ;; srfi-137                         ; Minimal Unique Types
+    ;; srfi-138                         ; Compiling Scheme programs to executables
+    ;; srfi-139                         ; Syntax parameters
+    ;; srfi-140                         ; Immutable Strings
+    ;; srfi-141                         ; Integer division
+    ;; srfi-142                         ; ....... withdrawn
+    ;; srfi-143                         ; Fixnums
+    ;; srfi-144                         ; Flonums
+    ;; srfi-145                         ; Assumptions
+    ;; srfi-146                         ; Mappings
+    ;; srfi-147                         ; Custom macro transformers
+    ;; srfi-148                         ; Eager syntax-rules
+    ;; srfi-149                         ; Basic Syntax-rules Template Extensions
+    ;; srfi-150                         ; Hygienic ERR5RS Record Syntax (reduced)
+    ;; srfi-151                         ; Bitwise Operations
+    ;; srfi-152                         ; String Library (reduced)
+    ;; srfi-153                         ; ....... withdrawn
+    ;; srfi-154                         ; First-class dynamic extents
+    ;; srfi-155                         ; Promises
+    ;; srfi-156                         ; Syntactic combiners for binary predicates
+    ;; srfi-157                         ; Continuation marks
+    (srfi-158 "srfi-158")               ; Generators and Accumulators
+    ;; srfi-159                         ; Combinator Formatting
+    ;; srfi-160                         ; Homogeneous numeric vector libraries
+    ;; srfi-161                         ; Unifiable Boxes
+    ;; srfi-162                         ; Comparators sublibrary
+    ;; srfi-163                         ; Enhanced array literals
+    ;; srfi-164                         ; Enhanced multi-dimensional Arrays
+    ;; srfi-165                         ; The Environment Monad
+    ;; srfi-166                         ; Monadic Formatting (draft)
+    ;; srfi-167                         ; Ordered Key Value Store
+    ;; srfi-168                         ; Generic Tuple Store Database
+    ;; srfi-169                         ; Underscores in numbers
+    ;; srfi-170                         ; POSIX API (draft)
+    ;; srfi-171                         ; Transducers
+    ;; srfi-172                         ; Two Safer Subsets of R7RS
+    ;; srfi-173                         ; Hooks
+    ;; srfi-174                         ; POSIX Timespecs
+    ;; srfi-175                         ; ASCII character library
+    ;; srfi-176                         ; Version flag
+    ;; srfi-177                         ; Portable keyword arguments (draft)
+    ;; srfi-178                         ; Bitvector library (draft)
+    ;; srfi-179                         ; Nonempty Intervals and Generalized Arrays (Updated) (draft)
+    ;; srfi-180                         ; JSON (draft)
+    ;; srfi-181                         ; Custom ports (draft)
+    ;; srfi-182                         ; ....... withdrawn
+    ;; srfi-183                         ; ....... withdrawn
+    ;; srfi-184                         ; ....... withdrawn
+    ;; srfi-185                         ; Linear adjustable-length strings
+    ;; srfi-186                         ; Transcoders and transcoded ports
+    ;; srfi-187                         ; ....... withdrawn
+    ;; srfi-188                         ; Splicing binding constructs for syntactic keywords
+    ;; srfi-189                         ; Maybe and Either: optional container types (draft)
+    ;; srfi-190                         ; Coroutine Generators
+    ;; srfi-191                         ; Procedure Arity Inspection (draft)
+    ;; srfi-192                         ; Port Positioning (draft)
+    ;; srfi-193                         ; Command lines (draft)
+    ;; srfi-194                         ; Random data generators (draft)
+    ;; srfi-195                         ; Multiple-value boxes (draft)
+    ;; srfi-196                         ; Range Objects (draft)
+    ;; srfi-197                         ; Expression Chaining Operators (draft)
+    ;; srfi-198                         ; POSIX system call exceptions (draft)
     ))
 
 ;; ----------------------------------------------------------------------
