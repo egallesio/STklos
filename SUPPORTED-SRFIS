@@ -14,7 +14,7 @@ SRFI home page at http://srfi.schemers.org/
 Any help for supporting new SRFIs in STklos is welcome.
 
 The list of the implemented SRFIs in this version is given below (the ones
-implemented in lates version is available at https://stklos.net/srfi.html):
+implemented in latest version is available at https://stklos.net/srfi.html):
 
     - SRFI-0: Feature-based conditional expansion construct
     - SRFI-1: List Library
@@ -61,3 +61,4 @@ implemented in lates version is available at https://stklos.net/srfi.html):
     - SRFI-111: Boxes
     - SRFI-112: Environment Inquiry
     - SRFI-158: Generators and Accumulators
+    - SRFI-190: Coroutines Generators

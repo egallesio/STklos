@@ -1,7 +1,7 @@
 ;;;;
-;;;; test-srfi.stk	-- Test of various SRFIs
+;;;; test-srfi.stk  -- Test of various SRFIs
 ;;;;
-;;;; Copyright © 2005-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update:  5-Apr-2010 00:29 (eg)
+;;;; Last file update: 18-Jun-2020 17:18 (eg)
 ;;;;
 
 (require "test")
@@ -29,21 +29,14 @@
 (test-section "SRFIs")
 
 ;; ----------------------------------------------------------------------
-;; 	SRFI 62 ...
+;;  SRFI 62 ...
 ;; ----------------------------------------------------------------------
-(test-subsection "SRFI 62 - S-expression comments")
 
-(test "srfi-62.1" 5 (+ 1 #;(* 2 3) 4))
-(test "srfi-62.2" '(x z) (list 'x #;'y 'z))
-(test "srfi-62.3" 12 (* 3 4 #;(+ 1 2)))
-(test "srfi-62.4" 16 (#;sqrt abs -16))
-
-(test "srfi-62.5" '(a e) (list 'a #;(list 'b #;c 'd) 'e))
-(test "srfi-62.6" '(a . c) '(a . #;b c))
-(test "srfi-62.7" '(a . b) '(a . b #;c))
+;; Tests have been moved to the end since test 62.5 breaks emacs
+;; fonctifiation unil EOF
 
 ;; ----------------------------------------------------------------------
-;; 	SRFI 71 ...
+;;  SRFI 71 ...
 ;; ----------------------------------------------------------------------
 (test-subsection "SRFI 70 - Numbers")
 
@@ -90,8 +83,8 @@
 (test "/.6" +nan.0 (/ 0.0 0.0))
 
 (test "angle.1" #t (< (- (* 4 (atan 1))
-			 (angle -inf.0))
-		      0.00001))
+             (angle -inf.0))
+              0.00001))
 (test "angle.2" 0.0 (angle +inf.0))
 
 (test "string->number.1" +inf.0 (string->number "+inf.0"))
@@ -100,7 +93,7 @@
 (test "number->string.2" "-inf.0" (number->string -inf.0))
 
 ;; ----------------------------------------------------------------------
-;; 	SRFI 74 ...
+;;  SRFI 74 ...
 ;; ----------------------------------------------------------------------
 (test-subsection "SRFI 74 - BLOBs")
 
@@ -118,11 +111,11 @@
 (test "blob repr"
       '(223 123 123 -123 133 15)
       (list (blob-u8-ref b1 0)
-	    (blob-s8-ref b1 1)
-	    (blob-u8-ref b1 1)
-	    (blob-s8-ref b1 2)
-	    (blob-u8-ref b1 2)
-	    (blob-u8-ref b1 3)))
+        (blob-s8-ref b1 1)
+        (blob-u8-ref b1 1)
+        (blob-s8-ref b1 2)
+        (blob-u8-ref b1 2)
+        (blob-u8-ref b1 3)))
 
 (blob-uint-set! 16 (endianness little) b1 0 (- (expt 2 128) 3))
 (test "blob-uint-ref.1"
@@ -252,12 +245,12 @@
       (blob->sint-list 2 (endianness little) b4))
 
 ;; ----------------------------------------------------------------------
-;; 	SRFI 158 ...
+;;  SRFI 158 ...
 ;; ----------------------------------------------------------------------
 (test-subsection "SRFI 158 - generators")
 
 (require "srfi-158")
-	
+
 
 (test "iota-simple" (generator->list (make-iota-generator 3 8)) '(8 9 10))
 (test "iota-step" (generator->list (make-iota-generator 3 8 2)) '(8 10 12))
@@ -301,6 +294,54 @@
 (test "gselect" (generator->list (gselect (list->generator '(a b c d e f))
                                           (list->generator '(#t #f #f #t #t #f))))
       '(a d e))
+
+;; ----------------------------------------------------------------------
+;;  SRFI 190 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 190 - Coroutine Generators")
+
+(require "srfi-190")
+
+(let ()
+  (define g1 (coroutine-generator
+           (do ((i 0 (+ i 1)))
+               ((<= 5 i))
+             (yield i))))
+
+  (define g2 (let ((yield-square (lambda (yield i) (yield (* i i)))))
+               (coroutine-generator
+                (do ((i 0 (+ i 1)))
+                    ((<= 5 i))
+                  (yield-square yield i)))))
+
+  (define-coroutine-generator (g3 n)
+    (do ((i 0 (+ i 1)))
+        ((<= n i))
+      (yield i)))
+
+  (test "Coroutine generator.1" '(0 1 2 3 4)
+        (generator->list g1))
+  (test "Coroutine generator.2" '(0 1 4 9 16)
+        (generator->list g2))
+  (test "Coroutine generator.3" '(0 1 2 3 4 5 6)
+        (generator->list (g3 7))))
+
+;; ----------------------------------------------------------------------
+;;  SRFI 62 ...
+;; ----------------------------------------------------------------------
+;; Tests have been moved here because test 62.5 breaks Emacs fontification
+
+(test-subsection "SRFI 62 - S-expression comments")
+
+(test "srfi-62.1" 5 (+ 1 #;(* 2 3) 4))
+(test "srfi-62.2" '(x z) (list 'x #;'y 'z))
+(test "srfi-62.3" 12 (* 3 4 #;(+ 1 2)))
+(test "srfi-62.4" 16 (#;sqrt abs -16))
+
+(test "srfi-62.5" '(a e) (list 'a #;(list 'b #;c 'd) 'e))
+(test "srfi-62.6" '(a . c) '(a . #;b c))
+(test "srfi-62.7" '(a . b) '(a . b #;c))
+
 
 ;; ----------------------------------------------------------------------
 (test-section-end)

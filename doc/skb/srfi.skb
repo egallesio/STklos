@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 18-Jun-2020 12:36 (eg)
+;; Last file update: 18-Jun-2020 18:25 (eg)
 ;;
 ;; ======================================================================
 
@@ -443,7 +443,9 @@ figure ,(ref :figure "Feature identifiers") in a
          (tr (tdl "error")       (tdl "srfi-23"))
          (tr (tdl "random")      (tdl "srfi-27"))
          (tr (tdl "conditions")  (tdl "srfi-34, srfi-35, srfi-36"))
-         (tr (tdl "hash-tables") (tdl "srfi-69"))))))
+         (tr (tdl "hash-tables") (tdl "srfi-69"))
+         (tr (tdl "generators")  (tdl "srfi-158, srfi-190"))
+         ))))
 
 ;; ----------------------------------------------------------------------
 ;; SRFI 59 -- Vicinity
@@ -577,7 +579,7 @@ you need to insert the following expression])
 ;; ----------------------------------------------------------------------
 (srfi-section 111
 
-(p [,(quick-link-srfi 111) is fully supported.  To use SRFI-111, 
+(p [,(quick-link-srfi 111) is fully supported.  To use SRFI-111,
 you need to insert the following expression])
 (fontified-code [(require "srfi-111")])
 (p [in your code or uses the ,(code "cond-expand") special form.]))
@@ -594,9 +596,19 @@ you need to insert the following expression])
 ;; ----------------------------------------------------------------------
 (srfi-section 158
 
-(p [,(quick-link-srfi 158) is fully supported.  To use SRFI-158, 
+(p [,(quick-link-srfi 158) is fully supported.  To use SRFI-158,
 you need to insert the following expression])
 (fontified-code [(require "srfi-158")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 190 -- Coroutine Generators
+;; ----------------------------------------------------------------------
+(srfi-section 190
+
+(p [,(quick-link-srfi 190) is fully supported.  To use SRFI-190,
+you need to insert the following expression])
+(fontified-code [(require "srfi-190")])
 (p [in your code or uses the ,(code "cond-expand") special form.]))
 
 ;; End of chapter

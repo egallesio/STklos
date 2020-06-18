@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 17-Jun-2020 19:34 (eg)
+;;;; Last file update: 18-Jun-2020 17:59 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -244,7 +244,8 @@
     ;; srfi-187                         ; ....... withdrawn
     ;; srfi-188                         ; Splicing binding constructs for syntactic keywords
     ;; srfi-189                         ; Maybe and Either: optional container types (draft)
-    ;; srfi-190                         ; Coroutine Generators
+    (srfi-190 "srfi-190")               ; Coroutine Generators
+    (generators "srfi-158" "srfi-190")
     ;; srfi-191                         ; Procedure Arity Inspection (draft)
     ;; srfi-192                         ; Port Positioning (draft)
     ;; srfi-193                         ; Command lines (draft)
