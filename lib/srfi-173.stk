@@ -1,0 +1,110 @@
+;;;;
+;;;; srfi-173.stk		-- Implementation of SRFI-173
+;;;;
+;;;; Copyright © 2002-2007 Jeronimo Pellegrini - <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the  implementation of
+;;;; this SRFI by Amirouche Boubekki, it is copyrighted
+;;;; as:
+;;;;
+;;;;;; Copyright © Amirouche Boubekki (2019).
+;;;;;;
+;;;;;; Permission is hereby granted, free of charge, to any person obtaining
+;;;;;; a copy of this software and associated documentation files (the
+;;;;;; “Software”), to deal in the Software without restriction, including
+;;;;;; without limitation the rights to use, copy, modify, merge, publish,
+;;;;;; distribute, sublicense, and/or sell copies of the Software, and to
+;;;;;; permit persons to whom the Software is furnished to do so, subject to
+;;;;;; the following conditions:
+;;;;;;
+;;;;;; The above copyright notice and this permission notice (including the
+;;;;;; next paragraph) shall be included in all copies or substantial
+;;;;;; portions of the Software.
+;;;;;;
+;;;;;; THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+;;;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+;;;;;; MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+;;;;;; LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+;;;;;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+;;;;;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 18-Jun-2020 15:21 (jpellegrini)
+;;;; Last file update: 18-May-2020 16:22 (jpellegrini)
+;;;;
+
+(require "srfi-9")
+
+(define-module SRFI-173
+  (export make-hook
+          hook?
+          list->hook
+          list->hook!
+          hook-add!
+          hook-delete!
+          hook-reset!
+          hook->list
+          hook-run)
+
+(define-record-type <hook>
+  (%make-hook procs arity)
+  hook?
+  (procs hook-procs hook-procs!)
+  (arity hook-arity hook-arity!))
+
+(define (make-hook arity)
+  (%make-hook '() arity))
+
+(define (list->hook arity lst)
+  (%make-hook lst arity))
+
+(define (list->hook! hook lst)
+  (hook-procs! hook lst))
+
+(define (hook-add! hook proc)
+  (let ((procs (hook-procs hook)))
+    (hook-procs! hook (cons proc procs))))
+
+(define (hook-delete! hook proc)
+  (let loop ((procs (hook-procs hook))
+             (out '()))
+    (unless (null? procs)
+      (if (eq? proc (car procs))
+          (hook-procs! hook (append (cdr procs) out))
+          (loop (cdr procs) (cons (car procs) out))))))
+
+(define (hook-reset! hook)
+  (hook-procs! hook '()))
+
+(define (hook->list hook)
+  (hook-procs hook))
+
+(define (hook-run hook . args)
+  (if (not (= (length args) (hook-arity hook)))
+      (error "wrong number of arguments to hook-run")
+      (for-each (lambda (proc) (apply proc args)) (hook-procs hook))))
+
+) ;; END OF DEFINE-MODULE
+;;;; ======================================================================
+(select-module STklos)
+
+(import SRFI-173)
+(provide "srfi-173")
+
