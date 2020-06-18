@@ -1,112 +1,63 @@
 
-			STKLOS SUPPORTED SRFIS
+            STKLOS SUPPORTED SRFIS
 
 
-The "Scheme Requests for Implementation" (SRFI) process is a new
-approach to helping Scheme users to write portable and yet useful
-code. It is a forum for people interested in coordinating libraries
-and other additions to the Scheme language between implementations.
+The "Scheme Requests for Implementation" (SRFI) process is an approach
+to help Scheme users to write portable and yet useful code. It is a
+forum for people interested in coordinating libraries and other
+additions to the Scheme language between implementations.
 
 STklos tries to supports as much as possible the "Final" SRFIs. For a
 definition of what is a final SRFI, you should have a look at the
 SRFI home page at http://srfi.schemers.org/
 
-Hereafter is the list of final SRFIs, for the current release of
-STklos, and the state of their implementation in this release.
+Any help for supporting new SRFIs in STklos is welcome.
 
-State can be one of the following values
-   Y: completely implemented
-   N: not implemented (and will probably not be implemented)
-   -: not implemented yet, but on the TODO list
+The list of the implemented SRFIs in this version is given below (the ones
+implemented in lates version is available at https://stklos.net/srfi.html):
 
-
-
-  State	SRFI    Title
-  ----------------------------------------------------------------------
-    Y	0       Feature-based conditional expansion construct
-    Y	1	List Library
-    Y   2	AND-LET*: an AND with local bindings, a guarded LET* special form
-    Y	4	Homogeneous numeric vector datatypes
-    N	5	A compatible let form with signatures and rest arguments
-
-    Y	6	Basic String Ports
-    Y	7	Feature-based program configuration language
-    Y	8	receive: Binding to multiple values
-    Y	9	Defining Record Types
-    Y	10	Sharp-Comma External Form
-
-    Y	11	Syntax for receiving multiple values
-    Y	13	String Library
-    Y	14	Character-Set Library
-    Y	16	Syntax for procedures of variable arity
-    Y	17	Generalized set!
-
-    Y	18	Multithreading support
-    -	19	Time Data Types and Procedures
-    -	21	Real-time multithreading support
-    Y	22	Running Scheme Scripts on Unix
-    Y	23	Error reporting mechanism
-
-    -	25	Multi-dimensional Array Primitives
-    Y	26	Notation for Specializing Parameters without Currying
-    Y	27	Sources of Random Bits
-    Y	28	Basic Format Strings
-    -	29	Localization
-
-    Y	30	Nested Multi-line Comments
-    Y	31	A special form for recursive evaluation
-    Y	34	Exception Handling for Programs
-    Y	35	Conditions
-    Y	36	I/O Conditions
-
-    N	37	args-fold: a program argument processor
-    Y   38	External Representation for Data With Shared Structure
-    Y	39	Parameter objects
-    -   40	A Library of Streams
-    ?	42	Eager Comprehension
-
-    -	43	Vector Library
-    -   44	Collections
-    Y   45	Primitives for expressing iterative lazy algorithms
-    ?	47	Array
-    Y   48	Intermediate Format Strings
-
-    N   49	Indentation-sensitive syntax
-    ?	51	Handling rest list
-    ?	54	Formatting
-    Y   55	Require-Extension
-    -   57	Records
-
-    ?   58	Array Notation
-    Y   59	Vicinity
-    Y   60	Integers as Bits
-    -   61	A more general cond clause
-    Y   62	S-expression comments
-
-    -   63	Homogeneous and Heterogeneous Arrays
-    Y 	66	Octet Vectors
-    ?   67      Compare Procedures
-    Y   69	Basic hash tables
-    Y   70      Numbers
-
-    ?   71	LET-syntax for multiple values
-    -   72	Simple hygienic macros
-    Y	74	Octet-Addressed Binary Blocks
-    ?	78	Lightweight testing
-    N   86	MU and NU simulating VALUES & CALL-WITH-VALUES, ...
-
-    ?   87      => in case clauses
-    Y   88      Keyword Objects
-    Y   89	Optional and named parameters
-    ?   90	Extensible hash table constructor
-    ?   94	Type-Restricted Numerical Functions
-
-    -   95	Sorting and Merging
-    Y   96	SLIB Prerequisites
-    -   97	SRFI Libraries
-    Y	98	An interface to access environment variables
-    ?   99	ERR5RS Records
-
-    Y  100	define-lambda-object
-
-Implemented SRFIs: 42/71 (final SRFIs)
+    - SRFI-0: Feature-based conditional expansion construct
+    - SRFI-1: List Library
+    - SRFI-2: AND-LET*: an AND with local bindings, a guarded LET* special form
+    - SRFI-4: Homogeneous numeric vector datatypes
+    - SRFI-6: Basic String Ports
+    - SRFI-7: Feature-based program configuration language 
+    - SRFI-8: Receive: Binding to multiple values
+    - SRFI-9: Defining Record Types
+    - SRFI-10: Sharp Comma External Form
+    - SRFI-11: Syntax for receiving multiple values
+    - SRFI-13: String Library
+    - SRFI-14: Character-Set Library
+    - SRFI-16: Syntax for procedures of variable arity
+    - SRFI-17: Generalized set!
+    - SRFI-18: Multithreading support
+    - SRFI-22: Running Scheme Scripts on Unix
+    - SRFI-23: Error reporting mechanism
+    - SRFI-26: Notation for Specializing Parameters without Currying
+    - SRFI-27: Source of random bits
+    - SRFI-28: Basic Format Strings
+    - SRFI-30: Nested Multi-line Comments
+    - SRFI-31: A special form for recursive evaluation
+    - SRFI-34: Exception Handling for Programs
+    - SRFI-35: Conditions
+    - SRFI-36: I/O Conditions
+    - SRFI-38: External representation of shared structures
+    - SRFI-39: Parameters objects
+    - SRFI-45: Optional positional and named parameters
+    - SRFI-48: Intermediate Format Strings
+    - SRFI-55: Require-extension
+    - SRFI-59: Vicinity
+    - SRFI-60: Integers as bits
+    - SRFI-62: S-expression comments
+    - SRFI-66: Octet Vectors
+    - SRFI-69: Basic Hash Tables
+    - SRFI-70: Numbers
+    - SRFI-74: Octet-Addressed Binary Blocks
+    - SRFI-88: Keyword Objects
+    - SRFI-89: Optional Positional and Named Parameters
+    - SRFI-96: SLIB Prerequisites 
+    - SRFI-98: Interface to access environment variables
+    - SRFI-100: define-lambda-object
+    - SRFI-111: Boxes
+    - SRFI-112: Environment Inquiry
+    - SRFI-158: Generators and Accumulators

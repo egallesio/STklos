@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi.stk   -- List of implemented SRFI in STklos
 ;;;;
-;;;; Copyright © 2004-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2004-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Aug-2004 12:43 (eg)
-;;;; Last file update: 12-Jul-2019 17:24 (eg)
+;;;; Last file update: 18-Jun-2020 12:34 (eg)
 ;;;;
 
 (define srfi-address "http://srfi.schemers.org/srfi-~A/srfi-~A.html")
@@ -71,6 +71,7 @@
      (100 . "define-lambda-object")
      (111 . "Boxes")
      (112 . "Environment Inquiry")
+     (158 . "Generators and Accumulators")
    ))
 
 (define (srfi n)
