@@ -105,7 +105,7 @@
     srfi-48                             ; Intermediate Format Strings
     ;; srfi-49                          ; Indentation-sensitive syntax (NEVER)
     ;; srfi-50                          ; ....... withdrawn
-    ;; srfi-51                          ; Handling rest list
+    ((srfi-51 rest-list) "srfi-51")     ; Handling rest list
     ;; srfi-52                          ; ....... withdrawn
     ;; srfi-53                          ; ....... withdrawn
     ;; srfi-54                          ; Formatting
