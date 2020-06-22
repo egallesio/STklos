@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 18-Jun-2020 17:59 (eg)
+;;;; Last file update: 22-Jun-2020 18:31 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -227,7 +227,7 @@
     ;; srfi-170                         ; POSIX API (draft)
     ;; srfi-171                         ; Transducers
     ;; srfi-172                         ; Two Safer Subsets of R7RS
-    (srfi-173 "srfi-173")               ; Hooks
+    ((srfi-173 hooks) "srfi-173")       ; Hooks
     ;; srfi-174                         ; POSIX Timespecs
     ;; srfi-175                         ; ASCII character library
     ;; srfi-176                         ; Version flag

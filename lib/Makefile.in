@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 18-Jun-2020 17:00 (eg)
+# Last file update: 22-Jun-2020 18:15 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -358,128 +358,130 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 SFLAGS = 
-scheme_BOOT = assembler.stk		\
-	      bb.stk 			\
-	      bonus.stk 		\
-	      boot.stk 			\
-	      callcc.stk		\
-	      compiler.stk 		\
-	      computils.stk		\
-	      date.stk			\
-	      equiv.stk			\
-	      expand.pp			\
-	      ffi.stk			\
-	      load.stk			\
-	      logical.stk		\
-	      mbe.stk			\
-	      module.stk		\
-	      object.stk 		\
-	      obsolete.stk		\
-	      peephole.stk		\
-	      process.stk		\
-	      r5rs.stk 			\
-	      r7rs.stk			\
-	      regexp.stk		\
-	      readline.stk		\
-	      repl.stk 			\
-	      repl-readline.stk		\
-	      runtime.stk		\
-	      str.stk			\
-	      srfi-0.stk		\
-	      struct.stk		\
-	      thread.stk
+scheme_BOOT = assembler.stk \
+          bb.stk            \
+          bonus.stk         \
+          boot.stk          \
+          callcc.stk        \
+          compiler.stk      \
+          computils.stk     \
+          date.stk          \
+          equiv.stk         \
+          expand.pp         \
+          ffi.stk           \
+          load.stk          \
+          logical.stk       \
+          mbe.stk           \
+          module.stk        \
+          object.stk        \
+          obsolete.stk      \
+          peephole.stk      \
+          process.stk       \
+          r5rs.stk          \
+          r7rs.stk          \
+          regexp.stk        \
+          readline.stk      \
+          repl.stk          \
+          repl-readline.stk \
+          runtime.stk       \
+          str.stk           \
+          srfi-0.stk        \
+          struct.stk        \
+          thread.stk
 
-scheme_SRCS = STklos.init		\
-	      bigloo-support.stk	\
-	      bigmatch.stk		\
-	      compfile.stk 		\
-	      describe.stk		\
-	      env.stk			\
-	      expand.ss			\
-	      full-syntax.stk		\
-	      full-conditions.stk 	\
-	      getopt.stk		\
-	      help.stk			\
-	      http.stk			\
-	      lex-rt.stk		\
-	      make-C-boot.stk		\
-	      pretty-print.stk		\
-	      recette.stk		\
-	      slib.stk			\
-	      srfi-1.stk		\
-	      srfi-2.stk		\
-	      srfi-4.stk		\
-	      srfi-7.stk		\
-	      srfi-9.stk		\
-	      srfi-11.stk		\
-	      srfi-13.stk		\
-	      srfi-14.stk		\
-	      srfi-17.stk		\
-	      srfi-26.stk		\
-	      srfi-27.stk		\
-	      srfi-31.stk		\
-	      srfi-34.stk		\
-	      srfi-35.stk		\
-	      srfi-36.stk		\
-	      srfi-45.stk		\
-	      srfi-48.stk		\
-	      srfi-59.stk		\
-	      srfi-60.stk		\
-	      srfi-66.stk		\
-	      srfi-69.stk		\
-	      srfi-70.stk		\
-	      srfi-74.stk		\
-	      srfi-89.stk		\
-	      srfi-96.stk		\
-	      srfi-100.stk		\
-		  srfi-158.stk      \
-		  srfi-190.stk      \
-	      tar.stk			\
-	      trace.stk
+scheme_SRCS = STklos.init     \
+          bigloo-support.stk  \
+          bigmatch.stk        \
+          compfile.stk        \
+          describe.stk        \
+          env.stk             \
+          expand.ss           \
+          full-syntax.stk     \
+          full-conditions.stk \
+          getopt.stk          \
+          help.stk            \
+          http.stk            \
+          lex-rt.stk          \
+          make-C-boot.stk     \
+          pretty-print.stk    \
+          recette.stk         \
+          slib.stk            \
+          srfi-1.stk          \
+          srfi-2.stk          \
+          srfi-4.stk          \
+          srfi-7.stk          \
+          srfi-9.stk          \
+          srfi-11.stk         \
+          srfi-13.stk         \
+          srfi-14.stk         \
+          srfi-17.stk         \
+          srfi-26.stk         \
+          srfi-27.stk         \
+          srfi-31.stk         \
+          srfi-34.stk         \
+          srfi-35.stk         \
+          srfi-36.stk         \
+          srfi-45.stk         \
+          srfi-48.stk         \
+          srfi-59.stk         \
+          srfi-60.stk         \
+          srfi-66.stk         \
+          srfi-69.stk         \
+          srfi-70.stk         \
+          srfi-74.stk         \
+          srfi-89.stk         \
+          srfi-96.stk         \
+          srfi-100.stk        \
+          srfi-158.stk        \
+          srfi-173.stk        \
+          srfi-190.stk        \
+          tar.stk             \
+          trace.stk
 
-scheme_OBJS = compfile.ostk		\
-	      bigmatch.ostk		\
-	      full-syntax.ostk		\
-	      full-conditions.ostk 	\
-	      describe.ostk		\
-	      env.ostk			\
-	      getopt.ostk		\
-	      help.ostk			\
-	      http.ostk			\
-	      lex-rt.ostk		\
-	      pretty-print.ostk		\
-	      recette.ostk		\
-	      slib.ostk			\
-	      srfi-1.ostk 		\
-	      srfi-2.ostk		\
-	      srfi-4.ostk		\
-	      srfi-7.ostk		\
-	      srfi-9.ostk		\
-	      srfi-11.ostk		\
-	      srfi-13.ostk		\
-	      srfi-14.ostk		\
-	      srfi-17.ostk		\
-	      srfi-26.ostk		\
-	      srfi-27.ostk		\
-	      srfi-31.ostk		\
-	      srfi-34.ostk		\
-	      srfi-35.ostk		\
-	      srfi-36.ostk		\
-	      srfi-45.ostk		\
-	      srfi-48.ostk		\
-	      srfi-59.ostk		\
-	      srfi-60.ostk		\
-	      srfi-66.ostk		\
-	      srfi-69.ostk		\
-	      srfi-70.ostk		\
-	      srfi-74.ostk		\
-	      srfi-89.ostk		\
-	      srfi-96.ostk		\
-	      srfi-100.ostk		\
-		  srfi-158.ostk     \
-		  srfi-190.ostk     \
-	      tar.ostk			\
-	      trace.ostk
+scheme_OBJS = compfile.ostk    \
+          bigmatch.ostk        \
+          full-syntax.ostk     \
+          full-conditions.ostk \
+          describe.ostk        \
+          env.ostk             \
+          getopt.ostk          \
+          help.ostk            \
+          http.ostk            \
+          lex-rt.ostk          \
+          pretty-print.ostk    \
+          recette.ostk         \
+          slib.ostk            \
+          srfi-1.ostk          \
+          srfi-2.ostk          \
+          srfi-4.ostk          \
+          srfi-7.ostk          \
+          srfi-9.ostk          \
+          srfi-11.ostk         \
+          srfi-13.ostk         \
+          srfi-14.ostk         \
+          srfi-17.ostk         \
+          srfi-26.ostk         \
+          srfi-27.ostk         \
+          srfi-31.ostk         \
+          srfi-34.ostk         \
+          srfi-35.ostk         \
+          srfi-36.ostk         \
+          srfi-45.ostk         \
+          srfi-48.ostk         \
+          srfi-59.ostk         \
+          srfi-60.ostk         \
+          srfi-66.ostk         \
+          srfi-69.ostk         \
+          srfi-70.ostk         \
+          srfi-74.ostk         \
+          srfi-89.ostk         \
+          srfi-96.ostk         \
+          srfi-100.ostk        \
+          srfi-158.ostk        \
+          srfi-173.ostk        \
+          srfi-190.ostk        \
+          tar.ostk             \
+          trace.ostk
 
 DOCDB = DOCDB
 

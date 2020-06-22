@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Aug-2004 12:43 (eg)
-;;;; Last file update: 21-Jun-2020 17:21 (eg)
+;;;; Last file update: 22-Jun-2020 18:35 (eg)
 ;;;;
 
 (define srfi-address "http://srfi.schemers.org/srfi-~A/srfi-~A.html")
@@ -72,6 +72,7 @@
      (111 . "Boxes")
      (112 . "Environment Inquiry")
      (158 . "Generators and Accumulators")
+     (173 . "Hooks")
      (190 . "Coroutines Generators")
    ))
 
