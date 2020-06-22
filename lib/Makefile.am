@@ -87,6 +87,7 @@ scheme_SRCS = STklos.init		\
 	      srfi-96.stk		\
 	      srfi-100.stk		\
 		  srfi-158.stk      \
+	      srfi-173.stk		\
 		  srfi-190.stk      \
 	      tar.stk			\
 	      trace.stk

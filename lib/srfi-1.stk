@@ -312,7 +312,7 @@
 
 (define (make-list len . maybe-elt)
   (check-arg (lambda (n) (and (integer? n) (>= n 0))) len make-list)
-  (let ((elt (cond ((null? maybe-elt) #f) ; Default value
+  (let ((elt (cond ((null? maybe-elt) #void) ; Default value
 		   ((null? (cdr maybe-elt)) (car maybe-elt))
 		   (else (error 'make-list "too many arguments to make-list ~S"
 				(cons len maybe-elt))))))

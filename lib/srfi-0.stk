@@ -227,7 +227,7 @@
     ;; srfi-170                         ; POSIX API (draft)
     ;; srfi-171                         ; Transducers
     ;; srfi-172                         ; Two Safer Subsets of R7RS
-    ;; srfi-173                         ; Hooks
+    (srfi-173 "srfi-173")               ; Hooks
     ;; srfi-174                         ; POSIX Timespecs
     ;; srfi-175                         ; ASCII character library
     ;; srfi-176                         ; Version flag
