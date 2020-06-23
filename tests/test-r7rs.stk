@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update:  7-Jun-2020 18:57 (eg)
+;;;; Last file update: 23-Jun-2020 11:05 (eg)
 ;;;;
 
 (require "test")
@@ -659,6 +659,15 @@
       '(2.0 3.0)
       (member 1.99 '(1.0 2.0 3.0) (lambda (x y) (< (abs (- x y)) 0.1))))
 
+(test "member with 3d parameter.3"
+      10
+      (let ((final 0))
+        ;; R7RS doesn't state anything about the comparator arguments order
+        ;; Anyway, fix it to the one used by SRFI-1 to ensure maximum
+        ;; compatibility
+        (member 2 '(1 2 3 4 5) (lambda (x y) (set! final (+ final x)) #f))
+        final))
+
 (test "assoc with 3d parameter.1"
       '(2 4)
       (assoc 2.0 '((1 1) (2 4) (3 9)) =))
@@ -666,6 +675,17 @@
 (test "assoc with 3d parameter.2"
       '("b" 4)
       (assoc "B" '(("a" 1) ("b" 4) ("c" 9)) string-ci=?))
+
+(test "assoc with 3d parameter.3"
+      '(a b c d e)
+      (let ((final '()))
+        ;; R7RS doesn't state anything about the comparator arguments order
+        ;; Anyway, fix it to the one used by SRFI-1 to ensure maximum
+        ;; compatibility
+        (assoc 2
+               '((a . 1) (b . 2) (c . 3) (d . 4) (e  . 5))
+               (lambda (x y) (set! final (append final (list y))) #f))
+        final))
 
 (test "list-set!.1"
       '("foo" 2 3)

@@ -2,7 +2,7 @@
  *
  * l i s t . c                  -- Lists procedures
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-Oct-1993 21:37
- * Last file update: 27-Nov-2018 17:22 (eg)
+ * Last file update: 23-Jun-2020 09:41 (eg)
  */
 
 #include "stklos.h"
@@ -547,7 +547,7 @@ doc>
                                                                 \
   for (ptr=list; !NULLP(ptr); ) {                               \
     if (CONSP(ptr)) {                                           \
-      if (compare(CAR(ptr), obj)) return ptr;                   \
+      if (compare(obj, CAR(ptr))) return ptr;                   \
     }                                                           \
     else                                                        \
       break; /* end of a dotted list */                         \
@@ -620,7 +620,7 @@ doc>
                                                                 \
   for(l=alist; CONSP(l); ) {                                    \
     tmp = CAR(l);                                               \
-    if (CONSP(tmp) && compare(CAR(tmp), obj)) return tmp;       \
+    if (CONSP(tmp) && compare(obj, CAR(tmp))) return tmp;       \
     if ((l=CDR(l)) == alist) break;                             \
   }                                                             \
   if (NULLP(l)) return(STk_false);                              \
