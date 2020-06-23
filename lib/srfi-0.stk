@@ -218,7 +218,7 @@
     (srfi-158 "srfi-158")               ; Generators and Accumulators
     ;; srfi-159                         ; Combinator Formatting
     ;; srfi-160                         ; Homogeneous numeric vector libraries
-    ;; srfi-161                         ; Unifiable Boxes
+    (srfi-161 "srfi-161")               ; Unifiable Boxes
     ;; srfi-162                         ; Comparators sublibrary
     ;; srfi-163                         ; Enhanced array literals
     ;; srfi-164                         ; Enhanced multi-dimensional Arrays

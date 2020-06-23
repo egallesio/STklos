@@ -628,6 +628,9 @@ described in this document (procedures
 ;; SRFI 158 -- Generators and Accumulators
 (gen-loaded-srfi 158)
 
+;; SRFI 161 -- Unifiable Boxes
+(gen-loaded-srfi 161)
+
 ;; SRFI 169 -- Underscores in numbers
 (gen-embedded-srfi 169
                    [See ,(ref :mark "accept-srfi-169-numbers"
