@@ -28,8 +28,21 @@ STklos has been successfully built on the following distributions:
 
 ### ARM architecture
 
-STklos has been successfully built on the following distribution:
-- Raspbian 8.3.0 on a Raspberry Pi 2 (ARM v7l) (32 bits gcc, kernel 4.19)
+STklos has been successfully built on (gcc ran on the device) and tested on the following
+distributions:
+- Raspbian 10.4 (Buster) on a Raspberry Pi 2 (ARM v7l) (32 bits gcc, glibc, kernel 4.19)
+- Armbian 10.4 (Buster) on a Banana Pi M3 (ARM v7l) (32 bits gcc, glibc, kernel 5.4.45)
+
+### MIPS architecture
+
+STklos has been successfully cross-compiled and tested on the following distributions:
+- OpenWRT 19.07.1 on a TP-Link Archer C7 v4 (MIPS 74Kc V5.0, big endian) (32 bits gcc, musl, kernel 4.14)
+- OpenWRT 19.07.1 on a Asus RT-AC51U MIPS (24KEc V5.0, little endian) (32 bits gcc, musl, kernel 4.14)
+- OpenWRT 19.07.1 on a D-Link DIR-505 (MIPS 24Kc V7.4, big endian) (32 bits gcc, musl, kernel 4.14)
+- OpenWRT 19.07.1 on Qemu MALTA (MIPS 32-bits, big endian) (32 bits gcc, musl, kernel 4.14)
+- LibreCMC 1.5.1 on a TP-Link TL-WR1043ND (MIPS 74Kc V5.0, big endian) (32 bits gcc, musl, kernel 4.14)
+
+Zram was enabled in all devices, except the emulated Qemu, which was already started with 256Mb RAM.
 
 Apple MacOs
 -----------
