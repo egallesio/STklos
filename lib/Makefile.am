@@ -89,6 +89,7 @@ scheme_SRCS = STklos.init     \
           srfi-96.stk         \
           srfi-100.stk        \
           srfi-158.stk        \
+          srfi-171.stk        \
           srfi-173.stk        \
           srfi-190.stk        \
           tar.stk             \
@@ -136,6 +137,7 @@ scheme_OBJS = compfile.ostk    \
           srfi-96.ostk         \
           srfi-100.ostk        \
           srfi-158.ostk        \
+          srfi-171.ostk        \
           srfi-173.ostk        \
           srfi-190.ostk        \
           tar.ostk             \
