@@ -43,7 +43,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-36: I/O Conditions
     - SRFI-38: External representation of shared structures
     - SRFI-39: Parameters objects
-    - SRFI-45: Optional positional and named parameters
+    - SRFI-45: Primitives for Expressing Iterative Lazy Algorithms
     - SRFI-48: Intermediate Format Strings
     - SRFI-55: Require-extension
     - SRFI-59: Vicinity
