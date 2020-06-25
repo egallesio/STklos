@@ -11,8 +11,8 @@ For more information on the way to build STklos from the source distribution,
 you can look at https://stklos.bet/documentation.html.
 
 
-Main Linux distributions
-------------------------
+Linux distributions
+-------------------
 
 STklos is developed on a Linux distribution (Arch) and compiling it on any
 general purpose Linux distribution should be easy.
@@ -44,6 +44,16 @@ STklos has been successfully cross-compiled and tested on the following distribu
 
 Zram was enabled in all devices, except the emulated Qemu, which was already started with 256Mb RAM.
 
+
+BSD Family
+----------
+
+STklos has been successfully built on the following members of the BSD family: 
+
+- FreeBSD 12.1 (64 bits, clang 8.0.1 compiler)
+- OpenBSD 6.6 (64 bits, clang 8.0.1 compiler)
+
+
 Apple MacOs
 -----------
 
@@ -72,12 +82,11 @@ WSL. It has been been successfully built on the following distribution:
   (64 bits gcc, kernel 4.4)
 
 
-========================================================================
+----------------------------------------------------------------------
 
 The following text is kept here for historical purpose.
 You should not need the information it contains.
 
-=======================================================================
 
 (Obsolete) Information for version 1.x
 ======================================
