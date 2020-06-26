@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 26-Jun-2020 13:53 (eg)
+ * Last file update: 26-Jun-2020 19:00 (eg)
  */
 
 #include <unistd.h>
@@ -1070,7 +1070,7 @@ DEFINE_PRIMITIVE("%seconds->string", date2string, subr2, (SCM fmt, SCM seconds))
  * Returns the name of the underlying Operating System which is running
  * the program.
  * The value returned by |runnin-os| is a symbol. For now, this procedure
- * returns either |unix|, |windows|, or |cygwin-windows|.
+ * returns either |unix|, |android|, |windows|, or |cygwin-windows|.
 doc>
 */
 DEFINE_PRIMITIVE("running-os", running_os, subr0, (void))
@@ -1082,7 +1082,11 @@ DEFINE_PRIMITIVE("running-os", running_os, subr0, (void))
   return STk_intern("windows");
 # endif
 #else
+#  ifdef __ANDROID__
+  return STk_intern("android");
+#  else
   return STk_intern("unix");
+#endif
 #endif
 }
 
