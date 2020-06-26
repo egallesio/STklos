@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 18-Jun-2020 17:18 (eg)
+;;;; Last file update: 25-Jun-2020 12:23 (eg)
 ;;;;
 
 (require "test")
@@ -51,6 +51,71 @@
 (test "rest-list #t"         '(x 1 "str") (receive (a b c) (rest-values rest-list #t `(x y z) `(100 . ,number?) `("str" . ,string?)) (list a b c)))
 (test "rest-list #t"         '(1 "str" x) (receive (a b c) (rest-values rest-list #t `(100 . ,number?) `("str" . ,string?) `(x y z)) (list a b c)))
 (test "rest-list #f"         '(1 "str" y x) (receive (a b c d) (rest-values rest-list #f `(100 . ,number?) `("str" . ,string?) `(y z)) (list a b c d)))
+
+;; ----------------------------------------------------------------------
+;;  SRFI 60 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 60 - Integers as Bits")
+
+(require "srfi-60")
+(test "logand" "1000" (number->string (logand #b1100 #b1010) 2))
+(test "logior" "1110" (number->string (logior #b1100 #b1010) 2))
+(test "logxor" "110"  (number->string (logxor #b1100 #b1010) 2))
+(test "lognot.1" "-10000001" (number->string (lognot #b10000000) 2))
+(test "lognot.2" "-1" (number->string (lognot #b0) 2))
+(test "logtest.1" #f (logtest #b0100 #b1011))
+(test "logtest.1" #t (logtest #b0100 #b0111))
+(test "logcount.1" 4 (logcount #b10101010))
+(test "logcount.2" 0 (logcount 0))
+(test "logcount.3" 1 (logcount -2))
+(test "integer-length.1" 8 (integer-length #b10101010))
+(test "integer-length.2" 0 (integer-length 0))
+(test "integer-length.2" 4 (integer-length #b1111))
+(test "log2-binary-factors"
+      '((-1 . -1) (0 . 0) (1 . 1) (0 . 0) (2 . 2) (0 . 0)
+        (1 . 1) (0 . 0) (3 . 3) (0 . 0) (1 . 1) (0 . 0)
+        (2 . 2) (0 . 0) (1 . 1) (0 . 0) (4 . 4))
+      (let ((res '()))
+        (do ((idx 0 (+ 1 idx)))
+            ((> idx 16))
+          (set! res (cons (cons (log2-binary-factors (- idx))
+                                (log2-binary-factors (+ idx)))
+                          res)))
+        (reverse res)))
+(test "logbit?.1" #t (logbit? 0 #b1101))
+(test "logbit?.2" #f (logbit? 1 #b1101))
+(test "logbit?.3" #t (logbit? 2 #b1101))
+(test "logbit?.4" #t (logbit? 3 #b1101))
+(test "logbit?.5" #f (logbit? 4 #b1101))
+(test "copybit.1" "1"   (number->string (copy-bit 0 0 #t) 2))
+(test "copybit.2" "100" (number->string (copy-bit 2 0 #t) 2))
+(test "copybit.3" "1011" (number->string (copy-bit 2 #b1111 #f) 2))
+(test "bit-field.1" "1010" (number->string (bit-field #b1101101010 0 4) 2))
+(test "bit-field.2" "10110" (number->string (bit-field #b1101101010 4 9) 2))
+(test "copy-bit-field.1" "1101100000"
+      (number->string (copy-bit-field #b1101101010 0 0 4) 2))
+(test "copy-bit-field.2" "1101101111"
+      (number->string (copy-bit-field #b1101101010 -1 0 4) 2))
+(test "copy-bit-field.3" "110100111110000"
+      (number->string (copy-bit-field #b110100100010000 -1 5 9) 2))
+(test "ash.1" "1000" (number->string (ash #b1 3) 2))
+(test "ash.2" "101" (number->string (ash #b1010 -1) 2))
+(test "rotate-bit-field.1"  "10"
+      (number->string (rotate-bit-field #b0100 3 0 4) 2))
+(test "rotate-bit-field.2" "110100010010000"
+      (number->string (rotate-bit-field #b110100100010000 -1 5 9) 2))
+(test "rotate-bit-field.3" "110100000110000"
+      (number->string (rotate-bit-field #b110100100010000 1 5 9) 2))
+(test  "reverse-bit-field" "e5"
+       (number->string (reverse-bit-field #xa7 0 8) 16))
+(test "integer->list.1" '(#t #t #t #f #t) (integer->list #b11101))
+(test "integer->list.2" '(#f #f #f #f #f #t #t #t #f #t) (integer->list #b11101 10))
+(test "list->integer"   #b11101 (list->integer '(#f #f #f #f #f #t #t #t #f #t)))
+(test "booleans->integer"  #b11101
+      (booleans->integer #f #f #f #f #f #t #t #t #f #t))
+
+
+
 
 
 
