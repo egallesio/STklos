@@ -57,6 +57,7 @@
      (45 . "Primitives for Expressing Iterative Lazy Algorithms")
      (48 . "Intermediate Format Strings")
      (51 . "Handling rest list")
+     (54 . "Formatting")
      (55 . "Require-extension")
      (59 . "Vicinity")
      (60 . "Integers as bits")
