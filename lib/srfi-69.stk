@@ -60,6 +60,9 @@
 (define (make-hash-table :optional (comp equal?) (hash hash))
   (%old-make-hash-table comp hash))
 
+(define (alist->hash-table lst :optional (comp equal?) (hash hash-table-hash))
+  (%old-alist->hash-table lst comp hash))
+
 ;; hash-table-for-each is called hash-table-walk in SRFI-69
 (define hash-table-walk hash-table-for-each) ;; Name used in srfi69
 
