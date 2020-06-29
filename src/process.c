@@ -15,7 +15,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 30-May-2020 17:46 (eg)
+ * Last file update: 26-Jun-2020 15:13 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -34,6 +34,7 @@
 #include <fcntl.h>
 #include <sys/param.h>
 #include <sys/wait.h>
+#include <sys/resource.h>  
 #include <signal.h>
 #include "fport.h"
 
@@ -323,7 +324,14 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
              }
 
              /* close all remaining files */
-             for(i = 3; i < NOFILE; i++) close(i);
+             {
+               struct rlimit rl;
+
+               if (getrlimit(RLIMIT_NOFILE, &rl) == 0) 
+                 for(i = 3; i < (int) rl.rlim_cur; i++) close(i);
+               else
+                 STk_warning("run-process: cannot close file descriptors > 2");
+             }
 
              /*  And then, EXEC'ing...  */
              execvp(*argv, argv);

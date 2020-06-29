@@ -22,22 +22,40 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  2-Jun-2020 17:35 (eg)
+ * Last file update: 25-Jun-2020 09:11 (eg)
  */
-
+#include <sys/resource.h>
 #include "stklos.h"
 #include "object.h"
 #include "struct.h"
 
+
 /* Define the maximum calls for equal-count (a version of equal bounded in
-  recursive calls). The value depends of the compiler used , since CLANG
-  produces code which crashes when STklos is compiled without any
-  optimization. */
-#if defined(__clang__) && !defined(__OPTIMIZE__)
-# define MAX_EQUAL_CALLS   50000
+  recursive calls). The value depends of the way the program is compiled:
+  if optimizations are used, the program grows stack faster
+*/
+
+#define DEFAULT_MAX_EQUAL_CALLS  50000 /* max recursive calls  */
+#define STK_DIVISOR_OPTIM          100 /* divisisor if compiled with -O option */
+#define STK_DIVISOR_NOT_OPTIM      200 /* divisisor if compiled without -O option */
+
+#ifdef __OPTIMIZE__
+   static int optimized = 1;
 #else
-#  define MAX_EQUAL_CALLS 100000
+   static int optimized = 0;
 #endif
+
+static int max_equal_calls = DEFAULT_MAX_EQUAL_CALLS;
+
+static void limit_max_equal_calls(void) {
+  struct rlimit rl;
+
+  if (getrlimit(RLIMIT_STACK, &rl) == 0) {
+    /* Determine a value for the maximum calls for equal-count depending of stack size*/
+    max_equal_calls = rl.rlim_cur / (optimized? STK_DIVISOR_OPTIM: STK_DIVISOR_NOT_OPTIM);
+  }
+}
+
 
 DEFINE_PRIMITIVE("not", not, subr1, (SCM x))
 /*
@@ -452,13 +470,14 @@ static SCM equal_count(SCM x, SCM y, int max, int *cycle)
 DEFINE_PRIMITIVE("%equal-try", equal_try, subr2, (SCM x, SCM y))
 {
   int cycle = 0;
-  SCM res = equal_count(x, y, MAX_EQUAL_CALLS, &cycle);
+  SCM res = equal_count(x, y, max_equal_calls, &cycle);
   return (cycle) ? STk_nil : res;
 }
 
 
 int STk_init_boolean(void)
 {
+  limit_max_equal_calls();
   ADD_PRIMITIVE(not);
   ADD_PRIMITIVE(booleanp);
   ADD_PRIMITIVE(eq);

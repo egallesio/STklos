@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  7-Feb-2020 12:16 (eg)
+;;;; Last file update: 29-Jun-2020 07:15 (eg)
 ;;;;
 
 
@@ -1220,9 +1220,9 @@ doc>
 |#
 (define (file-separator)
   (case (running-os)
-    ((unix cygwin-windows)    #\/)
-    ((windows)                #\\)
-    (else                     #\?)))
+    ((unix cygwin-windows android)    #\/)
+    ((windows)                        #\\)
+    (else                             #\?)))
 
 #|
 <doc EXT make-path

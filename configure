@@ -6235,6 +6235,17 @@ fi
 
 $as_echo "#define THREADS_PTHREADS /**/" >>confdefs.h
 
+   for ac_func in pthread_cancel
+do :
+  ac_fn_c_check_func "$LINENO" "pthread_cancel" "ac_cv_func_pthread_cancel"
+if test "x$ac_cv_func_pthread_cancel" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PTHREAD_CANCEL 1
+_ACEOF
+
+fi
+done
+
    ;;
  *)
    as_fn_error $? "Unknown thread system: $THREADS" "$LINENO" 5

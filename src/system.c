@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 30-May-2020 20:42 (eg)
+ * Last file update: 26-Jun-2020 19:00 (eg)
  */
 
 #include <unistd.h>
@@ -636,14 +636,23 @@ DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
   s = tmpnam(buff);
   return s ? STk_Cstring2string(s) : STk_false;
 #else
-  static int cpt=0;
-  int pid = (int) getpid();
+  static int cpt=0, pid;
+  static char *tmpdir;
   char buff[MAX_PATH_LENGTH];
   MUT_DECL(tmpnam_mutex);
 
   MUT_LOCK(tmpnam_mutex);
+  if (cpt == 0) {
+    /* First call: initialize tmpdir and pid */
+    char *tmp = getenv("TMPDIR");
+
+    tmpdir = (tmp) ? tmp : "/tmp";
+    pid    = (int) getpid();
+  }
+
   for ( ; ; ) {
-    sprintf(buff, "/tmp/stklos%05d-%05x", pid, cpt++);
+
+    sprintf(buff, "%s/stklos%05d-%05x", tmpdir, pid, cpt++);
     if (cpt > 100000)           /* arbitrary limit to avoid infinite search */
       return STk_false;
     if (access(buff, F_OK) == -1) break;
@@ -1061,7 +1070,7 @@ DEFINE_PRIMITIVE("%seconds->string", date2string, subr2, (SCM fmt, SCM seconds))
  * Returns the name of the underlying Operating System which is running
  * the program.
  * The value returned by |runnin-os| is a symbol. For now, this procedure
- * returns either |unix|, |windows|, or |cygwin-windows|.
+ * returns either |unix|, |android|, |windows|, or |cygwin-windows|.
 doc>
 */
 DEFINE_PRIMITIVE("running-os", running_os, subr0, (void))
@@ -1073,7 +1082,11 @@ DEFINE_PRIMITIVE("running-os", running_os, subr0, (void))
   return STk_intern("windows");
 # endif
 #else
+#  ifdef __ANDROID__
+  return STk_intern("android");
+#  else
   return STk_intern("unix");
+#endif
 #endif
 }
 
@@ -1263,7 +1276,7 @@ DEFINE_PRIMITIVE("%uname", uname, subr0, (void))
   VECTOR_DATA(z)[2] = STk_Cstring2string(name.release);
   VECTOR_DATA(z)[3] = STk_Cstring2string(name.version);
   VECTOR_DATA(z)[4] = STk_Cstring2string(name.machine);
-  
+
   return z;
 }
 

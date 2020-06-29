@@ -16,49 +16,51 @@ Any help for supporting new SRFIs in STklos is welcome.
 The list of the implemented SRFIs in this version is given below (the ones
 implemented in latest version is available at https://stklos.net/srfi.html):
 
-    - SRFI-0: Feature-based conditional expansion construct
-    - SRFI-1: List Library
-    - SRFI-2: AND-LET*: an AND with local bindings, a guarded LET* special form
-    - SRFI-4: Homogeneous numeric vector datatypes
-    - SRFI-6: Basic String Ports
-    - SRFI-7: Feature-based program configuration language 
-    - SRFI-8: Receive: Binding to multiple values
-    - SRFI-9: Defining Record Types
-    - SRFI-10: Sharp Comma External Form
-    - SRFI-11: Syntax for receiving multiple values
-    - SRFI-13: String Library
-    - SRFI-14: Character-Set Library
-    - SRFI-16: Syntax for procedures of variable arity
-    - SRFI-17: Generalized set!
-    - SRFI-18: Multithreading support
-    - SRFI-22: Running Scheme Scripts on Unix
-    - SRFI-23: Error reporting mechanism
-    - SRFI-26: Notation for Specializing Parameters without Currying
-    - SRFI-27: Source of random bits
-    - SRFI-28: Basic Format Strings
-    - SRFI-30: Nested Multi-line Comments
-    - SRFI-31: A special form for recursive evaluation
-    - SRFI-34: Exception Handling for Programs
-    - SRFI-35: Conditions
-    - SRFI-36: I/O Conditions
-    - SRFI-38: External representation of shared structures
-    - SRFI-39: Parameters objects
-    - SRFI-45: Optional positional and named parameters
-    - SRFI-48: Intermediate Format Strings
-    - SRFI-55: Require-extension
-    - SRFI-59: Vicinity
-    - SRFI-60: Integers as bits
-    - SRFI-62: S-expression comments
-    - SRFI-66: Octet Vectors
-    - SRFI-69: Basic Hash Tables
-    - SRFI-70: Numbers
-    - SRFI-74: Octet-Addressed Binary Blocks
-    - SRFI-88: Keyword Objects
-    - SRFI-89: Optional Positional and Named Parameters
-    - SRFI-96: SLIB Prerequisites 
-    - SRFI-98: Interface to access environment variables
-    - SRFI-100: define-lambda-object
-    - SRFI-111: Boxes
-    - SRFI-112: Environment Inquiry
-    - SRFI-158: Generators and Accumulators
-    - SRFI-190: Coroutines Generators
+- SRFI-0: Feature-based conditional expansion construct
+- SRFI-1: List Library
+- SRFI-2: AND-LET*: an AND with local bindings, a guarded LET* special form
+- SRFI-4: Homogeneous numeric vector datatypes
+- SRFI-6: Basic String Ports
+- SRFI-7: Feature-based program configuration language 
+- SRFI-8: Receive: Binding to multiple values
+- SRFI-9: Defining Record Types
+- SRFI-10: Sharp Comma External Form
+- SRFI-11: Syntax for receiving multiple values
+- SRFI-13: String Library
+- SRFI-14: Character-Set Library
+- SRFI-16: Syntax for procedures of variable arity
+- SRFI-17: Generalized set!
+- SRFI-18: Multithreading support
+- SRFI-22: Running Scheme Scripts on Unix
+- SRFI-23: Error reporting mechanism
+- SRFI-26: Notation for Specializing Parameters without Currying
+- SRFI-27: Source of random bits
+- SRFI-28: Basic Format Strings
+- SRFI-30: Nested Multi-line Comments
+- SRFI-31: A special form for recursive evaluation
+- SRFI-34: Exception Handling for Programs
+- SRFI-35: Conditions
+- SRFI-36: I/O Conditions
+- SRFI-38: External representation of shared structures
+- SRFI-39: Parameters objects
+- SRFI-45: Primitives for Expressing Iterative Lazy Algorithms
+- SRFI-48: Intermediate Format Strings
+- SRFI-51: Handling rest list
+- SRFI-55: Require-extension
+- SRFI-59: Vicinity
+- SRFI-60: Integers as bits
+- SRFI-62: S-expression comments
+- SRFI-66: Octet Vectors
+- SRFI-69: Basic Hash Tables
+- SRFI-70: Numbers
+- SRFI-74: Octet-Addressed Binary Blocks
+- SRFI-88: Keyword Objects
+- SRFI-89: Optional Positional and Named Parameters
+- SRFI-96: SLIB Prerequisites 
+- SRFI-98: Interface to access environment variables
+- SRFI-100: define-lambda-object
+- SRFI-111: Boxes
+- SRFI-112: Environment Inquiry
+- SRFI-158: Generators and Accumulators
+- SRFI-173: Hooks
+- SRFI-190: Coroutines Generators
