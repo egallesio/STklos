@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  2-Jun-2020 19:30 (eg)
+ * Last file update: 29-Jun-2020 16:12 (eg)
  */
 
 
@@ -176,6 +176,9 @@ DEFINE_PRIMITIVE("thread-yield!", thread_yield, subr0, (void))
  * state. However, another thread attempting to enter this critical section
  * will raise an "abandoned mutex exception" because the mutex is
  * unlocked/abandoned.
+ * ,(linebreak)
+ * On ,(emph "Android"), |thread-terminate!| can be used only to terminate the
+ * current thread.  Trying to kill another thread produces an error.
 doc>
 */
 DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
@@ -197,8 +200,13 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
     if (thr == STk_get_current_vm()->scheme_thread)
       pthread_exit(0);                          /* Suicide */
     else {
-      if (saved_state != th_new)
-        pthread_cancel(THREAD_PTHREAD(thr));    /* terminate an other thread */
+      if (saved_state != th_new) {
+#ifdef HAVE_PTHREAD_CANCEL
+        pthread_cancel(THREAD_PTHREAD(thr));    /* terminate another thread */
+#else
+        STk_error("running system lacks suport to termninate another thread");
+#endif
+      }
     }
     pthread_mutex_unlock(&THREAD_MYMUTEX(thr));
   }
