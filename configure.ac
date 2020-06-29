@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  5-Jun-2020 17:25 (eg)
+### Last file update: 26-Jun-2020 17:42 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.40])
@@ -170,6 +170,7 @@ case "$THREADS" in
                 [AC_MSG_ERROR([Missing PThread library])])
    THREADS=pthreads
    AC_DEFINE(THREADS_PTHREADS, [], [PThread support])
+   AC_CHECK_FUNCS([pthread_cancel])
    ;;
  *)
    AC_MSG_ERROR([Unknown thread system: $THREADS])
