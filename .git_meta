@@ -1159,7 +1159,11 @@ chmod 0644 "src/dynload.c"; touch -c -t "202005291833.00" "src/dynload.c"
 chmod 0644 "src/env.c"; touch -c -t "202002071145.29" "src/env.c"
 chmod 0644 "src/error.c"; touch -c -t "202006021558.54" "src/error.c"
 chmod 0644 "src/extend.c"; touch -c -t "201108220900.58" "src/extend.c"
+<<<<<<< HEAD
 chmod 0644 "src/extraconf.h.in"; touch -c -t "202006291707.33" "src/extraconf.h.in"
+=======
+chmod 0644 "src/extraconf.h.in"; touch -c -t "202006291621.04" "src/extraconf.h.in"
+>>>>>>> 6bea8b791cfffc48c927fa5721048765f8d90786
 chmod 0644 "src/ffi.c"; touch -c -t "202006021558.54" "src/ffi.c"
 chmod 0644 "src/fixnum.c"; touch -c -t "202003061033.28" "src/fixnum.c"
 chmod 0644 "src/fport.c"; touch -c -t "202006021558.54" "src/fport.c"

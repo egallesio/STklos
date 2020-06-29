@@ -108,7 +108,7 @@
     ((srfi-51 rest-list) "srfi-51")     ; Handling rest list
     ;; srfi-52                          ; ....... withdrawn
     ;; srfi-53                          ; ....... withdrawn
-    ;; srfi-54                          ; Formatting
+    ((srfi-54 formatting) "srfi-54")    ; Formatting
     srfi-55                             ; require-extension
     ;; srfi-56                          ; ....... withdrawn
     ;; srfi-57                          ; Records

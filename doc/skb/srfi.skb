@@ -425,6 +425,16 @@ you need to insert the following expression])
 (p [in your code or uses the ,(code "cond-expand") special form.]))
 
 ;; ----------------------------------------------------------------------
+;; SRFI 54 -- Formatting
+;; ----------------------------------------------------------------------
+(srfi-section 54
+
+(p [,(quick-link-srfi 54) is fully supported.  To use SRFI-54,
+you need to insert the following expression])
+(fontified-code [(require "srfi-54")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
 ;; SRFI 55 -- Require-extension
 ;; ----------------------------------------------------------------------
 (index "require-extension")
