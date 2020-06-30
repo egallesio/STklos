@@ -73,6 +73,7 @@
      (100 . "define-lambda-object")
      (111 . "Boxes")
      (112 . "Environment Inquiry")
+     (117 . "Queues based on lists")
      (158 . "Generators and Accumulators")
      (173 . "Hooks")
      (190 . "Coroutines Generators")
