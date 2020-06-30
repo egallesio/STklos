@@ -622,6 +622,14 @@ you need to insert the following expression])
 (p [in your code or uses the ,(code "cond-expand") special form.]))
 
 ;; ----------------------------------------------------------------------
+;; SRFI 169 -- Underscores in numbers
+;; ----------------------------------------------------------------------
+(srfi-section 169
+
+(p [,(quick-link-srfi 169) is fully supported.]))
+
+
+;; ----------------------------------------------------------------------
 ;; SRFI 190 -- Coroutine Generators
 ;; ----------------------------------------------------------------------
 (srfi-section 190
