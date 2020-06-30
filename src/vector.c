@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??? 1993
- * Last file update:  3-Jun-2020 20:45 (eg)
+ * Last file update: 29-Jun-2020 19:28 (eg)
  */
 
 #include <string.h>
@@ -341,8 +341,8 @@ DEFINE_PRIMITIVE("list->vector", list2vector, subr1, (SCM l))
 /*
 <doc R57RS vector-copy
  * (vector-copy v)
- * (vector-copy string start)
- * (vector-copy string start stop)
+ * (vector-copy v start)
+ * (vector-copy v start stop)
  *
  * Return a newly allocated copy of the elements of the given
  * vector between |start| and |end| . The elements of the new

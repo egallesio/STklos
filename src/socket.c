@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update:  2-Jun-2020 12:29 (eg)
+ * Last file update: 30-Jun-2020 08:43 (eg)
  */
 
 #include <sys/types.h>
@@ -420,7 +420,7 @@ static void socket_finalizer(SCM socket, void _UNUSED(*client_data))
  * associated to the socket and we write the length of this line on its
  * output port.
  * @lisp
- * (let* ((server (make-server-socket 13345))
+ * (let* ((server (make-server-socket 12345))
  *        (client (socket-accept server))
  *        (l      (read-line (socket-input client))))
  *   (format (socket-output client)
@@ -541,7 +541,7 @@ DEFINE_PRIMITIVE("socket-port-number", socket_port_number, subr1, (SCM sock))
  * (socket-input socket)
  * (socket-output socket)
  *
- * Returns the file port associated for reading or writing with the
+ * Returns the textual port associated for reading or writing with the
  * program connected with |socket|. If no connection has already been
  * established, these functions return |#f|.
  *

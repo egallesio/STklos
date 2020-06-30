@@ -16,7 +16,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 26-Jun-2020 19:00 (eg)
+ * Last file update: 29-Jun-2020 19:32 (eg)
  */
 
 #include <unistd.h>
@@ -782,7 +782,7 @@ DEFINE_PRIMITIVE("emergency-exit", emergency_exit, subr01, (SCM retcode))
  *
  * Returns a string identifying the kind of machine which is running the
  * program. The result string is of the form
- * |[os-name]-[os-version]-[processor-type]|.
+ * |[os-name]-[os-version]-[cpu-architecture]|.
 doc>
 */
 DEFINE_PRIMITIVE("machine-type", machine_type, subr0, (void))
