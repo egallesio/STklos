@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update: 30-Jun-2020 08:43 (eg)
+ * Last file update: 30-Jun-2020 09:12 (eg)
  */
 
 #include <sys/types.h>
@@ -107,10 +107,10 @@ static void set_socket_io_ports(SCM sock, int line_buffered)
   t   = dup(s);
 
   in  = STk_fd2scheme_port(s, "r", fname);
-  PORT_FLAGS(in) |= PORT_TEXTUAL;
+  PORT_FLAGS(in) |= PORT_TEXTUAL | PORT_BINARY;
 
   out = STk_fd2scheme_port(t, "w", fname);
-  PORT_FLAGS(out) |= PORT_TEXTUAL;
+  PORT_FLAGS(out) |= PORT_TEXTUAL | PORT_BINARY;
 
   if (NULLP(in) || NULLP(out))
     STk_error("cannot create socket IO ports");
@@ -541,9 +541,10 @@ DEFINE_PRIMITIVE("socket-port-number", socket_port_number, subr1, (SCM sock))
  * (socket-input socket)
  * (socket-output socket)
  *
- * Returns the textual port associated for reading or writing with the
- * program connected with |socket|. If no connection has already been
- * established, these functions return |#f|.
+ * Returns the port associated for reading or writing with the
+ * program connected with |socket|. Note that this port is both textual
+ * and binary. If no connection has already been established,
+ * these functions return |#f|.
  *
  * The following example shows how to make a client socket. Here we
  * create a socket on port 13 of the machine |kaolin.unice.fr|,(footnote
