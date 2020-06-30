@@ -17,7 +17,7 @@ STklos Reference Manual<hr align="center" width="10%">4. Standard Procedures</di
 <td align="left" valign="top" width="20%" bgcolor="#204875">
 <table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-50995">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-51185">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -2069,7 +2069,7 @@ parameter.</td></tr>
 <tr><td bgcolor="#dddddd"><a name="vector-copy"></a><a name="--index-entry-21573"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(vector-copy v)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span>/<span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
-<code><strong><font color="IndianRed">(vector-copy string start)</font></strong></code><br /><code><strong><font color="IndianRed">(vector-copy string start stop)</font></strong></code><br /><br />Return a newly allocated copy of the elements of the given
+<code><strong><font color="IndianRed">(vector-copy v start)</font></strong></code><br /><code><strong><font color="IndianRed">(vector-copy v start stop)</font></strong></code><br /><br />Return a newly allocated copy of the elements of the given
 vector between <code>start</code> and <code>end</code> . The elements of the new
 vector are the same (in the sense of eqv?) as the elements
 of the old.
@@ -4501,37 +4501,37 @@ example of what <code>features</code> might return:
 <br />Returns the name of the underlying Operating System which is running
 the program.
 The value returned by <code>runnin-os</code> is a symbol. For now, this procedure
-returns either <code>unix</code>, <code>windows</code>, or <code>cygwin-windows</code>.</td></tr>
+returns either <code>unix</code>, <code>android</code>, <code>windows</code>, or <code>cygwin-windows</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hostname"></a><a name="--index-entry-31972"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hostname"></a><a name="--index-entry-31977"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hostname)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return the  host name of the current processor as a string.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="argc"></a><a name="--index-entry-31991"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="argc"></a><a name="--index-entry-31996"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(argc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the number of argument present on the command line</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="argv"></a><a name="--index-entry-32010"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="argv"></a><a name="--index-entry-32015"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(argv)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a list of the arguments given on the shell command line. The
 interpreter options are no included in the result</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="command-line"></a><a name="--index-entry-32029"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="command-line"></a><a name="--index-entry-32034"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(command-line)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the command line passed to the process as a list
 of strings. The first string corresponds to the command
 name.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="program-name"></a><a name="--index-entry-32049"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="program-name"></a><a name="--index-entry-32054"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(program-name)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the invocation name of the current program as a string.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="version"></a><a name="implementation-version"></a><a name="--index-entry-32069"></a><a name="--index-entry-32073"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="version"></a><a name="implementation-version"></a><a name="--index-entry-32074"></a><a name="--index-entry-32078"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(version)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(implementation-version)</font></strong></code><br /><br />Returns a string identifying the current version of the system. A
@@ -4539,47 +4539,47 @@ version is constituted of two numbers separated by a point: the version
 and the release numbers. Note that <code>implementation-version</code> corresponds
 to the <strong>SRFI-112</strong> (Environment Inquiry) name of this function.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="machine-type"></a><a name="--index-entry-32105"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="machine-type"></a><a name="--index-entry-32110"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(machine-type)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a string identifying the kind of machine which is running the
 program. The result string is of the form
-<code>`(os-name)-`(os-version)-`(processor-type)</code>.</td></tr>
+<code>`(os-name)-`(os-version)-`(cpu-architecture)</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="implementation-name"></a><a name="--index-entry-32129"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="implementation-name"></a><a name="--index-entry-32134"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(implementation-name)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This function is defined in <strong>SRFI-112</strong> (Environment Inquiry); it returns the Scheme
 implementation (i.e. &quot;,(stklos)&quot;).</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="cpu-architecture"></a><a name="--index-entry-32152"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="cpu-architecture"></a><a name="--index-entry-32157"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(cpu-architecture)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This function is defined in <strong>SRFI-112</strong> (Environment Inquiry); it returns the CPU
 architecture, real or virtual, on which this implementation
 is executing.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="machine-name"></a><a name="--index-entry-32175"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="machine-name"></a><a name="--index-entry-32180"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(machine-name)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This function is defined in <strong>SRFI-112</strong> (Environment Inquiry); it returns a name for the
 particular machine on which the implementation is running.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="os-name"></a><a name="--index-entry-32198"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="os-name"></a><a name="--index-entry-32203"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(os-name)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This function is defined in <strong>SRFI-112</strong> (Environment Inquiry); it returns the name for
 the operating system, platform, or equivalent on which the
 implementation is running.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="os-version"></a><a name="--index-entry-32221"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="os-version"></a><a name="--index-entry-32226"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(os-version)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This function is defined in <strong>SRFI-112</strong> (Environment Inquiry); it returns the version for
 the operating system, platform, or equivalent on which the
 implementation is running.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="getpid"></a><a name="--index-entry-32244"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="getpid"></a><a name="--index-entry-32249"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(getpid)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the system process number of the current program (i.e. the
@@ -4587,12 +4587,12 @@ Unix <em>pid</em>) as an integer.</td></tr>
 </tbody></table></div></div><div class="subsectiondiv"><div class="subsectiontitle"><a name="Program-Arguments-Parsing"></a>
 <h4 id="Program-Arguments-Parsing">4.13.6 Program Arguments Parsing</h4>
 </div>
-<div class="subsectionbody"><a name="--index-entry-32268"></a><p><span style="font-variant: small-caps">STklos</span> provides a simple way to parse program arguments with the
+<div class="subsectionbody"><a name="--index-entry-32273"></a><p><span style="font-variant: small-caps">STklos</span> provides a simple way to parse program arguments with the
 |parse-arguments| special form. This form is generally used into
 the |main| function in a Scheme script. See <strong><a  class="http" href="http://srfi.schemers.org/srfi-22/srfi-22.html">SRFI-22</a></strong>
      (<em>Running Scheme Scripts on Unix</em>) on how to
 use a |main| function in a Scheme program.</p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="parse-arguments"></a><a name="--index-entry-32280"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="parse-arguments"></a><a name="--index-entry-32285"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(parse-arguments &lt;args&gt; &lt;clause1&gt; &lt;clause2&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />The <code>parse-arguments</code> special form is used to parse the
@@ -4735,7 +4735,7 @@ to set the output in the <code>bar</code> file for the previous example can be e
 </ul></li>
 </ul></td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="arg-usage"></a><a name="--index-entry-32624"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="arg-usage"></a><a name="--index-entry-32629"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(arg-usage port)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(arg-usage port as-sexpr)</font></strong></code><br /><br />This procedure is only bound inside a <code>parse-arguments</code> form.
@@ -4749,13 +4749,13 @@ strings need to be manipulated by a program.
 <h4 id="Misc--System-Procedures">4.13.7 Misc. System Procedures</h4>
 </div>
 <div class="subsectionbody"><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="system"></a><a name="--index-entry-32679"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="system"></a><a name="--index-entry-32684"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(system string)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Sends the given <code>string</code> to the system shell <code>/bin/sh</code>. The result of
 <code>system</code> is the integer status code the shell returns.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="exec-list"></a><a name="exec"></a><a name="--index-entry-32714"></a><a name="--index-entry-32718"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="exec-list"></a><a name="exec"></a><a name="--index-entry-32719"></a><a name="--index-entry-32723"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(exec str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(exec-list str)</font></strong></code><br /><br />These procedures execute the command given in <code>str</code>. The command given
@@ -4770,12 +4770,12 @@ the output of <code>str</code>.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="address-of"></a><a name="--index-entry-32800"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="address-of"></a><a name="--index-entry-32805"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(address-of obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the address of the object <code>obj</code> as an integer.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="exit"></a><a name="--index-entry-32825"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="exit"></a><a name="--index-entry-32830"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(exit)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(exit ret-code)</font></strong></code><br /><br />Exits the program with the specified integer return code. If <code>ret-code</code>
@@ -4786,7 +4786,7 @@ they are called (in an order which is the reverse of their call order).
 <strong>Note:</strong> The <span style="font-variant: small-caps">STklos</span> <code>exit</code> primitive accepts also an
 integer value as parameter (<span style="font-variant: small-caps">R<sup>7</sup>RS</span> accepts only a boolean).</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="emergency-exit"></a><a name="--index-entry-32880"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="emergency-exit"></a><a name="--index-entry-32885"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(emergency-exit)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(emergency-exit ret-code)</font></strong></code><br /><br />Terminates the program without running any outstanding
@@ -4796,21 +4796,21 @@ value to the operating system in the same manner as <code>exit</code>.
 <strong>Note:</strong> The <span style="font-variant: small-caps">STklos</span> <code>emergency-exit</code> primitive accepts also an
 integer value as parameter (<span style="font-variant: small-caps">R<sup>7</sup>RS</span> accepts only a boolean).</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="die"></a><a name="--index-entry-32934"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="die"></a><a name="--index-entry-32939"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(die message)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(die message status)</font></strong></code><br /><br /><code>Die</code> prints the given <code>message</code> on the current error port and exits
 the program with the <code>status</code> value. If <code>status</code> is omitted, it
 defaults to 1.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="get-password"></a><a name="--index-entry-32977"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="get-password"></a><a name="--index-entry-32982"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(get-password)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This primitive permits to enter a password (character echoing
 being turned off). The value returned by <code>get-password</code> is the entered
 password as a string.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="register-exit-function-"></a><a name="--index-entry-33001"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="register-exit-function-"></a><a name="--index-entry-33006"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(register-exit-function! proc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This function registers <code>proc</code> as an exit function. This function will
@@ -4831,12 +4831,12 @@ is undefined.
 </tbody></table></div></div></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Keywords"></a>
 <h3 id="Keywords">4.14 Keywords</h3>
 </div>
-<div class="sectionbody"><a name="--index-entry-33059"></a><p>Keywords are symbolic constants which evaluate to themselves.
+<div class="sectionbody"><a name="--index-entry-33064"></a><p>Keywords are symbolic constants which evaluate to themselves.
 A keyword is a symbol whose first (or last) character is a colon
 (<em>":"</em>). Alternatively, to be compatible with other Scheme
 implementations, the notation <code>#:foo</code> is also available to denote
 the keyword of name <code>foo</code></p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="keyword-"></a><a name="--index-entry-33070"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="keyword-"></a><a name="--index-entry-33075"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(keyword obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>obj</code> is a keyword, otherwise returns <code>#f</code>.
@@ -4850,7 +4850,7 @@ the keyword of name <code>foo</code></p><br /><table cellspacing="0" class="doc-
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-keyword"></a><a name="--index-entry-33144"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-keyword"></a><a name="--index-entry-33149"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-keyword s)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Builds a keyword from the given <code>s</code>. The parameter <code>s</code> must be a symbol
@@ -4863,19 +4863,19 @@ or a string.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="keyword--string"></a><a name="--index-entry-33203"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="keyword--string"></a><a name="--index-entry-33208"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(keyword-&gt;string key)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the name of <code>key</code> as a string. The result does not contain a colon.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="string--keyword"></a><a name="--index-entry-33227"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="string--keyword"></a><a name="--index-entry-33232"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(string-&gt;keyword str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This function function has been added to be compatibe with SRFI-88.
 It is equivalent to make-keyword, except that the parameter cannot be
 a symbol.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="key-get"></a><a name="--index-entry-33246"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="key-get"></a><a name="--index-entry-33251"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(key-get list key)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(key-get list key default)</font></strong></code><br /><br /><code>List</code> must be a list of keywords and their respective values.
@@ -4892,7 +4892,7 @@ specified.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="key-set-"></a><a name="--index-entry-33344"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="key-set-"></a><a name="--index-entry-33349"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(key-set! list key value)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>List</code> must be a list of keywords and their respective values.
@@ -4908,7 +4908,7 @@ If the key is already present in <code>list</code>, the keyword list is
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="key-delete-"></a><a name="key-delete"></a><a name="--index-entry-33411"></a><a name="--index-entry-33415"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="key-delete-"></a><a name="key-delete"></a><a name="--index-entry-33416"></a><a name="--index-entry-33420"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(key-delete  list key)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(key-delete! list key)</font></strong></code><br /><br /><code>List</code> must be a list of keywords and their respective values.
@@ -4926,7 +4926,7 @@ same job than <code>key-delete</code> by physically modifying its <code>list</co
 </tbody></table></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Hash-Tables"></a>
 <h3 id="Hash-Tables">4.15 Hash Tables</h3>
 </div>
-<div class="sectionbody"><a name="--index-entry-33501"></a><p>A hash table consists of zero or more entries, each consisting of a key
+<div class="sectionbody"><a name="--index-entry-33506"></a><p>A hash table consists of zero or more entries, each consisting of a key
 and a value. Given the key for an entry, the hashing function can very
 quickly locate the entry, and hence the corresponding value. There may
 be at most one entry in a hash table with a particular key, but many
@@ -4938,7 +4938,7 @@ defined in <strong><a  class="http" href="http://srfi.schemers.org/srfi-69/srfi-
      (<em>Basic Hash Tables</em>). Note that the default comparison function
 is <code>eq?</code> whereas it is <code>equal?</code> in this SRFI. See
 <a href="stklos-ref-14.html#SRFIs">SRFIs</a> for more information.</p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-hash-table"></a><a name="--index-entry-33519"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-hash-table"></a><a name="--index-entry-33524"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-hash-table)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(make-hash-table comparison)</font></strong></code><br /><code><strong><font color="IndianRed">(make-hash-table comparison hash)</font></strong></code><br /><br /><code>Make-hash-table</code> admits three different forms.  The most general form
@@ -4997,12 +4997,12 @@ not perfect, hash table:
 <code>string=?</code> are handled in an more efficient way (in fact, they don't use
 the <code>hash-table-hash</code> function to speed up hash table retrievals).</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-"></a><a name="--index-entry-33673"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-"></a><a name="--index-entry-33678"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>obj</code> is a hash table, returns <code>#f</code> otherwise.</td></tr>
-</tbody></table><a name="--index-entry-33705"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-hash"></a><a name="--index-entry-33711"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+</tbody></table><a name="--index-entry-33710"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-hash"></a><a name="--index-entry-33716"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-hash obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Computes a hash code for an object and returns this hash code as a
@@ -5016,7 +5016,7 @@ non negative integer. A property of <code>hash-table-hash</code> is that
 as the the Common Lisp <code>sxhash</code> function from which this procedure is
 modeled.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="alist--hash-table"></a><a name="--index-entry-33754"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="alist--hash-table"></a><a name="--index-entry-33759"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(alist-&gt;hash-table alist)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(alist-&gt;hash-table alist comparison)</font></strong></code><br /><code><strong><font color="IndianRed">(alist-&gt;hash-table alist comparison hash)</font></strong></code><br /><br />Returns hash-table built from the ``association list''
@@ -5027,7 +5027,7 @@ occurs multiple times in <code>alist</code>, the value in the first
 association will take precedence over later ones.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table--alist"></a><a name="--index-entry-33826"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table--alist"></a><a name="--index-entry-33831"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-&gt;alist hash)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns an ``association list'' built from the entries in <code>hash</code>.
@@ -5046,13 +5046,13 @@ entry's key and whose <code>cdr</code> is its value.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-set-"></a><a name="--index-entry-33898"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-set-"></a><a name="--index-entry-33903"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-set! hash key value)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Enters an association between <code>key</code> and <code>value</code> in the<code>hash</code> table.
 The value returned by <code>hash-table-set!</code> is <em>void</em>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-ref"></a><a name="--index-entry-33941"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-ref"></a><a name="--index-entry-33946"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-ref hash key)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(hash-table-ref hash key thunk)</font></strong></code><br /><br />Returns the value associated with <code>key</code> in the given <code>hash</code> table. If no
@@ -5076,7 +5076,7 @@ called and its value is returned; otherwise an error is raised.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-ref-default"></a><a name="--index-entry-34039"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-ref-default"></a><a name="--index-entry-34044"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-ref/default hash key default)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This function is equivalent to
@@ -5086,7 +5086,7 @@ called and its value is returned; otherwise an error is raised.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-delete-"></a><a name="--index-entry-34067"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-delete-"></a><a name="--index-entry-34072"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-delete! hash key)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Deletes the entry for <code>key</code> in <code>hash</code>, if it exists. Result of
@@ -5103,13 +5103,13 @@ called and its value is returned; otherwise an error is raised.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-exists-"></a><a name="--index-entry-34130"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-exists-"></a><a name="--index-entry-34135"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-exists? hash key)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if there is any association of <code>key</code> in
 <code>hash</code>. Returns <code>#f</code> otherwise.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-update-"></a><a name="hash-table-update--default"></a><a name="--index-entry-34170"></a><a name="--index-entry-34174"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-update-"></a><a name="hash-table-update--default"></a><a name="--index-entry-34175"></a><a name="--index-entry-34179"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-update! hash key update-fun thunk)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(hash-table-update!/default hash key update-fun default)</font></strong></code><br /><br />Update the value associated to <code>key</code> in table <code>hash</code> if key is already in
@@ -5140,7 +5140,7 @@ is equivalent to
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-for-each"></a><a name="hash-table-walk"></a><a name="--index-entry-34265"></a><a name="--index-entry-34269"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-for-each"></a><a name="hash-table-walk"></a><a name="--index-entry-34270"></a><a name="--index-entry-34274"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-for-each hash proc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(hash-table-walk hash proc)</font></strong></code><br /><br /><code>Proc</code> must be a procedure taking two arguments. <code>Hash-table-for-each</code>
@@ -5166,7 +5166,7 @@ the first argument and the value as the second.  The value returned by
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-map"></a><a name="--index-entry-34381"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-map"></a><a name="--index-entry-34386"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-map hash proc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Proc</code> must be a procedure taking two arguments. <code>Hash-table-map</code>
@@ -5187,12 +5187,12 @@ unspecified order.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-keys"></a><a name="hash-table-values"></a><a name="--index-entry-34470"></a><a name="--index-entry-34474"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-keys"></a><a name="hash-table-values"></a><a name="--index-entry-34475"></a><a name="--index-entry-34479"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-keys hash)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(hash-table-values hash)</font></strong></code><br /><br />Returns the keys or the values of <code>hash</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-fold"></a><a name="--index-entry-34502"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-fold"></a><a name="--index-entry-34507"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-fold hash func init-value)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This procedure calls <code>func</code> for every association in <code>hash</code>
@@ -5212,33 +5212,33 @@ For instance, the following expression
 
 computes the number of associations present in the <code>ht</code> hash table.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-copy"></a><a name="--index-entry-34595"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-copy"></a><a name="--index-entry-34600"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-copy hash)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a copy of <code>hash</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-merge-"></a><a name="--index-entry-34619"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-merge-"></a><a name="--index-entry-34624"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-merge! hash1 hash2)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Adds all mappings in <code>hash2</code> into <code>hash1</code> and returns the resulting
 hash table. This function may modify <code>hash1</code> destructively.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-equivalence-function"></a><a name="--index-entry-34653"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-equivalence-function"></a><a name="--index-entry-34658"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-equivalence-function hash)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the equivalence predicate used for keys in <code>hash</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-hash-function"></a><a name="--index-entry-34677"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-hash-function"></a><a name="--index-entry-34682"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-hash-function hash)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the hash function used for keys in <code>hash</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-size"></a><a name="--index-entry-34701"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-size"></a><a name="--index-entry-34706"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-size hash)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the number of entries in the <code>hash</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hash-table-stats"></a><a name="--index-entry-34725"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hash-table-stats"></a><a name="--index-entry-34730"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hash-table-stats hash)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(hash-table-stats hash port)</font></strong></code><br /><br />Prints  overall information about <code>hash</code>, such as the number of entries
@@ -5254,7 +5254,7 @@ representation which consists is an integer which represents the
 number of seconds elapsed since the <em>Epoch</em> (00:00:00 on
 January 1, 1970, Coordinated Universal Time --UTC). Dates can
 also be represented with date structures.</p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="current-second"></a><a name="--index-entry-34778"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="current-second"></a><a name="--index-entry-34783"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(current-second)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns an inexact number representing the current time on the
@@ -5263,7 +5263,7 @@ midnight on January 1, 1970 TAI (equivalent to ten seconds before
 midnight Universal Time) and the value 1.0 represents one TAI
 second later.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="current-seconds"></a><a name="--index-entry-34798"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="current-seconds"></a><a name="--index-entry-34803"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(current-seconds)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970),
@@ -5275,17 +5275,17 @@ and whose result is expressed using  the International Atomic Time
 instead of UTC.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="current-time"></a><a name="--index-entry-34835"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="current-time"></a><a name="--index-entry-34840"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(current-time)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a time object corresponding to the current time.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="time-"></a><a name="--index-entry-34854"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="time-"></a><a name="--index-entry-34859"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(time? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return <code>#t</code> if <code>obj</code> is a time object, othererwise returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="time--seconds"></a><a name="--index-entry-34888"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="time--seconds"></a><a name="--index-entry-34893"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(time-&gt;seconds time)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Convert the time object <code>time</code> into an inexact real number representing
@@ -5296,7 +5296,7 @@ the number of seconds elapsed since the Epoch.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="seconds--time"></a><a name="--index-entry-34925"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="seconds--time"></a><a name="--index-entry-34930"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(seconds-&gt;time x)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Converts into a time object the real number <code>x</code> representing the number
@@ -5308,64 +5308,64 @@ of seconds elapsed since the Epoch.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="current-date"></a><a name="--index-entry-34963"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="current-date"></a><a name="--index-entry-34968"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(current-date)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the current system date.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-date"></a><a name="--index-entry-34982"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-date"></a><a name="--index-entry-34987"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-date :key second minute hour day month year)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Build a date from its argument. <code>hour</code>, <code>minute</code>, <code>second</code> default to 0;
 <code>day</code> and <code>month</code> default to 1; <code>year</code> defaults to 1970</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date-"></a><a name="--index-entry-35031"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date-"></a><a name="--index-entry-35036"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return <code>#t</code> if <code>obj</code> is a date, and otherwise returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date-second"></a><a name="--index-entry-35065"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date-second"></a><a name="--index-entry-35070"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date-second d)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return the second of date <code>d</code>, in the range 0 to 59.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date-minute"></a><a name="--index-entry-35089"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date-minute"></a><a name="--index-entry-35094"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date-minute d)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return the minute of date <code>d</code>, in the range 0 to 59.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date-hour"></a><a name="--index-entry-35113"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date-hour"></a><a name="--index-entry-35118"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date-hour d)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return the hour of date <code>d</code>, in the range 0 to 23.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date-day"></a><a name="--index-entry-35137"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date-day"></a><a name="--index-entry-35142"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date-day d)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return the day of date <code>d</code>, in the range 1 to 31</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date-month"></a><a name="--index-entry-35161"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date-month"></a><a name="--index-entry-35166"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date-month d)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return the month of date <code>d</code>, in the range 1 to 12</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date-year"></a><a name="--index-entry-35185"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date-year"></a><a name="--index-entry-35190"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date-year d)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return the year of date <code>d</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date-week-day"></a><a name="--index-entry-35209"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date-week-day"></a><a name="--index-entry-35214"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date-week-day d)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return the week day of date <code>d</code>, in the range 0 to 6 (0 is Sunday).</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date-year-day"></a><a name="--index-entry-35233"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date-year-day"></a><a name="--index-entry-35238"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date-year-day d)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return the the number of days since January 1 of date <code>d</code>, in the range
 1 to 366.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date-dst"></a><a name="--index-entry-35257"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date-dst"></a><a name="--index-entry-35262"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date-dst d)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return an indication about daylight saving adjustment:
@@ -5374,30 +5374,30 @@ of seconds elapsed since the Epoch.
 <li>-1 if the information is not available</li>
 </ul></td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date-tz"></a><a name="--index-entry-35288"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date-tz"></a><a name="--index-entry-35293"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date-tz d)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return the time zone of date <code>d</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date--seconds"></a><a name="--index-entry-35312"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date--seconds"></a><a name="--index-entry-35317"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date-&gt;seconds d)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Convert the date <code>d</code> to the number of seconds since the <em>Epoch</em>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date--string"></a><a name="--index-entry-35340"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date--string"></a><a name="--index-entry-35345"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date-&gt;string format d)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Convert the date <code>d</code> using the string <code>format</code> as a
 specification. Conventions for format are the same as the one
 of <a href="stklos-ref-4.html#seconds--string">seconds--string</a>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="seconds--date"></a><a name="--index-entry-35373"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="seconds--date"></a><a name="--index-entry-35378"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(seconds-&gt;date n)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Convert the date <code>n</code> expressed as a number of seconds since the Epoch
 to a date.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="seconds--string"></a><a name="--index-entry-35397"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="seconds--string"></a><a name="--index-entry-35402"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(seconds-&gt;string format n)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Convert a date expressed in seconds using the string <code>format</code> as a
@@ -5446,7 +5446,7 @@ specification. Conventions for <code>format</code> are given below:
 <li><strong>~Z </strong>symbol time zone</li>
 </ul></td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="seconds--list"></a><a name="--index-entry-35614"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="seconds--list"></a><a name="--index-entry-35619"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(seconds-&gt;list sec)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a keyword list for the date given by <code>sec</code> (a date based on the
@@ -5473,7 +5473,7 @@ Epoch). The keyed values returned are
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="date"></a><a name="--index-entry-35702"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="date"></a><a name="--index-entry-35707"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(date)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the current date in a string</td></tr>
@@ -5484,7 +5484,7 @@ Epoch). The keyed values returned are
 the <tt>make-box</tt>, <tt>make-constant-box</tt> or the <tt>read</tt> primitives.
 A box produced by read (using the "<tt>#&amp;</tt>" notation) is mutable. Note that
 two boxes  are <tt>equal?</tt> <em>iff</em> their content are <tt>equal?</tt>.</p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-box"></a><a name="--index-entry-35733"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-box"></a><a name="--index-entry-35738"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-box obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a new box that contains <code>obj</code>. The box is mutable.
@@ -5495,27 +5495,27 @@ two boxes  are <tt>equal?</tt> <em>iff</em> their content are <tt>equal?</tt>.</
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-constant-box"></a><a name="--index-entry-35772"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-constant-box"></a><a name="--index-entry-35777"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-constant-box obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a new box that contains <code>obj</code>. The box is immutable.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="box-"></a><a name="--index-entry-35796"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="box-"></a><a name="--index-entry-35801"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(box? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>obj</code>is box, <code>#f</code> otherwise.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="box-mutable-"></a><a name="--index-entry-35830"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="box-mutable-"></a><a name="--index-entry-35835"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(box-mutable? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>obj</code>is mutable box, <code>#f</code> otherwise.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="box-set-"></a><a name="--index-entry-35864"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="box-set-"></a><a name="--index-entry-35869"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(box-set! box x)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Sets the content of <code>box</code> to <code>x</code>. The box must be mutable.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="unbox"></a><a name="--index-entry-35893"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="unbox"></a><a name="--index-entry-35898"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(unbox box)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the content of <code>box</code>. For any <code>obj</code>, <code>(unbox (make-box obj))</code>
@@ -5523,11 +5523,11 @@ returns <code>obj</code>.</td></tr>
 </tbody></table></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Processes"></a>
 <h3 id="Processes">4.18 Processes</h3>
 </div>
-<div class="sectionbody"><a name="--index-entry-35933"></a><a name="--index-entry-35937"></a><p><span style="font-variant: small-caps">STklos</span> provides access to Unix processes as first class objects.
+<div class="sectionbody"><a name="--index-entry-35938"></a><a name="--index-entry-35942"></a><p><span style="font-variant: small-caps">STklos</span> provides access to Unix processes as first class objects.
 Basically, a process contains several informations such as the standard
 system process identification (aka PID on Unix Systems), the files where
 the standard files of the process are redirected.</p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="run-process"></a><a name="--index-entry-35945"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="run-process"></a><a name="--index-entry-35950"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(run-process command p1 p2 ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>run-process</code> creates a new process and run the executable
@@ -5573,23 +5573,23 @@ printed by this command are stored in the file <code>/tmp/X</code>
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="process-"></a><a name="--index-entry-36142"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="process-"></a><a name="--index-entry-36147"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(process? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>obj</code> is a process , otherwise returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="process-alive-"></a><a name="--index-entry-36176"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="process-alive-"></a><a name="--index-entry-36181"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(process-alive? proc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if process <code>proc</code> is currently running, otherwise returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="process-pid"></a><a name="--index-entry-36210"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="process-pid"></a><a name="--index-entry-36215"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(process-pid proc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns an integer which represents the Unix identification (PID) of the
 processus.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="process-error"></a><a name="process-output"></a><a name="process-input"></a><a name="--index-entry-36231"></a><a name="--index-entry-36235"></a><a name="--index-entry-36239"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="process-error"></a><a name="process-output"></a><a name="process-input"></a><a name="--index-entry-36236"></a><a name="--index-entry-36240"></a><a name="--index-entry-36244"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(process-input proc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(process-output proc)</font></strong></code><br /><code><strong><font color="IndianRed">(process-error proc)</font></strong></code><br /><br />Returns the file port associated to the standard input, output or error
@@ -5598,20 +5598,20 @@ returns <code>#f</code>. Note that the returned port is opened for reading
 when calling <code>process-output</code> or <code>process-error</code>; it is opened
 for writing when calling <code>process-input</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="process-wait"></a><a name="--index-entry-36291"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="process-wait"></a><a name="--index-entry-36296"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(process-wait proc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Stops the current process (the Scheme process) until <code>proc</code> completion.
 <code>Process-wait</code> returns <code>#f</code> when <code>proc</code> is already terminated; it returns
 <code>#t</code> otherwise.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="process-exit-status"></a><a name="--index-entry-36335"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="process-exit-status"></a><a name="--index-entry-36340"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(process-exit-status proc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the exit status of <code>proc</code> if it has finished its execution;
 returns <code>#f</code> otherwise.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="process-signal"></a><a name="--index-entry-36364"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="process-signal"></a><a name="--index-entry-36369"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(process-signal proc sig)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Sends the integer signal <code>sig</code> to <code>proc</code>. Since value of <code>sig</code> is system
@@ -5619,7 +5619,7 @@ dependant, use the symbolic defined signal constants to make your program
 independant of the running system (see <a href="stklos-ref-4.html#signals">signals</a>).
 The result of <code>process-signal</code> is <em>void</em>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="process-kill"></a><a name="--index-entry-36411"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="process-kill"></a><a name="--index-entry-36416"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(process-kill proc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Kills (brutally) <code>process</code>. The result of <code>process-kill</code>
@@ -5630,7 +5630,7 @@ is <em>void</em>. This procedure is equivalent to
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="process-continue"></a><a name="process-stop"></a><a name="--index-entry-36453"></a><a name="--index-entry-36457"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="process-continue"></a><a name="process-stop"></a><a name="--index-entry-36458"></a><a name="--index-entry-36462"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(process-stop proc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(process-continue proc)</font></strong></code><br /><br /><code>Process-stop</code> stops the execution of <code>proc</code> and <code>process-continue</code> resumes
@@ -5642,12 +5642,12 @@ its execution. They are equivalent, respectively, to
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="process-list"></a><a name="--index-entry-36504"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="process-list"></a><a name="--index-entry-36509"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(process-list)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the list of processes which are currently running (i.e. alive).</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="fork"></a><a name="--index-entry-36523"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="fork"></a><a name="--index-entry-36528"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(fork)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(fork thunk)</font></strong></code><br /><br />This procedure is a wrapper around the standard Unix <code>fork</code> system
@@ -5664,11 +5664,11 @@ the child process.</td></tr>
 </tbody></table></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Sockets"></a>
 <h3 id="Sockets">4.19 Sockets</h3>
 </div>
-<div class="sectionbody"><a name="--index-entry-36567"></a><p><span style="font-variant: small-caps">STklos</span> defines <strong>sockets</strong>, on systems which support them,
+<div class="sectionbody"><a name="--index-entry-36572"></a><p><span style="font-variant: small-caps">STklos</span> defines <strong>sockets</strong>, on systems which support them,
 as first class objects. Sockets permits processes to communicate even if
 they are on different machines. Sockets are useful for creating client-server
 applications.</p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-client-socket"></a><a name="--index-entry-36576"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-client-socket"></a><a name="--index-entry-36581"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed"> (make-client-socket hostname port-number)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed"> (make-client-socket hostname port_number line-buffered)</font></strong></code><br /><br /><code>make-client-socket</code> returns a new socket object. This socket
@@ -5680,14 +5680,14 @@ as a <code>#\newline</code> character is encountered). The default value of
 <code>line-buffered</code> is <code>#t</code>.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-server-socket"></a><a name="--index-entry-36633"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-server-socket"></a><a name="--index-entry-36638"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-server-socket)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(make-server-socket port-number)</font></strong></code><br /><br /><code>make-server-socket</code> returns a new socket object. If <code>port-number</code>
 is specified, the socket is listening on the specified port;
 otherwise, the communication port is chosen by the system.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="socket-shutdown"></a><a name="--index-entry-36666"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="socket-shutdown"></a><a name="--index-entry-36671"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(socket-shutdown sock)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(socket-shutdown sock close)</font></strong></code><br /><br /><code>Socket-shutdown</code> shutdowns the connection associated to
@@ -5714,7 +5714,7 @@ go back waiting for further client connections.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="socket-accept"></a><a name="--index-entry-36741"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="socket-accept"></a><a name="--index-entry-36746"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(socket-accept socket)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(socket-accept socket line-buffered)</font></strong></code><br /><br /><code>socket-accept</code> waits for a client connection on the given
@@ -5728,13 +5728,13 @@ with <code>make-server-socket</code>. The result of <code>socket-accept</code> i
 line buffered. If <code>line-buffered</code> is omitted, it defaults to <code>#t</code>.
 <br /><br />
 The following example is a simple server which waits for a connection
-on the port 12345 <a href="#fn--footnote-36833"><sup><small>1</small></sup></a>.
+on the port 12345 <a href="#fn--footnote-36838"><sup><small>1</small></sup></a>.
  Once the connection with the
 distant program is established, we read a line on the input port
 associated to the socket and we write the length of this line on its
 output port.
 <blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
-<tr><td bgcolor="ivory"><pre>(<strong>let*</strong> ((server (make-server-socket 13345))
+<tr><td bgcolor="ivory"><pre>(<strong>let*</strong> ((server (make-server-socket 12345))
        (client (socket-accept server))
        (l      (read-line (socket-input client))))
   (format (socket-output client)
@@ -5747,22 +5747,22 @@ output port.
  Note that shutting down the <code>server</code> socket suffices here to close
 also the connection to <code>client</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="socket-"></a><a name="--index-entry-36851"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="socket-"></a><a name="--index-entry-36856"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(socket? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>socket</code> is a socket, otherwise returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="socket-server-"></a><a name="--index-entry-36885"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="socket-server-"></a><a name="--index-entry-36890"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(socket-server? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>socket</code> is a server socket, otherwise returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="socket-client-"></a><a name="--index-entry-36919"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="socket-client-"></a><a name="--index-entry-36924"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(socket-client? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>socket</code> is a client socket, otherwise returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="socket-host-name"></a><a name="--index-entry-36953"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="socket-host-name"></a><a name="--index-entry-36958"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(socket-host-name socket)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a string which contains the name of the distant host
@@ -5773,7 +5773,7 @@ created with <code>make-server-socket</code>, this function returns the
  official name of the client connected to the socket. If no client
 has used yet <code>socket</code>, this function returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="socket-host-address"></a><a name="--index-entry-37007"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="socket-host-address"></a><a name="--index-entry-37012"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(socket-host-address socket)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a string which contains the IP number of the distant host
@@ -5784,26 +5784,27 @@ with <code>make-server-socket</code>, this function returns the address of the
 client connected to the socket.  If no client has used yet
 <code>socket</code>, this function returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="socket-local-address"></a><a name="--index-entry-37061"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="socket-local-address"></a><a name="--index-entry-37066"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(socket-local-address socket)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a string which contains the IP number of the local host
 attached to <code>socket</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="socket-port-number"></a><a name="--index-entry-37085"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="socket-port-number"></a><a name="--index-entry-37090"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(socket-port-number socket)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the integer number of the port used for <code>socket</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="socket-output"></a><a name="socket-input"></a><a name="--index-entry-37110"></a><a name="--index-entry-37114"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="socket-output"></a><a name="socket-input"></a><a name="--index-entry-37115"></a><a name="--index-entry-37119"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(socket-input socket)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
-<code><strong><font color="IndianRed">(socket-output socket)</font></strong></code><br /><br />Returns the file port associated for reading or writing with the
-program connected with <code>socket</code>. If no connection has already been
-established, these functions return <code>#f</code>.
+<code><strong><font color="IndianRed">(socket-output socket)</font></strong></code><br /><br />Returns the port associated for reading or writing with the
+program connected with <code>socket</code>. Note that this port is both textual
+and binary. If no connection has already been established,
+these functions return <code>#f</code>.
 
 The following example shows how to make a client socket. Here we
-create a socket on port 13 of the machine <code>kaolin.unice.fr</code><a href="#fn--footnote-37156"><sup><small>2</small></sup></a>:
+create a socket on port 13 of the machine <code>kaolin.unice.fr</code><a href="#fn--footnote-37161"><sup><small>2</small></sup></a>:
 <blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="ivory"><pre>(<strong>let</strong> ((s (make-client-socket <span class="source-string">&quot;kaolin.unice.fr&quot;</span> 13)))
   (format #t <span class="source-string">&quot;Time is: ~A~%&quot;</span> (read-line (socket-input s)))
@@ -5818,36 +5819,36 @@ create a socket on port 13 of the machine <code>kaolin.unice.fr</code><a href="#
 <h4 id="File-Primitives">4.20.1 File Primitives</h4>
 </div>
 <div class="subsectionbody"><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="temporary-file-name"></a><a name="--index-entry-37173"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="temporary-file-name"></a><a name="--index-entry-37178"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(temporary-file-name)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Generates a unique temporary file name. The value returned by
 <code>temporary-file-name</code> is the newly generated name of <code>#f</code>
 if a unique name cannot be generated.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="rename-file"></a><a name="--index-entry-37202"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="rename-file"></a><a name="--index-entry-37207"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(rename-file string1 string2)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Renames the file whose path-name is <code>string1</code> to a file whose path-name is
 <code>string2</code>. The result of <code>rename-file</code> is <em>void</em>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="remove-file"></a><a name="delete-file"></a><a name="--index-entry-37241"></a><a name="--index-entry-37245"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="remove-file"></a><a name="delete-file"></a><a name="--index-entry-37246"></a><a name="--index-entry-37250"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(delete-file string)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Removes the file whose path name is given in <code>string</code>.
 The result of <code>delete-file</code> is <em>void</em>.
 <br /><br />
 This function is also called <code>remove-file</code> for compatibility
-reasons. <a name="--index-entry-37287"></a></td></tr>
+reasons. <a name="--index-entry-37292"></a></td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="copy-file"></a><a name="--index-entry-37294"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="copy-file"></a><a name="--index-entry-37299"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(copy-file string1 string2)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Copies the file whose path-name is <code>string1</code> to a file whose path-name is
 <code>string2</code>. If the file <code>string2</code> already exists, its content prior
 the call to <code>copy-file</code> is lost. The result of <code>copy-file</code> is <em>void</em>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="copy-port"></a><a name="--index-entry-37342"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="copy-port"></a><a name="--index-entry-37347"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(copy-port in out)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(copy-port in out max)</font></strong></code><br /><br />Copy the content of port <code>in</code>, which must be opened for reading, on
@@ -5856,25 +5857,25 @@ All the characters from the input port are copied on ouput port. If <code>max</c
 is specified, it must be an integer indicating the maximum number of characters
 which are copied from <code>in</code> to <code>out</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="file-exists-"></a><a name="--index-entry-37395"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="file-exists-"></a><a name="--index-entry-37400"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(file-exists? string)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if the path name given in <code>string</code> denotes an existing file;
 returns <code>#f</code> otherwise.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="file-size"></a><a name="--index-entry-37430"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="file-size"></a><a name="--index-entry-37435"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(file-size string)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the size of the file whose path name is given in
 <code>string</code>.If <code>string</code> denotes a file which does not exist,
 <code>file-size</code> returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="getcwd"></a><a name="--index-entry-37469"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="getcwd"></a><a name="--index-entry-37474"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(getcwd)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a string containing the current working directory.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="chmod"></a><a name="--index-entry-37488"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="chmod"></a><a name="--index-entry-37493"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(chmod str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(chmod str option1 ...)</font></strong></code><br /><br />Change the access mode of the file whose path name is given in <code>string</code>.
@@ -5890,42 +5891,42 @@ is equivalent to pass it the integer <code>0</code>. If the operation succeeds,
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="chdir"></a><a name="--index-entry-37567"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="chdir"></a><a name="--index-entry-37572"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(chdir dir)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Changes the current directory to the directory given in string <code>dir</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-directory"></a><a name="--index-entry-37591"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-directory"></a><a name="--index-entry-37596"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-directory dir)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Create a directory with name <code>dir</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-directories"></a><a name="--index-entry-37615"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-directories"></a><a name="--index-entry-37620"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-directories str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Create a directory with name <code>dir</code>. No error is signaled if <code>dir</code> already exists,
 Parent directories of <code>dir</code> are created as needed.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="ensure-directories-exist"></a><a name="--index-entry-37649"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="ensure-directories-exist"></a><a name="--index-entry-37654"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(ensure-directories-exist path)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Create a directory with name <code>dir</code> (and its parent directories if needed), if it
 does not exist yet.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="remove-directory"></a><a name="delete-directory"></a><a name="--index-entry-37674"></a><a name="--index-entry-37678"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="remove-directory"></a><a name="delete-directory"></a><a name="--index-entry-37679"></a><a name="--index-entry-37683"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(remove-directory dir)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(delete-directory dir)</font></strong></code><br /><br />Delete the directory with name <code>dir</code>.
 <br /><br />
 <strong>Note:</strong> The name <code>remove-directory</code> is kept for compatibility.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="directory-files"></a><a name="--index-entry-37719"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="directory-files"></a><a name="--index-entry-37724"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(directory-files path)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the list of the files in the directory <code>path</code>. Directories "."
 and ".." don't appear in the result.</td></tr>
-</tbody></table><a name="--index-entry-37749"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="expand-file-name"></a><a name="--index-entry-37755"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+</tbody></table><a name="--index-entry-37754"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="expand-file-name"></a><a name="--index-entry-37760"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(expand-file-name path)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Expand-file-name</code> expands the filename given in <code>path</code> to
@@ -5939,7 +5940,7 @@ an absolute path.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="canonical-file-name"></a><a name="--index-entry-37817"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="canonical-file-name"></a><a name="--index-entry-37822"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(canonical-file-name path)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Expands all symbolic links in <code>path</code> and returns its canonicalized
@@ -5947,7 +5948,7 @@ absolute path name. The resulting path does not have symbolic links.
 If <code>path</code> doesn't designate a valid path name, <code>canonical-file-name</code>
 returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="decompose-file-name"></a><a name="--index-entry-37856"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="decompose-file-name"></a><a name="--index-entry-37861"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(decompose-file-name string)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns an ``exploded'' list of the path name components given in
@@ -5962,7 +5963,7 @@ Each component of this list is a string.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="winify-file-name"></a><a name="--index-entry-37914"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="winify-file-name"></a><a name="--index-entry-37919"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(winify-file-name fn)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />On Win32 system, when compiled with the Cygwin environment,
@@ -5979,7 +5980,7 @@ file name
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="posixify-file-name"></a><a name="--index-entry-37964"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="posixify-file-name"></a><a name="--index-entry-37969"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(posixify-file-name fn)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />On Win32 system, when compiled with the Cygwin environment,
@@ -5994,7 +5995,7 @@ file name
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="basename"></a><a name="--index-entry-38004"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="basename"></a><a name="--index-entry-38009"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(basename str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a string containing the last component of the path name
@@ -6005,7 +6006,7 @@ given in <code>str</code>.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="dirname"></a><a name="--index-entry-38043"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="dirname"></a><a name="--index-entry-38048"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(dirname str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a string containing all but the last component of the path
@@ -6016,7 +6017,7 @@ name given in <code>str</code>.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="file-suffix"></a><a name="--index-entry-38082"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="file-suffix"></a><a name="--index-entry-38087"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(file-suffix pathname)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the suffix of given <code>pathname</code>. If no suffix is found, <code>file-suffix</code>
@@ -6028,7 +6029,7 @@ returns an empty string.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="file-prefix"></a><a name="--index-entry-38134"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="file-prefix"></a><a name="--index-entry-38139"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(file-prefix pathname)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the suffix of given <code>pathname</code>.
@@ -6039,13 +6040,13 @@ returns an empty string.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="file-separator"></a><a name="--index-entry-38181"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="file-separator"></a><a name="--index-entry-38186"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(file-separator)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Retuns the operating system file separator as a character. This is typically
 #\/ on Unix (or Cygwin) systems and #\\ on Windows.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-path"></a><a name="--index-entry-38200"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-path"></a><a name="--index-entry-38205"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-path dirname .  names)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Builds a file name from the directory <code>dirname</code> and <code>names</code>. For instance,
@@ -6056,7 +6057,7 @@ on a Unix system:
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="glob"></a><a name="--index-entry-38246"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="glob"></a><a name="--index-entry-38251"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(glob pattern ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Glob</code> performs file name ``globbing'' in a fashion similar to the
@@ -6091,7 +6092,7 @@ in csh no check for existence is made unless a pattern contains a
 <h4 id="Environment">4.20.2 Environment</h4>
 </div>
 <div class="subsectionbody"><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="getenv"></a><a name="--index-entry-38410"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="getenv"></a><a name="--index-entry-38415"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(getenv str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(getenv)</font></strong></code><br /><br />Looks for the environment variable named <code>str</code> and returns its
@@ -6108,13 +6109,13 @@ A-list.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="setenv-"></a><a name="--index-entry-38480"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="setenv-"></a><a name="--index-entry-38485"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(setenv! var value)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Sets the environment variable <code>var</code> to <code>value</code>. <code>Var</code> and
 <code>value</code> must be strings. The result of <code>setenv!</code> is <em>void</em>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="unsetenv-"></a><a name="--index-entry-38528"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="unsetenv-"></a><a name="--index-entry-38533"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(unsetenv! var)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Unsets the environment variable <code>var</code>. <code>Var</code> must be a string.
@@ -6123,36 +6124,36 @@ The result of <code>unsetenv!</code> is <em>void</em>.</td></tr>
 <h4 id="System-Informations">4.20.3 System Informations</h4>
 </div>
 <div class="subsectionbody"><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="running-os"></a><a name="--index-entry-38569"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="running-os"></a><a name="--index-entry-38574"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(running-os)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the name of the underlying Operating System which is running
 the program.
 The value returned by <code>runnin-os</code> is a symbol. For now, this procedure
-returns either <code>unix</code>, <code>windows</code>, or <code>cygwin-windows</code>.</td></tr>
+returns either <code>unix</code>, <code>android</code>, <code>windows</code>, or <code>cygwin-windows</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="hostname"></a><a name="--index-entry-38608"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="hostname"></a><a name="--index-entry-38618"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(hostname)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return the  host name of the current processor as a string.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="argc"></a><a name="--index-entry-38627"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="argc"></a><a name="--index-entry-38637"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(argc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the number of argument present on the command line</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="argv"></a><a name="--index-entry-38646"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="argv"></a><a name="--index-entry-38656"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(argv)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a list of the arguments given on the shell command line. The
 interpreter options are no included in the result</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="program-name"></a><a name="--index-entry-38665"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="program-name"></a><a name="--index-entry-38675"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(program-name)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the invocation name of the current program as a string.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="version"></a><a name="implementation-version"></a><a name="--index-entry-38685"></a><a name="--index-entry-38689"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="version"></a><a name="implementation-version"></a><a name="--index-entry-38695"></a><a name="--index-entry-38699"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(version)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(implementation-version)</font></strong></code><br /><br />Returns a string identifying the current version of the system. A
@@ -6160,20 +6161,20 @@ version is constituted of two numbers separated by a point: the version
 and the release numbers. Note that <code>implementation-version</code> corresponds
 to the <strong>SRFI-112</strong> (Environment Inquiry) name of this function.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="machine-type"></a><a name="--index-entry-38721"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="machine-type"></a><a name="--index-entry-38731"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(machine-type)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns a string identifying the kind of machine which is running the
 program. The result string is of the form
-<code>`(os-name)-`(os-version)-`(processor-type)</code>.</td></tr>
+<code>`(os-name)-`(os-version)-`(cpu-architecture)</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="clock"></a><a name="--index-entry-38745"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="clock"></a><a name="--index-entry-38755"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(clock)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns an approximation of processor time, in milliseconds, used so far by the
 program.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="sleep"></a><a name="--index-entry-38764"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="sleep"></a><a name="--index-entry-38774"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(sleep n)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Suspend the execution of the program for at <code>ms</code> milliseconds. Note that due
@@ -6181,14 +6182,14 @@ to system clock resolution, the pause may be a little bit longer. If a
 signal arrives during the pause, the execution may be resumed.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="time"></a><a name="--index-entry-38788"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="time"></a><a name="--index-entry-38798"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(time expr1 expr2 ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />Evaluates the expressions <code>expr1</code>, <code>expr2</code>, ... and returns the
 result of the last expression. This form prints also the time spent
 for this evaluation on the current error port.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="getpid"></a><a name="--index-entry-38817"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="getpid"></a><a name="--index-entry-38827"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(getpid)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the system process number of the current program (i.e. the
@@ -6196,12 +6197,12 @@ Unix <em>pid</em>) as an integer.</td></tr>
 </tbody></table></div></div><div class="subsectiondiv"><div class="subsectiontitle"><a name="Program-Arguments-Parsing"></a>
 <h4 id="Program-Arguments-Parsing">4.20.4 Program Arguments Parsing</h4>
 </div>
-<div class="subsectionbody"><a name="--index-entry-38841"></a><p><span style="font-variant: small-caps">STklos</span> provides a simple way to parse program arguments with the
+<div class="subsectionbody"><a name="--index-entry-38851"></a><p><span style="font-variant: small-caps">STklos</span> provides a simple way to parse program arguments with the
 |parse-arguments| special form. This form is generally used into
 the |main| function in a Scheme script. See <strong><a  class="http" href="http://srfi.schemers.org/srfi-22/srfi-22.html">SRFI-22</a></strong>
      (<em>Running Scheme Scripts on Unix</em>) on how to
 use a |main| function in a Scheme program.</p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="parse-arguments"></a><a name="--index-entry-38853"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="parse-arguments"></a><a name="--index-entry-38863"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(parse-arguments &lt;args&gt; &lt;clause1&gt; &lt;clause2&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />The <code>parse-arguments</code> special form is used to parse the
@@ -6344,7 +6345,7 @@ to set the output in the <code>bar</code> file for the previous example can be e
 </ul></li>
 </ul></td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="arg-usage"></a><a name="--index-entry-39197"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="arg-usage"></a><a name="--index-entry-39207"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(arg-usage port)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(arg-usage port as-sexpr)</font></strong></code><br /><br />This procedure is only bound inside a <code>parse-arguments</code> form.
@@ -6358,13 +6359,13 @@ strings need to be manipulated by a program.
 <h4 id="Misc--System-Procedures">4.20.5 Misc. System Procedures</h4>
 </div>
 <div class="subsectionbody"><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="system"></a><a name="--index-entry-39252"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="system"></a><a name="--index-entry-39262"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(system string)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Sends the given <code>string</code> to the system shell <code>/bin/sh</code>. The result of
 <code>system</code> is the integer status code the shell returns.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="exec-list"></a><a name="exec"></a><a name="--index-entry-39287"></a><a name="--index-entry-39291"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="exec-list"></a><a name="exec"></a><a name="--index-entry-39297"></a><a name="--index-entry-39301"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(exec str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(exec-list str)</font></strong></code><br /><br />These procedures execute the command given in <code>str</code>. The command given
@@ -6379,12 +6380,12 @@ the output of <code>str</code>.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="address-of"></a><a name="--index-entry-39373"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="address-of"></a><a name="--index-entry-39383"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(address-of obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the address of the object <code>obj</code> as an integer.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="exit"></a><a name="--index-entry-39398"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="exit"></a><a name="--index-entry-39408"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(exit)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(exit ret-code)</font></strong></code><br /><br />Exits the program with the specified integer return code. If <code>ret-code</code>
@@ -6395,21 +6396,21 @@ they are called (in an order which is the reverse of their call order).
 <strong>Note:</strong> The <span style="font-variant: small-caps">STklos</span> <code>exit</code> primitive accepts also an
 integer value as parameter (<span style="font-variant: small-caps">R<sup>7</sup>RS</span> accepts only a boolean).</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="die"></a><a name="--index-entry-39453"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="die"></a><a name="--index-entry-39463"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(die message)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(die message status)</font></strong></code><br /><br /><code>Die</code> prints the given <code>message</code> on the current error port and exits
 the program with the <code>status</code> value. If <code>status</code> is omitted, it
 defaults to 1.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="get-password"></a><a name="--index-entry-39496"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="get-password"></a><a name="--index-entry-39506"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(get-password)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This primitive permits to enter a password (character echoing
 being turned off). The value returned by <code>get-password</code> is the entered
 password as a string.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="register-exit-function-"></a><a name="--index-entry-39520"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="register-exit-function-"></a><a name="--index-entry-39530"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(register-exit-function! proc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This function registers <code>proc</code> as an exit function. This function will
@@ -6436,7 +6437,7 @@ is undefined.
 <div class="sectionbody"><p><span style="font-variant: small-caps">STklos</span> parameters correspond to the ones defined in <strong><a  class="http" href="http://srfi.schemers.org/srfi-39/srfi-39.html">SRFI-39</a></strong>
      (<em>Parameters objects</em>).
 See SRFI document for more information.</p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-parameter"></a><a name="--index-entry-39592"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-parameter"></a><a name="--index-entry-39602"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(make-parameter init)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(make-parameter init converter)</font></strong></code><br /><br />Returns a new parameter object which is bound in the global dynamic
@@ -6486,7 +6487,7 @@ an unspecified value is returned.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="parameterize"></a><a name="--index-entry-39712"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="parameterize"></a><a name="--index-entry-39722"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(parameterize ((expr1 expr2) ...) &lt;body&gt;)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />The expressions <code>expr1</code> and <code>expr2</code> are evaluated in an unspecified order.
@@ -6515,7 +6516,7 @@ the <code>&lt;body&gt;</code>.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="parameter-"></a><a name="--index-entry-39836"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="parameter-"></a><a name="--index-entry-39846"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(parameter? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /> Returns <code>#t</code> if <code>obj</code> is a parameter object, otherwise returns <code>#f</code>.</td></tr>
@@ -6523,18 +6524,18 @@ the <code>&lt;body&gt;</code>.
 <h3 id="Misc">4.23 Misc</h3>
 </div>
 <div class="sectionbody"><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="gc"></a><a name="--index-entry-39873"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="gc"></a><a name="--index-entry-39883"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(gc)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the address of the object <code>obj</code> as an integer.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="void"></a><a name="--index-entry-39898"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="void"></a><a name="--index-entry-39908"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(void)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(void arg1 ...)</font></strong></code><br /><br />Returns the special <em>void</em> object. If arguments are passed to <code>void</code>,
 they are evalued and simply ignored.</td></tr>
-</tbody></table><a name="--index-entry-39928"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="error"></a><a name="--index-entry-39934"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+</tbody></table><a name="--index-entry-39938"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="error"></a><a name="--index-entry-39944"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(error str obj ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(error name str obj ...)</font></strong></code><br /><br /><code>error</code> is used to signal an error to the user. The second form
@@ -6575,7 +6576,7 @@ and some conform to <strong>SRFI-23</strong> (Error reporting mechanism)
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="signal-error"></a><a name="--index-entry-40122"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="signal-error"></a><a name="--index-entry-40132"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(signal-error cond str obj ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(signal-error cond name str obj ...)</font></strong></code><br /><br />This procedure is similar to error, except that the type of the error
@@ -6589,7 +6590,7 @@ Note that <code>(error arg ...)</code> is equivalent to
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="file-error-"></a><a name="read-error-"></a><a name="--index-entry-40168"></a><a name="--index-entry-40172"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="file-error-"></a><a name="read-error-"></a><a name="--index-entry-40178"></a><a name="--index-entry-40182"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(read-error? obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(file-error? obj)</font></strong></code><br /><br />
@@ -6598,25 +6599,25 @@ by the read procedure or by the inability to open an input or
 output port on a file, respectively. Otherwise, it returns #f.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="error-object-"></a><a name="--index-entry-40201"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="error-object-"></a><a name="--index-entry-40211"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(error-object? obj )</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns #t if obj is an object created by error. Otherwise,
 it returns #f.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="error-object-message"></a><a name="--index-entry-40221"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="error-object-message"></a><a name="--index-entry-40231"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(error-object-message error-object)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the message encapsulated by <code>error-object</code>.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="error-object-irritants"></a><a name="--index-entry-40246"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="error-object-irritants"></a><a name="--index-entry-40256"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(error-object-irritants error-object)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the message encapsulated by <code>error-object</code>.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="error-object-location"></a><a name="--index-entry-40271"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="error-object-location"></a><a name="--index-entry-40281"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(error-object-location error-object)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the location encapsulated by <code>error-object</code> if it exists.
@@ -6630,7 +6631,7 @@ of the procedure which raised the error.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="require-extension"></a><a name="--index-entry-40313"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="require-extension"></a><a name="--index-entry-40323"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(require-extension &lt;clause&gt; ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />The syntax of require-extension is as follows:
@@ -6669,7 +6670,7 @@ is equivalent to the previous <code>require-extension</code>. A list of availabl
  symbols as  <code>&lt;extension-argument&gt;</code> is given in chapter
 <a href="stklos-ref-14.html#SRFIs">SRFIs</a>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="repl"></a><a name="--index-entry-40411"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="repl"></a><a name="--index-entry-40421"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(repl)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(repl :in inport :out outport :err errport)</font></strong></code><br /><br />This procedure launches a new Read-Eval-Print-Loop. Calls to <code>repl</code> can be
@@ -6677,7 +6678,7 @@ embedded. The ports used for input/output as well as the error port can
 be passed when <code>repl</code> is called. If not passed, they default to
 <code>current-input-port</code>, <code>current-output-port</code> and <code>current-error-port</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="apropos"></a><a name="--index-entry-40459"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="apropos"></a><a name="--index-entry-40469"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(apropos obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(apropos obj module)</font></strong></code><br /><br /><code>Apropos</code> returns a list of symbols whose print name contains the
@@ -6687,7 +6688,7 @@ be accessed from the given <code>module</code> (defaults to the current module i
 provided).
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="help"></a><a name="--index-entry-40502"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="help"></a><a name="--index-entry-40512"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(help obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(help)</font></strong></code><br /><br />When called with an argument, <code>help</code> tries to give some help on the
@@ -6713,7 +6714,7 @@ strings are given below
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="trace"></a><a name="--index-entry-40564"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="trace"></a><a name="--index-entry-40574"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(trace f-name ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />Invoking <code>trace</code> with one or more function names causes the functions
@@ -6723,7 +6724,7 @@ printed on the current error port.
 
 Calling <code>trace</code> with no argument returns the list of traced functions.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="untrace"></a><a name="--index-entry-40593"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="untrace"></a><a name="--index-entry-40603"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(untrace f-name ...)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />Invoking <code>untrace</code> with one or more function names causes the functions
@@ -6732,7 +6733,7 @@ named not to be traced anymore.
 Calling <code>untrace</code> with no argument will untrace all the functions
 currently traced.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="pp"></a><a name="pretty-print"></a><a name="--index-entry-40623"></a><a name="--index-entry-40627"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="pp"></a><a name="pretty-print"></a><a name="--index-entry-40633"></a><a name="--index-entry-40637"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(pretty-print sexpr :key port width)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(pp sexpr :key port width)</font></strong></code><br /><br />This function tries to obtain a pretty-printed representation of <code>sexpr</code>.
@@ -6744,7 +6745,7 @@ is returned as a string by <code>pretty-print</code>.
 Note that <code>pp</code> is another name for <code>pretty-print</code>.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="uri-parse"></a><a name="--index-entry-40705"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="uri-parse"></a><a name="--index-entry-40715"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(uri-parse str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Parses the string <code>str</code> as a RFC-2396 URI and return a keyed list with the
@@ -6780,7 +6781,7 @@ empty string)</li>
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="string--html"></a><a name="--index-entry-40916"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="string--html"></a><a name="--index-entry-40926"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(string-&gt;html str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This primitive is a convenience function; it returns a string where
@@ -6793,43 +6794,43 @@ in Scheme, but this version is fast.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="md5sum"></a><a name="--index-entry-40951"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="md5sum"></a><a name="--index-entry-40961"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(md5sum obj)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return a string contening the md5 dum of <code>obj</code>. The given parameter can
 be a string or an open input port.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="md5sum-file"></a><a name="--index-entry-40975"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="md5sum-file"></a><a name="--index-entry-40985"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(md5sum-file str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return a string contening the md5 dum of the file whose name is <code>str</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="base64-encode"></a><a name="--index-entry-40999"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="base64-encode"></a><a name="--index-entry-41009"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(base64-encode in)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(base64-encode in out)</font></strong></code><br /><br />Encode in Base64 the characters from input port <code>in</code> to the output port
 <code>out</code>. If <code>out</code> is not specified, it defaults to the current output port.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="base64-decode"></a><a name="--index-entry-41037"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="base64-decode"></a><a name="--index-entry-41047"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(base64-decode in)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(base64-decode in out)</font></strong></code><br /><br />Decode the Base64 characters from input port <code>in</code> to the output port
 <code>out</code>. If <code>out</code> is not specified, it defaults to the current output port.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="base64-encode-string"></a><a name="--index-entry-41075"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="base64-encode-string"></a><a name="--index-entry-41085"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(base64-encode-string str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return a string contening the contents of <code>str</code> converted to Base64
 encoded format</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="base64-decode-string"></a><a name="--index-entry-41099"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="base64-decode-string"></a><a name="--index-entry-41109"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="left"><code><strong><font color="IndianRed">(base64-encode-string str)</font></strong></code></td><td align="right"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Decode the contents of <code>str</code> expressed in Base64.</td></tr>
 </tbody></table></div></div></div><div class='footnotes'>
 <hr>
 <b>Notes:</b><br>
-<a name="fn--footnote-36833"><sup><small>1</small></sup></a>: Under Unix, you can simply connect to
+<a name="fn--footnote-36838"><sup><small>1</small></sup></a>: Under Unix, you can simply connect to
 a listening socket with the <code>telnet</code> command. With the given
 example, this can be achieved by typing the following command in a
 window shell:
@@ -6839,12 +6840,12 @@ window shell:
 </tbody></table></blockquote>
 
 <br>
-<a name="fn--footnote-37156"><sup><small>2</small></sup></a>: Port 13 is generally used for testing:
+<a name="fn--footnote-37161"><sup><small>2</small></sup></a>: Port 13 is generally used for testing:
 making a connection to it permits to know the distant system's idea
 of the time of day.
 <br>
 </div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Mon Jun  8 17:11:37 2020</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Tue Jun 30 09:55:57 2020</em></small>
 </body>
 </html>
