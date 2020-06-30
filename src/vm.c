@@ -665,6 +665,7 @@ SCM STk_n_values(int n, ...)
       for (i = 0; i < n; i++) VECTOR_DATA(tmp)[i] = va_arg(ap, SCM);
       vm->vals[0] = tmp;
     }
+    va_end(ap);
   }
   return vm->val;
 }

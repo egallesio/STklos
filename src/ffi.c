@@ -488,6 +488,8 @@ static int exec_callback(SCM callback, ...)
     Sargs[i++] = c2scheme(param, CAR(Cargs));
   }
 
+  va_end(ap);
+
   /* Add the callback value as last parameter */
   Sargs[i++] = CALLBACK_DATA(callback);
   Sargs[i]= NULL;
