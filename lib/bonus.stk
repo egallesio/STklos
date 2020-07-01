@@ -872,7 +872,7 @@ doc>
     (let ((alist '((normal      . "0")
                    (bold        . "1")  (no-bold        . "21")
                    (italic      . "2")  (no-italic      . "22")
-                   (underline   . "4")  (no-undeline    . "24")
+                   (underline   . "4")  (no-underline   . "24")
                    (blink       . "5")  (no-blink       . "25")
                    (reverse     . "7")  (no-reverse     . "27")
                    (black       . "30") (bg-black       . "40")
