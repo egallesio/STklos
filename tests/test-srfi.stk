@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 25-Jun-2020 12:23 (eg)
+;;;; Last file update:  2-Jul-2020 12:17 (eg)
 ;;;;
 
 (require "test")
@@ -64,13 +64,11 @@
 
 (require "srfi-54")
 
-(define (cat-output-and-value . args)
-  (let ((val #f))
-    (let ((out  (with-output-to-string (lambda ()
-                                         (set! val
-                                               (apply cat args))))))
-      (list out val))))
-  
+(define-macro (mute-cat expr)
+  `(let ((res #f))
+     (with-output-to-string (lambda () (set! res ,expr)))
+     res))
+
 
 (test "align left" "130.00    " (cat 129.995 -10 2.))
 (test "align right, I" "    130.00" (cat 129.995 10 2.))
@@ -111,23 +109,22 @@
 
 
 ;; Tests with output changed to ignore the string printed below.
-;; They're not to ouseful as this, but will at least detect crashes.
+;; They're not to useful as this, but will at least detect crashes.
 
 ;; (test "" (#\a "str" s)"(#\\a \"str\" s)" (cat '(#\a "str" s) #t))
-(test "output I" "(#\\a \"str\" s)" (cat '(#\a "str" s) #t))
+(test "output I" "(#\\a \"str\" s)" (mute-cat (cat '(#\a "str" s) #t)))
 
 ;;(test "" (#\a "str" s)"(#\\a \"str\" s)" (cat '(#\a "str" s) (current-output-port)))
-(test "output II" "(#\\a \"str\" s)" (cat '(#\a "str" s) (current-output-port)))
+(test "output II" "(#\\a \"str\" s)" (mute-cat (cat '(#\a "str" s) (current-output-port))))
 
 ;; original ok:
-(test "output III" "3s \"str\"" (cat 3 (cat 's) " " (cat "str" write)))
+(test "output III" "3s \"str\"" (mute-cat (cat 3 (cat 's) " " (cat "str" write))))
 
 ;;(test "" 3s "str""3s \"str\"" (cat 3 #t (cat 's) " " (cat "str" write)))
-(test "output IV" "3s \"str\"" (cat 3 #t (cat 's) " " (cat "str" write)))
+(test "output IV" "3s \"str\"" (mute-cat (cat 3 #t (cat 's) " " (cat "str" write))))
 
 ;;(test "" s3s "str""3s \"str\"" (cat 3 #t (cat 's #t) " " (cat "str" write)))
-(test "output V" "3s \"str\"" (cat 3 #t (cat 's #t) " " (cat "str" write)))
-
+(test "output V" "3s \"str\"" (mute-cat (cat 3 #t (cat 's #t) " " (cat "str" write))))
 
 
 ;; records!
@@ -144,14 +141,14 @@
 
 (define (record-writer object string-port)
     (if (example? object)
-	(begin (display (get-num object) string-port)
-	       (display "-" string-port)
-	       (display (get-str object) string-port))
-	((or (and (or (string? object)
-		      (char? object)
-		      (boolean? object))
-		  display)
-	     write) object string-port)))
+    (begin (display (get-num object) string-port)
+           (display "-" string-port)
+           (display (get-str object) string-port))
+    ((or (and (or (string? object)
+              (char? object)
+              (boolean? object))
+          display)
+         write) object string-port)))
 
 ;; STklos includes a unique identifier in the object description,
 ;;
