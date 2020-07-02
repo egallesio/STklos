@@ -75,6 +75,7 @@
      (112 . "Environment Inquiry")
      (117 . "Queues based on lists")
      (158 . "Generators and Accumulators")
+     (171 . "Trnsducers")
      (173 . "Hooks")
      (190 . "Coroutines Generators")
    ))

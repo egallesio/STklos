@@ -642,6 +642,16 @@ you need to insert the following expression])
 (p [in your code or uses the ,(code "cond-expand") special form.]))
 
 ;; ----------------------------------------------------------------------
+;; SRFI 171 -- Transducers
+;; ----------------------------------------------------------------------
+(srfi-section 171
+
+(p [,(quick-link-srfi 171) is fully supported.  To use SRFI-171,
+you need to insert the following expression])
+(fontified-code [(require "srfi-171")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
 ;; SRFI 173 -- Hooks
 ;; ----------------------------------------------------------------------
 (srfi-section 173

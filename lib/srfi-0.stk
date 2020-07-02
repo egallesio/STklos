@@ -226,7 +226,7 @@
     ;; srfi-168                         ; Generic Tuple Store Database
     ;; srfi-169                         ; Underscores in numbers
     ;; srfi-170                         ; POSIX API (draft)
-    ;; srfi-171                         ; Transducers
+    ((srfi-171 transducers) "srfi-171") ; Transducers
     ;; srfi-172                         ; Two Safer Subsets of R7RS
     ((srfi-173 hooks) "srfi-173")       ; Hooks
     ;; srfi-174                         ; POSIX Timespecs
