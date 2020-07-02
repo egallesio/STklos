@@ -171,7 +171,8 @@
     ;; srfi-114                         ; ....... withdrawn
     ;; srfi-115                         ; Scheme Regular Expressions
     ;; srfi-116                         ; Immutable List Library
-    ;; srfi-117                         ; Queues based on lists
+    ((srfi-117 queues-as-lists)
+     "srfi-117")                        ; Queues based on lists
     ;; srfi-118                         ; Simple adjustable-size strings
     ;; srfi-119                         ; wisp: simpler indentation-sensitive scheme
     ;; srfi-120                         ; Timer APIs

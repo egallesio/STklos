@@ -487,6 +487,111 @@
       (blob->sint-list 2 (endianness little) b4))
 
 ;; ----------------------------------------------------------------------
+;;  SRFI 117 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 117 - Queues based on lists")
+
+(require "srfi-117")
+
+;; list-queues/simple
+(test "make-list-queue"  '(1 1 1) (list-queue-list (make-list-queue '(1 1 1))))
+(define x (list-queue 1 2 3))
+(test "list-queue-list" '(1 2 3) (list-queue-list x))
+(define x1 (list 1 2 3))
+(define x2 (make-list-queue x1 (cddr x1)))
+(test "list-queue-back" 3 (list-queue-back x2))
+(define y (list-queue 4 5))
+(test "list-queue?" #t (list-queue? y))
+(define z (list-queue-append x y))
+(test "list-queue-append" '(1 2 3 4 5) (list-queue-list z))
+(define z2 (list-queue-append! x (list-queue-copy y)))
+(test "list-queue-append-copy" '(1 2 3 4 5) (list-queue-list z2))
+(test "list-queue-append-copy-front" 1 (list-queue-front z))
+(test "list-queue-append-copy-back" 5 (list-queue-back z))
+(list-queue-remove-front! y)
+(test "list-queue-remove-front!" '(5) (list-queue-list y))
+(list-queue-remove-back! y)
+(test "list-queue-empty?" #t (list-queue-empty? y))
+(test "list-queue don't remove-front from empty"
+      'error-occurred
+      (with-handler (lambda (e)
+                      'error-occurred)
+                    (list-queue-remove-front! y)))
+(test "list-queue don't remove-back from empty"
+      'error-occurred
+      (with-handler (lambda (e)
+                      'error-occurred)
+                    (list-queue-remove-back! y)))
+(test "list-queue-list II" '(1 2 3 4 5) (list-queue-list z))
+(test "list-queue-remove-all!" '(1 2 3 4 5) (list-queue-remove-all! z2))
+(test "list-queue-remove-all! -> empty" #t (list-queue-empty? z2))
+(list-queue-remove-all! z)
+(list-queue-add-front! z 1)
+(list-queue-add-front! z 0)
+(list-queue-add-back! z 2)
+(list-queue-add-back! z 3)
+(test "list-queue-remove-all-add-4" '(0 1 2 3) (list-queue-list z))
+
+;; list-queues/whole
+(define a (list-queue 1 2 3))
+(define b (list-queue-copy a))
+(test "list-queue-copy" '(1 2 3) (list-queue-list b))
+(list-queue-add-front! b 0)
+(test "list-queue-copy is not shared" '(1 2 3) (list-queue-list a))
+(test "list-queue-copy size" 4 (length (list-queue-list b)))
+(define c (list-queue-concatenate (list a b)))
+(test "list-queue-concatenate" '(1 2 3 0 1 2 3) (list-queue-list c))
+
+;; list-queues/map
+(define r (list-queue 1 2 3))
+(define s (list-queue-map (lambda (x) (* x 10)) r))
+(test "list-queue-map" '(10 20 30) (list-queue-list s))
+(list-queue-map! (lambda (x) (+ x 1)) r)
+(test "list-queue-map!" '(2 3 4) (list-queue-list r))
+(define sum 0)
+(list-queue-for-each (lambda (x) (set! sum (+ sum x))) s)
+(test "list-queue-for-each" 60 sum)
+
+;; list-queues/conversion
+(define n (list-queue 5 6))
+(list-queue-set-list! n (list 1 2))
+(test "list-queue-set-list!" '(1 2) (list-queue-list n))
+(define d (list 1 2 3))
+(define e (cddr d))
+(define f (make-list-queue d e))
+(define dx #f) ; redefined below
+(define ex #f) ; redefined below
+(let-values (((dxv exv) (list-queue-first-last f)))
+  (set! dx dxv)
+  (set! ex exv))
+(test "list-queue-first-last" #t (eq? d dx))
+(test "list-queue-first-last II" #t (eq? e ex))
+(test "list-queue-first-last III" '(1 2 3) (list-queue-list f))
+(list-queue-add-front! f 0)
+(list-queue-add-back! f 4)
+(test "list-queue-add-{front,back}!" '(0 1 2 3 4) (list-queue-list f))
+(define g (make-list-queue d e))
+(test "make-list-queue II" '(1 2 3 4) (list-queue-list g))
+(define h (list-queue 5 6))
+(list-queue-set-list! h d e)
+(test "list-queue-set-list! II" '(1 2 3 4) (list-queue-list h))
+
+;; list-queues/unfold
+(define (double x) (* x 2))
+(define (done? x) (> x 3))
+(define (add1 x) (+ x 1))
+(define x (list-queue-unfold done? double add1 0))
+(test "list-queue-unfold" '(0 2 4 6) (list-queue-list x))
+(define y (list-queue-unfold-right done? double add1 0))
+(test "list-queue-unfold-right" '(6 4 2 0) (list-queue-list y))
+(define x0 (list-queue 8))
+(define x1 (list-queue-unfold done? double add1 0 x0))
+(test "list-queue-unfold II" '(0 2 4 6 8) (list-queue-list x1))
+(define y0 (list-queue 8))
+(define y1 (list-queue-unfold-right done? double add1 0 y0))
+(test "list-queue-unfold-right II" '(8 6 4 2 0) (list-queue-list y1))
+
+;; ----------------------------------------------------------------------
 ;;  SRFI 158 ...
 ;; ----------------------------------------------------------------------
 (test-subsection "SRFI 158 - generators")
