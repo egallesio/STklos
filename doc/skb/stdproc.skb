@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 14-Oct-2019 15:13 (eg)
+;; Last file update:  3-Jul-2020 15:15 (eg)
 ;;
 ;; ======================================================================
 
@@ -1042,6 +1042,7 @@ See SRFI document for more information.])
 (insertdoc 'error-object-location)
 (insertdoc 'require-extension)
 (insertdoc 'repl)
+(insertdoc 'assume)
 
 (insertdoc 'apropos)
 (insertdoc 'help)

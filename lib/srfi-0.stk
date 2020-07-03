@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  3-Jul-2020 12:52 (eg)
+;;;; Last file update:  3-Jul-2020 15:47 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -201,7 +201,7 @@
     ;; srfi-142                         ; ....... withdrawn
     ;; srfi-143                         ; Fixnums
     ;; srfi-144                         ; Flonums
-    ;; srfi-145                         ; Assumptions
+    srfi-145                            ; Assumptions
     ;; srfi-146                         ; Mappings
     ;; srfi-147                         ; Custom macro transformers
     ;; srfi-148                         ; Eager syntax-rules

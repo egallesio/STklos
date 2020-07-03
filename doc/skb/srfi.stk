@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Aug-2004 12:43 (eg)
-;;;; Last file update: 22-Jun-2020 18:35 (eg)
+;;;; Last file update:  3-Jul-2020 14:42 (eg)
 ;;;;
 
 (define srfi-address "http://srfi.schemers.org/srfi-~A/srfi-~A.html")
@@ -74,6 +74,7 @@
      (111 . "Boxes")
      (112 . "Environment Inquiry")
      (117 . "Queues based on lists")
+     (145 . "Assumptions")
      (158 . "Generators and Accumulators")
      (169 . "Underscores in numbers")
      (171 . "Transducers")

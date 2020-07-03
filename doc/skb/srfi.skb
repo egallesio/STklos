@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 18-Jun-2020 18:25 (eg)
+;; Last file update:  3-Jul-2020 15:46 (eg)
 ;;
 ;; ======================================================================
 
@@ -26,6 +26,18 @@
   (list
    (index (format "SRFI-~A" n))
    (apply section :number #f :title (title-srfi n) l)))
+
+(define-macro (gen-embedded-srfi n :optional rest)
+  `(srfi-section ,n
+      (p [,(quick-link-srfi ,n) is fully supported. ]
+         ,(if rest rest ""))))
+
+(define-macro (gen-loaded-srfi n :optional rest)
+  `(srfi-section ,n
+     (p [,(quick-link-srfi ,n) is fully supported.  To use SRFI-] ,n
+         [, you need to insert the following expression])
+     (fontified-code ,(format "(require \"srfi-~A\")" n))
+     (p [in your code or uses the ,(code "cond-expand") special form.])))
 
 ;; ======================================================================
 
@@ -585,89 +597,41 @@ described in this document (procedures
 
 
 ;; ----------------------------------------------------------------------
+;; ----------------------------------------------------------------------
 ;; SRFI 100 -- define-lambda-object
-;; ----------------------------------------------------------------------
-(srfi-section 100
+(gen-loaded-srfi 100)
 
-(p [,(quick-link-srfi 100) is fully supported.  To use SRFI-100,
-you need to insert the following expression])
-(fontified-code [(require "srfi-100")])
-(p [in your code or uses the ,(code "cond-expand") special form.]))
-
-;; ----------------------------------------------------------------------
 ;; SRFI 111 -- Boxes
-;; ----------------------------------------------------------------------
-(srfi-section 111
+(gen-loaded-srfi 111)
 
-(p [,(quick-link-srfi 111) is fully supported.  To use SRFI-111,
-you need to insert the following expression])
-(fontified-code [(require "srfi-111")])
-(p [in your code or uses the ,(code "cond-expand") special form.]))
-
-;; ----------------------------------------------------------------------
 ;; SRFI 112 -- Environment Inquiry
-;; ----------------------------------------------------------------------
-(srfi-section 112
+(gen-embedded-srfi 112)
 
-(p [,(quick-link-srfi 112) is fully supported.]))
-
-;; ----------------------------------------------------------------------
 ;; SRFI 117 -- Queues based on lists
-;; ----------------------------------------------------------------------
-(srfi-section 117
+(gen-loaded-srfi 117)
 
-(p [,(quick-link-srfi 117) is fully supported.  To use SRFI-117,
-you need to insert the following expression])
-(fontified-code [(require "srfi-117")])
-(p [in your code or uses the ,(code "cond-expand") special form.]))
+;; SRFI 145 -- Assumptions
+(gen-embedded-srfi 145
+                   [See the ,(ref :mark "assume" :text "assume") special form])
 
-;; ----------------------------------------------------------------------
 ;; SRFI 158 -- Generators and Accumulators
-;; ----------------------------------------------------------------------
-(srfi-section 158
+(gen-loaded-srfi 158)
 
-(p [,(quick-link-srfi 158) is fully supported.  To use SRFI-158,
-you need to insert the following expression])
-(fontified-code [(require "srfi-158")])
-(p [in your code or uses the ,(code "cond-expand") special form.]))
-
-;; ----------------------------------------------------------------------
 ;; SRFI 169 -- Underscores in numbers
-;; ----------------------------------------------------------------------
-(srfi-section 169
+(gen-embedded-srfi 169
+                   [See ,(ref :mark "accept-srfi-169-numbers"
+                              :text "accept-srfi-169-numbers")
+                        to eventually forbid the usage of underscores in numbers.])
 
-(p [,(quick-link-srfi 169) is fully supported.]))
-
-
-;; ----------------------------------------------------------------------
 ;; SRFI 190 -- Coroutine Generators
-;; ----------------------------------------------------------------------
-(srfi-section 190
+(gen-loaded-srfi 190)
 
-(p [,(quick-link-srfi 190) is fully supported.  To use SRFI-190,
-you need to insert the following expression])
-(fontified-code [(require "srfi-190")])
-(p [in your code or uses the ,(code "cond-expand") special form.]))
-
-;; ----------------------------------------------------------------------
 ;; SRFI 171 -- Transducers
-;; ----------------------------------------------------------------------
-(srfi-section 171
+(gen-loaded-srfi 171)
 
-(p [,(quick-link-srfi 171) is fully supported.  To use SRFI-171,
-you need to insert the following expression])
-(fontified-code [(require "srfi-171")])
-(p [in your code or uses the ,(code "cond-expand") special form.]))
-
-;; ----------------------------------------------------------------------
 ;; SRFI 173 -- Hooks
-;; ----------------------------------------------------------------------
-(srfi-section 173
+(gen-loaded-srfi 173)
 
-(p [,(quick-link-srfi 173) is fully supported.  To use SRFI-173,
-you need to insert the following expression])
-(fontified-code [(require "srfi-173")])
-(p [in your code or uses the ,(code "cond-expand") special form.]))
 
 ;; End of chapter
 )

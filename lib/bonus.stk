@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 29-Jun-2020 07:15 (eg)
+;;;; Last file update:  3-Jul-2020 14:29 (eg)
 ;;;;
 
 
@@ -1790,5 +1790,36 @@ doc>
     (string-append (vector-ref u 2)                 ; Posix version field
                    " "
                    (vector-ref u 3))))              ; Posix release field
+
+;;
+;; SRFI-145: "Assumptions"
+;;
+
+#|
+<doc EXT-SYNTAX assume
+ * (assume obj ...)
+ *
+ * The special form |assume| is defined in ,(srfi 145).
+ * When ,(stklos) is in debug mode, this special form is an expression
+ * that evaluates to the value of |obj| if |obj| evaluates to a true
+ * value and it is an error if |obj| evaluates to a false value.
+ * ,(linebreak)
+ * When ,(stklos) is not in debug mode, the call to |assume| is elided.
+doc>
+|#
+(define-macro (assume expr . args)
+  (if (positive? (stklos-debug-level))
+      ;; Assumptions are evaluated in debug mode ...
+      (let* ((efile (and (%epair? expr) (%epair-file expr)))
+             (eline (and (%epair? expr) (%epair-line expr)))
+             (fmt   (string-append (if efile
+                                       (format "in ~A:~A, " efile eline)
+                                       "")
+                                   "invalid assumption:")))
+        `(or ,expr
+             (error ,fmt ',expr ,@args)))
+      ;; ... and ignored otherwise
+      #void))
+
 
 ;; LocalWords:  doc dotimes R5RS str SRFI optarg
