@@ -66,6 +66,7 @@
      (69 . "Basic Hash Tables")
      (70 . "Numbers")
      (74 . "Octet-Addressed Binary Blocks")
+     (87 . "=> in case clauses")
      (88 . "Keyword Objects")
      (89 . "Optional Positional and Named Parameters")
      (96 . "SLIB Prerequisites ")
