@@ -119,4 +119,16 @@
 (define-macro (test msg expect expr :optional (compare equal?))
   `(%tester ,msg ,expect (lambda () ,expr) ',expr ,compare))
 
+;; ----------------------------------------------------------------------
+;; test/error ...
+;; ----------------------------------------------------------------------
+
+(define-syntax test/error
+  (syntax-rules ()
+    ((_ str code)
+     (let ((result
+            (with-handler (lambda (e) 'returned-error)
+                   code)))
+       (test str 'returned-error result)))))
+
 (provide "test")

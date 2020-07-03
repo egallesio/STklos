@@ -640,6 +640,96 @@
       '(a d e))
 
 ;; ----------------------------------------------------------------------
+;;  SRFI 169 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 169 - Underscores in numbers")
+
+;; bin
+(test "binary" 201 (read-from-string "#b11001001"))
+(test "binary" 201 (read-from-string "#b1_1_0_0_1_0_0_1"))
+(test "binary" 201 (read-from-string "#b1_1001001"))
+(test "binary" 201 (read-from-string "#b110_01001"))
+(test "binary" 201 (read-from-string "#b1100100_1"))
+
+(test/error "binary, leading _"  (read-from-string "#b_11001001"))
+(test/error "binary, trailing _" (read-from-string "#b11001001_"))
+(test/error "binary, #_b"        (read-from-string "#_b11001001"))
+(test/error "binary, double _"   (read-from-string "#b1100__1001"))
+
+;; if it begins with _, it's a symbol!
+(test "binary, _#b"  #t (symbol? (read-from-string "_#b11001001")))
+
+;; hex
+(test "hex" 4194308277 (read-from-string "#xfa0010b5"))
+(test "hex, several _" 4194308277 (read-from-string "#xf_a_0_0_1_0_b_5"))
+(test "hex, left _" 4194308277 (read-from-string "#xf_a0010b5"))
+(test "hex, right _" 4194308277 (read-from-string "#xfa0010b_5"))
+(test "hex, middle _" 4194308277 (read-from-string "#xfa0_010b5"))
+
+(test/error "hex, leading _"  (read-from-string "#x_fa0010b5"))
+(test/error "hex, trailing _" (read-from-string "#xfa0010b5_"))
+(test/error "hex, #_x"        (read-from-string "#_xfa0010b5"))
+(test/error "hex, double _"   (read-from-string "#xfa0__010b5"))
+
+;; if it begins with _, it's a symbol!
+(test "hex, _#x" #t (symbol? (read-from-string "_#xfa0010b5")))
+
+;; from the SRFI
+;; integers
+(test "int" 123 (read-from-string "0123"))
+(test "int, three underscores" 123 (read-from-string "0_1_2_3"))
+(test "int, one underscore I" 123 (read-from-string "0_123"))
+(test "int, one underscore II" 123 (read-from-string "01_23"))
+(test "int, one underscore III" 123 (read-from-string "012_3"))
+(test "int, signed+, no underscore" 123 (read-from-string "+0123"))
+(test "int, signed+, one underscore" 123 (read-from-string "+0_123"))
+(test "int, signed-, no underscore" -123 (read-from-string "-0123"))
+(test "int, signed-, one underscore" -123 (read-from-string "-0_123"))
+
+
+(test "int, leading _" #f (number? (read-from-string "_0123")))
+(test "int, trailing _" #f (number? (read-from-string "0123_")))
+(test "int, trailing double _" #f (number? (read-from-string "0123__")))
+(test "int, double _" #f (number? (read-from-string "01__23")))
+(test "int, several _" #f (number? (read-from-string "0_1__2___3")))
+(test "int, _ after sign+" #f (number? (read-from-string "+_0123")))
+(test "int, signed+, trailing _" #f (number? (read-from-string "+0123_")))
+(test "int, after sign-" #f (number? (read-from-string "-_0123")))
+(test "int, signed-, trailing _" #f (number? (read-from-string "-0123_")))
+
+;; reals
+(test "real" 123.456 (read-from-string "123.456"))
+(test "real, 4 underscores" 123.456 (read-from-string "0_1_23.4_5_6"))
+(test "real, exp-notation" 123.5e6 (read-from-string "1_2_3.5e6"))
+(test "real, exp-notation" 12e12 (read-from-string "1_2e1_2"))
+
+(test "real, leading _" #f (number? (read-from-string "_0123.456")))
+(test "real, _." #f (number? (read-from-string "0123_.456")))
+(test "real, ._" #f (number? (read-from-string "0123._456")))
+(test "real, trailing _" #f (number? (read-from-string "0123.456_")))
+(test "real, _., exp-notation" #f (number? (read-from-string "123_.5e6" )))
+(test "real, ._, exp-notation" #f (number? (read-from-string "123._5e6" )))
+(test "real, _e" #f (number? (read-from-string "123.5_e6" )))
+(test "real, e_" #f (number? (read-from-string "123.5e_6" )))
+(test "real, trailing _, exp-notation" #f (number? (read-from-string "123.5e6_" )))
+(test "real, _e, no dot" #f (number? (read-from-string "12_e12"   )))
+(test "real e_, no dot" #f (number? (read-from-string "12e_12"   )))
+(test "real, trailing _, no dot" #f (number? (read-from-string "12e12_"   )))
+
+(test "octal, two _"  80247 (read-from-string "#o23_45_67"))
+(test "int, #d, two _" 456789 (read-from-string "#d45_67_89"))
+(test "hex, negative" -32 (read-from-string "#x-2_0"))
+(test "octal, signed, two _" 10030 (read-from-string "#o+2_345_6"))
+
+(test/error "hex, #x-_"  (read-from-string "#x-_2"))
+(test "_#x-_"  #t (symbol? (read-from-string "_#x-_2")))
+(test/error "#d_"   (read-from-string "#d_45_67_89"))
+(test/error "#e_"  (read-from-string "#e_45/67_89"))
+(test/error "#i#o_"  (read-from-string "#i#o_1234"))
+(test/error "#i_#o_" (read-from-string "#i_#o_1234"))
+(test/error "trailing _" (read-from-string "#e#x1234_"))
+
+;; ---------------------------------------------------------------------
 ;;  SRFI 171 ...
 ;; ----------------------------------------------------------------------
 (test-subsection "SRFI 171 - Transducers")
@@ -908,7 +998,6 @@
 
 (test "bytevector-u8-transduce with identity"
       15 (bytevector-u8-transduce (tmap add1) + 0 bv))
-
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI 173 ...
