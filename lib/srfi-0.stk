@@ -171,7 +171,8 @@
     ;; srfi-114                         ; ....... withdrawn
     ;; srfi-115                         ; Scheme Regular Expressions
     ;; srfi-116                         ; Immutable List Library
-    ;; srfi-117                         ; Queues based on lists
+    ((srfi-117 queues-as-lists)
+     "srfi-117")                        ; Queues based on lists
     ;; srfi-118                         ; Simple adjustable-size strings
     ;; srfi-119                         ; wisp: simpler indentation-sensitive scheme
     ;; srfi-120                         ; Timer APIs
@@ -225,7 +226,7 @@
     ;; srfi-168                         ; Generic Tuple Store Database
     srfi-169                            ; Underscores in numbers
     ;; srfi-170                         ; POSIX API (draft)
-    ;; srfi-171                         ; Transducers
+    ((srfi-171 transducers) "srfi-171") ; Transducers
     ;; srfi-172                         ; Two Safer Subsets of R7RS
     ((srfi-173 hooks) "srfi-173")       ; Hooks
     ;; srfi-174                         ; POSIX Timespecs

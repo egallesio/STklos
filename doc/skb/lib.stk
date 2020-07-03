@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 20-Dec-2003 23:23 (eg)
-;;;; Last file update:  8-Jun-2020 11:09 (eg)
+;;;; Last file update:  2-Jul-2020 13:23 (eg)
 ;;;;
 
 (load "srfi.stk")
@@ -152,8 +152,8 @@
            (cons name similar))
       ;; Display first line of synopsis
       (table :width 100.
-         (tr (td :align 'left  (show-form (car synopsis)))
-             (td :align 'right (show-type type))))
+         (tr (td (show-form (car synopsis)))
+             (td :class "align-right" (show-type type))))
       ;; Display (eventually) the other lines of synopsis
       (map (lambda (x) (list (show-form x) (linebreak)))
            (cdr synopsis))
@@ -171,7 +171,7 @@
     (color :fg "peru"
        (it (case x
          ((syntax)          [,(rfive)  ,(linebreak) syntax])
-                 ((r57rs-procedure) [,(rfive) ,(linebreak) (rseven)
+                 ((r57rs-procedure) [,(rfive) ,(linebreak) ,(rseven)
                                      ,(linebreak) procedure])
                  ((r7rs-procedure)  [,(rseven) ,(linebreak) procedure])
                  ((r7rs-syntax)     [,(rseven) ,(linebreak) syntax])

@@ -3,7 +3,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 13-Oct-2004 11:42 (eg)
- * Last file update:  8-Jun-2020 16:55 (eg)
+ * Last file update:  2-Jul-2020 14:11 (eg)
  */
 
 html {
@@ -119,3 +119,5 @@ A:hover {
     background: #aaaaff;
     text-decoration: none;
 }
+
+td.align-right{ text-align: right; }

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 25-Jun-2020 12:23 (eg)
+;;;; Last file update:  2-Jul-2020 12:17 (eg)
 ;;;;
 
 (require "test")
@@ -64,13 +64,11 @@
 
 (require "srfi-54")
 
-(define (cat-output-and-value . args)
-  (let ((val #f))
-    (let ((out  (with-output-to-string (lambda ()
-                                         (set! val
-                                               (apply cat args))))))
-      (list out val))))
-  
+(define-macro (mute-cat expr)
+  `(let ((res #f))
+     (with-output-to-string (lambda () (set! res ,expr)))
+     res))
+
 
 (test "align left" "130.00    " (cat 129.995 -10 2.))
 (test "align right, I" "    130.00" (cat 129.995 10 2.))
@@ -111,23 +109,22 @@
 
 
 ;; Tests with output changed to ignore the string printed below.
-;; They're not to ouseful as this, but will at least detect crashes.
+;; They're not to useful as this, but will at least detect crashes.
 
 ;; (test "" (#\a "str" s)"(#\\a \"str\" s)" (cat '(#\a "str" s) #t))
-(test "output I" "(#\\a \"str\" s)" (cat '(#\a "str" s) #t))
+(test "output I" "(#\\a \"str\" s)" (mute-cat (cat '(#\a "str" s) #t)))
 
 ;;(test "" (#\a "str" s)"(#\\a \"str\" s)" (cat '(#\a "str" s) (current-output-port)))
-(test "output II" "(#\\a \"str\" s)" (cat '(#\a "str" s) (current-output-port)))
+(test "output II" "(#\\a \"str\" s)" (mute-cat (cat '(#\a "str" s) (current-output-port))))
 
 ;; original ok:
-(test "output III" "3s \"str\"" (cat 3 (cat 's) " " (cat "str" write)))
+(test "output III" "3s \"str\"" (mute-cat (cat 3 (cat 's) " " (cat "str" write))))
 
 ;;(test "" 3s "str""3s \"str\"" (cat 3 #t (cat 's) " " (cat "str" write)))
-(test "output IV" "3s \"str\"" (cat 3 #t (cat 's) " " (cat "str" write)))
+(test "output IV" "3s \"str\"" (mute-cat (cat 3 #t (cat 's) " " (cat "str" write))))
 
 ;;(test "" s3s "str""3s \"str\"" (cat 3 #t (cat 's #t) " " (cat "str" write)))
-(test "output V" "3s \"str\"" (cat 3 #t (cat 's #t) " " (cat "str" write)))
-
+(test "output V" "3s \"str\"" (mute-cat (cat 3 #t (cat 's #t) " " (cat "str" write))))
 
 
 ;; records!
@@ -144,14 +141,14 @@
 
 (define (record-writer object string-port)
     (if (example? object)
-	(begin (display (get-num object) string-port)
-	       (display "-" string-port)
-	       (display (get-str object) string-port))
-	((or (and (or (string? object)
-		      (char? object)
-		      (boolean? object))
-		  display)
-	     write) object string-port)))
+    (begin (display (get-num object) string-port)
+           (display "-" string-port)
+           (display (get-str object) string-port))
+    ((or (and (or (string? object)
+              (char? object)
+              (boolean? object))
+          display)
+         write) object string-port)))
 
 ;; STklos includes a unique identifier in the object description,
 ;;
@@ -487,6 +484,111 @@
       (blob->sint-list 2 (endianness little) b4))
 
 ;; ----------------------------------------------------------------------
+;;  SRFI 117 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 117 - Queues based on lists")
+
+(require "srfi-117")
+
+;; list-queues/simple
+(test "make-list-queue"  '(1 1 1) (list-queue-list (make-list-queue '(1 1 1))))
+(define x (list-queue 1 2 3))
+(test "list-queue-list" '(1 2 3) (list-queue-list x))
+(define x1 (list 1 2 3))
+(define x2 (make-list-queue x1 (cddr x1)))
+(test "list-queue-back" 3 (list-queue-back x2))
+(define y (list-queue 4 5))
+(test "list-queue?" #t (list-queue? y))
+(define z (list-queue-append x y))
+(test "list-queue-append" '(1 2 3 4 5) (list-queue-list z))
+(define z2 (list-queue-append! x (list-queue-copy y)))
+(test "list-queue-append-copy" '(1 2 3 4 5) (list-queue-list z2))
+(test "list-queue-append-copy-front" 1 (list-queue-front z))
+(test "list-queue-append-copy-back" 5 (list-queue-back z))
+(list-queue-remove-front! y)
+(test "list-queue-remove-front!" '(5) (list-queue-list y))
+(list-queue-remove-back! y)
+(test "list-queue-empty?" #t (list-queue-empty? y))
+(test "list-queue don't remove-front from empty"
+      'error-occurred
+      (with-handler (lambda (e)
+                      'error-occurred)
+                    (list-queue-remove-front! y)))
+(test "list-queue don't remove-back from empty"
+      'error-occurred
+      (with-handler (lambda (e)
+                      'error-occurred)
+                    (list-queue-remove-back! y)))
+(test "list-queue-list II" '(1 2 3 4 5) (list-queue-list z))
+(test "list-queue-remove-all!" '(1 2 3 4 5) (list-queue-remove-all! z2))
+(test "list-queue-remove-all! -> empty" #t (list-queue-empty? z2))
+(list-queue-remove-all! z)
+(list-queue-add-front! z 1)
+(list-queue-add-front! z 0)
+(list-queue-add-back! z 2)
+(list-queue-add-back! z 3)
+(test "list-queue-remove-all-add-4" '(0 1 2 3) (list-queue-list z))
+
+;; list-queues/whole
+(define a (list-queue 1 2 3))
+(define b (list-queue-copy a))
+(test "list-queue-copy" '(1 2 3) (list-queue-list b))
+(list-queue-add-front! b 0)
+(test "list-queue-copy is not shared" '(1 2 3) (list-queue-list a))
+(test "list-queue-copy size" 4 (length (list-queue-list b)))
+(define c (list-queue-concatenate (list a b)))
+(test "list-queue-concatenate" '(1 2 3 0 1 2 3) (list-queue-list c))
+
+;; list-queues/map
+(define r (list-queue 1 2 3))
+(define s (list-queue-map (lambda (x) (* x 10)) r))
+(test "list-queue-map" '(10 20 30) (list-queue-list s))
+(list-queue-map! (lambda (x) (+ x 1)) r)
+(test "list-queue-map!" '(2 3 4) (list-queue-list r))
+(define sum 0)
+(list-queue-for-each (lambda (x) (set! sum (+ sum x))) s)
+(test "list-queue-for-each" 60 sum)
+
+;; list-queues/conversion
+(define n (list-queue 5 6))
+(list-queue-set-list! n (list 1 2))
+(test "list-queue-set-list!" '(1 2) (list-queue-list n))
+(define d (list 1 2 3))
+(define e (cddr d))
+(define f (make-list-queue d e))
+(define dx #f) ; redefined below
+(define ex #f) ; redefined below
+(let-values (((dxv exv) (list-queue-first-last f)))
+  (set! dx dxv)
+  (set! ex exv))
+(test "list-queue-first-last" #t (eq? d dx))
+(test "list-queue-first-last II" #t (eq? e ex))
+(test "list-queue-first-last III" '(1 2 3) (list-queue-list f))
+(list-queue-add-front! f 0)
+(list-queue-add-back! f 4)
+(test "list-queue-add-{front,back}!" '(0 1 2 3 4) (list-queue-list f))
+(define g (make-list-queue d e))
+(test "make-list-queue II" '(1 2 3 4) (list-queue-list g))
+(define h (list-queue 5 6))
+(list-queue-set-list! h d e)
+(test "list-queue-set-list! II" '(1 2 3 4) (list-queue-list h))
+
+;; list-queues/unfold
+(define (double x) (* x 2))
+(define (done? x) (> x 3))
+(define (add1 x) (+ x 1))
+(define x (list-queue-unfold done? double add1 0))
+(test "list-queue-unfold" '(0 2 4 6) (list-queue-list x))
+(define y (list-queue-unfold-right done? double add1 0))
+(test "list-queue-unfold-right" '(6 4 2 0) (list-queue-list y))
+(define x0 (list-queue 8))
+(define x1 (list-queue-unfold done? double add1 0 x0))
+(test "list-queue-unfold II" '(0 2 4 6 8) (list-queue-list x1))
+(define y0 (list-queue 8))
+(define y1 (list-queue-unfold-right done? double add1 0 y0))
+(test "list-queue-unfold-right II" '(8 6 4 2 0) (list-queue-list y1))
+
+;; ----------------------------------------------------------------------
 ;;  SRFI 158 ...
 ;; ----------------------------------------------------------------------
 (test-subsection "SRFI 158 - generators")
@@ -626,6 +728,276 @@
 (test/error "#i#o_"  (read-from-string "#i#o_1234"))
 (test/error "#i_#o_" (read-from-string "#i_#o_1234"))
 (test/error "trailing _" (read-from-string "#e#x1234_"))
+
+;; ---------------------------------------------------------------------
+;;  SRFI 171 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 171 - Transducers")
+
+(require "srfi-1")
+(require "srfi-66")
+(require "srfi-69")
+(require "srfi-171")
+
+(define (add1 x) (+ x 1))
+
+(define numeric-list (iota 5))
+(define numeric-vec (list->vector numeric-list))
+(define bv (list->u8vector numeric-list))
+(define test-string "0123456789abcdef")
+(define list-of-chars (string->list test-string))
+
+;; for testing all treplace variations
+(define replace-alist '((1 . s) (2 . c) (3 . h) (4 . e) (5 . m)))
+(define stklos-hashtable (%old-alist->hash-table replace-alist eq? md5sum))
+(define srfi69-hashtable (alist->hash-table replace-alist))
+;;(define rnrs-hashtable (rnrs:make-eq-hashtable))
+
+;; No rnrs hashtables
+;; (rnrs:hashtable-set! rnrs-hashtable 1 's)
+;; (rnrs:hashtable-set! rnrs-hashtable 2 'c)
+;; (rnrs:hashtable-set! rnrs-hashtable 3 'h)
+;; (rnrs:hashtable-set! rnrs-hashtable 4 'e)
+;; (rnrs:hashtable-set! rnrs-hashtable 5 'm)
+
+(define (replace-function val)
+  (case val
+    ((1) 's)
+    ((2) 'c)
+    ((3) 'h)
+    ((4) 'e)
+    ((5) 'm)
+    (else val)))
+
+;; Test procedures for port-transduce
+;; broken out to properly close port
+(define (port-transduce-test)
+  (let* ((port (open-input-string "0 1 2 3 4"))
+        (res (equal? 15 (port-transduce (tmap add1) + read
+                                        (open-input-string "0 1 2 3 4")))))
+    (close-port port)
+    res))
+(define (port-transduce-with-identity-test)
+  (let* ((port (open-input-string "0 1 2 3 4"))
+         (res (equal? 15 (port-transduce (tmap add1)
+                                         +
+                                         0
+                                         read
+                                         (open-input-string "0 1 2 3 4")))))
+    (close-port port)
+    res))
+
+
+;;; helpers:
+
+
+  (define (compose . functions)
+    (define (make-chain thunk chain)
+      (lambda args
+        (call-with-values (lambda () (apply thunk args)) chain)))
+    (if (null? functions)
+        values
+        (fold make-chain (car functions) (cdr functions))))
+
+
+;; "transducers"
+
+
+(test "tmap"
+      '(1 2 3 4 5)
+      (list-transduce (tmap add1)
+                      rcons
+                      numeric-list))
+
+(test "tfilter"
+      '(0 2 4)
+      (list-transduce (tfilter even?)
+                      rcons
+                      numeric-list))
+
+(test "tfilter+tmap"
+      '(1 3 5)
+      (list-transduce (compose (tfilter even?) (tmap add1))
+                      rcons
+                      numeric-list))
+
+(test "tfilter-map"
+      '(1 3 5)
+      (list-transduce (tfilter-map
+                       (lambda (x)
+                         (if (even? x)
+                             (+ x 1)
+                             #f)))
+                      rcons numeric-list))
+
+(test "tremove"
+      (list-transduce (tremove char-alphabetic?)
+                      rcount
+                      list-of-chars)
+      (string-transduce (tremove char-alphabetic?)
+                        rcount
+                        test-string))
+
+(test "treplace with alist"
+      '(s c h e m e  r o c k s)
+      (list-transduce (treplace replace-alist)
+                      rcons
+                      '(1 2 3 4 5 4 r o c k s) ))
+
+(test "treplace with replace-function"
+      '(s c h e m e  r o c k s)
+      (list-transduce (treplace replace-function)
+                      rcons
+                      '(1 2 3 4 5 4 r o c k s)))
+
+(test "treplace with STklos hash-table"
+      '(s c h e m e  r o c k s)
+      (list-transduce (treplace stklos-hashtable)
+                      rcons
+                      '(1 2 3 4 5 4 r o c k s)))
+
+(test "treplace with srfi-69 hash-table"
+      '(s c h e m e  r o c k s)
+      (list-transduce (treplace srfi69-hashtable)
+                      rcons
+                      '(1 2 3 4 5 4 r o c k s)))
+
+;; STklos has no RNRS hashtables, so we comment this out.
+;;
+;; (test "treplace with rnrs hash-table"
+;;       '(s c h e m e  r o c k s)
+;;       (list-transduce (treplace rnrs-hashtable)
+;;                       rcons
+;;                       '(1 2 3 4 5 4 r o c k s)))
+
+(test "ttake"
+      6 (list-transduce (ttake 4) + numeric-list))
+
+(test "tdrop"
+      7 (list-transduce (tdrop 3) + numeric-list))
+
+(test "tdrop-while"
+      '(3 4)
+      (list-transduce (tdrop-while (lambda (x) (< x 3)))
+                      rcons
+                      numeric-list))
+
+(test "ttake-while"
+      '(0 1 2)
+      (list-transduce (ttake-while (lambda (x) (< x 3)))
+                      rcons
+                      numeric-list))
+
+(test "tconcatenate"
+      '(0 1 2 3 4) (list-transduce tconcatenate
+                                   rcons
+                                   '((0 1) (2 3) (4))))
+
+(test "tappend-map"
+      '(1 2 2 4 3 6)
+      (list-transduce (tappend-map (lambda (x) (list x (* x 2))))
+                      rcons
+                      '(1 2 3)))
+
+(test "tdelete-neighbor-duplicates"
+      '(1 2 1 2 3)
+      (list-transduce (tdelete-neighbor-duplicates)
+                      rcons
+                      '(1 1 1 2 2 1 2 3 3)))
+
+(test "tdelete-neighbor-duplicates with equality predicate"
+      '(a b c "hej" "hej")
+      (list-transduce (tdelete-neighbor-duplicates eq?)
+                      rcons
+                      (list 'a 'a 'b 'c 'c "hej" (string #\h #\e #\j))))
+
+(test "tdelete-duplicates"
+      '(1 2 3 4)
+      (list-transduce (tdelete-duplicates)
+                      rcons
+                      '(1 1 2 1 2 3 3 1 2 3 4)))
+
+(test "tdelete-duplicates with predicate"
+      '("hej" "hopp")
+      (list-transduce (tdelete-duplicates string-ci=?)
+                      rcons
+                      (list "hej" "HEJ" "hopp" "HOPP" "heJ")))
+
+;; added by jpellegrini:
+(test "tdelete-duplicates with string=?"
+      '("hej" "HEJ" "hopp" "HOPP")
+      (list-transduce (tdelete-duplicates string=?)
+                      rcons
+                      (list "hej" "HEJ" "hopp" "HOPP" "hej")))
+
+(test "tflatten"
+      '(1 2 3 4 5 6 7 8 9)
+      (list-transduce tflatten rcons '((1 2) 3 (4 (5 6) 7) 8 (9))))
+
+(test "tpartition"
+      '((1 1 1 1) (2 2 2 2) (3 3 3) (4 4 4 4))
+      (list-transduce (tpartition even?)
+                      rcons
+                      '(1 1 1 1 2 2 2 2 3 3 3 4 4 4 4)))
+
+(test "tsegment"
+      '((0 1) (2 3) (4))
+      (vector-transduce (tsegment 2) rcons numeric-vec))
+
+(test "tadd-between"
+      '(0 and 1 and 2 and 3 and 4)
+      (list-transduce (tadd-between 'and) rcons numeric-list))
+
+(test "tenumerate"
+      '((-1 . 0) (0 . 1) (1 . 2) (2 . 3) (3 . 4))
+      (list-transduce (tenumerate (- 1)) rcons numeric-list))
+
+
+;; "x-transduce"
+
+(test "list-transduce"
+      15 (list-transduce (tmap add1) + numeric-list))
+
+(test "list-transduce with identity"
+      15 (list-transduce (tmap add1) + 0 numeric-list))
+
+(test "vector-transduce"
+      15 (vector-transduce (tmap add1) + numeric-vec))
+
+(test "vector-transduce with identity"
+      15
+      (vector-transduce (tmap add1) + 0 numeric-vec))
+
+(test "port-transduce" #t (port-transduce-test))
+(test "port-transduce with identity" #t (port-transduce-with-identity-test))
+
+;; Converts each numeric char to it's corresponding integer  and sums them.
+(test "string-transduce"
+      15
+      (string-transduce (tmap (lambda (x) (- (char->integer x) 47))) + "01234"))
+
+(test "string-transduce with identity"
+      15
+      (string-transduce  (tmap (lambda (x) (- (char->integer x) 47)))
+                         +
+                         0
+                         "01234"))
+
+(test "generator-transduce"
+      '(1 2 3)
+      (with-input-from-string "1 2 3"
+        (lambda () (generator-transduce (tmap (lambda (x) x)) rcons read))))
+
+(test "generator-transduce with identity"
+      '(1 2 3)
+      (with-input-from-string "1 2 3"
+        (lambda () (generator-transduce (tmap (lambda (x) x)) rcons '() read))))
+
+(test "bytevector-u8-transduce"
+      15 (bytevector-u8-transduce (tmap add1) + bv))
+
+(test "bytevector-u8-transduce with identity"
+      15 (bytevector-u8-transduce (tmap add1) + 0 bv))
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI 173 ...
