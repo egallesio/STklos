@@ -92,7 +92,7 @@
     (srfi-35 "srfi-35")                 ; Conditions
     (srfi-36 "srfi-36")                 ; I/O Conditions
     (conditions "srfi-35" "srfi-36")
-    ;; srfi-37                          ; Program Argument Processor
+    ((srfi-37 args-fold) "srfi-37")     ; Program Argument Processor
     srfi-38                             ; Ext. Rep. of shared structures
     ((srfi-39 parameters))              ; Parameter Objects
     ;; srfi-40                          ; A Library of Streams
