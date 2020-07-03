@@ -17,7 +17,7 @@ STklos Reference Manual<hr align="center" width="10%">14. SRFIs</div>
 <td align="left" valign="top" width="20%" bgcolor="#204875">
 <table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-51250">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-51564">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -72,6 +72,7 @@ STklos Reference Manual<hr align="center" width="10%">14. SRFIs</div>
  <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-69----Basic-Hash-Tables">SRFI-69 -- Basic Hash Tables</td></tr>
  <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-70----Numbers">SRFI-70 -- Numbers</td></tr>
  <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-74----Octet-Addressed-Binary-Blocks">SRFI-74 -- Octet-Addressed Binary Blocks</td></tr>
+ <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-87-------in-case-clauses">SRFI-87 -- =&gt; in case clauses</td></tr>
  <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-88----Keyword-Objects">SRFI-88 -- Keyword Objects</td></tr>
  <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-89----Optional-Positional-and-Named-Parameters">SRFI-89 -- Optional Positional and Named Parameters</td></tr>
  <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-96----SLIB-Prerequisites-">SRFI-96 -- SLIB Prerequisites </td></tr>
@@ -80,9 +81,11 @@ STklos Reference Manual<hr align="center" width="10%">14. SRFIs</div>
  <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-111----Boxes">SRFI-111 -- Boxes</td></tr>
  <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-112----Environment-Inquiry">SRFI-112 -- Environment Inquiry</td></tr>
  <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-117----Queues-based-on-lists">SRFI-117 -- Queues based on lists</td></tr>
+ <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-145----Assumptions">SRFI-145 -- Assumptions</td></tr>
  <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-158----Generators-and-Accumulators">SRFI-158 -- Generators and Accumulators</td></tr>
+ <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-169----Underscores-in-numbers">SRFI-169 -- Underscores in numbers</td></tr>
  <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-190----Coroutines-Generators">SRFI-190 -- Coroutines Generators</td></tr>
- <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-171----Trnsducers">SRFI-171 -- Trnsducers</td></tr>
+ <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-171----Transducers">SRFI-171 -- Transducers</td></tr>
  <tr><td valign="top" align="left"></td><td colspan="4" width="100%"><a href="stklos-ref-14.html#SRFI-173----Hooks">SRFI-173 -- Hooks</td></tr>
 </tbody>
 </table>
@@ -104,7 +107,7 @@ several years and this would prevent the timely implementation of
 standardized approaches to several important problems and needs
 in the Scheme community.</p><p>Only the implemented SRFIs are (briefly) presented here. For further
 information on each SRFI, please look at the official
-<a  class="http" href="http://srfi.schemers.org">SRFI site</a>.</p><a name="--index-entry-50241"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-0----Feature-based-conditional-expansion-construct"></a>
+<a  class="http" href="http://srfi.schemers.org">SRFI site</a>.</p><a name="--index-entry-50523"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-0----Feature-based-conditional-expansion-construct"></a>
 <h3 id="SRFI-0----Feature-based-conditional-expansion-construct">SRFI-0 -- Feature-based conditional expansion construct</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-0/srfi-0.html">SRFI-0</a> defines the <code>cond-expand</code>
@@ -116,7 +119,7 @@ SRFI supported by the implementation (for instance
 feature identifiers which are the same that the ones
 defined in igure <a href="stklos-ref-14.html#Feature-identifiers">3</a></p><p>Furthermore, the feature
 identifier <em>stklos</em> is defined for application which need
-to know on which Scheme implementation they are running on.</p></div></div><a name="--index-entry-50259"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-1----List-Library"></a>
+to know on which Scheme implementation they are running on.</p></div></div><a name="--index-entry-50541"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-1----List-Library"></a>
 <h3 id="SRFI-1----List-Library">SRFI-1 -- List Library</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-1/srfi-1.html">SRFI-1</a> defines an extensive library for list
@@ -126,7 +129,7 @@ need to insert the following expression</p><blockquote><table cellspacing="0" cl
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-1&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50279"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-2----AND-LET---an-AND-with-local-bindings--a-guarded-LET--special-form"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50561"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-2----AND-LET---an-AND-with-local-bindings--a-guarded-LET--special-form"></a>
 <h3 id="SRFI-2----AND-LET---an-AND-with-local-bindings--a-guarded-LET--special-form">SRFI-2 -- AND-LET*: an AND with local bindings, a guarded LET* special form</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-2/srfi-2.html">SRFI-2</a> defines an <em>and</em> form with local
@@ -135,7 +138,7 @@ you need to insert the following expression</p><blockquote><table cellspacing="0
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-2&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50297"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-4----Homogeneous-numeric-vector-datatypes"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50579"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-4----Homogeneous-numeric-vector-datatypes"></a>
 <h3 id="SRFI-4----Homogeneous-numeric-vector-datatypes">SRFI-4 -- Homogeneous numeric vector datatypes</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-4/srfi-4.html">SRFI-4</a> defines a set of data types for vectors
@@ -144,13 +147,13 @@ To use SRFI-4, you need to insert the following expression</p><blockquote><table
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-4&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50304"></a><a name="--index-entry-50308"></a><a name="--index-entry-50312"></a><a name="--index-entry-50322"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-6----Basic-String-Ports"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50586"></a><a name="--index-entry-50590"></a><a name="--index-entry-50594"></a><a name="--index-entry-50604"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-6----Basic-String-Ports"></a>
 <h3 id="SRFI-6----Basic-String-Ports">SRFI-6 -- Basic String Ports</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-6/srfi-6.html">SRFI-6</a> is fully supported and is completely
 described in this document (procedures
 <code>open-input-string</code>, <code>open-output-string</code> and
-<code>get-output-string</code>). </p></div></div><a name="--index-entry-50340"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-7----Feature-based-program-configuration-language-"></a>
+<code>get-output-string</code>). </p></div></div><a name="--index-entry-50622"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-7----Feature-based-program-configuration-language-"></a>
 <h3 id="SRFI-7----Feature-based-program-configuration-language-">SRFI-7 -- Feature-based program configuration language </h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-7/srfi-7.html">SRFI-7</a> is fully supported. To use SRFI-7, you
@@ -158,11 +161,11 @@ need to insert the following expression </p><blockquote><table cellspacing="0" c
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-7&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50347"></a><a name="--index-entry-50355"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-8----Receive--Binding-to-multiple-values"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50629"></a><a name="--index-entry-50637"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-8----Receive--Binding-to-multiple-values"></a>
 <h3 id="SRFI-8----Receive--Binding-to-multiple-values">SRFI-8 -- Receive: Binding to multiple values</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-8/srfi-8.html">SRFI-8</a> is fully supported and is completely
-described in this document (special form <code>receive</code>)</p></div></div><a name="--index-entry-50374"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-9----Defining-Record-Types"></a>
+described in this document (special form <code>receive</code>)</p></div></div><a name="--index-entry-50656"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-9----Defining-Record-Types"></a>
 <h3 id="SRFI-9----Defining-Record-Types">SRFI-9 -- Defining Record Types</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-9/srfi-9.html">SRFI-9</a> is fully supported (the implementation
@@ -171,12 +174,12 @@ SRFI-9, you need to insert the following expression </p><blockquote><table cells
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-9&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50391"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-10----Sharp-Comma-External-Form"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50673"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-10----Sharp-Comma-External-Form"></a>
 <h3 id="SRFI-10----Sharp-Comma-External-Form">SRFI-10 -- Sharp Comma External Form</h3>
 </div>
-<div class="sectionbody"><a name="--index-entry-50381"></a><p><a  class="http" href="http://srfi.schemers.org/srfi-10/srfi-10.html">SRFI-10</a> is fully supported. This SRFI extends the
+<div class="sectionbody"><a name="--index-entry-50663"></a><p><a  class="http" href="http://srfi.schemers.org/srfi-10/srfi-10.html">SRFI-10</a> is fully supported. This SRFI extends the
 STklos reader with the "<code>#,</code>" notation which is fully described in
-this document (see <a href="stklos-ref-4.html#define-reader-ctor">define-reader-ctor</a>).</p></div></div><a name="--index-entry-50398"></a><a name="--index-entry-50402"></a><a name="--index-entry-50417"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-11----Syntax-for-receiving-multiple-values"></a>
+this document (see <a href="stklos-ref-4.html#define-reader-ctor">define-reader-ctor</a>).</p></div></div><a name="--index-entry-50680"></a><a name="--index-entry-50684"></a><a name="--index-entry-50699"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-11----Syntax-for-receiving-multiple-values"></a>
 <h3 id="SRFI-11----Syntax-for-receiving-multiple-values">SRFI-11 -- Syntax for receiving multiple values</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-11/srfi-11.html">SRFI-11</a> is fully supported. To use SRFI-11, you
@@ -184,7 +187,7 @@ need to insert the following expression</p><blockquote><table cellspacing="0" cl
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-11&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50424"></a><a name="--index-entry-50439"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-13----String-Library"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50706"></a><a name="--index-entry-50721"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-13----String-Library"></a>
 <h3 id="SRFI-13----String-Library">SRFI-13 -- String Library</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-13/srfi-13.html">SRFI-13</a> is fully supported. To use SRFI-13, you
@@ -192,7 +195,7 @@ need to insert the following expression</p><blockquote><table cellspacing="0" cl
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-13&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50446"></a><a name="--index-entry-50461"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-14----Character-Set-Library"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50728"></a><a name="--index-entry-50743"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-14----Character-Set-Library"></a>
 <h3 id="SRFI-14----Character-Set-Library">SRFI-14 -- Character-Set Library</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-14/srfi-14.html">SRFI-14</a> is fully supported. To use SRFI-14, you
@@ -200,12 +203,12 @@ need to insert the following expression</p><blockquote><table cellspacing="0" cl
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-14&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50468"></a><a name="--index-entry-50472"></a><a name="--index-entry-50483"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-16----Syntax-for-procedures-of-variable-arity"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50750"></a><a name="--index-entry-50754"></a><a name="--index-entry-50765"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-16----Syntax-for-procedures-of-variable-arity"></a>
 <h3 id="SRFI-16----Syntax-for-procedures-of-variable-arity">SRFI-16 -- Syntax for procedures of variable arity</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-16/srfi-16.html">SRFI-16</a> is fully supported and is completely
 described in this document (procedure <code>case-lambda</code>).
-Note <code>case-lambda</code> is now defined in <span style="font-variant: small-caps">R<sup>7</sup>RS</span>.</p></div></div><a name="--index-entry-50490"></a><a name="--index-entry-50494"></a><a name="--index-entry-50498"></a><a name="--index-entry-50515"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-17----Generalized-set-"></a>
+Note <code>case-lambda</code> is now defined in <span style="font-variant: small-caps">R<sup>7</sup>RS</span>.</p></div></div><a name="--index-entry-50772"></a><a name="--index-entry-50776"></a><a name="--index-entry-50780"></a><a name="--index-entry-50797"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-17----Generalized-set-"></a>
 <h3 id="SRFI-17----Generalized-set-">SRFI-17 -- Generalized set!</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-17/srfi-17.html">SRFI-17</a> is fully supported and is completely
@@ -215,11 +218,11 @@ described in this document (procedures <code>set!</code> and
 </pre></td></tr>
 </tbody></table></blockquote>
 <p>in your code (or the use of the <code>cond-expand</code> special form) permits
-to define the setters for the (numerous) cXXXXr list procedures.</p></div></div><a name="--index-entry-50522"></a><a name="--index-entry-50526"></a><a name="--index-entry-50530"></a><a name="--index-entry-50537"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-18----Multithreading-support"></a>
+to define the setters for the (numerous) cXXXXr list procedures.</p></div></div><a name="--index-entry-50804"></a><a name="--index-entry-50808"></a><a name="--index-entry-50812"></a><a name="--index-entry-50819"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-18----Multithreading-support"></a>
 <h3 id="SRFI-18----Multithreading-support">SRFI-18 -- Multithreading support</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-18/srfi-18.html">SRFI-18</a> is fully supported and is completely
-described in this document</p></div></div><a name="--index-entry-50544"></a><a name="--index-entry-50581"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-22----Running-Scheme-Scripts-on-Unix"></a>
+described in this document</p></div></div><a name="--index-entry-50826"></a><a name="--index-entry-50863"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-22----Running-Scheme-Scripts-on-Unix"></a>
 <h3 id="SRFI-22----Running-Scheme-Scripts-on-Unix">SRFI-22 -- Running Scheme Scripts on Unix</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-22/srfi-22.html">SRFI-22</a> describes basic prerequisites for
@@ -249,13 +252,13 @@ command (without option) in Scheme:</p><blockquote><table cellspacing="0" class=
   0)
 </pre></td></tr>
 </tbody></table></blockquote>
-</div></div><a name="--index-entry-50588"></a><a name="--index-entry-50597"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-23----Error-reporting-mechanism"></a>
+</div></div><a name="--index-entry-50870"></a><a name="--index-entry-50879"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-23----Error-reporting-mechanism"></a>
 <h3 id="SRFI-23----Error-reporting-mechanism">SRFI-23 -- Error reporting mechanism</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-23/srfi-23.html">SRFI-23</a> is fully supported. See the
 documentation of the (ref :mark &quot;error&quot;) primitive form more
 information (in fact <span style="font-variant: small-caps">STklos</span> <code>error</code> is more general
-than the one defined in SRFI-23).</p></div></div><a name="--index-entry-50615"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-26----Notation-for-Specializing-Parameters-without-Currying"></a>
+than the one defined in SRFI-23).</p></div></div><a name="--index-entry-50897"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-26----Notation-for-Specializing-Parameters-without-Currying"></a>
 <h3 id="SRFI-26----Notation-for-Specializing-Parameters-without-Currying">SRFI-26 -- Notation for Specializing Parameters without Currying</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-26/srfi-26.html">SRFI-26</a> is fully supported.  To use SRFI-31,
@@ -263,22 +266,22 @@ you need to insert the following expression </p><blockquote><table cellspacing="
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-26&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50622"></a><a name="--index-entry-50626"></a><a name="--index-entry-50635"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-27----Source-of-random-bits"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50904"></a><a name="--index-entry-50908"></a><a name="--index-entry-50917"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-27----Source-of-random-bits"></a>
 <h3 id="SRFI-27----Source-of-random-bits">SRFI-27 -- Source of random bits</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRFI-27</a> is fully supported. See
 <a href="stklos-ref-4.html#random-integer">random-integer</a> and
-<a href="stklos-ref-4.html#random-real">random-real</a>.</p></div></div><a name="--index-entry-50642"></a><a name="--index-entry-50653"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-28----Basic-Format-Strings"></a>
+<a href="stklos-ref-4.html#random-real">random-real</a>.</p></div></div><a name="--index-entry-50924"></a><a name="--index-entry-50935"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-28----Basic-Format-Strings"></a>
 <h3 id="SRFI-28----Basic-Format-Strings">SRFI-28 -- Basic Format Strings</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-28/srfi-28.html">SRFI-28</a> is fully supported. See the
 documentation of the <a href="stklos-ref-4.html#format">format</a> primitive form more
 information (in fact <span style="font-variant: small-caps">STklos</span> <code>format</code> is more general
-than the one defined in <strong>SRFI-28</strong> (Basic Format Strings)).</p></div></div><a name="--index-entry-50664"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-30----Nested-Multi-line-Comments"></a>
+than the one defined in <strong>SRFI-28</strong> (Basic Format Strings)).</p></div></div><a name="--index-entry-50946"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-30----Nested-Multi-line-Comments"></a>
 <h3 id="SRFI-30----Nested-Multi-line-Comments">SRFI-30 -- Nested Multi-line Comments</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-30/srfi-30.html">SRFI-30</a> is fully supported by <span style="font-variant: small-caps">STklos</span>
-reader.</p></div></div><a name="--index-entry-50682"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-31----A-special-form-for-recursive-evaluation"></a>
+reader.</p></div></div><a name="--index-entry-50964"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-31----A-special-form-for-recursive-evaluation"></a>
 <h3 id="SRFI-31----A-special-form-for-recursive-evaluation">SRFI-31 -- A special form for recursive evaluation</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-31/srfi-31.html">SRFI-31</a> is fully supported.  To use SRFI-31,
@@ -286,12 +289,12 @@ you need to insert the following expression</p><blockquote><table cellspacing="0
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-31&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50689"></a><a name="--index-entry-50693"></a><a name="--index-entry-50704"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-34----Exception-Handling-for-Programs"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50971"></a><a name="--index-entry-50975"></a><a name="--index-entry-50986"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-34----Exception-Handling-for-Programs"></a>
 <h3 id="SRFI-34----Exception-Handling-for-Programs">SRFI-34 -- Exception Handling for Programs</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-34/srfi-34.html">SRFI-34</a> is fully supported and is completely
 described in this document (see <code>with-exception-handler</code>
-and <code>guard</code>). Note that this SRFI is now part of <span style="font-variant: small-caps">R<sup>7</sup>RS</span>.</p></div></div><a name="--index-entry-50723"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-35----Conditions"></a>
+and <code>guard</code>). Note that this SRFI is now part of <span style="font-variant: small-caps">R<sup>7</sup>RS</span>.</p></div></div><a name="--index-entry-51005"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-35----Conditions"></a>
 <h3 id="SRFI-35----Conditions">SRFI-35 -- Conditions</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-35/srfi-35.html">SRFI-35</a> is fully supported.  To use SRFI-35,
@@ -301,7 +304,7 @@ you need to insert the following expression </p><blockquote><table cellspacing="
 </tbody></table></blockquote>
 <p>in your code or uses the <code>cond-expand</code> special form.
 See section <a href="stklos-ref-7.html#Predefined-Conditions">Predefined Conditions</a> for the predefined conditions
-and when it is required to load this file.</p></div></div><a name="--index-entry-50742"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-36----I-O-Conditions"></a>
+and when it is required to load this file.</p></div></div><a name="--index-entry-51024"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-36----I-O-Conditions"></a>
 <h3 id="SRFI-36----I-O-Conditions">SRFI-36 -- I/O Conditions</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-36/srfi-36.html">SRFI-36</a> is fully supported.  To use SRFI-36,
@@ -311,17 +314,17 @@ you need to insert the following expression </p><blockquote><table cellspacing="
 </tbody></table></blockquote>
 <p>in your code or uses the <code>cond-expand</code> special form.
 See section <a href="stklos-ref-7.html#Predefined-Conditions">Predefined Conditions</a> for the predefined conditions
-and when it is required to load this file.</p></div></div><a name="--index-entry-50753"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-38----External-representation-of-shared-structures"></a>
+and when it is required to load this file.</p></div></div><a name="--index-entry-51035"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-38----External-representation-of-shared-structures"></a>
 <h3 id="SRFI-38----External-representation-of-shared-structures">SRFI-38 -- External representation of shared structures</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-38/srfi-38.html">SRFI-38</a> is fully supported by <span style="font-variant: small-caps">STklos</span>
-reader.</p></div></div><a name="--index-entry-50765"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-39----Parameters-objects"></a>
+reader.</p></div></div><a name="--index-entry-51047"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-39----Parameters-objects"></a>
 <h3 id="SRFI-39----Parameters-objects">SRFI-39 -- Parameters objects</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-39/srfi-39.html">SRFI-39</a> is fully supported and is completely
 described in this document (procedures
 <a href="stklos-ref-4.html#make-parameter">make-parameter</a> and
-<a href="stklos-ref-4.html#parameterize">parameterize</a>).</p></div></div><a name="--index-entry-50783"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-45----Primitives-for-Expressing-Iterative-Lazy-Algorithms"></a>
+<a href="stklos-ref-4.html#parameterize">parameterize</a>).</p></div></div><a name="--index-entry-51065"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-45----Primitives-for-Expressing-Iterative-Lazy-Algorithms"></a>
 <h3 id="SRFI-45----Primitives-for-Expressing-Iterative-Lazy-Algorithms">SRFI-45 -- Primitives for Expressing Iterative Lazy Algorithms</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-45/srfi-45.html">SRFI-45</a> is fully supported.  To use SRFI-45,
@@ -329,11 +332,11 @@ you need to insert the following expression</p><blockquote><table cellspacing="0
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-45&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50790"></a><a name="--index-entry-50798"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-48----Intermediate-Format-Strings"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51072"></a><a name="--index-entry-51080"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-48----Intermediate-Format-Strings"></a>
 <h3 id="SRFI-48----Intermediate-Format-Strings">SRFI-48 -- Intermediate Format Strings</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-48/srfi-48.html">SRFI-48</a> is fully supported and is completely
-described in this document (procedure <code>format</code>).</p></div></div><a name="--index-entry-50816"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-51----Handling-rest-list"></a>
+described in this document (procedure <code>format</code>).</p></div></div><a name="--index-entry-51098"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-51----Handling-rest-list"></a>
 <h3 id="SRFI-51----Handling-rest-list">SRFI-51 -- Handling rest list</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-51/srfi-51.html">SRFI-51</a> is fully supported.  To use SRFI-51,
@@ -341,7 +344,7 @@ you need to insert the following expression</p><blockquote><table cellspacing="0
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-51&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50834"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-54----Formatting"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51116"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-54----Formatting"></a>
 <h3 id="SRFI-54----Formatting">SRFI-54 -- Formatting</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-54/srfi-54.html">SRFI-54</a> is fully supported.  To use SRFI-54,
@@ -349,7 +352,7 @@ you need to insert the following expression</p><blockquote><table cellspacing="0
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-54&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50841"></a><a name="--index-entry-50903"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-55----Require-extension"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51123"></a><a name="--index-entry-51185"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-55----Require-extension"></a>
 <h3 id="SRFI-55----Require-extension">SRFI-55 -- Require-extension</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-55/srfi-55.html">SRFI-55</a> is fully supported and is completely
@@ -377,7 +380,7 @@ figure <a href="stklos-ref-14.html#Feature-identifiers">3</a> in a
 <center>
 <strong>Fig. 3:</strong> Feature identifiers</center>
 <br>
-</div></div><a name="--index-entry-50921"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-59----Vicinity"></a>
+</div></div><a name="--index-entry-51203"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-59----Vicinity"></a>
 <h3 id="SRFI-59----Vicinity">SRFI-59 -- Vicinity</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-59/srfi-59.html">SRFI-59</a> is fully supported.  To use SRFI-59,
@@ -385,7 +388,7 @@ you need to insert the following expression</p><blockquote><table cellspacing="0
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-59&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50939"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-60----Integers-as-bits"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51221"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-60----Integers-as-bits"></a>
 <h3 id="SRFI-60----Integers-as-bits">SRFI-60 -- Integers as bits</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-60/srfi-60.html">SRFI-60</a> is fully supported.  To use SRFI-60,
@@ -393,10 +396,10 @@ you need to insert the following expression</p><blockquote><table cellspacing="0
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-60&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50950"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-62----S-expression-comments"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51232"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-62----S-expression-comments"></a>
 <h3 id="SRFI-62----S-expression-comments">SRFI-62 -- S-expression comments</h3>
 </div>
-<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-62/srfi-62.html">SRFI-62</a> is fully supported. See <a href="stklos-ref-1.html#Comments">Comments</a></p></div></div><a name="--index-entry-50968"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-66----Octet-Vectors"></a>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-62/srfi-62.html">SRFI-62</a> is fully supported. See <a href="stklos-ref-1.html#Comments">Comments</a></p></div></div><a name="--index-entry-51250"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-66----Octet-Vectors"></a>
 <h3 id="SRFI-66----Octet-Vectors">SRFI-66 -- Octet Vectors</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-66/srfi-66.html">SRFI-66</a> is fully supported.  To use SRFI-66,
@@ -404,7 +407,7 @@ you need to insert the following expression</p><blockquote><table cellspacing="0
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-66&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50989"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-69----Basic-Hash-Tables"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51271"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-69----Basic-Hash-Tables"></a>
 <h3 id="SRFI-69----Basic-Hash-Tables">SRFI-69 -- Basic Hash Tables</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-69/srfi-69.html">SRFI-69</a> is fully supported. Note that the
@@ -416,10 +419,10 @@ following expression </p><blockquote><table cellspacing="0" class="code" cellpad
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-69&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-50999"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-70----Numbers"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51281"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-70----Numbers"></a>
 <h3 id="SRFI-70----Numbers">SRFI-70 -- Numbers</h3>
 </div>
-<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-70/srfi-70.html">SRFI-70</a> is fully supported.</p></div></div><a name="--index-entry-51017"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-74----Octet-Addressed-Binary-Blocks"></a>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-70/srfi-70.html">SRFI-70</a> is fully supported.</p></div></div><a name="--index-entry-51299"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-74----Octet-Addressed-Binary-Blocks"></a>
 <h3 id="SRFI-74----Octet-Addressed-Binary-Blocks">SRFI-74 -- Octet-Addressed Binary Blocks</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-74/srfi-74.html">SRFI-74</a> is fully supported.  To use SRFI-74,
@@ -427,7 +430,11 @@ you need to insert the following expression</p><blockquote><table cellspacing="0
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-74&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51032"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-88----Keyword-Objects"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51309"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-87-------in-case-clauses"></a>
+<h3 id="SRFI-87-------in-case-clauses">SRFI-87 -- =&gt; in case clauses</h3>
+</div>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-87/srfi-87.html">SRFI-87</a>, ehich became part of the R7RS standard,
+is fully supported.</p></div></div><a name="--index-entry-51324"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-88----Keyword-Objects"></a>
 <h3 id="SRFI-88----Keyword-Objects">SRFI-88 -- Keyword Objects</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-88/srfi-88.html">SRFI-88</a> is fully supported. The only difference
@@ -435,7 +442,7 @@ between the keywords defined in the SRFI document and the
 <span style="font-variant: small-caps">STklos</span> keywords is on the zero-length keyword: in <span style="font-variant: small-caps">STklos</span>,
 the keyword <tt>:</tt> is equivalent to the keyword <tt>||:</tt>,
 whereas the srfi considers that <tt>:</tt> is not a keyword but a
-symbol.</p></div></div><a name="--index-entry-51050"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-89----Optional-Positional-and-Named-Parameters"></a>
+symbol.</p></div></div><a name="--index-entry-51342"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-89----Optional-Positional-and-Named-Parameters"></a>
 <h3 id="SRFI-89----Optional-Positional-and-Named-Parameters">SRFI-89 -- Optional Positional and Named Parameters</h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-89/srfi-89.html">SRFI-89</a> is fully supported.  To use SRFI-89,
@@ -443,7 +450,7 @@ you need to insert the following expression</p><blockquote><table cellspacing="0
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-89&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51068"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-96----SLIB-Prerequisites-"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51360"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-96----SLIB-Prerequisites-"></a>
 <h3 id="SRFI-96----SLIB-Prerequisites-">SRFI-96 -- SLIB Prerequisites </h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-96/srfi-96.html">SRFI-96</a> is fully supported.  To use SRFI-96,
@@ -451,73 +458,73 @@ you need to insert the following expression</p><blockquote><table cellspacing="0
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-96&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51075"></a><a name="--index-entry-51079"></a><a name="--index-entry-51091"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-96----SLIB-Prerequisites-"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51367"></a><a name="--index-entry-51371"></a><a name="--index-entry-51383"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-96----SLIB-Prerequisites-"></a>
 <h3 id="SRFI-96----SLIB-Prerequisites-">SRFI-96 -- SLIB Prerequisites </h3>
 </div>
 <div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-96/srfi-96.html">SRFI-96</a> is fully supported and is completely
 described in this document (procedures
 <code>get-environment-variable</code>, and
-<code>get-environment-variables</code>). <p>Note that both primitives are now defined in <span style="font-variant: small-caps">R<sup>7</sup>RS</span>.</p></p></div></div><a name="--index-entry-51109"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-100----define-lambda-object"></a>
+<code>get-environment-variables</code>). <p>Note that both primitives are now defined in <span style="font-variant: small-caps">R<sup>7</sup>RS</span>.</p></p></div></div><a name="--index-entry-51401"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-100----define-lambda-object"></a>
 <h3 id="SRFI-100----define-lambda-object">SRFI-100 -- define-lambda-object</h3>
 </div>
-<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-100/srfi-100.html">SRFI-100</a> is fully supported.  To use SRFI-100,
-you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-100/srfi-100.html">SRFI-100</a> is fully supported.  To use SRFI-100, you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-100&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51127"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-111----Boxes"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51419"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-111----Boxes"></a>
 <h3 id="SRFI-111----Boxes">SRFI-111 -- Boxes</h3>
 </div>
-<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-111/srfi-111.html">SRFI-111</a> is fully supported.  To use SRFI-111,
-you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-111/srfi-111.html">SRFI-111</a> is fully supported.  To use SRFI-111, you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-111&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51137"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-112----Environment-Inquiry"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51429"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-112----Environment-Inquiry"></a>
 <h3 id="SRFI-112----Environment-Inquiry">SRFI-112 -- Environment Inquiry</h3>
 </div>
-<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-112/srfi-112.html">SRFI-112</a> is fully supported.</p></div></div><a name="--index-entry-51155"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-117----Queues-based-on-lists"></a>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-112/srfi-112.html">SRFI-112</a> is fully supported. </p></div></div><a name="--index-entry-51447"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-117----Queues-based-on-lists"></a>
 <h3 id="SRFI-117----Queues-based-on-lists">SRFI-117 -- Queues based on lists</h3>
 </div>
-<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-117/srfi-117.html">SRFI-117</a> is fully supported.  To use SRFI-117,
-you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-117/srfi-117.html">SRFI-117</a> is fully supported.  To use SRFI-117, you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-117&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51173"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-158----Generators-and-Accumulators"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51458"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-145----Assumptions"></a>
+<h3 id="SRFI-145----Assumptions">SRFI-145 -- Assumptions</h3>
+</div>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-145/srfi-145.html">SRFI-145</a> is fully supported. See the <a href="stklos-ref-4.html#assume">assume</a> special form</p></div></div><a name="--index-entry-51476"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-158----Generators-and-Accumulators"></a>
 <h3 id="SRFI-158----Generators-and-Accumulators">SRFI-158 -- Generators and Accumulators</h3>
 </div>
-<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-158/srfi-158.html">SRFI-158</a> is fully supported.  To use SRFI-158,
-you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-158/srfi-158.html">SRFI-158</a> is fully supported.  To use SRFI-158, you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-158&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51191"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-190----Coroutines-Generators"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51487"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-169----Underscores-in-numbers"></a>
+<h3 id="SRFI-169----Underscores-in-numbers">SRFI-169 -- Underscores in numbers</h3>
+</div>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-169/srfi-169.html">SRFI-169</a> is fully supported. See <a href="stklos-ref-10.html#accept-srfi-169-numbers">accept-srfi-169-numbers</a>
+                        to eventually forbid the usage of underscores in numbers.</p></div></div><a name="--index-entry-51505"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-190----Coroutines-Generators"></a>
 <h3 id="SRFI-190----Coroutines-Generators">SRFI-190 -- Coroutines Generators</h3>
 </div>
-<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-190/srfi-190.html">SRFI-190</a> is fully supported.  To use SRFI-190,
-you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-190/srfi-190.html">SRFI-190</a> is fully supported.  To use SRFI-190, you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-190&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51209"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-171----Trnsducers"></a>
-<h3 id="SRFI-171----Trnsducers">SRFI-171 -- Trnsducers</h3>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51523"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-171----Transducers"></a>
+<h3 id="SRFI-171----Transducers">SRFI-171 -- Transducers</h3>
 </div>
-<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-171/srfi-171.html">SRFI-171</a> is fully supported.  To use SRFI-171,
-you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-171/srfi-171.html">SRFI-171</a> is fully supported.  To use SRFI-171, you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-171&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
-<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51227"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-173----Hooks"></a>
+<p>in your code or uses the <code>cond-expand</code> special form.</p></div></div><a name="--index-entry-51541"></a><div class="sectiondiv"><div class="sectiontitle"><a name="SRFI-173----Hooks"></a>
 <h3 id="SRFI-173----Hooks">SRFI-173 -- Hooks</h3>
 </div>
-<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-173/srfi-173.html">SRFI-173</a> is fully supported.  To use SRFI-173,
-you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<div class="sectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-173/srfi-173.html">SRFI-173</a> is fully supported.  To use SRFI-173, you need to insert the following expression</p><blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="ivory"><pre>(require <span class="source-string">&quot;srfi-173&quot;</span>)
 </pre></td></tr>
 </tbody></table></blockquote>
 <p>in your code or uses the <code>cond-expand</code> special form.</p></div></div></div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Thu Jul  2 14:11:27 2020</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Fri Jul  3 16:48:12 2020</em></small>
 </body>
 </html>
