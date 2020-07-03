@@ -549,6 +549,14 @@ you need to insert the following expression])
 (p [in your code or uses the ,(code "cond-expand") special form.]))
 
 ;; ----------------------------------------------------------------------
+;; SRFI 87 -- => in case clauses
+;; ----------------------------------------------------------------------
+(srfi-section 87
+
+(p [,(quick-link-srfi 87), ehich became part of the R7RS standard,
+is fully supported.]))
+
+;; ----------------------------------------------------------------------
 ;; SRFI 88 -- Keyword objects
 ;; ----------------------------------------------------------------------
 (srfi-section 88

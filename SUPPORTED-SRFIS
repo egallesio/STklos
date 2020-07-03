@@ -55,6 +55,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-69: Basic Hash Tables
     - SRFI-70: Numbers
     - SRFI-74: Octet-Addressed Binary Blocks
+    - SRFI-87: => in case clauses
     - SRFI-88: Keyword Objects
     - SRFI-89: Optional Positional and Named Parameters
     - SRFI-96: SLIB Prerequisites 
