@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 28-Oct-2010 14:56 (eg)
+;; Last file update:  3-Jul-2020 11:54 (eg)
 ;;
 ;; ======================================================================
 
@@ -28,6 +28,7 @@
 parmaters are listed below.])
 
    (insertdoc 'real-precision)
+   (insertdoc 'accept-srfi-169-numbers)
    (insertdoc 'read-case-sensitive)
    (insertdoc 'write-pretty-quotes)
    (insertdoc 'load-path)

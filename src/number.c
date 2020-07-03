@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  3-Jun-2020 19:16 (eg)
+ * Last file update:  3-Jul-2020 11:59 (eg)
  */
 
 
@@ -43,6 +43,7 @@
 #  include <signal.h>
 #endif
 
+static int use_srfi_169 = 1; /* do we allow the use of underscores in numbers? */
 
 /* Real precision */
 static int real_precision = REAL_FORMAT_SIZE;
@@ -54,7 +55,7 @@ static unsigned int log10_maxint;
 
 /* Declaration of bignums. This is done here instead of stklos.h to avoid
  * to expose the file "gmp.h" in "stklos.h" which is the interface users
- * see to access all the sytem (note that we can also use our version which
+ * see to access all the system (note that we can also use our version which
  * can be different of the one which is sytem installed, and resolve conflits
  * could be hard).
  */
@@ -165,9 +166,9 @@ static void error_incorrect_radix(SCM r)
  * @lisp
  * (real-precision)        => 15
  * (define f 0.123456789)
- * (display f)             @print{} 0.123456789
+ * (display f)             => 0.123456789
  * (real-precision 3)
- * (display f)             @print{} 0.123
+ * (display f)             => 0.123
  * @end lisp
 doc>
 */
@@ -182,6 +183,32 @@ static SCM real_precision_conv(SCM value)
   return value;
 }
 
+
+/*
+<doc EXT accept-srfi-169-numbers
+ * (accept-srfi-169-numbers)
+ * (accept-srfi-169-numbers value)
+ *
+ * This parameter object permits to change the behavior of the reader
+ * with underscores in numbers. Numbers with underscores are defined
+ * in ,(link-srfi 169). By default, this variable is true, meaning that
+ * underscores are accepted in numbers.
+ *
+ * @lisp
+ * (accept-srfi-169-numbers)        => #t
+ * (symbol? '1_000_000)             => #f
+ * (number? '1_000_000)             => #t
+ * (accept-srfi-169-numbers #f)
+ * (symbol? '1_000_000)             => #t
+ * (number? '1_000_000)             => #f
+ * @end lisp
+doc>
+*/
+static SCM srfi_169_conv(SCM value)
+{
+  use_srfi_169 = (value != STk_false);
+  return MAKE_BOOLEAN(use_srfi_169);
+}
 
 /******************************************************************************
  *
@@ -207,8 +234,6 @@ static Inline SCM make_polar(SCM a, SCM m)
 {
   return make_complex(mul2(a, my_cos(m)), mul2(a, my_sin(m)));
 }
-
-
 
 
 static Inline SCM Cmake_rational(SCM n, SCM d)
@@ -901,29 +926,30 @@ static SCM compute_exact_real(char *s, char *p1, char *p2, char *p3, char *p4)
  * underscore close to anything that is not a digit).
  */
 static int remove_underscores(char *str, char *end, long base) {
-    char *q;
-    int just_saw_one = 0;
-    for (char *p=str; p<end-1; p++)
-        if (*p=='_') {
+  char *q;
+  int just_saw_one = 0;
+  for (char *p=str; p<end-1; p++)
+    if (*p=='_') {
 
-            /* SRFI-169: no double underscores */
-            if (just_saw_one) return 0;
-            just_saw_one = 1;
+      /* SRFI-169: no double underscores */
+      if (just_saw_one) return 0;
+      just_saw_one = 1;
 
-            if ((p>str) && (! digitp(*(p-1),base))) return 0; /* SRFI-169: no '_' adjacent to dot. */
-            if (!digitp(*(p+1),base))               return 0; /* SRFI-169: no '_' adjacent to dot. */
-    
-            for (q=p; q<end; q++) {
-                *q=*(q+1);
-            }
-            p--;
-            end = q;
-        } else
-            just_saw_one = 0;
+      if ((p>str) && (! digitp(*(p-1),base))) return 0; /* SRFI-169: no '_' adjacent to dot. */
+      if (!digitp(*(p+1),base))               return 0; /* SRFI-169: no '_' adjacent to dot. */
 
-    if (*(end-1)=='_') return 0;  /* SRFI-169 forbids trailing '_' */
-    return 1;
+      for (q=p; q<end; q++) {
+        *q=*(q+1);
+      }
+      p--;
+      end = q;
+    } else
+      just_saw_one = 0;
+
+  if (*(end-1)=='_') return 0;  /* SRFI-169 forbids trailing '_' */
+  return 1;
 }
+
 
 static SCM read_integer_or_real(char *str, long base, char exact_flag, char **end)
 {
@@ -937,7 +963,7 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
   if (*p == '-' || *p == '+') p+=1;
   if (*p == '#') return STk_false;
   if (*p == '_') return STk_false; /* SRFI-169 forbids _ in leading position. */
-  
+
   /* the  ( || *p=='_' ) in the rest of this function implements SRFI-169. */
   while(digitp(*p, base) || *p=='_') { p+=1; adigit=1; if (*p == '#') isint = 0; }
 
@@ -970,8 +996,11 @@ static SCM read_integer_or_real(char *str, long base, char exact_flag, char **en
   /* SRFI-169: we have already accepted the number with underscores, now
    *  remove_underscores will validate their positions and remove them
    */
-  if (!remove_underscores(str,p,base))
+  if (strchr(str, '_')) {
+    if (!use_srfi_169) return STk_false;
+    if (!remove_underscores(str,p,base))
       return STk_false;
+  }
 
   if (isint) {
     /* We are sure to have an integer. Read it as a bignum and see if we can
@@ -3193,5 +3222,10 @@ int STk_init_number(void)
                        real_precision_conv,
                        STk_STklos_module);
 
+   /* Add parameter for allowing underscore in numbers */
+   STk_make_C_parameter("accept-srfi-169-numbers",
+                       MAKE_BOOLEAN(use_srfi_169),
+                       srfi_169_conv,
+                       STk_STklos_module);
   return TRUE;
 }
