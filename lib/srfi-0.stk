@@ -142,7 +142,7 @@
     ;; srfi-84                          ; ....... withdrawn
     ;; srfi-85                          ; ....... withdrawn
     ;; srfi-86                          ; MU and NU simulating VALUES & CALL-WITH-VALUES
-    ;; srfi-87                          ; => in case clauses
+    srfi-87                             ; => in case clauses
     srfi-88                             ; Keyword objects
     (srfi-89 "srfi-89")                 ; Optional Positional and Named Parameters
     ;; srfi-90                          ; Extensible hash table constructor
