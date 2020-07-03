@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 22-Jun-2020 18:31 (eg)
+;;;; Last file update:  3-Jul-2020 12:52 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -38,6 +38,7 @@
       (string-append "STklos-" (version)))
     ,(string->symbol
       (string-append "id-" (%push-id)))
+    ,@(if (positive? (key-get *%program-args* :debug 0)) '(debug) '())
     almost-r7rs                         ; hope it will be r7rs someday
     ;; exact-closed
     exact-complex                       ; exact complexes are OK
