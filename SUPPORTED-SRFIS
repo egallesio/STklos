@@ -52,6 +52,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-59: Vicinity
     - SRFI-60: Integers as bits
     - SRFI-62: S-expression comments
+    - SRFI-64: A Scheme API for test suites
     - SRFI-66: Octet Vectors
     - SRFI-69: Basic Hash Tables
     - SRFI-70: Numbers
