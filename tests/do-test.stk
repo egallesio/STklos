@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update:  5-Jul-2020 19:22 (eg)
+;;;; Last file update:  6-Jul-2020 10:33 (eg)
 ;;;;
 
 (load-path (cons "../lib"
@@ -37,7 +37,7 @@
   (load "test-fport.stk")
   (load "test-threads.stk")
   (load "test-srfi.stk")
-  (load "test-json.stk")
+; (load "test-json.stk")
   (load "test-md5.stk")
   (load "test-base64.stk")
   (load "test-box.stk")
