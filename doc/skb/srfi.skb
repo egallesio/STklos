@@ -618,6 +618,16 @@ described in this document (procedures
 ;; SRFI 117 -- Queues based on lists
 (gen-loaded-srfi 117)
 
+;; ----------------------------------------------------------------------
+;; SRFI 141 -- Integer division
+;; ----------------------------------------------------------------------
+(srfi-section 141
+
+(p [,(quick-link-srfi 141) is fully supported.  To use SRFI-141,
+you need to insert the following expression])
+(fontified-code [(require "srfi-141")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
 ;; SRFI 145 -- Assumptions
 (gen-embedded-srfi 145
                    [See the ,(ref :mark "assume" :text "assume") special form])
