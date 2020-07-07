@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  5-Mar-2020 15:00 (eg)
+;;;; Last file update:  7-Jul-2020 19:16 (eg)
 ;;;;
 
 
@@ -1279,7 +1279,7 @@ doc>
 
 #|
 <doc R7RS raise-continuable
- * (raise-continauble obj)
+ * (raise-continuable obj)
  *
  * Raises an exception by invoking the current exception handler on
  * |obj|. The handler is called with the same dynamic environment as the
