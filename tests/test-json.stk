@@ -1,0 +1,542 @@
+;;;;
+;;;;
+;;;; test-json.stk         -- Testing JSON
+;;;;
+;;;; Copyright © 2020 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is freutfe software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  4-Jul-2020 20:30
+;;;; Last file update:  8-Jul-2020 12:22 (eg)
+;;;;
+
+
+;;; Most of the following tests are an adaptation of the Medea Egg for Chicken
+;;; Scheme. Medea is a "A JSON parser (and emitter) built with comparse" The
+;;; author of these tests is Moritz Heidkamp. The original licence of the
+;;; implementation is BSD
+;;; See https://bitbucket.org/DerGuteMoritz/medea/src/master
+
+
+(require "test")
+(require "srfi-180")
+
+(define-macro (test-json-read name expected str)
+  `(test ,name ,expected (call-with-input-string ,str json-read)))
+
+(define-macro (test-json-error name  str)
+  `(test/error ,name (call-with-input-string ,str json-read)))
+
+(define-macro (test-json-write name expected json)
+  `(test ,name ,expected (with-output-to-string (lambda () (json-write ,json)))))
+
+(define-macro (test-json-read+write name json)
+  `(test ,name
+         ,json
+         (with-output-to-string (lambda ()
+                                  (json-write (call-with-input-string ,json, json-read))))))
+
+(define-macro (test-json-write+read name obj)
+  `(test ,name
+         ,obj
+         (call-with-input-string (with-output-to-string (lambda () (json-write ,obj)))
+                                 json-read)))
+
+
+(test-section "JSON")
+
+(test-json-read "objects.1"
+                '()
+                "{}")
+(test-json-read "objects.2"
+                '((foo . 123) (qux . "hey"))
+                "{ \"foo\" : 123, \"qux\": \"hey\" } ")
+
+(test-json-read "arrays.1"
+                #()
+                "[]")
+(test-json-read "arrays.2"
+                '#("foo")
+                "[\"foo\"]")
+(test-json-read "arrays.3"
+                '#("one" 2 3 "four" 5)
+                "[\"one\", 2,3, \"four\", 5]")
+
+(test-json-read "numbers.1"
+                #(0)
+                "[0]")
+(test-json-read "numbers.2"
+                #(-10)
+                "[-10]")
+(test-json-read "numbers.3"
+                #(222.5)
+                "[222.5]")
+(test-json-read "numbers.4"
+                #(10e2)
+                "[10e2]")
+(test-json-read "numbers.5"
+                #(2.3e2)
+                "[2.3E+2]")
+
+(test-json-read "strings.1"
+                #("")
+                "[\"\"]")
+(test-json-read "strings.2"
+                #("E9")
+                "[\"\\u00459\"]")
+(test-json-read "strings.3"
+                #("Дҫ")
+                "[\"\\u0414\\u04ab\"]")
+(test-json-read "strings.4"
+                #("Ð”Ò«")
+                "[\"Ð”Ò«\"]")
+(test-json-read "strings.5"
+                #("\f")
+                "[\"\\f\"]")
+(test-json-read "strings.6"
+                #("\"")
+                "[\"\\\"\"]")
+(test-json-error  "strings.7"
+                  "[\"\\x\"]")
+
+(test-json-read "literals.1"
+                #(#t)
+                "[true]")
+(test-json-read "literals.2"
+                #(#f)
+                "[false]")
+(test-json-read "literals.3"
+                #(null)
+                "[null]")
+
+(test-json-read "whitespace.1"
+                '()
+                " {  \n  \t}")
+(test-json-read "whitespace.2"
+                #()
+                " \r  []")
+
+
+(test-json-error "malformed"
+                 "{..}")
+
+(test-json-read "Big string"
+                #("/\\\xcafe;\xBABE;\xAB98;\xFCDE;\xbcda;\xef4A;\b\f\n\r\t1~!@#$%^&*()_+-=[]{}\\|;:',./<>?")
+                #<<JSON
+                ["/\\\uCAFE\uBABE\uAB98\uFCDE\ubcda\uef4A\b\f\n\r\t1~!@#$%^&*()_+-=[]{}\\|;:',./<>?"]
+                #JSON
+                )
+
+(test-json-read "complex.1" ; example 1 from RFC 4627
+                '((Image
+                   (Width . 800)
+                   (Height . 600)
+                   (Title . "View from 15th Floor")
+                   (Thumbnail
+                    (Url . "http://www.example.com/image/481989943")
+                    (Height . 125)
+                    (Width . "100"))
+                   (IDs . #(116 943 234 38793))))
+#<<JSON
+{
+    "Image": {
+        "Width":  800,
+        "Height": 600,
+        "Title":  "View from 15th Floor",
+        "Thumbnail": {
+            "Url":    "http://www.example.com/image/481989943",
+            "Height": 125,
+            "Width":  "100"
+        },
+        "IDs": [116, 943, 234, 38793]
+    }
+}
+JSON
+)
+
+(test-json-read "complex.2"      ;; example 2 from RFC 4627
+                '#(((precision . "zip")
+                    (Latitude . 37.7668)
+                    (Longitude . -122.3959)
+                    (Address . "")
+                    (City . "SAN FRANCISCO")
+                    (State . "CA")
+                    (Zip . "94107")
+                    (Country . "US"))
+                   ((precision . "zip")
+                    (Latitude . 37.371991)
+                    (Longitude . -122.02602)
+                    (Address . "")
+                    (City . "SUNNYVALE")
+                    (State . "CA")
+                    (Zip . "94085")
+                    (Country . "US")))
+
+#<<JSON
+[
+   {
+      "precision": "zip",
+      "Latitude":  37.7668,
+      "Longitude": -122.3959,
+      "Address":   "",
+      "City":      "SAN FRANCISCO",
+      "State":     "CA",
+      "Zip":       "94107",
+      "Country":   "US"
+   },
+   {
+      "precision": "zip",
+      "Latitude":  37.371991,
+      "Longitude": -122.026020,
+      "Address":   "",
+      "City":      "SUNNYVALE",
+      "State":     "CA",
+      "Zip":       "94085",
+      "Country":   "US"
+   }
+]
+JSON
+)
+
+(test-json-read "complex.3"
+                #("JSON Test Pattern pass1"
+                  ((|object with 1 member| . #("array with 1 element")))
+                  ()
+                  #()
+                  -42
+                  #t
+                  #f
+                  null
+                  (
+                   (integer . 1234567890)
+                   (real . -9876.54321)
+                   (e . 1.23456789e-13)
+                   (E . 1.23456789e+34) (|| . 2.3456789012e+76) (zero . 0) (one . 1) (space . " ")
+                   (quote . "\"") (backslash . "\\") (controls . "\b\f\n\r\t") (slash . "/ & /")
+                   (alpha . "abcdefghijklmnopqrstuvwyz")
+                   (ALPHA . "ABCDEFGHIJKLMNOPQRSTUVWYZ")
+                   (digit . "0123456789")
+                   (special . "`1~!@#$%^&*()_+-={':[,]}|;.</>?")
+                   (hex . "\x0123;\x4567;\x89AB;\xCDEF;\xabcd;\xef4A;")
+                   (true . #t)
+                   (false . #f)
+                   (null . null)
+                   (array . #())
+                   (object)
+                   (address . "50 St. James Street")
+                   (url . "http://www.JSON.org/")
+                   (comment . "// /* <!-- --")
+                   (|; # -- --> */| . " ")
+                   (| s p a c e d | . #(1 2 3 4 5 6 7))
+                   (compact . #(1 2 3 4 5 6 7))
+                   (jsontext . "{\"object with 1 member\":[\"array with 1 element\"]}")
+                   (quotes . "&#34; \" %22 0x22 034 &#x22;")
+                   ;;                   (|/\\"쫾몾ꮘﳞ볚\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}\|;:',./<>?| .
+                   (|/\\"\xcafe;\xbabe;\xab98;\xfcde;\xbcda;\xef4a;\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}\|;:',./<>?| .
+                    "A key can be any string")
+                   (end . "END")
+                   )
+                  0.5
+                  98.6
+                  99.44
+                  1066
+                  "rosebud")
+
+#<<JSON
+[
+    "JSON Test Pattern pass1",
+    {"object with 1 member":["array with 1 element"]},
+    {},
+    [],
+    -42,
+    true,
+    false,
+    null,
+    {
+        "integer": 1234567890,
+        "real": -9876.543210,
+        "e": 0.123456789e-12,
+        "E": 1.234567890E+34,
+        "":  23456789012E66,
+        "zero": 0,
+        "one": 1,
+        "space": " ",
+        "quote": "\"",
+        "backslash": "\\",
+        "controls": "\b\f\n\r\t",
+        "slash": "/ & \/",
+        "alpha": "abcdefghijklmnopqrstuvwyz",
+        "ALPHA": "ABCDEFGHIJKLMNOPQRSTUVWYZ",
+        "digit": "0123456789",
+        "special": "`1~!@#$%^&*()_+-={':[,]}|;.</>?",
+        "hex": "\u0123\u4567\u89AB\uCDEF\uabcd\uef4A",
+        "true": true,
+        "false": false,
+        "null": null,
+        "array":[  ],
+        "object":{  },
+        "address": "50 St. James Street",
+        "url": "http://www.JSON.org/",
+        "comment": "// /* <!-- --",
+        "; # -- --> */": " ",
+        " s p a c e d " :[1,2 , 3
+
+,
+
+4 , 5        ,          6           ,7        ],
+        "compact": [1,2,3,4,5,6,7],
+        "jsontext": "{\"object with 1 member\":[\"array with 1 element\"]}",
+        "quotes": "&#34; \u0022 %22 0x22 034 &#x22;",
+        "\/\\\"\uCAFE\uBABE\uAB98\uFCDE\ubcda\uef4A\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}|;:',./<>?"
+        : "A key can be any string",
+        "end": "END"
+    },
+     0.5 ,98.6
+,
+99.44
+,
+
+1066
+
+
+,"rosebud"]
+JSON
+)
+
+;; ======================================================================
+
+(test-json-write "objects.1"
+                 "{}"
+                 '())
+
+(test-json-write "objects.2"
+                 "{\"foo\":123,\"qux\":\"hey\"}"
+                 '((foo . 123) (qux . "hey")))
+
+(test-json-write "arrays.1"
+                "[]"
+                #())
+
+(test-json-write "arrays.2"
+                 "[\"foo\"]"
+                 '#("foo"))
+
+(test-json-write "arrays.3"
+                 "[\"one\",2,3,\"four\",5]"
+                 '#("one" 2 3 "four" 5))
+
+(test-json-write "numbers.1"
+                 "[0]"
+                 #(0))
+
+(test-json-write "numbers.2"
+                 "[-10]"
+                 #(-10))
+
+(test-json-write "numbers.3"
+                 "[222.5]"
+                 #(222.5))
+
+(test-json-write "numbers.4"
+                 "[1000.0]"
+                 #(10e2))
+
+(test-json-write "numbers.5"
+                 "[2.3e+20]"
+                 #(2.3E20))
+
+(test-json-write "strings.1"
+                 "[\"\"]"
+                 #(""))
+(test-json-write "strings.2"
+                 "[\"E9\"]"
+                 #("\x0045;9"))
+
+(test-json-write "strings.3"
+                 "[\"\x0414;\x04ab;\"]"
+                 #("\x0414;\x04ab;"))
+
+(test-json-write "strings.4"
+                 "[\"Ð”Ò«\"]"
+                 #("Ð”Ò«"))
+
+(test-json-write "strings.5"
+                 "[\"\\f\"]"
+                 #("\f"))
+
+(test-json-write "strings.6"
+                 "[\"\\\"\"]"
+                 #("\""))
+
+
+(test-json-write "literals.1"
+                 "[true]"
+                 #(#t))
+(test-json-write "literals.2"
+                 "[false]"
+                 #(#f))
+(test-json-write "literals.3"
+                 "[null]"
+                 #(null))
+
+
+(test-json-write "Big string"
+                 "[\"\\/\\\\\xcafe;\xbabe;\xab98;\xfcde;\xbcda;\xef4a;\\b\\f\\n\\r\\t1~!@#$%^&*()_+-=[]{}\\\\|;:',.\\/<>?\"]"
+                 #("/\\\xcafe;\xBABE;\xAB98;\xFCDE;\xbcda;\xef4A;\b\f\n\r\t1~!@#$%^&*()_+-=[]{}\\|;:',./<>?"))
+
+;;;
+;;; Testing reversibility
+;;;
+(test-json-read+write "complex.1 from JSON"
+                      "{\"Image\":{\"Width\":800,\"Height\":600,\"Title\":\"View from 15th Floor\",\"Thumbnail\":{\"Url\":\"http:\\/\\/www.example.com\\/image\\/481989943\",\"Height\":125,\"Width\":\"100\"},\"IDs\":[116,943,234,38793]}}")
+
+
+(test-json-read+write "complex.2 form JSON"
+"[{\"precision\":\"zip\",\"Latitude\":37.7668,\"Longitude\":-122.3959,\"Address\":\"\",\"City\":\"SAN FRANCISCO\",\"State\":\"CA\",\"Zip\":\"94107\",\"Country\":\"US\"},{\"precision\":\"zip\",\"Latitude\":37.371991,\"Longitude\":-122.02602,\"Address\":\"\",\"City\":\"SUNNYVALE\",\"State\":\"CA\",\"Zip\":\"94085\",\"Country\":\"US\"}]")
+
+
+
+(test-json-write+read "complex.1 from Scheme"
+                      #(((precision . "zip")
+                         (Latitude . 37.7668)
+                         (Longitude . -122.3959)
+                         (Address . "")
+                         (City . "SAN FRANCISCO")
+                         (State . "CA")
+                         (Zip . "94107")
+                         (Country . "US"))
+                        ((precision . "zip")
+                         (Latitude . 37.371991)
+                         (Longitude . -122.02602)
+                         (Address . "")
+                         (City . "SUNNYVALE")
+                         (State . "CA")
+                         (Zip . "94085")
+                         (Country . "US"))))
+
+(test-json-write+read "complex.2 from Scheme"
+                     #(((precision . "zip")
+                        (Latitude . 37.7668)
+                        (Longitude . -122.3959)
+                        (Address . "")
+                        (City . "SAN FRANCISCO")
+                        (State . "CA")
+                        (Zip . "94107")
+                        (Country . "US"))
+                       ((precision . "zip")
+                        (Latitude . 37.371991)
+                        (Longitude . -122.02602)
+                        (Address . "")
+                        (City . "SUNNYVALE")
+                        (State . "CA")
+                        (Zip . "94085")
+                        (Country . "US"))))
+
+(test-json-write+read "complex.3 from Scheme"
+                #("JSON Test Pattern pass1"
+                  ((|object with 1 member| . #("array with 1 element")))
+                  ()
+                  #()
+                  -42
+                  #t
+                  #f
+                  null
+                  (
+                   (integer . 1234567890)
+                   (real . -9876.54321)
+                   (e . 1.23456789e-13)
+                   (E . 1.23456789e+34) (|| . 2.3456789012e+76) (zero . 0) (one . 1) (space . " ")
+                   (quote . "\"") (backslash . "\\") (controls . "\b\f\n\r\t") (slash . "/ & /")
+                   (alpha . "abcdefghijklmnopqrstuvwyz")
+                   (ALPHA . "ABCDEFGHIJKLMNOPQRSTUVWYZ")
+                   (digit . "0123456789")
+                   (special . "`1~!@#$%^&*()_+-={':[,]}|;.</>?")
+                   (hex . "\x0123;\x4567;\x89AB;\xCDEF;\xabcd;\xef4A;")
+                   (true . #t)
+                   (false . #f)
+                   (null . null)
+                   (array . #())
+                   (object)
+                   (address . "50 St. James Street")
+                   (url . "http://www.JSON.org/")
+                   (comment . "// /* <!-- --")
+                   (|; # -- --> */| . " ")
+                   (| s p a c e d | . #(1 2 3 4 5 6 7))
+                   (compact . #(1 2 3 4 5 6 7))
+                   (jsontext . "{\"object with 1 member\":[\"array with 1 element\"]}")
+                   (quotes . "&#34; \" %22 0x22 034 &#x22;")
+                   ;;                   (|/\\"쫾몾ꮘﳞ볚\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}\|;:',./<>?| .
+                   (|/\\"\xcafe;\xbabe;\xab98;\xfcde;\xbcda;\xef4a;\b\f\n\r\t`1~!@#$%^&*()_+-=[]{}\|;:',./<>?| .
+                    "A key can be any string")
+                   (end . "END")
+                   )
+                  0.5
+                  98.6
+                  99.44
+                  1066
+                  "rosebud"))
+
+
+
+;; The following tests are a rewriting of the sample implementation tests based
+;; on the Nicolas Seriot suite (Copyright (c) 2016 Nicolas Seriot)
+;; More tests should be added
+;; ======================================================================
+;; Some tests from the SRFI sample implementation
+(test-json-read "i_number_double_huge_neg_exp"
+           #(0.0)
+           "[123.456e-789]")
+(test-json-read "i_number_huge_exp"
+           #(+inf.0)
+           "[0.4e00669999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999969999999006]")
+
+(test-json-error "i_number_neg_int_huge_exp"
+                  "[-1e+9999]")
+(test-json-error "i_number_pos_double_huge_exp"
+                 "[1.5e+9999]")
+(test-json-error "i_number_real_neg_overflow"
+                 "[-123123e100000]")
+(test-json-error "i_number_real_pos_overflow"
+                  "[123123e100000]")
+
+(test-json-read "i_number_real_underflow"
+           #(0.0)
+           "[123e-10000000]")
+(test-json-read "i_number_too_big_neg_int"
+           #(-123123123123123123123123123123)
+           "[-123123123123123123123123123123]")
+(test-json-read "i_number_too_big_pos_int"
+           #(100000000000000000000)
+           "[100000000000000000000]")
+(test-json-read "i_number_very_big_negative_int"
+           #(-237462374673276894279832749832423479823246327846)
+           "[-237462374673276894279832749832423479823246327846]")
+(test-json-read "y_object_string_unicode"
+                '((title . "Полтора Землекопа"))
+#<<JSON
+{"title":"\u041f\u043e\u043b\u0442\u043e\u0440\u0430 \u0417\u0435\u043c\u043b\u0435\u043a\u043e\u043f\u0430" }
+JSON
+)
+
+
+
+(test-section-end)
+
+;; Local Variables:
+;; coding: utf-8
+;; End:
