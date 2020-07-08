@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  8-Jul-2020 15:48 (eg)
+;; Last file update:  8-Jul-2020 18:38 (eg)
 ;;
 ;; ======================================================================
 
@@ -618,15 +618,8 @@ described in this document (procedures
 ;; SRFI 117 -- Queues based on lists
 (gen-loaded-srfi 117)
 
-;; ----------------------------------------------------------------------
 ;; SRFI 141 -- Integer division
-;; ----------------------------------------------------------------------
-(srfi-section 141
-
-(p [,(quick-link-srfi 141) is fully supported.  To use SRFI-141,
-you need to insert the following expression])
-(fontified-code [(require "srfi-141")])
-(p [in your code or uses the ,(code "cond-expand") special form.]))
+(gen-loaded-srfi 141)
 
 ;; SRFI 145 -- Assumptions
 (gen-embedded-srfi 145
