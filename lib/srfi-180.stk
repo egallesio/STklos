@@ -47,7 +47,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 16:36
-;;;; Last file update:  8-Jul-2020 15:18 (eg)
+;;;; Last file update:  8-Jul-2020 17:34 (eg)
 ;;;;
 
 (require "srfi-9")
@@ -67,17 +67,49 @@
            json-accumulator
            json-write)
 
-;; Avoid a warning about undefine reference ...
-(define exception-kind #f)
+;;; **STklos**
+;;; (define (%read-error? x)
+;;;  (and (error-object? x) (memq (exception-kind x) '(user read read-incomplete)) #t))
 
-(define (%read-error? x)
-  (and (error-object? x) (memq (exception-kind x) '(user read read-incomplete)) #t))
+(define %read-error? read-error?)
 
 (define (valid-number? str)
   (and (regexp-match "^[+-]?(([0-9]+\.?[0-9]*)|(.[0-9]+))([eE][+-]?[0-9]+)?$"
                      str)
        #t))
 
+;;; ----------------------------------------------------------------------
+;;;
+;;; The sample implementation of the SRFI uses structures for error.
+;;; Use conditions here for a better integration witch errors in STklos
+;;;
+;;; ----------------------------------------------------------------------
+(define &json-error (make-condition-type '&json-error &error-message '()))
+
+(define (make-json-error reason)
+  (let* ((err (with-handler (lambda (err) err) (error reason)))
+         (type (struct-type err))
+         (init (apply append (map (lambda (slot) (list slot (struct-ref err slot)))
+                                  (struct-type-slots type)))))
+    ;; err is an error condition with all its slots  initialized
+    ;; build a &json-error by copying all the fields
+    (let ((res (apply make-condition &json-error init)))
+      ; delete the error call whih is on the top of the backtrace
+      (struct-set!  res 'backtrace (cdr (struct-ref res 'backtrace)))
+      res)))
+
+(define (json-error? err)
+  (and (condition? err) (condition-has-type? err &json-error)))
+
+(define (json-error-reason obj)
+  (unless (json-error?  obj)
+    (error "parameter is not a JSON error"))
+  (condition-ref obj 'message))
+
+;; ----------------------------------------------------------------------
+;;
+;; Code of sample implementation
+;;
 ;; ----------------------------------------------------------------------
 
 ;;// **STklos**: Useless definition
@@ -92,10 +124,12 @@
 (define (json-null? obj)
   (eq? obj 'null))
 
-(define-record-type <json-error>
-  (make-json-error reason)
-  json-error?
-  (reason json-error-reason))
+;;; **STklos**: se above for the implementation od json errors
+;;;
+;;; (define-record-type <json-error>
+;;;   (make-json-error reason)
+;;;   json-error?
+;;;   (reason json-error-reason))
 
 (define (json-whitespace? char)
   (case char
@@ -842,10 +876,10 @@
 (import SRFI-180)
 
 ;; Plug a REPL error handler for errors coming from the implementation of SRFI-180
-#;(%add-error-to-repl-handler json-error? 
-                            (lambda (e port)
-                              (format port "(JSON error): ~A\n"
-                                      (json-error-reason e))))
+;;(%add-error-to-repl-handler json-error?
+;;                            (lambda (e port)
+;;                              (format port "(JSON error): ~A\n"
+;;                                      (json-error-reason e))))
 
 
 (provide "srfi-180")
