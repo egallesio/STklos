@@ -80,6 +80,7 @@
      (169 . "Underscores in numbers")
      (171 . "Transducers")
      (173 . "Hooks")
+     (180 . "JSON")
      (190 . "Coroutines Generators")
    ))
 

@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  3-Jul-2020 15:46 (eg)
+;; Last file update:  7-Jul-2020 17:54 (eg)
 ;;
 ;; ======================================================================
 
@@ -630,6 +630,9 @@ described in this document (procedures
                    [See ,(ref :mark "accept-srfi-169-numbers"
                               :text "accept-srfi-169-numbers")
                         to eventually forbid the usage of underscores in numbers.])
+
+;; SRFI 180 -- JSON
+(gen-loaded-srfi 180)
 
 ;; SRFI 190 -- Coroutine Generators
 (gen-loaded-srfi 190)

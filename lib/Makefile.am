@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 22-Jun-2020 18:15 (eg)
+# Last file update:  8-Jul-2020 12:32 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -77,8 +77,8 @@ scheme_SRCS = STklos.init     \
           srfi-36.stk         \
           srfi-45.stk         \
           srfi-48.stk         \
-	  srfi-51.stk         \
-	  srfi-54.stk         \
+          srfi-51.stk         \
+          srfi-54.stk         \
           srfi-59.stk         \
           srfi-60.stk         \
           srfi-66.stk         \
@@ -88,10 +88,11 @@ scheme_SRCS = STklos.init     \
           srfi-89.stk         \
           srfi-96.stk         \
           srfi-100.stk        \
-	  srfi-117.stk        \
+          srfi-117.stk        \
           srfi-158.stk        \
           srfi-171.stk        \
           srfi-173.stk        \
+          srfi-180.stk        \
           srfi-190.stk        \
           tar.stk             \
           trace.stk
@@ -126,8 +127,8 @@ scheme_OBJS = compfile.ostk    \
           srfi-36.ostk         \
           srfi-45.ostk         \
           srfi-48.ostk         \
-	  srfi-51.ostk         \
-	  srfi-54.ostk         \
+          srfi-51.ostk         \
+          srfi-54.ostk         \
           srfi-59.ostk         \
           srfi-60.ostk         \
           srfi-66.ostk         \
@@ -137,13 +138,15 @@ scheme_OBJS = compfile.ostk    \
           srfi-89.ostk         \
           srfi-96.ostk         \
           srfi-100.ostk        \
-	  srfi-117.ostk        \
+          srfi-117.ostk        \
           srfi-158.ostk        \
           srfi-171.ostk        \
           srfi-173.ostk        \
+          srfi-180.ostk        \
           srfi-190.ostk        \
           tar.ostk             \
           trace.ostk
+
 
 DOCDB	    = DOCDB
 
