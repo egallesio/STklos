@@ -75,6 +75,7 @@
      (111 . "Boxes")
      (112 . "Environment Inquiry")
      (117 . "Queues based on lists")
+     (141 . "Integer Division")
      (145 . "Assumptions")
      (158 . "Generators and Accumulators")
      (169 . "Underscores in numbers")

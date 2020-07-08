@@ -197,7 +197,8 @@
     ;; srfi-138                         ; Compiling Scheme programs to executables
     ;; srfi-139                         ; Syntax parameters
     ;; srfi-140                         ; Immutable Strings
-    ;; srfi-141                         ; Integer division
+    ((srfi-141 integer-division) "srfi-141")
+                                        ; Integer division
     ;; srfi-142                         ; ....... withdrawn
     ;; srfi-143                         ; Fixnums
     ;; srfi-144                         ; Flonums
