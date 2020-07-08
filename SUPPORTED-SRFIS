@@ -70,4 +70,5 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-169: Underscores in numbers
     - SRFI-171: Transducers
     - SRFI-173: Hooks
+    - SRFI-180: JSON
     - SRFI-190: Coroutines Generators

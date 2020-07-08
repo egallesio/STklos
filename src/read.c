@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 30-May-2020 20:09 (eg)
+ * Last file update:  5-Jul-2020 18:51 (eg)
  *
  */
 
@@ -239,21 +239,37 @@ static int read_word(SCM port, int c, char *tok, int case_significant)
       tok[j++]  = (allchars || case_significant) ? c : tolower(c);
 
     if (c == '\\') {
-      c = STk_getc(port);
-      if (c == 'x') {
-        /* This is an internal hexa sequence */
-        char buffer[5];
-        int len = read_hex_sequence(port, buffer);
+      int k = j-1;
 
-        if (j + len >= MAX_TOKEN_SIZE-1) {
-          tok[j] = '\0';
-          error_token_too_large(port, tok);
-        } else {
-          memcpy(tok + j-1, buffer, len);
-          j += len-1;
+      c = STk_getc(port);
+      switch (c) {
+        case '\\': tok[k] = '\\'; break;     /*   \  */
+        case '|' : tok[k] ='|';   break;     /*   |  */
+        case 'a' : tok[k] ='\a';  break;     /* Bell */
+        case 'b' : tok[k] ='\b';  break;     /* Bs   */
+        case 'e' : tok[k] =0x1b;  break;     /* Esc  */
+        case 'f' : tok[k] ='\f';  break;     /* FF   */
+        case 'n' : tok[k] ='\n';  break;     /* Lf   */
+        case 'r' : tok[k] ='\r';  break;     /* Cr   */
+        case 't' : tok[k] ='\t';  break;     /* Tab  */
+        case 'v' : tok[k] ='\v';  break;     /* VTab */
+        case 'x': {
+          /* This is an internal hexa sequence */
+          char buffer[5];
+          int len = read_hex_sequence(port, buffer);
+
+          if (j + len >= MAX_TOKEN_SIZE-1) {
+            tok[j] = '\0';
+            error_token_too_large(port, tok);
+          } else {
+            memcpy(tok + j-1, buffer, len);
+            j += len-1;
+          }
+          break;
         }
-      } else { /* c != 'x' */
-        STk_ungetc(c, port);
+        default:
+          j -= 1; /* to delete the useless '\' */
+          STk_ungetc(c, port);
       }
     }
 
@@ -964,7 +980,7 @@ static SCM read_srfi10(SCM port, SCM l)
  * (read-case-sensitive)        => |#t|
  * (read-from-string "ABC")     => ABC
  * (read-case-sensitive #f)
- * (read-from-string "ABC")     => abc 
+ * (read-from-string "ABC")     => abc
  * @end lisp
  * ,(bold "Note:")  Default behaviour can be changed for a whole execution
  * with the |--case-sensitive| or |case-insensitive| options.

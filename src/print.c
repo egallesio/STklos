@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 30-May-2020 17:27 (eg)
+ * Last file update:  5-Jul-2020 19:20 (eg)
  *
  */
 #include <ctype.h>
@@ -67,7 +67,28 @@ static Inline void printsymbol(SCM symb, SCM port, int mode)
   if ((mode==WRT_MODE) &&
       ((BOXED_INFO(symb) & SYMBOL_NEEDS_BARS) ||
        ((!PORT_CASE_SENSITIVEP(port)) && (BOXED_INFO(symb) & SYMBOL_HAS_UPPER)))) {
-    STk_putc('|', port);  STk_puts(s, port); STk_putc('|', port);
+    STk_putc('|', port);
+    for ( ; *s; s++ ) {
+      int c = 0;
+      switch (*s) {
+        case '\a' : c = 'a';  break;
+        case '\b' : c = 'b';  break;
+        case '\f' : c = 'f';  break;
+        case '\n' : c = 'n';  break;
+        case '\r' : c = 'r';  break;
+        case '\t' : c = 't';  break;
+        case '\v' : c = 'v';  break;
+        case '|'  : c = '|';  break;
+        case '\\' : c = '\\'; break;
+      }
+      if (c) {
+        STk_putc('\\', port);
+        STk_putc(c, port);
+      }
+      else 
+        STk_putc(*s, port);
+   }
+    STk_putc('|', port);
   } else
     STk_puts(*s ? s: "||", port); /* print bars around the "null" symbol */
 }

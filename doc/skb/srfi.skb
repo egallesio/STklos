@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  3-Jul-2020 15:46 (eg)
+;; Last file update:  8-Jul-2020 15:48 (eg)
 ;;
 ;; ======================================================================
 
@@ -641,14 +641,18 @@ you need to insert the following expression])
                               :text "accept-srfi-169-numbers")
                         to eventually forbid the usage of underscores in numbers.])
 
-;; SRFI 190 -- Coroutine Generators
-(gen-loaded-srfi 190)
-
 ;; SRFI 171 -- Transducers
 (gen-loaded-srfi 171)
 
 ;; SRFI 173 -- Hooks
 (gen-loaded-srfi 173)
+
+;; SRFI 180 -- JSON
+(gen-loaded-srfi 180)
+
+;; SRFI 190 -- Coroutine Generators
+(gen-loaded-srfi 190)
+
 
 
 ;; End of chapter
