@@ -66,6 +66,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-117: Queues based on lists
     - SRFI-141: Integer Division
     - SRFI-145: Assumptions
+    - SRFI-151: Bitwise Operations
     - SRFI-156: Syntactic combiners for binary predicates
     - SRFI-158: Generators and Accumulators
     - SRFI-169: Underscores in numbers

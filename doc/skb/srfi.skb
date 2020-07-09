@@ -635,6 +635,9 @@ described in this document (procedures
 (gen-embedded-srfi 145
                    [See the ,(ref :mark "assume" :text "assume") special form])
 
+;; SRFI 151 -- Bitwise Operations
+(gen-loaded-srfi 151)
+
 ;; SRFI 156 -- Syntactic combiners for binary predicates
 (gen-loaded-srfi 156)
 

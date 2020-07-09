@@ -78,6 +78,7 @@
      (117 . "Queues based on lists")
      (141 . "Integer Division")
      (145 . "Assumptions")
+     (151 . "Bitwise Operations")
      (156 . "Syntactic combiners for binary predicates")
      (158 . "Generators and Accumulators")
      (169 . "Underscores in numbers")
