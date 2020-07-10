@@ -231,7 +231,8 @@
     ((srfi-171 transducers) "srfi-171") ; Transducers
     ;; srfi-172                         ; Two Safer Subsets of R7RS
     ((srfi-173 hooks) "srfi-173")       ; Hooks
-    ;; srfi-174                         ; POSIX Timespecs
+    ((srfi-174 posix-timespecs) "srfi-174")
+                                        ; POSIX Timespecs
     ;; srfi-175                         ; ASCII character library
     ;; srfi-176                         ; Version flag
     ;; srfi-177                         ; Portable keyword arguments (draft)

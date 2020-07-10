@@ -640,12 +640,14 @@ described in this document (procedures
 ;; SRFI 173 -- Hooks
 (gen-loaded-srfi 173)
 
+;; SRFI 174 -- POSIX Timespecs
+(gen-loaded-srfi 174)
+
 ;; SRFI 180 -- JSON
 (gen-loaded-srfi 180)
 
 ;; SRFI 190 -- Coroutine Generators
 (gen-loaded-srfi 190)
-
 
 
 ;; End of chapter
