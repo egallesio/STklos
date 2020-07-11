@@ -1269,7 +1269,7 @@ DEFINE_PRIMITIVE("rational?", rationalp, subr1, (SCM x))
  * (bignum? "no")             => |#f|
  * @end lisp
 doc>
-a*/
+*/
 DEFINE_PRIMITIVE("bignum?", bignump, subr1, (SCM x))
 {
   return MAKE_BOOLEAN(BIGNUMP(x));
