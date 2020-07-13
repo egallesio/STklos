@@ -9,15 +9,15 @@ hacking STklos should not be difficult.
 The subdirectories in the STklos source tree are:
 
 * `doc` -- documentation, written mostly in Skribe
-* `etc`
+* `etc` -- various sample files for specific needs
 * `examples` -- examples (oh, who could tell?)
 * `ffi` -- `libffi` (a local copy)
 * `gc` -- the Boehm-Demers-Weiser garbage collector, libgc (a local copy)
-* `gmp` -- GNU GMP (a local copy)
-* `lib/` -- Scheme files, including from basic things like the boot program up to high-level things like modules implementing SRFIs
+* `gmp` -- a slow compatible GNU MP )
+* `lib` -- Scheme files, including from basic things like the boot program up to high-level things like modules implementing SRFIs
 * `pcre` -- `libpcre` (a local copy)
 * `pkgman` -- the package manager
-* `src/` -- the STklos core, written in C
+* `src` -- the STklos core, written in C
 * `tests` -- the tests, of course!
 * `utils` -- utilities and wrappers
 
@@ -28,11 +28,11 @@ The subdirectories in the STklos source tree are:
   `scheme_SRCS` and `scheme_OBJS`, in `lib/Makefile.am`
 * if there should be a SRFI-0 synonym for the module or SRFI, add
   it to `lib/srfi-0.stk`
-* add the tests to `test/`. If you are testing a new SRFI, add it to the 
+* add the tests to `test/`. If you are testing a new SRFI, add it to the
   `test-srfi.stk` file; otherwise, create a new file and include it
   in the list of loaded files in `do-test.stk`
 * If it is a SRFI, add it to `SUPPORTED-SRFIS`
-* If you are adding a new SRFI, 
+* If you are adding a new SRFI,
   - add its number and  name to the `*srfis*` variable in `doc/skb/srfi.stk`
   - add its documentation to `doc/skb/srfi.skb` (see below)
 
@@ -101,7 +101,7 @@ DEFINE_PRIMITIVE("fixnum?", fixnump, subr1, (SCM obj))
 The arguments for this example are
 
 * Scheme name
-* C function name
+* C function name (its full name will have the string "STk_" prepended to it)
 * the type of primitive (in this case, it is a subroutine with one
   parameter -- "`subr1`"
 * the arguents, surrounded by parentheses. In this case there is only
@@ -141,7 +141,7 @@ The C function that raises errors is
 * `STk_error(fmt, arg1, arg2, ...)` -- the STklos error procedure. `fmt` is a format string,
 and after it there are arguments.
 
-But as you can see in the top of several C files, it is useful to define 
+But as you can see in the top of several C files, it is useful to define
 wrappers:
 
 ```
@@ -207,7 +207,7 @@ Fixnums are not allocated but have their two least significant bits set to `01`
 * `INTP(o)` - returns STklos_true if `o` is a Scheme integer or `STklos_false`
   otherwise
 * `MAKE_INT(n)` - takes a `long` C number and turns it into an `SCM` integer object.
-  Actually, this will shift the number to the left by two positions nad insert the tag
+  Actually, this will shift the number to the left by two positions and insert the tag
   If we could represent numbers as binary in C, it would be like this:
 
 ```
@@ -215,7 +215,7 @@ MAKE_INT( 000011000 ) --> 001100001
 ```
 
 * `INT_VAL(o)` - returns the value of the fixnum `o`, as a C `long` value (the opposite
-  of the previousoperation)
+  of the previous operation)
 
 ## Boxed types
 
