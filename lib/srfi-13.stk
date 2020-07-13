@@ -45,7 +45,7 @@
 	  ;; Selection
 	  string-copy substring/shared string-copy!
 	  string-take string-drop string-take-right string-drop-right
-	  string-pad string-pad-right string-trim-left string-trim-right
+	  string-pad string-pad-right string-trim string-trim-right
 	  string-trim-both
 	  ;; Modification
 	  string-fill!
@@ -73,7 +73,7 @@
 	  string-fold string-fold-right string-unfold string-unfold-right
 	  string-for-each string-for-each-index
 	  ;; Replicate & rotate
-	  xsubstring strin-xcopy
+	  xsubstring string-xcopy!
 	  ;; Miscellaneous: insertion, parsing
 	  string-replace string-tokenize
 	  ;; Filtering & deleting
@@ -128,7 +128,7 @@
 
 
 (define (string-every criterion str :optional (start 0) (end -1))
-  (%check-indexes str start end 'string-every -1)
+  (%check-indexes str start end 'string-every 0)
   (cond
     ((char? criterion)
      (let Loop ((i start))
@@ -298,7 +298,7 @@
 (define (string-trim s :optional (criterion char-set:whitespace)
 		     (start 0)
 		     (end (string-length s)))
-  (%check-indexes start end s 'string-trim)
+  (%check-indexes s start end 'string-trim)
   (cond ((string-skip s criterion start end) =>
 	 (lambda (i) (%substring/shared s i end)))
 	(else "")))
@@ -308,7 +308,7 @@
 			   (end (string-length s)))
   (%check-indexes s start end  'string-trim-right)
   (cond ((string-skip-right s criterion start end) =>
-	 (lambda (i) (%substring/shared s 0 (+ 1 i))))
+	 (lambda (i) (%substring/shared s start (+ 1 i))))
 	(else "")))
 
 (define (string-trim-both s :optional (criterion char-set:whitespace)
@@ -501,50 +501,50 @@
 ;;;
 (define (string-prefix-length s1 s2
 			      :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
-  (%check-indexes s1 start1 end1 'string-prefix-length -1)
-  (%check-indexes s2 start2 end2 'string-prefix-length -1)
+  (%check-indexes s1 start1 end1 'string-prefix-length 0)
+  (%check-indexes s2 start2 end2 'string-prefix-length 0)
   (%string-prefix-length s1 start1 end1 s2 start2 end2 char=?))
 
 (define (string-suffix-length s1 s2
 			      :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
-  (%check-indexes s1 start1 end1 'string-suffix-length -1)
-  (%check-indexes s2 start2 end2 'string-suffix-length -1)
+  (%check-indexes s1 start1 end1 'string-suffix-length 0)
+  (%check-indexes s2 start2 end2 'string-suffix-length 0)
   (%string-suffix-length s1 start1 end1 s2 start2 end2 char=?))
 
 (define (string-prefix-length-ci s1 s2
 			      :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
-  (%check-indexes s1 start1 end1 'string-prefix-length-ci -1)
-  (%check-indexes s2 start2 end2 'string-prefix-length-ci -1)
+  (%check-indexes s1 start1 end1 'string-prefix-length-ci 0)
+  (%check-indexes s2 start2 end2 'string-prefix-length-ci 0)
   (%string-prefix-length s1 start1 end1 s2 start2 end2 char-ci=?))
 
 (define (string-suffix-length-ci s1 s2
 				 :optional (start1 0) (end1 -1)
 				 (start2 0) (end2 -1))
-  (%check-indexes s1 start1 end1 'string-suffix-length-ci -1)
-  (%check-indexes s2 start2 end2 'string-suffix-length-ci -1)
+  (%check-indexes s1 start1 end1 'string-suffix-length-ci 0)
+  (%check-indexes s2 start2 end2 'string-suffix-length-ci 0)
   (%string-suffix-length s1 start1 end1 s2 start2 end2 char-ci=?))
 
 
 (define (string-prefix? s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
-;  (%check-indexes s1 start1 end1 'string-prefix? -1)
-;  (%check-indexes s2 start2 end2 'string-prefix? -1)
+  (%check-indexes s1 start1 end1 'string-prefix? 0)
+  (%check-indexes s2 start2 end2 'string-prefix? 0)
   (%string-prefix? s1 start1 end1 s2 start2 end2 char=?))
 
 (define (string-suffix? s1 s2 :optional (start1 0) (end1 -1) (start2 0) (end2 -1))
-;  (%check-indexes s1 start1 end1 'string-prefix? -1)
-;  (%check-indexes s2 start2 end2 'string-prefix? -1)
+  (%check-indexes s1 start1 end1 'string-prefix? 0)
+  (%check-indexes s2 start2 end2 'string-prefix? 0)
   (%string-suffix? s1 start1 end1 s2 start2 end2 char=?))
 
 (define (string-prefix-ci? s1 s2 :optional (start1 0) (end1 -1)
 			                   (start2 0) (end2 -1))
-  (%check-indexes s1 start1 end1 'string-prefix-ci? -1)
-  (%check-indexes s2 start2 end2 'string-prefix-ci? -1)
+  (%check-indexes s1 start1 end1 'string-prefix-ci? 0)
+  (%check-indexes s2 start2 end2 'string-prefix-ci? 0)
   (%string-prefix? s1 start1 end1 s2 start2 end2 char-ci=?))
 
 (define (string-suffix-ci? s1 s2 :optional (start1 0) (end1 -1)
 			                   (start2 0) (end2 -1))
-  (%check-indexes s1 start1 end1 'string-suffix-ci? -1)
-  (%check-indexes s2 start2 end2 'string-suffix-ci? -1)
+  (%check-indexes s1 start1 end1 'string-suffix-ci? 0)
+  (%check-indexes s2 start2 end2 'string-suffix-ci? 0)
   (%string-suffix? s1 start1 end1 s2 start2 end2 char-ci=?))
 
 ;;;; ======================================================================
@@ -698,15 +698,15 @@
 ;;;;
 ;;;; ======================================================================
 (define (%finish-string-concatenate-reverse len string-list final end)
-  (let ((res (make-string (+ end len))))
-    (%string-copy! res len final 0 end)
+  (let ((res (make-string (+ (max 0 end) len))))
+    (%string-copy! res len final 0 (max 0 end))
     (let Loop ((i len) (lis string-list))
       (if (pair? lis)
 	  (let* ((s   (car lis))
 		 (lis (cdr lis))
 		 (slen (string-length s))
 		 (i (- i slen)))
-	    (%string-copy! res i s 0 slen)
+                (%string-copy! res i s 0 slen)
 	    (Loop i lis))))
     res))
 
@@ -1021,7 +1021,7 @@
 ;;;;			F I L T E R I N G   &   D E L E T I N G
 ;;;;
 ;;;; ======================================================================
-(define (string-filter str criterion :optional (start 0) (end -1))
+(define (string-filter criterion str :optional (start 0) (end -1))
   (%check-indexes str start end 'string-filter)
   (let ((dst  (open-output-string))
 	(proc (cond
@@ -1041,7 +1041,7 @@
     (get-output-string dst)))
 
 
-(define (string-delete str criterion :optional (start 0) (end -1))
+(define (string-delete criterion str :optional (start 0) (end -1))
   (%check-indexes str start end 'string-filter)
   (let ((dst  (open-output-string))
 	(proc (cond
@@ -1174,25 +1174,27 @@
 	  (let Loop1 ((i 0) (j -1) (k start))
 	    (if (< i rvlen-1)
 
-		(let ((ck (string-ref pattern k)))
+		;(let ((ck (string-ref pattern (+ 1 k))))
 		  ;; Loop2 invariant:
 		  ;;   pat[(k-j) .. k-1] matches pat[start .. start+j-1]
 		  ;;   or j = -1.
 		  (let Loop2 ((j j))
 
 		    (cond ((= j -1)
-			   (let ((i1 (+ i 1)))
+			   (let ((i1 (+ i 1))
+                                 (ck (string-ref pattern (+ 1 k))))
 			     (vector-set! rv i1 (if (c= ck c0) -1 0))
 			     (Loop1 i1 0 (+ k 1))))
 
 			  ;; pat[(k-j) .. k] matches pat[start..start+j].
-			  ((c= ck (string-ref pattern (+ j start)))
+			  ((c= (string-ref pattern k)
+                               (string-ref pattern (+ j start)))
 			   (let* ((i1 (+ 1 i))
 				  (j1 (+ 1 j)))
 			     (vector-set! rv i1 j1)
 			     (Loop1 i1 j1 (+ k 1))))
 
-			  (else (Loop2 (vector-ref rv j))))))))))
+			  (else (Loop2 (vector-ref rv j)))))))));)
     rv))
 
 
@@ -1270,6 +1272,22 @@
 
 ;; Overload STklos string-index with the SRFI one
 (set! string-index (in-module SRFI-13 string-index))
+
+;; Some R7RS procedures conflict with this SRFI. If the user required
+;; this SRFI, we shadow the R7RS versions of those procedures.
+(define r7rs:string-map string-map)
+(set! string-map (in-module SRFI-13 string-map))
+(define r7rs:string-for-each string-for-each)
+(set! string-for-each (in-module SRFI-13 string-for-each))
+(define r7rs:string-hash string-hash)
+(set! string-hash (in-module SRFI-13 string-hash))
+(define r7rs:string-downcase string-downcase)
+(set! string-downcase (in-module SRFI-13 string-downcase))
+(define r7rs:string-upcase string-upcase)
+(set! string-upcase (in-module SRFI-13 string-upcase))
+
+
+
 
 (provide "srfi-13")
 
