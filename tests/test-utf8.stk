@@ -1,7 +1,7 @@
 ;;;;                                                    -*- coding utf-8 -*-
 ;;;; test-utf8.stk      -- Test of UTF-8 strings
 ;;;;
-;;;; Copyright © 2011-2019 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2020 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2011 23:35 (eg)
-;;;; Last file update:  4-Jul-2019 14:45 (eg)
+;;;; Last file update: 13-Jul-2020 15:00 (eg)
 ;;;;
 
 (require "test")
@@ -43,7 +43,12 @@
 (test "length.1" 4 (string-length "«€œ»"))
 (test "length.2" 8 (string-length "♜♞♝♛♚♝♞♜"))
 (test "length.3" 8 (string-length (make-string 8 #\♟)))
+(test "length.4" 3 (string-length "\x3b1;\x3b2;\x3b3;"))
+(test "length.5" 3 (string-length (list->string (map integer->char
+                                                     '(#x3b1 #x3b2 #x3b3)))))
+      
 (test "const"    "♟♟♟♟♟♟♟♟" (make-string 8 #\♟))
+
 
 
 (test-subsection "Chibi Scheme unicode tests")
