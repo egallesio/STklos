@@ -635,6 +635,9 @@ described in this document (procedures
 (gen-embedded-srfi 145
                    [See the ,(ref :mark "assume" :text "assume") special form])
 
+;; SRFI 156 -- Syntactic combiners for binary predicates
+(gen-loaded-srfi 156)
+
 ;; SRFI 158 -- Generators and Accumulators
 (gen-loaded-srfi 158)
 

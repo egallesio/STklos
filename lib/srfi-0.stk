@@ -213,7 +213,7 @@
     ;; srfi-153                         ; ....... withdrawn
     ;; srfi-154                         ; First-class dynamic extents
     ;; srfi-155                         ; Promises
-    ;; srfi-156                         ; Syntactic combiners for binary predicates
+    srfi-156                            ; Syntactic combiners for binary predicates
     ;; srfi-157                         ; Continuation marks
     (srfi-158 "srfi-158")               ; Generators and Accumulators
     ;; srfi-159                         ; Combinator Formatting
