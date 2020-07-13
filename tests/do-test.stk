@@ -1,7 +1,7 @@
 ;;;;
 ;;;; do-test.stk        -- The pilot of all tests
 ;;;;
-;;;; Copyright © 2005-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update: 11-Jun-2018 15:23 (eg)
+;;;; Last file update:  7-Jul-2020 12:23 (eg)
 ;;;;
 
 (load-path (cons "../lib"
@@ -37,6 +37,7 @@
   (load "test-fport.stk")
   (load "test-threads.stk")
   (load "test-srfi.stk")
+  (load "test-json.stk")
   (load "test-md5.stk")
   (load "test-base64.stk")
   (load "test-box.stk")
@@ -46,6 +47,7 @@
   (load "test-r7rs.stk")
   (load "test-circular.stk")
   (load "test-utf8.stk")
+  (load "test-misc.stk")
   (load "test-r5rs-pitfall.stk")
   )
 

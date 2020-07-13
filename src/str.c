@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  3-Jun-2020 20:23 (eg)
+ * Last file update: 13-Jul-2020 14:53 (eg)
  */
 
 #include <ctype.h>
@@ -745,6 +745,10 @@ DEFINE_PRIMITIVE("list->string", list2string, subr1, (SCM l))
     s += STk_char2utf8(CHARACTER_VAL(CAR(l)), s);
   }
   *s = '\0';
+
+  /* Set the length of the resulting string */
+  STRING_LENGTH(z) = len;
+  
   return z;
 }
 

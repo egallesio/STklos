@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update: 25-Jun-2020 13:35 (eg)
+;;;; Last file update:  7-Jul-2020 19:31 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -117,6 +117,20 @@
 ;;      repl-handler ...
 ;;         -- The error handler for the REPL
 ;; ----------------------------------------------------------------------
+(define %other-error-handlers '())
+
+(define (%try-matching-condition e)
+  (assoc e %other-error-handlers (lambda(key pred?) (pred? key))))
+
+(define (%add-error-to-repl-handler pred? action)
+  ;; Usage exemple:
+  ;; (%add-error-to-repl-handler integer? (lambda (v port)
+  ;;                                       (format port "Got error #~S\n" v)))
+  ;; (raise 42) will print "Got error #42" instead of a "non condition was raised"
+  ;; error
+  (set! %other-error-handlers (cons (cons pred? action) %other-error-handlers)))
+
+
 (define (display-error-message who msg bt out)
   (let* ((loc (%build-error-location who bt))
          (from (if (cadr loc)
@@ -153,7 +167,10 @@
            (format port "Condition type: ~A\n" (struct-type-name (struct-type c)))
            (format port "Condition slots: ~S\n" (struct->list c))))
       ;; Value raised is not a condition. Display it
-      (format port "**** The following non-condition was raised: ~S\n" c)))
+      (let ((res (%try-matching-condition c)))
+        (if res
+            ( (cdr res) c port)
+            (format port "**** The following non-condition was raised: ~S\n" c)))))
 
 ;; ----------------------------------------------------------------------
 ;;      repl-prompt ...

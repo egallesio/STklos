@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  3-Jul-2020 15:47 (eg)
+;;;; Last file update:  7-Jul-2020 17:57 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -142,7 +142,7 @@
     ;; srfi-84                          ; ....... withdrawn
     ;; srfi-85                          ; ....... withdrawn
     ;; srfi-86                          ; MU and NU simulating VALUES & CALL-WITH-VALUES
-    ;; srfi-87                          ; => in case clauses
+    srfi-87                             ; => in case clauses
     srfi-88                             ; Keyword objects
     (srfi-89 "srfi-89")                 ; Optional Positional and Named Parameters
     ;; srfi-90                          ; Extensible hash table constructor
@@ -197,7 +197,8 @@
     ;; srfi-138                         ; Compiling Scheme programs to executables
     ;; srfi-139                         ; Syntax parameters
     ;; srfi-140                         ; Immutable Strings
-    ;; srfi-141                         ; Integer division
+    ((srfi-141 integer-division) "srfi-141")
+                                        ; Integer division
     ;; srfi-142                         ; ....... withdrawn
     ;; srfi-143                         ; Fixnums
     ;; srfi-144                         ; Flonums
@@ -230,13 +231,14 @@
     ((srfi-171 transducers) "srfi-171") ; Transducers
     ;; srfi-172                         ; Two Safer Subsets of R7RS
     ((srfi-173 hooks) "srfi-173")       ; Hooks
-    ;; srfi-174                         ; POSIX Timespecs
+    ((srfi-174 posix-timespecs) "srfi-174")
+                                        ; POSIX Timespecs
     ;; srfi-175                         ; ASCII character library
     ;; srfi-176                         ; Version flag
     ;; srfi-177                         ; Portable keyword arguments (draft)
     ;; srfi-178                         ; Bitvector library (draft)
     ;; srfi-179                         ; Nonempty Intervals and Generalized Arrays (Updated) (draft)
-    ;; srfi-180                         ; JSON (draft)
+    ((srfi-180 JSON json) "srfi-180")   ; JSON 
     ;; srfi-181                         ; Custom ports (draft)
     ;; srfi-182                         ; ....... withdrawn
     ;; srfi-183                         ; ....... withdrawn
@@ -248,7 +250,7 @@
     ;; srfi-189                         ; Maybe and Either: optional container types (draft)
     (srfi-190 "srfi-190")               ; Coroutine Generators
     (generators "srfi-158" "srfi-190")
-    ;; srfi-191                         ; Procedure Arity Inspection (draft)
+    ;; srfi-191                         ; ....... withdrawn
     ;; srfi-192                         ; Port Positioning (draft)
     ;; srfi-193                         ; Command lines (draft)
     ;; srfi-194                         ; Random data generators (draft)

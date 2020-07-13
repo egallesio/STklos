@@ -1,0 +1,52 @@
+;;;;
+;;;;
+;;;; test-misc.stk         -- Some tests which don't feat anywhere else
+;;;;
+;;;; Copyright © 2020 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  5-Jul-2020 19:23
+;;;; Last file update:  5-Jul-2020 20:52 (eg)
+;;;;
+
+(require "test")
+
+(test-section "Miscellaneous tests")
+
+;;------------------------------------------------------------------
+(test-subsection "Symbols")
+
+(test "symbol.1" '|a\x33;b| 'a3b)
+(test "symbol.2" '|a\|b| 'a\|b)
+(test "symbol.3" '|a\\b| 'a\\b)
+(test "symbol.4" '|a\nb| '|a
+b|)
+(test "symbols.5" '|a\x8;b| (string->symbol "a\010b"))
+(test "print-symbol.1" "a\nb"  (with-output-to-string (lambda() (display 'a\nb))))
+(test "print-symbol.2" "|a\\nb|" (with-output-to-string (lambda() (write 'a\nb))))
+(test "bars anywhere"  '|a   b| 'a|   |b)
+(test "useless backslash.1" 'abcd '|ab\cd|)
+(test "useless backslash.2" 'abc '|ab\c|)
+(test "useless backslash.3" 'abc 'ab\c)
+(test "special-name.1"       '|\b| '\b)
+(test "special-name.2"       '|| (string->symbol ""))
+
+
+;;------------------------------------------------------------------
+(test-section-end)

@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  7-Jun-2020 18:58 (eg)
+ * Last file update:  3-Jul-2020 16:47 (eg)
  *
  */
 
@@ -1759,6 +1759,8 @@ int STk_init_port(void)
 
   ADD_PRIMITIVE(close_input_port);
   ADD_PRIMITIVE(close_output_port);
+  ADD_PRIMITIVE(textual_portp);
+  ADD_PRIMITIVE(binary_portp);
   ADD_PRIMITIVE(close_port);
   ADD_PRIMITIVE(port_closed);
   ADD_PRIMITIVE(port_open);

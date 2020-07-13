@@ -55,6 +55,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-69: Basic Hash Tables
     - SRFI-70: Numbers
     - SRFI-74: Octet-Addressed Binary Blocks
+    - SRFI-87: => in case clauses
     - SRFI-88: Keyword Objects
     - SRFI-89: Optional Positional and Named Parameters
     - SRFI-96: SLIB Prerequisites 
@@ -63,9 +64,12 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-111: Boxes
     - SRFI-112: Environment Inquiry
     - SRFI-117: Queues based on lists
+    - SRFI-141: Integer Division
     - SRFI-145: Assumptions
     - SRFI-158: Generators and Accumulators
     - SRFI-169: Underscores in numbers
     - SRFI-171: Transducers
     - SRFI-173: Hooks
+    - SRFI-174: POSIX Timespecs
+    - SRFI-180: JSON
     - SRFI-190: Coroutines Generators

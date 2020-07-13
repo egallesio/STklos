@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  3-Jul-2020 15:46 (eg)
+;; Last file update:  8-Jul-2020 18:38 (eg)
 ;;
 ;; ======================================================================
 
@@ -559,6 +559,14 @@ you need to insert the following expression])
 (p [in your code or uses the ,(code "cond-expand") special form.]))
 
 ;; ----------------------------------------------------------------------
+;; SRFI 87 -- => in case clauses
+;; ----------------------------------------------------------------------
+(srfi-section 87
+
+(p [,(quick-link-srfi 87), ehich became part of the R7RS standard,
+is fully supported.]))
+
+;; ----------------------------------------------------------------------
 ;; SRFI 88 -- Keyword objects
 ;; ----------------------------------------------------------------------
 (srfi-section 88
@@ -620,6 +628,9 @@ described in this document (procedures
 ;; SRFI 117 -- Queues based on lists
 (gen-loaded-srfi 117)
 
+;; SRFI 141 -- Integer division
+(gen-loaded-srfi 141)
+
 ;; SRFI 145 -- Assumptions
 (gen-embedded-srfi 145
                    [See the ,(ref :mark "assume" :text "assume") special form])
@@ -633,14 +644,20 @@ described in this document (procedures
                               :text "accept-srfi-169-numbers")
                         to eventually forbid the usage of underscores in numbers.])
 
-;; SRFI 190 -- Coroutine Generators
-(gen-loaded-srfi 190)
-
 ;; SRFI 171 -- Transducers
 (gen-loaded-srfi 171)
 
 ;; SRFI 173 -- Hooks
 (gen-loaded-srfi 173)
+
+;; SRFI 174 -- POSIX Timespecs
+(gen-loaded-srfi 174)
+
+;; SRFI 180 -- JSON
+(gen-loaded-srfi 180)
+
+;; SRFI 190 -- Coroutine Generators
+(gen-loaded-srfi 190)
 
 
 ;; End of chapter

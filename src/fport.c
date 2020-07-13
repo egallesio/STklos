@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update:  2-Jun-2020 12:16 (eg)
+ * Last file update:  4-Jul-2020 23:25 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -546,6 +546,8 @@ SCM STk_open_file(char *filename, char *mode)
     case 'w': type = (mode[1] == '+') ? PORT_RW : PORT_WRITE; break;
     default:  goto Error;
   }
+  type |= PORT_TEXTUAL;                     /* by default */
+  
   return open_file_port(STk_Cstring2string(filename), mode, type, FALSE);
 Error:
   STk_panic("bad opening mode %s", mode);
