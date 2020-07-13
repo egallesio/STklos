@@ -2,10 +2,32 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 26-Jun-2020 17:42 (eg)
+### Last file update: 13-Jul-2020 19:17 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.40])
+
+#
+# Grab configure options before it is too late
+#
+CONF_OPT=""; HAS_CC=""; HAS_CFLAGS=""
+
+for opt in "$@"
+do
+  case $opt in
+     CC=*)     HAS_CC=1 ;;
+     CFLAGS=*) HAS_CFLAGS=1;;
+  esac
+  
+  if test "X$opt" = "X--no-create" -o "X$opt" = "X--no-recursion"
+  then
+     # These options are added when configure is older than configure.ac
+     true
+  else
+     CONF_OPT="$CONF_OPT \\\"$opt\\\""
+  fi
+done
+
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR(src/stklos.c)
 AC_CONFIG_HEADERS(src/stklosconf.h)
@@ -52,13 +74,6 @@ AC_CHECK_FUNCS([atexit dup2 endpwent floor getcwd gethostbyaddr gethostbyname ge
 
 ### Initialize prefix
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
-
-### use -O3 if user has not specified something else and we are using GCC
-USER_CFLAGS=$CFLAGS
-if test "X$USER_CFLAGS" = "X" -a "$CC" = "gcc"
-then
-  CFLAGS="-O3 -fomit-frame-pointer"
-fi
 
 ### Determine the options necessary for dynamic loading (even if disbaled later)
 eval `CC=$CC /bin/sh ./utils/shlib-options`
@@ -410,8 +425,17 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[ void inner (char *foo) { char bar; exit (!(foo 
 ###
 ### Finishing ...
 ###
-LIB_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS))"
 
+# See if we must add CC and CFLAGS to the arguments stored in $CONF_OPT
+if test "X$HAS_CC" = "X" ;then
+   CONF_OPT="$CONF_OPT \\\"CC=$CC\\\""
+fi
+
+if test "X$HAS_CFLAGS" = "X" ;then
+   CONF_OPT="$CONF_OPT \\\"CFLAGS=$CFLAGS\\\""
+fi
+
+CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT))"
 
 ### Output files
 AC_SUBST(STKCFLAGS)
@@ -455,7 +479,7 @@ AC_SUBST(FFILIB)
 AC_SUBST(FFIINC)
 
 AC_SUBST(THREADS)
-AC_SUBST(LIB_SUMMARY)
+AC_SUBST(CONF_SUMMARY)
 AC_SUBST(DEFAULT_CS)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile

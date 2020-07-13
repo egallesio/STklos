@@ -230,6 +230,7 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
+CONF_SUMMARY = @CONF_SUMMARY@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -267,7 +268,6 @@ LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
-LIB_SUMMARY = @LIB_SUMMARY@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
@@ -434,10 +434,12 @@ scheme_SRCS = STklos.init     \
           srfi-89.stk         \
           srfi-96.stk         \
           srfi-100.stk        \
-          srfi-117.stk        \
+	        srfi-117.stk        \
+          srfi-141.stk        \
           srfi-158.stk        \
           srfi-171.stk        \
           srfi-173.stk        \
+          srfi-174.stk        \
           srfi-180.stk        \
           srfi-190.stk        \
           tar.stk             \
@@ -484,10 +486,13 @@ scheme_OBJS = compfile.ostk    \
           srfi-89.ostk         \
           srfi-96.ostk         \
           srfi-100.ostk        \
+	        srfi-117.ostk        \
+          srfi-141.ostk        \
           srfi-117.ostk        \
           srfi-158.ostk        \
           srfi-171.ostk        \
           srfi-173.ostk        \
+          srfi-174.ostk        \
           srfi-180.ostk        \
           srfi-190.ostk        \
           tar.ostk             \

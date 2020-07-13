@@ -625,7 +625,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 DEFAULT_CS
-LIB_SUMMARY
+CONF_SUMMARY
 THREADS
 FFIINC
 FFILIB
@@ -2272,6 +2272,27 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+
+
+#
+# Grab configure options before it is too late
+#
+CONF_OPT=""; HAS_CC=""; HAS_CFLAGS=""
+
+for opt in "$@"
+do
+  case $opt in
+     CC=*)     HAS_CC=1 ;;
+     CFLAGS=*) HAS_CFLAGS=1;;
+  esac
+
+  if test "X$opt" = "X--no-create" -o "X$opt" = "X--no-recursion"
+  then
+     true
+  else
+     CONF_OPT="$CONF_OPT \\\"$opt\\\""
+  fi
+done
 
 am__api_version='1.16'
 
@@ -5975,13 +5996,6 @@ done
 ### Initialize prefix
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
 
-### use -O3 if user has not specified something else and we are using GCC
-USER_CFLAGS=$CFLAGS
-if test "X$USER_CFLAGS" = "X" -a "$CC" = "gcc"
-then
-  CFLAGS="-O3 -fomit-frame-pointer"
-fi
-
 ### Determine the options necessary for dynamic loading (even if disbaled later)
 eval `CC=$CC /bin/sh ./utils/shlib-options`
 
@@ -6752,8 +6766,17 @@ fi
 ###
 ### Finishing ...
 ###
-LIB_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS))"
 
+# See if we must add CC and CFLAGS to the arguments stored in $CONF_OPT
+if test "X$HAS_CC" = "X" ;then
+   CONF_OPT="$CONF_OPT \\\"CC=$CC\\\""
+fi
+
+if test "X$HAS_CFLAGS" = "X" ;then
+   CONF_OPT="$CONF_OPT \\\"CFLAGS=$CFLAGS\\\""
+fi
+
+CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT))"
 
 ### Output files
 

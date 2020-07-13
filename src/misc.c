@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 29-Jun-2020 09:44 (eg)
+ * Last file update: 13-Jul-2020 18:12 (eg)
  */
 
 #include "stklos.h"
@@ -112,6 +112,10 @@ DEFINE_PRIMITIVE("%push-id", push_id, subr0, (void))
   return STk_Cstring2string(GIT_PUSH_ID);
 }
 
+DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
+{
+  return STk_read_from_C_string(CONF_SUMMARY);
+}
 
 /*
 <doc EXT void
@@ -577,6 +581,7 @@ int STk_init_misc(void)
 {
   ADD_PRIMITIVE(version);
   ADD_PRIMITIVE(push_id);
+  ADD_PRIMITIVE(stklos_configure);
   ADD_PRIMITIVE(scheme_void);
   ADD_PRIMITIVE(address_of);
   ADD_PRIMITIVE(scheme_gc);
