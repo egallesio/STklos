@@ -2288,6 +2288,7 @@ do
 
   if test "X$opt" = "X--no-create" -o "X$opt" = "X--no-recursion"
   then
+     # These options are added when configure is older than configure.ac
      true
   else
      CONF_OPT="$CONF_OPT \\\"$opt\\\""

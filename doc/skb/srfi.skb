@@ -388,6 +388,16 @@ you need to insert the following expression ])
 See section ,(ref :section "Predefined Conditions") for the predefined conditions
 and when it is required to load this file.]))
 
+;; ----------------------------------------------------------------------
+;; SRFI 37 -- args-fold: a program argument processor
+;; ----------------------------------------------------------------------
+(srfi-section 37
+
+(p [,(quick-link-srfi 37) is fully supported.  To use SRFI-37,
+you need to insert the following expression])
+(fontified-code [(require "srfi-37")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
 
 ;; ----------------------------------------------------------------------
 ;; SRFI 38 -- External Representation for Data With Shared Structure
