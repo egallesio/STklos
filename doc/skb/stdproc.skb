@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  3-Jul-2020 15:15 (eg)
+;; Last file update: 15-Jul-2020 17:57 (eg)
 ;;
 ;; ======================================================================
 
@@ -1043,7 +1043,8 @@ See SRFI document for more information.])
 (insertdoc 'require-extension)
 (insertdoc 'repl)
 (insertdoc 'assume)
-
+(index "SRFI-176")
+(insertdoc 'version-alist)
 (insertdoc 'apropos)
 (insertdoc 'help)
 (insertdoc 'trace)
