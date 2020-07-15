@@ -662,6 +662,15 @@ described in this document (procedures
 ;; SRFI 174 -- POSIX Timespecs
 (gen-loaded-srfi 174)
 
+;; ----------------------------------------------------------------------
+;; SRFI 176 -- Version flag
+;; ----------------------------------------------------------------------
+(srfi-section 176
+
+(p [,(quick-link-srfi 176) is fully supported.  To use SRFI-176,
+pass (tt "-V") as option when calling STklos, or use the (tt version-alist)
+procedure.]))
+
 ;; SRFI 180 -- JSON
 (gen-loaded-srfi 180)
 

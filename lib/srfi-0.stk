@@ -234,7 +234,7 @@
     ((srfi-174 posix-timespecs) "srfi-174")
                                         ; POSIX Timespecs
     ;; srfi-175                         ; ASCII character library
-    ;; srfi-176                         ; Version flag
+    srfi-176                            ; Version flag
     ;; srfi-177                         ; Portable keyword arguments (draft)
     ;; srfi-178                         ; Bitvector library (draft)
     ;; srfi-179                         ; Nonempty Intervals and Generalized Arrays (Updated) (draft)
