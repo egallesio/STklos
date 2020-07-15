@@ -628,6 +628,9 @@ described in this document (procedures
 ;; SRFI 117 -- Queues based on lists
 (gen-loaded-srfi 117)
 
+;; SRFI 129 -- Titlecase Procedures
+(gen-loaded-srfi 129)
+
 ;; SRFI 141 -- Integer division
 (gen-loaded-srfi 141)
 
