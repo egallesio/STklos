@@ -28,7 +28,6 @@
 #include <langinfo.h>
 #include "gnu-getopt.h"
 
-
 #define ADD_OPTION(o, k)                                        \
   if (*o) options = STk_key_set(options,                        \
                                 STk_makekey(k),                 \
@@ -61,6 +60,7 @@ static int  vanilla       = 0;
 static int  stack_size    = DEFAULT_STACK_SIZE;
 static int  debug_mode    = 0;
 static int  line_editor   = 1;
+static int  srfi_176      = 0;
 
 static struct option long_options [] =
 {
@@ -103,6 +103,7 @@ static void Usage(char *progname, int only_version)
 "       --case-insensitive      be case incensitive by default\n"
 "   -u, --utf8-encoding=yes|no  use/don't use UTF-8 encoding (instead of default)\n"
 "   -v, --version               print program version and exit\n"
+"   -V, (SRFI-176)              print version and program information, as per SRFI-176"
 "   -h, --help                  print this help and exit\n"
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
@@ -116,11 +117,12 @@ static int process_program_arguments(int argc, char *argv[])
   int c;
 
   for ( ; ; ) {
-    c = getopt_long(argc, argv, "qidnvhcf:l:e:b:s:D:u:", long_options, NULL);
+    c = getopt_long(argc, argv, "qidnvVhcf:l:e:b:s:D:u:", long_options, NULL);
     if (c == -1) break;
 
     switch (c) {
       case 'v': Usage(*argv, 1); exit(0);
+      case 'V': srfi_176        = 1;                            break;
       case 'f': program_file    = optarg;                       break;
       case 'l': load_file       = optarg;                       break;
       case 'e': sexpr           = optarg;                       break;
@@ -157,6 +159,7 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   ADD_OPTION(load_file,            ":load");
   ADD_OPTION(sexpr,                ":sexpr");
   ADD_OPTION(conf_dir,             ":conf-dir");
+  ADD_BOOL_OPTION(srfi_176,        ":srfi-176");
   ADD_BOOL_OPTION(vanilla,         ":no-init-file");
   ADD_BOOL_OPTION(STk_interactive, ":interactive");
   ADD_BOOL_OPTION(line_editor,     ":line-editor");

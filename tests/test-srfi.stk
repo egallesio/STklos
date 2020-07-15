@@ -2742,6 +2742,15 @@
               hook-sum-var
               hook-prod-var)))
 
+;;  SRFI 176 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 176 - Version flag")
+
+(test "version-alist is list" #t (list? (version-alist)))
+(test "scheme.id stklos" 'stklos (cadr (assoc 'scheme.id (version-alist))))
+(test "version" (version) (cadr (assoc 'version (version-alist))))
+(test "version" (features) (cdr (assoc 'scheme.features (version-alist))))
+
 ;; ----------------------------------------------------------------------
 ;;  SRFI 174 ...
 ;; ----------------------------------------------------------------------
@@ -2798,8 +2807,6 @@
       #t
       (with-handler (lambda (e) (json-error? e))
                     (call-with-input-string "{" json-read)))
-
-
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI 190 ...

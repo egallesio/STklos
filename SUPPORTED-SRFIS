@@ -75,5 +75,6 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-171: Transducers
     - SRFI-173: Hooks
     - SRFI-174: POSIX Timespecs
+    - SRFI-176: Version flag
     - SRFI-180: JSON
     - SRFI-190: Coroutines Generators
