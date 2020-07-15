@@ -249,6 +249,7 @@
     ;; srfi-187                         ; ....... withdrawn
     ;; srfi-188                         ; Splicing binding constructs for syntactic keywords
     ;; srfi-189                         ; Maybe and Either: optional container types
+    ((srfi-189 maybe-either) "srfi-189"); Maybe and Either: optional container types
     (srfi-190 "srfi-190")               ; Coroutine Generators
     (generators "srfi-158" "srfi-190")
     ;; srfi-191                         ; ....... withdrawn
