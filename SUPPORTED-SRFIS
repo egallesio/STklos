@@ -70,6 +70,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-151: Bitwise Operations
     - SRFI-156: Syntactic combiners for binary predicates
     - SRFI-158: Generators and Accumulators
+    - SRFI-161: Unifiable Boxes
     - SRFI-169: Underscores in numbers
     - SRFI-171: Transducers
     - SRFI-173: Hooks

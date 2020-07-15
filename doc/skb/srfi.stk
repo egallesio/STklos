@@ -82,6 +82,7 @@
      (151 . "Bitwise Operations")
      (156 . "Syntactic combiners for binary predicates")
      (158 . "Generators and Accumulators")
+     (161 . "Unifiable Boxes")
      (169 . "Underscores in numbers")
      (171 . "Transducers")
      (173 . "Hooks")
