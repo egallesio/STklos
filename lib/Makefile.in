@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 15-Jul-2020 12:11 (eg)
+# Last file update: 15-Jul-2020 18:07 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -415,7 +415,6 @@ scheme_SRCS = STklos.init     \
           srfi-13.stk         \
           srfi-14.stk         \
           srfi-17.stk         \
-          srfi-19.stk         \
           srfi-26.stk         \
           srfi-27.stk         \
           srfi-31.stk         \
@@ -442,6 +441,7 @@ scheme_SRCS = STklos.init     \
           srfi-151.stk        \
           srfi-156.stk        \
           srfi-158.stk        \
+          srfi-161.stk        \
           srfi-171.stk        \
           srfi-173.stk        \
           srfi-174.stk        \
@@ -472,7 +472,6 @@ scheme_OBJS = compfile.ostk    \
           srfi-13.ostk         \
           srfi-14.ostk         \
           srfi-17.ostk         \
-          srfi-19.ostk         \
           srfi-26.ostk         \
           srfi-27.ostk         \
           srfi-31.ostk         \
@@ -499,6 +498,7 @@ scheme_OBJS = compfile.ostk    \
           srfi-151.ostk        \
           srfi-156.ostk        \
           srfi-158.ostk        \
+          srfi-161.ostk        \
           srfi-171.ostk        \
           srfi-173.ostk        \
           srfi-174.ostk        \

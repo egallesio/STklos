@@ -41,6 +41,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-34: Exception Handling for Programs
     - SRFI-35: Conditions
     - SRFI-36: I/O Conditions
+    - SRFI-37: args-fold: a program argument processor
     - SRFI-38: External representation of shared structures
     - SRFI-39: Parameters objects
     - SRFI-45: Primitives for Expressing Iterative Lazy Algorithms
