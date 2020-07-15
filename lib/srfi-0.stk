@@ -247,7 +247,7 @@
     ;; srfi-186                         ; Transcoders and transcoded ports
     ;; srfi-187                         ; ....... withdrawn
     ;; srfi-188                         ; Splicing binding constructs for syntactic keywords
-    ;; srfi-189                         ; Maybe and Either: optional container types (draft)
+    ;; srfi-189                         ; Maybe and Either: optional container types
     (srfi-190 "srfi-190")               ; Coroutine Generators
     (generators "srfi-158" "srfi-190")
     ;; srfi-191                         ; ....... withdrawn
@@ -258,6 +258,11 @@
     ;; srfi-196                         ; Range Objects (draft)
     ;; srfi-197                         ; Expression Chaining Operators (draft)
     ;; srfi-198                         ; POSIX system call exceptions (draft)
+    ;; srfi-199                         ; POSIX errno manipulation (draft)
+    ;; srfi-200                         ; Pattern Matching (draft)
+    ;; srfi-201                         ; Syntactic Extensions to the Core Scheme Bindings (draft)
+    ;; srfi-202                         ; Pattern-matching Variant of the and-let* Form that Supports Multiple Values
+    ;; srfi-203                         ; A Simple Picture Language in the Style of SICP
     ))
 
 ;; ----------------------------------------------------------------------
