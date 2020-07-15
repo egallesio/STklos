@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  2-Jun-2020 18:27 (eg)
+ * Last file update: 15-Jul-2020 17:42 (eg)
  */
 
 #include "stklos.h"
@@ -82,12 +82,15 @@ static struct option long_options [] =
   {NULL,                0,                 NULL, 0  }     /* for Clang */
 };
 
-static void Usage(char *progname, int only_version)
+static void Usage(int only_version)
 {
-  fprintf(stderr, "%s (version %s)\n", progname, VERSION);
-  if (only_version) return;
-  fprintf(stderr, "Usage: %s [option ...] [--] [arg ... ]", progname);
-  fprintf(stderr, "\n"
+  fprintf(stdout, "stklos %s\n", VERSION);
+  if (only_version) {
+    fprintf(stdout, "For more information, use the -V option.\n");
+    return;
+  }
+  fprintf(stdout, "Usage: stklos [option ...] [--] [arg ... ]");
+  fprintf(stdout, "\n"
 "Possible options:\n"
 "   -l file, --load=file        load 'file' before going interactive\n"
 "   -f file, --file=file        use 'file' as program\n"
@@ -103,7 +106,7 @@ static void Usage(char *progname, int only_version)
 "       --case-insensitive      be case incensitive by default\n"
 "   -u, --utf8-encoding=yes|no  use/don't use UTF-8 encoding (instead of default)\n"
 "   -v, --version               print program version and exit\n"
-"   -V, (SRFI-176)              print version and program information, as per SRFI-176"
+"   -V                          print version and program information, as per SRFI-176\n"
 "   -h, --help                  print this help and exit\n"
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
@@ -121,7 +124,7 @@ static int process_program_arguments(int argc, char *argv[])
     if (c == -1) break;
 
     switch (c) {
-      case 'v': Usage(*argv, 1); exit(0);
+      case 'v': Usage(1); exit(0);
       case 'V': srfi_176        = 1;                            break;
       case 'f': program_file    = optarg;                       break;
       case 'l': load_file       = optarg;                       break;
@@ -139,7 +142,7 @@ static int process_program_arguments(int argc, char *argv[])
       case '?': /* message error is printed by getopt */
                 fprintf(stderr, "Try `%s --help' for more information\n", *argv);
                 exit(1);
-      default:  Usage(*argv, 0); exit(c != 'h');
+      default:  Usage(0); exit(c != 'h');
     }
   }
   return optind;

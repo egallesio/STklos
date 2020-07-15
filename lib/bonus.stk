@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  3-Jul-2020 14:29 (eg)
+;;;; Last file update: 15-Jul-2020 16:53 (eg)
 ;;;;
 
 
@@ -1821,5 +1821,49 @@ doc>
       ;; ... and ignored otherwise
       #void))
 
+
+;; ----------------------------------------------------------------------
+;;  SRFI-176: "Version flag"
+;; ----------------------------------------------------------------------
+
+#|
+<doc EXT version-alist
+ * (version-alist)
+ *
+ * This function returns an association list of STklos properties as defined by
+ * ,(quick-link-srfi 176). 
+doc>
+|#
+
+(define (version-alist)
+  (define (%feature->srfi feature)
+    (let* ((srfi- "srfi-")
+           (srfi-len 5)
+           (feat (symbol->string feature))
+           (feat-len (string-length feat)))
+      (and (> feat-len srfi-len)
+           (string=? srfi- (substring feat 0 srfi-len))
+           (string->number (substring feat srfi-len feat-len)))))
+
+  (let ((u (%uname))
+        (utf8? (key-get *%system-state-plist* :use-utf8 #f))
+        (conf  (%stklos-configure)))
+    `((version ,(version))
+      (command "stklos")
+      (scheme.id stklos)
+      (languages scheme r5rs)
+      (encodings ,@(if utf8? '(utf-8) '()))
+      (install-dir ,(%library-prefix))
+      (website "https://stklos.net")
+      (scheme.features ,@(features))
+      (scheme.srfi ,@(filter-map %feature->srfi (features)))
+      (scheme.path ,@(load-path))
+      (build.configure ,@(key-get conf :configure #f))
+      (stklos.threads ,(%thread-system))
+      (stklos.system-libs ,@(key-get conf :system #f))
+      (stklos.compiled-libs ,@(key-get conf :compiled #f))
+      (os.uname ,(vector-ref u 0) ,(vector-ref u 2) ,(vector-ref u 4))
+      (os.env.LANG ,(or (getenv "LANG") ""))
+      (os.env.TERM ,(or (getenv "TERM") "")))))
 
 ;; LocalWords:  doc dotimes R5RS str SRFI optarg

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; boot.stk                                   -- Default boot file
 ;;;;
-;;;; Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 14-Jun-2019 18:28 (eg)
+;;;; Last file update: 15-Jul-2020 17:46 (eg)
 ;;;;
 
 (include "runtime.stk")         ; Definition necessary for the bootstrap
@@ -205,39 +205,6 @@
   (%module-exports-set! Scheme (module-exports STklos)))
 
 ;; ----------------------------------------------------------------------
-;;      SRFI-176
-;; ----------------------------------------------------------------------
-
-          
-(define (version-alist)
-  (define (%feature->srfi feature)
-    (let* ((srfi- "srfi-")
-           (srfi-len 5)
-           (feat (symbol->string feature))
-           (feat-len (string-length feat)))
-      (and (> feat-len srfi-len)
-           (string=? srfi- (substring feat 0 srfi-len))
-           (string->number (substring feat srfi-len feat-len)))))
-  (let ((u (%uname)) (utf8? (key-get *%system-state-plist* :use-utf8 #f)))
-    `((version ,(version))
-      (command "stklos")
-      (scheme.id stklos)
-      (languages scheme r5rs)
-      (encodings ,@(if utf8? '(utf-8) '()))
-      (install-dir ,(%library-prefix))
-      (website "https://stklos.net")
-      (scheme.features ,@(features))
-      (scheme.srfi ,@(filter-map %feature->srfi (features)))
-      (scheme.path ,@(load-path))
-      (build.configure ,@(key-get (%stklos-configure) :configure))
-      (stklos.threads ,(%thread-system))
-      (stklos.system-libs ,@(key-get (%stklos-configure)  :system))
-      (stklos.compiled-libs ,@(key-get (%stklos-configure)  :compiled))
-      (os.uname ,(vector-ref u 0) ,(vector-ref u 2) ,(vector-ref u 4))
-      (os.env.LANG ,(or (getenv "LANG") ""))
-      (os.env.TERM ,(or (getenv "TERM") "")))))
-
-;; ----------------------------------------------------------------------
 ;;      option analysis and REPL launching
 ;; ----------------------------------------------------------------------
 (let ((no-init (key-get *%program-args* :no-init-file #f))
@@ -269,15 +236,14 @@
        (make-directories dir))))
 
   (when s176
-    (display (string-append "stklos (version " (version) ")"))
-    (newline)
+    (printf "stklos ~A\n" (version))
     (for-each (lambda (line)
                 (write line)
                 (newline))
               (version-alist))
     (flush-output-port (current-output-port))
     (emergency-exit 0))
-  
+
   ;; Try to load the user initialization file except if "--no-init-file"
   (unless no-init
     (try-load (%stklos-conf-file "stklosrc")))
