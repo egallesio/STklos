@@ -76,6 +76,7 @@
      (111 . "Boxes")
      (112 . "Environment Inquiry")
      (117 . "Queues based on lists")
+     (129 . "Titlecase procedures")
      (141 . "Integer Division")
      (145 . "Assumptions")
      (156 . "Syntactic combiners for binary predicates")

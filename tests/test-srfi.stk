@@ -1525,6 +1525,51 @@
 (define y1 (list-queue-unfold-right done? double add1 0 y0))
 (test "list-queue-unfold-right II" '(8 6 4 2 0) (list-queue-list y1))
 
+
+;; ----------------------------------------------------------------------
+;;  SRFI 129 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 129 - Titlecase procedures")
+
+(require "srfi-129")
+
+(test "" #t (char-title-case? #\x01C5))
+(test "" #t (char-title-case? #\x1FFC))
+(test "" #f (char-title-case? #\Z))
+(test "" #f (char-title-case? #\z))
+
+(test "char 1" #\x01C5 (char-titlecase #\x01C4))
+(test "char 2" #\x01C5 (char-titlecase #\x01C6))
+(test "char 3" #\Z (char-titlecase #\Z))
+(test "char 4" #\Z (char-titlecase #\z))
+
+(test "string 1" "\x01C5;" (string-titlecase "\x01C5;"))
+(test "string 2" "\x01C5;" (string-titlecase "\x01C4;"))    ;
+(test "string 3" "Ss" (string-titlecase "\x00DF;"))         ;
+(test "string 4" "Xi\x0307;" (string-titlecase "x\x0130;")) ;
+(test "string 5" "\x1F88;" (string-titlecase "\x1F80;"))
+(test "string 6" "\x1F88;" (string-titlecase "\x1F88;"))
+
+
+(define Floo "\xFB02;oo")
+(define Floo-bar "\xFB02;oo bar")
+(define Baffle "Ba\xFB04;e")
+(define LJUBLJANA "\x01C7;ub\x01C7;ana")
+(define Ljubljana "\x01C8;ub\x01C9;ana")
+(define ljubljana "\x01C9;ub\x01C9;ana")
+
+(test "string 7" "Bar Baz" (string-titlecase "bAr baZ"))
+(test "string 8" "Floo" (string-titlecase "floo"))
+(test "string 9" "Floo" (string-titlecase "FLOO"))
+(test "string 10" "Floo" (string-titlecase Floo))          ;
+(test "string 11" "Floo Bar" (string-titlecase "floo bar"))
+(test "string 12" "Floo Bar" (string-titlecase "FLOO BAR"))
+(test "string 13" "Floo Bar" (string-titlecase Floo-bar))  ;
+(test "string 14" Baffle (string-titlecase Baffle))
+(test "string 15" Ljubljana (string-titlecase LJUBLJANA))  ;
+(test "string 16" Ljubljana (string-titlecase Ljubljana))
+(test "string 17" Ljubljana (string-titlecase ljubljana))  ;
+
 ;; ----------------------------------------------------------------------
 ;;  SRFI 141 ...
 ;; ----------------------------------------------------------------------
