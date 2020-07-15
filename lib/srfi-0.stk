@@ -208,7 +208,7 @@
     ;; srfi-148                         ; Eager syntax-rules
     ;; srfi-149                         ; Basic Syntax-rules Template Extensions
     ;; srfi-150                         ; Hygienic ERR5RS Record Syntax (reduced)
-    ;; srfi-151                         ; Bitwise Operations
+    ((srfi-151 bitwise-ops) "srfi-151") ; Bitwise Operations
     ;; srfi-152                         ; String Library (reduced)
     ;; srfi-153                         ; ....... withdrawn
     ;; srfi-154                         ; First-class dynamic extents
