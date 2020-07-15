@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 15-Jul-2020 17:46 (eg)
+;;;; Last file update: 15-Jul-2020 18:03 (eg)
 ;;;;
 
 (include "runtime.stk")         ; Definition necessary for the bootstrap
@@ -215,6 +215,16 @@
       (confdir (key-get *%program-args* :conf-dir #f))
       (debug   (key-get *%program-args* :debug 0)))
 
+  ;; Test if we have the -V flag (SRFI-176 version flag)
+  (when s176
+    (printf "stklos ~A\n" (version))
+    (for-each (lambda (line)
+                (write line)
+                (newline))
+              (version-alist))
+    (flush-output-port (current-output-port))
+    (emergency-exit 0))
+
   ;; Set the configuration if needed
   (when confdir
     (%stklos-conf-dir confdir))
@@ -234,15 +244,6 @@
        (lambda (c)
          (eprintf "Warning: cannot create configuration directory ~S\n" dir))
        (make-directories dir))))
-
-  (when s176
-    (printf "stklos ~A\n" (version))
-    (for-each (lambda (line)
-                (write line)
-                (newline))
-              (version-alist))
-    (flush-output-port (current-output-port))
-    (emergency-exit 0))
 
   ;; Try to load the user initialization file except if "--no-init-file"
   (unless no-init
