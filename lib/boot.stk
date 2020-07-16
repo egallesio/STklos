@@ -217,7 +217,6 @@
 
   ;; Test if we have the -V flag (SRFI-176 version flag)
   (when s176
-    (printf "stklos ~A\n" (version))
     (for-each (lambda (line)
                 (write line)
                 (newline))

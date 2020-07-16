@@ -100,14 +100,14 @@ static void Usage(int only_version)
 "   -q, --no-init-file          quiet: do not load the user init file\n"
 "   -i, --interactive           interactive mode\n"
 "   -n, --no-line-editor        don't use line editor\n"
-"   -d, --debug                 add informations to ease debugging\n"
+"   -d, --debug                 add information to ease debugging\n"
 "   -s, --stack-size=n          use a stack of size n (default %d)\n"
 "   -c, --case-sensitive        be case sensitive by default\n"
-"       --case-insensitive      be case incensitive by default\n"
+"       --case-insensitive      be case insensitive by default\n"
 "   -u, --utf8-encoding=yes|no  use/don't use UTF-8 encoding (instead of default)\n"
-"   -v, --version               print program version and exit\n"
-"   -V                          print version and program information, as per SRFI-176\n"
-"   -h, --help                  print this help and exit\n"
+"   -v, --version               show version and exit (simple)\n"
+"   -V                          show version and exit (detailed, SRFI-176)\n"
+"   -h, --help                  show this help and exit\n"
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
 }
