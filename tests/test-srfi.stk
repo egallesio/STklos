@@ -2783,6 +2783,245 @@
   (test "from inexact" t u))
 
 ;; ----------------------------------------------------------------------
+;;  SRFI 175 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 175 - ASCII character library")
+
+(require "srfi-175")
+
+
+(test "ascii 1" #f (ascii-codepoint? -1))
+(test "ascii 2" #t (ascii-codepoint? 0))
+(test "ascii 3" #t (ascii-codepoint? #x7f))
+(test "ascii 4" #f (ascii-codepoint? #x80))
+
+(test "ascii 5" #t (ascii-char? (integer->char 0)))
+(test "ascii 6" #t (ascii-char? (integer->char #x7f)))
+(test "ascii 7" #f (ascii-char? (integer->char #x80)))
+
+(test "ascii 8" #t (ascii-string? ""))
+(test "ascii 9" #t (ascii-string? "a"))
+(test "ascii 10" #t (ascii-string? "a b c"))
+(test "ascii 11" #f (ascii-string? "å b o"))
+(test "ascii 12" #t (ascii-string? (make-string 1 (integer->char #x7f))))
+(test "ascii 13" #f (ascii-string? (make-string 1 (integer->char #x80))))
+
+(test "ascii 14" #t (ascii-bytevector? (string->utf8 "")))
+(test "ascii 15" #t (ascii-bytevector? (string->utf8 "a")))
+(test "ascii 16" #t (ascii-bytevector? (string->utf8 "a b c")))
+(test "ascii 17" #f (ascii-bytevector? (string->utf8 "å b o")))
+(test "ascii 18" #t (ascii-bytevector?
+          (string->utf8 (make-string 1 (integer->char #x7f)))))
+(test "ascii 19" #f (ascii-bytevector?
+          (string->utf8 (make-string 1 (integer->char #x80)))))
+
+(test "ascii 20" #t (ascii-non-control? #\space))
+(test "ascii 21" #f (ascii-non-control? #\tab))
+(test "ascii 22" #f (ascii-non-control? #\newline))
+(test "ascii 23" #f (ascii-non-control? (integer->char #x0d)))
+
+(test "ascii 24" #t (ascii-space-or-tab? #\space))
+(test "ascii 25" #t (ascii-space-or-tab? #\tab))
+(test "ascii 26" #f (ascii-space-or-tab? #\newline))
+(test "ascii 27" #f (ascii-non-control? (integer->char #x0d)))
+
+(test "ascii 28" #f (ascii-non-control? (integer->char #x00)))
+(test "ascii 29" #f (ascii-non-control? (integer->char #x1f)))
+(test "ascii 30" #t (ascii-non-control? (integer->char #x20)))
+(test "ascii 31" #t (ascii-non-control? (integer->char #x7e)))
+(test "ascii 32" #f (ascii-non-control? (integer->char #x7f)))
+(test "ascii 33" #f (ascii-non-control? (integer->char #x80)))
+
+(let ((lowers "abcdefghijklmnopqrstuvwxyz")
+      (uppers "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+  (let loop ((i 0))
+    (when (< i 26)
+      (let ((lower (string-ref lowers i))
+            (upper (string-ref uppers i)))
+        (test "ascii 34" upper (ascii-upcase upper))
+        (test "ascii 35" upper (ascii-upcase lower))
+        (test "ascii 36" lower (ascii-downcase upper))
+        (test "ascii 37" lower (ascii-downcase lower))
+        (loop (+ i 1))))))
+
+(let loop ((cc 0))
+  (when (< cc #x80)
+    (unless (ascii-alphabetic? cc)
+      (test "ascii 38" cc (ascii-upcase cc))
+      (test "ascii 39" cc (ascii-downcase cc)))
+    (loop (+ cc 1))))
+
+(let loop ((cc 0))
+  (when (< cc #x80)
+    (test "ascii 40" #f (ascii-char? cc))
+    (test "ascii 41" #t (ascii-char? (integer->char cc)))
+    (cond ((ascii-alphabetic? cc)
+           (test "ascii 42" #t (ascii-upper-case? (ascii-upcase cc)))
+           (test "ascii 43" #t (ascii-lower-case? (ascii-downcase cc)))
+           (test "ascii 44" #f (ascii-lower-case? (ascii-upcase cc)))
+           (test "ascii 45" #f (ascii-upper-case? (ascii-downcase cc)))
+           (test "ascii 46" #t (ascii-alphanumeric? cc))
+           (test "ascii 47" #t (ascii-non-control? cc))
+           (test "ascii 48" #f (ascii-other-graphic? cc))
+           (test "ascii 49" #f (ascii-control? cc))
+           (test "ascii 50" #f (ascii-numeric? cc))
+           (test "ascii 51" #f (ascii-whitespace? cc))
+           (test "ascii 52" #f (ascii-space-or-tab? cc)))
+          ((ascii-control? cc)
+           (test "ascii 53" #f (ascii-non-control? cc))
+           (test "ascii 54" #f (ascii-other-graphic? cc))
+           (test "ascii 55" cc
+                 (ascii-graphic->control
+                  (ascii-control->graphic cc)))
+           (test "ascii 56" (integer->char cc)
+                 (ascii-graphic->control
+                  (ascii-control->graphic (integer->char cc)))))
+          ((member cc '(#\( #\) #\[ #\] #\{ #\} #\< #\>))
+           (test "ascii 57" cc (ascii-mirror-bracket (ascii-mirror-bracket cc)))))
+    (loop (+ cc 1))))
+
+(let outer ((a 0))
+  (when (< a 26)
+    (let inner ((b 0))
+      (if (= b 26)
+          (outer (+ a 1))
+          (begin (test "ascii 58" (= a b)  (ascii-ci=?
+                                 (ascii-nth-lower-case a)
+                                 (ascii-nth-upper-case b)))
+                 (test "ascii 59" (< a b)  (ascii-ci<?
+                                 (ascii-nth-lower-case a)
+                                 (ascii-nth-upper-case b)))
+                 (test "ascii 60" (<= a b) (ascii-ci<=?
+                                 (ascii-nth-lower-case a)
+                                 (ascii-nth-upper-case b)))
+                 (test "ascii 61" (> a b)  (ascii-ci>?
+                                 (ascii-nth-lower-case a)
+                                 (ascii-nth-upper-case b)))
+                 (test "ascii 62" (>= a b) (ascii-ci>=?
+                                 (ascii-nth-lower-case a)
+                                 (ascii-nth-upper-case b)))
+                 (inner (+ b 1)))))))
+
+(ascii-ci>? #\A #\_)
+(ascii-ci>? #\Z #\_)
+
+(test "ascii 63" #f (ascii-char? -1))
+(test "ascii 64" #f (ascii-char? #x80))
+(test "ascii 65" #f (ascii-char? (integer->char #x80)))
+
+(test "ascii 66" #f (ascii-control? -1))
+(test "ascii 67" #t (ascii-control? #x00))
+(test "ascii 68" #t (ascii-control? #x1f))
+(test "ascii 69" #f (ascii-control? #x20))
+(test "ascii 70" #f (ascii-control? #x7e))
+(test "ascii 71" #t (ascii-control? #x7f))
+(test "ascii 72" #f (ascii-control? #x80))
+
+(test "ascii 73" 0 (ascii-digit-value #\0 10))
+(test "ascii 74" 0 (ascii-digit-value #\0 1))
+(test "ascii 75" #f (ascii-digit-value #\0 0))
+(test "ascii 76" #f (ascii-digit-value #\0 -1))
+(test "ascii 77" 7 (ascii-digit-value #\7 8))
+(test "ascii 78" #f (ascii-digit-value #\7 7))
+(test "ascii 79" #f (ascii-digit-value #\: 10))
+
+(test "ascii 80" 0 (ascii-upper-case-value #\A 0 26))
+(test "ascii 81" 25 (ascii-upper-case-value #\Z 0 26))
+(test "ascii 82" #f (ascii-upper-case-value #\Z 0 25))
+
+(test "ascii 83" 0 (ascii-lower-case-value #\a 0 26))
+(test "ascii 84" 25 (ascii-lower-case-value #\z 0 26))
+(test "ascii 85" #f (ascii-lower-case-value #\z 0 25))
+
+(test "ascii 86" 0 (ascii-lower-case-value #\a 0 1))
+(test "ascii 87" #f (ascii-lower-case-value #\a 0 0))
+(test "ascii 88" #f (ascii-lower-case-value #\a 0 -1))
+(test "ascii 89" 9001 (ascii-lower-case-value #\b 9000 2))
+
+(test "ascii 90" #f (ascii-nth-digit -1))
+(test "ascii 91" #\0 (ascii-nth-digit 0))
+(test "ascii 92" #\9 (ascii-nth-digit 9))
+(test "ascii 93" #f (ascii-nth-digit 10))
+
+(test "ascii 94" #\Z (ascii-nth-upper-case -1))
+(test "ascii 95" #\A (ascii-nth-upper-case 0))
+(test "ascii 96" #\Z (ascii-nth-upper-case 25))
+(test "ascii 97" #\A (ascii-nth-upper-case 26))
+
+(test "ascii 98" #\z (ascii-nth-lower-case -1))
+(test "ascii 99" #\a (ascii-nth-lower-case 0))
+(test "ascii 100" #\z (ascii-nth-lower-case 25))
+(test "ascii 101" #\a (ascii-nth-lower-case 26))
+
+(define (count-matching predicates value)
+  (let loop ((ps predicates) (n 0))
+    (if (null? ps) n (loop (cdr ps) (if ((car ps) value) (+ n 1) n)))))
+
+(define (union? whole . parts)
+  (let check ((cc 0))
+    (or (= cc #x80)
+        (if (and (whole cc) (not (= 1 (count-matching parts cc))))
+            #f (check (+ cc 1))))))
+
+(define (subset? small-set . bigger-sets)
+  (let check ((cc 0))
+    (or (= cc #x80)
+        (if (and (small-set cc) (= 0 (count-matching bigger-sets cc)))
+            #f (check (+ cc 1))))))
+
+(define (disjoint? . predicates)
+  (let check ((cc 0))
+    (or (= cc #x80) (and (<= (count-matching predicates cc) 1)
+                         (check (+ cc 1))))))
+
+(test "ascii 102" #t (union? ascii-alphanumeric? ascii-alphabetic? ascii-numeric?))
+(test "ascii 103" #t (union? ascii-alphabetic? ascii-upper-case? ascii-lower-case?))
+
+(test "ascii 104" #t (subset? ascii-space-or-tab? ascii-whitespace?))
+(test "ascii 105" #t (subset? ascii-other-graphic? ascii-non-control?))
+(test "ascii 106" #t (subset? ascii-upper-case?   ascii-alphabetic? ascii-non-control?))
+(test "ascii 107" #t (subset? ascii-lower-case?   ascii-alphabetic? ascii-non-control?))
+(test "ascii 108" #t (subset? ascii-alphabetic?   ascii-alphanumeric? ascii-non-control?))
+(test "ascii 109" #t (subset? ascii-numeric?      ascii-alphanumeric? ascii-non-control?))
+(test "ascii 110" #t (subset? ascii-alphanumeric? ascii-non-control?))
+
+(test "ascii 111" #t (disjoint? ascii-control? ascii-non-control?))
+(test "ascii 112" #t (disjoint? ascii-whitespace?
+                    ascii-other-graphic?
+                    ascii-upper-case?
+                    ascii-lower-case?
+                    ascii-numeric?))
+(test "ascii 113" #t (disjoint? ascii-control?
+                    ascii-other-graphic?
+                    ascii-upper-case?
+                    ascii-lower-case?
+                    ascii-numeric?))
+
+(define (check-string-ci a b cmp)
+  (test "ascii 114" (= cmp 0) (ascii-string-ci=? a b))
+  (test "ascii 115" (< cmp 0) (ascii-string-ci<? a b))
+  (test "ascii 116" (> cmp 0) (ascii-string-ci>? a b))
+  (test "ascii 117" (<= cmp 0) (ascii-string-ci<=? a b))
+  (test "ascii 118" (>= cmp 0) (ascii-string-ci>=? a b)))
+
+(check-string-ci "" "" 0)
+(check-string-ci "a" "a" 0)
+(check-string-ci "A" "a" 0)
+(check-string-ci "a" "A" 0)
+
+(check-string-ci "a" "b" -1)
+(check-string-ci "b" "a" 1)
+
+(check-string-ci "a" "B" -1)
+(check-string-ci "B" "a" 1)
+
+(check-string-ci "aa" "aa" 0)
+(check-string-ci "aa" "ab" -1)
+(check-string-ci "ab" "aa" 1)
+(check-string-ci "aa" "aaa" -1)
+(check-string-ci "aaa" "aa" 1)
+
+;; ----------------------------------------------------------------------
 ;;  SRFI 180 ...
 ;;
 ;; The tests here are a small part of the tests from the sample
