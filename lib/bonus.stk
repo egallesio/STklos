@@ -917,7 +917,7 @@ doc>
                                   (code (car args)))))
           ((pair? (car args))
              (Loop (append (car args) (cdr args))
-                   res
+                   str-prev?
                    res))
           (else (error 'ansi-color "bad command ~S" args)))))))
 
