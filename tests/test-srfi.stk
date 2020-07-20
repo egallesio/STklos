@@ -1872,6 +1872,130 @@
 (define y1 (list-queue-unfold-right done? double add1 0 y0))
 (test "list-queue-unfold-right II" '(8 6 4 2 0) (list-queue-list y1))
 
+;; ----------------------------------------------------------------------
+;;  SRFI 118 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 118 - Simple adjustable-size strings")
+
+(define-syntax set-mutable-string!
+  (syntax-rules ()
+    ((_ s v)
+     (set! s (string-copy v)))))
+
+(define a6  (string-copy "abcdef"))
+(define b6  (string-copy "123456"))
+(define b12 (string-copy "qwertyuiopas"))
+
+(define au6  (string-copy "ábcdÊf"))
+(define bu6  (string-copy "ȠȘȡǮƶそ"))
+(define bu12 (string-copy "行きऔ国ث؇صאװ⇇xy"))
+
+(test "string-append! single" "abcdef" (string-append! a6))
+(set-mutable-string! a6 "abcdef")
+(test "string-append! single length" 6  (string-length (string-append! a6)))
+(set-mutable-string! a6 "abcdef")
+(test "string-append! single eq?" #t (eq? a6 (string-append! a6)))
+
+(set-mutable-string! a6  "abcdef")
+(define a6-copy (string-copy a6))
+(test "string-append! = append" #t (string=? (string-append! a6 b6)
+                                             (string-append  a6-copy b6)))
+(set-mutable-string! a6 "abcdef")
+(test "string-append!" "abcdef123456" (string-append! a6 b6))
+(set-mutable-string! a6 "abcdef")
+(test "string-append! length" 12 (string-length (string-append! a6 b6)))
+(set-mutable-string! a6 "abcdef")
+(test "string-append! eq?" #t (eq? a6 (string-append! a6 b6)))
+
+(set-mutable-string! a6 "abcdef")
+(test "string-append! char" "abcdef123456" (string-append! a6 #\1 #\2 "345" #\6))
+(set-mutable-string! a6 "abcdef")
+(test "string-append! char length" 12 (string-length (string-append! a6 #\1 #\2 "345" #\6)))
+(set-mutable-string! a6 "abcdef")
+(test "string-append! char eq?" #t (eq? a6 (string-append! a6 #\1 #\2 "345" #\6)))
+
+
+
+(define au6-copy (string-copy au6))
+(test "append! = append, unicode" #t (string=? (string-append! au6 bu6 bu12)
+                                               (string-append au6-copy bu6 bu12)))
+(set-mutable-string! au6  "ábcdÊf")
+(test "append! = append, unicode, length" 24 (string-length (string-append! au6 bu6 bu12)))
+(set-mutable-string! au6  "ábcdÊf")
+(test "append! = append, unicode, eq?" #t (eq? au6 (string-append! au6 bu6 bu12)))
+(set-mutable-string! au6  "ábcdÊf")
+
+(set-mutable-string! a6 "abcdef")
+(test "string-append! char, unicode" "abcdefঈ2345༫" (string-append! a6 #\ঈ #\2 "345" #\༫))
+(set-mutable-string! a6 "abcdef")
+(test "string-append! char, unicode, length" 12 (string-length (string-append! a6 #\ঈ #\2 "345" #\༫)))
+(set-mutable-string! a6 "abcdef")
+(test "string-append! char, unidoce, eq?" #t (eq? a6 (string-append! a6 #\ঈ #\2 "345" #\༫)))
+
+(set-mutable-string! au6  "ábcdÊf")
+(test "string-append! char, unicode" "ábcdÊfঈ2345༫" (string-append! au6 #\ঈ #\2 "345" #\༫))
+(set-mutable-string! au6  "ábcdÊf")
+(test "string-append! char, unicode, length" 12 (string-length (string-append! au6 #\ঈ #\2 "345" #\༫)))
+(set-mutable-string! au6  "ábcdÊf")
+(test "string-append! char, unidoce, eq?" #t (eq? au6 (string-append! au6 #\ঈ #\2 "345" #\༫)))
+
+
+(test/error "string-append! args 1"  (string-append! a6 #t))
+(test/error "string-append! args 2"  (string-append! a6 2))
+(test/error "string-append! args 3"  (string-append! 3 10))
+(test/error "string-append! args 4"  (string-append! 'a 'b))
+
+(test/error "string-replace! args 1" (string-replace! 'a 0 6  b6 0 6))
+(test/error "string-replace! args 2" (string-replace! a6 0 6  #t 0 6))
+(test/error "string-replace! args 3" (string-replace! a6 -1 6  b6 0 6))
+(test/error "string-replace! args 4" (string-replace! a6  0 50 b6 0 6))
+(test/error "string-replace! args 5" (string-replace! a6  0  6  b6 -1 6))
+(test/error "string-replace! args 6" (string-replace! a6  0  6  b6  0 50))
+
+(test/error "string-replace! args 7" (string-replace! 'a 6 0  b6 0 6))
+(test/error "string-replace! args 8" (string-replace! 'a 0 6  b6 6 0))
+
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! all" "123456"  (string-replace! a6 0 6 b6 0 6))
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! all length" 6  (string-length (string-replace! a6 0 6 b6 0 6)))
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! all eq?" #t  (eq? a6 (string-replace! a6 0 6 b6 0 6)))
+
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! part" "ab23ef"  (string-replace! a6 2 4 b6 1 3))
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! part length" 6  (string-length (string-replace! a6 2 4 b6 1 3)))
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! part eq?" #t  (eq? a6 (string-replace! a6 2 4 b6 1 3)))
+
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! part 2" "abpaef"  (string-replace! a6 2 4 b12 9 11))
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! part 2 length" 6  (string-length (string-replace! a6 2 4 b12 9 11)))
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! part 2 eq?" #t  (eq? a6 (string-replace! a6 2 4 b12 9 11)))
+
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! delete" "abef" (string-replace! a6 2 4 b6 0 0))
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! delete length" 4  (string-length (string-replace! a6 2 4 b6 0 0)))
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! delete eq?" #t  (eq? a6 (string-replace! a6 2 4 b6 0 0)))
+
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! insert" "abc123456def" (string-replace! a6 3 3 b6 0 6))
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! insert length" 12  (string-length (string-replace! a6 3 3 b6 0 6)))
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! insert eq?" #t  (eq? a6 (string-replace! a6 3 3 b6 0 6)))
+
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! overlap" "abefef" (string-replace! a6 2 4 a6 4 6))
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! overlap length" 6  (string-length (string-replace! a6 2 4 a6 4 6)))
+(set-mutable-string! a6 "abcdef")
+(test "string-replace! overlap eq?" #t  (eq? a6 (string-replace! a6 2 4 a6 4 6)))
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI 129 ...
@@ -1916,6 +2040,15 @@
 (test "string 15" Ljubljana (string-titlecase LJUBLJANA))  ;
 (test "string 16" Ljubljana (string-titlecase Ljubljana))
 (test "string 17" Ljubljana (string-titlecase ljubljana))  ;
+
+(define str1 "abc")
+(define str2 "def")
+(test/error "string-append! constant 1" (string-append! "a" "b"))
+(test/error "string-append! constant 2" (string-append! "ábç, unicode!" "bçdéﬀ"))
+(test/error "string-append! constant 3" (string-append! str1 "x"))
+(test "string-append! constant 3" "abcdef" (string-append! (string-copy str1) str2)) ;  second arg may be constant
+(test "string-append! constant 3" "xdef" (string-append! (string-copy "x") str2)) ;  second arg may be constant
+
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI 141 ...
