@@ -103,9 +103,12 @@ The \fI--utf8-encoding\fR permits to force the encoding used. Note
 that if \fILC_ALL\fR is unset and this option is not used, UTF-8
 encoding will be used.
 .IP "-v, --version"
-print program version and exit
+print program version and exit.
+.IP "-V"
+print detailed program version and information in machine-readable format,
+as per SRFI-176, and exit.
 .IP "-h, --help"
-print this help and exit
+print this help and exit.
 .IP "--"
 This special option signals the end of the \fBstklos\fR command. The
 arguments placed after this option are taken program arguments,
