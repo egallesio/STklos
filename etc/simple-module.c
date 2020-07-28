@@ -1,7 +1,7 @@
 /*
- * simple-module.c	-- A simple C module for STklos
+ * simple-module.c  -- A simple C module for STklos
  *
- * Copyright © 2000 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,38 +21,46 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 22-Jul-2000 12:10 (eg)
- * Last file update: 22-Jul-2000 12:41 (eg)
+ * Last file update: 28-Jul-2020 14:24 (eg)
  */
 
-/* This module defines two simple primitive called "test" and "add".
- * "test" takes one parameter, displays it and returns it.
- * "add" return the sum of its two (small) integer parameters
+/* This module defines two simple primitives called "test" and "add".
+ *    - "test" takes one parameter, displays it and returns it.
+ *    - "add" returns the sum of its two (small) integer parameters
  *
  * New primitives are defined with the DEFINE_PRIMITIVE macro
  * and module entry is defined with the MODULE_ENTRY_* macros
  *
- * To test this module on Linux: just do
+ * The utility "stklos-config" helps you to compile this module
+ * The main option of this programs are:
+ *     --compile (or -c) to find the command to compile a C file
+ *     --link (or -l) to find the command to pre-link the shared object
+ *     --shared-suffix (or -s) to find the suffix used by your system for
+ *             shared libraries
  *
- *      $ gcc -I../gc -I../src -fPIC -c simple-module.c
- *      $ ld -shared simple-module.o -o simple-module.so
+ * To test this module: just enter in a terminal:
+ *
+ *      $ $(stklos-config -c) -c -o simple-module.o simple-module.c
+ *      $ $(stklos-config -l) simple-module.$(stklos-config -s) simple-module.o
  *
  * File can be loaded from the interpreter by doing
  *
- *      stklos> (load "simple-module.so")
+ *      stklos> (load "simple-module")
  *
  * (You may have to set you LD_LIBRARY_PATH variable to find the file,
  * or place the shared object in a directory present in *load-path*)
  *
  */
 
-#include "stklos.h"
+#include <stklos.h>
 
 
 DEFINE_PRIMITIVE("test", tst, subr1, (SCM l))
 {
-  STk_fprintf(STk_curr_oport, "Parameter is ");
-  STk_display(l, STk_curr_oport);
-  STk_newline(STk_curr_oport);
+  SCM oport =  STk_current_output_port();
+  STk_fprintf(oport, "Parameter is ");
+  STk_display(l, oport);
+  STk_newline(oport);
   return l;
 }
 
@@ -68,12 +76,14 @@ DEFINE_PRIMITIVE("add", add, subr2, (SCM a, SCM b))
 
 
 /*
- * The name of the module is just used for display error message. Put
+ * The name of the module is just used to display error message. Put
  * something meaningful in it. The statements beween MODULE_ENTRY_START
  * and MODULE_ENTRY_END are executed when the module is loaded.
  */
 MODULE_ENTRY_START("simple-module")
-     STk_puts("Loading extension", STk_curr_oport);
-     ADD_PRIMITIVE(tst);
-     ADD_PRIMITIVE(add);
+{
+  STk_puts("Loading extension simple-module\n", STk_current_output_port());
+  ADD_PRIMITIVE(tst);
+  ADD_PRIMITIVE(add);
+}
 MODULE_ENTRY_END

@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  2-Jun-2020 10:45 (eg)
+ * Last file update: 28-Jul-2020 14:04 (eg)
  */
 
 
@@ -1016,8 +1016,12 @@ int STk_init_vport(void);
 /****
  ****           port.h primitives
  ****/
-EXTERN_PRIMITIVE("close-port", close_port, subr1, (SCM port));
+EXTERN_PRIMITIVE("read", scheme_read, subr01, (SCM port));
 EXTERN_PRIMITIVE("read-line", read_line, subr01, (SCM port));
+EXTERN_PRIMITIVE("display", display, subr12, (SCM expr, SCM port));
+EXTERN_PRIMITIVE("write", write, subr12, (SCM expr, SCM port));
+EXTERN_PRIMITIVE("newline", newline, subr01, (SCM port));
+EXTERN_PRIMITIVE("close-port", close_port, subr1, (SCM port));
 
 void STk_error_bad_port(SCM p);
 void STk_error_bad_file_name(SCM f);
@@ -1034,7 +1038,7 @@ int STk_init_port(void);
 
 extern char *STk_current_filename;               /* Name of the file we read */
 
-extern SCM STk_stdin, STk_stdout, STk_stderr;             /* unredirected ports   */
+extern SCM STk_stdin, STk_stdout, STk_stderr;   /* unredirected ports   */
 extern int STk_interactive;                     /* We are in intearctive mode */
 
 /*
@@ -1420,7 +1424,7 @@ extern STk_instr STk_boot_code[];
 #if defined(__GNUC__) || defined(__clang__)
 #  define _UNUSED(x) __attribute__((__unused__)) x
 #endif
-  
+
 #ifdef __cplusplus
 }
 #endif
