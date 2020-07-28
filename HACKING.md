@@ -21,6 +21,21 @@ The subdirectories in the STklos source tree are:
 * `tests` -- the tests, of course!
 * `utils` -- utilities and wrappers
 
+# STklos initialization
+
+`main` is in `src/stklos.c`, where command line options are parsed and the
+scheme interpreter is started:
+
+* `STk_init_library` -- performs library initialization. This is done in `src/lib.c`, which is a 
+  very simple file that just calls several initialization functions. Those functions are defined
+  in different files under `src/`;
+* `build_scheme_args` -- collects the command line options in the variable `*%program-args*`;
+* `STk_load_boot` -- loads the boot file (if one is to be loaded);
+* `STk_boot_from_C` -- actually boots the Scheme interpreter. This function is defined in 
+  `src/vm.c`, where the STklos virtual machine code is.
+
+In order to include Scheme code for execution during STklos startup, edit `lib/boot.stk`.
+
 # Adding simple modules or SRFIs
 
 * add your `fantastic-module.stk` to `lib/`
@@ -101,7 +116,7 @@ DEFINE_PRIMITIVE("fixnum?", fixnump, subr1, (SCM obj))
 The arguments for this example are
 
 * Scheme name
-* C function name (its full name will have the string "STk_" prepended to it)
+* C function name (its full name will have the string "`STk_`" prepended to it)
 * the type of primitive (in this case, it is a subroutine with one
   parameter -- "`subr1`"
 * the arguents, surrounded by parentheses. In this case there is only
@@ -115,6 +130,24 @@ ADD_PRIMITIVE(fixnump);
 ```
 
 The name passed to `ADD_PRIMITIVE` is the C function name.
+
+## Calling Scheme primitives
+
+Recall that a primitive is defined like this:
+
+```
+DEFINE_PRIMITIVE("fixnum?", fixnump, subr1, (SCM obj))
+{ ... }
+
+ADD_PRIMITIVE(fixnump);
+```
+
+TO use this primitive later in C code, add the `STk_` prefix to its
+C function name:
+
+```
+if (STk_fixnump(obj) == STk_false) ...
+```
 
 ## Returning values
 
@@ -170,7 +203,7 @@ are used for this.
 
 * `00` - pointer on an object descriptor (a box)
 * `01` - fixnum
-* `10` - small object
+* `10` - small object (characters and others)
 * `11` - small constant (`#t`, `#f`, `'()`, `#eof`, `#void`, dot, close-parenthesis)
 
 The idea is that checking the type of these should be very fast, because it is done at runtime,
@@ -219,15 +252,75 @@ MAKE_INT( 000011000 ) --> 001100001
 
 ## Boxed types
 
+Boxed types are anything except for fixnums, small objects and small constants.
+They are tagged with `00`.
 
+* `BOXED_OBJP(o)` -- true if `o` is a boxed object
+* `BOXED_TYPE_EQ(o,t)` -- checks wether `o` is a boxed object of type `t`
+* `BOXED_TYPE(o)` -- returns the type of boxed object `o`
+* `BOXED_INFO` -- returns the information of boxed object `o`
+
+The tyoe definition for all possible types, in `stklos.h`, is self-explanatory:
+
+```
+typedef enum {
+  tc_not_boxed=-1,
+  tc_cons, tc_integer, tc_real, tc_bignum,  tc_rational,                /* 0 */
+  tc_complex, tc_symbol, tc_keyword, tc_string, tc_module,              /* 5 */
+  tc_instance, tc_closure, tc_subr0, tc_subr1, tc_subr2,                /* 10 */
+  tc_subr3, tc_subr4, tc_subr5, tc_subr01, tc_subr12,                   /* 15 */
+  tc_subr23, tc_vsubr, tc_apply, tc_vector, tc_uvector,                 /* 20 */
+  tc_hash_table, tc_port, tc_frame, tc_next_method, tc_promise,         /* 25 */
+  tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,      /* 30 */
+  tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex,            /* 35 */
+  tc_condv, tc_box, tc_ext_func, tc_pointer, tc_callback,               /* 40 */
+  tc_last_standard /* must be last as indicated by its name */
+} type_cell;
+```
 
 ### Lists
+
+Here are some primitives for lists, for example:
 
 * `CAR(p)` -- equivalent to Scheme `car`: returns the car of `p` (an SCM object)
 * `CDR(p)` -- equivalent to Scheme `cdr`: returns the car of `p` (an SCM object, which certainly is a list)
 * `CONSP(p)` - equivalent to Scheme `cons?`
 * `NULLP(p)` - equivalent to Scheme `null?`
 * `STk_cons` - equivalent to Scheme `cons`
+
+### Strings
+
+Another example are strings. They are defined as the following structure:
+
+```
+struct string_obj {
+  stk_header header;
+  int space;            /* allocated size  */
+  int size;             /* # of bytes used */
+  int length;           /* "external" length of the string */
+  char *chars;
+};
+```
+
+Then, some primitives:
+
+```
+#define STRING_SPACE(p)  (((struct string_obj *) (p))->space)
+#define STRING_SIZE(p)   (((struct string_obj *) (p))->size)
+#define STRING_LENGTH(p) (((struct string_obj *) (p))->length)
+#define STRING_CHARS(p)  (((struct string_obj *) (p))->chars)
+#define STRINGP(p)       (BOXED_TYPE_EQ((p), tc_string))
+```
+
+The following primitives are defined in a `str.c`, but `stklos.h` is
+used by several files use them, so they're included with `EXTERN_PRIMITIVE`:
+
+```
+EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));
+EXTERN_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index));
+EXTERN_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM value));
+EXTERN_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *argv));
+```
 
 ## Dynamically loadable modules
 
