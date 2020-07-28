@@ -665,6 +665,9 @@ described in this document (procedures
 ;; SRFI 174 -- POSIX Timespecs
 (gen-loaded-srfi 174)
 
+;; SRFI 175 -- ASCII character library
+(gen-loaded-srfi 175)
+
 ;; ----------------------------------------------------------------------
 ;; SRFI 176 -- Version flag
 ;; ----------------------------------------------------------------------
