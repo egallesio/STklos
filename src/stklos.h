@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 28-Jul-2020 14:04 (eg)
+ * Last file update: 24-Jul-2020 21:52 (eg)
  */
 
 
@@ -267,7 +267,7 @@ struct primitive_obj {
 
 #define DEFINE_PRIMITIVE(_sname, _cname, _type, _params)        \
   SCM CPP_CONCAT(STk_, _cname) _params;                         \
-  struct primitive_obj CPP_CONCAT(STk_o_, _cname) = {   \
+  struct primitive_obj CPP_CONCAT(STk_o_, _cname) = {           \
         {CPP_CONCAT(tc_, _type), 0},                            \
         _sname, CPP_CONCAT(STk_, _cname), STk_nil};             \
   SCM CPP_CONCAT(STk_, _cname) _params
@@ -512,6 +512,8 @@ extern SCM STk_STklos_module;
 EXTERN_PRIMITIVE("%create-module", create_module, subr1, (SCM name));
 EXTERN_PRIMITIVE("current-module", current_module, subr0, (void));
 EXTERN_PRIMITIVE("%select-module", select_module, subr1, (SCM module));
+
+void STk_export_all_symbols(SCM module);
 
 /*
   ------------------------------------------------------------------------------
@@ -1016,12 +1018,8 @@ int STk_init_vport(void);
 /****
  ****           port.h primitives
  ****/
-EXTERN_PRIMITIVE("read", scheme_read, subr01, (SCM port));
-EXTERN_PRIMITIVE("read-line", read_line, subr01, (SCM port));
-EXTERN_PRIMITIVE("display", display, subr12, (SCM expr, SCM port));
-EXTERN_PRIMITIVE("write", write, subr12, (SCM expr, SCM port));
-EXTERN_PRIMITIVE("newline", newline, subr01, (SCM port));
 EXTERN_PRIMITIVE("close-port", close_port, subr1, (SCM port));
+EXTERN_PRIMITIVE("read-line", read_line, subr01, (SCM port));
 
 void STk_error_bad_port(SCM p);
 void STk_error_bad_file_name(SCM f);
@@ -1038,7 +1036,7 @@ int STk_init_port(void);
 
 extern char *STk_current_filename;               /* Name of the file we read */
 
-extern SCM STk_stdin, STk_stdout, STk_stderr;   /* unredirected ports   */
+extern SCM STk_stdin, STk_stdout, STk_stderr;             /* unredirected ports   */
 extern int STk_interactive;                     /* We are in intearctive mode */
 
 /*
@@ -1424,7 +1422,7 @@ extern STk_instr STk_boot_code[];
 #if defined(__GNUC__) || defined(__clang__)
 #  define _UNUSED(x) __attribute__((__unused__)) x
 #endif
-
+  
 #ifdef __cplusplus
 }
 #endif

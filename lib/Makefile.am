@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 15-Jul-2020 18:07 (eg)
+# Last file update: 28-Jul-2020 15:41 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -42,8 +42,7 @@ scheme_BOOT = assembler.stk \
           struct.stk        \
           thread.stk
 
-
-scheme_SRCS = STklos.init     \
+SRC_STK = STklos.init     \
           bigloo-support.stk  \
           bigmatch.stk        \
           compfile.stk        \
@@ -105,6 +104,10 @@ scheme_SRCS = STklos.init     \
           tar.stk             \
           trace.stk
 
+SRC_C = srfi-175-impl.c
+
+scheme_SRCS = $(SRC_STK) $(SRC_C)
+
 scheme_OBJS = compfile.ostk    \
           bigmatch.ostk        \
           full-syntax.ostk     \
@@ -158,6 +161,7 @@ scheme_OBJS = compfile.ostk    \
           srfi-173.ostk        \
           srfi-174.ostk        \
           srfi-175.ostk        \
+          srfi-175-impl.@SH_SUFFIX@  \
           srfi-180.ostk        \
           srfi-190.ostk        \
           tar.ostk             \
@@ -169,7 +173,7 @@ DOCDB	    = DOCDB
 
 #======================================================================
 schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
-scheme_DATA = $(scheme_SRCS) $(scheme_OBJS) $(scheme_BOOT)
+scheme_DATA = $(SRC_STK) $(scheme_OBJS) $(scheme_BOOT)
 
 #======================================================================
 
@@ -179,6 +183,11 @@ SUFFIXES = .stk .ostk .scm
 
 .scm.ostk:
 	$(COMP) -o $*.ostk $*.scm
+
+.c.@SH_SUFFIX@ :
+	@CC@ @CFLAGS@ @SH_COMP_FLAGS@ -I../src -I../gc -c  -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o
+	/bin/rm -f $*.o
 
 #======================================================================
 
@@ -206,7 +215,7 @@ boot:	../src/boot.img
 	   cp ./instr3    ../src/vm-instr.h;  				\
 	   echo "*** Create new boot.c";				\
 	   (export STKLOS_BUILDING=1;					\
-	    $(STKLOS_BINARY) $(SFLAGS) -q -c -b ../src/boot.img  		\
+	    $(STKLOS_BINARY) $(SFLAGS) -q -c -b ../src/boot.img  	\
 		-f make-C-boot.stk -- boot.img3 ../src/boot.c);		\
 	   echo "*** Recompile STklos";					\
 	   (cd ../src; $(MAKE) stklos);					\
