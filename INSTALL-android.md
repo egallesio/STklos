@@ -10,7 +10,7 @@ running state.
 ## Overview
 
 Instead of cross-compiling, compile STklos in the Android device itself using
-the Termux package, which has all build tools available. This means the following 
+the Termux package, which has all build tools available. This means the following
 is needed:
 
 - You must have developer access and enable ADB debugging on the phone
@@ -32,7 +32,7 @@ sudo apt install adb
 ```
 
 ```
-yum install android-tools 
+yum install android-tools
 ```
 
 ```
@@ -43,7 +43,7 @@ or the equivalent for your system.
 
 You will need to enable debugging in the Android device.
 
-Test with a USB cable 
+Test with a USB cable
 
 * `adb devices` should list your Android device (you will need to authorize the connection on the device screen)
 * `adb shell` gives you a shell on the device.
@@ -55,14 +55,14 @@ adb tcpip 5555
 adb connect <PHONE-IP>:5555
 ```
 
-Then dp `adb devices` and `adb shell` to test the connection.
+Then do `adb devices` and `adb shell` to test the connection.
 
 You do NOT need the adb shell -- we will be using the Termux shell. Adb will be used solely
 to forward TCP connections so we can ssh into the device.
 
 ## Set up sshd in Termux
 
-Open Termux in the Android device and prepare it to accept 
+Open Termux in the Android device and prepare it to accept
 ssh connections:
 
 ```
@@ -100,14 +100,14 @@ You are now remotely connected to the Termux shell.
 
 ## Prepare to use the external SD card (optional)
 
-If you don't want compilation to use the devices' internal flash memory, you may 
+If you don't want compilation to use the devices' internal flash memory, you may
 use your external SD card for that. Run
 
 ```
 termux-setup-storage
 ```
 
-and you will notice that a `storage` filder will be created on your homedir in Termux:
+and you will notice that a `storage` folder will be created on your homedir in Termux:
 
 ```
 ls -l storage/
@@ -121,7 +121,7 @@ lrwxrwxrwx 1 u0_a196 u0_a196 28 Jun 28 07:33 pictures -> /storage/emulated/0/Pic
 lrwxrwxrwx 1 u0_a196 u0_a196 19 Jun 28 07:33 shared -> /storage/emulated/0
 ```
 
-Then `cd storage/external-1` and you will be in the SD card directory (you won't 
+Then `cd storage/external-1` and you will be in the SD card directory (you won't
 see the contents of the SD card there, Android doesn't let you do that -- but
 you are in a directory specifically created for Termux in your extenal SD card).
 
