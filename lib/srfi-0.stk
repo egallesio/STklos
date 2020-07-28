@@ -233,7 +233,7 @@
     ((srfi-173 hooks) "srfi-173")       ; Hooks
     ((srfi-174 posix-timespecs) "srfi-174")
                                         ; POSIX Timespecs
-    ;; srfi-175                         ; ASCII character library
+    ((srfi-175 ascii) "srfi-175")       ; ASCII character library
     srfi-176                            ; Version flag
     ;; srfi-177                         ; Portable keyword arguments (draft)
     ;; srfi-178                         ; Bitvector library (draft)
