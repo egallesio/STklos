@@ -2,7 +2,7 @@
  *
  * e n v . c                    -- Environment management
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  5-Oct-2018 18:04 (eg)
+ * Last file update: 24-Jul-2020 21:51 (eg)
  */
 
 #include "stklos.h"
@@ -135,6 +135,13 @@ static SCM find_module(SCM name, int create)
  * Module primitives
  *
 \*===========================================================================*/
+
+void STk_export_all_symbols(SCM module)
+{
+  if (!MODULEP(module)) error_bad_module(module);
+  if (module != STk_STklos_module)
+    MODULE_EXPORTS(module) = STk_hash_keys(&MODULE_HASH_TABLE(module));
+}
 
 /* ==== Undocumented primitives ==== */
 
