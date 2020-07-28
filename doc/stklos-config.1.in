@@ -38,6 +38,8 @@ The version of STklos that is installed.
 The command that should be run to compile shared libraries.
 .IP "--link | -l"
 The command that should be used to link shared libraries.
+.IP "--cc"
+Value of CC used to compile STklos
 .IP "--cflags"
 Value of CFLAGS used to compile STklos
 .IP "--ldlags"
