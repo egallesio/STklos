@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 29-Jul-2020 17:13 (eg)
+# Last file update: 29-Jul-2020 19:07 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -250,6 +250,7 @@ clean:
 
 distclean: clean
 	/bin/rm -f Makefile
+	touch boot.stk
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) distclean)\
 	done
