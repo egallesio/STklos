@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  7-Jul-2020 19:31 (eg)
+;;;; Last file update: 29-Jul-2020 18:23 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -103,7 +103,7 @@
 - ,backtrace ,bt   Show the stack when last error occurred
 - ,quit ,q         Exit STklos
 - ,help ,? ,h      This help\n")
-                                   'clear)
+                                   'normal)
                          (current-error-port))
                         (flush-output-port (current-error-port)))
     ((quit q)           (exit 0))
@@ -138,9 +138,9 @@
                    "")))
     (display (do-color (get-repl-color :error)
                        (format "**** Error~A:\n~A: ~A\n" from (car loc) msg)
-                       'clear
+                       'normal
                        "\t(type \""
-                       'underline ",help" 'clear
+                       'underline ",help" 'normal
                        "\" for more information)\n")
              out)))
 
@@ -190,8 +190,8 @@
         (str2 (format "~A>" (module-name module))))
     (repl-prompt (if (repl-prompt-use-color?)
                      (string-append
-                        (do-color (get-repl-color :repl-level) str1 'clear)
-                        (do-color (get-repl-color :prompt) str2 'clear
+                        (do-color (get-repl-color :repl-level) str1 'normal)
+                        (do-color (get-repl-color :prompt) str2 'normal
                                   (get-repl-color :input))
                         " ")
                      (string-append str1 str2 " ")))))
@@ -256,7 +256,7 @@ doc>
            ( (repl-display-prompt) err ))
 
          (let ((e (%read in)))
-           (display (do-color 'clear))
+           (display (do-color 'normal))
            (cond
              ((eof-object? e)
                 (set! repl-level (- repl-level 1))
@@ -282,7 +282,7 @@ doc>
                              ;; Special convention for variable definition
                              (display (do-color (get-repl-color :info)
                                                 (format ";; ~A\n" (cadr v))
-                                                'clear)
+                                                'normal)
                                       out)))
                         (else
                            (for-each (lambda (x) (write-shared x out) (newline out))
@@ -315,10 +315,10 @@ doc>
                          (if utf8? 'utf8 'no-utf8)))
           (col1  (get-repl-color :input))
           (col2  (get-repl-color :info)))
-      (display (do-color 'normal col1 "  \\    " col2 line1 'clear))
-      (display (do-color 'normal col1 "   \\   " col2 line2 'clear))
-      (display (do-color 'normal col1 "  / \\  " col2 line3 'clear))
-      (display (do-color 'normal col1 " /   \\ " col2 line4 'clear))))
+      (display (do-color 'normal col1 "  \\    " col2 line1 'normal))
+      (display (do-color 'normal col1 "   \\   " col2 line2 'normal))
+      (display (do-color 'normal col1 "  / \\  " col2 line3 'normal))
+      (display (do-color 'normal col1 " /   \\ " col2 line4 'normal))))
   ;; Lauch the REPL
   ((main-repl-hook))
   (repl)
