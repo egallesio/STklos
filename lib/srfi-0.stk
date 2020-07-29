@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  7-Jul-2020 17:57 (eg)
+;;;; Last file update: 29-Jul-2020 16:26 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -258,11 +258,13 @@
     ;; srfi-196                         ; Range Objects (draft)
     ;; srfi-197                         ; Expression Chaining Operators (draft)
     ;; srfi-198                         ; POSIX system call exceptions (draft)
-    ;; srfi-199                         ; POSIX errno manipulation (draft)
+    ;; srfi-199                         ; ....... withdrawn
     ;; srfi-200                         ; Pattern Matching (draft)
     ;; srfi-201                         ; Syntactic Extensions to the Core Scheme Bindings (draft)
-    ;; srfi-202                         ; Pattern-matching Variant of the and-let* Form that Supports Multiple Values
+    ;; srfi-202                         ; Pattern-matching Variant of the and-let* Form that Supports Multiple Values (draft)
     ;; srfi-203                         ; A Simple Picture Language in the Style of SICP
+    ;; srfi-204                         ; Wright-Cartwright-Shinn Pattern Matcher (draft)
+    ;; srfi-205                         ; POSIX Terminal Fundamentals (draft)
     ))
 
 ;; ----------------------------------------------------------------------
