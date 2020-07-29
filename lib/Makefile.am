@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 28-Jul-2020 15:41 (eg)
+# Last file update: 29-Jul-2020 14:33 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -193,7 +193,7 @@ SUFFIXES = .stk .ostk .scm
 
 all-recursive: boot compfile.ostk
 
-boot:	../src/boot.img
+boot:	../src/boot.img srfi-34.stk
 
 ../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \
