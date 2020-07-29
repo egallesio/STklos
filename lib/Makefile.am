@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 29-Jul-2020 14:33 (eg)
+# Last file update: 29-Jul-2020 16:03 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -71,7 +71,6 @@ SRC_STK = STklos.init     \
           srfi-26.stk         \
           srfi-27.stk         \
           srfi-31.stk         \
-          srfi-34.stk         \
           srfi-35.stk         \
           srfi-36.stk         \
           srfi-37.stk         \
@@ -133,7 +132,6 @@ scheme_OBJS = compfile.ostk    \
           srfi-26.ostk         \
           srfi-27.ostk         \
           srfi-31.ostk         \
-          srfi-34.ostk         \
           srfi-35.ostk         \
           srfi-36.ostk         \
           srfi-37.ostk         \
@@ -193,7 +191,7 @@ SUFFIXES = .stk .ostk .scm
 
 all-recursive: boot compfile.ostk
 
-boot:	../src/boot.img srfi-34.stk
+boot:	../src/boot.img 
 
 ../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \
