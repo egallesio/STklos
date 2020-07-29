@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 29-Jul-2020 15:39 (eg)
+;;;; Last file update: 29-Jul-2020 16:16 (eg)
 ;;;;
 
 (require "test")
@@ -1396,6 +1396,64 @@
       (file-error?
        (guard (exn (else exn))
               (load "**This file doesn't exist**"))))
+
+
+;;;
+;;; Chibi tests
+;;;
+
+(define something-went-wrong #f)
+(define (test-exception-handler-1 v)
+  (call-with-current-continuation
+   (lambda (k)
+     (with-exception-handler
+      (lambda (x)
+        (set! something-went-wrong (list "condition: " x))
+        (k 'exception))
+      (lambda ()
+        (+ 1 (if (> v 0) (+ v 100) (raise 'an-error))))))))
+
+(test "chibi-exception.1" 106 (test-exception-handler-1 5))
+(test "chibi-exception.2" #f something-went-wrong)
+(test "chibi-exception.3" 'exception (test-exception-handler-1 -1))
+(test "chibi-exception.4" '("condition: " an-error) something-went-wrong)
+
+(set! something-went-wrong #f)
+(define (test-exception-handler-2 v)
+  (guard (ex (else 'caught-another-exception))
+    (with-exception-handler
+     (lambda (x)
+       (set! something-went-wrong #t)
+       (list "exception:" x))
+     (lambda ()
+       (+ 1 (if (> v 0) (+ v 100) (raise 'an-error)))))))
+
+(test "chibi-exception.5" 106 (test-exception-handler-2 5))
+(test "chibi-exception.6" #f something-went-wrong)
+(test "chibi-exception.7" 'caught-another-exception (test-exception-handler-2 -1))
+(test "chibi-exception.8" #t something-went-wrong)
+
+;; Based on an example from R6RS-lib section 7.1 Exceptions.
+;; R7RS section 6.11 Exceptions has a simplified version.
+(let* ((out (open-output-string))
+       (value (with-exception-handler
+               (lambda (con)
+                 (cond
+                  ((not (list? con))
+                   (raise con))
+                  ((list? con)
+                   (display (car con) out))
+                  (else
+                   (display "a warning has been issued" out)))
+                 42)
+               (lambda ()
+                 (+ (raise-continuable
+                     (list "should be a number"))
+                    23)))))
+
+  (test "chibi-exception.9" "should be a number" (get-output-string out))
+  (test "chibi-exception.10" 65 value))
+
 
 ;;======================================================================
 (test-subsection "6.13 Input and Output")
