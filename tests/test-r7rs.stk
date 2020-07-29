@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 23-Jun-2020 11:05 (eg)
+;;;; Last file update: 29-Jul-2020 15:39 (eg)
 ;;;;
 
 (require "test")
@@ -1151,11 +1151,15 @@
       "something went wrong"
       (call-with-output-string
        (lambda (p)
-         (with-exception-handler (lambda (x)
-                                   (display "something went wrong" p)
-                                   'dont-care)
-                                 (lambda ()
-                                   (+ 1 (raise 'an-error)))))))
+         (with-handler  ;; This handler is used to grab the error from R7RS
+             void       ;; (whereas it was an unspecified behavior in SRFI-34)
+             (with-exception-handler
+                (lambda (x)
+                  (display "something went wrong" p)
+                  'dont-care)
+                (lambda ()
+                  (+ 1 (raise 'an-error))))))))
+
 
 (test "srfi-34.3"
       '("condition: an-error" exception)
@@ -1295,28 +1299,36 @@
       '(:cont #f :err #t)
       (let ((cont #f)
             (err #f))
-        (with-exception-handler
-         (lambda (c)
-           (if (error-object? c)
-               (set! err #t)
-               (set! cont #t)))
-         (lambda()
-           (error "BAD")
-           (raise-continuable 100)))
+        (call-with-current-continuation
+            (lambda (k)
+              (with-exception-handler
+                  (lambda (c)
+                    (if (error-object? c)
+                        (begin
+                          (set! err #t)
+                          (k))
+                        (set! cont #t)))
+                  (lambda()
+                    (error "BAD")
+                    (raise-continuable 100)))))
         `(cont: ,cont err: ,err)))
 
 (test "error-object?.5"
       '(:cont #t :err #t)
       (let ((cont #f)
             (err #f))
-        (with-exception-handler
-         (lambda (c)
-           (if (error-object? c)
-               (set! err #t)
-               (set! cont #t)))
-         (lambda()
-           (raise-continuable 100)
-           (error "BAD")))
+        (call-with-current-continuation
+            (lambda (k)
+              (with-exception-handler
+                  (lambda (c)
+                    (if (error-object? c)
+                        (begin
+                          (set! err #t)
+                          (k))
+                        (set! cont #t)))
+                  (lambda()
+                    (raise-continuable 100)
+                    (error "BAD")))))
         `(cont: ,cont err: ,err)))
 
 
