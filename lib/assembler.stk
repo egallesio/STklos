@@ -1,7 +1,7 @@
 ;;;;
 ;;;; assembler.stk      -- Assember stuff
 ;;;;
-;;;; Copyright © 2000-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 29-Jun-2018 16:43 (eg)
+;;;; Last file update: 30-Jul-2020 19:03 (eg)
 ;;;;
 
 ;;;
@@ -379,6 +379,53 @@
 ;;;; DISASSEMBLE
 ;;;;
 ;;;; ======================================================================
+
+#|
+<doc EXT disassemble
+ * (disassemble proc)
+ * (disassemble proc port)
+ *
+ * This function prints on the given port (by default the current output
+ * port) the instructions of procedure |proc|. The printed code uses an
+ * ,(emph "ad-hoc") instruction set that should be quite understandable.
+ *
+ * @lisp
+ * (define (fact n)
+ *   (if (< n 2)
+ *       1
+ *       (* n (fact (- n 1)))))
+ * @end lisp
+ *
+ * The call ,(code "(disassemble fact)") will produce the following output:
+ *
+ * @lisp
+ *    000:  LOCAL-REF0-PUSH
+ *    001:  SMALL-INT            2
+ *    003:  JUMP-NUMGE           2  ;; ==> 007
+ *    005:  IM-ONE
+ *    006:  RETURN
+ *    007:  LOCAL-REF0-PUSH
+ *    008:  PREPARE-CALL
+ *    009:  LOCAL-REF0
+ *    010:  IN-SINT-ADD2         -1
+ *    012:  PUSH-GREF-INVOKE     0 1
+ *    015:  IN-MUL2
+ *    016:  RETURN
+ * @end lisp
+ * ,(bold "Notes:")
+ * ,(itemize
+ *    (item [The code of a procedure may be patched after the first execution
+ *           of |proc| to optimize it;])
+ *    (item [If |proc| is an anonymous function, you can use the special
+ *          notation '#pxxx' to disassemble it:]))
+ * @lisp
+ * (disassemble #p7fee1dd82f80)  ;; (address-of (lambda() 42))
+ *
+ *       000:  SMALL-INT            42
+ *       002:  RETURN
+ * @end lisp
+doc>
+|#
 (define (disassemble-code v out)
   (define (show x)
     (format #f "~A~A~A"
@@ -413,8 +460,8 @@
           ;; Last instruction
           (format out "\n~A:\n" (show pos))))))
 
-(define (disassemble proc)
+(define (disassemble proc :optional (port (current-output-port)))
   (let ((code (%procedure-code proc)))
     (if code
-        (disassemble-code code (current-output-port))
+        (disassemble-code code port)
         (error 'disassemble "cannot disassemble ~S" proc))))
