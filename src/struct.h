@@ -1,7 +1,7 @@
 /*
- * struct.h			-- Low level support for structures
+ * struct.h         -- Low level support for structures
  *
- * Copyright © 2004-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 12-May-2004 17:26 (eg)
- * Last file update:  6-Jul-2007 17:17 (eg)
+ * Last file update: 31-Jul-2020 15:35 (eg)
  */
 
 /**** Structure types ****/
@@ -34,12 +34,12 @@ struct struct_type_obj {
   int size;
 };
 
-#define STRUCT_TYPEP(x)		(BOXED_TYPE_EQ((x),tc_struct_type))
-#define STRUCT_TYPE_SLOTS(x)	(((struct struct_type_obj *) (x))->slots)
-#define STRUCT_TYPE_PARENT(x)	(((struct struct_type_obj *) (x))->parent)
-#define STRUCT_TYPE_NAME(x)	(((struct struct_type_obj *) (x))->name)
-#define STRUCT_TYPE_PRINTER(x)	(((struct struct_type_obj *) (x))->printer)
-#define STRUCT_TYPE_SIZE(x)	(((struct struct_type_obj *) (x))->size)
+#define STRUCT_TYPEP(x)         (BOXED_TYPE_EQ((x),tc_struct_type))
+#define STRUCT_TYPE_SLOTS(x)    (((struct struct_type_obj *) (x))->slots)
+#define STRUCT_TYPE_PARENT(x)   (((struct struct_type_obj *) (x))->parent)
+#define STRUCT_TYPE_NAME(x)     (((struct struct_type_obj *) (x))->name)
+#define STRUCT_TYPE_PRINTER(x)  (((struct struct_type_obj *) (x))->printer)
+#define STRUCT_TYPE_SIZE(x)     (((struct struct_type_obj *) (x))->size)
 
 
 /**** Structure instances ****/
@@ -49,14 +49,14 @@ struct struct_obj {
   SCM slots[1];
 };
 
-#define STRUCTP(x)		(BOXED_TYPE_EQ((x),tc_struct))
-#define STRUCT_SLOTS(x)		(((struct struct_obj *) (x))->slots)
-#define STRUCT_TYPE(x)		(((struct struct_obj *) (x))->type)
+#define STRUCTP(x)          (BOXED_TYPE_EQ((x),tc_struct))
+#define STRUCT_SLOTS(x)     (((struct struct_obj *) (x))->slots)
+#define STRUCT_TYPE(x)      (((struct struct_obj *) (x))->type)
 
 
 
 EXTERN_PRIMITIVE("make-struct-type", make_struct_type, subr3,
-		 (SCM name, SCM parent, SCM slots));
+                    (SCM name, SCM parent, SCM slots));
 EXTERN_PRIMITIVE("struct-type-slots", st_slots, subr1, (SCM obj));
 EXTERN_PRIMITIVE("struct-set!", struct_set, subr3, (SCM s, SCM slot, SCM val));
 EXTERN_PRIMITIVE("make-struct", make_struct, vsubr, (int argc, SCM *argv));
@@ -67,7 +67,7 @@ SCM STk_int_struct_set(SCM s, SCM slot, SCM val);
 
 
 /**** Conditions ****/
-#define COND_FLAG		1
-#define COND_TYPEP(x)		(STRUCT_TYPEP(x) && (BOXED_INFO(x) & COND_FLAG))
-#define CONDP(x)		(STRUCTP(x) && (BOXED_INFO(x) & COND_FLAG))
-#define SET_COND_FLAG(x)	(BOXED_INFO(x) |= COND_FLAG)
+#define COND_FLAG           1
+#define COND_TYPEP(x)       (STRUCT_TYPEP(x) && (BOXED_INFO(x) & COND_FLAG))
+#define CONDP(x)            (STRUCTP(x) && (BOXED_INFO(x) & COND_FLAG))
+#define SET_COND_FLAG(x)    (BOXED_INFO(x) |= COND_FLAG)

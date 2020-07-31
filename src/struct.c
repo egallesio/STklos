@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 12-May-2004 17:26 (eg)
- * Last file update:  2-Jun-2020 10:18 (eg)
+ * Last file update: 31-Jul-2020 15:57 (eg)
  */
 
 #include "stklos.h"
@@ -410,7 +410,6 @@ DEFINE_PRIMITIVE("struct-is-a?", struct_isa, subr2, (SCM s, SCM t))
 {
   if (!STRUCTP(s))      error_bad_struct(s);
   if (!STRUCT_TYPEP(t)) error_bad_type(t);
-  if (CONDP(s))         STk_error("cannot be computed on condition");
   return is_a(STRUCT_TYPE(s), t);
 }
 
