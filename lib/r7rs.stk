@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 30-Jul-2020 17:16 (eg)
+;;;; Last file update: 31-Jul-2020 16:43 (eg)
 ;;;;
 
 
@@ -1314,7 +1314,7 @@ doc>
 (define-macro (with-exception-handler handler thunk)
   (let ((v (gensym)))
     `(with-handler (lambda(,v)
-                     (if (and (not (condition? ,v)) (%continuable-exception? ,v))
+                     (if (%continuable-exception? ,v)
                          (,handler (%continuable-exception-value ,v))
                          (begin
                            (,handler ,v)
@@ -1394,21 +1394,23 @@ doc>
 (define-macro (guard clauses . body)
   (let* ((var  (car clauses))
          (last (last-pair clauses))
-         (tst  `(cond
-                 ,@(cdr clauses)
-                 ,@(if (and (pair? last) (pair? (car last)) (eq? (caar last) 'else))
-                       '()
-                       `((else (raise ,var)))))))
+         (ex   (gensym 'ex-)))
     `(with-handler
-      (lambda (,var) ,tst)
+      (lambda (,ex)
+        (let ((,var (if (%continuable-exception? ,ex)
+                        (%continuable-exception-value ,ex)
+                        ,ex)))
+          (cond
+           ,@(cdr clauses)
+           ;; Add an else clause if 
+           ,@(if (and (pair? last) (pair? (car last)) (eq? (caar last) 'else))
+                 '()
+                 `((else (raise ,ex))))))) ;; if ex is continuable <=> raise-continuable
       (with-handler
        (lambda (,var)
          ;; Transform a continuable exception in a normal one
-         (raise (if (and (not (condition? ,var)) (%continuable-exception? ,var))
-                    (%continuable-exception-value ,var)
-                    ,var)))
+         (raise ,var))
        ,@body))))
-
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.14 System Interface
