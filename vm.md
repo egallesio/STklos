@@ -1,0 +1,689 @@
+# The STklos Virtual Machine
+
+This is the documentation for the opcodes of the STklos virtual machine.
+You can see the opcodes of a compiled thunk with
+
+```
+(disassemble (lambda () ...))
+```
+
+We make a closure with the lambda, because `disassemble` would not work
+on expressions (which would be evaluated to values). So we'll always see
+a `RETURN` at the end of the output:
+
+```
+stklos> (disassemble (lambda () '() ))
+
+000:  IM-NIL
+001:  RETURN
+```
+
+In the above example, one opcode loads the `NIL` value to the register
+and another opcode `RETURN`s. This return is from the lambda.
+
+## Value register
+
+The simpler opcodes are those that carry with them an immediate value. These
+operations will copy their value to the `val` register in the VM.
+
+```
+IM_FALSE
+IM_TRUE
+IM_NIL
+IM_MINUS1
+IM_ZERO
+IM_ONE
+IM_VOID
+```
+
+Examples:
+
+```
+(disassemble  (lambda () 1) )
+
+000:  IM-ONE
+001:  RETURN
+```
+
+```
+(disassemble  (lambda () #f 1) )
+
+000:  IM-FALSE
+001:  IM-ONE
+002:  RETURN
+```
+
+Opcodes for small integers and constants do the same, but they take a little
+longer to execute, since they need to perform some small operations.
+
+```
+SMALL_INT
+CONSTANT
+```
+
+```
+(disassemble  (lambda () 1) )
+
+000:  SMALL-INT            5
+002:  RETURN
+```
+
+
+
+
+## Stack
+
+The following opcodes are similar to the immediate-value ones, except that,
+instead of copying their values to the `val` register, they push the value
+on the stack.
+
+```
+FALSE_PUSH
+TRUE_PUSH
+NIL_PUSH
+MINUS1_PUSH
+ZERO_PUSH
+ONE_PUSH
+VOID_PUSH
+
+INT_PUSH
+CONSTANT_PUSH
+```
+
+The `POP` and `PUSH` move objects between stack and value register.
+
+```
+POP     ; move top of stack to val register
+PUSH    ; store val register on top of stack
+```
+
+## Local variables
+
+The `LOCAL_REF` opcodes will load the values of variables
+from the current environment (the "local" variables) on the `val` register.
+
+```
+LOCAL_REF0
+LOCAL_REF1
+LOCAL_REF2
+LOCAL_REF3
+LOCAL_REF4
+LOCAL_REF
+```
+
+Examples:
+
+```
+(disassemble (lambda (a) a))
+
+000:  LOCAL-REF0          
+001:  RETURN              
+```
+
+```
+(disassemble (lambda (a b) a))
+
+000:  LOCAL-REF1          
+001:  RETURN              
+```
+
+There are opcodes for five fixed positions only, so after that another opcode,
+`LOCAL_REF`, needs an argument:
+
+```
+(disassemble (lambda (a b c d e f) a))
+
+000:  LOCAL-REF            5
+002:  RETURN
+```
+
+The following opcodes are similar to the local reference ones, except that,
+instead of copying their values to the `val` register, they push the value
+on the stack.
+
+```
+LOCAL_REF0_PUSH
+LOCAL_REF1_PUSH
+LOCAL_REF2_PUSH
+LOCAL_REF3_PUSH
+LOCAL_REF4_PUSH
+```
+
+The following opcodes are analogous to the local reference ones, but instead
+of loading values, they store the value of the `val` register on the local
+variables
+
+```
+LOCAL_SET0
+LOCAL_SET1
+LOCAL_SET2
+LOCAL_SET3
+LOCAL_SET4
+LOCAL_SET
+```
+
+## Deep variables
+
+Variables which are visible but not in the immediately accessible environment
+are accessed with the `DEEP` opcodes.
+
+```
+DEEP_LOCAL_REF
+DEEP_LOCAL_SET
+DEEP_LOC_REF_PUSH
+```
+
+Examples:
+
+```
+(disassemble
+ (let ((a 10))
+   (lambda () a)))
+
+000:  DEEP-LOCAL-REF       256
+002:  RETURN
+```
+
+```
+(disassemble
+ (let ((a 10))
+   (lambda ()
+     (set! a 20))))
+
+000:  SMALL-INT            20
+002:  DEEP-LOCAL-SET       256
+004:  RETURN
+```
+
+In the following example, the value of `a` is fetched from a deep environment
+and pushed onto the stack, so it can be used by the comparison opcode `IN-NUMEQ`:
+
+```
+(disassemble
+ (let ((a 10))
+   (lambda ()
+     (= a 20))))
+
+000:  DEEP-LOC-REF-PUSH    256
+002:  SMALL-INT            20
+004:  IN-NUMEQ
+005:  RETURN
+```
+
+## Global variables
+
+Global variables can be read and set with the following opcodes:
+
+```
+GLOBAL-REF
+GLOBAL-SET
+```
+
+Examples:
+
+```
+(disassemble
+ (lambda ()
+   my-cool-global-variable))
+   
+000:  GLOBAL-REF           0
+002:  RETURN
+```
+
+```
+(disassemble
+ (lambda ()
+   (set! my-cool-global-variable #f)))
+   
+000:  IM-FALSE
+001:  GLOBAL-SET           0
+003:  RETURN
+```
+
+## Operations
+
+### Arithmetic
+
+The operations take the top of stack and `val` as operands, and leave the result on
+`val`.
+
+```
+IN_ADD2
+IN_SUB2
+IN_MUL2
+IN_DIV2
+```
+
+Example:
+
+```
+(let ((x 3))
+  (disassemble
+   (lambda (a) (+ a x))))
+
+000:  LOCAL-REF0-PUSH
+001:  DEEP-LOCAL-REF       256
+003:  IN-ADD2
+004:  RETURN
+```
+
+First the value of `a` (which is the zero-th local variable) is pushed onto the stack.
+Then, `DEEP-LOCAL-REF` brings the value of `x`, and `IM-ADD2` adds the two values,
+leaving the result on the local variable register.
+
+For fixnums, the analogous opcodes are:
+
+```
+IN_FXADD2
+IN_FXSUB2
+IN_FXMUL2
+IN_FXDIV2
+```
+
+The following variant of those opcodes do not use the stack. They operate on
+`val` and an argument:
+
+```
+IN_SINT_ADD2
+IN_SINT_SUB2
+IN_SINT_MUL2
+IN_SINT_DIV2
+```
+
+Example:
+
+```
+(disassemble (lambda (a) (+ a 2)))
+
+000:  LOCAL-REF0
+001:  IN-SINT-ADD2         2
+003:  RETURN
+```
+
+First, the value of `a` is put on `val`; then it is summed with `2`, which comes
+as an argument to the opcode `IN-SINT-ADD2`.
+
+These also have fixnum variants:
+
+```
+IN_SINT_FXADD2
+IN_SINT_FXSUB2
+IN_SINT_FXMUL2
+IN_SINT_FXDIV2
+```
+
+### Increment and decrement val
+
+```
+IN_INCR
+IN_DECR
+```
+
+### Comparisons
+
+These compare the top of stack with `val`, and leave a boolean on `val`.
+
+```
+IN_NUMEQ     ;   pop() == val ?
+IN_NUMDIFF   ; ! pop() == val ?
+IN_NUMLT     ;   pop < val ?
+IN_NUMGT     ;   pop > val ?
+IN_NUMLE     ;   pop <= val ?
+IN_NUMGE     ;   pop >= val ?
+```
+
+Example:
+
+```
+(disassemble (lambda (a) (>= a 2)))
+
+000:  LOCAL-REF0-PUSH
+001:  SMALL-INT            2
+003:  IN-NUMGE
+004:  RETURN
+```
+
+There are also opcodes for `equal?`, `eqv?` and `eq?`:
+
+```
+IN_EQUAL
+IN_EQV
+IN_EQ
+```
+
+Example:
+
+```
+(disassemble (lambda (a) (eq? a 2)))
+
+000:  LOCAL-REF0-PUSH
+001:  SMALL-INT            2
+003:  IN-EQ
+004:  RETURN
+```
+
+The `dissassemble` procedure will not, however, show the names of symbols
+or values of strings.
+
+```
+(disassemble (lambda (a) (eq? a 'hello-i-am-a-symbol)))
+
+000:  LOCAL-REF0-PUSH
+001:  CONSTANT             0
+003:  IN-EQ
+004:  RETURN
+```
+
+### Constructors
+
+These will build structures with the value in `val` and store the
+structure (that is, the tagged word representing it) again on `val`.
+
+```
+IN_CONS
+IN_CAR
+IN_CDR
+IN_LIST
+```
+
+Examples:
+
+```
+(disassemble (lambda (a b) (cons a b)))
+
+000:  LOCAL-REF1-PUSH
+001:  LOCAL-REF0
+002:  IN-CONS
+003:  RETURN
+```
+
+The element to be consed is pushed on the stack; then the second element
+is loaded on `val`, and then `IN-CONS` is called.
+
+```
+(disassemble (lambda (a) (list a)))
+
+000:  LOCAL-REF0-PUSH
+001:  IN-LIST              1
+003:  RETURN
+```
+
+```
+(disassemble (lambda (a) (car a)))
+
+000:  LOCAL-REF0
+001:  IN-CAR
+002:  RETURN
+```
+
+
+
+
+### Structure references
+
+
+```
+IN_VREF
+IN_SREF
+IN_VSET
+IN_SSET
+```
+
+## Control flow
+
+The following opcodes have an argument, which is the offset to be added to
+the program counter.
+
+```
+GOTO           ; unconditionally jump
+JUMP_TRUE      ; jump if val is true
+JUMP_FALSE     ; jump if val is false
+JUMP_NUMDIFF   ; jump if ! pop() = val (for numbers)
+JUMP_NUMEQ     ; jump if pop() = val (for numbers)
+JUMP_NUMLT     ; jump of pop() <  val
+JUMP_NUMLE     ; jump of pop() <= val
+JUMP_NUMGT     ; jump of pop() >  val
+JUMP_NUMGE     ; jump of pop() >= val
+JUMP_NOT_EQ    ; jump if pop() not eq? val
+JUMP_NOT_EQV   ; jump if pop() not eqv? val
+JUMP_NOT_EQUAL ; jump if pop() not equal? val
+```
+
+Example:
+
+```
+(disassemble
+ (lambda () (if #t 2 4)))
+
+000:  IM-TRUE
+001:  JUMP-FALSE           3	;; ==> 006
+003:  SMALL-INT            2
+005:  RETURN
+006:  SMALL-INT            4
+008:  RETURN
+```
+
+STklos' `disassemble` is nice enough to tell you the line number where a
+jump goes!
+
+## Closures, let, and related
+
+### let
+
+The opcodes for "entering `let`" create new environments and push them on the
+stack, but do *not* update activation records, since there is no procedure
+call happening. Then, the `LEAVE_LET` opcode removes the environment from the
+stack.
+
+
+```
+ENTER_LET
+ENTER_LET_STAR
+ENTER_TAIL_LET
+ENTER_TAIL_LET_STAR
+LEAVE_LET
+```
+
+Examples:
+
+
+```
+(disassemble
+ (lambda ()
+   (list (let ((x 1))
+           x))))
+
+000:  PREPARE-CALL
+001:  INT-PUSH             3
+002:  ENTER-LET            1
+004:  LOCAL-REF0
+005:  LEAVE-LET
+006:  PUSH
+007:  IN-LIST              1
+009:  RETURN
+```
+
+When the `let` is  in tail position, then the opcode
+used is the ordinary `ENTER_TAIL_LET`, and no `LEAVE_LET` is
+needed:
+
+```
+(disassemble
+ (lambda ()
+   (let ((x 1))
+     x)))
+
+000:  PREPARE-CALL
+001:  INT-PUSH             4
+002:  ENTER-TAIL-LET       1
+004:  LOCAL-REF0
+005:  RETURN
+```
+
+
+
+## 
+
+The following sets a docstring for a procedure:
+
+```
+DOCSTRG
+```
+
+Example:
+
+```
+(disassemble
+ (lambda ()
+   (define (f) "A well-documented function" 5)
+   10))
+
+000:  PREPARE-CALL
+001:  FALSE-PUSH
+002:  ENTER-TAIL-LET       1
+004:  CREATE-CLOSURE       4 0	;; ==> 010
+007:  SMALL-INT            5
+009:  RETURN
+010:  DOCSTRG              0
+012:  LOCAL-SET0
+013:  SMALL-INT            10
+015:  RETURN
+```
+
+Here, `DOCSTRG` seems to have a zero argument because it uses a constant string,
+and `disassemble` does not show values of strings and symbol names.
+
+### Closures
+
+The following opcode creates a closure.
+
+```
+CREATE_CLOSURE
+```
+
+Examples:
+
+```
+(disassemble
+ (lambda ()
+   (lambda () "Hello")))
+
+000:  CREATE-CLOSURE       4 0	;; ==> 006
+003:  CONSTANT             0
+005:  RETURN              
+006:  RETURN              
+```
+
+```
+(disassemble
+ (lambda ()
+   (lambda (x) (* 2 x))))
+
+000:  CREATE-CLOSURE       5 1	;; ==> 007
+003:  LOCAL-REF0
+004:  IN-SINT-MUL2         2
+006:  RETURN
+007:  RETURN
+```
+
+### Procedures
+
+The following opcodes are used to make procedure calls:
+
+```
+PREPARE-CALL
+INVOKE
+TAIL_INVOKE
+GREF-INVOKE
+GREF-TAIL-INVOKE
+```
+
+`PREPARE_CALL` pushes an activation record on the stack.
+The `INVOKE` opcodes call procedures -- local or global;
+in tail position or not.
+
+
+```
+(disassemble (lambda () (f)))
+
+000:  PREPARE-CALL
+001:  GREF-TAIL-INVOKE     0 0
+004:  RETURN
+```
+
+```
+(disassemble (lambda () (f 3)))
+
+000:  PREPARE-CALL
+001:  INT-PUSH             3
+003:  GREF-TAIL-INVOKE     0 1
+006:  RETURN
+```
+
+```
+(disassemble (lambda () (+ 2 (f))))
+
+000:  PREPARE-CALL
+001:  GREF-INVOKE          0 0
+004:  IN-SINT-ADD2         2
+006:  RETURN
+```
+
+In the next example, `GREF-INVOKE` is called with arguments 0 and 2.
+The value 2 is the address of the procedure in the stack. The
+`IN-SINT-ADD2` procedure is called afterwards to sum 1 with the
+return from `f`.
+
+```
+(disassemble
+ (lambda (x)
+   (+ 1 (f x #f))))
+
+000:  PREPARE-CALL
+001:  LOCAL-REF0-PUSH
+002:  FALSE-PUSH
+003:  GREF-INVOKE          0 2
+006:  IN-SINT-ADD2         1
+008:  RETURN
+```
+
+Now the next example shows how `INVOKE` is used to call a procedure
+that is non-global (it is in the local environment):
+
+
+```
+(let ((f (lambda (x) x)))
+  (disassemble
+   (lambda ()
+     (+ 1 (f x #f)))))
+     
+000:  PREPARE-CALL
+001:  GLOBAL-REF-PUSH      0
+003:  FALSE-PUSH
+004:  DEEP-LOCAL-REF       256
+006:  INVOKE               2
+008:  IN-SINT-ADD2         1
+010:  RETURN
+```
+
+## Modules
+
+The following opcode enters a given module.
+
+```
+SET_CUR_MOD
+```
+
+Example:
+
+```
+(disassemble
+ (lambda (m) (select-module m)))
+ 
+000:  PREPARE-CALL
+001:  CONSTANT-PUSH        0
+003:  GREF-INVOKE          1 1
+006:  SET-CUR-MOD
+007:  RETURN
+```
+
