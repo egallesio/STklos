@@ -41,6 +41,11 @@ extern SCM STk_make_bytevector_from_string(char *str, long len);
  *
  */
 
+static void error_bad_index(SCM s)
+{
+  STk_error("bad index ~s", s);
+}
+
 static void error_bad_string(SCM s)
 {
   STk_error("bad string ~s", s);
@@ -49,6 +54,11 @@ static void error_bad_string(SCM s)
 static void error_bad_character(SCM s)
 {
   STk_error("bad character ~S", s);
+}
+
+static void error_bad_string_or_character(SCM s)
+{
+  STk_error("bad string or character ~S", s);
 }
 
 static void error_change_const_string(SCM s)
@@ -675,6 +685,213 @@ DEFINE_PRIMITIVE("string-append", string_append, vsubr, (int argc, SCM* argv))
   STRING_LENGTH(z) = total;
 
   return z;
+}
+
+/*
+<doc SRFI-118 string-append!
+ * (string-append! string ...)
+ *
+ * Extends string by appending each value (in order) to the end of string.
+ * A value can be a character or a string.
+ *
+ * It is guaranteed that string-append! will return the same object that
+ * was passed to it as first argument, whose size may be larger.
+doc>
+ */
+DEFINE_PRIMITIVE("string-append!", string_dappend, vsubr, (int argc, SCM* argv))
+{
+  unsigned long i, total_size, total_length;
+  char *q; /* first string */
+  char *p; /* others (chars or strings) */
+
+  if (argc==0) STk_error("incorrect number of arguments (%d)", argc);
+  
+  /* First argument MUST be a string: */
+  if (STRINGP(argv[0]))
+      total_size = STRING_SIZE(argv[0]);
+  else
+      error_bad_string(argv[0]);
+  
+  if (BOXED_INFO(argv[0]) & STRING_CONST)   error_change_const_string(argv[0]);
+  
+  /* Compute total length of resulting string */
+  for (i = 1; i < argc; i++) {
+    p = argv[-i];
+    if (STRINGP(p))
+        total_size += STRING_SIZE(p);
+    else if (CHARACTERP(p))
+        total_size+=STk_utf8_char_bytes_needed(CHARACTER_VAL(p));
+    else
+     error_bad_string_or_character(p);
+  }
+
+  q = argv[0];
+
+  /* Reallocate space in first argument string: */
+  STRING_CHARS(q) = STk_must_realloc(STRING_CHARS(q), total_size);
+
+  /* point to the last character of first string: */
+  p = (STRING_CHARS(q)+STRING_SIZE(q));
+
+  STRING_SPACE(q) = STRING_SIZE(q) = total_size;
+      
+  /* copy strings. i starts at ONE, not zero, since the first
+     string need not be copied. */
+  for (total_length=STRING_LENGTH(q), i=1; i < argc; i++) {
+    if (STRINGP(*(argv-i))) {
+      memcpy(p, STRING_CHARS(argv[-i]), (unsigned int) STRING_SIZE(argv[-i]));
+      p += STRING_SIZE(*(argv-i));
+      total_length += STRING_LENGTH(*(argv-i));
+    } else { /* we have already checked, it is a char! */
+      p += STk_char2utf8(CHARACTER_VAL(*(argv-i)),p);
+      /*      p += STk_utf8_char_bytes_needed(CHARACTER_VAL(p));*/
+      total_length ++;
+    }
+  }
+
+  STRING_LENGTH(q) = total_length;
+  return q;
+}
+
+inline
+static
+int get_substring_size(SCM string, long from, long to) {
+  /* WARNING: from and to must be checked by caller */
+  if (STRING_MONOBYTE(string))
+    return (to - from);
+  else {
+    /* multi-bytes string */
+    uint32_t c;
+    char *pfrom, *pto;
+    SCM z;
+
+    pto = pfrom = STk_utf8_index(STRING_CHARS(string), from, STRING_SIZE(string));
+
+    for ( ; from < to; from++)
+      pto = STk_utf8_grab_char(pto, &c);
+
+    return (pto-pfrom);
+  }
+}
+
+/*
+<doc  SRFI-118 string-replace!
+ * (string-replace! dst dst-start dst-end src [src-start [src-end]])
+ *
+ * Replaces the characters of the variable-size string dst (between
+ * dst-start and dst-end) with the characters of the string src
+ * (between src-start and src-end). The number of characters from src
+ * may be different than the number replaced in dst, so the string may
+ * grow or contract. The special case where dst-start is equal to
+ * dst-end corresponds to insertion; the case where src-start is equal
+ * to src-end corresponds to deletion. The order in which characters
+ * are copied is unspecified, except that if the source and
+ * destination overlap, copying takes place as if the source is first
+ * copied into a temporary string and then into the destination.
+ * Returns string, appended with the characters form the concatenation
+ * of the given arguments, which can be wither strings or characters.
+ *
+ * It is guaranteed that string-replace! will return the same object that
+ * was passed to it as first argument, whose size may be larger.
+doc>
+ */
+
+DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv))
+{
+  unsigned long i, total_size, total_length;
+  SCM dst = argv[0];
+  SCM src = argv[-3];
+  unsigned long dst_start, dst_end, src_start, src_end;
+  char* source_chars;
+
+  if (!STRINGP(dst)) error_bad_string(dst);
+  if (!STRINGP(src)) error_bad_string(src);
+
+  switch (argc) {
+  case 4:  src_start = 0;
+           src_end=STRING_LENGTH(src);
+           break;
+  case 5:  if (!INTP(argv[-4])) error_bad_index(argv[-4]);
+           src_start = STk_integer_value(argv[-4]);
+           src_end=STRING_LENGTH(src);
+           if (src_start < 0 || src_start > STRING_LENGTH(src)) error_index_out_of_bound(src, argv[-4]);
+           break;
+  case 6:  if (!INTP(argv[-4])) error_bad_index(argv[-4]);
+           if (!INTP(argv[-5])) error_bad_index(argv[-5]);
+           src_start = STk_integer_value(argv[-4]);
+           src_end= STk_integer_value(argv[-5]);
+           if (src_start < 0 || src_start > STRING_LENGTH(src)) error_index_out_of_bound(src, argv[-4]);
+           if (  src_end < 0 ||   src_end > STRING_LENGTH(src)) error_index_out_of_bound(src, argv[-5]);
+           break;
+  default: STk_error("incorrect number of arguments (%d)", argc);
+  }
+
+  if (!INTP(argv[-1])) error_bad_index(argv[-1]);
+  if (!INTP(argv[-2])) error_bad_index(argv[-2]);
+  dst_start = STk_integer_value(argv[-1]);
+  dst_end   = STk_integer_value(argv[-2]);
+  if (dst_start < 0 || dst_start > STRING_LENGTH(dst)) error_index_out_of_bound(dst, argv[-1]);
+  if (  dst_end < 0 ||   dst_end > STRING_LENGTH(dst)) error_index_out_of_bound(dst, argv[-2]);
+
+  if (dst_start > dst_end) STk_error("start higher than end for destination string: ~S > ~S", argv[-1], argv[-2]);
+  if (src_start > src_end) STk_error("start higher than end for source string: ~S > ~S", argv[-4], argv[-5]);
+  
+  /* if src and dest overlap, copy src to a temporary buffer and use it */
+  if (( STRING_CHARS(dst) < STRING_CHARS(src)+STRING_SIZE(src)  &&
+         STRING_CHARS(src) < STRING_CHARS(dst)+STRING_SIZE(dst) )
+       ||
+       ( STRING_CHARS(src) < STRING_CHARS(dst)+STRING_SIZE(dst) &&
+         STRING_CHARS(dst) < STRING_CHARS(dst)+STRING_SIZE(src) ))
+      src = STk_makestring(STRING_SIZE(src),STRING_CHARS(src));
+  
+  int src_substring_size = get_substring_size(src, src_start, src_end);
+  int dst_substring_size = get_substring_size(dst, dst_start, dst_end);
+  
+  /* how much source is larger than destination? */
+  int diff = src_substring_size - dst_substring_size;
+
+  char *start_char_dst;
+  if (diff > 0) { /* src larger, must grow dst */
+      
+      /* we need to set start_char_dst here, because it will be used to move
+         elements forward and make the string larger. AFTER remalloc. */
+      STRING_CHARS(dst) = STk_must_realloc(STRING_CHARS(dst),STRING_SIZE(dst) + diff);
+      start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
+      STRING_SIZE(dst) = STRING_SIZE(dst) + diff;
+ 
+      char *p;
+      for ( p = STRING_CHARS(dst) + STRING_SIZE(dst);
+            p >= (start_char_dst + src_substring_size);
+            p--)
+          *p = *(p-diff);
+            
+  } else if (diff < 0) { /* src smaller, must shrink dst */
+
+      /* start_char_dst will change, because the string will be reallocated!
+         we compute it here, and again later */
+      start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
+
+      char *p;
+      for (p = start_char_dst; p < STRING_CHARS(dst) + STRING_SIZE(dst) + diff + 1; p++)
+          *p = *(p-diff);
+      
+      /* we need to set start_char_dst here, because it will be used to move
+         elements back and make the string smaller. AFTER remalloc. */
+      STRING_CHARS(dst) = STk_must_realloc(STRING_CHARS(dst), STRING_SIZE(dst) + diff);
+      start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
+      
+      STRING_SIZE(dst) = STRING_SIZE(dst) + diff;
+      
+  } else
+      /* if the substring sizes are equal, we did not yet set the start_char_dst
+         variable. do it here. */
+      start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
+
+  char* start_char_src = STk_utf8_index(STRING_CHARS(src),src_start,STRING_SIZE(src));
+  memcpy(start_char_dst, start_char_src, (unsigned long) src_substring_size);
+  
+  STRING_LENGTH(dst) = STRING_LENGTH(dst) + (src_end - src_start) - (dst_end - dst_start);
+  return dst;
 }
 
 
@@ -1381,6 +1598,8 @@ int STk_init_string(void)
   ADD_PRIMITIVE(strgei);
   ADD_PRIMITIVE(substring);
   ADD_PRIMITIVE(string_append);
+  ADD_PRIMITIVE(string_dappend);
+  ADD_PRIMITIVE(string_dreplace);
   ADD_PRIMITIVE(string2list);
   ADD_PRIMITIVE(list2string);
   ADD_PRIMITIVE(string_copy);

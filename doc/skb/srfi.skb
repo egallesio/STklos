@@ -628,6 +628,9 @@ described in this document (procedures
 ;; SRFI 117 -- Queues based on lists
 (gen-loaded-srfi 117)
 
+;; SRFI 118 -- Simple adjustable-size strings 
+(gen-embedded-srfi 118)
+
 ;; SRFI 129 -- Titlecase Procedures
 (gen-loaded-srfi 129)
 
