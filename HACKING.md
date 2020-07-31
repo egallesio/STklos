@@ -325,3 +325,7 @@ EXTERN_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
 ## Dynamically loadable modules
 
 See some examples in `etc/`
+
+## The virtual machine
+
+See the file `vm.md` for a description of the opcodes.
