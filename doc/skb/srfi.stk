@@ -91,6 +91,7 @@
      (175 . "ASCII character library")
      (176 . "Version flag")
      (180 . "JSON")
+     (185 . "Linear adjustable-length strings")
      (190 . "Coroutines Generators")
    ))
 

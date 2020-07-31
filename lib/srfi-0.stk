@@ -244,7 +244,7 @@
     ;; srfi-182                         ; ....... withdrawn
     ;; srfi-183                         ; ....... withdrawn
     ;; srfi-184                         ; ....... withdrawn
-    ;; srfi-185                         ; Linear adjustable-length strings
+    (srfi-185 "srfi-185")               ; Linear adjustable-length strings
     ;; srfi-186                         ; Transcoders and transcoded ports
     ;; srfi-187                         ; ....... withdrawn
     ;; srfi-188                         ; Splicing binding constructs for syntactic keywords

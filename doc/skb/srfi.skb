@@ -683,6 +683,9 @@ procedure.]))
 ;; SRFI 180 -- JSON
 (gen-loaded-srfi 180)
 
+;; SRFI 185 --  Linear adjustable-length strings
+(gen-loaded-srfi 185)
+
 ;; SRFI 190 -- Coroutine Generators
 (gen-loaded-srfi 190)
 
