@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 13-Jul-2020 14:53 (eg)
+ * Last file update:  1-Aug-2020 10:15 (eg)
  */
 
 #include <ctype.h>
@@ -143,7 +143,7 @@ static int stringcompi(SCM s1, SCM s2)
 
       c1low = STk_to_lower(ch1);
       c2low = STk_to_lower(ch2);
-      
+
       if (c1low != c2low) return c1low - c2low;
     }
 
@@ -700,20 +700,21 @@ doc>
  */
 DEFINE_PRIMITIVE("string-append!", string_dappend, vsubr, (int argc, SCM* argv))
 {
-  unsigned long i, total_size, total_length;
+  int i;
+  unsigned total_size, total_length;
   char *q; /* first string */
   char *p; /* others (chars or strings) */
 
   if (argc==0) STk_error("incorrect number of arguments (%d)", argc);
-  
+
   /* First argument MUST be a string: */
   if (STRINGP(argv[0]))
       total_size = STRING_SIZE(argv[0]);
   else
       error_bad_string(argv[0]);
-  
+
   if (BOXED_INFO(argv[0]) & STRING_CONST)   error_change_const_string(argv[0]);
-  
+
   /* Compute total length of resulting string */
   for (i = 1; i < argc; i++) {
     p = argv[-i];
@@ -734,7 +735,7 @@ DEFINE_PRIMITIVE("string-append!", string_dappend, vsubr, (int argc, SCM* argv))
   p = (STRING_CHARS(q)+STRING_SIZE(q));
 
   STRING_SPACE(q) = STRING_SIZE(q) = total_size;
-      
+
   /* copy strings. i starts at ONE, not zero, since the first
      string need not be copied. */
   for (total_length=STRING_LENGTH(q), i=1; i < argc; i++) {
@@ -763,7 +764,6 @@ int get_substring_size(SCM string, long from, long to) {
     /* multi-bytes string */
     uint32_t c;
     char *pfrom, *pto;
-    SCM z;
 
     pto = pfrom = STk_utf8_index(STRING_CHARS(string), from, STRING_SIZE(string));
 
@@ -798,11 +798,9 @@ doc>
 
 DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv))
 {
-  unsigned long i, total_size, total_length;
   SCM dst = argv[0];
   SCM src = argv[-3];
-  unsigned long dst_start, dst_end, src_start, src_end;
-  char* source_chars;
+  long dst_start, dst_end, src_start, src_end;
 
   if (!STRINGP(dst)) error_bad_string(dst);
   if (!STRINGP(src)) error_bad_string(src);
@@ -824,6 +822,7 @@ DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv
            if (  src_end < 0 ||   src_end > STRING_LENGTH(src)) error_index_out_of_bound(src, argv[-5]);
            break;
   default: STk_error("incorrect number of arguments (%d)", argc);
+           return STk_void;      /* for the compiler */ 
   }
 
   if (!INTP(argv[-1])) error_bad_index(argv[-1]);
@@ -835,7 +834,7 @@ DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv
 
   if (dst_start > dst_end) STk_error("start higher than end for destination string: ~S > ~S", argv[-1], argv[-2]);
   if (src_start > src_end) STk_error("start higher than end for source string: ~S > ~S", argv[-4], argv[-5]);
-  
+
   /* if src and dest overlap, copy src to a temporary buffer and use it */
   if (( STRING_CHARS(dst) < STRING_CHARS(src)+STRING_SIZE(src)  &&
          STRING_CHARS(src) < STRING_CHARS(dst)+STRING_SIZE(dst) )
@@ -843,28 +842,28 @@ DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv
        ( STRING_CHARS(src) < STRING_CHARS(dst)+STRING_SIZE(dst) &&
          STRING_CHARS(dst) < STRING_CHARS(dst)+STRING_SIZE(src) ))
       src = STk_makestring(STRING_SIZE(src),STRING_CHARS(src));
-  
+
   int src_substring_size = get_substring_size(src, src_start, src_end);
   int dst_substring_size = get_substring_size(dst, dst_start, dst_end);
-  
+
   /* how much source is larger than destination? */
   int diff = src_substring_size - dst_substring_size;
 
   char *start_char_dst;
   if (diff > 0) { /* src larger, must grow dst */
-      
+
       /* we need to set start_char_dst here, because it will be used to move
          elements forward and make the string larger. AFTER remalloc. */
       STRING_CHARS(dst) = STk_must_realloc(STRING_CHARS(dst),STRING_SIZE(dst) + diff);
       start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
       STRING_SIZE(dst) = STRING_SIZE(dst) + diff;
- 
+
       char *p;
       for ( p = STRING_CHARS(dst) + STRING_SIZE(dst);
             p >= (start_char_dst + src_substring_size);
             p--)
           *p = *(p-diff);
-            
+
   } else if (diff < 0) { /* src smaller, must shrink dst */
 
       /* start_char_dst will change, because the string will be reallocated!
@@ -874,14 +873,14 @@ DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv
       char *p;
       for (p = start_char_dst; p < STRING_CHARS(dst) + STRING_SIZE(dst) + diff + 1; p++)
           *p = *(p-diff);
-      
+
       /* we need to set start_char_dst here, because it will be used to move
          elements back and make the string smaller. AFTER remalloc. */
       STRING_CHARS(dst) = STk_must_realloc(STRING_CHARS(dst), STRING_SIZE(dst) + diff);
       start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
-      
+
       STRING_SIZE(dst) = STRING_SIZE(dst) + diff;
-      
+
   } else
       /* if the substring sizes are equal, we did not yet set the start_char_dst
          variable. do it here. */
@@ -889,7 +888,7 @@ DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv
 
   char* start_char_src = STk_utf8_index(STRING_CHARS(src),src_start,STRING_SIZE(src));
   memcpy(start_char_dst, start_char_src, (unsigned long) src_substring_size);
-  
+
   STRING_LENGTH(dst) = STRING_LENGTH(dst) + (src_end - src_start) - (dst_end - dst_start);
   return dst;
 }
@@ -965,7 +964,7 @@ DEFINE_PRIMITIVE("list->string", list2string, subr1, (SCM l))
 
   /* Set the length of the resulting string */
   STRING_LENGTH(z) = len;
-  
+
   return z;
 }
 
@@ -1371,7 +1370,7 @@ doc>
 DEFINE_PRIMITIVE("string-foldcase!", string_dfoldcase, vsubr, (int argc, SCM *argv))
 {
   return string_dxxcase(argc, argv, toupper, STk_to_fold);
-  
+
 }
 
 
