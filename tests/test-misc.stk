@@ -47,6 +47,109 @@ b|)
 (test "special-name.1"       '|\b| '\b)
 (test "special-name.2"       '|| (string->symbol ""))
 
+(test-subsection "Docstrings and signatures")
+
+(import STKLOS-COMPILER)
+(compiler:generate-signature #t)
+
+(define (d) 1)
+(define (e x) 10)
+(define (f a b) "docstring abc" 42)
+(define g f)
+(define h (lambda (x y) "h doc" 10))
+(define i #f)
+(set! i (lambda (w z) 0))
+
+(test "empty signature"
+      '()
+      (%procedure-signature d))
+(test "no-docstring"
+      #f
+      (%procedure-doc e))
+(test "no-docstring, but signature"
+      '(x)
+      (%procedure-signature e))
+(test "docstring"
+      "docstring abc"
+      (%procedure-doc f))
+(test "docstring g"
+      "docstring abc"
+      (%procedure-doc g))
+(test "signature"
+      '(a b)
+      (%procedure-signature f))
+(test "signature g"
+      '(a b)
+      (%procedure-signature g))
+(test "docstring h"
+      "h doc"
+      (%procedure-doc h))
+(test "signature h"
+      '(x y)
+      (%procedure-signature h))
+(test "signature i"
+      '(w z)
+      (%procedure-signature i))
+(test "really anonymous lambda - sig"
+      '(l i s p)
+      (%procedure-signature (lambda (l i s p) (+ l i s p))))
+(test "really anonymous lambda sig, with docstring"
+      '(l i s p)
+      (%procedure-signature (lambda (l i s p) "Hello!" (+ l i s p))))
+(test "really anonymous lambda - docstring"
+      "Hello!"
+      (%procedure-doc (lambda (l i s p) "Hello!" (+ l i s p))))
+
+(compiler:generate-signature #f)
+
+(define (dd) 1)
+(define (ee x) 10)
+(define (ff a b) "docstring abcd" 42)
+(define gg ff)
+(define hh (lambda (x y) "hh doc" 10))
+(define ii #f)
+(set! ii (lambda (w z) 0))
+
+(test "empty signature, not generated"
+      #f
+      (%procedure-signature dd))
+(test "no-docstring"
+      #f
+      (%procedure-doc ee))
+(test "no-docstring, but sig, not generated"
+      #f
+      (%procedure-signature ee))
+(test "docstring"
+      "docstring abcd"
+      (%procedure-doc ff))
+(test "docstring g"
+      "docstring abcd"
+      (%procedure-doc gg))
+(test "signature"
+      #f
+      (%procedure-signature ff))
+(test "signature gg"
+      #f
+      (%procedure-signature gg))
+(test "docstring hh"
+      "hh doc"
+      (%procedure-doc hh))
+(test "signature hh"
+      #f
+      (%procedure-signature hh))
+(test "signature ii"
+      #f
+      (%procedure-signature ii))
+(test "really anonymous lambda - sig (not generated)"
+      #f
+      (%procedure-signature (lambda (l i s p) (+ l i s p))))
+(test "really anonymous lambda sig - sig not generated, with docstring"
+      #f
+      (%procedure-signature (lambda (l i s p) "Hello!" (+ l i s p))))
+(test "really anonymous lambda doc - sig not generated, with docstring"
+      "Hello!"
+      (%procedure-doc (lambda (l i s p) "Hello!" (+ l i s p))))
+
 
 ;;------------------------------------------------------------------
 (test-section-end)

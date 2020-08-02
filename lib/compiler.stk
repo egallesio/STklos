@@ -33,6 +33,7 @@
           compiler:warn-use-undefined
           compiler:warn-use-undefined-postpone
           compiler:show-assembly-code
+          compiler:generate-signature
           compiler:inline-common-functions))
 
 (select-module STKLOS-COMPILER)
@@ -101,6 +102,8 @@
 (define compiler:warn-use-undefined             (make-parameter #f))
 (define compiler:warn-use-undefined-postpone    (make-parameter #t))
 (define compiler:show-assembly-code             (make-parameter #f))
+(define compiler:generate-signature             (make-parameter
+                                                 (positive? (stklos-debug-level))))
 
 (define compiler:inline-common-functions
   (let ((inlined *inline-symbols*))
@@ -587,6 +590,10 @@ doc>
     (compile-body body env body #t)
     (emit 'RETURN)
     (emit-label lab)
+
+    (when (compiler:generate-signature)
+      ;; emit signature
+      (emit 'FORMALS (fetch-constant formals)))
 
     (when doc
       ;; emit the docstring

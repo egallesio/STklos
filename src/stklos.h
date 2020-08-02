@@ -1092,7 +1092,7 @@ struct closure_obj {
   stk_header header;
   short arity;
   unsigned short code_size;
-  /*  SCM formals; */
+  SCM formals;
   SCM env;
   SCM plist;
   SCM name;
@@ -1108,6 +1108,7 @@ struct closure_obj {
 
 #define CLOSURE_ARITY(p)        (((struct closure_obj *) (p))->arity)
 #define CLOSURE_SIZE(p)         (((struct closure_obj *) (p))->code_size)
+#define CLOSURE_FORMALS(p)      (((struct closure_obj *) (p))->formals)
 #define CLOSURE_ENV(p)          (((struct closure_obj *) (p))->env)
 #define CLOSURE_PLIST(p)        (((struct closure_obj *) (p))->plist)
 #define CLOSURE_NAME(p)         (((struct closure_obj *) (p))->name)

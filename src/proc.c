@@ -50,6 +50,7 @@ SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env)
 
   NEWCELL(z, closure);
   CLOSURE_ENV(z)   = env;
+  CLOSURE_FORMALS(z) = STk_false;
   CLOSURE_PLIST(z) = STk_nil;
   CLOSURE_NAME(z)  = STk_false;
   CLOSURE_ARITY(z) = arity;
@@ -268,6 +269,11 @@ DEFINE_PRIMITIVE("%procedure-doc", proc_doc, subr1, (SCM proc))
   return CLOSURE_DOC(proc);
 }
 
+DEFINE_PRIMITIVE("%procedure-signature", proc_signature, subr1, (SCM proc))
+{
+  if (!CLOSUREP(proc)) return STk_false;
+  return CLOSURE_FORMALS(proc);
+}
 
 /*===========================================================================*\
  *
@@ -399,6 +405,7 @@ int STk_init_proc(void)
   ADD_PRIMITIVE(proc_arity);
   ADD_PRIMITIVE(procedure_name);
   ADD_PRIMITIVE(set_procedure_name);
+  ADD_PRIMITIVE(proc_signature);
 
   ADD_PRIMITIVE(map);
   ADD_PRIMITIVE(for_each);
