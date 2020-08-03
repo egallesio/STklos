@@ -173,6 +173,10 @@ doc>
 
 ;=============================================================================
 
+;; reverse assq:
+;;
+;; (hyg:rassq 'a '((10 . b) (50 . a) (1111 . c)))
+;; (50 . a)
 (define hyg:rassq
   (lambda (k al)
     (let loop ((al al))
@@ -181,6 +185,23 @@ doc>
           (if (eq? (cdr c) k) c
             (loop (cdr al))))))))
 
+;; hyg:tag uses gensym to rename variables (actually, tag the ones which will be renamed).
+;;
+;; e is the form
+;; kk ar ethe keywords
+;; al is an assoc list
+;;
+;; returns a list with
+;; CAR: the original form, rewritten so only the keywords stay with the same names,
+;;      the rest is substituted.
+;; CDR: is an assoc list that maps the generated symbols (G...) with their original
+;;      names.
+;;
+;; the list al is appended to the output CDR, so the assoc list may be build gradually.
+;;
+;; (hyg:tag '(f a b c) '(a c)          '()) => ((G984 a G985 c) (G985 . b) (G984 . f))
+;; (hyg:tag 1          '(fun x fun oh) '()) => (1)
+;; (hyg:tag '(f a b c) '(a c)          '((G-something . y))) => ((G1333 a G1334 c) (G1334 . b) (G1333 . f) (G-something . y))
 (define hyg:tag
   (lambda (e kk al)
     (cond ((pair? e)
@@ -198,12 +219,18 @@ doc>
             (lambda (c)
               (cons (car c) al)))
           (else
-            (let ((te (gensym)))
+            (let ((te (gensym e)))
               (cons te (cons (cons te e) al))))))
       (else (cons e al)))))
 
 ;;untagging
-
+;;
+;; e is the TAGGED expression, as produced by hyg:tag
+;; al is the assoc list of tags -- se hyg:tag
+;; tmps is a list of gensymed symbols NOT to be substituted back.
+;;
+;; (hyg:untag '(G1333 a G1334 c) '((G1334 . b) (G1333 . f) (G-something . y)) '()) => (f a b c)
+;; (hyg:untag '(G1333 a G1334 c) '((G1334 . b) (G1333 . f) (G-something . y)) '(G1334)) => (f a G1334 c)
 (define hyg:untag
   (lambda (e al tmps)
     (if (pair? e)
@@ -377,6 +404,8 @@ doc>
          ,(hyg:untag-list exit-test al tmps2)
          ,@(hyg:untag-list body al tmps2)))))
 
+;; (hyg:untag-vanilla 'a '((a . b)) '(a c)) => a
+;; (hyg:untag-vanilla 'a '((a . b)) '(c))   => b
 (define hyg:untag-vanilla
   (lambda (e al tmps)
     (cond ((pair? e)
@@ -401,6 +430,7 @@ doc>
 			      (cdr v)))))
       (else e))))
 
+;; a flatten procedure.
 (define hyg:flatten
   (lambda (e)
     (let loop ((e e) (r '()))
@@ -430,6 +460,12 @@ doc>
 
 ;;; tests if expression e matches pattern p where k is the list of
 ;;; keywords
+;;
+;; Examples:
+;;
+;; (mbe:matches-pattern? '(f a b) '(* 3 4) '())      => #t
+;; (mbe:matches-pattern? '(f a x b) '(* 2 x 4) '(x)) => #t
+;; (mbe:matches-pattern? '(f a x b) '(* 2 3 4) '(x)) => #f
 (define mbe:matches-pattern?
   (lambda (p e k)
     (cond ((mbe:ellipsis? p)
@@ -589,6 +625,21 @@ doc>
 
 |#
 
+
+;; find-clause will find the clause to be used in order to expand a macro.
+;; 
+;; Example:
+;; 
+;; (define-syntax2 f
+;;   (syntax-rules ()
+;;     ((f a b)   (+ a b))
+;;     ((f a b c) (* b c))))
+;;
+;; (find-clause 'f '(2 3) '() '( ((f a b)   (+ a b)) ((f a b c) (* b c))))
+;; => (+ 2 3)
+;;
+;; (find-clause 'f '(1 2 3) '() '( ((f a b)   (+ a b)) ((f a b c) (* b c))))
+;; => (* 2 3)
 (define (find-clause macro-name macro-args keywords clauses)
   (let ((macro-form (cons macro-name macro-args)))
     (let Loop ((l clauses))
