@@ -80,4 +80,5 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-175: ASCII character library
     - SRFI-176: Version flag
     - SRFI-180: JSON
+    - SRFI-185: Linear adjustable-length strings
     - SRFI-190: Coroutines Generators
