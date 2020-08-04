@@ -3154,6 +3154,46 @@
 (check-string-ci "aa" "aaa" -1)
 (check-string-ci "aaa" "aa" 1)
 
+
+;; ----------------------------------------------------------------------
+;;  SRFI 185 ...
+;; ----------------------------------------------------------------------
+
+(require "srfi-185")
+
+
+(test "string-append! ok"  #t (eq? string-append! string-append-linear!))
+(test "string-replace! ok" #t (eq? string-replace! string-replace-linear!))
+
+;; srting-append! and string-replace! should now be macros, and they should
+;; NOT expand to themselves!
+(test "string-append! expansion"
+      #f
+      (equal? '(string-append! a b c)
+              (macro-expand '(string-append! a b c))))
+
+(test "string-replace! expansion"
+      #f
+      (equal? '(string-replace! dst dst-start dst-end src src-start src-end)
+              (macro-expand '(string-replace! dst dst-start dst-end src src-start src-end))))
+
+;; repeat part of SRFI-118 tests here, although nothing should go wrong --
+;; the procedures being used here were already tested!
+(set-mutable-string! au6  "ábcdÊf")
+(test "(linear) string-append! char, unicode" "ábcdÊfঈ2345༫" (string-append! au6 #\ঈ #\2 "345" #\༫))
+(set-mutable-string! au6  "ábcdÊf")
+(test "(linear) string-append! char, unicode, length" 12 (string-length (string-append! au6 #\ঈ #\2 "345" #\༫)))
+(set-mutable-string! au6  "ábcdÊf")
+(test "(linear) string-append! char, unidoce, eq?" #t (eq? au6 (string-append! au6 #\ঈ #\2 "345" #\༫)))
+
+(set-mutable-string! a6 "abcdef")
+(test "(linear) string-replace! overlap" "abefef" (string-replace! a6 2 4 a6 4 6))
+(set-mutable-string! a6 "abcdef")
+(test "(linear) string-replace! overlap length" 6  (string-length (string-replace! a6 2 4 a6 4 6)))
+(set-mutable-string! a6 "abcdef")
+(test "(linear) string-replace! overlap eq?" #t  (eq? a6 (string-replace! a6 2 4 a6 4 6)))
+
+
 ;; ----------------------------------------------------------------------
 ;;  SRFI 180 ...
 ;;

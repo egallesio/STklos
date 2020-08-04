@@ -1,6 +1,13 @@
 # The STklos Virtual Machine
 
 This is the documentation for the opcodes of the STklos virtual machine.
+The VM implementation is contained in the files `src/vm.h` and `src/vm.c`. 
+
+The VM has a stack, which in the source code is accessed using the C functions
+`push(elt)` and `pop()`; one register, `val`; an array of auxiliary registers
+`vals[]`; and the necessary pointers:  the PC, frame pointer, stack pointer,
+current environment etc.
+
 You can see the opcodes of a compiled thunk with
 
 ```
@@ -421,12 +428,54 @@ is loaded on `val`, and then `IN-CONS` is called.
 
 ### Structure references
 
+The following opcodes access and set elements of strings and vectors.
 
 ```
 IN_VREF
 IN_SREF
 IN_VSET
 IN_SSET
+```
+
+Examples
+
+```
+(disassemble
+ (let ((a #(0 1 2 3)))
+   (lambda () (vector-ref a 2))))
+
+000:  DEEP-LOC-REF-PUSH    256
+002:  SMALL-INT            2
+004:  IN-VREF
+005:  RETURN
+```
+
+In the following example, the `CONSTANT-PUSH` is including a reference
+to the string on the stack.
+
+```
+(disassemble
+ (lambda () (string-ref "abcde" 3)))
+
+000:  CONSTANT-PUSH        0
+002:  SMALL-INT            3
+004:  IN-SREF
+005:  RETURN
+```
+
+When setting a value, the reference to the vecotr or string and the index go
+on the stack, and the value goes on `val`, then the setting opcode is used:
+
+```
+(disassemble
+ (let ((v (vector #\a #\b #\c)))
+   (lambda () (vector-set! v 2 10))))
+
+000:  DEEP-LOC-REF-PUSH    256    ; push ref. to vector
+002:  INT-PUSH             2      ; push index
+004:  SMALL-INT            10     ; put new value in val
+006:  IN-VSET                     ; set it!
+007:  RETURN
 ```
 
 ## Control flow
@@ -522,7 +571,14 @@ needed:
 
 
 
-## 
+## Miscelannea
+
+The following opcode does nothing:
+
+```
+NOP
+```
+
 
 The following sets a docstring for a procedure:
 
@@ -553,13 +609,20 @@ Example:
 Here, `DOCSTRG` seems to have a zero argument because it uses a constant string,
 and `disassemble` does not show values of strings and symbol names.
 
-### Closures
+### Creating closures and procedures
 
 The following opcode creates a closure.
 
 ```
 CREATE_CLOSURE
 ```
+
+This opcode fetches two parameters:
+
+* the number of instructions ahead that the VM needs to jump to (because
+  what follows is the code of a closure being created, and it should *not*
+  be executed, so the VM wull jump over it)
+* the closure arity.
 
 Examples:
 
@@ -574,6 +637,7 @@ Examples:
 006:  RETURN              
 ```
 
+
 ```
 (disassemble
  (lambda ()
@@ -586,7 +650,24 @@ Examples:
 007:  RETURN
 ```
 
-### Procedures
+```
+(disassemble
+ (lambda ()
+   (define (g a b c) 10)
+   g))
+
+000:  PREPARE-CALL
+001:  FALSE-PUSH
+002:  ENTER-TAIL-LET       1
+004:  CREATE-CLOSURE       4 3	;; ==> 010
+007:  SMALL-INT            10
+009:  RETURN
+010:  LOCAL-SET0
+011:  LOCAL-REF0
+012:  RETURN
+```
+
+### Procedure calls
 
 The following opcodes are used to make procedure calls:
 
