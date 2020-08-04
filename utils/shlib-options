@@ -1,8 +1,8 @@
 #!/bin/sh
-#							-*- shell-script -*-
+#                           -*- shell-script -*-
 #
-# s h l i b - o p t i o n s		--  Determine the options to use
-#					    for compiling with dynamic loading
+# s h l i b - o p t i o n s     --  Determine the options to use
+#                       for compiling with dynamic loading
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 12:21 (eg)
-# Last file update: 20-Aug-2010 16:52 (eg)
+# Last file update:  4-Aug-2020 14:42 (eg)
 
 
 #
@@ -57,111 +57,111 @@ fi
 
 case $os in
   FreeBSD*)
- 	  case $machine in
- 	    i*86) machine=ix86;;
- 	  esac
-	  OS=FREEBSD
-	  SH_COMP_FLAGS='-fpic'
+      case $machine in
+        i*86) machine=ix86;;
+      esac
+      OS=FREEBSD
+      SH_COMP_FLAGS='-fpic'
           SH_LOAD_FLAGS='-shared -o'
-          SH_LOADER='ld'
+          SH_LOADER="$LD"
           SH_SUFFIX='so'
           SH_LIB_SUFFIX='so'
           SH_MAIN_LOAD_FLAGS="-rdynamic"
-	  ;;
+      ;;
   HP*)
           OS=HPUX
-     	  SH_COMP_FLAGS="+Z"
-     	  SH_LOAD_FLAGS="-b -o"
-     	  SH_LOADER="ld"
-     	  SH_SUFFIX='sl'
+          SH_COMP_FLAGS="+Z"
+          SH_LOAD_FLAGS="-b -o"
+          SH_LOADER="$LD"
+          SH_SUFFIX='sl'
           SH_LIB_SUFFIX='sl'
-	  SH_MAIN_LOAD_FLAGS="-Wl,-E"
-	  ;;
+      SH_MAIN_LOAD_FLAGS="-Wl,-E"
+      ;;
   IRIX*)
-	  OS=IRIX;
-	  if test "$CC" = "gcc"
-	  then
-	    SH_COMP_FLAGS="-fpic"
-	  else
-	    SH_COMP_FLAGS="-KPIC"
-	  fi
-	  SH_LOAD_FLAGS="-shared -o"
-	  SH_LOADER="$CC"
-	  SH_SUFFIX='so'
+      OS=IRIX;
+      if test "$CC" = "gcc"
+      then
+        SH_COMP_FLAGS="-fpic"
+      else
+        SH_COMP_FLAGS="-KPIC"
+      fi
+      SH_LOAD_FLAGS="-shared -o"
+      SH_LOADER="$CC"
+      SH_SUFFIX='so'
           SH_LIB_SUFFIX='so'
-	  ;;
+      ;;
   Linux*)
-	  case $version in
+      case $version in
             2.0.*) version=2.0.x;;
-	    2.1.*) version=2.1.x;;
-	    2.2.*) version=2.2.x;;
-	    2.3.*) version=2.3.x;;
-	    2.4.*) version=2.4.x;;
+        2.1.*) version=2.1.x;;
+        2.2.*) version=2.2.x;;
+        2.3.*) version=2.3.x;;
+        2.4.*) version=2.4.x;;
           esac
           case $machine in
-	    i*86) machine=ix86;;
-	  esac
-	  OS=LINUX
-	  SH_COMP_FLAGS='-fpic -nostdlib'
+        i*86) machine=ix86;;
+      esac
+      OS=LINUX
+      SH_COMP_FLAGS='-fpic -nostdlib'
           SH_LOAD_FLAGS='-shared -o'
-          SH_LOADER='ld'
+          SH_LOADER="$LD"
           SH_SUFFIX='so'
           SH_LIB_SUFFIX='so'
           SH_MAIN_LOAD_FLAGS="-rdynamic"
-	  ;;
+      ;;
   NetBSD*)
-	  OS=NETBSD
-	  SH_COMP_FLAGS="-fpic"
+      OS=NETBSD
+      SH_COMP_FLAGS="-fpic"
           SH_LOAD_FLAGS="-Bshareable -o"
-          SH_LOADER="ld"
+          SH_LOADER="$LD"
           SH_SUFFIX='so'
           SH_LIB_SUFFIX='so'
-	  ;;
+      ;;
   OSF*)
-	  OS=OSF
-	  if [ "$CC" = "gcc" ] ;then
-	     SH_COMP_FLAGS="-fpic"
+      OS=OSF
+      if [ "$CC" = "gcc" ] ;then
+         SH_COMP_FLAGS="-fpic"
              SH_LOAD_FLAGS="-shared -o"
-             SH_LOADER="ld"
-	     SH_SUFFIX='so'
+             SH_LOADER="$LD"
+         SH_SUFFIX='so'
              SH_LIB_SUFFIX='so'
-	   else
-	     die "I do not know how to dynamically load on $os with $CC"
-	   fi
-	  ;;
+       else
+         die "I do not know how to dynamically load on $os with $CC"
+       fi
+      ;;
   SunOS*)
-	  case $machine in
-	    sun4*) machine=sun4;;
-	  esac
-	  OS=SUNOS
+      case $machine in
+        sun4*) machine=sun4;;
+      esac
+      OS=SUNOS
 #         SH_COMP_FLAGS="-K pic"
-#	  SH_LOAD_FLAGS='-G -z text -h'
-	  SH_COMP_FLAGS="-fpic"
-	  SH_LOAD_FLAGS='-shared -o'
-          SH_LOADER="ld"
+#     SH_LOAD_FLAGS='-G -z text -h'
+      SH_COMP_FLAGS="-fpic"
+      SH_LOAD_FLAGS='-shared -o'
+          SH_LOADER="$LD"
           SH_SUFFIX='so'
           SH_LIB_SUFFIX='so'
-	  ;;
+      ;;
   Darwin*)
-	  OS=DARWIN;
+      OS=DARWIN;
           SH_COMP_FLAGS="-fPIC -fno-common"
-	  SH_LOAD_FLAGS='-bundle -flat_namespace -undefined suppress -o'
+      SH_LOAD_FLAGS='-bundle -flat_namespace -undefined suppress -o'
           SH_LOADER="$CC"
           SH_SUFFIX='so'
           SH_LIB_SUFFIX='dylib'
-	  ;;
+      ;;
   CYGWIN*)
-	  # Since I cannot figure yet how to use shared libraries in Cygwin
-	  # And since they are not used yet. Just don't do it;-)
-	  OS=CYGWIN;
-	  OS_FLAVOUR=WIN32;
-	  SH_COMP_FLAGS=
+      # Since I cannot figure yet how to use shared libraries in Cygwin
+      # And since they are not used yet. Just don't do it;-)
+      OS=CYGWIN;
+      OS_FLAVOUR=WIN32;
+      SH_COMP_FLAGS=
           SH_LOAD_FLAGS='-shared -o'
           SH_LOADER='true'
           SH_SUFFIX='so'
           SH_LIB_SUFFIX='so'
           SH_MAIN_LOAD_FLAGS=""
-	  ;;
+      ;;
   *)      OS=UNKNOWN;;
 esac
 
