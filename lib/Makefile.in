@@ -446,6 +446,7 @@ SRC_STK = STklos.init     \
           srfi-174.stk        \
           srfi-175.stk        \
           srfi-180.stk        \
+          srfi-185.stk        \
           srfi-190.stk        \
           tar.stk             \
           trace.stk
@@ -506,6 +507,7 @@ scheme_OBJS = compfile.ostk    \
           srfi-175.ostk        \
           srfi-175-impl.@SH_SUFFIX@  \
           srfi-180.ostk        \
+          srfi-185.ostk        \
           srfi-190.ostk        \
           tar.ostk             \
           trace.ostk

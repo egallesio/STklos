@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 13-Jul-2020 19:17 (eg)
+### Last file update:  4-Aug-2020 20:01 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.40])
@@ -76,7 +76,12 @@ AC_CHECK_FUNCS([atexit dup2 endpwent floor getcwd gethostbyaddr gethostbyname ge
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
 
 ### Determine the options necessary for dynamic loading (even if disbaled later)
-eval `CC=$CC /bin/sh ./utils/shlib-options`
+if test X$LD = X
+then
+   LD="ld"
+fi
+
+eval `CC=$CC LD=$LD /bin/sh ./utils/shlib-options`
 
 case $OS_NAME_VERSION in
   SUNOS*)

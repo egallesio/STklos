@@ -5998,7 +5998,12 @@ done
 if test X$prefix = XNONE ;then  prefix=$ac_default_prefix; fi
 
 ### Determine the options necessary for dynamic loading (even if disbaled later)
-eval `CC=$CC /bin/sh ./utils/shlib-options`
+if test X$LD = X
+then
+   LD="ld"
+fi
+
+eval `CC=$CC LD=$LD /bin/sh ./utils/shlib-options`
 
 case $OS_NAME_VERSION in
   SUNOS*)
