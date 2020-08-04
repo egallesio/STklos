@@ -20,6 +20,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-1: List Library
     - SRFI-2: AND-LET*: an AND with local bindings, a guarded LET* special form
     - SRFI-4: Homogeneous numeric vector datatypes
+    - SRFI-5: A compatible let form with signatures and rest arguments
     - SRFI-6: Basic String Ports
     - SRFI-7: Feature-based program configuration language 
     - SRFI-8: Receive: Binding to multiple values

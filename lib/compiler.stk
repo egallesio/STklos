@@ -1120,15 +1120,16 @@ doc>
               (cond
                ((null? l) #t)
                ((pair? l) (let ((b (car l)))
-                            (if (and (list? b)
-                                     (= (length b) 2)
-                                     (symbol? (car b)))
-                                (if (and unique? (memq (car b) seen))
-                                    (compiler-error 'let bindings
-                                                     "duplicate binding ~S" (car b))
-                                    (aux (cdr l) (cons (car b) seen)))
-                                (compiler-error 'let bindings
-                                                 "malformed binding ~S" b))))
+                            (cond ((and (list? b)
+                                        (= (length b) 2)
+                                        (symbol? (car b)))
+                                   (if (and unique? (memq (car b) seen))
+                                       (compiler-error 'let bindings
+                                                       "duplicate binding ~S" (car b))
+                                       (aux (cdr l) (cons (car b) seen))))
+                                  ((symbol? b) #t) ;; SRFI-5 rest list
+                                  (else (compiler-error 'let bindings
+                                                        "malformed binding ~S" b)))))
                (else #f)))))
     (aux bindings '())))
 
@@ -1154,6 +1155,7 @@ doc>
                               (let () ,@body))
                            env args tail?))))))))
 
+
 ;;
 ;; LET (& named let)
 ;;
@@ -1162,29 +1164,86 @@ doc>
   (if (< len 4)
       (compiler-error 'let args "ill formed named let ~S" args)
       (when (valid-let-bindings? bindings #t)
-        (compile `((letrec ((,name (lambda ,(map car bindings) ,@body)))
+        (let-values (((args vals) (split-args-values bindings)))
+          (compile `((letrec ((,name (lambda ,args ,@body)))
                        ,name)
-                   ,@(map cadr bindings))
+                   ,@vals)
                  env
                  args
-                 tail?))))
+                 tail?)))))
+
+;; set-last-cdr! sets the CDR of the last element of a list.
+;; Useful for producing improper lists such as the list of
+;; names for rest arguments.
+;;
+;; * the list must be mutable!
+;;
+;; (define lst (list-copy '(a b c)))
+;; lst => (a b c)
+;; (set-last-cdr! lst 'E)
+;; lst => (a b c . E)
+(define (set-last-cdr! lst elt)
+  (cond ((not (or (list? lst)
+                  (pair? lst)))
+         (compiler-error 'set-last-cdr! lst "Not a cons cell ~S" lst))
+        ((null? (cdr lst))
+         (set-cdr! lst elt))
+        (else
+         (set-last-cdr! (cdr lst) elt))))
+
+;; split-args-values returns two values:
+;; 1. - the list of formal arguments. this will be
+;;      a proper list using standard LET, and an improper
+;;      list using SRFI-5 rest arguments.
+;; 2. - the init values of the arguments. This is always
+;;      a proper list.
+;;
+;; (split-args-values '( (a 10) (b 20) ))
+;; => (a b)
+;; => (10 20)
+;;
+;; (split-args-values '( (a 10) (b 20) c 1 2 3 ))
+;; => (a b . c)
+;; => (10 20 1 2 3)
+(define (split-args-values bindings)
+  (define (split-args-values-aux bindings seen-args seen-values)
+    (cond ((null?    bindings) (values (reverse seen-args) (reverse seen-values)))
+          ((pair?   (car bindings)) (split-args-values-aux (cdr bindings)
+                                                           (cons (caar  bindings) seen-args)
+                                                           (cons (cadar bindings) seen-values)))
+          ((symbol? (car bindings))
+           (let ((args-copy (list-copy (reverse seen-args)))) ;; needs to be mutable
+             (set-last-cdr! args-copy (car bindings)) ; include rest argument name
+             (values args-copy                        ; previous arg names
+                     (append (reverse seen-values) (cdr bindings))))) ; rest argument value list
+          (else (compiler-error 'let bindings "ill formed let ~S" bindings))))
+  (split-args-values-aux bindings '() '()))
 
 
+;; modified by jpellegrini 2020-08-04 for SRFI-5 support
 (define (compile-let args env tail?)
   (let ((len (length args)))
-    (if (< len 3)
+    (if (< len 2)
         (compiler-error 'let args "ill formed let ~S" args)
         (let ((bindings (cadr args))
               (body     (cddr args)))
-          (if (symbol? bindings)
+          (if (symbol? bindings)  ;; named let
               ;; Transform named let in letrec
               (compile-named-let bindings (car body) (cdr body) len args env tail?)
               (when (valid-let-bindings? bindings #t)
-                (if (null? bindings)
-                    (compile-body body env args tail?)
-                    (compile `((lambda ,(map car bindings) ,@body)
-                               ,@(map cadr bindings))
-                             env args tail?))))))))
+                (if (and (list? bindings)          ;; SRFI-5 allows one to write named LETs
+                         (not (null? bindings))    ;; as (let (proc bindings body)
+                         (symbol? (car bindings))) ;;
+                      (compile-let `(let ,(car bindings) ,(cdr bindings) ,@body)
+                                   env tail?)
+                    (if (< len 3)
+                        (compiler-error 'let args "ill formed let ~S" args)
+                        ;; The split-args-values procedure will automatically
+                        ;; take care of SRFI-5 LET rest lists
+                        (let-values (((args vals) (split-args-values bindings)))
+                          (compile `((lambda ,args ,@body)
+                                     ,@vals)
+                                   env args tail?))))))))))
 
 ;;
 ;; LET*

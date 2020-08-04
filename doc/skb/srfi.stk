@@ -31,6 +31,7 @@
      (1  . "List Library")
      (2  . "AND-LET*: an AND with local bindings, a guarded LET* special form")
      (4  . "Homogeneous numeric vector datatypes")
+     (5  . "A compatible let form with signatures and rest arguments")
      (6  . "Basic String Ports")
      (7  . "Feature-based program configuration language ")
      (8  . "Receive: Binding to multiple values")

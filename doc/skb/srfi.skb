@@ -117,6 +117,10 @@ To use SRFI-4, you need to insert the following expression])
 (fontified-code [(require "srfi-4")])
 (p [in your code or uses the ,(code "cond-expand") special form.]))
 
+;; SRFI 5 -- A compatible let form with signatures and rest arguments
+(gen-embedded-srfi 5)
+
+
 ;; ----------------------------------------------------------------------
 ;; SRFI 6 -- String Ports
 ;; ----------------------------------------------------------------------
