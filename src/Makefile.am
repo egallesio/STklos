@@ -36,7 +36,7 @@ stklos_SOURCES = base64.c boolean.c boot.c box.c char.c \
  path.c port.c print.c proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
  symbol.c system.c utf8.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
-
+BUILT_SOURCES = git-info.h
 
 ### # The STklos library
 ### lib_LTLIBRARIES      = libstklos.la
@@ -81,6 +81,12 @@ INCLUDES       = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
 
 struct.o cond.o: struct.h
 chars.c: utf8-tables.in
+
+# redo the git info thing every time make is invoked:
+.PHONY: git-info.h
+git-info.h:
+	./generate-git-info.sh
+
 
 doc:  $(DOCDB)
 
