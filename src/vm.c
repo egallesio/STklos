@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  3-Jun-2020 12:42 (eg)
+ * Last file update:  7-Aug-2020 11:12 (eg)
  */
 
 // INLINER values
@@ -881,7 +881,6 @@ DEFINE_PRIMITIVE("%vm", set_vm_debug, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
 static void run_vm(vm_thread_t *vm)
 {
   jbuf jb;
-  jbuf *old_jb = NULL;          /* to make Gcc happy */
   short tailp;
   volatile int offset,
                have_global_lock = 0;     /* if true, we're patching the code */
@@ -1416,7 +1415,6 @@ do_push_handler:
   if (STk_procedurep(vm->val) == STk_false)
     STk_error("bad exception handler ~S", vm->val);
 
-  old_jb          = vm->top_jmp_buf;
   vm->top_jmp_buf = &jb;
 
   if (MY_SETJMP(jb)) {
@@ -1438,7 +1436,6 @@ CASE(PUSH_HANDLER_FAR) {
 CASE(POP_HANDLER) {
   UNSAVE_HANDLER_STATE();
   RESTORE_VM_STATE(vm->sp);
-  vm->top_jmp_buf = old_jb;
   NEXT;
 }
 
@@ -1895,6 +1892,17 @@ DEFINE_PRIMITIVE("current-exception-handler", current_handler, subr0, (void))
     return (SCM) HANDLER_PROC(vm->handlers);
 }
 
+/*
+DEFINE_PRIMITIVE("%pop-exception-handler", pop_handler, subr0, (void))
+{
+  vm_thread_t *vm = STk_get_current_vm();
+
+  UNSAVE_HANDLER_STATE();
+  RESTORE_VM_STATE(vm->sp);
+  return STk_void;
+}
+
+*/
 
 /*===========================================================================*\
  *
@@ -2244,6 +2252,7 @@ int STk_init_vm()
   ADD_PRIMITIVE(call_with_values);
 
   ADD_PRIMITIVE(current_handler);
+  /* ADD_PRIMITIVE(pop_handler); */
 
   ADD_PRIMITIVE(make_continuation);
   ADD_PRIMITIVE(restore_cont);

@@ -1,4 +1,4 @@
- ;;;;                                                    -*- coding: utf-8 -*-
+s ;;;;                                                    -*- coding: utf-8 -*-
 ;;;;
 ;;;; test-r7rs.stk      -- Testing R7RS constructs/primitives
 ;;;;
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 31-Jul-2020 15:24 (eg)
+;;;; Last file update:  7-Aug-2020 11:00 (eg)
 ;;;;
 
 (require "test")
@@ -1454,7 +1454,9 @@
   (test "chibi-exception.9" "should be a number" (get-output-string out))
   (test "chibi-exception.10" 65 value))
 
+;;
 ;; Some tests from @jpellegrini on raise-continuable (issue #67 @github)
+;;
 (test "bug.1"
       12
       (let ((res (guard (x (#t x))
@@ -1470,11 +1472,73 @@
         res))
 
 (test "bug.3"
-      -5
+      '(-5)
       (with-exception-handler (lambda (x) (- x))
                               (lambda ()
                                 (guard (e ((symbol? e) (symbol->string e)))
                                        (list (raise-continuable 5))))))
+
+;;
+;; Some (adapted) Gauche tests
+;; 
+
+(test "Gauche: guard" 'caught-error
+       (guard (x
+               ((symbol? x) (cons 'symbol x))
+               ((error-object? x) 'caught-error))
+         (car 'a)))
+
+
+(test/error "Gauche: guard (uncaught error)" 
+       (guard (x
+               ((symbol? x) (cons 'symbol x))
+               ((error-object? x) 'caught-error))
+         (raise 4)))
+
+(test "Gauche: guard (uncaught error)" '(else . 4)
+      (guard (x
+              ((symbol? x) (cons 'symbol x))
+              ((error-object? x) 'caught-error)
+              (else (cons 'else x)))
+          (raise 4)))
+
+(test "Gauche: guard (subtype)" 'read-error
+       (guard (x
+               ((read-error? x)   'read-error)
+               ((file-error? x)   'file-error)
+               ((error-object? x) 'other-error)
+               (else             '???))
+              (read-from-string "(abc")))
+
+
+(test "Gauche: guard (nested)" 'exn
+      (call/cc (lambda (k)
+                 (with-exception-handler
+                  (lambda (x)
+                    (k x))
+                  (lambda ()
+                    (guard (ball
+                            (#f (display "Caught exception.")))
+                           (guard (ball
+                                   (#f (raise ball)))
+                                  (raise 'exn))))))))
+
+(let ()
+  (define aaa '())
+  (define (foo)
+    (dynamic-wind
+        (lambda () (set! aaa '()))
+        (lambda ()
+          (set! aaa (cons 'a aaa))
+          (error "foo"))
+        (lambda ()
+          (set! aaa (cons 'b aaa)))))
+  (test "Gauche: guard w/dynamic-wind" '((b a) (b a))
+         (let ((x (guard (e (else aaa)) (foo))))
+           (list x aaa))))
+
+
+
 ;;======================================================================
 (test-subsection "6.13 Input and Output")
 

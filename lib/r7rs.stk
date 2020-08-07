@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 31-Jul-2020 16:43 (eg)
+;;;; Last file update:  7-Aug-2020 11:17 (eg)
 ;;;;
 
 
@@ -1312,15 +1312,19 @@ doc>
 (define-struct %continuable-exception value)
 
 (define-macro (with-exception-handler handler thunk)
-  (let ((v (gensym)))
-    `(with-handler (lambda(,v)
-                     (if (%continuable-exception? ,v)
-                         (,handler (%continuable-exception-value ,v))
-                         (begin
-                           (,handler ,v)
-                           (error "exception handler returned on non-continuable exception"))))
-                   (,thunk))))
-
+  (let ((v   (gensym))
+        (res (gensym))
+        (err (gensym)))
+    `(let ((,res (with-handler (lambda(,v)
+                                 (if (%continuable-exception? ,v)
+                                    (,handler (%continuable-exception-value ,v))
+                                    (begin
+                                      (,handler ,v)
+                                      ',err)))
+                                 (,thunk))))
+       (if (eq? ,res ',err)
+           (error "exception handler returned on non-continuable exception")
+          ,res))))
 
 #|
 <doc R7RS raise-continuable
@@ -1392,25 +1396,32 @@ doc>
 doc>
 |#
 (define-macro (guard clauses . body)
-  (let* ((var  (car clauses))
-         (last (last-pair clauses))
-         (ex   (gensym 'ex-)))
-    `(with-handler
-      (lambda (,ex)
-        (let ((,var (if (%continuable-exception? ,ex)
-                        (%continuable-exception-value ,ex)
-                        ,ex)))
-          (cond
-           ,@(cdr clauses)
-           ;; Add an else clause if 
-           ,@(if (and (pair? last) (pair? (car last)) (eq? (caar last) 'else))
-                 '()
-                 `((else (raise ,ex))))))) ;; if ex is continuable <=> raise-continuable
-      (with-handler
-       (lambda (,var)
-         ;; Transform a continuable exception in a normal one
-         (raise ,var))
-       ,@body))))
+  (let* ((var      (car clauses))
+         (last     (last-pair clauses))
+         (ex       (gensym))
+         (old-hdlr (gensym))
+         (reraised (gensym))
+         (res      (gensym)))
+    `(let ((,old-hdlr (current-exception-handler)))
+       (with-handler
+        (lambda (,ex)
+          (let* ((,var (if (%continuable-exception? ,ex)
+                           (%continuable-exception-value ,ex)
+                           ,ex))
+                 (,reraised #f)
+                 (,res (cond
+                        ,@(cdr clauses)
+                           ;; Add an else clause if not present
+                        ,@(if (and (pair? last) (pair? (car last)) (eq? (caar last) 'else))
+                              '()
+                              `((else (set! ,reraised #t)
+                                      (,old-hdlr ,ex)))))))
+            (if ,reraised
+                ,res
+                (if (%continuable-exception? ,ex)
+                    (raise ,res)
+                    ,res))))
+        ,@body))))
 
 ;;;; ----------------------------------------------------------------------
 ;;;; 6.14 System Interface
