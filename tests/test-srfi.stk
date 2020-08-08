@@ -3226,6 +3226,465 @@
                     (call-with-input-string "{" json-read)))
 
 ;; ----------------------------------------------------------------------
+;;  SRFI 189 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 189 - Maybe and Either: optional container types")
+
+(require "srfi-189")
+
+(define (identity x) x)
+
+
+(define-syntax constantly
+  (syntax-rules ()
+    ((_ obj) (lambda _ obj))))
+
+(define-syntax values->list
+  (syntax-rules ()
+    ((_ expr)
+     (call-with-values (lambda () expr) list))))
+
+(define always (constantly #t))
+(define never (constantly #f))
+
+
+;; Verify that a Maybe is a Just of 'z, a dummy object.
+(define (just-of-z? m)
+  (and (maybe? m) (maybe= eqv? m (just 'z))))
+
+;; Verify that an Either is a Right of 'z, a dummy object.
+(define (right-of-z? e)
+  (and (either? e) (either= eqv? e (right 'z))))
+
+;; Verify that an Either is a Left of 'z, a dummy object.
+(define (left-of-z? e)
+  (and (either? e) (either= eqv? e (left 'z))))
+
+;; CONSTRUCTORS
+
+;; Uniqueness of the Nothing object.
+(test "eq? nothing" #t (eq? (nothing) (nothing)))
+
+;; list->just and list->right
+(test "list->just and list->right 1" #t (maybe= eqv? (just #t #t) (list->just '(#t #t))))
+(test "list->just and list->right 2" #t (either= eqv? (right #t #t) (list->right '(#t #t))))
+(test "list->just and list->right 3" #t (either= eqv? (left #t #t) (list->left '(#t #t))))
+
+;; maybe->either and either->maybe
+(test "maybe->either and either->maybe 1" #t (left-of-z? (maybe->either (nothing) 'z)))
+(test "maybe->either and either->maybe 2" #t (right-of-z? (maybe->either (just 'z) #f)))
+(test "maybe->either and either->maybe 3" #t (either= eqv? (right #t #t) (maybe->either (just #t #t) #f)))
+(test "maybe->either and either->maybe 4" #t (nothing? (either->maybe (left #t))))
+(test "maybe->either and either->maybe 5" #t (just-of-z? (either->maybe (right 'z))))
+(test "maybe->either and either->maybe 6" #t (maybe= eqv? (just #t #t) (either->maybe (right #t #t))))
+
+;; either-swap
+(test "either-swap 1" #t (either= eqv? (right #t #t) (either-swap (left #t #t))))
+(test "either-swap 2" #t (either= eqv? (left #t #t) (either-swap (right #t #t))))
+
+;;;; Predicates
+
+(test "predicates 1" #t (just? (just 'z)))
+(test "predicates 2" #f (just? (nothing)))
+(test "predicates 3" #f (nothing? (just 'z)))
+(test "predicates 4" #t (nothing? (nothing)))
+(test "predicates 5" #t (maybe? (just 'z)))
+(test "predicates 6" #t (maybe? (nothing)))
+
+(test "predicates 7" #t (right? (right 'z)))
+(test "predicates 8" #f (right? (left 'z)))
+(test "predicates 9" #f (left? (right 'z)))
+(test "predicates 10" #t (left? (left 'z)))
+(test "predicates 11" #t (either? (right 'z)))
+(test "predicates 12" #t (either? (left 'z)))
+
+(test "predicates 13" #t (maybe= eqv? (just #t) (just #t)))
+(test "predicates 14" #f (maybe= eqv? (just #t) (just #f)))
+(test "predicates 15" #t (maybe= eqv? (nothing) (nothing)))
+(test "predicates 16" #f (maybe= eqv? (just #t) (nothing)))
+
+(test "predicates 17" #t (maybe= eqv? (just #t #f) (just #t #f)))
+(test "predicates 18" #f (maybe= eqv? (just #t #f) (just #t 'z)))
+(test "predicates 19" #f (maybe= eqv? (just #t #f) (just #t)))
+
+(test "predicates 20" #t (maybe= eqv? (just #t) (just #t) (just #t)))
+(test "predicates 21" #t (maybe= eqv? (nothing) (nothing) (nothing)))
+(test "predicates 22" #f (maybe= eqv? (just #t) (just #t) (nothing)))
+(test "predicates 23" #f (maybe= eqv? (just #t) (just #t) (just #f)))
+(test "predicates 24" #t (maybe= eqv? (just #t 'z) (just #t 'z) (just #t 'z)))
+
+(test "predicates 25" #t (either= eqv? (right #t) (right #t)))
+(test "predicates 26" #f (either= eqv? (right #t) (right #f)))
+(test "predicates 27" #t (either= eqv? (left #t) (left #t)))
+(test "predicates 28" #f (either= eqv? (left #t) (left #f)))
+(test "predicates 29" #f (either= eqv? (right #t) (left #t)))
+
+(test "predicates 30" #t (either= eqv? (right #t #f) (right #t #f)))
+(test "predicates 31" #f (either= eqv? (right #t #f) (right #t 'z)))
+(test "predicates 32" #f (either= eqv? (right #t #f) (right #t)))
+(test "predicates 33" #t (either= eqv? (left #t #f) (left #t #f)))
+(test "predicates 34" #f (either= eqv? (left #t #f) (left #t 'z)))
+(test "predicates 35" #f (either= eqv? (left #t #f) (left #t)))
+(test "predicates 36" #f (either= eqv? (left #t #f) (right #t #f)))
+
+(test "predicates 37" #t (either= eqv? (right #t) (right #t) (right #t)))
+(test "predicates 38" #t (either= eqv? (left #t) (left #t) (left #t)))
+(test "predicates 39" #f (either= eqv? (right #t) (right #t) (left #t)))
+(test "predicates 40" #f (either= eqv? (right #t) (right #t) (right #f)))
+(test "predicates 41" #t (either= eqv? (right #t 'z) (right #t 'z) (right #t 'z)))
+
+;;;; Accessors
+
+(test "accessors 1" #f (maybe-ref (nothing) (lambda () #f)))
+(test "accessors 2" #t (maybe-ref (just #t) (lambda () #f) values))
+(test "accessors 3" #f (maybe-ref (nothing) (lambda () #f) values))
+
+(test "accessors 4" '(#t #f) (values->list (maybe-ref (just #t #f) (lambda () #f))))
+(test "accessors 5" '(#t #f) (maybe-ref (just #t #f) (lambda () #f) list))
+
+(test "accessors 6" #f (either-ref (left #t) (constantly #f)))
+(test "accessors 7" #t (either-ref (right #t) (constantly #f) values))
+(test "accessors 8" #t (either-ref (left #t) values (constantly #f)))
+
+(test "accessors 9" '(#t #f) (either-ref (right #t #f) (constantly #f) list))
+(test "accessors 10" '(#t #f) (either-ref (left #t #f) list (constantly #f)))
+
+(test "accessors 11" #t (maybe-ref/default (just #t) #f))
+(test "accessors 12" #f (maybe-ref/default (nothing) #f))
+(test "accessors 13" '(#t #t) (values->list (maybe-ref/default (just #t #t) #f #f)))
+(test "accessors 14" '(#f #f) (values->list (maybe-ref/default (nothing) #f #f)))
+
+(test "accessors 15" #t (either-ref/default (right #t) #f))
+(test "accessors 16" #f (either-ref/default (left #t) #f))
+(test "accessors 17" '(#t #t) (values->list (either-ref/default (right #t #t) #f #f)))
+(test "accessors 18" '(#f #f) (values->list (either-ref/default (left #t) #f #f)))
+
+;;;; Join and bind
+
+  ;; maybe-join
+(test "maybe-join 1" #t (just-of-z? (maybe-join (just (just 'z)))))
+(test "maybe-join 2" #t (nothing? (maybe-join (just (nothing)))))
+(test "maybe-join 3" #t (nothing? (maybe-join (nothing))))
+
+  ;; either-join
+(test "either-join 1" #t (right-of-z? (either-join (right (right 'z)))))
+(test "either-join 2" #t (left-of-z? (either-join (right (left 'z)))))
+(test "either-join 3" #t (left-of-z? (either-join (left 'z))))
+
+;; maybe-bind
+(test "maybe-bind 1" #t (nothing? (maybe-bind (nothing) just)))
+
+(test "maybe-bind 2" #t (just-of-z? (maybe-bind (just 'z) just)))
+
+(test "maybe-bind 3" #t (let ((m (just #t #f)))
+           (maybe= eqv? m (maybe-bind m just))))
+
+
+;; Associativity of bind.
+(let ((k (lambda (n) (just (* n 2))))
+      (h (lambda (n) (just (+ n 5))))
+      (m (just 1)))
+  (test "Associativity of bind" #t (maybe= eqv?
+                      (maybe-bind m (lambda (n) (maybe-bind (k n) h)))
+                      (maybe-bind (maybe-bind m k) h))))
+
+
+;; Bind with multiple mprocs.
+(let ((neg (lambda (b) (just (not b)))))
+  (test "Bind with multiple mprocs 1" #t (maybe= eqv? (just #f) (maybe-bind (just #t) neg neg neg)))
+  (test "Bind with multiple mprocs 2" #t (nothing? (maybe-bind (just #t) neg (constantly (nothing)) neg))))
+
+;; maybe-compose
+(test "maybe-compose 1" #t (nothing? ((maybe-compose (constantly (nothing))) 'z)))
+(test "maybe-compose 2" #t (just-of-z? ((maybe-compose just) 'z)))
+
+;; Compose with multiple mprocs.
+(let ((neg (lambda (b) (just (not b)))))
+  (test "Compose with multiple mprocs" #t (maybe= eqv? (just #t) ((maybe-compose neg neg neg) #f))))
+
+;; either-bind
+(test "either-bind 1" #t (left? (either-bind (left #f) right)))
+
+(test "either-bind 2" #t (right-of-z? (either-bind (right 'z) right)))
+
+(test "either-bind 3" #t (let ((e (right #t #f)))
+              (either= eqv? e (either-bind e right))))
+
+;; Associativity of bind.
+(let ((k (lambda (n) (right (* n 2))))
+      (h (lambda (n) (right (+ n 5))))
+      (e (right 1)))
+  (test "Associativity of bind 2" #t
+     (either= eqv? (either-bind e (lambda (n) (either-bind (k n) h)))
+                   (either-bind (either-bind e k) h))))
+
+;; Bind with multiple mprocs.
+(let ((neg (lambda (b) (right (not b)))))
+  (test "Bind with multiple mprocs 3" #t (either= eqv? (right #f) (either-bind (right #t) neg neg neg)))
+  (test "Bind with multiple mprocs 4" #t (either= eqv? (left #f) (either-bind (right #t) neg left neg))))
+
+;; either-compose
+(test "either-compose" #t (left-of-z? ((either-compose left) 'z)))
+(test "either-compose 2" #t (either= eqv? (right #t) ((either-compose right) #t)))
+
+;; Compose with multiple mprocs.
+(let ((neg (lambda (b) (right (not b)))))
+  (test "Compose with multiple mprocs" #t (either= eqv? (right #t) ((either-compose neg neg neg) #f))))
+
+
+;;;; Sequence operations
+
+(define (both b c) (and b c))
+
+(test "maybe-length 0" 0 (maybe-length (nothing)))
+(test "maybe-length 1" 1 (maybe-length (just #t)))
+
+(test "either-length 0" 0 (either-length (left #t)))
+(test "either-length 1" 1 (either-length (right #t)))
+
+;; maybe-filter & maybe-remove
+(test "maybe-filter & maybe-remove 1" #t (just-of-z? (maybe-filter always (just 'z))))
+(test "maybe-filter & maybe-remove 2" #t (nothing? (maybe-filter never (just #t))))
+(test "maybe-filter & maybe-remove 3" #t (nothing? (maybe-filter always (nothing))))
+
+(test "maybe-filter & maybe-remove 4" #t (maybe= eqv? (just #t #t) (maybe-filter both (just #t #t))))
+
+(test "maybe-filter & maybe-remove 5" #t (just-of-z? (maybe-remove never (just 'z))))
+(test "maybe-filter & maybe-remove 6" #t (nothing? (maybe-remove always (just #t))))
+(test "maybe-filter & maybe-remove 7" #t (nothing? (maybe-remove always (nothing))))
+
+(test "maybe-filter & maybe-remove 8" #t (maybe= eqv? (just #t #f) (maybe-remove both (just #t #f))))
+
+;; maybe-sequence
+(test "maybe-sequence" #t
+      (maybe= equal? (maybe-sequence (map just '(#t #f)) map identity)
+              (just '(#t #f))))
+
+(test "maybe-sequence 2" #t
+      (maybe= equal? (maybe-sequence (list (just 1 #t) (just 2 #f))
+                                     map
+                                     list)
+              (just '((1 #t) (2 #f)))))
+
+(test "maybe-sequence 3" #t
+      (nothing? (maybe-sequence (list (just #t) (nothing)) map identity)))
+
+;; either-filter & either-remove
+(test "either-filter & either-remove" #t (right-of-z? (either-filter always (right 'z) #f)))
+(test "either-filter & either-remove 2" #t (left-of-z? (either-filter never (right #t) 'z)))
+(test "either-filter & either-remove 3" #t (left-of-z? (either-filter always (left #t) 'z)))
+
+(test "either-filter & either-remove 4" #t
+      (either= eqv? (right #t #t) (either-filter both (right #t #t) #f)))
+
+(test "either-filter & either-remove 5" #t (right-of-z? (either-remove never (right 'z) #f)))
+(test "either-filter & either-remove 6" #t (left-of-z? (either-remove always (right #t) 'z)))
+(test "either-filter & either-remove 7" #t (left-of-z? (either-remove never (left #t) 'z)))
+
+(test "either-filter & either-remove 8"  #t
+      (either= eqv? (right #t #f) (either-remove both (right #t #f) #f)))
+
+;; either-sequence
+(test "either-sequence 1" #t
+      (either= equal? (either-sequence (map right (list 1 2)) map identity)
+               (right (list 1 2))))
+(test "either-sequence 2" #t
+      (left-of-z? (either-sequence (list (right #t) (left 'z)) map identity)))
+(test "either-sequence 3" #t
+      (either= equal? (either-sequence (list (right 1 #t) (right 2 #f))
+                                       map
+                                       list)
+               (right '((1 #t) (2 #f)))))
+
+
+;;;; Protocol conversion procedures
+
+(test "maybe->list (nothing)" '() (maybe->list (nothing)))
+(test "conversion 2" '(#t #t) (maybe->list (just #t #t)))
+(test "conversion 3" '(#t #t) (either->list (right #t #t)))
+(test "conversion 4" '(#t #t) (either->list (left #t #t)))
+
+(test "conversion 5" #t (nothing? (list->maybe '())))
+(test "conversion 6" #t (just-of-z? (list->maybe '(z))))
+(test "conversion 7" #t (left-of-z? (list->either '() 'z)))
+(test "conversion 8" #t (right-of-z? (list->either '(z) #f)))
+
+(test "conversion 9" #f (maybe->truth (nothing)))
+(test "maybe->truth, just" 'z (maybe->truth (just 'z)))
+(test "conversion 11" #f (either->truth (left 'z)))
+(test "maybe->truth, right" 'z (either->truth (right 'z)))
+
+(test "conversion 13" #t (nothing? (truth->maybe #f)))
+(test "conversion 14" #t (just-of-z? (truth->maybe 'z)))
+(test "conversion 15" #t (left-of-z? (truth->either #f 'z)))
+(test "conversion 16" #t (right-of-z? (truth->either 'z #f)))
+
+(test "conversion 17" '(z #t) (maybe->list-truth (just 'z #t)))
+(test "conversion 18" #f (maybe->list-truth (nothing)))
+(test "conversion 19" '(z #t) (either->list-truth (right 'z #t)))
+(test "conversion 20" #f (either->list-truth (left 'z)))
+
+(test "conversion 21" #t (just-of-z? (list-truth->maybe '(z))))
+(test "conversion 22" #t (nothing? (list-truth->maybe #f)))
+(test "conversion 23" #t (right-of-z? (list-truth->either '(z))))
+(test "conversion 24" #t (left-of-z? (list-truth->either #f 'z)))
+
+(test "conversion 25" #t (eof-object? (maybe->generation (nothing))))
+(test "conversion 26" #t (maybe->generation (just #t)))
+(test "conversion 27" #t (nothing? (generation->maybe (eof-object))))
+(test "conversion 28" #t (just-of-z? (generation->maybe 'z)))
+
+(test "conversion 29" #t (eof-object? (either->generation (left))))
+(test "conversion 30" #t (either->generation (right #t)))
+(test "conversion 31" #t (left-of-z? (generation->either (eof-object) 'z)))
+(test "conversion 32" #t (right-of-z? (generation->either 'z #f)))
+
+;; maybe->values and friends
+(test "maybe->values and friends 1" #t (maybe->values (just #t)))
+(test "maybe->values and friends 2" '() (values->list (maybe->values (nothing))))
+
+(test "maybe->values and friends 3" '(#f #f) (values->list (maybe->two-values (nothing))))
+(test "maybe->values and friends 4" '(#t #t) (values->list (maybe->two-values (just #t))))
+
+(test "maybe->values and friends 5" #t (just-of-z? (two-values->maybe (lambda () (values 'z #t)))))
+(test "maybe->values and friends 6" #t (nothing? (two-values->maybe (lambda () (values 'z #f)))))
+
+(test "maybe->values and friends 7" #t (nothing? (values->maybe (lambda () (values)))))
+(test "maybe->values and friends 8" #t (just-of-z? (values->maybe (lambda () 'z))))
+(test "maybe->values and friends 9" #t (maybe->values (values->maybe (lambda () #t))))
+(test "maybe->values and friends 10" #t (just-of-z? (values->maybe (lambda ()
+                                         (maybe->values (just 'z))))))
+
+;; either->values and friends
+(test "either->values and friends 1" #t (either->values (right #t)))
+(test "either->values and friends 2" '() (values->list (either->values (left 'z))))
+
+(test "either->values and friends 3" #t (left-of-z? (values->either (lambda () (values)) 'z)))
+(test "either->values and friends 4" #t (right-of-z? (values->either (lambda () 'z) #f)))
+(test "either->values and friends 5" #t (either->values (values->either (lambda () #t) #f)))
+(test "either->values and friends 6" #t (right-of-z? (values->either (lambda () (either->values (right 'z))) #f)))
+
+(test "either->values and friends 7" #t (left-of-z? (exception->either symbol? (lambda () (raise 'z)))))
+(test "either->values and friends 8" #t (right-of-z? (exception->either symbol? (lambda () 'z))))
+
+(test "guarded" 'z (guard (obj ((symbol? obj) obj))
+                     (exception->either number?
+                                        (lambda () (raise-continuable 'z)))))
+
+(test "exception->either" #t (either= eqv?
+                                      (with-exception-handler
+                                          not
+                                        (lambda ()
+                                          (exception->either string?
+                                                             (lambda ()
+                                                               (not (raise-continuable #t))))))
+                                      (right #t)))
+
+
+;;;; Map, fold, and unfold
+
+  ;; maybe-map
+(test "Map, fold, and unfold 1" #t (nothing? (maybe-map not (nothing))))
+(test "Map, fold, and unfold 2" #t (maybe= eqv? (just #f) (maybe-map not (just #t))))
+
+(test "Map, fold, and unfold 3" #t (maybe= eqv? (just #t #f) (maybe-map values (just #t #f))))
+
+;; either-map
+  ;; Verify that the result is the same Left (in the sense of eqv?).
+(test "Map, fold, and unfold 4" #t (let ((e (left #t))) (eqv? e (either-map not e))))
+(test "Map, fold, and unfold 5" #t (either= eqv? (right #f) (either-map not (right #t))))
+
+(test "Map, fold, and unfold 6" #t (let ((e (right #t #f)))
+              (either= eqv? e (either-map values e))))
+
+;; maybe-for-each
+(test "maybe-for-each 1" #t (let ((x #f))
+              (maybe-for-each (lambda (y) (set! x y)) (just #t))
+              x))
+
+;; Given Nothing, ensure the proc argument is not executed.
+(test "maybe-for-each 2" #f
+      (let ((x #f))
+        (maybe-for-each (lambda (_) (set! x #t)) (nothing))
+        x))
+
+;; either-for-each
+(test "either-for-each" #t (let ((x #f))
+              (either-for-each (lambda (y) (set! x y)) (right #t))
+              x))
+
+;; Given a Left, ensure the proc argument is not executed.
+(test "Map, fold, and unfold 10" #f (let ((x #f))
+              (either-for-each (lambda (_) (set! x #t)) (left 'z))
+              x))
+
+(test "Map, fold, and unfold 11" '() (maybe-fold cons '() (nothing)))
+(test "Map, fold, and unfold 12" '(#t) (maybe-fold cons '() (just #t)))
+(test "Map, fold, and unfold 13" 24 (maybe-fold * 2 (just 3 4)))
+
+(test "Map, fold, and unfold 14" '() (either-fold cons '() (left #t)))
+(test "Map, fold, and unfold 15" '(#t) (either-fold cons '() (right #t)))
+(test "Map, fold, and unfold 16" 24 (either-fold * 2 (right 3 4)))
+
+(test "Map, fold, and unfold 17" #t (nothing? (maybe-unfold always not always #f)))
+(test "Map, fold, and unfold 18" #t (maybe= eqv? (just #t) (maybe-unfold values not not #f)))
+(test "Map, fold, and unfold 19" #t (maybe= eqv? (just #t 'z)
+                         (maybe-unfold (lambda (b _) (not b))
+                                       values
+                                       (lambda (b x) (values (not b) x))
+                                       #t
+                                       'z)))
+
+(test "Map, fold, and unfold 20" #t (left-of-z? (either-unfold always not always 'z)))
+(test "Map, fold, and unfold 21" #t (either= eqv? (right #t) (either-unfold values not not #f)))
+(test "Map, fold, and unfold 22" #t (either= eqv? (right #t 'z)
+                       (either-unfold (lambda (b _) (not b))
+                                      values
+                                      (lambda (b x) (values (not b) x))
+                                      #t
+                                      'z)))
+
+
+
+
+
+;;;; Trivalent logic
+
+(define (tri-true? m)
+  (and (just? m) (maybe-ref/default m 'z)))
+
+(define (tri-false? m)
+  (and (just? m) (not (maybe-ref/default m 'z))))
+
+(test "trivalent 1" #t (tri-true? (tri-not (just #f))))
+(test "trivalent 2" #t (tri-false? (tri-not (just #t))))
+(test "trivalent 3" #t (nothing? (tri-not (nothing))))
+
+(test "trivalent 4" #t (tri-true? (tri=? (just #t) (just 1) (just 'x))))
+(test "trivalent 5" #t (tri-true? (tri=? (just #f) (just #f))))
+(test "trivalent 6" #t (tri-true? (tri=? (just #f) (just #f))))
+(test "trivalent 7" #t (tri-false? (tri=? (just #f) (just #t))))
+(test "trivalent 8" #t (tri-false? (tri=? (just #f) (nothing))))
+
+(test "trivalent 9" #t (tri-true? (tri-and (just #t) (just 1) (just 'x))))
+(test "trivalent 10" #t (nothing? (tri-and (just #t) (nothing))))
+(test "trivalent 11" #t (tri-false? (tri-and (just #f) (just #t))))
+(test "trivalent 12" #t (tri-true? (tri-and)))
+
+(test "trivalent 13" #t (tri-false? (tri-or (just #f) (just #f) (just #f))))
+(test "trivalent 14" #t (nothing? (tri-or (just #f) (nothing))))
+(let ((m-true (just 'x)))
+  (test "trivalent 15" #t (maybe= eqv? m-true (tri-or (just #f) m-true))))
+(test "trivalent 16" #t (tri-false? (tri-or)))
+
+(test "trivalent 17" #t (nothing? (tri-merge (nothing) (nothing) (nothing))))
+(let ((m-true (just 'x)))
+  (test "trivalent 18" #t (maybe= eqv? m-true (tri-merge (nothing) m-true))))
+(let ((m-false (just #f)))
+  (test "trivalent 19" #t (maybe= eqv? m-false (tri-merge (nothing) m-false))))
+(test "trivalent 20" #t (nothing? (tri-merge)))
+
+;; ----------------------------------------------------------------------
 ;;  SRFI 190 ...
 ;; ----------------------------------------------------------------------
 (test-subsection "SRFI 190 - Coroutine Generators")

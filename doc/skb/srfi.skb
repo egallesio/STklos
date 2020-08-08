@@ -686,6 +686,9 @@ procedure.]))
 ;; SRFI 185 --  Linear adjustable-length strings
 (gen-loaded-srfi 185)
 
+;; SRFI 189 -- Maybe and Either: optional container types
+(gen-loaded-srfi 189)
+
 ;; SRFI 190 -- Coroutine Generators
 (gen-loaded-srfi 190)
 
