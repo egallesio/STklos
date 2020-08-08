@@ -92,6 +92,7 @@
      (176 . "Version flag")
      (180 . "JSON")
      (185 . "Linear adjustable-length strings")
+     (189 . "Maybe and Either: optional container types")
      (190 . "Coroutines Generators")
    ))
 
