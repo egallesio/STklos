@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 31-Jul-2020 12:34 (eg)
+# Last file update:  8-Aug-2020 18:03 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -185,7 +185,7 @@ SUFFIXES = .stk .ostk .scm
 	$(COMP) -o $*.ostk $*.scm
 
 .c.@SH_SUFFIX@ :
-	@CC@ @CFLAGS@ @SH_COMP_FLAGS@ -I../src -I../gc/include -c  -o $*.o $*.c
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src -c  -o $*.o $*.c
 	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o
 	/bin/rm -f $*.o
 
