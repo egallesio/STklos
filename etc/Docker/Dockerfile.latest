@@ -4,7 +4,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  3-Jun-2019 11:28
-# Last file update:  8-Aug-2020 19:12 (eg)
+# Last file update:  8-Aug-2020 19:30 (eg)
 
 # The image is created from the git version of STklos
 #
@@ -20,7 +20,7 @@ RUN apk update && \
         gc-dev gmp-dev libffi-dev pcre-dev 
 
 WORKDIR /build
-RUN git clone https://gitlab.com/Gallesio/STklos.git stklos
+RUN git clone https://github.com/egallesio/STklos.git stklos
 WORKDIR /build/stklos
 RUN env CFLAGS='-O3 -fomit-frame-pointer' ./configure \
     --without-provided-bignum \
