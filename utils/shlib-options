@@ -21,7 +21,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 27-Jul-2000 12:21 (eg)
-# Last file update:  4-Aug-2020 14:42 (eg)
+# Last file update:  8-Aug-2020 18:48 (eg)
 
 
 #
@@ -52,8 +52,14 @@ SH_MAIN_LOAD_FLAGS=""
 
 if [ "$CC" = "" ]
 then
-    die "CC variable not set"
+    die "CC variable is not set"
 fi
+
+if [ "$LD" = "" ]
+then
+    die "LD variable is not set"
+fi
+
 
 case $os in
   FreeBSD*)

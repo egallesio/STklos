@@ -6003,7 +6003,7 @@ then
    LD="ld"
 fi
 
-eval `CC=$CC LD=$LD /bin/sh ./utils/shlib-options`
+eval `env CC=$CC LD=$LD /bin/sh ./utils/shlib-options`
 
 case $OS_NAME_VERSION in
   SUNOS*)
@@ -8330,6 +8330,7 @@ echo "              OS type: " $OS_FLAVOUR
 echo "      Install prefix : " $prefix
 echo "           C compiler: " $CC
 echo "    Compilation flags: " $CFLAGS
+echo "               Loader: " $LD
 echo "       Thread support: " $THREADS
 echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "System libraries used: " $SYST_LIBS

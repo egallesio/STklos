@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  4-Aug-2020 20:01 (eg)
+### Last file update:  8-Aug-2020 19:06 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.40])
@@ -81,7 +81,7 @@ then
    LD="ld"
 fi
 
-eval `CC=$CC LD=$LD /bin/sh ./utils/shlib-options`
+eval `env CC=$CC LD=$LD /bin/sh ./utils/shlib-options`
 
 case $OS_NAME_VERSION in
   SUNOS*)
@@ -510,6 +510,7 @@ echo "              OS type: " $OS_FLAVOUR
 echo "      Install prefix : " $prefix
 echo "           C compiler: " $CC
 echo "    Compilation flags: " $CFLAGS
+echo "               Loader: " $LD
 echo "       Thread support: " $THREADS
 echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
 echo "System libraries used: " $SYST_LIBS

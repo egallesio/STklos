@@ -67,6 +67,18 @@ implemented SRFIs is available in the file SUPPORTED-SRFIS in the
 distribution). The goal is to support as much as possible final
 SRFIs. Any help on implementing other SRFIs on STklos is welcome.
 
+IDEs
+----
+
+There are two recommended IDEs that can be used with STklos:
+
+* Quack by Neil van Dyke, which still works fine, but it's not being updated:
+  https://www.neilvandyke.org/quack/
+  
+* Geiser:
+  http://www.nongnu.org/geiser/
+  The STklos support package is here: https://gitlab.com/emacs-geiser/stklos/
+  
 Supported architectures
 ----------------------
 
