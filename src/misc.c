@@ -26,6 +26,7 @@
 
 #include "stklos.h"
 #include "gnu-getopt.h"
+#include "git-info.h"
 
 #ifdef STK_DEBUG
 #include <execinfo.h>
@@ -115,6 +116,11 @@ DEFINE_PRIMITIVE("%push-id", push_id, subr0, (void))
 DEFINE_PRIMITIVE("%stklos-configure", stklos_configure, subr0, (void))
 {
   return STk_read_from_C_string(CONF_SUMMARY);
+}
+
+DEFINE_PRIMITIVE("%stklos-git", stklos_git, subr0, (void))
+{
+  return STk_read_from_C_string(GIT_SUMMARY);
 }
 
 /*
@@ -582,6 +588,7 @@ int STk_init_misc(void)
   ADD_PRIMITIVE(version);
   ADD_PRIMITIVE(push_id);
   ADD_PRIMITIVE(stklos_configure);
+  ADD_PRIMITIVE(stklos_git);
   ADD_PRIMITIVE(scheme_void);
   ADD_PRIMITIVE(address_of);
   ADD_PRIMITIVE(scheme_gc);
