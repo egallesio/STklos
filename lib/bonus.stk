@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 15-Jul-2020 16:53 (eg)
+;;;; Last file update:  9-Aug-2020 16:50 (eg)
 ;;;;
 
 
@@ -1406,6 +1406,13 @@ doc>
       (error "bad error object: ~S" obj)))
 
 
+(define (%push-id)
+  (let ((value (key-get (%stklos-git) :commit "")))
+    (if (string=? value "")
+        (string-append "stable-" (version))
+        value)))
+
+
 ;;;; ======================================================================
 ;;;;
 ;;;; SRFIs support
@@ -1831,10 +1838,9 @@ doc>
  * (version-alist)
  *
  * This function returns an association list of STklos properties as defined by
- * ,(quick-link-srfi 176). 
+ * ,(quick-link-srfi 176).
 doc>
 |#
-
 (define (version-alist)
   (define (%feature->srfi feature)
     (let* ((srfi- "srfi-")
