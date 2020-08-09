@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 14-Jun-2019 13:31 (eg)
+# Last file update:  9-Aug-2020 15:53 (eg)
 
 
 VPATH = @srcdir@
@@ -413,6 +413,7 @@ stklos_SOURCES = base64.c boolean.c boot.c box.c char.c \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
  symbol.c system.c utf8.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
 
+BUILT_SOURCES = generate-git-info
 
 ### # The STklos library
 ### lib_LTLIBRARIES      = libstklos.la
@@ -452,7 +453,7 @@ ffiinc = @FFIINC@
 stklos_LDADD = $(compatlib) $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
 INCLUDES = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
-all: stklosconf.h
+all: $(BUILT_SOURCES) stklosconf.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
@@ -737,13 +738,15 @@ distdir-am: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS) $(DATA) stklosconf.h
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(extraincdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -773,6 +776,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
@@ -944,7 +948,7 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-extraincDATA
 
-.MAKE: all install-am install-strip
+.MAKE: all check install install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
 	clean-binPROGRAMS clean-generic cscopelist-am ctags ctags-am \
@@ -966,8 +970,17 @@ uninstall-am: uninstall-binPROGRAMS uninstall-extraincDATA
 
 STKLOS_BINARY ?= ./stklos
 
+# HACK:  Normally BUILT_SOURCES contains the files that must be generated before
+# starting the construction of the main target. We use it with a fictive target
+# which runs a script which may update the git-config.h file. If it is updated, 
+# normal rules apply and a new global link is done.
+.PHONY: generate-git-info
+
 struct.o cond.o: struct.h
 chars.c: utf8-tables.in
+
+generate-git-info:
+	@../utils/generate-git-info
 
 doc:  $(DOCDB)
 
@@ -975,7 +988,7 @@ $(DOCDB): $(stklos_SOURCES)
 	$(STKLOS_BINARY) -b boot.img -c -q -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
 
 clean:
-	/bin/rm -f *.o $(DOCDB)
+	/bin/rm -f *.o $(DOCDB) git-config.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

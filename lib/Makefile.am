@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  8-Aug-2020 19:09 (eg)
+# Last file update:  9-Aug-2020 15:53 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -194,9 +194,13 @@ SUFFIXES = .stk .ostk .scm
 
 #======================================================================
 
-all-recursive: boot compfile.ostk
+all-recursive: boot generate-git-info compfile.ostk
 
-boot:	../src/boot.img 
+boot:	../src/boot.img
+
+generate-git-info:
+	@../utils/generate-git-info
+	@(cd ../src; $(MAKE) all)
 
 ../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \

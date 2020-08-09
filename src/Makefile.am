@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 14-Jun-2019 13:31 (eg)
+# Last file update:  9-Aug-2020 15:53 (eg)
 
 CC	    = @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -36,7 +36,13 @@ stklos_SOURCES = base64.c boolean.c boot.c box.c char.c \
  path.c port.c print.c proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
  symbol.c system.c utf8.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
-BUILT_SOURCES = git-info.h
+
+# HACK:  Normally BUILT_SOURCES contains the files that must be generated before
+# starting the construction of the main target. We use it with a fictive target
+# which runs a script which may update the git-config.h file. If it is updated, 
+# normal rules apply and a new global link is done.
+.PHONY: generate-git-info
+BUILT_SOURCES = generate-git-info
 
 ### # The STklos library
 ### lib_LTLIBRARIES      = libstklos.la
@@ -82,11 +88,8 @@ INCLUDES       = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
 struct.o cond.o: struct.h
 chars.c: utf8-tables.in
 
-# redo the git info thing every time make is invoked:
-.PHONY: git-info.h
-git-info.h:
-	./generate-git-info.sh
-
+generate-git-info:
+	@../utils/generate-git-info
 
 doc:  $(DOCDB)
 
@@ -94,5 +97,5 @@ $(DOCDB): $(stklos_SOURCES)
 	$(STKLOS_BINARY) -b boot.img -c -q -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
 
 clean:
-	/bin/rm -f *.o $(DOCDB)
+	/bin/rm -f *.o $(DOCDB) git-config.h
 
