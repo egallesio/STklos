@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  3-Jul-2020 16:47 (eg)
+ * Last file update: 11-Aug-2020 18:20 (eg)
  *
  */
 
@@ -195,16 +195,6 @@ DEFINE_PRIMITIVE("interactive-port?", interactive_portp, subr1, (SCM port))
  * Returns the current default input or output port.
 doc>
  */
-DEFINE_PRIMITIVE("current-input-port",current_input_port, subr0, (void))
-{
-  return STk_get_current_vm()->iport;
-}
-
-DEFINE_PRIMITIVE("current-output-port",current_output_port, subr0, (void))
-{
-  return STk_get_current_vm()->oport;
-}
-
 /*
 <doc EXT current-error-port
  * (current-error-port obj)
@@ -212,9 +202,33 @@ DEFINE_PRIMITIVE("current-output-port",current_output_port, subr0, (void))
  * Returns the current default error port.
 doc>
  */
-DEFINE_PRIMITIVE("current-error-port",current_error_port, subr0, (void))
+
+/* The 3 following C functions correspond to the R5RS primitives.
+ * For compatibility reason, they are not renamed. 
+ */
+SCM STk_current_input_port(void) { return STk_get_current_vm()->iport; }
+SCM STk_current_output_port(void){ return STk_get_current_vm()->oport; }
+SCM STk_current_error_port(void) { return STk_get_current_vm()->eport; }
+
+/* The setters for the standard port (since current-xxx-port are parameters 
+ * in R7RS.
+ */
+static SCM STk_set_current_input_port(SCM port)
 {
-  return STk_get_current_vm()->eport;
+  if (!IPORTP(port)) STk_error_bad_port(port);
+  return STk_get_current_vm()->iport = port;
+}
+
+static SCM STk_set_current_output_port(SCM port)
+{
+  if (!OPORTP(port)) STk_error_bad_port(port);
+  return STk_get_current_vm()->oport = port;
+}
+
+static SCM STk_set_current_error_port(SCM port)
+{
+  if (!OPORTP(port)) STk_error_bad_port(port);
+  return STk_get_current_vm()->eport = port;
 }
 
 
@@ -1724,9 +1738,14 @@ int STk_init_port(void)
   ADD_PRIMITIVE(textual_portp);
   ADD_PRIMITIVE(portp);
   ADD_PRIMITIVE(interactive_portp);
-  ADD_PRIMITIVE(current_input_port);
-  ADD_PRIMITIVE(current_output_port);
-  ADD_PRIMITIVE(current_error_port);
+
+  STk_make_C_parameter2("current-input-port", STk_current_input_port,
+                        STk_set_current_input_port, STk_STklos_module);
+  STk_make_C_parameter2("current-output-port", STk_current_output_port,
+                        STk_set_current_output_port, STk_STklos_module);
+  STk_make_C_parameter2("current-error-port", STk_current_error_port,
+                        STk_set_current_error_port, STk_STklos_module);
+
   ADD_PRIMITIVE(set_std_port);
   ADD_PRIMITIVE(scheme_read);
   ADD_PRIMITIVE(scheme_read_cst);

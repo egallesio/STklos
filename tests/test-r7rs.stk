@@ -22,7 +22,7 @@ s ;;;;                                                    -*- coding: utf-8 -*-
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update:  7-Aug-2020 11:00 (eg)
+;;;; Last file update: 11-Aug-2020 18:21 (eg)
 ;;;;
 
 (require "test")
@@ -1480,7 +1480,7 @@ s ;;;;                                                    -*- coding: utf-8 -*-
 
 ;;
 ;; Some (adapted) Gauche tests
-;; 
+;;
 
 (test "Gauche: guard" 'caught-error
        (guard (x
@@ -1489,7 +1489,7 @@ s ;;;;                                                    -*- coding: utf-8 -*-
          (car 'a)))
 
 
-(test/error "Gauche: guard (uncaught error)" 
+(test/error "Gauche: guard (uncaught error)"
        (guard (x
                ((symbol? x) (cons 'symbol x))
                ((error-object? x) 'caught-error))
@@ -1792,6 +1792,23 @@ s ;;;;                                                    -*- coding: utf-8 -*-
         (flush-output-port p)
         (get-output-bytevector p)))
 
+; --------------------------------------------------
+(test "current-input-port as parameter.1"
+      '((a b) 10 #eof)
+      (parameterize ((current-input-port (open-input-string "(a b) 10")))
+        (let* ((a (read))
+               (b (read))
+               (c (read)))
+          (list a b c))))
+
+(test "current-output-port as parameter"
+      "piece by piece by piece.\n"
+      (parameterize ((current-output-port (open-output-string)))
+        (display "piece")
+        (display " by piece ")
+        (display "by piece.")
+        (newline)
+        (get-output-string (current-output-port))))
 
 
 ;;======================================================================

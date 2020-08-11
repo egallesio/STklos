@@ -1,7 +1,7 @@
 /*
- * parameter.c	-- Parameter Objects (SRFI-39)
+ * parameter.c  -- Parameter Objects (SRFI-39)
  *
- * Copyright © 2003-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  1-Jul-2003 11:38 (eg)
- * Last file update: 19-Aug-2011 18:00 (eg)
+ * Last file update: 11-Aug-2020 18:17 (eg)
  */
 
 
@@ -31,23 +31,25 @@
 
 struct parameter_obj {
   stk_header header;
+  int C_type;           /* 0: parameter is expressed in Scheme                    */
+                        /* 1: Converter is expressed in C rather than in Scheme   */
+                        /* 2: idem and getter is a procedure to call to get value */
   SCM value;
   SCM converter;
-  SCM dynenv; 	  /* an A-list ((thr1 . val) ...) to look before returning value */
-  int C_type;	  /* 0: parameter is expressed in Scheme
-		     1: Converter is expressed in C rather than in Scheme
-		     2: idem and value is a procedure to call to get value */
+  SCM (*getter)(void);  /* Used only for type 2 parameter objects */
+  SCM dynenv;           /* an A-list ((thr1 . val) ...) to look before returning value */
 };
 
-#define PARAMETERP(o) 		(BOXED_TYPE_EQ((o), tc_parameter))
-#define PARAMETER_VALUE(p)	(((struct parameter_obj *) (p))->value)
-#define PARAMETER_CONV(p)	(((struct parameter_obj *) (p))->converter)
-#define PARAMETER_C_TYPE(p)	(((struct parameter_obj *) (p))->C_type)
-#define PARAMETER_DYNENV(p)	(((struct parameter_obj *) (p))->dynenv)
+#define PARAMETERP(o)       (BOXED_TYPE_EQ((o), tc_parameter))
+#define PARAMETER_C_TYPE(p) (((struct parameter_obj *) (p))->C_type)
+#define PARAMETER_VALUE(p)  (((struct parameter_obj *) (p))->value)
+#define PARAMETER_CONV(p)   (((struct parameter_obj *) (p))->converter)
+#define PARAMETER_GETTER(p) (((struct parameter_obj *) (p))->getter)
+#define PARAMETER_DYNENV(p) (((struct parameter_obj *) (p))->dynenv)
 
 /*===========================================================================*\
  *
- * 	Utilities
+ *  Utilities
  *
 \*===========================================================================*/
 
@@ -59,14 +61,16 @@ static void error_bad_parameter(SCM obj)
 
 SCM STk_get_parameter(SCM param)
 {
-  SCM val, tmp;
+  SCM tmp;
 
   if (!PARAMETERP(param)) error_bad_parameter(param);
 
   tmp = STk_int_assq(STk_current_thread(), PARAMETER_DYNENV(param));
-  val =  (tmp != STk_false) ? CDR(tmp) : PARAMETER_VALUE(param);
 
-  return (PARAMETER_C_TYPE(param) == 2) ? ((SCM (*)(void)) val)(): val;
+  if (PARAMETER_C_TYPE(param) == 2)
+    return (tmp != STk_false) ? CDR(tmp) : PARAMETER_GETTER(param)();
+  else
+    return (tmp != STk_false) ? CDR(tmp) : PARAMETER_VALUE(param);
 }
 
 SCM STk_set_parameter(SCM param, SCM value)
@@ -78,8 +82,9 @@ SCM STk_set_parameter(SCM param, SCM value)
   conv = PARAMETER_CONV(param);
 
   if (PARAMETER_C_TYPE(param)) {
-    /* We have a C converter */
-    new = (conv != STk_false) ? ((SCM (*) (SCM))conv)(value): value;
+    /* We have a C converter (which is always present) */
+    //new = (conv != STk_false) ? ((SCM (*) (SCM))conv)(value): value;
+    new = ((SCM (*) (SCM))conv)(value);
   } else {
     /* We have a Scheme converter */
     new = (conv != STk_false) ? STk_C_apply(conv,1,value): value;
@@ -89,23 +94,22 @@ SCM STk_set_parameter(SCM param, SCM value)
   if (tmp != STk_false)
     CDR(tmp) = new;
   else {
-    if (PARAMETER_C_TYPE(param) != 2)
-      PARAMETER_VALUE(param) = new;
+    PARAMETER_VALUE(param) = new;
   }
 
   return STk_void;
 }
 
-SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value),
-			 SCM module)
+SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*conv)(SCM new_value),
+             SCM module)
 {
   SCM z;
 
-  /* Define the parameter */
   NEWCELL(z, parameter);
-  PARAMETER_VALUE(z)  = value;
-  PARAMETER_CONV(z)   = (SCM) proc;
   PARAMETER_C_TYPE(z) = 1;
+  PARAMETER_VALUE(z)  = conv(value);
+  PARAMETER_CONV(z)   = (SCM) conv;
+  PARAMETER_GETTER(z) = STk_void;
   PARAMETER_DYNENV(z) = STk_nil;
 
   /* Bind it to the given symbol */
@@ -114,12 +118,21 @@ SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*proc)(SCM new_value),
   return z;
 }
 
-SCM STk_make_C_parameter2(SCM symbol, SCM (*value)(void), SCM (*proc)(SCM new_value),
-			  SCM module)
+SCM STk_make_C_parameter2(SCM symbol, SCM (*getter)(void), SCM (*conv)(SCM new_value),
+              SCM module)
 {
-  SCM z = STk_make_C_parameter(symbol, (SCM) value, proc, module);
+  SCM z;
 
+  NEWCELL(z, parameter);
   PARAMETER_C_TYPE(z) = 2;
+  PARAMETER_VALUE(z)  = getter();
+  PARAMETER_CONV(z)   = (SCM) conv;
+  PARAMETER_GETTER(z) = getter;
+  PARAMETER_DYNENV(z) = STk_nil;
+
+  /* Bind it to the given symbol */
+  STk_define_variable(STk_intern(symbol), z, module);
+
   return z;
 }
 
@@ -127,7 +140,7 @@ SCM STk_make_C_parameter2(SCM symbol, SCM (*value)(void), SCM (*proc)(SCM new_va
 
 /*===========================================================================*\
  *
- * 	Primitives
+ *  Primitives
  *
 \*===========================================================================*/
 
@@ -193,9 +206,10 @@ DEFINE_PRIMITIVE("make-parameter", make_parameter, subr12, (SCM value, SCM conv)
   v = (conv) ? STk_C_apply(conv, 1, value): value;
 
   NEWCELL(z, parameter);
+  PARAMETER_C_TYPE(z) = 0;
   PARAMETER_VALUE(z)  = v;
   PARAMETER_CONV(z)   = (conv) ? conv : STk_false;
-  PARAMETER_C_TYPE(z) = 0;
+  PARAMETER_GETTER(z) = STk_void;
   PARAMETER_DYNENV(z) = STk_nil;
 
   return z;
@@ -221,7 +235,7 @@ DEFINE_PRIMITIVE("%parameter-dynenv-push!", parameter_dynenv_push, subr1, (SCM p
   if (!PARAMETERP(param)) error_bad_parameter(param);
 
   PARAMETER_DYNENV(param) = STk_cons(STk_cons(STk_current_thread(), STk_void),
-				     PARAMETER_DYNENV(param));
+                                     PARAMETER_DYNENV(param));
   return STk_void;
 }
 
@@ -234,9 +248,8 @@ DEFINE_PRIMITIVE("%parameter-dynenv-pop!", parameter_dynenv_pop, subr1, (SCM par
   thr = STk_current_thread();
   for (prev = tmp = PARAMETER_DYNENV(param); !NULLP(tmp); prev=tmp, tmp=CDR(tmp)) {
     if (CAR(CAR(tmp)) == thr) {
-      if (tmp ==  prev) PARAMETER_DYNENV(param) = CDR(tmp);
+      if (tmp == prev) PARAMETER_DYNENV(param) = CDR(tmp);
       else CDR(prev) = CDR(tmp);
-      break;
     }
   }
   return STk_void;
@@ -246,7 +259,7 @@ DEFINE_PRIMITIVE("%parameter-dynenv-pop!", parameter_dynenv_pop, subr1, (SCM par
 
 /*===========================================================================*\
  *
- * 	Initialization code
+ *  Initialization code
  *
 \*===========================================================================*/
 
