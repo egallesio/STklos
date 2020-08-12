@@ -22,7 +22,7 @@ s ;;;;                                                    -*- coding: utf-8 -*-
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 11-Aug-2020 18:21 (eg)
+;;;; Last file update: 11-Aug-2020 18:40 (eg)
 ;;;;
 
 (require "test")
@@ -1800,6 +1800,20 @@ s ;;;;                                                    -*- coding: utf-8 -*-
                (b (read))
                (c (read)))
           (list a b c))))
+
+(test "current-input-port as parameter.2"
+      '(1000 ((a b) 10 #eof) 2000 #eof)
+      (parameterize ((current-input-port (open-input-string "1000 2000")))
+        (let* ((a (read))
+               (b (parameterize ((current-input-port (open-input-string "(a b) 10")))
+                    (let* ((a (read))
+                           (b (read))
+                           (c (read)))
+                      (list a b c))))
+               (c (read))
+               (d (read)))
+          (list a b c d))))
+
 
 (test "current-output-port as parameter"
       "piece by piece by piece.\n"

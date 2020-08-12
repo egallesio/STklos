@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  9-Aug-2020 16:50 (eg)
+;;;; Last file update: 12-Aug-2020 15:48 (eg)
 ;;;;
 
 
@@ -1617,23 +1617,22 @@ doc>
 doc>
 |#
 (define-macro (parameterize bindings . body)
-  (let ((tmp (map (lambda (_) (gensym)) bindings)))
-    `(let ,(map (lambda (x y) (list y (cadr x)))
-                 bindings tmp)
+  (let ((tmp1 (map (lambda (_) (gensym)) bindings))
+        (tmp2 (map (lambda (_) (gensym)) bindings)))
+    `(let (,@(map (lambda (x y) (list y (cadr x)))
+                  bindings tmp1)
+           ,@(map (lambda (x y) (list y (list (car x))))
+                  bindings tmp2))
        (dynamic-wind
            (lambda ()
-             ;; First push all the current parameter values
-             ,@(map (lambda (x) `(%parameter-dynenv-push! ,(car x)))
-                    bindings)
              ;; Change all parameters values
              ,@(map (lambda (x y) `(,(car x) ,y))
-                    bindings tmp))
+                    bindings tmp1))
            (lambda ()
              ,@body)
            (lambda ()
-             ,@(map (lambda (x) `(%parameter-dynenv-pop! ,(car x)))
-                   bindings))))))
-
+             ,@(map (lambda (x y) `(,(car x) ,y))
+                    bindings tmp2))))))
 ;;
 ;; SRFI-55: "require-extension"
 ;;

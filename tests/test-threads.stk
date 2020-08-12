@@ -21,13 +21,14 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 16-Apr-2006 12:54 (eg)
-;;;; Last file update: 29-Jun-2020 16:06 (eg)
+;;;; Last file update: 11-Aug-2020 18:49 (eg)
 ;;;;
 
 (require "test")
 
-(unless (eq? (%thread-system) 'none)
 
+(unless (eq? (%thread-system) 'none)
+  
 (thread-handler-error-show #f) ;; don't display errors asap
 
 ;;;; These tests are performed when we have threads
@@ -49,31 +50,31 @@
 
 (test "thread-specific" "hello"
       (begin
-    (thread-specific-set! (current-thread) "hello")
-    (thread-specific (current-thread))))
+        (thread-specific-set! (current-thread) "hello")
+        (thread-specific (current-thread))))
 
 (test "thread-start!" "hello"
       (call-with-output-string
-          (lambda (p)
-        (let ((t (thread-start! (make-thread (lambda () (display "hello" p))))))
-          (thread-join! t)
-          t))))
+       (lambda (p)
+         (let ((t (thread-start! (make-thread (lambda () (display "hello" p))))))
+           (thread-join! t)
+           t))))
 
 ;; calculate fibonacchi in awful way
 (define (mt-fib n)
   (let ((threads (make-vector n)))
     (dotimes (i n)
-      (vector-set! threads
-           i
-           (make-thread
-            (case i
-              ((0)  (lambda () 1))
-              ((1)  (lambda () 2))
-              (else (lambda ()
-                  (+ (thread-join! (vector-ref threads (- i 1)))
-                 (thread-join! (vector-ref threads (- i 2))))))))))
+             (vector-set! threads
+                          i
+                          (make-thread
+                           (case i
+                             ((0)  (lambda () 1))
+                             ((1)  (lambda () 2))
+                             (else (lambda ()
+                                     (+ (thread-join! (vector-ref threads (- i 1)))
+                                        (thread-join! (vector-ref threads (- i 2))))))))))
     (dotimes (i n)
-      (thread-start! (vector-ref threads (- n i 1))))
+             (thread-start! (vector-ref threads (- n i 1))))
     (thread-join! (vector-ref threads (- n 1)))))
 
 (test "thread-join!" 14930352 (mt-fib 35))
@@ -90,7 +91,7 @@
         (let ((t (make-thread (lambda () (thread-sleep! 100000)))))
           (thread-start! t)
           (thread-terminate! t)
-        43)))
+          43)))
 
 (test "Terminate a (probably) terminated thread"
       44
@@ -120,21 +121,21 @@
 (test-subsection "Thread and error")
 
 (test "uncaught-exception.1" 123
-       (let ((t (make-thread (lambda () (error "foo")))))
-         (thread-start! t)
-         (with-handler (lambda (c)
-             ;; c is the condition associated to error "foo"
-             123)
-           (thread-join! t))))
+      (let ((t (make-thread (lambda () (error "foo")))))
+        (thread-start! t)
+        (with-handler (lambda (c)
+                        ;; c is the condition associated to error "foo"
+                        123)
+                      (thread-join! t))))
 
 (test "uncaught-exception.2"
       1230
       (let ((t (thread-start! (make-thread (lambda () (raise 123))))))
-    (with-handler (lambda (exc)
-            (if (uncaught-exception? exc)
-                (* 10 (uncaught-exception-reason exc))
-                99999))
-      (+ 1 (thread-join! t)))))
+        (with-handler (lambda (exc)
+                        (if (uncaught-exception? exc)
+                            (* 10 (uncaught-exception-reason exc))
+                            99999))
+                      (+ 1 (thread-join! t)))))
 
 
 ;;------------------------------------------------------------------
@@ -142,37 +143,37 @@
 
 (test "parameter.1" 1
       (let ((local #f))
-    (thread-join! (thread-start!
-               (make-thread
-            (lambda ()
-              (set! local (make-parameter 1))))))
-         (thread-join! (thread-start!
-            (make-thread
-             (lambda ()
-               (local)))))))
+        (thread-join! (thread-start!
+                       (make-thread
+                        (lambda ()
+                          (set! local (make-parameter 1))))))
+        (thread-join! (thread-start!
+                       (make-thread
+                        (lambda ()
+                          (local)))))))
 
 (define *thr1-val* #f)
 (define *thr2-val* #f)
 (define p (make-parameter 3))
 
 (test "parameter.2" '(3 4 5)
-       (let ((th1 (make-thread
-                   (lambda ()
-             (parameterize ((p 4))
-               (thread-yield!)
-               (set! *thr1-val* (p))))))
-             (th2 (make-thread
-                   (lambda ()
-             (parameterize ((p 5))
-               (thread-yield!)
-               (set! *thr2-val* (p)))))))
-         (thread-start! th1)
-         (thread-start! th2)
-         (thread-join! th1)
-         (thread-join! th2)
-         (list (p) *thr1-val* *thr2-val*)))
+      (let ((th1 (make-thread
+                  (lambda ()
+                    (parameterize ((p 4))
+                      (thread-yield!)
+                      (set! *thr1-val* (p))))))
+            (th2 (make-thread
+                  (lambda ()
+                    (parameterize ((p 5))
+                      (thread-yield!)
+                      (set! *thr2-val* (p)))))))
+        (thread-start! th1)
+        (thread-start! th2)
+        (thread-join! th1)
+        (thread-join! th2)
+        (list (p) *thr1-val* *thr2-val*)))
 
-;------------------------------------------------------------------
+;;------------------------------------------------------------------
 (test-subsection "Mutexes")
 
 (test "make-mutex" #t (mutex? (make-mutex)))
@@ -180,65 +181,65 @@
 
 (test "mutex-specific" "hello"
       (let ((m (make-mutex 'bar)))
-    (mutex-specific-set! m "hello")
-    (mutex-specific m)))
+        (mutex-specific-set! m "hello")
+        (mutex-specific m)))
 
 (test "lock and unlock - no blocking" #t
       (let ((m (make-mutex)))
-    (mutex-lock! m)
-    (mutex-unlock! m)))
+        (mutex-lock! m)
+        (mutex-unlock! m)))
 
 (test "mutex-state"
-       (list 'not-abandoned (current-thread) 'not-owned 'not-abandoned)
-       (let ((m (make-mutex)))
-     (list (mutex-state m)
-           (begin
-         (mutex-lock! m)
-         (mutex-state m))
-           (begin
-         (mutex-unlock! m)
-         (mutex-lock! m #f #f)
-         (mutex-state m))
-           (begin (mutex-unlock! m)
-              (mutex-state m)))))
+      (list 'not-abandoned (current-thread) 'not-owned 'not-abandoned)
+      (let ((m (make-mutex)))
+        (list (mutex-state m)
+              (begin
+                (mutex-lock! m)
+                (mutex-state m))
+              (begin
+                (mutex-unlock! m)
+                (mutex-lock! m #f #f)
+                (mutex-state m))
+              (begin (mutex-unlock! m)
+                     (mutex-state m)))))
 (test "lock/unlock"
       '((put a) (get a) (put b) (get b) (put c) (get c))
       (let ((log '())
-        (cell #f)
-        (m (make-mutex)))
-    (define (put! msg)
-      (mutex-lock! m)
-      (if cell
-          (begin (mutex-unlock! m)
+            (cell #f)
+            (m (make-mutex)))
+        (define (put! msg)
+          (mutex-lock! m)
+          (if cell
+              (begin (mutex-unlock! m)
                      (thread-yield!)
                      (put! msg))
-          (begin (set! cell msg)
-             (set! log `((put ,msg) ,@log))
-             (mutex-unlock! m))))
-    (define (get!)
-      (mutex-lock! m)
-      (if cell
-          (let(( r cell))
-        (set! cell #f)
-        (set! log `((get ,r) ,@log))
-        (mutex-unlock! m)
-        r)
-          (begin (mutex-unlock! m)
+              (begin (set! cell msg)
+                     (set! log `((put ,msg) ,@log))
+                     (mutex-unlock! m))))
+        (define (get!)
+          (mutex-lock! m)
+          (if cell
+              (let(( r cell))
+                (set! cell #f)
+                (set! log `((get ,r) ,@log))
+                (mutex-unlock! m)
+                r)
+              (begin (mutex-unlock! m)
                      (thread-yield!)
                      (get!))))
-    (define (producer)
-      (put! 'a)
-      (put! 'b)
-      (put! 'c))
-    (define (consumer)
-      (get!)
-      (get!)
-      (get!))
-    (let ((tp (thread-start! (make-thread producer 'producer)))
-          (tc (thread-start! (make-thread consumer 'consumer))))
-      (thread-join! tp)
-      (thread-join! tc)
-      (reverse log))))
+        (define (producer)
+          (put! 'a)
+          (put! 'b)
+          (put! 'c))
+        (define (consumer)
+          (get!)
+          (get!)
+          (get!))
+        (let ((tp (thread-start! (make-thread producer 'producer)))
+              (tc (thread-start! (make-thread consumer 'consumer))))
+          (thread-join! tp)
+          (thread-join! tc)
+          (reverse log))))
 
 (test "lock with timeout"
       '(#t #f #f #f #f #t #t)
@@ -247,9 +248,9 @@
                (r1 (mutex-lock! m 0))
                (r2 (mutex-lock! m 0.05))
                (r3 (mutex-lock! m (seconds->time (+ (time->seconds (current-time))
-                            0.05))))
+                                                    0.05))))
                (r4 (mutex-lock! m (seconds->time (- (time->seconds (current-time))
-                            0.05))))
+                                                    0.05))))
                (r5 (mutex-unlock! m))
                (r6 (mutex-lock! m 0)))
           (mutex-unlock! m)
@@ -258,30 +259,30 @@
 (test "recursive mutex"
       (list (current-thread) 0 'not-abandoned)
       (letrec ()
-    (define (mutex-lock-recursively! mutex)
-      (if (eq? (mutex-state mutex) (current-thread))
-          (let ((n (mutex-specific mutex)))
-        (mutex-specific-set! mutex (+ n 1)))
-          (begin
-        (mutex-lock! mutex)
-        (mutex-specific-set! mutex 0))))
+        (define (mutex-lock-recursively! mutex)
+          (if (eq? (mutex-state mutex) (current-thread))
+              (let ((n (mutex-specific mutex)))
+                (mutex-specific-set! mutex (+ n 1)))
+              (begin
+                (mutex-lock! mutex)
+                (mutex-specific-set! mutex 0))))
 
-    (define (mutex-unlock-recursively! mutex)
-      (let ((n (mutex-specific mutex)))
-        (if (= n 0)
-        (mutex-unlock! mutex)
-        (mutex-specific-set! mutex (- n 1)))))
-    (let ((m (make-mutex)))
-      (mutex-specific-set! m 0)
-      (mutex-lock-recursively! m)
-      (mutex-lock-recursively! m)
-      (mutex-lock-recursively! m)
-      (let ((r0 (mutex-state m)))
-        (mutex-unlock-recursively! m)
-        (mutex-unlock-recursively! m)
-        (let ((r1 (mutex-specific m)))
-          (mutex-unlock-recursively! m)
-          (list r0 r1 (mutex-state m)))))))
+        (define (mutex-unlock-recursively! mutex)
+          (let ((n (mutex-specific mutex)))
+            (if (= n 0)
+                (mutex-unlock! mutex)
+                (mutex-specific-set! mutex (- n 1)))))
+        (let ((m (make-mutex)))
+          (mutex-specific-set! m 0)
+          (mutex-lock-recursively! m)
+          (mutex-lock-recursively! m)
+          (mutex-lock-recursively! m)
+          (let ((r0 (mutex-state m)))
+            (mutex-unlock-recursively! m)
+            (mutex-unlock-recursively! m)
+            (let ((r1 (mutex-specific m)))
+              (mutex-unlock-recursively! m)
+              (list r0 r1 (mutex-state m)))))))
 
 
 ;;------------------------------------------------------------------
@@ -298,49 +299,49 @@
 (test "condition-variable-specific"
       "hello"
       (let ((c (make-condition-variable 'foo)))
-    (condition-variable-specific-set! c "hello")
-    (condition-variable-specific c)))
+        (condition-variable-specific-set! c "hello")
+        (condition-variable-specific c)))
 
 (test "condition-variable-signal!"
       '((put a) (get a) (put b) (get b) (put c) (get c))
       (let ((log '())
-        (cell #f)
-        (m  (make-mutex))
-        (put-cv (make-condition-variable))
-        (get-cv (make-condition-variable)))
-    (define (put! msg)
-      (mutex-lock! m)
-      (if cell
-          (begin (mutex-unlock! m put-cv) (put! msg))
-          (begin (set! cell msg)
-             (set! log (cons `(put ,msg) log))
-             (condition-variable-signal! get-cv)
-             (mutex-unlock! m))))
-    (define (get!)
-      (mutex-lock! m)
-      (if cell
-          (let ((r cell))
-        (set! cell #f)
-        (set! log (cons `(get ,r) log))
-        (condition-variable-signal! put-cv)
-        (mutex-unlock! m)
-        r)
-          (begin
-        (mutex-unlock! m get-cv) (get!))))
-    (define (producer)
-      (put! 'a)
-      (put! 'b)
-      (put! 'c))
-    (define (consumer)
-      (get!)
-      (get!)
-      (get!))
+            (cell #f)
+            (m  (make-mutex))
+            (put-cv (make-condition-variable))
+            (get-cv (make-condition-variable)))
+        (define (put! msg)
+          (mutex-lock! m)
+          (if cell
+              (begin (mutex-unlock! m put-cv) (put! msg))
+              (begin (set! cell msg)
+                     (set! log (cons `(put ,msg) log))
+                     (condition-variable-signal! get-cv)
+                     (mutex-unlock! m))))
+        (define (get!)
+          (mutex-lock! m)
+          (if cell
+              (let ((r cell))
+                (set! cell #f)
+                (set! log (cons `(get ,r) log))
+                (condition-variable-signal! put-cv)
+                (mutex-unlock! m)
+                r)
+              (begin
+                (mutex-unlock! m get-cv) (get!))))
+        (define (producer)
+          (put! 'a)
+          (put! 'b)
+          (put! 'c))
+        (define (consumer)
+          (get!)
+          (get!)
+          (get!))
 
-    (let ((tp (thread-start! (make-thread producer 'producer)))
-          (tc (thread-start! (make-thread consumer 'consumer))))
-      (thread-join! tp)
-      (thread-join! tc)
-      (reverse log))))
+        (let ((tp (thread-start! (make-thread producer 'producer)))
+              (tc (thread-start! (make-thread consumer 'consumer))))
+          (thread-join! tp)
+          (thread-join! tc)
+          (reverse log))))
 
 (test-section-end)
 
