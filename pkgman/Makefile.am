@@ -1,7 +1,7 @@
 # Makefile for stklos-pkgman
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 22-Dec-2006 12:00 (eg)
-# Last file update: 10-Feb-2020 16:32 (eg)
+# Last file update: 12-Aug-2020 19:38 (eg)
 
 
 makefiledir  = $(prefix)/share/@PACKAGE@/@VERSION@/etc
@@ -32,7 +32,8 @@ lang-mzscheme.inc: lang-mzscheme.l
 	$(GENLEX) lang-mzscheme.l lang-mzscheme.inc lang-mzscheme
 
 $(bin_SCRIPTS):  $(LEXOBJS) $(SRC)
-	$(COMP) -o $(bin_SCRIPTS) main.stk 
+	$(COMP) -o $(bin_SCRIPTS) main.stk
+	rm -f  $(LEXOBJS)
 
 clean:
 	$(RM) -f $(bin_SCRIPTS) $(LEXOBJS) *~
