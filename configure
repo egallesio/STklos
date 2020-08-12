@@ -8317,6 +8317,9 @@ $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
 
+# Add a src/git-config.h if we dont have one
+(cd src; ../utils/generate-git-info)
+
 chmod 0755 utils/stklos-config utils/stklos-script
 
 

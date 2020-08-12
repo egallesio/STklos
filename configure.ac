@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  8-Aug-2020 19:06 (eg)
+### Last file update: 12-Aug-2020 17:24 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.40])
@@ -496,6 +496,9 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/stklos-genlex.1 doc/stklos-pkg.1 doc/skb/stklos-version.stk
           pkgman/Makefile])
 AC_OUTPUT
+
+# Add a src/git-config.h if we dont have one
+(cd src; ../utils/generate-git-info)
 
 chmod 0755 utils/stklos-config utils/stklos-script
 
