@@ -155,7 +155,7 @@ src/extraconf.h
 src/stamp-h1
 src/stklos
 src/stklosconf.h
-src/git-config.h
+src/git-info.h
 
 # Test directory
 tests/TEST.LOG

@@ -2,7 +2,7 @@
 ;;;; obsolete.stk       -- Definition of functions which are obsolete.
 ;;;;                       Function defined here are candidate to disappear.
 ;;;;
-;;;; Copyright © 2002-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update:  5-Oct-2018 18:01 (eg)
+;;;; Last file update: 12-Aug-2020 18:48 (eg)
 ;;;;
 
 
@@ -77,3 +77,11 @@
 
 ;; 05-Oct-2017 (v1.21)
 (define copy-tree list-copy)
+
+;; 12-Aug-2020 (v1.40) -- Use parameter object instead
+(define (%set-std-port!  index port)
+  (case index
+    ((0) (current-input-port port))
+    ((1) (current-output-port port))
+    ((2) (current-error-port port))
+    (else (error '%set-std-port! "bad port number" index))))

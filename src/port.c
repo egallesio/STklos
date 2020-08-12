@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 11-Aug-2020 18:20 (eg)
+ * Last file update: 12-Aug-2020 18:49 (eg)
  *
  */
 
@@ -230,24 +230,6 @@ static SCM STk_set_current_error_port(SCM port)
   if (!OPORTP(port)) STk_error_bad_port(port);
   return STk_get_current_vm()->eport = port;
 }
-
-
-DEFINE_PRIMITIVE("%set-std-port!", set_std_port, subr2, (SCM index, SCM port))
-{
-  vm_thread_t *vm = STk_get_current_vm();
-
-  switch (AS_LONG(index)) {
-    case SCM_LONG(0): if (!IPORTP(port)) goto badport; vm->iport = port; break;
-    case SCM_LONG(1): if (!OPORTP(port)) goto badport; vm->oport = port; break;
-    case SCM_LONG(2): if (!OPORTP(port)) goto badport; vm->eport = port; break;
-    default: STk_error_bad_io_param("bad port number ~S", index);
-  }
-  return STk_void;
-badport:
-  STk_error_bad_port(port);
-  return STk_void;
-}
-
 
 /*=============================================================================*\
  *                              Read
@@ -1746,7 +1728,6 @@ int STk_init_port(void)
   STk_make_C_parameter2("current-error-port", STk_current_error_port,
                         STk_set_current_error_port, STk_STklos_module);
 
-  ADD_PRIMITIVE(set_std_port);
   ADD_PRIMITIVE(scheme_read);
   ADD_PRIMITIVE(scheme_read_cst);
   ADD_PRIMITIVE(read_char);
