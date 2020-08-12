@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  1-Jul-2003 11:38 (eg)
- * Last file update: 12-Aug-2020 17:01 (eg)
+ * Last file update: 12-Aug-2020 18:14 (eg)
  */
 
 
@@ -37,6 +37,7 @@ struct parameter_obj {
   SCM value;
   SCM converter;
   SCM (*getter)(void);  /* Used only for type 2 parameter objects */
+  MUT_FIELD(mtx);       /* mutex use for setting the value of the parameter object */
 };
 
 #define PARAMETERP(o)       (BOXED_TYPE_EQ((o), tc_parameter))
@@ -44,7 +45,11 @@ struct parameter_obj {
 #define PARAMETER_VALUE(p)  (((struct parameter_obj *) (p))->value)
 #define PARAMETER_CONV(p)   (((struct parameter_obj *) (p))->converter)
 #define PARAMETER_GETTER(p) (((struct parameter_obj *) (p))->getter)
-
+#ifdef THREADS_NONE
+#  define PARAMETER_MUTEX(p)
+#else
+#  define PARAMETER_MUTEX(p) (((struct parameter_obj *) (p))->mtx)
+#endif
 
 /*===========================================================================*\
  *
@@ -62,10 +67,9 @@ SCM STk_get_parameter(SCM param)
 {
   if (!PARAMETERP(param)) error_bad_parameter(param);
 
-  if (PARAMETER_C_TYPE(param) == 2)
-    return  PARAMETER_GETTER(param)();
-  else
-    return PARAMETER_VALUE(param);
+  return (PARAMETER_C_TYPE(param) == 2) ?
+    PARAMETER_GETTER(param)():
+    PARAMETER_VALUE(param);
 }
 
 SCM STk_set_parameter(SCM param, SCM value)
@@ -84,7 +88,9 @@ SCM STk_set_parameter(SCM param, SCM value)
     new = (conv != STk_false) ? STk_C_apply(conv,1,value): value;
   }
 
+  MUT_LOCK(PARAMETER_MUTEX(param));
   PARAMETER_VALUE(param) = new;
+  MUT_UNLOCK(PARAMETER_MUTEX(param));
 
   return STk_void;
 }
@@ -99,6 +105,7 @@ SCM STk_make_C_parameter(SCM symbol, SCM value, SCM (*conv)(SCM new_value),
   PARAMETER_VALUE(z)  = conv(value);
   PARAMETER_CONV(z)   = (SCM) conv;
   PARAMETER_GETTER(z) = STk_void;
+  MUT_INIT(PARAMETER_MUTEX(z));
 
   /* Bind it to the given symbol */
   STk_define_variable(STk_intern(symbol), z, module);
@@ -116,6 +123,7 @@ SCM STk_make_C_parameter2(SCM symbol, SCM (*getter)(void), SCM (*conv)(SCM new_v
   PARAMETER_VALUE(z)  = getter();
   PARAMETER_CONV(z)   = (SCM) conv;
   PARAMETER_GETTER(z) = getter;
+  MUT_INIT(PARAMETER_MUTEX(z));
 
   /* Bind it to the given symbol */
   STk_define_variable(STk_intern(symbol), z, module);
@@ -197,6 +205,7 @@ DEFINE_PRIMITIVE("make-parameter", make_parameter, subr12, (SCM value, SCM conv)
   PARAMETER_VALUE(z)  = v;
   PARAMETER_CONV(z)   = (conv) ? conv : STk_false;
   PARAMETER_GETTER(z) = STk_void;
+  MUT_INIT(PARAMETER_MUTEX(z));
 
   return z;
 }
@@ -231,6 +240,6 @@ int STk_init_parameter(void)
   /* Define primitives */
   ADD_PRIMITIVE(make_parameter);
   ADD_PRIMITIVE(parameterp);
-  
+
   return TRUE;
 }

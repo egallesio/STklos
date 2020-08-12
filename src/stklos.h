@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 24-Jul-2020 21:52 (eg)
+ * Last file update: 12-Aug-2020 17:44 (eg)
  */
 
 
@@ -103,10 +103,14 @@ extern "C"
 \*===========================================================================*/
 #ifdef THREADS_NONE
 #  define MUT_DECL(lck)
+#  define MUT_FIELD(lck)
+#  define MUT_INIT(lck)
 #  define MUT_LOCK(lck)
 #  define MUT_UNLOCK(lck)
 #else
 #  define MUT_DECL(lck)    static pthread_mutex_t lck = PTHREAD_MUTEX_INITIALIZER;
+#  define MUT_FIELD(lck)   pthread_mutex_t lck 
+#  define MUT_INIT(lck)    { pthread_mutex_init(&lck, NULL); }
 #  define MUT_LOCK(lck)    { pthread_mutex_lock(&lck); }
 #  define MUT_UNLOCK(lck)  { pthread_mutex_unlock(&lck); }
 #endif
