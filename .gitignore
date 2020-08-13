@@ -159,7 +159,7 @@ src/git-info.h
 
 # Test directory
 tests/TEST.LOG
-
+tests/SRFI-64_Meta-Test_Suite.log
 # Utils directory
 utils/lisp-lex.l-BUG
 utils/stklos-compile

@@ -90,7 +90,7 @@
 
 
 
-(test-begin "SRFI 64 - Meta-Test Suite")
+(test-begin "SRFI-64_Meta-Test_Suite")
 
 ;;;
 ;;;  Ironically, in order to set up the meta-test environment,
@@ -1052,7 +1052,7 @@
  |#
 
 (stklos-count-failures)
-(test-end "SRFI 64 - Meta-Test Suite")
+(test-end "SRFI-64_Meta-Test_Suite")
 
 ;;;
 
@@ -1068,3 +1068,7 @@
                   0           ;; expected failures
                   (cadr t)))  ;; number of failures
   stklos-test-list)
+
+;; Local Variables:
+;; tab-width: 8
+;; End:

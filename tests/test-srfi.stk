@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update:  4-Aug-2020 12:41 (eg)
+;;;; Last file update: 13-Aug-2020 17:07 (eg)
 ;;;;
 
 (require "test")
@@ -1196,7 +1196,7 @@
 ;; ----------------------------------------------------------------------
 ;;  SRFI 64 ...
 ;; ----------------------------------------------------------------------
-(test-subsection "SRFI 70 - Numbers")
+(test-subsection "SRFI 64 - A Scheme API for test suites")
 
 (require "srfi-64")
 
