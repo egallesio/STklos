@@ -25,7 +25,7 @@ four) step process:
     ```
     A summary will be printed at the end of the execution of the script as shown below:
 
-    ```alertindent
+    ```
     SUMMARY
     *******
                    System:  Linux-5.6.15-1-MANJARO
@@ -40,6 +40,7 @@ four) step process:
     System libraries used:  libffi libpcre libgmp
        Compiled libraries:  libgc
    ```
+
 
 2. If everything is correct, you can just type `make` now at your shell prompt. Note that
    STklos supports [parallel execution](https://www.gnu.org/software/make/manual/html_node/Parallel.html)
