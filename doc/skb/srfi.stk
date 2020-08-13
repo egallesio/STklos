@@ -63,6 +63,7 @@
      (59 . "Vicinity")
      (60 . "Integers as bits")
      (62 . "S-expression comments")
+     (64 . "A Scheme API for test suites")
      (66 . "Octet Vectors")
      (69 . "Basic Hash Tables")
      (70 . "Numbers")

@@ -517,6 +517,16 @@ you need to insert the following expression])
 (p [,(quick-link-srfi 62) is fully supported. See ,(ref :subsection "Comments")]))
 
 ;; ----------------------------------------------------------------------
+;; SRFI 64 -- A Scheme API for test suites
+;; ----------------------------------------------------------------------
+(srfi-section 64
+
+(p [,(quick-link-srfi 64) is fully supported, but no line numbers are shown for
+errors.  To use SRFI-64, you need to insert the following expression])
+(fontified-code [(require "srfi-64")])
+(p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
 ;; SRFI 66 -- Octet vectors
 ;; ----------------------------------------------------------------------
 (srfi-section 66

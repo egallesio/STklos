@@ -119,7 +119,7 @@
     ;; srfi-61                          ; A more general cond clause
     srfi-62                             ; S-expression comments
     ;; srfi-63                          ; Homogeneous and Heterogeneous Arrays
-    ;; srfi-64                          ; A Scheme API for test suites
+    ((srfi-64 testing) "srfi-64")       ; A Scheme API for test suites
     ;; srfi-65                          ; ....... withdrawn
     (srfi-66 "srfi-66")                 ; Octet Vectors
     ;; srfi-67                          ; Compare Procedures
