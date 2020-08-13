@@ -551,7 +551,7 @@ int STk_init_char(void)
   ADD_PRIMITIVE(char_isupper);
   ADD_PRIMITIVE(char_islower);
 
-  ADD_PRIMITIVE(digit_value);;
+  ADD_PRIMITIVE(digit_value);
 
 
   ADD_PRIMITIVE(char2integer);
