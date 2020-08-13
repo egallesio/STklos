@@ -112,6 +112,15 @@ STklos on it. The old ports were effective on:
 More informations on supported platforms is available in the
 PORTING-NOTES file in the distribution.
 
+STklos Installation 
+-------------------
+
+See the file ./QUICK-INSTALL.md for instructions on how to build STklos (a
+more complete document is available in ./INSTALL
+
+If you want to build or run a Docker image of STklos, you can find some information 
+in the ./etc/Docker/README.md
+
 Project Home
 ------------
 
