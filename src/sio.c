@@ -87,7 +87,7 @@ STk_ungetc(int c, SCM port)
 int
 STk_close(SCM port)
 {
-  int res, exec_hook = FALSE;;
+  int res, exec_hook = FALSE;
 
   if (! (PORT_FLAGS(port) & PORT_CLOSED)) {
     PORT_RELEASE(port)(port);

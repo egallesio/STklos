@@ -790,7 +790,7 @@ doc>
 DEFINE_PRIMITIVE("hash-table-for-each", hash_for_each, subr2, (SCM ht, SCM proc))
 {
   int i, n;
-  SCM l = STk_nil;;
+  SCM l = STk_nil;
 
   if (!HASHP(ht))                        error_bad_hash_table(ht);
   if (STk_procedurep(proc) == STk_false) error_bad_procedure(proc);

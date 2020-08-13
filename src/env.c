@@ -429,7 +429,7 @@ DEFINE_PRIMITIVE("%symbol-define", symbol_define, subr3,
 DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
                  (SCM new, SCM old, SCM module))
 {
-  SCM res, mod = STk_current_module();;
+  SCM res, mod = STk_current_module();
   int i;
 
   if (!SYMBOLP(new)) error_bad_symbol(new);

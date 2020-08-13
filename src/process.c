@@ -662,7 +662,7 @@ DEFINE_PRIMITIVE("process-wait", proc_wait, subr1, (SCM proc))
     res = waitpid(PROCESS_PID(proc), &info, 0);
     if (res == PROCESS_PID(proc)) {
       PROCESS_STATUS(proc) = info;
-      ret_val =  STk_true;;
+      ret_val =  STk_true;
     }
 
     PROCESS_WAITED(proc) = 0;
