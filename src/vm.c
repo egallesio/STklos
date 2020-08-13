@@ -1685,7 +1685,7 @@ FUNCALL:  /* (int nargs, int tailp) */
 
       /* Do the call */
       CALL_CLOSURE(vm->val);
-      goto end_funcall;;
+      goto end_funcall;
     }
 
     case tc_next_method: {
