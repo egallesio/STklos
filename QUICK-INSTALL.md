@@ -34,16 +34,17 @@ four) step process:
           Install prefix :  /opt
                C compiler:  clang
         Compilation flags:  -O3 -Wall
-                   Loader:  ld 
+                   Loader:  ld
            Thread support:  pthreads
          Case sensitivity:  true (by default)
     System libraries used:  libffi libpcre libgmp
        Compiled libraries:  libgc
    ```
-2. If everything is correct, you can just type `make` now at your shell prompt. Note that 
+
+2. If everything is correct, you can just type `make` now at your shell prompt. Note that
    STklos supports [parallel execution](https://www.gnu.org/software/make/manual/html_node/Parallel.html)
-   for faster builds. For instance, you can enter `make -j 8` to build 8 recipes simultaneously. 
-   
+   for faster builds. For instance, you can enter `make -j 8` to build 8 recipes simultaneously.
+
 3. **Optionally**, you can type `make tests` to run some internal tests
 
 4. To install the version you just compiled in the place you have chosen previously (or in
@@ -51,4 +52,3 @@ four) step process:
 
 For a more complete description of the build process, you can refer to the
 INSTALL file at the top of the distribution tree.
-
