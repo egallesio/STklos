@@ -80,6 +80,7 @@ SRC_STK = STklos.init     \
           srfi-54.stk         \
           srfi-59.stk         \
           srfi-60.stk         \
+          srfi-64.stk         \
           srfi-66.stk         \
           srfi-69.stk         \
           srfi-70.stk         \
@@ -143,6 +144,7 @@ scheme_OBJS = compfile.ostk    \
           srfi-54.ostk         \
           srfi-59.ostk         \
           srfi-60.ostk         \
+          srfi-64.ostk         \
           srfi-66.ostk         \
           srfi-69.ostk         \
           srfi-70.ostk         \
