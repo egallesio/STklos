@@ -17,10 +17,10 @@ STklos Reference Manual<hr align="center" width="10%">1. Introduction</div>
 <td align="left" valign="top" width="20%" bgcolor="#204875">
 <table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-52020">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-52122">*Top*</a></td></tr>
 <tr class="navsel"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a><br /><table cellspacing="1" cellpadding="1" width="100%">
 <tbody>
- <tr><td valign="top" align="left">1.1</td><td colspan="4" width="100%"><a href="stklos-ref-1.html#-section-5373">Overview of <span style="font-variant: small-caps">STklos</span></td></tr>
+ <tr><td valign="top" align="left">1.1</td><td colspan="4" width="100%"><a href="stklos-ref-1.html#-section-5397">Overview of <span style="font-variant: small-caps">STklos</span></td></tr>
  <tr><td valign="top" align="left">1.2</td><td colspan="4" width="100%"><a href="stklos-ref-1.html#-Lexical-Conventions"> Lexical Conventions</td></tr>
  <tr><td valign="top" align="left">1.3</td><td colspan="4" width="100%"><a href="stklos-ref-1.html#Basic-Concepts">Basic Concepts</td></tr>
 </tbody>
@@ -44,12 +44,12 @@ STklos Reference Manual<hr align="center" width="10%">1. Introduction</div>
 </tbody></table>
 </td>
 <td align="left" valign="top">
-<div class="chapterbody"><div class="sectiondiv"><div class="sectiontitle"><a name="-section-5373"></a>
+<div class="chapterbody"><div class="sectiondiv"><div class="sectiontitle"><a name="-section-5397"></a>
 <h3>1.1 Overview of <span style="font-variant: small-caps">STklos</span></h3>
 </div>
-<div class="sectionbody"><a name="--index-entry-5329"></a><a name="--index-entry-5334"></a><p> <span style="font-variant: small-caps">STklos</span> is the successor of <span style="font-variant: small-caps">STk</span>
-[<a href="stklos-ref-16.html#Gallesio95-1a">6</a>], a Scheme interpreter which was tightly
-connected to the Tk graphical toolkit [<a href="stklos-ref-16.html#Ouster-Tk">11</a>].
+<div class="sectionbody"><a name="--index-entry-5353"></a><a name="--index-entry-5358"></a><p> <span style="font-variant: small-caps">STklos</span> is the successor of <span style="font-variant: small-caps">STk</span>
+[<a href="stklos-ref-16.html#Gallesio95-1a">7</a>], a Scheme interpreter which was tightly
+connected to the Tk graphical toolkit [<a href="stklos-ref-16.html#Ouster-Tk">12</a>].
 <span style="font-variant: small-caps">STk</span> had an object layer which was called <span style="font-variant: small-caps">STklos</span>. At this
 time, <span style="font-variant: small-caps">STk</span> was used to denote the base Scheme interpreter and
 <span style="font-variant: small-caps">STklos</span> was used to denote its object layer, which was an
@@ -57,7 +57,7 @@ extension.  For instance, when programming a GUI application,
 a user could access the widgets at the (low) Tk level, or access
 them using a neat hierarchy of classes wrapped in <span style="font-variant: small-caps">STklos</span>.</p><p> Since the object layer is now more closely integrated with
 the language, the new system has been renamed <span style="font-variant: small-caps">STklos</span> and
-<span style="font-variant: small-caps">STk</span> is now used to designate the old system. </p><a name="--index-entry-5357"></a><p> <strong>Compatibility with <span style="font-variant: small-caps">STk</span></strong>: <span style="font-variant: small-caps">STklos</span> has been
+<span style="font-variant: small-caps">STk</span> is now used to designate the old system. </p><a name="--index-entry-5381"></a><p> <strong>Compatibility with <span style="font-variant: small-caps">STk</span></strong>: <span style="font-variant: small-caps">STklos</span> has been
 completely rewritten and as a consequence, due to new
 implementation choices, old <span style="font-variant: small-caps">STk</span> programs are not fully
 compatible with the new system. However, these changes are very
@@ -73,7 +73,7 @@ identical in every points, share the same philosophy.</p></div></div><div class=
 <div class="sectionbody"><div class="subsectiondiv"><div class="subsectiontitle"><a name="Identifiers"></a>
 <h4 id="Identifiers">1.2.1 Identifiers</h4>
 </div>
-<div class="subsectionbody"><a name="--index-entry-5376"></a><a name="--index-entry-5380"></a><a name="--index-entry-5384"></a><p>In <span style="font-variant: small-caps">STklos</span>, identifiers which start (or end) with a colon "<code>:</code>" are considered as keywords.  For instance <code>:foo</code> and <code>bar:</code> are <span style="font-variant: small-caps">STklos</span> keywords, but <code>not:key</code> is not a
+<div class="subsectionbody"><a name="--index-entry-5400"></a><a name="--index-entry-5404"></a><a name="--index-entry-5408"></a><p>In <span style="font-variant: small-caps">STklos</span>, identifiers which start (or end) with a colon "<code>:</code>" are considered as keywords.  For instance <code>:foo</code> and <code>bar:</code> are <span style="font-variant: small-caps">STklos</span> keywords, but <code>not:key</code> is not a
 keyword. Alternatively, to be compatible with other Scheme implementations,
 the notation <code>#:foo</code> is also available to denote the keyword of
 name <code>foo</code>. See section&nbsp;<a href="stklos-ref-4.html#Keywords">Keywords</a> for more
@@ -92,7 +92,7 @@ information</p><p>Note that, by default, <span style="font-variant: small-caps">
 </ul></p></div></div><div class="subsectiondiv"><div class="subsectiontitle"><a name="Comments"></a>
 <h4 id="Comments">1.2.2 Comments</h4>
 </div>
-<div class="subsectionbody"><a name="--index-entry-5417"></a><a name="--index-entry-5421"></a><a name="--index-entry-5425"></a><a name="--index-entry-5429"></a><a name="--index-entry-5433"></a><p>There are four types of comments in <span style="font-variant: small-caps">STklos</span>:</p><ul><li>a semicolon "<code>;</code>" indicates the start of a
+<div class="subsectionbody"><a name="--index-entry-5441"></a><a name="--index-entry-5445"></a><a name="--index-entry-5449"></a><a name="--index-entry-5453"></a><a name="--index-entry-5457"></a><p>There are four types of comments in <span style="font-variant: small-caps">STklos</span>:</p><ul><li>a semicolon "<code>;</code>" indicates the start of a
 comment. This kind of comment extends to the end of the line (as
 described in <span style="font-variant: small-caps">R<sup>5</sup>RS</span>).</li>
 <li> multi-lines comment use the classical Lisp convention:
@@ -118,11 +118,11 @@ the notation introduced in <strong><a  class="http" href="http://srfi.schemers.o
 keywords "<code>:key</code>", "<code>:optional</code>" and
 "<code>:rest</code>". This permits to Scheme lambdas, which
 accepts keywords and optional arguments, to be compatible with
-DSSSL lambdas [<a href="stklos-ref-16.html#dsssl-96">10</a>].</p></li>
+DSSSL lambdas [<a href="stklos-ref-16.html#dsssl-96">11</a>].</p></li>
 </ul></div></div><div class="subsectiondiv"><div class="subsectiontitle"><a name="Here-Strings"></a>
 <h4 id="Here-Strings">1.2.3 Here Strings</h4>
 </div>
-<div class="subsectionbody"><a name="--index-entry-5488"></a><a name="--index-entry-5492"></a><p>Here strings permit to easily enter multilines strings in programs.
+<div class="subsectionbody"><a name="--index-entry-5512"></a><a name="--index-entry-5516"></a><p>Here strings permit to easily enter multilines strings in programs.
 The sequence of characters <em>#&lt;&lt;</em> starts a here string. The characters
 following this sequence #&lt;&lt; until a newline character define a terminator for
 the here string. The content of the string includes all characters between
@@ -135,7 +135,7 @@ def
 EOF</pre><p>is equivalent to the string </p><pre>&quot;abc\ndef\n  ghi&quot;</pre></div></div><div class="subsectiondiv"><div class="subsectiontitle"><a name="Other-Notations"></a>
 <h4 id="Other-Notations">1.2.4 Other Notations</h4>
 </div>
-<div class="subsectionbody"><a name="--index-entry-5507"></a><a name="--index-entry-5511"></a><a name="--index-entry-5515"></a><a name="--index-entry-5519"></a><p><span style="font-variant: small-caps">STk</span> accepts all the notations defined in <span style="font-variant: small-caps">R<sup>5</sup>RS</span> plus</p><ul><li><code>#true</code> and <code>#false</code> are other names for
+<div class="subsectionbody"><a name="--index-entry-5531"></a><a name="--index-entry-5535"></a><a name="--index-entry-5539"></a><a name="--index-entry-5543"></a><p><span style="font-variant: small-caps">STk</span> accepts all the notations defined in <span style="font-variant: small-caps">R<sup>5</sup>RS</span> plus</p><ul><li><code>#true</code> and <code>#false</code> are other names for
 the constants <code>#t</code> and <code>#f</code> as proposed by <span style="font-variant: small-caps">R<sup>7</sup>RS</span>.</li>
 <li>"<code>[]</code>" Brackets are equivalent to
 parentheses. They are used for grouping and to build lists. A
@@ -172,6 +172,6 @@ can also be represented in this way:
 <div class="sectionbody">See the original <span style="font-variant: small-caps">R<sup>5</sup>RS</span> document for more informations on
 the basic concepts of the Scheme Programming Language.<p></p></div></div></div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Thu Jul 30 19:02:30 2020</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Thu Aug 13 11:38:46 2020</em></small>
 </body>
 </html>
