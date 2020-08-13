@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  8-Jun-2020 17:11 (eg)
+;; Last file update: 13-Aug-2020 11:38 (eg)
 ;;
 ;; ======================================================================
 
@@ -73,14 +73,16 @@
                     *logo-for-tex*))
 
       (linebreak 3)
-      (frame :class "chapterbody"  :border 0
-             [This document provides a complete list of procedures and special
-             forms implemented in version ,(bold *stklos-version*) of
-             ,(stklos).  Since ,(stklos) is (nearly) compliant with the
-             language described in the Revised,(sup "5") Report on the
-             Algorithmic Language Scheme (aka ,(rfive)) ,(ref :bib "R5RS"),
-             the organization of this manual follows closely the one of this
-             document.])
+      
+      (frame :class "chapterbody" :border 0 [This document provides a complete
+             list of procedures and special forms implemented in version
+             ,(bold *stklos-version*) of ,(stklos). The language implemented
+             by ,(stklos) is nearly compliant with the language described in
+             the Revised,(sup "5") Report on the Algorithmic Language Scheme
+             (aka ,(rfive)) ,(ref :bib "R5RS"). However, since version 1.30,
+             the goal is to make it more compliant with ,(rseven) ,(ref :bib
+             "R7RS"). This document states the compliance of each construction
+             relatively to these reports, or if it is a ,(stklos) extension.])
 
 (skribe-include "intro.skb")
 (skribe-include "expr.skb")
