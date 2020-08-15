@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 29-Jul-2020 15:55 (eg)
+;;;; Last file update: 15-Aug-2020 19:01 (eg)
 ;;;;
 
 (include "runtime.stk")         ; Definition necessary for the bootstrap
@@ -232,6 +232,7 @@
     (stklos-debug-level debug)
     (compiler:warn-use-undefined #t)    ; Signal usage of still undefined symbols
     (compiler:gen-line-number #t)       ; Generate line numbers
+    (compiler:generate-signature #t)    ; Generate procedure signature
     (when (> debug 1)                   ; Load-verbose when debug >= 2
       (load-verbose debug)))
 

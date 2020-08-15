@@ -25,7 +25,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Dec-2009 18:26 (eg)
-;;;; Last file update:  7-Feb-2020 18:01 (eg)
+;;;; Last file update: 15-Aug-2020 17:48 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -84,7 +84,7 @@
           "Furthermore, they can be changed without notice. Dont use them.\n"))
       (else
          ;; no documentation
-         (format "No documentation for ~s\n" self)))))
+         #f))))
 
 
 (define-method find-documentation ((self <procedure>))
@@ -142,7 +142,7 @@ doc>
   (let ((def (if (null? default)
                  obj
                  (car default))))
-    (if (procedure? (eval obj))
+    (if (procedure? obj)
         (let* ((name (%procedure-name obj)))
           (if (string? name)
               (string->symbol name)
@@ -153,7 +153,7 @@ doc>
 ;; (f x y), or
 ;; (_ x y)  if it is unnamed.
 (define (%help-signature obj)
-  (if (procedure? (eval obj))
+  (if (procedure? obj)
       (let* ((sig (%procedure-signature obj)))
         (if sig
             (cons (%get-object-name obj '_) sig)
@@ -161,12 +161,21 @@ doc>
       #f))
 
 (define-method help (obj)
-  (let ((doc (find-documentation obj))
-        (sig (%help-signature obj)))
-    (when sig (printf "Signature: ~a\n" sig))
-    (if doc
-        (printf "Documentation for ~s:\n~a\n" (%get-object-name obj) doc)
-        (printf "No documentation for ~s\n" obj))))
+  (let ((doc  (find-documentation obj))
+        (sig  (%help-signature obj))
+        (name (%get-object-name obj))
+        (pr   (lambda (str)
+                (for-each (lambda (line) (printf "  ~A\n" line))
+                          (string-split str "\n")))))
+    (if (or sig doc)
+        (begin
+          (display (ansi-color 'bold 'yellow (format #f "Help for ~a:" name) 'normal "\n"))
+          (when sig
+            (display (ansi-color 'bold "Signature:" 'normal (format #f "\n  ~S\n" sig))))
+          (when doc
+            (display (ansi-color 'bold "Documentation:" 'normal "\n"))
+            (pr doc)))
+          (display (ansi-color 'bold 'yellow (format #f "No help for ~a" name) 'normal "\n")))))
 
 
 (define-method help ()
