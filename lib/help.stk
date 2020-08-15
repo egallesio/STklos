@@ -134,10 +134,38 @@
  * @end lisp
 doc>
 |#
+
+;; Returns the name of the object, if it is a procedure, or
+;; default if it has no name or if it is not a procedure.
+;; If default is ommited, it is taken to be obj itself.
+(define (%get-object-name obj . default)
+  (let ((def (if (null? default)
+                 obj
+                 (car default))))
+    (if (procedure? (eval obj))
+        (let* ((name (%procedure-name obj)))
+          (if (string? name)
+              (string->symbol name)
+              def))
+        def)))
+
+;; Returns the signature of an object in a human-friendly form.
+;; (f x y), or
+;; (_ x y)  if it is unnamed.
+(define (%help-signature obj)
+  (if (procedure? (eval obj))
+      (let* ((sig (%procedure-signature obj)))
+        (if sig
+            (cons (%get-object-name obj '_) sig)
+            #f))
+      #f))
+
 (define-method help (obj)
-  (let ((doc (find-documentation obj)))
+  (let ((doc (find-documentation obj))
+        (sig (%help-signature obj)))
+    (when sig (printf "Signature: ~a\n" sig))
     (if doc
-        (printf "Documentation for ~s:\n~a\n" obj doc)
+        (printf "Documentation for ~s:\n~a\n" (%get-object-name obj) doc)
         (printf "No documentation for ~s\n" obj))))
 
 
@@ -154,9 +182,11 @@ doc>
       (unless (eof-object? name)
         (if (symbol? name)
             (let ((val (symbol-value* name (current-module) #f)))
-              (display (if val
-                           (find-documentation val)
-                           (do-color color (format "Symbol ~S is unbound\n" name)))))
+              (if val
+                  (let ((sig (%help-signature val)))
+                    (when sig (printf "Signature: ~a\n" sig))
+                    (display (find-documentation val)))
+                  (display (do-color color (format "Symbol ~S is unbound\n" name)))))
             (display (do-color color "help only accepts symbols.\n")))
         (Loop prompt))))
   (display "done.\n"))

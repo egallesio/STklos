@@ -1459,11 +1459,21 @@ CASE(MAKE_EXPANDER) {
   NEXT;
 }
 
+CASE(FORMALS) {
+  SCM formals = fetch_const();
+
+  if (vm->valc == 1 && CLOSUREP(vm->val))
+    CLOSURE_FORMALS(vm->val) = formals;
+
+  NEXT;
+}
+
 CASE(DOCSTRG) {
   SCM str = fetch_const();
 
   if (vm->valc == 1 && CLOSUREP(vm->val))
     CLOSURE_DOC(vm->val) = str;
+
   NEXT;
 }
 
@@ -1471,7 +1481,6 @@ CASE(END_OF_CODE) {
   return;
 }
 
-CASE(UNUSED_2)
 CASE(UNUSED_3)
 CASE(UNUSED_4)
 CASE(UNUSED_5)
