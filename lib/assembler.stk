@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 30-Jul-2020 19:03 (eg)
+;;;; Last file update: 16-Aug-2020 08:01 (eg)
 ;;;;
 
 ;;;
@@ -78,7 +78,7 @@
            (POP                 0)
            (PUSH                0)
 
-           (DBG-VM              1)
+           (DBG-VM              1)     ;; used for VM debugging
 
            (CREATE-CLOSURE      2)
            (RETURN              0)
@@ -189,23 +189,23 @@
            (PUSH-UGREF-TAIL-INV 2)      ;; Never produced by the compiler
 
            (DEEP-LOC-REF-PUSH   1)      ;; peephole: DEEP-LOCAL-SET + PUSH
-           (UNUSED-19           0)
-           (UNUSED-18           0)
-           (UNUSED-17           0)
-           (UNUSED-16           0)
-           (UNUSED-15           0)
-           (UNUSED-14           0)
-           (UNUSED-13           0)
-           (UNUSED-12           0)
-           (UNUSED-11           0)
-           (UNUSED-10           0)
-           (UNUSED-9            0)
-           (UNUSED-8            0)
-           (UNUSED-7            0)
-           (UNUSED-6            0)
-           (UNUSED-5            0)
-           (UNUSED-4            0)
            (UNUSED-3            0)
+           (UNUSED-4            0)
+           (UNUSED-5            0)
+           (UNUSED-6            0)
+           (UNUSED-7            0)
+           (UNUSED-8            0)
+           (UNUSED-9            0)
+           (UNUSED-10           0)
+           (UNUSED-11           0)
+           (UNUSED-12           0)
+           (UNUSED-13           0)
+           (UNUSED-14           0)
+           (UNUSED-15           0)
+           (UNUSED-16           0)
+           (UNUSED-17           0)
+           (UNUSED-18           0)
+           (UNUSED-19           0)
 
 
            ;; INLINED FUNCTIONS (again)
@@ -213,17 +213,18 @@
            (IN-SINT-SUB2        1)
            (IN-SINT-MUL2        1)
            (IN-SINT-DIV2        1)
-           (UNUSED-29           0)
-           (UNUSED-28           0)
-           (UNUSED-27           0)
-           (UNUSED-26           0)
-           (UNUSED-25           0)
-           (UNUSED-24           0)
-           (UNUSED-23           0)
-           (UNUSED-22           0)
-           (UNUSED-21           0)
            (UNUSED-20           0)
+           (UNUSED-21           0)
+           (UNUSED-22           0)
+           (UNUSED-23           0)
+           (UNUSED-24           0)
+           (UNUSED-25           0)
+           (UNUSED-26           0)
+           (UNUSED-27           0)
+           (UNUSED-28           0)
 
+           ;; Call location information in debug mode
+           (CALL-LOCATION       1)
 
            ;; FAR instructions
            (DEEP-LOC-REF-FAR    1)

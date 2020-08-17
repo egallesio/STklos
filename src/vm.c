@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  7-Aug-2020 11:12 (eg)
+ * Last file update: 16-Aug-2020 08:06 (eg)
  */
 
 // INLINER values
@@ -719,26 +719,26 @@ SCM STk_values2vector(SCM obj, SCM vect)
  * the number of elements used on the stack
  */
 
-static void vm_debug(int kind, vm_thread_t *vm)
-{
-  switch (kind) {
-  case 0: /* old trace code position. Don't use it anymode */
-    {
-      SCM line = vm->val;
-      SCM file = pop();
-      STk_panic("Recompile code in file ~S (contains obsolete line informations)",
-                file, line);
-      break;
-    }
-  case 1: /* Embed line information in a procedure call */
-    {
-      SCM line = vm->val;
-
-      ACT_SAVE_INFO(vm->fp) = STk_cons(pop(), line);
-      break;
-    }
-  }
-}
+// static void vm_debug(int kind, vm_thread_t *vm)
+// {
+//   switch (kind) {
+//   case 0: /* old trace code position. Don't use it anymode */
+//     {
+//       SCM line = vm->val;
+//       SCM file = pop();
+//       STk_panic("Recompile code in file ~S (contains obsolete line informations)",
+//                 file, line);
+//       break;
+//     }
+//   case 1: /* Embed line information in a procedure call */
+//     {
+//       SCM line = vm->val;
+// 
+//       ACT_SAVE_INFO(vm->fp) = STk_cons(pop(), line);
+//       break;
+//     }
+//   }
+// }
 
 DEFINE_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void))
 {
@@ -1300,9 +1300,6 @@ CASE(SET_CUR_MOD) {
 CASE(POP)     { vm->val = pop(); NEXT1; }
 CASE(PUSH)    { push(vm->val);   NEXT; }
 
-CASE(DBG_VM)  { vm_debug(fetch_next(), vm); NEXT; }
-
-
 CASE(CREATE_CLOSURE) {
   /* pc[0] = offset; pc[1] = arity ; code of the routine starts in pc+2 */
   vm->env    = clone_env(vm->env, vm);
@@ -1429,7 +1426,7 @@ do_push_handler:
 }
 
 CASE(PUSH_HANDLER_FAR) {
-  offset = INT_VAL(fetch_const());   // Read a FAR offset in constants */
+  offset = INT_VAL(fetch_const());   /* Read a FAR offset in constants */
   goto do_push_handler;
 }
 
@@ -1477,10 +1474,19 @@ CASE(DOCSTRG) {
   NEXT;
 }
 
+CASE(CALL_LOCATION) {
+   ACT_SAVE_INFO(vm->fp) = STk_cons(pop(),                   /* file */
+                                    MAKE_INT(fetch_next())); /* line */
+  NEXT1;
+}
+
 CASE(END_OF_CODE) {
   return;
 }
 
+CASE(DBG_VM)  {
+  ; 
+}
 CASE(UNUSED_3)
 CASE(UNUSED_4)
 CASE(UNUSED_5)
@@ -1507,8 +1513,6 @@ CASE(UNUSED_25)
 CASE(UNUSED_26)
 CASE(UNUSED_27)
 CASE(UNUSED_28)
-CASE(UNUSED_29)
-
 {
   ;
 }
