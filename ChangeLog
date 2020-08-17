@@ -1,3 +1,348 @@
+2020-08-17 Erick Gallesio <eg@unice.fr>
+	- Changed the implementation of line numbers generation in
+	  debug mode
+
+2020-08-15 Erick Gallesio <eg@unice.fr>
+	- Deleted the code of call/cc and dynamic-wind in r5rs.stk
+	- Minor changes in the presentation in the help function
+	- Merge pull request #92 from jpellegrini/signatures
+
+2020-08-14 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add signature information to procedures
+
+2020-08-14 Erick Gallesio <eg@unice.fr>
+	- Use valueof $LD instead of the default ld for shared librairies
+
+2020-08-13 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Update QUICK-INSTALL.md
+	- Merge pull request #101 from jpellegrini/small-fixes
+
+2020-08-13 Erick Gallesio <eg@unice.fr>
+	- Added a Quick installation guide at the top of distribution tree
+	- Fix references in the manual's bibliography
+
+2020-08-13 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Remove double semicolon from C files
+	- Adds SRFI-64 -  A Scheme API for test suites
+
+2020-08-12 Erick Gallesio <eg@unice.fr>
+	- Makefile cleaning
+	- Obsoleted the function %set-std-port!
+	- Added a mutex to parameter objects.
+	- Force the creation od the `src/git-config.h` at configure time
+	- Simplification of parameterize implementation
+
+2020-08-11 Erick Gallesio <eg@unice.fr>
+	- Current-{input,output,error}-port are parameters now (R7RS)
+
+2020-08-09 Erick Gallesio <eg@unice.fr>
+	- Changed the ID displayed in the repl to the git commit hash
+	- Don't update the git-info.h file if not necessary
+	- Merge pull request #99 from jpellegrini/git-info
+
+2020-08-09 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #98 from jpellegrini/srfi-189
+
+2020-08-08 Erick Gallesio <eg@unice.fr>
+	- Changed the git source for Docker hub to Github
+	- Another fix for Docker building!
+	- Merge branch 'master' of github.com:egallesio/STklos
+	- Changed the compilation line for dynamically loadable extensions
+
+2020-08-07 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add git info to SRFI-176 output
+	- Add SRFI-189 - Maybe and Either: optional container types
+
+2020-08-07 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #95 from jpellegrini/small-fixes
+	- Bug fix on guard
+
+2020-08-04 Erick Gallesio <eg@unice.fr>
+	- Force LD to ld if not defined
+
+2020-08-04 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Mention IDEs in README
+
+2020-08-04 Erick Gallesio <eg@unice.fr>
+	- Use valueof $LD instead of the default ld for shared librairies
+	- Modified tests on SRFI-185 that are erroneous
+
+2020-08-03 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #86 from jpellegrini/srfi-185
+	- Merge pull request #93 from jpellegrini/syntax
+	- Merge pull request #89 from jpellegrini/hacking.md
+
+2020-08-03 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Small enhancements to hygienic macro code
+
+2020-08-01 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Update to VM documentation
+
+2020-08-01 Erick Gallesio <eg@unice.fr>
+	- Fixed gcc warnings in SRFI-118 implementation
+
+2020-07-31 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #85 from jpellegrini/vm-doc
+	- Merge pull request #79 from jpellegrini/srfi-118
+	- Fix: guard didn't propagate properly continuable exceptions.
+	- Added 3 tests on exceptions
+	- Struct-is-a? doesn't yield aymore an error on a condition
+	- Correction of the GC include dir for Github CI
+
+2020-07-31 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-185 - Linear adjustable-length strings
+	- Documentation for the virtual machine
+
+2020-07-30 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-118 - Simple adjustable-size strings
+	- Added minimal documentation for the function `disassemble`.
+	- Fix `guard` when the exception is a continuable one.
+
+2020-07-29 Erick Gallesio <eg@unice.fr>
+	- The STklos boot image is always rebuilt now after a make distclean
+	- In do-color calls, replaced the 'clear with 'normal
+	- Updated srfi-0 list
+	- Added a bunch of tests from Chibi for exceptions
+	- Some tests for SRFI-34 are modified to be adapted to R7RS semantic.
+	- Deleted file srfi-34.stk
+	- Bug fixes for R7RS exceptions
+
+2020-07-28 Erick Gallesio <eg@unice.fr>
+	- New generated Makefile.in
+	- Merge pull request #71 from jpellegrini/hacking.md
+	- Re-implement SRFI-175 in C
+	- Added the function STk_export_all_symbols
+	- Added the --cc option to stklos-config
+	- Merge pull request #78 from jpellegrini/srfi-175
+	- Updated the example to build a simple loadable file in C
+	- Fixed small typos
+
+2020-07-27 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #76 from lassik/ansi-bugfix
+	- Merge pull request #77 from jpellegrini/small-fixes
+	- Merge pull request #82 from jpellegrini/manpage
+
+2020-07-24 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add "-V" to the manpage
+
+2020-07-19 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI 175 - ASCII character library
+	- Fix indentation in compiler.stk
+
+2020-07-19 Lassi Kortela <lassi@lassi.io>
+	- Fix sublist flattening bug in ansi-color (#72)
+
+2020-07-16 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Expanding HACKING.md
+
+2020-07-16 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #68 from jpellegrini/small-fixes
+	- Merge pull request #69 from lassik/version
+
+2020-07-15 Lassi Kortela <lassi@lassi.io>
+	- Drop top "stklos n.nn" line from detailed -V output
+	- Fix typos in --help message
+	- Edit --help message to fit 80 columns
+
+2020-07-15 Erick Gallesio <eg@unice.fr>
+	- Documentation update
+	- Fix: Test of the -V option arrives too late
+	- Added documentation of SRFI-176 version-alist
+	- Refactoring of the -V option and small fixes
+
+2020-07-15 Jeronimo Pellegrini <j_p@aleph0.info>
+	- More draft SRFIs
+	- Add SRFI-176 - Version flag
+
+2020-07-15 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #33 from jpellegrini/srfi-176
+	- Merge pull request #60 from jpellegrini/srfi-161
+	- Merge pull request #52 from jpellegrini/srfi-151
+	- Merge pull request #62 from jpellegrini/srfi-129
+	- Merge pull request #64 from jpellegrini/srfi-13
+
+2020-07-14 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-129 - Titlecase Procedures
+	- Fix a couple of SRFI-13 bugs
+
+2020-07-13 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-151 - Bitwise Operations
+
+2020-07-13 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #54 from jpellegrini/srfi-156
+	- Merge pull request #45 from jpellegrini/srfi-37
+	- Merge pull request #58 from jpellegrini/hacking.md
+	- Merge pull request #59 from jpellegrini/small-fixes
+	- Added the function %stklos-configure to get configure options
+	- Fixed some typos
+	- Fix: string length built by list->string was sometimes incorrect
+
+2020-07-11 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Adds SRFI-161
+	- Remove stray character in documentation
+	- Add a HACKING.md file
+
+2020-07-10 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #51 from jpellegrini/srfi-174
+
+2020-07-10 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Adds SRFI-174
+	- Add SRFI-156
+
+2020-07-08 Erick Gallesio <eg@unice.fr>
+	- Converted SRFI 141 documentation to new format
+	- Merge pull request #48 from jpellegrini/srfi-141
+	- Enhancement: Use conditions instead of records for JSON
+	- Fix: added the test-json file
+	- Documentation update
+	- Added SRFI-180
+	- Added the function `%add-error-to-repl-handler`
+
+2020-07-07 Erick Gallesio <eg@unice.fr>
+	- Typo error
+
+2020-07-06 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Adds SRFI-141 - Integer Division
+
+2020-07-06 Erick Gallesio <eg@unice.fr>
+	- Suppress the call to the JSON test
+	- Added some tests for symbols
+
+2020-07-05 Erick Gallesio <eg@unice.fr>
+	- Fix: vertical bars (pipes) were forbidden in symbols.
+
+2020-07-04 Erick Gallesio <eg@unice.fr>
+	- Fix: force the type of a file opened with STk_open_file to textual
+
+2020-07-03 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Adds SRFI-37
+
+2020-07-03 Erick Gallesio <eg@unice.fr>
+	- Documentation Build
+	- textual-port? and binary-port? were defined but not loaded
+	- Merge pull request #42 from jpellegrini/srfi-87
+	- Added SRFI-145 and feature "debug" when the option -d is used
+	- Include SRFI-87 in the documentation; add tests
+	- Use the existing value returned by erroneous tests for test/error
+	- Added the parameter accept-srfi-169-numbers
+	- Merge pull request #39 from jpellegrini/srfi-169
+
+2020-07-02 Erick Gallesio <eg@unice.fr>
+	- Small documentation enhancements
+	- Changed SRFI-54 tests to avoid traces on standard output
+	- Merge pull request #38 from jpellegrini/srfi-171
+	- Merge pull request #40 from jpellegrini/small-fixes
+	- Added a provide to SRFI-100
+	- Merge pull request #37 from jpellegrini/srfi-117
+
+2020-07-01 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix a typo in the ansi-color code names
+	- Add SRFI-117
+
+2020-07-01 Erick Gallesio <eg@unice.fr>
+	- Documentation Build
+
+2020-06-30 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-169 - Underscores in numbers
+	- Adds SRFI-171
+
+2020-06-30 Erick Gallesio <eg@unice.fr>
+	- Documentation Build
+	- Merge pull request #36 from jpellegrini/small-fixes
+	- Changed the ports associated to sockets to be textual AND binary
+	- Documentation fixes
+
+2020-06-29 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Close va_list
+	- Redefine alist->hash-table in SRFI-69
+
+2020-06-29 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #30 from jpellegrini/srfi-69
+	- Merge pull request #34 from jpellegrini/android
+	- Merge pull request #26 from jpellegrini/srfi-54
+	- Adaptation of the threads for Android
+	- Fix: the `file-separator` function didn't take android int account
+
+2020-06-29 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add INSTALL-android
+
+2020-06-26 Erick Gallesio <eg@unice.fr>
+	- Added `android` to the `running-system` function
+	- Use a dynamic limit for the process maximum number of files
+	- Added tests for SRFI-60
+	- Changed the function used to test FFI
+	- Fix: Generation of temporary file names use the TMPDIR shell variable
+
+2020-06-25 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-54 (Formatting)
+
+2020-06-25 Erick Gallesio <eg@unice.fr>
+	- Don't use diacritics in banner if not UTF-8
+	- Added information on FreeBSD and OpenBSD
+	- Fix a bug on OpenBSD
+
+2020-06-24 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #27 from jpellegrini/master
+	- Merge pull request #25 from jpellegrini/srfi-51
+
+2020-06-23 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add list of tested hardware to PORTING-NOTES
+
+2020-06-23 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #25 from jpellegrini/srfi-51
+	- Deleted the functions in the SRFI which are now R7RS
+	- Changed the arguments order of the comparator function
+
+2020-06-22 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Adds SRFI-51
+
+2020-06-22 Erick Gallesio <eg@unice.fr>
+	- Added some documentation on SRF-173
+	- Merge pull request #20 from jpellegrini/master
+	- Updated the information about STklos construction.
+
+2020-06-21 Jeronimo Pellegrini <j_p@aleph0.info>
+	- default value for make-list is not #void
+
+2020-06-21 Erick Gallesio <eg@unice.fr>
+	- Fixed the title of SRFI-45
+
+2020-06-19 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Adds SRFI-173
+
+2020-06-18 Erick Gallesio <eg@unice.fr>
+	- Added SRFI-190
+	- Updated the list of supported SRFIS and documentation
+
+2020-06-17 Erick Gallesio <eg@unice.fr>
+	- Added an entry for new SRFI-158 in srfi-0 and lib/Makefile.am
+	- Merge pull request #17 from jpellegrini/master
+
+2020-06-16 Erick Gallesio <eg@unice.fr>
+	- Docker: Added tests during the image built (to abort the built if a test fail)
+	- Docker: Place images in the /home directory to ease volume binding
+
+2020-06-15 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Adds SRFI-158 -- generators and accumulators
+
+2020-06-09 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #14 from jpellegrini/master
+	- We have now two Dokerfiles (kind of 'stable' and 'unstable')
+
+2020-06-08 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix crash on 32-bit big-endian MIPS
+
+2020-06-08 Erick Gallesio <eg@unice.fr>
+	- Produced the new documentation
+	- Bug fix: bookmarks were no more displayed
+	- Make the HTML documention easier to read.
+
+2020-06-07 Erick Gallesio <eg@unice.fr>
+	- Pushing version with Id: 574efe7
+	- Fixed (again) the bug signaled by okuoku on github
+
+
+
 2020-06-05 Erick Gallesio <eg@unice.fr>
 	- STklos 1.40 release
 	  ===================

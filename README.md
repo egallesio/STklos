@@ -1,12 +1,12 @@
-STklos   (version 1.4x)
-=======================
+STklos (version 1.50)
+=====================
 
 **Erick Gallesio** <eg(at)unice.fr>
 
 
 Purpose
 -------
- 
+
 STklos is a free Scheme system compliant with the languages features
 defined in R7RS. The aim of this implementation is to be fast as well
 as light. The implementation is based on an ad-hoc Virtual
@@ -46,18 +46,24 @@ easy to port old STk graphical applications (provided that they use
 objects). The GTK+ extension can be loaded at run time and does not
 require a special interpreter as it was the case with STk.
 
-**March 2018:**
-Development of STklos was on hold for several years, due to heavy
-administrative tasks in my University. However, Ι still use it for
-personal scripts and, since Ι was asked for, the source tree is now
-publicly available. The DVCS used is now **git** instead of mercurial.
-
 **July 2019**
 The 1.3x versions try to be more R7RS compliant. All the
 R5RS functions which have been extended in R7RS are now conform to
 R7RS (for instance `assoc` and `member` accept now an optional
 parameter which is a compare function, vector->list accepts the
 `start` and `end` parameters, ...)
+
+**June 2020**
+The 1.40 version continues to add R7RS traits to STklos.
+
+**August 2020** 
+
+The 1.50 version has been ported on various architectures (in
+particular on `small" systems running on 32 bits little as well as big
+endian) and a port on Android.  This version brings also the support
+of 23 new SRFIs. For a complete list of supported SRFIs, see
+https://www.stklos.net/srfi.html
+
 
 SRFI Support
 ------------
@@ -74,11 +80,11 @@ There are two recommended IDEs that can be used with STklos:
 
 * Quack by Neil van Dyke, which still works fine, but it's not being updated:
   https://www.neilvandyke.org/quack/
-  
+
 * Geiser:
   http://www.nongnu.org/geiser/
   The STklos support package is here: https://gitlab.com/emacs-geiser/stklos/
-  
+
 Supported architectures
 ----------------------
 
@@ -112,17 +118,16 @@ STklos on it. The old ports were effective on:
 More informations on supported platforms is available in the
 PORTING-NOTES file in the distribution.
 
-STklos Installation 
+STklos Installation
 -------------------
 
 See the file ./QUICK-INSTALL.md for instructions on how to build STklos (a
 more complete document is available in ./INSTALL
 
-If you want to build or run a Docker image of STklos, you can find some information 
+If you want to build or run a Docker image of STklos, you can find some information
 in the ./etc/Docker/README.md
 
 Project Home
 ------------
 
 STklos home page is is located at http://stklos.net
-

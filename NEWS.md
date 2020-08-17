@@ -1,10 +1,79 @@
 NEWS
 ====
 
+Version 1.50
+------------
+
+This version enhances R7RS compliance and a lot of new SRFIs (thanks to the awesome work of [Jeronimo Pellegrini  — **@jpellegrini**](https://github.com/jpellegrini))
+
+Changes in this version are:
+
+   - Exceptions behavior is now R7RS compliant
+   - `current{input,ouput,error}-port` are now parameters as required by R7RS.
+   - Socket ports are now both binary and textual.
+   - Added support for Android.
+   - Better support of 32 bits big-endian architectures
+   - Support of more architectures. STklos can be run now on
+       - GNU/Linux on x86_64  (64 bits)
+       - GNU/Linux on ARM v7l (32 bits)
+       - GNU/Linux on MIPS (32 bits little and big endian)
+       - FreeBSD
+       - OPenBSD
+       - MacOS X86_64
+       - Windows 10 (on WSL)
+       - Android on ARM 64
+   - Support of new SRFIs (most of them were implemented by @jpellegrini):
+       - SRFI-37: args-fold: a program argument processor
+       - SRFI-51: Handling rest list
+       - SRFI-54: Formatting
+       - SRFI-64: A Scheme API for test suites
+       - SRFI-117: Queues based on lists
+       - SRFI-118: Simple adjustable-size strings
+       - SRFI-129: Titlecase procedures
+       - SRFI-141: Integer Division
+       - SRFI-145: Assumptions
+       - SRFI-151: Bitwise Operations
+       - SRFI-156: Syntactic combiners for binary predicates
+       - SRFI-158: Generators and Accumulators
+       - SRFI-161: Unifiable Boxes
+       - SRFI-169: Underscores in numbers
+       - SRFI-171: Transducers
+       - SRFI-173: Hooks
+       - SRFI-174: POSIX Timespecs
+       - SRFI-175: ASCII character library
+       - SRFI-176: Version flag
+       - SRFI-180: JSON
+       - SRFI-185: Linear adjustable-length strings
+       - SRFI-189: Maybe and Either: optional container types
+       - SRFI-190: Coroutines Generators
+   - Better documentation (thanks to @jpellegrini again! — need to be completed)
+       - description of the internals of STklos
+       - description of the VM instructions
+       - instructions to compile STklos on various OS
+       - updated manual's bibliography
+   - Bug fixes
+
+Version 1.40
+------------
+
+Changes in this version are:
+
+   - Updated the build tools
+   - Now STklos is case sensitive by default as required by R7RS\
+     the R5RS case insensitivity can be enable with the
+     `--case-insensitive` option
+   - New parameter: `repl-theme` permits to customize REPL prompt colors.
+   - Added more tests
+   - Added the `#:xxx` syntax for keywords for compatibility with
+     other implementations
+   - Added the R7RS syntaxes letrec*, let-values & let*-values
+   - Various bug fixes
+
+
 version 1.31
 ------------
 
-Bug fix version. 
+Bug fix version.
 
 Changes in this version are:
 
@@ -13,7 +82,7 @@ Changes in this version are:
   - Bug fix for MacOs UTF8 detection
   - Added SRFI-112
   - Updated documentation
-  
+
 
 version 1.30
 ------------
@@ -26,7 +95,7 @@ parameter which is a compare function, vector->list accepts the
 
 
 Changes in this version are:
-  - Implementations R7RS I/O  
+  - Implementations R7RS I/O
       - Ports can now be binary or textual (standard ports are both)
       - New functions:
           - `write-string`
@@ -39,7 +108,7 @@ Changes in this version are:
           - `open-binary-input-file`
           - `open-binary-output-file`
           - `utf8->string` & `string->utf8`
- - Updated various functions to be R7RS compliant. 
+ - Updated various functions to be R7RS compliant.
  - Added the R7RS functions on bytevectors
  - Added R7RS `#true` and `#false` constants
  - Added R7RS exceptions
@@ -152,7 +221,7 @@ version 0.98 (2008 04 15)
 
 version 0.97 (2007 12 16)
 -------------------------
- 
+
  - Fixed support for recent versions of SLIB
  - Added boxes: they were used by the system but unavailable to the user.
  - Improved the stklos-pkg command
@@ -298,7 +367,7 @@ version 0.70 (2005 05 27)
 The main changes in this release are: a new back-trace system, a
 conform call/cc/dynamic-wind implementation and some performance
 enhancements.
-    
+
  - Added a way to have a back-trace when an error occurs
  - call/cc has been completely implemented. Its interaction with
    dynamic-wind is now conform to R5RS.
@@ -548,7 +617,7 @@ version 0.52
 
 version 0.51
 ------------
-     
+
 - Added R5RS hygienic macros
 - Added compatibility with the Aubrey Jaffer's SLIB
 - New port on Alpha/Linux
