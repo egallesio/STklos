@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 15-Aug-2020 16:26 (eg)
+;;;; Last file update: 16-Aug-2020 08:07 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -862,14 +862,28 @@ doc>
         (compile-args `(,@(reverse f) (list ,@rest)) env)
         (loop (- n 1) (cons (car rest) f) (cdr rest)))))
 
+
+(define %maybe-generate-line-information
+  ;; keep the last generated file name to avoid to produce a new file
+  ;; name (which is probably long) at each line information generation.
+  (let ((%last-generated-file-name #f))
+    (lambda (epair)
+      (when (and (compiler:gen-line-number) (%epair? epair))
+        ;; Generate a line number for the call
+        (let ((file (%epair-file epair))
+              (line (%epair-line epair)))
+          (unless (equal? file %last-generated-file-name)
+            (set! %last-generated-file-name file))
+          ;; the parameter constant of instruction should be short
+          (when (small-integer-constant? line)
+            (compile-constant %last-generated-file-name '() #f)
+            (emit 'PUSH)
+            (emit 'CALL-LOCATION line)))))))
+
+
 (define (generate-PREPARE-CALL epair)
   (emit 'PREPARE-CALL)
-  (when (and (compiler:gen-line-number) (%epair? epair))
-    ;; Generate a line number for the call
-    (compile-constant (%epair-file epair) '() #f)
-    (emit 'PUSH)
-    (compile-constant (%epair-line epair) '() #f)
-    (emit 'DBG-VM 1)))
+  (%maybe-generate-line-information epair))
 
 
 (define (compile-normal-call fct actuals len env epair tail?)

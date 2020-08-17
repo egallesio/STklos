@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 15-Aug-2020 19:01 (eg)
+;;;; Last file update: 16-Aug-2020 08:08 (eg)
 ;;;;
 
 (include "runtime.stk")         ; Definition necessary for the bootstrap
@@ -114,7 +114,7 @@
                                  p))
                       ;; Print (eventually) the position
                       (if (cdr x)
-                          (format p " @ [~S:~S]\n" (cadr x) (cddr x))
+                          (format p " @ [~A:~A]\n" (cadr x) (cddr x))
                           (newline p)))))
               (limit-bt (hack-bt)))
     (flush-output-port p)))

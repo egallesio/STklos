@@ -120,37 +120,37 @@
 #  define PUSH_GREF_TAIL_INV   115
 #  define PUSH_UGREF_TAIL_INV  116
 #  define DEEP_LOC_REF_PUSH    117
-#  define UNUSED_19            118
-#  define UNUSED_18            119
-#  define UNUSED_17            120
-#  define UNUSED_16            121
-#  define UNUSED_15            122
-#  define UNUSED_14            123
-#  define UNUSED_13            124
-#  define UNUSED_12            125
+#  define UNUSED_3             118
+#  define UNUSED_4             119
+#  define UNUSED_5             120
+#  define UNUSED_6             121
+#  define UNUSED_7             122
+#  define UNUSED_8             123
+#  define UNUSED_9             124
+#  define UNUSED_10            125
 #  define UNUSED_11            126
-#  define UNUSED_10            127
-#  define UNUSED_9             128
-#  define UNUSED_8             129
-#  define UNUSED_7             130
-#  define UNUSED_6             131
-#  define UNUSED_5             132
-#  define UNUSED_4             133
-#  define UNUSED_3             134
+#  define UNUSED_12            127
+#  define UNUSED_13            128
+#  define UNUSED_14            129
+#  define UNUSED_15            130
+#  define UNUSED_16            131
+#  define UNUSED_17            132
+#  define UNUSED_18            133
+#  define UNUSED_19            134
 #  define IN_SINT_ADD2         135
 #  define IN_SINT_SUB2         136
 #  define IN_SINT_MUL2         137
 #  define IN_SINT_DIV2         138
-#  define UNUSED_29            139
-#  define UNUSED_28            140
-#  define UNUSED_27            141
-#  define UNUSED_26            142
-#  define UNUSED_25            143
-#  define UNUSED_24            144
-#  define UNUSED_23            145
-#  define UNUSED_22            146
-#  define UNUSED_21            147
-#  define UNUSED_20            148
+#  define UNUSED_20            139
+#  define UNUSED_21            140
+#  define UNUSED_22            141
+#  define UNUSED_23            142
+#  define UNUSED_24            143
+#  define UNUSED_25            144
+#  define UNUSED_26            145
+#  define UNUSED_27            146
+#  define UNUSED_28            147
+#  define CALL_LOCATION        148
 #  define DEEP_LOC_REF_FAR     149
 #  define DEEP_LOC_SET_FAR     150
 #  define CREATE_CLOSURE_FAR   151
@@ -289,37 +289,37 @@ static void *jump_table[] = {
   &&lab_PUSH_GREF_TAIL_INV  ,
   &&lab_PUSH_UGREF_TAIL_INV ,
   &&lab_DEEP_LOC_REF_PUSH   ,
-  &&lab_UNUSED_19           ,
-  &&lab_UNUSED_18           ,
-  &&lab_UNUSED_17           ,
-  &&lab_UNUSED_16           ,
-  &&lab_UNUSED_15           ,
-  &&lab_UNUSED_14           ,
-  &&lab_UNUSED_13           ,
-  &&lab_UNUSED_12           ,
-  &&lab_UNUSED_11           ,
-  &&lab_UNUSED_10           ,
-  &&lab_UNUSED_9            ,
-  &&lab_UNUSED_8            ,
-  &&lab_UNUSED_7            ,
-  &&lab_UNUSED_6            ,
-  &&lab_UNUSED_5            ,
-  &&lab_UNUSED_4            ,
   &&lab_UNUSED_3            ,
+  &&lab_UNUSED_4            ,
+  &&lab_UNUSED_5            ,
+  &&lab_UNUSED_6            ,
+  &&lab_UNUSED_7            ,
+  &&lab_UNUSED_8            ,
+  &&lab_UNUSED_9            ,
+  &&lab_UNUSED_10           ,
+  &&lab_UNUSED_11           ,
+  &&lab_UNUSED_12           ,
+  &&lab_UNUSED_13           ,
+  &&lab_UNUSED_14           ,
+  &&lab_UNUSED_15           ,
+  &&lab_UNUSED_16           ,
+  &&lab_UNUSED_17           ,
+  &&lab_UNUSED_18           ,
+  &&lab_UNUSED_19           ,
   &&lab_IN_SINT_ADD2        ,
   &&lab_IN_SINT_SUB2        ,
   &&lab_IN_SINT_MUL2        ,
   &&lab_IN_SINT_DIV2        ,
-  &&lab_UNUSED_29           ,
-  &&lab_UNUSED_28           ,
-  &&lab_UNUSED_27           ,
-  &&lab_UNUSED_26           ,
-  &&lab_UNUSED_25           ,
-  &&lab_UNUSED_24           ,
-  &&lab_UNUSED_23           ,
-  &&lab_UNUSED_22           ,
-  &&lab_UNUSED_21           ,
   &&lab_UNUSED_20           ,
+  &&lab_UNUSED_21           ,
+  &&lab_UNUSED_22           ,
+  &&lab_UNUSED_23           ,
+  &&lab_UNUSED_24           ,
+  &&lab_UNUSED_25           ,
+  &&lab_UNUSED_26           ,
+  &&lab_UNUSED_27           ,
+  &&lab_UNUSED_28           ,
+  &&lab_CALL_LOCATION       ,
   &&lab_DEEP_LOC_REF_FAR    ,
   &&lab_DEEP_LOC_SET_FAR    ,
   &&lab_CREATE_CLOSURE_FAR  ,
@@ -458,37 +458,37 @@ static char *name_table[] = {
   "PUSH_GREF_TAIL_INV  ",
   "PUSH_UGREF_TAIL_INV ",
   "DEEP_LOC_REF_PUSH   ",
-  "UNUSED_19           ",
-  "UNUSED_18           ",
-  "UNUSED_17           ",
-  "UNUSED_16           ",
-  "UNUSED_15           ",
-  "UNUSED_14           ",
-  "UNUSED_13           ",
-  "UNUSED_12           ",
-  "UNUSED_11           ",
-  "UNUSED_10           ",
-  "UNUSED_9            ",
-  "UNUSED_8            ",
-  "UNUSED_7            ",
-  "UNUSED_6            ",
-  "UNUSED_5            ",
-  "UNUSED_4            ",
   "UNUSED_3            ",
+  "UNUSED_4            ",
+  "UNUSED_5            ",
+  "UNUSED_6            ",
+  "UNUSED_7            ",
+  "UNUSED_8            ",
+  "UNUSED_9            ",
+  "UNUSED_10           ",
+  "UNUSED_11           ",
+  "UNUSED_12           ",
+  "UNUSED_13           ",
+  "UNUSED_14           ",
+  "UNUSED_15           ",
+  "UNUSED_16           ",
+  "UNUSED_17           ",
+  "UNUSED_18           ",
+  "UNUSED_19           ",
   "IN_SINT_ADD2        ",
   "IN_SINT_SUB2        ",
   "IN_SINT_MUL2        ",
   "IN_SINT_DIV2        ",
-  "UNUSED_29           ",
-  "UNUSED_28           ",
-  "UNUSED_27           ",
-  "UNUSED_26           ",
-  "UNUSED_25           ",
-  "UNUSED_24           ",
-  "UNUSED_23           ",
-  "UNUSED_22           ",
-  "UNUSED_21           ",
   "UNUSED_20           ",
+  "UNUSED_21           ",
+  "UNUSED_22           ",
+  "UNUSED_23           ",
+  "UNUSED_24           ",
+  "UNUSED_25           ",
+  "UNUSED_26           ",
+  "UNUSED_27           ",
+  "UNUSED_28           ",
+  "CALL_LOCATION       ",
   "DEEP_LOC_REF_FAR    ",
   "DEEP_LOC_SET_FAR    ",
   "CREATE_CLOSURE_FAR  ",
