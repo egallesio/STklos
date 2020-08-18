@@ -580,10 +580,12 @@ NOP
 ```
 
 
-The following sets a docstring for a procedure:
+The following sets the docstring and the formal parameter list
+documentation for a procedure:
 
 ```
 DOCSTRG
+FORMALS
 ```
 
 Example:
@@ -608,6 +610,32 @@ Example:
 
 Here, `DOCSTRG` seems to have a zero argument because it uses a constant string,
 and `disassemble` does not show values of strings and symbol names.
+
+The `FORMALS` opcode is similar to `DOCSTRG`, except that it expects a list
+instead of a string.
+
+```
+((in-module STKLOS-COMPILER compiler:generate-signature) #t)
+
+(disassemble
+ (lambda ()
+   (define (f a b . c) "A well-documented function" (* a 3))
+   10))
+
+000:  PREPARE-CALL        
+001:  FALSE-PUSH          
+002:  ENTER-TAIL-LET       1
+004:  CREATE-CLOSURE       5 -3	;; ==> 011
+007:  LOCAL-REF2          
+008:  IN-SINT-MUL2         3
+010:  RETURN              
+011:  FORMALS              0
+013:  DOCSTRG              1
+015:  LOCAL-SET0          
+016:  SMALL-INT            10
+018:  RETURN              
+```
+
 
 ### Creating closures and procedures
 
@@ -755,6 +783,8 @@ The following opcode enters a given module.
 SET_CUR_MOD
 ```
 
+An SCM object of type `module` must be in the `val` resgister.
+
 Example:
 
 ```
@@ -768,3 +798,11 @@ Example:
 007:  RETURN
 ```
 
+The following opcode defines a variable ina module.
+
+```
+DEFINE_SYMBOL
+```
+
+It will define a variable with name set as symbol fetched after the opcode,
+and value in the `val` register.
