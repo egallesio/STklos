@@ -251,12 +251,38 @@ doc>
 ;;;;
 ;;;; REFERENCES & ASSIGNMENT
 ;;;;
+
+;; (%%local-alias b a) defines that a and b are aliases.
+;; We push a new entry onto the environment, but instead
+;; of pushing a symbol, we push a list: (b a).
+;; Then, compile-access will know that this is an alias.
+(define (compile-%%local-alias args env tail?)
+  (let ((len (length (cdr args))))
+    (if (and (= len 2)
+             (symbol? (cadr args))
+             (symbol? (caddr args)))
+        (let ((target (cadr args))
+              (source (caddr args)))
+          (let ((alias (cdr args))) ;; same as (list target source)
+            (set-car! env (cons alias (car env)))
+            (emit 'IM-VOID)))
+        (compiler-error 'set! (cdr args) "%%local-alias: need exactly two arguments ~S" args))))
+
 (define (symbol-in-env? symb env)
+  ;; since there may be lists, and not only symbols, in the environment,
+  ;; we flatten it before comparing.
+  (define (flatten lst)
+    (let loop ((lst lst) (acc '()))
+      (cond
+       ((null? lst) acc)
+       ((pair? lst) (loop (car lst) (loop (cdr lst) acc)))
+       (else (cons lst acc)))))
+
   (let Loop ((l env))
     (cond
-      ((null? l)                #f)
-      ((memq symb (car l))      #t)
-      (else                     (Loop (cdr l))))))
+      ((null? l)                     #f)
+      ((memq symb (flatten (car l))) #t)
+      (else                          (Loop (cdr l))))))
 
 
 (define (compile-access name env epair ref)
@@ -295,7 +321,17 @@ doc>
                      (em 'DEEP-LOCAL-REF  'DEEP-LOCAL-SET (make-word lev idx))
                      (em 'DEEP-LOC-REF-FAR 'DEEP-LOC-SET-FAR ;; Use a FAR variants
                          (fetch-constant (cons lev idx)))))))
-            (else   (loop2 (+ idx 1) (cdr l))))))))
+            ;; If it's a list, and not a symbol, then it is '(b a), where b is an
+            ;; alias to a. We set the name to "a" and try again (call the loop),
+            ;; but without changing lev or env.
+            ((and (list? (car l))        ;; it's an alias!
+                  (= (length (car l)) 2) ;; should never be different from 2, but since we're calling cadar...
+                  (eq? (cadar l) name))  ;; found it!
+             (set! name (caar l))
+             (loop2 idx (car env))) ;; try again, with the right name, in this level and this env!
+            ((symbol? (car l)) ;; it was a symbol, count one more var in the stack
+             (loop2 (+ idx 1) (cdr l)))
+            (else (loop2 idx (cdr l)))))))) ;; it was an alias, do not count it!
 
 
 (define (compile-reference name env epair tail?)
@@ -1702,6 +1738,7 @@ doc>
           ((%%label)            (compile-%%label        e env tail?))
           ((%%goto)             (compile-%%goto         e env tail?))
           ((%%publish-syntax)   (compile-%%pubsyntax    e env tail?))
+          ((%%local-alias)      (compile-%%local-alias  e env tail?))
 
           ;; Unmatched cases
           (else                 (let ((first (car e)))
