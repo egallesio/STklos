@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 30-Jul-2020 18:50 (eg)
+;; Last file update: 28-Aug-2020 19:37 (eg)
 ;;
 ;; ======================================================================
 
@@ -1051,6 +1051,7 @@ See SRFI document for more information.])
 (insertdoc 'untrace)
 (insertdoc 'pp)
 (insertdoc 'disassemble)
+(insertdoc 'disassemble-expr)
 (insertdoc 'uri-parse)
 (insertdoc 'string->html)
 (insertdoc 'md5sum)
