@@ -14,9 +14,32 @@ You can see the opcodes of a compiled thunk with
 (disassemble (lambda () ...))
 ```
 
-We make a closure with the lambda, because `disassemble` would not work
-on expressions (which would be evaluated to values). So we'll always see
-a `RETURN` at the end of the output:
+and the opcodes of an expression with
+
+```
+(disassemble-expr 'expr)
+```
+
+With an extra `#t` argument, `dissasemble-proc` will show constants:
+
+```
+(disassemble-expr "abc")
+
+000:  CONSTANT             0
+002:
+
+
+
+(disassemble-expr "abc" #t)
+
+000:  CONSTANT             0
+002:
+
+Constants:
+0: "abc"
+```
+
+When we make a closure with the lambda, we'll always see a `RETURN` at the end of the output:
 
 ```
 stklos> (disassemble (lambda () '() ))
@@ -46,10 +69,9 @@ IM_VOID
 Examples:
 
 ```
-(disassemble  (lambda () 1) )
+(disassemble-expr  1)
 
 000:  IM-ONE
-001:  RETURN
 ```
 
 ```
@@ -69,10 +91,9 @@ CONSTANT
 ```
 
 ```
-(disassemble  (lambda () 1) )
+(disassemble-expr  5)
 
 000:  SMALL-INT            5
-002:  RETURN
 ```
 
 
@@ -229,22 +250,22 @@ GLOBAL-SET
 Examples:
 
 ```
-(disassemble
- (lambda ()
-   my-cool-global-variable))
+(disassemble-expr 'my-cool-global-variable) #t)
    
 000:  GLOBAL-REF           0
-002:  RETURN
+
+Constants:
+0: my-cool-global-variable
 ```
 
 ```
-(disassemble
- (lambda ()
-   (set! my-cool-global-variable #f)))
+(disassemble-expr '(set! my-cool-global-variable #f) #t)
    
 000:  IM-FALSE
 001:  GLOBAL-SET           0
-003:  RETURN
+
+Constants:
+0: my-cool-global-variable
 ```
 
 ## Operations
@@ -261,17 +282,14 @@ IN_MUL2
 IN_DIV2
 ```
 
-Example:
-
 ```
-(let ((x 3))
-  (disassemble
-   (lambda (a) (+ a x))))
+(disassemble-expr '(+ a 3) #t)
 
-000:  LOCAL-REF0-PUSH
-001:  DEEP-LOCAL-REF       256
-003:  IN-ADD2
-004:  RETURN
+000:  GLOBAL-REF           0
+002:  IN-SINT-ADD2         3
+
+Constants:
+0: a
 ```
 
 First the value of `a` (which is the zero-th local variable) is pushed onto the stack.
@@ -287,6 +305,16 @@ IN_FXMUL2
 IN_FXDIV2
 ```
 
+```
+(disassemble-expr '(fx+ v 3))
+
+000:  GLOBAL-REF           0
+002:  IN-SINT-FXADD2       3
+
+Constants:
+0: v
+```
+
 The following variant of those opcodes do not use the stack. They operate on
 `val` and an argument:
 
@@ -298,6 +326,18 @@ IN_SINT_DIV2
 ```
 
 Example:
+
+```
+(disassemble-expr '(+ a 2))
+
+000:  GLOBAL-REF           0
+002:  IN-SINT-ADD2         2
+
+Constants:
+0: a
+```
+
+With `a` as a local variable:
 
 ```
 (disassemble (lambda (a) (+ a 2)))
@@ -317,6 +357,18 @@ IN_SINT_FXADD2
 IN_SINT_FXSUB2
 IN_SINT_FXMUL2
 IN_SINT_FXDIV2
+```
+
+Example:
+
+```
+(disassemble-expr '(fx+ a 2))
+
+000:  GLOBAL-REF           0
+002:  IN-SINT-FXADD2       2
+
+Constants:
+0: a
 ```
 
 ### Increment and decrement val
@@ -342,12 +394,14 @@ IN_NUMGE     ;   pop >= val ?
 Example:
 
 ```
-(disassemble (lambda (a) (>= a 2)))
+(disassemble-expr ' (>= a 2))
 
-000:  LOCAL-REF0-PUSH
-001:  SMALL-INT            2
-003:  IN-NUMGE
-004:  RETURN
+000:  GLOBAL-REF-PUSH      0
+002:  SMALL-INT            2
+004:  IN-NUMGE
+
+Constants:
+0: a
 ```
 
 There are also opcodes for `equal?`, `eqv?` and `eq?`:
@@ -360,17 +414,20 @@ IN_EQ
 
 Example:
 
-```
-(disassemble (lambda (a) (eq? a 2)))
 
-000:  LOCAL-REF0-PUSH
-001:  SMALL-INT            2
-003:  IN-EQ
-004:  RETURN
+```
+(disassemble-expr '(eq? a 2))
+
+000:  GLOBAL-REF-PUSH      0
+002:  SMALL-INT            2
+004:  IN-EQ
+
+Constants:
+0: a
 ```
 
-The `dissassemble` procedure will not, however, show the names of symbols
-or values of strings.
+The `dissassemble`  procedures will not, however, show the names of symbols
+or values of strings (`disassemble-expr` does, when passed the extra `#t` argument).
 
 ```
 (disassemble (lambda (a) (eq? a 'hello-i-am-a-symbol)))
@@ -379,6 +436,19 @@ or values of strings.
 001:  CONSTANT             0
 003:  IN-EQ
 004:  RETURN
+```
+
+```
+(disassemble-expr '(eq? a 'hello-i-am-a-symbol) #t)
+
+000:  GLOBAL-REF-PUSH      0
+002:  CONSTANT             1
+004:  IN-EQ
+005:
+
+Constants:
+0: a
+1: hello-i-am-a-symbol
 ```
 
 ### Constructors
@@ -394,6 +464,19 @@ IN_LIST
 ```
 
 Examples:
+
+```
+(disassemble-expr '(cons "a" "b") #t)
+
+000:  CONSTANT-PUSH        0
+002:  CONSTANT             1
+004:  IN-CONS
+005:
+
+Constants:
+0: "a"
+1: "b"
+```
 
 ```
 (disassemble (lambda (a b) (cons a b)))
@@ -416,14 +499,15 @@ is loaded on `val`, and then `IN-CONS` is called.
 ```
 
 ```
-(disassemble (lambda (a) (car a)))
+(disassemble-expr '(car a) #t)
 
-000:  LOCAL-REF0
-001:  IN-CAR
-002:  RETURN
+000:  GLOBAL-REF           0
+002:  IN-CAR
+003:
+
+Constants:
+0: a
 ```
-
-
 
 
 ### Structure references
@@ -454,13 +538,15 @@ In the following example, the `CONSTANT-PUSH` is including a reference
 to the string on the stack.
 
 ```
-(disassemble
- (lambda () (string-ref "abcde" 3)))
+(disassemble-expr '(string-ref "abcde" 3) #t)
 
 000:  CONSTANT-PUSH        0
 002:  SMALL-INT            3
 004:  IN-SREF
-005:  RETURN
+005:
+
+Constants:
+0: "abcde"
 ```
 
 When setting a value, the reference to the vecotr or string and the index go
@@ -535,21 +621,19 @@ LEAVE_LET
 
 Examples:
 
-
 ```
-(disassemble
- (lambda ()
-   (list (let ((x 1))
-           x))))
+(disassemble-expr '(list (let ((x 1))
+                           x)) #t)
 
 000:  PREPARE-CALL
-001:  INT-PUSH             3
+001:  ONE-PUSH
 002:  ENTER-LET            1
 004:  LOCAL-REF0
 005:  LEAVE-LET
 006:  PUSH
 007:  IN-LIST              1
-009:  RETURN
+
+Constants:
 ```
 
 When the `let` is  in tail position, then the opcode
@@ -588,7 +672,22 @@ DOCSTRG
 FORMALS
 ```
 
-Example:
+Examples:
+
+```
+(disassemble-expr '(define (f) "A well-documented function" 5) #t)
+
+000:  CREATE-CLOSURE       4 0	;; ==> 006
+003:  SMALL-INT            5
+005:  RETURN
+006:  DOCSTRG              0
+008:  DEFINE-SYMBOL        1
+010:
+
+Constants:
+0: "A well-documented function"
+1: f
+```
 
 ```
 (disassemble
@@ -617,25 +716,23 @@ instead of a string.
 ```
 ((in-module STKLOS-COMPILER compiler:generate-signature) #t)
 
-(disassemble
- (lambda ()
-   (define (f a b . c) "A well-documented function" (* a 3))
-   10))
+(disassemble-expr '(define (f a b . c) "A well-documented function" (* a 3)) #t)
 
-000:  PREPARE-CALL        
-001:  FALSE-PUSH          
-002:  ENTER-TAIL-LET       1
-004:  CREATE-CLOSURE       5 -3	;; ==> 011
-007:  LOCAL-REF2          
-008:  IN-SINT-MUL2         3
-010:  RETURN              
-011:  FORMALS              0
-013:  DOCSTRG              1
-015:  LOCAL-SET0          
-016:  SMALL-INT            10
-018:  RETURN              
+000:  CREATE-CLOSURE       5 -3;; ==> 007
+003:  LOCAL-REF2
+004:  IN-SINT-MUL2         3
+006:  RETURN
+007:  FORMALS              0
+009:  DOCSTRG              1
+011:  DEFINE-SYMBOL        2
+013:
+
+Constants:
+0: (a b . c)
+1: "A well-documented function"
+2: f
+
 ```
-
 
 ### Creating closures and procedures
 
@@ -788,17 +885,20 @@ An SCM object of type `module` must be in the `val` resgister.
 Example:
 
 ```
-(disassemble
- (lambda (m) (select-module m)))
- 
+(disassemble-expr '(select-module m) #t)
+
 000:  PREPARE-CALL
 001:  CONSTANT-PUSH        0
 003:  GREF-INVOKE          1 1
 006:  SET-CUR-MOD
-007:  RETURN
+007:
+
+Constants:
+0: m
+1: find-module
 ```
 
-The following opcode defines a variable ina module.
+The following opcode defines a variable in a module.
 
 ```
 DEFINE_SYMBOL
@@ -806,3 +906,26 @@ DEFINE_SYMBOL
 
 It will define a variable with name set as symbol fetched after the opcode,
 and value in the `val` register.
+
+```
+(disassemble-expr '(define a "abc") #t)
+
+000:  CONSTANT             0
+002:  DEFINE-SYMBOL        1
+004:
+
+Constants:
+0: "abc"
+1: a
+```
+
+```
+(disassemble-expr '(define a #f) #t)
+
+000:  IM-FALSE
+001:  DEFINE-SYMBOL        0
+003:
+
+Constants:
+0: a
+```
