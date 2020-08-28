@@ -1,8 +1,8 @@
-# Makefile.am for STklos lib
+# Makefile for STklos lib
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 12-Aug-2020 19:36 (eg)
+# Last file update: 28-Aug-2020 19:54 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -42,8 +42,9 @@ scheme_BOOT = assembler.stk \
           struct.stk        \
           thread.stk
 
-SRC_STK = STklos.init     \
-          bigloo-support.stk  \
+scheme_extra = STklos.init
+
+SRC_STK = bigloo-support.stk  \
           bigmatch.stk        \
           compfile.stk        \
           describe.stk        \
@@ -108,8 +109,6 @@ SRC_STK = STklos.init     \
 
 SRC_C = srfi-175-impl.c
 
-scheme_SRCS = $(SRC_STK) $(SRC_C)
-
 scheme_OBJS = compfile.ostk    \
           bigmatch.ostk        \
           full-syntax.ostk     \
@@ -171,14 +170,12 @@ scheme_OBJS = compfile.ostk    \
           tar.ostk             \
           trace.ostk
 
-
-
 DOCDB	    = DOCDB
 
 #======================================================================
-schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
-scheme_DATA = $(SRC_STK) $(scheme_OBJS) $(scheme_BOOT)
-
+schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@
+scheme_DATA    = $(scheme_extra) $(scheme_OBJS) 
+scheme_sources = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 
 SUFFIXES = .stk .ostk .scm
@@ -234,6 +231,15 @@ generate-git-info:
 	   exit 1; 							\
 	fi;
 
+# Installation of *.stk files
+install-sources:
+	@for i in $(SUBDIRS) ;do \
+	   (cd $$i; $(MAKE) install-sources)\
+	done
+	cp $(SRC_STK) $(scheme_BOOT) $(schemedir)
+
+
+
 # Compile SRFI13 before SRFI14 to avoid 2 warnings
 
 $(SCHEME_OBJS): ../src/boot.img
@@ -245,12 +251,11 @@ srfi-13.ostk: srfi-14.ostk
 srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
 
-
 doc: $(DOCDB)
 
-$(DOCDB): $(scheme_SRCS) $(scheme_BOOT)
+$(DOCDB): $(scheme_sources)
 	$(STKLOS_BINARY) -q -c -b ../src/boot.img -f ../doc/extract-doc \
-	$(scheme_SRCS) $(scheme_BOOT) > $(DOCDB)
+	$(scheme_sources) > $(DOCDB)
 
 clean:
 	/bin/rm -f $(scheme_OBJS)

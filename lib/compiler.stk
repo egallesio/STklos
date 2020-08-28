@@ -21,13 +21,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 16-Aug-2020 08:07 (eg)
+;;;; Last file update: 28-Aug-2020 19:33 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
   (import SCHEME)
   (export eval
-          disassemble
+          disassemble disassemble-expr
           compiler:time-display
           compiler:gen-line-number
           compiler:warn-use-undefined
