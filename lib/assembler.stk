@@ -470,8 +470,8 @@ doc>
 #|
 <doc EXT disassemble-expr
  * (disassemble-expr sexpr)
- * (disassemble proc sexpr show-consts)
- * (disassemble proc sexpr show-consts port)
+ * (disassemble-expr show-consts)
+ * (disassemble-expr show-consts port)
  *
  * This function prints on the given |port| (by default the current output
  * port) the instructions of the given |sexpr|. If |show-consts| is true,
