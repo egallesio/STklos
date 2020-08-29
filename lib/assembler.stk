@@ -505,12 +505,14 @@ doc>
                                          (port (current-output-port)))
   (define (compile-expression e)
     (compile e '() e #f)
+    (emit 'END-OF-CODE)
     (assemble (reverse! *code-instr*)))
 
   (fluid-let ((*code-instr*     '())
               (*code-constants* '()))
     (let ((code (compile-expression expr)))
-      (disassemble-code code port)
+      ;; Suppress the last instr. (END-OF-CODE) which is useless and confusing
+      (disassemble-code (vector-copy code 0 (- (vector-length code) 1)) port)
       (when show-consts
         (printf "\nConstants:\n")
         (let Loop ((i 0)
