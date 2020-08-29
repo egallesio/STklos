@@ -185,7 +185,8 @@
     ;; srfi-125                         ; Intermediate hash tables
     ;; srfi-126                         ; R6RS-based hashtables
     ;; srfi-127                         ; Lazy Sequences
-    ;; srfi-128                         ; Comparators (reduced)
+    ((srfi-128 comparators-reduced) "srfi-128")
+                                        ; Comparators (reduced)
     ((srfi-129 titlecase) "srfi-129")   ; Titlecase procedures
     ;; srfi-130                         ; Cursor-based string library
     ;; srfi-131                         ; ERR5RS Record Syntax (reduced)

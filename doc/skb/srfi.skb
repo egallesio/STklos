@@ -641,6 +641,9 @@ described in this document (procedures
 ;; SRFI 118 -- Simple adjustable-size strings 
 (gen-embedded-srfi 118)
 
+;; SRFI 128 -- Comparators (reduced)
+(gen-loaded-srfi 128)
+
 ;; SRFI 129 -- Titlecase Procedures
 (gen-loaded-srfi 129)
 
