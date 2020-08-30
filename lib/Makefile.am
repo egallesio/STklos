@@ -238,7 +238,7 @@ install-sources:
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) install-sources)\
 	done
-	cp $(SRC_STK) $(scheme_BOOT) $(schemedir)
+	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)/$(schemedir)
 
 
 
