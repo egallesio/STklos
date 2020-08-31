@@ -1827,7 +1827,8 @@
 
 (define char-comparison (make-comparison=/< char=? char<?))
 
-(define (char-hash obj) (abs (char->integer obj)))
+;; not necesary, and interferes with SRFI-128:
+;; (define (char-hash obj) (abs (char->integer obj)))
 
 (define char-comparator
   (make-comparator char? char=? char-comparison char-hash))
@@ -1844,8 +1845,9 @@
                (sum (modulo (+ prod (hash (ref obj index))) limit)))
           (loop (- index 1) sum))))))
 
-(define string-hash
-  (make-vectorwise-hash char-hash string-length string-ref))
+;; not necesary, and interferes with SRFI-128:
+;; (define string-hash
+;;   (make-vectorwise-hash char-hash string-length string-ref))
 
 (define string-comparison (make-comparison=/< string=? string<?))
 
@@ -2989,7 +2991,6 @@
       (begin
         (let ((a (comparator-hash default-comparator "t"))
               (b (string-hash "t")))
-          (print "a= " a "\nb= " b "\n")
           (= a b))))
 (test "103" #t (= (comparator-hash default-comparator 't) (symbol-hash 't)))
 (test "104" #t (= (comparator-hash default-comparator 10) (number-hash 10)))
