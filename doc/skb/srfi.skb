@@ -635,6 +635,9 @@ described in this document (procedures
 ;; SRFI 112 -- Environment Inquiry
 (gen-embedded-srfi 112)
 
+;; SRFI 113 -- Sets and Bags
+(gen-loaded-srfi 113)
+
 ;; SRFI 117 -- Queues based on lists
 (gen-loaded-srfi 117)
 

@@ -168,7 +168,7 @@
     ;; srfi-110                         ; Sweet-expressions (t-expressions)
     ((srfi-111 boxes) "srfi-111")       ; Boxes
     srfi-112                            ; Environment Inquiry
-    ;; srfi-113                         ; Sets and bags
+    ((srfi-113 sets-bags) "srfi-113")   ; Sets and bags
     ;; srfi-114                         ; ....... withdrawn
     ;; srfi-115                         ; Scheme Regular Expressions
     ;; srfi-116                         ; Immutable List Library
