@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 28-Aug-2020 19:33 (eg)
+;;;; Last file update: 31-Aug-2020 17:23 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -348,7 +348,9 @@ doc>
           (let* ((l        (extended-lambda->lambda l))
                  (name     (cadr l))
                  (proc     (caddr l))
-                 (expander `(lambda (form e) (apply ,proc (cdr form)))))
+                 (form     (gensym 'form))
+                 (e        (gensym '_))
+                 (expander `(lambda (,form ,e) (apply ,proc (cdr ,form)))))
             ;; Install expander for further compilation
             (install-expander! name (eval expander) proc)
             ;; Compile code for installing expander (for byte-code files)
