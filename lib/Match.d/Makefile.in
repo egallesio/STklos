@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 26-Nov-2001 10:10 (eg)
-# Last file update: 28-Aug-2020 16:50 (eg)
+# Last file update: 31-Aug-2020 18:10 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -458,8 +458,8 @@ uninstall-am:
 
 
 install-sources:
-	mkdir -p  $(scheme_matchdir)
-	cp $(SRC) $(scheme_matchdir)
+	mkdir -p  $(DESTDIR)/$(scheme_matchdir)
+	cp $(SRC) $(DESTDIR)/$(scheme_matchdir)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

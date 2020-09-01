@@ -14,6 +14,9 @@ COMP ?= ../utils/tmpcomp
 .stk:
 	$(COMP) -o $* $*.stk 
 
+# Override the install target to avoid intallation in destination dir.
+install:
+
 clean:
 	   /bin/rm -f $(schemedemo_SCRIPTS) *~
 

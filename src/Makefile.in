@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  9-Aug-2020 15:53 (eg)
+# Last file update: 31-Aug-2020 18:52 (eg)
 
 
 VPATH = @srcdir@
@@ -356,7 +356,7 @@ am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
-bindir = @bindir@
+bindir = $(prefix)/bin
 build = @build@
 build_alias = @build_alias@
 build_cpu = @build_cpu@
@@ -856,7 +856,8 @@ install-dvi: install-dvi-am
 install-dvi-am:
 
 install-exec-am: install-binPROGRAMS
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 install-html: install-html-am
 
 install-html-am:
@@ -947,8 +948,10 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-extraincDATA
-
-.MAKE: all check install install-am install-strip
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
+.MAKE: all check install install-am install-exec-am install-strip \
+	uninstall-am
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
 	clean-binPROGRAMS clean-generic cscopelist-am ctags ctags-am \
@@ -956,14 +959,14 @@ uninstall-am: uninstall-binPROGRAMS uninstall-extraincDATA
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-binPROGRAMS install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-extraincDATA install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-extraincDATA
+	install-exec-am install-exec-hook install-extraincDATA \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic pdf pdf-am \
+	ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-extraincDATA uninstall-hook
 
 .PRECIOUS: Makefile
 
@@ -981,6 +984,14 @@ chars.c: utf8-tables.in
 
 generate-git-info:
 	@../utils/generate-git-info
+
+install-exec-hook:
+	strip $(DESTDIR)/$(bindir)/stklos
+	mv $(DESTDIR)/$(bindir)/stklos $(DESTDIR)/$(bindir)/stklos-@VERSION@
+	ln -s stklos-@VERSION@ $(DESTDIR)/$(bindir)/stklos
+
+uninstall-hook:
+	rm -f $(DESTDIR)/$(bindir)/stklos-@VERSION@
 
 doc:  $(DOCDB)
 

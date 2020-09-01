@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 28-Aug-2020 19:54 (eg)
+# Last file update: 31-Aug-2020 18:09 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -240,7 +240,7 @@ install-sources:
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) install-sources)\
 	done
-	cp $(SRC_STK) $(scheme_BOOT) $(schemedir)
+	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)/$(schemedir)
 
 
 

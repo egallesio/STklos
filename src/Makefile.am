@@ -2,13 +2,14 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  9-Aug-2020 15:53 (eg)
+# Last file update: 31-Aug-2020 18:52 (eg)
 
-CC	    = @CC@
+CC		 	= @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
 
 STKLOS_BINARY ?= ./stklos
 
+bindir      = $(prefix)/bin
 schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
 extraincdir = $(prefix)/include/@PACKAGE@
 
@@ -91,6 +92,16 @@ chars.c: utf8-tables.in
 generate-git-info:
 	@../utils/generate-git-info
 
+
+install-exec-hook:
+	strip $(DESTDIR)/$(bindir)/stklos
+	mv $(DESTDIR)/$(bindir)/stklos $(DESTDIR)/$(bindir)/stklos-@VERSION@
+	ln -s stklos-@VERSION@ $(DESTDIR)/$(bindir)/stklos
+
+uninstall-hook:
+	rm -f $(DESTDIR)/$(bindir)/stklos-@VERSION@
+
+
 doc:  $(DOCDB)
 
 $(DOCDB): $(stklos_SOURCES)
@@ -98,4 +109,3 @@ $(DOCDB): $(stklos_SOURCES)
 
 clean:
 	/bin/rm -f *.o $(DOCDB) git-config.h
-

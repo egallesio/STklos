@@ -439,7 +439,6 @@ installdirs:
 	for dir in "$(DESTDIR)$(schemedemodir)" "$(DESTDIR)$(schemedemodir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -553,6 +552,9 @@ COMP ?= ../utils/tmpcomp
 
 .stk:
 	$(COMP) -o $* $*.stk 
+
+# Override the install target to avoid intallation in destination dir.
+install:
 
 clean:
 	   /bin/rm -f $(schemedemo_SCRIPTS) *~
