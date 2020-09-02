@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 29-Jul-2020 16:26 (eg)
+;;;; Last file update:  2-Sep-2020 10:38 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -166,7 +166,7 @@
     ;; srfi-108                         ; Named quasi-literal constructors
     ;; srfi-109                         ; Extended string quasi-literals
     ;; srfi-110                         ; Sweet-expressions (t-expressions)
-    ((srfi-111 boxes) "srfi-111")       ; Boxes
+    ((srfi-111 boxes))                  ; Boxes
     srfi-112                            ; Environment Inquiry
     ((srfi-113 sets-bags) "srfi-113")   ; Sets and bags
     ;; srfi-114                         ; ....... withdrawn
@@ -240,7 +240,7 @@
     ;; srfi-177                         ; Portable keyword arguments (draft)
     ;; srfi-178                         ; Bitvector library (draft)
     ;; srfi-179                         ; Nonempty Intervals and Generalized Arrays (Updated) (draft)
-    ((srfi-180 JSON json) "srfi-180")   ; JSON 
+    ((srfi-180 JSON json) "srfi-180")   ; JSON
     ;; srfi-181                         ; Custom ports (draft)
     ;; srfi-182                         ; ....... withdrawn
     ;; srfi-183                         ; ....... withdrawn
@@ -254,10 +254,10 @@
     (srfi-190 "srfi-190")               ; Coroutine Generators
     (generators "srfi-158" "srfi-190")
     ;; srfi-191                         ; ....... withdrawn
-    ;; srfi-192                         ; Port Positioning (draft)
+    ;; srfi-192                         ; Port Positioning
     ;; srfi-193                         ; Command lines (draft)
-    ;; srfi-194                         ; Random data generators (draft)
-    ;; srfi-195                         ; Multiple-value boxes (draft)
+    ;; srfi-194                         ; Random data generators
+    ;; srfi-195                         ; Multiple-value boxes
     ;; srfi-196                         ; Range Objects (draft)
     ;; srfi-197                         ; Expression Chaining Operators (draft)
     ;; srfi-198                         ; POSIX system call exceptions (draft)
@@ -265,9 +265,14 @@
     ;; srfi-200                         ; Pattern Matching (draft)
     ;; srfi-201                         ; Syntactic Extensions to the Core Scheme Bindings (draft)
     ;; srfi-202                         ; Pattern-matching Variant of the and-let* Form that Supports Multiple Values (draft)
-    ;; srfi-203                         ; A Simple Picture Language in the Style of SICP
+    ;; srfi-203                         ; A Simple Picture Language in the Style of SICP (draft)
     ;; srfi-204                         ; Wright-Cartwright-Shinn Pattern Matcher (draft)
     ;; srfi-205                         ; POSIX Terminal Fundamentals (draft)
+    ;; srfi-206                         ; Auxiliary Syntax Keywords (draft)
+    ;; srfi-207                         ; String-notated bytevectors (draft)
+    ;; srfi-208                         ; NaN procedures (draft)
+    ;; srfi-209                         ; Enumerations and Enum Sets (draft)
+    ;; srfi-210                         ; Procedures and Syntax for Multiple Values (draft)
     ))
 
 ;; ----------------------------------------------------------------------

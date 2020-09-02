@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  8-Jul-2020 18:38 (eg)
+;; Last file update:  2-Sep-2020 10:42 (eg)
 ;;
 ;; ======================================================================
 
@@ -630,7 +630,7 @@ described in this document (procedures
 (gen-loaded-srfi 100)
 
 ;; SRFI 111 -- Boxes
-(gen-loaded-srfi 111)
+(gen-embedded-srfi 111)
 
 ;; SRFI 112 -- Environment Inquiry
 (gen-embedded-srfi 112)
