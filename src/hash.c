@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 30-May-2020 17:19 (eg)
+ * Last file update:  4-Sep-2020 14:00 (eg)
  */
 
 #include "stklos.h"
@@ -357,7 +357,7 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value)
 
   if (z) {
     /* Variable already exists. Change its value*/
-    BOX_VALUE(CDR(z)) = value;
+    *BOX_VALUES(CDR(z)) = value;
   } else {
     SCM z;
 

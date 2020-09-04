@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  5-Jul-2020 19:20 (eg)
+ * Last file update:  3-Sep-2020 12:28 (eg)
  *
  */
 #include <ctype.h>
@@ -240,9 +240,15 @@ void STk_print(SCM exp, SCM port, int mode)
       printstring(exp, port, mode);
       return;
     case tc_box:
-      STk_putc('#', port);
-      STk_putc('&', port);
-      STk_print(BOX_VALUE(exp), port, mode);
+      if (BOX_ARITY(exp) == 1) {
+        STk_putc('#', port);
+        STk_putc('&', port);
+        STk_print_star(*BOX_VALUES(exp), port, mode);
+      }
+      else {
+        sprintf(buffer, "#[box (%d) %lx]", BOX_ARITY(exp), (unsigned long) exp);
+        STk_puts(buffer, port);
+      }
       return;
     case tc_pointer:
       if (CPOINTER_TYPE(exp) == STk_void) {

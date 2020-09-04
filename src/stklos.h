@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 12-Aug-2020 17:44 (eg)
+ * Last file update:  4-Sep-2020 13:59 (eg)
  */
 
 
@@ -328,15 +328,18 @@ int STk_init_boolean(void);
 */
 struct box_obj {
   stk_header header;
-  SCM value;
+  int arity;
+  SCM values[1];
 };
 
 #define BOXP(p)         (BOXED_TYPE_EQ((p), tc_box))
-#define BOX_VALUE(p)    (((struct box_obj *) (p))->value)
-
+#define BOX_ARITY(p)    (((struct box_obj *) (p))->arity)
+#define BOX_VALUES(p)   (((struct box_obj *) (p))->values)
 #define BOX_CONST       (1 << 0)
 
-EXTERN_PRIMITIVE("make-box", make_box, subr1, (SCM x));
+EXTERN_PRIMITIVE("box", box, vsubr, (int argc, SCM * argv));
+SCM STk_make_box(SCM obj);
+
 
 int STk_init_box(void);
 
@@ -1395,6 +1398,7 @@ void STk_get_stack_pointer(void **addr);
 SCM STk_n_values(int n, ...);
 SCM STk_values2vector(SCM obj, SCM vect);
 
+EXTERN_PRIMITIVE("values", values, vsubr, (int argc, SCM *argv));
 EXTERN_PRIMITIVE("%vm-backtrace", vm_bt, subr0, (void));
 
 SCM STk_load_bcode_file(SCM f);

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 31-Aug-2020 18:00 (eg)
+;;;; Last file update:  3-Sep-2020 10:39 (eg)
 ;;;;
 
 (require "test")
@@ -4737,6 +4737,12 @@
         (generator->list g2))
   (test "Coroutine generator.3" '(0 1 2 3 4 5 6)
         (generator->list (g3 7))))
+
+;; ----------------------------------------------------------------------
+;;  SRFI 195 ...
+;; ----------------------------------------------------------------------
+;; Tests are in the file test-box.stk
+
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI 62 ...

@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 24-Jul-2020 21:51 (eg)
+ * Last file update:  3-Sep-2020 15:18 (eg)
  */
 
 #include "stklos.h"
@@ -347,7 +347,7 @@ DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol, &i);
   if (res) {
-    return BOX_VALUE(CDR(res));
+    return *BOX_VALUES(CDR(res));    /* sure that this box arity is 1 */
   } else {
     if (!default_value) error_unbound_variable(symbol);
     return default_value;
@@ -377,7 +377,7 @@ DEFINE_PRIMITIVE("%redefine-module-exports", redefine_module_exports, subr12,
     res = STk_hash_get_variable(&MODULE_HASH_TABLE(from), CAR(lst), &i);
     if (res)
       /* symbol (car lst) is bound in module from. redefine it in module to */
-      STk_define_variable(CAR(lst), BOX_VALUE(CDR(res)), to);
+      STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), to);
   }
   return STk_void;
 }
@@ -462,7 +462,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol, &i);
   if (res) {
     *ref = res;
-    return BOX_VALUE(CDR(res));
+    return *BOX_VALUES(CDR(res));
   }
   else {
     /* symbol was not found in the given env module. Try to find it in
@@ -473,7 +473,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
       res    = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol, &i);
       if (res && VISIBLE_P(symbol, module)) {
         *ref = res;
-        return BOX_VALUE(CDR(res));
+        return *BOX_VALUES(CDR(res));
       }
     }
 

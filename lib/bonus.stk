@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  2-Sep-2020 10:41 (eg)
+;;;; Last file update:  4-Sep-2020 14:30 (eg)
 ;;;;
 
 
@@ -1732,13 +1732,6 @@ doc>
 |#
 (define (get-environment-variables)
   (getenv))
-
-
-;;
-;; SRFI-111: "Boxes"
-;;
-(define box make-box)
-(define set-box! box-set!)
 
 
 ;;

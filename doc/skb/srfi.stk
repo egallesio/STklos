@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Aug-2004 12:43 (eg)
-;;;; Last file update:  3-Jul-2020 14:42 (eg)
+;;;; Last file update:  4-Sep-2020 14:47 (eg)
 ;;;;
 
 (define srfi-address "http://srfi.schemers.org/srfi-~A/srfi-~A.html")
@@ -97,6 +97,7 @@
      (185 . "Linear adjustable-length strings")
      (189 . "Maybe and Either: optional container types")
      (190 . "Coroutines Generators")
+     (195 . "Multiple-value boxes")
    ))
 
 (define (srfi n)

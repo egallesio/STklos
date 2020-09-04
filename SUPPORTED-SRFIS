@@ -86,3 +86,4 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-185: Linear adjustable-length strings
     - SRFI-189: Maybe and Either: optional container types
     - SRFI-190: Coroutines Generators
+    - SRFI-195: Multiple-value boxes

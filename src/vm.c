@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 16-Aug-2020 08:06 (eg)
+ * Last file update:  3-Sep-2020 15:15 (eg)
  */
 
 // INLINER values
@@ -405,7 +405,7 @@ static Inline short adjust_arity(SCM func, short nargs, vm_thread_t *vm)
 /* Add a new global reference to the table of checked references */
 static int add_global(SCM ref)
 {
-  SCM addr = &(BOX_VALUE(ref));
+  SCM addr = BOX_VALUES(ref);
   int i;
 
   /* Search this global in the already accessed globals */
@@ -733,7 +733,7 @@ SCM STk_values2vector(SCM obj, SCM vect)
 //   case 1: /* Embed line information in a procedure call */
 //     {
 //       SCM line = vm->val;
-// 
+//
 //       ACT_SAVE_INFO(vm->fp) = STk_cons(pop(), line);
 //       break;
 //     }
@@ -1177,7 +1177,7 @@ CASE(GLOBAL_SET) {
     error_unbound_variable(orig_operand);
   }
 
-  BOX_VALUE(CDR(ref)) = vm->val;
+  *BOX_VALUES(CDR(ref)) = vm->val;    /* sure that this box arity is 1 */
   /* patch the code for optimize next accesses */
   vm->pc[-1] = add_global(CDR(ref));
   vm->pc[-2] = UGLOBAL_SET;
@@ -1448,7 +1448,8 @@ CASE(MAKE_EXPANDER) {
      * Note: if this test is false, this is probably that wa are reading
      * back a bytecode file and the macro must be entered in the table
      */
-    BOX_VALUE(CDR(ref)) = STk_cons(STk_cons(name, vm->val), val);
+    /* Note: we are sure that this box arity is 1 */
+    *BOX_VALUES(CDR(ref)) = STk_cons(STk_cons(name, vm->val), val);
   }
   vm->valc    = 2;
   vm->val     = STk_void;
@@ -1485,7 +1486,7 @@ CASE(END_OF_CODE) {
 }
 
 CASE(DBG_VM)  {
-  ; 
+  ;
 }
 CASE(UNUSED_3)
 CASE(UNUSED_4)

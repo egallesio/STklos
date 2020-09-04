@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 25-Jun-2020 09:11 (eg)
+ * Last file update:  3-Sep-2020 15:21 (eg)
  */
 #include <sys/resource.h>
 #include "stklos.h"
@@ -374,8 +374,18 @@ DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
         return STk_equal(STk_struct2list(x), STk_struct2list(y));
       break;
     case tc_box:
-      if (BOXP(y))
-        return STk_equal(BOX_VALUE(x), BOX_VALUE(y));
+      if (BOXP(y)) {
+        long lx, ly, i;
+        lx = BOX_ARITY(x); ly = BOX_ARITY(y);
+        if (lx == ly) {
+          SCM *vx = BOX_VALUES(x);
+          SCM *vy = BOX_VALUES(y);
+          for (i=0; i < lx;  i++) {
+            if (STk_equal(vx[i], vy[i]) == STk_false) return STk_false;
+          }
+          return STk_true;
+        }
+      }
       break;
     case tc_uvector:
       if (BOXED_TYPE_EQ(y, tc_uvector))
@@ -447,8 +457,18 @@ static SCM equal_count(SCM x, SCM y, int max, int *cycle)
         return equal_count(STk_struct2list(x), STk_struct2list(y), max, cycle);
       break;
     case tc_box:
-      if (BOXP(y))
-        return equal_count(BOX_VALUE(x), BOX_VALUE(y), max, cycle);
+      if (BOXP(y)) {
+        long lx, ly, i;
+        lx = BOX_ARITY(x); ly = BOX_ARITY(y);
+        if (lx == ly) {
+          SCM *vx = BOX_VALUES(x);
+          SCM *vy = BOX_VALUES(y);
+          for (i=0; i < lx;  i++) {
+            if (equal_count(vx[i], vy[i], max, cycle) == STk_false) return STk_false;
+          }
+          return STk_true;
+        }
+      }
       break;
     case tc_uvector:
       if (BOXED_TYPE_EQ(y, tc_uvector))

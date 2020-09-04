@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  2-Sep-2020 10:38 (eg)
+;;;; Last file update:  4-Sep-2020 15:08 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -257,7 +257,7 @@
     ;; srfi-192                         ; Port Positioning
     ;; srfi-193                         ; Command lines (draft)
     ;; srfi-194                         ; Random data generators
-    ;; srfi-195                         ; Multiple-value boxes
+    srfi-195                            ; Multiple-value boxes
     ;; srfi-196                         ; Range Objects (draft)
     ;; srfi-197                         ; Expression Chaining Operators (draft)
     ;; srfi-198                         ; POSIX system call exceptions (draft)

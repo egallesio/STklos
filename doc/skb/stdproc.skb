@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 28-Aug-2020 19:37 (eg)
+;; Last file update:  4-Sep-2020 14:56 (eg)
 ;;
 ;; ======================================================================
 
@@ -866,17 +866,30 @@ also be represented with date structures.])
 ;;; BOXES
 ;;;
 (section :title "Boxes"
-   (p [Boxes are records that have a single field. A box may be constructed with
-the ,(tt "make-box"), ,(tt "make-constant-box") or the ,(tt "read") primitives.
-A box produced by read (using the ,(q (tt "#&")) notation) is mutable. Note that
-two boxes  are ,(tt "equal?") ,(emph "iff") their content are ,(tt "equal?").])
 
-(insertdoc 'make-box)
-(insertdoc 'make-constant-box)
+  (p [Boxes are objects which contain one or several states.  A box may
+be constructed with the ,(tt "box"), ,(tt "constant-box"). ,(stklos) boxes are
+compatible with the one defined in ,(link-srfi 111) or ,(link-srfi 195).  Boxes of
+SRFI-111 can contain only one value, whereas SRFI-195 boxes can contain multiple
+values. Furthermore, ,(stklos) defines also the notion of constant boxes which
+are not mutable.])
+
+  (p [The ,(tt "read") primitive can also make single valued boxes
+          (using the ,(q (tt "#&")) notation). Such boxes are mutable.])
+
+  (p [Note that two boxes are ,(tt "equal?") ,(emph "iff") their content are
+,(tt "equal?").])
+
+(insertdoc 'box)
+(insertdoc 'constant-box)
 (insertdoc 'box?)
 (insertdoc 'box-mutable?)
-(insertdoc 'box-set!)
-(insertdoc 'unbox))
+(insertdoc 'set-box!)
+(insertdoc 'unbox)
+(insertdoc 'box-arity)
+(insertdoc 'unbox-value)
+(insertdoc 'set-box-value!)
+)
 
 
 ;;;

@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update: 12-Aug-2020 18:48 (eg)
+;;;; Last file update:  4-Sep-2020 14:31 (eg)
 ;;;;
 
 
@@ -85,3 +85,8 @@
     ((1) (current-output-port port))
     ((2) (current-error-port port))
     (else (error '%set-std-port! "bad port number" index))))
+
+;; 04-Sep-2020(v1.50) use the SRFI 111 and SRFI 195 for boxes
+(define make-box box)
+(define make-constant-box constant-box)
+(define box-set! set-box!)
