@@ -65,9 +65,9 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-100: define-lambda-object
     - SRFI-111: Boxes
     - SRFI-112: Environment Inquiry
-    - SRFI-113: Sets and bags
+    - SRFI-113: Sets and Bags
     - SRFI-117: Queues based on lists
-    - SRFI-118: Simple adjustable-size strings
+    - SRFI-118: Simple adjustable-size strings 
     - SRFI-128: Comparators (reduced)
     - SRFI-129: Titlecase procedures
     - SRFI-141: Integer Division
