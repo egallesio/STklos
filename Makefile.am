@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  1-Sep-2020 09:18 (eg)
+# Last file update:  7-Sep-2020 16:36 (eg)
 
 
 EXTRA_DIST   =
@@ -20,6 +20,8 @@ install-base:
 	  echo "***** Installing directory $$i"; \
 	  (cd $$i && $(MAKE) $(AM_MAKEFLAGS) install); \
 	done
+install-base-no-strip:
+	@env $(MAKE) install-base STRIP=no
 
 install-sources: install-base
 	(cd lib && $(MAKE)  $(AM_MAKEFLAGS) install-sources)
