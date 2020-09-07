@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 31-Aug-2020 18:52 (eg)
+# Last file update:  7-Sep-2020 16:37 (eg)
 
 CC		 	= @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -94,7 +94,7 @@ generate-git-info:
 
 
 install-exec-hook:
-	strip $(DESTDIR)/$(bindir)/stklos
+	if test "X$$STRIP" != "Xno" ;then strip $(DESTDIR)/$(bindir)/stklos; fi
 	mv $(DESTDIR)/$(bindir)/stklos $(DESTDIR)/$(bindir)/stklos-@VERSION@
 	ln -s stklos-@VERSION@ $(DESTDIR)/$(bindir)/stklos
 
