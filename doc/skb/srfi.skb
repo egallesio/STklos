@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  4-Sep-2020 14:48 (eg)
+;; Last file update: 16-Sep-2020 11:15 (eg)
 ;;
 ;; ======================================================================
 
@@ -707,6 +707,9 @@ procedure.]))
 
 ;; SRFI 190 -- Coroutine Generators
 (gen-loaded-srfi 190)
+
+;; SRFI 190 -- Coroutine Generators
+(gen-embedded-srfi 193)
 
 ;; SRFI 195 -- Multiple-value boxes
 (gen-embedded-srfi 195)

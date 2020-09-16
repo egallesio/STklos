@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update:  4-Sep-2020 15:08 (eg)
+;;;; Last file update: 16-Sep-2020 11:13 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -241,12 +241,12 @@
     ;; srfi-178                         ; Bitvector library (draft)
     ;; srfi-179                         ; Nonempty Intervals and Generalized Arrays (Updated) (draft)
     ((srfi-180 JSON json) "srfi-180")   ; JSON
-    ;; srfi-181                         ; Custom ports (draft)
+    ;; srfi-181                         ; Custom ports (including transcoded ports)
     ;; srfi-182                         ; ....... withdrawn
     ;; srfi-183                         ; ....... withdrawn
     ;; srfi-184                         ; ....... withdrawn
     (srfi-185 "srfi-185")               ; Linear adjustable-length strings
-    ;; srfi-186                         ; Transcoders and transcoded ports
+    ;; srfi-186                         ; ....... withdrawn
     ;; srfi-187                         ; ....... withdrawn
     ;; srfi-188                         ; Splicing binding constructs for syntactic keywords
     ;; srfi-189                         ; Maybe and Either: optional container types
@@ -255,16 +255,17 @@
     (generators "srfi-158" "srfi-190")
     ;; srfi-191                         ; ....... withdrawn
     ;; srfi-192                         ; Port Positioning
-    ;; srfi-193                         ; Command lines (draft)
+    srfi-193                            ; Command lines
     ;; srfi-194                         ; Random data generators
     srfi-195                            ; Multiple-value boxes
     ;; srfi-196                         ; Range Objects (draft)
-    ;; srfi-197                         ; Expression Chaining Operators (draft)
-    ;; srfi-198                         ; POSIX system call exceptions (draft)
+    ;; srfi-197                         ; Expression Chaining Operators
+    ;; srfi-198                         ; ....... withdrawn
     ;; srfi-199                         ; ....... withdrawn
     ;; srfi-200                         ; Pattern Matching (draft)
     ;; srfi-201                         ; Syntactic Extensions to the Core Scheme Bindings (draft)
-    ;; srfi-202                         ; Pattern-matching Variant of the and-let* Form that Supports Multiple Values (draft)
+    ;; srfi-202                         ; Pattern-matching Variant of the and-let* Form
+                                        ;     that Supports Multiple Values (draft)
     ;; srfi-203                         ; A Simple Picture Language in the Style of SICP (draft)
     ;; srfi-204                         ; Wright-Cartwright-Shinn Pattern Matcher (draft)
     ;; srfi-205                         ; POSIX Terminal Fundamentals (draft)
@@ -273,6 +274,7 @@
     ;; srfi-208                         ; NaN procedures (draft)
     ;; srfi-209                         ; Enumerations and Enum Sets (draft)
     ;; srfi-210                         ; Procedures and Syntax for Multiple Values (draft)
+    ;; srfi-211                         ; Namespaces for Scheme Macro Systems (draft)
     ))
 
 ;; ----------------------------------------------------------------------

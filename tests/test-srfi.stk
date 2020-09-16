@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update:  3-Sep-2020 10:39 (eg)
+;;;; Last file update: 16-Sep-2020 11:32 (eg)
 ;;;;
 
 (require "test")
@@ -4737,6 +4737,37 @@
         (generator->list g2))
   (test "Coroutine generator.3" '(0 1 2 3 4 5 6)
         (generator->list (g3 7))))
+
+;; ----------------------------------------------------------------------
+;;  SRFI 193 ...
+;; ----------------------------------------------------------------------
+(let ((val (command-line)))
+  (test "command-line validate" #t
+        (and (list? val)
+               (not (null? val))
+               (or (boolean? (car val))
+                   (string? (car val)))
+               (every string? (cdr val))))
+  (test "command-args"
+        #t
+        (eq? (cdr val)
+             (command-args))))
+
+(parameterize ((command-line '(#f "1" "2")))
+  (test "new command line.1"
+        #t
+        (let ((val (command-line)))
+          (and (not (car val))
+               (equal? '("1" "2")
+                       (command-args))))))
+
+(parameterize ((command-line '("../../foo.stk" "1" "2" "3")))
+  (test "new command line.2"
+        #t
+        (let ((val (command-line)))
+          (and (equal? (command-name) "foo.stk")
+               (equal? '("1" "2" "3")
+                       (command-args))))))
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI 195 ...
