@@ -7,6 +7,14 @@
 CC		 	= @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
 
+# In order to use strip when cross-compiling, we need it to be settable
+# as an env variable. Setting it in configure.ac doesn't seem to make the
+# desired effect, so we just do this simple conditional assignment here.
+# We do *not* do "STRIP ?= strip" because it may happen (did, actually)
+# that the variable STRIP is set but empty.
+# -- jpellegrini
+STRIP := $(or $(STRIP),strip)
+
 STKLOS_BINARY ?= ./stklos
 
 bindir      = $(prefix)/bin
@@ -94,7 +102,7 @@ generate-git-info:
 
 
 install-exec-hook:
-	if test "X$$STRIP" != "Xno" ;then strip $(DESTDIR)/$(bindir)/stklos; fi
+	if test "X$$STRIP" != "Xno" ;then $(STRIP) $(DESTDIR)/$(bindir)/stklos; fi
 	mv $(DESTDIR)/$(bindir)/stklos $(DESTDIR)/$(bindir)/stklos-@VERSION@
 	ln -s stklos-@VERSION@ $(DESTDIR)/$(bindir)/stklos
 
