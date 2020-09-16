@@ -1,4 +1,4 @@
-;;;;
+-;;;;
 ;;;; bonus.stk  -- Useful primitives not in R5RS
 ;;;;
 ;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  4-Sep-2020 14:30 (eg)
+;;;; Last file update: 16-Sep-2020 11:47 (eg)
 ;;;;
 
 
@@ -309,28 +309,6 @@ doc>
 ;;;;
 ;;;; System functions
 ;;;;
-
-#|
-<doc EXT argv
- * (argv)
- *
- * Returns a list of the arguments given on the shell command line. The
- * interpreter options are no included in the result
-doc>
-|#
-(define (argv)
-  (key-get *%program-args* :argv '()))
-
-#|
-<doc EXT program-name
- * (program-name)
- *
- * Returns the invocation name of the current program as a string.
-doc>
-|#
-(define (program-name)
-  (key-get *%program-args* :program-name))
-
 #|
 <doc R7RS command-line
  * (command-line)
@@ -340,9 +318,40 @@ doc>
  * name.
 doc>
 |#
-(define (command-line)
-  (cons (key-get *%program-args* :program-name)
-        (key-get *%program-args* :argv '())))
+
+(define command-line
+  (let* ((script-file (key-get *%program-args* :script-file ""))
+         (cmd-line    (cons (if (equal? script-file "")
+                                ""
+                                (key-get *%program-args* :program-name ""))
+                            (key-get *%program-args* :argv '()))))
+    (define (verify-setter val)
+      (if (and (list? val)
+               (not (null? val))
+               (or (boolean? (car val))
+                   (string? (car val)))
+               (every string? (cdr val)))
+          val
+          (error "bad command line ~S" val)))
+
+    (make-parameter cmd-line verify-setter)))
+
+
+#|
+<doc EXT program-name
+ * (program-name)
+ *
+ * Returns the invocation name of the current program as a string. If the file is
+ * not a script (in sense of SRFI 193), it is the name of the running ,(stklos)
+ * interpreter, otherwise it is the name of the running script. This function always
+ * returns a string wheareas the|command-name| procedure returns #f when the
+ * program name is not a script.
+doc>
+|#
+(define (program-name)
+  (key-get *%program-args* :program-name))
+
+
 
 #|
 <doc EXT make-directories
@@ -1066,15 +1075,6 @@ doc>
 (define (exec-list command)
   (call-with-input-file (string-append "| " command) port->string-list))
 
-
-#|
-<doc EXT argc
- * (argc)
- *
- * Returns the number of argument present on the command line
-doc>
-|#
-(define argc (lambda () (length (argv))))
 
 
 #|
@@ -1880,5 +1880,70 @@ doc>
       (os.uname ,(vector-ref u 0) ,(vector-ref u 2) ,(vector-ref u 4))
       (os.env.LANG ,(or (getenv "LANG") ""))
       (os.env.TERM ,(or (getenv "TERM") "")))))
+
+;; ----------------------------------------------------------------------
+;;  SRFI-193: "Command line"
+;; ----------------------------------------------------------------------
+#|
+<doc EXT command-name
+ * (command-name)
+ *
+ * Returnd the name of the running program if it is a standalone and #f
+ * otherwise. This function is defined in ,(quick-link-srfi 193).
+doc>
+|#
+(define (command-name)
+  (let ((name (car (command-line))))
+    (and name (basename name))))
+
+#|
+<doc EXT argv command-args
+ * (command-args)
+ * (argv)
+ *
+ * Returns a list of the arguments given on the shell command line. The
+ * interpreter options are no included in the result. The name |argv| is
+ * deprecated and should not be used.
+doc>
+|#
+(define (command-args)
+  (cdr (command-line)))
+
+#|
+<doc EXT argc
+ * (argc)
+ *
+ * Returns the number of arguments present on the command line.
+doc>
+|#
+(define argc (lambda () (length (command-args)))))
+
+
+
+#|
+<doc EXT script-file
+ * (script-file)
+ *
+ * Returns the absolute path of the current script.
+ * If the calling program is not a script, #f is returned.
+ * This function is defined in ,(quick-link-srfi 193).
+doc>
+|#
+(define (script-file)
+  (let ((file (key-get *%system-state-plist* :script-file "")))
+    (and (not (equal? file ""))  file)))
+
+#|
+<doc EXT script-directory
+ * (script-directory)
+ *
+ * Returns the non-filename part of script-file as a string.
+ * As with |script-file|, this is an absolute pathname.
+doc>
+|#
+(define (script-directory)
+  (let ((file (key-get *%system-state-plist* :script-file "")))
+    (and (not (equal? file ""))
+         (string-append (dirname file) "/"))))
 
 ;; LocalWords:  doc dotimes R5RS str SRFI optarg

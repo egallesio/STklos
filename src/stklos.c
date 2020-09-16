@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 15-Jul-2020 17:42 (eg)
+ * Last file update: 16-Sep-2020 11:34 (eg)
  */
 
 #include "stklos.h"
@@ -61,6 +61,7 @@ static int  stack_size    = DEFAULT_STACK_SIZE;
 static int  debug_mode    = 0;
 static int  line_editor   = 1;
 static int  srfi_176      = 0;
+static char* script_file  = "";
 
 static struct option long_options [] =
 {
@@ -126,7 +127,8 @@ static int process_program_arguments(int argc, char *argv[])
     switch (c) {
       case 'v': Usage(1); exit(0);
       case 'V': srfi_176        = 1;                            break;
-      case 'f': program_file    = optarg;                       break;
+      case 'f': program_file    = optarg;
+                script_file     = STk_expand_file_name(optarg); break;
       case 'l': load_file       = optarg;                       break;
       case 'e': sexpr           = optarg;                       break;
       case 'b': boot_file       = optarg;                       break;
@@ -168,6 +170,7 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   ADD_BOOL_OPTION(line_editor,     ":line-editor");
   ADD_INT_OPTION(debug_mode,       ":debug");
   ADD_BOOL_OPTION(STk_use_utf8,    ":use-utf8");
+  ADD_OPTION(script_file,          ":script-file");
 
   STk_define_variable(STk_intern("*%program-args*"), options,
                       STk_STklos_module);

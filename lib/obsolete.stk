@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update:  4-Sep-2020 14:31 (eg)
+;;;; Last file update: 16-Sep-2020 10:11 (eg)
 ;;;;
 
 
@@ -90,3 +90,6 @@
 (define make-box box)
 (define make-constant-box constant-box)
 (define box-set! set-box!)
+
+;; 
+(define argv command-args)
