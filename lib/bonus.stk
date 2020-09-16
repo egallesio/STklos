@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 16-Sep-2020 11:40 (eg)
+;;;; Last file update: 16-Sep-2020 11:47 (eg)
 ;;;;
 
 
@@ -1076,15 +1076,6 @@ doc>
   (call-with-input-file (string-append "| " command) port->string-list))
 
 
-#|
-<doc EXT argc
- * (argc)
- *
- * Returns the number of argument present on the command line
-doc>
-|#
-(define argc (lambda () (length (argv))))
-
 
 #|
 <doc EXT apropos
@@ -1917,6 +1908,16 @@ doc>
 |#
 (define (command-args)
   (cdr (command-line)))
+
+#|
+<doc EXT argc
+ * (argc)
+ *
+ * Returns the number of arguments present on the command line.
+doc>
+|#
+(define argc (lambda () (length (command-args)))))
+
 
 
 #|

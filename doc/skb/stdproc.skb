@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  4-Sep-2020 14:56 (eg)
+;; Last file update: 16-Sep-2020 11:52 (eg)
 ;;
 ;; ======================================================================
 
@@ -716,10 +716,13 @@ standard primivitives to acess environment variables.])
 (insertdoc 'features)
 (insertdoc 'running-os)
 (insertdoc 'hostname)
-(insertdoc 'argc)
-(insertdoc 'argv)
 (insertdoc 'command-line)
+(insertdoc 'command-name)
+(insertdoc 'command-args)
+(insertdoc 'argc)
 (insertdoc 'program-name)
+(insertdoc 'script-file)
+(insertdoc 'script-directory)
 (insertdoc 'version)
 (insertdoc 'machine-type)
 (insertdoc 'implementation-name)
@@ -986,8 +989,6 @@ applications.])
 (subsection :title "System Informations"
 (insertdoc 'running-os)
 (insertdoc 'hostname)
-(insertdoc 'argc)
-(insertdoc 'argv)
 (insertdoc 'program-name)
 (insertdoc 'version)
 (insertdoc 'machine-type)
