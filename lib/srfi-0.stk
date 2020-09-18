@@ -225,7 +225,7 @@
     ;; srfi-163                         ; Enhanced array literals
     ;; srfi-164                         ; Enhanced multi-dimensional Arrays
     ;; srfi-165                         ; The Environment Monad
-    ;; srfi-166                         ; Monadic Formatting (draft)
+    ;; srfi-166                         ; Monadic Formatting
     ;; srfi-167                         ; Ordered Key Value Store
     ;; srfi-168                         ; Generic Tuple Store Database
     srfi-169                            ; Underscores in numbers
@@ -237,11 +237,15 @@
                                         ; POSIX Timespecs
     ((srfi-175 ascii) "srfi-175")       ; ASCII character library
     srfi-176                            ; Version flag
-    ;; srfi-177                         ; Portable keyword arguments (draft)
-    ;; srfi-178                         ; Bitvector library (draft)
-    ;; srfi-179                         ; Nonempty Intervals and Generalized Arrays (Updated) (draft)
+    ;; srfi-177                         ; ....... withdrawn
+    ;; srfi-178                         ; Bitvector library
+    ;; srfi-179                         ; Nonempty Intervals and Generalized Arrays (Updated)
     ((srfi-180 JSON json) "srfi-180")   ; JSON
+<<<<<<< HEAD
     ;; srfi-181                         ; Custom ports (including transcoded ports)
+=======
+    ;; srfi-181                         ; Custom ports
+>>>>>>> e8216a1... Update SRFIs information in srfi-0.stk
     ;; srfi-182                         ; ....... withdrawn
     ;; srfi-183                         ; ....... withdrawn
     ;; srfi-184                         ; ....... withdrawn
@@ -255,11 +259,11 @@
     (generators "srfi-158" "srfi-190")
     ;; srfi-191                         ; ....... withdrawn
     ;; srfi-192                         ; Port Positioning
-    srfi-193                            ; Command lines
+    srfi-193                            ; Command line
     ;; srfi-194                         ; Random data generators
     srfi-195                            ; Multiple-value boxes
     ;; srfi-196                         ; Range Objects (draft)
-    ;; srfi-197                         ; Expression Chaining Operators
+    ;; srfi-197                         ; Pipeline Operators
     ;; srfi-198                         ; ....... withdrawn
     ;; srfi-199                         ; ....... withdrawn
     ;; srfi-200                         ; Pattern Matching (draft)
