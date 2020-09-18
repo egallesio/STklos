@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 16-Sep-2020 11:47 (eg)
+;;;; Last file update: 18-Sep-2020 13:12 (eg)
 ;;;;
 
 
@@ -1916,7 +1916,7 @@ doc>
  * Returns the number of arguments present on the command line.
 doc>
 |#
-(define argc (lambda () (length (command-args)))))
+(define argc (lambda () (length (command-args))))
 
 
 
