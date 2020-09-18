@@ -1,7 +1,7 @@
 ;;;;
-;;;; socket-server.stk	-- A simple socket server
+;;;; socket-server.stk  -- A simple socket server
 ;;;;
-;;;; Copyright © 2003 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2003-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 31-Jan-2003 13:58 (eg)
-;;;; Last file update: 20-Jun-2003 20:15 (eg)
+;;;; Last file update: 18-Sep-2020 12:11 (eg)
 ;;;;
 
 
@@ -34,8 +34,10 @@
 
     (let ((s (socket-accept p)))
       (let Loop ((line (read-line (socket-input s))))
-	(unless (or (eof-object? line) (string=? line "exit"))
-	  (format #t "You have typed ~S\n" line)
-	  (Loop (read-line (socket-input s)))))
+        (unless (or (eof-object? line) (string=? line "exit"))
+          (format #t "User typed: ~S\n" line)
+          ;; Our answer is the read string in uppercase to the client
+          (format (socket-output s) "==> ~A\n" (string-upper line))
+          (Loop (read-line (socket-input s)))))
 
       (socket-shutdown s))))
