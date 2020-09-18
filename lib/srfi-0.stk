@@ -241,11 +241,7 @@
     ;; srfi-178                         ; Bitvector library
     ;; srfi-179                         ; Nonempty Intervals and Generalized Arrays (Updated)
     ((srfi-180 JSON json) "srfi-180")   ; JSON
-<<<<<<< HEAD
     ;; srfi-181                         ; Custom ports (including transcoded ports)
-=======
-    ;; srfi-181                         ; Custom ports
->>>>>>> e8216a1... Update SRFIs information in srfi-0.stk
     ;; srfi-182                         ; ....... withdrawn
     ;; srfi-183                         ; ....... withdrawn
     ;; srfi-184                         ; ....... withdrawn
