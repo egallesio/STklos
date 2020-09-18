@@ -1,7 +1,8 @@
+#! /usr/bin/env stklos-script
 ;;;;
-;;;; secho.stk	-- a simple /bin/echo in Scheme
+;;;; secho.stk  -- a simple /bin/echo in Scheme
 ;;;;
-;;;; Copyright © 2009 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2009-2020 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-May-2009 10:56 (eg)
-;;;; Last file update:  9-May-2009 00:41 (eg)
+;;;; Last file update: 18-Sep-2020 11:42 (eg)
 ;;;;
 
 
@@ -29,26 +30,26 @@
 
 (define (main argv)
   (let ((output-nl #t)
-	(out	   (current-output-port)))
+        (out       (current-output-port)))
 
     (parse-arguments argv
        "Usage: secho [options] [parameter ...]"
        "Available options"
        (("no-newline" :alternate "n" :help "do not output the trailing newline")
-	 (set! output-nl #f))
+         (set! output-nl #f))
        (("error-port" :alternate "2" :help "Use the error port for the outputs")
-	 (set! out (current-error-port)))
+         (set! out (current-error-port)))
        "Other options"
        (("help" :alternate "h" :help "display this help and exit")
-	(arg-usage (current-error-port))
-	(exit 1))
+        (arg-usage (current-error-port))
+        (exit 1))
        (("version" :alternate "V" :help "output version information and exit")
-	(printf "~a version ~a\n" (program-name) *version*)
-	(exit 0))
+        (printf "~a version ~a\n" (program-name) *version*)
+        (exit 0))
        (else
-	(for-each  (lambda (x)
-		     (display x out)
-		     (display #\space out))
-		   other-arguments)
-	(when output-nl
-	  (newline out))))))
+        (for-each  (lambda (x)
+                     (display x out)
+                     (display #\space out))
+                   other-arguments)
+        (when output-nl
+          (newline out))))))

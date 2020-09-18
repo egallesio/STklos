@@ -1,8 +1,8 @@
-#! /usr/bin/env stklos -f
+#! /usr/bin/env stklos-script
 ;;;;
-;;;; threads2.stk	-- A simple thread example
+;;;; threads2.stk       -- A simple thread example
 ;;;;
-;;;; Copyright © 2010 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2010-2020 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Aug-2010 18:45 (eg)
-;;;; Last file update:  2-Aug-2010 17:05 (eg)
+;;;; Last file update: 18-Sep-2020 11:12 (eg)
 ;;;;
 
 (when (eq? (%thread-system) 'none)
@@ -31,7 +31,7 @@
 
 (define *global-count* 0)
 (define *global-mutex* (make-mutex) )   ; used to ensure that each thread
-					; alternates correctly
+                                        ; alternates correctly
 (define (pretty n)
   (cond
     ((< n 10)  (format "  ~a" n))
@@ -41,7 +41,7 @@
 
 (define (thread-func)
   (let ((name (thread-name (current-thread)))
-	(max  50))
+        (max  50))
     (dotimes (i max)
       (mutex-lock! *global-mutex*)
       (set! *global-count* (+ *global-count* 1))
@@ -55,8 +55,8 @@
 
 (define (main argv)
   (let ((thread1 (make-thread thread-func "A"))
-	(thread2 (make-thread thread-func "B"))
-	(thread3 (make-thread thread-func "C")))
+        (thread2 (make-thread thread-func "B"))
+        (thread3 (make-thread thread-func "C")))
     ; start the threads
     (thread-start! thread1) (thread-start! thread2) (thread-start! thread3)
     ;; Wait the threads finish
