@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 16-Sep-2020 11:13 (eg)
+;;;; Last file update: 18-Sep-2020 10:55 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -258,7 +258,7 @@
     srfi-193                            ; Command line
     ;; srfi-194                         ; Random data generators
     srfi-195                            ; Multiple-value boxes
-    ;; srfi-196                         ; Range Objects (draft)
+    ;; srfi-196                         ; Range Objects
     ;; srfi-197                         ; Pipeline Operators
     ;; srfi-198                         ; ....... withdrawn
     ;; srfi-199                         ; ....... withdrawn
@@ -266,7 +266,7 @@
     ;; srfi-201                         ; Syntactic Extensions to the Core Scheme Bindings (draft)
     ;; srfi-202                         ; Pattern-matching Variant of the and-let* Form
                                         ;     that Supports Multiple Values (draft)
-    ;; srfi-203                         ; A Simple Picture Language in the Style of SICP (draft)
+    ;; srfi-203                         ; A Simple Picture Language in the Style of SICP
     ;; srfi-204                         ; Wright-Cartwright-Shinn Pattern Matcher (draft)
     ;; srfi-205                         ; POSIX Terminal Fundamentals (draft)
     ;; srfi-206                         ; Auxiliary Syntax Keywords (draft)
