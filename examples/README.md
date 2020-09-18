@@ -21,7 +21,11 @@ The files in this directory show some examples in STklos:
   port to use for communicating with it. This server accepts only one
   connection and it answers its client by returning the entered lines
   in uppercase.
-  
+
+- `socket-server-fork.stk` is a simple TCP server. This server accepts
+  multiple clients. When a new connection is detected, a new process
+  is launched (using fork) to handle the new connection
+
 - `socket-client.stk` is a simple TCP client.
 
     

@@ -343,7 +343,14 @@ SH_MAIN_LOAD_FLAGS = @SH_MAIN_LOAD_FLAGS@
 SH_SUFFIX = @SH_SUFFIX@
 STACK_DIRECTION = @STACK_DIRECTION@
 STKCFLAGS = @STKCFLAGS@
-STRIP = @STRIP@
+
+# In order to use strip when cross-compiling, we need it to be settable
+# as an env variable. Setting it in configure.ac doesn't seem to make the
+# desired effect, so we just do this simple conditional assignment here.
+# We do *not* do "STRIP ?= strip" because it may happen (did, actually)
+# that the variable STRIP is set but empty.
+# -- jpellegrini
+STRIP := $(or $(STRIP),strip)
 THREADS = @THREADS@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
@@ -986,7 +993,7 @@ generate-git-info:
 	@../utils/generate-git-info
 
 install-exec-hook:
-	if test "X$$STRIP" != "Xno" ;then strip $(DESTDIR)/$(bindir)/stklos; fi
+	if test "X$$STRIP" != "Xno" ;then $(STRIP) $(DESTDIR)/$(bindir)/stklos; fi
 	mv $(DESTDIR)/$(bindir)/stklos $(DESTDIR)/$(bindir)/stklos-@VERSION@
 	ln -s stklos-@VERSION@ $(DESTDIR)/$(bindir)/stklos
 

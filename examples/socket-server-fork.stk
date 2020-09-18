@@ -1,0 +1,51 @@
+;;;;
+;;;; socket-server-fork.stk  -- A simple socket server using fork
+;;;;
+;;;; Copyright © 2003-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 18-Sep-2020 12:47 (eg)
+;;;; Last file update: 18-Sep-2020 13:15 (eg)
+;;;;
+
+;; A version of socket-server which forks itself when a new connection
+;; is detected to allow to have multiple clients.
+
+(define (handle-connection s id)
+  (let Loop ((line (read-line (socket-input s))))
+    (unless (or (eof-object? line) (string=? line "exit"))
+      (format #t "User #~A typed: ~S\n" id line)
+      (format (socket-output s) "==> ~A\n" (string-upper line))
+      (Loop (read-line (socket-input s)))))
+  (format #t "User #~A leaved.\n" id)
+  (socket-shutdown s)
+  (exit 0))
+
+(define (main argv)
+  (let ((p (make-server-socket)))
+    (format #t "You can connect now on this server with the following line\n")
+    (format #t "     telnet localhost ~S\n" (socket-port-number p))
+    (format #t "and you can type a line in in your telnet session\n")
+    (format #t "Type 'exit' to quit the server\n\n")
+
+    (let Loop ((id 0))
+      (let ((s (socket-accept p)))
+        (if (fork)
+            (handle-connection s id)
+            (Loop (+ id 1)))))))
