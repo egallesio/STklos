@@ -42,7 +42,7 @@
 ;; SISC 1.5, Chicken, Kawa 1.7, and Guile 1.6.4.
 ;; 
 ;; It should be portable to any Scheme interpreter or compiler supporting
-;; low-level, non-hygienic macros à la @c define-macro. If you port
+;; low-level, non-hygienic macros Ã  la @c define-macro. If you port
 ;; @c lalr-scm to a new Scheme system and you want this port to be
 ;; included in the next releases, please send a request at:
 ;; @email boucherd@iro.umontreal.ca
@@ -177,7 +177,7 @@
 ;;;
 ;; The above grammar implicitly handles operator precedences. It is also
 ;; possible to explicitly assign precedences and associativity to
-;; terminal symbols and productions @a "à la" Yacc. Here is a modified
+;; terminal symbols and productions @a "Ã  la" Yacc. Here is a modified
 ;; (and augmented) version of the grammar:
 ;; @verbatim
 ;; (define expr-parser

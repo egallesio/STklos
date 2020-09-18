@@ -29,7 +29,7 @@
       obj
       (open-output-file obj)))
 
-;;; Macro used for multi-grammar readers à la Bigloo
+;;; Macro used for multi-grammar readers Ã  la Bigloo
 (define-macro (define-regular-grammar name args defs grammar)
   (let ((tmp (open-input-string (string-append defs "\n%%\n" grammar)))
 	(out (open-output-string)))
