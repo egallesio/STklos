@@ -1,6 +1,6 @@
 # Some examples in STklos
 
-The files in this directory show some examples in STklos: 
+The files in this directory show some examples in STklos:
 
 - `hello.stk` is a simple hello world. This file can be run directly
   as a script without compiling it by entering `./hello.stk` in a
@@ -10,22 +10,23 @@ The files in this directory show some examples in STklos:
 
 - `secho.stk` is a simple echo program written is STklos. Use the
   `--help` option to see the available options.
-  
+
 - `fork-test.stk` is a simple program using the Unix `fork(2)`
   primitive.
 
 - `threads.stk` is a program with 3 threads. It shows how to use
   threads and mutexes.
-  
+
 - `socket-server.stk` is a simple TCP server. Running it displays the
   port to use for communicating with it. This server accepts only one
   connection and it answers its client by returning the entered lines
   in uppercase.
 
-- `socket-server-fork.stk` is a simple TCP server. This server accepts
-  multiple clients. When a new connection is detected, a new process
-  is launched (using fork) to handle the new connection
+- `socket-server-fork.stk` is a TCP server which accepts multiple
+  clients. When a new connection is detected, a new process is
+  launched (using fork) to handle the new connection
+
+- `socket-server-thread.stk` another multiple client TCP server (using
+  thread this time).
 
 - `socket-client.stk` is a simple TCP client.
-
-    
