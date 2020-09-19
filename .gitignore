@@ -68,6 +68,8 @@ doc/skb/stklos-ref-mpgraph.mp
 # Examples directory 
 examples/socket-client
 examples/socket-server
+examples/socket-server-fork
+examples/socket-server-thread
 examples/fork-test
 examples/hello
 examples/secho
