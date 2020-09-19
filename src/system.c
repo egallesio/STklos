@@ -5,18 +5,24 @@
  * Copyright © 1994-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
- * Permission to use, copy, modify, distribute,and license this
- * software and its documentation for any purpose is hereby granted,
- * provided that existing copyright notices are retained in all
- * copies and that this notice is included verbatim in any
- * distributions.  No written agreement, license, or royalty fee is
- * required for any of the authorized uses.
- * This software is provided ``AS IS'' without express or implied
- * warranty.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 29-Jun-2020 19:32 (eg)
+ * Last file update: 19-Sep-2020 19:04 (eg)
  */
 
 #include <unistd.h>

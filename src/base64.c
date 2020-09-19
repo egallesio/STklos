@@ -1,28 +1,33 @@
-/*					-*- coding: utf-8 -*-
+/*                  -*- coding: utf-8 -*-
  *
- * b a s e 6 4 . c			-- Base64 support for STk
+ * b a s e 6 4 . c          -- Base64 support for STk
  *
- * Copyright © 1998-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1998-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * Permission to use, copy, modify, distribute,and license this
- * software and its documentation for any purpose is hereby granted,
- * provided that existing copyright notices are retained in all
- * copies and that this notice is included verbatim in any
- * distributions.  No written agreement, license, or royalty fee is
- * required for any of the authorized uses.
- * This software is provided ``AS IS'' without express or implied
- * warranty.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 20-Jul-1998 12:19
- * Last file update: 22-Sep-2006 18:10 (eg)
+ * Last file update: 19-Sep-2020 19:05 (eg)
  */
 
 #include <stklos.h>
 
 static char table[] =
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 static char rev_table[128] = {
       0,  0,  0,  0,   0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -35,12 +40,12 @@ static char rev_table[128] = {
      41, 42, 43, 44,  45, 46, 47, 48, 49, 50, 51,  0,  0,  0,  0,  0
 };
 
-#define OutChar(c, f) { 			\
-    STk_putc((c), (f)); 			\
-    if (++count>=72) {				\
-      STk_putc('\n', (f));			\
-      count=0;					\
-    }						\
+#define OutChar(c, f) {             \
+    STk_putc((c), (f));             \
+    if (++count>=72) {              \
+      STk_putc('\n', (f));          \
+      count=0;                  \
+    }                       \
 }
 
 static void error_bad_input_port(SCM obj)
@@ -62,13 +67,13 @@ static void encode(SCM f, SCM g)
   while ((c = STk_getc(f)) != EOF) {
     switch (++state) {
       case 1: OutChar(table[(c>>2) & 0x3f], g);
-	      break;
+          break;
       case 2: OutChar(table[((old<<4) & 0x30) | ((c>>4) & 0x0f)], g);
-	      break;
+          break;
       case 3: OutChar(table[((old<<2) & 0x3c) | ((c>>6) & 0x03)], g);
-	      OutChar(table[c & 0x3f], g);
-	      state = 0;
-	      break;
+          OutChar(table[c & 0x3f], g);
+          state = 0;
+          break;
     }
     old = c;
   }
@@ -77,10 +82,10 @@ static void encode(SCM f, SCM g)
     case 1: OutChar(table[(old<<4) & 0x30], g);
             OutChar('=', g);
             OutChar('=', g);
-	    break;
+        break;
     case 2: OutChar(table[(old<<2) & 0x3c], g);
             OutChar('=', g);
-	    break;
+        break;
   }
 }
 
@@ -92,19 +97,19 @@ static void decode(SCM f, SCM g)
   while ((c = STk_getc(f)) != EOF) {
     if (c != '\n') {
       if (c != '=') {
-	bits = rev_table[c];
-	group |= bits << j;
+    bits = rev_table[c];
+    group |= bits << j;
       }
       else equal += 1;
 
       j -= 6;
 
       if (j < 0) {
-	c = (group&0xff0000) >> 16; STk_putc(c, g);
-	c = (group&0x00ff00) >> 8;  if (equal < 2) STk_putc(c, g);
-	c = (group&0x0000ff);       if (equal < 1) STk_putc(c, g);
-	group = 0;
-	j = 18;
+    c = (group&0xff0000) >> 16; STk_putc(c, g);
+    c = (group&0x00ff00) >> 8;  if (equal < 2) STk_putc(c, g);
+    c = (group&0x0000ff);       if (equal < 1) STk_putc(c, g);
+    group = 0;
+    j = 18;
       }
     }
   }
@@ -154,7 +159,7 @@ DEFINE_PRIMITIVE("base64-decode", base64_decode, subr12, (SCM f, SCM g))
 
 /*===========================================================================*\
  *
- * 	Initialization code
+ *  Initialization code
  *
 \*===========================================================================*/
 int STk_init_base64(void)

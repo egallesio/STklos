@@ -4,18 +4,24 @@
  * Copyright © 1994-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
- * Permission to use, copy, modify, distribute,and license this
- * software and its documentation for any purpose is hereby granted,
- * provided that existing copyright notices are retained in all
- * copies and that this notice is included verbatim in any
- * distributions.  No written agreement, license, or royalty fee is
- * required for any of the authorized uses.
- * This software is provided ``AS IS'' without express or implied
- * warranty.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 26-Jun-2020 15:13 (eg)
+ * Last file update: 19-Sep-2020 19:04 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -34,7 +40,7 @@
 #include <fcntl.h>
 #include <sys/param.h>
 #include <sys/wait.h>
-#include <sys/resource.h>  
+#include <sys/resource.h>
 #include <signal.h>
 #include "fport.h"
 
@@ -327,7 +333,7 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
              {
                struct rlimit rl;
 
-               if (getrlimit(RLIMIT_NOFILE, &rl) == 0) 
+               if (getrlimit(RLIMIT_NOFILE, &rl) == 0)
                  for(i = 3; i < (int) rl.rlim_cur; i++) close(i);
                else
                  STk_warning("run-process: cannot close file descriptors > 2");

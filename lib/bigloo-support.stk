@@ -1,20 +1,27 @@
 ;;;;
-;;;; b i g l o o -s u p p o r t. s t k		-- Bigloo compatibility file
+;;;; b i g l o o -s u p p o r t. s t k      -- Bigloo compatibility file
 ;;;;
-;;;; Copyright © 1997-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1997-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
-;;;; Permission to use, copy, modify, distribute,and license this
-;;;; software and its documentation for any purpose is hereby granted,
-;;;; provided that existing copyright notices are retained in all
-;;;; copies and that this notice is included verbatim in any
-;;;; distributions.  No written agreement, license, or royalty fee is
-;;;; required for any of the authorized uses.
-;;;; This software is provided ``AS IS'' without express or implied
-;;;; warranty.
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 28-Oct-1997 11:09
-;;;; Last file update: 25-Apr-2007 23:57 (eg)
+;;;; Last file update: 19-Sep-2020 19:07 (eg)
 
 
 ;;;
@@ -63,21 +70,21 @@
 
   (define (export-directive x)
     `(export ,@(map (lambda (x)
-		      (if (pair? x)
-			  ( (if (eq? (car x) 'inline) cadr car)  x)
-			  x))
-		    x)))
+              (if (pair? x)
+              ( (if (eq? (car x) 'inline) cadr car)  x)
+              x))
+            x)))
 
   `(begin
      (define-module ,name
        ,@(map (lambda (clause)
-		(case (car clause)
-		  ((export) (export-directive (cdr clause)))
-		  ((import) (import-directive (cdr clause)))
-		  ((use)    '())
-		  (else     (bigloo:error "module" "Unknown clause"
-					  (cons name clause)))))
-	      clauses)
+        (case (car clause)
+          ((export) (export-directive (cdr clause)))
+          ((import) (import-directive (cdr clause)))
+          ((use)    '())
+          (else     (bigloo:error "module" "Unknown clause"
+                      (cons name clause)))))
+          clauses)
        (define error bigloo:error))
      (select-module ,name)))
 
