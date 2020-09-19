@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 18-Sep-2020 13:12 (eg)
+;;;; Last file update: 19-Sep-2020 18:34 (eg)
 ;;;;
 
 
@@ -328,9 +328,7 @@ doc>
     (define (verify-setter val)
       (if (and (list? val)
                (not (null? val))
-               (or (boolean? (car val))
-                   (string? (car val)))
-               (every string? (cdr val)))
+               (every string? val))
           val
           (error "bad command line ~S" val)))
 
@@ -1894,7 +1892,9 @@ doc>
 |#
 (define (command-name)
   (let ((name (car (command-line))))
-    (and name (basename name))))
+    (if (string=? name "")
+        #f
+        (basename name))))
 
 #|
 <doc EXT argv command-args

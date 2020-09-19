@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 16-Sep-2020 11:32 (eg)
+;;;; Last file update: 19-Sep-2020 18:39 (eg)
 ;;;;
 
 (require "test")
@@ -4753,11 +4753,11 @@
         (eq? (cdr val)
              (command-args))))
 
-(parameterize ((command-line '(#f "1" "2")))
+(parameterize ((command-line '("" "1" "2")))
   (test "new command line.1"
         #t
         (let ((val (command-line)))
-          (and (not (car val))
+          (and (not (command-name))
                (equal? '("1" "2")
                        (command-args))))))
 
@@ -4765,7 +4765,7 @@
   (test "new command line.2"
         #t
         (let ((val (command-line)))
-          (and (equal? (command-name) "foo.stk")
+          (and (string=? (command-name) "foo.stk")
                (equal? '("1" "2" "3")
                        (command-args))))))
 
