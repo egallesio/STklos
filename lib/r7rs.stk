@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  7-Aug-2020 11:17 (eg)
+;;;; Last file update: 19-Sep-2020 20:54 (eg)
 ;;;;
 
 
@@ -203,8 +203,9 @@ doc>
   `(delay-force (%make-promise (list ,exp))))
 
 #|
-<doc r7rs-syntax delay-force
+<doc r7rs-syntax lazy delay-force
  * (delay-force <expression>)
+ * (lazy <expression>)
  *
  * The expression |(delay-force expression)| is conceptually similar
  * to |(delay (force expression))|, with the difference that forcing the result
@@ -213,25 +214,38 @@ doc>
  * iterative lazy algorithms that might result in a long series of chains of
  * |delay| and |force| can be rewritten using |delay-force| to prevent consuming
  * unbounded space during evaluation.
+ *
+ * The special form |delay-force| appears with name |lazy| in SRFI-45.
+ *
 doc>
 |#
 (define-macro (delay-force exp)
   `(%make-promise (lambda () ,exp)))
 
+(define-macro (lazy expr)      ;; the SRFI-45 sytax
+  `(delay-force ,expr))
+
 #|
-<doc r7rs make-promise
+<doc r7rs eager make-promise
  * (make-promise obj)
+ * (eager obj)
  *
  * The |make-promise| procedure returns a promise which,
  * when forced, will return |obj| . It is similar to |delay|, but
  * does not delay its argument: it is a procedure rather than
  * syntax. If |obj| is already a promise, it is returned.
+ *
+ * The primitve |make-promise| appears with name |eager| in
+ * SRFI-45.
 doc>
 |#
 (define (make-promise expr)
   (if (promise? expr)
       expr
       (delay expr)))
+
+(define eager make-promise)
+
 
 
 ;;;; ----------------------------------------------------------------------
