@@ -190,9 +190,9 @@ SUFFIXES = .stk .ostk .scm
 	$(COMP) -o $*.ostk $*.scm
 
 .c.@SH_SUFFIX@ :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
+	@CC@ @CPPFLAGS@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
 	-c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $(LDFLAGS) -lc $*.o
 	/bin/rm -f $*.o
 
 #======================================================================
