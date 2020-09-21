@@ -65,7 +65,7 @@ stklos_SOURCES = base64.c boolean.c boot.c box.c char.c \
 
 # HACK:  Normally BUILT_SOURCES contains the files that must be generated before
 # starting the construction of the main target. We use it with a fictive target
-# which runs a script which may update the git-config.h file. If it is updated, 
+# which runs a script which may update the git-info.h file. If it is updated, 
 # normal rules apply and a new global link is done.
 .PHONY: generate-git-info
 BUILT_SOURCES = generate-git-info
@@ -133,4 +133,4 @@ $(DOCDB): $(stklos_SOURCES)
 	$(STKLOS_BINARY) -b boot.img -c -q -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
 
 clean:
-	/bin/rm -f *.o $(DOCDB) git-config.h
+	/bin/rm -f *.o $(DOCDB) git-info.h boot.ok
