@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Sep-2020 14:24 (eg)
+# Last file update: 21-Sep-2020 15:25 (eg)
 
 CC		 	= @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -27,12 +27,11 @@ CFLAGS	    = @CFLAGS@ @STKCFLAGS@
 # In order to use strip when cross-compiling, we need it to be settable
 # as an env variable. Setting it in configure.ac doesn't seem to make the
 # desired effect, so we just do this simple conditional assignment here.
-# We do *not* do "STRIP ?= strip" because it may happen (did, actually)
-# that the variable STRIP is set but empty.
 # -- jpellegrini
-STRIP := $(or $(STRIP),strip)
+STRIP         ?= strip
 
 STKLOS_BINARY ?= ./stklos
+
 
 bindir      = $(prefix)/bin
 schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
