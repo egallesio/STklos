@@ -182,7 +182,6 @@ scheme_OBJS = compfile.ostk    \
           srfi-173.ostk        \
           srfi-174.ostk        \
           srfi-175.ostk        \
-          srfi-175-impl.@SH_SUFFIX@  \
           srfi-180.ostk        \
           srfi-185.ostk        \
           srfi-189.ostk        \
@@ -190,15 +189,19 @@ scheme_OBJS = compfile.ostk    \
           tar.ostk             \
           trace.ostk
 
+scheme_SOLIBS = srfi-175-impl.@SH_SUFFIX@
+
 DOCDB	    = DOCDB
 
 #======================================================================
 schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@
-scheme_DATA    = $(scheme_extra) $(scheme_OBJS) 
+schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@
+scheme_DATA    = $(scheme_extra) $(scheme_OBJS)
+noinst_DATA    = $(scheme_SOLIBS)
 scheme_sources = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 
-SUFFIXES = .stk .ostk .scm
+SUFFIXES = .stk .ostk .scm .c
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
 
@@ -219,6 +222,10 @@ boot:	../src/boot.img
 
 generate-git-info:
 	@(cd ../src; ../utils/generate-git-info && $(MAKE) all)
+
+install-exec-hook:
+	install -d $(DESTDIR)$(schemelibdir)
+	install $(scheme_SOLIBS) $(DESTDIR)$(schemelibdir)
 
 ../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \
@@ -278,7 +285,7 @@ $(DOCDB): $(scheme_sources)
 	$(scheme_sources) > $(DOCDB)
 
 clean:
-	/bin/rm -f $(scheme_OBJS)
+	/bin/rm -f $(scheme_OBJS) $(scheme_SOLIBS)
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) clean)\
 	done
