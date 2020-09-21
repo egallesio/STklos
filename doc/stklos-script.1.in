@@ -1,0 +1,44 @@
+.\" -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH STKLOS-SCRIPT 1 "version @VERSION@"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+stklos-script \- Wrapper for running STklos code as scripts on Unix
+
+.SH DESCRIPTION
+SRFI-22 (Running Scheme Scripts on Unix) recommends to invoke the Scheme script
+interpreter from the script via a \fI/usr/bin/env\fR trampoline, like this:
+.PP
+.B #!/usr/bin/env <executable>
+.PP
+where \fB<executable>\fR can recover several specified names. STklos uses only the name 
+.B stklos-script
+for \fB<executable>\fR.
+.PP
+Here is an example of the classical echo command (without option) in Scheme:
+.PP
+.nf
+#!/usr/bin/env stklos-script
+(define (main arguments)
+  (for-each (lambda (x) (display x) (display #space))
+            (cdr arguments))
+  (newline)
+  0)
+.fi
+.PP
+.SH "SEE ALSO"
+.BR stklos (1)
+.BR stklos-compile (1)

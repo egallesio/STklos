@@ -493,7 +493,8 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
           lib/ScmPkg.d/Makefile tests/Makefile
           doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
-          doc/stklos-genlex.1 doc/stklos-pkg.1 doc/skb/stklos-version.stk
+          doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 
+          doc/skb/stklos-version.stk
           pkgman/Makefile])
 AC_OUTPUT
 
