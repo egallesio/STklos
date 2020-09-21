@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Sep-2020 11:53 (eg)
+# Last file update: 21-Sep-2020 14:24 (eg)
 
 CC		 	= @CC@
 CFLAGS	    = @CFLAGS@ @STKCFLAGS@
@@ -134,3 +134,6 @@ $(DOCDB): $(stklos_SOURCES)
 
 clean:
 	/bin/rm -f *.o $(DOCDB) git-info.h boot.ok
+
+distclean: clean
+	/bin/rm -f boot.keep

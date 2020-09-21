@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Sep-2020 11:50 (eg)
+# Last file update: 21-Sep-2020 14:24 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -235,7 +235,7 @@ generate-git-info:
 	$(STKLOS_BINARY) $(SFLAGS) -q -c -b ./boot.img2     -f bb.stk boot.img3 instr3)
 	@if cmp ./boot.img2 ./boot.img3 ;then 				\
 	   echo "*** New boot file created";  				\
-	   cp ../src/boot.img ../src/boot.ok; 				\
+	   cp ../src/boot.img ../src/boot.keep;				\
 	   cp ./boot.img3 ../src/boot.img;    				\
 	   cp ./instr3    ../src/vm-instr.h;  				\
 	   echo "*** Create new boot.c";				\

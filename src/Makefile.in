@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Sep-2020 11:53 (eg)
+# Last file update: 21-Sep-2020 14:24 (eg)
 
 
 VPATH = @srcdir@
@@ -803,61 +803,6 @@ maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
-distclean: distclean-am
-		-rm -f ./$(DEPDIR)/base64.Po
-	-rm -f ./$(DEPDIR)/boolean.Po
-	-rm -f ./$(DEPDIR)/boot.Po
-	-rm -f ./$(DEPDIR)/box.Po
-	-rm -f ./$(DEPDIR)/char.Po
-	-rm -f ./$(DEPDIR)/cond.Po
-	-rm -f ./$(DEPDIR)/cpointer.Po
-	-rm -f ./$(DEPDIR)/dynload.Po
-	-rm -f ./$(DEPDIR)/env.Po
-	-rm -f ./$(DEPDIR)/error.Po
-	-rm -f ./$(DEPDIR)/extend.Po
-	-rm -f ./$(DEPDIR)/ffi.Po
-	-rm -f ./$(DEPDIR)/fixnum.Po
-	-rm -f ./$(DEPDIR)/fport.Po
-	-rm -f ./$(DEPDIR)/gnu-getopt.Po
-	-rm -f ./$(DEPDIR)/gnu-glob.Po
-	-rm -f ./$(DEPDIR)/hash.Po
-	-rm -f ./$(DEPDIR)/keyword.Po
-	-rm -f ./$(DEPDIR)/lib.Po
-	-rm -f ./$(DEPDIR)/list.Po
-	-rm -f ./$(DEPDIR)/md5.Po
-	-rm -f ./$(DEPDIR)/misc.Po
-	-rm -f ./$(DEPDIR)/mutex-common.Po
-	-rm -f ./$(DEPDIR)/mutex-none.Po
-	-rm -f ./$(DEPDIR)/mutex-pthreads.Po
-	-rm -f ./$(DEPDIR)/number.Po
-	-rm -f ./$(DEPDIR)/object.Po
-	-rm -f ./$(DEPDIR)/parameter.Po
-	-rm -f ./$(DEPDIR)/path.Po
-	-rm -f ./$(DEPDIR)/port.Po
-	-rm -f ./$(DEPDIR)/print.Po
-	-rm -f ./$(DEPDIR)/proc.Po
-	-rm -f ./$(DEPDIR)/process.Po
-	-rm -f ./$(DEPDIR)/promise.Po
-	-rm -f ./$(DEPDIR)/read.Po
-	-rm -f ./$(DEPDIR)/regexp.Po
-	-rm -f ./$(DEPDIR)/signal.Po
-	-rm -f ./$(DEPDIR)/sio.Po
-	-rm -f ./$(DEPDIR)/socket.Po
-	-rm -f ./$(DEPDIR)/sport.Po
-	-rm -f ./$(DEPDIR)/stklos.Po
-	-rm -f ./$(DEPDIR)/str.Po
-	-rm -f ./$(DEPDIR)/struct.Po
-	-rm -f ./$(DEPDIR)/symbol.Po
-	-rm -f ./$(DEPDIR)/system.Po
-	-rm -f ./$(DEPDIR)/thread-common.Po
-	-rm -f ./$(DEPDIR)/thread-none.Po
-	-rm -f ./$(DEPDIR)/thread-pthreads.Po
-	-rm -f ./$(DEPDIR)/utf8.Po
-	-rm -f ./$(DEPDIR)/uvector.Po
-	-rm -f ./$(DEPDIR)/vector.Po
-	-rm -f ./$(DEPDIR)/vm.Po
-	-rm -f ./$(DEPDIR)/vport.Po
-	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
 
@@ -999,7 +944,7 @@ STKLOS_BINARY ?= ./stklos
 
 # HACK:  Normally BUILT_SOURCES contains the files that must be generated before
 # starting the construction of the main target. We use it with a fictive target
-# which runs a script which may update the git-config.h file. If it is updated, 
+# which runs a script which may update the git-info.h file. If it is updated, 
 # normal rules apply and a new global link is done.
 .PHONY: generate-git-info
 
@@ -1023,7 +968,10 @@ $(DOCDB): $(stklos_SOURCES)
 	$(STKLOS_BINARY) -b boot.img -c -q -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
 
 clean:
-	/bin/rm -f *.o $(DOCDB) git-config.h
+	/bin/rm -f *.o $(DOCDB) git-info.h boot.ok
+
+distclean: clean
+	/bin/rm -f boot.keep
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

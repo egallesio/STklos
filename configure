@@ -6829,7 +6829,7 @@ CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/skb/stklos-version.stk pkgman/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 doc/skb/stklos-version.stk pkgman/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -7585,6 +7585,7 @@ do
     "doc/stklos-compile.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-compile.1" ;;
     "doc/stklos-genlex.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-genlex.1" ;;
     "doc/stklos-pkg.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-pkg.1" ;;
+    "doc/stklos-script.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-script.1" ;;
     "doc/skb/stklos-version.stk") CONFIG_FILES="$CONFIG_FILES doc/skb/stklos-version.stk" ;;
     "pkgman/Makefile") CONFIG_FILES="$CONFIG_FILES pkgman/Makefile" ;;
 

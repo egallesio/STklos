@@ -60,6 +60,7 @@ doc/stklos-config.1
 doc/stklos-genlex.1
 doc/stklos-install.1
 doc/stklos-pkg.1
+doc/stklos-script.1
 doc/stklos.1
 doc/skb/mpgraph.mp
 doc/skb/mprun.mp
@@ -152,7 +153,7 @@ pkgman/stklos-pkg
 src/.STklos.prcs_aux
 src/HOWTO-WIN32
 src/TODO
-src/boot.ok
+src/boot.keep
 src/extraconf.h
 src/stamp-h1
 src/stklos
