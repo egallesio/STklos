@@ -1288,7 +1288,7 @@ DEFINE_PRIMITIVE("signal-error", scheme_signal_error, vsubr, (int argc, SCM *arg
 {
   SCM type_error;
 
-  if (! argc) STk_error("error condtion expected");
+  if (! argc) STk_error("error condition expected");
 
   type_error = *argv;
   argc -= 1;
