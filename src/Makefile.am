@@ -19,10 +19,12 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Sep-2020 15:25 (eg)
+# Last file update: 23-Sep-2020 17:55 (eg)
 
-CC		 	= @CC@
-CFLAGS	    = @CFLAGS@ @STKCFLAGS@
+# Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
+# CFLAGS is used here
+CC	   	 = @CC@
+AM_CFLAGS	 = @CFLAGS@ @STKCFLAGS@
 
 # In order to use strip when cross-compiling, we need it to be settable
 # as an env variable. Setting it in configure.ac doesn't seem to make the
@@ -107,7 +109,7 @@ ffiinc		= @FFIINC@
 
 stklos_LDADD   = $(compatlib) $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
-INCLUDES       = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
+AM_CPPFLAGS    = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
 
 
 struct.o cond.o: struct.h
@@ -136,3 +138,7 @@ clean:
 
 distclean: clean
 	/bin/rm -f boot.keep
+
+# Local Variables:
+# tab-width: 8
+# End:

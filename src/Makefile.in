@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Sep-2020 15:23 (eg)
+# Last file update: 23-Sep-2020 17:55 (eg)
 
 
 VPATH = @srcdir@
@@ -282,9 +282,12 @@ AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BUILD_ARCH = @BUILD_ARCH@
 BUILD_OS = @BUILD_OS@
+
+# Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
+# CFLAGS is used here
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
-CFLAGS = @CFLAGS@ @STKCFLAGS@
+CFLAGS = @CFLAGS@
 COMPOBJ = @COMPOBJ@
 COMPSRC = @COMPSRC@
 CONF_SUMMARY = @CONF_SUMMARY@
@@ -413,6 +416,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+AM_CFLAGS = @CFLAGS@ @STKCFLAGS@
 schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
 extraincdir = $(prefix)/include/@PACKAGE@
 #scheme_DATA     = boot.img
@@ -469,7 +473,7 @@ ffilib = @FFILIB@
 ffiinc = @FFIINC@
 stklos_LDADD = $(compatlib) $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm
 stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
-INCLUDES = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
+AM_CPPFLAGS = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
 all: $(BUILT_SOURCES) stklosconf.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -971,6 +975,10 @@ clean:
 
 distclean: clean
 	/bin/rm -f boot.keep
+
+# Local Variables:
+# tab-width: 8
+# End:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

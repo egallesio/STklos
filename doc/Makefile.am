@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Sep-2020 11:45 (eg)
+# Last file update: 23-Sep-2020 17:52 (eg)
 
 mandir	      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
@@ -39,10 +39,28 @@ docpdfdir   = $(doclocation)/pdf
 docpdf_DATA = pdf/stklos-ref.pdf
 
 dochtmldir  = $(doclocation)/html
-dochtml_DATA= $(wildcard html/stklos-ref*.html) $(wildcard html/*.css)
+dochtml_DATA= html/index.html		\
+	      html/stklos-ref.html	\
+	      html/stklos-ref-1.html	\
+	      html/stklos-ref-2.html	\
+	      html/stklos-ref-3.html	\
+	      html/stklos-ref-4.html	\
+	      html/stklos-ref-5.html	\
+	      html/stklos-ref-6.html	\
+	      html/stklos-ref-7.html	\
+	      html/stklos-ref-8.html	\
+	      html/stklos-ref-9.html	\
+	      html/stklos-ref-10.html	\
+              html/stklos-ref-11.html	\
+	      html/stklos-ref-12.html	\
+	      html/stklos-ref-13.html	\
+	      html/stklos-ref-14.html	\
+	      html/stklos-ref-15.html	\
+	      html/stklos-ref-16.html	\
+	      html/doc-style.css
 
 docimgdir   = $(doclocation)/html/images
-docimg_DATA = $(wildcard html/images/*)
+docimg_DATA = html/images/hierarchy.jpg
 
 
 all: $(DOCDB)
@@ -72,3 +90,7 @@ clean:
 distclean: clean
 	/bin/rm -f Makefile
 
+
+# Local Variables:
+# tab-width: 8
+# End:
