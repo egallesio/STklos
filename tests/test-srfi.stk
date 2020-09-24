@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 19-Sep-2020 18:39 (eg)
+;;;; Last file update: 24-Sep-2020 12:11 (eg)
 ;;;;
 
 (require "test")
@@ -4762,10 +4762,18 @@
                        (command-args))))))
 
 (parameterize ((command-line '("../../foo.stk" "1" "2" "3")))
-  (test "new command line.2"
+  (test "new command line.2 (suffix must be supressed)"
         #t
         (let ((val (command-line)))
-          (and (string=? (command-name) "foo.stk")
+          (and (string=? (command-name) "foo")
+               (equal? '("1" "2" "3")
+                       (command-args))))))
+
+(parameterize ((command-line '("../../foo.keep" "1" "2" "3")))
+  (test "new command line.3 (suddix must be kept)"
+        #t
+        (let ((val (command-line)))
+          (and (string=? (command-name) "foo.keep")
                (equal? '("1" "2" "3")
                        (command-args))))))
 
