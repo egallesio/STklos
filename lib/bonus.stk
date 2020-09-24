@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 19-Sep-2020 20:48 (eg)
+;;;; Last file update: 24-Sep-2020 11:26 (eg)
 ;;;;
 
 
@@ -1271,7 +1271,7 @@ doc>
 <doc EXT file-prefix
  * (file-prefix pathname)
  *
- * Returns the suffix of given |pathname|.
+ * Returns the prefix of given |pathname|.
  * @lisp
  * (file-prefix "./foo.tar.gz") => "./foo.tar"
  * (file-prefix "./a.b/c")      => "./a.b/c"
@@ -1902,7 +1902,10 @@ doc>
   (let ((name (car (command-line))))
     (if (string=? name "")
         #f
-        (basename name))))
+        (let ((res (basename name)))
+          (if (member (file-suffix res) *load-suffixes*)
+              (file-prefix res)
+              res)))))
 
 #|
 <doc EXT argv command-args
