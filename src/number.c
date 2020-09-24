@@ -1857,7 +1857,7 @@ SCM STk_sub2(SCM o1, SCM o2)
           o1 = make_rational(sub2(num1, num2), den);
           break;
         }
-      default: error_cannot_operate("substraction", o1, o2);
+      default: error_cannot_operate("subtraction", o1, o2);
   }
   return o1;
 }
