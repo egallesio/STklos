@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 17-Aug-2020 10:32 (eg)
+### Last file update: 24-Sep-2020 10:18 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.50])
@@ -442,6 +442,14 @@ fi
 
 CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT))"
 
+# Determmine the STRIP command to use
+if test "X$STRIP" = "X" ;then
+   STRIPCMD=strip
+else
+   STRIPCMD=$STRIP
+fi
+
+
 ### Output files
 AC_SUBST(STKCFLAGS)
 AC_SUBST(VERSION)
@@ -469,6 +477,7 @@ AC_SUBST(COMPSRC)
 AC_SUBST(STACK_DIRECTION)
 AC_SUBST(HAVE_GNOME)
 AC_SUBST(LDAP_LIB)
+AC_SUBST(STRIPCMD)
 #GC
 AC_SUBST(GC)
 AC_SUBST(GCLIB)

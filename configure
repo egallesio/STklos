@@ -637,6 +637,7 @@ PCRE
 GCINC
 GCLIB
 GC
+STRIPCMD
 LDAP_LIB
 HAVE_GNOME
 STACK_DIRECTION
@@ -6784,7 +6785,16 @@ fi
 
 CONF_SUMMARY="(:system ($SYST_LIBS) :compiled ($COMP_LIBS) :configure ($CONF_OPT))"
 
+# Determmine the STRIP command to use
+if test "X$STRIP" = "X" ;then
+   STRIPCMD=strip
+else
+   STRIPCMD=$STRIP
+fi
+
+
 ### Output files
+
 
 
 

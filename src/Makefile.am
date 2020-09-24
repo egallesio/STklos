@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 23-Sep-2020 17:55 (eg)
+# Last file update: 24-Sep-2020 10:24 (eg)
 
 # Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
 # CFLAGS is used here
@@ -30,7 +30,8 @@ AM_CFLAGS	 = @CFLAGS@ @STKCFLAGS@
 # as an env variable. Setting it in configure.ac doesn't seem to make the
 # desired effect, so we just do this simple conditional assignment here.
 # -- jpellegrini
-STRIP         ?= strip
+STRIP         = @STRIPCMD@
+
 
 STKLOS_BINARY ?= ./stklos
 
@@ -120,7 +121,8 @@ generate-git-info:
 
 
 install-exec-hook:
-	if test "X$$STRIP" != "Xno" ;then $(STRIP) $(DESTDIR)/$(bindir)/stklos; fi
+	@echo "STRIP command: $$STRIP"
+	if test "X$$STRIP" != "Xno" ;then $(STRIP) $(DESTDIR)/$(bindir)/stklos; fi;
 	mv $(DESTDIR)/$(bindir)/stklos $(DESTDIR)/$(bindir)/stklos-@VERSION@
 	ln -s stklos-@VERSION@ $(DESTDIR)/$(bindir)/stklos
 

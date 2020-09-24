@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 23-Sep-2020 17:55 (eg)
+# Last file update: 24-Sep-2020 10:24 (eg)
 
 
 VPATH = @srcdir@
@@ -363,7 +363,13 @@ SH_MAIN_LOAD_FLAGS = @SH_MAIN_LOAD_FLAGS@
 SH_SUFFIX = @SH_SUFFIX@
 STACK_DIRECTION = @STACK_DIRECTION@
 STKCFLAGS = @STKCFLAGS@
-STRIP = @STRIP@
+
+# In order to use strip when cross-compiling, we need it to be settable
+# as an env variable. Setting it in configure.ac doesn't seem to make the
+# desired effect, so we just do this simple conditional assignment here.
+# -- jpellegrini
+STRIP = @STRIPCMD@
+STRIPCMD = @STRIPCMD@
 THREADS = @THREADS@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
@@ -937,12 +943,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-extraincDATA
 .PRECIOUS: Makefile
 
 
-# In order to use strip when cross-compiling, we need it to be settable
-# as an env variable. Setting it in configure.ac doesn't seem to make the
-# desired effect, so we just do this simple conditional assignment here.
-# -- jpellegrini
-STRIP         ?= strip
-
 STKLOS_BINARY ?= ./stklos
 
 # HACK:  Normally BUILT_SOURCES contains the files that must be generated before
@@ -958,7 +958,8 @@ generate-git-info:
 	@../utils/generate-git-info
 
 install-exec-hook:
-	if test "X$$STRIP" != "Xno" ;then $(STRIP) $(DESTDIR)/$(bindir)/stklos; fi
+	@echo "STRIP command: $$STRIP"
+	if test "X$$STRIP" != "Xno" ;then $(STRIP) $(DESTDIR)/$(bindir)/stklos; fi;
 	mv $(DESTDIR)/$(bindir)/stklos $(DESTDIR)/$(bindir)/stklos-@VERSION@
 	ln -s stklos-@VERSION@ $(DESTDIR)/$(bindir)/stklos
 
