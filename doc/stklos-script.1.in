@@ -33,7 +33,7 @@ Here is an example of the classical echo command (without option) in Scheme:
 .nf
 #!/usr/bin/env stklos-script
 (define (main arguments)
-  (for-each (lambda (x) (display x) (display #space))
+  (for-each (lambda (x) (display x) (display #\\space))
             (cdr arguments))
   (newline)
   0)
