@@ -150,6 +150,31 @@ b|)
       "Hello!"
       (%procedure-doc (lambda (l i s p) "Hello!" (+ l i s p))))
 
+(test-subsection "Compiler functions")
+
+(test "%%local-alias local to local"
+      1
+      (let ((o 10))
+        (let ((a 1)
+              (c 2))
+          (%%local-alias a b)
+          (let ((a 2)) b))))
+
+(define xx -1)
+(test "%%local-alias local to global"
+      -1
+      (let ((o 10))
+        (let ((a 1)
+              (c 2))
+          (%%local-alias xx b)
+          (let ((a 2)) b))))
+
+(test/error "%%local-alias local to undefined"
+      (let ((o 10))
+        (let ((a 1)
+              (c 2))
+          (%%local-alias b lets-hope-this-global-variable-is-undefined-during-tests)
+          (let ((a 2)) b))))
 
 ;;------------------------------------------------------------------
 (test-section-end)
