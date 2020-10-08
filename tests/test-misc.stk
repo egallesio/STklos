@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 19:23
-;;;; Last file update:  5-Jul-2020 20:52 (eg)
+;;;; Last file update:  8-Oct-2020 16:52 (eg)
 ;;;;
 
 (require "test")
@@ -47,6 +47,14 @@ b|)
 (test "special-name.1"       '|\b| '\b)
 (test "special-name.2"       '|| (string->symbol ""))
 
+;;----------------------------------------------------------------------
+(test-subsection "Paths")
+(test "file-suffix.1" "gz" (file-suffix "./foo.tar.gz"))
+(test "file-suffix.2" #f  (file-suffix "./a.b/c"))
+(test "file-suffix.3" ""  (file-suffix "./a.b/c."))
+(test "(file-suffix.4" #f  (file-suffix "~/.profile"))
+
+;;----------------------------------------------------------------------
 (test-subsection "Docstrings and signatures")
 
 (import STKLOS-COMPILER)

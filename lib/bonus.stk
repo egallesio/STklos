@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 24-Sep-2020 11:26 (eg)
+;;;; Last file update:  8-Oct-2020 16:42 (eg)
 ;;;;
 
 
@@ -1246,24 +1246,29 @@ doc>
  * (file-suffix pathname)
  *
  * Returns the suffix of given |pathname|. If no suffix is found, |file-suffix|
- * returns an empty string.
+ * returns #f.
  * @lisp
  * (file-suffix "./foo.tar.gz") => "gz"
- * (file-suffix "./a.b/c")      => ""
+ * (file-suffix "./a.b/c")      => #f
+ * (file-suffix "./a.b/c.")     => ""
+ * (file-suffix "~/.profile")   => #f
  * @end lisp
 doc>
 |#
 (define (file-suffix pathname)
-  (let ((end (string-length pathname)))
+  (let ((end (string-length pathname))
+        (/   (file-separator)))
     (let loop ((i (- end 1)))
-      (if (< i 0)
-          ""
+      (if (< i 1)
+          #f
           (let ((c (string-ref pathname i)))
             (cond
-              ((char=? c #\.)
-               (substring pathname (+ i 1) end))
-              ((char=? c (file-separator))
-               "")
+             ((char=? c #\.)
+              (and (> i 0)
+                   (not (char=? (string-ref pathname (- i 1)) /))
+                   (substring pathname (+ i 1) end)))
+              ((char=? c /)
+               #f)
               (else
                (loop (- i 1)))))))))
 
