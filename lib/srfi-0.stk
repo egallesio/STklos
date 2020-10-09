@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 19-Sep-2020 20:55 (eg)
+;;;; Last file update:  9-Oct-2020 10:36 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -59,7 +59,7 @@
     ((srfi-2 and-let*)  "srfi-2")       ; AND-LET*
     ;; srfi-3                           ; ....... withdrawn
     ((srfi-4 hvectors)  "srfi-4")       ; Homogeneous vectors
-    ;; srfi-5                           ; let with signature & rest args
+    (srfi-5             "srfi-5")       ; let with signature & rest args
     srfi-6                              ; String ports
     ((srfi-7 program)   "srfi-7")       ; PROGRAM
     srfi-8                              ; RECEIVE

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 24-Sep-2020 12:11 (eg)
+;;;; Last file update:  9-Oct-2020 18:31 (eg)
 ;;;;
 
 (require "test")
@@ -29,6 +29,90 @@
 
 (test-section "SRFIs")
 
+
+;; ----------------------------------------------------------------------
+;;  SRFI 5 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 5 - A compatible let form ...")
+
+(require "srfi-5")
+
+;; A binding list must be a sequence of pairs, and with SRFI-5,
+;; these mayy be followed by a SYMBOL and a free list.
+;; But it MUST be a symbol!
+(test/error "error in bindings"
+            (let ((a 1)
+                  (b 2)
+                  3 4 5)))
+
+(test "Unnamed.0"
+      #f
+      (let () #f))
+
+(test "Unnamed.1"
+      '(2 . 1)
+      (let ((x 1) (y 2)) (cons y x)))
+
+(test "Named, non-signature-style, no rest argument"
+      55
+      (let loop ((i 10) (sum 0))
+        (if (> i 0)
+            (loop (- i 1) (+ sum i))
+            sum)))
+
+(test "Named, signature-style, no rest argument"
+      55
+      (let (loop (i 10) (sum 0))
+        (if (> i 0)
+            (loop (- i 1) (+ sum i))
+            sum)))
+
+(test "Named, non-signature-style, rest argument"
+      '(4 3 2 1)
+      (let reverse-list ((res '()) . (l 1 2 3 4))
+        (if (null? l)
+            res
+            (apply reverse-list (cons (car l) res) (cdr l)))))
+
+(test "Named, signature-style, rest argument"
+      '(4 3 2 1)
+      (let (reverse-list (res '()) . (l 1 2 3 4))
+        (if (null? l)
+            res
+            (apply reverse-list (cons (car l) res) (cdr l)))))
+
+;; The two following tests are Andy Gaynor's examples from the SRFI:
+(test "fibonacci"
+      55
+      (let (fibonacci (n 10) (i 0) (f0 0) (f1 1))
+        (if (= i n)
+            f0
+            (fibonacci n (+ i 1) f1 (+ f0 f1)))))
+
+(test "contrived"
+      "345"
+      (with-output-to-string
+        (lambda ()
+          (let (blast (port (current-output-port)) . (x (+ 1 2) 4 5))
+            (if (null? x)
+                'just-a-silly-contrived-example
+                (begin
+                  (write (car x) port)
+                  (apply blast port (cdr x))))))))
+
+(test "recursive list sum"
+      21
+      (let (loop (sum 0) (lst '(1 2 3 4 5 6)))
+        (if (null? lst)
+            sum
+            (loop (+ (car lst) sum) (cdr lst)))))
+
+(test "recursive list sum with rest arguments"
+      21
+      (let (loop (sum 0) . (lst 1 2 3 4 5 6))
+        (if (null? lst)
+            sum
+            (apply loop (+ (car lst) sum) (cdr lst)))))
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI 13 ...
@@ -912,7 +996,7 @@
 (test "short options without arguments"
       ;; In Guile 1.8.4 and earlier, using short names of argument-less options
       ;; would lead to a stack overflow.
-      '((#\x . #f))  
+      '((#\x . #f))
       (let ((arg-proc (lambda (opt name arg k)
                     (cons (cons name arg) k))))
         (args-fold '("-x")
@@ -1957,17 +2041,17 @@
 
 
 ;;; sets/search
-(define-syntax define-values 
-   (syntax-rules () 
-     ((define-values () exp) 
-      (call-with-values (lambda () exp) (lambda () 'unspecified))) 
-     ((define-values (var . vars) exp) 
-      (begin  
-        (define var (call-with-values (lambda () exp) list)) 
-        (define-values vars (apply values (cdr var))) 
-        (define var (car var)))) 
-     ((define-values var exp) 
-      (define var (call-with-values (lambda () exp) list))))) 
+(define-syntax define-values
+   (syntax-rules ()
+     ((define-values () exp)
+      (call-with-values (lambda () exp) (lambda () 'unspecified)))
+     ((define-values (var . vars) exp)
+      (begin
+        (define var (call-with-values (lambda () exp) list))
+        (define-values vars (apply values (cdr var)))
+        (define var (car var))))
+     ((define-values var exp)
+      (define var (call-with-values (lambda () exp) list)))))
 
 (define yam (set char-comparator #\y #\a #\m))
 (define (failure/insert insert ignore)
@@ -3118,14 +3202,14 @@
                 (test (format "flr:~d:~d" n d)
                      (- n (* flq d))
                      flr)
-                
+
                 (test (format "clq:~d:~d" n d)
                       (ceiling (/ n d))
                       clq)
                 (test (format "clr:~d:~d" n d)
                       (- n (* clq d))
                       clr)
-                
+
                 (test (format "trlq:~d:~d" n d)
                       (truncate (/ n d))
                       tcq)
@@ -3139,7 +3223,7 @@
                 (test (format "rdr:~d:~d" n d)
                       (- n (* rdq d))
                       rdr)
-          
+
                 (test (format "euq:~d:~d" n d)
                       (if (positive? d)
                           (floor (/ n d))

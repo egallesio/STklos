@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  8-Oct-2020 17:27 (eg)
+;;;; Last file update:  9-Oct-2020 14:57 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1685,7 +1685,7 @@ doc>
             ((define)             (compile-define         e env tail?))
             ((begin)              (compile-begin          e env tail?))
             ((lambda λ)                (compile-lambda         e env tail?))
-            ((let)                (compile-let            e env tail?))
+            ((let %let)           (compile-let            e env tail?))
             ((let*)               (compile-let*           e env tail?))
             ((letrec)             (compile-letrec         e env tail?))
             ((and)                (compile-and            e env tail?))

@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 19-Sep-2020 20:59 (eg)
+;; Last file update:  9-Oct-2020 18:51 (eg)
 ;;
 ;; ======================================================================
 
@@ -116,6 +116,11 @@ whose element are of the same numeric type (homogeneous vectors).
 To use SRFI-4, you need to insert the following expression])
 (fontified-code [(require "srfi-4")])
 (p [in your code or uses the ,(code "cond-expand") special form.]))
+
+;; ----------------------------------------------------------------------
+;; SRFI 5 --  A compatible let form with signatures and rest arguments
+;; ----------------------------------------------------------------------
+(gen-loaded-srfi 5)
 
 ;; ----------------------------------------------------------------------
 ;; SRFI 6 -- String Ports

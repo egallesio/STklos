@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Aug-2004 12:43 (eg)
-;;;; Last file update: 16-Sep-2020 11:14 (eg)
+;;;; Last file update:  9-Oct-2020 18:51 (eg)
 ;;;;
 
 (define srfi-address "http://srfi.schemers.org/srfi-~A/srfi-~A.html")
@@ -31,6 +31,7 @@
      (1  . "List Library")
      (2  . "AND-LET*: an AND with local bindings, a guarded LET* special form")
      (4  . "Homogeneous numeric vector datatypes")
+     (5  . "A compatible let form with signatures and rest arguments")
      (6  . "Basic String Ports")
      (7  . "Feature-based program configuration language ")
      (8  . "Receive: Binding to multiple values")
