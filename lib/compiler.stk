@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 31-Aug-2020 17:23 (eg)
+;;;; Last file update:  8-Oct-2020 17:27 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1669,50 +1669,57 @@ doc>
 ;;;;
 ;;;;======================================================================
 (define (compile e env epair tail?)
-  (if (not (pair? e))
-      (if (symbol? e)
-          (begin
-            (compiler-maybe-do-autoload e)
-            (compile-reference e env epair tail?))
-          (compile-constant  e env tail?))
-      (begin
-        (case (car e)
-          ((if)                 (compile-if             e env tail?))
-          ((define)             (compile-define         e env tail?))
-          ((begin)              (compile-begin          e env tail?))
-          ((lambda λ)                (compile-lambda         e env tail?))
-          ((let)                (compile-let            e env tail?))
-          ((let*)               (compile-let*           e env tail?))
-          ((letrec)             (compile-letrec         e env tail?))
-          ((and)                (compile-and            e env tail?))
-          ((or)                 (compile-or             e env tail?))
-          ((cond)               (compile-cond           e env tail?))
-          ((case)               (compile-case           e env tail?))
-          ((do)                 (compile-do             e env tail?))
-          ((quote)              (compile-quote          e env tail?))
-          ((quasiquote)         (compile-quasiquote     e env tail?))
-          ((with-handler)       (compile-with-handler   e env tail?))
-          ((define-macro)       (compile-define-macro   e env tail?))
-          ((%%set!)             (compile-set!           e env tail?))
+  (cond
+   ;; ---- We have a pair
+   ((pair? e)
+    (let ((first (car e)))
+      (compiler-maybe-do-autoload first)
+      (if (and (symbol? first)
+               (not (symbol-in-env? first env))
+               (expander? first))
+          ;; ---- macro call
+          (compile (macro-expand e) env epair tail?)
+          ;; ---- special-form? function call?
+          (case first
+            ((if)                 (compile-if             e env tail?))
+            ((define)             (compile-define         e env tail?))
+            ((begin)              (compile-begin          e env tail?))
+            ((lambda λ)                (compile-lambda         e env tail?))
+            ((let)                (compile-let            e env tail?))
+            ((let*)               (compile-let*           e env tail?))
+            ((letrec)             (compile-letrec         e env tail?))
+            ((and)                (compile-and            e env tail?))
+            ((or)                 (compile-or             e env tail?))
+            ((cond)               (compile-cond           e env tail?))
+            ((case)               (compile-case           e env tail?))
+            ((do)                 (compile-do             e env tail?))
+            ((quote)              (compile-quote          e env tail?))
+            ((quasiquote)         (compile-quasiquote     e env tail?))
+            ((with-handler)       (compile-with-handler   e env tail?))
+            ((define-macro)       (compile-define-macro   e env tail?))
+            ((%%set!)             (compile-set!           e env tail?))
 
-          ;; Special calls
-          ((%%require)          (compile-require        e env tail?))
-          ((%%require4syntax)   (compile-require4syntax e env tail?))
-          ((%%when-compile)     (compile-when-compile   e env tail?))
-          ((%%include)          (compile-include        e env tail?))
-          ((%%source-pos)       (compile-%%source-pos   e env tail?))
-          ((%%label)            (compile-%%label        e env tail?))
-          ((%%goto)             (compile-%%goto         e env tail?))
-          ((%%publish-syntax)   (compile-%%pubsyntax    e env tail?))
+            ;; Special calls
+            ((%%require)          (compile-require        e env tail?))
+            ((%%require4syntax)   (compile-require4syntax e env tail?))
+            ((%%when-compile)     (compile-when-compile   e env tail?))
+            ((%%include)          (compile-include        e env tail?))
+            ((%%source-pos)       (compile-%%source-pos   e env tail?))
+            ((%%label)            (compile-%%label        e env tail?))
+            ((%%goto)             (compile-%%goto         e env tail?))
+            ((%%publish-syntax)   (compile-%%pubsyntax    e env tail?))
 
-          ;; Unmatched cases
-          (else                 (let ((first (car e)))
-                                  (compiler-maybe-do-autoload first)
-                                  (if (and (symbol? first)
-                                           (not (symbol-in-env? first env))
-                                           (expander? first))
-                                      (compile (macro-expand e) env epair tail?)
-                                      (compile-call e env tail?))))))))
+            ;; Standard call
+            (else                 (compile-call           e env tail?))))))
+
+   ;; ---- We have a symbol
+   ((symbol? e)
+    (compiler-maybe-do-autoload e)
+    (compile-reference e env epair tail?))
+
+   ;; Self evaluating object
+   (else
+    (compile-constant  e env tail?))))
 
 
 ;=============================================================================
