@@ -17,7 +17,7 @@ STklos Reference Manual<hr align="center" width="10%">2. Expressions</div>
 <td align="left" valign="top" width="20%" bgcolor="#204875">
 <table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-52561">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-52643">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navsel"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a><br /><table cellspacing="1" cellpadding="1" width="100%">
 <tbody>
@@ -918,18 +918,21 @@ The effect of <code>&lt;expression&gt;</code> returning multiple values is unpre
 See the description of <code>force</code> (&#x40;pxref{force}) for a more complete
 description of <code>delay</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="delay-force"></a><a name="--index-entry-8816"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="delay-force"></a><a name="lazy"></a><a name="--index-entry-8817"></a><a name="--index-entry-8821"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(delay-force &lt;expression&gt;)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
-<br />The expression <code>(delay-force expression)</code> is conceptually similar
+<code><strong><font color="IndianRed">(lazy &lt;expression&gt;)</font></strong></code><br /><br />The expression <code>(delay-force expression)</code> is conceptually similar
 to <code>(delay (force expression))</code>, with the difference that forcing the result
 of <code>delay-force</code> will in effect result in a tail call to <code>(force expression)</code>,
 while forcing the result of <code>(delay (force expression))</code> might not. Thus
 iterative lazy algorithms that might result in a long series of chains of
 <code>delay</code> and <code>force</code> can be rewritten using <code>delay-force</code> to prevent consuming
-unbounded space during evaluation.</td></tr>
+unbounded space during evaluation.
+
+The special form <code>delay-force</code> appears with name <code>lazy</code> in SRFI-45.
+</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="force"></a><a name="--index-entry-8876"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="force"></a><a name="--index-entry-8895"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(force promise)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Forces the value of <code>promise</code> (see <a href="stklos-ref-2.html#delay">delay</a>). If no value has been
@@ -978,23 +981,26 @@ p                     &#8658;  a promise, still
 <strong>Note:</strong> See <span style="font-variant: small-caps">R<sup>5</sup>RS</span> for details on a posssible way to implement
 <code>force</code> and <code>delay</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="promise-"></a><a name="--index-entry-9023"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="promise-"></a><a name="--index-entry-9042"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(promise? obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /> Returns <code>#t</code> if <code>obj</code> is a promise, otherwise returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-promise"></a><a name="--index-entry-9058"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-promise"></a><a name="eager"></a><a name="--index-entry-9078"></a><a name="--index-entry-9082"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(make-promise obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
-<br />The <code>make-promise</code> procedure returns a promise which,
+<code><strong><font color="IndianRed">(eager obj)</font></strong></code><br /><br />The <code>make-promise</code> procedure returns a promise which,
 when forced, will return <code>obj</code> . It is similar to <code>delay</code>, but
 does not delay its argument: it is a procedure rather than
-syntax. If <code>obj</code> is already a promise, it is returned.</td></tr>
+syntax. If <code>obj</code> is already a promise, it is returned.
+
+The primitve <code>make-promise</code> appears with name <code>eager</code> in
+SRFI-45.</td></tr>
 </tbody></table></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Quasiquotation"></a>
 <h3 id="Quasiquotation">2.9 Quasiquotation</h3>
 </div>
-<div class="sectionbody"><a name="--index-entry-9099"></a><a name="--index-entry-9103"></a><a name="--index-entry-9107"></a><a name="--index-entry-9111"></a><a name="--index-entry-9115"></a><a name="--index-entry-9119"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="quasiquote"></a><a name="--index-entry-9125"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<div class="sectionbody"><a name="--index-entry-9137"></a><a name="--index-entry-9141"></a><a name="--index-entry-9145"></a><a name="--index-entry-9149"></a><a name="--index-entry-9153"></a><a name="--index-entry-9157"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="quasiquote"></a><a name="--index-entry-9163"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(quasiquote &lt;template&gt;)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">`&lt;template&gt;</font></strong></code><br /><br />&quot;Backquote&quot; or &quot;quasiquote&quot; expressions are useful for constructing a
@@ -1049,13 +1055,13 @@ in all respects.  <code>,&lt;expression&gt;</code> is identical to <code>(unquot
 </tbody></table></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Macros"></a>
 <h3 id="Macros">2.10 Macros</h3>
 </div>
-<div class="sectionbody"><a name="--index-entry-9277"></a><a name="--index-entry-9281"></a><a name="--index-entry-9285"></a><p>STklos supports hygienic macros such as the ones defined in R5RS
-as well as low level macros.</p><a name="--index-entry-9290"></a><p>Low level macros are defined with <code>define-macro</code> whereas
+<div class="sectionbody"><a name="--index-entry-9315"></a><a name="--index-entry-9319"></a><a name="--index-entry-9323"></a><p>STklos supports hygienic macros such as the ones defined in R5RS
+as well as low level macros.</p><a name="--index-entry-9328"></a><p>Low level macros are defined with <code>define-macro</code> whereas
 R5RS macros are defined with <code>define-syntax</code>
-<a href="#fn--footnote-9296"><sup><small>1</small></sup></a>.  Hygienic macros use the implementation
+<a href="#fn--footnote-9334"><sup><small>1</small></sup></a>.  Hygienic macros use the implementation
 called <em>Macro by Example</em> (Eugene Kohlbecker, R4RS) done by Dorai
 Sitaram. This implementation generates low level STklos
-macros. This implementation of hygienic macros is not expensive.</p><a name="--index-entry-9299"></a><p>The major drawback of this implementation is that the macros are
+macros. This implementation of hygienic macros is not expensive.</p><a name="--index-entry-9337"></a><p>The major drawback of this implementation is that the macros are
  not <em>referentially transparent</em> (see section `Macros' in
  R4RS for details). Lexically scoped macros
  (i.e., <code>let-syntax</code> and <code>letrec-syntax</code> are not
@@ -1075,7 +1081,7 @@ macros. This implementation of hygienic macros is not expensive.</p><a name="--i
  versions of <code>syntax-rules</code>. Requiring <code>&quot;full-syntax&quot;</code>
  loads the version 2.1 of an implementation of hygienic macros by
  Robert Hieb and R. Kent Dybvig.</p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="define-macro"></a><a name="--index-entry-9321"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="define-macro"></a><a name="--index-entry-9359"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(define-macro (&lt;name&gt; &lt;formals&gt;) &lt;body&gt;)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(define-macro &lt;name&gt; (lambda &lt;formals&gt; &lt;body&gt;))</font></strong></code><br /><br /><code>define-macro</code> can be used to define low-level macro
@@ -1104,7 +1110,7 @@ macros. This implementation of hygienic macros is not expensive.</p><a name="--i
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="define-syntax"></a><a name="--index-entry-9418"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="define-syntax"></a><a name="--index-entry-9456"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(define-syntax &lt;identifier&gt; &lt;transformer-spec&gt;)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br /><code>&lt;Define-syntax&gt;</code>  extends the top-level syntactic environment by binding
@@ -1125,7 +1131,7 @@ the <code>&lt;identifier&gt;</code> to the specified transformer.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="syntax-rules"></a><a name="--index-entry-9485"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="syntax-rules"></a><a name="--index-entry-9523"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(syntax-rules &lt;literals&gt; &lt;syntax-rule&gt; ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br /><code>&lt;literals&gt;</code> is a list of identifiers, and each <code>&lt;syntax-rule&gt;</code> should be of
@@ -1151,7 +1157,7 @@ literal identifier.
 <strong>Note:</strong> For a complete description of the Scheme pattern language,
 refer to <span style="font-variant: small-caps">R<sup>5</sup>RS</span>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="let-syntax"></a><a name="--index-entry-9546"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="let-syntax"></a><a name="--index-entry-9584"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(let-syntax &lt;bindings&gt; &lt;body&gt;)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br /><code>&lt;Bindings&gt;</code> should have the form
@@ -1190,7 +1196,7 @@ binding of a <code>&lt;keyword&gt;</code> has <code>&lt;body&gt;</code> as its r
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="letrec-syntax"></a><a name="--index-entry-9693"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="letrec-syntax"></a><a name="--index-entry-9731"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(letrec-syntax &lt;bindings&gt; &lt;body&gt;)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>5</sup>RS</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />Syntax of <code>letrec-syntax</code> is the same as for <code>let-syntax</code>.
@@ -1228,8 +1234,8 @@ expression.
 </pre></td></tr>
 </tbody></table></blockquote>
 </td></tr>
-</tbody></table><a name="--index-entry-9815"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="macro-expand"></a><a name="--index-entry-9821"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+</tbody></table><a name="--index-entry-9853"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="macro-expand"></a><a name="--index-entry-9859"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(macro-expand form)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the macro expansion of <code>form</code> if it is a macro call,
@@ -1245,11 +1251,11 @@ otherwise <code>form</code> is returned unchanged.
 </tbody></table></div></div></div><div class='footnotes'>
 <hr>
 <b>Note:</b><br>
-<a name="fn--footnote-9296"><sup><small>1</small></sup></a>: Documentation about hygienic macros has been stolen in
+<a name="fn--footnote-9334"><sup><small>1</small></sup></a>: Documentation about hygienic macros has been stolen in
 the SLIB manual
 <br>
 </div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Wed Sep 16 11:52:59 2020</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Sat Oct 10 13:50:35 2020</em></small>
 </body>
 </html>

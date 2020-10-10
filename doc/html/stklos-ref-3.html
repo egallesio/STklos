@@ -17,7 +17,7 @@ STklos Reference Manual<hr align="center" width="10%">3. Program structure</div>
 <td align="left" valign="top" width="20%" bgcolor="#204875">
 <table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-52561">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-52643">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navsel"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a><br /></td></tr>
@@ -40,13 +40,13 @@ STklos Reference Manual<hr align="center" width="10%">3. Program structure</div>
 <div class="chapterbody"><p>R5RS discusses how to structure programs. Everything which is defined
 in Section 5 of R5RS applies also to STklos. To make things
 shorter, this aspects will not be described here (see R5RS for
-complete information).</p><a name="--index-entry-9910"></a><a name="--index-entry-9914"></a><p>STklos modules can be used to organize a program into separate
+complete information).</p><a name="--index-entry-9948"></a><a name="--index-entry-9952"></a><p>STklos modules can be used to organize a program into separate
 environments (or <em>name spaces</em>). Modules provide a clean way to
 organize and enforce the barriers between the components of a program.</p><p>STklos provides a simple module system which is largely inspired from
 the one of Tung and Dybvig exposed in [<a href="stklos-ref-16.html#Tung-Dybvig-96">15</a>]. As their
 modules system, STklos modules are defined to be easily used in an
-interactive environment. </p><a name="--index-entry-9925"></a><a name="--index-entry-9929"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="define-module"></a><a name="--index-entry-9935"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+interactive environment. </p><a name="--index-entry-9963"></a><a name="--index-entry-9967"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="define-module"></a><a name="--index-entry-9973"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(define-module &lt;name&gt; &lt;expr1&gt; &lt;expr2&gt; ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br /><code>Define-module</code> evaluates the expressions <code>&lt;expr1&gt;</code>, <code>&lt;expr2&gt;</code> ... which
@@ -55,7 +55,7 @@ constitute the body of the module <code>&lt;name&gt;</code> in the environment o
 define a module, a new module, named <code>name</code>, is created.
 Otherwise, the expressions <code>&lt;expr1&gt;</code>, <code>&lt;expr2&gt;</code> ... are evaluated in
 the environment of the (old) module <code>&lt;name&gt;</code>
-<a href="#fn--footnote-10062"><sup><small>1</small></sup></a>.
+<a href="#fn--footnote-10100"><sup><small>1</small></sup></a>.
 Definitions done in a module are local to the module and do not interact with
 the definitions in other modules. Consider the following definitions,
 <blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
@@ -81,7 +81,7 @@ always visible from inside a module. So, in the previous exemple, the
 <br /><br />
 The result of <code>define-module</code> is <em>void</em>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="current-module"></a><a name="--index-entry-10098"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="current-module"></a><a name="--index-entry-10136"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(current-module)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the current module.
@@ -95,7 +95,7 @@ The result of <code>define-module</code> is <em>void</em>.</td></tr>
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="find-module"></a><a name="--index-entry-10139"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="find-module"></a><a name="--index-entry-10177"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(find-module name)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(find-module name default)</font></strong></code><br /><br /><span style="font-variant: small-caps">STklos</span> modules are first class objects and <code>find-module</code> returns the
@@ -103,7 +103,7 @@ module associated to <code>name</code> if it exists. If there is no module
 associated to <code>name</code>, an error is signaled if no <code>default</code> is
 provided, otherwise <code>find-module</code> returns <code>default</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="module-"></a><a name="--index-entry-10196"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="module-"></a><a name="--index-entry-10234"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(module? object)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>object</code> is a module and <code>#f</code> otherwise.
@@ -115,7 +115,7 @@ provided, otherwise <code>find-module</code> returns <code>default</code>.</td><
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="export"></a><a name="--index-entry-10255"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="export"></a><a name="--index-entry-10293"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(export &lt;symbol1&gt; &lt;symbol2&gt; ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />Specifies the symbols which are exported (i.e. <em>visible</em>) outside
@@ -129,7 +129,7 @@ in all the <code>export</code> clauses.
 <br /><br />
 The result of <code>export</code> is <em>void</em>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="import"></a><a name="--index-entry-10314"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="import"></a><a name="--index-entry-10352"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(import &lt;module1&gt; &lt;module2&gt; ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />Specifies the modules which are imported by the current module.
@@ -173,7 +173,7 @@ in their apparition order.
   (display (list a b c d)))  -| (M1-a M2-b M2-c M2-d)
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="select-module"></a><a name="--index-entry-10396"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="select-module"></a><a name="--index-entry-10434"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(select-module &lt;name&gt;)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />Changes the value of the current module to the module with the given <code>name</code>.
@@ -184,7 +184,7 @@ previously by a <code>define-module</code>. The result of <code>select-module</c
 <code>Select-module</code> is particularly useful when debugging since it
 allows to place toplevel evaluation in a particular module. The
 following transcript shows an usage of <code>select-module</code>.
-<a href="#fn--footnote-10463"><sup><small>2</small></sup></a>:
+<a href="#fn--footnote-10501"><sup><small>2</small></sup></a>:
 <blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="ivory"><pre>stklos&gt; (<span class="source-define">define</span> foo 1)
 stklos&gt; (<span class="source-define">define-module</span> bar
@@ -200,14 +200,14 @@ stklos&gt;
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="symbol-value"></a><a name="--index-entry-10486"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="symbol-value"></a><a name="--index-entry-10524"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(symbol-value symbol module)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(symbol-value symbol module default)</font></strong></code><br /><br />Returns the value bound to <code>symbol</code> in <code>module</code>. If <code>symbol</code> is not bound,
 an error is signaled if no <code>default</code> is provided, otherwise <code>symbol-value</code>
 returns <code>default</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="symbol-value-"></a><a name="--index-entry-10539"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="symbol-value-"></a><a name="--index-entry-10577"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(symbol-value* symbol module)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(symbol-value* symbol module default)</font></strong></code><br /><br />Returns the value bound to <code>symbol</code> in <code>module</code>. If <code>symbol</code> is not bound,
@@ -218,34 +218,34 @@ Note that this function searches the value of <code>symbol</code> in <code>modul
 <strong>and</strong> all the modules it imports whereas <code>symbol-value</code> searches
 only in <code>module</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="module-name"></a><a name="--index-entry-10620"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="module-name"></a><a name="--index-entry-10658"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(module-name module)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the name (a symbol) associated to a <code>module</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="module-imports"></a><a name="--index-entry-10644"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="module-imports"></a><a name="--index-entry-10682"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(module-imports module)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the list of modules that <code>module</code> (fully) imports.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="module-exports"></a><a name="--index-entry-10668"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="module-exports"></a><a name="--index-entry-10706"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(module-exports module)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the list of symbols exported by <code>module</code>. Note that this function
 returns the list of symbols given in the module <code>export</code> clause and that
 some of these symbols can be not yet defined.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="module-symbols"></a><a name="--index-entry-10697"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="module-symbols"></a><a name="--index-entry-10735"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(module-symbols module)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the list of symbols already defined in <code>module</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="all-modules"></a><a name="--index-entry-10721"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="all-modules"></a><a name="--index-entry-10759"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(all-modules)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the list of all the living modules.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="in-module"></a><a name="--index-entry-10740"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="in-module"></a><a name="--index-entry-10778"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(in-module mod s)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(in-module mod s default)</font></strong></code><br /><br />This form returns the value of symbol with name <code>s</code> in the module with name
@@ -269,17 +269,17 @@ is equivalent to
 </tbody></table></div><div class='footnotes'>
 <hr>
 <b>Notes:</b><br>
-<a name="fn--footnote-10062"><sup><small>1</small></sup></a>: In fact <code>define-module</code> on a given name
+<a name="fn--footnote-10100"><sup><small>1</small></sup></a>: In fact <code>define-module</code> on a given name
 	     defines a new module only the first time it is invoked on this name.
 	     By this way, interactively reloading a module does not define
 	     a new entity, and the other modules which use it are not altered.
 <br>
-<a name="fn--footnote-10463"><sup><small>2</small></sup></a>: This transcript uses the default toplevel loop
+<a name="fn--footnote-10501"><sup><small>2</small></sup></a>: This transcript uses the default toplevel loop
 	       which displays the name of the current module in the evaluator
 	       prompt.
 <br>
 </div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Wed Sep 16 11:52:59 2020</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Sat Oct 10 13:50:35 2020</em></small>
 </body>
 </html>
