@@ -1,4 +1,4 @@
-s ;;;;                                                    -*- coding: utf-8 -*-
+;;;;                                                    -*- coding: utf-8 -*-
 ;;;;
 ;;;; test-r7rs.stk      -- Testing R7RS constructs/primitives
 ;;;;
@@ -22,7 +22,7 @@ s ;;;;                                                    -*- coding: utf-8 -*-
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 11-Aug-2020 18:40 (eg)
+;;;; Last file update: 15-Oct-2020 18:28 (eg)
 ;;;;
 
 (require "test")
@@ -520,6 +520,50 @@ s ;;;;                                                    -*- coding: utf-8 -*-
          ((a) a)
          ((a b) (* a b)))
        1 2 3))
+;; ======================================================================
+
+(test-subsection "5.3 Multiple-values definitions")
+
+(test "define-values.1"
+      '(4 1)
+      (let ()
+        (define-values (x y) (exact-integer-sqrt 17))
+        (list x y)))
+
+(test "define-values.2"
+      '(#void)
+      (let ()
+        (list (define-values () (values 1 2 3)))))
+
+(test "define-values.3"
+    1
+    (let ()
+      (define-values (x) (values 1))
+      x))
+
+(test "define-values.4"
+      3
+      (let ()
+        (define-values x (values 1 2))
+        (apply + x)))
+
+(test "define-values.5"
+      3
+      (let ()
+        (define-values (x y) (values 1 2))
+        (+ x y)))
+
+(test "define-values.6"
+      10
+      (let ()
+        (define-values (x y . z) (values 1 2 3 4))
+        (apply + x y z)))
+
+(test "define-values.7"
+      '(1 (2 3))
+      (let ()
+        (define-values (x . y) (values 1 2 3))
+        (list x y)))
 
 ;; ======================================================================
 

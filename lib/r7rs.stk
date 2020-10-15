@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 19-Sep-2020 20:54 (eg)
+;;;; Last file update: 15-Oct-2020 18:53 (eg)
 ;;;;
 
 
@@ -246,6 +246,49 @@ doc>
 
 (define eager make-promise)
 
+;;;; ----------------------------------------------------------------------
+;;;; 5.3 Variable definitions
+;;;; ----------------------------------------------------------------------
+
+#|
+<doc R7RS define-values
+ * (define-values formals expression)
+ *
+ * The form |define-values| creates multiple definitions from a single expression
+ * returning multiple values. Here, |expression| is evaluated, and the |formals|
+ * are bound to the return values in the same way that the |formals| in a
+ * lambda expression are matched to the arguments in a procedure call.
+ *
+ * @lisp
+ * (let ()
+ *   (define-values (x y) (exact-integer-sqrt 17))
+ *   (list x y))                   => (4 1)
+ *
+ * (let ()
+ *    (define-values (x y) (values 1 2))
+ *    (+ x y))                     => 3
+ * 
+ * (let ()
+ *    (define-values (x . y) (values 1 2 3))
+ *    (list x y)                  => (1 (2 3))
+ * @end lisp
+doc>
+|#
+(define-macro (define-values formals expr)
+  (cond
+   ((symbol? formals)
+    `(define ,formals (call-with-values (lambda () ,expr) list)))
+   ((null? formals)
+    `(call-with-values (lambda () ,expr) void))
+   ((pair? formals)
+    (let ((first (car formals)))
+      `(begin
+         (define ,first (call-with-values (lambda () ,expr) list))
+         (define-values ,(cdr formals) (apply values (cdr ,first)))
+         (set! ,first (car ,first))
+         ;; return a (values (void) ...) for the REPL
+         (values (void) ',formals))))
+   (else (error "bad formal list in define-values ~S" ',formals))))
 
 
 ;;;; ----------------------------------------------------------------------
