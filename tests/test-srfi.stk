@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update:  9-Oct-2020 18:31 (eg)
+;;;; Last file update: 19-Oct-2020 11:39 (eg)
 ;;;;
 
 (require "test")
@@ -2041,17 +2041,6 @@
 
 
 ;;; sets/search
-(define-syntax define-values
-   (syntax-rules ()
-     ((define-values () exp)
-      (call-with-values (lambda () exp) (lambda () 'unspecified)))
-     ((define-values (var . vars) exp)
-      (begin
-        (define var (call-with-values (lambda () exp) list))
-        (define-values vars (apply values (cdr var)))
-        (define var (car var))))
-     ((define-values var exp)
-      (define var (call-with-values (lambda () exp) list)))))
 
 (define yam (set char-comparator #\y #\a #\m))
 (define (failure/insert insert ignore)
