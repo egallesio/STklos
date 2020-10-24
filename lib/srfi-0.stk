@@ -114,9 +114,9 @@
     ;; srfi-56                          ; ....... withdrawn
     ;; srfi-57                          ; Records
     ;; srfi-58                          ; Array Notation
-    (srfi-59 "srfi-59")                         ; Vicinity
+    (srfi-59 "srfi-59")                 ; Vicinity
     (srfi-60 "srfi-60")                 ; Integers as Bits
-    ;; srfi-61                          ; A more general cond clause
+    (srfi-61 "srfi-61")                 ; A more general cond clause
     srfi-62                             ; S-expression comments
     ;; srfi-63                          ; Homogeneous and Heterogeneous Arrays
     ((srfi-64 testing) "srfi-64")       ; A Scheme API for test suites

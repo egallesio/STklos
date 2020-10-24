@@ -1,0 +1,103 @@
+;;;; srfi-61.stk         -- Implementattion of SRFI-61
+;;;;
+;;;; Copyright © 2020 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 24-Oct-2020 10:12
+;;;; Last file update: 24-Oct-2020 16:03
+;;;;
+;;;; This is a simple modification of STklos' compiler code for COND,
+;;;; which has been authored by Erick Gallesio, copyrighted as follows:
+
+;;;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;;;
+;;;;;;
+;;;;;; This program is free software; you can redistribute it and/or modify
+;;;;;; it under the terms of the GNU General Public License as published by
+;;;;;; the Free Software Foundation; either version 2 of the License, or
+;;;;;; (at your option) any later version.
+;;;;;;
+;;;;;; This program is distributed in the hope that it will be useful,
+;;;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;;;; GNU General Public License for more details.
+;;;;;;
+;;;;;; You should have received a copy of the GNU General Public License
+;;;;;; along with this program; if not, write to the Free Software
+;;;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;;;; USA.
+;;;;;;
+;;;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;;;    Creation date: 26-Feb-2000 10:47 (eg)
+;;;;;; Last file update:  9-Oct-2020 14:57 (eg)
+
+
+
+(define-module SRFI-61
+
+(define-macro (cond . expr)
+
+(define (rewrite-cnd-clauses c)
+  (cond
+   ((null? c)                 (void))
+   ((not (pair? (car c)))     (compiler-error 'cond c "invalid clause ~S" (car c)))
+   ((eq? (caar c) 'else)      (if (null? (cdr c))
+                                  `(begin ,@(cdar c))
+                                  (compiler-error 'cond
+                                                   c
+                                                   "else not in last clause ~S"
+                                                   c)))
+   ((and (pair? (cdar c)) (eq? (cadar c) '=>))
+                              (if (and (list? (car c)) (= (length (car c)) 3))
+                                  (let ((test-var (gensym)))
+                                    `(let ((,test-var ,(caar c)))
+                                       (if ,test-var
+                                           (,(caddar c) ,test-var)
+                                           ,(rewrite-cnd-clauses (cdr c)))))
+                                  (compiler-error 'cond
+                                                   c
+                                                   "bad '=>' clause syntax ~S"
+                                                   (car c))))
+   ((and (pair? (cdar c)) (pair? (cddar c)) (eq? (caddar c) '=>))
+                              (if (and (list? (car c)) (= (length (car c)) 4))
+                                  (let ((test-var (gensym)))
+                                    `(let ((,test-var ,(caar c)))
+                                       (if (and ,test-var
+                                                (,(cadar c) ,test-var))
+                                           (,(car (cdddar c)) ,test-var)
+                                           ,(rewrite-cnd-clauses (cdr c)))))
+                                  (compiler-error 'cond
+                                                   c
+                                                   "bad '=>' clause syntax ~S"
+                                                   (car c))))
+   ((null? (cdar c))          (let ((test-var (gensym)))
+                                `(let ((,test-var ,(caar c)))
+                                   (or ,test-var
+                                       ,(rewrite-cnd-clauses (cdr c))))))
+   (else                      `(if ,(caar c)
+                                   (begin ,@(cdar c))
+                                   ,(rewrite-cnd-clauses (cdr c))))))
+
+
+  (rewrite-cnd-clauses expr))
+
+(export-syntax cond)
+)
+
+(provide "srfi-61")

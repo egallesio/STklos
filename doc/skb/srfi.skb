@@ -517,6 +517,11 @@ you need to insert the following expression])
 (p [,(quick-link-srfi 62) is fully supported. See ,(ref :subsection "Comments")]))
 
 ;; ----------------------------------------------------------------------
+;; SRFI 61 -- A more general COND clause
+;; ----------------------------------------------------------------------
+(gen-loaded-srfi 61)
+
+;; ----------------------------------------------------------------------
 ;; SRFI 64 -- A Scheme API for test suites
 ;; ----------------------------------------------------------------------
 (srfi-section 64
