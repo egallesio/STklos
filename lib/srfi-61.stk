@@ -1,11 +1,11 @@
 ;;;; srfi-61.stk         -- Implementattion of SRFI-61
 ;;;;
-;;;; Copyright © 2020 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;; Copyright © 2020 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
-;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; the Free Software Foundation; either version 2 of the License, or
 ;;;; (at your option) any later version.
 ;;;;
 ;;;; This program is distributed in the hope that it will be useful,
@@ -18,86 +18,78 @@
 ;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
 ;;;; USA.
 ;;;;
-;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
-;;;;    Creation date: 24-Oct-2020 10:12
-;;;; Last file update: 24-Oct-2020 16:03
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 25-Oct-2020 20:22
+;;;; Last file update: 25-Oct-2020 20:29 (eg)
 ;;;;
-;;;; This is a simple modification of STklos' compiler code for COND,
-;;;; which has been authored by Erick Gallesio, copyrighted as follows:
 
-;;;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
-;;;;;;
-;;;;;;
-;;;;;; This program is free software; you can redistribute it and/or modify
-;;;;;; it under the terms of the GNU General Public License as published by
-;;;;;; the Free Software Foundation; either version 2 of the License, or
-;;;;;; (at your option) any later version.
-;;;;;;
-;;;;;; This program is distributed in the hope that it will be useful,
-;;;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;;;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;;;;;; GNU General Public License for more details.
-;;;;;;
-;;;;;; You should have received a copy of the GNU General Public License
-;;;;;; along with this program; if not, write to the Free Software
-;;;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
-;;;;;; USA.
-;;;;;;
-;;;;;;           Author: Erick Gallesio [eg@unice.fr]
-;;;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;;;; Last file update:  9-Oct-2020 14:57 (eg)
-
-
+;;;; This code is an adaptation of the sample implementation gfiven in the
+;;;; SRFI-61 document. It has the following copyright
+;;;;
+;;;; Permission is hereby granted, free of charge, to any person obtaining a
+;;;; copy of this software and associated documentation files (the
+;;;; "Software"), to deal in the Software without restriction, including
+;;;; without limitation the rights to use, copy, modify, merge, publish,
+;;;; distribute, sublicense, and/or sell copies of the Software, and to permit
+;;;; persons to whom the Software is furnished to do so, subject to the
+;;;; following conditions:
+;;;;
+;;;; The above copyright notice and this permission notice shall be included
+;;;; in all copies or substantial portions of the Software.
+;;;;
+;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+;;;; OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+;;;; MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+;;;; NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+;;;; DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+;;;; OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+;;;; USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (define-module SRFI-61
 
-(define-macro (cond . expr)
+  (define-syntax cond
+    (syntax-rules (=> else)
 
-(define (rewrite-cnd-clauses c)
-  (cond
-   ((null? c)                 (void))
-   ((not (pair? (car c)))     (compiler-error 'cond c "invalid clause ~S" (car c)))
-   ((eq? (caar c) 'else)      (if (null? (cdr c))
-                                  `(begin ,@(cdar c))
-                                  (compiler-error 'cond
-                                                   c
-                                                   "else not in last clause ~S"
-                                                   c)))
-   ((and (pair? (cdar c)) (eq? (cadar c) '=>))
-                              (if (and (list? (car c)) (= (length (car c)) 3))
-                                  (let ((test-var (gensym)))
-                                    `(let ((,test-var ,(caar c)))
-                                       (if ,test-var
-                                           (,(caddar c) ,test-var)
-                                           ,(rewrite-cnd-clauses (cdr c)))))
-                                  (compiler-error 'cond
-                                                   c
-                                                   "bad '=>' clause syntax ~S"
-                                                   (car c))))
-   ((and (pair? (cdar c)) (pair? (cddar c)) (eq? (caddar c) '=>))
-                              (if (and (list? (car c)) (= (length (car c)) 4))
-                                  (let ((test-var (gensym)))
-                                    `(let ((,test-var ,(caar c)))
-                                       (if (and ,test-var
-                                                (,(cadar c) ,test-var))
-                                           (,(car (cdddar c)) ,test-var)
-                                           ,(rewrite-cnd-clauses (cdr c)))))
-                                  (compiler-error 'cond
-                                                   c
-                                                   "bad '=>' clause syntax ~S"
-                                                   (car c))))
-   ((null? (cdar c))          (let ((test-var (gensym)))
-                                `(let ((,test-var ,(caar c)))
-                                   (or ,test-var
-                                       ,(rewrite-cnd-clauses (cdr c))))))
-   (else                      `(if ,(caar c)
-                                   (begin ,@(cdar c))
-                                   ,(rewrite-cnd-clauses (cdr c))))))
+      ((cond (else else1 else2 ...))
+       ;; The (if #t (begin ...)) wrapper ensures that there may be no
+       ;; internal definitions in the body of the clause.  R5RS mandates
+       ;; this in text (by referring to each subform of the clauses as
+       ;; <expression>) but not in its reference implementation of cond,
+       ;; which just expands to (begin ...) with no (if #t ...) wrapper.
+       (if #t (begin else1 else2 ...)))
 
+      ((cond (test => receiver) more-clause ...)
+       (let ((t test))
+         (%cond/maybe-more t
+                          (receiver t)
+                          more-clause ...)))
 
-  (rewrite-cnd-clauses expr))
+      ((cond (generator guard => receiver) more-clause ...)
+       (call-with-values (lambda () generator)
+         (lambda t
+           (%cond/maybe-more (apply guard    t)
+                            (apply receiver t)
+                            more-clause ...))))
 
-(export-syntax cond)
-)
+      ((cond (test) more-clause ...)
+       (let ((t test))
+         (%cond/maybe-more t t more-clause ...)))
+
+      ((cond (test body1 body2 ...) more-clause ...)
+       (%cond/maybe-more test
+                        (begin body1 body2 ...)
+                        more-clause ...))))
+
+  (define-syntax %cond/maybe-more
+    (syntax-rules ()
+      ((%cond/maybe-more test consequent)
+       (if test
+           consequent))
+      ((%cond/maybe-more test consequent clause ...)
+       (if test
+           consequent
+           (cond clause ...)))))
+
+  (export-syntax cond con/maybe-more))
 
 (provide "srfi-61")
