@@ -1321,6 +1321,48 @@
 (test "booleans->integer"  #b11101
       (booleans->integer #f #f #f #f #f #t #t #t #f #t))
 
+;; ----------------------------------------------------------------------
+;;  SRFI 61 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 61 - A more general cond clause")
+
+(require "srfi-61")
+
+(define (get-nat) 10)
+(define (get-sym) 'x)
+(define (get-bool) #t)
+(define (get-false) #f)
+
+(test "basic 4-element => clause, succeeds"
+      -10
+      (cond ((get-nat) integer? => (lambda (x) (- x)))
+            ((get-sym) 'y)))
+
+(test "basic 4-element => clause, fails"
+      'y
+      (cond ((get-nat) negative? => (lambda (x) (- x)))
+            ((get-sym) 'y)))
+
+(test "mixed 4-element and 3-element => clauses, fails 4-element, succeeds 3-element clause"
+      "x"
+      (cond ((get-nat) string? => (lambda (x) (- x)))
+            ((get-sym) => symbol->string)))
+
+(test "mixed 4-element and 3-element => clauses, fails 3-element, succeeds 4-element clause"
+      -10
+      (cond   ((get-false) => not)
+              ((get-nat) positive? => -)
+              ((get-bool) 'no)))
+
+(test "mixed 4-element and 3-element => clauses, fails both"
+      'last
+      (cond   ((get-false) => not)
+              ((get-nat) boolean? => not)
+              ((get-sym) 'last)))
+
+(test/error "no 5-element => clause"
+            (cond ((get-nat) integer? => (lambda (x) (- x)) 'extraneous)
+                  ((get-sym) 'y)))
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI 62 ...

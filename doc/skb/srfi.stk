@@ -63,6 +63,7 @@
      (55 . "Require-extension")
      (59 . "Vicinity")
      (60 . "Integers as bits")
+     (61 . "A more general COND clause")
      (62 . "S-expression comments")
      (64 . "A Scheme API for test suites")
      (66 . "Octet Vectors")
