@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-Oct-2020 20:22
-;;;; Last file update: 25-Oct-2020 20:29 (eg)
+;;;; Last file update: 27-Oct-2020 18:14 (eg)
 ;;;;
 
 ;;;; This code is an adaptation of the sample implementation gfiven in the
@@ -51,12 +51,10 @@
     (syntax-rules (=> else)
 
       ((cond (else else1 else2 ...))
-       ;; The (if #t (begin ...)) wrapper ensures that there may be no
-       ;; internal definitions in the body of the clause.  R5RS mandates
-       ;; this in text (by referring to each subform of the clauses as
-       ;; <expression>) but not in its reference implementation of cond,
-       ;; which just expands to (begin ...) with no (if #t ...) wrapper.
-       (if #t (begin else1 else2 ...)))
+       ;; original code was (if #t (begin else1 else2 ...)) to avoid internal
+       ;; defines, but since STklos doesn't test that, code here shoul be
+       ;; sufficient
+       (begin else1 else2 ...))
 
       ((cond (test => receiver) more-clause ...)
        (let ((t test))
