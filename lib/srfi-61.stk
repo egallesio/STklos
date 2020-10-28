@@ -20,74 +20,51 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-Oct-2020 20:22
-;;;; Last file update: 27-Oct-2020 19:11 (eg)
+;;;; Last file update: 27-Oct-2020 19:53 (eg)
 ;;;;
-
-;;;; This code is an adaptation of the sample implementation gfiven in the
-;;;; SRFI-61 document. It has the following copyright
-;;;;
-;;;; Permission is hereby granted, free of charge, to any person obtaining a
-;;;; copy of this software and associated documentation files (the
-;;;; "Software"), to deal in the Software without restriction, including
-;;;; without limitation the rights to use, copy, modify, merge, publish,
-;;;; distribute, sublicense, and/or sell copies of the Software, and to permit
-;;;; persons to whom the Software is furnished to do so, subject to the
-;;;; following conditions:
-;;;;
-;;;; The above copyright notice and this permission notice shall be included
-;;;; in all copies or substantial portions of the Software.
-;;;;
-;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-;;;; OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-;;;; MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-;;;; NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-;;;; DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-;;;; OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-;;;; USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 (define-module SRFI-61
 
   (define-syntax cond
-    (syntax-rules (=> else)
-
-      ((cond (else else1 else2 ...))
-       ;; original code was (if #t (begin else1 else2 ...)) to avoid internal
-       ;; defines, but since STklos doesn't test that, code here should be
-       ;; sufficient
-       (begin else1 else2 ...))
-
-      ((cond (test => receiver) more-clause ...)
-       (let ((t test))
-         (%cond/maybe-more t
-                          (receiver t)
-                          more-clause ...)))
-
-      ((cond (generator guard => receiver) more-clause ...)
+    (syntax-rules (else =>)
+      ((cond (else result1 result2 ...))
+       (begin result1 result2 ...))
+      ((cond (test => result))
+       (let ((temp test))
+         (if temp (result temp))))
+      ((cond (test => result) clause1 clause2 ...)
+       (let ((temp test))
+         (if temp
+             (result temp)
+             (cond clause1 clause2 ...))))
+      ;;
+      ;; Clause added for implementing SRFI-61
+      ;;
+      ((cond (generator guard => receiver) clause1 clause2 ...)
        (call-with-values (lambda () generator)
-         (lambda t
-           (%cond/maybe-more (apply guard    t)
-                            (apply receiver t)
-                            more-clause ...))))
-
-      ((cond (test) more-clause ...)
-       (let ((t test))
-         (%cond/maybe-more t t more-clause ...)))
-
-      ((cond (test body1 body2 ...) more-clause ...)
-       (%cond/maybe-more test
-                        (begin body1 body2 ...)
-                        more-clause ...))))
-
-  (define-syntax %cond/maybe-more
-    (syntax-rules ()
-      ((%cond/maybe-more test consequent)
+         (lambda lst (if (apply guard lst)
+                    (apply receiver lst)
+                    (cond clause1 clause2 ...)))))
+      ;;
+      ;; end
+      ;;
+      ((cond (test)) test)
+      ((cond (test) clause1 clause2 ...)
+       (let ((temp test))
+         (if temp
+             temp
+             (cond clause1 clause2 ...))))
+      ((cond (test result1 result2 ...))
+       (if test (begin result1 result2 ...)))
+      ((cond (test result1 result2 ...)
+             clause1 clause2 ...)
        (if test
-           consequent))
-      ((%cond/maybe-more test consequent clause ...)
-       (if test
-           consequent
-           (cond clause ...)))))
+           (begin result1 result2 ...)
+           (cond clause1 clause2 ...)))
 
-  (export-syntax cond cond/maybe-more))
+      )
+    )
+
+  (export-syntax cond))
 
 (provide "srfi-61")
