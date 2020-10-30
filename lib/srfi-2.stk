@@ -1,11 +1,11 @@
 ;;=============================================================================
 ;; This code implements SRFI-2 "AND-LET*: an AND with local bindings,
 ;; a guarded LET* special form" proposed by Oleg Kiselyov. This
-;; implementation is an adaptation of the one made by Oleg Kiselyov
-;; that can be found at "http://pobox.com/~oleg/ftp/Scheme/vland.scm".
+;; implementation is written by Marc Nieper-Wißkirchen, who has put it in
+;; the public domain.".
 ;;
 ;;    Creation date: 30-Aug-1999 14:43 (eg)
-;; Last file update:  4-May-2007 19:41 (eg)
+;; Last file update: 30-Oct-2020 07:21 (jpellegrini)
 ;;
 ;;=============================================================================
 
@@ -146,39 +146,27 @@
 
 ;; //FIXME: (select-module Scheme)
 
-
-(define-macro (and-let* claws . body)
-  (let* ((new-vars '()) (result (cons 'and '())) (growth-point result))
-
-    (define (andjoin! clause)
-      (let ((prev-point growth-point) (clause-cell (cons clause '())))
-        (set-cdr! growth-point clause-cell)
-        (set! growth-point clause-cell)))
-
-    (if (not (list? claws))
-      (error 'and-let* "bindings must be a list ~S" claws))
-    (for-each
-      (lambda (claw)
-        (cond
-          ((symbol? claw)	; BOUND-VARIABLE form
-            (andjoin! claw))
-          ((and (pair? claw) (null? (cdr claw))) ; (EXPRESSION) form
-            (andjoin! (car claw)))
-						; (VARIABLE EXPRESSION) form
-          ((and (pair? claw) (symbol? (car claw))
-		(pair? (cdr claw)) (null? (cddr claw)))
-            (let* ((var (car claw)) (var-cell (cons var '())))
-              (if (memq var new-vars)
-                (error 'and-let* "duplicate variable ~S in the bindings" var))
-              (set! new-vars (cons var new-vars))
-              (set-cdr! growth-point `((let (,claw) (and . ,var-cell))))
-              (set! growth-point var-cell)))
-          (else
-            (error 'and-let* "ill-formed binding ~S" claw))))
-      claws)
-    (if (not (null? body))
-      (andjoin! `(begin ,@body)))
-    result))
+(define-syntax and-let*
+  (syntax-rules ()
+    ((_ ())
+     #t)
+    ((and-let () form form* ...)
+     (begin form form* ...))
+    ((_ ((id expr)))
+     expr)
+    ((_ ((expr)))
+     expr)
+    ((_ (id))
+     id)
+    ((_ ((id expr) . claw*) . body)
+     (let ((id expr))
+       (and id (and-let* claw* . body))))
+    ((_ ((expr) . claw*) . body)
+     (and expr (and-let* claw* . body)))
+    ((_ (id . claw*) . body)
+     (and id (and-let* claw* . body)))
+    ((_ . _)
+     (syntax-error "ill-formed and-let* form"))))
 
 (export-syntax and-let*)
 (provide "srfi-2")
