@@ -64,6 +64,7 @@
    
    ;;; for STklos - macros will use these symbols, and will only
    ;;; be expanded outside the module
+   %test-approximate=
    %test-begin
    %test-on-test-begin
    %test-result-expected-value!
