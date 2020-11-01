@@ -713,7 +713,7 @@ procedure.]))
 ;; SRFI 190 -- Coroutine Generators
 (gen-loaded-srfi 190)
 
-;; SRFI 190 -- Coroutine Generators
+;; SRFI 193 -- Command Line
 (gen-embedded-srfi 193)
 
 ;; SRFI 195 -- Multiple-value boxes
