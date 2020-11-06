@@ -101,6 +101,7 @@
      (190 . "Coroutines Generators")
      (193 . "Command line")
      (195 . "Multiple-value boxes")
+     (196 . "Range Objects")
    ))
 
 (define (srfi n)
