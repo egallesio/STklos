@@ -78,6 +78,687 @@
                           (and-let* (x (y (- x 1)) ((positive? y))) (/ x y))))
 
 ;; ----------------------------------------------------------------------
+;;  SRFI 4 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 4 - Homogeneous numeric vector datatypes ...")
+
+;; Adapted from Guile. Some tests were commented out because they depend
+;; on array->list, or because they deviate from what the SRFI specifies.
+;; -- jpellegrini
+;;
+;; It is copyrighted in Guile as follows:
+;;
+;;;; Martin Grabmueller, 2001-06-26
+;;;;
+;;;; Copyright (C) 2001, 2006, 2010, 2011, 2013, 2014 Free Software Foundation, Inc.
+;;;; 
+;;;; This library is free software; you can redistribute it and/or
+;;;; modify it under the terms of the GNU Lesser General Public
+;;;; License as published by the Free Software Foundation; either
+;;;; version 3 of the License, or (at your option) any later version.
+;;;; 
+;;;; This library is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;;;; Lesser General Public License for more details.
+;;;; 
+;;;; You should have received a copy of the GNU Lesser General Public
+;;;; License along with this library; if not, write to the Free Software
+;;;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+(require "srfi-4")
+
+
+(test "u8vector? success"
+      #t
+      (u8vector? (u8vector)))
+
+(test "u8vector? failure"
+  #f
+  (u8vector? (s8vector)))
+
+(test "u8vector-length success 1"
+  0
+  (u8vector-length (u8vector)))
+
+(test "u8vector-length success 2"
+  1
+  (u8vector-length (u8vector 3)))
+
+(test "u8vector-length failure"
+  #f
+  (= (u8vector-length (u8vector 3)) 3))
+
+(test "u8vector-ref"
+  2
+  (u8vector-ref (u8vector 1 2 3) 1))
+
+(test "u8vector-set!/ref"
+  33
+  (let ((s (make-u8vector 10 0)))
+       (u8vector-set! s 4 33)
+       (u8vector-ref s 4)))
+
+(test "u8vector->list/list->u8vector"
+      #t
+      (equal?
+       (u8vector->list (list->u8vector '(1 2 3 4)))
+       (u8vector->list (u8vector 1 2 3 4))))
+
+;; (test "u8vector->list/array->list"
+;;       #t
+;;       (equal? (u8vector->list (u8vector 1 2 3 4))
+;; 	      (array->list (u8vector 1 2 3 4))))
+
+(test "make-u8vector"
+  #t
+  (equal? (list->u8vector '(7 7 7 7))
+          (make-u8vector 4 7)))
+
+(test "s8vector? success"
+  #t
+  (s8vector? (s8vector)))
+
+(test "s8vector? failure"
+  #f
+  (s8vector? (u8vector)))
+
+(test "s8vector-length success 1"
+      0
+      (s8vector-length (s8vector)))
+
+(test "s8vector-length success 2"
+      1
+      (s8vector-length (s8vector -3)))
+
+(test "s8vector-length failure"
+      #f
+      (= (s8vector-length (s8vector 3)) 3))
+
+(test "s8vector-ref"
+      2
+      (s8vector-ref (s8vector 1 2 3) 1))
+  
+(test "s8vector-set!/ref"
+      33
+      (let ((s (make-s8vector 10 0)))
+	(s8vector-set! s 4 33)
+	(s8vector-ref s 4)))
+
+(test "s8vector->list/list->s8vector"
+      #t
+      (equal? (s8vector->list (s8vector 1 2 3 4))
+	      (s8vector->list (list->s8vector '(1 2 3 4)))))
+
+;; (test "s8vector->list/array->list"
+;;       #t
+;;       (equal? (s8vector->list (s8vector 1 2 3 4))
+;; 	      (array->list (s8vector 1 2 3 4))))
+
+(test "make-s8vector"
+      #t
+      (equal? (list->s8vector '(7 7 7 7))
+              (make-s8vector 4 7)))
+
+
+(test "u16vector? success"
+      #t
+      (u16vector? (u16vector)))
+
+(test "u16vector? failure"
+      #f
+      (u16vector? (s16vector)))
+
+(test "u16vector-length success 1"
+      0
+      (u16vector-length (u16vector)))
+
+(test "u16vector-length success 2"
+      1
+      (u16vector-length (u16vector 3)))
+
+(test "u16vector-length failure"
+      #f
+      (= (u16vector-length (u16vector 3)) 3))
+
+(test "u16vector-ref"
+      2
+      (u16vector-ref (u16vector 1 2 3) 1))
+  
+(test "u16vector-set!/ref"
+      33
+      (let ((s (make-u16vector 10 0)))
+	(u16vector-set! s 4 33)
+	(u16vector-ref s 4)))
+
+(test "u16vector->list/list->u16vector"
+      #t
+      (equal? (u16vector->list (u16vector 1 2 3 4))
+	      (u16vector->list (list->u16vector '(1 2 3 4)))))
+
+;; (test "u16vector->list/array->list"
+;;       #t
+;;       (equal? (u16vector->list (u16vector 1 2 3 4))
+;; 	      (array->list (u16vector 1 2 3 4))))
+
+(test "make-u16vector"
+      #t
+      (equal? (list->u16vector '(7 7 7 7))
+              (make-u16vector 4 7)))
+
+
+(test "s16vector? success"
+      #t
+      (s16vector? (s16vector)))
+
+(test "s16vector? failure"
+      #f
+      (s16vector? (u16vector)))
+
+(test "s16vector-length success 1"
+      0
+      (s16vector-length (s16vector)))
+
+(test "s16vector-length success 2"
+      1
+      (s16vector-length (s16vector -3)))
+
+(test "s16vector-length failure"
+      #f
+      (= (s16vector-length (s16vector 3)) 3))
+
+(test "s16vector-ref"
+      2
+      (s16vector-ref (s16vector 1 2 3) 1))
+  
+(test "s16vector-set!/ref"
+      33
+      (let ((s (make-s16vector 10 0)))
+	(s16vector-set! s 4 33)
+	(s16vector-ref s 4)))
+
+
+(test "s16vector->list/list->s16vector"
+      #t
+      (equal? (s16vector->list (s16vector 1 2 3 4))
+	      (s16vector->list (list->s16vector '(1 2 3 4)))))
+
+;; (test "s16vector->list/array->list"
+;;       #t
+;;       (equal? (s16vector->list (s16vector 1 2 3 4))
+;; 	      (array->list (s16vector 1 2 3 4))))
+
+(test "make-s16vector"
+      #t
+      (equal? (list->s16vector '(7 7 7 7))
+              (make-s16vector 4 7)))
+
+
+(test "u32vector? success"
+      #t
+      (u32vector? (u32vector)))
+
+(test "u32vector? failure"
+      #f
+      (u32vector? (s32vector)))
+
+(test "u32vector-length success 1"
+      0
+      (u32vector-length (u32vector)))
+
+(test "u32vector-length success 2"
+      1
+      (u32vector-length (u32vector 3)))
+
+(test "u32vector-length failure"
+      #f
+      (= (u32vector-length (u32vector 3)) 3))
+
+(test "u32vector-ref"
+      2
+      (u32vector-ref (u32vector 1 2 3) 1))
+  
+(test "u32vector-set!/ref"
+      33
+      (let ((s (make-u32vector 10 0)))
+	(u32vector-set! s 4 33)
+	(u32vector-ref s 4)))
+
+(test "u32vector->list/list->u32vector"
+      #t
+      (equal? (u32vector->list (u32vector 1 2 3 4))
+	      (u32vector->list (list->u32vector '(1 2 3 4)))))
+
+;; (test "u32vector->list/array->list"
+;;       #t
+;;       (equal? (u32vector->list (u32vector 1 2 3 4))
+;; 	      (array->list (u32vector 1 2 3 4))))
+
+(test "make-u32vector"
+      #t
+      (equal? (list->u32vector '(7 7 7 7))
+              (make-u32vector 4 7)))
+
+
+(test "s32vector? success"
+      #t
+      (s32vector? (s32vector)))
+
+(test "s32vector? failure"
+      #f
+      (s32vector? (u32vector)))
+
+(test "s32vector-length success 1"
+      0
+      (s32vector-length (s32vector)))
+
+(test "s32vector-length success 2"
+      1
+      (s32vector-length (s32vector -3)))
+
+(test "s32vector-length failure"
+      #f
+      (= (s32vector-length (s32vector 3)) 3))
+
+
+(test "s32vector-ref"
+      2
+      (s32vector-ref (s32vector 1 2 3) 1))
+  
+(test "s32vector-set!/ref"
+      33
+      (let ((s (make-s32vector 10 0)))
+	(s32vector-set! s 4 33)
+	(s32vector-ref s 4)))
+
+(test "s32vector->list/list->s32vector"
+      #t
+      (equal? (s32vector->list (s32vector 1 2 3 4))
+	      (s32vector->list (list->s32vector '(1 2 3 4)))))
+
+;; (test "s32vector->list/array->list"
+;;       #t
+;;       (equal? (s32vector->list (s32vector 1 2 3 4))
+;; 	      (array->list (s32vector 1 2 3 4))))
+
+(test "make-s32vector"
+      #t
+      (equal? (list->s32vector '(7 7 7 7))
+              (make-s32vector 4 7)))
+
+
+(test "u64vector? success"
+      #t
+      (u64vector? (u64vector)))
+
+(test "u64vector? failure"
+      #f
+      (u64vector? (s64vector)))
+
+(test "u64vector-length success 1"
+      0
+      (u64vector-length (u64vector)))
+
+(test "u64vector-length success 2"
+      1
+      (u64vector-length (u64vector 3)))
+
+(test "u64vector-length failure"
+      #f
+      (= (u64vector-length (u64vector 3)) 3))
+
+(test "u64vector-ref"
+      2
+      (u64vector-ref (u64vector 1 2 3) 1))
+  
+(test "u64vector-set!/ref"
+      33
+      (let ((s (make-u64vector 10 0)))
+	(u64vector-set! s 4 33)
+	(u64vector-ref s 4)))
+
+(test "u64vector->list/list->u64vector"
+      #t
+      (equal? (u64vector->list (u64vector 1 2 3 4))
+	      (u64vector->list (list->u64vector '(1 2 3 4)))))
+
+;; (test "u64vector->list/array->list"
+;;       #t
+;;       (equal? (u64vector->list (u64vector 1 2 3 4))
+;; 	      (array->list (u64vector 1 2 3 4))))
+
+(test "make-u64vector"
+      #t
+      (equal? (list->u64vector '(7 7 7 7))
+              (make-u64vector 4 7)))
+
+
+
+(test "s64vector? success"
+      #t
+      (s64vector? (s64vector)))
+
+(test "s64vector? failure"
+      #f
+      (s64vector? (u64vector)))
+
+(test "s64vector-length success 1"
+      0
+      (s64vector-length (s64vector)))
+
+(test "s64vector-length success 2"
+      1
+      (s64vector-length (s64vector -3)))
+
+(test "s64vector-length failure"
+      #f
+      (= (s64vector-length (s64vector 3)) 3))
+
+(test "s64vector-ref"
+      2
+      (s64vector-ref (s64vector 1 2 3) 1))
+  
+(test "s64vector-set!/ref"
+      33
+      (let ((s (make-s64vector 10 0)))
+	(s64vector-set! s 4 33)
+	(s64vector-ref s 4)))
+
+(test "s64vector->list/list->s64vector"
+      #t
+      (equal? (s64vector->list (s64vector 1 2 3 4))
+	      (s64vector->list (list->s64vector '(1 2 3 4)))))
+
+;; (test "s64vector->list/array->list"
+;;       #t
+;;       (equal? (s64vector->list (s64vector 1 2 3 4))
+;; 	      (array->list (s64vector 1 2 3 4))))
+
+(test "make-s64vector"
+      #t
+      (equal? (list->s64vector '(7 7 7 7))
+              (make-s64vector 4 7)))
+
+(test "f32vector? success"
+      #t
+      (f32vector? (f32vector)))
+
+(test "f32vector? failure"
+      #f
+      (f32vector? (s8vector)))
+
+(test "f32vector-length success 1"
+      0
+      (f32vector-length (f32vector)))
+
+(test "f32vector-length success 2"
+      1
+      (f32vector-length (f32vector -3.0)))
+
+(test "f32vector-length failure"
+      #f
+      (= (f32vector-length (f32vector 3.0)) 3))
+
+(test "f32vector-ref"
+      2.0
+      (f32vector-ref (f32vector 1.0 2.0 3.0) 1))
+  
+(test "f32vector-set!/ref"
+      33.0
+      (let ((s (make-f32vector 10 0.0)))
+	(f32vector-set! s 4 33.0)
+	(f32vector-ref s 4)))
+
+(test "f32vector->list/list->f32vector"
+      #t
+      (equal? (f32vector->list (f32vector 1.0 2.0 3.0 4.0))
+	      (f32vector->list (list->f32vector '(1.0 2.0 3.0 4.0)))))
+
+;; (test "f32vector->list/array->list"
+;;       #t
+;;       (equal? (f32vector->list (f32vector 1 2 3 4))
+;; 	      (array->list (f32vector 1 2 3 4))))
+
+(test "make-f32vector"
+      #t
+      (equal? (list->f32vector '(7.0 7.0 7.0 7.0))
+              (make-f32vector 4 7.0)))
+
+(test "+inf.0, -inf.0, +nan.0 in f32vector"
+      #t
+      (f32vector? #f32(+inf.0 -inf.0 +nan.0)))
+
+
+(test "f64vector? success"
+      #t
+      (f64vector? (f64vector)))
+
+(test "f64vector? failure"
+      #f
+      (f64vector? (f32vector)))
+
+(test "f64vector-length success 1"
+      0
+      (f64vector-length (f64vector)))
+
+(test "f64vector-length success 2"
+      1
+      (f64vector-length (f64vector -3.0)))
+
+(test "f64vector-length failure"
+      #f
+      (= (f64vector-length (f64vector 3.0)) 3))
+
+(test "f64vector-ref"
+      2.0
+      (f64vector-ref (f64vector 1.0 2.0 3.0) 1))
+  
+(test "f64vector-set!/ref"
+      33.0
+      (let ((s (make-f64vector 10 0.0)))
+	(f64vector-set! s 4 33.0)
+	(f64vector-ref s 4)))
+
+(test "f64vector->list/list->f64vector"
+      #t
+      (equal? (f64vector->list (f64vector 1.0 2.0 3.0 4.0))
+	      (f64vector->list (list->f64vector '(1.0 2.0 3.0 4.0)))))
+
+;; (test "f64vector->list/array->list"
+;;       #t
+;;       (equal? (f64vector->list (f64vector 1 2 3 4))
+;; 	      (array->list (f64vector 1 2 3 4))))
+
+(test "make-f64vector"
+      #t
+      (equal? (list->f64vector '(7.0 7.0 7.0 7.0))
+              (make-f64vector 4 7.0)))
+
+(test "+inf.0, -inf.0, +nan.0 in f64vector"
+      #t
+      (f64vector? #f64(+inf.0 -inf.0 +nan.0)))
+
+
+;; COMMENTED OUT
+;; The SRFI does not mention complex vectors.
+
+
+;; (test "c32vector? success"
+;;       #t
+;;       (c32vector? (c32vector)))
+
+;; (test "c32vector? failure"
+;;       #f
+;;       (c32vector? (s8vector)))
+
+;; (test "c32vector-length success 1"
+;;       0
+;;       (c32vector-length (c32vector)))
+
+;; (test "c32vector-length success 2"
+;;       1
+;;       (c32vector-length (c32vector -3-2i)))
+
+;; (test "c32vector-length failure"
+;;       #f
+;;       (= (c32vector-length (c32vector 3)) 3))
+
+;; (test "c32vector-ref"
+;;       2+13i
+;;       (c32vector-ref (c32vector 1 2+13i 3) 1))
+  
+;; (test "c32vector-set!/ref"
+;;       33-1i
+;;       (let ((s (make-c32vector 10 0)))
+;; 	(c32vector-set! s 4 33-1i)
+;; 	(c32vector-ref s 4)))
+
+;; (test "c32vector->list/list->c32vector"
+;;       #t
+;;       (equal? (c32vector->list (c32vector 1 2 3 4))
+;; 	      (c32vector->list (list->c32vector '(1 2 3 4)))))
+
+;; (test "c32vector->list/array->list"
+;;       #t
+;;       (equal? (c32vector->list (c32vector 1 2 3 4))
+;; 	      (array->list (c32vector 1 2 3 4))))
+
+;; (test "make-c32vector"
+;;       #t
+;;       (equal? (list->c32vector '(7 7 7 7))
+;;               (make-c32vector 4 7)))
+
+;; (test "+inf.0, -inf.0, +nan.0 in c32vector"
+;;       #t
+;;       (c32vector? #c32(+inf.0 -inf.0 +nan.0)))
+
+;; (test "array-ref"
+;;       #t
+;;       (let ((v (c32vector 1+1i)))
+;;         (= (c32vector-ref v 0)
+;;            (array-ref v 0))))
+
+;; (test "array-set!"
+;;       #t
+;;       (let ((x 1+1i)
+;;             (v (c32vector 0)))
+;;         (array-set! v x 0)
+;;         (= x (array-ref v 0))))
+
+;; (test/error "array-ref, out-of-range"
+;;             (array-ref (c32vector 1.0) 1))
+
+;; (test/error "array-set!, out-of-range"
+;;             (array-set! (c32vector 1.0) 2.0 1))
+
+
+
+;; (test "c64vector? success"
+;;       #t
+;;       (c64vector? (c64vector)))
+
+;; (test "c64vector? failure"
+;;       #f
+;;       (c64vector? (s8vector)))
+
+;; (test "c64vector-length success 1"
+;;       0
+;;       (c64vector-length (c64vector)))
+
+;; (test "c64vector-length success 2"
+;;       1
+;;       (c64vector-length (c64vector -3-2i)))
+
+;; (test "c64vector-length failure"
+;;       #f
+;;       (= (c64vector-length (c64vector 3)) 3))
+
+;; (test "c64vector-ref"
+;;       2+3i
+;;     (c64vector-ref (c64vector 1+2i 2+3i 3) 1))
+  
+;; (test "c64vector-set!/ref"
+;;       33+1i
+;;       (let ((s (make-c64vector 10 0)))
+;; 	(c64vector-set! s 4 33+1i)
+;; 	(c64vector-ref s 4)))
+
+;; (test "c64vector->list/list->c64vector"
+;;       #t
+;;       (equal? (c64vector->list (c64vector 1 2 3 4))
+;; 	      (c64vector->list (list->c64vector '(1 2 3 4)))))
+
+;; (test "c64vector->list/array->list"
+;;       #t
+;;       (equal? (c64vector->list (c64vector 1 2 3 4))
+;; 	      (array->list (c64vector 1 2 3 4))))
+
+;; (test "make-c64vector"
+;;       #t
+;;       (equal? (list->c64vector '(7 7 7 7))
+;;               (make-c64vector 4 7)))
+
+;; (test "+inf.0, -inf.0, +nan.0 in c64vector"
+;;       #t
+;;       (c64vector? #c64(+inf.0 -inf.0 +nan.0)))
+
+;; (test "array-ref"
+;;       #t
+;;       (let ((v (c64vector 1+1i)))
+;;         (= (c64vector-ref v 0)
+;;            (array-ref v 0))))
+
+;; (test "array-set!"
+;;       #t
+;;       (let ((x 1+1i)
+;;             (v (c64vector 0)))
+;;         (array-set! v x 0)
+;;         (= x (array-ref v 0))))
+
+;; (test/error "array-ref, out-of-range"
+;;             (array-ref (c64vector 1.0) 1))
+
+;; (test/error "array-set!, out-of-range"
+;;     (array-set! (c64vector 1.0) 2.0 1))
+
+
+;; COMMENTED OUT
+;; This is a Guile deviation from the SRFI, which states
+;; that the TAVvector and TAGvalue must be of the same
+;; type.
+
+;; (test "u32vector-length of u16vector"
+;;       2
+;;       (u32vector-length (make-u16vector 4)))
+      
+
+;; (test "u32vector-length of u8vector"
+;;       2
+;;       (u32vector-length (make-u8vector 8)))
+
+;; (test "u8vector-length of u16vector"
+;;       4
+;;       (u8vector-length (make-u16vector 2)))
+
+;; (test "u8vector-length of u32vector"
+;;       8
+;;       (u8vector-length (make-u32vector 2)))
+
+;; (test "u32vector-set! of u16vector"
+;;       #t
+;;       (let ((v (make-u16vector 4 #xFFFF)))
+;;         (u32vector-set! v 1 0)
+;;         (equal? v #u16(#xFFFF #xFFFF 0 0))))
+
+;; (test "u16vector-set! of u32vector"
+;;       #t
+;;       (let ((v (make-u32vector 2 #xFFFFFFFF)))
+;;         (u16vector-set! v 2 0)
+;;         (u16vector-set! v 3 0)
+;;         (equal? v #u32(#xFFFFFFFF 0))))
+
+
+;; ----------------------------------------------------------------------
 ;;  SRFI 5 ...
 ;; ----------------------------------------------------------------------
 (test-subsection "SRFI 5 - A compatible let form ...")
