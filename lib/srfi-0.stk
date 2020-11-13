@@ -258,7 +258,7 @@
     srfi-193                            ; Command line
     ;; srfi-194                         ; Random data generators
     srfi-195                            ; Multiple-value boxes
-    ;; srfi-196                         ; Range Objects
+    (srfi-196 "srfi-196")               ; Range Objects
     ;; srfi-197                         ; Pipeline Operators
     ;; srfi-198                         ; ....... withdrawn
     ;; srfi-199                         ; ....... withdrawn

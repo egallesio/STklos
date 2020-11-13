@@ -719,5 +719,8 @@ procedure.]))
 ;; SRFI 195 -- Multiple-value boxes
 (gen-embedded-srfi 195)
 
+;; SRFI 196 -- Range Objects
+(gen-loaded-srfi 196)
+
 ;; End of chapter
 )
