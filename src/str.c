@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  1-Aug-2020 10:15 (eg)
+ * Last file update: 13-Nov-2020 12:34 (eg)
  */
 
 #include <ctype.h>
@@ -1099,18 +1099,21 @@ DEFINE_PRIMITIVE("string-find?", string_find, subr2, (SCM s1, SCM s2))
 }
 
 /*
-<doc EXT string-index
- * (string-index str1 str2)
+<doc EXT string-index string-position
+ * (string-position str1 str2)
  *
  * Returns the (first) index where |str1| is a substring of |str2| if it exists;
  * otherwise returns |#f|.
  * @lisp
- * (string-index "ca" "abracadabra") =>  4
- * (string-index "ba" "abracadabra") =>  #f
+ * (string-position "ca" "abracadabra") =>  4
+ * (string-position "ba" "abracadabra") =>  #f
  * @end lisp
+ * 
+ * ,(bold "Note") This function was also called |string-index|. This name is deprecated
+ * since it conficts with the |string-index| defined in SRFI-13.
 doc>
 */
-DEFINE_PRIMITIVE("string-index", string_index, subr2, (SCM s1, SCM s2))
+DEFINE_PRIMITIVE("string-position", string_position, subr2, (SCM s1, SCM s2))
 {
   int pos;
 
@@ -1605,7 +1608,7 @@ int STk_init_string(void)
   ADD_PRIMITIVE(string_fill);
 
   ADD_PRIMITIVE(string_find);
-  ADD_PRIMITIVE(string_index);
+  ADD_PRIMITIVE(string_position);
   ADD_PRIMITIVE(string_split);
   ADD_PRIMITIVE(string_mutable);
   ADD_PRIMITIVE(string_downcase);

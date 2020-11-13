@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update: 16-Sep-2020 10:11 (eg)
+;;;; Last file update: 13-Nov-2020 12:14 (eg)
 ;;;;
 
 
@@ -91,5 +91,8 @@
 (define make-constant-box constant-box)
 (define box-set! set-box!)
 
-;; 
+;; 13-Sep-2020(v1.50)
+(define string-index string-position) ; a different string-index is defined in SRFI-13
+
+;;
 (define argv command-args)
