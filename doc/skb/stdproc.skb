@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 16-Sep-2020 11:52 (eg)
+;; Last file update: 13-Nov-2020 12:33 (eg)
 ;;
 ;; ======================================================================
 
@@ -333,7 +333,7 @@ legibility.])))
 (insertdoc 'string-copy)
 (insertdoc 'string-copy!)
 (insertdoc 'string-split)
-(insertdoc 'string-index)
+(insertdoc 'string-position)
 (insertdoc 'string-find?)
 (insertdoc 'string-fill!)
 (insertdoc 'string-blit!)

@@ -17,7 +17,7 @@ STklos Reference Manual<hr align="center" width="10%">6. Pattern Matching</div>
 <td align="left" valign="top" width="20%" bgcolor="#204875">
 <table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-52643">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-52766">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -25,7 +25,7 @@ STklos Reference Manual<hr align="center" width="10%">6. Pattern Matching</div>
 <tr class="navnorm"><td width="8%" align="left" valign="top">5&nbsp;</td><td align="left"><a href="stklos-ref-5.html#Regular-Expressions">Regular Expressions</a></td></tr>
 <tr class="navsel"><td width="8%" align="left" valign="top">6&nbsp;</td><td align="left"><a href="stklos-ref-6.html#Pattern-Matching">Pattern Matching</a><br /><table cellspacing="1" cellpadding="1" width="100%">
 <tbody>
- <tr><td valign="top" align="left">6.1</td><td colspan="4" width="100%"><a href="stklos-ref-6.html#-section-44287"><span style="font-variant: small-caps">STklos</span> Pattern Matching Facilities</td></tr>
+ <tr><td valign="top" align="left">6.1</td><td colspan="4" width="100%"><a href="stklos-ref-6.html#-section-44379"><span style="font-variant: small-caps">STklos</span> Pattern Matching Facilities</td></tr>
  <tr><td valign="top" align="left">6.2</td><td colspan="4" width="100%"><a href="stklos-ref-6.html#The-Pattern-Language">The Pattern Language</td></tr>
 </tbody>
 </table>
@@ -48,7 +48,7 @@ languages since it allows clean and secure code to be
 written. Internally, "pattern-matching forms" should be translated
 (compiled) into cascades of "elementary tests" where code is made as
 efficient as possible, avoiding redundant tests; <span style="font-variant: small-caps">STklos</span>
-"pattern matching compiler" provides this <a href="#fn--footnote-44109"><sup><small>1</small></sup></a>.</p><p>The technique used is described in details in
+"pattern matching compiler" provides this <a href="#fn--footnote-44201"><sup><small>1</small></sup></a>.</p><p>The technique used is described in details in
 [<a href="stklos-ref-16.html#Queinnec-Geffroy92">5</a>], and the code generated can be
 considered optimal</p><p>The "pattern language" allows the expression of a wide variety
 of patterns, including:</p><ul><li>Non-linear patterns: pattern variables can appear more than
@@ -57,12 +57,12 @@ once, allowing comparison of subparts of the datum (through <a href="stklos-ref-
 datum is a list of zero or more <code>a</code>s followed by zero or more
 <code>b</code>s.</li>
 <li>Pattern matching on lists as well as on vectors.</li>
-</ul><div class="sectiondiv"><div class="sectiontitle"><a name="-section-44287"></a>
+</ul><div class="sectiondiv"><div class="sectiontitle"><a name="-section-44379"></a>
 <h3>6.1 <span style="font-variant: small-caps">STklos</span> Pattern Matching Facilities</h3>
 </div>
 <div class="sectionbody"><p>Only two special forms are provided for this in <span style="font-variant: small-caps">STklos</span>: <code>match-case</code>
 and <code>match-lambda</code>.</p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="match-case"></a><a name="--index-entry-44132"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="match-case"></a><a name="--index-entry-44224"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(match-case &lt;key&gt; &lt;clause&gt; ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />The argument key may be any expression and each clause has the form
@@ -97,7 +97,7 @@ The equality predicate used for tests is <code>eq?</code>.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="match-lambda"></a><a name="--index-entry-44243"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="match-lambda"></a><a name="--index-entry-44335"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(match-lambda &lt;clause&gt; ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br /><code>match-lambda</code> expands into a lambda-expression expecting an argument
@@ -114,7 +114,7 @@ which, once applied to an expression, behaves exactly like a
 </tbody></table></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="The-Pattern-Language"></a>
 <h3 id="The-Pattern-Language">6.2 The Pattern Language</h3>
 </div>
-<div class="sectionbody"><a name="--index-entry-44290"></a><p>The syntax for <code>&lt;pattern&gt;</code> is:</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
+<div class="sectionbody"><a name="--index-entry-44382"></a><p>The syntax for <code>&lt;pattern&gt;</code> is:</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
 <tr><td bgcolor="ivory"><pre>&lt;pattern&gt; ==&gt;                <em>Matches:</em>
 
   &lt;atom&gt;                    <em>the &lt;atom&gt;.</em>
@@ -169,7 +169,7 @@ patterns, whereas <code>#(a ???-)</code> is valid and matches any
 vector whose first element is the atom <code>a</code>.</p></div></div></div></div></div><div class='footnotes'>
 <hr>
 <b>Note:</b><br>
-<a name="fn--footnote-44109"><sup><small>1</small></sup></a>: The "pattern matching compiler" has been written by Jean-Marie Geffroy
+<a name="fn--footnote-44201"><sup><small>1</small></sup></a>: The "pattern matching compiler" has been written by Jean-Marie Geffroy
   and is part of the Manuel Serrano's Bigloo compiler [<a href="stklos-ref-16.html#Bigloo-home">1</a>]
   since several years. The code (and documentation) included in <span style="font-variant: small-caps">STklos</span>
   has been stolen from the Bigloo package v2.4 (the only difference
@@ -178,6 +178,6 @@ vector whose first element is the atom <code>a</code>.</p></div></div></div></di
 <br>
 </div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Sat Oct 10 13:50:35 2020</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Fri Nov 13 13:53:44 2020</em></small>
 </body>
 </html>

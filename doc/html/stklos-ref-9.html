@@ -17,7 +17,7 @@ STklos Reference Manual<hr align="center" width="10%">9. Threads, Mutexes and Co
 <td align="left" valign="top" width="20%" bgcolor="#204875">
 <table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-52643">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-52766">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -45,7 +45,7 @@ STklos Reference Manual<hr align="center" width="10%">9. Threads, Mutexes and Co
 </tbody></table>
 </td>
 <td align="left" valign="top">
-<div class="chapterbody"><a name="--index-entry-47444"></a><a name="--index-entry-47448"></a><a name="--index-entry-47452"></a><a name="--index-entry-47456"></a><p>The thread system provides the following data types:<ul><li> Thread (a virtual processor which shares object
+<div class="chapterbody"><a name="--index-entry-47536"></a><a name="--index-entry-47540"></a><a name="--index-entry-47544"></a><a name="--index-entry-47548"></a><p>The thread system provides the following data types:<ul><li> Thread (a virtual processor which shares object
 			space with all other threads)</li>
 <li>Mutex (a mutual exclusion device,
 		      also known as a lock and binary semaphore)</li>
@@ -57,7 +57,7 @@ description</p><div class="sectiondiv"><div class="sectiontitle"><a name="Thread
 <h3 id="Threads">9.1 Threads</h3>
 </div>
 <div class="sectionbody"><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-thread"></a><a name="--index-entry-47473"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-thread"></a><a name="--index-entry-47565"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(make-thread thunk)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(make-thread thunk name)</font></strong></code><br /><code><strong><font color="IndianRed">(make-thread thunk name stack-size)</font></strong></code><br /><br />Returns a new thread. This thread is not automatically made runnable
@@ -81,7 +81,7 @@ of the handler, abandon all mutexes it owns, and finally terminate.
 the size (in words) reserved for the thread. This option does not exist
 in <a  class="http" href="http://srfi.schemers.org/srfi-18/srfi-18.html">SRFI-18</a>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="current-thread"></a><a name="--index-entry-47523"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="current-thread"></a><a name="--index-entry-47615"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(current-thread)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /> Returns the current thread.
@@ -91,7 +91,7 @@ in <a  class="http" href="http://srfi.schemers.org/srfi-18/srfi-18.html">SRFI-18
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="thread-start-"></a><a name="--index-entry-47555"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="thread-start-"></a><a name="--index-entry-47647"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(thread-start! thread)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Makes <code>thread</code> runnable. The <code>thread</code> must be a new thread.
@@ -106,13 +106,13 @@ in <a  class="http" href="http://srfi.schemers.org/srfi-18/srfi-18.html">SRFI-18
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="thread-yield-"></a><a name="--index-entry-47608"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="thread-yield-"></a><a name="--index-entry-47700"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(thread-yield!)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />The current thread exits the running state as if its quantum had
 expired. <code>Thread-yield!</code> returns an unspecified value.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="thread-terminate-"></a><a name="--index-entry-47632"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="thread-terminate-"></a><a name="--index-entry-47724"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(thread-terminate! thread)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Causes an abnormal termination of the <code>thread</code>. If the <code>thread</code> is not
@@ -135,14 +135,14 @@ unlocked/abandoned.
 On <em>Android</em>, <code>thread-terminate!</code> can be used only to terminate the
 current thread.  Trying to kill another thread produces an error.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="thread-sleep-"></a><a name="--index-entry-47707"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="thread-sleep-"></a><a name="--index-entry-47799"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(thread-sleep! timeout)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />The current thread waits until the <code>timeout</code> is reached. This blocks the
 thread only if timeout represents a point in the future. It is an error
 for timeout to be <code>#f</code>. <code>Thread-sleep!</code> returns an unspecified value.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="thread-join-"></a><a name="--index-entry-47741"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="thread-join-"></a><a name="--index-entry-47833"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(thread-join! thread)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(thread-join! thread timeout)</font></strong></code><br /><code><strong><font color="IndianRed">(thread-join! thread timeout timeout-val)</font></strong></code><br /><br />The current thread waits until the <code>thread</code> terminates (normally or not)
@@ -161,7 +161,7 @@ is raised.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="thread-"></a><a name="--index-entry-47811"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="thread-"></a><a name="--index-entry-47903"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(thread? obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>obj</code> is a thread, otherwise returns <code>#f</code>.
@@ -172,7 +172,7 @@ is raised.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="thread-name"></a><a name="--index-entry-47864"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="thread-name"></a><a name="--index-entry-47956"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(thread-name thread)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the name of the <code>thread</code>.
@@ -182,18 +182,18 @@ is raised.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="thread-stack-size"></a><a name="--index-entry-47902"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="thread-stack-size"></a><a name="--index-entry-47994"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(thread-stack-size thread)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the allocated stack size for <code>thread</code>.
 Note that this procedure is not present in <a  class="http" href="http://srfi.schemers.org/srfi-18/srfi-18.html">SRFI-18</a>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="thread-specific"></a><a name="--index-entry-47931"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="thread-specific"></a><a name="--index-entry-48023"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(thread-specific thread)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the content of the <code>thread</code>'s specific field.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="thread-specific-set-"></a><a name="--index-entry-47955"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="thread-specific-set-"></a><a name="--index-entry-48047"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(thread-specific-set! thread)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Stores <code>obj</code> into the <code>thread</code>'s specific field. <code>Thread-specific-set!</code>
@@ -210,7 +210,7 @@ returns an unspecified value.
 <h3 id="Mutexes">9.2 Mutexes</h3>
 </div>
 <div class="sectionbody"><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-mutex"></a><a name="--index-entry-48015"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-mutex"></a><a name="--index-entry-48107"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(make-mutex)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(make-mutex name)</font></strong></code><br /><br /> Returns a new mutex in the unlocked/not-abandoned state. The optional <code>name</code>
@@ -218,12 +218,12 @@ is an arbitrary Scheme object which identifies the mutex
 (useful for debugging); it defaults to an unspecified value.
 The mutex's specific field is set to an unspecified value.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="mutex-"></a><a name="--index-entry-48043"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="mutex-"></a><a name="--index-entry-48135"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(mutex? obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if obj is a mutex, otherwise returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="mutex-name"></a><a name="--index-entry-48072"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="mutex-name"></a><a name="--index-entry-48164"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(mutex-name mutex)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the name of the <code>mutex</code>.
@@ -233,12 +233,12 @@ The mutex's specific field is set to an unspecified value.</td></tr>
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="mutex-specific"></a><a name="--index-entry-48109"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="mutex-specific"></a><a name="--index-entry-48201"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(mutex-specific mutex)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the content of the <code>mutex</code>'s specific field.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="mutex-specific-set-"></a><a name="--index-entry-48133"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="mutex-specific-set-"></a><a name="--index-entry-48225"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(mutex-specific! mutex obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Stores <code>obj</code> into the <code>mutex</code>'s specific field and eturns an unspecified value.
@@ -264,7 +264,7 @@ The mutex's specific field is set to an unspecified value.</td></tr>
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="mutex-state"></a><a name="--index-entry-48206"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="mutex-state"></a><a name="--index-entry-48298"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(mutex-state mutex)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns information about the state of the <code>mutex</code>. The possible results
@@ -291,7 +291,7 @@ are:
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="mutex-lock-"></a><a name="--index-entry-48286"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="mutex-lock-"></a><a name="--index-entry-48378"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(mutex-lock! mutex)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(mutex-lock! mutex timeout)</font></strong></code><br /><code><strong><font color="IndianRed">(mutex-lock! mutex timeout thread)</font></strong></code><br /><br />If the <code>mutex</code> is currently locked, the current thread waits until the
@@ -319,7 +319,7 @@ otherwise <code>mutex-lock!</code> returns <code>#t</code>.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="mutex-unlock-"></a><a name="--index-entry-48396"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="mutex-unlock-"></a><a name="--index-entry-48488"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(mutex-unlock! mutex)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(mutex-unlock! mutex condition-variable)</font></strong></code><br /><code><strong><font color="IndianRed">(mutex-unlock! mutex condition-variable timeout)</font></strong></code><br /><br />Unlocks the <code>mutex</code> by making it unlocked/not-abandoned. It is not an error
@@ -337,7 +337,7 @@ and the thread is unblocked. <code>mutex-unlock!</code> returns <code>#f</code> 
 <h3 id="Condition-Variables">9.3 Condition Variables</h3>
 </div>
 <div class="sectionbody"><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="make-condition-variable"></a><a name="--index-entry-48481"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="make-condition-variable"></a><a name="--index-entry-48573"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(make-conditon-variable)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(make-conditon-variable name)</font></strong></code><br /><br />Returns a new empty condition variable. The optional <code>name</code> is an arbitrary
@@ -345,34 +345,34 @@ Scheme object which identifies the condition variable (useful for debugging);
 it defaults to an unspecified value. The condition variable's specific
 field is set to an unspecified value.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="condition-variable-"></a><a name="--index-entry-48509"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="condition-variable-"></a><a name="--index-entry-48601"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(conditon-variable? obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns <code>#t</code> if <code>obj</code> is a condition variable, otherwise returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="condition-variable-name"></a><a name="--index-entry-48543"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="condition-variable-name"></a><a name="--index-entry-48635"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(conditon-variable-name conditon-variable)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />eturns the name of the <code>condition-variable</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="condition-variable-specific"></a><a name="--index-entry-48567"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="condition-variable-specific"></a><a name="--index-entry-48659"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(conditon-variable-specific conditon-variable)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the content of the <code>condition-variable</code>'s specific field.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="condition-variable-specific-set-"></a><a name="--index-entry-48591"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="condition-variable-specific-set-"></a><a name="--index-entry-48683"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(conditon-variable-specific-set! conditon-variable obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Stores <code>obj</code> into the <code>condition-variable</code>'s specific field.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="condition-variable-signal-"></a><a name="--index-entry-48620"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="condition-variable-signal-"></a><a name="--index-entry-48712"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(condition-variable-signal! condition-variable)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />If there are threads blocked on the <code>condition-variable</code>, the scheduler
 selects a thread and unblocks it. <code>Condition-variable-signal!</code>  returns
 an unspecified value.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="condition-variable-broadcast-"></a><a name="--index-entry-48649"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="condition-variable-broadcast-"></a><a name="--index-entry-48741"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(condition-variable-broadcast! condition-variable)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Unblocks all the threads blocked on the <code>condition-variable</code>.
@@ -381,21 +381,21 @@ an unspecified value.</td></tr>
 <h3 id="Conditions">9.4 Conditions</h3>
 </div>
 <div class="sectionbody"><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="join-timeout-exception-"></a><a name="--index-entry-48681"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="join-timeout-exception-"></a><a name="--index-entry-48773"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(join-timeout-exception? obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns #t if <code>obj</code> is a &quot;join timeout exception&quot; object, otherwise returns #f.
 A join timeout exception is raised when thread-join! is called, the timeout
 is reached and no timeout-val is supplied.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="abandoned-mutex-exception-"></a><a name="--index-entry-48705"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="abandoned-mutex-exception-"></a><a name="--index-entry-48797"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(abandoned-mutex-exception? obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns #t if <code>obj</code> is an &quot;abandoned mutex exception&quot; object, otherwise returns
 #f. An abandoned mutex exception is raised when the current thread locks
 a mutex that was owned by a thread which terminated (see <code>mutex-lock!</code>).</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="terminated-thread-exception-"></a><a name="--index-entry-48734"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="terminated-thread-exception-"></a><a name="--index-entry-48826"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(terminated-thread-exception? obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns #t if <code>obj</code> is a &quot;terminated thread exception&quot; object, otherwise
@@ -403,7 +403,7 @@ returns #f. A terminated thread exception is raised when thread-join! is
 called and the target thread has terminated as a result of a call to
 <code>thread-terminate!</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="uncaught-exception-"></a><a name="--index-entry-48763"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="uncaught-exception-"></a><a name="--index-entry-48855"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(uncaught-exception? obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns #t if <code>obj</code> is an &quot;uncaught exception&quot; object, otherwise returns
@@ -411,13 +411,13 @@ called and the target thread has terminated as a result of a call to
 target thread has terminated because it raised an exception that called
 the initial exception handler of that thread.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="uncaught-exception-reason"></a><a name="--index-entry-48792"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="uncaught-exception-reason"></a><a name="--index-entry-48884"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(uncaught-exception-reason exc)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the object which was passed to the initial exception handler
 of that thread (exc must be an &quot;uncaught exception&quot; object).</td></tr>
 </tbody></table></div></div></div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Sat Oct 10 13:50:36 2020</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Fri Nov 13 13:53:45 2020</em></small>
 </body>
 </html>
