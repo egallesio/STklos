@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  3-Jul-2020 11:59 (eg)
+ * Last file update: 13-Nov-2020 11:14 (eg)
  */
 
 
@@ -3113,7 +3113,7 @@ int STk_init_number(void)
 #else
   plus_inf  = 1.0 / 0.0;
   minus_inf = -plus_inf;
-  STk_NaN   = plus_inf + minus_inf;
+  STk_NaN   = strtod("NAN", NULL);  
 #endif
 
   /* Force the LC_NUMERIC locale to "C", since Scheme definition
