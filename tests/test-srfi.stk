@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 13-Nov-2020 12:20 (eg)
+;;;; Last file update: 13-Nov-2020 20:02 (eg)
 ;;;;
 
 (require "test")
@@ -2392,6 +2392,8 @@
 ;; ----------------------------------------------------------------------
 
 (test-subsection "SRFI 48 - Intermediate Format strings")
+
+(require "srfi-48")
 
 (parameterize
     ((real-precision 6))
