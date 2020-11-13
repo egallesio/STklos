@@ -184,7 +184,8 @@
     ;; srfi-124                         ; Ephemerons
     ;; srfi-125                         ; Intermediate hash tables
     ;; srfi-126                         ; R6RS-based hashtables
-    ;; srfi-127                         ; Lazy Sequences
+    ((srfi-127 lazy-sequencesseq) "srfi-127")
+                                        ; Lazy Sequences
     ((srfi-128 comparators-reduced) "srfi-128")
                                         ; Comparators (reduced)
     ((srfi-129 titlecase) "srfi-129")   ; Titlecase procedures

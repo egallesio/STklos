@@ -80,6 +80,7 @@
      (112 . "Environment Inquiry")
      (113 . "Sets and Bags")
      (117 . "Queues based on lists")
+     (127 . "Lazy Sequences")
      (118 . "Simple adjustable-size strings ")
      (128 . "Comparators (reduced)")
      (129 . "Titlecase procedures")
