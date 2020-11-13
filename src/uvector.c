@@ -248,14 +248,14 @@ static void uvector_set(int _UNUSED(type), SCM v, long i, SCM value)
       break;
     case UVECT_S64:
       if (INTP(value) || BIGNUMP(value))
-        if (STk_numle2(MAKE_INT(0), value) && STk_numle2(value, u64_max)) {
+        if (STk_numle2(s64_min, value) && STk_numle2(value, s64_max)) {
           ((SCM *) UVECTOR_DATA(v))[i] = value;
           return;
         }
       break;
     case UVECT_U64:
       if (INTP(value) || BIGNUMP(value))
-        if (STk_numle2(s64_min, value) && STk_numle2(value, s64_max)) {
+        if (STk_numle2(MAKE_INT(0), value) && STk_numle2(value, u64_max)) {
           ((SCM *) UVECTOR_DATA(v))[i] = value;
           return;
         }
