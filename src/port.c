@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 12-Aug-2020 18:49 (eg)
+ * Last file update: 13-Nov-2020 09:52 (eg)
  *
  */
 
@@ -204,13 +204,13 @@ doc>
  */
 
 /* The 3 following C functions correspond to the R5RS primitives.
- * For compatibility reason, they are not renamed. 
+ * For compatibility reason, they are not renamed.
  */
 SCM STk_current_input_port(void) { return STk_get_current_vm()->iport; }
 SCM STk_current_output_port(void){ return STk_get_current_vm()->oport; }
 SCM STk_current_error_port(void) { return STk_get_current_vm()->eport; }
 
-/* The setters for the standard port (since current-xxx-port are parameters 
+/* The setters for the standard port (since current-xxx-port are parameters
  * in R7RS.
  */
 static SCM STk_set_current_input_port(SCM port)
@@ -890,7 +890,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
 
   /* Parse the format string */
   start_fmt = STRING_CHARS(fmt);
-  prev_char = '\n';
+  prev_char = ' ';
 
   for(p = start_fmt; *p; p++) {
     if (*p == '~') {
@@ -959,6 +959,8 @@ static SCM internal_format(int argc, SCM *argv, int error)
                       prev_char = '\n'; /* since our pp always add a newline */
                       continue;         /* because we set ourselves prev_char */
         }
+        case 'F':
+        case 'f':
         case '0': case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9': {
                   char width[FMT_SIZE], digits[FMT_SIZE];
@@ -971,6 +973,9 @@ static SCM internal_format(int argc, SCM *argv, int error)
                     if (i >= FMT_SIZE) goto Incorrect_format_width;
                     width[i] = *p++;
                   }
+                  if (!i)
+                    /* no size given <=> 1 */
+                    width[i++] = '1';
                   width[i] = '\0';
 
                   if (*p == ',') {
@@ -991,10 +996,12 @@ static SCM internal_format(int argc, SCM *argv, int error)
                                   STk_current_module(),
                                   &ref,
                                   TRUE);
+
                   tmp = STk_C_apply(ff, 3,
                                         *argv--,
                                         STk_Cstr2number(width, 10L),
-                                    STk_Cstr2number(digits, 10L));
+                                        STk_Cstr2number(digits, 10L));
+
                   if (STRINGP(tmp)) {
                     if (STRING_SIZE(tmp) > 0)
                       prev_char = STRING_CHARS(tmp)[STRING_SIZE(tmp) - 1];
@@ -1041,7 +1048,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
                   break;
         case '_': STk_putc(' ',port);
                   break;
-      case '&': if (prev_char == '\n') continue; /* FALLTHROUGH */
+        case '&': if (prev_char == '\n') continue; /* FALLTHROUGH */
         case '%': STk_putc('\n', port);
                   prev_char = '\n';
                   continue;
