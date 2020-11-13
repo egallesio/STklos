@@ -1,7 +1,7 @@
 ;;;;
-;;;; srfi-48.stk	-- Implementation of SRFI-48
+;;;; srfi-48.stk    -- Implementation of SRFI-48
 ;;;;
-;;;; Copyright © 2004 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2004-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 23-Apr-2004 21:19 (eg)
-;;;; Last file update: 26-May-2004 10:56 (eg)
+;;;; Last file update: 13-Nov-2020 12:07 (eg)
 ;;;;
 ;;;;
 ;;;; Most of the implementation is done in C. The part which are
@@ -61,97 +61,165 @@
 
 (define srfi48:help
   (let ((str "(format []  [...]) --  is #t, #f or an output-port
-OPTION	[MNEMONIC]	DESCRIPTION	-- Implementation Assumes ASCII Text
+OPTION  [MNEMONIC]  DESCRIPTION -- Implementation Assumes ASCII Text
                                            Encoding
-~H	[Help]		output this text
-~A	[Any]		(display arg) for humans
-~S	[Slashified]	(write arg) for parsers
-~W	[WriteCircular]	like ~s but outputs circular and recursive data
+~H  [Help]      output this text
+~A  [Any]       (display arg) for humans
+~S  [Slashified]    (write arg) for parsers
+~W  [WriteCircular] like ~s but outputs circular and recursive data
                         structures
-~~	[tilde]		output a tilde
-~T	[Tab]		output a tab character
-~%	[Newline]	output a newline character
-~&	[Freshline]	output a newline character if the previous output
+~~  [tilde]     output a tilde
+~T  [Tab]       output a tab character
+~%  [Newline]   output a newline character
+~&  [Freshline] output a newline character if the previous output
                         was not a newline
-~D	[Decimal]	the arg is a number which is output in decimal radix
-~X	[heXadecimal]	the arg is a number which is output in hexadecimal
+~D  [Decimal]   the arg is a number which is output in decimal radix
+~X  [heXadecimal]   the arg is a number which is output in hexadecimal
                         radix
-~O	[Octal]		the arg is a number which is output in octal radix
-~B	[Binary]	the arg is a number which is output in binary radix
-~w,dF	[Fixed]		the arg is a string or number which has width w and
+~O  [Octal]     the arg is a number which is output in octal radix
+~B  [Binary]    the arg is a number which is output in binary radix
+~w,dF   [Fixed]     the arg is a string or number which has width w and
                         d digits after the decimal
-~C	[Character]	character arg is output by write-char
-~_	[Space]		a single space character is output
-~Y	[Yuppify]	the list arg is pretty-printed to the output
-~?	[Indirection]	recursive format: next 2 args are format-string and
+~C  [Character] character arg is output by write-char
+~_  [Space]     a single space character is output
+~Y  [Yuppify]   the list arg is pretty-printed to the output
+~?  [Indirection]   recursive format: next 2 args are format-string and
                         list of arguments
-~K	[Indirection]	same as ~?\n"))
+~K  [Indirection]   same as ~?\n"))
     (lambda (port)
       (format port "~A" str))))
 
 
-(define (srfi48:format-fixed number-or-string width digits)
-  (define (string-grow str len)
-    (let ((off (- len (string-length str))))
+
+
+
+(define (srfi48:format-fixed number-or-string width digits) ; returns a string
+  ;; Following three procedures are used by format ~F .
+  ;; 'inexact-number->string' determines whether output is fixed-point
+  ;; notation or exponential notation. In the current definition,
+  ;; the notation depends on the implementation of 'number->string'.
+  ;; 'exact-number->string' is expected to output only numeric characters
+  ;; (not including such as '#', 'e', '.', '/') if the input is an positive
+  ;; integer or zero.
+  ;; 'real-number->string' is used when the digits of ~F is not specified.
+  (define (inexact-number->string x) (number->string (exact->inexact x)))
+  (define (exact-number->string x)   (number->string (inexact->exact x)))
+  (define (real-number->string x)    (number->string x))
+
+  (define (string-grow str len char)
+    (let ( (off (- len (string-length str))) )
       (if (positive? off)
-	  (string-append (make-string off #\space) str)
-	  str)))
+          (string-append (make-string off char) str)
+          str)))
 
-  (define (string-pad-right str len char)
-    (let ((slen (string-length str)))
-      (cond ((< slen len) (string-append str (make-string (- len slen) char)))
-	    ((> slen len) (substring str 0 len))
-	    (else         str))))
-
-  (define (round* n scale)
-    (let ((one (expt 10 scale)))
-      (/ (round (* n one)) one)))
-
+  (define (compose-with-digits digits pre-str frac-str exp-str)
+    (let ( (frac-len (string-length frac-str)) )
+      (cond
+       ((< frac-len digits) ;; grow frac part, pad with zeros
+        (string-append pre-str "."
+                       frac-str (make-string (- digits frac-len) #\0)
+                       exp-str)
+        )
+       ((= frac-len digits) ;; frac-part is exactly the right size
+        (string-append pre-str "."
+                       frac-str
+                       exp-str)
+        )
+       (else ;; must round to shrink it
+        (let* ( (minus-flag (and (> (string-length pre-str) 0)
+                                 (char=? (string-ref pre-str 0) #\-)))
+                (pre-str*   (if minus-flag
+                                (substring pre-str 1 (string-length pre-str))
+                                pre-str))
+                (first-part (substring frac-str 0 digits))
+                (last-part  (substring frac-str digits frac-len))
+                (temp-str
+                 (string-grow
+                  (exact-number->string
+                   (round (string->number
+                           (string-append pre-str* first-part "." last-part))))
+                  digits
+                  #\0))
+                (temp-len   (string-length temp-str))
+                (new-pre    (substring temp-str 0 (- temp-len digits)))
+                (new-frac   (substring temp-str (- temp-len digits) temp-len))
+                )
+          (string-append
+           (if minus-flag "-" "")
+           (if (string=? new-pre "")
+               ;; check if the system displays integer part of numbers
+               ;; whose absolute value is 0 < x < 1.
+               (if (and (string=? pre-str* "")
+                        (> digits 0)
+                        (not (= (string->number new-frac) 0)))
+                   "" "0")
+               new-pre)
+           "."
+           new-frac
+           exp-str)))
+       ) ) )
+         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (cond
-    ((string? number-or-string)
-       (string-grow number-or-string width))
-    ((number? number-or-string)
-        (let ((real (real-part number-or-string))
-	      (imag (imag-part number-or-string)))
-	  (cond
-	    ((not (zero? imag))
-	     (string-grow (string-append (srfi48:format-fixed real 0 digits)
-					 (if (negative? imag) "" "+")
-					 (srfi48:format-fixed imag 0 digits)
-					 "i")
-			  width))
- 	    (digits
- 	     (let* ((rounded-number (exact->inexact (round* real digits)))
-		    (rounded-string (number->string rounded-number))
-		    (dot-index      (string-index  "." rounded-string))
-		    (exp-index      (string-index  "e" rounded-string))
-		    (length         (string-length rounded-string))
-		    (pre-string     (cond
-				      (exp-index
-				         (substring rounded-string
-						    0
-						    (+ (or dot-index exp-index) 1)))
-				      (dot-index
-				         (substring rounded-string
-						    0
-						    (+ dot-index 1)))
-				      (else
-				         rounded-string)))
-		    (exp-string     (if exp-index
-					(substring rounded-string exp-index length)
-					""))
-		    (frac-string    (substring rounded-string
-					       (+ dot-index 1)
-					       (or exp-index length))))
+   ((string? number-or-string)
+    (string-grow number-or-string width #\space)
+    )
+   ((number? number-or-string)
+    (let ( (real (real-part number-or-string))
+           (imag (imag-part number-or-string))
+           )
+      (cond
+       ((not (zero? imag))
+        (string-grow
+         (string-append (srfi48:format-fixed real 0 digits)
+                        (if (negative? imag) "" "+")
+                        (srfi48:format-fixed imag 0 digits)
+                        "i")
+         width
+         #\space)
+        )
+       (digits
+        (let* ( (num-str   (inexact-number->string real))
+                (dot-index (string-position "." num-str))
+                (exp-index (string-position  "e" num-str ))
+                (length    (string-length num-str))
+                (pre-string
+                 (if dot-index
+                     (substring num-str 0 dot-index)
+                     (if exp-index
+                         (substring num-str 0 exp-index)
+                         num-str))
+                 )
+                (exp-string
+                 (if exp-index
+                     (substring num-str exp-index length)
+                     "")
+                 )
+                (frac-string
+                 (if dot-index
+                     (if exp-index
+                         (substring num-str (+ dot-index 1) exp-index)
+                         (substring num-str (+ dot-index 1) length))
+                     "")
+                 )
+                )
+          ;; check +inf.0, -inf.0, +nan.0, -nan.0
+          (if (string-position "n" num-str)
+              (string-grow num-str width #\space)
+              (string-grow
+               (compose-with-digits digits
+                                    pre-string
+                                    frac-string
+                                    exp-string)
+               width
+               #\space))
+          ))
+       (else ;; no digits
+        (string-grow (real-number->string real) width #\space)))
+      ))
+   (else
+    (error
+     (format "FORMAT: ~F requires a number or a string, got ~s" number-or-string)))
+   ))
 
-	       (string-grow (string-append pre-string
-					   (if dot-index "" ".")
-					   (string-pad-right frac-string digits #\0)
-					   exp-string)
-			    width)))
-	    (else ;; no digits
-	     (string-grow (number->string real) width)))))
-    (else (error 'format "~~F requires a number or a string, parameter was ~s"
-		 number-or-string))))
 
 (provide "srfi-48")
