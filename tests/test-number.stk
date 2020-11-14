@@ -140,17 +140,11 @@
 (test "rational reader.8" '(1/2 #t) (rational-test '+1/2))
 (test "rational reader.9" '(1/2 #t) (rational-test '751/1502))
 
-;; FIXME: string->number ne doit pas signaler une erreur ici
-;; (test "rational reader" '(1 #t)
-;;       (rational-test (string->number "3/03")))
-;; (test "rational reader" #f
-;;       (rational-test (string->number "3/0")))
-;; (test "rational reader" #f
-;;       (rational-test (string->number "3/3/4")))
-;; (test "rational reader" #f
-;;       (rational-test (string->number "1/2.")))
-;; (test "rational reader" #f
-;;       (rational-test (string->number "1.3/2")))
+(test "rational reader" '(1 #t) (rational-test (string->number "3/03")))
+(test/error "rational reader" (string->number "3/0"))
+(test/error "rational reader" '3/3/4)            
+(test/error "rational reader" (rational-test (string->number "1/2.")))
+(test/error "rational reader" (rational-test (string->number "1.3/2")))
 
 (test "rational reader w/#e" '(1234 #t)
       (rational-test '#e1234/1))
@@ -160,21 +154,13 @@
       (string->number "#e32/7"))
 (test "rational reader w/#e" -32/7
       (string->number "#e-32/7"))
-;; FIXME:
-;; (test "rational reader w/#i" '(1234.0 #f)
-;;       (rational-test '#i1234/1))
-;; (test "rational reader w/#i" '(-1234.0 #f)
-;;       (rational-test '#i-1234/1))
-;; (test "rational reader w/#i" '(-0.125 #f)
-;;       (rational-test '#i-4/32))
 
 (test "rational reader w/radix" '(15 #t)
       (rational-test '#e#xff/11))
 (test "rational reader w/radix" '(56 #t)
       (rational-test '#o770/11))
-;;FIXME:
-;;(test "rational reader w/radix" '(15.0 #f)
-;;      (rational-test '#x#iff/11))
+(test "rational reader w/radix" '(15.0 #f)
+      (rational-test '#x#iff/11))
 
 
 ;;------------------------------------------------------------------
@@ -263,6 +249,14 @@
 (test "padding (exactness)" '(120.0 #t) (flonum-test '#i12#))
 (test "padding (exactness)" '(120.0 #t) (flonum-test '#i12#.#))
 
+(test "flonum from ratio reader" '(0.4 #t)     (flonum-test '#i2/5))
+(test "flonum from ratio reader" '(-0.6 #t)    (flonum-test '#i-3/5))
+(test "flonum from ratio reader" '(-0.6 #t)    (flonum-test '#i3/-5))
+(test "flonum from ratio reader" '(1234.0 #t)  (flonum-test '#i1234/1))
+(test "flonum from ratio reader" '(-1234.0 #t) (flonum-test '#i-1234/1))
+(test "flonum from ratio reader" '(-0.125 #t)  (flonum-test '#i-4/32))
+
+
 ;;------------------------------------------------------------------
 (test-subsection "complex reader")
 
@@ -317,6 +311,19 @@
 (test "complex reader (polar)" (make-polar 3.5 -3.0) 7/2@-3.0)
 (test "complex reader (polar)" #f (string->number "7/2@-3.14i"))
 
+(test "complex from ratio reader" '(0.4 1.0)    (decompose-complex '#i2/5+1i))
+(test "complex from ratio reader" '(1.0 0.4)    (decompose-complex '#i1+2/5i))
+(test "complex from ratio reader" '(0.6 2.0)    (decompose-complex '#i3/5+2i))
+(test "complex from ratio reader" '(2.0 -2.5)   (decompose-complex '#i2+5/-2i))
+(test "complex from ratio reader" 0.0           (decompose-complex '#i0/1+0/1i))
+(test "complex from ratio reader" '(-0.5 -0.5)  (decompose-complex '#i-1/2-1/2i))
+
+(test "complex from ratio reader (polar)" (make-polar #i2/5 1.0)       '#i2/5@1)
+(test "complex from ratio reader (polar)" (make-polar 1.0 #i2/5)       '#i1@2/5)
+(test "complex from ratio reader (polar)" (make-polar #i3/5 #i2)       '#i3/5@2)
+(test "complex from ratio reader (polar)" (make-polar #i2 #i5/-2)      '#i2@5/-2)
+(test "complex from ratio reader (polar)" (make-polar #i0 #i0)         '#i0/1@0/1)
+(test "complex from ratio reader (polar)" (make-polar #i-1/2 #i1/2)    '#i-1/2@1/2)
 
 ;;------------------------------------------------------------------
 (test-subsection "integer writer syntax")
