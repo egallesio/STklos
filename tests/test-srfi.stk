@@ -4791,6 +4791,15 @@
 (test "string-append! constant 3" "abcdef" (string-append! (string-copy str1) str2)) ;  second arg may be constant
 (test "string-append! constant 3" "xdef" (string-append! (string-copy "x") str2)) ;  second arg may be constant
 
+;; ----------------------------------------------------------------------
+;;  SRFI 141 ...
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 130 - Cursor-based string library")
+
+(require "srfi-130")
+
+(load "test-srfi-130.stk")
+
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI 141 ...

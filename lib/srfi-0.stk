@@ -188,7 +188,7 @@
     ((srfi-128 comparators-reduced) "srfi-128")
                                         ; Comparators (reduced)
     ((srfi-129 titlecase) "srfi-129")   ; Titlecase procedures
-    ;; srfi-130                         ; Cursor-based string library
+    (srfi-130 "srfi-130")               ; Cursor-based string library
     ;; srfi-131                         ; ERR5RS Record Syntax (reduced)
     ;; srfi-132                         ; Sort Libraries
     ;; srfi-133                         ; Vector Library (R7RS-compatible)
