@@ -254,7 +254,7 @@
     (srfi-190 "srfi-190")               ; Coroutine Generators
     (generators "srfi-158" "srfi-190")
     ;; srfi-191                         ; ....... withdrawn
-    ;; srfi-192                         ; Port Positioning
+    srfi-192                            ; Port Positioning
     srfi-193                            ; Command line
     ;; srfi-194                         ; Random data generators
     srfi-195                            ; Multiple-value boxes

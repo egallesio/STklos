@@ -99,6 +99,7 @@
      (185 . "Linear adjustable-length strings")
      (189 . "Maybe and Either: optional container types")
      (190 . "Coroutines Generators")
+     (192 . "Port Positioning")
      (193 . "Command line")
      (195 . "Multiple-value boxes")
      (196 . "Range Objects")
