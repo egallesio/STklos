@@ -1070,8 +1070,12 @@ static SCM read_rational(SCM num, char *str, long base, char exact_flag, char **
   if ((TYPEOF(num) == tc_integer || TYPEOF(num) == tc_bignum) &&
       (TYPEOF(den) == tc_integer || TYPEOF(den) == tc_bignum))
     return make_rational(num, den);
-  else
-    STk_error("cannot make rational with ~S and ~S", num, den);
+  else if (exact_flag=='i')
+    /* We're sure we got here with either fixnums, bignums or reals, so
+       div2 will always work. */
+    return  (div2(num,den));
+
+  STk_error("cannot make rational with ~S and ~S", num, den);
 
   return STk_false;             /* never reached */
 }
