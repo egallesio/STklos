@@ -655,6 +655,9 @@ described in this document (procedures
 ;; SRFI 129 -- Titlecase Procedures
 (gen-loaded-srfi 129)
 
+;; SRFI 135 -- Immutable Texts
+(gen-loaded-srfi 135)
+
 ;; SRFI 141 -- Integer division
 (gen-loaded-srfi 141)
 

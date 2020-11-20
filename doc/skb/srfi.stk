@@ -83,6 +83,7 @@
      (118 . "Simple adjustable-size strings ")
      (128 . "Comparators (reduced)")
      (129 . "Titlecase procedures")
+     (135 . "Immutable Texts")
      (141 . "Integer Division")
      (145 . "Assumptions")
      (151 . "Bitwise Operations")

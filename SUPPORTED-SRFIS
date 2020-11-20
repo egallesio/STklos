@@ -72,6 +72,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-118: Simple adjustable-size strings 
     - SRFI-128: Comparators (reduced)
     - SRFI-129: Titlecase procedures
+    - SRFI-135: Immutable Texts
     - SRFI-141: Integer Division
     - SRFI-145: Assumptions
     - SRFI-151: Bitwise Operations
