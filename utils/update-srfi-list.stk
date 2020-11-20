@@ -1,0 +1,101 @@
+;;;;
+;;;;
+;;;; update-srfi-list.stk         -- Utility to manage the list of SRFIs
+;;;;                                 in various places.
+;;;;
+;;;; Copyright © 2020 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 20-Nov-2020 17:10
+;;;; Last file update: 20-Nov-2020 17:28 (eg)
+;;;;
+
+;; WARNING: This scipt is useful for STklos development, it will not be
+;; installed
+
+(include "../lib/srfis.stk")
+
+
+;;
+;; Print the SRFI list as text
+;;
+(define (list-srfis-as-text)
+  (for-each (lambda(x) (printf "- SRFI-~A: ~A\n" (car x) (cadr x)))
+            *srfi-database*))
+
+;;
+;; Print the SRFI list as markdown (with links)
+;;
+(define (list-srfis-as-markdown)
+  (for-each
+   (lambda(x)
+     (printf "- [SRFI-~A](http://srfi.schemers.org/srfi-~A/srfi-~A.html) — *~A*\n"
+             (car x) (cadr x) (car x) (cadr x)))
+   *srfi-database*))
+
+;;
+;; Print the SRFI list in an intenal format to be used by STKlos
+;; implementation
+;;
+(define (build-srfi-features)
+  (define (process-database db)
+    (let Loop ((db  db)
+               (res '()))
+      (if (null? db)
+          (reverse res)
+          (let* ((srfi (%description->srfi (car db)))
+                 (names (srfi-names srfi))
+                 (file  (srfi-file srfi)))
+            (Loop (cdr db)
+                  `(,@(map (lambda (n)
+                             (if file (cons n file) n))
+                           (reverse names))
+                    ,@res))))))
+  (append (process-database *srfi-database*)
+          *srfi-shortcuts*))
+
+(define (list-srfis-as-internal)
+  (printf ";;;; Generated file. *** DO NOT EDIT ***\n")
+  (printf "(define %srfi-feature-list '(\n")
+  (for-each (lambda(x) (printf "    ~S\n" x))
+            (build-srfi-features))
+  (printf ")\n;;; ***EOF***\n"))
+
+
+(define (main args)
+  (let ((mode 'text))
+    (parse-arguments args
+       "Usage: update-srfi-list [options]"
+       "Display the list of supported SRFIs"
+       ""
+       (("markdown" :alternate "m"  :help "display a markdown list")
+        (set! mode 'markdown))
+       (("text" :alternate "t"  :help "display a text list")
+        (set! mode 'text))
+       (("internal" :alternate "i"  :help "display list in intenal format")
+        (set! mode 'internal)))
+
+    (case mode
+      ((markdown) (list-srfis-as-markdown))
+      ((text)     (list-srfis-as-text))
+      ((internal) (list-srfis-as-internal)))))
+
+;; Local Variables:
+;; mode: scheme
+;; End:
