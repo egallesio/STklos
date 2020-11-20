@@ -23,7 +23,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Nov-2020 17:10
-;;;; Last file update: 20-Nov-2020 17:28 (eg)
+;;;; Last file update: 20-Nov-2020 17:55 (eg)
 ;;;;
 
 ;; WARNING: This scipt is useful for STklos development, it will not be
@@ -75,7 +75,7 @@
   (printf "(define %srfi-feature-list '(\n")
   (for-each (lambda(x) (printf "    ~S\n" x))
             (build-srfi-features))
-  (printf ")\n;;; ***EOF***\n"))
+  (printf "))\n;;; ***EOF***\n"))
 
 
 (define (main args)
