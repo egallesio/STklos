@@ -305,7 +305,7 @@ static SCM read_token(SCM port, int c, int case_significant)
       case '#': if (len > 1) {
                   if (len == 2) {
                     if (tok[1] == 't' || tok[1] == 'T') return STk_true;
-                    if (tok[1] == 'f' || tok[1] == 'f') return STk_false;
+                    if (tok[1] == 'f' || tok[1] == 'F') return STk_false;
                   }
                   if (tok[1] == ':')
                     return STk_makekey(tok+1);

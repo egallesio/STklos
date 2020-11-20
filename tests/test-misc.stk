@@ -55,6 +55,33 @@ b|)
 (test "(file-suffix.4" #f  (file-suffix "~/.profile"))
 
 ;;----------------------------------------------------------------------
+(test-subsection "Sharp syntax")
+
+(test "#t #T"
+      #t
+      (eq? #t #T))
+
+(test "#t #true"
+      #t
+      (eq? #t #true))
+
+(test "#f #F"
+      #t
+      (eq? #f #F))
+
+(test "f #false"
+      #t
+      (eq? #f #false))
+
+(test "#eof"
+      #t
+      (eof-object? #eof))
+
+(test "#void"
+      #t
+      (eq? #void (if #f 'WRONG)))
+
+;;----------------------------------------------------------------------
 (test-subsection "Docstrings and signatures")
 
 (import STKLOS-COMPILER)
