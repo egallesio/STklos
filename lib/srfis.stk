@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 20-Nov-2020 15:30 (eg)
+;;;; Last file update: 21-Nov-2020 17:50 (eg)
 ;;;;
 
 
@@ -42,7 +42,7 @@
         (and-let*) "srfi-2")
     ;;  3  ........ Withdrawn
     (4  "Homogeneous numeric vector datatypes"
-        (hvectors) "srfi4")
+        (hvectors) "srfi-4")
     (5  "A compatible let form with signatures and rest arguments" () "srfi-5")
     (6  "Basic String Ports")
     (7  "Feature-based program configuration language " (program) "srfi-7")
