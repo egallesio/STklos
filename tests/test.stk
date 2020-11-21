@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 11:19 (eg)
-;;;; Last file update:  3-Jul-2020 12:14 (eg)
+;;;; Last file update: 21-Nov-2020 21:04 (eg)
 ;;;;
 
 (define *all-errors* '())
@@ -38,16 +38,16 @@
   (format *log* "  testing ~A expects ~S ==> " message expect)
   (flush-output-port)
   (let ((res (with-handler
-            (lambda (c) *test-failed*)
-        (thunk))))
+              (lambda (c) *test-failed*)
+              (thunk))))
     (set! *test-counter* (+ *test-counter* 1))
     (if (compare expect res)
-    (format *log* "OK.\n")
-    (begin
-      (set! *test-ko* (+ *test-ko* 1))
-      (format *log* "ERROR: got ~S.\n" res)
-      (set! *all-errors* (cons (list message code expect res)
-                   *all-errors*)))))
+        (format *log* "OK.\n")
+        (begin
+          (set! *test-ko* (+ *test-ko* 1))
+          (format *log* "ERROR: got ~S.\n" res)
+          (set! *all-errors* (cons (list message code expect res)
+                                   *all-errors*)))))
   (flush-output-port *log*))
 
 ;; ----------------------------------------------------------------------
@@ -62,14 +62,14 @@
 ;; ----------------------------------------------------------------------
 (define (test-end)
   (for-each (lambda (port)
-          (format port "~A\n" (make-string 70 #\-))
-          (format port "Number of tests: ~A (OK: ~A Error: ~A)\n"
-               *test-counter* (- *test-counter* *test-ko*) *test-ko*)
-          (format port "   Elapsed Time: ~Ams\n"
-              (inexact->exact (round (clock))))
-          (format port "*** End of tests ***\n")
-          (close-output-port port))
-        (list *log* *err*))
+              (format port "~A\n" (make-string 70 #\-))
+              (format port "Number of tests: ~A (OK: ~A Error: ~A)\n"
+                      *test-counter* (- *test-counter* *test-ko*) *test-ko*)
+              (format port "   Elapsed Time: ~Ams\n"
+                      (inexact->exact (round (clock))))
+              (format port "*** End of tests ***\n")
+              (close-output-port port))
+            (list *log* *err*))
   (exit (if (positive? *test-ko*) 1 0)))
 
 ;; ----------------------------------------------------------------------
@@ -77,7 +77,7 @@
 ;; ----------------------------------------------------------------------
 (define (test-section msg)
   (let* ((s   (format "==== Testing ~a " msg))
-     (len (string-length s)))
+         (len (string-length s)))
     (set! *all-errors* '())
     ;; Log
     (format *log* "~a ~a\n" s (make-string (- 70 len) #\=))
@@ -99,19 +99,19 @@
   (if (null? *all-errors*)
       (fmt "passed\n")
       (begin
-    (fmt "failed\n")
-    (fmt "Errors found in this section:\n")
-    (for-each (lambda (x) (apply fmt "test ~a on ~S expected ~S but got ~S\n" x))
-          (reverse! *all-errors*)))))
+        (fmt "failed\n")
+        (fmt "Errors found in this section:\n")
+        (for-each (lambda (x) (apply fmt "test ~a on ~S expected ~S but got ~S\n" x))
+                  (reverse! *all-errors*)))))
 
 ;; ----------------------------------------------------------------------
 ;;  test-subsection ...
 ;; ----------------------------------------------------------------------
 (define (test-subsection msg)
   (let* ((s (format "---- ~a " msg))
-     (len (string-length s)))
-  (format *log* "~a ~a\n" msg (make-string (- 70 len) #\=))
-  (flush-output-port *log*)))
+         (len (string-length s)))
+    (format *log* "~a ~a\n" msg (make-string (max (- 70 len) 0) #\=))
+    (flush-output-port *log*)))
 
 ;; ----------------------------------------------------------------------
 ;;  test ...
