@@ -1586,6 +1586,14 @@
 ;;======================================================================
 (test-subsection "6.13 Input and Output")
 
+(test/error "bad escaped hex value"       (read-from-string "\"\\xg;\""))
+(test/error "unterminated hex string"     (read-from-string "\"\\x01\""))
+(test/error "bad line continuation"       (read-from-string "\"\\ 1\""))
+(test       "read escaped hex"        "K" (guard (e (else 'wrong))
+                                            (read-from-string "\"\\x4b;\"")))
+
+;; --------------------------------------------------
+
 (test "call-with-port"
       '(123 . #t)
       (let* ((p (open-input-string "123 456"))

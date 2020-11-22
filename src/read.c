@@ -136,14 +136,18 @@ static int read_hex_sequence(SCM port, char* utf8_seq)
   while ((i < sizeof(buffer) - 1) && isxdigit(c) && (c != ';') && (c != EOF));
   buffer[i] = '\0';
 
-  if (c != ';')
+  if (c != ';') {
+    /* we need to proceed skipping characters until
+       either EOF or '"' is found */
+    while(((c = STk_getc(port)) != '"') && (c != EOF));
     error_bad_inline_hexa_sequence(port, buffer, 1);
-  else {
+  } else {
     val = strtol(buffer, &end, 16);
 
-    if (val == LONG_MIN || val == LONG_MAX || *end != ';')
+    if (val == LONG_MIN || val == LONG_MAX || *end != ';') {
+      while(((c = STk_getc(port)) != '"') && (c != EOF));
       error_bad_inline_hexa_sequence(port, buffer, 2);
-    else
+    } else
       if (STk_use_utf8) {
         int len = STk_char2utf8(val, utf8_seq);
 
@@ -537,6 +541,9 @@ static SCM read_string(SCM port, int constant)
                    } while (c == ' ' || c == '\t');
 
                   if (c != '\n') {
+                    /* we need to proceed skipping characters until
+                       either EOF or '"' is found */
+                    while(((c = STk_getc(port)) != '"') && (c != EOF));
                     signal_error(port, "bad line continuation sequence in string",
                                  STk_nil);
                   }

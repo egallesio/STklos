@@ -82,6 +82,14 @@ b|)
       (eq? #void (if #f 'WRONG)))
 
 ;;----------------------------------------------------------------------
+(test-subsection "Escaped octals in strings")
+
+; similar tests are in test-r7rs, but since R7RS does not mention escaped octals,
+; we keep these here:
+(test "read escaped octal"       "C"   (guard (e (else 'wrong)) (read-from-string "\"\\0103\"")))
+(test "read only 3 octal digits" "S45" (guard (e (else 'wrong)) (read-from-string "\"\\012345\"")))
+
+;;----------------------------------------------------------------------
 (test-subsection "Docstrings and signatures")
 
 (import STKLOS-COMPILER)
