@@ -1,0 +1,38 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 193 ...
+;; ----------------------------------------------------------------------
+(let ((val (command-line)))
+  (test "command-line validate" #t
+        (and (list? val)
+               (not (null? val))
+               (or (boolean? (car val))
+                   (string? (car val)))
+               (every string? (cdr val))))
+  (test "command-args"
+        #t
+        (eq? (cdr val)
+             (command-args))))
+
+(parameterize ((command-line '("" "1" "2")))
+  (test "new command line.1"
+        #t
+        (let ((val (command-line)))
+          (and (not (command-name))
+               (equal? '("1" "2")
+                       (command-args))))))
+
+(parameterize ((command-line '("../../foo.stk" "1" "2" "3")))
+  (test "new command line.2 (suffix must be supressed)"
+        #t
+        (let ((val (command-line)))
+          (and (string=? (command-name) "foo")
+               (equal? '("1" "2" "3")
+                       (command-args))))))
+
+(parameterize ((command-line '("../../foo.keep" "1" "2" "3")))
+  (test "new command line.3 (suddix must be kept)"
+        #t
+        (let ((val (command-line)))
+          (and (string=? (command-name) "foo.keep")
+               (equal? '("1" "2" "3")
+                       (command-args))))))
