@@ -1,0 +1,27 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 180 ...
+;;
+;; The tests here are a small part of the tests from the sample
+;; implementation.
+;;
+;; Other tests (only for json-read and json-write) are also available
+;; in the file "../test-json.stk".
+;; ----------------------------------------------------------------------
+(test-subsection "SRFI 180 - JSON")
+
+(require "srfi-180")
+
+(test "json-generator.1"
+      '(42)
+      (call-with-input-string "42 101 1337"
+                              (lambda (port) (generator->list (json-generator port)))))
+(test "json-generator.2"
+      '(array-start 42 array-end)
+      (call-with-input-string "[42] 101 1337"
+                              (lambda (port) (generator->list (json-generator port)))))
+(test "json-error"
+      #t
+      (with-handler (lambda (e) (json-error? e))
+                    (call-with-input-string "{" json-read)))
+
+

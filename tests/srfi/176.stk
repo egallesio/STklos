@@ -1,0 +1,11 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 176 ...
+;; ----------------------------------------------------------------------
+
+(test "version-alist is list" #t (list? (version-alist)))
+(test "scheme.id stklos" 'stklos (cadr (assoc 'scheme.id (version-alist))))
+(test "version" (version) (cadr (assoc 'version (version-alist))))
+(test "version" (features) (cdr (assoc 'scheme.features (version-alist))))
+
+
+

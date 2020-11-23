@@ -1,0 +1,47 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 161 ...
+;; ----------------------------------------------------------------------
+
+(define a (ubox 'a))
+(define b (ubox 'b))
+(define c (ubox 'c))
+(define d (ubox 'd))
+(define e (ubox 'e))
+(define f (ubox 'f))
+
+
+(test "ubox?" #t (ubox? (ubox 'g)))
+
+(test "ubox?, 2" #f (ubox? (vector 'h)))
+
+(test "ubox=?" #f (ubox=? a b))
+
+(test "ubox-ref"
+      #t
+      (eq? 'a (ubox-ref a)))
+
+(ubox-link! a b)
+(ubox-union! a c)
+(ubox-unify! cons d e)
+(ubox-link! b f)
+
+(test "ubox=?" #t (ubox=? a b))
+(test "ubox=?" #t (ubox=? b c))
+(test "ubox=?" #t (ubox=? c f))
+(test "ubox=?" #t (ubox=? a f))
+(test "ubox=?" #t (ubox=? d e))
+(test "ubox=?" #f (ubox=? a e))
+
+(test "ubox-ref, eq?" #t (eq? (ubox-ref a) 'f))
+(test "ubox-ref, equal?" #t (equal? (ubox-ref d) '(d . e)))
+
+(ubox-set! b 'i)
+
+(test "ubox-set!" #t (eq? (ubox-ref a) 'i))
+
+(ubox-link! a e)
+
+(test "ubox-link!" #t (ubox=? c e))
+
+
+

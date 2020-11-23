@@ -1,0 +1,58 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 173 ...
+;; ----------------------------------------------------------------------
+(test "make-hook type" (hook? (make-hook 2)) #t)
+
+(define hook (make-hook 2))
+(define hook-sum-var 0)
+(define hook-prod-var 1)
+(define (hook-prod x y)
+  (set! hook-prod-var (* x y)))
+
+(hook-add! hook (lambda (x y) (set! hook-sum-var (+ x y))))
+(hook-add! hook hook-prod)
+
+(test "add-hook!+run-hook" '(8 15)
+      (begin
+        (hook-run hook 3 5)
+        (list hook-sum-var hook-prod-var)))
+
+(define list-from-hook (hook->list hook))
+
+(test "hook->list" #t (list? list-from-hook))
+(test "hook->list length" 2 (length list-from-hook))
+(test "hook->list element types" #f (member #f (map procedure? list-from-hook)))
+
+(hook-delete! hook hook-prod)
+(set! list-from-hook (hook->list hook))
+(test "hook-delete!" #f (member hook-prod (hook->list hook)))
+(test "hook->list length after delete 1 proc" 1 (length list-from-hook))
+
+(hook-reset! hook)
+(set! list-from-hook (hook->list hook))
+(test "hook-reset!" 0 (length list-from-hook))
+
+;; these three will be changed by the hook:
+(define hook-arith-var 0)
+(define hook-geom-var 0)
+(define hook-harmo-var 0)
+;; define the following two as zero. the procs that changed their values
+;; were removed, so they should NOT be altered.
+(set! hook-sum-var 0)
+(set! hook-prod-var 1)
+
+;; three procedures:
+(define (arith-mean x y) (set! hook-arith-var (/ (+ x y) 2)))
+(define (geom-mean x y)  (set! hook-geom-var  (sqrt (* x y))))
+(define (harmo-mean x y) (set! hook-harmo-var (/ 1 (+ x y))))
+
+(list->hook! hook (list arith-mean geom-mean harmo-mean))
+(test "list->hook! - length of list" 3 (length (hook->list hook)))
+(test "add-hook!+run-hook after list->hook"  (list 4 (sqrt 15) 1/8 0 1)
+      (begin
+        (hook-run hook 3 5)
+        (list hook-arith-var
+              hook-geom-var
+              hook-harmo-var
+              hook-sum-var
+              hook-prod-var)))

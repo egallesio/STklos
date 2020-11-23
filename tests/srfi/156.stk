@@ -1,0 +1,205 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 156 ...
+;; ----------------------------------------------------------------------
+
+;; the tests were translated from the original SRFI reference implementation
+
+(test "" #t
+ (is 1 odd?))
+
+(test "" #t
+ (isnt 2 odd?))
+
+(test "" #t
+ (is '() null?))
+
+(test "" #t
+ (is procedure? procedure?))
+
+(test "" #t
+ (isnt 5 procedure?))
+
+;; two arguments:
+
+(test "" #t
+ (is 1 < 2))
+
+(test "" #t
+ (isnt 1 < 1))
+
+(test "" #t
+ (is (+ 2 2) = 4))
+
+(test "" #t
+ (is 'x eq? 'x))
+
+(test "" #t
+ (is procedure? eq? procedure?))
+
+(test "" #t
+ (eq? (is eq? eq? eq?)
+      (eq? eq? eq?)))
+
+(test "" #t
+ (is (is eq? eq? eq?) eq? (eq? eq? eq?)))
+
+(test "" '(y z)
+ (is 'y memq '(x y z)))
+
+(test "" '((1) (2) (1 2))
+ (is '(1) member '(() (1) (2) (1 2))))
+
+(test "" #t
+ (isnt 'x eq? 'y))
+
+(test "" #t
+ (is '(a b c) equal? '(a b c)))
+
+(test "" #t
+ (isnt '(a b c) equal? '(c b a)))
+
+(test "" #t
+ (is 0 = 0.0))
+
+(test "" #t
+ (is 1.0 = 1))
+
+(test "" #t
+ (isnt 1 = 0))
+
+(define (divisible-by? x y)
+  (is (modulo x y) = 0))
+
+(test "" #t
+ (is 9 divisible-by? 3))
+
+(test "" #t
+ (isnt 3 divisible-by? 9))
+
+;; ending with unary predicate:
+
+(test "" #t
+ (is 1 < 2 even?))
+
+(test "" #t
+ (isnt 1 < 2 odd?))
+
+(test "" #t
+ (isnt 2 < 1 even?))
+
+(test "" #t
+ (is 0 = 0.0 zero?))
+
+(test "" #t
+ (isnt 1.0 = 1 zero?))
+
+;; three arguments:
+
+(test "" #t
+ (is 1 < 2 <= 3))
+
+(test "" #t
+ (is 0 = 0.0 = 0+0i = 0.0+0.0i))
+
+(test "" #t
+ (isnt 1 <= 2 < 2))
+
+;; predicates don't need to be transitive
+;; (although that's not particularly elegant):
+
+(test "" #t
+ (is 1 < 2 > 1.5))
+
+(test "" #t
+ (isnt 1 < 2 > 3))
+
+(test "" #t
+ (isnt 3 < 2 < 1))
+
+(test "" '((x y) (y x))
+ (is 'x member '(x y) member '((x y) (y x))))
+
+;; more arguments:
+
+(test "" #t
+ (is -0.4 < -0.1 <= 0 = 0.0 < 0.1 < 0.4))
+
+(test "" #t
+ (isnt -0.4 < -0.1 <= 0 = 0.0 < 0.1 < -0.1))
+
+(test "" #t
+ (is 0 = 0.0 = 0+0i = 0.0+0.0i = (+) < (*) = 1 = 1.0 = 1+0i = 1.0+0.0i))
+
+;; ending with unary predicate:
+
+(test "" #t
+ (is -0.4 < -0.1 <= 0 <= 0.0 < 0.1 < 0.4 <= 2 even?))
+
+(test "" #t
+ (isnt -0.4 < -0.1 <= 0 <= 0.0 < 0.1 < 0.4 <= 2 odd?))
+
+;; as procedures (with underscore):
+
+(test "" #t
+ (equal? (filter (isnt _ even?) '(2 4 5 6 7 8))
+     '(5 7)))
+
+(test "" #t
+ (equal? (filter (is _ < 2) '(1 3 2 0))
+     '(1 0)))
+
+(test "" #t
+ (equal? (filter (is 1 < _) '(1 3 2 0))
+     '(3 2)))
+
+(test "" #t
+ (equal? (filter (is 3 < _ <= 5) '(2 3 4 5 6 7))
+     '(4 5)))
+
+(test "" #t
+ (equal? (filter (is 'x memq _) '((a b) (x) (p q) (x y) (c d) (z x)))
+     '((x) (x y) (z x))))
+
+(test "" #t
+ (equal? (filter (isnt 'x memq _) '((a b) (x) (p q) (x y) (c d) (z x)))
+     '((a b) (p q) (c d))))
+
+(test "" #t
+ (equal? (filter (isnt 3 < _ <= 5) '(2 3 4 5 6 7))
+     '(2 3 6 7)))
+
+(test "" #t
+ (equal? (filter (is _ eq? 'a) '(m a m a))
+     '(a a)))
+
+(test "" #t
+ (equal? (filter (isnt 'a eq? _) '(m a m a))
+     '(m m)))
+
+;; multiple underscores:
+
+(test "" #t
+ ((is _ < 2 < _) 1 3))
+
+(test "" #t
+ ((isnt 1 < _ <= _ < 3) 2 4))
+
+(test "" #t
+ ((is _ < _ even?) 1 2))
+
+(test "" #t
+ ((isnt _ < _ odd?) 1 2))
+
+(test "" #t
+ ((is 1 < _ <= 3 < _ <= 5 < _) 3 5 6))
+
+(test "" #t
+ ((isnt 1 < _ <= 3 < _ <= 5 < _) 3 3 6))
+
+(test "" #t
+ ((is 1 < _ <= 3 < _ <= 5 < _ even?) 3 5 6))
+
+(test "" #t
+ ((isnt 1 < _ <= 3 < _ <= 5 < _ odd?) 3 5 6))
+
+

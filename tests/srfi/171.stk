@@ -1,0 +1,270 @@
+;; ---------------------------------------------------------------------
+;;  SRFI 171 ...
+;; ----------------------------------------------------------------------
+
+;; (require "srfi-1")
+;; (require "srfi-66")
+;; (require "srfi-69")
+;; (require "srfi-171")
+
+(define (add1 x) (+ x 1))
+
+(define numeric-list (iota 5))
+(define numeric-vec (list->vector numeric-list))
+(define bv (list->u8vector numeric-list))
+(define test-string "0123456789abcdef")
+(define list-of-chars (string->list test-string))
+
+;; for testing all treplace variations
+(define replace-alist '((1 . s) (2 . c) (3 . h) (4 . e) (5 . m)))
+(define stklos-hashtable (%old-alist->hash-table replace-alist eq? md5sum))
+(define srfi69-hashtable (alist->hash-table replace-alist))
+;;(define rnrs-hashtable (rnrs:make-eq-hashtable))
+
+;; No rnrs hashtables
+;; (rnrs:hashtable-set! rnrs-hashtable 1 's)
+;; (rnrs:hashtable-set! rnrs-hashtable 2 'c)
+;; (rnrs:hashtable-set! rnrs-hashtable 3 'h)
+;; (rnrs:hashtable-set! rnrs-hashtable 4 'e)
+;; (rnrs:hashtable-set! rnrs-hashtable 5 'm)
+
+(define (replace-function val)
+  (case val
+    ((1) 's)
+    ((2) 'c)
+    ((3) 'h)
+    ((4) 'e)
+    ((5) 'm)
+    (else val)))
+
+;; Test procedures for port-transduce
+;; broken out to properly close port
+(define (port-transduce-test)
+  (let* ((port (open-input-string "0 1 2 3 4"))
+        (res (equal? 15 (port-transduce (tmap add1) + read
+                                        (open-input-string "0 1 2 3 4")))))
+    (close-port port)
+    res))
+(define (port-transduce-with-identity-test)
+  (let* ((port (open-input-string "0 1 2 3 4"))
+         (res (equal? 15 (port-transduce (tmap add1)
+                                         +
+                                         0
+                                         read
+                                         (open-input-string "0 1 2 3 4")))))
+    (close-port port)
+    res))
+
+
+;;; helpers:
+
+
+  (define (compose . functions)
+    (define (make-chain thunk chain)
+      (lambda args
+        (call-with-values (lambda () (apply thunk args)) chain)))
+    (if (null? functions)
+        values
+        (fold make-chain (car functions) (cdr functions))))
+
+
+;; "transducers"
+
+
+(test "tmap"
+      '(1 2 3 4 5)
+      (list-transduce (tmap add1)
+                      rcons
+                      numeric-list))
+
+(test "tfilter"
+      '(0 2 4)
+      (list-transduce (tfilter even?)
+                      rcons
+                      numeric-list))
+
+(test "tfilter+tmap"
+      '(1 3 5)
+      (list-transduce (compose (tfilter even?) (tmap add1))
+                      rcons
+                      numeric-list))
+
+(test "tfilter-map"
+      '(1 3 5)
+      (list-transduce (tfilter-map
+                       (lambda (x)
+                         (if (even? x)
+                             (+ x 1)
+                             #f)))
+                      rcons numeric-list))
+
+(test "tremove"
+      (list-transduce (tremove char-alphabetic?)
+                      rcount
+                      list-of-chars)
+      (string-transduce (tremove char-alphabetic?)
+                        rcount
+                        test-string))
+
+(test "treplace with alist"
+      '(s c h e m e  r o c k s)
+      (list-transduce (treplace replace-alist)
+                      rcons
+                      '(1 2 3 4 5 4 r o c k s) ))
+
+(test "treplace with replace-function"
+      '(s c h e m e  r o c k s)
+      (list-transduce (treplace replace-function)
+                      rcons
+                      '(1 2 3 4 5 4 r o c k s)))
+
+(test "treplace with STklos hash-table"
+      '(s c h e m e  r o c k s)
+      (list-transduce (treplace stklos-hashtable)
+                      rcons
+                      '(1 2 3 4 5 4 r o c k s)))
+
+(test "treplace with srfi-69 hash-table"
+      '(s c h e m e  r o c k s)
+      (list-transduce (treplace srfi69-hashtable)
+                      rcons
+                      '(1 2 3 4 5 4 r o c k s)))
+
+;; STklos has no RNRS hashtables, so we comment this out.
+;;
+;; (test "treplace with rnrs hash-table"
+;;       '(s c h e m e  r o c k s)
+;;       (list-transduce (treplace rnrs-hashtable)
+;;                       rcons
+;;                       '(1 2 3 4 5 4 r o c k s)))
+
+(test "ttake"
+      6 (list-transduce (ttake 4) + numeric-list))
+
+(test "tdrop"
+      7 (list-transduce (tdrop 3) + numeric-list))
+
+(test "tdrop-while"
+      '(3 4)
+      (list-transduce (tdrop-while (lambda (x) (< x 3)))
+                      rcons
+                      numeric-list))
+
+(test "ttake-while"
+      '(0 1 2)
+      (list-transduce (ttake-while (lambda (x) (< x 3)))
+                      rcons
+                      numeric-list))
+
+(test "tconcatenate"
+      '(0 1 2 3 4) (list-transduce tconcatenate
+                                   rcons
+                                   '((0 1) (2 3) (4))))
+
+(test "tappend-map"
+      '(1 2 2 4 3 6)
+      (list-transduce (tappend-map (lambda (x) (list x (* x 2))))
+                      rcons
+                      '(1 2 3)))
+
+(test "tdelete-neighbor-duplicates"
+      '(1 2 1 2 3)
+      (list-transduce (tdelete-neighbor-duplicates)
+                      rcons
+                      '(1 1 1 2 2 1 2 3 3)))
+
+(test "tdelete-neighbor-duplicates with equality predicate"
+      '(a b c "hej" "hej")
+      (list-transduce (tdelete-neighbor-duplicates eq?)
+                      rcons
+                      (list 'a 'a 'b 'c 'c "hej" (string #\h #\e #\j))))
+
+(test "tdelete-duplicates"
+      '(1 2 3 4)
+      (list-transduce (tdelete-duplicates)
+                      rcons
+                      '(1 1 2 1 2 3 3 1 2 3 4)))
+
+(test "tdelete-duplicates with predicate"
+      '("hej" "hopp")
+      (list-transduce (tdelete-duplicates string-ci=?)
+                      rcons
+                      (list "hej" "HEJ" "hopp" "HOPP" "heJ")))
+
+;; added by jpellegrini:
+(test "tdelete-duplicates with string=?"
+      '("hej" "HEJ" "hopp" "HOPP")
+      (list-transduce (tdelete-duplicates string=?)
+                      rcons
+                      (list "hej" "HEJ" "hopp" "HOPP" "hej")))
+
+(test "tflatten"
+      '(1 2 3 4 5 6 7 8 9)
+      (list-transduce tflatten rcons '((1 2) 3 (4 (5 6) 7) 8 (9))))
+
+(test "tpartition"
+      '((1 1 1 1) (2 2 2 2) (3 3 3) (4 4 4 4))
+      (list-transduce (tpartition even?)
+                      rcons
+                      '(1 1 1 1 2 2 2 2 3 3 3 4 4 4 4)))
+
+(test "tsegment"
+      '((0 1) (2 3) (4))
+      (vector-transduce (tsegment 2) rcons numeric-vec))
+
+(test "tadd-between"
+      '(0 and 1 and 2 and 3 and 4)
+      (list-transduce (tadd-between 'and) rcons numeric-list))
+
+(test "tenumerate"
+      '((-1 . 0) (0 . 1) (1 . 2) (2 . 3) (3 . 4))
+      (list-transduce (tenumerate (- 1)) rcons numeric-list))
+
+
+;; "x-transduce"
+
+(test "list-transduce"
+      15 (list-transduce (tmap add1) + numeric-list))
+
+(test "list-transduce with identity"
+      15 (list-transduce (tmap add1) + 0 numeric-list))
+
+(test "vector-transduce"
+      15 (vector-transduce (tmap add1) + numeric-vec))
+
+(test "vector-transduce with identity"
+      15
+      (vector-transduce (tmap add1) + 0 numeric-vec))
+
+(test "port-transduce" #t (port-transduce-test))
+(test "port-transduce with identity" #t (port-transduce-with-identity-test))
+
+;; Converts each numeric char to it's corresponding integer  and sums them.
+(test "string-transduce"
+      15
+      (string-transduce (tmap (lambda (x) (- (char->integer x) 47))) + "01234"))
+
+(test "string-transduce with identity"
+      15
+      (string-transduce  (tmap (lambda (x) (- (char->integer x) 47)))
+                         +
+                         0
+                         "01234"))
+
+(test "generator-transduce"
+      '(1 2 3)
+      (with-input-from-string "1 2 3"
+        (lambda () (generator-transduce (tmap (lambda (x) x)) rcons read))))
+
+(test "generator-transduce with identity"
+      '(1 2 3)
+      (with-input-from-string "1 2 3"
+        (lambda () (generator-transduce (tmap (lambda (x) x)) rcons '() read))))
+
+(test "bytevector-u8-transduce"
+      15 (bytevector-u8-transduce (tmap add1) + bv))
+
+(test "bytevector-u8-transduce with identity"
+      15 (bytevector-u8-transduce (tmap add1) + 0 bv))
+
+

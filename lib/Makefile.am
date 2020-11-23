@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Nov-2020 19:29 (eg)
+# Last file update: 23-Nov-2020 09:58 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -292,7 +292,9 @@ slib.ostk: slib.stk STklos.init
 #     - srfi-0-data.stk (used by SRFI0 and features)
 srfi-0-data.scm: srfis.stk
 	../src/stklos -l srfis.stk \
-                      -f ../utils/update-srfi-list.stk --internal > $@
+	              -f ../utils/update-srfi-list.stk \
+                  -- --internal > $@
+
 
 doc: $(DOCDB)
 
@@ -312,3 +314,7 @@ distclean: clean
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) distclean)\
 	done
+
+# Local Variables:
+# tab-width: 4
+# End:

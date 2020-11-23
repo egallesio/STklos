@@ -1,0 +1,27 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 174 ...
+;; ----------------------------------------------------------------------
+
+(define ts1 (timespec 1 2))
+(define ts2 (timespec 1 2))
+(define ts3 (timespec 1 3))
+(define ts4 (timespec 2 2))
+(define ts-neg1 (timespec -1 2))
+(define ts-neg2 (timespec -1 5))
+(define ts-neg3 (timespec -2 0))
+
+
+(test "timespec?" #t (timespec? ts1))
+(test "not timespec?" #t (not (timespec? #f)))
+(test "seconds" 1 (timespec-seconds ts1))
+(test "nanos" 2 (timespec-nanoseconds ts1))
+(test "equal" #t (timespec=? ts1 ts2))
+(test "less nanos" #t (timespec<? ts1 ts3))
+(test "less seconds" #t (timespec<? ts1 ts4))
+(test "less -nanos" #t (timespec<? ts-neg2 ts-neg1))
+(test "less -seconds" #t (timespec<? ts-neg3 ts-neg2))
+(test "positive hash" #t (positive? (timespec-hash ts-neg1)))
+(test "to inexact" #i1.1 (timespec->inexact (timespec 1 #e1e8)))
+(let ((t (timespec 1 1))
+      (u (inexact->timespec #i1.000000001)))
+  (test "from inexact" t u))

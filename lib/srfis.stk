@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 21-Nov-2020 21:33 (eg)
+;;;; Last file update: 23-Nov-2020 10:09 (eg)
 ;;;;
 
 
@@ -156,7 +156,7 @@
     ;; 115  Scheme Regular Expressions
     ;; 116  Immutable List Library
     (117 "Queues based on lists" (queues-as-lists) "srfi-117")
-    (118 "Simple adjustable-size strings " (adjustable-strings) "srfi-118")
+    (118 "Simple adjustable-size strings " (adjustable-strings))
     ;; 119  wisp: simpler indentation-sensitive scheme
     ;; 120  Timer APIs
     ;; 121  ....... withdrawn
@@ -194,7 +194,7 @@
     ;; 153  ....... withdrawn
     ;; 154  First-class dynamic extents
     ;; 155  Promises
-    (156 "Syntactic combiners for binary predicates")
+    (156 "Syntactic combiners for binary predicates" () "srfi-156")
     ;; 157  Continuation marks
     (158 "Generators and Accumulators" () "srfi-158")
     ;; 159  Combinator Formatting

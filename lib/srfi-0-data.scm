@@ -70,8 +70,8 @@
     (sets-bags . "srfi-113")
     (srfi-117 . "srfi-117")
     (queues-as-lists . "srfi-117")
-    (srfi-118 . "srfi-118")
-    (adjustable-strings . "srfi-118")
+    srfi-118
+    adjustable-strings
     (srfi-128 . "srfi-128")
     (comparators-reduced . "srfi-128")
     (srfi-129 . "srfi-129")
@@ -81,7 +81,7 @@
     srfi-145
     (srfi-151 . "srfi-151")
     (bitwise-ops . "srfi-151")
-    srfi-156
+    (srfi-156 . "srfi-156")
     (srfi-158 . "srfi-158")
     (srfi-161 . "srfi-161")
     srfi-169
