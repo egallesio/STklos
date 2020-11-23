@@ -1,0 +1,124 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 37 ...
+;; ----------------------------------------------------------------------
+
+;; tests from Guile
+;; Copyright (C) 2007, 2008, 2013 Free Software Foundation, Inc.
+;; Released under the LGPL.
+;; Adapted to STklos by Jeronimo Pellegrini
+
+(test "empty calls with count-modified seeds"
+      '(21 42)
+      (call-with-values
+      (lambda ()
+        (args-fold '("1" "3" "4") '()
+               (lambda (opt name arg seed seed2)
+             (values 1 2))
+               (lambda (op seed seed2)
+             (values (+ 1 seed) (+ 2 seed2)))
+               18 36))
+    list))
+
+;; Guile returns '(#t #t "doit" "whatev" #t #t)
+;; Chicken, Gauche, SISC, Kawa return '(#t #t "doit" #f #t #t)
+;; Guile seems correct.
+(test "short opt params"
+      '(#t #t "doit" "whatev" #t #t)
+      (let ((a-set #f) (b-set #f) (c-val #f) (d-val #f) (no-fail #t) (no-operands #t))
+        (args-fold '("-abcdoit" "-ad" "whatev")
+           (list (option '(#\a) #f #f
+                                 (lambda (opt name arg)
+                   (set! a-set #t)
+                   (values)))
+                 (option '(#\b) #f #f
+                                 (lambda (opt name arg)
+                   (set! b-set #t)
+                   (values)))
+                 (option '("cdoit" #\c) #f #t
+                     (lambda (opt name arg)
+                   (set! c-val arg)
+                   (values)))
+                 (option '(#\d) #f #t
+                     (lambda (opt name arg)
+                   (set! d-val arg)
+                   (values))))
+           (lambda (opt name arg) (set! no-fail #f) (values))
+           (lambda (oper) (set! no-operands #f) (values)))
+        (list a-set b-set c-val d-val no-fail no-operands)))
+
+(test "single unrecognized long-opt"
+      "::fake"
+      (args-fold '("--fake" "-i2")
+             (list (option '(#\i) #t #f
+                       (lambda (opt name arg k) k)))
+             (lambda (opt name arg k) (string-append "::" name))
+             (lambda (operand k) #f)
+             #f))
+
+(test "long req'd/optional"
+      '(#f "bsquare" "apple")
+      (args-fold '("--x=pple" "--y=square" "--y")
+             (list (option '("x") #t #f
+                       (lambda (opt name arg k)
+                     (cons (string-append "a" arg) k)))
+                   (option '("y") #f #t
+                       (lambda (opt name arg k)
+                     (cons (if arg
+                           (string-append "b" arg)
+                           #f) k))))
+             (lambda (opt name arg k) #f)
+             (lambda (opt name arg k) #f)
+             '()))
+
+;; this matches behavior of getopt_long in libc 2.4
+(test "short options absorb special markers in the next arg"
+      '((#\y . "-z") (#\x . "--") (#\z . #f))
+      (let ((arg-proc (lambda (opt name arg k)
+                    (cons (cons  name arg ) k))))
+        (args-fold '("-zx" "--" "-y" "-z" "--")
+               (list (option '(#\x) #f #t arg-proc)
+                 (option '(#\z) #f #f arg-proc)
+                 (option '(#\y) #t #f arg-proc))
+               (lambda (opt name arg k) #f)
+               (lambda (opt name arg k) #f)
+               '())))
+
+(test "short options without arguments"
+      ;; In Guile 1.8.4 and earlier, using short names of argument-less options
+      ;; would lead to a stack overflow.
+      '((#\x . #f))
+      (let ((arg-proc (lambda (opt name arg k)
+                    (cons (cons name arg) k))))
+        (args-fold '("-x")
+               (list (option '(#\x) #f #f arg-proc))
+               (lambda (opt name arg k) #f)
+               (lambda (opt name arg k) #f)
+               '())))
+
+(test "short option with optional argument omitted"
+      'good
+      ;; This would trigger an infinite loop in Guile up to 2.0.7.
+      ;; See <http://bugs.gnu.org/13176>.
+      (args-fold '("-I")
+                 (list (option '(#\I) #f #t
+                               (lambda (opt name arg value)
+                                 (and (eqv? name #\I) (not arg)
+                                      'good))))
+                 (lambda _ (error "unrecognized"))
+                 (lambda args #f)
+                 #f))
+
+;; Gosh, Chicken, SISC, Kawa return #f,
+;; but the Guile tests expect "the-argument", whicih, according to the
+;; SRFI, should be the correct value.
+(test "short option with optional argument provided"
+      "the-argument"
+      (args-fold '("-I" "the-argument")
+                 (list (option '(#\I) #f #t
+                               (lambda (opt name arg result)
+                                 (and (eqv? name #\I) arg))))
+                 (lambda args (error "unrecognized"))
+                 (lambda args #f)
+                 #f))
+
+

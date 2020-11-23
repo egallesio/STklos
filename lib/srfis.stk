@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 21-Nov-2020 17:50 (eg)
+;;;; Last file update: 21-Nov-2020 21:33 (eg)
 ;;;;
 
 
@@ -86,7 +86,7 @@
     (45 "Primitives for Expressing Iterative Lazy Algorithms")
     ;; 46 Basic Syntax-rules Extensions
     ;; 47 Array
-    (48 "Intermediate Format Strings")
+    (48 "Intermediate Format Strings" () "srfi-48")
     ;; 49 Indentation-sensitive syntax (NEVER)
     ;; 50 ....... withdrawn
     (51 "Handling rest list" (rest-list) "srfi-51")
@@ -291,24 +291,9 @@
          (%description->srfi tmp))))
 
 
-;;
-;; build-srfi-features:
-;;              a small utility to build a A-list of the SRFI
-;;              features to add in the SRFI-0 features
-;;
-(define (build-srfi-features)
-  (define (process-database db)
-    (let Loop ((db  db)
-               (res '()))
-      (if (null? db)
-          (reverse res)
-          (let* ((srfi (%description->srfi (car db)))
-                 (names (srfi-names srfi))
-                 (file  (srfi-file srfi)))
-            (Loop (cdr db)
-                  `(,@(map (lambda (n)
-                             (if file (cons n file) n))
-                           (reverse names))
-                    ,@res))))))
-  (append (process-database *srfi-database*)
-          *srfi-shortcuts*))
+;; ----------------------------------------------------------------------
+(define (last-implemented-srfi)
+  (let ((last (last-pair *srfi-database*)))
+    (if (pair? (car last))
+        (caar last)
+        (car last))))

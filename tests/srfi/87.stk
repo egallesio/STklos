@@ -1,0 +1,14 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 87 and R7RS ...
+;; ----------------------------------------------------------------------
+(test "=> else symbol" 'none (case 20 ((5) 'five) ((10) => 'ten) ((15) 'fifteen) (else => (lambda (x) 'none))))
+(test "=> choose non-procedure" *test-failed* (case 10 ((5) 'five) ((10) => 'ten) ((15) 'fifteen) (else 'none)))
+(test "=> don't choose non-procedure" 'none (case 20 ((5) 'five) ((10) => 'ten) ((15) 'fifteen) (else 'none)))
+(test "=> don't choose non-procedure, II"  -20 (case 20 ((5) 'five) ((10) => 'ten) ((15) 'fifteen) (else => (lambda (x) (- x)))))
+(test "=> else number" 60 (case 20 ((5) 'five) ((10) 'ten) ((15) 'fifteen) (else =>  (lambda (x) (* x 3)))))
+(test "=> else -" -20 (case 20 ((5) 'five) ((10) 'ten) ((15) 'fifteen) (else =>  -)))
+(test "=> only"  #\z (case #\Z ((#\a) => char-upcase)
+                               ((#\c) => (lambda (x) (string x #\d)))
+                               ((#\z) => char->integer)
+                               ((#\Z) => char-downcase)
+                               (else => #f)))

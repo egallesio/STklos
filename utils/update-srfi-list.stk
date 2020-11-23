@@ -23,13 +23,12 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Nov-2020 17:10
-;;;; Last file update: 20-Nov-2020 17:55 (eg)
+;;;; Last file update: 21-Nov-2020 19:31 (eg)
 ;;;;
 
-;; WARNING: This scipt is useful for STklos development, it will not be
-;; installed
-
-(include "../lib/srfis.stk")
+;; WARNING: This scipt is useful for STklos development, it will not
+;; be installed. Furthermore, the list of SRFIs must be loaded before
+;; the script is run.
 
 
 ;;

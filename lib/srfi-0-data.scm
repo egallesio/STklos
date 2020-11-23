@@ -5,8 +5,8 @@
     (lists . "srfi-1")
     (srfi-2 . "srfi-2")
     (and-let* . "srfi-2")
-    (srfi-4 . "srfi4")
-    (hvectors . "srfi4")
+    (srfi-4 . "srfi-4")
+    (hvectors . "srfi-4")
     (srfi-5 . "srfi-5")
     srfi-6
     (srfi-7 . "srfi-7")
@@ -40,7 +40,7 @@
     srfi-39
     parameters
     srfi-45
-    srfi-48
+    (srfi-48 . "srfi-48")
     (srfi-51 . "srfi-51")
     (rest-list . "srfi-51")
     (srfi-54 . "srfi-54")

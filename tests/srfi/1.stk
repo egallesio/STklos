@@ -1,0 +1,623 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 1 ...
+;; ----------------------------------------------------------------------
+
+
+;; From Chicken (which were adapted from Larceny).
+;; The copyright is as follows.
+
+;;; List tests from Larceny, ported to CHICKEN by Mario Domenech Goulart.
+;;;
+;;; Copyright 1991, 1994, 1998 William D Clinger
+;;; Copyright 1998             Lars T Hansen
+;;; Copyright 1984 - 1993      Lightship Software, Incorporated
+;;;
+;;; Permission to copy this software, in whole or in part, to use this
+;;; software for any lawful purpose, and to redistribute this software
+;;; is granted subject to the following restriction:  Any publication
+;;; or redistribution of this software, whether on its own or
+;;; incorporated into other software, must bear the above copyright
+;;; notices and the following legend:
+;;;
+;;;     The Twobit compiler and the Larceny runtime system were
+;;;     developed by William Clinger and Lars Hansen with the
+;;;     assistance of Lightship Software and the College of Computer
+;;;     Science of Northeastern University.  This acknowledges that
+;;;     Clinger et al remain the sole copyright holders to Twobit
+;;;     and Larceny and that no rights pursuant to that status are
+;;;     waived or conveyed.
+;;;
+;;; Twobit and Larceny are provided as is.  The user specifically
+;;; acknowledges that Northeastern University, William Clinger, Lars
+;;; Hansen, and Lightship Software have not made any representations
+;;; or warranty with regard to performance of Twobit and Larceny,
+;;; their merchantability, or fitness for a particular purpose.  Users
+;;; further acknowledge that they have had the opportunity to inspect
+;;; Twobit and Larceny and will hold harmless Northeastern University,
+;;; William Clinger, Lars Hansen, and Lightship Software from any cost,
+;;; liability, or expense arising from, or in any way related to the
+;;; use of this software.
+;;;
+
+
+(test "srfi-1-1" '(2 . 1) (xcons 1 2))
+
+(test "srfi-1-2" 1 (cons* 1))
+
+(test "srfi-1-3" '(1 2 3 4 . 5) (cons* 1 2 3 4 5) )
+
+(test "srfi-1-4" '(#t #t #t #t #t) (make-list 5 #t))
+
+(test "srfi-1-5" '() (make-list 0 #f))
+
+(test "srfi-1-6" 3 (length (make-list 3)))
+
+(test "srfi-1-7" '(0 1 2 3 4) (list-tabulate 5 (lambda (x) x)))
+
+(test "srfi-1-8" '() (list-tabulate 0 (lambda (x) (error "FOO!"))))
+
+(test "srfi-1-9" #t (call-with-current-continuation
+          (lambda (abort)
+            (let* ((c  (list 1 2 3 4 5))
+                   (cp (list-copy c)))
+              (or (equal? c cp)
+                  (abort #f))
+              (let loop ((c c) (cp cp))
+                (if (not (null? c))
+                    (begin
+                      (or (not (eq? c cp))
+                          (abort #f))
+                      (loop (cdr c) (cdr cp)))))
+              #t))))
+
+(test "srfi-1-10" '(1 2 3 . 4) (list-copy '(1 2 3 . 4)))
+
+(test "srfi-1-11" #f (list? (circular-list 1 2 3)))
+
+(test "srfi-1-12" #t (let* ((a (list 'a))
+                (b (list 'b))
+                (c (list 'c))
+                (x (circular-list a b c)))
+           (and (eq? a (car x))
+                (eq? b (cadr x))
+                (eq? c (caddr x))
+                (eq? a (cadddr x)))))
+
+(test "srfi-1-13" '() (iota 0))
+
+(test "srfi-1-14" '(2 5 8 11 14) (iota 5 2 3))
+
+(test "srfi-1-15" '(2 3 4 5 6) (iota 5 2))
+
+
+(test "srfi-1-16" #t (proper-list? '(1 2 3 4 5)))
+
+(test "srfi-1-17" #t (proper-list? '()))
+
+(test "srfi-1-18" #f (proper-list? '(1 2 . 3)))
+
+(test "srfi-1-19" #f (proper-list? (circular-list 1 2 3)))
+
+(test "srfi-1-20" #f (circular-list? '(1 2 3 4 5)))
+
+(test "srfi-1-21" #f (circular-list? '()))
+
+(test "srfi-1-22" #f (circular-list? '(1 2 . 3)))
+
+(test "srfi-1-23" #t (circular-list? (circular-list 1 2 3)))
+
+(test "srfi-1-24" #f (dotted-list? '(1 2 3 4 5)))
+
+(test "srfi-1-25" #f (dotted-list? '()))
+
+(test "srfi-1-26" #t (dotted-list? '(1 2 . 3)))
+
+(test "srfi-1-27" #f (dotted-list? (circular-list 1 2 3)))
+
+(test "srfi-1-28" #t (null-list? '()))
+
+(test "srfi-1-29" #f (null-list? '(1 2)))
+
+(test "srfi-1-30" #f (null-list? (circular-list 1 2)))
+
+(test "srfi-1-31" #t (not-pair? 1))
+
+(test "srfi-1-32" #f (not-pair? (cons 1 2)))
+
+(test "srfi-1-33" #t (list= = '(1 2 3) '(1 2 3) '(1 2 3)))
+
+(test "srfi-1-34" #f (list= = '(1 2 3) '(1 2 3) '(1 4 3)))
+
+; Checks that l0 is not being used when testing l2, cf spec
+(test "srfi-1-35" #t (list= (lambda (a b) (not (eq? a b))) '(#f #f #f) '(#t #t #t) '(#f #f #f)))
+
+(test "srfi-1-36" #t (list= =))
+
+(test "srfi-1-37" #t (= (first '(1 2 3 4 5 6 7 8 9 10)) 1))
+(test "srfi-1-38" #t (= (second '(1 2 3 4 5 6 7 8 9 10)) 2))
+(test "srfi-1-39" #t (= (third '(1 2 3 4 5 6 7 8 9 10)) 3))
+(test "srfi-1-40" #t (= (fourth '(1 2 3 4 5 6 7 8 9 10)) 4))
+(test "srfi-1-41" #t (= (fifth '(1 2 3 4 5 6 7 8 9 10)) 5))
+(test "srfi-1-42" #t (= (sixth '(1 2 3 4 5 6 7 8 9 10)) 6))
+(test "srfi-1-43" #t (= (seventh '(1 2 3 4 5 6 7 8 9 10)) 7))
+(test "srfi-1-44" #t (= (eighth '(1 2 3 4 5 6 7 8 9 10)) 8))
+(test "srfi-1-45" #t (= (ninth '(1 2 3 4 5 6 7 8 9 10)) 9))
+(test "srfi-1-46" #t (= (tenth '(1 2 3 4 5 6 7 8 9 10)) 10))
+
+(test "srfi-1-47" #t (let-values (((a b) (car+cdr '(1 . 2))))
+           (and (= a 1) (= b 2))))
+
+(test "srfi-1-48" '(1 2 3) (take '(1 2 3 4 5 6) 3))
+
+(test "srfi-1-49" '(1) (take '(1) 1))
+
+(test "srfi-1-50" #t (let ((x (list 1 2 3 4 5 6)))
+           (eq? (cdddr x) (drop x 3))))
+
+(test "srfi-1-51" #t (let ((x (list 1 2 3)))
+           (eq? x (drop x 0))))
+
+(test "srfi-1-52" '(4 5 6) (take-right '(1 2 3 4 5 6) 3))
+
+(test "srfi-1-53" #t (null? (take-right '(1 2 3 4 5 6) 0)))
+
+(test "srfi-1-54" '(2 3 . 4) (take-right '(1 2 3 . 4) 2))
+
+(test "srfi-1-55" 4 (take-right '(1 2 3 . 4) 0))
+
+(test "srfi-1-56" '(1 2 3) (drop-right '(1 2 3 4 5 6) 3))
+
+(test "srfi-1-57" '(1 2 3) (drop-right '(1 2 3) 0))
+
+(test "srfi-1-58" '(1 2 3) (drop-right '(1 2 3 . 4) 0))
+
+(test "srfi-1-59" #t (let ((x (list 1 2 3 4 5 6)))
+           (let ((y (take! x 3)))
+             (and (eq? x y)
+                  (eq? (cdr x) (cdr y))
+                  (eq? (cddr x) (cddr y))
+                  (equal? y '(1 2 3))))))
+
+(test "srfi-1-60" #t (let ((x (list 1 2 3 4 5 6)))
+           (let ((y (drop-right! x 3)))
+             (and (eq? x y)
+                  (eq? (cdr x) (cdr y))
+                  (eq? (cddr x) (cddr y))
+                  (equal? y '(1 2 3))))))
+
+(test "srfi-1-61" #t (let-values (((a b) (split-at '(1 2 3 4 5 6) 2)))
+           (and (equal? a '(1 2))
+                (equal? b '(3 4 5 6)))))
+
+(test "srfi-1-62" #t (let* ((x (list 1 2 3 4 5 6))
+                (y (cddr x)))
+           (let-values (((a b) (split-at! x 2)))
+             (and (equal? a '(1 2))
+                  (eq? a x)
+                  (equal? b '(3 4 5 6))
+                  (eq? b y)))))
+
+(test "srfi-1-63" 37 (last '(1 2 3 37)))
+
+(test "srfi-1-64" #f (length+ (circular-list 1 2 3)))
+
+(test "srfi-1-65" 4 (length+ '(1 2 3 4)))
+
+(test "srfi-1-66" #t (let ((x (list 1 2))
+               (y (list 3 4))
+               (z (list 5 6)))
+           (let ((r (append! x y '() z)))
+             (and (equal? r '(1 2 3 4 5 6))
+                  (eq? r x)
+                  (eq? (cdr r) (cdr x))
+                  (eq? (cddr r) y)
+                  (eq? (cdddr r) (cdr y))
+                  (eq? (cddddr r) z)
+                  (eq? (cdr (cddddr r)) (cdr z))))))
+
+(test "srfi-1-67" '(1 2 3 4 5 6 7 8 9)
+      (concatenate '((1 2 3) (4 5 6) () (7 8 9))))
+
+(test "srfi-1-68" '(1 2 3 4 5 6 7 8 9)
+      (concatenate! `(,(list 1 2 3) ,(list 4 5 6) () ,(list 7 8 9))))
+
+(test "srfi-1-69" '(1 2 3 4 5 6)
+      (append-reverse '(3 2 1) '(4 5 6)))
+
+(test "srfi-1-70" '(1 2 3 4 5 6)
+      (append-reverse! (list 3 2 1) (list 4 5 6)))
+
+(test "srfi-1-71" '((1 4) (2 5) (3 6))
+      (zip '(1 2 3) '(4 5 6)))
+
+(test "srfi-1-72" '()
+      (zip '() '() '() '()))
+
+(test "srfi-1-73" '((1 1))
+      (zip '(1) (circular-list 1 2)))
+
+(test "srfi-1-74" '(1 2 3 4 5)
+      (unzip1 '((1) (2) (3) (4) (5))))
+
+(test "srfi-1-75" #t (let-values (((a b) (unzip2 '((10 11) (20 21) (30 31)))))
+           (and (equal? a '(10 20 30))
+                (equal? b '(11 21 31)))))
+
+(test "srfi-1-76" #t (let-values (((a b c) (unzip3 '((10 11 12) (20 21 22) (30 31 32)))))
+           (and (equal? a '(10 20 30))
+                (equal? b '(11 21 31))
+                (equal? c '(12 22 32)))))
+
+(test "srfi-1-77" #t (let-values (((a b c d) (unzip4 '((10 11 12 13)
+                                           (20 21 22 23)
+                                           (30 31 32 33)))))
+           (and (equal? a '(10 20 30))
+                (equal? b '(11 21 31))
+                (equal? c '(12 22 32))
+                (equal? d '(13 23 33)))))
+
+(test "srfi-1-78" #t (let-values (((a b c d e) (unzip5 '((10 11 12 13 14)
+                                             (20 21 22 23 24)
+                                             (30 31 32 33 34)))))
+           (and (equal? a '(10 20 30))
+                (equal? b '(11 21 31))
+                (equal? c '(12 22 32))
+                (equal? d '(13 23 33))
+                (equal? e '(14 24 34)))))
+
+(test "srfi-1-79" 3 (count even? '(3 1 4 1 5 9 2 5 6)))
+
+(test "srfi-1-80" 3 (count < '(1 2 4 8) '(2 4 6 8 10 12 14 16)))
+
+(test "srfi-1-81" 2 (count < '(3 1 4 1) (circular-list 1 10)))
+
+(test "srfi-1-82" '(c 3 b 2 a 1)
+      (fold cons* '() '(a b c) '(1 2 3 4 5)))
+
+(test "srfi-1-83" '(a 1 b 2 c 3)
+      (fold-right cons* '() '(a b c) '(1 2 3 4 5)))
+
+(test "srfi-1-84" #t (let* ((x (list 1 2 3))
+                (r (list x (cdr x) (cddr x)))
+                (y (pair-fold (lambda (pair tail)
+                                (set-cdr! pair tail) pair)
+                              '()
+                              x)))
+           (and (equal? y '(3 2 1))
+                (every (lambda (c) (memq c r)) (list y (cdr y) (cddr y)))
+                #t)))
+
+(test "srfi-1-85" '((a b c) (b c) (c))
+      (pair-fold-right cons '() '(a b c)))
+
+(test "srfi-1-86" 5 (reduce max 'illegal '(1 2 3 4 5)))
+
+(test "srfi-1-87" 0 (reduce max 0 '()))
+
+(test "srfi-1-88" '(1 2 3 4 5)
+      (reduce-right append 'illegal '((1 2) () (3 4 5))))
+
+(test "srfi-1-89" '(1 4 9 16 25 36 49 64 81 100)
+      (unfold (lambda (x) (> x 10))
+              (lambda (x) (* x x))
+              (lambda (x) (+ x 1))
+              1))
+
+(test "srfi-1-90" '(1 4 9 16 25 36 49 64 81 100)
+      (unfold-right zero?
+                    (lambda (x) (* x x))
+                    (lambda (x) (- x 1))
+                    10))
+
+(test "srfi-1-91" '(4 1 5 1)
+      (map + '(3 1 4 1) (circular-list 1 0)))
+
+(test "srfi-1-92" '(5 4 3 2 1)
+      (let ((v 1)
+            (l '()))
+        (for-each (lambda (x y)
+                    (let ((n v))
+                      (set! v (+ v 1))
+                      (set! l (cons n l))))
+                  '(0 0 0 0 0)
+                  (circular-list 1 2))
+        l))
+
+(test "srfi-1-93" '(1 -1 3 -3 8 -8)
+      (append-map (lambda (x) (list x (- x))) '(1 3 8)))
+
+
+(test "srfi-1-94" '(1 -1 3 -3 8 -8)
+      (append-map! (lambda (x) (list x (- x))) '(1 3 8)))
+
+(test "srfi-1-95" #t (let* ((l (list 1 2 3))
+                (m (map! (lambda (x) (* x x)) l)))
+           (and (equal? m '(1 4 9))
+                (equal? l '(1 4 9)))))
+
+(test "srfi-1-96" '(1 2 3 4 5)
+      (let ((v 1))
+        (map-in-order (lambda (x)
+                        (let ((n v))
+                          (set! v (+ v 1))
+                          n))
+                      '(0 0 0 0 0))))
+
+(test "srfi-1-97" '((3) (2 3) (1 2 3))
+      (let ((xs (list 1 2 3))
+            (l '()))
+        (pair-for-each (lambda (x) (set! l (cons x l))) xs)
+        l))
+
+(test "srfi-1-98" '(1 9 49)
+      (filter-map (lambda (x y) (and (number? x) (* x x)))
+                  '(a 1 b 3 c 7)
+                  (circular-list 1 2)))
+
+(test "srfi-1-99" '(0 8 8 -4)
+      (filter even? '(0 7 8 8 43 -4)))
+
+(test "srfi-1-100" #t (let-values (((a b) (partition symbol? '(one 2 3 four five 6))))
+           (and (equal? a '(one four five))
+                (equal? b '(2 3 6)))))
+
+(test "srfi-1-101" '(7 43)
+      (remove even? '(0 7 8 8 43 -4)))
+
+(test "srfi-1-102" #t (let* ((x (list 0 7 8 8 43 -4))
+                (y (pair-fold cons '() x))
+                (r (filter! even? x)))
+           (and (equal? '(0 8 8 -4) r)
+                (every (lambda (c) (memq c y)) (pair-fold cons '() r))
+                #t)))
+
+(test "srfi-1-103" #t (let* ((x (list 'one 2 3 'four 'five 6))
+                (y (pair-fold cons '() x)))
+           (let-values (((a b) (partition! symbol? x)))
+             (and (equal? a '(one four five))
+                  (equal? b '(2 3 6))
+                  (every (lambda (c) (memq c y)) (pair-fold cons '() a))
+                  (every (lambda (c) (memq c y)) (pair-fold cons '() b))
+                  #t))))
+
+(test "srfi-1-104" #t (let* ((x (list 0 7 8 8 43 -4))
+                (y (pair-fold cons '() x))
+                (r (remove! even? x)))
+           (and (equal? '(7 43) r)
+                (every (lambda (c) (memq c y)) (pair-fold cons '() r))
+                #t)))
+
+(test "srfi-1-105" 4 (find even? '(3 1 4 1 5 9 8)))
+
+(test "srfi-1-106" '(4 1 5 9 8)
+      (find-tail even? '(3 1 4 1 5 9 8)))
+
+(test "srfi-1-107" #f (find-tail even? '(1 3 5 7)))
+
+(test "srfi-1-108" '(2 18)
+      (take-while even? '(2 18 3 10 22 9)))
+
+(test "srfi-1-109" #t (let* ((x (list 2 18 3 10 22 9))
+                (r (take-while! even? x)))
+           (and (equal? r '(2 18))
+                (eq? r x)
+                (eq? (cdr r) (cdr x)))))
+
+(test "srfi-1-110" '(3 10 22 9)
+      (drop-while even? '(2 18 3 10 22 9)))
+
+(test "srfi-1-111" #t (let-values (((a b) (span even? '(2 18 3 10 22 9))))
+           (and (equal? a '(2 18))
+                (equal? b '(3 10 22 9)))))
+
+(test "srfi-1-112" #t (let-values (((a b) (break even? '(3 1 4 1 5 9))))
+           (and (equal? a '(3 1))
+                (equal? b '(4 1 5 9)))))
+
+(test "srfi-1-113" #t (let* ((x     (list 2 18 3 10 22 9))
+                (cells (pair-fold cons '() x)))
+           (let-values (((a b) (span! even? x)))
+             (and (equal? a '(2 18))
+                  (equal? b '(3 10 22 9))
+                  (every (lambda (x) (memq x cells)) (pair-fold cons '() a))
+                  (every (lambda (x) (memq x cells)) (pair-fold cons '() b))
+                  #t))))
+
+(test "srfi-1-114" #t (let* ((x     (list 3 1 4 1 5 9))
+                (cells (pair-fold cons '() x)))
+           (let-values (((a b) (break! even? x)))
+             (and (equal? a '(3 1))
+                  (equal? b '(4 1 5 9))
+                  (every (lambda (x) (memq x cells)) (pair-fold cons '() a))
+                  (every (lambda (x) (memq x cells)) (pair-fold cons '() b))
+                  #t))))
+
+(test "srfi-1-115" #t (any integer? '(a 3 b 2.7)))
+
+(test "srfi-1-116" #f (any integer? '(a 3.1 b 2.7)))
+
+(test "srfi-1-117" #t (any < '(3 1 4 1 5) (circular-list 2 7 1 8 2)))
+
+(test "srfi-1-118" 'yes (any (lambda (a b) (if (< a b) 'yes #f))
+                '(1 2 3) '(0 1 4)))
+
+(test "srfi-1-119" #t (every integer? '(1 2 3)))
+
+(test "srfi-1-120" #f (every integer? '(3 4 5.1)))
+
+(test "srfi-1-121" #t (every < '(1 2 3) (circular-list 2 3 4)))
+
+(test "srfi-1-122" 2 (list-index even? '(3 1 4 1 5 9)))
+
+(test "srfi-1-123" 1 (list-index < '(3 1 4 1 5 9 2 5 6) '(2 7 1 8 2)))
+
+(test "srfi-1-124" #f (list-index = '(3 1 4 1 5 9 2 5 6) '(2 7 1 8 2)))
+
+(test "srfi-1-125" '(37 48)
+      (member 5 '(1 2 5 37 48) <))
+
+(test "srfi-1-126" '(1 2 5)
+      (delete 5 '(1 48 2 5 37) <))
+
+(test "srfi-1-127" '(1 2 7)
+      (delete 5 '(1 5 2 5 7)))
+
+(test "srfi-1-128" #t (let* ((x     (list 1 48 2 5 37))
+                (cells (pair-fold cons '() x))
+                (r     (delete! 5 x <)))
+           (and (equal? r '(1 2 5))
+                (every (lambda (x) (memq x cells)) (pair-fold cons '() r))
+                #t)))
+
+(test "srfi-1-129" '((a . 3) (b . 7) (c . 1))
+      (delete-duplicates '((a . 3) (b . 7) (a . 9) (c . 1))
+                         (lambda (x y) (eq? (car x) (car y)))))
+
+(test "srfi-1-130" '(a b c z)
+      (delete-duplicates '(a b a c a b c z) eq?))
+
+(test "srfi-1-131" #t (let* ((x     (list 'a 'b 'a 'c 'a 'b 'c 'z))
+                (cells (pair-fold cons '() x))
+                (r     (delete-duplicates! x)))
+           (and (equal? '(a b c z) r)
+                ;; XXX NOTE member, not memq as in original test
+                (every (lambda (x) (member x cells)) (pair-fold cons '() r))
+                #t)))
+
+(test "srfi-1-132" '(3 . #t)
+      (assoc 6
+             '((4 . #t) (3 . #t) (5 . #t))
+             (lambda (x y)
+               (zero? (remainder x y)))))
+
+(test "srfi-1-133" '((1 . #t) (2 . #f))
+      (alist-cons 1 #t '((2 . #f))))
+
+(test "srfi-1-134" #t (let* ((a (list (cons 1 2) (cons 3 4)))
+                (b (alist-copy a)))
+           (and (equal? a b)
+                (every (lambda (x) (not (memq x b))) a)
+                (every (lambda (x) (not (memq x a))) b)
+                #t)))
+
+(test "srfi-1-135" '((1 . #t) (2 . #t) (4 . #t))
+      (alist-delete 5 '((1 . #t) (2 . #t) (37 . #t) (4 . #t) (48 #t)) <))
+
+(test "srfi-1-136" '((1 . #t) (2 . #t) (4 . #t))
+      (alist-delete 7 '((1 . #t) (2 . #t) (7 . #t) (4 . #t) (7 #t))))
+
+;; Excluded srfi-1-137:
+;;
+;; In Chibi, returns #f instead of #t
+;; In Sagittarius, Gauche and Kawa, fails when trying to mutate an immutable pair
+;; Racket does not have alist-delete!
+;;
+;; (test "srfi-1-137" #t
+;;       (let* ((x '((1 . #t) (2 . #t) (7 . #t) (4 . #t) (7 #t)))
+;;              (y (list-copy x))
+;;              (cells (pair-fold cons '() x))
+;;              (r (alist-delete! 7 x)))
+;;         (and (equal? r '((1 . #t) (2 . #t) (4 . #t)))
+;;              (every (lambda (x) (memq x cells)) (pair-fold cons '() r))
+;;              (every (lambda (x) (memq x y)) r)
+;;              #t)))
+
+(test "srfi-1-138" #t (lset<= eq? '(a) '(a b a) '(a b c c)))
+
+(test "srfi-1-139" #f (lset<= eq? '(a) '(a b a) '(a)))
+
+(test "srfi-1-140" #t (lset<= eq?))
+
+(test "srfi-1-141" #t (lset<= eq? '(a)))
+
+(test "srfi-1-142" #t (lset= eq? '(b e a) '(a e b) '(e e b a)))
+
+(test "srfi-1-143" #f (lset= eq? '(b e a) '(a e b) '(e e b a c)))
+
+(test "srfi-1-144" #t (lset= eq?))
+
+(test "srfi-1-145" #t (lset= eq? '(a)))
+
+(test "srfi-1-146" '(u o i a b c d c e)
+      (lset-adjoin eq? '(a b c d c e) 'a 'e 'i 'o 'u))
+
+(test "srfi-1-147" '(u o i a b c d e)
+      (lset-union eq? '(a b c d e) '(a e i o u)))
+
+(test "srfi-1-148" '(x a a c)
+      (lset-union eq? '(a a c) '(x a x)))
+
+(test "srfi-1-149" #t (null? (lset-union eq?)))
+
+(test "srfi-1-150" '(a b c)
+      (lset-union eq? '(a b c)))
+
+(test "srfi-1-151" '(a e)
+      (lset-intersection eq? '(a b c d e) '(a e i o u)))
+
+(test "srfi-1-152" '(a x a)
+      (lset-intersection eq? '(a x y a) '(x a x z)))
+
+(test "srfi-1-153" '(a b c)
+      (lset-intersection eq? '(a b c)))
+
+(test "srfi-1-154" '(b c d)
+      (lset-difference eq? '(a b c d e) '(a e i o u)))
+
+(test "srfi-1-155" '(a b c)
+      (lset-difference eq? '(a b c)))
+
+(test "srfi-1-156" #t (lset= eq? '(d c b i o u) (lset-xor eq? '(a b c d e) '(a e i o u))))
+
+(test "srfi-1-157" #t (lset= eq? '() (lset-xor eq?)))
+
+(test "srfi-1-158" #t (lset= eq? '(a b c d e) (lset-xor eq? '(a b c d e))))
+
+(test "srfi-1-159" #t (let-values (((d i) (lset-diff+intersection eq? '(a b c d e) '(c d f))))
+           (and (equal? d '(a b e))
+                (equal? i '(c d)))))
+
+; FIXME: For the following five procedures, need to check that cells
+; returned are from the arguments.
+
+(test "srfi-1-160" '(u o i a b c d e)
+      (lset-union! eq? (list 'a 'b 'c 'd 'e) (list 'a 'e 'i 'o 'u)))
+
+(test "srfi-1-161" '(x a a c)
+      (lset-union! eq? (list 'a 'a 'c) (list 'x 'a 'x)))
+
+(test "srfi-1-162" #t (null? (lset-union! eq?)))
+
+(test "srfi-1-163" '(a b c)
+      (lset-union! eq? (list 'a 'b 'c)))
+
+(test "srfi-1-164" '(a e)
+      (lset-intersection! eq? (list 'a 'b 'c 'd 'e)
+                          (list 'a 'e 'i 'o 'u)))
+
+(test "srfi-1-165" '(a x a)
+      (lset-intersection! eq? (list 'a 'x 'y 'a)
+                          (list 'x 'a 'x 'z)))
+
+(test "srfi-1-166" '(a b c)
+      (lset-intersection! eq? (list 'a 'b 'c)))
+
+(test "srfi-1-167" '(b c d)
+      (lset-difference! eq? (list 'a 'b 'c 'd 'e)
+                        (list 'a 'e 'i 'o 'u)))
+
+(test "srfi-1-168" '(a b c)
+      (lset-difference! eq? (list 'a 'b 'c)))
+
+(test "srfi-1-169" #t (lset= eq? '(d c b i o u)
+                             (lset-xor! eq? (list 'a 'b 'c 'd 'e)
+                                        (list 'a 'e 'i 'o 'u))))
+
+(test "srfi-1-170" #t (lset= eq? '() (lset-xor! eq?)))
+
+(test "srfi-1-171" #t (lset= eq? '(a b c d e) (lset-xor! eq? (list 'a 'b 'c 'd 'e))))
+
+(test "srfi-1-172" #t (let-values (((d i) (lset-diff+intersection! eq? (list 'a 'b 'c 'd 'e)
+                                                      (list 'c 'd 'f))))
+                        (and (equal? d '(a b e))
+                             (equal? i '(c d)))))

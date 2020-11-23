@@ -19,26 +19,19 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 14-Aug-2000 13:13 (eg)
-# Last file update: 20-Nov-2020 17:05 (eg)
+# Last file update: 21-Nov-2020 19:31 (eg)
 
 scmbin      = stklos-compile stklos-genlex
 bin_SCRIPTS = stklos-config  stklos-script $(scmbin)
 
-# HACK: We define localscript as a dependence of the scripts
-# stklos-compile and stklos-genlex to ensure that it is compiled
-# Since it is not in bin_SCRIPTS, it will not be installed
-localscript = update-srfi-list
-
 COMP ?= ./tmpcomp
 
-stklos-compile: $(localscript) stklos-compile.stk
+stklos-compile: stklos-compile.stk
 	$(COMP) -o stklos-compile stklos-compile.stk
 
-stklos-genlex: $(localscript) stklos-genlex.stk
+stklos-genlex: stklos-genlex.stk
 	$(COMP) -o stklos-genlex stklos-genlex.stk
 
-update-srfi-list: update-srfi-list.stk
-	$(COMP) -o update-srfi-list update-srfi-list.stk
 
 clean:
 	rm -f $(scmbin) $(localscript) *~

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 21-Nov-2020 13:03 (eg)
+;;;; Last file update: 21-Nov-2020 20:49 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -63,24 +63,6 @@
 ;; ----------------------------------------------------------------------
 (define (srfi-0-feature-implementation-file x)
   (let Loop ((l *all-features*))
-    (cond
-      ((null? l)                        ;; not found
-       #f)
-      ((symbol? (car l))                ; clause  srfi-x
-       (if (eq? (car l) x)
-           #f
-           (Loop (cdr l))))
-      ((symbol? (caar l))               ; clause  (srfi-x ...)
-       (if (eq? x (caar l))
-           (cdar l)
-           (Loop (cdr l))))
-      (else                             ; clause ((srfi-x foo bar) ...)
-       (if (memq x (caar l))
-           (cdar l)
-           (Loop (cdr l)))))))
-
-(define (srfi-0-feature-implementation-file x)
-  (let Loop ((l *all-features*))
     (if (null? l)
         #f                          ;; not found
         (let ((current (car l)))
@@ -90,10 +72,8 @@
                   (let ((val (cdr current)))
                     (if (pair? val) val (list val)))
                   (Loop (cdr l)))
-              ;; Clause is FEATURE
-              (if (eq? current x)
-                  (list current)
-                  (Loop (cdr l))))))))
+              (Loop (cdr l)))))))
+
 ;; ----------------------------------------------------------------------
 (define (%has-feature? x)
   (define (load-implementation files)

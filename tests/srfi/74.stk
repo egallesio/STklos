@@ -1,0 +1,147 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 74 ...
+;; ----------------------------------------------------------------------
+(define b1 (make-blob 16))
+
+(test "blob-length" 16 (blob-length b1))
+
+(blob-u8-set! b1 0 223)
+(blob-s8-set! b1 1 123)
+(blob-s8-set! b1 2 -123)
+(blob-u8-set! b1 3 15)
+
+(test "blob repr"
+      '(223 123 123 -123 133 15)
+      (list (blob-u8-ref b1 0)
+        (blob-s8-ref b1 1)
+        (blob-u8-ref b1 1)
+        (blob-s8-ref b1 2)
+        (blob-u8-ref b1 2)
+        (blob-u8-ref b1 3)))
+
+(blob-uint-set! 16 (endianness little) b1 0 (- (expt 2 128) 3))
+(test "blob-uint-ref.1"
+      (- (expt 2 128) 3)
+      (blob-uint-ref 16 (endianness little) b1 0))
+(test "blob-uint-ref.2"
+      -3
+      (blob-sint-ref 16 (endianness little) b1 0))
+
+(test "blob->u8-list"
+      '(253 255 255 255 255 255 255 255 255 255 255 255 255 255 255 255)
+      (blob->u8-list b1))
+
+(blob-uint-set! 16 (endianness big) b1 0 (- (expt 2 128) 3))
+
+(test "blob-uint-ref.3"
+      (- (expt 2 128) 3)
+      (blob-uint-ref 16 (endianness big) b1 0))
+
+(test "blob-sint-ref"
+      -3
+      (blob-sint-ref 16 (endianness big) b1 0))
+
+(test "blob->u8-list"
+      '(255 255 255 255 255 255 255 255 255 255 255 255 255 255 255 253)
+      (blob->u8-list b1))
+
+(test "blob-u16-ref"
+      65023
+      (blob-u16-ref (endianness little) b1 14))
+
+(test "blob-s16-ref"
+      -513
+      (blob-s16-ref (endianness little) b1 14))
+
+(test "blob-u16-ref"
+      65533
+      (blob-u16-ref (endianness big) b1 14))
+
+(test "blob-s16-ref"
+      -3
+      (blob-s16-ref (endianness big) b1 14))
+
+
+(blob-u16-set! (endianness little) b1 0 12345)
+(blob-u16-native-set! b1 0 12345)
+
+(test "blob-u16-native-ref"
+      12345
+      (blob-u16-native-ref b1 0))
+
+(test "blob-u32-ref"
+      4261412863
+      (blob-u32-ref (endianness little) b1 12))
+(test "blob-s32-ref"
+      -33554433
+      (blob-s32-ref (endianness little) b1 12))
+
+(test "blob-u32-ref"
+      4294967293
+      (blob-u32-ref (endianness big) b1 12))
+(test "blob-s32-ref"
+      -3
+      (blob-s32-ref(endianness big) b1 12))
+
+(blob-u32-set! (endianness little) b1 0 12345)
+(blob-u32-native-set! b1 0 12345)
+
+(test "blob-u32-native-ref"
+      12345
+      (blob-u32-native-ref b1 0))
+(test "blob-u64-ref"
+      18302628885633695743
+       (blob-u64-ref (endianness little) b1 8))
+(test "(blob-s64-ref (endianness little) b1 8)"
+      -144115188075855873
+      (blob-s64-ref (endianness little) b1 8))
+(test "(blob-u64-ref (endianness big) b1 8)"
+      18446744073709551613
+      (blob-u64-ref (endianness big) b1 8))
+(test "(blob-s64-ref (endianness big) b1 8)"
+      -3
+      (blob-s64-ref (endianness big) b1 8))
+
+(blob-u64-set! (endianness little) b1 0 12345)
+(blob-u64-native-set! b1 0 12345)
+
+(test "(blob-u64-native-ref b1 0)"
+      12345
+      (blob-u64-native-ref b1 0))
+
+(define b2 (u8-list->blob '(1 2 3 4 5 6 7 8)))
+(define b3 (blob-copy b2))
+
+(test "(blob=? b2 b3)"
+      #t
+      (blob=? b2 b3))
+(test "(blob=? b1 b2)"
+      #f
+      (blob=? b1 b2))
+
+(blob-copy! b3 0 b3 4 4)
+(test "(blob->u8-list b3)"
+      '(1 2 3 4 1 2 3 4)
+      (blob->u8-list b3))
+
+(blob-copy! b3 0 b3 2 6)
+(test "(blob->u8-list b3)"
+      '(1 2 1 2 3 4 1 2)
+      (blob->u8-list b3))
+
+(blob-copy! b3 2 b3 0 6)
+(test "(blob->u8-list b3)"
+      '(1 2 3 4 1 2 1 2)
+      (blob->u8-list b3))
+(test "(blob->uint-list 1 (endianness little) b3)"
+      '(1 2 3 4 1 2 1 2)
+      (blob->uint-list 1 (endianness little) b3))
+(test "(blob->uint-list 2 (endianness little) b3)"
+      '(513 1027 513 513)
+      (blob->uint-list 2 (endianness little) b3))
+
+(define b4 (u8-list->blob '(0 0 0 0 0 0 48 57 255 255 255 255 255 255 255 253)))
+
+(test "(blob->sint-list 2 (endianness little) b4)"
+      '(0 0 0 14640 -1 -1 -1 -513)
+      (blob->sint-list 2 (endianness little) b4))
