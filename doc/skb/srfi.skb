@@ -713,6 +713,9 @@ procedure.]))
 ;; SRFI 190 -- Coroutine Generators
 (gen-loaded-srfi 190)
 
+;; SRFI 192 -- Port Positioning
+(gen-embedded-srfi 192)
+
 ;; SRFI 193 -- Command Line
 (gen-embedded-srfi 193)
 

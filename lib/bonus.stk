@@ -1893,6 +1893,114 @@ doc>
       (os.env.TERM ,(or (getenv "TERM") "")))))
 
 ;; ----------------------------------------------------------------------
+;;  SRFI-192: "Port positioning"
+;; ----------------------------------------------------------------------
+  
+#|
+<doc EXT port-has-port-position?
+ * (port-has-port-position? port)
+ *
+ * The port-has-port-position? procedure returns #t if the port
+ * supports the port-position operation, and #f otherwise. If the port
+ * does not support the operation, port-position signals an error.
+doc>
+|#
+(define (port-has-port-position? port)
+  (if (not (port? port))
+      (error 'port-has-port-position?
+             "Not a port: ~A" port)
+      #t))
+
+#|
+<doc EXT port-position
+ * (port-position port)
+ *
+ * The port-position procedure returns an object representing the
+ * information state  about the port current position as is
+ * necessary to save and restore that position. This value can be useful
+ * only as the pos argument to set-port-position!, if the latter is even
+ * supported on the port. However, if the port is binary and the object
+ * is an exact integer, then it is the position measured in bytes, and
+ * can be used to compute a new position some specified number of bytes
+ * away.
+doc>
+|#
+(define port-position port-current-position)
+
+#|
+<doc EXT set-port-position!
+ * (port-has-set-port-position!? port)
+ *
+ * The port-has-set-port-position!? procedure returns #t if the port supports
+ * the set-port-position! operation, and #f otherwise.
+doc>
+|#
+(define (port-has-set-port-position!? port)
+  (if (not (port? port))
+      (error 'port-has-set-port-position!?
+             "Not a port: ~A" port)
+      #t))
+
+#|
+<doc EXT set-port-position!
+ * (set-port-position! port pos)
+ *
+ * For a textual port, it is implementation-defined what happens if pos is not
+ * the return value of a call to port-position on port. However, a binary port
+ * will also accept an exact integer, in which case the port position is set to
+ * the specified number of bytes from the beginning of the port data. If this
+ * is not sufficient information to specify the port state, or the specified
+ * position is uninterpretable by the port, an error satisfying
+ * i/o-invalid-position-error? is signaled.
+ *
+ * If set-port-position! procedure is invoked on a port that does not support
+ * the operation or if pos is not in the range of valid positions of port,
+ * set-port-position! signals an error. Otherwise, it sets the current position
+ * of the port to pos. If port is an output port, set-port-position! first flushes
+ * port (even if the port position will not change).
+ *
+ * If port is a binary output port and the current position is set beyond the
+ * current end of the data in the underlying data sink, the object is not extended
+ * until new data is written at that position. The contents of any intervening
+ * positions are unspecified. It is also possible to set the position of a binary
+ * input port beyond the end of the data in the data source, but a read will fail
+ * unless the data has been extended by other means. File ports can always be
+ * extended in this manner within the limits of the underlying operating system.
+ * In other types of ports, if an attempt is made to set the position beyond the
+ * current end of data in the underlying object, and the object does not support
+ * extension, an error satisfying i/o-invalid-position-error? is signaled.
+|#
+(define (set-port-position! port pos)
+  (when (output-port? port)
+    (flush port))
+  (port-seek port pos))
+
+#|
+<doc EXT make-i/o-invalid-position-error
+ * (make-i/o-invalid-position-error pos)
+ * 
+ * Returns a condition object which satisfies i/o-invalid-position-error?.
+ * The pos argument represents a position passed to set-position!.
+doc>
+|#
+(define (make-i/o-invalid-position-error pos)
+   (make-condition &i/o-bad-parameter 'parameter pos))
+
+#|
+<doc EXT
+ * (i/o-invalid-position-error? obj)
+ * Returns #t if obj is an object created by
+ * make-i/o-invalid-position-error? or an object raised in the circumstances
+ * described in SRFI-192 (attempt to access an invalid position in the
+ * stream), or #f if it is not.
+doc>
+|#
+(define (i/o-invalid-position-error? obj)
+  (and (condition? obj)
+       (condition-has-type? 'obj &i/o-bad-parameter)))
+
+
+;; ----------------------------------------------------------------------
 ;;  SRFI-193: "Command line"
 ;; ----------------------------------------------------------------------
 #|
