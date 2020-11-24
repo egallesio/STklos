@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 24-Nov-2020 15:21 (eg)
+# Last file update: 24-Nov-2020 16:01 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -747,8 +747,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-recursive
-
 clean-am: clean-generic mostlyclean-am
 
 distclean: distclean-recursive
@@ -855,12 +853,24 @@ install-sources: install-base
 install-doc: install-base
 	(cd doc && $(MAKE) $(AM_MAKEFLAGS) install)
 
-# Update the list of supported SRFIs (used by lib/Makefile)
-SUPPORTED-SRFIS: 
-	@echo "Updating list of supported SRFIs"
+# Update the list of supported SRFIs
+# This target is used by lib/Makefile. It needs a running STklos
+# Dont call it directly
+SUPPORTED-SRFIS: lib/srfis.stk
+	@echo "Updating list of supported SRFIs ... "
+	sed -e '/- SRFI/d' $@ > $@.tmp                                          && \
+	./src/stklos -l ./lib/srfis.stk -f utils/update-srfi-list.stk >> $@.tmp && \
+	mv -f  $@.tmp $@
+
+clean:
+	rm -f SUPPORTED-SRFIS.tmp
 
 test tests: all
 	(cd tests; $(MAKE) test)
+
+# Local Variables:
+# tab-width: 4
+# End:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
