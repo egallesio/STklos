@@ -23,7 +23,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Nov-2020 17:10
-;;;; Last file update: 21-Nov-2020 19:31 (eg)
+;;;; Last file update: 24-Nov-2020 17:16 (eg)
 ;;;;
 
 ;; WARNING: This scipt is useful for STklos development, it will not
@@ -35,7 +35,7 @@
 ;; Print the SRFI list as text
 ;;
 (define (list-srfis-as-text)
-  (for-each (lambda(x) (printf "- SRFI-~A: ~A\n" (car x) (cadr x)))
+  (for-each (lambda(x) (printf "    - SRFI-~A: ~A\n" (car x) (cadr x)))
             *srfi-database*))
 
 ;;

@@ -16,78 +16,78 @@ Any help for supporting new SRFIs in STklos is welcome.
 The list of the implemented SRFIs in this version is given below (the ones
 implemented in latest version is available at https://stklos.net/srfi.html):
 
-- SRFI-0: Feature-based conditional expansion construct
-- SRFI-1: List Library
-- SRFI-2: AND-LET*: an AND with local bindings, a guarded LET* special form
-- SRFI-4: Homogeneous numeric vector datatypes
-- SRFI-5: A compatible let form with signatures and rest arguments
-- SRFI-6: Basic String Ports
-- SRFI-7: Feature-based program configuration language 
-- SRFI-8: Receive: Binding to multiple values
-- SRFI-9: Defining Record Types
-- SRFI-10: Sharp Comma External Form
-- SRFI-11: Syntax for receiving multiple values
-- SRFI-13: String Library
-- SRFI-14: Character-Set Library
-- SRFI-16: Syntax for procedures of variable arity
-- SRFI-17: Generalized set!
-- SRFI-18: Multithreading support
-- SRFI-22: Running Scheme Scripts on Unix
-- SRFI-23: Error reporting mechanism
-- SRFI-26: Notation for Specializing Parameters without Currying
-- SRFI-27: Source of random bits
-- SRFI-28: Basic Format Strings
-- SRFI-30: Nested Multi-line Comments
-- SRFI-31: A special form for recursive evaluation
-- SRFI-34: Exception Handling for Programs
-- SRFI-35: Conditions
-- SRFI-36: I/O Conditions
-- SRFI-37: args-fold: a program argument processor
-- SRFI-38: External representation of shared structures
-- SRFI-39: Parameters objects
-- SRFI-45: Primitives for Expressing Iterative Lazy Algorithms
-- SRFI-48: Intermediate Format Strings
-- SRFI-51: Handling rest list
-- SRFI-54: Formatting
-- SRFI-55: Require-extension
-- SRFI-59: Vicinity
-- SRFI-60: Integers as bits
-- SRFI-61: A more general COND clause
-- SRFI-62: S-expression comments
-- SRFI-64: A Scheme API for test suites
-- SRFI-66: Octet Vectors
-- SRFI-69: Basic Hash Tables
-- SRFI-70: Numbers
-- SRFI-74: Octet-Addressed Binary Blocks
-- SRFI-87: => in case clauses
-- SRFI-88: Keyword Objects
-- SRFI-89: Optional Positional and Named Parameters
-- SRFI-96: SLIB Prerequisites
-- SRFI-98: Interface to access environment variables
-- SRFI-100: define-lambda-object
-- SRFI-111: Boxes
-- SRFI-112: Environment Inquiry
-- SRFI-113: Sets and Bags
-- SRFI-117: Queues based on lists
-- SRFI-118: Simple adjustable-size strings 
-- SRFI-128: Comparators (reduced)
-- SRFI-129: Titlecase procedures
-- SRFI-141: Integer Division
-- SRFI-145: Assumptions
-- SRFI-151: Bitwise Operations
-- SRFI-156: Syntactic combiners for binary predicates
-- SRFI-158: Generators and Accumulators
-- SRFI-161: Unifiable Boxes
-- SRFI-169: Underscores in numbers
-- SRFI-171: Transducers
-- SRFI-173: Hooks
-- SRFI-174: POSIX Timespecs
-- SRFI-175: ASCII character library
-- SRFI-176: Version flag
-- SRFI-180: JSON
-- SRFI-185: Linear adjustable-length strings
-- SRFI-189: Maybe and Either: optional container types
-- SRFI-190: Coroutines Generators
-- SRFI-193: Command line
-- SRFI-195: Multiple-value boxes
-- SRFI-196: Range Objects
+    - SRFI-0: Feature-based conditional expansion construct
+    - SRFI-1: List Library
+    - SRFI-2: AND-LET*: an AND with local bindings, a guarded LET* special form
+    - SRFI-4: Homogeneous numeric vector datatypes
+    - SRFI-5: A compatible let form with signatures and rest arguments
+    - SRFI-6: Basic String Ports
+    - SRFI-7: Feature-based program configuration language 
+    - SRFI-8: Receive: Binding to multiple values
+    - SRFI-9: Defining Record Types
+    - SRFI-10: Sharp Comma External Form
+    - SRFI-11: Syntax for receiving multiple values
+    - SRFI-13: String Library
+    - SRFI-14: Character-Set Library
+    - SRFI-16: Syntax for procedures of variable arity
+    - SRFI-17: Generalized set!
+    - SRFI-18: Multithreading support
+    - SRFI-22: Running Scheme Scripts on Unix
+    - SRFI-23: Error reporting mechanism
+    - SRFI-26: Notation for Specializing Parameters without Currying
+    - SRFI-27: Source of random bits
+    - SRFI-28: Basic Format Strings
+    - SRFI-30: Nested Multi-line Comments
+    - SRFI-31: A special form for recursive evaluation
+    - SRFI-34: Exception Handling for Programs
+    - SRFI-35: Conditions
+    - SRFI-36: I/O Conditions
+    - SRFI-37: args-fold: a program argument processor
+    - SRFI-38: External representation of shared structures
+    - SRFI-39: Parameters objects
+    - SRFI-45: Primitives for Expressing Iterative Lazy Algorithms
+    - SRFI-48: Intermediate Format Strings
+    - SRFI-51: Handling rest list
+    - SRFI-54: Formatting
+    - SRFI-55: Require-extension
+    - SRFI-59: Vicinity
+    - SRFI-60: Integers as bits
+    - SRFI-61: A more general COND clause
+    - SRFI-62: S-expression comments
+    - SRFI-64: A Scheme API for test suites
+    - SRFI-66: Octet Vectors
+    - SRFI-69: Basic Hash Tables
+    - SRFI-70: Numbers
+    - SRFI-74: Octet-Addressed Binary Blocks
+    - SRFI-87: => in case clauses
+    - SRFI-88: Keyword Objects
+    - SRFI-89: Optional Positional and Named Parameters
+    - SRFI-96: SLIB Prerequisites
+    - SRFI-98: Interface to access environment variables
+    - SRFI-100: define-lambda-object
+    - SRFI-111: Boxes
+    - SRFI-112: Environment Inquiry
+    - SRFI-113: Sets and Bags
+    - SRFI-117: Queues based on lists
+    - SRFI-118: Simple adjustable-size strings 
+    - SRFI-128: Comparators (reduced)
+    - SRFI-129: Titlecase procedures
+    - SRFI-141: Integer Division
+    - SRFI-145: Assumptions
+    - SRFI-151: Bitwise Operations
+    - SRFI-156: Syntactic combiners for binary predicates
+    - SRFI-158: Generators and Accumulators
+    - SRFI-161: Unifiable Boxes
+    - SRFI-169: Underscores in numbers
+    - SRFI-171: Transducers
+    - SRFI-173: Hooks
+    - SRFI-174: POSIX Timespecs
+    - SRFI-175: ASCII character library
+    - SRFI-176: Version flag
+    - SRFI-180: JSON
+    - SRFI-185: Linear adjustable-length strings
+    - SRFI-189: Maybe and Either: optional container types
+    - SRFI-190: Coroutines Generators
+    - SRFI-193: Command line
+    - SRFI-195: Multiple-value boxes
+    - SRFI-196: Range Objects
