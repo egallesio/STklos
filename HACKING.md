@@ -26,12 +26,12 @@ The subdirectories in the STklos source tree are:
 `main` is in `src/stklos.c`, where command line options are parsed and the
 scheme interpreter is started:
 
-* `STk_init_library` -- performs library initialization. This is done in `src/lib.c`, which is a 
+* `STk_init_library` -- performs library initialization. This is done in `src/lib.c`, which is a
   very simple file that just calls several initialization functions. Those functions are defined
   in different files under `src/`;
 * `build_scheme_args` -- collects the command line options in the variable `*%program-args*`;
 * `STk_load_boot` -- loads the boot file (if one is to be loaded);
-* `STk_boot_from_C` -- actually boots the Scheme interpreter. This function is defined in 
+* `STk_boot_from_C` -- actually boots the Scheme interpreter. This function is defined in
   `src/vm.c`, where the STklos virtual machine code is.
 
 In order to include Scheme code for execution during STklos startup, edit `lib/boot.stk`.
@@ -41,15 +41,21 @@ In order to include Scheme code for execution during STklos startup, edit `lib/b
 * add your `fantastic-module.stk` to `lib/`
 * include `fantastic-module.stk` and `fantastic-module.ostk`  in the variables
   `scheme_SRCS` and `scheme_OBJS`, in `lib/Makefile.am`
-* if there should be a SRFI-0 synonym for the module or SRFI, add
-  it to `lib/srfi-0.stk`
-* add the tests to `test/`. If you are testing a new SRFI, add it to the
-  `test-srfi.stk` file; otherwise, create a new file and include it
-  in the list of loaded files in `do-test.stk`
-* If it is a SRFI, add it to `SUPPORTED-SRFIS`
-* If you are adding a new SRFI,
-  - add its number and  name to the `*srfis*` variable in `doc/skb/srfi.stk`
-  - add its documentation to `doc/skb/srfi.skb` (see below)
+* For SRFIs, add a line describing it in `lib/srfis.stk` (the format
+  is described in the file  itself).
+* Tests reside in the `tests` directory.
+    * for a new SRFI add a test in `tests/srfis/`
+	* for new libraries, create a new file in `tests` directory and
+      include it in the list of loaded files in `do-test.stk`
+
+For new SRFIs, adding its description in `lib/srfis.stk` suffices to update
+
+* the `SUPPORTED-SRFIS` in the main directory
+* launch the tests you added in `tests/srfis` directory, and
+* (in the future) add an automatically generated documentation for this SRFI
+
+Until the documentation is automatically generated, you have to add
+its documentation, as explained below.
 
 ## Documentation
 

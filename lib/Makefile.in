@@ -36,7 +36,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  9-Oct-2020 10:40 (eg)
+# Last file update: 24-Nov-2020 15:44 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -403,6 +403,7 @@ scheme_BOOT = assembler.stk \
           repl.stk          \
           repl-readline.stk \
           runtime.stk       \
+		  srfis-data.scm    \
           srfi-0.stk        \
           str.stk           \
           struct.stk        \
@@ -472,6 +473,7 @@ SRC_STK = bigloo-support.stk  \
           srfi-185.stk        \
           srfi-189.stk        \
           srfi-190.stk        \
+          srfi-196.stk        \
           tar.stk             \
           trace.stk
 
@@ -492,7 +494,7 @@ scheme_OBJS = compfile.ostk    \
           srfi-1.ostk          \
           srfi-2.ostk          \
           srfi-4.ostk          \
-	  srfi-5.ostk	       \
+          srfi-5.ostk	       \
           srfi-7.ostk          \
           srfi-9.ostk          \
           srfi-11.ostk         \
@@ -536,6 +538,7 @@ scheme_OBJS = compfile.ostk    \
           srfi-185.ostk        \
           srfi-189.ostk        \
           srfi-190.ostk        \
+          srfi-196.ostk        \
           tar.ostk             \
           trace.ostk
 
@@ -958,6 +961,17 @@ srfi-13.ostk: srfi-14.ostk
 srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
 
+#
+# SRFIs support
+#
+# If ./srfis.stk we must rebuild
+#     - srfis-data.scm (used by SRFI0 and features)
+srfis-data.scm: srfis.stk
+	../src/stklos -l srfis.stk \
+	              -f ../utils/update-srfi-list.stk \
+                  -- --internal > $@
+	(cd ..; $(MAKE) SUPPORTED-SRFIS)
+
 doc: $(DOCDB)
 
 $(DOCDB): $(scheme_sources)
@@ -976,6 +990,10 @@ distclean: clean
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) distclean)\
 	done
+
+# Local Variables:
+# tab-width: 4
+# End:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

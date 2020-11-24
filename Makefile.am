@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Sep-2020 11:45 (eg)
+# Last file update: 24-Nov-2020 16:01 (eg)
 
 
 EXTRA_DIST   =
@@ -47,5 +47,21 @@ install-doc: install-base
 	(cd doc && $(MAKE) $(AM_MAKEFLAGS) install)
 
 
+# Update the list of supported SRFIs
+# This target is used by lib/Makefile. It needs a running STklos
+# Dont call it directly
+SUPPORTED-SRFIS: lib/srfis.stk
+	@echo "Updating list of supported SRFIs ... "
+	sed -e '/- SRFI/d' $@ > $@.tmp                                          && \
+	./src/stklos -l ./lib/srfis.stk -f utils/update-srfi-list.stk >> $@.tmp && \
+	mv -f  $@.tmp $@
+
+clean:
+	rm -f SUPPORTED-SRFIS.tmp
+
 test tests: all
 	(cd tests; $(MAKE) test)
+
+# Local Variables:
+# tab-width: 4
+# End:

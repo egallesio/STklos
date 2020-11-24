@@ -1,0 +1,91 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 141 ...
+;; ----------------------------------------------------------------------
+
+;; SRFI 141 comes with no tests, so @jpellegrini have ceated a few
+
+(define nums-dens '( (25 3)
+                     (-25 3)
+                     (17 3)
+                     (-17 3)
+                     (29 5)
+                     (-29 5)
+                     (30 3)
+                     (-30 3)
+                     (101 80)
+                     (-101 80)
+                     (101 -80)
+                     (100 60)
+                     (-100 60) ))
+
+(for-each (lambda (num-den)
+            (let ((n (car num-den))
+                  (d (cadr num-den)))
+              (let ((flq (floor-quotient n d))
+                    (flr (floor-remainder n d))
+                    (clq (ceiling-quotient n d))
+                    (clr (ceiling-remainder n d))
+                    (tcq (truncate-quotient n d))
+                    (tcr (truncate-remainder n d))
+                    (rdq (round-quotient n d))
+                    (rdr (round-remainder n d))
+                    (euq (euclidean-quotient n d))
+                    (eur (euclidean-remainder n d))
+                    (blq (balanced-quotient n d))
+                    (blr (balanced-remainder n d)))
+
+                (test (format "flq:~d:~d" n d)
+                      (floor (/ n d))
+                      flq)
+                (test (format "flr:~d:~d" n d)
+                     (- n (* flq d))
+                     flr)
+
+                (test (format "clq:~d:~d" n d)
+                      (ceiling (/ n d))
+                      clq)
+                (test (format "clr:~d:~d" n d)
+                      (- n (* clq d))
+                      clr)
+
+                (test (format "trlq:~d:~d" n d)
+                      (truncate (/ n d))
+                      tcq)
+                (test (format "trr:~d:~d" n d)
+                      (- n (* tcq d))
+                      tcr)
+
+                (test (format "rdq:~d:~d" n d)
+                      (round (/ n d))
+                      rdq)
+                (test (format "rdr:~d:~d" n d)
+                      (- n (* rdq d))
+                      rdr)
+
+                (test (format "euq:~d:~d" n d)
+                      (if (positive? d)
+                          (floor (/ n d))
+                          (ceiling (/ n d)))
+                      euq)
+                (test (format "eur3:~d:~d" n d)
+                      #t
+                      (< eur (abs d)))
+                (test (format "eur2:~d:~d" n d)
+                      #t
+                      (>= eur 0))
+                (test (format "eur:~d:~d" n d)
+                      (- n (* euq d))
+                      eur)
+
+                (test (format "blr1:~d:~d" n d)
+                      #t
+                      (< blr (abs (/ d 2))))
+                (test (format "blr2:~d:~d" n d)
+                      #t
+                      (>= blr (- (abs (/ d 2)))))
+                (test (format "blr:~d:~d" n d)
+                      (- n (* blq d))
+                      blr))))
+          nums-dens)
+
+

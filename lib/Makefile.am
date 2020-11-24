@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  9-Oct-2020 10:40 (eg)
+# Last file update: 24-Nov-2020 15:44 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -55,6 +55,7 @@ scheme_BOOT = assembler.stk \
           repl.stk          \
           repl-readline.stk \
           runtime.stk       \
+		  srfis-data.scm    \
           srfi-0.stk        \
           str.stk           \
           struct.stk        \
@@ -147,7 +148,7 @@ scheme_OBJS = compfile.ostk    \
           srfi-1.ostk          \
           srfi-2.ostk          \
           srfi-4.ostk          \
-	  srfi-5.ostk	       \
+          srfi-5.ostk	       \
           srfi-7.ostk          \
           srfi-9.ostk          \
           srfi-11.ostk         \
@@ -284,6 +285,17 @@ srfi-13.ostk: srfi-14.ostk
 srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
 
+#
+# SRFIs support
+#
+# If ./srfis.stk we must rebuild
+#     - srfis-data.scm (used by SRFI0 and features)
+srfis-data.scm: srfis.stk
+	../src/stklos -l srfis.stk \
+	              -f ../utils/update-srfi-list.stk \
+                  -- --internal > $@
+	(cd ..; $(MAKE) SUPPORTED-SRFIS)
+
 doc: $(DOCDB)
 
 $(DOCDB): $(scheme_sources)
@@ -302,3 +314,7 @@ distclean: clean
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) distclean)\
 	done
+
+# Local Variables:
+# tab-width: 4
+# End:

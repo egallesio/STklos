@@ -1,0 +1,83 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 5 ...
+;; ----------------------------------------------------------------------
+
+;; A binding list must be a sequence of pairs, and with SRFI-5,
+;; these mayy be followed by a SYMBOL and a free list.
+;; But it MUST be a symbol!
+(test/error "error in bindings"
+            (let ((a 1)
+                  (b 2)
+                  3 4 5)))
+
+(test "Unnamed.0"
+      #f
+      (let () #f))
+
+(test "Unnamed.1"
+      '(2 . 1)
+      (let ((x 1) (y 2)) (cons y x)))
+
+(test "Named, non-signature-style, no rest argument"
+      55
+      (let loop ((i 10) (sum 0))
+        (if (> i 0)
+            (loop (- i 1) (+ sum i))
+            sum)))
+
+(test "Named, signature-style, no rest argument"
+      55
+      (let (loop (i 10) (sum 0))
+        (if (> i 0)
+            (loop (- i 1) (+ sum i))
+            sum)))
+
+(test "Named, non-signature-style, rest argument"
+      '(4 3 2 1)
+      (let reverse-list ((res '()) . (l 1 2 3 4))
+        (if (null? l)
+            res
+            (apply reverse-list (cons (car l) res) (cdr l)))))
+
+(test "Named, signature-style, rest argument"
+      '(4 3 2 1)
+      (let (reverse-list (res '()) . (l 1 2 3 4))
+        (if (null? l)
+            res
+            (apply reverse-list (cons (car l) res) (cdr l)))))
+
+;; The two following tests are Andy Gaynor's examples from the SRFI:
+(test "fibonacci"
+      55
+      (let (fibonacci (n 10) (i 0) (f0 0) (f1 1))
+        (if (= i n)
+            f0
+            (fibonacci n (+ i 1) f1 (+ f0 f1)))))
+
+(test "contrived"
+      "345"
+      (with-output-to-string
+        (lambda ()
+          (let (blast (port (current-output-port)) . (x (+ 1 2) 4 5))
+            (if (null? x)
+                'just-a-silly-contrived-example
+                (begin
+                  (write (car x) port)
+                  (apply blast port (cdr x))))))))
+
+(test "recursive list sum"
+      21
+      (let (loop (sum 0) (lst '(1 2 3 4 5 6)))
+        (if (null? lst)
+            sum
+            (loop (+ (car lst) sum) (cdr lst)))))
+
+(test "recursive list sum with rest arguments"
+      21
+      (let (loop (sum 0) . (lst 1 2 3 4 5 6))
+        (if (null? lst)
+            sum
+            (apply loop (+ (car lst) sum) (cdr lst)))))
+
+
+
