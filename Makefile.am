@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Sep-2020 11:45 (eg)
+# Last file update: 24-Nov-2020 15:21 (eg)
 
 
 EXTRA_DIST   =
@@ -45,6 +45,11 @@ install-sources: install-base
 
 install-doc: install-base
 	(cd doc && $(MAKE) $(AM_MAKEFLAGS) install)
+
+
+# Update the list of supported SRFIs (used by lib/Makefile)
+SUPPORTED-SRFIS: 
+	@echo "Updating list of supported SRFIs"
 
 
 test tests: all

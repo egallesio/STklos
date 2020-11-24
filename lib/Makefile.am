@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 23-Nov-2020 09:58 (eg)
+# Last file update: 24-Nov-2020 15:19 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -286,15 +286,15 @@ srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
 
 #
-# SRFIs support 
+# SRFIs support
 #
 # If ./srfis.stk we must rebuild
-#     - srfi-0-data.stk (used by SRFI0 and features)
-srfi-0-data.scm: srfis.stk
+#     - srfis-data.scm (used by SRFI0 and features)
+srfis-data.scm: srfis.stk
 	../src/stklos -l srfis.stk \
 	              -f ../utils/update-srfi-list.stk \
                   -- --internal > $@
-
+	(cd ..; $(MAKE) SUPPORTED-SRFIS)
 
 doc: $(DOCDB)
 

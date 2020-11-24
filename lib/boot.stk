@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 20-Nov-2020 18:03 (eg)
+;;;; Last file update: 24-Nov-2020 15:21 (eg)
 ;;;;
 
 (include "runtime.stk")         ; Definition necessary for the bootstrap
@@ -32,7 +32,7 @@
 (include "struct.stk")          ; STklos structures
 (include "bonus.stk")           ; Extended functions and syntaxes
 (include "load.stk")            ; Extended load dealing with paths and suffixes
-(include "srfi-0-data.scm")     ; Information iif implemented SRFIs for SRFI-0
+(include "srfis-data.scm")      ; Information of implemented SRFIs for SRFI-0
 (include "srfi-0.stk")          ; Implementation of SRFI-0
 (include "mbe.stk")             ; A simple R5RS macro system
 (include "regexp.stk")          ; Regular expressions

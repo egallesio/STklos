@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 23-Nov-2020 10:40 (eg)
+;;;; Last file update: 24-Nov-2020 15:16 (eg)
 ;;;;
 
 (require "test")
@@ -36,7 +36,7 @@
 (dotimes (nb (+ (last-implemented-srfi) 1))
   (let ((desc (find-srfi nb)))
     (when desc                            ;; We have an impl. for this SRFI
-      (let ((test-file (format "./srfi/~a.stk" nb)))
+      (let ((test-file (format "./srfis/~a.stk" nb)))
         (when (file-exists? test-file)    ;; and we have a test for it
           ;; Add a subsection title
           (test-subsection (format "SRFI ~S - ~S ..." nb (srfi-title desc)))
