@@ -101,6 +101,7 @@
     (srfi-189 . "srfi-189")
     (maybe-either . "srfi-189")
     (srfi-190 . "srfi-190")
+    srfi-192
     srfi-193
     srfi-195
     (srfi-196 . "srfi-196")

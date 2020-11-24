@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 13-Nov-2020 12:33 (eg)
+;; Last file update: 24-Nov-2020 17:57 (eg)
 ;;
 ;; ======================================================================
 
@@ -591,7 +591,17 @@ be accessed as a normal port with the standard Scheme primitives.])
 (insertdoc 'port-current-position)
 (insertdoc 'port-file-name)
 (insertdoc 'port-idle-reset!)
-(insertdoc 'port-closed?))
+(insertdoc 'port-closed?)
+
+[ The following procedures are defined in ,(link-srfi 192) which is fully
+  supported:]
+(index "SRFI-192")
+(insertdoc 'port-has-port-position?)
+(insertdoc 'port-position)
+(insertdoc 'set-port-position!)
+(insertdoc 'make-i/o-invalid-position-error)
+(insertdoc 'i/o-invalid-position-error?)
+)
 
 (subsection :title "Input"
 (insertdoc 'read)

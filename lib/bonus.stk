@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  8-Oct-2020 16:42 (eg)
+;;;; Last file update: 24-Nov-2020 17:58 (eg)
 ;;;;
 
 
@@ -1895,7 +1895,7 @@ doc>
 ;; ----------------------------------------------------------------------
 ;;  SRFI-192: "Port positioning"
 ;; ----------------------------------------------------------------------
-  
+
 #|
 <doc EXT port-has-port-position?
  * (port-has-port-position? port)
@@ -1969,6 +1969,7 @@ doc>
  * In other types of ports, if an attempt is made to set the position beyond the
  * current end of data in the underlying object, and the object does not support
  * extension, an error satisfying i/o-invalid-position-error? is signaled.
+doc>
 |#
 (define (set-port-position! port pos)
   (when (output-port? port)
@@ -1978,7 +1979,7 @@ doc>
 #|
 <doc EXT make-i/o-invalid-position-error
  * (make-i/o-invalid-position-error pos)
- * 
+ *
  * Returns a condition object which satisfies i/o-invalid-position-error?.
  * The pos argument represents a position passed to set-position!.
 doc>
@@ -1987,8 +1988,9 @@ doc>
    (make-condition &i/o-bad-parameter 'parameter pos))
 
 #|
-<doc EXT
+<doc EXT i/o-invalid-position-error?
  * (i/o-invalid-position-error? obj)
+ *
  * Returns #t if obj is an object created by
  * make-i/o-invalid-position-error? or an object raised in the circumstances
  * described in SRFI-192 (attempt to access an invalid position in the
@@ -1998,7 +2000,7 @@ doc>
 (define (i/o-invalid-position-error? obj)
   (and (condition? obj)
        (condition-has-type? 'obj &i/o-bad-parameter)))
-
+ 
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI-193: "Command line"

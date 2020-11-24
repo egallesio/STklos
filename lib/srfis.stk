@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 23-Nov-2020 10:09 (eg)
+;;;; Last file update: 24-Nov-2020 17:38 (eg)
 ;;;;
 
 
@@ -231,7 +231,7 @@
          (maybe-either) "srfi-189")
     (190 "Coroutines Generators" () "srfi-190")
     ;;191  ....... withdrawn
-    ;;192  Port Positioning
+    (192 "Port Positioning")
     (193 "Command line")
     ;; 194 Random data generators
     (195 "Multiple-value boxes")
