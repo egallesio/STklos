@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 24-Nov-2020 16:01 (eg)
+# Last file update: 25-Nov-2020 11:06 (eg)
 
 
 EXTRA_DIST   =
@@ -56,7 +56,7 @@ SUPPORTED-SRFIS: lib/srfis.stk
 	./src/stklos -l ./lib/srfis.stk -f utils/update-srfi-list.stk >> $@.tmp && \
 	mv -f  $@.tmp $@
 
-clean:
+clean-am:
 	rm -f SUPPORTED-SRFIS.tmp
 
 test tests: all

@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 24-Nov-2020 16:01 (eg)
+# Last file update: 25-Nov-2020 11:06 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -747,7 +747,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean-am: clean-generic mostlyclean-am
+clean: clean-recursive
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -862,7 +862,7 @@ SUPPORTED-SRFIS: lib/srfis.stk
 	./src/stklos -l ./lib/srfis.stk -f utils/update-srfi-list.stk >> $@.tmp && \
 	mv -f  $@.tmp $@
 
-clean:
+clean-am:
 	rm -f SUPPORTED-SRFIS.tmp
 
 test tests: all
