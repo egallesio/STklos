@@ -72,6 +72,8 @@
     (queues-as-lists . "srfi-117")
     srfi-118
     adjustable-strings
+    (srfi-127 . "srfi-127")
+    (lazy-sequences . "srfi-127")
     (srfi-128 . "srfi-128")
     (comparators-reduced . "srfi-128")
     (srfi-129 . "srfi-129")

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 24-Nov-2020 17:38 (eg)
+;;;; Last file update: 26-Nov-2020 11:58 (eg)
 ;;;;
 
 
@@ -165,7 +165,7 @@
     ;; 124  Ephemerons
     ;; 125  Intermediate hash tables
     ;; 126  R6RS-based hashtables
-    ;; 127  Lazy Sequences
+    (127 "Lazy Sequences" (lazy-sequences) "srfi-127")
     (128 "Comparators (reduced)" (comparators-reduced) "srfi-128")
     (129 "Titlecase procedures" (titlecase) "srfi-129")
     ;; 130  Cursor-based string library

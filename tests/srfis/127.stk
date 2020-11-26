@@ -1,0 +1,192 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 127 ...
+;; ----------------------------------------------------------------------
+(define (%%make-generator . args)
+        (lambda () (if (null? args)
+                       (eof-object)
+                       (let ((next (car args)))
+                            (set! args (cdr args))
+                            next))))
+
+(define (make-lseq . args) (generator->lseq (apply %%make-generator args)))
+
+
+
+;; "lseqs/constructor"
+(define one23 (make-lseq 1 2 3))
+(test "lseq-1" 1 (car one23))
+(test "lseq-2" #t (procedure? (cdr one23)))
+(test "lseq-3"   '(1 2 3) (lseq-realize one23))
+
+
+(test "lseq-4" #t (lseq? '()))
+(test "lseq-5" #t (lseq? '(1 2 3)))
+(test "lseq-6" #t (lseq? (make-lseq 1 2 3)))
+(test "lseq-7" #t (lseq? (cons 'x (lambda () 'x))))
+
+(test "lseq-8" #t (lseq=? = '() '()))
+(test "lseq-9" #t (lseq=? = '(1 2 3) '(1 2 3)))
+(test "lseq-10" #t (lseq=? = (make-lseq 1 2 3)
+                           (make-lseq 1 2 3)))
+(test "lseq-11" #t (lseq=? = (make-lseq 1 2 3) '(1 2 3)))
+
+
+;; "lseqs/selectors"
+(test/error "lseq-12" (lseq-car (make-generator)))
+(test "lseq-13" 1 (lseq-car (make-lseq 1 2 3)))
+(test "lseq-14" 1 (lseq-car '(1 2 3)))
+(test/error "lseq-15" (lseq-car 2))
+
+(test/error "lseq-16" (lseq-first (make-generator)))
+(test "lseq-17" 1 (lseq-first (make-lseq 1 2 3)))
+(test "lseq-18" 1 (lseq-first '(1 2 3)))
+(test/error "lseq-19" (lseq-first 2))
+
+(test/error "lseq-20" (lseq-cdr (make-generator)))
+(test "lseq-21" 2 (lseq-cdr '(1 . 2)))
+(test "lseq-22" 2 (lseq-car (lseq-cdr '(1 2 3))))
+(test "lseq-23" 2 (lseq-car (lseq-cdr (make-lseq 1 2 3))))
+
+(test/error "lseq-24" (lseq-rest (make-generator)))
+(test "lseq-25" 2 (lseq-rest '(1 . 2)))
+(test "lseq-26" 2 (lseq-car (lseq-rest '(1 2 3))))
+(test "lseq-27" 2 (lseq-car (lseq-rest (make-lseq 1 2 3))))
+(test/error "lseq-28" (lseq-rest 2))
+
+(test/error "lseq-29" (lseq-ref '() 0))
+(test "lseq-30" 1 (lseq-ref '(1) 0))
+(test "lseq-31" 2 (lseq-ref '(1 2) 1))
+(test/error "lseq-32" (lseq-ref (make-lseq) 0))
+(test "lseq-33" 1 (lseq-ref (make-lseq 1) 0))
+(test "lseq-34" 1 (lseq-ref (make-lseq 1 2) 0))
+(test "lseq-35" 2 (lseq-ref (make-lseq 1 2) 1))
+
+(test/error "lseq-36" (lseq-take '() 1))
+(test/error "lseq-37" (lseq-take (make-lseq) 1))
+(test "lseq-38" #t (procedure? (cdr (lseq-take '(1 2 3 4 5) 3)))) ; test laziness
+(test "lseq-39" '(1 2 3) (lseq-realize (lseq-take '(1 2 3 4 5) 3)))
+
+(test/error "lseq-40" (lseq-drop '() 1))
+(test/error "lseq-41" (lseq-drop (make-lseq 1) 2))
+(test "lseq-42" '(3 4 5) (lseq-realize (lseq-drop '(1 2 3 4 5) 2)))
+(test "lseq-43" '(3 4 5) (lseq-realize (lseq-drop (make-lseq 1 2 3 4 5) 2)))
+
+
+;; "lseqs/whole"
+(test "lseq-44" '() (lseq-realize '()))
+(test "lseq-45" '(1 2 3) (lseq-realize '(1 2 3)))
+(test "lseq-46" '() (lseq-realize (make-lseq)))
+(test "lseq-47" '(1 2 3) (lseq-realize (make-lseq 1 2 3)))
+
+(define g (lseq->generator '(1 2 3)))
+(begin
+  (test "lseq-48" 1 (g))
+  (test "lseq-49" 2 (g))
+  (test "lseq-50" 3 (g))
+  (test "lseq-51" #t (eof-object? (g))))
+(define g (lseq->generator (make-lseq 1 2 3)))
+(begin
+  (test "lseq-52" 1 (g))
+  (test "lseq-53" 2 (g))
+  (test "lseq-54" 3 (g))
+  (test "lseq-55" #t (eof-object? (g))))
+
+(test "lseq-56" 0 (lseq-length '()))
+(test "lseq-57" 3 (lseq-length '(1 2 3)))
+(test "lseq-58" 3 (lseq-length (make-lseq 1 2 3)))
+
+(test "lseq-59" '(1 2 3 a b c) (lseq-realize (lseq-append '(1 2 3) '(a b c))))
+(define one23abc (lseq-append (make-lseq 1 2 3) (make-lseq 'a 'b 'c)))
+(test "lseq-60" #t (procedure? (cdr one23abc)))
+;; lseq-61 adapted --jpellegrini
+(test "lseq-61"
+      '(1 2 3 a b c)
+      (lseq-realize one23abc))
+
+(define one2345 (make-lseq 1 2 3 4 5))
+(define oddeven (make-lseq 'odd 'even 'odd 'even 'odd 'even 'odd 'even))
+(test "lseq-62" '((one 1 odd) (two 2 even) (three 3 odd))
+      (lseq-realize (lseq-zip '(one two three) one2345 oddeven)))
+
+
+;; "lseqs/mapping"
+(test "lseq-63" '() (lseq-map - '()))
+(test "lseq-64" '(-1 -2 -3) (lseq-realize (lseq-map - '(1 2 3))))
+(test "lseq-65" '(-1 -2 -3) (lseq-realize (lseq-map - (make-lseq 1 2 3))))
+(test "lseq-66" #t (procedure? (cdr (lseq-map - '(1 2 3)))))
+
+(define output '())
+(define out! (lambda (x) (set! output (cons x output))))
+(lseq-for-each out! '())
+(test "lseq-67" output '())
+(lseq-for-each out! '(a b c))
+(test "lseq-68" output '(c b a))
+(lseq-for-each out! (make-lseq 1 2 3))
+(test "lseq-69" output '(3 2 1 c b a))
+
+(test "lseq-70" '() (lseq-filter odd? '()))
+(define odds (lseq-filter odd? '(1 2 3 4 5)))
+(test "lseq-71" #t (procedure? (cdr odds)))
+(test "lseq-72" '(1 3 5) (lseq-realize odds))
+(test "lseq-73" '(1 3 5) (lseq-realize (lseq-filter odd? (make-lseq 1 2 3 4 5))))
+
+(test "lseq-74" '() (lseq-remove even? '()))
+(define odds (lseq-remove even? '(1 2 3 4 5)))
+(test "lseq-75" #t (procedure? (cdr odds)))
+(test "lseq-76" '(1 3 5) (lseq-realize odds))
+(test "lseq-77" '(1 3 5) (lseq-realize (lseq-remove even? (make-lseq 1 2 3 4 5))))
+
+
+;; "lseqs/searching"
+(test "lseq-78" 4 (lseq-find even? '(3 1 4 1 5 9 2 6)))
+(test "lseq-79" 4 (lseq-find even? (make-lseq 3 1 4 1 5 9 2 6)))
+(test "lseq-80" #f (lseq-find negative? (make-lseq 1 2 3 4 5)))
+
+(test "lseq-81" '(-8 -5 0 0) (lseq-realize (lseq-find-tail even? '(3 1 37 -8 -5 0 0))))
+(test "lseq-82" '(-8 -5 0 0) (lseq-realize (lseq-find-tail even?
+                                                           (make-lseq 3 1 37 -8 -5 0 0))))
+(test "lseq-83" #f (lseq-find-tail even? '()))
+(test "lseq-84" #f (lseq-find-tail negative? (make-lseq 1 2 3 4 5)))
+
+(test "lseq-85" '(2 18) (lseq-realize (lseq-take-while even? '(2 18 3 10 22 9))))
+(test "lseq-86" '(2 18) (lseq-realize (lseq-take-while even?
+                                                       (make-lseq 2 18 3 10 22 9))))
+(test "lseq-87" '(2 18) (lseq-realize (lseq-take-while even?
+                                                       (make-lseq 2 18 3 10 22 9))))
+
+(test "lseq-88" '(3 10 22 9) (lseq-drop-while even? '(2 18 3 10 22 9)))
+(test "lseq-89" '(3 10 22 9) (lseq-realize (lseq-drop-while even?
+                                                            (make-lseq 2 18 3 10 22 9))))
+
+(test "lseq-90" #t (lseq-any integer? '(a 3 b 2.7)))
+(test "lseq-91" #t (lseq-any integer? (make-lseq 'a 3 'b 2.7)))
+(test "lseq-92" #f (lseq-any integer? '(a 3.1 b 2.7)))
+(test "lseq-93" #f (lseq-any integer? (make-lseq 'a 3.1 'b 2.7)))
+(test "lseq-94" #t (lseq-any < '(3 1 4 1 5) '(2 7 1 8 2)))
+(define (factorial n)
+  (cond
+   ((< n 0) #f)
+   ((= n 0) 1)
+   (else (* n (factorial (- n 1))))))
+(test "lseq-95" 6 (lseq-any factorial '(-1 -2 3 4)))
+(test "lseq-96" 6 (lseq-any factorial (make-lseq -1 -2 3 4)))
+
+(test "lseq-97" 24 (lseq-every factorial '(1 2 3 4)))
+(test "lseq-98" 24 (lseq-every factorial (make-lseq 1 2 3 4)))
+
+(test "lseq-99" 2 (lseq-index even? '(3 1 4 1 5 9)))
+(test "lseq-100" 1 (lseq-index < '(3 1 4 1 5 9 2 5 6) '(2 7 1 8 2)))
+(test "lseq-101" #f (lseq-index = '(3 1 4 1 5 9 2 5 6) '(2 7 1 8 2)))
+
+(test "lseq-102" '(a b c) (lseq-realize (lseq-memq 'a '(a b c))))
+(test "lseq-103" '(a b c) (lseq-realize (lseq-memq 'a (make-lseq 'a 'b 'c))))
+(test "lseq-104" #f (lseq-memq 'a (make-lseq 'b 'c 'd)))
+(test "lseq-105" #f (lseq-memq (list 'a) '(b c d)))
+(test "lseq-106" #f (lseq-memq (list 'a) (make-lseq 'b 'c 'd)))
+
+(test "lseq-107" '(101 102) (lseq-realize (lseq-memv 101 (make-lseq 100 101 102))))
+
+(test "lseq-108" '((a) c) (lseq-realize (lseq-member (list 'a) (make-lseq 'b '(a) 'c))))
+(test "lseq-109" '(2 3) (lseq-realize (lseq-member 2.0 (make-lseq 1 2 3) =)))
+
+
