@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Aug-2004 12:43 (eg)
-;;;; Last file update: 26-Nov-2020 11:59 (eg)
+;;;; Last file update: 26-Nov-2020 12:16 (eg)
 ;;;;
 
 (define srfi-address "http://srfi.schemers.org/srfi-~A/srfi-~A.html")
@@ -84,6 +84,7 @@
      (128 . "Comparators (reduced)")
      (127 . "Lazy Sequences")
      (129 . "Titlecase procedures")
+     (135 . "Immutable Texts")
      (141 . "Integer Division")
      (145 . "Assumptions")
      (151 . "Bitwise Operations")
