@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 26-Nov-2020 12:19 (eg)
+;;;; Last file update: 26-Nov-2020 17:02 (eg)
 ;;;;
 
 
@@ -168,7 +168,7 @@
     (127 "Lazy Sequences" (lazy-sequences) "srfi-127")
     (128 "Comparators (reduced)" (comparators-reduced) "srfi-128")
     (129 "Titlecase procedures" (titlecase) "srfi-129")
-    ;; 130  Cursor-based string library
+    (130 "Cursor-based string library" () "srfi-130")
     ;; 131  ERR5RS Record Syntax (reduced)
     ;; 132  Sort Libraries
     ;; 133  Vector Library (R7RS-compatible)

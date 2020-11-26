@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 26-Nov-2020 12:16 (eg)
+;; Last file update: 26-Nov-2020 16:57 (eg)
 ;;
 ;; ======================================================================
 
@@ -657,6 +657,9 @@ described in this document (procedures
 
 ;; SRFI 129 -- Titlecase Procedures
 (gen-loaded-srfi 129)
+
+;; SRFI 130 -- Cursor-based string library
+￼(gen-loaded-srfi 130)
 
 ;; SRFI 135 -- Titlecase Procedures
 (gen-loaded-srfi 135)

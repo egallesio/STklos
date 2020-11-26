@@ -1,0 +1,4778 @@
+;;;;
+;;;; srfi-130.stk		-- Implementation of SRFI-130
+;;;;
+;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the  implementation of
+;;;; the tests for this SRFI by William Clinger, it is copyrighted as:
+;;;;
+;;;;;;  Copyright (c) William Clinger (2016).
+;;;;;;  Permission is hereby granted, free of charge, to any person
+;;;;;;  obtaining a copy of this software and associated documentation
+;;;;;;  files (the "Software"), to deal in the Software without
+;;;;;;  restriction, including without limitation the rights to use,
+;;;;;;  copy, modify, merge, publish, distribute, sublicense, and/or
+;;;;;;  sell copies of the Software, and to permit persons to whom the
+;;;;;;  Software is furnished to do so, subject to the following
+;;;;;;  conditions:
+;;;;;;
+;;;;;; The above copyright notice and this permission notice shall be
+;;;;;; included in all copies or substantial portions of the Software.
+;;;;;;
+;;;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;;;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+;;;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+;;;;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+;;;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+;;;;;; OTHER DEALINGS IN THE SOFTWARE.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 13-Nov-2020 21:00 (jpellegrini)
+;;;; Last file update: 14-Nov-2020 00:01 (jpellegrini)
+;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Tests for SRFI 130.
+;;;
+;;; To run in Larceny or Sagittarius, cd to the directory containing
+;;; this file and incant:
+;;;
+;;;     larceny --r7rs --path . --program srfi-130-test.scm
+;;;     sagittarius -r7 -L . srfi-130-test.scm
+;;;
+;;; Both Larceny and Sagittarius will look for the (srfi 130) library
+;;; in the srfi subdirectory.  The implementations contained within
+;;; the foof and srfi-130 directories can be tested by renaming those
+;;; directories to srfi.
+;;;
+;;; FIXME: These tests are incomplete because there's  a combinatorial
+;;; explosion of possibilities for optional arguments that could be
+;;; either indexes or cursors.  Consider string-prefix-length, for
+;;; example.  For each test that calls that procedure with all four
+;;; optional arguments, there are 16 possible combinations of indexes
+;;; and cursors.  Beginning with string-take, the optional arguments
+;;; tested are indexes rather than cursors.
+
+
+;;; Unicode is the main motivation for string cursors, so we ought
+;;; to use at least some non-ASCII strings for testing.
+;;; Some systems would blow up if this file were to contain non-ASCII
+;;; characters, however, so we have to be careful here.
+
+(cond-expand (full-unicode
+              (define ABC
+                (list->string (map integer->char
+                                   '(#x3b1 #x3b2 #x3b3))))
+              (define ABCDEF
+                (list->string (map integer->char
+                                   '(#x0c0 #x062 #x0c7 #x064 #x0c9 #x066)))))
+             (else
+              (define ABC "abc")
+              (define ABCDEF "abcdef")))
+
+;;; Cursor operations
+
+(test "(fail 'string-cursor?)"
+      #t
+      (string-cursor? (string-index->cursor "" 0)))
+
+
+(test "(fail 'string-cursor?)-2"
+      #t
+      (not (string-cursor? #f)))
+
+
+(test "'string-cursor?-3"
+      #t
+      (string-cursor? (string-index->cursor (make-string 10000) 9999)))
+
+
+(test "string-cursor-start-4"
+      #t
+      (= 0
+         (string-cursor->index "" (string-cursor-start ""))))
+
+
+(test "string-cursor-start-5"
+      #t
+      (= 0
+         (string-cursor->index ABC (string-cursor-start ABC))))
+
+
+(test "string-cursor-end-6"
+      #t
+      (= 0
+         (string-cursor->index "" (string-cursor-end ""))))
+
+
+(test "string-cursor-end-7"
+      #t
+      (= 3
+         (string-cursor->index ABC (string-cursor-end ABC))))
+
+
+(test "string-cursor-next-8"
+      #t
+      (= 1
+         (string-cursor->index ABC (string-cursor-next ABC 0))))
+
+
+(test "string-cursor-next-9"
+      #t
+      (= 2
+         (string-cursor->index ABC (string-cursor-next ABC 1))))
+
+
+(test "string-cursor-next-10"
+      #t
+      (= 3
+         (string-cursor->index ABC (string-cursor-next ABC 2))))
+
+
+(test "string-cursor-prev-11"
+      #t
+      (= 0
+         (string-cursor->index ABC (string-cursor-prev ABC 1))))
+
+
+(test "string-cursor-prev-12"
+      #t
+      (= 1
+         (string-cursor->index ABC (string-cursor-prev ABC 2))))
+
+
+(test "string-cursor-prev-13"
+      #t
+      (= 2
+         (string-cursor->index ABC (string-cursor-prev ABC 3))))
+
+
+(test "string-cursor-forward-14"
+      #t
+      (= 0
+         (string-cursor->index ABC (string-cursor-forward ABC 0 0))))
+
+
+(test "string-cursor-forward-15"
+      #t
+      (= 2
+         (string-cursor->index ABC (string-cursor-forward ABC 0 2))))
+
+
+(test "string-cursor-forward-16"
+      #t
+      (= 3
+         (string-cursor->index ABC (string-cursor-forward ABC 1 2))))
+
+
+(test "string-cursor-forward-17"
+      #t
+      (= 3
+         (string-cursor->index ABC (string-cursor-forward ABC 3 0))))
+
+
+(test "string-cursor-back-18"
+      #t
+      (= 0
+         (string-cursor->index ABC (string-cursor-back ABC 0 0))))
+
+
+(test "string-cursor-back-19"
+      #t
+      (= 0
+         (string-cursor->index ABC (string-cursor-back ABC 2 2))))
+
+
+(test "string-cursor-back-20"
+      #t
+      (= 1
+         (string-cursor->index ABC (string-cursor-back ABC 3 2))))
+
+
+(test "string-cursor-back-21"
+      #t
+      (= 3
+         (string-cursor->index ABC (string-cursor-back ABC 3 0))))
+
+
+
+;;; These are supposed to work on both indexes and cursors.
+
+(test "string-cursor=?-22"
+      #t
+      (string-cursor=? 0 0))
+
+
+(test "string-cursor=?-23"
+      #t
+      (not (string-cursor=? 0 1)))
+
+
+(test "string-cursor=?-24"
+      #t
+      (not (string-cursor=? 0 2)))
+
+
+(test "string-cursor=?-25"
+      #t
+      (not (string-cursor=? 0 3)))
+
+
+(test "string-cursor=?-26"
+      #t
+      (not (string-cursor=? 1 0)))
+
+
+(test "string-cursor=?-27"
+      #t
+      (string-cursor=? 1 1))
+
+
+(test "string-cursor=?-28"
+      #t
+      (not (string-cursor=? 1 2)))
+
+
+(test "string-cursor=?-29"
+      #t
+      (not (string-cursor=? 1 3)))
+
+
+(test "string-cursor=?-30"
+      #t
+      (not (string-cursor=? 2 0)))
+
+
+(test "string-cursor=?-31"
+      #t
+      (not (string-cursor=? 2 1)))
+
+
+(test "string-cursor=?-32"
+      #t
+      (string-cursor=? 2 2))
+
+
+(test "string-cursor=?-33"
+      #t
+      (not (string-cursor=? 2 3)))
+
+
+(test "string-cursor=?-34"
+      #t
+      (not (string-cursor=? 3 0)))
+
+
+(test "string-cursor=?-35"
+      #t
+      (not (string-cursor=? 3 1)))
+
+
+(test "string-cursor=?-36"
+      #t
+      (not (string-cursor=? 3 2)))
+
+
+(test "string-cursor=?-37"
+      #t
+      (string-cursor=? 3 3))
+
+
+
+(test "string-cursor<?-38"
+      #t
+      (not (string-cursor<? 0 0)))
+
+
+(test "string-cursor<?-39"
+      #t
+      (string-cursor<? 0 1))
+
+
+(test "string-cursor<?-40"
+      #t
+      (string-cursor<? 0 2))
+
+
+(test "string-cursor<?-41"
+      #t
+      (string-cursor<? 0 3))
+
+
+(test "string-cursor<?-42"
+      #t
+      (not (string-cursor<? 1 0)))
+
+
+(test "string-cursor<?-43"
+      #t
+      (not (string-cursor<? 1 1)))
+
+
+(test "string-cursor<?-44"
+      #t
+      (string-cursor<? 1 2))
+
+
+(test "string-cursor<?-45"
+      #t
+      (string-cursor<? 1 3))
+
+
+(test "string-cursor<?-46"
+      #t
+      (not (string-cursor<? 2 0)))
+
+
+(test "string-cursor<?-47"
+      #t
+      (not (string-cursor<? 2 1)))
+
+
+(test "string-cursor<?-48"
+      #t
+      (not (string-cursor<? 2 2)))
+
+
+(test "string-cursor<?-49"
+      #t
+      (string-cursor<? 2 3))
+
+
+(test "string-cursor<?-50"
+      #t
+      (not (string-cursor<? 3 0)))
+
+
+(test "string-cursor<?-51"
+      #t
+      (not (string-cursor<? 3 1)))
+
+
+(test "string-cursor<?-52"
+      #t
+      (not (string-cursor<? 3 2)))
+
+
+(test "string-cursor<?-53"
+      #t
+      (not (string-cursor<? 3 3)))
+
+
+
+(test "string-cursor>?-54"
+      #t
+      (not (string-cursor>? 0 0)))
+
+
+(test "string-cursor>?-55"
+      #t
+      (not (string-cursor>? 0 1)))
+
+
+(test "string-cursor>?-56"
+      #t
+      (not (string-cursor>? 0 2)))
+
+
+(test "string-cursor>?-57"
+      #t
+      (not (string-cursor>? 0 3)))
+
+
+(test "string-cursor>?-58"
+      #t
+      (string-cursor>? 1 0))
+
+
+(test "string-cursor>?-59"
+      #t
+      (not (string-cursor>? 1 1)))
+
+
+(test "string-cursor>?-60"
+      #t
+      (not (string-cursor>? 1 2)))
+
+
+(test "string-cursor>?-61"
+      #t
+      (not (string-cursor>? 1 3)))
+
+
+(test "string-cursor>?-62"
+      #t
+      (string-cursor>? 2 0))
+
+
+(test "string-cursor>?-63"
+      #t
+      (string-cursor>? 2 1))
+
+
+(test "string-cursor>?-64"
+      #t
+      (not (string-cursor>? 2 2)))
+
+
+(test "string-cursor>?-65"
+      #t
+      (not (string-cursor>? 2 3)))
+
+
+(test "string-cursor>?-66"
+      #t
+      (string-cursor>? 3 0))
+
+
+(test "string-cursor>?-67"
+      #t
+      (string-cursor>? 3 1))
+
+
+(test "string-cursor>?-68"
+      #t
+      (string-cursor>? 3 2))
+
+
+(test "string-cursor>?-69"
+      #t
+      (not (string-cursor>? 3 3)))
+
+
+
+(test "string-cursor<=?-70"
+      #t
+      (string-cursor<=? 0 0))
+
+
+(test "string-cursor<=?-71"
+      #t
+      (string-cursor<=? 0 1))
+
+
+(test "string-cursor<=?-72"
+      #t
+      (string-cursor<=? 0 2))
+
+
+(test "string-cursor<=?-73"
+      #t
+      (string-cursor<=? 0 3))
+
+
+(test "string-cursor<=?-74"
+      #t
+      (not (string-cursor<=? 1 0)))
+
+
+(test "string-cursor<=?-75"
+      #t
+      (string-cursor<=? 1 1))
+
+
+(test "string-cursor<=?-76"
+      #t
+      (string-cursor<=? 1 2))
+
+
+(test "string-cursor<=?-77"
+      #t
+      (string-cursor<=? 1 3))
+
+
+(test "string-cursor<=?-78"
+      #t
+      (not (string-cursor<=? 2 0)))
+
+
+(test "string-cursor<=?-79"
+      #t
+      (not (string-cursor<=? 2 1)))
+
+
+(test "string-cursor<=?-80"
+      #t
+      (string-cursor<=? 2 2))
+
+
+(test "string-cursor<=?-81"
+      #t
+      (string-cursor<=? 2 3))
+
+
+(test "string-cursor<=?-82"
+      #t
+      (not (string-cursor<=? 3 0)))
+
+
+(test "string-cursor<=?-83"
+      #t
+      (not (string-cursor<=? 3 1)))
+
+
+(test "string-cursor<=?-84"
+      #t
+      (not (string-cursor<=? 3 2)))
+
+
+(test "string-cursor<=?-85"
+      #t
+      (string-cursor<=? 3 3))
+
+
+
+(test "string-cursor>=?-86"
+      #t
+      (string-cursor>=? 0 0))
+
+
+(test "string-cursor>=?-87"
+      #t
+      (not (string-cursor>=? 0 1)))
+
+
+(test "string-cursor>=?-88"
+      #t
+      (not (string-cursor>=? 0 2)))
+
+
+(test "string-cursor>=?-89"
+      #t
+      (not (string-cursor>=? 0 3)))
+
+
+(test "string-cursor>=?-90"
+      #t
+      (string-cursor>=? 1 0))
+
+
+(test "string-cursor>=?-91"
+      #t
+      (string-cursor>=? 1 1))
+
+
+(test "string-cursor>=?-92"
+      #t
+      (not (string-cursor>=? 1 2)))
+
+
+(test "string-cursor>=?-93"
+      #t
+      (not (string-cursor>=? 1 3)))
+
+
+(test "string-cursor>=?-94"
+      #t
+      (string-cursor>=? 2 0))
+
+
+(test "string-cursor>=?-95"
+      #t
+      (string-cursor>=? 2 1))
+
+
+(test "string-cursor>=?-96"
+      #t
+      (string-cursor>=? 2 2))
+
+
+(test "string-cursor>=?-97"
+      #t
+      (not (string-cursor>=? 2 3)))
+
+
+(test "string-cursor>=?-98"
+      #t
+      (string-cursor>=? 3 0))
+
+
+(test "string-cursor>=?-99"
+      #t
+      (string-cursor>=? 3 1))
+
+
+(test "string-cursor>=?-100"
+      #t
+      (string-cursor>=? 3 2))
+
+
+(test "string-cursor>=?-101"
+      #t
+      (string-cursor>=? 3 3))
+
+
+
+(test "string-cursor=?-102"
+      #t
+      (string-cursor=? (string-index->cursor ABC 0)
+                       (string-index->cursor ABC 0)))
+
+
+(test "string-cursor=?-103"
+      #t
+      (not (string-cursor=? (string-index->cursor ABC 0)
+                            (string-index->cursor ABC 1))))
+
+
+(test "string-cursor=?-104"
+      #t
+      (not (string-cursor=? (string-index->cursor ABC 0)
+                            (string-index->cursor ABC 2))))
+
+
+(test "string-cursor=?-105"
+      #t
+      (not (string-cursor=? (string-index->cursor ABC 0)
+                            (string-index->cursor ABC 3))))
+
+
+(test "string-cursor=?-106"
+      #t
+      (not (string-cursor=? (string-index->cursor ABC 1)
+                            (string-index->cursor ABC 0))))
+
+
+(test "string-cursor=?-107"
+      #t
+      (string-cursor=? (string-index->cursor ABC 1)
+                       (string-index->cursor ABC 1)))
+
+
+(test "string-cursor=?-108"
+      #t
+      (not (string-cursor=? (string-index->cursor ABC 1)
+                            (string-index->cursor ABC 2))))
+
+
+(test "string-cursor=?-109"
+      #t
+      (not (string-cursor=? (string-index->cursor ABC 1)
+                            (string-index->cursor ABC 3))))
+
+
+(test "string-cursor=?-110"
+      #t
+      (not (string-cursor=? (string-index->cursor ABC 2)
+                            (string-index->cursor ABC 0))))
+
+
+(test "string-cursor=?-111"
+      #t
+      (not (string-cursor=? (string-index->cursor ABC 2)
+                            (string-index->cursor ABC 1))))
+
+
+(test "string-cursor=?-112"
+      #t
+      (string-cursor=? (string-index->cursor ABC 2)
+                       (string-index->cursor ABC 2)))
+
+
+(test "string-cursor=?-113"
+      #t
+      (not (string-cursor=? (string-index->cursor ABC 2)
+                            (string-index->cursor ABC 3))))
+
+
+(test "string-cursor=?-114"
+      #t
+      (not (string-cursor=? (string-index->cursor ABC 3)
+                            (string-index->cursor ABC 0))))
+
+
+(test "string-cursor=?-115"
+      #t
+      (not (string-cursor=? (string-index->cursor ABC 3)
+                            (string-index->cursor ABC 1))))
+
+
+(test "string-cursor=?-116"
+      #t
+      (not (string-cursor=? (string-index->cursor ABC 3)
+                            (string-index->cursor ABC 2))))
+
+
+(test "string-cursor=?-117"
+      #t
+      (string-cursor=? (string-index->cursor ABC 3)
+                       (string-index->cursor ABC 3)))
+
+
+
+(test "string-cursor<?-118"
+      #t
+      (not (string-cursor<? (string-index->cursor ABC 0)
+                            (string-index->cursor ABC 0))))
+
+
+(test "string-cursor<?-119"
+      #t
+      (string-cursor<? (string-index->cursor ABC 0)
+                       (string-index->cursor ABC 1)))
+
+
+(test "string-cursor<?-120"
+      #t
+      (string-cursor<? (string-index->cursor ABC 0)
+                       (string-index->cursor ABC 2)))
+
+
+(test "string-cursor<?-121"
+      #t
+      (string-cursor<? (string-index->cursor ABC 0)
+                       (string-index->cursor ABC 3)))
+
+
+(test "string-cursor<?-122"
+      #t
+      (not (string-cursor<? (string-index->cursor ABC 1)
+                            (string-index->cursor ABC 0))))
+
+
+(test "string-cursor<?-123"
+      #t
+      (not (string-cursor<? (string-index->cursor ABC 1)
+                            (string-index->cursor ABC 1))))
+
+
+(test "string-cursor<?-124"
+      #t
+      (string-cursor<? (string-index->cursor ABC 1)
+                       (string-index->cursor ABC 2)))
+
+
+(test "string-cursor<?-125"
+      #t
+      (string-cursor<? (string-index->cursor ABC 1)
+                       (string-index->cursor ABC 3)))
+
+
+(test "string-cursor<?-126"
+      #t
+      (not (string-cursor<? (string-index->cursor ABC 2)
+                            (string-index->cursor ABC 0))))
+
+
+(test "string-cursor<?-127"
+      #t
+      (not (string-cursor<? (string-index->cursor ABC 2)
+                            (string-index->cursor ABC 1))))
+
+
+(test "string-cursor<?-128"
+      #t
+      (not (string-cursor<? (string-index->cursor ABC 2)
+                            (string-index->cursor ABC 2))))
+
+
+(test "string-cursor<?-129"
+      #t
+      (string-cursor<? (string-index->cursor ABC 2)
+                       (string-index->cursor ABC 3)))
+
+
+(test "string-cursor<?-130"
+      #t
+      (not (string-cursor<? (string-index->cursor ABC 3)
+                            (string-index->cursor ABC 0))))
+
+
+(test "string-cursor<?-131"
+      #t
+      (not (string-cursor<? (string-index->cursor ABC 3)
+                            (string-index->cursor ABC 1))))
+
+
+(test "string-cursor<?-132"
+      #t
+      (not (string-cursor<? (string-index->cursor ABC 3)
+                            (string-index->cursor ABC 2))))
+
+
+(test "string-cursor<?-133"
+      #t
+      (not (string-cursor<? (string-index->cursor ABC 3)
+                            (string-index->cursor ABC 3))))
+
+
+
+(test "string-cursor>?-134"
+      #t
+      (not (string-cursor>? (string-index->cursor ABC 0)
+                            (string-index->cursor ABC 0))))
+
+
+(test "string-cursor>?-135"
+      #t
+      (not (string-cursor>? (string-index->cursor ABC 0)
+                            (string-index->cursor ABC 1))))
+
+
+(test "string-cursor>?-136"
+      #t
+      (not (string-cursor>? (string-index->cursor ABC 0)
+                            (string-index->cursor ABC 2))))
+
+
+(test "string-cursor>?-137"
+      #t
+      (not (string-cursor>? (string-index->cursor ABC 0)
+                            (string-index->cursor ABC 3))))
+
+
+(test "string-cursor>?-138"
+      #t
+      (string-cursor>? (string-index->cursor ABC 1)
+                       (string-index->cursor ABC 0)))
+
+
+(test "string-cursor>?-139"
+      #t
+      (not (string-cursor>? (string-index->cursor ABC 1)
+                            (string-index->cursor ABC 1))))
+
+
+(test "string-cursor>?-140"
+      #t
+      (not (string-cursor>? (string-index->cursor ABC 1)
+                            (string-index->cursor ABC 2))))
+
+
+(test "string-cursor>?-141"
+      #t
+      (not (string-cursor>? (string-index->cursor ABC 1)
+                            (string-index->cursor ABC 3))))
+
+
+(test "string-cursor>?-142"
+      #t
+      (string-cursor>? (string-index->cursor ABC 2)
+                       (string-index->cursor ABC 0)))
+
+
+(test "string-cursor>?-143"
+      #t
+      (string-cursor>? (string-index->cursor ABC 2)
+                       (string-index->cursor ABC 1)))
+
+
+(test "string-cursor>?-144"
+      #t
+      (not (string-cursor>? (string-index->cursor ABC 2)
+                            (string-index->cursor ABC 2))))
+
+
+(test "string-cursor>?-145"
+      #t
+      (not (string-cursor>? (string-index->cursor ABC 2)
+                            (string-index->cursor ABC 3))))
+
+
+(test "string-cursor>?-146"
+      #t
+      (string-cursor>? (string-index->cursor ABC 3)
+                       (string-index->cursor ABC 0)))
+
+
+(test "string-cursor>?-147"
+      #t
+      (string-cursor>? (string-index->cursor ABC 3)
+                       (string-index->cursor ABC 1)))
+
+
+(test "string-cursor>?-148"
+      #t
+      (string-cursor>? (string-index->cursor ABC 3)
+                       (string-index->cursor ABC 2)))
+
+
+(test "string-cursor>?-149"
+      #t
+      (not (string-cursor>? (string-index->cursor ABC 3)
+                            (string-index->cursor ABC 3))))
+
+
+
+(test "string-cursor<=?-150"
+      #t
+      (string-cursor<=? (string-index->cursor ABC 0)
+                        (string-index->cursor ABC 0)))
+
+
+(test "string-cursor<=?-151"
+      #t
+      (string-cursor<=? (string-index->cursor ABC 0)
+                        (string-index->cursor ABC 1)))
+
+
+(test "string-cursor<=?-152"
+      #t
+      (string-cursor<=? (string-index->cursor ABC 0)
+                        (string-index->cursor ABC 2)))
+
+
+(test "string-cursor<=?-153"
+      #t
+      (string-cursor<=? (string-index->cursor ABC 0)
+                        (string-index->cursor ABC 3)))
+
+
+(test "string-cursor<=?-154"
+      #t
+      (not (string-cursor<=? (string-index->cursor ABC 1)
+                             (string-index->cursor ABC 0))))
+
+
+(test "string-cursor<=?-155"
+      #t
+      (string-cursor<=? (string-index->cursor ABC 1)
+                        (string-index->cursor ABC 1)))
+
+
+(test "string-cursor<=?-156"
+      #t
+      (string-cursor<=? (string-index->cursor ABC 1)
+                        (string-index->cursor ABC 2)))
+
+
+(test "string-cursor<=?-157"
+      #t
+      (string-cursor<=? (string-index->cursor ABC 1)
+                        (string-index->cursor ABC 3)))
+
+
+(test "string-cursor<=?-158"
+      #t
+      (not (string-cursor<=? (string-index->cursor ABC 2)
+                             (string-index->cursor ABC 0))))
+
+
+(test "string-cursor<=?-159"
+      #t
+      (not (string-cursor<=? (string-index->cursor ABC 2)
+                             (string-index->cursor ABC 1))))
+
+
+(test "string-cursor<=?-160"
+      #t
+      (string-cursor<=? (string-index->cursor ABC 2)
+                        (string-index->cursor ABC 2)))
+
+
+(test "string-cursor<=?-161"
+      #t
+      (string-cursor<=? (string-index->cursor ABC 2)
+                        (string-index->cursor ABC 3)))
+
+
+(test "string-cursor<=?-162"
+      #t
+      (not (string-cursor<=? (string-index->cursor ABC 3)
+                             (string-index->cursor ABC 0))))
+
+
+(test "string-cursor<=?-163"
+      #t
+      (not (string-cursor<=? (string-index->cursor ABC 3)
+                             (string-index->cursor ABC 1))))
+
+
+(test "string-cursor<=?-164"
+      #t
+      (not (string-cursor<=? (string-index->cursor ABC 3)
+                             (string-index->cursor ABC 2))))
+
+
+(test "string-cursor<=?-165"
+      #t
+      (string-cursor<=? (string-index->cursor ABC 3)
+                        (string-index->cursor ABC 3)))
+
+
+
+(test "string-cursor>=?-166"
+      #t
+      (string-cursor>=? (string-index->cursor ABC 0)
+                        (string-index->cursor ABC 0)))
+
+
+(test "string-cursor>=?-167"
+      #t
+      (not (string-cursor>=? (string-index->cursor ABC 0)
+                             (string-index->cursor ABC 1))))
+
+
+(test "string-cursor>=?-168"
+      #t
+      (not (string-cursor>=? (string-index->cursor ABC 0)
+                             (string-index->cursor ABC 2))))
+
+
+(test "string-cursor>=?-169"
+      #t
+      (not (string-cursor>=? (string-index->cursor ABC 0)
+                             (string-index->cursor ABC 3))))
+
+
+(test "string-cursor>=?-170"
+      #t
+      (string-cursor>=? (string-index->cursor ABC 1)
+                        (string-index->cursor ABC 0)))
+
+
+(test "string-cursor>=?-171"
+      #t
+      (string-cursor>=? (string-index->cursor ABC 1)
+                        (string-index->cursor ABC 1)))
+
+
+(test "string-cursor>=?-172"
+      #t
+      (not (string-cursor>=? (string-index->cursor ABC 1)
+                             (string-index->cursor ABC 2))))
+
+
+(test "string-cursor>=?-173"
+      #t
+      (not (string-cursor>=? (string-index->cursor ABC 1)
+                             (string-index->cursor ABC 3))))
+
+
+(test "string-cursor>=?-174"
+      #t
+      (string-cursor>=? (string-index->cursor ABC 2)
+                        (string-index->cursor ABC 0)))
+
+
+(test "string-cursor>=?-175"
+      #t
+      (string-cursor>=? (string-index->cursor ABC 2)
+                        (string-index->cursor ABC 1)))
+
+
+(test "string-cursor>=?-176"
+      #t
+      (string-cursor>=? (string-index->cursor ABC 2)
+                        (string-index->cursor ABC 2)))
+
+
+(test "string-cursor>=?-177"
+      #t
+      (not (string-cursor>=? (string-index->cursor ABC 2)
+                             (string-index->cursor ABC 3))))
+
+
+(test "string-cursor>=?-178"
+      #t
+      (string-cursor>=? (string-index->cursor ABC 3)
+                        (string-index->cursor ABC 0)))
+
+
+(test "string-cursor>=?-179"
+      #t
+      (string-cursor>=? (string-index->cursor ABC 3)
+                        (string-index->cursor ABC 1)))
+
+
+(test "string-cursor>=?-180"
+      #t
+      (string-cursor>=? (string-index->cursor ABC 3)
+                        (string-index->cursor ABC 2)))
+
+
+(test "string-cursor>=?-181"
+      #t
+      (string-cursor>=? (string-index->cursor ABC 3)
+                        (string-index->cursor ABC 3)))
+
+
+
+(test "string-cursor-diff-182"
+      #t
+      (= 0 (string-cursor-diff ""
+                               (string-index->cursor ABC 0)
+                               (string-index->cursor ABC 0))))
+
+
+(test "string-cursor-diff-183"
+      #t
+      (= 3 (string-cursor-diff ABC
+                               (string-index->cursor ABC 0)
+                               (string-index->cursor ABC 3))))
+
+
+(test "string-cursor->index-184"
+      #t
+      (= 0 (string-cursor->index "" (string-index->cursor "" 0))))
+
+
+(test "string-cursor->index-185"
+      #t
+      (= 3 (string-cursor->index ABC (string-index->cursor ABC 3))))
+
+
+(test "string-index->cursor-186"
+      #t
+      (= 0 (string-index->cursor "" (string-index->cursor "" 0))))
+
+
+(test "string-index->cursor-187"
+      #t
+      (= 3 (string-index->cursor ABC (string-index->cursor ABC 3))))
+
+
+;;; Predicates
+
+(test "string-null-188"
+      #t
+      (string-null? ""))
+
+
+(test "string-null-189"
+      #t
+      (not (string-null? "abc")))
+
+
+(test "string-every-190"
+      #t
+      (eqv? #t (string-every (lambda (c) (if (char? c) c #f)) "")))
+
+
+(test "string-every-191"
+      #t
+      (eqv? #\c (string-every (lambda (c) (if (char? c) c #f)) "abc")))
+
+
+(test "string-every-192"
+      #t
+      (eqv? #f (string-every (lambda (c) (if (char>? c #\b) c #f)) "abc")))
+
+
+(test "string-every-193"
+      #t
+      (eqv? #\c (string-every (lambda (c) (if (char>? c #\b) c #f)) "abc" 2)))
+
+
+(test "string-every-194"
+      #t
+      (eqv? #t (string-every (lambda (c) (if (char>? c #\b) c #f)) "abc" 1 1)))
+
+
+(test "string-any-195"
+      #t
+      (eqv? #f (string-any (lambda (c) (if (char? c) c #f)) "")))
+
+
+(test "string-any-196"
+      #t
+      (eqv? #\a (string-any (lambda (c) (if (char? c) c #f)) "abc")))
+
+
+(test "string-any-197"
+      #t
+      (eqv? #\c (string-any (lambda (c) (if (char>? c #\b) c #f)) "abc")))
+
+
+(test "string-any-198"
+      #t
+      (eqv? #\c (string-any (lambda (c) (if (char>? c #\b) c #f)) "abc" 2)))
+
+
+(test "string-any-199"
+      #t
+      (eqv? #f (string-any (lambda (c) (if (char>? c #\b) c #f)) "abc" 0 2)))
+
+
+;;; Constructors
+
+(test "string-tabulate-200"
+      #t
+      (equal? ""
+              (string-tabulate (lambda (i)
+                                 (integer->char (+ i (char->integer #\a))))
+                               0)))
+
+
+(test "string-tabulate-201"
+      #t
+      (equal? "abc"
+              (string-tabulate (lambda (i)
+                                 (integer->char (+ i (char->integer #\a))))
+                               3)))
+
+
+(test "string-unfold-202"
+      #t
+      (equal? "abc"
+              (let ((p (open-input-string "abc")))
+                (string-unfold eof-object?
+                               values
+                               (lambda (x) (read-char p))
+                               (read-char p)))))
+
+
+(test "string-unfold-203"
+      #t
+      (equal? "" (string-unfold null? car cdr '())))
+
+
+(test "string-unfold-204"
+      #t
+      (equal? "abc" (string-unfold null? car cdr (string->list "abc"))))
+
+
+(test "string-unfold-205"
+      #t
+      (equal? "def" (string-unfold null? car cdr '() "def")))
+
+
+(test "string-unfold-206"
+      #t
+      (equal? "defabcG"
+              (string-unfold null?
+                             car
+                             cdr
+                             (string->list "abc")
+                             "def"
+                             (lambda (x) (and (null? x) "G")))))
+
+
+(test "string-unfold-right-207"
+      #t
+      (equal? "" (string-unfold-right null? car cdr '())))
+
+
+(test "string-unfold-right-208"
+      #t
+      (equal? "cba" (string-unfold-right null? car cdr (string->list "abc"))))
+
+
+(test "string-unfold-right-209"
+      #t
+      (equal? "def" (string-unfold-right null? car cdr '() "def")))
+
+
+(test "string-unfold-right-210"
+      #t
+      (equal? "Gcbadef"
+              (string-unfold-right null?
+                                   car
+                                   cdr
+                                   (string->list "abc")
+                                   "def"
+                                   (lambda (x) (and (null? x) "G")))))
+
+
+;;; Conversion
+
+(test "string->list/cursors-211"
+      #t
+      (equal? '() (string->list/cursors "")))
+
+
+(test "string->list/cursors-212"
+      #t
+      (equal? '() (string->list/cursors "" 0)))
+
+
+(test "string->list/cursors-213"
+      #t
+      (equal? '() (string->list/cursors "" 0 0)))
+
+
+(test "string->list/cursors-214"
+      #t
+      (equal? '(#\a #\b #\c) (string->list/cursors "abc")))
+
+
+(test "string->list/cursors-215"
+      #t
+      (equal? '() (string->list/cursors "abc" 3)))
+
+
+(test "string->list/cursors-216"
+      #t
+      (equal? '(#\b #\c) (string->list/cursors "abc" 1 3)))
+
+
+(test "string->list/cursors-217"
+      #t
+      (equal? '(#\b #\c)
+              (string->list/cursors "abc"
+                                    (string-index->cursor "abc" 1)
+                                    (string-index->cursor "abc" 3))))
+
+
+(test "string->vector/cursors-218"
+      #t
+      (equal? '#() (string->vector/cursors "")))
+
+
+(test "string->vector/cursors-219"
+      #t
+      (equal? '#() (string->vector/cursors "" 0)))
+
+
+(test "string->vector/cursors-220"
+      #t
+      (equal? '#() (string->vector/cursors "" 0 0)))
+
+
+(test "string->vector/cursors-221"
+      #t
+      (equal? '#(#\a #\b #\c) (string->vector/cursors "abc")))
+
+
+(test "string->vector/cursors-222"
+      #t
+      (equal? '#() (string->vector/cursors "abc" 3)))
+
+
+(test "string->vector/cursors-223"
+      #t
+      (equal? '#(#\b #\c) (string->vector/cursors "abc" 1 3)))
+
+
+(test "string->vector/cursors-224"
+      #t
+      (equal? '#(#\b #\c)
+              (string->vector/cursors "abc"
+                                      (string-index->cursor "abc" 1)
+                                      (string-index->cursor "abc" 3))))
+
+
+(test "reverse-list->string-225"
+      #t
+      (equal? "" (reverse-list->string '())))
+
+
+(test "reverse-list->string-226"
+      #t
+      (equal? "cba" (reverse-list->string '(#\a #\b #\c))))
+
+
+(test "string-join-227"
+      #t
+      (equal? "" (string-join '())))
+
+
+(test "string-join-228"
+      #t
+      (equal? " ab cd  e f "
+              (string-join '("" "ab" "cd" "" "e" "f" ""))))
+
+
+(test "string-join-229"
+      #t
+      (equal? "" (string-join '() "")))
+
+
+(test "string-join-230"
+      #t
+      (equal? "abcdef"
+              (string-join '("" "ab" "cd" "" "e" "f" "") "")))
+
+
+(test "string-join-231"
+      #t
+      (equal? "" (string-join '() "xyz")))
+
+
+(test "string-join-232"
+      #t
+      (equal? "xyzabxyzcdxyzxyzexyzfxyz"
+              (string-join '("" "ab" "cd" "" "e" "f" "") "xyz")))
+
+
+(test "string-join-233"
+      #t
+      (equal? "" (string-join '() "" 'infix)))
+
+
+(test "string-join-234"
+      #t
+      (equal? "abcdef"
+              (string-join '("" "ab" "cd" "" "e" "f" "") "" 'infix)))
+
+
+(test "string-join-235"
+      #t
+      (equal? "" (string-join '() "xyz" 'infix)))
+
+
+(test "string-join-236"
+      #t
+      (equal? "xyzabxyzcdxyzxyzexyzfxyz"
+              (string-join '("" "ab" "cd" "" "e" "f" "") "xyz" 'infix)))
+
+
+(test "string-join-237"
+      #t
+      (equal? 'horror
+              (guard (exn (#t 'horror))
+                (string-join '() "" 'strict-infix))))
+
+
+(test "string-join-238"
+      #t
+      (equal? "abcdef"
+              (string-join '("" "ab" "cd" "" "e" "f" "") "" 'strict-infix)))
+
+
+(test "string-join-239"
+      #t
+      (equal? 'wham
+              (guard (exn (else 'wham))
+                (string-join '() "xyz" 'strict-infix))))
+
+
+(test "string-join-240"
+      #t
+      (equal? "xyzabxyzcdxyzxyzexyzfxyz"
+              (string-join '("" "ab" "cd" "" "e" "f" "") "xyz" 'strict-infix)))
+
+
+(test "string-join-241"
+      #t
+      (equal? "" (string-join '() "" 'suffix)))
+
+
+(test "string-join-242"
+      #t
+      (equal? "abcdef"
+              (string-join '("" "ab" "cd" "" "e" "f" "") "" 'suffix)))
+
+
+(test "string-join-243"
+      #t
+      (equal? "" (string-join '() "xyz" 'suffix)))
+
+
+(test "string-join-244"
+      #t
+      (equal? "xyzabxyzcdxyzxyzexyzfxyzxyz"
+              (string-join '("" "ab" "cd" "" "e" "f" "") "xyz" 'suffix)))
+
+
+(test "string-join-245"
+      #t
+      (equal? "" (string-join '() "" 'prefix)))
+
+
+(test "string-join-246"
+      #t
+      (equal? "abcdef"
+              (string-join '("" "ab" "cd" "" "e" "f" "") "" 'prefix)))
+
+
+(test "string-join-247"
+      #t
+      (equal? "" (string-join '() "xyz" 'prefix)))
+
+
+(test "string-join-248"
+      #t
+      (equal? "xyzxyzabxyzcdxyzxyzexyzfxyz"
+              (string-join '("" "ab" "cd" "" "e" "f" "") "xyz" 'prefix)))
+
+
+;;; Selection
+
+(test "string-ref/cursor-249"
+      #t
+      (char=? #\a (string-ref/cursor "abc" 0)))
+
+
+(test "string-ref/cursor-250"
+      #t
+      (char=? #\c (string-ref/cursor "abc" 2)))
+
+
+(test "string-ref/cursor-251"
+      #t
+      (char=? #\a (string-ref/cursor "abc" (string-index->cursor "abc" 0))))
+
+
+(test "string-ref/cursor-252"
+      #t
+      (char=? #\c (string-ref/cursor "abc" (string-index->cursor "abc" 2))))
+
+
+(test "substring/cursors-253"
+      #t
+      (string=? "" (substring/cursors "" 0 0)))
+
+
+(test "substring/cursors-254"
+      #t
+      (string=? "" (substring/cursors "abc" 0 0)))
+
+
+(test "substring/cursors-255"
+      #t
+      (string=? "" (substring/cursors "abc" 3 3)))
+
+
+(test "substring/cursors-256"
+      #t
+      (string=? ABC (substring/cursors ABC 0 3)))
+
+
+(test "substring/cursors-257"
+      #t
+      (string=? ABC
+                (substring/cursors ABC
+                                   (string-index->cursor "abc" 0)
+                                   (string-index->cursor "abc" 3))))
+
+
+(test "substring/cursors-258"
+      #t
+      (string=? "b" (substring/cursors "abc" 1 2)))
+
+
+(test "string-copy/cursors-259"
+      #t
+      (string=? "" (string-copy/cursors "")))
+
+
+(test "string-copy/cursors-260"
+      #t
+      (string=? "abc" (string-copy/cursors "abc")))
+
+
+(test "string-copy/cursors-261"
+      #t
+      (string=? "" (string-copy/cursors "abc" 3)))
+
+
+(test "string-copy/cursors-262"
+      #t
+      (string=? "c" (string-copy/cursors "abc" 2)))
+
+
+(test "string-copy/cursors-263"
+      #t
+      (string=? "abc" (string-copy/cursors "abc" 0)))
+
+
+(test "string-copy/cursors-264"
+      #t
+      (string=? "b" (string-copy/cursors "abc" 1 2)))
+
+
+(test "string-copy/cursors-265"
+      #t
+      (string=? "" (string-copy/cursors "" 0 0)))
+
+
+(test "string-copy/cursors-266"
+      #t
+      (string=? "" (string-copy/cursors "abc" 0 0)))
+
+
+(test "string-copy/cursors-267"
+      #t
+      (string=? "" (string-copy/cursors "abc" 3 3)))
+
+
+(test "string-copy/cursors-268"
+      #t
+      (string=? "abc" (string-copy/cursors "abc" 0 3)))
+
+
+(test "string-copy/cursors-269"
+      #t
+      (string=? "b" (string-copy/cursors "abc" 1 2)))
+
+
+(test "string-copy/cursors-270"
+      #t
+      (string=? (substring ABC 1 2)
+                (string-copy/cursors ABC
+                                     (string-index->cursor "abc" 1)
+                                     (string-index->cursor "abc" 2))))
+
+
+(test "string-take-271"
+      #t
+      (string=? "" (string-take "" 0)))
+
+
+(test "string-take-272"
+      #t
+      (string=? "" (string-take "abcdef" 0)))
+
+
+(test "string-take-273"
+      #t
+      (string=? "ab" (string-take "abcdef" 2)))
+
+
+(test "string-drop-274"
+      #t
+      (string=? "" (string-drop "" 0)))
+
+
+(test "string-drop-275"
+      #t
+      (string=? "abcdef" (string-drop "abcdef" 0)))
+
+
+(test "string-drop-276"
+      #t
+      (string=? "cdef" (string-drop "abcdef" 2)))
+
+
+(test "string-take-right-277"
+      #t
+      (string=? "" (string-take-right "" 0)))
+
+
+(test "string-take-right-278"
+      #t
+      (string=? "" (string-take-right "abcdef" 0)))
+
+
+(test "string-take-right-279"
+      #t
+      (string=? "ef" (string-take-right "abcdef" 2)))
+
+
+(test "string-drop-right-280"
+      #t
+      (string=? "" (string-drop-right "" 0)))
+
+
+(test "string-drop-right-281"
+      #t
+      (string=? "abcdef" (string-drop-right "abcdef" 0)))
+
+
+(test "string-drop-right-282"
+      #t
+      (string=? "abcd" (string-drop-right "abcdef" 2)))
+
+
+(test "string-pad-283"
+      #t
+      (string=? "" (string-pad "" 0)))
+
+
+(test "string-pad-284"
+      #t
+      (string=? "     " (string-pad "" 5)))
+
+
+(test "string-pad-285"
+      #t
+      (string=? "  325" (string-pad "325" 5)))
+
+
+(test "string-pad-286"
+      #t
+      (string=? "71325" (string-pad "71325" 5)))
+
+
+(test "string-pad-287"
+      #t
+      (string=? "71325" (string-pad "8871325" 5)))
+
+
+(test "string-pad-288"
+      #t
+      (string=? "" (string-pad "" 0 #\*)))
+
+
+(test "string-pad-289"
+      #t
+      (string=? "*****" (string-pad "" 5 #\*)))
+
+
+(test "string-pad-290"
+      #t
+      (string=? "**325" (string-pad "325" 5 #\*)))
+
+
+(test "string-pad-291"
+      #t
+      (string=? "71325" (string-pad "71325" 5 #\*)))
+
+
+(test "string-pad-292"
+      #t
+      (string=? "71325" (string-pad "8871325" 5 #\*)))
+
+
+(test "string-pad-293"
+      #t
+      (string=? "" (string-pad "" 0 #\* 0)))
+
+
+(test "string-pad-294"
+      #t
+      (string=? "*****" (string-pad "" 5 #\* 0)))
+
+
+(test "string-pad-295"
+      #t
+      (string=? "**325" (string-pad "325" 5 #\* 0)))
+
+
+(test "string-pad-296"
+      #t
+      (string=? "71325" (string-pad "71325" 5 #\* 0)))
+
+
+(test "string-pad-297"
+      #t
+      (string=? "71325" (string-pad "8871325" 5 #\* 0)))
+
+
+(test "string-pad-298"
+      #t
+      (string=? "***25" (string-pad "325" 5 #\* 1)))
+
+
+(test "string-pad-299"
+      #t
+      (string=? "*1325" (string-pad "71325" 5 #\* 1)))
+
+
+(test "string-pad-300"
+      #t
+      (string=? "71325" (string-pad "8871325" 5 #\* 1)))
+
+
+(test "string-pad-301"
+      #t
+      (string=? "" (string-pad "" 0 #\* 0 0)))
+
+
+(test "string-pad-302"
+      #t
+      (string=? "*****" (string-pad "" 5 #\* 0 0)))
+
+
+(test "string-pad-303"
+      #t
+      (string=? "**325" (string-pad "325" 5 #\* 0 3)))
+
+
+(test "string-pad-304"
+      #t
+      (string=? "**713" (string-pad "71325" 5 #\* 0 3)))
+
+
+(test "string-pad-305"
+      #t
+      (string=? "**887" (string-pad "8871325" 5 #\* 0 3)))
+
+
+(test "string-pad-306"
+      #t
+      (string=? "***25" (string-pad "325" 5 #\* 1 3)))
+
+
+(test "string-pad-307"
+      #t
+      (string=? "**132" (string-pad "71325" 5 #\* 1 4)))
+
+
+(test "string-pad-308"
+      #t
+      (string=? "*8713" (string-pad "8871325" 5 #\* 1 5)))
+
+
+(test "string-pad-right-309"
+      #t
+      (string=? "" (string-pad-right "" 0)))
+
+
+(test "string-pad-right-310"
+      #t
+      (string=? "     " (string-pad-right "" 5)))
+
+
+(test "string-pad-right-311"
+      #t
+      (string=? "325  " (string-pad-right "325" 5)))
+
+
+(test "string-pad-right-312"
+      #t
+      (string=? "71325" (string-pad-right "71325" 5)))
+
+
+(test "string-pad-right-313"
+      #t
+      (string=? "88713" (string-pad-right "8871325" 5)))
+
+
+(test "string-pad-right-314"
+      #t
+      (string=? "" (string-pad-right "" 0 #\*)))
+
+
+(test "string-pad-right-315"
+      #t
+      (string=? "*****" (string-pad-right "" 5 #\*)))
+
+
+(test "string-pad-right-316"
+      #t
+      (string=? "325**" (string-pad-right "325" 5 #\*)))
+
+
+(test "string-pad-right-317"
+      #t
+      (string=? "71325" (string-pad-right "71325" 5 #\*)))
+
+
+(test "string-pad-right-318"
+      #t
+      (string=? "88713" (string-pad-right "8871325" 5 #\*)))
+
+
+(test "string-pad-right-319"
+      #t
+      (string=? "" (string-pad-right "" 0 #\* 0)))
+
+
+(test "string-pad-right-320"
+      #t
+      (string=? "*****" (string-pad-right "" 5 #\* 0)))
+
+
+(test "string-pad-right-321"
+      #t
+      (string=? "325**" (string-pad-right "325" 5 #\* 0)))
+
+
+(test "string-pad-right-322"
+      #t
+      (string=? "71325" (string-pad-right "71325" 5 #\* 0)))
+
+
+(test "string-pad-right-323"
+      #t
+      (string=? "88713" (string-pad-right "8871325" 5 #\* 0)))
+
+
+(test "string-pad-right-324"
+      #t
+      (string=? "25***" (string-pad-right "325" 5 #\* 1)))
+
+
+(test "string-pad-right-325"
+      #t
+      (string=? "1325*" (string-pad-right "71325" 5 #\* 1)))
+
+
+(test "string-pad-right-326"
+      #t
+      (string=? "87132" (string-pad-right "8871325" 5 #\* 1)))
+
+
+(test "string-pad-right-327"
+      #t
+      (string=? "" (string-pad-right "" 0 #\* 0 0)))
+
+
+(test "string-pad-right-328"
+      #t
+      (string=? "*****" (string-pad-right "" 5 #\* 0 0)))
+
+
+(test "string-pad-right-329"
+      #t
+      (string=? "325**" (string-pad-right "325" 5 #\* 0 3)))
+
+
+(test "string-pad-right-330"
+      #t
+      (string=? "713**" (string-pad-right "71325" 5 #\* 0 3)))
+
+
+(test "string-pad-right-331"
+      #t
+      (string=? "887**" (string-pad-right "8871325" 5 #\* 0 3)))
+
+
+(test "string-pad-right-332"
+      #t
+      (string=? "25***" (string-pad-right "325" 5 #\* 1 3)))
+
+
+(test "string-pad-right-333"
+      #t
+      (string=? "132**" (string-pad-right "71325" 5 #\* 1 4)))
+
+
+(test "string-pad-right-334"
+      #t
+      (string=? "8713*" (string-pad-right "8871325" 5 #\* 1 5)))
+
+
+
+(test "string-trim-335"
+      #t
+      (string=? "" (string-trim "")))
+
+
+(test "string-trim-336"
+      #t
+      (string=? "a  b  c  " (string-trim "  a  b  c  ")))
+
+
+(test "string-trim-337"
+      #t
+      (string=? "" (string-trim "" char-whitespace?)))
+
+
+(test "string-trim-338"
+      #t
+      (string=? "a  b  c  " (string-trim "  a  b  c  " char-whitespace?)))
+
+
+(test "string-trim-339"
+      #t
+      (string=? "" (string-trim "  a  b  c  " char?)))
+
+
+(test "string-trim-340"
+      #t
+      (string=? "" (string-trim "" char-whitespace? 0)))
+
+
+(test "string-trim-341"
+      #t
+      (string=? "a  b  c  " (string-trim "  a  b  c  " char-whitespace? 0)))
+
+
+(test "string-trim-342"
+      #t
+      (string=? "" (string-trim "  a  b  c  " char? 0)))
+
+
+(test "string-trim-343"
+      #t
+      (string=? "b  c  " (string-trim "  a  b  c  " char-whitespace? 3)))
+
+
+(test "string-trim-344"
+      #t
+      (string=? "" (string-trim "  a  b  c  " char? 3)))
+
+
+(test "string-trim-345"
+      #t
+      (string=? "" (string-trim "  a  b  c  " char? 0 11)))
+
+
+(test "string-trim-346"
+      #t
+      (string=? "b  c  " (string-trim "  a  b  c  " char-whitespace? 3 11)))
+
+
+(test "string-trim-347"
+      #t
+      (string=? "" (string-trim "  a  b  c  " char? 3 11)))
+
+
+(test "string-trim-348"
+      #t
+      (string=? "" (string-trim "  a  b  c  " char? 0 8)))
+
+
+(test "string-trim-349"
+      #t
+      (string=? "b  " (string-trim "  a  b  c  " char-whitespace? 3 8)))
+
+
+(test "string-trim-350"
+      #t
+      (string=? "" (string-trim "  a  b  c  " char? 3 8)))
+
+
+
+(test "string-trim-right-351"
+      #t
+      (string=? "" (string-trim-right "")))
+
+
+(test "string-trim-right-352"
+      #t
+      (string=? "  a  b  c" (string-trim-right "  a  b  c  ")))
+
+
+(test "string-trim-right-353"
+      #t
+      (string=? "" (string-trim-right "" char-whitespace?)))
+
+
+(test "string-trim-right-354"
+      #t
+      (string=? "  a  b  c" (string-trim-right "  a  b  c  " char-whitespace?)))
+
+
+(test "string-trim-right-355"
+      #t
+      (string=? "" (string-trim-right "  a  b  c  " char?)))
+
+
+(test "string-trim-right-356"
+      #t
+      (string=? "" (string-trim-right "" char-whitespace? 0)))
+
+
+(test "string-trim-right-357"
+      #t
+      (string=? "  a  b  c" (string-trim-right "  a  b  c  " char-whitespace? 0)))
+
+
+(test "string-trim-right-358"
+      #t
+      (string=? "" (string-trim-right "  a  b  c  " char? 0)))
+
+
+(test "string-trim-right-359"
+      #t
+      (string=? "  b  c" (string-trim-right "  a  b  c  " char-whitespace? 3)))
+
+
+(test "string-trim-right-360"
+      #t
+      (string=? "" (string-trim-right "  a  b  c  " char? 3)))
+
+
+(test "string-trim-right-361"
+      #t
+      (string=? "" (string-trim-right "  a  b  c  " char? 0 11)))
+
+
+(test "string-trim-right-362"
+      #t
+      (string=? "  b  c" (string-trim-right "  a  b  c  " char-whitespace? 3 11)))
+
+
+(test "string-trim-right-363"
+      #t
+      (string=? "" (string-trim-right "  a  b  c  " char? 3 11)))
+
+
+(test "string-trim-right-364"
+      #t
+      (string=? "" (string-trim-right "  a  b  c  " char? 0 8)))
+
+
+(test "string-trim-right-365"
+      #t
+      (string=? "  b" (string-trim-right "  a  b  c  " char-whitespace? 3 8)))
+
+
+(test "string-trim-right-366"
+      #t
+      (string=? "" (string-trim-right "  a  b  c  " char? 3 8)))
+
+
+
+(test "string-trim-both-367"
+      #t
+      (string=? "" (string-trim-both "")))
+
+
+(test "string-trim-both-368"
+      #t
+      (string=? "a  b  c" (string-trim-both "  a  b  c  ")))
+
+
+(test "string-trim-both-369"
+      #t
+      (string=? "" (string-trim-both "" char-whitespace?)))
+
+
+(test "string-trim-both-370"
+      #t
+      (string=? "a  b  c" (string-trim-both "  a  b  c  " char-whitespace?)))
+
+
+(test "string-trim-both-371"
+      #t
+      (string=? "" (string-trim-both "  a  b  c  " char?)))
+
+
+(test "string-trim-both-372"
+      #t
+      (string=? "" (string-trim-both "" char-whitespace? 0)))
+
+
+(test "string-trim-both-373"
+      #t
+      (string=? "a  b  c" (string-trim-both "  a  b  c  " char-whitespace? 0)))
+
+
+(test "string-trim-both-374"
+      #t
+      (string=? "" (string-trim-both "  a  b  c  " char? 0)))
+
+
+(test "string-trim-both-375"
+      #t
+      (string=? "b  c" (string-trim-both "  a  b  c  " char-whitespace? 3)))
+
+
+(test "string-trim-both-376"
+      #t
+      (string=? "" (string-trim-both "  a  b  c  " char? 3)))
+
+
+(test "string-trim-both-377"
+      #t
+      (string=? "" (string-trim-both "  a  b  c  " char? 0 11)))
+
+
+(test "string-trim-both-378"
+      #t
+      (string=? "b  c" (string-trim-both "  a  b  c  " char-whitespace? 3 11)))
+
+
+(test "string-trim-both-379"
+      #t
+      (string=? "" (string-trim-both "  a  b  c  " char? 3 11)))
+
+
+(test "string-trim-both-380"
+      #t
+      (string=? "" (string-trim-both "  a  b  c  " char? 0 8)))
+
+
+(test "string-trim-both-381"
+      #t
+      (string=? "b" (string-trim-both "  a  b  c  " char-whitespace? 3 8)))
+
+
+(test "string-trim-both-382"
+      #t
+      (string=? "" (string-trim-both "  a  b  c  " char? 3 8)))
+
+
+
+(test "string-prefix-length-383"
+      #t
+      (= 0 (string-prefix-length "" "")))
+
+
+(test "string-prefix-length-384"
+      #t
+      (= 0 (string-prefix-length "" "aabbccddee")))
+
+
+(test "string-prefix-length-385"
+      #t
+      (= 0 (string-prefix-length "aisle" "")))
+
+
+(test "string-prefix-length-386"
+      #t
+      (= 0 (string-prefix-length "" "aabbccddee")))
+
+
+(test "string-prefix-length-387"
+      #t
+      (= 1 (string-prefix-length "aisle" "aabbccddee")))
+
+
+(test "string-prefix-length-388"
+      #t
+      (= 0 (string-prefix-length "bail" "aabbccddee")))
+
+
+(test "string-prefix-length-389"
+      #t
+      (= 4 (string-prefix-length "prefix" "preface")))
+
+
+(test "string-prefix-length-390"
+      #t
+      (= 0 (string-prefix-length "" "" 0)))
+
+
+(test "string-prefix-length-391"
+      #t
+      (= 0 (string-prefix-length "" "aabbccddee" 0)))
+
+
+(test "string-prefix-length-392"
+      #t
+      (= 0 (string-prefix-length "aisle" "" 0)))
+
+
+(test "string-prefix-length-393"
+      #t
+      (= 1 (string-prefix-length "aisle" "aabbccddee" 0)))
+
+
+(test "string-prefix-length-394"
+      #t
+      (= 0 (string-prefix-length "bail" "aabbccddee" 0)))
+
+
+(test "string-prefix-length-395"
+      #t
+      (= 4 (string-prefix-length "prefix" "preface" 0)))
+
+
+(test "string-prefix-length-396"
+      #t
+      (= 0 (string-prefix-length "aisle" "" 1)))
+
+
+(test "string-prefix-length-397"
+      #t
+      (= 0 (string-prefix-length "aisle" "aabbccddee" 1)))
+
+
+(test "string-prefix-length-398"
+      #t
+      (= 1 (string-prefix-length "bail" "aabbccddee" 1)))
+
+
+(test "string-prefix-length-399"
+      #t
+      (= 0 (string-prefix-length "prefix" "preface" 1)))
+
+
+(test "string-prefix-length-400"
+      #t
+      (= 0 (string-prefix-length "" "" 0 0)))
+
+
+(test "string-prefix-length-401"
+      #t
+      (= 0 (string-prefix-length "" "aabbccddee" 0 0)))
+
+
+(test "string-prefix-length-402"
+      #t
+      (= 0 (string-prefix-length "aisle" "" 0 4)))
+
+
+(test "string-prefix-length-403"
+      #t
+      (= 1 (string-prefix-length "aisle" "aabbccddee" 0 4)))
+
+
+(test "string-prefix-length-404"
+      #t
+      (= 0 (string-prefix-length "bail" "aabbccddee" 0 1)))
+
+
+(test "string-prefix-length-405"
+      #t
+      (= 0 (string-prefix-length "aisle" "" 1 4)))
+
+
+(test "string-prefix-length-406"
+      #t
+      (= 0 (string-prefix-length "aisle" "aabbccddee" 1 4)))
+
+
+(test "string-prefix-length-407"
+      #t
+      (= 1 (string-prefix-length "bail" "aabbccddee" 1 4)))
+
+
+(test "string-prefix-length-408"
+      #t
+      (= 0 (string-prefix-length "prefix" "preface" 1 5)))
+
+
+(test "string-prefix-length-409"
+      #t
+      (= 0 (string-prefix-length "" "" 0 0 0)))
+
+
+(test "string-prefix-length-410"
+      #t
+      (= 0 (string-prefix-length "" "aabbccddee" 0 0 0)))
+
+
+(test "string-prefix-length-411"
+      #t
+      (= 0 (string-prefix-length "aisle" "" 0 4 0)))
+
+
+(test "string-prefix-length-412"
+      #t
+      (= 0 (string-prefix-length "aisle" "aabbccddee" 0 4 2)))
+
+
+(test "string-prefix-length-413"
+      #t
+      (= 1 (string-prefix-length "bail" "aabbccddee" 0 1 2)))
+
+
+(test "string-prefix-length-414"
+      #t
+      (= 0 (string-prefix-length "prefix" "preface" 0 5 1)))
+
+
+(test "string-prefix-length-415"
+      #t
+      (= 0 (string-prefix-length "aisle" "" 1 4 0)))
+
+
+(test "string-prefix-length-416"
+      #t
+      (= 0 (string-prefix-length "aisle" "aabbccddee" 1 4 3)))
+
+
+(test "string-prefix-length-417"
+      #t
+      (= 0 (string-prefix-length "bail" "aabbccddee" 1 4 3)))
+
+
+(test "string-prefix-length-418"
+      #t
+      (= 3 (string-prefix-length "prefix" "preface" 1 5 1)))
+
+
+(test "string-prefix-length-419"
+      #t
+      (= 0 (string-prefix-length "" "" 0 0 0 0)))
+
+
+(test "string-prefix-length-420"
+      #t
+      (= 0 (string-prefix-length "" "aabbccddee" 0 0 0 0)))
+
+
+(test "string-prefix-length-421"
+      #t
+      (= 0 (string-prefix-length "aisle" "" 0 4 0 0)))
+
+
+(test "string-prefix-length-422"
+      #t
+      (= 0 (string-prefix-length "aisle" "aabbccddee" 0 4 2 10)))
+
+
+(test "string-prefix-length-423"
+      #t
+      (= 1 (string-prefix-length "bail" "aabbccddee" 0 1 2 10)))
+
+
+(test "string-prefix-length-424"
+      #t
+      (= 0 (string-prefix-length "prefix" "preface" 0 5 1 6)))
+
+
+(test "string-prefix-length-425"
+      #t
+      (= 0 (string-prefix-length "aisle" "" 1 4 0 0)))
+
+
+(test "string-prefix-length-426"
+      #t
+      (= 0 (string-prefix-length "aisle" "aabbccddee" 1 4 3 3)))
+
+
+(test "string-prefix-length-427"
+      #t
+      (= 0 (string-prefix-length "bail" "aabbccddee" 1 4 3 6)))
+
+
+(test "string-prefix-length-428"
+      #t
+      (= 3 (string-prefix-length "prefix" "preface" 1 5 1 7)))
+
+
+
+(test "string-suffix-length-429"
+      #t
+      (= 0 (string-suffix-length "" "")))
+
+
+(test "string-suffix-length-430"
+      #t
+      (= 0 (string-suffix-length "" "aabbccddee")))
+
+
+(test "string-suffix-length-431"
+      #t
+      (= 0 (string-suffix-length "aisle" "")))
+
+
+(test "string-suffix-length-432"
+      #t
+      (= 0 (string-suffix-length "" "aabbccddee")))
+
+
+(test "string-suffix-length-433"
+      #t
+      (= 1 (string-suffix-length "aisle" "aabbccddee")))
+
+
+(test "string-suffix-length-434"
+      #t
+      (= 0 (string-suffix-length "bail" "aabbccddee")))
+
+
+(test "string-suffix-length-435"
+      #t
+      (= 3 (string-suffix-length "place" "preface")))
+
+
+(test "string-suffix-length-436"
+      #t
+      (= 0 (string-suffix-length "" "" 0)))
+
+
+(test "string-suffix-length-437"
+      #t
+      (= 0 (string-suffix-length "" "aabbccddee" 0)))
+
+
+(test "string-suffix-length-438"
+      #t
+      (= 0 (string-suffix-length "aisle" "" 0)))
+
+
+(test "string-suffix-length-439"
+      #t
+      (= 1 (string-suffix-length "aisle" "aabbccddee" 0)))
+
+
+(test "string-suffix-length-440"
+      #t
+      (= 0 (string-suffix-length "bail" "aabbccddee" 0)))
+
+
+(test "string-suffix-length-441"
+      #t
+      (= 3 (string-suffix-length "place" "preface" 0)))
+
+
+(test "string-suffix-length-442"
+      #t
+      (= 0 (string-suffix-length "aisle" "" 1)))
+
+
+(test "string-suffix-length-443"
+      #t
+      (= 1 (string-suffix-length "aisle" "aabbccddee" 1)))
+
+
+(test "string-suffix-length-444"
+      #t
+      (= 0 (string-suffix-length "bail" "aabbccddee" 1)))
+
+
+(test "string-suffix-length-445"
+      #t
+      (= 3 (string-suffix-length "place" "preface" 1)))
+
+
+(test "string-suffix-length-446"
+      #t
+      (= 0 (string-suffix-length "" "" 0 0)))
+
+
+(test "string-suffix-length-447"
+      #t
+      (= 0 (string-suffix-length "" "aabbccddee" 0 0)))
+
+
+(test "string-suffix-length-448"
+      #t
+      (= 0 (string-suffix-length "aisle" "" 0 4)))
+
+
+(test "string-suffix-length-449"
+      #t
+      (= 0 (string-suffix-length "aisle" "aabbccddee" 0 4)))
+
+
+(test "string-suffix-length-450"
+      #t
+      (= 0 (string-suffix-length "bail" "aabbccddee" 0 1)))
+
+
+(test "string-suffix-length-451"
+      #t
+      (= 0 (string-suffix-length "aisle" "" 1 4)))
+
+
+(test "string-suffix-length-452"
+      #t
+      (= 0 (string-suffix-length "aisle" "aabbccddee" 1 4)))
+
+
+(test "string-suffix-length-453"
+      #t
+      (= 1 (string-suffix-length "aisle" "aabbccddee" 1 5)))
+
+
+(test "string-suffix-length-454"
+      #t
+      (= 0 (string-suffix-length "bail" "aabbccddee" 1 4)))
+
+
+(test "string-suffix-length-455"
+      #t
+      (= 3 (string-suffix-length "place" "preface" 1 5)))
+
+
+(test "string-suffix-length-456"
+      #t
+      (= 0 (string-suffix-length "" "" 0 0 0)))
+
+
+(test "string-suffix-length-457"
+      #t
+      (= 0 (string-suffix-length "" "aabbccddee" 0 0 0)))
+
+
+(test "string-suffix-length-458"
+      #t
+      (= 0 (string-suffix-length "aisle" "" 0 4 0)))
+
+
+(test "string-suffix-length-459"
+      #t
+      (= 0 (string-suffix-length "aisle" "aabbccddee" 0 4 2)))
+
+
+(test "string-suffix-length-460"
+      #t
+      (= 0 (string-suffix-length "bail" "aabbccddee" 0 1 2)))
+
+
+(test "string-suffix-length-461"
+      #t
+      (= 3 (string-suffix-length "place" "preface" 0 5 1)))
+
+
+(test "string-suffix-length-462"
+      #t
+      (= 0 (string-suffix-length "aisle" "" 1 4 0)))
+
+
+(test "string-suffix-length-463"
+      #t
+      (= 0 (string-suffix-length "aisle" "aabbccddee" 1 4 3)))
+
+
+(test "string-suffix-length-464"
+      #t
+      (= 0 (string-suffix-length "bail" "aabbccddee" 1 4 3)))
+
+
+(test "string-suffix-length-465"
+      #t
+      (= 3 (string-suffix-length "place" "preface" 1 5 1)))
+
+
+(test "string-suffix-length-466"
+      #t
+      (= 0 (string-suffix-length "" "" 0 0 0 0)))
+
+
+(test "string-suffix-length-467"
+      #t
+      (= 0 (string-suffix-length "" "aabbccddee" 0 0 0 0)))
+
+
+(test "string-suffix-length-468"
+      #t
+      (= 0 (string-suffix-length "aisle" "" 0 4 0 0)))
+
+
+(test "string-suffix-length-469"
+      #t
+      (= 1 (string-suffix-length "aisle" "aabbccddee" 0 5 2 10)))
+
+
+(test "string-suffix-length-470"
+      #t
+      (= 1 (string-suffix-length "bail" "aabbccddee" 0 1 2 4)))
+
+
+(test "string-suffix-length-471"
+      #t
+      (= 0 (string-suffix-length "place" "preface" 0 5 1 6)))
+
+
+(test "string-suffix-length-472"
+      #t
+      (= 2 (string-suffix-length "place" "preface" 0 4 1 6)))
+
+
+(test "string-suffix-length-473"
+      #t
+      (= 0 (string-suffix-length "aisle" "" 1 4 0 0)))
+
+
+(test "string-suffix-length-474"
+      #t
+      (= 0 (string-suffix-length "aisle" "aabbccddee" 1 4 3 3)))
+
+
+(test "string-suffix-length-475"
+      #t
+      (= 0 (string-suffix-length "bail" "aabbccddee" 1 4 3 6)))
+
+
+(test "string-suffix-length-476"
+      #t
+      (= 3 (string-suffix-length "place" "preface" 1 5 1 7)))
+
+
+
+(test "string-prefix?-477"
+      #t
+      (eq? #t (string-prefix? "" "")))
+
+
+(test "string-prefix?-478"
+      #t
+      (eq? #t (string-prefix? "" "abc")))
+
+
+(test "string-prefix?-479"
+      #t
+      (eq? #t (string-prefix? "a" "abc")))
+
+
+(test "string-prefix?-480"
+      #t
+      (eq? #f (string-prefix? "c" "abc")))
+
+
+(test "string-prefix?-481"
+      #t
+      (eq? #t (string-prefix? "ab" "abc")))
+
+
+(test "string-prefix?-482"
+      #t
+      (eq? #f (string-prefix? "ac" "abc")))
+
+
+(test "string-prefix?-483"
+      #t
+      (eq? #t (string-prefix? "abc" "abc")))
+
+
+(test "string-suffix?-484"
+      #t
+      (eq? #t (string-suffix? "" "")))
+
+
+(test "string-suffix?-485"
+      #t
+      (eq? #t (string-suffix? "" "abc")))
+
+
+(test "string-suffix?-486"
+      #t
+      (eq? #f (string-suffix? "a" "abc")))
+
+
+(test "string-suffix?-487"
+      #t
+      (eq? #t (string-suffix? "c" "abc")))
+
+
+(test "string-suffix?-488"
+      #t
+      (eq? #f (string-suffix? "ac" "abc")))
+
+
+(test "string-suffix?-489"
+      #t
+      (eq? #t (string-suffix? "bc" "abc")))
+
+
+(test "string-suffix?-490"
+      #t
+      (eq? #t (string-suffix? "abc" "abc")))
+
+
+(test "string-prefix?-491"
+      #t
+      (eq? #t (string-prefix? "" "" 0)))
+
+
+(test "string-prefix?-492"
+      #t
+      (eq? #t (string-prefix? "" "abc" 0)))
+
+
+(test "string-prefix?-493"
+      #t
+      (eq? #t (string-prefix? "a" "abc" 0)))
+
+
+(test "string-prefix?-494"
+      #t
+      (eq? #f (string-prefix? "c" "abc" 0)))
+
+
+(test "string-prefix?-495"
+      #t
+      (eq? #t (string-prefix? "ab" "abc" 0)))
+
+
+(test "string-prefix?-496"
+      #t
+      (eq? #f (string-prefix? "ac" "abc" 0)))
+
+
+(test "string-prefix?-497"
+      #t
+      (eq? #t (string-prefix? "abc" "abc" 0)))
+
+
+(test "string-suffix?-498"
+      #t
+      (eq? #t (string-suffix? "" "" 0)))
+
+
+(test "string-suffix?-499"
+      #t
+      (eq? #t (string-suffix? "" "abc" 0)))
+
+
+(test "string-suffix?-500"
+      #t
+      (eq? #f (string-suffix? "a" "abc" 0)))
+
+
+(test "string-suffix?-501"
+      #t
+      (eq? #t (string-suffix? "c" "abc" 0)))
+
+
+(test "string-suffix?-502"
+      #t
+      (eq? #f (string-suffix? "ac" "abc" 0)))
+
+
+(test "string-suffix?-503"
+      #t
+      (eq? #t (string-suffix? "bc" "abc" 0)))
+
+
+(test "string-suffix?-504"
+      #t
+      (eq? #t (string-suffix? "abc" "abc" 0)))
+
+
+(test "string-prefix?-505"
+      #t
+      (eq? #t (string-prefix? "ab" "abc" 2)))
+
+
+(test "string-prefix?-506"
+      #t
+      (eq? #t (string-prefix? "ac" "abc" 2)))
+
+
+(test "string-prefix?-507"
+      #t
+      (eq? #f (string-prefix? "abc" "abc" 2)))
+
+
+(test "string-suffix?-508"
+      #t
+      (eq? #t (string-suffix? "ac" "abc" 2)))
+
+
+(test "string-suffix?-509"
+      #t
+      (eq? #t (string-suffix? "bc" "abc" 2)))
+
+
+(test "string-suffix?-510"
+      #t
+      (eq? #t (string-suffix? "abc" "abc" 2)))
+
+
+
+(test "string-prefix?-511"
+      #t
+      (eq? #t (string-prefix? "" "" 0 0)))
+
+
+(test "string-prefix?-512"
+      #t
+      (eq? #t (string-prefix? "" "abc" 0 0)))
+
+
+(test "string-prefix?-513"
+      #t
+      (eq? #t (string-prefix? "a" "abc" 0 0)))
+
+
+(test "string-prefix?-514"
+      #t
+      (eq? #f (string-prefix? "c" "abc" 0 1)))
+
+
+(test "string-prefix?-515"
+      #t
+      (eq? #t (string-prefix? "ab" "abc" 0 1)))
+
+
+(test "string-prefix?-516"
+      #t
+      (eq? #t (string-prefix? "ab" "abc" 0 2)))
+
+
+(test "string-prefix?-517"
+      #t
+      (eq? #f (string-prefix? "ac" "abc" 0 2)))
+
+
+(test "string-prefix?-518"
+      #t
+      (eq? #t (string-prefix? "abc" "abc" 0 3)))
+
+
+(test "string-suffix?-519"
+      #t
+      (eq? #t (string-suffix? "" "" 0 0)))
+
+
+(test "string-suffix?-520"
+      #t
+      (eq? #t (string-suffix? "" "abc" 0 0)))
+
+
+(test "string-suffix?-521"
+      #t
+      (eq? #f (string-suffix? "a" "abc" 0 1)))
+
+
+(test "string-suffix?-522"
+      #t
+      (eq? #t (string-suffix? "c" "abc" 0 1)))
+
+
+(test "string-suffix?-523"
+      #t
+      (eq? #t (string-suffix? "ac" "abc" 1 2)))
+
+
+(test "string-suffix?-524"
+      #t
+      (eq? #f (string-suffix? "ac" "abc" 0 2)))
+
+
+(test "string-suffix?-525"
+      #t
+      (eq? #t (string-suffix? "bc" "abc" 0 2)))
+
+
+(test "string-suffix?-526"
+      #t
+      (eq? #t (string-suffix? "abc" "abc" 0 3)))
+
+
+(test "string-prefix?-527"
+      #t
+      (eq? #t (string-prefix? "ab" "abc" 2 2)))
+
+
+(test "string-prefix?-528"
+      #t
+      (eq? #t (string-prefix? "ac" "abc" 2 2)))
+
+
+(test "string-prefix?-529"
+      #t
+      (eq? #f (string-prefix? "abc" "abc" 2 3)))
+
+
+(test "string-suffix?-530"
+      #t
+      (eq? #t (string-suffix? "ac" "abc" 2 2)))
+
+
+(test "string-suffix?-531"
+      #t
+      (eq? #t (string-suffix? "bc" "abc" 2 2)))
+
+
+(test "string-suffix?-532"
+      #t
+      (eq? #t (string-suffix? "abc" "abc" 2 3)))
+
+
+
+(test "string-prefix?-533"
+      #t
+      (eq? #t (string-prefix? "" "" 0 0 0)))
+
+
+(test "string-prefix?-534"
+      #t
+      (eq? #t (string-prefix? "" "abc" 0 0 0)))
+
+
+(test "string-prefix?-535"
+      #t
+      (eq? #t (string-prefix? "a" "abc" 0 0 0)))
+
+
+(test "string-prefix?-536"
+      #t
+      (eq? #f (string-prefix? "c" "abc" 0 1 0)))
+
+
+(test "string-prefix?-537"
+      #t
+      (eq? #t (string-prefix? "ab" "abc" 0 1 0)))
+
+
+(test "string-prefix?-538"
+      #t
+      (eq? #t (string-prefix? "ab" "abc" 0 2 0)))
+
+
+(test "string-prefix?-539"
+      #t
+      (eq? #f (string-prefix? "ac" "abc" 0 2 0)))
+
+
+(test "string-prefix?-540"
+      #t
+      (eq? #t (string-prefix? "abc" "abc" 0 3 0)))
+
+
+(test "string-suffix?-541"
+      #t
+      (eq? #t (string-suffix? "" "" 0 0 0)))
+
+
+(test "string-suffix?-542"
+      #t
+      (eq? #t (string-suffix? "" "abc" 0 0 0)))
+
+
+(test "string-suffix?-543"
+      #t
+      (eq? #f (string-suffix? "a" "abc" 0 1 0)))
+
+
+(test "string-suffix?-544"
+      #t
+      (eq? #t (string-suffix? "c" "abc" 0 1 0)))
+
+
+(test "string-suffix?-545"
+      #t
+      (eq? #t (string-suffix? "ac" "abc" 1 2 0)))
+
+
+(test "string-suffix?-546"
+      #t
+      (eq? #f (string-suffix? "ac" "abc" 0 2 0)))
+
+
+(test "string-suffix?-547"
+      #t
+      (eq? #t (string-suffix? "bc" "abc" 0 2 0)))
+
+
+(test "string-suffix?-548"
+      #t
+      (eq? #t (string-suffix? "abc" "abc" 0 3 0)))
+
+
+(test "string-prefix?-549"
+      #t
+      (eq? #t (string-prefix? "ab" "abc" 2 2 0)))
+
+
+(test "string-prefix?-550"
+      #t
+      (eq? #t (string-prefix? "ac" "abc" 2 2 0)))
+
+
+(test "string-prefix?-551"
+      #t
+      (eq? #f (string-prefix? "abc" "abc" 2 3 0)))
+
+
+(test "string-suffix?-552"
+      #t
+      (eq? #t (string-suffix? "ac" "abc" 2 2 0)))
+
+
+(test "string-suffix?-553"
+      #t
+      (eq? #t (string-suffix? "bc" "abc" 2 2 0)))
+
+
+(test "string-suffix?-554"
+      #t
+      (eq? #t (string-suffix? "abc" "abc" 2 3 0)))
+
+
+(test "string-prefix?-555"
+      #t
+      (eq? #t (string-prefix? "" "abc" 0 0 1)))
+
+
+(test "string-prefix?-556"
+      #t
+      (eq? #t (string-prefix? "a" "abc" 0 0 1)))
+
+
+(test "string-prefix?-557"
+      #t
+      (eq? #t (string-prefix? "c" "abc" 0 1 2)))
+
+
+(test "string-prefix?-558"
+      #t
+      (eq? #f (string-prefix? "ab" "abc" 0 1 2)))
+
+
+(test "string-prefix?-559"
+      #t
+      (eq? #f (string-prefix? "ab" "abc" 0 2 1)))
+
+
+(test "string-prefix?-560"
+      #t
+      (eq? #f (string-prefix? "ac" "abc" 0 2 1)))
+
+
+(test "string-prefix?-561"
+      #t
+      (eq? #f (string-prefix? "abc" "abc" 0 3 1)))
+
+
+(test "string-suffix?-562"
+      #t
+      (eq? #f (string-suffix? "a" "abc" 0 1 2)))
+
+
+(test "string-suffix?-563"
+      #t
+      (eq? #t (string-suffix? "c" "abc" 0 1 1)))
+
+
+(test "string-suffix?-564"
+      #t
+      (eq? #t (string-suffix? "ac" "abc" 1 2 2)))
+
+
+(test "string-suffix?-565"
+      #t
+      (eq? #t (string-suffix? "bc" "abc" 0 2 1)))
+
+
+(test "string-suffix?-566"
+      #t
+      (eq? #f (string-suffix? "bc" "abc" 0 2 2)))
+
+
+
+(test "string-prefix?-567"
+      #t
+      (eq? #t (string-prefix? "" "" 0 0 0 0)))
+
+
+(test "string-prefix?-568"
+      #t
+      (eq? #t (string-prefix? "" "abc" 0 0 0 3)))
+
+
+(test "string-prefix?-569"
+      #t
+      (eq? #t (string-prefix? "a" "abc" 0 0 0 3)))
+
+
+(test "string-prefix?-570"
+      #t
+      (eq? #f (string-prefix? "c" "abc" 0 1 0 3)))
+
+
+(test "string-prefix?-571"
+      #t
+      (eq? #t (string-prefix? "ab" "abc" 0 1 0 3)))
+
+
+(test "string-prefix?-572"
+      #t
+      (eq? #t (string-prefix? "ab" "abc" 0 2 0 3)))
+
+
+(test "string-prefix?-573"
+      #t
+      (eq? #f (string-prefix? "ac" "abc" 0 2 0 3)))
+
+
+(test "string-prefix?-574"
+      #t
+      (eq? #t (string-prefix? "abc" "abc" 0 3 0 3)))
+
+
+(test "string-suffix?-575"
+      #t
+      (eq? #t (string-suffix? "" "abc" 0 0 0 3)))
+
+
+(test "string-suffix?-576"
+      #t
+      (eq? #f (string-suffix? "a" "abc" 0 1 0 3)))
+
+
+(test "string-suffix?-577"
+      #t
+      (eq? #t (string-suffix? "c" "abc" 0 1 0 3)))
+
+
+(test "string-suffix?-578"
+      #t
+      (eq? #t (string-suffix? "ac" "abc" 1 2 0 3)))
+
+
+(test "string-suffix?-579"
+      #t
+      (eq? #f (string-suffix? "ac" "abc" 0 2 0 3)))
+
+
+(test "string-suffix?-580"
+      #t
+      (eq? #t (string-suffix? "bc" "abc" 0 2 0 3)))
+
+
+(test "string-suffix?-581"
+      #t
+      (eq? #t (string-suffix? "abc" "abc" 0 3 0 3)))
+
+
+(test "string-prefix?-582"
+      #t
+      (eq? #t (string-prefix? "ab" "abc" 2 2 0 3)))
+
+
+(test "string-prefix?-583"
+      #t
+      (eq? #t (string-prefix? "ac" "abc" 2 2 0 3)))
+
+
+(test "string-prefix?-584"
+      #t
+      (eq? #f (string-prefix? "abc" "abc" 2 3 0 3)))
+
+
+(test "string-suffix?-585"
+      #t
+      (eq? #t (string-suffix? "ac" "abc" 2 2 0 3)))
+
+
+(test "string-suffix?-586"
+      #t
+      (eq? #t (string-suffix? "bc" "abc" 2 2 0 3)))
+
+
+(test "string-suffix?-587"
+      #t
+      (eq? #t (string-suffix? "abc" "abc" 2 3 0 3)))
+
+
+(test "string-prefix?-588"
+      #t
+      (eq? #t (string-prefix? "" "abc" 0 0 1 3)))
+
+
+(test "string-prefix?-589"
+      #t
+      (eq? #t (string-prefix? "a" "abc" 0 0 1 3)))
+
+
+(test "string-prefix?-590"
+      #t
+      (eq? #t (string-prefix? "c" "abc" 0 1 2 3)))
+
+
+(test "string-prefix?-591"
+      #t
+      (eq? #f (string-prefix? "ab" "abc" 0 1 2 3)))
+
+
+(test "string-prefix?-592"
+      #t
+      (eq? #f (string-prefix? "ab" "abc" 0 2 1 3)))
+
+
+(test "string-prefix?-593"
+      #t
+      (eq? #f (string-prefix? "ac" "abc" 0 2 1 3)))
+
+
+(test "string-prefix?-594"
+      #t
+      (eq? #f (string-prefix? "abc" "abc" 0 3 1 3)))
+
+
+(test "string-suffix?-595"
+      #t
+      (eq? #f (string-suffix? "a" "abc" 0 1 2 3)))
+
+
+(test "string-suffix?-596"
+      #t
+      (eq? #t (string-suffix? "c" "abc" 0 1 1 3)))
+
+
+(test "string-suffix?-597"
+      #t
+      (eq? #t (string-suffix? "ac" "abc" 1 2 2 3)))
+
+
+(test "string-suffix?-598"
+      #t
+      (eq? #t (string-suffix? "bc" "abc" 0 2 1 3)))
+
+
+(test "string-suffix?-599"
+      #t
+      (eq? #f (string-suffix? "bc" "abc" 0 2 2 3)))
+
+
+
+(test "string-prefix?-600"
+      #t
+      (eq? #t (string-prefix? "" "abc" 0 0 0 2)))
+
+
+(test "string-prefix?-601"
+      #t
+      (eq? #t (string-prefix? "a" "abc" 0 0 0 2)))
+
+
+(test "string-prefix?-602"
+      #t
+      (eq? #f (string-prefix? "c" "abc" 0 1 0 2)))
+
+
+(test "string-prefix?-603"
+      #t
+      (eq? #t (string-prefix? "ab" "abc" 0 1 0 2)))
+
+
+(test "string-prefix?-604"
+      #t
+      (eq? #f (string-prefix? "abc" "abc" 0 3 0 2)))
+
+
+(test "string-suffix?-605"
+      #t
+      (eq? #t (string-suffix? "" "abc" 0 0 0 2)))
+
+
+(test "string-suffix?-606"
+      #t
+      (eq? #f (string-suffix? "c" "abc" 0 1 0 2)))
+
+
+(test "string-suffix?-607"
+      #t
+      (eq? #f (string-suffix? "ac" "abc" 1 2 0 2)))
+
+
+;;; Searching
+
+(test "string-index-608"
+      #t
+      (= 0
+         (string-cursor->index ""
+                               (string-index "" char?))))
+
+
+(test "string-index-609"
+      #t
+      (= 0
+         (string-cursor->index "abcdef"
+                               (string-index "abcdef" char?))))
+
+
+(test "string-index-610"
+      #t
+      (= 4
+         (string-cursor->index "abcdef"
+                               (string-index "abcdef"
+                                             (lambda (c) (char>? c #\d))))))
+
+
+(test "string-index-611"
+      #t
+      (= 6
+         (string-cursor->index "abcdef"
+                               (string-index "abcdef" char-whitespace?))))
+
+
+(test "string-index-right-612"
+      #t
+      (= 0
+         (string-cursor->index "abcdef"
+                               (string-index-right "" char?))))
+
+
+(test "string-index-right-613"
+      #t
+      (= 6
+         (string-cursor->index "abcdef"
+                               (string-index-right "abcdef" char?))))
+
+
+(test "string-index-right-614"
+      #t
+      (= 6
+         (string-cursor->index "abcdef"
+                               (string-index-right "abcdef"
+                                                   (lambda (c) (char>? c #\d))))))
+
+
+(test "string-index-right-615"
+      #t
+      (= 0
+         (string-cursor->index "abcdef"
+                               (string-index-right "abcdef" char-whitespace?))))
+
+
+(test "string-skip-616"
+      #t
+      (= 0
+         (string-cursor->index "" (string-skip "" string?))))
+
+
+(test "string-skip-617"
+      #t
+      (= 0
+         (string-cursor->index "abcdef"
+                               (string-skip "abcdef" string?))))
+
+
+(test "string-skip-618"
+      #t
+      (= 4
+         (string-cursor->index "abcdef"
+                               (string-skip "abcdef"
+                                            (lambda (c) (char<=? c #\d))))))
+
+
+(test "string-skip-619"
+      #t
+      (= 6
+         (string-cursor->index "abcdef"
+                               (string-skip "abcdef" char?))))
+
+
+(test "string-skip-right-620"
+      #t
+      (= 0
+         (string-cursor->index "" (string-skip-right "" string?))))
+
+
+(test "string-skip-right-621"
+      #t
+      (= 6
+         (string-cursor->index "abcdef"
+                               (string-skip-right "abcdef" string?))))
+
+
+(test "string-skip-right-622"
+      #t
+      (= 6
+         (string-cursor->index "abcdef"
+                               (string-skip-right "abcdef"
+                                                  (lambda (c) (char<=? c #\d))))))
+
+
+(test "string-skip-right-623"
+      #t
+      (= 0
+         (string-cursor->index "abcdef"
+                               (string-skip-right "abcdef" char?))))
+
+
+
+(test "string-index-624"
+      #t
+      (= 2
+         (string-cursor->index "abcdef"
+                               (string-index "abcdef" char? 2))))
+
+
+(test "string-index-625"
+      #t
+      (= 4
+         (string-cursor->index "abcdef"
+                               (string-index "abcdef"
+                                             (lambda (c) (char>? c #\d)) 2))))
+
+
+(test "string-index-626"
+      #t
+      (= 6
+         (string-cursor->index "abcdef"
+                               (string-index "abcdef" char-whitespace? 2))))
+
+
+(test "string-index-right-627"
+      #t
+      (= 6
+         (string-cursor->index "abcdef"
+                               (string-index-right "abcdef" char? 2))))
+
+
+(test "string-index-right-628"
+      #t
+      (= 6
+         (string-cursor->index "abcdef"
+                               (string-index-right "abcdef"
+                                                   (lambda (c)
+                                                     (char>? c #\d)) 2))))
+
+
+(test "string-index-right-629"
+      #t
+      (= 2
+         (string-cursor->index "abcdef"
+                               (string-index-right "abcdef" char-whitespace? 2))))
+
+
+(test "string-skip-630"
+      #t
+      (= 2
+         (string-cursor->index "abcdef"
+                               (string-skip "abcdef" string? 2))))
+
+
+(test "string-skip-631"
+      #t
+      (= 4
+         (string-cursor->index "abcdef"
+                               (string-skip "abcdef"
+                                            (lambda (c)
+                                              (char<=? c #\d)) 2))))
+
+
+(test "string-skip-632"
+      #t
+      (= 6
+         (string-cursor->index "abcdef"
+                               (string-skip "abcdef" char? 2))))
+
+
+(test "string-skip-right-633"
+      #t
+      (= 6
+         (string-cursor->index "abcdef"
+                               (string-skip-right "abcdef" string? 2))))
+
+
+(test "string-skip-right-634"
+      #t
+      (= 6
+         (string-cursor->index "abcdef"
+                               (string-skip-right "abcdef"
+                                                  (lambda (c)
+                                                    (char<=? c #\d)) 2))))
+
+
+(test "string-skip-right-635"
+      #t
+      (= 2
+         (string-cursor->index "abcdef"
+                               (string-skip-right "abcdef" char? 2))))
+
+
+
+(test "string-index-636"
+      #t
+      (= 2
+         (string-cursor->index "abcdef"
+                               (string-index "abcdef" char? 2 5))))
+
+
+(test "string-index-637"
+      #t
+      (= 4
+         (string-cursor->index "abcdef"
+                               (string-index "abcdef"
+                                             (lambda (c) (char>? c #\d)) 2 5))))
+
+
+(test "string-index-638"
+      #t
+      (= 5
+         (string-cursor->index "abcdef"
+                               (string-index "abcdef" char-whitespace? 2 5))))
+
+
+(test "string-index-right-639"
+      #t
+      (= 5
+         (string-cursor->index "abcdef"
+                               (string-index-right "abcdef" char? 2 5))))
+
+
+(test "string-index-right-640"
+      #t
+      (= 5
+         (string-cursor->index "abcdef"
+                               (string-index-right "abcdef"
+                                                   (lambda (c)
+                                                     (char>? c #\d)) 2 5))))
+
+
+(test "string-index-right-641"
+      #t
+      (= 2
+         (string-cursor->index "abcdef"
+                               (string-index-right "abcdef"
+                                                   char-whitespace? 2 5))))
+
+
+(test "string-skip-642"
+      #t
+      (= 2
+         (string-cursor->index "abcdef"
+                               (string-skip "abcdef" string? 2 5))))
+
+
+(test "string-skip-643"
+      #t
+      (= 4
+         (string-cursor->index "abcdef"
+                               (string-skip "abcdef"
+                                            (lambda (c) (char<=? c #\d)) 2 5))))
+
+
+(test "string-skip-644"
+      #t
+      (= 5
+         (string-cursor->index "abcdef"
+                               (string-skip "abcdef" char? 2 5))))
+
+
+(test "string-skip-right-645"
+      #t
+      (= 5
+         (string-cursor->index "abcdef"
+                               (string-skip-right "abcdef" string? 2 5))))
+
+
+(test "string-skip-right-646"
+      #t
+      (= 5
+         (string-cursor->index "abcdef"
+                               (string-skip-right "abcdef"
+                                                  (lambda (c)
+                                                    (char<=? c #\d)) 2 5))))
+
+
+(test "string-skip-right-647"
+      #t
+      (= 2
+         (string-cursor->index "abcdef"
+                               (string-skip-right "abcdef" char? 2 5))))
+
+
+
+(test "string-contains-648"
+      #t
+      (eqv? 0
+            (string-cursor->index ""
+                                  (string-contains "" ""))))
+
+
+(test "string-contains-649"
+      #t
+      (eqv? 0
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo" ""))))
+
+
+(test "string-contains-650"
+      #t
+      (eqv? 0
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo" "a"))))
+
+
+(test "string-contains-651"
+      #t
+      (eqv? 5
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo" "ff"))))
+
+
+(test "string-contains-652"
+      #t
+      (eqv? 4
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo" "eff"))))
+
+
+(test "string-contains-653"
+      #t
+      (eqv? 8
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo" "foo"))))
+
+
+(test "string-contains-654"
+      #t
+      (not (string-contains "abcdeffffoo" "efffoo")))
+
+
+(test "string-contains-right-655"
+      #t
+      (eqv? 0
+            (string-cursor->index ""
+                                  (string-contains-right "" ""))))
+
+
+(test "string-contains-right-656"
+      #t
+      (eqv? 11
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo" ""))))
+
+
+(test "string-contains-right-657"
+      #t
+      (eqv? 0
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo" "a"))))
+
+
+(test "string-contains-right-658"
+      #t
+      (eqv? 7
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo" "ff"))))
+
+
+(test "string-contains-right-659"
+      #t
+      (eqv? 4
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo" "eff"))))
+
+
+(test "string-contains-right-660"
+      #t
+      (eqv? 8
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo" "foo"))))
+
+
+(test "string-contains-right-661"
+      #t
+      (not (string-contains-right "abcdeffffoo" "efffoo")))
+
+
+
+(test "string-contains-662"
+      #t
+      (eqv? 0
+            (string-cursor->index ""
+                                  (string-contains "" "" 0))))
+
+
+(test "string-contains-663"
+      #t
+      (eqv? 2
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo" "" 2))))
+
+
+(test "string-contains-664"
+      #t
+      (not (string-contains "abcdeffffoo" "a" 2)))
+
+
+(test "string-contains-665"
+      #t
+      (eqv? 5
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo" "ff" 2))))
+
+
+(test "string-contains-666"
+      #t
+      (eqv? 4
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo" "eff" 2))))
+
+
+(test "string-contains-667"
+      #t
+      (eqv? 8
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo" "foo" 2))))
+
+
+(test "string-contains-668"
+      #t
+      (not (string-contains "abcdeffffoo" "efffoo" 2)))
+
+
+(test "string-contains-right-669"
+      #t
+      (eqv? 0
+            (string-cursor->index ""
+                                  (string-contains-right "" "" 0))))
+
+
+(test "string-contains-right-670"
+      #t
+      (eqv? 11
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "" 2))))
+
+
+(test "string-contains-right-671"
+      #t
+      (not (string-contains-right "abcdeffffoo" "a" 2)))
+
+
+(test "string-contains-right-672"
+      #t
+      (eqv? 7
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "ff" 2))))
+
+
+(test "string-contains-right-673"
+      #t
+      (eqv? 4
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "eff" 2))))
+
+
+(test "string-contains-right-674"
+      #t
+      (eqv? 8
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "foo" 2))))
+
+
+(test "string-contains-right-675"
+      #t
+      (not (string-contains-right "abcdeffffoo" "efffoo" 2)))
+
+
+
+(test "string-contains-676"
+      #t
+      (eqv? 0
+            (string-cursor->index ""
+                                  (string-contains "" "" 0 0))))
+
+
+(test "string-contains-677"
+      #t
+      (eqv? 2
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "" 2 10))))
+
+
+(test "string-contains-678"
+      #t
+      (not (string-contains "abcdeffffoo" "a" 2 10)))
+
+
+(test "string-contains-679"
+      #t
+      (eqv? 5
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "ff" 2 10))))
+
+
+(test "string-contains-680"
+      #t
+      (eqv? 4
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "eff" 2 10))))
+
+
+(test "string-contains-681"
+      #t
+      (not (string-contains "abcdeffffoo" "foo" 2 10)))
+
+
+(test "string-contains-682"
+      #t
+      (not (string-contains "abcdeffffoo" "efffoo" 2 10)))
+
+
+(test "string-contains-right-683"
+      #t
+      (eqv? 0
+            (string-cursor->index ""
+                                  (string-contains-right "" "" 0 0))))
+
+
+(test "string-contains-right-684"
+      #t
+      (eqv? 10
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "" 2 10))))
+
+
+(test "string-contains-right-685"
+      #t
+      (not (string-contains-right "abcdeffffoo" "a" 2 10)))
+
+
+(test "string-contains-right-686"
+      #t
+      (eqv? 7
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "ff" 2 10))))
+
+
+(test "string-contains-right-687"
+      #t
+      (eqv? 4
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "eff" 2 10))))
+
+
+(test "string-contains-right-688"
+      #t
+      (not (string-contains-right "abcdeffffoo" "foo" 2 10)))
+
+
+(test "string-contains-right-689"
+      #t
+      (not (string-contains-right "abcdeffffoo" "efffoo" 2 10)))
+
+
+
+(test "string-contains-690"
+      #t
+      (eqv? 0
+            (string-cursor->index ""
+                                  (string-contains "" "" 0 0 0))))
+
+
+(test "string-contains-691"
+      #t
+      (eqv? 2
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "" 2 10 0))))
+
+
+(test "string-contains-692"
+      #t
+      (eqv? 2
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "a" 2 10 1))))
+
+
+(test "string-contains-693"
+      #t
+      (eqv? 5
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "ff" 2 10 1))))
+
+
+(test "string-contains-694"
+      #t
+      (eqv? 5
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "eff" 2 10 1))))
+
+
+(test "string-contains-695"
+      #t
+      (not (string-contains "abcdeffffoo" "foo" 2 10 1)))
+
+
+(test "string-contains-696"
+      #t
+      (not (string-contains "abcdeffffoo" "efffoo" 2 10 1)))
+
+
+(test "string-contains-right-697"
+      #t
+      (eqv? 0
+            (string-cursor->index ""
+                                  (string-contains-right "" "" 0 0 0))))
+
+
+(test "string-contains-right-698"
+      #t
+      (eqv? 10
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "" 2 10 0))))
+
+
+(test "string-contains-right-699"
+      #t
+      (eqv? 10
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "a" 2 10 1))))
+
+
+(test "string-contains-right-700"
+      #t
+      (eqv? 8
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "ff" 2 10 1))))
+
+
+(test "string-contains-right-701"
+      #t
+      (eqv? 7
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "eff" 2 10 1))))
+
+
+(test "string-contains-right-702"
+      #t
+      (not (string-contains-right "abcdeffffoo" "foo" 2 10 1)))
+
+
+(test "string-contains-right-703"
+      #t
+      (not (string-contains-right "abcdeffffoo" "efffoo" 2 10 1)))
+
+
+
+(test "string-contains-704"
+      #t
+      (eqv? 0
+            (string-cursor->index ""
+                                  (string-contains "" "" 0 0 0 0))))
+
+
+(test "string-contains-705"
+      #t
+      (eqv? 2
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "" 2 10 0 0))))
+
+
+(test "string-contains-706"
+      #t
+      (eqv? 2
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "a" 2 10 1 1))))
+
+
+(test "string-contains-707"
+      #t
+      (eqv? 5
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "ff" 2 10 1 2))))
+
+
+(test "string-contains-708"
+      #t
+      (eqv? 5
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "eff" 2 10 1 2))))
+
+
+(test "string-contains-709"
+      #t
+      (eqv? 9
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "foo" 2 10 1 2))))
+
+
+(test "string-contains-710"
+      #t
+      (eqv? 4
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains "abcdeffffoo"
+                                                   "efffoo" 2 10 0 2))))
+
+
+(test "string-contains-right-711"
+      #t
+      (eqv? 0
+            (string-cursor->index ""
+                                  (string-contains-right "" "" 0 0 0 0))))
+
+
+(test "string-contains-right-712"
+      #t
+      (eqv? 10
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "" 2 10 0 0))))
+
+
+(test "string-contains-right-713"
+      #t
+      (eqv? 10
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "a" 2 10 1 1))))
+
+
+(test "string-contains-right-714"
+      #t
+      (eqv? 8
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "ff" 2 10 1 2))))
+
+
+(test "string-contains-right-715"
+      #t
+      (eqv? 8
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "eff" 2 10 1 2))))
+
+
+(test "string-contains-right-716"
+      #t
+      (eqv? 9
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "foo" 2 10 1 2))))
+
+
+(test "string-contains-right-717"
+      #t
+      (eqv? 7
+            (string-cursor->index "abcdeffffoo"
+                                  (string-contains-right "abcdeffffoo"
+                                                         "efffoo" 2 10 1 3))))
+
+
+;;; The whole string
+
+(test "string-reverse-718"
+      #t
+      (string=? "" (string-reverse "")))
+
+
+(test "string-reverse-719"
+      #t
+      (string=? "fedcba" (string-reverse "abcdef")))
+
+
+(test "string-reverse-720"
+      #t
+      (string=? "" (string-reverse "" 0)))
+
+
+(test "string-reverse-721"
+      #t
+      (string=? "fedcba" (string-reverse "abcdef" 0)))
+
+
+(test "string-reverse-722"
+      #t
+      (string=? "fedc" (string-reverse "abcdef" 2)))
+
+
+(test "string-reverse-723"
+      #t
+      (string=? "" (string-reverse "" 0 0)))
+
+
+(test "string-reverse-724"
+      #t
+      (string=? "fedcba" (string-reverse "abcdef" 0 6)))
+
+
+(test "string-reverse-725"
+      #t
+      (string=? "edc" (string-reverse "abcdef" 2 5)))
+
+
+
+(test "string-concatenate-726"
+      #t
+      (string=? "" (string-concatenate '())))
+
+
+(test "string-concatenate-727"
+      #t
+      (string=? "abcdef" (string-concatenate '("" "a" "bcd" "" "ef" "" ""))))
+
+
+(test "string-concatenate-reverse-728"
+      #t
+      (string=? "" (string-concatenate-reverse '())))
+
+
+(test "string-concatenate-reverse-729"
+      #t
+      (string=? "efbcda"
+                (string-concatenate-reverse '("" "a" "bcd" "" "ef" "" ""))))
+
+
+(test "string-concatenate-reverse-730"
+      #t
+      (string=? "huh?" (string-concatenate-reverse '() "huh?")))
+
+
+(test "string-concatenate-reverse-731"
+      #t
+      (string=? "efbcdaxy"
+                (string-concatenate-reverse '("" "a" "bcd" "" "ef" "" "") "xy")))
+
+
+(test "string-concatenate-reverse-732"
+      #t
+      (string=? "huh" (string-concatenate-reverse '() "huh?" 3)))
+
+
+(test "string-concatenate-reverse-733"
+      #t
+      (string=? "efbcdax"
+                (string-concatenate-reverse '("" "a" "bcd" "" "ef" "" "") "x" 1)))
+
+
+
+(test "string-fold-734"
+      #t
+      (= 8
+         (string-fold (lambda (c count)
+                        (if (char-whitespace? c)
+                            (+ count 1)
+                            count))
+                      0
+                      " ...a couple of spaces in this one... ")))
+
+
+(test "string-fold-735"
+      #t
+      (= 7
+         (string-fold (lambda (c count)
+                        (if (char-whitespace? c)
+                            (+ count 1)
+                            count))
+                      0
+                      " ...a couple of spaces in this one... "
+                      1)))
+
+
+(test "string-fold-736"
+      #t
+      (= 6
+         (string-fold (lambda (c count)
+                        (if (char-whitespace? c)
+                            (+ count 1)
+                            count))
+                      0
+                      " ...a couple of spaces in this one... "
+                      1
+                      32)))
+
+
+(test "string-fold-right-737"
+      #t
+      (equal? (string->list "abcdef")
+              (string-fold-right cons '() "abcdef")))
+
+
+(test "string-fold-right-738"
+      #t
+      (equal? (string->list "def")
+              (string-fold-right cons '() "abcdef" 3)))
+
+
+(test "string-fold-right-739"
+      #t
+      (equal? (string->list "cde")
+              (string-fold-right cons '() "abcdef" 2 5)))
+
+
+(test "string-fold-740"
+      #t
+      (string=? "aabraacaadaabraa"
+                (let* ((s "abracadabra")
+                       (ans-len (string-fold (lambda (c sum)
+                                               (+ sum (if (char=? c #\a) 2 1)))
+                                             0 s))
+                       (ans (make-string ans-len)))
+                  (string-fold (lambda (c i)
+                                 (let ((i (if (char=? c #\a)
+                                              (begin (string-set! ans i #\a)
+                                                     (+ i 1))
+                                              i)))
+                                   (string-set! ans i c)
+                                   (+ i 1)))
+                               0 s)
+                  ans)))
+
+
+
+(test "string-for-each-cursor-741"
+      #t
+      (equal? '(101 100 99 98 97)
+              (let ((s "abcde") (v '()))
+                (string-for-each-cursor
+                 (lambda (cur)
+                   (set! v (cons (char->integer (string-ref/cursor s cur)) v)))
+                 s)
+                v)))
+
+
+
+(test "string-replicate-742"
+      #t
+      (string=? "cdefabcdefabcd"
+                (string-replicate "abcdef" -4 10)))
+
+
+(test "string-replicate-743"
+      #t
+      (string=? "bcdefbcdefbcd"
+                (string-replicate "abcdef" 90 103 1)))
+
+
+(test "string-replicate-744"
+      #t
+      (string=? "ecdecdecde"
+                (string-replicate "abcdef" -13 -3 2 5)))
+
+
+
+(test "string-count-745"
+      #t
+      (= 6 (string-count "abcdef" char?)))
+
+
+(test "string-count-746"
+      #t
+      (= 4 (string-count "counting  whitespace, again " char-whitespace? 5)))
+
+
+(test "string-count-747"
+      #t
+      (= 3 (string-count "abcdefwxyz"
+                         (lambda (c) (odd? (char->integer c)))
+                         2 8)))
+
+
+
+(test "string-replace-748"
+      #t
+      (string=? "It's lots of fun to code it up in Scheme."
+                (string-replace "It's easy to code it up in Scheme."
+                                "lots of fun"
+                                5 9)))
+
+
+(test "string-replace-749"
+      #t
+      (string=? "The miserable perl programmer endured daily ridicule."
+                (string-replace "The TCL programmer endured daily ridicule."
+                                "another miserable perl drone"
+                                4 7 8 22)))
+
+
+(test "string-replace-750"
+      #t
+      (string=? "It's really easy to code it up in Scheme."
+                (string-replace "It's easy to code it up in Scheme."
+                                "really "
+                                5 5)))
+
+
+
+(test "string-split-751"
+      #t
+      (equal? '() (string-split "" "")))
+
+
+(test "string-split-752"
+      #t
+      (equal? '("a" "b" "c") (string-split "abc" "")))
+
+
+(test "string-split-753"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (string-split "too  much  data" " ")))
+
+
+(test "string-split-754"
+      #t
+      (equal? '("" "there" "ya" "go" "")
+              (string-split "***there***ya***go***" "***")))
+
+
+(test "string-split-755"
+      #t
+      (equal? '() (string-split "" "" 'infix)))
+
+
+(test "string-split-756"
+      #t
+      (equal? '("a" "b" "c") (string-split "abc" "" 'infix)))
+
+
+(test "string-split-757"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (string-split "too  much  data" " " 'infix)))
+
+
+(test "string-split-758"
+      #t
+      (equal? '("" "there" "ya" "go" "")
+              (string-split "***there***ya***go***" "***" 'infix)))
+
+
+(test "string-split-759"
+      #t
+      (equal? 'error
+              (guard (exn (else 'error))
+                (string-split "" "" 'strict-infix))))
+
+
+(test "string-split-760"
+      #t
+      (equal? '("a" "b" "c") (string-split "abc" "" 'strict-infix)))
+
+
+(test "string-split-761"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (string-split "too  much  data" " " 'strict-infix)))
+
+
+(test "string-split-762"
+      #t
+      (equal? '("" "there" "ya" "go" "")
+              (string-split "***there***ya***go***" "***" 'strict-infix)))
+
+
+(test "string-split-763"
+      #t
+      (equal? '() (string-split "" "" 'prefix)))
+
+
+(test "string-split-764"
+      #t
+      (equal? '("a" "b" "c") (string-split "abc" "" 'prefix)))
+
+
+(test "string-split-765"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (string-split "too  much  data" " " 'prefix)))
+
+
+(test "string-split-766"
+      #t
+      (equal? '("there" "ya" "go" "")
+              (string-split "***there***ya***go***" "***" 'prefix)))
+
+
+(test "string-split-767"
+      #t
+      (equal? '() (string-split "" "" 'suffix)))
+
+
+(test "string-split-768"
+      #t
+      (equal? '("a" "b" "c") (string-split "abc" "" 'suffix)))
+
+
+(test "string-split-769"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (string-split "too  much  data" " " 'suffix)))
+
+
+(test "string-split-770"
+      #t
+      (equal? '("" "there" "ya" "go")
+              (string-split "***there***ya***go***" "***" 'suffix)))
+
+
+
+(test "string-split-771"
+      #t
+      (equal? '() (string-split "" "" 'infix #f)))
+
+
+(test "string-split-772"
+      #t
+      (equal? '("a" "b" "c") (string-split "abc" "" 'infix #f)))
+
+
+(test "string-split-773"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (string-split "too  much  data" " " 'infix #f)))
+
+
+(test "string-split-774"
+      #t
+      (equal? '("" "there" "ya" "go" "")
+              (string-split "***there***ya***go***" "***" 'infix #f)))
+
+
+(test "string-split-775"
+      #t
+      (equal? 'error
+              (guard (exn (else 'error))
+                (string-split "" "" 'strict-infix #f))))
+
+
+(test "string-split-776"
+      #t
+      (equal? '("a" "b" "c") (string-split "abc" "" 'strict-infix #f)))
+
+
+(test "string-split-777"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (string-split "too  much  data" " " 'strict-infix #f)))
+
+
+(test "string-split-778"
+      #t
+      (equal? '("" "there" "ya" "go" "")
+              (string-split "***there***ya***go***" "***" 'strict-infix #f)))
+
+
+(test "string-split-779"
+      #t
+      (equal? '() (string-split "" "" 'prefix #f)))
+
+
+(test "string-split-780"
+      #t
+      (equal? '("a" "b" "c") (string-split "abc" "" 'prefix #f)))
+
+
+(test "string-split-781"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (string-split "too  much  data" " " 'prefix #f)))
+
+
+(test "string-split-782"
+      #t
+      (equal? '("there" "ya" "go" "")
+              (string-split "***there***ya***go***" "***" 'prefix #f)))
+
+
+(test "string-split-783"
+      #t
+      (equal? '() (string-split "" "" 'suffix #f)))
+
+
+(test "string-split-784"
+      #t
+      (equal? '("a" "b" "c") (string-split "abc" "" 'suffix #f)))
+
+
+(test "string-split-785"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (string-split "too  much  data" " " 'suffix #f)))
+
+
+(test "string-split-786"
+      #t
+      (equal? '("" "there" "ya" "go")
+              (string-split "***there***ya***go***" "***" 'suffix #f)))
+
+
+
+(test "string-split-787"
+      #t
+      (equal? 'error
+              (guard (exn (else 'error))
+                (string-split "" "" 'strict-infix 3))))
+
+
+(test "string-split-788"
+      #t
+      (equal? '("a" "b" "c") (string-split "abc" "" 'strict-infix 3)))
+
+
+(test "string-split-789"
+      #t
+      (equal? '("too" "" "much" " data")
+              (string-split "too  much  data" " " 'strict-infix 3)))
+
+
+(test "string-split-790"
+      #t
+      (equal? '("" "there" "ya" "go***")
+              (string-split "***there***ya***go***" "***" 'strict-infix 3)))
+
+
+(test "string-split-791"
+      #t
+      (equal? '() (string-split "" "" 'prefix 3)))
+
+
+(test "string-split-792"
+      #t
+      (equal? '("a" "b" "c") (string-split "abc" "" 'prefix 3)))
+
+
+(test "string-split-793"
+      #t
+      (equal? '("too" "" "much" " data")
+              (string-split "too  much  data" " " 'prefix 3)))
+
+
+(test "string-split-794"
+      #t
+      (equal? '("there" "ya" "go***")
+              (string-split "***there***ya***go***" "***" 'prefix 3)))
+
+
+(test "string-split-795"
+      #t
+      (equal? '() (string-split "" "" 'suffix 3)))
+
+
+(test "string-split-796"
+      #t
+      (equal? '("a" "b" "c") (string-split "abc" "" 'suffix 3)))
+
+
+(test "string-split-797"
+      #t
+      (equal? '("too" "" "much" " data")
+              (string-split "too  much  data" " " 'suffix 3)))
+
+
+(test "string-split-798"
+      #t
+      (equal? '("" "there" "ya" "go***")
+              (string-split "***there***ya***go***" "***" 'suffix 3)))
+
+
+
+(test "string-split-799"
+      #t
+      (equal? 'error
+              (guard (exn (else 'error))
+                (string-split "" "" 'strict-infix 3 0))))
+
+
+(test "string-split-800"
+      #t
+      (equal? '("b" "c") (string-split "abc" "" 'strict-infix 3 1)))
+
+
+(test "string-split-801"
+      #t
+      (equal? '("oo" "" "much" " data")
+              (string-split "too  much  data" " " 'strict-infix 3 1)))
+
+
+(test "string-split-802"
+      #t
+      (equal? '("**there" "ya" "go" "")
+              (string-split "***there***ya***go***" "***" 'strict-infix 3 1)))
+
+
+(test "string-split-803"
+      #t
+      (equal? '() (string-split "" "" 'prefix 3 0)))
+
+
+(test "string-split-804"
+      #t
+      (equal? '("b" "c") (string-split "abc" "" 'prefix 3 1)))
+
+
+(test "string-split-805"
+      #t
+      (equal? '("oo" "" "much" " data")
+              (string-split "too  much  data" " " 'prefix 3 1)))
+
+
+(test "string-split-806"
+      #t
+      (equal? '("**there" "ya" "go" "")
+              (string-split "***there***ya***go***" "***" 'prefix 3 1)))
+
+
+(test "string-split-807"
+      #t
+      (equal? '() (string-split "" "" 'suffix 3 0)))
+
+
+(test "string-split-808"
+      #t
+      (equal? '("b" "c") (string-split "abc" "" 'suffix 3 1)))
+
+
+(test "string-split-809"
+      #t
+      (equal? '("oo" "" "much" " data")
+              (string-split "too  much  data" " " 'suffix 3 1)))
+
+
+(test "string-split-810"
+      #t
+      (equal? '("**there" "ya" "go")
+              (string-split "***there***ya***go***" "***" 'suffix 3 1)))
+
+
+
+(test "string-split-811"
+      #t
+      (equal? 'error
+              (guard (exn (else 'error))
+                (string-split "" "" 'strict-infix 3 0 0))))
+
+
+(test "string-split-812"
+      #t
+      (equal? '("b") (string-split "abc" "" 'strict-infix 3 1 2)))
+
+
+(test "string-split-813"
+      #t
+      (equal? '("oo" "" "much" " ")
+              (string-split "too  much  data" " " 'strict-infix 3 1 11)))
+
+
+(test "string-split-814"
+      #t
+      (equal? '() (string-split "" "" 'prefix 3 0 0)))
+
+
+(test "string-split-815"
+      #t
+      (equal? '("b") (string-split "abc" "" 'prefix 3 1 2)))
+
+
+(test "string-split-816"
+      #t
+      (equal? '("oo" "" "much" " ")
+              (string-split "too  much  data" " " 'prefix 3 1 11)))
+
+
+(test "string-split-817"
+      #t
+      (equal? '() (string-split "" "" 'suffix 3 0 0)))
+
+
+(test "string-split-818"
+      #t
+      (equal? '("b") (string-split "abc" "" 'suffix 3 1 2)))
+
+
+(test "string-split-819"
+      #t
+      (equal? '("oo" "" "much" " ")
+              (string-split "too  much  data" " " 'suffix 3 1 11)))
+
+
+
+(test "string-filter-820"
+      #t
+      (string=? "aiueaaaoi"
+                (string-filter (lambda (c) (memv c (string->list "aeiou")))
+                               "What is number, that man may know it?")))
+
+
+(test "string-remove-821"
+      #t
+      (string=? "And wmn, tht sh my knw nmbr?"
+                (string-remove (lambda (c) (memv c (string->list "aeiou")))
+                               "And woman, that she may know number?")))
+
+
+(test "string-filter-822"
+      #t
+      (string=? "iueaaaoi"
+                (string-filter (lambda (c) (memv c (string->list "aeiou")))
+                               "What is number, that man may know it?"
+                               4)))
+
+
+(test "string-remove-823"
+      #t
+      (string=? "mn, tht sh my knw nmbr?"
+                (string-remove (lambda (c) (memv c (string->list "aeiou")))
+                               "And woman, that she may know number?"
+                               6)))
+
+
+(test "string-filter-824"
+      #t
+      (string=? "aaao"
+                (string-filter (lambda (c) (memv c (string->list "aeiou")))
+                               "What is number, that man may know it?"
+                               16 32)))
+
+
+(test "string-remove-825"
+      #t
+      (string=? "And woman, that sh may know"
+                (string-remove (lambda (c) (memv c (string->list "eiu")))
+                               "And woman, that she may know number?"
+                               0 28)))
+
+

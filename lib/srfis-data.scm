@@ -78,6 +78,7 @@
     (comparators-reduced . "srfi-128")
     (srfi-129 . "srfi-129")
     (titlecase . "srfi-129")
+    (srfi-130 . "srfi-130")
     (srfi-135 . "srfi-135")
     (immuttable-texts . "srfi-135")
     (srfi-141 . "srfi-141")
