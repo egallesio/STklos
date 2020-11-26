@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 24-Sep-2020 10:24 (eg)
+# Last file update: 26-Nov-2020 11:20 (eg)
 
 # Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
 # CFLAGS is used here
@@ -135,11 +135,11 @@ doc:  $(DOCDB)
 $(DOCDB): $(stklos_SOURCES)
 	$(STKLOS_BINARY) -b boot.img -c -q -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
 
-clean:
+clean-am:
 	/bin/rm -f *.o $(DOCDB) git-info.h boot.ok
 
 distclean: clean
-	/bin/rm -f boot.keep
+	/bin/rm -f boot.keep Makefile extraconf.h stklos stamp-h1 stklosconf.h
 
 # Local Variables:
 # tab-width: 8

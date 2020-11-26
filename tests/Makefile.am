@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 23-May-2005 14:52 (eg)
-# Last file update: 21-Sep-2020 11:54 (eg)
+# Last file update: 26-Nov-2020 11:10 (eg)
 
 all:
 	@echo "Use \"make test\" for testing STklos."
@@ -29,7 +29,7 @@ check: test
 test:
 	@../src/stklos --no-init-file --utf8-encoding=yes -f do-test.stk
 
-clean:
+clean-am:
 	rm -f TEST.LOG SRFI-64_Meta-Test_Suite.log data *~
 
 distclean: clean

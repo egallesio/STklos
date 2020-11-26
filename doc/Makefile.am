@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 23-Sep-2020 17:52 (eg)
+# Last file update: 26-Nov-2020 11:19 (eg)
 
 mandir	      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
@@ -88,6 +88,7 @@ clean:
 	/bin/rm -f $(ALLDB)  stklos*.1 *~
 
 distclean: clean
+	(cd skb; $(MAKE) distclean)
 	/bin/rm -f Makefile
 
 

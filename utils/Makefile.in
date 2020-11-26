@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 14-Aug-2000 13:13 (eg)
-# Last file update: 21-Nov-2020 19:31 (eg)
+# Last file update: 26-Nov-2020 10:50 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -465,7 +465,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean-am: clean-generic mostlyclean-am
+clean: clean-am
 
 distclean: distclean-am
 	-rm -f Makefile
@@ -554,7 +554,7 @@ stklos-compile: stklos-compile.stk
 stklos-genlex: stklos-genlex.stk
 	$(COMP) -o stklos-genlex stklos-genlex.stk
 
-clean:
+clean-am:
 	rm -f $(scmbin) $(localscript) *~
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

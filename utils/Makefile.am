@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 14-Aug-2000 13:13 (eg)
-# Last file update: 21-Nov-2020 19:31 (eg)
+# Last file update: 26-Nov-2020 10:50 (eg)
 
 scmbin      = stklos-compile stklos-genlex
 bin_SCRIPTS = stklos-config  stklos-script $(scmbin)
@@ -33,5 +33,5 @@ stklos-genlex: stklos-genlex.stk
 	$(COMP) -o stklos-genlex stklos-genlex.stk
 
 
-clean:
+clean-am:
 	rm -f $(scmbin) $(localscript) *~

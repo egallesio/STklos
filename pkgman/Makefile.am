@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 22-Dec-2006 12:00 (eg)
-# Last file update: 21-Sep-2020 11:53 (eg)
+# Last file update: 25-Nov-2020 11:47 (eg)
 
 
 makefiledir  = $(prefix)/share/@PACKAGE@/@VERSION@/etc
@@ -56,7 +56,7 @@ $(bin_SCRIPTS):  $(LEXOBJS) $(SRC)
 	$(COMP) -o $(bin_SCRIPTS) main.stk
 	rm -f  $(LEXOBJS)
 
-clean:
+clean-am:
 	$(RM) -f $(bin_SCRIPTS) $(LEXOBJS) *~
 
 distclean: clean

@@ -19,13 +19,13 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 25-Nov-2020 11:06 (eg)
+# Last file update: 26-Nov-2020 11:16 (eg)
 
 
 EXTRA_DIST   =
 # INSTDIRS contains the dirs which need to be installed
 INSTDIRS     =  @GC@ src utils lib examples pkgman
-SUBDIRS      =  @PCRE@ @GMP@ @FFI@ $(INSTDIRS)
+SUBDIRS      =  @PCRE@ @GMP@ @FFI@ $(INSTDIRS) doc tests
 
 .PHONY:  test tests
 
@@ -57,7 +57,12 @@ SUPPORTED-SRFIS: lib/srfis.stk
 	mv -f  $@.tmp $@
 
 clean-am:
+	for i in doc tests utils;do (cd $$i; $(MAKE) clean) ;done
 	rm -f SUPPORTED-SRFIS.tmp
+
+distclean: clean
+	for i in $(SUBDIRS) ;do (cd $$i; $(MAKE) distclean); done
+	rm -rf Makefile config.log config.status autom4te.cache
 
 test tests: all
 	(cd tests; $(MAKE) test)

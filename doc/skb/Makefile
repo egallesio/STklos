@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update:  8-Jun-2020 10:59 (eg)
+# Last file update: 26-Nov-2020 11:18 (eg)
 
 
 SOURCES  = biblio.skb cond.skb custom.skb expr.skb index.skb 		\
@@ -43,6 +43,10 @@ $(DOCDB):
 
 clean:
 	rm -rf ./stklos-ref.* *~ *.mp html/* $(PDF)
+
+distclean: clean
+	rm -f stklos-version.stk
+
 
 install: Html Pdf
 	rm -rf ../html/*.html ../html/images/*;

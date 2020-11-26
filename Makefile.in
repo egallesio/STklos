@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 25-Nov-2020 11:06 (eg)
+# Last file update: 26-Nov-2020 11:16 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -370,7 +370,7 @@ top_srcdir = @top_srcdir@
 EXTRA_DIST = 
 # INSTDIRS contains the dirs which need to be installed
 INSTDIRS = @GC@ src utils lib examples pkgman
-SUBDIRS = @PCRE@ @GMP@ @FFI@ $(INSTDIRS)
+SUBDIRS = @PCRE@ @GMP@ @FFI@ $(INSTDIRS) doc tests
 all: all-recursive
 
 .SUFFIXES:
@@ -749,9 +749,6 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-distclean: distclean-recursive
-	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -f Makefile
 distclean-am: clean-am distclean-generic distclean-tags
 
 dvi: dvi-recursive
@@ -863,7 +860,12 @@ SUPPORTED-SRFIS: lib/srfis.stk
 	mv -f  $@.tmp $@
 
 clean-am:
+	for i in doc tests utils;do (cd $$i; $(MAKE) clean) ;done
 	rm -f SUPPORTED-SRFIS.tmp
+
+distclean: clean
+	for i in $(SUBDIRS) ;do (cd $$i; $(MAKE) distclean); done
+	rm -rf Makefile config.log config.status autom4te.cache
 
 test tests: all
 	(cd tests; $(MAKE) test)
