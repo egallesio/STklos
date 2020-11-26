@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 11:19 (eg)
-;;;; Last file update: 21-Nov-2020 21:04 (eg)
+;;;; Last file update: 26-Nov-2020 14:59 (eg)
 ;;;;
 
 (define *all-errors* '())
@@ -80,10 +80,14 @@
          (len (string-length s)))
     (set! *all-errors* '())
     ;; Log
-    (format *log* "~a ~a\n" s (make-string (- 70 len) #\=))
-    (flush-output-port *log*)
+    (let ((delim (make-string 70 #\=)))
+      (format *log* "\n~a\n" delim)
+      (format *log* "~a ~a\n" s
+              (make-string (max (- 70 len 1) 0) #\=))
+      (format *log* "~a\n\n" delim)
+      (flush-output-port *log*))
     ;; Output
-    (format *err* "~a ... ~a" s (make-string (- 60 len) #\space))
+    (format *err* "~a ... ~a" s (make-string (max (- 60 len) 0) #\space))
     (flush-output-port *err*)))
 
 ;; ----------------------------------------------------------------------
@@ -108,9 +112,10 @@
 ;;  test-subsection ...
 ;; ----------------------------------------------------------------------
 (define (test-subsection msg)
-  (let* ((s (format "---- ~a " msg))
-         (len (string-length s)))
-    (format *log* "~a ~a\n" msg (make-string (max (- 70 len) 0) #\=))
+  (let ((delim (make-string 50 #\-)))
+    (format *log* "\n~a\n" delim)
+    (format *log* "---- ~a\n" msg)
+    (format *log* "~a\n\n" delim)
     (flush-output-port *log*)))
 
 ;; ----------------------------------------------------------------------

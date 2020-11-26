@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 23-May-2005 14:52 (eg)
-# Last file update: 26-Nov-2020 11:10 (eg)
+# Last file update: 26-Nov-2020 15:00 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -472,7 +472,7 @@ all:
 
 check: test
 
-test:
+test tests:
 	@../src/stklos --no-init-file --utf8-encoding=yes -f do-test.stk
 
 clean-am:
