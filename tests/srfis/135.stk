@@ -1,7 +1,6325 @@
-;; ======================================================================
-;; SRFI 135
-;; ======================================================================
+;;;;
+;;;; srfi-135.stk		-- Tests for SRFI-135
+;;;;
+;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the  implementation of
+;;;; this SRFI by William Clinger, it is copyrighted as:
+;;;;
+;;;;;;  Copyright (c) 2015 William Clinger
+;;;;;;  Permission is hereby granted, free of charge, to any person
+;;;;;;  obtaining a copy of this software and associated documentation
+;;;;;;  files (the "Software"), to deal in the Software without
+;;;;;;  restriction, including without limitation the rights to use,
+;;;;;;  copy, modify, merge, publish, distribute, sublicense, and/or
+;;;;;;  sell copies of the Software, and to permit persons to whom the
+;;;;;;  Software is furnished to do so, subject to the following
+;;;;;;  conditions:
+;;;;;;
+;;;;;; The above copyright notice and this permission notice shall be
+;;;;;; included in all copies or substantial portions of the Software.
+;;;;;;
+;;;;;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+;;;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+;;;;;; OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+;;;;;; HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+;;;;;; WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+;;;;;; FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+;;;;;; OTHER DEALINGS IN THE SOFTWARE.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 19-Nov-2020 22:32 (jpellegrini)
+;;;; Last file update: 20-Nov-2020 00:26 (jpellegrini)
+;;;;
 
-(test "Should be changed" #t (text? (text)))
-(test "Should be changed" #f (text? (string)))
+
+(require "srfi-135")
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Tests for immutable texts.
+;;;
+;;; To run in Larceny, Sagittarius, or Chibi,
+;;; cd to the directory containing this file and incant:
+;;;
+;;;     larceny --r7rs --path . --program texts-test.sps
+;;;     sagittarius -c -r7 -L . texts-test.sps
+;;;     chibi-scheme -I . texts-test.sps
+;;;
+;;; Larceny, Sagittarius, and Chibi will look for the (srfi ???)
+;;; library in the srfi subdirectory.
+
+
+;; (define (writeln . xs)
+;;   (for-each display xs)
+;;   (newline))
+
+;; (define (fail token . more)
+;;   (newline)
+;;   (writeln "Error: test failed: " token)
+;;   (display " ")
+;;   (write current-test)
+;;   (newline)
+;;   #f)
+
+;; ;;; To display tests that fail, change "(or " to "(OR ".
+;; ;;; To display tests before they are run, uncomment the write below.
+
+;; (define current-test #f)
+
+;; (define-syntax OR
+;;   (syntax-rules ()
+;;     ((_ expr1 expr ...)
+;;      (begin (set! current-test 'expr1)
+;;             ;;          (write current-test)
+;;             ;;          (newline)
+;;             (or expr1 expr ...)))))
+
+;;; Help functions for testing.
+
+(define (as-text . args)
+  (textual-concatenate (map (lambda (x)
+                              (cond ((text? x) x)
+                                    ((string? x) (string->text x))
+                                    ((char? x) (text x))
+                                    (else
+                                     (error "as-text: illegal argument" x))))
+                            args)))
+
+(define (result=? str txt)
+  (and (text? txt)
+       (textual=? str txt)))
+
+;;; Unicode is a strong motivation for immutable texts, so we ought
+;;; to use at least some non-ASCII strings for testing.
+;;; Some systems would blow up if this file were to contain non-ASCII
+;;; characters, however, so we have to be careful here.
+;;;
+;;; FIXME: need more tests with really high code points
+
+(cond-expand ((or sagittarius
+                  chibi
+                  full-unicode-strings
+                  full-unicode)
+              (define ABC
+                (as-text
+                 (list->string (map integer->char
+                                    '(#x3b1 #x3b2 #x3b3)))))
+              (define ABCDEF
+                (as-text
+                 (list->string (map integer->char
+                                    '(#x0c0 #x062 #x0c7 #x064 #x0c9 #x066)))))
+              (define DEFABC
+                (as-text
+                 (list->string (map integer->char
+                                    '(#x064 #x0c9 #x066 #x0c0 #x062 #x0c7)))))
+              (define eszett (integer->char #xDF))
+              (define fuss (text #\F #\u eszett))
+              (define chaos0
+                (as-text
+                 (list->string (map integer->char
+                                    '(#x39E #x391 #x39F #x3A3)))))
+              (define chaos1
+                (as-text
+                 (list->string (map integer->char
+                                    '(#x3BE #x3B1 #x3BF #x3C2)))))
+              (define chaos2
+                (as-text
+                 (list->string (map integer->char
+                                    '(#x3BE #x3B1 #x3BF #x3C3)))))
+              (define beyondBMP
+                (as-text
+                 (list->string (map integer->char
+                                    '(#x61 #xc0 #x3bf
+                                           #x1d441 #x1d113 #x1d110 #x7a))))))
+             (else
+              (define ABC (as-text "abc"))
+              (define ABCDEF (as-text "ABCdef"))
+              (define DEFABC (as-text "defabc"))))
+
+
+;;; Predicates
+
+(test "text?-1"
+      #t
+      (text? (text)))
+
+
+(test "text?-2"
+      #t
+      (not (text? (string))))
+
+
+(test "text?-3"
+      #t
+      (not (text? #\a)))
+
+
+(test "textual?-4"
+      #t
+      (textual? (text)))
+
+
+(test "textual?-5"
+      #t
+      (textual? (string)))
+
+
+(test "textual?-6"
+      #t
+      (not (textual? #\a)))
+
+
+(test "textual-null?-7"
+      #t
+      (textual-null? (text)))
+
+
+(test "textual-null?-8"
+      #t
+      (not (textual-null? ABC)))
+
+
+
+(test "textual-every-9"
+      #t
+      (eqv? #t (textual-every (lambda (c) (if (char? c) c #f))
+                              (text))))
+
+
+(test "textual-every-10"
+      #t
+      (eqv? #\c (textual-every (lambda (c) (if (char? c) c #f))
+                               (as-text "abc"))))
+
+
+(test "textual-every-11"
+      #t
+      (eqv? #f (textual-every (lambda (c) (if (char>? c #\b) c #f))
+                              (as-text "abc"))))
+
+
+(test "textual-every-12"
+      #t
+      (eqv? #\c (textual-every (lambda (c) (if (char>? c #\b) c #f))
+                               (as-text "abc") 2)))
+
+
+(test "textual-every-13"
+      #t
+      (eqv? #t (textual-every (lambda (c) (if (char>? c #\b) c #f))
+                              (as-text "abc") 1 1)))
+
+
+(test "textual-any-14"
+      #t
+      (eqv? #f (textual-any (lambda (c) (if (char? c) c #f))
+                            (text))))
+
+
+(test "textual-any-15"
+      #t
+      (eqv? #\a (textual-any (lambda (c) (if (char? c) c #f))
+                             (as-text "abc"))))
+
+
+(test "textual-any-16"
+      #t
+      (eqv? #\c (textual-any (lambda (c) (if (char>? c #\b) c #f))
+                             (as-text "abc"))))
+
+
+(test "textual-any-17"
+      #t
+      (eqv? #\c (textual-any (lambda (c) (if (char>? c #\b) c #f))
+                             (as-text "abc") 2)))
+
+
+(test "textual-any-18"
+      #t
+      (eqv? #f (textual-any (lambda (c) (if (char>? c #\b) c #f))
+                            (as-text "abc") 0 2)))
+
+
+
+(test "textual-every-19"
+      #t
+      (eqv? #t (textual-every (lambda (c) (if (char? c) c #f)) "")))
+
+
+(test "textual-every-20"
+      #t
+      (eqv? #\c (textual-every (lambda (c) (if (char? c) c #f)) "abc")))
+
+
+(test "textual-every-21"
+      #t
+      (eqv? #f (textual-every (lambda (c) (if (char>? c #\b) c #f)) "abc")))
+
+
+(test "textual-every-22"
+      #t
+      (eqv? #\c (textual-every (lambda (c) (if (char>? c #\b) c #f)) "abc" 2)))
+
+
+(test "textual-every-23"
+      #t
+      (eqv? #t (textual-every (lambda (c) (if (char>? c #\b) c #f)) "abc" 1 1)))
+
+
+(test "textual-any-24"
+      #t
+      (eqv? #f (textual-any (lambda (c) (if (char? c) c #f)) "")))
+
+
+(test "textual-any-25"
+      #t
+      (eqv? #\a (textual-any (lambda (c) (if (char? c) c #f)) "abc")))
+
+
+(test "textual-any-26"
+      #t
+      (eqv? #\c (textual-any (lambda (c) (if (char>? c #\b) c #f)) "abc")))
+
+
+(test "textual-any-27"
+      #t
+      (eqv? #\c (textual-any (lambda (c) (if (char>? c #\b) c #f)) "abc" 2)))
+
+
+(test "textual-any-28"
+      #t
+      (eqv? #f (textual-any (lambda (c) (if (char>? c #\b) c #f)) "abc" 0 2)))
+
+
+
+;;; Constructors
+
+(test "text-tabulate-29"
+      #t
+      (result=? ""
+                (text-tabulate (lambda (i)
+                                 (integer->char (+ i (char->integer #\a))))
+                               0)))
+
+
+(test "text-tabulate-30"
+      #t
+      (result=? "abc"
+                (text-tabulate (lambda (i)
+                                 (integer->char (+ i (char->integer #\a))))
+                               3)))
+
+
+
+(test "text-unfold-31"
+      #t
+      (result=? "abc"
+                (let ((p (open-input-string "abc")))
+                  (text-unfold eof-object?
+                               values
+                               (lambda (x) (read-char p))
+                               (read-char p)))))
+
+
+(test "text-unfold-32"
+      #t
+      (result=? "" (text-unfold null? car cdr '())))
+
+
+(test "text-unfold-33"
+      #t
+      (result=? "abc"
+                (text-unfold null? car cdr (string->list "abc"))))
+
+
+(test "text-unfold-34"
+      #t
+      (result=? "def"
+                (text-unfold null? car cdr '() (string->text "def"))))
+
+
+(test "text-unfold-35"
+      #t
+      (result=? "defabcG"
+                (text-unfold null?
+                             car
+                             cdr
+                             (string->list "abc")
+                             (string->text "def")
+                             (lambda (x) (if (null? x) (text #\G) "")))))
+
+
+(test "text-unfold-right-36"
+      #t
+      (result=? "" (text-unfold-right null? car cdr '())))
+
+
+(test "text-unfold-right-37"
+      #t
+      (result=? "cba"
+                (text-unfold-right null? car cdr (string->list "abc"))))
+
+
+(test "text-unfold-right-38"
+      #t
+      (result=? "def"
+                (text-unfold-right null? car cdr '() (string->text "def"))))
+
+
+(test "text-unfold-right-39"
+      #t
+      (result=? "Gcbadef"
+                (text-unfold-right null?
+                                   car
+                                   cdr
+                                   (string->list "abc")
+                                   (string->text "def")
+                                   (lambda (x) (if (null? x) (text #\G) "")))))
+
+
+
+(test "text-unfold-40"
+      #t
+      (result=? "def"
+                (text-unfold null? car cdr '() "def")))
+
+
+(test "text-unfold-41"
+      #t
+      (result=? "defabcG"
+                (text-unfold null?
+                             car
+                             cdr
+                             (string->list "abc")
+                             "def"
+                             (lambda (x) (if (null? x) "G" "")))))
+
+
+(test "text-unfold-42"
+      #t
+      (result=? "dabcG"
+                (text-unfold null?
+                             car
+                             cdr
+                             (string->list "abc")
+                             #\d
+                             (lambda (x) (if (null? x) "G" "")))))
+
+
+(test "text-unfold-43"
+      #t
+      (result=? (string-append "%="
+                               (make-string 200 #\*)
+                               "A B C D E F G H I J K L M "
+                               "N O P Q R S T U V W X Y Z "
+                               (make-string (* 200 (- (char->integer #\a)
+                                                      (char->integer #\Z)
+                                                      1))
+                                            #\*)
+                               "abcdefghijklmnopqrstuvwxyz"
+                               " ")
+                (text-unfold (lambda (n) (char>? (integer->char n) #\z))
+                             (lambda (n)
+                               (let ((c (integer->char n)))
+                                 (cond ((char<=? #\a c #\z) c)
+                                       ((char<=? #\A c #\Z) (text c #\space))
+                                       (else (make-string 200 #\*)))))
+                             (lambda (n) (+ n 1))
+                             (char->integer #\@)
+                             "%="
+                             (lambda (n) #\space))))
+
+
+(test "text-unfold-right-44"
+      #t
+      (result=? "def"
+                (text-unfold-right null? car cdr '() "def")))
+
+
+(test "text-unfold-right-45"
+      #t
+      (result=? "Gcbadef"
+                (text-unfold-right null?
+                                   car
+                                   cdr
+                                   (string->list "abc")
+                                   "def"
+                                   (lambda (x) (if (null? x) "G" "")))))
+
+
+(test "text-unfold-right-46"
+      #t
+      (result=? "Gcbad"
+                (text-unfold-right null?
+                                   car
+                                   cdr
+                                   (string->list "abc")
+                                   #\d
+                                   (lambda (x) (if (null? x) "G" "")))))
+
+
+(test "text-unfold-right-47"
+      #t
+      (result=? (string-append " "
+                               (list->string
+                                (reverse
+                                 (string->list "abcdefghijklmnopqrstuvwxyz")))
+                               (make-string (* 200 (- (char->integer #\a)
+                                                      (char->integer #\Z)
+                                                      1))
+                                            #\*)
+                               "Z Y X W V U T S R Q P O N "
+                               "M L K J I H G F E D C B A "
+                               (make-string 200 #\*)
+                               "%=")
+                (text-unfold-right
+                 (lambda (n) (char>? (integer->char n) #\z))
+                 (lambda (n)
+                   (let ((c (integer->char n)))
+                     (cond ((char<=? #\a c #\z) c)
+                           ((char<=? #\A c #\Z) (text c #\space))
+                           (else (make-string 200 #\*)))))
+                 (lambda (n) (+ n 1))
+                 (char->integer #\@)
+                 "%="
+                 (lambda (n) #\space))))
+
+
+(test "text-unfold-right-48"
+      #t
+      (result=? " The English alphabet: abcdefghijklmnopqrstuvwxyz "
+                (text-unfold-right (lambda (n) (< n (char->integer #\A)))
+                                   (lambda (n)
+                                     (char-downcase (integer->char n)))
+                                   (lambda (n) (- n 1))
+                                   (char->integer #\Z)
+                                   #\space
+                                   (lambda (n) " The English alphabet: "))))
+
+
+
+;;; Conversion
+
+(test "textual->text-49"
+      #t
+      (let ((txt (textual->text "str")))
+        (and (text? txt)
+             (textual=? txt "str"))))
+
+
+(test "textual->text-50"
+      #t
+      (let ((txt (textual->text (text #\s #\t #\r))))
+        (and (text? txt)
+             (textual=? txt "str"))))
+
+
+
+(test "textual->string-51"
+      #t
+      (string=? "" (textual->string (text))))
+
+
+(test "textual->string-52"
+      #t
+      (string=? "" (textual->string (text) 0)))
+
+
+(test "textual->string-53"
+      #t
+      (string=? "" (textual->string (text) 0 0)))
+
+
+(test "textual->string-54"
+      #t
+      (string=? "abc" (textual->string (text #\a #\b #\c))))
+
+
+(test "textual->string-55"
+      #t
+      (string=? "" (textual->string (text #\a #\b #\c) 3)))
+
+
+(test "textual->string-56"
+      #t
+      (string=? "bc" (textual->string (text #\a #\b #\c) 1 3)))
+
+
+
+(test "textual->string-57"
+      #t
+      (string=? "" (textual->string "")))
+
+
+(test "textual->string-58"
+      #t
+      (string=? "" (textual->string "" 0)))
+
+
+(test "textual->string-59"
+      #t
+      (string=? "" (textual->string "" 0 0)))
+
+
+(test "textual->string-60"
+      #t
+      (string=? "abc" (textual->string "abc")))
+
+
+(test "textual->string-61"
+      #t
+      (string=? "" (textual->string "abc" 3)))
+
+
+(test "textual->string-62"
+      #t
+      (string=? "bc" (textual->string "abc" 1 3)))
+
+
+
+(test "textual->vector-63"
+      #t
+      (equal? '#() (textual->vector (text))))
+
+
+(test "textual->vector-64"
+      #t
+      (equal? '#() (textual->vector (text) 0)))
+
+
+(test "textual->vector-65"
+      #t
+      (equal? '#() (textual->vector (text) 0 0)))
+
+
+(test "textual->vector-66"
+      #t
+      (equal? '#(#\a #\b #\c) (textual->vector (text #\a #\b #\c))))
+
+
+(test "textual->vector-67"
+      #t
+      (equal? '#() (textual->vector (text #\a #\b #\c) 3)))
+
+
+(test "textual->vector-68"
+      #t
+      (equal? '#(#\b #\c) (textual->vector (text #\a #\b #\c) 1 3)))
+
+
+
+(test "textual->vector-69"
+      #t
+      (equal? '#() (textual->vector "")))
+
+
+(test "textual->vector-70"
+      #t
+      (equal? '#() (textual->vector "" 0)))
+
+
+(test "textual->vector-71"
+      #t
+      (equal? '#() (textual->vector "" 0 0)))
+
+
+(test "textual->vector-72"
+      #t
+      (equal? '#(#\a #\b #\c) (textual->vector "abc")))
+
+
+(test "textual->vector-73"
+      #t
+      (equal? '#() (textual->vector "abc" 3)))
+
+
+(test "textual->vector-74"
+      #t
+      (equal? '#(#\b #\c) (textual->vector "abc" 1 3)))
+
+
+
+(test "textual->list-75"
+      #t
+      (equal? '() (textual->list (text))))
+
+
+(test "textual->list-76"
+      #t
+      (equal? '() (textual->list (text) 0)))
+
+
+(test "textual->list-77"
+      #t
+      (equal? '() (textual->list (text) 0 0)))
+
+
+(test "textual->list-78"
+      #t
+      (equal? '(#\a #\b #\c) (textual->list (text #\a #\b #\c))))
+
+
+(test "textual->list-79"
+      #t
+      (equal? '() (textual->list (text #\a #\b #\c) 3)))
+
+
+(test "textual->list-80"
+      #t
+      (equal? '(#\b #\c) (textual->list (text #\a #\b #\c) 1 3)))
+
+
+
+(test "textual->list-81"
+      #t
+      (equal? '() (textual->list "")))
+
+
+(test "textual->list-82"
+      #t
+      (equal? '() (textual->list "" 0)))
+
+
+(test "textual->list-83"
+      #t
+      (equal? '() (textual->list "" 0 0)))
+
+
+(test "textual->list-84"
+      #t
+      (equal? '(#\a #\b #\c) (textual->list "abc")))
+
+
+(test "textual->list-85"
+      #t
+      (equal? '() (textual->list "abc" 3)))
+
+
+(test "textual->list-86"
+      #t
+      (equal? '(#\b #\c) (textual->list "abc" 1 3)))
+
+
+
+(test "string->text-87"
+      #t
+      (result=? "" (string->text "")))
+
+
+(test "string->text-88"
+      #t
+      (result=? "" (string->text "" 0)))
+
+
+(test "string->text-89"
+      #t
+      (result=? "" (string->text "" 0 0)))
+
+
+(test "string->text-90"
+      #t
+      (result=? "abc" (string->text "abc")))
+
+
+(test "string->text-91"
+      #t
+      (result=? "bc" (string->text "abc" 1)))
+
+
+(test "string->text-92"
+      #t
+      (result=? "" (string->text "abc" 3)))
+
+
+(test "string->text-93"
+      #t
+      (result=? "b" (string->text "abc" 1 2)))
+
+
+(test "string->text-94"
+      #t
+      (result=? "bc" (string->text "abc" 1 3)))
+
+
+
+(test "vector->text-95"
+      #t
+      (result=? "" (vector->text '#())))
+
+
+(test "vector->text-96"
+      #t
+      (result=? "" (vector->text '#() 0)))
+
+
+(test "vector->text-97"
+      #t
+      (result=? "" (vector->text '#() 0 0)))
+
+
+(test "vector->text-98"
+      #t
+      (result=? "abc" (vector->text '#(#\a #\b #\c))))
+
+
+(test "vector->text-99"
+      #t
+      (result=? "bc" (vector->text '#(#\a #\b #\c) 1)))
+
+
+(test "vector->text-100"
+      #t
+      (result=? "" (vector->text '#(#\a #\b #\c) 3)))
+
+
+(test "vector->text-101"
+      #t
+      (result=? "b" (vector->text '#(#\a #\b #\c) 1 2)))
+
+
+(test "vector->text-102"
+      #t
+      (result=? "bc" (vector->text '#(#\a #\b #\c) 1 3)))
+
+
+
+(test "list->text-103"
+      #t
+      (result=? "" (list->text '())))
+
+
+(test "list->text-104"
+      #t
+      (result=? "" (list->text '() 0)))
+
+
+(test "list->text-105"
+      #t
+      (result=? "" (list->text '() 0 0)))
+
+
+(test "list->text-106"
+      #t
+      (result=? "abc" (list->text '(#\a #\b #\c))))
+
+
+(test "list->text-107"
+      #t
+      (result=? "bc" (list->text '(#\a #\b #\c) 1)))
+
+
+(test "list->text-108"
+      #t
+      (result=? "" (list->text '(#\a #\b #\c) 3)))
+
+
+(test "list->text-109"
+      #t
+      (result=? "b" (list->text '(#\a #\b #\c) 1 2)))
+
+
+(test "list->text-110"
+      #t
+      (result=? "bc" (list->text '(#\a #\b #\c) 1 3)))
+
+
+
+(test "reverse-list->text-111"
+      #t
+      (result=? "" (reverse-list->text '())))
+
+
+(test "reverse-list->text-112"
+      #t
+      (result=? "cba" (reverse-list->text '(#\a #\b #\c))))
+
+
+
+(test "textual->utf8-113"
+      #t
+      (equal? '#u8(97 98 99)
+              (textual->utf8 (as-text "abc"))))
+
+
+(test "textual->utf8-114"
+      #t
+      (equal? '#u8(97 98 99)
+              (textual->utf8 "abc")))
+
+
+(test "textual->utf8-115"
+      #t
+      (equal? '#u8(97 98 99 121 121 121 122 122 122)
+              (textual->utf8 (as-text "xxxabcyyyzzz") 3)))
+
+
+(test "textual->utf8-116"
+      #t
+      (equal? '#u8(97 98 99 121 121 121 122 122 122)
+              (textual->utf8 "xxxabcyyyzzz" 3)))
+
+
+(test "textual->utf8-117"
+      #t
+      (equal? '#u8(97 98 99)
+              (textual->utf8 (as-text "xxxabcyyyzzz") 3 6)))
+
+
+(test "textual->utf8-118"
+      #t
+      (equal? '#u8(97 98 99)
+              (textual->utf8 "xxxabcyyyzzz" 3 6)))
+
+
+
+(define assumed-endianness
+  (let ((bom (textual->utf16 (as-text ""))))
+    (test "textual->utf16-119"
+          #t
+          (eqv? (bytevector-length bom) 2))
+
+    (if (= (bytevector-u8-ref bom 0) 254)
+      'big
+      'little)))
+
+(test "textual->utf16-120"
+      #t
+      (equal? (if (eq? assumed-endianness 'big)
+                  '#u8(254 255 0 97 0 98 0 99)
+                  '#u8(255 254 97 0 98 0 99 0))
+              (textual->utf16 (as-text "abc"))))
+
+
+(test "textual->utf16-121"
+      #t
+      (equal? (if (eq? assumed-endianness 'big)
+                  '#u8(254 255 0 97 0 98 0 99)
+                  '#u8(255 254 97 0 98 0 99 0))
+              (textual->utf16 "abc")))
+
+
+(test "textual->utf16-122"
+      #t
+      (equal? (if (eq? assumed-endianness 'big)
+                  '#u8(254 255 0 97 0 98 0 99 0 121 0 121 0 121 0 122 0 122 0 122)
+                  '#u8(255 254 97 0 98 0 99 0 121 0 121 0 121 0 122 0 122 0 122 0))
+              (textual->utf16 (as-text "xxxabcyyyzzz") 3)))
+
+
+(test "textual->utf16-123"
+      #t
+      (equal? (if (eq? assumed-endianness 'big)
+                  '#u8(254 255 0 97 0 98 0 99 0 121 0 121 0 121 0 122 0 122 0 122)
+                  '#u8(255 254 97 0 98 0 99 0 121 0 121 0 121 0 122 0 122 0 122 0))
+              (textual->utf16 "xxxabcyyyzzz" 3)))
+
+
+(test "textual->utf16-124"
+      #t
+      (equal? (if (eq? assumed-endianness 'big)
+                  '#u8(254 255 0 97 0 98 0 99)
+                  '#u8(255 254 97 0 98 0 99 0))
+              (textual->utf16 (as-text "xxxabcyyyzzz") 3 6)))
+
+
+(test "textual->utf16-125"
+      #t
+      (equal? (if (eq? assumed-endianness 'big)
+                  '#u8(254 255 0 97 0 98 0 99)
+                  '#u8(255 254 97 0 98 0 99 0))
+              (textual->utf16 "xxxabcyyyzzz" 3 6)))
+
+
+
+(test "textual->utf16be-126"
+      #t
+      (equal? '#u8(0 97 0 98 0 99)
+              (textual->utf16be (as-text "abc"))))
+
+
+(test "textual->utf16be-127"
+      #t
+      (equal? '#u8(0 97 0 98 0 99)
+              (textual->utf16be "abc")))
+
+
+(test "textual->utf16be-128"
+      #t
+      (equal? '#u8(0 97 0 98 0 99 0 121 0 121 0 121 0 122 0 122 0 122)
+              (textual->utf16be (as-text "xxxabcyyyzzz") 3)))
+
+
+(test "textual->utf16be-129"
+      #t
+      (equal? '#u8(0 97 0 98 0 99 0 121 0 121 0 121 0 122 0 122 0 122)
+              (textual->utf16be "xxxabcyyyzzz" 3)))
+
+
+(test "textual->utf16be-130"
+      #t
+      (equal? '#u8(0 97 0 98 0 99)
+              (textual->utf16be (as-text "xxxabcyyyzzz") 3 6)))
+
+
+(test "textual->utf16be-131"
+      #t
+      (equal? '#u8(0 97 0 98 0 99)
+              (textual->utf16be "xxxabcyyyzzz" 3 6)))
+
+
+
+(test "textual->utf16le-132"
+      #t
+      (equal? '#u8(97 0 98 0 99 0)
+              (textual->utf16le (as-text "abc"))))
+
+
+(test "textual->utf16le-133"
+      #t
+      (equal? '#u8(97 0 98 0 99 0)
+              (textual->utf16le "abc")))
+
+
+(test "textual->utf16le-134"
+      #t
+      (equal? '#u8(97 0 98 0 99 0 121 0 121 0 121 0 122 0 122 0 122 0)
+              (textual->utf16le (as-text "xxxabcyyyzzz") 3)))
+
+
+(test "textual->utf16le-135"
+      #t
+      (equal? '#u8(97 0 98 0 99 0 121 0 121 0 121 0 122 0 122 0 122 0)
+              (textual->utf16le "xxxabcyyyzzz" 3)))
+
+
+(test "textual->utf16le-136"
+      #t
+      (equal? '#u8(97 0 98 0 99 0)
+              (textual->utf16le (as-text "xxxabcyyyzzz") 3 6)))
+
+
+(test "textual->utf16le-137"
+      #t
+      (equal? '#u8(97 0 98 0 99 0)
+              (textual->utf16le "xxxabcyyyzzz" 3 6)))
+
+
+
+(test "textual->utf8-138"
+      #t
+      (result=? "abc"
+                (utf8->text '#u8(97 98 99))))
+
+
+(test "textual->utf8-139"
+      #t
+      (result=? "abcyyyzzz"
+                (utf8->text '#u8(0 1 2 97 98 99 121 121 121 122 122 122) 3)))
+
+
+(test "textual->utf8-140"
+      #t
+      (result=? "abc"
+                (utf8->text '#u8(41 42 43 97 98 99 100 101 102) 3 6)))
+
+
+
+(test "textual->utf16-141"
+      #t
+      (result=? "abc"
+                (utf16->text '#u8(254 255 0 97 0 98 0 99))))
+
+
+(test "textual->utf16-142"
+      #t
+      (result=? "abc"
+                (utf16->text '#u8(255 254 97 0 98 0 99 0))))
+
+
+(test "textual->utf16-143"
+      #t
+      (result=? "abc"
+                (utf16->text (textual->utf16 "abc") 2)))
+
+
+(test "textual->utf16-144"
+      #t
+      (result=? "bcdef"
+                (utf16->text (textual->utf16 "abcdef") 4)))
+
+
+(test "textual->utf16-145"
+      #t
+      (result=? "bcd"
+                (utf16->text (textual->utf16 "abcdef") 4 10)))
+
+
+
+(test "textual->utf16be-146"
+      #t
+      (result=? "abc"
+                (utf16be->text '#u8(0 97 0 98 0 99))))
+
+
+(test "textual->utf16be-147"
+      #t
+      (result=? "bc"
+                (utf16be->text (textual->utf16be "abc") 2)))
+
+
+(test "textual->utf16be-148"
+      #t
+      (result=? "bcd"
+                (utf16be->text (textual->utf16be "abcdef") 2 8)))
+
+
+
+(test "textual->utf16le-149"
+      #t
+      (result=? "abc"
+                (utf16le->text '#u8(97 0 98 0 99 0))))
+
+
+(test "textual->utf16le-150"
+      #t
+      (result=? "bc"
+                (utf16le->text (textual->utf16le "abc") 2)))
+
+
+(test "textual->utf16le-151"
+      #t
+      (result=? "bcd"
+                (utf16le->text (textual->utf16le "abcdef") 2 8)))
+
+(cond-expand
+ ((or sagittarius
+      chibi
+      full-unicode-strings)
+
+  (test "textual->utf8-152"
+        #t
+        (equal?
+         '#u8(97 195 128 206 191
+                 240 157 145 129 240 157 132 147 240 157 132 144 122)
+         (textual->utf8 beyondBMP)))
+
+
+  (let ((bv (textual->utf16 beyondBMP)))
+    (test "textual->utf16-153"
+          #t
+          (equal? bv
+                  '#u8(254 255 0 97 0 192 3 191
+                           216 53 220 65 216 52 221 19 216 52 221 16 0 122)))
+    (test "textual->utf16-154"
+          #t
+          (equal? bv
+                  '#u8(255 254 97 0 192 0 191 3
+                           53 216 65 220 52 216 19 221 52 216 16 221 122 0))))
+
+  (test "textual->utf8-155"
+        #t
+        (equal?
+         '#u8(0 97 0 192 3 191 216 53 220 65 216 52 221 19 216 52 221 16 0 122)
+         (textual->utf16be beyondBMP)))
+
+  (test "textual->utf8-156"
+        #t
+        (equal?
+         '#u8(97 0 192 0 191 3 53 216 65 220 52 216 19 221 52 216 16 221 122 0)
+         (textual->utf16le beyondBMP)))
+
+  (test "utf8->text-157"
+        #t
+        (textual=?
+         beyondBMP
+         (utf8->text
+          '#u8(97 195 128 206 191
+                  240 157 145 129 240 157 132 147 240 157 132 144 122))))
+
+  (test "utf16->text-158"
+        #t
+        (textual=? beyondBMP (utf16->text (textual->utf16 beyondBMP))))
+
+
+  (test "utf16->text-159"
+        #t
+        (textual=? beyondBMP
+                   (utf16->text (textual->utf16 beyondBMP) 2)))
+
+  
+  (test "utf16be->text-160"
+        #t
+        (textual=? beyondBMP (utf16be->text (textual->utf16be beyondBMP))))
+
+
+  (test "utf16le->text-161"
+        #t
+        (textual=? beyondBMP (utf16le->text (textual->utf16le beyondBMP))))
+
+
+  (test "utf16be->text-162"
+        #t
+        (result=? (string-append (string (integer->char #xfeff)) "abc")
+                  (utf16be->text '#u8(254 255 0 97 0 98 0 99))))
+
+
+  (test "utf16le->text-163"
+        #t
+        (result=? (string-append (string (integer->char #xfeff)) "abc")
+                  (utf16le->text '#u8(255 254 97 0 98 0 99 0))))
+  )
+ (else))
+
+
+;;; Selection
+
+(test "text-length-164"
+      #t
+      (= 0 (text-length (text))))
+
+
+(test "text-length-165"
+      #t
+      (= 6 (text-length ABCDEF)))
+
+
+(test "text-ref-166"
+      #t
+      (= 1234 (text-length (make-text 1234 (text-ref ABC 0)))))
+
+
+
+(test "text-ref-167"
+      #t
+      (char=? #\a (text-ref (text #\a #\b #\c) 0)))
+
+
+(test "text-ref-168"
+      #t
+      (char=? #\c (text-ref (text #\a #\b #\c) 2)))
+
+
+(test "textual-length-169"
+      #t
+      (char=? (string-ref (textual->string ABCDEF) 3)
+              (text-ref ABCDEF 3)))
+
+
+
+(test "textual-length-170"
+      #t
+      (= 0 (textual-length (text))))
+
+
+(test "textual-length-171"
+      #t
+      (= 6 (textual-length ABCDEF)))
+
+
+(test "textual-ref-172"
+      #t
+      (= 1234 (textual-length (make-text 1234 (text-ref ABC 0)))))
+
+
+
+(test "textual-ref-173"
+      #t
+      (char=? #\a (textual-ref (text #\a #\b #\c) 0)))
+
+
+(test "textual-ref-174"
+      #t
+      (char=? #\c (textual-ref (text #\a #\b #\c) 2)))
+
+
+(test "subtext-175"
+      #t
+      (char=? (string-ref (textual->string ABCDEF) 3)
+              (textual-ref ABCDEF 3)))
+
+
+
+(test "subtext-176"
+      #t
+      (result=? ""
+                (subtext (text) 0 0)))
+
+
+(test "subtext-177"
+      #t
+      (result=? ""
+                (subtext (string->text "abcdef") 0 0)))
+
+
+(test "subtext-178"
+      #t
+      (result=? ""
+                (subtext (string->text "abcdef") 4 4)))
+
+
+(test "subtext-179"
+      #t
+      (result=? ""
+                (subtext (string->text "abcdef") 6 6)))
+
+
+(test "subtext-180"
+      #t
+      (result=? "abcd"
+                (subtext (string->text "abcdef") 0 4)))
+
+
+(test "subtext-181"
+      #t
+      (result=? "cde"
+                (subtext (string->text "abcdef") 2 5)))
+
+
+(test "subtext-182"
+      #t
+      (result=? "cdef"
+                (subtext (string->text "abcdef") 2 6)))
+
+
+(test "subtextual-183"
+      #t
+      (result=? "abcdef"
+                (subtext (string->text "abcdef") 0 6)))
+
+
+
+(test "subtextual-184"
+      #t
+      (result=? ""
+                (subtextual (text) 0 0)))
+
+
+(test "subtextual-185"
+      #t
+      (result=? ""
+                (subtextual (string->text "abcdef") 0 0)))
+
+
+(test "subtextual-186"
+      #t
+      (result=? ""
+                (subtextual (string->text "abcdef") 4 4)))
+
+
+(test "subtextual-187"
+      #t
+      (result=? ""
+                (subtextual (string->text "abcdef") 6 6)))
+
+
+(test "subtextual-188"
+      #t
+      (result=? "abcd"
+                (subtextual (string->text "abcdef") 0 4)))
+
+
+(test "subtextual-189"
+      #t
+      (result=? "cde"
+                (subtextual (string->text "abcdef") 2 5)))
+
+
+(test "subtextual-190"
+      #t
+      (result=? "cdef"
+                (subtextual (string->text "abcdef") 2 6)))
+
+
+(test "subtextual-191"
+      #t
+      (result=? "abcdef"
+                (subtextual (string->text "abcdef") 0 6)))
+
+
+
+(test "subtextual-192"
+      #t
+      (result=? ""
+                (subtextual "" 0 0)))
+
+
+(test "subtextual-193"
+      #t
+      (result=? ""
+                (subtextual "abcdef" 0 0)))
+
+
+(test "subtextual-194"
+      #t
+      (result=? ""
+                (subtextual "abcdef" 4 4)))
+
+
+(test "subtextual-195"
+      #t
+      (result=? ""
+                (subtextual "abcdef" 6 6)))
+
+
+(test "subtextual-196"
+      #t
+      (result=? "abcd"
+                (subtextual "abcdef" 0 4)))
+
+
+(test "subtextual-197"
+      #t
+      (result=? "cde"
+                (subtextual "abcdef" 2 5)))
+
+
+(test "subtextual-198"
+      #t
+      (result=? "cdef"
+                (subtextual "abcdef" 2 6)))
+
+
+(test "textual-copy-199"
+      #t
+      (result=? "abcdef"
+                (subtextual "abcdef" 0 6)))
+
+
+
+(test "textual-copy-200"
+      #t
+      (result=? ""
+                (textual-copy (text))))
+
+
+(test "textual-copy-201"
+      #t
+      (let* ((txt (string->text "abcdef"))
+             (copy (textual-copy txt)))
+        (and (result=? "abcdef"
+                       copy)
+             (not (eqv? txt copy)))))
+
+
+
+(test "textual-copy-202"
+      #t
+      (result=? ""
+                (textual-copy "")))
+
+
+(test "textual-copy-203"
+      #t
+      (result=? "abcdef"
+                (textual-copy "abcdef")))
+
+
+
+(test "textual-copy-204"
+      #t
+      (result=? ""
+                (textual-copy (text) 0)))
+
+
+(test "textual-copy-205"
+      #t
+      (result=? "abcdef"
+                (textual-copy (string->text "abcdef") 0)))
+
+
+(test "textual-copy-206"
+      #t
+      (result=? "ef"
+                (textual-copy (string->text "abcdef") 4)))
+
+
+(test "textual-copy-207"
+      #t
+      (result=? ""
+                (textual-copy (string->text "abcdef") 6)))
+
+
+
+(test "textual-copy-208"
+      #t
+      (result=? ""
+                (textual-copy "" 0)))
+
+
+(test "textual-copy-209"
+      #t
+      (result=? "abcdef"
+                (textual-copy "abcdef" 0)))
+
+
+(test "textual-copy-210"
+      #t
+      (result=? "ef"
+                (textual-copy "abcdef" 4)))
+
+
+(test "textual-copy-211"
+      #t
+      (result=? ""
+                (textual-copy "abcdef" 6)))
+
+
+
+(test "textual-copy-212"
+      #t
+      (result=? ""
+                (textual-copy (text) 0 0)))
+
+
+(test "textual-copy-213"
+      #t
+      (result=? ""
+                (textual-copy (string->text "abcdef") 0 0)))
+
+
+(test "textual-copy-214"
+      #t
+      (result=? ""
+                (textual-copy (string->text "abcdef") 4 4)))
+
+
+(test "textual-copy-215"
+      #t
+      (result=? ""
+                (textual-copy (string->text "abcdef") 6 6)))
+
+
+(test "textual-copy-216"
+      #t
+      (result=? "abcd"
+                (textual-copy (string->text "abcdef") 0 4)))
+
+
+(test "textual-copy-217"
+      #t
+      (result=? "cde"
+                (textual-copy (string->text "abcdef") 2 5)))
+
+
+(test "textual-copy-218"
+      #t
+      (result=? "cdef"
+                (textual-copy (string->text "abcdef") 2 6)))
+
+
+(test "textual-copy-219"
+      #t
+      (result=? "abcdef"
+                (textual-copy (string->text "abcdef") 0 6)))
+
+
+
+(test "textual-copy-220"
+      #t
+      (result=? ""
+                (textual-copy "" 0 0)))
+
+
+(test "textual-copy-221"
+      #t
+      (result=? ""
+                (textual-copy "abcdef" 0 0)))
+
+
+(test "textual-copy-222"
+      #t
+      (result=? ""
+                (textual-copy "abcdef" 4 4)))
+
+
+(test "textual-copy-223"
+      #t
+      (result=? ""
+                (textual-copy "abcdef" 6 6)))
+
+
+(test "textual-copy-224"
+      #t
+      (result=? "abcd"
+                (textual-copy "abcdef" 0 4)))
+
+
+(test "textual-copy-225"
+      #t
+      (result=? "cde"
+                (textual-copy "abcdef" 2 5)))
+
+
+(test "textual-copy-226"
+      #t
+      (result=? "cdef"
+                (textual-copy "abcdef" 2 6)))
+
+
+(test "textual-take-227"
+      #t
+      (result=? "abcdef"
+                (textual-copy "abcdef" 0 6)))
+
+
+
+(test "textual-take-228"
+      #t
+      (result=? "" (textual-take (text) 0)))
+
+
+(test "textual-take-229"
+      #t
+      (result=? "" (textual-take (string->text "abcdef") 0)))
+
+
+(test "textual-drop-230"
+      #t
+      (result=? "ab" (textual-take (string->text "abcdef") 2)))
+
+
+(test "textual-drop-231"
+      #t
+      (result=? "" (textual-drop (string->text "") 0)))
+
+
+(test "textual-drop-232"
+      #t
+      (result=? "abcdef" (textual-drop (string->text "abcdef") 0)))
+
+
+(test "textual-take-right-233"
+      #t
+      (result=? "cdef" (textual-drop (string->text "abcdef") 2)))
+
+
+(test "textual-take-right-234"
+      #t
+      (result=? "" (textual-take-right (text) 0)))
+
+
+(test "textual-take-right-235"
+      #t
+      (result=? "" (textual-take-right (string->text "abcdef") 0)))
+
+
+(test "textual-drop-right-236"
+      #t
+      (result=? "ef" (textual-take-right (string->text "abcdef") 2)))
+
+
+(test "textual-drop-right-237"
+      #t
+      (result=? "" (textual-drop-right (text) 0)))
+
+
+(test "textual-drop-right-238"
+      #t
+      (result=? "abcdef"
+                (textual-drop-right (string->text "abcdef") 0)))
+
+
+(test "textual-take-239"
+      #t
+      (result=? "abcd"
+                (textual-drop-right (string->text "abcdef") 2)))
+
+
+
+(test "textual-take-240"
+      #t
+      (result=? "" (textual-take "" 0)))
+
+
+(test "textual-take-241"
+      #t
+      (result=? "" (textual-take "abcdef" 0)))
+
+
+(test "textual-drop-242"
+      #t
+      (result=? "ab" (textual-take "abcdef" 2)))
+
+
+(test "textual-drop-243"
+      #t
+      (result=? "" (textual-drop "" 0)))
+
+
+(test "textual-drop-244"
+      #t
+      (result=? "abcdef" (textual-drop "abcdef" 0)))
+
+
+(test "textual-take-right-245"
+      #t
+      (result=? "cdef" (textual-drop "abcdef" 2)))
+
+
+(test "textual-take-right-246"
+      #t
+      (result=? "" (textual-take-right "" 0)))
+
+
+(test "textual-take-right-247"
+      #t
+      (result=? "" (textual-take-right "abcdef" 0)))
+
+
+(test "textual-drop-right-248"
+      #t
+      (result=? "ef" (textual-take-right "abcdef" 2)))
+
+
+(test "textual-drop-right-249"
+      #t
+      (result=? "" (textual-drop-right "" 0)))
+
+
+(test "textual-drop-right-250"
+      #t
+      (result=? "abcdef" (textual-drop-right "abcdef" 0)))
+
+
+(test "textual-pad-251"
+      #t
+      (result=? "abcd" (textual-drop-right "abcdef" 2)))
+
+
+
+(test "textual-pad-252"
+      #t
+      (result=? "" 
+                (textual-pad (string->text "") 0)))
+
+
+(test "textual-pad-253"
+      #t
+      (result=? "     " 
+                (textual-pad (string->text "") 5)))
+
+
+(test "textual-pad-254"
+      #t
+      (result=? "  325" 
+                (textual-pad (string->text "325") 5)))
+
+
+(test "textual-pad-255"
+      #t
+      (result=? "71325" 
+                (textual-pad (string->text "71325") 5)))
+
+
+(test "textual-pad-256"
+      #t
+      (result=? "71325" 
+                (textual-pad (string->text "8871325") 5)))
+
+
+(test "textual-pad-257"
+      #t
+      (result=? "" 
+                (textual-pad (string->text "") 0 #\*)))
+
+
+(test "textual-pad-258"
+      #t
+      (result=? "*****" 
+                (textual-pad (string->text "") 5 #\*)))
+
+
+(test "textual-pad-259"
+      #t
+      (result=? "**325" 
+                (textual-pad (string->text "325") 5 #\*)))
+
+
+(test "textual-pad-260"
+      #t
+      (result=? "71325" 
+                (textual-pad (string->text "71325") 5 #\*)))
+
+
+(test "textual-pad-261"
+      #t
+      (result=? "71325" 
+                (textual-pad (string->text "8871325") 5 #\*)))
+
+
+(test "textual-pad-262"
+      #t
+      (result=? "" 
+                (textual-pad (string->text "") 0 #\* 0)))
+
+
+(test "textual-pad-263"
+      #t
+      (result=? "*****" 
+                (textual-pad (string->text "") 5 #\* 0)))
+
+
+(test "textual-pad-264"
+      #t
+      (result=? "**325" 
+                (textual-pad (string->text "325") 5 #\* 0)))
+
+
+(test "textual-pad-265"
+      #t
+      (result=? "71325" 
+                (textual-pad (string->text "71325") 5 #\* 0)))
+
+
+(test "textual-pad-266"
+      #t
+      (result=? "71325" 
+                (textual-pad (string->text "8871325") 5 #\* 0)))
+
+
+(test "textual-pad-267"
+      #t
+      (result=? "***25" 
+                (textual-pad (string->text "325") 5 #\* 1)))
+
+
+(test "textual-pad-268"
+      #t
+      (result=? "*1325" 
+                (textual-pad (string->text "71325") 5 #\* 1)))
+
+
+(test "textual-pad-269"
+      #t
+      (result=? "71325" 
+                (textual-pad (string->text "8871325") 5 #\* 1)))
+
+
+(test "textual-pad-270"
+      #t
+      (result=? "" 
+                (textual-pad (string->text "") 0 #\* 0 0)))
+
+
+(test "textual-pad-271"
+      #t
+      (result=? "*****" 
+                (textual-pad (string->text "") 5 #\* 0 0)))
+
+
+(test "textual-pad-272"
+      #t
+      (result=? "**325" 
+                (textual-pad (string->text "325") 5 #\* 0 3)))
+
+
+(test "textual-pad-273"
+      #t
+      (result=? "**713" 
+                (textual-pad (string->text "71325") 5 #\* 0 3)))
+
+
+(test "textual-pad-274"
+      #t
+      (result=? "**887" 
+                (textual-pad (string->text "8871325") 5 #\* 0 3)))
+
+
+(test "textual-pad-275"
+      #t
+      (result=? "***25" 
+                (textual-pad (string->text "325") 5 #\* 1 3)))
+
+
+(test "textual-pad-276"
+      #t
+      (result=? "**132" 
+                (textual-pad (string->text "71325") 5 #\* 1 4)))
+
+
+(test "textual-pad-right-277"
+      #t
+      (result=? "*8713" 
+                (textual-pad (string->text "8871325") 5 #\* 1 5)))
+
+
+(test "textual-pad-right-278"
+      #t
+      (result=? "" 
+                (textual-pad-right (string->text "") 0)))
+
+
+(test "textual-pad-right-279"
+      #t
+      (result=? "     " 
+                (textual-pad-right (string->text "") 5)))
+
+
+(test "textual-pad-right-280"
+      #t
+      (result=? "325  " 
+                (textual-pad-right (string->text "325") 5)))
+
+
+(test "textual-pad-right-281"
+      #t
+      (result=? "71325" 
+                (textual-pad-right (string->text "71325") 5)))
+
+
+(test "textual-pad-right-282"
+      #t
+      (result=? "88713" 
+                (textual-pad-right (string->text "8871325") 5)))
+
+
+(test "textual-pad-right-283"
+      #t
+      (result=? "" 
+                (textual-pad-right (string->text "") 0 #\*)))
+
+
+(test "textual-pad-right-284"
+      #t
+      (result=? "*****" 
+                (textual-pad-right (string->text "") 5 #\*)))
+
+
+(test "textual-pad-right-285"
+      #t
+      (result=? "325**" 
+                (textual-pad-right (string->text "325") 5 #\*)))
+
+
+(test "textual-pad-right-286"
+      #t
+      (result=? "71325" 
+                (textual-pad-right (string->text "71325") 5 #\*)))
+
+
+(test "textual-pad-right-287"
+      #t
+      (result=? "88713" 
+                (textual-pad-right (string->text "8871325") 5 #\*)))
+
+
+(test "textual-pad-right-288"
+      #t
+      (result=? "" 
+                (textual-pad-right (string->text "") 0 #\* 0)))
+
+
+(test "textual-pad-right-289"
+      #t
+      (result=? "*****" 
+                (textual-pad-right (string->text "") 5 #\* 0)))
+
+
+(test "textual-pad-right-290"
+      #t
+      (result=? "325**" 
+                (textual-pad-right (string->text "325") 5 #\* 0)))
+
+
+(test "textual-pad-right-291"
+      #t
+      (result=? "71325" 
+                (textual-pad-right (string->text "71325") 5 #\* 0)))
+
+
+(test "textual-pad-right-292"
+      #t
+      (result=? "88713" 
+                (textual-pad-right (string->text "8871325") 5 #\* 0)))
+
+
+(test "textual-pad-right-293"
+      #t
+      (result=? "25***" 
+                (textual-pad-right (string->text "325") 5 #\* 1)))
+
+
+(test "textual-pad-right-294"
+      #t
+      (result=? "1325*" 
+                (textual-pad-right (string->text "71325") 5 #\* 1)))
+
+
+(test "textual-pad-right-295"
+      #t
+      (result=? "87132" 
+                (textual-pad-right (string->text "8871325") 5 #\* 1)))
+
+
+(test "textual-pad-right-296"
+      #t
+      (result=? "" 
+                (textual-pad-right (string->text "") 0 #\* 0 0)))
+
+
+(test "textual-pad-right-297"
+      #t
+      (result=? "*****" 
+                (textual-pad-right (string->text "") 5 #\* 0 0)))
+
+
+(test "textual-pad-right-298"
+      #t
+      (result=? "325**" 
+                (textual-pad-right (string->text "325") 5 #\* 0 3)))
+
+
+(test "textual-pad-right-299"
+      #t
+      (result=? "713**" 
+                (textual-pad-right (string->text "71325") 5 #\* 0 3)))
+
+
+(test "textual-pad-right-300"
+      #t
+      (result=? "887**" 
+              
+                (textual-pad-right (string->text "8871325") 5 #\* 0 3)))
+
+
+(test "textual-pad-right-301"
+      #t
+      (result=? "25***" 
+                (textual-pad-right (string->text "325") 5 #\* 1 3)))
+
+
+(test "textual-pad-right-302"
+      #t
+      (result=? "132**" 
+                (textual-pad-right (string->text "71325") 5 #\* 1 4)))
+
+
+(test "textual-pad-303"
+      #t
+      (result=? "8713*" 
+              
+                (textual-pad-right (string->text "8871325") 5 #\* 1 5)))
+
+
+
+(test "textual-pad-304"
+      #t
+      (result=? "" (textual-pad "" 0)))
+
+
+(test "textual-pad-305"
+      #t
+      (result=? "     " (textual-pad "" 5)))
+
+
+(test "textual-pad-306"
+      #t
+      (result=? "  325" (textual-pad "325" 5)))
+
+
+(test "textual-pad-307"
+      #t
+      (result=? "71325" (textual-pad "71325" 5)))
+
+
+(test "textual-pad-308"
+      #t
+      (result=? "71325" (textual-pad "8871325" 5)))
+
+
+(test "textual-pad-309"
+      #t
+      (result=? "" (textual-pad "" 0 #\*)))
+
+
+(test "textual-pad-310"
+      #t
+      (result=? "*****" (textual-pad "" 5 #\*)))
+
+
+(test "textual-pad-311"
+      #t
+      (result=? "**325" (textual-pad "325" 5 #\*)))
+
+
+(test "textual-pad-312"
+      #t
+      (result=? "71325" (textual-pad "71325" 5 #\*)))
+
+
+(test "textual-pad-313"
+      #t
+      (result=? "71325" (textual-pad "8871325" 5 #\*)))
+
+
+(test "textual-pad-314"
+      #t
+      (result=? "" (textual-pad "" 0 #\* 0)))
+
+
+(test "textual-pad-315"
+      #t
+      (result=? "*****" (textual-pad "" 5 #\* 0)))
+
+
+(test "textual-pad-316"
+      #t
+      (result=? "**325" (textual-pad "325" 5 #\* 0)))
+
+
+(test "textual-pad-317"
+      #t
+      (result=? "71325" (textual-pad "71325" 5 #\* 0)))
+
+
+(test "textual-pad-318"
+      #t
+      (result=? "71325" (textual-pad "8871325" 5 #\* 0)))
+
+
+(test "textual-pad-319"
+      #t
+      (result=? "***25" (textual-pad "325" 5 #\* 1)))
+
+
+(test "textual-pad-320"
+      #t
+      (result=? "*1325" (textual-pad "71325" 5 #\* 1)))
+
+
+(test "textual-pad-321"
+      #t
+      (result=? "71325" (textual-pad "8871325" 5 #\* 1)))
+
+
+(test "textual-pad-322"
+      #t
+      (result=? "" (textual-pad "" 0 #\* 0 0)))
+
+
+(test "textual-pad-323"
+      #t
+      (result=? "*****" (textual-pad "" 5 #\* 0 0)))
+
+
+(test "textual-pad-324"
+      #t
+      (result=? "**325" (textual-pad "325" 5 #\* 0 3)))
+
+
+(test "textual-pad-325"
+      #t
+      (result=? "**713" (textual-pad "71325" 5 #\* 0 3)))
+
+
+(test "textual-pad-326"
+      #t
+      (result=? "**887" (textual-pad "8871325" 5 #\* 0 3)))
+
+
+(test "textual-pad-327"
+      #t
+      (result=? "***25" (textual-pad "325" 5 #\* 1 3)))
+
+
+(test "textual-pad-328"
+      #t
+      (result=? "**132" (textual-pad "71325" 5 #\* 1 4)))
+
+
+(test "textual-pad-right-329"
+      #t
+      (result=? "*8713" (textual-pad "8871325" 5 #\* 1 5)))
+
+
+(test "textual-pad-right-330"
+      #t
+      (result=? "" (textual-pad-right "" 0)))
+
+
+(test "textual-pad-right-331"
+      #t
+      (result=? "     " (textual-pad-right "" 5)))
+
+
+(test "textual-pad-right-332"
+      #t
+      (result=? "325  " (textual-pad-right "325" 5)))
+
+
+(test "textual-pad-right-333"
+      #t
+      (result=? "71325" (textual-pad-right "71325" 5)))
+
+
+(test "textual-pad-right-334"
+      #t
+      (result=? "88713" (textual-pad-right "8871325" 5)))
+
+
+(test "textual-pad-right-335"
+      #t
+      (result=? "" (textual-pad-right "" 0 #\*)))
+
+
+(test "textual-pad-right-336"
+      #t
+      (result=? "*****" (textual-pad-right "" 5 #\*)))
+
+
+(test "textual-pad-right-337"
+      #t
+      (result=? "325**" (textual-pad-right "325" 5 #\*)))
+
+
+(test "textual-pad-right-338"
+      #t
+      (result=? "71325" (textual-pad-right "71325" 5 #\*)))
+
+
+(test "textual-pad-right-339"
+      #t
+      (result=? "88713" (textual-pad-right "8871325" 5 #\*)))
+
+
+(test "textual-pad-right-340"
+      #t
+      (result=? "" (textual-pad-right "" 0 #\* 0)))
+
+
+(test "textual-pad-right-341"
+      #t
+      (result=? "*****" (textual-pad-right "" 5 #\* 0)))
+
+
+(test "textual-pad-right-342"
+      #t
+      (result=? "325**" (textual-pad-right "325" 5 #\* 0)))
+
+
+(test "textual-pad-right-343"
+      #t
+      (result=? "71325" (textual-pad-right "71325" 5 #\* 0)))
+
+
+(test "textual-pad-right-344"
+      #t
+      (result=? "88713" (textual-pad-right "8871325" 5 #\* 0)))
+
+
+(test "textual-pad-right-345"
+      #t
+      (result=? "25***" (textual-pad-right "325" 5 #\* 1)))
+
+
+(test "textual-pad-right-346"
+      #t
+      (result=? "1325*" (textual-pad-right "71325" 5 #\* 1)))
+
+
+(test "textual-pad-right-347"
+      #t
+      (result=? "87132" (textual-pad-right "8871325" 5 #\* 1)))
+
+
+(test "textual-pad-right-348"
+      #t
+      (result=? "" (textual-pad-right "" 0 #\* 0 0)))
+
+
+(test "textual-pad-right-349"
+      #t
+      (result=? "*****" (textual-pad-right "" 5 #\* 0 0)))
+
+
+(test "textual-pad-right-350"
+      #t
+      (result=? "325**" (textual-pad-right "325" 5 #\* 0 3)))
+
+
+(test "textual-pad-right-351"
+      #t
+      (result=? "713**" (textual-pad-right "71325" 5 #\* 0 3)))
+
+
+(test "textual-pad-right-352"
+      #t
+      (result=? "887**" (textual-pad-right "8871325" 5 #\* 0 3)))
+
+
+(test "textual-pad-right-353"
+      #t
+      (result=? "25***" (textual-pad-right "325" 5 #\* 1 3)))
+
+
+(test "textual-pad-right-354"
+      #t
+      (result=? "132**" (textual-pad-right "71325" 5 #\* 1 4)))
+
+
+(test "textual-trim-355"
+      #t
+      (result=? "8713*" (textual-pad-right "8871325" 5 #\* 1 5)))
+
+
+
+(test "textual-trim-356"
+      #t
+      (result=? ""
+                (textual-trim (string->text ""))))
+
+
+(test "textual-trim-357"
+      #t
+      (result=? "a  b  c  "
+                (textual-trim (string->text "  a  b  c  "))))
+
+
+(test "textual-trim-358"
+      #t
+      (result=? ""
+                (textual-trim (string->text "") char-whitespace?)))
+
+
+(test "textual-trim-359"
+      #t
+      (result=? "a  b  c  "
+                (textual-trim (string->text "  a  b  c  ") char-whitespace?)))
+
+
+(test "textual-trim-360"
+      #t
+      (result=? ""
+                (textual-trim (string->text "  a  b  c  ") char?)))
+
+
+(test "textual-trim-361"
+      #t
+      (result=? ""
+                (textual-trim (string->text "") char-whitespace? 0)))
+
+
+(test "textual-trim-362"
+      #t
+      (result=? "a  b  c  "
+                (textual-trim (string->text "  a  b  c  ") char-whitespace? 0)))
+
+
+(test "textual-trim-363"
+      #t
+      (result=? ""
+                (textual-trim (string->text "  a  b  c  ") char? 0)))
+
+
+(test "textual-trim-364"
+      #t
+      (result=? "b  c  "
+                (textual-trim (string->text "  a  b  c  ") char-whitespace? 3)))
+
+
+(test "textual-trim-365"
+      #t
+      (result=? ""
+                (textual-trim (string->text "  a  b  c  ") char? 3)))
+
+
+(test "textual-trim-366"
+      #t
+      (result=? ""
+                (textual-trim (string->text "  a  b  c  ") char? 0 11)))
+
+
+(test "textual-trim-367"
+      #t
+      (result=? "b  c  "
+                (textual-trim (string->text "  a  b  c  ")
+                              char-whitespace? 3 11)))
+
+
+(test "textual-trim-368"
+      #t
+      (result=? ""
+                (textual-trim (string->text "  a  b  c  ") char? 3 11)))
+
+
+(test "textual-trim-369"
+      #t
+      (result=? ""
+                (textual-trim (string->text "  a  b  c  ") char? 0 8)))
+
+
+(test "textual-trim-370"
+      #t
+      (result=? "b  "
+                (textual-trim (string->text "  a  b  c  ")
+                              char-whitespace? 3 8)))
+
+
+(test "textual-trim-right-371"
+      #t
+      (result=? ""
+                (textual-trim (string->text "  a  b  c  ") char? 3 8)))
+
+
+
+(test "textual-trim-right-372"
+      #t
+      (result=? ""
+                (textual-trim-right (string->text ""))))
+
+
+(test "textual-trim-right-373"
+      #t
+      (result=? "  a  b  c"
+                (textual-trim-right (string->text "  a  b  c  "))))
+
+
+(test "textual-trim-right-374"
+      #t
+      (result=? ""
+                (textual-trim-right (string->text "") char-whitespace?)))
+
+
+(test "textual-trim-right-375"
+      #t
+      (result=? "  a  b  c"
+                (textual-trim-right (string->text "  a  b  c  ")
+                                    char-whitespace?)))
+
+
+(test "textual-trim-right-376"
+      #t
+      (result=? ""
+                (textual-trim-right (string->text "  a  b  c  ") char?)))
+
+
+(test "textual-trim-right-377"
+      #t
+      (result=? ""
+                (textual-trim-right (string->text "") char-whitespace? 0)))
+
+
+(test "textual-trim-right-378"
+      #t
+      (result=? "  a  b  c"
+                (textual-trim-right (string->text "  a  b  c  ")
+                                    char-whitespace? 0)))
+
+
+(test "textual-trim-right-379"
+      #t
+      (result=? ""
+                (textual-trim-right (string->text "  a  b  c  ") char? 0)))
+
+
+(test "textual-trim-right-380"
+      #t
+      (result=? "  b  c"
+                (textual-trim-right (string->text "  a  b  c  ")
+                                    char-whitespace? 3)))
+
+
+(test "textual-trim-right-381"
+      #t
+      (result=? ""
+                (textual-trim-right (string->text "  a  b  c  ") char? 3)))
+
+
+(test "textual-trim-right-382"
+      #t
+      (result=? ""
+                (textual-trim-right (string->text "  a  b  c  ") char? 0 11)))
+
+
+(test "textual-trim-right-383"
+      #t
+      (result=? "  b  c"
+                (textual-trim-right (string->text "  a  b  c  ")
+                                    char-whitespace? 3 11)))
+
+
+(test "textual-trim-right-384"
+      #t
+      (result=? ""
+                (textual-trim-right (string->text "  a  b  c  ") char? 3 11)))
+
+
+(test "textual-trim-right-385"
+      #t
+      (result=? ""
+                (textual-trim-right (string->text "  a  b  c  ") char? 0 8)))
+
+
+(test "textual-trim-right-386"
+      #t
+      (result=? "  b"
+                (textual-trim-right (string->text "  a  b  c  ")
+                                    char-whitespace? 3 8)))
+
+
+(test "textual-trim-both-387"
+      #t
+      (result=? ""
+                (textual-trim-right (string->text "  a  b  c  ") char? 3 8)))
+
+
+
+(test "textual-trim-both-388"
+      #t
+      (result=? ""
+                (textual-trim-both (string->text ""))))
+
+
+(test "textual-trim-both-389"
+      #t
+      (result=? "a  b  c"
+                (textual-trim-both (string->text "  a  b  c  "))))
+
+
+(test "textual-trim-both-390"
+      #t
+      (result=? ""
+                (textual-trim-both (string->text "") char-whitespace?)))
+
+
+(test "textual-trim-both-391"
+      #t
+      (result=? "a  b  c"
+                (textual-trim-both (string->text "  a  b  c  ")
+                                   char-whitespace?)))
+
+
+(test "textual-trim-both-392"
+      #t
+      (result=? ""
+                (textual-trim-both (string->text "  a  b  c  ") char?)))
+
+
+(test "textual-trim-both-393"
+      #t
+      (result=? ""
+                (textual-trim-both (string->text "") char-whitespace? 0)))
+
+
+(test "textual-trim-both-394"
+      #t
+      (result=? "a  b  c"
+                (textual-trim-both (string->text "  a  b  c  ")
+                                   char-whitespace? 0)))
+
+
+(test "textual-trim-both-395"
+      #t
+      (result=? ""
+                (textual-trim-both (string->text "  a  b  c  ") char? 0)))
+
+
+(test "textual-trim-both-396"
+      #t
+      (result=? "b  c"
+                (textual-trim-both (string->text "  a  b  c  ")
+                                   char-whitespace? 3)))
+
+
+(test "textual-trim-both-397"
+      #t
+      (result=? ""
+                (textual-trim-both (string->text "  a  b  c  ") char? 3)))
+
+
+(test "textual-trim-both-398"
+      #t
+      (result=? ""
+                (textual-trim-both (string->text "  a  b  c  ") char? 0 11)))
+
+
+(test "textual-trim-both-399"
+      #t
+      (result=? "b  c"
+                (textual-trim-both (string->text "  a  b  c  ")
+                                   char-whitespace? 3 11)))
+
+
+(test "textual-trim-both-400"
+      #t
+      (result=? ""
+                (textual-trim-both (string->text "  a  b  c  ") char? 3 11)))
+
+
+(test "textual-trim-both-401"
+      #t
+      (result=? ""
+                (textual-trim-both (string->text "  a  b  c  ") char? 0 8)))
+
+
+(test "textual-trim-both-402"
+      #t
+      (result=? "b"
+                (textual-trim-both (string->text "  a  b  c  ")
+                                   char-whitespace? 3 8)))
+
+
+(test "textual-trim-403"
+      #t
+      (result=? ""
+                (textual-trim-both (string->text "  a  b  c  ") char? 3 8)))
+
+
+
+(test "textual-trim-404"
+      #t
+      (result=? ""
+                (textual-trim "")))
+
+
+(test "textual-trim-405"
+      #t
+      (result=? "a  b  c  "
+                (textual-trim "  a  b  c  ")))
+
+
+(test "textual-trim-406"
+      #t
+      (result=? ""
+                (textual-trim "" char-whitespace?)))
+
+
+(test "textual-trim-407"
+      #t
+      (result=? "a  b  c  "
+                (textual-trim "  a  b  c  " char-whitespace?)))
+
+
+(test "textual-trim-408"
+      #t
+      (result=? ""
+                (textual-trim "  a  b  c  " char?)))
+
+
+(test "textual-trim-409"
+      #t
+      (result=? ""
+                (textual-trim "" char-whitespace? 0)))
+
+
+(test "textual-trim-410"
+      #t
+      (result=? "a  b  c  "
+                (textual-trim "  a  b  c  " char-whitespace? 0)))
+
+
+(test "textual-trim-411"
+      #t
+      (result=? ""
+                (textual-trim "  a  b  c  " char? 0)))
+
+
+(test "textual-trim-412"
+      #t
+      (result=? "b  c  "
+                (textual-trim "  a  b  c  " char-whitespace? 3)))
+
+
+(test "textual-trim-413"
+      #t
+      (result=? ""
+                (textual-trim "  a  b  c  " char? 3)))
+
+
+(test "textual-trim-414"
+      #t
+      (result=? ""
+                (textual-trim "  a  b  c  " char? 0 11)))
+
+
+(test "textual-trim-415"
+      #t
+      (result=? "b  c  "
+                (textual-trim "  a  b  c  " char-whitespace? 3 11)))
+
+
+(test "textual-trim-416"
+      #t
+      (result=? ""
+                (textual-trim "  a  b  c  " char? 3 11)))
+
+
+(test "textual-trim-417"
+      #t
+      (result=? ""
+                (textual-trim "  a  b  c  " char? 0 8)))
+
+
+(test "textual-trim-418"
+      #t
+      (result=? "b  "
+                (textual-trim "  a  b  c  " char-whitespace? 3 8)))
+
+
+(test "textual-trim-right-419"
+      #t
+      (result=? ""
+                (textual-trim "  a  b  c  " char? 3 8)))
+
+
+
+(test "textual-trim-right-420"
+      #t
+      (result=? ""
+                (textual-trim-right "")))
+
+
+(test "textual-trim-right-421"
+      #t
+      (result=? "  a  b  c"
+                (textual-trim-right "  a  b  c  ")))
+
+
+(test "textual-trim-right-422"
+      #t
+      (result=? ""
+                (textual-trim-right "" char-whitespace?)))
+
+
+(test "textual-trim-right-423"
+      #t
+      (result=? "  a  b  c"
+                (textual-trim-right "  a  b  c  " char-whitespace?)))
+
+
+(test "textual-trim-right-424"
+      #t
+      (result=? ""
+                (textual-trim-right "  a  b  c  " char?)))
+
+
+(test "textual-trim-right-425"
+      #t
+      (result=? ""
+                (textual-trim-right "" char-whitespace? 0)))
+
+
+(test "textual-trim-right-426"
+      #t
+      (result=? "  a  b  c"
+                (textual-trim-right "  a  b  c  " char-whitespace? 0)))
+
+
+(test "textual-trim-right-427"
+      #t
+      (result=? ""
+                (textual-trim-right "  a  b  c  " char? 0)))
+
+
+(test "textual-trim-right-428"
+      #t
+      (result=? "  b  c"
+                (textual-trim-right "  a  b  c  " char-whitespace? 3)))
+
+
+(test "textual-trim-right-429"
+      #t
+      (result=? ""
+                (textual-trim-right "  a  b  c  " char? 3)))
+
+
+(test "textual-trim-right-430"
+      #t
+      (result=? ""
+                (textual-trim-right "  a  b  c  " char? 0 11)))
+
+
+(test "textual-trim-right-431"
+      #t
+      (result=? "  b  c"
+                (textual-trim-right "  a  b  c  " char-whitespace? 3 11)))
+
+
+(test "textual-trim-right-432"
+      #t
+      (result=? ""
+                (textual-trim-right "  a  b  c  " char? 3 11)))
+
+
+(test "textual-trim-right-433"
+      #t
+      (result=? ""
+                (textual-trim-right "  a  b  c  " char? 0 8)))
+
+
+(test "textual-trim-right-434"
+      #t
+      (result=? "  b"
+                (textual-trim-right "  a  b  c  " char-whitespace? 3 8)))
+
+
+(test "textual-trim-both-435"
+      #t
+      (result=? ""
+                (textual-trim-right "  a  b  c  " char? 3 8)))
+
+
+
+(test "textual-trim-both-436"
+      #t
+      (result=? ""
+                (textual-trim-both "")))
+
+
+(test "textual-trim-both-437"
+      #t
+      (result=? "a  b  c"
+                (textual-trim-both "  a  b  c  ")))
+
+
+(test "textual-trim-both-438"
+      #t
+      (result=? ""
+                (textual-trim-both "" char-whitespace?)))
+
+
+(test "textual-trim-both-439"
+      #t
+      (result=? "a  b  c"
+                (textual-trim-both "  a  b  c  " char-whitespace?)))
+
+
+(test "textual-trim-both-440"
+      #t
+      (result=? ""
+                (textual-trim-both "  a  b  c  " char?)))
+
+
+(test "textual-trim-both-441"
+      #t
+      (result=? ""
+                (textual-trim-both "" char-whitespace? 0)))
+
+
+(test "textual-trim-both-442"
+      #t
+      (result=? "a  b  c"
+                (textual-trim-both "  a  b  c  " char-whitespace? 0)))
+
+
+(test "textual-trim-both-443"
+      #t
+      (result=? ""
+                (textual-trim-both "  a  b  c  " char? 0)))
+
+
+(test "textual-trim-both-444"
+      #t
+      (result=? "b  c"
+                (textual-trim-both "  a  b  c  " char-whitespace? 3)))
+
+
+(test "textual-trim-both-445"
+      #t
+      (result=? ""
+                (textual-trim-both "  a  b  c  " char? 3)))
+
+
+(test "textual-trim-both-446"
+      #t
+      (result=? ""
+                (textual-trim-both "  a  b  c  " char? 0 11)))
+
+
+(test "textual-trim-both-447"
+      #t
+      (result=? "b  c"
+                (textual-trim-both "  a  b  c  " char-whitespace? 3 11)))
+
+
+(test "textual-trim-both-448"
+      #t
+      (result=? ""
+                (textual-trim-both "  a  b  c  " char? 3 11)))
+
+
+(test "textual-trim-both-449"
+      #t
+      (result=? ""
+                (textual-trim-both "  a  b  c  " char? 0 8)))
+
+
+(test "textual-trim-both-450"
+      #t
+      (result=? "b"
+                (textual-trim-both "  a  b  c  " char-whitespace? 3 8)))
+
+
+(test "textual-replace-451"
+      #t
+      (result=? ""
+                (textual-trim-both "  a  b  c  " char? 3 8)))
+
+
+
+;;; Replacement
+
+(test "textual-replace-452"
+      #t
+      (result=? "It's lots of fun to code it up in Scheme."
+                (textual-replace (as-text "It's easy to code it up in Scheme.")
+                                 (as-text "lots of fun")
+                                 5 9)))
+
+
+(test "textual-replace-453"
+      #t
+      (result=? "The miserable perl programmer endured daily ridicule."
+                (textual-replace "The TCL programmer endured daily ridicule."
+                                 (as-text "another miserable perl drone")
+                                 4 7 8 22)))
+
+
+(test "textual-replace-454"
+      #t
+      (result=? "It's really easy to code it up in Scheme."
+                (textual-replace (as-text "It's easy to code it up in Scheme.")
+                                 "really "
+                                 5 5)))
+
+
+(test "textual=?-455"
+      #t
+      (result=? "Runs in O(1) time." ; for texts (using sample implementations)
+                (textual-replace "Runs in O(n) time." (text #\1) 10 11)))
+
+
+;;; Comparison
+;;;
+;;; The comparison tests aren't perfectly black-box because the
+;;; specification of these comparison procedures allows them to
+;;; use an ordering other than the usual lexicographic ordering.
+;;; The sample implementations use lexicographic ordering, however,
+;;; and a test program that discourages implementations from using
+;;; orderings that differ from the usual on such simple cases is
+;;; probably doing a public service.
+
+(test "textual=?-456"
+      #t
+      (equal? #t (textual=? (as-text "Strasse") (as-text "Strasse"))))
+
+
+(test "textual<?-457"
+      #t
+      (equal? #t (textual=? "Strasse" (as-text "Strasse") "Strasse")))
+
+
+(test "textual<?-458"
+      #t
+      (equal? #f (textual<? (as-text "z") (as-text "z"))))
+
+(test "textual<?-459"
+      #t
+      (equal? #t (textual<? (as-text "z") "zz")))
+
+(test "textual<=?-460"
+      #t
+      (equal? #f (textual<? (as-text "z") (as-text "Z"))))
+
+(test "textual<=?-461"
+      #t
+      (equal? #t (textual<=? (as-text "z") "zz")))
+
+(test "textual<=?-462"
+      #t
+      (equal? #f (textual<=? "z" "Z")))
+
+(test "textual<?-463"
+      #t
+      (equal? #t (textual<=? "z" (as-text "z"))))
+
+
+(test "textual>?-464"
+      #t
+      (equal? #f (textual<? "z" (as-text "z"))))
+
+(test "textual>?-465"
+      #t
+      (equal? #f (textual>? (as-text "z") "zz")))
+
+(test "textual>=?-466"
+      #t
+      (equal? #t (textual>? "z" (as-text "Z"))))
+
+(test "textual>=?-467"
+      #t
+      (equal? #f (textual>=? (as-text "z") "zz")))
+
+(test "textual>=?-468"
+      #t
+      (equal? #t (textual>=? "z" "Z")))
+
+(test "textual=?-469"
+      #t
+      (equal? #t (textual>=? (as-text "z") (as-text "z"))))
+
+
+
+(let* ((w "a")
+       (x "abc")
+       (y "def")
+       (z (text #\a #\b #\c)))
+
+  (test "textual=?-470"
+        #t
+        (equal? (textual=? x y z)                           #f))
+
+  (test "textual=?-471"
+        #t
+        (equal? (textual=? x x z)                           #t))
+
+  (test "textual=?-472"
+        #t
+        (equal? (textual=? w x y)                           #f))
+
+  (test "textual<?-473"
+        #t
+        (equal? (textual=? y x w)                           #f))
+
+
+  (test "textual<?-474"
+        #t
+        (equal? (textual<? x y z)                           #f))
+
+  (test "textual<?-475"
+        #t
+        (equal? (textual<? x x z)                           #f))
+
+  (test "textual<?-476"
+        #t
+        (equal? (textual<? w x y)                           #t))
+
+  (test "textual>?-477"
+        #t
+        (equal? (textual<? y x w)                           #f))
+
+
+  (test "textual>?-478"
+        #t
+        (equal? (textual>? x y z)                           #f))
+
+  (test "textual>?-479"
+        #t
+        (equal? (textual>? x x z)                           #f))
+
+  (test "textual>?-480"
+        #t
+        (equal? (textual>? w x y)                           #f))
+
+  (test "textual<=?-481"
+        #t
+        (equal? (textual>? y x w)                           #t))
+
+
+  (test "textual<=?-482"
+        #t
+        (equal? (textual<=? x y z)                          #f))
+
+  (test "textual<=?-483"
+        #t
+        (equal? (textual<=? x x z)                          #t))
+
+  (test "textual<=?-484"
+        #t
+        (equal? (textual<=? w x y)                          #t))
+
+  (test "textual>=?-485"
+        #t
+        (equal? (textual<=? y x w)                          #f))
+
+
+  (test "textual>=?-486"
+        #t
+        (equal? (textual>=? x y z)                          #f))
+
+  (test "textual>=?-487"
+        #t
+        (equal? (textual>=? x x z)                          #t))
+
+  (test "textual>=?-488"
+        #t
+        (equal? (textual>=? w x y)                          #f))
+
+  (test "textual=?-489"
+        #t
+        (equal? (textual>=? y x w)                          #t))
+
+
+
+  (test "textual=?-490"
+        #t
+        (equal? (textual=? x x)                             #t))
+
+  (test "textual=?-491"
+        #t
+        (equal? (textual=? w x)                             #f))
+
+  (test "textual<?-492"
+        #t
+        (equal? (textual=? y x)                             #f))
+
+
+  (test "textual<?-493"
+        #t
+        (equal? (textual<? x x)                             #f))
+
+  (test "textual<?-494"
+        #t
+        (equal? (textual<? w x)                             #t))
+
+  (test "textual>?-495"
+        #t
+        (equal? (textual<? y x)                             #f))
+
+
+  (test "textual>?-496"
+        #t
+        (equal? (textual>? x x)                             #f))
+
+  (test "textual>?-497"
+        #t
+        (equal? (textual>? w x)                             #f))
+
+  (test "textual<=?-498"
+        #t
+        (equal? (textual>? y x)                             #t))
+
+
+  (test "textual<=?-499"
+        #t
+        (equal? (textual<=? x x)                            #t))
+
+  (test "textual<=?-500"
+        #t
+        (equal? (textual<=? w x)                            #t))
+
+  (test "textual>=?-501"
+        #t
+        (equal? (textual<=? y x)                            #f))
+
+
+  (test "textual>=?-502"
+        #t
+        (equal? (textual>=? x x)                            #t))
+
+  (test "textual>=?-503"
+        #t
+        (equal? (textual>=? w x)                            #f))
+
+  (test "textual-ci<?-504"
+        #t
+        (equal? (textual>=? y x)                            #t))
+)
+
+
+(test "textual-ci<?-505"
+      #t
+      (equal? #t (textual-ci<? "a" "Z")))
+
+(test "textual-ci<?-506"
+      #t
+      (equal? #t (textual-ci<? "A" "z")))
+
+(test "textual-ci<?-507"
+      #t
+      (equal? #f (textual-ci<? "Z" "a")))
+
+(test "textual-ci<?-508"
+      #t
+      (equal? #f (textual-ci<? "z" "A")))
+
+(test "textual-ci<?-509"
+      #t
+      (equal? #f (textual-ci<? "z" "Z")))
+
+(test "textual-ci>?-510"
+      #t
+      (equal? #f (textual-ci<? "Z" "z")))
+
+(test "textual-ci>?-511"
+      #t
+      (equal? #f (textual-ci>? "a" "Z")))
+
+(test "textual-ci>?-512"
+      #t
+      (equal? #f (textual-ci>? "A" "z")))
+
+(test "textual-ci>?-513"
+      #t
+      (equal? #t (textual-ci>? "Z" "a")))
+
+(test "textual-ci>?-514"
+      #t
+      (equal? #t (textual-ci>? "z" "A")))
+
+(test "textual-ci>?-515"
+      #t
+      (equal? #f (textual-ci>? "z" "Z")))
+
+(test "textual-ci=?-516"
+      #t
+      (equal? #f (textual-ci>? "Z" "z")))
+
+(test "textual-ci=?-517"
+      #t
+      (equal? #t (textual-ci=? "z" "Z")))
+
+(test "textual-ci<=?-518"
+      #t
+      (equal? #f (textual-ci=? "z" "a")))
+
+(test "textual-ci<=?-519"
+      #t
+      (equal? #t (textual-ci<=? "a" "Z")))
+
+(test "textual-ci<=?-520"
+      #t
+      (equal? #t (textual-ci<=? "A" "z")))
+
+(test "textual-ci<=?-521"
+      #t
+      (equal? #f (textual-ci<=? "Z" "a")))
+
+(test "textual-ci<=?-522"
+      #t
+      (equal? #f (textual-ci<=? "z" "A")))
+
+(test "textual-ci<=?-523"
+      #t
+      (equal? #t (textual-ci<=? "z" "Z")))
+
+(test "textual-ci>=?-524"
+      #t
+      (equal? #t (textual-ci<=? "Z" "z")))
+
+(test "textual-ci>=?-525"
+      #t
+      (equal? #f (textual-ci>=? "a" "Z")))
+
+(test "textual-ci>=?-526"
+      #t
+      (equal? #f (textual-ci>=? "A" "z")))
+
+(test "textual-ci>=?-527"
+      #t
+      (equal? #t (textual-ci>=? "Z" "a")))
+
+(test "textual-ci>=?-528"
+      #t
+      (equal? #t (textual-ci>=? "z" "A")))
+
+(test "textual-ci>=?-529"
+      #t
+      (equal? #t (textual-ci>=? "z" "Z")))
+
+(test "textual=?-530"
+      #t
+      (equal? #t (textual-ci>=? "Z" "z")))
+
+
+;;; The full-unicode feature doesn't imply full Unicode in strings,
+;;; so these tests might fail even in a conforming implementation.
+;;; Implementations that support full Unicode strings often have
+;;; this feature, however, even though it isn't listed in the R7RS.
+
+(cond-expand
+ (full-unicode-strings
+  (test "textual=?-531"
+        #t
+        (equal? #f (textual=? ABCDEF DEFABC)))
+
+  (test "textual=?-532"
+        #t
+        (equal? #f (textual=? DEFABC ABCDEF)))
+
+  (test "textual=?-533"
+        #t
+        (equal? #t (textual=? DEFABC DEFABC)))
+
+
+  (test "textual=?-534"
+        #t
+        (equal? #f (textual<? ABCDEF DEFABC)))
+
+  (test "textual=?-535"
+        #t
+        (equal? #t (textual<? DEFABC ABCDEF)))
+
+  (test "textual=?-536"
+        #t
+        (equal? #f (textual<? DEFABC DEFABC)))
+
+
+  (test "textual=?-537"
+        #t
+        (equal? #t (textual>? ABCDEF DEFABC)))
+
+  (test "textual=?-538"
+        #t
+        (equal? #f (textual>? DEFABC ABCDEF)))
+
+  (test "textual=?-539"
+        #t
+        (equal? #f (textual>? DEFABC DEFABC)))
+
+
+  (test "textual=?-540"
+        #t
+        (equal? #f (textual<=? ABCDEF DEFABC)))
+
+  (test "textual=?-541"
+        #t
+        (equal? #t (textual<=? DEFABC ABCDEF)))
+
+  (test "textual=?-542"
+        #t
+        (equal? #t (textual<=? DEFABC DEFABC)))
+
+
+  (test "textual=?-543"
+        #t
+        (equal? #t (textual>=? ABCDEF DEFABC)))
+
+  (test "textual=?-544"
+        #t
+        (equal? #f (textual>=? DEFABC ABCDEF)))
+
+  (test "textual=?:unicode-545"
+        #t
+        (equal? #t (textual>=? DEFABC DEFABC)))
+
+
+  (test "textual=?:unicode-546"
+        #t
+        (equal? #f (textual=? "Fuss" fuss)))
+
+  (test "textual=?:unicode-547"
+        #t
+        (equal? #f (textual=? "Fuss" "Fuss" fuss)))
+
+  (test "textual=?:unicode-548"
+        #t
+        (equal? #f (textual=? "Fuss" fuss "Fuss")))
+
+  (test "textual<?:unicode-549"
+        #t
+        (equal? #f (textual=? fuss "Fuss" "Fuss")))
+
+  (test "textual<?:unicode-550"
+        #t
+        (equal? #t (textual<? "z" (as-text eszett))))
+
+  (test "textual<=?:unicode-551"
+        #t
+        (equal? #f (textual<? (as-text eszett) "z")))
+
+  (test "textual<=?:unicode-552"
+        #t
+        (equal? #t (textual<=? "z" (as-text eszett))))
+
+  (test "textual>?:unicode-553"
+        #t
+        (equal? #f (textual<=? (as-text eszett) "z")))
+
+  (test "textual>?:unicode-554"
+        #t
+        (equal? #f (textual>? "z" (as-text eszett))))
+
+  (test "textual>=?:unicode-555"
+        #t
+        (equal? #t (textual>? (as-text eszett) "z")))
+
+  (test "textual>=?:unicode-556"
+        #t
+        (equal? #f (textual>=? "z" (as-text eszett))))
+
+  (test "textual-ci=?:unicode-557"
+        #t
+        (equal? #t (textual>=? (as-text eszett) "z")))
+
+  (test "textual-ci=?:unicode-558"
+        #t
+        (textual-ci=? fuss "Fuss"))
+
+  (test "textual-ci=?:chaos-559"
+        #t
+        (textual-ci=? fuss "FUSS"))
+
+  (test "textual-prefix-length-560"
+        #t
+        (textual-ci=? chaos0 chaos1 chaos2))
+)
+ (else))
+
+
+;;; Prefixes and suffixes
+
+(test "textual-prefix-length-561"
+      #t
+      (= 0 (textual-prefix-length ABC ABCDEF)))
+
+
+(test "textual-prefix-length-562"
+      #t
+      (= 0 (textual-prefix-length ABCDEF ABC)))
+
+
+(test "textual-prefix-length-563"
+      #t
+      (= 0 (textual-prefix-length ABCDEF DEFABC)))
+
+
+(test "textual-prefix-length-564"
+      #t
+      (= 6 (textual-prefix-length DEFABC DEFABC)))
+
+
+(test "textual-prefix-length-565"
+      #t
+      (= 6 (textual-prefix-length (textual->string DEFABC) DEFABC)))
+
+
+(test "textual-prefix-length-566"
+      #t
+      (= 6 (textual-prefix-length DEFABC (textual->string DEFABC))))
+
+
+(test "textual-prefix-length-567"
+      #t
+      (= 6 (textual-prefix-length (textual->string DEFABC)
+                                  (textual->string DEFABC))))
+
+
+(test "textual-prefix-length-568"
+      #t
+      (= 0 (textual-prefix-length (as-text "") (as-text ""))))
+
+
+(test "textual-prefix-length-569"
+      #t
+      (= 0 (textual-prefix-length (as-text "") (as-text "aabbccddee"))))
+
+
+(test "textual-prefix-length-570"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text ""))))
+
+
+(test "textual-prefix-length-571"
+      #t
+      (= 0 (textual-prefix-length (as-text "") (as-text "aabbccddee"))))
+
+
+(test "textual-prefix-length-572"
+      #t
+      (= 1 (textual-prefix-length (as-text "aisle") (as-text "aabbccddee"))))
+
+
+(test "textual-prefix-length-573"
+      #t
+      (= 0 (textual-prefix-length (as-text "bail") (as-text "aabbccddee"))))
+
+
+(test "textual-prefix-length-574"
+      #t
+      (= 4 (textual-prefix-length (as-text "prefix") (as-text "preface"))))
+
+
+(test "textual-prefix-length-575"
+      #t
+      (= 0 (textual-prefix-length (as-text "") (as-text "") 0)))
+
+
+(test "textual-prefix-length-576"
+      #t
+      (= 0 (textual-prefix-length (as-text "") (as-text "aabbccddee") 0)))
+
+
+(test "textual-prefix-length-577"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "") 0)))
+
+
+(test "textual-prefix-length-578"
+      #t
+      (= 1 (textual-prefix-length (as-text "aisle") (as-text "aabbccddee") 0)))
+
+
+(test "textual-prefix-length-579"
+      #t
+      (= 0 (textual-prefix-length (as-text "bail") (as-text "aabbccddee") 0)))
+
+
+(test "textual-prefix-length-580"
+      #t
+      (= 4 (textual-prefix-length (as-text "prefix") (as-text "preface") 0)))
+
+
+(test "textual-prefix-length-581"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "") 1)))
+
+
+(test "textual-prefix-length-582"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "aabbccddee") 1)))
+
+
+(test "textual-prefix-length-583"
+      #t
+      (= 1 (textual-prefix-length (as-text "bail") (as-text "aabbccddee") 1)))
+
+
+(test "textual-prefix-length-584"
+      #t
+      (= 0 (textual-prefix-length (as-text "prefix") (as-text "preface") 1)))
+
+
+(test "textual-prefix-length-585"
+      #t
+      (= 0 (textual-prefix-length (as-text "") (as-text "") 0 0)))
+
+
+(test "textual-prefix-length-586"
+      #t
+      (= 0 (textual-prefix-length (as-text "") (as-text "aabbccddee") 0 0)))
+
+
+(test "textual-prefix-length-587"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "") 0 4)))
+
+
+(test "textual-prefix-length-588"
+      #t
+      (= 1 (textual-prefix-length (as-text "aisle") (as-text "aabbccddee") 0 4)))
+
+
+(test "textual-prefix-length-589"
+      #t
+      (= 0 (textual-prefix-length (as-text "bail") (as-text "aabbccddee") 0 1)))
+
+
+(test "textual-prefix-length-590"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "") 1 4)))
+
+
+(test "textual-prefix-length-591"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "aabbccddee") 1 4)))
+
+
+(test "textual-prefix-length-592"
+      #t
+      (= 1 (textual-prefix-length (as-text "bail") (as-text "aabbccddee") 1 4)))
+
+
+(test "textual-prefix-length-593"
+      #t
+      (= 0 (textual-prefix-length (as-text "prefix") (as-text "preface") 1 5)))
+
+
+(test "textual-prefix-length-594"
+      #t
+      (= 0 (textual-prefix-length (as-text "") (as-text "") 0 0 0)))
+
+
+(test "textual-prefix-length-595"
+      #t
+      (= 0 (textual-prefix-length (as-text "") (as-text "aabbccddee") 0 0 0)))
+
+
+(test "textual-prefix-length-596"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "") 0 4 0)))
+
+
+(test "textual-prefix-length-597"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "aabbccddee") 0 4 2)))
+
+
+(test "textual-prefix-length-598"
+      #t
+      (= 1 (textual-prefix-length (as-text "bail") (as-text "aabbccddee") 0 1 2)))
+
+
+(test "textual-prefix-length-599"
+      #t
+      (= 0 (textual-prefix-length (as-text "prefix") (as-text "preface") 0 5 1)))
+
+
+(test "textual-prefix-length-600"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "") 1 4 0)))
+
+
+(test "textual-prefix-length-601"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "aabbccddee") 1 4 3)))
+
+
+(test "textual-prefix-length-602"
+      #t
+      (= 0 (textual-prefix-length (as-text "bail") (as-text "aabbccddee") 1 4 3)))
+
+
+(test "textual-prefix-length-603"
+      #t
+      (= 3 (textual-prefix-length (as-text "prefix") (as-text "preface") 1 5 1)))
+
+
+(test "textual-prefix-length-604"
+      #t
+      (= 0 (textual-prefix-length (as-text "") (as-text "") 0 0 0 0)))
+
+
+(test "textual-prefix-length-605"
+      #t
+      (= 0 (textual-prefix-length (as-text "") (as-text "aabbccddee") 0 0 0 0)))
+
+
+(test "textual-prefix-length-606"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "") 0 4 0 0)))
+
+
+(test "textual-prefix-length-607"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") "aabbccddee" 0 4 2 10)))
+
+
+(test "textual-prefix-length-608"
+      #t
+      (= 1 (textual-prefix-length (as-text "bail") (as-text "aabbccddee") 0 1 2 10)))
+
+
+(test "textual-prefix-length-609"
+      #t
+      (= 0 (textual-prefix-length (as-text "prefix") (as-text "preface") 0 5 1 6)))
+
+
+(test "textual-prefix-length-610"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "") 1 4 0 0)))
+
+
+(test "textual-prefix-length-611"
+      #t
+      (= 0 (textual-prefix-length (as-text "aisle") (as-text "aabbccddee") 1 4 3 3)))
+
+
+(test "textual-prefix-length-612"
+      #t
+      (= 0 (textual-prefix-length (as-text "bail") (as-text "aabbccddee") 1 4 3 6)))
+
+
+(test "textual-suffix-length-613"
+      #t
+      (= 3 (textual-prefix-length (as-text "prefix") (as-text "preface") 1 5 1 7)))
+
+
+
+(test "textual-suffix-length-614"
+      #t
+      (= 0 (textual-suffix-length ABC ABCDEF)))
+
+
+(test "textual-suffix-length-615"
+      #t
+      (= 0 (textual-suffix-length ABCDEF ABC)))
+
+
+(test "textual-suffix-length-616"
+      #t
+      (= 0 (textual-suffix-length ABCDEF DEFABC)))
+
+
+(test "textual-suffix-length-617"
+      #t
+      (= 6 (textual-suffix-length DEFABC DEFABC)))
+
+
+(test "textual-suffix-length-618"
+      #t
+      (= 6 (textual-suffix-length (textual->string DEFABC) DEFABC)))
+
+
+(test "textual-suffix-length-619"
+      #t
+      (= 6 (textual-suffix-length DEFABC (textual->string DEFABC))))
+
+
+(test "textual-suffix-length-620"
+      #t
+      (= 6 (textual-suffix-length (textual->string DEFABC) (textual->string DEFABC))))
+
+
+(test "textual-suffix-length-621"
+      #t
+      (= 0 (textual-suffix-length (as-text "") (as-text ""))))
+
+
+(test "textual-suffix-length-622"
+      #t
+      (= 0 (textual-suffix-length (as-text "") (as-text "aabbccddee"))))
+
+
+(test "textual-suffix-length-623"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text ""))))
+
+
+(test "textual-suffix-length-624"
+      #t
+      (= 0 (textual-suffix-length (as-text "") (as-text "aabbccddee"))))
+
+
+(test "textual-suffix-length-625"
+      #t
+      (= 1 (textual-suffix-length (as-text "aisle") (as-text "aabbccddee"))))
+
+
+(test "textual-suffix-length-626"
+      #t
+      (= 0 (textual-suffix-length (as-text "bail") (as-text "aabbccddee"))))
+
+
+(test "textual-suffix-length-627"
+      #t
+      (= 3 (textual-suffix-length (as-text "place") (as-text "preface"))))
+
+
+(test "textual-suffix-length-628"
+      #t
+      (= 0 (textual-suffix-length (as-text "") (as-text "") 0)))
+
+
+(test "textual-suffix-length-629"
+      #t
+      (= 0 (textual-suffix-length (as-text "") (as-text "aabbccddee") 0)))
+
+
+(test "textual-suffix-length-630"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "") 0)))
+
+
+(test "textual-suffix-length-631"
+      #t
+      (= 1 (textual-suffix-length (as-text "aisle") (as-text "aabbccddee") 0)))
+
+
+(test "textual-suffix-length-632"
+      #t
+      (= 0 (textual-suffix-length (as-text "bail") (as-text "aabbccddee") 0)))
+
+
+(test "textual-suffix-length-633"
+      #t
+      (= 3 (textual-suffix-length (as-text "place") (as-text "preface") 0)))
+
+
+(test "textual-suffix-length-634"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "") 1)))
+
+
+(test "textual-suffix-length-635"
+      #t
+      (= 1 (textual-suffix-length (as-text "aisle") (as-text "aabbccddee") 1)))
+
+
+(test "textual-suffix-length-636"
+      #t
+      (= 0 (textual-suffix-length (as-text "bail") (as-text "aabbccddee") 1)))
+
+
+(test "textual-suffix-length-637"
+      #t
+      (= 3 (textual-suffix-length (as-text "place") (as-text "preface") 1)))
+
+
+(test "textual-suffix-length-638"
+      #t
+      (= 0 (textual-suffix-length (as-text "") (as-text "") 0 0)))
+
+
+(test "textual-suffix-length-639"
+      #t
+      (= 0 (textual-suffix-length (as-text "") (as-text "aabbccddee") 0 0)))
+
+
+(test "textual-suffix-length-640"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "") 0 4)))
+
+
+(test "textual-suffix-length-641"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "aabbccddee") 0 4)))
+
+
+(test "textual-suffix-length-642"
+      #t
+      (= 0 (textual-suffix-length (as-text "bail") (as-text "aabbccddee") 0 1)))
+
+
+(test "textual-suffix-length-643"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "") 1 4)))
+
+
+(test "textual-suffix-length-644"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "aabbccddee") 1 4)))
+
+
+(test "textual-suffix-length-645"
+      #t
+      (= 1 (textual-suffix-length (as-text "aisle") (as-text "aabbccddee") 1 5)))
+
+
+(test "textual-suffix-length-646"
+      #t
+      (= 0 (textual-suffix-length (as-text "bail") (as-text "aabbccddee") 1 4)))
+
+
+(test "textual-suffix-length-647"
+      #t
+      (= 3 (textual-suffix-length (as-text "place") (as-text "preface") 1 5)))
+
+
+(test "textual-suffix-length-648"
+      #t
+      (= 0 (textual-suffix-length (as-text "") (as-text "") 0 0 0)))
+
+
+(test "textual-suffix-length-649"
+      #t
+      (= 0 (textual-suffix-length (as-text "") (as-text "aabbccddee") 0 0 0)))
+
+
+(test "textual-suffix-length-650"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "") 0 4 0)))
+
+
+(test "textual-suffix-length-651"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "aabbccddee") 0 4 2)))
+
+
+(test "textual-suffix-length-652"
+      #t
+      (= 0 (textual-suffix-length (as-text "bail") (as-text "aabbccddee") 0 1 2)))
+
+
+(test "textual-suffix-length-653"
+      #t
+      (= 3 (textual-suffix-length (as-text "place") (as-text "preface") 0 5 1)))
+
+
+(test "textual-suffix-length-654"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "") 1 4 0)))
+
+
+(test "textual-suffix-length-655"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "aabbccddee") 1 4 3)))
+
+
+(test "textual-suffix-length-656"
+      #t
+      (= 0 (textual-suffix-length (as-text "bail") (as-text "aabbccddee") 1 4 3)))
+
+
+(test "textual-suffix-length-657"
+      #t
+      (= 3 (textual-suffix-length (as-text "place") (as-text "preface") 1 5 1)))
+
+
+(test "textual-suffix-length-658"
+      #t
+      (= 0 (textual-suffix-length (as-text "") (as-text "") 0 0 0 0)))
+
+
+(test "textual-suffix-length-659"
+      #t
+      (= 0 (textual-suffix-length (as-text "") (as-text "aabbccddee") 0 0 0 0)))
+
+
+(test "textual-suffix-length-660"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "") 0 4 0 0)))
+
+
+(test "textual-suffix-length-661"
+      #t
+      (= 1 (textual-suffix-length "aisle" (as-text "aabbccddee") 0 5 2 10)))
+
+
+(test "textual-suffix-length-662"
+      #t
+      (= 1 (textual-suffix-length (as-text "bail") (as-text "aabbccddee") 0 1 2 4)))
+
+
+(test "textual-suffix-length-663"
+      #t
+      (= 0 (textual-suffix-length (as-text "place") (as-text "preface") 0 5 1 6)))
+
+
+(test "textual-suffix-length-664"
+      #t
+      (= 2 (textual-suffix-length (as-text "place") (as-text "preface") 0 4 1 6)))
+
+
+(test "textual-suffix-length-665"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "") 1 4 0 0)))
+
+
+(test "textual-suffix-length-666"
+      #t
+      (= 0 (textual-suffix-length (as-text "aisle") (as-text "aabbccddee") 1 4 3 3)))
+
+
+(test "textual-suffix-length-667"
+      #t
+      (= 0 (textual-suffix-length (as-text "bail") (as-text "aabbccddee") 1 4 3 6)))
+
+
+(test "textual-prefix?-668"
+      #t
+      (= 3 (textual-suffix-length (as-text "place") (as-text "preface") 1 5 1 7)))
+
+
+
+(test "textual-prefix?-669"
+      #t
+      (eq? #f (textual-prefix? ABC ABCDEF)))
+
+
+(test "textual-prefix?-670"
+      #t
+      (eq? #f (textual-prefix? ABCDEF ABC)))
+
+
+(test "textual-prefix?-671"
+      #t
+      (eq? #f (textual-prefix? ABCDEF DEFABC)))
+
+
+(test "textual-prefix?-672"
+      #t
+      (eq? #t (textual-prefix? DEFABC DEFABC)))
+
+
+(test "textual-prefix?-673"
+      #t
+      (eq? #t (textual-prefix? (textual->string DEFABC) DEFABC)))
+
+
+(test "textual-prefix?-674"
+      #t
+      (eq? #t (textual-prefix? DEFABC (textual->string DEFABC))))
+
+
+(test "textual-prefix?-675"
+      #t
+      (eq? #t (textual-prefix? (textual->string DEFABC) (textual->string DEFABC))))
+
+
+(test "textual-prefix?-676"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text ""))))
+
+
+(test "textual-prefix?-677"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text "abc"))))
+
+
+(test "textual-prefix?-678"
+      #t
+      (eq? #t (textual-prefix? (as-text "a") (as-text "abc"))))
+
+
+(test "textual-prefix?-679"
+      #t
+      (eq? #f (textual-prefix? (as-text "c") (as-text "abc"))))
+
+
+(test "textual-prefix?-680"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc"))))
+
+
+(test "textual-prefix?-681"
+      #t
+      (eq? #f (textual-prefix? (as-text "ac") (as-text "abc"))))
+
+
+(test "textual-suffix?-682"
+      #t
+      (eq? #t (textual-prefix? (as-text "abc") (as-text "abc"))))
+
+
+(test "textual-suffix?-683"
+      #t
+      (eq? #f (textual-suffix? ABC ABCDEF)))
+
+
+(test "textual-suffix?-684"
+      #t
+      (eq? #f (textual-suffix? ABCDEF ABC)))
+
+
+(test "textual-suffix?-685"
+      #t
+      (eq? #f (textual-suffix? ABCDEF DEFABC)))
+
+
+(test "textual-suffix?-686"
+      #t
+      (eq? #t (textual-suffix? DEFABC DEFABC)))
+
+
+(test "textual-suffix?-687"
+      #t
+      (eq? #t (textual-suffix? (textual->string DEFABC) DEFABC)))
+
+
+(test "textual-suffix?-688"
+      #t
+      (eq? #t (textual-suffix? DEFABC (textual->string DEFABC))))
+
+
+(test "textual-suffix?-689"
+      #t
+      (eq? #t (textual-suffix? (as-text "") (as-text ""))))
+
+
+(test "textual-suffix?-690"
+      #t
+      (eq? #t (textual-suffix? (as-text "") (as-text "abc"))))
+
+
+(test "textual-suffix?-691"
+      #t
+      (eq? #f (textual-suffix? (as-text "a") (as-text "abc"))))
+
+
+(test "textual-suffix?-692"
+      #t
+      (eq? #t (textual-suffix? (as-text "c") (as-text "abc"))))
+
+
+(test "textual-suffix?-693"
+      #t
+      (eq? #f (textual-suffix? (as-text "ac") (as-text "abc"))))
+
+
+(test "textual-suffix?-694"
+      #t
+      (eq? #t (textual-suffix? (as-text "bc") (as-text "abc"))))
+
+
+(test "textual-prefix?-695"
+      #t
+      (eq? #t (textual-suffix? (as-text "abc") (as-text "abc"))))
+
+
+(test "textual-prefix?-696"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text "") 0)))
+
+
+(test "textual-prefix?-697"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text "abc") 0)))
+
+
+(test "textual-prefix?-698"
+      #t
+      (eq? #t (textual-prefix? (as-text "a") (as-text "abc") 0)))
+
+
+(test "textual-prefix?-699"
+      #t
+      (eq? #f (textual-prefix? (as-text "c") (as-text "abc") 0)))
+
+
+(test "textual-prefix?-700"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc") 0)))
+
+
+(test "textual-prefix?-701"
+      #t
+      (eq? #f (textual-prefix? (as-text "ac") (as-text "abc") 0)))
+
+
+(test "textual-suffix?-702"
+      #t
+      (eq? #t (textual-prefix? (as-text "abc") (as-text "abc") 0)))
+
+
+(test "textual-suffix?-703"
+      #t
+      (eq? #t (textual-suffix? (as-text "") (as-text "") 0)))
+
+
+(test "textual-suffix?-704"
+      #t
+      (eq? #t (textual-suffix? (as-text "") (as-text "abc") 0)))
+
+
+(test "textual-suffix?-705"
+      #t
+      (eq? #f (textual-suffix? (as-text "a") (as-text "abc") 0)))
+
+
+(test "textual-suffix?-706"
+      #t
+      (eq? #t (textual-suffix? (as-text "c") (as-text "abc") 0)))
+
+
+(test "textual-suffix?-707"
+      #t
+      (eq? #f (textual-suffix? (as-text "ac") (as-text "abc") 0)))
+
+
+(test "textual-suffix?-708"
+      #t
+      (eq? #t (textual-suffix? (as-text "bc") (as-text "abc") 0)))
+
+
+(test "textual-prefix?-709"
+      #t
+      (eq? #t (textual-suffix? (as-text "abc") (as-text "abc") 0)))
+
+
+(test "textual-prefix?-710"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc") 2)))
+
+
+(test "textual-prefix?-711"
+      #t
+      (eq? #t (textual-prefix? (as-text "ac") (as-text "abc") 2)))
+
+
+(test "textual-suffix?-712"
+      #t
+      (eq? #f (textual-prefix? (as-text "abc") (as-text "abc") 2)))
+
+
+(test "textual-suffix?-713"
+      #t
+      (eq? #t (textual-suffix? (as-text "ac") (as-text "abc") 2)))
+
+
+(test "textual-suffix?-714"
+      #t
+      (eq? #t (textual-suffix? (as-text "bc") (as-text "abc") 2)))
+
+
+(test "textual-prefix?-715"
+      #t
+      (eq? #t (textual-suffix? (as-text "abc") (as-text "abc") 2)))
+
+
+
+(test "textual-prefix?-716"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text "") 0 0)))
+
+
+(test "textual-prefix?-717"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text "abc") 0 0)))
+
+
+(test "textual-prefix?-718"
+      #t
+      (eq? #t (textual-prefix? (as-text "a") (as-text "abc") 0 0)))
+
+
+(test "textual-prefix?-719"
+      #t
+      (eq? #f (textual-prefix? (as-text "c") (as-text "abc") 0 1)))
+
+
+(test "textual-prefix?-720"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc") 0 1)))
+
+
+(test "textual-prefix?-721"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc") 0 2)))
+
+
+(test "textual-prefix?-722"
+      #t
+      (eq? #f (textual-prefix? (as-text "ac") (as-text "abc") 0 2)))
+
+
+(test "textual-suffix?-723"
+      #t
+      (eq? #t (textual-prefix? (as-text "abc") (as-text "abc") 0 3)))
+
+
+(test "textual-suffix?-724"
+      #t
+      (eq? #t (textual-suffix? (as-text "") (as-text "") 0 0)))
+
+
+(test "textual-suffix?-725"
+      #t
+      (eq? #t (textual-suffix? (as-text "") (as-text "abc") 0 0)))
+
+
+(test "textual-suffix?-726"
+      #t
+      (eq? #f (textual-suffix? (as-text "a") (as-text "abc") 0 1)))
+
+
+(test "textual-suffix?-727"
+      #t
+      (eq? #t (textual-suffix? (as-text "c") (as-text "abc") 0 1)))
+
+
+(test "textual-suffix?-728"
+      #t
+      (eq? #t (textual-suffix? (as-text "ac") (as-text "abc") 1 2)))
+
+
+(test "textual-suffix?-729"
+      #t
+      (eq? #f (textual-suffix? (as-text "ac") (as-text "abc") 0 2)))
+
+
+(test "textual-suffix?-730"
+      #t
+      (eq? #t (textual-suffix? (as-text "bc") (as-text "abc") 0 2)))
+
+
+(test "textual-prefix?-731"
+      #t
+      (eq? #t (textual-suffix? (as-text "abc") (as-text "abc") 0 3)))
+
+
+(test "textual-prefix?-732"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc") 2 2)))
+
+
+(test "textual-prefix?-733"
+      #t
+      (eq? #t (textual-prefix? (as-text "ac") (as-text "abc") 2 2)))
+
+
+(test "textual-suffix?-734"
+      #t
+      (eq? #f (textual-prefix? (as-text "abc") (as-text "abc") 2 3)))
+
+
+(test "textual-suffix?-735"
+      #t
+      (eq? #t (textual-suffix? (as-text "ac") (as-text "abc") 2 2)))
+
+
+(test "textual-suffix?-736"
+      #t
+      (eq? #t (textual-suffix? (as-text "bc") (as-text "abc") 2 2)))
+
+
+(test "textual-prefix?-737"
+      #t
+      (eq? #t (textual-suffix? (as-text "abc") (as-text "abc") 2 3)))
+
+
+
+(test "textual-prefix?-738"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text "") 0 0 0)))
+
+
+(test "textual-prefix?-739"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text "abc") 0 0 0)))
+
+
+(test "textual-prefix?-740"
+      #t
+      (eq? #t (textual-prefix? (as-text "a") (as-text "abc") 0 0 0)))
+
+
+(test "textual-prefix?-741"
+      #t
+      (eq? #f (textual-prefix? (as-text "c") (as-text "abc") 0 1 0)))
+
+
+(test "textual-prefix?-742"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc") 0 1 0)))
+
+
+(test "textual-prefix?-743"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc") 0 2 0)))
+
+
+(test "textual-prefix?-744"
+      #t
+      (eq? #f (textual-prefix? (as-text "ac") (as-text "abc") 0 2 0)))
+
+
+(test "textual-suffix?-745"
+      #t
+      (eq? #t (textual-prefix? (as-text "abc") (as-text "abc") 0 3 0)))
+
+
+(test "textual-suffix?-746"
+      #t
+      (eq? #t (textual-suffix? (as-text "") (as-text "") 0 0 0)))
+
+
+(test "textual-suffix?-747"
+      #t
+      (eq? #t (textual-suffix? (as-text "") (as-text "abc") 0 0 0)))
+
+
+(test "textual-suffix?-748"
+      #t
+      (eq? #f (textual-suffix? (as-text "a") (as-text "abc") 0 1 0)))
+
+
+(test "textual-suffix?-749"
+      #t
+      (eq? #t (textual-suffix? (as-text "c") (as-text "abc") 0 1 0)))
+
+
+(test "textual-suffix?-750"
+      #t
+      (eq? #t (textual-suffix? (as-text "ac") (as-text "abc") 1 2 0)))
+
+
+(test "textual-suffix?-751"
+      #t
+      (eq? #f (textual-suffix? (as-text "ac") (as-text "abc") 0 2 0)))
+
+
+(test "textual-suffix?-752"
+      #t
+      (eq? #t (textual-suffix? (as-text "bc") (as-text "abc") 0 2 0)))
+
+
+(test "textual-prefix?-753"
+      #t
+      (eq? #t (textual-suffix? (as-text "abc") (as-text "abc") 0 3 0)))
+
+
+(test "textual-prefix?-754"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc") 2 2 0)))
+
+
+(test "textual-prefix?-755"
+      #t
+      (eq? #t (textual-prefix? (as-text "ac") (as-text "abc") 2 2 0)))
+
+
+(test "textual-suffix?-756"
+      #t
+      (eq? #f (textual-prefix? (as-text "abc") (as-text "abc") 2 3 0)))
+
+
+(test "textual-suffix?-757"
+      #t
+      (eq? #t (textual-suffix? (as-text "ac") (as-text "abc") 2 2 0)))
+
+
+(test "textual-suffix?-758"
+      #t
+      (eq? #t (textual-suffix? (as-text "bc") (as-text "abc") 2 2 0)))
+
+
+(test "textual-prefix?-759"
+      #t
+      (eq? #t (textual-suffix? (as-text "abc") (as-text "abc") 2 3 0)))
+
+
+(test "textual-prefix?-760"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text "abc") 0 0 1)))
+
+
+(test "textual-prefix?-761"
+      #t
+      (eq? #t (textual-prefix? (as-text "a") (as-text "abc") 0 0 1)))
+
+
+(test "textual-prefix?-762"
+      #t
+      (eq? #t (textual-prefix? (as-text "c") (as-text "abc") 0 1 2)))
+
+
+(test "textual-prefix?-763"
+      #t
+      (eq? #f (textual-prefix? (as-text "ab") (as-text "abc") 0 1 2)))
+
+
+(test "textual-prefix?-764"
+      #t
+      (eq? #f (textual-prefix? (as-text "ab") (as-text "abc") 0 2 1)))
+
+
+(test "textual-prefix?-765"
+      #t
+      (eq? #f (textual-prefix? (as-text "ac") (as-text "abc") 0 2 1)))
+
+
+(test "textual-suffix?-766"
+      #t
+      (eq? #f (textual-prefix? (as-text "abc") (as-text "abc") 0 3 1)))
+
+
+(test "textual-suffix?-767"
+      #t
+      (eq? #f (textual-suffix? (as-text "a") (as-text "abc") 0 1 2)))
+
+
+(test "textual-suffix?-768"
+      #t
+      (eq? #t (textual-suffix? (as-text "c") (as-text "abc") 0 1 1)))
+
+
+(test "textual-suffix?-769"
+      #t
+      (eq? #t (textual-suffix? (as-text "ac") (as-text "abc") 1 2 2)))
+
+
+(test "textual-suffix?-770"
+      #t
+      (eq? #t (textual-suffix? (as-text "bc") (as-text "abc") 0 2 1)))
+
+
+(test "textual-prefix?-771"
+      #t
+      (eq? #f (textual-suffix? (as-text "bc") (as-text "abc") 0 2 2)))
+
+
+
+(test "textual-prefix?-772"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text "") 0 0 0 0)))
+
+
+(test "textual-prefix?-773"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text "abc") 0 0 0 3)))
+
+
+(test "textual-prefix?-774"
+      #t
+      (eq? #t (textual-prefix? (as-text "a") (as-text "abc") 0 0 0 3)))
+
+
+(test "textual-prefix?-775"
+      #t
+      (eq? #f (textual-prefix? (as-text "c") (as-text "abc") 0 1 0 3)))
+
+
+(test "textual-prefix?-776"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc") 0 1 0 3)))
+
+
+(test "textual-prefix?-777"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc") 0 2 0 3)))
+
+
+(test "textual-prefix?-778"
+      #t
+      (eq? #f (textual-prefix? (as-text "ac") (as-text "abc") 0 2 0 3)))
+
+
+(test "textual-suffix?-779"
+      #t
+      (eq? #t (textual-prefix? (as-text "abc") (as-text "abc") 0 3 0 3)))
+
+
+(test "textual-suffix?-780"
+      #t
+      (eq? #t (textual-suffix? (as-text "") (as-text "abc") 0 0 0 3)))
+
+
+(test "textual-suffix?-781"
+      #t
+      (eq? #f (textual-suffix? (as-text "a") (as-text "abc") 0 1 0 3)))
+
+
+(test "textual-suffix?-782"
+      #t
+      (eq? #t (textual-suffix? (as-text "c") (as-text "abc") 0 1 0 3)))
+
+
+(test "textual-suffix?-783"
+      #t
+      (eq? #t (textual-suffix? (as-text "ac") (as-text "abc") 1 2 0 3)))
+
+
+(test "textual-suffix?-784"
+      #t
+      (eq? #f (textual-suffix? (as-text "ac") (as-text "abc") 0 2 0 3)))
+
+
+(test "textual-suffix?-785"
+      #t
+      (eq? #t (textual-suffix? (as-text "bc") (as-text "abc") 0 2 0 3)))
+
+
+(test "textual-prefix?-786"
+      #t
+      (eq? #t (textual-suffix? (as-text "abc") (as-text "abc") 0 3 0 3)))
+
+
+(test "textual-prefix?-787"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc") 2 2 0 3)))
+
+
+(test "textual-prefix?-788"
+      #t
+      (eq? #t (textual-prefix? (as-text "ac") (as-text "abc") 2 2 0 3)))
+
+
+(test "textual-suffix?-789"
+      #t
+      (eq? #f (textual-prefix? (as-text "abc") (as-text "abc") 2 3 0 3)))
+
+
+(test "textual-suffix?-790"
+      #t
+      (eq? #t (textual-suffix? (as-text "ac") (as-text "abc") 2 2 0 3)))
+
+
+(test "textual-suffix?-791"
+      #t
+      (eq? #t (textual-suffix? (as-text "bc") (as-text "abc") 2 2 0 3)))
+
+
+(test "textual-prefix?-792"
+      #t
+      (eq? #t (textual-suffix? (as-text "abc") (as-text "abc") 2 3 0 3)))
+
+
+(test "textual-prefix?-793"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text "abc") 0 0 1 3)))
+
+
+(test "textual-prefix?-794"
+      #t
+      (eq? #t (textual-prefix? (as-text "a") (as-text "abc") 0 0 1 3)))
+
+
+(test "textual-prefix?-795"
+      #t
+      (eq? #t (textual-prefix? (as-text "c") (as-text "abc") 0 1 2 3)))
+
+
+(test "textual-prefix?-796"
+      #t
+      (eq? #f (textual-prefix? (as-text "ab") (as-text "abc") 0 1 2 3)))
+
+
+(test "textual-prefix?-797"
+      #t
+      (eq? #f (textual-prefix? (as-text "ab") (as-text "abc") 0 2 1 3)))
+
+
+(test "textual-prefix?-798"
+      #t
+      (eq? #f (textual-prefix? (as-text "ac") (as-text "abc") 0 2 1 3)))
+
+
+(test "textual-suffix?-799"
+      #t
+      (eq? #f (textual-prefix? (as-text "abc") (as-text "abc") 0 3 1 3)))
+
+
+(test "textual-suffix?-800"
+      #t
+      (eq? #f (textual-suffix? (as-text "a") (as-text "abc") 0 1 2 3)))
+
+
+(test "textual-suffix?-801"
+      #t
+      (eq? #t (textual-suffix? (as-text "c") (as-text "abc") 0 1 1 3)))
+
+
+(test "textual-suffix?-802"
+      #t
+      (eq? #t (textual-suffix? (as-text "ac") (as-text "abc") 1 2 2 3)))
+
+
+(test "textual-suffix?-803"
+      #t
+      (eq? #t (textual-suffix? (as-text "bc") (as-text "abc") 0 2 1 3)))
+
+
+(test "textual-prefix?-804"
+      #t
+      (eq? #f (textual-suffix? (as-text "bc") (as-text "abc") 0 2 2 3)))
+
+
+
+(test "textual-prefix?-805"
+      #t
+      (eq? #t (textual-prefix? (as-text "") (as-text "abc") 0 0 0 2)))
+
+
+(test "textual-prefix?-806"
+      #t
+      (eq? #t (textual-prefix? (as-text "a") (as-text "abc") 0 0 0 2)))
+
+
+(test "textual-prefix?-807"
+      #t
+      (eq? #f (textual-prefix? (as-text "c") (as-text "abc") 0 1 0 2)))
+
+
+(test "textual-prefix?-808"
+      #t
+      (eq? #t (textual-prefix? (as-text "ab") (as-text "abc") 0 1 0 2)))
+
+
+(test "textual-suffix?-809"
+      #t
+      (eq? #f (textual-prefix? (as-text "abc") (as-text "abc") 0 3 0 2)))
+
+
+(test "textual-suffix?-810"
+      #t
+      (eq? #t (textual-suffix? (as-text "") (as-text "abc") 0 0 0 2)))
+
+
+(test "textual-suffix?-811"
+      #t
+      (eq? #f (textual-suffix? (as-text "c") (as-text "abc") 0 1 0 2)))
+
+
+(test "textual-index-812"
+      #t
+      (eq? #f (textual-suffix? (as-text "ac") (as-text "abc") 1 2 0 2)))
+
+
+
+;;; Searching
+
+(test "textual-index-813"
+      #t
+      (eqv? #f (textual-index (as-text "") char?)))
+
+
+(test "textual-index-814"
+      #t
+      (eqv? 0 (textual-index (as-text "abcdef") char?)))
+
+
+(test "textual-index-815"
+      #t
+      (eqv? 4 (textual-index (as-text "abcdef") (lambda (c) (char>? c #\d)))))
+
+
+(test "textual-index-right-816"
+      #t
+      (eqv? #f (textual-index (as-text "abcdef") char-whitespace?)))
+
+
+(test "textual-index-right-817"
+      #t
+      (eqv? #f (textual-index-right (as-text "") char?)))
+
+
+(test "textual-index-right-818"
+      #t
+      (eqv? 5 (textual-index-right (as-text "abcdef") char?)))
+
+
+(test "textual-index-right-819"
+      #t
+      (eqv? 5 (textual-index-right (as-text "abcdef")
+                                   (lambda (c) (char>? c #\d)))))
+
+
+
+(test "textual-skip-820"
+      #t
+      (eqv? #f (textual-index-right (as-text "abcdef") char-whitespace?)))
+
+
+(test "textual-skip-821"
+      #t
+      (eqv? #f (textual-skip (as-text "") string?)))
+
+
+(test "textual-skip-822"
+      #t
+      (eqv? 0 (textual-skip (as-text "abcdef") string?)))
+
+
+(test "textual-skip-823"
+      #t
+      (eqv? 4 (textual-skip (as-text "abcdef") (lambda (c) (char<=? c #\d)))))
+
+
+(test "textual-skip-right-824"
+      #t
+      (eqv? #f (textual-skip (as-text "abcdef") char?)))
+
+
+(test "textual-skip-right-825"
+      #t
+      (eqv? #f (textual-skip-right (as-text "") string?)))
+
+
+(test "textual-skip-right-826"
+      #t
+      (eqv? 5 (textual-skip-right (as-text "abcdef") string?)))
+
+
+(test "textual-skip-right-827"
+      #t
+      (eqv? 5 (textual-skip-right (as-text "abcdef")
+                                  (lambda (c) (char<=? c #\d)))))
+
+
+(test "textual-index-828"
+      #t
+      (eqv? #f (textual-skip-right (as-text "abcdef") char?)))
+
+
+
+(test "textual-index-829"
+      #t
+      (eqv? 2 (textual-index "abcdef" char? 2)))
+
+
+(test "textual-index-830"
+      #t
+      (eqv? 4 (textual-index "abcdef" (lambda (c) (char>? c #\d)) 2)))
+
+
+(test "textual-index-right-831"
+      #t
+      (eqv? #f (textual-index "abcdef" char-whitespace? 2)))
+
+
+(test "textual-index-right-832"
+      #t
+      (eqv? 5 (textual-index-right "abcdef" char? 2)))
+
+
+(test "textual-index-right-833"
+      #t
+      (eqv? 5 (textual-index-right "abcdef"
+                                   (lambda (c)
+                                     (char>? c #\d)) 2)))
+
+
+(test "textual-skip-834"
+      #t
+      (eqv? #f (textual-index-right "abcdef" char-whitespace? 2)))
+
+
+(test "textual-skip-835"
+      #t
+      (eqv? 2 (textual-skip "abcdef" string? 2)))
+
+
+(test "textual-skip-836"
+      #t
+      (eqv? 4 (textual-skip "abcdef"
+                            (lambda (c)
+                              (char<=? c #\d)) 2)))
+
+
+(test "textual-skip-right-837"
+      #t
+      (eqv? #f (textual-skip "abcdef" char? 2)))
+
+
+(test "textual-skip-right-838"
+      #t
+      (eqv? 5 (textual-skip-right "abcdef" string? 2)))
+
+
+(test "textual-skip-right-839"
+      #t
+      (eqv? 5 (textual-skip-right "abcdef"
+                                  (lambda (c)
+                                    (char<=? c #\d)) 2)))
+
+
+(test "textual-index-840"
+      #t
+      (eqv? #f (textual-skip-right "abcdef" char? 2)))
+
+
+
+(test "textual-index-841"
+      #t
+      (eqv? 2 (textual-index (as-text "abcdef") char? 2 5)))
+
+
+(test "textual-index-842"
+      #t
+      (eqv? 4 (textual-index (as-text "abcdef")
+                             (lambda (c) (char>? c #\d)) 2 5)))
+
+
+(test "textual-index-right-843"
+      #t
+      (eqv? #f (textual-index (as-text "abcdef") char-whitespace? 2 5)))
+
+
+(test "textual-index-right-844"
+      #t
+      (eqv? 4 (textual-index-right (as-text "abcdef") char? 2 5)))
+
+
+(test "textual-index-right-845"
+      #t
+      (eqv? 4 (textual-index-right (as-text "abcdef")
+                                   (lambda (c)
+                                     (char>? c #\d)) 2 5)))
+
+
+(test "textual-skip-846"
+      #t
+      (eqv? #f (textual-index-right (as-text "abcdef")
+                                    char-whitespace? 2 5)))
+
+
+
+(test "textual-skip-847"
+      #t
+      (eqv? 2 (textual-skip (as-text "abcdef") string? 2 5)))
+
+
+(test "textual-skip-848"
+      #t
+      (eqv? 4 (textual-skip (as-text "abcdef")
+                            (lambda (c) (char<=? c #\d)) 2 5)))
+
+
+(test "textual-skip-right-849"
+      #t
+      (eqv? #f (textual-skip (as-text "abcdef") char? 2 5)))
+
+
+(test "textual-skip-right-850"
+      #t
+      (eqv? 4 (textual-skip-right (as-text "abcdef") string? 2 5)))
+
+
+(test "textual-skip-right-851"
+      #t
+      (eqv? 4 (textual-skip-right (as-text "abcdef")
+                                  (lambda (c)
+                                    (char<=? c #\d)) 2 5)))
+
+
+(test "textual-contains-852"
+      #t
+      (eqv? #f (textual-skip-right (as-text "abcdef") char? 2 5)))
+
+
+
+(test "textual-contains-853"
+      #t
+      (eqv? 0 (textual-contains (as-text "") (as-text ""))))
+
+
+(test "textual-contains-854"
+      #t
+      (eqv? 0 (textual-contains (as-text "abcdeffffoo") (as-text ""))))
+
+
+(test "textual-contains-855"
+      #t
+      (eqv? 0 (textual-contains (as-text "abcdeffffoo") (as-text "a"))))
+
+
+(test "textual-contains-856"
+      #t
+      (eqv? 5 (textual-contains (as-text "abcdeffffoo") (as-text "ff"))))
+
+
+(test "textual-contains-857"
+      #t
+      (eqv? 4 (textual-contains (as-text "abcdeffffoo") (as-text "eff"))))
+
+
+(test "textual-contains-858"
+      #t
+      (eqv? 8 (textual-contains (as-text "abcdeffffoo") (as-text "foo"))))
+
+
+(test "textual-contains-right-859"
+      #t
+      (eqv? #f (textual-contains (as-text "abcdeffffoo") (as-text "efffoo"))))
+
+
+(test "textual-contains-right-860"
+      #t
+      (eqv? 0 (textual-contains-right (as-text "") (as-text ""))))
+
+
+(test "textual-contains-right-861"
+      #t
+      (eqv? 11 (textual-contains-right (as-text "abcdeffffoo") (as-text ""))))
+
+
+(test "textual-contains-right-862"
+      #t
+      (eqv? 0 (textual-contains-right (as-text "abcdeffffoo") (as-text "a"))))
+
+
+(test "textual-contains-right-863"
+      #t
+      (eqv? 7 (textual-contains-right (as-text "abcdeffffoo") (as-text "ff"))))
+
+
+(test "textual-contains-right-864"
+      #t
+      (eqv? 4 (textual-contains-right (as-text "abcdeffffoo") (as-text "eff"))))
+
+
+(test "textual-contains-right-865"
+      #t
+      (eqv? 8 (textual-contains-right (as-text "abcdeffffoo") (as-text "foo"))))
+
+
+(test "textual-contains-866"
+      #t
+      (eqv? #f (textual-contains-right (as-text "abcdeffffoo")
+                                       (as-text "efffoo"))))
+
+
+
+(test "textual-contains-867"
+      #t
+      (eqv? 0 (textual-contains "" "" 0)))
+
+
+(test "textual-contains-868"
+      #t
+      (eqv? 2 (textual-contains "abcdeffffoo" "" 2)))
+
+
+(test "textual-contains-869"
+      #t
+      (eqv? #f (textual-contains "abcdeffffoo" "a" 2)))
+
+
+(test "textual-contains-870"
+      #t
+      (eqv? 5 (textual-contains "abcdeffffoo" "ff" 2)))
+
+
+(test "textual-contains-871"
+      #t
+      (eqv? 4 (textual-contains "abcdeffffoo" "eff" 2)))
+
+
+(test "textual-contains-872"
+      #t
+      (eqv? 8 (textual-contains "abcdeffffoo" "foo" 2)))
+
+
+(test "textual-contains-right-873"
+      #t
+      (eqv? #f (textual-contains "abcdeffffoo" "efffoo" 2)))
+
+
+(test "textual-contains-right-874"
+      #t
+      (eqv? 0 (textual-contains-right "" "" 0)))
+
+
+(test "textual-contains-right-875"
+      #t
+      (eqv? 11 (textual-contains-right "abcdeffffoo" "" 2)))
+
+
+(test "textual-contains-right-876"
+      #t
+      (eqv? #f (textual-contains-right "abcdeffffoo" "a" 2)))
+
+
+(test "textual-contains-right-877"
+      #t
+      (eqv? 7 (textual-contains-right "abcdeffffoo" "ff" 2)))
+
+
+(test "textual-contains-right-878"
+      #t
+      (eqv? 4 (textual-contains-right "abcdeffffoo" "eff" 2)))
+
+
+(test "textual-contains-right-879"
+      #t
+      (eqv? 8 (textual-contains-right "abcdeffffoo" "foo" 2)))
+
+
+(test "textual-contains-880"
+      #t
+      (eqv? #f (textual-contains-right "abcdeffffoo" "efffoo" 2)))
+
+
+
+(test "textual-contains-881"
+      #t
+      (eqv? 0 (textual-contains (as-text "") (as-text "") 0 0)))
+
+
+(test "textual-contains-882"
+      #t
+      (eqv? 2 (textual-contains (as-text "abcdeffffoo") (as-text "") 2 10)))
+
+
+(test "textual-contains-883"
+      #t
+      (eqv? #f (textual-contains (as-text "abcdeffffoo") (as-text "a") 2 10)))
+
+
+(test "textual-contains-884"
+      #t
+      (eqv? 5 (textual-contains (as-text "abcdeffffoo") (as-text "ff") 2 10)))
+
+
+(test "textual-contains-885"
+      #t
+      (eqv? 4 (textual-contains (as-text "abcdeffffoo") (as-text "eff") 2 10)))
+
+
+(test "textual-contains-886"
+      #t
+      (eqv? #f (textual-contains (as-text "abcdeffffoo") (as-text "foo") 2 10)))
+
+
+(test "textual-contains-right-887"
+      #t
+      (eqv? #f (textual-contains (as-text "abcdeffffoo") (as-text "efffoo") 2 10)))
+
+
+(test "textual-contains-right-888"
+      #t
+      (eqv? 0 (textual-contains-right (as-text "") (as-text "") 0 0)))
+
+
+(test "textual-contains-right-889"
+      #t
+      (eqv? 10 (textual-contains-right (as-text "abcdeffffoo") (as-text "") 2 10)))
+
+
+(test "textual-contains-right-890"
+      #t
+      (eqv? #f (textual-contains-right (as-text "abcdeffffoo") (as-text "a") 2 10)))
+
+
+(test "textual-contains-right-891"
+      #t
+      (eqv? 7 (textual-contains-right (as-text "abcdeffffoo") (as-text "ff") 2 10)))
+
+
+(test "textual-contains-right-892"
+      #t
+      (eqv? 4 (textual-contains-right (as-text "abcdeffffoo") (as-text "eff") 2 10)))
+
+
+(test "textual-contains-right-893"
+      #t
+      (eqv? #f (textual-contains-right (as-text "abcdeffffoo") "foo" 2 10)))
+
+
+(test "textual-contains-894"
+      #t
+      (eqv? #f (textual-contains-right "abcdeffffoo" (as-text "efffoo") 2 10)))
+
+
+
+(test "textual-contains-895"
+      #t
+      (eqv? 0 (textual-contains "" "" 0 0 0)))
+
+
+(test "textual-contains-896"
+      #t
+      (eqv? 2 (textual-contains "abcdeffffoo" "" 2 10 0)))
+
+
+(test "textual-contains-897"
+      #t
+      (eqv? 2 (textual-contains "abcdeffffoo" "a" 2 10 1)))
+
+
+(test "textual-contains-898"
+      #t
+      (eqv? 5 (textual-contains "abcdeffffoo" "ff" 2 10 1)))
+
+
+(test "textual-contains-899"
+      #t
+      (eqv? 5 (textual-contains "abcdeffffoo" "eff" 2 10 1)))
+
+
+(test "textual-contains-900"
+      #t
+      (eqv? #f (textual-contains "abcdeffffoo" "foo" 2 10 1)))
+
+
+(test "textual-contains-right-901"
+      #t
+      (eqv? #f (textual-contains "abcdeffffoo" "efffoo" 2 10 1)))
+
+
+(test "textual-contains-right-902"
+      #t
+      (eqv? 0 (textual-contains-right "" "" 0 0 0)))
+
+
+(test "textual-contains-right-903"
+      #t
+      (eqv? 10 (textual-contains-right "abcdeffffoo" "" 2 10 0)))
+
+
+(test "textual-contains-right-904"
+      #t
+      (eqv? 10 (textual-contains-right "abcdeffffoo" "a" 2 10 1)))
+
+
+(test "textual-contains-right-905"
+      #t
+      (eqv? 8 (textual-contains-right "abcdeffffoo" "ff" 2 10 1)))
+
+
+(test "textual-contains-right-906"
+      #t
+      (eqv? 7 (textual-contains-right "abcdeffffoo" "eff" 2 10 1)))
+
+
+(test "textual-contains-right-907"
+      #t
+      (eqv? #f (textual-contains-right "abcdeffffoo" "foo" 2 10 1)))
+
+
+(test "textual-contains-908"
+      #t
+      (eqv? #f (textual-contains-right "abcdeffffoo" "efffoo" 2 10 1)))
+
+
+
+(test "textual-contains-909"
+      #t
+      (eqv? 0 (textual-contains "" "" 0 0 0 0)))
+
+
+(test "textual-contains-910"
+      #t
+      (eqv? 2 (textual-contains "abcdeffffoo" "" 2 10 0 0)))
+
+
+(test "textual-contains-911"
+      #t
+      (eqv? 2 (textual-contains "abcdeffffoo" "a" 2 10 1 1)))
+
+
+(test "textual-contains-912"
+      #t
+      (eqv? 5 (textual-contains "abcdeffffoo" "ff" 2 10 1 2)))
+
+
+(test "textual-contains-913"
+      #t
+      (eqv? 5 (textual-contains "abcdeffffoo" "eff" 2 10 1 2)))
+
+
+(test "textual-contains-914"
+      #t
+      (eqv? 9 (textual-contains "abcdeffffoo" "foo" 2 10 1 2)))
+
+
+(test "textual-contains-right-915"
+      #t
+      (eqv? 4 (textual-contains "abcdeffffoo" "efffoo" 2 10 0 2)))
+
+
+(test "textual-contains-right-916"
+      #t
+      (eqv? 0 (textual-contains-right "" "" 0 0 0 0)))
+
+
+(test "textual-contains-right-917"
+      #t
+      (eqv? 10 (textual-contains-right "abcdeffffoo" "" 2 10 0 0)))
+
+
+(test "textual-contains-right-918"
+      #t
+      (eqv? 10 (textual-contains-right "abcdeffffoo" "a" 2 10 1 1)))
+
+
+(test "textual-contains-right-919"
+      #t
+      (eqv? 8  (textual-contains-right "abcdeffffoo" "ff" 2 10 1 2)))
+
+
+(test "textual-contains-right-920"
+      #t
+      (eqv? 8 (textual-contains-right "abcdeffffoo" "eff" 2 10 1 2)))
+
+
+(test "textual-contains-right-921"
+      #t
+      (eqv? 9 (textual-contains-right "abcdeffffoo" "foo" 2 10 1 2)))
+
+
+(test "textual-upcase-922"
+      #t
+      (eqv? 7 (textual-contains-right "abcdeffffoo" "efffoo" 2 10 1 3)))
+
+
+
+;;; Case conversion
+
+;;; FIXME: should test some non-ASCII cases here.
+
+(test "textual-upcase-923"
+      #t
+      (result=? "1234STRIKES" (textual-upcase (as-text "1234Strikes"))))
+
+
+(test "textual-upcase-924"
+      #t
+      (result=? "1234STRIKES" (textual-upcase (as-text "1234strikes"))))
+
+
+(test "textual-downcase-925"
+      #t
+      (result=? "1234STRIKES" (textual-upcase (as-text "1234STRIKES"))))
+
+
+(test "textual-downcase-926"
+      #t
+      (result=? "1234strikes" (textual-downcase (as-text "1234Strikes"))))
+
+
+(test "textual-downcase-927"
+      #t
+      (result=? "1234strikes" (textual-downcase (as-text "1234strikes"))))
+
+
+(test "textual-foldcase-928"
+      #t
+      (result=? "1234strikes" (textual-downcase (as-text "1234STRIKES"))))
+
+
+(test "textual-foldcase-929"
+      #t
+      (result=? "1234strikes" (textual-foldcase (as-text "1234Strikes"))))
+
+
+(test "textual-foldcase-930"
+      #t
+      (result=? "1234strikes" (textual-foldcase (as-text "1234strikes"))))
+
+
+(test "textual-titlecase-931"
+      #t
+      (result=? "1234strikes" (textual-foldcase (as-text "1234STRIKES"))))
+
+
+(test "textual-append-932"
+      #t
+      (result=? "And With Three Strikes You Are Out"
+                (textual-titlecase
+                 (as-text "and with THREE STRIKES you are oUT"))))
+
+
+;;; Concatenation
+
+(test "textual-append-933"
+      #t
+      (result=? "" (textual-append)))
+
+
+(test "textual-concatenate-934"
+      #t
+      (result=? "abcdef"
+              
+                (textual-append (as-text "")
+                                (as-text "a")
+                                (as-text "bcd")
+                                "" "ef" "" "")))
+
+
+(test "textual-concatenate-935"
+      #t
+      (result=? "" (textual-concatenate '())))
+
+
+(test "textual-concatenate-936"
+      #t
+      (result=? "abcdef"
+                (textual-concatenate
+                 (map string->text '("" "a" "bcd" "" "ef" "" "")))))
+
+
+;;; textual-concatenate is likely to have special cases for longer texts.
+
+(let* ((alphabet "abcdefghijklmnopqrstuvwxyz")
+       (str1 alphabet)
+       (str10 (apply string-append (vector->list (make-vector 10 str1))))
+       (str100 (apply string-append (vector->list (make-vector 10 str10))))
+       (str100-500 (substring str100 100 500))
+       (str600-999 (substring str100 600 999))
+       (alph1 (textual-copy alphabet))
+       (alph10 (textual-concatenate (vector->list (make-vector 10 alph1))))
+       (alph100 (textual-concatenate (vector->list (make-vector 10 alph10))))
+       (t100-500 (subtext alph100 100 500))
+       (t600-999 (subtext alph100 600 999)))
+
+  (test "textual-concatenate-937"
+        #t
+        (result=? str10 alph10))
+
+
+  (test "textual-concatenate-938"
+        #t
+        (result=? str100 alph100))
+
+
+  (test "textual-concatenate-939"
+        #t
+        (result=? str100-500 t100-500))
+
+
+  (test "textual-concatenate-940"
+        #t
+        (result=? str600-999 t600-999))
+
+
+  ;; concatenating a short text with a long text
+
+  (test "textual-concatenate-941"
+        #t
+        (result=? (string-append str1 str600-999)
+                  (textual-concatenate (list alph1 t600-999))))
+
+
+  (test "textual-concatenate-942"
+        #t
+        (result=? (string-append str1 str600-999)
+                  (textual-concatenate (list alph1 (textual-copy t600-999)))))
+
+
+  (test "textual-concatenate-943"
+        #t
+        (result=? (string-append str600-999 str1)
+                  (textual-concatenate (list t600-999 alph1))))
+
+
+  (test "textual-concatenate-reverse-944"
+        #t
+        (result=? (string-append str600-999 str1)
+                  (textual-concatenate (list (textual-copy t600-999) alph1))))
+)
+
+
+(test "textual-concatenate-reverse-945"
+      #t
+      (result=? "" (textual-concatenate-reverse '())))
+
+
+(test "textual-concatenate-reverse-946"
+      #t
+      (result=? "efbcda"
+                (textual-concatenate-reverse
+                 (map string->text '("" "a" "bcd" "" "ef" "" "")))))
+
+
+(test "textual-concatenate-reverse-947"
+      #t
+      (result=? "huh?"
+                (textual-concatenate-reverse '() "huh?")))
+
+
+(test "textual-concatenate-reverse-948"
+      #t
+      (result=? "efbcdaxy"
+                (textual-concatenate-reverse '("" "a" "bcd" "" "ef" "" "") "xy")))
+
+
+(test "textual-concatenate-reverse-949"
+      #t
+      (result=? "huh"
+                (textual-concatenate-reverse '() "huh?" 3)))
+
+
+(test "textual-join-950"
+      #t
+      (result=? "efbcdax"
+                (textual-concatenate-reverse
+                 '("" "a" "bcd" "" "ef" "" "") "x" 1)))
+
+
+
+(test "textual-join-951"
+      #t
+      (result=? "" (textual-join '())))
+
+
+(test "textual-join-952"
+      #t
+      (result=? " ab cd  e f "
+                (textual-join (map string->text '("" "ab" "cd" "" "e" "f" "")))))
+
+
+(test "textual-join-953"
+      #t
+      (result=? ""
+                (textual-join '() "")))
+
+
+(test "textual-join-954"
+      #t
+      (result=? "abcdef"
+                (textual-join '("" "ab" "cd" "" "e" "f" "") "")))
+
+
+(test "textual-join-955"
+      #t
+      (result=? ""
+                (textual-join '() "xyz")))
+
+
+(test "textual-join-956"
+      #t
+      (result=? "xyzabxyzcdxyzxyzexyzfxyz"
+                (textual-join '("" "ab" "cd" "" "e" "f" "") "xyz")))
+
+
+(test "textual-join-957"
+      #t
+      (result=? ""
+                (textual-join '() "" 'infix)))
+
+
+(test "textual-join-958"
+      #t
+      (result=? "abcdef"
+                (textual-join '("" "ab" "cd" "" "e" "f" "") "" 'infix)))
+
+
+(test "textual-join-959"
+      #t
+      (result=? ""
+                (textual-join '() "xyz" 'infix)))
+
+
+(test "textual-join-960"
+      #t
+      (result=? "xyzabxyzcdxyzxyzexyzfxyz"
+                (textual-join '("" "ab" "cd" "" "e" "f" "") (as-text "xyz") 'infix)))
+
+
+(test "textual-join-961"
+      #t
+      (equal? 'horror
+              (guard (exn (#t 'horror))
+                (textual-join '() "" 'strict-infix))))
+
+
+(test "textual-join-962"
+      #t
+      (result=? "abcdef"
+                (textual-join '("" "ab" "cd" "" "e" "f" "") "" 'strict-infix)))
+
+
+(test "textual-join-963"
+      #t
+      (equal? 'wham
+              (guard (exn (else 'wham))
+                (textual-join '() "xyz" 'strict-infix))))
+
+
+(test "textual-join-964"
+      #t
+      (result=? "xyzabxyzcdxyzxyzexyzfxyz"
+                (textual-join '("" "ab" "cd" "" "e" "f" "") "xyz" 'strict-infix)))
+
+
+(test "textual-join-965"
+      #t
+      (result=? ""
+                (textual-join '() "" 'suffix)))
+
+
+(test "textual-join-966"
+      #t
+      (result=? "abcdef"
+                (textual-join '("" "ab" "cd" "" "e" "f" "") "" 'suffix)))
+
+
+(test "textual-join-967"
+      #t
+      (result=? ""
+                (textual-join '() "xyz" 'suffix)))
+
+
+(test "textual-join-968"
+      #t
+      (result=? "xyzabxyzcdxyzxyzexyzfxyzxyz"
+                (textual-join '("" "ab" "cd" "" "e" "f" "") "xyz" 'suffix)))
+
+
+(test "textual-join-969"
+      #t
+      (result=? ""
+                (textual-join '() "" 'prefix)))
+
+
+(test "textual-join-970"
+      #t
+      (result=? "abcdef"
+                (textual-join '("" "ab" "cd" "" "e" "f" "") "" 'prefix)))
+
+
+(test "textual-join-971"
+      #t
+      (result=? ""
+                (textual-join '() "xyz" 'prefix)))
+
+
+(test "textual-fold-972"
+      #t
+      (result=? "xyzxyzabxyzcdxyzxyzexyzfxyz"
+                (textual-join '("" "ab" "cd" "" "e" "f" "") "xyz" 'prefix)))
+
+
+
+;;; Fold & map & friends
+
+(test "textual-fold-973"
+      #t
+      (= 8
+         (textual-fold (lambda (c count)
+                         (if (char-whitespace? c)
+                             (+ count 1)
+                             count))
+                       0
+                       (as-text " ...a couple of spaces in this one... "))))
+
+
+(test "textual-fold-974"
+      #t
+      (= 7
+         (textual-fold (lambda (c count)
+                         (if (char-whitespace? c)
+                             (+ count 1)
+                             count))
+                       0
+                       " ...a couple of spaces in this one... "
+                       1)))
+
+
+(test "textual-fold-right-975"
+      #t
+      (= 6
+         (textual-fold (lambda (c count)
+                         (if (char-whitespace? c)
+                             (+ count 1)
+                             count))
+                       0
+                       " ...a couple of spaces in this one... "
+                       1
+                       32)))
+
+
+(test "textual-fold-right-976"
+      #t
+      (equal? (string->list "abcdef")
+              (textual-fold-right cons '() "abcdef")))
+
+
+(test "textual-fold-right-977"
+      #t
+      (equal? (string->list "def")
+              (textual-fold-right cons '() (as-text "abcdef") 3)))
+
+
+(test "textual-fold-978"
+      #t
+      (equal? (string->list "cde")
+              (textual-fold-right cons '() (as-text "abcdef") 2 5)))
+
+
+(test "textual-map-979"
+      #t
+      (string=? "aabraacaadaabraa"
+                (let* ((s (as-text "abracadabra"))
+                       (ans-len (textual-fold (lambda (c sum)
+                                                (+ sum (if (char=? c #\a) 2 1)))
+                                              0 s))
+                       (ans (make-string ans-len)))
+                  (textual-fold (lambda (c i)
+                                  (let ((i (if (char=? c #\a)
+                                               (begin (string-set! ans i #\a)
+                                                      (+ i 1))
+                                               i)))
+                                    (string-set! ans i c)
+                                    (+ i 1)))
+                                0 s)
+                  ans)))
+
+
+
+(test "textual-map-980"
+      #t
+      (result=? "abc" (textual-map string (as-text "abc"))))
+
+
+(test "textual-map-981"
+      #t
+      (result=? "ABC" (textual-map char-upcase "abc")))
+
+
+(test "textual-for-each-982"
+      #t
+      (result=? "Hear-here!"
+                (textual-map (lambda (c0 c1 c2)
+                               (case c0
+                                 ((#\1) c1)
+                                 ((#\2) (string c2))
+                                 ((#\-) (text #\- c1))))
+                             (string->text "1222-1111-2222")
+                             (string->text "Hi There!")
+                             (string->text "Dear John"))))
+
+
+(test "textual-for-each-983"
+      #t
+      (string=? "abc"
+                (let ((q (open-output-string)))
+                  (textual-for-each (lambda (c) (write-char c q))
+                                    (as-text "abc"))
+                  (get-output-string q))))
+
+
+(test "textual-map-index-984"
+      #t
+      (equal? '("cfi" "beh" "adg")
+              (let ((x '()))
+                (textual-for-each (lambda (c1 c2 c3)
+                                    (set! x (cons (string c1 c2 c3) x)))
+                                  "abc"
+                                  (as-text "defxyz")
+                                  (as-text "ghijklmnopqrstuvwxyz"))
+                x)))
+
+
+(test "textual-map-index-985"
+      #t
+      (result=? "abc"
+                (textual-map-index (lambda (i)
+                                     (integer->char (+ i (char->integer #\a))))
+                                   "xyz")))
+
+
+(test "textual-map-index-986"
+      #t
+      (result=? "def"
+                (textual-map-index (lambda (i)
+                                     (integer->char (+ i (char->integer #\a))))
+                                   "xyz***" 3)))
+
+
+(test "textual-for-each-index-987"
+      #t
+      (result=? "cde"
+                (textual-map-index (lambda (i)
+                                     (integer->char (+ i (char->integer #\a))))
+                                   "......" 2 5)))
+
+
+(test "textual-for-each-index-988"
+      #t
+      (equal? '(101 100 99 98 97)
+              (let ((s (as-text "abcde"))
+                    (v '()))
+                (textual-for-each-index
+                 (lambda (i)
+                   (set! v (cons (char->integer (textual-ref s i)) v)))
+                 s)
+                v)))
+
+
+(test "textual-for-each-index-989"
+      #t
+      (equal? '(101 100 99)
+              (let ((s (as-text "abcde"))
+                    (v '()))
+                (textual-for-each-index
+                 (lambda (i)
+                   (set! v (cons (char->integer (textual-ref s i)) v)))
+                 s 2)
+                v)))
+
+
+(test "textual-count-990"
+      #t
+      (equal? '(99 98)
+              (let ((s (as-text "abcde"))
+                    (v '()))
+                (textual-for-each-index
+                 (lambda (i)
+                   (set! v (cons (char->integer (textual-ref s i)) v)))
+                 s 1 3)
+                v)))
+
+
+(test "textual-count-991"
+      #t
+      (= 6 (textual-count "abcdef" char?)))
+
+
+(test "textual-count-992"
+      #t
+      (= 4 (textual-count "counting  whitespace, again " char-whitespace? 5)))
+
+
+(test "textual-filter-993"
+      #t
+      (= 3 (textual-count "abcdefwxyz"
+                          (lambda (c) (odd? (char->integer c)))
+                          2 8)))
+
+
+
+(test "textual-remove-994"
+      #t
+      (result=? "aiueaaaoi"
+                (textual-filter (lambda (c) (memv c (textual->list "aeiou")))
+                                (as-text "What is number, that man may know it?"))))
+
+
+(test "textual-filter-995"
+      #t
+      (result=? "And wmn, tht sh my knw nmbr?"
+                (textual-remove (lambda (c) (memv c (textual->list "aeiou")))
+                                "And woman, that she may know number?")))
+
+
+(test "textual-remove-996"
+      #t
+      (result=? "iueaaaoi"
+                (textual-filter (lambda (c) (memv c (textual->list "aeiou")))
+                                (as-text "What is number, that man may know it?")
+                                4)))
+
+
+(test "textual-filter-997"
+      #t
+      (result=? "mn, tht sh my knw nmbr?"
+                (textual-remove (lambda (c) (memv c (textual->list "aeiou")))
+                                "And woman, that she may know number?"
+                                6)))
+
+
+(test "textual-remove-998"
+      #t
+      (result=? "aaao"
+                (textual-filter (lambda (c) (memv c (textual->list "aeiou")))
+                                (as-text "What is number, that man may know it?")
+                                16 32)))
+
+
+(test "textual-reverse-999"
+      #t
+      (result=? "And woman, that sh may know"
+                (textual-remove (lambda (c) (memv c (textual->list "eiu")))
+                                "And woman, that she may know number?"
+                                0 28)))
+
+
+
+;; #|
+;; (test "textual-reverse-1000"
+;;#t
+;;(result=? "" (textual-reverse ""))
+;;)
+
+
+;; (or (result=? "fedcba" (textual-reverse "abcdef"))
+;;)
+
+
+;; (or (result=? "" (textual-reverse (as-text "") 0))
+;;     (fail 'textual-reverse))
+
+;; (or (result=? "fedcba" (textual-reverse "abcdef" 0))
+;;     (fail 'textual-reverse))
+
+;; (or (result=? "fedc" (textual-reverse (as-text "abcdef") 2))
+;;     (fail 'textual-reverse))
+
+;; (or (result=? "" (textual-reverse "" 0 0))
+;;     (fail 'textual-reverse))
+
+;; (or (result=? "fedcba" (textual-reverse "abcdef" 0 6))
+;;     (fail 'textual-reverse))
+
+;; (or (result=? "edc" (textual-reverse "abcdef" 2 5))
+;;     (fail 'textual-reverse))
+;; |#
+
+
+;; ;;; Replication and splitting
+
+(test "textual-replicate-1000"
+      #t
+      (result=? "cdefabcdefabcd"
+                (textual-replicate "abcdef" -4 10)))
+
+
+(test "textual-replicate-1001"
+      #t
+      (result=? "bcdefbcdefbcd"
+                (textual-replicate "abcdef" 90 103 1)))
+
+
+(test "textual-replicate-1002"
+      #t
+      (result=? "ecdecdecde"
+                (textual-replicate "abcdef" -13 -3 2 5)))
+
+
+(test "textual-split-1003"
+      #t
+      (equal? '() (map textual->string (textual-split "" ""))))
+
+
+(test "textual-split-1004"
+      #t
+      (equal? '("a" "b" "c") (map textual->string (textual-split "abc" ""))))
+
+
+(test "textual-split-1005"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (map textual->string
+                   (textual-split "too  much  data" " "))))
+
+
+(test "textual-split-1006"
+      #t
+      (equal? '("" "there" "ya" "go" "")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***"))))
+
+
+(test "textual-split-1007"
+      #t
+      (equal? '() (map textual->string (textual-split "" "" 'infix))))
+
+
+(test "textual-split-1008"
+      #t
+      (equal? '("a" "b" "c")
+              (map textual->string (textual-split "abc" "" 'infix))))
+
+
+(test "textual-split-1009"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'infix))))
+
+
+(test "textual-split-1010"
+      #t
+      (equal? '("" "there" "ya" "go" "")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'infix))))
+
+
+(test "textual-split-1011"
+      #t
+      (equal? 'error
+              (guard (exn (else 'error))
+                (map textual->string
+                     (textual-split "" "" 'strict-infix)))))
+
+
+(test "textual-split-1012"
+      #t
+      (equal? '("a" "b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'strict-infix))))
+
+
+(test "textual-split-1013"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'strict-infix))))
+
+
+(test "textual-split-1014"
+      #t
+      (equal? '("" "there" "ya" "go" "")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'strict-infix))))
+
+
+(test "textual-split-1015"
+      #t
+      (equal? '()
+              (map textual->string
+                   (textual-split "" "" 'prefix))))
+
+
+(test "textual-split-1016"
+      #t
+      (equal? '("a" "b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'prefix))))
+
+
+(test "textual-split-1017"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'prefix))))
+
+
+(test "textual-split-1018"
+      #t
+      (equal? '("there" "ya" "go" "")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'prefix))))
+
+
+(test "textual-split-1019"
+      #t
+      (equal? '()
+              (map textual->string
+                   (textual-split "" "" 'suffix))))
+
+
+(test "textual-split-1020"
+      #t
+      (equal? '("a" "b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'suffix))))
+
+
+(test "textual-split-1021"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'suffix))))
+
+
+(test "textual-split-1022"
+      #t
+      (equal? '("" "there" "ya" "go")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'suffix))))
+
+
+
+(test "textual-split-1023"
+      #t
+      (equal? '()
+              (map textual->string
+                   (textual-split "" "" 'infix #f))))
+
+
+(test "textual-split-1024"
+      #t
+      (equal? '("a" "b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'infix #f))))
+
+
+(test "textual-split-1025"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'infix #f))))
+
+
+(test "textual-split-1026"
+      #t
+      (equal? '("" "there" "ya" "go" "")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'infix #f))))
+
+
+(test "textual-split-1027"
+      #t
+      (equal? 'error
+              (guard (exn (else 'error))
+                (map textual->string
+                     (textual-split "" "" 'strict-infix #f)))))
+
+
+(test "textual-split-1028"
+      #t
+      (equal? '("a" "b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'strict-infix #f))))
+
+
+(test "textual-split-1029"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'strict-infix #f))))
+
+
+(test "textual-split-1030"
+      #t
+      (equal? '("" "there" "ya" "go" "")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'strict-infix #f))))
+
+
+(test "textual-split-1031"
+      #t
+      (equal? '()
+              (map textual->string
+                   (textual-split "" "" 'prefix #f))))
+
+
+(test "textual-split-1032"
+      #t
+      (equal? '("a" "b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'prefix #f))))
+
+
+(test "textual-split-1033"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'prefix #f))))
+
+
+(test "textual-split-1034"
+      #t
+      (equal? '("there" "ya" "go" "")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'prefix #f))))
+
+
+(test "textual-split-1035"
+      #t
+      (equal? '()
+              (map textual->string
+                   (textual-split "" "" 'suffix #f))))
+
+
+(test "textual-split-1036"
+      #t
+      (equal? '("a" "b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'suffix #f))))
+
+
+(test "textual-split-1037"
+      #t
+      (equal? '("too" "" "much" "" "data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'suffix #f))))
+
+
+(test "textual-split-1038"
+      #t
+      (equal? '("" "there" "ya" "go")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'suffix #f))))
+
+
+
+(test "textual-split-1039"
+      #t
+      (equal? 'error
+              (guard (exn (else 'error))
+                (map textual->string
+                     (textual-split "" "" 'strict-infix 3)))))
+
+
+(test "textual-split-1040"
+      #t
+      (equal? '("a" "b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'strict-infix 3))))
+
+
+(test "textual-split-1041"
+      #t
+      (equal? '("too" "" "much" " data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'strict-infix 3))))
+
+
+(test "textual-split-1042"
+      #t
+      (equal? '("" "there" "ya" "go***")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'strict-infix 3))))
+
+
+(test "textual-split-1043"
+      #t
+      (equal? '()
+              (map textual->string
+                   (textual-split "" "" 'prefix 3))))
+
+
+(test "textual-split-1044"
+      #t
+      (equal? '("a" "b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'prefix 3))))
+
+
+(test "textual-split-1045"
+      #t
+      (equal? '("too" "" "much" " data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'prefix 3))))
+
+
+(test "textual-split-1046"
+      #t
+      (equal? '("there" "ya" "go***")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'prefix 3))))
+
+
+(test "textual-split-1047"
+      #t
+      (equal? '()
+              (map textual->string
+                   (textual-split "" "" 'suffix 3))))
+
+
+(test "textual-split-1048"
+      #t
+      (equal? '("a" "b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'suffix 3))))
+
+
+(test "textual-split-1049"
+      #t
+      (equal? '("too" "" "much" " data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'suffix 3))))
+
+
+(test "textual-split-1050"
+      #t
+      (equal? '("" "there" "ya" "go***")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'suffix 3))))
+
+
+
+(test "textual-split-1051"
+      #t
+      (equal? 'error
+              (guard (exn (else 'error))
+                (map textual->string
+                     (textual-split "" "" 'strict-infix 3 0)))))
+
+
+(test "textual-split-1052"
+      #t
+      (equal? '("b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'strict-infix 3 1))))
+
+
+(test "textual-split-1053"
+      #t
+      (equal? '("oo" "" "much" " data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'strict-infix 3 1))))
+
+
+(test "textual-split-1054"
+      #t
+      (equal? '("**there" "ya" "go" "")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'strict-infix 3 1))))
+
+
+(test "textual-split-1055"
+      #t
+      (equal? '()
+              (map textual->string
+                   (textual-split "" "" 'prefix 3 0))))
+
+
+(test "textual-split-1056"
+      #t
+      (equal? '("b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'prefix 3 1))))
+
+
+(test "textual-split-1057"
+      #t
+      (equal? '("oo" "" "much" " data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'prefix 3 1))))
+
+
+(test "textual-split-1058"
+      #t
+      (equal? '("**there" "ya" "go" "")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'prefix 3 1))))
+
+
+(test "textual-split-1059"
+      #t
+      (equal? '()
+              (map textual->string
+                   (textual-split "" "" 'suffix 3 0))))
+
+
+(test "textual-split-1060"
+      #t
+      (equal? '("b" "c")
+              (map textual->string
+                   (textual-split "abc" "" 'suffix 3 1))))
+
+
+(test "textual-split-1061"
+      #t
+      (equal? '("oo" "" "much" " data")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'suffix 3 1))))
+
+
+(test "textual-split-1062"
+      #t
+      (equal? '("**there" "ya" "go")
+              (map textual->string
+                   (textual-split "***there***ya***go***" "***" 'suffix 3 1))))
+
+
+
+(test "textual-split-1063"
+      #t
+      (equal? 'error
+              (guard (exn (else 'error))
+                (map textual->string
+                     (textual-split "" "" 'strict-infix 3 0 0)))))
+
+
+(test "textual-split-1064"
+      #t
+      (equal? '("b")
+              (map textual->string
+                   (textual-split "abc" "" 'strict-infix 3 1 2))))
+
+
+(test "textual-split-1065"
+      #t
+      (equal? '("oo" "" "much" " ")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'strict-infix 3 1 11))))
+
+
+(test "textual-split-1066"
+      #t
+      (equal? '()
+              (map textual->string
+                   (textual-split "" "" 'prefix 3 0 0))))
+
+
+(test "textual-split-1067"
+      #t
+      (equal? '("b")
+              (map textual->string
+                   (textual-split "abc" "" 'prefix 3 1 2))))
+
+
+(test "textual-split-1068"
+      #t
+      (equal? '("oo" "" "much" " ")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'prefix 3 1 11))))
+
+
+(test "textual-split-1069"
+      #t
+      (equal? '()
+              (map textual->string
+                   (textual-split "" "" 'suffix 3 0 0))))
+
+
+(test "textual-split-1070"
+      #t
+      (equal? '("b")
+              (map textual->string
+                   (textual-split "abc" "" 'suffix 3 1 2))))
+
+
+(test "textual-split-1071"
+      #t
+      (equal? '("oo" "" "much" " ")
+              (map textual->string
+                   (textual-split "too  much  data" " " 'suffix 3 1 11))))
 
