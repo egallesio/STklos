@@ -52,31 +52,21 @@ For new SRFIs, adding its description in `lib/srfis.stk` suffices to update
 
 * the `SUPPORTED-SRFIS` in the main directory
 * launch the tests you added in `tests/srfis` directory, and
-* (in the future) add an automatically generated documentation for this SRFI
-
-Until the documentation is automatically generated, you have to add
-its documentation, as explained below.
+* add an automatically generated documentation for this SRFI
 
 ## Documentation
 
 
 ### Documenting SRFIs in `srfi.skb`
 
-If the SRFI is loaded (there's a `srfi-nnn` file, and it must be `require`d,
-use the `gen-loaded-srfi` procedure:
+General documentation is automatically generated for SRFIs. If you
+need to give a precision specific to a given SRFI, add it to the end of the
+`doc/skb/srfi.skb` file using the `gen-srfi-documentation` function. 
 
-```
-;; SRFI 111 -- Boxes
-(gen-loaded-srfi 111)
-```
+Note that the documentation is written in Skribe tool which is no more
+maintained.  Consequently, the documentation will not be generated. The
+HTML and PDF documentation is rebuilt from time to time by @egallesio. 
 
-If the SRFI is embedded (will be available without need for `require`),
-use the `gen-embedded-srfi` procedure:
-
-```
-;; SRFI 112 -- Environment Inquiry
-(gen-embedded-srfi 112)
-```
 
 ### Documenting primitives written in C
 
