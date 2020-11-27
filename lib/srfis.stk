@@ -175,7 +175,7 @@
     ;; 134  Immutable Deques
     (135  "Immutable Texts" (immuttable-texts) "srfi-135")
     ;; 136  Extensible record types
-    ;; 137  Minimal Unique Types
+    (137  "Minimal Unique Types" () "srfi-137")
     ;; 138  Compiling Scheme programs to executables
     ;; 139  Syntax parameters
     ;; 140  Immutable Strings
