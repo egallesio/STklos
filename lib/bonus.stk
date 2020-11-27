@@ -1,4 +1,4 @@
--;;;;
+;;;;
 ;;;; bonus.stk  -- Useful primitives not in R5RS
 ;;;;
 ;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
@@ -141,21 +141,39 @@ doc>
  * general value.
 doc>
 |#
-(define (every pred l . others)         ;; compatible with SRFI-1
-  (if (null? others)
-      ;; EVERY called with mono argument predicate
-      (letrec ((every (lambda (l)
-                        (if (null? l)
-                            #t
-                            (and (pred (car l)) (every (cdr l)))))))
-        (every l))
-      ;; General case
-      (letrec ((every (lambda (l)
-                        (if (memq '() l)
-                            #t
-                            (and (apply pred (map car l))
-                                 (every (map cdr l)))))))
-        (every (cons l others)))))
+(define (%cars+cdrs lists)
+  (call/ec
+    (lambda (abort)
+      (let recur ((lists lists))
+        (if (pair? lists)
+        (receive (list other-lists) (values (car lists) (cdr lists))
+          (if (and (list? list) (null? list))
+              (abort '() '()) ; LIST is empty -- bail out
+              (receive (a d)  (values (car list) (cdr lists))
+                (receive (cars cdrs) (recur other-lists)
+                  (values (cons a cars) (cons d cdrs))))))
+        (values '() '()))))))
+
+(define (every pred lis1 . lists)
+  (unless (procedure? pred)
+    (error 'every ": bad procedure ~S", pred))
+  (if (pair? lists)
+
+      ;; N-ary case
+      (receive (heads tails) (%cars+cdrs (cons lis1 lists))
+        (or (not (pair? heads))
+            (let lp ((heads heads) (tails tails))
+              (receive (next-heads next-tails) (%cars+cdrs tails)
+                (if (pair? next-heads)
+                    (and (apply pred heads) (lp next-heads next-tails))
+                    (apply pred heads)))))) ; Last PRED app is tail call.
+
+      ;; Fast path
+      (or (and (list? lis1) (null? lis1)) ; null list
+          (let lp ((head (car lis1))  (tail (cdr lis1)))
+            (if (and (list? tail) (null? tail)) ; null list
+                (pred head) ; Last PRED app is tail call.
+                (and (pred head) (lp (car tail) (cdr tail))))))))
 
 #|
 <doc EXT any
@@ -187,21 +205,27 @@ doc>
  * @end lisp
 doc>
 |#
-(define (any pred l . others)           ;; compatible with SRFI-1
-  (if (null? others)
-      ;; ANY called with mono argument predicate
-      (letrec ((any (lambda (l)
-                        (if (null? l)
-                            #f
-                            (or (pred (car l)) (any (cdr l)))))))
-        (any l))
-      ;; General case
-      (letrec ((any (lambda (l)
-                        (if (memq '() l)
-                            #f
-                            (or (apply pred (map car l))
-                                 (any (map cdr l)))))))
-        (any (cons l others)))))
+(define (any pred lis1 . lists)
+    (unless (procedure? pred)
+      (error 'any ": bad procedure ~S", pred))
+    (if (pair? lists)
+
+      ;; N-ary case
+      (receive (heads tails) (%cars+cdrs (cons lis1 lists))
+    (and (pair? heads)
+         (let lp ((heads heads) (tails tails))
+           (receive (next-heads next-tails) (%cars+cdrs tails)
+         (if (pair? next-heads)
+             (or (apply pred heads) (lp next-heads next-tails))
+             (apply pred heads)))))) ; Last PRED app is tail call.
+
+      ;; Fast path
+      (and
+       (not (and (list? lis1) (null? lis1))) ; not null list
+       (let lp ((head (car lis1)) (tail (cdr lis1)))
+         (if (and (list? tail) (null? tail)) ; null list
+             (pred head)        ; Last PRED app is tail call.
+             (or (pred head) (lp (car tail) (cdr tail))))))))
 
 
 ;;;

@@ -82,6 +82,23 @@ b|)
       (eq? #void (if #f 'WRONG)))
 
 ;;----------------------------------------------------------------------
+(test-subsection "bonus.stk")
+
+;; the following two errors do occur in some Scheme implementations.
+(test "every"
+      1
+      (every (lambda (x y)
+               (if (and (even? x) (even? y)) 1 -1))
+             '(2 4 5) '(12 14)))
+
+(test "any"
+      -1
+      (any (lambda (x y)
+             (if (or (even? x) (even? y)) 1 -1))
+           '(1 3 4) '(11 13)))
+
+
+;;----------------------------------------------------------------------
 (test-subsection "Docstrings and signatures")
 
 (import STKLOS-COMPILER)
