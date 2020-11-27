@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 24-Nov-2020 15:16 (eg)
+;;;; Last file update: 27-Nov-2020 10:54 (eg)
 ;;;;
 
 (require "test")
@@ -40,15 +40,8 @@
         (when (file-exists? test-file)    ;; and we have a test for it
           ;; Add a subsection title
           (test-subsection (format "SRFI ~S - ~S ..." nb (srfi-title desc)))
-          ;; Eventually require the SRFI
-          (let* ((name    (symbol-append 'srfi- nb))
-                 (to-load (srfi-0-feature-implementation-file name)))
-            (when to-load
-              (for-each (lambda (x)
-                          ;; /!\ do not use the function but the require macro!!
-                          (require x)) 
-                        to-load)))
-          ;; Run the tests
+          ;; Require the SRFI and run the tests
+          (require-feature nb)
           (load test-file))))))
 
 

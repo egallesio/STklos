@@ -21,13 +21,15 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 21-Nov-2020 20:49 (eg)
+;;;; Last file update: 27-Nov-2020 10:53 (eg)
 ;;;;
 
 (define-module SRFI-0
   (import SCHEME)
   (export srfi0-register-feature!
-          srfi-0-feature-implementation-file))
+          srfi-0-feature-implementation-file
+          require-feature))
+
 
 (select-module SRFI-0)
 
@@ -64,7 +66,7 @@
 (define (srfi-0-feature-implementation-file x)
   (let Loop ((l *all-features*))
     (if (null? l)
-        #f                          ;; not found
+        (error "feature ~S is not supported" x)
         (let ((current (car l)))
           (if (pair? current)
               ;; Clause is (FEATURE . file) or (FEATURE file1 file2 ...)
@@ -72,7 +74,42 @@
                   (let ((val (cdr current)))
                     (if (pair? val) val (list val)))
                   (Loop (cdr l)))
-              (Loop (cdr l)))))))
+              (if (eq? current x)
+                  #f
+                  (Loop (cdr l))))))))
+
+#|
+<doc EXT require-feature
+ * (require-feature feature)
+ *
+ * This primitive ensures that the |feature| (in sense of SRFI-0 feature) can be used.
+ * In particular, it eventually requires the loading of the files needed to used |feature|.
+ * The |feature| can be expressed as a string or a symbol, If feature is an integer |n|,
+ * it is equivalent to |srfi-n|. Consquently, to use ,(quick-link-srfi 1) 
+ * the following forms are equivalent:
+ *
+ * @lisp
+ * (require-feature 'srfi-1)
+ * (require-feature "srfi-1")
+ * (require-feature 1)
+ * (require-feature 'lists)      ;; Since this feature name is an alias for SRFI-1
+ * @end lisp
+ *
+ * See also chapter ,(ref :chapter "SRFIs") for more information.])
+doc>
+|#
+(define (require-feature feat)
+  (let* ((name (cond
+                ((symbol? feat) feat)
+                ((string? feat) (string->symbol feat))
+                ((integer? feat) (symbol-append 'srfi- feat))
+                (else (error "bad feature" feat))))
+         (files (srfi-0-feature-implementation-file name)))
+    (when files
+       (for-each (lambda (x)
+                   ;; /!\ do not use the function but the require macro!!
+                   (require x))
+                 files))))
 
 ;; ----------------------------------------------------------------------
 (define (%has-feature? x)

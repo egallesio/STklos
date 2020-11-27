@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 24-Nov-2020 17:58 (eg)
+;;;; Last file update: 27-Nov-2020 09:16 (eg)
 ;;;;
 
 
@@ -1637,7 +1637,7 @@ doc>
              ,@(map (lambda (x y) `(,(car x) ,y))
                     bindings tmp2))))))
 ;;
-;; SRFI-45: "require-extension"
+;; SRFI-45: "Primitives for Expressing Iterative Lazy Algorithms"
 ;;
 ;; lazy and eager are now present in R7RS with names delay-force
 ;; and make-promise. They are implemented in r7rs.stk
