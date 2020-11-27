@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 26-Nov-2020 17:02 (eg)
+;;;; Last file update: 27-Nov-2020 16:37 (eg)
 ;;;;
 
 
@@ -267,23 +267,22 @@
 ;; ----------------------------------------------------------------------
 
 ;; A struct to ease srfi information manipulations
-(define-struct srfi number title names file)
+(define-struct %srfi number title names file)
 
 
 (define (%description->srfi lst)
   (let* ((number  (car lst))
-         (name    (symbol-append 'srfi- number))
+         (name    (string->symbol (format "srfi-~a" number)))
          (title   (cadr lst))
          (aliases (and (not (null? (cddr lst)))
                        (caddr lst)))
          (file   (and aliases
                        (not (null? (cdddr lst)))
                        (cadddr lst))))
-    (make-srfi number
-               title
-               (cons name
-                     (or aliases '()))
-               file)))
+    (make-%srfi number
+                title
+                (cons name (or aliases '()))
+                file)))
 
 (define (find-srfi number)
   (let ((tmp (assoc number *srfi-database*)))

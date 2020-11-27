@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 27-Nov-2020 10:54 (eg)
+;;;; Last file update: 27-Nov-2020 16:40 (eg)
 ;;;;
 
 (require "test")
@@ -39,7 +39,7 @@
       (let ((test-file (format "./srfis/~a.stk" nb)))
         (when (file-exists? test-file)    ;; and we have a test for it
           ;; Add a subsection title
-          (test-subsection (format "SRFI ~S - ~S ..." nb (srfi-title desc)))
+          (test-subsection (format "SRFI ~S - ~S ..." nb (%srfi-title desc)))
           ;; Require the SRFI and run the tests
           (require-feature nb)
           (load test-file))))))
