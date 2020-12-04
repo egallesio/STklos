@@ -61,6 +61,12 @@ Here are the options available in the version @VERSION@ of
 load 'file' before going interactive
 .IP "-f file, --file=file"
 use 'file' as program
+.IP "-I dir"
+prepend 'dir' to the directory path. This option can be used several
+times.
+.IP "-A dir"
+append 'dir' to the directory path. This option can be used several
+times.
 .IP "-e sexpr, --execute=sexpr"
 evaluate the given sexpr and exit
 .IP "-b file, --boot-file=file"
