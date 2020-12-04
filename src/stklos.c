@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 16-Sep-2020 11:34 (eg)
+ * Last file update:  4-Dec-2020 11:46 (eg)
  */
 
 #include "stklos.h"
@@ -43,6 +43,8 @@
                         STk_makekey(k),                 \
                         MAKE_INT(o));
 
+#define ADD_SCM_OPTION(o, k)                            \
+  options = STk_key_set(options, STk_makekey(k),o);
 
 /*=============================================================================
  *
@@ -62,6 +64,9 @@ static int  debug_mode    = 0;
 static int  line_editor   = 1;
 static int  srfi_176      = 0;
 static char* script_file  = "";
+static SCM  Idirs         = STk_nil;
+static SCM  Adirs         = STk_nil;
+
 
 static struct option long_options [] =
 {
@@ -98,6 +103,8 @@ static void Usage(int only_version)
 "   -e sexpr, --execute=sexpr   evaluate the given sexpr and exit\n"
 "   -b file, --boot-file=file   use 'file' to boot the system\n"
 "   -D dir, --conf-dir=dir      change configuration dir (default: ~/.stklos)\n"
+"   -I dir                      prepend 'dir' to the load path list.\n"
+"   -A dir                      append 'dir' to the load path list.\n"
 "   -q, --no-init-file          quiet: do not load the user init file\n"
 "   -i, --interactive           interactive mode\n"
 "   -n, --no-line-editor        don't use line editor\n"
@@ -121,26 +128,28 @@ static int process_program_arguments(int argc, char *argv[])
   int c;
 
   for ( ; ; ) {
-    c = getopt_long(argc, argv, "qidnvVhcf:l:e:b:s:D:u:", long_options, NULL);
+    c = getopt_long(argc, argv, "qidnvVhcf:l:e:b:s:D:I:A:u:", long_options, NULL);
     if (c == -1) break;
 
     switch (c) {
       case 'v': Usage(1); exit(0);
-      case 'V': srfi_176        = 1;                            break;
+      case 'V': srfi_176        = 1;                                    break;
+      case 'I': Idirs = STk_cons(STk_Cstring2string(optarg), Idirs);    break;
+      case 'A': Adirs = STk_cons(STk_Cstring2string(optarg), Adirs);    break;
       case 'f': program_file    = optarg;
-                script_file     = STk_expand_file_name(optarg); break;
-      case 'l': load_file       = optarg;                       break;
-      case 'e': sexpr           = optarg;                       break;
-      case 'b': boot_file       = optarg;                       break;
-      case 'D': conf_dir        = optarg;                       break;
-      case 'i': STk_interactive = 1;                            break;
-      case 'n': line_editor     = 0;                            break;
-      case 'd': debug_mode++;                                   break;
-      case 'q': vanilla         = 1;                            break;
-      case 's': stack_size      = atoi(optarg);                 break;
-      case 'c': STk_read_case_sensitive = 1;                    break;
-      case 'z': STk_read_case_sensitive = 0;                    break;
-      case 'u': STk_use_utf8    = strspn(optarg, "yY1");        break;
+                script_file     = STk_expand_file_name(optarg);         break;
+      case 'l': load_file       = optarg;                               break;
+      case 'e': sexpr           = optarg;                               break;
+      case 'b': boot_file       = optarg;                               break;
+      case 'D': conf_dir        = optarg;                               break;
+      case 'i': STk_interactive = 1;                                    break;
+      case 'n': line_editor     = 0;                                    break;
+      case 'd': debug_mode++;                                           break;
+      case 'q': vanilla         = 1;                                    break;
+      case 's': stack_size      = atoi(optarg);                         break;
+      case 'c': STk_read_case_sensitive = 1;                            break;
+      case 'z': STk_read_case_sensitive = 0;                            break;
+      case 'u': STk_use_utf8    = strspn(optarg, "yY1");                break;
       case '?': /* message error is printed by getopt */
                 fprintf(stderr, "Try `%s --help' for more information\n", *argv);
                 exit(1);
@@ -171,6 +180,8 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   ADD_INT_OPTION(debug_mode,       ":debug");
   ADD_BOOL_OPTION(STk_use_utf8,    ":use-utf8");
   ADD_OPTION(script_file,          ":script-file");
+  ADD_SCM_OPTION(Idirs,            ":prepend-dirs");
+  ADD_SCM_OPTION(Adirs,            ":append-dirs");
 
   STk_define_variable(STk_intern("*%program-args*"), options,
                       STk_STklos_module);

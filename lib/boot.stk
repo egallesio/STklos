@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 24-Nov-2020 15:21 (eg)
+;;;; Last file update:  4-Dec-2020 11:58 (eg)
 ;;;;
 
 (include "runtime.stk")         ; Definition necessary for the bootstrap
@@ -213,7 +213,9 @@
       (file    (key-get *%program-args* :file #f))
       (expr    (key-get *%program-args* :sexpr #f))
       (confdir (key-get *%program-args* :conf-dir #f))
-      (debug   (key-get *%program-args* :debug 0)))
+      (debug   (key-get *%program-args* :debug 0))
+      (Idirs   (key-get *%program-args* :prepend-dirs '()))
+      (Adirs   (key-get *%program-args* :append-dirs '())))
 
   ;; Test if we have the -V flag (SRFI-176 version flag)
   (when s176
@@ -227,6 +229,12 @@
   ;; Set the configuration if needed
   (when confdir
     (%stklos-conf-dir confdir))
+
+  ;; Add the paths given in the -I and -A options
+  (unless (and (null? Idirs) (null? Adirs))
+    (load-path (append Idirs
+                       (load-path)
+                       (reverse Adirs))))
 
   ;; Look at the debug flag
   (when (> debug 0)
