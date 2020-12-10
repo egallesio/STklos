@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  4-Sep-2020 14:01 (eg)
+ * Last file update:  7-Dec-2020 18:59 (eg)
  *
  */
 
@@ -50,6 +50,8 @@ int STk_read_case_sensitive = DEFAULT_CASE_SENSITIVE;
 #define PLACEHOLDER_VAL(x)      (CDR(x))
 
 #define SYMBOL_VALUE(x,ref)     STk_lookup((x), STk_current_module(), &(ref), FALSE)
+
+#define MAX_HEX_SEQ_LEN 20      /* Normally max value is 10FFFFF => 9 with '\0' */
 
 /*===========================================================================*\
  *
@@ -91,12 +93,14 @@ static void error_bad_dotted_list(SCM port)
   signal_error(port, "bad dotted list", STk_nil);
 }
 
-static void error_bad_inline_hexa_sequence(SCM port, char *buffer, int x)
+static void error_bad_inline_hexa_sequence(SCM port, char *str, int in_symbol)
 {
-  char message[200];
+  char message[100];
 
-  snprintf(message, 200, "bad inline hexa sequence (%s %d) on port ~S", buffer, x);
-  signal_error(port, message, port);
+  snprintf(message, 100, "bad inline hexa sequence (%s) in a %s",
+           str, (in_symbol ? "symbol": "string"));
+  signal_error(port, message, STk_nil);
+
 }
 
 static void warning_parenthesis(SCM port)
@@ -123,9 +127,10 @@ static int flush_spaces(SCM port, char *message, SCM file)
 }
 
 
-static int read_hex_sequence(SCM port, char* utf8_seq)
+static int read_hex_sequence(SCM port, char* utf8_seq) // ⇒ -1 if incorrect
 {
-  char *end, buffer[30];   /* normally max value is 10FFFFF */
+  char buffer[MAX_HEX_SEQ_LEN];
+  char *end;   /* normally max value is 10FFFFF */
   int c;
   unsigned i = 0;
   long int val;
@@ -133,16 +138,16 @@ static int read_hex_sequence(SCM port, char* utf8_seq)
   /* assert: current char is 'x' */
   do
     c = buffer[i++] = STk_getc(port);
-  while ((i < sizeof(buffer) - 1) && isxdigit(c) && (c != ';') && (c != EOF));
+  while ((i < MAX_HEX_SEQ_LEN - 1) && isxdigit(c) && (c != ';') && (c != EOF));
   buffer[i] = '\0';
 
   if (c != ';')
-    error_bad_inline_hexa_sequence(port, buffer, 1);
+    goto bad_sequence;
   else {
     val = strtol(buffer, &end, 16);
 
     if (val == LONG_MIN || val == LONG_MAX || *end != ';')
-      error_bad_inline_hexa_sequence(port, buffer, 2);
+      goto bad_sequence;
     else
       if (STk_use_utf8) {
         int len = STk_char2utf8(val, utf8_seq);
@@ -155,10 +160,9 @@ static int read_hex_sequence(SCM port, char* utf8_seq)
         }
       }
   }
-
-  /* if we are here , we have an error */
-  error_bad_inline_hexa_sequence(port, buffer,3);
-  return 0;
+ bad_sequence:
+  strcpy(utf8_seq, buffer); /* for a better error message */
+  return -1;
 }
 
 
@@ -230,6 +234,7 @@ Top:
 static int read_word(SCM port, int c, char *tok, int case_significant)
 /* read an item whose 1st char is in c. Return its length */
 {
+  char buffer[MAX_HEX_SEQ_LEN];    // used to read hex sequences
   register int j = 0;
   int allchars   = 0;
 
@@ -255,15 +260,18 @@ static int read_word(SCM port, int c, char *tok, int case_significant)
         case 'v' : tok[k] ='\v';  break;     /* VTab */
         case 'x': {
           /* This is an internal hexa sequence */
-          char buffer[5];
           int len = read_hex_sequence(port, buffer);
 
-          if (j + len >= MAX_TOKEN_SIZE-1) {
-            tok[j] = '\0';
-            error_token_too_large(port, tok);
-          } else {
-            memcpy(tok + j-1, buffer, len);
-            j += len-1;
+          if (len < 0)
+            error_bad_inline_hexa_sequence(port, buffer, 1); /* 1 = symbol */
+          else {
+            if (j + len >= MAX_TOKEN_SIZE-1) {
+              tok[j] = '\0';
+              error_token_too_large(port, tok);
+            } else {
+              memcpy(tok + j-1, buffer, len);
+              j += len-1;
+            }
           }
           break;
         }
@@ -510,6 +518,8 @@ static SCM read_cycle(SCM port, int c, struct read_context *ctx)
 
 static SCM read_string(SCM port, int constant)
 {
+  char hex_buffer[MAX_HEX_SEQ_LEN];    // used to read hex sequence
+  int bad_hex_sequence = 0;
   int k ,c, n;
   size_t j, len;
   char *p, *buffer;
@@ -546,17 +556,20 @@ static SCM read_string(SCM port, int constant)
                    } while (c == ' ' || c == '\t');
                    break;
         case 'x' : {
-                     char seq[5];
-                     int seqlen = read_hex_sequence(port, seq);
+                     int seqlen = read_hex_sequence(port, hex_buffer);
 
-                     if ((j + seqlen) >= len) {
-                       len = len + len / 2;
-                       buffer = STk_must_realloc(buffer, len);
-                       p = buffer + j;
+                     if (seqlen < 0) {
+                       bad_hex_sequence = 1;
+                     } else {
+                       if ((j + seqlen) >= len) {
+                         len = len + len / 2;
+                         buffer = STk_must_realloc(buffer, len);
+                         p = buffer + j;
+                       }
+                       memcpy(p, hex_buffer, seqlen);
+                       p += seqlen;
+                       j += seqlen;
                      }
-                     memcpy(p, seq, seqlen);
-                     p += seqlen;
-                     j += seqlen;
                      continue;
                    }
         case '0' : for( k=n=0 ; ; k++ ) {
@@ -587,6 +600,7 @@ static SCM read_string(SCM port, int constant)
     j++;
     *p++ = c;
   }
+  if (bad_hex_sequence) error_bad_inline_hexa_sequence(port, hex_buffer, 0);
   if (c == EOF) signal_error(port,"end of file while reading a string on ~S", port);
   *p = '\0';
 

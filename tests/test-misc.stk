@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 19:23
-;;;; Last file update:  8-Oct-2020 16:52 (eg)
+;;;; Last file update: 10-Dec-2020 16:21 (eg)
 ;;;;
 
 (require "test")
@@ -46,6 +46,10 @@ b|)
 (test "useless backslash.3" 'abc 'ab\c)
 (test "special-name.1"       '|\b| '\b)
 (test "special-name.2"       '|| (string->symbol ""))
+
+(test "symbol with an hexa sequence" '|A B| (read-from-string "A\\x20;B"))
+(test/error "non finished hex sequence" (read-from-string "a\\x123Z"))
+(test/error "too long hex sequence" (read-form-string "\\x111111111111111111111111"))
 
 ;;----------------------------------------------------------------------
 (test-subsection "Paths")
@@ -80,6 +84,14 @@ b|)
 (test "#void"
       #t
       (eq? #void (if #f 'WRONG)))
+
+;;----------------------------------------------------------------------
+(test-subsection "Escaped octals in strings")
+
+;; similar tests are in test-r7rs, but since R7RS does not mention escaped octals,
+;; we keep these here:
+(test "read escaped octal"       "C"   (guard (e (else 'wrong)) (read-from-string "\"\\0103\"")))
+(test "read only 3 octal digits" "S45" (guard (e (else 'wrong)) (read-from-string "\"\\012345\"")))
 
 ;;----------------------------------------------------------------------
 (test-subsection "Docstrings and signatures")

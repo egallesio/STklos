@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 15-Oct-2020 18:28 (eg)
+;;;; Last file update: 10-Dec-2020 16:22 (eg)
 ;;;;
 
 (require "test")
@@ -1585,6 +1585,13 @@
 
 ;;======================================================================
 (test-subsection "6.13 Input and Output")
+
+(test/error "bad escaped hex value"       (read-from-string "\"\\xg;\""))
+(test/error "unterminated hex string"     (read-from-string "\"\\x01\""))
+(test/error "bad line continuation"       (read-from-string "\"\\ 1\""))
+(test       "read escaped hex"        "K" (guard (e (else 'wrong))
+                                                 (read-from-string "\"\\x4b;\"")))
+
 
 (test "call-with-port"
       '(123 . #t)
