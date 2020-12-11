@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 27-Nov-2020 09:16 (eg)
+;;;; Last file update: 11-Dec-2020 17:28 (eg)
 ;;;;
 
 
@@ -142,20 +142,31 @@ doc>
 doc>
 |#
 (define (every pred l . others)         ;; compatible with SRFI-1
+  (unless (procedure? pred)
+    (error 'every "bad procedure" pred))
+
   (if (null? others)
       ;; EVERY called with mono argument predicate
       (letrec ((every (lambda (l)
-                        (if (null? l)
-                            #t
-                            (and (pred (car l)) (every (cdr l)))))))
+                        (cond
+                         ((null? l)        #t)
+                         ((null? (cdr l)) (pred (car l)))
+                         (else            (and  (pred (car l))
+                                                (every (cdr l))))))))
         (every l))
+
       ;; General case
-      (letrec ((every (lambda (l)
+      (letrec ((every (lambda (l last)
                         (if (memq '() l)
-                            #t
-                            (and (apply pred (map car l))
-                                 (every (map cdr l)))))))
-        (every (cons l others)))))
+                            last
+                            (let ((cars  (map car l))
+                                  (cdrs (map cdr l)))
+                              (if (memq '() cdrs)
+                                  (apply pred cars)
+                                  (let ((res (apply pred cars)))
+                                    (and res
+                                         (every cdrs res)))))))))
+        (every (cons l others) #t))))
 
 #|
 <doc EXT any
@@ -188,20 +199,30 @@ doc>
 doc>
 |#
 (define (any pred l . others)           ;; compatible with SRFI-1
+  (unless (procedure? pred)
+    (error 'any "bad procedure" pred))
+
   (if (null? others)
       ;; ANY called with mono argument predicate
       (letrec ((any (lambda (l)
-                        (if (null? l)
-                            #f
-                            (or (pred (car l)) (any (cdr l)))))))
+                      (cond
+                       ((null? l)       #f)
+                       ((null? (cdr l)) (pred (car l)))
+                       (else            (or (pred (car l))
+                                            (any (cdr l))))))))
         (any l))
       ;; General case
-      (letrec ((any (lambda (l)
-                        (if (memq '() l)
-                            #f
-                            (or (apply pred (map car l))
-                                 (any (map cdr l)))))))
-        (any (cons l others)))))
+      (letrec ((any (lambda (l last)
+                      (if (memq '() l)
+                          last
+                          (let ((cars  (map car l))
+                                (cdrs (map cdr l)))
+                            (if (memq '() cdrs)
+                                (apply pred cars)
+                                (let ((res (apply pred cars)))
+                                  (or res
+                                      (any cdrs res)))))))))
+        (any (cons l others) #f))))
 
 
 ;;;
@@ -2000,7 +2021,7 @@ doc>
 (define (i/o-invalid-position-error? obj)
   (and (condition? obj)
        (condition-has-type? 'obj &i/o-bad-parameter)))
- 
+
 
 ;; ----------------------------------------------------------------------
 ;;  SRFI-193: "Command line"

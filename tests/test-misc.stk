@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 19:23
-;;;; Last file update: 10-Dec-2020 16:21 (eg)
+;;;; Last file update: 11-Dec-2020 18:38 (eg)
 ;;;;
 
 (require "test")
@@ -84,6 +84,32 @@ b|)
 (test "#void"
       #t
       (eq? #void (if #f 'WRONG)))
+
+;;----------------------------------------------------------------------
+(test-subsection "bonus.stk")
+
+(let ((fct  (lambda (x y) (and (even? x) (even? y) (+ x y)))))
+  (test "every.1"
+        1
+        (every (lambda (x y) (if (and (even? x) (even? y)) 1 -1))
+               '(2 4 5) '(12 14)))
+
+  (test "every.2" #t (every fct '() '()))
+  (test "every.3" #f (every fct '(2 1) '(4 6)))
+  (test "every.4" 12 (every fct '(2 4) '(6 8)))
+  (test "every.5" 12 (every fct '(2 4 1) '(6 8)))
+
+  (test "any.1"
+        -1
+        (any (lambda (x y)
+               (if (or (even? x) (even? y)) 1 -1))
+             '(1 3 4) '(11 13)))
+
+  (test "any.2" #f (any fct '() '()))
+  (test "any.3" #f (any fct '(2 4 6) '(1 3 5)))
+  (test "any.4" 6  (any fct '(2 4 6) '(1 2 5)))
+  (test "any.5" 2  (any fct '(2 4 6 8 10) '(-1 -3 -4))))
+
 
 ;;----------------------------------------------------------------------
 (test-subsection "Escaped octals in strings")
