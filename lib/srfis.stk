@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 27-Nov-2020 16:37 (eg)
+;;;; Last file update: 11-Dec-2020 13:05 (eg)
 ;;;;
 
 
@@ -175,7 +175,7 @@
     ;; 134  Immutable Deques
     (135  "Immutable Texts" (immuttable-texts) "srfi-135")
     ;; 136  Extensible record types
-    ;; 137  Minimal Unique Types
+    (137 "Minimal Unique Types" () "srfi-137")
     ;; 138  Compiling Scheme programs to executables
     ;; 139  Syntax parameters
     ;; 140  Immutable Strings

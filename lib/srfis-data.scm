@@ -81,6 +81,7 @@
     (srfi-130 . "srfi-130")
     (srfi-135 . "srfi-135")
     (immuttable-texts . "srfi-135")
+    (srfi-137 . "srfi-137")
     (srfi-141 . "srfi-141")
     (integer-division . "srfi-141")
     srfi-145
