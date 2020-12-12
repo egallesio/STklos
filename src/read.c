@@ -45,7 +45,6 @@ static SCM sym_read_brace, sym_read_bracket, read_error;
 
 int STk_read_case_sensitive = DEFAULT_CASE_SENSITIVE;
 
-
 #define PLACEHOLDERP(x)         (CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
 #define PLACEHOLDER_VAL(x)      (CDR(x))
 
@@ -71,6 +70,20 @@ static void signal_error(SCM port, char *format, SCM param)
                                       STk_false));                  /* span */
 }
 
+static void error_bad_srfi_207_escape(SCM port, char *tok)
+{
+    signal_error(port, "bad escape \\~a in string-notated bytevector", STk_Cstring2string(tok));
+}
+
+static void error_bad_srfi_207_char(SCM port, char *str, int pos)
+{
+      char message[100];
+
+      snprintf(message, 100,
+               "bad non-ASCII character in position %u of string \"~a\" used as string-notated bytevector",
+               pos);
+      signal_error(port, message, STk_Cstring2string(str));
+}
 
 static void error_token_too_large(SCM port, char *tok)
 {
@@ -127,7 +140,7 @@ static int flush_spaces(SCM port, char *message, SCM file)
 }
 
 
-static int read_hex_sequence(SCM port, char* utf8_seq) // ⇒ -1 if incorrect
+static int read_hex_sequence(SCM port, char* utf8_seq, int use_utf8) // ⇒ -1 if incorrect
 {
   char buffer[MAX_HEX_SEQ_LEN];
   char *end;   /* normally max value is 10FFFFF */
@@ -152,7 +165,7 @@ static int read_hex_sequence(SCM port, char* utf8_seq) // ⇒ -1 if incorrect
     if (val == LONG_MIN || val == LONG_MAX || *end != ';')
       goto bad_sequence;
     else
-      if (STk_use_utf8) {
+      if (use_utf8) {
         int len = STk_char2utf8(val, utf8_seq);
 
         if (len) return len;
@@ -263,7 +276,7 @@ static int read_word(SCM port, int c, char *tok, int case_significant)
         case 'x': {
           /* This is an internal hexa sequence */
           char buffer[MAX_HEX_SEQ_LEN];
-          int len = read_hex_sequence(port, buffer);
+          int len = read_hex_sequence(port, buffer, STk_use_utf8);
 
           if (len < 0)
             error_bad_inline_hexa_sequence(port, buffer, 1); /* 1 = symbol */
@@ -519,10 +532,12 @@ static SCM read_cycle(SCM port, int c, struct read_context *ctx)
 }
 
 
-static SCM read_string(SCM port, int constant)
+static SCM read_string(SCM port, int constant, int srfi_207)
 {
   char hex_buffer[MAX_HEX_SEQ_LEN];    // used to read hex sequence
+  int position = 0;
   int bad_hex_sequence = 0;
+  int bad_srfi_207_char = -1;
   int k ,c, n;
   size_t j, len;
   char *p, *buffer;
@@ -539,12 +554,19 @@ static SCM read_string(SCM port, int constant)
       switch(c) {
         case 'a' : c = '\a'; break;     /* Bell */
         case 'b' : c = '\b'; break;     /* Bs   */
-        case 'e' : c = 0x1b; break;     /* Esc  */
-        case 'f' : c = '\f'; break;     /* FF   */
+        case 'e' : if (srfi_207) { while(((c = STk_getc(port)) != '"') && (c != EOF));
+                                   error_bad_srfi_207_escape(port, "e"); }
+                   else c = 0x1b;
+                   break;           /* Esc  */
+        case 'f' : if (srfi_207) error_bad_srfi_207_escape(port, "f");
+                   else c = '\f';
+                   break;               /* FF   */
         case 'n' : c = '\n'; break;     /* Lf   */
         case 'r' : c = '\r'; break;     /* Cr   */
         case 't' : c = '\t'; break;     /* Tab  */
-        case 'v' : c = '\v'; break;     /* VTab */
+        case 'v' : if (srfi_207) error_bad_srfi_207_escape(port, "v");
+                   else c = '\v';
+                   break;               /* VTab */
         case ' ' : do {
                         c = STk_getc(port);
                    } while (c == ' ' || c == '\t');
@@ -559,7 +581,10 @@ static SCM read_string(SCM port, int constant)
                    } while (c == ' ' || c == '\t');
                    break;
         case 'x' : {
-                     int seqlen = read_hex_sequence(port, hex_buffer);
+                     /* the sequence must be read as UTF8 *only* if
+                        - it is NOT part of a SRFI-207 string-notted bytevector, AND
+                        - STk_use_utf8 is set  */
+                     int seqlen = read_hex_sequence(port, hex_buffer, (!srfi_207) && STk_use_utf8);
 
                      if (seqlen < 0) {
                        bad_hex_sequence = 1;
@@ -574,26 +599,31 @@ static SCM read_string(SCM port, int constant)
                        j += seqlen;
                      }
                      continue;
-                   }
-        case '0' : for( k=n=0 ; ; k++ ) {
-                     c = STk_getc(port);
-                     if (c == EOF)
-                       signal_error(port,
-                                    "eof encountered when reading char in string",
-                                    STk_nil);
+                    }
+        case '0' :  if (srfi_207) error_bad_srfi_207_escape(port, "0");
+                    else {
+                      for( k=n=0 ; ; k++ ) {
+                        c = STk_getc(port);
+                        if (c == EOF)
+                          signal_error(port,
+                                       "eof encountered when reading char in string",
+                                       STk_nil);
 
-                     c &= 0377;
-                     /* 3 digit max for bytes */
-                     if (isdigit(c) && (c < '8') && k < 3)
-                       n = n * 8 + c - '0';
-                     else {
-                       STk_ungetc(c, port);
-                       break;
-                     }
-                   }
-                   c = n & 0xff;
+                        c &= 0377;
+                        /* 3 digit max for bytes */
+                        if (isdigit(c) && (c < '8') && k < 3)
+                          n = n * 8 + c - '0';
+                        else {
+                          STk_ungetc(c, port);
+                          break;
+                        }
+                      }
+                      c = n & 0xff;
+                    }
       }
-    }
+    } else /* not an escape sequence, so if it's a SRFI-207 string,
+              we must restrict chars to ASCII-printable */
+        if (srfi_207 && ( (c < 32) || (c > 126) )) bad_srfi_207_char=j-1;
 
     if ((j + 1) >= len) {
       len = len + len / 2;
@@ -603,11 +633,23 @@ static SCM read_string(SCM port, int constant)
     j++;
     *p++ = c;
   }
+  
   if (bad_hex_sequence) error_bad_inline_hexa_sequence(port, hex_buffer, 0);
   if (c == EOF) signal_error(port,"end of file while reading a string on ~S", port);
   *p = '\0';
+  if (bad_srfi_207_char >=0 ) error_bad_srfi_207_char(port, buffer, bad_srfi_207_char);
 
-  z = STk_makestring(j, buffer);
+  if (srfi_207) {
+    /* if read_string was called for reading a SRFI-207 string-notated bytevector,
+       we *must not* interpret it as UTF-8, so we just do what STk_makestring
+       would do, but without the UTF8 stuff. */
+    NEWCELL(z, string);
+    STRING_CHARS(z)  = STk_must_malloc_atomic(j + 1);
+    STRING_SPACE(z)  = STRING_SIZE(z) = j;
+    STRING_LENGTH(z) = len;
+    strcpy(STRING_CHARS(z), buffer);
+  }
+  else z = STk_makestring(j, buffer);
   if (constant)
     BOXED_INFO(z) |= STRING_CONST;
 
@@ -639,18 +681,35 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
     if ((!STk_uvectors_allowed &&  (strcmp(tok, "u8") == 0)) ||
         (STk_uvectors_allowed && (len == 2 || len == 3))) {
       c = STk_getc(port);
-      if (c != '(') goto bad_spec;
-      tag = STk_uniform_vector_tag(tok);
-      if (tag >= 0) {
-        int konst = ctx->constant;
+      if (c == '(') {
+        tag = STk_uniform_vector_tag(tok);
+        if (tag >= 0) {
+          int konst = ctx->constant;
 
-        /* Ok that's seems correct read the list of values (this IS a constant) */
-        ctx->constant = TRUE;
-        v =  STk_list2uvector(tag, read_list(port, ')', ctx));
-        ctx->constant = konst;
-        BOXED_INFO(v) |= VECTOR_CONST;
-        return v;
-      }
+          /* Ok that's seems correct read the list of values (this IS a constant) */
+          ctx->constant = TRUE;
+          v =  STk_list2uvector(tag, read_list(port, ')', ctx));
+          ctx->constant = konst;
+          BOXED_INFO(v) |= VECTOR_CONST;
+          return v;
+        }
+      } else if (c == '"') { /* SRFI-207: #u8"abc" => #u8(97 98 99) */
+          int konst = ctx->constant;
+          ctx->constant = TRUE;
+          SCM str = read_string(port, TRUE , TRUE);
+
+          len = STRING_SIZE(str);
+          NEWCELL_WITH_LEN(v, uvector, sizeof(struct vector_obj) + len - 1);
+          UVECTOR_TYPE(v) = UVECT_U8;
+          UVECTOR_SIZE(v) = len;
+          
+          for (int i = 0; i < len; i++)
+              ((unsigned char *) UVECTOR_DATA(v))[i] = (unsigned char) (((unsigned char *) STRING_CHARS(str))[i]);
+
+          ctx->constant = konst;
+          BOXED_INFO(v) |= VECTOR_CONST;
+          return v;
+      } else goto bad_spec;
     }
   }
  bad_spec:
@@ -861,7 +920,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         return LIST2(symb, tmp);
       }
       case '"':
-        return read_string(port, ctx->constant);
+          return read_string(port, ctx->constant, FALSE); /* NOT a string-notated bytevector from */
       default:
     default_case: {
           SCM tmp = read_token(port, c, ctx->case_significant);
