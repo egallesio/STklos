@@ -246,7 +246,7 @@
     ;; 204  Wright-Cartwright-Shinn Pattern Matcher (draft)
     ;; 205  POSIX Terminal Fundamentals (draft)
     ;; 206  Auxiliary Syntax Keywords (draft)
-    ;; 207  String-notated bytevectors
+    (207  "String-notated bytevectors" () "srfi-207")
     ;; 208  NaN procedures (draft)
     ;; 209  Enumerations and Enum Sets (draft)
     ;; 210  Procedures and Syntax for Multiple Values (draft)
