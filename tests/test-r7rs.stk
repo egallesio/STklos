@@ -1663,6 +1663,12 @@
           (close-port p)
           (list closed? val (port-closed? p)))))
 
+  (test/error "write text to binary port"
+              (call-with-port (open-bytevector-port)
+                              (lambda (out)
+                                (write "should not work")
+                                (get-output-bytevector out))))
+
 ; --------------------------------------------------
 (let ((p (open-input-bytevector #u8(0 1 2 3))))
   (test "read-bytevector.1"

@@ -624,7 +624,7 @@ doc>
  */
 DEFINE_PRIMITIVE("write", write, subr12, (SCM expr, SCM port))
 {
-  port = verify_port(port, PORT_WRITE);
+  port = verify_port(port, PORT_WRITE | PORT_TEXTUAL);
   STk_print(expr, port, WRT_MODE);
   return STk_void;
 }
