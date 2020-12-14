@@ -79,6 +79,8 @@
     (srfi-129 . "srfi-129")
     (titlecase . "srfi-129")
     (srfi-130 . "srfi-130")
+    (srfi-134 . "srfi-134")
+    (immutable-deques . "srfi-134")
     (srfi-135 . "srfi-135")
     (immuttable-texts . "srfi-135")
     (srfi-137 . "srfi-137")
