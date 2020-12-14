@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  7-Dec-2020 18:59 (eg)
+ * Last file update: 14-Dec-2020 17:09 (eg)
  *
  */
 
@@ -97,7 +97,7 @@ static void error_bad_inline_hexa_sequence(SCM port, char *str, int in_symbol)
 {
   char message[100];
 
-  snprintf(message, 100, "bad inline hexa sequence (%s) in a %s",
+  snprintf(message, 100, "bad or unfinished hexa sequence `\\x%s' in a %s",
            str, (in_symbol ? "symbol": "string"));
   signal_error(port, message, STk_nil);
 
@@ -141,8 +141,11 @@ static int read_hex_sequence(SCM port, char* utf8_seq) // ⇒ -1 if incorrect
   while ((i < MAX_HEX_SEQ_LEN - 1) && isxdigit(c) && (c != ';') && (c != EOF));
   buffer[i] = '\0';
 
-  if (c != ';')
+  if (c != ';') {
+    buffer[i-1] = '\0';
+    STk_ungetc(c, port);
     goto bad_sequence;
+  }
   else {
     val = strtol(buffer, &end, 16);
 
@@ -234,7 +237,6 @@ Top:
 static int read_word(SCM port, int c, char *tok, int case_significant)
 /* read an item whose 1st char is in c. Return its length */
 {
-  char buffer[MAX_HEX_SEQ_LEN];    // used to read hex sequences
   register int j = 0;
   int allchars   = 0;
 
@@ -260,6 +262,7 @@ static int read_word(SCM port, int c, char *tok, int case_significant)
         case 'v' : tok[k] ='\v';  break;     /* VTab */
         case 'x': {
           /* This is an internal hexa sequence */
+          char buffer[MAX_HEX_SEQ_LEN];
           int len = read_hex_sequence(port, buffer);
 
           if (len < 0)

@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 19:23
-;;;; Last file update: 11-Dec-2020 18:38 (eg)
+;;;; Last file update: 14-Dec-2020 16:39 (eg)
 ;;;;
 
 (require "test")
@@ -48,8 +48,10 @@ b|)
 (test "special-name.2"       '|| (string->symbol ""))
 
 (test "symbol with an hexa sequence" '|A B| (read-from-string "A\\x20;B"))
-(test/error "non finished hex sequence" (read-from-string "a\\x123Z"))
+(test/error "non finished hex sequence.1" (read-from-string "a\\x123Z"))
+(test/error "non finished hex sequence.2" (read-from-string "a\\x123"))
 (test/error "too long hex sequence" (read-form-string "\\x111111111111111111111111"))
+
 
 ;;----------------------------------------------------------------------
 (test-subsection "Paths")
