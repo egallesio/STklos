@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  7-Jan-2021 15:33 (eg)
+ * Last file update:  7-Jan-2021 16:55 (eg)
  *
  */
 
@@ -584,6 +584,10 @@ static SCM read_string(SCM port, int constant)
         case '\n': do {
                         c = STk_getc(port);
                    } while (c == ' ' || c == '\t');
+                   if (c == '"' || c == '\\') {
+                     STk_ungetc(c, port);
+                     continue;
+                   }
                    break;
         case 'x' : {
                      int seqlen = read_hex_sequence(port, hex_buffer, STk_use_utf8);
@@ -677,12 +681,17 @@ static SCM read_srfi207_bytevector(SCM port, int constant)
                    } while (c == ' ' || c == '\t');
 
                    if (c != '\n') { pos = j; error = BAD_ESCAPED_SPACE; break; }
+                   
                    /* FALLTHROUGH */
         case '\n': do {
                      c = STk_getc(port);
                    } while (c == ' ' || c == '\t');
+                   if (c == '"' || c == '\\') {
+                     STk_ungetc(c, port);
+                     continue;
+                   }
                    break;
-        case 'x' : {
+      case 'x' : {
           int seqlen = read_hex_sequence(port, (char *) &c, 0);
                      if (seqlen < 0) error = BAD_HEX_SEQUENCE;
                      break;
