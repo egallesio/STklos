@@ -97,3 +97,4 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-193: Command line
     - SRFI-195: Multiple-value boxes
     - SRFI-196: Range Objects
+    - SRFI-207: String-notated bytevectors

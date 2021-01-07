@@ -1,7 +1,7 @@
 /*
  * r e a d  . c                         -- reading stuff
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 14-Dec-2020 17:09 (eg)
+ * Last file update:  7-Jan-2021 15:33 (eg)
  *
  */
 
@@ -45,12 +45,19 @@ static SCM sym_read_brace, sym_read_bracket, read_error;
 
 int STk_read_case_sensitive = DEFAULT_CASE_SENSITIVE;
 
+
 #define PLACEHOLDERP(x)         (CONSP(x) && (BOXED_INFO(x) & CONS_PLACEHOLDER))
 #define PLACEHOLDER_VAL(x)      (CDR(x))
 
 #define SYMBOL_VALUE(x,ref)     STk_lookup((x), STk_current_module(), &(ref), FALSE)
 
 #define MAX_HEX_SEQ_LEN 20      /* Normally max value is 10FFFFF => 9 with '\0' */
+
+/* errors when reading strings */
+#define BAD_HEX_SEQUENCE     1
+#define BAD_ESCAPED_SPACE    2
+#define BAD_ASCII_CHAR       3
+
 
 /*===========================================================================*\
  *
@@ -70,20 +77,6 @@ static void signal_error(SCM port, char *format, SCM param)
                                       STk_false));                  /* span */
 }
 
-static void error_bad_srfi_207_escape(SCM port, char *tok)
-{
-    signal_error(port, "bad escape \\~a in string-notated bytevector", STk_Cstring2string(tok));
-}
-
-static void error_bad_srfi_207_char(SCM port, char *str, int pos)
-{
-      char message[100];
-
-      snprintf(message, 100,
-               "bad non-ASCII character in position %u of string \"~a\" used as string-notated bytevector",
-               pos);
-      signal_error(port, message, STk_Cstring2string(str));
-}
 
 static void error_token_too_large(SCM port, char *tok)
 {
@@ -116,9 +109,34 @@ static void error_bad_inline_hexa_sequence(SCM port, char *str, int in_symbol)
 
 }
 
+static void error_bad_ascii_character(SCM port, char *str, int pos)
+{
+  char message[100];
+
+  snprintf(message, 100, "bad non-ASCII character in position %d of #u8\"~a\"", pos);
+  signal_error(port, message, STk_Cstring2string(str));
+}
+
+static void error_bad_escaped_space(SCM port, int pos)
+{
+  signal_error(port, "bad line continuation sequence in string near pos ~a",
+               MAKE_INT(pos));
+}
+
+static void error_eof_in_string(SCM port)
+{
+  signal_error(port, "end of file while reading a string on ~S", port);
+}
+
+
 static void warning_parenthesis(SCM port)
 {
   STk_warning("bad closing parenthesis on line %d of ~S", PORT_LINE(port), port);
+}
+
+static void warning_bad_escaped_sequence(SCM port, int c)
+{
+  STk_warning("character %c must not be escaped on line %d of ~S", c, PORT_LINE(port), port);
 }
 
 
@@ -532,13 +550,10 @@ static SCM read_cycle(SCM port, int c, struct read_context *ctx)
 }
 
 
-static SCM read_string(SCM port, int constant, int srfi_207)
+static SCM read_string(SCM port, int constant)
 {
   char hex_buffer[MAX_HEX_SEQ_LEN];    // used to read hex sequence
-  int position = 0;
-  int bad_hex_sequence = 0;
-  int bad_srfi_207_char = -1;
-  int k ,c, n;
+  int k ,c, pos = 0, error = 0, n;
   size_t j, len;
   char *p, *buffer;
   SCM z;
@@ -554,40 +569,27 @@ static SCM read_string(SCM port, int constant, int srfi_207)
       switch(c) {
         case 'a' : c = '\a'; break;     /* Bell */
         case 'b' : c = '\b'; break;     /* Bs   */
-        case 'e' : if (srfi_207) { while(((c = STk_getc(port)) != '"') && (c != EOF));
-                                   error_bad_srfi_207_escape(port, "e"); }
-                   else c = 0x1b;
-                   break;           /* Esc  */
-        case 'f' : if (srfi_207) error_bad_srfi_207_escape(port, "f");
-                   else c = '\f';
-                   break;               /* FF   */
+        case 'e' : c = 0x1b; break;     /* Esc  */
+        case 'f' : c = '\f'; break;     /* FF   */
         case 'n' : c = '\n'; break;     /* Lf   */
         case 'r' : c = '\r'; break;     /* Cr   */
         case 't' : c = '\t'; break;     /* Tab  */
-        case 'v' : if (srfi_207) error_bad_srfi_207_escape(port, "v");
-                   else c = '\v';
-                   break;               /* VTab */
+        case 'v' : c = '\v'; break;     /* VTab */
         case ' ' : do {
                         c = STk_getc(port);
                    } while (c == ' ' || c == '\t');
 
-                  if (c != '\n') {
-                    signal_error(port, "bad line continuation sequence in string",
-                                 STk_nil);
-                  }
+                  if (c != '\n') { pos = j; error = BAD_ESCAPED_SPACE; break; }
                   /* FALLTHROUGH */
         case '\n': do {
                         c = STk_getc(port);
                    } while (c == ' ' || c == '\t');
                    break;
         case 'x' : {
-                     /* the sequence must be read as UTF8 *only* if
-                        - it is NOT part of a SRFI-207 string-notted bytevector, AND
-                        - STk_use_utf8 is set  */
-                     int seqlen = read_hex_sequence(port, hex_buffer, (!srfi_207) && STk_use_utf8);
+                     int seqlen = read_hex_sequence(port, hex_buffer, STk_use_utf8);
 
                      if (seqlen < 0) {
-                       bad_hex_sequence = 1;
+                       error = 1;
                      } else {
                        if ((j + seqlen) >= len) {
                          len = len + len / 2;
@@ -600,9 +602,7 @@ static SCM read_string(SCM port, int constant, int srfi_207)
                      }
                      continue;
                     }
-        case '0' :  if (srfi_207) error_bad_srfi_207_escape(port, "0");
-                    else {
-                      for( k=n=0 ; ; k++ ) {
+        case '0' : for( k=n=0 ; ; k++ ) {
                         c = STk_getc(port);
                         if (c == EOF)
                           signal_error(port,
@@ -619,12 +619,8 @@ static SCM read_string(SCM port, int constant, int srfi_207)
                         }
                       }
                       c = n & 0xff;
-                    }
       }
-    } else /* not an escape sequence, so if it's a SRFI-207 string,
-              we must restrict chars to ASCII-printable */
-        if (srfi_207 && ( (c < 32) || (c > 126) )) bad_srfi_207_char=j-1;
-
+    }
     if ((j + 1) >= len) {
       len = len + len / 2;
       buffer = STk_must_realloc(buffer, len);
@@ -633,23 +629,18 @@ static SCM read_string(SCM port, int constant, int srfi_207)
     j++;
     *p++ = c;
   }
-  
-  if (bad_hex_sequence) error_bad_inline_hexa_sequence(port, hex_buffer, 0);
-  if (c == EOF) signal_error(port,"end of file while reading a string on ~S", port);
   *p = '\0';
-  if (bad_srfi_207_char >=0 ) error_bad_srfi_207_char(port, buffer, bad_srfi_207_char);
-
-  if (srfi_207) {
-    /* if read_string was called for reading a SRFI-207 string-notated bytevector,
-       we *must not* interpret it as UTF-8, so we just do what STk_makestring
-       would do, but without the UTF8 stuff. */
-    NEWCELL(z, string);
-    STRING_CHARS(z)  = STk_must_malloc_atomic(j + 1);
-    STRING_SPACE(z)  = STRING_SIZE(z) = j;
-    STRING_LENGTH(z) = len;
-    strcpy(STRING_CHARS(z), buffer);
+  
+  switch(error) {    /* No BAD_ASCII_CHAR here: '\!' is equivalent to '!' */
+    case BAD_HEX_SEQUENCE:
+      error_bad_inline_hexa_sequence(port, hex_buffer, 0); break;
+    case BAD_ESCAPED_SPACE:
+      error_bad_escaped_space(port, pos); break;
+    default:
+      if (c == EOF) error_eof_in_string(port);
   }
-  else z = STk_makestring(j, buffer);
+
+  z = STk_makestring(j, buffer);
   if (constant)
     BOXED_INFO(z) |= STRING_CONST;
 
@@ -657,6 +648,83 @@ static SCM read_string(SCM port, int constant, int srfi_207)
   return z;
 }
 
+
+static SCM read_srfi207_bytevector(SCM port, int constant)
+{
+  char hex_buffer[MAX_HEX_SEQ_LEN];    // used to read hex sequence
+  int c, pos = 0, error = 0;
+  size_t j = 0, len = 100;
+  char *p, *buffer;
+  SCM z;
+
+  p = buffer = STk_must_malloc(len);
+
+  while(((c = STk_getc(port)) != '"') && (c != EOF)) {
+    if (c == '\\') {
+      c = STk_getc(port);
+      if (c == EOF) signal_error(port, "eof encountered after \\", STk_nil);
+      switch(c) {
+        case '"' : c = 34;   break;
+        case '\\': c = 92;   break;
+        case 'a' : c = 7;    break;
+        case 'b' : c = 8;    break;
+        case 't' : c = 9;    break;
+        case 'n' : c = 10;   break;
+        case 'r' : c = 13;   break;
+        case '|' : c = 124;  break;
+        case ' ' : do {
+                     c = STk_getc(port);
+                   } while (c == ' ' || c == '\t');
+
+                   if (c != '\n') { pos = j; error = BAD_ESCAPED_SPACE; break; }
+                   /* FALLTHROUGH */
+        case '\n': do {
+                     c = STk_getc(port);
+                   } while (c == ' ' || c == '\t');
+                   break;
+        case 'x' : {
+          int seqlen = read_hex_sequence(port, (char *) &c, 0);
+                     if (seqlen < 0) error = BAD_HEX_SEQUENCE;
+                     break;
+                   }
+        default:
+          warning_bad_escaped_sequence(port, c);
+      }
+    } else {
+      if (!isgraph(c) && !isspace(c)) {
+        pos = j-1;
+        error = BAD_ASCII_CHAR;
+      }
+    }
+
+     if ((j + 1) >= len) {
+      len = len + len / 2;
+      buffer = STk_must_realloc(buffer, len);
+      p = buffer + j;
+    }
+    j++;
+    *p++ = c;
+  }
+  *p = 0;
+
+  switch(error) {
+    case BAD_HEX_SEQUENCE:
+      error_bad_inline_hexa_sequence(port, hex_buffer, 0); break;
+    case BAD_ESCAPED_SPACE:
+      error_bad_escaped_space(port, pos); break;
+    case BAD_ASCII_CHAR:
+      error_bad_ascii_character(port, buffer, pos); break;
+    default:
+      if (c == EOF) error_eof_in_string(port);
+  }
+
+  z = STk_make_bytevector_from_C_string(buffer, j);
+  if (constant)
+    BOXED_INFO(z) |= VECTOR_CONST;
+
+  STk_free(buffer);
+  return z;
+}
 
 static SCM read_vector(SCM port, struct read_context *ctx)
 {
@@ -681,7 +749,9 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
     if ((!STk_uvectors_allowed &&  (strcmp(tok, "u8") == 0)) ||
         (STk_uvectors_allowed && (len == 2 || len == 3))) {
       c = STk_getc(port);
-      if (c == '(') {
+      if (c == '"')
+        return read_srfi207_bytevector(port, ctx->constant);
+      if (c != '(') goto bad_spec;
         tag = STk_uniform_vector_tag(tok);
         if (tag >= 0) {
           int konst = ctx->constant;
@@ -693,23 +763,6 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
           BOXED_INFO(v) |= VECTOR_CONST;
           return v;
         }
-      } else if (c == '"') { /* SRFI-207: #u8"abc" => #u8(97 98 99) */
-          int konst = ctx->constant;
-          ctx->constant = TRUE;
-          SCM str = read_string(port, TRUE , TRUE);
-
-          len = STRING_SIZE(str);
-          NEWCELL_WITH_LEN(v, uvector, sizeof(struct vector_obj) + len - 1);
-          UVECTOR_TYPE(v) = UVECT_U8;
-          UVECTOR_SIZE(v) = len;
-          
-          for (int i = 0; i < len; i++)
-              ((unsigned char *) UVECTOR_DATA(v))[i] = (unsigned char) (((unsigned char *) STRING_CHARS(str))[i]);
-
-          ctx->constant = konst;
-          BOXED_INFO(v) |= VECTOR_CONST;
-          return v;
-      } else goto bad_spec;
     }
   }
  bad_spec:
@@ -920,7 +973,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
         return LIST2(symb, tmp);
       }
       case '"':
-          return read_string(port, ctx->constant, FALSE); /* NOT a string-notated bytevector from */
+        return read_string(port, ctx->constant);
       default:
     default_case: {
           SCM tmp = read_token(port, c, ctx->case_significant);

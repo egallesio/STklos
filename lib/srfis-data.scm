@@ -113,6 +113,7 @@
     srfi-193
     srfi-195
     (srfi-196 . "srfi-196")
+    (srfi-207 . "srfi-207")
     (conditions "srfi-35" "srfi-36")
     (generators "srfi-158" "srfi-190")
 ))
