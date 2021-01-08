@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  7-Jan-2021 16:55 (eg)
+ * Last file update:  8-Jan-2021 10:58 (eg)
  *
  */
 
@@ -575,6 +575,7 @@ static SCM read_string(SCM port, int constant)
         case 'r' : c = '\r'; break;     /* Cr   */
         case 't' : c = '\t'; break;     /* Tab  */
         case 'v' : c = '\v'; break;     /* VTab */
+        case '\t':
         case ' ' : do {
                         c = STk_getc(port);
                    } while (c == ' ' || c == '\t');
@@ -676,6 +677,7 @@ static SCM read_srfi207_bytevector(SCM port, int constant)
         case 'n' : c = 10;   break;
         case 'r' : c = 13;   break;
         case '|' : c = 124;  break;
+        case '\t':
         case ' ' : do {
                      c = STk_getc(port);
                    } while (c == ' ' || c == '\t');
