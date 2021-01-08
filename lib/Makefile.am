@@ -1,7 +1,7 @@
 # Makefile for STklos lib
 #
 #
-# Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 11-Dec-2020 13:04 (eg)
+# Last file update:  8-Jan-2021 11:34 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -315,7 +315,7 @@ $(DOCDB): $(scheme_sources)
 	$(scheme_sources) > $(DOCDB)
 
 clean:
-	/bin/rm -f $(scheme_OBJS) $(scheme_SOLIBS)
+	/bin/rm -f $(scheme_OBJS) $(scheme_SOLIBS) ./srfis-data.scm
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) clean)\
 	done
