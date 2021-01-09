@@ -79,6 +79,8 @@ SRC_STK = bigloo-support.stk  \
           pretty-print.stk    \
           recette.stk         \
           slib.stk            \
+          streams-primitive.stk \
+          streams-derived.stk \
           srfi-1.stk          \
           srfi-2.stk          \
           srfi-4.stk          \
@@ -95,6 +97,7 @@ SRC_STK = bigloo-support.stk  \
           srfi-35.stk         \
           srfi-36.stk         \
           srfi-37.stk         \
+          srfi-41.stk         \
           srfi-48.stk         \
           srfi-51.stk         \
           srfi-54.stk         \
@@ -138,74 +141,77 @@ SRC_STK = bigloo-support.stk  \
 
 SRC_C = srfi-175-impl.c
 
-scheme_OBJS = compfile.ostk    \
-          bigmatch.ostk        \
-          full-syntax.ostk     \
-          full-conditions.ostk \
-          describe.ostk        \
-          env.ostk             \
-          getopt.ostk          \
-          help.ostk            \
-          http.ostk            \
-          lex-rt.ostk          \
-          pretty-print.ostk    \
-          recette.ostk         \
-          slib.ostk            \
-          srfi-1.ostk          \
-          srfi-2.ostk          \
-          srfi-4.ostk          \
-          srfi-5.ostk	       \
-          srfi-7.ostk          \
-          srfi-9.ostk          \
-          srfi-11.ostk         \
-          srfi-13.ostk         \
-          srfi-14.ostk         \
-          srfi-17.ostk         \
-          srfi-26.ostk         \
-          srfi-27.ostk         \
-          srfi-31.ostk         \
-          srfi-35.ostk         \
-          srfi-36.ostk         \
-          srfi-37.ostk         \
-          srfi-48.ostk         \
-          srfi-51.ostk         \
-          srfi-54.ostk         \
-          srfi-59.ostk         \
-          srfi-60.ostk         \
-          srfi-61.ostk         \
-          srfi-64.ostk         \
-          srfi-66.ostk         \
-          srfi-69.ostk         \
-          srfi-70.ostk         \
-          srfi-74.ostk         \
-          srfi-89.ostk         \
-          srfi-96.ostk         \
-          srfi-100.ostk        \
-          srfi-113.ostk        \
-          srfi-117.ostk        \
-          srfi-127.ostk        \
-          srfi-128.ostk        \
-          srfi-129.ostk        \
-          srfi-130.ostk        \
-          srfi-134.ostk        \
-          srfi-135.ostk        \
-          srfi-137.ostk        \
-          srfi-141.ostk        \
-          srfi-151.ostk        \
-          srfi-156.ostk        \
-          srfi-158.ostk        \
-          srfi-161.ostk        \
-          srfi-171.ostk        \
-          srfi-173.ostk        \
-          srfi-174.ostk        \
-          srfi-175.ostk        \
-          srfi-180.ostk        \
-          srfi-185.ostk        \
-          srfi-189.ostk        \
-          srfi-190.ostk        \
-          srfi-196.ostk        \
-          srfi-207.ostk        \
-          tar.ostk             \
+scheme_OBJS = compfile.ostk     \
+          bigmatch.ostk         \
+          full-syntax.ostk      \
+          full-conditions.ostk  \
+          describe.ostk         \
+          env.ostk              \
+          getopt.ostk           \
+          help.ostk             \
+          http.ostk             \
+          lex-rt.ostk           \
+          pretty-print.ostk     \
+          recette.ostk          \
+          slib.ostk             \
+          streams-primitive.stk \
+          streams-derived.stk   \
+          srfi-1.ostk           \
+          srfi-2.ostk           \
+          srfi-4.ostk           \
+          srfi-5.ostk	        \
+          srfi-7.ostk           \
+          srfi-9.ostk           \
+          srfi-11.ostk          \
+          srfi-13.ostk          \
+          srfi-14.ostk          \
+          srfi-17.ostk          \
+          srfi-26.ostk          \
+          srfi-27.ostk          \
+          srfi-31.ostk          \
+          srfi-35.ostk          \
+          srfi-36.ostk          \
+          srfi-37.ostk          \
+          srfi-41.ostk          \
+          srfi-48.ostk          \
+          srfi-51.ostk          \
+          srfi-54.ostk          \
+          srfi-59.ostk          \
+          srfi-60.ostk          \
+          srfi-61.ostk          \
+          srfi-64.ostk          \
+          srfi-66.ostk          \
+          srfi-69.ostk          \
+          srfi-70.ostk          \
+          srfi-74.ostk          \
+          srfi-89.ostk          \
+          srfi-96.ostk          \
+          srfi-100.ostk         \
+          srfi-113.ostk         \
+          srfi-117.ostk         \
+          srfi-127.ostk         \
+          srfi-128.ostk         \
+          srfi-129.ostk         \
+          srfi-130.ostk         \
+          srfi-134.ostk         \
+          srfi-135.ostk         \
+          srfi-137.ostk         \
+          srfi-141.ostk         \
+          srfi-151.ostk         \
+          srfi-156.ostk         \
+          srfi-158.ostk         \
+          srfi-161.ostk         \
+          srfi-171.ostk         \
+          srfi-173.ostk         \
+          srfi-174.ostk         \
+          srfi-175.ostk         \
+          srfi-180.ostk         \
+          srfi-185.ostk         \
+          srfi-189.ostk         \
+          srfi-190.ostk         \
+          srfi-196.ostk         \
+          srfi-207.ostk         \
+          tar.ostk              \
           trace.ostk
 
 scheme_SOLIBS = srfi-175-impl.@SH_SUFFIX@

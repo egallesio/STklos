@@ -79,7 +79,7 @@
     (38 "External representation of shared structures")
     (39 "Parameters objects" (parameters))
     ;; 40  A Library of Streams
-    ;; 41  ?????????? Disappeared
+    (41 "Streams" (streams) "srfi-41")
     ;; 42  Eager Comprehensions
     ;; 43  Vector library
     ;; 44  Collections
