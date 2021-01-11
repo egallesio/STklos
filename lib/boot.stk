@@ -69,6 +69,15 @@
 (autoload        "srfi-48"        srfi48:help srfi48:format-fixed)
 
 ;==============================================================================
+;; give new names to some primitives and define some constants so as to comply
+;; with SRFI-143 (fixnums):
+(define fxquotient fxdiv)
+(define fxremainder fxrem)
+(define fx-width (fixnum-width))
+(define fx-greatest (greatest-fixnum))
+(define fx-least (least-fixnum))
+
+;==============================================================================
 ;; Execute the REPL only if a file was not given on the command line
 (define %before-exit-hook void)
 
