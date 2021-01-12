@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  8-Jan-2021 11:34 (eg)
+# Last file update: 12-Jan-2021 18:39 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -154,8 +154,8 @@ scheme_OBJS = compfile.ostk     \
           pretty-print.ostk     \
           recette.ostk          \
           slib.ostk             \
-          streams-primitive.stk \
-          streams-derived.stk   \
+          streams-primitive.ostk \
+          streams-derived.ostk  \
           srfi-1.ostk           \
           srfi-2.ostk           \
           srfi-4.ostk           \
