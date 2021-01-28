@@ -25,8 +25,6 @@
 ;;;; Last file update: 10-Jul-2020 08:31 (jpellegrini)
 ;;;;
 
-(require "srfi-9")
-
 (define-module SRFI-41
   (export stream-null stream-cons stream? stream-null? stream-pair? stream-car
           stream-cdr stream-lambda define-stream list->stream port->stream stream
@@ -35,7 +33,8 @@
           stream-iterate stream-length stream-let stream-map stream-match _
           stream-of stream-range stream-ref stream-reverse stream-scan stream-take
           stream-take-while stream-unfold stream-unfolds stream-zip)
-  (export-syntax stream-lambda)
+  (export-syntax stream-cons stream-lambda stream-delay stream-lazy
+                 define-stream stream stream-let stream-match stream-of)
   
   (require "streams-primitive")
   (require "streams-derived")
