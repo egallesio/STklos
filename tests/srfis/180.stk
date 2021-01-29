@@ -7,9 +7,8 @@
 ;; Other tests (only for json-read and json-write) are also available
 ;; in the file "../test-json.stk".
 ;; ----------------------------------------------------------------------
-(test-subsection "SRFI 180 - JSON")
-
-(require "srfi-180")
+;; (test-subsection "SRFI 180 - JSON")
+;; (require "srfi-180")
 
 (test "json-generator.1"
       '(42)
