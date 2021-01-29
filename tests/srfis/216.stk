@@ -1,0 +1,79 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 216  ...
+;; ----------------------------------------------------------------------
+
+;;
+;; The tests are based on the tests given in the SRFI repository
+;; No copyright in the file execpt the following header
+;;     ;; Time-stamp: <2021-01-06 22:50:57 lockywolf>
+;;     ;; Title: Testing SRFI-?.
+;;     ;; Author: lockywolf
+;;     ;; Date: <2020-11-03 Tue>
+
+
+;; For the test we redefine here stream-null?  beacause the test of SRFI-41
+;; defines its own version of stream-null? which is seen here instead of the
+;; one of srfi-216. 
+(define stream-null? (in-module SRFI-216 stream-null?))
+
+
+(define (sleep-a-little)
+  (define starting-time (current-second))
+  (let loop ()
+    (if (< (- (current-second) starting-time) 1)
+       (loop))))
+
+;;; Test runtime.
+(test "srfi-216.1" #t
+      (> (let* ((first-value (runtime))
+                (second-value (begin (sleep-a-little) (runtime))))
+           (- second-value first-value)) 0))
+
+;;; Test random.
+(test "srfi-216.2" #t (> (random 100) -1))
+(test "srfi-216.3" #t (< (random 100) 100))
+(test "srfi-216.4" #t (exact-integer? (random 100)))
+(test "srfi-216.5" #f (exact-integer? (random 100.0)))
+
+;;; Test parallel-execute.
+
+;; Testing parallel programming is always hard.
+;; In this case, please verify that your code produces both 2 _and_ 3.
+
+(define (my-wait n)
+  (if (= n 0)
+      #t
+      (my-wait (- n 1))))
+
+(do ((i 0 (+ i 1)))
+    ((= i 5) #f)
+  (let ((testval 1))
+    (parallel-execute
+     (lambda ()
+       (my-wait (random-integer 100))
+       (set! testval 2))
+     (lambda ()
+       (my-wait (random-integer 100))
+       (set! testval 3)))
+    (test "srfi-216.6" #t
+          (or (= testval 2)
+              (= testval 3)))))
+
+;; Testing test-and-set!
+                                        ; No test on atomicity here.
+(let ((cell (list #f)))
+  (test "srfi-216.7" #f (test-and-set! cell))
+  (set-car! cell (list #t))
+  (test "srfi-216.8" #t (test-and-set! cell)))
+
+;; Testing constants
+(test "srfi-216.9" #f  (if false #t #f))
+(test "srfi-216.10" #t (if true #t #f))
+(test "srfi-216.11" '() nil)
+
+;; Testing streams.
+(test "srfi-216.12" #t (stream-null? the-empty-stream))
+(test "srfi-216.13" 'a (car (cons-stream 'a 'b)))
+(test "srfi-216.14" #t (promise? (cdr (cons-stream 'a 'b))))
+(test "srfi-216.12" 'b (force (cdr (cons-stream 'a 'b))))
+>

@@ -2,8 +2,6 @@
 ;;; SRFI 195 - Multiple-value boxes
 ;;; ======================================================================
 
-(test-subsection "SRFI 195 - Multiple-value boxes")
-
 (require "srfi-1")
 (define (fold* kons* knil* clist . clist*)
   (unbox (apply fold

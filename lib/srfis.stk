@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfis.stk  - The list of STklos implemented SRFIs and some utilities
 ;;;;
-;;;; Copyright © 2020 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 11-Dec-2020 13:05 (eg)
+;;;; Last file update: 28-Jan-2021 18:38 (eg)
 ;;;;
 
 
@@ -255,7 +255,7 @@
     ;; 213  Identifier Properties (draft)
     ;; 214  Flexvectors (draft)
     ;; 215  Central Log Exchange (draft)
-    ;; 216  SICP Prerequisites (Portable) (draft)
+    (216  "SICP Prerequisites (Portable)" () "srfi-216")
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file

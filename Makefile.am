@@ -1,6 +1,6 @@
 # Makefile.am for STklos
 #
-# Copyright © 1999-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Nov-2020 11:16 (eg)
+# Last file update: 29-Jan-2021 17:14 (eg)
 
 
 EXTRA_DIST   =
@@ -52,8 +52,8 @@ install-doc: install-base
 # Dont call it directly
 SUPPORTED-SRFIS: lib/srfis.stk
 	@echo "Updating list of supported SRFIs ... "
-	sed -e '/- SRFI/d' $@ > $@.tmp                                          && \
-	./src/stklos -l ./lib/srfis.stk -f utils/update-srfi-list.stk >> $@.tmp && \
+	sed -e '/- SRFI/d' $@ > $@.tmp                                             && \
+	./src/stklos -I ./lib -l srfis.stk -f utils/update-srfi-list.stk >> $@.tmp && \
 	mv -f  $@.tmp $@
 
 clean-am:

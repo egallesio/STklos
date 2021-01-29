@@ -50,24 +50,21 @@
 ;;;; Last file update: 08-Jul-2020 12:43 (jpellegrini)
 ;;;;
 
-(require "srfi-9")
-
 (define-module STREAMS-PRIMITIVE
   (export stream-null stream-cons stream? stream-null? stream-pair?
           stream-car stream-cdr)
   
   (export make-stream make-stream-pare)
   (export %stream-eager)
-  (export-syntax stream-lambda)
+  (export stream-cons stream-lambda stream-delay stream-lazy)
+  (export-syntax stream-cons stream-lambda stream-delay stream-lazy)
 
-  (require "srfi-9")
 
   ;;(define-record-type (stream-type make-stream stream?)
   ;;  (fields (mutable box stream-promise stream-promise!)))
-  (define-record-type <stream>
-    (make-stream box)
-    stream?
-    (box stream-promise stream-promise!))
+  (define-struct stream promise)
+  (define (stream-promise! s x)
+    (set! (stream-promise s) x))
   
   (define-syntax stream-lazy
     (syntax-rules ()
@@ -100,11 +97,9 @@
 
 ;;  (define-record-type (stream-pare-type make-stream-pare stream-pare?)
 ;;    (fields (immutable kar stream-kar) (immutable kdr stream-kdr)))
-  (define-record-type <stream-pare>
-    (make-stream-pare kar kdr)
-    stream-pare?
-    (kar stream-kar)
-    (kdr stream-kdr))
+  (define-struct stream-pare kar kdr)
+  (define stream-kar stream-pare-kar)
+  (define stream-kdr stream-pare-kdr)
 
   (define (stream-pair? obj)
     (and (stream? obj) (stream-pare? (stream-force obj))))
