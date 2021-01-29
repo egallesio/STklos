@@ -22,10 +22,14 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 09-Jul-2020 23:22 (jpellegrini)
-;;;; Last file update: 10-Jul-2020 08:31 (jpellegrini)
+;;;; Last file update: 29-Jan-2021 16:00 (eg)
 ;;;;
 
+(require "streams-primitive")
+(require "streams-derived")
+
 (define-module SRFI-41
+  (import STREAMS-PRIMITIVE STREAMS-DERIVED)
   (export stream-null stream-cons stream? stream-null? stream-pair? stream-car
           stream-cdr stream-lambda define-stream list->stream port->stream stream
           stream->list stream-append stream-concat stream-constant stream-drop
@@ -35,10 +39,6 @@
           stream-take-while stream-unfold stream-unfolds stream-zip)
   (export-syntax stream-cons stream-lambda stream-delay stream-lazy
                  define-stream stream stream-let stream-match stream-of)
-  
-  (require "streams-primitive")
-  (require "streams-derived")
-
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
 (select-module STklos)

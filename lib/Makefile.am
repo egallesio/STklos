@@ -297,11 +297,12 @@ install-sources:
 $(SCHEME_OBJS): ../src/boot.img
 compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
-full-conditions: srfi-35.ostk srfi-36.stk
+full-conditions: srfi-35.ostk srfi-36.ostk
 recette.ostk: pretty-print.ostk
 srfi-13.ostk: srfi-14.ostk
 srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
+srfi41.ostk: srfi-1.ostk streams-primitive.ostk streams-derived.ostk
 
 #
 # SRFIs support
