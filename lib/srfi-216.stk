@@ -1,0 +1,95 @@
+>;;;;
+;;;;
+;;;; srfi-216.stk         -- SRFI-116: SICP Prerequisites
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 28-Jan-2021 16:03
+;;;; Last file update: 29-Jan-2021 15:35 (eg)
+;;;;
+
+(require "srfi-27")
+
+(define-module SRFI-216
+  (export false true nil
+          runtime
+          random
+          parallel-execute test-and-set!
+          the-empty-stream stream-null?)
+  (export-syntax cons-stream)
+
+;; ======================================================================
+;; Constants
+;; ======================================================================
+(define false #false)
+(define true  #true)
+(define nil   '())
+
+
+;; ======================================================================
+;; Runtime
+;; ======================================================================
+(define runtime current-second)
+
+;; ======================================================================
+;; Random
+;; ======================================================================
+(define (random n)
+  (if (exact-integer? n)
+      (random-integer n)
+      (* n (random-real))))
+
+;; ======================================================================
+;; Multi-threading
+;; ======================================================================
+(define (parallel-execute . procs)
+  (let ((threads (map (lambda (p) (thread-start! (make-thread p)))
+                      procs)))
+    (for-each thread-join! threads)))
+
+;; tests-and-set!
+(define test-and-set! #f)
+(let ((mutex(make-mutex)))
+  (set! test-and-set!
+        (lambda (cell)
+          (mutex-lock! mutex)
+          (let ((result (if (car cell)
+                            #t
+                            (begin (set-car! cell #t)
+                                   #f))))
+            (mutex-unlock! mutex)
+            result))))
+
+
+;; ======================================================================
+;; Streams.
+;; ======================================================================
+(define-macro (cons-stream a b)
+  `(cons ,a (delay ,b)))
+
+(define the-empty-stream '())
+(define stream-null?  null?)
+
+) ;; END OF DEFINE-MODULE
+;;;; ======================================================================
+(select-module STklos)
+
+(import SRFI-216)
+(provide "srfi-216")
