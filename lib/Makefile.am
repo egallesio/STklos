@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 29-Jan-2021 11:05 (eg)
+# Last file update: 29-Jan-2021 18:11 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -304,7 +304,10 @@ recette.ostk: pretty-print.ostk
 srfi-13.ostk: srfi-14.ostk
 srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
-srfi41.ostk: srfi-1.ostk streams-primitive.ostk streams-derived.ostk
+srfi-41.ostk: streams-derived.ostk streams-primitive.ostk
+streams-derived.ostk: srfi-1.ostk streams-primitive.ostk
+
+
 
 #
 # SRFIs support
