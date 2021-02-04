@@ -22,9 +22,10 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 28-Jan-2021 16:03
-;;;; Last file update: 30-Jan-2021 11:11 (eg)
+;;;; Last file update:  4-Feb-2021 12:04 (eg)
 ;;;;
 
+(require "srfi-27")
 
 (define-module SRFI-216
   (export false true nil
