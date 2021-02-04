@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  9-Aug-2020 16:31 (eg)
+ * Last file update:  4-Feb-2021 11:20 (eg)
  */
 
 #include "stklos.h"
@@ -139,7 +139,7 @@ DEFINE_PRIMITIVE("void", scheme_void, vsubr, (int _UNUSED(argc), SCM _UNUSED(*ar
 
 
 /*
-<doc address-of
+<doc EXT address-of
  * (address-of obj)
  *
  * Returns the address of the object |obj| as an integer.
@@ -178,7 +178,7 @@ void STk_gc_init(void)
 
 
 /*
-<doc gc
+<doc EXT gc
  * (gc)
  *
  * Returns the address of the object |obj| as an integer.
