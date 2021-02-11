@@ -181,7 +181,7 @@ void STk_gc_init(void)
 <doc EXT gc
  * (gc)
  *
- * Returns the address of the object |obj| as an integer.
+ * Force a garbage collection step.
 doc>
 */
 DEFINE_PRIMITIVE("gc", scheme_gc, subr0, (void))
