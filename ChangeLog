@@ -1,3 +1,285 @@
+2021-02-04 Erick Gallesio <eg@unice.fr>
+	- Documentation update
+	- gc and address-of were not tagged as STklos procedures (Issue #166)
+
+2021-02-01 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix documentation of (gc) primitive
+	- Modified the Makefile for Github-CI
+
+2021-01-29 Erick Gallesio <eg@unice.fr>
+	- Cleaning of some tests in "tests/srfis/" directory
+	- Added SRFI-216
+	- Small modification on SRFI-41
+
+2021-01-09 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-41 - Streams
+
+2021-01-08 Erick Gallesio <eg@unice.fr>
+	- Delete the file lib/srfis-data.scm when doing a make clean
+	- Added '\t' for entering skip escaped space sequences
+	- Another bug fix in escaped newline reading in strings
+	- Added some tests for escaped chars in strings
+	- Rewriting the code for reading string-notated bytevectors (srfi-207)
+
+2021-01-08 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-207
+
+2020-12-15 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #160 from jpellegrini/check-ports
+
+2020-12-14 Erick Gallesio <eg@unice.fr>
+	- Another fix for issue #152
+	- Merge pull request #158 from jpellegrini/srfi-134-2
+
+2020-12-12 Jeronimo Pellegrini <j_p@aleph0.info>
+	- write: check if port is textual
+
+2020-12-11 Erick Gallesio <eg@unice.fr>
+	- every and any functions  does not return the last PRED value
+	- Added SRFI-137 - Minimal Unique Types
+
+2020-12-10 Erick Gallesio <eg@unice.fr>
+	- Correct the Issue #152 signaled by @jpelleggini
+
+2020-12-04 Erick Gallesio <eg@unice.fr>
+	- Added option -I and -A to prepend and append to the loadpath
+
+2020-11-27 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-134 - Immutable Deques
+
+2020-11-27 Erick Gallesio <eg@unice.fr>
+	- Updated HACKING.md for SRFI documenatation
+	- Documentation update
+	- SRFI documentation is automatically built
+
+2020-11-27 Erick Gallesio <eg@unice.fr>
+	- New primitive: require-feature
+
+2020-11-26 Erick Gallesio <eg@unice.fr>
+	- Add SRFI-130 - Cursor-based string library
+
+2020-11-26 Erick Gallesio <eg@unice.fr>
+	- Make the TEST.LOG file easier to read (@jpellegrini)
+	- Merge pull request #156 from jpellegrini/srfi-135-3
+	- Add SRFI-135 - Immutable Texts (@jpellegrini)
+	- Add SRFI-127 - Lazy Sequences (@jpellegrini)
+
+2020-11-24 Erick Gallesio <eg@unice.fr>
+	- Documentation update
+	- Fixed some problems with the documentation of SRFI 192
+	- Merge pull request #149 from jpellegrini/srfi-192
+	- Updated the HACKING.md to reflect the new way to implement SRFIs
+	- Automatic generation of file SUPPORTED-SRFIS
+	- All the tests files ar now in separate files
+	- Bug fix: test-subsection failed if the string was too long
+	- Modification of srfi-0 to use the new SRFI database
+	- The new generated SRFI-list is now included in the bootstrap
+	- Added a new script to manage the list of srfis.
+	- Added a "database" of implemented SRFIS
+
+2020-11-21 Erick Gallesio <eg@unice.fr>
+	- Merge pull request #151 from jpellegrini/small-fixes
+
+2020-11-20 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix uppercase for "#F"
+
+2020-11-16 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #148 from jpellegrini/read-imprecise-ratio
+
+2020-11-14 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-192: Port Positioning
+	- Let reader accept #i for rationals
+
+2020-11-13 Erick Gallesio <eg@unice.fr>
+	- Merge pull request #142 from jpellegrini/srfi-4-tests
+	- Merge pull request #144 from jpellegrini/srfi-4
+	- Merge pull request #143 from jpellegrini/small-fixes
+	- Merge pull request #140 from jpellegrini/srfi-1-tests
+	- Merge pull request #135 from jpellegrini/srfi-1
+	- Merge pull request #134 from jpellegrini/srfi-196
+	- Correction of SRFI-48 implementation. Added tests for SRFI-48.
+	- Documentation update
+	- Rename the STklos primitive string-index in string-position
+	- Accept ~F without specifying a width in format
+	- Change the way STk_NaN is initialized
+
+2020-11-12 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add tests for SRFI-1
+	- Fix u64/s64 vectors mixup
+	- Include test-subsection for SRFI-193 test
+	- Add tests for SRFI-4
+
+2020-11-08 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix list=
+
+2020-11-06 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-196 - Range Objects
+
+2020-11-01 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #133 from jpellegrini/srfi-64
+	- Merge pull request #132 from jpellegrini/small-fixes
+
+2020-11-01 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Export a procedure used by a macro in SRFI-64
+
+2020-10-31 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix SRFI-193 comment in srfi.skb
+
+2020-10-31 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #131 from jpellegrini/srfi-2
+
+2020-10-30 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Update SRFI-2 implementation
+
+2020-10-29 Erick Gallesio <eg@unice.fr>
+	- Changed the version of LALR-SCM to version 2.5.0
+	- Converted HTML documentation from 2.1.0 to Markdown
+
+2020-10-28 Erick Gallesio <eg@unice.fr>
+	- Changed the implementation of SRFI-61
+
+2020-10-24 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-61 - A more general COND clause
+
+2020-10-23 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Remove extra copy of GPL
+
+2020-10-22 Erick Gallesio <eg@unice.fr>
+	- Added tests for SRFI-2
+
+2020-10-19 Erick Gallesio <eg@unice.fr>
+	- Deleted a definition  of define-values in tests/test-srfi.stk
+
+2020-10-15 Erick Gallesio <eg@unice.fr>
+	- Added the R7RS define-values form
+	- Usage message for stklos-genlex was unaligned
+
+2020-10-10 Erick Gallesio <eg@unice.fr>
+	- Documentation update
+
+2020-10-09 Erick Gallesio <eg@unice.fr>
+	- Added SRFI-5
+	- Fixed the error-duplicate-option function
+	- Rewriting of the function compile
+
+2020-10-08 Erick Gallesio <eg@unice.fr>
+	- file-suffix with filename without suffix returns #f (instead of "")
+
+2020-09-24 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'master' of github.com:egallesio/STklos into master
+	- Updated tests now that command-name may suppress script suffix
+	- command-name returns the script name without suffix
+	- Merge pull request #129 from jpellegrini/manpage
+	- Fixed automake for using the configure STRIP command
+
+2020-09-24 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix typos
+	- It's "#\space", not "#space"
+
+2020-09-23 Erick Gallesio <eg@unice.fr>
+	- Fixed some automake warnings
+	- Upgrade automake stuff
+	- Upgraded the main ltmain.sh script
+
+2020-09-23 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix typos
+
+2020-09-21 Erick Gallesio <eg@unice.fr>
+	- Avoid an automake warning of the STRIP variable
+	- Added a copyright pointer in expand.pp
+	- Merge pull request #117 from jpellegrini/install
+	- Renamed boot.ok in boot.keep
+	- Merge pull request #114 from jpellegrini/cleanup
+	- Merge pull request #120 from jpellegrini/manpage
+	- Added copyright notices in Makefiles
+
+2020-09-19 Erick Gallesio <eg@unice.fr>
+	- Fix: examples/socket-server-thread was not built
+	- SRFI 45 is now embedded.
+	- Added a copyrigth in pkgman lex files
+	- Deleted the useless file etc/stk-dynload.c
+	- Copyright clarification for some files
+	- Bug fix in the implementation of SRFI-193
+	- Documentation update for scripts in example/ directory
+	- Added a new demo: socket-server-thread
+
+2020-09-18 Erick Gallesio <eg@unice.fr>
+	- Added a new demo: socket-server-fork
+	- Added a README in the examples directory
+	- Change the shebang of some demos to show how to make simple scripts
+	- Updated SRFI list
+	- Update srfi-0.stk
+	- Merge pull request #116 from jpellegrini/srfis
+	- Merge pull request #121 from jpellegrini/encoding
+
+2020-09-16 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Change encoding to UTF-8
+	- Add manpage to stklos-script
+	- Install .so files in lib/
+	- Update SRFIs information in srfi-0.stk
+
+2020-09-16 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #112 from jpellegrini/small-fixes
+	- Documentation update
+	- Added SRFI-193: Command Line
+
+2020-09-14 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use an env var for strip
+	- Make clean really clean in src/
+
+2020-09-07 Erick Gallesio <eg@unice.fr>
+	- Added the new make target `install-base-no-strip`
+
+2020-09-04 Erick Gallesio <eg@unice.fr>
+	- Updated documentation
+
+2020-09-04 Erick Gallesio <eg@unice.fr>
+	- Implementation of SRFI 195 -- Multiple-value boxes
+
+2020-09-02 Erick Gallesio <eg@unice.fr>
+	- Transform SRFI 111 in an embedded SRFI
+
+2020-09-01 Erick Gallesio <eg@unice.fr>
+	- Reduce again the size of installation with the install-base target
+
+2020-08-31 Erick Gallesio <eg@unice.fr>
+	- Typo fix in documentation
+	- Exchanged SRFI-128 and SRFI-129 tests
+	- Merge pull request #111 from jpellegrini/srfi-113
+
+2020-08-31 Erick Gallesio <eg@unice.fr>
+	- Bug fix on the construction of non hygienic macros (Issue #102)
+
+2020-08-31 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix interaction between SRFIs 113 and 128 during tests
+
+2020-08-30 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-113 - Sets and Bags
+
+2020-08-30 Erick Gallesio <eg@unice.fr>
+	- Changed the implementation of line numbers generation
+
+2020-08-29 Erick Gallesio <eg@unice.fr>
+	- Bug fix in the disassemble-expr function
+	- Merge pull request #50 from jpellegrini/srfi-128
+	- Merge pull request #105 from jpellegrini/vm-doc
+	- Merge pull request #108 from jpellegrini/small-fixes
+
+2020-08-28 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix documentation of disassemble-expr
+	- Updates to vm documentation
+	- Some more updates on the VM documentation
+
+2020-08-28 Erick Gallesio <eg@unice.fr>
+	- Added documentation of disassemble-expr
+	- Added the function `disassemble-expr`
+	- Allow to avoid the  installation of some parts of STklos
+
+2020-08-17 Erick Gallesio <eg@unice.fr>
+	- STklos 1.50 Release
+	=====================
+
+
 2020-08-17 Erick Gallesio <eg@unice.fr>
 	- Changed the implementation of line numbers generation in
 	  debug mode

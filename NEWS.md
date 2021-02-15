@@ -1,6 +1,49 @@
 NEWS
 ====
 
+Version 1.60
+------------
+
+As the previous version, R7RS compliance is enhanced and a bunch of
+new SRFIS has been implemented (thanks again to [Jeronimo Pellegrini —
+**@jpellegrini**](https://github.com/jpellegrini)).
+
+Changes in this version are:
+
+	- Added option -I and -A to prepend and append to the loadpath
+	- New primitives/syntaxes
+	    - `require-feature`
+		- `define-values`
+	- Added makefile targets to install only subparts of STklos on constrained
+	  environments
+	- Reader accepts now `#i` for rationals
+    - Changed the version of LALR-SCM to version 2.5.0
+    - Added scripts and documentation in the `exemples` directory
+    - Definition of a new framework for implementing SRFIs
+		- Documentation of SRFI is now automatically built
+		- SRFI tests are automatically done with `make tests`
+		- Automatic update of the SUPPORTED-SRFIS file
+    - Support of new SRFIs
+	    - SRFI-5: A compatible let form with signatures and rest arguments
+	    - SRFI-41: Streams
+		- SRFI-61: A more general COND clause
+		- SRFI-113: Sets and Bags
+		- SRFI-127: Lazy Sequences
+		- SRFI-128: Comparators (reduced)
+		- SRFI-130: Cursor-based string library
+		- SRFI-134: Immutable Deques
+		- SRFI-135: Immutable Texts
+		- SRFI-137: Minimal Unique Types
+		- SRFI-192: Port Positioning
+		- SRFI-193: Command line
+		- SRFI-195: Multiple-value boxes
+		- SRFI-196: Range Objects
+		- SRFI-207: String-notated bytevectors
+		- SRFI-216: SICP Prerequisites (Portable)
+	- Documentations update
+	- Added tests
+	- Bug fixes
+
 Version 1.50
 ------------
 

@@ -48,7 +48,8 @@ four) step process:
 
 3. **Optionally**, you can type `make tests` to run some internal tests
 
-4. To install the version just compiled in the place you have chosen previously (or in `/usr/local`), type `make install` for a full install. The size of a full installation is approximately 6.5Mb (on a x86 64 bits architecture. On machines with a more limited space, you can use the following Makefile installation targets:
+4. To install the version just compiled in the configured place, type `make install` for a full install. The size of a full installation is approximately 6.5Mb (on a x86 64 bits architecture).  
+On machines with a more limited space, you can use the following Makefile installation targets:
     - `install-base` to install only the VM and all the compiled Scheme files (size is ~2.0Mb). The installation is fully functional (except the `help` function which will yield an error).
     - `install-base-no-strip` is identical to `install-base`, except that the `stklos` binary is not stripped (this could be useful when cross compiling **STklos** or when generating packages with debug symbols).
     - `install-sources` to install the Scheme source files used whence building the system (adds ~1.5Mb to the installation)

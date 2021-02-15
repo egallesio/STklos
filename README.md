@@ -1,4 +1,4 @@
-STklos (version 1.50)
+STklos (version 1.60)
 =====================
 
 **Erick Gallesio** <eg(at)unice.fr>
@@ -57,12 +57,16 @@ parameter which is a compare function, vector->list accepts the
 The 1.40 version continues to add R7RS traits to STklos.
 
 **August 2020** 
-
 The 1.50 version has been ported on various architectures (in
 particular on `small" systems running on 32 bits little as well as big
 endian) and a port on Android.  This version brings also the support
 of 23 new SRFIs. For a complete list of supported SRFIs, see
 https://www.stklos.net/srfi.html
+
+
+**February 2021** 
+Support for 16 new [**SRFIs**](https://www.stklos.net/srfi.html)
+giving a total of 103 supported SRFIs.
 
 
 SRFI Support
