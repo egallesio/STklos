@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 29-Jan-2021 18:11 (eg)
+# Last file update: 11-Feb-2021 18:40 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -294,8 +294,7 @@ install-sources:
 
 
 
-# Compile SRFI13 before SRFI14 to avoid 2 warnings
-
+# Explicit some dependencies here to avoid some warnings when compiling files
 $(SCHEME_OBJS): ../src/boot.img
 compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
@@ -306,7 +305,8 @@ srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
 srfi-41.ostk: streams-derived.ostk streams-primitive.ostk
 streams-derived.ostk: srfi-1.ostk streams-primitive.ostk
-
+srfi-113.ostk: srfi-128.ostk
+srfi-134.ostk: srfi-158.ostk
 
 
 #

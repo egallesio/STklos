@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-4.stk	-- Implementation of SRFI-4 (Uniform Vectors)
 ;;;;
-;;;; Copyright © 2001-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,9 +21,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Apr-2001 11:36 (eg)
-;;;; Last file update: 19-Aug-2011 11:03 (eg)
+;;;; Last file update: 15-Feb-2021 10:52 (eg)
 ;;;;
 
+
+;; Following two definitions have been added here to avoid compilation warnings
+(define %list->uvector (void))
+(define %uvector->list (void))
 
 ;; This implementation is built on the uniform layer present in the file
 ;; src/uvector.c. Nearly everything is written in Scheme
