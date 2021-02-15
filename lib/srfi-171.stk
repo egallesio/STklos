@@ -49,6 +49,7 @@
 ;;;; Last file update: 25-May-2020 07:00 (jpellegrini)
 ;;;;
 
+(require "srfi-1")
 (require "srfi-9")
 (require "srfi-69")
 
