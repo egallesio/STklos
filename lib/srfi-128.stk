@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-113.stk		-- Implementation of SRFI-113
+;;;; srfi-128.stk		-- Implementation of SRFI-128
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -69,7 +69,7 @@
    ;; need to export %salt, otherwise (hash-salt) won't work:
    %salt%)
 
-  
+
 ;;;; Main part of the SRFI 114 reference implementation
 
 ;;; "There are two ways of constructing a software design: One way is to
@@ -80,7 +80,7 @@
 ;;; Syntax (because syntax must be defined before it is used, contra Dr. Hardcase)
 
 ;; Arithmetic if
-  
+
 (define-syntax comparator-if<=>
   (syntax-rules ()
     ((if<=> a b less equal greater)
@@ -407,7 +407,7 @@
 ;; its string-hash (slightly adapted) here.
 ;;
 ;; Now all tests pass.
-;; 
+;;
 ;; (define (string-hash obj)
 ;;   (let ((acc (make-hasher))
 ;;         (len (string-length obj)))
@@ -421,7 +421,7 @@
     (if (positive? (hash-bound))
  	(modulo h (hash-bound))
  	h)))
-  
+
 ;;; The default comparator
 
 ;;; Standard comparators and their functions
@@ -521,7 +521,7 @@
                              bytevector? bytevector-length bytevector-u8-ref) obj))
     ; Add more here
     (else (comparator-hash (registered-comparator (object-type obj)) obj))))
-  
+
 (define (default-ordering a b)
   (let ((a-type (object-type a))
         (b-type (object-type b)))
