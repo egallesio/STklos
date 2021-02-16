@@ -17,7 +17,7 @@ STklos Reference Manual<hr align="center" width="10%">4. Standard Procedures</di
 <td align="left" valign="top" width="20%" bgcolor="#204875">
 <table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-49932">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-49927">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -6029,15 +6029,15 @@ the <code>&lt;body&gt;</code>.
 <tr><td bgcolor="#dddddd"><a name="gc"></a><a name="--index-entry-38030"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(gc)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
-<br />Returns the address of the object <code>obj</code> as an integer.</td></tr>
+<br />Force a garbage collection step.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="void"></a><a name="--index-entry-38054"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="void"></a><a name="--index-entry-38049"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(void)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(void arg1 ...)</font></strong></code><br /><br />Returns the special <em>void</em> object. If arguments are passed to <code>void</code>,
 they are evalued and simply ignored.</td></tr>
-</tbody></table><a name="--index-entry-38084"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="error"></a><a name="--index-entry-38090"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+</tbody></table><a name="--index-entry-38079"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="error"></a><a name="--index-entry-38085"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(error str obj ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(error name str obj ...)</font></strong></code><br /><br /><code>error</code> is used to signal an error to the user. The second form
@@ -6078,7 +6078,7 @@ and some conform to <strong>SRFI-23</strong>
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="signal-error"></a><a name="--index-entry-38278"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="signal-error"></a><a name="--index-entry-38273"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(signal-error cond str obj ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(signal-error cond name str obj ...)</font></strong></code><br /><br />This procedure is similar to error, except that the type of the error
@@ -6092,7 +6092,7 @@ Note that <code>(error arg ...)</code> is equivalent to
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="file-error-"></a><a name="read-error-"></a><a name="--index-entry-38324"></a><a name="--index-entry-38328"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="file-error-"></a><a name="read-error-"></a><a name="--index-entry-38319"></a><a name="--index-entry-38323"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(read-error? obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(file-error? obj)</font></strong></code><br /><br />
@@ -6101,25 +6101,25 @@ by the read procedure or by the inability to open an input or
 output port on a file, respectively. Otherwise, it returns #f.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="error-object-"></a><a name="--index-entry-38357"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="error-object-"></a><a name="--index-entry-38352"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(error-object? obj )</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns #t if obj is an object created by error. Otherwise,
 it returns #f.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="error-object-message"></a><a name="--index-entry-38377"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="error-object-message"></a><a name="--index-entry-38372"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(error-object-message error-object)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the message encapsulated by <code>error-object</code>.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="error-object-irritants"></a><a name="--index-entry-38402"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="error-object-irritants"></a><a name="--index-entry-38397"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(error-object-irritants error-object)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">R<sup>7</sup>RS</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the message encapsulated by <code>error-object</code>.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="error-object-location"></a><a name="--index-entry-38427"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="error-object-location"></a><a name="--index-entry-38422"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(error-object-location error-object)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Returns the location encapsulated by <code>error-object</code> if it exists.
@@ -6133,7 +6133,7 @@ of the procedure which raised the error.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="require-extension"></a><a name="--index-entry-38469"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="require-extension"></a><a name="--index-entry-38464"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(require-extension &lt;clause&gt; ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />The syntax of require-extension is as follows:
@@ -6172,7 +6172,7 @@ is equivalent to the previous <code>require-extension</code>. A list of availabl
  symbols as  <code>&lt;extension-argument&gt;</code> is given in chapter
 <a href="stklos-ref-14.html#SRFIs">SRFIs</a>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="require-feature"></a><a name="--index-entry-38567"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="require-feature"></a><a name="--index-entry-38562"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(require-feature feature)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This primitive ensures that the <code>feature</code> (in sense of SRFI-0 feature) can be used.
@@ -6192,7 +6192,7 @@ the following forms are equivalent:
 
 See also chapter <a href="stklos-ref-14.html#SRFIs">SRFIs</a> for more information.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="repl"></a><a name="--index-entry-38634"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="repl"></a><a name="--index-entry-38629"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(repl)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(repl :in inport :out outport :err errport)</font></strong></code><br /><br />This procedure launches a new Read-Eval-Print-Loop. Calls to <code>repl</code> can be
@@ -6200,7 +6200,7 @@ embedded. The ports used for input/output as well as the error port can
 be passed when <code>repl</code> is called. If not passed, they default to
 <code>current-input-port</code>, <code>current-output-port</code> and <code>current-error-port</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="assume"></a><a name="--index-entry-38682"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="assume"></a><a name="--index-entry-38677"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(assume obj ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />The special form <code>assume</code> is defined in <strong>SRFI-145</strong>.
@@ -6209,14 +6209,14 @@ that evaluates to the value of <code>obj</code> if <code>obj</code> evaluates to
 value and it is an error if <code>obj</code> evaluates to a false value.
 <br />
 When <span style="font-variant: small-caps">STklos</span> is not in debug mode, the call to <code>assume</code> is elided.</td></tr>
-</tbody></table><a name="--index-entry-38740"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="version-alist"></a><a name="--index-entry-38746"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+</tbody></table><a name="--index-entry-38735"></a><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="version-alist"></a><a name="--index-entry-38741"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(version-alist)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This function returns an association list of <span style="font-variant: small-caps">STklos</span> properties as defined by
 <a  class="http" href="http://srfi.schemers.org/srfi-176/srfi-176.html">SRFI-176</a>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="apropos"></a><a name="--index-entry-38774"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="apropos"></a><a name="--index-entry-38769"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(apropos obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(apropos obj module)</font></strong></code><br /><br /><code>Apropos</code> returns a list of symbols whose print name contains the
@@ -6226,7 +6226,7 @@ be accessed from the given <code>module</code> (defaults to the current module i
 provided).
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="help"></a><a name="--index-entry-38817"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="help"></a><a name="--index-entry-38812"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(help obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(help)</font></strong></code><br /><br />When called with an argument, <code>help</code> tries to give some help on the
@@ -6252,7 +6252,7 @@ strings are given below
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="trace"></a><a name="--index-entry-38879"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="trace"></a><a name="--index-entry-38874"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(trace f-name ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />Invoking <code>trace</code> with one or more function names causes the functions
@@ -6262,7 +6262,7 @@ printed on the current error port.
 
 Calling <code>trace</code> with no argument returns the list of traced functions.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="untrace"></a><a name="--index-entry-38908"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="untrace"></a><a name="--index-entry-38903"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(untrace f-name ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />Invoking <code>untrace</code> with one or more function names causes the functions
@@ -6271,7 +6271,7 @@ named not to be traced anymore.
 Calling <code>untrace</code> with no argument will untrace all the functions
 currently traced.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="pp"></a><a name="pretty-print"></a><a name="--index-entry-38938"></a><a name="--index-entry-38942"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="pp"></a><a name="pretty-print"></a><a name="--index-entry-38933"></a><a name="--index-entry-38937"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(pretty-print sexpr :key port width)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(pp sexpr :key port width)</font></strong></code><br /><br />This function tries to obtain a pretty-printed representation of <code>sexpr</code>.
@@ -6283,7 +6283,7 @@ is returned as a string by <code>pretty-print</code>.
 Note that <code>pp</code> is another name for <code>pretty-print</code>.
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="disassemble"></a><a name="--index-entry-39020"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="disassemble"></a><a name="--index-entry-39015"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(disassemble proc)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(disassemble proc port)</font></strong></code><br /><br />This function prints on the given port (by default the current output
@@ -6332,7 +6332,7 @@ The call <code>(disassemble fact)</code> will produce the following output:
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="disassemble-expr"></a><a name="--index-entry-39146"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="disassemble-expr"></a><a name="--index-entry-39141"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(disassemble-expr sexpr)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(disassemble-expr show-consts)</font></strong></code><br /><code><strong><font color="IndianRed">(disassemble-expr show-consts port)</font></strong></code><br /><br />This function prints on the given <code>port</code> (by default the current output
@@ -6366,7 +6366,7 @@ will print:
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="uri-parse"></a><a name="--index-entry-39235"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="uri-parse"></a><a name="--index-entry-39230"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(uri-parse str)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Parses the string <code>str</code> as a RFC-2396 URI and return a keyed list with the
@@ -6402,7 +6402,7 @@ empty string)</li>
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="string--html"></a><a name="--index-entry-39446"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="string--html"></a><a name="--index-entry-39441"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(string-&gt;html str)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />This primitive is a convenience function; it returns a string where
@@ -6415,36 +6415,36 @@ in Scheme, but this version is fast.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="md5sum"></a><a name="--index-entry-39481"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="md5sum"></a><a name="--index-entry-39476"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(md5sum obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return a string contening the md5 dum of <code>obj</code>. The given parameter can
 be a string or an open input port.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="md5sum-file"></a><a name="--index-entry-39505"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="md5sum-file"></a><a name="--index-entry-39500"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(md5sum-file str)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return a string contening the md5 dum of the file whose name is <code>str</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="base64-encode"></a><a name="--index-entry-39529"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="base64-encode"></a><a name="--index-entry-39524"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(base64-encode in)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(base64-encode in out)</font></strong></code><br /><br />Encode in Base64 the characters from input port <code>in</code> to the output port
 <code>out</code>. If <code>out</code> is not specified, it defaults to the current output port.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="base64-decode"></a><a name="--index-entry-39567"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="base64-decode"></a><a name="--index-entry-39562"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(base64-decode in)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(base64-decode in out)</font></strong></code><br /><br />Decode the Base64 characters from input port <code>in</code> to the output port
 <code>out</code>. If <code>out</code> is not specified, it defaults to the current output port.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="base64-encode-string"></a><a name="--index-entry-39605"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="base64-encode-string"></a><a name="--index-entry-39600"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(base64-encode-string str)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Return a string contening the contents of <code>str</code> converted to Base64
 encoded format</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="base64-decode-string"></a><a name="--index-entry-39629"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="base64-decode-string"></a><a name="--index-entry-39624"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(base64-encode-string str)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Decode the contents of <code>str</code> expressed in Base64.</td></tr>
@@ -6467,6 +6467,6 @@ of the time of day.
 <br>
 </div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Thu Feb  4 11:23:35 2021</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Tue Feb 16 16:00:32 2021</em></small>
 </body>
 </html>
