@@ -1,7 +1,7 @@
 -;;;;
 ;;;; bonus.stk  -- Useful primitives not in R5RS
 ;;;;
-;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 11-Dec-2020 17:28 (eg)
+;;;; Last file update: 16-Feb-2021 16:36 (eg)
 ;;;;
 
 
@@ -1949,7 +1949,7 @@ doc>
 (define port-position port-current-position)
 
 #|
-<doc EXT set-port-position!
+<doc EXT port-has-set-port-position!?
  * (port-has-set-port-position!? port)
  *
  * The port-has-set-port-position!? procedure returns #t if the port supports

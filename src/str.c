@@ -2,7 +2,7 @@
  *
  * s t r . c                            -- Strings management
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 13-Nov-2020 12:34 (eg)
+ * Last file update: 16-Feb-2021 16:30 (eg)
  */
 
 #include <ctype.h>
@@ -688,7 +688,7 @@ DEFINE_PRIMITIVE("string-append", string_append, vsubr, (int argc, SCM* argv))
 }
 
 /*
-<doc SRFI-118 string-append!
+<doc EXT string-append!
  * (string-append! string ...)
  *
  * Extends string by appending each value (in order) to the end of string.
@@ -696,6 +696,9 @@ DEFINE_PRIMITIVE("string-append", string_append, vsubr, (int argc, SCM* argv))
  *
  * It is guaranteed that string-append! will return the same object that
  * was passed to it as first argument, whose size may be larger.
+ *
+ * ,(linebreak)
+ * ,(bold "Note:") This function is defined in SRFI-118.
 doc>
  */
 DEFINE_PRIMITIVE("string-append!", string_dappend, vsubr, (int argc, SCM* argv))
@@ -709,9 +712,9 @@ DEFINE_PRIMITIVE("string-append!", string_dappend, vsubr, (int argc, SCM* argv))
 
   /* First argument MUST be a string: */
   if (STRINGP(argv[0]))
-      total_size = STRING_SIZE(argv[0]);
+    total_size = STRING_SIZE(argv[0]);
   else
-      error_bad_string(argv[0]);
+    error_bad_string(argv[0]);
 
   if (BOXED_INFO(argv[0]) & STRING_CONST)   error_change_const_string(argv[0]);
 
@@ -719,11 +722,11 @@ DEFINE_PRIMITIVE("string-append!", string_dappend, vsubr, (int argc, SCM* argv))
   for (i = 1; i < argc; i++) {
     p = argv[-i];
     if (STRINGP(p))
-        total_size += STRING_SIZE(p);
+      total_size += STRING_SIZE(p);
     else if (CHARACTERP(p))
-        total_size+=STk_utf8_char_bytes_needed(CHARACTER_VAL(p));
+      total_size+=STk_utf8_char_bytes_needed(CHARACTER_VAL(p));
     else
-     error_bad_string_or_character(p);
+      error_bad_string_or_character(p);
   }
 
   q = argv[0];
@@ -775,7 +778,7 @@ int get_substring_size(SCM string, long from, long to) {
 }
 
 /*
-<doc  SRFI-118 string-replace!
+<doc EXT string-replace!
  * (string-replace! dst dst-start dst-end src [src-start [src-end]])
  *
  * Replaces the characters of the variable-size string dst (between
@@ -793,9 +796,10 @@ int get_substring_size(SCM string, long from, long to) {
  *
  * It is guaranteed that string-replace! will return the same object that
  * was passed to it as first argument, whose size may be larger.
+ * ,(linebreak)
+ * ,(bold "Note:") This function is defined in SRFI-118.
 doc>
  */
-
 DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv))
 {
   SCM dst = argv[0];
@@ -807,41 +811,50 @@ DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv
 
   switch (argc) {
   case 4:  src_start = 0;
-           src_end=STRING_LENGTH(src);
-           break;
+    src_end=STRING_LENGTH(src);
+    break;
   case 5:  if (!INTP(argv[-4])) error_bad_index(argv[-4]);
-           src_start = STk_integer_value(argv[-4]);
-           src_end=STRING_LENGTH(src);
-           if (src_start < 0 || src_start > STRING_LENGTH(src)) error_index_out_of_bound(src, argv[-4]);
-           break;
+    src_start = STk_integer_value(argv[-4]);
+    src_end=STRING_LENGTH(src);
+    if (src_start < 0 || src_start > STRING_LENGTH(src))
+      error_index_out_of_bound(src, argv[-4]);
+    break;
   case 6:  if (!INTP(argv[-4])) error_bad_index(argv[-4]);
-           if (!INTP(argv[-5])) error_bad_index(argv[-5]);
-           src_start = STk_integer_value(argv[-4]);
-           src_end= STk_integer_value(argv[-5]);
-           if (src_start < 0 || src_start > STRING_LENGTH(src)) error_index_out_of_bound(src, argv[-4]);
-           if (  src_end < 0 ||   src_end > STRING_LENGTH(src)) error_index_out_of_bound(src, argv[-5]);
-           break;
+    if (!INTP(argv[-5])) error_bad_index(argv[-5]);
+    src_start = STk_integer_value(argv[-4]);
+    src_end= STk_integer_value(argv[-5]);
+    if (src_start < 0 || src_start > STRING_LENGTH(src))
+      error_index_out_of_bound(src, argv[-4]);
+    if (  src_end < 0 ||   src_end > STRING_LENGTH(src))
+      error_index_out_of_bound(src, argv[-5]);
+    break;
   default: STk_error("incorrect number of arguments (%d)", argc);
-           return STk_void;      /* for the compiler */ 
+    return STk_void;      /* for the compiler */
   }
 
   if (!INTP(argv[-1])) error_bad_index(argv[-1]);
   if (!INTP(argv[-2])) error_bad_index(argv[-2]);
   dst_start = STk_integer_value(argv[-1]);
   dst_end   = STk_integer_value(argv[-2]);
-  if (dst_start < 0 || dst_start > STRING_LENGTH(dst)) error_index_out_of_bound(dst, argv[-1]);
-  if (  dst_end < 0 ||   dst_end > STRING_LENGTH(dst)) error_index_out_of_bound(dst, argv[-2]);
+  if (dst_start < 0 || dst_start > STRING_LENGTH(dst))
+    error_index_out_of_bound(dst, argv[-1]);
+  if (  dst_end < 0 ||   dst_end > STRING_LENGTH(dst))
+    error_index_out_of_bound(dst, argv[-2]);
 
-  if (dst_start > dst_end) STk_error("start higher than end for destination string: ~S > ~S", argv[-1], argv[-2]);
-  if (src_start > src_end) STk_error("start higher than end for source string: ~S > ~S", argv[-4], argv[-5]);
+  if (dst_start > dst_end)
+    STk_error("start higher than end for destination string: ~S > ~S",
+              argv[-1], argv[-2]);
+  if (src_start > src_end)
+    STk_error("start higher than end for source string: ~S > ~S",
+              argv[-4], argv[-5]);
 
   /* if src and dest overlap, copy src to a temporary buffer and use it */
   if (( STRING_CHARS(dst) < STRING_CHARS(src)+STRING_SIZE(src)  &&
-         STRING_CHARS(src) < STRING_CHARS(dst)+STRING_SIZE(dst) )
-       ||
-       ( STRING_CHARS(src) < STRING_CHARS(dst)+STRING_SIZE(dst) &&
-         STRING_CHARS(dst) < STRING_CHARS(dst)+STRING_SIZE(src) ))
-      src = STk_makestring(STRING_SIZE(src),STRING_CHARS(src));
+        STRING_CHARS(src) < STRING_CHARS(dst)+STRING_SIZE(dst) )
+      ||
+      ( STRING_CHARS(src) < STRING_CHARS(dst)+STRING_SIZE(dst) &&
+        STRING_CHARS(dst) < STRING_CHARS(dst)+STRING_SIZE(src) ))
+    src = STk_makestring(STRING_SIZE(src),STRING_CHARS(src));
 
   int src_substring_size = get_substring_size(src, src_start, src_end);
   int dst_substring_size = get_substring_size(dst, dst_start, dst_end);
@@ -852,39 +865,39 @@ DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv
   char *start_char_dst;
   if (diff > 0) { /* src larger, must grow dst */
 
-      /* we need to set start_char_dst here, because it will be used to move
-         elements forward and make the string larger. AFTER remalloc. */
-      STRING_CHARS(dst) = STk_must_realloc(STRING_CHARS(dst),STRING_SIZE(dst) + diff);
-      start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
-      STRING_SIZE(dst) = STRING_SIZE(dst) + diff;
+    /* we need to set start_char_dst here, because it will be used to move
+       elements forward and make the string larger. AFTER remalloc. */
+    STRING_CHARS(dst) = STk_must_realloc(STRING_CHARS(dst),STRING_SIZE(dst) + diff);
+    start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
+    STRING_SIZE(dst) = STRING_SIZE(dst) + diff;
 
-      char *p;
-      for ( p = STRING_CHARS(dst) + STRING_SIZE(dst);
-            p >= (start_char_dst + src_substring_size);
-            p--)
-          *p = *(p-diff);
+    char *p;
+    for ( p = STRING_CHARS(dst) + STRING_SIZE(dst);
+          p >= (start_char_dst + src_substring_size);
+          p--)
+      *p = *(p-diff);
 
   } else if (diff < 0) { /* src smaller, must shrink dst */
 
-      /* start_char_dst will change, because the string will be reallocated!
-         we compute it here, and again later */
-      start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
+    /* start_char_dst will change, because the string will be reallocated!
+       we compute it here, and again later */
+    start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
 
-      char *p;
-      for (p = start_char_dst; p < STRING_CHARS(dst) + STRING_SIZE(dst) + diff + 1; p++)
-          *p = *(p-diff);
+    char *p;
+    for (p = start_char_dst; p < STRING_CHARS(dst) + STRING_SIZE(dst) + diff + 1; p++)
+      *p = *(p-diff);
 
-      /* we need to set start_char_dst here, because it will be used to move
-         elements back and make the string smaller. AFTER remalloc. */
-      STRING_CHARS(dst) = STk_must_realloc(STRING_CHARS(dst), STRING_SIZE(dst) + diff);
-      start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
+    /* we need to set start_char_dst here, because it will be used to move
+       elements back and make the string smaller. AFTER remalloc. */
+    STRING_CHARS(dst) = STk_must_realloc(STRING_CHARS(dst), STRING_SIZE(dst) + diff);
+    start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
 
-      STRING_SIZE(dst) = STRING_SIZE(dst) + diff;
+    STRING_SIZE(dst) = STRING_SIZE(dst) + diff;
 
   } else
-      /* if the substring sizes are equal, we did not yet set the start_char_dst
-         variable. do it here. */
-      start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
+    /* if the substring sizes are equal, we did not yet set the start_char_dst
+       variable. do it here. */
+    start_char_dst = STk_utf8_index(STRING_CHARS(dst),dst_start,STRING_SIZE(dst));
 
   char* start_char_src = STk_utf8_index(STRING_CHARS(src),src_start,STRING_SIZE(src));
   memcpy(start_char_dst, start_char_src, (unsigned long) src_substring_size);
@@ -1108,7 +1121,7 @@ DEFINE_PRIMITIVE("string-find?", string_find, subr2, (SCM s1, SCM s2))
  * (string-position "ca" "abracadabra") =>  4
  * (string-position "ba" "abracadabra") =>  #f
  * @end lisp
- * 
+ *
  * ,(bold "Note") This function was also called |string-index|. This name is deprecated
  * since it conficts with the |string-index| defined in SRFI-13.
 doc>

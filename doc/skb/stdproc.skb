@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 27-Nov-2020 11:00 (eg)
+;; Last file update: 16-Feb-2021 16:38 (eg)
 ;;
 ;; ======================================================================
 
@@ -357,6 +357,10 @@ and their documentation comes from the SRFI document.])
 (insertdoc 'string-titlecase)
 (insertdoc 'string-titlecase!)
 
+(index "SRFI-118")
+(insertdoc 'string-append!)
+(insertdoc 'string-replace!)
+
 (p [The functions ,(tt "string-foldcase") and ,(tt "string-foldcase!") described
 below are inspired from R6RS.])
 (insertdoc 'string-foldcase)
@@ -598,7 +602,9 @@ be accessed as a normal port with the standard Scheme primitives.])
 (index "SRFI-192")
 (insertdoc 'port-has-port-position?)
 (insertdoc 'port-position)
+(insertdoc 'port-has-set-port-position!?)
 (insertdoc 'set-port-position!)
+
 (insertdoc 'make-i/o-invalid-position-error)
 (insertdoc 'i/o-invalid-position-error?)
 )
