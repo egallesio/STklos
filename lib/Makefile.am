@@ -315,9 +315,9 @@ srfi-134.ostk: srfi-158.ostk
 # If ./srfis.stk we must rebuild
 #     - srfis-data.scm (used by SRFI0 and features)
 srfis-data.scm: srfis.stk
-	../src/stklos -l srfis.stk \
-	              -f ../utils/update-srfi-list.stk \
-                  -- --internal > $@
+	$(STKLOS_BINARY) -l srfis.stk \
+	                 -f ../utils/update-srfi-list.stk \
+                     -- --internal > $@
 	(cd ..; $(MAKE) SUPPORTED-SRFIS)
 
 doc: $(DOCDB)
