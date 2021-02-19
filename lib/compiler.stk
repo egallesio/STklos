@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k                    -- STklos Compiler
 ;;;;
-;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  9-Oct-2020 14:57 (eg)
+;;;; Last file update: 19-Feb-2021 19:04 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -959,7 +959,9 @@ doc>
       ((void) (emit 'IM-VOID))
       ((+)  (case len
               ((0)  (emit 'IM-ZERO))
-              ((1)  (compile (car actuals) env epair tail?))
+              ((1)  (if (number? (car actuals))
+                        (compile (car actuals) env epair tail?)
+                        (compile-normal-call fct actuals len env epair #f)))
               ((2)  (let ((a (car actuals))
                           (b (cadr actuals)))
                       (cond
@@ -992,7 +994,9 @@ doc>
                 (else (compile-normal-call fct actuals len env epair #f))))
       ((*)    (case len
                 ((0)  (emit 'IM-ONE))
-                ((1)  (compile (car actuals) env epair tail?))
+                ((1)  (if (number? (car actuals))
+                        (compile (car actuals) env epair tail?)
+                        (compile-normal-call fct actuals len env epair #f)))
                 ((2)  (let ((a (car actuals))
                             (b (cadr actuals)))
                         (cond
