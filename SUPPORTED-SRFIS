@@ -63,6 +63,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-87: => in case clauses
     - SRFI-88: Keyword Objects
     - SRFI-89: Optional Positional and Named Parameters
+    - SRFI-94: Type-Restricted Numerical Functions
     - SRFI-96: SLIB Prerequisites
     - SRFI-98: Interface to access environment variables
     - SRFI-100: define-lambda-object

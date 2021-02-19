@@ -132,7 +132,7 @@
     ;; 91  ....... withdrawn
     ;; 92  ....... withdrawn
     ;; 93  ....... withdrawn
-    ;; 94  Type-Restricted Numerical Functions
+    (94 "Type-Restricted Numerical Functions" () "srfi-94")
     ;; 95  Sorting and Merging
     (96 "SLIB Prerequisites" () "srfi-96")
     ;; 97 SRFI Libraries
