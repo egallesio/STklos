@@ -181,7 +181,7 @@
     ;; 140  Immutable Strings
     (141 "Integer Division" (integer-division) "srfi-141")
     ;; 142  ....... withdrawn
-    ;; 143  Fixnums
+    (143  "Fixnums")
     ;; 144  Flonums
     (145 "Assumptions")
     ;; 146  Mappings

@@ -720,7 +720,8 @@ int STk_init_misc(void);
 #define MAKE_INT(n)     (AS_SCM(SCM_LONG(n)))
 #define INT_MIN_VAL     ((LONG_MIN & ~3) >> 2)
 #define INT_MAX_VAL     ((LONG_MAX & ~3) >> 2)
-
+#define INT_LENGTH      (sizeof(long) * 8 - 2)
+    
 long STk_integer_value(SCM x); /* Returns LONG_MIN if not representable as long */
 unsigned long STk_uinteger_value(SCM x); /* Returns ULONG_MAX if not an ulong */
 

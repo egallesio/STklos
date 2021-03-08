@@ -79,6 +79,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-135: Immutable Texts
     - SRFI-137: Minimal Unique Types
     - SRFI-141: Integer Division
+    - SRFI-143: Fixnums
     - SRFI-145: Assumptions
     - SRFI-151: Bitwise Operations
     - SRFI-156: Syntactic combiners for binary predicates
