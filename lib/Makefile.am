@@ -136,6 +136,8 @@ SRC_STK = bigloo-support.stk  \
           srfi-196.stk        \
           srfi-207.stk        \
           srfi-216.stk        \
+          srfi-217.stk        \
+          trie.stk            \
           tar.stk             \
           trace.stk
 
@@ -211,7 +213,9 @@ scheme_OBJS = compfile.ostk     \
           srfi-190.ostk         \
           srfi-196.ostk         \
           srfi-207.ostk         \
-          srfi-216.ostk          \
+          srfi-216.ostk         \
+          srfi-217.ostk         \
+          trie.ostk             \
           tar.ostk              \
           trace.ostk
 
