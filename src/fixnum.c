@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update:  9-Mar-2021 16:08 (eg)
+ * Last file update:  9-Mar-2021 18:38 (eg)
  */
 
 #include "stklos.h"
@@ -58,12 +58,12 @@ long exp_2_fxwidth() {
 
 
 /*
-  <doc EXT fixnum?
-  * (fixnum? obj)
-  *
-  * Returns |#t| if obj is an exact integer within the fixnum range,
-  * |#f| otherwise.
-  doc>
+<doc EXT fixnum?
+ * (fixnum? obj)
+ *
+ * Returns |#t| if obj is an exact integer within the fixnum range,
+ * |#f| otherwise.
+doc>
 */
 DEFINE_PRIMITIVE("fixnum?", fixnump, subr1, (SCM obj))
 {
@@ -71,11 +71,11 @@ DEFINE_PRIMITIVE("fixnum?", fixnump, subr1, (SCM obj))
 }
 
 /*
-  <doc EXT fixnum-width
-  * (fixnum-width)
-  *
-  * Returns the number of bits used to represent a fixnum number
-  doc>
+<doc EXT fixnum-width
+ * (fixnum-width)
+ *
+ * Returns the number of bits used to represent a fixnum number
+doc>
 */
 DEFINE_PRIMITIVE("fixnum-width", fixnum_width, subr0, (void))
 {
@@ -83,13 +83,13 @@ DEFINE_PRIMITIVE("fixnum-width", fixnum_width, subr0, (void))
 }
 
 /*
-  <doc EXT least-fixnum greatest-fixnum
-  * (least-fixnum)
-  * (greatest-fixnum)
-  *
-  * These procedures return the minimum value and the maximum value of
-  * the fixnum range.
-  doc>
+<doc EXT least-fixnum greatest-fixnum
+ * (least-fixnum)
+ * (greatest-fixnum)
+ *
+ * These procedures return the minimum value and the maximum value of
+ * the fixnum range.
+doc>
 */
 DEFINE_PRIMITIVE("least-fixnum", least_fixnum, subr0, (void))
 {
@@ -102,18 +102,18 @@ DEFINE_PRIMITIVE("greatest-fixnum", greatest_fixnum, subr0, (void))
 }
 
 /*
-  <doc  fxzero?
-  * (fxzero? obj)
-  *
-  * |fxzero?| returns |#t| if |obj| is the fixnum zero and returns
-  * |#f| if it is a non-zero fixnum.
-  * @lisp
-  *   (fxzero? #f)            =>  error (if controlled)
-  *   (fxzero? (expt 100 100) =>  error (if controlled)
-  *   (fxzero? 0)             =>  #t
-  *   (fxzero? 1)             =>  #f
-  * @end lisp
-  doc>
+<doc EXT fxzero?
+ * (fxzero? obj)
+ *
+ * |fxzero?| returns |#t| if |obj| is the fixnum zero and returns
+ * |#f| if it is a non-zero fixnum.
+ * @lisp
+ *   (fxzero? #f)            =>  error
+ *   (fxzero? (expt 100 100) =>  error
+ *   (fxzero? 0)             =>  #t
+ *   (fxzero? 1)             =>  #f
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxzero?", fxzerop, subr1, (SCM o1))
 {
@@ -121,24 +121,24 @@ DEFINE_PRIMITIVE("fxzero?", fxzerop, subr1, (SCM o1))
 }
 
 /*
-  <doc  fxpositive? fxnegative?
-  * (fxpositive? obj)
-  * (fxnegative? obj)
-  *
-  * |fxpositive?| returns |#t| if |obj| is a positive fixnum and returns
-  * |#f| if it is a non-positive fixnum. |fxnegative?| can be used to test
-  * if a fixnum is negative.
-  * @lisp
-  *   (fxpositive? #f)            =>  error (if controlled)
-  *   (fxpositive? (expt 100 100) =>  error (if controlled)
-  *   (fxpositive? 0)             =>  #f
-  *   (fxpositive? 1)             =>  #t
-  *   (fxpositive? -1)            =>  #f
-  *   (fxnegative? 0)             =>  #f
-  *   (fxnegative? 1)             =>  #f
-  *   (fxnegative? -1)            =>  #t
-  * @end lisp
-  doc>
+<doc EXT fxpositive? fxnegative?
+ * (fxpositive? obj)
+ * (fxnegative? obj)
+ *
+ * |fxpositive?| returns |#t| if |obj| is a positive fixnum and returns
+ * |#f| if it is a non-positive fixnum. |fxnegative?| can be used to test
+ * if a fixnum is negative.
+ * @lisp
+ *   (fxpositive? #f)            =>  error
+ *   (fxpositive? (expt 100 100) =>  error
+ *   (fxpositive? 0)             =>  #f
+ *   (fxpositive? 1)             =>  #t
+ *   (fxpositive? -1)            =>  #f
+ *   (fxnegative? 0)             =>  #f
+ *   (fxnegative? 1)             =>  #f
+ *   (fxnegative? -1)            =>  #t
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxpositive?", fxpositivep, subr1, (SCM o1))
 {
@@ -151,22 +151,22 @@ DEFINE_PRIMITIVE("fxnegative?", fxnegativep, subr1, (SCM o1))
 }
 
 /*
-  <doc  fxodd? fxeven?
-  * (fxodd? obj)
-  *
-  * |fxodd?| returns |#t| if |obj| is a odd fixnum and returns
-  * |#f| if it is an even fixnum.
-  * @lisp
-  *   (fxodd? #f)            =>  error (if controlled)
-  *   (fxodd? (expt 100 100) =>  error (if controlled)
-  *   (fxodd? 0)             =>  #f
-  *   (fxodd? 1)             =>  #t
-  *   (fxodd? 4)             =>  #f
-  *   (fxeven? 0)            =>  #t
-  *   (fxeven? 1)            =>  #f
-  *   (fxeven? 4)            =>  #t
-  * @end lisp
-  doc>
+<doc EXT fxodd? fxeven?
+ * (fxodd? obj)
+ *
+ * |fxodd?| returns |#t| if |obj| is a odd fixnum and returns
+ * |#f| if it is an even fixnum.
+ * @lisp
+ *   (fxodd? #f)            =>  error
+ *   (fxodd? (expt 100 100) =>  error
+ *   (fxodd? 0)             =>  #f
+ *   (fxodd? 1)             =>  #t
+ *   (fxodd? 4)             =>  #f
+ *   (fxeven? 0)            =>  #t
+ *   (fxeven? 1)            =>  #f
+ *   (fxeven? 4)            =>  #t
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxodd?", fxoddp, subr1, (SCM o1))
 {
@@ -180,22 +180,22 @@ DEFINE_PRIMITIVE("fxeven?", fxevenp, subr1, (SCM o1))
 
 
 /*
-  <doc EXT fx+ fx- fx* fxquotient fxremainder fxmodulo fxabs fxneg
-  * (fx+ fx1 fx2)
-  * (fx- fx1 fx2)
-  * (fx* fx1 fx2)
-  * (fxquotient fx1 fx2)
-  * (fxremainder fx1 fx2)
-  * (fxmodulo fx1 fx2)
-  * (fxabs fx)
-  * (fxneg fx)
-  *
-  * These procedures compute (respectively) the sum, the difference, the product,
-  * the quotient and the remainder and modulo of the fixnums |fx1| and |fx2|.
-  * The call of  |fx-| with one parameter |fx| computes the opposite of |fx|, and
-  * is equivalent in a call of |fxneg| with this parameter. |fxabs|
-  * computes the absolute value of |fx|.
-  doc>
+<doc EXT fx+ fx- fx* fxquotient fxremainder fxmodulo fxabs fxneg
+ * (fx+ fx1 fx2)
+ * (fx- fx1 fx2)
+ * (fx* fx1 fx2)
+ * (fxquotient fx1 fx2)
+ * (fxremainder fx1 fx2)
+ * (fxmodulo fx1 fx2)
+ * (fxabs fx)
+ * (fxneg fx)
+ *
+ * These procedures compute (respectively) the sum, the difference, the product,
+ * the quotient and the remainder and modulo of the fixnums |fx1| and |fx2|.
+ * The call of  |fx-| with one parameter |fx| computes the opposite of |fx|, and
+ * is equivalent in a call of |fxneg| with this parameter. |fxabs|
+ * computes the absolute value of |fx|.
+doc>
 */
 DEFINE_PRIMITIVE("fx+", fxplus, subr2, (SCM o1, SCM o2))
 {
@@ -255,23 +255,23 @@ DEFINE_PRIMITIVE("fxneg", fxneg, subr1, (SCM o1))
 }
 
 /*
-  <doc EXT fxsquare fxsqrt
-  * (fxsquare fx1)
-  * (fxsqrt fx1)
-  *
-  * These procedures compute (respectively) the square and the square root
-  * of the fixnum |fx1|.
-  * |fxsqrt| id semantically equivalent to exact-integer-sqrt (not sqrt), so
-  * that |(fxsqrt n)| returns two values |a|, |b|, such that |a*a+b|=|n|.
-  * @lisp
-  *   (fxsqrt? #f)            =>  error
-  *   (fxdqrt? (expt 100 100) =>  error
-  *   (fxsqrt? -1)            =>  error
-  *   (fxsqrt? 0)             =>  0, 0
-  *   (fxsqrt? 1)             =>  1, 0
-  *   (fxsqrt? 6)             =>  2, 2
-  * @end lisp
-  doc>
+<doc EXT fxsquare fxsqrt
+ * (fxsquare fx1)
+ * (fxsqrt fx1)
+ *
+ * These procedures compute (respectively) the square and the square root
+ * of the fixnum |fx1|.
+ * |fxsqrt| id semantically equivalent to exact-integer-sqrt (not sqrt), so
+ * that |(fxsqrt n)| returns two values |a|, |b|, such that |a*a+b|=|n|.
+ * @lisp
+ *   (fxsqrt? #f)            =>  error
+ *   (fxdqrt? (expt 100 100) =>  error
+ *   (fxsqrt? -1)            =>  error
+ *   (fxsqrt? 0)             =>  0, 0
+ *   (fxsqrt? 1)             =>  1, 0
+ *   (fxsqrt? 6)             =>  2, 2
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxsquare", fxsquare, subr1, (SCM o1))
 {
@@ -291,19 +291,18 @@ DEFINE_PRIMITIVE("fxsqrt", fxsqrt, subr1, (SCM o1))
 
 
 /*
-  <doc  fxmax fxmin
-  * (fxmax fx1 fx2 ...)
-  * (fxmin fx1 fx2 ...)
-  *
-  * These procedures return the maximum or minimum of their fixnum arguments.
-  *
-  * @lisp
-  * (fxmax 3 4)              =>  4
-  * (fxmax 3.9 4)            =>  error
-  * (fxmax)                  =>  error
-  * (fxmax 2 -1 3)           =>  3
-  * @end lisp
-  doc>
+<doc EXT fxmax fxmin
+ * (fxmax fx1 fx2 ...)
+ * (fxmin fx1 fx2 ...)
+ *
+ * These procedures return the maximum or minimum of their fixnum arguments.
+ * @lisp
+ * (fxmax 3 4)              =>  4
+ * (fxmax 3.9 4)            =>  error
+ * (fxmax)                  =>  error
+ * (fxmax 2 -1 3)           =>  3
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxmax", fxmax, vsubr, (int argc, SCM *argv))
 {
@@ -333,19 +332,19 @@ DEFINE_PRIMITIVE("fxmin", fxmin, vsubr, (int argc, SCM *argv))
 
 
 /*
-  <doc EXT fx<? fx<=? fx>? fx>=? fx=?
-  * (fx<? fx1 fx2 ...)
-  * (fx<=? fx1 fx2 ...)
-  * (fx>? fx1 fx2 ...)
-  * (fx>=? fx1 fx2 ...)
-  * (fx=? fx1 fx2 ...)
-  *
-  * These are SRFI-143 procedures that compare the fixnums |fx1|, |fx2|, and so on.
-  * |fx<?| and |fx>?| return |#t| if the arguments are in strictly increasing/decreasing
-  * order;
-  * |fx<=?| and |fx>=?| do the same, but admit equal neighbors;
-  * |fx=?| returns |#t| if the arguments are all equal.
-  doc>
+<doc EXT fx<? fx<=? fx>? fx>=? fx=?
+ * (fx<? fx1 fx2 ...)
+ * (fx<=? fx1 fx2 ...)
+ * (fx>? fx1 fx2 ...)
+ * (fx>=? fx1 fx2 ...)
+ * (fx=? fx1 fx2 ...)
+ *
+ * These are SRFI-143 procedures that compare the fixnums |fx1|, |fx2|, and so on.
+ * |fx<?| and |fx>?| return |#t| if the arguments are in strictly
+ * increasing/decreasing order;
+ * |fx<=?| and |fx>=?| do the same, but admit equal neighbors;
+ * |fx=?| returns |#t| if the arguments are all equal.
+doc>
 */
 #define FX_COMP(name, func, op) \
 DEFINE_PRIMITIVE(name, func, vsubr, (int argc, SCM *argv))        \
@@ -367,23 +366,23 @@ FX_COMP("fx=?",  fxeq, !=)
 
 
 /*
-  <doc EXT fxnot fxand fxior fxxor
-  * (fxnot fx1)
-  * (fxand fx ...)
-  * (fxior fx ...)
-  * (fxxor fx ...)
-  *
-  * These procedures are specified in SRFI-143, and they return
-  * (respectively) the bitwise not, and, inclusive or and exclusive
-  * or of their arguments, which must be fixnums.
-  * @lisp
-  * (fxnot 1)              => -2
-  * (fxnot 0)              => -1
-  * (fxand #x1010 #x1011)  => 4112  ; = #x1010
-  * (fxior #x1010 #x1011)  => 4113  ; = #x1011
-  * (fxxor #x1010 #x1011)  => 1     ; = #x0001
-  * @end lisp
-  doc>
+<doc EXT fxnot fxand fxior fxxor
+ * (fxnot fx1)
+ * (fxand fx ...)
+ * (fxior fx ...)
+ * (fxxor fx ...)
+ *
+ * These procedures are specified in SRFI-143, and they return
+ * (respectively) the bitwise not, and, inclusive or and exclusive
+ * or of their arguments, which must be fixnums.
+ * @lisp
+ * (fxnot 1)              => -2
+ * (fxnot 0)              => -1
+ * (fxand #x1010 #x1011)  => 4112  ; = #x1010
+ * (fxior #x1010 #x1011)  => 4113  ; = #x1011
+ * (fxxor #x1010 #x1011)  => 1     ; = #x0001
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxnot", fxnot, subr1, (SCM o1))
 {
@@ -409,21 +408,21 @@ FX_LOGICAL("fxior", fxior, |=)
 FX_LOGICAL("fxxor", fxxor, ^=)
 
 /*
-  <doc EXT fxarithmetic-shift-right fxarithmetic-shift-left fxarithmetic-shift
-  * (fxarithmetic-shift-right fx count)
-  * (fxarithmetic-shift-left fx count)
-  * (fxarithmetic-shift fx count)
-  *
-  * These procedures are specified in SRFI-143, and they perform
-  * bitwise right-shift, left-shft and shift with arbitrary direction
-  * on fixnums. The strictly left and right shifts are more efficient.
-  * @lisp
-  * (fxarithmetic-shift-right #b100110 3) =>   4 ; = #b100
-  * (fxarithmetic-shift-left  #b100110 3) => 304 ; = #b100110000
-  * (fxarithmetic-shift #b101 2)          => 20  ; = #b10100
-  * (fxarithmetic-shift #b101 -2)         =>  1  ; =#b1
-  * @end lisp
-  doc>
+<doc EXT fxarithmetic-shift-right fxarithmetic-shift-left fxarithmetic-shift
+ * (fxarithmetic-shift-right fx count)
+ * (fxarithmetic-shift-left fx count)
+ * (fxarithmetic-shift fx count)
+ *
+ * These procedures are specified in SRFI-143, and they perform
+ * bitwise right-shift, left-shft and shift with arbitrary direction
+ * on fixnums. The strictly left and right shifts are more efficient.
+ * @lisp
+ * (fxarithmetic-shift-right #b100110 3) =>   4 ; = #b100
+ * (fxarithmetic-shift-left  #b100110 3) => 304 ; = #b100110000
+ * (fxarithmetic-shift #b101 2)          => 20  ; = #b10100
+ * (fxarithmetic-shift #b101 -2)         =>  1  ; =#b1
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxarithmetic-shift-right", fxarithmetic_shiftr, subr2, (SCM o1, SCM o2))
 {
@@ -454,17 +453,17 @@ DEFINE_PRIMITIVE("fxarithmetic-shift", fxarithmetic_shift, subr2, (SCM o1, SCM o
 }
 
 /*
-  <doc EXT fxlength
-  * (fxlength fx)
-  *
-  * This is a SRFI-143 procedure that returns the length of the fixnum in
-  * bits (that is, the number of bits necessary to represent the number).
-  * @lisp
-  * (fxlength #b101)          =>  3
-  * (fxlength #b1101)         =>  4
-  * (fxlength #b0101)         =>  3
-  * @end lisp
-  doc>
+<doc EXT fxlength
+ * (fxlength fx)
+ *
+ * This is a SRFI-143 procedure that returns the length of the fixnum in
+ * bits (that is, the number of bits necessary to represent the number).
+ * @lisp
+ * (fxlength #b101)          =>  3
+ * (fxlength #b1101)         =>  4
+ * (fxlength #b0101)         =>  3
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxlength", fxlength, subr1, (SCM o1))
 {
@@ -475,20 +474,20 @@ DEFINE_PRIMITIVE("fxlength", fxlength, subr1, (SCM o1))
 }
 
 /*
-  <doc EXT fxif
-  * (fxif mask fx1 fx2)
-  *
-  * This is a SRFI-143 procedure that merge the fixnum bitstrings |fx1| and |fx2|, with
-  * bitstring  mask determining from which string to take each bit. That is, if the kth bit
-  * of mask is 1, then the kth bit of the result is the kth bit of |fx1|, otherwise the kth
-  * bit of |fx2|.
-  * @lisp
-  * (fxif 3 1 8)                            => 9
-  * (fxif 3 8 1)                            => 0
-  * (fxif 1 1 2)                            => 3
-  * (fxif #b00111100 #b11110000 #b00001111) => #b00110011
-  * @end lisp
-  doc>
+<doc EXT fxif
+ * (fxif mask fx1 fx2)
+ *
+ * This is a SRFI-143 procedure that merge the fixnum bitstrings |fx1| and |fx2|, with
+ * bitstring  mask determining from which string to take each bit. That is, if the kth bit
+ * of mask is 1, then the kth bit of the result is the kth bit of |fx1|, otherwise the kth
+ * bit of |fx2|.
+ * @lisp
+ * (fxif 3 1 8)                            => 9
+ * (fxif 3 8 1)                            => 0
+ * (fxif 1 1 2)                            => 3
+ * (fxif #b00111100 #b11110000 #b00001111) => #b00110011
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxif", fxif, subr3, (SCM m, SCM o1, SCM o2))
 {
@@ -498,18 +497,18 @@ DEFINE_PRIMITIVE("fxif", fxif, subr3, (SCM m, SCM o1, SCM o2))
 }
 
 /*
-  <doc EXT fxbit-set?
-  * (fxbit-set? index fx)
-  *
-  * This is a SRFI-143 procedure that returns |#t| if the |index|-th bit of
-  * |fx|.
-  * @lisp
-  * (fxbit-set? 1 3)          => #t
-  * (fxbit-set? 2 7)          => #t
-  * (fxbit-set? 3 6)          => #f
-  * (fxbit-set? 5 #b00111100) => #t
-  * @end lisp
-  doc>
+<doc EXT fxbit-set?
+ * (fxbit-set? index fx)
+ *
+ * This is a SRFI-143 procedure that returns |#t| if the |index|-th bit of
+ * |fx|.
+ * @lisp
+ * (fxbit-set? 1 3)          => #t
+ * (fxbit-set? 2 7)          => #t
+ * (fxbit-set? 3 6)          => #f
+ * (fxbit-set? 5 #b00111100) => #t
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxbit-set?", fxbit_setp, subr2, (SCM o1, SCM o2))
 {
@@ -517,17 +516,17 @@ DEFINE_PRIMITIVE("fxbit-set?", fxbit_setp, subr2, (SCM o1, SCM o2))
 }
 
 /*
-  <doc EXT fxcopy-bit
-  * (fxcopy-bit index fx value)
-  *
-  * This is a SRFI-143 procedure that sets the |index|-th bit if |fx|
-  * to one if |value| is |#t|, and to zero if |value| is |#f|.
-  * @lisp
-  * (fxcopy-bit 2 3 #t)          =>  7
-  * (fxcopy-bit 2 7 #f)          =>  3
-  * (fxcopy-bit 5 #b00111100 #f) => 28 ; = #b00011100
-  * @end lisp
-  doc>
+<doc EXT fxcopy-bit
+ * (fxcopy-bit index fx value)
+ *
+ * This is a SRFI-143 procedure that sets the |index|-th bit if |fx|
+ * to one if |value| is |#t|, and to zero if |value| is |#f|.
+ * @lisp
+ * (fxcopy-bit 2 3 #t)          =>  7
+ * (fxcopy-bit 2 7 #f)          =>  3
+ * (fxcopy-bit 5 #b00111100 #f) => 28 ; = #b00011100
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxcopy-bit", fxcopy_bit, subr3, (SCM o1, SCM o2, SCM o3))
 {
@@ -538,18 +537,18 @@ DEFINE_PRIMITIVE("fxcopy-bit", fxcopy_bit, subr3, (SCM o1, SCM o2, SCM o3))
 
 
 /*
-  <doc EXT fxbit-count
-  * (fxbit-count fx1)
-  *
-  * This is a SRFI-143 procedure that returns the quantity of bits equal to one in
-  * the fixnum |fx| (that is, computes its Hamming weight).
-  * @lisp
-  * (fxbit-count 8)                         => 1
-  * (fxbit-count 3)                         => 2
-  * (fxbit-count 7)                         => 3
-  * (fxbit-count #b00111010)                => 4
-  * @end lisp
-  doc>
+<doc EXT fxbit-count
+ * (fxbit-count fx1)
+ *
+ * This is a SRFI-143 procedure that returns the quantity of bits equal to one in
+ * the fixnum |fx| (that is, computes its Hamming weight).
+ * @lisp
+ * (fxbit-count 8)                         => 1
+ * (fxbit-count 3)                         => 2
+ * (fxbit-count 7)                         => 3
+ * (fxbit-count #b00111010)                => 4
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o1))
 /* TODO: Somewhat efficient, but there is a better way, described
@@ -565,19 +564,19 @@ DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o1))
 }
 
 /*
-  <doc EXT fxfirst-set-bit
-  * (fxfirst-set-bit fx1)
-  *
-  * This is a SRFI-143 procedure that returns the index of the first (smallest index)
-  * 1 bit in bitstring |fx|. Returns -1 if |fx| contains no 1 bits (i.e., if |fx|
-  * is zero).
-  * @lisp
-  * (fxfirst-set-bit  8)                         => 3
-  * (fxfirst-set-bit  3)                         => 0
-  * (fxfirst-set-bit  7)                         => 0
-  * (fxfirst-set-bit  #b10110000)                => 4
-  * @end lisp
-  doc>
+<doc EXT fxfirst-set-bit
+ * (fxfirst-set-bit fx1)
+ *
+ * This is a SRFI-143 procedure that returns the index of the first (smallest index)
+ * 1 bit in bitstring |fx|. Returns -1 if |fx| contains no 1 bits (i.e., if |fx|
+ * is zero).
+ * @lisp
+ * (fxfirst-set-bit  8)                         => 3
+ * (fxfirst-set-bit  3)                         => 0
+ * (fxfirst-set-bit  7)                         => 0
+ * (fxfirst-set-bit  #b10110000)                => 4
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxfirst-set-bit", fxfirst_set_bit, subr1, (SCM o1))
 {
@@ -589,16 +588,16 @@ DEFINE_PRIMITIVE("fxfirst-set-bit", fxfirst_set_bit, subr1, (SCM o1))
 }
 
 /*
-  <doc EXT fxbit-field
-  * (fxbit-field fx1 start end)
-  *
-  * This is a SRFI-143 procedure that extracts a bit field from the fixnum |fx1|.
-  * The bit field is the sequence of bits between |start| (including) and |end|
-  * (excluding)
-  * @lisp
-  * (fxbit-field  #b10110000 3 5)  => 6 ; = #b110
-  * @end lisp
-  doc>
+<doc EXT fxbit-field
+ * (fxbit-field fx1 start end)
+ *
+ * This is a SRFI-143 procedure that extracts a bit field from the fixnum |fx1|.
+ * The bit field is the sequence of bits between |start| (including) and |end|
+ * (excluding)
+ * @lisp
+ * (fxbit-field  #b10110000 3 5)  => 6 ; = #b110
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxbit-field", fxbit_field, subr3, (SCM o1, SCM o2, SCM o3))
 {
@@ -612,17 +611,17 @@ DEFINE_PRIMITIVE("fxbit-field", fxbit_field, subr3, (SCM o1, SCM o2, SCM o3))
 
 
 /*
-  <doc EXT fxbit-field-rotate
-  * (fxbit-field-rotate fx)
-  *
-  * This is a SRFI-143 procedure that returns fx with the field cyclically permuted by count bits towards high-order.
-  * @lisp
-  * (fxbit-field-rotate #b101011100 -2 1 5)     => 342  = #b101010110
-  * (fxbit-field-rotate #b101011011110 -3 2 10) => 3034 = #b101111011010
-  * (fxbit-field-rotate #b101011011110 3 2 10)  => 2806 = #b101011110110
-  *
-  * @end lisp
-  doc>
+<doc EXT fxbit-field-rotate
+ * (fxbit-field-rotate fx)
+ *
+ * This is a SRFI-143 procedure that returns fx with the field cyclically permuted
+ * by count bits towards high-order.
+ * @lisp
+ * (fxbit-field-rotate #b101011100 -2 1 5)     => 342  = #b101010110
+ * (fxbit-field-rotate #b101011011110 -3 2 10) => 3034 = #b101111011010
+ * (fxbit-field-rotate #b101011011110 3 2 10)  => 2806 = #b101011110110
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxbit-field-rotate", fxbit_field_rotate, subr4, (SCM o1, SCM o2, SCM o3, SCM o4))
 {
@@ -664,16 +663,16 @@ DEFINE_PRIMITIVE("fxbit-field-rotate", fxbit_field_rotate, subr4, (SCM o1, SCM o
 }
 
 /*
-  <doc EXT fxbit-field-reverse
-  * (fxbit-field-reverse fx)
-  *
-  * This is a SRFI-143 procedure that returns fx with the order of the bits in the field reversed.
-  * @lisp
-  * (fxbit-field-reverse #b101011100 1 5)     => #b101001110
-  * (fxbit-field-reverse #b101011011110 2 10) => #b101110110110
-  *
-  * @end lisp
-  doc>
+<doc EXT fxbit-field-reverse
+ * (fxbit-field-reverse fx)
+ *
+ * This is a SRFI-143 procedure that returns fx with the order of the bits in the
+ * field reversed.
+ * @lisp
+ * (fxbit-field-reverse #b101011100 1 5)     => #b101001110
+ * (fxbit-field-reverse #b101011011110 2 10) => #b101110110110
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fxbit-field-reverse", fxbit_field_reverse, subr3, (SCM o1, SCM o2, SCM o3))
 {
@@ -757,14 +756,16 @@ void fxbalanced_div (long *qq, long *rr, long x, long y)
 
 
 /*
-  <doc EXT fx+/carry
-  * (fx+/carry i j k)
-  *
-  * Returns two values: |i|+|j|+|k|, and carry: it is the value of the computation
-  * (let*-values (((s) (+ i j k))
-  *        ((q r) (balanced/ s (expt 2 fx-width))))
-  *   (values r q))
-  doc>
+<doc EXT fx+/carry
+ * (fx+/carry i j k)
+ *
+ * Returns two values: |i|+|j|+|k|, and carry: it is the value of the computation
+ * @lisp
+ * (let*-values (((s) (+ i j k))
+ *               ((q r) (balanced/ s (expt 2 fx-width))))
+ *   (values r q))
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fx+/carry", fxsum_carry, subr3, (SCM o1, SCM o2, SCM o3))
 {
@@ -777,14 +778,16 @@ DEFINE_PRIMITIVE("fx+/carry", fxsum_carry, subr3, (SCM o1, SCM o2, SCM o3))
 }
 
 /*
-  <doc EXT fx-/carry
-  * (fx-/carry i j k)
-  *
-  * Returns two values: |i|-|j|-|k|, and carry: it is the value of the computation
-  * (let*-values (((s) (- i j k))
-  *        ((q r) (balanced/ s (expt 2 fx-width))))
-  *   (values r q))
-  doc>
+<doc EXT fx-/carry
+ * (fx-/carry i j k)
+ *
+ * Returns two values: |i|-|j|-|k|, and carry: it is the value of the computation
+ * @lisp
+ * (let*-values (((s) (- i j k))
+ *               ((q r) (balanced/ s (expt 2 fx-width))))
+ *   (values r q))
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fx-/carry", fxminus_carry, subr3, (SCM o1, SCM o2, SCM o3))
 {
@@ -797,14 +800,16 @@ DEFINE_PRIMITIVE("fx-/carry", fxminus_carry, subr3, (SCM o1, SCM o2, SCM o3))
 }
 
 /*
-  <doc EXT fx{*}/carry
-  * (fx{*}/carry i j k)
-  *
-  * Returns two values: |i|-|j|-|k|, and carry: it is the value of the computation
-  * (let*-values (((s) (+ (* i j) k))
-  *        ((q r) (balanced/ s (expt 2 fx-width))))
-  *   (values r q))
-  doc>
+<doc EXT fx{*}/carry fxstar/carry
+ * (fx* /carry i j k)
+ *
+ * Returns two values: |i|*|j|+|k|, and carry: it is the value of the computation
+ * @lisp
+ * (let*-values (((s) (+ (* i j) k))
+ *               ((q r) (balanced/ s (expt 2 fx-width))))
+ *   (values r q))
+ * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("fx*/carry", fxmul_carry, subr3, (SCM o1, SCM o2, SCM o3))
 {

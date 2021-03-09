@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 16-Feb-2021 16:38 (eg)
+;; Last file update:  9-Mar-2021 18:47 (eg)
 ;;
 ;; ======================================================================
 
@@ -99,19 +99,41 @@ infinity), ,(code "+nan.0") (not a number), and
 
 (subsection :title "Fixnums"
 
+   (index  "SRFI-143")
    (p [,(stklos) defines small integers as fixnums. Operations on fixnums
 are generally faster than operations which accept general numbers.
 Fixnums operations, as described below, may produce results which are incorrect
 if some temporary computation falls outside the range of fixnum. These
 functions should be used only when speed really matters.])
 
+   (p [The functions defined in this section are conform to the ones defined in
+,(link-srfi 143)])
+
 (insertdoc 'fixnum?)
 (insertdoc 'fixnum-width)
 (insertdoc 'greatest-fixnum)
-(insertdoc 'fxmod)
-(insertdoc 'fx=))
-
-)
+(insertdoc 'fxzero?)
+(insertdoc 'fxnegative?)
+(insertdoc 'fxeven?)
+(insertdoc 'fxneg)
+(insertdoc 'fxsqrt)
+(insertdoc 'fxmin)
+(insertdoc 'fx=?)
+(insertdoc 'fxxor)
+(insertdoc 'fxarithmetic-shift)
+(insertdoc 'fxlength)
+(insertdoc 'fxif)
+(insertdoc 'fxbit-set?)
+(insertdoc 'fxcopy-bit)
+(insertdoc 'fxbit-count)
+(insertdoc 'fxfirst-set-bit)
+(insertdoc 'fxbit-field)
+(insertdoc 'fxbit-field-rotate)
+(insertdoc 'fxbit-field-reverse)
+(insertdoc 'fx+/carry)
+(insertdoc 'fx-/carry)
+(insertdoc 'fxstar/carry)
+))
 
 
 ;;;
