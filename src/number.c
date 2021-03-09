@@ -2324,6 +2324,7 @@ DEFINE_PRIMITIVE("round", round, subr1, (SCM x))
 <doc  exp log sin cos tan asin acos atan
  * (exp z)
  * (log z)
+ * (log z b)
  * (sin z)
  * (cos z)
  * (tan z)
@@ -2335,6 +2336,10 @@ DEFINE_PRIMITIVE("round", round, subr1, (SCM x))
  * These procedures compute the usual transcendental functions. |Log| computes the
  * natural logarithm of z (not the base ten logarithm). |Asin|, |acos|,
  * and |atan| compute arcsine, arccosine, and  arctangent, respectively.
+ * The two-argument variant of |log| computes the logarithm of x in base b as
+ * @lisp
+ * (/ (log x) (log b))
+ * @end lisp
  * The two-argument variant of |atan| computes
  * @lisp
  * (angle (make-rectangular x y))
@@ -2574,12 +2579,17 @@ static SCM my_atan2(SCM y, SCM x)
   }
 
 transcendental(exp)
-transcendental(log)
 transcendental(sin)
 transcendental(cos)
 transcendental(tan)
 transcendental(asin)
 transcendental(acos)
+
+DEFINE_PRIMITIVE("log", log, subr12, (SCM x, SCM b))
+{
+    return (b)? div2(my_log(x),my_log(b)) : my_log(x);
+}
+
 
 DEFINE_PRIMITIVE("atan", atan, subr12, (SCM y, SCM x))
 {
