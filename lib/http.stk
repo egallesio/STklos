@@ -1,7 +1,7 @@
 ;;;;
 ;;;; http.stk			-- HTTP utilities
 ;;;;
-;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 ;;;; Manuel Serrano.
 ;;;;
 ;;;;    Creation date: 14-May-2007 19:12 (eg)
-;;;; Last file update:  8-Jun-2007 14:44 (eg)
+;;;; Last file update:  9-Mar-2021 16:40 (eg)
 ;;;;
 
 (define-module HTTP-MODULE
@@ -333,7 +333,7 @@
 
   (define (encode-char c port)
     (let ((n (char->integer c)))
-      (if (fx< n 16)
+      (if (fx<? n 16)
 	  (fprintf port "%0~x" n)
 	  (fprintf port "%~x" n))))
 
