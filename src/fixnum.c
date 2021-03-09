@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update:  8-Mar-2021 23:07 (eg)
+ * Last file update:  9-Mar-2021 14:24 (eg)
  */
 
 #include "stklos.h"
@@ -192,8 +192,8 @@ DEFINE_PRIMITIVE("fxeven?", fxevenp, subr1, (SCM o1))
   *
   * These procedures compute (respectively) the sum, the difference, the product,
   * the quotient and the remainder and modulo of the fixnums |fx1| and |fx2|.
-  * The call of  |fx-| with one parameter |fx| computes the opposite of |fx|, and 
-  * is equivalent in a call of |fxneg| with this parameter. |fxabs| 
+  * The call of  |fx-| with one parameter |fx| computes the opposite of |fx|, and
+  * is equivalent in a call of |fxneg| with this parameter. |fxabs|
   * computes the absolute value of |fx|.
   doc>
 */
@@ -202,10 +202,8 @@ DEFINE_PRIMITIVE("fx+", fxplus, subr2, (SCM o1, SCM o2))
   return MAKE_INT(INT_VAL(o1) + INT_VAL(o2));
 }
 
-DEFINE_PRIMITIVE("fx-", fxminus, subr12, (SCM o1, SCM o2))
+DEFINE_PRIMITIVE("fx-", fxminus, subr2, (SCM o1, SCM o2))
 {
-  if (!o2)
-    return MAKE_INT(-INT_VAL(o1));
   return MAKE_INT(INT_VAL(o1) - INT_VAL(o2));
 }
 
@@ -371,9 +369,9 @@ FX_COMP("fx=?",  fxeq, !=)
 /*
   <doc EXT fxnot fxand fxior fxxor
   * (fxnot fx1)
-  * (fxand fx1 fx2)
-  * (fxior fx1 fx2)
-  * (fxxor fx1 fx2)
+  * (fxand fx ...)
+  * (fxior fx ...)
+  * (fxxor fx ...)
   *
   * These procedures are specified in SRFI-143, and they return
   * (respectively) the bitwise not, and, inclusive or and exclusive
@@ -392,20 +390,23 @@ DEFINE_PRIMITIVE("fxnot", fxnot, subr1, (SCM o1))
   return MAKE_INT(~INT_VAL(o1));
 }
 
-DEFINE_PRIMITIVE("fxand", fxand, subr2, (SCM o1, SCM o2))
-{
-  return MAKE_INT(INT_VAL(o1) & INT_VAL(o2));
+#define FX_LOGICAL(name, func, op) \
+DEFINE_PRIMITIVE(name, func, vsubr, (int argc, SCM *argv))  \
+{                                                           \
+  if (argc == 0) error_fx_at_least_1();                     \
+  if (argc == 1) return *argv;                              \
+  else {                                                    \
+    long int res;                                           \
+    for (res = INT_VAL(*argv--); --argc; argv--) {          \
+      res op INT_VAL(*argv);                                \
+    }                                                       \
+    return MAKE_INT(res);                                   \
+  }                                                         \
 }
 
-DEFINE_PRIMITIVE("fxior", fxior, subr2, (SCM o1, SCM o2))
-{
-  return MAKE_INT(INT_VAL(o1) | INT_VAL(o2));
-}
-
-DEFINE_PRIMITIVE("fxxor", fxxor, subr2, (SCM o1, SCM o2))
-{
-  return MAKE_INT(INT_VAL(o1) ^ INT_VAL(o2));
-}
+FX_LOGICAL("fxand", fxand, &=)
+FX_LOGICAL("fxior", fxior, |=)
+FX_LOGICAL("fxxor", fxxor, ^=)
 
 /*
   <doc EXT fxarithmetic-shift-right fxarithmetic-shift-left fxarithmetic-shift
@@ -477,9 +478,9 @@ DEFINE_PRIMITIVE("fxlength", fxlength, subr1, (SCM o1))
   <doc EXT fxif
   * (fxif mask fx1 fx2)
   *
-  * This is a SRFI-143 procedure that merge the fixnum bitstrings |fx1| and |fx2|, with 
+  * This is a SRFI-143 procedure that merge the fixnum bitstrings |fx1| and |fx2|, with
   * bitstring  mask determining from which string to take each bit. That is, if the kth bit
-  * of mask is 1, then the kth bit of the result is the kth bit of |fx1|, otherwise the kth 
+  * of mask is 1, then the kth bit of the result is the kth bit of |fx1|, otherwise the kth
   * bit of |fx2|.
   * @lisp
   * (fxif 3 1 8)                            => 9
