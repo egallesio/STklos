@@ -1226,4 +1226,205 @@
 (test "bit-or (-big | -big)" #x-103454301aacca9
       (bit-or #x-123456789abcdef #x-fedcba987654321fedcba987654321fedcba))
 
+;;------------------------------------------------------------------
+(test-subsection "transcendental functions")
+
+;; exp
+
+(test "exp 0.0"
+      1.0
+      (exp 0.0))
+
+(test "exp 1.0"
+      #t
+      (< 2.7182818000
+         (exp 1.0)
+         2.7182819000))
+
+(test "exp 3/2, e times sqrt(e)"
+      #t
+      (=  (exp 3/2)
+          (* (exp 1) (sqrt (exp 1)))))
+
+(test "exp 1-2i"
+      #t
+      (let* ((z (exp 1-2i))
+             (r (real-part z))
+             (i (imag-part z)))
+        (and (< -1.1312044000 r -1.1312043000)
+             (< -2.4717267000 i -2.4717266000))))
+
+;; log
+
+(test "log 1.0"
+      0.0
+      (log 1.0))
+
+(test "log 2/3"
+      #t
+      (< -0.4055000
+         (log 2/3)
+         -0.4054000))
+
+(test "(log 3 4) = (log 3)/(log 4)"
+      #t
+      (= (log 3 4)
+         (/ (log 3) (log 4))))
+
+(test "log 16 2"
+      4.0
+      (log 16 2))
+
+(test "log 1/4 2"
+      -2.0
+      (log 1/4 2))
+
+(test "log 2 10"
+      #t
+      (< 0.30102000
+         (log 2 10)
+         0.30103000))
+
+(test "log 3-5i"
+      #t
+      (let* ((z (log  3-5i))
+             (r (real-part z))
+             (i (imag-part z)))
+        (and (<  1.7631802000 r  1.7631803000)
+             (< -1.0303769000 i -1.0303768000))))
+
+;; exp, log
+
+(test "exp log 1.0"
+      1.0
+      (exp (log 1.0)))
+
+(test "log exp 1.0"
+      1.0
+      (log (exp 1.0)))
+
+(test "log exp 2-3i"
+      #t
+      (let* ((z (log (exp 2-3i)))
+             (r (real-part z))
+             (i (imag-part z)))
+        (and (<  1.99999999 r  2.00000001)
+             (< -3.00000001 i -2.99999999))))
+       
+(test "sin 1-1i"
+      #t
+      (let* ((z (sin 1-1i))
+             (r (real-part z))
+             (i (imag-part z)))
+        (and (<  1.2984575000 r  1.2984576000)
+             (< -0.6349640000 i -0.6349639000))))
+
+(test "sin +- 1-1i"
+      #t
+      (= (sin 1-1i) (- (sin -1+1i))))
+
+(test "cos 1-1i"
+      #t
+      (let* ((z (cos 1-1i))
+             (r (real-part z))
+             (i (imag-part z)))
+        (and (<  0.8337300000 r 0.8337301000)
+             (<  0.9888977000 i 0.9888978000))))
+
+(test "cos +- 1-1i"
+      #t
+      (= (cos 1-1i) (cos -1+1i)))
+
+;; sin, cos
+(test "sin 0.0"
+      0.0
+      (sin 0.0))
+
+(test "cos 0.0"
+      1.0
+      (cos 0.0))
+
+
+;; sin, asin; cos, acos
+(test "sin-asin 1"
+      1.0
+      (sin (asin 1)))
+
+(test "sin-asin 2/3"
+      #t
+      (= (+ 0.0 2/3)
+         (sin (asin 2/3))))
+
+(test "cos-acos 1"
+      1.0
+      (cos (acos 1)))
+
+(test "cos-acos 2/3"
+      #t
+      (= (+ 0.0 2/3)
+         (cos (acos 2/3))))
+
+;; tan
+
+(test "tan 0.0"
+      0.0
+      (tan 0.0))
+
+(test "tan 1"
+      #t
+      (< 1.5574077000
+         (tan 1)
+         1.5574078000))
+
+(test "tan 3/5"
+      #t
+      (< 0.6841368000
+         (tan 3/5)
+         0.6841369000))
+
+(test "tan -5+2i"
+      #t
+      (let* ((z (tan -5+2i))
+             (r (real-part z))
+             (i (imag-part z)))
+        (and (< 0.0205530000 r 0.0205531000)
+             (< 1.0310080000 i 1.0310081000))))
+
+(test "tan acos 0"
+      #t
+      (> (tan (acos 0)) 1e16))
+
+(test "atan 0 1"
+      0.0
+      (atan 0 1))
+
+(test "atan 1 0"
+      #t
+      (= (atan 1 0) (acos 0)))
+
+(test "atan 1 1"
+      #t
+      (< 0.7853981000
+         (atan 1 1)
+         0.7853982000))
+
+;; tan, atan
+
+(test "atan tan 2/3"
+      (+ 0.0 2/3)
+      (atan (tan 2/3)))
+
+;; this one (tan (atan 1 1)) is usually slightly inaccurate,
+;; so we use an interval for testing
+(test "tan atan 1 1"
+      #t
+      (< 0.9999999999
+         (tan (atan 1 1))
+         1.0000000001))
+
+(test "atan tan 1 1"
+      1.0
+      (atan (tan 1) 1))
+
+
 (test-section-end)
