@@ -1,7 +1,7 @@
 /*
  * stklos.h     -- stklos.h
  *
- * Copyright © 1999-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  4-Sep-2020 13:59 (eg)
+ * Last file update:  9-Mar-2021 16:00 (eg)
  */
 
 
@@ -567,10 +567,10 @@ int STk_init_ffi(void);
   ----
   ------------------------------------------------------------------------------
 */
-EXTERN_PRIMITIVE("fx+",   fxplus,  subr2, (SCM o1, SCM o2));
-EXTERN_PRIMITIVE("fx-",   fxminus, subr2, (SCM o1, SCM o2));
-EXTERN_PRIMITIVE("fx*",   fxtime,  subr2, (SCM o1, SCM o2));
-EXTERN_PRIMITIVE("fxdiv", fxdiv,   subr2, (SCM o1, SCM o2));
+EXTERN_PRIMITIVE("fx+",        fxplus,  subr2, (SCM o1, SCM o2));
+EXTERN_PRIMITIVE("fx-",        fxminus, subr2, (SCM o1, SCM o2));
+EXTERN_PRIMITIVE("fx*",        fxtime,  subr2, (SCM o1, SCM o2));
+EXTERN_PRIMITIVE("fxquotient", fxdiv,   subr2, (SCM o1, SCM o2));
 int STk_init_fixnum(void);
 
 

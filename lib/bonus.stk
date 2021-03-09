@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 16-Feb-2021 16:36 (eg)
+;;;; Last file update:  9-Mar-2021 16:10 (eg)
 ;;;;
 
 
@@ -1830,9 +1830,20 @@ doc>
                    " "
                    (vector-ref u 3))))              ; Posix release field
 
-;;
+;;----------------------------------------------------------------------
+;; SRFI-143: "Fixnums"
+;; ----------------------------------------------------------------------
+
+;; give new names to some primitives and define some constants so as to comply
+;; with SRFI-143 (fixnums):
+(define fx-width (fixnum-width))
+(define fx-greatest (greatest-fixnum))
+(define fx-least (least-fixnum))
+
+
+;;----------------------------------------------------------------------
 ;; SRFI-145: "Assumptions"
-;;
+;; ----------------------------------------------------------------------
 
 #|
 <doc EXT-SYNTAX assume

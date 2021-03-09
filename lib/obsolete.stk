@@ -2,7 +2,7 @@
 ;;;; obsolete.stk       -- Definition of functions which are obsolete.
 ;;;;                       Function defined here are candidate to disappear.
 ;;;;
-;;;; Copyright © 2002-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update: 13-Nov-2020 12:14 (eg)
+;;;; Last file update:  9-Mar-2021 16:14 (eg)
 ;;;;
 
 
@@ -93,6 +93,15 @@
 
 ;; 13-Sep-2020(v1.50)
 (define string-index string-position) ; a different string-index is defined in SRFI-13
-
-;;
 (define argv command-args)
+
+;; 08-Mar-2021
+;; New names comply with SRFI-143 (Fixnums)
+(define fxdiv fxquotient)
+(define fxrem fxremainder)
+(define fxmod fxmodulo)
+(define fx<   fx<?)
+(define fx<=  fx<=?)
+(define fx>   fx>?)
+(define fx>=  fx>=?)
+(define fx=   fx=?)

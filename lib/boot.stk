@@ -1,7 +1,7 @@
 ;;;;
 ;;;; boot.stk                                   -- Default boot file
 ;;;;
-;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  4-Dec-2020 11:58 (eg)
+;;;; Last file update:  9-Mar-2021 16:09 (eg)
 ;;;;
 
 (include "runtime.stk")         ; Definition necessary for the bootstrap
@@ -67,15 +67,6 @@
 (autoload        "srfi-27"        random-integer random-real)
 (syntax-autoload "srfi-35"        define-condition-type condition)
 (autoload        "srfi-48"        srfi48:help srfi48:format-fixed)
-
-;==============================================================================
-;; give new names to some primitives and define some constants so as to comply
-;; with SRFI-143 (fixnums):
-(define fxquotient fxdiv)
-(define fxremainder fxrem)
-(define fx-width (fixnum-width))
-(define fx-greatest (greatest-fixnum))
-(define fx-least (least-fixnum))
 
 ;==============================================================================
 ;; Execute the REPL only if a file was not given on the command line

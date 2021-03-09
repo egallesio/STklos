@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 19-Feb-2021 19:04 (eg)
+;;;; Last file update:  9-Mar-2021 16:07 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -47,7 +47,7 @@
                          (fx+            . ,fx+)
                          (fx-            . ,fx-)
                          (fx*            . ,fx*)
-                         (fxdiv          . ,fxdiv)
+                         (fxquotient     . ,fxquotient)
                          (=              . ,=)
                          (<              . ,<)
                          (<=              . ,<=)
@@ -1024,7 +1024,7 @@ doc>
                           (else
                            (comp2 'IN-DIV2)))))
                 (else  (compile-normal-call fct actuals len env epair #f))))
-      ((fx+ fx- fx* fxdiv)
+      ((fx+ fx- fx* fxquotient)
                 (case len
                   ((2) (let ((a (car actuals))
                              (b (cadr actuals)))
@@ -1034,7 +1034,7 @@ doc>
                                                 ((fx+) (fx+ a b))
                                                 ((fx-) (fx- a b))
                                                 ((fx*) (fx* a b))
-                                                ((fxdiv) (fxdiv a b)))
+                                                (else  (fxquotient a b)))
                                               env
                                               tail?))
                            ((and (small-integer-constant? a)
@@ -1045,17 +1045,17 @@ doc>
                                    b a))
                            ((small-integer-constant? b)
                             (oper2 (case fct
-                                     ((fx+)   'IN-SINT-FXADD2)
-                                     ((fx-)   'IN-SINT-FXSUB2)
-                                     ((fx*)   'IN-SINT-FXMUL2)
-                                     ((fxdiv) 'IN-SINT-FXDIV2))
+                                     ((fx+) 'IN-SINT-FXADD2)
+                                     ((fx-) 'IN-SINT-FXSUB2)
+                                     ((fx*) 'IN-SINT-FXMUL2)
+                                     (else  'IN-SINT-FXDIV2))
                                    a b))
                            (else
                             (comp2 (case fct
-                                     ((fx+)   'IN-FXADD2)
-                                     ((fx-)   'IN-FXSUB2)
-                                     ((fx*)   'IN-FXMUL2)
-                                     ((fxdiv) 'IN-FXDIV2)))))))
+                                     ((fx+) 'IN-FXADD2)
+                                     ((fx-) 'IN-FXSUB2)
+                                     ((fx*) 'IN-FXMUL2)
+                                     (else  'IN-FXDIV2)))))))
                   (else
                    (compile-normal-call fct actuals len env epair #f))))
 

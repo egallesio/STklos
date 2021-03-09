@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update:  9-Mar-2021 14:24 (eg)
+ * Last file update:  9-Mar-2021 16:08 (eg)
  */
 
 #include "stklos.h"
@@ -212,7 +212,7 @@ DEFINE_PRIMITIVE("fx*", fxtime, subr2, (SCM o1, SCM o2))
   return MAKE_INT(INT_VAL(o1) * INT_VAL(o2));
 }
 
-DEFINE_PRIMITIVE("fxdiv", fxdiv, subr2, (SCM o1, SCM o2))
+DEFINE_PRIMITIVE("fxquotient", fxdiv, subr2, (SCM o1, SCM o2))
 {
   int n = INT_VAL(o2);
 
@@ -220,7 +220,7 @@ DEFINE_PRIMITIVE("fxdiv", fxdiv, subr2, (SCM o1, SCM o2))
   return MAKE_INT(INT_VAL(o1) / n);
 }
 
-DEFINE_PRIMITIVE("fxrem", fxrem, subr2, (SCM o1, SCM o2))
+DEFINE_PRIMITIVE("fxremainder", fxrem, subr2, (SCM o1, SCM o2))
 {
   int n = INT_VAL(o2);
 
@@ -228,7 +228,7 @@ DEFINE_PRIMITIVE("fxrem", fxrem, subr2, (SCM o1, SCM o2))
   return MAKE_INT(INT_VAL(o1) % n);
 }
 
-DEFINE_PRIMITIVE("fxmod", fxmod, subr2, (SCM o1, SCM o2))
+DEFINE_PRIMITIVE("fxmodulo", fxmod, subr2, (SCM o1, SCM o2))
 {
   int n1 = INT_VAL(o1);
   int n2 = INT_VAL(o2);
