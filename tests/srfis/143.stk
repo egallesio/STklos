@@ -1,7 +1,7 @@
 ;; ----------------------------------------------------------------------
 ;;  SRFI 143...
 ;; ----------------------------------------------------------------------
-(test-subsection "SRFI 143 - fixnums")
+;(test-subsection "SRFI 143 - fixnums")
 
 (test "fixnum? 1" #t (fixnum? 32767))
 (test "fixnum? 2" #f (fixnum? 1.1))
@@ -177,6 +177,22 @@
 (test "test-373" 3 (fxif 1 1 2))
 (test "test-378" #b00110011 (fxif #b00111100 #b11110000 #b00001111))
 (test "test-379" #b1 (fxcopy-bit 0 0 #t))
+
+
+;; Bitwise operation with any number of parameters
+(test "bitwise.1" 42       (fxand 42))
+(test "bitwise.2" #b1      (fxand #b101011 #b1))
+(test "bitwise.3" #b1      (fxand #b101011 #b1 #b100101))
+
+(test "bitwise.4" 42       (fxior 42))
+(test "bitwise.5" #b101011 (fxior #b101011 #b1))
+(test "bitwise.6" #b101111 (fxior #b101011 #b1 #b100101))
+
+(test "bitwise.7" 42       (fxxor 42))
+(test "bitwise.8" #b101010 (fxxor #b101011 #b1))
+(test "bitwise.9" #b001111 (fxxor #b101011 #b1 #b100101))
+
+
 
 ;; Extra tests for the tricky bit-field juggling functions:
 
