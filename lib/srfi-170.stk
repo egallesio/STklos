@@ -1,0 +1,426 @@
+;;;;
+;;;; srfi-170.stk         -- SRFI-170: POSIX API
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 09-Jan-2021 09:14
+;;;; Last file update: 13-Jan-2021 00:21 (jpellegrini)
+;;;;
+
+(require "srfi-158")
+
+(load "srfi-170-impl")
+
+(define %%srfi-170-previous-module (current-module))
+
+(select-module SRFI-170)
+(import SRFI-158)
+
+;; defines a list of symbols evaluating to themselves:
+(define-syntax defsymbol
+  (syntax-rules ()
+    ((_ s)
+     (define s 's))
+    ((_ s t ...)
+     (begin (define s 's)
+            (defsymbol t ...)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; 3.1  Error handling -- DONE
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; (define &posix-error ...)   implemented in C
+
+(define (posix-error errno :optional procedure args)
+  (let ((errname (%get-posix-error-name errno)))
+    (raise (make-condition &posix-error
+                           'procedure procedure
+                           'args args
+                           'errname (%get-posix-error-name errno)
+                           'message (posix-get-message-for-errno errno)
+                           'errno errno))))
+
+(define (posix-error? obj)
+  (and (condition? obj)
+       (condition-has-type? obj &posix-error)))
+
+(define (posix-error-name posix-error)
+  (condition-ref posix-error 'errname))
+
+(define (posix-error-procedure posix-error)
+  (condition-ref posix-error 'procedure))
+
+(define (posix-error-args posix-error)
+  (condition-ref posix-error 'args))
+
+(define (posix-error-message posix-error)
+  (condition-ref posix-error 'message))
+
+(define (posix-error-errno posix-error)
+  (condition-ref posix-error 'errno))
+
+;; (posix-error-message posix-error)   implemented as primitive
+
+(export posix-error
+        posix-error?
+        posix-error-name
+        posix-error-procedure
+        posix-error-args
+        posix-error-message
+        posix-error-errno)
+
+;;;;;;;;;;;;;;;;;;;
+;;;
+;;; 3.2  I/O - DONE
+;;;
+;;;;;;;;;;;;;;;;;;;
+
+
+(defsymbol binary-input)
+(defsymbol textual-input)
+(defsymbol binary-output)
+(defsymbol textual-output)
+(defsymbol binary-input/output)
+
+(defsymbol buffer-none)
+(defsymbol buffer-block)
+(defsymbol buffer-line)
+
+;; open/append     implemented in C
+;; open/create     implemented in C
+;; open/exclusive  implemented in C
+;; open/nofollow   implemented in C
+;; open/truncate   implemented in C
+
+;; (open-file fname port-type flags [permission-bits [buffer-mode] ]) implemented as primitive
+;; (fd->port fd port-type [buffer-mode])                              implemented as primitive
+
+(export binary-input
+        textual-input
+        binary-output
+        textual-output
+        binary-input/output
+
+        buffer-none
+        buffer-block
+        buffer-line)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; 3.3  File system - DONE
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defsymbol
+  time/now
+  time/unchanged
+  owner/unchanged
+  group/unchanged)
+
+(define default-prefix
+  (let ((p (let ((tmpdir (getenv "TMPDIR")))
+             (or tmpdir "/tmp"))))
+    (format #f "~a/~a" p (getpid))))
+
+(define temp-file-prefix (make-parameter default-prefix))
+
+;; (create-directory fname [permission-bits])  implemented as primitive
+;; (create-fifo fname [permission-bits])       implemented as primitive
+;; (create-hard-link old-fname new-fname)      implemented as primitive
+;; (create-symlink old-fname new-fname)        implemented as primitive
+;; (read-symlink fname)                        implemented as primitive
+;; (rename-file old-fname new-fname)           implemented as primitive
+;; (delete-directory fname)                    implemented as primitive
+
+;; set-file-owner needs to take into account the /unchanged parameters,
+;; and it's easier to do it here in Scheme.
+;; (%set-file-owner fname uid gid)              implemented as primitive
+(define (set-file-owner fname uid gid)
+  (let ((info (file-info fname #t)))
+    (let ((uid-to-go (if (eq? uid owner/unchanged)
+                         (file-info:uid info)
+                         uid))
+          (gid-to-go (if (eq? gid group/unchanged)
+                         (file-info:gid info)
+                         gid)))
+      (%set-file-owner fname uid-to-go gid-to-go))))
+  
+;; (set-file-times fname [access-time-object modify-time-object]) implemented as primitive
+;; (truncate-file fname/port len)              implemented as primitive
+;; (file-info fname/port follow?)              implemented as primitive
+
+(define (file-info? obj)
+  (and (struct? obj)
+       (struct-is-a? obj %file-info)))
+
+(define (file-info:device file-info)  (struct-ref file-info 'device))
+(define (file-info:inode file-info)   (struct-ref file-info 'inode))  
+(define (file-info:mode file-info)    (struct-ref file-info 'mode))  
+(define (file-info:nlinks file-info)  (struct-ref file-info 'nlinks))  
+(define (file-info:uid file-info)     (struct-ref file-info 'uid))  
+(define (file-info:gid file-info)     (struct-ref file-info 'gid))  
+(define (file-info:rdev file-info)    (struct-ref file-info 'rdev))  
+(define (file-info:size file-info)    (struct-ref file-info 'size))  
+(define (file-info:blksize file-info) (struct-ref file-info 'blksize))  
+(define (file-info:blocks file-info)  (struct-ref file-info 'blocks))  
+(define (file-info:atime file-info)   (struct-ref file-info 'atim))
+(define (file-info:mtime file-info)   (struct-ref file-info 'mtim))
+(define (file-info:ctime file-info)   (struct-ref file-info 'ctim))
+(define (file-info:atim file-info)    (struct-ref file-info 'atime))
+(define (file-info:mtim file-info)    (struct-ref file-info 'mtime))
+(define (file-info:ctim file-info)    (struct-ref file-info 'ctime))
+
+;; (file-info-directory? file-info) implemented as primitive
+;; (file-info-fifo? file-info)      implemented as primitive
+;; (file-info-symlink? file-info)   implemented as primitive
+;; (file-info-regular? file-info)   implemented as primitive
+;; (file-info-socket? file-info)    implemented as primitive
+;; (file-info-device? file-info)    implemented as primitive
+;; (set-file-mode fname bits)       implemented as primitive
+
+;; directory-files already exists in STklos, but does not throw
+;; &posix-error. This version, which calls open-directory and
+;; read-directory, does.
+(define (directory-files path :optional dot)
+  (let ((dir (open-directory path dot))
+        (files '()))
+    (let again ((f (read-directory dir)))
+      (if (eof-object? f)
+          files
+          (begin (set! files (cons f files))
+                 (again (read-directory dir)))))))
+
+(define (make-directory-files-generator path :optional dot)
+  (let ((dir (open-directory path dot)))
+    (make-unfold-generator eof-object?
+                           (lambda (x) (read-directory dir))
+                           (lambda (x) x)
+                           ())))
+
+;; (open-directory dir [dot-files?])  implemented as primitive
+;; (read-directory directory-object)  implemented as primitive
+;; (close-directory directory-object) implemented as primitive
+;; (real-path path)                   implemented as primitive
+;; (file-space path-or-port)          implemented as primitive
+
+
+;; About create-temp-file:
+;;
+;; 1. It is not clear from the SRFI text what should happen if the prefix
+;; denominates a non-existing directory. We don't create it, and let
+;; mkstemp throw a ENOENT error (it's a POSIX API, so mimic'ing whatever
+;; a POSIX function does seems appropriate). Gauche and Loko do the same.
+;;
+;; 2. Loko tries to protect against symlink attacks; Gauche just calls mkstemp
+;; directly. $mkstemp does the same as Gauche.
+;;
+(define (create-temp-file . arg)
+  (when (> (length arg) 1) (error 'create-temp-file "accepts at most one argument"))
+  (let ((pref (if (null? arg)
+                  (temp-file-prefix)
+                  (car arg))))
+    (%mkstemp (string-append pref "XXXXXX"))))
+
+
+(define alpha "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_")
+
+(define (random-string n)
+  (let ((s (make-string n)))
+    (dotimes (i n)
+      (string-set! s i (string-ref alpha (random-integer 63))))
+    s))
+
+;; FIXME: needs review.
+(define (call-with-temporary-filename maker . arg)
+  (let ((pref (if (null? arg)
+                  (temp-file-prefix)
+                  (car arg))))
+    (let again ((tries 100))
+      (let ((name (string-append pref (random-string 12))))
+        (let-values (((x . rest)
+                      (guard (e
+                              ((and (condition-has-type? e &posix-error)
+                                    (not (eqv? 0 tries)))
+                               #f))
+                        (maker name))))
+          (if (not x)
+              (again (fx- tries 1))
+              (apply values x rest)))))))
+
+(export temp-file-prefix
+        
+        time/now
+        time/unchanged
+
+        owner/unchanged
+        group/unchanged
+
+        directory-files
+        make-directory-files-generator
+        
+        set-file-owner
+        create-temp-file
+        call-with-temporary-filename
+        
+        file-info?
+        file-info:device
+        file-info:inode 
+        file-info:mode 
+        file-info:nlinks 
+        file-info:uid 
+        file-info:gid 
+        file-info:rdev 
+        file-info:size 
+        file-info:blksize
+        file-info:blocks 
+        file-info:atime 
+        file-info:mtime 
+        file-info:ctime 
+        file-info:atim 
+        file-info:mtim 
+        file-info:ctim )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; 3.5 Process state  --  DONE
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; (umask)                               implemented as primitive
+;; (set-umask! umask)                    implemented as primitive
+;; (define current-directory getcwd)     implemented as primitive
+;; (define set-current-directory! chdir) implemented as primitive
+
+(define pid getpid) ; in STklos, always successful
+
+;; (nice delta)              implemented as primitive
+;; (user-uid)                implemented as primitive
+;; (user-gid)                implemented as primitive
+;; (user-effective-uid)      implemented as primitive
+;; (user-effective-gid)      implemented as primitive
+;; (user-supplementary-gids) implemented as primitive
+
+(export pid)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
+;;; 3.6  User and group database access -- DONE
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; (user-info uid/name)        implemented as primitive
+
+(define (user-info? obj)
+  (and (struct? obj)
+       (struct-is-a? obj %user-info)))
+
+(define (user-info:name obj)             (struct-ref obj 'name))
+(define (user-info:uid obj)              (struct-ref obj 'uid))
+(define (user-info:gid obj)              (struct-ref obj 'gid))
+(define (user-info:home-dir obj)         (struct-ref obj 'home-dir))
+(define (user-info:shell obj)            (struct-ref obj 'shell))
+(define (user-info:full-name obj)        (struct-ref obj 'full-name))
+(define (user-info:parsed-full-name obj) (struct-ref obj 'parsed-full-name))
+
+;; (group-info gid/name)      implemented as primitive
+
+(define (group-info:name obj) (struct-ref obj 'name))
+(define (group-info:gid obj)  (struct-ref obj 'gid))
+(define (group-info? obj)
+  (and (struct? obj)
+       (struct-is-a? obj (in-module SRFI-170 %group-info))))
+                                                  
+(export user-info?
+        user-info:name
+        user-info:uid
+        user-info:gid
+        user-info:home-dir
+        user-info:shell
+        user-info:full-name
+        user-info:parsed-full-name
+        
+        group-info?
+        group-info:name
+        group-info:gid)
+
+;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; 3.10  Time -- DONE
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;
+
+;; (posix-time)      implemented as primitive
+;; (monotonic-time)  implemented as primitive
+
+(define (%make-time sec nano)
+  (make-struct %time sec nano))
+  
+(define (time-second x) (struct-ref x 'second))
+(define (time-nanosecond x) (struct-ref x 'nanosecond))
+
+(export %make-time
+        time-second
+        time-nanosecond)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; 3.11  Environment variables -- DONE
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; FIXME: implement as primitives
+(define set-environment-variable! setenv!)
+(define delete-environment-variable! unsetenv!)
+
+(export set-environment-variable!
+        delete-environment-variable!)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
+;;; 3.12  Terminal device control -- DONE
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; (terminal? port)  implemented as primitive
+
+;;;
+;;; END OF MODULE
+;;;
+
+(select-module STklos)
+(import SRFI-170)
+
+(define %rename-file      rename-file)
+(define %directory-files  directory-files)
+(define %delete-directory delete-directory)
+(define %open-file        open-file)
+
+(define rename-file      (in-module SRFI-170 rename-file))
+(define directory-files  (in-module SRFI-170 directory-files))
+(define delete-directory (in-module SRFI-170 delete-directory))
+(define (open-file . args)
+  (if (= (length args) 2)
+      (apply %open-file args)
+      (apply (in-module SRFI-170 open-file) args)))
+
+(provide "srfi-170")
