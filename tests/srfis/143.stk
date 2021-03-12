@@ -10,15 +10,21 @@
 (test "fx=? 2" #f (fx=? 1 2 2))
 (test "fx=? 3" #f (fx=? 1 1 2))
 (test "fx=? 4" #f (fx=? 1 2 3))
+(test "fx=? 5" #t (fx=? 1))
 
 (test "fx<? 1" #t (fx<? 1 2 3))
 (test "fx<? 2" #f (fx<? 1 1 2))
+(test "fx<? 3" #t (fx<? 1))
 (test "fx>? 1" #t (fx>? 3 2 1))
 (test "fx>? 2" #f (fx>? 2 1 1))
+(test "fx>? 3" #t (fx>? 2))
 (test "fx<=? 1" #t (fx<=? 1 1 2))
 (test "fx<=? 2" #f (fx<=? 1 2 1))
+(test "fx<=? 3" #t (fx<=? 1))
 (test "fx>=? 1" #t (fx>=? 2 1 1))
 (test "fx>=? 2" #f (fx>=? 1 2 1))
+(test "fx>=? 3" #t (fx>=? 1))
+
 (test "fx<=? 3" '(#t #f) (list (fx<=? 1 1 2) (fx<=? 2 1 3)))
 
 (test "fxzero? 1" #t (fxzero? 0))

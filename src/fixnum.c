@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 12-Mar-2021 16:39 (eg)
+ * Last file update: 12-Mar-2021 18:33 (eg)
  */
 
 #include "stklos.h"
@@ -334,12 +334,12 @@ DEFINE_PRIMITIVE("fxneg", fxneg, subr1, (SCM o))
  * |fxsqrt| id semantically equivalent to exact-integer-sqrt (not sqrt), so
  * that |(fxsqrt n)| returns two values |a|, |b|, such that |a*a+b|=|n|.
  * @lisp
- *   (fxsqrt? #f)            =>  error
- *   (fxdqrt? (expt 100 100) =>  error
- *   (fxsqrt? -1)            =>  error
- *   (fxsqrt? 0)             =>  0, 0
- *   (fxsqrt? 1)             =>  1, 0
- *   (fxsqrt? 6)             =>  2, 2
+ *   (fxsqrt #f)            =>  error
+ *   (fxdqrt (expt 100 100) =>  error
+ *   (fxsqrt -1)            =>  error
+ *   (fxsqrt 0)             =>  0, 0
+ *   (fxsqrt 1)             =>  1, 0
+ *   (fxsqrt 6)             =>  2, 2
  * @end lisp
 doc>
 */
@@ -433,7 +433,7 @@ DEFINE_PRIMITIVE(name, func, vsubr, (int argc, SCM *argv))        \
   if (argc == 0) error_fx_at_least_1();                           \
                                                                   \
   ensure_fx(*argv);                                               \
-  if (argc == 1) return *argv;                                    \
+  if (argc == 1) return STk_true;                                 \
   for (p = *argv--; --argc; p=*argv,argv--) {                     \
     ensure_fx(*argv);                                             \
     if (INT_VAL(p) op INT_VAL(*argv)) return STk_false;           \
