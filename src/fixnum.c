@@ -21,18 +21,12 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update:  9-Mar-2021 18:38 (eg)
+ * Last file update: 12-Mar-2021 15:46 (eg)
  */
 
 #include "stklos.h"
 #include <stdlib.h>  /* for ldiv */
 #include <math.h>    /* for sqrt & pow */
-
-
-static void error_bad_fixnum(SCM obj)
-{
-  STk_error("bad fixnum ~S", obj);
-}
 
 static void error_division_by_0(void)
 {
@@ -55,6 +49,95 @@ long exp_2_fxwidth() {
   return ( 1L << (INT_LENGTH/2-1) ) << (INT_LENGTH/2-1);
   /*    return (long) pow (2, sizeof(long)* 8 - 2);  */
 }
+
+
+/*
+<doc EXT verify-fx-parameters
+ * (verify-fx-parameters)
+ * (verify-fx-parameters value)
+ *
+ * This parameter object is used to determine if fixnum functions should test
+ * that their parameters are fixnums or not.  By default, this parameter
+ * object is true, meaning that functions tests that the fixnum functions
+ * verify that their parameters are effectively fixnum numbers.
+ *
+ * @lisp
+ * (verify-fx-parameters)           => #t
+ * (fx+ 1 'foo)                     => error
+ * (verify-fx-parameters #f)
+ * (fx+ 1 'foo)                     => 34943415040161 (or any bogus value)
+ * @end lisp
+ *
+ * Note that only the parameters are verified and that an overflow in a
+ * computation can produce an erroneous result (which is still a fixnum
+ * number)
+doc>
+*/
+
+#define ENSURE_FX
+
+#ifdef ENSURE_FX
+#define ensure_fx(x) {                      \
+  if (verify_fx_parameters && !INTP(x))     \
+    error_bad_fixnum1(x);                   \
+}
+
+#define ensure_fx2(x, y) {                              \
+  if (verify_fx_parameters && !(INTP(x) && INTP(y)))    \
+    error_bad_fixnum2(x, y);                            \
+}
+
+#define ensure_fx3(x, y, z) {                                   \
+  if (verify_fx_parameters && !(INTP(x) && INTP(y) && INTP(z))) \
+    error_bad_fixnum3(x, y, z);                                 \
+}
+
+#define ensure_fx4(x, y, z, w) {                                           \
+  if (verify_fx_parameters && !(INTP(x) && INTP(y) && INTP(z) && INTP(w))) \
+    error_bad_fixnum4(x, y, z, w);                                         \
+}
+
+static void error_bad_fixnum1(SCM o1)
+{
+  STk_error("bad fixnum ~S", o1);
+}
+
+static void error_bad_fixnum2(SCM o1, SCM o2)
+{
+  if (!INTP(o1)) error_bad_fixnum1(o1);
+  error_bad_fixnum1(o2);
+}
+
+static void error_bad_fixnum3(SCM o1, SCM o2, SCM o3)
+{
+  if (!INTP(o1)) error_bad_fixnum1(o1);
+  if (!INTP(o2)) error_bad_fixnum1(o2);
+  error_bad_fixnum1(o3);
+}
+
+static void error_bad_fixnum4(SCM o1, SCM o2, SCM o3, SCM o4)
+{
+  if (!INTP(o1)) error_bad_fixnum1(o1);
+  if (!INTP(o2)) error_bad_fixnum1(o2);
+  if (!INTP(o3)) error_bad_fixnum1(o3);
+  error_bad_fixnum1(o4);
+}
+#else
+#define ensure_fx(x)           {}
+#define ensure_fx2(x, y)       {}
+#define ensure_fx3(x, y, z)    {}
+#define ensure_fx4(x, y, z, w) {}
+#endif
+
+static int verify_fx_parameters = 1;
+
+static SCM verify_fx_parameters_conv(SCM value)
+{
+  verify_fx_parameters = (value != STk_false);
+  return MAKE_BOOLEAN(verify_fx_parameters);
+}
+
+
 
 
 /*
@@ -115,9 +198,10 @@ DEFINE_PRIMITIVE("greatest-fixnum", greatest_fixnum, subr0, (void))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("fxzero?", fxzerop, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxzero?", fxzerop, subr1, (SCM o))
 {
-  return MAKE_BOOLEAN (INT_VAL(o1)==0);
+  ensure_fx(o);
+  return MAKE_BOOLEAN (INT_VAL(o)==0);
 }
 
 /*
@@ -140,14 +224,16 @@ DEFINE_PRIMITIVE("fxzero?", fxzerop, subr1, (SCM o1))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("fxpositive?", fxpositivep, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxpositive?", fxpositivep, subr1, (SCM o))
 {
-  return MAKE_BOOLEAN (INT_VAL(o1)>0);
+  ensure_fx(o);
+  return MAKE_BOOLEAN (INT_VAL(o)>0);
 }
 
-DEFINE_PRIMITIVE("fxnegative?", fxnegativep, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxnegative?", fxnegativep, subr1, (SCM o))
 {
-  return MAKE_BOOLEAN (INT_VAL(o1)<0);
+  ensure_fx(o);
+  return MAKE_BOOLEAN (INT_VAL(o)<0);
 }
 
 /*
@@ -168,14 +254,16 @@ DEFINE_PRIMITIVE("fxnegative?", fxnegativep, subr1, (SCM o1))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("fxodd?", fxoddp, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxodd?", fxoddp, subr1, (SCM o))
 {
-  return MAKE_BOOLEAN (INT_VAL(o1)&1);
+  ensure_fx(o);
+  return MAKE_BOOLEAN (INT_VAL(o)&1);
 }
 
-DEFINE_PRIMITIVE("fxeven?", fxevenp, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxeven?", fxevenp, subr1, (SCM o))
 {
-  return MAKE_BOOLEAN (!(INT_VAL(o1)&1));
+  ensure_fx(o);
+  return MAKE_BOOLEAN (!(INT_VAL(o)&1));
 }
 
 
@@ -199,59 +287,73 @@ doc>
 */
 DEFINE_PRIMITIVE("fx+", fxplus, subr2, (SCM o1, SCM o2))
 {
+  ensure_fx2(o1,o2);
   return MAKE_INT(INT_VAL(o1) + INT_VAL(o2));
 }
 
 DEFINE_PRIMITIVE("fx-", fxminus, subr2, (SCM o1, SCM o2))
 {
+  ensure_fx2(o1, o2);
   return MAKE_INT(INT_VAL(o1) - INT_VAL(o2));
 }
 
 DEFINE_PRIMITIVE("fx*", fxtime, subr2, (SCM o1, SCM o2))
 {
+  ensure_fx2(o1, o2);
   return MAKE_INT(INT_VAL(o1) * INT_VAL(o2));
 }
 
 DEFINE_PRIMITIVE("fxquotient", fxdiv, subr2, (SCM o1, SCM o2))
 {
-  int n = INT_VAL(o2);
+  ensure_fx2(o1, o2);
+  {
+    int n = INT_VAL(o2);
 
-  if (!n) error_division_by_0();
-  return MAKE_INT(INT_VAL(o1) / n);
+    if (!n) error_division_by_0();
+    return MAKE_INT(INT_VAL(o1) / n);
+  }
 }
 
 DEFINE_PRIMITIVE("fxremainder", fxrem, subr2, (SCM o1, SCM o2))
 {
-  int n = INT_VAL(o2);
+  ensure_fx2(o1, o2);
+  {
+    int n = INT_VAL(o2);
 
-  if (!n) error_division_by_0();
-  return MAKE_INT(INT_VAL(o1) % n);
+    if (!n) error_division_by_0();
+    return MAKE_INT(INT_VAL(o1) % n);
+  }
 }
 
 DEFINE_PRIMITIVE("fxmodulo", fxmod, subr2, (SCM o1, SCM o2))
 {
-  int n1 = INT_VAL(o1);
-  int n2 = INT_VAL(o2);
-  int r;
+  ensure_fx2(o1, o2);
+  {
+    int n1 = INT_VAL(o1);
+    int n2 = INT_VAL(o2);
+    int r;
 
-  if (!n2) error_division_by_0();
-  r = n1 % n2;
+    if (!n2) error_division_by_0();
+    r = n1 % n2;
 
-  /* (negativep(n1) != negativep(n2) && !zerop(r)) */
-  if ((((n1 < 0) && (n2 >= 0)) || ((n1 >= 0) && (n2 < 0))) && r)
-    r += n2;
+    /* (negativep(n1) != negativep(n2) && !zerop(r)) */
+    if ((((n1 < 0) && (n2 >= 0)) || ((n1 >= 0) && (n2 < 0))) && r)
+      r += n2;
 
-  return MAKE_INT(r);
+    return MAKE_INT(r);
+  }
 }
 
-DEFINE_PRIMITIVE("fxabs", fxabs, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxabs", fxabs, subr1, (SCM o))
 {
-  return MAKE_INT(labs(INT_VAL(o1)));
+  ensure_fx(o);
+  return MAKE_INT(labs(INT_VAL(o)));
 }
 
-DEFINE_PRIMITIVE("fxneg", fxneg, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxneg", fxneg, subr1, (SCM o))
 {
-  return MAKE_INT(-INT_VAL(o1));
+  ensure_fx(o);
+  return MAKE_INT(-INT_VAL(o));
 }
 
 /*
@@ -273,20 +375,24 @@ DEFINE_PRIMITIVE("fxneg", fxneg, subr1, (SCM o1))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("fxsquare", fxsquare, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxsquare", fxsquare, subr1, (SCM o))
 {
-  return MAKE_INT(INT_VAL(o1) * INT_VAL(o1));
+  ensure_fx(o);
+  return MAKE_INT(INT_VAL(o) * INT_VAL(o));
 }
 
-DEFINE_PRIMITIVE("fxsqrt", fxsqrt, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxsqrt", fxsqrt, subr1, (SCM o))
 {
-  long no = INT_VAL(o1);
-  if (no < 0)   STk_error("non negative fixnum expected. It was: ~S", o1);
-  long n1 = (long) sqrt((float)no);
-  long n2 = no - (n1*n1);
-  return STk_n_values(2,
-                      MAKE_INT(n1),
-                      MAKE_INT(n2));
+  ensure_fx(o);
+  {
+    long no = INT_VAL(o);
+    if (no < 0)   STk_error("non negative fixnum expected. It was: ~S", o);
+    long n1 = (long) sqrt((float)no);
+    long n2 = no - (n1*n1);
+    return STk_n_values(2,
+                        MAKE_INT(n1),
+                        MAKE_INT(n2));
+  }
 }
 
 
@@ -309,9 +415,12 @@ DEFINE_PRIMITIVE("fxmax", fxmax, vsubr, (int argc, SCM *argv))
   SCM res;
 
   if (argc == 0) error_fx_at_least_1();
-  if (argc == 1)  return *argv;
+
+  ensure_fx(*argv);
+  if (argc == 1) return *argv;
 
   for (res = *argv--; --argc; argv--) {
+    ensure_fx(*argv);
     if (INT_VAL(res) < INT_VAL(*argv)) res = *argv;
   }
   return res;
@@ -322,9 +431,12 @@ DEFINE_PRIMITIVE("fxmin", fxmin, vsubr, (int argc, SCM *argv))
   SCM res;
 
   if (argc == 0) error_fx_at_least_1();
+
+  ensure_fx(*argv);
   if (argc == 1) return *argv;
 
   for (res = *argv--; --argc; argv--) {
+    ensure_fx(*argv);
     if (INT_VAL(res) > INT_VAL(*argv)) res = *argv;
   }
   return res;
@@ -351,8 +463,11 @@ DEFINE_PRIMITIVE(name, func, vsubr, (int argc, SCM *argv))        \
 {                                                                 \
   SCM p;                                                          \
   if (argc == 0) error_fx_at_least_1();                           \
+                                                                  \
+  ensure_fx(*argv);                                               \
   if (argc == 1) return *argv;                                    \
   for (p = *argv--; --argc; p=*argv,argv--) {                     \
+    ensure_fx(*argv);                                             \
     if (INT_VAL(p) op INT_VAL(*argv)) return STk_false;           \
   }                                                               \
   return STk_true;                                                \
@@ -384,19 +499,23 @@ FX_COMP("fx=?",  fxeq, !=)
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("fxnot", fxnot, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxnot", fxnot, subr1, (SCM o))
 {
-  return MAKE_INT(~INT_VAL(o1));
+  ensure_fx(o);
+  return MAKE_INT(~INT_VAL(o));
 }
 
 #define FX_LOGICAL(name, func, op) \
 DEFINE_PRIMITIVE(name, func, vsubr, (int argc, SCM *argv))  \
 {                                                           \
   if (argc == 0) error_fx_at_least_1();                     \
+                                                            \
+  ensure_fx(*argv);                                         \
   if (argc == 1) return *argv;                              \
   else {                                                    \
     long int res;                                           \
     for (res = INT_VAL(*argv--); --argc; argv--) {          \
+      ensure_fx(*argv);                                     \
       res op INT_VAL(*argv);                                \
     }                                                       \
     return MAKE_INT(res);                                   \
@@ -426,30 +545,36 @@ doc>
 */
 DEFINE_PRIMITIVE("fxarithmetic-shift-right", fxarithmetic_shiftr, subr2, (SCM o1, SCM o2))
 {
-  if (!INTP(o2)) error_bad_fixnum(o2);
-  long k = INT_VAL(o2);
-  if (k>=0)
-    return MAKE_INT( INT_VAL(o1) >> k );
-  error_negative_fixnum(o2);
-  return STk_false; /* should never get here */
+  ensure_fx2(o1, o2);
+  {
+    long k = INT_VAL(o2);
+    if (k>=0)
+      return MAKE_INT( INT_VAL(o1) >> k );
+    error_negative_fixnum(o2);
+    return STk_false; /* should never get here */
+  }
 }
 
 DEFINE_PRIMITIVE("fxarithmetic-shift-left", fxarithmetic_shiftl, subr2, (SCM o1, SCM o2))
 {
-  if (!INTP(o2)) error_bad_fixnum(o2);
-  long k = INT_VAL(o2);
-  if (k>=0)
-    return MAKE_INT( INT_VAL(o1) << k );
-  error_negative_fixnum(o2);
-  return STk_false; /* should never get here */
+  ensure_fx2(o1, o2);
+  {
+    long k = INT_VAL(o2);
+    if (k>=0)
+      return MAKE_INT( INT_VAL(o1) << k );
+    error_negative_fixnum(o2);
+    return STk_false; /* should never get here */
+  }
 }
 
 DEFINE_PRIMITIVE("fxarithmetic-shift", fxarithmetic_shift, subr2, (SCM o1, SCM o2))
 {
-  if (!INTP(o2)) error_bad_fixnum(o2);
-  long k = INT_VAL(o2);
-  if (k<0) return MAKE_INT( INT_VAL(o1) >> -k );
-  else     return MAKE_INT( INT_VAL(o1) << k );
+  ensure_fx2(o1, o2);
+  {
+    long k = INT_VAL(o2);
+    if (k<0) return MAKE_INT( INT_VAL(o1) >> -k );
+    else     return MAKE_INT( INT_VAL(o1) << k );
+  }
 }
 
 /*
@@ -465,12 +590,15 @@ DEFINE_PRIMITIVE("fxarithmetic-shift", fxarithmetic_shift, subr2, (SCM o1, SCM o
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("fxlength", fxlength, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxlength", fxlength, subr1, (SCM o))
 {
-  long n = INT_VAL(o1);
-  if (n == -1 || n == 0) return MAKE_INT(0);
-  if (n>0)  return MAKE_INT( (long) log2( (float) n) + 1 );
-  return MAKE_INT( (long) log2( (float) labs(n+1) ) + 1 ); /* n<-1 */
+  ensure_fx(o);
+  {
+    long n = INT_VAL(o);
+    if (n == -1 || n == 0) return MAKE_INT(0);
+    if (n>0)  return MAKE_INT( (long) log2( (float) n) + 1 );
+    return MAKE_INT( (long) log2( (float) labs(n+1) ) + 1 ); /* n<-1 */
+  }
 }
 
 /*
@@ -491,9 +619,12 @@ doc>
 */
 DEFINE_PRIMITIVE("fxif", fxif, subr3, (SCM m, SCM o1, SCM o2))
 {
-  unsigned long mask = INT_VAL(m);
-  return MAKE_INT(  (  mask  & INT_VAL(o1))  |
-                    ((~mask) & INT_VAL(o2)));
+  ensure_fx3(m, o1, o2);
+  {
+    unsigned long mask = INT_VAL(m);
+    return MAKE_INT(  (  mask  & INT_VAL(o1))  |
+                      ((~mask) & INT_VAL(o2)));
+  }
 }
 
 /*
@@ -512,7 +643,8 @@ doc>
 */
 DEFINE_PRIMITIVE("fxbit-set?", fxbit_setp, subr2, (SCM o1, SCM o2))
 {
-   return MAKE_BOOLEAN(  (1 << INT_VAL(o1)) & INT_VAL(o2) );
+  ensure_fx2(o1, o2);
+  return MAKE_BOOLEAN(  (1 << INT_VAL(o1)) & INT_VAL(o2) );
 }
 
 /*
@@ -530,11 +662,13 @@ doc>
 */
 DEFINE_PRIMITIVE("fxcopy-bit", fxcopy_bit, subr3, (SCM o1, SCM o2, SCM o3))
 {
-  unsigned long mask = 1 << INT_VAL(o1);
-  if (o3==STk_true) return MAKE_INT( INT_VAL(o2) | mask);
-  else              return MAKE_INT( INT_VAL(o2) & (~mask) );
+  ensure_fx3(o1, o2, o3);
+  {
+    unsigned long mask = 1 << INT_VAL(o1);
+    if (o3==STk_true) return MAKE_INT( INT_VAL(o2) | mask);
+    else              return MAKE_INT( INT_VAL(o2) & (~mask) );
+  }
 }
-
 
 /*
 <doc EXT fxbit-count
@@ -550,17 +684,20 @@ DEFINE_PRIMITIVE("fxcopy-bit", fxcopy_bit, subr3, (SCM o1, SCM o2, SCM o3))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o))
 /* TODO: Somewhat efficient, but there is a better way, described
    in "Hacker's Delight", but it needs to be adapted to the
    variable length datum. */
 {
-  long n = INT_VAL(o1);
-  int total=0;
-  for (int i=0; i < (int) INT_LENGTH; i++, n=n>> 1)
-    if ( n & 1 )
-      total++;
-  return MAKE_INT(total);
+  ensure_fx(o);
+  {
+    long n = INT_VAL(o);
+    int total=0;
+    for (int i=0; i < (int) INT_LENGTH; i++, n=n>> 1)
+      if ( n & 1 )
+        total++;
+    return MAKE_INT(total);
+  }
 }
 
 /*
@@ -578,13 +715,16 @@ DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o1))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("fxfirst-set-bit", fxfirst_set_bit, subr1, (SCM o1))
+DEFINE_PRIMITIVE("fxfirst-set-bit", fxfirst_set_bit, subr1, (SCM o))
 {
-  unsigned long n = INT_VAL(o1);
-  for (int i=0; i < (int) INT_LENGTH; i++, n=n>> 1)
-    if ( n & 1 )
-      return MAKE_INT(i);
-  return MAKE_INT(-1UL);
+  ensure_fx(o);
+  {
+    unsigned long n = INT_VAL(o);
+    for (int i=0; i < (int) INT_LENGTH; i++, n=n>> 1)
+      if ( n & 1 )
+        return MAKE_INT(i);
+    return MAKE_INT(-1UL);
+  }
 }
 
 /*
@@ -601,14 +741,16 @@ doc>
 */
 DEFINE_PRIMITIVE("fxbit-field", fxbit_field, subr3, (SCM o1, SCM o2, SCM o3))
 {
-  int start = INT_VAL(o2);
-  int end = INT_VAL(o3);
-  unsigned long n = INT_VAL(o1);
-  int leftshift = INT_LENGTH +2 -end;
-  n = (n << leftshift) >> (leftshift+start);
-  return MAKE_INT(n);
+  ensure_fx3(o1, o2, o3);
+  {
+    int start = INT_VAL(o2);
+    int end = INT_VAL(o3);
+    unsigned long n = INT_VAL(o1);
+    int leftshift = INT_LENGTH +2 -end;
+    n = (n << leftshift) >> (leftshift+start);
+    return MAKE_INT(n);
+  }
 }
-
 
 /*
 <doc EXT fxbit-field-rotate
@@ -625,41 +767,44 @@ doc>
 */
 DEFINE_PRIMITIVE("fxbit-field-rotate", fxbit_field_rotate, subr4, (SCM o1, SCM o2, SCM o3, SCM o4))
 {
-  int count = INT_VAL(o2);
-  int start = INT_VAL(o3);
-  int end = INT_VAL(o4);
-  unsigned long n = INT_VAL(o1);
+  ensure_fx4(o1, o2, o3, o4);
+  {
+    int count = INT_VAL(o2);
+    int start = INT_VAL(o3);
+    int end = INT_VAL(o4);
+    unsigned long n = INT_VAL(o1);
 
-  unsigned long start_mask = (1 << start);
-  unsigned long last_mask  = (1 << (end-1));
+    unsigned long start_mask = (1 << start);
+    unsigned long last_mask  = (1 << (end-1));
 
-  if (count < 0) {
-    for (int j=0; j<-count; j++) {
+    if (count < 0) {
+      for (int j=0; j<-count; j++) {
 
-      /* single rotation to RIGHT: */
-      unsigned long start_bit = n & start_mask; /* save start-th bit of n */
-      for (int i=start; i<end-1; i++)
-        n = (n & (~(1 << i))) /* set ith-bit to zero */
-          | ( (n & (1 << (i+1)) ) >> 1); /* now OR it with i+1-th bit, shifted down */
+        /* single rotation to RIGHT: */
+        unsigned long start_bit = n & start_mask; /* save start-th bit of n */
+        for (int i=start; i<end-1; i++)
+          n = (n & (~(1 << i))) /* set ith-bit to zero */
+            | ( (n & (1 << (i+1)) ) >> 1); /* now OR it with i+1-th bit, shifted down */
 
-      n = (n & ~last_mask)
-        | (start_bit << (end-start-1));
-    }
-  } else if (count > 0) {
-    for (int j=0; j < count; j++) {
+        n = (n & ~last_mask)
+          | (start_bit << (end-start-1));
+      }
+    } else if (count > 0) {
+      for (int j=0; j < count; j++) {
 
-      /* single rotation to LEFT: */
-      unsigned long end_bit = n & last_mask; /* save start-th bit of n */
-      for (int i=end-1; i>start; i--)
-        n = (n & (~(1 << i))) /* set ith-bit to zero */
-          | ( (n & (1 << (i-1)) ) << 1); /* now OR it with i-1-th bit, shifted up */
+        /* single rotation to LEFT: */
+        unsigned long end_bit = n & last_mask; /* save start-th bit of n */
+        for (int i=end-1; i>start; i--)
+          n = (n & (~(1 << i))) /* set ith-bit to zero */
+            | ( (n & (1 << (i-1)) ) << 1); /* now OR it with i-1-th bit, shifted up */
 
-      n = (n & ~start_mask)
-        | (end_bit >> (end-start-1));
-    }
-  } else return o1;
+        n = (n & ~start_mask)
+          | (end_bit >> (end-start-1));
+      }
+    } else return o1;
 
-  return MAKE_INT((long)n);
+    return MAKE_INT((long)n);
+  }
 }
 
 /*
@@ -676,30 +821,32 @@ doc>
 */
 DEFINE_PRIMITIVE("fxbit-field-reverse", fxbit_field_reverse, subr3, (SCM o1, SCM o2, SCM o3))
 {
-  int start = INT_VAL(o2);
-  int end = INT_VAL(o3);
-  unsigned long n = INT_VAL(o1);
-  int size = end-start;
+  ensure_fx3(o1, o2, o3);
+  {
+    int start = INT_VAL(o2);
+    int end = INT_VAL(o3);
+    unsigned long n = INT_VAL(o1);
+    int size = end-start;
 
-  for (int i=0; i < size/2; i++) {
-    long mask_left  = 1<<(start+i);
-    long mask_right = 1<<(start+size-i-1);
-    long left = n & mask_left;
-    long right= n & mask_right;
+    for (int i=0; i < size/2; i++) {
+      long mask_left  = 1<<(start+i);
+      long mask_right = 1<<(start+size-i-1);
+      long left = n & mask_left;
+      long right= n & mask_right;
 
-    if (left)
-      n = n | mask_right;
-    else
-      n = n & (~mask_right);
+      if (left)
+        n = n | mask_right;
+      else
+        n = n & (~mask_right);
 
-    if (right)
-      n = n | mask_left;
-    else
-      n = n & (~mask_left);
+      if (right)
+        n = n | mask_left;
+      else
+        n = n & (~mask_left);
+    }
+    return MAKE_INT(n);
   }
-  return MAKE_INT(n);
 }
-
 
 /*
   This is a helper function for the fx../carry functions. It is
@@ -769,12 +916,15 @@ doc>
 */
 DEFINE_PRIMITIVE("fx+/carry", fxsum_carry, subr3, (SCM o1, SCM o2, SCM o3))
 {
-  long s = INT_VAL(o1) + INT_VAL(o2) + INT_VAL(o3);
-  long e = exp_2_fxwidth();
-  long q;
-  long r;
-  fxbalanced_div (&q,&r,s,e);
-  return STk_n_values(2, MAKE_INT(r), MAKE_INT(q));
+  ensure_fx3(o1, o2, o3);
+  {
+    long s = INT_VAL(o1) + INT_VAL(o2) + INT_VAL(o3);
+    long e = exp_2_fxwidth();
+    long q;
+    long r;
+    fxbalanced_div (&q,&r,s,e);
+    return STk_n_values(2, MAKE_INT(r), MAKE_INT(q));
+  }
 }
 
 /*
@@ -791,12 +941,15 @@ doc>
 */
 DEFINE_PRIMITIVE("fx-/carry", fxminus_carry, subr3, (SCM o1, SCM o2, SCM o3))
 {
-  long d = INT_VAL(o1) - INT_VAL(o2) - INT_VAL(o3);
-  long e = exp_2_fxwidth();
-  long q;
-  long r;
-  fxbalanced_div (&q,&r,d,e);
-  return STk_n_values(2, MAKE_INT(r), MAKE_INT(q));
+  ensure_fx3(o1, o2, o3);
+  {
+    long d = INT_VAL(o1) - INT_VAL(o2) - INT_VAL(o3);
+    long e = exp_2_fxwidth();
+    long q;
+    long r;
+    fxbalanced_div (&q,&r,d,e);
+    return STk_n_values(2, MAKE_INT(r), MAKE_INT(q));
+  }
 }
 
 /*
@@ -813,12 +966,15 @@ doc>
 */
 DEFINE_PRIMITIVE("fx*/carry", fxmul_carry, subr3, (SCM o1, SCM o2, SCM o3))
 {
-  long s = INT_VAL(o1) * INT_VAL(o2) + INT_VAL(o3);
-  long e = exp_2_fxwidth();
-  long q;
-  long r;
-  fxbalanced_div (&q,&r,s,e);
-  return STk_n_values(2, MAKE_INT(r), MAKE_INT(q));
+  ensure_fx3(o1, o2, o3);
+  {
+    long s = INT_VAL(o1) * INT_VAL(o2) + INT_VAL(o3);
+    long e = exp_2_fxwidth();
+    long q;
+    long r;
+    fxbalanced_div (&q,&r,s,e);
+    return STk_n_values(2, MAKE_INT(r), MAKE_INT(q));
+  }
 }
 
 
@@ -876,5 +1032,10 @@ int STk_init_fixnum(void)
   ADD_PRIMITIVE(fxminus_carry);
   ADD_PRIMITIVE(fxmul_carry);
 
+  /* Add parameter for doing type tests on fx functions or not */
+   STk_make_C_parameter("verify-fx-parameters",
+                       MAKE_BOOLEAN(verify_fx_parameters),
+                       verify_fx_parameters_conv,
+                       STk_STklos_module);
   return TRUE;
 }
