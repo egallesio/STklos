@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 12-Mar-2021 16:31 (eg)
+ * Last file update: 12-Mar-2021 16:39 (eg)
  */
 
 #include "stklos.h"
@@ -41,6 +41,11 @@ static void error_fx_at_least_1(void)
 static void error_negative_fixnum(SCM obj)
 {
   STk_error("expected non-negative fixnum, found ~S", obj);
+}
+
+static void error_bad_fxlength(SCM obj)
+{
+    STk_error("bad fixnum length ~S (should be < ~S)", obj, INT_LENGTH);
 }
 
 /* used internally by the fx../carry primitives */
@@ -535,6 +540,7 @@ DEFINE_PRIMITIVE("fxarithmetic-shift", fxarithmetic_shift, subr2, (SCM o1, SCM o
   ensure_fx2(o1, o2);
   {
     long k = INT_VAL(o2);
+    if (labs(k) > INT_LENGTH) error_bad_fxlength(o2);
     if (k<0) return MAKE_INT( INT_VAL(o1) >> -k );
     else     return MAKE_INT( INT_VAL(o1) << k );
   }
@@ -628,8 +634,8 @@ DEFINE_PRIMITIVE("fxcopy-bit", fxcopy_bit, subr3, (SCM o1, SCM o2, SCM o3))
   ensure_fx2(o1, o2);
   {
     unsigned long mask = 1 << INT_VAL(o1);
-    if (o3==STk_true) return MAKE_INT( INT_VAL(o2) | mask);
-    else              return MAKE_INT( INT_VAL(o2) & (~mask) );
+    if (o3!=STk_false) return MAKE_INT( INT_VAL(o2) | mask);
+    else               return MAKE_INT( INT_VAL(o2) & (~mask) );
   }
 }
 
