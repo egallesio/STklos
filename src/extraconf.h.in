@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 19-May-2000 18:44 (eg)
- * Last file update:  9-Aug-2020 16:28 (eg)
+ * Last file update: 12-Mar-2021 16:02 (eg)
  */
 
 #define PREFIXDIR               "@PREFIX@"
@@ -42,3 +42,4 @@
 #define SHARED_SUFFIX           "@SH_SUFFIX@"
 #define SHARED_LIB_SUFFIX       "@SH_LIB_SUFFIX@"
 #define DEFAULT_CASE_SENSITIVE  @DEFAULT_CS@
+#define CONTROL_FX_PARAMETERS   @CONTROL_FX_PARAMETERS@

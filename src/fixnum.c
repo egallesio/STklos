@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 12-Mar-2021 15:46 (eg)
+ * Last file update: 12-Mar-2021 16:31 (eg)
  */
 
 #include "stklos.h"
@@ -50,51 +50,25 @@ long exp_2_fxwidth() {
   /*    return (long) pow (2, sizeof(long)* 8 - 2);  */
 }
 
-
-/*
-<doc EXT verify-fx-parameters
- * (verify-fx-parameters)
- * (verify-fx-parameters value)
- *
- * This parameter object is used to determine if fixnum functions should test
- * that their parameters are fixnums or not.  By default, this parameter
- * object is true, meaning that functions tests that the fixnum functions
- * verify that their parameters are effectively fixnum numbers.
- *
- * @lisp
- * (verify-fx-parameters)           => #t
- * (fx+ 1 'foo)                     => error
- * (verify-fx-parameters #f)
- * (fx+ 1 'foo)                     => 34943415040161 (or any bogus value)
- * @end lisp
- *
- * Note that only the parameters are verified and that an overflow in a
- * computation can produce an erroneous result (which is still a fixnum
- * number)
-doc>
-*/
-
-#define ENSURE_FX
-
-#ifdef ENSURE_FX
-#define ensure_fx(x) {                      \
-  if (verify_fx_parameters && !INTP(x))     \
-    error_bad_fixnum1(x);                   \
+#if CONTROL_FX_PARAMETERS == 1
+#define ensure_fx(x) {        \
+  if (!INTP(x))               \
+    error_bad_fixnum1(x);     \
 }
 
-#define ensure_fx2(x, y) {                              \
-  if (verify_fx_parameters && !(INTP(x) && INTP(y)))    \
-    error_bad_fixnum2(x, y);                            \
+#define ensure_fx2(x, y) {      \
+  if (!(INTP(x) && INTP(y)))    \
+    error_bad_fixnum2(x, y);    \
 }
 
-#define ensure_fx3(x, y, z) {                                   \
-  if (verify_fx_parameters && !(INTP(x) && INTP(y) && INTP(z))) \
-    error_bad_fixnum3(x, y, z);                                 \
+#define ensure_fx3(x, y, z) {           \
+  if (!(INTP(x) && INTP(y) && INTP(z))) \
+    error_bad_fixnum3(x, y, z);         \
 }
 
-#define ensure_fx4(x, y, z, w) {                                           \
-  if (verify_fx_parameters && !(INTP(x) && INTP(y) && INTP(z) && INTP(w))) \
-    error_bad_fixnum4(x, y, z, w);                                         \
+#define ensure_fx4(x, y, z, w) {                   \
+  if (!(INTP(x) && INTP(y) && INTP(z) && INTP(w))) \
+    error_bad_fixnum4(x, y, z, w);                 \
 }
 
 static void error_bad_fixnum1(SCM o1)
@@ -128,17 +102,6 @@ static void error_bad_fixnum4(SCM o1, SCM o2, SCM o3, SCM o4)
 #define ensure_fx3(x, y, z)    {}
 #define ensure_fx4(x, y, z, w) {}
 #endif
-
-static int verify_fx_parameters = 1;
-
-static SCM verify_fx_parameters_conv(SCM value)
-{
-  verify_fx_parameters = (value != STk_false);
-  return MAKE_BOOLEAN(verify_fx_parameters);
-}
-
-
-
 
 /*
 <doc EXT fixnum?
@@ -662,7 +625,7 @@ doc>
 */
 DEFINE_PRIMITIVE("fxcopy-bit", fxcopy_bit, subr3, (SCM o1, SCM o2, SCM o3))
 {
-  ensure_fx3(o1, o2, o3);
+  ensure_fx2(o1, o2);
   {
     unsigned long mask = 1 << INT_VAL(o1);
     if (o3==STk_true) return MAKE_INT( INT_VAL(o2) | mask);
@@ -1032,10 +995,5 @@ int STk_init_fixnum(void)
   ADD_PRIMITIVE(fxminus_carry);
   ADD_PRIMITIVE(fxmul_carry);
 
-  /* Add parameter for doing type tests on fx functions or not */
-   STk_make_C_parameter("verify-fx-parameters",
-                       MAKE_BOOLEAN(verify_fx_parameters),
-                       verify_fx_parameters_conv,
-                       STk_STklos_module);
   return TRUE;
 }

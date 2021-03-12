@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 15-Feb-2021 11:25 (eg)
+### Last file update: 12-Mar-2021 16:18 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -18,7 +18,7 @@ do
      CC=*)     HAS_CC=1 ;;
      CFLAGS=*) HAS_CFLAGS=1;;
   esac
-  
+
   if test "X$opt" = "X--no-create" -o "X$opt" = "X--no-recursion"
   then
      # These options are added when configure is older than configure.ac
@@ -42,7 +42,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
-AC_PROG_LEX
+extraAC_PROG_LEX
 AC_PROG_MKDIR_P
 AC_CHECK_PROG(PKGCONFIG, pkg-config, "pkg-config", "false")
 
@@ -304,7 +304,7 @@ AC_ARG_WITH(provided-bignum,
 
 if test "$PROV_GMP" = "no" ;then
   AC_ARG_WITH(gmp-light,
-         [  --with-gmp-light      a synonym for --with-provided-bignum],
+         [  --with-gmp-light        a synonym for --with-provided-bignum],
          PROV_GMP="$withval", PROV_GMP="no")
 fi
 
@@ -344,7 +344,7 @@ fi
 
 # Test if the user want to force with our PCRE lib
 AC_ARG_WITH(provided-regexp,
-       [  --with-provided-regexp use the provided Regexp (PCRE) library],
+       [  --with-provided-regexp  use the provided Regexp (PCRE) library],
        PROV_PCRE="$withval", PROV_PCRE="no")
 
 if test "$HAVE_PCRE" = "no" -o "$PROV_PCRE" = "yes"
@@ -392,7 +392,7 @@ fi
 
 # Test if the user want to force with our FFI lib
 AC_ARG_WITH(provided-ffi,
-       [  --with-provided-ffi    use the provided FFI library],
+       [  --with-provided-ffi     use the provided FFI library],
        PROV_FFI="$withval", PROV_FFI="no")
 
 if test "$HAVE_FFI" = "no" -o "$PROV_FFI" = "yes"
@@ -419,6 +419,21 @@ else
 fi
 # We always want FFI. Should be modifiable in the future
 AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
+
+
+# ----------------------------------------------------------------------
+# Control fixnum parameters
+# ----------------------------------------------------------------------
+AC_ARG_WITH(control-fixnums,
+       [  --with-control-fixnums  verify that fx functions are fixnums],
+       CONTROL_FX="$withval", CONTROL_FX="yes")
+
+if test "$CONTROL_FX" = "yes"
+then
+    CONTROL_FX_PARAMETERS=1
+else
+    CONTROL_FX_PARAMETERS=0
+fi
 
 ###
 ### See in what direction the stack grows (code stolen from Sawfish)
@@ -495,6 +510,7 @@ AC_SUBST(FFIINC)
 AC_SUBST(THREADS)
 AC_SUBST(CONF_SUMMARY)
 AC_SUBST(DEFAULT_CS)
+AC_SUBST(CONTROL_FX_PARAMETERS)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
@@ -502,7 +518,7 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
           lib/ScmPkg.d/Makefile tests/Makefile
           doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
-          doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 
+          doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1
           doc/skb/stklos-version.stk
           pkgman/Makefile])
 AC_OUTPUT
@@ -526,6 +542,7 @@ echo "    Compilation flags: " $CFLAGS
 echo "               Loader: " $LD
 echo "       Thread support: " $THREADS
 echo "     Case sensitivity: " $CASE_SENSITIVE '(by default)'
+echo "Control fx parameters: " $CONTROL_FX
 echo "System libraries used: " $SYST_LIBS
 echo "   Compiled libraries: " $COMP_LIBS
 echo " "
