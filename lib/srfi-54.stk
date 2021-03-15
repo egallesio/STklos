@@ -50,8 +50,6 @@
 ;;;; Last file update: 23-Jun-2020 13:22 (jpellegrini)
 ;;;;
 
-;;(require "srfi-6")
-;;(require "srfi-23")
 
 (define-module SRFI-54
   (export cat)
