@@ -19,13 +19,16 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 29-Jan-2021 17:14 (eg)
+# Last file update: 15-Mar-2021 14:33 (eg)
 
 
 EXTRA_DIST   =
 # INSTDIRS contains the dirs which need to be installed
 INSTDIRS     =  @GC@ src utils lib examples pkgman
 SUBDIRS      =  @PCRE@ @GMP@ @FFI@ $(INSTDIRS) doc tests
+
+STKLOS_BINARY= ./src/stklos
+STKLOS_FLAGS = --no-init-file --case-sensitive
 
 .PHONY:  test tests
 
@@ -52,8 +55,9 @@ install-doc: install-base
 # Dont call it directly
 SUPPORTED-SRFIS: lib/srfis.stk
 	@echo "Updating list of supported SRFIs ... "
-	sed -e '/- SRFI/d' $@ > $@.tmp                                             && \
-	./src/stklos -I ./lib -l srfis.stk -f utils/update-srfi-list.stk >> $@.tmp && \
+	sed -e '/- SRFI/d' $@ > $@.tmp                         && \
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -I ./lib -l srfis.stk    \
+		-f utils/update-srfi-list.stk >> $@.tmp            && \
 	mv -f  $@.tmp $@
 
 clean-am:

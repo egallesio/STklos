@@ -1,6 +1,6 @@
 # Makefile.am for STklos source file
 #
-# Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Nov-2020 11:20 (eg)
+# Last file update: 15-Mar-2021 14:24 (eg)
 
 # Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
 # CFLAGS is used here
@@ -34,6 +34,7 @@ STRIP         = @STRIPCMD@
 
 
 STKLOS_BINARY ?= ./stklos
+STKLOS_FLAGS   = --no-init-file --case-sensitive
 
 
 bindir      = $(prefix)/bin
@@ -133,7 +134,7 @@ uninstall-hook:
 doc:  $(DOCDB)
 
 $(DOCDB): $(stklos_SOURCES)
-	$(STKLOS_BINARY) -b boot.img -c -q -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b boot.img -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
 
 clean-am:
 	/bin/rm -f *.o $(DOCDB) git-info.h boot.ok
