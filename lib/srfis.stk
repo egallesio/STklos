@@ -254,7 +254,7 @@
     ;; 212  Aliases
     ;; 213  Identifier Properties
     (214  "Flexvectors" () "srfi-214")
-    ;; 215  Central Log Exchange
+    (215  "Central Log Exchange" () "srfi-215")
     (216  "SICP Prerequisites (Portable)" () "srfi-216")
     (217  "Integer Sets" () "srfi-217")
     ;; 218 ...... withdrawn
