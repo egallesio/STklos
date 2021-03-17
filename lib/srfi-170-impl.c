@@ -261,7 +261,7 @@ DEFINE_PRIMITIVE("fd->port",posix_fd_port,subr23,(SCM fd, SCM type, SCM bufmode)
 
     if (!bufmode) bufmode = STk_false;
     
-    char *cname = malloc(25);
+    char *cname = STk_must_malloc(25);
     snprintf(cname,24,"fd->port(%ld)",INT_VAL(fd));
     
     char *mode;
@@ -388,7 +388,7 @@ DEFINE_PRIMITIVE("read-symlink", posix_readlink, subr1, (SCM name))
     if  (sb.st_size == 0)
         bsize = PATH_MAX;
 
-    char *buf = malloc(bsize);
+    char *buf = STk_must_malloc(bsize);
     if (buf == NULL) STk_error("cannot allocate memory for symlink resolved name ~S", name);
 
     e = readlink(cname, buf, bsize);
@@ -711,7 +711,7 @@ DEFINE_PRIMITIVE("close-directory", posix_closedir, subr1, (SCM dir) )
 DEFINE_PRIMITIVE("real-path", posix_realpath, subr1, (SCM p) )
 {
     char* pa;
-    char* rpath = malloc(PATH_MAX);
+    char* rpath = STk_must_malloc(PATH_MAX);
     
     if (!STRINGP(p)) STk_error("bad string ~S", p);
     
@@ -840,7 +840,7 @@ DEFINE_PRIMITIVE("user-supplementary-gids", posix_getgroups, subr0, (void))
     gid_t *groups;
     int n = getgroups(0,NULL);
 
-    groups = malloc(sizeof(gid_t) * n);
+    groups = STk_must_malloc(sizeof(gid_t) * n);
     if (groups == 0) STk_error("memory allocation error");
     
     int gs = getgroups(n, groups);
