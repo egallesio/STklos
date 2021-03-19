@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 09-Jan-2021 09:14
-;;;; Last file update: 13-Jan-2021 00:21 (jpellegrini)
+;;;; Last file update: 19-Mar-2021 13:53 (eg)
 ;;;;
 
 (require "srfi-158")
@@ -50,14 +50,17 @@
 
 ;; (define &posix-error ...)   implemented in C
 
+;; FIXME: Should we keep "posix-errror' (since it is not used later) ?
 (define (posix-error errno :optional procedure args)
-  (let ((errname (%get-posix-error-name errno)))
+  (let ((message (posix-get-message-for-errno errno)))
     (raise (make-condition &posix-error
-                           'procedure procedure
-                           'args args
-                           'errname (%get-posix-error-name errno)
-                           'message (posix-get-message-for-errno errno)
-                           'errno errno))))
+                           'location        procedure
+                           'backtrace       '()     ;; FIXME
+                           'message
+                           'r7rs-msg        message
+                           'r7rs-irritants  args
+                           'errname         (%get-posix-error-name errno)
+                           'errno           errno))))
 
 (define (posix-error? obj)
   (and (condition? obj)
@@ -67,13 +70,13 @@
   (condition-ref posix-error 'errname))
 
 (define (posix-error-procedure posix-error)
-  (condition-ref posix-error 'procedure))
+  (condition-ref posix-error 'location))
 
 (define (posix-error-args posix-error)
-  (condition-ref posix-error 'args))
+  (condition-ref posix-error 'r7rs-irritants))
 
 (define (posix-error-message posix-error)
-  (condition-ref posix-error 'message))
+  (condition-ref posix-error 'r7rs-msg))
 
 (define (posix-error-errno posix-error)
   (condition-ref posix-error 'errno))
@@ -163,7 +166,7 @@
                          (file-info:gid info)
                          gid)))
       (%set-file-owner fname uid-to-go gid-to-go))))
-  
+
 ;; (set-file-times fname [access-time-object modify-time-object]) implemented as primitive
 ;; (truncate-file fname/port len)              implemented as primitive
 ;; (file-info fname/port follow?)              implemented as primitive
@@ -173,15 +176,15 @@
        (struct-is-a? obj %file-info)))
 
 (define (file-info:device file-info)  (struct-ref file-info 'device))
-(define (file-info:inode file-info)   (struct-ref file-info 'inode))  
-(define (file-info:mode file-info)    (struct-ref file-info 'mode))  
-(define (file-info:nlinks file-info)  (struct-ref file-info 'nlinks))  
-(define (file-info:uid file-info)     (struct-ref file-info 'uid))  
-(define (file-info:gid file-info)     (struct-ref file-info 'gid))  
-(define (file-info:rdev file-info)    (struct-ref file-info 'rdev))  
-(define (file-info:size file-info)    (struct-ref file-info 'size))  
-(define (file-info:blksize file-info) (struct-ref file-info 'blksize))  
-(define (file-info:blocks file-info)  (struct-ref file-info 'blocks))  
+(define (file-info:inode file-info)   (struct-ref file-info 'inode))
+(define (file-info:mode file-info)    (struct-ref file-info 'mode))
+(define (file-info:nlinks file-info)  (struct-ref file-info 'nlinks))
+(define (file-info:uid file-info)     (struct-ref file-info 'uid))
+(define (file-info:gid file-info)     (struct-ref file-info 'gid))
+(define (file-info:rdev file-info)    (struct-ref file-info 'rdev))
+(define (file-info:size file-info)    (struct-ref file-info 'size))
+(define (file-info:blksize file-info) (struct-ref file-info 'blksize))
+(define (file-info:blocks file-info)  (struct-ref file-info 'blocks))
 (define (file-info:atime file-info)   (struct-ref file-info 'atim))
 (define (file-info:mtime file-info)   (struct-ref file-info 'mtim))
 (define (file-info:ctime file-info)   (struct-ref file-info 'ctim))
@@ -267,7 +270,7 @@
               (apply values x rest)))))))
 
 (export temp-file-prefix
-        
+
         time/now
         time/unchanged
 
@@ -276,27 +279,27 @@
 
         directory-files
         make-directory-files-generator
-        
+
         set-file-owner
         create-temp-file
         call-with-temporary-filename
-        
+
         file-info?
         file-info:device
-        file-info:inode 
-        file-info:mode 
-        file-info:nlinks 
-        file-info:uid 
-        file-info:gid 
-        file-info:rdev 
-        file-info:size 
+        file-info:inode
+        file-info:mode
+        file-info:nlinks
+        file-info:uid
+        file-info:gid
+        file-info:rdev
+        file-info:size
         file-info:blksize
-        file-info:blocks 
-        file-info:atime 
-        file-info:mtime 
-        file-info:ctime 
-        file-info:atim 
-        file-info:mtim 
+        file-info:blocks
+        file-info:atime
+        file-info:mtime
+        file-info:ctime
+        file-info:atim
+        file-info:mtim
         file-info:ctim )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -322,7 +325,7 @@
 (export pid)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; 3.6  User and group database access -- DONE
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -348,7 +351,7 @@
 (define (group-info? obj)
   (and (struct? obj)
        (struct-is-a? obj (in-module SRFI-170 %group-info))))
-                                                  
+
 (export user-info?
         user-info:name
         user-info:uid
@@ -357,7 +360,7 @@
         user-info:shell
         user-info:full-name
         user-info:parsed-full-name
-        
+
         group-info?
         group-info:name
         group-info:gid)
@@ -373,7 +376,7 @@
 
 (define (%make-time sec nano)
   (make-struct %time sec nano))
-  
+
 (define (time-second x) (struct-ref x 'second))
 (define (time-nanosecond x) (struct-ref x 'nanosecond))
 
@@ -395,7 +398,7 @@
         delete-environment-variable!)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; 
+;;;
 ;;; 3.12  Terminal device control -- DONE
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

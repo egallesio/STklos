@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Jan-2021 11:54
- * Last file update: 19-Mar-2021 10:55 (eg)
+ * Last file update: 19-Mar-2021 14:09 (eg)
  */
 
 #include <limits.h>
@@ -45,6 +45,16 @@ static SCM file_info_type, dir_info_type, user_info_type, group_info_type;
 static SCM posix_error;
 
 SCM time_type; /* FIXME */
+
+textual-input
+binary-output
+textual-output
+binary-input/output
+
+static SCM _binary_input, _textual_input, _binary_output, textual_output, _binary_input_output;
+
+
+
 
 /* 3.1 Error handling */
 
@@ -169,12 +179,14 @@ void STk_error_posix(int err,char *proc_name, SCM args)
     SCM procedure = STk_intern(proc_name);
 
     STk_raise_exception(STk_make_C_cond(posix_error,
-                                        5,
-                                        procedure,
-                                        args,
-                                        errname,
-                                        message,
-                                        err_no));
+                                        7,
+                                        procedure,    /* location  */
+                                        STk_vm_bt(),  /* backtrace */
+                                        message,      /* message */
+                                        message,      /* r7rs-msg */
+                                        args,         /* r7rs-irritants */
+                                        errname,      /* errname */
+                                        err_no));     /* errno */
 }
 
 
@@ -997,12 +1009,9 @@ MODULE_ENTRY_START("srfi-170")
 
   /* 3.1 Error handling */
 
-  posix_error = STk_defcond_type("&posix-error", STk_false,
-                                 LIST5(STk_intern("procedure"),
-                                       STk_intern("args"),
-                                       STk_intern("errname"),
-                                       STk_intern("message"),
-                                       STk_intern("errno")),
+  posix_error = STk_defcond_type("&posix-error",
+                                 STk_err_mess_condition,
+                                 LIST2(STk_intern("errname"), STk_intern("errno")),
                                  module);
 
   ADD_PRIMITIVE_IN_MODULE(posix_strerror,module);
