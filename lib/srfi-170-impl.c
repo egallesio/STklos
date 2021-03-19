@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Jan-2021 11:54
- * Last file update: 13-Jan-2021 00:36 (jpellegrini)
+ * Last file update: 19-Mar-2021 10:55 (eg)
  */
 
 #include <limits.h>
@@ -54,10 +54,10 @@ DEFINE_PRIMITIVE("posix-get-message-for-errno", posix_strerror, subr1, (SCM obj)
     if (!  ( INTP(obj) ||
              (CONDP(obj) && 1)))
         STk_error("bad integer or condition", obj);
-    int no;
-    char *errstr;
-    
-    
+
+    char *errstr="";
+
+
     if (INTP(obj)) errstr = strerror(INT_VAL(obj));
     else if (CONDP(obj)) {
         /* don't presume that the message field in obj has been
@@ -65,7 +65,7 @@ DEFINE_PRIMITIVE("posix-get-message-for-errno", posix_strerror, subr1, (SCM obj)
         SCM e = STk_int_struct_ref(obj,STk_intern("errno"));
         errstr = strerror(INT_VAL(e));
     } else STk_error("impossible error!");
-    
+
     return STk_Cstring2string(errstr);
 }
 
@@ -76,7 +76,7 @@ DEFINE_PRIMITIVE("%get-posix-error-name", get_posix_error_name,subr1,(SCM n))
        every time a condition is rqaised... */
 
     if (!INTP(n)) STk_error("bad integer ~S", n);
-    
+
     SCM errname = STk_false;
     int err_no = INT_VAL(n);
     switch (err_no) {
@@ -167,7 +167,7 @@ void STk_error_posix(int err,char *proc_name, SCM args)
     char *msg = strerror(err);
     SCM message = STk_Cstring2string(msg);
     SCM procedure = STk_intern(proc_name);
-        
+
     STk_raise_exception(STk_make_C_cond(posix_error,
                                         5,
                                         procedure,
@@ -182,7 +182,7 @@ void STk_error_posix(int err,char *proc_name, SCM args)
 
 DEFINE_PRIMITIVE("open-file",posix_open,vsubr, (int argc, SCM *argv))
 {
-    
+
     if (argc < 3) STk_error("expects at least three arguments");
     if (argc > 5) STk_error("expects at most five arguments");
 
@@ -192,7 +192,7 @@ DEFINE_PRIMITIVE("open-file",posix_open,vsubr, (int argc, SCM *argv))
 
     if (!STRINGP(name)) STk_error("bad string ~S", name);
     char *cname = STRING_CHARS(name);
-    
+
     if (!INTP(flags)) STk_error("bad integer ~S", flags);
     int cflags = INT_VAL(flags);
 
@@ -202,12 +202,12 @@ DEFINE_PRIMITIVE("open-file",posix_open,vsubr, (int argc, SCM *argv))
         if (!INTP(permbits)) STk_error("bad integer ~S", permbits);
         cpermbits = INT_VAL(permbits);
     }
-    
+
     if (argc > 4) {
         // SCM bufmode = *argv--;
         STk_error("setting buffering mode not supported");
     }
-    
+
     char *mode;
     int pflags; /* int? */
     if      (STk_eqv(type, STk_intern("binary-input")) == STk_true)
@@ -240,14 +240,14 @@ DEFINE_PRIMITIVE("open-file",posix_open,vsubr, (int argc, SCM *argv))
         pflags = PORT_BINARY|PORT_RW;
         cflags |= O_RDWR;
     }
-    else
+    else {
         STk_error("bad port type ~S", type);
+        return STk_void;     /* to avoid a compiler warning */
+    }
 
     int fd = open(cname, cflags, cpermbits);
     if (fd == -1) STk_error_posix(errno,"open-file",STk_argv2list(argc,argv));
 
-
-    FILE *f = fdopen(fd, mode);            
     SCM port = STk_fd2scheme_port (fd,mode,cname);
     if (port == NULL) STk_error_posix(errno,"open-file",STk_argv2list(argc,argv));
     PORT_FLAGS(port) = PORT_IS_FILE | pflags;
@@ -260,20 +260,20 @@ DEFINE_PRIMITIVE("fd->port",posix_fd_port,subr23,(SCM fd, SCM type, SCM bufmode)
 
 
     if (!bufmode) bufmode = STk_false;
-    
-    char *cname = STk_must_malloc(25);
-    snprintf(cname,24,"fd->port(%ld)",INT_VAL(fd));
-    
+
+    char cname[50];
+    snprintf(cname,sizeof(cname),"fd->port(%ld)",INT_VAL(fd));
+
     char *mode;
-    
+
     int flags; /* "int"? */
-    
+
     if      (STk_eqv(type, STk_intern("binary-input")) == STk_true)   { mode = "r"; flags = PORT_BINARY|PORT_READ;}
     else if (STk_eqv(type, STk_intern("textual-input")) == STk_true)  { mode = "r"; flags = PORT_TEXTUAL|PORT_READ;}
     else if (STk_eqv(type, STk_intern("binary-output")) == STk_true)  { mode = "a"; flags = PORT_BINARY|PORT_WRITE;}
     else if (STk_eqv(type, STk_intern("textual-output")) == STk_true) { mode = "a"; flags = PORT_TEXTUAL|PORT_WRITE;}
     else if (STk_eqv(type, STk_intern("binary-input/output")) == STk_true) { mode = "r+"; flags = PORT_BINARY|PORT_RW;}
-    else STk_error("bad port type ~S", type);
+    else { STk_error("bad port type ~S", type); return STk_void; }
 
     SCM port = STk_fd2scheme_port (INT_VAL(fd),mode,cname);
     if (port == NULL) STk_error_posix(errno,"fd->port",LIST3(fd,type,bufmode));
@@ -292,17 +292,17 @@ DEFINE_PRIMITIVE("create-directory", posix_mkdir, subr12, (SCM name, SCM bits))
     if (bits) {
         if (!INTP(bits)) STk_error("bad integer ~S", bits); /* FIXME: positive? */
         cbits = INT_VAL(bits);
-    } 
+    }
     else {
         bits = STk_false; /* to include in error reporting */
         cbits = 0775;
     }
-    
+
     char *cname = STRING_CHARS(name);
     int e = mkdir(cname,cbits);
-    
+
     if (e != 0) STk_error_posix(errno,"create-directory",LIST2(name,bits));
-    
+
     return STk_void;
 }
 
@@ -312,7 +312,7 @@ DEFINE_PRIMITIVE("create-fifo", posix_mkfifo, subr12, (SCM name, SCM bits))
         int cbits;
     if (bits) {
         if (!INTP(bits)) STk_error("bad integer ~S", bits); /* FIXME: positive? */
-    } 
+    }
     else {
         bits = STk_false; /* to include in error reporting */
         cbits = 0664;
@@ -322,9 +322,9 @@ DEFINE_PRIMITIVE("create-fifo", posix_mkfifo, subr12, (SCM name, SCM bits))
     cbits = INT_VAL(bits);
 
     int e = mkfifo(cname,cbits);
-    
+
     if (e != 0) STk_error_posix(errno,"create-fifo", LIST2(name,bits));
-    
+
     return STk_void;
 }
 
@@ -339,9 +339,9 @@ DEFINE_PRIMITIVE("create-hard-link", posix_link, subr2, (SCM old, SCM new))
     char *newname = STRING_CHARS(new);
 
     int e = link(oldname,newname);
-    
+
     if (e != 0) STk_error_posix(errno,"create-hard-link",LIST2(old,new));
-    
+
     return STk_void;
 }
 
@@ -354,9 +354,9 @@ DEFINE_PRIMITIVE("create-symlink", posix_symlink, subr2, (SCM old, SCM new))
     char *newname = STRING_CHARS(new);
 
     int e = symlink(oldname,newname);
-    
+
     if (e != 0) STk_error_posix(errno,"create-symlink",LIST2(old,new));
-    
+
     return STk_void;
 }
 
@@ -375,7 +375,7 @@ DEFINE_PRIMITIVE("read-symlink", posix_readlink, subr1, (SCM name))
        When a pathname exists but is not a link, readlink will
        set errno to EINVAL.
        The following would be more informative, but we stick to the SRFI.
-       
+
       if ((sb.st_mode & S_IFMT) != S_IFLNK) STk_error("bad symlink ~S", name);
     */
 
@@ -392,13 +392,13 @@ DEFINE_PRIMITIVE("read-symlink", posix_readlink, subr1, (SCM name))
     if (buf == NULL) STk_error("cannot allocate memory for symlink resolved name ~S", name);
 
     e = readlink(cname, buf, bsize);
-    
+
     /* if (e == bsize) printf("buffer was truncated\n");fflush(stdout); */
     if (e == -1) STk_error_posix(errno,"read-symlink",LIST1(name));
 
     /* readlink does not append the trailing zero! */
     buf[e]=0;
-    
+
     return STk_Cstring2string(buf);
 }
 
@@ -426,12 +426,15 @@ DEFINE_PRIMITIVE("delete-directory", posix_rmdir,subr1, (SCM dir))
 DEFINE_PRIMITIVE("truncate-file", posix_truncate, subr2, (SCM p, SCM length))
 {
     int e;
-     
+
     if (STRINGP(p)) { /* it's a path */
         e = truncate(STRING_CHARS(p), INT_VAL(length));
     } else if (FPORTP(p)) { /* it's a port */
         e = ftruncate(PORT_FD(PORT_STREAM(p)), INT_VAL(length));
-    } else STk_error("bad string or port ~S", p);
+    } else {
+      STk_error("bad string or port ~S", p);
+      return STk_void;     /* to avoid a compiler warning */
+    }
 
     if (e != 0) STk_error_posix(errno,"truncate-file",LIST2(p,length));
     return STk_void;
@@ -451,7 +454,10 @@ DEFINE_PRIMITIVE("file-info", posix_stat, subr2, (SCM p, SCM follow))
             e = lstat(STRING_CHARS(p), &st);
     } else if (FPORTP(p)) { /* it's a port */
         e = fstat(PORT_FD(PORT_STREAM(p)), &st);
-    } else STk_error("bad string or port ~S", p);
+    } else {
+      STk_error("bad string or port ~S", p);
+      return STk_void;     /* to avoid a compiler warning */
+    }
 
     if (e == -1) STk_error_posix(errno,"file-info",LIST2(p,follow));
     else {
@@ -459,12 +465,12 @@ DEFINE_PRIMITIVE("file-info", posix_stat, subr2, (SCM p, SCM follow))
         ats[2] = time_type;
         ats[1] = MAKE_INT(st.st_atim.tv_sec);
         ats[0] = MAKE_INT(st.st_atim.tv_nsec);
-        
+
         SCM mts[3]; /* mtime */
         mts[2] = time_type;
         mts[1] = MAKE_INT(st.st_mtim.tv_sec);
         mts[0] = MAKE_INT(st.st_mtim.tv_nsec);
-        
+
         SCM cts[3]; /* ctime */
         cts[2] = time_type;
         cts[1] = MAKE_INT(st.st_ctim.tv_sec);
@@ -560,7 +566,7 @@ DEFINE_PRIMITIVE("set-file-mode", posix_chmod, subr2, (SCM name, SCM bits) )
     int e = chmod(STRING_CHARS(name), INT_VAL(bits));
 
     if (e == -1) STk_error_posix(errno,"set-file-mode",LIST2(name,bits));
-    
+
     return STk_void;
 }
 
@@ -585,7 +591,7 @@ DEFINE_PRIMITIVE("%set-file-owner", posix_chown, subr3, (SCM name, SCM uid, SCM 
                   INT_VAL(gid));
 
     if (e == -1) STk_error_posix(errno,"set-file-owner",LIST3(name,uid,gid));
-    
+
     return STk_void;
 }
 
@@ -600,12 +606,10 @@ DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
     if (!STRINGP(name)) STk_error("bad string ~S", name);
 
     char *cname = STRING_CHARS(name);
-    
-    SCM time1;
-    SCM time2;
-    time_t sec1;
+
+    time_t sec1 = 0;        // FIXME: ::EG:: not sure.
     long   nsec1;
-    time_t sec2;
+    time_t sec2 = 0;        // FIXME: ::EG:: not sure.
     long   nsec2;
 
 
@@ -615,22 +619,28 @@ DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
     } else {
         SCM time1 = *argv--;
         SCM time2 = *argv--;
-       
+
         if (SYMBOLP(time1)) {
             if      (STk_eqv(time1, STk_intern("time/now")) == STk_true)       nsec1 = UTIME_NOW;
             else if (STk_eqv(time1, STk_intern("time/unchanged")) == STk_true) nsec1 = UTIME_OMIT;
-            else STk_error("bad argument ~S",time1);
+            else {
+              STk_error("bad argument ~S",time1);
+              return STk_void;     /* to avoid a compiler warning */
+            }
         } else {
             if (!STRUCTP(time1)) STk_error("bad structure ~S",time1);
             if (STRUCT_TYPE(time1) != time_type) STk_error("bad time structure ~S",time1);
             sec1  = INT_VAL(STk_int_struct_ref(time1,STk_intern("second")));
             nsec1 = INT_VAL(STk_int_struct_ref(time1,STk_intern("nanosecond")));
         }
-        
+
         if (SYMBOLP(time2)) {
             if      (STk_eqv(time2, STk_intern("time/now")) == STk_true)       nsec2 = UTIME_NOW;
             else if (STk_eqv(time2, STk_intern("time/unchanged")) == STk_true) nsec2 = UTIME_OMIT;
-            else STk_error("bad argument ~S",time2);
+            else {
+              STk_error("bad argument ~S",time2);
+              return STk_void;     /* to avoid a compiler warning */
+            }
         } else {
             if (!STRUCTP(time1)) STk_error("bad structure ~S",time2);
             if (STRUCT_TYPE(time2) != time_type) STk_error("bad time structure ~S",time2);
@@ -638,13 +648,13 @@ DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
             nsec2 = INT_VAL(STk_int_struct_ref(time2,STk_intern("nanosecond")));
         }
     }
-    
+
     struct timespec t[2];
     t[0].tv_sec  = sec1;
     t[0].tv_nsec = nsec1;
     t[1].tv_sec  = sec2;
     t[1].tv_nsec = nsec2;
-    
+
     int e = utimensat(AT_FDCWD,cname, t, 0);
 
     if (e == -1) STk_error_posix(errno,"set-file-times",STk_argv2list(argc,argv));
@@ -659,7 +669,7 @@ DEFINE_PRIMITIVE("open-directory", posix_opendir, subr12, (SCM name, SCM dot) )
     if (!STRINGP(name)) STk_error("bad string ~S", name);
     if (!dot) dot = STk_false;
     else if (!BOOLEANP(dot)) STk_error("bad boolean ~S", dot);
-    
+
     DIR *d = opendir(STRING_CHARS(name));
     if (d == 0) STk_error_posix(errno,"open-directory",LIST2(name,dot));
 
@@ -675,7 +685,7 @@ DEFINE_PRIMITIVE("read-directory", posix_readdir, subr1, (SCM dir) )
     if (!STRUCTP(dir)) STk_error("bad structure", STk_false);
     if (STRUCT_TYPE(dir) != dir_info_type)
         STk_error("bad directory structure", STk_false);
-    
+
     DIR  *d = STk_int_struct_ref(dir,STk_intern("dir-object"));
     SCM dot = STk_int_struct_ref(dir,STk_intern("dot-files"));
 
@@ -712,9 +722,9 @@ DEFINE_PRIMITIVE("real-path", posix_realpath, subr1, (SCM p) )
 {
     char* pa;
     char* rpath = STk_must_malloc(PATH_MAX);
-    
+
     if (!STRINGP(p)) STk_error("bad string ~S", p);
-    
+
     pa = STRING_CHARS(p);
 
     /* I have tried "rpath = realpath(pa,NULL)", as per the manpage
@@ -722,7 +732,7 @@ DEFINE_PRIMITIVE("real-path", posix_realpath, subr1, (SCM p) )
        to 22. Giving realpath an allocated buffer seems to work.
        -- jpellegrini */
     rpath = realpath(pa, rpath);
-    
+
     if (rpath == 0) {
         STk_error_posix(errno,"real-path",LIST1(p));
         return STk_void; /* never reached */
@@ -742,12 +752,15 @@ DEFINE_PRIMITIVE("file-space", posix_statvfs, subr1, (SCM p))
        seems to do, for example). If the behavior of POSIX is to
        return an EBADF error when passed std{in,out,err}, then we
        mimic that. */
-    
+
     if (STRINGP(p)) { /* it's a path */
         e = statvfs(STRING_CHARS(p), &st);
     } else if (FPORTP(p)) { /* it's a port */
         e = fstatvfs(PORT_FD(PORT_STREAM(p)), &st);
-    } else STk_error("bad string or port ~S", p);
+    } else {
+      STk_error("bad string or port ~S", p);
+      return STk_void;     /* to avoid a compiler warning */
+    }
 
     if (e != 0) STk_error_posix(errno,"file-space",LIST1(p));
 
@@ -802,7 +815,7 @@ DEFINE_PRIMITIVE("user-uid", posix_getuid, subr0, (void))
 {
     /* getuid is always successful, don't check for errors */
     uid_t u = getuid();
-    
+
     /* we *suppose* uid_t is always integer */
     return MAKE_INT(u);
 }
@@ -811,7 +824,7 @@ DEFINE_PRIMITIVE("user-effective-uid", posix_geteuid, subr0, (void))
 {
     /* geteuid is always successful, don't check for errors */
     uid_t u = geteuid();
-    
+
     /* we *suppose* uid_t is always integer */
     return MAKE_INT(u);
 }
@@ -821,7 +834,7 @@ DEFINE_PRIMITIVE("user-gid", posix_getgid, subr0, (void))
 {
     /* getuid is always successful, don't check for errors */
     uid_t u = getgid();
-    
+
     /* we *suppose* uid_t is always integer */
     return MAKE_INT(u);
 }
@@ -830,7 +843,7 @@ DEFINE_PRIMITIVE("user-effective-gid", posix_getegid, subr0, (void))
 {
     /* geteuid is always successful, don't check for errors */
     uid_t u = getegid();
-    
+
     /* we *suppose* uid_t is always integer */
     return MAKE_INT(u);
 }
@@ -842,7 +855,7 @@ DEFINE_PRIMITIVE("user-supplementary-gids", posix_getgroups, subr0, (void))
 
     groups = STk_must_malloc(sizeof(gid_t) * n);
     if (groups == 0) STk_error("memory allocation error");
-    
+
     int gs = getgroups(n, groups);
     SCM list = STk_nil;
 
@@ -853,7 +866,7 @@ DEFINE_PRIMITIVE("user-supplementary-gids", posix_getgroups, subr0, (void))
         }
     } else
         STk_error_posix(errno,"user-supplementary-gids",STk_nil);
-    return(list);    
+    return(list);
 }
 
 
@@ -870,6 +883,7 @@ DEFINE_PRIMITIVE("user-info",get_user_info, subr1, (SCM uid_name))
         info = getpwuid(INT_VAL(uid_name));
     else {
         STk_error("not string or integer ~S", uid_name);
+        return STk_void;     /* to avoid a compiler warning */
     }
     if (info == 0) {
         if (errno) STk_error_posix(errno,"user-info",LIST1(uid_name)); /* <- error */
@@ -908,6 +922,7 @@ DEFINE_PRIMITIVE("group-info",get_group_info, subr1, (SCM gid_name))
         info = getgrgid(INT_VAL(gid_name));
     else {
         STk_error("not string or integer ~S", gid_name);
+        return STk_void;     /* to avoid a compiler warning */
     }
     if (info == 0) {
         if (errno) STk_error_posix(errno,"group-info",LIST1(gid_name)); /* <- error */
@@ -945,7 +960,7 @@ DEFINE_PRIMITIVE("monotonic-time",posix_monotonic_time, subr0, (void))
     int e = clock_gettime(CLOCK_MONOTONIC, &ts);
 
     if (e==-1) STk_error_posix(errno,"monotonic-time",STk_nil);
-    
+
     SCM argv[3];
     argv[2]=time_type;
     argv[1]=MAKE_INT(ts.tv_sec);
@@ -965,7 +980,7 @@ DEFINE_PRIMITIVE("terminal?",posix_isatty, subr1, (SCM port))
     if (e == 1) return STk_true;
     if (errno == ENOTTY) return STk_false;
     STk_error_posix(errno,"terminal?",LIST1(port));
-    return STk_false; /* never reached */       
+    return STk_false; /* never reached */
 }
 
 
@@ -979,7 +994,7 @@ MODULE_ENTRY_START("srfi-170")
 {
   SCM module =  STk_create_module(STk_intern("SRFI-170"));
 
-  
+
   /* 3.1 Error handling */
 
   posix_error = STk_defcond_type("&posix-error", STk_false,
@@ -989,10 +1004,10 @@ MODULE_ENTRY_START("srfi-170")
                                        STk_intern("message"),
                                        STk_intern("errno")),
                                  module);
-  
+
   ADD_PRIMITIVE_IN_MODULE(posix_strerror,module);
   ADD_PRIMITIVE_IN_MODULE(get_posix_error_name,module);
-  
+
   /* 3.2 I/O */
 
   ADD_PRIMITIVE_IN_MODULE(posix_open,module);
@@ -1003,13 +1018,13 @@ MODULE_ENTRY_START("srfi-170")
   STk_define_variable(STk_intern("open/read"),      MAKE_INT(O_RDONLY), module);
   STk_define_variable(STk_intern("open/write"),     MAKE_INT(O_WRONLY), module);
   STk_define_variable(STk_intern("open/read+write"),  MAKE_INT(O_RDWR), module);
-  
+
   STk_define_variable(STk_intern("open/append"),    MAKE_INT(O_APPEND), module);
   STk_define_variable(STk_intern("open/create"),    MAKE_INT(O_CREAT), module);
   STk_define_variable(STk_intern("open/exclusive"), MAKE_INT(O_EXCL), module);
   STk_define_variable(STk_intern("open/nofollow"),  MAKE_INT(O_NOFOLLOW), module);
   STk_define_variable(STk_intern("open/truncate"),  MAKE_INT(O_TRUNC), module);
-    
+
   /* 3.3 File System */
 
   file_info_type = STk_make_struct_type(STk_intern("%file-info"),
@@ -1041,7 +1056,7 @@ MODULE_ENTRY_START("srfi-170")
 
   STk_define_variable(STk_intern("%directory-info"), dir_info_type, module);
 
-  
+
   ADD_PRIMITIVE_IN_MODULE(posix_mkdir,module);
   ADD_PRIMITIVE_IN_MODULE(posix_mkfifo,module);
   ADD_PRIMITIVE_IN_MODULE(posix_link,module);
@@ -1067,9 +1082,9 @@ MODULE_ENTRY_START("srfi-170")
   ADD_PRIMITIVE_IN_MODULE(posix_isregular, module);
   ADD_PRIMITIVE_IN_MODULE(posix_issocket, module);
   ADD_PRIMITIVE_IN_MODULE(posix_isdevice, module);
-  
+
   /* 3.5 Process state */
-  
+
   ADD_PRIMITIVE_IN_MODULE(posix_umask, module);
   ADD_PRIMITIVE_IN_MODULE(posix_set_umask, module);
   ADD_PRIMITIVE_IN_MODULE(posix_getcwd, module);
@@ -1119,7 +1134,7 @@ MODULE_ENTRY_START("srfi-170")
   /* 3.12 Terminal device control */
 
   ADD_PRIMITIVE_IN_MODULE(posix_isatty, module);
-  
+
   /* Export all the symbols we have just defined */
   STk_export_all_symbols(module);
 
