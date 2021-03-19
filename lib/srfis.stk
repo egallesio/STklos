@@ -208,7 +208,7 @@
     ;; 167  Ordered Key Value Store
     ;; 168  Generic Tuple Store Database
     (169 "Underscores in numbers")
-    ;; 170  POSIX API
+    (170 "POSIX API" (posix) "srfi-170")
     (171 "Transducers" (transducers) "srfi-171")
     ;; 172  Two Safer Subsets of R7RS
     (173 "Hooks" (hooks) "srfi-173")
