@@ -969,7 +969,7 @@ DEFINE_PRIMITIVE("monotonic-time",posix_monotonic_time, subr0, (void))
 DEFINE_PRIMITIVE("terminal?",posix_isatty, subr1, (SCM port))
 {
     if (!PORTP(port)) STk_error("bad port ~S", port);
-    if (!FPORTP(port)) STk_error("bad file port ~S", port);
+    if (!FPORTP(port)) return STk_false;
     int fd = PORT_FD(PORT_STREAM(port));
     int e = isatty(fd);
 
