@@ -208,14 +208,18 @@
           (begin (set! files (cons f files))
                  (again (read-directory dir)))))))
 
-
-(define (make-directory-files-generator path :optional dot)
-  (let ((dir (open-directory path dot)))
-    (make-unfold-generator eof-object?
-                           (lambda (x) (read-directory dir))
-                           (lambda (x) x)
-                           ())))
-
+(define (make-directory-files-generator dir :optional dot-files?)
+  (let ((dir-obj (open-directory dir dot-files?))
+        (eof (eof-object))
+        (done #f))
+    (lambda ()
+      (if done
+          eof
+          (let ((f (read-directory dir-obj)))
+             (when (eq? f eof)
+               (close-directory dir-obj)
+               (set! done #t))
+              f)))))
 
 ;; (open-directory dir [dot-files?])  implemented as primitive
 ;; (read-directory directory-object)  implemented as primitive
