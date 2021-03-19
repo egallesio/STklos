@@ -79,9 +79,8 @@ static SCM symb_EACCES, symb_EBADF, symb_EBUSY, symb_EDQUOT, symb_EEXIST, symb_E
 // TODO
 
 /* # 3.3 */
-static SCM symb_time_now, symb_time_unchanged, symb_second, symb_nanosecond;
-
-
+static SCM symb_time_now, symb_time_unchanged, symb_second, symb_nanosecond,
+           symb_time_utc, symb_time_monotonic;
 
 static void initialize_global_symbols(void)
 {
@@ -116,6 +115,9 @@ static void initialize_global_symbols(void)
   symb_time_unchanged = STk_intern("time/unchanged");
   symb_second         = STk_intern("second");
   symb_nanosecond     = STk_intern("nanosecond");
+
+  symb_time_utc       = STk_intern("time-utc");
+  symb_time_monotonic = STk_intern("time-monotonic");
 
 }
 
@@ -457,18 +459,21 @@ DEFINE_PRIMITIVE("file-info", posix_stat, subr2, (SCM p, SCM follow))
 
     if (e == -1) STk_error_posix(errno,"file-info",LIST2(p,follow));
     else {
-        SCM ats[3]; /* atime */
-        ats[2] = time_type;
+        SCM ats[4]; /* atime */
+        ats[3] = time_type;
+        ats[2] = symb_time_utc;
         ats[1] = MAKE_INT(st.st_atim.tv_sec);
         ats[0] = MAKE_INT(st.st_atim.tv_nsec);
 
-        SCM mts[3]; /* mtime */
-        mts[2] = time_type;
+        SCM mts[4]; /* mtime */
+        mts[3] = time_type;
+        mts[2] = symb_time_utc;
         mts[1] = MAKE_INT(st.st_mtim.tv_sec);
         mts[0] = MAKE_INT(st.st_mtim.tv_nsec);
 
-        SCM cts[3]; /* ctime */
-        cts[2] = time_type;
+        SCM cts[4]; /* ctime */
+        cts[3] = time_type;
+        cts[2] = symb_time_utc;
         cts[1] = MAKE_INT(st.st_ctim.tv_sec);
         cts[0] = MAKE_INT(st.st_ctim.tv_nsec);
 
@@ -487,9 +492,9 @@ DEFINE_PRIMITIVE("file-info", posix_stat, subr2, (SCM p, SCM follow))
         argv[5]  = MAKE_INT(st.st_atim.tv_sec);
         argv[4]  = MAKE_INT(st.st_mtim.tv_sec);
         argv[3]  = MAKE_INT(st.st_ctim.tv_sec);
-        argv[2]  = STk_make_struct(3, &ats[2]);
-        argv[1]  = STk_make_struct(3, &mts[2]);
-        argv[0]  = STk_make_struct(3, &cts[2]);
+        argv[2]  = STk_make_struct(4, &ats[3]);
+        argv[1]  = STk_make_struct(4, &mts[3]);
+        argv[0]  = STk_make_struct(4, &cts[3]);
         return STk_make_struct(17, &argv[16]);
     }
     return STk_false; /* never reached */
@@ -943,11 +948,12 @@ DEFINE_PRIMITIVE("posix-time",posix_time, subr0, (void))
 
     if (e==-1) STk_error_posix(errno,"posix-time",STk_nil);
 
-    SCM argv[3];
-    argv[2]=time_type;
+    SCM argv[4];
+    argv[3]=time_type;
+    argv[2]=symb_time_utc;
     argv[1]=MAKE_INT(ts.tv_sec);
     argv[0]=MAKE_INT(ts.tv_nsec);
-    return STk_make_struct(3, &argv[2]);
+    return STk_make_struct(4, &argv[3]);
 }
 
 DEFINE_PRIMITIVE("monotonic-time",posix_monotonic_time, subr0, (void))
@@ -957,11 +963,12 @@ DEFINE_PRIMITIVE("monotonic-time",posix_monotonic_time, subr0, (void))
 
     if (e==-1) STk_error_posix(errno,"monotonic-time",STk_nil);
 
-    SCM argv[3];
-    argv[2]=time_type;
+    SCM argv[4];
+    argv[3]=time_type;
+    argv[2]=symb_time_monotonic;
     argv[1]=MAKE_INT(ts.tv_sec);
     argv[0]=MAKE_INT(ts.tv_nsec);
-    return STk_make_struct(3, &argv[2]);
+    return STk_make_struct(4, &argv[3]);
 }
 
 /* 3.12 Terminal device control */

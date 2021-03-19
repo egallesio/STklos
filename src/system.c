@@ -939,10 +939,11 @@ DEFINE_PRIMITIVE("current-time", current_time, subr0, (void))
 
   clock_gettime(CLOCK_REALTIME, &now);
 
-  argv[2] = time_type;
-  argv[1] =  STk_long2integer(now.tv_sec);
-  argv[0] =  STk_long2integer(now.tv_nsec);
-  return STk_make_struct(3, &argv[2]);
+  argv[3] = time_type;
+  argv[2] = STk_intern("time-utc");
+  argv[1] = STk_long2integer(now.tv_sec);
+  argv[0] = STk_long2integer(now.tv_nsec);
+  return STk_make_struct(4, &argv[3]);
 }
 
 
@@ -1309,10 +1310,19 @@ int STk_init_system(void)
   /* Create the time structure-type */
   time_type =  STk_make_struct_type(STk_intern("%time"),
                                     STk_false,
-                                    LIST2(STk_intern("second"),
+                                    LIST3(STk_intern("type"),
+                                          STk_intern("second"),
                                           STk_intern("nanosecond")));
   STk_define_variable(STk_intern("%time"), time_type, current_module);
 
+  /* for SRFI-19: */
+  STk_define_variable(STk_intern("time-tai"),       STk_intern("time-tai"), current_module);
+  STk_define_variable(STk_intern("time-utc"),       STk_intern("time-utc"), current_module);
+  STk_define_variable(STk_intern("time-monotonic"), STk_intern("time-monotonic"), current_module);
+  STk_define_variable(STk_intern("time-thread"),    STk_intern("time-thread"), current_module);
+  STk_define_variable(STk_intern("time-process"),   STk_intern("time-process"), current_module);
+  STk_define_variable(STk_intern("time-duration"),  STk_intern("time-duration"), current_module);
+                      
   /* Declare primitives */
   ADD_PRIMITIVE(clock);
   ADD_PRIMITIVE(date);

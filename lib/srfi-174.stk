@@ -71,15 +71,15 @@
 ;;   (nanoseconds timespec-nanoseconds))
 
 (define (timespec seconds nanoseconds)
-  (make-struct %time seconds nanoseconds))
+  (make-struct %time time-utc seconds nanoseconds))
 
 (define timespec? time?)
 
 (define (timespec-seconds ts)
-  (%fast-struct-ref ts %time 'second 0))
+  (%fast-struct-ref ts %time 'second 1))
 
 (define (timespec-nanoseconds ts)
-  (%fast-struct-ref ts %time 'nanosecond 1))
+  (%fast-struct-ref ts %time 'nanosecond 2))
 
 ;; sample implementation using pairs
 ; (define timespec cons)
