@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 09-Jan-2021 09:14
-;;;; Last file update: 19-Mar-2021 13:53 (eg)
+;;;; Last file update: 19-Mar-2021 18:12 (eg)
 ;;;;
 
 (require "srfi-158")
@@ -80,8 +80,6 @@
 
 (define (posix-error-errno posix-error)
   (condition-ref posix-error 'errno))
-
-;; (posix-error-message posix-error)   implemented as primitive
 
 (export posix-error
         posix-error?
@@ -236,12 +234,8 @@
 ;; 2. Loko tries to protect against symlink attacks; Gauche just calls mkstemp
 ;; directly. $mkstemp does the same as Gauche.
 ;;
-(define (create-temp-file . arg)
-  (when (> (length arg) 1) (error 'create-temp-file "accepts at most one argument"))
-  (let ((pref (if (null? arg)
-                  (temp-file-prefix)
-                  (car arg))))
-    (%mkstemp (string-append pref "XXXXXX"))))
+(define (create-temp-file :optional (prefix (temp-file-prefix)))
+  (%mkstemp (string-append prefix "XXXXXX")))
 
 
 (define alpha "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_")
@@ -253,21 +247,18 @@
     s))
 
 ;; FIXME: needs review.
-(define (call-with-temporary-filename maker . arg)
-  (let ((pref (if (null? arg)
-                  (temp-file-prefix)
-                  (car arg))))
-    (let again ((tries 100))
-      (let ((name (string-append pref (random-string 12))))
-        (let-values (((x . rest)
-                      (guard (e
-                              ((and (condition-has-type? e &posix-error)
-                                    (not (eqv? 0 tries)))
-                               #f))
-                        (maker name))))
-          (if (not x)
-              (again (fx- tries 1))
-              (apply values x rest)))))))
+(define (call-with-temporary-filename maker :optional (pref (temp-file-prefix)))
+  (let again ((tries 100))
+    (let ((name (string-append pref (random-string 12))))
+      (let-values (((x . rest)
+                    (guard (e
+                            ((and (condition-has-type? e &posix-error)
+                                  (not (eqv? 0 tries)))
+                             #f))
+                           (maker name))))
+        (if (not x)
+            (again (fx- tries 1))
+            (apply values x rest)))))))
 
 (export temp-file-prefix
 

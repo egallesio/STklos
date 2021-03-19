@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Jan-2021 11:54
- * Last file update: 19-Mar-2021 14:09 (eg)
+ * Last file update: 19-Mar-2021 18:52 (eg)
  */
 
 #include <limits.h>
@@ -46,16 +46,6 @@ static SCM posix_error;
 
 SCM time_type; /* FIXME */
 
-textual-input
-binary-output
-textual-output
-binary-input/output
-
-static SCM _binary_input, _textual_input, _binary_output, textual_output, _binary_input_output;
-
-
-
-
 /* 3.1 Error handling */
 
 
@@ -79,95 +69,90 @@ DEFINE_PRIMITIVE("posix-get-message-for-errno", posix_strerror, subr1, (SCM obj)
     return STk_Cstring2string(errstr);
 }
 
+/* # 3.1 */
+static SCM symb_EACCES, symb_EBADF, symb_EBUSY, symb_EDQUOT, symb_EEXIST, symb_EFAULT, symb_EINVAL,
+           symb_EINTR, symb_EIO, symb_ELOOP, symb_EMLINK, symb_ENAMETOOLONG, symb_ENOENT,
+           symb_ENOMEM, symb_ENOSPC, symb_ENOSYS, symb_ENOTDIR, symb_ENOTEMPTY, symb_ENOTTY,
+           symb_EOVERFLOW, symb_EPERM, symb_EROFS, symb_ESRCH, symb_EXDEV;
+
+/* # 3.2 */
+// TODO
+
+/* # 3.3 */
+static SCM symb_time_now, symb_time_unchanged, symb_second, symb_nanosecond;
+
+
+
+static void initialize_global_symbols(void)
+{
+  /* ========== POSIX errrors ========== */
+  symb_EACCES       = STk_intern("EACCES");
+  symb_EBADF        = STk_intern("EBADF");
+  symb_EBUSY        = STk_intern("EBUSY");
+  symb_EDQUOT       = STk_intern("EDQUOT");
+  symb_EEXIST       = STk_intern("EEXIST");
+  symb_EFAULT       = STk_intern("EFAULT");
+  symb_EINVAL       = STk_intern("EINVAL");
+  symb_EINTR        = STk_intern("EINTR");
+  symb_EIO          = STk_intern("EIO");
+  symb_ELOOP        = STk_intern("ELOOP");
+  symb_EMLINK       = STk_intern("EMLINK");
+  symb_ENAMETOOLONG = STk_intern("ENAMETOOLONG");
+  symb_ENOENT       = STk_intern("ENOENT");
+  symb_ENOMEM       = STk_intern("ENOMEM");
+  symb_ENOSPC       = STk_intern("ENOSPC");
+  symb_ENOSYS       = STk_intern("ENOSYS");
+  symb_ENOTDIR      = STk_intern("ENOTDIR");
+  symb_ENOTEMPTY    = STk_intern("ENOTEMPTY");
+  symb_ENOTTY       = STk_intern("ENOTTY");
+  symb_EOVERFLOW    = STk_intern("EOVERFLOW");
+  symb_EPERM        = STk_intern("EPERM");
+  symb_EROFS        = STk_intern("EROFS");
+  symb_ESRCH        = STk_intern("ESRCH");
+  symb_EXDEV        = STk_intern("EXDEV");
+
+  /* ========== Section #3.3 ========== */
+  symb_time_now       = STk_intern("time/now");
+  symb_time_unchanged = STk_intern("time/unchanged");
+  symb_second         = STk_intern("second");
+  symb_nanosecond     = STk_intern("nanosecond");
+
+}
+
+
 
 DEFINE_PRIMITIVE("%get-posix-error-name", get_posix_error_name,subr1,(SCM n))
 {
-    /* FIXME: make names static, don't call STk_intern
-       every time a condition is rqaised... */
+  if (!INTP(n)) STk_error("bad integer ~S", n);
 
-    if (!INTP(n)) STk_error("bad integer ~S", n);
-
-    SCM errname = STk_false;
-    int err_no = INT_VAL(n);
-    switch (err_no) {
-    case EACCES:
-        errname = STk_intern("EACCES");
-        break;
-    case EBADF:
-        errname = STk_intern("EBADF");
-        break;
-    case EBUSY:
-        errname = STk_intern("EBUSY");
-        break;
-    case EDQUOT:
-        errname = STk_intern("EDQUOT");
-        break;
-    case EEXIST:
-        errname = STk_intern("EEXIST");
-        break;
-    case EFAULT:
-        errname = STk_intern("EFAULT");
-        break;
-    case EINVAL:
-        errname = STk_intern("EINVAL");
-        break;
-    case EINTR:
-        errname = STk_intern("EINTR");
-        break;
-    case EIO:
-        errname = STk_intern("EIO");
-        break;
-    case ELOOP:
-        errname = STk_intern("ELOOP");
-        break;
-    case EMLINK:
-        errname = STk_intern("EMLINK");
-        break;
-    case ENAMETOOLONG:
-        errname = STk_intern("ENAMETOOLONG");
-        break;
-    case ENOENT:
-        errname = STk_intern("ENOENT");
-        break;
-    case ENOMEM:
-        errname = STk_intern("ENOMEM");
-        break;
-    case ENOSPC:
-        errname = STk_intern("ENOSPC");
-        break;
-    case ENOSYS:
-        errname = STk_intern("ENOSYS");
-        break;
-    case ENOTDIR:
-        errname = STk_intern("ENOTDIR");
-        break;
-    case ENOTEMPTY:
-        errname = STk_intern("ENOTEMPTY");
-        break;
-    case ENOTTY:
-        errname = STk_intern("ENOTTY");
-        break;
-    case EOVERFLOW:
-        errname = STk_intern("EOVERFLOW");
-        break;
-    case EPERM:
-        errname = STk_intern("EPERM");
-        break;
-    case EROFS:
-        errname = STk_intern("EROFS");
-        break;
-    case ESRCH:
-        errname = STk_intern("ESRCH");
-        break;
-    case EXDEV:
-        errname = STk_intern("EXDEV");
-        break;
-
-    default:
-        STk_error("POSIX unknown error ~S", n);
-        break;
-    }
-    return errname;
+  switch (INT_VAL(n)) {
+    case EACCES:        return symb_EACCES;
+    case EBADF:         return symb_EBADF;
+    case EBUSY:         return symb_EBUSY;
+    case EDQUOT:        return symb_EDQUOT;
+    case EEXIST:        return symb_EEXIST;
+    case EFAULT:        return symb_EFAULT;
+    case EINVAL:        return symb_EINVAL;
+    case EINTR:         return symb_EINTR;
+    case EIO:           return symb_EIO;
+    case ELOOP:         return symb_ELOOP;
+    case EMLINK:        return symb_EMLINK;
+    case ENAMETOOLONG:  return symb_ENAMETOOLONG;
+    case ENOENT:        return symb_ENOENT;
+    case ENOMEM:        return symb_ENOMEM;
+    case ENOSPC:        return symb_ENOSPC;
+    case ENOSYS:        return symb_ENOSYS;
+    case ENOTDIR:       return symb_ENOTDIR;
+    case ENOTEMPTY:     return symb_ENOTEMPTY;
+    case ENOTTY:        return symb_ENOTTY;
+    case EOVERFLOW:     return symb_EOVERFLOW;
+    case EPERM:         return symb_EPERM;
+    case EROFS:         return symb_EROFS;
+    case ESRCH:         return symb_ESRCH;
+    case EXDEV:         return symb_EXDEV;
+    default:            STk_error("POSIX unknown error ~S", INT_VAL(n));
+  }
+  return STk_void;  /* for the compiler */
 }
 
 void STk_error_posix(int err,char *proc_name, SCM args)
@@ -459,8 +444,7 @@ DEFINE_PRIMITIVE("file-info", posix_stat, subr2, (SCM p, SCM follow))
 
     errno = 0;
     if (STRINGP(p)) { /* it's a path */
-        if (!BOOLEANP(follow)) STk_error("bad boolean ~S",follow);
-        if (follow == STk_true)
+        if (follow != STk_false)
             e = stat(STRING_CHARS(p), &st);
         else
             e = lstat(STRING_CHARS(p), &st);
@@ -508,7 +492,7 @@ DEFINE_PRIMITIVE("file-info", posix_stat, subr2, (SCM p, SCM follow))
         argv[0]  = STk_make_struct(3, &cts[2]);
         return STk_make_struct(17, &argv[16]);
     }
-    return STk_false; /* neer reached */
+    return STk_false; /* never reached */
 }
 
 void check_file_info(SCM info) {
@@ -566,8 +550,6 @@ DEFINE_PRIMITIVE("file-info-device?",posix_isdevice,subr1,(SCM info, SCM mode))
     int v = INT_VAL(m);
     return MAKE_BOOLEAN(S_ISCHR(v)||S_ISBLK(v));
 }
-
-
 
 
 DEFINE_PRIMITIVE("set-file-mode", posix_chmod, subr2, (SCM name, SCM bits) )
@@ -633,8 +615,8 @@ DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
         SCM time2 = *argv--;
 
         if (SYMBOLP(time1)) {
-            if      (STk_eqv(time1, STk_intern("time/now")) == STk_true)       nsec1 = UTIME_NOW;
-            else if (STk_eqv(time1, STk_intern("time/unchanged")) == STk_true) nsec1 = UTIME_OMIT;
+            if      (STk_eqv(time1, symb_time_now) == STk_true)       nsec1 = UTIME_NOW;
+            else if (STk_eqv(time1, symb_time_unchanged) == STk_true) nsec1 = UTIME_OMIT;
             else {
               STk_error("bad argument ~S",time1);
               return STk_void;     /* to avoid a compiler warning */
@@ -642,13 +624,13 @@ DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
         } else {
             if (!STRUCTP(time1)) STk_error("bad structure ~S",time1);
             if (STRUCT_TYPE(time1) != time_type) STk_error("bad time structure ~S",time1);
-            sec1  = INT_VAL(STk_int_struct_ref(time1,STk_intern("second")));
-            nsec1 = INT_VAL(STk_int_struct_ref(time1,STk_intern("nanosecond")));
+            sec1  = INT_VAL(STk_int_struct_ref(time1, symb_second));
+            nsec1 = INT_VAL(STk_int_struct_ref(time1, symb_nanosecond));
         }
 
         if (SYMBOLP(time2)) {
-            if      (STk_eqv(time2, STk_intern("time/now")) == STk_true)       nsec2 = UTIME_NOW;
-            else if (STk_eqv(time2, STk_intern("time/unchanged")) == STk_true) nsec2 = UTIME_OMIT;
+            if      (STk_eqv(time2, symb_time_now) == STk_true)       nsec2 = UTIME_NOW;
+            else if (STk_eqv(time2, symb_time_unchanged) == STk_true) nsec2 = UTIME_OMIT;
             else {
               STk_error("bad argument ~S",time2);
               return STk_void;     /* to avoid a compiler warning */
@@ -656,8 +638,8 @@ DEFINE_PRIMITIVE("set-file-times",posix_utimensat, vsubr, (int argc, SCM *argv))
         } else {
             if (!STRUCTP(time1)) STk_error("bad structure ~S",time2);
             if (STRUCT_TYPE(time2) != time_type) STk_error("bad time structure ~S",time2);
-            sec2  = INT_VAL(STk_int_struct_ref(time2,STk_intern("second")));
-            nsec2 = INT_VAL(STk_int_struct_ref(time2,STk_intern("nanosecond")));
+            sec2  = INT_VAL(STk_int_struct_ref(time2, symb_second));
+            nsec2 = INT_VAL(STk_int_struct_ref(time2, symb_nanosecond));
         }
     }
 
@@ -680,7 +662,7 @@ DEFINE_PRIMITIVE("open-directory", posix_opendir, subr12, (SCM name, SCM dot) )
 {
     if (!STRINGP(name)) STk_error("bad string ~S", name);
     if (!dot) dot = STk_false;
-    else if (!BOOLEANP(dot)) STk_error("bad boolean ~S", dot);
+
 
     DIR *d = opendir(STRING_CHARS(name));
     if (d == 0) STk_error_posix(errno,"open-directory",LIST2(name,dot));
@@ -745,14 +727,11 @@ DEFINE_PRIMITIVE("real-path", posix_realpath, subr1, (SCM p) )
        -- jpellegrini */
     rpath = realpath(pa, rpath);
 
-    if (rpath == 0) {
+    if (rpath == NULL) {
         STk_error_posix(errno,"real-path",LIST1(p));
         return STk_void; /* never reached */
-    } else {
-        int len = strlen(rpath);
-        rpath=realloc(rpath,len+1);
-        return STk_makestring(len, rpath);
-    }
+    } else
+      return STk_Cstring2string(rpath);
 }
 
 DEFINE_PRIMITIVE("file-space", posix_statvfs, subr1, (SCM p))
@@ -816,10 +795,15 @@ DEFINE_PRIMITIVE("set-current-directory!", posix_chdir, subr1, (SCM dir))
 
 DEFINE_PRIMITIVE("nice", posix_nice, subr01, (SCM delta))
 {
-    int d = delta? INT_VAL(delta) : 1;
-    int new_delta = nice(d);
-    if (new_delta == -1)  STk_error_posix(errno,"nice", LIST1(delta));
-    return MAKE_INT(new_delta);
+  int d = 1;
+
+  if (delta) {
+    if (!INTP(delta)) STk_error("bad integer ~S", delta);
+    d = INT_VAL(delta);
+  }
+  int new_delta = nice(d);
+  if (new_delta == -1)  STk_error_posix(errno,"nice", LIST1(delta));
+  return MAKE_INT(new_delta);
 }
 
 
@@ -1006,6 +990,7 @@ MODULE_ENTRY_START("srfi-170")
 {
   SCM module =  STk_create_module(STk_intern("SRFI-170"));
 
+  initialize_global_symbols();
 
   /* 3.1 Error handling */
 
