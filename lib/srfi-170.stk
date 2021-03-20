@@ -27,8 +27,6 @@
 
 (load "srfi-170-impl")
 
-(define %%srfi-170-previous-module (current-module))
-
 (select-module SRFI-170)
 
 ;; defines a list of symbols evaluating to themselves:
@@ -262,7 +260,7 @@
                            (maker name))))
         (if (not x)
             (again (fx- tries 1))
-            (apply values x rest)))))))
+            (apply values x rest))))))
 
 (export temp-file-prefix
 
