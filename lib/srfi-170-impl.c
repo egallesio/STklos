@@ -41,6 +41,10 @@
 #include "struct.h"
 #include "fport.h"
 
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+
 static SCM file_info_type, dir_info_type, user_info_type, group_info_type;
 static SCM posix_error;
 
