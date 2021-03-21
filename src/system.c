@@ -935,7 +935,7 @@ doc>
 DEFINE_PRIMITIVE("current-time", current_time, subr0, (void))
 {
   struct timespec now;
-  SCM argv[3];
+  SCM argv[4];
 
   clock_gettime(CLOCK_REALTIME, &now);
 
