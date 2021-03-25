@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Jan-2021 11:54
- * Last file update: 25-Mar-2021 16:14 (eg)
+ * Last file update: 25-Mar-2021 17:01 (eg)
  */
 
 #include <limits.h>
@@ -46,6 +46,28 @@ static SCM posix_error;
 
 SCM time_type; /* FIXME */
 
+
+static SCM symb_errno, symb_mode, symb_dir_object, symb_dot_files;
+
+
+/* # 3.1 */
+static SCM symb_EACCES, symb_EBADF, symb_EBUSY, symb_EDQUOT, symb_EEXIST, symb_EFAULT, symb_EINVAL,
+           symb_EINTR, symb_EIO, symb_ELOOP, symb_EMLINK, symb_ENAMETOOLONG, symb_ENOENT,
+           symb_ENOMEM, symb_ENOSPC, symb_ENOSYS, symb_ENOTDIR, symb_ENOTEMPTY, symb_ENOTTY,
+           symb_EOVERFLOW, symb_EPERM, symb_EROFS, symb_ESRCH, symb_EXDEV;
+
+/* # 3.2 */
+static SCM symb_binary_input, symb_textual_input, symb_binary_output, symb_textual_output,
+           symb_binary_input_output, symb_buffer_none, symb_buffer_block, symb_buffer_line;
+
+/* # 3.3 */
+static SCM symb_time_now, symb_time_unchanged, symb_second, symb_nanosecond;
+static SCM key_time_utc, key_time_monotonic;
+
+
+
+
+
 /* 3.1 Error handling */
 
 
@@ -62,28 +84,22 @@ DEFINE_PRIMITIVE("posix-get-message-for-errno", posix_strerror, subr1, (SCM obj)
     else if (CONDP(obj)) {
         /* don't presume that the message field in obj has been
            set up properly. get the string from errno */
-        SCM e = STk_int_struct_ref(obj,STk_intern("errno"));
+        SCM e = STk_int_struct_ref(obj, symb_errno);
         errstr = strerror(INT_VAL(e));
     } else STk_error("impossible error!");
 
     return STk_Cstring2string(errstr);
 }
 
-/* # 3.1 */
-static SCM symb_EACCES, symb_EBADF, symb_EBUSY, symb_EDQUOT, symb_EEXIST, symb_EFAULT, symb_EINVAL,
-           symb_EINTR, symb_EIO, symb_ELOOP, symb_EMLINK, symb_ENAMETOOLONG, symb_ENOENT,
-           symb_ENOMEM, symb_ENOSPC, symb_ENOSYS, symb_ENOTDIR, symb_ENOTEMPTY, symb_ENOTTY,
-           symb_EOVERFLOW, symb_EPERM, symb_EROFS, symb_ESRCH, symb_EXDEV;
-
-/* # 3.2 */
-// TODO
-
-/* # 3.3 */
-static SCM symb_time_now, symb_time_unchanged, symb_second, symb_nanosecond;
-static SCM key_time_utc, key_time_monotonic;
 
 static void initialize_global_symbols(void)
 {
+  /* Frequently used symbols */
+  symb_errno      = STk_intern("errno");
+  symb_mode       = STk_intern("mode");
+  symb_dir_object = STk_intern("dir-object");
+  symb_dot_files  = STk_intern("dot-files");
+  
   /* ========== POSIX errrors ========== */
   symb_EACCES       = STk_intern("EACCES");
   symb_EBADF        = STk_intern("EBADF");
@@ -109,6 +125,16 @@ static void initialize_global_symbols(void)
   symb_EROFS        = STk_intern("EROFS");
   symb_ESRCH        = STk_intern("ESRCH");
   symb_EXDEV        = STk_intern("EXDEV");
+
+  /* ========== Section #3.2 ========== */
+  symb_binary_input         = STk_intern("binary-input");
+  symb_textual_input        = STk_intern("textual-input");
+  symb_binary_output        = STk_intern("binary-output");
+  symb_textual_output       = STk_intern("textual-output");
+  symb_binary_input_output  = STk_intern("binary-input/output");
+  symb_buffer_none          = STk_intern("buffer-none");
+  symb_buffer_block         = STk_intern("buffer-block");
+  symb_buffer_line          = STk_intern("buffer-line");
 
   /* ========== Section #3.3 ========== */
   symb_time_now       = STk_intern("time/now");
@@ -209,31 +235,31 @@ DEFINE_PRIMITIVE("open-file",posix_open,vsubr, (int argc, SCM *argv))
 
     char *mode;
     int pflags; /* int? */
-    if      (STk_eqv(type, STk_intern("binary-input")) == STk_true)
+    if      (STk_eqv(type, symb_binary_input) == STk_true)
     {
         mode = "r";
         pflags = PORT_BINARY|PORT_READ;
         cflags |= O_RDONLY;
     }
-    else if (STk_eqv(type, STk_intern("textual-input")) == STk_true)
+    else if (STk_eqv(type, symb_textual_input) == STk_true)
     {
         mode = "r";
         pflags = PORT_TEXTUAL|PORT_READ;
         cflags |= O_RDONLY;
     }
-    else if (STk_eqv(type, STk_intern("binary-output")) == STk_true)
+    else if (STk_eqv(type, symb_binary_output) == STk_true)
     {
         mode = "a";
         pflags = PORT_BINARY|PORT_WRITE;
         cflags |= O_WRONLY;
     }
-    else if (STk_eqv(type, STk_intern("textual-output")) == STk_true)
+    else if (STk_eqv(type, symb_textual_output) == STk_true)
     {
         mode = "a";
         pflags = PORT_TEXTUAL|PORT_WRITE;
         cflags |= O_WRONLY;
     }
-    else if (STk_eqv(type, STk_intern("binary-input/output")) == STk_true)
+    else if (STk_eqv(type, symb_binary_input_output) == STk_true)
     {
         mode = "r+";
         pflags = PORT_BINARY|PORT_RW;
@@ -267,11 +293,11 @@ DEFINE_PRIMITIVE("fd->port",posix_fd_port,subr23,(SCM fd, SCM type, SCM bufmode)
 
     int flags; /* "int"? */
 
-    if      (STk_eqv(type, STk_intern("binary-input")) == STk_true)   { mode = "r"; flags = PORT_BINARY|PORT_READ;}
-    else if (STk_eqv(type, STk_intern("textual-input")) == STk_true)  { mode = "r"; flags = PORT_TEXTUAL|PORT_READ;}
-    else if (STk_eqv(type, STk_intern("binary-output")) == STk_true)  { mode = "a"; flags = PORT_BINARY|PORT_WRITE;}
-    else if (STk_eqv(type, STk_intern("textual-output")) == STk_true) { mode = "a"; flags = PORT_TEXTUAL|PORT_WRITE;}
-    else if (STk_eqv(type, STk_intern("binary-input/output")) == STk_true) { mode = "r+"; flags = PORT_BINARY|PORT_RW;}
+    if      (STk_eqv(type, symb_binary_input) == STk_true)   { mode = "r"; flags = PORT_BINARY|PORT_READ;}
+    else if (STk_eqv(type, symb_textual_input) == STk_true)  { mode = "r"; flags = PORT_TEXTUAL|PORT_READ;}
+    else if (STk_eqv(type, symb_binary_output) == STk_true)  { mode = "a"; flags = PORT_BINARY|PORT_WRITE;}
+    else if (STk_eqv(type, symb_textual_output) == STk_true) { mode = "a"; flags = PORT_TEXTUAL|PORT_WRITE;}
+    else if (STk_eqv(type, symb_binary_input_output) == STk_true) { mode = "r+"; flags = PORT_BINARY|PORT_RW;}
     else { STk_error("bad port type ~S", type); return STk_void; }
 
     SCM port = STk_fd2scheme_port (INT_VAL(fd),mode,cname);
@@ -512,7 +538,7 @@ DEFINE_PRIMITIVE("file-info-directory?",posix_isdir,subr1,(SCM info, SCM mode))
 {
     check_file_info(info);
     if (INTP(mode)) STk_error("bad integer ~S", mode);
-    SCM m = STk_int_struct_ref(info,STk_intern("mode"));
+    SCM m = STk_int_struct_ref(info,symb_mode);
     return MAKE_BOOLEAN(S_ISDIR(INT_VAL(m)));
 }
 
@@ -520,7 +546,7 @@ DEFINE_PRIMITIVE("file-info-fifo?",posix_isfifo,subr1,(SCM info, SCM mode))
 {
     check_file_info(info);
     if (INTP(mode)) STk_error("bad integer ~S", mode);
-    SCM m = STk_int_struct_ref(info,STk_intern("mode"));
+    SCM m = STk_int_struct_ref(info,symb_mode);
     return MAKE_BOOLEAN(S_ISFIFO(INT_VAL(m)));
 }
 
@@ -528,7 +554,7 @@ DEFINE_PRIMITIVE("file-info-symlink?",posix_issymlink,subr1,(SCM info, SCM mode)
 {
     check_file_info(info);
     if (INTP(mode)) STk_error("bad integer ~S", mode);
-    SCM m = STk_int_struct_ref(info,STk_intern("mode"));
+    SCM m = STk_int_struct_ref(info,symb_mode);
     return MAKE_BOOLEAN(S_ISLNK(INT_VAL(m)));
 }
 
@@ -536,7 +562,7 @@ DEFINE_PRIMITIVE("file-info-regular?",posix_isregular,subr1,(SCM info, SCM mode)
 {
     check_file_info(info);
     if (INTP(mode)) STk_error("bad integer ~S", mode);
-    SCM m = STk_int_struct_ref(info,STk_intern("mode"));
+    SCM m = STk_int_struct_ref(info,symb_mode);
     return MAKE_BOOLEAN(S_ISREG(INT_VAL(m)));
 }
 
@@ -544,14 +570,14 @@ DEFINE_PRIMITIVE("file-info-socket?",posix_issocket,subr1,(SCM info, SCM mode))
 {
     check_file_info(info);
     if (INTP(mode)) STk_error("bad integer ~S", mode);
-    SCM m = STk_int_struct_ref(info,STk_intern("mode"));
+    SCM m = STk_int_struct_ref(info,symb_mode);
     return MAKE_BOOLEAN(S_ISFIFO(INT_VAL(m)));
 }
 DEFINE_PRIMITIVE("file-info-device?",posix_isdevice,subr1,(SCM info, SCM mode))
 {
     check_file_info(info);
     if (INTP(mode)) STk_error("bad integer ~S", mode);
-    SCM m = STk_int_struct_ref(info,STk_intern("mode"));
+    SCM m = STk_int_struct_ref(info,symb_mode);
     int v = INT_VAL(m);
     return MAKE_BOOLEAN(S_ISCHR(v)||S_ISBLK(v));
 }
@@ -685,8 +711,8 @@ DEFINE_PRIMITIVE("read-directory", posix_readdir, subr1, (SCM dir) )
     if (STRUCT_TYPE(dir) != dir_info_type)
         STk_error("bad directory structure", STk_false);
 
-    DIR  *d = STk_int_struct_ref(dir,STk_intern("dir-object"));
-    SCM dot = STk_int_struct_ref(dir,STk_intern("dot-files"));
+    DIR  *d = STk_int_struct_ref(dir,symb_dir_object);
+    SCM dot = STk_int_struct_ref(dir,symb_dot_files);
 
     errno = 0;
     struct dirent *e = readdir(d);
@@ -711,7 +737,7 @@ DEFINE_PRIMITIVE("close-directory", posix_closedir, subr1, (SCM dir) )
     if (!STRUCTP(dir)) STk_error("bad structure", STk_false);
     if (STRUCT_TYPE(dir) != dir_info_type)
         STk_error("bad directory structure", STk_false);
-    DIR  *d = STk_int_struct_ref(dir,STk_intern("dir-object"));
+    DIR  *d = STk_int_struct_ref(dir,symb_dir_object);
     int e = closedir(d);
     if (e != 0) STk_error_posix(errno,"close-directory",LIST1(dir));
     return STk_void;
@@ -1052,8 +1078,7 @@ MODULE_ENTRY_START("srfi-170")
 
   dir_info_type = STk_make_struct_type(STk_intern("%directory-info"),
                                        STk_false,
-                                       LIST2(STk_intern("dir-object"),
-                                             STk_intern("dot-files")));
+                                       LIST2(symb_dir_object, symb_dot_files));
 
   STk_define_variable(STk_intern("%directory-info"), dir_info_type, module);
 
