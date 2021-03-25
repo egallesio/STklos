@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  9-Mar-2021 16:00 (eg)
+ * Last file update: 25-Mar-2021 16:08 (eg)
  */
 
 
@@ -83,7 +83,11 @@ extern "C"
 #ifdef _POSIX_PATH_MAX
 #  define MAX_PATH_LENGTH        _POSIX_PATH_MAX
 #else
-#  define MAX_PATH_LENGTH        256
+#  ifdef PATH_MAX
+#    define MAX_PATH_LENGTH     PATH_MAX
+#  else
+#    define MAX_PATH_LENGTH        4096
+#  endif
 #endif
 
 #define MAX_TOKEN_SIZE          1024            /* max size of a token */
@@ -109,7 +113,7 @@ extern "C"
 #  define MUT_UNLOCK(lck)
 #else
 #  define MUT_DECL(lck)    static pthread_mutex_t lck = PTHREAD_MUTEX_INITIALIZER;
-#  define MUT_FIELD(lck)   pthread_mutex_t lck 
+#  define MUT_FIELD(lck)   pthread_mutex_t lck
 #  define MUT_INIT(lck)    { pthread_mutex_init(&lck, NULL); }
 #  define MUT_LOCK(lck)    { pthread_mutex_lock(&lck); }
 #  define MUT_UNLOCK(lck)  { pthread_mutex_unlock(&lck); }
@@ -721,7 +725,7 @@ int STk_init_misc(void);
 #define INT_MIN_VAL     ((LONG_MIN & ~3) >> 2)
 #define INT_MAX_VAL     ((LONG_MAX & ~3) >> 2)
 #define INT_LENGTH      (sizeof(long) * 8 - 2)
-    
+
 long STk_integer_value(SCM x); /* Returns LONG_MIN if not representable as long */
 unsigned long STk_uinteger_value(SCM x); /* Returns ULONG_MAX if not an ulong */
 
@@ -1432,7 +1436,7 @@ extern STk_instr STk_boot_code[];
 #if defined(__GNUC__) || defined(__clang__)
 #  define _UNUSED(x) __attribute__((__unused__)) x
 #endif
-  
+
 #ifdef __cplusplus
 }
 #endif

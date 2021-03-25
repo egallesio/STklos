@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Jan-2021 11:54
- * Last file update: 25-Mar-2021 15:58 (eg)
+ * Last file update: 25-Mar-2021 16:14 (eg)
  */
 
 #include <limits.h>
@@ -40,10 +40,6 @@
 #include "stklos.h"
 #include "struct.h"
 #include "fport.h"
-
-#ifndef PATH_MAX
-#define PATH_MAX 4096
-#endif
 
 static SCM file_info_type, dir_info_type, user_info_type, group_info_type;
 static SCM posix_error;
@@ -386,10 +382,10 @@ DEFINE_PRIMITIVE("read-symlink", posix_readlink, subr1, (SCM name))
 
     /* FROM MANPAGE OF readlink:
        Some magic symlinks under (for example) /proc and /sys
-       report 'st_size' as zero. In that case, take PATH_MAX as
+       report 'st_size' as zero. In that case, take MAX_PATH_LENGTH as
        a "good enough" estimate. */
     if  (sb.st_size == 0)
-        bsize = PATH_MAX;
+        bsize = MAX_PATH_LENGTH;
 
     char *buf = STk_must_malloc(bsize);
     if (buf == NULL) STk_error("cannot allocate memory for symlink resolved name ~S", name);
@@ -724,7 +720,7 @@ DEFINE_PRIMITIVE("close-directory", posix_closedir, subr1, (SCM dir) )
 DEFINE_PRIMITIVE("real-path", posix_realpath, subr1, (SCM p) )
 {
     char* pa;
-    char* rpath = STk_must_malloc(PATH_MAX);
+    char* rpath = STk_must_malloc(MAX_PATH_LENGTH);
 
     if (!STRINGP(p)) STk_error("bad string ~S", p);
 
