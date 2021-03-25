@@ -1,7 +1,7 @@
 ;;;;
 ;;;; date.stk                   -- Date and Time Operations
 ;;;;
-;;;; Copyright © 2002-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2002 10:06 (eg)
-;;;; Last file update:  7-Feb-2020 18:46 (eg)
+;;;; Last file update: 25-Mar-2021 15:41 (eg)
 ;;;;
 
 ;;;; ======================================================================
@@ -54,8 +54,8 @@ doc>
 |#
 (define (time->seconds time)
   (if (time? time)
-      (exact->inexact (+ (%fast-struct-ref time %time 'second 0)
-                         (/ (%fast-struct-ref time %time 'nanosecond 1)
+      (exact->inexact (+ (%fast-struct-ref time %time 'second 1)
+                         (/ (%fast-struct-ref time %time 'nanosecond 2)
                             #e1e9)))
       (error 'time-seconds "bad time ~S" time)))
 
@@ -77,7 +77,7 @@ doc>
       (cond
         ((real? x)
          (let ((n (inexact->exact (round (* x #e1e9)))))
-           (make-struct %time (quotient n #e1e9) (remainder n #e1e9))))
+           (make-struct %time :time-utc (quotient n #e1e9) (remainder n #e1e9))))
         ((integer? x)
          (make-struct %time  x 0))
         (else

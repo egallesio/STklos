@@ -24,14 +24,10 @@
 ;;;; Last file update: 19-Mar-2021 18:12 (eg)
 ;;;;
 
-(require "srfi-158")
 
 (load "srfi-170-impl")
 
-(define %%srfi-170-previous-module (current-module))
-
 (select-module SRFI-170)
-(import SRFI-158)
 
 ;; defines a list of symbols evaluating to themselves:
 (define-syntax defsymbol
@@ -210,12 +206,18 @@
           (begin (set! files (cons f files))
                  (again (read-directory dir)))))))
 
-(define (make-directory-files-generator path :optional dot)
-  (let ((dir (open-directory path dot)))
-    (make-unfold-generator eof-object?
-                           (lambda (x) (read-directory dir))
-                           (lambda (x) x)
-                           ())))
+(define (make-directory-files-generator dir :optional dot-files?)
+  (let ((dir-obj (open-directory dir dot-files?))
+        (eof (eof-object))
+        (done #f))
+    (lambda ()
+      (if done
+          eof
+          (let ((f (read-directory dir-obj)))
+             (when (eq? f eof)
+               (close-directory dir-obj)
+               (set! done #t))
+              f)))))
 
 ;; (open-directory dir [dot-files?])  implemented as primitive
 ;; (read-directory directory-object)  implemented as primitive
@@ -258,7 +260,7 @@
                            (maker name))))
         (if (not x)
             (again (fx- tries 1))
-            (apply values x rest)))))))
+            (apply values x rest))))))
 
 (export temp-file-prefix
 
@@ -365,13 +367,13 @@
 ;; (posix-time)      implemented as primitive
 ;; (monotonic-time)  implemented as primitive
 
-(define (%make-time sec nano)
-  (make-struct %time sec nano))
+(define (make-time type sec nano)
+  (make-struct %time type sec nano))
 
 (define (time-second x) (struct-ref x 'second))
 (define (time-nanosecond x) (struct-ref x 'nanosecond))
 
-(export %make-time
+(export make-time
         time-second
         time-nanosecond)
 
