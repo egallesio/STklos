@@ -2,7 +2,7 @@
  *
  * s y s t e m . c                              -- System relative primitives
  *
- * Copyright © 1994-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 19-Sep-2020 19:04 (eg)
+ * Last file update: 25-Mar-2021 15:49 (eg)
  */
 
 #include <unistd.h>
@@ -940,7 +940,7 @@ DEFINE_PRIMITIVE("current-time", current_time, subr0, (void))
   clock_gettime(CLOCK_REALTIME, &now);
 
   argv[3] = time_type;
-  argv[2] = STk_intern("time-utc");
+  argv[2] = STk_makekey("time-utc");
   argv[1] = STk_long2integer(now.tv_sec);
   argv[0] = STk_long2integer(now.tv_nsec);
   return STk_make_struct(4, &argv[3]);
@@ -1315,14 +1315,6 @@ int STk_init_system(void)
                                           STk_intern("nanosecond")));
   STk_define_variable(STk_intern("%time"), time_type, current_module);
 
-  /* for SRFI-19: */
-  STk_define_variable(STk_intern("time-tai"),       STk_intern("time-tai"), current_module);
-  STk_define_variable(STk_intern("time-utc"),       STk_intern("time-utc"), current_module);
-  STk_define_variable(STk_intern("time-monotonic"), STk_intern("time-monotonic"), current_module);
-  STk_define_variable(STk_intern("time-thread"),    STk_intern("time-thread"), current_module);
-  STk_define_variable(STk_intern("time-process"),   STk_intern("time-process"), current_module);
-  STk_define_variable(STk_intern("time-duration"),  STk_intern("time-duration"), current_module);
-                      
   /* Declare primitives */
   ADD_PRIMITIVE(clock);
   ADD_PRIMITIVE(date);

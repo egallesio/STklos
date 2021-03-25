@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Jan-2021 11:54
- * Last file update: 19-Mar-2021 18:52 (eg)
+ * Last file update: 25-Mar-2021 15:58 (eg)
  */
 
 #include <limits.h>
@@ -83,8 +83,8 @@ static SCM symb_EACCES, symb_EBADF, symb_EBUSY, symb_EDQUOT, symb_EEXIST, symb_E
 // TODO
 
 /* # 3.3 */
-static SCM symb_time_now, symb_time_unchanged, symb_second, symb_nanosecond,
-           symb_time_utc, symb_time_monotonic;
+static SCM symb_time_now, symb_time_unchanged, symb_second, symb_nanosecond;
+static SCM key_time_utc, key_time_monotonic;
 
 static void initialize_global_symbols(void)
 {
@@ -120,8 +120,8 @@ static void initialize_global_symbols(void)
   symb_second         = STk_intern("second");
   symb_nanosecond     = STk_intern("nanosecond");
 
-  symb_time_utc       = STk_intern("time-utc");
-  symb_time_monotonic = STk_intern("time-monotonic");
+  key_time_utc       = STk_makekey("time-utc");
+  key_time_monotonic = STk_makekey("time-monotonic");
 
 }
 
@@ -465,19 +465,19 @@ DEFINE_PRIMITIVE("file-info", posix_stat, subr2, (SCM p, SCM follow))
     else {
         SCM ats[4]; /* atime */
         ats[3] = time_type;
-        ats[2] = symb_time_utc;
+        ats[2] = key_time_utc;
         ats[1] = MAKE_INT(st.st_atim.tv_sec);
         ats[0] = MAKE_INT(st.st_atim.tv_nsec);
 
         SCM mts[4]; /* mtime */
         mts[3] = time_type;
-        mts[2] = symb_time_utc;
+        mts[2] = key_time_utc;
         mts[1] = MAKE_INT(st.st_mtim.tv_sec);
         mts[0] = MAKE_INT(st.st_mtim.tv_nsec);
 
         SCM cts[4]; /* ctime */
         cts[3] = time_type;
-        cts[2] = symb_time_utc;
+        cts[2] = key_time_utc;
         cts[1] = MAKE_INT(st.st_ctim.tv_sec);
         cts[0] = MAKE_INT(st.st_ctim.tv_nsec);
 
@@ -954,7 +954,7 @@ DEFINE_PRIMITIVE("posix-time",posix_time, subr0, (void))
 
     SCM argv[4];
     argv[3]=time_type;
-    argv[2]=symb_time_utc;
+    argv[2]=key_time_utc;
     argv[1]=MAKE_INT(ts.tv_sec);
     argv[0]=MAKE_INT(ts.tv_nsec);
     return STk_make_struct(4, &argv[3]);
@@ -969,7 +969,7 @@ DEFINE_PRIMITIVE("monotonic-time",posix_monotonic_time, subr0, (void))
 
     SCM argv[4];
     argv[3]=time_type;
-    argv[2]=symb_time_monotonic;
+    argv[2]=key_time_monotonic;
     argv[1]=MAKE_INT(ts.tv_sec);
     argv[0]=MAKE_INT(ts.tv_nsec);
     return STk_make_struct(4, &argv[3]);
