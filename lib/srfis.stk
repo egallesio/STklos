@@ -256,6 +256,7 @@
     ;; 214  Flexvectors (draft)
     ;; 215  Central Log Exchange (draft)
     (216  "SICP Prerequisites (Portable)" () "srfi-216")
+    (217  "Integer Sets" () "srfi-217")
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file
