@@ -117,6 +117,7 @@ SRC_STK = bigloo-support.stk  \
           srfi-128.stk        \
           srfi-129.stk        \
           srfi-130.stk        \
+          srfi-133.stk        \
           srfi-134.stk        \
           srfi-135.stk        \
           srfi-137.stk        \
@@ -142,7 +143,9 @@ SRC_STK = bigloo-support.stk  \
           tar.stk             \
           trace.stk
 
-SRC_C = srfi-170-impl.c srfi-175-impl.c
+SRC_C = srfi-133-impl.c \
+        srfi-170-impl.c \
+        srfi-175-impl.c
 
 scheme_OBJS = compfile.ostk     \
           bigmatch.ostk         \
@@ -196,6 +199,7 @@ scheme_OBJS = compfile.ostk     \
           srfi-128.ostk         \
           srfi-129.ostk         \
           srfi-130.ostk         \
+          srfi-133.ostk         \
           srfi-134.ostk         \
           srfi-135.ostk         \
           srfi-137.ostk         \
@@ -221,7 +225,9 @@ scheme_OBJS = compfile.ostk     \
           tar.ostk              \
           trace.ostk
 
-scheme_SOLIBS =  srfi-170-impl.@SH_SUFFIX@ srfi-175-impl.@SH_SUFFIX@
+scheme_SOLIBS = srfi-133-impl.@SH_SUFFIX@ \
+                srfi-170-impl.@SH_SUFFIX@ \
+                srfi-175-impl.@SH_SUFFIX@ 
 
 DOCDB	    = DOCDB
 

@@ -171,7 +171,7 @@
     (130 "Cursor-based string library" () "srfi-130")
     ;; 131  ERR5RS Record Syntax (reduced)
     ;; 132  Sort Libraries
-    ;; 133  Vector Library (R7RS-compatible)
+    (133  "Vector Library (R7RS-compatible)" (vector) "srfi-133")
     (134  "Immutable Deques" (immutable-deques) "srfi-134")
     (135  "Immutable Texts" (immuttable-texts) "srfi-135")
     ;; 136  Extensible record types
