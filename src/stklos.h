@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 25-Mar-2021 16:08 (eg)
+ * Last file update: 26-Mar-2021 11:01 (eg)
  */
 
 
@@ -470,6 +470,7 @@ SCM STk_info_object_file(char *fname);
 
 void STk_signal_error(SCM type, SCM who, SCM str, SCM msg, SCM irritants);
 void STk_error(char *format, ...);
+void STk_error_with_location(SCM loc, char *format, ...);
 SCM  STk_make_error(char *format, ...);
 SCM  STk_format_error(char *format, ...);
 void STk_warning(char *format, ...);

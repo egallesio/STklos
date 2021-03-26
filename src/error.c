@@ -2,7 +2,7 @@
  *
  * e r r o r . c                        -- The error procedure
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,11 +22,11 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 14-Nov-1993 14:58
- * Last file update: 30-May-2020 17:44 (eg)
+ * Last file update: 26-Mar-2021 11:01 (eg)
  */
 
 #include "stklos.h"
-
+#include "struct.h"
 
 /*===========================================================================*\
  *
@@ -180,8 +180,6 @@ SCM STk_make_error(char *format, ...)
 }
 
 
-
-
 void STk_error(char *format, ...)
 {
   va_list ap;
@@ -189,6 +187,21 @@ void STk_error(char *format, ...)
 
   va_start(ap, format);
   cond = make_error_condition(format, ap);
+  va_end(ap);
+
+  /* Signal error */
+  STk_raise_exception(cond);
+}
+
+
+void STk_error_with_location(SCM loc, char *format, ...)
+{
+  va_list ap;
+  SCM cond;
+
+  va_start(ap, format);
+  cond = make_error_condition(format, ap);
+  STk_int_struct_set(cond, STk_intern("location"), loc);
   va_end(ap);
 
   /* Signal error */
