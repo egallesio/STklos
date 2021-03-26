@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Mar-2021 12:14 (jpellegrini)
- * Last file update: 26-Mar-2021 10:30 (eg)
+ * Last file update: 26-Mar-2021 11:09 (eg)
  */
 
 
@@ -37,24 +37,27 @@ DEFINE_PRIMITIVE("check-index", srfi_133_check_index,subr3, (SCM vec,
     return index;
 }
 
-SCM _check_indices (SCM vec,
-                    SCM start,
-                    SCM start_name,
-                    SCM end,
-                    SCM end_name,
-                    SCM callee)
+#define error_with_loc STk_error_with_location
+
+
+static SCM _check_indices (SCM vec,
+                           SCM start,
+                           SCM start_name,
+                           SCM end,
+                           SCM end_name,
+                           SCM callee)
 {
-    if (!VECTORP(vec)) STk_error("bad vector ~S",  vec);
-    if (!INTP(start))  STk_error("bad integer ~S", start);
-    if (!INTP(end))    STk_error("bad integer ~S", end);
+    if (!VECTORP(vec)) error_with_loc(callee, "bad vector ~S",  vec);
+    if (!INTP(start))  error_with_loc(callee, "bad integer ~S", start);
+    if (!INTP(end))    error_with_loc(callee, "bad integer ~S", end);
 
     int cstart = INT_VAL(start);
     int cend   = INT_VAL(end);
 
-    if (cstart < 0) STk_error("vector range out of bounds (~S < 0)", start_name);
-    if (cstart > VECTOR_SIZE(vec)) STk_error("vector range out of bounds (~S > len)", start_name);
-    if (cend > VECTOR_SIZE(vec)) STk_error("vector range out of bounds (~S > len)", end_name);
-    if (cstart > cend) STk_error("vector range out of bounds: ~S > ~S", start_name, end_name);
+    if (cstart < 0) error_with_loc(callee, "vector range out of bounds (~S < 0)", start_name);
+    if (cstart > VECTOR_SIZE(vec)) error_with_loc(callee, "vector range out of bounds (~S > len)", start_name);
+    if (cend > VECTOR_SIZE(vec)) error_with_loc(callee, "vector range out of bounds (~S > len)", end_name);
+    if (cstart > cend) error_with_loc(callee, "vector range out of bounds: ~S > ~S", start_name, end_name);
 
     return STk_n_values(2,start,end);
 }
@@ -67,7 +70,7 @@ DEFINE_PRIMITIVE("vector-parse-start+end",srfi_133_vector_parse_start_end,subr5,
                   SCM end_name,
                   SCM callee))
 {
-    if (!VECTORP(vector)) STk_error("bad vector ~S",  vector);
+    if (!VECTORP(vector)) error_with_loc(callee, "bad vector ~S",  vector);
     int len = VECTOR_SIZE(vector);
 
     if (NULLP(args)) {
@@ -82,7 +85,7 @@ DEFINE_PRIMITIVE("vector-parse-start+end",srfi_133_vector_parse_start_end,subr5,
                               CAR(args), start_name,
                               CAR(CDR(args)), end_name,
                               callee);
-    } else STk_error("too many arguments. callee: ~S. extra args: ~S", callee, CDR(CDR(args)));
+    } else error_with_loc(callee, "too many arguments. callee: ~S. extra args: ~S", callee, CDR(CDR(args)));
 
     return STk_void; /* never reached */
 }
@@ -96,7 +99,7 @@ DEFINE_PRIMITIVE("%smallest-length",srfi_133__smallest_length,subr3,(SCM vecs,
     SCM vec;
     while(!NULLP(vecs)) {
         vec = CAR(vecs);
-        if (!VECTORP(vec)) STk_error("~S: bad vector ~S", callee, vec);
+        if (!VECTORP(vec)) error_with_loc(callee, "~S: bad vector ~S", callee, vec);
         if (VECTOR_SIZE(vec) < min)
             min = VECTOR_SIZE(vec);
         vecs = CDR(vecs);
