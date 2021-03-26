@@ -56,29 +56,33 @@
 
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date:  16-Jul-2020 10:20
-;;;; Last file update:  17-Mar-2021 22:01
+;;;; Last file update: 26-Mar-2021 14:50 (eg)
 ;;;;
-
 
 (define-module SRFI-133
 
+  ;; Pseudo-define the pritives defined in C to avoid compiler warnings
+  (%compile-time-define check-index vector-parse-start+end %smallest-length %vector-copy!
+                        %vector-reverse-copy! %vector-reverse! %vector-fold1 %vector-fold2+
+                        %vector-map1! %vector-map2+! vector-empty?)
+
 (load "srfi-133-impl")
-  
-  ;; Constructors 
-(export vector-unfold vector-unfold-right vector-reverse-copy 
+
+  ;; Constructors
+(export vector-unfold vector-unfold-right vector-reverse-copy
           vector-concatenate vector-append-subvectors)
-;; Predicates 
+;; Predicates
   (export vector-empty? vector=)
-  ;; Iteration 
+  ;; Iteration
   (export vector-fold vector-fold-right vector-map!
           vector-count vector-cumulate)
-  ;; Searching 
-  (export vector-index vector-index-right vector-skip vector-skip-right 
+  ;; Searching
+  (export vector-index vector-index-right vector-skip vector-skip-right
           vector-binary-search vector-any vector-every vector-partition)
-  ;; Mutators 
-  (export vector-swap! vector-reverse! 
+  ;; Mutators
+  (export vector-swap! vector-reverse!
           vector-reverse-copy! vector-unfold! vector-unfold-right!)
-  ;; Conversion 
+  ;; Conversion
   (export reverse-vector->list reverse-list->vector)
 
 ;; Maybe implement in C in the future:

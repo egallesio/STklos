@@ -45,7 +45,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 15-Jan-2021 07:31 (jpellegrini)
-;;;; Last file update: 16-Mar-2021 08:02 (jpellegrini)
+;;;; Last file update: 26-Mar-2021 15:30 (eg)
 ;;;;
 
 
@@ -80,6 +80,8 @@
 ;;; Leaves and branches are constructed so as to maintain the following
 ;;; invariant: Every leaf and every subtrie contains at least one value.
 ;;; This means that the empty trie (#f) never appears as a subtrie.
+
+(require "srfi-9")
 
 (define-record-type <leaf>
   (raw-leaf prefix bitmap)
@@ -921,3 +923,5 @@
                    (else (fxand low-mask bitmap))))
             ((fx>? prefix hp) 0)
             (else (fxand (fxand low-mask high-mask) bitmap))))))
+
+(provide "trie")

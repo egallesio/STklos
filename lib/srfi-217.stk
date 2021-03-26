@@ -45,7 +45,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 15-Jan-2021 07:29 (jpellegrini)
-;;;; Last file update: 16-Mar-2021 08:13 (jpellegrini)
+;;;; Last file update: 26-Mar-2021 15:47 (eg)
 ;;;;
 
 (require "srfi-1")
@@ -91,8 +91,15 @@
           highest-bit-mask
           lowest-bit-mask
           )
-
-  (load "trie.stk")
+  (%compile-time-define copy-trie subtrie-interval subtrie< subtrie>
+                        trie-contains? trie-delete trie-delete-max
+                        trie-delete-min trie-difference trie-disjoint?
+                        trie-filter trie-fold trie-fold-right
+                        trie-insert trie-intersection trie-max
+                        trie-min trie-partition trie-proper-subset?
+                        trie-search trie-size trie-subset-compare
+                        trie-union trie-xor trie=?)
+  (require "trie.stk")
 
 (define-record-type <iset>
   (raw-iset trie)

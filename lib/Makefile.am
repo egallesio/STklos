@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 15-Mar-2021 14:24 (eg)
+# Last file update: 26-Mar-2021 15:28 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
 
@@ -318,6 +318,7 @@ srfi-41.ostk: streams-derived.ostk streams-primitive.ostk
 streams-derived.ostk: srfi-1.ostk streams-primitive.ostk
 srfi-113.ostk: srfi-128.ostk
 srfi-134.ostk: srfi-158.ostk
+srfi-217.ostk: trie.ostk
 
 
 #

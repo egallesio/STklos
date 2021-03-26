@@ -21,13 +21,31 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 09-Jan-2021 09:14
-;;;; Last file update: 19-Mar-2021 18:12 (eg)
+;;;; Last file update: 26-Mar-2021 15:13 (eg)
 ;;;;
 
+(define-module SRFI-170
+  (%compile-time-define posix-get-message-for-errno %get-posix-error-name open-file
+                        fd->port create-directory create-fifo create-hard-link
+                        create-symlink read-symlink rename-file delete-directory
+                        truncate-file file-info file-info-directory? file-info-fifo?
+                        file-info-symlink? file-info-regular? file-info-socket? file-info-device?
+                        set-file-mode %mkstemp %set-file-owner set-file-times
+                        open-directory read-directory close-directory real-path
+                        file-space umask set-umask! current-directory
+                        set-current-directory! nice user-uid user-effective-uid
+                        user-gid user-effective-gid user-supplementary-gids user-info
+                        group-info posix-time monotonic-time terminal?
+                        ;; structures & conditions
+                        %user-info %file-info &posix-error)
 
-(load "srfi-170-impl")
+  (load "srfi-170-impl")
+)
+
 
 (select-module SRFI-170)
+
+
 
 ;; defines a list of symbols evaluating to themselves:
 (define-syntax defsymbol
