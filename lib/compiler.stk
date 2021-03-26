@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  9-Mar-2021 16:07 (eg)
+;;;; Last file update: 26-Mar-2021 14:30 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1744,6 +1744,14 @@ doc>
     (let ((code (parse-expression e)))
       ;;(disassemble-code code (current-error-port))
       (%execute code (list->vector *code-constants*) (or env (current-module))))))
+
+
+(define-macro (%compile-time-define . symbs)
+  ;; This macro permits to add the given symbols in the list of defined symbols
+  ;; to avoid the "undefined symbol" warning messages
+  `(when-compile
+     ,@(map (lambda(x) `(define ,x #void)) symbs)))
+
 
 ;; ======================================================================
 (select-module STklos)
