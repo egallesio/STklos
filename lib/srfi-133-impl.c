@@ -20,8 +20,8 @@
  * USA.
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
- *    Creation date: 09-Mar-2021 12:14
- * Last file update: 17-Mar-2021 22:05 (jpellegrini)
+ *    Creation date: 09-Mar-2021 12:14 (jpellegrini)
+ * Last file update: 26-Mar-2021 10:30 (eg)
  */
 
 
@@ -47,37 +47,18 @@ SCM _check_indices (SCM vec,
     if (!VECTORP(vec)) STk_error("bad vector ~S",  vec);
     if (!INTP(start))  STk_error("bad integer ~S", start);
     if (!INTP(end))    STk_error("bad integer ~S", end);
-    
+
     int cstart = INT_VAL(start);
     int cend   = INT_VAL(end);
-    
+
     if (cstart < 0) STk_error("vector range out of bounds (~S < 0)", start_name);
     if (cstart > VECTOR_SIZE(vec)) STk_error("vector range out of bounds (~S > len)", start_name);
     if (cend > VECTOR_SIZE(vec)) STk_error("vector range out of bounds (~S > len)", end_name);
     if (cstart > cend) STk_error("vector range out of bounds: ~S > ~S", start_name, end_name);
-    
+
     return STk_n_values(2,start,end);
 }
 
-DEFINE_PRIMITIVE("check-indices", srfi_133_check_indices,vsubr, (int argc, SCM *argv))
-{
-    if (argc!=6) STk_error("expects exactly 6 arguments");
-    SCM vec        = *argv--;
-    SCM start      = *argv--;
-    SCM start_name = *argv--;
-    SCM end        = *argv--;
-    SCM end_name   = *argv--;
-    SCM callee     = *argv--;
-    if (!INTP(start))  STk_error("bad integer ~S", start);
-    if (!INTP(end))    STk_error("bad integer ~S", end);
-
-    return _check_indices ( vec,
-                            start,
-                            start_name,
-                            end,
-                            end_name,
-                            callee);
-}
 
 DEFINE_PRIMITIVE("vector-parse-start+end",srfi_133_vector_parse_start_end,subr5,
                  (SCM vector,
@@ -88,7 +69,7 @@ DEFINE_PRIMITIVE("vector-parse-start+end",srfi_133_vector_parse_start_end,subr5,
 {
     if (!VECTORP(vector)) STk_error("bad vector ~S",  vector);
     int len = VECTOR_SIZE(vector);
-    
+
     if (NULLP(args)) {
         return STk_n_values(2,MAKE_INT(0),MAKE_INT(len));
     } else if (NULLP(CDR(args))) {
@@ -102,7 +83,7 @@ DEFINE_PRIMITIVE("vector-parse-start+end",srfi_133_vector_parse_start_end,subr5,
                               CAR(CDR(args)), end_name,
                               callee);
     } else STk_error("too many arguments. callee: ~S. extra args: ~S", callee, CDR(CDR(args)));
-    
+
     return STk_void; /* never reached */
 }
 
@@ -140,6 +121,7 @@ DEFINE_PRIMITIVE("%vector-copy!",srfi_133__nvector_copy,subr5,(SCM target,
         ctstart++;
         csstart++;
     }
+    return STk_void;
 }
 
 DEFINE_PRIMITIVE("%vector-reverse-copy!",srfi_133__nvector_reverse_copy,subr5,(SCM target,
@@ -157,7 +139,9 @@ DEFINE_PRIMITIVE("%vector-reverse-copy!",srfi_133__nvector_reverse_copy,subr5,(S
         ctstart++;
         csend--;
     }
+    return STk_void;
 }
+
 DEFINE_PRIMITIVE("%vector-reverse!",srfi_133__nvector_reverse,subr3,(SCM vec,
                                                                      SCM start,
                                                                      SCM end))
@@ -167,7 +151,7 @@ DEFINE_PRIMITIVE("%vector-reverse!",srfi_133__nvector_reverse,subr3,(SCM vec,
     int i      = cstart;
     int j      = cend - 1;
     SCM tmp;
-    
+
     while( i < j ) {
         tmp                 = VECTOR_DATA(vec)[i];
         VECTOR_DATA(vec)[i] = VECTOR_DATA(vec)[j];
@@ -175,6 +159,7 @@ DEFINE_PRIMITIVE("%vector-reverse!",srfi_133__nvector_reverse,subr3,(SCM vec,
         i++;
         j--;
     }
+    return STk_void;
 }
 
 
@@ -269,7 +254,7 @@ DEFINE_PRIMITIVE("%vector-map2+!",srfi_133__nvector_map2, subr4, (SCM f,
     SCM args = STk_nil;
     for (j=0; j < n_vecs ; j++)
         args = STk_cons(STk_void, args);
-    
+
     while(i != 0) {
         i--;
 
@@ -301,9 +286,8 @@ DEFINE_PRIMITIVE("vector-empty?",srfi_133_vector_emptyp,subr1, (SCM vec))
 MODULE_ENTRY_START("srfi-133")
 {
   SCM module =  STk_create_module(STk_intern("SRFI-133"));
-  
+
   ADD_PRIMITIVE_IN_MODULE(srfi_133_check_index, module);
-  ADD_PRIMITIVE_IN_MODULE(srfi_133_check_indices, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_133_vector_parse_start_end, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_133__smallest_length, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_133__nvector_copy, module);
@@ -315,9 +299,9 @@ MODULE_ENTRY_START("srfi-133")
   ADD_PRIMITIVE_IN_MODULE(srfi_133__nvector_map2, module);
 
   ADD_PRIMITIVE_IN_MODULE(srfi_133_vector_emptyp, module);
-  
+
   /* Export all the symbols we have just defined */
   STk_export_all_symbols(module);
-  
+
 }
 MODULE_ENTRY_END
