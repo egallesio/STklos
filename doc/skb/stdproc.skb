@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  9-Mar-2021 18:47 (eg)
+;; Last file update: 27-Mar-2021 19:50 (eg)
 ;;
 ;; ======================================================================
 
@@ -132,7 +132,7 @@ functions should be used only when speed really matters.])
 (insertdoc 'fxbit-field-reverse)
 (insertdoc 'fx+/carry)
 (insertdoc 'fx-/carry)
-(insertdoc 'fxstar/carry)
+(insertdoc 'fx*/carry)
 ))
 
 

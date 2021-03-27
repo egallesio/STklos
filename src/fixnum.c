@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 12-Mar-2021 18:33 (eg)
+ * Last file update: 27-Mar-2021 19:48 (eg)
  */
 
 #include "stklos.h"
@@ -921,17 +921,11 @@ DEFINE_PRIMITIVE("fx-/carry", fxminus_carry, subr3, (SCM o1, SCM o2, SCM o3))
   }
 }
 
-/*
-<doc EXT fx{*}/carry fxstar/carry
- * (fx* /carry i j k)
- *
- * Returns two values: |i|*|j|+|k|, and carry: it is the value of the computation
- * @lisp
- * (let*-values (((s) (+ (* i j) k))
- *               ((q r) (balanced/ s (expt 2 fx-width))))
- *   (values r q))
- * @end lisp
-doc>
+/* HACK: The documentation of the following primitive cannot be here
+   because a '*' followed bay a '/' ends a C comment (and we cannot use
+   '//' comment for C documentation. As a consquence the documentation
+    of this function is in bonus.stk
+    Not very proud of that
 */
 DEFINE_PRIMITIVE("fx*/carry", fxmul_carry, subr3, (SCM o1, SCM o2, SCM o3))
 {

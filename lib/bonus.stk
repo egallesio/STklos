@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  9-Mar-2021 16:10 (eg)
+;;;; Last file update: 27-Mar-2021 19:47 (eg)
 ;;;;
 
 
@@ -2103,5 +2103,31 @@ doc>
   (let ((file (key-get *%system-state-plist* :script-file "")))
     (and (not (equal? file ""))
          (string-append (dirname file) "/"))))
+
+
+
+;; ----------------------------------------------------------------------
+
+;; HACK: The documentation of the fx*/carry is here instead of in
+;; file fixnum.c because a '*' followed bay a '/' ends a C comment
+;; (and we cannot use '//' comment in C documentation.
+;; As a consquence the documentation of this function is here
+;; Not very proud of that.... 
+
+#|
+<doc EXT fx*/carry
+ * (fx*/carry i j k)
+ *
+ * Returns two values: |i|*|j|+|k|, and carry: it is the value of the computation
+ * @lisp
+ * (let*-values (((s) (+ (* i j) k))
+ *               ((q r) (balanced/ s (expt 2 fx-width))))
+ *   (values r q))
+ * @end lisp
+doc>
+|#
+
+
+
 
 ;; LocalWords:  doc dotimes R5RS str SRFI optarg
