@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 25-Mar-2021 15:49 (eg)
+ * Last file update: 29-Mar-2021 12:38 (eg)
  */
 
 #include <unistd.h>
@@ -50,6 +50,8 @@
 
 static SCM exit_procs = STk_nil; /* atexit functions */
 static SCM date_type, time_type;
+
+SCM STk_posix_error_condition;  /* condition type &posix-error */
 
 /******************************************************************************
  *
@@ -177,6 +179,69 @@ int STk_dirp(const char *path)
 //EG:   path[0] = '\0';
 //EG: }
 #endif
+
+/******************************************************************************
+ *
+ *  SRFI 170 support
+ *
+ ******************************************************************************/
+static SCM get_posix_error_name (SCM n)
+{
+  char *err = "";
+
+  if (!INTP(n)) STk_error("bad integer ~S", n);
+
+  switch (INT_VAL(n)) {
+    case EACCES:        return err = "EACCES";      break;
+    case EBADF:         return err = "EBADF";       break;
+    case EBUSY:         return err = "EBUSY";       break;
+    case EDQUOT:        return err = "EDQUOT";      break;
+    case EEXIST:        return err = "EEXIST";      break;
+    case EFAULT:        return err = "EFAULT";      break;
+    case EINVAL:        return err = "EINVAL";      break;
+    case EINTR:         return err = "EINTR";       break;
+    case EIO:           return err = "EIO";         break;
+    case ELOOP:         return err = "ELOOP";       break;
+    case EMLINK:        return err = "EMLINK";      break;
+    case ENAMETOOLONG:  return err = "ENAMETOOLONG";break;
+    case ENOENT:        return err = "ENOENT";      break;
+    case ENOMEM:        return err = "ENOMEM";      break;
+    case ENOSPC:        return err = "ENOSPC";      break;
+    case ENOSYS:        return err = "ENOSYS";      break;
+    case ENOTDIR:       return err = "ENOTDIR";     break;
+    case ENOTEMPTY:     return err = "ENOTEMPTY";   break;
+    case ENOTTY:        return err = "ENOTTY";      break;
+    case EOVERFLOW:     return err = "EOVERFLOW";   break;
+    case EPERM:         return err = "EPERM";       break;
+    case EROFS:         return err = "EROFS";       break;
+    case ESRCH:         return err = "ESRCH";       break;
+    case EXDEV:         return err = "EXDEV";       break;
+    default:            STk_error("POSIX unknown error ~S", INT_VAL(n));
+  }
+  return STk_intern(err);
+}
+
+
+/* Raise a &posix-error message */
+void STk_error_posix(int err,char *proc_name, SCM args)
+{
+    SCM err_no = MAKE_INT(err);
+    SCM errname = get_posix_error_name(err_no);
+    char *msg = strerror(err);
+    SCM message = STk_Cstring2string(msg);
+    SCM procedure = STk_intern(proc_name);
+
+    STk_raise_exception(STk_make_C_cond(STk_posix_error_condition,
+                                        7,
+                                        procedure,    /* location  */
+                                        STk_vm_bt(),  /* backtrace */
+                                        message,      /* message */
+                                        message,      /* r7rs-msg */
+                                        args,         /* r7rs-irritants */
+                                        errname,      /* errname */
+                                        err_no));     /* errno */
+}
+
 
 /******************************************************************************
  *
@@ -1219,8 +1284,6 @@ DEFINE_PRIMITIVE("pause", pause, subr0, (void))
 
 
 
-
-
 /*
  * Undocumented primitives
  *
@@ -1291,6 +1354,14 @@ DEFINE_PRIMITIVE("%uname", uname, subr0, (void))
 int STk_init_system(void)
 {
   SCM current_module = STk_STklos_module;
+
+  /* Create the &posix-error condition type */
+  STk_posix_error_condition = STk_defcond_type("&posix-error",
+                                               STk_err_mess_condition,
+                                               LIST2(STk_intern("errname"),
+                                                     STk_intern("errno")),
+                                               current_module);
+
 
   /* Create the system-date structure-type */
   date_type =  STk_make_struct_type(STk_intern("%date"),

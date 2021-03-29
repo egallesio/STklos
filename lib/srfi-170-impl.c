@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Jan-2021 11:54
- * Last file update: 25-Mar-2021 17:01 (eg)
+ * Last file update: 29-Mar-2021 12:43 (eg)
  */
 
 #include <limits.h>
@@ -42,7 +42,7 @@
 #include "fport.h"
 
 static SCM file_info_type, dir_info_type, user_info_type, group_info_type;
-static SCM posix_error;
+
 
 SCM time_type; /* FIXME */
 
@@ -65,33 +65,6 @@ static SCM symb_time_now, symb_time_unchanged, symb_second, symb_nanosecond;
 static SCM key_time_utc, key_time_monotonic;
 
 
-
-
-
-/* 3.1 Error handling */
-
-
-DEFINE_PRIMITIVE("posix-get-message-for-errno", posix_strerror, subr1, (SCM obj))
-{
-    if (!  ( INTP(obj) ||
-             (CONDP(obj) && 1)))
-        STk_error("bad integer or condition", obj);
-
-    char *errstr="";
-
-
-    if (INTP(obj)) errstr = strerror(INT_VAL(obj));
-    else if (CONDP(obj)) {
-        /* don't presume that the message field in obj has been
-           set up properly. get the string from errno */
-        SCM e = STk_int_struct_ref(obj, symb_errno);
-        errstr = strerror(INT_VAL(e));
-    } else STk_error("impossible error!");
-
-    return STk_Cstring2string(errstr);
-}
-
-
 static void initialize_global_symbols(void)
 {
   /* Frequently used symbols */
@@ -99,8 +72,8 @@ static void initialize_global_symbols(void)
   symb_mode       = STk_intern("mode");
   symb_dir_object = STk_intern("dir-object");
   symb_dot_files  = STk_intern("dot-files");
-  
-  /* ========== POSIX errrors ========== */
+
+  /* ========== Section #3.1 ========== */
   symb_EACCES       = STk_intern("EACCES");
   symb_EBADF        = STk_intern("EBADF");
   symb_EBUSY        = STk_intern("EBUSY");
@@ -148,60 +121,9 @@ static void initialize_global_symbols(void)
 }
 
 
+/* 3.1 Error handling */
 
-DEFINE_PRIMITIVE("%get-posix-error-name", get_posix_error_name,subr1,(SCM n))
-{
-  if (!INTP(n)) STk_error("bad integer ~S", n);
-
-  switch (INT_VAL(n)) {
-    case EACCES:        return symb_EACCES;
-    case EBADF:         return symb_EBADF;
-    case EBUSY:         return symb_EBUSY;
-    case EDQUOT:        return symb_EDQUOT;
-    case EEXIST:        return symb_EEXIST;
-    case EFAULT:        return symb_EFAULT;
-    case EINVAL:        return symb_EINVAL;
-    case EINTR:         return symb_EINTR;
-    case EIO:           return symb_EIO;
-    case ELOOP:         return symb_ELOOP;
-    case EMLINK:        return symb_EMLINK;
-    case ENAMETOOLONG:  return symb_ENAMETOOLONG;
-    case ENOENT:        return symb_ENOENT;
-    case ENOMEM:        return symb_ENOMEM;
-    case ENOSPC:        return symb_ENOSPC;
-    case ENOSYS:        return symb_ENOSYS;
-    case ENOTDIR:       return symb_ENOTDIR;
-    case ENOTEMPTY:     return symb_ENOTEMPTY;
-    case ENOTTY:        return symb_ENOTTY;
-    case EOVERFLOW:     return symb_EOVERFLOW;
-    case EPERM:         return symb_EPERM;
-    case EROFS:         return symb_EROFS;
-    case ESRCH:         return symb_ESRCH;
-    case EXDEV:         return symb_EXDEV;
-    default:            STk_error("POSIX unknown error ~S", INT_VAL(n));
-  }
-  return STk_void;  /* for the compiler */
-}
-
-void STk_error_posix(int err,char *proc_name, SCM args)
-{
-    SCM err_no = MAKE_INT(err);
-    SCM errname = STk_get_posix_error_name(err_no);
-    char *msg = strerror(err);
-    SCM message = STk_Cstring2string(msg);
-    SCM procedure = STk_intern(proc_name);
-
-    STk_raise_exception(STk_make_C_cond(posix_error,
-                                        7,
-                                        procedure,    /* location  */
-                                        STk_vm_bt(),  /* backtrace */
-                                        message,      /* message */
-                                        message,      /* r7rs-msg */
-                                        args,         /* r7rs-irritants */
-                                        errname,      /* errname */
-                                        err_no));     /* errno */
-}
-
+/* All the necessary support is now in the system procedures of STklos */
 
 /* 3.2 I/O */
 
@@ -1024,16 +946,6 @@ MODULE_ENTRY_START("srfi-170")
   SCM module =  STk_create_module(STk_intern("SRFI-170"));
 
   initialize_global_symbols();
-
-  /* 3.1 Error handling */
-
-  posix_error = STk_defcond_type("&posix-error",
-                                 STk_err_mess_condition,
-                                 LIST2(STk_intern("errname"), STk_intern("errno")),
-                                 module);
-
-  ADD_PRIMITIVE_IN_MODULE(posix_strerror,module);
-  ADD_PRIMITIVE_IN_MODULE(get_posix_error_name,module);
 
   /* 3.2 I/O */
 

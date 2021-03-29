@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 27-Mar-2021 19:47 (eg)
+;;;; Last file update: 29-Mar-2021 12:10 (eg)
 ;;;;
 
 
@@ -398,6 +398,93 @@ doc>
 (define (ensure-directories-exist path)
   (unless (file-is-directory? path)
     (make-directories path)))
+
+
+;;
+;; STRFI-170 (POSIX API) compatible functions
+;;
+
+#|
+<doc EXT posix-error?
+ * (posix-error? obj)
+ *
+ * This procedure returns #t if |obj| is a condition object that describes a
+ * POSIX error, and #f otherwise.
+ * ,(linebreak)
+ * This function is defined in ,(link-srfi 170).
+doc>
+|#
+(define (posix-error? obj)
+  (and (condition? obj)
+       (condition-has-type? obj &posix-error)))
+
+#|
+<doc EXT posix-error-name
+ * (posix-error-name posix-error)
+ *
+ * This procedure returns a symbol that is the name associated with the
+ * value of |errno| when the POSIX function reported an error. This can be
+ * used to provide programmatic recovery when a POSIX function can return
+ * more than one value of |errno|.
+ * ,(linebreak)
+ * This function is defined in ,(link-srfi 170).
+doc>
+|#
+(define (%posix-error-condition-ref posix-error field)
+  (unless (posix-error? posix-error)
+    (error "expected a posix-error condition" posix-error))
+  (condition-ref posix-error field))
+
+(define (posix-error-name posix-error)
+  (%posix-error-condition-ref posix-error 'errname))
+
+#|
+<doc EXT posix-error-message
+ * (posix-error-message posix-error)
+ *
+ * This procedure returns a string that is an error message reflecting the
+ * value of errno when the POSIX function reported an error. This string
+ * is useful for reporting the cause of the error to the user
+ * ,(linebreak)
+ * This function is defined in ,(link-srfi 170).
+doc>
+|#
+(define (posix-error-message posix-error)
+  (%posix-error-condition-ref posix-error 'r7rs-msg))
+
+#|
+<doc EXT posix-error-errno
+ * (posix-error-errno posix-error)
+ *
+ * This procedure returns the value of |errno| (an exact integer).
+doc>
+|#
+(define (posix-error-errno posix-error)
+  (%posix-error-condition-ref posix-error 'errno))
+
+
+#|
+<doc EXT posix-error-procedure
+ * (posix-error-procedure posix-error)
+ *
+ * This procedure returns the name of the Scheme procedure that raised
+ * the error.
+doc>
+|#
+(define (posix-error-procedure posix-error)
+  (condition-ref posix-error 'location))
+
+#|
+<doc EXT posix-error-arguments
+ * (posix-error-args posix-error)
+ *
+ * This procedure returns the list of the Scheme procedure arguments
+ * that raised the error.
+doc>
+|#
+(define (posix-error-arguments posix-error)
+  (condition-ref posix-error 'r7rs-irritants))
+
 
 ;;;;
 ;;;; Hash-tables functions
@@ -2112,7 +2199,7 @@ doc>
 ;; file fixnum.c because a '*' followed bay a '/' ends a C comment
 ;; (and we cannot use '//' comment in C documentation.
 ;; As a consquence the documentation of this function is here
-;; Not very proud of that.... 
+;; Not very proud of that....
 
 #|
 <doc EXT fx*/carry
