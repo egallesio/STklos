@@ -45,7 +45,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 15-Jan-2021 07:29 (jpellegrini)
-;;;; Last file update: 26-Mar-2021 15:47 (eg)
+;;;; Last file update: 29-Mar-2021 11:11 (eg)
 ;;;;
 
 (require "srfi-1")
@@ -99,7 +99,7 @@
                         trie-min trie-partition trie-proper-subset?
                         trie-search trie-size trie-subset-compare
                         trie-union trie-xor trie=?)
-  (require "trie.stk")
+  (require "trie")
 
 (define-record-type <iset>
   (raw-iset trie)
