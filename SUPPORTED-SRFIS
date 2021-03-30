@@ -34,6 +34,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-18: Multithreading support
     - SRFI-22: Running Scheme Scripts on Unix
     - SRFI-23: Error reporting mechanism
+    - SRFI-25: Multi-dimensional Arrays
     - SRFI-26: Notation for Specializing Parameters without Currying
     - SRFI-27: Source of random bits
     - SRFI-28: Basic Format Strings

@@ -57,6 +57,14 @@
      ((struct-type? x)  (format port "the type structure named ~A"
 				(struct-type-name x)))
      ((module? x)	(format port "a module named ~A" (module-name x)))
+
+     ;; for srfi-25. arrays are a native type, but 'array?' is only available
+     ;; when the SRFI is loaded.
+     ((and (provided? "srfi-25")
+           (array? x))            (format port "an array of rank ~A and size ~A"
+                                          (array-rank x)
+                                          (array-size x)))
+
      (else	  	(format port "an an instance of class ~A"
 				(class-name (class-of x)))))
   (format port ".~%")

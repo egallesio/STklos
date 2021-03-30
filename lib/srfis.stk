@@ -63,7 +63,7 @@
     (22 "Running Scheme Scripts on Unix")
     (23 "Error reporting mechanism" (error))
     ;;  24 ........ Withdrawn
-    ;;  25 Multi-dimensional Arrays
+    (25 "Multi-dimensional Arrays" () "srfi-25")
     (26 "Notation for Specializing Parameters without Currying" () "srfi-26")
     (27 "Source of random bits" (random) "srfi-27")
     (28 "Basic Format Strings")

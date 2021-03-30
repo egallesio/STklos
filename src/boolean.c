@@ -391,6 +391,22 @@ DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
       if (BOXED_TYPE_EQ(y, tc_uvector))
         return MAKE_BOOLEAN(STk_uvector_equal(x, y));
       break;
+    case tc_array:
+        if (ARRAYP(y)) {
+            long lx, ly, i;
+            SCM *dx, *dy;
+
+            lx = ARRAY_SIZE(x); ly = ARRAY_SIZE(y);
+            if (lx == ly) {
+                dx = ARRAY_DATA(x);
+                dy = ARRAY_DATA(y);
+                for (i=0; i < lx;  i++) {
+                    if (STk_equal(dx[i], dy[i]) == STk_false) return STk_false;
+                }
+                return STk_true;
+            }
+        }
+        break;
 #ifdef FIXME
 //EG:       default:
 //EG:           if (EXTENDEDP(x) && EXTENDEDP(y) && TYPE(x) == TYPE(y))
