@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 27-Mar-2021 19:50 (eg)
+;; Last file update:  2-Apr-2021 16:59 (eg)
 ;;
 ;; ======================================================================
 
@@ -684,6 +684,16 @@ be accessed as a normal port with the standard Scheme primitives.])
 ;;;
 (section :title "System interface"
 
+ (p [The ,(stklos) system interface offers all the functions defined in
+,(rseven). Note, that the base implementation provides also a subset of the
+functions defined in ,(link-srfi 170). These functions are described here.])
+
+ (p [Note, however that SRFI-170 is fully supported and accessing the other
+           functions it defines can be done by requiring it, as the other SRFIs
+           that STklos supports.])
+
+
+
 (subsection :title "Loading code"
 (index "STKLOS_LOAD_PATH")
 (insertdoc 'load)
@@ -696,35 +706,44 @@ be accessed as a normal port with the standard Scheme primitives.])
 
 ;;; File Primitives.
 (subsection :title "File Primitives"
-(insertdoc 'temporary-file-name)
-(insertdoc 'rename-file)
-(insertdoc 'remove-file)
-(insertdoc 'copy-file)
-(insertdoc 'copy-port)
-(insertdoc 'file-exists?)
-(insertdoc 'file-is-executable?)
-(insertdoc 'file-size)
-(insertdoc 'getcwd)
-(insertdoc 'chmod)
-(insertdoc 'chdir)
-(insertdoc 'make-directory)
-(insertdoc 'make-directories)
-(insertdoc 'ensure-directories-exist)
-(insertdoc 'remove-directory)
-(insertdoc 'directory-files)
-(index "tilde expansion")
-(insertdoc 'expand-file-name)
-(insertdoc 'canonical-file-name)
-(insertdoc 'decompose-file-name)
-(insertdoc 'winify-file-name)
-(insertdoc 'posixify-file-name)
-(insertdoc 'basename)
-(insertdoc 'dirname)
-(insertdoc 'file-suffix)
-(insertdoc 'file-prefix)
-(insertdoc 'file-separator)
-(insertdoc 'make-path)
-(insertdoc 'glob))
+   (insertdoc 'temp-file-prefix)
+   (insertdoc 'temporary-file-name)
+   (insertdoc 'rename-file)
+   (insertdoc 'remove-file)
+   (insertdoc 'copy-file)
+   (insertdoc 'copy-port)
+   (insertdoc 'file-exists?)
+   (insertdoc 'file-is-executable?)
+   (insertdoc 'file-size)
+   (insertdoc 'getcwd)
+   (insertdoc 'chmod)
+   (insertdoc 'chdir)
+   (insertdoc 'create-directory)
+   (insertdoc 'create-directories)
+   (insertdoc 'ensure-directories-exist)
+   (insertdoc 'remove-directory)
+   (insertdoc 'directory-files)
+   (index "tilde expansion")
+   (insertdoc 'expand-file-name)
+   (insertdoc 'canonical-file-name)
+   (insertdoc 'decompose-file-name)
+   (insertdoc 'winify-file-name)
+   (insertdoc 'posixify-file-name)
+   (insertdoc 'basename)
+   (insertdoc 'dirname)
+   (insertdoc 'file-suffix)
+   (insertdoc 'file-prefix)
+   (insertdoc 'file-separator)
+   (insertdoc 'make-path)
+   (insertdoc 'glob)
+   ;; SRFI 170 primitives available in STklos core
+   (index "SRFI-170")
+   (insertdoc 'posix-error?)
+   (insertdoc 'posix-error-name)
+   (insertdoc 'posix-error-message)
+   (insertdoc 'posix-error-errno)
+   (insertdoc 'posix-error-procedure)
+   (insertdoc 'posix-error-arguments))
 
 ;;; Environment.
 (subsection :title "Environment"

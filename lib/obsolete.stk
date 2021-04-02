@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update:  2-Apr-2021 15:20 (eg)
+;;;; Last file update:  2-Apr-2021 17:15 (eg)
 ;;;;
 
 
@@ -106,5 +106,6 @@
 (define fx>=  fx>=?)
 (define fx=   fx=?)
 
-;; 29-Mar-2021
-(define make-directory create-directory)
+;; 02-Apr-2021
+(define make-directory   create-directory)
+(define make-directories create-directories)

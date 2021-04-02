@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  2-Apr-2021 17:09 (eg)
+;;;; Last file update:  2-Apr-2021 17:14 (eg)
 ;;;;
 
 
@@ -380,6 +380,8 @@ doc>
  * Create a directory with name |dir|. No error is signaled if |dir| already exists.
  * Parent directories of |dir| are created as needed. If |permissions| is omitted,
  * it defaults to #o775 (masked by the current umask).
+ * @l
+ * This function was also called |make-directories|. This old name is obsolete.
 doc>
 |#
 (define (create-directories path :optional (perm #o775))
