@@ -153,8 +153,6 @@
             ((pair? y)           #t)
             ((vector? x)         (not (vector? y)))
             ((vector? y)         #t)
-            ((vector? x)         (not (vector? y)))
-            ((vector? y)         #t)
             ((not (string? x))     #t)
             ((not (string? y))     #t)
             (else                #f)))
