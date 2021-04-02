@@ -1,7 +1,7 @@
 ;;;;
 ;;;; lang.stk	-- ScmPkg languages
 ;;;;
-;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 21-Mar-2007 14:31 (eg)
-;;;; Last file update: 31-May-2007 14:48 (eg)
+;;;; Last file update:  2-Apr-2021 15:31 (eg)
 ;;;;
 
 (include "lang-bigloo.inc")
@@ -38,18 +38,18 @@
 
     (define (do-rewrite in tmp)
       (with-output-to-file tmp
-	(lambda ()
-	  (let ((lex (lang-lex in)))
-	    (let loop ((token  (lexer-next-token lex)))
-	      (unless (eq? token 'eof)
-		(display token)
-		(loop (lexer-next-token lex))))))))
+	    (lambda ()
+	      (let ((lex (lang-lex in)))
+	        (let loop ((token  (lexer-next-token lex)))
+	          (unless (eq? token 'eof)
+		        (display token)
+		        (loop (lexer-next-token lex))))))))
 
     (when (file-exists? src)
-      (let ((tmp (temporary-file-name)))
-	(do-rewrite src tmp)
-	(copy-file tmp src)
-	(remove-file tmp)))))
+      (let ((tmp (create-temp-file)))
+	    (do-rewrite src tmp)
+	    (copy-file tmp src)
+	    (remove-file tmp)))))
 
 
 ;; ----------------------------------------------------------------------

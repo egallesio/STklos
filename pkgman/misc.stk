@@ -1,7 +1,7 @@
 ;;;;
 ;;;; misc.stk	-- Misc functions for stklos-pkg
 ;;;;
-;;;; Copyright © 2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Jan-2007 13:37 (eg)
-;;;; Last file update: 29-Jun-2007 18:06 (eg)
+;;;; Last file update: 30-Mar-2021 14:21 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -153,7 +153,7 @@
   (when (file-exists? path)
     ;(eprintf "rm -rf ~S\n" path)
     (if (file-is-directory? path)
-	(let ((files (directory-files path)))
+	(let ((files (directory-files path #t)))
 	  (for-each (lambda (f) (rm-rf (make-path path f)))
 		    files)
 	  (delete-directory path))

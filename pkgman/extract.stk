@@ -1,7 +1,7 @@
 ;;;;
 ;;;; extract.stk        -- Implementation of stklos-pkg extract option
 ;;;;
-;;;; Copyright © 2007-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 15-Jan-2007 12:10 (eg)
-;;;; Last file update:  6-Jun-2018 16:39 (eg)
+;;;; Last file update: 30-Mar-2021 14:20 (eg)
 ;;;;
 
 
@@ -87,7 +87,7 @@
                                                "$(SO)"
                                                "ostk")))
                          (docs     (if (file-is-directory? docdir)
-                                       (directory-files docdir)
+                                       (directory-files docdir #t)
                                        '())))
                     ;; if we have a configure or Makefile go in dir
                     (when (or (file-exists? tuneconf)

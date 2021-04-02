@@ -1,7 +1,7 @@
 ;;;;
 ;;;; main.stk   -- Stklos-Pkg main program
 ;;;;
-;;;; Copyright © 2006-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2006-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update:  1-Jul-2019 12:47 (eg)
+;;;; Last file update:  2-Apr-2021 15:30 (eg)
 ;;;;
 
 (include "../lib/http.stk")
@@ -205,10 +205,10 @@
                                        (stklos-pkg-extract-dir)))
           ((test)
              (exit (find-extract-and-test-package (cadar actions)
-                                                  (temporary-file-name))))
+                                                  (create-temp-file))))
           ((install)
              (exit (find-extract-and-install-package (cadar actions)
-                                                     (temporary-file-name))))
+                                                     (create-temp-file))))
           ((download)
              (download-package-only (cadar actions))
              (exit 0))

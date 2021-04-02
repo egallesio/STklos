@@ -1,7 +1,7 @@
 ;;;;
 ;;;; install.stk	-- Installin/Uninstalling packages
 ;;;;
-;;;; Copyright © 2007-2008 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 30-May-2007 11:42 (eg)
-;;;; Last file update: 15-Apr-2008 23:21 (eg)
+;;;; Last file update: 30-Mar-2021 14:21 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -31,16 +31,16 @@
 
   (define (do-print dir)
     (for-each (lambda(x) (printf "  ~a\n" x))
-	      (sort (directory-files dir) string<=?)))
+	      (sort (directory-files dir #t) string<=?)))
 
   (let ((system (make-path (stklos-pkg-system-directory) "etc"))
 	(user   (make-path (stklos-pkg-directory) "etc")))
     (when (and (file-is-directory? user)
-	       (not (null? (directory-files user))))
+	       (not (null? (directory-files user #t))))
       (printf "User installed packages:\n")
       (do-print user))
     (when (and (file-is-directory? system)
-	       (not (null? (directory-files system))))
+	       (not (null? (directory-files system #t))))
       (printf "System-wide installed packages:\n")
       (do-print system))))
 
