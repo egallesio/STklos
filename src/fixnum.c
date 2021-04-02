@@ -159,10 +159,10 @@ DEFINE_PRIMITIVE("greatest-fixnum", greatest_fixnum, subr0, (void))
  * |fxzero?| returns |#t| if |obj| is the fixnum zero and returns
  * |#f| if it is a non-zero fixnum.
  * @lisp
- *   (fxzero? #f)            =>  error
- *   (fxzero? (expt 100 100) =>  error
- *   (fxzero? 0)             =>  #t
- *   (fxzero? 1)             =>  #f
+ *   (fxzero? #f)             =>  error
+ *   (fxzero? (expt 100 100)) =>  error
+ *   (fxzero? 0)              =>  #t
+ *   (fxzero? 1)              =>  #f
  * @end lisp
 doc>
 */
@@ -181,14 +181,14 @@ DEFINE_PRIMITIVE("fxzero?", fxzerop, subr1, (SCM o))
  * |#f| if it is a non-positive fixnum. |fxnegative?| can be used to test
  * if a fixnum is negative.
  * @lisp
- *   (fxpositive? #f)            =>  error
- *   (fxpositive? (expt 100 100) =>  error
- *   (fxpositive? 0)             =>  #f
- *   (fxpositive? 1)             =>  #t
- *   (fxpositive? -1)            =>  #f
- *   (fxnegative? 0)             =>  #f
- *   (fxnegative? 1)             =>  #f
- *   (fxnegative? -1)            =>  #t
+ *   (fxpositive? #f)             =>  error
+ *   (fxpositive? (expt 100 100)) =>  error
+ *   (fxpositive? 0)              =>  #f
+ *   (fxpositive? 1)              =>  #t
+ *   (fxpositive? -1)             =>  #f
+ *   (fxnegative? 0)              =>  #f
+ *   (fxnegative? 1)              =>  #f
+ *   (fxnegative? -1)             =>  #t
  * @end lisp
 doc>
 */
@@ -211,14 +211,14 @@ DEFINE_PRIMITIVE("fxnegative?", fxnegativep, subr1, (SCM o))
  * |fxodd?| returns |#t| if |obj| is a odd fixnum and returns
  * |#f| if it is an even fixnum.
  * @lisp
- *   (fxodd? #f)            =>  error
- *   (fxodd? (expt 100 100) =>  error
- *   (fxodd? 0)             =>  #f
- *   (fxodd? 1)             =>  #t
- *   (fxodd? 4)             =>  #f
- *   (fxeven? 0)            =>  #t
- *   (fxeven? 1)            =>  #f
- *   (fxeven? 4)            =>  #t
+ *   (fxodd? #f)             =>  error
+ *   (fxodd? (expt 100 100)) =>  error
+ *   (fxodd? 0)              =>  #f
+ *   (fxodd? 1)              =>  #t
+ *   (fxodd? 4)              =>  #f
+ *   (fxeven? 0)             =>  #t
+ *   (fxeven? 1)             =>  #f
+ *   (fxeven? 4)             =>  #t
  * @end lisp
 doc>
 */
@@ -334,12 +334,12 @@ DEFINE_PRIMITIVE("fxneg", fxneg, subr1, (SCM o))
  * |fxsqrt| id semantically equivalent to exact-integer-sqrt (not sqrt), so
  * that |(fxsqrt n)| returns two values |a|, |b|, such that |a*a+b|=|n|.
  * @lisp
- *   (fxsqrt #f)            =>  error
- *   (fxdqrt (expt 100 100) =>  error
- *   (fxsqrt -1)            =>  error
- *   (fxsqrt 0)             =>  0, 0
- *   (fxsqrt 1)             =>  1, 0
- *   (fxsqrt 6)             =>  2, 2
+ *   (fxsqrt #f)             =>  error
+ *   (fxdqrt (expt 100 100)) =>  error
+ *   (fxsqrt -1)             =>  error
+ *   (fxsqrt 0)              =>  0, 0
+ *   (fxsqrt 1)              =>  1, 0
+ *   (fxsqrt 6)              =>  2, 2
  * @end lisp
 doc>
 */

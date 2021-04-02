@@ -3058,7 +3058,7 @@ static SCM decode_flonum(double d, int *exp, int *sign)
  *                     => (5557441940175192 -52 -1)
  * (exact->inexact (* -1
  *                     5557441940175192
- *                     (expt 2 -52))
+ *                     (expt 2 -52)))
  *                     => -1.234
  * @end lisp
 doc>
