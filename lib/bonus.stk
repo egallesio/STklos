@@ -1,4 +1,4 @@
--;;;;
+;;;;
 ;;;; bonus.stk  -- Useful primitives not in R5RS
 ;;;;
 ;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 29-Mar-2021 12:10 (eg)
+;;;; Last file update:  2-Apr-2021 17:09 (eg)
 ;;;;
 
 
@@ -373,18 +373,20 @@ doc>
 
 
 #|
-<doc EXT make-directories
- * (make-directories str)
+<doc EXT create-directories
+ * (create-directories dir)
+ * (create-directories dir permissions)
  *
- * Create a directory with name |dir|. No error is signaled if |dir| already exists,
- * Parent directories of |dir| are created as needed.
+ * Create a directory with name |dir|. No error is signaled if |dir| already exists.
+ * Parent directories of |dir| are created as needed. If |permissions| is omitted,
+ * it defaults to #o775 (masked by the current umask).
 doc>
 |#
-(define (make-directories path)
+(define (create-directories path :optional (perm #o775))
   (let ((dir (dirname path)))
     (unless (file-is-directory? dir)
-      (make-directories dir))
-    (make-directory path)))
+      (create-directories dir perm))
+    (create-directory path perm)))
 
 
 #|
@@ -397,7 +399,7 @@ doc>
 |#
 (define (ensure-directories-exist path)
   (unless (file-is-directory? path)
-    (make-directories path)))
+    (create-directories path)))
 
 
 ;;
