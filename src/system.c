@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  2-Apr-2021 15:19 (eg)
+ * Last file update:  2-Apr-2021 16:53 (eg)
  */
 
 #include <unistd.h>
@@ -440,11 +440,11 @@ DEFINE_PRIMITIVE("chdir", chdir, subr1, (SCM s))
  * (create-directory dir)
  * (create-directory dir permissions)
  *
- * Create a directory with name |dir|. If [permissions| is omitted, it
+ * Create a directory with name |dir|. If |permissions| is omitted, it
  * defaults to #o775 (masked by the current umask).
  * ,(linebreak)
- * This function is also defined in ,(link-srfi 170). The old name |make-disrectory|
- * is deprecated.
+ * This function is also defined in ,(link-srfi 170). The old name 
+ * |make-directory| is deprecated.
 doc>
 */
 DEFINE_PRIMITIVE("create-directory", make_directory, subr12, (SCM path, SCM perms))

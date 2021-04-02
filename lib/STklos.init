@@ -235,7 +235,7 @@
 ;;(define tmpnam (let ((cntr 100))
 ;;		 (lambda () (set! cntr (+ 1 cntr))
 ;;			 (string-append "slib_" (number->string cntr)))))
-(define tmpnam temporary-file-name)
+(define tmpnam create-temp-file)
 
 ;;@ (FILE-EXISTS? <string>)
 ;;(define (file-exists? f) #f)

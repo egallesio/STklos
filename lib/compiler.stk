@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 26-Mar-2021 14:30 (eg)
+;;;; Last file update:  2-Apr-2021 15:22 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1542,7 +1542,7 @@ doc>
 (define (find-file-informations file lib-only? eventually-compile?)
 
   (define (compile-and-find-infos path)
-    (let ((tmp (temporary-file-name)))
+    (let ((tmp (create-temp-file)))
       (compile-file path tmp)
       (let ((infos (%file-informations tmp)))
         (remove-file tmp)

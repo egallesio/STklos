@@ -1,7 +1,7 @@
 ;;;;
 ;;;; stklos-compile.stk -- Call the stklos compiler
 ;;;;
-;;;; Copyright © 2001-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update:  5-Mar-2020 14:13 (eg)
+;;;; Last file update:  2-Apr-2021 15:13 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -101,7 +101,7 @@
 ;;      compile-to-C-code ...
 ;; ----------------------------------------------------------------------
 (define (compile-to-C-code file out)
-  (let ((tmp  (temporary-file-name))
+  (let ((tmp  (create-temp-file))
         (name (file-prefix (basename file))))
     (compile-to-bytecode file tmp)
     (convert-to-C tmp out name)
