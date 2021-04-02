@@ -1,7 +1,7 @@
 /*
  * f p o r t . c                                -- File ports
  *
- * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update:  4-Jul-2020 23:25 (eg)
+ * Last file update:  2-Apr-2021 13:55 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -402,7 +402,7 @@ make_fport(char *fname, FILE *f, int flags)
     mode = STK_IOFBF;
   }
 
-  /* keep the indication that file is opened in read in the steam part */
+  /* keep the indication that file is opened in read in the stream part */
   if (flags & (PORT_READ | PORT_RW)) mode |= STK_IOREAD;
 
   /* Set the case sensitive bit */

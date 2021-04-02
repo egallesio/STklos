@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 29-Mar-2021 12:41 (eg)
+ * Last file update: 29-Mar-2021 18:23 (eg)
  */
 
 
@@ -1260,7 +1260,7 @@ int STk_init_symbol(void);
 
 extern SCM  STk_posix_error_condition;  /* condition type &posix-error */
 
-void STk_error_posix(int err,char *proc_name, SCM args);
+  void STk_error_posix(int err,char *proc_name, SCM arg1, SCM arg2);
 
 int STk_dirp(const char *path);
 int STk_init_system(void);

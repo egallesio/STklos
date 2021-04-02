@@ -1,7 +1,7 @@
 ;;;;
 ;;;; add.stk                    -- Adding a file to local server
 ;;;;
-;;;; Copyright © 2007-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Jan-2007 16:59 (eg)
-;;;; Last file update: 27-Mar-2018 14:14 (eg)
+;;;; Last file update:  2-Apr-2021 15:27 (eg)
 ;;;;
 
 
@@ -37,7 +37,7 @@
      (when (negative? (version-number->integer version #f))
        (die (format "Bad version number for pkgball ~S" pkgball)))
 
-     (let ((dirname  (temporary-file-name)))
+     (let ((dirname  (string-append (create-temp-file) ".dir"))) ;; FIXME:
        ;; Untar the given pkgball
        (make-directory dirname)
        (untar pkgball dirname)

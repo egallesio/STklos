@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 29-Mar-2021 12:38 (eg)
+ * Last file update:  2-Apr-2021 15:19 (eg)
  */
 
 #include <unistd.h>
@@ -50,8 +50,7 @@
 
 static SCM exit_procs = STk_nil; /* atexit functions */
 static SCM date_type, time_type;
-
-SCM STk_posix_error_condition;  /* condition type &posix-error */
+static SCM *temp_file_prefix;
 
 /******************************************************************************
  *
@@ -66,6 +65,11 @@ static void error_bad_path(SCM path)
 static void error_bad_string(SCM path)
 {
   STk_error("~S is a bad string", path);
+}
+
+static void error_bad_int(SCM n)
+{
+  STk_error("~S is a bad int", n);
 }
 
 static void error_bad_int_or_out_of_bounds(SCM val)
@@ -185,61 +189,103 @@ int STk_dirp(const char *path)
  *  SRFI 170 support
  *
  ******************************************************************************/
-static SCM get_posix_error_name (SCM n)
+static SCM get_posix_error_name (int n)
 {
   char *err = "";
 
-  if (!INTP(n)) STk_error("bad integer ~S", n);
-
-  switch (INT_VAL(n)) {
-    case EACCES:        return err = "EACCES";      break;
-    case EBADF:         return err = "EBADF";       break;
-    case EBUSY:         return err = "EBUSY";       break;
-    case EDQUOT:        return err = "EDQUOT";      break;
-    case EEXIST:        return err = "EEXIST";      break;
-    case EFAULT:        return err = "EFAULT";      break;
-    case EINVAL:        return err = "EINVAL";      break;
-    case EINTR:         return err = "EINTR";       break;
-    case EIO:           return err = "EIO";         break;
-    case ELOOP:         return err = "ELOOP";       break;
-    case EMLINK:        return err = "EMLINK";      break;
-    case ENAMETOOLONG:  return err = "ENAMETOOLONG";break;
-    case ENOENT:        return err = "ENOENT";      break;
-    case ENOMEM:        return err = "ENOMEM";      break;
-    case ENOSPC:        return err = "ENOSPC";      break;
-    case ENOSYS:        return err = "ENOSYS";      break;
-    case ENOTDIR:       return err = "ENOTDIR";     break;
-    case ENOTEMPTY:     return err = "ENOTEMPTY";   break;
-    case ENOTTY:        return err = "ENOTTY";      break;
-    case EOVERFLOW:     return err = "EOVERFLOW";   break;
-    case EPERM:         return err = "EPERM";       break;
-    case EROFS:         return err = "EROFS";       break;
-    case ESRCH:         return err = "ESRCH";       break;
-    case EXDEV:         return err = "EXDEV";       break;
-    default:            STk_error("POSIX unknown error ~S", INT_VAL(n));
+  switch (n) {
+    case EACCES:        err = "EACCES";      break;
+    case EBADF:         err = "EBADF";       break;
+    case EBUSY:         err = "EBUSY";       break;
+    case EDQUOT:        err = "EDQUOT";      break;
+    case EEXIST:        err = "EEXIST";      break;
+    case EFAULT:        err = "EFAULT";      break;
+    case EINVAL:        err = "EINVAL";      break;
+    case EINTR:         err = "EINTR";       break;
+    case EIO:           err = "EIO";         break;
+    case ELOOP:         err = "ELOOP";       break;
+    case EMLINK:        err = "EMLINK";      break;
+    case ENAMETOOLONG:  err = "ENAMETOOLONG";break;
+    case ENOENT:        err = "ENOENT";      break;
+    case ENOMEM:        err = "ENOMEM";      break;
+    case ENOSPC:        err = "ENOSPC";      break;
+    case ENOSYS:        err = "ENOSYS";      break;
+    case ENOTDIR:       err = "ENOTDIR";     break;
+    case ENOTEMPTY:     err = "ENOTEMPTY";   break;
+    case ENOTTY:        err = "ENOTTY";      break;
+    case EOVERFLOW:     err = "EOVERFLOW";   break;
+    case EPERM:         err = "EPERM";       break;
+    case EROFS:         err = "EROFS";       break;
+    case ESRCH:         err = "ESRCH";       break;
+    case EXDEV:         err = "EXDEV";       break;
+    default:            err = "UNKNOWN_NAME";break;
   }
   return STk_intern(err);
 }
 
 
 /* Raise a &posix-error message */
-void STk_error_posix(int err,char *proc_name, SCM args)
+void STk_error_posix(int err, char *proc_name, SCM obj1, SCM obj2)
 {
     SCM err_no = MAKE_INT(err);
-    SCM errname = get_posix_error_name(err_no);
-    char *msg = strerror(err);
-    SCM message = STk_Cstring2string(msg);
-    SCM procedure = STk_intern(proc_name);
+    SCM errname = get_posix_error_name(err);
+    SCM r7_msg = STk_Cstring2string(strerror(err));
+    SCM procedure = (*proc_name) ? STk_intern(proc_name): STk_false;
+    SCM args, message;
+
+
+    /* Build the error message */
+    if (obj1 && obj2) {
+      message = STk_format_error("~a: ~s, ~s", r7_msg, obj1, obj2);
+      args    = LIST2(obj1, obj2);
+    } else if (obj1) {
+      message = STk_format_error("~a: ~s", r7_msg, obj1);
+      args    = LIST1(obj1);
+    } else {
+      message = r7_msg;
+      args    = STk_nil;
+    }
 
     STk_raise_exception(STk_make_C_cond(STk_posix_error_condition,
                                         7,
                                         procedure,    /* location  */
                                         STk_vm_bt(),  /* backtrace */
                                         message,      /* message */
-                                        message,      /* r7rs-msg */
+                                        r7_msg,       /* r7rs-msg */
                                         args,         /* r7rs-irritants */
                                         errname,      /* errname */
                                         err_no));     /* errno */
+}
+
+
+/*
+<doc EXT temp-file-prefix
+ * (temp-file-prefix)
+ * (temp-file-prefix value)
+ *
+ * This parameter object permits to change the default prefix used to build
+ * temporary file name. Its default value is built using the |TMPDIR|
+ * environment variable (if it is defined) and the current process ID.
+ * If a value is provided, it must be a string designating a valid prefix path.
+ * @l
+ * This parameter object is also defined in ,(link-srfi 170).
+doc>
+*/
+static SCM init_temp_file_prefix(void)
+{
+  char *tmpdir = getenv("TMPDIR");
+  char buffer[MAX_PATH_LENGTH];
+
+  if (!tmpdir) tmpdir = "/tmp";
+  snprintf(buffer, MAX_PATH_LENGTH, "%s/%d", tmpdir, getpid());
+
+  return temp_file_prefix = STk_Cstring2string(buffer);
+}
+
+static SCM temp_file_prefix_conv(SCM val)
+{
+  if (!STRINGP(val)) error_bad_string(val);
+  return (temp_file_prefix = val);
 }
 
 
@@ -390,38 +436,55 @@ DEFINE_PRIMITIVE("chdir", chdir, subr1, (SCM s))
 }
 
 /*
-<doc EXT make-directory
- * (make-directory dir)
+<doc EXT make-directory create-directory
+ * (create-directory dir)
+ * (create-directory dir permissions)
  *
- * Create a directory with name |dir|.
+ * Create a directory with name |dir|. If [permissions| is omitted, it
+ * defaults to #o775 (masked by the current umask).
+ * ,(linebreak)
+ * This function is also defined in ,(link-srfi 170). The old name |make-disrectory|
+ * is deprecated.
 doc>
 */
-DEFINE_PRIMITIVE("make-directory", make_directory, subr1, (SCM path))
+DEFINE_PRIMITIVE("create-directory", make_directory, subr12, (SCM path, SCM perms))
 {
-  mode_t mask;
+  mode_t msk;
 
   if (!STRINGP(path)) error_bad_path(path);
-  umask(mask = umask(0));
-  if (mkdir(STRING_CHARS(path), 0777) != 0)
-    error_posix(path, NULL);
+
+  if (perms) {
+    if (!INTP(perms)) error_bad_int(perms);
+    msk = INT_VAL(perms);
+  }
+  else {
+    umask(msk = umask(0));
+    msk = 0775;
+  }
+
+  if (mkdir(STRING_CHARS(path), msk) != 0)
+    STk_error_posix(errno, "", path, perms);
+
   return STk_void;
 }
 
+
 /*
 <doc EXT delete-directory remove-directory
- * (remove-directory dir)
  * (delete-directory dir)
+ * (remove-directory dir)
  *
  * Delete the directory with name |dir|.
  * @l
- * ,(bold "Note:") The name |remove-directory| is kept for compatibility.
+ * ,(bold "Note:") This function is also defined in ,(link-srfi 170). The name
+ * |remove-directory| is kept for compatibility.
 doc>
 */
-DEFINE_PRIMITIVE("remove-directory", remove_directory, subr1, (SCM path))
+DEFINE_PRIMITIVE("delete-directory", delete_directory, subr1, (SCM path))
 {
   if (!STRINGP(path)) error_bad_path(path);
   if (rmdir(STRING_CHARS(path)) != 0)
-    error_posix(path, NULL);
+    STk_error_posix(errno, "", path, NULL);
   return STk_void;
 }
 
@@ -591,7 +654,7 @@ doc>
 #define do_remove(filename)                             \
   if (!STRINGP(filename)) error_bad_string(filename);   \
   if (remove(STRING_CHARS(filename)) != 0)              \
-    error_posix(filename, NULL);                        \
+    STk_error_posix(errno, "", filename, NULL);       \
   return STk_void;                                      \
 
 DEFINE_PRIMITIVE("delete-file", delete_file, subr1, (SCM filename))
@@ -611,6 +674,8 @@ DEFINE_PRIMITIVE("remove-file", remove_file, subr1, (SCM filename))
  *
  * Renames the file whose path-name is |string1| to a file whose path-name is
  * |string2|. The result of |rename-file| is ,(emph "void").
+ * @l
+ * This function is also defined in ,(link-srfi 170).
 doc>
 */
 DEFINE_PRIMITIVE("rename-file", rename_file, subr2, (SCM filename1, SCM filename2))
@@ -618,7 +683,7 @@ DEFINE_PRIMITIVE("rename-file", rename_file, subr2, (SCM filename1, SCM filename
   if (!STRINGP(filename1)) error_bad_string(filename1);
   if (!STRINGP(filename2)) error_bad_string(filename2);
   if (rename(STRING_CHARS(filename1), STRING_CHARS(filename2)) != 0)
-    error_posix(filename1, filename2);
+    STk_error_posix(errno, "", filename1, filename2);
   return STk_void;
 }
 
@@ -626,27 +691,38 @@ DEFINE_PRIMITIVE("rename-file", rename_file, subr2, (SCM filename1, SCM filename
 /*
 <doc EXT directory-files
  * (directory-files path)
+ * (directory-files path dotfiles?)
  *
- * Returns the list of the files in the directory |path|. Directories ,(q ".")
- * and ,(q "..") don't appear in the result.
+ * Returns the list of the files in the directory |path|. The |dotfiles?| flag
+ * (default |#f|) causes files beginning with ,(q ".") to be included in the list.
+ * Regardless of the value of |dotfiles?|, the two files ,(q ".") and ,(q "..")
+ * are never  returned.
+ * @l
+ * This function is also defined in ,(link-srfi 170).
 doc>
 */
-DEFINE_PRIMITIVE("directory-files", directory_files, subr1, (SCM dirname))
+DEFINE_PRIMITIVE("directory-files", directory_files, subr12, (SCM dirname, SCM dot))
 {
   char *path;
   DIR* dir;
   SCM res = STk_nil;
   struct dirent *d;
+  int add_dot_files = dot? (dot  != STk_false): 0;
 
   if (!STRINGP(dirname)) error_bad_string(dirname);
   path = STk_expand_file_name(STRING_CHARS(dirname));
   dir  = opendir(path);
-  if (!dir) error_posix(dirname, NULL);
+  if (!dir) STk_error_posix(errno, "", dirname, NULL);
 
+  /* readdir and closedir can yield an error (EBADF) only on  when dir is incorrect
+   * This cannot occurs here since we have tested that opendir result is OK.
+   */
   for (d = readdir(dir); d ; d = readdir(dir)) {
-    if (d->d_name[0] == '.')
-      if ((d->d_name[1] == '\0') || (d->d_name[1] == '.' && d->d_name[2] == '\0'))
+    if (d->d_name[0] == '.') {
+      if (!add_dot_files ||
+          ((d->d_name[1] == '\0') || (d->d_name[1] == '.' && d->d_name[2] == '\0')))
         continue;
+    }
     res = STk_cons(STk_Cstring2string(d->d_name), res);
   }
   closedir(dir);
@@ -691,47 +767,60 @@ DEFINE_PRIMITIVE("copy-file", copy_file, subr2, (SCM filename1, SCM filename2))
 
 
 /*
-<doc EXT temporary-file-name
- * (temporary-file-name)
+<doc EXT temporary-file-name create-temp-file
+ * (create-temp-file)
+ * (create-temp-file prefix)
  *
- * Generates a unique temporary file name. The value returned by
- * |temporary-file-name| is the newly generated name of |#f|
- * if a unique name cannot be generated.
+ * Creates a new temporary file and returns two values: its name and an opened
+ * file port on it. The optional argument specifies the filename prefix
+ * to use, and defaults to the result of invoking |temp-file-prefix|.
+ * The returned file port is opened in read/write mode. It ensures that
+ * the name cannot be reused by another process before being used
+ * in the program that calls |create-temp-file|.
+ * Note, that if the opened port is not used, it can be closed and collected
+ * by the GC.
+ * @lisp
+ * (let-values (((name port) (create-temp-file)))
+ *   (let ((msg (format "Name: ~s\n" name)))
+ *     (display msg)
+ *     (display msg port)
+ *     (close-port port)))     => prints the name of the temp. file on the 
+ *                                current output port and in the file itself.
+ * @end lisp
+ *
+ * ,(bold "Notes:") This function is also defined in ,(link-srfi 170).However,
+ * in SRFI-170, |create-temp-file| returns only the name of the temporary file.
+ * @l
+ * |temporary-file-name| is another name for this function.
 doc>
 */
-DEFINE_PRIMITIVE("temporary-file-name", tmp_file, subr0, (void))
+DEFINE_PRIMITIVE("create-temp-file", create_tmp_file, subr01, (SCM arg))
 {
-#ifdef WIN32
-  char buff[MAX_PATH_LENGTH], *s;
+  char buffer[MAX_PATH_LENGTH];
+  SCM prefix = temp_file_prefix;
+  SCM port, res[2];
+  int fd;
 
-  s = tmpnam(buff);
-  return s ? STk_Cstring2string(s) : STk_false;
-#else
-  static int cpt=0, pid;
-  static char *tmpdir;
-  char buff[MAX_PATH_LENGTH];
-  MUT_DECL(tmpnam_mutex);
-
-  MUT_LOCK(tmpnam_mutex);
-  if (cpt == 0) {
-    /* First call: initialize tmpdir and pid */
-    char *tmp = getenv("TMPDIR");
-
-    tmpdir = (tmp) ? tmp : "/tmp";
-    pid    = (int) getpid();
+  if (arg){
+    if (!STRINGP(arg)) error_bad_string(arg);
+    prefix = arg;
   }
 
-  for ( ; ; ) {
+  snprintf(buffer, MAX_PATH_LENGTH, "%sXXXXXX", STRING_CHARS(prefix));
 
-    sprintf(buff, "%s/stklos%05d-%05x", tmpdir, pid, cpt++);
-    if (cpt > 100000)           /* arbitrary limit to avoid infinite search */
-      return STk_false;
-    if (access(buff, F_OK) == -1) break;
-  }
-  MUT_UNLOCK(tmpnam_mutex);
+  fd = mkstemp(buffer);
+  if (fd<0) STk_error_posix(errno,"", arg, NULL);
 
-  return STk_Cstring2string(buff);
-#endif
+  /* Since fd designs an open port, create a Scheme port to avoid a file descriptor
+   * leak (it will be GC'ed if not used). The result will be two values (the name
+   * of the temporary file name and a write port associated to the file
+   */
+  port = STk_fd2scheme_port(fd, "w", buffer);
+  PORT_FLAGS(port) |= PORT_TEXTUAL | PORT_BINARY;
+
+  res[0]= port;
+  res[1]= STk_Cstring2string(buffer);
+  return STk_values(2, res +1);
 }
 
 
@@ -1355,14 +1444,6 @@ int STk_init_system(void)
 {
   SCM current_module = STk_STklos_module;
 
-  /* Create the &posix-error condition type */
-  STk_posix_error_condition = STk_defcond_type("&posix-error",
-                                               STk_err_mess_condition,
-                                               LIST2(STk_intern("errname"),
-                                                     STk_intern("errno")),
-                                               current_module);
-
-
   /* Create the system-date structure-type */
   date_type =  STk_make_struct_type(STk_intern("%date"),
                                     STk_false,
@@ -1385,6 +1466,13 @@ int STk_init_system(void)
                                           STk_intern("second"),
                                           STk_intern("nanosecond")));
   STk_define_variable(STk_intern("%time"), time_type, current_module);
+
+
+  /* Add parameter for generating temporary files */
+  STk_make_C_parameter("temp-file-prefix",
+                       init_temp_file_prefix(),
+                       temp_file_prefix_conv,
+                       current_module);
 
   /* Declare primitives */
   ADD_PRIMITIVE(clock);
@@ -1409,7 +1497,7 @@ int STk_init_system(void)
   ADD_PRIMITIVE(getcwd);
   ADD_PRIMITIVE(chdir);
   ADD_PRIMITIVE(make_directory);
-  ADD_PRIMITIVE(remove_directory);
+  ADD_PRIMITIVE(delete_directory);
   ADD_PRIMITIVE(directory_files);
   ADD_PRIMITIVE(getpid);
   ADD_PRIMITIVE(system);
@@ -1429,7 +1517,7 @@ int STk_init_system(void)
   ADD_PRIMITIVE(delete_file);
   ADD_PRIMITIVE(rename_file);
   ADD_PRIMITIVE(copy_file);
-  ADD_PRIMITIVE(tmp_file);
+  ADD_PRIMITIVE(create_tmp_file);
   ADD_PRIMITIVE(pre_exit);
   ADD_PRIMITIVE(exit);
   ADD_PRIMITIVE(emergency_exit);

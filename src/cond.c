@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * c o n d . c          -- Condition implementation
  *
- * Copyright © 2004-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 22-May-2004 08:57 (eg)
- * Last file update: 27-Jun-2019 14:05 (eg)
+ * Last file update: 29-Mar-2021 17:21 (eg)
  */
 
 #include "stklos.h"
@@ -31,6 +31,8 @@ static SCM root_condition, location_condition, serious_condition, error_conditio
 SCM STk_message_condition;
 SCM STk_err_mess_condition;
 SCM STk_exit_condition;
+SCM STk_posix_error_condition;
+
 
 static void error_bad_type(SCM obj)
 {
@@ -534,6 +536,13 @@ int STk_init_cond(void)
   /* Define the exit-condition used for R7RS exit primitive */
   STk_exit_condition = STk_defcond_type("&exit-r7rs", root_condition,
                                         LIST1(STk_intern("retcode")),
+                                        module);
+
+  /* Define the &posix_error used for SRFI-170 */
+  STk_posix_error_condition = STk_defcond_type("&posix-error",
+                                               STk_err_mess_condition,
+                                               LIST2(STk_intern("errname"),
+                                                     STk_intern("errno")),
                                         module);
 
   /* Conditions types */

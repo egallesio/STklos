@@ -21,16 +21,16 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 09-Jan-2021 09:14
-;;;; Last file update: 29-Mar-2021 12:30 (eg)
+;;;; Last file update:  2-Apr-2021 15:40 (eg)
 ;;;;
 
 (define-module SRFI-170
-  (%compile-time-define open-file fd->port create-directory create-fifo create-hard-link
-                        create-symlink read-symlink rename-file delete-directory
-                        truncate-file file-info file-info-directory? file-info-fifo?
-                        file-info-symlink? file-info-regular? file-info-socket?
-                        file-info-device? 
-                        set-file-mode %mkstemp %set-file-owner set-file-times
+  (%compile-time-define open-file fd->port create-fifo
+                        create-hard-link create-symlink read-symlink
+                        truncate-file file-info file-info-directory?
+                        file-info-fifo? file-info-symlink? file-info-regular?
+                        file-info-socket? file-info-device? set-file-mode
+                        %set-file-owner set-file-times
                         open-directory read-directory close-directory real-path
                         file-space umask set-umask! current-directory
                         set-current-directory! nice user-uid user-effective-uid
@@ -112,20 +112,13 @@
   owner/unchanged
   group/unchanged)
 
-(define default-prefix
-  (let ((p (let ((tmpdir (getenv "TMPDIR")))
-             (or tmpdir "/tmp"))))
-    (format #f "~a/~a" p (getpid))))
-
-(define temp-file-prefix (make-parameter default-prefix))
-
-;; (create-directory fname [permission-bits])  implemented as primitive
+;; (create-directory fname [permission-bits])  implemented in base STklos
 ;; (create-fifo fname [permission-bits])       implemented as primitive
 ;; (create-hard-link old-fname new-fname)      implemented as primitive
 ;; (create-symlink old-fname new-fname)        implemented as primitive
 ;; (read-symlink fname)                        implemented as primitive
-;; (rename-file old-fname new-fname)           implemented as primitive
-;; (delete-directory fname)                    implemented as primitive
+;; (rename-file old-fname new-fname)           implemented in base STklos
+;; (delete-directory fname)                    implemented in base STklos
 
 ;; set-file-owner needs to take into account the /unchanged parameters,
 ;; and it's easier to do it here in Scheme.
@@ -173,9 +166,10 @@
 ;; (file-info-device? file-info)    implemented as primitive
 ;; (set-file-mode fname bits)       implemented as primitive
 
-;; directory-files already exists in STklos, but does not throw
-;; &posix-error. This version, which calls open-directory and
-;; read-directory, does.
+#|
+;; directory-files already exists in STklos as a primitive.
+;; Here is a way to write it in Scheme
+
 (define (directory-files path :optional dot)
   (let ((dir (open-directory path dot))
         (files '()))
@@ -184,6 +178,7 @@
           files
           (begin (set! files (cons f files))
                  (again (read-directory dir)))))))
+|#
 
 (define (make-directory-files-generator dir :optional dot-files?)
   (let ((dir-obj (open-directory dir dot-files?))
@@ -203,7 +198,8 @@
 ;; (close-directory directory-object) implemented as primitive
 ;; (real-path path)                   implemented as primitive
 ;; (file-space path-or-port)          implemented as primitive
-
+;; (temp-file prefix [str])           implemented in STklos base
+;; (create-temp-file [prefix])        implemented in STklos base
 
 ;; About create-temp-file:
 ;;
@@ -215,10 +211,6 @@
 ;; 2. Loko tries to protect against symlink attacks; Gauche just calls mkstemp
 ;; directly. $mkstemp does the same as Gauche.
 ;;
-(define (create-temp-file :optional (prefix (temp-file-prefix)))
-  (%mkstemp (string-append prefix "XXXXXX")))
-
-
 (define alpha "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_")
 
 (define (random-string n)
@@ -249,11 +241,9 @@
         owner/unchanged
         group/unchanged
 
-        directory-files
         make-directory-files-generator
 
         set-file-owner
-        create-temp-file
         call-with-temporary-filename
 
         file-info?

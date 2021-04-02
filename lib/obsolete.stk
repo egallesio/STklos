@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 11-Jun-2002 17:54 (eg)
-;;;; Last file update:  9-Mar-2021 16:14 (eg)
+;;;; Last file update:  2-Apr-2021 15:20 (eg)
 ;;;;
 
 
@@ -66,7 +66,7 @@
 
 
 ;; 12-Feb-2007 (v0.83)
-(define delete-directory remove-directory)
+(define remove-directory delete-directory)
 
 ;; 05-May-2007 (v0.83)
 ;; current-second is now R7RS
@@ -105,3 +105,6 @@
 (define fx>   fx>?)
 (define fx>=  fx>=?)
 (define fx=   fx=?)
+
+;; 29-Mar-2021
+(define make-directory create-directory)
