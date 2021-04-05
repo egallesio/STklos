@@ -240,23 +240,30 @@
     ;; 198  ...... withdrawn
     ;; 199  ....... withdrawn
     ;; 200  Pattern Matching (draft)
-    ;; 201  Extensions to the Core Scheme Bindings (draft)
-    ;; 202  Pattern-matching Variant of the and-let* Form that Supports Multiple Values (draft)
+    ;; 201  Extensions to the Core Scheme Bindings
+    ;; 202  Pattern-matching Variant of the and-let* Form that Supports Multiple Values
     ;; 203  A Simple Picture Language in the Style of SICP
     ;; 204  Wright-Cartwright-Shinn Pattern Matcher (draft)
     ;; 205  POSIX Terminal Fundamentals (draft)
-    ;; 206  Auxiliary Syntax Keywords (draft)
+    ;; 206  Auxiliary Syntax Keywords
     (207  "String-notated bytevectors" () "srfi-207")
-    ;; 208  NaN procedures (draft)
-    ;; 209  Enumerations and Enum Sets (draft)
-    ;; 210  Procedures and Syntax for Multiple Values (draft)
+    ;; 208  NaN procedures
+    ;; 209  Enumerations and Enum Sets
+    ;; 210  Procedures and Syntax for Multiple Values
     ;; 211  Namespaces for Scheme Macro Systems (draft)
-    ;; 212  Aliases (draft)
-    ;; 213  Identifier Properties (draft)
-    ;; 214  Flexvectors (draft)
-    ;; 215  Central Log Exchange (draft)
+    ;; 212  Aliases
+    ;; 213  Identifier Properties
+    ;; 214  Flexvectors
+    ;; 215  Central Log Exchange
     (216  "SICP Prerequisites (Portable)" () "srfi-216")
     (217  "Integer Sets" () "srfi-217")
+    ;; 218 ...... withdrawn
+    ;; 219 Define higher-order lambda
+    ;; 220 Line directives (draft)
+    ;; 221 Generator/accumulator sub-library (draft)
+    ;; 222 Compound objexts (draft)
+    ;; 223 Generalized binary search procedures (draft)
+    ;; 224 Integer Mappings (draft)
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file
