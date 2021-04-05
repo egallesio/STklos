@@ -803,6 +803,6 @@
                 -2  2 -2)))
   (let ((c (make-array (array-shape b) 'z)))
     (array-map! c (lambda (x y) (* x y)) a b)
-    (test "srfi 25 jp 25.array-map!.3" '(0 2 0 3) (array->list (array-shape c)))
-    (test "srfi 25 jp 25.array-map!.4" '(1 -2 3 8 -10 12) (array->list c))))
+     (test "srfi 25 jp 25.array-map!.3" '(0 2 0 3) (array->list (array-shape c)))
+     (test "srfi 25 jp 25.array-map!.4" '(1 -2 3 8 -10 12) (array->list c))))
 

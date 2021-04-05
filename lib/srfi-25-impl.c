@@ -513,7 +513,7 @@ DEFINE_PRIMITIVE("make-array",srfi_25_make_array,subr12,(SCM shape, SCM obj))
 
 DEFINE_PRIMITIVE("shape",srfi_25_shape,vsubr,(int argc, SCM *argv))
 {
-  if (argc % 2) STk_error("bad array shape number or args ~S", argc);
+  if (argc % 2) STk_error("bad array shape numracketber or args ~S", argc);
 
   /* shape of a shape is 0 d 0 2 */
   long *meta_shape = STk_must_malloc(4*sizeof(long));
@@ -637,7 +637,7 @@ DEFINE_PRIMITIVE("array-ref", srfi_25_array_ref,vsubr, (int argc, SCM *argv))
         index = get_index_from_array(array, *argv);
         
     } else STk_error("Index must be vector, array or sequence of integers");
-    
+
     return ARRAY_DATA(array)[index];
 }
 
@@ -897,7 +897,7 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
  * (shared-array? array)
  *
  * Will return true when the array has its data shared with other
- * arrays.
+ * arrays, and false otherwise.
 doc>
  */
 DEFINE_PRIMITIVE("shared-array?",srfi_25_shared_arrayp,subr1,(SCM array))
@@ -914,8 +914,9 @@ DEFINE_PRIMITIVE("shared-array?",srfi_25_shared_arrayp,subr1,(SCM array))
  * elements through |(share-array array shape proc)|, and that were not
  * yet garbage collected.
  * Note that it may take a long time for an object to be garbage
- * collected automatically, but it is possible to force a garbage
- * collection pass with |gc|
+ * collected automatically. It is possible to force a garbage
+ * collection pass by calling |(gc)|, but even that does not guarantee that
+ * a specific object will be collected.
 doc>
  */
 DEFINE_PRIMITIVE("array-share-count",srfi_25_array_share_count,subr1,(SCM array))
@@ -1022,7 +1023,7 @@ DEFINE_PRIMITIVE("array-copy+share",srfi_25_array_copy_share,subr1,(SCM old_arra
  * This procedure will apply proc to all valid sequences of
  * indices in |shape|, in row-major order.
  *
- * If |index-object| is not provided, then proc must accept
+ * If |index-object| is not provided, then |proc| must accept
  * as many arguments as the number of dimensions that the shape
  * describes.
  * @lisp
@@ -1035,8 +1036,8 @@ DEFINE_PRIMITIVE("array-copy+share",srfi_25_array_copy_share,subr1,(SCM old_arra
  * [2 11]
  * @end lisp
  * If |index-object| is provided, it is used as a place to store the
- * indices, so proc must accept a vector (this is to avoid pushing
- * and popping too many values when calling proc).
+ * indices, so proc must accept either a vector or an array (this is to
+ * avoid pushing and popping too many values when calling |proc|).
  * |index-object|, when present, must be aither a vector or array.
  * @lisp
  * (let ((vec (make-vector 2 #f)))
@@ -1196,7 +1197,7 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
 
 static void print_array(SCM array, SCM port, int mode)
 {
-   /* This should probably use shape-for-each, but thta function expects us
+   /* This should probably use shape-for-each, but that function expects us
       to pass it a Scheme procedure to be called in each step, so I left this
       as a hard-coded loop (actually I first wrote this function then used its
       loop as a template for shape-for-each). -- jpellegrini */
