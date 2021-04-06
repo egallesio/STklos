@@ -543,7 +543,7 @@ DEFINE_PRIMITIVE("array", srfi_25_array, vsubr, (int argc, SCM *argv))
     if (argc < 1) STk_error("not enough arguments");
     
     SCM shape = *argv--;
-    if (!STk_srfi_25_shapep(shape)) STk_error("bad array shape ~S",shape);
+    if (STk_srfi_25_shapep(shape) == STk_false) STk_error("bad array shape ~S",shape);
     
     long *cshape = shapetoCshape(shape);
     long len = ARRAY_LENGTH(shape);
