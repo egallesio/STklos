@@ -1435,6 +1435,13 @@ struct array_obj {
 #define ARRAY_MULTS(p)       (((struct array_obj *) (p))->multipliers)
 #define ARRAY_DATA(p)        (((struct array_obj *) (p))->data_ptr)
 
+#ifdef THREADS_NONE
+#  define ARRAY_MUTEX(p)
+#  define ARRAY_MUTEX_SIZE 1
+#else
+#  define ARRAY_MUTEX(p) (((struct array_obj *) (p))->share_cnt_lock)
+#  define ARRAY_MUTEX_SIZE (sizeof(pthread_mutex_t))
+#endif
 
 /*
   ------------------------------------------------------------------------------

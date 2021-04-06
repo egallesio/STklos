@@ -384,6 +384,7 @@ SCM STk_make_array(int rank, long *shape, SCM init)
                    sizeof(struct array_obj) +
                    sizeof(int) +                  /* shared */
                    sizeof(int*) +                 /* orig_share_count */
+                   ARRAY_MUTEX_SIZE +             /* share_cnt_lock */
                    sizeof(long) +                 /* size */
                    sizeof(long) +                 /* length */
                    sizeof(int) +                  /* rank */
@@ -403,6 +404,8 @@ SCM STk_make_array(int rank, long *shape, SCM init)
   s->rank             = rank;
   s->offset           = 0L;     /* will be updated, see below */
 
+  MUT_INIT(s->share_cnt_lock);
+  
   /* data begins right after the data pointer: */
   s->data_ptr = (SCM *)(&(s->data_ptr)) + 1;
 
@@ -840,6 +843,7 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
                    sizeof(struct array_obj) +
                    sizeof(int) +                  /* shared */
                    sizeof(int*) +                 /* orig_share_count */
+                   ARRAY_MUTEX_SIZE +             /* share_cnt_lock */
                    sizeof(long) +                 /* size */
                    sizeof(long) +                 /* length */
                    sizeof(int) +                  /* rank */
@@ -848,6 +852,7 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
                    sizeof(long*) +                /* multipliers */
                    sizeof(SCM*));                 /* data_ptr */
                    /* don't include data elements, we'll use the othre array's */
+
 
     /* multipliers */
     long *old_mult = ARRAY_MULTS(old_array);
@@ -879,6 +884,8 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
     s->shape            = cshape;
     s->multipliers      = new_mult;
     s->data_ptr         = ARRAY_DATA(old_array);
+
+    MUT_INIT(s->share_cnt_lock);
 
     STk_register_finalizer(a, shared_array_dec_count);
 
@@ -987,6 +994,8 @@ DEFINE_PRIMITIVE("array-copy+share",srfi_25_array_copy_share,subr1,(SCM old_arra
     long total_size =
         sizeof(struct array_obj) +
         sizeof(int) +                  /* shared */
+        sizeof(int*) +                 /* orig_share_count */
+        ARRAY_MUTEX_SIZE +             /* share_cnt_lock */
         sizeof(long) +                 /* size */
         sizeof(long) +                 /* length */
         sizeof(int) +                  /* rank */
@@ -1003,6 +1012,8 @@ DEFINE_PRIMITIVE("array-copy+share",srfi_25_array_copy_share,subr1,(SCM old_arra
 
     memcpy(n,o, total_size);
 
+    MUT_INIT(n->share_cnt_lock);
+    
     /* If old_array was not share-created, then we copied its data vector,
        and nobody points to the new copy. We created a fresh, non-shared array. */
     if (*ARRAY_SHARE_COUNT(old_array) >= 0)  *ARRAY_SHARE_COUNT(new_array)=0;
