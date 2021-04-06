@@ -262,14 +262,20 @@ doc>
 (define (tabulate-array! shape proc ind)
   (tabulate-array shape proc ind))
 
-  
+;; reader for arrays
+(define-reader-ctor 'array
+  (lambda args
+    (apply array (apply shape (car args)) (cdr args))))
+
+
 (export array-for-each-index
         array->vector
         array->list
         array-map!
         array-map
         array-copy
-        tabulate-array)
+        tabulate-array
+        tabulate-array!)
 
 (select-module STklos)
 (import SRFI-25)

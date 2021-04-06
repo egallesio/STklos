@@ -1216,15 +1216,9 @@ static void print_array(SCM array, SCM port, int mode)
    int rank = ARRAY_RANK(array);
 
    char buffer[100];
-   sprintf(buffer,"#%d",rank);
-   STk_puts(buffer, port);
-
-   /* if the array is shared, we prepend "S" */
-   if (ARRAY_SHARED(array)) STk_putc('S',port);
+   STk_puts("#,(array (",port);
 
    /* write the array shape */
-   STk_puts("A((",port);
-   
    for (int i =0; i< rank; i++) {
      sprintf(buffer,"%ld %ld",
              ARRAY_SHAPE(array)[2*i],    /* lower bound */
@@ -1232,7 +1226,7 @@ static void print_array(SCM array, SCM port, int mode)
      STk_puts(buffer, port);
      if (i != rank-1 ) STk_putc(' ', port);
    }
-   STk_puts(")", port);
+   STk_putc(')', port);
 
    /* now, the tricky part. we could easily just run through ARRAY_DATA(array),
       printing the elements and including ")(" to separate strides, however
@@ -1270,7 +1264,7 @@ static void print_array(SCM array, SCM port, int mode)
    if ( (rank==0) || empty) {
        /* Empty arrays may have a default value. We show it here. */
        if (ARRAY_DATA(array)[0]) {
-           STk_putc(' ', port);
+           STk_putc(' ',port);
            STk_print(ARRAY_DATA(array)[0], port, mode);
        }
    } else {
@@ -1278,12 +1272,7 @@ static void print_array(SCM array, SCM port, int mode)
        int updated = 1;
        while(updated) {
            updated = 0;
-           
-           /* last dimension index is the lowest. open parens */
-           if (INT_VAL(VECTOR_DATA(idx)[rank-1]) == ARRAY_SHAPE(array)[(rank-1)*2])
-               STk_putc('(', port);
-           
-           
+
            /* now we print one element: */
            SCM x = STk_srfi_25_array_ref(2, &args[1]);
            if (x)
@@ -1291,13 +1280,7 @@ static void print_array(SCM array, SCM port, int mode)
            else
                STk_error("array element is NULL, not a Scheme value -- this should not have happened!");
            
-           /* if last dimension index is the highest possible, close parens;
-              otherwise, put a blank to separate the values. */
-           if (INT_VAL(VECTOR_DATA(idx)[rank-1]) + 1 == ARRAY_SHAPE(array)[(rank-1)*2+1])
-               STk_putc(')', port);
-           else
-               STk_putc(' ', port);
-           
+          
            /* update idx vector */
            for(int d = rank - 1; d >= 0; d--)
                if (INT_VAL(VECTOR_DATA(idx)[d]) < ARRAY_SHAPE(array)[d*2+1] - 1) { /* we can increase */
@@ -1306,6 +1289,7 @@ static void print_array(SCM array, SCM port, int mode)
                        VECTOR_DATA(idx)[i] = MAKE_INT(ARRAY_SHAPE(array)[i*2]);
                    }
                    updated=1;
+                   STk_putc(' ', port);
                    break;
                }
        }

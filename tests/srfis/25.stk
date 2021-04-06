@@ -882,3 +882,30 @@
   (let ((c (mult a b)))
     (test "srfi-25 jp.matrix-mult.1" '(0 2 0 2) (array->list (array-shape c)))
     (test "srfi-25 jp.matrix-mult.2" '(-4 -4 5 1) (array->list c))))
+
+
+;; some tests for the reader.
+;;
+(test "srfi-25 jp.reader.1" #t (array? (read-from-string "#,(array ())")))
+(test "srfi-25 jp.reader.2" 0 (array-rank (read-from-string "#,(array ())")))
+(test "srfi-25 jp.reader.3" 2 (array-rank (array-shape (read-from-string "#,(array ())"))))
+(test "srfi-25 jp.reader.4" #f (shared-array? (read-from-string "#,(array ())")))
+
+(test "srfi-25 jp.reader.4" #t (array? (read-from-string "#,(array (0 0 1 2))")))
+(test "srfi-25 jp.reader.5" 2 (array-rank (read-from-string "#,(array (0 0 1 2))")))
+(test "srfi-25 jp.reader.6" 2 (array-rank (array-shape (read-from-string "#,(array (0 0 1 2))"))))
+(test "srfi-25 jp.reader.7" #f (shared-array? (read-from-string "#,(array (0 0 1 2))")))
+
+(test "srfi-25 jp.reader.7" #t (array? (read-from-string "#,(array (0 1 1 3) -1 -2)")))
+(test "srfi-25 jp.reader.8" 2 (array-rank (array-shape (read-from-string "#,(array (0 1 1 3) -1 -2)"))))
+(test "srfi-25 jp.reader.9" 2 (array-rank (read-from-string "#,(array (0 1 1 3) -1 -2)")))
+(test "srfi-25 jp.reader.10" #f (shared-array? (read-from-string "#,(array (0 0 1 2))")))
+
+(test "srfi-25 jp.reader.11" #t (array? (read-from-string "#,(array (0 1 1 3 -2 0) -1 -2 -3 -4)")))
+(test "srfi-25 jp.reader.12"
+      '(-1 -2 -3 -4)
+      (array->list (read-from-string "#,(array (0 1 1 3 -2 0) -1 -2 -3 -4)) ")))
+
+(test "srfi-25 jp.reader.13" 42 (array-ref (read-from-string "#,(array () 42)")))
+(test/error "srfi-25 jp.reader.14" (array-ref (read-from-string "#,(array ())")))            ;; no default value
+(test/error "srfi-25 jp.reader.15" (array-ref (read-from-string "#,(array (0 0 1 2))") 0 1)) ;; no possible indices
