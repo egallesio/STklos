@@ -516,7 +516,7 @@ DEFINE_PRIMITIVE("make-array",srfi_25_make_array,subr12,(SCM shape, SCM obj))
 
 DEFINE_PRIMITIVE("shape",srfi_25_shape,vsubr,(int argc, SCM *argv))
 {
-  if (argc % 2) STk_error("bad array shape numracketber or args ~S", argc);
+  if (argc % 2) STk_error("odd number of arguments (~S) given for shape", argc);
 
   /* shape of a shape is 0 d 0 2 */
   long *meta_shape = STk_must_malloc(4*sizeof(long));
