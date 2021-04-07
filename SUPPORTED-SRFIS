@@ -83,6 +83,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-143: Fixnums
     - SRFI-145: Assumptions
     - SRFI-151: Bitwise Operations
+    - SRFI-154: First-class dynamic extents
     - SRFI-156: Syntactic combiners for binary predicates
     - SRFI-158: Generators and Accumulators
     - SRFI-161: Unifiable Boxes
