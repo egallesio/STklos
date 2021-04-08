@@ -38,6 +38,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-26: Notation for Specializing Parameters without Currying
     - SRFI-27: Source of random bits
     - SRFI-28: Basic Format Strings
+    - SRFI-29: Localization
     - SRFI-30: Nested Multi-line Comments
     - SRFI-31: A special form for recursive evaluation
     - SRFI-34: Exception Handling for Programs
