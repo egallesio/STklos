@@ -796,9 +796,9 @@ DEFINE_PRIMITIVE("%write-string", write_string, subr4, (SCM str, SCM port,
 /*
 <doc EXT write-chars
  * (write-chars str)
- * (write-char str port)
+ * (write-chars str port)
  *
- * Writes the character of string |str| to the given |port| and
+ * Writes the characters of string |str| to the given |port| and
  * returns an unspecified value.  The |port| argument may be omitted,
  * in which case it defaults to the value returned by
  * |current-output-port|.
@@ -1120,7 +1120,8 @@ Incorrect_format_width:
  * of the next |obj|. The standard pretty-printer is used here.])
  *
  * (item [|~?| is replaced by the result of the recursive call of |format|
- * with the two next |obj|.])
+ * with the two next |obj|: the first item should be a string, and the
+ * second, a list with the arguments.])
  *
  * (item [|~k| or |~K| is another name for |~?|])
  *
@@ -1352,7 +1353,7 @@ DEFINE_PRIMITIVE("close-port", close_port, subr1, (SCM port))
  * (port-closed? port)
  * (port-open?  port)
  *
- * |port-closed| returns |#t| if |port| is closed and |#f| otherwise.
+ * |port-closed?| returns |#t| if |port| is closed and |#f| otherwise.
  * On the contrary, |port-open?| returns |#t| if |port| is open and
  * |#f| otherwise.
  * @l
