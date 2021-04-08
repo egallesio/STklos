@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 28-Jan-2021 18:38 (eg)
+;;;; Last file update:  8-Apr-2021 18:45 (eg)
 ;;;;
 
 
@@ -258,7 +258,7 @@
     (216  "SICP Prerequisites (Portable)" () "srfi-216")
     (217  "Integer Sets" () "srfi-217")
     ;; 218 ...... withdrawn
-    ;; 219 Define higher-order lambda
+    (219 "Define higher-order lambda")
     ;; 220 Line directives (draft)
     ;; 221 Generator/accumulator sub-library (draft)
     ;; 222 Compound objexts (draft)
