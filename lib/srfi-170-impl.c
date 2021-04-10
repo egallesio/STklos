@@ -41,6 +41,12 @@
 #include "struct.h"
 #include "fport.h"
 
+#if defined(__APPLE__) && defined(__MACH__)  /* Darwin */
+#define st_atim st_atimespec
+#define st_ctim st_ctimespec
+#define st_mtim st_mtimespec
+#endif
+
 static SCM file_info_type, dir_info_type, user_info_type, group_info_type;
 
 
