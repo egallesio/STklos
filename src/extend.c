@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Mar-1995 11:31
- * Last file update: 11-Apr-2021 17:45 (eg)
+ * Last file update: 11-Apr-2021 20:18 (eg)
  */
 
 #include "stklos.h"
@@ -31,8 +31,12 @@
  * The array of extended type descriptors
  */
 struct extended_type_descr *STk_xtypes[MAX_CELL_TYPES] = {NULL};
-
 static int user_extended_type = tc_last_standard;
+
+
+static void error_bad_symbol(SCM o) {  STk_error("bad symbol ~S", o); }
+static void error_bad_user_type(SCM o) { STk_error("bad user type name ~S", o); }
+static void error_bad_key(SCM o) { STk_error("bad procedure key name ~S", o); }
 
 
 int STk_new_user_type(struct extended_type_descr *descr)
@@ -46,6 +50,7 @@ int STk_new_user_type(struct extended_type_descr *descr)
 
   return user_extended_type;
 }
+
 
 SCM STk_extended_eqv(SCM o1, SCM o2)
 {
@@ -61,7 +66,71 @@ SCM STk_extended_equal(SCM o1, SCM o2)
   return (XTYPE_EQUAL(BOXED_XTYPE(o1))) (o1, o2);
 }
 
+// ----------------------------------------------------------------------
+//
+// Scheme aceess to the extended type descriptor
+//
+// ----------------------------------------------------------------------
+static struct extended_type_descr *search_descriptor(char *str) {
+  for (int i = tc_last_standard+1; i <= user_extended_type; i++) {
+    if (strcmp(str, (STk_xtypes[i])->name) == 0) return STk_xtypes[i];
+  }
+  return NULL;
+}
+
+
+DEFINE_PRIMITIVE("%user-type-name", user_type_name, subr1, (SCM o))
+{
+   return (HAS_EXTENDED_TYPEP(o))?
+     STk_intern(XTYPE_NAME(BOXED_XTYPE(o))):
+     STk_false;
+}
+
+
+DEFINE_PRIMITIVE("%user-type-proc", user_type_proc, subr2, (SCM name, SCM key))
+{
+  struct extended_type_descr *descr;
+
+  if (!SYMBOLP(name)) error_bad_symbol(name);
+  if (!SYMBOLP(key)) error_bad_symbol(key);
+
+  descr = search_descriptor(SYMBOL_PNAME(name));
+  if (!descr) error_bad_user_type(name);
+
+  if (strcmp(SYMBOL_PNAME(key), "describe") == 0) {
+    SCM result = XTYPE_DESCRIBE(descr);
+    return (result) ? result: STk_false;
+  }
+  error_bad_key(key);
+  return STk_void;  /* for the compiler */
+}
+
+
+DEFINE_PRIMITIVE("%user-type-proc-set!", user_type_proc_set, subr3,
+                 (SCM name, SCM key, SCM proc))
+{
+  struct extended_type_descr *descr;
+
+  if (!SYMBOLP(name)) error_bad_symbol(name);
+  if (!SYMBOLP(key)) error_bad_symbol(key);
+
+  descr = search_descriptor(SYMBOL_PNAME(name));
+  if (!descr) error_bad_user_type(name);
+
+  if (strcmp(SYMBOL_PNAME(key), "describe") == 0) {
+    XTYPE_DESCRIBE(descr) = proc;
+    return STk_void;
+  }
+  error_bad_key(key);
+  return STk_void;  /* for the compiler */
+}
+
+
 int STk_init_extend(void)
 {
+  ADD_PRIMITIVE(user_type_name);
+  ADD_PRIMITIVE(user_type_proc);
+  ADD_PRIMITIVE(user_type_proc_set);
+
   return TRUE;
 }

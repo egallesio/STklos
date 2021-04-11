@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 10-Apr-2021 21:10 (eg)
+ * Last file update: 11-Apr-2021 19:00 (eg)
  */
 
 
@@ -542,16 +542,18 @@ struct extended_type_descr {
   void (*print)(SCM exp, SCM port, int mode);
   SCM  (*equal)(SCM o1, SCM o2);
   SCM  (*eqv)(SCM o1, SCM o2);
+  SCM  *describe_proc;
 };
 
 extern struct extended_type_descr *STk_xtypes[];
 
 #define HAS_EXTENDED_TYPEP(o)            (BOXED_OBJP(o) && (BOXED_TYPE(o) > tc_last_standard))
 #define BOXED_XTYPE(o)                   (STk_xtypes[((stk_header *) o)->type])
-#define XTYPE_NAME(d)                    (d->name)
-#define XTYPE_PRINT(d)                   (d->print)
-#define XTYPE_EQUAL(d)                   (d->equal)
-#define XTYPE_EQV(d)                     (d->eqv)
+#define XTYPE_NAME(d)                    ((d)->name)
+#define XTYPE_PRINT(d)                   ((d)->print)
+#define XTYPE_EQUAL(d)                   ((d)->equal)
+#define XTYPE_EQV(d)                     ((d)->eqv)
+#define XTYPE_DESCRIBE(d)                ((d)->describe_proc)
 #define DEFINE_XTYPE(_type, _descr)      (STk_xtypes[CPP_CONCAT(tc_, _type)]=_descr)
 #define DEFINE_USER_TYPE(_type, _descr)  { _type = STk_new_user_type(_descr); }
 
