@@ -1,7 +1,7 @@
 /*
  * promise.c    -- Implementation of promises
  *
- * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *           Author: Erick Gallesio [eg@unice.fr]
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date:  2-Jun-1993 12:27 (eg)
- * Last file update: 30-May-2020 17:28 (eg)
+ * Last file update: 10-Apr-2021 18:51 (eg)
  */
 #include "stklos.h"
 
@@ -218,8 +218,8 @@ static void print_promise(SCM promise, SCM port, int _UNUSED(mode))
 }
 
 static struct extended_type_descr xtype_promise = {
-  "promise",
-  print_promise
+  .name  = "promise",
+  .print = print_promise
 };
 
 

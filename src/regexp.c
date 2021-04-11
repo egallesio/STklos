@@ -1,7 +1,7 @@
 /*
  * regexp.c -- STklos Regexps
  *
- * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 24-Nov-2000 10:35 (eg)
- * Last file update:  2-Jun-2020 12:19 (eg)
+ * Last file update: 10-Apr-2021 18:46 (eg)
  */
 
 #include "stklos.h"
@@ -319,8 +319,8 @@ DEFINE_PRIMITIVE("regexp-quote", regexp_quote, subr1, (SCM str))
 
 /* The stucture which describes the regexp type */
 static struct extended_type_descr xtype_regexp = {
-  "regexp",         /* name */
-  print_regexp          /* print function */
+  .name  = "regexp",
+  .print = print_regexp
 };
 
 

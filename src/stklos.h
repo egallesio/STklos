@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 29-Mar-2021 18:23 (eg)
+ * Last file update: 10-Apr-2021 21:10 (eg)
  */
 
 
@@ -224,7 +224,6 @@ typedef struct {
 #define BOXED_INFO(x)           (((stk_header *) x)->cell_info)
 #define BOXED_OBJP(x)           (!(AS_LONG(x) & 3))
 #define BOXED_TYPE_EQ(x, y)     (BOXED_OBJP(x) && BOXED_TYPE(x) == y)
-
 #define STYPE(x)                (BOXED_OBJP(x)? BOXED_TYPE(x): tc_not_boxed)
 
 
@@ -541,18 +540,26 @@ void STk_export_all_symbols(SCM module);
 struct extended_type_descr {
   char *name;
   void (*print)(SCM exp, SCM port, int mode);
+  SCM  (*equal)(SCM o1, SCM o2);
+  SCM  (*eqv)(SCM o1, SCM o2);
 };
 
 extern struct extended_type_descr *STk_xtypes[];
 
+#define HAS_EXTENDED_TYPEP(o)            (BOXED_OBJP(o) && (BOXED_TYPE(o) > tc_last_standard))
 #define BOXED_XTYPE(o)                   (STk_xtypes[((stk_header *) o)->type])
 #define XTYPE_NAME(d)                    (d->name)
 #define XTYPE_PRINT(d)                   (d->print)
+#define XTYPE_EQUAL(d)                   (d->equal)
+#define XTYPE_EQV(d)                     (d->eqv)
 #define DEFINE_XTYPE(_type, _descr)      (STk_xtypes[CPP_CONCAT(tc_, _type)]=_descr)
 #define DEFINE_USER_TYPE(_type, _descr)  { _type = STk_new_user_type(_descr); }
 
 int STk_new_user_type(struct extended_type_descr *);
+SCM STk_extended_eqv(SCM o1, SCM o2);
+SCM STk_extended_equal(SCM o1, SCM o2);
 int STk_init_extend(void);
+
 /*
   ------------------------------------------------------------------------------
   ----

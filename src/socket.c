@@ -1,7 +1,7 @@
 /*
  * socket.c                             -- Socket acess for STklos
  *
- * Copyright © 2003-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update: 30-Jun-2020 09:12 (eg)
+ * Last file update: 10-Apr-2021 18:46 (eg)
  */
 
 #include <sys/types.h>
@@ -54,8 +54,8 @@ static void print_socket(SCM sock, SCM port, int _UNUSED(mode))
 }
 
 static struct extended_type_descr xtype_socket = {
-  "socket",
-  print_socket
+  .name  = "socket",
+  .print = print_socket
 };
 
 

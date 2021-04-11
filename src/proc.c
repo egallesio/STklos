@@ -2,7 +2,7 @@
  *
  * p r o c . c                          -- Things about procedures
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 30-May-2020 18:25 (eg)
+ * Last file update: 10-Apr-2021 18:45 (eg)
  */
 
 #include "stklos.h"
@@ -75,8 +75,8 @@ static void print_lambda(SCM closure, SCM port, int _UNUSED(mode))
  * The stucture which describes the closure type
  */
 static struct extended_type_descr xtype_closure = {
-  "closure",                    /* name */
-  print_lambda                  /* print function */
+  .name  = "closure",
+  .print = print_lambda
 };
 
 

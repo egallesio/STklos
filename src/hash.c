@@ -2,7 +2,7 @@
  *
  * h a s h  . c                 -- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update:  4-Sep-2020 14:00 (eg)
+ * Last file update: 10-Apr-2021 18:42 (eg)
  */
 
 #include "stklos.h"
@@ -892,7 +892,7 @@ DEFINE_PRIMITIVE("hash-table-stats", hash_stats, subr12, (SCM ht, SCM port))
  *
 \*===========================================================================*/
 
-static struct extended_type_descr xtype_hash = { "hash-table", NULL };
+static struct extended_type_descr xtype_hash = { .name = "hash-table" };
 
 int STk_init_hash(void)
 {

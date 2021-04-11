@@ -2,7 +2,7 @@
  *
  *  o b j e c t . c                     -- Objects support
  *
- * Copyright © 1994-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update: 30-May-2020 17:26 (eg)
+ * Last file update: 10-Apr-2021 18:44 (eg)
  */
 
 #include "stklos.h"
@@ -1110,13 +1110,12 @@ static void print_instance(SCM inst, SCM port, int mode)
 
 
 static struct extended_type_descr xtype_instance = {
-  "instance",
-  print_instance
+  .name  = "instance",
+  .print = print_instance
 };
 
 static struct extended_type_descr xtype_next_method = {
-  "next-method",
-  NULL,
+  .name = "next-method",
 };
 
 

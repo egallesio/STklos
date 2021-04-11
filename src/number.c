@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 13-Nov-2020 11:14 (eg)
+ * Last file update: 10-Apr-2021 18:43 (eg)
  */
 
 
@@ -313,18 +313,18 @@ static void print_complex(SCM n, SCM port, int mode)
 
 
 static struct extended_type_descr xtype_bignum = {
-  "bignum",
-  print_bignum
+  .name  = "bignum",
+  .print = print_bignum
 };
 
 static struct extended_type_descr xtype_complex = {
-  "complex",
-  print_complex
+  .name  = "complex",
+  .print = print_complex
 };
 
 static struct extended_type_descr xtype_rational = {
-  "rational",
-  print_rational
+  .name  = "rational",
+  .print = print_rational
 };
 
 

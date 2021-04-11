@@ -1,7 +1,7 @@
 /*
  *  p o r t . c                 -- ports implementation
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 13-Nov-2020 09:52 (eg)
+ * Last file update: 10-Apr-2021 18:45 (eg)
  *
  */
 
@@ -1698,8 +1698,8 @@ static void print_port(SCM obj, SCM port, int _UNUSED(mode))
 
 /* The stucture which describes the port type */
 static struct extended_type_descr xtype_port = {
-  "port",                       /* name */
-  print_port                    /* print function */
+  .name  = "port",
+  .print = print_port
 };
 
 

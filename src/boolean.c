@@ -2,7 +2,7 @@
  *
  * b o o l e a n . c                    -- Booleans and Equivalence predicates
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  3-Sep-2020 15:21 (eg)
+ * Last file update: 11-Apr-2021 17:19 (eg)
  */
 #include <sys/resource.h>
 #include "stklos.h"
@@ -233,13 +233,31 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
       if (CPOINTERP(y) && (CPOINTER_VALUE(x) == CPOINTER_VALUE(y)))
         return STk_true;
       break;
-#ifdef FIXME
-//EG:       default: if (EXTENDEDP(x) && EXTENDEDP(y) && TYPE(x) == TYPE(y))
-//EG:             return STk_extended_compare(x, y, FALSE);
-#endif
-    default: break;
+
+    // The default case could handle those labels. They are just here to
+    // avoid the complex test in the default case when we are sure
+    // to return #f
+    case tc_not_boxed:
+    case tc_cons:         case tc_integer:     case tc_keyword:
+    case tc_string:       case tc_module:      case tc_closure:
+    case tc_subr0:        case tc_subr1:       case tc_subr2:
+    case tc_subr3:        case tc_subr4:       case tc_subr5:
+    case tc_subr01:       case tc_subr12:      case tc_subr23:
+    case tc_vsubr:        case tc_apply:       case tc_vector:
+    case tc_uvector:      case tc_hash_table:  case tc_port:
+    case tc_frame:        case tc_next_method: case tc_promise:
+    case tc_regexp:       case tc_process:     case tc_continuation:
+    case tc_values:       case tc_parameter:   case tc_socket:
+    case tc_struct_type:  case tc_struct:      case tc_thread:
+    case tc_mutex:        case tc_condv:       case tc_box:
+    case tc_ext_func:     case tc_callback:
+      return STk_false;
+
+    default:
+     if ((HAS_EXTENDED_TYPEP(x) && HAS_EXTENDED_TYPEP(y)) &&
+         (BOXED_TYPE(x) == BOXED_TYPE(y)))
+       return STk_extended_eqv(x, y);
   }
-  /* What can we do else? */
   return STk_false;
 }
 
@@ -391,12 +409,30 @@ DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
       if (BOXED_TYPE_EQ(y, tc_uvector))
         return MAKE_BOOLEAN(STk_uvector_equal(x, y));
       break;
-#ifdef FIXME
-//EG:       default:
-//EG:           if (EXTENDEDP(x) && EXTENDEDP(y) && TYPE(x) == TYPE(y))
-//EG:             return STk_extended_compare(x, y, TRUE);
-#endif
-    default: break;
+
+    // The default case could handle those labels. They are just here to
+    // avoid the complex test in the default case when we are sure
+    // to return #f
+    case tc_not_boxed:
+    case tc_integer:      case tc_real:         case tc_bignum:
+    case tc_rational:     case tc_complex:      case tc_symbol:
+    case tc_keyword:      case tc_module:       case tc_closure:
+    case tc_subr0:        case tc_subr1:        case tc_subr2:
+    case tc_subr3:        case tc_subr4:        case tc_subr5:
+    case tc_subr01:       case tc_subr12:       case tc_subr23:
+    case tc_vsubr:        case tc_apply:       case tc_hash_table:
+    case tc_frame:        case tc_next_method:  case tc_promise:
+    case tc_regexp:       case tc_process:      case tc_continuation:
+    case tc_values:       case tc_parameter:    case tc_socket:
+    case tc_struct_type:  case tc_thread:       case tc_mutex:
+    case tc_condv:        case tc_ext_func:     case tc_pointer:
+    case tc_callback:
+      return STk_false;
+
+  default:
+      if ((HAS_EXTENDED_TYPEP(x) && HAS_EXTENDED_TYPEP(y)) &&
+         (BOXED_TYPE(x) == BOXED_TYPE(y)))
+       return STk_extended_equal(x, y);
   }
   return STk_false;
 }
@@ -474,12 +510,32 @@ static SCM equal_count(SCM x, SCM y, int max, int *cycle)
       if (BOXED_TYPE_EQ(y, tc_uvector))
         return MAKE_BOOLEAN(STk_uvector_equal(x, y));
       break;
-#ifdef FIXME
-//EG:       default:
-//EG:           if (EXTENDEDP(x) && EXTENDEDP(y) && TYPE(x) == TYPE(y))
-//EG:             return STk_extended_compare(x, y, TRUE);
-#endif
-    default: break;
+
+    // The default case could handle those labels. They are just here to
+    // avoid the complex test in the default case when we are sure
+    // to return #f
+    case tc_not_boxed:
+    case tc_integer:      case tc_real:         case tc_bignum:
+    case tc_rational:     case tc_complex:      case tc_symbol:
+    case tc_keyword:      case tc_module:       case tc_closure:
+    case tc_subr0:        case tc_subr1:        case tc_subr2:
+    case tc_subr3:        case tc_subr4:        case tc_subr5:
+    case tc_subr01:       case tc_subr12:       case tc_subr23:
+    case tc_vsubr:        case tc_apply:       case tc_hash_table:
+    case tc_frame:        case tc_next_method:  case tc_promise:
+    case tc_regexp:       case tc_process:      case tc_continuation:
+    case tc_values:       case tc_parameter:    case tc_socket:
+    case tc_struct_type:  case tc_thread:       case tc_mutex:
+    case tc_condv:        case tc_ext_func:     case tc_pointer:
+    case tc_callback:
+      return STk_false;
+
+   default:
+     // FIXME: The following code uses the above equal? . As a consequenece,
+     // we will not be able to detecte cycles in extended types.
+     if ((HAS_EXTENDED_TYPEP(x) && HAS_EXTENDED_TYPEP(y)) &&
+          (BOXED_TYPE(x) == BOXED_TYPE(y)))
+        return STk_extended_equal(x, y);
   }
   return STk_false;
 }

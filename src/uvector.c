@@ -1,7 +1,7 @@
 /*
  * u v e c t o r . c                    -- Uniform Vectors Implementation
  *
- * Copyright © 2001-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 15-Apr-2001 10:13 (eg)
- * Last file update:  3-Jun-2020 20:29 (eg)
+ * Last file update: 10-Apr-2021 18:47 (eg)
  */
 
 #include "stklos.h"
@@ -488,8 +488,8 @@ static void print_uvector(SCM vect, SCM port, int mode)
 
 
 static struct extended_type_descr xtype_uvector = {
-  "uvector",
-  print_uvector
+  .name  = "uvector",
+  .print = print_uvector
 };
 
 /*==========================================================================*/

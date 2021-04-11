@@ -1,9 +1,9 @@
 /*
  *
- * e x t e n d . c			-- All the stuff dealing with
- *					   extended types
+ * e x t e n d . c          -- All the stuff dealing with
+ *                             extended types
  *
- * Copyright © 1995-2006 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1995-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Mar-1995 11:31
- * Last file update:  6-Aug-2006 22:09 (eg)
+ * Last file update: 11-Apr-2021 17:45 (eg)
  */
 
 #include "stklos.h"
@@ -47,6 +47,19 @@ int STk_new_user_type(struct extended_type_descr *descr)
   return user_extended_type;
 }
 
+SCM STk_extended_eqv(SCM o1, SCM o2)
+{
+  /* Assert: o1 and o2 has the same type */
+  struct extended_type_descr *descr = BOXED_XTYPE(o1);
+  printf("On est dans eqv\n");
+  return XTYPE_EQV(descr) ? (XTYPE_EQV(descr) (o1, o2)) : STk_false;
+}
+
+SCM STk_extended_equal(SCM o1, SCM o2)
+{
+  /* Assert: o1 and o2 has the same type */
+  return (XTYPE_EQUAL(BOXED_XTYPE(o1))) (o1, o2);
+}
 
 int STk_init_extend(void)
 {
