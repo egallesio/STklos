@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 11-Apr-2021 19:00 (eg)
+ * Last file update: 13-Apr-2021 17:56 (eg)
  */
 
 
@@ -188,7 +188,6 @@ typedef enum {
   tc_regexp, tc_process, tc_continuation, tc_values, tc_parameter,      /* 30 */
   tc_socket, tc_struct_type, tc_struct, tc_thread, tc_mutex,            /* 35 */
   tc_condv, tc_box, tc_ext_func, tc_pointer, tc_callback,               /* 40 */
-  tc_array,                                                             /* 45 */
   tc_last_standard /* must be last as indicated by its name */
 } type_cell;
 
@@ -1401,56 +1400,6 @@ EXTERN_PRIMITIVE("list->vector", list2vector, subr1, (SCM l));
 SCM STk_makevect(int len, SCM init);
 int STk_init_vector(void);
 
-
-/*
-  ------------------------------------------------------------------------------
-  ----
-  ----                                 A R R A Y . C
-  ----
-  ------------------------------------------------------------------------------
-*/
-
-/* Only the definition of the array structure and related macros are here.
-   All the rest is in srfi-25-impl.c.
-   These bits are here so we can use 'tc_array' as a type -- however, without
-   loading SRFI 25, nothing can be done on arrays.
-
-   See srfi-25-impl.c for implementation details -- there is an explanation
-   in the beginning of the file.   */
-
-
-struct array_obj {
-  stk_header header;
-  int shared;                /* does this array share data with another? */
-  int *orig_share_count;     /* pointer to original array share counter */
-  MUT_FIELD(share_cnt_lock); /* lock for share counter */
-  long size;                 /* size of data */
-  long length;               /* # of elements */
-  int  rank;                 /* # of dimensons */
-  long offset;               /* offset from zero, to be added when calculaing index */
-  long *shape;               /* pairs of bounds for each dimenson */
-  long *multipliers;         /* size of each dimension stride */
-  SCM  *data_ptr;            /* pointer to data */
-};
-
-#define ARRAYP(p)            (BOXED_TYPE_EQ((p), tc_array))
-#define ARRAY_SHARED(p)      (((struct array_obj *) (p))->shared)
-#define ARRAY_SHARE_COUNT(p) (((struct array_obj *) (p))->orig_share_count)
-#define ARRAY_SIZE(p)        (((struct array_obj *) (p))->size)
-#define ARRAY_LENGTH(p)      (((struct array_obj *) (p))->length)
-#define ARRAY_RANK(p)        (((struct array_obj *) (p))->rank)
-#define ARRAY_OFFSET(p)      (((struct array_obj *) (p))->offset)
-#define ARRAY_SHAPE(p)       (((struct array_obj *) (p))->shape)
-#define ARRAY_MULTS(p)       (((struct array_obj *) (p))->multipliers)
-#define ARRAY_DATA(p)        (((struct array_obj *) (p))->data_ptr)
-
-#ifdef THREADS_NONE
-#  define ARRAY_MUTEX(p)
-#  define ARRAY_MUTEX_SIZE 1
-#else
-#  define ARRAY_MUTEX(p) (((struct array_obj *) (p))->share_cnt_lock)
-#  define ARRAY_MUTEX_SIZE (sizeof(pthread_mutex_t))
-#endif
 
 /*
   ------------------------------------------------------------------------------

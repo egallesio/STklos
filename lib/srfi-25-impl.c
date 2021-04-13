@@ -21,10 +21,60 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update: 04-Apr-2021 17:48 (jpellegrini)
+ * Last file update: 13-Apr-2021 18:21 (eg)
  */
 
 #include "stklos.h"
+
+
+/*
+  ------------------------------------------------------------------------------
+  ----
+  ----                                 A R R A Y . C
+  ----
+  ------------------------------------------------------------------------------
+*/
+
+static int tc_array;
+
+
+struct array_obj {
+  stk_header header;
+  int shared;                /* does this array share data with another? */
+  int *orig_share_count;     /* pointer to original array share counter */
+  MUT_FIELD(share_cnt_lock); /* lock for share counter */
+  long size;                 /* size of data */
+  long length;               /* # of elements */
+  int  rank;                 /* # of dimensons */
+  long offset;               /* offset from zero, to be added when calculaing index */
+  long *shape;               /* pairs of bounds for each dimenson */
+  long *multipliers;         /* size of each dimension stride */
+  SCM  *data_ptr;            /* pointer to data */
+};
+
+#define ARRAYP(p)            (BOXED_TYPE_EQ((p), tc_array))
+#define ARRAY_SHARED(p)      (((struct array_obj *) (p))->shared)
+#define ARRAY_SHARE_COUNT(p) (((struct array_obj *) (p))->orig_share_count)
+#define ARRAY_SIZE(p)        (((struct array_obj *) (p))->size)
+#define ARRAY_LENGTH(p)      (((struct array_obj *) (p))->length)
+#define ARRAY_RANK(p)        (((struct array_obj *) (p))->rank)
+#define ARRAY_OFFSET(p)      (((struct array_obj *) (p))->offset)
+#define ARRAY_SHAPE(p)       (((struct array_obj *) (p))->shape)
+#define ARRAY_MULTS(p)       (((struct array_obj *) (p))->multipliers)
+#define ARRAY_DATA(p)        (((struct array_obj *) (p))->data_ptr)
+
+#ifdef THREADS_NONE
+#  define ARRAY_MUTEX(p)
+#  define ARRAY_MUTEX_SIZE 1
+#else
+#  define ARRAY_MUTEX(p) (((struct array_obj *) (p))->share_cnt_lock)
+#  define ARRAY_MUTEX_SIZE (sizeof(pthread_mutex_t))
+#endif
+
+
+
+
+
 
 EXTERN_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj));
 
@@ -33,20 +83,20 @@ EXTERN_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj));
  *
  * ARRAY STRUCTURE
  *
- 
+
   An array object is:
 
   struct array_obj {
     stk_header header;
     int shared;                does this array share data with another? (the counter)
     int *orig_share_count;     pointer to original array share counter
-    MUT_FIELD(share_cnt_lock); lock for share counter 
-    long size;                 size of data 
+    MUT_FIELD(share_cnt_lock); lock for share counter
+    long size;                 size of data
     long length;               # of elements
-    int  rank;                 # of dimensons 
-    long offset;               offset from zero, to be added when calculaing index 
-    long *shape;               pairs of bounds for each dimenson 
-    long *multipliers;         size of each dimension stride 
+    int  rank;                 # of dimensons
+    long offset;               offset from zero, to be added when calculaing index
+    long *shape;               pairs of bounds for each dimenson
+    long *multipliers;         size of each dimension stride
     SCM  *data_ptr;            pointer to data
   }
 
@@ -55,7 +105,7 @@ EXTERN_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj));
             shared arrays do not have theyr data vector with them. But we
             do something similar (we allocate more than necessary when the array
             is not shared).
-        
+
   SHARED: when share-array is applied to array A in order to create array B,
           *both* A and B are marked as "shared". But they're different.
 
@@ -79,7 +129,7 @@ EXTERN_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj));
   multipliers[1] * j +
   multipliers[2] * k
 
-  
+
   OFFSET: When an index (i j k) is used in array-ref or array-set!, it is translated
           as the sum
 
@@ -104,57 +154,57 @@ EXTERN_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj));
   *
   * MACROS
   *
-  
- ARRAYP(p)            
+
+ ARRAYP(p)
  ARRAY_SHARED(p)
- ARRAY_SHARE_COUNT(p) 
+ ARRAY_SHARE_COUNT(p)
  ARRAY_SIZE(p)
  ARRAY_LENGTH(p)
- ARRAY_RANK(p)        
- ARRAY_OFFSET(p)      
- ARRAY_SHAPE(p)       
- ARRAY_MULTS(p)       
- ARRAY_DATA(p)        
+ ARRAY_RANK(p)
+ ARRAY_OFFSET(p)
+ ARRAY_SHAPE(p)
+ ARRAY_MULTS(p)
+ ARRAY_DATA(p)
 
  *
  * empty arrays and default values
  *
- 
+
  The SRFI requires support for empty arrays (or at least
  it is implied by the reference implementation and mailing
  list archives). But the reference implementation is not
  consistent, but I have adopter the same behavior:
- 
+
  * arrays are created with a default value, so
    (make-array (shape)) has a default value of #void
- 
+
    (array-ref (make-array (shape)))  =>  #void
- 
+
  * from the reference implementation, from Kawa and Gauche,
    (shape) is an array of rank 2, but there are no indices that
    can be used on it, so referencing (shape) is an error:
-  
+
   (array-ref (shape) i j) => out of bounds, no matter what i, j are!
 
 * from the reference implementation:
 
   (define a (make-array (shape) -2))  ; empty array, default value -2
   (array-ref a) => -2
-  
+
   (define b (make-array (shape 1 1) -2))  ; empty array, not referenceable:
   (array-ref b) => error
- 
+
 };
 
 
  *
  * efficiency
  *
- 
+
  I have tried as much as possible to make a fast
  implementation -- however, there are lots of verifications
  necessary for each element access. For example,
- 
+
  * the element position may be specifed as arguments, as
    elements in a vector, or as elements in an array.
    This requires one more "if"...
@@ -331,7 +381,7 @@ get_index_from_array (SCM array, SCM idx_arr)
    They are macros so as to avoid the use of an index vector.
    The index, however, needs to be a lvalue (register variables won't work).
    Indices are NOT checked (we suppose that is done before using these. */
-   
+
 #define AREF1(array, i) ( ARRAY_DATA(array) [ raw_get_index_from_C_args(array,1,&i) ] )
 
 #define ASET1(array, i, val) { ARRAY_DATA(array) [ raw_get_index_from_C_args(array,1,&i) ] = val; }
@@ -347,7 +397,7 @@ get_index_from_array (SCM array, SCM idx_arr)
    - if rank is zero, size is zero;
    - if a dimension has no possible index, for example as the
      second dimension in (shape 0 3 5 5  0 3), the size
-     will be zero. */   
+     will be zero. */
 static inline long
 get_array_size(int rank, long *shape)
 {
@@ -376,7 +426,7 @@ SCM STk_make_array(int rank, long *shape, SCM init)
      multipliers is rank *  sizeof(long).
      add them to size of data[]           */
   long metadata_size = elements_size + rank * 3;
-    
+
   register long i;
 
   SCM a;
@@ -405,7 +455,7 @@ SCM STk_make_array(int rank, long *shape, SCM init)
   s->offset           = 0L;     /* will be updated, see below */
 
   MUT_INIT(s->share_cnt_lock);
-  
+
   /* data begins right after the data pointer: */
   s->data_ptr = (SCM *)(&(s->data_ptr)) + 1;
 
@@ -521,7 +571,7 @@ DEFINE_PRIMITIVE("shape",srfi_25_shape,vsubr,(int argc, SCM *argv))
   /* shape of a shape is 0 d 0 2 */
   long *meta_shape = STk_must_malloc(4*sizeof(long));
   meta_shape[0]=0L;
-  meta_shape[1]=argc/2L; 
+  meta_shape[1]=argc/2L;
   meta_shape[2]=0L;
   meta_shape[3]=2L; /* two elements (start/end) */
 
@@ -533,7 +583,7 @@ DEFINE_PRIMITIVE("shape",srfi_25_shape,vsubr,(int argc, SCM *argv))
       if (INT_VAL(ARRAY_DATA(s)[2*i])  >  INT_VAL(ARRAY_DATA(s)[2*i+1])) {
           STk_error("shape has upper bound below lower bound");
       }
-  
+
   return s;
 }
 
@@ -541,10 +591,10 @@ DEFINE_PRIMITIVE("shape",srfi_25_shape,vsubr,(int argc, SCM *argv))
 DEFINE_PRIMITIVE("array", srfi_25_array, vsubr, (int argc, SCM *argv))
 {
     if (argc < 1) STk_error("not enough arguments");
-    
+
     SCM shape = *argv--;
     if (STk_srfi_25_shapep(shape) == STk_false) STk_error("bad array shape ~S",shape);
-    
+
     long *cshape = shapetoCshape(shape);
     long len = ARRAY_LENGTH(shape);
 
@@ -552,10 +602,10 @@ DEFINE_PRIMITIVE("array", srfi_25_array, vsubr, (int argc, SCM *argv))
     if (len > 0) {
         if (get_array_size(len/2,cshape) != (argc-1))
             STk_error("shape does not match argument count");
-        
+
     } else if (argc > 2) /* The empty array case: one or zero inits */
             STk_error("shape does not match argument count");
-    
+
     SCM a = STk_make_array(len/2, cshape, NULL);
 
     /* array, empty or not, with init. use it. */
@@ -565,7 +615,7 @@ DEFINE_PRIMITIVE("array", srfi_25_array, vsubr, (int argc, SCM *argv))
     /* empty array *without* init; use NULL (should this be #void?) */
     if ((len == 0) && (argc == 1))
         ARRAY_DATA(a)[0] = NULL;
-    
+
     return a;
 }
 
@@ -616,12 +666,12 @@ DEFINE_PRIMITIVE("array-ref", srfi_25_array_ref,vsubr, (int argc, SCM *argv))
        OR an array,  (array-set! A #1A((0 3)(i j k)) value),.
        So we need to check all these cases here.    */
 
-    register long index;
-    
+    register long index = 0;
+
     if (INTP(*argv)) {
         check_index_arguments(array, argc-1, argv);
         index = get_index_from_args(array, argc-1, argv);
-        
+
     } else if (VECTORP(*argv)) {
         if (VECTOR_SIZE(*argv)==0) {
             if (!ARRAY_DATA(array)[0]) STk_error("array ~S has no default value", array);
@@ -629,16 +679,16 @@ DEFINE_PRIMITIVE("array-ref", srfi_25_array_ref,vsubr, (int argc, SCM *argv))
         }
         check_index_vector(*argv, array);
         index = get_index_from_vector(array, *argv);
-        
+
     } else if (ARRAYP(*argv)) {
         check_index_array(*argv,array);
-        
+
         if (ARRAY_RANK(array) == 0)  {
             if (!ARRAY_DATA(array)[0]) STk_error("array ~S has no default value", array);
             return  ARRAY_DATA(array)[0];
         }
         index = get_index_from_array(array, *argv);
-        
+
     } else STk_error("Index must be vector, array or sequence of integers");
 
     return ARRAY_DATA(array)[index];
@@ -659,14 +709,14 @@ DEFINE_PRIMITIVE("array-set!", srfi_25_array_set,vsubr, (int argc, SCM *argv))
         ARRAY_DATA(array)[0] = *argv;
         return STk_void;
     }
-    
+
     /* SRFI-25 says indices can be split into args, (array-set! A i j k value)
        OR they can be in a vector, (array-set! A #(i j k) value),
        OR an array,  (array-set! A #1A((0 3)(i j k)) value),.
        So we need to check all these cases here.    */
 
-    register long index;
-    
+    register long index = 0;
+
     if (INTP(*argv)) {
         check_index_arguments(array, argc-2, argv);
         index = get_index_from_args(array, argc-2, argv);
@@ -680,10 +730,10 @@ DEFINE_PRIMITIVE("array-set!", srfi_25_array_set,vsubr, (int argc, SCM *argv))
         check_index_vector(*argv,array);
         index = get_index_from_vector(array, *argv);
         argv--; /* skip the vector with indices */
-        
+
     } else if (ARRAYP(*argv)) {
         check_index_array(*argv,array);
-        
+
         if (ARRAY_RANK(array) == 0) {
             argv--;
             ARRAY_DATA(array)[0] = *argv;
@@ -691,9 +741,9 @@ DEFINE_PRIMITIVE("array-set!", srfi_25_array_set,vsubr, (int argc, SCM *argv))
         }
         index = get_index_from_array(array, *argv);
         argv--; /* skip the array with indices */
-        
+
     } else STk_error("Index must be vector, array or sequence of integers");
-    
+
     ARRAY_DATA(array)[index] = *argv;
 
     return STk_void;
@@ -716,13 +766,13 @@ SCM *get_coefficients (SCM proc, int p)
       The affine map mentioned in the SRFI is a linear map plus a
       constant -- the linear map is identified by running proc
       on the canonical basis, so we identify the map coefficients.
-      
+
       # GIVEN:
-      
+
       new array indices      r1, r2, ..., rp
                 multipliers  n1, n2, ..., np
                 offset       f
-                
+
       old array indices      x1, x2, ..., xq
                 multipliers  m1, m2, ..., mq
                 offset       o
@@ -740,7 +790,7 @@ SCM *get_coefficients (SCM proc, int p)
       * MAP CONSTANTS are
 
       k_1 k_2 ... k_q
-      
+
       * MULTIPLIERS for the new array are:
 
       n1 = a_11 m1 + a_21 m2 + ... + a_q1 mq
@@ -749,35 +799,35 @@ SCM *get_coefficients (SCM proc, int p)
       np = a_1p m1 + a_2p m2 + ... + a_qp mq
 
       * OFFSET for the new array is:
-      
+
       f = o + m1 k1 + m2 k2 + ... + mq kq
     */
 
     /*
-     
+
       (proc r1=0 ... ri=1 ... rp=0) retruns Q values:
-      
+
       a_i1 + k_1,   a_i2 + k_2,   ... ,  a_iq + k_q
 
      */
-    
-    
+
+
     /* k_1 ... k_q  q = rank of old array */
     SCM k = STk_values2vector(STk_C_apply_list(proc, args),NULL);
     int q = VECTOR_SIZE(k);
-        
+
     /* coefs[i] is a vector with the a_j,i coefficients --
        the coefficient a_ji in the affine map */
     for (i=0; i < p; i++) {
 
         STk_list_set(args, MAKE_INT(i), one);
-        
+
         coefs[i] = STk_values2vector(STk_C_apply_list(proc, args),NULL);
-        
+
         for (j=0; j < q; j++)
             VECTOR_DATA(coefs[i])[j] = MAKE_INT(INT_VAL(VECTOR_DATA(coefs[i])[j]) -
                                                 INT_VAL(VECTOR_DATA(k)[j]));
-            
+
         STk_list_set(args, MAKE_INT(i), zero);
     }
     coefs[p] = k;
@@ -792,7 +842,7 @@ SCM *get_coefficients (SCM proc, int p)
        .
        p -> k_1 k_2 ... k_q
      */
-     
+
     return coefs;
 }
 
@@ -808,7 +858,7 @@ static void shared_array_inc_count(SCM array)
 
 /* Decreases the sare counter of an array. This is registered as a finalizer
    only for arrays that were build with share-array. */
-static void shared_array_dec_count(SCM array)
+static void shared_array_dec_count(SCM array,  void _UNUSED(*client_data))
 {
     struct array_obj *a = (struct array_obj *) array;
     MUT_LOCK(a->share_cnt_lock);
@@ -833,11 +883,11 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
 
     /* the number of elements that will be accessible from this array. */
     long elements_size = get_array_size(p,cshape);
-    
+
     /* mark old array as shared by one more array, OR of the original
-       array (the right thing will be done) */    
+       array (the right thing will be done) */
     shared_array_inc_count(old_array);
-    
+
     SCM a;
     NEWCELL_WITH_LEN(a, array,
                    sizeof(struct array_obj) +
@@ -869,11 +919,12 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
         for (j=0; j<q; j++)
             new_mult[i] += old_mult[j] * INT_VAL(VECTOR_DATA(coefs[i])[j]);
     }
-        
+
     struct array_obj *s = (struct array_obj *) a;
-    
+
     s->shared           = -1;
-    if (ARRAY_SHARE_COUNT(old_array) >= 0) /* original has the data */
+    //FIXME:egallesio original code was (ARRAY_SHARE_COUNT(old_array) >= 0)
+    if (*ARRAY_SHARE_COUNT(old_array) >= 0) /* original has the data */
         s->orig_share_count = &ARRAY_SHARED(old_array);
     else
         s->orig_share_count = ARRAY_SHARE_COUNT(old_array); /* original was already a copy, has pointer */
@@ -946,18 +997,18 @@ DEFINE_PRIMITIVE("array-shape",srfi_25_array_shape,subr1,(SCM array))
 
     long *ashape = ARRAY_SHAPE(array);
     int dim = 2 * ARRAY_RANK(array);
-        
+
     long *meta_shape = STk_must_malloc(4*sizeof(long));
     meta_shape[0]=0L;
     meta_shape[1]=ARRAY_RANK(array);
     meta_shape[2]=0L;
-    meta_shape[3]=2L;               
+    meta_shape[3]=2L;
 
     SCM shape = STk_make_array(2,meta_shape,NULL);
 
     for (int i = 0; i < dim; i++)
         ARRAY_DATA(shape)[i] = MAKE_INT(ashape[i]);
-        
+
     return shape;
 }
 
@@ -1004,16 +1055,16 @@ DEFINE_PRIMITIVE("array-copy+share",srfi_25_array_copy_share,subr1,(SCM old_arra
         sizeof(long*) +                /* multipliers */
         sizeof(SCM*) +                 /* data_ptr */
         ARRAY_SIZE(old_array);
-    
+
     NEWCELL_WITH_LEN(new_array, array, total_size);
-    
+
     struct array_obj *n = (struct array_obj *) new_array;
     struct array_obj *o = (struct array_obj *) old_array;
 
     memcpy(n,o, total_size);
 
     MUT_INIT(n->share_cnt_lock);
-    
+
     /* If old_array was not share-created, then we copied its data vector,
        and nobody points to the new copy. We created a fresh, non-shared array. */
     if (*ARRAY_SHARE_COUNT(old_array) >= 0)  *ARRAY_SHARE_COUNT(new_array)=0;
@@ -1022,7 +1073,7 @@ DEFINE_PRIMITIVE("array-copy+share",srfi_25_array_copy_share,subr1,(SCM old_arra
        original! :)
        We then increase the original array's share-counter. */
     if (*ARRAY_SHARE_COUNT(old_array) == -1) shared_array_inc_count(old_array);
-    
+
     return new_array;
 }
 
@@ -1080,7 +1131,7 @@ doc>
 DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM *argv))
 {
     if (argc < 2 || argc > 3) STk_error ("either 2 or 3 arguments needed");
-    
+
     SCM shape = *argv--;
     SCM proc  = *argv;
 
@@ -1088,12 +1139,12 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
     if (!CLOSUREP(proc)) STk_error("bad procedure ~S", proc);
 
     long * cshape = shapetoCshape(shape);
-    
+
     int rank = ARRAY_LENGTH(shape)/2;
     SCM idx; // the index vector -- may or mey not be used.
     int updated = 1;
     register int i, d, dim;
-    
+
     if (argc == 3) {
         argv--;
         SCM obj = *argv;
@@ -1111,9 +1162,9 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
             updated = 1;
             while(updated) {
                 updated = 0;
-                
+
                 STk_C_apply(proc,1,idx);
-                    
+
                 /* update idx vector */
                 for(d = rank - 1; d >= 0; d--)
                     if (INT_VAL(VECTOR_DATA(idx)[d]) < cshape[d*2+1] - 1) { /* we can increase */
@@ -1127,7 +1178,7 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
             }
             return STk_void;
 
-            
+
         } else if (ARRAYP(obj)) {
             /****************/
             /** ARRAY CASE **/
@@ -1144,17 +1195,17 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
             updated = 1;
             while(updated) {
                 updated = 0;
-                
+
                 STk_C_apply(proc,1,idx);
-                    
+
                 /* update idx vector */
                 for(d = rank - 1; d >= 0; d--)
-                    
+
                     if (INT_VAL(AREF1(idx, d)) < cshape[d*2+1] - 1) { /* we can increase */
                         ASET1(idx, d, MAKE_INT(INT_VAL(AREF1(idx, d))+1));
-                        for(i = d+1; i < rank; i++) 
+                        for(i = d+1; i < rank; i++)
                             ASET1(idx, i, MAKE_INT(cshape[i*2]));
-                        
+
                         updated=1;
                         break;
                     }
@@ -1171,7 +1222,7 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
             STk_error("length of shape (~S) is different fromm procedure arity (~S)",
                       MAKE_INT(rank),
                       MAKE_INT(CLOSURE_ARITY(proc)));
-        
+
         SCM idx = STk_makevect(rank,NULL);
 
         /* initialize idx with the lowest index for each dimension */
@@ -1180,9 +1231,9 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
 
         while(updated) {
             updated = 0;
-            
+
             STk_C_apply_list(proc, STk_vector2list(idx));
-        
+
             /* update idx vector */
             for(d = rank - 1; d >= 0; d--)
                 if (INT_VAL(VECTOR_DATA(idx)[d]) < cshape[d*2+1] - 1) { /* we can increase */
@@ -1244,7 +1295,7 @@ static void print_array(SCM array, SCM port, int mode)
 
    SCM idx = STk_makevect(rank,NULL);
    int dim;
-   
+
    /* initialize idx with the lowest values for all indices */
    for (dim = 0; dim < rank; dim++)
        VECTOR_DATA(idx)[dim] = MAKE_INT(ARRAY_SHAPE(array)[dim*2]);
@@ -1279,8 +1330,8 @@ static void print_array(SCM array, SCM port, int mode)
                STk_print(STk_srfi_25_array_ref(2, &args[1]), port, mode);
            else
                STk_error("array element is NULL, not a Scheme value -- this should not have happened!");
-           
-          
+
+
            /* update idx vector */
            for(int d = rank - 1; d >= 0; d--)
                if (INT_VAL(VECTOR_DATA(idx)[d]) < ARRAY_SHAPE(array)[d*2+1] - 1) { /* we can increase */
@@ -1299,9 +1350,29 @@ static void print_array(SCM array, SCM port, int mode)
 }
 
 
+static SCM test_equal_array(SCM x, SCM y)
+{
+  long lx, ly, i;
+  SCM *dx, *dy;
+
+  lx = ARRAY_SIZE(x); ly = ARRAY_SIZE(y);
+  if (lx == ly) {
+    dx = ARRAY_DATA(x);
+    dy = ARRAY_DATA(y);
+    for (i=0; i < lx;  i++) {
+      if (STk_equal(dx[i], dy[i]) == STk_false) return STk_false;
+    }
+    return STk_true;
+  }
+  return STk_false;
+}
+
+
+
 static struct extended_type_descr xtype_array = {
-  "array",
-  print_array
+  .name  = "array",
+  .print = print_array,
+  .equal = test_equal_array
 };
 
 
@@ -1314,7 +1385,9 @@ static struct extended_type_descr xtype_array = {
 MODULE_ENTRY_START("srfi-25")
 {
   SCM module =  STk_create_module(STk_intern("SRFI-25"));
-  DEFINE_XTYPE(array, &xtype_array);
+
+  /* Create a new type for arrays */
+  tc_array = STk_new_user_type(&xtype_array);
 
 
   ADD_PRIMITIVE_IN_MODULE(srfi_25_arrayp, module);
@@ -1328,7 +1401,7 @@ MODULE_ENTRY_START("srfi-25")
   ADD_PRIMITIVE_IN_MODULE(srfi_25_array_ref, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_25_array_set, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_25_share_array, module);
-  
+
   /* EXTRA procedures: */
   ADD_PRIMITIVE_IN_MODULE(srfi_25_shared_arrayp, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_25_array_share_count, module);
@@ -1336,7 +1409,7 @@ MODULE_ENTRY_START("srfi-25")
   ADD_PRIMITIVE_IN_MODULE(srfi_25_array_size, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_25_array_copy_share, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_25_shape_for_each, module);
-  
+
   STk_export_all_symbols(module);
 
 }
