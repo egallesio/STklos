@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 27-Mar-2021 02:33
-;;;; Last file update: 13-Apr-2021 18:38 (eg)
+;;;; Last file update: 13-Apr-2021 19:04 (eg)
 ;;;;
 
 
@@ -30,13 +30,20 @@
 (select-module SRFI-25)
 
 ;;
-;;  Finish array type constuction; plug a function to describe arrays
+;;  Finish array type constuction:
+;;    - plug a function to describe arrays
+;;    - provide a way to read arrays
 ;;
 (%user-type-proc-set! 'array 'describe
                       (lambda (x port)
                         (format port "an array of rank ~A and size ~A"
                                 (array-rank x)
                                 (array-size x))))
+
+;; reader for arrays
+(define-reader-ctor 'array array)
+(define-reader-ctor 'shape shape)
+
 
 ;; extra:
 ;;
@@ -270,12 +277,6 @@ doc>
 ;;   seems consistent with the other procedures.
 (define (tabulate-array! shape proc ind)
   (tabulate-array shape proc ind))
-
-;; reader for arrays
-(define-reader-ctor 'array
-  (lambda args
-    (apply array (apply shape (car args)) (cdr args))))
-
 
 (export array-for-each-index
         array->vector
