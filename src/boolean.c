@@ -258,6 +258,7 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
          (BOXED_TYPE(x) == BOXED_TYPE(y)))
        return STk_extended_eqv(x, y);
   }
+  /* What can we do else? */
   return STk_false;
 }
 
