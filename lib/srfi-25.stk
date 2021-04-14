@@ -1,0 +1,249 @@
+;;;;
+;;;; srfi-25.stk         -- SRFI-25: Multi-dimensional Array Primitives
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 27-Mar-2021 02:33
+;;;; Last file update: 04-Apr-2021 18:13 (jpellegrini)
+;;;;
+
+
+(load "srfi-25-impl")
+
+(select-module SRFI-25)
+
+;; extra:
+;;
+;;; (array-shape arr)        
+;;; (array-length arr dim)
+;;; (array-size arr)
+;;; (array-equal? arr1 arr2) 
+;;; (shape-for-each shp proc [ind])
+;;; (array-for-each-index arr proc [ind])
+;;; (tabulate-array shp proc)
+;;; (tabulate-array! shp proc ind)
+;;; (array-map [shp] proc arr0 arr1 ...)
+;;; (array-map! arr [shp] proc arr0 arr1 ...)
+;;; (array->vector arr) (array->list arr)
+
+;;; NOT implemented:
+;;; (share-array/prefix arr k ...) (share-row arr k) (share-column arr k)
+;;; (share-array/origin arr k ...) (share-array/origin arr ind)
+;;; (array-append dim arr0 arr1 ...)
+;;; (transpose arr dim ...)
+;;; (share-nths arr dim n)
+;;; (array-retabulate! arr shp proc [ind])
+
+
+#|
+<doc EXT array-length
+ * |(array-length array dim)|
+ *
+ * will return the length of dimension |dim| in array |array|.
+doc>
+|#
+(define (array-length arr dim)
+  (- (array-end arr dim)
+     (array-start arr dim)))
+
+#|
+<doc EXT array-for-each-index
+ *
+ * |(array-for-each-index arr proc [index-object])| will loop
+ * through all valid indices of array, applying |proc| to those
+ * indices.
+ *
+ * If |index-object| is not provided, then proc must accept
+ * as many arguments as the number of dimensions that the shape
+ * describes.
+ * If |index-object| is provided, it is used as a place to store the
+ * indices, so proc must accept a vector (this is to avoid pushing
+ * and popping too many values when calling proc).
+ * |index-object|, when present, must be aither a vector or array.
+ *
+ * See the documentation of |shape-for-each| for more information
+ * on |index-object|.
+doc>
+|#
+(define (array-for-each-index arr proc :optional (ind #f))
+  (if ind
+      (shape-for-each (array-shape arr) proc ind)
+      (shape-for-each (array-shape arr) proc)))
+
+
+#|
+<doc EXT array->vector
+ * (array->vector array)
+ *
+ * Returns a vector that contains a copy of the elements of |array|,
+ * in row-major order. The new vector does not share elements with
+ * the original array (it is a fresh copy).
+ * This is not recursive, and will not flatten the array.
+doc>
+|#
+(define (array->vector arr)
+  (let ((shape (array-shape arr))
+        (rank  (array-rank arr))
+        (len   (array-size arr)))
+    (let ((vec (make-vector len))
+          (arr-ind (make-vector rank))
+          (vec-ind 0))
+      (array-for-each-index arr
+                            (lambda (arr-ind)
+                              (vector-set! vec vec-ind (array-ref arr arr-ind))
+                              (set! vec-ind (+ 1 vec-ind)))
+                            arr-ind)
+      vec)))
+
+#|
+<doc EXT array->list
+ * (array->list array)
+ *
+ * Returns a list that contains a copy of the elements of |array|,
+ * in row-major order.
+ * This is not recursive, and will not flatten the array.
+doc>
+|#
+(define (array->list arr)
+  (vector->list (array->vector arr)))
+
+#|
+<doc EXT array-map!
+ * (array-map! array [shape] proc arr0 arr1 ...)
+ *
+ * For each valid index |idx|, applies proc to the corresponding
+ * position in |arr0|, |arr1|, ...  and then sets the same
+ * place in |array| to the result.
+ *
+ * If |shape| is specified, it should specify a subarray of
+ * |array|, and only that section will be mapped.
+|#
+(define (array-map! target shape-or-proc . more)
+  (when (< (length more) 1) (error "at least three arguments required, ~S provided"
+                                   (+ 3 (length more))))
+  
+  (when (not (array? target)) (error "bad array ~S" target))
+  
+    (let ((shape (if (shape? shape-or-proc) shape (array-shape target)))
+          (proc  (if (shape? shape-or-proc) (car more) shape-or-proc))
+          (args  (if (shape? shape-or-proc) (cdr more) more))
+          (idx-vec (make-vector (array-rank target))))
+    
+      (when (not (shape? shape))    (error "bad shape ~S" shape))
+      (when (not (procedure? proc)) (error "bad procedure ~S" proc))
+      
+      (shape-for-each shape
+                      (lambda (iv) ; idx-vec goes here
+                        (array-set! target
+                                    iv
+                                    (apply proc
+                                           (map (lambda (source)
+                                                  (array-ref source iv))
+                                                args))))
+                      idx-vec)))
+
+
+#|
+<doc EXT array-map
+ * (array-map [shape] proc arr0 arr1 ...)
+ *
+|#
+(define (array-map . args)
+  (when (< (length args) 2) (error "at least two arguments required, ~S provided"
+                                   (length args)))
+  
+  (let ((shape (cond ((shape? (car args))  ;; (array-map shape proc arr0 ...)
+                      (car args))
+                     
+                     ((array? (cadr args)) ;; (array-map proc arr0 ...)
+                      (array-shape (cadr args)))
+                     
+                     (else (error "first argument ~S is not a shape, but second ~S is not an array"
+                                  (car args) (cdr args))))))
+    (let ((new (make-array shape #void)))
+      (apply array-map! (cons new args))
+      new)))
+
+#|
+<doc EXT array-copy
+ * (array-copy array)
+ *
+ * Returns a copy of |array|.
+ * The new copy will have no data shared with any other array, even if the
+ * argument |array| did.
+|#
+(define (array-copy arr)
+  (array-map (lambda (x) x) arr))
+
+
+#|
+<doc EXT tabulate-array
+* (tabulate-array shape proc [idx])
+*
+* Returns a new array of shape |shape|, populated according
+* to |proc|. Each valid index in |shape| is passed to |proc|,
+* and the result is place in the according array position.
+*
+* |idx| is an object that may be used to store the indices, and
+* it may be either a vector or an array. If it is not present, or
+* if it is |\#f|, then an index vector will be created internally.
+doc>
+|#
+(define (tabulate-array shape proc :optional (ind #f))
+  ;; we use vector index objects always, regardless of what the
+  ;; user gave us. 
+  (let* ((arr (make-array shape)))
+    (cond ((or (vector? ind) (array? ind))
+           (lambda (idx) (array-set! arr idx (proc idx)))
+           (shape-for-each shape (lambda (idx) (array-set! arr
+                                                      idx
+                                                      (proc idx)))
+                           ind))
+          
+          ((not ind)
+           (shape-for-each shape (lambda idx (array-set! arr
+                                                    (list->vector idx)
+                                                    (apply proc idx)))))
+          
+          (else
+           (error "index object ~S is none of vector, array or #f" ind)))
+    arr))
+
+
+;; The following is here just for compatibility, requiring the third argument.
+;; * Racket only implements tabulate-array, and does not accept the index argument
+;; * Gauche implements tabulate-array, and accepts an optional ind argumet. This
+;;   seems consistent with the other procedures.
+(define (tabulate-array! shape proc ind)
+  (tabulate-array shape proc ind))
+
+  
+(export array-for-each-index
+        array->vector
+        array->list
+        array-map!
+        array-map
+        array-copy
+        tabulate-array)
+
+(select-module STklos)
+(import SRFI-25)
+
+(provide "srfi-25")
