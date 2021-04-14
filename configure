@@ -4934,7 +4934,7 @@ else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
 
-extraAC_PROG_LEX
+# AC_PROG_LEX
 
 # Extract the first word of "pkg-config", so it can be a program name with args.
 set dummy pkg-config; ac_word=$2
