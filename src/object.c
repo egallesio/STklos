@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update: 10-Apr-2021 18:44 (eg)
+ * Last file update: 15-Apr-2021 19:02 (eg)
  */
 
 #include "stklos.h"
@@ -555,7 +555,7 @@ DEFINE_PRIMITIVE("%slot-ref", undoc_slot_ref, subr2, (SCM obj, SCM slot_name))
 // {
 // #ifdef FIXME
 //    SCM old_val = get_slot_value(classe, obj, slot_name);
-// 
+//
 //   //FIXMOI:  if (old_val == STk_void)
 // #endif
 //     set_slot_value(classe, obj, slot_name, val);
@@ -1023,15 +1023,19 @@ DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
     case tc_struct_type:return (COND_TYPEP(obj)) ? Cond_type: Struct_type;
     case tc_struct:     return (CONDP(obj)) ? Cond : Struct;
     case tc_box:        return Box;
-    default:
-#ifdef FIXME
-      //XX      if (EXTENDEDP(obj))
-      //XX          return STk_extended_class_of(obj);
-      //XX    else
-#endif
-                        return (STk_procedurep(obj) == STk_true)? Procedure :
-                                                                  UnknownClass;
+  default: ;
   }
+
+  if (STk_procedurep(obj) == STk_true)
+    return Procedure;
+
+  if (HAS_EXTENDED_TYPEP(obj)) {
+    SCM tmp = STk_extended_class_of(obj);
+    if (tmp) return tmp;
+  }
+
+  /* Return class <unknown> */
+  return UnknownClass;
 }
 
 /* ==== I N S T A N C E S */

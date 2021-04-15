@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Mar-1995 11:31
- * Last file update: 13-Apr-2021 18:29 (eg)
+ * Last file update: 15-Apr-2021 19:15 (eg)
  */
 
 #include "stklos.h"
@@ -56,7 +56,6 @@ SCM STk_extended_eqv(SCM o1, SCM o2)
 {
   /* Assert: o1 and o2 have the same type */
   struct extended_type_descr *descr = BOXED_XTYPE(o1);
-
   return XTYPE_EQV(descr) ? (XTYPE_EQV(descr) (o1, o2)) : STk_false;
 }
 
@@ -64,7 +63,12 @@ SCM STk_extended_equal(SCM o1, SCM o2)
 {
   /* Assert: o1 and o2 have the same type */
   struct extended_type_descr *descr = BOXED_XTYPE(o1);
-   return XTYPE_EQUAL(descr) ? (XTYPE_EQUAL(descr) (o1, o2)) : STk_false;
+  return XTYPE_EQUAL(descr) ? (XTYPE_EQUAL(descr) (o1, o2)) : STk_false;
+}
+
+SCM STk_extended_class_of(SCM o)
+{
+  return XTYPE_CLASS_OF(BOXED_XTYPE(o));
 }
 
 // ----------------------------------------------------------------------
@@ -102,6 +106,11 @@ DEFINE_PRIMITIVE("%user-type-proc", user_type_proc, subr2, (SCM name, SCM key))
     SCM result = XTYPE_DESCRIBE(descr);
     return (result) ? result: STk_false;
   }
+  if (strcmp(SYMBOL_PNAME(key), "class-of") == 0) {
+    SCM result = XTYPE_CLASS_OF(descr);
+    return (result) ? result: STk_false;
+  }
+
   error_bad_key(key);
   return STk_void;  /* for the compiler */
 }
@@ -120,6 +129,10 @@ DEFINE_PRIMITIVE("%user-type-proc-set!", user_type_proc_set, subr3,
 
   if (strcmp(SYMBOL_PNAME(key), "describe") == 0) {
     XTYPE_DESCRIBE(descr) = proc;
+    return STk_void;
+  }
+  if (strcmp(SYMBOL_PNAME(key), "class-of") == 0) {
+    XTYPE_CLASS_OF(descr) = proc;
     return STk_void;
   }
   error_bad_key(key);

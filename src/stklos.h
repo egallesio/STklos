@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 13-Apr-2021 17:56 (eg)
+ * Last file update: 15-Apr-2021 19:02 (eg)
  */
 
 
@@ -542,7 +542,8 @@ struct extended_type_descr {
   void (*print)(SCM exp, SCM port, int mode);
   SCM  (*equal)(SCM o1, SCM o2);
   SCM  (*eqv)(SCM o1, SCM o2);
-  SCM  *describe_proc;
+  SCM  class_of;
+  SCM  describe_proc;
 };
 
 extern struct extended_type_descr *STk_xtypes[];
@@ -553,6 +554,7 @@ extern struct extended_type_descr *STk_xtypes[];
 #define XTYPE_PRINT(d)                   ((d)->print)
 #define XTYPE_EQUAL(d)                   ((d)->equal)
 #define XTYPE_EQV(d)                     ((d)->eqv)
+#define XTYPE_CLASS_OF(d)                ((d)->class_of)
 #define XTYPE_DESCRIBE(d)                ((d)->describe_proc)
 #define DEFINE_XTYPE(_type, _descr)      (STk_xtypes[CPP_CONCAT(tc_, _type)]=_descr)
 #define DEFINE_USER_TYPE(_type, _descr)  { _type = STk_new_user_type(_descr); }
@@ -560,6 +562,7 @@ extern struct extended_type_descr *STk_xtypes[];
 int STk_new_user_type(struct extended_type_descr *);
 SCM STk_extended_eqv(SCM o1, SCM o2);
 SCM STk_extended_equal(SCM o1, SCM o2);
+SCM STk_extended_class_of(SCM o);
 int STk_init_extend(void);
 
 /*
