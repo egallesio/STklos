@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 27-Mar-2021 02:33
-;;;; Last file update: 13-Apr-2021 19:04 (eg)
+;;;; Last file update: 16-Apr-2021 12:26 (eg)
 ;;;;
 
 
@@ -32,15 +32,25 @@
 ;;
 ;;  Finish array type constuction:
 ;;    - plug a function to describe arrays
+;;    - define a new class for arrays and plug it for class-of
 ;;    - provide a way to read arrays
 ;;
+
+;; Customize "describe"
 (%user-type-proc-set! 'array 'describe
                       (lambda (x port)
                         (format port "an array of rank ~A and size ~A"
                                 (array-rank x)
                                 (array-size x))))
+;; Customize "class-of"
+(define-class <array> (<top>) ())
+(export <array>)
 
-;; reader for arrays
+(%user-type-proc-set! 'array 'class-of <array>)
+
+
+
+;; Reader for arrays
 (define-reader-ctor 'array array)
 (define-reader-ctor 'shape shape)
 

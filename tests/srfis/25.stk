@@ -47,7 +47,7 @@
 ;;;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 29-Mar-2021 22:21 (jpellegrini)
-;;;; Last file update: 13-Apr-2021 20:02 (eg)
+;;;; Last file update: 16-Apr-2021 12:21 (eg)
 
 (define (tail n)
   (if (< n (length (past)))
@@ -926,3 +926,7 @@
 
 (test "srfi-25 eg.reader.6" #t (equal? (read-from-string "#,(array #,(shape 0 2 1 2 1 2) 0.0 0.0)")
                                        (make-array (shape 0 2  1 2 1 2) 0.)))
+
+
+(test "srfi-25 eg.class-of" <array> (class-of (make-array (shape 0 2  1 2 1 2) 0.)))
+
