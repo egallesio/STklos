@@ -47,7 +47,7 @@
 ;;;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 29-Mar-2021 22:21 (jpellegrini)
-;;;; Last file update: 16-Apr-2021 12:21 (eg)
+;;;; Last file update: 16-Apr-2021 14:30 (eg)
 
 (define (tail n)
   (if (< n (length (past)))
@@ -886,45 +886,45 @@
 
 ;; some tests for the reader.
 ;;
-(test "srfi-25 jp.reader.1" #t (array? (read-from-string "#,(array #,(shape))")))
-(test "srfi-25 jp.reader.2" 0 (array-rank (read-from-string "#,(array #,(shape))")))
-(test "srfi-25 jp.reader.3" 2 (array-rank (array-shape (read-from-string "#,(array #,(shape))"))))
-(test "srfi-25 jp.reader.4" #f (shared-array? (read-from-string "#,(array #,(shape))")))
+(test "srfi-25 jp.reader.1" #t (array? (read-from-string "#,(<array> ())")))
+(test "srfi-25 jp.reader.2" 0 (array-rank (read-from-string "#,(<array> ())")))
+(test "srfi-25 jp.reader.3" 2 (array-rank (array-shape (read-from-string "#,(<array> ())"))))
+(test "srfi-25 jp.reader.4" #f (shared-array? (read-from-string "#,(<array> ())")))
 
-(test "srfi-25 jp.reader.4" #t (array? (read-from-string "#,(array #,(shape 0 0 1 2))")))
-(test "srfi-25 jp.reader.5" 2 (array-rank (read-from-string "#,(array #,(shape 0 0 1 2))")))
-(test "srfi-25 jp.reader.6" 2 (array-rank (array-shape (read-from-string "#,(array #,(shape 0 0 1 2))"))))
-(test "srfi-25 jp.reader.7" #f (shared-array? (read-from-string "#,(array #,(shape 0 0 1 2))")))
+(test "srfi-25 jp.reader.4" #t (array? (read-from-string "#,(<array> (0 0 1 2))")))
+(test "srfi-25 jp.reader.5" 2 (array-rank (read-from-string "#,(<array> (0 0 1 2))")))
+(test "srfi-25 jp.reader.6" 2 (array-rank (array-shape (read-from-string "#,(<array> (0 0 1 2))"))))
+(test "srfi-25 jp.reader.7" #f (shared-array? (read-from-string "#,(<array> (0 0 1 2))")))
 
-(test "srfi-25 jp.reader.7" #t (array? (read-from-string "#,(array #,(shape 0 1 1 3) -1 -2)")))
-(test "srfi-25 jp.reader.8" 2 (array-rank (array-shape (read-from-string "#,(array #,(shape 0 1 1 3) -1 -2)"))))
-(test "srfi-25 jp.reader.9" 2 (array-rank (read-from-string "#,(array #,(shape 0 1 1 3) -1 -2)")))
-(test "srfi-25 jp.reader.10" #f (shared-array? (read-from-string "#,(array #,(shape 0 1 1 3) -1 -2)")))
+(test "srfi-25 jp.reader.7" #t (array? (read-from-string "#,(<array> (0 1 1 3) -1 -2)")))
+(test "srfi-25 jp.reader.8" 2 (array-rank (array-shape (read-from-string "#,(<array> (0 1 1 3) -1 -2)"))))
+(test "srfi-25 jp.reader.9" 2 (array-rank (read-from-string "#,(<array> (0 1 1 3) -1 -2)")))
+(test "srfi-25 jp.reader.10" #f (shared-array? (read-from-string "#,(<array> (0 1 1 3) -1 -2)")))
 
-(test "srfi-25 jp.reader.11" #t (array? (read-from-string "#,(array #,(shape 0 1 1 3 -2 0) -1 -2 -3 -4)")))
+(test "srfi-25 jp.reader.11" #t (array? (read-from-string "#,(<array> (0 1 1 3 -2 0) -1 -2 -3 -4)")))
 (test "srfi-25 jp.reader.12"
       '(-1 -2 -3 -4)
-      (array->list (read-from-string "#,(array #,(shape 0 1 1 3 -2 0) -1 -2 -3 -4)")))
+      (array->list (read-from-string "#,(<array> (0 1 1 3 -2 0) -1 -2 -3 -4)")))
 
-(test "srfi-25 jp.reader.13" 42 (array-ref (read-from-string "#,(array #,(shape) 42)")))
-(test/error "srfi-25 jp.reader.14" (array-ref (read-from-string "#,(array #,(shape))")))             ;; no default value
-(test/error "srfi-25 jp.reader.15" (array-ref (read-from-string "#,(array #,(shape 0 0 1 2))") 0 1)) ;; no possible indices
+(test "srfi-25 jp.reader.13" 42 (array-ref (read-from-string "#,(<array> () 42)")))
+(test/error "srfi-25 jp.reader.14" (array-ref (read-from-string "#,(<array> ())")))             ;; no default value
+(test/error "srfi-25 jp.reader.15" (array-ref (read-from-string "#,(<array> (0 0 1 2))") 0 1)) ;; no possible indices
 
 
-(test "srfi-25 eg.reader.1" #t (equal? (read-from-string "#,(array #,(shape))")
+(test "srfi-25 eg.reader.1" #t (equal? (read-from-string "#,(<array> ())")
                                        (array (shape))))
-(test "srfi-25 eg.reader.2" #t (equal? (read-from-string "#,(array #,(shape 0 1 1 3) -1 -2)")
+(test "srfi-25 eg.reader.2" #t (equal? (read-from-string "#,(<array> (0 1 1 3) -1 -2)")
                                        (array (shape 0 1 1 3) -1 -2)))
 
-(test "srfi-25 eg.reader.3" #t (equal? (read-from-string "#,(array #,(shape 0 1 1 3 -2 0) -1 -2 -3 -4)")
+(test "srfi-25 eg.reader.3" #t (equal? (read-from-string "#,(<array> (0 1 1 3 -2 0) -1 -2 -3 -4)")
                                        (array (shape 0 1 1 3 -2 0) -1 -2 -3 -4)))
 
-(test "srfi-25 eg.reader.4" #t (equal? (read-from-string "#,(array #,(shape 0 2 0 3) #void #void #void #void #void #void)")
+(test "srfi-25 eg.reader.4" #t (equal? (read-from-string "#,(<array> (0 2 0 3) #void #void #void #void #void #void)")
                                        (make-array (shape 0 2 0 3))))
-(test "srfi-25 eg.reader.5" #t (equal? (read-from-string "#,(array #,(shape 1 2 1 2 1 2) 7)")
+(test "srfi-25 eg.reader.5" #t (equal? (read-from-string "#,(<array> (1 2 1 2 1 2) 7)")
                                        (make-array (shape 1 2  1 2 1 2) 7)))
 
-(test "srfi-25 eg.reader.6" #t (equal? (read-from-string "#,(array #,(shape 0 2 1 2 1 2) 0.0 0.0)")
+(test "srfi-25 eg.reader.6" #t (equal? (read-from-string "#,(<array> (0 2 1 2 1 2) 0.0 0.0)")
                                        (make-array (shape 0 2  1 2 1 2) 0.)))
 
 

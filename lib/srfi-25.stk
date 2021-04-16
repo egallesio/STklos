@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 27-Mar-2021 02:33
-;;;; Last file update: 16-Apr-2021 12:26 (eg)
+;;;; Last file update: 16-Apr-2021 14:27 (eg)
 ;;;;
 
 
@@ -51,9 +51,9 @@
 
 
 ;; Reader for arrays
-(define-reader-ctor 'array array)
-(define-reader-ctor 'shape shape)
-
+(define-reader-ctor '<array>
+  (lambda args
+    (apply array (apply shape (car args)) (cdr args))))
 
 ;; extra:
 ;;

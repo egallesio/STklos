@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update: 13-Apr-2021 19:01 (eg)
+ * Last file update: 16-Apr-2021 13:54 (eg)
  */
 
 #include "stklos.h"
@@ -1267,7 +1267,7 @@ static void print_array(SCM array, SCM port, int mode)
    int rank = ARRAY_RANK(array);
 
    char buffer[100];
-   STk_puts("#,(array #,(shape ",port);
+   STk_puts("#,(<array> (",port);
 
    /* write the array shape */
    for (int i =0; i< rank; i++) {
