@@ -930,3 +930,15 @@
 
 (test "srfi-25 eg.class-of" <array> (class-of (make-array (shape 0 2  1 2 1 2) 0.)))
 
+
+(let ((arr (array (shape 0 2 0 3 0 2)
+                  -1 -2 -3 -4 -5 -6
+                  -7 -8 -9 -10 -11 -12)))
+  (test/error "srfi-25 jp.wrong-shape.1"
+              (share-array arr (shape 0 12) (lambda (x) (values x x x))))
+  (test/error "srfi-25 jp.wrong-shape.2"
+              (share-array arr (shape 0 3) (lambda (x) (values (- x) x x))))
+  (test/error "srfi-25 jp.wrong-shape.3"
+              (share-array arr (shape 0 2 0 3 0 2) (lambda (x y) (- x 1) y)))
+  (test/error "srfi-25 jp.wrong-shape.4"
+              (share-array arr (shape 0 2 0 3 0 2) (lambda (x y) (+ x 1) y))))
