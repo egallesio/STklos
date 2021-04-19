@@ -24,7 +24,7 @@ System
 
 .SH DESCRIPTION
 .B STklos
-is a free Scheme System (nearly) conform to R5RS. The aim of this
+is a free Scheme System (nearly) conforming to R5RS. The aim of this
 implementation is to be fast as well as light. The implementation is
 based on an ad-hoc Virtual Machine.
 .B STklos
@@ -33,7 +33,7 @@ in an application.
 .LP
 The salient points of STklos are:
 .IP "" 4
-- efficient and powerful object system based on CLOS providing:
+- an efficient and powerful object system based on CLOS providing:
 .IP "" 8
 + Multiple Inheritance,
 .IP "" 8
@@ -45,13 +45,13 @@ The salient points of STklos are:
 .IP "" 4
 - a simple to use module system
 .IP "" 4
-- implemanents the full tower of numbers defined in R5RS
+- implementing the full tower of numbers defined in R5RS
 .IP "" 4
-- easy connection to the GTK+ toolkit
+- an easy connection to the GTK+ toolkit
 .IP "" 4
-- Perl compatible regular expressions thanks to the PCRE package.
+- Perl compatible regular expressions thanks to the PCRE package
 .IP "" 4
-- tail recursive calls are properly implemented
+- properly implemented tail recursive calls
 
 .SH OPTIONS
 Here are the options available in the version @VERSION@ of
@@ -95,12 +95,12 @@ use a stack of \fBn\fR cells.
 .IP "--case-insensitive"
 be case insensitive as in R5RS (see below).
 .IP "-c, --case-sensitive"
-be case sensitive as in R7RS. This the default value (unless \fBstklos\fR
+be case sensitive as in R7RS. This is the default value (unless \fBstklos\fR
 has been built with the \fI--enable-case-insensitive\fR configure
 option). This option (and the previous one) permits to change the default
 behavior.
 .IP "-u yes|no, --utf8-encoding=yes|no"
-At ininitialisation time, \fBSTklos\fR infers the current locale from the
+At initialisation time, \fBSTklos\fR infers the current locale from the
 \fILC_ALL\fR variable. From the character encoding used in the selected
 locale, \fBSTklos\fR determines if UTF-8 should be used for representing
 strings.
@@ -117,12 +117,12 @@ as per SRFI-176, and exit.
 print this help and exit.
 .IP "--"
 This special option signals the end of the \fBstklos\fR command. The
-arguments placed after this option are taken program arguments,
+arguments placed after this option are taken as program arguments,
 even if they start with a "-" character.
 
 .SH NOTES
 
-Default case sensitivity depends of the way STklos as 
+Default case sensitivity depends on the way STklos is built.
 
 .SH ENVIRONMENT VARIABLES
 
@@ -155,5 +155,5 @@ starts. Use the \fB-q\fR to avoid the loading of this file.
 
 .LP
 The full documentation for
-.B stkos
+.B stklos
 is available at http://www.stklos.net/documentation.html
