@@ -556,7 +556,7 @@
 (test "srfi-25 jp 17.share.2" 0  (array-share-count orig))
 (define one (share-array orig
                          (shape 1 3 1 4)
-                         (lambda (x y) (values y x))))
+                         (lambda (x y) (values (- x 1) (- y 1)))))
 (test "srfi-25 jp 17.share.3" #t (shared-array? orig))
 (test "srfi-25 jp 17.share.4" 1  (array-share-count orig))
 (test "srfi-25 jp 17.share.5" #t (shared-array? one))
@@ -572,7 +572,7 @@
 (test "srfi-25 jp 17.share.12" -1 (array-share-count two))
 (define three (share-array one
                            (shape 0 2 0 3)
-                           (lambda (x y) (values y y))))
+                           (lambda (x y) (values 2 (+ y 1)))))
 (test "srfi-25 jp 17.share.13" #t (shared-array? orig))
 (test "srfi-25 jp 17.share.14" 3  (array-share-count orig))
 (test "srfi-25 jp 17.share.15" #t (shared-array? one))
@@ -1025,3 +1025,17 @@
                     -1  -3  -5  -7
                     -9 -11 -13 -15)
          (share-nths a 1 2)))
+
+
+
+(let ((arr (array (shape 0 2 0 3 0 2)
+                  -1 -2 -3 -4 -5 -6
+                  -7 -8 -9 -10 -11 -12)))
+  (test/error "srfi-25 jp.wrong-shape.1"
+              (share-array arr (shape 0 12) (lambda (x) (values x x x))))
+  (test/error "srfi-25 jp.wrong-shape.2"
+              (share-array arr (shape 0 3) (lambda (x) (values (- x) x x))))
+  (test/error "srfi-25 jp.wrong-shape.3"
+              (share-array arr (shape 0 2 0 3 0 2) (lambda (x y) (- x 1) y)))
+  (test/error "srfi-25 jp.wrong-shape.4"
+              (share-array arr (shape 0 2 0 3 0 2) (lambda (x y) (+ x 1) y))))

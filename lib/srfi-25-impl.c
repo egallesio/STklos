@@ -25,7 +25,7 @@
  */
 
 #include "stklos.h"
-
+#include <math.h>
 
 /*
   ------------------------------------------------------------------------------
@@ -55,6 +55,7 @@ struct array_obj {
 #define ARRAYP(p)            (BOXED_TYPE_EQ((p), tc_array))
 #define ARRAY_SHARED(p)      (((struct array_obj *) (p))->shared)
 #define ARRAY_SHARE_COUNT(p) (((struct array_obj *) (p))->orig_share_count)
+#define ARRAY_LOCK(p)        (((struct array_obj *) (p))->share_cnt_lock)
 #define ARRAY_SIZE(p)        (((struct array_obj *) (p))->size)
 #define ARRAY_LENGTH(p)      (((struct array_obj *) (p))->length)
 #define ARRAY_RANK(p)        (((struct array_obj *) (p))->rank)
@@ -302,24 +303,11 @@ void check_array_dim_bounds(SCM array, int given_index, int dim)
 /*****************/
 
 static inline long
-get_index_from_C_args(SCM array, int argc, int *argv)
+raw_get_index_from_C_args(long *mults, long offset, int argc, long *argv)
 {
-    register long index = ARRAY_OFFSET(array);
-    register long dim_idx;
-    for(register int i=0; i < argc; i++) {
-        dim_idx = *argv--; /* the index given by user for dimension i */
-        check_array_dim_bounds(array,  dim_idx,  i);
-        index +=  ARRAY_MULTS(array)[i] * dim_idx;
-    }
-    return index;
-}
-
-static inline long
-raw_get_index_from_C_args(SCM array, int argc, int *argv)
-{
-    register long index = ARRAY_OFFSET(array);
+    register long index = offset;
     for(register int i=0; i < argc; i++)
-        index +=  ARRAY_MULTS(array)[i] * (*argv--); /* the index given by user for dimension i */
+        index +=  mults[i] * (*argv++); /* the index given by user for dimension i */
     return index;
 }
 
@@ -382,9 +370,9 @@ get_index_from_array (SCM array, SCM idx_arr)
    The index, however, needs to be a lvalue (register variables won't work).
    Indices are NOT checked (we suppose that is done before using these. */
 
-#define AREF1(array, i) ( ARRAY_DATA(array) [ raw_get_index_from_C_args(array,1,&i) ] )
+#define AREF1(array, i) ( ARRAY_DATA(array) [ raw_get_index_from_C_args(ARRAY_MULTS(array),ARRAY_OFFSET(array),1,&i) ] )
 
-#define ASET1(array, i, val) { ARRAY_DATA(array) [ raw_get_index_from_C_args(array,1,&i) ] = val; }
+#define ASET1(array, i, val) { ARRAY_DATA(array) [ raw_get_index_from_C_args(ARRAY_MULTS(array),ARRAY_OFFSET(array),1,&i) ] = val; }
 
 
 /******************/
@@ -516,7 +504,7 @@ long * shapetoCshape(SCM shape)
     if (len%2) STk_error("bad array shape ~S", shape);
 
     /* shape could be a shared array, so we can't blindly traverse its data array. */
-    long *cshape = STk_must_malloc(len * sizeof(long));
+    long *cshape = STk_must_malloc_atomic(len * sizeof(long));
     long index;
     SCM arg[2];
 
@@ -569,7 +557,7 @@ DEFINE_PRIMITIVE("shape",srfi_25_shape,vsubr,(int argc, SCM *argv))
   if (argc % 2) STk_error("odd number of arguments (~S) given for shape", argc);
 
   /* shape of a shape is 0 d 0 2 */
-  long *meta_shape = STk_must_malloc(4*sizeof(long));
+  long *meta_shape = STk_must_malloc_atomic(4*sizeof(long));
   meta_shape[0]=0L;
   meta_shape[1]=argc/2L;
   meta_shape[2]=0L;
@@ -756,10 +744,13 @@ DEFINE_PRIMITIVE("array-set!", srfi_25_array_set,vsubr, (int argc, SCM *argv))
 
 SCM *get_coefficients (SCM proc, int p)
 {
-    SCM *coefs = STk_must_malloc((p+1) * sizeof(SCM));
+    /* although coefs is a pointer to SCM, the SCM objects should be
+       integers only, and neither VECTOR nor INT contain pointers,
+       so we use STk_must_malloc_atomic here. */
+    SCM *coefs = STk_must_malloc_atomic((p+1) * sizeof(SCM));
     SCM args = STk_vector2list(STk_makevect(p, MAKE_INT(0)));
     SCM zero = MAKE_INT(0);
-    SCM one = MAKE_INT(1);
+    SCM one  = MAKE_INT(1);
     int i, j;
 
     /*
@@ -846,8 +837,185 @@ SCM *get_coefficients (SCM proc, int p)
     return coefs;
 }
 
+/*
+  Given a procedure PROC and the number of arguments (or "array rank"):
+  - p of the new array
+  - q of the old array
+  this function creates a string that displays the affine map that
+  PROC implements for translating shapes.
 
-/* Increases the sare counter of an array. */
+  We try as much as possible to be memory-efficient, so we calculate the space
+  needed for the string.
+ */
+char *get_affine_map(SCM proc, int p, int q)
+{
+    SCM *c = get_coefficients(proc,p);
+
+    double dtotal = 0;
+    long size;
+    for (int i=0; i<p; i++)
+        for (int j=0; j<q; j++) {
+            size = INT_VAL(VECTOR_DATA(c[i])[j]);
+            dtotal += size < 2
+                ? 2
+                : ceil(log10((double) size)) + 1;
+        }
+    
+    SCM er = STk_makestring(6,"given");
+
+    long written = 0;
+    long total = (long) dtotal * 6 + 1;
+
+    char *buf = STk_must_malloc_atomic(total);
+    char *ptr = buf;
+
+    long val;
+    char *sign;
+    int nonzero;
+    for(long j=0; j<q; j++) {
+        nonzero = 0;
+        
+        written = snprintf(ptr, total-(ptr-buf),"x_%ld ->", j);
+        if (written < 0) return er;
+        ptr+=written;
+
+        for (long i=0; i<p; i++) {
+            val = INT_VAL(VECTOR_DATA(c[i])[j]);
+            if  (val != 0) {
+                
+                if (i == 0 && val > 0) sign = "";
+                else sign = (val < 0) ? "- " : "+ ";
+                
+                written = snprintf(ptr,total-(ptr-buf)," %s%ldy_%ld",sign,labs(INT_VAL(VECTOR_DATA(c[i])[j])),i);
+                if (written < 0) return er;
+                ptr += written;
+                nonzero=1;
+            }
+        }
+
+        /* the constant */
+        val = INT_VAL(VECTOR_DATA(c[p])[j]);
+        if (val || !nonzero) {
+
+            if (!nonzero && !val) sign = "";
+            else sign = (val < 0) ? "- " : "+ ";
+
+            written = snprintf(ptr, total - (ptr-buf), " %s%ld", sign, labs(val));
+            if (written < 0) return er;
+            ptr += written;
+        }
+        if (j != q-1) written = snprintf(ptr, total - (ptr-buf),"; ");
+        if (written < 0) return er;
+        ptr += written;
+    }
+    return buf;
+}
+
+/*
+  cvec2string returns a newly allocated string containing
+  a display of the values in vec:
+
+  vec[0]=10;
+  vec[1]=20;
+  vec[2]=30;
+  cvec2string(3, vec) => "(10 20 30)"
+
+  The amount of memory needed is calculated precisely.
+ */
+char *cvec2string(int n, long *vec)
+{
+    double dtotal = 0;
+    double size;
+
+    /* compute the number of digits we will print: */
+    for (int i=0; i<n; i++) {
+        size = vec[i] < 2
+            /* always add one for a space after the number */
+            ? 2 
+            : ceil(log10((double)(vec[i]))) + 1;
+        dtotal += size;
+    }
+    
+    long total = (long) dtotal;
+    char *s = STk_must_malloc_atomic(total+3);
+    char *p = s;
+    *p = '(';
+    p++;
+    int written = 1;
+
+    for(int i=0;  i<n;  i++,p++) {
+        written = snprintf(p,total-(s-p), "%ld", vec[i]);
+        p += written;
+        if (i==n-1)  *p = ')';
+        else         *p = ' ';
+    }
+    *p = '\0';
+
+    return s;
+}
+
+/* Verifies is cshape is compatible with the shape of array, which
+   has an underlying store of size elements.
+
+   This function will run all possible indices within cshape, generating
+   a long integer that would be an index to the data vector of array. If
+   this number is negative or >= size of the underlying vector, then we
+   return zero (false). Otherwise, we return one.
+ */
+void check_array_shape_compatible(int new_rank, long *new_shape,
+                                  int old_rank, long *old_shape,
+                                  SCM proc,
+                                  long offset, long *mults,
+                                  long size)
+{
+    long index;
+    long *idx = STk_must_malloc_atomic(new_rank);
+    
+    if (new_rank == 0) return; /* always compatible with any shape */
+    
+    for (int i=0; i<new_rank; i++) {
+        if (new_shape[2*i] == new_shape[2*i+1]) return; /* no usable indices, compatible with anything */
+        idx[i] = new_shape[2*i]; /* lower bound */
+    }
+
+    int updated = 1;
+    while(updated) {
+        updated = 0;
+                    
+        index = raw_get_index_from_C_args(mults, offset,new_rank,&idx[0]);
+
+        if ( index < 0 || (index >= size) ) {
+            char *ns = cvec2string(2*new_rank,new_shape);
+            char *os = cvec2string(2*old_rank,old_shape);
+            char *map = get_affine_map(proc,new_rank, old_rank);
+            char *id  = cvec2string(new_rank,idx);
+            char *buf = STk_must_malloc_atomic(strlen(ns)+
+                                               strlen(os)+
+                                               strlen(map)+
+                                               strlen(id)+1);
+
+            sprintf(buf,"Shape %s does not map to shape %s under mapping %s. \
+Index %s for the new array goes out of bounds in the original array.",
+                    ns, os, map, id);
+
+            STk_error(buf);
+        }
+        
+        /* update idx vector */
+        for(int d = new_rank - 1; d >= 0; d--) {
+            if (idx[d] < new_shape[d*2+1] - 1) { /* we can increase */
+                idx[d]++;
+                for(int i = d+1; i < new_rank; i++) {
+                    idx[i] = new_shape[2*i];
+                }
+                updated=1;
+                break;
+            }
+        }
+    }
+}
+
+/* Increases the share counter of an array. */
 static void shared_array_inc_count(SCM array)
 {
     struct array_obj *a = (struct array_obj *) array;
@@ -867,6 +1035,8 @@ static void shared_array_dec_count(SCM array,  void _UNUSED(*client_data))
 };
 
 
+EXTERN_PRIMITIVE("array-shape",srfi_25_array_shape,subr1,(SCM array));  /* will be used in share-array */
+
 DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM new_shape, SCM proc))
 {
     if (!ARRAYP(old_array)) STk_error("bad array ~S", old_array);
@@ -883,10 +1053,6 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
 
     /* the number of elements that will be accessible from this array. */
     long elements_size = get_array_size(p,cshape);
-
-    /* mark old array as shared by one more array, OR of the original
-       array (the right thing will be done) */
-    shared_array_inc_count(old_array);
 
     SCM a;
     NEWCELL_WITH_LEN(a, array,
@@ -907,23 +1073,26 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
     /* multipliers */
     long *old_mult = ARRAY_MULTS(old_array);
 
-    SCM *coefs = get_coefficients(proc, p );
+    SCM *coefs = get_coefficients(proc, p);
 
     long offset = ARRAY_OFFSET(old_array);
     for (i=0; i<q; i++)
         offset += old_mult[i] * INT_VAL(VECTOR_DATA(coefs[p])[i]);
 
-    long *new_mult = STk_must_malloc(p * sizeof(long));
+    long *new_mult = STk_must_malloc_atomic(p * sizeof(long));
     for (i=0; i<p; i++) {
         new_mult[i] = 0L;
         for (j=0; j<q; j++)
             new_mult[i] += old_mult[j] * INT_VAL(VECTOR_DATA(coefs[i])[j]);
     }
 
+    check_array_shape_compatible(p, cshape,
+                                 q, ARRAY_SHAPE(old_array),
+                                 proc, offset, new_mult, ARRAY_SIZE(old_array));
+
     struct array_obj *s = (struct array_obj *) a;
 
     s->shared           = -1;
-    //FIXME:egallesio original code was (ARRAY_SHARE_COUNT(old_array) >= 0)
     if (*ARRAY_SHARE_COUNT(old_array) >= 0) /* original has the data */
         s->orig_share_count = &ARRAY_SHARED(old_array);
     else
@@ -935,8 +1104,11 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
     s->shape            = cshape;
     s->multipliers      = new_mult;
     s->data_ptr         = ARRAY_DATA(old_array);
+    s->share_cnt_lock   = ARRAY_LOCK(old_array);
 
-    MUT_INIT(s->share_cnt_lock);
+    /* mark old array as shared by one more array, OR of the original
+       array (the right thing will be done) */
+    shared_array_inc_count(old_array);
 
     STk_register_finalizer(a, shared_array_dec_count);
 
@@ -998,7 +1170,7 @@ DEFINE_PRIMITIVE("array-shape",srfi_25_array_shape,subr1,(SCM array))
     long *ashape = ARRAY_SHAPE(array);
     int dim = 2 * ARRAY_RANK(array);
 
-    long *meta_shape = STk_must_malloc(4*sizeof(long));
+    long *meta_shape = STk_must_malloc_atomic(4*sizeof(long));
     meta_shape[0]=0L;
     meta_shape[1]=ARRAY_RANK(array);
     meta_shape[2]=0L;
@@ -1141,7 +1313,7 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
     long * cshape = shapetoCshape(shape);
 
     int rank = ARRAY_LENGTH(shape)/2;
-    SCM idx; // the index vector -- may or mey not be used.
+    SCM idx; // the index vector -- may or may not be used.
     int updated = 1;
     register int i, d, dim;
 
@@ -1188,7 +1360,7 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
             /* initialize idx with the lowest index for each dimension.
                since we're working on a n array, we need to first get the index into its
                internal data. */
-            int i, dim, d;
+            long i, d, dim;
             for (dim = 0; dim < rank; dim++)
                 ASET1(idx, dim, MAKE_INT(cshape[dim*2]));
 
