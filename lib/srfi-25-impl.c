@@ -1542,7 +1542,6 @@ static SCM test_equal_array(SCM x, SCM y)
     for (i=0; i < rx;  i++) {
       if (sx[i]!= sy[i]) return STk_false;
     }
-
     return STk_true;
   }
   return STk_false;
