@@ -1523,11 +1523,12 @@ static void print_array(SCM array, SCM port, int mode)
 
 static SCM test_equal_array(SCM x, SCM y)
 {
-  long lx, ly, rx, ry, i;
+  long ix, iy, lx, ly, rx, ry, i;
   SCM *dx, *dy;
   long *sx, *sy;
+  SCM data_x, data_y;
 
-  lx = ARRAY_SIZE(x); ly = ARRAY_SIZE(y);
+  lx = ARRAY_LENGTH(x); ly = ARRAY_LENGTH(y);
   rx = ARRAY_RANK(x); ry = ARRAY_RANK(y);
   if (lx == ly && rx == ry) {
     dx = ARRAY_DATA(x);
@@ -1535,14 +1536,58 @@ static SCM test_equal_array(SCM x, SCM y)
     sx = ARRAY_SHAPE(x);
     sy = ARRAY_SHAPE(y);
 
-    for (i=0; i < lx;  i++) {
-      if (STk_equal(dx[i], dy[i]) == STk_false) return STk_false;
-    }
-
-    for (i=0; i < rx;  i++) {
+    for (i=0; i < rx;  i++) 
       if (sx[i]!= sy[i]) return STk_false;
+
+    /* check for empty arrays */
+   int empty = 0;
+   for (int d=0; d<rx; d++)
+       if (sx[d*2] == sx[d*2+1]) {
+           empty = 1;
+           break;
+       }
+
+    if ( (rx==0) || empty) {
+        /* if none of them have elements, they're equal! */
+        if (!dx[0] && !dy[0]) return STk_true;
+        
+       /* empty arrays may have a default value. we compare it here. */
+        if (dx[0] && dy[0])
+            if (STk_equal(dx[0], dy[0]) == STk_true) return STk_true;
+    } else {
+        
+        /* idx is the vector that will be used as index for the two arrays: */
+        SCM idx = STk_makevect(rx,NULL);
+
+        /* initialize idx with the lowest values for all indices */
+        for (int dim = 0; dim < rx; dim++)
+            VECTOR_DATA(idx)[dim] = MAKE_INT(sx[dim*2]);
+
+        int updated = 1;
+        while(updated) {
+            updated = 0;
+            
+            /* now we compare two elements at the same index: */
+            ix = get_index_from_vector(x, idx);
+            iy = get_index_from_vector(y, idx);
+            data_x = dx[ix];
+            data_y = dy[iy];
+            
+            if (STk_equal(data_x, data_y) == STk_false) return STk_false;
+            
+            /* update idx vector */
+            for(int d = rx - 1; d >= 0; d--)
+                if (INT_VAL(VECTOR_DATA(idx)[d]) < sx[d*2+1] - 1) { /* we can increase */
+                    VECTOR_DATA(idx)[d] = MAKE_INT(INT_VAL(VECTOR_DATA(idx)[d])+1);
+                    for(i = d+1; i < rx; i++) {
+                        VECTOR_DATA(idx)[i] = MAKE_INT(sx[i*2]);
+                    }
+                    updated=1;
+                    break;
+                }
+        }
+        return STk_true;
     }
-    return STk_true;
   }
   return STk_false;
 }

@@ -1051,9 +1051,9 @@
        (c (share-array a
                        (shape 0 4)
                        (lambda (i) (* 2 i)))))
-  (test "srfi-25 jp.array-equal?.1"
-        #f
-        (equal? b c))
-  (test "srfi-25 jp.array-equal?.2"
-        #t
-        (array-equal? b c)))
+  (test "srfi-25 jp.array-equal?.1" #t (equal? b c)))
+
+(let* ((a (array (shape 0 8) '(a b) -2 -3 -4 -5 -6 -7 -8))
+       (b (array (shape 0 4) (list 'a 'b) -3 -5 -7))
+       (c (share-array a (shape 0 4) (lambda (x) (* x 2)))))
+  (test "srfi-25 jp.equal?.2" #t (equal? b c)))
