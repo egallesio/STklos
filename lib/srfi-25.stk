@@ -63,6 +63,8 @@
         tabulate-array
         tabulate-array!
 
+        array-equal?
+        
         array-retabulate!
         share-row
         share-column
@@ -671,7 +673,20 @@ doc>
                     (cons (+ b (* n (- (car ks) b))) (cdr ks))
                     (cons (car ks) (d/nk (+ u 1) (cdr ks))))))))))
 
-
+(define (array-equal? a b)
+  (if (equal? (array->list (array-shape a))
+              (array->list (array-shape b)))
+      (let ((vec (make-vector (array-rank a) 0)))
+        (call/cc (lambda (return)
+                   (shape-for-each (array-shape a)
+                                   (lambda (idx)
+                                     (if (not (equal? (array-ref a idx)
+                                                      (array-ref b idx)))
+                                         (return #f)))
+                                   vec)))
+        #t)
+      #f))
+        
 (select-module STklos)
 (import SRFI-25)
 
