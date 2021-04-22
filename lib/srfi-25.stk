@@ -673,6 +673,17 @@ doc>
                     (cons (+ b (* n (- (car ks) b))) (cdr ks))
                     (cons (car ks) (d/nk (+ u 1) (cdr ks))))))))))
 
+
+#|
+<doc EXT array-equal?
+ * (array-equal? a b)
+ *
+ * Verifies if arrays |a| and |b| have the same shape and
+ * the same addressable elements. This is different from |equal?|,
+ * because |equal?| will check the internal data for the arrays;
+ * |array-equal?| works for shared arrays. 
+doc>
+|#
 (define (array-equal? a b)
   (if (equal? (array->list (array-shape a))
               (array->list (array-shape b)))
