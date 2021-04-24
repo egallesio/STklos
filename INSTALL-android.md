@@ -62,8 +62,14 @@ to forward TCP connections so we can ssh into the device.
 
 ## Set up sshd in Termux
 
-Open Termux in the Android device and prepare it to accept
-ssh connections:
+Open Termux in the Android device and update its packages.
+
+```
+pkg update
+pkg upgrade
+```
+
+Now prepare it to accept ssh connections:
 
 ```
 pkg install openssh
@@ -121,7 +127,11 @@ lrwxrwxrwx 1 u0_a196 u0_a196 28 Jun 28 07:33 pictures -> /storage/emulated/0/Pic
 lrwxrwxrwx 1 u0_a196 u0_a196 19 Jun 28 07:33 shared -> /storage/emulated/0
 ```
 
-Then `cd storage/external-1` and you will be in the SD card directory (you won't
+If you get a "permission denied" error, or if the `storage/` directory was not
+created, please try revoking and granting again permissions to the Termux app
+in your Android configuration (see https://wiki.termux.com/wiki/Termux-setup-storage).
+
+Now `cd storage/external-1` and you will be in the SD card directory (you won't
 see the contents of the SD card there, Android doesn't let you do that -- but
 you are in a directory specifically created for Termux in your extenal SD card).
 
@@ -133,7 +143,13 @@ After ssh-ing into the device, install the build tools. Termux does not have gcc
 apt install libgc libpcreposix make clang git autoconf automake
 ```
 
-Configure: in order to install STklos for usage within Termuc, we use the prefix as below.
+Of course, clone the repository (or you can download a release tarball and extract it):
+
+```
+git clone https://github.com/egallesio/STklos
+```
+
+Configure: in order to install STklos for usage within Termux, we use the prefix as below.
 
 ```
 ./configure --prefix=/data/data/com.termux/files/usr/
