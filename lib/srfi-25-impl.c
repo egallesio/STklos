@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update: 26-Apr-2021 11:14 (eg)
+ * Last file update: 26-Apr-2021 12:10 (eg)
  */
 
 #include "stklos.h"
@@ -208,7 +208,7 @@ EXTERN_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj));
 
  * the element position may be specifed as arguments, as
    elements in a vector, or as elements in an array.
-   This requires one more "if"...
+  > This requires one more "if"...
  * arrays may be empty, and may or not have a default value.
    More checks.
    This also requires us to store a single element, even
@@ -1523,16 +1523,26 @@ static void print_array(SCM array, SCM port, int mode)
 
 static SCM test_equal_array(SCM x, SCM y)
 {
-  long lx, ly, i;
+  long lx, ly, rx, ry, i;
   SCM *dx, *dy;
+  long *sx, *sy;
 
   lx = ARRAY_SIZE(x); ly = ARRAY_SIZE(y);
-  if (lx == ly) {
+  rx = ARRAY_RANK(x); ry = ARRAY_RANK(y);
+  if (lx == ly && rx == ry) {
     dx = ARRAY_DATA(x);
     dy = ARRAY_DATA(y);
+    sx = ARRAY_SHAPE(x);
+    sy = ARRAY_SHAPE(y);
+
     for (i=0; i < lx;  i++) {
       if (STk_equal(dx[i], dy[i]) == STk_false) return STk_false;
     }
+
+    for (i=0; i < rx;  i++) {
+      if (sx[i]!= sy[i]) return STk_false;
+    }
+
     return STk_true;
   }
   return STk_false;

@@ -47,7 +47,7 @@
 ;;;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 29-Mar-2021 22:21 (jpellegrini)
-;;;; Last file update: 22-Apr-2021 14:01 (eg)
+;;;; Last file update: 26-Apr-2021 12:14 (eg)
 
 (define (tail n)
   (if (< n (length (past)))
@@ -1039,3 +1039,9 @@
               (share-array arr (shape 0 2 0 3 0 2) (lambda (x y) (- x 1) y)))
   (test/error "srfi-25 jp.wrong-shape.4"
               (share-array arr (shape 0 2 0 3 0 2) (lambda (x y) (+ x 1) y))))
+
+(let ((a (array (shape 0 2 0 2) 'a 'b 'c 'd))
+      (b (array (shape 0 4) 'a 'b 'c 'd)))
+  (test "srfi-25 jp.unequal-shapes"
+        #f
+        (equal? a b)))
