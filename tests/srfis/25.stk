@@ -47,7 +47,7 @@
 ;;;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 29-Mar-2021 22:21 (jpellegrini)
-;;;; Last file update: 26-Apr-2021 12:14 (eg)
+;;;; Last file update: 26-Apr-2021 14:59 (eg)
 
 (define (tail n)
   (if (< n (length (past)))
@@ -940,24 +940,24 @@
 (let ((a (array (shape 0 2 0 2 0 2) -1 -2 -3 -4 -5 -6 -7 -8)))
   (test "srfi-25 jp.share-row.1"
         #,(<array> (0 2 0 2) -1 -2 -3 -4)
-        (array-copy (share-row a 0)))
+        (share-row a 0))
 
   (test "srfi-25 jp.share-row.2"
         #,(<array> (0 2 0 2) -5 -6 -7 -8)
-        (array-copy (share-row a 1)))
+        (share-row a 1))
 
   (test "srfi-25 jp.share-col.1"
-        (array-copy (share-column a 0))
+        (share-column a 0)
         #,(<array> (0 2 0 2) -1 -2 -5 -6))
 
   (test "srfi-25 jp.share-col.2"
-        (array-copy (share-column a 1))
+        (share-column a 1)
         #,(<array> (0 2 0 2) -3 -4 -7 -8)))
 
 (let ((a (array (shape 0 2 0 2 ) -1 -2 -3 -4)))
   (test "srfi-25 jp.share-array/origin"
         #,(<array> (1 3 1 3) -1 -2 -3 -4)
-        (array-copy (share-array/origin  a 1 1))))
+        (share-array/origin  a 1 1)))
 
 
 (let ((a (array (shape 0 2 0 3) 11 22 33 44 55 66))
@@ -984,7 +984,7 @@
                    -2 -6 -10 -14
                    -3 -7 -11 -15
                    -4 -8 -12 -16)
-        (array-copy (transpose a))))
+        (transpose a)))
 
 
 (let ((a (array (shape 0 3 0 3 0 2)
@@ -1008,7 +1008,7 @@
                    -2  -8 -14
                    -4 -10 -16
                    -6 -12 -18)
-        (array-copy (transpose a))))
+        (transpose a)))
 
 (let ((a (array (shape 0 4 0 4)
                 -1 -2 -3 -4
@@ -1019,12 +1019,12 @@
         #,(<array> (0 2 0 4)
                    -1  -2  -3  -4
                    -9 -10 -11 -12)
-            (array-copy (share-nths a 0 2)))
+        (share-nths a 0 2))
   (test  "srfi-25 jp.share-nths.2"
          #,(<array> (0 4 0 2)
                     -1  -3  -5  -7
                     -9 -11 -13 -15)
-         (array-copy (share-nths a 1 2))))
+         (share-nths a 1 2)))
 
 
 
@@ -1045,3 +1045,15 @@
   (test "srfi-25 jp.unequal-shapes"
         #f
         (equal? a b)))
+
+(let* ((a (array (shape 0 8) -1 -2 -3 -4 -5 -6 -7 -8))
+       (b (array (shape 0 4) -1 -3 -5 -7))
+       (c (share-array a
+                       (shape 0 4)
+                       (lambda (i) (* 2 i)))))
+  (test "srfi-25 jp.array-equal?.1" #t (equal? b c)))
+
+(let* ((a (array (shape 0 8) '(a b) -2 -3 -4 -5 -6 -7 -8))
+       (b (array (shape 0 4) (list 'a 'b) -3 -5 -7))
+       (c (share-array a (shape 0 4) (lambda (x) (* x 2)))))
+  (test "srfi-25 jp.equal?.2" #t (equal? b c)))

@@ -104,7 +104,6 @@
 ;;; (array-shape arr)
 ;;; (array-length arr dim)
 ;;; (array-size arr)
-;;; (array-equal? arr1 arr2)
 ;;; (shape-for-each shp proc [ind])
 ;;; (array-for-each-index arr proc [ind])
 ;;; (tabulate-array shp proc)
