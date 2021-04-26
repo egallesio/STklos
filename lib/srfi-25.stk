@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 27-Mar-2021 02:33
-;;;; Last file update: 26-Apr-2021 11:28 (eg)
+;;;; Last file update: 26-Apr-2021 15:18 (eg)
 ;;;;
 
 
@@ -97,6 +97,12 @@
   (lambda args
     (apply array (apply shape (car args)) (cdr args))))
 
+
+(%compile-time-define  shape          array-shape    array
+                       array-rank     array-set!     make-array
+                       array-ref      array-end      array-start
+                       shape-for-each array?         shape?
+                       share-array    array-size)
 
 ;; EXTRA: almost all procdures in arlib.scm, not part of the
 ;;        SRFI spec but included with the reference implementation.
