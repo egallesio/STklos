@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  2-Apr-2021 17:14 (eg)
+;;;; Last file update: 26-Apr-2021 17:03 (eg)
 ;;;;
 
 
@@ -870,7 +870,7 @@ doc>
            (let ((limit  (gensym))
                  (result (if (null? result) (list '(void)) result)))
              `(let ((,limit ,count))
-                (do ((,var 0 (+ ,var 1)))
+                (do ((,var 0 (fx+ ,var 1)))
                     ((>= ,var ,limit) ,@result)
                   ,@body))))
          bindings))
