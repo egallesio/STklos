@@ -17,7 +17,7 @@ STklos Reference Manual<hr align="center" width="10%">12. Foreign Function Inter
 <td align="left" valign="top" width="20%" bgcolor="#204875">
 <table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-51725">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-52974">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -41,7 +41,7 @@ STklos Reference Manual<hr align="center" width="10%">12. Foreign Function Inter
 defined to allow an easy access to functions written in C without
 needing to build C-wrappers and, consequently, without any need to
 write C code.  Note that the FFI is very machine dependent and that it
-works only on a limited set of architectures/systems <a href="#fn--footnote-49338"><sup><small>1</small></sup></a>. Moreover,
+works only on a limited set of architectures/systems <a href="#fn--footnote-49422"><sup><small>1</small></sup></a>. Moreover,
 since FFI allows very low level access, it is easy to crash the
 <span style="font-variant: small-caps">STklos</span> VM when using an external C function.</p><p><strong>Note that the support for FFI is still minimal and that it will
 evolve in future versions.</strong></p><p>The definition of an external function is done with the
@@ -74,7 +74,7 @@ between the C and the Scheme worlds.</p><br id="FFI-types"><a name="FFI-types"><
 <strong>Fig. 2:</strong> FFI types</center>
 <br>
 <br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="define-external"></a><a name="--index-entry-49427"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="define-external"></a><a name="--index-entry-49511"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(define-external name parameters option)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> syntax</i></font></td></tr>
 </tbody></table>
 <br />The form <code>define-external</code> binds a new procedure to <code>name</code>.
@@ -157,12 +157,12 @@ as within C prototypes.</li>
 interaction with the GC</strong></div><div class='footnotes'>
 <hr>
 <b>Note:</b><br>
-<a name="fn--footnote-49338"><sup><small>1</small></sup></a>: FFI
+<a name="fn--footnote-49422"><sup><small>1</small></sup></a>: FFI
 system should works on the following architectures/systems:
 gcc_ppc_osx, gcc_sparc_unix, gcc_x64_unix, gcc_x86_unix.
 <br>
 </div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Fri Apr  2 17:19:14 2021</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Mon Apr 26 11:33:46 2021</em></small>
 </body>
 </html>

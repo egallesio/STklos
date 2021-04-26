@@ -17,7 +17,7 @@ STklos Reference Manual<hr align="center" width="10%">14. SRFIs</div>
 <td align="left" valign="top" width="20%" bgcolor="#204875">
 <table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-51725">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-52974">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -59,361 +59,369 @@ information on each SRFI, please look at the official
 <a  class="http" href="http://srfi.schemers.org">SRFI site</a>.</p><div class="sectiondiv"><div class="sectiontitle"><a name="Supported-SRFIs"></a>
 <h3 id="Supported-SRFIs">14.1 Supported SRFIs</h3>
 </div>
-<div class="sectionbody"><p><span style="font-variant: small-caps">STklos</span> supports <strong>88</strong> finalized SRFIS.  Some of
+<div class="sectionbody"><p><span style="font-variant: small-caps">STklos</span> supports <strong>90</strong> finalized SRFIS.  Some of
 these SRFIS are <em>embedded</em> and some are <em>external</em>.  An
 <em>embedded</em> SRFI can be directly used without any particular action,
 whereas an <em>external</em> needs to be loaded.</p><p>The following SRFIS are implemented:</p><ul><li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-0/srfi-0.html">SRFI-0</a></strong>
         --
         <em>Feature-based conditional expansion construct</em>
-        <em>(embedded)</em> <a name="--index-entry-50280"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50447"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-1/srfi-1.html">SRFI-1</a></strong>
         --
         <em>List Library</em>
-        <em>(external)</em> <a name="--index-entry-50290"></a></li>
+        <em>(external)</em> <a name="--index-entry-50457"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-2/srfi-2.html">SRFI-2</a></strong>
         --
         <em>AND-LET*: an AND with local bindings, a guarded LET* special form</em>
-        <em>(external)</em> <a name="--index-entry-50300"></a></li>
+        <em>(external)</em> <a name="--index-entry-50467"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-4/srfi-4.html">SRFI-4</a></strong>
         --
         <em>Homogeneous numeric vector datatypes</em>
-        <em>(external)</em> <a name="--index-entry-50310"></a></li>
+        <em>(external)</em> <a name="--index-entry-50477"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-5/srfi-5.html">SRFI-5</a></strong>
         --
         <em>A compatible let form with signatures and rest arguments</em>
-        <em>(external)</em> <a name="--index-entry-50320"></a></li>
+        <em>(external)</em> <a name="--index-entry-50487"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-6/srfi-6.html">SRFI-6</a></strong>
         --
         <em>Basic String Ports</em>
-        <em>(embedded)</em> <a name="--index-entry-50330"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50497"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-7/srfi-7.html">SRFI-7</a></strong>
         --
         <em>Feature-based program configuration language </em>
-        <em>(external)</em> <a name="--index-entry-50340"></a></li>
+        <em>(external)</em> <a name="--index-entry-50507"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-8/srfi-8.html">SRFI-8</a></strong>
         --
         <em>Receive: Binding to multiple values</em>
-        <em>(embedded)</em> <a name="--index-entry-50350"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50517"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-9/srfi-9.html">SRFI-9</a></strong>
         --
         <em>Defining Record Types</em>
-        <em>(external)</em> <a name="--index-entry-50360"></a></li>
+        <em>(external)</em> <a name="--index-entry-50527"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-10/srfi-10.html">SRFI-10</a></strong>
         --
         <em>Sharp Comma External Form</em>
-        <em>(embedded)</em> <a name="--index-entry-50370"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50537"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-11/srfi-11.html">SRFI-11</a></strong>
         --
         <em>Syntax for receiving multiple values</em>
-        <em>(embedded)</em> <a name="--index-entry-50380"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50547"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-13/srfi-13.html">SRFI-13</a></strong>
         --
         <em>String Library</em>
-        <em>(external)</em> <a name="--index-entry-50390"></a></li>
+        <em>(external)</em> <a name="--index-entry-50557"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-14/srfi-14.html">SRFI-14</a></strong>
         --
         <em>Character-Set Library</em>
-        <em>(external)</em> <a name="--index-entry-50400"></a></li>
+        <em>(external)</em> <a name="--index-entry-50567"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-16/srfi-16.html">SRFI-16</a></strong>
         --
         <em>Syntax for procedures of variable arity</em>
-        <em>(embedded)</em> <a name="--index-entry-50410"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50577"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-17/srfi-17.html">SRFI-17</a></strong>
         --
         <em>Generalized set!</em>
-        <em>(embedded)</em> <a name="--index-entry-50420"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50587"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-18/srfi-18.html">SRFI-18</a></strong>
         --
         <em>Multithreading support</em>
-        <em>(embedded)</em> <a name="--index-entry-50430"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50597"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-22/srfi-22.html">SRFI-22</a></strong>
         --
         <em>Running Scheme Scripts on Unix</em>
-        <em>(embedded)</em> <a name="--index-entry-50440"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50607"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-23/srfi-23.html">SRFI-23</a></strong>
         --
         <em>Error reporting mechanism</em>
-        <em>(embedded)</em> <a name="--index-entry-50450"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50617"></a></li>
+<li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-25/srfi-25.html">SRFI-25</a></strong>
+        --
+        <em>Multi-dimensional Arrays</em>
+        <em>(external)</em> <a name="--index-entry-50627"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-26/srfi-26.html">SRFI-26</a></strong>
         --
         <em>Notation for Specializing Parameters without Currying</em>
-        <em>(external)</em> <a name="--index-entry-50460"></a></li>
+        <em>(external)</em> <a name="--index-entry-50637"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRFI-27</a></strong>
         --
         <em>Source of random bits</em>
-        <em>(external)</em> <a name="--index-entry-50470"></a></li>
+        <em>(external)</em> <a name="--index-entry-50647"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-28/srfi-28.html">SRFI-28</a></strong>
         --
         <em>Basic Format Strings</em>
-        <em>(embedded)</em> <a name="--index-entry-50480"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50657"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-30/srfi-30.html">SRFI-30</a></strong>
         --
         <em>Nested Multi-line Comments</em>
-        <em>(embedded)</em> <a name="--index-entry-50490"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50667"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-31/srfi-31.html">SRFI-31</a></strong>
         --
         <em>A special form for recursive evaluation</em>
-        <em>(embedded)</em> <a name="--index-entry-50500"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50677"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-34/srfi-34.html">SRFI-34</a></strong>
         --
         <em>Exception Handling for Programs</em>
-        <em>(embedded)</em> <a name="--index-entry-50510"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50687"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-35/srfi-35.html">SRFI-35</a></strong>
         --
         <em>Conditions</em>
-        <em>(external)</em> <a name="--index-entry-50520"></a></li>
+        <em>(external)</em> <a name="--index-entry-50697"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-36/srfi-36.html">SRFI-36</a></strong>
         --
         <em>I/O Conditions</em>
-        <em>(external)</em> <a name="--index-entry-50530"></a></li>
+        <em>(external)</em> <a name="--index-entry-50707"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-37/srfi-37.html">SRFI-37</a></strong>
         --
         <em>args-fold: a program argument processor</em>
-        <em>(external)</em> <a name="--index-entry-50540"></a></li>
+        <em>(external)</em> <a name="--index-entry-50717"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-38/srfi-38.html">SRFI-38</a></strong>
         --
         <em>External representation of shared structures</em>
-        <em>(embedded)</em> <a name="--index-entry-50550"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50727"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-39/srfi-39.html">SRFI-39</a></strong>
         --
         <em>Parameters objects</em>
-        <em>(embedded)</em> <a name="--index-entry-50560"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50737"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-41/srfi-41.html">SRFI-41</a></strong>
         --
         <em>Streams</em>
-        <em>(external)</em> <a name="--index-entry-50570"></a></li>
+        <em>(external)</em> <a name="--index-entry-50747"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-45/srfi-45.html">SRFI-45</a></strong>
         --
         <em>Primitives for Expressing Iterative Lazy Algorithms</em>
-        <em>(embedded)</em> <a name="--index-entry-50580"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50757"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-48/srfi-48.html">SRFI-48</a></strong>
         --
         <em>Intermediate Format Strings</em>
-        <em>(external)</em> <a name="--index-entry-50590"></a></li>
+        <em>(external)</em> <a name="--index-entry-50767"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-51/srfi-51.html">SRFI-51</a></strong>
         --
         <em>Handling rest list</em>
-        <em>(external)</em> <a name="--index-entry-50600"></a></li>
+        <em>(external)</em> <a name="--index-entry-50777"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-54/srfi-54.html">SRFI-54</a></strong>
         --
         <em>Formatting</em>
-        <em>(external)</em> <a name="--index-entry-50610"></a></li>
+        <em>(external)</em> <a name="--index-entry-50787"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-55/srfi-55.html">SRFI-55</a></strong>
         --
         <em>Require-extension</em>
-        <em>(embedded)</em> <a name="--index-entry-50620"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50797"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-59/srfi-59.html">SRFI-59</a></strong>
         --
         <em>Vicinity</em>
-        <em>(external)</em> <a name="--index-entry-50630"></a></li>
+        <em>(external)</em> <a name="--index-entry-50807"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-60/srfi-60.html">SRFI-60</a></strong>
         --
         <em>Integers as bits</em>
-        <em>(external)</em> <a name="--index-entry-50640"></a></li>
+        <em>(external)</em> <a name="--index-entry-50817"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-61/srfi-61.html">SRFI-61</a></strong>
         --
         <em>A more general COND clause</em>
-        <em>(external)</em> <a name="--index-entry-50650"></a></li>
+        <em>(external)</em> <a name="--index-entry-50827"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-62/srfi-62.html">SRFI-62</a></strong>
         --
         <em>S-expression comments</em>
-        <em>(embedded)</em> <a name="--index-entry-50660"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50837"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-64/srfi-64.html">SRFI-64</a></strong>
         --
         <em>A Scheme API for test suites</em>
-        <em>(external)</em> <a name="--index-entry-50670"></a></li>
+        <em>(external)</em> <a name="--index-entry-50847"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-66/srfi-66.html">SRFI-66</a></strong>
         --
         <em>Octet Vectors</em>
-        <em>(external)</em> <a name="--index-entry-50680"></a></li>
+        <em>(external)</em> <a name="--index-entry-50857"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-69/srfi-69.html">SRFI-69</a></strong>
         --
         <em>Basic Hash Tables</em>
-        <em>(external)</em> <a name="--index-entry-50690"></a></li>
+        <em>(external)</em> <a name="--index-entry-50867"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-70/srfi-70.html">SRFI-70</a></strong>
         --
         <em>Numbers</em>
-        <em>(embedded)</em> <a name="--index-entry-50700"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50877"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-74/srfi-74.html">SRFI-74</a></strong>
         --
         <em>Octet-Addressed Binary Blocks</em>
-        <em>(external)</em> <a name="--index-entry-50710"></a></li>
+        <em>(external)</em> <a name="--index-entry-50887"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-87/srfi-87.html">SRFI-87</a></strong>
         --
         <em>=&gt; in case clauses</em>
-        <em>(embedded)</em> <a name="--index-entry-50720"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50897"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-88/srfi-88.html">SRFI-88</a></strong>
         --
         <em>Keyword Objects</em>
-        <em>(embedded)</em> <a name="--index-entry-50730"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50907"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-89/srfi-89.html">SRFI-89</a></strong>
         --
         <em>Optional Positional and Named Parameters</em>
-        <em>(external)</em> <a name="--index-entry-50740"></a></li>
+        <em>(external)</em> <a name="--index-entry-50917"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-96/srfi-96.html">SRFI-96</a></strong>
         --
         <em>SLIB Prerequisites</em>
-        <em>(external)</em> <a name="--index-entry-50750"></a></li>
+        <em>(external)</em> <a name="--index-entry-50927"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-98/srfi-98.html">SRFI-98</a></strong>
         --
         <em>Interface to access environment variables</em>
-        <em>(embedded)</em> <a name="--index-entry-50760"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50937"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-100/srfi-100.html">SRFI-100</a></strong>
         --
         <em>define-lambda-object</em>
-        <em>(external)</em> <a name="--index-entry-50770"></a></li>
+        <em>(external)</em> <a name="--index-entry-50947"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-111/srfi-111.html">SRFI-111</a></strong>
         --
         <em>Boxes</em>
-        <em>(embedded)</em> <a name="--index-entry-50780"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50957"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-112/srfi-112.html">SRFI-112</a></strong>
         --
         <em>Environment Inquiry</em>
-        <em>(embedded)</em> <a name="--index-entry-50790"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50967"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-113/srfi-113.html">SRFI-113</a></strong>
         --
         <em>Sets and Bags</em>
-        <em>(external)</em> <a name="--index-entry-50800"></a></li>
+        <em>(external)</em> <a name="--index-entry-50977"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-117/srfi-117.html">SRFI-117</a></strong>
         --
         <em>Queues based on lists</em>
-        <em>(external)</em> <a name="--index-entry-50810"></a></li>
+        <em>(external)</em> <a name="--index-entry-50987"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-118/srfi-118.html">SRFI-118</a></strong>
         --
         <em>Simple adjustable-size strings </em>
-        <em>(embedded)</em> <a name="--index-entry-50820"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-50997"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-127/srfi-127.html">SRFI-127</a></strong>
         --
         <em>Lazy Sequences</em>
-        <em>(external)</em> <a name="--index-entry-50830"></a></li>
+        <em>(external)</em> <a name="--index-entry-51007"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-128/srfi-128.html">SRFI-128</a></strong>
         --
         <em>Comparators (reduced)</em>
-        <em>(external)</em> <a name="--index-entry-50840"></a></li>
+        <em>(external)</em> <a name="--index-entry-51017"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-129/srfi-129.html">SRFI-129</a></strong>
         --
         <em>Titlecase procedures</em>
-        <em>(external)</em> <a name="--index-entry-50850"></a></li>
+        <em>(external)</em> <a name="--index-entry-51027"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-130/srfi-130.html">SRFI-130</a></strong>
         --
         <em>Cursor-based string library</em>
-        <em>(external)</em> <a name="--index-entry-50860"></a></li>
+        <em>(external)</em> <a name="--index-entry-51037"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-133/srfi-133.html">SRFI-133</a></strong>
         --
         <em>Vector Library (R7RS-compatible)</em>
-        <em>(external)</em> <a name="--index-entry-50870"></a></li>
+        <em>(external)</em> <a name="--index-entry-51047"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-134/srfi-134.html">SRFI-134</a></strong>
         --
         <em>Immutable Deques</em>
-        <em>(external)</em> <a name="--index-entry-50880"></a></li>
+        <em>(external)</em> <a name="--index-entry-51057"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-135/srfi-135.html">SRFI-135</a></strong>
         --
         <em>Immutable Texts</em>
-        <em>(external)</em> <a name="--index-entry-50890"></a></li>
+        <em>(external)</em> <a name="--index-entry-51067"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-137/srfi-137.html">SRFI-137</a></strong>
         --
         <em>Minimal Unique Types</em>
-        <em>(external)</em> <a name="--index-entry-50900"></a></li>
+        <em>(external)</em> <a name="--index-entry-51077"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-141/srfi-141.html">SRFI-141</a></strong>
         --
         <em>Integer Division</em>
-        <em>(external)</em> <a name="--index-entry-50910"></a></li>
+        <em>(external)</em> <a name="--index-entry-51087"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-143/srfi-143.html">SRFI-143</a></strong>
         --
         <em>Fixnums</em>
-        <em>(embedded)</em> <a name="--index-entry-50920"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-51097"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-145/srfi-145.html">SRFI-145</a></strong>
         --
         <em>Assumptions</em>
-        <em>(embedded)</em> <a name="--index-entry-50930"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-51107"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-151/srfi-151.html">SRFI-151</a></strong>
         --
         <em>Bitwise Operations</em>
-        <em>(external)</em> <a name="--index-entry-50940"></a></li>
+        <em>(external)</em> <a name="--index-entry-51117"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-156/srfi-156.html">SRFI-156</a></strong>
         --
         <em>Syntactic combiners for binary predicates</em>
-        <em>(external)</em> <a name="--index-entry-50950"></a></li>
+        <em>(external)</em> <a name="--index-entry-51127"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-158/srfi-158.html">SRFI-158</a></strong>
         --
         <em>Generators and Accumulators</em>
-        <em>(external)</em> <a name="--index-entry-50960"></a></li>
+        <em>(external)</em> <a name="--index-entry-51137"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-161/srfi-161.html">SRFI-161</a></strong>
         --
         <em>Unifiable Boxes</em>
-        <em>(external)</em> <a name="--index-entry-50970"></a></li>
+        <em>(external)</em> <a name="--index-entry-51147"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-169/srfi-169.html">SRFI-169</a></strong>
         --
         <em>Underscores in numbers</em>
-        <em>(embedded)</em> <a name="--index-entry-50980"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-51157"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-170/srfi-170.html">SRFI-170</a></strong>
         --
         <em>POSIX API</em>
-        <em>(external)</em> <a name="--index-entry-50990"></a></li>
+        <em>(external)</em> <a name="--index-entry-51167"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-171/srfi-171.html">SRFI-171</a></strong>
         --
         <em>Transducers</em>
-        <em>(external)</em> <a name="--index-entry-51000"></a></li>
+        <em>(external)</em> <a name="--index-entry-51177"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-173/srfi-173.html">SRFI-173</a></strong>
         --
         <em>Hooks</em>
-        <em>(external)</em> <a name="--index-entry-51010"></a></li>
+        <em>(external)</em> <a name="--index-entry-51187"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-174/srfi-174.html">SRFI-174</a></strong>
         --
         <em>POSIX Timespecs</em>
-        <em>(external)</em> <a name="--index-entry-51020"></a></li>
+        <em>(external)</em> <a name="--index-entry-51197"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-175/srfi-175.html">SRFI-175</a></strong>
         --
         <em>ASCII character library</em>
-        <em>(external)</em> <a name="--index-entry-51030"></a></li>
+        <em>(external)</em> <a name="--index-entry-51207"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-176/srfi-176.html">SRFI-176</a></strong>
         --
         <em>Version flag</em>
-        <em>(embedded)</em> <a name="--index-entry-51040"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-51217"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-180/srfi-180.html">SRFI-180</a></strong>
         --
         <em>JSON</em>
-        <em>(external)</em> <a name="--index-entry-51050"></a></li>
+        <em>(external)</em> <a name="--index-entry-51227"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-185/srfi-185.html">SRFI-185</a></strong>
         --
         <em>Linear adjustable-length strings</em>
-        <em>(external)</em> <a name="--index-entry-51060"></a></li>
+        <em>(external)</em> <a name="--index-entry-51237"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-189/srfi-189.html">SRFI-189</a></strong>
         --
         <em>Maybe and Either: optional container types</em>
-        <em>(external)</em> <a name="--index-entry-51070"></a></li>
+        <em>(external)</em> <a name="--index-entry-51247"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-190/srfi-190.html">SRFI-190</a></strong>
         --
         <em>Coroutines Generators</em>
-        <em>(external)</em> <a name="--index-entry-51080"></a></li>
+        <em>(external)</em> <a name="--index-entry-51257"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-192/srfi-192.html">SRFI-192</a></strong>
         --
         <em>Port Positioning</em>
-        <em>(embedded)</em> <a name="--index-entry-51090"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-51267"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-193/srfi-193.html">SRFI-193</a></strong>
         --
         <em>Command line</em>
-        <em>(embedded)</em> <a name="--index-entry-51100"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-51277"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-195/srfi-195.html">SRFI-195</a></strong>
         --
         <em>Multiple-value boxes</em>
-        <em>(embedded)</em> <a name="--index-entry-51110"></a></li>
+        <em>(embedded)</em> <a name="--index-entry-51287"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-196/srfi-196.html">SRFI-196</a></strong>
         --
         <em>Range Objects</em>
-        <em>(external)</em> <a name="--index-entry-51120"></a></li>
+        <em>(external)</em> <a name="--index-entry-51297"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-207/srfi-207.html">SRFI-207</a></strong>
         --
         <em>String-notated bytevectors</em>
-        <em>(external)</em> <a name="--index-entry-51130"></a></li>
+        <em>(external)</em> <a name="--index-entry-51307"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-216/srfi-216.html">SRFI-216</a></strong>
         --
         <em>SICP Prerequisites (Portable)</em>
-        <em>(external)</em> <a name="--index-entry-51140"></a></li>
+        <em>(external)</em> <a name="--index-entry-51317"></a></li>
 <li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-217/srfi-217.html">SRFI-217</a></strong>
         --
         <em>Integer Sets</em>
-        <em>(external)</em> <a name="--index-entry-51150"></a></li>
+        <em>(external)</em> <a name="--index-entry-51327"></a></li>
+<li>  <strong><a  class="http" href="http://srfi.schemers.org/srfi-219/srfi-219.html">SRFI-219</a></strong>
+        --
+        <em>Define higher-order lambda</em>
+        <em>(embedded)</em> <a name="--index-entry-51337"></a></li>
 </ul></div></div><div class="sectiondiv"><div class="sectiontitle"><a name="Using-a-SRFI"></a>
 <h3 id="Using-a-SRFI">14.2 Using a SRFI</h3>
 </div>
@@ -447,13 +455,13 @@ For instance, to use SRFI-1 the following forms are possible:
 <div class="subsectionbody"><p>As said before, a embedded SRFI can be used directly without loading a
 support file. (Note that using <strong><a href="stklos-ref-4.html#require-feature">require-feature</a></strong> works too
 and permits to ignore if the SRFI is embedded).</p><p><strong>List of embedded SRFIs:</strong>
-    <code> srfi-0</code><code> srfi-6</code><code> srfi-8</code><code> srfi-10</code><code> srfi-11</code><code> srfi-16</code><code> srfi-17</code><code> srfi-18</code><code> srfi-22</code><code> srfi-23</code><code> srfi-28</code><code> srfi-30</code><code> srfi-31</code><code> srfi-34</code><code> srfi-38</code><code> srfi-39</code><code> srfi-45</code><code> srfi-55</code><code> srfi-62</code><code> srfi-70</code><code> srfi-87</code><code> srfi-88</code><code> srfi-98</code><code> srfi-111</code><code> srfi-112</code><code> srfi-118</code><code> srfi-143</code><code> srfi-145</code><code> srfi-169</code><code> srfi-176</code><code> srfi-192</code><code> srfi-193</code><code> srfi-195</code>
+    <code> srfi-0</code><code> srfi-6</code><code> srfi-8</code><code> srfi-10</code><code> srfi-11</code><code> srfi-16</code><code> srfi-17</code><code> srfi-18</code><code> srfi-22</code><code> srfi-23</code><code> srfi-28</code><code> srfi-30</code><code> srfi-31</code><code> srfi-34</code><code> srfi-38</code><code> srfi-39</code><code> srfi-45</code><code> srfi-55</code><code> srfi-62</code><code> srfi-70</code><code> srfi-87</code><code> srfi-88</code><code> srfi-98</code><code> srfi-111</code><code> srfi-112</code><code> srfi-118</code><code> srfi-143</code><code> srfi-145</code><code> srfi-169</code><code> srfi-176</code><code> srfi-192</code><code> srfi-193</code><code> srfi-195</code><code> srfi-219</code>
    .</p></div></div><div class="subsectiondiv"><div class="subsectiontitle"><a name="External-SRFIs"></a>
 <h4 id="External-SRFIs">14.2.2 External SRFIs</h4>
 </div>
 <div class="subsectionbody"><p>An external SRFI needs to load at least one external file. This can be
 done with <strong><a href="stklos-ref-4.html#require">require</a></strong> or <strong><a href="stklos-ref-4.html#require-feature">require-feature</a></strong>. As with embedded SRFIS, using <strong><a href="stklos-ref-4.html#require-feature">require-feature</a></strong> permits to ignore if the SRFI is external.</p><p><strong>List of external SRFIs:</strong>
-   <code> srfi-1</code><code> srfi-2</code><code> srfi-4</code><code> srfi-5</code><code> srfi-7</code><code> srfi-9</code><code> srfi-13</code><code> srfi-14</code><code> srfi-26</code><code> srfi-27</code><code> srfi-35</code><code> srfi-36</code><code> srfi-37</code><code> srfi-41</code><code> srfi-48</code><code> srfi-51</code><code> srfi-54</code><code> srfi-59</code><code> srfi-60</code><code> srfi-61</code><code> srfi-64</code><code> srfi-66</code><code> srfi-69</code><code> srfi-74</code><code> srfi-89</code><code> srfi-96</code><code> srfi-100</code><code> srfi-113</code><code> srfi-117</code><code> srfi-127</code><code> srfi-128</code><code> srfi-129</code><code> srfi-130</code><code> srfi-133</code><code> srfi-134</code><code> srfi-135</code><code> srfi-137</code><code> srfi-141</code><code> srfi-151</code><code> srfi-156</code><code> srfi-158</code><code> srfi-161</code><code> srfi-170</code><code> srfi-171</code><code> srfi-173</code><code> srfi-174</code><code> srfi-175</code><code> srfi-180</code><code> srfi-185</code><code> srfi-189</code><code> srfi-190</code><code> srfi-196</code><code> srfi-207</code><code> srfi-216</code><code> srfi-217</code> .</p></div></div><div class="subsectiondiv"><div class="subsectiontitle"><a name="SRFI-features"></a>
+   <code> srfi-1</code><code> srfi-2</code><code> srfi-4</code><code> srfi-5</code><code> srfi-7</code><code> srfi-9</code><code> srfi-13</code><code> srfi-14</code><code> srfi-25</code><code> srfi-26</code><code> srfi-27</code><code> srfi-35</code><code> srfi-36</code><code> srfi-37</code><code> srfi-41</code><code> srfi-48</code><code> srfi-51</code><code> srfi-54</code><code> srfi-59</code><code> srfi-60</code><code> srfi-61</code><code> srfi-64</code><code> srfi-66</code><code> srfi-69</code><code> srfi-74</code><code> srfi-89</code><code> srfi-96</code><code> srfi-100</code><code> srfi-113</code><code> srfi-117</code><code> srfi-127</code><code> srfi-128</code><code> srfi-129</code><code> srfi-130</code><code> srfi-133</code><code> srfi-134</code><code> srfi-135</code><code> srfi-137</code><code> srfi-141</code><code> srfi-151</code><code> srfi-156</code><code> srfi-158</code><code> srfi-161</code><code> srfi-170</code><code> srfi-171</code><code> srfi-173</code><code> srfi-174</code><code> srfi-175</code><code> srfi-180</code><code> srfi-185</code><code> srfi-189</code><code> srfi-190</code><code> srfi-196</code><code> srfi-207</code><code> srfi-216</code><code> srfi-217</code> .</p></div></div><div class="subsectiondiv"><div class="subsectiontitle"><a name="SRFI-features"></a>
 <h4 id="SRFI-features">14.2.3 SRFI features</h4>
 </div>
 <div class="subsectionbody"><p>For some SRFIs, <span style="font-variant: small-caps">STklos</span> accepts that uses them with a name. This names
@@ -505,7 +513,7 @@ are given the table <a href="stklos-ref-14.html#Feature-identifiers">3</a>.</p><
 <h3 id="Misc--Information">14.3 Misc. Information</h3>
 </div>
 <div class="sectionbody"><p>Previous section described the general way to use the SRFIS implemented in
-             <span style="font-variant: small-caps">STklos</span>.  This section concentrates on information not given above.</p><a name="--index-entry-51446"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51450"></a>
+             <span style="font-variant: small-caps">STklos</span>.  This section concentrates on information not given above.</p><a name="--index-entry-51635"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51639"></a>
 <h4>srfi-0 -- Feature-based conditional expansion construct</h4>
 </div>
 <div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-0/srfi-0.html">SRFI-0</a> defines the <code>cond-expand</code>
@@ -517,20 +525,20 @@ SRFI supported by the implementation (for instance
 feature identifiers which are the same that the ones
 defined in figure <a href="stklos-ref-14.html#Feature-identifiers">3</a></p><p>Furthermore, the feature identifier <em>stklos</em> and <em>STklos</em>
 are defined for applications which need to know on which Scheme implementation
-they are running on.</p></div></div><a name="--index-entry-51463"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51467"></a>
+they are running on.</p></div></div><a name="--index-entry-51652"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51656"></a>
 <h4>srfi-10 -- Sharp Comma External Form</h4>
 </div>
-<div class="subsectionbody"><a name="--index-entry-51453"></a><p><a  class="http" href="http://srfi.schemers.org/srfi-10/srfi-10.html">SRFI-10</a> is fully supported. This SRFI extends the
+<div class="subsectionbody"><a name="--index-entry-51642"></a><p><a  class="http" href="http://srfi.schemers.org/srfi-10/srfi-10.html">SRFI-10</a> is fully supported. This SRFI extends the
 STklos reader with the "<code>#,</code>" notation which is fully described in
-this document (see <a href="stklos-ref-4.html#define-reader-ctor">define-reader-ctor</a>).</p></div></div><a name="--index-entry-51470"></a><a name="--index-entry-51474"></a><a name="--index-entry-51484"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51488"></a>
+this document (see <a href="stklos-ref-4.html#define-reader-ctor">define-reader-ctor</a>).</p></div></div><a name="--index-entry-51659"></a><a name="--index-entry-51663"></a><a name="--index-entry-51673"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51677"></a>
 <h4>srfi-16 -- Syntax for procedures of variable arity</h4>
 </div>
-<div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-16/srfi-16.html">SRFI-16</a> is fully supported. Note <code>case-lambda</code> is now defined in <span style="font-variant: small-caps">R<sup>7</sup>RS</span>.</p></div></div><a name="--index-entry-51491"></a><a name="--index-entry-51495"></a><a name="--index-entry-51499"></a><a name="--index-entry-51509"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51513"></a>
+<div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-16/srfi-16.html">SRFI-16</a> is fully supported. Note <code>case-lambda</code> is now defined in <span style="font-variant: small-caps">R<sup>7</sup>RS</span>.</p></div></div><a name="--index-entry-51680"></a><a name="--index-entry-51684"></a><a name="--index-entry-51688"></a><a name="--index-entry-51698"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51702"></a>
 <h4>srfi-17 -- Generalized set!</h4>
 </div>
 <div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-17/srfi-17.html">SRFI-17</a> is fully supported. See the documentation of procedures <code>set!</code>
 and <code>setter</code>. However, requiring explicitly <code>srfi-17</code> permits
-to define the setters for the (numerous) cXXXXr list procedures.</p></div></div><a name="--index-entry-51516"></a><a name="--index-entry-51553"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51557"></a>
+to define the setters for the (numerous) cXXXXr list procedures.</p></div></div><a name="--index-entry-51705"></a><a name="--index-entry-51742"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51746"></a>
 <h4>srfi-22 -- Running Scheme Scripts on Unix</h4>
 </div>
 <div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-22/srfi-22.html">SRFI-22</a> describes basic prerequisites for
@@ -560,56 +568,422 @@ command (without option) in Scheme:</p><blockquote><table cellspacing="0" class=
   0)
 </pre></td></tr>
 </tbody></table></blockquote>
-</div></div><a name="--index-entry-51560"></a><a name="--index-entry-51570"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51574"></a>
+</div></div><a name="--index-entry-51749"></a><a name="--index-entry-51759"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51763"></a>
 <h4>srfi-23 -- Error reporting mechanism</h4>
 </div>
 <div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-23/srfi-23.html">SRFI-23</a> is fully supported.  Note that the <span style="font-variant: small-caps">STklos</span> <strong><a href="stklos-ref-4.html#error">error</a></strong> is more
-general than the one defined in SRFI-23.</p></div></div><a name="--index-entry-51577"></a><a name="--index-entry-51581"></a><a name="--index-entry-51590"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51594"></a>
+general than the one defined in SRFI-23.</p></div></div><a name="--index-entry-51766"></a><a name="--index-entry-52819"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-52823"></a>
+<h4>srfi-25 -- Multi-dimensional Arrays</h4>
+</div>
+<div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-25/srfi-25.html">SRFI-25</a> is fully supported. 
+
+  <span style="font-variant: small-caps">STklos</span> implements the arrays as defined in the SRFI document. All the forms
+defined in the SRFI are implemented in <span style="font-variant: small-caps">STklos</span>, but some other
+functions, not present in the SRFI, are documented here.
+
+<br />
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="shape-"></a><a name="--index-entry-51777"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(shape? obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Checks if <code>obj</code> is an array shape. SRFI-25 dictates that a
+shape is an ordinary array, with rank two and shape <code>(0 r 0 2)</code>,
+where <code>r</code> is the rank of the array that the shape describes.
+So, any array of shape <code>(0 r 0 2</code> is a shape, for any non-negative
+integer <code>r</code>.</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="shared-array-"></a><a name="--index-entry-51821"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(shared-array? array)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Will return <code>#t</code> when the array has its data shared with other
+arrays, and <code>#f</code> otherwise.</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="shape-for-each"></a><a name="--index-entry-51848"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(shape-for-each shape proc [index-object])</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />This procedure will apply proc to all valid sequences of
+indices in <code>shape</code>, in row-major order.
+
+If <code>index-object</code> is not provided, then <code>proc</code> must accept
+as many arguments as the number of dimensions that the shape
+describes.
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="ivory"><pre>(shape-for-each (shape 1 3 10 12)
+                (<strong>lambda</strong> (x y)
+                  (format #t <span class="source-string">&quot;[~a ~a]~%&quot;</span> x y)))
+<span class="source-bracket">[</span>1 10<span class="source-bracket">]</span>
+<span class="source-bracket">[</span>1 11<span class="source-bracket">]</span>
+<span class="source-bracket">[</span>2 10<span class="source-bracket">]</span>
+<span class="source-bracket">[</span>2 11<span class="source-bracket">]</span>
+</pre></td></tr>
+</tbody></table></blockquote>
+
+If <code>index-object</code> is provided, it is used as a place to store the
+indices, so proc must accept either a vector or an array (this is to
+avoid pushing and popping too many values when calling <code>proc</code>).
+<code>index-object</code>, when present, must be aither a vector or array.
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="ivory"><pre>(<strong>let</strong> ((vec (make-vector 2 #f)))
+  (shape-for-each (shape 1 3 10 12)
+                  (<strong>lambda</strong> (o)
+                    (format #t <span class="source-string">&quot;[~a ~a]~%&quot;</span>
+                    (vector-ref o 0)
+                    (vector-ref o 1)))
+                  vec))
+<span class="source-bracket">[</span>1 10<span class="source-bracket">]</span>
+<span class="source-bracket">[</span>1 11<span class="source-bracket">]</span>
+<span class="source-bracket">[</span>2 10<span class="source-bracket">]</span>
+<span class="source-bracket">[</span>2 11<span class="source-bracket">]</span>
+
+(<strong>let</strong> ((arr (make-array (shape 0 2))))
+  (shape-for-each (shape 1 3 10 12)
+                  (<strong>lambda</strong> (o)
+                    (format #t <span class="source-string">&quot;[~a ~a]~%&quot;</span>
+                    (array-ref o 0)
+                    (array-ref o 1)))
+                  arr))
+<span class="source-bracket">[</span>1 10<span class="source-bracket">]</span>
+<span class="source-bracket">[</span>1 11<span class="source-bracket">]</span>
+<span class="source-bracket">[</span>2 10<span class="source-bracket">]</span>
+<span class="source-bracket">[</span>2 11<span class="source-bracket">]</span>
+</pre></td></tr>
+</tbody></table></blockquote>
+</td></tr>
+</tbody></table>
+
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="share-nths"></a><a name="--index-entry-51974"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(share-nths a d n)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br /><code>Share-nths</code> takes every <code>n</code>th slice along dimension <code>d</code> into a shared array.
+This preserves the origin.
+
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="ivory"><pre>(<span class="source-define">define</span> a (array (shape 0 4 0 4)
+                 -1 -2 -3 -4
+                 -5 -6 -7 -8
+                 -9 -10 -11 -12
+                 -13 -14 -15 -16))
+
+(share-nths a 0 2)
+ &#8658; #,(<span class="source-module">&lt;array&gt;</span> (0 2 0 4) -1  -2  -3  -4
+                        -9 -10 -11 -12)
+
+(share-nths a 1 2)
+ &#8658; #,(<span class="source-module">&lt;array&gt;</span> (0 4 0 2) -1  -3  -5  -7
+                        -9 -11 -13 -15)
+</pre></td></tr>
+</tbody></table></blockquote>
+</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="share-column"></a><a name="--index-entry-52041"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(share-column arr k)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Shares whatever the second index is about. The result has one dimension less.
+
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="ivory"><pre>(<span class="source-define">define</span> a (array (shape 0 2 0 2 0 2) -1 -2 -3 -4 -5 -6 -7 -8))
+
+(share-column a 1) &#8658; #,(<span class="source-module">&lt;array&gt;</span> (0 2 0 2) -3 -4 -7 -8)
+(share-column a 0) &#8658; #,(<span class="source-module">&lt;array&gt;</span> (0 2 0 2) -1 -2 -5 -6)
+</pre></td></tr>
+</tbody></table></blockquote>
+</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="share-row"></a><a name="--index-entry-52084"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(share-row arr k)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Shares whatever the first index is about. The result has one dimension less.
+
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="ivory"><pre>(<span class="source-define">define</span> a (array (shape 0 2 0 2 0 2) -1 -2 -3 -4 -5 -6 -7 -8))
+
+(share-row a 0) &#8658; #,(<span class="source-module">&lt;array&gt;</span> (0 2 0 2) -1 -2 -3 -4)
+(share-row a 1) &#8658; #,(<span class="source-module">&lt;array&gt;</span> (0 2 0 2) -5 -6 -7 -8)
+</pre></td></tr>
+</tbody></table></blockquote>
+</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="share-array-origin"></a><a name="--index-entry-52127"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(share-array/origin arr k ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<code><strong><font color="IndianRed">(share-array/origin arr index)</font></strong></code><br /><br />change the origin of <code>arr</code> to <code>k</code> ..., with <code>index</code> a vector or zero-based
+one-dimensional array that contains k ...
+
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="ivory"><pre>(<span class="source-define">define</span> a (array (shape 0 2 0 2 ) -1 -2 -3 -4))
+
+(share-array/origin  a 1 1) &#8658; #,(<span class="source-module">&lt;array&gt;</span> (1 3 1 3) -1 -2 -3 -4)
+</pre></td></tr>
+</tbody></table></blockquote>
+</td></tr>
+</tbody></table>
+
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array-copy-share"></a><a name="--index-entry-52182"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-copy+share array)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Returns a copy of <code>array</code>.
+If array does not have its own internal data, but was built using
+share-array, then the new array will be similar -- it will be a copy of
+array, sharing the elements in the same way.</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array-size"></a><a name="--index-entry-52206"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-size array)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Returns the number of elements in <code>array</code>.</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array-shape"></a><a name="--index-entry-52230"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-shape array)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Returns the shape of <code>array</code>.</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array--list"></a><a name="--index-entry-52254"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-&gt;list array)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Returns a list that contains a copy of the elements of <code>array</code>,
+in row-major order.
+This is not recursive, and will not flatten the array.</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array--vector"></a><a name="--index-entry-52278"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-&gt;vector array)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Returns a vector that contains a copy of the elements of <code>array</code>,
+in row-major order. The new vector does not share elements with
+the original array (it is a fresh copy).
+This is not recursive, and will not flatten the array.</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array-length"></a><a name="--index-entry-52302"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-length array dim)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Returns the length of dimension <code>dim</code> in array <code>array</code>.</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array-map"></a><a name="--index-entry-52331"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-map [shape] proc arr0 arr1 ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />This procedure is similar to <code>map</code> for lists:
+it will run <code>proc</code> on an element of each of the
+<code>arr0</code>, <code>arr1</code>, ... arguments, storing the result in
+the equivalent position of a newly created array.
+
+The shapes of the arrays must be the same.
+
+The procedure will create a new array with shape <code>shape</code>
+(or <code>arr0</code>'s shape, if <code>shape</code> was not specified).</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array-map-"></a><a name="--index-entry-52385"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-map! array [shape] proc arr0 arr1 ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />For each valid index <code>idx</code>, applies proc to the corresponding
+position in <code>arr0</code>, <code>arr1</code>, ...  and then sets the same
+place in <code>array</code> to the result.
+
+If <code>shape</code> is specified, it should specify a subarray of
+<code>array</code>, and only that section will be mapped.</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array-append"></a><a name="--index-entry-52434"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-append dim arr1 arr2 ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Appends arrays <code>arr1</code>, <code>arr2</code>, ... along the specified dimension <code>dim</code>.
+The arrays must have equally many dimensions and all other dimensions
+equally long.
+
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="ivory"><pre>(<span class="source-define">define</span> a (array (shape 0 2 0 3) 11 22 33 44 55 66))
+(<span class="source-define">define</span> b (array (shape 0 3 0 3) -11 -22 -33 -44 -55 -66 -77 -88 -99))
+(<span class="source-define">define</span> c (array (shape 0 1 0 3) 'a 'b 'c))
+
+(array-append 0 a b c) &#8658;  #,(<span class="source-module">&lt;array&gt;</span> (0 6 0 3)
+                                      11  22  33
+                                      44  55  66
+                                     -11 -22 -33
+                                     -44 -55 -66
+                                     -77 -88 -99
+                                       a   b   c)
+</pre></td></tr>
+</tbody></table></blockquote>
+</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array-share-count"></a><a name="--index-entry-52495"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-share-count array)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Returns the number of arrays that were built sharing <code>array</code>'s
+elements through <code>(share-array array shape proc)</code>, and that were not
+yet garbage collected.
+Note that it may take a long time for an object to be garbage
+collected automatically. It is possible to force a garbage
+collection pass by calling <code>(gc)</code>, but even that does not guarantee that
+a specific object will be collected.</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array-copy"></a><a name="--index-entry-52529"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-copy array)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Returns a copy of <code>array</code>.
+The new copy will have no data shared with any other array, even if the
+argument <code>array</code> did.</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array-for-each-index"></a><a name="--index-entry-52558"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-for-each-index arr proc [index-object])</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Will loop through all valid indices of <code>array</code>, applying <code>proc</code>
+to those indices.
+
+If <code>index-object</code> is not provided, then <code>proc</code> must accept
+as many arguments as the number of dimensions that the shape
+describes.
+
+If <code>index-object</code> is provided, it is used as a place to store the
+indices, so <code>proc</code> must accept a vector or an array (this is to avoid
+pushing and popping too many values when calling proc).
+<code>index-object</code>, when present, must be aither a vector or array.
+
+See the documentation of <code>shape-for-each</code> for more information
+on <code>index-object</code>.</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="tabulate-array"></a><a name="--index-entry-52622"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(tabulate-array shape proc)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<code><strong><font color="IndianRed">(tabulate-array shape proc idx)</font></strong></code><br /><br />Returns a new array of shape <code>shape</code>, populated according
+to <code>proc</code>. Each valid index in <code>shape</code> is passed to <code>proc</code>,
+and the result is place in the according array position.
+
+<code>idx</code> is an object that may be used to store the indices, and
+it may be either a vector or an array. If it is not present, or
+if it is <code>#f</code>, then an index vector will be created internally.
+</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="array-retabulate-"></a><a name="--index-entry-52674"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(array-retabulate! arr shp proc [index-object])</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Sets the elements of <code>arr</code> in <code>shape</code> to the value of <code>proc</code> at that
+index, using <code>index-object</code> if provided. This is similar to
+<code>tabulate-array!</code>, except that the array is given by the user.
+
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="ivory"><pre>(<span class="source-define">define</span> arr (array (shape 0 2 0 2) 'a 'b 'c 'd))
+(array-retabulate! arr (shape 0 2 0 2) (<strong>lambda</strong> (x y) (+ 1 x y)))
+arr &#8658; #,(<span class="source-module">&lt;array&gt;</span> (0 2 0 2) 1 2 2 3)
+</pre></td></tr>
+</tbody></table></blockquote>
+</td></tr>
+</tbody></table>
+<br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
+<tr><td bgcolor="#dddddd"><a name="transpose"></a><a name="--index-entry-52736"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td align="center"><code><strong><font color="IndianRed">(transpose arr k ...)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
+</tbody></table>
+<br />Shares <code>arr</code> with permuted dimensions. Each dimension from 0
+inclusive to rank exclusive must appear once in <code>k</code> ...
+
+This is a generalized transpose. It can permute the dimensions any which
+way. The permutation is provided by a permutation matrix: a square matrix
+of zeros and ones, with exactly one one in each row and column, or a
+permutation of the rows of an identity matrix; the size of the matrix
+must match the number of dimensions of the array.
+
+The default permutation is <code>`( 0 1 , 1 0 )</code> of course, but any permutation
+array can be specified, and the shape array of the original array is then
+multiplied with it, and index column vectors of the new array with its
+inverse, from left, to permute the rows appropriately.
+<blockquote><table cellspacing="0" class="code" cellpadding="4" width="90%"><tbody>
+<tr><td bgcolor="ivory"><pre>(transpose (array (shape 0 4 0 4)
+                  -1  -2   -3  -4
+                  -5  -6   -7  -8
+                  -9  -10 -11 -12
+                  -13 -14 -15 -16))
+ &#8658; #,(<span class="source-module">&lt;array&gt;</span> (0 4 0 4)
+              -1 -5  -9 -13
+              -2 -6 -10 -14
+              -3 -7 -11 -15
+              -4 -8 -12 -16)
+
+(transpose (array (shape 0 3 0 3 0 2)
+                  -1 -2
+                  -3 -4
+                  -5 -6
+
+                  -7 -8
+                  -9 -10
+                  -11 -12
+
+                  -13 -14
+                  -15 -16
+                  -17 -18))
+ &#8658; #,(<span class="source-module">&lt;array&gt;</span> (0 2 0 3 0 3)
+              -1  -7 -13
+              -3  -9 -15
+              -5 -11 -17
+
+              -2  -8 -14
+              -4 -10 -16
+              -6 -12 -18)
+</pre></td></tr>
+</tbody></table></blockquote>
+</td></tr>
+</tbody></table>
+</p></div></div><a name="--index-entry-52826"></a><a name="--index-entry-52830"></a><a name="--index-entry-52839"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-52843"></a>
 <h4>srfi-27 -- Source of random bits</h4>
 </div>
-<div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRFI-27</a> is fully supported. Using primitives <a href="stklos-ref-4.html#random-integer">random-integer</a> or <a href="stklos-ref-4.html#random-real">random-real</a> 
-automatically loadthis SRFI.</p></div></div><a name="--index-entry-51597"></a><a name="--index-entry-51606"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51610"></a>
+<div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-27/srfi-27.html">SRFI-27</a> is fully supported. Using primitives <a href="stklos-ref-4.html#random-integer">random-integer</a> or <a href="stklos-ref-4.html#random-real">random-real</a>
+automatically loadthis SRFI.</p></div></div><a name="--index-entry-52846"></a><a name="--index-entry-52855"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-52859"></a>
 <h4>srfi-28 -- Basic Format Strings</h4>
 </div>
 <div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-28/srfi-28.html">SRFI-28</a> is fully supported. Note that <span style="font-variant: small-caps">STklos</span> <code>format</code> is more general
-than the one defined this SRFI.</p></div></div><a name="--index-entry-51617"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51621"></a>
+than the one defined this SRFI.</p></div></div><a name="--index-entry-52866"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-52870"></a>
 <h4>srfi-35 -- Conditions</h4>
 </div>
 <div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-35/srfi-35.html">SRFI-35</a> is fully supported. 
 See section <a href="stklos-ref-7.html#Predefined-Conditions">Predefined Conditions</a> for the predefined conditions
-and when it is required to load this file.</p></div></div><a name="--index-entry-51628"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51632"></a>
+and when it is required to load this file.</p></div></div><a name="--index-entry-52877"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-52881"></a>
 <h4>srfi-36 -- I/O Conditions</h4>
 </div>
 <div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-36/srfi-36.html">SRFI-36</a> is fully supported. 
 See section <a href="stklos-ref-7.html#Predefined-Conditions">Predefined Conditions</a> for the predefined conditions
-and when it is required to load this file.</p></div></div><a name="--index-entry-51635"></a><a name="--index-entry-51646"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51650"></a>
+and when it is required to load this file.</p></div></div><a name="--index-entry-52884"></a><a name="--index-entry-52895"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-52899"></a>
 <h4>srfi-55 -- Require-extension</h4>
 </div>
 <div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-55/srfi-55.html">SRFI-55</a> is fully supported. Furthermore, <span style="font-variant: small-caps">STklos</span> also accepts the symbols
 defined in figure <a href="stklos-ref-14.html#Feature-identifiers">3</a> in a
-<strong><a href="stklos-ref-4.html#require-extension">require-extension</a></strong> clause.</p></div></div><a name="--index-entry-51662"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51666"></a>
+<strong><a href="stklos-ref-4.html#require-extension">require-extension</a></strong> clause.</p></div></div><a name="--index-entry-52911"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-52915"></a>
 <h4>srfi-69 -- Basic Hash Tables</h4>
 </div>
 <div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-69/srfi-69.html">SRFI-69</a> is fully supported. Note that the default comparison function in <span style="font-variant: small-caps">STklos</span> is <code>eq?</code> whereas it
 is <code>equal?</code> for the SRFI. Furthermore the hash functions
 defined in the SRFI are not defined by default in <span style="font-variant: small-caps">STklos</span>. To have
 a fully compliant SRFI-69 behaviour, you need use a <strong><a href="stklos-ref-4.html#require-feature">require-feature</a></strong>
-in your code.</p></div></div><a name="--index-entry-51677"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51681"></a>
+in your code.</p></div></div><a name="--index-entry-52926"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-52930"></a>
 <h4>srfi-88 -- Keyword Objects</h4>
 </div>
 <div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-88/srfi-88.html">SRFI-88</a> is fully supported. The only difference between the keywords defined in the SRFI document and the
 <span style="font-variant: small-caps">STklos</span> keywords is on the zero-length keyword: in <span style="font-variant: small-caps">STklos</span>, the keyword
 <tt>:</tt> is equivalent to the keyword <tt>||:</tt>, whereas the srfi considers
-that <tt>:</tt> is not a keyword but a symbol.</p></div></div><a name="--index-entry-51688"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51692"></a>
+that <tt>:</tt> is not a keyword but a symbol.</p></div></div><a name="--index-entry-52937"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-52941"></a>
 <h4>srfi-145 -- Assumptions</h4>
 </div>
 <div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-145/srfi-145.html">SRFI-145</a> is fully supported. See the <a href="stklos-ref-4.html#assume">assume</a>
-special form</p></div></div><a name="--index-entry-51699"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-51703"></a>
+special form</p></div></div><a name="--index-entry-52948"></a><div class="subsectiondiv"><div class="subsectiontitle"><a name="-subsection-52952"></a>
 <h4>srfi-169 -- Underscores in numbers</h4>
 </div>
 <div class="subsectionbody"><p><a  class="http" href="http://srfi.schemers.org/srfi-169/srfi-169.html">SRFI-169</a> is fully supported. See <a href="stklos-ref-10.html#accept-srfi-169-numbers">accept-srfi-169-numbers</a> to eventually
 forbid the usage of underscores in numbers.</p></div></div></div></div></div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Fri Apr  2 17:19:14 2021</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Mon Apr 26 11:33:46 2021</em></small>
 </body>
 </html>
