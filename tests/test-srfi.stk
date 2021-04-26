@@ -21,8 +21,11 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 26-Apr-2021 16:44 (eg)
+;;;; Last file update: 26-Apr-2021 17:23 (eg)
 ;;;;
+
+(require "srfi-48")   ;; for ~F format
+
 
 (test-section "SRFIs")
 
