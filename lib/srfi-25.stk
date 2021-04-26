@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 27-Mar-2021 02:33
-;;;; Last file update: 18-Apr-2021 18:34 (jpellegrini)
+;;;; Last file update: 26-Apr-2021 11:28 (eg)
 ;;;;
 
 
@@ -123,7 +123,7 @@
 ;;; (array-retabulate! arr shp proc [ind])
 
 ;; NOT implemented:
-;;; (share-array/prefix arr k ...) 
+;;; (share-array/prefix arr k ...)
 
 #|
 <doc EXT array-length
@@ -140,7 +140,6 @@ doc>
 
 #|
 <doc EXT array-for-each-index
- *
  * (array-for-each-index arr proc [index-object])
  *
  * Will loop through all valid indices of |array|, applying |proc|
@@ -218,6 +217,7 @@ doc>
  *
  * If |shape| is specified, it should specify a subarray of
  * |array|, and only that section will be mapped.
+doc>
 |#
 (define (array-map! target shape-or-proc . more)
   (when (null? more) (error "at least three arguments required, ~S provided"
@@ -261,8 +261,9 @@ doc>
  *
  * The shapes of the arrays must be the same.
  *
- * The prodecude will create a new array with shape |shape|
- * (or |arr0|'s shape, if |shape was not specified).
+ * The procedure will create a new array with shape |shape|
+ * (or |arr0|'s shape, if |shape| was not specified).
+doc>
 |#
 (define (array-map . args)
   (when (< (length args) 2) (error "at least two arguments required, ~S provided"
@@ -287,6 +288,7 @@ doc>
  * Returns a copy of |array|.
  * The new copy will have no data shared with any other array, even if the
  * argument |array| did.
+doc>
 |#
 (define (array-copy arr)
   (array-map (lambda (x) x) arr))
@@ -294,17 +296,20 @@ doc>
 
 #|
 <doc EXT tabulate-array
-* (tabulate-array shape proc [idx])
-*
-* Returns a new array of shape |shape|, populated according
-* to |proc|. Each valid index in |shape| is passed to |proc|,
-* and the result is place in the according array position.
-*
-* |idx| is an object that may be used to store the indices, and
-* it may be either a vector or an array. If it is not present, or
-* if it is |\#f|, then an index vector will be created internally.
+ * (tabulate-array shape proc)
+ * (tabulate-array shape proc idx)
+ *
+ * Returns a new array of shape |shape|, populated according
+ * to |proc|. Each valid index in |shape| is passed to |proc|,
+ * and the result is place in the according array position.
+ *
+ * |idx| is an object that may be used to store the indices, and
+ * it may be either a vector or an array. If it is not present, or
+ * if it is ,(code "#f"), then an index vector will be created internally.
+ *
 doc>
 |#
+
 (define (tabulate-array shape proc :optional (ind #f))
   ;; we use vector index objects always, regardless of what the
   ;; user gave us.
@@ -352,7 +357,7 @@ doc>
  * @lisp
  * (define arr (array (shape 0 2 0 2) 'a 'b 'c 'd))
  * (array-retabulate! arr (shape 0 2 0 2) (lambda (x y) (+ 1 x y)))
- * arr => #,(<array> (0 2 0 2) 1 2 2 3)
+ * arr => #,\(<array> (0 2 0 2) 1 2 2 3)
  * @end lisp
 doc>
 |#
@@ -367,12 +372,12 @@ doc>
                                                     idx
                                                     (proc idx)))
                          ind))
-        
+
         ((not ind)
          (shape-for-each shape (lambda idx (array-set! arr
                                                   (list->vector idx)
                                                   (apply proc idx)))))
-        
+
         (else
          (error "index object ~S is none of vector, array or #f" ind)))
   arr)
@@ -386,8 +391,8 @@ doc>
  * @lisp
  * (define a (array (shape 0 2 0 2 0 2) -1 -2 -3 -4 -5 -6 -7 -8))
  *
- * (share-row a 0) => #,(<array> (0 2 0 2) -1 -2 -3 -4)
- * (share-row a 1) => #,(<array> (0 2 0 2) -5 -6 -7 -8)
+ * (share-row a 0) => #,\(<array> (0 2 0 2) -1 -2 -3 -4)
+ * (share-row a 1) => #,\(<array> (0 2 0 2) -5 -6 -7 -8)
  * @end lisp
 doc>
 |#
@@ -408,9 +413,8 @@ doc>
  * @lisp
  * (define a (array (shape 0 2 0 2 0 2) -1 -2 -3 -4 -5 -6 -7 -8))
  *
- * (share-column a 0) =>
-
- * (share-column a 1) => #,(<array> (0 2 0 2) -3 -4 -7 -8)
+ * (share-column a 1) => #,\(<array> (0 2 0 2) -3 -4 -7 -8)
+ * (share-column a 0) => #,\(<array> (0 2 0 2) -1 -2 -5 -6)
  * @end lisp
 doc>
 |#
@@ -435,7 +439,7 @@ doc>
  * @lisp
  * (define a (array (shape 0 2 0 2 ) -1 -2 -3 -4))
  *
- * (share-array/origin  a 1 1) => #,(<array> (1 3 1 3) -1 -2 -3 -4)
+ * (share-array/origin  a 1 1) => #,\(<array> (1 3 1 3) -1 -2 -3 -4)
  * @end lisp
 doc>
 |#
@@ -479,13 +483,13 @@ doc>
  * (define b (array (shape 0 3 0 3) -11 -22 -33 -44 -55 -66 -77 -88 -99))
  * (define c (array (shape 0 1 0 3) 'a 'b 'c))
  *
- * (array-append 0 a b c) =>  #,(<array> (0 6 0 3)
- *                                        11  22  33
- *                                        44  55  66
- *                                       -11 -22 -33
- *                                       -44 -55 -66
- *                                       -77 -88 -99
- *                                         a   b   c)
+ * (array-append 0 a b c) =>  #,\(<array> (0 6 0 3)
+ *                                       11  22  33
+ *                                       44  55  66
+ *                                      -11 -22 -33
+ *                                      -44 -55 -66
+ *                                      -77 -88 -99
+ *                                        a   b   c)
  * @end lisp
 doc>
 |#
@@ -522,7 +526,7 @@ doc>
       (error "matrix-times: arrays are not matrices"))
   (let ((r0 (array-start a 0))  (rn (array-end a 0))
         (t0 (array-start a 1))  (tn (array-end a 1))
-        (u0 (array-start b 0))  (un (array-end b 0)) 
+        (u0 (array-start b 0))  (un (array-end b 0))
         (k0 (array-start b 1))  (kn (array-end b 1)))
     (or (= (- tn t0) (- un u0))
         (error "matrix-times: matrices are not compatible"))
@@ -547,51 +551,48 @@ doc>
  * Shares |arr| with permuted dimensions. Each dimension from 0
  * inclusive to rank exclusive must appear once in |k| ...
  *
- * This is a generalized transpose. It can permute the dimensions any which 
+ * This is a generalized transpose. It can permute the dimensions any which
  * way. The permutation is provided by a permutation matrix: a square matrix
  * of zeros and ones, with exactly one one in each row and column, or a
  * permutation of the rows of an identity matrix; the size of the matrix
  * must match the number of dimensions of the array.
  *
- * The default permutation is |[ 0 1 | 1 0 ]| of course, but any permutation
+ * The default permutation is |[ 0 1 , 1 0 ]| of course, but any permutation
  * array can be specified, and the shape array of the original array is then
  * multiplied with it, and index column vectors of the new array with its
  * inverse, from left, to permute the rows appropriately.
  * @lisp
- * (define a (array (shape 0 4 0 4)
- *                  -1  -2   -3  -4
- *                  -5  -6   -7  -8
- *                  -9  -10 -11 -12
- *                  -13 -14 -15 -16))
+ * (transpose (array (shape 0 4 0 4)
+ *                   -1  -2   -3  -4
+ *                   -5  -6   -7  -8
+ *                   -9  -10 -11 -12
+ *                   -13 -14 -15 -16))
+ *  => #,\(<array> (0 4 0 4)
+ *               -1 -5  -9 -13
+ *               -2 -6 -10 -14
+ *               -3 -7 -11 -15
+ *               -4 -8 -12 -16)
  *
- * (transpose a)
- *  => #,(<array> (0 4 0 4)
- *                 -1 -5  -9 -13
- *                 -2 -6 -10 -14
- *                 -3 -7 -11 -15
- *                 -4 -8 -12 -16)
- * (define a (array (shape 0 3 0 3 0 2)
- *                  -1 -2
- *                  -3 -4
- *                  -5 -6
+ * (transpose (array (shape 0 3 0 3 0 2)
+ *                   -1 -2
+ *                   -3 -4
+ *                   -5 -6
  *
- *                  -7 -8
- *                  -9 -10 
- *                  -11 -12
+ *                   -7 -8
+ *                   -9 -10
+ *                   -11 -12
  *
- *                  -13 -14
- *                  -15 -16
- *                  -17 -18))
+ *                   -13 -14
+ *                   -15 -16
+ *                   -17 -18))
+ *  => #,\(<array> (0 2 0 3 0 3)
+ *               -1  -7 -13
+ *               -3  -9 -15
+ *               -5 -11 -17
  *
- * (transpose a)
- *  => #,(<array> (0 2 0 3 0 3)
- *                 -1  -7 -13
- *                 -3  -9 -15
- *                 -5 -11 -17
- *
- *                 -2  -8 -14
- *                 -4 -10 -16
- *                 -6 -12 -18)
+ *               -2  -8 -14
+ *               -4 -10 -16
+ *               -6 -12 -18)
  * @end lisp
 doc>
 |#
@@ -638,28 +639,20 @@ doc>
  * |Share-nths| takes every |n|th slice along dimension |d| into a shared array.
  * This preserves the origin.
  *
- * Example:
- *
  * @lisp
  * (define a (array (shape 0 4 0 4)
  *                  -1 -2 -3 -4
  *                  -5 -6 -7 -8
  *                  -9 -10 -11 -12
  *                  -13 -14 -15 -16))
- * a
- *  => #,(<array> (0 4 0 4)
- *                 -1 -2 -3 -4
- *                 -5 -6 -7 -8
- *                 -9 -10 -11 -12
- *                 -13 -14 -15 -16)
- * 
+ *
  * (share-nths a 0 2)
- *  => #,(<array> (0 2 0 4) -1  -2  -3  -4
- *                          -9 -10 -11 -12)
- * 
+ *  => #,\(<array> (0 2 0 4) -1  -2  -3  -4
+ *                         -9 -10 -11 -12)
+ *
  * (share-nths a 1 2)
- *  => #,(<array> (0 4 0 2) -1  -3  -5  -7
- *                          -9 -11 -13 -15)
+ *  => #,\(<array> (0 4 0 2) -1  -3  -5  -7
+ *                         -9 -11 -13 -15)
  * @end lisp
 doc>
 |#

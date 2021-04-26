@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  2-Apr-2021 16:59 (eg)
+;; Last file update: 26-Apr-2021 10:44 (eg)
 ;;
 ;; ======================================================================
 
@@ -707,7 +707,7 @@ functions defined in ,(link-srfi 170). These functions are described here.])
 ;;; File Primitives.
 (subsection :title "File Primitives"
    (insertdoc 'temp-file-prefix)
-   (insertdoc 'temporary-file-name)
+   (insertdoc 'create-temp-file)
    (insertdoc 'rename-file)
    (insertdoc 'remove-file)
    (insertdoc 'copy-file)
