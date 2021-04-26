@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Mar-1995 11:31
- * Last file update: 15-Apr-2021 19:15 (eg)
+ * Last file update: 26-Apr-2021 13:11 (eg)
  */
 
 #include "stklos.h"
@@ -45,6 +45,10 @@ int STk_new_user_type(struct extended_type_descr *descr)
 
   MUT_LOCK(lck);
   user_extended_type += 1;
+
+  if (user_extended_type >= MAX_CELL_TYPES)
+    STk_panic("cannot define a new type (max allowed types: %d)", MAX_CELL_TYPES);
+
   STk_xtypes[user_extended_type]= descr;
   MUT_UNLOCK(lck);
 
@@ -86,7 +90,7 @@ static struct extended_type_descr *search_descriptor(char *str) {
 
 DEFINE_PRIMITIVE("%user-type-name", user_type_name, subr1, (SCM o))
 {
-   return (HAS_EXTENDED_TYPEP(o))?
+   return (HAS_USER_TYPEP(o))?
      STk_intern(XTYPE_NAME(BOXED_XTYPE(o))):
      STk_false;
 }

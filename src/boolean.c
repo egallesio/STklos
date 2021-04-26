@@ -254,7 +254,7 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
       return STk_false;
 
     default:
-     if ((HAS_EXTENDED_TYPEP(x) && HAS_EXTENDED_TYPEP(y)) &&
+     if ((HAS_USER_TYPEP(x) && HAS_USER_TYPEP(y)) &&
          (BOXED_TYPE(x) == BOXED_TYPE(y)))
        return STk_extended_eqv(x, y);
   }
@@ -431,7 +431,7 @@ DEFINE_PRIMITIVE("equal?", equal, subr2, (SCM x, SCM y))
       return STk_false;
 
   default:
-      if ((HAS_EXTENDED_TYPEP(x) && HAS_EXTENDED_TYPEP(y)) &&
+      if ((HAS_USER_TYPEP(x) && HAS_USER_TYPEP(y)) &&
          (BOXED_TYPE(x) == BOXED_TYPE(y)))
        return STk_extended_equal(x, y);
   }
@@ -534,7 +534,7 @@ static SCM equal_count(SCM x, SCM y, int max, int *cycle)
    default:
      // FIXME: The following code uses the above equal? . As a consequenece,
      // we will not be able to detecte cycles in extended types.
-     if ((HAS_EXTENDED_TYPEP(x) && HAS_EXTENDED_TYPEP(y)) &&
+     if ((HAS_USER_TYPEP(x) && HAS_USER_TYPEP(y)) &&
           (BOXED_TYPE(x) == BOXED_TYPE(y)))
         return STk_extended_equal(x, y);
   }

@@ -1029,7 +1029,7 @@ DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
   if (STk_procedurep(obj) == STk_true)
     return Procedure;
 
-  if (HAS_EXTENDED_TYPEP(obj)) {
+  if (HAS_USER_TYPEP(obj)) {
     SCM tmp = STk_extended_class_of(obj);
     if (tmp) return tmp;
   }

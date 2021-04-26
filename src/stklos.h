@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 15-Apr-2021 19:02 (eg)
+ * Last file update: 26-Apr-2021 13:03 (eg)
  */
 
 
@@ -548,7 +548,7 @@ struct extended_type_descr {
 
 extern struct extended_type_descr *STk_xtypes[];
 
-#define HAS_EXTENDED_TYPEP(o)            (BOXED_OBJP(o) && (BOXED_TYPE(o) > tc_last_standard))
+#define HAS_USER_TYPEP(o)      (BOXED_OBJP(o) && (BOXED_TYPE(o) > tc_last_standard))
 #define BOXED_XTYPE(o)                   (STk_xtypes[((stk_header *) o)->type])
 #define XTYPE_NAME(d)                    ((d)->name)
 #define XTYPE_PRINT(d)                   ((d)->print)
