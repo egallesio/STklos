@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-srfi.stk  -- Test of various SRFIs
 ;;;;
-;;;; Copyright © 2005-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,10 +21,8 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  4-Aug-2005 10:34 (eg)
-;;;; Last file update: 27-Nov-2020 16:40 (eg)
+;;;; Last file update: 26-Apr-2021 16:44 (eg)
 ;;;;
-
-(require "test")
 
 (test-section "SRFIs")
 
@@ -33,16 +31,33 @@
 ;;
 (load "../lib/srfis.stk")
 
+(define trace-srfi
+  (let ((count 0))
+    (lambda (nb)
+      (if nb
+          ;; print the SRFI number
+          (begin
+            (when (zero? (modulo count 12))
+              (eprintf "\n  ")
+              (set! count 0))
+            (eprintf "~5f" nb)
+            (set! count (+ count 1)))
+          ;; print spaces before failed/passed status
+          (eprintf "~a   " (make-string (- 60  (* count 5)) #\space)))
+      (flush-output-port *err*))))
+
 (dotimes (nb (+ (last-implemented-srfi) 1))
   (let ((desc (find-srfi nb)))
     (when desc                            ;; We have an impl. for this SRFI
       (let ((test-file (format "./srfis/~a.stk" nb)))
         (when (file-exists? test-file)    ;; and we have a test for it
-          ;; Add a subsection title
+          ;; Add a subsection title (and a trace)
           (test-subsection (format "SRFI ~S - ~S ..." nb (%srfi-title desc)))
+          (trace-srfi nb)
           ;; Require the SRFI and run the tests
           (require-feature nb)
           (load test-file))))))
 
+(trace-srfi #f)
 
 (test-section-end)
