@@ -180,22 +180,35 @@
 ;; Extracted from SRFI-1, with argument checking removed
 ;; (it's not exposed and we know only (list number) will
 ;; ever be passed to it).
+;; and allowing k to be as large as one wants
 (define (take lis k)
   (let recur ((lis lis) (k k))
-    (if (zero? k) '()
+    (if (or (zero? k) (null? lis)) '()
         (cons (car lis)
               (recur (cdr lis) (- k 1))))))
 
 
 
-(define (%srfi-29:format A . rest)
-  (let ((port (if (string? A) #f A))
-        (fmt  (if (string? A) A (car rest)))
-        (args (if (string? A) rest (cdr rest))))
-    
+(define (%srfi-29:format . args)
+  (when (< (length args) 1) (error "need at least one argument"))
+  
+  (let ((port #f)
+        (fmt #f))
+
+  (let ((first (car args)))
+    (when (not (string? first))
+      (when (null? (cdr args)) (error "port given, but no format string"))
+      (set! port first)
+      (set! args (cdr args))))
+
+  (let ((first (car args))) ; we already checked this car exists!
+    (if (string? first)
+        (begin (set! fmt  first)
+               (set! args (cdr args)))
+        (error "bad format string ~S" first)))
+
     (if (null? args)
         ;; just the string don't enter the rewriting loop:
-        (%stklos-format port fmt)
 
         ;; there are arguments after the format string.
         (let ((orig-args (list-copy args)))
@@ -249,7 +262,6 @@
                                                 (loop (substring fmt (cadar m) (string-length fmt)) (+ arg-pos 1)))
                                             arg-pos)))
                                 arg-pos)))))
-            
             ;; now remove all instances of '~nnn@*' from the format string
             ;; and remove the extra arguments at the end of the list:
             (let ((fmt (regexp-replace-all positional-directive-regexp fmt ""))
@@ -262,6 +274,6 @@
 
 (import SRFI-29)
 
-(define %format (in-module SRFI-29 %srfi-29:format))
+(define format (in-module SRFI-29 %srfi-29:format))
 
 (provide "srfi-29")

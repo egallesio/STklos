@@ -108,32 +108,32 @@
 
 (test "srfi-29 jp.format.1"
       "zero 0 one -2 two -1"
-      (%format "zero ~a one ~1@*~a two ~a" 0 -1 -2))
+      (format "zero ~a one ~1@*~a two ~a" 0 -1 -2))
 
 (test "srfi-29 jp.format.2"
       "zero 0 one -2 two -1 three -2 four -3"
-      (%format "zero ~a one ~1@*~a two ~a three ~a four ~a" 0 -1 -2 -3 -4))
+      (format "zero ~a one ~1@*~a two ~a three ~a four ~a" 0 -1 -2 -3 -4))
 
 (test "srfi-29 jp.format.3"
       "one -1 two -3 three b 12 four -3"
-      (%format "one ~a two ~2@*~a three ~? four ~a" -1 "~x ~d" '(11 12) -3))
+      (format "one ~a two ~2@*~a three ~? four ~a" -1 "~x ~d" '(11 12) -3))
 
 
 (test "srfi-29 jp.format.4"
       "zero 0 one -1 two -1 three -2 four -3"
-      (%format "zero ~a one ~a two ~-1@*~a three ~a four ~a" 0 -1 -2 -3 -4))
+      (format "zero ~a one ~a two ~-1@*~a three ~a four ~a" 0 -1 -2 -3 -4))
 
 (test "srfi-29 jp.format.5"
       "zero 0 one -1 two 0 three -2 four -3"
-      (%format "zero ~a one ~a two ~-2@*~a three ~a four ~a" 0 -1 -2 -3 -4))
+      (format "zero ~a one ~a two ~-2@*~a three ~a four ~a" 0 -1 -2 -3 -4))
 
 (test "srfi-29 jp.format.6"
       "zero 0 one -1 two -2 three -2 four -3"
-      (%format "zero ~a one ~a two ~0@*~a three ~a four ~a" 0 -1 -2 -3 -4))
+      (format "zero ~a one ~a two ~0@*~a three ~a four ~a" 0 -1 -2 -3 -4))
 
 
 (test/error "srfi-29 jp.format.7"
-            (%format "zero ~a one ~2*~a two ~a" 0 -1 -2))
+            (format "zero ~a one ~2*~a two ~a" 0 -1 -2))
 
 (test/error "srfi-29 jp.format.8"
-            (%format "zero ~a one ~-2@*~a two ~a" 0 -1 -2))
+            (format "zero ~a one ~-2@*~a two ~a" 0 -1 -2))
