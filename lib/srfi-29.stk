@@ -209,7 +209,8 @@
 
     (if (null? args)
         ;; just the string don't enter the rewriting loop:
-
+        (%stklos-format port fmt)
+        
         ;; there are arguments after the format string.
         (let ((orig-args (list-copy args)))
           (let ((n-args (let loop ((fmt fmt)
@@ -266,6 +267,7 @@
             ;; and remove the extra arguments at the end of the list:
             (let ((fmt (regexp-replace-all positional-directive-regexp fmt ""))
                   (args (take args (+ 1 n-args))))
+              ;;(%stklos-format #t "--> ~a ~a ~a~%" port fmt args)
               (apply %stklos-format (cons port (cons fmt args)))))))))
 
 );; END OF DEFINE-MODULE
