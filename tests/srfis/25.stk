@@ -47,7 +47,7 @@
 ;;;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 29-Mar-2021 22:21 (jpellegrini)
-;;;; Last file update: 26-Apr-2021 14:59 (eg)
+;;;; Last file update: 27-Apr-2021 12:33 (eg)
 
 (define (tail n)
   (if (< n (length (past)))
@@ -808,38 +808,39 @@
      (test "srfi 25 jp 25.array-map!.3" '(0 2 0 3) (array->list (array-shape c)))
      (test "srfi 25 jp 25.array-map!.4" '(1 -2 3 8 -10 12) (array->list c))))
 
-
-;; create 50 threads; each thread creates 20 arrays sharing content with a single
-;; array.
-;; then:
-;; - each thread checks that its arrays are shared and have -1 share-count
-;; - after joining all threads, we check that the original array is shared
-;;   and its shared count is exactly the
-(let* ((thread-num 50)
-       (arrays-per-thread 20)
-       (t '())
-       (orig (make-array (shape 0 2 0 3) 'unused))
-       (a (make-array (shape 0 thread-num 0 arrays-per-thread) #f)))
-  (dotimes (i thread-num)
-    (push! (make-thread (lambda ()
-                            (dotimes (j arrays-per-thread)
-                              (array-set! a i j (share-array orig
-                                                             (shape 0 2 0 3)
-                                                             (lambda (x y) (values x y)))))
-                            (dotimes (j arrays-per-thread)
-                              (test "srfi 25 jp 25.threads.3"
-                                    #t
-                                    (shared-array? (array-ref a i j)))
-                              (test "srfi 25 jp 25.threads.4"
-                                    -1
-                                    (array-share-count (array-ref a i j))))))
-           t))
-  (for-each thread-start! t)
-  (for-each thread-join! t)
-  (test "srfi 25 jp 25.threads.1"
-        (* thread-num arrays-per-thread)
-        (array-share-count orig))
-  (test "srfi 25 jp 25.threads.2" #t (shared-array? orig)))
+(unless (eq? (%thread-system)  'none)
+  ;; create 50 threads; each thread creates 20 arrays sharing content with a single
+  ;; array.
+  ;; then:
+  ;; - each thread checks that its arrays are shared and have -1 share-count
+  ;; - after joining all threads, we check that the original array is shared
+  ;;   and its shared count is exactly the
+  
+  (let* ((thread-num 50)
+         (arrays-per-thread 20)
+         (t '())
+         (orig (make-array (shape 0 2 0 3) 'unused))
+         (a (make-array (shape 0 thread-num 0 arrays-per-thread) #f)))
+    (dotimes (i thread-num)
+             (push! (make-thread (lambda ()
+                                   (dotimes (j arrays-per-thread)
+                                            (array-set! a i j (share-array orig
+                                                                           (shape 0 2 0 3)
+                                                                           (lambda (x y) (values x y)))))
+                                   (dotimes (j arrays-per-thread)
+                                            (test "srfi 25 jp 25.threads.3"
+                                                  #t
+                                                  (shared-array? (array-ref a i j)))
+                                            (test "srfi 25 jp 25.threads.4"
+                                                  -1
+                                                  (array-share-count (array-ref a i j))))))
+                    t))
+    (for-each thread-start! t)
+    (for-each thread-join! t)
+    (test "srfi 25 jp 25.threads.1"
+          (* thread-num arrays-per-thread)
+          (array-share-count orig))
+    (test "srfi 25 jp 25.threads.2" #t (shared-array? orig))))
 
 
 (test "srfi-25 26.shape.1" #t (shape? (shape)))

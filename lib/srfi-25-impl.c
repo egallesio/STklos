@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update: 26-Apr-2021 12:10 (eg)
+ * Last file update: 27-Apr-2021 13:42 (eg)
  */
 
 #include "stklos.h"
@@ -42,7 +42,9 @@ struct array_obj {
   stk_header header;
   int shared;                /* does this array share data with another? */
   int *orig_share_count;     /* pointer to original array share counter */
+#ifndef THREADS_NONE
   MUT_FIELD(share_cnt_lock); /* lock for share counter */
+#endif
   long size;                 /* size of data */
   long length;               /* # of elements */
   int  rank;                 /* # of dimensons */
@@ -860,7 +862,7 @@ char *get_affine_map(SCM proc, int p, int q)
                 ? 2
                 : ceil(log10((double) size)) + 1;
         }
-    
+
     SCM er = STk_makestring(6,"given");
 
     long written = 0;
@@ -874,7 +876,7 @@ char *get_affine_map(SCM proc, int p, int q)
     int nonzero;
     for(long j=0; j<q; j++) {
         nonzero = 0;
-        
+
         written = snprintf(ptr, total-(ptr-buf),"x_%ld ->", j);
         if (written < 0) return er;
         ptr+=written;
@@ -882,10 +884,10 @@ char *get_affine_map(SCM proc, int p, int q)
         for (long i=0; i<p; i++) {
             val = INT_VAL(VECTOR_DATA(c[i])[j]);
             if  (val != 0) {
-                
+
                 if (i == 0 && val > 0) sign = "";
                 else sign = (val < 0) ? "- " : "+ ";
-                
+
                 written = snprintf(ptr,total-(ptr-buf)," %s%ldy_%ld",sign,labs(INT_VAL(VECTOR_DATA(c[i])[j])),i);
                 if (written < 0) return er;
                 ptr += written;
@@ -931,11 +933,11 @@ char *cvec2string(int n, long *vec)
     for (int i=0; i<n; i++) {
         size = vec[i] < 2
             /* always add one for a space after the number */
-            ? 2 
+            ? 2
             : ceil(log10((double)(vec[i]))) + 1;
         dtotal += size;
     }
-    
+
     long total = (long) dtotal;
     char *s = STk_must_malloc_atomic(total+3);
     char *p = s;
@@ -970,9 +972,9 @@ void check_array_shape_compatible(int new_rank, long *new_shape,
 {
     long index;
     long *idx = STk_must_malloc_atomic(new_rank);
-    
+
     if (new_rank == 0) return; /* always compatible with any shape */
-    
+
     for (int i=0; i<new_rank; i++) {
         if (new_shape[2*i] == new_shape[2*i+1]) return; /* no usable indices, compatible with anything */
         idx[i] = new_shape[2*i]; /* lower bound */
@@ -981,7 +983,7 @@ void check_array_shape_compatible(int new_rank, long *new_shape,
     int updated = 1;
     while(updated) {
         updated = 0;
-                    
+
         index = raw_get_index_from_C_args(mults, offset,new_rank,&idx[0]);
 
         if ( index < 0 || (index >= size) ) {
@@ -1000,7 +1002,7 @@ Index %s for the new array goes out of bounds in the original array.",
 
             STk_error(buf);
         }
-        
+
         /* update idx vector */
         for(int d = new_rank - 1; d >= 0; d--) {
             if (idx[d] < new_shape[d*2+1] - 1) { /* we can increase */
@@ -1104,7 +1106,9 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
     s->shape            = cshape;
     s->multipliers      = new_mult;
     s->data_ptr         = ARRAY_DATA(old_array);
+#ifndef THREADS_NONE
     s->share_cnt_lock   = ARRAY_LOCK(old_array);
+#endif
 
     /* mark old array as shared by one more array, OR of the original
        array (the right thing will be done) */
@@ -1218,7 +1222,9 @@ DEFINE_PRIMITIVE("array-copy+share",srfi_25_array_copy_share,subr1,(SCM old_arra
         sizeof(struct array_obj) +
         sizeof(int) +                  /* shared */
         sizeof(int*) +                 /* orig_share_count */
+#ifndef THREAD_NONE
         ARRAY_MUTEX_SIZE +             /* share_cnt_lock */
+#endif
         sizeof(long) +                 /* size */
         sizeof(long) +                 /* length */
         sizeof(int) +                  /* rank */
@@ -1536,7 +1542,7 @@ static SCM test_equal_array(SCM x, SCM y)
     sx = ARRAY_SHAPE(x);
     sy = ARRAY_SHAPE(y);
 
-    for (i=0; i < rx;  i++) 
+    for (i=0; i < rx;  i++)
       if (sx[i]!= sy[i]) return STk_false;
 
     /* check for empty arrays */
@@ -1550,12 +1556,12 @@ static SCM test_equal_array(SCM x, SCM y)
     if ( (rx==0) || empty) {
         /* if none of them have elements, they're equal! */
         if (!dx[0] && !dy[0]) return STk_true;
-        
+
        /* empty arrays may have a default value. we compare it here. */
         if (dx[0] && dy[0])
             if (STk_equal(dx[0], dy[0]) == STk_true) return STk_true;
     } else {
-        
+
         /* idx is the vector that will be used as index for the two arrays: */
         SCM idx = STk_makevect(rx,NULL);
 
@@ -1566,15 +1572,15 @@ static SCM test_equal_array(SCM x, SCM y)
         int updated = 1;
         while(updated) {
             updated = 0;
-            
+
             /* now we compare two elements at the same index: */
             ix = get_index_from_vector(x, idx);
             iy = get_index_from_vector(y, idx);
             data_x = dx[ix];
             data_y = dy[iy];
-            
+
             if (STk_equal(data_x, data_y) == STk_false) return STk_false;
-            
+
             /* update idx vector */
             for(int d = rx - 1; d >= 0; d--)
                 if (INT_VAL(VECTOR_DATA(idx)[d]) < sx[d*2+1] - 1) { /* we can increase */

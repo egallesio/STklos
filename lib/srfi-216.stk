@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 28-Jan-2021 16:03
-;;;; Last file update:  4-Feb-2021 12:04 (eg)
+;;;; Last file update: 27-Apr-2021 13:31 (eg)
 ;;;;
 
 (require "srfi-27")
@@ -59,23 +59,25 @@
 ;; ======================================================================
 ;; Multi-threading
 ;; ======================================================================
-(define (parallel-execute . procs)
-  (let ((threads (map (lambda (p) (thread-start! (make-thread p)))
-                      procs)))
-    (for-each thread-join! threads)))
+(unless (eq? (%thread-system) 'none)
+  (define (parallel-execute . procs)
+    (let ((threads (map (lambda (p) (thread-start! (make-thread p)))
+                        procs)))
+      (for-each thread-join! threads)))
 
-;; tests-and-set!
-(define test-and-set! #f)
-(let ((mutex(make-mutex)))
-  (set! test-and-set!
-        (lambda (cell)
-          (mutex-lock! mutex)
-          (let ((result (if (car cell)
-                            #t
-                            (begin (set-car! cell #t)
-                                   #f))))
-            (mutex-unlock! mutex)
-            result))))
+  ;; tests-and-set!
+  (define test-and-set! #f)
+
+  (let ((mutex(make-mutex)))
+    (set! test-and-set!
+          (lambda (cell)
+            (mutex-lock! mutex)
+            (let ((result (if (car cell)
+                              #t
+                              (begin (set-car! cell #t)
+                                     #f))))
+              (mutex-unlock! mutex)
+              result)))))
 
 
 ;; ======================================================================
@@ -93,3 +95,4 @@
 
 (import SRFI-216)
 (provide "srfi-216")
+
