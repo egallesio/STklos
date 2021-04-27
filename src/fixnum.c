@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 27-Mar-2021 19:48 (eg)
+ * Last file update: 27-Apr-2021 15:25 (eg)
  */
 
 #include "stklos.h"
@@ -540,7 +540,7 @@ DEFINE_PRIMITIVE("fxarithmetic-shift", fxarithmetic_shift, subr2, (SCM o1, SCM o
   ensure_fx2(o1, o2);
   {
     long k = INT_VAL(o2);
-    if (labs(k) > INT_LENGTH) error_bad_fxlength(o2);
+    if (labs(k) > (long) INT_LENGTH) error_bad_fxlength(o2);
     if (k<0) return MAKE_INT( INT_VAL(o1) >> -k );
     else     return MAKE_INT( INT_VAL(o1) << k );
   }

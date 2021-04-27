@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 16-Feb-2021 16:30 (eg)
+ * Last file update: 27-Apr-2021 15:21 (eg)
  */
 
 #include <ctype.h>
@@ -288,7 +288,7 @@ SCM STk_makestring(int len, char *init)
       STRING_LENGTH(z) = STk_utf8_strlen(STRING_CHARS(z), len);
   }
   else
-    bzero(STRING_CHARS(z), len+1);
+    memset(STRING_CHARS(z), '\0', len+1);
 
   return z;
 }
