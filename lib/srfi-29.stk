@@ -212,7 +212,7 @@
         (%stklos-format port fmt)
         
         ;; there are arguments after the format string.
-        (let ((orig-args (list-copy args))
+        (let ((orig-args args)
               (orig-fmt  (string-copy fmt)))
           (let ((n-args (let loop ((fmt fmt)
                                    (arg-pos 0)) ;; we're processing the i-th argument
