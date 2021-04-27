@@ -171,7 +171,7 @@
 ;; in the directive, so ~-1@* will work; that is why we have the minus sign in
 ;; the character class [-[:digit:]].
 (define format-regexp
-  (string->regexp "\\~(?:(?:((?:[-[:digit:]])+)(?:@\\*|f|F))|(?i)[aswdxobcyf\\?])"))
+  (string->regexp "\\~(?:(?:((?:[-[:digit:]])+)(?:@\\*))|(?:(?:(?:[-[:digit:]])+)(?:f|F))|(?i)[aswdxobcyf\\?])"))
 
 ;; this matches the positional-directive of SRFI-29.
 (define positional-directive-regexp
@@ -212,7 +212,8 @@
         (%stklos-format port fmt)
         
         ;; there are arguments after the format string.
-        (let ((orig-args (list-copy args)))
+        (let ((orig-args (list-copy args))
+              (orig-fmt  (string-copy fmt)))
           (let ((n-args (let loop ((fmt fmt)
                                    (arg-pos 0)) ;; we're processing the i-th argument
                           
@@ -244,9 +245,10 @@
                                           ;; are allowed, obviously.
                                           (when (>= (+ arg-pos num) (length orig-args))
                                             (error (%stklos-format #f
-                                                           "SRFI-29 directive ~[N]@* referenced index ~d after last index ~d"
+                                                           "SRFI-29 directive ~[N]@* referenced index ~d after last index ~d, format was ~w"
                                                            (+ arg-pos num)
-                                                           (- (length orig-args) 1))))
+                                                           (- (length orig-args) 1)
+                                                           orig-fmt)))
                                           (when (< (+ arg-pos num) 0)
                                             (error "SRFI-29 directive ~[N]@* referenced negative index "
                                                    (+ arg-pos num)))
