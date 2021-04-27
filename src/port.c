@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 10-Apr-2021 18:45 (eg)
+ * Last file update: 27-Apr-2021 12:15 (eg)
  *
  */
 
@@ -966,6 +966,8 @@ static SCM internal_format(int argc, SCM *argv, int error)
                   char width[FMT_SIZE], digits[FMT_SIZE];
                   SCM ff, ref, tmp;
                   int i;
+
+                  *width = *digits = '\0'; /* initialize arrays */
 
                   if (argc-- <= 0) goto TooMuch;
 
