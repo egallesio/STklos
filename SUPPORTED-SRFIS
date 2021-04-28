@@ -52,6 +52,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-41: Streams
     - SRFI-43: Vector library
     - SRFI-45: Primitives for Expressing Iterative Lazy Algorithms
+    - SRFI-46: Basic Syntax-rules Extensions
     - SRFI-48: Intermediate Format Strings
     - SRFI-51: Handling rest list
     - SRFI-54: Formatting

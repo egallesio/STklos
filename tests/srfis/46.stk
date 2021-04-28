@@ -1,0 +1,111 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 46 ...
+;; ----------------------------------------------------------------------
+
+;;; Macros created here begin with "s46:test:", so as to not interfere
+;;; with other tests. I have tried including these tests in a module,
+;;; but the macros were still visible in other SRFI tests (127, for example,
+;;; which uses the identifier "g").
+
+;;; First, testing the configurable ellipsis:
+
+;; with symbol, "_"
+(define-syntax s46:test:g
+  (syntax-rules _ ()
+    ((_ x _) (format #f x _))))
+
+(test "srfi-46 ellipsis.1"
+      "[x]"
+      (s46:test:g "[~a]" 'x))
+
+;; with keyword, "..."
+(define-syntax s46:test:h
+  (syntax-rules ::: ()
+    ((_ x :::) (format #f x :::))))
+
+(test "srfi-46 ellipsis.2"
+      "[x]"
+      (s46:test:h "[~a]" 'x))
+
+
+;; with unicode horizontal ellipsis, "…"
+(define-syntax s46:test:i
+  (syntax-rules … ()
+    ((i x …) (format #f x …))))
+(test "srfi-46 ellipsis.3"
+      "[x]"
+      (s46:test:i "[~a]" 'x))
+
+
+(define-syntax s46:test:my-and
+  (syntax-rules :... ()
+    ((_) #t)
+    ((_ e) e)
+    ((_ e1 e2 :...)
+     (if e1
+	 (s46:test:my-and e2 :...)
+	 #f))))
+
+(test "srfi-46 ellipsis 4"
+      #f
+      (s46:test:my-and #f #f 2 #f))
+
+(test "srfi-46 ellipsis 5"
+      40
+      (s46:test:my-and 10 20 30 40))
+
+(define-syntax s46:test:my-or
+  (syntax-rules /// ()
+    ((_) #f)
+    ((_ e) e)
+    ((_ e1 e2 /// )
+     (let ((t e1))
+       (if t t (s46:test:my-or e2 ///))))))
+
+(test "srfi-46 ellipsis 6"
+      2
+      (s46:test:my-or #f #f 2 #f))
+
+(test "srfi-46 ellipsis 7"
+      #f
+      (s46:test:my-or #f #f #f #f))
+
+;; Two unicode chars.
+(define-syntax s46:test:my-cond
+  (syntax-rules ⋱⋰ (else)
+    ((_ (else e1 ⋱⋰))
+     (begin e1 ⋱⋰))
+    ((_ (e1 e2 ⋱⋰))
+     (when e1 e2 ⋱⋰))
+    ((_ (e1 e2 ⋱⋰) c1 ⋱⋰)
+     (if e1 
+	 (begin e2 ⋱⋰)
+	 (cond c1 ⋱⋰)))))
+
+(test "srfi-46 sllipsis 8"
+      4
+      (s46:test:my-cond (#f 1) (#f 2) (#f 3) (#t 4) (#f 5)))
+
+;;; Now, testing tail patterns:
+
+
+;; From the SRFI text:
+(define-syntax s46:test:fake-begin
+  (syntax-rules ()
+    ((s46:test:fake-begin ?body ... ?tail)
+     (let* ((ignored ?body) ...) ?tail))))
+
+;; We check for this:
+;;
+;; (macro-expand '(s46:test:fake-begin (f) (g)))
+;; => (let* ((ignored138 (f))) (g))
+;;
+;; Since gensym is used, we cannot check for the exact "ignoreNNN" symbol,
+;; but we verify everything else:
+(let ((e (macro-expand
+          '(s46:test:fake-begin (f) (g)))))
+  (test "srfi-46 tail.1" 'let* (car e))
+  (test "srfi-46 tail.2" '(g) (caddr e))
+  (test "srfi-46 tail.3" '(g) (caddr e))
+  (test "srfi-46 tail.4" '((f)) (cdaadr e))
+  (test "srfi-46 tail.5" "ignored" (substring (symbol->string (caaadr e)) 0 7)))
