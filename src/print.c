@@ -1,7 +1,7 @@
 /*
  * p r i n t . c                                -- writing stuff
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  3-Sep-2020 12:28 (eg)
+ * Last file update: 29-Apr-2021 16:12 (eg)
  *
  */
 #include <ctype.h>
@@ -100,10 +100,10 @@ static Inline void printkeyword(SCM key, SCM port, int mode)
   if (mode==WRT_MODE) {
     if ((BOXED_INFO(key) & SYMBOL_NEEDS_BARS) ||
         ((!PORT_CASE_SENSITIVEP(port)) && (BOXED_INFO(key) & SYMBOL_HAS_UPPER))) {
-      STk_nputs(port, "|:", 2);  STk_puts(s, port); STk_putc('|', port);
+      STk_nputs(port, "#:|", 3);  STk_puts(s, port); STk_putc('|', port);
       return;
     }
-    STk_putc(':', port);
+    STk_nputs(port, "#:", 2);
   }
   STk_puts(s, port);
 }

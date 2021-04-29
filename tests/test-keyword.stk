@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-keyword.stk   -- ss
 ;;;;
-;;;; Copyright © 2005-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 14:29 (eg)
-;;;; Last file update: 31-Jul-2019 12:32 (eg)
+;;;; Last file update: 29-Apr-2021 16:19 (eg)
 ;;;;
 
 ;;;; Most of theses tests were stolen in Gauche Scheme distribution
@@ -43,6 +43,23 @@
 (test "eqv?.3" #t (eqv? :a a:))
 (test "eqv?.4" #t (eqv? :a #:a))
 (test "eqv?.5" #f (eqv? :a 'a))
+
+;; Using bars with keywords and symbols
+(test "reader.bars.1" #t (keyword? :foobar))
+(test "reader.bars.2" #t (keyword? :|foo bar|))
+(test "reader.bars.3" #t (keyword? :|:foobar|))
+(test "reader.bars.4" #f (keyword? '|:foobar|))  ; it's a symbol
+(test "reader.bars.5" ":foobar" (keyword->string :|:foobar|))
+(test "reader.bars.6" ::foobar :|:foobar|)
+
+
+(test "writer.1" "#:ab" (with-output-to-string (lambda()
+                                                 (write (make-keyword "ab")))))
+
+(test "writer.2" "#:|a b|" (with-output-to-string (lambda()
+                                                    (write (make-keyword "a b")))))
+
+
 
 ;;----------------------------------------------------------------
 (test-subsection "key-get")

@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  8-Jan-2021 10:58 (eg)
+ * Last file update: 29-Apr-2021 15:54 (eg)
  *
  */
 
@@ -343,7 +343,7 @@ static SCM read_token(SCM port, int c, int case_significant)
   if (z == STk_false) {
     /* It is not a number */
     switch (*tok) {
-      case ':': return STk_makekey(tok);
+      case ':': return (c == ':')? STk_makekey(tok): STk_intern(tok);
       case '#': if (len > 1) {
                   if (len == 2) {
                     if (tok[1] == 't' || tok[1] == 'T') return STk_true;
