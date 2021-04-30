@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 26-Apr-2021 13:03 (eg)
+ * Last file update: 30-Apr-2021 14:17 (eg)
  */
 
 
@@ -902,6 +902,7 @@ struct port_obj {
   char *filename;               /* File name (for file port, a const otherwise) */
   int  line;                    /* Line number  (unused when writing) */
   int  pos;                     /* position from the start of file */
+  int  keyword_colon_pos;       /* position of the ':' in keywords */
   SCM  close_hook;              /* hook called when a file is closed */
 
   /* virtual functions (in the object 'cause the # of ports should be low ) */
@@ -937,13 +938,14 @@ struct port_obj {
 #define PORT_TEXTUAL            (1<<11)
 #define PORT_BINARY             (1<<12)
 
-#define PORT_STREAM(x)    (((struct port_obj *) (x))->stream)
-#define PORT_FLAGS(x)     (((struct port_obj *) (x))->flags)
-#define PORT_UNGETC(x)    (((struct port_obj *) (x))->ungetted_char)
-#define PORT_LINE(x)      (((struct port_obj *) (x))->line)
-#define PORT_POS(x)       (((struct port_obj *) (x))->pos)
-#define PORT_FNAME(x)     (((struct port_obj *) (x))->filename)
-#define PORT_CLOSEHOOK(x) (((struct port_obj *) (x))->close_hook)
+#define PORT_STREAM(x)     (((struct port_obj *) (x))->stream)
+#define PORT_FLAGS(x)      (((struct port_obj *) (x))->flags)
+#define PORT_UNGETC(x)     (((struct port_obj *) (x))->ungetted_char)
+#define PORT_LINE(x)       (((struct port_obj *) (x))->line)
+#define PORT_POS(x)        (((struct port_obj *) (x))->pos)
+#define PORT_FNAME(x)      (((struct port_obj *) (x))->filename)
+#define PORT_KW_COL_POS(x) (((struct port_obj *) (x))->keyword_colon_pos)
+#define PORT_CLOSEHOOK(x)  (((struct port_obj *) (x))->close_hook)
 
 #define PORT_PRINT(x)     (((struct port_obj *) (x))->print_it)
 #define PORT_RELEASE(x)   (((struct port_obj *) (x))->release_it)
@@ -1157,6 +1159,7 @@ SCM   STk_read(SCM port, int case_significant);
 SCM   STk_read_constant(SCM port, int case_significant);
 char *STk_quote2str(SCM symb);
 int   STk_init_reader(void);
+int   STk_keyword_colon_convention(void); // pos. of ':' in symbolro make a  keyword
 extern int STk_read_case_sensitive;
 
 

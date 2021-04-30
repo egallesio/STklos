@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update: 15-Apr-2021 19:02 (eg)
+ * Last file update: 29-Apr-2021 19:12 (eg)
  */
 
 #include "stklos.h"
@@ -564,7 +564,7 @@ DEFINE_PRIMITIVE("%slot-ref", undoc_slot_ref, subr2, (SCM obj, SCM slot_name))
 
 DEFINE_PRIMITIVE("%initialize-object", initialize_obj, subr2,(SCM obj,SCM initargs))
 {
-  static char k_init_keyword[] = ":init-keyword";
+  static char k_init_keyword[] = "init-keyword";
   SCM tmp, get_n_set, slots;
   SCM init_keyword = STk_makekey(k_init_keyword);
   SCM classe       = INST_CLASS_OF(obj);

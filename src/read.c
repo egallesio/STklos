@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 29-Apr-2021 15:54 (eg)
+ * Last file update: 30-Apr-2021 14:13 (eg)
  *
  */
 
@@ -58,6 +58,14 @@ int STk_read_case_sensitive = DEFAULT_CASE_SENSITIVE;
 #define BAD_ESCAPED_SPACE    2
 #define BAD_ASCII_CHAR       3
 
+
+/* Conventions for reading keyword */
+#define COLON_NONE   0x0
+#define COLON_BEFORE 0x1
+#define COLON_AFTER  0x2
+#define COLON_BOTH   0x3
+
+static char colon_pos;
 
 /*===========================================================================*\
  *
@@ -137,6 +145,18 @@ static void warning_parenthesis(SCM port)
 static void warning_bad_escaped_sequence(SCM port, int c)
 {
   STk_warning("character %c must not be escaped on line %d of ~S", c, PORT_LINE(port), port);
+}
+
+
+static int colon_position_value(char *str)
+{
+  if      (strcmp(str, "none")   == 0) return COLON_NONE;
+  else if (strcmp(str, "before") == 0) return COLON_BEFORE;
+  else if (strcmp(str, "after")  == 0) return COLON_AFTER;
+  else if (strcmp(str, "both")   == 0) return COLON_BOTH;
+  else STk_error("bad value for colon position");
+
+  return 0;   // for the compiler
 }
 
 
@@ -265,11 +285,13 @@ Top:
 }
 
 
-static int read_word(SCM port, int c, char *tok, int case_significant)
-/* read an item whose 1st char is in c. Return its length */
+static int read_word(SCM port, int c, char *tok, int case_significant, int *last)
+// read an item whose 1st char is in c. Return its length
+// At exit "last", if not NULL,  contains the last character read for thi item
 {
   register int j = 0;
   int allchars   = 0;
+  int next;
 
   for( ; ; ) {
     allchars  ^= (c == '|');
@@ -315,17 +337,19 @@ static int read_word(SCM port, int c, char *tok, int case_significant)
       }
     }
 
-    c = STk_getc(port);
-    if (c == EOF) break;
+    next = STk_getc(port);
+    if (next == EOF) break;
     if (!allchars) {
-      if (strchr("()[]{}'`,;\"\n\r \t\f", c)) {
-        STk_ungetc(c, port);
+      if (strchr("()[]{}'`,;\"\n\r \t\f", next)) {
+        STk_ungetc(next, port);
         break;
       }
-      //      if (isspace(c)) break; //FIXME:
     }
+    c = next;
     if (j >= MAX_TOKEN_SIZE-1) error_token_too_large(port, tok);
   }
+
+  if (last) *last = c;
 
   tok[j] = '\0';
   return j;
@@ -335,38 +359,48 @@ static SCM read_token(SCM port, int c, int case_significant)
 {
   char tok[MAX_TOKEN_SIZE];
   SCM z;
-  int len;
+  int len, last;
 
-  len = read_word(port, c, tok, case_significant);
+  len = read_word(port, c, tok, case_significant, &last);
   z   = STk_Cstr2number(tok, 10L);
 
-  if (z == STk_false) {
-    /* It is not a number */
-    switch (*tok) {
-      case ':': return (c == ':')? STk_makekey(tok): STk_intern(tok);
-      case '#': if (len > 1) {
-                  if (len == 2) {
-                    if (tok[1] == 't' || tok[1] == 'T') return STk_true;
-                    if (tok[1] == 'f' || tok[1] == 'F') return STk_false;
-                  }
-                  if (tok[1] == ':')
-                    return STk_makekey(tok+1);
-                  else if (strcasecmp(tok+1, "true") == 0)
-                    return STk_true;
-                  else if (strcasecmp(tok+1, "false") == 0)
-                    return STk_false;
-                  else if (strcasecmp(tok+1, "eof") == 0)
-                    return STk_eof;
-                  else if (strcasecmp(tok+1, "void") == 0)
-                    return STk_void;
-                }
-                error_bad_sharp_syntax(port, tok);
-                break; /* for the compiler */
-      default : return (tok[len-1] == ':') ? STk_makekey(tok) : STk_intern(tok);
+  if (z != STk_false)
+    return z;
+
+  /* It is not a number */
+  if (*tok == '#') {
+    if (len > 1) {
+      if (len == 2) {
+        if (tok[1] == 't' || tok[1] == 'T') return STk_true;
+        if (tok[1] == 'f' || tok[1] == 'F') return STk_false;
+      }
+      if (tok[1] == ':')
+        return STk_makekey(tok+2);
+      else if (strcasecmp(tok+1, "true") == 0)
+        return STk_true;
+      else if (strcasecmp(tok+1, "false") == 0)
+        return STk_false;
+      else if (strcasecmp(tok+1, "eof") == 0)
+        return STk_eof;
+      else if (strcasecmp(tok+1, "void") == 0)
+        return STk_void;
+      }
+    error_bad_sharp_syntax(port, tok);
+  } else {
+    /* We have a symbol or a keyword */
+    int colon_pos = PORT_KW_COL_POS(port);
+
+    if ((c == ':') && (colon_pos & COLON_BEFORE)) {
+      return STk_makekey(tok+1);
+    } else if ((tok[len-1]==':') && (colon_pos & COLON_AFTER) && (last!='|')){
+      tok[len-1] = '\0';
+      return STk_makekey(tok);
+    }
+    else {
+      return STk_intern(tok);
     }
   }
-  /* Return the number read */
-  return z;
+  return STk_void;   // for the compiler
 }
 
 static SCM read_char(SCM port, int c)
@@ -399,7 +433,7 @@ static SCM read_address(SCM port)
   char *end, tok[MAX_TOKEN_SIZE] = "0";
   unsigned long address;
 
-  read_word(port, 'x', tok+1, FALSE);
+  read_word(port, 'x', tok+1, FALSE, NULL);
   address = strtoul(tok, &end, 16);
   if (*end)
     signal_error(port, "bad address specifier #p~a", STk_Cstring2string(tok+2));
@@ -635,7 +669,7 @@ static SCM read_string(SCM port, int constant)
     *p++ = c;
   }
   *p = '\0';
-  
+
   switch(error) {    /* No BAD_ASCII_CHAR here: '\!' is equivalent to '!' */
     case BAD_HEX_SEQUENCE:
       error_bad_inline_hexa_sequence(port, hex_buffer, 0); break;
@@ -683,7 +717,7 @@ static SCM read_srfi207_bytevector(SCM port, int constant)
                    } while (c == ' ' || c == '\t');
 
                    if (c != '\n') { pos = j; error = BAD_ESCAPED_SPACE; break; }
-                   
+
                    /* FALLTHROUGH */
         case '\n': do {
                      c = STk_getc(port);
@@ -751,7 +785,7 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
   int tag, len;
   SCM v;
 
-  len = read_word(port, c, tok, ctx->case_significant);
+  len = read_word(port, c, tok, ctx->case_significant, NULL);
 
   if (strcasecmp(tok, "f") ==0 || strcasecmp(tok, "false") ==0) {
     /* This is the #f constant */
@@ -871,6 +905,14 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
                                PORT_FLAGS(port) &= ~PORT_CASE_SENSITIVE;
                                ctx->case_significant = FALSE;
                              }
+                             continue;
+                           }
+                           /* Treat keyword-colon-{none,before,after,both} */
+                           if ((strcmp(s, "keyword-colon-position-none")   == 0) ||
+                               (strcmp(s, "keyword-colon-position-before") == 0) ||
+                               (strcmp(s, "keyword-colon-position-after")  == 0) ||
+                               (strcmp(s, "keyword-colon-position-both")   == 0)) {
+                             PORT_KW_COL_POS(port) = colon_position_value(s+23); // none, before, ...
                              continue;
                            }
                          }
@@ -1137,6 +1179,41 @@ static SCM read_case_sensitive_conv(SCM value)
 }
 
 
+/*
+<doc EXT keyword-colon-position
+ * (keyword-colon-position)
+ * (keyword-colon-position value)
+ *
+doc>
+*/
+
+static SCM keyword_colon_position_get(void)
+{
+  switch (colon_pos) {
+  case COLON_NONE:    return STk_intern("none");
+  case COLON_BEFORE:  return STk_intern("before");
+  case COLON_AFTER:   return STk_intern("after");
+  default:            return STk_intern("both");
+  }
+}
+
+static SCM keyword_colon_position_set(SCM value)
+{
+  if (SYMBOLP(value))
+    colon_pos = colon_position_value(SYMBOL_PNAME(value));
+  else if (KEYWORDP(value))
+    colon_pos = colon_position_value(KEYWORD_PNAME(value));
+  else
+    STk_error("expected a symbol or a keyword as parameter value");
+
+  PORT_KW_COL_POS(STk_current_input_port()) = colon_pos;
+  return keyword_colon_position_get();
+}
+
+int STk_keyword_colon_convention(void)
+{
+  return colon_pos;
+}
 
 /*===========================================================================*\
  *
@@ -1170,5 +1247,12 @@ int STk_init_reader(void)
                        MAKE_BOOLEAN(STk_read_case_sensitive),
                        read_case_sensitive_conv,
                        STk_STklos_module);
+
+  /* Declare parameter keyword-colon-position */
+  colon_pos = COLON_BOTH;
+  STk_make_C_parameter2("keyword-colon-position",
+                        keyword_colon_position_get,
+                        keyword_colon_position_set,
+                        STk_STklos_module);
   return TRUE;
 }

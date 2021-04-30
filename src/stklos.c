@@ -1,7 +1,7 @@
 /*
  * stklos.c     -- STklos interpreter main function
  *
- * Copyright © 1999-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update:  4-Dec-2020 11:46 (eg)
+ * Last file update: 29-Apr-2021 18:34 (eg)
  */
 
 #include "stklos.h"
@@ -167,21 +167,21 @@ static void  build_scheme_args(int argc, char *argv[], char *argv0)
   for (i = argc-1; i >= 0; i--)
     l = STk_cons(STk_Cstring2string(argv[i]), l);
 
-  options = LIST2(STk_makekey(":argv"), l);
-  ADD_OPTION(argv0,                ":program-name");
-  ADD_OPTION(program_file,         ":file");
-  ADD_OPTION(load_file,            ":load");
-  ADD_OPTION(sexpr,                ":sexpr");
-  ADD_OPTION(conf_dir,             ":conf-dir");
-  ADD_BOOL_OPTION(srfi_176,        ":srfi-176");
-  ADD_BOOL_OPTION(vanilla,         ":no-init-file");
-  ADD_BOOL_OPTION(STk_interactive, ":interactive");
-  ADD_BOOL_OPTION(line_editor,     ":line-editor");
-  ADD_INT_OPTION(debug_mode,       ":debug");
-  ADD_BOOL_OPTION(STk_use_utf8,    ":use-utf8");
-  ADD_OPTION(script_file,          ":script-file");
-  ADD_SCM_OPTION(Idirs,            ":prepend-dirs");
-  ADD_SCM_OPTION(Adirs,            ":append-dirs");
+  options = LIST2(STk_makekey("argv"), l);
+  ADD_OPTION(argv0,                "program-name");
+  ADD_OPTION(program_file,         "file");
+  ADD_OPTION(load_file,            "load");
+  ADD_OPTION(sexpr,                "sexpr");
+  ADD_OPTION(conf_dir,             "conf-dir");
+  ADD_BOOL_OPTION(srfi_176,        "srfi-176");
+  ADD_BOOL_OPTION(vanilla,         "no-init-file");
+  ADD_BOOL_OPTION(STk_interactive, "interactive");
+  ADD_BOOL_OPTION(line_editor,     "line-editor");
+  ADD_INT_OPTION(debug_mode,       "debug");
+  ADD_BOOL_OPTION(STk_use_utf8,    "use-utf8");
+  ADD_OPTION(script_file,          "script-file");
+  ADD_SCM_OPTION(Idirs,            "prepend-dirs");
+  ADD_SCM_OPTION(Adirs,            "append-dirs");
 
   STk_define_variable(STk_intern("*%program-args*"), options,
                       STk_STklos_module);

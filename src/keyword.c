@@ -2,7 +2,7 @@
  *
  * k e y w o r d . c                            -- Keywords management
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 19-Nov-1993 16:12
- * Last file update:  5-Oct-2018 18:04 (eg)
+ * Last file update: 30-Apr-2021 09:41 (eg)
  */
 
 #include "stklos.h"
@@ -62,25 +62,12 @@ static SCM make_uninterned_keyword(char *name)
 SCM STk_makekey(char *token)
 {
   SCM res;
-  char *s;
   MUT_DECL(lck);
 
-  /* We accept two kinds of keywords :xy and xy:. In anycase, the value
-   * stored does not contain the ':' char.
-   */
-  if (*token == ':')
-    s = STk_strdup(token + 1);
-  else {
-    int len = strlen(token);
-
-    s = STk_strdup(token);
-    if (s[len-1] == ':') {
-      /* we had a token of the form 'key:' */
-      s[len - 1] = '\0';
-    }
-  }
   MUT_LOCK(lck);
-  res =  STk_hash_intern_symbol(&keyword_table, s, make_uninterned_keyword);
+  res =  STk_hash_intern_symbol(&keyword_table,
+                                STk_strdup(token),
+                                make_uninterned_keyword);
   MUT_UNLOCK(lck);
 
   return res;
