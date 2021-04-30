@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 26-Apr-2021 10:44 (eg)
+;; Last file update: 30-Apr-2021 15:40 (eg)
 ;;
 ;; ======================================================================
 
@@ -818,21 +818,31 @@ use a |main| function in a Scheme program.])
 ;;;
 (section :title "Keywords"
 (index "keyword")
+(index "#!keyword-colon-position-none")
+(index "#!keyword-colon-position-before")
+(index "#!keyword-colon-position-after")
+(index "#!keyword-colon-position-both")
 
 (p [Keywords are symbolic constants which evaluate to themselves.
-A keyword is a symbol whose first (or last) character is a colon
-(,(emph (q ":"))). Alternatively, to be compatible with other Scheme
-implementations, the notation ,(code "#:foo") is also available to denote
-the keyword of name ,(code "foo")])
+   By default, a keyword is a symbol whose first (or last) character is a colon
+   (,(emph (q ":"))). Alternatively, to be compatible with other Scheme
+   implementations, the notation ,(code "#:foo") is also available to denote
+   the keyword of name ,(code "foo").])
 
+(p [Note that the four directives ,(code "keyword-colon-position-xxx") or the
+   parameter object ,(code " keyword-colon-position") permit to change the
+   default behavior. See section,(~),(ref :subsection "Identifiers") for more
+   information.])
+
+ 
 (insertdoc 'keyword?)
 (insertdoc 'make-keyword)
 (insertdoc 'keyword->string)
 (insertdoc 'string->keyword)
 (insertdoc 'key-get)
 (insertdoc 'key-set!)
-(insertdoc 'key-delete!))
-
+(insertdoc 'key-delete!)
+(insertdoc 'keyword-colon-position))
 ;;;
 ;;; HASH TABLES
 ;;;

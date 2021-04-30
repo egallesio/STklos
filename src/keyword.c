@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 19-Nov-1993 16:12
- * Last file update: 30-Apr-2021 09:41 (eg)
+ * Last file update: 30-Apr-2021 14:51 (eg)
  */
 
 #include "stklos.h"
@@ -86,9 +86,9 @@ SCM STk_makekey(char *token)
  * Builds a keyword from the given |s|. The parameter |s| must be a symbol
  * or a string.
  * @lisp
- * (make-keyword "test")    => :test
- * (make-keyword 'test)     => :test
- * (make-keyword ":hello")  => ::hello
+ * (make-keyword "test")    => #:test
+ * (make-keyword 'test)     => #:test
+ * (make-keyword ":hello")  => #::hello
  * @end lisp
 doc>
  */
@@ -113,10 +113,12 @@ DEFINE_PRIMITIVE("make-keyword", make_keyword, subr1, (SCM str))
  * Returns |#t| if |obj| is a keyword, otherwise returns |#f|.
  * @lisp
  * (keyword? 'foo)     => #f
- * (keyword? ':foo)    => #t
- * (keyword? 'foo:)    => #t
- * (keyword? :foo)     => #t
- * (keyword? foo:)     => #t
+ * (keyword? ':foo)    => #t  ; depends of keyword-colon-position
+ * (keyword? 'foo:)    => #t  ; depends of keyword-colon-position
+ * (keyword? '#:foo)   => #t  ; always
+ * (keyword? :foo)     => #t  ; depends of keyword-colon-position
+ * (keyword? foo:)     => #t  ; depends of keyword-colon-position
+ * (keyword? #:foo)    => #t  ; always 
  * @end lisp
 doc>
  */
@@ -155,9 +157,9 @@ DEFINE_PRIMITIVE("keyword->string", keyword2string, subr1, (SCM obj))
  * |default| is returned, or an error is raised if no |default| was
  * specified.
  * @lisp
- * (key-get '(:one 1 :two 2) :one)     => 1
- * (key-get '(:one 1 :two 2) :four #f) => #f
- * (key-get '(:one 1 :two 2) :four)    => error
+ * (key-get '(#:one 1 #:two 2) #:one)     => 1
+ * (key-get '(#:one 1 #:two 2) #:four #f) => #f
+ * (key-get '(#:one 1 #:two 2) #:four)    => error
  * @end lisp
 doc>
  */
@@ -194,10 +196,10 @@ DEFINE_PRIMITIVE("key-get", key_get, subr23, (SCM l, SCM key, SCM dflt))
  * If the key is already present in |list|, the keyword list is
  * ,(emph "physically") changed.
  * @lisp
- * (let ((l (list :one 1 :two 2)))
- *   (set! l (key-set! l :three 3))
- *   (cons (key-get l :one)
- *         (key-get l :three)))            => (1 . 3)
+ * (let ((l (list #:one 1 #:two 2)))
+ *   (set! l (key-set! l #:three 3))
+ *   (cons (key-get l #:one)
+ *         (key-get l #:three)))            => (1 . 3)
  * @end lisp
 doc>
   */
@@ -237,11 +239,14 @@ DEFINE_PRIMITIVE("key-set!", key_set, subr3, (SCM l, SCM key, SCM val))
  * |key-delete| remove the |key| and its associated value of the keyword
  * list. The key can be absent of the list.
  * ,(linebreak)
- * |key-delete!| does the
- * same job than |key-delete| by physically modifying its |list| argument.
+ * |key-delete!| does the same job than |key-delete| by physically 
+ * modifying its |list| argument.
  * @lisp
  * (key-delete '(:one 1 :two 2) :two)    => (:one 1)
  * (key-delete '(:one 1 :two 2) :three)  => (:one 1 :two 2)
+ * (let ((l (list :one 1 :two 2)))
+ *    (key-delete! l :two)
+ *    l)                                 =>  (:one 1)
  * @end lisp
 doc>
   */
