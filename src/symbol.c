@@ -2,7 +2,7 @@
  *
  * s y m b o l . c                      -- Symbols management
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 20-Nov-1993 12:12
- * Last file update:  5-Mar-2020 14:45 (eg)
+ * Last file update:  1-May-2021 19:25 (eg)
  */
 
 #include <ctype.h>
@@ -46,6 +46,8 @@ int STk_symbol_flags(register char *s)
 {
   int res = 0;
 
+  if (s[0] == ':') res |= SYMBOL_NEEDS_BARS;   // seems to be a keyword
+
   for ( ;*s; s++) {
     if (strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", *s)) {
       res |= SYMBOL_HAS_UPPER;
@@ -56,6 +58,8 @@ int STk_symbol_flags(register char *s)
       break;
     }
   }
+
+  if (s[-1] == ':') res |= SYMBOL_NEEDS_BARS; // seems to be a keyword
   return res;
 }
 
@@ -87,7 +91,7 @@ SCM STk_intern(char *name)
 //EG: SCM STk_intern_ci(char *name)
 //EG: {
 //EG:   char *s;
-//EG: 
+//EG:
 //EG:   if (!STk_read_case_sensitive)
 //EG:     for (s= name; *s; s++) *s=tolower(*s);
 //EG:   return STk_intern(name);
