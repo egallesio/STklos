@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 20-Nov-1993 12:12
- * Last file update:  1-May-2021 19:25 (eg)
+ * Last file update:  1-May-2021 20:00 (eg)
  */
 
 #include <ctype.h>
@@ -49,7 +49,7 @@ int STk_symbol_flags(register char *s)
   if (s[0] == ':') res |= SYMBOL_NEEDS_BARS;   // seems to be a keyword
 
   for ( ;*s; s++) {
-    if (strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", *s)) {
+    if (isupper(*s)) {
       res |= SYMBOL_HAS_UPPER;
       continue;
     }
@@ -83,46 +83,6 @@ SCM STk_intern(char *name)
   MUT_UNLOCK(obarray_mutex);
   return res;
 }
-
-
-#ifdef FIXME
-
-//EG: /* Devenue inutile */
-//EG: SCM STk_intern_ci(char *name)
-//EG: {
-//EG:   char *s;
-//EG:
-//EG:   if (!STk_read_case_sensitive)
-//EG:     for (s= name; *s; s++) *s=tolower(*s);
-//EG:   return STk_intern(name);
-//EG: }
-
-//EG: SCM STk_global_env2list(void)
-//EG: {
-//EG:   register SCM symbol, res = STk_nil;
-//EG:   Tcl_HashEntry *ent;
-//EG:   Tcl_HashSearch tmp;
-//EG:
-//EG:   for (ent=Tcl_FirstHashEntry(&obarray, &tmp); ent;  ent=Tcl_NextHashEntry(&tmp)) {
-//EG:     symbol = (SCM)Tcl_GetHashValue(ent);
-//EG:     res    = Cons(Cons(symbol, VCELL(symbol)), res);
-//EG:   }
-//EG:   return res;
-//EG: }
-//EG:
-//EG: SCM STk_global_symbols(void)
-//EG: {
-//EG:   register SCM symbol, res = STk_nil;
-//EG:   Tcl_HashEntry *ent;
-//EG:   Tcl_HashSearch tmp;
-//EG:
-//EG:   for (ent=Tcl_FirstHashEntry(&obarray, &tmp); ent;  ent=Tcl_NextHashEntry(&tmp)) {
-//EG:     symbol = (SCM)Tcl_GetHashValue(ent);
-//EG:     if (VCELL(symbol) != UNBOUND) res = Cons(symbol, res);
-//EG:   }
-//EG:   return res;
-//EG: }
-#endif
 
 DEFINE_PRIMITIVE("symbol?", symbolp, subr1, (SCM x))
 /*
