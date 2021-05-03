@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 27-Apr-2021 10:26 (eg)
+### Last file update:  3-May-2021 09:52 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -200,15 +200,15 @@ case "$THREADS" in
    ;;
 esac
 
-
-### Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
-case "$THREADS" in
-  none) true ;;
-  *) case `uname -s` in
-        Linux*) STKCFLAGS="-D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
-     esac
-esac
-
+#XX 
+#XX ### Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
+#XX case "$THREADS" in
+#XX   none) true ;;
+#XX   *) case `uname -s` in
+#XX         Linux*) STKCFLAGS="-D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
+#XX      esac
+#XX esac
+#XX 
 
 
 
