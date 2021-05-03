@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update: 27-Apr-2021 13:42 (eg)
+ * Last file update:  3-May-2021 11:49 (eg)
  */
 
 #include "stklos.h"
@@ -1018,7 +1018,7 @@ static void shared_array_dec_count(SCM array,  void _UNUSED(*client_data))
 {
     struct array_obj *a = (struct array_obj *) array;
     MUT_LOCK(a->share_cnt_lock);
-    fprintf(stderr,"DECREMENTED\n");
+    // fprintf(stderr,"DECREMENTED\n");
     (*(a->orig_share_count))--;
     MUT_UNLOCK(a->share_cnt_lock);
 };
