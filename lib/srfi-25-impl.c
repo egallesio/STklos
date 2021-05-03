@@ -44,6 +44,7 @@ struct array_obj {
   int *orig_share_count;     /* pointer to original array share counter */
 #ifndef THREADS_NONE
   MUT_FIELD(share_cnt_lock); /* lock for share counter */
+  MUT_FIELD(*share_cnt_lock_addr); /* pointer to mutex - ours or of original array's */
 #endif
   long size;                 /* size of data */
   long length;               /* # of elements */
@@ -57,7 +58,7 @@ struct array_obj {
 #define ARRAYP(p)            (BOXED_TYPE_EQ((p), tc_array))
 #define ARRAY_SHARED(p)      (((struct array_obj *) (p))->shared)
 #define ARRAY_SHARE_COUNT(p) (((struct array_obj *) (p))->orig_share_count)
-#define ARRAY_LOCK(p)        (((struct array_obj *) (p))->share_cnt_lock)
+#define ARRAY_LOCK(p)        (*(((struct array_obj *) (p))->share_cnt_lock_addr))
 #define ARRAY_SIZE(p)        (((struct array_obj *) (p))->size)
 #define ARRAY_LENGTH(p)      (((struct array_obj *) (p))->length)
 #define ARRAY_RANK(p)        (((struct array_obj *) (p))->rank)
@@ -72,10 +73,8 @@ struct array_obj {
 #else
 #  define ARRAY_MUTEX(p) (((struct array_obj *) (p))->share_cnt_lock)
 #  define ARRAY_MUTEX_SIZE (sizeof(pthread_mutex_t))
+#  define ARRAY_MUTEX_PTR_SIZE (sizeof(pthread_mutex_t*))
 #endif
-
-
-
 
 
 
@@ -86,22 +85,6 @@ EXTERN_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj));
  *
  * ARRAY STRUCTURE
  *
-
-  An array object is:
-
-  struct array_obj {
-    stk_header header;
-    int shared;                does this array share data with another? (the counter)
-    int *orig_share_count;     pointer to original array share counter
-    MUT_FIELD(share_cnt_lock); lock for share counter
-    long size;                 size of data
-    long length;               # of elements
-    int  rank;                 # of dimensons
-    long offset;               offset from zero, to be added when calculaing index
-    long *shape;               pairs of bounds for each dimenson
-    long *multipliers;         size of each dimension stride
-    SCM  *data_ptr;            pointer to data
-  }
 
   DATA_PTR: pointer to data. We cannot do as it is done with vectors, and implement
             this as "SCM data[1]", then allocate more than the necessary size, because
@@ -425,6 +408,7 @@ SCM STk_make_array(int rank, long *shape, SCM init)
                    sizeof(int) +                  /* shared */
                    sizeof(int*) +                 /* orig_share_count */
                    ARRAY_MUTEX_SIZE +             /* share_cnt_lock */
+                   ARRAY_MUTEX_PTR_SIZE +         /* share_cnt_lock_addr */
                    sizeof(long) +                 /* size */
                    sizeof(long) +                 /* length */
                    sizeof(int) +                  /* rank */
@@ -444,6 +428,8 @@ SCM STk_make_array(int rank, long *shape, SCM init)
   s->rank             = rank;
   s->offset           = 0L;     /* will be updated, see below */
 
+  /* we are a fresh array (not a copy) , so we point to our own lock: */
+  s->share_cnt_lock_addr = &(s->share_cnt_lock);
   MUT_INIT(s->share_cnt_lock);
 
   /* data begins right after the data pointer: */
@@ -1032,6 +1018,7 @@ static void shared_array_dec_count(SCM array,  void _UNUSED(*client_data))
 {
     struct array_obj *a = (struct array_obj *) array;
     MUT_LOCK(a->share_cnt_lock);
+    fprintf(stderr,"DECREMENTED\n");
     (*(a->orig_share_count))--;
     MUT_UNLOCK(a->share_cnt_lock);
 };
@@ -1062,6 +1049,7 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
                    sizeof(int) +                  /* shared */
                    sizeof(int*) +                 /* orig_share_count */
                    ARRAY_MUTEX_SIZE +             /* share_cnt_lock */
+                   ARRAY_MUTEX_PTR_SIZE +         /* share_cnt_lock_addr */
                    sizeof(long) +                 /* size */
                    sizeof(long) +                 /* length */
                    sizeof(int) +                  /* rank */
@@ -1106,8 +1094,11 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
     s->shape            = cshape;
     s->multipliers      = new_mult;
     s->data_ptr         = ARRAY_DATA(old_array);
+
 #ifndef THREADS_NONE
     s->share_cnt_lock   = ARRAY_LOCK(old_array);
+    /* get the address of the lock from the old array, and don't initialize ours. */ 
+    s->share_cnt_lock_addr = &(ARRAY_LOCK(old_array));
 #endif
 
     /* mark old array as shared by one more array, OR of the original
