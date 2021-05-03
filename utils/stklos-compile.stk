@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update:  2-Apr-2021 15:13 (eg)
+;;;; Last file update:  1-May-2021 20:28 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -119,8 +119,16 @@
      (("case-sensitive" :alternate "c"  :help "Be case sensitive on symbols")
         (read-case-sensitive #t))
      (("case-insensitive" :alternate "i"  :help "Be case insensitive on symbols")
-        (read-case-sensitive #f))
-
+      (read-case-sensitive #f))
+     (("colon-position" :alternate "p" :arg pos
+       :help "allowed position of ':' for keywords")
+      (cond
+       ((member pos '("none" "before" "after" "both"))
+        (keyword-colon-position (string->symbol pos)))
+       (else 
+        (eprintf "~a: bad position ~s\n" (program-name) pos)
+        (exit 1))))
+     
      "Output options"
      (("output" :alternate "o" :arg file :help "Output compiled code in <file>")
         (set! *output* file))
