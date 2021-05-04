@@ -23,7 +23,7 @@
 # Last file update: 15-May-2021 16:15 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
-		  srfi-25 srfi-133 srfi-170 srfi-175
+		  srfi-25 srfi-27 srfi-133 srfi-170 srfi-175
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
@@ -92,7 +92,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-14.stk         \
           srfi-17.stk         \
           srfi-26.stk         \
-          srfi-27.stk         \
           srfi-31.stk         \
           srfi-35.stk         \
           srfi-36.stk         \
@@ -141,7 +140,6 @@ SRC_STK = bigloo-support.stk  \
           tar.stk             \
           trace.stk
 
-SRC_C =
 
 scheme_OBJS = compfile.ostk     \
           bigmatch.ostk         \
@@ -169,7 +167,6 @@ scheme_OBJS = compfile.ostk     \
           srfi-14.ostk          \
           srfi-17.ostk          \
           srfi-26.ostk          \
-          srfi-27.ostk          \
           srfi-31.ostk          \
           srfi-35.ostk          \
           srfi-36.ostk          \
@@ -218,7 +215,6 @@ scheme_OBJS = compfile.ostk     \
           tar.ostk              \
           trace.ostk
 
-scheme_SOLIBS = 
 
 DOCDB	    = DOCDB
 BASEDIR     = ..

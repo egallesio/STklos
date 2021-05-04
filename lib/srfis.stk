@@ -65,7 +65,7 @@
     ;;  24 ........ Withdrawn
     (25 "Multi-dimensional Arrays" () "srfi-25")
     (26 "Notation for Specializing Parameters without Currying" () "srfi-26")
-    (27 "Source of random bits" (random) "srfi-27")
+    (27 "Source of random bits" (random) "prng-mt")
     (28 "Basic Format Strings")
     ;;   29 Localization
     (30 "Nested Multi-line Comments")
