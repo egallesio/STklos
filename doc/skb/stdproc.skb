@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 30-Apr-2021 15:40 (eg)
+;; Last file update:  6-May-2021 17:42 (eg)
 ;;
 ;; ======================================================================
 
@@ -618,6 +618,9 @@ be accessed as a normal port with the standard Scheme primitives.])
 (insertdoc 'port-file-name)
 (insertdoc 'port-idle-reset!)
 (insertdoc 'port-closed?)
+(insertdoc 'port-close-hook-set!)
+(insertdoc 'port-close-hook)
+
 
 [ The following procedures are defined in ,(link-srfi 192) which is fully
   supported:]
