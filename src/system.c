@@ -1001,7 +1001,7 @@ DEFINE_PRIMITIVE("machine-type", machine_type, subr0, (void))
 <doc EXT date
  * (date)
  *
- * Returns the current date in a string
+ * Returns the current date in a string.
 doc>
 */
 DEFINE_PRIMITIVE("date", date, subr0, (void))
