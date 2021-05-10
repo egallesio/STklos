@@ -122,6 +122,8 @@ gtklos/gtklosconf.h
 # Lib directory
 lib/Lalr.d/calc
 lib/boot-callcc.stk
+lib/srfis-data.scm
+
 
 # Pcre directory
 pcre/.libs
@@ -152,6 +154,7 @@ pkgman/stklos-pkg
 # Src directory
 src/.STklos.prcs_aux
 src/HOWTO-WIN32
+src/TAGS
 src/TODO
 src/boot.keep
 src/extraconf.h
