@@ -14,14 +14,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should hcave received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 30-Apr-2021 14:18 (eg)
+ * Last file update:  7-May-2021 19:14 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -30,6 +30,8 @@
  *
  */
 #include <ctype.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "stklos.h"
 #include "fport.h"
 #include "vm.h"
@@ -385,13 +387,12 @@ static void fport_finalizer(struct port_obj *port, void _UNUSED(*client_data))
 
 
 static struct port_obj *
-make_fport(char *fname, FILE *f, int flags)
+make_fport(char *fname, int fd, int flags)
 {
   struct fstream  *fs = STk_must_malloc(sizeof(struct fstream));
-  int n, mode, fd;
+  int n, mode;
   SCM res;
 
-  fd = fileno(f);
   /* allocate buffer for file */
   if (isatty(fd) || (STk_interactive && fd < 2)) {
     n      = TTY_BUFSIZE;
@@ -414,7 +415,7 @@ make_fport(char *fname, FILE *f, int flags)
   PORT_CNT(fs)           = 0;
   PORT_BUFSIZE(fs)       = n;
   PORT_STREAM_FLAGS(fs)  = mode;
-  PORT_FILE(fs)          = f;
+  PORT_FILE(fs)          = NULL; // will be changed if port is a pipe
   PORT_FD(fs)            = fd;
   PORT_REVENT(fs)        = STk_false;
   PORT_WEVENT(fs)        = STk_false;
@@ -479,31 +480,62 @@ static char *convert_for_win32(char *mode)
 }
 #endif
 
+static int convert_mode(char* mode) {
+  char first = *mode;
+
+  if (mode[1] == 'b')
+    mode++;
+
+  switch (first) {
+    case 'r':
+      if (mode[1] == '\0') return O_RDONLY;
+      if (mode[1] == '+')  return O_RDWR;
+      break;
+    case 'w':
+      if (mode[1] == '\0') return O_WRONLY | O_TRUNC | O_CREAT;
+      if (mode[1] == '+')  return O_RDWR   | O_TRUNC | O_CREAT;
+      break;
+    case 'a':
+      if (mode[1] == '\0') return O_WRONLY | O_CREAT | O_APPEND;
+      if (mode[1] == '+')  return O_RDWR   | O_CREAT | O_APPEND;
+      break;
+    default:
+      break;
+  }
+  STk_error("bad file opening mode %s", mode);
+  return 0;
+}
 
 
 static SCM open_file_port(SCM filename, char *mode, int flags, int error)
 {
-  FILE *f;
   char *full_name, *name;
+  SCM z;
 
-  /* We use fopen (or popen) here to simplify problems with mode opening
-   * But since we don't use the buffer, we say that we work in non buffered
-   * mode
-   */
   name = STRING_CHARS(filename);
 
   if (strncmp(name, "| ", 2)) {
+    int fd;
+
     full_name  = STk_expand_file_name(name);
     flags     |= PORT_IS_FILE;
 
-    if ((f = fopen(full_name, mode)) == NULL) {
+    if ((fd = open(full_name, convert_mode(mode), 0666)) == -1) {
       if (error)
         STk_error_file_name("could not open file ~S", filename);
       else
         return STk_false;
     }
-  }
-  else {
+    if (*mode == 'a') lseek(fd, 0L, SEEK_END);
+
+    return  make_fport(full_name, fd, flags);
+  } else {
+    /* We use popen here to simplify problems with mode opening But since we
+     * don't use the buffer, we say that we work in non buffered mode
+     */
+
+    // FIXME: Do not use anymore a FILE * here
+    FILE * f;
     full_name  = name;
     flags     |= PORT_IS_PIPE;
     if ((f = popen(name+1, mode)) == NULL) {
@@ -513,27 +545,32 @@ static SCM open_file_port(SCM filename, char *mode, int flags, int error)
       else
         return STk_false;
     }
-  }
+    /* Don't use (and allocate) a buffer for this file */
+    setvbuf(f, NULL, _IONBF, 0);
+    z = make_fport(full_name, fileno(f), flags);
+    PORT_FILE(PORT_STREAM(z)) = f;
 
-  /* Don't use (and allocate) a buffer for this file */
-  setvbuf(f, NULL, _IONBF, 0);
-  return (SCM) make_fport(full_name, f, flags);
+    return z;
+  }
 }
+
+
 
 
 SCM STk_fd2scheme_port(int fd, char *mode, char *identification)
 {
-  FILE *f;
+// FIXME:
+//  FILE *f;
   int flags;
 
-  f = fdopen(fd, mode);
-  if (!f) return (SCM) NULL;
-
-  /* Don't use (and allocate) a buffer for this file */
-  setvbuf(f, NULL, _IONBF, 0);
+//  f = fdopen(fd, mode);
+//  if (!f) return (SCM) NULL;
+//
+//  /* Don't use (and allocate) a buffer for this file */
+//  setvbuf(f, NULL, _IONBF, 0);
 
   flags = PORT_IS_FILE | ((*mode == 'r') ? PORT_READ : PORT_WRITE);
-  return (SCM) make_fport(identification, f, flags);
+  return (SCM) make_fport(identification, fd, flags);
 }
 
 
@@ -548,7 +585,7 @@ SCM STk_open_file(char *filename, char *mode)
     default:  goto Error;
   }
   type |= PORT_TEXTUAL;                     /* by default */
-  
+
   return open_file_port(STk_Cstring2string(filename), mode, type, FALSE);
 Error:
   STk_panic("bad opening mode %s", mode);
@@ -678,7 +715,7 @@ DEFINE_PRIMITIVE("output-file-port?", output_fportp, subr1, (SCM port))
  * (item [|"a+"| to open file for reading and writing. The file is created
  * if it does not exist. The stream is positioned at the end of the file.])
  * )
- * If the file can be opened, |open-file| returns the textual port associated 
+ * If the file can be opened, |open-file| returns the textual port associated
  * with the given file, otherwise it returns |#f|. Here again, the ``magic''
  * string "@pipe " permits to open a pipe port (in this case mode can only be
  * |"r"| or |"w"|).
@@ -896,13 +933,13 @@ int STk_init_fport(void)
 {
   vm_thread_t *vm = STk_get_current_vm();
 
-  STk_stdin  = vm->iport = (SCM) make_fport("*stdin*",  stdin,
+  STk_stdin  = vm->iport = (SCM) make_fport("*stdin*", 0,
                                             PORT_IS_FILE | PORT_READ |
                                             PORT_BINARY | PORT_TEXTUAL);
-  STk_stdout = vm->oport = (SCM) make_fport("*stdout*", stdout,
+  STk_stdout = vm->oport = (SCM) make_fport("*stdout*", 1,
                                             PORT_IS_FILE | PORT_WRITE |
                                             PORT_BINARY | PORT_TEXTUAL);
-  STk_stderr = vm->eport = (SCM) make_fport("*stderr*", stderr,
+  STk_stderr = vm->eport = (SCM) make_fport("*stderr*", 2,
                                             PORT_IS_FILE | PORT_WRITE |
                                             PORT_BINARY | PORT_TEXTUAL);
 
