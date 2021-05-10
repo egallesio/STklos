@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update:  7-May-2021 19:14 (eg)
+ * Last file update: 10-May-2021 18:01 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -32,6 +32,8 @@
 #include <ctype.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/wait.h>
+
 #include "stklos.h"
 #include "fport.h"
 #include "vm.h"
@@ -39,6 +41,58 @@
 int STk_interactive = 0;                  /* We are in interactive mode */
 SCM STk_stdin, STk_stdout, STk_stderr;    /* The unredirected ports */
 MUT_DECL(all_fports_mutex)
+
+/*
+ * Implementation of our own popen/pclose. We use her file descriptor, instad
+ * of FILE *.
+ *
+ * The fd_popen function returns also the pid of the shell process launched
+ * for the redirection. This pid is stored in the internal file port
+ * representation to wait on it during the fd_pclose.
+ */
+static int fd_popen(char *cmd, char *mode, int *pid)
+{
+  int p[2];
+
+  if ((*mode != 'r' && *mode != 'w') || mode[1] ||
+      pipe(p) == -1) {
+    return -1;
+  }
+
+  switch (*pid = fork()) {
+  case -1:                                   /* Cannot fork */
+      close(p[0]); close(p[1]);
+      return -1;
+    case 0:                                  /* Child process */
+      if (*mode == 'r') {
+        if (p[1] != 1) dup2(p[1], 1);
+        close(p[0]);
+      } else {
+        if (p[0] != 0) dup2(p[0], 0);
+        close(p[1]);
+      }
+      execlp("sh", "sh", "-c", cmd, NULL);
+      STk_panic("*** shell error in fd_popen");
+      return -1; /* for the compiler */
+    default:                                 /* Parent process*/
+      if (*mode == 'r') {
+        close(p[1]);
+        return p[0];
+      } else {
+        close(p[0]);
+        return p[1];
+      }
+    }
+}
+
+static int fd_pclose(int fd, int pid) {
+  int status, n;
+  close(fd);
+  do {
+    n = waitpid(pid, &status, 0);
+  } while (n == -1 && errno == EINTR);
+  return WEXITSTATUS(status);
+}
 
 
 /*
@@ -259,7 +313,7 @@ static int Fclose_pipe(void *stream)    /* pipe version (used by "| cmd" files *
 {
   int ret = flush_buffer(stream);
 
-  return (ret == EOF) ? EOF : pclose(PORT_FILE(stream));
+  return (ret == EOF) ? EOF : fd_pclose(PORT_FD(stream), PORT_PID(stream));
 }
 
 
@@ -415,7 +469,7 @@ make_fport(char *fname, int fd, int flags)
   PORT_CNT(fs)           = 0;
   PORT_BUFSIZE(fs)       = n;
   PORT_STREAM_FLAGS(fs)  = mode;
-  PORT_FILE(fs)          = NULL; // will be changed if port is a pipe
+  PORT_PID(fs)           = 0; /* will be changed if port is a pipe */
   PORT_FD(fs)            = fd;
   PORT_REVENT(fs)        = STk_false;
   PORT_WEVENT(fs)        = STk_false;
@@ -511,12 +565,11 @@ static SCM open_file_port(SCM filename, char *mode, int flags, int error)
 {
   char *full_name, *name;
   SCM z;
+  int fd;
 
   name = STRING_CHARS(filename);
 
   if (strncmp(name, "| ", 2)) {
-    int fd;
-
     full_name  = STk_expand_file_name(name);
     flags     |= PORT_IS_FILE;
 
@@ -527,31 +580,24 @@ static SCM open_file_port(SCM filename, char *mode, int flags, int error)
         return STk_false;
     }
     if (*mode == 'a') lseek(fd, 0L, SEEK_END);
-
-    return  make_fport(full_name, fd, flags);
+    z = make_fport(full_name, fd, flags);
   } else {
-    /* We use popen here to simplify problems with mode opening But since we
-     * don't use the buffer, we say that we work in non buffered mode
-     */
+    pid_t pid = 0; /* for the compiler */
 
-    // FIXME: Do not use anymore a FILE * here
-    FILE * f;
     full_name  = name;
     flags     |= PORT_IS_PIPE;
-    if ((f = popen(name+1, mode)) == NULL) {
+    if ((fd = fd_popen(name+1, mode, &pid)) < 0) {
       if (error)
         STk_error_file_name("could not create pipe for ~S",
                             STk_Cstring2string(name+2));
       else
         return STk_false;
     }
-    /* Don't use (and allocate) a buffer for this file */
-    setvbuf(f, NULL, _IONBF, 0);
-    z = make_fport(full_name, fileno(f), flags);
-    PORT_FILE(PORT_STREAM(z)) = f;
-
-    return z;
+    z = make_fport(full_name, fd, flags);
+    PORT_PID(PORT_STREAM(z)) = pid;
   }
+
+  return z;
 }
 
 
@@ -559,15 +605,7 @@ static SCM open_file_port(SCM filename, char *mode, int flags, int error)
 
 SCM STk_fd2scheme_port(int fd, char *mode, char *identification)
 {
-// FIXME:
-//  FILE *f;
   int flags;
-
-//  f = fdopen(fd, mode);
-//  if (!f) return (SCM) NULL;
-//
-//  /* Don't use (and allocate) a buffer for this file */
-//  setvbuf(f, NULL, _IONBF, 0);
 
   flags = PORT_IS_FILE | ((*mode == 'r') ? PORT_READ : PORT_WRITE);
   return (SCM) make_fport(identification, fd, flags);
