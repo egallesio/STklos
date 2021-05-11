@@ -830,7 +830,8 @@ doc>
  *
  * Evaluates the expressions |expr1|, |expr2|, ... and returns the
  * result of the last expression. This form prints also the time spent
- * for this evaluation on the current error port.
+ * for this evaluation, in milliseconds, on the current error port.
+ * This is CPU time, and not real ("wall") time.
 doc>
 |#
 (define-macro time
@@ -939,7 +940,7 @@ doc>
  * (base64-encode-string str)
  *
  * Return a string contening the contents of |str| converted to Base64
- * encoded format
+ * encoded format.
 doc>
 
 <doc EXT base64-decode-string
@@ -1492,6 +1493,10 @@ doc>
 <doc EXT with-mutex
  * (with-mutex mtx <body>)
  *
+ * Executes |body|, protected by mutex |mtx|. The mutex will
+ * be locked before and released after execution of |body|, and
+ * also on entrance or departure of its dynamic context
+ * (lock and unlock are used with |dynamic-wind|).
 doc>
 |#
 (define (with-mutex mtx  proc)

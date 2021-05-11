@@ -256,7 +256,7 @@ They are tagged with `00`.
 * `BOXED_TYPE(o)` -- returns the type of boxed object `o`
 * `BOXED_INFO` -- returns the information of boxed object `o`
 
-The tyoe definition for all possible types, in `stklos.h`, is self-explanatory:
+The type definition for all possible types, in `stklos.h`, is self-explanatory:
 
 ```
 typedef enum {
@@ -321,6 +321,137 @@ EXTERN_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
 ## Dynamically loadable modules
 
 See some examples in `etc/`
+
+## Creating new types
+
+We'll be using SRFI-25 as an example. In that SRFI, am `array` type is created.
+
+* Create a C struct whose first field is of type `stk_header`
+
+```
+struct array_obj {
+  stk_header header;
+  int shared;                /* does this array share data with another? */
+  int *orig_share_count;     /* pointer to original array share counter */
+#ifndef THREADS_NONE
+  MUT_FIELD(share_cnt_lock); /* lock for share counter */
+  MUT_FIELD(*share_cnt_lock_addr); /* pointer to mutex - ours or of original array's */
+#endif
+  long size;                 /* size of data */
+  long length;               /* # of elements */
+  int  rank;                 /* # of dimensons */
+  long offset;               /* offset from zero, to be added when calculaing index */
+  long *shape;               /* pairs of bounds for each dimenson */
+  long *multipliers;         /* size of each dimension stride */
+  SCM  *data_ptr;            /* pointer to data */
+};
+```
+
+The fields in the struct may contain both C and Scheme elements (the Scheme elements
+have `SCM` types).
+
+* Maybe create some accessor macros
+
+```
+#define ARRAYP(p)            (BOXED_TYPE_EQ((p), tc_array))
+#define ARRAY_SHARED(p)      (((struct array_obj *) (p))->shared)
+#define ARRAY_SHARE_COUNT(p) (((struct array_obj *) (p))->orig_share_count)
+#define ARRAY_LOCK(p)        (*(((struct array_obj *) (p))->share_cnt_lock_addr))
+#define ARRAY_SIZE(p)        (((struct array_obj *) (p))->size)
+#define ARRAY_LENGTH(p)      (((struct array_obj *) (p))->length)
+#define ARRAY_RANK(p)        (((struct array_obj *) (p))->rank)
+#define ARRAY_OFFSET(p)      (((struct array_obj *) (p))->offset)
+#define ARRAY_SHAPE(p)       (((struct array_obj *) (p))->shape)
+#define ARRAY_MULTS(p)       (((struct array_obj *) (p))->multipliers)
+#define ARRAY_DATA(p)        (((struct array_obj *) (p))->data_ptr)
+```
+
+Be mindful of thread-related things: not all STklos builds have threading enabled!
+
+```
+#ifdef THREADS_NONE
+#  define ARRAY_MUTEX(p)
+#  define ARRAY_MUTEX_SIZE 1
+#else
+#  define ARRAY_MUTEX(p) (((struct array_obj *) (p))->share_cnt_lock)
+#  define ARRAY_MUTEX_SIZE (sizeof(pthread_mutex_t))
+#  define ARRAY_MUTEX_PTR_SIZE (sizeof(pthread_mutex_t*))
+#endif
+```
+
+* Create an extended type descriptor which contains the type name, and pointers
+  to functions to print and compare elements:
+
+```
+static void print_array(SCM array, SCM port, int mode)
+{
+  /*
+    Here goes the code for printing array.
+    Use the functions
+      - STk_puts(char *str, SCM port)
+      - STk_print(SCM obj, SCM port, int mode)
+    It may be useful to first create a buffer, use snprintf on it, then
+    use STk_puts to print it.
+   */
+}
+```
+
+```
+static SCM test_equal_array(SCM x, SCM y)
+{
+ /*
+   Code that retruns STk_true if x and y are to be considered `equal?`,
+   and STk_false othereise.
+
+   NOTE: remember to NOT return 0 or 1. THe return value should be a Scheme
+         object, not a C with the intended boolean value. This is particularly
+         important because the compiler will NOT warn you if you return "0":
+         - SCM is defined as a pointer to void
+         - '0' can be interpreted as a pointer, so the compiler thinks it's OK
+         - '0' is *not* the same as STk_void
+  */
+}
+```
+
+```
+static struct extended_type_descr xtype_array = {
+  .name  = "array",
+  .print = print_array,
+  .equal = test_equal_array
+};
+```
+
+* At the end of your C code, inside the MODULE_ENTRY_START part, initialize an element 
+  of the new type: `tc_array = STk_new_user_type(&xtype_array);`
+
+* Create a describing procedure:
+
+```
+(%user-type-proc-set! 'array 'describe
+                      (lambda (x port)
+                        (format port "an array of rank ~A and size ~A"
+                                (array-rank x)
+                                (array-size x))))
+```
+
+* Define a class, and associate it with the type name you have
+  created.
+
+```
+(define-class <array> (<top>) ())
+(export <array>)
+
+(%user-type-proc-set! 'array 'class-of <array>)
+```
+
+* If objects of the new type will have a printed representation, create 
+  a reader procedure:
+
+```
+(define-reader-ctor '<array>
+  (lambda args
+    (apply array (apply shape (car args)) (cdr args))))
+```
 
 ## The virtual machine
 
