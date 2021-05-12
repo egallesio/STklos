@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  3-May-2021 09:52 (eg)
+### Last file update: 12-May-2021 16:09 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -531,11 +531,14 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
           utils/stklos-script examples/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
-          lib/ScmPkg.d/Makefile tests/Makefile
+          lib/ScmPkg.d/Makefile  tests/Makefile
           doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
           doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1
           doc/skb/stklos-version.stk
-          pkgman/Makefile])
+          pkgman/Makefile
+
+          lib/srfi-170/Makefile
+])
 AC_OUTPUT
 
 # Add a src/git-config.h if we dont have one

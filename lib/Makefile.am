@@ -20,9 +20,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 27-Apr-2021 10:27 (eg)
+# Last file update: 12-May-2021 19:19 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
+SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d srfi-170
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
@@ -127,7 +127,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-156.stk        \
           srfi-158.stk        \
           srfi-161.stk        \
-          srfi-170.stk        \
           srfi-171.stk        \
           srfi-173.stk        \
           srfi-174.stk        \
@@ -146,7 +145,6 @@ SRC_STK = bigloo-support.stk  \
 
 SRC_C = srfi-25-impl.c \
         srfi-133-impl.c \
-        srfi-170-impl.c \
         srfi-175-impl.c
 
 scheme_OBJS = compfile.ostk     \
@@ -211,7 +209,6 @@ scheme_OBJS = compfile.ostk     \
           srfi-156.ostk         \
           srfi-158.ostk         \
           srfi-161.ostk         \
-          srfi-170.ostk         \
           srfi-171.ostk         \
           srfi-173.ostk         \
           srfi-174.ostk         \
@@ -230,7 +227,6 @@ scheme_OBJS = compfile.ostk     \
 
 scheme_SOLIBS = srfi-25-impl.@SH_SUFFIX@ \
                 srfi-133-impl.@SH_SUFFIX@ \
-                srfi-170-impl.@SH_SUFFIX@ \
                 srfi-175-impl.@SH_SUFFIX@ 
 
 DOCDB	    = DOCDB
@@ -337,6 +333,10 @@ srfis-data.scm: srfis.stk
 	(cd ..; $(MAKE) SUPPORTED-SRFIS)
 
 doc: $(DOCDB)
+	@for i in $(SUBDIRS) ;do \
+	   (cd $$i; $(MAKE) doc)\
+	done
+
 
 $(DOCDB): $(scheme_sources)
 	$(STKLOS_BINARY) -q -c -b ../src/boot.img -f ../doc/extract-doc \
