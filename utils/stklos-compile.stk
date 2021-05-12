@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update:  1-May-2021 20:28 (eg)
+;;;; Last file update: 12-May-2021 07:33 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -56,18 +56,25 @@
         (out  (open-output-file dst)))
     ;; Output the header
     (header in out)
+
     ;; Skip the symbol STklos
     (read in)
-    ;; Write file informations
+
+    ;; Write file informations (information is not used for now)
     (let ((info (read in))
           (str  (open-output-string)))
       (write info str)
-      (format out "static char* __module_infos = ~S;\n\n" (get-output-string str)))
+      (format out "#ifdef USE_MODULE_INFOS\n")
+      (format out "static char* __module_infos = ~S;\n"
+              (get-output-string str))
+      (format out "#endif\n\n"))
+
     ;; Write constants
     (let ((v   (read in))
           (str (open-output-string)))
       (write v str)
       (format out "static char* __module_consts = ~S;\n\n" (get-output-string str)))
+
     ;; Write the code
     (let ((sz (read in)))
       (format out "static STk_instr __module_code [] = { \n")
@@ -125,10 +132,10 @@
       (cond
        ((member pos '("none" "before" "after" "both"))
         (keyword-colon-position (string->symbol pos)))
-       (else 
+       (else
         (eprintf "~a: bad position ~s\n" (program-name) pos)
         (exit 1))))
-     
+
      "Output options"
      (("output" :alternate "o" :arg file :help "Output compiled code in <file>")
         (set! *output* file))
