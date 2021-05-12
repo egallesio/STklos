@@ -70,6 +70,7 @@ struct array_obj {
 #ifdef THREADS_NONE
 #  define ARRAY_MUTEX(p)
 #  define ARRAY_MUTEX_SIZE 1
+#  define ARRAY_MUTEX_PTR_SIZE (sizeof(int))
 #else
 #  define ARRAY_MUTEX(p) (((struct array_obj *) (p))->share_cnt_lock)
 #  define ARRAY_MUTEX_SIZE (sizeof(pthread_mutex_t))
@@ -428,9 +429,11 @@ SCM STk_make_array(int rank, long *shape, SCM init)
   s->rank             = rank;
   s->offset           = 0L;     /* will be updated, see below */
 
+#ifndef THREADS_NONE  
   /* we are a fresh array (not a copy) , so we point to our own lock: */
   s->share_cnt_lock_addr = &(s->share_cnt_lock);
   MUT_INIT(s->share_cnt_lock);
+#endif
 
   /* data begins right after the data pointer: */
   s->data_ptr = (SCM *)(&(s->data_ptr)) + 1;
