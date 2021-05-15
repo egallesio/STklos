@@ -60,7 +60,7 @@ install-sources:
 	cp $(SRFI).stk $(DESTDIR)/$(schemedir)
 
 doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
 		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
 
 install-exec-hook:
