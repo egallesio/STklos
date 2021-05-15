@@ -6808,7 +6808,7 @@ then
               --includedir=$prefix/include/stklos \
               --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
-     GCINC="-I../gc/include"
+     GCINC='-I$(BASEDIR)/gc/include'
      GCLIB="../gc/.libs/libgc.a"
      COMP_LIBS="libgc $COMP_LIBS"
 else

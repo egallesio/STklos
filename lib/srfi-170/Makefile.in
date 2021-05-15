@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 12-May-2021 19:25 (eg)
+# Last file update: 15-May-2021 16:18 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -309,6 +309,7 @@ STKLOS_FLAGS = --no-init-file --case-sensitive
 # ======================================================================
 SOURCES = $(SRFI).c $(SRFI).stk
 DOCDB = ../DOCDB
+BASEDIR = ../..
 SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 all: all-am
 
@@ -568,7 +569,7 @@ install-sources:
 	cp $(SRFI).stk $(DESTDIR)/$(schemedir)
 
 doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
 		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
 
 install-exec-hook:

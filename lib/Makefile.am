@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 15-May-2021 09:34 (eg)
+# Last file update: 15-May-2021 16:15 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
 		  srfi-25 srfi-133 srfi-170 srfi-175
@@ -221,6 +221,8 @@ scheme_OBJS = compfile.ostk     \
 scheme_SOLIBS = 
 
 DOCDB	    = DOCDB
+BASEDIR     = ..
+
 
 #======================================================================
 schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@

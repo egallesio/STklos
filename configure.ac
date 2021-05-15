@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 15-May-2021 09:27 (eg)
+### Last file update: 15-May-2021 16:16 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -263,7 +263,7 @@ then
               --includedir=$prefix/include/stklos \
               --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
-     GCINC="-I../gc/include"
+     GCINC='-I$(BASEDIR)/gc/include'
      GCLIB="../gc/.libs/libgc.a"
      COMP_LIBS="libgc $COMP_LIBS"
 else

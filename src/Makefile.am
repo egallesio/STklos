@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 15-Mar-2021 14:24 (eg)
+# Last file update: 15-May-2021 16:16 (eg)
 
 # Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
 # CFLAGS is used here
@@ -47,6 +47,7 @@ bin_PROGRAMS    = stklos
 extrainc_DATA   = stklos.h extraconf.h stklosconf.h socket.h fport.h
 
 DOCDB	        = DOCDB
+BASEDIR         = ..
 
 THREADS     = @THREADS@
 

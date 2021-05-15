@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 15-May-2021 09:23 (eg)
+# Last file update: 15-May-2021 16:18 (eg)
 
 SRFI=srfi-133
 
@@ -35,7 +35,8 @@ STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 # ======================================================================
 SOURCES=$(SRFI).c $(SRFI).stk
-DOCDB = ../DOCDB
+DOCDB  = ../DOCDB
+BASEDIR= ../..
 
 SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 
