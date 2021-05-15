@@ -20,9 +20,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 12-May-2021 19:19 (eg)
+# Last file update: 15-May-2021 09:34 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d srfi-170
+SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
+		  srfi-25 srfi-133 srfi-170 srfi-175
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
@@ -90,7 +91,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-13.stk         \
           srfi-14.stk         \
           srfi-17.stk         \
-          srfi-25.stk         \
           srfi-26.stk         \
           srfi-27.stk         \
           srfi-31.stk         \
@@ -118,7 +118,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-128.stk        \
           srfi-129.stk        \
           srfi-130.stk        \
-          srfi-133.stk        \
           srfi-134.stk        \
           srfi-135.stk        \
           srfi-137.stk        \
@@ -130,7 +129,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-171.stk        \
           srfi-173.stk        \
           srfi-174.stk        \
-          srfi-175.stk        \
           srfi-180.stk        \
           srfi-185.stk        \
           srfi-189.stk        \
@@ -143,9 +141,7 @@ SRC_STK = bigloo-support.stk  \
           tar.stk             \
           trace.stk
 
-SRC_C = srfi-25-impl.c \
-        srfi-133-impl.c \
-        srfi-175-impl.c
+SRC_C =
 
 scheme_OBJS = compfile.ostk     \
           bigmatch.ostk         \
@@ -172,7 +168,6 @@ scheme_OBJS = compfile.ostk     \
           srfi-13.ostk          \
           srfi-14.ostk          \
           srfi-17.ostk          \
-          srfi-25.ostk          \
           srfi-26.ostk          \
           srfi-27.ostk          \
           srfi-31.ostk          \
@@ -200,7 +195,6 @@ scheme_OBJS = compfile.ostk     \
           srfi-128.ostk         \
           srfi-129.ostk         \
           srfi-130.ostk         \
-          srfi-133.ostk         \
           srfi-134.ostk         \
           srfi-135.ostk         \
           srfi-137.ostk         \
@@ -212,7 +206,6 @@ scheme_OBJS = compfile.ostk     \
           srfi-171.ostk         \
           srfi-173.ostk         \
           srfi-174.ostk         \
-          srfi-175.ostk         \
           srfi-180.ostk         \
           srfi-185.ostk         \
           srfi-189.ostk         \
@@ -225,9 +218,7 @@ scheme_OBJS = compfile.ostk     \
           tar.ostk              \
           trace.ostk
 
-scheme_SOLIBS = srfi-25-impl.@SH_SUFFIX@ \
-                srfi-133-impl.@SH_SUFFIX@ \
-                srfi-175-impl.@SH_SUFFIX@ 
+scheme_SOLIBS = 
 
 DOCDB	    = DOCDB
 

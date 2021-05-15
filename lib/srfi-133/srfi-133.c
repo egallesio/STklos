@@ -21,11 +21,12 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Mar-2021 12:14 (jpellegrini)
- * Last file update: 26-Mar-2021 11:09 (eg)
+ * Last file update: 15-May-2021 09:29 (eg)
  */
 
 
 #include "stklos.h"
+#include "srfi-133-incl.c"
 
 DEFINE_PRIMITIVE("check-index", srfi_133_check_index,subr3, (SCM vec,
                                                              SCM index,
@@ -306,5 +307,7 @@ MODULE_ENTRY_START("srfi-133")
   /* Export all the symbols we have just defined */
   STk_export_all_symbols(module);
 
+  /* Execute Scheme code */
+  STk_execute_C_bytecode(__module_consts, __module_code);
 }
 MODULE_ENTRY_END
