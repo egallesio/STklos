@@ -61,11 +61,11 @@ For new SRFIs, adding its description in `lib/srfis.stk` suffices to update
 
 General documentation is automatically generated for SRFIs. If you
 need to give a precision specific to a given SRFI, add it to the end of the
-`doc/skb/srfi.skb` file using the `gen-srfi-documentation` function. 
+`doc/skb/srfi.skb` file using the `gen-srfi-documentation` function.
 
 Note that the documentation is written in Skribe tool which is no more
 maintained.  Consequently, the documentation will not be generated. The
-HTML and PDF documentation is rebuilt from time to time by @egallesio. 
+HTML and PDF documentation is rebuilt from time to time by @egallesio.
 
 
 ### Documenting primitives written in C
@@ -421,7 +421,7 @@ static struct extended_type_descr xtype_array = {
 };
 ```
 
-* At the end of your C code, inside the MODULE_ENTRY_START part, initialize an element 
+* At the end of your C code, inside the MODULE_ENTRY_START part, initialize an element
   of the new type: `tc_array = STk_new_user_type(&xtype_array);`
 
 * Create a describing procedure:
@@ -444,7 +444,7 @@ static struct extended_type_descr xtype_array = {
 (%user-type-proc-set! 'array 'class-of <array>)
 ```
 
-* If objects of the new type will have a printed representation, create 
+* If objects of the new type will have a printed representation, create
   a reader procedure:
 
 ```
@@ -452,6 +452,120 @@ static struct extended_type_descr xtype_array = {
   (lambda args
     (apply array (apply shape (car args)) (cdr args))))
 ```
+
+
+## Mixed code modules
+
+A mixed code module is a module compiled as a shared library with some parts
+written in Scheme and some parts written in C.
+
+To illustrate our purpose, we will see here how to implement the SRFI-170,
+which is a good example of mixed code module.
+
+The following actions need to be done
+
+1. Create a subdirectory for the module (here `lib/srfi-170` — named `DIR` hereafter)
+2. Place all the files in this directory. Here we have:
+    - `$DIR/srfi-170.stk`
+    - `$DIR/srfi-170.c`
+3. Create a file name `$DIR/Makefile.am`. This file permits to
+    * compile the Scheme file in a file named `$DIR/srfi-170-incl.c`.
+      This file must be included by the file `$DIR/srfi-170.c`
+    * compile the C file `$DIR/srfi-170.c`
+4. Add the name `lib/srfi-170/Makefile` in `configure.ac` in the
+   `AC_CONFIG_FILES` macro which is at the end of this file. This directive tells
+   the `autoconf/automake` system that a `$DIR/Makefile.in` must be    generated
+   (this file being used by the `configure` script to make the    `$LIB/Makefile`
+   of directory `$DIR`).
+5. Add also the name of the implementation directory `srfi-170`) in the
+   variable `SUBDIR` of file `lib/Makefile.am`
+
+### Content of the Scheme file
+
+The Scheme file will be compiled as a byte-code stream embedded in C. Here,
+the compiled file will be called `$DIR/srfi-170-incl.c`. It is built by the
+`utils/tmpcomp` script with
+
+```sh
+../../utils/tmpcomp -o srfi-170-incl.c $DIR/srfi-170.stk
+```
+
+Note: when the destination file ends with a `.c` sifix, the `tmpcomp` command
+produces a C file instead of a byte-code file.
+
+You don't have to pay to a particular point in the writing of this file.
+
+## Content of the C file
+
+The C file must follow the conventions of dynamically loadable code as shown
+in the example in the `/etc` directory.
+
+In this C file, to use the previously compiled Scheme code, you have to
+
+* include the file `srfi-170-incl.c` at the top of your C file
+* add a call to execute the Scheme code just before the `MODULE_ENTRY_END`
+  directive. This is done with the following invocation
+
+```c
+    STk_execute_C_bytecode(__module_consts, __module_code);
+```
+
+
+
+
+
+
+
+## Mixed code modules
+
+A mixed code module is a module compiled as a shared library with some parts
+written in Scheme and some parts written in C.
+
+To illustrate our purpose, we will see here how to implement the SRFI-170,
+which is a good example of mixed code module.
+
+The following actions need to be done
+
+1. Create a subdir for the module (here `lib/srfi-170` — named `DIR` hereafter)
+2. Place all the files in this directory. Here we have:
+    - `$DIR/srfi-170.stk`
+    - `$DIR/srfi-170.c`
+3. Create a file name `$DIR/Makefile.am`. This file permits to
+    * compile the Scheme file in a file named `$DIR/srfi-170-incl.c`.
+      This file must be included by the file `$DIR/srfi-170.c`
+    * compile the C file `$DIR/srfi-170.c`
+4. Add the name `lib/srfi-170/Makefile` in `configure.ac` in the
+   `AC_CONFIG_FILES` macro which is at the end of this file. This directive
+   tells the `autoconf/automake` system that a `$DIR/Makefile.in` must be
+   generated (this file being used by the `configure` script to make the
+   `$LIB/Makefile` of directory `$DIR`.
+5. Add also the name of the implementation directory `srfi-170`) in the
+   variable `SUBDIR` of file `lib/Makefile.am`
+
+## Content of the Scheme file
+
+The Scheme file will be compiled as a bytecode stream embedded in
+C. Here the compiled file will be called `$DIR/srfi-170-incl.c`. It is
+built by the `utils/tmpcomp` script with
+
+```sh
+../../utils/tmpcomp -o srfi-170-incl.c $DIR/srfi-170.stk
+```
+
+You don't have to pay to a particular point in the writing of this file
+
+## Content of the C file
+
+The C file must follow the conventions of dynamically loadable code as shown
+in the example in the `/etc` directory.
+
+To use the previously compiled Scheme code, you have
+
+* include the file `srfi-170-incl.c` at the top of your file
+* add a call to execute the Scheme code just before the `MODULE_ENTRY_END`
+  directive. This is done with the following invocation
+
+       STk_execute_C_bytecode(__module_consts, __module_code);
 
 ## The virtual machine
 
