@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update: 15-May-2021 08:08 (eg)
+ * Last file update: 15-May-2021 10:53 (eg)
  */
 
 #include "stklos.h"
@@ -71,6 +71,7 @@ struct array_obj {
 #ifdef THREADS_NONE
 #  define ARRAY_MUTEX(p)
 #  define ARRAY_MUTEX_SIZE 1
+#  define ARRAY_MUTEX_PTR_SIZE (sizeof(int))
 #else
 #  define ARRAY_MUTEX(p) (((struct array_obj *) (p))->share_cnt_lock)
 #  define ARRAY_MUTEX_SIZE (sizeof(pthread_mutex_t))
@@ -429,9 +430,11 @@ SCM STk_make_array(int rank, long *shape, SCM init)
   s->rank             = rank;
   s->offset           = 0L;     /* will be updated, see below */
 
+#ifndef THREADS_NONE
   /* we are a fresh array (not a copy) , so we point to our own lock: */
   s->share_cnt_lock_addr = &(s->share_cnt_lock);
   MUT_INIT(s->share_cnt_lock);
+#endif
 
   /* data begins right after the data pointer: */
   s->data_ptr = (SCM *)(&(s->data_ptr)) + 1;
@@ -1098,7 +1101,7 @@ DEFINE_PRIMITIVE("share-array", srfi_25_share_array, subr3, (SCM old_array, SCM 
 
 #ifndef THREADS_NONE
     s->share_cnt_lock   = ARRAY_LOCK(old_array);
-    /* get the address of the lock from the old array, and don't initialize ours. */ 
+    /* get the address of the lock from the old array, and don't initialize ours. */
     s->share_cnt_lock_addr = &(ARRAY_LOCK(old_array));
 #endif
 
