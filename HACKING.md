@@ -490,7 +490,7 @@ the compiled file will be called `$DIR/srfi-170-incl.c`. It is built by the
 ../../utils/tmpcomp -o srfi-170-incl.c $DIR/srfi-170.stk
 ```
 
-Note: when the destination file ends with a `.c` sifix, the `tmpcomp` command
+Note: when the destination file ends with a `.c` suffix, the `tmpcomp` command
 produces a C file instead of a byte-code file.
 
 You don't have to pay attention to a particular point in the writing of this file.
