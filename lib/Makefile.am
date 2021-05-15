@@ -20,9 +20,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 15-May-2021 09:13 (eg)
+# Last file update: 15-May-2021 09:34 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d srfi-25 srfi-170 srfi-175
+SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
+		  srfi-25 srfi-133 srfi-170 srfi-175
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
@@ -117,7 +118,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-128.stk        \
           srfi-129.stk        \
           srfi-130.stk        \
-          srfi-133.stk        \
           srfi-134.stk        \
           srfi-135.stk        \
           srfi-137.stk        \
@@ -141,7 +141,7 @@ SRC_STK = bigloo-support.stk  \
           tar.stk             \
           trace.stk
 
-SRC_C = srfi-133-impl.c 
+SRC_C =
 
 scheme_OBJS = compfile.ostk     \
           bigmatch.ostk         \
@@ -195,7 +195,6 @@ scheme_OBJS = compfile.ostk     \
           srfi-128.ostk         \
           srfi-129.ostk         \
           srfi-130.ostk         \
-          srfi-133.ostk         \
           srfi-134.ostk         \
           srfi-135.ostk         \
           srfi-137.ostk         \
@@ -219,7 +218,7 @@ scheme_OBJS = compfile.ostk     \
           tar.ostk              \
           trace.ostk
 
-scheme_SOLIBS = srfi-133-impl.@SH_SUFFIX@
+scheme_SOLIBS = 
 
 DOCDB	    = DOCDB
 

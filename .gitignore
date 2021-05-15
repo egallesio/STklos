@@ -123,7 +123,8 @@ gtklos/gtklosconf.h
 lib/Lalr.d/calc
 lib/boot-callcc.stk
 lib/srfis-data.scm
-
+#                  ... generated C files
+*incl.c         
 
 # Pcre directory
 pcre/.libs
@@ -174,5 +175,3 @@ utils/stklos-config
 utils/stklos-genlex
 utils/stklos-script
 utils/update-srfi-list
-
-
