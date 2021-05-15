@@ -21,11 +21,12 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update:  3-May-2021 11:49 (eg)
+ * Last file update: 15-May-2021 08:08 (eg)
  */
 
 #include "stklos.h"
 #include <math.h>
+#include "srfi-25-incl.c"
 
 /*
   ------------------------------------------------------------------------------
@@ -1634,5 +1635,7 @@ MODULE_ENTRY_START("srfi-25")
 
   STk_export_all_symbols(module);
 
+  /* Execute Scheme code */
+  STk_execute_C_bytecode(__module_consts, __module_code);
 }
 MODULE_ENTRY_END
