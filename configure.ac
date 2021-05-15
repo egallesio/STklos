@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 15-May-2021 07:54 (eg)
+### Last file update: 15-May-2021 09:08 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -200,7 +200,7 @@ case "$THREADS" in
    ;;
 esac
 
-#XX 
+#XX
 #XX ### Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
 #XX case "$THREADS" in
 #XX   none) true ;;
@@ -208,7 +208,7 @@ esac
 #XX         Linux*) STKCFLAGS="-D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
 #XX      esac
 #XX esac
-#XX 
+#XX
 
 
 
@@ -539,6 +539,7 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
 
           lib/srfi-25/Makefile
           lib/srfi-170/Makefile
+          lib/srfi-175/Makefile
 ])
 AC_OUTPUT
 
