@@ -46,11 +46,8 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 27-Mar-2021 02:33
-;;;; Last file update: 26-Apr-2021 15:18 (eg)
+;;;; Last file update: 15-May-2021 08:23 (eg)
 ;;;;
-
-
-(load "srfi-25-impl")
 
 (select-module SRFI-25)
 

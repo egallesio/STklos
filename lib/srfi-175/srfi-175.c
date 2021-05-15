@@ -1,7 +1,7 @@
 /*
  * srfi-175.c   -- Implementation fo SRFI-175
  *
- * Copyright © 2020 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+ * Copyright © 2020-2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,10 +21,11 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Jul-2020 18:41
- * Last file update: 26-Jul-2020 17:48 (eg)
+ * Last file update: 15-May-2021 09:10 (eg)
  */
 
 #include <stklos.h>
+#include "srfi-175-incl.c"
 
 /*
  * Refrain to use <ctype.h> and implement our own ctype function in the
@@ -443,5 +444,7 @@ MODULE_ENTRY_START("srfi-175")
   /* Export all the symbols we have just defined */
   STk_export_all_symbols(module);
 
+  /* Execute Scheme code */
+  STk_execute_C_bytecode(__module_consts, __module_code);
 }
 MODULE_ENTRY_END

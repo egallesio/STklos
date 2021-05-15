@@ -56,17 +56,17 @@
 
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date:  16-Jul-2020 10:20
-;;;; Last file update: 26-Mar-2021 14:50 (eg)
+;;;; Last file update: 15-May-2021 09:25 (eg)
 ;;;;
 
-(define-module SRFI-133
+(select-module SRFI-133)
 
-  ;; Pseudo-define the pritives defined in C to avoid compiler warnings
-  (%compile-time-define check-index vector-parse-start+end %smallest-length %vector-copy!
-                        %vector-reverse-copy! %vector-reverse! %vector-fold1 %vector-fold2+
-                        %vector-map1! %vector-map2+! vector-empty?)
+;; Pseudo-define the primitives defined in C to avoid compiler warnings
+(%compile-time-define check-index vector-parse-start+end %smallest-length
+                      %vector-copy! %vector-reverse-copy! %vector-reverse!
+                      %vector-fold1 %vector-fold2+ %vector-map1!
+                      %vector-map2+! vector-empty?)
 
-(load "srfi-133-impl")
 
   ;; Constructors
 (export vector-unfold vector-unfold-right vector-reverse-copy
@@ -954,7 +954,7 @@
           (vector-set! result at (string-ref str i))
           (loop (+ at 1) (+ i 1)))))))
 
-) ;; END of module SRFI-133
+;; END of module SRFI-133
 
 ;;; ======================================================================
 (select-module STklos)
