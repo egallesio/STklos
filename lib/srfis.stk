@@ -182,7 +182,7 @@
     (141 "Integer Division" (integer-division) "srfi-141")
     ;; 142  ....... withdrawn
     (143  "Fixnums")
-    ;; 144  Flonums
+    (144  "Flonums" () "srfi-144")
     (145 "Assumptions")
     ;; 146  Mappings
     ;; 147  Custom macro transformers
