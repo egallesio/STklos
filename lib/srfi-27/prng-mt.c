@@ -320,7 +320,7 @@ DEFINE_PRIMITIVE("%make-random-state-mt", srfi_27_make_random_state_mt, vsubr, (
 }
 
 /* %random-state-copy-mt will create a new copy of a random state. */
-DEFINE_PRIMITIVE("%random-state-copy-mt",random_state_copy_mt,subr1,(SCM state))
+DEFINE_PRIMITIVE("%random-state-copy-mt",srfi_27_random_state_copy_mt,subr1,(SCM state))
 {
     SCM st;
 
@@ -463,14 +463,16 @@ DEFINE_PRIMITIVE("%random-real-from-source-mt", srfi_27_rnd_real_src_mt, subr1, 
  *
 \*===========================================================================*/
 
+extern SCM find_module(SCM name, int create);
+
 MODULE_ENTRY_START("srfi-27")
 {
   SCM module =  STk_create_module(STk_intern("SRFI-27"));
-
+    
   tc_state_mt = STk_new_user_type(&xtype_state_mt);
 
   ADD_PRIMITIVE_IN_MODULE(srfi_27_make_random_state_mt, module);
-  ADD_PRIMITIVE_IN_MODULE(random_state_copy_mt, module);
+  ADD_PRIMITIVE_IN_MODULE(srfi_27_random_state_copy_mt, module);
       
   ADD_PRIMITIVE_IN_MODULE(srfi_27_random_source_randomize_mt, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_27_random_source_pseudo_randomize_mt, module);
