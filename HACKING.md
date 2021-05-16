@@ -73,7 +73,7 @@ HTML and PDF documentation is rebuilt from time to time by @egallesio.
 Before `DEFINE_PRIMITIVE`, add a comment similar to the others you see
 in the C files. An example:
 
-```
+```c
 /*
 <doc EXT bignum?
  * (bignum? x)
@@ -102,7 +102,7 @@ show an example of usage.
 
 Use the macro `DEFINE_PRIMITIVE`:
 
-```
+```c
 DEFINE_PRIMITIVE("fixnum?", fixnump, subr1, (SCM obj))
 {
   return MAKE_BOOLEAN(INTP(obj));
@@ -121,7 +121,7 @@ The arguments for this example are
 
 Then add it:
 
-```
+```c
 ADD_PRIMITIVE(fixnump);
 ```
 
@@ -131,7 +131,7 @@ The name passed to `ADD_PRIMITIVE` is the C function name.
 
 Recall that a primitive is defined like this:
 
-```
+```c
 DEFINE_PRIMITIVE("fixnum?", fixnump, subr1, (SCM obj))
 { ... }
 
@@ -141,7 +141,7 @@ ADD_PRIMITIVE(fixnump);
 TO use this primitive later in C code, add the `STk_` prefix to its
 C function name:
 
-```
+```c
 if (STk_fixnump(obj) == STk_false) ...
 ```
 
@@ -151,13 +151,13 @@ if (STk_fixnump(obj) == STk_false) ...
 
 For example, `read-line` (defined in `port.c`) has these two lines:
 
-```
+```c
 return STk_n_values(2, res, STk_eof)
 ```
 
 for when it found the end of the file, and
 
-```
+```c
 return STk_n_values(2, res, delim);
 ```
 
@@ -173,7 +173,7 @@ and after it there are arguments.
 But as you can see in the top of several C files, it is useful to define
 wrappers:
 
-```
+```c
 static void error_bad_number(SCM n)
 {
   STk_error("~S is a bad number", n);
@@ -239,8 +239,8 @@ Fixnums are not allocated but have their two least significant bits set to `01`
   Actually, this will shift the number to the left by two positions and insert the tag
   If we could represent numbers as binary in C, it would be like this:
 
-```
-MAKE_INT( 000011000 ) --> 001100001
+```c
+MAKE_INT( 000011000 )  // --> 001100001
 ```
 
 * `INT_VAL(o)` - returns the value of the fixnum `o`, as a C `long` value (the opposite
@@ -258,7 +258,7 @@ They are tagged with `00`.
 
 The type definition for all possible types, in `stklos.h`, is self-explanatory:
 
-```
+```c
 typedef enum {
   tc_not_boxed=-1,
   tc_cons, tc_integer, tc_real, tc_bignum,  tc_rational,                /* 0 */
@@ -288,7 +288,7 @@ Here are some primitives for lists, for example:
 
 Another example are strings. They are defined as the following structure:
 
-```
+```c
 struct string_obj {
   stk_header header;
   int space;            /* allocated size  */
@@ -300,7 +300,7 @@ struct string_obj {
 
 Then, some primitives:
 
-```
+```c
 #define STRING_SPACE(p)  (((struct string_obj *) (p))->space)
 #define STRING_SIZE(p)   (((struct string_obj *) (p))->size)
 #define STRING_LENGTH(p) (((struct string_obj *) (p))->length)
@@ -311,7 +311,7 @@ Then, some primitives:
 The following primitives are defined in a `str.c`, but `stklos.h` is
 used by several files use them, so they're included with `EXTERN_PRIMITIVE`:
 
-```
+```c
 EXTERN_PRIMITIVE("string=?", streq, subr2, (SCM s1, SCM s2));
 EXTERN_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index));
 EXTERN_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM value));
@@ -328,7 +328,7 @@ We'll be using SRFI-25 as an example. In that SRFI, am `array` type is created.
 
 * Create a C struct whose first field is of type `stk_header`
 
-```
+```c
 struct array_obj {
   stk_header header;
   int shared;                /* does this array share data with another? */
@@ -352,7 +352,7 @@ have `SCM` types).
 
 * Maybe create some accessor macros
 
-```
+```c
 #define ARRAYP(p)            (BOXED_TYPE_EQ((p), tc_array))
 #define ARRAY_SHARED(p)      (((struct array_obj *) (p))->shared)
 #define ARRAY_SHARE_COUNT(p) (((struct array_obj *) (p))->orig_share_count)
@@ -368,7 +368,7 @@ have `SCM` types).
 
 Be mindful of thread-related things: not all STklos builds have threading enabled!
 
-```
+```c
 #ifdef THREADS_NONE
 #  define ARRAY_MUTEX(p)
 #  define ARRAY_MUTEX_SIZE 1
@@ -382,7 +382,7 @@ Be mindful of thread-related things: not all STklos builds have threading enable
 * Create an extended type descriptor which contains the type name, and pointers
   to functions to print and compare elements:
 
-```
+```c
 static void print_array(SCM array, SCM port, int mode)
 {
   /*
@@ -396,7 +396,7 @@ static void print_array(SCM array, SCM port, int mode)
 }
 ```
 
-```
+```c
 static SCM test_equal_array(SCM x, SCM y)
 {
  /*
@@ -413,7 +413,7 @@ static SCM test_equal_array(SCM x, SCM y)
 }
 ```
 
-```
+```c
 static struct extended_type_descr xtype_array = {
   .name  = "array",
   .print = print_array,
@@ -426,7 +426,7 @@ static struct extended_type_descr xtype_array = {
 
 * Create a describing procedure:
 
-```
+```scheme
 (%user-type-proc-set! 'array 'describe
                       (lambda (x port)
                         (format port "an array of rank ~A and size ~A"
@@ -437,7 +437,7 @@ static struct extended_type_descr xtype_array = {
 * Define a class, and associate it with the type name you have
   created.
 
-```
+```scheme
 (define-class <array> (<top>) ())
 (export <array>)
 
@@ -447,7 +447,7 @@ static struct extended_type_descr xtype_array = {
 * If objects of the new type will have a printed representation, create
   a reader procedure:
 
-```
+```scheme
 (define-reader-ctor '<array>
   (lambda args
     (apply array (apply shape (car args)) (cdr args))))
