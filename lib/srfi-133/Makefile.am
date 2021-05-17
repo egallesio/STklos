@@ -1,4 +1,4 @@
-# Makefile for STklos srfi-170 library
+# Makefile for STklos srfi-133 library
 #
 # Copyright © 2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
