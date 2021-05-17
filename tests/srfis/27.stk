@@ -1,7 +1,4 @@
 
-(require "srfi-27")
-
-
 (test "srfi-27 random-source? 1"
       #t
       (random-source? default-random-source))
