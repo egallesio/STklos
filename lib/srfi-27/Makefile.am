@@ -24,7 +24,7 @@
 SRFI=srfi-27
 
 #======================================================================
-OUT            = prng-mt.@SH_SUFFIX@
+OUT            = $(SRFI).@SH_SUFFIX@
 schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@
 
@@ -35,10 +35,7 @@ STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 # ======================================================================
 
-# We don't include $(SRFI).c here because the C file one of many possible
-# implementations of random sources -- it just happens to be the only one
-# available for now. So we include "prng-mt.c".
-SOURCES= prng-mt.c $(SRFI).stk
+SOURCES= $(SRFI).c $(SRFI).stk
 DOCDB = ../DOCDB
 
 SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
@@ -55,7 +52,7 @@ SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 
 all: $(OUT)
 
-$(OUT): $(SRFI)-incl.c prng-mt.c
+$(OUT): $(SRFI)-incl.c $(SRFI).c
 
 
 $(SRFI)-incl.c: $(SRFI).stk
