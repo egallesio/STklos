@@ -430,10 +430,10 @@ AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
 
 
 # ----------------------------------------------------------------------
-# Control fixnum parameters
+# Control fixnum and flonum parameters
 # ----------------------------------------------------------------------
-AC_ARG_WITH(control-fixnums,
-       [  --with-control-fixnums  verify that fx functions are fixnums],
+AC_ARG_WITH(control-fast-math,
+       [  --with-control-fast-math  verify that arguments to fx/fl functions are fixnums/flonums],
        CONTROL_FX="$withval", CONTROL_FX="yes")
 
 if test "$CONTROL_FX" = "yes"
