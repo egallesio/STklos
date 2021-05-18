@@ -38,7 +38,7 @@
   with 32 bits (conversion to/from string). This is slow, but it works.
 
   We know that we have a 64 bits value when the value is ouside the
-  range [MIN32_SI, MAX32_SI]. In this case, we pass by the deciaml
+  range [MIN32_SI, MAX32_SI]. In this case, we pass by the decimal
   representation of the number in a string
  */
 
