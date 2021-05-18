@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 18-May-2021 15:04 (eg)
+# Last file update: 18-May-2021 15:56 (eg)
 
 SRFI=srfi-27
 
@@ -36,7 +36,8 @@ STKLOS_FLAGS   = --no-init-file --case-sensitive
 # ======================================================================
 
 SOURCES= $(SRFI).c $(SRFI).stk
-DOCDB = ../DOCDB
+DOCDB  = ../DOCDB
+BASEDIR= ../..
 
 SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 
@@ -44,7 +45,7 @@ SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 	$(COMP) -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ \
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
 	-c -o $*.o $*.c
 	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@
 	/bin/rm -f $*.o

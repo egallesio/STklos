@@ -6959,7 +6959,7 @@ then
      (cd gmp; CC=${CC} CFLAGS="${cflags} -I../src -DFOR_STKLOS=1" ./configure \
               --prefix=$prefix) || { echo "Cannot configure the GMP"; exit; }
      GMP=gmp
-     GMPINC="-I../gmp"
+     GMPINC='-I$(BASEDIR)/gmp'
      GMPLIB="../gmp/.libs/libgmp.a"
      COMP_LIBS="libgmp $COMP_LIBS"
 else

@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 15-May-2021 16:16 (eg)
+### Last file update: 18-May-2021 15:58 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -318,7 +318,7 @@ then
      (cd gmp; CC=${CC} CFLAGS="${cflags} -I../src -DFOR_STKLOS=1" ./configure \
               --prefix=$prefix) || { echo "Cannot configure the GMP"; exit; }
      GMP=gmp
-     GMPINC="-I../gmp"
+     GMPINC='-I$(BASEDIR)/gmp'
      GMPLIB="../gmp/.libs/libgmp.a"
      COMP_LIBS="libgmp $COMP_LIBS"
 else
