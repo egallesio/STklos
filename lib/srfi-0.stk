@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-0.stk                                 -- SRFI-0 aka cond-expand
 ;;;;
-;;;; Copyright © 1999-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 27-Nov-2020 10:53 (eg)
+;;;; Last file update: 17-May-2021 16:43 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -85,7 +85,7 @@
  * This primitive ensures that the |feature| (in sense of SRFI-0 feature) can be used.
  * In particular, it eventually requires the loading of the files needed to used |feature|.
  * The |feature| can be expressed as a string or a symbol, If feature is an integer |n|,
- * it is equivalent to |srfi-n|. Consquently, to use ,(quick-link-srfi 1) 
+ * it is equivalent to |srfi-n|. Consequently, to use ,(quick-link-srfi 1) 
  * the following forms are equivalent:
  *
  * @lisp

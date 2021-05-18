@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 15-May-2021 09:07 (eg)
+# Last file update: 18-May-2021 15:04 (eg)
 
 SRFI=srfi-27
 
@@ -57,8 +57,9 @@ $(OUT): $(SRFI)-incl.c $(SRFI).c
 
 $(SRFI)-incl.c: $(SRFI).stk
 
+# Scheme source is not complete => do not install
 install-sources:
-	cp $(SRFI).stk $(DESTDIR)/$(schemedir)
+	@echo "No source file to install for $(SRFI)"
 
 doc:
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
