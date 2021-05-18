@@ -73,7 +73,9 @@ static Inline SCM double2real(double x)
 
 static int tc_state_mt;
 
+#define NUMBER_POWERS_2_64 20
 
+static mpz_t expt_2_64k[NUMBER_POWERS_2_64];
 
 /********************************************\
  *                                          *
@@ -411,7 +413,6 @@ DEFINE_PRIMITIVE("%random-integer-from-source-mt", srfi_27_rnd_int_src_mt, subr2
         size_t size = mpz_sizeinbase(BIGNUM_VAL(n),2)/64;
 
         mpz_t x;
-        mpz_init(x);
 
         /*
          * Generate a number, zero the bits we know we won't use, and check
@@ -420,12 +421,42 @@ DEFINE_PRIMITIVE("%random-integer-from-source-mt", srfi_27_rnd_int_src_mt, subr2
          * and Algebra", section 7.4, "Generating a random number from a
          * given interval")
          */
+
+        /*
+         * With big GMP ("system" GMP), we have mpz_import, and then we can
+         * just get enough bits and interpret them as a GMP number.
+         * If we DON'T have system GMP, ew need to use the provided GMP, and
+         * then we get 64-bit numbers, initialize mpz's with each of them
+         * and make them fir in the right place in the generated integer,
+         * multiplying each by (2^(64*k)). We use a pre-computed table for the
+         * first powers (that quantity is NUMBER_POWERS_2_64, defined at the top
+         * of this file).
+         */
+#ifdef HAVE_GMP
         uint64_t *buf = STk_must_malloc_atomic(size*sizeof(uint64_t));
         do {
+            mpz_init(x);
             for (size_t i=0; i<size; i++)
                 buf[i] = genrand64_int64((state_mt *)state);
             mpz_import(x,size,1,8,0,0,buf);
         } while (mpz_cmp(x,BIGNUM_VAL(n)) >= 0); /* while x >= limit */
+#else
+        do {
+            mpz_t y, z;
+            mpz_init(z);
+            mpz_init_set_ui(x, (unsigned long) genrand64_int64((state_mt *)state));
+            for (size_t i=1; i<size; i++) {
+                mpz_init_set_ui(y,  (unsigned long) genrand64_int64((state_mt *)state)); // new function; needs review
+                if (i<NUMBER_POWERS_2_64)
+                    mpz_mul(y,y,expt_2_64k[i]);
+                else {
+                    mpz_ui_pow_ui(z,2,64*i);
+                    mpz_mul(y,y,z);
+                }
+                mpz_add(x,x,y);
+            }
+        } while (mpz_cmp(x,BIGNUM_VAL(n)) >= 0); /* while x >= limit */
+#endif
 
         return bignum2scheme_bignum(x);
 
@@ -470,6 +501,12 @@ MODULE_ENTRY_START("srfi-27")
   SCM module =  STk_create_module(STk_intern("SRFI-27"));
 
   tc_state_mt = STk_new_user_type(&xtype_state_mt);
+
+  /*  pre-compute a table of powers of 2  */
+  for (int i=0; i<NUMBER_POWERS_2_64; i++) {
+      mpz_init(expt_2_64k[i]);
+      mpz_ui_pow_ui(expt_2_64k[i],2,64*i);
+  }
 
   ADD_PRIMITIVE_IN_MODULE(srfi_27_make_random_state_mt, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_27_random_state_copy_mt, module);
