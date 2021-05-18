@@ -109,6 +109,35 @@ and returns an ,(emph "int").])
 Note that in this function the name of the parameter has been omitted
 as within C prototypes.]))
 
+(p [If an external function receives an  ,(tt ":int") argument and is passed a Scheme bignum,
+which then doesn't fit a ,(emph "long int") in C, the external function will signal
+an error. When a  ,(tt ":float") or ,(tt ":double") argument is declared and is passed a
+Scheme real that requires so many bits so as to not be representable in that type, that
+argument will be silently taken as infinity.])
+
+(fontified-code [
+ (define-external c-abs ((fd :int))
+     :entry-name "abs"
+     :return-type :int)
+
+ (define-external c-fabs ((fd :double))
+     :entry-name "fabs"
+     :return-type :double)
+
+ (define-external c-fabsf ((fd :float))
+     :entry-name "fabsf"
+     :return-type :float)
+])
+
+(raw-code [
+(c-abs (- (expt 2 70)))    ,(symbol-arrow) Error
+(c-fabs -1.0e+250)         ,(symbol-arrow) 1e+250
+(c-fabsf -1.0e+250)        ,(symbol-arrow) +inf.0
+(c-fabs (- (expt 10 300))) ,(symbol-arrow) 1e+300
+(c-fabs (- (expt 10 600))) ,(symbol-arrow) +inf.0
+])
+
+
    (bold "TODO: describe malloc and malloc_atomic and their
 interaction with the GC")
 
