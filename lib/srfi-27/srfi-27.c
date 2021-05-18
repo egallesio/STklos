@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 03-May-2021 15:22
- * Last file update: 04-May-2021 07:42 (jpellegrini)
+ * Last file update: 18-May-2021 16:25 (eg)
  */
 
 #include <gmp.h>
@@ -86,7 +86,7 @@ static int tc_state_mt;
 
    Slightly adapted for STklos (made state an argument to the functions)
 
-   
+
    Original Copyright notice follows:
 
    A C-program for MT19937-64 (2014/2/23 version).
@@ -95,11 +95,11 @@ static int tc_state_mt;
    This is a 64-bit version of Mersenne Twister pseudorandom number
    generator.
 
-   Before using, initialize the state by using init_genrand64(seed)  
+   Before using, initialize the state by using init_genrand64(seed)
    or init_by_array64(init_key, key_length).
 
    Copyright (C) 2004, 2014, Makoto Matsumoto and Takuji Nishimura,
-   All rights reserved.                          
+   All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
@@ -112,8 +112,8 @@ static int tc_state_mt;
         notice, this list of conditions and the following disclaimer in the
         documentation and/or other materials provided with the distribution.
 
-     3. The names of its contributors may not be used to endorse or promote 
-        products derived from this software without specific prior written 
+     3. The names of its contributors may not be used to endorse or promote
+        products derived from this software without specific prior written
         permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -130,12 +130,12 @@ static int tc_state_mt;
 
    References:
    T. Nishimura, ``Tables of 64-bit Mersenne Twisters''
-     ACM Transactions on Modeling and 
+     ACM Transactions on Modeling and
      Computer Simulation 10. (2000) 348--357.
    M. Matsumoto and T. Nishimura,
      ``Mersenne Twister: a 623-dimensionally equidistributed
        uniform pseudorandom number generator''
-     ACM Transactions on Modeling and 
+     ACM Transactions on Modeling and
      Computer Simulation 8. (Jan. 1998) 3--30.
 
    Any feedback is very welcome.
@@ -156,7 +156,7 @@ static int tc_state_mt;
 void init_genrand64(state_mt *state, uint64_t seed)
 {
     state->mt[0] = seed;
-    for (state->mti=1; state->mti<NN; state->mti++) 
+    for (state->mti=1; state->mti<NN; state->mti++)
         state->mt[state->mti] =  (UINT64_C(6364136223846793005) *
                                   (state->mt[state->mti-1] ^ (state->mt[state->mti-1] >> 62)) +
                                   state->mti);
@@ -188,7 +188,7 @@ void init_by_array64(state_mt *state,
         if (i>=NN) { state->mt[0] = state->mt[NN-1]; i=1; }
     }
 
-    state->mt[0] = UINT64_C(1) << 63; /* MSB is 1; assuring non-zero initial array */ 
+    state->mt[0] = UINT64_C(1) << 63; /* MSB is 1; assuring non-zero initial array */
 }
 
 /* generates a random number on [0, 2^64-1]-interval */
@@ -202,7 +202,7 @@ uint64_t genrand64_int64(state_mt *state)
 
         /* if init_genrand64() has not been called, */
         /* a default initial seed is used     * /
-        if (mti == NN+1) 
+        if (mti == NN+1)
             init_genrand64(UINT64_C(5489)); */
 
         for (i=0;i<NN-MM;i++) {
@@ -218,7 +218,7 @@ uint64_t genrand64_int64(state_mt *state)
 
         state->mti = 0;
     }
-  
+
     x = state->mt[state->mti++];
 
     x ^= (x >> 29) & UINT64_C(0x5555555555555555);
@@ -280,7 +280,7 @@ double genrand64_real3(state_mt *state)
 DEFINE_PRIMITIVE("%make-random-state-mt", srfi_27_make_random_state_mt, vsubr, (int argc, SCM *argv))
 {
     SCM st;
-    
+
     NEWCELL_ATOMIC(st, state_mt,
                    sizeof(state_mt) +
                    sizeof(uint64_t) * NN);
@@ -296,7 +296,7 @@ DEFINE_PRIMITIVE("%make-random-state-mt", srfi_27_make_random_state_mt, vsubr, (
         if (!VECTORP(*argv)) STk_error("bad vector ~S", *argv);
 
         SCM _mt  = *argv;
-        
+
         if (VECTOR_SIZE(_mt) != NN)
             STk_error("bad size ~S for Mersenne Twister state vector",
                       MAKE_INT(VECTOR_SIZE(_mt)));
@@ -306,7 +306,7 @@ DEFINE_PRIMITIVE("%make-random-state-mt", srfi_27_make_random_state_mt, vsubr, (
         SCM x;
         for (int i=0; i<NN; i++) {
             x = VECTOR_DATA(_mt)[i];
-            if (BIGNUMP(x)) 
+            if (BIGNUMP(x))
                 STATE_MT_MT(s)[i] = mpz_get_ui(BIGNUM_VAL(x));
             else if (INTP(x))
                 STATE_MT_MT(s)[i] = INT_VAL(x);
@@ -315,7 +315,7 @@ DEFINE_PRIMITIVE("%make-random-state-mt", srfi_27_make_random_state_mt, vsubr, (
         }
     } else
         STk_error("expects either zero or two arguments");
-    
+
     return st;
 }
 
@@ -326,29 +326,29 @@ DEFINE_PRIMITIVE("%random-state-copy-mt",srfi_27_random_state_copy_mt,subr1,(SCM
 
     size_t size = sizeof(state_mt) +
                   sizeof(uint64_t) * (NN - 1);
-    
+
     NEWCELL_ATOMIC(st, state_mt, size);
-          
+
     memcpy(st,state,size);
     return st;
 }
 
 
-void print_random_state_mt (SCM state, SCM port, int mode)
+void print_random_state_mt (SCM state, SCM port, int _UNUSED(mode))
 {
     /* The format is   #,(<random-statet-mt> i v1 v2 v3 ...) */
-    
+
     STk_puts("#,(<random-state-mt> ",port);
     char *buf = STk_must_malloc((NN+1)*20);
-    
+
     sprintf(buf,"%d", STATE_MT_MTI(state));
     STk_puts(buf, port);
-    
+
     for (int i=0; i < NN; i++) {
         sprintf(buf," %lu", STATE_MT_MT(state)[i]);
         STk_puts(buf, port);
     }
-    
+
     STk_putc(')',port);
 }
 
@@ -400,7 +400,7 @@ DEFINE_PRIMITIVE("%random-source-pseudo-randomize-mt!",
     init_by_array64((state_mt *)st, init, VECTOR_SIZE(vec));
 
     STATE_MT_MTI(st) = NN + 1;
-    
+
     return STk_void;
 }
 
@@ -422,13 +422,13 @@ DEFINE_PRIMITIVE("%random-integer-from-source-mt", srfi_27_rnd_int_src_mt, subr2
          */
         uint64_t *buf = STk_must_malloc_atomic(size*sizeof(uint64_t));
         do {
-            for (long i=0; i<size; i++)
+            for (size_t i=0; i<size; i++)
                 buf[i] = genrand64_int64((state_mt *)state);
             mpz_import(x,size,1,8,0,0,buf);
         } while (mpz_cmp(x,BIGNUM_VAL(n)) >= 0); /* while x >= limit */
-        
+
         return bignum2scheme_bignum(x);
-        
+
     } else if (INTP(n)) {
         long limit = INT_VAL(n);
         if (limit <=0) STk_error("range bound ~S for generating random integer is <=0", n);
@@ -438,9 +438,9 @@ DEFINE_PRIMITIVE("%random-integer-from-source-mt", srfi_27_rnd_int_src_mt, subr2
         do {
             /* Clear the bits we don't want: */
             x = (genrand64_int64(state) << (64-size)) >> (64-size);
-        } while (x >= limit);
+        } while (x >= (size_t) limit);
         return (MAKE_INT(x));
-    } else 
+    } else
          STk_error("bad integer ~S", n);
     return STk_false; /* never reached */
 }
@@ -452,7 +452,7 @@ DEFINE_PRIMITIVE("%random-real-from-source-mt", srfi_27_rnd_real_src_mt, subr1, 
        Note: double is 64-bit on all devices I checked, even those with
        32-bit word size. */
     double res = genrand64_real3((state_mt *) state);
-    
+
     return double2real(res);
 }
 
@@ -468,18 +468,18 @@ extern SCM find_module(SCM name, int create);
 MODULE_ENTRY_START("srfi-27")
 {
   SCM module =  STk_create_module(STk_intern("SRFI-27"));
-    
+
   tc_state_mt = STk_new_user_type(&xtype_state_mt);
 
   ADD_PRIMITIVE_IN_MODULE(srfi_27_make_random_state_mt, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_27_random_state_copy_mt, module);
-      
+
   ADD_PRIMITIVE_IN_MODULE(srfi_27_random_source_randomize_mt, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_27_random_source_pseudo_randomize_mt, module);
-  
+
   ADD_PRIMITIVE_IN_MODULE(srfi_27_rnd_int_src_mt,module);
   ADD_PRIMITIVE_IN_MODULE(srfi_27_rnd_real_src_mt,module);
-  
+
   STk_export_all_symbols(module);
 
   /* Execute Scheme code */
