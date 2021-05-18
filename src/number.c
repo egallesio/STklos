@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 10-Apr-2021 18:43 (eg)
+ * Last file update: 18-May-2021 17:52 (eg)
  */
 
 
@@ -254,7 +254,7 @@ static SCM make_rational(SCM n, SCM d)
   if (zerop(d))
     STk_error("cannot make rational with null denominator");
 
-  /* Always keep sign in the denominator */
+  /* Always keep sign in the numerator */
   if (negativep(d)) {
     n = mul2(n, MAKE_INT((unsigned long) -1));
     d = mul2(d, MAKE_INT((unsigned long) -1));
@@ -2174,10 +2174,10 @@ DEFINE_PRIMITIVE("numerator", numerator, subr1, (SCM q))
 {
   switch (TYPEOF(q)) {
     case tc_real:     return
-                        absolute(exact2inexact(STk_numerator(inexact2exact(q))));
-    case tc_rational: return absolute(RATIONAL_NUM(q));
+                        exact2inexact(STk_numerator(inexact2exact(q)));
+    case tc_rational: return RATIONAL_NUM(q);
     case tc_bignum:
-    case tc_integer:  return absolute(q);
+    case tc_integer:  return q;
     default:          error_bad_number(q);
   }
   return STk_void; /* never reached */
