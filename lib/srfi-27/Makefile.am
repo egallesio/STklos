@@ -34,7 +34,6 @@ COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 # ======================================================================
-
 SOURCES= $(SRFI).c $(SRFI).stk
 DOCDB  = ../DOCDB
 BASEDIR= ../..
