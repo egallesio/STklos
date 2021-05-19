@@ -434,8 +434,8 @@ DEFINE_PRIMITIVE("%random-integer-from-source-mt", srfi_27_rnd_int_src_mt, subr2
          */
 #ifdef HAVE_GMP
         uint64_t *buf = STk_must_malloc_atomic(size*sizeof(uint64_t));
+        mpz_init(x);
         do {
-            mpz_init(x);
             for (size_t i=0; i<size; i++)
                 buf[i] = genrand64_int64((state_mt *)state);
             mpz_import(x,size,1,8,0,0,buf);
