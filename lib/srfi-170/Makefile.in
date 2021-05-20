@@ -554,7 +554,7 @@ STKLOS_BINARY ?= ../../src/stklos
 	$(COMP) -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ \
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
 	-c -o $*.o $*.c
 	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@
 	/bin/rm -f $*.o
@@ -565,8 +565,9 @@ $(OUT): $(SRFI)-incl.c $(SRFI).c
 
 $(SRFI)-incl.c: $(SRFI).stk
 
+# Scheme source is not complete => do not install
 install-sources:
-	cp $(SRFI).stk $(DESTDIR)/$(schemedir)
+	@echo "No source file to install for $(SRFI)"
 
 doc:
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
