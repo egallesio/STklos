@@ -1,2 +1,3 @@
-07/04/03: Initial version
-10/28/09: Replaced GMP subset by MPI
+07/04/2003: Initial version
+10/28/2009: Replaced GMP subset by MPI
+05/20/2021: Replaced version with wrappers around MPI with mini-gmp

@@ -1,5 +1,20 @@
 This is a GMPlite version.
 
+This version uses the mini-gmp implementation (a small one-file version of the
+real GMP library). Mini-gmp is provided with GMP.
+
+The original ChangeLog, AUTHORS, ... files present in GMP are suffixed
+with 'mini-gmp'
+
+    
+                This version is based on GMP-6.2.1
+
+
+
+
+------ Previous version of the README -----------
+
+
 This version is a new version built as a wrapper around the MPI
 library (http://spinning-yarns.org/michael/mpi). It replaces the
 previous version built with starting from the sources of an old
