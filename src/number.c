@@ -472,7 +472,15 @@ static double rational2double(SCM r)
 
   switch (convert(&num, &den)) {
     case tc_integer: return ((double) INT_VAL(num)) / ((double) INT_VAL(den));
-    case tc_bignum:  return scheme_bignum2double(num) / scheme_bignum2double(den);
+    case tc_bignum: {
+        mpq_t a, b;
+        mpq_init(a);
+        mpq_init(b);
+        mpq_set_z(a,BIGNUM_VAL(num));
+        mpq_set_z(b,BIGNUM_VAL(den));
+        mpq_div(a,a,b);
+        return mpq_get_d(a);
+    }
     default:         STk_panic("bad rational ~S", r);
   }
   return 0.0; /* never reached */
