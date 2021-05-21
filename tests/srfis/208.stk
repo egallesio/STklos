@@ -1,0 +1,24 @@
+;; ----------------------------------------------------------------------
+;;  SRFI 208 ...  NaN procedures
+;; ----------------------------------------------------------------------
+
+(let ((n1 (make-nan #f #f 123))
+      (n2 (make-nan #t #t 456)))
+  (test "isnan.1" #t (nan? n1))
+  (test "isnan.2" #t (nan? n2))
+
+  (test "nan-negative?.1" #f (nan-negative? n1))
+  (test "nan-negative?.2" #t (nan-negative? n2))
+
+  (test "nan-quiet?.1"    #f (nan-quiet? n1))
+  (test "nan-quiet?.2"    #t (nan-quiet? n2))
+
+  (test "nan-pauload.1"   123 (nan-payload n1))
+  (test "nan-payload.2"   456 (nan-payload n2))
+
+  (test "nan=?.1"         #f  (nan=? n1 n2))
+  (test "nan=?.2"         #t  (nan=? n1 (make-nan #f #f 123)))
+  (test "nan=?.3"         #f  (nan=? n1 (make-nan #f #f 42)))
+
+  (test "nan=?.4"         #f  (nan=? n2 (make-nan #f #f 456)))
+  (test "nan=?.5"         #f  (nan=? n2 (make-nan #f #f 42))))

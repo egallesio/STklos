@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  6-May-2021 17:42 (eg)
+;; Last file update: 21-May-2021 18:22 (eg)
 ;;
 ;; ======================================================================
 
@@ -59,7 +59,7 @@ document for a complete description.])
 following inexact numerical constants:
 ,(code "+inf.0") (infinity), ,(code "-inf.0") (negative
 infinity), ,(code "+nan.0") (not a number), and
-,(code "-nan.0") (same as +nan.0).])
+,(code "-nan.0") (not a number).])
 
 (insertdoc 'integer?)
 (insertdoc 'inexact?)
@@ -71,6 +71,12 @@ infinity), ,(code "+nan.0") (not a number), and
 
 (insertdoc 'even?)
 (insertdoc 'nan?)
+(index "SRFI-208")
+(insertdoc 'make-nan)
+(insertdoc 'nan-negative?)
+(insertdoc 'nan-quiet?)
+(insertdoc 'nan-payload)
+(insertdoc 'nan=?)
 (insertdoc 'min)
 (insertdoc 'truncate-remainder)
 (insertdoc '*)

@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 21-May-2021 18:15 (eg)
+ * Last file update: 21-May-2021 18:25 (eg)
  */
 
 
@@ -3244,6 +3244,7 @@ DEFINE_PRIMITIVE("nan-payload", nan_payload, subr1, (SCM nan)) {
  *
  * Returns #t if |nan1| and |nan2| have the same sign, quiet bit,
  * and payload; and #f otherwise.
+doc>
 */
 DEFINE_PRIMITIVE("nan=?", nan_equalp, subr2, (SCM n1, SCM n2)) {
   union binary64 tmp1, tmp2;
