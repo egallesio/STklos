@@ -49,7 +49,7 @@ static int use_srfi_169 = 1; /* do we allow the use of underscores in numbers? *
 static int real_precision = REAL_FORMAT_SIZE;
 static unsigned int log10_maxint;
 
-#define FINITE_REALP(n) ((REAL_VAL(n) != minus_inf) && (REAL_VAL(n) != plus_inf))
+#define FINITE_REALP(n) isfinite(REAL_VAL(n))
 
 
 
@@ -1548,6 +1548,19 @@ static int finitep(SCM n)
   return FALSE; /* never reached */
 }
 
+static int infinitep(SCM n)
+{
+  switch (TYPEOF(n)) {
+    case tc_real:     return (isinf(REAL_VAL(n)));
+    case tc_rational:
+    case tc_bignum:
+    case tc_integer:  return FALSE;
+    case tc_complex:  return (infinitep(COMPLEX_REAL(n)) ||
+                              infinitep(COMPLEX_IMAG(n)));
+    default:          error_bad_number(n);
+  }
+  return FALSE; /* never reached */
+}
 
 DEFINE_PRIMITIVE("finite?", finitep, subr1, (SCM n))
 {
@@ -1557,7 +1570,7 @@ DEFINE_PRIMITIVE("finite?", finitep, subr1, (SCM n))
 
 DEFINE_PRIMITIVE("infinite?", infinitep, subr1, (SCM n))
 {
-  return MAKE_BOOLEAN(!finitep(n));
+  return MAKE_BOOLEAN(infinitep(n));
 }
 
 

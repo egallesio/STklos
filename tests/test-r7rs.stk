@@ -648,7 +648,8 @@
 (test "finite?.1" #t (finite? 3))
 (test "finite?.2" #f (finite? +inf.0))
 (test "finite?.3" #f (finite? -inf.0))
-(test "finite?.4" #f (finite? (make-rectangular 3.0 +inf.0)))
+(test "finite?.4" #f (finite? +nan.0))
+(test "finite?.5" #f (finite? (make-rectangular 3.0 +inf.0)))
 
 (test "infinite?.1" #f (infinite? 3))
 (test "infinite?.2" #t (infinite? +inf.0))
