@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 18-May-2021 17:52 (eg)
+ * Last file update: 21-May-2021 09:51 (eg)
  */
 
 
@@ -465,6 +465,40 @@ static Inline SCM scheme_bignum2real(SCM bn)
 }
 
 
+
+/* The following code is an adaptation of code stolen in mini-gmp   */
+/* (mpq_get_d function)                                             */
+static double bigrational2double(mpz_t num, mpz_t den) {
+  #ifndef GMP_LIMB_BITS
+     #define GMP_LIMB_BITS (sizeof(mp_limb_t) * CHAR_BIT)
+  #endif
+  #define GMP_LIMB_HIGHBIT ((mp_limb_t) 1 << (GMP_LIMB_BITS - 1))
+
+  mp_bitcnt_t ne, de, ee;
+  mpz_t z;
+  double B, ret;
+
+  ne = mpz_sizeinbase(num, 2);
+  de = mpz_sizeinbase(den, 2);
+
+  ee = CHAR_BIT * sizeof (double);
+  if (de == 1 || ne > de + ee)
+    ee = 0;
+  else
+    ee = (ee + de - ne) / GMP_LIMB_BITS + 1;
+
+  mpz_init (z);
+  mpz_mul_2exp (z, num, ee * GMP_LIMB_BITS);
+  mpz_tdiv_q (z, z, den);
+  ret = mpz_get_d (z);
+  mpz_clear (z);
+
+  B = 4.0 * (double) (GMP_LIMB_HIGHBIT >> 1);
+  for (B = 1 / B; ee != 0; --ee)
+    ret *= B;
+  return ret;
+}
+
 static double rational2double(SCM r)
 {
   SCM num = RATIONAL_NUM(r);
@@ -472,7 +506,7 @@ static double rational2double(SCM r)
 
   switch (convert(&num, &den)) {
     case tc_integer: return ((double) INT_VAL(num)) / ((double) INT_VAL(den));
-    case tc_bignum:  return scheme_bignum2double(num) / scheme_bignum2double(den);
+    case tc_bignum:  return bigrational2double(BIGNUM_VAL(num), BIGNUM_VAL(den));
     default:         STk_panic("bad rational ~S", r);
   }
   return 0.0; /* never reached */
