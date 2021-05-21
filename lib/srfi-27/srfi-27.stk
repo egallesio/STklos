@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 28-Apr-2021 02:01
-;;;; Last file update: 09-May-2021 22:43 (jpellegrini)
+;;;; Last file update: 21-May-2021 10:36 (eg)
 ;;;;
 
 (select-module SRFI-27)
@@ -88,8 +88,8 @@
               #:getter       %random-source-state-ref
               #:setter       %random-source-state-set!)))
 
-  
-  
+
+
 (define-generic make-random-source)
 (define-generic random-source-make-integers)
 (define-generic random-source-make-reals)
@@ -108,7 +108,7 @@
             ((cdr maker))
             (error "bad PRNG algorithm ~S" algo)))
       default-random-source)) ;; WRONG! Should make a new one
-      
+
 ;;;
 ;;; MERSENNE TWISTER
 ;;;
@@ -212,7 +212,7 @@
        (let ((q (quotient i K))
              (r (remainder i K)))
          (interleave-j q j (cons r lis)))))
- 
+
     (define (interleave-j i j lis)
       (if (zero? j)
           (if (zero? i) lis (interleave-i i 0 (cons 0 lis)))
@@ -256,6 +256,27 @@
 
 (select-module STklos)
 (import SRFI-27)
+
+#|
+<doc EXT random-integer
+ * (random-integer n)
+ *
+ * Return an integer in the range \[0, ..., |n|\[.  Subsequent results of
+ * this procedure appear to be independent uniformly distributed over
+ * the range \[0, ..., |n|\[. The argument |n| must be a positive integer,
+ * otherwise an error is signaled. This function is equivalent to the eponym
+ * function of SRFI-27 (see ,(link-srfi 27) definition for more details).
+doc>
+
+<doc EXT random-real
+ * (random-real)
+ *
+ * Return a real number |r| such that |0 < r < 1|.
+ * Subsequent results of this procedure appear to be independent uniformly
+ * distributed. This function is equivalent to the eponym
+ * function of SRFI-27 (see ,(link-srfi 27) definition for more details).
+doc>
+|#
 
 ;; These two procedures were broken due to autoloads, so we force their definition here
 (define (random-integer n) ((in-module SRFI-27 %random-integer-from-source-mt)
