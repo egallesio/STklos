@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update:  8-Apr-2021 18:45 (eg)
+;;;; Last file update: 21-May-2021 15:20 (eg)
 ;;;;
 
 
@@ -247,7 +247,7 @@
     ;; 205  POSIX Terminal Fundamentals (draft)
     ;; 206  Auxiliary Syntax Keywords
     (207  "String-notated bytevectors" () "srfi-207")
-    ;; 208  NaN procedures
+    (208  "NaN procedures")
     ;; 209  Enumerations and Enum Sets
     ;; 210  Procedures and Syntax for Multiple Values
     ;; 211  Namespaces for Scheme Macro Systems (draft)

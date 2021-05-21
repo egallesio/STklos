@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  7-May-2021 17:09 (eg)
+;;;; Last file update: 21-May-2021 18:17 (eg)
 ;;;;
 
 
@@ -2200,6 +2200,27 @@ doc>
     (and (not (equal? file ""))
          (string-append (dirname file) "/"))))
 
+
+;; ----------------------------------------------------------------------
+;;  SRFI-208: "NaN procedures"
+;; ----------------------------------------------------------------------
+#|
+<doc EXT make-nan
+ * (make-nan negative? quiet? payload)
+ * (make-nan negative? quiet? payload float)
+ *
+ * Returns a NaN whose sign bit is equal to |negative?|  (#t for negative,
+ * #f for positive), whose quiet bit is equal to quiet? (#t for quiet,
+ * #f for signaling), and whose payload is the positive exact integer payload.
+ * It is an error if payload is larger than a NaN can hold.
+ *
+ * The optional parameter |float|, is never used in ,(stklos).
+ * 
+ * This function is defined in ,(quick-link-srfi 208).
+doc>
+|#
+(define (make-nan negative? quiet? payload :optional float)
+  (%make-nan negative? quiet? payload))
 
 
 ;; ----------------------------------------------------------------------

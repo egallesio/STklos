@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 21-May-2021 09:51 (eg)
+ * Last file update: 21-May-2021 18:15 (eg)
  */
 
 
@@ -81,7 +81,8 @@ struct bignum_obj {
 
 #define MINUS_INF "-inf.0"
 #define PLUS_INF  "+inf.0"
-#define NaN       "nan.0"
+#define MINUS_NaN "-nan.0"
+#define PLUS_NaN  "+nan.0"
 
 
 /* Special IEEE values */
@@ -153,6 +154,36 @@ static void error_divide_by_0(SCM n)
 static void error_incorrect_radix(SCM r)
 {
   STk_error("base must be 2, 8, 10 or 16. It was ~S", r);
+}
+
+union binary64 {
+  uint64_t u;
+  double   d;
+};
+
+static const uint64_t sign_mask    = (uint64_t) 1 << 63;
+static const uint64_t quiet_mask   = (uint64_t) 1 << 51;
+static const uint64_t payload_mask = ((uint64_t) 1 << 50) - 1;
+
+static double make_nan(int neg, int quiet, unsigned long pay)
+{
+  union binary64 t;
+
+  /* Beware:
+   *   quiet NAN is       0x7ff8000000000000
+   *   signaling NaN is   0x7ffZxxxxxxxxxxxx   where Z is 0xxx (bit 51 is 0)
+   * BUT
+   *   +inf.0          is 0x7ff0000000000000
+   * Consequently, clearing bit 51 is not sufficient (if the payload is 0, a
+   * signaling dille be seen as a positive infinity.
+   * So, to make a signaling NaN, we clear the bit 51 and set the bit 50
+   * ==> the payload can use only 50 bits
+   */
+  t.u = (quiet)? 0x7ff8000000000000U : 0x7ff4000000000000U;
+  if (neg)   t.u |= sign_mask;
+  t.u |= pay;
+
+  return t.d;
 }
 
 
@@ -1129,7 +1160,8 @@ SCM STk_Cstr2number(char *str, long base)
       /* Treat special values "+inf.0" -inf.0 and "NaN" as well as +i and -i */
       if (strcmp(str, MINUS_INF)==0) return double2real(minus_inf);
       if (strcmp(str, PLUS_INF)==0)  return double2real(plus_inf);
-      if (strcmp(str+1, NaN)==0)     return double2real(STk_NaN);
+      if (strcmp(str, MINUS_NaN)==0) return double2real(make_nan(1,0,0));
+      if (strcmp(str, PLUS_NaN)==0)  return double2real(make_nan(0,0,0));
       if (strcmp(str, "+i")==0)      return make_complex(MAKE_INT(0), MAKE_INT(+1UL));
       if (strcmp(str, "-i")==0)      return make_complex(MAKE_INT(0), MAKE_INT(-1UL));
     }
@@ -3138,7 +3170,90 @@ static void deallocate_function(void * ptr, size_t _UNUSED(sz))
   STk_free(ptr);
 }
 
+/*
+ * SRFI 28: NaN procedures
+ */
 
+static void verify_NaN(SCM n) {
+  if ((TYPEOF(n) != tc_real) || !isnan(REAL_VAL(n)))
+    STk_error("bad NaN value: ~S", n);
+}
+
+
+
+DEFINE_PRIMITIVE("%make-nan", make_nan, subr3, (SCM neg, SCM quiet, SCM payload)) {
+  if (!INTP(payload) || ((uint64_t) INT_VAL(payload) > payload_mask))
+    STk_error("bad payload ~S", payload);
+  return double2real(make_nan(neg != STk_false,
+                              quiet != STk_false,
+                              INT_VAL(payload)));
+}
+
+
+/*
+<doc EXT nan-negative?
+ * (nan-negative? nan)
+ *
+ * returns #t if the sign bit of |nan| is set and #f otherwise.
+doc>
+*/
+DEFINE_PRIMITIVE("nan-negative?", nan_negativep, subr1, (SCM nan)) {
+  union binary64 tmp;
+
+  verify_NaN(nan);
+  tmp.d = REAL_VAL(nan);
+  return MAKE_BOOLEAN((tmp.u & sign_mask) != 0);
+}
+
+
+/*
+<doc EXT nan-quiet?
+ * (nan-quiet? nan)
+ *
+ * returns #t  if |nan| is a quiet NaN.
+doc>
+*/
+DEFINE_PRIMITIVE("nan-quiet?", nan_quietp, subr1, (SCM nan)) {
+  union binary64 tmp;
+
+  verify_NaN(nan);
+  tmp.d = REAL_VAL(nan);
+  return MAKE_BOOLEAN((tmp.u & quiet_mask)!= 0);
+}
+
+
+/*
+<doc EXT nan-payload
+ * (nan-payload nan)
+ *
+ * returns  the payload bits of |nan| as a positive exact integer.
+doc>
+*/
+DEFINE_PRIMITIVE("nan-payload", nan_payload, subr1, (SCM nan)) {
+  union binary64 tmp;
+
+  verify_NaN(nan);
+  tmp.d = REAL_VAL(nan);
+  return MAKE_INT(tmp.u & payload_mask);
+}
+
+
+/*
+<doc EXT nan=?
+ * (nan=? nan1 nan2)
+ *
+ * Returns #t if |nan1| and |nan2| have the same sign, quiet bit,
+ * and payload; and #f otherwise.
+*/
+DEFINE_PRIMITIVE("nan=?", nan_equalp, subr2, (SCM n1, SCM n2)) {
+  union binary64 tmp1, tmp2;
+
+  verify_NaN(n1);
+  verify_NaN(n2);
+  tmp1.d = REAL_VAL(n1);
+  tmp2.d = REAL_VAL(n2);
+  return MAKE_BOOLEAN(tmp1.u ==tmp2.u);
+}
 
 /*
  *
@@ -3147,22 +3262,16 @@ static void deallocate_function(void * ptr, size_t _UNUSED(sz))
  */
 int STk_init_number(void)
 {
-#if defined(__linux__) && defined(__alpha__)
-  static union {
-    unsigned char a[4];
-    float f;
-  } union_nan = { 0, 0, 0xc0, 0x7f};
-
-  plus_inf  = HUGE_VAL;
-  minus_inf = -HUGE_VAL;
-  STk_NaN   = (double) union_nan.f;
-  /* Deactivate signals on floating point exception which are armed by default */
-  signal(SIGFPE, SIG_IGN);
-#else
+  /* For systems without these constants, we can do:
   plus_inf  = 1.0 / 0.0;
   minus_inf = -plus_inf;
-  STk_NaN   = strtod("NAN", NULL);  
-#endif
+  STk_NaN   = strtod("NAN", NULL);
+  */
+
+  /* initialize  special IEEE 754 values */
+  plus_inf  = HUGE_VAL;
+  minus_inf = -HUGE_VAL;
+  STk_NaN   =  strtod("NAN", NULL);
 
   /* Force the LC_NUMERIC locale to "C", since Scheme definition
      imposes that decimal numbers use a '.'
@@ -3263,6 +3372,13 @@ int STk_init_number(void)
   ADD_PRIMITIVE(string2number);
 
   ADD_PRIMITIVE(decode_float);
+
+  /* SRFI 208: NaN procedures */
+  ADD_PRIMITIVE(make_nan);
+  ADD_PRIMITIVE(nan_negativep);
+  ADD_PRIMITIVE(nan_quietp);
+  ADD_PRIMITIVE(nan_payload);
+  ADD_PRIMITIVE(nan_equalp);
 
   /* Add parameter for float numbers precision */
   STk_make_C_parameter("real-precision",
