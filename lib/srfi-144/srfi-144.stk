@@ -37,12 +37,15 @@
 ;;; ARITHMETIC -- DONE
 ;;;
 
-;; From Gauche:
 (define (flnumerator x)
-  (if (or (infinite? x) (nan? x) (zero? x))
-      x ; -0.0 is handled here
-      (exact->inexact (numerator (exact x)))))
+  (cond ((or (infinite? x) (nan? x) (zero? x))
+         x) ; -0.0 is handled here
+        ((let-values (( (i f) (flinteger-fraction x))) (zero? f))
+         x)
+        (else
+         (exact->inexact (numerator (exact x))))))
 
+;; From Gauche:
 (define (fldenominator x)
   (cond ((or (infinite? x) (zero? x)) 1.0)
         ((nan? x) x)
