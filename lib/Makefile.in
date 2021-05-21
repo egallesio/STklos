@@ -260,6 +260,7 @@ DLLIBS = @DLLIBS@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
+EGREP = @EGREP@
 EXECDIR = @EXECDIR@
 EXEEXT = @EXEEXT@
 EXTRA_COMP_FLAGS = @EXTRA_COMP_FLAGS@
@@ -272,6 +273,7 @@ GCLIB = @GCLIB@
 GMP = @GMP@
 GMPINC = @GMPINC@
 GMPLIB = @GMPLIB@
+GREP = @GREP@
 HAVE_DLOPEN = @HAVE_DLOPEN@
 HAVE_GNOME = @HAVE_GNOME@
 INSTALL = @INSTALL@
@@ -374,7 +376,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
-		  srfi-25 srfi-27 srfi-133 srfi-170 srfi-175
+		  srfi-25 srfi-27 srfi-133 srfi-144 srfi-170 srfi-175
 
 STKLOS_FLAGS = --no-init-file --case-sensitive
 scheme_BOOT = assembler.stk \
