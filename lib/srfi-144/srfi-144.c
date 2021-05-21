@@ -415,7 +415,7 @@ DEFINE_PRIMITIVE("fleven?",srfi_144_flevenp,subr1,(SCM x))
 DEFINE_PRIMITIVE("flfinite?",srfi_144_flfinitep,subr1,(SCM x))
 {
     ensure_fl(x);
-    return FP_INFINITE != fpclassify(REAL_VAL(x)) ? STk_true : STk_false;
+    return (!isinf(REAL_VAL(x)) && !isnan(REAL_VAL(x))) ? STk_true : STk_false;
 }
         
 DEFINE_PRIMITIVE("flinfinite?",srfi_144_flinfinitep,subr1,(SCM x))
