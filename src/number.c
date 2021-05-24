@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 21-May-2021 18:25 (eg)
+ * Last file update: 24-May-2021 17:49 (eg)
  */
 
 
@@ -2743,20 +2743,21 @@ doc>
 
 static Inline SCM exact_expt(SCM x, SCM y)
 {
-  SCM nx, ny, res = MAKE_INT(1);
+  mpz_t v;
 
   if (zerop(y)) return MAKE_INT(1);
   if (zerop(x) || (x == MAKE_INT(1))) return x;
 
-  while (y != MAKE_INT(1)) {
-    nx = mul2(x, x);
-    ny = STk_quotient(y, MAKE_INT(2));
-    if (STk_evenp(y) == STk_false) res = mul2(x, res);
-    x = nx;
-    y = ny;
-  }
+  if (TYPEOF(y) == tc_bignum)
+    STk_error("exponent too big: ~S", y);
 
-  return mul2(res, x);
+  mpz_init(v);
+  if (TYPEOF(x) == tc_integer)
+    mpz_ui_pow_ui(v, INT_VAL(x), INT_VAL(y));
+  else
+    mpz_pow_ui(v, BIGNUM_VAL(x), INT_VAL(y));
+
+  return bignum2number(v);
 }
 
 static SCM my_expt(SCM x, SCM y)
