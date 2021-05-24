@@ -2,7 +2,7 @@
  *
  * s i g n a l . c          -- Signal handling
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 10-Oct-1995 07:55
- * Last file update:  2-Jun-2020 12:26 (eg)
+ * Last file update: 24-May-2021 18:07 (eg)
  *
  */
 
@@ -137,6 +137,13 @@ static void sighup(int _UNUSED(i))
   STk_exit(0);
 }
 
+static void sigabort(int _UNUSED(i))
+{
+  /* GMP uses abort() whan it detects problems (mainly number too try).  Try
+   * to trap SIGABRT signals, hoping that next GC will recoverthe memory used
+   */
+  STk_signal("*** SIGABRT signal trapped ***\n");
+}
 
 int STk_get_signal_value(SCM sig)
 {
@@ -170,6 +177,12 @@ DEFINE_PRIMITIVE("%initialize-signals", initialize_signals, subr0, (void))
   sigact.sa_handler = sigint;
   sigact.sa_flags   = 0;
   sigaction(SIGINT, &sigact, NULL);
+
+  /* ====  SIGABRT  handler */
+  sigfillset(&(sigact.sa_mask));
+  sigact.sa_handler = sigabort;
+  sigact.sa_flags   = 0;
+  sigaction(SIGABRT, &sigact, NULL);
 
   /* ====  SIGHUP  handler */
   sigfillset(&(sigact.sa_mask));
