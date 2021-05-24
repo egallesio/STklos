@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 10-Oct-1995 07:55
- * Last file update: 24-May-2021 18:07 (eg)
+ * Last file update: 24-May-2021 19:44 (eg)
  *
  */
 
@@ -142,7 +142,7 @@ static void sigabort(int _UNUSED(i))
   /* GMP uses abort() whan it detects problems (mainly number too try).  Try
    * to trap SIGABRT signals, hoping that next GC will recoverthe memory used
    */
-  STk_signal("*** SIGABRT signal trapped ***\n");
+  STk_error("Received a SIGABRT signal.");
 }
 
 int STk_get_signal_value(SCM sig)
