@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 18-May-2021 15:56 (eg)
+# Last file update: 25-May-2021 18:47 (eg)
 
 SRFI=srfi-27
 
@@ -41,7 +41,7 @@ BASEDIR= ../..
 SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 
 .stk-incl.c:
-	$(COMP) -o $*-incl.c $*.stk
+	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
 	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \

@@ -22,36 +22,45 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  1-Jan-2002 18:57 (eg)
-# Last file update: 12-May-2021 10:31 (eg)
+# Last file update: 25-May-2021 18:43 (eg)
 #
 
 # This script is only used to compile the different components of the
 # system which need compilation. It will not be installed since the
 # user version is the stklos-compile script.
 
-out=a.out
+out="a.out"
+in=""
 Copt=""
+
+for arg in $*
+do
+    case $1 in
+        -o)
+            out=$2
+            shift 2
+            ;;
+        -C)
+            Copt=--C-code
+            shift
+            ;;
+        -*)
+            echo "Unknown option $1"
+            exit 1
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
 
 case $# in
     1) in=$1
        ;;
-    3) if [ "$1" = "-o" ] ;then
-           in=$3
-           out=$2
-           case $out in
-               *.c) Copt=-C;;
-               *)
-           esac
-       else
-           echo "$0 accepts only -o option"
-           exit 1
-       fi
-       ;;
-    *) echo "Usage: $0 [ -o bytecode-file ] src"
+    *) echo "Usage: $0 [-C] [-o bytecode-file] src"
        exit 1
        ;;
 esac
-
 
 # Sep is now also ":"  on CYGWIN
 sep=":"
