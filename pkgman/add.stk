@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Jan-2007 16:59 (eg)
-;;;; Last file update:  2-Apr-2021 15:27 (eg)
+;;;; Last file update: 25-May-2021 17:54 (eg)
 ;;;;
 
 
@@ -37,7 +37,7 @@
      (when (negative? (version-number->integer version #f))
        (die (format "Bad version number for pkgball ~S" pkgball)))
 
-     (let ((dirname  (string-append (create-temp-file) ".dir"))) ;; FIXME:
+     (let ((dirname (create-temp-directory)))
        ;; Untar the given pkgball
        (make-directory dirname)
        (untar pkgball dirname)

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update:  2-Apr-2021 15:30 (eg)
+;;;; Last file update: 25-May-2021 17:56 (eg)
 ;;;;
 
 (include "../lib/http.stk")
@@ -205,10 +205,10 @@
                                        (stklos-pkg-extract-dir)))
           ((test)
              (exit (find-extract-and-test-package (cadar actions)
-                                                  (create-temp-file))))
+                                                  (create-temp-directory))))
           ((install)
              (exit (find-extract-and-install-package (cadar actions)
-                                                     (create-temp-file))))
+                                                     (create-temp-directory))))
           ((download)
              (download-package-only (cadar actions))
              (exit 0))
