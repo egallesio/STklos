@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  2-Apr-2021 16:53 (eg)
+ * Last file update: 25-May-2021 17:44 (eg)
  */
 
 #include <unistd.h>
@@ -443,7 +443,7 @@ DEFINE_PRIMITIVE("chdir", chdir, subr1, (SCM s))
  * Create a directory with name |dir|. If |permissions| is omitted, it
  * defaults to #o775 (masked by the current umask).
  * ,(linebreak)
- * This function is also defined in ,(link-srfi 170). The old name 
+ * This function is also defined in ,(link-srfi 170). The old name
  * |make-directory| is deprecated.
 doc>
 */
@@ -784,7 +784,7 @@ DEFINE_PRIMITIVE("copy-file", copy_file, subr2, (SCM filename1, SCM filename2))
  *   (let ((msg (format "Name: ~s\n" name)))
  *     (display msg)
  *     (display msg port)
- *     (close-port port)))     => prints the name of the temp. file on the 
+ *     (close-port port)))     => prints the name of the temp. file on the
  *                                current output port and in the file itself.
  * @end lisp
  *
@@ -794,20 +794,26 @@ DEFINE_PRIMITIVE("copy-file", copy_file, subr2, (SCM filename1, SCM filename2))
  * |temporary-file-name| is another name for this function.
 doc>
 */
-DEFINE_PRIMITIVE("create-temp-file", create_tmp_file, subr01, (SCM arg))
+
+static void initialize_temp_template(char *buffer, SCM arg)
 {
-  char buffer[MAX_PATH_LENGTH];
   SCM prefix = temp_file_prefix;
-  SCM port, res[2];
-  int fd;
 
   if (arg){
     if (!STRINGP(arg)) error_bad_string(arg);
     prefix = arg;
   }
-
   snprintf(buffer, MAX_PATH_LENGTH, "%sXXXXXX", STRING_CHARS(prefix));
+}
 
+
+DEFINE_PRIMITIVE("create-temp-file", create_tmp_file, subr01, (SCM arg))
+{
+  char buffer[MAX_PATH_LENGTH];
+  SCM port, res[2];
+  int fd;
+
+  initialize_temp_template(buffer, arg);
   fd = mkstemp(buffer);
   if (fd<0) STk_error_posix(errno,"", arg, NULL);
 
@@ -821,6 +827,28 @@ DEFINE_PRIMITIVE("create-temp-file", create_tmp_file, subr01, (SCM arg))
   res[0]= port;
   res[1]= STk_Cstring2string(buffer);
   return STk_values(2, res +1);
+}
+
+/*
+<doc EXT create-temp-directory
+ * (create-temp-directory)
+ * (create-temp-directory prefix)
+ *
+ * Creates a new temporary directory and returns its name as a string.
+ * The optional argument specifies the filename prefix to use, and
+ * defaults to the result of invoking |temp-file-prefix|.
+doc>
+*/
+DEFINE_PRIMITIVE("create-temp-directory", create_tmp_dir, subr01, (SCM arg))
+{
+  char buffer[MAX_PATH_LENGTH];
+  char *dir;
+
+  initialize_temp_template(buffer, arg);
+  if ((dir = mkdtemp(buffer)) == NULL) {
+    STk_error_posix(errno,"", arg, NULL);
+  }
+  return STk_Cstring2string(dir);
 }
 
 
@@ -1518,6 +1546,7 @@ int STk_init_system(void)
   ADD_PRIMITIVE(rename_file);
   ADD_PRIMITIVE(copy_file);
   ADD_PRIMITIVE(create_tmp_file);
+  ADD_PRIMITIVE(create_tmp_dir);
   ADD_PRIMITIVE(pre_exit);
   ADD_PRIMITIVE(exit);
   ADD_PRIMITIVE(emergency_exit);
