@@ -163,7 +163,7 @@
      (("no-time" :help "Don't display compilation time")
         (compiler:time-display #f))
      (("help" :alternate "h" :help "This help")
-        (arg-usage (current-error-port))
+        (arg-usage (current-output-port))
         (exit 0))
 
      (else
