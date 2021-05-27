@@ -173,7 +173,7 @@
     ;; 132  Sort Libraries
     (133  "Vector Library (R7RS-compatible)" (vector) "srfi-133")
     (134  "Immutable Deques" (immutable-deques) "srfi-134")
-    (135  "Immutable Texts" (immuttable-texts) "srfi-135")
+    (135  "Immutable Texts" (immutable-texts) "srfi-135")
     ;; 136  Extensible record types
     (137 "Minimal Unique Types" () "srfi-137")
     ;; 138  Compiling Scheme programs to executables
