@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 22-Dec-2006 11:32 (eg)
-;;;; Last file update: 25-May-2021 17:56 (eg)
+;;;; Last file update: 27-May-2021 09:28 (eg)
 ;;;;
 
 (include "../lib/http.stk")
@@ -98,13 +98,13 @@
        (("system-wide" :alternate "S" :help "do a system wide (de)installation")
         (stklos-pkg-swide #t))
        (("version" :alternate "V" :help "print the version and exit")
-        (eprintf "stklos-pkg shipped with STklos (version ~A)\n" (version))
+        (printf "stklos-pkg shipped with STklos (version ~A)\n" (version))
         (exit 0))
        (("help" :alternate "h" :help "display this help")
-        (arg-usage (current-error-port))
+        (arg-usage (current-output-port))
         (exit 0))
        (("options" :help "display program options")
-        (arg-usage (current-error-port) #t)
+        (arg-usage (current-output-port) #t)
         (exit 0))
        (("cp" :help "INTERNAL USE ONLY. Do not use this option")
         (set! cp #t))
