@@ -88,15 +88,17 @@ static struct option long_options [] =
   {NULL,                0,                 NULL, 0  }     /* for Clang */
 };
 
-static void Usage(int only_version)
+static void SimpleVersion(void)
 {
-  fprintf(stdout, "stklos %s\n", VERSION);
-  if (only_version) {
-    fprintf(stdout, "For more information, use the -V option.\n");
-    return;
-  }
-  fprintf(stdout, "Usage: stklos [option ...] [--] [arg ... ]");
-  fprintf(stdout, "\n"
+  printf("stklos %s\n", VERSION);
+  printf("For more information, use the -V option.\n");
+}
+
+static void Usage(FILE *stream)
+{
+  fprintf(stream, "stklos %s\n", VERSION);
+  fprintf(stream, "Usage: stklos [option ...] [--] [arg ... ]");
+  fprintf(stream, "\n"
 "Possible options:\n"
 "   -l file, --load=file        load 'file' before going interactive\n"
 "   -f file, --file=file        use 'file' as program\n"
@@ -132,7 +134,7 @@ static int process_program_arguments(int argc, char *argv[])
     if (c == -1) break;
 
     switch (c) {
-      case 'v': Usage(1); exit(0);
+      case 'v': SimpleVersion(); exit(0);
       case 'V': srfi_176        = 1;                                    break;
       case 'I': Idirs = STk_cons(STk_Cstring2string(optarg), Idirs);    break;
       case 'A': Adirs = STk_cons(STk_Cstring2string(optarg), Adirs);    break;
@@ -150,10 +152,11 @@ static int process_program_arguments(int argc, char *argv[])
       case 'c': STk_read_case_sensitive = 1;                            break;
       case 'z': STk_read_case_sensitive = 0;                            break;
       case 'u': STk_use_utf8    = strspn(optarg, "yY1");                break;
+      case 'h': Usage(stdout); exit(0);
       case '?': /* message error is printed by getopt */
                 fprintf(stderr, "Try `%s --help' for more information\n", *argv);
                 exit(1);
-      default:  Usage(0); exit(c != 'h');
+      default:  Usage(stderr); exit(1);
     }
   }
   return optind;
