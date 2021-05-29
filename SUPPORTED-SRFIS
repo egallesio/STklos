@@ -110,4 +110,5 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-216: SICP Prerequisites (Portable)
     - SRFI-217: Integer Sets
     - SRFI-219: Define higher-order lambda
+    - SRFI-221: Generator/accumulator sub-library
     - SRFI-223: Generalized binary search procedures
