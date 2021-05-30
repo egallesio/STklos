@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 18-Jan-2007 16:59 (eg)
-;;;; Last file update: 25-May-2021 17:54 (eg)
+;;;; Last file update: 28-May-2021 15:29 (eg)
 ;;;;
 
 
@@ -39,7 +39,6 @@
 
      (let ((dirname (create-temp-directory)))
        ;; Untar the given pkgball
-       (make-directory dirname)
        (untar pkgball dirname)
 
        ;; Adding a package or a tuning?
