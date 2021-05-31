@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update: 15-May-2021 10:53 (eg)
+ * Last file update: 31-May-2021 12:34 (eg)
  */
 
 #include "stklos.h"
@@ -1642,3 +1642,5 @@ MODULE_ENTRY_START("srfi-25")
   STk_execute_C_bytecode(__module_consts, __module_code);
 }
 MODULE_ENTRY_END
+
+DEFINE_MODULE_INFO

@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Jan-2021 11:54
- * Last file update: 12-May-2021 11:04 (eg)
+ * Last file update: 31-May-2021 17:08 (eg)
  */
 
 #include <limits.h>
@@ -1037,3 +1037,5 @@ MODULE_ENTRY_START("srfi-170")
   STk_execute_C_bytecode(__module_consts, __module_code);
 }
 MODULE_ENTRY_END
+
+DEFINE_MODULE_INFO

@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Jul-2020 18:41
- * Last file update: 15-May-2021 09:10 (eg)
+ * Last file update: 31-May-2021 17:08 (eg)
  */
 
 #include <stklos.h>
@@ -448,3 +448,5 @@ MODULE_ENTRY_START("srfi-175")
   STk_execute_C_bytecode(__module_consts, __module_code);
 }
 MODULE_ENTRY_END
+
+DEFINE_MODULE_INFO

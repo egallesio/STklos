@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Mar-2021 12:14 (jpellegrini)
- * Last file update: 15-May-2021 09:29 (eg)
+ * Last file update: 31-May-2021 17:07 (eg)
  */
 
 
@@ -311,3 +311,5 @@ MODULE_ENTRY_START("srfi-133")
   STk_execute_C_bytecode(__module_consts, __module_code);
 }
 MODULE_ENTRY_END
+
+DEFINE_MODULE_INFO
