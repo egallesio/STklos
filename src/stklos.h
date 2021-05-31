@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 30-Apr-2021 14:17 (eg)
+ * Last file update: 31-May-2021 12:32 (eg)
  */
 
 
@@ -453,7 +453,12 @@ int STk_init_cpointer(void);
 
 #define MODULE_ENTRY_END        } }
 
-#define MODULE_ENTRY_INFO() SCM STk_module_info(void)
+#define MODULE_ENTRY_INFO() SCM STk_module_info(void)  /* old form */
+
+#define DEFINE_MODULE_INFO                                /* new form */ \
+  SCM STk_module_info(void) { return STk_read_from_C_string(__module_infos); }
+
+
 
 void *STk_find_external_function(char *path, char *fname, int error_if_absent);
 SCM STk_load_object_file(SCM f, char *fname);

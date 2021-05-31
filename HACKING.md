@@ -503,14 +503,19 @@ in the example in the `/etc` directory.
 In this C file, to use the previously compiled Scheme code, you have to
 
 * include the file `srfi-170-incl.c` at the top of your C file
+
 * add a call to execute the Scheme code just before the `MODULE_ENTRY_END`
   directive. This is done with the following invocation:
 
-```c
-    STk_execute_C_bytecode(__module_consts, __module_code);
-```
+    ```c
+        STk_execute_C_bytecode(__module_consts, __module_code);
+    ```
 
-
+* Add a directive `DEFINE_MODULE_INFO` at the end of the file. It permits to
+  access some information of the module (STklos version used to compile the
+  module, exported symbols, ...). For now, this information is not used, but
+  omitting to add this directive will probably lead to a compiler warning
+  about an unresolved reference.
 
 
 ## The virtual machine
