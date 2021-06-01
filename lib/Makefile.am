@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 15-May-2021 16:15 (eg)
+# Last file update:  1-Jun-2021 17:01 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
 		  srfi-25 srfi-27 srfi-133 srfi-170 srfi-175
@@ -251,8 +251,8 @@ generate-git-info:
 	@(cd ../src; ../utils/generate-git-info && $(MAKE) all)
 
 install-exec-hook:
-	install -d $(DESTDIR)$(schemelibdir)
-	install $(scheme_SOLIBS) $(DESTDIR)$(schemelibdir)
+	mkdir -p $(DESTDIR)$(schemelibdir)
+	install $(scheme_SOLIBS) $(scheme_OBJS) $(DESTDIR)$(schemelibdir)
 
 ../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \
