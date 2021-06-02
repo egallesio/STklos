@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 15-May-2021 16:16 (eg)
+# Last file update:  1-Jun-2021 19:36 (eg)
 
 # Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
 # CFLAGS is used here
@@ -128,9 +128,6 @@ install-exec-hook:
 	mv $(DESTDIR)/$(bindir)/stklos $(DESTDIR)/$(bindir)/stklos-@VERSION@
 	ln -s stklos-@VERSION@ $(DESTDIR)/$(bindir)/stklos
 
-uninstall-hook:
-	rm -f $(DESTDIR)/$(bindir)/stklos-@VERSION@
-
 
 doc:  $(DOCDB)
 
@@ -142,6 +139,14 @@ clean-am:
 
 distclean: clean
 	/bin/rm -f boot.keep Makefile extraconf.h stklos stamp-h1 stklosconf.h
+
+
+uninstall-hook:
+	rm -f $(DESTDIR)/$(bindir)/stklos-@VERSION@
+	rmdir $(extraincdir) || true
+
+
+
 
 # Local Variables:
 # tab-width: 8
