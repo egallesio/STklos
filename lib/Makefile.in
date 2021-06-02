@@ -36,7 +36,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  1-Jun-2021 17:01 (eg)
+# Last file update:  2-Jun-2021 11:34 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -176,8 +176,8 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(schemedir)"
-DATA = $(noinst_DATA) $(scheme_DATA)
+am__installdirs = "$(DESTDIR)$(schemedir)" "$(DESTDIR)$(schemelibdir)"
+DATA = $(scheme_DATA) $(schemelib_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -403,7 +403,7 @@ scheme_BOOT = assembler.stk \
           repl.stk          \
           repl-readline.stk \
           runtime.stk       \
-		  srfis-data.scm    \
+          srfis-data.scm    \
           srfi-0.stk        \
           str.stk           \
           struct.stk        \
@@ -460,7 +460,7 @@ SRC_STK = bigloo-support.stk  \
           srfi-100.stk        \
           srfi-113.stk        \
           srfi-117.stk        \
-	  srfi-127.stk        \
+          srfi-127.stk        \
           srfi-128.stk        \
           srfi-129.stk        \
           srfi-130.stk        \
@@ -505,7 +505,7 @@ scheme_OBJS = compfile.ostk     \
           srfi-1.ostk           \
           srfi-2.ostk           \
           srfi-4.ostk           \
-          srfi-5.ostk	        \
+          srfi-5.ostk           \
           srfi-7.ostk           \
           srfi-9.ostk           \
           srfi-11.ostk          \
@@ -568,7 +568,7 @@ BASEDIR = ..
 schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir = $(prefix)/lib/@PACKAGE@/@VERSION@
 scheme_DATA = $(scheme_extra) $(scheme_OBJS)
-noinst_DATA = $(scheme_SOLIBS)
+schemelib_DATA = $(scheme_SOLIBS)
 scheme_sources = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 SUFFIXES = .stk .ostk .scm .c
@@ -626,6 +626,27 @@ uninstall-schemeDATA:
 	@list='$(scheme_DATA)'; test -n "$(schemedir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(schemedir)'; $(am__uninstall_files_from_dir)
+install-schemelibDATA: $(schemelib_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(schemelib_DATA)'; test -n "$(schemelibdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(schemelibdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(schemelibdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(schemelibdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(schemelibdir)" || exit $$?; \
+	done
+
+uninstall-schemelibDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(schemelib_DATA)'; test -n "$(schemelibdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(schemelibdir)'; $(am__uninstall_files_from_dir)
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run 'make' without going through this Makefile.
@@ -789,7 +810,7 @@ check: check-recursive
 all-am: Makefile $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(schemedir)"; do \
+	for dir in "$(DESTDIR)$(schemedir)" "$(DESTDIR)$(schemelibdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -838,15 +859,14 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-schemeDATA
+install-data-am: install-schemeDATA install-schemelibDATA
 
 install-dvi: install-dvi-recursive
 
 install-dvi-am:
 
 install-exec-am:
-	@$(NORMAL_INSTALL)
-	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
+
 install-html: install-html-recursive
 
 install-html-am:
@@ -883,23 +903,24 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-schemeDATA
-
-.MAKE: $(am__recursive_targets) install-am install-exec-am \
-	install-strip
+uninstall-am: uninstall-schemeDATA uninstall-schemelibDATA
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
+.MAKE: $(am__recursive_targets) install-am install-strip uninstall-am
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am check \
 	check-am clean clean-generic cscopelist-am ctags ctags-am \
 	distclean distclean-generic distclean-tags distdir dvi dvi-am \
 	html html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-exec-hook install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-schemeDATA \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags \
-	tags-am uninstall uninstall-am uninstall-schemeDATA
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-schemeDATA \
+	install-schemelibDATA install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-hook uninstall-schemeDATA uninstall-schemelibDATA
 
 .PRECIOUS: Makefile
 
@@ -927,9 +948,9 @@ boot:	../src/boot.img
 generate-git-info:
 	@(cd ../src; ../utils/generate-git-info && $(MAKE) all)
 
-install-exec-hook:
-	mkdir -p $(DESTDIR)$(schemelibdir)
-	install $(scheme_SOLIBS) $(scheme_OBJS) $(DESTDIR)$(schemelibdir)
+#install-exec-hook:
+#	mkdir -p $(DESTDIR)$(schemelibdir)
+#	install $(scheme_SOLIBS) $(DESTDIR)$(schemelibdir)
 
 ../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \
@@ -1016,6 +1037,10 @@ distclean: clean
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) distclean)\
 	done
+
+uninstall-hook:
+	(cd $(schemedir) && rm -f $(DOCDB) $(scheme_sources))
+	rmdir $(schemedir) $(schemelibdir) || true
 
 # Local Variables:
 # tab-width: 4
