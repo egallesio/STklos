@@ -1,7 +1,7 @@
 /*
  * mutex-pthreads.c     -- Pthread Mutexes in Scheme
  *
- * Copyright © 2006-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update:  2-Jun-2020 12:49 (eg)
+ * Last file update:  4-Jun-2021 10:39 (eg)
  */
 
 #include <unistd.h>
@@ -49,9 +49,7 @@ void STk_make_sys_mutex(SCM z)
   pthread_mutex_init(&MUTEX_MYMUTEX(z), NULL);
   pthread_cond_init(&MUTEX_MYCONDV(z), NULL);
 
-#ifdef THREAD_FINALIZER_ISSUE
-   STk_register_finalizer(z, mutex_finalizer);
-#endif
+  STk_register_finalizer(z, (void (*)()) mutex_finalizer);
 }
 
 /*
@@ -149,7 +147,7 @@ DEFINE_PRIMITIVE("%mutex-lock!", mutex_lock, subr3, (SCM mtx, SCM tm, SCM thread
     ts.tv_nsec = (suseconds_t) ((tmd - ts.tv_sec) * 1000000);
   }
 
-  pthread_cleanup_push((void (*)(void*))mutex_finalizer, mtx);
+  pthread_cleanup_push((void (*)()) mutex_finalizer, mtx);
 
   if (pthread_mutex_lock(&MUTEX_MYMUTEX(mtx)) != 0)
     STk_error_deadlock();
@@ -219,7 +217,7 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
     ts.tv_nsec = (suseconds_t) ((tmd - ts.tv_sec) * 1000000000);
   }
 
-  pthread_cleanup_push((void (*)(void*))mutex_finalizer, mtx);
+  pthread_cleanup_push((void (*)()) mutex_finalizer, mtx);
 
   if (pthread_mutex_lock(&MUTEX_MYMUTEX(mtx)) != 0)
     STk_error_deadlock();
@@ -251,20 +249,16 @@ DEFINE_PRIMITIVE("%mutex-unlock!", mutex_unlock, subr3, (SCM mtx, SCM cv, SCM tm
  *
 \* ====================================================================== */
 
-#ifdef THREAD_FINALIZER_ISSUE
 static void condv_finalizer(SCM cv)
 {
   pthread_cond_destroy(&CONDV_MYCONDV(cv));
 }
-#endif
+
 
 void STk_make_sys_condv(SCM z)
 {
   pthread_cond_init(&CONDV_MYCONDV(z), NULL);
-
-#ifdef THREAD_FINALIZER_ISSUE
-  STk_register_finalizer(z, condv_finalizer);
-#endif
+  STk_register_finalizer(z, (void (*) ()) condv_finalizer);
 }
 
 

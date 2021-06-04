@@ -1,7 +1,7 @@
 /*
  * thread-pthreads.c                    -- Threads support in STklos
  *
- * Copyright © 2006-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 29-Jun-2020 16:12 (eg)
+ * Last file update:  4-Jun-2021 20:10 (eg)
  */
 
 
@@ -62,13 +62,11 @@ vm_thread_t *STk_get_current_vm(void)
 
 /* ====================================================================== */
 
-#ifdef THREAD_FINALIZER_ISSUE
-static void thread_finalizer(SCM thr)
+static void thread_finalizer(SCM thr, void _UNUSED(*clientdata))
 {
   pthread_mutex_destroy(&THREAD_MYMUTEX(thr));
   pthread_cond_destroy(&THREAD_MYCONDV(thr));
 }
-#endif
 
 static void terminate_scheme_thread(void *arg)
 {
@@ -112,29 +110,19 @@ void STk_do_make_sys_thread(SCM thr)
 {
   pthread_mutex_init(&THREAD_MYMUTEX(thr), NULL);
   pthread_cond_init(&THREAD_MYCONDV(thr), NULL);
-
-#ifdef THREAD_FINALIZER_ISSUE
-  /* now the finalizer */
-  STk_register_finalizer(thr, thread_gfinalizer);
-#endif
+  STk_register_finalizer(thr, thread_finalizer);
 }
-
-/* FIXME: This prototype should not lie here (but since we dont include gc.h
-   clang on MacOS Mojave issue a warning)  */
-extern int GC_pthread_create(pthread_t *, const pthread_attr_t *,
-                             void *(*)(void *), void *);
 
 void STk_sys_thread_start(SCM thr)
 {
   pthread_attr_t attr;
 
   pthread_attr_init(&attr);
-  pthread_attr_setdetachstate(&attr, TRUE);
+  // pthread_attr_setdetachstate(&attr, FALSE);   // Seems incorrect (EG: 2021-06-03)
 
   // pthread_mutex_lock(&THREAD_MYMUTEX(thr));
 
-  /* !!!!! Use the GC_pthread_create instead of pthread_create !!!!! */
-  if (GC_pthread_create(&THREAD_PTHREAD(thr), NULL, start_scheme_thread, thr))
+  if (pthread_create(&THREAD_PTHREAD(thr), NULL, start_scheme_thread, thr))
     STk_error("cannot start thread ~S", thr);
 
   pthread_attr_destroy(&attr);
@@ -196,10 +184,16 @@ DEFINE_PRIMITIVE("thread-terminate!", thread_terminate, subr1, (SCM thr))
       THREAD_EXCEPTION(thr) =
         STk_make_C_cond(STk_cond_thread_terminated, 1, thr);
     }
-    /* Terminate effectively the thread */
-    if (thr == STk_get_current_vm()->scheme_thread)
-      pthread_exit(0);                          /* Suicide */
-    else {
+    /* Terminate effectively the thread. */
+    if (thr == STk_get_current_vm()->scheme_thread) {
+#ifdef HAVE_PTHREAD_CANCEL
+      pthread_cancel(THREAD_PTHREAD(thr));    /* suicide don't use pthread_exit */
+#else
+      // We are probably on Android
+      //       pthread_exit should not work but it's seems OK on this platform
+      pthread_exit(NULL);
+#endif
+    } else {
       if (saved_state != th_new) {
 #ifdef HAVE_PTHREAD_CANCEL
         pthread_cancel(THREAD_PTHREAD(thr));    /* terminate another thread */
