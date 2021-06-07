@@ -92,7 +92,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-14.stk         \
           srfi-17.stk         \
           srfi-26.stk         \
-          srfi-27.stk         \
           srfi-29.stk         \
           srfi-31.stk         \
           srfi-35.stk         \
@@ -169,7 +168,6 @@ scheme_OBJS = compfile.ostk     \
           srfi-14.ostk          \
           srfi-17.ostk          \
           srfi-26.ostk          \
-          srfi-27.ostk          \
           srfi-29.ostk          \
           srfi-31.ostk          \
           srfi-35.ostk          \
