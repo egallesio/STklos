@@ -67,7 +67,7 @@
     (26 "Notation for Specializing Parameters without Currying" () "srfi-26")
     (27 "Source of random bits" (random) "srfi-27")
     (28 "Basic Format Strings")
-    ;;   29 Localization
+    (29 "Localization" () "srfi-29")
     (30 "Nested Multi-line Comments")
     (31 "A special form for recursive evaluation")
     ;;   32 ........ Withdrawn
