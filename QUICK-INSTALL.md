@@ -15,7 +15,7 @@ four) step process:
     - `--with-provided-bignum`: use the provided Bignum (GMPlite) library
     - `--with-provided-regexp`: use the provided Regexp (PCRE) library
     - `--with-provided-ffi:` use the provided FFI library
-    - `--without-control-fixnums`: do not verify that parameters of fx functions are correct fixnums
+    - `--without-control-fast-math`: do not verify that parameters of fx/fl functions are correct fixnums/flonums
     - `--enable-case-insensitive`: be case insensitive by default as in R5RS
     - `--enable-threads=TYPE`: choose threading package (value can be 'none' or 'pthreads', the default)
 
