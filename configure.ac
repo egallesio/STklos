@@ -430,10 +430,10 @@ AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
 
 
 # ----------------------------------------------------------------------
-# Control fixnum parameters
+# Control fixnum and flonum parameters
 # ----------------------------------------------------------------------
-AC_ARG_WITH(control-fixnums,
-       [  --with-control-fixnums  verify that fx functions are fixnums],
+AC_ARG_WITH(control-fast-math,
+       [  --with-control-fast-math  verify that arguments to fx and fl functions are fixnums and flonums],
        CONTROL_FX="$withval", CONTROL_FX="yes")
 
 if test "$CONTROL_FX" = "yes"
@@ -540,6 +540,7 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/srfi-25/Makefile
           lib/srfi-27/Makefile
           lib/srfi-133/Makefile
+          lib/srfi-144/Makefile
           lib/srfi-170/Makefile
           lib/srfi-175/Makefile
 ])
