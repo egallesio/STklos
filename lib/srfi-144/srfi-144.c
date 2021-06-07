@@ -204,7 +204,7 @@ DEFINE_PRIMITIVE("flnormalized-fraction-exponent", srfi_144_flnormalized_fractio
     double f;
     if (isinf(REAL_VAL(x))) {
         f = 0.5 * ( signbit(REAL_VAL(x)) ? -1 : 1);
-        e = 3 + round(log2 DBL_MAX);
+        e = 3 + round(log2(DBL_MAX));
     } else {
         f = frexp(REAL_VAL(x), &e);
     }
