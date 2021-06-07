@@ -1,0 +1,139 @@
+;;;;
+;;;; 29.stk         -- Tests for SRFI-29: Localization
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the  implementation of
+;;;; this SRFI by Scott G. Miller, it is copyrighted as:
+;;;;
+;;;;;; 
+;;;;;; Copyright (C) Scott G. Miller (2002). All Rights Reserved.
+;;;;;; 
+;;;;;; This document and translations of it may be copied and furnished to
+;;;;;; others, and derivative works that comment on or otherwise explain it
+;;;;;; or assist in its implementation may be prepared, copied, published and
+;;;;;; distributed, in whole or in part, without restriction of any kind,
+;;;;;; provided that the above copyright notice and this paragraph are
+;;;;;; included on all such copies and derivative works. However, this
+;;;;;; document itself may not be modified in any way, such as by removing
+;;;;;; the copyright notice or references to the Scheme Request For
+;;;;;; Implementation process or editors, except as needed for the purpose of
+;;;;;; developing SRFIs in which case the procedures for copyrights defined
+;;;;;; in the SRFI process must be followed, or as required to translate it
+;;;;;; into languages other than English.
+;;;;;; 
+;;;;;; The limited permissions granted above are perpetual and will not be
+;;;;;; revoked by the authors or their successors or assigns.
+;;;;;; 
+;;;;;; This document and the information contained herein is provided on
+;;;;;; an "AS IS" basis and THE AUTHOR AND THE SRFI EDITORS DISCLAIM ALL
+;;;;;; WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY
+;;;;;; WARRANTY THAT THE USE OF THE INFORMATION HEREIN WILL NOT INFRINGE ANY
+;;;;;; RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A
+;;;;;; PARTICULAR PURPOSE.
+;;;;;; 
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 07-Apr-2021 21:33
+;;;; Last file update: 07-Apr-2021 21:45 (jpellegrini)
+;;;;
+
+
+(test "srfi-29.1" #t (symbol? (current-language)))
+
+(let ((language (if (eq? (current-language) 'en) 'fr 'en)))
+  (parameterize ((current-language language))
+     (test "srfi-29.2" language (current-language))))
+
+(test "srfi-29.3" #t (symbol? (current-country)))
+
+(let ((country (if (eq? (current-country) 'us) 'ca 'us)))
+  (parameterize ((current-country country))
+    (test "srfi-29.4"  country (current-country))))
+
+(test "srfi-29.5" #t (list? (current-locale-details)))
+
+(let ((translations
+       '(((en) . ((time . "It's ~a, ~a.")
+                  (goodbye . "Goodbye, ~a.")))
+         ((fr) . (;(time . "~1@*~a, c'est ~a.")
+                  (time . "C'est ~a... ~a!")
+                  (goodbye . "Au revoir, ~a."))))))
+  (for-each (lambda (translation)
+              (let ((bundle-name (cons 'hello-program (car translation))))
+                (when (not (load-bundle! bundle-name))
+                  (declare-bundle! bundle-name (cdr translation))
+                  (store-bundle! bundle-name))))
+            translations))
+
+(current-language 'en)
+
+(test "srfi-29.6" #f (localized-template 'hello-program 'foobar))
+
+(define localized-message
+  (lambda (message-name . args)
+    (apply format (cons (localized-template 'hello-program message-name)
+                        args))))
+
+(let ((myname "Fred"))
+  (test "srfi-29.7.english"
+        '("It's 12:00, Fred." "Goodbye, Fred.")
+        (parameterize ((current-language 'en))
+          (list (localized-message 'time "12:00" myname)
+                (localized-message 'goodbye myname))))
+  
+  (test "srfi-29.7.french"
+        ;;'("Fred, c'est 12:00." "Au revoir, Fred.")
+        '("C'est 12:00... Fred!" "Au revoir, Fred.")
+        (parameterize ((current-language 'fr))
+          (list (localized-message 'time "12:00" myname)
+                (localized-message 'goodbye myname)))))
+
+
+(test "srfi-29 jp.format.1"
+      "zero 0 one -2 two -1"
+      (format "zero ~a one ~1@*~a two ~a" 0 -1 -2))
+
+(test "srfi-29 jp.format.2"
+      "zero 0 one -2 two -1 three -2 four -3"
+      (format "zero ~a one ~1@*~a two ~a three ~a four ~a" 0 -1 -2 -3 -4))
+
+(test "srfi-29 jp.format.3"
+      "one -1 two -3 three b 12 four -3"
+      (format "one ~a two ~2@*~a three ~? four ~a" -1 "~x ~d" '(11 12) -3))
+
+
+(test "srfi-29 jp.format.4"
+      "zero 0 one -1 two -1 three -2 four -3"
+      (format "zero ~a one ~a two ~-1@*~a three ~a four ~a" 0 -1 -2 -3 -4))
+
+(test "srfi-29 jp.format.5"
+      "zero 0 one -1 two 0 three -2 four -3"
+      (format "zero ~a one ~a two ~-2@*~a three ~a four ~a" 0 -1 -2 -3 -4))
+
+(test "srfi-29 jp.format.6"
+      "zero 0 one -1 two -2 three -2 four -3"
+      (format "zero ~a one ~a two ~0@*~a three ~a four ~a" 0 -1 -2 -3 -4))
+
+
+(test/error "srfi-29 jp.format.7"
+            (format "zero ~a one ~2*~a two ~a" 0 -1 -2))
+
+(test/error "srfi-29 jp.format.8"
+            (format "zero ~a one ~-2@*~a two ~a" 0 -1 -2))
