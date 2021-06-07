@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 25-May-2021 09:54 (eg)
+ * Last file update:  7-Jun-2021 14:33 (eg)
  */
 
 
@@ -2741,7 +2741,7 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
 doc>
  */
 
-static Inline SCM exact_expt(SCM x, SCM y)
+static Inline SCM exact_exponent_expt(SCM x, SCM y)
 {
   mpz_t res;
 
@@ -2751,22 +2751,38 @@ static Inline SCM exact_expt(SCM x, SCM y)
   if (TYPEOF(y) == tc_bignum)
     STk_error("exponent too big: ~S", y);
 
-  if (TYPEOF(x) == tc_integer) {
-    mpz_init_set_si(res, INT_VAL(x));
-    mpz_pow_ui(res, res, INT_VAL(y));
-  }
-  else
-    mpz_pow_ui(res, BIGNUM_VAL(x), INT_VAL(y));
+  switch (TYPEOF(x)) {
+    case tc_integer:
+      mpz_init_set_si(res, INT_VAL(x));
+      mpz_pow_ui(res, res, INT_VAL(y));
+      return bignum2number(res);
+    case tc_bignum:
+      mpz_pow_ui(res, BIGNUM_VAL(x), INT_VAL(y));
+      return bignum2number(res);
+    case tc_rational:
+      return make_rational(exact_exponent_expt(RATIONAL_NUM(x), y),
+                           exact_exponent_expt(RATIONAL_DEN(x), y));
+    default: {
+      SCM nx, ny, val = MAKE_INT(1);
 
-  return bignum2number(res);
+      while (y != MAKE_INT(1)) {
+        nx = mul2(x, x);
+        ny = STk_quotient(y, MAKE_INT(2));
+        if (STk_evenp(y) == STk_false) val = mul2(x, val);
+        x = nx;
+        y = ny;
+      }
+      return mul2(val, x);
+    }
+  }
 }
 
 static SCM my_expt(SCM x, SCM y)
 {
   /* y is >= 0 */
   switch (TYPEOF(y)) {
-    case tc_integer:
-    case tc_bignum:   return exact_expt(x, y);
+    case tc_integer: 
+    case tc_bignum:   return exact_exponent_expt(x, y);
     case tc_rational:
     case tc_real:     if (zerop(y)) return double2real(1.0);
                       if (zerop(x)) return (x==MAKE_INT(0)) ? x : double2real(0.0);
