@@ -1,6 +1,9 @@
 
 (select-module SRFI-144)
 
+(%compile-time-define fl/ fllog %flinteger-exponent flinteger-fraction
+                      %fl-integer-exponent-nan  %fl-integer-exponent-zero)
+
 (export ;; constants:
         fl-integer-exponent-zero
         fl-integer-exponent-nan

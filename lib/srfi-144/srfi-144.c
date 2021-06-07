@@ -1,6 +1,4 @@
-
-
-#include "stklos.h"
+#include <stklos.h>
 #include <gmp.h>
 #include <math.h>
 #include <float.h>
@@ -411,13 +409,13 @@ DEFINE_PRIMITIVE("fleven?",srfi_144_flevenp,subr1,(SCM x))
     if (val != floor(val)) return SCM_NaN; // +nan.0
     return MAKE_BOOLEAN(fpclassify(fmodl(val, 2.0)) == FP_ZERO);
 }
-                    
+
 DEFINE_PRIMITIVE("flfinite?",srfi_144_flfinitep,subr1,(SCM x))
 {
     ensure_fl(x);
     return (!isinf(REAL_VAL(x)) && !isnan(REAL_VAL(x))) ? STk_true : STk_false;
 }
-        
+
 DEFINE_PRIMITIVE("flinfinite?",srfi_144_flinfinitep,subr1,(SCM x))
 {
     ensure_fl(x);
@@ -429,7 +427,7 @@ DEFINE_PRIMITIVE("flnan?",srfi_144_flnanp,subr1,(SCM x))
     ensure_fl(x);
     return FP_NAN == fpclassify(REAL_VAL(x)) ? STk_true : STk_false;
 }
-         
+
 DEFINE_PRIMITIVE("flnormalized?",srfi_144_flnormalizedp,subr1,(SCM x))
 {
     ensure_fl(x);
@@ -450,9 +448,9 @@ DEFINE_PRIMITIVE("fldenormalized?",srfi_144_fldenormalizedp,subr1,(SCM x))
 DEFINE_PRIMITIVE("flmax",srfi_144_flmax,vsubr,(int argc, SCM *argv))
 {
     if (argc==0) return double2real(-INFINITY);
-    
+
     ensure_fl(*argv);
-    
+
     if (argc==1) return *argv;
 
     if (argc==2) {
@@ -478,7 +476,7 @@ DEFINE_PRIMITIVE("flmax",srfi_144_flmax,vsubr,(int argc, SCM *argv))
             /* first value, guaranteed to NOT be NaN */
             result = REAL_VAL(*argv--);
             argc--;
-            
+
             while (argc > 0) {
                 ensure_fl(*argv);
                 if (!isnan(REAL_VAL(*argv))) {
@@ -496,9 +494,9 @@ DEFINE_PRIMITIVE("flmax",srfi_144_flmax,vsubr,(int argc, SCM *argv))
 DEFINE_PRIMITIVE("flmin",srfi_144_flmin,vsubr,(int argc, SCM *argv))
 {
     if (argc==0) return double2real(INFINITY);
-    
+
     ensure_fl(*argv);
-    
+
     if (argc==1) return *argv;
 
     if (argc==2) {
@@ -524,7 +522,7 @@ DEFINE_PRIMITIVE("flmin",srfi_144_flmin,vsubr,(int argc, SCM *argv))
             /* first value, guaranteed to NOT be NaN */
             result = REAL_VAL(*argv--);
             argc--;
-            
+
             while (argc > 0) {
                 ensure_fl(*argv);
                 if (!isnan(REAL_VAL(*argv))) {
@@ -582,10 +580,10 @@ DEFINE_PRIMITIVE("fl/",srfi_144_div,vsubr,(int argc, SCM *argv))
     if (argc==0) STk_error("expects at least one argument");
     ensure_fl(*argv);
     if (argc==1) return double2real(1.0 / REAL_VAL(*argv));
-    
+
     register double res = REAL_VAL(*argv--);
     argc--;
-    
+
     for (register int i=0; i<argc; i++) {
         ensure_fl(*argv);
         res /= REAL_VAL(*argv--);
@@ -598,10 +596,10 @@ DEFINE_PRIMITIVE("fl-",srfi_144_sub,vsubr,(int argc, SCM *argv))
     if (argc==0) STk_error("expects at least one argument");
     ensure_fl(*argv);
     if (argc==1) return double2real( 0.0 - REAL_VAL(*argv));
-    
+
     register double res = REAL_VAL(*argv--);
     argc--;
-    
+
     for (register int i=0; i<argc; i++) {
         ensure_fl(*argv);
         res -= REAL_VAL(*argv--);
@@ -863,7 +861,7 @@ DEFINE_PRIMITIVE("flloggamma", srfi_144_flloggamma, subr1, (SCM x))
 }
 
 /* FIXME: if n is FIXNUM, return -inf.0 ? */
-   
+
 DEFINE_PRIMITIVE("flfirst-bessel", srfi_144_flfirst_bessel, subr2, (SCM n, SCM x))
 {
     ensure_fx(n);
@@ -901,10 +899,10 @@ MODULE_ENTRY_START("srfi-144")
 
   /* FIXME: this should exist outside of this SRFI... */
   SCM_NaN = double2real(NAN);
-  
+
   /* CONSTANTS */
   STk_srfi_144_define_constants(module);
-  
+
   /* CONSTRUCTORS */
   ADD_PRIMITIVE_IN_MODULE(srfi_144_flonum, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_144_fladjacent, module);
@@ -917,7 +915,7 @@ MODULE_ENTRY_START("srfi-144")
   ADD_PRIMITIVE_IN_MODULE(srfi_144_flinteger_exponent, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_144_flnormalized_fraction_exponent, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_144_flsign_bit, module);
-  
+
   /* PREDICATES */
   ADD_PRIMITIVE_IN_MODULE(srfi_144_flonump, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_144_fleqp, module);
@@ -946,7 +944,7 @@ MODULE_ENTRY_START("srfi-144")
   ADD_PRIMITIVE_IN_MODULE(srfi_144_div, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_144_sub, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_144_sum_mul, module);
-  
+
   ADD_PRIMITIVE_IN_MODULE(srfi_144_flabs, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_144_flabsdiff, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_144_flposdiff, module);
@@ -1002,3 +1000,5 @@ MODULE_ENTRY_START("srfi-144")
   STk_execute_C_bytecode(__module_consts, __module_code);
 }
 MODULE_ENTRY_END
+
+DEFINE_MODULE_INFO
