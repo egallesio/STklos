@@ -192,7 +192,7 @@
     (151 "Bitwise Operations" (bitwise-ops) "srfi-151")
     ;; 152  String Library (reduced)
     ;; 153  ....... withdrawn
-    ;; 154  First-class dynamic extents
+    (154 "First-class dynamic extents" () "srfi-154")
     ;; 155  Promises
     (156 "Syntactic combiners for binary predicates" () "srfi-156")
     ;; 157  Continuation marks
