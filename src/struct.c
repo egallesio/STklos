@@ -1,7 +1,7 @@
 /*
  * struct.c         -- Low level support for structures
  *
- * Copyright © 2004-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 12-May-2004 17:26 (eg)
- * Last file update: 31-Jul-2020 16:09 (eg)
+ * Last file update: 10-Apr-2021 18:47 (eg)
  */
 
 #include "stklos.h"
@@ -499,13 +499,13 @@ static void print_struct(SCM expr, SCM port, int _UNUSED(mode))
  * ----------------------------------------------------------------------
  */
 static struct extended_type_descr xtype_struct_type = {
-  "struct-type",
-  print_struct_type
+  .name  = "struct-type",
+  .print = print_struct_type
 };
 
 static struct extended_type_descr xtype_struct = {
-  "struct",
-  print_struct
+  .name  = "struct",
+  .print = print_struct
 };
 
 

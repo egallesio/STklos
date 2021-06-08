@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 13-Nov-2020 11:14 (eg)
+ * Last file update:  7-Jun-2021 14:33 (eg)
  */
 
 
@@ -49,7 +49,7 @@ static int use_srfi_169 = 1; /* do we allow the use of underscores in numbers? *
 static int real_precision = REAL_FORMAT_SIZE;
 static unsigned int log10_maxint;
 
-#define FINITE_REALP(n) ((REAL_VAL(n) != minus_inf) && (REAL_VAL(n) != plus_inf))
+#define FINITE_REALP(n) isfinite(REAL_VAL(n))
 
 
 
@@ -81,7 +81,8 @@ struct bignum_obj {
 
 #define MINUS_INF "-inf.0"
 #define PLUS_INF  "+inf.0"
-#define NaN       "nan.0"
+#define MINUS_NaN "-nan.0"
+#define PLUS_NaN  "+nan.0"
 
 
 /* Special IEEE values */
@@ -153,6 +154,36 @@ static void error_divide_by_0(SCM n)
 static void error_incorrect_radix(SCM r)
 {
   STk_error("base must be 2, 8, 10 or 16. It was ~S", r);
+}
+
+union binary64 {
+  uint64_t u;
+  double   d;
+};
+
+static const uint64_t sign_mask    = (uint64_t) 1 << 63;
+static const uint64_t quiet_mask   = (uint64_t) 1 << 51;
+static const uint64_t payload_mask = ((uint64_t) 1 << 50) - 1;
+
+static double make_nan(int neg, int quiet, unsigned long pay)
+{
+  union binary64 t;
+
+  /* Beware:
+   *   quiet NAN is       0x7ff8000000000000
+   *   signaling NaN is   0x7ffZxxxxxxxxxxxx   where Z is 0xxx (bit 51 is 0)
+   * BUT
+   *   +inf.0          is 0x7ff0000000000000
+   * Consequently, clearing bit 51 is not sufficient (if the payload is 0, a
+   * signaling dille be seen as a positive infinity.
+   * So, to make a signaling NaN, we clear the bit 51 and set the bit 50
+   * ==> the payload can use only 50 bits
+   */
+  t.u = (quiet)? 0x7ff8000000000000U : 0x7ff4000000000000U;
+  if (neg)   t.u |= sign_mask;
+  t.u |= pay;
+
+  return t.d;
 }
 
 
@@ -254,7 +285,7 @@ static SCM make_rational(SCM n, SCM d)
   if (zerop(d))
     STk_error("cannot make rational with null denominator");
 
-  /* Always keep sign in the denominator */
+  /* Always keep sign in the numerator */
   if (negativep(d)) {
     n = mul2(n, MAKE_INT((unsigned long) -1));
     d = mul2(d, MAKE_INT((unsigned long) -1));
@@ -313,18 +344,18 @@ static void print_complex(SCM n, SCM port, int mode)
 
 
 static struct extended_type_descr xtype_bignum = {
-  "bignum",
-  print_bignum
+  .name  = "bignum",
+  .print = print_bignum
 };
 
 static struct extended_type_descr xtype_complex = {
-  "complex",
-  print_complex
+  .name  = "complex",
+  .print = print_complex
 };
 
 static struct extended_type_descr xtype_rational = {
-  "rational",
-  print_rational
+  .name  = "rational",
+  .print = print_rational
 };
 
 
@@ -465,6 +496,40 @@ static Inline SCM scheme_bignum2real(SCM bn)
 }
 
 
+
+/* The following code is an adaptation of code stolen in mini-gmp   */
+/* (mpq_get_d function)                                             */
+static double bigrational2double(mpz_t num, mpz_t den) {
+  #ifndef GMP_LIMB_BITS
+     #define GMP_LIMB_BITS (sizeof(mp_limb_t) * CHAR_BIT)
+  #endif
+  #define GMP_LIMB_HIGHBIT ((mp_limb_t) 1 << (GMP_LIMB_BITS - 1))
+
+  mp_bitcnt_t ne, de, ee;
+  mpz_t z;
+  double B, ret;
+
+  ne = mpz_sizeinbase(num, 2);
+  de = mpz_sizeinbase(den, 2);
+
+  ee = CHAR_BIT * sizeof (double);
+  if (de == 1 || ne > de + ee)
+    ee = 0;
+  else
+    ee = (ee + de - ne) / GMP_LIMB_BITS + 1;
+
+  mpz_init (z);
+  mpz_mul_2exp (z, num, ee * GMP_LIMB_BITS);
+  mpz_tdiv_q (z, z, den);
+  ret = mpz_get_d (z);
+  mpz_clear (z);
+
+  B = 4.0 * (double) (GMP_LIMB_HIGHBIT >> 1);
+  for (B = 1 / B; ee != 0; --ee)
+    ret *= B;
+  return ret;
+}
+
 static double rational2double(SCM r)
 {
   SCM num = RATIONAL_NUM(r);
@@ -472,7 +537,7 @@ static double rational2double(SCM r)
 
   switch (convert(&num, &den)) {
     case tc_integer: return ((double) INT_VAL(num)) / ((double) INT_VAL(den));
-    case tc_bignum:  return scheme_bignum2double(num) / scheme_bignum2double(den);
+    case tc_bignum:  return bigrational2double(BIGNUM_VAL(num), BIGNUM_VAL(den));
     default:         STk_panic("bad rational ~S", r);
   }
   return 0.0; /* never reached */
@@ -1095,7 +1160,8 @@ SCM STk_Cstr2number(char *str, long base)
       /* Treat special values "+inf.0" -inf.0 and "NaN" as well as +i and -i */
       if (strcmp(str, MINUS_INF)==0) return double2real(minus_inf);
       if (strcmp(str, PLUS_INF)==0)  return double2real(plus_inf);
-      if (strcmp(str+1, NaN)==0)     return double2real(STk_NaN);
+      if (strcmp(str, MINUS_NaN)==0) return double2real(make_nan(1,0,0));
+      if (strcmp(str, PLUS_NaN)==0)  return double2real(make_nan(0,0,0));
       if (strcmp(str, "+i")==0)      return make_complex(MAKE_INT(0), MAKE_INT(+1UL));
       if (strcmp(str, "-i")==0)      return make_complex(MAKE_INT(0), MAKE_INT(-1UL));
     }
@@ -1482,6 +1548,19 @@ static int finitep(SCM n)
   return FALSE; /* never reached */
 }
 
+static int infinitep(SCM n)
+{
+  switch (TYPEOF(n)) {
+    case tc_real:     return (isinf(REAL_VAL(n)));
+    case tc_rational:
+    case tc_bignum:
+    case tc_integer:  return FALSE;
+    case tc_complex:  return (infinitep(COMPLEX_REAL(n)) ||
+                              infinitep(COMPLEX_IMAG(n)));
+    default:          error_bad_number(n);
+  }
+  return FALSE; /* never reached */
+}
 
 DEFINE_PRIMITIVE("finite?", finitep, subr1, (SCM n))
 {
@@ -1491,7 +1570,7 @@ DEFINE_PRIMITIVE("finite?", finitep, subr1, (SCM n))
 
 DEFINE_PRIMITIVE("infinite?", infinitep, subr1, (SCM n))
 {
-  return MAKE_BOOLEAN(!finitep(n));
+  return MAKE_BOOLEAN(infinitep(n));
 }
 
 
@@ -2174,10 +2253,10 @@ DEFINE_PRIMITIVE("numerator", numerator, subr1, (SCM q))
 {
   switch (TYPEOF(q)) {
     case tc_real:     return
-                        absolute(exact2inexact(STk_numerator(inexact2exact(q))));
-    case tc_rational: return absolute(RATIONAL_NUM(q));
+                        exact2inexact(STk_numerator(inexact2exact(q)));
+    case tc_rational: return RATIONAL_NUM(q);
     case tc_bignum:
-    case tc_integer:  return absolute(q);
+    case tc_integer:  return q;
     default:          error_bad_number(q);
   }
   return STk_void; /* never reached */
@@ -2662,30 +2741,48 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
 doc>
  */
 
-static Inline SCM exact_expt(SCM x, SCM y)
+static Inline SCM exact_exponent_expt(SCM x, SCM y)
 {
-  SCM nx, ny, res = MAKE_INT(1);
+  mpz_t res;
 
   if (zerop(y)) return MAKE_INT(1);
   if (zerop(x) || (x == MAKE_INT(1))) return x;
 
-  while (y != MAKE_INT(1)) {
-    nx = mul2(x, x);
-    ny = STk_quotient(y, MAKE_INT(2));
-    if (STk_evenp(y) == STk_false) res = mul2(x, res);
-    x = nx;
-    y = ny;
-  }
+  if (TYPEOF(y) == tc_bignum)
+    STk_error("exponent too big: ~S", y);
 
-  return mul2(res, x);
+  switch (TYPEOF(x)) {
+    case tc_integer:
+      mpz_init_set_si(res, INT_VAL(x));
+      mpz_pow_ui(res, res, INT_VAL(y));
+      return bignum2number(res);
+    case tc_bignum:
+      mpz_pow_ui(res, BIGNUM_VAL(x), INT_VAL(y));
+      return bignum2number(res);
+    case tc_rational:
+      return make_rational(exact_exponent_expt(RATIONAL_NUM(x), y),
+                           exact_exponent_expt(RATIONAL_DEN(x), y));
+    default: {
+      SCM nx, ny, val = MAKE_INT(1);
+
+      while (y != MAKE_INT(1)) {
+        nx = mul2(x, x);
+        ny = STk_quotient(y, MAKE_INT(2));
+        if (STk_evenp(y) == STk_false) val = mul2(x, val);
+        x = nx;
+        y = ny;
+      }
+      return mul2(val, x);
+    }
+  }
 }
 
 static SCM my_expt(SCM x, SCM y)
 {
   /* y is >= 0 */
   switch (TYPEOF(y)) {
-    case tc_integer:
-    case tc_bignum:   return exact_expt(x, y);
+    case tc_integer: 
+    case tc_bignum:   return exact_exponent_expt(x, y);
     case tc_rational:
     case tc_real:     if (zerop(y)) return double2real(1.0);
                       if (zerop(x)) return (x==MAKE_INT(0)) ? x : double2real(0.0);
@@ -3104,7 +3201,91 @@ static void deallocate_function(void * ptr, size_t _UNUSED(sz))
   STk_free(ptr);
 }
 
+/*
+ * SRFI 28: NaN procedures
+ */
 
+static void verify_NaN(SCM n) {
+  if ((TYPEOF(n) != tc_real) || !isnan(REAL_VAL(n)))
+    STk_error("bad NaN value: ~S", n);
+}
+
+
+
+DEFINE_PRIMITIVE("%make-nan", make_nan, subr3, (SCM neg, SCM quiet, SCM payload)) {
+  if (!INTP(payload) || ((uint64_t) INT_VAL(payload) > payload_mask))
+    STk_error("bad payload ~S", payload);
+  return double2real(make_nan(neg != STk_false,
+                              quiet != STk_false,
+                              INT_VAL(payload)));
+}
+
+
+/*
+<doc EXT nan-negative?
+ * (nan-negative? nan)
+ *
+ * returns #t if the sign bit of |nan| is set and #f otherwise.
+doc>
+*/
+DEFINE_PRIMITIVE("nan-negative?", nan_negativep, subr1, (SCM nan)) {
+  union binary64 tmp;
+
+  verify_NaN(nan);
+  tmp.d = REAL_VAL(nan);
+  return MAKE_BOOLEAN((tmp.u & sign_mask) != 0);
+}
+
+
+/*
+<doc EXT nan-quiet?
+ * (nan-quiet? nan)
+ *
+ * returns #t  if |nan| is a quiet NaN.
+doc>
+*/
+DEFINE_PRIMITIVE("nan-quiet?", nan_quietp, subr1, (SCM nan)) {
+  union binary64 tmp;
+
+  verify_NaN(nan);
+  tmp.d = REAL_VAL(nan);
+  return MAKE_BOOLEAN((tmp.u & quiet_mask)!= 0);
+}
+
+
+/*
+<doc EXT nan-payload
+ * (nan-payload nan)
+ *
+ * returns  the payload bits of |nan| as a positive exact integer.
+doc>
+*/
+DEFINE_PRIMITIVE("nan-payload", nan_payload, subr1, (SCM nan)) {
+  union binary64 tmp;
+
+  verify_NaN(nan);
+  tmp.d = REAL_VAL(nan);
+  return MAKE_INT(tmp.u & payload_mask);
+}
+
+
+/*
+<doc EXT nan=?
+ * (nan=? nan1 nan2)
+ *
+ * Returns #t if |nan1| and |nan2| have the same sign, quiet bit,
+ * and payload; and #f otherwise.
+doc>
+*/
+DEFINE_PRIMITIVE("nan=?", nan_equalp, subr2, (SCM n1, SCM n2)) {
+  union binary64 tmp1, tmp2;
+
+  verify_NaN(n1);
+  verify_NaN(n2);
+  tmp1.d = REAL_VAL(n1);
+  tmp2.d = REAL_VAL(n2);
+  return MAKE_BOOLEAN(tmp1.u ==tmp2.u);
+}
 
 /*
  *
@@ -3113,22 +3294,16 @@ static void deallocate_function(void * ptr, size_t _UNUSED(sz))
  */
 int STk_init_number(void)
 {
-#if defined(__linux__) && defined(__alpha__)
-  static union {
-    unsigned char a[4];
-    float f;
-  } union_nan = { 0, 0, 0xc0, 0x7f};
-
-  plus_inf  = HUGE_VAL;
-  minus_inf = -HUGE_VAL;
-  STk_NaN   = (double) union_nan.f;
-  /* Deactivate signals on floating point exception which are armed by default */
-  signal(SIGFPE, SIG_IGN);
-#else
+  /* For systems without these constants, we can do:
   plus_inf  = 1.0 / 0.0;
   minus_inf = -plus_inf;
-  STk_NaN   = strtod("NAN", NULL);  
-#endif
+  STk_NaN   = strtod("NAN", NULL);
+  */
+
+  /* initialize  special IEEE 754 values */
+  plus_inf  = HUGE_VAL;
+  minus_inf = -HUGE_VAL;
+  STk_NaN   =  strtod("NAN", NULL);
 
   /* Force the LC_NUMERIC locale to "C", since Scheme definition
      imposes that decimal numbers use a '.'
@@ -3229,6 +3404,13 @@ int STk_init_number(void)
   ADD_PRIMITIVE(string2number);
 
   ADD_PRIMITIVE(decode_float);
+
+  /* SRFI 208: NaN procedures */
+  ADD_PRIMITIVE(make_nan);
+  ADD_PRIMITIVE(nan_negativep);
+  ADD_PRIMITIVE(nan_quietp);
+  ADD_PRIMITIVE(nan_payload);
+  ADD_PRIMITIVE(nan_equalp);
 
   /* Add parameter for float numbers precision */
   STk_make_C_parameter("real-precision",

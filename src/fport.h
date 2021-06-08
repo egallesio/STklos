@@ -1,7 +1,7 @@
 /*
- * f p o r t . h				-- File ports
+ * f p o r t . h                -- File ports
  *
- * Copyright © 2000-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 29-Jun-2007 22:18 (eg)
+ * Last file update: 10-May-2021 16:56 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -30,23 +30,23 @@
  *
  */
 
-#define TTY_BUFSIZE   	256
-#define OTHER_BUFSIZE 	4096
+#define TTY_BUFSIZE     256
+#define OTHER_BUFSIZE   4096
 
-#define STK_IOFBF	(1 << 0) /* Full buffered*/
-#define STK_IOLBF	(1 << 1) /* Line buffered */
-#define STK_IONBF	(1 << 2) /* No buffered (unused for now) */
-#define STK_IOEOF	(1 << 3) /* EOF encountered on this file */
-#define STK_IOREAD	(1 << 4) /* File is opened in read */
+#define STK_IOFBF   (1 << 0) /* Full buffered*/
+#define STK_IOLBF   (1 << 1) /* Line buffered */
+#define STK_IONBF   (1 << 2) /* No buffered (unused for now) */
+#define STK_IOEOF   (1 << 3) /* EOF encountered on this file */
+#define STK_IOREAD  (1 << 4) /* File is opened in read */
 
 struct fstream {
   unsigned char *base;  /* buffer start */
   unsigned char *ptr;   /* ptr on the current character in buffer  */
-  int	cnt;	        /* # of chars in the buffer */
-  int	bufsize;        /* buffer size */
+  int   cnt;            /* # of chars in the buffer */
+  int   bufsize;        /* buffer size */
   int   stream_flags;   /* flags */
-  FILE  *f;             /* the file itself */
-  short fd;	        /* file descriptor */
+  short fd;             /* file descriptor */
+  pid_t pid;            /* PID of the shell created for pipe port only. */
   SCM  read_event;
   SCM  write_event;
   SCM  idle_procs;
@@ -56,16 +56,16 @@ struct fstream {
 };
 
 
-#define PORT_BASE(x)    	(((struct fstream *) (x))->base)
-#define PORT_PTR(x)     	(((struct fstream *) (x))->ptr)
-#define PORT_CNT(x)     	(((struct fstream *) (x))->cnt)
-#define PORT_BUFSIZE(x) 	(((struct fstream *) (x))->bufsize)
-#define PORT_STREAM_FLAGS(x) 	(((struct fstream *) (x))->stream_flags)
-#define PORT_FILE(x)  		(((struct fstream *) (x))->f)
-#define PORT_FD(x)  		(((struct fstream *) (x))->fd)
-#define PORT_REVENT(x)		(((struct fstream *) (x))->read_event)
-#define PORT_WEVENT(x)		(((struct fstream *) (x))->write_event)
-#define PORT_IDLE(x)		(((struct fstream *) (x))->idle_procs)
-#define PORT_USERDATA(x)	(((struct fstream *) (x))->user_data)
-#define PORT_LOWREAD(x)		(((struct fstream *) (x))->low_read)
-#define PORT_LOWWRITE(x)	(((struct fstream *) (x))->low_write)
+#define PORT_BASE(x)          (((struct fstream *) (x))->base)
+#define PORT_PTR(x)           (((struct fstream *) (x))->ptr)
+#define PORT_CNT(x)           (((struct fstream *) (x))->cnt)
+#define PORT_BUFSIZE(x)       (((struct fstream *) (x))->bufsize)
+#define PORT_STREAM_FLAGS(x)  (((struct fstream *) (x))->stream_flags)
+#define PORT_PID(x)           (((struct fstream *) (x))->pid)
+#define PORT_FD(x)            (((struct fstream *) (x))->fd)
+#define PORT_REVENT(x)        (((struct fstream *) (x))->read_event)
+#define PORT_WEVENT(x)        (((struct fstream *) (x))->write_event)
+#define PORT_IDLE(x)          (((struct fstream *) (x))->idle_procs)
+#define PORT_USERDATA(x)      (((struct fstream *) (x))->user_data)
+#define PORT_LOWREAD(x)       (((struct fstream *) (x))->low_read)
+#define PORT_LOWWRITE(x)      (((struct fstream *) (x))->low_write)

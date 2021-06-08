@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  2-Apr-2021 16:59 (eg)
+;; Last file update: 25-May-2021 17:39 (eg)
 ;;
 ;; ======================================================================
 
@@ -59,7 +59,7 @@ document for a complete description.])
 following inexact numerical constants:
 ,(code "+inf.0") (infinity), ,(code "-inf.0") (negative
 infinity), ,(code "+nan.0") (not a number), and
-,(code "-nan.0") (same as +nan.0).])
+,(code "-nan.0") (not a number).])
 
 (insertdoc 'integer?)
 (insertdoc 'inexact?)
@@ -71,6 +71,12 @@ infinity), ,(code "+nan.0") (not a number), and
 
 (insertdoc 'even?)
 (insertdoc 'nan?)
+(index "SRFI-208")
+(insertdoc 'make-nan)
+(insertdoc 'nan-negative?)
+(insertdoc 'nan-quiet?)
+(insertdoc 'nan-payload)
+(insertdoc 'nan=?)
 (insertdoc 'min)
 (insertdoc 'truncate-remainder)
 (insertdoc '*)
@@ -618,6 +624,9 @@ be accessed as a normal port with the standard Scheme primitives.])
 (insertdoc 'port-file-name)
 (insertdoc 'port-idle-reset!)
 (insertdoc 'port-closed?)
+(insertdoc 'port-close-hook-set!)
+(insertdoc 'port-close-hook)
+
 
 [ The following procedures are defined in ,(link-srfi 192) which is fully
   supported:]
@@ -707,7 +716,8 @@ functions defined in ,(link-srfi 170). These functions are described here.])
 ;;; File Primitives.
 (subsection :title "File Primitives"
    (insertdoc 'temp-file-prefix)
-   (insertdoc 'temporary-file-name)
+   (insertdoc 'create-temp-file)
+   (insertdoc 'create-temp-directory)
    (insertdoc 'rename-file)
    (insertdoc 'remove-file)
    (insertdoc 'copy-file)
@@ -818,21 +828,31 @@ use a |main| function in a Scheme program.])
 ;;;
 (section :title "Keywords"
 (index "keyword")
+(index "#!keyword-colon-position-none")
+(index "#!keyword-colon-position-before")
+(index "#!keyword-colon-position-after")
+(index "#!keyword-colon-position-both")
 
 (p [Keywords are symbolic constants which evaluate to themselves.
-A keyword is a symbol whose first (or last) character is a colon
-(,(emph (q ":"))). Alternatively, to be compatible with other Scheme
-implementations, the notation ,(code "#:foo") is also available to denote
-the keyword of name ,(code "foo")])
+   By default, a keyword is a symbol whose first (or last) character is a colon
+   (,(emph (q ":"))). Alternatively, to be compatible with other Scheme
+   implementations, the notation ,(code "#:foo") is also available to denote
+   the keyword of name ,(code "foo").])
 
+(p [Note that the four directives ,(code "keyword-colon-position-xxx") or the
+   parameter object ,(code " keyword-colon-position") permit to change the
+   default behavior. See section,(~),(ref :subsection "Identifiers") for more
+   information.])
+
+ 
 (insertdoc 'keyword?)
 (insertdoc 'make-keyword)
 (insertdoc 'keyword->string)
 (insertdoc 'string->keyword)
 (insertdoc 'key-get)
 (insertdoc 'key-set!)
-(insertdoc 'key-delete!))
-
+(insertdoc 'key-delete!)
+(insertdoc 'keyword-colon-position))
 ;;;
 ;;; HASH TABLES
 ;;;

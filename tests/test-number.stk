@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-number.stk	-- Test numbers
 ;;;;
-;;;; Copyright © 2005-2009 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 14:29 (eg)
-;;;; Last file update: 18-Oct-2009 22:24 (eg)
+;;;; Last file update: 18-May-2021 18:00 (eg)
 ;;;;
 
 ;;;; Most of theses tests were stolen in Gauche Scheme distribution
@@ -1425,6 +1425,30 @@
 (test "atan tan 1 1"
       1.0
       (atan (tan 1) 1))
+
+;;------------------------------------------------------------------
+(test-subsection "Misc")
+
+(test "numerator.1"   3   (numerator (/ 6 4)))
+(test "denominator.1" 2   (denominator (/ 6 4)))
+
+(test "numerator.2"   -3  (numerator (/ -6 4)))
+(test "denominator.2" 2   (denominator (/ -6 4)))
+
+(test "numerator.3"   -3  (numerator (/ 6 -4)))
+(test "denominator.3" 2   (denominator (/ 6 -4)))
+
+(test "numerator.4"   0   (numerator 0))
+(test "denominator.4" 1   (denominator 0))
+
+(test "numerator.5"   -1  (numerator -1))
+(test "denominator.5" 1   (denominator -1))
+
+(test "numerator.6"   3.0 (numerator (inexact (/ 6 4))))
+(test "denominator.6" 2.0 (denominator (inexact (/ 6 4))))
+
+(test "numerator.7"  -3.0 (numerator (inexact (/ -6 4))))
+(test "denominator.7" 2.0 (denominator (inexact (/ -6 4))))
 
 
 (test-section-end)

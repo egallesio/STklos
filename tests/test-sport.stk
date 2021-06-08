@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test-sport.stk	-- Testing String Ports
 ;;;;
-;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 20-May-2005 15:45 (eg)
-;;;; Last file update: 24-May-2005 15:49 (eg)
+;;;; Last file update:  6-May-2021 18:01 (eg)
 ;;;;
 
 (require "test")
@@ -130,6 +130,30 @@
       (begin (display "abcde" sport-p) (gos)))
 
 (test "Seek outside string" *test-failed* (port-seek 1 :end))
+
+;;------------------------------------------------------------------
+(test-subsection "Port close Hook")
+
+(let ((p (open-output-string))
+      (v #f))
+  (display "ABC" p)
+  (port-close-hook-set! p (lambda() (set! v #t)))
+  (close-port p)
+  (test "port-close string.1" "ABC" (get-output-string p))
+  (test "port-close string.2" #t v))
+
+(let* ((v   #f)
+       (str (call-with-output-string (lambda (p)
+                                       (set! v #t)
+                                       (write 123 p)
+                                       (display "Hello" p)))))
+  (test "post-close-string.3" "123Hello" str)
+  (test "post-close-string.4" #t v))
+
+
+
+
+
 
 
 

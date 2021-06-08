@@ -8,8 +8,3 @@ This directory contains
   - simple-module.c: A simple module which adds 2 primitives written in C
   		     to the interpreter. This module must be compiled and
 		     and dynamically loaded with the interpreter.
-   -stk-dynload.c:   This file contains the code for dynamic loading which
-		     was used for the old STk interpreter. It can be used
-		     has a base for porting dynamic loading on other
-		     architectures. Since I cannot access these architectures,
-		     any help on this subject is welcome.

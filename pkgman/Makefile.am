@@ -1,6 +1,6 @@
 # Makefile for stklos-pkgman
 #
-# Copyright © 2006-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2006-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,11 +19,11 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 22-Dec-2006 12:00 (eg)
-# Last file update: 25-Nov-2020 11:47 (eg)
+# Last file update:  2-Jun-2021 11:31 (eg)
 
-
-makefiledir  = $(prefix)/share/@PACKAGE@/@VERSION@/etc
-makefile_DATA= etc/Makefile-scmpkg.tmpl
+makefileprefix = $(prefix)/share/@PACKAGE@/@VERSION@
+makefiledir    = $(prefix)/share/@PACKAGE@/@VERSION@/etc
+makefile_DATA  = etc/Makefile-scmpkg.tmpl
 
 bin_SCRIPTS = stklos-pkg
 
@@ -61,3 +61,7 @@ clean-am:
 
 distclean: clean
 	$(RM) -f Makefile
+
+uninstall-hook:
+	rmdir $(makefiledir) || true
+	rmdir $(makefileprefix) || true

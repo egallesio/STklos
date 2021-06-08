@@ -649,6 +649,7 @@ ac_func_c_list=
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+DLLIBS
 CONTROL_FX_PARAMETERS
 DEFAULT_CS
 CONF_SUMMARY
@@ -803,7 +804,7 @@ with_provided_bignum
 with_gmp_light
 with_provided_regexp
 with_provided_ffi
-with_control_fixnums
+with_control_fast_math
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1459,7 +1460,7 @@ Optional Packages:
   --with-gmp-light        a synonym for --with-provided-bignum
   --with-provided-regexp  use the provided Regexp (PCRE) library
   --with-provided-ffi     use the provided FFI library
-  --with-control-fixnums  verify that fx functions are fixnums
+  --with-control-fast-math  verify that arguments to fx and fl functions are fixnums and flonums
 
 Some influential environment variables:
   CC          C compiler command
@@ -4934,7 +4935,7 @@ else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
 
-extraAC_PROG_LEX
+# AC_PROG_LEX
 
 # Extract the first word of "pkg-config", so it can be a program name with args.
 set dummy pkg-config; ac_word=$2
@@ -6412,6 +6413,9 @@ then
    LD="ld"
 fi
 
+# DLLIBS is used for dynamically loaded libraries on broken systems
+DLLIBS=""
+
 eval `env CC=$CC LD=$LD /bin/sh ./utils/shlib-options`
 
 case $OS_NAME_VERSION in
@@ -6680,15 +6684,15 @@ fi
    ;;
 esac
 
-
-### Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
-case "$THREADS" in
-  none) true ;;
-  *) case `uname -s` in
-        Linux*) STKCFLAGS="-D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
-     esac
-esac
-
+#XX
+#XX ### Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
+#XX case "$THREADS" in
+#XX   none) true ;;
+#XX   *) case `uname -s` in
+#XX         Linux*) STKCFLAGS="-D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
+#XX      esac
+#XX esac
+#XX
 
 
 
@@ -6804,19 +6808,20 @@ then
               --includedir=$prefix/include/stklos \
               --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
-     GCINC="-I../gc/include"
+     GCINC='-I$(BASEDIR)/gc/include'
      GCLIB="../gc/.libs/libgc.a"
      COMP_LIBS="libgc $COMP_LIBS"
 else
      echo "... Using system libgc library"
      GC=""
      if $PKGCONFIG --exists bdw-gc ;then
-        GCINC=$(pkg-config  bdw-gc --cflags)
-        GCLIB=$(pkg-config  bdw-gc --libs)
+        GCINC=$($PKGCONFIG  bdw-gc --cflags)
+        GCLIB=$($PKGCONFIG  bdw-gc --libs)
      else
         GCINC=""
         GCLIB="-lgc"
      fi
+     DLLIBS="$DLLIBS -lgc"
 
 printf "%s\n" "#define HAVE_GC 1" >>confdefs.h
 
@@ -6954,7 +6959,7 @@ then
      (cd gmp; CC=${CC} CFLAGS="${cflags} -I../src -DFOR_STKLOS=1" ./configure \
               --prefix=$prefix) || { echo "Cannot configure the GMP"; exit; }
      GMP=gmp
-     GMPINC="-I../gmp"
+     GMPINC='-I$(BASEDIR)/gmp'
      GMPLIB="../gmp/.libs/libgmp.a"
      COMP_LIBS="libgmp $COMP_LIBS"
 else
@@ -6962,6 +6967,7 @@ else
      GMP=""
      GMPINC=""
      GMPLIB="-lgmp"
+     DLLIBS="$DLLIBS $GMPLIB"
 
 printf "%s\n" "#define HAVE_GMP 1" >>confdefs.h
 
@@ -7060,6 +7066,7 @@ else
         PCREINC=""
         PCRELIB="-lpcre -lpcreposix"
      fi
+     DLLIBS="$DLLIBS $PCRELIB"
 
 printf "%s\n" "#define HAVE_PCRE 1 " >>confdefs.h
 
@@ -7152,7 +7159,9 @@ else
      else
        FFIINC="-I/usr/include/ffi"
        FFILIB="-lffi"
+       DLLIBS="$DLLIBS $FFILIB"
      fi
+     DLLIBS="$DLLIBS $FFILIB"
      SYST_LIBS="libffi $SYST_LIBS"
 fi
 # We always want FFI. Should be modifiable in the future
@@ -7162,13 +7171,13 @@ printf "%s\n" "#define HAVE_FFI 1" >>confdefs.h
 
 
 # ----------------------------------------------------------------------
-# Control fixnum parameters
+# Control fixnum and flonum parameters
 # ----------------------------------------------------------------------
 
-# Check whether --with-control-fixnums was given.
-if test ${with_control_fixnums+y}
+# Check whether --with-control-fast-math was given.
+if test ${with_control_fast_math+y}
 then :
-  withval=$with_control_fixnums; CONTROL_FX="$withval"
+  withval=$with_control_fast_math; CONTROL_FX="$withval"
 else $as_nop
   CONTROL_FX="yes"
 fi
@@ -7227,6 +7236,12 @@ else
    STRIPCMD=$STRIP
 fi
 
+# Adapt libraries that must be loaded fo systems with broken RTLD_GLOBAL (as Android)
+case `uname -o` in
+  Android) DLLIBS="$DLLIBS -lc -lm";;
+  *) DLLIBS="";;
+esac
+
 
 ### Output files
 
@@ -7275,7 +7290,8 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 doc/skb/stklos-version.stk pkgman/Makefile"
+
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 doc/skb/stklos-version.stk pkgman/Makefile lib/srfi-25/Makefile lib/srfi-27/Makefile lib/srfi-133/Makefile lib/srfi-144/Makefile lib/srfi-170/Makefile lib/srfi-175/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8029,6 +8045,12 @@ do
     "doc/stklos-script.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-script.1" ;;
     "doc/skb/stklos-version.stk") CONFIG_FILES="$CONFIG_FILES doc/skb/stklos-version.stk" ;;
     "pkgman/Makefile") CONFIG_FILES="$CONFIG_FILES pkgman/Makefile" ;;
+    "lib/srfi-25/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-25/Makefile" ;;
+    "lib/srfi-27/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-27/Makefile" ;;
+    "lib/srfi-133/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-133/Makefile" ;;
+    "lib/srfi-144/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-144/Makefile" ;;
+    "lib/srfi-170/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-170/Makefile" ;;
+    "lib/srfi-175/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-175/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

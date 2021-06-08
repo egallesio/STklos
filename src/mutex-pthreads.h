@@ -21,12 +21,11 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update:  4-Feb-2006 11:04 (eg)
+ * Last file update:  4-Jun-2021 11:00 (eg)
  */
 #ifndef _STK_MUTEX_PTHREADS_H
 #define _STK_MUTEX_PTHREADS_H
 
-#include <pthread.h>
 #include "stklos.h"
 
 /* ====================================================================== *\

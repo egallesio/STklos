@@ -1,6 +1,6 @@
 # Makefile.am for STklos lib
 #
-# Copyright © 2006-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2006-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Dec-2006 10:09 (eg)
-# Last file update: 21-Sep-2020 11:52 (eg)
+# Last file update:  1-Jun-2021 18:37 (eg)
 
 SRCS =  scmpkg-interface.stk scmpkg-languages.stk
 OBJ  =  ../scmpkg-support.ostk
@@ -38,6 +38,10 @@ install-sources:
 
 $(OBJ): scmpkg-support.stk $(SRCS)
 	(cd ..; $(COMP) -o scmpkg-support.ostk ScmPkg.d/scmpkg-support.stk )
+
+uninstall-hook:
+	(cd  $(scheme_libdir)/ScmPkg.d && rm -f $(SRCS) )
+	(rmdir $(scheme_libdir)/ScmPkg.d || true)
 
 clean: 
 	/bin/rm -f $(OBJ) *~

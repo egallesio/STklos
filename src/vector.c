@@ -2,7 +2,7 @@
  *
  * v e c t o r . c                      -- vectors management
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??? 1993
- * Last file update: 29-Jun-2020 19:28 (eg)
+ * Last file update: 10-Apr-2021 18:48 (eg)
  */
 
 #include <string.h>
@@ -573,8 +573,8 @@ static void print_vector(SCM vect, SCM port, int mode)
 
 
 static struct extended_type_descr xtype_vector = {
-  "vector",
-  print_vector
+  .name  = "vector",
+  .print = print_vector
 };
 
 

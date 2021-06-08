@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 29-Mar-2021 18:23 (eg)
+ * Last file update:  4-Jun-2021 17:12 (eg)
  */
 
 
@@ -47,22 +47,22 @@ extern "C"
 #include <memory.h>
 #include <locale.h>
 #include <stdint.h>
+#ifndef THEADS_NONE
+#  include <pthread.h>
+#  define GC_THREADS 1
+#  define _REENTRANT 1
+#endif
 
 #include "stklosconf.h"
 #include "extraconf.h"
 
 /* To debug the GC uncomment the following line */
-/* #define GC_DEBUG 1*/
-
+/* #define GC_DEBUG 1 */
 
 #ifdef HAVE_GC
 # include <gc/gc.h>
 #else
 # include <gc.h>
-#endif
-
-#ifndef THEADS_NONE
-#  include <pthread.h>
 #endif
 
 
@@ -159,8 +159,10 @@ extern "C"
 #define STk_must_malloc_atomic(size)    GC_MALLOC_ATOMIC(size)
 #define STk_must_realloc(ptr, size)     GC_REALLOC((ptr), (size))
 #define STk_free(ptr)                   GC_FREE(ptr)
-#define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER((void *) (ptr), \
-                                            (GC_finalization_proc)(f), 0, 0, 0)
+#define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER( \
+                                            (void *) (ptr),             \
+                                            (GC_finalization_proc)(f),  \
+                                            0, 0, 0)
 #define STk_gc()                        GC_gcollect()
 
 void STk_gc_init(void);
@@ -224,7 +226,6 @@ typedef struct {
 #define BOXED_INFO(x)           (((stk_header *) x)->cell_info)
 #define BOXED_OBJP(x)           (!(AS_LONG(x) & 3))
 #define BOXED_TYPE_EQ(x, y)     (BOXED_OBJP(x) && BOXED_TYPE(x) == y)
-
 #define STYPE(x)                (BOXED_OBJP(x)? BOXED_TYPE(x): tc_not_boxed)
 
 
@@ -454,7 +455,12 @@ int STk_init_cpointer(void);
 
 #define MODULE_ENTRY_END        } }
 
-#define MODULE_ENTRY_INFO() SCM STk_module_info(void)
+#define MODULE_ENTRY_INFO() SCM STk_module_info(void)  /* old form */
+
+#define DEFINE_MODULE_INFO                                /* new form */ \
+  SCM STk_module_info(void) { return STk_read_from_C_string(__module_infos); }
+
+
 
 void *STk_find_external_function(char *path, char *fname, int error_if_absent);
 SCM STk_load_object_file(SCM f, char *fname);
@@ -541,18 +547,31 @@ void STk_export_all_symbols(SCM module);
 struct extended_type_descr {
   char *name;
   void (*print)(SCM exp, SCM port, int mode);
+  SCM  (*equal)(SCM o1, SCM o2);
+  SCM  (*eqv)(SCM o1, SCM o2);
+  SCM  class_of;
+  SCM  describe_proc;
 };
 
 extern struct extended_type_descr *STk_xtypes[];
 
+#define HAS_USER_TYPEP(o)      (BOXED_OBJP(o) && (BOXED_TYPE(o) > tc_last_standard))
 #define BOXED_XTYPE(o)                   (STk_xtypes[((stk_header *) o)->type])
-#define XTYPE_NAME(d)                    (d->name)
-#define XTYPE_PRINT(d)                   (d->print)
+#define XTYPE_NAME(d)                    ((d)->name)
+#define XTYPE_PRINT(d)                   ((d)->print)
+#define XTYPE_EQUAL(d)                   ((d)->equal)
+#define XTYPE_EQV(d)                     ((d)->eqv)
+#define XTYPE_CLASS_OF(d)                ((d)->class_of)
+#define XTYPE_DESCRIBE(d)                ((d)->describe_proc)
 #define DEFINE_XTYPE(_type, _descr)      (STk_xtypes[CPP_CONCAT(tc_, _type)]=_descr)
 #define DEFINE_USER_TYPE(_type, _descr)  { _type = STk_new_user_type(_descr); }
 
 int STk_new_user_type(struct extended_type_descr *);
+SCM STk_extended_eqv(SCM o1, SCM o2);
+SCM STk_extended_equal(SCM o1, SCM o2);
+SCM STk_extended_class_of(SCM o);
 int STk_init_extend(void);
+
 /*
   ------------------------------------------------------------------------------
   ----
@@ -890,6 +909,7 @@ struct port_obj {
   char *filename;               /* File name (for file port, a const otherwise) */
   int  line;                    /* Line number  (unused when writing) */
   int  pos;                     /* position from the start of file */
+  int  keyword_colon_pos;       /* position of the ':' in keywords */
   SCM  close_hook;              /* hook called when a file is closed */
 
   /* virtual functions (in the object 'cause the # of ports should be low ) */
@@ -925,13 +945,14 @@ struct port_obj {
 #define PORT_TEXTUAL            (1<<11)
 #define PORT_BINARY             (1<<12)
 
-#define PORT_STREAM(x)    (((struct port_obj *) (x))->stream)
-#define PORT_FLAGS(x)     (((struct port_obj *) (x))->flags)
-#define PORT_UNGETC(x)    (((struct port_obj *) (x))->ungetted_char)
-#define PORT_LINE(x)      (((struct port_obj *) (x))->line)
-#define PORT_POS(x)       (((struct port_obj *) (x))->pos)
-#define PORT_FNAME(x)     (((struct port_obj *) (x))->filename)
-#define PORT_CLOSEHOOK(x) (((struct port_obj *) (x))->close_hook)
+#define PORT_STREAM(x)     (((struct port_obj *) (x))->stream)
+#define PORT_FLAGS(x)      (((struct port_obj *) (x))->flags)
+#define PORT_UNGETC(x)     (((struct port_obj *) (x))->ungetted_char)
+#define PORT_LINE(x)       (((struct port_obj *) (x))->line)
+#define PORT_POS(x)        (((struct port_obj *) (x))->pos)
+#define PORT_FNAME(x)      (((struct port_obj *) (x))->filename)
+#define PORT_KW_COL_POS(x) (((struct port_obj *) (x))->keyword_colon_pos)
+#define PORT_CLOSEHOOK(x)  (((struct port_obj *) (x))->close_hook)
 
 #define PORT_PRINT(x)     (((struct port_obj *) (x))->print_it)
 #define PORT_RELEASE(x)   (((struct port_obj *) (x))->release_it)
@@ -1145,6 +1166,7 @@ SCM   STk_read(SCM port, int case_significant);
 SCM   STk_read_constant(SCM port, int case_significant);
 char *STk_quote2str(SCM symb);
 int   STk_init_reader(void);
+int   STk_keyword_colon_convention(void); // pos. of ':' in symbolro make a  keyword
 extern int STk_read_case_sensitive;
 
 
@@ -1390,6 +1412,7 @@ EXTERN_PRIMITIVE("list->vector", list2vector, subr1, (SCM l));
 
 SCM STk_makevect(int len, SCM init);
 int STk_init_vector(void);
+
 
 /*
   ------------------------------------------------------------------------------

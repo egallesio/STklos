@@ -87,7 +87,9 @@ There are two recommended IDEs that can be used with STklos:
 
 * Geiser:
   http://www.nongnu.org/geiser/
-  The STklos support package is here: https://gitlab.com/emacs-geiser/stklos/
+  The STklos support package can be installed from MELPA: the package
+  name is `geiser-stklos`.
+  The source code is here: https://gitlab.com/emacs-geiser/stklos/
 
 Supported architectures
 ----------------------

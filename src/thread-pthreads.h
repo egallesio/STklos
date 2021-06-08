@@ -1,7 +1,7 @@
 /*
  * thread-pthreads.h	-- Thread support for STklos
  *
- * Copyright © 2006 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,12 +21,10 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  4-Feb-2006 11:03 (eg)
- * Last file update: 16-Apr-2006 10:53 (eg)
+ * Last file update:  4-Jun-2021 10:59 (eg)
  */
 #ifndef _STK_THREAD_PTHREADS_H
 #define _STK_THREAD_PTHREADS_H
-
-#include <pthread.h>
 
 struct sys_thread_obj {
   pthread_t pthread;

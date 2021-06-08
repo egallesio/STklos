@@ -1,7 +1,7 @@
 /*
  *  p o r t . c                 -- ports implementation
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 13-Nov-2020 09:52 (eg)
+ * Last file update: 27-Apr-2021 12:15 (eg)
  *
  */
 
@@ -796,9 +796,9 @@ DEFINE_PRIMITIVE("%write-string", write_string, subr4, (SCM str, SCM port,
 /*
 <doc EXT write-chars
  * (write-chars str)
- * (write-char str port)
+ * (write-chars str port)
  *
- * Writes the character of string |str| to the given |port| and
+ * Writes the characters of string |str| to the given |port| and
  * returns an unspecified value.  The |port| argument may be omitted,
  * in which case it defaults to the value returned by
  * |current-output-port|.
@@ -967,6 +967,8 @@ static SCM internal_format(int argc, SCM *argv, int error)
                   SCM ff, ref, tmp;
                   int i;
 
+                  *width = *digits = '\0'; /* initialize arrays */
+
                   if (argc-- <= 0) goto TooMuch;
 
                   for (i=0; isdigit(*p); i++) {
@@ -1120,7 +1122,8 @@ Incorrect_format_width:
  * of the next |obj|. The standard pretty-printer is used here.])
  *
  * (item [|~?| is replaced by the result of the recursive call of |format|
- * with the two next |obj|.])
+ * with the two next |obj|: the first item should be a string, and the
+ * second, a list with the arguments.])
  *
  * (item [|~k| or |~K| is another name for |~?|])
  *
@@ -1352,7 +1355,7 @@ DEFINE_PRIMITIVE("close-port", close_port, subr1, (SCM port))
  * (port-closed? port)
  * (port-open?  port)
  *
- * |port-closed| returns |#t| if |port| is closed and |#f| otherwise.
+ * |port-closed?| returns |#t| if |port| is closed and |#f| otherwise.
  * On the contrary, |port-open?| returns |#t| if |port| is open and
  * |#f| otherwise.
  * @l
@@ -1698,8 +1701,8 @@ static void print_port(SCM obj, SCM port, int _UNUSED(mode))
 
 /* The stucture which describes the port type */
 static struct extended_type_descr xtype_port = {
-  "port",                       /* name */
-  print_port                    /* print function */
+  .name  = "port",
+  .print = print_port
 };
 
 

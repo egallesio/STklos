@@ -1,7 +1,7 @@
 ;;;;
 ;;;; extract-doc.stk    -- Extrcat Documentation from STklos source files
 ;;;;
-;;;; Copyright © 2000-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Nov-2000 11:08 (eg)
-;;;; Last file update: 14-Oct-2019 15:31 (eg)
+;;;; Last file update:  7-May-2021 19:17 (eg)
 ;;;;
 
 (define start-doc-rgxp          (string->regexp "^<doc "))
@@ -125,7 +125,7 @@
 ;; "Create" the file on standard output (will be redirected in the Makefile)
 ;;
 (format #t ";; **DO NOT EDIT**\t\t\t-*- scheme -*-\n")
-(format #t ";; File generated automatically on ~A\n" (exec "date"))
+(format #t ";; File generated automatically on ~A\n\n" (date))
 
 
 (for-each (lambda (f)

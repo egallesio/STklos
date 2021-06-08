@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update:  5-Mar-2020 14:42 (eg)
+;; Last file update: 30-Apr-2021 15:34 (eg)
 ;;
 ;; ======================================================================
 
@@ -83,16 +83,36 @@ identical in every points, share the same philosophy.]))
 (index "keyword")
 (index "#!fold-case")
 (index "#!no-fold-case")
+(index "#!keyword-colon-position-none")
+(index "#!keyword-colon-position-before")
+(index "#!keyword-colon-position-after")
+(index "#!keyword-colon-position-both")
 
-(p [In ,(stklos), identifiers which start (or end) with a colon ,(q (code
-":")) are considered as keywords.  For instance ,(code ":foo") and ,(code
-"bar:") are ,(stklos) keywords, but ,(code "not:key") is not a
+(p [In ,(stklos), by default, identifiers which start (or end) with a colon
+,(q (code ":")) are considered as keywords.  For instance ,(code ":foo") and
+,(code "bar:") are ,(stklos) keywords, but ,(code "not:key") is not a
 keyword. Alternatively, to be compatible with other Scheme implementations,
-the notation ,(code "#:foo") is also available to denote the keyword of
-name ,(code "foo"). See section,(~),(ref :section "Keywords") for more
-information])
+the notation ,(code "#:foo") is also available to denote the keyword of name
+,(code "foo"). See section,(~),(ref :section "Keywords") for more
+information.])
 
-(p [Note that, by default, ,(stklos) is case sensitive as specified
+(p [The reader behavior, concerning keywords, can also be changed by the
+   following directives:]
+   (itemize
+     (item [the ,(code "#!keyword-colon-position-none") tells the reader
+           that colon in a symbol should not be interpreted as a keyword;])
+     (item [the ,(code "#!keyword-colon-position-before") tells the reader
+           that a symbol starting with a colon should be interpreted as
+           a keyword;])
+     (item [the ,(code "#!keyword-colon-position-after")  tells the reader
+           that a symbol ending with a colon should be interpreted as
+           a keyword;])
+      (item [the ,(code "#!keyword-colon-position-both") tells the reader
+           that a symbol starting or ending with a colon should be interpreted
+           as a keyword]))
+    [In any case, the notation ,(code "#:key") is always read as a keyword.])
+
+(p [By default, ,(stklos) is case sensitive as specified
          by R7RS. This behavior can be changed by]
    (itemize
     (item [the ,(code "--case-insensitive") option used for the commands
@@ -189,7 +209,7 @@ EOF])
    (itemize
       (item [,(code "#true") and ,(code "#false") are other names for
 the constants ,(code "#t") and ,(code "#f") as proposed by ,(rseven).])
-      
+
       (item [,(q (code "[]")) Brackets are equivalent to
 parentheses. They are used for grouping and to build lists. A
 list opened with a left square bracket must be closed with a

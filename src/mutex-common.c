@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update:  2-Jun-2020 12:31 (eg)
+ * Last file update: 10-Apr-2021 18:49 (eg)
  */
 
 #include <unistd.h>
@@ -265,14 +265,14 @@ static void print_condv(SCM condv, SCM port, int _UNUSED(mode))
 
 /* The stucture which describes the mutex type */
 static struct extended_type_descr xtype_mutex = {
-  "mutex",                      /* name */
-  print_mutex                   /* print function */
+  .name  = "mutex",
+  .print = print_mutex
 };
 
 /* The stucture which describes the condv type */
 static struct extended_type_descr xtype_condv = {
-  "condv",                      /* name */
-  print_condv                   /* print function */
+  .name  = "condv",
+  .print = print_condv
 };
 
 

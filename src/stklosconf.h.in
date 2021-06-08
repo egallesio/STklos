@@ -18,7 +18,7 @@
 /* Define to 1 if you have the `atexit' function. */
 #undef HAVE_ATEXIT
 
-/* System provides flopen */
+/* System provides dlopen */
 #undef HAVE_DLOPEN
 
 /* Define to 1 if you have the `dup2' function. */

@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 15-Mar-2021 14:33 (eg)
+# Last file update:  2-Jun-2021 11:37 (eg)
 
 
 EXTRA_DIST   =
@@ -29,6 +29,11 @@ SUBDIRS      =  @PCRE@ @GMP@ @FFI@ $(INSTDIRS) doc tests
 
 STKLOS_BINARY= ./src/stklos
 STKLOS_FLAGS = --no-init-file --case-sensitive
+
+
+schemeprefix    = $(prefix)/share/@PACKAGE@
+schemelibprefix = $(prefix)/lib/@PACKAGE@/
+
 
 .PHONY:  test tests
 
@@ -70,6 +75,9 @@ distclean: clean
 
 test tests: all
 	(cd tests; $(MAKE) test)
+
+uninstall-hook:
+	rmdir $(schemeprefix) $(schemelibprefix) || true
 
 # Local Variables:
 # tab-width: 4

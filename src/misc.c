@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  4-Feb-2021 11:20 (eg)
+ * Last file update:  4-Jun-2021 15:52 (eg)
  */
 
 #include "stklos.h"
@@ -159,21 +159,23 @@ DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
  * GC stuff
  *
 \*===========================================================================*/
-#ifdef STK_DEBUG
-static void stklos_GC_warning(char *msg, GC_word arg)
+static void GC_warning_handler(char *msg, GC_word arg)
 {
-  fprintf(stderr, msg, arg);
-  STk_debug("GC warning: STklos value of arg=~S", (SCM) arg);
+  char buffer[512];
+
+  if (strstr(msg, "cycle")) return;
+  snprintf(buffer, sizeof(buffer), msg, arg);
+  fprintf(stderr, "*** %s", buffer);
+  if (strstr(msg, "Returning NULL")) STk_error("OUT of memory");
 }
-#endif
+
 
 
 void STk_gc_init(void)
 {
   GC_init();
-#ifdef STK_DEBUG
-  GC_set_warn_proc(stklos_GC_warning);
-#endif
+  /* Consider a GC warning as errors. Abort as soon as we encounter one */
+  GC_set_warn_proc(GC_warning_handler);
 }
 
 

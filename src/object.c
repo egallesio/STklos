@@ -2,7 +2,7 @@
  *
  *  o b j e c t . c                     -- Objects support
  *
- * Copyright © 1994-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update: 30-May-2020 17:26 (eg)
+ * Last file update: 29-Apr-2021 19:12 (eg)
  */
 
 #include "stklos.h"
@@ -555,7 +555,7 @@ DEFINE_PRIMITIVE("%slot-ref", undoc_slot_ref, subr2, (SCM obj, SCM slot_name))
 // {
 // #ifdef FIXME
 //    SCM old_val = get_slot_value(classe, obj, slot_name);
-// 
+//
 //   //FIXMOI:  if (old_val == STk_void)
 // #endif
 //     set_slot_value(classe, obj, slot_name, val);
@@ -564,7 +564,7 @@ DEFINE_PRIMITIVE("%slot-ref", undoc_slot_ref, subr2, (SCM obj, SCM slot_name))
 
 DEFINE_PRIMITIVE("%initialize-object", initialize_obj, subr2,(SCM obj,SCM initargs))
 {
-  static char k_init_keyword[] = ":init-keyword";
+  static char k_init_keyword[] = "init-keyword";
   SCM tmp, get_n_set, slots;
   SCM init_keyword = STk_makekey(k_init_keyword);
   SCM classe       = INST_CLASS_OF(obj);
@@ -1023,15 +1023,19 @@ DEFINE_PRIMITIVE("class-of", class_of, subr1, (SCM obj))
     case tc_struct_type:return (COND_TYPEP(obj)) ? Cond_type: Struct_type;
     case tc_struct:     return (CONDP(obj)) ? Cond : Struct;
     case tc_box:        return Box;
-    default:
-#ifdef FIXME
-      //XX      if (EXTENDEDP(obj))
-      //XX          return STk_extended_class_of(obj);
-      //XX    else
-#endif
-                        return (STk_procedurep(obj) == STk_true)? Procedure :
-                                                                  UnknownClass;
+  default: ;
   }
+
+  if (STk_procedurep(obj) == STk_true)
+    return Procedure;
+
+  if (HAS_USER_TYPEP(obj)) {
+    SCM tmp = STk_extended_class_of(obj);
+    if (tmp) return tmp;
+  }
+
+  /* Return class <unknown> */
+  return UnknownClass;
 }
 
 /* ==== I N S T A N C E S */
@@ -1110,13 +1114,12 @@ static void print_instance(SCM inst, SCM port, int mode)
 
 
 static struct extended_type_descr xtype_instance = {
-  "instance",
-  print_instance
+  .name  = "instance",
+  .print = print_instance
 };
 
 static struct extended_type_descr xtype_next_method = {
-  "next-method",
-  NULL,
+  .name = "next-method",
 };
 
 

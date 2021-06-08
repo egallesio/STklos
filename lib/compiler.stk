@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  2-Apr-2021 15:22 (eg)
+;;;; Last file update:  8-Apr-2021 18:42 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -227,7 +227,7 @@ doc>
       (let ((bind (cadr l))
             (body (cddr l)))
         (if (pair? bind)
-            `(define ,(car bind) (lambda ,(cdr bind) ,@body))
+            (define->lambda `(define ,(car bind) (lambda ,(cdr bind) ,@body)))
             l))
       (begin
         (compiler-error 'define l "ill formed definition ~S" l)

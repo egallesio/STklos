@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 27-Nov-2020 17:00 (eg)
+;; Last file update: 26-Apr-2021 11:19 (eg)
 ;;
 ;; ======================================================================
 
@@ -181,7 +181,7 @@ are given the table ,(ref :figure "Feature identifiers").])
                                        (display " "))
                                      (cdr x)))))))
             *srfi-shortcuts*)))))
-       
+
 ;; End section
 )
 
@@ -288,12 +288,52 @@ command (without option) in Scheme:])
 general than the one defined in SRFI-23.])
 
 ;; ----------------------------------------------------------------------
+;; SRFI 25 -- Arrays
+;; ----------------------------------------------------------------------
+(index "arrays")
+
+(gen-srfi-documentation 25 [
+
+  ,(stklos) implements the arrays as defined in the SRFI document. All the forms
+defined in the SRFI are implemented in ,(stklos), but some other
+functions, not present in the SRFI, are documented here.
+
+,(linebreak)
+,(insertdoc 'shape?)
+,(insertdoc 'shared-array?)
+,(insertdoc 'shape-for-each)
+
+,(insertdoc 'share-nths)
+,(insertdoc 'share-column)
+,(insertdoc 'share-row)
+,(insertdoc 'share-array/origin)
+
+,(insertdoc 'array-copy+share)
+,(insertdoc 'array-size)
+,(insertdoc 'array-shape)
+,(insertdoc 'array->list)
+,(insertdoc 'array->vector)
+,(insertdoc 'array-length)
+,(insertdoc 'array-map)
+,(insertdoc 'array-map!)
+,(insertdoc 'array-append)
+,(insertdoc 'array-share-count)
+,(insertdoc 'array-copy)
+,(insertdoc 'array-for-each-index)
+,(insertdoc 'tabulate-array)
+,(insertdoc 'array-retabulate!)
+,(insertdoc 'transpose)
+])
+
+
+
+;; ----------------------------------------------------------------------
 ;; SRFI 27 --  Sources of Random Bits
 ;; ----------------------------------------------------------------------
 (index "random-integer")
 (index "random-real")
 (gen-srfi-documentation 27 [Using primitives ,(ref :mark "random-integer"
-:text "random-integer") or ,(ref :mark "random-real" :text "random-real") 
+:text "random-integer") or ,(ref :mark "random-real" :text "random-real")
 automatically loadthis SRFI.])
 
 ;; ----------------------------------------------------------------------

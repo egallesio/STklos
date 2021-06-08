@@ -2,7 +2,7 @@
  *
  * e n v . c                    -- Environment management
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  3-Sep-2020 15:18 (eg)
+ * Last file update: 10-Apr-2021 18:39 (eg)
  */
 
 #include "stklos.h"
@@ -493,8 +493,8 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
 
 /* The stucture which describes the modules type */
 static struct extended_type_descr xtype_module = {
-  "module",                     /* name */
-  print_module                  /* print function */
+  .name  = "module",
+  .print = print_module
 };
 
 
@@ -502,8 +502,7 @@ static struct extended_type_descr xtype_module = {
 
 /* The stucture which describes the frame type */
 static struct extended_type_descr xtype_frame = {
-  "frame",                      /* name */
-  NULL                          /* print function */
+  .name= "frame"                      /* name */
 };
 
 

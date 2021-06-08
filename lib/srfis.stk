@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 28-Jan-2021 18:38 (eg)
+;;;; Last file update: 21-May-2021 15:20 (eg)
 ;;;;
 
 
@@ -63,11 +63,11 @@
     (22 "Running Scheme Scripts on Unix")
     (23 "Error reporting mechanism" (error))
     ;;  24 ........ Withdrawn
-    ;;  25 Multi-dimensional Arrays
+    (25 "Multi-dimensional Arrays" () "srfi-25")
     (26 "Notation for Specializing Parameters without Currying" () "srfi-26")
     (27 "Source of random bits" (random) "srfi-27")
     (28 "Basic Format Strings")
-    ;;   29 Localization
+    (29 "Localization" () "srfi-29")
     (30 "Nested Multi-line Comments")
     (31 "A special form for recursive evaluation")
     ;;   32 ........ Withdrawn
@@ -132,7 +132,7 @@
     ;; 91  ....... withdrawn
     ;; 92  ....... withdrawn
     ;; 93  ....... withdrawn
-    ;; 94  Type-Restricted Numerical Functions
+    (94 "Type-Restricted Numerical Functions" () "srfi-94")
     ;; 95  Sorting and Merging
     (96 "SLIB Prerequisites" () "srfi-96")
     ;; 97 SRFI Libraries
@@ -173,7 +173,7 @@
     ;; 132  Sort Libraries
     (133  "Vector Library (R7RS-compatible)" (vector) "srfi-133")
     (134  "Immutable Deques" (immutable-deques) "srfi-134")
-    (135  "Immutable Texts" (immuttable-texts) "srfi-135")
+    (135  "Immutable Texts" (immutable-texts) "srfi-135")
     ;; 136  Extensible record types
     (137 "Minimal Unique Types" () "srfi-137")
     ;; 138  Compiling Scheme programs to executables
@@ -182,7 +182,7 @@
     (141 "Integer Division" (integer-division) "srfi-141")
     ;; 142  ....... withdrawn
     (143  "Fixnums")
-    ;; 144  Flonums
+    (144  "Flonums" () "srfi-144")
     (145 "Assumptions")
     ;; 146  Mappings
     ;; 147  Custom macro transformers
@@ -247,7 +247,7 @@
     ;; 205  POSIX Terminal Fundamentals (draft)
     ;; 206  Auxiliary Syntax Keywords
     (207  "String-notated bytevectors" () "srfi-207")
-    ;; 208  NaN procedures
+    (208  "NaN procedures")
     ;; 209  Enumerations and Enum Sets
     ;; 210  Procedures and Syntax for Multiple Values
     ;; 211  Namespaces for Scheme Macro Systems (draft)
@@ -258,7 +258,7 @@
     (216  "SICP Prerequisites (Portable)" () "srfi-216")
     (217  "Integer Sets" () "srfi-217")
     ;; 218 ...... withdrawn
-    ;; 219 Define higher-order lambda
+    (219 "Define higher-order lambda")
     ;; 220 Line directives (draft)
     ;; 221 Generator/accumulator sub-library (draft)
     ;; 222 Compound objexts (draft)

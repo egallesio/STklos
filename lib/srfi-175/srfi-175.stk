@@ -2,7 +2,7 @@
 ;;;;
 ;;;; srfi-175.stk         -- Wrapper for the implementation of SRFI-175
 ;;;;
-;;;; Copyright © 2020 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,10 +22,8 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 28-Jul-2020 15:35
-;;;; Last file update: 28-Jul-2020 15:42 (eg)
+;;;; Last file update: 15-May-2021 09:09 (eg)
 ;;;;
-
-(load "srfi-175-impl")
 
 (select-module STklos)
 (import SRFI-175)

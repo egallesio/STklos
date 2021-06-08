@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Jan-2021 11:54
- * Last file update:  2-Apr-2021 15:33 (eg)
+ * Last file update: 31-May-2021 17:08 (eg)
  */
 
 #include <limits.h>
@@ -40,6 +40,14 @@
 #include "stklos.h"
 #include "struct.h"
 #include "fport.h"
+
+#include "srfi-170-incl.c"
+
+#if defined(__APPLE__) && defined(__MACH__)  /* Darwin */
+#define st_atim st_atimespec
+#define st_ctim st_ctimespec
+#define st_mtim st_mtimespec
+#endif
 
 static SCM file_info_type, dir_info_type, user_info_type, group_info_type;
 
@@ -1025,5 +1033,9 @@ MODULE_ENTRY_START("srfi-170")
   /* Export all the symbols we have just defined */
   STk_export_all_symbols(module);
 
+  /* Execute Scheme code */
+  STk_execute_C_bytecode(__module_consts, __module_code);
 }
 MODULE_ENTRY_END
+
+DEFINE_MODULE_INFO

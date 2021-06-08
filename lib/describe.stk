@@ -1,7 +1,7 @@
 ;;;;
 ;;;; d e s c r i b e . s t k 	-- The DESCRIBE method (partly stolen fom Elk lib)
 ;;;;
-;;;; Copyright © 1993-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 21-Mar-1993 14:33
-;;;; Last file update:  3-Dec-2011 13:45 (eg)
+;;;; Last file update: 11-Apr-2021 20:01 (eg)
 ;;;;
 
 
@@ -57,8 +57,19 @@
      ((struct-type? x)  (format port "the type structure named ~A"
 				(struct-type-name x)))
      ((module? x)	(format port "a module named ~A" (module-name x)))
-     (else	  	(format port "an an instance of class ~A"
-				(class-name (class-of x)))))
+     (else              (let ((user-type-name (%user-type-name x)))
+                          (if user-type-name
+                              ;; Object type is user defined.
+                              (let ((proc (%user-type-proc user-type-name
+                                                           'describe)))
+                                (if proc
+                                    (proc x port) ;; Use user defined procedure
+                                    (format port "an objet whose type name is ~s"
+                                            user-type-name)))
+                              (begin
+                                ;; an object instance
+                                (format port "an an instance of class ~A"
+                                (class-name (class-of x))))))))
   (format port ".~%")
   (void))
 
@@ -134,9 +145,8 @@
 ;  (format port "~%Field Initializers ~%    ")
 ;  (write (slot-ref x 'initializers)) (newline)
 
-;  (format port "~%Getters and Setters~%    ")
-;  (write (slot-ref x 'getters-n-setters)) (newline)
-
+  ;;  (format port "~%Getters and Setters~%    ")
+  ;;  (write (slot-ref x 'getters-n-setters)) (newline)
   (void))
 
 ;;; ======================================================================

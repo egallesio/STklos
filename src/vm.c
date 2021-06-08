@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  3-Sep-2020 15:15 (eg)
+ * Last file update: 10-Apr-2021 18:48 (eg)
  */
 
 // INLINER values
@@ -2081,8 +2081,8 @@ static void print_continuation(SCM cont, SCM port, int _UNUSED(mode))
 }
 
 static struct extended_type_descr xtype_continuation = {
-  "continuation",               /* name */
-  print_continuation            /* print function */
+  .name  = "continuation",
+  .print = print_continuation
 };
 
 

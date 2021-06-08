@@ -1,7 +1,7 @@
 /*
  * s i o . c                                    -- Low level I/O
  *
- * Copyright © 1993-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ????
- * Last file update: 18-Jul-2018 16:24 (eg)
+ * Last file update:  6-May-2021 17:25 (eg)
  *
  *
  * Completely rewritten for the STklos version (Jan. 2000)
@@ -87,22 +87,23 @@ STk_ungetc(int c, SCM port)
 int
 STk_close(SCM port)
 {
-  int res, exec_hook = FALSE;
+  if (PORT_IS_CLOSEDP(port)) {
+    return 0;
+  } else {
+    int res;
 
-  if (! (PORT_FLAGS(port) & PORT_CLOSED)) {
     PORT_RELEASE(port)(port);
-    exec_hook = TRUE;
+
+    STk_register_finalizer(port, NULL); /* Unregister (possible) finalizer */
+    PORT_FLAGS(port) |= PORT_CLOSED;
+    res = PORT_CLOSE(port)(PORT_STREAM(port));
+
+    /* Eventually call the close hook */
+    if (PORT_CLOSEHOOK(port) != STk_false)
+      STk_C_apply(PORT_CLOSEHOOK(port), 0);
+
+    return res;
   }
-
-  STk_register_finalizer(port, NULL); /* Unregister (possible) finalizer */
-  PORT_FLAGS(port) |= PORT_CLOSED;
-  res = PORT_CLOSE(port)(PORT_STREAM(port));
-
-  /* Eventually call the close hook */
-  if (exec_hook && (PORT_CLOSEHOOK(port) != STk_false))
-    STk_C_apply(PORT_CLOSEHOOK(port), 0);
-
-  return res;
 }
 
 int
@@ -125,7 +126,7 @@ STk_put_character(int c, SCM port)       /* c may be a wide char */
 
     str[n] = '\0';
 
-    n = 0; 
+    n = 0;
     for (s = str; *s; s++)
       n += PORT_PUTC(port)(*s, PORT_STREAM(port));
 

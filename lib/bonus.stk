@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  2-Apr-2021 17:14 (eg)
+;;;; Last file update: 21-May-2021 18:17 (eg)
 ;;;;
 
 
@@ -830,7 +830,8 @@ doc>
  *
  * Evaluates the expressions |expr1|, |expr2|, ... and returns the
  * result of the last expression. This form prints also the time spent
- * for this evaluation on the current error port.
+ * for this evaluation, in milliseconds, on the current error port.
+ * This is CPU time, and not real ("wall") time.
 doc>
 |#
 (define-macro time
@@ -870,7 +871,7 @@ doc>
            (let ((limit  (gensym))
                  (result (if (null? result) (list '(void)) result)))
              `(let ((,limit ,count))
-                (do ((,var 0 (+ ,var 1)))
+                (do ((,var 0 (fx+ ,var 1)))
                     ((>= ,var ,limit) ,@result)
                   ,@body))))
          bindings))
@@ -939,7 +940,7 @@ doc>
  * (base64-encode-string str)
  *
  * Return a string contening the contents of |str| converted to Base64
- * encoded format
+ * encoded format.
 doc>
 
 <doc EXT base64-decode-string
@@ -1169,7 +1170,7 @@ doc>
  * (exec-list str)
  *
  * These procedures execute the command given in |str|. The command given
- * in |str| is passed to |/bin/sh|. |Exec| returns a strings which contains
+ * in |str| is passed to |/bin/sh|. |Exec| returns a string which contains
  * all the characters that the command |str| has printed on it's standard
  * output, whereas |exec-list| returns a list of the lines which constitute
  * the output of |str|.
@@ -1492,6 +1493,10 @@ doc>
 <doc EXT with-mutex
  * (with-mutex mtx <body>)
  *
+ * Executes |body|, protected by mutex |mtx|. The mutex will
+ * be locked before and released after execution of |body|, and
+ * also on entrance or departure of its dynamic context
+ * (lock and unlock are used with |dynamic-wind|).
 doc>
 |#
 (define (with-mutex mtx  proc)
@@ -2195,6 +2200,27 @@ doc>
     (and (not (equal? file ""))
          (string-append (dirname file) "/"))))
 
+
+;; ----------------------------------------------------------------------
+;;  SRFI-208: "NaN procedures"
+;; ----------------------------------------------------------------------
+#|
+<doc EXT make-nan
+ * (make-nan negative? quiet? payload)
+ * (make-nan negative? quiet? payload float)
+ *
+ * Returns a NaN whose sign bit is equal to |negative?|  (#t for negative,
+ * #f for positive), whose quiet bit is equal to quiet? (#t for quiet,
+ * #f for signaling), and whose payload is the positive exact integer payload.
+ * It is an error if payload is larger than a NaN can hold.
+ *
+ * The optional parameter |float|, is never used in ,(stklos).
+ * 
+ * This function is defined in ,(quick-link-srfi 208).
+doc>
+|#
+(define (make-nan negative? quiet? payload :optional float)
+  (%make-nan negative? quiet? payload))
 
 
 ;; ----------------------------------------------------------------------

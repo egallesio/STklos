@@ -1,7 +1,7 @@
 /*
  * thread-common.c                      -- Threads support in STklos
  *
- * Copyright © 2006-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2006-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update:  2-Jun-2020 10:49 (eg)
+ * Last file update: 10-Apr-2021 18:48 (eg)
  */
 #include <unistd.h>
 #include "stklos.h"
@@ -328,8 +328,8 @@ static void print_thread(SCM thread, SCM port, int _UNUSED(mode))
 
 /* The stucture which describes the thread type */
 static struct extended_type_descr xtype_thread = {
-  "thread",                     /* name */
-  print_thread                  /* print function */
+  .name  = "thread",
+  .print = print_thread
 };
 
 /* ---------------------------------------------------------------------- */

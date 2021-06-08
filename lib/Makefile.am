@@ -20,9 +20,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Mar-2021 15:28 (eg)
+# Last file update:  8-Jun-2021 09:02 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d
+SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
+		  srfi-25 srfi-27 srfi-133 srfi-144 srfi-170 srfi-175
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
@@ -54,7 +55,7 @@ scheme_BOOT = assembler.stk \
           repl.stk          \
           repl-readline.stk \
           runtime.stk       \
-		  srfis-data.scm    \
+          srfis-data.scm    \
           srfi-0.stk        \
           str.stk           \
           struct.stk        \
@@ -91,7 +92,7 @@ SRC_STK = bigloo-support.stk  \
           srfi-14.stk         \
           srfi-17.stk         \
           srfi-26.stk         \
-          srfi-27.stk         \
+          srfi-29.stk         \
           srfi-31.stk         \
           srfi-35.stk         \
           srfi-36.stk         \
@@ -109,15 +110,15 @@ SRC_STK = bigloo-support.stk  \
           srfi-70.stk         \
           srfi-74.stk         \
           srfi-89.stk         \
+          srfi-94.stk         \
           srfi-96.stk         \
           srfi-100.stk        \
           srfi-113.stk        \
           srfi-117.stk        \
-	      srfi-127.stk        \
+          srfi-127.stk        \
           srfi-128.stk        \
           srfi-129.stk        \
           srfi-130.stk        \
-          srfi-133.stk        \
           srfi-134.stk        \
           srfi-135.stk        \
           srfi-137.stk        \
@@ -126,11 +127,9 @@ SRC_STK = bigloo-support.stk  \
           srfi-156.stk        \
           srfi-158.stk        \
           srfi-161.stk        \
-          srfi-170.stk        \
           srfi-171.stk        \
           srfi-173.stk        \
           srfi-174.stk        \
-          srfi-175.stk        \
           srfi-180.stk        \
           srfi-185.stk        \
           srfi-189.stk        \
@@ -144,9 +143,6 @@ SRC_STK = bigloo-support.stk  \
           tar.stk             \
           trace.stk
 
-SRC_C = srfi-133-impl.c \
-        srfi-170-impl.c \
-        srfi-175-impl.c
 
 scheme_OBJS = compfile.ostk     \
           bigmatch.ostk         \
@@ -166,7 +162,7 @@ scheme_OBJS = compfile.ostk     \
           srfi-1.ostk           \
           srfi-2.ostk           \
           srfi-4.ostk           \
-          srfi-5.ostk	        \
+          srfi-5.ostk           \
           srfi-7.ostk           \
           srfi-9.ostk           \
           srfi-11.ostk          \
@@ -174,7 +170,7 @@ scheme_OBJS = compfile.ostk     \
           srfi-14.ostk          \
           srfi-17.ostk          \
           srfi-26.ostk          \
-          srfi-27.ostk          \
+          srfi-29.ostk          \
           srfi-31.ostk          \
           srfi-35.ostk          \
           srfi-36.ostk          \
@@ -192,6 +188,7 @@ scheme_OBJS = compfile.ostk     \
           srfi-70.ostk          \
           srfi-74.ostk          \
           srfi-89.ostk          \
+          srfi-94.ostk          \
           srfi-96.ostk          \
           srfi-100.ostk         \
           srfi-113.ostk         \
@@ -200,7 +197,6 @@ scheme_OBJS = compfile.ostk     \
           srfi-128.ostk         \
           srfi-129.ostk         \
           srfi-130.ostk         \
-          srfi-133.ostk         \
           srfi-134.ostk         \
           srfi-135.ostk         \
           srfi-137.ostk         \
@@ -209,11 +205,9 @@ scheme_OBJS = compfile.ostk     \
           srfi-156.ostk         \
           srfi-158.ostk         \
           srfi-161.ostk         \
-          srfi-170.ostk         \
           srfi-171.ostk         \
           srfi-173.ostk         \
           srfi-174.ostk         \
-          srfi-175.ostk         \
           srfi-180.ostk         \
           srfi-185.ostk         \
           srfi-189.ostk         \
@@ -227,18 +221,17 @@ scheme_OBJS = compfile.ostk     \
           tar.ostk              \
           trace.ostk
 
-scheme_SOLIBS = srfi-133-impl.@SH_SUFFIX@ \
-                srfi-170-impl.@SH_SUFFIX@ \
-                srfi-175-impl.@SH_SUFFIX@ 
 
-DOCDB	    = DOCDB
+DOCDB       = DOCDB
+BASEDIR     = ..
+
 
 #======================================================================
-schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@
-schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@
-scheme_DATA    = $(scheme_extra) $(scheme_OBJS)
-noinst_DATA    = $(scheme_SOLIBS)
-scheme_sources = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
+schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@
+schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@
+scheme_DATA     = $(scheme_extra) $(scheme_OBJS)
+schemelib_DATA  = $(scheme_SOLIBS)
+scheme_sources  = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 
 SUFFIXES = .stk .ostk .scm .c
@@ -251,7 +244,7 @@ SUFFIXES = .stk .ostk .scm .c
 .c.@SH_SUFFIX@ :
 	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
 	-c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@
 	/bin/rm -f $*.o
 
 #======================================================================
@@ -263,9 +256,9 @@ boot:	../src/boot.img
 generate-git-info:
 	@(cd ../src; ../utils/generate-git-info && $(MAKE) all)
 
-install-exec-hook:
-	install -d $(DESTDIR)$(schemelibdir)
-	install $(scheme_SOLIBS) $(DESTDIR)$(schemelibdir)
+#install-exec-hook:
+#	mkdir -p $(DESTDIR)$(schemelibdir)
+#	install $(scheme_SOLIBS) $(DESTDIR)$(schemelibdir)
 
 ../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \
@@ -306,7 +299,6 @@ install-sources:
 	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)/$(schemedir)
 
 
-
 # Explicit some dependencies here to avoid some warnings when compiling files
 $(SCHEME_OBJS): ../src/boot.img
 compfile.ostk: getopt.ostk
@@ -335,6 +327,10 @@ srfis-data.scm: srfis.stk
 	(cd ..; $(MAKE) SUPPORTED-SRFIS)
 
 doc: $(DOCDB)
+	@for i in $(SUBDIRS) ;do \
+	   (cd $$i; $(MAKE) doc)\
+	done
+
 
 $(DOCDB): $(scheme_sources)
 	$(STKLOS_BINARY) -q -c -b ../src/boot.img -f ../doc/extract-doc \
@@ -352,6 +348,11 @@ distclean: clean
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) distclean)\
 	done
+
+uninstall-hook:
+	(cd $(schemedir) && rm -f $(DOCDB) $(scheme_sources))
+	rmdir $(schemedir) $(schemelibdir) || true
+
 
 # Local Variables:
 # tab-width: 4

@@ -21,30 +21,24 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 09-Jan-2021 09:14
-;;;; Last file update:  2-Apr-2021 15:40 (eg)
+;;;; Last file update: 12-May-2021 11:15 (eg)
 ;;;;
-
-(define-module SRFI-170
-  (%compile-time-define open-file fd->port create-fifo
-                        create-hard-link create-symlink read-symlink
-                        truncate-file file-info file-info-directory?
-                        file-info-fifo? file-info-symlink? file-info-regular?
-                        file-info-socket? file-info-device? set-file-mode
-                        %set-file-owner set-file-times
-                        open-directory read-directory close-directory real-path
-                        file-space umask set-umask! current-directory
-                        set-current-directory! nice user-uid user-effective-uid
-                        user-gid user-effective-gid user-supplementary-gids user-info
-                        group-info posix-time monotonic-time terminal?
-                        ;; structures & conditions
-                        %user-info %file-info &posix-error)
-
-  (load "srfi-170-impl")
-)
-
 
 (select-module SRFI-170)
 
+(%compile-time-define open-file fd->port create-fifo
+                      create-hard-link create-symlink read-symlink
+                      truncate-file file-info file-info-directory?
+                      file-info-fifo? file-info-symlink? file-info-regular?
+                      file-info-socket? file-info-device? set-file-mode
+                      %set-file-owner set-file-times
+                      open-directory read-directory close-directory real-path
+                      file-space umask set-umask! current-directory
+                      set-current-directory! nice user-uid user-effective-uid
+                      user-gid user-effective-gid user-supplementary-gids user-info
+                      group-info posix-time monotonic-time terminal?
+                      ;; structures & conditions
+                      %user-info %file-info &posix-error)
 
 
 ;; defines a list of symbols evaluating to themselves:
@@ -371,6 +365,8 @@
 ;;;
 ;;; END OF MODULE
 ;;;
+
+;;; ======================================================================
 
 (select-module STklos)
 (import SRFI-170)

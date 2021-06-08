@@ -1,7 +1,7 @@
 /*
  * parameter.c  -- Parameter Objects (SRFI-39)
  *
- * Copyright © 2003-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  1-Jul-2003 11:38 (eg)
- * Last file update: 12-Aug-2020 18:14 (eg)
+ * Last file update: 10-Apr-2021 18:44 (eg)
  */
 
 
@@ -230,7 +230,7 @@ DEFINE_PRIMITIVE("parameter?", parameterp, subr1, (SCM obj))
  *
 \*===========================================================================*/
 
-static struct extended_type_descr xtype_parameter = { "parameter", NULL };
+static struct extended_type_descr xtype_parameter = { .name = "parameter" };
 
 int STk_init_parameter(void)
 {

@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 12-Mar-2021 16:18 (eg)
+### Last file update: 18-May-2021 15:58 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -42,7 +42,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
-extraAC_PROG_LEX
+# AC_PROG_LEX
 AC_PROG_MKDIR_P
 AC_CHECK_PROG(PKGCONFIG, pkg-config, "pkg-config", "false")
 
@@ -80,6 +80,9 @@ if test X$LD = X
 then
    LD="ld"
 fi
+
+# DLLIBS is used for dynamically loaded libraries on broken systems
+DLLIBS=""
 
 eval `env CC=$CC LD=$LD /bin/sh ./utils/shlib-options`
 
@@ -143,7 +146,7 @@ AC_CHECK_FUNC(dlopen, HAVE_DLOPEN="yes", AC_CHECK_LIB(dl, dlopen, LIBS="-ldl $LI
 
 if test "X$HAVE_DLOPEN" = "Xyes"
 then
-  AC_DEFINE(HAVE_DLOPEN, 1, [System provides flopen])
+  AC_DEFINE(HAVE_DLOPEN, 1, [System provides dlopen])
 fi
 
 ###
@@ -197,15 +200,15 @@ case "$THREADS" in
    ;;
 esac
 
-
-### Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
-case "$THREADS" in
-  none) true ;;
-  *) case `uname -s` in
-        Linux*) STKCFLAGS="-D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
-     esac
-esac
-
+#XX
+#XX ### Add the options _REENTRANT and GC_LINUX_THREADS if we are on Linux
+#XX case "$THREADS" in
+#XX   none) true ;;
+#XX   *) case `uname -s` in
+#XX         Linux*) STKCFLAGS="-D_REENTRANT=1 -DGC_LINUX_THREADS=1";;
+#XX      esac
+#XX esac
+#XX
 
 
 
@@ -260,19 +263,20 @@ then
               --includedir=$prefix/include/stklos \
               --enable-threads=$THREADS) || { echo "Cannot configure the GC"; exit; }
      GC=gc
-     GCINC="-I../gc/include"
+     GCINC='-I$(BASEDIR)/gc/include'
      GCLIB="../gc/.libs/libgc.a"
      COMP_LIBS="libgc $COMP_LIBS"
 else
      echo "... Using system libgc library"
      GC=""
      if $PKGCONFIG --exists bdw-gc ;then
-        GCINC=$(pkg-config  bdw-gc --cflags)
-        GCLIB=$(pkg-config  bdw-gc --libs)
+        GCINC=$($PKGCONFIG  bdw-gc --cflags)
+        GCLIB=$($PKGCONFIG  bdw-gc --libs)
      else
         GCINC=""
         GCLIB="-lgc"
      fi
+     DLLIBS="$DLLIBS -lgc"
      AC_DEFINE(HAVE_GC, 1, [Use system GC])
      SYST_LIBS="libgc $SYST_LIBS"
 fi
@@ -314,7 +318,7 @@ then
      (cd gmp; CC=${CC} CFLAGS="${cflags} -I../src -DFOR_STKLOS=1" ./configure \
               --prefix=$prefix) || { echo "Cannot configure the GMP"; exit; }
      GMP=gmp
-     GMPINC="-I../gmp"
+     GMPINC='-I$(BASEDIR)/gmp'
      GMPLIB="../gmp/.libs/libgmp.a"
      COMP_LIBS="libgmp $COMP_LIBS"
 else
@@ -322,6 +326,7 @@ else
      GMP=""
      GMPINC=""
      GMPLIB="-lgmp"
+     DLLIBS="$DLLIBS $GMPLIB"
      AC_DEFINE(HAVE_GMP, 1, [Use system GMP])
      SYST_LIBS="libgmp $SYST_LIBS"
 fi
@@ -371,6 +376,7 @@ else
         PCREINC=""
         PCRELIB="-lpcre -lpcreposix"
      fi
+     DLLIBS="$DLLIBS $PCRELIB"
      AC_DEFINE(HAVE_PCRE, 1 , [We use our version of pcre])
      SYST_LIBS="libpcre $SYST_LIBS"
 fi
@@ -414,7 +420,9 @@ else
      else
        FFIINC="-I/usr/include/ffi"
        FFILIB="-lffi"
+       DLLIBS="$DLLIBS $FFILIB"
      fi
+     DLLIBS="$DLLIBS $FFILIB"
      SYST_LIBS="libffi $SYST_LIBS"
 fi
 # We always want FFI. Should be modifiable in the future
@@ -422,10 +430,10 @@ AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
 
 
 # ----------------------------------------------------------------------
-# Control fixnum parameters
+# Control fixnum and flonum parameters
 # ----------------------------------------------------------------------
-AC_ARG_WITH(control-fixnums,
-       [  --with-control-fixnums  verify that fx functions are fixnums],
+AC_ARG_WITH(control-fast-math,
+       [  --with-control-fast-math  verify that arguments to fx and fl functions are fixnums and flonums],
        CONTROL_FX="$withval", CONTROL_FX="yes")
 
 if test "$CONTROL_FX" = "yes"
@@ -463,6 +471,12 @@ if test "X$STRIP" = "X" ;then
 else
    STRIPCMD=$STRIP
 fi
+
+# Adapt libraries that must be loaded fo systems with broken RTLD_GLOBAL (as Android)
+case `uname -o` in
+  Android) DLLIBS="$DLLIBS -lc -lm";;
+  *) DLLIBS="";;
+esac
 
 
 ### Output files
@@ -511,16 +525,25 @@ AC_SUBST(THREADS)
 AC_SUBST(CONF_SUMMARY)
 AC_SUBST(DEFAULT_CS)
 AC_SUBST(CONTROL_FX_PARAMETERS)
+AC_SUBST(DLLIBS)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
           utils/stklos-script examples/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
-          lib/ScmPkg.d/Makefile tests/Makefile
+          lib/ScmPkg.d/Makefile  tests/Makefile
           doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
           doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1
           doc/skb/stklos-version.stk
-          pkgman/Makefile])
+          pkgman/Makefile
+
+          lib/srfi-25/Makefile
+          lib/srfi-27/Makefile
+          lib/srfi-133/Makefile
+          lib/srfi-144/Makefile
+          lib/srfi-170/Makefile
+          lib/srfi-175/Makefile
+])
 AC_OUTPUT
 
 # Add a src/git-config.h if we dont have one
