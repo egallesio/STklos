@@ -22,9 +22,9 @@
 ;;;; This file is a derivative work from the  implementation of
 ;;;; this SRFI by Scott G. Miller, it is copyrighted as:
 ;;;;
-;;;;;; 
+;;;;;;
 ;;;;;; Copyright (C) Scott G. Miller (2002). All Rights Reserved.
-;;;;;; 
+;;;;;;
 ;;;;;; This document and translations of it may be copied and furnished to
 ;;;;;; others, and derivative works that comment on or otherwise explain it
 ;;;;;; or assist in its implementation may be prepared, copied, published and
@@ -37,21 +37,21 @@
 ;;;;;; developing SRFIs in which case the procedures for copyrights defined
 ;;;;;; in the SRFI process must be followed, or as required to translate it
 ;;;;;; into languages other than English.
-;;;;;; 
+;;;;;;
 ;;;;;; The limited permissions granted above are perpetual and will not be
 ;;;;;; revoked by the authors or their successors or assigns.
-;;;;;; 
+;;;;;;
 ;;;;;; This document and the information contained herein is provided on
 ;;;;;; an "AS IS" basis and THE AUTHOR AND THE SRFI EDITORS DISCLAIM ALL
 ;;;;;; WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY
 ;;;;;; WARRANTY THAT THE USE OF THE INFORMATION HEREIN WILL NOT INFRINGE ANY
 ;;;;;; RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A
 ;;;;;; PARTICULAR PURPOSE.
-;;;;;; 
+;;;;;;
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Apr-2021 20:20
-;;;; Last file update: 07-Apr-2021 21:25 (jpellegrini)
+;;;; Last file update:  8-Jun-2021 09:54 (eg)
 ;;;;
 
 (define %stklos-format format)
@@ -65,17 +65,24 @@
           store-bundle!
           declare-bundle!
           localized-template)
-  
+
 ;; The association list in which bundles will be stored
 (define *localization-bundles* '())
 
 (define (get-locale-pair)
-  (let ((locale (string-split (%get-locale) ";")))
-    (let ((locale-defs (map (lambda (x) (string-split x "=")) locale)))
-      (let ((some (string-split (cadar locale-defs) "_.")))
-        (list (string->symbol (string-downcase (car some)))
-              (string->symbol (string-downcase (cadr some))))))))
-
+  ;; Try to find the current locale setting from the LC-ALL or LANG variable
+  ;; If the current value is not defined or is not a couple (such as "POSIX"
+  ;; or "C"), the value returnesd is (en us)
+  (let ((default '(en us))
+        (locale  (or (get-environment-variable "LC_ALL")
+                     (get-environment-variable "LANG"))))
+    (if locale
+        (let ((fields (string-split locale "_.")))
+          (if (>= (length fields) 2)
+              (list (string->symbol (string-downcase (car fields)))
+                    (string->symbol (string-downcase (cadr fields))))
+              default))
+        default)))
 
 
 (define current-language
@@ -188,10 +195,9 @@
               (recur (cdr lis) (- k 1))))))
 
 
-
 (define (%srfi-29:format . args)
   (when (< (length args) 1) (error "need at least one argument"))
-  
+
   (let ((port #f)
         (fmt #f))
 
@@ -210,13 +216,13 @@
     (if (null? args)
         ;; just the string don't enter the rewriting loop:
         (%stklos-format port fmt)
-        
+
         ;; there are arguments after the format string.
         (let ((orig-args args)
               (orig-fmt  (string-copy fmt)))
           (let ((n-args (let loop ((fmt fmt)
                                    (arg-pos 0)) ;; we're processing the i-th argument
-                          
+
                           (let ((m (regexp-match-positions format-regexp fmt)))
                             (if m
                                 ;; m is ((A B) (C D)), where
@@ -235,7 +241,7 @@
                                         (let ((num (string->number (substring fmt
                                                                               (caadr m)
                                                                               (cadadr m)))))
-                                          
+
                                           ;; note: ~X@* means the X-th argument *after* the current
                                           ;; position.
 
