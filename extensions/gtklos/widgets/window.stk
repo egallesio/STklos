@@ -1,0 +1,90 @@
+;;;;
+;;;; window.stk -- GTK Windows
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 25-May-2001 15:47 (eg)
+;;;; Last file update: 11-Jun-2021 10:15 (eg)
+;;;;
+
+;;;;
+;;;; GTK Bindings
+;;;;
+(define-gtk gtk-window-new (:int) :pointer                 "gtk_window_new")
+(define-gtk gtk-window-get-title (:pointer) :string        "gtk_window_get_title")
+(define-gtk gtk-window-set-title (:pointer :string) :void  "gtk_window_set_title")
+
+
+;======================================================================
+;
+;           C l a s s   < w i n d o w >
+;
+;======================================================================
+
+(define-class <window> (<gtk-container>)
+  ((transient    #:accessor      transient
+                 #:init-keyword  #:transient
+                 #:init-form     #f)
+   (title        #:accessor      title
+                 #:init-form     "STklos window"
+                 #:init-keyword  #:title
+                 #:slot-ref      (lambda (o)
+                                   (gtk-window-get-title (slot-ref o 'wid)))
+                 #:slot-set!      (lambda (o v)
+                                    (gtk-window-set-title (slot-ref o 'wid) v)))
+;;   (resizable    #:accessor      resizable
+;;                 #:init-keyword  #:resizable
+;;                 #:allocation    #:virtual
+;;                 #:slot-ref      (lambda (o)
+;;                                   (gtk-window-get-resizable (slot-ref o 'wid)))
+;;                 #:slot-set!     (lambda (o v)
+;;                                   (gtk-window-set-resizable (slot-ref o 'wid) v)))
+;;   (modal        #:accessor      modal
+;;                 #:init-keyword  #:modal
+;;                 #:allocation    #:virtual
+;;                 #:slot-ref      (lambda (o)
+;;                                   (gtk-window-get-modal (slot-ref o 'wid)))
+;;                 #:slot-set!     (lambda (o v)
+;;                                   (gtk-window-set-modal (slot-ref o 'wid) v)))
+   ))
+
+(define-method realize-widget ((self <window>) initargs)
+  (eprintf "Realize-widget <window>\n")
+  (next-method)
+  (let* ((transient (key-get initargs #:transient #f))
+         (win       (gtk-window-new (if transient 1 0))))
+    (cpointer-type-set! win 'gtk-window)
+    (slot-set! self 'wid win)))
+
+;//;;
+;//;; CONTAINER-ADD!
+;//;;
+;//(define-method container-add! ((cont <window>) (widget <gtk-widget>) . options)
+;//  (let ((layout (slot-ref cont 'layout)))
+;//    (if (is-a? layout <gtk-object>)
+;// (apply container-add! layout widget options)
+;// (%set-widget-parent! (slot-ref widget 'wid) (slot-ref cont 'wid)))))
+
+
+
+;;;
+;;; Module exports
+;;;
+(export <window> title)

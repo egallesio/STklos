@@ -1,0 +1,84 @@
+;;;;
+;;;;
+;;;; libs.stk         -- Loading of the GTk libraries
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 10-Jun-2021 11:55
+;;;; Last file update: 10-Jun-2021 14:53 (eg)
+;;;;
+
+
+(require-library "ffi")
+
+
+;;;
+;;; find-gtk-library: to search a GTK3 library (gtk, gdk, ...)
+;;;
+(when-load-and-compile
+ (define *gtk-library-path*
+   (append (build-path-from-shell-variable "STKLOS_GTK_DIR")
+           '("/usr/lib"
+             "/usr/local/lib"
+             ;; For MacPorts
+             "/opt/local/lib")))
+
+ (define *gtk-library-suffix*
+   '("so"
+     "dylib"))
+
+ (define (find-gtk-library name)
+   (let ((file (case name
+                 ((gtk)     "libgtk-3")
+                 ((gdk)     "libgdk-3")
+                 ((glib)    "libglib-2.0")
+                 ((gobject) "libgobject-2.0")
+                 ;;                 ((pango)   "libpango-1.0")
+                 ((gio)      "libgio-2.0")
+                 ;;                 ((pixbuf)  "libgdk_pixbuf_xlib-2.0")
+                 (else      (if (string? name)
+                                name
+                                (error "bad GTK+ library name ~S" name))))))
+     (or (find-path file *gtk-library-path* *gtk-library-suffix*)
+         (error "Cannot find GTK+ library file ~S" file))))
+)
+
+
+;;;
+;;; define-gtk macro (for defining external GTK functions)
+;;;
+(when-compile
+(define-macro (define-gtk name args return-type entry-name . lib)
+  (define (iota n)
+    (let Loop ((i 0) (res '()))
+      (if (= i n)
+          (reverse! res)
+          (Loop (+ i 1) (cons i res)))))
+  (define (pretty lst)
+    (map (lambda (x y) (format "~a~a" (if (eq? x ':pointer) 'widget x) y))
+         lst
+         (iota (length lst))))
+  `(begin
+     (eprintf "  ~A\n" (cons ',name ',(pretty args)))
+     (define-external ,name ,args
+       :return-type ,return-type
+       :entry-name ,(or entry-name (symbol->string name))
+       :library-name ,(find-gtk-library (if (null? lib) 'gtk (car lib))))))
+)

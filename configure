@@ -7291,7 +7291,7 @@ esac
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 doc/skb/stklos-version.stk pkgman/Makefile lib/srfi-25/Makefile lib/srfi-27/Makefile lib/srfi-133/Makefile lib/srfi-170/Makefile lib/srfi-175/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 doc/skb/stklos-version.stk pkgman/Makefile extensions/gtklos/Makefile lib/srfi-25/Makefile lib/srfi-27/Makefile lib/srfi-133/Makefile lib/srfi-170/Makefile lib/srfi-175/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8045,6 +8045,7 @@ do
     "doc/stklos-script.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-script.1" ;;
     "doc/skb/stklos-version.stk") CONFIG_FILES="$CONFIG_FILES doc/skb/stklos-version.stk" ;;
     "pkgman/Makefile") CONFIG_FILES="$CONFIG_FILES pkgman/Makefile" ;;
+    "extensions/gtklos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/Makefile" ;;
     "lib/srfi-25/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-25/Makefile" ;;
     "lib/srfi-27/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-27/Makefile" ;;
     "lib/srfi-133/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-133/Makefile" ;;

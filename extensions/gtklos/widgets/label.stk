@@ -1,0 +1,105 @@
+;;;;
+;;;; label.stk  -- GTK labels
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 27-May-2001 22:23 (eg)
+;;;; Last file update: 11-Jun-2021 13:40 (eg)
+;;;;
+
+
+;;;
+;;; GTK Bindings
+;;;
+(define-gtk gtk-label-new         (#:string) #:pointer           "gtk_label_new")
+(define-gtk gtk-label-get-label   (#:pointer) #:string           "gtk_label_get_label")
+(define-gtk gtk-label-set-label   (#:pointer #:string) #:void    "gtk_label_set_label")
+(define-gtk gtk-label-get-justify (#:pointer) #:int              "gtk_label_get_justify")
+(define-gtk gtk-label-set-justify (#:pointer #:int) #:void       "gtk_label_set_justify")
+
+
+
+(define (justify->int val)
+  (case val
+    ((left)   0)
+    ((right)  1)
+    ((center) 2)
+    ((fill)   3)
+    (else     (error "bad justify value: ~S" val))))
+
+(define (int->justify val)
+  (case val
+    ((0)  'left)
+    ((1)  'right)
+    ((2)  'center)
+    ((3)  'fill)
+    (else  val)))
+
+;======================================================================
+;
+;           C l a s s   < l a b e l >
+;
+;======================================================================
+(define-class <label> (<gtk-misc>)
+  ((text       #:accessor       text
+               #:init-keyword   #:text
+               #:allocation     #:virtual
+               #:slot-ref       (lambda (o)
+                                  (gtk-label-get-label (slot-ref o 'wid)))
+               #:slot-set!      (lambda (o v)
+                                  (gtk-label-set-label (slot-ref o 'wid) v)))
+   (lines      #:accessor       lines
+               #:init-keyword   #:lines
+               #:allocation     #:gtk-property)
+   (selectable #:accessor       selectable
+               #:init-keyword   #:selectable
+               #:allocation     #:gtk-property)
+   (justify    #:accessor       justify
+               #:init-keyword   #:justify
+               #:allocation     #:virtual
+               #:slot-ref       (lambda (o)
+                                  (int->justify
+                                     (gtk-label-get-justify
+                                        (slot-ref o 'wid))))
+               #:slot-set!      (lambda (o v)
+                                  (gtk-label-set-justify
+                                      (slot-ref o 'wid)
+                                      (justify->int v))))
+   (use-markup   #:accessor     use-markup
+                 #:init-keyword #:use-markup
+                 #:allocation   #:virtual
+                 #:slot-ref     (lambda (o)
+                                  (%widget-data-get o #:markup #f))
+                 #:slot-set!    (lambda (o v)
+                                  (gtk-label-set-use-markup (wid o) v)
+                                  (%widget-data-set! o #:markup v)))
+  ))
+
+(define-method realize-widget ((self <label>) initargs)
+  (let ((lab (gtk-label-new "*label*")))
+    (cpointer-type-set! lab 'gtk-label)
+    (slot-set! self 'wid lab)))
+
+;;;
+;;; Module exports
+;;;
+
+(export <label>
+        text lines selectable justify use-markup)

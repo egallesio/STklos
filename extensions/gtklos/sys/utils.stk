@@ -1,0 +1,119 @@
+;;;;
+;;;; utils.stk  -- Utilities
+;;;;
+;;;; Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 23-Aug-2007 15:03 (eg)
+;;;; Last file update: 11-Jun-2021 13:44 (eg)
+;;;;
+
+
+;;;;
+;;;; GTK Bindings
+;;;;
+(define-gtk gtk-init (:pointer :pointer) :void        "gtk_init")
+(define-gtk gtk-main-iteration-do (:boolean) :boolean "gtk_main_iteration_do")
+(define-gtk gtk-main () :void                         "gtk_main")
+
+
+(define *table-id* '())
+
+(define (gtklos-wid-associate wid obj)
+  (set! *table-id* (cons (cons wid obj) *table-id*)))
+
+(define (diw obj)               ;; wid inverse function
+  (if (cpointer? obj)
+      (let ((x (assoc obj *table-id*)))
+        (and x (cdr x)))
+      (error "bad pointer ~S" obj)))
+
+;;//TODO:(define (diw* obj)              ;; the same one trying to find a known Scheme obj
+;;//TODO:  (let ((res (diw obj)))
+;;//TODO:    (or res
+;;//TODO:        (let ((parent (gtk-widget-get-parent obj)))
+;;//TODO:          (and (cpointer? parent) (diw* parent))))))
+;;//TODO:
+
+;;// (define (gtklos-widget-set-parent! w p)
+;;//   (let ((old (gtk-widget-get-parent w)))
+;;//     ( (if (eq? old #void) gtk-widget-set-parent gtk-widget-reparent) w p)))
+
+
+;; TODO:// ;; ======================================================================
+;; TODO:// ;;
+;; TODO:// ;;      GTK+ width & height
+;; TODO:// ;;
+;; TODO:// ;; ======================================================================
+;; TODO:// (define (gtklos-width w)
+;; TODO://   (car (%gtk-get-size (slot-ref w 'wid))))
+;; TODO:// 
+;; TODO:// (define (gtklos-height w)
+;; TODO://   (cdr (%gtk-get-size (slot-ref w 'wid))))
+
+
+;; ----------------------------------------------------------------------
+
+(define (gtklos-slot-is-ro slot)
+  (lambda (o v)
+    (error "slot `~S' is read-only in ~S" slot o)))
+
+
+;; ======================================================================
+;;
+;;      GTK+ thread management
+;;
+;; ======================================================================
+(define *gtk-freeze* #f)
+(define *gtk-freeze-mutex* (make-mutex 'gtk-freeze))
+
+(define (with-gtk-freezed proc)
+  (with-mutex *gtk-freeze-mutex*
+              (lambda ()
+                (set! *gtk-freeze* #t)
+                (proc)
+                (set! *gtk-freeze* #f))))
+
+
+(define (start-gtk-thread)
+  (let ((thr (make-thread gtk-main)))
+    (thread-start! thr)))
+
+
+(define (start-interactive-gtk)
+  (eprintf "Starting interactive GTK\n")
+  (port-idle-register! original-input-port ;(current-input-port)
+                       (lambda () (print ".") (gtk-main-iteration-do #f))))
+
+;;(start-interactive-gtk)
+;;(start-gtk-thread)
+
+
+;;; Initialize GTK
+(gtk-init (void) (void))
+
+
+
+;;;
+;;; Module exports
+;;;
+(export gtk-main-iteration-do  ;; For tests
+        start-gtk-thread
+        gtk-main)
+

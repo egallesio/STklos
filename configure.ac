@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 18-May-2021 15:58 (eg)
+### Last file update: 10-Jun-2021 12:43 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -536,6 +536,8 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1
           doc/skb/stklos-version.stk
           pkgman/Makefile
+
+          extensions/gtklos/Makefile
 
           lib/srfi-25/Makefile
           lib/srfi-27/Makefile

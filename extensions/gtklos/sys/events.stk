@@ -1,0 +1,185 @@
+;;;;
+;;;; events.stk                                  -- GTK Events Management
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 31-May-2001 18:36 (eg)
+;;;; Last file update: 11-Jun-2021 14:36 (eg)
+;;;;
+
+;;;
+;;; GTK bindings
+;;;
+(define-external g-signal-connect-data ((widget #:pointer)  (name #:string)
+                                        (proc #:pointer)    (data #:obj)
+                                        (unused1 #:pointer) (unused2 :int))
+  :entry-name "g_signal_connect_data"
+  :library-name (find-gtk-library 'gobject))
+
+
+;;; ______________________________________________________________________
+;;;
+;;; Low level signal management
+;;;
+;;; ----------------------------------------------------------------------
+
+;; The following events are connected to call backs for which we must pass
+;; two pointers (instead of one if the event is absent)
+(define *event-names* '("event"
+                        "button_press_event"        "button-press-event"
+                        "button_release_event"      "button-release-event"
+                        "scroll_event"              "scroll-event"
+                        "motion_notify_event"       "motion-notify-event"
+                        "delete_event"              "delete-event"
+                        "destroy_event"             "destroy-event"
+                        "expose_event"              "expose-event"
+                        "key_press_event"           "key-press-event"
+                        "key_release_event"         "key-release-event"
+                        "enter_notify_event"        "enter-notify-event"
+                        "leave_notify_event"        "leave-notify-event"
+                        "configure_event"           "configure-event"
+                        "focus_in_event"            "focus-in-event"
+                        "focus_out_event"           "focus-out-event"
+                        "map_event"                 "map-event"
+                        "unmap_event"               "unmap-event"
+                        "property_notify_event"     "property-notify-event"
+                        "selection_clear_event"     "selection-clear-event"
+                        "selection_request_event"   "selection-request-event"
+                        "selection_notify_event"    "selection-notify-event"
+                        "proximity_in_event"        "proximity-in-event"
+                        "proximity_out_event"       "proximity-out-event"
+                        "visibility_notify_event"   "visibility-notify-event"
+                        "client_event"              "client-event"
+                        "no_expose_event"           "no-expose-event"
+                        "window_state_event"        "window-state-event"))
+
+(define (%do-signal-connect widget name proc data after)
+  (let ((cb (make-callback proc
+                           (if (member name *event-names*)
+                               '(:pointer :pointer)
+                               '(:pointer))
+                           data)))
+    ;; This call correspond to the C call
+    ;;     g_signal_connect_swapped(widget, name, callback, cb);
+    ;; The value 2 below correspond to swapped callbacks where the user data
+    ;; is the first argument of the callback
+    (g-signal-connect-data widget
+                           name
+                           (%exec-callback-address)
+                           cb
+                           (void)
+                           (+ 2 (if after 1 0)))))
+
+
+(define (g-signal-connect widget name proc data)
+  (%do-signal-connect widget name proc data #f))
+
+(define (g-signal-connect-after widget name proc data)
+  (%do-signal-connect widget name proc data #t))
+
+; ======================================================================
+
+
+;;//FIXME:
+;;//FIXME:
+;;//FIXME:
+;;//FIXME:
+;;//FIXME:(define (%event-getter-func name)
+;;//FIXME:  (let ((key (make-keyword name)))
+;;//FIXME:    (lambda (o)
+;;//FIXME:      (key-get (slot-ref o '%event) key #f))))
+;;//FIXME:
+;;//FIXME:
+;;//FIXME:(define (%event-setter-func name)
+;;//FIXME:  (let ((key (make-keyword name)))
+;;//FIXME:    (lambda (o v)
+;;//FIXME:      (let ((new (lambda _ (v (new-gtk-event)))))
+;;//FIXME:        (slot-set! o '%event (key-set! (slot-ref o '%event) key new))
+;;//FIXME:        (g-signal-connect (slot-ref o 'wid) name new (void))))))
+;;//FIXME:
+;;//FIXME:
+;;//FIXME:(define (%signal-connect widget wid name closure after)
+;;//FIXME:  (let ((key     (make-keyword name))
+;;//FIXME:        (new     (lambda _ (closure (new-gtk-event))))
+;;//FIXME:        (connect (if after g-signal-connect-after g-signal-connect)))
+;;//FIXME:    (slot-set! widget '%event (key-set! (slot-ref widget '%event) key new))
+;;//FIXME:    (connect wid name new (void))))
+;;//FIXME:
+;;//FIXME:; ======================================================================
+;;//FIXME:
+;;//FIXME:(define-struct gtk-event obj)
+;;//FIXME:
+;;//FIXME:(define (new-gtk-event)
+;;//FIXME:  (let ((ev (gtk-get-current-event)))
+;;//FIXME:    (if (eq? ev #void)
+;;//FIXME:        #f
+;;//FIXME:        (make-gtk-event ev))))
+;;//FIXME:
+;;//FIXME:(define (event-widget e)
+;;//FIXME:  (if (gtk-event? e)
+;;//FIXME:      (diw (gtk-get-event-widget (gtk-event-obj e)))
+;;//FIXME:      (error "bad event ~S" e)))
+;;//FIXME:
+;;//FIXME:(define (event-type e)
+;;//FIXME:  (if (gtk-event? e)
+;;//FIXME:      (%event-type (gtk-event-obj e))
+;;//FIXME:      (error "bad event ~S" e)))
+;;//FIXME:
+;;//FIXME:(define (event-x e)
+;;//FIXME:  (if (gtk-event? e)
+;;//FIXME:      (%event-x (gtk-event-obj e))
+;;//FIXME:      (error "bad event ~S" e)))
+;;//FIXME:
+;;//FIXME:(define (event-y e)
+;;//FIXME:  (if (gtk-event? e)
+;;//FIXME:      (%event-y (gtk-event-obj e))
+;;//FIXME:      (error "bad event ~S" e)))
+;;//FIXME:
+;;//FIXME:(define (event-char e)
+;;//FIXME:  (if (gtk-event? e)
+;;//FIXME:      (%event-char (gtk-event-obj e))
+;;//FIXME:      (error "bad event ~S" e)))
+;;//FIXME:
+;;//FIXME:(define (event-modifiers e)
+;;//FIXME:  (if (gtk-event? e)
+;;//FIXME:      (%event-modifiers (gtk-event-obj e))
+;;//FIXME:      (error "bad event ~S" e)))
+;;//FIXME:
+;;//FIXME:(define (event-button e)
+;;//FIXME:  (if (gtk-event? e)
+;;//FIXME:      (%event-button (gtk-event-obj e))
+;;//FIXME:      (error "bad event ~S" e)))
+;;//FIXME:
+;;//FIXME:
+;;//FIXME:(define (event-describe e)
+;;//FIXME:  (eprintf "event description ~S\n" e)
+;;//FIXME:  (eprintf "\t   widget: ~S\n" (event-widget e))
+;;//FIXME:  (eprintf "\t     type: ~S\n" (event-type e))
+;;//FIXME:  (eprintf "\t   button: ~S\n" (event-button e))
+;;//FIXME:  (eprintf "\tmodifiers: ~S\n" (event-modifiers e))
+;;//FIXME:  (eprintf "\t     char: ~S\n" (event-char e))
+;;//FIXME:  (eprintf "\t        x: ~S\n" (event-x e))
+;;//FIXME:  (eprintf "\t        y: ~S\n" (event-y e)))
+
+
+;;;
+;;; Exports
+;;;
+(export g-signal-connect g-signal-connect-after)

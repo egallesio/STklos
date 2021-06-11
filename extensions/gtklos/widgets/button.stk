@@ -1,0 +1,126 @@
+;;;;
+;;;; button.stk -- GTK Button Widget
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 30-May-2001 22:11 (eg)
+;;;; Last file update: 11-Jun-2021 16:08 (eg)
+;;;;
+
+;;;
+;;; GTK Bindings
+;;;
+(define-gtk gtk-button-new-with-mnemonic (#:string)    #:pointer "gtk_button_new_with_mnemonic")
+(define-gtk gtk-button-set-label (#:pointer #:string)  #:void    "gtk_button_set_label")
+(define-gtk gtk-button-get-label (#:pointer)           #:string  "gtk_button_get_label")
+(define-gtk gtk-button-set-relief (#:pointer #:long)   #:void    "gtk_button_set_relief")
+(define-gtk gtk-button-get-relief (#:pointer)          #:long    "gtk_button_get_relief")
+(define-gtk gtk-button-set-image (#:pointer #:pointer) #:void    "gtk_button_set_image")
+(define-gtk gtk-button-get-image (#:pointer)           #:pointer "gtk_button_get_image")
+
+
+(define (relief->int rel)
+  ;; half is equivalent to normal now
+  (case rel
+    ((normal half)  0)
+    ((none)         2)
+    (else           (error "bad relief value: ~s" rel))))
+
+(define (int->relief v)
+  ;; half is equivalent to normal now
+  (if (= v 2) 'none 'normal))
+
+
+;======================================================================
+;
+;           < B u t t o n >
+;
+;======================================================================
+(define-class <button> (<gtk-container>)
+  ((command         #:accessor       command
+                    #:init-keyword   #:command
+                    #:allocation     #:virtual
+                    #:slot-ref       (lambda (o)
+                                       (key-get (slot-ref o '%event) #:clicked #f))
+                    #:slot-set!      (lambda (o v)
+                                       (let ((hdlr (lambda (_w _data) (v o))))
+                                         (g-signal-connect (slot-ref o 'wid)
+                                                           "clicked"
+                                                           hdlr
+                                                           (void))
+                                         (slot-set! o
+                                                    '%event
+                                                    (key-set! (slot-ref o '%event)
+                                                              #:clicked
+                                                              hdlr)))))
+   (text            #:accessor       text
+                    #:init-keyword   #:text
+                    #:allocation     #:virtual
+                    #:slot-ref       (lambda (o)
+                                       (gtk-button-get-label (slot-ref o 'wid)))
+                    #:slot-set!      (lambda (o v)
+                                       (gtk-button-set-label (slot-ref o 'wid) v)))
+   (image           #:accessor       image
+                    #:init-keyword   #:image
+                    #:allocation     #:virtual
+                    #:slot-ref      (lambda (o)
+                                      (let ((v (gtk-button-get-image (slot-ref o
+                                                                               'wid))))
+                                        (if (eq? v (void)) #f v)))
+                    #:slot-set!     (lambda (o v)
+                                      (gtk-button-set-image (slot-ref o 'wid)
+                                                            (slot-ref v 'wid))))
+   (focus-on-click  #:accessor      focus-on-click
+                    #:init-keyword  #:focus-on-click
+                    #:allocation    #:gtk-property)
+   (relief          #:accessor      relief
+                    #:init-keyword  #:relief
+                    #:allocation    #:virtual
+                    #:slot-ref      (lambda (o)
+                                      (int->relief (gtk-button-get-relief
+                                                          (slot-ref o 'wid))))
+                    #:slot-set!     (lambda (o v)
+                                      (gtk-button-set-relief (slot-ref o 'wid)
+                                                             (relief->int v))))
+   (use-stock      #:accessor       use-stock
+                   #:init-keyword   #:use-stock
+                   #:allocation     #:gtk-property)
+   (use-underline  #:accessor       use-underline
+                   #:init-keyword   #:use-underline
+                   #:allocation     #:gtk-property)
+   (xalign         #:accessor       xalign
+                   #:init-keyword   #:xalign
+                   #:allocation     #:gtk-property)
+   (yalign         #:accessor       yalign
+                   #:init-keyword   #:yalign
+                   #:allocation     #:gtk-property)))
+
+(define-method realize-widget ((self <button>) initargs)
+  (let ((b (gtk-button-new-with-mnemonic "*button*")))
+    (cpointer-type-set! b 'gtk-button)
+    (slot-set! self 'wid b)))
+
+
+;;;
+;;; Exports
+;;;
+(export <button>
+        command text image focus-on-click relief use-stock use-underline
+        xalign yalign)

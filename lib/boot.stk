@@ -21,9 +21,10 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  9-Mar-2021 16:09 (eg)
+;;;; Last file update: 10-Jun-2021 19:01 (eg)
 ;;;;
 
+(define original-input-port (current-input-port))
 (include "runtime.stk")         ; Definition necessary for the bootstrap
 (include "module.stk")          ; All the macros for defining modules
 (include "r5rs.stk")            ; R5RS stuff written in Scheme
