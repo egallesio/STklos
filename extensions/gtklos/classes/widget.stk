@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 18:30 (eg)
-;;;; Last file update: 11-Jun-2021 14:05 (eg)
+;;;; Last file update: 11-Jun-2021 18:38 (eg)
 ;;;;
 
 
@@ -231,15 +231,15 @@
 (define-method destroy (w)
   #f)
 
-;;;
-;;; Event connection
-;;;
-(define-method event-connect ((widget <gtk-widget>) name closure)
-  (%signal-connect widget (slot-ref widget 'wid) name closure #f))
-
-(define-method event-connect-after ((widget <gtk-widget>) name closure)
-  (%signal-connect widget (slot-ref widget 'wid) name closure #t))
-
+;;//FIXME: ;;;
+;;//FIXME: ;;; Event connection
+;;//FIXME: ;;;
+;;//FIXME: (define-method event-connect ((widget <gtk-widget>) name closure)
+;;//FIXME:   (%signal-connect widget (slot-ref widget 'wid) name closure #f))
+;;//FIXME: 
+;;//FIXME: (define-method event-connect-after ((widget <gtk-widget>) name closure)
+;;//FIXME:   (%signal-connect widget (slot-ref widget 'wid) name closure #t))
+;;//FIXME: 
 ;;;; ======================================================================
 ;;;;
 ;;;;    <gtk-misc> class ...

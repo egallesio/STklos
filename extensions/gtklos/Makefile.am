@@ -19,14 +19,15 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 11-Jun-2021 16:46 (eg)
+# Last file update: 11-Jun-2021 18:21 (eg)
 
 EXTENSION=gtklos
 
-SCM_SRCS = sys/events.stk sys/libs.stk sys/utils.stk                 \
-           classes/meta.stk classes/container.stk classes/widget.stk \
-           widgets/box.stk widgets/button.stk widgets/entry.stk      \
-           widgets/image.stk widgets/label.stk widgets/window.stk
+SCM_SRCS = sys/events.stk sys/libs.stk sys/utils.stk                  \
+           classes/meta.stk classes/container.stk classes/widget.stk  \
+           widgets/box.stk widgets/button.stk widgets/checkbutton.stk \
+           widgets/entry.stk widgets/image.stk widgets/label.stk      \
+           widgets/window.stk
 
 #======================================================================
 OUT            = $(EXTENSION).@SH_SUFFIX@

@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 11-Jun-2021 16:47 (eg)
+;;;; Last file update: 11-Jun-2021 18:20 (eg)
 ;;;;
 
 
@@ -45,6 +45,7 @@
 (include "widgets/label.stk")
 (include "widgets/button.stk")
 (include "widgets/image.stk")
+(include "widgets/checkbutton.stk")
 
 (provide "gtklos")
 
