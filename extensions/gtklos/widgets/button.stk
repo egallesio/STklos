@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 22:11 (eg)
-;;;; Last file update: 11-Jun-2021 16:08 (eg)
+;;;; Last file update: 11-Jun-2021 18:05 (eg)
 ;;;;
 
 ;;;
@@ -113,7 +113,7 @@
                    #:allocation     #:gtk-property)))
 
 (define-method realize-widget ((self <button>) initargs)
-  (let ((b (gtk-button-new-with-mnemonic "*button*")))
+  (let ((b (gtk-button-new-with-mnemonic "")))
     (cpointer-type-set! b 'gtk-button)
     (slot-set! self 'wid b)))
 

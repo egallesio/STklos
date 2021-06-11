@@ -1,0 +1,126 @@
+ ;;;;
+;;;; image.stk                  -- GTK Image Widget
+;;;;
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 13-Oct-2000 17:15 (eg)
+;;;; Last file update: 11-Jun-2021 18:07 (eg)
+;;;;
+
+;;;
+;;; GTK bindings
+;;;
+(define-gtk gtk-image-new-from-file (#:string) #:pointer       "gtk_image_new_from_file")
+(define-gtk gtk-image-new-from-icon (#:string :long) #:pointer "gtk_image_new_from_icon_name")
+
+
+;; See https://developer.gnome.org/gtk3/stable/gtk3-Themeable-Stock-Images.html#GtkIconSize
+(define (size->int sz)
+  (case sz
+    ((small)   1)   ; 16px
+    ((medium)  3)   ; 24px
+    ((large)   5)   ; 32px
+    ((huge)    6)   ; 48px
+    (else (error "bad size specification: ~s" sz))))
+
+(define (int->size v)
+  (case v
+    ((3)     'medium)
+    ((5)     'large)
+    ((6)     'huge)
+    (else    'small)))
+  
+;; ----------------------------------------------------------------------
+;;                          Images Utilities
+;;----------------------------------------------------------------------
+
+(define *image-suffixes* '("xpm" "jpg" "jpeg" "gif" "png"))
+
+(define *image-path*
+  (let ((user-path (build-path-from-shell-variable "STKLOS_IMAGE_PATH")))
+    (if (null? user-path)
+        (list "."
+              (string-append (%library-prefix)
+                             "/share/stklos/"
+                             (version)
+                             "/images"))
+        user-path)))
+
+(define (find-image fn)
+  (%guess-pathname fn (image-path) *image-suffixes*))
+
+
+(define image-path
+  (make-parameter *image-path*
+                  (lambda (path)
+                    (for-each (lambda (x)
+                                (unless (string? x)
+                                  (error 'image-path "bad directory ~S" x)))
+                              path)
+                    path)))
+
+
+;;;; ======================================================================
+;;;;
+;;;;                Class <image>
+;;;;
+;;;; ======================================================================
+(define-class <image> (<gtk-misc>)
+  ((%file       #:allocation    #:gtk-property
+                #:gtk-name      "file")
+   (%icon-size  #:allocation    #:gtk-property
+                #:gtk-name      "icon-size")
+   (file-name   #:accessor      file-name
+                #:init-keyword  #:file-name
+                #:allocation    #:virtual
+                #:slot-ref      (lambda (o)
+                                  (slot-ref o '%file))
+                #:slot-set!     (lambda (o v)
+                                  (slot-set! o '%file (find-image v))))
+   (icon-name   #:allocation    #:gtk-property
+                #:accessor      icon-name
+                #:init-keyword  #:icon-name)
+   (icon-size   #:allocation    #:virtual
+                #:accessor      icon-size
+                #:init-keyword  #:icon-size
+                #:slot-ref      (lambda (o)
+                                  (int->size (slot-ref o '%icon-size)))
+                #:slot-set!     (lambda (o v)
+                                  (slot-set! o '%icon-size
+                                             (size->int v))))))
+
+(define-method realize-widget ((self <image>) initargs)
+  (let* ((icon (key-get initargs #:icon-name #f))
+         (sz   (key-get initargs #:icon-size 'medium))
+         (file (key-get initargs #:file-name #f))
+         (img  (cond
+                (icon (gtk-image-new-from-icon
+                           icon
+                           (size->int sz)))
+                (file (gtk-image-new-from-file
+                       (or (find-image file) file)))
+                (else (error "file or icon name exptected")))))
+    (cpointer-type-set! img 'gtk-image)
+    (slot-set! self 'wid img)))
+
+;;;
+;;; Exports
+;;;
+(export image-path <image> file-name icon-name icon-size)
