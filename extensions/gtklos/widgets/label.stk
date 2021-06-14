@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2001 22:23 (eg)
-;;;; Last file update: 11-Jun-2021 13:40 (eg)
+;;;; Last file update: 14-Jun-2021 09:04 (eg)
 ;;;;
 
 
@@ -82,15 +82,10 @@
                                   (gtk-label-set-justify
                                       (slot-ref o 'wid)
                                       (justify->int v))))
-   (use-markup   #:accessor     use-markup
-                 #:init-keyword #:use-markup
-                 #:allocation   #:virtual
-                 #:slot-ref     (lambda (o)
-                                  (%widget-data-get o #:markup #f))
-                 #:slot-set!    (lambda (o v)
-                                  (gtk-label-set-use-markup (wid o) v)
-                                  (%widget-data-set! o #:markup v)))
-  ))
+   (use-markup #:accessor       use-markup
+               #:init-keyword   #:use-markup
+               #:allocation     #:gtk-property)
+))
 
 (define-method realize-widget ((self <label>) initargs)
   (let ((lab (gtk-label-new "*label*")))
