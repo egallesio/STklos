@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 15:44 (eg)
-;;;; Last file update: 11-Jun-2021 12:59 (eg)
+;;;; Last file update: 14-Jun-2021 08:35 (eg)
 ;;;;
 
 
@@ -53,7 +53,7 @@
 ;                 C l a s s    < b o x >
 ;
 ;======================================================================
-(define-class <box> (<gtk-container> <gtk-widget>)
+(define-class <box> (<gtk-container> <gtk-orientable>)
   ((expand             #:accessor       expand
                        #:init-keyword   #:expand
                        #:init-form      #f)
@@ -70,17 +70,6 @@
                        #:init-keyword   #:spacing
                        #:allocation     #:gtk-property
                        #:init-form      0)
-   (orientation        #:accessor       orientation
-                       #:init-keyword   #:orientation
-                       #:allocation     #:virtual
-                       #:slot-ref       (lambda (o)
-                                          (int->orientation
-                                             (gtk-orientable-get-orientation
-                                                (slot-ref o 'wid))))
-                       #:slot-set!      (lambda (o v)
-                                          (let ((v (orientation->int v)))
-                                            (gtk-orientable-set-orientation
-                                                 (slot-ref o 'wid) v))))
    (baseline-position  #:accessor       baseline-position
                        #:init-keyword   #:baseline-position
                        #:allocation     #:gtk-property)))

@@ -1,8 +1,7 @@
 ;;;;
+;;;; separator.stk  -- GTK+ Separator Widget
 ;;;;
-;;;; gtklos.stk         -- GTklos extension
-;;;;
-;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,33 +20,25 @@
 ;;;; USA.
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
-;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 14-Jun-2021 08:26 (eg)
+;;;;    Creation date: 24-Jul-2001 06:00 (eg)
+;;;; Last file update: 14-Jun-2021 08:28 (eg)
 ;;;;
 
 
-(select-module GTKLOS)
+(define-gtk gtk-separator-new (#:long) :pointer "gtk_separator_new")
 
-(%compile-time-define %gtk-get-property %gtk-set-property!)
- 
+;======================================================================
+;
+;           < S e p a r a t o r >
+;
+;======================================================================
+(define-class <separator> (<gtk-orientable>)
+  ())
 
-(include "sys/libs.stk")
-(include "sys/events.stk")
-(include "sys/utils.stk")
+(define-method realize-widget ((self <separator>) initargs)
+  (let* ((orient (key-get initargs #:orientation 'horizontal))
+         (sep    (gtk-separator-new (orientation->int orient))))
+    (cpointer-type-set! sep  'gtk-separator)
+    (slot-set! self 'wid sep)))
 
-(include "classes/meta.stk")
-(include "classes/widget.stk")
-(include "classes/container.stk")
-
-(include "widgets/window.stk")
-(include "widgets/entry.stk")
-(include "widgets/box.stk")
-(include "widgets/label.stk")
-(include "widgets/button.stk")
-(include "widgets/image.stk")
-(include "widgets/checkbutton.stk")
-(include "widgets/separator.stk")
-
-(provide "gtklos")
-
-
+(export <separator>)

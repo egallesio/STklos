@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 18:30 (eg)
-;;;; Last file update: 11-Jun-2021 18:38 (eg)
+;;;; Last file update: 14-Jun-2021 08:21 (eg)
 ;;;;
 
 
@@ -240,6 +240,8 @@
 ;;//FIXME: (define-method event-connect-after ((widget <gtk-widget>) name closure)
 ;;//FIXME:   (%signal-connect widget (slot-ref widget 'wid) name closure #t))
 ;;//FIXME: 
+
+
 ;;;; ======================================================================
 ;;;;
 ;;;;    <gtk-misc> class ...
@@ -260,6 +262,36 @@
                  #:allocation   #:gtk-property)))
 
 
+
+;;;; ======================================================================
+;;;;
+;;;;    <gtk-orientable> class ...
+;;;;
+;;;; ======================================================================
+(define (orientation->int orient)
+  (case orient
+    ((horizontal) 0)
+    ((vertical)   1)
+    (else (error "bad orientation value: ~S\n" orient))))
+
+(define (int->orientation orient)
+  (if (zero? orient) 'horizontal 'vertical))
+
+(define-class <gtk-orientable> (<gtk-widget>)
+  ((orientation    #:accessor       orientation
+                   #:init-keyword   #:orientation
+                   #:allocation     #:virtual
+                   #:slot-ref       (lambda (o)
+                                      (int->orientation
+                                       (gtk-orientable-get-orientation
+                                        (slot-ref o 'wid))))
+                   #:slot-set!      (lambda (o v)
+                                      (let ((v (orientation->int v)))
+                                        (gtk-orientable-set-orientation
+                                         (slot-ref o 'wid) v))))))
+
+
+
 ;;;
 ;;; Module exports
 ;;;
@@ -268,3 +300,4 @@
          sensitive width-request xalign yalign xpad ypad
          ;; methods
          destroy)
+
