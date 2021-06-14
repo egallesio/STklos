@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 18:30 (eg)
-;;;; Last file update: 14-Jun-2021 10:22 (eg)
+;;;; Last file update: 14-Jun-2021 11:12 (eg)
 ;;;;
 
 
@@ -32,6 +32,12 @@
 (define-gtk gtk-widget-show       (:pointer) :void    "gtk_widget_show")
 (define-gtk gtk-widget-show-all   (:pointer) :void    "gtk_widget_show_all")
 (define-gtk gtk-widget-get-parent (:pointer) :pointer "gtk_widget_get_parent")
+
+(define-gtk gtk-widget-get-tooltip-markup (:pointer) :string
+  "gtk_widget_get_tooltip_markup")
+
+(define-gtk gtk-widget-set-tooltip-markup (:pointer :string) :void
+  "gtk_widget_set_tooltip_markup")
 
 (define-gtk gtk-widget-get-allocated-width (:pointer) :long
   "gtk_widget_get_allocated_width")
@@ -122,6 +128,17 @@
                 #:accessor     width-request
                 #:init-keyword #:width-request
                 #:allocation   #:gtk-property)
+   (tooltip     #:accessor     tooltip
+                #:init-keyword #:tooltip
+                #:allocation   #:virtual
+                #:slot-ref     (lambda (o)
+                                 ;; Since the string returned by gtk-widget-get-tooltip-markup
+                                 ;; must be freed. We store the tooltip as a Scheme string.
+                                 (key-get (slot-ref o '%data) #:tooltip #f))
+                :slot-set!     (lambda (o v)
+                                 (gtk-widget-set-tooltip-markup (slot-ref o 'wid) v)
+                                 (slot-set! o '%data
+                                            (key-set!  (slot-ref o '%data) #:tooltip v))))
 ;;// TODO:   (width       #:accessor     width
 ;;// TODO:                #:init-keyword #:width
 ;;// TODO:                #:allocation   #:virtual
@@ -170,25 +187,6 @@
 ;;//                            (update)
 ;;//                            (%gtk-arg-set! (slot-ref o 'wid) #:has_default v)
 ;;//                            (update)))
-;;//TODO:   (tooltip     #:accessor     tooltip
-;;//TODO:                #:init-form    #f
-;;//TODO:                #:init-keyword #:tooltip
-;;//TODO:                #:allocation   #:virtual
-;;//TODO:                #:slot-ref     (lambda (o)
-;;//TODO:                                 (%widget-data-get o #:tooltip #f))
-;;//TODO:                #:slot-set!    (lambda (o v)
-;;//TODO:                                 (let ((tt (%widget-data-get o #:tooltip #f)))
-;;//TODO:                                   (unless tt
-;;//TODO:                                     (set! tt (gtk-tooltips-new))
-;;//TODO:                                     (%widget-data-set! o #:tooltip tt))
-;;//TODO:                                   (if v
-;;//TODO:                                       (let ((wid (slot-ref o 'wid)))
-;;//TODO:                                         (gtk-tooltips-enable tt)
-;;//TODO:                                         (gtk-tooltips-set-tip tt wid v ""))
-;;//TODO:                                       (when tt
-;;//TODO:                                         (gtk-tooltips-disable tt)))
-;;//TODO:                                   ;; Finally set
-;;//TODO:                                   (%widget-data-set! o #:tooltip v))))
    ))
 
 ;======================================================================
@@ -253,10 +251,10 @@
 ;;//FIXME: ;;;
 ;;//FIXME: (define-method event-connect ((widget <gtk-widget>) name closure)
 ;;//FIXME:   (%signal-connect widget (slot-ref widget 'wid) name closure #f))
-;;//FIXME: 
+;;//FIXME:
 ;;//FIXME: (define-method event-connect-after ((widget <gtk-widget>) name closure)
 ;;//FIXME:   (%signal-connect widget (slot-ref widget 'wid) name closure #t))
-;;//FIXME: 
+;;//FIXME:
 
 
 ;;;; ======================================================================
@@ -314,7 +312,6 @@
 ;;;
 (export  ;; accessors
          parent can-default has-default has-focus height-request name visible
-         sensitive width-request xalign yalign xpad ypad
+         sensitive width-request tooltip xalign yalign xpad ypad 
          ;; methods
          destroy get-widget-width get-widget-height)
-
