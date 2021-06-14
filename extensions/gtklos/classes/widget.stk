@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 18:30 (eg)
-;;;; Last file update: 14-Jun-2021 08:21 (eg)
+;;;; Last file update: 14-Jun-2021 10:22 (eg)
 ;;;;
 
 
@@ -32,6 +32,13 @@
 (define-gtk gtk-widget-show       (:pointer) :void    "gtk_widget_show")
 (define-gtk gtk-widget-show-all   (:pointer) :void    "gtk_widget_show_all")
 (define-gtk gtk-widget-get-parent (:pointer) :pointer "gtk_widget_get_parent")
+
+(define-gtk gtk-widget-get-allocated-width (:pointer) :long
+  "gtk_widget_get_allocated_width")
+
+(define-gtk gtk-widget-get-allocated-height (:pointer) :long
+  "gtk_widget_get_allocated_height")
+
 
 (define-generic realize-widget)
 (define-generic internal-arrange-widget)
@@ -231,6 +238,16 @@
 (define-method destroy (w)
   #f)
 
+
+(define-method widget-width ((w <gtk-widget>))
+  (gtk-widget-get-allocated-width  (slot-ref w 'wid)))
+
+(define-method widget-height ((w <gtk-widget>))
+  (gtk-widget-get-allocated-height (slot-ref w 'wid)))
+
+(define-method gtk-widget-set-size ((w <gtk-widget>) width height)
+  (gtk-widget-set-size-request (slot-ref w 'wid) width height))
+
 ;;//FIXME: ;;;
 ;;//FIXME: ;;; Event connection
 ;;//FIXME: ;;;
@@ -299,5 +316,5 @@
          parent can-default has-default has-focus height-request name visible
          sensitive width-request xalign yalign xpad ypad
          ;; methods
-         destroy)
+         destroy get-widget-width get-widget-height)
 

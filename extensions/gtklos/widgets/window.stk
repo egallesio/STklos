@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 15:47 (eg)
-;;;; Last file update: 11-Jun-2021 10:15 (eg)
+;;;; Last file update: 14-Jun-2021 10:30 (eg)
 ;;;;
 
 ;;;;
@@ -30,6 +30,7 @@
 (define-gtk gtk-window-new (:int) :pointer                 "gtk_window_new")
 (define-gtk gtk-window-get-title (:pointer) :string        "gtk_window_get_title")
 (define-gtk gtk-window-set-title (:pointer :string) :void  "gtk_window_set_title")
+(define-gtk gtk-window-resize (:pointer :long :long) :void "gtk_window_resize")
 
 
 ;======================================================================
@@ -49,13 +50,28 @@
                                    (gtk-window-get-title (slot-ref o 'wid)))
                  #:slot-set!      (lambda (o v)
                                     (gtk-window-set-title (slot-ref o 'wid) v)))
-;;   (resizable    #:accessor      resizable
-;;                 #:init-keyword  #:resizable
-;;                 #:allocation    #:virtual
-;;                 #:slot-ref      (lambda (o)
-;;                                   (gtk-window-get-resizable (slot-ref o 'wid)))
-;;                 #:slot-set!     (lambda (o v)
-;;                                   (gtk-window-set-resizable (slot-ref o 'wid) v)))
+   (resizable    #:accessor      resizable
+                 #:init-keyword  #:resizable
+                 #:allocation    #:gtk-property)
+   (width        #:accessor      width
+                 #:init-keyword  #:width
+                 #:allocation    #:virtual
+                 #:slot-ref      (lambda (o)
+                                   (gtk-widget-get-allocated-width (slot-ref o 'wid)))
+                 #:slot-set!     (lambda (o v)
+                                   (let* ((w (slot-ref o 'wid))
+                                          (h (gtk-widget-get-allocated-height w)))
+                                     (gtk-window-resize w v h))))
+   (height       #:accessor      height
+                 #:init-keyword  #:height
+                 #:allocation    #:virtual
+                 #:slot-ref      (lambda (o)
+                                   (gtk-widget-get-allocated-height (slot-ref o 'wid)))
+                 #:slot-set!     (lambda (o v)
+                                   (let* ((w (slot-ref o 'wid))
+                                          (x (gtk-widget-get-allocated-width w)))
+                                     (gtk-window-resize w x v))))
+
 ;;   (modal        #:accessor      modal
 ;;                 #:init-keyword  #:modal
 ;;                 #:allocation    #:virtual
@@ -87,4 +103,4 @@
 ;;;
 ;;; Module exports
 ;;;
-(export <window> title)
+(export <window> transient title resizable width height)
