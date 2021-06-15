@@ -19,15 +19,15 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 14-Jun-2021 08:25 (eg)
+# Last file update: 15-Jun-2021 17:37 (eg)
 
 EXTENSION=gtklos
 
-SCM_SRCS = sys/events.stk sys/libs.stk sys/utils.stk                  \
+SCM_SRCS = utils/events.stk utils/libs.stk utils/utils.stk            \
            classes/meta.stk classes/container.stk classes/widget.stk  \
            widgets/box.stk widgets/button.stk widgets/checkbutton.stk \
-           widgets/entry.stk widgets/image.stk widgets/label.stk      \
-           widgets/separator.stk  widgets/window.stk
+           widgets/entry.stk widgets/grid.stk widgets/image.stk       \
+	       widgets/label.stk widgets/separator.stk  widgets/window.stk
 
 #======================================================================
 OUT            = $(EXTENSION).@SH_SUFFIX@
@@ -51,9 +51,10 @@ SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
-	@CC@ @CFLAGS@ $(GTKFLAGS) @STKCFLAGS@ @SH_COMP_FLAGS@ \
+	@CC@ @CFLAGS@  @STKCFLAGS@ @SH_COMP_FLAGS@ \
+         $(GTKFLAGS) \
          -I../../src @GCINC@ @GMPINC@ \
-	     -c -o $*.o $*.c
+         -c -o $*.o $*.c
 	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@
 	/bin/rm -f $*.o
 

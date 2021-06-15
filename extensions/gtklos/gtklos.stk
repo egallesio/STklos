@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 14-Jun-2021 08:26 (eg)
+;;;; Last file update: 15-Jun-2021 17:37 (eg)
 ;;;;
 
 
@@ -31,9 +31,9 @@
 (%compile-time-define %gtk-get-property %gtk-set-property!)
  
 
-(include "sys/libs.stk")
-(include "sys/events.stk")
-(include "sys/utils.stk")
+(include "utils/libs.stk")
+(include "utils/events.stk")
+(include "utils/utils.stk")
 
 (include "classes/meta.stk")
 (include "classes/widget.stk")
@@ -42,6 +42,7 @@
 (include "widgets/window.stk")
 (include "widgets/entry.stk")
 (include "widgets/box.stk")
+(include "widgets/grid.stk")
 (include "widgets/label.stk")
 (include "widgets/button.stk")
 (include "widgets/image.stk")
