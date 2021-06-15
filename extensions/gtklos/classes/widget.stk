@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 18:30 (eg)
-;;;; Last file update: 14-Jun-2021 11:12 (eg)
+;;;; Last file update: 14-Jun-2021 11:21 (eg)
 ;;;;
 
 
@@ -32,9 +32,6 @@
 (define-gtk gtk-widget-show       (:pointer) :void    "gtk_widget_show")
 (define-gtk gtk-widget-show-all   (:pointer) :void    "gtk_widget_show_all")
 (define-gtk gtk-widget-get-parent (:pointer) :pointer "gtk_widget_get_parent")
-
-(define-gtk gtk-widget-get-tooltip-markup (:pointer) :string
-  "gtk_widget_get_tooltip_markup")
 
 (define-gtk gtk-widget-set-tooltip-markup (:pointer :string) :void
   "gtk_widget_set_tooltip_markup")

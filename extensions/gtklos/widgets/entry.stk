@@ -21,16 +21,18 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Jul-2001 18:05 (eg)
-;;;; Last file update: 11-Jun-2021 09:47 (eg)
+;;;; Last file update: 14-Jun-2021 14:24 (eg)
 ;;;;
 
 
 ;;;;
 ;;;; GTK Bindings
 ;;;;
-(define-gtk gtk-entry-new() :pointer                        "gtk_entry_new")
-(define-gtk gtk-editable-get-position (:pointer) :int       "gtk_editable_get_position")
-(define-gtk gtk-editable-set-position (:pointer :int) :void "gtk_editable_set_position")
+(define-gtk gtk-entry-new() :pointer                            "gtk_entry_new")
+(define-gtk gtk-editable-get-position (:pointer) :int           "gtk_editable_get_position")
+(define-gtk gtk-editable-set-position (:pointer :int) :void     "gtk_editable_set_position")
+(define-gtk gtk-editable-set-editable (:pointer :boolean) :void "gtk_editable_set_editable")
+(define-gtk gtk-editable-get-editable (:pointer) :boolean       "gtk_editable_get_editable")
 
 ;======================================================================
 ;
@@ -54,6 +56,13 @@
                     #:init-keyword   #:text-visibility
                     #:allocation     #:gtk-property
                     #:gtk-name       "visibility")
+   (text-editable   #:accessor       text-editable
+                    #:init-keyword   #:text-editable
+                    #:allocation     #:virtual ;; since the GTK property doesn't seems to work
+                    #:slot-ref       (lambda (o)
+                                       (gtk-editable-get-editable (slot-ref o 'wid)))
+                    #:slot-set!      (lambda (o v)
+                                       (gtk-editable-set-editable (slot-ref o 'wid) v)))
    (value           #:accessor       value
                     #:init-keyword   #:value
                     #:allocation     #:gtk-property
@@ -68,4 +77,4 @@
 ;;;
 ;;; Module exports
 ;;;
-(export <entry> cursor-position max-length text-visibility value)
+(export <entry> cursor-position max-length text-visibility text-editable value)
