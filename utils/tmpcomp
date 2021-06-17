@@ -22,7 +22,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  1-Jan-2002 18:57 (eg)
-# Last file update: 25-May-2021 18:43 (eg)
+# Last file update: 17-Jun-2021 09:31 (eg)
 #
 
 # This script is only used to compile the different components of the
@@ -68,7 +68,11 @@ sep=":"
 if test -f ../src/boot.img ;then
     prefix=".."
 else
-    prefix="../.."
+    if test -f ../../src/boot.img ;then
+        prefix="../.."
+    else
+        prefix="../../.."
+    fi
 fi
 
 STKLOS_LOAD_PATH="${prefix}/lib${sep}${prefix}/gtklos"

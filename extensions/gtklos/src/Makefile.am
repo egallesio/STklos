@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 15-Jun-2021 17:37 (eg)
+# Last file update: 17-Jun-2021 09:27 (eg)
 
 EXTENSION=gtklos
 
@@ -37,13 +37,12 @@ schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@
 GTKFLAGS       = `pkg-config --cflags gtk+-3.0`
 
 #======================================================================
-COMP ?= ../../utils/tmpcomp
-STKLOS_BINARY ?= ../../src/stklos
+BASEDIR= ../../..
+COMP ?= $(BASEDIR)/utils/tmpcomp
+STKLOS_BINARY ?= $(BASEDIR)/src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 # ======================================================================
 SOURCES= $(EXTENSION).c $(EXTENSION).stk
-DOCDB  = ../DOCDB
-BASEDIR= ../..
 
 SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 
@@ -53,7 +52,7 @@ SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 .c.@SH_SUFFIX@ :
 	@CC@ @CFLAGS@  @STKCFLAGS@ @SH_COMP_FLAGS@ \
          $(GTKFLAGS) \
-         -I../../src @GCINC@ @GMPINC@ \
+         -I$(BASEDIR)/src @GCINC@ @GMPINC@ \
          -c -o $*.o $*.c
 	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@
 	/bin/rm -f $*.o
@@ -67,14 +66,6 @@ $(OUT): $(EXTENSION)-incl.c $(EXTENSION).c
 
 
 $(EXTENSION)-incl.c: $(EXTENSION).stk
-
-# Scheme source is not complete => do not install
-install-sources:
-	@echo "No source file to install for $(EXTENSION)"
-
-doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
-		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
 
 install-exec-hook:
 	install -d $(DESTDIR)$(schemelibdir)
