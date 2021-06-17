@@ -21,27 +21,26 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 18:30 (eg)
-;;;; Last file update: 15-Jun-2021 17:45 (eg)
+;;;; Last file update: 17-Jun-2021 12:02 (eg)
 ;;;;
 
 
 ;;;;
 ;;;; GTK Bindings
 ;;;;
-(define-gtk gtk-widget-destroy    (:pointer) :void    "gtk_widget_destroy")
-(define-gtk gtk-widget-show       (:pointer) :void    "gtk_widget_show")
-(define-gtk gtk-widget-show-all   (:pointer) :void    "gtk_widget_show_all")
-(define-gtk gtk-widget-get-parent (:pointer) :pointer "gtk_widget_get_parent")
+(define-gtk gtk-widget-destroy    (#:pointer) #:void    "gtk_widget_destroy")
+(define-gtk gtk-widget-show       (#:pointer) #:void    "gtk_widget_show")
+(define-gtk gtk-widget-show-all   (#:pointer) #:void    "gtk_widget_show_all")
+(define-gtk gtk-widget-get-parent (#:pointer) #:pointer "gtk_widget_get_parent")
 
-(define-gtk gtk-widget-set-tooltip-markup (:pointer :string) :void
+(define-gtk gtk-widget-set-tooltip-markup (#:pointer #:string) #:void
   "gtk_widget_set_tooltip_markup")
 
-(define-gtk gtk-widget-get-allocated-width (:pointer) :long
+(define-gtk gtk-widget-get-allocated-width (#:pointer) #:long
   "gtk_widget_get_allocated_width")
 
-(define-gtk gtk-widget-get-allocated-height (:pointer) :long
+(define-gtk gtk-widget-get-allocated-height (#:pointer) #:long
   "gtk_widget_get_allocated_height")
-
 
 (define-generic realize-widget)
 (define-generic internal-arrange-widget)
@@ -192,12 +191,10 @@
 ;
 ;======================================================================
 (define-method realize-widget ((self <gtk-widget>) initargs)
-  (eprintf "Realize-widget <gtk-widget>\n")
   ;; Do nothing
   #f)
 
 (define-method internal-arrange-widget ((self <gtk-widget>) initargs)
-  (eprintf "Internal-arrange <gtk-widget>\n")
   ;; Do nothing
   #f)
 
@@ -213,7 +210,6 @@
   (let ((wid (slot-ref self 'wid)))
     ;; Show object (eventually)
     (when (slot-ref self 'show)
-      (eprintf "Showing ~s\n" self)
       (gtk-widget-show wid))
     ;; Store self in GTk+ object to allow GTK <-> Scheme conversions
     (gtklos-wid-associate wid self)))
@@ -245,7 +241,6 @@
 ;;; Event connection
 ;;;
 (define-method event-connect ((widget <gtk-widget>) name closure)
-  (eprintf "Connecting event ~s to ~s\n" name widget)
   (g-signal-connect (slot-ref widget 'wid)
                     name
                     (scheme-proc->gtk-handler closure widget)
@@ -308,7 +303,6 @@
                                          (slot-ref o 'wid) v))))))
 
 
-
 ;;;
 ;;; Module exports
 ;;;
@@ -318,3 +312,4 @@
          ;; methods
          destroy event-connect event-connect-after
          get-widget-width get-widget-height)
+

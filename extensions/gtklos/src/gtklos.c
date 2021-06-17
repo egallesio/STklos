@@ -492,7 +492,6 @@ static struct extended_type_descr xtype_gtk_event = {
 
 static void gtk_event_finalizer(struct gtk_event_obj *o, void _UNUSED(*client_data))
 {
-  printf("Finalizer de %p\n", o);
   gdk_event_free(GTK_EVENT_VALUE(o));
 }
 

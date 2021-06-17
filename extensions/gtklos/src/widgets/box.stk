@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 15:44 (eg)
-;;;; Last file update: 14-Jun-2021 08:35 (eg)
+;;;; Last file update: 17-Jun-2021 12:02 (eg)
 ;;;;
 
 
@@ -85,7 +85,6 @@
   (let ((c    (slot-ref cont   'wid))
         (w    (slot-ref widget 'wid))
         (func (if end gtk-box-pack-end gtk-box-pack-start)))
-    (eprintf "CONTAINER-ADD ~S ~S ~S ~S ~S ~S !\n" func c w expand fill padding)
     (func c w expand fill padding)))
 
 

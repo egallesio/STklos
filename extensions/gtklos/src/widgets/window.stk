@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 15:47 (eg)
-;;;; Last file update: 14-Jun-2021 10:30 (eg)
+;;;; Last file update: 17-Jun-2021 12:03 (eg)
 ;;;;
 
 ;;;;
@@ -82,7 +82,6 @@
    ))
 
 (define-method realize-widget ((self <window>) initargs)
-  (eprintf "Realize-widget <window>\n")
   (next-method)
   (let* ((transient (key-get initargs #:transient #f))
          (win       (gtk-window-new (if transient 1 0))))
