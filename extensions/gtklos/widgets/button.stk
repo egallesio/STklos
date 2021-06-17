@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 22:11 (eg)
-;;;; Last file update: 11-Jun-2021 18:05 (eg)
+;;;; Last file update: 17-Jun-2021 08:32 (eg)
 ;;;;
 
 ;;;
@@ -60,16 +60,15 @@
                     #:slot-ref       (lambda (o)
                                        (key-get (slot-ref o '%event) #:clicked #f))
                     #:slot-set!      (lambda (o v)
-                                       (let ((hdlr (lambda (_w _data) (v o))))
-                                         (g-signal-connect (slot-ref o 'wid)
-                                                           "clicked"
-                                                           hdlr
-                                                           (void))
-                                         (slot-set! o
-                                                    '%event
-                                                    (key-set! (slot-ref o '%event)
-                                                              #:clicked
-                                                              hdlr)))))
+                                       (g-signal-connect (slot-ref o 'wid)
+                                                         "clicked"
+                                                         (scheme-proc->gtk-handler v o)
+                                                         (void))
+                                       (slot-set! o
+                                                  '%event
+                                                  (key-set! (slot-ref o '%event)
+                                                            #:clicked
+                                                            v))))
    (text            #:accessor       text
                     #:init-keyword   #:text
                     #:allocation     #:virtual

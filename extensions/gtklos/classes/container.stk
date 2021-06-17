@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 16:59 (eg)
-;;;; Last file update: 11-Jun-2021 12:30 (eg)
+;;;; Last file update: 17-Jun-2021 08:46 (eg)
 ;;;;
 
 ;;;;
@@ -49,10 +49,10 @@
                  #:allocation   #:virtual
                  #:slot-ref     (lambda (o) (slot-ref o '%children))
                  #:slot-set!    (gtklos-slot-is-ro 'children))
-;;   (border-width #:accessor     border-width
-;;                 #:init-keyword #:border-width
-;;                 #:allocation   #:gtk-property)))
-   ))
+   (border-width #:accessor     border-width
+                 #:init-keyword #:border-width
+                 #:allocation   #:gtk-property)))
+
 ;;;;
 ;;;; Methods for containers
 ;;;;

@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 11-Aug-2007 11:38 (eg)
- * Last file update: 10-Jun-2021 14:18 (eg)
+ * Last file update: 16-Jun-2021 19:59 (eg)
  */
 
 #include <math.h>               /* for isnan */
@@ -43,11 +43,11 @@ static void error_set_property(SCM prop, SCM val, char *s)
             prop, s, val);
 }
 
-static void error_bad_widget(SCM obj)
-{
-  STk_error("bad widget ~S", obj);
-}
-
+//FIXME:static void error_bad_widget(SCM obj)
+//FIXME:{
+//FIXME:  STk_error("bad widget ~S", obj);
+//FIXME:}
+//FIXME:
 static void error_bad_event(SCM obj)
 {
   STk_error("bad event ~S", obj);
@@ -65,7 +65,7 @@ static void error_bad_integer(SCM obj)
  *
  * ======================================================================
  */
-static void Inline init_gvalue(SCM object, SCM prop, GValue *value)
+static void init_gvalue(SCM object, SCM prop, GValue *value)
 {
   GParamSpec *spec;
 
@@ -77,18 +77,18 @@ static void Inline init_gvalue(SCM object, SCM prop, GValue *value)
   g_value_init(value, spec->value_type);
 }
 
-static void Inline init_gvalue_for_child(SCM container, SCM prop, GValue *value)
-{
-  GParamSpec* spec;
-
-  spec = gtk_container_class_find_child_property(
-                         G_OBJECT_GET_CLASS(CPOINTER_VALUE(container)),
-                         STRING_CHARS(prop));
-  if (!spec)
-    STk_error("container ~S doesn't have the property ~S", container, prop);
-
-  g_value_init(value, G_PARAM_SPEC_VALUE_TYPE(spec));
-}
+//FIXME: static void init_gvalue_for_child(SCM container, SCM prop, GValue *value)
+//FIXME: {
+//FIXME:   GParamSpec* spec;
+//FIXME:
+//FIXME:   spec = gtk_container_class_find_child_property(
+//FIXME:                          G_OBJECT_GET_CLASS(CPOINTER_VALUE(container)),
+//FIXME:                          STRING_CHARS(prop));
+//FIXME:   if (!spec)
+//FIXME:     STk_error("container ~S doesn't have the property ~S", container, prop);
+//FIXME:
+//FIXME:   g_value_init(value, G_PARAM_SPEC_VALUE_TYPE(spec));
+//FIXME: }
 
 
 static SCM GValue2Scheme(GValue *value, SCM prop)
@@ -135,6 +135,7 @@ static SCM GValue2Scheme(GValue *value, SCM prop)
     case G_TYPE_OBJECT:
       STk_error("cannot convert property ~S to Scheme (%d)",
                 prop, G_VALUE_TYPE(value));
+      break; // for the compiler
     default:
       {
         /* Try to value objet to an int */
@@ -173,6 +174,7 @@ static void assign_GValue(GValue *value, SCM prop, SCM val)
     case G_TYPE_UCHAR:
       if (CHARACTERP(val))
         g_value_set_uchar(value, (unsigned char) CHARACTER_VAL(val));
+      else
         error_set_property(prop, val, "character");
       break;
     case G_TYPE_BOOLEAN:
@@ -258,6 +260,7 @@ static void assign_GValue(GValue *value, SCM prop, SCM val)
     case G_TYPE_PARAM:
     case G_TYPE_OBJECT:
       STk_error("cannot convert Scheme object ~S for property ~S", val, prop);
+      break; // for the compiler
     default:
       {
         /* Try to value objet to an int */
@@ -355,167 +358,205 @@ DEFINE_PRIMITIVE("%gtk-set-property!", gtk_set_prop, subr3,
 //TODO:   return STk_cons(MAKE_INT(width), MAKE_INT(height));
 //TODO: }
 
+//FIXME: /* ----------------------------------------------------------------------
+//FIXME:  *
+//FIXME:  *      Containers  ...
+//FIXME:  *
+//FIXME:  * ---------------------------------------------------------------------- */
+//FIXME: DEFINE_PRIMITIVE("gtk-box-query-child-packing", box_query_packing, subr2,
+//FIXME:                  (SCM box, SCM child))
+//FIXME: {
+//FIXME:   gboolean expand, fill;
+//FIXME:   guint padding;
+//FIXME:   GtkPackType pack_type;
+//FIXME:
+//FIXME:   if (!CPOINTERP(box)) error_bad_widget(box);
+//FIXME:   if (!CPOINTERP(child)) error_bad_widget(child);
+//FIXME:
+//FIXME:   expand = fill = padding = pack_type = 0;
+//FIXME:   gtk_box_query_child_packing(GTK_BOX(CPOINTER_VALUE(box)),
+//FIXME:                               GTK_WIDGET(CPOINTER_VALUE(child)),
+//FIXME:                               &expand,
+//FIXME:                               &fill,
+//FIXME:                               &padding,
+//FIXME:                               &pack_type);
+//FIXME:
+//FIXME:   return LIST4(MAKE_BOOLEAN(expand),
+//FIXME:                MAKE_BOOLEAN(fill),
+//FIXME:                MAKE_INT(padding),
+//FIXME:                MAKE_BOOLEAN(pack_type == GTK_PACK_START));
+//FIXME: }
+
+
+//FIXME: /* ----------------------------------------------------------------------
+//FIXME:  *      %gtk-get-child-property ...
+//FIXME:  * ---------------------------------------------------------------------- */
+//FIXME: DEFINE_PRIMITIVE("%gtk-get-child-property", gtk_get_child_prop, subr3,
+//FIXME:                  (SCM container, SCM object, SCM prop))
+//FIXME: {
+//FIXME:   GValue value = {G_TYPE_INVALID};
+//FIXME:   SCM res = STk_void;
+//FIXME:
+//FIXME:   if (! CPOINTERP(container)) STk_error("bad container ~S" , container);
+//FIXME:   if (! CPOINTERP(object))    STk_error("bad object ~S" , object);
+//FIXME:   if (! STRINGP(prop))        STk_error("bad property name ~S", prop);
+//FIXME:
+//FIXME:   init_gvalue_for_child(container, prop, &value);
+//FIXME:
+//FIXME:   /* the Gvalue is initialized with correct type . Fill it now */
+//FIXME:   gtk_container_child_get_property(GTK_CONTAINER(CPOINTER_VALUE(container)),
+//FIXME:                                    GTK_WIDGET(CPOINTER_VALUE(object)),
+//FIXME:                                    STRING_CHARS(prop),
+//FIXME:                                    &value);
+//FIXME:
+//FIXME:   res = GValue2Scheme(&value, prop);
+//FIXME:   g_value_unset(&value);
+//FIXME:   return res;
+//FIXME: }
+//FIXME:
+
+
+//FIXME: /*
+//FIXME:  * FIXME: This function is not exported. Should it be? Delete it?
+//FIXME:  *
+//FIXME:  */
+//FIXME: DEFINE_PRIMITIVE("gtk-box-set-child-packing", box_set_packing, subr3,
+//FIXME:                  (SCM box, SCM child, SCM value))
+//FIXME: {
+//FIXME:   long pad;
+//FIXME:
+//FIXME:
+//FIXME:   if (!CPOINTERP(box)) error_bad_widget(box);
+//FIXME:   if (!CPOINTERP(child)) error_bad_widget(child);
+//FIXME:
+//FIXME:   if (STk_int_length(value) != 4) STk_error("bad value ~S", value);
+//FIXME:   pad = STk_integer_value(CAR(CDR(CDR(value))));
+//FIXME:   if (pad == LONG_MIN) STk_error("bad padding value ~S", CAR(CDR(CDR(value))));
+//FIXME:
+//FIXME:   gtk_box_set_child_packing(GTK_BOX(CPOINTER_VALUE(box)),
+//FIXME:                             GTK_WIDGET(CPOINTER_VALUE(child)),
+//FIXME:                             (gboolean) 0, //(CAR(value) != STk_false),
+//FIXME:                             (gboolean) ~0, // (CAR(CDR(value)) != STk_false),
+//FIXME:                             (guint) pad,
+//FIXME:                             ((CAR(CDR((CDR(CDR(value))))) == STk_true)?
+//FIXME:                              GTK_PACK_START: GTK_PACK_END));
+//FIXME:   return STk_void;
+//FIXME: }
+//FIXME:
+//FIXME: /*
+//FIXME:  * Children of a container computation
+//FIXME:  */
+//FIXME: static void cont_children_helper(gpointer p, gpointer data)
+//FIXME: {
+//FIXME:   SCM *l = (SCM*) data;
+//FIXME:
+//FIXME:   *l = STk_cons(STk_make_Cpointer(p, STk_void, STk_false), *l);
+//FIXME: }
+//FIXME:
+//FIXME:
+//FIXME:
+//FIXME: DEFINE_PRIMITIVE("%container-children", cont_children, subr1, (SCM w))
+//FIXME: {
+//FIXME:   GList *gl;
+//FIXME:   SCM l = STk_nil;
+//FIXME:
+//FIXME:   if (!CPOINTERP(w)) error_bad_widget(w);
+//FIXME:
+//FIXME:   gl = gtk_container_get_children(GTK_CONTAINER(CPOINTER_VALUE(w)));
+//FIXME:   g_list_foreach(gl, cont_children_helper, &l);
+//FIXME:   g_list_free(gl);
+//FIXME:
+//FIXME:   return l;
+//FIXME: }
+
 /* ----------------------------------------------------------------------
  *
- *      Containers  ...
+ *      Events  ...
  *
  * ---------------------------------------------------------------------- */
-DEFINE_PRIMITIVE("gtk-box-query-child-packing", box_query_packing, subr2,
-                 (SCM box, SCM child))
+
+static int tc_gtk_event;
+
+struct gtk_event_obj {
+  stk_header header;
+  GdkEvent *ev;
+};
+
+#define GTK_EVENTP(p)         (BOXED_TYPE_EQ((p), tc_gtk_event))
+#define GTK_EVENT_VALUE(p)    (((struct gtk_event_obj *) (p))->ev)
+
+static struct extended_type_descr xtype_gtk_event = {
+  .name  = "GTK-event",
+};
+
+
+static void gtk_event_finalizer(struct gtk_event_obj *o, void _UNUSED(*client_data))
 {
-  gboolean expand, fill;
-  guint padding;
-  GtkPackType pack_type;
-
-  if (!CPOINTERP(box)) error_bad_widget(box);
-  if (!CPOINTERP(child)) error_bad_widget(child);
-
-  expand = fill = padding = pack_type = 0;
-  gtk_box_query_child_packing(GTK_BOX(CPOINTER_VALUE(box)),
-                              GTK_WIDGET(CPOINTER_VALUE(child)),
-                              &expand,
-                              &fill,
-                              &padding,
-                              &pack_type);
-
-  return LIST4(MAKE_BOOLEAN(expand),
-               MAKE_BOOLEAN(fill),
-               MAKE_INT(padding),
-               MAKE_BOOLEAN(pack_type == GTK_PACK_START));
+  printf("Finalizer de %p\n", o);
+  gdk_event_free(GTK_EVENT_VALUE(o));
 }
 
 
-/* ----------------------------------------------------------------------
- *      %gtk-get-child-property ...
- * ---------------------------------------------------------------------- */
-DEFINE_PRIMITIVE("%gtk-get-child-property", gtk_get_child_prop, subr3,
-                 (SCM container, SCM object, SCM prop))
-{
-  GValue value = {G_TYPE_INVALID};
-  SCM res = STk_void;
+DEFINE_PRIMITIVE("get-gtk-event", get_gtk_event, subr0, (void)) {
+  GdkEvent *ev= gtk_get_current_event();
 
-  if (! CPOINTERP(container)) STk_error("bad container ~S" , container);
-  if (! CPOINTERP(object))    STk_error("bad object ~S" , object);
-  if (! STRINGP(prop))        STk_error("bad property name ~S", prop);
-
-  init_gvalue_for_child(container, prop, &value);
-
-  /* the Gvalue is initialized with correct type . Fill it now */
-  gtk_container_child_get_property(GTK_CONTAINER(CPOINTER_VALUE(container)),
-                                   GTK_WIDGET(CPOINTER_VALUE(object)),
-                                   STRING_CHARS(prop),
-                                   &value);
-
-  res = GValue2Scheme(&value, prop);
-  g_value_unset(&value);
-  return res;
+  if (!ev)
+    return STk_false;
+  else {
+    SCM z;
+    NEWCELL(z, gtk_event);
+    GTK_EVENT_VALUE(z) = ev;
+    STk_register_finalizer(z, gtk_event_finalizer);
+    return z;
+  }
 }
 
 
 
-/*
- * FIXME: This function is not exported. Should it be? Delete it?
- *
- */
-DEFINE_PRIMITIVE("gtk-box-set-child-packing", box_set_packing, subr3,
-                 (SCM box, SCM child, SCM value))
+DEFINE_PRIMITIVE("%event-type", event_type, subr1, (SCM event))
 {
-  long pad;
+  GdkEvent *ev;
 
+  if (!CPOINTERP(event)) error_bad_event(event);
+  ev = CPOINTER_VALUE(event);
 
-  if (!CPOINTERP(box)) error_bad_widget(box);
-  if (!CPOINTERP(child)) error_bad_widget(child);
-
-  if (STk_int_length(value) != 4) STk_error("bad value ~S", value);
-  pad = STk_integer_value(CAR(CDR(CDR(value))));
-  if (pad == LONG_MIN) STk_error("bad padding value ~S", CAR(CDR(CDR(value))));
-
-  gtk_box_set_child_packing(GTK_BOX(CPOINTER_VALUE(box)),
-                            GTK_WIDGET(CPOINTER_VALUE(child)),
-                            (gboolean) 0, //(CAR(value) != STk_false),
-                            (gboolean) ~0, // (CAR(CDR(value)) != STk_false),
-                            (guint) pad,
-                            ((CAR(CDR((CDR(CDR(value))))) == STk_true)?
-                             GTK_PACK_START: GTK_PACK_END));
-  return STk_void;
+  switch (((GdkEventAny *) ev)->type) {
+    case GDK_NOTHING           : return STk_intern("NOTHING");
+    case GDK_DELETE            : return STk_intern("DELETE");
+    case GDK_DESTROY           : return STk_intern("DESTROY");
+    case GDK_EXPOSE            : return STk_intern("EXPOSE");
+    case GDK_MOTION_NOTIFY     : return STk_intern("MOTION");
+    case GDK_BUTTON_PRESS      :
+    case GDK_2BUTTON_PRESS     :
+    case GDK_3BUTTON_PRESS     : return STk_intern("PRESS");
+    case GDK_BUTTON_RELEASE    : return STk_intern("RELEASE");
+    case GDK_KEY_PRESS         : return STk_intern("KEY-PRESS");
+    case GDK_KEY_RELEASE       : return STk_intern("KEY-RELEASE");
+    case GDK_ENTER_NOTIFY      : return STk_intern("ENTER");
+    case GDK_LEAVE_NOTIFY      : return STk_intern("LEAVE");
+    case GDK_FOCUS_CHANGE      : return STk_intern(((GdkEventFocus *) ev)->in ?
+                                                      "FOCUS-IN" :
+                                                      "FOCUS-OUT");
+    case GDK_CONFIGURE         : return STk_intern("CONFIGURE");
+    case GDK_MAP               : return STk_intern("MAP");
+    case GDK_UNMAP             : return STk_intern("UNMAP");
+    case GDK_PROPERTY_NOTIFY   : return STk_intern("PROPERTY");
+    case GDK_SELECTION_CLEAR   : return STk_intern("SELECTION-CLEAR");
+    case GDK_SELECTION_REQUEST : return STk_intern("SELECTION-REQUEST");
+    case GDK_SELECTION_NOTIFY  : return STk_intern("SELECTION");
+    case GDK_PROXIMITY_IN      : return STk_intern("PROXIMITY-IN");
+    case GDK_PROXIMITY_OUT     : return STk_intern("PROXIMITY-OUT");
+    case GDK_DRAG_ENTER        : return STk_intern("DRAG-ENTER");
+    case GDK_DRAG_LEAVE        : return STk_intern("DRAG-LEAVE");
+    case GDK_DRAG_MOTION       : return STk_intern("DRAG-MOTION");
+    case GDK_DRAG_STATUS       : return STk_intern("DRAG-STATUS");
+    case GDK_DROP_START        : return STk_intern("DROP-START");
+    case GDK_DROP_FINISHED     : return STk_intern("DROP-FINISHED");
+    case GDK_CLIENT_EVENT      : return STk_intern("CLIENT-EVENT");
+    case GDK_VISIBILITY_NOTIFY : return STk_intern("VISIBILITY");
+    default:                     return STk_void;
+  }
 }
-
-/*
- * Children of a container computation
- */
-static void cont_children_helper(gpointer p, gpointer data)
-{
-  SCM *l = (SCM*) data;
-
-  *l = STk_cons(STk_make_Cpointer(p, STk_void, STk_false), *l);
-}
-
-
-
-DEFINE_PRIMITIVE("%container-children", cont_children, subr1, (SCM w))
-{
-  GList *gl;
-  SCM l = STk_nil;
-
-  if (!CPOINTERP(w)) error_bad_widget(w);
-
-  gl = gtk_container_get_children(GTK_CONTAINER(CPOINTER_VALUE(w)));
-  g_list_foreach(gl, cont_children_helper, &l);
-  g_list_free(gl);
-
-  return l;
-}
-
-//TODO: /* ----------------------------------------------------------------------
-//TODO:  *
-//TODO:  *      Events  ...
-//TODO:  *
-//TODO:  * ---------------------------------------------------------------------- */
-//TODO: DEFINE_PRIMITIVE("%event-type", event_type, subr1, (SCM event))
-//TODO: {
-//TODO:   GdkEvent *ev;
-//TODO:
-//TODO:   if (!CPOINTERP(event)) error_bad_event(event);
-//TODO:   ev = CPOINTER_VALUE(event);
-//TODO:
-//TODO:   switch (((GdkEventAny *) ev)->type) {
-//TODO:     case GDK_NOTHING           : return STk_intern("NOTHING");
-//TODO:     case GDK_DELETE            : return STk_intern("DELETE");
-//TODO:     case GDK_DESTROY           : return STk_intern("DESTROY");
-//TODO:     case GDK_EXPOSE            : return STk_intern("EXPOSE");
-//TODO:     case GDK_MOTION_NOTIFY     : return STk_intern("MOTION");
-//TODO:     case GDK_BUTTON_PRESS      :
-//TODO:     case GDK_2BUTTON_PRESS     :
-//TODO:     case GDK_3BUTTON_PRESS     : return STk_intern("PRESS");
-//TODO:     case GDK_BUTTON_RELEASE    : return STk_intern("RELEASE");
-//TODO:     case GDK_KEY_PRESS         : return STk_intern("KEY-PRESS");
-//TODO:     case GDK_KEY_RELEASE       : return STk_intern("KEY-RELEASE");
-//TODO:     case GDK_ENTER_NOTIFY      : return STk_intern("ENTER");
-//TODO:     case GDK_LEAVE_NOTIFY      : return STk_intern("LEAVE");
-//TODO:     case GDK_FOCUS_CHANGE      : return STk_intern(((GdkEventFocus *) ev)->in ?
-//TODO:                                                       "FOCUS-IN" :
-//TODO:                                                       "FOCUS-OUT");
-//TODO:     case GDK_CONFIGURE         : return STk_intern("CONFIGURE");
-//TODO:     case GDK_MAP               : return STk_intern("MAP");
-//TODO:     case GDK_UNMAP             : return STk_intern("UNMAP");
-//TODO:     case GDK_PROPERTY_NOTIFY   : return STk_intern("PROPERTY");
-//TODO:     case GDK_SELECTION_CLEAR   : return STk_intern("SELECTION-CLEAR");
-//TODO:     case GDK_SELECTION_REQUEST : return STk_intern("SELECTION-REQUEST");
-//TODO:     case GDK_SELECTION_NOTIFY  : return STk_intern("SELECTION");
-//TODO:     case GDK_PROXIMITY_IN      : return STk_intern("PROXIMITY-IN");
-//TODO:     case GDK_PROXIMITY_OUT     : return STk_intern("PROXIMITY-OUT");
-//TODO:     case GDK_DRAG_ENTER        : return STk_intern("DRAG-ENTER");
-//TODO:     case GDK_DRAG_LEAVE        : return STk_intern("DRAG-LEAVE");
-//TODO:     case GDK_DRAG_MOTION       : return STk_intern("DRAG-MOTION");
-//TODO:     case GDK_DRAG_STATUS       : return STk_intern("DRAG-STATUS");
-//TODO:     case GDK_DROP_START        : return STk_intern("DROP-START");
-//TODO:     case GDK_DROP_FINISHED     : return STk_intern("DROP-FINISHED");
-//TODO:     case GDK_CLIENT_EVENT      : return STk_intern("CLIENT-EVENT");
-//TODO:     case GDK_VISIBILITY_NOTIFY : return STk_intern("VISIBILITY");
-//TODO:     case GDK_NO_EXPOSE         : return STk_intern("NO-EXPOSE");
-//TODO:     default:                     return STk_void;
-//TODO:   }
-//TODO: }
 //TODO:
 //TODO:
 //TODO: DEFINE_PRIMITIVE("%event-x", event_x, subr1, (SCM event))
@@ -560,28 +601,28 @@ DEFINE_PRIMITIVE("%container-children", cont_children, subr1, (SCM w))
 //TODO: }
 //TODO:
 //TODO:
-//TODO: DEFINE_PRIMITIVE("%event-char", event_char, subr1, (SCM event))
-//TODO: {
-//TODO:   GdkEvent *ev;
-//TODO:   int keyval;
-//TODO:
-//TODO:   if (!CPOINTERP(event)) error_bad_event(event);
-//TODO:   ev = CPOINTER_VALUE(event);
-//TODO:
-//TODO:   switch (((GdkEventAny *) ev)->type) {
-//TODO:     case GDK_KEY_PRESS:
-//TODO:       keyval = ((GdkEventKey *)ev)->keyval;
-//TODO:       switch (keyval) {
-//TODO:         case GDK_Return: return MAKE_CHARACTER('\n');
-//TODO:         case GDK_Tab:    return MAKE_CHARACTER('\t');
-//TODO:         default:         keyval = (keyval < 0xff) ? keyval: 0;;
-//TODO:                          return MAKE_CHARACTER(keyval);
-//TODO:       }
-//TODO:     default:
-//TODO:       return MAKE_CHARACTER(0);
-//TODO:   }
-//TODO: }
-//TODO:
+DEFINE_PRIMITIVE("event-char", event_char, subr1, (SCM event))
+{
+  GdkEvent *ev;
+  int keyval;
+
+  if (!GTK_EVENTP(event)) error_bad_event(event);
+  ev = GTK_EVENT_VALUE(event);
+
+  switch (((GdkEventAny *) ev)->type) {
+  case GDK_KEY_PRESS:
+    keyval = ((GdkEventKey *)ev)->keyval;
+    switch (keyval) {                  // Names are in <gdk/gdkkeysyms.h>
+      case GDK_KEY_Return: return MAKE_CHARACTER('\n');
+      case GDK_KEY_Tab:    return MAKE_CHARACTER('\t');
+      default:             keyval = (keyval < 0xff) ? keyval: 0;;
+                           return MAKE_CHARACTER(keyval);
+    }
+  default:
+    return MAKE_CHARACTER(0);
+  }
+}
+
 //TODO: DEFINE_PRIMITIVE("%event-keysym", event_keysym, subr1, (SCM event))
 //TODO: {
 //TODO:   GdkEvent *ev;
@@ -601,64 +642,64 @@ DEFINE_PRIMITIVE("%container-children", cont_children, subr1, (SCM w))
 //TODO:       return STk_void;
 //TODO:   }
 //TODO: }
-//TODO:
-//TODO: DEFINE_PRIMITIVE("%event-modifiers", event_modifiers,  subr1, (SCM event))
-//TODO: {
-//TODO:   GdkEvent *ev;
-//TODO:   SCM res = STk_nil;
-//TODO:   int modifiers;
-//TODO:
-//TODO:   if (!CPOINTERP(event)) error_bad_event(event);
-//TODO:   ev = CPOINTER_VALUE(event);
-//TODO:
-//TODO:   switch (((GdkEventAny *) ev)->type) {
-//TODO:       case GDK_ENTER_NOTIFY:
-//TODO:       case GDK_LEAVE_NOTIFY:
-//TODO:         modifiers = ((GdkEventCrossing *)ev)->state;
-//TODO:         break;
-//TODO:       case GDK_BUTTON_PRESS:
-//TODO:       case GDK_2BUTTON_PRESS:
-//TODO:       case GDK_3BUTTON_PRESS:
-//TODO:       case GDK_BUTTON_RELEASE:
-//TODO:          modifiers = ((GdkEventButton *) ev)->state;
-//TODO:          break;
-//TODO:       case GDK_MOTION_NOTIFY:
-//TODO:          modifiers = ((GdkEventMotion *) ev)->state;
-//TODO:          break;
-//TODO:       case GDK_KEY_PRESS:
-//TODO:          modifiers = ((GdkEventKey *) ev)->state;
-//TODO:          break;
-//TODO:       default:
-//TODO:          modifiers = 0;
-//TODO:    }
-//TODO:
-//TODO:    if (modifiers & GDK_SHIFT_MASK)
-//TODO:       res = STk_cons(STk_intern("shift"), res);
-//TODO:
-//TODO:    if (modifiers & GDK_LOCK_MASK)
-//TODO:       res = STk_cons(STk_intern("lock"), res);
-//TODO:
-//TODO:    if (modifiers & GDK_CONTROL_MASK)
-//TODO:       res = STk_cons(STk_intern("control"), res);
-//TODO:
-//TODO:    if (modifiers & GDK_MOD1_MASK)
-//TODO:       res = STk_cons(STk_intern("mod1"), res);
-//TODO:
-//TODO:    if (modifiers & GDK_MOD2_MASK)
-//TODO:       res = STk_cons(STk_intern("mod2"), res);
-//TODO:
-//TODO:    if (modifiers & GDK_MOD3_MASK)
-//TODO:       res = STk_cons(STk_intern("mod3"), res);
-//TODO:
-//TODO:    if (modifiers & GDK_MOD4_MASK)
-//TODO:       res = STk_cons(STk_intern("mod4"), res);
-//TODO:
-//TODO:    if (modifiers & GDK_MOD5_MASK)
-//TODO:       res = STk_cons(STk_intern("mod5"), res);
-//TODO:
-//TODO:    return res;
-//TODO: }
-//TODO:
+
+DEFINE_PRIMITIVE("event-modifiers", event_modifiers,  subr1, (SCM event))
+{
+  GdkEvent *ev;
+  SCM res = STk_nil;
+  int modifiers;
+
+  if (!GTK_EVENTP(event)) error_bad_event(event);
+  ev = GTK_EVENT_VALUE(event);
+
+  switch (((GdkEventAny *) ev)->type) {
+      case GDK_ENTER_NOTIFY:
+      case GDK_LEAVE_NOTIFY:
+        modifiers = ((GdkEventCrossing *)ev)->state;
+        break;
+      case GDK_BUTTON_PRESS:
+      case GDK_2BUTTON_PRESS:
+      case GDK_3BUTTON_PRESS:
+      case GDK_BUTTON_RELEASE:
+         modifiers = ((GdkEventButton *) ev)->state;
+         break;
+      case GDK_MOTION_NOTIFY:
+         modifiers = ((GdkEventMotion *) ev)->state;
+         break;
+      case GDK_KEY_PRESS:
+         modifiers = ((GdkEventKey *) ev)->state;
+         break;
+      default:
+         modifiers = 0;
+   }
+
+   if (modifiers & GDK_SHIFT_MASK)
+      res = STk_cons(STk_intern("shift"), res);
+
+   if (modifiers & GDK_LOCK_MASK)
+      res = STk_cons(STk_intern("lock"), res);
+
+   if (modifiers & GDK_CONTROL_MASK)
+      res = STk_cons(STk_intern("control"), res);
+
+   if (modifiers & GDK_MOD1_MASK)
+      res = STk_cons(STk_intern("mod1"), res);
+
+   if (modifiers & GDK_MOD2_MASK)
+      res = STk_cons(STk_intern("mod2"), res);
+
+   if (modifiers & GDK_MOD3_MASK)
+      res = STk_cons(STk_intern("mod3"), res);
+
+   if (modifiers & GDK_MOD4_MASK)
+      res = STk_cons(STk_intern("mod4"), res);
+
+   if (modifiers & GDK_MOD5_MASK)
+      res = STk_cons(STk_intern("mod5"), res);
+
+   return res;
+}
+
 //TODO: DEFINE_PRIMITIVE("%event-button", event_button, subr1, (SCM event))
 //TODO: {
 //TODO:   GdkEvent *ev;
@@ -710,28 +751,28 @@ DEFINE_PRIMITIVE("%color->string", color2string, subr1, (SCM obj))
   return STk_Cstring2string(gdk_rgba_to_string(CPOINTER_VALUE(obj)));
 }
 
-/* ----------------------------------------------------------------------
- *
- *      Dialogs  ...
- *
- * ---------------------------------------------------------------------- */
-DEFINE_PRIMITIVE("%dialog-vbox", dialog_vbox, subr1, (SCM obj))
-{
-  if (!CPOINTERP(obj)) STk_error("bad dialog ~S", obj);
-
-  /* In 2.14, we no more need to query the vbox field of the dialog
-   * since the function "gtk_dialog_get_content_area" has been
-   * defined. However, this version of GTK+ is still experimental
-   */
-  //  return STk_make_Cpointer(((GtkDialog *) CPOINTER_VALUE(obj))->vbox,
-  //                       STk_void,
-  //                       STk_false);
-
-  return STk_make_Cpointer(
-             gtk_dialog_get_content_area(GTK_DIALOG(CPOINTER_VALUE(obj))),
-             STk_void,
-             STk_false);
-}
+//FIXME: /* ----------------------------------------------------------------------
+//FIXME:  *
+//FIXME:  *      Dialogs  ...
+//FIXME:  *
+//FIXME:  * ---------------------------------------------------------------------- */
+//FIXME: DEFINE_PRIMITIVE("%dialog-vbox", dialog_vbox, subr1, (SCM obj))
+//FIXME: {
+//FIXME:   if (!CPOINTERP(obj)) STk_error("bad dialog ~S", obj);
+//FIXME:
+//FIXME:   /* In 2.14, we no more need to query the vbox field of the dialog
+//FIXME:    * since the function "gtk_dialog_get_content_area" has been
+//FIXME:    * defined. However, this version of GTK+ is still experimental
+//FIXME:    */
+//FIXME:   //  return STk_make_Cpointer(((GtkDialog *) CPOINTER_VALUE(obj))->vbox,
+//FIXME:   //                       STk_void,
+//FIXME:   //                       STk_false);
+//FIXME:
+//FIXME:   return STk_make_Cpointer(
+//FIXME:              gtk_dialog_get_content_area(GTK_DIALOG(CPOINTER_VALUE(obj))),
+//FIXME:              STk_void,
+//FIXME:              STk_false);
+//FIXME: }
 
 /* ----------------------------------------------------------------------
  *
@@ -785,28 +826,39 @@ MODULE_ENTRY_START("stklos-gtklos") {
   /* Create a new module named "stklos-gtklos" */
   gtklos_module = STk_create_module(STk_intern("GTKLOS"));
 
+   /* Create a new type for GTK events */
+  tc_gtk_event = STk_new_user_type(&xtype_gtk_event);
+
+
+
+
   /* Add new primitives */
   ADD_PRIMITIVE_IN_MODULE(gtk_get_prop, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(gtk_set_prop, gtklos_module);
+
+
+  ADD_PRIMITIVE_IN_MODULE(get_gtk_event, gtklos_module);
+
+
   //TODO:  ADD_PRIMITIVE_IN_MODULE(gtk_get_size, gtklos_module);
 
-  ADD_PRIMITIVE_IN_MODULE(gtk_get_child_prop, gtklos_module);
-
-  ADD_PRIMITIVE_IN_MODULE(box_query_packing, gtklos_module);
-  ADD_PRIMITIVE_IN_MODULE(box_set_packing, gtklos_module);
-  ADD_PRIMITIVE_IN_MODULE(cont_children, gtklos_module);
+//FIXME:   ADD_PRIMITIVE_IN_MODULE(gtk_get_child_prop, gtklos_module);
+//FIXME:
+//FIXME:   ADD_PRIMITIVE_IN_MODULE(box_query_packing, gtklos_module);
+//FIXME:   ADD_PRIMITIVE_IN_MODULE(box_set_packing, gtklos_module);
+//FIXME:   ADD_PRIMITIVE_IN_MODULE(cont_children, gtklos_module);
 
 //TODO:   ADD_PRIMITIVE_IN_MODULE(event_type, gtklos_module);
 //TODO:   ADD_PRIMITIVE_IN_MODULE(event_x, gtklos_module);
 //TODO:   ADD_PRIMITIVE_IN_MODULE(event_y, gtklos_module);
-//TODO:   ADD_PRIMITIVE_IN_MODULE(event_char, gtklos_module);
-//TODO:   ADD_PRIMITIVE_IN_MODULE(event_modifiers, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(event_char, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(event_modifiers, gtklos_module);
 //TODO:   ADD_PRIMITIVE_IN_MODULE(event_button, gtklos_module);
 
   ADD_PRIMITIVE_IN_MODULE(string2color, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(color2string, gtklos_module);
 
-  ADD_PRIMITIVE_IN_MODULE(dialog_vbox, gtklos_module);
+  //FIXME: ADD_PRIMITIVE_IN_MODULE(dialog_vbox, gtklos_module);
 
   ADD_PRIMITIVE_IN_MODULE(timeout, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(when_idle, gtklos_module);

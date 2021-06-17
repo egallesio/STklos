@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 18:30 (eg)
-;;;; Last file update: 14-Jun-2021 11:21 (eg)
+;;;; Last file update: 15-Jun-2021 17:45 (eg)
 ;;;;
 
 
@@ -240,18 +240,23 @@
 (define-method widget-height ((w <gtk-widget>))
   (gtk-widget-get-allocated-height (slot-ref w 'wid)))
 
-(define-method gtk-widget-set-size ((w <gtk-widget>) width height)
-  (gtk-widget-set-size-request (slot-ref w 'wid) width height))
 
-;;//FIXME: ;;;
-;;//FIXME: ;;; Event connection
-;;//FIXME: ;;;
-;;//FIXME: (define-method event-connect ((widget <gtk-widget>) name closure)
-;;//FIXME:   (%signal-connect widget (slot-ref widget 'wid) name closure #f))
-;;//FIXME:
-;;//FIXME: (define-method event-connect-after ((widget <gtk-widget>) name closure)
-;;//FIXME:   (%signal-connect widget (slot-ref widget 'wid) name closure #t))
-;;//FIXME:
+;;;
+;;; Event connection
+;;;
+(define-method event-connect ((widget <gtk-widget>) name closure)
+  (eprintf "Connecting event ~s to ~s\n" name widget)
+  (g-signal-connect (slot-ref widget 'wid)
+                    name
+                    (scheme-proc->gtk-handler closure widget)
+                    (void)))
+
+(define-method event-connect-after ((widget <gtk-widget>) name closure)
+  (g-signal-connect-after  (slot-ref widget 'wid)
+                           name
+                           (scheme-proc->gtk-handler closure)
+                           (void)))
+
 
 
 ;;;; ======================================================================
@@ -311,4 +316,5 @@
          parent can-default has-default has-focus height-request name visible
          sensitive width-request tooltip xalign yalign xpad ypad 
          ;; methods
-         destroy get-widget-width get-widget-height)
+         destroy event-connect event-connect-after
+         get-widget-width get-widget-height)

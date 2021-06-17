@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 31-May-2001 18:36 (eg)
-;;;; Last file update: 11-Jun-2021 14:36 (eg)
+;;;; Last file update: 16-Jun-2021 19:56 (eg)
 ;;;;
 
 ;;;
@@ -39,42 +39,9 @@
 ;;; Low level signal management
 ;;;
 ;;; ----------------------------------------------------------------------
-
-;; The following events are connected to call backs for which we must pass
-;; two pointers (instead of one if the event is absent)
-(define *event-names* '("event"
-                        "button_press_event"        "button-press-event"
-                        "button_release_event"      "button-release-event"
-                        "scroll_event"              "scroll-event"
-                        "motion_notify_event"       "motion-notify-event"
-                        "delete_event"              "delete-event"
-                        "destroy_event"             "destroy-event"
-                        "expose_event"              "expose-event"
-                        "key_press_event"           "key-press-event"
-                        "key_release_event"         "key-release-event"
-                        "enter_notify_event"        "enter-notify-event"
-                        "leave_notify_event"        "leave-notify-event"
-                        "configure_event"           "configure-event"
-                        "focus_in_event"            "focus-in-event"
-                        "focus_out_event"           "focus-out-event"
-                        "map_event"                 "map-event"
-                        "unmap_event"               "unmap-event"
-                        "property_notify_event"     "property-notify-event"
-                        "selection_clear_event"     "selection-clear-event"
-                        "selection_request_event"   "selection-request-event"
-                        "selection_notify_event"    "selection-notify-event"
-                        "proximity_in_event"        "proximity-in-event"
-                        "proximity_out_event"       "proximity-out-event"
-                        "visibility_notify_event"   "visibility-notify-event"
-                        "client_event"              "client-event"
-                        "no_expose_event"           "no-expose-event"
-                        "window_state_event"        "window-state-event"))
-
 (define (%do-signal-connect widget name proc data after)
   (let ((cb (make-callback proc
-                           (if (member name *event-names*)
-                               '(:pointer :pointer)
-                               '(:pointer))
+                           '(#:pointer)
                            data)))
     ;; This call correspond to the C call
     ;;     g_signal_connect_swapped(widget, name, callback, cb);
@@ -89,12 +56,30 @@
 
 
 (define (g-signal-connect widget name proc data)
-  (%do-signal-connect widget name proc data #f))
+  (let ((closure (lambda (w widget) (proc widget))))
+    (%do-signal-connect widget name closure widget #f)))
 
 (define (g-signal-connect-after widget name proc data)
-  (%do-signal-connect widget name proc data #t))
+  (let ((closure (lambda (w widget) (proc widget))))
+    (%do-signal-connect widget name closure widget #t)))
+
+
+(define (scheme-proc->gtk-handler proc scheme-widget)
+  ;; GTK handlers can have a variable number of parameters depending of the signal
+  ;; For instance
+  ;;     - a clicked button handler will be called with the gtk-widget and
+  ;;       the user given data 
+  ;;     - a keypress handler will be called with the gtk-widget the keypress and
+  ;;       and the user given data
+  ;; To simplify Scheme code, all handlers take 2 parameters, the scheme widget object
+  ;; and an event object.
+  (lambda _    ;; We don't care of the parameters here.
+    ;; call the user handler with 2 parameters
+    (proc scheme-widget (get-gtk-event))))
 
 ; ======================================================================
+
+
 
 
 ;;//FIXME:
@@ -152,15 +137,6 @@
 ;;//FIXME:      (%event-y (gtk-event-obj e))
 ;;//FIXME:      (error "bad event ~S" e)))
 ;;//FIXME:
-;;//FIXME:(define (event-char e)
-;;//FIXME:  (if (gtk-event? e)
-;;//FIXME:      (%event-char (gtk-event-obj e))
-;;//FIXME:      (error "bad event ~S" e)))
-;;//FIXME:
-;;//FIXME:(define (event-modifiers e)
-;;//FIXME:  (if (gtk-event? e)
-;;//FIXME:      (%event-modifiers (gtk-event-obj e))
-;;//FIXME:      (error "bad event ~S" e)))
 ;;//FIXME:
 ;;//FIXME:(define (event-button e)
 ;;//FIXME:  (if (gtk-event? e)
@@ -182,4 +158,5 @@
 ;;;
 ;;; Exports
 ;;;
-(export g-signal-connect g-signal-connect-after)
+(export g-signal-connect g-signal-connect-after
+        event-char event-modifiers)
