@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 22:11 (eg)
-;;;; Last file update: 17-Jun-2021 08:32 (eg)
+;;;; Last file update: 18-Jun-2021 18:31 (eg)
 ;;;;
 
 ;;;
@@ -57,18 +57,8 @@
   ((command         #:accessor       command
                     #:init-keyword   #:command
                     #:allocation     #:virtual
-                    #:slot-ref       (lambda (o)
-                                       (key-get (slot-ref o '%event) #:clicked #f))
-                    #:slot-set!      (lambda (o v)
-                                       (g-signal-connect (slot-ref o 'wid)
-                                                         "clicked"
-                                                         (scheme-proc->gtk-handler v o)
-                                                         (void))
-                                       (slot-set! o
-                                                  '%event
-                                                  (key-set! (slot-ref o '%event)
-                                                            #:clicked
-                                                            v))))
+                    #:slot-ref       (%make-event-getter-func "clicked")
+                    #:slot-set!      (%make-event-setter-func "clicked"))
    (text            #:accessor       text
                     #:init-keyword   #:text
                     #:allocation     #:virtual

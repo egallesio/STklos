@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 31-May-2001 18:36 (eg)
-;;;; Last file update: 16-Jun-2021 19:56 (eg)
+;;;; Last file update: 18-Jun-2021 17:26 (eg)
 ;;;;
 
 ;;;
@@ -59,16 +59,54 @@
   (let ((closure (lambda (w widget) (proc widget))))
     (%do-signal-connect widget name closure widget #f)))
 
+
 (define (g-signal-connect-after widget name proc data)
   (let ((closure (lambda (w widget) (proc widget))))
     (%do-signal-connect widget name closure widget #t)))
+
+
+
+;; GTK handlers can have a variable number of parameters depending of the signal
+;; For instance
+;;     - a clicked button handler will be called with the gtk-widget and
+;;       the user given data
+;;     - a keypress handler will be called with the gtk-widget the keypress and
+;;       and the user given data
+;; To simplify Scheme code, all STklos handlers take 2 parameters, the scheme
+;; widget object on which the signal occurs and an event object.
+;;
+(define (%make-event-getter-func name)
+  (let ((key (make-keyword name)))
+    (lambda (o)
+      (key-get (slot-ref o '%event) key #f))))
+
+
+(define (%make-event-setter-func name)
+  (let ((key (make-keyword name)))
+    (lambda (o v)
+      (let ((old (key-get (slot-ref o '%event) key #f)))
+        (unless old
+          ;; Firsst time that we use this siggnal on this widget
+          (g-signal-connect
+                  (slot-ref o 'wid)
+                  name
+                  (lambda _
+                    ;; Call the function stored with this event key with
+                    ;;     - the object itself
+                    ;;     - the current event object
+                    (  (key-get (slot-ref o '%event) key)
+                       o
+                       (get-gtk-event)))
+                  (void)))
+        ;; Stoore the value v in the %event slot
+        (slot-set! o '%event (key-set! (slot-ref o '%event) key v))))))
 
 
 (define (scheme-proc->gtk-handler proc scheme-widget)
   ;; GTK handlers can have a variable number of parameters depending of the signal
   ;; For instance
   ;;     - a clicked button handler will be called with the gtk-widget and
-  ;;       the user given data 
+  ;;       the user given data
   ;;     - a keypress handler will be called with the gtk-widget the keypress and
   ;;       and the user given data
   ;; To simplify Scheme code, all handlers take 2 parameters, the scheme widget object
@@ -79,25 +117,28 @@
 
 ; ======================================================================
 
+(define (%virtual-event-getter-func name)
+  (let ((key (make-keyword name)))
+    (lambda (o)
+      (key-get (slot-ref o '%event) key #f))))
+
+
+(define (%virtual-event-setter-func name)
+  (let ((key (make-keyword name)))
+    (lambda (o v)
+      (g-signal-connect (slot-ref o 'wid)
+                        key
+                        (scheme-proc->gtk-handler v o)
+                        (void))
+      (slot-set! o
+                 '%event
+                 (key-set! (slot-ref o '%event) key v)))))
 
 
 
 ;;//FIXME:
 ;;//FIXME:
 ;;//FIXME:
-;;//FIXME:
-;;//FIXME:(define (%event-getter-func name)
-;;//FIXME:  (let ((key (make-keyword name)))
-;;//FIXME:    (lambda (o)
-;;//FIXME:      (key-get (slot-ref o '%event) key #f))))
-;;//FIXME:
-;;//FIXME:
-;;//FIXME:(define (%event-setter-func name)
-;;//FIXME:  (let ((key (make-keyword name)))
-;;//FIXME:    (lambda (o v)
-;;//FIXME:      (let ((new (lambda _ (v (new-gtk-event)))))
-;;//FIXME:        (slot-set! o '%event (key-set! (slot-ref o '%event) key new))
-;;//FIXME:        (g-signal-connect (slot-ref o 'wid) name new (void))))))
 ;;//FIXME:
 ;;//FIXME:
 ;;//FIXME:(define (%signal-connect widget wid name closure after)
