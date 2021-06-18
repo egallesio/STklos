@@ -19,11 +19,11 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 17-Jun-2021 10:56 (eg)
+# Last file update: 18-Jun-2021 14:53 (eg)
 
 EXTENSION=gtklos
 
-SCM_SRCS = utils/events.stk utils/libs.stk utils/utils.stk            \
+SCM_SRCS = lib/events.stk lib/libs.stk lib/utils.stk                  \
            classes/meta.stk classes/container.stk classes/widget.stk  \
            widgets/box.stk widgets/button.stk widgets/checkbutton.stk \
            widgets/entry.stk widgets/grid.stk widgets/image.stk       \
