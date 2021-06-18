@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 24-May-2021 18:51 (eg)
+ * Last file update:  4-Jun-2021 15:52 (eg)
  */
 
 #include "stklos.h"
@@ -163,9 +163,10 @@ static void GC_warning_handler(char *msg, GC_word arg)
 {
   char buffer[512];
 
+  if (strstr(msg, "cycle")) return;
   snprintf(buffer, sizeof(buffer), msg, arg);
-  buffer[strlen(buffer)-1] = '\0';
-  STk_error(buffer);
+  fprintf(stderr, "*** %s", buffer);
+  if (strstr(msg, "Returning NULL")) STk_error("OUT of memory");
 }
 
 

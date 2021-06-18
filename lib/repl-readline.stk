@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-May-2010 22:00 (eg)
-;;;; Last file update: 30-Apr-2021 12:27 (eg)
+;;;; Last file update: 17-Jun-2021 18:25 (eg)
 ;;;;
 
 
@@ -53,8 +53,8 @@
                             (old-make-prompt module)
                             (ansi-color-protect "" ""))))
 
-    (repl-display-prompt (lambda (port)
-                           'nothing))
+    (repl-display-prompt (lambda (port) 'nothing))
+
     ;;
     ;; History management
     ;;

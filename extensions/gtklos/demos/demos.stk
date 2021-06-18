@@ -1,0 +1,64 @@
+;;;;
+;;;; demos.stk  -- Run all the STklos demos
+;;;;
+;;;; Copyright © 2009-2021 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 19-Sep-2009 20:45 (eg)
+;;;; Last file update: 18-Jun-2021 14:15 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define all (with-input-from-file "all-demos"
+              (lambda ()
+                (read-from-string (format "(~A)" (read-line))))))
+
+
+(define (main args)
+  (let* ((win   (make <demo-window> #:title "Run a GTklos demo" :width 400))
+         (box   (make <box>    #:expand #f #:fill 'both #:parent win))
+         (label (make <label>  #:text "\n<b>Choose a demo below</b>\n" #:parent box))
+         (grid  (make <grid>   #:parent box :column-homogeneous #t))
+         (ex    (make <button> #:text "\nExit\n" #:parent box
+                               #:command (lambda (e) (exit 0)))))
+
+    ;; Fill the grid with demos
+    (let Loop ((top 0)
+               (left 0)
+               (lst all))
+      (unless (null? lst)
+        (if (eq? (car lst) 'demos)
+            ;; the demo program (not a a real demo. Don't be recursive here :-)
+            (Loop top left (cdr lst))
+            ;; A real demo. Make a button to run it
+            (let ((b (make <button>
+                       #:text (symbol->string (car lst))
+                       #:command (lambda (w ev)
+                                   (system (format "unset indemo; ./~A &" (car lst)))))))
+              (container-add! grid b :top top :left left)
+              (if (zero? (modulo (+ left 1) 2))
+                  (Loop (+ top 1) 0    (cdr lst))
+                  (Loop top (+ left 1) (cdr lst)))))))
+    
+    ;; Connect a signal to terminate application when the window is closed
+    ;; FIXME: (event-connect win "delete-event" (lambda (_) (exit 0)))
+
+    ;; GTk starts
+    (gtk-main)))

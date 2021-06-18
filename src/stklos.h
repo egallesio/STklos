@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 31-May-2021 12:32 (eg)
+ * Last file update:  4-Jun-2021 17:12 (eg)
  */
 
 
@@ -47,22 +47,22 @@ extern "C"
 #include <memory.h>
 #include <locale.h>
 #include <stdint.h>
+#ifndef THEADS_NONE
+#  include <pthread.h>
+#  define GC_THREADS 1
+#  define _REENTRANT 1
+#endif
 
 #include "stklosconf.h"
 #include "extraconf.h"
 
 /* To debug the GC uncomment the following line */
-/* #define GC_DEBUG 1*/
-
+/* #define GC_DEBUG 1 */
 
 #ifdef HAVE_GC
 # include <gc/gc.h>
 #else
 # include <gc.h>
-#endif
-
-#ifndef THEADS_NONE
-#  include <pthread.h>
 #endif
 
 
@@ -159,8 +159,10 @@ extern "C"
 #define STk_must_malloc_atomic(size)    GC_MALLOC_ATOMIC(size)
 #define STk_must_realloc(ptr, size)     GC_REALLOC((ptr), (size))
 #define STk_free(ptr)                   GC_FREE(ptr)
-#define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER((void *) (ptr), \
-                                            (GC_finalization_proc)(f), 0, 0, 0)
+#define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER( \
+                                            (void *) (ptr),             \
+                                            (GC_finalization_proc)(f),  \
+                                            0, 0, 0)
 #define STk_gc()                        GC_gcollect()
 
 void STk_gc_init(void);

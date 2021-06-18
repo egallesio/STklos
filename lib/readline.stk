@@ -1,8 +1,8 @@
 ;;;;
-;;;; readline.stk	-- Access to the GNU-readline lib
-;;;;			   (or libedit if absent :-<)
+;;;; readline.stk       -- Access to the GNU-readline lib
+;;;;                       (or libedit if absent :-<)
 ;;;;
-;;;; Copyright © 2007-2010 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,19 +22,23 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-Jun-2007 11:48 (eg)
-;;;; Last file update:  5-Aug-2010 18:52 (eg)
+;;;; Last file update: 17-Jun-2021 18:57 (eg)
 ;;;;
 
 (define-module READLINE
   (export try-initialize-readline
-	  readline add-history read-history
-	  write-history read-with-history)
+          readline add-history read-history
+          write-history read-with-history
+          rl-event-hook rl-input-timeout)
 
 ;;;; In module READLINE
-(define readline     	     #f)
-(define add-history  	     #f)
-(define read-history 	     #f)
-(define write-history 	     #f)
+(define readline             #f)
+(define add-history          #f)
+(define read-history         #f)
+(define write-history        #f)
+(define rl-event-hook        #f)
+(define rl-input-timeout     #f)
+
 
 (define (read-with-history :optional (prompt "> "))
   (let ((line (readline prompt)))
@@ -49,41 +53,48 @@
      ;; If we are here, this probably because library is not present
      #f)
    (let ((%readline (make-external-function "readline"
-					    '(:string)
-					    :pointer
-					    libname)))
+                                            '(:string)
+                                            :pointer
+                                            libname)))
      (set! readline  (lambda (prompt)
-		       (let ((ptr (%readline prompt)))
-			 (if (eq? ptr (void))
-			     #eof
-			     (let ((str (cpointer->string ptr)))
-			       ;; GNU/Readline always returns a string which is
-			       ;; dynamically allocated. Take care of that.
-			       (free-bytes ptr)
-			       str)))))
+                       (let ((ptr (%readline prompt)))
+                         (if (eq? ptr (void))
+                             #eof
+                             (let ((str (cpointer->string ptr)))
+                               ;; GNU/Readline always returns a string which is
+                               ;; dynamically allocated. Take care of that.
+                               (free-bytes ptr)
+                               str)))))
 
 
 
      (set! add-history (make-external-function "add_history"
-					       '(:string)
-					       :void
-					       libname))
+                                               '(:string)
+                                               :void
+                                               libname))
 
      (set! read-history (make-external-function "read_history"
-						'(:string)
- 						:int
-						libname))
+                                                '(:string)
+                                                :int
+                                                libname))
 
      (set! write-history (make-external-function  "write_history"
-						  '(:string)
-						  :int
-						  libname))
+                                                  '(:string)
+                                                  :int
+                                                  libname))
+
+     (set! rl-input-timeout (make-external-function "rl_set_keyboard_input_timeout"
+                                                    '(:int)
+                                                    :int
+                                                    libname))
+
+     (set! rl-event-hook (%get-symbol-address "rl_event_hook" libname))
 
      (let ((support (if (%get-symbol-address "el_set" "")
-			;; We have found a realine library which is in fact
-			;; libedit (macos)
-			'libedit
-			'readline)))
+                        ;; We have found a realine library which is in fact
+                        ;; libedit (macos)
+                        'libedit
+                        'readline)))
        ;; Retain that the kind of readline support we have
        (key-set! *%system-state-plist* :readline support)))
 
@@ -95,7 +106,7 @@
   (let ((suffix (%shared-library-suffix)))
     ;; Try in sequence the GNU readline and BSD libedit (which has readline support)
     (or (try-initialize (string-append "libreadline." suffix))
-	(try-initialize (string-append "libedit."  suffix)))))
+        (try-initialize (string-append "libedit."  suffix)))))
 
 ;; End of module READLINE
 )

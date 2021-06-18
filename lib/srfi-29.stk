@@ -1,0 +1,289 @@
+;;;;
+;;;; srfi-29.stk         -- SRFI-29: Localization
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the  implementation of
+;;;; this SRFI by Scott G. Miller, it is copyrighted as:
+;;;;
+;;;;;;
+;;;;;; Copyright (C) Scott G. Miller (2002). All Rights Reserved.
+;;;;;;
+;;;;;; This document and translations of it may be copied and furnished to
+;;;;;; others, and derivative works that comment on or otherwise explain it
+;;;;;; or assist in its implementation may be prepared, copied, published and
+;;;;;; distributed, in whole or in part, without restriction of any kind,
+;;;;;; provided that the above copyright notice and this paragraph are
+;;;;;; included on all such copies and derivative works. However, this
+;;;;;; document itself may not be modified in any way, such as by removing
+;;;;;; the copyright notice or references to the Scheme Request For
+;;;;;; Implementation process or editors, except as needed for the purpose of
+;;;;;; developing SRFIs in which case the procedures for copyrights defined
+;;;;;; in the SRFI process must be followed, or as required to translate it
+;;;;;; into languages other than English.
+;;;;;;
+;;;;;; The limited permissions granted above are perpetual and will not be
+;;;;;; revoked by the authors or their successors or assigns.
+;;;;;;
+;;;;;; This document and the information contained herein is provided on
+;;;;;; an "AS IS" basis and THE AUTHOR AND THE SRFI EDITORS DISCLAIM ALL
+;;;;;; WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY
+;;;;;; WARRANTY THAT THE USE OF THE INFORMATION HEREIN WILL NOT INFRINGE ANY
+;;;;;; RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A
+;;;;;; PARTICULAR PURPOSE.
+;;;;;;
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 07-Apr-2021 20:20
+;;;; Last file update:  8-Jun-2021 09:54 (eg)
+;;;;
+
+(define %stklos-format format)
+
+(define-module SRFI-29
+
+  (export current-language
+          current-country
+          current-locale-details
+          load-bundle!
+          store-bundle!
+          declare-bundle!
+          localized-template)
+
+;; The association list in which bundles will be stored
+(define *localization-bundles* '())
+
+(define (get-locale-pair)
+  ;; Try to find the current locale setting from the LC-ALL or LANG variable
+  ;; If the current value is not defined or is not a couple (such as "POSIX"
+  ;; or "C"), the value returnesd is (en us)
+  (let ((default '(en us))
+        (locale  (or (get-environment-variable "LC_ALL")
+                     (get-environment-variable "LANG"))))
+    (if locale
+        (let ((fields (string-split locale "_.")))
+          (if (>= (length fields) 2)
+              (list (string->symbol (string-downcase (car fields)))
+                    (string->symbol (string-downcase (cadr fields))))
+              default))
+        default)))
+
+
+(define current-language
+  (let ((current-language-value (car (get-locale-pair))))
+    (lambda args
+      (if (null? args)
+          current-language-value
+          (set! current-language-value (car args))))))
+
+(define current-country
+  (let ((current-country-value (cadr (get-locale-pair))))
+    (lambda args
+      (if (null? args)
+          current-country-value
+          (set! current-country-value (car args))))))
+
+(define current-locale-details
+  (let ((current-locale-details-value (if (%use-utf8?) '(utf-8) '() )))
+    (lambda args
+      (if (null? args)
+          current-locale-details-value
+          (set! current-locale-details-value (car args))))))
+
+;; The load-bundle! and store-bundle! both return #f in this
+;; reference implementation.  A compliant implementation need
+;; not rewrite these procedures.
+(define load-bundle!
+  (lambda (bundle-specifier)
+    #f))
+
+(define store-bundle!
+  (lambda (bundle-specifier)
+    #f))
+
+;; Declare a bundle of templates with a given bundle specifier
+(define declare-bundle!
+  (letrec ((remove-old-bundle
+            (lambda (specifier bundle)
+              (cond ((null? bundle) '())
+                    ((equal? (caar bundle) specifier)
+                     (cdr bundle))
+                    (else (cons (car bundle)
+                                (remove-old-bundle specifier
+                                                   (cdr bundle))))))))
+    (lambda (bundle-specifier bundle-assoc-list)
+      (set! *localization-bundles*
+            (cons (cons bundle-specifier bundle-assoc-list)
+                  (remove-old-bundle bundle-specifier
+                                     *localization-bundles*))))))
+
+;;Retrieve a localized template given its package name and a template name
+(define localized-template
+  (letrec ((rdc
+            (lambda (ls)
+              (if (null? (cdr ls))
+                  '()
+                  (cons (car ls) (rdc (cdr ls))))))
+           (find-bundle
+            (lambda (specifier template-name)
+              (cond ((assoc specifier *localization-bundles*) =>
+                     (lambda (bundle) bundle))
+                    ((null? specifier) #f)
+                    (else (find-bundle (rdc specifier)
+                                       template-name))))))
+    (lambda (package-name template-name)
+      (let loop ((specifier (cons package-name
+                                  (list (current-language)
+                                        (current-country)))))
+        (and (not (null? specifier))
+             (let ((bundle (find-bundle specifier template-name)))
+               (and bundle
+                    (cond ((assq template-name bundle) => cdr)
+                          ((null? (cdr specifier)) #f)
+                          (else (loop (rdc specifier)))))))))))
+
+
+;; inserts e before the n-th element of list lst
+(define (insert-before e lst n)
+  (if (= n 0)
+      (begin
+        (set-cdr! lst (cons (car lst) (cdr lst)))
+        (set-car! lst e))
+      (let Loop ((i n) (p lst))
+        (if (> i 1)
+            (Loop (- i 1) (cdr p))
+            (set-cdr! p (cons e (cdr p)))))))
+
+
+;; this regexp matches all possible format directives, and the result will be
+;; a pair of positions.
+;;
+;; the SRFI doesn't seem to allow that, but we let the user put negative numbers
+;; in the directive, so ~-1@* will work; that is why we have the minus sign in
+;; the character class [-[:digit:]].
+(define format-regexp
+  (string->regexp "\\~(?:(?:((?:[-[:digit:]])+)(?:@\\*))|(?:(?:(?:[-[:digit:]])+)(?:f|F))|(?i)[aswdxobcyf\\?])"))
+
+;; this matches the positional-directive of SRFI-29.
+(define positional-directive-regexp
+  (string->regexp "\\~([-[:digit:]])+@\\*"))
+
+;; Extracted from SRFI-1, with argument checking removed
+;; (it's not exposed and we know only (list number) will
+;; ever be passed to it).
+;; and allowing k to be as large as one wants
+(define (take lis k)
+  (let recur ((lis lis) (k k))
+    (if (or (zero? k) (null? lis)) '()
+        (cons (car lis)
+              (recur (cdr lis) (- k 1))))))
+
+
+(define (%srfi-29:format . args)
+  (when (< (length args) 1) (error "need at least one argument"))
+
+  (let ((port #f)
+        (fmt #f))
+
+  (let ((first (car args)))
+    (when (not (string? first))
+      (when (null? (cdr args)) (error "port given, but no format string"))
+      (set! port first)
+      (set! args (cdr args))))
+
+  (let ((first (car args))) ; we already checked this car exists!
+    (if (string? first)
+        (begin (set! fmt  first)
+               (set! args (cdr args)))
+        (error "bad format string ~S" first)))
+
+    (if (null? args)
+        ;; just the string don't enter the rewriting loop:
+        (%stklos-format port fmt)
+
+        ;; there are arguments after the format string.
+        (let ((orig-args args)
+              (orig-fmt  (string-copy fmt)))
+          (let ((n-args (let loop ((fmt fmt)
+                                   (arg-pos 0)) ;; we're processing the i-th argument
+
+                          (let ((m (regexp-match-positions format-regexp fmt)))
+                            (if m
+                                ;; m is ((A B) (C D)), where
+                                ;; (A B) delimit the full directive '~nnn@*'
+                                ;; (C D) delimit the number 'nnn' in ~nnn@*
+                                ;; So:
+                                ;; (caar m) is the start of the directive
+                                ;; (cadar m) is the end of the directive
+                                ;; (caadr m) is the start of the number
+                                ;; (cadadr m) is the end of the number
+                                (cond  ((not (equal? '(0 0) (cadr m)))
+                                        ;; positional directive
+                                        ;; get the number, then inser it in the args
+                                        ;; list *before* the current arg-pos (which
+                                        ;; is after the last non-positional directive).
+                                        (let ((num (string->number (substring fmt
+                                                                              (caadr m)
+                                                                              (cadadr m)))))
+
+                                          ;; note: ~X@* means the X-th argument *after* the current
+                                          ;; position.
+
+                                          ;; the SRFI doesn't seem to allow that, but we let the user
+                                          ;; put negative numbers in the directive, so ~-1@* will work
+                                          ;; as expected. but no indices outside of the argument list
+                                          ;; are allowed, obviously.
+                                          (when (>= (+ arg-pos num) (length orig-args))
+                                            (error (%stklos-format #f
+                                                           "SRFI-29 directive ~[N]@* referenced index ~d after last index ~d, format was ~w"
+                                                           (+ arg-pos num)
+                                                           (- (length orig-args) 1)
+                                                           orig-fmt)))
+                                          (when (< (+ arg-pos num) 0)
+                                            (error "SRFI-29 directive ~[N]@* referenced negative index "
+                                                   (+ arg-pos num)))
+
+                                          (insert-before (list-ref orig-args (+ arg-pos num)) args arg-pos)
+                                          (loop (substring fmt (cadar m) (string-length fmt))
+                                                arg-pos)))
+                                       (else
+                                        ;; single char directive
+                                        ;; just skip the appropriate number of arguments and loop.
+                                        (if (< (cadar m) (string-length fmt))
+                                            (if (eq? (string-ref fmt (+ (caar m) 1)) #\?)
+                                                (loop (substring fmt (cadar m) (string-length fmt)) (+ arg-pos 2))
+                                                (loop (substring fmt (cadar m) (string-length fmt)) (+ arg-pos 1)))
+                                            arg-pos)))
+                                arg-pos)))))
+            ;; now remove all instances of '~nnn@*' from the format string
+            ;; and remove the extra arguments at the end of the list:
+            (let ((fmt (regexp-replace-all positional-directive-regexp fmt ""))
+                  (args (take args (+ 1 n-args))))
+              ;;(%stklos-format #t "--> ~a ~a ~a~%" port fmt args)
+              (apply %stklos-format (cons port (cons fmt args)))))))))
+
+);; END OF DEFINE-MODULE
+
+(select-module STklos)
+
+(import SRFI-29)
+
+(define format (in-module SRFI-29 %srfi-29:format))
+
+(provide "srfi-29")

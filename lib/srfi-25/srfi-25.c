@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update: 31-May-2021 12:34 (eg)
+ * Last file update:  7-Jun-2021 11:41 (eg)
  */
 
 #include "stklos.h"
@@ -961,7 +961,7 @@ void check_array_shape_compatible(int new_rank, long *new_shape,
                                   long size)
 {
     long index;
-    long *idx = STk_must_malloc_atomic(new_rank);
+    long *idx = STk_must_malloc_atomic(new_rank*sizeof(long));
 
     if (new_rank == 0) return; /* always compatible with any shape */
 
@@ -971,6 +971,10 @@ void check_array_shape_compatible(int new_rank, long *new_shape,
     }
 
     int updated = 1;
+    char *msg   = "Shape %s does not map to shape %s under mapping %s. "
+                  "Index %s for the new array goes out of bounds in the "
+                  "original array.";
+
     while(updated) {
         updated = 0;
 
@@ -981,14 +985,13 @@ void check_array_shape_compatible(int new_rank, long *new_shape,
             char *os = cvec2string(2*old_rank,old_shape);
             char *map = get_affine_map(proc,new_rank, old_rank);
             char *id  = cvec2string(new_rank,idx);
-            char *buf = STk_must_malloc_atomic(strlen(ns)+
+            char *buf = STk_must_malloc_atomic(strlen(msg)+
+                                               strlen(ns)+
                                                strlen(os)+
                                                strlen(map)+
                                                strlen(id)+1);
 
-            sprintf(buf,"Shape %s does not map to shape %s under mapping %s. \
-Index %s for the new array goes out of bounds in the original array.",
-                    ns, os, map, id);
+            sprintf(buf,msg, ns, os, map, id);
 
             STk_error(buf);
         }

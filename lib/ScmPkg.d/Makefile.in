@@ -16,7 +16,7 @@
 
 # Makefile.am for STklos lib
 #
-# Copyright © 2006-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2006-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 20-Dec-2006 10:09 (eg)
-# Last file update: 21-Sep-2020 11:52 (eg)
+# Last file update:  1-Jun-2021 18:37 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -533,8 +533,9 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-scheme_libDATA uninstall-scheme_scmpkgDATA
-
-.MAKE: install-am install-strip
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
+.MAKE: install-am install-strip uninstall-am
 
 .PHONY: all all-am check check-am clean clean-generic cscopelist-am \
 	ctags-am distclean distclean-generic distdir dvi dvi-am html \
@@ -546,7 +547,7 @@ uninstall-am: uninstall-scheme_libDATA uninstall-scheme_scmpkgDATA
 	install-scheme_scmpkgDATA install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
-	pdf-am ps ps-am tags-am uninstall uninstall-am \
+	pdf-am ps ps-am tags-am uninstall uninstall-am uninstall-hook \
 	uninstall-scheme_libDATA uninstall-scheme_scmpkgDATA
 
 .PRECIOUS: Makefile
@@ -560,6 +561,10 @@ install-sources:
 
 $(OBJ): scmpkg-support.stk $(SRCS)
 	(cd ..; $(COMP) -o scmpkg-support.ostk ScmPkg.d/scmpkg-support.stk )
+
+uninstall-hook:
+	(cd  $(scheme_libdir)/ScmPkg.d && rm -f $(SRCS) )
+	(rmdir $(scheme_libdir)/ScmPkg.d || true)
 
 clean: 
 	/bin/rm -f $(OBJ) *~

@@ -1,0 +1,64 @@
+;;;;
+;;;; entry2.stk -- Another GTK+ Entry Demo
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 24-Jul-2001 21:54 (eg)
+;;;; Last file update: 17-Jun-2021 09:06 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define demo-message "
+Controlled Entries
+
+This is a demonstration of the entry widget.
+Here we have two entries. The first one accepts only digits whereas
+the second one convert its value to upper case characters.
+")
+
+(define (main args)
+  (let* ((window (make <demo-window>
+                       #:title "STklos Entry and Events"
+                       #:border-width 15 #:file "entry3"
+                       #:message demo-message))
+         (box    (make <box>   #:parent window #:padding 5 #:expand #t
+                               #:orientation 'vertical))
+         (line1  (make <box>   #:parent box #:orientation 'horizontal #:homogeneous #t))
+         (line2  (make <box>   #:parent box #:orientation 'horizontal #:homogeneous #t))
+         (lab1   (make <label> #:parent line1 #:text "only digits:"      #:width 150))
+         (lab2   (make <label> #:parent line2 #:text "convert to upper:" #:width 150))
+         (entry1 (make <entry> #:parent line1))
+         (entry2 (make <entry> #:parent line2)))
+    ;; digits entry
+    (event-connect entry1 "key-press-event"
+                   (lambda (w e)
+                     ;; if the returned value is #f, event propagates
+                     (not (char-numeric? (event-char e)))))
+    ;; upper entry
+    (event-connect entry2 "key-release-event"
+                   (lambda (w e)
+                     (let* ((pos (cursor-position entry2))
+                            (val (value entry2))
+                            (up  (string-upper val)))
+                       (unless (equal? val up)
+                         (set! (value entry2) up)
+                         (set! (cursor-position entry2) pos)))))
+    (gtk-main)))

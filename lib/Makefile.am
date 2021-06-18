@@ -20,10 +20,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 15-May-2021 16:15 (eg)
+# Last file update:  8-Jun-2021 09:02 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
-		  srfi-25 srfi-27 srfi-133 srfi-170 srfi-175
+		  srfi-25 srfi-27 srfi-133 srfi-144 srfi-170 srfi-175
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
@@ -55,7 +55,7 @@ scheme_BOOT = assembler.stk \
           repl.stk          \
           repl-readline.stk \
           runtime.stk       \
-		  srfis-data.scm    \
+          srfis-data.scm    \
           srfi-0.stk        \
           str.stk           \
           struct.stk        \
@@ -92,6 +92,7 @@ SRC_STK = bigloo-support.stk  \
           srfi-14.stk         \
           srfi-17.stk         \
           srfi-26.stk         \
+          srfi-29.stk         \
           srfi-31.stk         \
           srfi-35.stk         \
           srfi-36.stk         \
@@ -109,11 +110,12 @@ SRC_STK = bigloo-support.stk  \
           srfi-70.stk         \
           srfi-74.stk         \
           srfi-89.stk         \
+          srfi-94.stk         \
           srfi-96.stk         \
           srfi-100.stk        \
           srfi-113.stk        \
           srfi-117.stk        \
-	  srfi-127.stk        \
+          srfi-127.stk        \
           srfi-128.stk        \
           srfi-129.stk        \
           srfi-130.stk        \
@@ -159,7 +161,7 @@ scheme_OBJS = compfile.ostk     \
           srfi-1.ostk           \
           srfi-2.ostk           \
           srfi-4.ostk           \
-          srfi-5.ostk	        \
+          srfi-5.ostk           \
           srfi-7.ostk           \
           srfi-9.ostk           \
           srfi-11.ostk          \
@@ -167,6 +169,7 @@ scheme_OBJS = compfile.ostk     \
           srfi-14.ostk          \
           srfi-17.ostk          \
           srfi-26.ostk          \
+          srfi-29.ostk          \
           srfi-31.ostk          \
           srfi-35.ostk          \
           srfi-36.ostk          \
@@ -184,6 +187,7 @@ scheme_OBJS = compfile.ostk     \
           srfi-70.ostk          \
           srfi-74.ostk          \
           srfi-89.ostk          \
+          srfi-94.ostk          \
           srfi-96.ostk          \
           srfi-100.ostk         \
           srfi-113.ostk         \
@@ -216,16 +220,16 @@ scheme_OBJS = compfile.ostk     \
           trace.ostk
 
 
-DOCDB	    = DOCDB
+DOCDB       = DOCDB
 BASEDIR     = ..
 
 
 #======================================================================
-schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@
-schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@
-scheme_DATA    = $(scheme_extra) $(scheme_OBJS)
-noinst_DATA    = $(scheme_SOLIBS)
-scheme_sources = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
+schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@
+schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@
+scheme_DATA     = $(scheme_extra) $(scheme_OBJS)
+schemelib_DATA  = $(scheme_SOLIBS)
+scheme_sources  = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 
 SUFFIXES = .stk .ostk .scm .c
@@ -250,9 +254,9 @@ boot:	../src/boot.img
 generate-git-info:
 	@(cd ../src; ../utils/generate-git-info && $(MAKE) all)
 
-install-exec-hook:
-	install -d $(DESTDIR)$(schemelibdir)
-	install $(scheme_SOLIBS) $(DESTDIR)$(schemelibdir)
+#install-exec-hook:
+#	mkdir -p $(DESTDIR)$(schemelibdir)
+#	install $(scheme_SOLIBS) $(DESTDIR)$(schemelibdir)
 
 ../src/boot.img: $(scheme_BOOT)
 	@echo "*** Boot 0"; \
@@ -291,7 +295,6 @@ install-sources:
 	   (cd $$i; $(MAKE) install-sources)\
 	done
 	cp $(SRC_STK) $(scheme_BOOT) $(DESTDIR)/$(schemedir)
-
 
 
 # Explicit some dependencies here to avoid some warnings when compiling files
@@ -343,6 +346,11 @@ distclean: clean
 	@for i in $(SUBDIRS) ;do \
 	   (cd $$i; $(MAKE) distclean)\
 	done
+
+uninstall-hook:
+	(cd $(schemedir) && rm -f $(DOCDB) $(scheme_sources))
+	rmdir $(schemedir) $(schemelibdir) || true
+
 
 # Local Variables:
 # tab-width: 4

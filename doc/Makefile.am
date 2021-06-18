@@ -1,6 +1,6 @@
 # Makefile.am for STklos documentation
 #
-# Copyright © 1999-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Nov-2020 11:19 (eg)
+# Last file update:  1-Jun-2021 19:13 (eg)
 
 mandir	      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
@@ -91,7 +91,8 @@ distclean: clean
 	(cd skb; $(MAKE) distclean)
 	/bin/rm -f Makefile
 
-
+uninstall-hook:
+	rmdir $(docpdfdir) $(docimgdir) $(dochtmldir) $(doclocation) || true
 # Local Variables:
 # tab-width: 8
 # End:

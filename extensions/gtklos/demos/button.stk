@@ -1,0 +1,55 @@
+;;;;
+;;;; button.stk -- GTK demo using buttons
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 24-Jul-2001 16:31 (eg)
+;;;; Last file update: 17-Jun-2021 08:25 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+
+(define demo-message "
+Buttons Demo
+
+This is a demo showing a bunch of buttons with various reliefs.
+The last button show a button with an associated tool-tip.
+Note that, depending of your current theme, difference between
+various relief can be hardly visible.
+")
+
+(define (click w e)
+  (printf "You have clicked on '~s' button\n" (text w)))
+
+
+(define (main args)
+  (let* ((win (make <demo-window> #:title "Buttons Demo" #:width 600
+                    #:file "button" #:border-width 5
+                    #:message demo-message))
+         (b1  (make <button> #:parent win #:text "Normal"  #:border-width 5))
+         (b2  (make <button> #:parent win #:text "None"    #:border-width 5
+                    #:relief 'none))
+         (b3  (make <button> #:parent win #:text "Tooltip" #:border-width 5
+                    #:tooltip (string-append "A long tool-tip using\n"
+                                             "several lines\n"
+                                             "..."))))
+    (gtk-main)
+    0))

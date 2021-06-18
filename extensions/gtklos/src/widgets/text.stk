@@ -1,0 +1,207 @@
+;;;;
+;;;; text.stk   -- GTklos Text Widget
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 14-Feb-2002 22:24 (eg)
+;;;; Last file update: 18-Jun-2021 10:49 (eg)
+;;;;
+
+
+
+;;;
+;;; GTk bindings
+;;;
+(define-gtk gtk-text-view-new () #:pointer "gtk_text_view_new")
+(define-gtk gtk-text-view-new-with-buffer (#:pointer) #:pointer
+  "gtk_text_view_new_with_buffer")
+
+(define-gtk gtk-text-view-get-buffer(#:pointer) #:pointer
+  "gtk_text_view_get_buffer")
+
+(define-gtk gtk-text-buffer-set-text (#:pointer #:string #:long) #:void
+  "gtk_text_buffer_set_text")
+
+
+;; ----------------------------------------------------------------------
+;; We use only two of the 4 values offered by GTK+ ⇒ boolean
+(define (wrap->int val)
+  (if val 0 2))       ; GTK_WRAP_NONE or GTK_WRAP_WORD
+
+(define (int->wrap val)
+  (case val
+    ((0 1) #f)        ; GTK_WRAP_NONE or GTK_WRAP_CHAR
+    (else  #t)))      ; GTK_WRAP_WORD or GTK_WRAP_WORD_CHAR
+
+
+;======================================================================
+;
+;           < t e x t >   C l a s s
+;
+;======================================================================
+(define-class <text> (<gtk-widget>)
+  ((%twid)              ;; the real text widget ID
+   (text-buffer     #:accessor      text-buffer
+                    #:init-keyword  #:text-buffer
+                    #:allocation    #:virtual
+                    #:slot-ref      (lambda (o)
+                                      (let* ((w (slot-ref o '%twid))
+                                             (b (gtk-text-view-get-buffer w)))
+                                        (cpointer-type-set! b 'gtk-buffer)
+                                        b))
+                    #:slot-set!     (lambda (o v)
+                                      (unless (and (cpointer? v)
+                                                   (eq? (cpointer-type v)
+                                                        'gtk-buffer))
+                                        (error "cannot set text buffer to ~S" v))
+                                      (let ((w (slot-ref o '%twid)))
+                                        (gtk-text-view-set-buffer w v))))
+   (accepts-tab     #:accessor      accepts-tab
+                    #:init-keyword  #:accepts-tab
+                    #:allocation    #:gtk-property
+                    #:gtk-widget    %twid)
+   (cursor-visible  #:accessor      cursor-visible
+                    #:init-keyword  #:cursor-visible
+                    #:allocation    #:gtk-property
+                    #:gtk-widget    %twid)
+   (text-editable   #:accessor      text-editable
+                    #:init-keyword  #:text-editable
+                    #:allocation    #:gtk-property
+                    #:gtk-name      "editable"
+                    #:gtk-widget    %twid)
+   (text-indent     #:accessor      text-indent
+                    #:init-keyword  #:indent
+                    #:allocation    #:gtk-property
+                    #:gtk-name      "indent"
+                    #:gtk-widget    %twid)
+   (text-monospace  #:accessor      text-monospace
+                    #:init-form     #t
+                    #:init-keyword  #:text-monospace
+                    #:allocation    #:gtk-property
+                    #:gtk-name      "monospace"
+                    #:gtk-widget    %twid)
+   (text-overwrite  #:accessor      text-overwrite
+                    #:init-keyword  #:text-overwrite
+                    #:allocation    #:gtk-property
+                    #:gtk-name      "overwrite"
+                    #:gtk-widget    %twid)
+   (text-wrap       #:accessor      text-wrap
+                    #:init-keyword  #:text-wrap
+                    #:allocation    #:virtual
+                    #:slot-ref      (lambda (o)
+                                      (int->wrap
+                                       (%gtk-get-property (slot-ref o '%twid)
+                                                          "wrap-mode")))
+                    #:slot-set!     (lambda (o v)
+                                      (%gtk-set-property!
+                                          (slot-ref o '%twid)
+                                          "wrap-mode"
+                                          (wrap->int v))))
+   (justify         #:accessor      justify
+                    #:init-keyword  #:justify
+                    #:allocation    #:virtual
+                    #:slot-ref      (lambda (o)
+                                      ;; justify conv. function are in label.stk
+                                      (int->justify
+                                       (%gtk-get-property (slot-ref o '%twid)
+                                                          "justification")))
+                    #:slot-set!     (lambda (o v)
+                                      ;; justify conv. function are in label.stk
+                                      (%gtk-set-property!
+                                          (slot-ref o '%twid)
+                                          "justification"
+                                          (justify->int v))))
+   (value           #:accessor      value
+                    #:init-keyword  #:value
+                    #:allocation    #:virtual
+                    #:slot-ref      (lambda (o)
+                                      (%gtk-get-property (text-buffer o) "text"))
+                    #:slot-set!     (lambda (o v)
+                                      (%gtk-set-property! (text-buffer o) "text" v)))
+   ))
+
+
+
+(define-method realize-widget((self <text>) initargs)
+  (let ((sw  (gtk-scrolled-window-new (void) (void)))
+        (txt (gtk-text-view-new)))
+
+    ;; The scrolled window
+    (cpointer-type-set! sw 'scrolled-window)
+    (slot-set! self 'wid sw)
+    (gtk-scrolled-window-set-policy sw 1 1)  ; 1 = automatic
+
+    ;; The text widget itself
+    (cpointer-type-set! txt 'gtk-text-view)
+    (slot-set! self '%twid  txt)
+    ;; FIXME: (gtk-text-view-set-monospace txt #t)
+
+    ;; Add the text to the scrolled window
+    (gtk-container-add sw txt)
+
+    ;; Show the widget
+    (gtk-widget-show txt)))
+
+
+;;;; ======================================================================
+;;;;
+;;;; Text Methods and functions
+;;;;
+;;;; ======================================================================
+
+;;
+;; File IO operations
+;;
+(define (text-read-file txt file)
+  (let ((port (open-file file "r")))
+    (unless port
+      (error 'text-read-file "cannot open file ~S" file))
+    (slot-set! txt
+               'value
+               (port->string port))
+    (close-port port)))
+
+(define (text-write-file txt file)
+  (let ((port (open-file file "w")))
+    (unless port
+      (error 'text-write-file "cannot open file ~S" file))
+    (display (slot-ref txt 'value) port)
+    (close-port port)))
+
+
+;;
+;; Event connection
+;;
+;; because the real widget is not in the 'wid slot but in the '%twid slot
+(define-method event-connect ((widget <text>) name closure)
+  (g-signal-connect widget (slot-ref widget '%twid) name closure #f))
+
+(define-method event-connect-after ((widget <text>) name closure)
+  (g-signal-connect widget (slot-ref widget '%twid) name closure #t))
+
+
+;;;;
+;;;; Exports
+;;;;
+(export <text>
+        text-buffer accepts-tab cursor-visible text-editable text-indent
+        text-monospace text-overwrite text-wrap justify value
+        text-read-file text-write-file
+        )

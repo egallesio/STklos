@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 11-Aug-2007 11:38 (eg)
- * Last file update: 16-Jun-2021 19:59 (eg)
+ * Last file update: 17-Jun-2021 18:56 (eg)
  */
 
 #include <math.h>               /* for isnan */
@@ -773,6 +773,34 @@ DEFINE_PRIMITIVE("%color->string", color2string, subr1, (SCM obj))
 //FIXME:              STk_false);
 //FIXME: }
 
+
+/* ----------------------------------------------------------------------
+ *
+ * Interactive GTK support (when using readline/libedit)
+ *
+ * ---------------------------------------------------------------------- */
+// readline provides a pointer variable (rl_event_hook) which permits to call
+// the function it contains while there is no character ready to read. 
+
+static void stklos_interactive_gtk_loop(void) {
+  if (gtk_events_pending())
+    gtk_main_iteration_do(0);
+}
+
+
+DEFINE_PRIMITIVE("%readline-idle-hook", rl_hook, subr1, (SCM ptr))
+{
+  unsigned long *f;
+
+  if (!CPOINTERP(ptr))
+    STk_error("bad pointer: ~S", ptr);
+
+  f = (unsigned long*) CPOINTER_VALUE(ptr);
+  *f = (unsigned long) stklos_interactive_gtk_loop;
+
+  return STk_void;
+}
+
 /* ----------------------------------------------------------------------
  *
  *      Timeout  ...
@@ -858,6 +886,8 @@ MODULE_ENTRY_START("stklos-gtklos") {
   ADD_PRIMITIVE_IN_MODULE(color2string, gtklos_module);
 
   //FIXME: ADD_PRIMITIVE_IN_MODULE(dialog_vbox, gtklos_module);
+
+  ADD_PRIMITIVE_IN_MODULE(rl_hook, gtklos_module);
 
   ADD_PRIMITIVE_IN_MODULE(timeout, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(when_idle, gtklos_module);

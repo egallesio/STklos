@@ -1,7 +1,7 @@
 /*
  * ffi.c        -- FFI support dor STklos
  *
- * Copyright © 2007-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 14-Jun-2007 09:19 (eg)
- * Last file update: 30-May-2020 18:03 (eg)
+ * Last file update: 10-Jun-2021 11:21 (eg)
  */
 
 #include "stklos.h"
@@ -419,13 +419,7 @@ DEFINE_PRIMITIVE("%make-callback", make_callback, subr3,
 /* ======================================================================
  *      STk_exec_callback ...
  * ====================================================================== */
-#ifdef LIB_FFI_CAN_HANDLE_VARARG_IN_CALLBACKS
-/* As stated in libffi documentation, libffi doesn't correctly handle
- * varargs in callbacks. The code of the following exec_callback works
- * on 32 bits Linux but fails miserably on 64bits. It seems that the
- * ABI is different in these cas. As a consequence, this code is left
- * here just in case a day libffi is corrected.x
- */
+#ifndef LIB_FFI_KLUDGE
 #define MAX_ARGS_CALLBACK 20
 
 static int exec_callback(SCM callback, ...)
@@ -458,7 +452,7 @@ static int exec_callback(SCM callback, ...)
         param.ulvalue = va_arg(ap, unsigned long); break;
       case 8:                                           /* lonlong */
       case 9:                                           /* ulonlong */
-        STk_error("long long in a callback are not implemented yet");
+        STk_error("long long in a callback are not implemented yet"); break;
       case 10:                                          /* float */
         param.fvalue = (float) va_arg(ap, double); break;
       case 11:                                          /* double */
@@ -474,7 +468,7 @@ static int exec_callback(SCM callback, ...)
       case 17:                                          /* int32 */
       case 18:                                          /* int64 */
         STk_error("argument of type ~S in callback are not implemented yet",
-                  CAR(Cargs));
+                  CAR(Cargs)); break;
       case 19:                                          /* obj */
         param.pvalue = va_arg(ap, void *); break;
       default:
@@ -503,6 +497,9 @@ static int exec_callback(SCM callback, ...)
  * it is used in the gtk-gtklos-base ScmPkg (a callback can be called
  * with one or two pointers. Hopefully, callbacks were not documened
  * in previous versions of STklos ;-)
+ * 
+ * 2021/06/09: This code was used before for GTk support. It doesn't
+ * seem useful anymore. It is kept here for reference
  */
 static int exec_callback(SCM callback, void *ptr1, void *ptr2)
 {

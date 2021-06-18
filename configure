@@ -804,7 +804,7 @@ with_provided_bignum
 with_gmp_light
 with_provided_regexp
 with_provided_ffi
-with_control_fixnums
+with_control_fast_math
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1460,7 +1460,7 @@ Optional Packages:
   --with-gmp-light        a synonym for --with-provided-bignum
   --with-provided-regexp  use the provided Regexp (PCRE) library
   --with-provided-ffi     use the provided FFI library
-  --with-control-fixnums  verify that fx functions are fixnums
+  --with-control-fast-math  verify that arguments to fx and fl functions are fixnums and flonums
 
 Some influential environment variables:
   CC          C compiler command
@@ -7171,13 +7171,13 @@ printf "%s\n" "#define HAVE_FFI 1" >>confdefs.h
 
 
 # ----------------------------------------------------------------------
-# Control fixnum parameters
+# Control fixnum and flonum parameters
 # ----------------------------------------------------------------------
 
-# Check whether --with-control-fixnums was given.
-if test ${with_control_fixnums+y}
+# Check whether --with-control-fast-math was given.
+if test ${with_control_fast_math+y}
 then :
-  withval=$with_control_fixnums; CONTROL_FX="$withval"
+  withval=$with_control_fast_math; CONTROL_FX="$withval"
 else $as_nop
   CONTROL_FX="yes"
 fi
@@ -7291,7 +7291,7 @@ esac
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 doc/skb/stklos-version.stk pkgman/Makefile extensions/gtklos/src/Makefile lib/srfi-25/Makefile lib/srfi-27/Makefile lib/srfi-133/Makefile lib/srfi-170/Makefile lib/srfi-175/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 doc/skb/stklos-version.stk pkgman/Makefile extensions/gtklos/Makefile extensions/gtklos/demos/Makefile extensions/gtklos/src/Makefile lib/srfi-25/Makefile lib/srfi-27/Makefile lib/srfi-133/Makefile lib/srfi-144/Makefile lib/srfi-170/Makefile lib/srfi-175/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8045,10 +8045,13 @@ do
     "doc/stklos-script.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-script.1" ;;
     "doc/skb/stklos-version.stk") CONFIG_FILES="$CONFIG_FILES doc/skb/stklos-version.stk" ;;
     "pkgman/Makefile") CONFIG_FILES="$CONFIG_FILES pkgman/Makefile" ;;
+    "extensions/gtklos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/Makefile" ;;
+    "extensions/gtklos/demos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/demos/Makefile" ;;
     "extensions/gtklos/src/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/src/Makefile" ;;
     "lib/srfi-25/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-25/Makefile" ;;
     "lib/srfi-27/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-27/Makefile" ;;
     "lib/srfi-133/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-133/Makefile" ;;
+    "lib/srfi-144/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-144/Makefile" ;;
     "lib/srfi-170/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-170/Makefile" ;;
     "lib/srfi-175/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-175/Makefile" ;;
 

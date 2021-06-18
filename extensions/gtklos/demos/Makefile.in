@@ -1,0 +1,34 @@
+# Makefile.in for GTklos examples
+#
+#           Author: Erick Gallesio [eg@unice.fr]
+#    Creation date: 19-Sep-2009 20:29 (eg)
+# Last file update: 18-Jun-2021 11:09 (eg)
+
+SRC= demos \
+     button.stk checkbutton.stk  entry1.stk \
+	 entry2.stk entry3.stk label.stk text.stk
+
+
+# canvas1.stk canvas2.stk  colorselector.stk \
+#    combobox.stk demos.stk dialog.stk\
+#    event.stk fileselector.stk fontselector.stk frame.stk gauge.stk \
+#    grid1.stk grid2.stk handle.stk image1.stk image2.stk \
+#    menu1.stk menu2.stk radiobutton.stk \
+#    scale.stk scroll1.stk scroll2.stk sedit.stk \
+#    separator.stk text.stk toolbar.stk
+
+EXE=$(SRC:.stk=)
+
+%: %.stk demos-utils.stk
+	stklos-compile -c -o $* $<
+
+all: 	$(EXE)
+	@echo $(EXE) > all-demos
+
+clean:
+	/bin/rm -f $(EXE) *~ all-demos
+
+distclean:
+	/bin/rm -f stklos-gtklos.so Makefile
+
+

@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 17-Jun-2021 09:23 (eg)
+### Last file update: 18-Jun-2021 08:27 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -430,10 +430,10 @@ AC_DEFINE(HAVE_FFI, 1, [System provides FFI])
 
 
 # ----------------------------------------------------------------------
-# Control fixnum parameters
+# Control fixnum and flonum parameters
 # ----------------------------------------------------------------------
-AC_ARG_WITH(control-fixnums,
-       [  --with-control-fixnums  verify that fx functions are fixnums],
+AC_ARG_WITH(control-fast-math,
+       [  --with-control-fast-math  verify that arguments to fx and fl functions are fixnums and flonums],
        CONTROL_FX="$withval", CONTROL_FX="yes")
 
 if test "$CONTROL_FX" = "yes"
@@ -537,11 +537,14 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/skb/stklos-version.stk
           pkgman/Makefile
 
+          extensions/gtklos/Makefile
+          extensions/gtklos/demos/Makefile
           extensions/gtklos/src/Makefile
 
           lib/srfi-25/Makefile
           lib/srfi-27/Makefile
           lib/srfi-133/Makefile
+          lib/srfi-144/Makefile
           lib/srfi-170/Makefile
           lib/srfi-175/Makefile
 ])

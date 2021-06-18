@@ -1,0 +1,76 @@
+;;;;
+;;;; event.stk  -- Demo showing event management in GTklos
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  8-Apr-2002 19:33 (eg)
+;;;; Last file update: 17-Jun-2021 09:07 (eg)
+;;;;
+
+(include "gtklos-demo.stk")
+
+(define *event-msg* "
+Event Management
+
+In this demo, some handler have been placed on the buttons.  If you
+iconify, deiconify, or resize this window, a message is printed.
+Messages are also printed when the mouse is moved over the bottom text
+widget.  Try to fire them and see what is printed on the standard
+output.
+")
+
+(define (main args)
+  (let* ((win (make <demo-window> #:title "Event Management Demo" #:x 100 #:y 100
+                    #:file "event" #:message *event-msg* #:border-width  10))
+         (box (make <vbox> #:parent win #:border-width 10 #:padding 10))
+         (b1  (make <button> #:text "Enter/Leave Button" #:parent box))
+         (b2 (make <button> #:text "Mouse Press/Release Button"#:parent box))
+         (t  (make <text> #:text "Mouse Motion" #:parent box)))
+
+    ;; Adding events to the demo window
+    (event-connect win "map-event"
+                   (lambda (e) (printf "Map: ~S\n" (title win)) #f))
+    (event-connect win "unmap-event"
+                   (lambda (e) (printf "Unmap: ~S\n" (title win)) #f))
+    (event-connect win "configure-event"
+                   (lambda (e)
+                     (printf "Configure: x=~A, y=~A\n" (event-x e) (event-y e)) #f))
+
+    ;; Adding events to first button
+    (event-connect b1 "enter"
+                   (lambda (e) (printf "Entering: ~S\n" (text b1)) #f))
+    (event-connect b1 "leave"
+                   (lambda (e) (printf "Leaving: ~S\n" (text b1)) #f))
+
+    ;; Adding events to second button
+    (event-connect b2 "button-press-event"
+                   (lambda (e)
+                     (printf "Press: [~A] ~S\n" (event-button e) (text b2)) #f))
+    (event-connect b2 "button-release-event"
+                   (lambda (e)
+                     (printf "Release: [~A] ~S\n" (event-button e) (text b2)) #f))
+
+    ;; Adding events to text widget
+    (event-connect t "motion-notify-event"
+                   (lambda (e)
+                     (printf "Motion: [~A] (~A, ~A)\n"
+                             (event-button e) (event-x e) (event-y e))
+                     #f))
+    (gtk-main)))

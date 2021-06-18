@@ -22,13 +22,15 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 15-Jun-2021 17:37 (eg)
+;;;; Last file update: 18-Jun-2021 08:56 (eg)
 ;;;;
 
 
 (select-module GTKLOS)
 
-(%compile-time-define %gtk-get-property %gtk-set-property!)
+(%compile-time-define %gtk-get-property %gtk-set-property!
+                      %readline-idle-hook get-gtk-event
+                      rl-input-timeout rl-event-hook)
  
 
 (include "utils/libs.stk")
@@ -47,6 +49,9 @@
 (include "widgets/button.stk")
 (include "widgets/image.stk")
 (include "widgets/checkbutton.stk")
+(include "widgets/scroll.stk")
+(include "widgets/text.stk")
+
 (include "widgets/separator.stk")
 
 (provide "gtklos")

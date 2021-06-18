@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 25-May-2021 18:46 (eg)
+# Last file update:  1-Jun-2021 17:45 (eg)
 
 SRFI=srfi-25
 
@@ -27,7 +27,7 @@ SRFI=srfi-25
 OUT            = $(SRFI).@SH_SUFFIX@
 schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@
-
+schemelib_DATA = $(OUT)
 
 #======================================================================
 COMP ?= ../../utils/tmpcomp
@@ -65,9 +65,9 @@ doc:
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
 		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
 
-install-exec-hook:
-	install -d $(DESTDIR)$(schemelibdir)
-	install $(OUT) $(DESTDIR)$(schemelibdir)
+#install-exec-hook:
+#	install -d $(DESTDIR)$(schemelibdir)
+#	install $(OUT) $(DESTDIR)$(schemelibdir)
 
 clean:
 	rm -f $(OUT) $(SRFI)-incl.c *~

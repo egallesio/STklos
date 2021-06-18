@@ -1,0 +1,202 @@
+;;;;
+;;;; demos-utils.stk    -- Definition of useful things for GTKlos demos
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 24-Jul-2001 16:19 (eg)
+;;;; Last file update: 18-Jun-2021 14:17 (eg)
+;;;;
+
+
+;;;; Adapt the load-path.
+(when-load-and-compile
+ (let ((path (load-path)))
+   (unless (member "../src" path)
+     (load-path `("../src"  ,@path)))))
+
+;;; load GTklos
+(require "gtklos")
+(import GTKLOS)
+
+;;;;
+;;;; Utilities
+;;;;
+
+;; A rather bad approximation of where the demo source file lives
+(define *demo-path* (list "."
+                          (string-append (%library-prefix)
+                                         "/share/stklos/"
+                                         (version)
+                                         "/demos")))
+
+#|
+;; *user-code* is set to #t if the file is loaded a second time
+;; That means that this is the user which tries its code
+;; All this stuff permits to provide a different interface to the demo:
+;; Our code has a "Quit" and "See code" buttons, whereas user demo
+;; has only a "Close" button
+|#
+(define *user-code* (getenv "indemo"))
+(setenv! "indemo" "1")  ;; to avoid returning #f next time
+
+(define-method eval-current-buffer (txt)
+  ;; Save the current buffer in a file and load it
+  (let ((tmp (temporary-file-name)))
+    (text-write-file txt tmp)
+    (load tmp)
+    (main #f)
+    (remove-file tmp)))
+
+
+(define (demo-see-code file)
+
+  (let* ((win (make <window>  #:title (format #f "Code of the ~S Demo" file)))
+         (box (make <box>     #:parent win :orientation 'vertical
+                              #:expand #t #:fill #t))
+;;//XX   (tb  (make <toolbar> #:parent box))
+         (txt (make <text> #:width 640 #:height 480 :text-monospace #t)))
+    (container-add! box txt #:expand #t #:fill #t)
+    ;; Add the eval button
+;;//XX    (make <toolbar-button-item> #:parent tb #:stock-id "gtk-execute"
+;;//XX          #:command (lambda (_)
+;;//XX                     (eprintf "*** EXECUTING USER CODE ***\n")
+;;//XX                     (eval-current-buffer txt))
+;;//XX          #:text "Eval" )
+;;//XX    ;; Add the Close button
+;;//XX    (make <toolbar-button-item> #:parent tb #:stock-id "gtk-quit"
+;;//XX          #:command (lambda (_) (destroy win))
+;;//XX          #:text "Close" )
+
+    ;; Read the text of the demo (skipping the copyrigth)
+    (let* ((fn   (find-path (string-append file ".stk") *demo-path*))
+           (port (and fn (open-file fn "r"))))
+      (unless port
+        (error 'demo-see-code
+               "Cannot open source file `~A.stk' for this demo" file))
+
+      ;; Do the reading
+      (do ((l (read-line port) (read-line port)))
+          ((or (eof-object? l) (string=? l "")))
+        'skipping-copyright)
+
+      (set! (value txt) (port->string port)))))
+
+(define (demo-see-code file)
+  (eprintf "See the code of ~S\n" file))
+
+
+
+;;;; ======================================================================
+;;;;
+;;;;
+;;;;            < d e m o - w i n d o w >   W i d g e t
+;;;;
+;;;; This widget is a replacement of the window widget for GTklos
+;;;; demonstrations, it extends this class by providing a button to quit the
+;;;; demo ans see its code.
+;;;;
+;;;; ======================================================================
+
+(define-class <demo-window> (<window>)
+  ((message     #:init-form #f #:init-keyword #:message)
+   (file        #:init-form #f #:init-keyword #:file)
+   (content     #:init-form #f)))
+
+
+(define-method internal-arrange-widget ((self <demo-window>) initargs)
+  (next-method)
+  (let ((box (make <box> #:parent self #:orientation 'vertical))
+        (msg (slot-ref self 'message)))
+
+    ;; Create the top message, adding some fontification to make things prettier
+    (when msg
+      (let* ((lines (string-split msg "\n"))
+             (txt   (string-append "<big><b>" (car lines) "</b></big>\n\n<i>")))
+        (for-each (lambda (s)
+                    (set! txt (string-append txt s "\n")))
+                  (cdr lines))
+        (set! txt (string-append txt "</i>"))
+        (make <label> #:parent box #:text txt #:justify 'center)))
+
+    ;; Create the separator and the bottom buttons
+    (let ((sep  (make <separator>))
+          (hbox (make <box> #:orientation 'horizontal
+                            #:padding 4 #:expand #t #:fill #t)))
+      (container-add! box hbox #:padding 3  #:end #t)
+      (container-add! box sep  #:padding 10 #:end #t)
+
+      (if *user-code*
+          ;; This is user code
+          ;; Create just a "Close" button
+          (make <button> #:text "Close" #:parent hbox
+                #:command (lambda (w ev) (destroy self)))
+          (begin
+            ;; This is the original demo code.
+            ;; Create a "Quit" and "See code" buttons
+            (make <button> #:text " Quit " #:parent hbox
+                  #:command (lambda(w ev) (exit 0)))
+            (make <button> #:text "See code" #:parent hbox
+                  #:command (lambda (w ev) (demo-see-code (slot-ref self 'file)))))))
+
+    ;; Connect a signal to terminate application when the window is closed
+    ;; FIXME:
+;;//    (event-connect self
+;;//                   "delete-event"
+;;//                   (lambda (e)
+;;//                     (eprintf "Bye ...\n")
+;;//                     (exit 0)))
+
+    ;; Create a container for demo specific subwidgets
+    (let ((content (make <box> #:orientation 'vertical #:expand #t #:fill #t)))
+      ;; Set it to the content slot *after* creation (tested by container-add!)
+      (apply container-add! box content initargs)
+      (slot-set! self 'content content))))
+
+
+(define-method container-add! ((self <demo-window>) w . args)
+  (let ((container (slot-ref self 'content)))
+    (if container
+        ;; If a container exists, that is that the widget is initialized and
+        ;; that we are filling it with subwidgets which are demo-specific
+        (apply container-add! container w args)
+        ;; nothing special
+        (next-method))))
+
+(provide "demos-utils")
+
+#|
+
+Usage example:
+==============
+
+(define w (make <demo-window> #:title "This is a demo" #:width 400
+                #:file "T100"
+                #:message "
+A Title
+
+and a message which explains what is the demo for.
+The message itself can be on
+several lines
+"))
+
+(define b1 (make <button> #:text "Button 1" #:parent w))
+(define b2 (make <button> #:text "Button 2" #:parent w))
+
+|#

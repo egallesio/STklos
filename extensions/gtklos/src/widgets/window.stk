@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 15:47 (eg)
-;;;; Last file update: 17-Jun-2021 12:03 (eg)
+;;;; Last file update: 18-Jun-2021 12:43 (eg)
 ;;;;
 
 ;;;;
@@ -31,6 +31,9 @@
 (define-gtk gtk-window-get-title (:pointer) :string        "gtk_window_get_title")
 (define-gtk gtk-window-set-title (:pointer :string) :void  "gtk_window_set_title")
 (define-gtk gtk-window-resize (:pointer :long :long) :void "gtk_window_resize")
+
+(define-gtk gtk-window-set-default-size (:pointer :long :long) :void
+  "gtk_window_set_default_size")
 
 
 ;======================================================================
@@ -54,23 +57,23 @@
                  #:init-keyword  #:resizable
                  #:allocation    #:gtk-property)
    (width        #:accessor      width
-                 #:init-keyword  #:width
+                 ;; #:init-keyword  #:width
                  #:allocation    #:virtual
                  #:slot-ref      (lambda (o)
                                    (gtk-widget-get-allocated-width (slot-ref o 'wid)))
                  #:slot-set!     (lambda (o v)
-                                   (let* ((w (slot-ref o 'wid))
-                                          (h (gtk-widget-get-allocated-height w)))
-                                     (gtk-window-resize w v h))))
+                                   (let* ((wid (slot-ref o 'wid))
+                                          (h   (gtk-widget-get-allocated-height wid)))
+                                     (gtk-window-resize wid v h))))
    (height       #:accessor      height
-                 #:init-keyword  #:height
+                 ;; #:init-keyword  #:height
                  #:allocation    #:virtual
                  #:slot-ref      (lambda (o)
                                    (gtk-widget-get-allocated-height (slot-ref o 'wid)))
                  #:slot-set!     (lambda (o v)
-                                   (let* ((w (slot-ref o 'wid))
-                                          (x (gtk-widget-get-allocated-width w)))
-                                     (gtk-window-resize w x v))))
+                                   (let* ((wid (slot-ref o 'wid))
+                                          (w   (gtk-widget-get-allocated-width wid)))
+                                     (gtk-window-resize wid w v))))
 
 ;;   (modal        #:accessor      modal
 ;;                 #:init-keyword  #:modal
@@ -82,11 +85,23 @@
    ))
 
 (define-method realize-widget ((self <window>) initargs)
-  (next-method)
   (let* ((transient (key-get initargs #:transient #f))
-         (win       (gtk-window-new (if transient 1 0))))
-    (cpointer-type-set! win 'gtk-window)
-    (slot-set! self 'wid win)))
+         (w         (key-get initargs #:width  200))
+         (h         (key-get initargs #:height 200)))
+
+    ;; HACK: Set the preferred size by hand, otherwise value is not respected
+    ;; Changing it after that seems to be OK
+    (printf "initargs ~S\n" initargs)
+    (set! initargs (key-delete! initargs #:width))
+    (set! initargs (key-delete! initargs #:height))
+    (printf "after initargs ~S\n" initargs)
+
+    (next-method)
+    (let ((win (gtk-window-new (if transient 1 0))))
+      (cpointer-type-set! win 'gtk-window)
+      (slot-set! self 'wid win)
+      (gtk-window-set-default-size win w h))))
+
 
 ;//;;
 ;//;; CONTAINER-ADD!

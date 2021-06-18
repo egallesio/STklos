@@ -67,7 +67,7 @@
     (26 "Notation for Specializing Parameters without Currying" () "srfi-26")
     (27 "Source of random bits" (random) "srfi-27")
     (28 "Basic Format Strings")
-    ;;   29 Localization
+    (29 "Localization" () "srfi-29")
     (30 "Nested Multi-line Comments")
     (31 "A special form for recursive evaluation")
     ;;   32 ........ Withdrawn
@@ -132,7 +132,7 @@
     ;; 91  ....... withdrawn
     ;; 92  ....... withdrawn
     ;; 93  ....... withdrawn
-    ;; 94  Type-Restricted Numerical Functions
+    (94 "Type-Restricted Numerical Functions" () "srfi-94")
     ;; 95  Sorting and Merging
     (96 "SLIB Prerequisites" () "srfi-96")
     ;; 97 SRFI Libraries
@@ -173,7 +173,7 @@
     ;; 132  Sort Libraries
     (133  "Vector Library (R7RS-compatible)" (vector) "srfi-133")
     (134  "Immutable Deques" (immutable-deques) "srfi-134")
-    (135  "Immutable Texts" (immuttable-texts) "srfi-135")
+    (135  "Immutable Texts" (immutable-texts) "srfi-135")
     ;; 136  Extensible record types
     (137 "Minimal Unique Types" () "srfi-137")
     ;; 138  Compiling Scheme programs to executables
@@ -182,7 +182,7 @@
     (141 "Integer Division" (integer-division) "srfi-141")
     ;; 142  ....... withdrawn
     (143  "Fixnums")
-    ;; 144  Flonums
+    (144  "Flonums" () "srfi-144")
     (145 "Assumptions")
     ;; 146  Mappings
     ;; 147  Custom macro transformers

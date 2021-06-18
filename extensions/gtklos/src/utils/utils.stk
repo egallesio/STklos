@@ -21,8 +21,9 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 23-Aug-2007 15:03 (eg)
-;;;; Last file update: 11-Jun-2021 13:44 (eg)
+;;;; Last file update: 18-Jun-2021 08:56 (eg)
 ;;;;
+
 
 
 ;;;;
@@ -77,43 +78,34 @@
 
 ;; ======================================================================
 ;;
-;;      GTK+ thread management
+;;      GTK+ Event Loop management
 ;;
 ;; ======================================================================
-(define *gtk-freeze* #f)
-(define *gtk-freeze-mutex* (make-mutex 'gtk-freeze))
 
-(define (with-gtk-freezed proc)
-  (with-mutex *gtk-freeze-mutex*
-              (lambda ()
-                (set! *gtk-freeze* #t)
-                (proc)
-                (set! *gtk-freeze* #f))))
-
-
-(define (start-gtk-thread)
-  (let ((thr (make-thread gtk-main)))
-    (thread-start! thr)))
+(import READLINE)
 
 
 (define (start-interactive-gtk)
-  (eprintf "Starting interactive GTK\n")
-  (port-idle-register! original-input-port ;(current-input-port)
-                       (lambda () (print ".") (gtk-main-iteration-do #f))))
-
-;;(start-interactive-gtk)
-;;(start-gtk-thread)
+  (let ((readline-flavor (key-get *%system-state-plist* #:readline #f)))
+    (case readline-flavor
+      ((readline libedit)
+       ;; We are using a line editor. Use a hook function to poll the
+       ;; editor input
+       (rl-input-timeout 0)
+       (%readline-idle-hook rl-event-hook))
+      (else
+       ;; no editor. Use a file-port hook
+       (port-idle-register! (current-input-port)
+                            (lambda ()
+                              (gtk-main-iteration-do #f)))))))
 
 
 ;;; Initialize GTK
 (gtk-init (void) (void))
 
-
-
 ;;;
 ;;; Module exports
 ;;;
-(export gtk-main-iteration-do  ;; For tests
-        start-gtk-thread
+(export start-interactive-gtk
         gtk-main)
 

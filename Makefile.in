@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 15-Mar-2021 14:33 (eg)
+# Last file update:  2-Jun-2021 11:37 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -121,7 +121,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/stklosconf.h
-CONFIG_CLEAN_FILES = doc/skb/stklos-version.stk
+CONFIG_CLEAN_FILES = doc/skb/stklos-version.stk \
+	extensions/gtklos/Makefile extensions/gtklos/demos/Makefile
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -180,9 +181,11 @@ CTAGS = ctags
 CSCOPE = cscope
 DIST_SUBDIRS = $(SUBDIRS)
 am__DIST_COMMON = $(srcdir)/Makefile.in \
-	$(top_srcdir)/doc/skb/stklos-version.stk.in AUTHORS COPYING \
-	ChangeLog INSTALL NEWS README compile config.guess config.sub \
-	depcomp install-sh ltmain.sh missing mkinstalldirs
+	$(top_srcdir)/doc/skb/stklos-version.stk.in \
+	$(top_srcdir)/extensions/gtklos/Makefile.in \
+	$(top_srcdir)/extensions/gtklos/demos/Makefile.in AUTHORS \
+	COPYING ChangeLog INSTALL NEWS README compile config.guess \
+	config.sub depcomp install-sh ltmain.sh missing mkinstalldirs
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -373,6 +376,8 @@ INSTDIRS = @GC@ src utils lib examples pkgman
 SUBDIRS = @PCRE@ @GMP@ @FFI@ $(INSTDIRS) doc tests
 STKLOS_BINARY = ./src/stklos
 STKLOS_FLAGS = --no-init-file --case-sensitive
+schemeprefix = $(prefix)/share/@PACKAGE@
+schemelibprefix = $(prefix)/lib/@PACKAGE@/
 all: all-recursive
 
 .SUFFIXES:
@@ -410,6 +415,10 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
 doc/skb/stklos-version.stk: $(top_builddir)/config.status $(top_srcdir)/doc/skb/stklos-version.stk.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+extensions/gtklos/Makefile: $(top_builddir)/config.status $(top_srcdir)/extensions/gtklos/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+extensions/gtklos/demos/Makefile: $(top_builddir)/config.status $(top_srcdir)/extensions/gtklos/demos/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 # This directory's subdirectories are mostly independent; you can cd
@@ -812,8 +821,9 @@ ps: ps-recursive
 ps-am:
 
 uninstall-am:
-
-.MAKE: $(am__recursive_targets) install-am install-strip
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
+.MAKE: $(am__recursive_targets) install-am install-strip uninstall-am
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
 	am--refresh check check-am clean clean-cscope clean-generic \
@@ -828,7 +838,8 @@ uninstall-am:
 	install-ps install-ps-am install-strip installcheck \
 	installcheck-am installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
-	pdf-am ps ps-am tags tags-am uninstall uninstall-am
+	pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-hook
 
 .PRECIOUS: Makefile
 
@@ -872,6 +883,9 @@ distclean: clean
 
 test tests: all
 	(cd tests; $(MAKE) test)
+
+uninstall-hook:
+	rmdir $(schemeprefix) $(schemelibprefix) || true
 
 # Local Variables:
 # tab-width: 4
