@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 11-Aug-2007 11:38 (eg)
- * Last file update: 21-Jun-2021 11:19 (eg)
+ * Last file update: 21-Jun-2021 12:22 (eg)
  */
 
 #include <math.h>               /* for isnan */
@@ -43,10 +43,10 @@ static void error_set_property(SCM prop, SCM val, char *s)
             prop, s, val);
 }
 
-static void error_bad_widget(SCM obj)
-{
-  STk_error("bad widget ~S", obj);
-}
+//FIXME:static void error_bad_widget(SCM obj)
+//FIXME:{
+//FIXME:  STk_error("bad widget ~S", obj);
+//FIXME:}
 
 static void error_bad_event(SCM obj)
 {
@@ -77,18 +77,18 @@ static void init_gvalue(SCM object, SCM prop, GValue *value)
   g_value_init(value, spec->value_type);
 }
 
-//FIXME: static void init_gvalue_for_child(SCM container, SCM prop, GValue *value)
-//FIXME: {
-//FIXME:   GParamSpec* spec;
-//FIXME:
-//FIXME:   spec = gtk_container_class_find_child_property(
-//FIXME:                          G_OBJECT_GET_CLASS(CPOINTER_VALUE(container)),
-//FIXME:                          STRING_CHARS(prop));
-//FIXME:   if (!spec)
-//FIXME:     STk_error("container ~S doesn't have the property ~S", container, prop);
-//FIXME:
-//FIXME:   g_value_init(value, G_PARAM_SPEC_VALUE_TYPE(spec));
-//FIXME: }
+static void init_gvalue_for_child(SCM container, SCM prop, GValue *value)
+{
+  GParamSpec* spec;
+
+  spec = gtk_container_class_find_child_property(
+                         G_OBJECT_GET_CLASS(CPOINTER_VALUE(container)),
+                         STRING_CHARS(prop));
+  if (!spec)
+    STk_error("container ~S doesn't have the property ~S", container, prop);
+
+  g_value_init(value, G_PARAM_SPEC_VALUE_TYPE(spec));
+}
 
 
 static SCM GValue2Scheme(GValue *value, SCM prop)
@@ -363,57 +363,28 @@ DEFINE_PRIMITIVE("%gtk-set-property!", gtk_set_prop, subr3,
  *      Containers  ...
  *
  * ---------------------------------------------------------------------- */
-DEFINE_PRIMITIVE("gtk-box-query-child-packing", box_query_packing, subr2,
-                 (SCM box, SCM child))
+DEFINE_PRIMITIVE("%gtk-get-child-property", gtk_get_child_prop, subr3,
+                 (SCM container, SCM object, SCM prop))
 {
-  gboolean expand, fill;
-  guint padding;
-  GtkPackType pack_type;
-  
-  if (!CPOINTERP(box))   error_bad_widget(box);
-  if (!CPOINTERP(child)) error_bad_widget(child);
+  GValue value = {G_TYPE_INVALID};
+  SCM res = STk_void;
 
-  expand = fill = padding = pack_type = 0;
-  gtk_box_query_child_packing(GTK_BOX(CPOINTER_VALUE(box)),
-                              GTK_WIDGET(CPOINTER_VALUE(child)),
-                              &expand,
-                              &fill,
-                              &padding,
-                              &pack_type);
+  if (! CPOINTERP(container)) STk_error("bad container ~S" , container);
+  if (! CPOINTERP(object))    STk_error("bad object ~S" , object);
+  if (! STRINGP(prop))        STk_error("bad property name ~S", prop);
 
-  return LIST4(MAKE_BOOLEAN(expand),
-               MAKE_BOOLEAN(fill),
-               MAKE_INT(padding),
-               MAKE_BOOLEAN(pack_type == GTK_PACK_START));
+  init_gvalue_for_child(container, prop, &value);
+
+  /* the Gvalue is initialized with correct type . Fill it now */
+  gtk_container_child_get_property(GTK_CONTAINER(CPOINTER_VALUE(container)),
+                                   GTK_WIDGET(CPOINTER_VALUE(object)),
+                                   STRING_CHARS(prop),
+                                   &value);
+  res = GValue2Scheme(&value, prop);
+  g_value_unset(&value);
+  return res;
 }
 
-
-//FIXME: /* ----------------------------------------------------------------------
-//FIXME:  *      %gtk-get-child-property ...
-//FIXME:  * ---------------------------------------------------------------------- */
-//FIXME: DEFINE_PRIMITIVE("%gtk-get-child-property", gtk_get_child_prop, subr3,
-//FIXME:                  (SCM container, SCM object, SCM prop))
-//FIXME: {
-//FIXME:   GValue value = {G_TYPE_INVALID};
-//FIXME:   SCM res = STk_void;
-//FIXME:
-//FIXME:   if (! CPOINTERP(container)) STk_error("bad container ~S" , container);
-//FIXME:   if (! CPOINTERP(object))    STk_error("bad object ~S" , object);
-//FIXME:   if (! STRINGP(prop))        STk_error("bad property name ~S", prop);
-//FIXME:
-//FIXME:   init_gvalue_for_child(container, prop, &value);
-//FIXME:
-//FIXME:   /* the Gvalue is initialized with correct type . Fill it now */
-//FIXME:   gtk_container_child_get_property(GTK_CONTAINER(CPOINTER_VALUE(container)),
-//FIXME:                                    GTK_WIDGET(CPOINTER_VALUE(object)),
-//FIXME:                                    STRING_CHARS(prop),
-//FIXME:                                    &value);
-//FIXME:
-//FIXME:   res = GValue2Scheme(&value, prop);
-//FIXME:   g_value_unset(&value);
-//FIXME:   return res;
-//FIXME: }
-//FIXME:
 
 
 //FIXME: /*
@@ -857,8 +828,6 @@ MODULE_ENTRY_START("stklos-gtklos") {
   tc_gtk_event = STk_new_user_type(&xtype_gtk_event);
 
 
-
-
   /* Add new primitives */
   ADD_PRIMITIVE_IN_MODULE(gtk_get_prop, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(gtk_set_prop, gtklos_module);
@@ -868,10 +837,8 @@ MODULE_ENTRY_START("stklos-gtklos") {
 
 
   //TODO:  ADD_PRIMITIVE_IN_MODULE(gtk_get_size, gtklos_module);
-  
-  //FIXME:   ADD_PRIMITIVE_IN_MODULE(gtk_get_child_prop, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(gtk_get_child_prop, gtklos_module);
 
-  ADD_PRIMITIVE_IN_MODULE(box_query_packing, gtklos_module);
 //FIXME:   ADD_PRIMITIVE_IN_MODULE(box_set_packing, gtklos_module);
 //FIXME:   ADD_PRIMITIVE_IN_MODULE(cont_children, gtklos_module);
 

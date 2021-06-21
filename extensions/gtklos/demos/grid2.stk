@@ -1,0 +1,66 @@
+;;;;
+;;;; grid2.stk  -- Another GTklos Grid Demo
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 29-Jul-2001 20:06 (eg)
+;;;; Last file update: 21-Jun-2021 11:07 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define *message* "
+Another Grid Demo
+
+This is a simple demonstration of the grid widget.
+See the code to view the options used.
+")
+
+
+(define (main args)
+  (let* ((win (make <demo-window> #:title "GTklos Grid Demo" #:file "grid2"
+                    #:expand #t #:fill #t
+                    #:message  *message*))
+         (g   (make <grid> #:parent win #:row-homogeneous #t)))
+
+    ;; Make a bunch of buttons with various "gridding" options
+    (dotimes (i 9)
+             (container-add! g
+                             (make <button> #:text (format #f "Button ~S" i))
+                             #:top  (quotient i 5)
+                             #:left (modulo i 5)))
+
+    (container-add! g
+                    (make <button> #:text "Button 9")
+                    #:width 2 #:top 2 #:left 1)
+    (container-add! g
+                    (make <button> #:text "Button 10")
+                    #:height 8 #:top 2 #:left 3)
+     (container-add! g
+                    (make <button> #:text "Button 11")
+                    #:height 3 #:top 2 #:left 4)
+     (container-add! g
+                     (make <button> #:text "Button 12")
+                     #:height 3 #:width 2 #:top 3 #:left 0)
+     (dotimes (i 3)
+              (container-add! g
+                              (make <button> #:text (format #f "Button ~S" (+ i 13)))
+                              #:top (+ 3 i) #:left 2))
+     (gtk-main)))

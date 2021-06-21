@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 15:44 (eg)
-;;;; Last file update: 21-Jun-2021 11:22 (eg)
+;;;; Last file update: 21-Jun-2021 12:28 (eg)
 ;;;;
 
 
@@ -47,7 +47,7 @@
 
 (define (int->orientation orient)
   (if (zero? orient) 'horizontal 'vertical))
-  
+
 ;======================================================================
 ;
 ;                 C l a s s    < b o x >
@@ -114,14 +114,15 @@
 ;;
 ;; ======================================================================
 (define-method %container-info ((parent <box>) widget)
-  (let* ((w (wid widget))
-         (c (wid parent))
-         (i (gtk-box-query-child-packing c w)))
-    (list #:parent  parent
-          #:expand  (car i)
-          #:fill    (cadr i)
-          #:padding (caddr i)
-          #:end     (cadddr i))))
+  (let ((w (wid widget))
+        (c (wid parent)))
+    (list #:parent parent
+          #:expand    (%gtk-get-child-property c w "expand")
+          #:fill      (%gtk-get-child-property c w "fill")
+          #:padding   (%gtk-get-child-property c w "padding")
+          #:position  (%gtk-get-child-property c w "position")
+          #:end       (zero? (%gtk-get-child-property c w "pack-type")))))
+
 
 ;;;
 ;;; Module exports

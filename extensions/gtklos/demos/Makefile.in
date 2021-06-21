@@ -2,12 +2,12 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 19-Sep-2009 20:29 (eg)
-# Last file update: 20-Jun-2021 19:01 (eg)
+# Last file update: 21-Jun-2021 09:44 (eg)
 
 SRC= demos.stk \
      button.stk checkbutton.stk  combobox.stk      \
-	entry1.stk entry2.stk entry3.stk label.stk     \
-    text.stk
+     entry1.stk entry2.stk entry3.stk grid1.stk    \
+     grid2.stk label.stk text.stk
 
 
 # canvas1.stk canvas2.stk  colorselector.stk \

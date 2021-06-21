@@ -1,0 +1,95 @@
+;;;
+;;;; grid.stk                       -- GTK Grid
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 30-May-2001 21:25 (eg)
+;;;; Last file update: 21-Jun-2021 11:54 (eg)
+;;;;
+
+
+;;;
+;;; GTK bindings
+;;;
+(define-gtk gtk-grid-new () :pointer "gtk_grid_new")
+(define-gtk gtk-grid-attach (:pointer :pointer :long :long :long :long) :void
+  "gtk_grid_attach")
+
+
+;======================================================================
+;
+;                 C l a s s    < g r i d >
+;
+;======================================================================
+(define-class <grid> (<gtk-container>)
+  ((row-spacing         #:accessor      row-spacing
+                        #:init-keyword  #:row-spacing
+                        #:allocation    #:gtk-property)
+   (column-spacing      #:accessor      column-spacing
+                        #:init-keyword  #:column-spacing
+                        #:allocation    #:gtk-property)
+   (row-homogeneous     #:accessor      row-homogeneous
+                        #:init-keyword  #:row-homogeneous
+                        #:allocation    #:gtk-property)
+   (column-homogeneous  #:accessor      column-homogeneous
+                        #:init-keyword  #:column-homogeneous
+                        #:allocation    #:gtk-property)))
+
+(define-method realize-widget ((self <grid>) initargs)
+  (let ((g (gtk-grid-new)))
+    (cpointer-type-set! g 'gtk-grid)
+    (slot-set! self 'wid g)))
+
+
+;; ======================================================================
+;;
+;;          C O N T A I N E R - A D D !
+;;
+;; ======================================================================
+
+
+(define-method container-add! ((cont <grid>) (widget <gtk-widget>) . opt)
+  (let ((left   (key-get opt #:left 0))
+        (top    (key-get opt #:top  0))
+        (width  (key-get opt #:width 1))
+        (height (key-get opt #:height 1)))
+    (gtk-grid-attach (slot-ref cont 'wid) (slot-ref widget 'wid)
+                     left top width height)))
+
+;; ======================================================================
+;;
+;;          C O N T A I N E R - I N F O
+;;
+;; ======================================================================
+(define-method %container-info ((parent <grid>) widget)
+  (let* ((w      (wid widget))
+         (c      (wid parent))
+         (left   (%gtk-get-child-property c w "left-attach"))
+         (top    (%gtk-get-child-property c w "top-attach"))
+         (width  (%gtk-get-child-property c w "width"))
+         (height (%gtk-get-child-property c w "height")))
+    (list #:parent parent
+          #:left  left
+          #:top   top
+          #:width  width
+          #:height height)))
+
+
+(export <grid> rows columns row-spacing column-spacing row-homogeneous column-homogeneous)
