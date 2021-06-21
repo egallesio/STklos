@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Oct-2000 17:20 (eg)
-;;;; Last file update: 18-Jun-2021 14:44 (eg)
+;;;; Last file update: 21-Jun-2021 12:47 (eg)
 ;;;;
 
 (include "demos-utils.stk")
@@ -47,8 +47,12 @@ Aliquam erat volutpat.  Nunc eleifend leo vitae magna.  In id erat non orci comm
          (txt  (make <text> #:parent win #:value *text-value*))
          (hbox (make <box> #:orientation 'horizontal))
          (wrap (make <check-button> #:text "Wrap Text" #:parent hbox #:value #t
-                     #:command (lambda (w e) (set! (text-wrap txt) (not (value w)))))))
-
+                     #:command (lambda (w e) (set! (text-wrap txt) (not (value w))))))
+         (lab  (make <label> #:text "    Justify: " #:parent hbox))
+         (just (make <combobox> #:parent hbox #:value "left"
+                     #:items '("left" "right" "center" "fill")
+                     #:command (lambda (w e)
+                                 (set! (justify txt) (value w))))))
     ;; Pack the hbox at the end of the <demo-window>
     (container-add! win hbox #:expand #f #:fill #f)
 
