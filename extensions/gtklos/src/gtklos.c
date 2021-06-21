@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 11-Aug-2007 11:38 (eg)
- * Last file update: 17-Jun-2021 18:56 (eg)
+ * Last file update: 21-Jun-2021 11:19 (eg)
  */
 
 #include <math.h>               /* for isnan */
@@ -43,11 +43,11 @@ static void error_set_property(SCM prop, SCM val, char *s)
             prop, s, val);
 }
 
-//FIXME:static void error_bad_widget(SCM obj)
-//FIXME:{
-//FIXME:  STk_error("bad widget ~S", obj);
-//FIXME:}
-//FIXME:
+static void error_bad_widget(SCM obj)
+{
+  STk_error("bad widget ~S", obj);
+}
+
 static void error_bad_event(SCM obj)
 {
   STk_error("bad event ~S", obj);
@@ -358,34 +358,34 @@ DEFINE_PRIMITIVE("%gtk-set-property!", gtk_set_prop, subr3,
 //TODO:   return STk_cons(MAKE_INT(width), MAKE_INT(height));
 //TODO: }
 
-//FIXME: /* ----------------------------------------------------------------------
-//FIXME:  *
-//FIXME:  *      Containers  ...
-//FIXME:  *
-//FIXME:  * ---------------------------------------------------------------------- */
-//FIXME: DEFINE_PRIMITIVE("gtk-box-query-child-packing", box_query_packing, subr2,
-//FIXME:                  (SCM box, SCM child))
-//FIXME: {
-//FIXME:   gboolean expand, fill;
-//FIXME:   guint padding;
-//FIXME:   GtkPackType pack_type;
-//FIXME:
-//FIXME:   if (!CPOINTERP(box)) error_bad_widget(box);
-//FIXME:   if (!CPOINTERP(child)) error_bad_widget(child);
-//FIXME:
-//FIXME:   expand = fill = padding = pack_type = 0;
-//FIXME:   gtk_box_query_child_packing(GTK_BOX(CPOINTER_VALUE(box)),
-//FIXME:                               GTK_WIDGET(CPOINTER_VALUE(child)),
-//FIXME:                               &expand,
-//FIXME:                               &fill,
-//FIXME:                               &padding,
-//FIXME:                               &pack_type);
-//FIXME:
-//FIXME:   return LIST4(MAKE_BOOLEAN(expand),
-//FIXME:                MAKE_BOOLEAN(fill),
-//FIXME:                MAKE_INT(padding),
-//FIXME:                MAKE_BOOLEAN(pack_type == GTK_PACK_START));
-//FIXME: }
+/* ----------------------------------------------------------------------
+ *
+ *      Containers  ...
+ *
+ * ---------------------------------------------------------------------- */
+DEFINE_PRIMITIVE("gtk-box-query-child-packing", box_query_packing, subr2,
+                 (SCM box, SCM child))
+{
+  gboolean expand, fill;
+  guint padding;
+  GtkPackType pack_type;
+  
+  if (!CPOINTERP(box))   error_bad_widget(box);
+  if (!CPOINTERP(child)) error_bad_widget(child);
+
+  expand = fill = padding = pack_type = 0;
+  gtk_box_query_child_packing(GTK_BOX(CPOINTER_VALUE(box)),
+                              GTK_WIDGET(CPOINTER_VALUE(child)),
+                              &expand,
+                              &fill,
+                              &padding,
+                              &pack_type);
+
+  return LIST4(MAKE_BOOLEAN(expand),
+               MAKE_BOOLEAN(fill),
+               MAKE_INT(padding),
+               MAKE_BOOLEAN(pack_type == GTK_PACK_START));
+}
 
 
 //FIXME: /* ----------------------------------------------------------------------
@@ -868,10 +868,10 @@ MODULE_ENTRY_START("stklos-gtklos") {
 
 
   //TODO:  ADD_PRIMITIVE_IN_MODULE(gtk_get_size, gtklos_module);
+  
+  //FIXME:   ADD_PRIMITIVE_IN_MODULE(gtk_get_child_prop, gtklos_module);
 
-//FIXME:   ADD_PRIMITIVE_IN_MODULE(gtk_get_child_prop, gtklos_module);
-//FIXME:
-//FIXME:   ADD_PRIMITIVE_IN_MODULE(box_query_packing, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(box_query_packing, gtklos_module);
 //FIXME:   ADD_PRIMITIVE_IN_MODULE(box_set_packing, gtklos_module);
 //FIXME:   ADD_PRIMITIVE_IN_MODULE(cont_children, gtklos_module);
 

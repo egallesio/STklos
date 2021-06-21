@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 16:59 (eg)
-;;;; Last file update: 17-Jun-2021 08:46 (eg)
+;;;; Last file update: 21-Jun-2021 11:12 (eg)
 ;;;;
 
 ;;;;
@@ -115,22 +115,23 @@
 ;//
 
 
-;;//FIXME:;; ======================================================================
-;;//FIXME:;;
-;;//FIXME:;;                      C O N T A I N E R - I N F O
-;;//FIXME:;;
-;;//FIXME:;; ======================================================================
-;;//FIXME:(define-generic %container-info <generic>)
-;;//FIXME:
-;;//FIXME:(define-method container-info ((w <gtk-widget>))
-;;//FIXME:  (let ((p (parent w)))
-;;//FIXME:    (if p
-;;//FIXME:        (%container-info (parent w) w)
-;;//FIXME:        (error 'container-info "widget ~S has no parent" w))))
-;;//FIXME:
-;;//FIXME:(define-method %container-info ((parent <gtk-container>) widget)
-;;//FIXME:  (list #:parent parent))
-;;//FIXME:
+;; ======================================================================
+;;
+;;                      C O N T A I N E R - I N F O
+;;
+;; ======================================================================
+(define-generic %container-info <generic>)
+
+(define-method %container-info ((parent <gtk-container>) widget)
+  (list #:parent parent))
+
+(define-method container-info ((w <gtk-widget>))
+  (let ((p (parent w)))
+    (if p
+        (%container-info (parent w) w)
+        (error 'container-info "widget ~S has no parent" w))))
+
+
 
 ;//(define-method set-widget-parent! ((widget <gtk-widget>) (parent <gtk-container>))
 ;//  (%set-widget-parent! (slot-ref widget 'wid) (slot-ref parent  'wid)))
@@ -148,4 +149,4 @@
 ;;; Module exports
 ;;;
 
-(export container-add! container-remove! destroy)
+(export container-add! container-remove! container-info destroy)

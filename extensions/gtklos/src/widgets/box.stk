@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 15:44 (eg)
-;;;; Last file update: 17-Jun-2021 12:02 (eg)
+;;;; Last file update: 21-Jun-2021 11:22 (eg)
 ;;;;
 
 
@@ -108,22 +108,20 @@
 ;;// (void))
 
 
-;;// TODO: ;; ======================================================================
-;;// TODO: ;;
-;;// TODO: ;;          C O N T A I N E R - I N F O
-;;// TODO: ;;
-;;// TODO: ;; ======================================================================
-;;// TODO: (define-method %container-info ((parent <box>) widget)
-;;// TODO:   (let* ((w (wid widget))
-;;// TODO:          (c (wid parent))
-;;// TODO:          (i (gtk-box-query-child-packing c w)))
-;;// TODO:     (list #:parent  parent
-;;// TODO:           #:expand  (car i)
-;;// TODO:           #:fill    (cadr i)
-;;// TODO:           #:padding (caddr i)
-;;// TODO:           #:end     (cadddr i))))
-;;// TODO:
-
+;; ======================================================================
+;;
+;;          C O N T A I N E R - I N F O
+;;
+;; ======================================================================
+(define-method %container-info ((parent <box>) widget)
+  (let* ((w (wid widget))
+         (c (wid parent))
+         (i (gtk-box-query-child-packing c w)))
+    (list #:parent  parent
+          #:expand  (car i)
+          #:fill    (cadr i)
+          #:padding (caddr i)
+          #:end     (cadddr i))))
 
 ;;;
 ;;; Module exports
