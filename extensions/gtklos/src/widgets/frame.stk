@@ -1,0 +1,93 @@
+;;;;
+;;;; frame.stk                  -- GTklos frame widget
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author#: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date#: 11-Jul-2001 12#:09 (eg)
+;;;; Last file update#: 13-Aug-2009 11#:49 (eg)
+;;;;
+
+
+;;;
+;;; GTK Bindings
+;;;
+(define-gtk gtk-frame-new (#:string) #:pointer "gtk_frame_new")
+
+
+;; ----------------------------------------------------------------------
+
+(define (int->shadow val)
+  (case val
+    ((0)  'none)
+    ((1)  'in)
+    ((2)  'out)
+    ((3)  'etched-in)
+    ((4)  'etched-out)))
+
+(define (shadow->int val)
+  (let ((val (if (string? val) (string->symbol val) val)))
+    (case val
+      ((none)       0)
+      ((in)         1)
+      ((out)        2)
+      ((etched-in)  3)
+      ((etched-out) 4)
+      (else         (error "bad shadow value: ~S" val)))))
+
+;======================================================================
+;
+;                 C l a s s    < f r a m e >
+;
+;======================================================================
+
+(define-class <frame> (<gtk-container>)
+  ((title         #:accessor     title
+                  #:init-keyword #:title
+                  #:allocation   #:gtk-property
+                  #:gtk-name     "label")
+   (xalign        #:accessor     xalign
+                  #:init-keyword #:xalign
+                  #:allocation   #:gtk-property
+                  #:gtk-name     "label-xalign")
+   (yalign        #:accessor     yalign
+                  #:init-keyword #:xalign
+                  #:allocation   #:gtk-property
+                  #:gtk-name     "label-yalign")
+   (shadow        #:accessor     shadow
+                  #:init-keyword #:shadow
+                  #:allocation   #:virtual
+                  #:slot-ref     (lambda (o)
+                                   (int->shadow
+                                    (%gtk-get-property (slot-ref o 'wid)
+                                                       "shadow-type")))
+                  #:slot-set!    (lambda (o v)
+                                   (%gtk-set-property! (slot-ref o 'wid)
+                                                       "shadow-type"
+                                                       (shadow->int v))))))
+
+(define-method realize-widget ((self <frame>) initargs)
+  (let ((f (gtk-frame-new "")))
+    (cpointer-type-set! f 'gtk-frame)
+    (slot-set! self 'wid f)))
+
+;;;
+;;; Exports
+;;;
+(export <frame> title xalign yalign shadow)

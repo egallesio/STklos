@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 21-Jun-2021 12:20 (eg)
+;;;; Last file update: 21-Jun-2021 13:03 (eg)
 ;;;;
 
 
@@ -54,6 +54,7 @@
 (include "widgets/text.stk")
 (include "widgets/combobox.stk")
 (include "widgets/separator.stk")
+(include "widgets/frame.stk")
 
 (provide "gtklos")
 
