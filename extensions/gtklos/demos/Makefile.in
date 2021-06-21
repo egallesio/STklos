@@ -2,21 +2,21 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 19-Sep-2009 20:29 (eg)
-# Last file update: 21-Jun-2021 09:44 (eg)
+# Last file update: 21-Jun-2021 17:55 (eg)
 
 SRC= demos.stk \
      button.stk checkbutton.stk  combobox.stk      \
-     entry1.stk entry2.stk entry3.stk grid1.stk    \
-     grid2.stk label.stk text.stk
+     entry1.stk entry2.stk entry3.stk frame.stk    \
+     grid1.stk grid2.stk image1.stk image2.stk     \
+     label.stk scale.stk text.stk
 
 
 # canvas1.stk canvas2.stk  colorselector.stk \
-#    combobox.stk  dialog.stk\
-#    event.stk fileselector.stk fontselector.stk frame.stk gauge.stk \
-#    grid1.stk grid2.stk handle.stk image1.stk image2.stk \
-#    menu1.stk menu2.stk radiobutton.stk \
-#    scale.stk scroll1.stk scroll2.stk sedit.stk \
-#    separator.stk text.stk toolbar.stk
+#    dialog.stk\
+#    event.stk fileselector.stk fontselector.stk  gauge.stk \
+#    handle.stk menu1.stk menu2.stk radiobutton.stk \
+#    scroll1.stk scroll2.stk sedit.stk \
+#    separator.stk  toolbar.stk
 
 EXE=$(SRC:.stk=)
 

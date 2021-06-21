@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 21-Jun-2021 13:03 (eg)
+;;;; Last file update: 21-Jun-2021 16:44 (eg)
 ;;;;
 
 
@@ -32,7 +32,8 @@
                       %readline-idle-hook get-gtk-event
                       %gtk-get-child-property 
                       rl-input-timeout rl-event-hook)
- 
+
+(export timeout when-idle kill-idle)
 
 (include "lib/libs.stk")
 (include "lib/events.stk")
@@ -55,6 +56,7 @@
 (include "widgets/combobox.stk")
 (include "widgets/separator.stk")
 (include "widgets/frame.stk")
+(include "widgets/scale.stk")
 
 (provide "gtklos")
 

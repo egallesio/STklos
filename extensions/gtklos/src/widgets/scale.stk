@@ -1,0 +1,131 @@
+;;;;
+;;;; scale.stk              -- GTklos Scale Widget
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  1-Aug-2001 07:58 (eg)
+;;;; Last file update: 21-Jun-2021 19:12 (eg)
+;;;;
+
+
+;;;
+;;; GTK bindings
+;;;
+(define-gtk gtk-adjustment-new (#:double #:double #:double
+                                #:double #:double #:double) #:pointer
+  "gtk_adjustment_new")
+
+(define-gtk gtk-scale-new (#:long #:pointer) #:pointer "gtk_scale_new")
+
+
+
+(define (value-pos->int val)
+  (let ((val (if (string? val) (string->symbol val) val)))
+    (case val
+      ((left)    0)
+      ((right)   1)
+      ((top)     2)
+      ((bottom)  3)
+      (else      (error "bad position value: ~s" val)))))
+
+(define (int->value-pos val)
+  (case val
+    ((0)  'left)
+    ((1)  'right)
+    ((2)  'top)
+    ((3)  'bottom)))
+
+;======================================================================
+;
+;                < S c a l e >
+;
+;======================================================================
+(define-class <scale> (<gtk-widget>)
+  ((%adj)     ;; The widget adjustment
+   (orientation    #:reader       orientation)              ;; cannot be changed
+   (digits         #:accessor     digits
+                   #:init-keyword #:digits
+                   #:allocation   #:gtk-property)
+   (draw-value     #:accessor     draw-value
+                   #:init-keyword #:draw-value
+                   #:allocation   #:gtk-property)
+   (has-origin     #:accessor     has-origin
+                   #:init-keyword #:has-origin
+                   #:allocation   #:gtk-property)
+   (value-pos      #:accessor     value-pos
+                   #:init-keyword #:value-pos
+                   #:allocation   #:virtual
+                   #:slot-ref     (lambda (o)
+                                    (int->value-pos
+                                     (%gtk-get-property (slot-ref o 'wid)
+                                                        "value-pos")))
+                   #:slot-set!    (lambda (o v)
+                                   (%gtk-set-property! (slot-ref o 'wid)
+                                                       "value-pos"
+                                                       (value-pos->int v))))
+   (value          #:accessor     value
+                   #:init-keyword #:value
+                   #:allocation   #:gtk-property
+                   #:gtk-widget   %adj)
+   (lower          #:accessor     lower
+                   #:init-keyword #:from
+                   #:allocation   #:gtk-property
+                   #:gtk-widget   %adj)
+   (upper          #:accessor     upper
+                   #:init-keyword #:upper
+                   #:allocation   #:gtk-property
+                   #:gtk-widget   %adj)
+   (increment      #:accessor     increment
+                   #:init-keyword #:increment
+                   #:allocation   #:gtk-property
+                   #:gtk-name     "step-increment"
+                   #:gtk-widget   %adj)
+   (command        #:accessor     command
+                   #:init-keyword #:command
+                   #:allocation   #:virtual
+                   #:slot-ref     (%make-event-getter-func "value-changed")
+                   #:slot-set!    (%make-event-setter-func "value-changed"))))
+
+
+(define-method realize-widget ((self <scale>) initargs)
+  (let* ((o     (key-get initargs #:orientation 'horizontal))
+         (lower (key-get initargs #:from     0))
+         (upper (key-get initargs #:to     100))
+         (incr  (key-get initargs #:increment 1))
+         (value (key-get initargs #:value     lower))
+         (adj   (gtk-adjustment-new value lower upper incr
+                                    1 1))  ;; page-increment and page-size
+         (s     (gtk-scale-new (if (eq? o 'horizontal) 0 1)
+                               adj)))
+    ;; Keep a reference on the adjustment
+    (cpointer-type-set! s 'gtk-adjustement)
+    (slot-set! self '%adj adj)
+
+    ;; Normal stuff
+    (cpointer-type-set! s 'gtk-scale)
+    (slot-set! self 'wid s)
+    self))
+
+
+;;;
+;;; Exports
+;;;
+(export <scale> digits draw-value has-origin value-pos value lower upper
+        increment command)

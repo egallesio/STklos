@@ -1,0 +1,61 @@
+#! /usr/bin/env stklos -f
+;;;;
+;;;; scale.stk  -- GTklos Scale Demo
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  2-Aug-2001 06:51 (eg)
+;;;; Last file update: 21-Jun-2021 19:25 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define *message* "
+Scales Demo
+
+A simple demo showing an horizontal and a vertical scale.
+A message is printed when the scale is changed.
+")
+
+(define (main args)
+  (let* ((win (make <demo-window> #:title "Scale Demo"
+                    #:file "scale" #:border-width 5 #:message *message*
+                    #:expand #t #:fill #t
+                    #:width 500 #:height 400))
+         (box (make <box> #:orientation 'horizontal #:parent win
+                    #:expand #t #:fill #t))
+         (hs  (make <scale> #:orientation 'horizontal
+                    #:parent box
+                    #:value-pos 'left
+                    #:from 90
+                    #:to 201
+                    #:value 120
+                    #:command  (lambda (w e) (eprintf "horizontal: ~S\n" (value w)))))
+         (vs  (make <scale> #:orientation 'vertical
+                    #:parent box
+                    #:height 300
+                    #:value-pos 'right
+                    #:from 0
+                    #:to 1001
+                    #:increment 100
+                    #:digits 0
+                    #:value 500
+                    #:command (lambda (w e) (eprintf "vertical: ~S\n"   (value w))))))
+    (gtk-main)))
