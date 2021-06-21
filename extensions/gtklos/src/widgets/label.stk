@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-May-2001 22:23 (eg)
-;;;; Last file update: 15-Jun-2021 16:29 (eg)
+;;;; Last file update: 21-Jun-2021 12:44 (eg)
 ;;;;
 
 
@@ -37,12 +37,13 @@
 
 
 (define (justify->int val)
-  (case val
-    ((left)   0)
-    ((right)  1)
-    ((center) 2)
-    ((fill)   3)
-    (else     (error "bad justify value: ~S" val))))
+  (let ((val (if (string? val) (string->symbol val) val)))
+    (case val
+      ((left)   0)
+      ((right)  1)
+      ((center) 2)
+      ((fill)   3)
+      (else     (error "bad justify value: ~S" val)))))
 
 (define (int->justify val)
   (case val

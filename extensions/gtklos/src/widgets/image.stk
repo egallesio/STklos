@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 13-Oct-2000 17:15 (eg)
-;;;; Last file update: 11-Jun-2021 18:07 (eg)
+;;;; Last file update: 21-Jun-2021 12:55 (eg)
 ;;;;
 
 ;;;
@@ -33,12 +33,13 @@
 
 ;; See https://developer.gnome.org/gtk3/stable/gtk3-Themeable-Stock-Images.html#GtkIconSize
 (define (size->int sz)
-  (case sz
-    ((small)   1)   ; 16px
-    ((medium)  3)   ; 24px
-    ((large)   5)   ; 32px
-    ((huge)    6)   ; 48px
-    (else (error "bad size specification: ~s" sz))))
+  (let ((sz (if (string? sz) (string->symbol sz) sz)))
+    (case sz
+      ((small)   1)   ; 16px
+      ((medium)  3)   ; 24px
+      ((large)   5)   ; 32px
+      ((huge)    6)   ; 48px
+      (else (error "bad size specification: ~s" sz)))))
 
 (define (int->size v)
   (case v

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Jan-2002 19:03 (eg)
-;;;; Last file update: 20-Jun-2021 20:16 (eg)
+;;;; Last file update: 21-Jun-2021 12:53 (eg)
 ;;;;
 
 ;;;
@@ -57,8 +57,6 @@
 
 (define-gtk gtk-combo-box-text-remove (#:pointer #:long) #:void
   "gtk_combo_box_text_remove")
-
-
 
 
 

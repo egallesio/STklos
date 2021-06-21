@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 22:11 (eg)
-;;;; Last file update: 18-Jun-2021 18:31 (eg)
+;;;; Last file update: 21-Jun-2021 12:53 (eg)
 ;;;;
 
 ;;;
@@ -38,10 +38,11 @@
 
 (define (relief->int rel)
   ;; half is equivalent to normal now
-  (case rel
-    ((normal half)  0)
-    ((none)         2)
-    (else           (error "bad relief value: ~s" rel))))
+  (let ((rel (if (string? rel) (string->symbol rel) rel)))
+    (case rel
+      ((normal half)  0)
+      ((none)         2)
+      (else           (error "bad relief value: ~s" rel)))))
 
 (define (int->relief v)
   ;; half is equivalent to normal now
