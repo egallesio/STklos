@@ -2,15 +2,16 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 19-Sep-2009 20:29 (eg)
-# Last file update: 18-Jun-2021 11:09 (eg)
+# Last file update: 20-Jun-2021 19:01 (eg)
 
-SRC= demos \
-     button.stk checkbutton.stk  entry1.stk \
-	 entry2.stk entry3.stk label.stk text.stk
+SRC= demos.stk \
+     button.stk checkbutton.stk  combobox.stk      \
+	entry1.stk entry2.stk entry3.stk label.stk     \
+    text.stk
 
 
 # canvas1.stk canvas2.stk  colorselector.stk \
-#    combobox.stk demos.stk dialog.stk\
+#    combobox.stk  dialog.stk\
 #    event.stk fileselector.stk fontselector.stk frame.stk gauge.stk \
 #    grid1.stk grid2.stk handle.stk image1.stk image2.stk \
 #    menu1.stk menu2.stk radiobutton.stk \

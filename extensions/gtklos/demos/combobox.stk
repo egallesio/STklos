@@ -1,0 +1,56 @@
+;;;;
+;;;; combobox.stk   -- GTKlos combobox demo
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 17-Jan-2002 20:20 (eg)
+;;;; Last file update: 20-Jun-2021 19:04 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define *demo-msg* "
+Combobox Demonstation
+
+This is a demonstration of the combobox widget.
+Nothing very fancy here.
+Left combobox has a command associated which is
+executed when user selects a new value.
+")
+
+(define (main args)
+  (let* ((window (make <demo-window> #:title "STklos Combobox"
+                       #:file "combobox"
+                       #:width 400
+                       #:message *demo-msg*))
+         (box    (make <box> #:orientation 'vertical
+                       #:padding 8
+                       #:border-width 10
+                       #:parent window))
+         (combo1 (make <combobox> #:parent box
+                       #:items '("One" "Two" "Three" "Four")
+                       #:value "Two"))
+         (combo2 (make <entry-combobox> #:parent box
+                       #:items '("Test1" "Test2")
+                       #:value "Test")))
+    ;; Add a command to combo1
+    (set! (command combo1) (lambda (w e)
+                             (printf "You choose ~S\n" (value w))))
+    (gtk-main)))
