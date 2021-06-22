@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 21-Jun-2021 16:44 (eg)
+;;;; Last file update: 22-Jun-2021 14:48 (eg)
 ;;;;
 
 
@@ -57,6 +57,9 @@
 (include "widgets/separator.stk")
 (include "widgets/frame.stk")
 (include "widgets/scale.stk")
+                                        ;(include "widgets/toolbar.stk")
+(include "widgets/menu.stk")
+
 
 (provide "gtklos")
 

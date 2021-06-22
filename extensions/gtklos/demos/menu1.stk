@@ -1,0 +1,63 @@
+;;;;
+;;;; menu1.stk          -- GTK+ Menu Demo
+;;;;
+;;;; Copyright © 2009-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 13-Aug-2009 20:56 (eg)
+;;;; Last file update: 22-Jun-2021 16:17 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define *menu-msg* "
+Menu Bar Demo (version 1)
+
+This demo just shows a simple menu bar with simple menus.
+The code is a little bit tedious since everything is done
+by hand. See the version 2 of this demo which uses a helper 
+function.
+")
+
+
+(define (action w e)
+  (eprintf "You have clicked ~S\n" (text w)))
+
+
+(define (main args)
+  (let* ((win  (make <demo-window> #:title "Labels Demo" #:x 100 #:y 100
+                     #:file "menu1" #:border-width 10 #:padding 10
+                     #:message *menu-msg*))
+         (mb   (make <menu-bar> #:parent win))
+         ;; Menu 1
+         (it1  (make <menu-item> #:parent mb #:text "Item 1"))
+         (m1   (make <menu>      #:parent it1))
+         (it11 (make <menu-item> #:parent m1 #:text "Item 1 / 1" #:command action))
+         (it12 (make <menu-item> #:parent m1 #:text "Item 1 / 2" #:command action))
+         ;; Menu 2
+         (it2  (make <menu-item> #:parent mb #:text "Item 2"))
+         (m2   (make <menu>      #:parent it2))
+         (it21 (make <menu-item> #:parent m2 #:text "Item 2 / 1" #:command action))
+         (it22 (make <menu-item> #:parent m2 #:text "Item 2 / 2" #:command action))
+         ;; Menu 3 (on right)
+         (it3  (make <menu-item> #:parent mb #:text "Item 3" #:right-justified #t))
+         (m3   (make <menu>      #:parent it3))
+         (it31 (make <menu-item> #:parent m3 #:text "Item 3 / 1" #:command action))
+         (it32 (make <menu-item> #:parent m3 #:text "Item 3 / 2" #:command action)))
+    (gtk-main)))
