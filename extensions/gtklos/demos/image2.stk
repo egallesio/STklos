@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Aug-2001 15:45 (eg)
-;;;; Last file update: 22-Jun-2021 10:56 (eg)
+;;;; Last file update: 22-Jun-2021 12:01 (eg)
 ;;;;
 
 
@@ -70,5 +70,5 @@ We use here the function 'when-idle' to  do the animation.
                  (set! *imgs* (cdr *imgs*))
                  (sleep *wait*)))
 
-    (start-interactive-gtk)
+    (gtk-main)
     0))

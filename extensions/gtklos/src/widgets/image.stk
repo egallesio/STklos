@@ -1,4 +1,4 @@
- ;;;;
+;;;;
 ;;;; image.stk                  -- GTK Image Widget
 ;;;;
 ;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 13-Oct-2000 17:15 (eg)
-;;;; Last file update: 21-Jun-2021 12:55 (eg)
+;;;; Last file update: 22-Jun-2021 12:19 (eg)
 ;;;;
 
 ;;;
@@ -84,17 +84,16 @@
 ;;;;
 ;;;; ======================================================================
 (define-class <image> (<gtk-misc>)
-  ((%file       #:allocation    #:gtk-property
-                #:gtk-name      "file")
-   (%icon-size  #:allocation    #:gtk-property
-                #:gtk-name      "icon-size")
-   (file-name   #:accessor      file-name
+  ((file-name   #:accessor      file-name
                 #:init-keyword  #:file-name
                 #:allocation    #:virtual
                 #:slot-ref      (lambda (o)
-                                  (slot-ref o '%file))
+                                  (%gtk-get-property (slot-ref o 'wid)
+                                                     "file"))
                 #:slot-set!     (lambda (o v)
-                                  (slot-set! o '%file (find-image v))))
+                                  (%gtk-set-property! (slot-ref o 'wid)
+                                                       "file"
+                                                       (find-image v))))
    (icon-name   #:allocation    #:gtk-property
                 #:accessor      icon-name
                 #:init-keyword  #:icon-name)
@@ -102,10 +101,12 @@
                 #:accessor      icon-size
                 #:init-keyword  #:icon-size
                 #:slot-ref      (lambda (o)
-                                  (int->size (slot-ref o '%icon-size)))
+                                  (int->size (%gtk-get-property (slot-ref o 'wid)
+                                                                "icon-size")))
                 #:slot-set!     (lambda (o v)
-                                  (slot-set! o '%icon-size
-                                             (size->int v))))))
+                                  (%gtk-set-property! (slot-ref o 'wid)
+                                                      "icon-size"
+                                                      (size->int v))))))
 
 (define-method realize-widget ((self <image>) initargs)
   (let* ((icon (key-get initargs #:icon-name #f))

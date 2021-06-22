@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 19-Sep-2009 20:29 (eg)
-# Last file update: 21-Jun-2021 17:55 (eg)
+# Last file update: 22-Jun-2021 11:03 (eg)
 
 SRC= demos.stk \
      button.stk checkbutton.stk  combobox.stk      \
@@ -26,10 +26,16 @@ EXE=$(SRC:.stk=)
 all: 	$(EXE)
 	@echo $(EXE) > all-demos
 
+install:
+	@echo "Demos are not installed"
+
 clean:
 	/bin/rm -f $(EXE) *~ all-demos
 
 distclean:
 	/bin/rm -f stklos-gtklos.so Makefile
+
+demo: all
+	./demos
 
 
