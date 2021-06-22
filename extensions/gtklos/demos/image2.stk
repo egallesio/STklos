@@ -1,0 +1,74 @@
+;;;;
+;;;; image2.stk -- An Image Animation
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 16-Aug-2001 15:45 (eg)
+;;;; Last file update: 22-Jun-2021 10:56 (eg)
+;;;;
+
+
+;;; FIXME: This demos crashes it runs for a rather long time (50s) and we are
+;;; clicking on a button (o the slider.
+;;; BUT IT DOESN'T CRASH IF RUN INTERACTIVELY (even if we have the same loop)
+
+(include "demos-utils.stk")
+
+;; Change the image-path to allow execution of the demo without installation
+(image-path (cons "./images" (image-path)))
+
+
+(define *wait* 100)    ;; Waiting time for animation in ms
+(define *imgs*      ;; The image files
+  (map (lambda (i) (format #f "anim-~s.png" i))
+       '(0 1 2 3 4 5 6 7 8 9)))
+
+;; ======================================================================
+
+(define *message* "
+A simple animation made by hand
+
+A simple animation made of several files in PNG format.
+Use the scale to change the delay between image changes.
+We use here the function 'when-idle' to  do the animation.
+")
+
+
+(define (main args)
+  (let* ((win  (make <demo-window>  #:title "Buttons Demo" #:x 100 #:y 100
+                     #:file "image2" #:border-width 5
+                     #:message *message*))
+         (box  (make <box> #:orientation 'vertical #:parent win))
+         (img  (make <image> #:parent box #:file-name (car *imgs*)))
+         (s    (make <scale> #:orientation 'horizontal #:from 10 #:to 101
+                     #:value 50 #:digits 0 #:increment 10 #:parent box
+                     #:command (lambda (w e)
+                                 (set! *wait* (exact (value w)))))))
+    ;; Build the list of images and make it circular
+    (set-cdr! (last-pair *imgs*) *imgs*)
+
+    ;; start the animation
+    (when-idle (lambda ()
+                 (set! (file-name img) (car *imgs*))
+                 (set! *imgs* (cdr *imgs*))
+                 (sleep *wait*)))
+
+    (start-interactive-gtk)
+    0))

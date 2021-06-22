@@ -1,0 +1,210 @@
+#! /usr/bin/env stklos -f
+;;;;
+;;;; image.stk  -- GTK Image Demo
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 15-Aug-2001 07:19 (eg)
+;;;; Last file update: 21-Jun-2021 15:39 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+
+;; Change the image-path to allow execution of the demo without installation
+(image-path (cons "./images" (image-path)))
+
+
+; ======================================================================
+;
+; Free BSD Logo (expressed as a string -- propably not what you want)
+;
+; ======================================================================
+
+(define free-logo "/* XPM */\nstatic char *freebsd[] = {\n/* columns rows colors chars-per-pixel */\n\"48 48 256 2\",\n\"   c #0D0E0D\",\n\".  c #050808\",\n\"X  c #1C0E0D\",\n\"o  c #0F1210\",\n\"O  c #131615\",\n\"+  c #151917\",\n\"@  c #1A1916\",\n\"#  c #161919\",\n\"$  c #1B1C1B\",\n\"%  c #181716\",\n\"&  c #241311\",\n\"*  c #241D1B\",\n\"=  c #2A1B18\",\n\"-  c #331C1A\",\n\";  c #3C1E1B\",\n\":  c #341714\",\n\">  c #1E221E\",\n\",  c #152D1A\",\n\"<  c #24231D\",\n\"1  c #28281B\",\n\"2  c #3A201D\",\n\"3  c #34201F\",\n\"4  c #393618\",\n\"5  c #1E2120\",\n\"6  c #242523\",\n\"7  c #2B2523\",\n\"8  c #2A2827\",\n\"9  c #2D2B29\",\n\"0  c #222A24\",\n\"q  c #3B2424\",\n\"w  c #3D2926\",\n\"e  c #332C2B\",\n\"r  c #3D2A29\",\n\"t  c #312323\",\n\"y  c #2D312D\",\n\"u  c #33302A\",\n\"i  c #2F3330\",\n\"p  c #333432\",\n\"a  c #3C3533\",\n\"s  c #323D34\",\n\"d  c #38393A\",\n\"f  c #451E1C\",\n\"g  c #561E1C\",\n\"h  c #7A1D1D\",\n\"j  c #4B211C\",\n\"k  c #46201E\",\n\"l  c #5C201C\",\n\"z  c #55221E\",\n\"x  c #66211C\",\n\"c  c #6C211C\",\n\"v  c #74221C\",\n\"b  c #7B211B\",\n\"n  c #452525\",\n\"m  c #4C2423\",\n\"M  c #462C2C\",\n\"N  c #4A2C2A\",\n\"B  c #492828\",\n\"V  c #532523\",\n\"C  c #5D2423\",\n\"Z  c #55292A\",\n\"A  c #5C2B2B\",\n\"S  c #572928\",\n\"D  c #4B342A\",\n\"F  c #473634\",\n\"G  c #573332\",\n\"H  c #612525\",\n\"J  c #6E2321\",\n\"K  c #632B2A\",\n\"L  c #6B2B2A\",\n\"P  c #672927\",\n\"I  c #742422\",\n\"U  c #7B2422\",\n\"Y  c #742C2C\",\n\"T  c #7B2C2B\",\n\"R  c #7B2825\",\n\"E  c #79302C\",\n\"W  c #683735\",\n\"Q  c #7B3633\",\n\"!  c #1B5D2A\",\n\"~  c #154721\",\n\"^  c #284829\",\n\"/  c #334932\",\n\"(  c #2F5F30\",\n\")  c #325830\",\n\"_  c #18692C\",\n\"`  c #15752E\",\n\"'  c #15782F\",\n\"]  c #177831\",\n\"[  c #29602E\",\n\"{  c #2B6834\",\n\"}  c #356939\",\n\"|  c #247532\",\n\" . c #227B33\",\n\".. c #4F4815\",\n\"X. c #695E16\",\n\"o. c #6D601C\",\n\"O. c #405C37\",\n\"+. c #48453E\",\n\"@. c #724434\",\n\"#. c #323D4B\",\n\"$. c #374458\",\n\"%. c #374863\",\n\"&. c #3B4B66\",\n\"*. c #354762\",\n\"=. c #4C4847\",\n\"-. c #564847\",\n\";. c #484856\",\n\":. c #555053\",\n\">. c #664D4C\",\n\",. c #526E46\",\n\"<. c #626252\",\n\"1. c #786F55\",\n\"2. c #424C61\",\n\"3. c #746861\",\n\"4. c #646170\",\n\"5. c #871F1F\",\n\"6. c #84231D\",\n\"7. c #8B241E\",\n\"8. c #832724\",\n\"9. c #822926\",\n\"0. c #842D2B\",\n\"q. c #8D2C2B\",\n\"w. c #8C2724\",\n\"e. c #932724\",\n\"r. c #9D2623\",\n\"t. c #942A26\",\n\"y. c #9B2A25\",\n\"u. c #962C2A\",\n\"i. c #8B302C\",\n\"p. c #9F312B\",\n\"a. c #8A3634\",\n\"s. c #823A34\",\n\"d. c #873B38\",\n\"f. c #993631\",\n\"g. c #9D3B34\",\n\"h. c #973C3A\",\n\"j. c #A42923\",\n\"k. c #AD2926\",\n\"l. c #A12D2B\",\n\"z. c #A72926\",\n\"x. c #B32B25\",\n\"c. c #BB2C26\",\n\"v. c #BC2B27\",\n\"b. c #A7312A\",\n\"n. c #AC312A\",\n\"m. c #AF3E2B\",\n\"M. c #B7342C\",\n\"N. c #BB342A\",\n\"B. c #BE392F\",\n\"V. c #BB3125\",\n\"C. c #AD3731\",\n\"Z. c #A43E37\",\n\"A. c #B53C32\",\n\"S. c #BA3C30\",\n\"D. c #C32C25\",\n\"F. c #CC2C24\",\n\"G. c #C22E28\",\n\"H. c #D42D24\",\n\"J. c #DB2E23\",\n\"K. c #CC3126\",\n\"L. c #CB3329\",\n\"P. c #C7342B\",\n\"I. c #D53226\",\n\"U. c #DC3225\",\n\"Y. c #D53428\",\n\"T. c #C33B31\",\n\"R. c #E02F21\",\n\"E. c #E33224\",\n\"W. c #8C7B15\",\n\"Q. c #93453C\",\n\"!. c #8D4538\",\n\"~. c #AA4539\",\n\"^. c #B4483B\",\n\"/. c #CE4137\",\n\"(. c #93534F\",\n\"). c #9C4944\",\n\"_. c #A74E44\",\n\"`. c #8E7357\",\n\"'. c #AF644B\",\n\"]. c #917E69\",\n\"[. c #867174\",\n\"{. c #887171\",\n\"}. c #8F7364\",\n\"|. c #C76E55\",\n\" X c #1C8C38\",\n\".X c #2B8B3C\",\n\"XX c #218B38\",\n\"oX c #3F823F\",\n\"OX c #389945\",\n\"+X c #3DA049\",\n\"@X c #478A46\",\n\"#X c #5C8145\",\n\"$X c #409546\",\n\"%X c #AF831A\",\n\"&X c #AE9910\",\n\"*X c #B39D12\",\n\"=X c #9E8D3E\",\n\"-X c #B09D25\",\n\";X c #B7983E\",\n\":X c #AC9B24\",\n\">X c #BBA730\",\n\",X c #D1B81E\",\n\"<X c #D0B611\",\n\"1X c #CFB82C\",\n\"2X c #C8B229\",\n\"3X c #C1AD30\",\n\"4X c #C5B13F\",\n\"5X c #D0BA32\",\n\"6X c #F6DA12\",\n\"7X c #DEC62B\",\n\"8X c #DAC123\",\n\"9X c #E2CB20\",\n\"0X c #B6A752\",\n\"qX c #888160\",\n\"wX c #9F8A7A\",\n\"eX c #A39865\",\n\"rX c #AE8473\",\n\"tX c #C5B348\",\n\"yX c #C8B557\",\n\"uX c #C8906E\",\n\"iX c #C9A17F\",\n\"pX c #B49686\",\n\"aX c #B99C88\",\n\"sX c #A58D90\",\n\"dX c #B19A92\",\n\"fX c #A08987\",\n\"gX c #B6A188\",\n\"hX c #B4A285\",\n\"jX c #BCA794\",\n\"kX c #B1AC84\",\n\"lX c #C7AB8B\",\n\"zX c #DDB68D\",\n\"xX c #CAAB93\",\n\"cX c #C5A793\",\n\"vX c #C8B29A\",\n\"bX c #D6B995\",\n\"nX c #CAC38F\",\n\"mX c #D5C79A\",\n\"MX c #DAC3A2\",\n\"NX c #DACDA6\",\n\"BX c #E0CCA0\",\n\"VX c #E3D2AC\",\n\"CX c #EBD5AC\",\n\"ZX c #E6D9A6\",\n\"AX c #F0DCAD\",\n\"SX c #F8DCA8\",\n\"DX c #F8EBAB\",\n\"FX c #FAF5AE\",\n\"GX c #F5EBBA\",\n\"HX c #F8EDB2\",\n\"JX c #FBF4BC\",\n\"KX c #FCF8B8\",\n\"LX c #EDE5A8\",\n\"PX c #FFFBC3\",\n\"IX c #F9F3C3\",\n\"UX c None\",\n/* pixels */\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXG e UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXs.0.F UXUXUXUXUXUXUXUXUXUXUXUXUX@.L UXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXf.z.K UXUXUXUXUXUXUXUXUXUXUXUXUXUXUX0.w UXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUX^.F.q.e UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXf.z 6 UXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXQ.I.c.Y 8 UXW a.0.K B 3 6 8 UXUXUXUXUXUXg.R $ UXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXB.R.x.K C V U r.U C V m 2 < $ 6 UXUXUXUXf.w.# 5 UXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXY.I.e.e.k.x.c.k.x.j.k V x j $ # 6 UXUXQ v.R @ O UXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXY.F.j.^.rX_.F.A.~.F.e.m v v j 2 c z.M.I.v.C @ O UXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUX/.j.~.bXLX_.^.bXbX(.D.9.b b b v x.E.R.D.8.- + + UXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXs.y.iXKXzX/.zXJXAXrXC.D.8.b b b 7.j.j.I 3 + O 5 UXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXK '.GXPXuX|.PXFXDXaXh.E.r.b b v v x j * + + $ UXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUX!.rXhXmX'.lXGXDXDXcXQ.R.x.b c f 2 = @ + O # UXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUX!.].+.`.!.1.1.DXFXxX!.R.D.6.c : @ + + O @ UXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXE < o Q j =.< mXDXlXh.R.F.7.c : + O O * UXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXg.k.: X b &   @ nXDXpXm.R.K.7.c : % o + UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXg.I.U.r.6.j.: . u ZXAX}.F.R.V.6.x = + o % UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXS.E.D.H.J.F.h X `.LXpXs.K.K.x.b l & +   % UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXeXyXUXUXB.E.D.K.E.R.8.l Q.~.l.j.x.j.6.b g @ +   < UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUX5X2XUXA.U.F.j.r.r.H I F.J.E.E.J.D.5.c ; O O   UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXeX0XUXUX0X>XUXB.y.e.v.G.v.D.J.E.E.H.D.D.8.g = O   $ UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUX7X3XUXUXtXUXUXd.Y y.H.J.J.J.H.z.J g J H 2 #   O UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUX=X>X1XtX1XUXUXUXUXG 8.k.k.j.I C J R T V $ + O UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXeXyXyXUXUXUX2X6X1XUXUX/.UXUXG K I c h e.t.R L B # $ UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXtX,X;XUXtX9X<X9X;XL.E.i.UXUXUXL I Y H C Y L n @ 8 UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUX1X8X,X-XUX-X%XV.N.Z a UXUXs.r.r.z.G.D.c.e.t 6 UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXm.x.q.r F a -.C.E.E.E.H.H.J.D.B # UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUX).Y.E.b.M M 9 N p.x.D.H.J.H.G.l.m o 6 UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXM.N.T N M 9 L Y.H.F.z.y.b.T T m O @ UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUX0.w.Y r 8 P U.E.E.Y.u.K S T q + O UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXZ.W e B x.E.E.E.L.l.E A M $ O O UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXG q.P.Y.Y.G.u.L A e 6 $ O O UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXA T q.u.T L S r 0 5 # O < UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXL B S K A Z M 6 # # # O 8 UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXL.e.H n q t * 1 ..4 # # 6 UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXY.E.v.I f - q N W.&XX.6 $ UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXb.E.E.H.x.w.K Z N o.&XW.@ p UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXQ G.U.J.v.y.H B e 6 4 ..@ 6 UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXK R w.U H n t 5 # O O + # 6 UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX^ ! ^ = 0 ~ , # , 0 > # > 6 9 UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX} OXOX! ( .X` _ { / y 9 # 6 8 e d UXUXUXUXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUX,.@X+X.X_ | $XOX' { 3.s p UXy e 8 9 e p a UXUXUXUXUXUXUXUXUXUXUX\",\n\"UXUXUXUXUXUXUXUXvXmXmXgX>.O.@X#X#XoX . .| | _ _ ` [ =.y 9 UXUXUXUXp i 9 9 8 8 9 u a UXUXUXUXUXUX\",\n\"UXUXUXUXUXUXcXVXGXHXJXVX{.].kXNXNXhX<.}  X' ' ` | ) s i i UXUXUXUXUXUXUXd u e 9 w V V m r UXUXUX\",\n\"UXUXUXUXUXUXBXAXAXCXvXfXpXGXPXPXPXGXsX-. .XX .( / p d #.$.UXUXUXUXUXUXUXUXUXUXUXUXUXUX0.c 2 UXUX\",\n\"UXUXUXUXUXUXaXmXCXCXdX{.mXVXVXVXNXjX[.;./ / s #.#.$.*.$.;.UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXa.x < UX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXbXCXCXVXMXjX4.&.*.$.*.&.&.2.UXUXUXUXUXUXUXUXUXUXUXUXUX0.T UXUXUXA : $ UX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXxXcXgXwX:.;.;.;.:.UXUXUXUXUXUXUXUXUXUXUXUXUXUXa.j.x.e.S B - & % UXUX\",\n\"UXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXUXa.p.j.r.w.c f 7 6 UXUXUXUX\"\n};\n")
+
+
+; ======================================================================
+;
+; GNU Logo (expressed as a here-string)
+;
+; ======================================================================
+(define gnu-logo #<<EOF
+/* XPM */
+static char * gnu_xpm[] = {
+"56 85 16 1",
+"   c None",
+".  c #660A19",
+"+  c #615E65",
+"@  c #7A95B7",
+"#  c #ED1F47",
+"$  c #BC1C3B",
+"%  c #A6CCF0",
+"&  c #91BBF2",
+"*  c #312426",
+"=  c #B39985",
+"-  c #A67068",
+";  c #B6B7BD",
+">  c #832B3D",
+",  c #FEFAF1",
+"'  c #767B86",
+")  c #454044",
+"                       ;;                               ",
+"                     @)*));                             ",
+"                   ;*)+++)*);                           ",
+"                  @))+)++)))*;                          ",
+"                  )))++)+)+))*@;                        ",
+"                 ')))**))++)+)*+                        ",
+"           ;;;   +**)+'+*))+)+)*=                       ",
+"         ;@***+; @';   &+*++++))*;                      ",
+"         @*++))*)=      ;*))+++)*);                     ",
+"        =))+++)))*';    %'*)+)++)*'                     ",
+"        +)++)++++)*)      *)++)++*)                     ",
+"        *+)++)+)++)**;    )))++)+)*'                    ",
+"        *)))*))++)'))*= ;;'))+++)+))                    ",
+"       &*)*'@)*)+))+***@****+)++)++*=                   ",
+"        **&   )*)+)*****)))*)+++++)*'                   ",
+"        ;;     +**))+*)++)+*)+)++)+))                   ",
+"               %)))+))+)+))))+++)++)*%                  ",
+"               '))+))+++++))))+++)+)*;                  ",
+"              ;)+)+)++++)++))+)++++))@                  ",
+"              @*'+))++++++++++)+++++*=                  ",
+"              ;*)**)*))*)))+)+++)+)**@%                 ",
+"               **)+')*))**))+)+++))***;                 ",
+"              @)''@=@=@@@+**))++)*)@')+;                ",
+"             '+*))+---===@'****)*@@&&@);                ",
+"            =+=+-=---+==;==+)*+*+@&&&&+&                ",
+"            +-===-+)---==;==+)++@&&&&@+;                ",
+"           ;+====+==)-)-===;='*+&'+)@&)%                ",
+"           =+-=)**))+---=====&))&&&@+@+;                ",
+"           '+--++>;;')+*-====='*+&&&@@+%                ",
+"          =)-=-=@*=,,=)+.-====@))&&&&&';                ",
+"          '-==;=-'=,%'-')>-===;@))&&&&))@               ",
+"         ;+=====+@,,=+==-*-====&@+)@&&'+@               ",
+"         =+======+++)'====*>)+)++))@&+@'@               ",
+"         '-======+)+-=====)*)******+&&+'';              ",
+"         +===;=--========-*)@'+*)''*@@&''%              ",
+"       ;-)+>>+-+=======;=*''=@)'===))+@'+%              ",
+"      ;++-==-)--========-)'@@++===;'+)*'*%              ",
+"      =+=====-===;====;=+)@@@*====;=@)+'+'              ",
+"      +'='*+=-==========*+'&)'======')+'+@              ",
+"      ++=).-===========')+@@)=======''')*;              ",
+"      -)=))===========-)++&+)=====;=+=%@+               ",
+"      ;)--===-======-'))+'&++==;===-+; %=               ",
+"       ++-==--===;;-'=))''@+)-===;=--                   ",
+"       =+--=+-===,=',%&*''&+*======-+                   ",
+"      =*'=)>>==;,,+;,,=)@@&&+*-====+)=                  ",
+"    ;'+)**++*===,,+,,%+)@@&&@+*)---=+);                 ",
+"    '+-==+=-*-+;,=+,,@*+@@&&&''=)====*'                 ",
+"  ;'-======-))==;+;,@)*@@@&&&@+'-===')=                 ",
+"  =+===-====)==))+;,'+*@@@&&&@)+=====*=                 ",
+"  '-==-=====+',%==,,*'*'@@%&%@*+====-*;                 ",
+"  )=========+',,,,,;+@)@&&&&&@+)==;=++                  ",
+"  )=====-==;+',,,,;)+'*'&%%&%@+)++--)=                  ",
+"  *-=;==--==+;,,;=))'+*@@%&%&&++*>)));                  ",
+"  +-====-*-++;,;)+'==@*@&&&&&@'='-=-);                  ",
+"  =*-====-.+)==+-====;*'@&&%&&+')===+=                  ",
+"   '*-----=-'))-======))@&%&&&'*====+=                  ",
+"   ;=++-)====)-==;====+)@@&&%&')';==-'                  ",
+"        +'=='>;=======+*'@&&&%@*====+=                  ",
+"        *+==)-=========*'@&&&%&)'=;=-=                  ",
+"       ;'*)+*=====;===@*''&&%&&'*-==+=                  ",
+"        =')+)==;=======*'+&&&&&&*'='+;                  ",
+"          ;->=======;=@)++@&%%%@')+)=                   ",
+"           @*=--==;====++@'&&&%&@)*                     ",
+"           =)=--;======'*@+&&%&%@'+)@=@+=;              ",
+"           =*-=====;===@*''@&&&&&&'@+''+)=              ",
+"            )-==;=;==;=@)+''&&%&&&&&&&&&')%     =;;     ",
+"            +)-=========+*@@@&%&&&%&%&%&@+@     =)=;    ",
+"            ;*-=========@*+@@&&%&%&%&&&%@'+    ''+*=    ",
+"            ;-*-=-=-====-))@&&%&%%%&&+@&&+'  =)'-@+'    ",
+"              +*-+)>+>>>***+@&&&&&%&&&+@&+;;'+=;=='+    ",
+"    ;  ;===-==)++->..>....**+@&&%&%&&@+&@)&;+-===='-    ",
+"  ;=-..$$.....>)..>$$$$#$$.>.)'&&&&&&&+&@+;++)**)=+;    ",
+" ;-.>#$$$##$$....>#-########..)'&&%&&@+&@+'+)*))**+;    ",
+";-.-#--######$$.>#-#########$$**@&&&&@+@&@+++@'*+);     ",
+"=>>--#########$$#-############$.+@&&%&)@@&@&@+'+)*&';   ",
+";.-#-#########$$#-############$.*@&&&@@'@+@&@@)')'+))   ",
+"=.>-##########$$#####$$########$.+@&&&&&&&&&%&&)@@&@*%  ",
+";.-####$#$####$#-##$$...$$$####$.+@@&&&&&&&&&&&&&&@@)   ",
+";>$###$$.$.$#$$$$##......$.$###$.)@@&&&%&%%&%&&&&&&@)%  ",
+" =.>$$....$..$$$$$$$.....$$.$#$$.)&@&&&&&%&%&%&&&&&'+'  ",
+" ;-..$..$..$.$$.$$$$...$.$$$$$$>.)'&&&%%%&&&&%&&%&&@@+% ",
+"   -)..........$...$$..$$.$$$.>$')+@&&&&&&&&&&&@&&@@@*+%",
+"     ')*....>.......>.$.$$$.$..>;=)+@@@&@+)+''+)+'@+***;",
+"       =+>*.*.**+= ->........*-    @+))+@% @*)'% *+   ';",
+"         ;;=;=;;;   ;;='+--+';       %%    %            "};
+EOF
+)
+
+
+; ======================================================================
+;
+; The Demo Code
+;
+; ======================================================================
+(define *message* "
+Images Demo
+
+In this demo, several images are presented. The first one is
+taken from a file whereas the second and third ones are embedded in the
+source code of the demo. The second image is expressed as a string and
+the third is given as a pixmap file in a here-string.
+
+The second line of images uses stock icons
+")
+
+
+
+(define (string->image str)
+  (let-values (((name port) (create-temp-file)))
+    (display str port)
+    (close-output-port port)
+    name))
+
+  
+
+(define (main args)
+  (let* ((win (make <demo-window> #:title "Images Demo"
+            #:file "image1" #:border-width 20
+            #:message *message*))
+     (lines (make <box> #:parent win #:orientation 'vertical #:spacing 10))
+     (box   (make <box> #:parent lines #:orientation 'horizontal #:padding 70))
+     (sep   (make <separator> #:orientation 'horizontal #:parent lines))
+     (media (make <box> #:parent lines #:orientation 'horizontal #:padding 5
+                  #:expand #t)))
+    ;; Create 3 images
+    (let ((free (string->image free-logo))
+          (gnu  (string->image gnu-logo)))
+      (make <image> #:parent box #:file-name "linux.xpm")
+      (make <image> #:parent box #:file-name free)
+      (make <image> #:parent box #:file-name gnu)
+      ;; remove temporaries
+      (remove-file free)
+      (remove-file gnu))
+
+    ;; Separator
+    ;; Create the media demo
+    (make <image> #:parent media #:icon-name "gtk-media-previous" #:icon-size 'huge)
+    (make <image> #:parent media #:icon-name "gtk-media-play" #:icon-size 'huge)
+    (make <image> #:parent media #:icon-name "gtk-media-stop" #:icon-size 'huge)
+    (make <image> #:parent media #:icon-name "gtk-media-next" #:icon-size 'huge)
+    (gtk-main)
+    0))
