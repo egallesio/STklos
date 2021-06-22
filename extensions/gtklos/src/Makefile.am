@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 22-Jun-2021 14:48 (eg)
+# Last file update: 22-Jun-2021 17:45 (eg)
 
 EXTENSION=gtklos
 
@@ -28,9 +28,9 @@ SCM_SRCS = lib/events.stk lib/libs.stk lib/utils.stk                   \
            widgets/box.stk widgets/button.stk widgets/checkbutton.stk  \
            widgets/combobox.stk widgets/entry.stk widgets/frame.stk    \
            widgets/grid.stk widgets/image.stk widgets/label.stk        \
-           widgets/menu.stk widgets/scale.stk widgets/scroll.stk       \
-           widgets/separator.stk widgets/text.stk widgets/toolbar.stk  \
-           widgets/window.stk
+           widgets/menu.stk widgets/progress.stk widgets/scale.stk     \
+           widgets/scroll.stk widgets/separator.stk widgets/text.stk   \
+           widgets/toolbar.stk widgets/window.stk
 
 #======================================================================
 OUT            = $(EXTENSION).@SH_SUFFIX@

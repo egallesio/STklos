@@ -1,0 +1,69 @@
+;;;;
+;;;; progress.stk                  -- GTK+ Progress Bar Widget
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 30-Jul-2001 07:57 (eg)
+;;;; Last file update: 22-Jun-2021 18:19 (eg)
+;;;;
+
+;;;
+;;; GTk bindings
+;;;
+(define-gtk gtk-progress-bar-new () #:pointer         "gtk_progress_bar_new")
+(define-gtk gtk-progress-bar-pulse (#:pointer) #:void "gtk_progress_bar_pulse")
+
+;======================================================================
+;
+;                < p r o g r e s s - b a r >
+;
+;======================================================================
+(define-class <progress-bar> (<gtk-widget>)
+  ((value       #:accessor       value
+                #:init-keyword  #:value
+                #:allocation    #:gtk-property
+                #:gtk-name      "fraction")
+   (text        #:accessor      text
+                #:init-keyword  #:text
+                #:allocation    #:gtk-property)
+   (show-text   #:accessor      show-text
+                #:init-keyword  #:show-text
+                #:allocation    #:gtk-property)
+   (inverted    #:accessor      inverted
+                #:init-keyword  #:inverted
+                #:allocation    #:gtk-property)
+   (pulse-step  #:accessor      pulse-step
+                #:init-keyword  #:pule-step
+                #:allocation    #:gtk-property)))
+
+(define-method realize-widget((self <progress-bar>) initargs)
+  (let ((wid (gtk-progress-bar-new)))
+    (cpointer-type-set! wid 'gtk-progress-bar)
+    (slot-set! self 'wid wid)))
+
+(define-method progress-bar-pulse ((self <progress-bar>))
+  (gtk-progress-bar-pulse (wid self)))
+
+;;;
+;;; Exports
+;;;
+(export <progress-bar> value text show-text inverted pulse-step
+        progress-bar-pulse)
+

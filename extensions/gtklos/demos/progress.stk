@@ -1,0 +1,64 @@
+;;;;
+;;;; progress.stk               -- GTklos Gauge Demo
+;;;;
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 20-Oct-2000 12:55 (eg)
+;;;; Last file update: 22-Jun-2021 18:42 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define *message* "
+Progress Bar Demonstration
+
+This is a simple demo showing a progress bar and the various
+styles it can be given.
+")
+
+
+(define (main args)
+  (let* ((win   (make <demo-window> #:title "Gauge Demo"
+                      #:file "progress" #:border-width 5
+                      #:expand #t #:fill #t
+                      #:message *message*))
+         (box   (make <box> #:orientation 'vertical #:parent win))
+         (gauge (make <progress-bar> #:value 0.5 #:parent box))
+         (show  (make <check-button>
+                      #:text "Show value"
+                      #:parent box
+                      #:command (lambda (w e)
+                                  (let ((v (value w)))
+                                    (set! (show-text gauge) v)))))
+         (pulse #f)
+         (act   (make <check-button>
+                     #:text "Pulse mode"
+                     #:parent box
+                     #:command (lambda (w e)
+                                 (set! pulse (value w))))))
+    (let ((v 50.0))
+      (timeout 100 (lambda ()
+                     (if pulse
+                         (progress-bar-pulse gauge)
+                         (begin
+                           (set! (value gauge) (/ v 100))
+                           (set! v (if (>= v 100.0) 0 (+ v 1)))))
+                     #t)))
+    (gtk-main)))
