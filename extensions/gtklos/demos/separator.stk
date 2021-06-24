@@ -1,0 +1,49 @@
+;;;;
+;;;; separator.stk              -- GTklos Separator Demo
+;;;;
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 28-Jun-2009 18:07 (eg)
+;;;; Last file update: 24-Jun-2021 19:15 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define *message* "
+Separator Demonstration
+
+This is a simple demo showing the separator widget.
+Nothing fancy here.")
+
+
+(define (main args)
+  (let* ((win  (make <demo-window> #:title "Separator Demo"
+                     #:file "separator" #:border-width 5
+                     #:width 600
+                     #:expand #t #:fill #f #:message *message*))
+         (box  (make <box> #:orientation 'vertical  #:parent win
+                     #:expand #t #:fill #t)))
+
+    (make <label> #:text "\nLabel above a horizontal separator\n":parent box)
+    (make <separator> #:orientation 'horizontal #:parent box)
+    (make <label> #:text "\nLabel below a horizontal separator\n":parent box)
+
+    ;; run
+    (gtk-main)))
