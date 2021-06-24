@@ -21,16 +21,16 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 15:47 (eg)
-;;;; Last file update: 20-Jun-2021 20:18 (eg)
+;;;; Last file update: 23-Jun-2021 13:06 (eg)
 ;;;;
 
 ;;;;
 ;;;; GTK Bindings
 ;;;;
 (define-gtk gtk-window-new (:int) :pointer                 "gtk_window_new")
-(define-gtk gtk-window-get-title (:pointer) :string        "gtk_window_get_title")
-(define-gtk gtk-window-set-title (:pointer :string) :void  "gtk_window_set_title")
 (define-gtk gtk-window-resize (:pointer :long :long) :void "gtk_window_resize")
+;(define-gtk gtk-window-get-title (:pointer) :string        "gtk_window_get_title")
+;(define-gtk gtk-window-set-title (:pointer :string) :void  "gtk_window_set_title")
 
 (define-gtk gtk-window-set-default-size (:pointer :long :long) :void
   "gtk_window_set_default_size")
@@ -49,10 +49,7 @@
    (title        #:accessor      title
                  #:init-form     "STklos window"
                  #:init-keyword  #:title
-                 #:slot-ref      (lambda (o)
-                                   (gtk-window-get-title (slot-ref o 'wid)))
-                 #:slot-set!      (lambda (o v)
-                                    (gtk-window-set-title (slot-ref o 'wid) v)))
+                 #:allocation    #:gtk-property)
    (resizable    #:accessor      resizable
                  #:init-keyword  #:resizable
                  #:allocation    #:gtk-property)
