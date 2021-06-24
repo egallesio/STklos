@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 11-Aug-2007 11:38 (eg)
- * Last file update: 21-Jun-2021 12:22 (eg)
+ * Last file update: 24-Jun-2021 12:42 (eg)
  */
 
 #include <math.h>               /* for isnan */
@@ -721,28 +721,7 @@ DEFINE_PRIMITIVE("%color->string", color2string, subr1, (SCM obj))
   return STk_Cstring2string(gdk_rgba_to_string(CPOINTER_VALUE(obj)));
 }
 
-//FIXME: /* ----------------------------------------------------------------------
-//FIXME:  *
-//FIXME:  *      Dialogs  ...
-//FIXME:  *
-//FIXME:  * ---------------------------------------------------------------------- */
-//FIXME: DEFINE_PRIMITIVE("%dialog-vbox", dialog_vbox, subr1, (SCM obj))
-//FIXME: {
-//FIXME:   if (!CPOINTERP(obj)) STk_error("bad dialog ~S", obj);
-//FIXME:
-//FIXME:   /* In 2.14, we no more need to query the vbox field of the dialog
-//FIXME:    * since the function "gtk_dialog_get_content_area" has been
-//FIXME:    * defined. However, this version of GTK+ is still experimental
-//FIXME:    */
-//FIXME:   //  return STk_make_Cpointer(((GtkDialog *) CPOINTER_VALUE(obj))->vbox,
-//FIXME:   //                       STk_void,
-//FIXME:   //                       STk_false);
-//FIXME:
-//FIXME:   return STk_make_Cpointer(
-//FIXME:              gtk_dialog_get_content_area(GTK_DIALOG(CPOINTER_VALUE(obj))),
-//FIXME:              STk_void,
-//FIXME:              STk_false);
-//FIXME: }
+
 
 
 /* ----------------------------------------------------------------------

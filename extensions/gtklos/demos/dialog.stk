@@ -1,0 +1,59 @@
+;;;;
+;;;; dialog.stk -- Dialog box
+;;;;
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 11-Mar-2001 12:33 (eg)
+;;;; Last file update: 24-Jun-2021 17:03 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define *dialog-msg* "
+Various dialogs
+
+All the demos use the make-simple-message dialog procedure
+to create the dialog.
+")
+
+(define (make-dialog parent str type buttons)
+  (make <button>
+    :parent parent
+    :text (format #f "~A dialog" str)
+    :command (lambda (w e)
+               (let ((val (make-simple-message-dialog
+                              (string-append str " ...")
+                              type
+                              (format "<big><b>~A</b></big>:\n\n<i>    Some text …</i>"
+                                      str)
+                              buttons)))
+                 (printf "You choose ~S on the ~S dialog\n"
+                         val str)))))
+
+
+(define (main args)
+  (let* ((win (make <demo-window> :title "Dialog Demo" :x 100 :y 100
+                    :file "dialog" :border-width 15
+                    :message *dialog-msg*)))
+    (make-dialog win "Error"    'error '(ok))
+    (make-dialog win "Info"     'info '(ok))
+    (make-dialog win "Question" 'question '(yes no))
+    (make-dialog win "Warning"  'warning '("More information" cancel))
+    (gtk-main)))
