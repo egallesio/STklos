@@ -1,0 +1,84 @@
+;;;;
+;;;;
+;;;; color-dialog.stk         -- GTK+ Color Dialog
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 22-Jun-2021 18:51
+;;;; Last file update: 25-Jun-2021 11:06 (eg)
+;;;;
+
+;;;
+;;; GTk Bindings
+;;;
+(define-gtk gtk-color-chooser-dialog-new (#:string #:pointer) #:pointer
+  "gtk_color_chooser_dialog_new")
+
+(define-gtk gtk-color-chooser-get-rgba (#:pointer #:pointer) #:void
+  "gtk_color_chooser_get_rgba")
+
+(define-gtk gtk-color-chooser-set-rgba (#:pointer #:pointer) #:void
+  "gtk_color_chooser_set_rgba")
+
+
+;; ======================================================================
+;;
+;;  < c o l o r - d i a l o g >   c l a s s
+;;
+;; ======================================================================
+(define-class <color-dialog> (<dialog>)
+  ((show-editor   #:accessor     show-editor
+                  #:init-keyword #:show-editor
+                  #:allocation   #:gtk-property)
+   (value         #:accessor     value
+                  #:init-keyword #:value
+                  #:allocation   #:virtual
+                  #:slot-ref     (lambda (o)
+                                   (let ((&x  (%string->color "#000"))
+                                         (wid (slot-ref o 'wid)))
+                                     (gtk-color-chooser-get-rgba wid &x)
+                                     (%color->string &x)))
+                  #:slot-set!    (lambda (o v)
+                                   (gtk-color-chooser-set-rgba (slot-ref o 'wid)
+                                                               (%string->color v))))
+))
+
+
+(define-method realize-widget ((self <color-dialog>) initargs)
+  (let* ((title (key-get initargs #:title "Choose color"))
+         (b     (gtk-color-chooser-dialog-new title (void))))
+    (cpointer-type-set! b 'gtk-color-chooser)
+    (slot-set! self 'wid b)))
+
+
+;;;
+;;; dialog-run
+;;;
+(define-method dialog-run ((self <color-dialog>))
+  (let ((w (slot-ref self 'wid)))
+    (let ((val (gtk-dialog-run w))
+          (res #f))
+      (when (= val |GTK_RESPONSE_OK|)
+        (set! res (value self)))
+      (destroy self)
+      res)))
+
+
+(export <color-dialog> show-editor value dialog-run)

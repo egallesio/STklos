@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 23-Jun-2021 12:56 (eg)
+;;;; Last file update: 25-Jun-2021 09:48 (eg)
 ;;;;
 
 
@@ -30,7 +30,8 @@
 
 (%compile-time-define %gtk-get-property %gtk-set-property!
                       %readline-idle-hook get-gtk-event
-                      %gtk-get-child-property 
+                      %gtk-get-child-property
+                      %string->color %color->string
                       rl-input-timeout rl-event-hook)
 
 (export timeout when-idle kill-idle)
@@ -61,7 +62,6 @@
 (include "widgets/menu.stk")
 (include "widgets/progress.stk")
 (include "widgets/dialog.stk")
+(include "widgets/color-dialog.stk")
 
 (provide "gtklos")
-
-

@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 23-Jun-2021 12:55 (eg)
+# Last file update: 25-Jun-2021 08:54 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -303,8 +303,8 @@ EXTENSION = gtklos
 SCM_SRCS = lib/events.stk lib/libs.stk lib/utils.stk                   \
            classes/meta.stk classes/container.stk classes/widget.stk   \
            widgets/box.stk widgets/button.stk widgets/checkbutton.stk  \
-           widgets/combobox.stk widgets/dialog.stk widgets/entry.stk   \
-           widgets/frame.stk                                           \
+           widgets/color-dialog.stk widgets/combobox.stk               \
+           widgets/dialog.stk widgets/entry.stk widgets/frame.stk      \
            widgets/grid.stk widgets/image.stk widgets/label.stk        \
            widgets/menu.stk widgets/progress.stk widgets/scale.stk     \
            widgets/scroll.stk widgets/separator.stk widgets/text.stk   \

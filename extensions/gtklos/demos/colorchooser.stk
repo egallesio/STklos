@@ -1,0 +1,58 @@
+;;;;
+;;;;
+;;;; colorchooser.stk         --
+;;;;
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  6-Nov-2000 18:59 (eg)
+;;;; Last file update: 25-Jun-2021 11:08 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define color-msg "
+A simple demo of the &lt;color-dialog&gt; widget.
+
+Nothing special here
+")
+
+
+(define (choose-color edit)
+  (let ((col (make <color-dialog>  #:value "#f00" :title "Color Demo"
+                                   #:show-editor edit)))
+    ;; Be modal
+    (let ((ans (dialog-run col)))
+      (if ans
+          (printf "Color chosen ~a\n" ans)
+          (printf "No color selected\n")))))
+
+
+(define (main args)
+  (let* ((win (make <demo-window> #:title "Color Selector Demo"
+                    #:width 400 #:expand #t #:fill #t #:expand #t
+                    #:file "colorchooser" #:border-width 5
+                    #:message color-msg)))
+
+
+    (make <button> #:text "Choose color (palette)" #:parent win
+                   #:command (lambda _ (choose-color #f)))
+    (make <button> #:text "Choose color (editor)" #:parent win
+                   #:command (lambda _ (choose-color #t))))
+    (gtk-main))

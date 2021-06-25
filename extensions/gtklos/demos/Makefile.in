@@ -2,19 +2,19 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 19-Sep-2009 20:29 (eg)
-# Last file update: 24-Jun-2021 17:24 (eg)
+# Last file update: 25-Jun-2021 10:56 (eg)
 
 SRC= demos.stk \
-     button.stk checkbutton.stk  combobox.stk       \
-     dialog.stk entry1.stk entry2.stk entry3.stk    \
-     frame.stk grid1.stk grid2.stk image1.stk       \
-     image2.stk label.stk menu1.stk menu2.stk       \
-     menu3.stk progress.stk scale.stk separator.stk \
-     text.stk
+     button.stk checkbutton.stk  color-dialog      \
+     combobox.stk dialog.stk entry1.stk entry2.stk \
+     entry3.stk frame.stk grid1.stk grid2.stk      \
+     image1.stk image2.stk label.stk menu1.stk     \
+     menu2.stk menu3.stk progress.stk scale.stk    \
+     separator.stk text.stk
 
 #    canvas1.stk canvas2.stk
 #    event.stk
-#    colorselector.stk fileselector.stk fontselector.stk
+#    fileselector.stk fontselector.stk
 #    radiobutton.stk \
 #    scroll1.stk scroll2.stk sedit.stk toolbar.stk
 

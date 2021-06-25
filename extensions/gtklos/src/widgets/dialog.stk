@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Feb-2002 16:39 (eg)
-;;;; Last file update: 24-Jun-2021 16:30 (eg)
+;;;; Last file update: 25-Jun-2021 10:28 (eg)
 ;;;;
 
 ;;;
@@ -29,7 +29,7 @@
 ;;;
 
 (define-gtk gtk-dialog-new () #:pointer       "gtk_dialog_new")
-(define-gtk gtk-dialog-run (#:pointer) #:long "gtk_dialog_run")
+(define-gtk gtk-dialog-run (#:pointer) #:int  "gtk_dialog_run")
 
 (define-gtk gtk-dialog-get-content-area (#:pointer) #:pointer
   "gtk_dialog_get_content_area")
@@ -46,12 +46,25 @@
 (define |GTK_DIALOG_DESTROY_WITH_PARENT|  2)
 (define |GTK_DIALOG_NO_SEPARATOR|         4)
 
- ;; Type enum GtkMessageType
+;; Type enum GtkMessageType
 (define |GTK_MESSAGE_INFO|          0)
 (define |GTK_MESSAGE_WARNING|       1)
 (define |GTK_MESSAGE_QUESTION|      2)
 (define |GTK_MESSAGE_ERROR|         3)
 (define |GTK_MESSAGE_OTHER|         4)
+
+;; Type GtkResponseType
+(define |GTK_RESPONSE_NONE|         -1)
+(define |GTK_RESPONSE_REJECT|       -2)
+(define |GTK_RESPONSE_ACCEPT|       -3)
+(define |GTK_RESPONSE_DELETE_EVENT| -4)
+(define |GTK_RESPONSE_OK|           -5)
+(define |GTK_RESPONSE_CANCEL|       -6)
+(define |GTK_RESPONSE_CLOSE|        -7)
+(define |GTK_RESPONSE_YES|          -8)
+(define |GTK_RESPONSE_NO|           -9)
+(define |GTK_RESPONSE_APPLY|        -10)
+(define |GTK_RESPONSE_HELP|         -11)
 
 ;; ======================================================================
 ;;
@@ -118,6 +131,8 @@
 ;;;
 ;;; dialog-run
 ;;;
+(define-generic dialog-run)
+
 (define-method dialog-run ((d <dialog>))
   ( (slot-ref d '%run) ))
 
