@@ -1,6 +1,5 @@
 ;;;;
-;;;;
-;;;; colorchooser.stk         --
+;;;; filechooser.stk    -- GTK File Chooser Demo
 ;;;;
 ;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
@@ -22,35 +21,36 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  6-Nov-2000 18:59 (eg)
-;;;; Last file update: 25-Jun-2021 14:34 (eg)
+;;;; Last file update: 25-Jun-2021 14:46 (eg)
 ;;;;
 
 (include "demos-utils.stk")
 
-(define color-msg "
-A simple demo of the &lt;color-dialog&gt; widget.
+(define file-msg "
+A simple demo of the &lt;file-dialog&gt; widget
+
+Since we use the option <b>#:select-multiple</b>, the result 
+is the list of selected files.
 ")
 
 
-(define (choose-color edit)
-  (let ((col (make <color-dialog>  #:value "#f00" #:title "Color Demo"
-                                   #:show-editor edit)))
+(define (choose-files)
+  (let ((dlg (make <file-dialog> #:title "File Chooser demo"
+                   #:select-multiple #t)))
     ;; Be modal
-    (let ((ans (dialog-run col)))
+    (let ((ans (dialog-run dlg)))
       (if ans
-          (printf "Color chosen ~a\n" ans)
-          (printf "No color selected\n")))))
+          (begin
+            (printf "Files selected:\n")
+            (for-each (lambda (x) (printf "  - ~S\n" x)) ans))
+          (printf "No File selected\n")))))
 
 
 (define (main args)
-  (let* ((win (make <demo-window> #:title "Color Selector Demo"
-                    #:width 400 #:expand #t #:fill #t #:expand #t
-                    #:file "colorchooser" #:border-width 5
-                    #:message color-msg)))
+  (let ((win (make <demo-window> :title "File Selector Demo"
+                   :#width 400 :file "filechooser" :border-width 5
+                   :padding 20 :message file-msg)))
+    (make <button> #:text "Open a file chooser dialog" #:parent win
+          #:command (lambda _ (choose-files)))
+    (gtk-main)))
 
-
-    (make <button> #:text "Choose color (palette)" #:parent win
-                   #:command (lambda _ (choose-color #f)))
-    (make <button> #:text "Choose color (editor)" #:parent win
-                   #:command (lambda _ (choose-color #t))))
-    (gtk-main))

@@ -1,0 +1,108 @@
+;;;;
+;;;;
+;;;; file-dialog.stk         -- GTK+ File Dialog
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 22-Jun-2021 11:51
+;;;; Last file update: 25-Jun-2021 14:56 (eg)
+;;;;
+
+;;;
+;;; GTk Bindings
+;;;
+(define-gtk gtk-file-chooser-dialog-new (#:string #:pointer #:int #:pointer) #:pointer
+  "gtk_file_chooser_dialog_new")
+
+(define-gtk gtk-file-chooser-get-current-name (#:pointer) #:string
+  "gtk_file_chooser_get_current_name")
+
+
+(define |GTK_FILE_CHOOSER_ACTION_OPEN|          0)
+(define |GTK_FILE_CHOOSER_ACTION_SAVE|          1)
+(define |GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER| 2)
+(define |GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER| 3)
+
+(define (find-file-dialog-type type)
+  (let ((type (if (string? type) (string->symbol type) type)))
+    (case type
+      ((open)            |GTK_FILE_CHOOSER_ACTION_OPEN|)
+      ((save)            |GTK_FILE_CHOOSER_ACTION_SAVE|)
+      ((select-folder)   |GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER|)
+      ((create-folder)   |GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER|)
+      (else              (error "bad file dialog type: ~S" type)))))
+
+;; =====================================================================
+;;
+;;  < f i l e - d i a l o g >   c l a s s
+;;
+;; ======================================================================
+(define-class <file-dialog> (<dialog>)
+  ((select-multiple   #:accessor      select-multiple
+                      #:init-keyword  #:select-multiple
+                      #:allocation    #:gtk-property)
+   (show-hidden       #:accessor      show-hidden
+                      #:init-keyword  #:show-hidden
+                      #:allocation    #:gtk-property)
+   (use-preview-label #:accessor      use-preview-label
+                      #:init-keyword  #:use-preview-label
+                      #:allocation    #:gtk-property)))
+
+
+(define-method realize-widget ((self <file-dialog>) initargs)
+  (let* ((title (key-get initargs #:title "Select File"))
+         (type  (find-file-dialog-type (key-get initargs #:type 'open)))
+         (dialog  (gtk-file-chooser-dialog-new title (void) type (void))))
+
+    ;; Normal stuff
+    (cpointer-type-set! dialog 'gtk-file-chooser)
+    (slot-set! self 'wid dialog)
+
+    ;; Add buttons to the widget
+    (let ((buttons
+             (cond
+              ((= type |GTK_FILE_CHOOSER_ACTION_OPEN|)          '(cancel open))
+              ((= type |GTK_FILE_CHOOSER_ACTION_SAVE|)          '(cancel save))
+              ((= type |GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER|) '(cancel "Select"))
+              ((= type |GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER|) '(cancel "Create"))
+              (else                                             '(cancel ok)))))
+      (%create-dialog-buttons dialog buttons))))
+
+
+
+(define-method dialog-run ((self <file-dialog>))
+  (let* ((dialog (slot-ref self 'wid))
+         (val    (gtk-dialog-run dialog))
+         (res    (if (= val 1)
+                     ;; Something was selected
+                     (let ((res (%file-chooser-files dialog)))
+                       (if (null? res)
+                           #f
+                           (if (select-multiple self)
+                               ;; return the list of selected files
+                               res
+                               ;; user asked for a single file only; return it
+                               (and (pair? res) (car res)))))
+                     ;; Nothing was selected => #f
+                     #f)))
+    (destroy self)
+    res))
+
+(export <file-dialog> dialog-run)

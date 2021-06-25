@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Feb-2002 16:39 (eg)
-;;;; Last file update: 25-Jun-2021 10:28 (eg)
+;;;; Last file update: 25-Jun-2021 12:54 (eg)
 ;;;;
 
 ;;;
@@ -77,17 +77,34 @@
                    #:init-keyword  #:user-header-bar
                    #:allocation    #:virtual
                    #:slot-ref      (lambda (o)
-                                     (= (%gtk-get-property (slot-ref o '%wid)
+                                     (= (%gtk-get-property (slot-ref o 'wid)
                                                            "use-header-bar")
                                         1))
                    #:slot-set!     (lambda (o v)
-                                     (%gtk-set-property (slot-ref o '%wid)
+                                     (%gtk-set-property (slot-ref o 'wid)
                                                         "use-header-bar"
                                                         (if v 1 0))))
    ))
 
 
+(define (%create-dialog-buttons dialog buttons)
+  (let Loop ((value 0) (buttons buttons))
+      (unless (null? buttons)
+        (let* ((first (car buttons))
+               (txt   (if (symbol? first) (format "gtk-~a" first) first)))
+          (gtk-dialog-add-button dialog txt value)
+          (Loop (+ value 1)
+                (cdr buttons))))))
 
+(define (%create-dialog-closure dialog buttons)
+  (lambda ()
+    (let* ((dlg (gtk-dialog-run dialog))
+           (res (if (<= 0 dlg (- (length buttons) 1))
+                    (list-ref buttons dlg)
+                    #f)))
+      res)))
+
+  
 ;; Spécify at creation time the buttons used by the dialog
 ;; The default is "Ok" and "Cancel"
 ;; If a button is a symbol, it will be used as a GTk stock item
@@ -101,23 +118,9 @@
     (cpointer-type-set! dialog 'dialog)
     (slot-set! self 'wid dialog)
 
-    ;; Create the buttons
-    (let Loop ((value 0) (buttons buttons))
-      (unless (null? buttons)
-        (let* ((first (car buttons))
-               (txt   (if (symbol? first) (format "gtk-~a" first) first)))
-          (gtk-dialog-add-button dialog txt value)
-          (Loop (+ value 1)
-                (cdr buttons)))))
-
-    ;; Create a closure for running the dialog
-    (slot-set! self '%run (lambda ()
-                            (let* ((dlg (gtk-dialog-run dialog))
-                                   (res (if (<= 0 dlg (- (length buttons) 1))
-                                            (list-ref buttons dlg)
-                                            #f)))
-                                        ;(gtk-widget-destroy dialog)
-                              (values res self))))
+    ;; Create the buttons & the closure for running the dialog
+    (%create-dialog-buttons dialog buttons)
+    (slot-set! self '%run (%create-dialog-closure dialog buttons))
     dialog))
 
 
@@ -136,6 +139,12 @@
 (define-method dialog-run ((d <dialog>))
   ( (slot-ref d '%run) ))
 
+
+;; ======================================================================
+;;
+;;   make-simple-message-dialog
+;;
+;; ======================================================================
 
 ;; A list of possible icon names:
 ;;        https://developer.gnome.org/icon-naming-spec/

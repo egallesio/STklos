@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 11-Aug-2007 11:38 (eg)
- * Last file update: 24-Jun-2021 12:42 (eg)
+ * Last file update: 25-Jun-2021 14:05 (eg)
  */
 
 #include <math.h>               /* for isnan */
@@ -721,6 +721,34 @@ DEFINE_PRIMITIVE("%color->string", color2string, subr1, (SCM obj))
   return STk_Cstring2string(gdk_rgba_to_string(CPOINTER_VALUE(obj)));
 }
 
+/* ----------------------------------------------------------------------
+ *
+ *      File chooser files   ...
+ *
+ * ---------------------------------------------------------------------- */
+static void fcs_helper(gpointer p, gpointer data)
+{
+  SCM *l = (SCM*) data;
+
+  *l = STk_cons(STk_Cstring2string((char*) p), *l);
+  g_free(p);
+}
+
+DEFINE_PRIMITIVE("%file-chooser-files", file_chooser_files, subr1, (SCM obj))
+{
+  GtkFileChooser* choose;
+  GSList *lst;
+  SCM res = STk_nil;
+
+  if (!CPOINTERP(obj)) STk_error("bad file chooser ~S", obj);
+
+  choose = CPOINTER_VALUE(obj);
+  lst = gtk_file_chooser_get_filenames(choose);
+  g_slist_foreach(lst, fcs_helper, &res);
+  g_slist_free(lst);
+  
+  return res;
+}
 
 
 
@@ -730,7 +758,7 @@ DEFINE_PRIMITIVE("%color->string", color2string, subr1, (SCM obj))
  *
  * ---------------------------------------------------------------------- */
 // readline provides a pointer variable (rl_event_hook) which permits to call
-// the function it contains while there is no character ready to read. 
+// the function it contains while there is no character ready to read.
 
 static void stklos_interactive_gtk_loop(void) {
   if (gtk_events_pending())
@@ -830,7 +858,8 @@ MODULE_ENTRY_START("stklos-gtklos") {
 
   ADD_PRIMITIVE_IN_MODULE(string2color, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(color2string, gtklos_module);
-
+  ADD_PRIMITIVE_IN_MODULE(file_chooser_files, gtklos_module);
+  
   //FIXME: ADD_PRIMITIVE_IN_MODULE(dialog_vbox, gtklos_module);
 
   ADD_PRIMITIVE_IN_MODULE(rl_hook, gtklos_module);
