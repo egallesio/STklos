@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 25-Jun-2021 14:21 (eg)
+;;;; Last file update: 25-Jun-2021 15:08 (eg)
 ;;;;
 
 
@@ -66,5 +66,6 @@
 (include "widgets/dialog.stk")
 (include "widgets/color-dialog.stk")
 (include "widgets/file-dialog.stk")
+(include "widgets/font-dialog.stk")
 
 (provide "gtklos")

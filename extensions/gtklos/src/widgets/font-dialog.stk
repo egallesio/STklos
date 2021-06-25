@@ -1,0 +1,71 @@
+;;;;
+;;;;
+;;;; font-dialog.stk         -- GTK+ Font Selection  Dialog
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 22-Jun-2021 11:51
+;;;; Last file update: 25-Jun-2021 15:39 (eg)
+;;;;
+
+;;;
+;;; GTk Bindings
+;;;
+(define-gtk gtk-font-chooser-dialog-new (#:string #:pointer) #:pointer
+  "gtk_font_chooser_dialog_new")
+
+;; =====================================================================
+;;
+;;  < f o nt - d i a l o g >   c l a s s
+;;
+;; ======================================================================
+(define-class <font-dialog> (<dialog>)
+  ((value              #:accessor     value
+                       #:init-keyword #:value
+                       #:allocation   #:gtk-property
+                       #:gtk-name     "font")
+   (preview-text       #:accessor     preview-text
+                       #:init-keyword #:preview-text
+                       #:allocation   #:gtk-property)
+   (show-preview-entry #:accessor     show-preview-entry
+                       #:init-keyword #:show-preview-entry
+                       #:allocation   #:gtk-property)))
+
+
+(define-method realize-widget ((self <font-dialog>) initargs)
+  (let* ((title  (key-get initargs #:title "Select Font"))
+         (dialog (gtk-font-chooser-dialog-new title (void))))
+
+    (cpointer-type-set! dialog 'gtk-font-chooser)
+    (slot-set! self 'wid dialog)))
+
+
+
+(define-method dialog-run ((self <font-dialog>))
+  (let ((w (slot-ref self 'wid)))
+    (let ((val (gtk-dialog-run w))
+          (res #f))
+      (when (= val |GTK_RESPONSE_OK|)
+        (set! res (value self)))
+      (destroy self)
+      res)))
+
+
+(export <font-dialog> dialog-run)

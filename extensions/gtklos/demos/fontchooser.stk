@@ -1,0 +1,51 @@
+;;;;
+;;;; fontschooser.stk   -- GTK Font Selector Demo
+;;;;
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  6-Nov-2000 18:59 (eg)
+;;;; Last file update: 25-Jun-2021 15:53 (eg)
+;;;;
+
+
+(include "demos-utils.stk")
+
+(define font-msg "
+This is a demo of the Font Selector  Widget.
+")
+
+(define (choose-font)
+  (let ((dlg (make <font-dialog> #:title "File Chooser demo"
+                   #:preview-text "STklos is fun …"
+                   #:value "Serif Bold Italic, 24")))
+    ;; Be modal
+    (let ((ans (dialog-run dlg)))
+      (if ans
+          (printf "Selected font: ~s\n" ans)
+          (printf "No font selected\n")))))
+
+
+(define (main args)
+  (let ((win (make <demo-window> #:title "Font Selector Demo" 
+                   #:width 400 #:file "fontchooser" #:border-width 5
+                   #:padding 5 #:message font-msg)))
+    (make <button> #:text "Open a font chooser dialog" #:parent win
+          #:command (lambda _ (choose-font)))
+    (gtk-main)))
