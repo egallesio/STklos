@@ -1,0 +1,89 @@
+;;;;
+;;;; radiobutton.stk            -- GTK Radio Button Demo
+;;;;
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 25-Aug-2000 15:34 (eg)
+;;;; Last file update: 29-Jun-2021 14:07 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+
+(define *message* "
+Radio Button Demo
+
+Some GTklos radio buttons and two buttons to give them life.
+")
+
+
+(define (make-radiobutton txt parent leader group)
+  (make <radio-button>
+          #:text txt
+          #:parent parent
+          #:border-width 10
+          #:sibling leader
+          #:command (lambda (w e)
+                      (let ((sel (group-selected w)))
+                        (when (eq? w sel)
+                          ;; Show only a message when selected (not on de-selection)
+                          (printf "Radio group #~s: ~s\n" group (text sel)))))))
+
+
+(define (main args)
+  (let* ((win    (make <demo-window> #:title "STklos Radio Buttons"
+                       #:border-width 10 #:padding 10 #:spacing 10
+                       #:file "radiobutton" #:message *message*))
+         (frame1 (make <hframe> :title " Group 1 " #:parent win #:xalign 0.1))
+         (box    (make <hbox> #:parent win #:expand #t #:fill #t #:spacing 50))
+         (frame2 (make <vframe> :title " Group 2 " #:parent box #:xalign 0.1 #:expand #t
+                       #:fill #t)))
+    ;; Create a first group of radio-buttons
+    (let ((first #f))
+      (for-each (lambda (x)
+                  (let ((r (make-radiobutton x frame1 first 1)))
+                    (unless first (set! first r))))
+                '("One" "Two" "Three" "Four" "Five")))
+
+    ;; Create the second group of radio buttons
+    (let* ((r1 (make-radiobutton "Un"     frame2 #f 2))
+           (r2 (make-radiobutton "Deux"   frame2 r1 2))
+           (r3 (make-radiobutton "Trois"  frame2 r1 2))
+           (r4 (make-radiobutton "Quatre" frame2 r1 2))
+           (r5 (make-radiobutton "Cinq"   frame2 r1 2)))
+
+      ;; Create the two control buttons on the right
+      (let ((buttons (make <vbox> #:parent box #:end #f #:spacing 2)))
+        (make <label>  #:text ""        #:parent buttons) ;; a spacer
+        (make <button> #:text "Radio #2 selected"
+                       #:parent buttons
+                       #:command (lambda (w e)
+                                   (let ((sel (group-selected r1)))
+                                     (printf "Radio group #2: ~s\n" (text sel)))))
+        (make <button> #:text "Change Radio 2"
+                       #:parent buttons
+                       #:command (let ((l (list r1 r2 r3 r4 r5)))
+                                   (set-cdr! (last-pair l) l)   ; make the list circular
+                                   (lambda (w e)
+                                     (set! l (cdr l))
+                                     (set! (group-selected r1) (car l)))))))
+    (gtk-main)
+    0))
+
