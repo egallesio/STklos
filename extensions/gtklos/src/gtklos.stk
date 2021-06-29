@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 29-Jun-2021 12:36 (eg)
+;;;; Last file update: 29-Jun-2021 14:21 (eg)
 ;;;;
 
 
@@ -55,6 +55,7 @@
 (include "widgets/window.stk")
 (include "widgets/frame.stk")
 (include "widgets/grid.stk")
+(include "widgets/header.stk")
 
 ;; display
 (include "widgets/image.stk")

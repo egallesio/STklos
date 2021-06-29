@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 25-Jun-2021 16:20 (eg)
+# Last file update: 29-Jun-2021 14:19 (eg)
 
 EXTENSION=gtklos
 
@@ -29,7 +29,8 @@ SCM_SRCS = lib/events.stk lib/libs.stk lib/utils.stk                     \
            widgets/color-dialog.stk widgets/combobox.stk                 \
            widgets/dialog.stk widgets/entry.stk widgets/file-dialog.stk  \
            widgets/font-dialog.stk widgets/frame.stk                     \
-           widgets/grid.stk widgets/image.stk widgets/label.stk          \
+           widgets/grid.stk widgets/header.stk widgets/image.stk         \
+           widgets/label.stk          \
            widgets/menu.stk widgets/progress.stk widgets/radiobutton.stk \
            widgets/scale.stk widgets/scroll.stk widgets/separator.stk    \
            widgets/text.stk widgets/toolbar.stk widgets/window.stk

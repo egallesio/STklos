@@ -1,0 +1,66 @@
+;;;;
+;;;;
+;;;; header.stk         -- A simple Heraderbar demo
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 29-Jun-2021 14:47
+;;;; Last file update: 29-Jun-2021 15:15 (eg)
+;;;;
+
+
+(include "demos-utils.stk")
+
+
+(define demo-message "
+Header Bar demo
+
+This demo illustrates the use of the GTK Header Bars in windows.
+")
+
+(define (click w e)
+  (printf "You have clicked on '~s' button\n" (text w)))
+
+
+(define (make-command ctrl)
+  (lambda (w e)
+    (let* ((win (make <vwindow> #:title "A window with a header" #:width 400))
+           (hdr (make <header-bar> #:title "I'm the title"
+                      #:subtitle "I'm the subtitle" #:parent win
+                      #:decoration-layout ":minimize,maximize,close"
+                      #:show-close-button #t)))
+      (make <label> :text "I'm the content of the window"
+            :parent (list win #:expand #t ))
+      (when ctrl
+        ;; Add the control buttons: Here we spevify that we have, on the right,
+        ;; minimize, maximize and close buttons.
+        (set! (show-close-button hdr) #t)
+        (set! (decoration-layout hdr) ":minimize,maximize,close")))))
+
+
+
+(define (main args)
+  (let* ((win (make <demo-window> #:title "Header Bar demo" #:width 600
+                    #:file "header" #:border-width 5 #:padding 10
+                    #:message demo-message)))
+    (make <button> #:text "Without controls" #:parent win #:command (make-command #f))
+    (make <button> #:text "With controls"    #:parent win #:command (make-command #t))
+    (gtk-main)
+    0))
