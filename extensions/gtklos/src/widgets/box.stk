@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 15:44 (eg)
-;;;; Last file update: 21-Jun-2021 12:45 (eg)
+;;;; Last file update: 29-Jun-2021 12:19 (eg)
 ;;;;
 
 
@@ -48,12 +48,13 @@
 (define (int->orientation orient)
   (if (zero? orient) 'horizontal 'vertical))
 
-;======================================================================
-;
-;                 C l a s s    < b o x >
-;
-;======================================================================
-(define-class <box> (<gtk-container> <gtk-orientable>)
+
+;;======================================================================
+;;
+;;                 C l a s s    < b o x >
+;;
+;;======================================================================
+(define-class <box> (<gtk-orientable>)
   ((expand             #:accessor       expand
                        #:init-keyword   #:expand
                        #:init-form      #f)
@@ -68,12 +69,10 @@
                        #:allocation     #:gtk-property)
    (spacing            #:accessor       spacing
                        #:init-keyword   #:spacing
-                       #:allocation     #:gtk-property
-                       #:init-form      0)
+                       #:allocation     #:gtk-property)
    (baseline-position  #:accessor       baseline-position
                        #:init-keyword   #:baseline-position
                        #:allocation     #:gtk-property)))
-
 ;;;;
 ;;;; Methods for Boxes
 ;;;;
@@ -93,9 +92,10 @@
          (space  (key-get initargs #:spacing 0))
          (box    (gtk-box-new (orientation->int orient) space)))
       (cpointer-type-set! box 'gtk-box)
-      (slot-set! self 'wid box)))
+      (slot-set! self 'wid   box)))
 
 
+;;// FIXME:
 ;;//(define-method %container-place ((cont <box>) widget
 ;;//                 #:key (expand  #t expand?)
 ;;//                      (fill    #t fill?)
@@ -124,9 +124,81 @@
           #:end       (zero? (%gtk-get-child-property c w "pack-type")))))
 
 
+
+;======================================================================
+;
+;                 C l a s s    < h b o x >
+;
+;======================================================================
+(define-class <hbox> (<box>)
+  ())
+
+(define-method initialize ((self <hbox>) initargs)
+  (next-method self (append initargs '(#:orientation horizontal))))
+
+
+;======================================================================
+;
+;                 C l a s s    < v b o x >
+;
+;======================================================================
+(define-class <vbox> (<box>)
+  ())
+
+(define-method initialize ((self <vbox>) initargs)
+  (next-method self (append initargs '(#:orientation vertical))))
+
+
+;;======================================================================
+;;
+;;                 C l a s s    < % b o x >
+;;
+;;======================================================================
+
+;; The class <%box> is used by GTK containers that only accept one child.  In
+;; fact, for these widgets we define a new classes with a <hbox> or a <vbox>
+;; stored in the %bcontent slot
+(define-class <%box> ()
+  ((%bcontent #:init-form #f)))
+
+
+(define-method container-add! ((self <%box>) w . args)
+  (let ((container (slot-ref self '%bcontent)))
+    (if container
+        ;; If a container exists, that is that the widget is initialized and
+        ;; that we are filling it with subwidgets.
+        (apply container-add! container w args)
+        ;; nothing special
+        (next-method))))
+
+;;
+;; <%hbox> and <%vbox> are used for classes with embedded <hbox> / <vbox>
+;;
+(define-class <%hbox> (<%box>)   ())
+(define-class <%vbox> (<%box>)   ())
+
+
+(define-method internal-arrange-widget ((self <%hbox>) initargs)
+  (let* ((init    (key-delete initargs #:parent)) ;; skip :parent if present
+         (content (apply make <hbox> init)))
+    (container-add! self content)
+    (slot-set! self '%bcontent content))) 
+
+(define-method internal-arrange-widget ((self <%vbox>) initargs)
+  (let* ((init    (key-delete initargs #:parent)) ;; skip :parent if present
+         (content (apply make <vbox> init)))
+    (container-add! self content initargs)
+    (slot-set! self '%bcontent content))) 
+
+
 ;;;
 ;;; Module exports
 ;;;
 (export <box>
         ;; accessors
-        expand fill padding homogeneous spacing orientation)
+        expand fill padding homogeneous spacing orientation
+        <hbox> <vbox>)
+
+;; Local Variables:
+;; compile-command: "make -C .."
+;; End:

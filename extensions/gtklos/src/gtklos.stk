@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 25-Jun-2021 15:08 (eg)
+;;;; Last file update: 29-Jun-2021 12:36 (eg)
 ;;;;
 
 
@@ -37,32 +37,46 @@
 
 (export timeout when-idle kill-idle)
 
+;;;; ---- Library
 (include "lib/libs.stk")
 (include "lib/events.stk")
 (include "lib/utils.stk")
 
+
+;;;; ----  Base classes
 (include "classes/meta.stk")
 (include "classes/widget.stk")
 (include "classes/container.stk")
 
-(include "widgets/window.stk")
-(include "widgets/entry.stk")
-(include "widgets/box.stk")
-(include "widgets/grid.stk")
-(include "widgets/label.stk")
-(include "widgets/button.stk")
-(include "widgets/image.stk")
-(include "widgets/checkbutton.stk")
-(include "widgets/scroll.stk")
-(include "widgets/text.stk")
-(include "widgets/combobox.stk")
-(include "widgets/separator.stk")
-(include "widgets/frame.stk")
-(include "widgets/scale.stk")
-                                        ;(include "widgets/toolbar.stk")
-(include "widgets/menu.stk")
-(include "widgets/progress.stk")
 
+;;;; ---- Widgets
+;; containers
+(include "widgets/box.stk")
+(include "widgets/window.stk")
+(include "widgets/frame.stk")
+(include "widgets/grid.stk")
+
+;; display
+(include "widgets/image.stk")
+(include "widgets/label.stk")
+(include "widgets/progress.stk")
+(include "widgets/scale.stk")
+(include "widgets/scroll.stk")
+(include "widgets/separator.stk")
+
+;; buttons
+(include "widgets/button.stk")
+(include "widgets/checkbutton.stk")
+(include "widgets/radiobutton.stk")
+(include "widgets/combobox.stk")
+(include "widgets/menu.stk")
+
+;;entries & text
+(include "widgets/entry.stk")
+(include "widgets/text.stk")
+
+
+;;;; ---- Dialogs and specialized choosers
 (include "widgets/dialog.stk")
 (include "widgets/color-dialog.stk")
 (include "widgets/file-dialog.stk")

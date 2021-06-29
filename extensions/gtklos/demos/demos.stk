@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 19-Sep-2009 20:45 (eg)
-;;;; Last file update: 22-Jun-2021 11:08 (eg)
+;;;; Last file update: 29-Jun-2021 12:34 (eg)
 ;;;;
 
 (include "demos-utils.stk")
@@ -50,13 +50,9 @@
                        #:text (symbol->string (car lst))
                        #:command (lambda (w ev)
                                    (system (format "unset indemo; ./~A &" (car lst)))))))
-              (container-add! grid b :top top :left left)
-              (if (zero? (modulo (+ left 1) 2))
+              (container-add! grid b #:top top #:left left)
+              (if (zero? (modulo (+ left 1) 4))
                   (Loop (+ top 1) 0    (cdr lst))
                   (Loop top (+ left 1) (cdr lst)))))))
-    
-    ;; Connect a signal to terminate application when the window is closed
-    ;; FIXME: (event-connect win "delete-event" (lambda (_) (exit 0)))
-
     ;; GTk starts
     (gtk-main)))

@@ -51,12 +51,11 @@
       ((etched-out) 4)
       (else         (error "bad shadow value: ~S" val)))))
 
-;======================================================================
-;
-;                 C l a s s    < f r a m e >
-;
-;======================================================================
-
+;;======================================================================
+;;
+;;                 C l a s s    < f r a m e >
+;;
+;;======================================================================
 (define-class <frame> (<gtk-container>)
   ((title         #:accessor     title
                   #:init-keyword #:title
@@ -67,7 +66,7 @@
                   #:allocation   #:gtk-property
                   #:gtk-name     "label-xalign")
    (yalign        #:accessor     yalign
-                  #:init-keyword #:xalign
+                  #:init-keyword #:yalign
                   #:allocation   #:gtk-property
                   #:gtk-name     "label-yalign")
    (shadow        #:accessor     shadow
@@ -87,8 +86,26 @@
     (cpointer-type-set! f 'gtk-frame)
     (slot-set! self 'wid f)))
 
+;;======================================================================
+;;
+;;           C l a s s   < h f r a m e >
+;;
+;;======================================================================
+(define-class <hframe> (<%hbox> <frame>)
+  ())
+
+;;======================================================================
+;;
+;;           C l a s s   < v f r a m e >
+;;
+;;======================================================================
+(define-class <vframe> (<%vbox> <frame>)
+  ())
+
+
 ;;;
 ;;; Exports
 ;;;
-(export <frame> title xalign yalign shadow)
+(export <frame> title xalign yalign shadow
+        <hframe> <vframe>)
 

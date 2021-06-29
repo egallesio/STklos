@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 18:30 (eg)
-;;;; Last file update: 17-Jun-2021 12:02 (eg)
+;;;; Last file update: 28-Jun-2021 18:45 (eg)
 ;;;;
 
 
@@ -301,7 +301,6 @@
                                       (let ((v (orientation->int v)))
                                         (gtk-orientable-set-orientation
                                          (slot-ref o 'wid) v))))))
-
 
 ;;;
 ;;; Module exports

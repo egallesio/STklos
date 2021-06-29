@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 29-Jul-2001 18:17 (eg)
-;;;; Last file update: 21-Jun-2021 15:04 (eg)
+;;;; Last file update: 29-Jun-2021 12:32 (eg)
 ;;;;
 
 (include "demos-utils.stk")
@@ -36,21 +36,18 @@ Furthermore, we use here various shadows for the frame.
 ")
 
 
-
 (define (make-frame parent shadow title justify)
-  (let* ((frame (make <frame> #:parent parent #:shadow shadow))
-         (box   (make <box>   #:orientation 'vertical #:padding 20 #:parent frame)))
+  (let ((frame (make <vframe> #:parent parent #:shadow shadow :padding 20)))
     (when title
       (slot-set! frame 'title title)
       (slot-set! frame 'xalign justify))
-    (make <label> #:parent box #:text (format "shadow is '~A'" shadow))
-    frame))
-
+    (make <label> #:text (format "shadow is '~A'" shadow) :parent frame)))
+          ;;#:parent (list frame #:padding 20))))
 
 (define (main args)
   (let* ((win (make <demo-window> #:title "Frame Demo" #:width 450
                     #:file "frame" #:border-width 10
-                    #:message *message*))
+                    #:message *message* #:padding 5))
          (box (make <box> #:padding 5 #:parent win)))
 
     ;; Build several frames
