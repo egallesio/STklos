@@ -1,0 +1,176 @@
+;;;;
+;;;; toolbar.stk    -- GTklos Toolbars Implementation
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  7-Apr-2002 14:23 (eg)
+;;;; Last file update: 29-Jun-2021 17:24 (eg)
+;;;;
+
+;;;
+;;; GTK Bindings
+;;;
+(define-gtk gtk-toolbar-new () #:pointer "gtk_toolbar_new")
+
+(define-gtk gtk-toolbar-insert (#:pointer #:pointer #:int) #:void
+  "gtk_toolbar_insert")
+
+(define-gtk gtk-tool-button-new (#:pointer #:string) #:pointer
+  "gtk_tool_button_new")
+
+(define-gtk gtk-separator-tool-item-new () #:pointer
+  "gtk_separator_tool_item_new")
+
+
+
+(define (tbstyle->int val)
+  (let ((val (if (string? val) (string->symbol val) val)))
+    (case val
+      ((icons)           0)
+      ((text)            1)
+      ((both)            2)
+      ((both-horizontal) 3)
+      (else              (error "bad toolbar style ~S" val)))))
+
+(define (int->tbstyle val)
+  (case val
+    ((0)  'icons)
+    ((1)  'text)
+    ((2)  'both)
+    (else 'both-horizontal)))
+
+;; ----------------------------------------------------------------------
+;;
+;;          < t o o l b a r >   c l a s s
+;;
+;; ----------------------------------------------------------------------
+
+(define-class <toolbar> (<gtk-container> <gtk-orientable>)
+  ((icon-size     #:allocation   #:virtual
+                  #:accessor     icon-size
+                  #:init-keyword #:icon-size
+                  #:slot-ref     (lambda (o)
+                                   (int->size (%gtk-get-property (slot-ref o 'wid)
+                                                                 "icon-size")))
+                  #:slot-set!    (lambda (o v)
+                                   (%gtk-set-property! (slot-ref o 'wid)
+                                                       "icon-size"
+                                                       (size->int v))))
+   (show-arrow    #:accessor     show-arrow
+                  #:init-keyword #:show-arrow
+                  #:allocation   #:gtk-property)
+   (toolbar-style #:accessor     toolbar-style
+                  #:init-keyword #:toolbar-style
+                  #:allocation   #:virtual
+                  #:slot-ref     (lambda (o)
+                                   (int->tbstyle (%gtk-get-property (slot-ref o 'wid)
+                                                                    "toolbar-style")))
+                  #:slot-set!    (lambda (o v)
+                                   (%gtk-set-property! (slot-ref o 'wid)
+                                                       "toolbar-style"
+                                                       (tbstyle->int v))))
+   (expand        #:accessor     expand
+                  #:init-keyword #:expand
+                  #:init-form    #f)
+   (homogeneous   #:accessor     homogeneous
+                  #:init-keyword #:homogeneous
+                  #:initform     #f)
+))
+
+
+(define-method realize-widget((self <toolbar>) initargs)
+  (let ((tb (gtk-toolbar-new)))
+    (cpointer-type-set! tb 'toolbar)
+    (slot-set! self 'wid tb)))
+
+
+;; ----------------------------------------------------------------------
+;;
+;;         < t o o l b a r - i t e m >   c l a s s
+;;
+;; and its two subclasses#:
+;;  <toolbar-separator-item>
+;;  <toolbar-button-item>
+;; ----------------------------------------------------------------------
+(define-class <toolbar-item> (<gtk-widget>)
+  ())
+
+(define-method container-add!((toolbar <toolbar>) (item <toolbar-item>))
+  (gtk-toolbar-insert (slot-ref toolbar 'wid) (slot-ref item 'wid) -1))
+
+
+;;;;
+;;;;    <toolbar-separator-item>
+;;;;
+(define-class <toolbar-separator-item> (<toolbar-item>)
+ ())
+
+
+
+(define-method realize-widget((self <toolbar-separator-item>) initargs)
+  (let ((sep (gtk-separator-tool-item-new)))
+   (cpointer-type-set! sep 'toolbar-separator-item)
+    (slot-set! self 'wid sep)))
+
+;;;;
+;;;;
+;;;;    <toolbar-button-item>
+
+(define-class <toolbar-button-item> (<toolbar-item>)
+ ((text          #:accessor      text
+                 #:init-keyword  #:text
+                 #:allocation    #:gtk-property
+                 #:gtk-name      "label")
+   (command      #:accessor      command
+                 #:init-keyword  #:command
+                 #:allocation    #:virtual
+                 #:slot-ref      (%make-event-getter-func "clicked")
+                 #:slot-set!     (%make-event-setter-func "clicked"))
+   (icon-name    #:accessor      icon-name
+                 #:init-keyword  #:icon-name
+                 #:allocation    #:gtk-property)))
+
+
+(define-method realize-widget((self <toolbar-button-item>) initargs)
+  (let ((but (gtk-tool-button-new (void) "")))
+    (cpointer-type-set! but 'toolbar-button-item)
+    (slot-set! self 'wid but)))
+
+;; ----------------------------------------------------------------------
+;;
+;;              M i s c
+;;
+;; ----------------------------------------------------------------------
+(define-method add-toolbar-items ((tb <toolbar>) items)
+  (for-each (lambda (x)
+              (container-add! tb
+                              (if (null? x)
+                                  (make <toolbar-separator-item>)
+                                  (apply make <toolbar-button-item> x))))
+            items))
+
+;;;
+;;; Exports
+;;;
+(export <toolbar>
+        icon-size show-arrow toolbar-style expand
+        <toolbar-separator-item>
+        <toolbar-button-item> text icon-name command
+        add-toolbar-items)

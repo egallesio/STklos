@@ -1,0 +1,83 @@
+;;;;
+;;;; toolbar.stk    -- GTklos Toolbars Implementation
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  7-Apr-2002 14:23 (eg)
+;;;; Last file update: 29-Jun-2021 18:56 (eg)
+;;;;
+
+
+(include "demos-utils.stk")
+
+
+(define *toolbar-msg* "
+Toolbar Demo
+
+In this demo, the tool bar is contained in a frame.
+Using the radio buttons, at the bottom of this window
+allows to change the orientation of the tool bar, as well as
+its appearance.
+")
+
+
+(define (tb-callback)
+  (lambda (w e)
+    (eprintf "You have clicked on item ~S of the toolbar\n" (text w))))
+
+
+(define (make-radio txt sibling parent cmd)
+  (make <radio-button> #:text txt #:sibling sibling #:parent parent #:command cmd))
+
+
+(define (main args)
+  (let* ((win  (make <demo-window> #:title "Toolbar Demo" #:width 400 #:height 600
+                     #:file "toolbar" #:border-width 10 #:padding 10
+                     #:expand #t #:fill #t
+                     #:message *toolbar-msg*))
+         (frm  (make <frame> #:title  "Toolbar Example" #:parent win #:expand #t #:fill #t))
+         (tb   (make <toolbar> #:parent frm #:toolbar-style "both"#:expand #t #:fill #t ))
+         (box  (make <hbox>   #:parent win #:padding 10 #:expand #t #:fill #t)))
+
+    ;; First radio-buttons group
+    (let* ((frm  (make <vframe> #:parent box  #:title "  Orientation  "))
+           (cmd (lambda (w e) (set! (orientation tb) (string->symbol (text w)))))
+           (h   (make-radio "horizontal" #f frm cmd))
+           (v   (make-radio "vertical"    h frm cmd)))
+      #void)
+
+    ;; Second radio-buttons group
+    (let* ((frm  (make <vframe> #:parent box  #:title "  Style  "))
+           (cmd (lambda (w e) (write (text w)) (set! (toolbar-style tb) (string->symbol (text w)))))
+           (r1   (make-radio "icons"           #f frm cmd))
+           (r2   (make-radio "text"            r1 frm cmd))
+           (r3   (make-radio "both"            r1 frm cmd))
+           (r4   (make-radio "both-horizontal" r1 frm cmd)))
+      #void)
+
+    ;; Populate the toolbar
+    (add-toolbar-items tb
+          `( (#:text "Up"    #:icon-name "go-up"   #:command ,tb-callback)
+             (#:text "Down"  #:icon-name "go-down" #:command ,tb-callback)
+             () ; A separator
+             (#:text "Left"  #:icon-name "go-left"  #:command ,tb-callback)
+             (#:text "Right" #:icon-name "go-right" #:command ,tb-callback)))
+
+    (gtk-main)))
