@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 18:30 (eg)
-;;;; Last file update: 28-Jun-2021 18:45 (eg)
+;;;; Last file update: 30-Jun-2021 19:47 (eg)
 ;;;;
 
 
@@ -42,9 +42,11 @@
 (define-gtk gtk-widget-get-allocated-height (#:pointer) #:long
   "gtk_widget_get_allocated_height")
 
+(define-gtk gtk-widget-set-size-request (#:pointer #:int #:int) #:void
+  "gtk_widget_set_size_request")
+
 (define-generic realize-widget)
 (define-generic internal-arrange-widget)
-
 
 ;;;; ======================================================================
 ;;;;
@@ -77,6 +79,23 @@
     (slot-set! widget
                '%data
                (key-set! data key value))))
+
+
+;;
+;; width an height get & set
+;;
+(define (get-widget-width o)  (gtk-widget-get-allocated-width  (slot-ref o 'wid)))  ;; FIXME (%gtk-get-width  (slot-ref o 'wid)))
+(define (get-widget-height o) (gtk-widget-get-allocated-height (slot-ref o 'wid)))      ;; FIXME(%gtk-get-height (slot-ref o 'wid)))
+
+(define (set-widget-width! o v)
+  (let ((h (slot-ref o 'height-request)))
+    (gtk-widget-set-size-request (slot-ref o 'wid) v h)))
+
+(define (set-widget-height! o v)
+  (let ((w (slot-ref o 'width-request)))
+    (gtk-widget-set-size-request (slot-ref o 'wid) w v)))
+  
+  
 
 (define-class <gtk-widget> (<gtk-object>)
   ((wid         #:getter         wid)            ;; Widget Id
@@ -135,24 +154,17 @@
                                  (gtk-widget-set-tooltip-markup (slot-ref o 'wid) v)
                                  (slot-set! o '%data
                                             (key-set!  (slot-ref o '%data) #:tooltip v))))
-;;// TODO:   (width       #:accessor     width
-;;// TODO:                #:init-keyword #:width
-;;// TODO:                #:allocation   #:virtual
-;;// TODO:                #:slot-ref     gtklos-width
-;;// TODO:                #:slot-set!    (lambda (o v)
-;;// TODO:                                 (let ((h (slot-ref o 'height-request)))
-;;// TODO:                                   (gtk-widget-set-size-request (slot-ref o 'wid)
-;;// TODO:                                                                v
-;;// TODO:                                                                h))))
-;;// TODO:   (height      #:accessor     height
-;;// TODO:                #:init-keyword #:height
-;;// TODO:                #:allocation   #:virtual
-;;// TODO:                #:slot-ref     gtklos-height
-;;// TODO:                #:slot-set!    (lambda (o v)
-;;// TODO:                                 (let ((w (slot-ref o 'width-request)))
-;;// TODO:                                   (gtk-widget-set-size-request (slot-ref o 'wid)
-;;// TODO:                                                                w
-;;// TODO:                                                                v))))
+   (width       #:accessor     width
+                #:init-keyword #:width
+                #:allocation   #:virtual
+                #:slot-ref     get-widget-width
+                #:slot-set!    set-widget-width!)
+   (height      #:accessor     height
+                #:init-keyword #:height
+                #:allocation   #:virtual
+                #:slot-ref     get-widget-height
+                #:slot-set!    set-widget-height!)
+   
 #;   (font-name #:accessor       font-name
                 #:init-keyword   #:font-name
                 #:allocation     #:gtk-property
@@ -230,11 +242,11 @@
   #f)
 
 
-(define-method widget-width ((w <gtk-widget>))
-  (gtk-widget-get-allocated-width  (slot-ref w 'wid)))
-
-(define-method widget-height ((w <gtk-widget>))
-  (gtk-widget-get-allocated-height (slot-ref w 'wid)))
+;;//(define-method widget-width ((w <gtk-widget>))
+;;//  (gtk-widget-get-allocated-width  (slot-ref w 'wid)))
+;;//
+;;//(define-method widget-height ((w <gtk-widget>))
+;;//  (gtk-widget-get-allocated-height (slot-ref w 'wid)))
 
 
 ;;;

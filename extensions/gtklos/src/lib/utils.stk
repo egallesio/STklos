@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 23-Aug-2007 15:03 (eg)
-;;;; Last file update: 22-Jun-2021 10:47 (eg)
+;;;; Last file update: 30-Jun-2021 18:58 (eg)
 ;;;;
 
 
@@ -55,18 +55,6 @@
 ;;// (define (gtklos-widget-set-parent! w p)
 ;;//   (let ((old (gtk-widget-get-parent w)))
 ;;//     ( (if (eq? old #void) gtk-widget-set-parent gtk-widget-reparent) w p)))
-
-
-;; TODO:// ;; ======================================================================
-;; TODO:// ;;
-;; TODO:// ;;      GTK+ width & height
-;; TODO:// ;;
-;; TODO:// ;; ======================================================================
-;; TODO:// (define (gtklos-width w)
-;; TODO://   (car (%gtk-get-size (slot-ref w 'wid))))
-;; TODO:// 
-;; TODO:// (define (gtklos-height w)
-;; TODO://   (cdr (%gtk-get-size (slot-ref w 'wid))))
 
 
 ;; ----------------------------------------------------------------------

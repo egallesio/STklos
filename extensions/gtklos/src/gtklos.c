@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 11-Aug-2007 11:38 (eg)
- * Last file update: 25-Jun-2021 14:05 (eg)
+ * Last file update: 30-Jun-2021 20:27 (eg)
  */
 
 #include <math.h>               /* for isnan */
@@ -43,10 +43,10 @@ static void error_set_property(SCM prop, SCM val, char *s)
             prop, s, val);
 }
 
-//FIXME:static void error_bad_widget(SCM obj)
-//FIXME:{
-//FIXME:  STk_error("bad widget ~S", obj);
-//FIXME:}
+//XXX static void error_bad_widget(SCM obj)
+//XXX {
+//XXX   STk_error("bad widget ~S", obj);
+//XXX }
 
 static void error_bad_event(SCM obj)
 {
@@ -341,22 +341,32 @@ DEFINE_PRIMITIVE("%gtk-set-property!", gtk_set_prop, subr3,
   return STk_void;
 }
 
-//TODO: /* ----------------------------------------------------------------------
-//TODO:  *      %gtk-get-size ...
-//TODO:  * ---------------------------------------------------------------------- */
-//TODO: DEFINE_PRIMITIVE("%gtk-get-size", gtk_get_size, subr1, (SCM obj))
-//TODO: {
-//TODO:   gint width, height;
-//TODO:
-//TODO:   if (!CPOINTERP(obj)) error_bad_widget(obj);
-//TODO:
-//TODO:   if (GTK_WIDGET_DRAWABLE(CPOINTER_VALUE(obj)))
-//TODO:     gdk_window_get_size(GTK_WIDGET(CPOINTER_VALUE(obj))->window, &width, &height);
-//TODO:   else
-//TODO:     width = height = -1;
-//TODO:
-//TODO:   return STk_cons(MAKE_INT(width), MAKE_INT(height));
-//TODO: }
+//XXX/* ----------------------------------------------------------------------
+//XXX *      %gtk-get-width/height ...
+//XXX * ---------------------------------------------------------------------- */
+//XXXDEFINE_PRIMITIVE("%gtk-get-width", gtk_get_width, subr1, (SCM obj))
+//XXX{
+//XXX  GdkWindow *win;
+//XXX
+//XXX  if (!CPOINTERP(obj)) error_bad_widget(obj);
+//XXX
+//XXX  win = gtk_widget_get_window(GTK_WIDGET(CPOINTER_VALUE(obj)));
+//XXX
+//XXX  return MAKE_INT(gdk_window_get_width(win));
+//XXX}
+//XXX
+//XXX
+//XXXDEFINE_PRIMITIVE("%gtk-get-height", gtk_get_height, subr1, (SCM obj))
+//XXX{
+//XXX  GdkWindow *win;
+//XXX
+//XXX  if (!CPOINTERP(obj)) error_bad_widget(obj);
+//XXX
+//XXX  win = gtk_widget_get_window(GTK_WIDGET(CPOINTER_VALUE(obj)));
+//XXX
+//XXX  return MAKE_INT(gdk_window_get_height(win));
+//XXX}
+
 
 /* ----------------------------------------------------------------------
  *
@@ -527,8 +537,8 @@ DEFINE_PRIMITIVE("%event-type", event_type, subr1, (SCM event))
     default:                     return STk_void;
   }
 }
-//TODO:
-//TODO:
+
+
 //TODO: DEFINE_PRIMITIVE("%event-x", event_x, subr1, (SCM event))
 //TODO: {
 //TODO:   GdkEvent *ev;
@@ -746,7 +756,7 @@ DEFINE_PRIMITIVE("%file-chooser-files", file_chooser_files, subr1, (SCM obj))
   lst = gtk_file_chooser_get_filenames(choose);
   g_slist_foreach(lst, fcs_helper, &res);
   g_slist_free(lst);
-  
+
   return res;
 }
 
@@ -843,8 +853,9 @@ MODULE_ENTRY_START("stklos-gtklos") {
   ADD_PRIMITIVE_IN_MODULE(get_gtk_event, gtklos_module);
 
 
-  //TODO:  ADD_PRIMITIVE_IN_MODULE(gtk_get_size, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(gtk_get_child_prop, gtklos_module);
+  //XXX ADD_PRIMITIVE_IN_MODULE(gtk_get_width, gtklos_module);
+  //XXX ADD_PRIMITIVE_IN_MODULE(gtk_get_height, gtklos_module);
 
 //FIXME:   ADD_PRIMITIVE_IN_MODULE(box_set_packing, gtklos_module);
 //FIXME:   ADD_PRIMITIVE_IN_MODULE(cont_children, gtklos_module);
@@ -859,7 +870,7 @@ MODULE_ENTRY_START("stklos-gtklos") {
   ADD_PRIMITIVE_IN_MODULE(string2color, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(color2string, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(file_chooser_files, gtklos_module);
-  
+
   //FIXME: ADD_PRIMITIVE_IN_MODULE(dialog_vbox, gtklos_module);
 
   ADD_PRIMITIVE_IN_MODULE(rl_hook, gtklos_module);
