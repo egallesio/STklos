@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 13-Aug-2009 20:56 (eg)
-;;;; Last file update: 22-Jun-2021 17:13 (eg)
+;;;; Last file update:  1-Jul-2021 10:43 (eg)
 ;;;;
 
 (include "demos-utils.stk")
@@ -46,7 +46,7 @@ and the same demo wher everything is done bt hand).
                      #:message *menu-msg*))
          (mb   (make <menu-bar> #:parent win)))
 
-    (add-items-to-menubar! mb
+    (add-items-to-menubar mb
         `(("Item 1"
              ("Item 1 / 1"   :action ,action)
              ("Item 1 / 2"   :action ,action))

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  7-Apr-2002 14:23 (eg)
-;;;; Last file update: 29-Jun-2021 18:56 (eg)
+;;;; Last file update:  1-Jul-2021 11:05 (eg)
 ;;;;
 
 
@@ -53,7 +53,7 @@ its appearance.
                      #:expand #t #:fill #t
                      #:message *toolbar-msg*))
          (frm  (make <frame> #:title  "Toolbar Example" #:parent win #:expand #t #:fill #t))
-         (tb   (make <toolbar> #:parent frm #:toolbar-style "both"#:expand #t #:fill #t ))
+         (tb   (make <toolbar> #:parent frm #:toolbar-style "both" #:expand #t #:fill #t ))
          (box  (make <hbox>   #:parent win #:padding 10 #:expand #t #:fill #t)))
 
     ;; First radio-buttons group
@@ -73,11 +73,11 @@ its appearance.
       #void)
 
     ;; Populate the toolbar
-    (add-toolbar-items tb
-          `( (#:text "Up"    #:icon-name "go-up"   #:command ,tb-callback)
-             (#:text "Down"  #:icon-name "go-down" #:command ,tb-callback)
+    (add-items-to-toolbar tb
+          `( (#:text "Up"    #:icon-name "go-up"   #:command ,(tb-callback))
+             (#:text "Down"  #:icon-name "go-down" #:command ,(tb-callback))
              () ; A separator
-             (#:text "Left"  #:icon-name "go-left"  #:command ,tb-callback)
-             (#:text "Right" #:icon-name "go-right" #:command ,tb-callback)))
+             (#:text "Left"  #:icon-name "go-left"  #:command ,(tb-callback))
+             (#:text "Right" #:icon-name "go-right" #:command ,(tb-callback))))
 
     (gtk-main)))

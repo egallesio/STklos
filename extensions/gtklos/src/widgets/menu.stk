@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-Oct-2000 22:09 (eg)
-;;;; Last file update: 22-Jun-2021 17:19 (eg)
+;;;; Last file update:  1-Jul-2021 10:42 (eg)
 ;;;;
 
 ;;;
@@ -211,7 +211,7 @@
 ;; Utility function to fill a menubar
 ;;
 ;;======================================================================
-(define-method add-items-to-menubar! ((mb <menu-bar>) items)
+(define-method add-items-to-menubar ((mb <menu-bar>) items)
 
   (define (fill-menu m items)
     (let ((sibling #f))
@@ -272,5 +272,5 @@
         <menu-item> text-justified right-justified accel-path use-underline
         <menu-check-item> value draw-as-radio inconsistent
         <menu-separator-item>
-        add-items-to-menubar!)
+        add-items-to-menubar)
 
