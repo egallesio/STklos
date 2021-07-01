@@ -1,0 +1,189 @@
+;;;;
+;;;; scroll.stk             -- GTklos Scrolled Windows
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 18-Jan-2002 08:56 (eg)
+;;;; Last file update:  1-Jul-2021 16:21 (eg)
+;;;;
+
+
+;;;
+;;; GTK bindings
+;;;
+(define-gtk gtk-scrolled-window-set-policy (:pointer :long :long) :void
+  "gtk_scrolled_window_set_policy")
+
+(define-gtk gtk-scrolled-window-new (:pointer :pointer) :pointer
+  "gtk_scrolled_window_new")
+
+;; Note: gtk-adjustement-new is defined in scale.stk
+
+;;;; ======================================================================
+;;;;
+;;;;    <gtk-adjustement> class ...
+;;;;
+;;;; ======================================================================
+(define-class <gtk-adjustement> (<gtk-widget>)
+  ((value               #:accessor      value
+                        #:init-keyword  #:value
+                        #:allocation    #:gtk-property)
+   (adjustement-lower   #:accessor      adjustement-lower
+                        #:init-keyword  #:adjustement-lower
+                        #:allocation    #:gtk-property
+                        #:gtk-name      lower)
+   (adjustement-upper   #:accessor      adjustement-upper
+                        #:init-keyword  #:adjustement-upper
+                        #:allocation    #:gtk-property
+                        #:gtk-name      upper)
+   (step-increment      #:accessor      step-increment
+                        #:init-keyword  #:step-increment
+                        #:allocation    #:gtk-property)
+   (page-increment      #:accessor      page-increment
+                        #:init-keyword  #:page-increment
+                        #:allocation    #:gtk-property)
+   (page-size           #:accessor      page-size
+                        #:init-keyword  #:page-size
+                        #:allocation    #:gtk-property)))
+
+
+
+(define-method realize-widget ((self <gtk-adjustement>) initargs)
+  (let* ((value (key-get #:value             initargs 0))
+         (lower (key-get #:adjustement-lower initargs 0))
+         (upper (key-get #:adjustement-upper initargs 100))
+         (si    (key-get #:step-increment    initargs 1))
+         (pi    (key-get #:page-increment    initargs 1))
+         (ps    (key-get #:page-size         initargs 100))
+         (adj   (gtk-adjustment-new value lower upper si pi ps)))
+    (cpointer-type-set! adj 'gtk-adjustement)
+    (slot-set! self 'wid adj)))
+
+
+;;======================================================================
+;;
+;;               C l a s s   < s c r o l l  >
+;;
+;;======================================================================
+
+(define (int->scroll-policy v)
+  (case v
+    ((0)  'always)
+    ((1)  'automatic)
+    ((2)  'never)
+    (else 'external)))
+
+(define (scroll-policy->int v)
+  (let ((v (if (string? v) (string->symbol v) v)))
+    (case v
+      ((always)    0)
+      ((automatic) 1)
+      ((never)     2)
+      ((external)  3)
+      (else        (error "bad policy adjustement: ~S" v)))))
+
+(define (make-get-policy vert?)
+  (lambda (o)
+    (int->scroll-policy
+         (%gtk-get-property (slot-ref o 'wid)
+                            (format "~ascrollbar-policy" (if vert? "v" "h"))))))
+
+(define (make-set-policy vert?)
+  (lambda (o v)
+    (%gtk-set-property! (slot-ref o 'wid)
+                       (format "~ascrollbar-policy" (if vert? "v" "h"))
+                       (scroll-policy->int v))))
+
+(define (int->placement v)
+  (case v
+    ((0)  'top-left)
+    ((1)  'bottom-left)
+    ((2)  'top-right)
+    (else 'bottom-right)))
+
+(define (placement->int v)
+  (let ((v (if (string? v) (string->symbol v) v)))
+    (case v
+      ((top-left)      0)
+      ((bottom-left)   1)
+      ((top-right)     2)
+      ((bottom-right)  3)
+      (else            (error "bad placement: ~S" v)))))
+
+;; ----------------------------------------------------------------------
+
+(define-class <scroll> (<gtk-container>)
+  ((min-content-height   #:accessor      min-content-height
+                         #:init-keyword  #:min-content-height
+                         #:allocation    #:gtk-property)
+   (max-content-height   #:accessor      max-content-height
+                         #:init-keyword  #:max-content-height
+                         #:allocation    #:gtk-property)
+   (min-content-width    #:accessor      min-content-width
+                         #:init-keyword  #:min-content-width
+                         #:allocation    #:gtk-property)
+   (max-content-width    #:accessor      max-content-width
+                         #:init-keyword  #:max-content-width
+                         #:allocation    #:gtk-property)
+   (overlay-scrolling    #:accessor      overlay-scrolling
+                         #:init-keyword  #:overlay-scrolling
+                         #:allocation    #:gtk-property)
+   (hpolicy              #:accessor      hpolicy
+                         #:init-keyword  #:hpolicy
+                         #:allocation    #:virtual
+                         #:slot-ref      (make-get-policy #f)
+                         #:slot-set!     (make-set-policy #f))
+   (vpolicy              #:accessor      vpolicy
+                         #:init-keyword  #:vpolicy
+                         #:allocation    #:virtual
+                         #:slot-ref      (make-get-policy #t)
+                         #:slot-set!     (make-set-policy #t))
+   (window-placement     #:accessor      window-placement 
+                         #:init-keyword  #:window-placement
+                         #:allocation    #:virtual
+                         #:slot-ref      (lambda (o)
+                                           (int->placement
+                                            (%gtk-get-property (slot-ref o 'wid)
+                                                               "window-placement")))
+                         #:slot-set!     (lambda (o v)
+                                           (%gtk-set-property! (slot-ref o 'wid)
+                                                              "window-placement"
+                                                              (placement->int v))))))
+
+(define-method realize-widget ((self <scroll>) initargs)
+  (let ((s (gtk-scrolled-window-new (void) (void))))
+    (cpointer-type-set! s 'gtk-scroll)
+    (slot-set! self 'wid s)))
+
+;;;
+;;; Exports
+;;
+(export <gtk-adjustement>
+        vakue adjustement-lower adjustement-upper
+        step-increment page-increment page-size
+        <scroll>
+        min-content-width max-content-width min-content-height
+        max-content-height overlay-scrolling hpolicy vpolicy
+        window-placement)
+
+
+;; Local Variables:
+;; compile-command: "make -C .."
+;; End:

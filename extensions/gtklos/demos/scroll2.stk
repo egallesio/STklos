@@ -1,0 +1,98 @@
+;;;;
+;;;; scroll2.stk	-- GTklos Scroll Widget Demo
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 11-Feb-2002 16:05 (eg)
+;;;; Last file update:  1-Jul-2021 16:23 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define demo-msg "
+Another Scroll Demo
+
+This is a demo showing a scrollable window containing
+a bunch of buttons.
+Scrollbars position and behavior can be controlled with the
+radio buttons located at the top of this window.
+")
+
+(define (make-radiobutton txt parent leader scroll)
+  (make <radio-button>
+        #:text txt
+        #:parent parent
+        #:border-width 10
+        #:sibling leader
+        #:command (lambda (w e)
+                    (let ((sel (group-selected w)))
+                      (when (eq? w sel)
+                        (set! (window-placement scroll) (text sel)))))))
+
+(define (main args)
+  (let* ((win    (make <demo-window> #:title "Scroll Demo"
+                       #:file "scroll2" #:border-width 5 #:message demo-msg
+                       #:expand #t #:fill #t))
+         (layout (make <grid> #:parent win #:border-width 4 :row-spacing 40))
+         (scroll (make <scroll> #:parent (list layout #:top 1 #:width 2)
+                                #:width 500
+                                #:height 300
+                                #:hpolicy 'automatic
+                                #:vpolicy 'automatic))
+         (grid (make <grid> #:parent scroll #:row-spacing 10 #:column-spacing 10))
+         (frm1 (make <vframe> #:title " Window position " #:xalign 0.1
+                              #:parent (list layout #:top 0 #:left 0)))
+         (frm2 (make <vframe> #:title " Scroll properties " #:xalign  0.1
+                             #:parent (list layout #:top 0 #:left 1))))
+
+    ;; Build the left radiobutton group
+    (let* ((r1 (make-radiobutton "top-left"     frm1 #f scroll))
+           (r2 (make-radiobutton "top-right"    frm1 r1 scroll))
+           (r3 (make-radiobutton "bottom-left"  frm1 r1 scroll))
+           (r4 (make-radiobutton "bottom-right" frm1 r1 scroll)))
+      #void)
+
+    ;; Fill the right frame
+    (make <check-button> #:text "Scrolls overlayed"
+                         #:value (overlay-scrolling scroll)
+                         #:command (lambda (w e)
+                                     (set! (overlay-scrolling scroll) (value w)))
+                         #:parent frm2)
+
+    (make <check-button> #:text "Vertical Scroll"
+                         #:value #t
+                         #:command (lambda (chk e)
+                                     (set! (vpolicy scroll) (if (value chk) 'automatic 'never)))
+                         #:parent frm2)
+    (make <check-button> #:text "Horizontal Scroll"
+                         #:value #t
+                         #:command (lambda (chk e)
+                                     (set! (hpolicy scroll) (if (value chk) 'automatic 'never)))
+                         #:parent frm2)
+
+
+
+    ;; Build a set of  buttons in the scroll
+    (dotimes (i 60)
+      (make <button>
+            #:text (format "Button #~A" i)
+            #:parent (list grid #:top (quotient i 5) #:left (modulo i 5))
+            #:command (lambda _ (eprintf "You have clicked on button #~A\n" i))))
+    (gtk-main)))
