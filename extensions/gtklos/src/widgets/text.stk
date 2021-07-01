@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Feb-2002 22:24 (eg)
-;;;; Last file update: 18-Jun-2021 10:49 (eg)
+;;;; Last file update:  1-Jul-2021 12:19 (eg)
 ;;;;
 
 
@@ -39,6 +39,17 @@
 (define-gtk gtk-text-buffer-set-text (#:pointer #:string #:long) #:void
   "gtk_text_buffer_set_text")
 
+;; clipboard management
+(define-gtk gtk-clipboard-get (:long) :pointer "gtk_clipboard_get")
+
+(define-gtk gtk-text-buffer-copy-clipboard (:pointer :pointer) :void
+   "gtk_text_buffer_copy_clipboard")
+
+(define-gtk gtk-text-buffer-cut-clipboard (:pointer :pointer :boolean) :void
+   "gtk_text_buffer_cut_clipboard")
+
+(define-gtk gtk-text-buffer-paste-clipboard (:pointer :pointer :pointer :boolean) :void
+   "gtk_text_buffer_paste_clipboard")
 
 ;; ----------------------------------------------------------------------
 ;; We use only two of the 4 values offered by GTK+ ⇒ boolean
@@ -196,7 +207,23 @@
 (define-method event-connect-after ((widget <text>) name closure)
   (g-signal-connect widget (slot-ref widget '%twid) name closure #t))
 
+;;
+;; Selection management
+;;
+(define-method text-cut-clipboard ((t <text>))
+  (gtk-text-buffer-cut-clipboard (text-buffer t)
+                                 (gtk-clipboard-get 1)    ; 0 = GDK_NONE
+                                 #t))
 
+(define-method text-copy-clipboard ((t <text>))
+  (gtk-text-buffer-copy-clipboard (text-buffer t)
+                                  (gtk-clipboard-get 0))) ; 0 = GDK_NONE
+
+(define-method text-paste-clipboard ((t <text>))
+  (gtk-text-buffer-paste-clipboard (text-buffer t)
+                                   (gtk-clipboard-get 0)  ; 0 = GDK_NONE
+                                   (void)
+                                   #t))
 ;;;;
 ;;;; Exports
 ;;;;
@@ -204,4 +231,4 @@
         text-buffer accepts-tab cursor-visible text-editable text-indent
         text-monospace text-overwrite text-wrap justify value
         text-read-file text-write-file
-        )
+        text-cut-clipboard text-copy-clipboard text-paste-clipboard)
