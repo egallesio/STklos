@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Jul-2001 16:19 (eg)
-;;;; Last file update: 22-Jun-2021 17:50 (eg)
+;;;; Last file update: 30-Jun-2021 20:18 (eg)
 ;;;;
 
 
@@ -56,9 +56,9 @@
 (define *user-code* (getenv "indemo"))
 (setenv! "indemo" "1")  ;; to avoid returning #f next time
 
-(define-method eval-current-buffer (txt)
+(define (eval-current-buffer txt)
   ;; Save the current buffer in a file and load it
-  '(let ((tmp (temporary-file-name)))
+  (let ((tmp (create-temp-file)))
     (text-write-file txt tmp)
     (load tmp)
     (main #f)
@@ -66,23 +66,25 @@
 
 
 (define (demo-see-code file)
+  (let* ((win (make <vwindow>
+                    #:title (format #f "Code of the ~S Demo" file)
+                    #:expand #f #:fill #f))
+         (tb  (make <toolbar> #:parent win #:toolbar-style 'both))
+         (txt (make <text> #:width 1000 #:height 600)))
+    (container-add! win txt #:expand #t #:fill #t)
 
-  (let* ((win (make <window>  #:title (format #f "Code of the ~S Demo" file)))
-         (box (make <box>     #:parent win :orientation 'vertical
-                              #:expand #t #:fill #t))
-;;//XX   (tb  (make <toolbar> #:parent box))
-         (txt (make <text> #:width 640 #:height 480 :text-monospace #t)))
-    (container-add! box txt #:expand #t #:fill #t)
     ;; Add the eval button
-;;//XX    (make <toolbar-button-item> #:parent tb #:stock-id "gtk-execute"
-;;//XX          #:command (lambda (_)
-;;//XX                     (eprintf "*** EXECUTING USER CODE ***\n")
-;;//XX                     (eval-current-buffer txt))
-;;//XX          #:text "Eval" )
-;;//XX    ;; Add the Close button
-;;//XX    (make <toolbar-button-item> #:parent tb #:stock-id "gtk-quit"
-;;//XX          #:command (lambda (_) (destroy win))
-;;//XX          #:text "Close" )
+    (make <toolbar-button-item> #:parent tb
+          #:icon-name "system-run"
+          #:text "Eval" 
+          #:command (lambda _
+                      (eprintf "*** EXECUTING USER CODE ***\n")
+                      (eval-current-buffer txt)))
+    ;; Add the Close button
+    (make <toolbar-button-item> #:parent tb
+          #:icon-name "application-exit"
+          #:text "Close"
+          #:command (lambda _ (destroy win)))
 
     ;; Read the text of the demo (skipping the copyrigth)
     (let* ((fn   (find-path (string-append file ".stk") *demo-path*))
@@ -98,8 +100,7 @@
 
       (set! (value txt) (port->string port)))))
 
-(define (demo-see-code file)
-  (eprintf "See the code of ~S\n" file))
+
 
 
 

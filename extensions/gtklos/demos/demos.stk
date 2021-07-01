@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 19-Sep-2009 20:45 (eg)
-;;;; Last file update: 29-Jun-2021 12:34 (eg)
+;;;; Last file update: 30-Jun-2021 20:07 (eg)
 ;;;;
 
 (include "demos-utils.stk")
@@ -32,10 +32,11 @@
 
 
 (define (main args)
-  (let* ((win   (make <demo-window> #:title "Run a GTklos demo" :width 400))
-         (box   (make <box>    #:expand #f #:fill 'both #:parent win))
-         (label (make <label>  #:text "\n<b>Choose a demo below</b>\n" #:parent box))
-         (grid  (make <grid>   #:parent box :column-homogeneous #t)))
+  (let* ((win   (make <vwindow> #:title "Run a GTklos demo" :width 400))
+         (label (make <label>  #:text "\n<b>Choose a demo below</b>\n" #:parent win))
+         (grid  (make <grid>   #:parent win :column-homogeneous #t))
+         (bye   (make <button> :text "\nExit\n" :parent win
+                               :command (lambda _ (exit 0)))))
 
     ;; Fill the grid with demos
     (let Loop ((top 0)
