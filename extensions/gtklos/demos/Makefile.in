@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 19-Sep-2009 20:29 (eg)
-# Last file update: 29-Jun-2021 17:48 (eg)
+# Last file update:  1-Jul-2021 10:30 (eg)
 
 SRC= demos.stk \
      button.stk checkbutton.stk  colorchooser.stk     \
@@ -11,7 +11,8 @@ SRC= demos.stk \
      frame.stk grid1.stk grid2.stk header.stk         \
      image1.stk image2.stk label.stk menu1.stk        \
      menu2.stk menu3.stk progress.stk radiobutton.stk \
-     scale.stk separator.stk text.stk toolbar.stk
+     scale.stk separator.stk sedit.stk text.stk       \
+     toolbar.stk
 
 #    canvas1.stk canvas2.stk
 #    event.stk

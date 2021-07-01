@@ -1,0 +1,150 @@
+;;;;
+;;;; sedit.stk  -- A small editor written in STklos
+;;;;
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 10-Nov-2000 15:14 (eg)
+;;;; Last file update:  1-Jul-2021 12:31 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define *current-file* "")  ;; Name of the current file
+(define *text*         #f)  ;; The text widget
+
+;;;;
+;;;; Our error handler. This handler pops a window instead of displaying the
+;;;; message on the standard error port.
+;;;;
+(define (graphical-handler c)
+  (describe c)
+  (make-simple-message-dialog "Error ..."
+                  'error
+                  (format "\n\n~A: ~A\n\n"
+                      (condition-ref c 'location)
+                      (condition-ref c 'message))
+                  '(ok)))
+
+;;;;
+;;;; I/O Operations
+;;;;
+(define (file-edit f)
+  (with-handler graphical-handler
+    (set! *current-file* f)
+    (text-read-file *text* f)))
+
+
+(define (open-a-file . _)
+  (with-handler graphical-handler
+     (let ((f (make-file-selector-dialog #:title "Open File ..."
+                                         #:value (and  *current-file* ""))))
+       (when f
+         (file-edit f)))))
+
+
+(define (save-as . _)
+  (with-handler graphical-handler
+     (let ((f (make-file-selector-dialog #:title "Save as ..."
+                                         #:type 'save
+                                         #:value (and  *current-file* ""))))
+       (when f
+         (if (and (file-exists? f) (not (file-is-regular? f)))
+             (error "buffer cannot be saved in ~S" f)
+             (begin
+               (set! *current-file* f)
+               (text-write-file *text* *current-file*)))))))
+
+(define (save-file . _)
+  (with-handler graphical-handler
+     (if *current-file*
+         (text-write-file *text* *current-file*)
+         (save-as _))))
+
+;;;;
+;;;; Copy and Paste
+;;;;
+(define (cut-sel   . l) (text-cut-clipboard *text*))
+(define (copy-sel  . l) (text-copy-clipboard *text*))
+(define (paste-sel . l) (text-paste-clipboard *text*))
+
+;;;;
+;;;; Misc
+;;;;
+(define (quit-editor . _)
+  (exit 0))
+
+(define (about-editor . _)
+  (make-simple-message-dialog "Information ..."
+                  'info
+                  (string-append
+                   "\n"
+                   "This is a simple demo of an editor written\n"
+                   "using STklos (version " (version) ")\n")
+                  '(ok)))
+
+
+;;;;
+;;;;    M A K E - I N T E R F A C E
+;;;;
+(define (make-interface)
+  (let* ((top   (make <window> #:title "STklos Demo Editor"))
+         (box   (make <vbox> #:parent top))
+         (menus (make <menu-bar> #:parent box))
+         (tb    (make <toolbar>  #:toolbar-style "icons" #:parent box))
+         (txt   (make <text> #:width 800 #:height 500)))
+
+    ;; Place now txt in its container and tell it that it expands and fills..
+    (container-add! box txt #:fill #t #:expand #t)
+    (set! *text* txt)
+
+    ;; Fill the menu
+    (add-items-to-menubar menus
+        `(("File"
+             ("Open"          #:action ,open-a-file)
+             ("Save"          #:action ,save-file)
+             ("Save As ..."   #:action ,save-as)
+             (""              #:type   #:separator)
+             ("Quit"          #:action ,quit-editor))
+          ("Edit"
+             ("Cut"           #:action ,cut-sel)
+             ("Copy"          #:action ,copy-sel)
+             ("Paste"         #:action ,paste-sel))
+          ()
+          ("Help"
+             ("About"       #:action ,about-editor))))
+    ;; Fill the toolbar
+    (add-items-to-toolbar tb
+        `((:icon-name "document-open"    #:command ,open-a-file #:tooltip "Open file")
+          (:icon-name "document-save"    #:command ,save-file   #:tooltip "Save file")
+          (:icon-name "document-save-as" #:command ,save-as     #:tooltip "Save as ...")
+          ()
+          (:icon-name "application-exit" #:command ,quit-editor #:tooltip "Quit")
+          ()
+          (:icon-name "edit-cut"     #:command ,cut-sel     #:tooltip "Cut")
+          (:icon-name "edit-copy"    #:command ,copy-sel    #:tooltip "Copy")
+          (:icon-name "edit-paste"   #:command ,paste-sel   #:tooltip "Paste")))))
+
+
+(define (main args)
+  (make-interface)
+  (when (= (length args) 2)
+    ;; If we have just one argument, use it as an initial file
+    (file-edit (cadr args)))
+  (gtk-main))
