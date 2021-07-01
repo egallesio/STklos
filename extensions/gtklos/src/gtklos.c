@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 11-Aug-2007 11:38 (eg)
- * Last file update: 30-Jun-2021 20:27 (eg)
+ * Last file update:  1-Jul-2021 17:59 (eg)
  */
 
 #include <math.h>               /* for isnan */
@@ -493,12 +493,12 @@ DEFINE_PRIMITIVE("get-gtk-event", get_gtk_event, subr0, (void)) {
 
 
 
-DEFINE_PRIMITIVE("%event-type", event_type, subr1, (SCM event))
+DEFINE_PRIMITIVE("event-type", event_type, subr1, (SCM event))
 {
   GdkEvent *ev;
 
-  if (!CPOINTERP(event)) error_bad_event(event);
-  ev = CPOINTER_VALUE(event);
+  if (!GTK_EVENTP(event)) error_bad_event(event);
+  ev = GTK_EVENT_VALUE(event);
 
   switch (((GdkEventAny *) ev)->type) {
     case GDK_NOTHING           : return STk_intern("NOTHING");
@@ -539,48 +539,34 @@ DEFINE_PRIMITIVE("%event-type", event_type, subr1, (SCM event))
 }
 
 
-//TODO: DEFINE_PRIMITIVE("%event-x", event_x, subr1, (SCM event))
-//TODO: {
-//TODO:   GdkEvent *ev;
-//TODO:
-//TODO:   if (!CPOINTERP(event)) error_bad_event(event);
-//TODO:   ev = CPOINTER_VALUE(event);
-//TODO:
-//TODO:   switch(((GdkEventAny *) ev)->type) {
-//TODO:     case GDK_ENTER_NOTIFY:
-//TODO:     case GDK_LEAVE_NOTIFY:   return STk_double2real(((GdkEventCrossing *)  ev)->x);
-//TODO:     case GDK_BUTTON_PRESS:
-//TODO:     case GDK_2BUTTON_PRESS:
-//TODO:     case GDK_3BUTTON_PRESS:
-//TODO:     case GDK_BUTTON_RELEASE: return STk_double2real(((GdkEventButton *)    ev)->x);
-//TODO:     case GDK_MOTION_NOTIFY:  return STk_double2real(((GdkEventMotion *)    ev)->x);
-//TODO:     case GDK_CONFIGURE:      return MAKE_INT(((GdkEventConfigure *) ev)->x);
-//TODO:     default:                 return MAKE_INT(-1);
-//TODO:   }
-//TODO: }
-//TODO:
-//TODO:
-//TODO: DEFINE_PRIMITIVE("%event-y", event_y, subr1, (SCM event))
-//TODO: {
-//TODO:   GdkEvent *ev;
-//TODO:
-//TODO:   if (!CPOINTERP(event)) error_bad_event(event);
-//TODO:   ev = CPOINTER_VALUE(event);
-//TODO:
-//TODO:   switch(((GdkEventAny *) ev)->type) {
-//TODO:     case GDK_ENTER_NOTIFY:
-//TODO:     case GDK_LEAVE_NOTIFY:   return STk_double2real(((GdkEventCrossing *)  ev)->y);
-//TODO:     case GDK_BUTTON_PRESS:
-//TODO:     case GDK_2BUTTON_PRESS:
-//TODO:     case GDK_3BUTTON_PRESS:
-//TODO:     case GDK_BUTTON_RELEASE: return STk_double2real(((GdkEventButton *)    ev)->y);
-//TODO:     case GDK_MOTION_NOTIFY:  return STk_double2real(((GdkEventMotion *)    ev)->y);
-//TODO:     case GDK_CONFIGURE:      return MAKE_INT(((GdkEventConfigure *) ev)->y);
-//TODO:     default:                 return MAKE_INT(-1);
-//TODO:   }
-//TODO: }
-//TODO:
-//TODO:
+DEFINE_PRIMITIVE("event-x", event_x, subr1, (SCM event))
+{
+  GdkEvent *ev;
+  int res;
+  gdouble x;
+
+  if (!GTK_EVENTP(event)) error_bad_event(event);
+  ev = GTK_EVENT_VALUE(event);
+
+  res = gdk_event_get_coords(ev, &x, NULL);
+  return res ? STk_double2real(x): STk_false;
+}
+
+
+DEFINE_PRIMITIVE("event-y", event_y, subr1, (SCM event))
+{
+  GdkEvent *ev;
+  int res;
+  gdouble y;
+
+  if (!GTK_EVENTP(event)) error_bad_event(event);
+  ev = GTK_EVENT_VALUE(event);
+
+  res = gdk_event_get_coords(ev, NULL, &y);
+  return res ? STk_double2real(y): STk_false;
+}
+
+
 DEFINE_PRIMITIVE("event-char", event_char, subr1, (SCM event))
 {
   GdkEvent *ev;
@@ -603,25 +589,20 @@ DEFINE_PRIMITIVE("event-char", event_char, subr1, (SCM event))
   }
 }
 
-//TODO: DEFINE_PRIMITIVE("%event-keysym", event_keysym, subr1, (SCM event))
-//TODO: {
-//TODO:   GdkEvent *ev;
-//TODO:   int keyval;
-//TODO:
-//TODO:   if (!CPOINTERP(event)) error_bad_event(event);
-//TODO:   ev = CPOINTER_VALUE(event);
-//TODO:
-//TODO:   switch (((GdkEventAny *) ev)->type) {
-//TODO:     case GDK_KEY_PRESS:
-//TODO:       switch (keyval = ((GdkEventKey *)ev)->keyval) {
-//TODO:         case GDK_Return: return MAKE_CHARACTER('\n');
-//TODO:         case GDK_Tab:    return MAKE_CHARACTER('\t');
-//TODO:         default:         return MAKE_INT(keyval);
-//TODO:       }
-//TODO:     default:
-//TODO:       return STk_void;
-//TODO:   }
-//TODO: }
+
+DEFINE_PRIMITIVE("event-keyval", event_keyval, subr1, (SCM event))
+{
+  GdkEvent *ev;
+  guint16 keyval;
+  gboolean res;
+
+  if (!GTK_EVENTP(event)) error_bad_event(event);
+  ev = GTK_EVENT_VALUE(event);
+
+  res = gdk_event_get_keycode(ev, &keyval);
+  return res ? MAKE_INT(keyval): STk_false;
+}
+
 
 DEFINE_PRIMITIVE("event-modifiers", event_modifiers,  subr1, (SCM event))
 {
@@ -680,31 +661,31 @@ DEFINE_PRIMITIVE("event-modifiers", event_modifiers,  subr1, (SCM event))
    return res;
 }
 
-//TODO: DEFINE_PRIMITIVE("%event-button", event_button, subr1, (SCM event))
-//TODO: {
-//TODO:   GdkEvent *ev;
-//TODO:
-//TODO:   if (!CPOINTERP(event)) error_bad_event(event);
-//TODO:   ev = CPOINTER_VALUE(event);
-//TODO:
-//TODO:   switch (((GdkEventAny *)ev)->type) {
-//TODO:     case GDK_BUTTON_PRESS:
-//TODO:     case GDK_2BUTTON_PRESS:
-//TODO:     case GDK_3BUTTON_PRESS:
-//TODO:     case GDK_BUTTON_RELEASE: return MAKE_INT(((GdkEventButton *)ev)->button);
-//TODO:     case GDK_MOTION_NOTIFY: {
-//TODO:          int state = ((GdkEventMotion *)ev)->state;
-//TODO:          if( state & GDK_BUTTON1_MASK )
-//TODO:             return MAKE_INT(1);
-//TODO:          if( state & GDK_BUTTON2_MASK )
-//TODO:             return MAKE_INT(2);
-//TODO:          if( state & GDK_BUTTON3_MASK )
-//TODO:             return MAKE_INT(3);
-//TODO:          return MAKE_INT(0);
-//TODO:       }
-//TODO:     default: return MAKE_INT(0);
-//TODO:   }
-//TODO: }
+DEFINE_PRIMITIVE("event-button", event_button, subr1, (SCM event))
+{
+  GdkEvent *ev;
+
+  if (!GTK_EVENTP(event)) error_bad_event(event);
+  ev = GTK_EVENT_VALUE(event);
+
+  switch (((GdkEventAny *)ev)->type) {
+    case GDK_BUTTON_PRESS:
+    case GDK_2BUTTON_PRESS:
+    case GDK_3BUTTON_PRESS:
+    case GDK_BUTTON_RELEASE: return MAKE_INT(((GdkEventButton *)ev)->button);
+    case GDK_MOTION_NOTIFY: {
+         int state = ((GdkEventMotion *)ev)->state;
+         if( state & GDK_BUTTON1_MASK )
+            return MAKE_INT(1);
+         if( state & GDK_BUTTON2_MASK )
+            return MAKE_INT(2);
+         if( state & GDK_BUTTON3_MASK )
+            return MAKE_INT(3);
+         return MAKE_INT(0);
+      }
+    default: return MAKE_INT(0);
+  }
+}
 
 /* ----------------------------------------------------------------------
  *
@@ -860,12 +841,13 @@ MODULE_ENTRY_START("stklos-gtklos") {
 //FIXME:   ADD_PRIMITIVE_IN_MODULE(box_set_packing, gtklos_module);
 //FIXME:   ADD_PRIMITIVE_IN_MODULE(cont_children, gtklos_module);
 
-//TODO:   ADD_PRIMITIVE_IN_MODULE(event_type, gtklos_module);
-//TODO:   ADD_PRIMITIVE_IN_MODULE(event_x, gtklos_module);
-//TODO:   ADD_PRIMITIVE_IN_MODULE(event_y, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(event_type, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(event_x, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(event_y, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(event_char, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(event_keyval, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(event_modifiers, gtklos_module);
-//TODO:   ADD_PRIMITIVE_IN_MODULE(event_button, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(event_button, gtklos_module);
 
   ADD_PRIMITIVE_IN_MODULE(string2color, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(color2string, gtklos_module);

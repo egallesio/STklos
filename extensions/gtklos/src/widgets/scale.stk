@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Aug-2001 07:58 (eg)
-;;;; Last file update: 21-Jun-2021 19:12 (eg)
+;;;; Last file update:  1-Jul-2021 14:39 (eg)
 ;;;;
 
 
@@ -33,8 +33,6 @@
   "gtk_adjustment_new")
 
 (define-gtk gtk-scale-new (#:long #:pointer) #:pointer "gtk_scale_new")
-
-
 
 (define (value-pos->int val)
   (let ((val (if (string? val) (string->symbol val) val)))

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Feb-2002 22:24 (eg)
-;;;; Last file update:  1-Jul-2021 12:19 (eg)
+;;;; Last file update:  1-Jul-2021 17:44 (eg)
 ;;;;
 
 
@@ -202,11 +202,16 @@
 ;;
 ;; because the real widget is not in the 'wid slot but in the '%twid slot
 (define-method event-connect ((widget <text>) name closure)
-  (g-signal-connect widget (slot-ref widget '%twid) name closure #f))
+  (g-signal-connect (slot-ref widget '%twid)
+                    name
+                    (scheme-proc->gtk-handler closure widget)
+                    (void)))
 
 (define-method event-connect-after ((widget <text>) name closure)
-  (g-signal-connect widget (slot-ref widget '%twid) name closure #t))
-
+  (g-signal-connect (slot-ref widget '%twid)
+                    name
+                    (scheme-proc->gtk-handler closure widget)
+                    (void)))
 ;;
 ;; Selection management
 ;;

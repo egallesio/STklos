@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 29-Jun-2021 15:55 (eg)
+;;;; Last file update:  1-Jul-2021 17:19 (eg)
 ;;;;
 
 
@@ -33,7 +33,8 @@
                       %gtk-get-child-property
                       %string->color %color->string
                       %file-chooser-files
-                      rl-input-timeout rl-event-hook)
+                      rl-input-timeout rl-event-hook
+                      event-x event-y)
 
 (export timeout when-idle kill-idle)
 

@@ -21,10 +21,10 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  8-Apr-2002 19:33 (eg)
-;;;; Last file update: 17-Jun-2021 09:07 (eg)
+;;;; Last file update:  1-Jul-2021 18:06 (eg)
 ;;;;
 
-(include "gtklos-demo.stk")
+(include "demos-utils.stk")
 
 (define *event-msg* "
 Event Management
@@ -38,39 +38,52 @@ output.
 
 (define (main args)
   (let* ((win (make <demo-window> #:title "Event Management Demo" #:x 100 #:y 100
-                    #:file "event" #:message *event-msg* #:border-width  10))
+                    #:file "event" #:message *event-msg* #:border-width  10
+                    #:expand #t #:fill #t))
          (box (make <vbox> #:parent win #:border-width 10 #:padding 10))
          (b1  (make <button> #:text "Enter/Leave Button" #:parent box))
-         (b2 (make <button> #:text "Mouse Press/Release Button"#:parent box))
-         (t  (make <text> #:text "Mouse Motion" #:parent box)))
+         (b2  (make <button> #:text "Mouse Press/Release Button"#:parent box))
+         (txt (make <text> #:text "Mouse Motion" #:height 120
+                    #:parent (list box #:expand #t #:fill #t))))
+
 
     ;; Adding events to the demo window
     (event-connect win "map-event"
-                   (lambda (e) (printf "Map: ~S\n" (title win)) #f))
+                   (lambda _ (printf "Map: ~S\n" (title win)) #f))
     (event-connect win "unmap-event"
-                   (lambda (e) (printf "Unmap: ~S\n" (title win)) #f))
+                   (lambda - (printf "Unmap: ~S\n" (title win)) #f))
     (event-connect win "configure-event"
-                   (lambda (e)
-                     (printf "Configure: x=~A, y=~A\n" (event-x e) (event-y e)) #f))
+                   (lambda (w e)
+                     (printf "Configure: x=~A, y=~A\n" (event-x e) (event-y e))
+                     #f))
 
     ;; Adding events to first button
     (event-connect b1 "enter"
-                   (lambda (e) (printf "Entering: ~S\n" (text b1)) #f))
+                   (lambda _ (printf "Entering: ~S\n" (text b1)) #f))
     (event-connect b1 "leave"
-                   (lambda (e) (printf "Leaving: ~S\n" (text b1)) #f))
+                   (lambda _ (printf "Leaving: ~S\n" (text b1)) #f))
 
     ;; Adding events to second button
     (event-connect b2 "button-press-event"
-                   (lambda (e)
-                     (printf "Press: [~A] ~S\n" (event-button e) (text b2)) #f))
+                   (lambda (w e)
+                     (printf "Button ~A press (Modifiers: ~S)\n"
+                             (event-button e) (event-modifiers e))
+                     #f))
     (event-connect b2 "button-release-event"
-                   (lambda (e)
-                     (printf "Release: [~A] ~S\n" (event-button e) (text b2)) #f))
+                   (lambda (w e)
+                     (printf "Button ~A release (Modifiers: ~S)\n"
+                             (event-button e) (event-modifiers e))
+                     #f))
 
     ;; Adding events to text widget
-    (event-connect t "motion-notify-event"
-                   (lambda (e)
-                     (printf "Motion: [~A] (~A, ~A)\n"
+    (event-connect txt "motion-notify-event"
+                   (lambda (w e)
+                     (printf "Motion: [~A] @ (~A, ~A)\n"
                              (event-button e) (event-x e) (event-y e))
+                     #f))
+    (event-connect txt "key-press-event"
+                   (lambda (w e)
+                     (printf "Keypress: [~A] (keysym: [~A] modifiers [~A]\n"
+                             (event-char e) (event-keyval e) (event-modifiers e))
                      #f))
     (gtk-main)))
