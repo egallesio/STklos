@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 22-Jun-2021 11:51
-;;;; Last file update: 25-Jun-2021 14:56 (eg)
+;;;; Last file update:  1-Jul-2021 12:43 (eg)
 ;;;;
 
 ;;;
@@ -31,9 +31,11 @@
 (define-gtk gtk-file-chooser-dialog-new (#:string #:pointer #:int #:pointer) #:pointer
   "gtk_file_chooser_dialog_new")
 
-(define-gtk gtk-file-chooser-get-current-name (#:pointer) #:string
-  "gtk_file_chooser_get_current_name")
+(define-gtk gtk-file-chooser-get-filename (#:pointer) #:string
+  "gtk_file_chooser_get_filename")
 
+(define-gtk gtk-file-chooser-set-filename (#:pointer #:string) #:void
+  "gtk_file_chooser_set_filename")
 
 (define |GTK_FILE_CHOOSER_ACTION_OPEN|          0)
 (define |GTK_FILE_CHOOSER_ACTION_SAVE|          1)
@@ -63,7 +65,14 @@
                       #:allocation    #:gtk-property)
    (use-preview-label #:accessor      use-preview-label
                       #:init-keyword  #:use-preview-label
-                      #:allocation    #:gtk-property)))
+                      #:allocation    #:gtk-property)
+   (value             #:accessor      value
+                      #:init-keyword  #:value
+                      #:allocation    #:virtual
+                      #:slot-ref      (lambda (o)
+                                        (gtk-file-chooser-get-filename (slot-ref o 'wid)))
+                      #:slot-set!     (lambda (o v)
+                                        (gtk-file-chooser-set-filename (slot-ref o 'wid) v)))))
 
 
 (define-method realize-widget ((self <file-dialog>) initargs)
@@ -105,4 +114,13 @@
     (destroy self)
     res))
 
-(export <file-dialog> dialog-run)
+
+(define (make-file-selector-dialog . args)
+  (let* ((dlg (apply make <file-dialog> args))
+         (res (dialog-run dlg)))
+    (destroy dlg)
+    res))
+
+
+(export <file-dialog> select-multiple show-hidden use-preview-label value
+        dialog-run  make-file-selector-dialog)
