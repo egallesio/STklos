@@ -19,9 +19,13 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 29-Jun-2021 14:19 (eg)
+# Last file update:  2-Jul-2021 16:17 (eg)
 
 EXTENSION=gtklos
+
+SCM_CANVAS = canvas/present.stk canvas/canvas.stk canvas/canvitem.stk    \
+             canvas/canvellipse.stk canvas/canvrect.stk                  \
+             canvas/canvtext.stk 
 
 SCM_SRCS = lib/events.stk lib/libs.stk lib/utils.stk                     \
            classes/meta.stk classes/container.stk classes/widget.stk     \
@@ -33,7 +37,8 @@ SCM_SRCS = lib/events.stk lib/libs.stk lib/utils.stk                     \
            widgets/label.stk          \
            widgets/menu.stk widgets/progress.stk widgets/radiobutton.stk \
            widgets/scale.stk widgets/scroll.stk widgets/separator.stk    \
-           widgets/text.stk widgets/toolbar.stk widgets/window.stk
+           widgets/text.stk widgets/toolbar.stk widgets/window.stk       \
+           $(SCM_CANVAS)
 
 #======================================================================
 OUT            = $(EXTENSION).@SH_SUFFIX@

@@ -1,0 +1,135 @@
+;;;;
+;;;; canvas.stk -- GTklos Canvas Widget
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 17-Feb-2002 10:44 (eg)
+;;;; Last file update:  2-Jul-2021 17:29 (eg)
+;;;;
+
+;;;
+;;; GTk bindings
+;;;
+(define-gtk goo-canvas-new () #:pointer "goo_canvas_new" canvas)
+
+(define-gtk goo-canvas-get-root-item (#:pointer) #:pointer
+  "goo_canvas_get_root_item" canvas)
+
+(define-gtk goo-canvas-update (#:pointer) #:void
+  "goo_canvas_update" canvas)
+
+;;//XXX (define-gtk goo-canvas-scroll-to (#:pointer #:double #:double) #:void
+;;//XXX   "goo_canvas_scroll_to" canvas)
+
+
+;;; ======================================================================
+;;;
+;;;                   < C A N V A S >
+;;;
+;;; ======================================================================
+(define-class <canvas> (<gtk-container>)
+  ((%root                #:init-form     #f) ; root item of the canvas
+   (automatic-bounds     #:accessor      automatic-bounds
+                         #:init-keyword  #:automatic-bounds
+                         #:allocation    #:gtk-property)
+   (background-color     #:accessor      background-color
+                         #:init-keyword  #:background-color
+                         #:allocation    #:virtual
+                         #:slot-ref      (lambda (o)
+                                           ;; background is write-only in goocanvas!!
+                                           (%widget-data-get o #:bg-color #f))
+                         #:slot-set!     (lambda (o v)
+                                           (let ((w (slot-ref o 'wid)))
+                                             (%gtk-set-property! w "background-color" v)
+                                             ;; Since a redraw is not done; we force it
+                                             ;; by rescaling the canvas to it's actual
+                                             ;; scale
+                                             (set! (scale o) (scale o));; YES!!!
+                                             (%widget-data-set! o #:bg-color v))))
+   (bounds-from-origin   #:accessor      bounds-from-origin
+                         #:init-keyword  #:bounds-from-origin
+                         #:allocation    #:gtk-property)
+   (bounds-padding       #:accessor      bounds-padding
+                         #:init-keyword  #:bounds-padding
+                         #:allocation    #:gtk-property)
+   (clear-background     #:accessor      clear-background
+                         #:init-keyword  #:clear-background
+                         #:allocation    #:gtk-property)
+   (integer-layout       #:accessor      integer-layout
+                         #:init-keyword  #:integer-layout
+                         #:allocation    #:gtk-property)
+   (resolution-x         #:accessor      resolution-x
+                         #:init-keyword  #:resolution-x
+                         #:allocation    #:gtk-property)
+   (resolution-y         #:accessor       resolution-y
+                         #:init-keyword  #:resolution-y
+                         #:allocation    #:gtk-property)
+   (scale                #:accessor       scale
+                         #:init-keyword  #:scale
+                         #:allocation    #:gtk-property)
+   (scale-x              #:accessor      scale-x
+                         #:init-keyword  #:scale-x
+                         #:allocation    #:gtk-property)
+   (scale-y              #:accessor      scale-y
+                         #:init-keyword  #:scale-y
+                         #:allocation    #:gtk-property)
+   (canvas-x1            #:accessor      canvas-x1
+                         #:init-keyword  #:canvas-x1
+                         #:allocation    #:gtk-property
+                         #:gtk-name      "x1")
+   (canvas-x2            #:accessor      canvas-x2
+                         #:init-keyword  #:canvas-x2
+                         #:allocation    #:gtk-property
+                         #:gtk-name      "x2")
+   (canvas-y1            #:accessor      canvas-y1
+                         #:init-keyword  #:canvas-y1
+                         #:allocation    #:gtk-property
+                         #:gtk-name      "y1")
+   (canvas-y2            #:accessor      canvas-y2
+                         #:init-keyword  #:canvas-y2
+                         #:allocation    #:gtk-property
+                         #:gtk-name      "y2")))
+
+;;;
+;;; realize-widget
+;;;
+(define-method realize-widget ((self <canvas>) initargs)
+  (let ((e (goo-canvas-new)))
+    (cpointer-type-set! e 'goo-canvas)
+    (slot-set! self 'wid e)))
+
+
+;;;
+;;; initialize
+;;;
+(define-method initialize ((self <canvas>) initargs)
+  (next-method)
+  (let ((root (goo-canvas-get-root-item (slot-ref self 'wid))))
+    (cpointer-type-set! root 'goo-canvas-root)
+    (slot-set! self '%root root)))
+
+
+;;;
+;;; Exports
+;;;
+(export <canvas>
+        automatic-bounds background-color bounds-from-origin bounds-padding
+        clear-background integer-layout resolution-x resolution-y scale
+        scale-x scale-y canvas-x1 canvas-x2 canvas-y1 canvas-y2)

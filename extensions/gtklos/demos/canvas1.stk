@@ -1,0 +1,72 @@
+;;;;
+;;;;
+;;;; canvas1.stk         -- The demo for the GooCanvas documentation
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  2-Jul-2021 17:59
+;;;; Last file update:  2-Jul-2021 18:46 (eg)
+;;;;
+
+
+(include "demos-utils.stk")
+
+
+(define demo-message "
+A simple Canvas demo
+
+Here's a complete example that creates a GooCanvas with a rectangle
+and a text item in it.
+
+Pressing a button in the rectangle will print a message.
+
+This code is inspired from the C code that can be found at:
+https://developer.gnome.org/goocanvas/stable/goocanvas-simple-canvas.html
+")
+
+
+(define (main args)
+  (let* ((win  (make <demo-window> #:title "Canvas Demo"
+                     #:file "canvas1" #:border-width 5
+                     #:message demo-message))
+         (can  (make <canvas> #:parent win
+                     #:width 640 #:height 600))
+         (rect (make <canvas-rectangle> #:parent can
+                     #:x 100 #:y 100
+                     #:width 400 #:height 400
+                     #:line-width 10
+                     #:radius-x 20 #:radius-y 10
+                     #:stroke-color "yellow" #:fill-color "red"))
+         (txt  (make <canvas-text> #:parent can
+                     #:value "Hello World"
+                     #:x 300 #:y 300
+                     ;; FIXME - 1 et ANCHOR center
+                     #:font "Sans 24")))
+    ;; Rotate text
+    (canvas-item-rotate txt 45 300 300)
+
+    ;; Connect a signal handler for the rectangle item.
+    (event-connect rect "button-press-event"
+                   (lambda (w e)
+                     (printf "Button press event at (~s, ~s)\n"
+                             (exact (round (event-x e)))
+                             (exact (round (event-y e))))))
+    (gtk-main)
+    0))

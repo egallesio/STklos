@@ -1,0 +1,66 @@
+;;;;
+;;;;
+;;;; canvellipse.stk         -- Canvas::Ellipse
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  2-Jul-2021 16:04
+;;;; Last file update:  2-Jul-2021 16:19 (eg)
+;;;;
+
+;;;
+;;; GTK Bindings
+;;;
+(define-gtk goo-canvas-ellipse-new (#:pointer #:double #:double
+                                    #:double #:double #:pointer) #:pointer
+   "goo_canvas_ellipse_new" canvas)
+
+
+;;;; ======================================================================
+;;;;
+;;;;    < c a n v a s - e l l i p s e  >   c l a s s
+;;;;
+;;;; ======================================================================
+(define-class <canvas-ellipse> (<gtk-canvas-item-simple>)
+  ((center-x  #:accessor      center-x
+              #:init-keyword  #:center-x
+              #:allocation    #:gtk-property)
+   (center-y  #:accessor      center-y
+              #:init-keyword  #:center-y
+              #:allocation    #:gtk-property)
+   (radius-x  #:accessor      radius-x
+              #:init-keyword  #:radius-x
+              #:allocation    #:gtk-property)
+   (radius-y  #:accessor      radius-y
+              #:init-keyword  #:radius-y
+              #:allocation    #:gtk-property)))
+
+(define-method make-canvas-item ((self <canvas-ellipse>) parent)
+  (let ((x (goo-canvas-ellipse-new parent 0 0 0 0 (void))))
+    (cpointer-type-set! x 'canvas-ellipse)
+    x))
+
+;;;
+;;; Exports
+;;;
+(export <canvas-ellipse> center-x center-y radius-x radius-y)
+
+
+

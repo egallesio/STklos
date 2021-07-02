@@ -1,0 +1,257 @@
+;;;;
+;;;; canvas-vitem.stk   -- GTklos Canvas Items
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  9-Mar-2002 11:39 (eg)
+;;;; Last file update:  2-Jul-2021 18:40 (eg)
+;;;;
+
+;;;
+;;; GTK Bindings
+;;;
+
+(define-gtk goo-canvas-item-translate (#:pointer #:double #:double) #:void
+  "goo_canvas_item_translate" canvas)
+
+(define-gtk goo-canvas-item-scale (#:pointer #:double #:double) #:void
+  "goo_canvas_item_scale" canvas)
+
+(define-gtk goo-canvas-item-rotate (#:pointer #:double #:double #:double) #:void
+  "goo_canvas_item_rotate" canvas)
+
+
+;;;; ======================================================================
+;;;;
+;;;;        < g t k - c a n v a s - i t e m >   c l a s s
+;;;;
+;;;; ======================================================================
+(define-class <gtk-canvas-item> (<gtk-object>)
+  ((wid                  #:getter         wid)        ;; Widget Id
+   (%event               #:init-form      '())        ;; Private event handler
+   (%data                #:init-form      '())        ;; Private data
+   (parent               #:getter         parent
+                         #:init-keyword   #:parent
+                         #:allocation      #:virtual
+                         #:slot-ref        (lambda (o)
+                                             (%widget-data-get o #:parent #f))
+                         #:slot-set!       (lambda (o v)
+                                             (when (slot-ref o 'parent)
+                                               (error "Parent of ~S can't be changed" o))
+                                             (%widget-data-set! o #:parent v)))
+   (can-focus            #:accessor        can-focus
+                         #:init-keyword    #:can-focus
+                         #:allocation      #:gtk-property)
+   (description          #:accessor        description
+                         #:init-keyword    #:description
+                         #:allocation      #:gtk-property)
+;; (pointer-events       #:accessor        pointer-events
+;;                       #:init-keyword    #:pointer-events
+;;                       #:allocation      #:gtk-property)
+   (title                #:accessor        title
+                         #:init-keyword    #:title
+                         #:allocation      #:gtk-property)
+   (tooltip              #:accessor        tooltip
+                         #:init-keyword    #:tooltip
+                         #:allocation      #:gtk-property)
+;; (transform            #:accessor        transform
+;;                       #:init-keyword    #:transform
+;;                       #:allocation      #:gtk-property)
+;; (visibility           #:accessor        visibility
+;;                       #:init-keyword    #:visibility
+;;                       #:allocation      #:gtk-property)
+;; (visibility-threshold #:accessor        visibility-threshold
+;;                       #:init-keyword    #:visibility-threshold
+;;                       #:allocation      #:gtk-property)
+))
+
+
+;;;
+;;; Initialize for <gtk-canvas-item>
+;;;
+(define-generic make-canvas-item)
+
+(define-method make-canvas-item ((self <gtk-canvas-item>))
+  (error 'make-canvas-item "no make-canvas-item method defined for ~S" self))
+
+(define-method initialize ((self <gtk-canvas-item>) initargs)
+  (let ((parent (key-get initargs #:parent #f)))
+    ;; Verify that we have a parent for this object
+    (unless parent
+      (error 'initialize "cannot create a ~S without parent"
+             (class-name (class-of self))))
+
+    ;; Create the canvas item
+    (let ((id (make-canvas-item self (slot-ref parent '%root))))
+      (slot-set! self 'wid id))
+
+    ;; And initialize it
+    (next-method)))
+
+
+;;;
+;;; M E T H O D S
+;;;
+
+(define-method canvas-item-translate ((self <gtk-canvas-item>) tx ty)
+  (goo-canvas-item-translate (slot-ref self 'wid) tx ty))
+
+(define-method canvas-item-scale ((self <gtk-canvas-item>) sx sy)
+  (goo-canvas-item-scale (slot-ref self 'wid) sx sy))
+
+(define-method canvas-item-rotate ((self <gtk-canvas-item>) degrees cx cy)
+  (goo-canvas-item-rotate (slot-ref self 'wid) degrees cx cy))
+
+
+
+;;// ;;; Animation
+;;// (define-method canvas-item-animate ((self <gtk-canvas-item>)
+;;//                                     #:key (x 0.0) (y 0.0)
+;;//                                     (scale 1.0) (degrees 360.0)
+;;//                                     (absolute #t) (duration 1000)
+;;//                                     (step-time 1) (animation-type 'freeze))
+;;//   (let ((type (case animation-type
+;;//                 ((freeze) 0)
+;;//                 ((reset)  1)
+;;//                 ((restart) 2)
+;;//                 ((bounce)  3)
+;;//                 (else (error "bad animation type ~S" animation-type)))))
+;;//     (goo-canvas-item-animate (slot-ref self 'wid) x y scale degrees absolute
+;;//                              duration step-time type)))
+;;// ;;//
+;;// ;;//
+;;// (define-method canvas-item-stop-animation ((self <gtk-canvas-item>))
+;;//   (goo-canvas-item-stop-animation (slot-ref self 'wid)))
+;;// ;;//
+;;// ;;; Raise / Lower
+;;// (define-method canvas-item-raise ((self <gtk-canvas-item>) #:optional above)
+;;//   (when (and above (not (is-a? above <gtk-canvas-item>)))
+;;//     (error 'canvas-item-raise "bad item ~S" above))
+;;// ;;//
+;;//   (goo-canvas-item-raise (slot-ref self 'wid) (if above
+;;//                                                   (slot-ref self 'above)
+;;//                                                   (void))))
+;;// ;;//
+;;// (define-method canvas-item-lower ((self <gtk-canvas-item>) #:optional below)
+;;//   (when (and below (not (is-a? below <gtk-canvas-item>)))
+;;//     (error 'canvas-item-raise "bad item ~S" below))
+;;// ;;//
+;;//   (goo-canvas-item-lower (slot-ref self 'wid) (if below
+;;//                                                   (slot-ref self 'below)
+;;//                                                   (void))))
+;;// ;;//
+;;// ;;; Remove
+;;// (define-method canvas-item-remove ((self <gtk-canvas-item>))
+;;//   (goo-canvas-item-remove (slot-ref self 'wid)))
+;;// ;;//
+
+;;;; ======================================================================
+;;;;
+;;;;    < g t k - c a n v a s - i t e m - s i m p l e >   c l a s s
+;;;;
+;;;; ======================================================================
+(define-class <gtk-canvas-item-simple> (<gtk-canvas-item>)
+  (
+;; (antialias             #:accessor       antialias
+;;                        #:init-keyword   #:antialias
+;;                        #:allocation     #:gtk-property)
+;; (clip-fill-rule        #:accessor       clip-fill-rule
+;;                        #:init-keyword   #:clip-fill-rule
+;;                        #:allocation     #:gtk-property)
+;; (clip-path             #:accessor       clip-path
+;;                        #:init-keyword   #:clip-path
+;;                        #:allocation     #:gtk-property)
+   (fill-color            #:accessor       fill-color
+                          #:init-keyword   #:fill-color
+                          #:allocation     #:virtual
+                          #:slot-ref       (lambda (o)
+                                             (%widget-data-get o #:fill-color #f))
+                          #:slot-set!      (lambda (o v)
+                                             (%gtk-set-property! (slot-ref o 'wid)
+                                                                 "fill-color" v)
+                                             (%widget-data-set! o #:fill-color v)))
+;; (fill-pattern          #:accessor       fill-pattern
+;;                        #:init-keyword   #:fill-pattern
+;;                        #:allocation     #:gtk-property)
+;; (fill-pixbuf           #:accessor       fill-pixbuf
+;;                        #:init-keyword   #:fill-pixbuf
+;;                        #:allocation     #:gtk-property)
+;; (fill-rule             #:accessor       fill-rule
+;;                        #:init-keyword   #:fill-rule
+;;                        #:allocation     #:gtk-property)
+   (font                  #:accessor       font
+                          #:init-keyword   #:font
+                          #:allocation     #:gtk-property)
+;; (hint-metrics          #:accessor       hint-metrics
+;;                        #:init-keyword   #:hint-metrics
+;;                        #:allocation     #:gtk-property)
+;; (line-cap              #:accessor       line-cap
+;;                        #:init-keyword   #:line-cap
+;;                        #:allocation     #:gtk-property)
+;; (line-dash             #:accessor       line-dash
+;;                        #:init-keyword   #:line-dash
+;;                        #:allocation     #:gtk-property)
+;; (line-join             #:accessor       line-join
+;;                        #:init-keyword   #:line-join
+;;                        #:allocation     #:gtk-property)
+;; (line-join-miter-limit #:accessor       line-join-miter-limit
+;;                        #:init-keyword   #:line-join-miter-limit
+;;                        #:allocation     #:gtk-property)
+   (line-width            #:accessor       line-width
+                          #:init-keyword   #:line-width
+                          #:allocation     #:gtk-property)
+;; (operator              #:accessor       operator
+;;                        #:init-keyword   #:operator
+;;                        #:allocation     #:gtk-property)
+  (stroke-color           #:accessor       stroke-color
+                          #:init-keyword   #:stroke-color
+                          #:allocation     #:virtual
+                          #:slot-ref       (lambda (o)
+                                             (%widget-data-get o #:stroke-color #f))
+                          #:slot-set!      (lambda (o v)
+                                             (%gtk-set-property! (slot-ref o 'wid)
+                                                                 "stroke-color" v)
+                                             (%widget-data-set! o #:stroke-color v)))
+;;(stroke-pattern         #:accessor       stroke-pattern
+;;                        #:init-keyword   #:stroke-pattern
+;;                        #:allocation     #:gtk-property)
+;;(stroke-pixbuf          #:accessor       stroke-pixbuf
+;;                        #:init-keyword   #:stroke-pixbuf
+;;                        #:allocation     #:gtk-property)
+  (width                  #:accessor       width
+                          #:init-keyword   #:width
+                          #:allocation     #:gtk-property)
+  (height                 #:accessor       height
+                          #:init-keyword   #:height
+                          #:allocation     #:gtk-property)
+  (x                      #:accessor       canvas-item-x
+                          #:init-keyword   #:x
+                          #:allocation     #:gtk-property)
+  (y                      #:accessor       canvas-item-y
+                          #:init-keyword   #:y
+                          #:allocation     #:gtk-property)))
+
+;;;
+;;; Export
+;;;
+(export canvas-item-translate canvas-item-scale canvas-item-rotate
+        parent can-focus description title tooltip
+        antialias clip-fill-rule fill-color font line-width stroke-color width height
+        canvas-item-x canvas-item-y)
