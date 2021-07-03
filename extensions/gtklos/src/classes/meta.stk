@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 16-Aug-2000 09:21 (eg)
-;;;; Last file update: 18-Jun-2021 08:11 (eg)
+;;;; Last file update:  3-Jul-2021 12:41 (eg)
 ;;;;
 
 ;;;;======================================================================
@@ -42,5 +42,27 @@
        (list
         (lambda (o)   (%gtk-get-property  (slot-ref o s-name) name))
         (lambda (o v) (%gtk-set-property! (slot-ref o s-name) name v)))))
+
+    ((:gtk-property-enum)
+     (let ((s-name (key-get (cdr slot) #:gtk-widget 'wid))
+           (name   (key-get (cdr slot) #:gtk-name (symbol->string (car slot))))
+           (enum   (key-get (cdr slot) #:gtk-enum #f)))
+       (unless enum
+         (error "you must sepcify the enum values for ~s" name))
+       (list
+        (lambda (o)
+          (let ((val (%gtk-get-property (slot-ref o s-name) name)))
+            (if (< -1 val (length enum))
+                (list-ref enum val)
+                (error "value (~s) for enum ~S" val enum))))
+        (lambda (o v)
+          (let* ((val  (if (string? v) (string->symbol v) v))
+                 (item (memq val enum)))
+            (if item
+                (%gtk-set-property! (slot-ref o s-name)
+                                    name
+                                    (- (length enum) (length item)))
+                (error "value for property ~s must be in ~s. It was ~s"
+                       name enum v)))))))
     (else
      (next-method))))
