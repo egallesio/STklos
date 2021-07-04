@@ -37,7 +37,15 @@
           compiler:inline-common-functions
 
           %grab-file-information
-          %compiler-new-label))
+          %compiler-new-label
+          <syntax>?   ;; FIMXE
+          syntax-type
+          syntax-name
+          syntax-expander
+          syntax-compiled-expander
+          syntax-environment
+          syntax-module
+          %macroexpand-1))
 
 (select-module STKLOS-COMPILER)
 
@@ -88,6 +96,388 @@
 (include "peephole.stk")
 (include "assembler.stk")
 (include "computils.stk")
+
+; ======================================================================
+;
+;                            ENVIRONMENTS
+;
+; ======================================================================
+
+
+;;; Environments are represented as lists of lists. An example:
+;;; (let ((a 1)
+;;;       (b 2)
+;;;       (c 3))
+;;;  (let ((d 4)
+;;;        (e 5))
+;;;
+;;; This would be represented as the list
+;;; ( (d e)
+;;;   (a b c) )
+
+;;; Lexically-scoped macros need to use the same stack as other identifiers,
+;;; so we also include them here. However, they cannot be treated as other
+;;; identifiers (they need to be expanded at compile time), so we represent them
+;;; differently on the stack, as a pair of name-expander:
+;;; (f . e) represents a macro "f" with its expander e.
+
+;;; Symbol-in-env? was changed from a predicate to a procedure that
+;;; searches and returns a symbol, and renamed to find-symbol-in-env.
+
+
+
+
+;; Find-symbol-in-env searches for a symbol in an environment.
+;; - if the symbol S is not found, #f is returned
+;; - if the symbol S is found and it is represented as itself,
+;;   "S", then it is itself returned.
+;; - if the symbol S is found and it is represented as a
+;;   pair (S . E), then it is a macro with its expander,
+;;   and the pair is returned
+;;
+;; Suppose the environment is
+;; env: ( (a b c)
+;;        (x (m . e) y)
+;;        (z) )
+;;
+;; Then:
+;;
+;; (find-symbol-in-env x env) => x
+;; (find-symbol-in-env g env) => #f
+;; (find-symbol-in-env m env) => (m . e)
+;;
+(define (find-symbol-in-env symb env)
+
+  (define (compare? a b)
+    (if (pair? b)
+        (eq? a (car b))
+        (eq? a b)))
+  
+  (let Loop ((l env))
+    (if (null? l)
+        #f
+        (let ((x (member symb (car l) compare?)))
+          (if x
+              (caar l)
+              (Loop (cdr l)))))))
+
+;;;; ----------------------------------------------------------------------
+;;;;
+;;;; Lexically-scoped macros
+;;;;
+;;;; ----------------------------------------------------------------------
+
+;; Lexically scoped macros work as this:
+;;
+;; 1. GLOBAL MACROS
+;;
+;; A global macro needs to be DEFINEd first, so it will have been
+;; computed and can be stored in a global variable. So its value will
+;; be a <syntax> structure, containing the expander.
+;; When the compiler finds a global variable of this type, it just
+;; expands and compiles the expanded form.
+;;
+;; Scheme implementation usally do not allow SET!-ing a variable that
+;; is bound to a macro transformer, but it may be interesting to be
+;; able to change the transformer of a macro.
+;;
+;; When the compiler finds a global macro being used,
+;; (define-syntax f ...)
+;; ...
+;; (f ...)   <= f is bound to a <syntax> structure!
+;;
+;; then it will call f's expander on that form and call itself
+;; recursively.
+;;
+;;
+;; 2. LOCAL MACROS
+;;
+;; A local macro needs to have its identifier inserted in the same
+;; stack structure that holds the names of variables, so lexical
+;; scope works as intended (identifiers for variables -- used at execution
+;; time -- and macros -- expanded at compile time -- may shadow each other).
+;; Also, local macros defined in outermost code should be available for use
+;; in macro code in innermost code:
+;;
+;; (define-syntax h ...)
+;;
+;; (let-syntax ((g ...))
+;;   ...
+;;     (let-syntax ((f ... ,(g ...) ...))  <= f may refer to g and h
+;;
+;; The local macro name is kept on the environment stack by the compiler
+;; as a pair (not a symbol), so that it's clear it's a macro. The pair
+;; is (name macro-obj), where macro-obj is an instance of <syntax>
+;;
+;; When the compiler finds a reference to an identifier,
+;; - if it is stored as a symbol, compile reference-to-variable
+;; - if it is stored as a pair, run the expander (which is stored
+;;   along with the macro name), then recursively run the compiler.
+;;
+;;
+;; 3. ENVIRONMENTS: HOW EXPANDERS ARE COMPILED
+;;
+;; A macro expander should use the environment in which it was defined.
+;; So, compiled-expander should be compiled as
+;;
+;; (eval expander-in-env module)
+;;
+;; Where:
+;; - expander-in-env is the expander source code, surrounded by LETs
+;;   that bind the names of the macros in its environment to their
+;;   <syntax> objects:
+;;   (let-syntax ((h ...))
+;;     (let-syntax ((g ...))
+;;       (let-syntax ((f ...))
+;;
+;;   The expander-in-env for f is
+;;   (let ((h h-obj))       <= h-obj is the <syntax> object for h
+;;     (let ((g g-obj))     <= g-obj is the <syntax> object for h
+;;       (lambda (form) ...)     <= expander for f
+;;
+;; When f makes a reference to a macro not in its local environment,
+;; then the global environment should be used. But since we have modules,
+;; the global environment is not unique, so the expander is compiled in
+;; the module where the macro was defined.
+;;
+;;
+;; 4. LOCAL MACROS USING GLOBAL MACROS
+;;
+;; If a global macro has been defined, then it is available as the value
+;; of a global variable, *in a module*. So, since a local macro must
+;; have access to that global macro, we computed the expander calling
+;; eval in it, *on that module*.
+;;
+;; Caveat: it is possible to change the content of the global macro
+;; after the local macro has been defined, but before it has been
+;; used.
+;;
+;;
+;; 5. WE DO NOT KEEP TRACK OF GLOBAL/LOCAL DISTINCTION
+;;
+;; It's not necessary.
+;;
+;; 6. NAME REWRITING, HYGIENE ETC
+;;
+;; We DO NOT yet deal with those issues here. They can be dealt with
+;; separatelty later, maybe with the help of an ALIAS compiler macro.
+;; 
+
+;; FIXME: used "<syntax>" instead of "syntax" because it's the way other
+;; types are defined, but then it's necessary to define alternative names
+;; for the accessors...
+;;
+(define-struct <syntax>
+  type                       ; syntax-rules? syntax-case? other?
+  name                       ; may be useful
+  expander                   ; source
+  compiled-expander          ; compiled with environment
+  environment                ; the environment representation as used in the compiler
+  module)                    ; module where the macro was defined
+
+(define syntax-type               <syntax>-type)
+(define syntax-name               <syntax>-name)
+(define syntax-expander           <syntax>-expander)
+(define syntax-compiled-expander  <syntax>-compiled-expander)
+(define syntax-environment        <syntax>-environment)
+(define syntax-module             <syntax>-module)
+
+
+
+;; Writing a macro will show something like this:
+;; 
+;; #[syntax f in module stklos, of type syntax-rules]
+;;
+;; NOTE: it is probably not possible to have a representation of macros that can
+;; be read back, because the environment of the macro is part of it. Same for
+;; closures.
+;;
+(struct-type-change-writer! <syntax>
+                            (lambda (s port)
+                              (display "#[syntax " port)
+                              (display (struct-ref s 'name) port)
+                              (when (module? (struct-ref s 'module))
+                                (display " in module " port)
+                                (display (module-name (struct-ref s 'module)) port))
+                              (display ", of type " port)
+                              (display (struct-ref s 'type) port)
+                              (display "]" port)))
+
+
+;; %%macroexpand  will expand the CAR of a form if it is a macro.
+;;
+;; If repeat is #f only ONE expansion is performed.
+;; If repeat is #t then the car will be expanded repeatedly until it's
+;; not a macro anymore.
+;;
+;; This is used INTERNALLY by the compiler for local macros!
+;; (internally, because it requires env, which is the internal
+;;  representation of the environment used by the compiler).
+;;
+(define (%%macroexpand form env repeat)
+  (if (and (list? form)
+           (not (null? form)))
+
+      (let ((name (car form)))
+        (let ((obj (find-symbol-in-env name env)))
+          (cond ((and (pair? obj)
+                      (<syntax>? (cdr obj)))
+                 
+                 ;; we have found a LOCAL macro use! apply the expander:
+                 (let ((result (apply (syntax-compiled-expander (cdr obj))
+                                      (cdr form))))
+                   (if repeat
+                       (%%macroexpand result env repeat)
+                       result)))
+                
+                ((and (symbol? name)
+                      (<syntax>? (symbol-value name (current-module) #f)))
+                 ;; The car of the form was not found in the lexical environment, but
+                 ;; is bound to a <syntax> structure in the current module, so it is a
+                 ;; GLOBAL macro being used. We use it to expand the form!
+                 (let ((s (symbol-value name (current-module) #f)))
+                   (let ((result (apply (syntax-compiled-expander s)
+                                        (cdr form))))
+                     (if repeat
+                         (%%macroexpand result env repeat)
+                         result))))
+                
+                 
+                (else
+                  ;; car of the form was not the name of a macro, so
+                  ;; we leave it along - return the form unchanged:
+                  form))))
+
+      ;; form was either '() or not a list, so we just
+      ;; return it unchanged:
+      form))
+
+;; EXAMPLE:
+;; (%%macroexpand '(f)
+;;                (list (list (cons 'f (make-<syntax> (lambda (form) -2)))))
+;;                #f)
+;;  => -2
+
+;; EXAMPLE:
+;; (let ((f (make-<syntax> (lambda (form)
+;;                             ;; (f x) -> (+ 1 x)
+;;                             (list '+ 1 (cadr form))))))
+;;   (let ((env (list (list (cons 'f f)))))
+;;     (format #t "~a~%" (%%macroexpand '(g 2) env #f))
+;;     (format #t "~a~%" (%%macroexpand 'f env #f))
+;;     (format #t "~a~%" (%%macroexpand '(f -10) env #f))
+;;     (format #t "~a~%" (%%macroexpand #(f 10) env #f))))
+;; (g 2)
+;; f
+;; (+ 1 -10)
+;; #(f 10)
+
+
+;; %macroexpand-1  will expand the CAR of a form if it is a macro.
+;; Only ONE expansion is performed.
+;;
+;; This is EXPORTED to the user, and can be used with GLOBAL macros.
+;;
+#|
+<doc EXT %macroexpand-1
+ * (%macroexpand-1 form)
+ *
+ * This procedure will take a Scheme form and, if it is a list and
+ * its |car| is the name of a global macro in the current module,
+ * expand its car.
+ * 
+ * Only one expansion is performed.
+doc>
+|#
+(define (%macroexpand-1 form)
+  (if (and (list? form)
+           (not (null? form)))
+      
+      (let ((first (car form)))
+        
+        (if (and (symbol? first)
+                 (<syntax>? (symbol-value first (current-module) #f)))
+            ;; just apply the transformer and return the result:
+            (apply (struct-ref (symbol-value first (current-module) 'x)
+                               'compiled-expander)
+                   form)
+            
+            ;; not a macro, return unchanged
+            form))
+      
+      ;; not even a list, return unchanged
+      form))
+
+
+;;;
+;;; LET-SYNTAX FOR MACROS WITH LEXICAL SCOPE
+;;;
+
+#|
+<doc %let-syntax EXT-SYNTAX
+ * (%define-syntax ( (name expander) ... )
+ *
+ * Defines a local macro. The macro will be included in the current
+ * lexical scope, and scope rules will be valid for its name, but
+ * it will NOT be hygienic:
+ *
+ * @lisp
+ * (let ((f ...))
+ *   (%define-syntax ((f ...))
+ *      (f)))
+ * @end lisp
+ *
+ * In the above example, |f| refers to the macro |f|, and not the
+ * variable |f|;
+ *
+ * @lisp
+ * (%define-syntax ((f ...))
+ *   (let ((f ...))
+ *      (f)))
+ * @end lisp
+ *
+ * In the above example, |f| refers to the variable |f|, and not the
+ * macro |f|.
+ *
+ * Local macros defined this way shadow and are shadowed by other bindings
+ * in the environment (including variables).
+ * However, although variable names are availabe, their bindings (and values)
+ * are not available when the macro is expanded, so the expansion of a macro
+ * cannot count on the value of a variable (or procedure) which is only available
+ * at runtime.
+doc>
+|#
+(define (compile-%let-syntax e env tail?)
+  (when (not (= (length e) 3))
+    (error "bad let binding (length of form is not three)"))
+  (let ((body (caddr e)))
+    (if (null? (cadr e))
+        (compile-body (cddr e) env e tail?)
+        (let Loop ((bindings (cadr e)) (new-env '()))
+          (if (not (null? bindings))
+              (let ((b      (car bindings)))
+                (let ((name     (car b))
+                      (expander (cadr b)))
+                  
+                  (let ((macro-in-env (cons name (make-<syntax> 'lambda
+                                                                name
+                                                                expander
+                                                                (eval expander
+                                                                      (current-module))
+                                                                env))))
+                    
+                    (Loop (cdr bindings) (cons macro-in-env new-env)))))
+              
+              (begin
+                (compile body (cons new-env env) body tail?)))))))
+
+
+
+;;;; ----------------------------------------------------------------------
+;;;;
+;;;; END of support for lexically-scoped macros
+;;;;
+;;;; ----------------------------------------------------------------------
 
 
 
@@ -195,6 +585,9 @@ doc>
       (compile-constant (cadr expr) env tail?)
       (compiler-error 'quote expr "bad usage in ~S" expr)))
 
+
+
+
 ; ======================================================================
 ;
 ;                               DEFINE
@@ -261,12 +654,6 @@ doc>
 ;;;;
 ;;;; REFERENCES & ASSIGNMENT
 ;;;;
-(define (symbol-in-env? symb env)
-  (let Loop ((l env))
-    (cond
-      ((null? l)                #f)
-      ((memq symb (car l))      #t)
-      (else                     (Loop (cdr l))))))
 
 
 (define (compile-access name env epair ref)
@@ -280,15 +667,30 @@ doc>
 
   (let loop ((lev 0) (env env))
     (if (null? env)
+        
         ;; name is a global variable
         (begin
           (verify-global name epair)
           (em 'GLOBAL-REF 'GLOBAL-SET (fetch-constant name)))
-        ;; name is a local variable
-        (let loop2 ((idx 0) (l (car env)))
+
+        
+        ;; name is a local variable:
+        
+        ;; Changed by jpellegrini (2021-07-25): if we're dealing with an environment
+        ;; level that was introduced by %let-syntax, then we do NOT count it for variable
+        ;; access (otherwise an extra level will be used and variable access will be
+        ;; totally wrong when %let-syntax is used).
+        (let loop2 ((idx 0) (l (car env)) (synt #f)) ; last arg means "is this a let-syntax level?"
           (cond
             ((null? l)
-             (loop (+ lev 1) (cdr env)))
+             (if synt
+                 (loop lev (cdr env))          ; let-syntax level, don't increment lev
+                 (loop (+ lev 1) (cdr env))))  ; ordinary variables level, increment lev
+
+            ((pair? (car l))
+             (when (eq? (caar l) name) compiler-error "syntax ~S used as value" name)
+             (loop2 (+ idx 1) (cdr l) #t))
+            
             ((eq? (car l) name)
              (if (zero? lev)
                  ;; variable in  innermost block
@@ -305,7 +707,7 @@ doc>
                      (em 'DEEP-LOCAL-REF  'DEEP-LOCAL-SET (make-word lev idx))
                      (em 'DEEP-LOC-REF-FAR 'DEEP-LOC-SET-FAR ;; Use a FAR variants
                          (fetch-constant (cons lev idx)))))))
-            (else   (loop2 (+ idx 1) (cdr l))))))))
+            (else   (loop2 (+ idx 1) (cdr l) synt)))))))
 
 
 (define (compile-reference name env epair tail?)
@@ -862,7 +1264,7 @@ doc>
 
 (define (compile-args actuals env)
   (unless (null? actuals)
-    (compile (car actuals) env actuals #f)
+    (compile (%%macroexpand (car actuals) env #t) env actuals #f)
     (emit 'PUSH)
     (compile-args (cdr actuals) env)))
 
@@ -910,7 +1312,7 @@ doc>
     (lambda (fct env)
       ;; Avoid to use *inline-table* on all symbols (assoc is too expensive here)
       (if (and (memq fct *inline-symbols*)
-               (not (symbol-in-env? fct env)))
+               (not (find-symbol-in-env fct env)))
           (let ((f (assoc fct *inline-table*)))
             (and f (eq? (symbol-value* fct STklos) (cdr f))))
           (memq fct *always-inlined*)))))
@@ -1716,58 +2118,60 @@ doc>
 ;;;;
 ;;;;======================================================================
 (define (compile e env epair tail?)
-  (cond
-   ;; ---- We have a pair
-   ((pair? e)
-    (let ((first (car e)))
-      (compiler-maybe-do-autoload first)
-      (if (and (symbol? first)
-               (not (symbol-in-env? first env))
-               (expander? first))
-          ;; ---- macro call
-          (compile (macro-expand e) env epair tail?)
-          ;; ---- special-form? function call?
-          (case first
-            ((if)                 (compile-if             e env tail?))
-            ((define)             (compile-define         e env tail?))
-            ((begin)              (compile-begin          e env tail?))
-            ((lambda λ)                (compile-lambda         e env tail?))
-            ((let %let)           (compile-let            e env tail?))
-            ((let*)               (compile-let*           e env tail?))
-            ((letrec)             (compile-letrec         e env tail?))
-            ((and)                (compile-and            e env tail?))
-            ((or)                 (compile-or             e env tail?))
-            ((cond)               (compile-cond           e env tail?))
-            ((case)               (compile-case           e env tail?))
-            ((do)                 (compile-do             e env tail?))
-            ((quote)              (compile-quote          e env tail?))
-            ((quasiquote)         (compile-quasiquote     e env tail?))
-            ((with-handler)       (compile-with-handler   e env tail?))
-            ((define-macro)       (compile-define-macro   e env tail?))
-            ((%%set!)             (compile-set!           e env tail?))
+  (let ((e (%%macroexpand e env #t))) ;; expand macros first!
+    (cond
+     ;; ---- We have a pair
+     ((pair? e)
+      (let ((first (car e)))
+        (compiler-maybe-do-autoload first)
+        (if (and (symbol? first)
+                 (not (symbol-in-env? first env))
+                 (expander? first))
+            ;; ---- Use of primitive macro (define-macro)
+            (compile (macro-expand e) env epair tail?)
+            
+            ;; ---- special-form? function call?
+            (case first
+              ((if)                 (compile-if             e env tail?))
+              ((define)             (compile-define         e env tail?))
+              ((begin)              (compile-begin          e env tail?))
+              ((lambda λ)                (compile-lambda         e env tail?))
+              ((let %let)           (compile-let            e env tail?))
+              ((let*)               (compile-let*           e env tail?))
+              ((letrec)             (compile-letrec         e env tail?))
+              ((and)                (compile-and            e env tail?))
+              ((or)                 (compile-or             e env tail?))
+              ((cond)               (compile-cond           e env tail?))
+              ((case)               (compile-case           e env tail?))
+              ((do)                 (compile-do             e env tail?))
+              ((quote)              (compile-quote          e env tail?))
+              ((quasiquote)         (compile-quasiquote     e env tail?))
+              ((with-handler)       (compile-with-handler   e env tail?))
+              ((define-macro)       (compile-define-macro   e env tail?))
+              ((%%set!)             (compile-set!           e env tail?))
 
-            ;; Special calls
-            ((%%require)          (compile-require        e env tail?))
-            ((%%require4syntax)   (compile-require4syntax e env tail?))
-            ((%%when-compile)     (compile-when-compile   e env tail?))
-            ((%%include)          (compile-include        e env tail?))
-            ((%%include-ci)       (compile-include-ci     e env tail?))
-            ((%%source-pos)       (compile-%%source-pos   e env tail?))
-            ((%%label)            (compile-%%label        e env tail?))
-            ((%%goto)             (compile-%%goto         e env tail?))
-            ((%%publish-syntax)   (compile-%%pubsyntax    e env tail?))
+              ;; Special calls
+              ((%%require)          (compile-require        e env tail?))
+              ((%%require4syntax)   (compile-require4syntax e env tail?))
+              ((%%when-compile)     (compile-when-compile   e env tail?))
+              ((%%include)          (compile-include        e env tail?))
+              ((%%include-ci)       (compile-include-ci     e env tail?))
+              ((%%source-pos)       (compile-%%source-pos   e env tail?))
+              ((%%label)            (compile-%%label        e env tail?))
+              ((%%goto)             (compile-%%goto         e env tail?))
+              ((%%publish-syntax)   (compile-%%pubsyntax    e env tail?))
+              
+              ;; Standard call
+              (else                 (compile-call           e env tail?))))))
+     
+     ;; ---- We have a symbol
+     ((symbol? e)
+      (compiler-maybe-do-autoload e)
+      (compile-reference e env epair tail?))
 
-            ;; Standard call
-            (else                 (compile-call           e env tail?))))))
-
-   ;; ---- We have a symbol
-   ((symbol? e)
-    (compiler-maybe-do-autoload e)
-    (compile-reference e env epair tail?))
-
-   ;; Self evaluating object
-   (else
-    (compile-constant  e env tail?))))
+     ;; Self evaluating object
+     (else
+      (compile-constant  e env tail?)))))
 
 
 ;=============================================================================
@@ -1801,6 +2205,74 @@ doc>
 (select-module STklos)
 (import STKLOS-COMPILER)
 (define eval (in-module STKLOS-COMPILER eval))
+
+#|
+<doc %define-syntax EXT-SYNTAX
+ * (%define-syntax name expander)
+ *
+ * Defines a global macro which is not hygienic, but enters the same identifier
+ * discipline as variable identifiers (although global, these macros are part of
+ * the lexically-scoped macro system).
+ *
+ * @lisp
+ * (%define-syntax f (lambda form -1))
+ *
+ * (let ((a ...))
+ *   (%let-syntax ((b ...))
+ *     (f)))
+ * @end lisp
+ *
+ * In the above example, the result is |1|, because the macro name was not found in
+ * the local environment (which contained |a| and |b|), but it was found in the
+ * "global" environment (the current module).
+ *
+ * Although local macros cannot have their values used and printed, global macros
+ * must be defined and have their bindings available before they can be used, so
+ * one can inspect them:
+ *
+ * @lisp
+ * (describe f)
+ * #[syntax f in module stklos, of type syntax-rules]
+ * Slots are: 
+ *   type = lambda
+ *   name = f
+ *   expander = (lambda form -1)
+ *   compiled-expander = #[closure 7f03b1887500]
+ *   environment = ()
+ *   module = #[module stklos]
+ * @end lisp
+ *
+ * These are always instances of the structure |<syntax>|, defined in the module
+ * |STKLOS-COMPILER|. In fact, another (cumbersome) way to create a macro like this
+ * is to create an instance of such structure:
+ *
+ * @lisp
+ * (define f ((in-module STKLOS-COMPILER make-<syntax>)
+ *            'lambda
+ *            'f
+ *            '(lambda form -1)
+ *            (eval '(lambda form -1))
+ *            '()
+ *            (current-module)))
+ * @end lisp
+ *
+ * When the compiler looks at a form, it will first check if its |car| is
+ * bound in the environment that was used when the compiler was called,
+ * see if it is an object of this type, and it it is, the form will be
+ * expanded using the |compiled-expander| field.
+doc>
+|#
+(define-macro %define-syntax
+  (lambda (name . e)
+    (let ((expander (car e)))
+      (let ((compiled-expander (eval expander)))
+        `(define ,name ((in-module STKLOS-COMPILER make-<syntax>)
+                        'lambda
+                        ',name
+                        ',expander
+                        (eval ',expander (find-module ',(module-name (current-module))))
+                        ()
+                        (current-module)))))))
 
 
 ;;)

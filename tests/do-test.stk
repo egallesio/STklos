@@ -50,6 +50,7 @@
   (load "test-utf8.stk")
   (load "test-unmutable-bindings.stk")
   (load "test-misc.stk")
+  (load "test-hygienic-macros.stk")
   (load "test-r5rs-pitfall.stk")
 )
 
