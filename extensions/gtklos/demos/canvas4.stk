@@ -1,0 +1,57 @@
+;;;;
+;;;; canvas4.stk    -- GTKlos Canvas Demo
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 11-Sep-2009 18:49 (eg)
+;;;; Last file update:  5-Jul-2021 14:28 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define canvas-msg "
+Canvas Item using SVG paths
+
+This is a simple demo &lt;canvas-path&gt; items.
+
+Note that this canvas use scroll bars. 
+
+The SVG paths come from https://developer.gnome.org/goocanvas/stable/GooCanvasPath.html
+")
+
+(define (main args)
+  (let* ((win (make <demo-window> #:title "Canvas Demo" #:x 100 #:y 100
+                    #:file "canvas4" #:border-width 5 #:width 600 #:height 800
+                    #:expand #t #:fill #t
+                    #:padding 20 #:message canvas-msg))
+         (s   (make <scroll>  #:parent win))
+         (c   (make <canvas> #:parent s)))
+
+
+    (make <canvas-path> #:parent c #:value "M 20 20 L 40 40"
+          #:stroke-color "red")
+    (make <canvas-path> #:parent c #:value "M20,100 C20,50 100,50 100,100"
+          #:stroke-color "blue")
+
+    (make <canvas-path> #:parent c
+          #:value "M200,500 h-150 a150,150 0 1,0 150,-150 z"
+          #:fill-color "red" #:stroke-color "blue" #:line-width 5)
+
+    (gtk-main)))

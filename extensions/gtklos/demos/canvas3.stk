@@ -1,0 +1,68 @@
+;;;;
+;;;; canvas3.stk	-- GTKlos Canvas Demo
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 11-Sep-2009 18:49 (eg)
+;;;; Last file update:  5-Jul-2021 12:54 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define canvas-msg "
+Canvas Item Animation
+
+This is a simple animation of a canvas item.
+")
+
+(define (main args)
+  (let* ((win  (make <demo-window> #:title "Canvas Demo" #:x 100 #:y 100
+                     #:file "canvas3" #:border-width 5
+                     #:padding 20 #:message canvas-msg))
+         (c    (make <canvas> #:parent win #:width 600 #:height 500))
+         (poly #f)
+         (new  (lambda ()
+                 (set! poly (make <canvas-line> #:parent c
+                                  #:stroke-color "red" #:line-width 3
+                                  #:points '(270 330 270 430 390 430 390
+                                             330 310 330 310 390 350 390
+                                             350 370 330 370 330 350 370
+                                             350 370 410 290 410 290 330)))))
+         (box   (make <hbox> #:parent win)))
+
+    ;; Make the Animate button
+    (make <button> #:parent box #:text "Start Animation"
+          #:command (lambda _
+                      (canvas-item-animate poly
+                                           #:scale 0.2
+                                           #:step-time 20
+                                           #:degrees 20
+                                           #:duration 3000
+                                           #:animation-type 'bounce)))
+    ;; Make the Sop button
+    (make <button> #:parent box #:text "Stop Animation"
+          #:command (lambda _
+                      (canvas-item-stop-animation poly)
+                      (canvas-item-remove poly)
+                      (new)))
+
+    ;; Create a new poly
+    (new)
+    (gtk-main)))
