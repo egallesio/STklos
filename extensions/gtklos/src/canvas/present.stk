@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  2-Jul-2021 12:48
-;;;; Last file update:  2-Jul-2021 16:41 (eg)
+;;;; Last file update:  5-Jul-2021 13:14 (eg)
 ;;;;
 
 
@@ -32,5 +32,6 @@
 (include "canvas/canvellipse.stk")
 (include "canvas/canvrect.stk")
 (include "canvas/canvtext.stk")
-
+(include "canvas/canvline.stk")
+(include "canvas/canvpath.stk")
 

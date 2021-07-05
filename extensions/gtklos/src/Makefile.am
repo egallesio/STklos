@@ -19,13 +19,13 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update:  2-Jul-2021 16:17 (eg)
+# Last file update:  5-Jul-2021 13:15 (eg)
 
 EXTENSION=gtklos
 
 SCM_CANVAS = canvas/present.stk canvas/canvas.stk canvas/canvitem.stk    \
-             canvas/canvellipse.stk canvas/canvrect.stk                  \
-             canvas/canvtext.stk 
+             canvas/canvellipse.stk canvas/canvline.stk                  \
+             canvas/canvpath.stk canvas/canvrect.stk canvas/canvtext.stk
 
 SCM_SRCS = lib/events.stk lib/libs.stk lib/utils.stk                     \
            classes/meta.stk classes/container.stk classes/widget.stk     \
@@ -45,7 +45,7 @@ OUT            = $(EXTENSION).@SH_SUFFIX@
 schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@
 
-GTKFLAGS       = `pkg-config --cflags gtk+-3.0`
+GTKFLAGS       = `pkg-config --cflags gtk+-3.0 goocanvas-3.0`
 
 #======================================================================
 BASEDIR= ../../..

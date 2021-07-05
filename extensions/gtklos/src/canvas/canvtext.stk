@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  2-Jul-2021 14:09
-;;;; Last file update:  2-Jul-2021 15:59 (eg)
+;;;; Last file update:  4-Jul-2021 16:33 (eg)
 ;;;;
 
 ;;;
@@ -38,16 +38,19 @@
 ;;;;
 ;;;; ======================================================================
 (define-class <canvas-text> (<gtk-canvas-item-simple>)
-  (
-;; (alignment   #:accessor       alignment
-;;              #:init-keyword   #:alignment
-;;              #:allocation     #:gtk-property)
-;; (anchor      #:accessor       anchor
-;;              #:init-keyword   #:anchor
-;;              #:allocation     #:gtk-property)
-;; (ellipsize   #:accessor       ellipsize
-;;              #:init-keyword   #:ellipsize
-;;              #:allocation     #:gtk-property)
+  ((alignment   #:accessor       alignment
+                #:init-keyword   #:alignment
+                #:allocation     #:gtk-property-enum
+                #:gtk-enum       (left center right))
+   (anchor      #:accessor       anchor
+                #:init-keyword   #:anchor
+                #:allocation     #:gtk-property-enum
+                #:gtk-enum       (center north north-west north-east
+                                  south south-west south-east west east))
+   (ellipsize   #:accessor       ellipsize
+                #:init-keyword   #:ellipsize
+                #:allocation     #:gtk-property-enum
+                #:gtk-enum       (none start middle end))
    (value       #:accessor       value
                 #:init-keyword   #:value
                 #:allocation     #:gtk-property
@@ -55,11 +58,10 @@
    (use-markup  #:accessor       use-markup
                 #:init-keyword   #:use-markup
                 #:allocation     #:gtk-property)
-;; (wrap        #:accessor       wrap
-;;              #:init-keyword   #:wrap
-;;              #:allocation     #:gtk-property)
- ))
-
+   (wrap        #:accessor       wrap
+                #:init-keyword   #:wrap
+                #:allocation     #:gtk-property-enum
+                #:gtk-enum      (word char word-char))))
 
 (define-method make-canvas-item ((self <canvas-text>) parent)
   (let ((x (goo-canvas-text-new parent "" 0 0 -1 0 (void))))
@@ -71,4 +73,4 @@
 ;;;
 ;;; Exports
 ;;;
-(export <canvas-text> anchor value use-markup)
+(export <canvas-text> alignment anchor ellipsize value use-markup wrap)

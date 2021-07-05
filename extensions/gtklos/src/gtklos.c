@@ -21,15 +21,18 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 11-Aug-2007 11:38 (eg)
- * Last file update:  1-Jul-2021 17:59 (eg)
+ * Last file update:  5-Jul-2021 12:16 (eg)
  */
+#define HAVE_GOO
 
 #include <math.h>               /* for isnan */
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>     /* For the keysyms macros */
 #include "stklos.h"
 #include "gtklos-incl.c"
-
+#ifdef HAVE_GOO
+#  include <goocanvas.h>
+#endif
 
 /* ======================================================================
  *
@@ -807,6 +810,70 @@ DEFINE_PRIMITIVE("kill-idle", kill_idle, subr1, (SCM id))
 }
 
 
+#ifdef HAVE_GOO
+/* ----------------------------------------------------------------------
+ *
+ *      Canvas support
+ *
+ * ______________________________________________________________________
+ */
+
+static SCM canvas_line;  // will contain the symbol "canvas-line"
+
+static void error_bad_polyline(SCM obj)
+{
+  STk_error("bad Goo canvas polyline ~S", obj);
+}
+
+DEFINE_PRIMITIVE("%polyline-get-points", goocanv_get_points, subr1, (SCM line))
+{
+  SCM res = STk_nil;
+  GooCanvasPoints* p;
+  int i, len;
+
+  if (!CPOINTERP(line) || CPOINTER_TYPE(line) != canvas_line)
+    error_bad_polyline(line);
+
+  g_object_get(G_OBJECT(CPOINTER_VALUE(line)), "points", &p, NULL);
+  len = p->num_points * 2;
+  for (i =  len-1 ; i >= 0; i--) {
+    res = STk_cons(STk_double2real(p->coords[i]), res);
+  }
+
+  return res;
+}
+
+DEFINE_PRIMITIVE("%polyline-set-points!", goocanv_set_points, subr2, (SCM line, SCM lst))
+{
+  int i, len = STk_int_length(lst);
+  GooCanvasPoints* p, *old;
+
+  if (!CPOINTERP(line) || CPOINTER_TYPE(line) != canvas_line)
+    STk_error("bad Goo canvas polyline ~S", line);
+
+  if (len < 0) STk_error("bad list ~S", lst);
+  if ((len % 2) != 0) STk_error("number of coordinates in ~S must be even", lst);
+
+  /* Grab the old value to unref it later */
+  g_object_get(G_OBJECT(CPOINTER_VALUE(line)), "points", &old, NULL);
+
+  /* Allocate a new set of points */
+  p = goo_canvas_points_new(len / 2);  // ref_count is set to 1
+  
+  for (i = 0; !NULLP(lst) ; lst = CDR(lst), i++) {
+    double d = STk_number2double(CAR(lst));
+
+    if (isnan(d)) STk_error("bad real number ~S", CAR(lst));
+    p->coords[i] = d;
+  }
+  g_object_set(G_OBJECT(CPOINTER_VALUE(line)), "points", p, NULL);
+  goo_canvas_points_unref(old); // to free it
+
+  return STk_void;
+}
+
+#endif
+
 /* ======================================================================
  *
  *      Module stklos-gtklos starts here
@@ -860,6 +927,13 @@ MODULE_ENTRY_START("stklos-gtklos") {
   ADD_PRIMITIVE_IN_MODULE(timeout, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(when_idle, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(kill_idle, gtklos_module);
+
+#ifdef HAVE_GOO
+  /* Canvas support */
+  canvas_line = STk_intern("canvas-line");
+  ADD_PRIMITIVE_IN_MODULE(goocanv_get_points, gtklos_module);
+  ADD_PRIMITIVE_IN_MODULE(goocanv_set_points, gtklos_module);
+#endif
 
   /* Execute Scheme code */
   STk_execute_C_bytecode(__module_consts, __module_code);

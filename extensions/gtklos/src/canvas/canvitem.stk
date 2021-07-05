@@ -1,4 +1,4 @@
-;;;;
+1;;;;
 ;;;; canvas-vitem.stk   -- GTklos Canvas Items
 ;;;;
 ;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  9-Mar-2002 11:39 (eg)
-;;;; Last file update:  2-Jul-2021 18:40 (eg)
+;;;; Last file update:  5-Jul-2021 12:53 (eg)
 ;;;;
 
 ;;;
@@ -37,6 +37,27 @@
 (define-gtk goo-canvas-item-rotate (#:pointer #:double #:double #:double) #:void
   "goo_canvas_item_rotate" canvas)
 
+(define-gtk goo-canvas-item-animate (#:pointer #:double #:double #:double
+                                     #:double #:boolean #:int #:int #:int) #:void
+  "goo_canvas_item_animate" canvas)
+
+(define-gtk goo-canvas-item-stop-animation (#:pointer) #:void
+  "goo_canvas_item_stop_animation" canvas)
+
+(define-gtk goo-canvas-item-raise (#:pointer #:pointer) #:void
+  "goo_canvas_item_raise" canvas)
+
+(define-gtk goo-canvas-item-lower (#:pointer #:pointer) #:void
+  "goo_canvas_item_lower" canvas)
+
+(define-gtk goo-canvas-item-remove (#:pointer) #:void "goo_canvas_item_remove" canvas)
+
+
+(define CANVAS_EVENTS_NONE          0)
+(define CANVAS_EVENTS_VISIBLE_MASK  1)
+(define CANVAS_EVENTS_PAINTED_MASK  2)
+(define CANVAS_EVENTS_FILL_MASK     4)
+(define CANVAS_EVENTS_STROKE_MASK   8)
 
 ;;;; ======================================================================
 ;;;;
@@ -62,9 +83,9 @@
    (description          #:accessor        description
                          #:init-keyword    #:description
                          #:allocation      #:gtk-property)
-;; (pointer-events       #:accessor        pointer-events
-;;                       #:init-keyword    #:pointer-events
-;;                       #:allocation      #:gtk-property)
+   (pointer-events       #:accessor        pointer-events
+                         #:init-keyword    #:pointer-events
+                         #:allocation      #:gtk-property)
    (title                #:accessor        title
                          #:init-keyword    #:title
                          #:allocation      #:gtk-property)
@@ -74,13 +95,13 @@
 ;; (transform            #:accessor        transform
 ;;                       #:init-keyword    #:transform
 ;;                       #:allocation      #:gtk-property)
-;; (visibility           #:accessor        visibility
-;;                       #:init-keyword    #:visibility
-;;                       #:allocation      #:gtk-property)
-;; (visibility-threshold #:accessor        visibility-threshold
-;;                       #:init-keyword    #:visibility-threshold
-;;                       #:allocation      #:gtk-property)
-))
+   (visibility           #:accessor        visibility
+                         #:init-keyword    #:visibility
+                         #:allocation      #:gtk-property-enum
+                         #:gtk-enum        (hidden invisible visible visible-above-threshold))
+   (visibility-threshold #:accessor        visibility-threshold
+                         #:init-keyword    #:visibility-threshold
+                         #:allocation      #:gtk-property)))
 
 
 ;;;
@@ -120,47 +141,49 @@
   (goo-canvas-item-rotate (slot-ref self 'wid) degrees cx cy))
 
 
+;; Animation
+;;
+(define-method canvas-item-animate ((self <gtk-canvas-item>)
+                                    #:key (x 0.0) (y 0.0)
+                                    (scale 1.0) (degrees 360.0)
+                                    (absolute #t) (duration 1000)
+                                    (step-time 1) (animation-type 'freeze))
+  (let ((type (case animation-type
+                ((freeze) 0)
+                ((reset)  1)
+                ((restart) 2)
+                ((bounce)  3)
+                (else (error "bad animation type ~S" animation-type)))))
+    (goo-canvas-item-animate (slot-ref self 'wid) x y scale degrees absolute
+                             duration step-time type)))
 
-;;// ;;; Animation
-;;// (define-method canvas-item-animate ((self <gtk-canvas-item>)
-;;//                                     #:key (x 0.0) (y 0.0)
-;;//                                     (scale 1.0) (degrees 360.0)
-;;//                                     (absolute #t) (duration 1000)
-;;//                                     (step-time 1) (animation-type 'freeze))
-;;//   (let ((type (case animation-type
-;;//                 ((freeze) 0)
-;;//                 ((reset)  1)
-;;//                 ((restart) 2)
-;;//                 ((bounce)  3)
-;;//                 (else (error "bad animation type ~S" animation-type)))))
-;;//     (goo-canvas-item-animate (slot-ref self 'wid) x y scale degrees absolute
-;;//                              duration step-time type)))
-;;// ;;//
-;;// ;;//
-;;// (define-method canvas-item-stop-animation ((self <gtk-canvas-item>))
-;;//   (goo-canvas-item-stop-animation (slot-ref self 'wid)))
-;;// ;;//
-;;// ;;; Raise / Lower
-;;// (define-method canvas-item-raise ((self <gtk-canvas-item>) #:optional above)
-;;//   (when (and above (not (is-a? above <gtk-canvas-item>)))
-;;//     (error 'canvas-item-raise "bad item ~S" above))
-;;// ;;//
-;;//   (goo-canvas-item-raise (slot-ref self 'wid) (if above
-;;//                                                   (slot-ref self 'above)
-;;//                                                   (void))))
-;;// ;;//
-;;// (define-method canvas-item-lower ((self <gtk-canvas-item>) #:optional below)
-;;//   (when (and below (not (is-a? below <gtk-canvas-item>)))
-;;//     (error 'canvas-item-raise "bad item ~S" below))
-;;// ;;//
-;;//   (goo-canvas-item-lower (slot-ref self 'wid) (if below
-;;//                                                   (slot-ref self 'below)
-;;//                                                   (void))))
-;;// ;;//
-;;// ;;; Remove
-;;// (define-method canvas-item-remove ((self <gtk-canvas-item>))
-;;//   (goo-canvas-item-remove (slot-ref self 'wid)))
-;;// ;;//
+(define-method canvas-item-stop-animation ((self <gtk-canvas-item>))
+  (goo-canvas-item-stop-animation (slot-ref self 'wid)))
+
+
+;;
+;; Raise / Lower
+;;
+(define-method canvas-item-raise ((self <gtk-canvas-item>) #:optional above)
+  (when (and above (not (is-a? above <gtk-canvas-item>)))
+    (error 'canvas-item-raise "bad item ~S" above))
+
+  (goo-canvas-item-raise (slot-ref self 'wid) (if above
+                                                  (slot-ref self 'above)
+                                                  (void))))
+
+(define-method canvas-item-lower ((self <gtk-canvas-item>) #:optional below)
+  (when (and below (not (is-a? below <gtk-canvas-item>)))
+    (error 'canvas-item-raise "bad item ~S" below))
+
+  (goo-canvas-item-lower (slot-ref self 'wid) (if below
+                                                  (slot-ref self 'below)
+                                                  (void))))
+;;
+;; Remove
+;;
+(define-method canvas-item-remove ((self <gtk-canvas-item>))
+  (goo-canvas-item-remove (slot-ref self 'wid)))
 
 ;;;; ======================================================================
 ;;;;
@@ -168,16 +191,23 @@
 ;;;;
 ;;;; ======================================================================
 (define-class <gtk-canvas-item-simple> (<gtk-canvas-item>)
-  (
-;; (antialias             #:accessor       antialias
-;;                        #:init-keyword   #:antialias
-;;                        #:allocation     #:gtk-property)
-;; (clip-fill-rule        #:accessor       clip-fill-rule
-;;                        #:init-keyword   #:clip-fill-rule
-;;                        #:allocation     #:gtk-property)
-;; (clip-path             #:accessor       clip-path
-;;                        #:init-keyword   #:clip-path
-;;                        #:allocation     #:gtk-property)
+  ((antialias             #:accessor       antialias
+                          #:init-keyword   #:antialias
+                          #:allocation     #:gtk-property-enum
+                          #:gtk-enum       (default none gray subpixel))
+   (clip-fill-rule        #:accessor       clip-fill-rule
+                          #:init-keyword   #:clip-fill-rule
+                          #:allocation     #:gtk-property-enum
+                          #:gtk-enum       (winding even-odd))
+   (clip-path             #:accessor       clip-path
+                          #:init-keyword   #:clip-path
+                          #:allocation     #:virtual
+                          #:slot-ref       (lambda (o)
+                                             (%widget-data-get o #:clip-path ""))
+                          #:slot-set!      (lambda (o v)
+                                             (%gtk-set-property! (slot-ref o 'wid)
+                                                                 "clip-path" v)
+                                             (%widget-data-set! o #:clip-path v)))
    (fill-color            #:accessor       fill-color
                           #:init-keyword   #:fill-color
                           #:allocation     #:virtual
@@ -193,33 +223,43 @@
 ;; (fill-pixbuf           #:accessor       fill-pixbuf
 ;;                        #:init-keyword   #:fill-pixbuf
 ;;                        #:allocation     #:gtk-property)
-;; (fill-rule             #:accessor       fill-rule
-;;                        #:init-keyword   #:fill-rule
-;;                        #:allocation     #:gtk-property)
+   (fill-rule             #:accessor       fill-rule
+                          #:init-keyword   #:fill-rule
+                          #:allocation     #:gtk-property-enum
+                          #:gtk-enum       (winding even-odd))
    (font                  #:accessor       font
                           #:init-keyword   #:font
                           #:allocation     #:gtk-property)
-;; (hint-metrics          #:accessor       hint-metrics
-;;                        #:init-keyword   #:hint-metrics
-;;                        #:allocation     #:gtk-property)
-;; (line-cap              #:accessor       line-cap
-;;                        #:init-keyword   #:line-cap
-;;                        #:allocation     #:gtk-property)
+   (hint-metrics          #:accessor       hint-metrics
+                          #:init-keyword   #:hint-metrics
+                          #:allocation     #:gtk-property-enum
+                          #:gtk-enum       (default off on))
+   (line-cap              #:accessor       line-cap
+                          #:init-keyword   #:line-cap
+                          #:allocation     #:gtk-property-enum
+                          #:gtk-enum       (butt round sqaure))
 ;; (line-dash             #:accessor       line-dash
 ;;                        #:init-keyword   #:line-dash
 ;;                        #:allocation     #:gtk-property)
-;; (line-join             #:accessor       line-join
-;;                        #:init-keyword   #:line-join
-;;                        #:allocation     #:gtk-property)
-;; (line-join-miter-limit #:accessor       line-join-miter-limit
-;;                        #:init-keyword   #:line-join-miter-limit
-;;                        #:allocation     #:gtk-property)
+   (line-join             #:accessor       line-join
+                          #:init-keyword   #:line-join
+                          #:allocation     #:gtk-property-enum
+                          #:gtk-enum       (mitter round bevel))
+   (line-join-miter-limit #:accessor       line-join-miter-limit
+                          #:init-keyword   #:line-join-miter-limit
+                          #:allocation     #:gtk-property)
    (line-width            #:accessor       line-width
                           #:init-keyword   #:line-width
                           #:allocation     #:gtk-property)
-;; (operator              #:accessor       operator
-;;                        #:init-keyword   #:operator
-;;                        #:allocation     #:gtk-property)
+   (operator              #:accessor       operator
+                          #:init-keyword   #:operator
+                          #:allocation     #:gtk-property-enum
+                          #:gtk-enum       (clear source over in out atop
+                                            dest dest-over dest-in dest-out dest-atop
+                                            xor add saturate
+                                            multiply  screen overlay darken lighten color-dodge
+                                            color-burn hard-light soft-light differennce exclusion
+                                            hsl-hue hsl-saturation hsl-color hsl-luminosity))
   (stroke-color           #:accessor       stroke-color
                           #:init-keyword   #:stroke-color
                           #:allocation     #:virtual
@@ -249,9 +289,16 @@
                           #:allocation     #:gtk-property)))
 
 ;;;
-;;; Export
+;;; Exports
 ;;;
-(export canvas-item-translate canvas-item-scale canvas-item-rotate
-        parent can-focus description title tooltip
-        antialias clip-fill-rule fill-color font line-width stroke-color width height
-        canvas-item-x canvas-item-y)
+(export CANVAS_EVENTS_NONE CANVAS_EVENTS_VISIBLE_MASK CANVAS_EVENTS_PAINTED_MASK
+        CANVAS_EVENTS_FILL_MASK CANVAS_EVENTS_STROKE_MASK
+
+        canvas-item-translate canvas-item-scale canvas-item-rotate
+        canvas-item-animate canvas-item-stop-animation canvas-item-raise
+        canvas-item-lower canvas-item-remove
+
+        parent can-focus description title tooltip visibility visibility-threshold
+        antialias clip-fill-rule clip-path fill-color fill-rule font hint-metrics
+        line-cap line-join line-join-miter-limit line-width operator stroke-color
+        width height canvas-item-x canvas-item-y)

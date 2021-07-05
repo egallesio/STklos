@@ -1,0 +1,78 @@
+;;;;
+;;;;
+;;;; canvline.stk         -- Canvas::Line
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  2-Jul-2021 15:47
+;;;; Last file update:  5-Jul-2021 12:57 (eg)
+;;;;
+
+;;;
+;;; GTK Bindings
+;;;
+(define-gtk goo-canvas-polyline-new-line (#:pointer #:double #:double
+                                          #:double #:double #:pointer)  #:pointer
+  "goo_canvas_polyline_new_line" canvas)
+
+
+;;;; ======================================================================
+;;;;
+;;;;    < c a n v a s - l i n e >   c l a s s
+;;;;
+;;;; ======================================================================
+(define-class <canvas-line> (<gtk-canvas-item-simple>)
+  ((arrow-length     #:accessor      arrow-length
+                     #:init-keyword  #:arrow-length
+                     #:allocation    #:gtk-property)
+   (arrow-tip-length #:accessor      arrow-tip-length
+                     #:init-keyword  #:arrow-tip-length
+                     #:allocation    #:gtk-property)
+   (arrow-width      #:accessor      arrow-width
+                     #:init-keyword  #:arrow-width
+                     #:allocation    #:gtk-property)
+   (close-path       #:accessor      close-path
+                     #:init-keyword  #:close-path
+                     #:allocation    #:gtk-property)
+   (start-arrow      #:accessor      start-arrow
+                     #:init-keyword  #:start-arrow
+                     #:allocation    #:gtk-property)
+   (end-arrow        #:accessor      end-arrow
+                     #:init-keyword  #:end-arrow
+                     #:allocation    #:gtk-property)
+   (points           #:accessor      points
+                     #:init-keyword  #:points
+                     #:allocation    #:virtual
+                     #:slot-ref      (lambda (o)
+                                       (%polyline-get-points (slot-ref o 'wid)))
+                     #:slot-set!     (lambda (o v)
+                                       (%polyline-set-points! (slot-ref o 'wid) v)))))
+
+(define-method make-canvas-item ((self <canvas-line>) parent)
+  (let ((x (goo-canvas-polyline-new-line parent 0 0 120 120 (void))))
+    (cpointer-type-set! x 'canvas-line)
+    x))
+
+;;;
+;;; Exports
+;;;
+(export <canvas-line> arrow-length arrow-tip-length arrow-width close-path
+        start-arrow end-arrow points)
+
