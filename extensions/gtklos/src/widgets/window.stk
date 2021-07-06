@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 15:47 (eg)
-;;;; Last file update: 30-Jun-2021 19:58 (eg)
+;;;; Last file update:  6-Jul-2021 16:28 (eg)
 ;;;;
 
 ;;;;
@@ -53,24 +53,24 @@
    (resizable    #:accessor      resizable
                  #:init-keyword  #:resizable
                  #:allocation    #:gtk-property)
-;;FIXME   (width        #:accessor      width
-;;FIXME                 ;; #:init-keyword  #:width
-;;FIXME                 #:allocation    #:virtual
-;;FIXME                 #:slot-ref      (lambda (o)
-;;FIXME                                   (gtk-widget-get-allocated-width (slot-ref o 'wid)))
-;;FIXME                 #:slot-set!     (lambda (o v)
-;;FIXME                                   (let* ((wid (slot-ref o 'wid))
-;;FIXME                                          (h   (gtk-widget-get-allocated-height wid)))
-;;FIXME                                     (gtk-window-resize wid v h))))
-;;FIXME   (height       #:accessor      height
-;;FIXME                 ;; #:init-keyword  #:height
-;;FIXME                 #:allocation    #:virtual
-;;FIXME                 #:slot-ref      (lambda (o)
-;;FIXME                                   (gtk-widget-get-allocated-height (slot-ref o 'wid)))
-;;FIXME                 #:slot-set!     (lambda (o v)
-;;FIXME                                   (let* ((wid (slot-ref o 'wid))
-;;FIXME                                          (w   (gtk-widget-get-allocated-width wid)))
-;;FIXME                                     (gtk-window-resize wid w v))))
+   (width        #:accessor      width
+                 ;; #:init-keyword  #:width
+                 #:allocation    #:virtual
+                 #:slot-ref      (lambda (o)
+                                   (gtk-widget-get-allocated-width (slot-ref o 'wid)))
+                 #:slot-set!     (lambda (o v)
+                                   (let* ((wid (slot-ref o 'wid))
+                                          (h   (gtk-widget-get-allocated-height wid)))
+                                     (gtk-window-resize wid v h))))
+   (height       #:accessor      height
+                 ;; #:init-keyword  #:height
+                 #:allocation    #:virtual
+                 #:slot-ref      (lambda (o)
+                                   (gtk-widget-get-allocated-height (slot-ref o 'wid)))
+                 #:slot-set!     (lambda (o v)
+                                   (let* ((wid (slot-ref o 'wid))
+                                          (w   (gtk-widget-get-allocated-width wid)))
+                                     (gtk-window-resize wid w v))))
    (modal        #:accessor      modal
                  #:init-keyword  #:modal
                  #:allocation    #:gtk-property)))
