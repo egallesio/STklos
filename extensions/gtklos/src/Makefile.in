@@ -118,7 +118,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/stklosconf.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = gtklos-config.h
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -157,7 +157,8 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/mkinstalldirs
+am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/gtklos-config.h.in \
+	$(top_srcdir)/mkinstalldirs
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
@@ -198,8 +199,11 @@ GCLIB = @GCLIB@
 GMP = @GMP@
 GMPINC = @GMPINC@
 GMPLIB = @GMPLIB@
+GTK_CFLAGS = @GTK_CFLAGS@
+HAVE_CANVAS = @HAVE_CANVAS@
 HAVE_DLOPEN = @HAVE_DLOPEN@
 HAVE_GNOME = @HAVE_GNOME@
+HAVE_GTK = @HAVE_GTK@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -364,6 +368,8 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+gtklos-config.h: $(top_builddir)/config.status $(srcdir)/gtklos-config.h.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

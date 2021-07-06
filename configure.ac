@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 18-Jun-2021 08:27 (eg)
+### Last file update:  6-Jul-2021 09:52 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -450,6 +450,33 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[ void inner (char *foo) { char bar; exit (!(foo 
              void main () { char foo; inner (&foo); } ]])],[STACK_DIRECTION="DOWN"],[STACK_DIRECTION="UP"],[echo "Stack direction is not detected when cross compiling for now"])
 
 
+
+###
+### Configuration for extensions
+###
+
+## --- GTKLOS
+
+GTK_CFLAGS=""
+HAVE_GTK=""
+HAVE_CANVAS=""
+
+# Do we have GTK+?
+if pkg-config --exists gtk+-3.0
+then
+  GTK_CFLAGS=`pkgconfig --cflags gtk+-3.0
+  HAVE_GTK=1
+fi
+
+# Do we have goocanvas?
+if pkg-config --exists goocanvas-3.0
+then
+   GTK_CFLAGS=`pkgconfig --cflags goocanvas-3.0
+   HAVE_GTK=1
+   HAVE_CANVAS=1
+fi
+
+
 ###
 ### Finishing ...
 ###
@@ -527,6 +554,11 @@ AC_SUBST(DEFAULT_CS)
 AC_SUBST(CONTROL_FX_PARAMETERS)
 AC_SUBST(DLLIBS)
 
+# Extensions
+AC_SUBST(HAVE_GTK)
+AC_SUBST(HAVE_CANVAS)
+AC_SUBST(GTK_CFLAGS)
+
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
           utils/stklos-script examples/Makefile
@@ -540,7 +572,8 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           extensions/gtklos/Makefile
           extensions/gtklos/demos/Makefile
           extensions/gtklos/src/Makefile
-
+          extensions/gtklos/src/gtklos-config.h
+          
           lib/srfi-25/Makefile
           lib/srfi-27/Makefile
           lib/srfi-133/Makefile

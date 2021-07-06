@@ -5,29 +5,30 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 18-Jun-2021 08:18
-# Last file update: 22-Jun-2021 11:04 (eg)
+# Last file update:  6-Jul-2021 10:22 (eg)
 #
 
-.PHONY: demo
-
-SUBDIRS= src demos
+.PHONY: all clean demo install distclean
 
 all:
-	for f in $(SUBDIRS) ;do (cd $$f; $(MAKE) $@) ;done
-
-clean:
-	for f in $(SUBDIRS) ;do (cd $$f; $(MAKE) $@) ;done
-	rm -f *~
-
+	(cd src; $(MAKE) $@)
+	(cd demos; $(MAKE) $@)
 
 demo:
-	(cd demos; make demo)
+	(cd demos; $(MAKE) $@)
 
 
 install:
 
 
+clean:
+	rm -f *~
+	(cd src; $(MAKE) $@)
+	(cd demos; $(MAKE) $@)
+
+
 distclean: clean
-	for f in $(SUBDIRS) ;do (cd $$f; $(MAKE) $@) ;done
+	(cd src; $(MAKE) $@)
+	(cd demos; $(MAKE) $@)
 	rm -f Makefile
 
