@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update:  2-Jul-2021 17:49 (eg)
+;;;; Last file update:  6-Jul-2021 10:53 (eg)
 ;;;;
 
 
@@ -86,7 +86,16 @@
 (include "widgets/font-dialog.stk")
 
 ;;;; ---- Canvases
-(include "canvas/present.stk")
+(include "canvas/canvas.stk")
+(include "canvas/canvitem.stk")
+
+(include "canvas/canvellipse.stk")
+(include "canvas/canvrect.stk")
+(include "canvas/canvtext.stk")
+(include "canvas/canvline.stk")
+(include "canvas/canvpath.stk")
+(include "canvas/canvimage.stk")
+
 
 
 (provide "gtklos")
