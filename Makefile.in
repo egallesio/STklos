@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  2-Jun-2021 11:37 (eg)
+# Last file update:  6-Jul-2021 12:21 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -121,8 +121,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/stklosconf.h
-CONFIG_CLEAN_FILES = doc/skb/stklos-version.stk \
-	extensions/gtklos/Makefile extensions/gtklos/demos/Makefile
+CONFIG_CLEAN_FILES = doc/skb/stklos-version.stk
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -181,11 +180,9 @@ CTAGS = ctags
 CSCOPE = cscope
 DIST_SUBDIRS = $(SUBDIRS)
 am__DIST_COMMON = $(srcdir)/Makefile.in \
-	$(top_srcdir)/doc/skb/stklos-version.stk.in \
-	$(top_srcdir)/extensions/gtklos/Makefile.in \
-	$(top_srcdir)/extensions/gtklos/demos/Makefile.in AUTHORS \
-	COPYING ChangeLog INSTALL NEWS README compile config.guess \
-	config.sub depcomp install-sh ltmain.sh missing mkinstalldirs
+	$(top_srcdir)/doc/skb/stklos-version.stk.in AUTHORS COPYING \
+	ChangeLog INSTALL NEWS README compile config.guess config.sub \
+	depcomp install-sh ltmain.sh missing mkinstalldirs
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -418,10 +415,6 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
 doc/skb/stklos-version.stk: $(top_builddir)/config.status $(top_srcdir)/doc/skb/stklos-version.stk.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-extensions/gtklos/Makefile: $(top_builddir)/config.status $(top_srcdir)/extensions/gtklos/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-extensions/gtklos/demos/Makefile: $(top_builddir)/config.status $(top_srcdir)/extensions/gtklos/demos/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 # This directory's subdirectories are mostly independent; you can cd
@@ -877,11 +870,11 @@ SUPPORTED-SRFIS: lib/srfis.stk
 	mv -f  $@.tmp $@
 
 clean-am:
-	for i in doc tests utils;do (cd $$i; $(MAKE) clean) ;done
+	for i in doc tests utils extensions;do (cd $$i; $(MAKE) clean) ;done
 	rm -f SUPPORTED-SRFIS.tmp
 
 distclean: clean
-	for i in $(SUBDIRS) ;do (cd $$i; $(MAKE) distclean); done
+	for i in $(SUBDIRS) extensions ;do (cd $$i; $(MAKE) distclean); done
 	rm -rf Makefile config.log config.status autom4te.cache
 
 test tests: all

@@ -1,0 +1,44 @@
+#
+#  Makefile.in 	-- Makefile for GTklos Extension
+#
+# Copyright © 2021 Erick Gallesio - Polytech Nice-Sophia <eg@unice.fr>
+#
+#           Author: Erick Gallesio [eg@unice.fr]
+#    Creation date: 18-Jun-2021 08:18
+# Last file update:  6-Jul-2021 12:30 (eg)
+#
+
+SUBDIRS=src demos
+
+clean-am:
+	rm -f *~
+
+distclean-am:
+	rm -f Makefile
+
+
+
+
+##.PHONY: all clean demo install distclean
+
+##all:
+##	(cd src; $(MAKE) $@)
+##	(cd demos; $(MAKE) $@)
+##
+##demo:
+##	(cd demos; $(MAKE) $@)
+##
+##
+##install:
+##
+##
+##clean:
+##	rm -f *~
+##	(cd src; $(MAKE) $@)
+##	(cd demos; $(MAKE) $@)
+##
+##
+##distclean: clean
+##	(cd src; $(MAKE) $@)
+##	(cd demos; $(MAKE) $@)
+##	rm -f Makefile

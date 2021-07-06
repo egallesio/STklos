@@ -19,11 +19,11 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update:  5-Jul-2021 15:23 (eg)
+# Last file update:  6-Jul-2021 12:32 (eg)
 
 EXTENSION=gtklos
 
-SCM_CANVAS = canvas/present.stk canvas/canvas.stk canvas/canvitem.stk    \
+SCM_CANVAS = canvas/canvas.stk canvas/canvitem.stk                       \
              canvas/canvellipse.stk canvas/canvimage.stk                 \
              canvas/canvline.stk canvas/canvpath.stk canvas/canvrect.stk \
              canvas/canvtext.stk
@@ -83,5 +83,8 @@ install-exec-hook:
 	install -d $(DESTDIR)$(schemelibdir)
 	install $(OUT) $(DESTDIR)$(schemelibdir)
 
-clean:
+clean-am:
 	rm -f $(OUT) $(EXTENSION)-incl.c *~
+
+distclean-am: 
+	rm -f Makefile

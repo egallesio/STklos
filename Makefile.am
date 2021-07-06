@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  2-Jun-2021 11:37 (eg)
+# Last file update:  6-Jul-2021 12:21 (eg)
 
 
 EXTRA_DIST   =
@@ -66,11 +66,11 @@ SUPPORTED-SRFIS: lib/srfis.stk
 	mv -f  $@.tmp $@
 
 clean-am:
-	for i in doc tests utils;do (cd $$i; $(MAKE) clean) ;done
+	for i in doc tests utils extensions;do (cd $$i; $(MAKE) clean) ;done
 	rm -f SUPPORTED-SRFIS.tmp
 
 distclean: clean
-	for i in $(SUBDIRS) ;do (cd $$i; $(MAKE) distclean); done
+	for i in $(SUBDIRS) extensions ;do (cd $$i; $(MAKE) distclean); done
 	rm -rf Makefile config.log config.status autom4te.cache
 
 test tests: all

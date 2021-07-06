@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update:  5-Jul-2021 15:23 (eg)
+# Last file update:  6-Jul-2021 12:32 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -304,7 +304,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTENSION = gtklos
-SCM_CANVAS = canvas/present.stk canvas/canvas.stk canvas/canvitem.stk    \
+SCM_CANVAS = canvas/canvas.stk canvas/canvitem.stk                       \
              canvas/canvellipse.stk canvas/canvimage.stk                 \
              canvas/canvline.stk canvas/canvpath.stk canvas/canvrect.stk \
              canvas/canvtext.stk
@@ -490,12 +490,10 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean-am: clean-generic mostlyclean-am
+clean: clean-am
 
 distclean: distclean-am
 	-rm -f Makefile
-distclean-am: clean-am distclean-generic distclean-tags
-
 dvi: dvi-am
 
 dvi-am:
@@ -597,8 +595,11 @@ install-exec-hook:
 	install -d $(DESTDIR)$(schemelibdir)
 	install $(OUT) $(DESTDIR)$(schemelibdir)
 
-clean:
+clean-am:
 	rm -f $(OUT) $(EXTENSION)-incl.c *~
+
+distclean-am: 
+	rm -f Makefile
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
