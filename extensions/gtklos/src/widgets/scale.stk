@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Aug-2001 07:58 (eg)
-;;;; Last file update:  1-Jul-2021 14:39 (eg)
+;;;; Last file update:  5-Jul-2021 19:49 (eg)
 ;;;;
 
 
@@ -83,7 +83,7 @@
                    #:allocation   #:gtk-property
                    #:gtk-widget   %adj)
    (lower          #:accessor     lower
-                   #:init-keyword #:from
+                   #:init-keyword #:lower
                    #:allocation   #:gtk-property
                    #:gtk-widget   %adj)
    (upper          #:accessor     upper

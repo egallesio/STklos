@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 13-Oct-2000 17:15 (eg)
-;;;; Last file update: 22-Jun-2021 12:19 (eg)
+;;;; Last file update:  5-Jul-2021 16:13 (eg)
 ;;;;
 
 ;;;
@@ -29,6 +29,8 @@
 ;;;
 (define-gtk gtk-image-new-from-file (#:string) #:pointer       "gtk_image_new_from_file")
 (define-gtk gtk-image-new-from-icon (#:string :long) #:pointer "gtk_image_new_from_icon_name")
+(define-gtk gtk-image-get-pixbuf (#:pointer) #:pointer         "gtk_image_get_pixbuf")
+
 
 
 ;; See https://developer.gnome.org/gtk3/stable/gtk3-Themeable-Stock-Images.html#GtkIconSize
@@ -47,7 +49,7 @@
     ((5)     'large)
     ((6)     'huge)
     (else    'small)))
-  
+
 ;; ----------------------------------------------------------------------
 ;;                          Images Utilities
 ;;----------------------------------------------------------------------
@@ -108,6 +110,7 @@
                                                       "icon-size"
                                                       (size->int v))))))
 
+
 (define-method realize-widget ((self <image>) initargs)
   (let* ((icon (key-get initargs #:icon-name #f))
          (sz   (key-get initargs #:icon-size 'medium))
@@ -122,7 +125,16 @@
     (cpointer-type-set! img 'gtk-image)
     (slot-set! self 'wid img)))
 
+(define-method get-image-pixbuf ((self <image>))
+  (let ((pix (gtk-image-get-pixbuf (slot-ref self 'wid))))
+    (cond
+     ((eq? pix (void)) #f)
+     (else (cpointer-type-set! pix 'image-pixbuf)
+           pix))))
+
 ;;;
 ;;; Exports
 ;;;
-(export image-path <image> file-name icon-name icon-size)
+(export image-path
+        <image> file-name icon-name icon-size
+        get-image-pixbuf)

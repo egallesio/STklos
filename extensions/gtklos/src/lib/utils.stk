@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 23-Aug-2007 15:03 (eg)
-;;;; Last file update: 30-Jun-2021 18:58 (eg)
+;;;; Last file update:  5-Jul-2021 19:41 (eg)
 ;;;;
 
 
@@ -33,6 +33,7 @@
 (define-gtk gtk-main-iteration-do (:boolean) :boolean "gtk_main_iteration_do")
 (define-gtk gtk-main () :void                         "gtk_main")
 (define-gtk gtk-events-pending () :boolean            "gtk_events_pending")
+
 
 (define *table-id* '())
 
@@ -62,6 +63,29 @@
 (define (gtklos-slot-is-ro slot)
   (lambda (o v)
     (error "slot `~S' is read-only in ~S" slot o)))
+
+
+
+;; ======================================================================
+;;
+;; Set GTK properties (special case for C pointers)
+;;
+;; ======================================================================
+
+;; Normally we use the function %gtk-set-property! for setting properties
+;; (defined in C). Unfortunately this function don't work whe we manipulate
+;; pointers.
+
+;; The next definition is not completely correct. It is a specialized version
+;; for setting values which are pointers in GTK. Her the value set must be a
+;; Cpointer. Furthermore, we only set one property here (the last pointer being
+;; always #void here),whereas the g_object_set accepts any number of properties
+
+(define-gtk g-object-set-for-pointers (:pointer #:string #:pointer #:pointer) #:void
+   "g_object_set" gtk)
+
+(define (%gtk-set-pointer-property! obj prop value)
+  (g-object-set-for-pointers obj prop value (void)))
 
 
 ;; ======================================================================
@@ -108,6 +132,5 @@
 ;;;
 ;;; Module exports
 ;;;
-(export start-interactive-gtk 
+(export start-interactive-gtk
         gtk-main) ;; the GTK "official" event loop
-

@@ -1,0 +1,76 @@
+;;;;
+;;;;
+;;;; canvimage.stk         -- Canvas::Image
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  5-Jul-2021 14:39
+;;;; Last file update:  6-Jul-2021 09:21 (eg)
+;;;;
+
+;;;
+;;; GTK Bindings
+;;;
+(define-gtk goo-canvas-image-new (#:pointer #:pointer #:double #:double :pointer) #:pointer
+  "goo_canvas_image_new" canvas)
+
+
+;;;; ======================================================================
+;;;;
+;;;;    < c a n v a s - i m a g e >   c l a s s
+;;;;
+;;;; ======================================================================
+(define-class <canvas-image> (<gtk-canvas-item-simple>)
+  ((alpha         #:accessor      alpha
+                  #:init-keyword  #:alpha
+                  #:allocation    #:gtk-property)
+;; (pattern       #:accessor      pattern
+;;                #:init-keyword  #:pattern
+;;                #:allocation    #:gtk-property)
+   (pixbuf        #:accessor      pixbuf
+                  #:init-keyword  #:pixbuf
+                  #:allocation    #:virtual
+                  #:slot-ref      (lambda (o)
+                                    (%widget-data-get o #:pixbuf #f))
+                  #:slot-set!     (lambda (o v)
+                                    (%gtk-set-pointer-property! (slot-ref o 'wid) "pixbuf" v)
+                                    (%widget-data-set! o #:pixbuf v)))
+   (image        #:accessor      image
+                 #:init-keyword  #:image       ;; A simpler way to set pixbuf
+                 #:allocation    #:virtual
+                 #:slot-ref      (lambda (o)
+                                   (%widget-data-get o #:image #f))
+                 #:slot-set!     (lambda (o v)
+                                   (slot-set! o 'pixbuf (get-image-pixbuf v))
+                                   (%widget-data-set! o #:image v)))
+   (scale-to-fit  #:accessor      scale-to-fit
+                  #:init-keyword  #:scale-to-fit
+                  #:allocation    #:gtk-property)))
+
+
+(define-method make-canvas-item ((self <canvas-image>) parent)
+  (let ((x (goo-canvas-image-new  parent (void) 0 0 (void))))
+    (cpointer-type-set! x 'canvas-image)
+    x))
+
+;;;
+;;; Exports
+;;;
+(export <canvas-image> alpha pixbuf image scale-to-fit)

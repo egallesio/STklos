@@ -19,13 +19,14 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update:  5-Jul-2021 13:15 (eg)
+# Last file update:  5-Jul-2021 15:23 (eg)
 
 EXTENSION=gtklos
 
 SCM_CANVAS = canvas/present.stk canvas/canvas.stk canvas/canvitem.stk    \
-             canvas/canvellipse.stk canvas/canvline.stk                  \
-             canvas/canvpath.stk canvas/canvrect.stk canvas/canvtext.stk
+             canvas/canvellipse.stk canvas/canvimage.stk                 \
+             canvas/canvline.stk canvas/canvpath.stk canvas/canvrect.stk \
+             canvas/canvtext.stk
 
 SCM_SRCS = lib/events.stk lib/libs.stk lib/utils.stk                     \
            classes/meta.stk classes/container.stk classes/widget.stk     \

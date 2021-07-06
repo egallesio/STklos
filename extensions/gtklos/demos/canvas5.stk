@@ -1,0 +1,63 @@
+;;;;
+;;;; canvas5.stk    -- GTKlos Canvas Demo
+;;;;
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 11-Sep-2009 18:49 (eg)
+;;;; Last file update:  6-Jul-2021 09:24 (eg)
+;;;;
+
+(include "demos-utils.stk")
+
+(define canvas-msg "
+Image in a canvas
+
+This is a simple demo  an image in a canvas.
+
+Use the fisrt scale to change image size.
+
+Use the second scale to change the transparency of the image
+")
+
+(define (main args)
+  (let* ((win (make <demo-window> #:title "Canvas Demo" #:x 100 #:y 100
+                    #:file "canvas5" #:border-width 5 #:width 600 #:height 800
+                    #:expand #t #:fill #t
+                    #:padding 20 #:message canvas-msg))
+         (s      (make <scroll>  #:parent win))
+         (c      (make <canvas> #:parent s))
+         (fig    (make <canvas-ellipse> #:parent c #:center-x 130 #:center-y 130
+                       #:radius-x 50 #:radius-y 30 #:stroke-color "#000099"
+                       #:fill-color "rgb(40,90,120)"))
+         (cimg   (make <canvas-image> #:parent c
+                       #:image (make <image> #:file-name "./images/stklos-logo.png")
+                       #:scale-to-fit #t)))
+
+    ;; First scale: image size
+    (make <scale> #:value 100 #:lower 30 #:upper 301 #:increment 1
+          #:parent (list win #:expand #f #:fill #f)
+          #:command (lambda (w e)
+                      (let ((v (exact (round (value w)))))
+                        (slot-set! cimg 'width  v)
+                        (slot-set! cimg 'height v))))
+    (make <scale> #:value 1.0 #:upper 2 #:digits 2
+          #:parent (list win #:expand #f #:fill #f)
+          #:command (lambda (w e) (set! (alpha cimg) (value w))))
+    (gtk-main)))
