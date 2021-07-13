@@ -21,7 +21,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  6-Jul-2021 11:53
-# Last file update: 13-Jul-2021 19:16 (eg)
+# Last file update: 13-Jul-2021 19:19 (eg)
 #
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -645,7 +645,7 @@ all-recursive:
 clean-am:
 	rm -f *~
 
-distclean-am: 
+distclean-am:
 	rm -f Makefile
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

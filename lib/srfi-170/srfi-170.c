@@ -21,7 +21,7 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Jan-2021 11:54
- * Last file update: 31-May-2021 17:08 (eg)
+ * Last file update: 13-Jul-2021 19:39 (eg)
  */
 
 #include <limits.h>
@@ -58,12 +58,6 @@ SCM time_type; /* FIXME */
 static SCM symb_errno, symb_mode, symb_dir_object, symb_dot_files;
 
 
-/* # 3.1 */
-//FIXMEstatic SCM symb_EACCES, symb_EBADF, symb_EBUSY, symb_EDQUOT, symb_EEXIST, symb_EFAULT, symb_EINVAL,
-//FIXME           symb_EINTR, symb_EIO, symb_ELOOP, symb_EMLINK, symb_ENAMETOOLONG, symb_ENOENT,
-//FIXME           symb_ENOMEM, symb_ENOSPC, symb_ENOSYS, symb_ENOTDIR, symb_ENOTEMPTY, symb_ENOTTY,
-//FIXME           symb_EOVERFLOW, symb_EPERM, symb_EROFS, symb_ESRCH, symb_EXDEV;
-
 /* # 3.2 */
 static SCM symb_binary_input, symb_textual_input, symb_binary_output, symb_textual_output,
            symb_binary_input_output, symb_buffer_none, symb_buffer_block, symb_buffer_line;
@@ -80,32 +74,6 @@ static void initialize_global_symbols(void)
   symb_mode       = STk_intern("mode");
   symb_dir_object = STk_intern("dir-object");
   symb_dot_files  = STk_intern("dot-files");
-
-  /* ========== Section #3.1 ========== */
-//FIXME  symb_EACCES       = STk_intern("EACCES");
-//FIXME  symb_EBADF        = STk_intern("EBADF");
-//FIXME  symb_EBUSY        = STk_intern("EBUSY");
-//FIXME  symb_EDQUOT       = STk_intern("EDQUOT");
-//FIXME  symb_EEXIST       = STk_intern("EEXIST");
-//FIXME  symb_EFAULT       = STk_intern("EFAULT");
-//FIXME  symb_EINVAL       = STk_intern("EINVAL");
-//FIXME  symb_EINTR        = STk_intern("EINTR");
-//FIXME  symb_EIO          = STk_intern("EIO");
-//FIXME  symb_ELOOP        = STk_intern("ELOOP");
-//FIXME  symb_EMLINK       = STk_intern("EMLINK");
-//FIXME  symb_ENAMETOOLONG = STk_intern("ENAMETOOLONG");
-//FIXME  symb_ENOENT       = STk_intern("ENOENT");
-//FIXME  symb_ENOMEM       = STk_intern("ENOMEM");
-//FIXME  symb_ENOSPC       = STk_intern("ENOSPC");
-//FIXME  symb_ENOSYS       = STk_intern("ENOSYS");
-//FIXME  symb_ENOTDIR      = STk_intern("ENOTDIR");
-//FIXME  symb_ENOTEMPTY    = STk_intern("ENOTEMPTY");
-//FIXME  symb_ENOTTY       = STk_intern("ENOTTY");
-//FIXME  symb_EOVERFLOW    = STk_intern("EOVERFLOW");
-//FIXME  symb_EPERM        = STk_intern("EPERM");
-//FIXME  symb_EROFS        = STk_intern("EROFS");
-//FIXME  symb_ESRCH        = STk_intern("ESRCH");
-//FIXME  symb_EXDEV        = STk_intern("EXDEV");
 
   /* ========== Section #3.2 ========== */
   symb_binary_input         = STk_intern("binary-input");
