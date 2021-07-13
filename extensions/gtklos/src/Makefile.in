@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update:  6-Jul-2021 12:32 (eg)
+# Last file update: 13-Jul-2021 09:54 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -327,7 +327,7 @@ SCM_SRCS = lib/events.stk lib/libs.stk lib/utils.stk                     \
 OUT = $(EXTENSION).@SH_SUFFIX@
 schemedir = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir = $(prefix)/lib/@PACKAGE@/@VERSION@
-GTKFLAGS = `pkg-config --cflags gtk+-3.0 goocanvas-3.0`
+GTKFLAGS = @GTK_CFLAGS@
 
 #======================================================================
 BASEDIR = ../../..

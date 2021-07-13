@@ -5,11 +5,11 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  6-Jul-2021 11:53
-# Last file update:  6-Jul-2021 12:24 (eg)
+# Last file update: 13-Jul-2021 19:19 (eg)
 #
 
 
-SUBDIRS=gtklos
+SUBDIRS=gtklos stklos-fuse
 
 all-recursive:
 	@echo "***"
@@ -19,5 +19,5 @@ all-recursive:
 clean-am:
 	rm -f *~
 
-distclean-am: 
+distclean-am:
 	rm -f Makefile

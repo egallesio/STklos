@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  6-Jul-2021 11:59 (eg)
+### Last file update: 13-Jul-2021 10:06 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -462,16 +462,16 @@ HAVE_GTK=""
 HAVE_CANVAS=""
 
 # Do we have GTK+?
-if pkg-config --exists gtk+-3.0
+if ${PKGCONFIG} --exists gtk+-3.0
 then
-  GTK_CFLAGS=`pkgconfig --cflags gtk+-3.0
+  GTK_CFLAGS=`${PKGCONFIG} --cflags gtk+-3.0`
   HAVE_GTK=1
 fi
 
 # Do we have goocanvas?
-if pkg-config --exists goocanvas-3.0
+if ${PKGCONFIG} --exists goocanvas-3.0
 then
-   GTK_CFLAGS=`pkgconfig --cflags goocanvas-3.0
+   GTK_CFLAGS=`${PKGCONFIG} --cflags goocanvas-3.0`
    HAVE_GTK=1
    HAVE_CANVAS=1
 fi
@@ -569,18 +569,23 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/skb/stklos-version.stk
           pkgman/Makefile
 
-          extensions/Makefile
-          extensions/gtklos/Makefile
-          extensions/gtklos/src/Makefile
-          extensions/gtklos/demos/Makefile
-          extensions/gtklos/src/gtklos-config.h
-
           lib/srfi-25/Makefile
           lib/srfi-27/Makefile
           lib/srfi-133/Makefile
           lib/srfi-144/Makefile
           lib/srfi-170/Makefile
           lib/srfi-175/Makefile
+
+          extensions/Makefile
+
+          extensions/gtklos/Makefile
+          extensions/gtklos/src/Makefile
+          extensions/gtklos/demos/Makefile
+          extensions/gtklos/src/gtklos-config.h
+
+          extensions/stklos-fuse/Makefile
+          extensions/stklos-fuse/src/Makefile
+          extensions/stklos-fuse/demos/Makefile
 ])
 AC_OUTPUT
 

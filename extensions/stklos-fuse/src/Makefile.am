@@ -19,34 +19,16 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 13-Jul-2021 09:54 (eg)
+# Last file update: 13-Jul-2021 12:42 (eg)
 
-EXTENSION=gtklos
+EXTENSION=stklos-fuse
 
-SCM_CANVAS = canvas/canvas.stk canvas/canvitem.stk                       \
-             canvas/canvellipse.stk canvas/canvimage.stk                 \
-             canvas/canvline.stk canvas/canvpath.stk canvas/canvrect.stk \
-             canvas/canvtext.stk
-
-SCM_SRCS = lib/events.stk lib/libs.stk lib/utils.stk                     \
-           classes/meta.stk classes/container.stk classes/widget.stk     \
-           widgets/box.stk widgets/button.stk widgets/checkbutton.stk    \
-           widgets/color-dialog.stk widgets/combobox.stk                 \
-           widgets/dialog.stk widgets/entry.stk widgets/file-dialog.stk  \
-           widgets/font-dialog.stk widgets/frame.stk                     \
-           widgets/grid.stk widgets/header.stk widgets/image.stk         \
-           widgets/label.stk          \
-           widgets/menu.stk widgets/progress.stk widgets/radiobutton.stk \
-           widgets/scale.stk widgets/scroll.stk widgets/separator.stk    \
-           widgets/text.stk widgets/toolbar.stk widgets/window.stk       \
-           $(SCM_CANVAS)
+SCM_SRCS = stklos-fuse.stk
 
 #======================================================================
 OUT            = $(EXTENSION).@SH_SUFFIX@
 schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@
-
-GTKFLAGS       = @GTK_CFLAGS@
 
 #======================================================================
 BASEDIR= ../../..
@@ -63,10 +45,9 @@ SUFFIXES = .stk -incl.c .@SH_SUFFIX@ .c
 
 .c.@SH_SUFFIX@ :
 	@CC@ @CFLAGS@  @STKCFLAGS@ @SH_COMP_FLAGS@ \
-         $(GTKFLAGS) \
          -I$(BASEDIR)/src @GCINC@ @GMPINC@ \
          -c -o $*.o $*.c
-	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.@SH_SUFFIX@ $*.o @DLLIBS@ -lfuse
 	/bin/rm -f $*.o
 
 $(EXTENSION)-incl.c: $(EXTENSION).stk $(SCM_SRCS)
@@ -86,5 +67,5 @@ install-exec-hook:
 clean-am:
 	rm -f $(OUT) $(EXTENSION)-incl.c *~
 
-distclean-am: 
+distclean-am:
 	rm -f Makefile
