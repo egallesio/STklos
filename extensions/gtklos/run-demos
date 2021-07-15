@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# A simple script to run the GTklos demos
+#
+#           Author: Erick Gallesio [eg@unice.fr]
+#    Creation date: 15-Jul-2021 19:39
+# Last file update: 15-Jul-2021 19:54 (eg)
+
+# Change the directory because the "See code" buttons in each demos search in
+# the current directory only
+cd demos
+
+# An run the demos program. Assume that the user as perhaps not yet installed
+# STklos, and that the stklos-script wrapper is not available
+../../../src/stklos -f demos
+
