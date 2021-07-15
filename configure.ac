@@ -458,8 +458,8 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[ void inner (char *foo) { char bar; exit (!(foo 
 ## --- GTKLOS
 
 GTK_CFLAGS=""
-HAVE_GTK=""
-HAVE_CANVAS=""
+HAVE_GTK=0
+HAVE_CANVAS=0
 
 # Do we have GTK+?
 if ${PKGCONFIG} --exists gtk+-3.0

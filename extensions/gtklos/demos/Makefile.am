@@ -17,12 +17,14 @@ SRC= demos.stk \
      sedit.stk separator.stk text.stk toolbar.stk
 
 
+COMP ?= ../../../utils/tmpcomp
+
 EXE=$(SRC:.stk=)
 
 SUFFIXES= .stk
 
 .stk:
-	stklos-compile -c -o $* $<
+	$(COMP) -o $* $<
 
 all: 	$(EXE)
 	@echo $(EXE) > all-demos

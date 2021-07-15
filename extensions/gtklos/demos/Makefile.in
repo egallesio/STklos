@@ -466,8 +466,10 @@ uninstall-am:
 .PRECIOUS: Makefile
 
 
+COMP ?= ../../../utils/tmpcomp
+
 .stk:
-	stklos-compile -c -o $* $<
+	$(COMP) -o $* $<
 
 all: 	$(EXE)
 	@echo $(EXE) > all-demos
