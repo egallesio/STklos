@@ -1,0 +1,49 @@
+;;;;
+;;;; 
+;;;; goo-absent.stk         -- Definition of the <canvas> class for absent goocanvas
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 16-Jul-2021 10:32
+;;;; Last file update: 16-Jul-2021 11:20 (eg)
+;;;;
+
+;; This file is used when GooCanvas is not installed
+
+
+(define-class <fake-class> () ())
+
+(define-method initialize ((self <fake-class>) initargs)
+  (die (string-append "Canvases are not available on this machine.\n"
+                        "Have you installed the \"goocanvas\" library?")))
+
+;; Fake classes definition for canvas and canvas items
+(define-class <canvas>           (<fake-class>) ())
+(define-class <canvas-ellipse>   (<fake-class>) ())
+(define-class <canvas-image>     (<fake-class>) ())
+(define-class <canvas-line>      (<fake-class>) ())
+(define-class <canvas-path>      (<fake-class>) ())
+(define-class <canvas-rectangle> (<fake-class>) ())
+(define-class <canvas-text>      (<fake-class>) ())
+
+
+(export <canvas> <canvas-ellipse> <canvas-image> <canvas-line>
+        <canvas-path> <canvas-rectangle> <canvas-text>)
+

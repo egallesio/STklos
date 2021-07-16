@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 13-Jul-2021 10:06 (eg)
+### Last file update: 16-Jul-2021 10:41 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -460,6 +460,7 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[ void inner (char *foo) { char bar; exit (!(foo 
 GTK_CFLAGS=""
 HAVE_GTK=0
 HAVE_CANVAS=0
+GOOCANV=absent
 
 # Do we have GTK+?
 if ${PKGCONFIG} --exists gtk+-3.0
@@ -474,6 +475,7 @@ then
    GTK_CFLAGS=`${PKGCONFIG} --cflags goocanvas-3.0`
    HAVE_GTK=1
    HAVE_CANVAS=1
+   GOOCANV=present
 fi
 
 
@@ -558,6 +560,7 @@ AC_SUBST(DLLIBS)
 AC_SUBST(HAVE_GTK)
 AC_SUBST(HAVE_CANVAS)
 AC_SUBST(GTK_CFLAGS)
+AC_SUBST(GOOCANV)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile utils/stklos-config
@@ -582,6 +585,7 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           extensions/gtklos/src/Makefile
           extensions/gtklos/demos/Makefile
           extensions/gtklos/src/gtklos-config.h
+          extensions/gtklos/src/gtklos.stk
 
           extensions/stklos-fuse/Makefile
           extensions/stklos-fuse/src/Makefile

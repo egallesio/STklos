@@ -649,6 +649,7 @@ ac_func_c_list=
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+GOOCANV
 GTK_CFLAGS
 HAVE_CANVAS
 HAVE_GTK
@@ -7227,6 +7228,7 @@ fi
 GTK_CFLAGS=""
 HAVE_GTK=0
 HAVE_CANVAS=0
+GOOCANV=absent
 
 # Do we have GTK+?
 if ${PKGCONFIG} --exists gtk+-3.0
@@ -7241,6 +7243,7 @@ then
    GTK_CFLAGS=`${PKGCONFIG} --cflags goocanvas-3.0`
    HAVE_GTK=1
    HAVE_CANVAS=1
+   GOOCANV=present
 fi
 
 
@@ -7326,7 +7329,8 @@ esac
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 doc/skb/stklos-version.stk pkgman/Makefile lib/srfi-25/Makefile lib/srfi-27/Makefile lib/srfi-133/Makefile lib/srfi-144/Makefile lib/srfi-170/Makefile lib/srfi-175/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/src/Makefile extensions/gtklos/demos/Makefile extensions/gtklos/src/gtklos-config.h extensions/stklos-fuse/Makefile extensions/stklos-fuse/src/Makefile extensions/stklos-fuse/demos/Makefile"
+
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 doc/skb/stklos-version.stk pkgman/Makefile lib/srfi-25/Makefile lib/srfi-27/Makefile lib/srfi-133/Makefile lib/srfi-144/Makefile lib/srfi-170/Makefile lib/srfi-175/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/src/Makefile extensions/gtklos/demos/Makefile extensions/gtklos/src/gtklos-config.h extensions/gtklos/src/gtklos.stk extensions/stklos-fuse/Makefile extensions/stklos-fuse/src/Makefile extensions/stklos-fuse/demos/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8091,6 +8095,7 @@ do
     "extensions/gtklos/src/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/src/Makefile" ;;
     "extensions/gtklos/demos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/demos/Makefile" ;;
     "extensions/gtklos/src/gtklos-config.h") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/src/gtklos-config.h" ;;
+    "extensions/gtklos/src/gtklos.stk") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/src/gtklos.stk" ;;
     "extensions/stklos-fuse/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/stklos-fuse/Makefile" ;;
     "extensions/stklos-fuse/src/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/stklos-fuse/src/Makefile" ;;
     "extensions/stklos-fuse/demos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/stklos-fuse/demos/Makefile" ;;

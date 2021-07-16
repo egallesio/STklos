@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 13-Jul-2021 09:54 (eg)
+# Last file update: 16-Jul-2021 10:40 (eg)
 
 EXTENSION=gtklos
 
@@ -84,7 +84,7 @@ install-exec-hook:
 	install $(OUT) $(DESTDIR)$(schemelibdir)
 
 clean-am:
-	rm -f $(OUT) $(EXTENSION)-incl.c *~
+	rm -f $(OUT) $(EXTENSION)-incl.c  *~
 
-distclean-am: 
-	rm -f Makefile
+distclean-am:
+	rm -f Makefile gtklos.stk
