@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 16-Jul-2021 10:41 (eg)
+### Last file update: 16-Jul-2021 13:00 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -461,6 +461,7 @@ GTK_CFLAGS=""
 HAVE_GTK=0
 HAVE_CANVAS=0
 GOOCANV=absent
+GOOVERS=""
 
 # Do we have GTK+?
 if ${PKGCONFIG} --exists gtk+-3.0
@@ -472,12 +473,21 @@ fi
 # Do we have goocanvas?
 if ${PKGCONFIG} --exists goocanvas-3.0
 then
-   GTK_CFLAGS=`${PKGCONFIG} --cflags goocanvas-3.0`
+   GOOVERS=goocanvas-3.0
+else
+   if ${PKGCONFIG} --exists goocanvas-2.0
+   then
+      GOOVERS=goocanvas-2.0
+   fi
+fi
+
+if test "X${GOOVERS}" != "X"
+then 
+   GTK_CFLAGS=`${PKGCONFIG} --cflags ${GOOVERS}`
    HAVE_GTK=1
    HAVE_CANVAS=1
    GOOCANV=present
 fi
-
 
 ###
 ### Finishing ...
@@ -561,6 +571,7 @@ AC_SUBST(HAVE_GTK)
 AC_SUBST(HAVE_CANVAS)
 AC_SUBST(GTK_CFLAGS)
 AC_SUBST(GOOCANV)
+AC_SUBST(GOOVERS)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           lib/Makefile utils/Makefile utils/stklos-config

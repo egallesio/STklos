@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 11-Aug-2007 11:38 (eg)
- * Last file update:  6-Jul-2021 10:32 (eg)
+ * Last file update: 16-Jul-2021 12:20 (eg)
  */
 
 
@@ -825,12 +825,6 @@ static void error_bad_polyline(SCM obj)
   STk_error("bad Goo canvas polyline ~S", obj);
 }
 
-DEFINE_PRIMITIVE("%have-goo-canvas", have_goo_canvas, subr0, (void))
-{
-  return STk_true;
-}
-
-
 DEFINE_PRIMITIVE("%polyline-get-points", goocanv_get_points, subr1, (SCM line))
 {
   SCM res = STk_nil;
@@ -876,13 +870,6 @@ DEFINE_PRIMITIVE("%polyline-set-points!", goocanv_set_points, subr2, (SCM line, 
   goo_canvas_points_unref(old); // to free it
 
   return STk_void;
-}
-
-#else
-
-DEFINE_PRIMITIVE("%have-goo-canvas", have_goo_canvas, subr0, (void))
-{
-  return STk_false;
 }
 #endif // HAVE_CANVAS
 
@@ -940,7 +927,6 @@ MODULE_ENTRY_START("stklos-gtklos") {
   ADD_PRIMITIVE_IN_MODULE(when_idle, gtklos_module);
   ADD_PRIMITIVE_IN_MODULE(kill_idle, gtklos_module);
 
-  ADD_PRIMITIVE_IN_MODULE(have_goo_canvas, gtklos_module);
 #if HAVE_CANVAS == 1
   /* Canvas support */
   canvas_line = STk_intern("canvas-line");

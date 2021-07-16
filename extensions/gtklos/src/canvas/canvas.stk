@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Feb-2002 10:44 (eg)
-;;;; Last file update:  6-Jul-2021 10:41 (eg)
+;;;; Last file update: 16-Jul-2021 11:45 (eg)
 ;;;;
 
 ;;;
@@ -120,10 +120,6 @@
 ;;; initialize
 ;;;
 (define-method initialize ((self <canvas>) initargs)
-  ;; Verify that the library is installed
-  (unless (%have-goo-canvas)
-    (die "You need to install libgoocanvas-3 to use canvases in GTKLOS"))
-  ;; OK, we have a goocanvas library installed!
   (next-method)
   (let ((root (goo-canvas-get-root-item (slot-ref self 'wid))))
     (cpointer-type-set! root 'goo-canvas-root)

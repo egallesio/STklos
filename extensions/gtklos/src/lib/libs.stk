@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:55
-;;;; Last file update: 16-Jul-2021 09:44 (eg)
+;;;; Last file update: 16-Jul-2021 12:24 (eg)
 ;;;;
 
 
@@ -46,13 +46,13 @@
  (define (find-gtk-library name)
    (let ((file (case name
                  ((gtk)     "libgtk-3")
-                 ((gdk)     "libgdk-3")
-                 ((glib)    "libglib-2.0")
                  ((gobject) "libgobject-2.0")
-                 ;;                 ((pango)   "libpango-1.0")
-                 ((gio)      "libgio-2.0")
-                 ;;                 ((pixbuf)  "libgdk_pixbuf_xlib-2.0")
-                 ((canvas)  "libgoocanvas-3.0")
+                 ((canvas)   %goo-canvas-lib)
+                 ;; ((gdk)     "libgdk-3")
+                 ;; ((glib)    "libglib-2.0")
+                 ;; ((pango)   "libpango-1.0")
+                 ;; ((gio)      "libgio-2.0")
+                 ;; ((pixbuf)  "libgdk_pixbuf_xlib-2.0")
                  (else      (if (string? name)
                                 name
                                 (error "bad GTK+ library name ~S" name))))))

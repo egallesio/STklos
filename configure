@@ -649,6 +649,7 @@ ac_func_c_list=
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+GOOVERS
 GOOCANV
 GTK_CFLAGS
 HAVE_CANVAS
@@ -7229,6 +7230,7 @@ GTK_CFLAGS=""
 HAVE_GTK=0
 HAVE_CANVAS=0
 GOOCANV=absent
+GOOVERS=""
 
 # Do we have GTK+?
 if ${PKGCONFIG} --exists gtk+-3.0
@@ -7240,12 +7242,21 @@ fi
 # Do we have goocanvas?
 if ${PKGCONFIG} --exists goocanvas-3.0
 then
-   GTK_CFLAGS=`${PKGCONFIG} --cflags goocanvas-3.0`
+   GOOVERS=goocanvas-3.0
+else
+   if ${PKGCONFIG} --exists goocanvas-2.0
+   then
+      GOOVERS=goocanvas-2.0
+   fi
+fi
+
+if test "X${GOOVERS}" != "X"
+then
+   GTK_CFLAGS=`${PKGCONFIG} --cflags ${GOOVERS}`
    HAVE_GTK=1
    HAVE_CANVAS=1
    GOOCANV=present
 fi
-
 
 ###
 ### Finishing ...
@@ -7325,6 +7336,7 @@ esac
 
 
 # Extensions
+
 
 
 

@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 16-Jul-2021 10:44 (eg)
+;;;; Last file update: 16-Jul-2021 12:18 (eg)
 ;;;;
 
 
@@ -86,6 +86,9 @@
 (include "widgets/font-dialog.stk")
 
 ;;;; ---- Canvases
+(when-load-and-compile
+   (define %goo-canvas-lib "lib@GOOVERS@"))
+
 (include "canvas/goo-@GOOCANV@.stk")
 
 
