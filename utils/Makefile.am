@@ -1,6 +1,6 @@
 # Makefile.am for STklos/utils source file
 #
-# Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,12 +19,15 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 14-Aug-2000 13:13 (eg)
-# Last file update: 26-Nov-2020 10:50 (eg)
+# Last file update: 16-Jul-2021 10:17 (eg)
 
 scmbin      = stklos-compile stklos-genlex
 bin_SCRIPTS = stklos-config  stklos-script $(scmbin)
 
 COMP ?= ./tmpcomp
+
+all-am:
+	chmod a+x stklos-script
 
 stklos-compile: stklos-compile.stk
 	$(COMP) -o stklos-compile stklos-compile.stk

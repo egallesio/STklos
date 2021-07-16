@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:55
-;;;; Last file update:  1-Jul-2021 18:42 (eg)
+;;;; Last file update: 16-Jul-2021 09:44 (eg)
 ;;;;
 
 
@@ -35,10 +35,9 @@
 (when-load-and-compile
  (define *gtk-library-path*
    (append (build-path-from-shell-variable "STKLOS_GTK_DIR")
-           '("/usr/lib"
-             "/usr/local/lib"
-             ;; For MacPorts
-             "/opt/local/lib")))
+           '("/usr/lib"          ;; Standard place
+             "/usr/local/lib"    ;; Standard place (also used by MacOS Homebrew)
+             )))
 
  (define *gtk-library-suffix*
    '("so"
