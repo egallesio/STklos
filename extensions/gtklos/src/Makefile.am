@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 16-Jul-2021 10:40 (eg)
+# Last file update: 16-Jul-2021 17:37 (eg)
 
 EXTENSION=gtklos
 
@@ -87,4 +87,5 @@ clean-am:
 	rm -f $(OUT) $(EXTENSION)-incl.c  *~
 
 distclean-am:
-	rm -f Makefile gtklos.stk
+	rm -f Makefile gtklos.stk gtklos-config.h
+

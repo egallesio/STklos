@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 16-Jul-2021 10:40 (eg)
+# Last file update: 16-Jul-2021 17:37 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -603,7 +603,7 @@ clean-am:
 	rm -f $(OUT) $(EXTENSION)-incl.c  *~
 
 distclean-am:
-	rm -f Makefile gtklos.stk
+	rm -f Makefile gtklos.stk gtklos-config.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
