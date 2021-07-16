@@ -19,7 +19,7 @@
 #
 
 # ---------- Build stage
-FROM alpine:latest AS build
+FROM alpine:3.11 AS build
 RUN apk update && \
     apk add build-base gc-dev gmp-dev libffi-dev pcre-dev git
 
