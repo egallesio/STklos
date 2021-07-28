@@ -1,0 +1,188 @@
+
+(define (test-compound-equal c1 c2)
+  (test "compound-test-compound"
+   (compound-subobjects c1)
+   (compound-subobjects c2)))
+
+(define-macro (test-group name . rest)
+  `(begin ,@rest))
+  
+
+(test-group "make-compound, compound?, compound-subobjects"
+            (define (%test c)
+              (test "compound 1" #t (compound? c))
+              (test "compound 2" (compound-subobjects c) '(1 2 3)))
+            (%test (make-compound 1 2 3))
+            (%test (make-compound (make-compound 1) (make-compound 2) 3))
+
+            (test "compound 3" #t (not (compound? (list '(1 2 3))))))
+
+(test-group "compound-length"
+            (test "compound 4" 3 (compound-length (make-compound 1 2 3)))
+            (test "compound 5" 1 (compound-length 'test)))
+
+(test-group "compound-ref"
+            (test "compound 6" 1 (compound-ref (make-compound 1 2 3) 0))
+            (test "compound 7" 1 (compound-ref 1 0)))
+
+(test-group "compound-map"
+            (define c (make-compound 1 2 3))
+
+            (test-compound-equal
+             (make-compound 2 3 4)
+             (compound-map (lambda (e) (+ 1 e)) c))
+
+            (test-compound-equal
+             (make-compound 0 2 0 3 0 4)
+             (compound-map (lambda (e) (make-compound 0 (+ 1 e))) c))
+
+            (test-compound-equal
+             (make-compound 2)
+             (compound-map (lambda (e) (+ 1 e)) 1)))
+
+(test-group "compound-map->list"
+            (define c (make-compound 1 2 3))
+            (test "compound 8"
+             (compound-map->list
+              (lambda (e) (+ 1 e))
+              c)
+             (list 2 3 4))
+            (test "compound 9"
+             (compound-map->list
+              (lambda (e) (+ 1 e))
+              1)
+             (list 2)))
+
+(test-group "compound-filter"
+            (define c (make-compound 1 2 3))
+            (test-compound-equal
+             (compound-filter (lambda (e) (= e 2)) c)
+             (make-compound 2))
+            (test-compound-equal
+             (compound-filter (lambda (e) (= e 2)) 2)
+             (make-compound 2))
+            (test-compound-equal
+             (compound-filter (lambda (e) (= e 2)) 1)
+             (make-compound)))
+
+(test-group "compound-predicate"
+            (define c1 (make-compound 1 2))
+            (define c2 (make-compound 3 4))
+            (define (pred1 obj)
+              (equal? obj 'a))
+            (define (pred3 obj)
+              (equal? obj 1))
+
+            (test "compound 10" #t (compound-predicate pred1 'a))
+            (test "compound 11" #t (not (compound-predicate pred1 c1)))
+            (test "compound 12" #t (not (compound-predicate pred1 c2)))
+
+            (test "compound 13" #t (not (compound-predicate pred3 'a)))
+            (test "compound 14" #t (compound-predicate pred3 c1))
+            (test "compound 15" #t (not (compound-predicate pred3 c2))))
+
+(test-group "compound-access"
+            (define (pred obj)
+              (and (number? obj)
+                   (= obj 2)))
+            (define (accessor obj)
+              (+ 1 obj))
+            (test "compound 16"
+             (compound-access pred accessor 0 (make-compound 1 2 3))
+             3)
+            (test "compound 17"
+             (compound-access pred accessor 0 (make-compound 1 3))
+             0)
+            (test "compound 18"
+             (compound-access pred accessor 0 1)
+             0)
+            (test "compound 19"
+             (compound-access pred accessor 0 2)
+             3))
+
+
+(define-record-type <student>
+  (student admission-year gpa)
+  student?
+  (admission-year admission-year)
+  (gpa gpa))       ; grade-point average
+
+(define-record-type <teacher>
+  (teacher hire-year salary)
+  teacher?
+  (hire-year hire-year)     ; integer year
+  (salary salary))  ; annualized
+
+(test-group "examples in spec"
+
+            ;; The following definitions are referenced in later examples
+
+
+            (define alyssa (student 1986 4.0))
+
+            (define guy (teacher 1981 25000))
+
+            ;; These definitions are referenced in later examples
+
+            (define george
+              (make-compound
+               'teaching-assistant
+               (student 1979 3.8)
+               (teacher 1983 1000)))
+
+            (define (teaching-assistant? obj)
+              (eq? obj 'teaching-assistant))
+
+            (test "compound 20" #t (not (compound? alyssa)))
+            (let ((subobjs (compound-subobjects alyssa)))
+              (test "compound 21" #t (list? subobjs))
+              (test "compound 22" 1 (length subobjs))
+              (test "compound 23" #t (student? (car subobjs)))
+              (test "compound 24" 1986 (admission-year (car subobjs)))
+              (test "compound 25" 4.0 (gpa (car subobjs))))
+            (let ((subobjs (compound-subobjects george)))
+              (test "compound 26" #t (list? subobjs))
+              (test "compound 27" 3 (length subobjs))
+              (test "compound 28" 'teaching-assistant (car subobjs))
+              (test "compound 29" #t (student? (cadr subobjs)))
+              (test "compound 30" 1979 (admission-year (cadr subobjs)))
+              (test "compound 31" 3.8 (gpa (cadr subobjs)))
+              (test "compound 32" #t (teacher? (list-ref subobjs 2)))
+              (test "compound 33" 1983 (hire-year (list-ref subobjs 2)))
+              (test "compound 34" 1000 (salary (list-ref subobjs 2))))
+
+            (test "compound 35" 1 (compound-length alyssa))
+
+            (test "compound 36" #t (student? (compound-ref alyssa 0)))
+            (test "compound 37" #t (teacher? (compound-ref george 2)))
+
+            (test "compound 38"
+             '(-1 -2 -3 -4 -5)
+             (compound-subobjects (compound-map - (make-compound 1 2 3 4 5))))
+            (test "compound 39"
+             '(-1 -2 -3 -4 -5)
+             (compound-map->list - (make-compound 1 2 3 4 5)))
+
+            (test "compound 40"
+             '()
+             (compound-subobjects (compound-filter teacher? alyssa)))
+            (let ((subobjs (compound-subobjects (compound-filter teacher? george))))
+              (test "compound 41" 1 (length subobjs))
+              (test "compound 42" #t (teacher? (car subobjs))))
+
+            (test "compound 43" #t (compound-predicate student? alyssa))
+            (test "compound 44" #t (compound-predicate student? george))
+            (test "compound 45" #t (compound-predicate teacher? george))
+            (test "compound 46" #t (compound-predicate teacher? guy))
+            (test "compound 47" #t (not (compound-predicate teaching-assistant? alyssa)))
+            (test "compound 48" #t (not (compound-predicate teaching-assistant? guy)))
+            (test "compound 49" #t (compound-predicate teaching-assistant? george))
+
+            (let ()
+              (define (uni-member-hire-year obj)
+                (compound-access teacher? hire-year #f obj))
+
+              (test "compound 50" #f (uni-member-hire-year alyssa))
+              (test "compound 51" 1981 (uni-member-hire-year guy))
+              (test "compound 52" 1983 (uni-member-hire-year george))
+              (test "compound 53" #f (uni-member-hire-year (make-compound '(27 42 98) 'fire!)))))
