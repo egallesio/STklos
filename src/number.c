@@ -2692,7 +2692,7 @@ static SCM my_sqrt_exact(SCM x)
   if (negativep(x)) return Cmake_complex(MAKE_INT(0),
                                          my_sqrt_exact(mul2(MAKE_INT(-1UL), x)));
   if (INTP(x)) {
-    int    i = INT_VAL(x);
+    long   i = INT_VAL(x);
     double d = (double) sqrt((double) i);
 
     return ((int) d * (int) d == i)? MAKE_INT((int) d) : double2real(d);
