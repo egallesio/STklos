@@ -968,7 +968,13 @@ doc>
                   defs))
         ((and (pair? cur) (eq? (car cur) 'define))
            ;; This is an internal define
-           (Loop (cdr l) (cons (cdr (define->lambda cur)) defs)))
+         (Loop (cdr l) (cons (cdr (define->lambda cur)) defs)))
+        
+        ((and (pair? cur) (eq? (car cur) '%define-syntax))
+         ;; This is an internal %define-syntax
+         ;; FIXME: make this work
+         (Loop (cdr l) (cons (cdr (define->lambda cur)) defs)))
+        
         ((and (pair? cur) (eq? (car cur) 'define-macro))
            ;; This is an internal define-macro. Add expander + skip expression
            (let ((name (compile-internal-define-macro cur env #f)))
