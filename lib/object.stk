@@ -266,12 +266,28 @@
 ;;
 ;; is-a?
 ;;
+#|
+<doc EXT is-a?
+ * (is-a? obj class)
+ *
+ * Returns true if |obj| is an instance of |class|, and false otherwise.
+doc>
+|#
 (define (is-a? obj class)
   (and (memq class (class-precedence-list (class-of obj))) #t))
 
 ;;
 ;; Find-class
 ;;
+#|
+<doc EXT find-class
+ * (find-class name)
+ * (find-class name default)
+ *
+ * Returns the class whose name is |name| (which must be a symbol, not a
+ * string).
+doc>
+|#
 (define (find-class name :optional (default #f default?))
   (let ((cls (if (symbol? name)
 		 (symbol-value* name (current-module) #f)
@@ -368,6 +384,51 @@
 ;
 ;=============================================================================
 ;==== Define-class
+#|
+<doc EXT-SYNTAX define-class
+ * (define-class name supers slots . options)
+ *
+ * Creates a class whose name is |name|, and whose superclasses are in the
+ * list |supers|, with the slots specified by the list |slots|.
+ *
+ * As an example, this is the definition of a point:
+ * @lisp
+ * (define-class <point> ()
+ *   (x y))
+ * @end lisp
+ *
+ * In another example, a class |<circle>| that inherits |<point>|.
+ * @lisp
+ * (define-class <circle> (<point>)
+ *   (radius))
+ * @end lisp
+ *
+ * The following options can be passed to slots:
+ * ,(itemize
+ * (item [|:init-form| is the default value for the slot.])
+ *
+ * (item [|:init-keyword| is the keyword for initializing the slot.])
+ *
+ * (item [|:getter| is the name of the getter procedure.])
+ *
+ * (item [|:setter| is the name of the setter procedure.])
+ * )
+ *
+ * For example,
+ * @lisp
+ * (define-class <point> ()
+ *   (x :init-form 0 :getter get-x :setter set-x! :init-keyword :x)
+ *   (y :init-form 0 :getter get-y :setter set-y! :init-keyword :y))
+ * @end lisp
+ *
+ * STklos also defines setters for the specified getters, so the following
+ * will work with the definition of |<point>| given above:
+ *
+ * @lisp
+ * (set! (slot-ref my-point 'x) 50)
+ * @end lisp
+doc>
+|#
 (define-macro (define-class name supers slots . options)
   `(define ,name
       (ensure-class
