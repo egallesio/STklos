@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 15-Jan-2012 22:52 (eg)
+;; Last file update:  4-Aug-2021 15:09 (eg)
 ;;
 ;; ======================================================================
 
@@ -226,11 +226,11 @@ slot getter])
    (item
       (index "slot" :note "setter")
       [,(bold ":setter") can be used to define the name of the
-slot setter]))
+slot setter])
    (item
       (index "slot" :note "accessor")
       [,(bold ":accessor") can be used to define the name of the
-slot accessor (see below)]))
+slot accessor (see below)])))
 
 
    (p [To illustrate slot description, we redefine here the
@@ -739,8 +739,20 @@ define the following method to compare points:])
 ]))))
 
 (section :title "Object System Reference"
+   (subsection :title "Class Definition"))
 
-   (subsection :title "Class Definition")))
+(section :title "Main Functions and sytaxes"
+        
+   (insertdoc 'define-class)
+   (insertdoc 'find-class)
+   (insertdoc 'is-a?)
+   )
+
+) ; End of chapter
+
+
+
+
 
 
 
