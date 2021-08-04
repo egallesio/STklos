@@ -397,17 +397,13 @@ DEFINE_PRIMITIVE("flnegative?",srfi_144_flnegativep,subr1,(SCM x))
 DEFINE_PRIMITIVE("flodd?",srfi_144_floddp,subr1,(SCM x))
 {
     ensure_fl(x);
-    register double val = REAL_VAL(x);
-    if (val != floor(val)) return SCM_NaN; // +nan.0
-    return MAKE_BOOLEAN(fpclassify(fmodl(val, 2.0)) != FP_ZERO);
+    return MAKE_BOOLEAN(STk_real_isoddp(x));
 }
 
 DEFINE_PRIMITIVE("fleven?",srfi_144_flevenp,subr1,(SCM x))
 {
     ensure_fl(x);
-    register double val = REAL_VAL(x);
-    if (val != floor(val)) return SCM_NaN; // +nan.0
-    return MAKE_BOOLEAN(fpclassify(fmodl(val, 2.0)) == FP_ZERO);
+    return MAKE_BOOLEAN(!STk_real_isoddp(x));
 }
 
 DEFINE_PRIMITIVE("flfinite?",srfi_144_flfinitep,subr1,(SCM x))
