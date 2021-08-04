@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  7-Jun-2021 14:33 (eg)
+ * Last file update:  4-Aug-2021 12:12 (eg)
  */
 
 
@@ -2125,8 +2125,9 @@ static void integer_division(SCM x, SCM y, SCM *quotient, SCM* remainder)
         *quotient  = MAKE_INT(i1 / i2);
         *remainder = MAKE_INT(i1 % i2);
       } else {
-        *quotient  = double2real((double) (i1 / i2));
-        *remainder = double2real((double) (i1 % i2));
+        /* Useless casts to long are here for clang-tidy */
+        *quotient  = double2real((double) ((long) (i1 / i2)));
+        *remainder = double2real((double) ((long) (i1 % i2)));
       }
       return;
     }
@@ -2942,16 +2943,17 @@ DEFINE_PRIMITIVE("exact->inexact", ex2inex, subr1, (SCM z))
 
 DEFINE_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z))
 {
-  register double x;
   switch (TYPEOF(z)) {
     case tc_complex:  if (REALP(COMPLEX_REAL(z)) || REALP(COMPLEX_IMAG(z)))
                         return Cmake_complex(inexact2exact(COMPLEX_REAL(z)),
                                              inexact2exact(COMPLEX_IMAG(z)));
                       else return z;
-    case tc_real:     x = REAL_VAL(z);
-                      if (!isinf(x) && !isnan(x))
+    case tc_real:     {
+                        register double x = REAL_VAL(z);
+                        if (isinf(x) || isnan(x))
+                          STk_error("Cannot make infinity/nan ~S exact", z);
                         return double2rational(x);
-                      else STk_error("Cannot make infinity/nan ~S exact", z);
+                      }
     case tc_rational:
     case tc_bignum:
     case tc_integer:  return z;
