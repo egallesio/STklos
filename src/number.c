@@ -2692,7 +2692,7 @@ static SCM my_sqrt_exact(SCM x)
   if (negativep(x)) return Cmake_complex(MAKE_INT(0),
                                          my_sqrt_exact(mul2(MAKE_INT(-1UL), x)));
   if (INTP(x)) {
-    int    i = INT_VAL(x);
+    long   i = INT_VAL(x);
     double d = (double) sqrt((double) i);
 
     return ((int) d * (int) d == i)? MAKE_INT((int) d) : double2real(d);
@@ -2940,15 +2940,18 @@ DEFINE_PRIMITIVE("exact->inexact", ex2inex, subr1, (SCM z))
   }
 }
 
-
 DEFINE_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z))
 {
+  register double x;
   switch (TYPEOF(z)) {
     case tc_complex:  if (REALP(COMPLEX_REAL(z)) || REALP(COMPLEX_IMAG(z)))
                         return Cmake_complex(inexact2exact(COMPLEX_REAL(z)),
                                              inexact2exact(COMPLEX_IMAG(z)));
                       else return z;
-    case tc_real:     return double2rational(REAL_VAL(z));
+    case tc_real:     x = REAL_VAL(z);
+                      if (!isinf(x) && !isnan(x))
+                        return double2rational(x);
+                      else STk_error("Cannot make infinity/nan ~S exact", z);
     case tc_rational:
     case tc_bignum:
     case tc_integer:  return z;
