@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  4-Aug-2021 12:12 (eg)
+ * Last file update:  4-Aug-2021 19:45 (eg)
  */
 
 
@@ -43,6 +43,7 @@
 #  include <signal.h>
 #endif
 
+
 static int use_srfi_169 = 1; /* do we allow the use of underscores in numbers? */
 
 /* Real precision */
@@ -51,6 +52,8 @@ static unsigned int log10_maxint;
 
 #define FINITE_REALP(n) isfinite(REAL_VAL(n))
 
+/* Forward declarations */
+static void integer_division(SCM x, SCM y, SCM *quotient, SCM* remainder);
 
 
 /* Declaration of bignums. This is done here instead of stklos.h to avoid
@@ -1483,12 +1486,22 @@ COMPARE_NUM2(numge,   STk_realp,    >=)
  * @end lisp
 doc>
  */
+
+int STk_real_isoddp(SCM n)   /* n MUST be a real */
+{
+  SCM q, r;
+
+  integer_division(n, MAKE_INT(2), &q, &r);
+  /* We are sure here that r is a real */
+  return (fpclassify(REAL_VAL(r)) != FP_ZERO);
+}
+
 static Inline int is_oddp(SCM n)
 {
   switch (TYPEOF(n)) {
     case tc_integer: return INT_VAL(n) & 1;
     case tc_bignum:  return mpz_odd_p(BIGNUM_VAL(n));
-    default:         error_bad_number(n);
+    case tc_real:    return STk_real_isoddp(n);
   }
   return FALSE; /* never reached */
 }
@@ -1497,7 +1510,7 @@ static int zerop(SCM n)
 {
   switch (TYPEOF(n)) {
     case tc_integer:  return (INT_VAL(n) == 0);
-    case tc_real:     return (REAL_VAL(n) == 0.0);
+    case tc_real:     return (fpclassify(REAL_VAL(n)) == FP_ZERO);
     case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) == 0);
     case tc_complex:  return zerop(COMPLEX_REAL(n)) && zerop(COMPLEX_IMAG(n));
     case tc_rational: return zerop(RATIONAL_NUM(n));
@@ -2782,7 +2795,7 @@ static SCM my_expt(SCM x, SCM y)
 {
   /* y is >= 0 */
   switch (TYPEOF(y)) {
-    case tc_integer: 
+    case tc_integer:
     case tc_bignum:   return exact_exponent_expt(x, y);
     case tc_rational:
     case tc_real:     if (zerop(y)) return double2real(1.0);

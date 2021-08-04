@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update:  4-Jun-2021 17:12 (eg)
+ * Last file update:  4-Aug-2021 19:49 (eg)
  */
 
 
@@ -815,6 +815,7 @@ SCM             STk_double2real(double d);
 double          STk_number2double(SCM n);
 long            STk_integer2int32(SCM n, int *overflow);
 unsigned long   STk_integer2uint32(SCM n, int *overflow);
+EXTERN_PRIMITIVE("number->string", number2string, subr12, (SCM n, SCM base));
 
   /****
    **** Arithmetic
@@ -831,10 +832,15 @@ long STk_numgt2(SCM o1, SCM o2);
 long STk_numle2(SCM o1, SCM o2);
 long STk_numge2(SCM o1, SCM o2);
 void STk_double2Cstr(char *buffer, double n);
-EXTERN_PRIMITIVE("number->string", number2string, subr12, (SCM n, SCM base));
+
+
+  /****
+   **** Predicate
+   ****/
+int STk_real_isoddp(SCM n);   /* n MUST be a real */
+
 
 int    STk_init_number(void);
-
 
 #define NUMBERP(x)      (INTP(x) || BIGNUMP(x) || REALP(x) || RATIONALP(x) || \
                          COMPLEXP(x))
