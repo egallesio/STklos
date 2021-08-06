@@ -1323,13 +1323,12 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
 
     if (argc == 3) {
         argv--;
-        SCM obj = *argv;
+        idx = *argv;
 
-        if (VECTORP(obj)) {
+        if (VECTORP(idx)) {
             /*****************/
             /** VECTOR CASE **/
             /*****************/
-            idx = obj;
 
             /* initialize idx with the lowest index for each dimension */
             for (dim = 0; dim < rank; dim++)
@@ -1355,11 +1354,10 @@ DEFINE_PRIMITIVE("shape-for-each", srfi_25_shape_for_each, vsubr, (int argc, SCM
             return STk_void;
 
 
-        } else if (ARRAYP(obj)) {
+        } else if (ARRAYP(idx)) {
             /****************/
             /** ARRAY CASE **/
             /****************/
-            idx = obj;
 
             /* initialize idx with the lowest index for each dimension.
                since we're working on a n array, we need to first get the index into its
