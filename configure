@@ -692,6 +692,7 @@ PREFIX
 GMPINC
 GMPLIB
 GMP
+UNAME_O
 OS_FLAVOUR
 HAVE_DLOPEN
 STKCFLAGS
@@ -7280,14 +7281,17 @@ else
    STRIPCMD=$STRIP
 fi
 
+UNAME_O=`uname -o | sed -e 's=/=_='`
+
 # Adapt libraries that must be loaded fo systems with broken RTLD_GLOBAL (as Android)
-case `uname -o` in
+case $UNAME_O in
   Android) DLLIBS="$DLLIBS -lc -lm";;
   *) DLLIBS="";;
 esac
 
 
 ### Output files
+
 
 
 

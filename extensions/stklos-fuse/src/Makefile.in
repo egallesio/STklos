@@ -252,6 +252,7 @@ STKCFLAGS = @STKCFLAGS@
 STRIP = @STRIP@
 STRIPCMD = @STRIPCMD@
 THREADS = @THREADS@
+UNAME_O = @UNAME_O@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@

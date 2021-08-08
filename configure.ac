@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 16-Jul-2021 13:00 (eg)
+### Last file update:  8-Aug-2021 17:24 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -511,8 +511,10 @@ else
    STRIPCMD=$STRIP
 fi
 
+UNAME_O=`uname -o | sed -e 's=/=_='`
+
 # Adapt libraries that must be loaded fo systems with broken RTLD_GLOBAL (as Android)
-case `uname -o` in
+case $UNAME_O in
   Android) DLLIBS="$DLLIBS -lc -lm";;
   *) DLLIBS="";;
 esac
@@ -523,6 +525,7 @@ AC_SUBST(STKCFLAGS)
 AC_SUBST(VERSION)
 AC_SUBST(HAVE_DLOPEN)
 AC_SUBST(OS_FLAVOUR)
+AC_SUBST(UNAME_O)
 AC_SUBST(GMP)
 AC_SUBST(GMPLIB)
 AC_SUBST(GMPINC)
