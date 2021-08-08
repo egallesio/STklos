@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  8-Aug-2021 17:24 (eg)
+### Last file update:  8-Aug-2021 18:28 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.60])
@@ -511,7 +511,15 @@ else
    STRIPCMD=$STRIP
 fi
 
-UNAME_O=`uname -o | sed -e 's=/=_='`
+UNAME_O=""
+case `uname -s` in
+  *Linux*)
+    UNAME_O=`uname -o | sed -e 's=/=_='`
+    ;;
+  *) # Darwin, for instance, does not support -o. Use the result of uname -s
+    UNAME_O=`uname -s`
+    ;;
+esac
 
 # Adapt libraries that must be loaded fo systems with broken RTLD_GLOBAL (as Android)
 case $UNAME_O in
