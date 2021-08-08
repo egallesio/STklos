@@ -11,6 +11,13 @@
 static SCM SCM_NaN;
 #endif
 
+#ifdef Android
+/* The lgamma_r function is not standard and not defined on Android.
+ * However, it seems to be present in the linked libm. Declare it here.
+ */
+ double lgamma_r(double x, int *signp);
+#endif
+
 static Inline SCM double2real(double x)
 {
   SCM z;
