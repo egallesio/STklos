@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update:  4-Aug-2021 15:09 (eg)
+;;;; Last file update:  8-Aug-2021 18:48 (eg)
 
 
 #|
@@ -419,7 +419,7 @@ doc>
  *   (y :init-form 0 :getter get-y :setter set-y! :init-keyword :y))
  * @end lisp
  *
- * @stklos also defines setters for the specified getters, so the following
+ * ,(stklos) also defines setters for the specified getters, so the following
  * will work with the definition of |<point>| given above:
  *
  * @lisp
