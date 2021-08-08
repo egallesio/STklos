@@ -820,7 +820,8 @@
 
      (test "srfi-144.372 " (fl+ one (flexp-1 negzero)) one)
      (test "srfi-144.373 " (fl+ one (flexp-1 zero)) one)
-     (test "srfi-144.374 " (fl+ one (flexp-1 one)) fl-e)
+     ;; [EG]: Changed the following "test" in "test-approx" 
+     (test/approx "srfi-144.374 " (fl+ one (flexp-1 one)) fl-e)
      (test/approx "srfi-144.375 " (fl+ one (flexp-1 (fl- one))) fl-1/e)
      (test/approx "srfi-144.376 " (fl+ one (flexp-1 two)) fl-e-2)
      (test/approx "srfi-144.377 " (fl+ one (flexp-1 fl-pi/4)) fl-e-pi/4)
