@@ -1437,9 +1437,9 @@ doc>
 
   ;; rewrite the body
   (let ((loop-name (new-label)))
-    `(let ,(map (lambda (init) (if (= (length init) 2)
-                              init
-                              (reverse (cdr (reverse init))))) inits)
+    `(letrec* ,(map (lambda (init) (if (= (length init) 2)
+                               init
+                               (reverse (cdr (reverse init))))) inits)
        (%%label ,loop-name)
        (if ,(car test)
            (begin ,@(if (null? (cdr test))
