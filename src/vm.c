@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 10-Apr-2021 18:48 (eg)
+ * Last file update: 11-Aug-2021 17:15 (eg)
  */
 
 // INLINER values
@@ -636,6 +636,36 @@ DEFINE_PRIMITIVE("call-with-values", call_with_values, subr2, (SCM prod, SCM con
     return STk_C_apply(con , -tmp, vm->vals);
   } else {
     return STk_C_apply(con, -tmp, VECTOR_DATA(vm->vals[0]));
+  }
+}
+
+DEFINE_PRIMITIVE("%call-for-values", call_for_values, subr1, (SCM prod))
+{
+  vm_thread_t *vm = STk_get_current_vm();
+  int len;
+
+  /* Don't test that prod is procedure (apply will fail if this not the case) */
+  STk_C_apply(prod, 0);
+  len = vm->valc;
+  vm->valc = 1;
+
+  /* We don't use use STk_values2vector here since we will call apply with the
+   * values produced by "prod" ⟹ buil a list here. There are too much allocation
+   * here :-(
+   */
+  switch (len) {
+    case 0: return STk_nil;
+    case 1: return LIST1(vm->val);
+    default:  {
+                SCM  res = STk_nil;
+                if (len <= MAX_VALS) {
+                  for (int i = len-1; i >= 1; i--)
+                    res = STk_cons(vm->vals[i], res);
+                  return STk_cons(vm->val, res);
+                } else {
+                  return STk_vector2list(vm->vals[0]);
+                }
+              }
   }
 }
 
@@ -2264,6 +2294,7 @@ int STk_init_vm()
 
   ADD_PRIMITIVE(values);
   ADD_PRIMITIVE(call_with_values);
+  ADD_PRIMITIVE(call_for_values);
 
   ADD_PRIMITIVE(current_handler);
   /* ADD_PRIMITIVE(pop_handler); */

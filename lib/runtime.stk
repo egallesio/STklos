@@ -1,7 +1,7 @@
 ;;;;
 ;;;; runtime.stk        -- Stuff necessary for bootstaping the system
 ;;;;
-;;;; Copyright © 2001-2018 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Mar-2001 22:49 (eg)
-;;;; Last file update: 29-Jun-2018 12:16 (eg)
+;;;; Last file update: 11-Aug-2021 17:38 (eg)
 ;;;;
 
 
@@ -63,6 +63,10 @@
         (loop (cdr args)
               (string-append res (format "~a" (car args)))))))
 
+;;
+;; A version of call-with-value where con is called in tail position.
+(define (call-with-values prod con)
+  (apply con (%call-for-values prod)))
 
 ;; ----------------------------------------------------------------------
 ;;      parameters
