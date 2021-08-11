@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 12:27 (eg)
-;;;; Last file update: 11-Aug-2021 18:06 (eg)
+;;;; Last file update: 11-Aug-2021 18:42 (eg)
 ;;;;
 
 
@@ -971,6 +971,15 @@ doc>
 |#
 (define (call-with-values prod con)
   ;; A version of call-with-value where con is called in tail position.
-  (apply con (%call-for-values prod)))
+  (let ((vals (%call-for-values prod)))
+    ;; Avoid to use apply which is costly.  Don't change the order of the
+    ;; tests in the case below (2 is probably more current than 1, if a user
+    ;; calls this function.
+    (case (length vals)
+      ((2) (con (car vals) (cadr vals)))
+      ((1) (con (car vals)))
+      ((0) (con))
+      (else (apply con vals)))))
+
 
 ; LocalWords:  noindent EXT
