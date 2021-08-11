@@ -1395,27 +1395,64 @@ doc>
 ;;
 ;; DO
 ;;
-(define (rewrite-do inits test body)
-  (let ((loop-name (gensym)))
-    `(letrec ((,loop-name
-       (lambda ,(map car inits)
-         (if ,(car test)
-             (begin ,@(if (null? (cdr test))
-                          (list (void))
-                          (cdr test)))
-             (begin ,@body
-                    (,loop-name ,@(map (lambda (init)
-                                         (if (< (length init) 2)
-                                             (compiler-error 'do
-                                                              init
-                                                              "bad binding ~S"
-                                                              init)
-                                             (if (null? (cddr init))
-                                                 (car init)
-                                                 (caddr init))))
-                                       inits)))))))
-       (,loop-name ,@(map cadr inits)))))
 
+;; Rewrite do loops
+;;
+;; (do inits test body)
+;; ->
+;; (let inits
+;;   (%%label L)
+;;   (if test
+;;       result
+;;       (begin body
+;;              (set! var-1 update-1)
+;;              ...
+;;              (%%goto L))))
+;;
+;; * 
+;; Vars with no update form are not updated.
+;;
+(define (rewrite-do inits test body)
+  ;; check inits
+  (for-each (lambda (init)
+              (when (< (length init) 2)
+                (compiler-error 'do
+                                init
+                                "not enough forms in binding ~S"
+                                init))
+              (when (> (length init) 3)
+                (compiler-error 'do
+                                init
+                                "too many forms in binding ~S"
+                                init)))
+            inits)
+
+  ;; check test-and-result form
+  (when (or (null? test)
+            (> (length test) 2))
+    (compiler-error 'do
+                    test
+                    "bad test-and-result form"
+                    test))
+
+  ;; rewrite the body
+  (let ((loop-name (new-label)))
+    `(let ,(map (lambda (init) (if (= (length init) 2)
+                              init
+                              (reverse (cdr (reverse init))))) inits)
+       (%%label ,loop-name)
+       (if ,(car test)
+           (begin ,@(if (null? (cdr test))
+                        (list (void))
+                        (cdr test)))
+           (begin ,@body
+                  ,@(filter (lambda (x) x) ; remove the useless '#f's
+                            (map (lambda (init)
+                                   (if (= (length init) 3)
+                                       (list 'set! (car init) (caddr init))
+                                       #f)) ;; will be removed
+                                 inits))
+                  (%%goto ,loop-name))))))
 
 (define (compile-do e env tail?)
   (if (>= (length e) 3)
