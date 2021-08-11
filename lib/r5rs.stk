@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r5rs.stk   -- R5RS function written in Scheme
 ;;;;
-;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 12:27 (eg)
-;;;; Last file update: 15-Aug-2020 17:43 (eg)
+;;;; Last file update: 11-Aug-2021 18:06 (eg)
 ;;;;
 
 
@@ -951,5 +951,26 @@ doc>
      (if (< y x)
          (simplest-rational y x)
          (simplest-rational x y))))
+
+
+#|
+<doc call-with-values
+ * (call-with-values producer consumer)
+ *
+ * Calls its producer argument with no values and a continuation that,
+ * when passed some values, calls the consumer procedure with those values
+ * as arguments. The continuation for the call to consumer is the
+ * continuation of the call to call-with-values.
+ * @lisp
+ * (call-with-values (lambda () (values 4 5))
+ *                   (lambda (a b) b))                =>  5
+ *
+ * (call-with-values * -)                             =>  -1
+ * @end lisp
+doc>
+|#
+(define (call-with-values prod con)
+  ;; A version of call-with-value where con is called in tail position.
+  (apply con (%call-for-values prod)))
 
 ; LocalWords:  noindent EXT

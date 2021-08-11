@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 11-Aug-2021 17:15 (eg)
+ * Last file update: 11-Aug-2021 18:04 (eg)
  */
 
 // INLINER values
@@ -601,43 +601,6 @@ DEFINE_PRIMITIVE("values", values, vsubr, (int argc, SCM *argv))
   return vm->val;
 }
 
-/*
-<doc call-with-values
- * (call-with-values producer consumer)
- *
- * Calls its producer argument with no values and a continuation that,
- * when passed some values, calls the consumer procedure with those values
- * as arguments. The continuation for the call to consumer is the
- * continuation of the call to call-with-values.
- * @lisp
- * (call-with-values (lambda () (values 4 5))
- *                   (lambda (a b) b))                =>  5
- *
- * (call-with-values * -)                             =>  -1
- * @end lisp
-doc>
- */
-DEFINE_PRIMITIVE("call-with-values", call_with_values, subr2, (SCM prod, SCM con))
-{
-  vm_thread_t *vm = STk_get_current_vm();
-  int tmp;
-
-  /* Test on prod and con being good procedure is useless, apply will evtly fail */
-  vm->val  = STk_C_apply(prod, 0);
-  tmp      = vm->valc;
-  vm->valc = 1;
-
-  if (tmp == 0)
-    return STk_C_apply(con, 0);
-  else if (tmp == 1)
-    return STk_C_apply(con, 1, vm->val);
-  else if (tmp <= MAX_VALS) {
-    vm->vals[0] = vm->val;
-    return STk_C_apply(con , -tmp, vm->vals);
-  } else {
-    return STk_C_apply(con, -tmp, VECTOR_DATA(vm->vals[0]));
-  }
-}
 
 DEFINE_PRIMITIVE("%call-for-values", call_for_values, subr1, (SCM prod))
 {
@@ -2293,7 +2256,6 @@ int STk_init_vm()
   ADD_PRIMITIVE(vm_bt);
 
   ADD_PRIMITIVE(values);
-  ADD_PRIMITIVE(call_with_values);
   ADD_PRIMITIVE(call_for_values);
 
   ADD_PRIMITIVE(current_handler);
