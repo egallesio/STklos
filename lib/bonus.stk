@@ -871,7 +871,7 @@ doc>
            (let ((limit  (gensym))
                  (result (if (null? result) (list '(void)) result)))
              `(let ((,limit ,count))
-                (do ((,var 0 (fx+ ,var 1)))
+                (do ((,var 0 (+ ,var 1)))
                     ((>= ,var ,limit) ,@result)
                   ,@body))))
          bindings))
