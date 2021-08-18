@@ -62,12 +62,19 @@ SCM STk_make_closure(STk_instr *code, int size, int arity, SCM *cst, SCM env)
 }
 
 
-static void print_lambda(SCM closure, SCM port, int _UNUSED(mode))
+static void print_lambda(SCM closure, SCM port, int mode)
 {
   if (CLOSURE_NAME(closure) != STk_false)
-    STk_fprintf(port, "#[closure %s]", SYMBOL_PNAME(CLOSURE_NAME(closure)));
+    STk_fprintf(port, "#[closure %s", SYMBOL_PNAME(CLOSURE_NAME(closure)));
   else
-    STk_fprintf(port, "#[closure %lx]", (unsigned long) closure);
+    STk_fprintf(port, "#[closure %lx", (unsigned long) closure);
+
+  SCM formals = CLOSURE_FORMALS(closure);
+  if (formals != STk_nil) {
+    STk_nputs(port, " ", 1);
+    STk_print(formals, port, mode);
+  }
+  STk_nputs(port,"]", 1);
 }
 
 
