@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 10-Apr-2021 18:45 (eg)
+ * Last file update: 18-Aug-2021 16:22 (eg)
  */
 
 #include "stklos.h"
@@ -70,7 +70,7 @@ static void print_lambda(SCM closure, SCM port, int mode)
     STk_fprintf(port, "#[closure %lx", (unsigned long) closure);
 
   SCM formals = CLOSURE_FORMALS(closure);
-  if (formals != STk_nil) {
+  if (formals != STk_false) {
     STk_nputs(port, " ", 1);
     STk_print(formals, port, mode);
   }
