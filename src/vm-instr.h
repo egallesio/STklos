@@ -163,8 +163,13 @@
 #  define IN_SINT_FXSUB2       158
 #  define IN_SINT_FXMUL2       159
 #  define IN_SINT_FXDIV2       160
+#  define IN_FXEQ              161
+#  define IN_FXLT              162
+#  define IN_FXGT              163
+#  define IN_FXLE              164
+#  define IN_FXGE              165
 
-#  define NB_VM_INSTR (IN_SINT_FXDIV2      +1)
+#  define NB_VM_INSTR (IN_FXGE             +1)
 #endif
 
 
@@ -332,6 +337,11 @@ static void *jump_table[] = {
   &&lab_IN_SINT_FXSUB2      ,
   &&lab_IN_SINT_FXMUL2      ,
   &&lab_IN_SINT_FXDIV2      ,
+  &&lab_IN_FXEQ             ,
+  &&lab_IN_FXLT             ,
+  &&lab_IN_FXGT             ,
+  &&lab_IN_FXLE             ,
+  &&lab_IN_FXGE             ,
   NULL};
 #endif
 #undef DEFINE_JUMP_TABLE
@@ -501,6 +511,11 @@ static char *name_table[] = {
   "IN_SINT_FXSUB2      ",
   "IN_SINT_FXMUL2      ",
   "IN_SINT_FXDIV2      ",
+  "IN_FXEQ             ",
+  "IN_FXLT             ",
+  "IN_FXGT             ",
+  "IN_FXLE             ",
+  "IN_FXGE             ",
   NULL};
 #endif
 #undef DEFINE_NAME_TABLE

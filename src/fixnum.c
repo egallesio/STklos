@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 27-Apr-2021 15:25 (eg)
+ * Last file update: 19-Aug-2021 18:33 (eg)
  */
 
 #include "stklos.h"
@@ -107,6 +107,14 @@ static void error_bad_fixnum4(SCM o1, SCM o2, SCM o3, SCM o4)
 #define ensure_fx3(x, y, z)    {}
 #define ensure_fx4(x, y, z, w) {}
 #endif
+
+
+long STk_fixval(SCM v)
+{
+  ensure_fx(v);
+  return INT_VAL(v);
+}
+
 
 /*
 <doc EXT fixnum?

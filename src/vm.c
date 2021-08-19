@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 11-Aug-2021 18:04 (eg)
+ * Last file update: 19-Aug-2021 20:24 (eg)
  */
 
 // INLINER values
@@ -73,6 +73,7 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 #define MY_SETJMP(jb)           (jb.blocked = get_signal_mask(), setjmp(jb.j))
 #define MY_LONGJMP(jb, val)     (longjmp((jb).j, val))
 
+#define FX(v)                   (STk_fixval(v))
 
 static Inline sigset_t get_signal_mask(void)
 {
@@ -1573,6 +1574,19 @@ CASE(IN_NUMLE)  { REG_CALL_PRIM(numle);
                   vm->val = MAKE_BOOLEAN(STk_numle2(pop(), vm->val));      NEXT1;}
 CASE(IN_NUMGE)  { REG_CALL_PRIM(numge);
                   vm->val = MAKE_BOOLEAN(STk_numge2(pop(), vm->val));      NEXT1;}
+
+CASE(IN_FXEQ)  { REG_CALL_PRIM(fxeq);
+                 vm->val = MAKE_BOOLEAN(FX(pop()) == FX(vm->val));         NEXT1;}
+//CASE(IN_FXDIFF){ vm->val = MAKE_BOOLEAN(FX(pop()) != FX(vm->val));      NEXT1;}
+CASE(IN_FXLT)  { REG_CALL_PRIM(fxlt);
+                 vm->val = MAKE_BOOLEAN(FX(pop()) <  FX(vm->val));         NEXT1;}
+CASE(IN_FXGT)  { REG_CALL_PRIM(fxgt);
+                 vm->val = MAKE_BOOLEAN(FX(pop()) >  FX(vm->val));         NEXT1;}
+CASE(IN_FXLE)  { REG_CALL_PRIM(fxle);
+                 vm->val = MAKE_BOOLEAN(FX(pop()) <= FX(vm->val));         NEXT1;}
+CASE(IN_FXGE)  { REG_CALL_PRIM(fxge);
+                 vm->val = MAKE_BOOLEAN(FX(pop()) >= FX(vm->val));         NEXT1;}
+
 
 CASE(IN_INCR)   { REG_CALL_PRIM(plus);
                   vm->val = STk_add2(vm->val, MAKE_INT(1)); NEXT1;}

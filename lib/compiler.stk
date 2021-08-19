@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  8-Apr-2021 18:42 (eg)
+;;;; Last file update: 19-Aug-2021 20:09 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -50,9 +50,14 @@
                          (fxquotient     . ,fxquotient)
                          (=              . ,=)
                          (<              . ,<)
-                         (<=              . ,<=)
+                         (<=             . ,<=)
                          (>              . ,>)
-                         (>=              . ,>=)
+                         (>=             . ,>=)
+                         (fx=?           . ,fx=?)
+                         (fx<?           . ,fx<?)
+                         (fx<=?          . ,fx<=?)
+                         (fx>?           . ,fx>?)
+                         (fx>=?          . ,fx>=?)
                          (cons           . ,cons)
                          (car            . ,car)
                          (cdr            . ,cdr)
@@ -1070,6 +1075,19 @@ doc>
                                 ((<=) 'IN-NUMLE)
                                 ((>=) 'IN-NUMGE))))
                 (else  (compile-normal-call fct actuals len env epair #f))))
+
+      ((fx=? fx<? fx>? fx<=? fx>=?)
+                (case len
+                ((O)   (compiler-error fct epair
+                                        "needs at least one argument" fct))
+                ((2)   (comp2 (case fct
+                                ((fx=?)  'IN-FXEQ)
+                                ((fx<?)  'IN-FXLT)
+                                ((fx>?)  'IN-FXGT)
+                                ((fx<=?) 'IN-FXLE)
+                                ((fx>=?) 'IN-FXGE))))
+                (else  (compile-normal-call fct actuals len env epair #f))))
+
       ((cons)   (comp2 'IN-CONS))
       ((car)    (comp1 'IN-CAR))
       ((cdr)    (comp1 'IN-CDR))

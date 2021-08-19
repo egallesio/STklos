@@ -1,7 +1,7 @@
 ;;;;
 ;;;; assembler.stk      -- Assember stuff
 ;;;;
-;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 28-Aug-2020 19:40 (eg)
+;;;; Last file update: 19-Aug-2021 17:40 (eg)
 ;;;;
 
 ;;;
@@ -241,7 +241,11 @@
            (IN-SINT-FXSUB2      1)
            (IN-SINT-FXMUL2      1)
            (IN-SINT-FXDIV2      1)
-
+           (IN-FXEQ             0)
+           (IN-FXLT             0)
+           (IN-FXGT             0)
+           (IN-FXLE             0)
+           (IN-FXGE             0)
 
 ))))
 
