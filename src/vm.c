@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 19-Aug-2021 20:24 (eg)
+ * Last file update: 20-Aug-2021 16:58 (eg)
  */
 
 // INLINER values
@@ -1576,16 +1576,15 @@ CASE(IN_NUMGE)  { REG_CALL_PRIM(numge);
                   vm->val = MAKE_BOOLEAN(STk_numge2(pop(), vm->val));      NEXT1;}
 
 CASE(IN_FXEQ)  { REG_CALL_PRIM(fxeq);
-                 vm->val = MAKE_BOOLEAN(FX(pop()) == FX(vm->val));         NEXT1;}
-//CASE(IN_FXDIFF){ vm->val = MAKE_BOOLEAN(FX(pop()) != FX(vm->val));      NEXT1;}
+                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)==0); NEXT1;}
 CASE(IN_FXLT)  { REG_CALL_PRIM(fxlt);
-                 vm->val = MAKE_BOOLEAN(FX(pop()) <  FX(vm->val));         NEXT1;}
+                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<0);  NEXT1;}
 CASE(IN_FXGT)  { REG_CALL_PRIM(fxgt);
-                 vm->val = MAKE_BOOLEAN(FX(pop()) >  FX(vm->val));         NEXT1;}
+                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)>0);  NEXT1;}
 CASE(IN_FXLE)  { REG_CALL_PRIM(fxle);
-                 vm->val = MAKE_BOOLEAN(FX(pop()) <= FX(vm->val));         NEXT1;}
+                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<=0); NEXT1;}
 CASE(IN_FXGE)  { REG_CALL_PRIM(fxge);
-                 vm->val = MAKE_BOOLEAN(FX(pop()) >= FX(vm->val));         NEXT1;}
+                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)>=0); NEXT1;}
 
 
 CASE(IN_INCR)   { REG_CALL_PRIM(plus);

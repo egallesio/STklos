@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 19-Aug-2021 18:35 (eg)
+ * Last file update: 20-Aug-2021 16:55 (eg)
  */
 
 
@@ -592,6 +592,7 @@ int STk_init_ffi(void);
   ------------------------------------------------------------------------------
 */
 long STk_fixval(SCM v);
+long STk_fixnum_cmp(SCM a, SCM b);
 EXTERN_PRIMITIVE("fx+",        fxplus,  subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fx-",        fxminus, subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fx*",        fxtime,  subr2, (SCM o1, SCM o2));

@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 19-Aug-2021 18:33 (eg)
+ * Last file update: 20-Aug-2021 17:23 (eg)
  */
 
 #include "stklos.h"
@@ -115,6 +115,12 @@ long STk_fixval(SCM v)
   return INT_VAL(v);
 }
 
+long STk_fixnum_cmp(SCM a, SCM b)
+{
+  ensure_fx2(a, b);
+  /* FIXME: are we obliged to untag a and b? */
+  return INT_VAL(a) - INT_VAL(b);
+}
 
 /*
 <doc EXT fixnum?
