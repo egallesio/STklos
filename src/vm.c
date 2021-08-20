@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 20-Aug-2021 16:58 (eg)
+ * Last file update: 20-Aug-2021 18:33 (eg)
  */
 
 // INLINER values
@@ -1577,6 +1577,8 @@ CASE(IN_NUMGE)  { REG_CALL_PRIM(numge);
 
 CASE(IN_FXEQ)  { REG_CALL_PRIM(fxeq);
                  vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)==0); NEXT1;}
+CASE(IN_FXDIFF){ REG_CALL_PRIM(fxeq);
+                 vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)!=0); NEXT1;}
 CASE(IN_FXLT)  { REG_CALL_PRIM(fxlt);
                  vm->val = MAKE_BOOLEAN(STk_fixnum_cmp(pop(),vm->val)<0);  NEXT1;}
 CASE(IN_FXGT)  { REG_CALL_PRIM(fxgt);

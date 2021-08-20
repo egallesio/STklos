@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:49 (eg)
-;;;; Last file update: 19-Aug-2021 17:40 (eg)
+;;;; Last file update: 20-Aug-2021 18:32 (eg)
 ;;;;
 
 ;;;
@@ -246,7 +246,7 @@
            (IN-FXGT             0)
            (IN-FXLE             0)
            (IN-FXGE             0)
-
+           (IN-FXDIFF           0)
 ))))
 
 ;;;;
