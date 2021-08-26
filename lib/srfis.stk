@@ -53,7 +53,7 @@
     ;    12 ........ Withdrawn
     (13 "String Library" () "srfi-13")
     (14 "Character-Set Library" () "srfi-14")
-    ;;  15 ........ Withdrawn
+    (15 "Syntax for dynamic scoping") ;; ........ Withdrawn, but supported nevertheless
     (16 "Syntax for procedures of variable arity" (case-lambda))
     (17 "Generalized set!")
     (18 "Multithreading support")
