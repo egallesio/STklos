@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 22-May-2004 08:57 (eg)
- * Last file update: 29-Mar-2021 17:21 (eg)
+ * Last file update: 27-Aug-2021 20:23 (eg)
  */
 
 #include "stklos.h"
@@ -316,7 +316,7 @@ DEFINE_PRIMITIVE("make-compound-condition", make_comp_cond, vsubr,
   }
 
   /* Create a new type and and instance of it for the compound condition */
-  sprintf(buff, "&cct-%d", counter++);
+  snprintf(buff, sizeof(buff), "&cct-%d", counter++);
   type = STk_make_comp_cond_type(STk_make_uninterned_symbol(buff),
                                  cts);
   z = allocate_condition(type);

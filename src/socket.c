@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  3-Jan-2003 18:45 (eg)
- * Last file update: 10-Apr-2021 18:46 (eg)
+ * Last file update: 28-Aug-2021 12:00 (eg)
  */
 
 #include <sys/types.h>
@@ -46,10 +46,10 @@ static void print_socket(SCM sock, SCM port, int _UNUSED(mode))
   char buffer[1000];
   SCM name = SOCKET_HOSTNAME(sock);
 
-  sprintf(buffer, "#[%s-socket %s:%ld (%d)]",
-          (SOCKET_TYPE(sock) == SOCKET_SERVER) ? "server" : "client",
-          ((name == STk_false) ?  "*none*" : (char *) STRING_CHARS(name)),
-          SOCKET_PORTNUM(sock), SOCKET_FD(sock));
+  snprintf(buffer, sizeof(buffer), "#[%s-socket %s:%ld (%d)]",
+           (SOCKET_TYPE(sock) == SOCKET_SERVER) ? "server" : "client",
+           ((name == STk_false) ?  "*none*" : (char *) STRING_CHARS(name)),
+           SOCKET_PORTNUM(sock), SOCKET_FD(sock));
   STk_puts(buffer, port);
 }
 
@@ -97,11 +97,13 @@ static void set_socket_io_ports(SCM sock, int line_buffered)
 {
   int s, t;
   char *hostname, *fname;
+  unsigned long len;
   SCM in, out;
 
   hostname = STRING_CHARS(SOCKET_HOSTNAME(sock));
-  fname    = STk_must_malloc_atomic(strlen(hostname) + 30);
-  sprintf(fname, "%s:%ld", hostname, SOCKET_PORTNUM(sock));
+  len      = strlen(hostname) + 50;
+  fname    = STk_must_malloc_atomic(len);
+  snprintf(fname, len, "%s:%ld", hostname, SOCKET_PORTNUM(sock));
 
   s   = SOCKET_FD(sock);
   t   = dup(s);

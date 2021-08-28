@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 20-Aug-2021 16:55 (eg)
+ * Last file update: 28-Aug-2021 12:01 (eg)
  */
 
 
@@ -937,7 +937,7 @@ struct port_obj {
   off_t (*seek)      (void *stream, off_t offset, int whence);
 };
 
-#define PORT_MAX_PRINTF 1024    /* max size for sprintf buffer */
+#define PORT_MAX_PRINTF 4096    /* max size for snprintf buffer */
 
 #define PORT_READ               (1<<0)
 #define PORT_WRITE              (1<<1)

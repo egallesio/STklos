@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 10-May-2021 18:01 (eg)
+ * Last file update: 28-Aug-2021 11:45 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -424,10 +424,10 @@ static void fport_print(SCM obj, SCM port)      /* Generic printing of file port
 {
   char buffer[MAX_PATH_LENGTH + 40];
 
-  sprintf(buffer, "#[%s-port '%s' (%d)%s]",
-          IPORTP(obj) ? "input" : "output",
-          PORT_FNAME(obj), PORT_FD(PORT_STREAM(obj)),
-          PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
+  snprintf(buffer, sizeof(buffer), "#[%s-port '%s' (%d)%s]",
+           IPORTP(obj) ? "input" : "output",
+           PORT_FNAME(obj), PORT_FD(PORT_STREAM(obj)),
+           PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
   STk_puts(buffer, port);
 }
 

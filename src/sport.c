@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 30-Apr-2021 14:19 (eg)
+ * Last file update: 27-Aug-2021 20:15 (eg)
  *
  */
 
@@ -185,10 +185,10 @@ static off_t Sseek(void *stream, off_t offset, int whence)
 
 static void sport_print(SCM obj, SCM port)   /* Generic printing of string ports */
 {
-  char buffer[MAX_PATH_LENGTH + 20];
+  char buffer[MAX_PATH_LENGTH + 100];
   int flags = PORT_FLAGS(obj);
 
-  sprintf(buffer, "#[%s-%s-port %lx%s]",
+  snprintf(buffer, sizeof(buffer), "#[%s-%s-port %lx%s]",
           (flags & PORT_READ)   ? "input" : "output",
           (flags & PORT_BINARY) ? "bytevector" : "string",
           (unsigned long) obj,

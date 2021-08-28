@@ -1,7 +1,7 @@
 /*
  * p a t h . c          -- Path names management
  *
- * Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 14:25 (eg)
- * Last file update:  2-Jun-2020 09:49 (eg)
+ * Last file update: 28-Aug-2021 12:25 (eg)
  */
 
 #include "stklos.h"
@@ -39,7 +39,7 @@
  *
 \*===========================================================================*/
 
-static char *tilde_expand(char *name, char *result)
+static char *tilde_expand(char *name, char *result, size_t result_len)
 {
   char *p;
   struct passwd *pwPtr;
@@ -60,7 +60,7 @@ static char *tilde_expand(char *name, char *result)
     } else
       dir =  pwPtr->pw_dir;
 
-    sprintf(result, "%s%s", dir, name+1);
+    snprintf(result, result_len, "%s%s", dir, name+1);
   }
   else {
     for (p=&name[1]; (*p != 0) && (*p != '/'); p++) {
@@ -74,7 +74,7 @@ static char *tilde_expand(char *name, char *result)
     if (pwPtr == NULL) {
       STk_error("user %S does not exist", result);
     }
-    sprintf(result, "%s%s", pwPtr->pw_dir, p);
+    snprintf(result, result_len, "%s%s", pwPtr->pw_dir, p);
   }
   return result;
 }
@@ -214,9 +214,9 @@ char *STk_expand_file_name(char *s)
 
 #ifdef WIN32
   cygwin_conv_to_full_posix_path(s, abs);
-  tilde_expand(abs, expanded);
+  tilde_expand(abs, expanded, sizeof(expanded));
 #else
-  tilde_expand(s, expanded);
+  tilde_expand(s, expanded, sizeof(expanded));
 #endif
   absolute(expanded, abs);
   return STk_strdup(abs);
@@ -245,7 +245,7 @@ SCM STk_do_glob(int argc, SCM *argv)
     if (!STRINGP(*argv)) STk_error("~S is a bad pathname", *argv);
     if (i == 1) flags |= GLOB_APPEND; /* append after the 1st argument done */
 
-    tilde_expand(STRING_CHARS(*argv), expanded);
+    tilde_expand(STRING_CHARS(*argv), expanded, sizeof(expanded));
     glob(expanded, flags, NULL, &buff);
     /* ignore the return value of glob */
   }

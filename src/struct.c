@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 12-May-2004 17:26 (eg)
- * Last file update: 10-Apr-2021 18:47 (eg)
+ * Last file update: 27-Aug-2021 20:37 (eg)
  */
 
 #include "stklos.h"
@@ -251,7 +251,7 @@ static void print_struct_type(SCM expr, SCM port, int _UNUSED(mode))
 {
   char buffer[1000];
 
-  sprintf(buffer, "#[%s-type %s %ld]",
+  snprintf(buffer, sizeof(buffer), "#[%s-type %s %ld]",
       COND_TYPEP(expr) ? "condition": "struct",
       get_struct_type_name(expr),
       (unsigned long) expr);
@@ -485,7 +485,7 @@ static void print_struct(SCM expr, SCM port, int _UNUSED(mode))
     STk_C_apply(STRUCT_TYPE_PRINTER(type), 2, expr, port);
   } else {
     /* Use the default writer */
-    sprintf(buffer, "#[%s %s %ld]",
+    snprintf(buffer, sizeof(buffer), "#[%s %s %ld]",
         (CONDP(expr) ? "condition" : "struct"),
         get_struct_type_name(STRUCT_TYPE(expr)),
         (unsigned long) expr);

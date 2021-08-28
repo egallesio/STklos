@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 17-Aug-2005 08:31 (eg)
- * Last file update: 30-Apr-2021 14:19 (eg)
+ * Last file update: 28-Aug-2021 11:19 (eg)
  */
 
 #include "stklos.h"
@@ -55,12 +55,12 @@ static void verify_proc(SCM proc, int arity)
 
 static void vport_print(SCM obj, SCM port)   /* Generic printing of virtual ports */
 {
-  char buffer[MAX_PATH_LENGTH + 20];
+  char buffer[MAX_PATH_LENGTH + 100];
 
-  sprintf(buffer, "#[%s-virtual-port %lx%s]",
-          IVPORTP(obj) ? "input" : "output",
-          (unsigned long) obj,
-          PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
+  snprintf(buffer, sizeof(buffer), "#[%s-virtual-port %lx%s]",
+           IVPORTP(obj) ? "input" : "output",
+           (unsigned long) obj,
+           PORT_IS_CLOSEDP(obj) ? " (closed)" : "");
   STk_puts(buffer, port);
 }
 

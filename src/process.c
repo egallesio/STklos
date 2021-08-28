@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 10-Apr-2021 18:45 (eg)
+ * Last file update: 27-Aug-2021 20:36 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -358,7 +358,7 @@ DEFINE_PRIMITIVE("%run-process", run_process, subr4,
 
                  close(pipes[i][i == 0 ? 0 : 1]);
                  /* Make a new file descriptor to access the pipe */
-                 sprintf(buffer, "pipe-%s-%d", stdStreams[i], pid);
+                 snprintf(buffer, sizeof(buffer), "pipe-%s-%d", stdStreams[i], pid);
                  port = (i == 0) ?
                                 STk_fd2scheme_port(pipes[i][1], "w", buffer) :
                                 STk_fd2scheme_port(pipes[i][0], "r", buffer);
@@ -746,7 +746,7 @@ static void print_process(SCM p, SCM port, int _UNUSED(mode))
 {
   char buffer[100];
 
-  sprintf(buffer, "#<process PID=%d>", PROCESS_PID(p));
+  snprintf(buffer, sizeof(buffer), "#<process PID=%d>", PROCESS_PID(p));
   STk_puts(buffer, port);
 }
 

@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  4-Aug-2021 19:45 (eg)
+ * Last file update: 28-Aug-2021 12:13 (eg)
  */
 
 
@@ -608,22 +608,26 @@ static char *number2Cstr(SCM n, long base, char buffer[])
     case tc_rational:
       {
         char *s1, *s2, *s3, tmp[100];
+        size_t len;
 
-        s1 = number2Cstr(RATIONAL_NUM(n), base, buffer);
-        s2 = number2Cstr(RATIONAL_DEN(n), base, tmp);
-        s3 = STk_must_malloc(strlen(s1) + strlen(s2) + 2);
-        sprintf(s3, "%s/%s", s1, s2);
+        s1  = number2Cstr(RATIONAL_NUM(n), base, buffer);
+        s2  = number2Cstr(RATIONAL_DEN(n), base, tmp);
+        len = strlen(s1) + strlen(s2) + 2;
+        s3  = STk_must_malloc(len);
+        snprintf(s3, len, "%s/%s", s1, s2);
         if (s2!=tmp) STk_free(s2); /*buffer will event. be deallocated by caller*/
         return s3;
       }
     case tc_complex:
       {
         char *s1, *s2, *s3, tmp[100];
+        size_t len;
 
-        s1 = number2Cstr(COMPLEX_REAL(n), base, buffer);
-        s2 = number2Cstr(COMPLEX_IMAG(n), base, tmp);
-        s3 = STk_must_malloc(strlen(s1) + strlen(s2) + 3);
-        sprintf(s3, "%s%s%si", s1, ((*s2 == '-') ? "": "+"), s2);
+        s1  = number2Cstr(COMPLEX_REAL(n), base, buffer);
+        s2  = number2Cstr(COMPLEX_IMAG(n), base, tmp);
+        len  = strlen(s1) + strlen(s2) + 3;
+        s3 = STk_must_malloc(len);
+        snprintf(s3, len, "%s%s%si", s1, ((*s2 == '-') ? "": "+"), s2);
         if (s2!=tmp) STk_free(s2); /*buffer will event. be deallocated by caller*/
         return s3;
       }

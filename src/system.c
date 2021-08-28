@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 13-Jul-2021 16:19 (eg)
+ * Last file update: 28-Aug-2021 11:18 (eg)
  */
 
 #include <unistd.h>
@@ -1717,14 +1717,17 @@ doc>
 DEFINE_PRIMITIVE("setenv!", setenv, subr2, (SCM var, SCM value))
 {
   char *s;
-
+  unsigned long len;
+  
   if (!STRINGP(var))                  error_bad_string(var);
   if (strchr(STRING_CHARS(var), '=')) STk_error("variable ~S contains a '='", var);
   if (!STRINGP(value))                STk_error("value ~S is not a string", value);
 
-  s = STk_must_malloc(strlen(STRING_CHARS(var))   +
-                      strlen(STRING_CHARS(value)) + 2); /* 2 because of '=' & \0 */
-  sprintf(s, "%s=%s", STRING_CHARS(var), STRING_CHARS(value));
+  len = strlen(STRING_CHARS(var))   +
+        strlen(STRING_CHARS(value)) + 2; /* 2 because of '=' & \0 */
+  
+  s = STk_must_malloc(len);
+  snprintf(s, len, "%s=%s", STRING_CHARS(var), STRING_CHARS(value));
   putenv(s);
   return STk_void;
 }

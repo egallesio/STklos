@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ????
- * Last file update:  6-May-2021 17:25 (eg)
+ * Last file update: 27-Aug-2021 20:23 (eg)
  *
  *
  * Completely rewritten for the STklos version (Jan. 2000)
@@ -240,7 +240,7 @@ STk_fprintf(SCM port, char *format, ...)
   char buffer[PORT_MAX_PRINTF];
 
   va_start(ap, format);
-  vsprintf(buffer, format, ap);
+  vsnprintf(buffer, sizeof(buffer), format, ap);
   va_end(ap);
   return STk_puts(buffer, port);
 }

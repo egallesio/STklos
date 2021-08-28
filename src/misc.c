@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  4-Jun-2021 15:52 (eg)
+ * Last file update: 27-Aug-2021 20:30 (eg)
  */
 
 #include "stklos.h"
@@ -149,7 +149,8 @@ DEFINE_PRIMITIVE("address-of", address_of, subr1, (SCM object))
 {
   char buffer[50];     /* should be sufficient for a while */
 
-  sprintf(buffer, "%lx", (unsigned long) object); /* not very efficient ... */
+  snprintf(buffer, sizeof(buffer),
+           "%lx", (unsigned long) object); /* not very efficient ... */
   return STk_Cstr2number(buffer, 16L);
 }
 

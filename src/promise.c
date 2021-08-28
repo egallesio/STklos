@@ -22,7 +22,7 @@
  *           Author: Erick Gallesio [eg@unice.fr]
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date:  2-Jun-1993 12:27 (eg)
- * Last file update: 10-Apr-2021 18:51 (eg)
+ * Last file update: 27-Aug-2021 20:34 (eg)
  */
 #include "stklos.h"
 
@@ -213,7 +213,7 @@ DEFINE_PRIMITIVE("promise?", promisep, subr1, (SCM obj))
 static void print_promise(SCM promise, SCM port, int _UNUSED(mode))
 {
   char buffer[100];
-  sprintf(buffer, "#[promise %lx]", (unsigned long) promise);
+  snprintf(buffer, sizeof(buffer), "#[promise %lx]", (unsigned long) promise);
   STk_puts(buffer, port);
 }
 

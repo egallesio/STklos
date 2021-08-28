@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 29-Apr-2021 16:12 (eg)
+ * Last file update: 27-Aug-2021 20:34 (eg)
  *
  */
 #include <ctype.h>
@@ -177,7 +177,7 @@ static void printstring(SCM s, SCM port, int mode)
 
 void STk_print(SCM exp, SCM port, int mode)
 {
-  char buffer[100]; /* for small results */
+  char buffer[512]; /* for small results */
 
   if (SCONSTP(exp)) {
     /* Expression is a small constant */
@@ -192,7 +192,7 @@ void STk_print(SCM exp, SCM port, int mode)
   }
 
   if (INTP(exp)) {
-    int len = sprintf(buffer, "%ld", INT_VAL(exp));
+    int len = snprintf(buffer, sizeof(buffer), "%ld", INT_VAL(exp));
     STk_nputs(port, buffer, len);
     return;
   }
@@ -246,18 +246,19 @@ void STk_print(SCM exp, SCM port, int mode)
         STk_print_star(*BOX_VALUES(exp), port, mode);
       }
       else {
-        sprintf(buffer, "#[box (%d) %lx]", BOX_ARITY(exp), (unsigned long) exp);
+        snprintf(buffer, sizeof(buffer),
+                 "#[box (%d) %lx]", BOX_ARITY(exp), (unsigned long) exp);
         STk_puts(buffer, port);
       }
       return;
     case tc_pointer:
       if (CPOINTER_TYPE(exp) == STk_void) {
-        sprintf(buffer, "#[C-pointer %lx @ %lx]",
+        snprintf(buffer, sizeof(buffer), "#[C-pointer %lx @ %lx]",
                 (unsigned long) CPOINTER_VALUE(exp), (unsigned long) exp);
       } else {
         STk_puts("#[", port);
         STk_print(CPOINTER_TYPE(exp), port, mode);
-        sprintf(buffer, "-pointer %lx @ %lx]", (unsigned long) CPOINTER_VALUE(exp),
+        snprintf(buffer, sizeof(buffer), "-pointer %lx @ %lx]", (unsigned long) CPOINTER_VALUE(exp),
                 (unsigned long) exp);
       }
       STk_puts(buffer, port);
@@ -284,7 +285,7 @@ void STk_print(SCM exp, SCM port, int mode)
       STk_putc(']', port);
       return;
     case tc_callback:
-      sprintf(buffer, "#[callback %lx]", (unsigned long) exp);
+      snprintf(buffer, sizeof(buffer), "#[callback %lx]", (unsigned long) exp);
       STk_puts(buffer, port);
       return;
 #endif
@@ -300,7 +301,8 @@ void STk_print(SCM exp, SCM port, int mode)
             p(exp, port, mode);
           else {
             /* No print function. Try to display something useful */
-            sprintf(buffer, "#[%s %lx]", XTYPE_NAME(xdescr), (unsigned long) exp);
+            snprintf(buffer, sizeof(buffer),
+                     "#[%s %lx]", XTYPE_NAME(xdescr), (unsigned long) exp);
             STk_puts(buffer, port);
           }
         }
