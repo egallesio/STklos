@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 03-May-2021 15:22
- * Last file update: 31-May-2021 17:07 (eg)
+ * Last file update: 28-Aug-2021 12:42 (eg)
  */
 
 #include <gmp.h>
@@ -336,16 +336,15 @@ DEFINE_PRIMITIVE("%random-state-copy-mt",srfi_27_random_state_copy_mt,subr1,(SCM
 
 void print_random_state_mt (SCM state, SCM port, int _UNUSED(mode))
 {
-    /* The format is   #,(<random-statet-mt> i v1 v2 v3 ...) */
+    /* The format is   #,(<random-state-mt> i v1 v2 v3 ...) */
+    char buf[50];
 
     STk_puts("#,(<random-state-mt> ",port);
-    char *buf = STk_must_malloc((NN+1)*20);
-
-    sprintf(buf,"%d", STATE_MT_MTI(state));
+    snprintf(buf, sizeof(buf), "%d", STATE_MT_MTI(state));
     STk_puts(buf, port);
 
     for (int i=0; i < NN; i++) {
-        sprintf(buf," %lu", STATE_MT_MT(state)[i]);
+        snprintf(buf, sizeof(buf), " %lu", STATE_MT_MT(state)[i]);
         STk_puts(buf, port);
     }
 

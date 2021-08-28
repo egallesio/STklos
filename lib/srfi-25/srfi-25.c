@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 28-Mar-2021 18:41
- * Last file update:  7-Jun-2021 11:41 (eg)
+ * Last file update: 28-Aug-2021 12:36 (eg)
  */
 
 #include "stklos.h"
@@ -985,14 +985,10 @@ void check_array_shape_compatible(int new_rank, long *new_shape,
             char *os = cvec2string(2*old_rank,old_shape);
             char *map = get_affine_map(proc,new_rank, old_rank);
             char *id  = cvec2string(new_rank,idx);
-            char *buf = STk_must_malloc_atomic(strlen(msg)+
-                                               strlen(ns)+
-                                               strlen(os)+
-                                               strlen(map)+
-                                               strlen(id)+1);
+            size_t len = strlen(msg)+ strlen(ns)+ strlen(os)+ strlen(map)+ strlen(id)+1;
+            char *buf = STk_must_malloc_atomic(len);
 
-            sprintf(buf,msg, ns, os, map, id);
-
+            snprintf(buf,len, msg, ns, os, map, id);
             STk_error(buf);
         }
 
@@ -1444,10 +1440,10 @@ static void print_array(SCM array, SCM port, int mode)
    STk_puts("#,(<array> (",port);
 
    /* write the array shape */
-   for (int i =0; i< rank; i++) {
-     sprintf(buffer,"%ld %ld",
-             ARRAY_SHAPE(array)[2*i],    /* lower bound */
-             ARRAY_SHAPE(array)[2*i+1]); /* upper bound */
+   for (int i =0; i < rank; i++) {
+     snprintf(buffer, sizeof(buffer), "%ld %ld",
+              ARRAY_SHAPE(array)[2*i],    /* lower bound */
+              ARRAY_SHAPE(array)[2*i+1]); /* upper bound */
      STk_puts(buffer, port);
      if (i != rank-1 ) STk_putc(' ', port);
    }
