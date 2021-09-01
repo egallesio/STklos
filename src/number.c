@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 28-Aug-2021 12:13 (eg)
+ * Last file update:  1-Sep-2021 15:29 (eg)
  */
 
 
@@ -562,9 +562,9 @@ static Inline SCM real2integer(SCM r)
   return double2integer(v);
 }
 
-void STk_double2Cstr(char *buffer, double n)
+void STk_double2Cstr(char *buffer, size_t bufflen, double n)
 {
-  sprintf(buffer, "%.*g", real_precision, n);
+  snprintf(buffer, bufflen, "%.*g", real_precision, n);
   if (strchr(buffer, '.') == NULL && strchr(buffer, 'e') == NULL)
     strcat(buffer, ".0");
   /* Treat special cases of +nan.0 and +inf.0 */
@@ -575,7 +575,7 @@ void STk_double2Cstr(char *buffer, double n)
 }
 
 /* Convert a number to a C-string. Result must be freed if != from buffer */
-static char *number2Cstr(SCM n, long base, char buffer[])
+static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
 {
   char *s = buffer;
 
@@ -610,8 +610,8 @@ static char *number2Cstr(SCM n, long base, char buffer[])
         char *s1, *s2, *s3, tmp[100];
         size_t len;
 
-        s1  = number2Cstr(RATIONAL_NUM(n), base, buffer);
-        s2  = number2Cstr(RATIONAL_DEN(n), base, tmp);
+        s1  = number2Cstr(RATIONAL_NUM(n), base, buffer, bufflen);
+        s2  = number2Cstr(RATIONAL_DEN(n), base, tmp, sizeof(tmp));
         len = strlen(s1) + strlen(s2) + 2;
         s3  = STk_must_malloc(len);
         snprintf(s3, len, "%s/%s", s1, s2);
@@ -623,8 +623,8 @@ static char *number2Cstr(SCM n, long base, char buffer[])
         char *s1, *s2, *s3, tmp[100];
         size_t len;
 
-        s1  = number2Cstr(COMPLEX_REAL(n), base, buffer);
-        s2  = number2Cstr(COMPLEX_IMAG(n), base, tmp);
+        s1  = number2Cstr(COMPLEX_REAL(n), base, buffer, bufflen);
+        s2  = number2Cstr(COMPLEX_IMAG(n), base, tmp, sizeof(tmp));
         len  = strlen(s1) + strlen(s2) + 3;
         s3 = STk_must_malloc(len);
         snprintf(s3, len, "%s%s%si", s1, ((*s2 == '-') ? "": "+"), s2);
@@ -633,7 +633,7 @@ static char *number2Cstr(SCM n, long base, char buffer[])
       }
     case tc_real:
       if (base != 10) STk_error("base must be 10 for this number", n);
-      STk_double2Cstr(buffer, REAL_VAL(n));
+      STk_double2Cstr(buffer, bufflen, REAL_VAL(n));
       return buffer;
 
     default: return STk_void; /* never reached (for the gcc static analyzer)  */
@@ -3023,7 +3023,7 @@ DEFINE_PRIMITIVE("number->string", number2string, subr12, (SCM n, SCM base))
   if (!NUMBERP(n))                            error_bad_number(n);
   if (b != 2 && b != 8 && b != 10 && b != 16) error_incorrect_radix(base);
 
-  s = number2Cstr(n, b, buffer);
+  s = number2Cstr(n, b, buffer, sizeof(buffer));
   z = STk_makestring(strlen(s), s);
   if (s != buffer) STk_free(s);
   return z;

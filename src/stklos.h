@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 22:58 (eg)
- * Last file update: 28-Aug-2021 12:01 (eg)
+ * Last file update:  1-Sep-2021 15:21 (eg)
  */
 
 
@@ -833,7 +833,7 @@ long STk_numlt2(SCM o1, SCM o2);
 long STk_numgt2(SCM o1, SCM o2);
 long STk_numle2(SCM o1, SCM o2);
 long STk_numge2(SCM o1, SCM o2);
-void STk_double2Cstr(char *buffer, double n);
+void STk_double2Cstr(char *buffer, size_t buuflen, double n);
 
 
   /****

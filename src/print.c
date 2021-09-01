@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 27-Aug-2021 20:34 (eg)
+ * Last file update:  1-Sep-2021 15:26 (eg)
  *
  */
 #include <ctype.h>
@@ -227,7 +227,7 @@ void STk_print(SCM exp, SCM port, int mode)
       printlist(exp, port, mode);
       return;
     case tc_real:
-      STk_double2Cstr(buffer, REAL_VAL(exp));
+      STk_double2Cstr(buffer, sizeof(buffer), REAL_VAL(exp));
       STk_puts(buffer, port);
       return;
     case tc_symbol:
