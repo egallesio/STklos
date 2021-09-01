@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  1-Sep-2021 15:43 (eg)
+ * Last file update:  1-Sep-2021 16:16 (eg)
  */
 
 
@@ -396,7 +396,7 @@ static Inline SCM double2real(double x)
 static SCM double2integer(double n)     /* small or big depending of n's size */
 {
   unsigned int i, j;
-  size_t size = 20;
+  size_t size = 30;
   char *tmp = NULL;
   SCM z;
 
@@ -405,7 +405,7 @@ static SCM double2integer(double n)     /* small or big depending of n's size */
     return MAKE_INT((long) n);
 
   /* n doesn't fit in a long => build a bignum. THIS IS VERY INEFFICIENT */
-  tmp = STk_must_malloc(size);
+  tmp = STk_must_malloc_atomic(size);
   i = 0;
   if (n < 0.0) { tmp[i++] = '-'; n = -n; }
   do {
@@ -602,7 +602,7 @@ static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
         return buffer;
       }
     case tc_bignum:
-      s = STk_must_malloc(mpz_sizeinbase(BIGNUM_VAL(n), base) + 2);
+      s = STk_must_malloc_atomic(mpz_sizeinbase(BIGNUM_VAL(n), base) + 2);
       s = mpz_get_str(s, base, BIGNUM_VAL(n));
       return s;
     case tc_rational:
@@ -613,7 +613,7 @@ static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
         s1  = number2Cstr(RATIONAL_NUM(n), base, buffer, bufflen);
         s2  = number2Cstr(RATIONAL_DEN(n), base, tmp, sizeof(tmp));
         len = strlen(s1) + strlen(s2) + 2;
-        s3  = STk_must_malloc(len);
+        s3  = STk_must_malloc_atomic(len);
         snprintf(s3, len, "%s/%s", s1, s2);
         if (s2!=tmp) STk_free(s2); /*buffer will event. be deallocated by caller*/
         return s3;
@@ -626,7 +626,7 @@ static char *number2Cstr(SCM n, long base, char buffer[], size_t bufflen)
         s1  = number2Cstr(COMPLEX_REAL(n), base, buffer, bufflen);
         s2  = number2Cstr(COMPLEX_IMAG(n), base, tmp, sizeof(tmp));
         len  = strlen(s1) + strlen(s2) + 3;
-        s3 = STk_must_malloc(len);
+        s3 = STk_must_malloc_atomic(len);
         snprintf(s3, len, "%s%s%si", s1, ((*s2 == '-') ? "": "+"), s2);
         if (s2!=tmp) STk_free(s2); /*buffer will event. be deallocated by caller*/
         return s3;
