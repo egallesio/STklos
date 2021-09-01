@@ -1,7 +1,7 @@
 /*
- * md5.c			-- MD5 algorithm
+ * md5.c            -- MD5 algorithm
  *
- * Copyright © 2007-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 13-May-2007 22:21 (eg)
- * Last file update:  3-Dec-2011 15:11 (eg)
+ * Last file update:  1-Sep-2021 14:15 (eg)
  */
 
 /*
@@ -261,12 +261,20 @@ static void md5_finish( struct md5_context *ctx, uint8 digest[16] )
 
 /*===========================================================================*\
  *
- * 	Scheme Primitive ...
+ *  Scheme Primitive ...
  *
 \*===========================================================================*/
 
 #include "stklos.h"
 #define MD5BUFSIZ 8192
+
+static inline char hexchar(unsigned int v)
+{
+  return (v < 10) ? (v + '0'): (v-10 + 'a');
+}
+
+
+
 
 /*
 <doc EXT md5sum
@@ -279,17 +287,16 @@ doc>
 DEFINE_PRIMITIVE("md5sum", md5sum, subr1, (SCM obj))
 {
   struct md5_context ctx;
-  unsigned char md5sum[16];
+  unsigned char md5sum[16], *psum;
   char output[33];
   int i;
 
-
   md5_starts(&ctx);
 
-  if (STRINGP(obj)) {					/* string */
+  if (STRINGP(obj)) {                   /* string */
     md5_update(&ctx, (uint8 *) STRING_CHARS(obj), STRING_SIZE(obj));
   }
-  else if (IPORTP(obj)) {				/* input port */
+  else if (IPORTP(obj)) {               /* input port */
     char buffer[MD5BUFSIZ];
     int n;
 
@@ -297,21 +304,24 @@ DEFINE_PRIMITIVE("md5sum", md5sum, subr1, (SCM obj))
       md5_update(&ctx, (uint8 *)buffer, n);
     }
   }
-  else 					/* neither string or port => error */
+  else                  /* neither string or port => error */
     STk_error("bad object ~S", obj);
 
   md5_finish(&ctx, md5sum);
 
   /* Build the Scheme result */
-  for(i = 0; i < 16; i++) {
-    sprintf(output + i * 2, "%02x", md5sum[i]);
+  for(i=0, psum=md5sum; i < 32; i+=2, psum++) {
+    output[i]   = hexchar(*psum / 16);
+    output[i+1] = hexchar(*psum % 16);
   }
+  output[32] = '\0';
+
   return STk_Cstring2string(output);
 }
 
 /*===========================================================================*\
  *
- * 	Initialization code
+ *  Initialization code
  *
 \*===========================================================================*/
 int STk_init_md5(void)
@@ -319,4 +329,3 @@ int STk_init_md5(void)
   ADD_PRIMITIVE(md5sum);
   return TRUE;
 }
-

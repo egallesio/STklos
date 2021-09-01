@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 14:25 (eg)
- * Last file update: 28-Aug-2021 12:25 (eg)
+ * Last file update:  1-Sep-2021 14:10 (eg)
  */
 
 #include "stklos.h"
@@ -177,7 +177,7 @@ SCM STk_resolve_link(char *path, int count)
                  /* d points the place where the link must be placed */
                  if (d - dst + strlen(link) + strlen(s) < MAX_PATH_LENGTH - 1) {
                    /* we have enough room */
-                   sprintf(d, "%s%s", link, s);
+                   snprintf(d, MAX_PATH_LENGTH, "%s%s", link, s);
                    /* Recurse. Be careful for loops (a->b and b->a) */
                    if (count < MAXLINK)
                      return STk_resolve_link(dst, count+1);
