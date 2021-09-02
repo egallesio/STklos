@@ -30,3 +30,6 @@
 (%make-copy-module scheme/comparator srfi/128)
 
 (provide "srfi/128")
+
+(provide "srfi/162")  ;; SRFI-162 is included in the body of (scheme comparator),
+                      ;; as recommended in the SRFI.
