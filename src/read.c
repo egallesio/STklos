@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 30-Apr-2021 15:41 (eg)
+ * Last file update:  2-Sep-2021 18:35 (eg)
  *
  */
 
@@ -102,9 +102,9 @@ static void error_key_not_defined(SCM port, SCM key)
   signal_error(port, "key ``#~a='' not defined", key);
 }
 
-static void error_bad_dotted_list(SCM port)
+static void error_bad_dotted_list(SCM port, int line)
 {
-  signal_error(port, "bad dotted list", STk_nil);
+  signal_error(port, "bad dotted list (near line ~A)", MAKE_INT(line));
 }
 
 static void error_bad_inline_hexa_sequence(SCM port, char *str, int in_symbol)
@@ -225,65 +225,71 @@ static SCM read_list(SCM port, char delim, struct read_context *ctx)
 {
   static char *eof_seen = "end of file encountered on ~S";
   int c, line;
-  SCM tmp, cell, cdr;
+  SCM cur, start, last;
 
-  line = PORT_LINE(port);
-  c    = flush_spaces(port, eof_seen, port);
+  start = last = STk_nil;
 
-  if (c == delim) return(STk_nil);
-Top:
-  /* Read the car */
-  STk_ungetc(c, port);
-  tmp = read_rec(port, ctx, TRUE);
-
-  /* See if we don't have a special car */
-  if (tmp == STk_close_par) {
-    /* We are here when reading a list such as (1 ..... #;XXX) */
-    c = STk_getc(port);
-    if (c == delim)
-      return STk_nil;
-    else {
-      warning_parenthesis(port);
-      c = delim;
-      goto Top;
-    }
-  }
-
-  if (tmp == STk_dot) {
-    tmp = read_rec(port, ctx, TRUE);
-    if (tmp == STk_close_par)
-      error_bad_dotted_list(port);
-
+  for ( ; ; ) {
     c = flush_spaces(port, eof_seen, port);
-    if (c == '#') {
+    STk_ungetc(c, port);
+
+    line = PORT_LINE(port);
+    cur  = read_rec(port, ctx, TRUE);
+
+    if (cur == STk_close_par) {
+      c = STk_getc(port);
+      if (c != delim) warning_parenthesis(port);
+      return start;
+    }
+
+    if (cur == STk_dot) {
+      if (last == STk_nil)
+        error_bad_dotted_list(port, line);  // dot before an element
+
+      cur = read_rec(port, ctx, TRUE);
+      if (cur == STk_close_par)
+        error_bad_dotted_list(port, line); // dot not followed by an element
+
+      c = flush_spaces(port, eof_seen, port);
+      if (c == '#') {   // could be a (a . b #;commented-expr)
+        SCM tmp;
+
+        STk_ungetc(c, port);
+        tmp = read_rec(port, ctx, TRUE);
+
+        if (tmp != STk_close_par) STk_error("closing parenthesis expected");
+        c = flush_spaces(port, eof_seen, port);
+      }
+      if (c != delim)
+        error_bad_dotted_list(port, line); // dot not befor last element
+      CDR(last) = cur;
+      return start;
+    }
+
+    /* Build a new pair with "cur" in car and append it of list pointed by
+     * "start" ("last" denotes the last-pair) 
+     */
+    {
       SCM tmp;
 
-      STk_ungetc(c, port);
-      tmp = read_rec(port, ctx, TRUE);
-      if (tmp != STk_close_par) warning_parenthesis(port);
-      c = flush_spaces(port, eof_seen, port);
+      if (ctx->constant) {
+         /* Constant read uses extended cons instead of cons */
+         tmp = STk_econs(cur, STk_nil, PORT_FNAME(port), line, PORT_POS(port));
+         BOXED_INFO(tmp) |= CONS_CONST;
+       }
+       else {
+         tmp = STk_cons(cur, STk_nil);
+       }
+
+       if (start == STk_nil)
+         start = last = tmp;
+       else {
+         CDR(last)= tmp;
+         last = CDR(last);
+       }
     }
-    if (c != delim)
-      STk_warning("missing close parenthesis (line %d)", PORT_LINE(port));
-    return(tmp);
   }
-
-  /* OK, read now the cdr */
-  cdr = read_list(port, delim, ctx);
-  if (cdr == STk_close_par)
-    error_bad_dotted_list(port);
-
-  if (ctx->constant) {
-    /* Constant read uses extended cons instead of cons */
-    cell = STk_econs(tmp, cdr, PORT_FNAME(port), line, PORT_POS(port));
-    BOXED_INFO(cell) |= CONS_CONST;
-  } else {
-    cell = STk_cons(tmp, cdr);
-  }
-
-  return cell;
 }
-
 
 static int read_word(SCM port, int c, char *tok, int case_significant, int *last)
 // read an item whose 1st char is in c. Return its length
@@ -848,6 +854,7 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           return STk_C_apply(read_brace_func, 1, port);
         }
         goto default_case;
+      return read_list(port, '}', ctx);
       }
 
       case ')':
