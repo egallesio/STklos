@@ -139,7 +139,8 @@ is
       ;; Verify that the binding seem correct
       (unless (and (list? binding)
                    (= (length binding) 2)
-                   (pair? (car binding)))
+                   (or (pair? (car binding))
+                       (symbol? (car binding))))
         (error 'let-values "incorrect binding ~S" binding))
       ;; Verify that the defined variables are unique
       (for-each* (lambda (x)
