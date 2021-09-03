@@ -351,7 +351,7 @@ static void printlist_star(SCM exp, SCM port, int mode, cycles *c)
   if (pretty_quotes) {
     /* Special case for pretty printing of quoted expressions */
     s = STk_quote2str(CAR(exp));
-    if (s && !NULLP(CDR(exp)) && NULLP(CDR(CDR(exp)))) {
+    if (s && !NULLP(CDR(exp)) && CONSP(CDR(exp)) && NULLP(CDR(CDR(exp)))) {
       STk_puts(s, port);
       print_cycle(CAR(CDR(exp)), port, mode, c);
       return;
