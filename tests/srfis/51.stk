@@ -5,7 +5,7 @@
 (define rest-list '(x 1))
 (define caller values)
 
-(test "rest-values" '(1 2 3)   (let-values (((a b c) ((lambda (. a-b) (rest-values a-b 5)) 1 2 3)))
+(test "rest-values" '(1 2 3)   (let-values (((a b c) ((lambda a-b (rest-values a-b 5)) 1 2 3)))
                                  (list a b c)))
 
 (test "rest-list"            '(x 1)       (receive (a b)  (rest-values rest-list) (list a b)))
