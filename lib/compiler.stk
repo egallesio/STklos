@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 19-Aug-2021 20:09 (eg)
+;;;; Last file update:  3-Sep-2021 18:40 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -34,7 +34,9 @@
           compiler:warn-use-undefined-postpone
           compiler:show-assembly-code
           compiler:generate-signature
-          compiler:inline-common-functions))
+          compiler:inline-common-functions
+
+          %compiler-new-label))
 
 (select-module STKLOS-COMPILER)
 
@@ -120,6 +122,8 @@
   (let ((lab *code-labels*))
     (set! *code-labels* (+ *code-labels* 1))
     lab))
+
+(define %compiler-new-label new-label)  ;; public name of new-label
 
 (define (emit . args)
   (set! *code-instr* (cons args *code-instr*)))

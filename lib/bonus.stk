@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 21-May-2021 18:17 (eg)
+;;;; Last file update:  4-Sep-2021 14:43 (eg)
 ;;;;
 
 
@@ -845,11 +845,83 @@ doc>
 
 
 
+#|
+<doc EXT-SYNTAX tagbody ->
+ * (tagbody <expression1> <expression2> ...)
+ *
+ * The |<expression>|s are evaluated sequentially from left to right,
+ * and the value(s) of the last <expression> is(are) returned as in a
+ * |begin| form. Within a |tagbody| form expressions which are keywords
+ * are considered as tags and the special form |(-> tag)| is used to
+ * transfer execution to the given tag. This is a ,(bold "very low level")
+ * form which is inspired on |tabgody| Common Lisp's form. It can be useful
+ * for defining new syntaxes, and should probably not used as is.
+ *
+ * @lisp
+ * (tagbody               ;; an infinite loop
+ *    #:1 (display ".")
+ *        (-> #:1))
+ *
+ * (let ((v 0))
+ *   (tagbody
+ *    #:top (when (< v 5)
+ *            (display v)
+ *            (set! v (fx+ v 1))
+ *            (-> #:top))))                      => prints 01234
+ *
+ * (tagbody (display 1)
+ *          (tagbody (display 2)
+ *                   (-> #:inner)
+ *                   (display "not printed")
+ *            #:inner
+ *                  (display 3)
+ *                  (-> #:outer)
+ *                  (display "not printed too"))
+ *    #:outer
+ *          (display "4"))                        => prints 1234
+ * @end lisp
+doc>
+|#
+(define-macro (tagbody . body)
+  (let ((tags  (map (lambda (x) (cons x (%compiler-new-label)))
+                    (filter keyword? body))))
+
+    (define (replace code)
+      ;; replace knowns tags in (-> tag) expressions
+      ;; Unknown tags (inner tagbody forms) are lefts as is
+      (if (pair? code)
+          (if (and (eq? (car code) '->) (= (length code) 2))
+              (let ((t (assq (cadr code) tags)))
+                (if t
+                    `(%%goto ,(cdr t))
+                    code))
+              (map replace code))
+          code))
+
+    (define (verify code)
+      ;; Verify that final expansion doesn't contains still (-> tag).
+      ;; Presence of remaining '->' forms denote a goto to an undefined label
+      (if (pair? code)
+          (cond
+             ((and (eq? (car code) '->) (= (length code) 2))
+                (error 'tagbody "destination label ~S not defined\n" (cadr code)))
+             ((eq? (car code) 'tagbody)  ;; internal tagbody ⇒ skip it
+                #void)
+             (else
+                (map verify code)))))
+
+    (let ((new-body (map (lambda (x)
+                           (if (keyword? x)
+                               `(%%label ,(cdr (assq x tags)))
+                               (replace x)))
+                         body)))
+      (verify new-body)
+      `(begin ,@new-body))))
 
 #|
 <doc EXT-SYNTAX dotimes
- * (dotimes [var count] <expression1> <expression2> ... )
- * (dotimes [var count result] <expression1> <expression2> ... )
+ * (dotimes [var count] <expression1> <expression2> ...)
+ * (dotimes [var count result] <expression1> <expression2> ...)
  *
  * Evaluates the |count| expression, which must return an
  * integer and then evaluates the |<expression>|s once for each
@@ -875,6 +947,34 @@ doc>
                     ((>= ,var ,limit) ,@result)
                   ,@body))))
          bindings))
+
+#|
+<doc EXT-SYNTAX repeat
+ * (repeat count <expression1> <expression2> ...)
+ *
+ * Evaluates the |count| expression, which must return an
+ * integer and then evaluates the |<expression>|s once for each
+ * integer from zero (inclusive) to |count| (exclusive). The result of
+ * |repeat| is undefined. 
+ *
+ * ,(linebreak)
+ * This form could be easily simulated with |dotimes|. Its interest is
+ * that it is faster.
+ * @lisp
+ * (repeat 3 (display "."))     => prints "..."
+ * (repeat 0 (display "."))     => prints nothing
+ * @end lisp
+doc>
+|#
+(define-macro (repeat expr . body)
+  (let ((var (gensym)))
+    `(let ((,var ,expr))
+       (tagbody
+        #:top
+        (when (> ,var 0)
+          (set! ,var (- ,var 1))
+          ,@body
+          (-> #:top))))))
 
 #|
 <doc EXT-SYNTAX while
@@ -2215,7 +2315,7 @@ doc>
  * It is an error if payload is larger than a NaN can hold.
  *
  * The optional parameter |float|, is never used in ,(stklos).
- * 
+ *
  * This function is defined in ,(quick-link-srfi 208).
 doc>
 |#
