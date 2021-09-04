@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  4-Sep-2021 14:43 (eg)
+;;;; Last file update:  4-Sep-2021 19:46 (eg)
 ;;;;
 
 
@@ -848,6 +848,7 @@ doc>
 #|
 <doc EXT-SYNTAX tagbody ->
  * (tagbody <expression1> <expression2> ...)
+ * (-> tag)
  *
  * The |<expression>|s are evaluated sequentially from left to right,
  * and the value(s) of the last <expression> is(are) returned as in a
@@ -955,7 +956,7 @@ doc>
  * Evaluates the |count| expression, which must return an
  * integer and then evaluates the |<expression>|s once for each
  * integer from zero (inclusive) to |count| (exclusive). The result of
- * |repeat| is undefined. 
+ * |repeat| is undefined.
  *
  * ,(linebreak)
  * This form could be easily simulated with |dotimes|. Its interest is

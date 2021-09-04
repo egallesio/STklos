@@ -17,7 +17,7 @@ STklos Reference Manual<hr align="center" width="10%">5. Regular Expressions</di
 <td align="left" valign="top" width="20%" bgcolor="#204875">
 <table width="100%" border="0" cellpadding="2" cellspacing="4" style="border-collapse: collapse;" frame="box" rules="none"><tbody>
 <tr><th align="center" colspan="2" bgcolor="#ACE919"><font color="darkolivegreen"><br />Contents<br /><br /></font></th></tr>
-<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-53825">*Top*</a></td></tr>
+<tr class="navnorm"><td align="center"></td><td align="left"><a href="stklos-ref.html#-document-54014">*Top*</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">1&nbsp;</td><td align="left"><a href="stklos-ref-1.html#Introduction">Introduction</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">2&nbsp;</td><td align="left"><a href="stklos-ref-2.html#Expressions">Expressions</a></td></tr>
 <tr class="navnorm"><td width="8%" align="left" valign="top">3&nbsp;</td><td align="left"><a href="stklos-ref-3.html#Program-structure">Program structure</a></td></tr>
@@ -58,7 +58,7 @@ STklos Reference Manual<hr align="center" width="10%">5. Regular Expressions</di
 </tbody></table>
 </td>
 <td align="left" valign="top">
-<div class="chapterbody"><a name="--index-entry-42703"></a><p><span style="font-variant: small-caps">STklos</span> uses the Philip Hazel's Perl-compatible Regular Expression
+<div class="chapterbody"><a name="--index-entry-42877"></a><p><span style="font-variant: small-caps">STklos</span> uses the Philip Hazel's Perl-compatible Regular Expression
 (PCRE) library for implementing regexps [<a href="stklos-ref-16.html#PCRE">14</a>].
 Consequently, the <span style="font-variant: small-caps">STklos</span> regular expression syntax is the same
 as PCRE, and Perl by the way.</p><p>The following text is extracted from the PCRE package. However, to make
@@ -66,7 +66,7 @@ things shorter, some of the original documentation as not been reported
 here. In particular some possibilities of PCRE have been completely
 occulted (those whose description was too long and which seems (at least
 to me), not too important). Read the documentation provided with PCRE
-for a complete description <a href="#fn--footnote-42716"><sup><small>1</small></sup></a></p><p>A regular expression is a pattern that is matched against a
+for a complete description <a href="#fn--footnote-42890"><sup><small>1</small></sup></a></p><p>A regular expression is a pattern that is matched against a
 subject string from left to right. Most characters stand for
 themselves in a pattern, and match the corresponding characters
 in the subject. As a trivial example, the pattern</p><blockquote><table cellspacing="0" cellpadding="4" width="90%"><tbody>
@@ -870,7 +870,7 @@ refer.</p></div></div><div class="sectiondiv"><div class="sectiontitle"><a name=
 </div>
 <div class="sectionbody"><p>This section lists the Scheme functions that can use PCRE regexpr described
 before</p><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="string--regexp"></a><a name="--index-entry-43471"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="string--regexp"></a><a name="--index-entry-43645"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(string-&gt;regexp string)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>String-&gt;regexp</code> takes a string representation of a regular
@@ -881,13 +881,13 @@ multiple times, it is faster to compile the string once to a regexp
 value and use it for repeated matches instead of using the string
 each time.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="regexp-"></a><a name="--index-entry-43495"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="regexp-"></a><a name="--index-entry-43669"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(regexp? obj)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br /><code>Regexp</code> returns <code>#t</code> if <code>obj</code> is a regexp value created by the <code>regexp</code>,
 otherwise <code>regexp</code> returns <code>#f</code>.</td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="regexp-match-positions"></a><a name="regexp-match"></a><a name="--index-entry-43545"></a><a name="--index-entry-43549"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="regexp-match-positions"></a><a name="regexp-match"></a><a name="--index-entry-43719"></a><a name="--index-entry-43723"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(regexp-match pattern str)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(regexp-match-positions pattern str)</font></strong></code><br /><br />These functions attempt to match <code>pattern</code> (a string or a regexp value)
@@ -921,7 +921,7 @@ in the order of the opening parentheses in pattern.
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="regexp-replace-all"></a><a name="regexp-replace"></a><a name="--index-entry-43673"></a><a name="--index-entry-43677"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="regexp-replace-all"></a><a name="regexp-replace"></a><a name="--index-entry-43847"></a><a name="--index-entry-43851"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(regexp-replace pattern string substitution)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <code><strong><font color="IndianRed">(regexp-replace-all pattern string substitution)</font></strong></code><br /><br /><code>Regexp-replace</code> matches the regular expression <code>pattern</code> against
@@ -959,7 +959,7 @@ To replace <strong>all</strong> the occurrences of <code>pattern</code>, use <co
 </tbody></table></blockquote>
 </td></tr>
 </tbody></table><br /><table cellspacing="0" class="doc-box" cellpadding="0" width="100%"><tbody>
-<tr><td bgcolor="#dddddd"><a name="regexp-quote"></a><a name="--index-entry-43909"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
+<tr><td bgcolor="#dddddd"><a name="regexp-quote"></a><a name="--index-entry-44083"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(regexp-quote str)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
 <br />Takes an arbitrary string and returns a string where characters of
@@ -976,11 +976,11 @@ a mix of regexp strings and verbatim strings.</td></tr>
 </tbody></table></div></div></div><div class='footnotes'>
 <hr>
 <b>Note:</b><br>
-<a name="fn--footnote-42716"><sup><small>1</small></sup></a>: The latest release of PCRE is
+<a name="fn--footnote-42890"><sup><small>1</small></sup></a>: The latest release of PCRE is
 available from <a  class="http" href="http://www.pcre.org/">http://www.pcre.org/</a>
 <br>
 </div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Wed Aug  4 15:10:00 2021</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Sat Sep  4 19:43:22 2021</em></small>
 </body>
 </html>

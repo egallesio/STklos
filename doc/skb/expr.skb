@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 15-Oct-2020 18:34 (eg)
+;; Last file update:  4-Sep-2021 19:40 (eg)
 ;;
 ;; ======================================================================
 
@@ -116,7 +116,8 @@ values are being computed, thus allowing mutually recursive definitions.
 ;; BEGIN
 ;;
 (section :title "Sequencing"
-(insertdoc 'begin))
+(insertdoc 'begin)
+(insertdoc '->))
 
 
 ;;
@@ -127,6 +128,7 @@ values are being computed, thus allowing mutually recursive definitions.
 (insertdoc 'do)
 
 (insertdoc 'dotimes)
+(insertdoc 'repeat)
 (insertdoc 'while)
 (insertdoc 'until))
 
