@@ -133,6 +133,8 @@ case $OS in
       OS_NAME_VERSION=$OS\_$v;
 esac
 
+# We use libtool because we need to build libstklos separate from the stklos binary:
+LT_INIT
 
 ###
 ### Checks for libraries.

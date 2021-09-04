@@ -59,14 +59,6 @@ if NO_THREAD
   THREAD_FILES = thread-none.c mutex-none.c
 endif
 
-stklos_SOURCES = base64.c boolean.c boot.c box.c char.c \
- cond.c  cpointer.c dynload.c env.c error.c extend.c ffi.c fixnum.c \
- fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
- list.c misc.c md5.c number.c object.c parameter.c \
- path.c port.c print.c proc.c process.c promise.c read.c regexp.c  \
- signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
- symbol.c system.c utf8.c uvector.c vector.c vm.c vport.c $(THREAD_FILES)
-
 # HACK:  Normally BUILT_SOURCES contains the files that must be generated before
 # starting the construction of the main target. We use it with a fictive target
 # which runs a script which may update the git-info.h file. If it is updated, 
@@ -74,16 +66,16 @@ stklos_SOURCES = base64.c boolean.c boot.c box.c char.c \
 .PHONY: generate-git-info
 BUILT_SOURCES = generate-git-info
 
-### # The STklos library
-### lib_LTLIBRARIES      = libstklos.la
-### libstklos_la_SOURCES = boolean.c char.c dynload.c env.c error.c \
-### extend.c fport.c hash.c keyword.c lib.c list.c misc.c number.c \
-### object.c path.c port.c print.c proc.c process.c promise.c read.c \
-### regexp.c signal.c sio.c sport.c  str.c symbol.c system.c \
-### uvector.c vector.c  vm.c
-###
-###
-### stklos_SOURCES = stklos.c
+# The STklos library
+lib_LTLIBRARIES      = libstklos.la
+libstklos_la_SOURCES = base64.c boolean.c box.c char.c cond.c  cpointer.c \
+ dynload.c env.c error.c extend.c ffi.c fixnum.c fport.c hash.c keyword.c lib.c \
+ list.c misc.c md5.c number.c object.c parameter.c path.c port.c print.c proc.c \
+ process.c promise.c read.c regexp.c signal.c sio.c socket.c sport.c str.c struct.c \
+ symbol.c system.c utf8.c uvector.c vector.c  vm.c vport.c $(THREAD_FILES)
+#include_HEADERS = src/stklos.h
+
+stklos_SOURCES = gnu-getopt.c gnu-glob.c boot.c stklos.c
 
 # gtklib		= @GTK_CONFIG_LIBS@
 
@@ -110,9 +102,10 @@ ffi		= @FFI@
 ffilib		= @FFILIB@
 ffiinc		= @FFIINC@
 
-stklos_LDADD   = $(compatlib) $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm
-stklos_LDFLAGS = @SH_MAIN_LOAD_FLAGS@
-AM_CPPFLAGS    = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
+stklos_LDADD          = $(compatlib) $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm libstklos.la
+libstklos_la_LIBADD   = $(compatlib) $(gmplib) $(pcrelib) $(ffilib) $(gclib) -lm
+libstklos_la_LDFLAGS  = @SH_MAIN_LOAD_FLAGS@
+AM_CPPFLAGS           = $(gmpinc) $(pcreinc) $(ffiinc) $(gcinc)
 
 
 struct.o cond.o: struct.h
