@@ -115,21 +115,34 @@
 ;;   (fv-vector vec set-vec!)
 ;;   (fv-length flexvector-length set-flexvector-length!))
 
-(define-struct <flexvector>
-  fv-vector
-  fv-length)
+(define-class <flexvector> ()
+  ((fv-vector :getter vec
+              :setter set-vec!
+              :init-keyword :vec)
+   (fv-length :getter flexvector-length
+              :setter set-flexvector-length!
+              :init-keyword :len)))
+  
+(export <flexvector>)
 
-(define %make-flexvector make-<flexvector>)
+(define-reader-ctor '<flexvector>
+  (lambda args
+    (let ((v (make-flexvector 0)))
+      (set-vec! v (cadr args))
+      (set-flexvector-length! v (car args))
+      v)))
 
-(define flexvector? <flexvector>?)
+(define-method write-object ((v <flexvector>) port)
+  (format port "#,(<flexvector> ~a ~a)"
+          (flexvector-length v)
+          (vec v)))
 
-(define vec <flexvector>-fv-vector)
-(define (set-vec! v new-vec)
-  (set! (<flexvector>-fv-vector v) new-vec))
+(define (%make-flexvector v l)
+  (make <flexvector>
+    :len l
+    :vec v))
 
-(define flexvector-length <flexvector>-fv-length)
-(define (set-flexvector-length! v k)
-  (set! (<flexvector>-fv-length v) k))
+(define (flexvector? obj) (is-a? obj <flexvector>))
 
 ;;;
 ;;; END OF CHANGES
