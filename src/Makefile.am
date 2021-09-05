@@ -72,10 +72,11 @@ libstklos_la_SOURCES = base64.c boolean.c box.c char.c cond.c  cpointer.c \
  dynload.c env.c error.c extend.c ffi.c fixnum.c fport.c hash.c keyword.c lib.c \
  list.c misc.c md5.c number.c object.c parameter.c path.c port.c print.c proc.c \
  process.c promise.c read.c regexp.c signal.c sio.c socket.c sport.c str.c struct.c \
- symbol.c system.c utf8.c uvector.c vector.c  vm.c vport.c $(THREAD_FILES)
+ symbol.c system.c utf8.c uvector.c vector.c  vm.c vport.c \
+ gnu-getopt.c gnu-glob.c $(THREAD_FILES)
 #include_HEADERS = src/stklos.h
 
-stklos_SOURCES = gnu-getopt.c gnu-glob.c boot.c stklos.c
+stklos_SOURCES =  boot.c stklos.c
 
 # gtklib		= @GTK_CONFIG_LIBS@
 
