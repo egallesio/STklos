@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 14:25 (eg)
- * Last file update:  1-Sep-2021 14:10 (eg)
+ * Last file update:  7-Sep-2021 11:28 (eg)
  */
 
 #include "stklos.h"
@@ -39,15 +39,14 @@
  *
 \*===========================================================================*/
 
-static char *tilde_expand(char *name, char *result, size_t result_len)
+static void tilde_expand(char *name, char *result, size_t result_len)
 {
   char *p;
   struct passwd *pwPtr;
-  register int len;
 
   if (name[0] != '~') {
-    strcpy(result, name);
-    return name;
+    snprintf(result, result_len, "%s", name);
+    return;
   }
 
   if (ISDIRSEP(name[1]) || name[1] == '\0') {
@@ -63,20 +62,20 @@ static char *tilde_expand(char *name, char *result, size_t result_len)
     snprintf(result, result_len, "%s%s", dir, name+1);
   }
   else {
-    for (p=&name[1]; (*p != 0) && (*p != '/'); p++) {
-      /* Null body;  just find end of name. */
-    }
-    len = p-(name+1);
-    strncpy(result, name+1, (size_t) len);
-    result[len] = '\0';
+    char user[100];             // 100 should be sufficient
+    register size_t i = 0;      // ~user will be truncated if it doesn't fit.
 
-    pwPtr = getpwnam(result);
+    for (p=&name[1]; (*p != 0) && (*p != '/'); p++) {
+      if (i < sizeof(user)-1) user[i++] = *p; // keep room for final NUL
+    }
+    user[i] = '\0';
+
+    pwPtr = getpwnam(user);
     if (pwPtr == NULL) {
-      STk_error("user %S does not exist", result);
+      STk_error("user %S does not exist", user);
     }
     snprintf(result, result_len, "%s%s", pwPtr->pw_dir, p);
   }
-  return result;
 }
 
 
@@ -259,4 +258,3 @@ SCM STk_do_glob(int argc, SCM *argv)
   globfree(&buff);
   return res;
 }
-

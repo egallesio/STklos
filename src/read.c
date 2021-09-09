@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  2-Sep-2021 18:35 (eg)
+ * Last file update:  6-Sep-2021 18:34 (eg)
  *
  */
 
@@ -215,7 +215,7 @@ static int read_hex_sequence(SCM port, char* utf8_seq, int use_utf8) // ⇒ -1 i
       }
   }
  bad_sequence:
-  strcpy(utf8_seq, buffer); /* for a better error message */
+  snprintf(utf8_seq, MAX_HEX_SEQ_LEN, "%s", buffer); /* for a better error message */
   return -1;
 }
 

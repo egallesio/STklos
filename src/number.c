@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  1-Sep-2021 16:16 (eg)
+ * Last file update:  6-Sep-2021 17:39 (eg)
  */
 
 
@@ -569,8 +569,8 @@ void STk_double2Cstr(char *buffer, size_t bufflen, double n)
     strncat(buffer, ".0", bufflen);
   /* Treat special cases of +nan.0 and +inf.0 */
   if (isalpha(buffer[0])) {
-    if (strcmp(buffer, "inf.0") == 0) strcpy(buffer, "+inf.0");
-    if (strcmp(buffer, "nan.0") == 0) strcpy(buffer, "+nan.0");
+    if (strcmp(buffer, "inf.0") == 0) snprintf(buffer, bufflen, "+inf.0");
+    if (strcmp(buffer, "nan.0") == 0) snprintf(buffer, bufflen,  "+nan.0");
   }
 }
 

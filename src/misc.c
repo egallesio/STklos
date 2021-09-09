@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update: 27-Aug-2021 20:30 (eg)
+ * Last file update:  6-Sep-2021 17:28 (eg)
  */
 
 #include "stklos.h"
@@ -45,9 +45,10 @@ char *STk_strdup(const char *s)
 {
   /* Like standard strdup but with our allocator */
   char *res;
+  register size_t len = strlen(s);
 
-  res = STk_must_malloc_atomic(strlen(s) + 1);
-  strcpy(res, s);
+  res = STk_must_malloc_atomic(len + 1);
+  memcpy(res, s, len+1);
   return res;
 }
 

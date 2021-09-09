@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update: 27-Apr-2021 15:21 (eg)
+ * Last file update:  6-Sep-2021 18:44 (eg)
  */
 
 #include <ctype.h>
@@ -280,11 +280,14 @@ SCM STk_makestring(int len, char *init)
   STRING_SPACE(z) = STRING_SIZE(z) = STRING_LENGTH(z) = len;
 
   if (init) {
+    /* use memcpy instead of str... here because init may eventually contain
+     * null characters.
+     */
     memcpy(STRING_CHARS(z), init, (size_t) len);
-    STRING_CHARS(z)[len] = '\0'; /* so that STRING_CHARS is compatible with C */
+    STRING_CHARS(z)[len] = '\0'; /* so that STRING_CHARS is ~ compatible with C */
 
     if (STk_use_utf8)
-      /* Eventually correct the length to be in charcaters instead of bytes */
+      /* Eventually correct the length to be in characters instead of bytes */
       STRING_LENGTH(z) = STk_utf8_strlen(STRING_CHARS(z), len);
   }
   else
@@ -303,7 +306,7 @@ SCM STk_Cstring2string(char *str) /* Embed a C string in Scheme world  */
   STRING_CHARS(z)  = STk_must_malloc_atomic(len + 1);
   STRING_SPACE(z)  = STRING_SIZE(z) = len;
   STRING_LENGTH(z) = STk_use_utf8 ? (size_t) STk_utf8_strlen(str, len): len;
-  strcpy(STRING_CHARS(z), str);
+  snprintf(STRING_CHARS(z), len+1, "%s", str);
 
   return z;
 }

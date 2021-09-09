@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 27-Apr-2021 12:15 (eg)
+ * Last file update:  9-Sep-2021 13:06 (eg)
  *
  */
 
@@ -1415,7 +1415,7 @@ DEFINE_PRIMITIVE("read-line", read_line, subr01, (SCM port))
       if (i == INITIAL_LINE_SIZE) {
         /* This is the first resize. Pass from static to dynamic allocation */
         buff = STk_must_malloc(size);
-        strncpy(buff, buffer, INITIAL_LINE_SIZE);
+        memcpy(buff, buffer, INITIAL_LINE_SIZE);
       }
       else
         buff = STk_must_realloc(buff, size);
