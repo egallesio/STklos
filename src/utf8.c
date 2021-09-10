@@ -1,7 +1,7 @@
 /*
  * utf8.c               -- UTF-8 support functions
  *
- * Copyright © 2011-2019 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+ * Copyright © 2011-2021 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 30-Apr-2011 19:46 (eg)
- * Last file update:  9-Jun-2019 19:51 (eg)
+ * Last file update: 10-Sep-2021 11:40 (eg)
  */
 
 #include "stklos.h"
@@ -32,7 +32,7 @@ int STk_use_utf8 = -1;
 static void error_bad_sequence(char *str)
 {
   int i;
-  char *buffer = STk_must_malloc(strlen(str) + 1);
+  char *buffer = STk_must_malloc_atomic(strlen(str) + 1);
 
   for (i = 0; *str; i++, str++) {
     buffer[i] = ((' ' < *str) && (*str < 0x7f)) ? *str : '.';

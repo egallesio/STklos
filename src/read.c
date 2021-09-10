@@ -600,7 +600,7 @@ static SCM read_string(SCM port, int constant)
 
   j    = 0;
   len  = 100;
-  p    = buffer = STk_must_malloc(len);
+  p    = buffer = STk_must_malloc_atomic(len);
 
   while(((c = STk_getc(port)) != '"') && (c != EOF)) {
     if (c == '\\') {

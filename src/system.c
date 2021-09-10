@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 28-Aug-2021 11:18 (eg)
+ * Last file update: 10-Sep-2021 11:37 (eg)
  */
 
 #include <unistd.h>
@@ -1726,7 +1726,7 @@ DEFINE_PRIMITIVE("setenv!", setenv, subr2, (SCM var, SCM value))
   len = strlen(STRING_CHARS(var))   +
         strlen(STRING_CHARS(value)) + 2; /* 2 because of '=' & \0 */
   
-  s = STk_must_malloc(len);
+  s = STk_must_malloc_atomic(len);
   snprintf(s, len, "%s=%s", STRING_CHARS(var), STRING_CHARS(value));
   putenv(s);
   return STk_void;
