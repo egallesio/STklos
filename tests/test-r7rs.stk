@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update:  7-Jan-2021 17:04 (eg)
+;;;; Last file update: 10-Sep-2021 11:16 (eg)
 ;;;;
 
 (require "test")
@@ -158,6 +158,16 @@
 (test "let-values.6"
       1
       (let-values () 1))
+(test "let-values.7"   ;; Issue #257
+      '(1 2 3)
+      (let-values ((x (values 1 2 3)))
+        x))
+(test "let-values.8"
+      '((1 2 3) 100)
+      (let ((x 100))
+        (let-values ((x (values 1 2 3))
+                     (y x))
+          (cons x y))))
 ;;;; ----------
 (test "let*-values.1" 35
       (let*-values (((root rem) (exact-integer-sqrt 32)))
@@ -186,6 +196,17 @@
           (define x 'in)
           x)
         x))
+(test "let*-values.8"
+      '((1 2 3) 4 5 6)
+      (let*-values ((x (values 1 2 3))
+                    (y (values 4 5 6)))
+        (cons x y)))
+(test "let*-values.9"
+      '(#0=(1 2 3) #0#)
+      (let*-values ((x (values 1 2 3))
+                    (y x))
+        (cons x y)))
+
 
 
 ;;;
