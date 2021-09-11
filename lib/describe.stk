@@ -74,6 +74,13 @@
   (void))
 
 
+(define (describe-parts-header part-list zero one many port)
+  (let ((msg (case (length part-list)
+               ((0) zero)
+               ((1) one)
+               (else many))))
+    (format port msg)))
+
 ;;;
 ;;; describe for STklos instances
 ;;;
@@ -85,14 +92,19 @@
 				   (symbol->string (slot-definition-name b))))))))
     (next-method)
     ;; print all the instance slots
-    (format port "Slots are: ~%")
-    (for-each (lambda (slot)
-		(let ((name (slot-definition-name slot)))
-		  (format port "     ~S = ~A~%" name
-			       (if (slot-bound? x name)
-				   (format #f "~W" (slot-ref x name))
-				   "#[unbound]"))))
-	      (sort-slots (class-slots (class-of x))))
+    (let ((slots (class-slots (class-of x))))
+      (describe-parts-header slots 
+                             "There are no slots.~%"
+                             "The only slot is:~%"
+                             "Slots are:~%"
+                             port)
+      (for-each (lambda (slot)
+		  (let ((name (slot-definition-name slot)))
+		    (format port "     ~S = ~A~%" name
+			    (if (slot-bound? x name)
+				(format #f "~W" (slot-ref x name))
+				"#[unbound]"))))
+	        (sort-slots slots)))
     (void)))
 
 ;;; ======================================================================
@@ -191,14 +203,19 @@
   (let ((type (struct-type x)))
     (format port "~A is an instance of the structure type ~A.\n"
 	    x (struct-type-name type))
-    (format port "Slots are: ~%")
-    (for-each (lambda (slot)
-		(let ((val (struct-ref x slot)))
-		  (format port "     ~S = ~A~%" slot
-			  (if (eq? val (void))
-			      "#[unbound]"
-			      (format #f "~W" val)))))
-	      (struct-type-slots type))))
+    (let ((slots (struct-type-slots type)))
+      (describe-parts-header slots
+                             "There are no slots.~%"
+                             "The only slot is:~%"
+                             "Slots are:~%"
+                             port)
+      (for-each (lambda (slot)
+		  (let ((val (struct-ref x slot)))
+		    (format port "     ~S = ~A~%" slot
+			    (if (eq? val (void))
+			        "#[unbound]"
+			        (format #f "~W" val)))))
+	        slots))))
 
 ;;;
 ;;; Describe for struct-types
@@ -206,9 +223,13 @@
 (define-method describe ((x <struct-type>) port)
   (format port "~A is a structure type whose name is ~A.\n" x (struct-type-name x))
   (format port "Parent structure type: ~S\n" (struct-type-parent x))
-  (format port "Fields of this structure type are:~%")
-  (for-each (lambda (x) (format port "\t~A\n" x))
-	    (struct-type-slots x)))
+  (let ((slots (struct-type-slots x)))
+    (describe-parts-header slots
+                           "There are no slots.~%"
+                           "The only slot is:~%"
+                           "Slots are:~%"
+                           port)
+    (for-each (lambda (x) (format port "\t~A\n" x)) slots)))
 
 ;;; ======================================================================
 ;;; 	Describe for conditions & condition types
@@ -216,14 +237,19 @@
 (define-method describe ((x <condition>) port)
   (let ((type (struct-type x)))
     (format port "~A is a condition of type ~A.\n" x (struct-type-name type))
-    (format port "Slots are: ~%")
-    (for-each (lambda (slot)
-		(let ((val (struct-ref x slot)))
-		  (format port "     ~S = ~A~%" slot
-			  (if (eq? val (void))
-			      "#[unbound]"
-			      (format #f "~W" val)))))
-	      (struct-type-slots type))))
+    (let ((slots (struct-type-slots type)))
+      (describe-parts-header slots
+                             "There are no slots.~%"
+                             "The only slot is:~%"
+                             "Slots are:~%"
+                             port)
+        (for-each (lambda (slot)
+		    (let ((val (struct-ref x slot)))
+		      (format port "     ~S = ~A~%" slot
+			      (if (eq? val (void))
+			          "#[unbound]"
+			          (format #f "~W" val)))))
+	          slots))))
 
 ;;;
 ;;; Describe for conditions-types
