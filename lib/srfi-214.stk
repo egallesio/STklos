@@ -45,7 +45,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 05-Sep-2021 08:23
-;;;; Last file update: 05-Sep-2021 09:57 (jpellegrini)
+;;;; Last file update: 17-Sep-2021 12:40 (eg)
 ;;;;
 
 (define-module SRFI-214
@@ -91,9 +91,9 @@
           generator->flexvector flexvector->generator)
 
 
-;;; 
+;;;
 ;;; flexvectors-body-2.scm
-;;; 
+;;;
 
 ;;;
 ;;; BEGIN CHANGES specific for STklos
@@ -114,16 +114,32 @@
 ;;   flexvector?
 ;;   (fv-vector vec set-vec!)
 ;;   (fv-length flexvector-length set-flexvector-length!))
+(define-struct <flexvector>
+  fv-vector
+  fv-length)
 
-(define-class <flexvector> ()
-  ((fv-vector :getter vec
-              :setter set-vec!
-              :init-keyword :vec)
-   (fv-length :getter flexvector-length
-              :setter set-flexvector-length!
-              :init-keyword :len)))
-  
+(define %make-flexvector make-<flexvector>)
+
+(define flexvector? <flexvector>?)
+
+(define vec <flexvector>-fv-vector)
+(define (set-vec! v new-vec)
+  (set! (<flexvector>-fv-vector v) new-vec))
+
+(define flexvector-length <flexvector>-fv-length)
+(define (set-flexvector-length! v k)
+  (set! (<flexvector>-fv-length v) k))
+
+
+;; Flexvector I/O
 (export <flexvector>)
+
+
+(struct-type-change-writer! <flexvector>
+                            (lambda (v port)
+                              (format port "#,(<flexvector> ~a ~w)"
+                                      (flexvector-length v)
+                                      (vec v))))
 
 (define-reader-ctor '<flexvector>
   (lambda args
@@ -131,18 +147,6 @@
       (set-vec! v (cadr args))
       (set-flexvector-length! v (car args))
       v)))
-
-(define-method write-object ((v <flexvector>) port)
-  (format port "#,(<flexvector> ~a ~a)"
-          (flexvector-length v)
-          (vec v)))
-
-(define (%make-flexvector v l)
-  (make <flexvector>
-    :len l
-    :vec v))
-
-(define (flexvector? obj) (is-a? obj <flexvector>))
 
 ;;;
 ;;; END OF CHANGES
@@ -365,9 +369,9 @@
         (set-flexvector-length! to
           (max (flexvector-length to) (+ at (- end start))))))))
 
-;;; 
+;;;
 ;;; flexvectors-body-2.scm
-;;; 
+;;;
 
 (define flexvector-unfold
   (case-lambda
