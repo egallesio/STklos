@@ -45,7 +45,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 05-Sep-2021 08:23
-;;;; Last file update: 17-Sep-2021 12:40 (eg)
+;;;; Last file update: 17-Sep-2021 13:11 (eg)
 ;;;;
 
 (define-module SRFI-214
@@ -148,19 +148,20 @@
       (set-flexvector-length! v (car args))
       v)))
 
-;;;
-;;; END OF CHANGES
-;;;
 
-(define (cap fv)
+(define (cap fv)               ;; unchanged
   (vector-length (vec fv)))
 
 (define (grow! fv)
-  (define old-vec (vec fv))
-  (define new-vec (make-vector (quotient (* (vector-length old-vec) 3) 2)))
-  (vector-copy! new-vec 0 old-vec)
-  (set-vec! fv new-vec)
-  new-vec)
+  (let* ((old-vec (vec fv))
+         (new-vec (vector-resize old-vec
+                                 (quotient (* (vector-length old-vec) 3) 2))))
+    (set-vec! fv new-vec)
+    new-vec))
+
+;;;
+;;; END OF CHANGES
+;;;
 
 (define make-flexvector
   (case-lambda
