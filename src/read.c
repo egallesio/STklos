@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  6-Sep-2021 18:34 (eg)
+ * Last file update: 18-Sep-2021 18:53 (eg)
  *
  */
 
@@ -267,7 +267,7 @@ static SCM read_list(SCM port, char delim, struct read_context *ctx)
     }
 
     /* Build a new pair with "cur" in car and append it of list pointed by
-     * "start" ("last" denotes the last-pair) 
+     * "start" ("last" denotes the last-pair)
      */
     {
       SCM tmp;
@@ -291,9 +291,10 @@ static SCM read_list(SCM port, char delim, struct read_context *ctx)
   }
 }
 
-static int read_word(SCM port, int c, char *tok, int case_significant, int *last)
+static int read_word(SCM port, int c, char *tok, int case_significant, int *last,
+                     int *seen_pipe)
 // read an item whose 1st char is in c. Return its length
-// At exit "last", if not NULL,  contains the last character read for thi item
+// At exit "last", if not NULL,  contains the last character read for this item
 {
   register int j = 0;
   int allchars   = 0;
@@ -301,8 +302,11 @@ static int read_word(SCM port, int c, char *tok, int case_significant, int *last
 
   for( ; ; ) {
     allchars  ^= (c == '|');
+
     if (c != '|')
       tok[j++]  = (allchars || case_significant) ? c : tolower(c);
+    else
+      if (seen_pipe) *seen_pipe = 1;
 
     if (c == '\\') {
       int k = j-1;
@@ -364,14 +368,15 @@ static int read_word(SCM port, int c, char *tok, int case_significant, int *last
 static SCM read_token(SCM port, int c, int case_significant)
 {
   char tok[MAX_TOKEN_SIZE];
-  SCM z;
-  int len, last;
+  int len, last, seen_pipe=0;
 
-  len = read_word(port, c, tok, case_significant, &last);
-  z   = STk_Cstr2number(tok, 10L);
+  len = read_word(port, c, tok, case_significant, &last, &seen_pipe);
+  if (!seen_pipe) {
+    SCM z = STk_Cstr2number(tok, 10L);
 
-  if (z != STk_false)
-    return z;
+    if (z != STk_false)
+      return z;
+  }
 
   /* It is not a number */
   if (*tok == '#') {
@@ -439,7 +444,7 @@ static SCM read_address(SCM port)
   char *end, tok[MAX_TOKEN_SIZE] = "0";
   unsigned long address;
 
-  read_word(port, 'x', tok+1, FALSE, NULL);
+  read_word(port, 'x', tok+1, FALSE, NULL, NULL);
   address = strtoul(tok, &end, 16);
   if (*end)
     signal_error(port, "bad address specifier #p~a", STk_Cstring2string(tok+2));
@@ -791,7 +796,7 @@ static SCM maybe_read_uniform_vector(SCM port, int c, struct read_context *ctx)
   int tag, len;
   SCM v;
 
-  len = read_word(port, c, tok, ctx->case_significant, NULL);
+  len = read_word(port, c, tok, ctx->case_significant, NULL, NULL);
 
   if (strcasecmp(tok, "f") ==0 || strcasecmp(tok, "false") ==0) {
     /* This is the #f constant */
