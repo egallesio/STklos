@@ -20,10 +20,12 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 21-Mar-1993 14:33
-;;;; Last file update: 21-Sep-2021 13:02 (eg)
+;;;; Last file update: 21-Sep-2021 13:11 (eg)
 ;;;;
 
-
+(define-module DESCRIBE
+  (export describe)
+  
 ;;;
 ;;; describe for simple objects
 ;;;
@@ -262,5 +264,11 @@
 ;;; ======================================================================
 (define-method describe (x)
   (describe x (current-output-port)))
+
+)  ;; End of module DESCRIBE
+
+;; overload the autoload closure with "describe" generic function
+(select-module STklos)
+(set! describe (in-module DESCRIBE describe))
 
 (provide "describe")
