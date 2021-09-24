@@ -21,17 +21,14 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 14:25 (eg)
- * Last file update:  7-Sep-2021 11:28 (eg)
+ * Last file update: 24-Sep-2021 09:08 (eg)
  */
 
 #include "stklos.h"
 #include "path.h"
 #ifdef HAVE_GLOB
 #  include <glob.h>
-#else
-#  include "gnu-glob.h"
 #endif
-
 
 /*===========================================================================*\
  *
@@ -229,6 +226,13 @@ char *STk_expand_file_name(char *s)
 \*===========================================================================*/
 SCM STk_do_glob(int argc, SCM *argv)
 {
+#ifndef HAVE_GLOB
+  (void)argc; (void)argv;
+
+  /* Not having glob should be rare now: it is in POSIX since 2001 */
+  STk_warning("glob is not supported on this system");
+  return STk_nil;
+#else
   int i, n, flags;
   glob_t buff;
   char expanded[2 * MAX_PATH_LENGTH];
@@ -257,4 +261,5 @@ SCM STk_do_glob(int argc, SCM *argv)
 
   globfree(&buff);
   return res;
+#endif
 }

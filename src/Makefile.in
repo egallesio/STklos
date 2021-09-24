@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  1-Jun-2021 19:36 (eg)
+# Last file update: 24-Sep-2021 08:44 (eg)
 
 
 VPATH = @srcdir@
@@ -127,13 +127,13 @@ am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(extraincdir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__stklos_SOURCES_DIST = base64.c boolean.c boot.c box.c char.c \
 	cond.c cpointer.c dynload.c env.c error.c extend.c ffi.c \
-	fixnum.c fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c \
-	lib.c list.c misc.c md5.c number.c object.c parameter.c path.c \
-	port.c print.c proc.c process.c promise.c read.c regexp.c \
-	signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
-	symbol.c system.c utf8.c uvector.c vector.c vm.c vport.c \
-	thread-none.c mutex-none.c thread-common.c thread-pthreads.c \
-	mutex-common.c mutex-pthreads.c
+	fixnum.c fport.c gnu-getopt.c hash.c keyword.c lib.c list.c \
+	misc.c md5.c number.c object.c parameter.c path.c port.c \
+	print.c proc.c process.c promise.c read.c regexp.c signal.c \
+	sio.c socket.c sport.c stklos.c str.c struct.c symbol.c \
+	system.c utf8.c uvector.c vector.c vm.c vport.c thread-none.c \
+	mutex-none.c thread-common.c thread-pthreads.c mutex-common.c \
+	mutex-pthreads.c
 @NO_THREAD_FALSE@@PTHREADS_TRUE@am__objects_1 =  \
 @NO_THREAD_FALSE@@PTHREADS_TRUE@	thread-common.$(OBJEXT) \
 @NO_THREAD_FALSE@@PTHREADS_TRUE@	thread-pthreads.$(OBJEXT) \
@@ -145,9 +145,9 @@ am_stklos_OBJECTS = base64.$(OBJEXT) boolean.$(OBJEXT) boot.$(OBJEXT) \
 	box.$(OBJEXT) char.$(OBJEXT) cond.$(OBJEXT) cpointer.$(OBJEXT) \
 	dynload.$(OBJEXT) env.$(OBJEXT) error.$(OBJEXT) \
 	extend.$(OBJEXT) ffi.$(OBJEXT) fixnum.$(OBJEXT) \
-	fport.$(OBJEXT) gnu-getopt.$(OBJEXT) gnu-glob.$(OBJEXT) \
-	hash.$(OBJEXT) keyword.$(OBJEXT) lib.$(OBJEXT) list.$(OBJEXT) \
-	misc.$(OBJEXT) md5.$(OBJEXT) number.$(OBJEXT) object.$(OBJEXT) \
+	fport.$(OBJEXT) gnu-getopt.$(OBJEXT) hash.$(OBJEXT) \
+	keyword.$(OBJEXT) lib.$(OBJEXT) list.$(OBJEXT) misc.$(OBJEXT) \
+	md5.$(OBJEXT) number.$(OBJEXT) object.$(OBJEXT) \
 	parameter.$(OBJEXT) path.$(OBJEXT) port.$(OBJEXT) \
 	print.$(OBJEXT) proc.$(OBJEXT) process.$(OBJEXT) \
 	promise.$(OBJEXT) read.$(OBJEXT) regexp.$(OBJEXT) \
@@ -183,9 +183,8 @@ am__depfiles_remade = ./$(DEPDIR)/base64.Po ./$(DEPDIR)/boolean.Po \
 	./$(DEPDIR)/dynload.Po ./$(DEPDIR)/env.Po ./$(DEPDIR)/error.Po \
 	./$(DEPDIR)/extend.Po ./$(DEPDIR)/ffi.Po ./$(DEPDIR)/fixnum.Po \
 	./$(DEPDIR)/fport.Po ./$(DEPDIR)/gnu-getopt.Po \
-	./$(DEPDIR)/gnu-glob.Po ./$(DEPDIR)/hash.Po \
-	./$(DEPDIR)/keyword.Po ./$(DEPDIR)/lib.Po ./$(DEPDIR)/list.Po \
-	./$(DEPDIR)/md5.Po ./$(DEPDIR)/misc.Po \
+	./$(DEPDIR)/hash.Po ./$(DEPDIR)/keyword.Po ./$(DEPDIR)/lib.Po \
+	./$(DEPDIR)/list.Po ./$(DEPDIR)/md5.Po ./$(DEPDIR)/misc.Po \
 	./$(DEPDIR)/mutex-common.Po ./$(DEPDIR)/mutex-none.Po \
 	./$(DEPDIR)/mutex-pthreads.Po ./$(DEPDIR)/number.Po \
 	./$(DEPDIR)/object.Po ./$(DEPDIR)/parameter.Po \
@@ -441,7 +440,7 @@ BASEDIR = ..
 @PTHREADS_TRUE@THREAD_FILES = thread-common.c thread-pthreads.c mutex-common.c mutex-pthreads.c
 stklos_SOURCES = base64.c boolean.c boot.c box.c char.c \
  cond.c  cpointer.c dynload.c env.c error.c extend.c ffi.c fixnum.c \
- fport.c gnu-getopt.c gnu-glob.c hash.c keyword.c lib.c \
+ fport.c gnu-getopt.c hash.c keyword.c lib.c \
  list.c misc.c md5.c number.c object.c parameter.c \
  path.c port.c print.c proc.c process.c promise.c read.c regexp.c  \
  signal.c sio.c socket.c sport.c stklos.c str.c struct.c \
@@ -606,7 +605,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fixnum.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fport.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnu-getopt.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnu-glob.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/keyword.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib.Po@am__quote@ # am--include-marker
@@ -873,7 +871,6 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/fixnum.Po
 	-rm -f ./$(DEPDIR)/fport.Po
 	-rm -f ./$(DEPDIR)/gnu-getopt.Po
-	-rm -f ./$(DEPDIR)/gnu-glob.Po
 	-rm -f ./$(DEPDIR)/hash.Po
 	-rm -f ./$(DEPDIR)/keyword.Po
 	-rm -f ./$(DEPDIR)/lib.Po
