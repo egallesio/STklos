@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 03-May-2021 15:22
- * Last file update: 28-Aug-2021 12:42 (eg)
+ * Last file update: 24-Sep-2021 09:49 (eg)
  */
 
 #include <gmp.h>
@@ -344,7 +344,7 @@ void print_random_state_mt (SCM state, SCM port, int _UNUSED(mode))
     STk_puts(buf, port);
 
     for (int i=0; i < NN; i++) {
-        snprintf(buf, sizeof(buf), " %lu", STATE_MT_MT(state)[i]);
+      snprintf(buf, sizeof(buf), " %lu", (unsigned long) STATE_MT_MT(state)[i]);
         STk_puts(buf, port);
     }
 
