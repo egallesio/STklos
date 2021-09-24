@@ -1,0 +1,61 @@
+
+;;; The example from the SRFI text:
+;;;
+(define v 1)
+(define again #f)
+
+(define (test1)
+  (display v)
+  (fluid-let ((v 2))
+    (call-with-current-continuation
+     (lambda (k)
+       (set! again (lambda () 
+                     (set! again #f)
+                     (k #t)))))
+    (test2)
+    (set! v 3))
+  (display v)
+  (set! v 4)
+  (if again (again)))
+
+(define (test2) (display v))       
+
+(test "fluid-let 1"
+      "12121"
+      (with-output-to-string
+        (lambda ()
+          (test1))))    
+
+
+;;; From Chez users' guide
+;;;
+(test "fluid-let 2"
+      8
+      (let ((x 3))
+        (+ (fluid-let ((x 5))
+             x)
+           x)))
+
+(test "fluid-let 3"
+      'a
+      (let ((x 'a))
+        (call/cc
+         (lambda (k)
+           (fluid-let ((x 'b))
+             (letrec ((f (lambda (y) (k '*))))
+               (f '*)))))
+        x))
+
+;;; Another test
+;;;
+
+(test "fluid-let 4"
+      -6
+      (let ((a 2)
+            (b 3)
+            (c 5))
+        (let ((sum (lambda () (+ a b c))))
+          (fluid-let ((a -1))
+            (fluid-let ((b (* a 2)))
+              (fluid-let ((c (+ a b)))
+                (sum)))))))
