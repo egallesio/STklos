@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 08-Aug-2021 13:40
- * Last file update: 31-Aug-2021 21:41
+ * Last file update: 26-Sep-2021 18:54 (eg)
  */
 
 #include <stklos.h>
@@ -76,7 +76,7 @@ DEFINE_PRIMITIVE("list-sorted?", list_sorted, subr2, (SCM pred, SCM l))
         if (cadr == original_car) return STk_true;
 
         if (STk_C_apply(pred, 2,car, cadr) == STk_false) return STk_false;
-        
+
         if (NULLP(CDR(cdr))) return STk_true; /* end of list */
 
         /* move to next: */
@@ -94,7 +94,7 @@ DEFINE_PRIMITIVE("vector-sorted?", vector_sorted, vsubr, (int argc, SCM *argv))
     if (argc > 4) STk_error ("requires at most 4 arguments");
     SCM pred = *argv--;
     SCM v = *argv--;
-    
+
     if (!(VECTORP(v))) error_bad_vector(v);
     if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
 
@@ -107,7 +107,7 @@ DEFINE_PRIMITIVE("vector-sorted?", vector_sorted, vsubr, (int argc, SCM *argv))
         if (!INTP(start)) STk_error("bad integer");
         cstart = INT_VAL(start);
     } else cstart = 0;
-    
+
     if (argc>3) {
         end = *argv--;
         if (!INTP(end)) STk_error("bad integer");
@@ -183,7 +183,7 @@ list_merge_aux(SCM less, SCM A, SCM B)
     /*
       cur   one
       |     |
-      v     v      
+      v     v
       a1 -> a2 -> a3 -> ...
 
       b1 -> b2 -> b3 -> ...
@@ -225,12 +225,12 @@ list_merge_aux(SCM less, SCM A, SCM B)
         }
     }
 
-    if (CONSP(two)) 
+    if (CONSP(two))
         CDR(cur) = two;
-    
-    if (CONSP(one)) 
+
+    if (CONSP(one))
         CDR(cur) = one;
-    
+
     return res;
 }
 
@@ -255,7 +255,7 @@ long gallop(SCM pred, SCM to,
       a[starta] <= b[cstartb] so now instead of proceeding linearly,
       use "galloping": search for the position where b[startb] would fit
       but proceed exponentially:
-      
+
       a[starta]      <= b[startb]
       a[starta + 1]  <= b[startb]
       a[starta + 3]  <= b[startb]
@@ -266,7 +266,7 @@ long gallop(SCM pred, SCM to,
                        .
                        .
       The index growing is starta + (2^k)-1.
-      
+
       As per the remarks on "galloping" in the CPython implementation of Timsort,
       https://github.com/python/cpython/blob/main/Objects/listsort.txt
 
@@ -288,9 +288,9 @@ long gallop(SCM pred, SCM to,
          }
 
          long skipped = starta - saved_starta;
-         
+
          /* TODO: binary search to find the EXACT place */
-         
+
 
          /* copy the beginning of A, which only has elements lesser than
             all elements in B. */
@@ -322,12 +322,12 @@ void vector_merge_aux(SCM pred, SCM to, SCM v1, SCM v2,
         cstart2 += skipped;
     }
     start += skipped;
-    
+
      /* do the proper merge: */
      int i = start;
      while ((cstart1 < cend1) || (cstart2 < cend2)) {
          if ((cstart1 < cend1) && (cstart2 < cend2)) {
-             
+
              if (STk_C_apply(pred,2,
                              VECTOR_DATA(v2)[cstart2],
                              VECTOR_DATA(v1)[cstart1]) == STk_true) {
@@ -375,7 +375,7 @@ vec_init_args(long *cstart1, long *cend1,
         if (!INTP(start1)) STk_error("bad integer for start index");
         *cstart1 = INT_VAL(start1);
     } else *cstart1 = 0;
-    
+
     if (argc>1) {
         end1 = *argv--;
         res++;
@@ -384,7 +384,7 @@ vec_init_args(long *cstart1, long *cend1,
     } else *cend1 = size1;
 
     check_index(size1,*cstart1,*cend1);
-    
+
     return res;
 }
 
@@ -395,7 +395,7 @@ DEFINE_PRIMITIVE("vector-merge",vector_merge,vsubr, (int argc, SCM *argv))
     SCM pred = *argv--;
     SCM v1 = *argv--;
     SCM v2 = *argv--;
-    
+
     if (!(VECTORP(v1))) error_bad_vector(v1);
     if (!(VECTORP(v2))) error_bad_vector(v2);
     if (STk_procedurep(pred) != STk_true) error_bad_proc(pred);
@@ -404,13 +404,13 @@ DEFINE_PRIMITIVE("vector-merge",vector_merge,vsubr, (int argc, SCM *argv))
 
     argc -= 3;
     int a;
-    
+
     a = vec_init_args(&cstart1, &cend1,
                       argc, argv,
                       VECTOR_SIZE(v1));
     argc -= a;
     argv -= a;
-    
+
     vec_init_args(&cstart2, &cend2,
                   argc, argv,
                   VECTOR_SIZE(v2));
@@ -419,7 +419,7 @@ DEFINE_PRIMITIVE("vector-merge",vector_merge,vsubr, (int argc, SCM *argv))
                             //(SCM) NULL );
 
     vector_merge_aux(pred,v3,v1,v2,0,cstart1,cend1,cstart2,cend2);
-    
+
     return v3;
 }
 
@@ -443,7 +443,7 @@ DEFINE_PRIMITIVE("vector-merge!",nvector_merge,vsubr, (int argc, SCM *argv))
     SCM v1 = *argv--;
     SCM v2 = *argv--;
     argc -= 4;
-    
+
     if (!(VECTORP(to))) error_bad_vector(to);
     if (!(VECTORP(v1))) error_bad_vector(v1);
     if (!(VECTORP(v2))) error_bad_vector(v2);
@@ -465,7 +465,7 @@ DEFINE_PRIMITIVE("vector-merge!",nvector_merge,vsubr, (int argc, SCM *argv))
 
     argc -= a;
     argv -= a;
-    
+
     vec_init_args(&cstart2, &cend2,
                   argc, argv,
                   VECTOR_SIZE(v2));
@@ -475,13 +475,13 @@ DEFINE_PRIMITIVE("vector-merge!",nvector_merge,vsubr, (int argc, SCM *argv))
     long to_max = cstart + (cend1 - cstart1) + (cend2 - cstart2);
     if (to_max > VECTOR_SIZE(to))
         STk_error("merged vector would exceed length of destination");
-    
+
     check_overlap(to,cstart,to_max, v1,cstart1,cend1);
     check_overlap(to,cstart,to_max, v2,cstart2,cend2);
 
     if (to_max - cstart > 0)
         vector_merge_aux(pred,to,v1,v2,cstart,cstart1,cend1,cstart2,cend2);
-    
+
     return STk_void;
 }
 
@@ -495,7 +495,7 @@ void merge(SCM v, SCM aux,
     memcpy( VECTOR_DATA(aux),
             &(VECTOR_DATA(v)[runs[i-2]]),
             (runs[i-1] - runs[i-2])* sizeof(SCM));
-    
+
     vector_merge_aux(less,
                      v,                        /* result is in v */
                      aux, v,                   /* the two sections to merge */
@@ -515,7 +515,7 @@ void insertion_sort(SCM *vec, SCM less, long start, long end)
     int r;
     int q = start + 1;
     SCM swap_aux;
-    
+
     /* TODO: use binary insertion sort */
     while (q < end) {
         r = q;
@@ -553,16 +553,15 @@ DEFINE_PRIMITIVE("list-stable-sort!",
     */
     if (!(CONSP(list) || NULLP(list))) STk_error("bad list ~S", list);
     if (NULLP(list) || NULLP(CDR(list))) return list;
-    
+
     SCM runs = STk_nil;
     SCM start = list;
     SCM end   = start;
     long run_len;
     SCM one, two;
     long size1, size2;
-    SCM x;
+    SCM x, *tmp_vec;
     long len = STk_int_length(start);
-    SCM *tmp_vec = STk_must_malloc(min_run * sizeof(SCM));
 
     /* We need to go through all the list in order to calculate its length --
        and the elements may be scattered all around. However, doing that once
@@ -572,6 +571,8 @@ DEFINE_PRIMITIVE("list-stable-sort!",
         min_run++;
     if (min_run == 0)
         min_run++;
+
+    tmp_vec = STk_must_malloc(min_run * sizeof(SCM));
 
     while (!NULLP(start) && !NULLP(end)) {
         if (!CONSP(end)) STk_error("improper list ~S", list);
@@ -586,7 +587,7 @@ DEFINE_PRIMITIVE("list-stable-sort!",
         }
         /* end points to the LAST element in a run (NOT to the element after it) */
 
-        
+
         /*
           if size of this run is less than min_run:
              extend the list so as to have min_run length,
@@ -638,21 +639,21 @@ DEFINE_PRIMITIVE("list-stable-sort!",
                    INT_VAL(CAR(CDR( CAR(runs) )))               /*    C */
                 +  INT_VAL(CAR(CDR( CAR(CDR(runs)) )))          /* +  B */
                 >= INT_VAL(CAR(CDR( CAR(CDR(CDR(runs))) )))) {  /* >= A */
-                
+
                 if(   INT_VAL(CAR(CDR( CAR(CDR(CDR(runs))) )))  /*   A */
                    <  INT_VAL(CAR(CDR( CAR(runs) )))) {         /* < C */
 
                     merged = 1;
                     one = CAR(CDR(runs));       /* B */
                     two = CAR(CDR(CDR(runs)));  /* A */
-                    
+
                     size1 = INT_VAL(CAR(CDR(one)));
                     size2 = INT_VAL(CAR(CDR(two)));
-                    
+
                     x = list_merge_aux(less,
                                        CAR(two),
                                        CAR(one));
-                    
+
                     CDR(runs) = STk_cons(LIST2(x, MAKE_INT(size1 + size2)),
                                          CDR(CDR(CDR(runs))));  /* discard the two runs we merged */
                 } else {
@@ -660,35 +661,35 @@ DEFINE_PRIMITIVE("list-stable-sort!",
                     merged = 1;
                     one = CAR(runs);
                     two = CAR(CDR(runs));
-                    
+
                     size1 = INT_VAL(CAR(CDR(one)));
                     size2 = INT_VAL(CAR(CDR(two)));
-                    
+
                     x = list_merge_aux(less,
                                        CAR(two),
                                        CAR(one));
-                    
+
                     runs = STk_cons(LIST2(x, MAKE_INT(size1 + size2)),
                                     CDR(CDR(runs))); /* discard the two runs we merged */
                 }
             }
-            
+
             if (!NULLP(CDR(runs)) &&                        /* at least two runs on the stack */
                 !NULLP(CDR(CDR(runs))) &&
                    INT_VAL(CAR(CDR( CAR(runs) )))           /*    C */
                 >= INT_VAL(CAR(CDR( CAR(CDR(runs)) )))) {   /* >= B */
-                
+
                 merged = 1;
                 one = CAR(runs);
                 two = CAR(CDR(runs));
-                
+
                 size1 = INT_VAL(CAR(CDR(one)));
                 size2 = INT_VAL(CAR(CDR(two)));
-                
+
                 x = list_merge_aux(less,
                                    CAR(two),
                                    CAR(one));
-                
+
                 runs = STk_cons(LIST2(x, MAKE_INT(size1 + size2)),
                                 CDR(CDR(runs))); /* discard the two runs we merged */
             }
@@ -754,7 +755,7 @@ DEFINE_PRIMITIVE("vector-stable-sort!",
         if (!INTP(start)) STk_error("bad integer ~S for start index", start);
         cstart = INT_VAL(start);
     } else cstart = 0;
-    
+
     if (argc>3) {
         end = *argv--;
         if (!INTP(end)) STk_error("bad integer ~S for end index", end);
@@ -770,47 +771,47 @@ DEFINE_PRIMITIVE("vector-stable-sort!",
         min_timsort_run++;
     if (min_timsort_run == 0)
         min_timsort_run++;
-        
-        
+
+
     /* The following is an implementation of Timsort.
        We find "runs" (portions of the array that are already
        sorted), store their indices in a list (actually an array),
        then merge the list.
        If a run is too short, we take a larger portion of the array
        (which is not sorted) and perform insertion sort on it. */
-    
+
     SCM aux = STk_makevect(size, STk_void);
 
     SCM *vec = &VECTOR_DATA(v)[0];
-    
+
     /* "runs" is an array of long and not int because it stores
        the end indices of runs */
     long runs_size = 1 + (size+1) / min_timsort_run;
-    long *runs = STk_must_malloc(sizeof(long) * runs_size); 
-    
+    long *runs = STk_must_malloc(sizeof(long) * runs_size);
+
     /*
       i  points to the beginning of the current run
       j  starts at i+1 and moves forward, and will end up one position AFTER the
          last position of the run
       k  is the sequential index of the run (1st run, 2nd run, etc).
      */
-    
+
     long i = cstart;
     long j;
     long s;
     long k = 1; /* index of the current run */
     long run_end = i+1;
-    
+
     runs[0]=cstart;
-    
-    
+
+
     while (run_end <= cend) {
         /* Find a run. Try forward, then backward. One of these will immediately fail,
            unless the user has been kind enough to call this procedure with `=` as a
            comparison predicate (which won't hurt anyway). */
 
         j = s = run_end;
-        
+
         /* forward */
         while ( (j < cend) &&
                 STk_C_apply(less, 2, vec[j-1], vec[j] ) == STk_true) {
@@ -828,7 +829,7 @@ DEFINE_PRIMITIVE("vector-stable-sort!",
         /* un-reverse the reversed run, regardless of its size: */
         if (s > j) reverse_vector(vec, i, run_end);
 
-        
+
         /* if the run is too short, create a long one with insertion sort
            (cannot be shell, mnust be a stable sort): */
         if ( (run_end - i) < min_timsort_run && run_end < cend) {
@@ -837,11 +838,11 @@ DEFINE_PRIMITIVE("vector-stable-sort!",
                 run_end = cend;
             else
                 run_end =  i + min_timsort_run;
-            
+
             insertion_sort(vec, less, i, run_end);
         }
 
-        
+
         /* include the end of the run into the list of runs to merge. */
         runs[k] = run_end;
 
@@ -883,7 +884,7 @@ DEFINE_PRIMITIVE("vector-stable-sort!",
                 }
         } while (kk != k); /* k was decreased, some merge was made */
         /* END of the merging done after each run is queued. */
-        
+
         i = run_end;
         run_end++;
         k++;
@@ -909,14 +910,14 @@ DEFINE_PRIMITIVE("vector-stable-sort",
                  (int argc, SCM *argv))
 {
     SCM *original_argv = argv;
-    
+
     if (argc < 2) STk_error ("requires at least 2 arguments");
     if (argc > 4) STk_error ("requires at most 4 arguments");
-    
+
     argv--; /* the predicate */
-    
+
     SCM v = *argv--;
-    
+
     if (!(VECTORP(v))) error_bad_vector(v);
 
     SCM start;
@@ -928,7 +929,7 @@ DEFINE_PRIMITIVE("vector-stable-sort",
         if (!INTP(start)) STk_error("bad integer ~S for start index", start);
         cstart = INT_VAL(start);
     } else cstart = 0;
-    
+
     if (argc>3) {
         end = *argv--;
         if (!INTP(end)) STk_error("bad integer ~S for end index", end);
@@ -940,7 +941,7 @@ DEFINE_PRIMITIVE("vector-stable-sort",
     SCM w = STk_makevect(size, NULL);
 
     if (size == 0) return w;
-        
+
     memcpy(&VECTOR_DATA(w)[0],&VECTOR_DATA(v)[cstart], size * sizeof(SCM));
 
     /* TODO: we're unboxing-then-boxing-then-unboxing. */
@@ -1014,8 +1015,8 @@ DEFINE_PRIMITIVE("list-delete-neighbor-dups!",
         if (STk_C_apply(eq, 2, CAR(CDR(ptr)), CAR(ptr)) == STk_true)
             CDR(ptr)=CDR(CDR(ptr));
         else
-            ptr = CDR(ptr);    
-    
+            ptr = CDR(ptr);
+
     return lst;
 }
 
@@ -1037,7 +1038,7 @@ srfi_132_vector_del_dups_aux(SCM v, SCM eq, long start, long end)
             j++;
             dups++;
         }
-        
+
         /* advance i and copy next different */
         if ( j < end ) {
             i++;
@@ -1062,7 +1063,7 @@ DEFINE_PRIMITIVE("vector-delete-neighbor-dups!",
     if (STk_procedurep(eq) != STk_true) error_bad_proc(eq);
 
     if (VECTOR_SIZE(v)<2) return MAKE_INT(VECTOR_SIZE(v));
-    
+
     long cstart, cend;
 
     argc -= 2;
@@ -1088,9 +1089,9 @@ DEFINE_PRIMITIVE("vector-delete-neighbor-dups",
     if (!(VECTORP(v))) error_bad_vector(v);
     if (STk_procedurep(eq) != STk_true) error_bad_proc(eq);
 
-   
+
     long cstart, cend;
-    
+
     argc -= 2;
     vec_init_args(&cstart, &cend,
                   argc, argv,
@@ -1101,7 +1102,7 @@ DEFINE_PRIMITIVE("vector-delete-neighbor-dups",
     memcpy (&VECTOR_DATA(w)[0],
             &VECTOR_DATA(v)[cstart],
             (cend-cstart) * sizeof(SCM));
-    
+
     if (VECTOR_SIZE(v)<2) return w;
 
     long dups = srfi_132_vector_del_dups_aux(w, eq, 0, cend-cstart);
@@ -1118,7 +1119,7 @@ DEFINE_PRIMITIVE("vector-delete-neighbor-dups",
 MODULE_ENTRY_START("srfi-132")
 {
     SCM module =  STk_create_module(STk_intern("SRFI-132"));
-    
+
     ADD_PRIMITIVE_IN_MODULE(list_sorted,module);
     ADD_PRIMITIVE_IN_MODULE(vector_sorted,module);
 
@@ -1138,7 +1139,7 @@ MODULE_ENTRY_START("srfi-132")
 
     /* Export all the symbols we have just defined */
     STk_export_all_symbols(module);
-    
+
    /* Execute Scheme code */
     STk_execute_C_bytecode(__module_consts, __module_code);
 }
