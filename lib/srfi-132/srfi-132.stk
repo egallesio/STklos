@@ -20,7 +20,7 @@
 ;;;; USA.
 ;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 08-Aug-2021 13:31
-;;;; Last file update: 31-Aug-2021 22:15
+;;;; Last file update: 26-Sep-2021 19:52 (eg)
 
 
 (select-module SRFI-132)
@@ -34,6 +34,9 @@
         vector-find-median
         vector-select!
         vector-separate! )
+
+;;; Avoi warnings when compiling this file
+(%compile-time-define vector-stable-sort vector-stable-sort! list-stable-sort!)
 
 ;;;;
 ;;;; Predicates
