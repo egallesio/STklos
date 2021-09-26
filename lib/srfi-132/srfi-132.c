@@ -1,5 +1,5 @@
 /*
- * srfi-25.c   -- Implementation of SRFI-132: Sort Libraries
+ * srfi-132.c   -- Implementation of SRFI-132: Sort Libraries
  *
  * Copyright © 2021 Jerônimo Pellegrini <j_p@aleph0.info>
  *
@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 08-Aug-2021 13:40
- * Last file update: 26-Sep-2021 18:54 (eg)
+ * Last file update: 26-Sep-2021 18:57 (eg)
  */
 
 #include <stklos.h>
@@ -249,7 +249,7 @@ long gallop(SCM pred, SCM to,
             SCM a, SCM b,
             long start,
             long starta, long enda,
-            long startb, long endb)
+            long startb, long _UNUSED(endb))
 {
      /*
       a[starta] <= b[cstartb] so now instead of proceeding linearly,
@@ -415,7 +415,8 @@ DEFINE_PRIMITIVE("vector-merge",vector_merge,vsubr, (int argc, SCM *argv))
                   argc, argv,
                   VECTOR_SIZE(v2));
 
-    SCM v3 = STk_makevect ( (cend1 - cstart1) + (cend2 - cstart2), MAKE_INT(-1));
+    SCM v3 = STk_makevect ( (cend1 - cstart1) + (cend2 - cstart2),
+                            MAKE_INT((unsigned long) -1));
                             //(SCM) NULL );
 
     vector_merge_aux(pred,v3,v1,v2,0,cstart1,cend1,cstart2,cend2);
