@@ -1,0 +1,224 @@
+;;;;
+;;;; srfi-132.stk         -- SRFI-132: Sort Libraries
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 08-Aug-2021 13:31
+;;;; Last file update: 31-Aug-2021 22:15
+
+
+(select-module SRFI-132)
+
+(export list-sort
+        list-sort!
+        list-stable-sort
+        vector-sort
+        vector-sort!
+        vector-find-median!
+        vector-find-median
+        vector-select!
+        vector-separate! )
+
+;;;;
+;;;; Predicates
+;;;;
+
+;; (list-sorted? < lis)                  implemented as primitive
+;; (vector-sorted? < v [start [ end ] ]) implemented as primitive
+
+;;;;
+;;;; General sort procedures
+;;;;
+
+;; We do the list => vector => sort => list thing here,
+;; since we have a good vector sorting algorithm.
+(define (list-stable-sort p l)
+  (vector->list (vector-stable-sort p (list->vector l))))
+
+(define list-sort list-stable-sort)
+
+;; (define list-stable-sort! p l) implemented as primitive
+
+(define list-sort! list-stable-sort!)
+
+;; (vector-stable-sort! p v)    implemented as primitive
+;; (vector-stable-sort p v)     implemented as primitive
+
+
+;; TODO: should we use a different algorithm for unstable sort?
+;;       is introsort faster than timsort?
+(define vector-sort vector-stable-sort)
+(define vector-sort! vector-stable-sort!)
+
+
+;;;;
+;;;; Merge procedures
+;;;;
+
+
+;; all implemented as primitives:
+
+;; (list-merge < lst)
+;; (list-merge! < lst)
+;; (vector-merge < v1 v2 [ start1 [ end1 [ start2 [ end2 ] ] ] ])
+;; (vector-merge! < to from1 from2 [ start [ start1 [ end1 [ start2 [ end2 ] ] ] ] ]) 
+
+
+;;;;
+;;;; Deleting duplicate neighbors
+;;;;
+
+;; (list-delete-neighbor-dups = lis)                       ; implemented as primitive
+;; (list-delete-neighbor-dups! = lis)                      ; implemented as primitive
+;; (vector-delete-neighbor-dups = lis [ start [ end ] ])   ; implemented as primitive
+;; (vector-delete-neighbor-dups! = lis [ start [ end ] ])  ; implemented as primitive
+
+;;;;
+;;;; Finding the median
+;;;;
+
+;; (vector-find-median < v knil [ mean ])
+;; (vector-find-median! < v knil [ mean ])
+
+
+
+;;;; There are some procedures ahead that have been adapted from Chibi Scheme.
+;;;; They have the following license:
+;;;;;;;;
+;;;;;;;; Copyright (c) 2009-2021 Alex Shinn
+;;;;;;;; All rights reserved.
+
+;;;;;;;; Redistribution and use in source and binary forms, with or without
+;;;;;;;; modification, are permitted provided that the following conditions
+;;;;;;;; are met:
+;;;;;;;; 1. Redistributions of source code must retain the above copyright
+;;;;;;;;    notice, this list of conditions and the following disclaimer.
+;;;;;;;; 2. Redistributions in binary form must reproduce the above copyright
+;;;;;;;;    notice, this list of conditions and the following disclaimer in the
+;;;;;;;;    documentation and/or other materials provided with the distribution.
+;;;;;;;; 3. The name of the author may not be used to endorse or promote products
+;;;;;;;;    derived from this software without specific prior written permission.
+
+;;;;;;;; THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+;;;;;;;; IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+;;;;;;;; OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+;;;;;;;; IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+;;;;;;;; INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+;;;;;;;; NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+;;;;;;;; DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+;;;;;;;; THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+;;;;;;;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+;;;;;;;; THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+;; From Chibi:
+(define (vector-find-median! < vec knil :optional mean)
+  (vector-sort! < vec)
+  (let* ((len (vector-length vec))
+         (mid (quotient len 2))
+         (mean (or mean (lambda (a b) (/ (+ a b) 2)))))
+    (cond
+     ((zero? len) knil)
+     ((odd? len) (vector-ref vec mid))
+     (else (mean (vector-ref vec (- mid 1))
+                 (vector-ref vec mid))))))
+
+(define (vector-max less vec lo hi largest)
+  (cond
+   ((>= lo hi) largest) 
+   ((less largest (vector-ref vec lo))
+    (vector-max less vec (+ lo 1) hi (vector-ref vec lo)))
+   (else
+    (vector-max less vec (+ lo 1) hi largest))))
+
+(define (vector-find-median < vec knil :optional mean)
+  (let* ((vec (vector-copy vec))
+         (len (vector-length vec))
+         (mid (quotient len 2))
+         (mean (or mean (lambda (a b) (/ (+ a b) 2)))))
+    (cond
+     ((zero? len) knil)
+     (else
+      (let ((mid-elt (vector-select! < vec mid)))
+        (cond
+         ((odd? len) mid-elt)
+         (else
+          (mean (vector-max < vec 0 (- mid 1) (vector-ref vec (- mid 1)))
+                mid-elt))))))))
+
+;;;;
+;;;; Selection
+;;;;
+
+;; From Chibi:
+(define (choose-pivot < vec left right)
+  (let* ((mid (quotient (+ left right) 2))
+         (a (vector-ref vec left))
+         (b (vector-ref vec mid))
+         (c (vector-ref vec right)))
+    (if (< a b)
+        (if (< b c) mid (if (< a c) right left))
+        (if (< a c) left (if (< b c) right mid)))))
+
+;; From Chibi:
+(define (vector-partition! < vec left right pivot)
+  (define (swap! i j)
+    (let ((tmp (vector-ref vec i)))
+      (vector-set! vec i (vector-ref vec j))
+      (vector-set! vec j tmp)))
+  (let ((elt (vector-ref vec pivot)))
+    (swap! pivot right)
+    (let lp ((i left)
+             (j left))
+      (cond
+       ((= i right)
+        (swap! i j)
+        j)
+       ((< (vector-ref vec i) elt)
+        (swap! i j)
+        (lp (+ i 1) (+ j 1)))
+       (else
+        (lp (+ i 1) j))))))
+
+;; From Chibi:
+(define (vector-select! less vec k :optional (start 0) end)
+   (let* ((k (+ k start)))
+     (if (not (<= 0 k (vector-length vec)))
+         (error "index out of range" vec k))
+     (let select ((start start)
+                  (end (- (or end (vector-length vec)) 1)))
+       (if (>= start end)
+           (vector-ref vec start)
+           (let* ((pivot (choose-pivot less vec start end))
+                  (pivot-index (vector-partition! less vec start end pivot)))
+             (cond
+              ((= k pivot-index)
+               (vector-ref vec k))
+              ((< k pivot-index)
+               (select start (- pivot-index 1)))
+              (else
+               (select (+ pivot-index 1) end))))))))
+
+(define (vector-separate! . args)
+  (apply vector-select! args)
+  #void)
+
+(select-module STklos)
+(import SRFI-132)
+(provide "srfi-132")

@@ -170,7 +170,7 @@
     (129 "Titlecase procedures" (titlecase) "srfi-129")
     (130 "Cursor-based string library" () "srfi-130")
     ;; 131  ERR5RS Record Syntax (reduced)
-    ;; 132  Sort Libraries
+    (132 "Sort Libraries" (sort) "srfi-132")
     (133  "Vector Library (R7RS-compatible)" (vector) "srfi-133")
     (134  "Immutable Deques" (immutable-deques) "srfi-134")
     (135  "Immutable Texts" (immutable-texts) "srfi-135")

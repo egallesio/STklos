@@ -23,7 +23,8 @@
 # Last file update:  8-Jun-2021 09:02 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
-		  srfi-25 srfi-27 srfi-133 srfi-144 srfi-170 srfi-175
+		  srfi-25 srfi-27 srfi-132 srfi-133 \
+		  srfi-144 srfi-170 srfi-175
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
