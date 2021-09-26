@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 21-May-2021 15:20 (eg)
+;;;; Last file update: 26-Sep-2021 20:09 (eg)
 ;;;;
 
 
@@ -53,7 +53,7 @@
     ;    12 ........ Withdrawn
     (13 "String Library" () "srfi-13")
     (14 "Character-Set Library" () "srfi-14")
-    (15 "Syntax for dynamic scoping") ;; ........ Withdrawn, but supported nevertheless
+    (15 "Syntax for dynamic scoping (withdrawn)") ;; Withdrawn, but supported nevertheless
     (16 "Syntax for procedures of variable arity" (case-lambda))
     (17 "Generalized set!")
     (18 "Multithreading support")
@@ -265,6 +265,11 @@
     (223 "Generalized binary search procedures" () "srfi-223")
     ;; 224 Integer Mappings
     ;; 225 Dictionaries (draft)
+    ;; 226 Control Features (draft)
+    ;; 227 Optional Arguments (draft)
+    ;; 228 A further comparator library (draft)
+    ;; 229 Tagged Procedures (draft)
+    ;; 230 Atomic Operations (draft)
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file

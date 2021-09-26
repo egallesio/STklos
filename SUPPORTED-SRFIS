@@ -29,7 +29,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-11: Syntax for receiving multiple values
     - SRFI-13: String Library
     - SRFI-14: Character-Set Library
-    - SRFI-15: Syntax for dynamic scoping
+    - SRFI-15: Syntax for dynamic scoping (withdrawn)
     - SRFI-16: Syntax for procedures of variable arity
     - SRFI-17: Generalized set!
     - SRFI-18: Multithreading support
