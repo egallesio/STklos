@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 20-Nov-1993 12:12
- * Last file update:  1-May-2021 20:00 (eg)
+ * Last file update: 28-Sep-2021 11:41 (eg)
  */
 
 #include <ctype.h>
@@ -44,23 +44,28 @@ static void error_bad_string(SCM str)
 
 int STk_symbol_flags(register char *s)
 {
-  int res = 0;
+  if (!*s || (*s == '.' && !s[1])) {
+    /* Special symbols || and |.| which always need bars */
+    return SYMBOL_NEEDS_BARS;
+  } else {
+    int res = 0;
 
-  if (s[0] == ':') res |= SYMBOL_NEEDS_BARS;   // seems to be a keyword
+    if (s[0] == ':') res |= SYMBOL_NEEDS_BARS;   // seems to be a keyword
 
-  for ( ;*s; s++) {
-    if (isupper(*s)) {
-      res |= SYMBOL_HAS_UPPER;
-      continue;
+    for ( ;*s; s++) {
+      if (isupper(*s)) {
+        res |= SYMBOL_HAS_UPPER;
+        continue;
+      }
+      if (!strchr(valid_symbol_chars, *s)) {
+        res |= SYMBOL_NEEDS_BARS;
+        break;
+      }
     }
-    if (!strchr(valid_symbol_chars, *s)) {
-      res |= SYMBOL_NEEDS_BARS;
-      break;
-    }
+
+    if (s[-1] == ':') res |= SYMBOL_NEEDS_BARS; // seems to be a keyword
+    return res;
   }
-
-  if (s[-1] == ':') res |= SYMBOL_NEEDS_BARS; // seems to be a keyword
-  return res;
 }
 
 SCM STk_make_uninterned_symbol(char *name)

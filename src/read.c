@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 18-Sep-2021 18:53 (eg)
+ * Last file update: 28-Sep-2021 07:51 (eg)
  *
  */
 
@@ -1044,6 +1044,10 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           SCM tmp = read_token(port, c, ctx->case_significant);
           if (tmp != sym_dot)
             return tmp;
+
+          if (c == '|')
+            return STk_intern(".");
+
           if (inlist)
             return STk_dot;
           signal_error(port, "dot outside of list", STk_nil);

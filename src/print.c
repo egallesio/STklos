@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update:  1-Sep-2021 15:26 (eg)
+ * Last file update: 28-Sep-2021 11:53 (eg)
  *
  */
 #include <ctype.h>
@@ -90,7 +90,7 @@ static Inline void printsymbol(SCM symb, SCM port, int mode)
    }
     STk_putc('|', port);
   } else
-    STk_puts(*s ? s: "||", port); /* print bars around the "null" symbol */
+    STk_puts(s, port);
 }
 
 static Inline void printkeyword(SCM key, SCM port, int mode)
