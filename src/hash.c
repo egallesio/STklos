@@ -158,13 +158,21 @@ static void hash_stats(struct hash_table_obj *h, SCM port)
 {
   int i, j, more, len, count[_MAX_COUNT] = {0};
 
+  /* If we're using unicode, we can draw a nicer histogram bar... */
+  char *bar_char;
+  if (STk_use_utf8)
+      bar_char = "█"; /* Other interesting options: 🮘 🮕 🮈 🮉 🮔 🭬 ═ */
+  else
+      bar_char = "#";
+
   STk_fprintf(port, "Hash table statistics\n");
   more = 0;
   for (i = 0; i < HASH_NBUCKETS(h); i++) {
     len = STk_int_length(HASH_BUCKETS(h)[i]);
 
     STk_fprintf(port, "%d: ", i);
-    for (j = 0; j < len; j++) STk_putc('#', port);
+    for (j = 0; j < len; j++)
+        STk_fprintf(port,bar_char);
     STk_putc('\n', port);
 
     if (len < _MAX_COUNT)
