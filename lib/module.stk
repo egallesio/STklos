@@ -208,7 +208,6 @@ doc>
  * (define-module M3
  *   (import M1 M2)
  *   (display (list a b c d)))  @print{} (M1-a M1-b M2-c M2-d)
- * @end lisp
  *
  * (define-module M4
  *   (import M2 M1)
