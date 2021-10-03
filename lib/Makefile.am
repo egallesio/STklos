@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  8-Jun-2021 09:02 (eg)
+# Last file update:  3-Oct-2021 20:17 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
 		  srfi-25 srfi-27 srfi-132 srfi-133 \
@@ -41,6 +41,7 @@ scheme_BOOT = assembler.stk \
           equiv.stk         \
           expand.pp         \
           ffi.stk           \
+          library.stk       \
           load.stk          \
           logical.stk       \
           mbe.stk           \
