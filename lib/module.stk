@@ -1,7 +1,7 @@
 ;;;;
-;;;; module.stk	-- Module stuff
+;;;; module.stk -- Module stuff
 ;;;;
-;;;; Copyright © 2000-2011 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,13 +21,13 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 27-May-2011 23:05 (eg)
+;;;; Last file update:  4-Oct-2021 12:16 (eg)
 ;;;;
 
 
 ;;=============================================================================
 ;;
-;; 				SYMBOL-VALUE*
+;;                              SYMBOL-VALUE*
 ;;
 ;;=============================================================================
 #|
@@ -48,19 +48,19 @@ doc>
   (let ((absent (gensym)))
     (let Loop ((all-mods (cons module (module-imports module))))
       (if (null? all-mods)
-	  ;; Symbol was absent in the module and its imported modules
-	  (if default?
-	      default
-	      (error 'symbol-value* "symbol ``~S'' not found" name))
-	  ;; Let's see
-	  (let ((val (symbol-value name (car all-mods) absent)))
-	    (if (eq? val absent)
-		(Loop (cdr all-mods))
-		val))))))
+          ;; Symbol was absent in the module and its imported modules
+          (if default?
+              default
+              (error 'symbol-value* "symbol ``~S'' not found" name))
+          ;; Let's see
+          (let ((val (symbol-value name (car all-mods) absent)))
+            (if (eq? val absent)
+                (Loop (cdr all-mods))
+                val))))))
 
 ;;=============================================================================
 ;;
-;; 				SELECT-MODULE
+;;                              SELECT-MODULE
 ;;
 ;;=============================================================================
 #|
@@ -76,8 +76,8 @@ doc>
  * allows to place toplevel evaluation in a particular module. The
  * following transcript shows an usage of |select-module|.
  * ,(footnote [This transcript uses the default toplevel loop
- * 	       which displays the name of the current module in the evaluator
- * 	       prompt.]):
+ *             which displays the name of the current module in the evaluator
+ *             prompt.]):
  * @lisp
  * stklos> (define foo 1)
  * stklos> (define-module bar
@@ -99,7 +99,7 @@ doc>
 
 ;;=============================================================================
 ;;
-;; 				DEFINE-MODULE
+;;                              DEFINE-MODULE
 ;;
 ;;=============================================================================
 #|
@@ -113,9 +113,9 @@ doc>
  * Otherwise, the expressions |<expr1>|, |<expr2>| ... are evaluated in
  * the environment of the (old) module |<name>|
  * ,(footnote [In fact |define-module| on a given name
- * 	     defines a new module only the first time it is invoked on this name.
- * 	     By this way, interactively reloading a module does not define
- * 	     a new entity, and the other modules which use it are not altered.]).
+ *           defines a new module only the first time it is invoked on this name.
+ *           By this way, interactively reloading a module does not define
+ *           a new entity, and the other modules which use it are not altered.]).
  * Definitions done in a module are local to the module and do not interact with
  * the definitions in other modules. Consider the following definitions,
  * @lisp
@@ -142,23 +142,23 @@ doc>
 |#
 (define %modules-stack  '())
 (define %module-create  (lambda (name)
-			  (set! %modules-stack (cons (current-module)
-						     %modules-stack))
-			  (%create-module name)))
+                          (set! %modules-stack (cons (current-module)
+                                                     %modules-stack))
+                          (%create-module name)))
 
 (define %module-restore (lambda ()
-			  (let ((previous (car %modules-stack)))
-			    (set! %modules-stack (cdr %modules-stack))
-			    previous)))
+                          (let ((previous (car %modules-stack)))
+                            (set! %modules-stack (cdr %modules-stack))
+                            previous)))
 
 (define %module-handler (lambda (c)
-			  (let ((mod (%module-restore)))
-			    ;; Push c on the module stack since env will be broken
-			    ;; by the module reset!
-			    (set! %modules-stack (cons c %modules-stack))
-			    (%%set-current-module mod)
-			    ;; Hack: Here %module-restore will get back the old c
-			    (raise (%module-restore)))))
+                          (let ((mod (%module-restore)))
+                            ;; Push c on the module stack since env will be broken
+                            ;; by the module reset!
+                            (set! %modules-stack (cons c %modules-stack))
+                            (%%set-current-module mod)
+                            ;; Hack: Here %module-restore will get back the old c
+                            (raise (%module-restore)))))
 
 (define-macro (define-module name . body)
   `(with-handler
@@ -171,7 +171,7 @@ doc>
 
 ;;=============================================================================
 ;;
-;; 				IMPORT
+;;                              IMPORT
 ;;
 ;;=============================================================================
 #|
@@ -182,7 +182,7 @@ doc>
  * Importing a module makes the symbols it exports visible to the
  * importer, if not hidden by local definitions. When a symbol
  * is exported by several of the imported modules, the location denoted by
- * this symbol in the importer module correspond to the one of the first module
+ * this symbol in the importer module correspond to the one of the last module
  * in the list
  * @lisp
  * (<module1> <module2> ...)
@@ -207,11 +207,11 @@ doc>
  *
  * (define-module M3
  *   (import M1 M2)
- *   (display (list a b c d)))  @print{} (M1-a M1-b M2-c M2-d)
+ *   (display (list a b c d)))  @print{} (M1-a M2-b M2-c M2-d)
  *
  * (define-module M4
  *   (import M2 M1)
- *   (display (list a b c d)))  @print{} (M1-a M2-b M2-c M2-d)
+ *   (display (list a b c d)))  @print{} (M1-a M1-b M2-c M2-d)
  * @end lisp
  *
  * It is also possible to import partially (i.e. not all
@@ -230,24 +230,24 @@ doc>
  * from ,(emph "C"), except  by explicitly importing the ,(emph "A")
  * module from ,(emph "C").
  * @l
-* ,(bold "Note:") The module |STklos|, which contains the ,(emph "global
+ * ,(bold "Note:") The module |STklos|, which contains the ,(emph "global
  * variables") is always implicitly imported from a module. Furthermore,
  * this module is always placed at the end of the list of imported modules.
 doc>
 |#
 (define (%module-import importer modules)
   (let Loop ((l modules)
-	     (res (cdr (reverse! (module-imports importer)))))
+             (res (cdr (reverse! (module-imports importer)))))
     (if (null? l)
-	(%module-imports-set! importer (reverse res))
-	(let ((mod (find-module (car l) #f)))
-	  (if mod
-	      (Loop (cdr l)
-		      (if (or (eq? mod importer) ; itself
-			      (memq mod res))    ; already imported
-			  res
-			  (cons mod res))) 	 ; add it to our result
-	      (error 'import "module `~S' does not exist" (car l)))))))
+        (%module-imports-set! importer res)
+        (let ((mod (find-module (car l) #f)))
+          (if mod
+              (Loop (cdr l)
+                      (if (or (eq? mod importer) ; itself
+                              (memq mod res))    ; already imported
+                          res
+                          (cons mod res)))       ; add it to our result
+              (error 'import "module `~S' does not exist" (car l)))))))
 
 (define (%module-aliases module-name symbols export?)
   ;; define aliases in the current module of symbols from module-name
@@ -256,11 +256,11 @@ doc>
       (error 'import "cannot find module ~S" module-name))
     (let ((exports (module-exports module)))
       (for-each (lambda (x)
-		  (if (memq x exports)
-		      (%symbol-alias x x module)
-		      (error 'import "symbol ~S is not exported from module ~S"
-			     x module-name)))
-		symbols)))
+                  (if (memq x exports)
+                      (%symbol-alias x x module)
+                      (error 'import "symbol ~S is not exported from module ~S"
+                             x module-name)))
+                symbols)))
   ;; if export? is true, export the given symbols
   (when export?
     (%module-export (current-module) symbols)))
@@ -275,51 +275,51 @@ doc>
 
   (define (split-modules lst)
     (let loop ((lst modules)
-	       (full '())
-	       (part '()))
+               (full '())
+               (part '()))
       (cond
-	((null? lst)
-	 (values (reverse! full) (reverse! part)))
-	((symbol? (car lst))
-	 ;; full import
-	 (loop (cdr lst)
-	       (cons (car lst) full)
-	       part))
-	((and (pair? (car lst)) (symbol? (caar lst)) (null? (cdar lst)))
-	 ;; a list which contains only a symbol. This is a full import
-	 (loop (cdr lst)
-	       (cons (caar lst) full)
-	       part))
-	((and (pair? (car lst)) (every symbol? (car lst)))
-	 ;; a partial import
-	 (loop (cdr lst)
-	       full
-	       (cons (car lst) part)))
-	(else (error 'import "bad import clause ~S" (car lst))))))
+        ((null? lst)
+         (values (reverse! full) (reverse! part)))
+        ((symbol? (car lst))
+         ;; full import
+         (loop (cdr lst)
+               (cons (car lst) full)
+               part))
+        ((and (pair? (car lst)) (symbol? (caar lst)) (null? (cdar lst)))
+         ;; a list which contains only a symbol. This is a full import
+         (loop (cdr lst)
+               (cons (caar lst) full)
+               part))
+        ((and (pair? (car lst)) (every symbol? (car lst)))
+         ;; a partial import
+         (loop (cdr lst)
+               full
+               (cons (car lst) part)))
+        (else (error 'import "bad import clause ~S" (car lst))))))
 
   (if (null? modules)
       '()
       (receive (full part)
-	 (split-modules modules)
-	 (cond
-	   ((null? part)
-	    ;; Only full exports
-	    `(%module-import (current-module) ',full))
-	   ((null? full)
-	    ;; Only partial exports
-	    `(begin
-	       ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x) #f))
-		      part)))
-	   (else
-	    `(begin
-	       (%module-import (current-module) ',full)
-	       ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x)))
-		      part)))))))
+         (split-modules modules)
+         (cond
+           ((null? part)
+            ;; Only full exports
+            `(%module-import (current-module) ',full))
+           ((null? full)
+            ;; Only partial exports
+            `(begin
+               ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x) #f))
+                      part)))
+           (else
+            `(begin
+               (%module-import (current-module) ',full)
+               ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x) #f))
+                      part)))))))
 
 
 ;;=============================================================================
 ;;
-;; 				EXPORT
+;;                              EXPORT
 ;;
 ;;=============================================================================
 #|
@@ -343,11 +343,11 @@ doc>
     (if (null? l)
       (%module-exports-set! exporter res)
       (if (symbol? (car l))
-	(Loop (cdr l)
-	      (if (memq (car l) res)
-		res			; already exported
-		(cons (car l) res)))	; add it to our result
-	(error 'export "bad symbol `~S'" (car l))))))
+        (Loop (cdr l)
+              (if (memq (car l) res)
+                res                     ; already exported
+                (cons (car l) res)))    ; add it to our result
+        (error 'export "bad symbol `~S'" (car l))))))
 
 (define-macro (export . symbols)
   (if (null? symbols)
@@ -355,7 +355,7 @@ doc>
     (begin
       ;; Hack to avoid useless message. This can declare too much symbols
       (for-each (lambda (x) (when symbol? x) (register-new-global! x))
-		symbols)
+                symbols)
       `(%module-export (current-module) ',symbols))))
 
 (define-macro (export-syntax . arg)
@@ -364,7 +364,7 @@ doc>
 
 ;;=============================================================================
 ;;
-;; 				IN-MODULE
+;;                              IN-MODULE
 ;;
 ;;=============================================================================
 #|
