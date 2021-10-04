@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  3-Sep-2021 18:40 (eg)
+;;;; Last file update:  4-Oct-2021 07:10 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1514,7 +1514,7 @@ doc>
 
 #|
 <doc EXT-SYNTAX include
- * (include <file>)
+ * (include <string1> <string2> ...)
  *
  * TODO
 doc>
@@ -1533,9 +1533,10 @@ doc>
     (close-port port)))
 
 (define (compile-include e env tail)
-  (if (and (= (length e) 2) (string? (cadr e)))
-      (include-file (cadr e))
-      (compiler-error 'include e "bad include directive ~S" e)))
+  (unless (every string? (cdr e))
+    (compiler-error 'include e "bad include directive ~S" e))
+  (for-each include-file (cdr e)))
+
 
 
 ;;
