@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update:  3-Oct-2021 20:17 (eg)
+;;;; Last file update:  4-Oct-2021 08:25 (eg)
 ;;;;
 
 
@@ -174,9 +174,58 @@
                                 (key-get keylist #:prefix #f))))
             clauses))
 
+
 ;; ======================================================================
 ;;
-;; DEFINE-LIBRARY 
+;; EXPORT
+;;
+;; ======================================================================
+
+;;
+;; FIXME: Add Export with renaming
+;;
+(define (%do-exports lib symbols)
+  (let Loop ((l symbols) (res (module-exports lib)))
+    (if (null? l)
+        (begin
+          ;; Hack to avoid useless compilation messages.
+          (for-each register-new-global!  res)
+          ;; Add the symbols to the export list
+          (%module-exports-set! lib res))
+
+        (cond
+         ((symbol? (car l))
+          ;;
+          ;; export a single identifier
+          ;;
+          (Loop (cdr l)
+                (if (memq (car l) res)
+                    res                     ; already exported
+                    (cons (car l) res))))   ; add it to our result
+
+         ((and (pair? (car l))
+               (eq? (caar l) 'rename))
+          ;;
+          ;; export with renaming: (rename old new)
+          ;;
+          (let ((symbs (cdar l)))
+            (unless (and (= (length symbs) 2)
+                         (symbol? (car symbs))
+                         (symbol? (cadr symbs)))
+              (error 'export "bad renaming clause ~S" (car l)))
+            ;; FIXME FIXME For now we export the symbol without renaming!!!
+            (Loop (cdr l)
+                  (if (memq (car symbs) res)
+                      res                         ; already exported
+                      (cons (car symbs) res)))))  ; add it to our result
+
+         (else
+          (error 'export "bad exportation `~S'" (car l)))))))
+
+
+;; ======================================================================
+;;
+;; DEFINE-LIBRARY
 ;;
 ;; ======================================================================
 (define-macro (define-library name . decls)
@@ -192,9 +241,14 @@
        (let ((key  (car d))
              (rest (cdr d)))
          (case key
-           ((import) (%do-imports lib rest))
-           ((begin)  (set! body (append body (list d))))
-           (else     (error "incorrect import directive ~s" d)))))
+           ((import)
+                (%do-imports lib rest))
+           ((export)
+                (%do-exports lib rest))
+           ((begin include)
+                (set! body (append body (list d))))
+           (else
+                (error 'define-library "incorrect directive ~s" d)))))
      decls)
 
     ;; register the created lib in the global module list
