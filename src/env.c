@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  2-Oct-2021 21:28 (eg)
+ * Last file update:  4-Oct-2021 09:40 (eg)
  */
 
 #include "stklos.h"
@@ -207,11 +207,10 @@ DEFINE_PRIMITIVE("%module-imports-set!", module_imports_set, subr2,
   if (CONSP(imported)) {
     /* STklos modules implicitely import STklos, but R7RS library don't */
     if (MODULE_IS_LIBRARY(importer)) {
-      fprintf(stderr, "ON Est dans le cas d'une library\n");
       MODULE_IMPORTS(importer) = imported;
     }
     else
-    MODULE_IMPORTS(importer) = STk_dappend2(imported, LIST1(STk_STklos_module));
+      MODULE_IMPORTS(importer) = STk_dappend2(imported, LIST1(STk_STklos_module));
   }
   else if (NULLP(imported))
     MODULE_IMPORTS(importer) = STk_nil;
