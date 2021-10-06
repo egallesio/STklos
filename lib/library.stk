@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update:  4-Oct-2021 08:25 (eg)
+;;;; Last file update:  6-Oct-2021 18:35 (eg)
 ;;;;
 
 
@@ -114,52 +114,64 @@
      (else
       (error 'import "bad import set ~s" import-set))))
 
+  (define (eventually-load-library name)
+    (let ((module (find-module name #f)))
+      (cond
+        (module)
+        (else
+         ;; Try to load a file which could define this module
+         (with-handler (lambda (x)
+                         (error 'import "cannot load module/library ~s" name))
+                       (require/provide (symbol->string name)))
+         (let ((mod (find-module name #f)))
+           (unless mod
+             ;; We were not able to define this module
+             (error 'import "module/library ~s does not exist" name))
+           mod)))))
+
   (define (import-symbols importer name only except rename prefix)
-    (let ((mod (find-module name #f)))
-      (unless mod
-        (error 'import "module ~s does not exist" name))
+    (let* ((mod              (eventually-load-library name))
+           (modules-exported (module-exports mod))
+           (exported         (or only modules-exported)))
+      ;; Verify that the symbols in the import set exist.
+      (for-each (lambda (symb)
+                  (unless (memq symb modules-exported)
+                    (error 'import "symbol ~s (only) is not in the import set"
+                           symb)))
+                exported)
 
-      (let* ((modules-exported (module-exports mod))
-             (exported         (or only modules-exported)))
-        ;; Verify that the symbols in the import set exist.
-        (for-each (lambda (symb)
-                    (unless (memq symb modules-exported)
-                      (error 'import "symbol ~s (only) is not in the import set"
+      ;; Suppress the symbols in the except list
+      (for-each (lambda (symb)
+                  (if (memq symb exported)
+                      (set! exported (remove (lambda(x) (eq? x symb)) exported))
+                      (error 'import "symbol ~s (except) is not in the import set"
                              symb)))
-                  exported)
+                (or except '()))
 
-        ;; Suppress the symbols in the except list
-        (for-each (lambda (symb)
-                    (if (memq symb exported)
-                        (set! exported (remove (lambda(x) (eq? x symb)) exported))
-                        (error 'import "symbol ~s (except) is not in the import set"
-                               symb)))
-                  (or except '()))
+      ;; rename eventually symbols
+      (let ((exported (map (lambda (x) (list x x)) exported)))
+        ;; exported is a now a list of couple (original-name new-name)
+        (for-each (lambda (couple)
+                    (let* ((original (car couple))
+                           (new      (cadr couple))
+                           (found    (assq original exported)))
+                      (unless found
+                        (error 'import "symbol ~s (rename) is not in the import set"
+                               original))
+                      (set-cdr! found (list new))))
+                  (or rename '()))
 
-        ;; rename eventually symbols
-        (let ((exported (map (lambda (x) (list x x)) exported)))
-          ;; exported is a now a list of couple (original-name new-name)
-          (for-each (lambda (couple)
-                      (let* ((original (car couple))
-                             (new      (cadr couple))
-                             (found    (assq original exported)))
-                        (unless found
-                          (error 'import "symbol ~s (rename) is not in the import set"
-                                 original))
-                        (set-cdr! found (list new))))
-                    (or rename '()))
+        ;; Eventually prefix  symbols
+        (when prefix
+          (set! exported (map (lambda (couple)
+                                (list (car couple)
+                                      (symbol-append prefix (cadr couple))))
+                              exported)))
 
-          ;; Eventually prefix  symbols
-          (when prefix
-            (set! exported (map (lambda (couple)
-                                  (list (car couple)
-                                        (symbol-append prefix (cadr couple))))
-                                exported)))
-
-          ;; Now we can (finally) make aliases for all symbols in exported list
-          (for-each (lambda (couple)
-                      (%symbol-link (cadr couple) (car couple) lib mod))
-                    exported)))))
+        ;; Now we can (finally) make aliases for all symbols in exported list
+        (for-each (lambda (couple)
+                    (%symbol-link (cadr couple) (car couple) lib mod))
+                  exported))))
 
   ;; Call import-symbols for each import spec
   (for-each (lambda (imp)
