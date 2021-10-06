@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update: 20-Aug-2021 18:33 (eg)
+ * Last file update:  5-Oct-2021 12:41 (eg)
  */
 
 // INLINER values
@@ -1170,7 +1170,11 @@ CASE(GLOBAL_SET) {
     RELEASE_LOCK;
     error_unbound_variable(orig_operand);
   }
-
+  if (BOXED_INFO(ref) & CONS_CONST) {
+    RELEASE_LOCK;
+    STk_error("cannot mute the value of ~S", orig_operand);
+  }
+  
   *BOX_VALUES(CDR(ref)) = vm->val;    /* sure that this box arity is 1 */
   /* patch the code for optimize next accesses */
   vm->pc[-1] = add_global(CDR(ref));

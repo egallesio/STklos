@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 10-Apr-2021 18:42 (eg)
+ * Last file update:  5-Oct-2021 12:58 (eg)
  */
 
 #include "stklos.h"
@@ -357,6 +357,9 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value)
 
   if (z) {
     /* Variable already exists. Change its value*/
+    if (BOXED_INFO(z) & CONS_CONST) {
+      STk_error("cannot redefine the symbol ~S", v);
+    }
     *BOX_VALUES(CDR(z)) = value;
   } else {
     SCM z;
@@ -373,7 +376,7 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value)
   }
 }
 
-void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value)
+void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly)
 {
   SCM z;
   int index;
@@ -385,8 +388,13 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value)
     CDR(z) = value;
   } else {
     /* Enter the new variable in table */
-    HASH_BUCKETS(h)[index] = STk_cons(STk_cons(v, value),
-                                      HASH_BUCKETS(h)[index]);
+    SCM new = STk_cons(v, value);
+
+    if (ronly)
+      // make the association read only
+      BOXED_INFO(new) |= CONS_CONST;
+
+    HASH_BUCKETS(h)[index] = STk_cons(new, HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
     /* If the table has exceeded a decent size, rebuild it */
     if (HASH_NENTRIES(h) >= HASH_NEWSIZE(h)) enlarge_table(h);

@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  4-Oct-2021 09:40 (eg)
+ * Last file update:  5-Oct-2021 12:36 (eg)
  */
 
 #include "stklos.h"
@@ -492,7 +492,7 @@ DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
   if (!res)
     error_unbound_variable(old);
 
-  STk_hash_set_alias(&MODULE_HASH_TABLE(mod), new, CDR(res));
+  STk_hash_set_alias(&MODULE_HASH_TABLE(mod), new, CDR(res), 0);
   return STk_void;
 }
 
@@ -511,7 +511,7 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
   if (!res)
     error_unbound_variable(old);
 
-  STk_hash_set_alias(&MODULE_HASH_TABLE(new_module), new, CDR(res));
+  STk_hash_set_alias(&MODULE_HASH_TABLE(new_module), new, CDR(res), 1);
   return STk_void;
 }
 
