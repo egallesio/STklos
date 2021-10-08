@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update:  6-Oct-2021 18:35 (eg)
+;;;; Last file update:  8-Oct-2021 09:53 (eg)
 ;;;;
 
 
@@ -51,6 +51,16 @@
 
 (define (%library-name->symbol libname)
   (string->symbol (%library-name->string libname)))
+
+
+;;
+;; A macro to redefine a symbol in a R7RS module
+;;
+(define-macro (%module-define-and-export . lst)
+  `(begin
+     ,@(map (lambda (x) `(%symbol-define ',x ,x)) lst)
+     (export ,@lst)))
+
 
 ;; ======================================================================
 ;;
