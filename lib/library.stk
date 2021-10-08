@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update:  8-Oct-2021 15:30 (eg)
+;;;; Last file update:  8-Oct-2021 16:02 (eg)
 ;;;;
 
 ;;
@@ -57,6 +57,8 @@
 (define (%library-name->symbol libname)
   (string->symbol (%library-name->string libname)))
 
+(define (%symbol->library-name name)
+  (map string->symbol (string-split (symbol->string name) "/")))
 
 ;;
 ;; A macro to redefine a symbol in a R7RS module
@@ -136,12 +138,14 @@
         (else
          ;; Try to load a file which could define this module
          (with-handler (lambda (x)
-                         (error 'import "cannot load module/library ~s" name))
+                         (error 'import "cannot load module/library ~s"
+                                (%symbol->library-name name)))
                        (require/provide (symbol->string name)))
          (let ((mod (find-module name #f)))
            (unless mod
              ;; We were not able to define this module
-             (error 'import "module/library ~s does not exist" name))
+             (error 'import "module/library ~s does not exist"
+                    (%symbol->library-name name)))
            mod)))))
 
   (define (import-symbols importer name only except rename prefix)
