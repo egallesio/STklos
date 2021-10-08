@@ -22,9 +22,14 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update:  8-Oct-2021 09:53 (eg)
+;;;; Last file update:  8-Oct-2021 15:30 (eg)
 ;;;;
 
+;;
+;; load common standard libraries to minimize files accesses at runtime
+;;
+(include "./scheme/base.stk")
+(include "./scheme/write.stk")
 
 ;;
 ;; library name conversion functions
