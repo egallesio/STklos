@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update:  8-Oct-2021 16:02 (eg)
+;;;; Last file update:  9-Oct-2021 18:08 (eg)
 ;;;;
 
 ;;
@@ -137,13 +137,11 @@
         (module)
         (else
          ;; Try to load a file which could define this module
-         (with-handler (lambda (x)
-                         (error 'import "cannot load module/library ~s"
-                                (%symbol->library-name name)))
-                       (require/provide (symbol->string name)))
+         (require/provide (symbol->string name))
+
+         ;; Verify that the was correctly defined in this file
          (let ((mod (find-module name #f)))
            (unless mod
-             ;; We were not able to define this module
              (error 'import "module/library ~s does not exist"
                     (%symbol->library-name name)))
            mod)))))
