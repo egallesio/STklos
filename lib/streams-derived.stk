@@ -84,7 +84,7 @@
 
 (define-module STREAMS-DERIVED
   (import STREAMS-PRIMITIVE)
-  (import SRFI-1)
+  (import srfi/1)
   (export list->stream port->stream stream->list
           stream-append stream-concat stream-constant stream-drop
           stream-drop-while stream-filter stream-fold stream-for-each stream-from

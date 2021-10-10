@@ -70,7 +70,7 @@
 (define-module SRFI-134
   ;;(import (scheme base) (scheme case-lambda)
   ;;        (srfi 1) (srfi 9) (srfi 158))
-  (import SRFI-1)
+  (import srfi/1)
   (import SRFI-158)
   (export ideque ideque-tabulate ideque-unfold ideque-unfold-right 
           ideque? ideque-empty? ideque= ideque-any ideque-every

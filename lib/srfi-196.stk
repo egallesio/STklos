@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 05-Nov-2020 12:34 (jpellegrini)
-;;;; Last file update:  9-Oct-2021 19:52 (eg)
+;;;; Last file update: 10-Oct-2021 15:07 (eg)
 ;;;;
 
 
@@ -54,7 +54,7 @@
 (require "srfi-9")
 
 (define-module SRFI-196
-  (import SRFI-1)
+  (import srfi/1)
   (export range numeric-range vector-range string-range range-append
           iota-range range? range=? range-length range-ref range-first
           range-last subrange range-segment range-split-at range-take

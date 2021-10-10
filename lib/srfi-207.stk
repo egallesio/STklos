@@ -5,7 +5,7 @@
 (require "srfi-158")
 
 (define-module SRFI-207
-  (import SRFI-1)
+  (import srfi/1)
   (import SRFI-13)
   (import SRFI-151)
   (import SRFI-158)
