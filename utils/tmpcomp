@@ -22,7 +22,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  1-Jan-2002 18:57 (eg)
-# Last file update:  7-Oct-2021 13:02 (eg)
+# Last file update: 10-Oct-2021 17:01 (eg)
 #
 
 # This script is only used to compile the different components of the
@@ -62,9 +62,6 @@ case $# in
        ;;
 esac
 
-# Sep is now also ":"  on CYGWIN
-sep=":"
-
 if test -f ../src/boot.img ;then
     prefix=".."
 else
@@ -75,7 +72,7 @@ else
     fi
 fi
 
-STKLOS_LOAD_PATH=".:${prefix}/lib${sep}${prefix}/gtklos"
+STKLOS_LOAD_PATH=".:${prefix}/lib:${prefix}/lib/srfi:${prefix}/gtklos"
 STKLOS_BUILDING=1
 export STKLOS_LOAD_PATH STKLOS_BUILDING
 
