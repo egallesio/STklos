@@ -1,12 +1,12 @@
 ;;;;
 ;;;; srfi-74.stk			-- SRFI-74 implementation
 ;;;;
-;;;; Copyright © 2010 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2010-2021 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;           Author: Michael Sperber
 ;;;;      Modified by: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  2005
-;;;; Last file update:  4-Apr-2010 19:55 (eg)
+;;;; Last file update: 10-Oct-2021 19:10 (eg)
 ;;;;
 ;;;; This code is an adaptation of the reference implementation provided
 ;;;; with the SRFI document by Michael Sperber.
@@ -42,6 +42,7 @@
 (require "srfi-66")
 
 (define-module SRFI-74
+  (import srfi/4)
   (export endianness blob? make-blob blob-length
 	  blob-u8-ref blob-s8-ref
 	  blob-u8-set! blob-s8-set!
