@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update:  9-Oct-2021 18:08 (eg)
+;;;; Last file update: 10-Oct-2021 14:29 (eg)
 ;;;;
 
 ;;
@@ -258,9 +258,11 @@
 ;;
 ;; ======================================================================
 (define-macro (define-library name . decls)
-  (let ((module-name (%library-name->symbol name))
-        (lib         (%make-library))
-        (body        '()))
+  (let ((module-name    (%library-name->symbol name))
+        (lib            (%make-library))
+        (body           '())
+        (module-restore (symbol-value '%module-restore
+                                      (find-module 'STklos))))
 
     ;; Parse declarations
     (for-each
@@ -285,5 +287,7 @@
 
     ;; Build the result that must be evaluated
     `(define-module ,module-name
-              ,@body
-       (values (void) ',module-name))))
+       ;; FIXME: %module-restore is used at the end of the expansion.
+       ;; We define here it locally to permit the module restoration
+       (define %module-restore ,module-restore)
+       ,@body)))

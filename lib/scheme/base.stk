@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Oct-2021 19:22
-;;;; Last file update:  8-Oct-2021 11:03 (eg)
+;;;; Last file update: 10-Oct-2021 15:12 (eg)
 ;;;;
 
 
@@ -42,11 +42,6 @@
                 letrec* letrec-syntax or parameterize quasiquote
                 quote set! set-car! syntax-error syntax-rules unless
                 unquote unquote-splicing when with-exception-handler)
-
-  ;; FIXME: %module-export should not be defined here. It is used
-  ;; by the STklos R7RS mechanic, that must be changed
-  (%module-define-and-export %module-restore)
-
   ;; HACK END
   ;; ----------------------------------------------------------------------
   (%module-define-and-export
