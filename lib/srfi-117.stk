@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 30-Jun-2020 05:01 (jpellegrini)
-;;;; Last file update: 30-May-2020 06:10 (jpellegrini)
+;;;; Last file update: 10-Oct-2021 11:09 (eg)
 ;;;;
 
 (require "srfi-9")
@@ -63,13 +63,16 @@
 ;; The only procedure from SRFI-1 we'd need is map!, so instead
 ;; of requireing SRFI-1, we define a simpler version of map! here,
 ;; unless SRFI-1 is already provided.
-(unless (provided? "srfi-1")
-  (define (map! f lis)
-    (let lp ((lis lis))
-      (if (pair? lis)
-        (begin
-          (set-car! lis (f (car lis)))
-          (lp (cdr lis)))))))
+(define srfi-117:map!
+        (let ((srfi-1 (find-module 'SRIF-1 #f)))
+          (if srfi-1
+              (symbol-value 'map! srfi-1)
+              (lambda (f lis)
+                (let lp ((lis lis))
+                  (if (pair? lis)
+                    (begin
+                      (set-car! lis (f (car lis)))
+                      (lp (cdr lis)))))))))
 
 ;;; The list-queue record
 ;;; The invariant is that either first is (the first pair of) a list
@@ -225,7 +228,7 @@
     queue))
 
 (define (list-queue-map! proc list-queue)
-  (map! proc (get-first list-queue)))
+  (srfi-117:map! proc (get-first list-queue)))
 
 (define (list-queue-for-each proc list-queue)
   (for-each proc (get-first list-queue)))

@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 25-Jun-2020 06:21 (jpellegrini)
-;;;; Last file update: 25-May-2020 07:00 (jpellegrini)
+;;;; Last file update:  9-Oct-2021 19:56 (eg)
 ;;;;
 
 (require "srfi-1")
@@ -54,6 +54,7 @@
 (require "srfi-69")
 
 (define-module SRFI-171
+  (import SRFI-1)
   (export rcons
           reverse-rcons
           rcount
