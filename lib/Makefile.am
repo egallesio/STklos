@@ -20,10 +20,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  8-Oct-2021 11:53 (eg)
+# Last file update: 10-Oct-2021 14:48 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
-	      scheme                            \
+	      scheme srfi                       \
 		  srfi-25 srfi-27 srfi-132 srfi-133 \
 		  srfi-144 srfi-170 srfi-175
 
