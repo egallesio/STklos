@@ -1,4 +1,4 @@
-;;;; srfi-7.stk 				-- SRFI-7 (PROGRAM)
+;;;; 7.stk 				-- SRFI-7 (PROGRAM)
 ;;;;
 ;;;; Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
@@ -22,16 +22,28 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 31-Aug-1999 16:10 (eg)
-;;;; Last file update: 10-Oct-2021 20:06 (eg)
+;;;; Last file update: 10-Oct-2021 20:12 (eg)
 
 
-(include "srfi/7.stk")
+(define-module srfi/7
+  ;; FIXME:
+  ; (export program)
+  
+  (define-syntax program
+    (syntax-rules (requires files code feature-cond)
+      ((program)
+       (begin))
+      ((program (requires feature-id ...) more ...)
+       (begin (cond-expand ((and feature-id ...) 'okay)) (program more ...)))
+      ((program (files filename ...) more ...)
+       (begin (load filename) ... (program more ...)))
+      ((program (code stuff ...) more ...)
+       (begin stuff ... (program more ...)))
+      ((program (feature-cond (requirement stuff ...) ...) more ...)
+       (begin (cond-expand (requirement (program stuff ...)) ...)
+	          (program more ...)))))
 
-(select-module STklos)
-(import srfi/7)
+  (export-syntax program))
 
-;; FIXME:
-(export-syntax program)
-
-(provide "srfi-7")
+(provide "srfi/7")
 

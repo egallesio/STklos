@@ -1,8 +1,8 @@
 ;;;;
 ;;;;
-;;;; srfi-5.stk         -- Implementattion of SRFI-5
+;;;; 6.stk         -- Implementation of the (srfi 6) library
 ;;;;
-;;;; Copyright © 2020-2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,16 +21,18 @@
 ;;;; USA.
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
-;;;;    Creation date:  8-Oct-2020 17:17
-;;;; Last file update: 10-Oct-2021 19:35 (eg)
+;;;;    Creation date: 10-Oct-2021 19:38
+;;;; Last file update: 10-Oct-2021 19:54 (eg)
 ;;;;
 
-(include "srfi/5.stk")
 
-(select-module STklos)
-(import srfi/5)
+(define-module srfi/6
+  (export open-input-string open-output-string get-output-string)
 
-;; FIXME: delete "export-syntax" call
-(export-syntax let)
+  ;; SRFI-6 is embedded in STklos; Redefine functions here
+  (%module-define-and-export open-input-string
+                             open-output-string
+                             get-output-string))
 
-(provide "srfi-5")
+(provide "srfi/6")
+

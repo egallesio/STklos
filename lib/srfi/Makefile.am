@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 10-Oct-2021 18:14 (eg)
+# Last file update: 10-Oct-2021 20:05 (eg)
 
 #======================================================================
 
@@ -27,8 +27,9 @@ COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 
-SRC_STK   = 1.stk 2.stk 4.stk
-srfi_OBJS = 1.ostk 2.ostk 4.ostk
+SRC_STK   = 1.stk 2.stk 4.stk 5.stk 6.stk 7.stk 8.stk
+
+srfi_OBJS = 1.ostk 2.ostk 4.ostk 5.ostk 6.ostk 7.ostk 8.ostk
 
 
 #======================================================================

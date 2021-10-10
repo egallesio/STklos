@@ -1,9 +1,6 @@
+;;;; 8.stk 				-- SRFI-8 (receive)
 ;;;;
-;;;;
-;;;; srfi-5.stk         -- Implementattion of SRFI-5
-;;;;
-;;;; Copyright © 2020-2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
-;;;;
+;;;; Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -21,16 +18,13 @@
 ;;;; USA.
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
-;;;;    Creation date:  8-Oct-2020 17:17
-;;;; Last file update: 10-Oct-2021 19:35 (eg)
-;;;;
+;;;;    Creation date: 10-Oct-2021 20:13 (eg)
+;;;; Last file update: 10-Oct-2021 20:31 (eg)
 
-(include "srfi/5.stk")
 
-(select-module STklos)
-(import srfi/5)
+(define-module srfi/8
+  ;; FIXME: Must be changed when macros can be exported
+  ;; (export receive)
+  )
 
-;; FIXME: delete "export-syntax" call
-(export-syntax let)
-
-(provide "srfi-5")
+(provide "srfi/8")
