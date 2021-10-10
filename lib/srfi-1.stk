@@ -5,7 +5,7 @@
 ;;;;           Author: Olin Shivers
 ;;;       Modified by: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: ??
-;;;; Last file update: 23-Jun-2020 11:43 (eg)
+;;;; Last file update: 10-Oct-2021 10:58 (eg)
 ;;;;
 
 ;;;; ===========================================================================
@@ -277,21 +277,19 @@
 ;;    `(call-with-values (lambda () ,producer)
 ;;             (lambda ,vars ,@body)))
 
-  (define-macro (check-arg pred val caller)
-    `(if (,pred ,val)
-     ,val
-     (error ',caller ": bad argument ~S" ,val))))
+(define-macro (check-arg pred val caller)
+  `(if (,pred ,val)
+       ,val
+       (error ',caller ": bad argument ~S" ,val)))
 
+(define fold #f)    ;; to avoid a warning  
 
-;// FIXME: (select-module srfi-1)
 
 ;;; Other adaptations for STklos are at the end of the file ....
 ;;; Some function defined in this SRFi are now part of R7RS
 ;;; They have been deleted (look at the 'R7RS suppression' tag)
 
 ;;; Olin Shivers code starts below
-
-(define fold #f)    ;; to avoid a warning
 
 ;======================================================================
 ;======================================================================
@@ -1025,27 +1023,27 @@
   (if (pair? lists)
 
       (let lp ((lists (cons lis1 lists)))
-    (let ((tails (%cdrs lists)))
-      (if (pair? tails)
-          (begin (apply proc lists)
-             (lp tails)))))
+        (let ((tails (%cdrs lists)))
+          (if (pair? tails)
+              (begin (apply proc lists)
+                     (lp tails)))))
 
       ;; Fast path.
       (let lp ((lis lis1))
-    (if (not (null-list? lis))
-        (let ((tail (cdr lis))) ; Grab the cdr now,
-          (proc lis)        ; in case PROC SET-CDR!s LIS.
-          (lp tail))))))
+        (if (not (null-list? lis))
+            (let ((tail (cdr lis))) ; Grab the cdr now,
+              (proc lis)        ; in case PROC SET-CDR!s LIS.
+              (lp tail))))))
 
 ;;; We stop when LIS1 runs out, not when any list runs out.
 (define (map! f lis1 . lists)
   (check-arg procedure? f map!)
   (if (pair? lists)
       (let lp ((lis1 lis1) (lists lists))
-    (if (not (null-list? lis1))
-        (receive (heads tails) (%cars+cdrs/no-test lists)
-          (set-car! lis1 (apply f (car lis1) heads))
-          (lp (cdr lis1) tails))))
+        (if (not (null-list? lis1))
+            (receive (heads tails) (%cars+cdrs/no-test lists)
+              (set-car! lis1 (apply f (car lis1) heads))
+              (lp (cdr lis1) tails))))
 
       ;; Fast path.
       (pair-for-each (lambda (pair) (set-car! pair (f (car pair)))) lis1))
@@ -1057,18 +1055,18 @@
   (check-arg procedure? f filter-map)
   (if (pair? lists)
       (let recur ((lists (cons lis1 lists)))
-    (receive (cars cdrs) (%cars+cdrs lists)
-      (if (pair? cars)
-          (cond ((apply f cars) => (lambda (x) (cons x (recur cdrs))))
-            (else (recur cdrs))) ; Tail call in this arm.
-          '())))
+        (receive (cars cdrs) (%cars+cdrs lists)
+          (if (pair? cars)
+              (cond ((apply f cars) => (lambda (x) (cons x (recur cdrs))))
+                    (else (recur cdrs))) ; Tail call in this arm.
+              '())))
 
       ;; Fast path.
       (let recur ((lis lis1))
-    (if (null-list? lis) lis
-        (let ((tail (recur (cdr lis))))
-          (cond ((f (car lis)) => (lambda (x) (cons x tail)))
-            (else tail)))))))
+        (if (null-list? lis) lis
+            (let ((tail (recur (cdr lis))))
+              (cond ((f (car lis)) => (lambda (x) (cons x tail)))
+                    (else tail)))))))
 
 
 ;;; Map F across lists, guaranteeing to go left-to-right.
@@ -1713,5 +1711,10 @@ FILTER an FILTER! are primitives in STklos
 (redefine make-list)
 (redefine assoc)
 (redefine member)
+
+)  ; END OF MODULE
+
+(select-module STklos)
+(import SRFI-1)
 
 (provide "srfi-1")

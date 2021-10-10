@@ -47,8 +47,10 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.ingo]
 ;;;;    Creation date: 27-Jul-2021 16:01 (jpellegrini)
-;;;; Last file update: 27-Jul-2021 17:04 (jpellegrini)
+;;;; Last file update:  9-Oct-2021 20:08 (eg)
 ;;;;
+
+;(require "srfi-1")     ;; seems to be uneeded (EG)
 
 (define-module SRFI-223
   
