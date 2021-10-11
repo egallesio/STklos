@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update:  6-Sep-2021 17:39 (eg)
+ * Last file update: 11-Oct-2021 20:33 (eg)
  */
 
 
@@ -121,7 +121,7 @@ EXTERN_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z));
 static SCM int_quotient(SCM o1, SCM o2);
 static SCM my_cos(SCM z);
 static SCM my_sin(SCM z);
-
+static SCM STk_complexp(SCM n);
 
 
 /******************************************************************************
@@ -133,6 +133,15 @@ static void error_bad_number(SCM n)
 {
   STk_error("~S is a bad number", n);
 }
+
+static void error_bad_number_in_comp(SCM n)
+{
+  if (COMPLEXP(n))
+    STk_error("~S is not a real number", n);
+  else 
+    error_bad_number(n);
+}
+
 
 static void error_at_least_1(void)
 {
@@ -1436,7 +1445,7 @@ doc>
       SCM previous;                                                         \
                                                                             \
       if (argc == 0) error_at_least_1();                                    \
-      if (_max_type_(*argv) == STk_false) error_bad_number(*argv);          \
+      if (_max_type_(*argv) == STk_false) error_bad_number_in_comp(*argv);  \
                                                                             \
       for (previous = *argv--; --argc; previous = *argv--) {                \
         if (_max_type_(*argv) == STk_false) error_bad_number(*argv);        \
@@ -1449,8 +1458,8 @@ doc>
 #define COMPARE_NUM2(_prim_, _max_type_, _operator_)                        \
     long STk_##_prim_##2(SCM o1, SCM o2)                                    \
     {                                                                       \
-      if (_max_type_(o1) == STk_false) error_bad_number(o1);                \
-      if (_max_type_(o2) == STk_false) error_bad_number(o2);                \
+      if (_max_type_(o1) == STk_false) error_bad_number_in_comp(o1);        \
+      if (_max_type_(o2) == STk_false) error_bad_number_in_comp(o2);        \
       return do_compare(o1, o2) _operator_ 0;                               \
     }
 
