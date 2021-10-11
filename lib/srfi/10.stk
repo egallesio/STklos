@@ -1,7 +1,8 @@
 ;;;;
-;;;; srfi-9.stk -- SRFI-9 (Records)
 ;;;;
-;;;; Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; 10.stk         -- The (srfi 10) library
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -20,15 +21,14 @@
 ;;;; USA.
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
-;;;;    Creation date: 27-Sep-1999 13:06 (eg)
-;;;; Last file update: 11-Oct-2021 11:14 (eg)
+;;;;    Creation date: 11-Oct-2021 11:42
+;;;; Last file update: 11-Oct-2021 11:44 (eg)
 ;;;;
 
-(include "srfi/9.stk")
+(define-module srfi/10
+  ;; FIXME:  Must be changed when macros can be exported
+  ;;(export define-reader-ctor)
+  )
 
-(select-module STklos)
-(import srfi/9)
+(provide "srfi/10")
 
-;; FIXME: delete "export-syntax" call
-(export-syntax define-record-type)
-(provide "srfi-9")
