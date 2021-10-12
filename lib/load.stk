@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 10-Oct-2021 15:24 (eg)
+;;;; Last file update: 12-Oct-2021 18:29 (eg)
 ;;;;
 
 
@@ -196,6 +196,10 @@ doc>
             (or (try fn)
                 (try-load-with-suffixes fn suffixes)
                 (Loop (cdr dir)))))))
+
+  (unless (string? fn)
+    (error '%guess-pathname "path must be a string (it was ~s)" fn))
+
   (if (regexp-match "\.?\.?/" fn)
       (or ;; First try to load file as given by user
           (try fn)
