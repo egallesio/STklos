@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 10-Oct-2021 14:29 (eg)
+;;;; Last file update: 12-Oct-2021 18:52 (eg)
 ;;;;
 
 ;;
@@ -276,7 +276,7 @@
                 (%do-imports lib rest))
            ((export)
                 (%do-exports lib rest))
-           ((begin include)
+           ((begin include include-ci)
                 (set! body (append body (list d))))
            (else
                 (error 'define-library "incorrect directive ~s" d)))))
