@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  4-Sep-2021 19:46 (eg)
+;;;; Last file update: 12-Oct-2021 11:47 (eg)
 ;;;;
 
 
@@ -2096,6 +2096,7 @@ doc>
          (conf  (%stklos-configure))
          (stklos-git (%stklos-git))
          (commit (key-get stklos-git :commit ""))
+         (srfis  (filter-map %feature->srfi (features)))
          (git-alist (if (= (string-length commit) 0)
                         '()
                         `((build.git.tag ,(key-get stklos-git :tag '()))
@@ -2110,13 +2111,14 @@ doc>
       (install-dir ,(%library-prefix))
       (website "https://stklos.net")
       (scheme.features ,@(features))
-      (scheme.srfi ,@(filter-map %feature->srfi (features)))
+      (scheme.srfi ,@srfis)
       (scheme.path ,@(load-path))
       (build.configure ,@(key-get conf :configure #f))
       ,@git-alist
       (stklos.threads ,(%thread-system))
       (stklos.system-libs ,@(key-get conf :system #f))
       (stklos.compiled-libs ,@(key-get conf :compiled #f))
+      (stklos.srfi.count ,(length srfis))
       (os.uname ,(vector-ref u 0) ,(vector-ref u 2) ,(vector-ref u 4))
       (os.env.LANG ,(or (getenv "LANG") ""))
       (os.env.TERM ,(or (getenv "TERM") "")))))
