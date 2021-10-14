@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update:  4-Jan-2021 16:25 (eg)
+;;;; Last file update: 14-Oct-2021 16:17 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -102,12 +102,14 @@
                                    (format "Available Commands:
 - ,backtrace ,bt   Show the stack when last error occurred
 - ,quit ,q         Exit STklos
+- ,shell ,!        Run a shell command
 - ,help ,? ,h      This help\n")
                                    'normal)
                          (current-error-port))
                         (flush-output-port (current-error-port)))
     ((quit q)           (exit 0))
     ((backtrace bt)     (%display-backtrace repl-backtrace 6))
+    ((shell !)          (system (read-line)))
     (else               (format (current-error-port)
                                 "bad command name: ~S. Type ,help for some help\n"
                                 (car l)))))
