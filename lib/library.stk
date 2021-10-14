@@ -22,11 +22,11 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 12-Oct-2021 18:52 (eg)
+;;;; Last file update: 14-Oct-2021 16:01 (eg)
 ;;;;
 
 ;;
-;; load common standard libraries to minimize files accesses at runtime
+;; Define common standard libraries to minimize files accesses at runtime
 ;;
 (include "./scheme/base.stk")
 (include "./scheme/write.stk")
@@ -147,48 +147,61 @@
            mod)))))
 
   (define (import-symbols importer name only except rename prefix)
-    (let* ((mod              (eventually-load-library name))
-           (modules-exported (module-exports mod))
-           (exported         (or only modules-exported)))
-      ;; Verify that the symbols in the import set exist.
-      (for-each (lambda (symb)
-                  (unless (memq symb modules-exported)
-                    (error 'import "symbol ~s (only) is not in the import set"
-                           symb)))
-                exported)
+    (let* ((mod       (eventually-load-library name))
+           (exported  (map (lambda(x)
+                             ;; FIXME: pair if lib atom if module
+                             (if (pair? x) x (cons x x)))
+                           (module-exports mod))))
 
-      ;; Suppress the symbols in the except list
-      (for-each (lambda (symb)
-                  (if (memq symb exported)
-                      (set! exported (remove (lambda(x) (eq? x symb)) exported))
-                      (error 'import "symbol ~s (except) is not in the import set"
-                             symb)))
-                (or except '()))
+      (when except
+        ;; Suppress the symbols in the except list
+        (let ((public (map cdr exported)))
+          (for-each (lambda (symb)
+                      (if (memq symb public)
+                          (set! exported (remove (lambda(x) (eq? (cdr x) symb)) exported))
+                          (error 'import "except: symbol ~s is not in the import set"
+                                 symb)))
+                    except)))
 
-      ;; rename eventually symbols
-      (let ((exported (map (lambda (x) (list x x)) exported)))
-        ;; exported is a now a list of couple (original-name new-name)
+      (when only
+        ;; Verify that all the symbols in the only list are exported
+        (let ((public (map cdr exported)))
+          (for-each (lambda (x)
+                      (unless (memq x public)
+                        (error 'import "only: symbol ~s is not in the import set"
+                               x)))
+                    only))
+        ;; Restrict now the exported set to the only list
+        (set! exported (filter! (lambda (x) (memq (cdr x) only))
+                                exported)))
+
+      (when rename
+        ;; Rename some symbols
         (for-each (lambda (couple)
-                    (let* ((original (car couple))
-                           (new      (cadr couple))
-                           (found    (assq original exported)))
-                      (unless found
-                        (error 'import "symbol ~s (rename) is not in the import set"
-                               original))
-                      (set-cdr! found (list new))))
-                  (or rename '()))
+                    (let ((original (car couple))
+                          (new      (cadr couple)))
+                      (let Loop ((lst exported))
+                        (if (null? lst)
+                            (error 'import "rename: symbol ~s is not in the import set"
+                                   original)
+                            (if (eq? (cdar lst) original)
+                                (set-cdr! (car lst) new)
+                                (Loop (cdr lst)))))))
+                  rename))
 
-        ;; Eventually prefix  symbols
         (when prefix
-          (set! exported (map (lambda (couple)
-                                (list (car couple)
-                                      (symbol-append prefix (cadr couple))))
-                              exported)))
+          ;; Prefix symbols
+          (for-each (lambda (pair)
+                      (set-cdr! pair (symbol-append prefix (cdr pair))))
+                    exported))
+
 
         ;; Now we can (finally) make aliases for all symbols in exported list
-        (for-each (lambda (couple)
-                    (%symbol-link (cadr couple) (car couple) lib mod))
-                  exported))))
+        ;; FIXME: cannot be compiled ==> make a runtime call for that
+        ;; something like (%module-link (module-name mod) exported)
+        (for-each (lambda (pair)
+                    (%symbol-link (cdr pair) (car pair) lib mod))
+                  exported)))
 
   ;; Call import-symbols for each import spec
   (for-each (lambda (imp)
@@ -210,15 +223,49 @@
 ;;
 ;; ======================================================================
 
-;;
-;; FIXME: Add Export with renaming
-;;
+(define (module-exports-alist lst)
+  (map (lambda (x)
+         (if (symbol? x)
+             (cons x x)
+             (cons (cadr x) (caddr x))))
+       lst))
+
 (define (%do-exports lib symbols)
+
+;;  (define (parse-exports exports)
+;;    (for-each (lambda (x)
+;;                (unless (or (symbol? x)
+;;                            (and (list? x)
+;;                                 (= (length x) 3)
+;;                                 (eq? (car x)'rename)
+;;                                 (symbol? (cadr x))
+;;                                 (symbol? (caddr x))))
+;;                  (error 'export "bad export" x)))
+;;              exports))
+;;
+  ;;
+  ;; %do-exports
+  ;;
+  ;; (parse-exports symbols)
+
+  (define (add-symbol name rename lst)
+    (let ((old (assq name lst)))
+      (if old
+          (let ((old-rename (cdr old)))
+            (unless (or (eq? name old-rename)
+                        (eq? old-rename rename))
+              (error 'export "exported symbol ~s was previously renamed as ~S"
+                     name old-rename))
+            (set-cdr! old rename)
+            lst)
+          (cons (cons name rename) lst))))
+
   (let Loop ((l symbols) (res (module-exports lib)))
     (if (null? l)
         (begin
           ;; Hack to avoid useless compilation messages.
-          (for-each register-new-global!  res)
+          (for-each register-new-global!  (map car res))
+
           ;; Add the symbols to the export list
           (%module-exports-set! lib res))
 
@@ -227,10 +274,9 @@
           ;;
           ;; export a single identifier
           ;;
-          (Loop (cdr l)
-                (if (memq (car l) res)
-                    res                     ; already exported
-                    (cons (car l) res))))   ; add it to our result
+          (let ((s (car l)))
+            (Loop (cdr l)
+                  (add-symbol s s res))))
 
          ((and (pair? (car l))
                (eq? (caar l) 'rename))
@@ -242,11 +288,8 @@
                          (symbol? (car symbs))
                          (symbol? (cadr symbs)))
               (error 'export "bad renaming clause ~S" (car l)))
-            ;; FIXME FIXME For now we export the symbol without renaming!!!
             (Loop (cdr l)
-                  (if (memq (car symbs) res)
-                      res                         ; already exported
-                      (cons (car symbs) res)))))  ; add it to our result
+                  (add-symbol (car symbs) (cadr symbs) res))))
 
          (else
           (error 'export "bad exportation `~S'" (car l)))))))
@@ -258,11 +301,11 @@
 ;;
 ;; ======================================================================
 (define-macro (define-library name . decls)
-  (let ((module-name    (%library-name->symbol name))
-        (lib            (%make-library))
-        (body           '())
-        (module-restore (symbol-value '%module-restore
-                                      (find-module 'STklos))))
+  (let* ((module-name    (%library-name->symbol name))
+         (lib            (or (find-module module-name #f) (%make-library)))
+         (body           '())
+         (module-restore (symbol-value '%module-restore
+                                       (find-module 'STklos))))
 
     ;; Parse declarations
     (for-each
