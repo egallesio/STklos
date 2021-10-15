@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Jun-2000 15:07 (eg)
-;;;; Last file update: 14-Oct-2021 16:17 (eg)
+;;;; Last file update: 15-Oct-2021 12:14 (eg)
 ;;;;
 
 ;; This file defines the REPL module. This module does not export anything
@@ -96,13 +96,19 @@
 ;;; ======================================================================
 
 (define (do-repl-command l)
+  (define (trim-left str)
+    (regexp-replace "^[ \t]*" str ""))
+
   (case (car l)
     ((help h ?)         (display
                          (do-color (get-repl-color :help)
                                    (format "Available Commands:
 - ,backtrace ,bt   Show the stack when last error occurred
+- ,cd              Change current directory
+- ,pwd             Print working directory
 - ,quit ,q         Exit STklos
 - ,shell ,!        Run a shell command
+
 - ,help ,? ,h      This help\n")
                                    'normal)
                          (current-error-port))
@@ -110,6 +116,8 @@
     ((quit q)           (exit 0))
     ((backtrace bt)     (%display-backtrace repl-backtrace 6))
     ((shell !)          (system (read-line)))
+    ((cd)               (chdir (trim-left (read-line))))
+    ((pwd)              (printf "~S\n" (getcwd)))
     (else               (format (current-error-port)
                                 "bad command name: ~S. Type ,help for some help\n"
                                 (car l)))))
