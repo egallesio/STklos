@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 14-Oct-2021 16:01 (eg)
+;;;; Last file update: 15-Oct-2021 20:32 (eg)
 ;;;;
 
 ;;
@@ -182,7 +182,8 @@
                           (new      (cadr couple)))
                       (let Loop ((lst exported))
                         (if (null? lst)
-                            (error 'import "rename: symbol ~s is not in the import set"
+                            (error 'import
+                                   "rename: symbol ~s is not in the import set"
                                    original)
                             (if (eq? (cdar lst) original)
                                 (set-cdr! (car lst) new)
@@ -216,37 +217,12 @@
                                 (key-get keylist #:prefix #f))))
             clauses))
 
-
 ;; ======================================================================
 ;;
 ;; EXPORT
 ;;
 ;; ======================================================================
-
-(define (module-exports-alist lst)
-  (map (lambda (x)
-         (if (symbol? x)
-             (cons x x)
-             (cons (cadr x) (caddr x))))
-       lst))
-
 (define (%do-exports lib symbols)
-
-;;  (define (parse-exports exports)
-;;    (for-each (lambda (x)
-;;                (unless (or (symbol? x)
-;;                            (and (list? x)
-;;                                 (= (length x) 3)
-;;                                 (eq? (car x)'rename)
-;;                                 (symbol? (cadr x))
-;;                                 (symbol? (caddr x))))
-;;                  (error 'export "bad export" x)))
-;;              exports))
-;;
-  ;;
-  ;; %do-exports
-  ;;
-  ;; (parse-exports symbols)
 
   (define (add-symbol name rename lst)
     (let ((old (assq name lst)))
@@ -300,10 +276,18 @@
 ;; DEFINE-LIBRARY
 ;;
 ;; ======================================================================
+(define (%eventually-create-library name)
+  (or (find-module name #f)
+      (let ((lib (%make-library)))
+        (%register-library-as-module lib name)
+        lib)))
+
 (define-macro (define-library name . decls)
   (let* ((module-name    (%library-name->symbol name))
-         (lib            (or (find-module module-name #f) (%make-library)))
+         (imports        '())
+         (exports        '())
          (body           '())
+         (lib            (gensym))
          (module-restore (symbol-value '%module-restore
                                        (find-module 'STklos))))
 
@@ -316,21 +300,37 @@
              (rest (cdr d)))
          (case key
            ((import)
-                (%do-imports lib rest))
+                (set! imports (append! imports (list rest))))
            ((export)
-                (%do-exports lib rest))
+                (set! exports (append! exports (list rest))))
            ((begin include include-ci)
                 (set! body (append body (list d))))
            (else
                 (error 'define-library "incorrect directive ~s" d)))))
      decls)
+    ;;
+    ;; Produce the expansion
+    ;;
+    ;; The difficulty here is that libraries have an empty environment. That
+    ;; means that we cannot expand in a "define-module" and do the imports
+    ;; and the exports in it. Consequently, we work in two time:
+    ;;  1. First, we create an empty library and fill it with the import and
+    ;;     the export. This is done in in the STklos environment
+    ;;  2. Then, we use a standard define-module which will use the library
+    ;;     previously built where the imports/exports have bee forged.
+    ;;
+    `(begin
+       ;; ①: Define (eventually) the library and do the imports and exports
+       (let ((,lib (%eventually-create-library ',module-name)))
+         ;; Do the imports
+         ,@(map (lambda (x) `(%do-imports ,lib ',x)) imports)
 
-    ;; register the created lib in the global module list
-    (%register-library-as-module lib module-name)
+         ;; Do the exports
+         ,@(map (lambda (x) `(%do-exports ,lib ',x)) exports)
 
-    ;; Build the result that must be evaluated
-    `(define-module ,module-name
-       ;; FIXME: %module-restore is used at the end of the expansion.
-       ;; We define here it locally to permit the module restoration
-       (define %module-restore ,module-restore)
-       ,@body)))
+         ;; HACK: %module-restore is used at the end of the expansion.
+         ;; We define here it locally to permit the module restoration
+         (%symbol-define '%module-restore %module-restore ,lib))
+
+       ;; ②: Define a standard STklos module
+       (define-module ,module-name ,@body))))
