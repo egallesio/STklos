@@ -18,7 +18,7 @@
 ;; USA.
 ;;           Author: Erick Gallesio [eg@unice.fr]
 ;;    Creation date: 26-Nov-2000 18:19 (eg)
-;; Last file update: 13-Aug-2020 11:38 (eg)
+;; Last file update: 16-Oct-2021 19:01 (eg)
 ;;
 ;; ======================================================================
 
@@ -40,7 +40,7 @@
 (define (TODO txt) (bold (color :bg "yellow" :fg "red" txt)) "")
 (define (~)        (symbol "nbs"))
 
-(%%include "./lib.stk")
+(include "./lib.stk")
 
 
 
