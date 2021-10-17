@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Oct-2021 19:30
-;;;; Last file update:  8-Oct-2021 11:48 (eg)
+;;;; Last file update: 17-Oct-2021 20:40 (eg)
 ;;;;
 
 
@@ -38,11 +38,6 @@
   (%define-here and begin case cond define
                 define-syntax delay do if lambda let let-syntax let* letrec
                 letrec-syntax or quasiquote quote set!)
-
-  ;; FIXME: %module-export should not be defined here. It is used
-  ;; by the STklos R7RS mechanic, that must be changed
-  (%module-define-and-export %module-restore)
-
   ;; HACK END
   ;; ----------------------------------------------------------------------
   
