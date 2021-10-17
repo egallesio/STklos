@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update:  3-Oct-2021 20:16 (eg)
+;;;; Last file update: 17-Oct-2021 19:28 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -186,6 +186,12 @@
     (emergency-exit 70)))   ; 70 seems to be required by SRFI-22
 
 
+;;
+;; Register the options given as program args in the system state plist
+;;
+(set! *%system-state-plist* (append *%system-state-plist* *%program-args*))
+
+
 ;; ----------------------------------------------------------------------
 ;;      Scheme Module
 ;; ----------------------------------------------------------------------
@@ -196,15 +202,10 @@
 ;;; module. Note that this is only partially true since bindings
 ;;; in SCHEME module are mutable
 ;;; Note that module SCHEME was already created before bootstrap
-
 (let ((STklos (find-module 'STklos))
-      (Scheme (find-module 'SCHEME)))
-
-  ;; Register the options given as program args in the system state plist
-  (set! *%system-state-plist* (append *%system-state-plist* *%program-args*))
-
-  (%redefine-module-exports STklos Scheme)
-  (%module-exports-set! Scheme (module-exports STklos)))
+      (SCHEME (find-module 'SCHEME)))
+  (%populate-scheme-module)
+  (%module-exports-set! SCHEME (module-exports STklos)))
 
 ;; ----------------------------------------------------------------------
 ;;      option analysis and REPL launching

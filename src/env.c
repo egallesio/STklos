@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  5-Oct-2021 12:36 (eg)
+ * Last file update: 17-Oct-2021 19:20 (eg)
  */
 
 #include "stklos.h"
@@ -400,6 +400,20 @@ DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
 }
 
 
+DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void))
+{
+  for (SCM lst = STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module));
+       !NULLP(lst);
+       lst = CDR(lst)) {
+    int i; 
+    SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(STk_STklos_module), CAR(lst), &i);
+    /* Redefine symbol in (car lst) in SCHEME module */
+    STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), Scheme_module);
+  }
+  return STk_void;
+}
+
+
 DEFINE_PRIMITIVE("%redefine-module-exports", redefine_module_exports, subr12,
                  (SCM from, SCM to))
 {
@@ -594,7 +608,7 @@ int STk_late_init_env(void)
   MODULE_IMPORTS(STk_STklos_module) = LIST1(STk_STklos_module);
 
   /* Create the SCHEME module */
-  STk_makemodule(STk_intern("SCHEME"));
+  Scheme_module = STk_makemodule(STk_intern("SCHEME"));
 
   /* ==== Undocumented primitives ==== */
   ADD_PRIMITIVE(make_library);
@@ -604,6 +618,7 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_imports_set);
   ADD_PRIMITIVE(module_exports_set);
   ADD_PRIMITIVE(redefine_module_exports);
+  ADD_PRIMITIVE(populate_scheme_module);
 
   /* ==== User primitives ==== */
   ADD_PRIMITIVE(modulep);
