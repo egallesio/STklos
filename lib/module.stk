@@ -21,10 +21,16 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 22-Oct-2021 11:04 (eg)
+;;;; Last file update: 22-Oct-2021 14:46 (eg)
 ;;;;
 
 
+;;//(define (old-module-exports mod)
+;;//  (let ((l (module-exports mod)))
+;;//    (if (and (not (null? l))
+;;//             (pair? (caar l)))
+;;//        (map car l)
+;;//        l)))
 
 
 ;;=============================================================================
@@ -252,14 +258,6 @@ doc>
               (error 'import "module `~S' does not exist" (car l)))))))
 
 (define (%module-aliases module-name symbols export?)
-
-  (define (old-module-exports mod)
-     (let ((l (module-exports mod)))
-          (if (and (not (null? l))
-                   (pair? (caar l)))
-              (map car l)
-              l)))
-
   ;; define aliases in the current module of symbols from module-name
   (let ((module (find-module module-name #f)))
     (unless module
@@ -348,6 +346,8 @@ doc>
  * The result of |export| is ,(emph "void").
 doc>
 |#
+
+
 (define (%parse-exports symbols)
   ;; Used at compile-time: returns a list of pairs ((name . exported-name) ... )
 
@@ -376,6 +376,7 @@ doc>
      (else
           (error 'export "bad exportation `~S'" (car l))))))
 
+
 (define (%do-exports lib symbols)
 
   (define (add-symbol name rename lst)
@@ -393,21 +394,21 @@ doc>
   (let Loop ((l symbols) (res (module-exports lib)))
     (cond
      ((null? l) (%module-exports-set! lib res))
-     (else
-      (let ((symbs (car l)))
-        (Loop (cdr l)
-              (add-symbol (car symbs) (cdr symbs) res)))))))
+     (else 
+          (let ((symbs (car l)))
+            (Loop (cdr l)
+                  (add-symbol (car symbs) (cdr symbs) res)))))))
 
-
-
-;; FIXME: For compatibility (should be deleted soon)
-(define (%module-export module . symbols)
-  (%do-exports module symbols))
 
 
 (define-macro (export . symbols)
   (let ((s (%parse-exports symbols)))
     `(%do-exports (current-module) ',s)))
+
+
+;; FIXME: For compatibility (should be deleted soon)
+(define (%module-export module . symbols)
+  (%do-exports module symbols))
 
 
 (define-macro (export-syntax . arg)

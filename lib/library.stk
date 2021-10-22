@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 15-Oct-2021 20:32 (eg)
+;;;; Last file update: 22-Oct-2021 15:17 (eg)
 ;;;;
 
 ;;
@@ -217,59 +217,6 @@
                                 (key-get keylist #:prefix #f))))
             clauses))
 
-;; ======================================================================
-;;
-;; EXPORT
-;;
-;; ======================================================================
-(define (%do-exports lib symbols)
-
-  (define (add-symbol name rename lst)
-    (let ((old (assq name lst)))
-      (if old
-          (let ((old-rename (cdr old)))
-            (unless (or (eq? name old-rename)
-                        (eq? old-rename rename))
-              (error 'export "exported symbol ~s was previously renamed as ~S"
-                     name old-rename))
-            (set-cdr! old rename)
-            lst)
-          (cons (cons name rename) lst))))
-
-  (let Loop ((l symbols) (res (module-exports lib)))
-    (if (null? l)
-        (begin
-          ;; Hack to avoid useless compilation messages.
-          (for-each register-new-global!  (map car res))
-
-          ;; Add the symbols to the export list
-          (%module-exports-set! lib res))
-
-        (cond
-         ((symbol? (car l))
-          ;;
-          ;; export a single identifier
-          ;;
-          (let ((s (car l)))
-            (Loop (cdr l)
-                  (add-symbol s s res))))
-
-         ((and (pair? (car l))
-               (eq? (caar l) 'rename))
-          ;;
-          ;; export with renaming: (rename old new)
-          ;;
-          (let ((symbs (cdar l)))
-            (unless (and (= (length symbs) 2)
-                         (symbol? (car symbs))
-                         (symbol? (cadr symbs)))
-              (error 'export "bad renaming clause ~S" (car l)))
-            (Loop (cdr l)
-                  (add-symbol (car symbs) (cadr symbs) res))))
-
-         (else
-          (error 'export "bad exportation `~S'" (car l)))))))
-
 
 ;; ======================================================================
 ;;
@@ -302,7 +249,8 @@
            ((import)
                 (set! imports (append! imports (list rest))))
            ((export)
-                (set! exports (append! exports (list rest))))
+                (let ((exp (%parse-exports rest)))
+                  (set! exports (append! exports (list exp)))))
            ((begin include include-ci)
                 (set! body (append body (list d))))
            (else
