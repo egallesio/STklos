@@ -21,8 +21,10 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  4-Oct-2021 12:16 (eg)
+;;;; Last file update: 22-Oct-2021 11:04 (eg)
 ;;;;
+
+
 
 
 ;;=============================================================================
@@ -250,11 +252,19 @@ doc>
               (error 'import "module `~S' does not exist" (car l)))))))
 
 (define (%module-aliases module-name symbols export?)
+
+  (define (old-module-exports mod)
+     (let ((l (module-exports mod)))
+          (if (and (not (null? l))
+                   (pair? (caar l)))
+              (map car l)
+              l)))
+
   ;; define aliases in the current module of symbols from module-name
   (let ((module (find-module module-name #f)))
     (unless module
       (error 'import "cannot find module ~S" module-name))
-    (let ((exports (module-exports module)))
+    (let ((exports (old-module-exports module)))
       (for-each (lambda (x)
                   (if (memq x exports)
                       (%symbol-alias x x module)
@@ -263,7 +273,7 @@ doc>
                 symbols)))
   ;; if export? is true, export the given symbols
   (when export?
-    (%module-export (current-module) symbols)))
+    (%do-exports (current-module) symbols)))
 
 
 ;;(define-macro (import . modules)
@@ -338,25 +348,67 @@ doc>
  * The result of |export| is ,(emph "void").
 doc>
 |#
-(define (%module-export exporter symbols)
-  (let Loop ((l symbols) (res (module-exports exporter)))
-    (if (null? l)
-      (%module-exports-set! exporter res)
-      (if (symbol? (car l))
+(define (%parse-exports symbols)
+  ;; Used at compile-time: returns a list of pairs ((name . exported-name) ... )
+
+  (let Loop ((l symbols) (res '()))
+    (cond
+     ((null? l)
+          ;; Hack to avoid useless compilation messages.
+          (for-each register-new-global!  (map car res))
+          (reverse! res))
+     ((symbol? (car l))
+          ;; export a single identifier
+          (let ((s (car l)))
+            (Loop (cdr l)
+                  (cons (cons s s)
+                        res))))
+     ((and (pair? (car l)) (eq? (caar l) 'rename))
+          ;; export with renaming: (rename old new)
+          (let ((symbs (cdar l)))
+            (unless (and (= (length symbs) 2)
+                         (symbol? (car symbs))
+                         (symbol? (cadr symbs)))
+              (error 'export "bad renaming clause ~S" (car l)))
+            (Loop (cdr l)
+                  (cons (cons (car symbs) (cadr symbs))
+                        res))))
+     (else
+          (error 'export "bad exportation `~S'" (car l))))))
+
+(define (%do-exports lib symbols)
+
+  (define (add-symbol name rename lst)
+    (let ((old (assq name lst)))
+      (if old
+          (let ((old-rename (cdr old)))
+            (unless (or (eq? name old-rename)
+                        (eq? old-rename rename))
+              (error 'export "exported symbol ~s was previously renamed as ~S"
+                     name old-rename))
+            (set-cdr! old rename)
+            lst)
+          (cons (cons name rename) lst))))
+
+  (let Loop ((l symbols) (res (module-exports lib)))
+    (cond
+     ((null? l) (%module-exports-set! lib res))
+     (else
+      (let ((symbs (car l)))
         (Loop (cdr l)
-              (if (memq (car l) res)
-                res                     ; already exported
-                (cons (car l) res)))    ; add it to our result
-        (error 'export "bad symbol `~S'" (car l))))))
+              (add-symbol (car symbs) (cdr symbs) res)))))))
+
+
+
+;; FIXME: For compatibility (should be deleted soon)
+(define (%module-export module . symbols)
+  (%do-exports module symbols))
+
 
 (define-macro (export . symbols)
-  (if (null? symbols)
-    '()
-    (begin
-      ;; Hack to avoid useless message. This can declare too much symbols
-      (for-each (lambda (x) (when symbol? x) (register-new-global! x))
-                symbols)
-      `(%module-export (current-module) ',symbols))))
+  (let ((s (%parse-exports symbols)))
+    `(%do-exports (current-module) ',s)))
+
 
 (define-macro (export-syntax . arg)
   ;; This is only an approximation. Must be rewritten
@@ -390,5 +442,3 @@ doc>
 |#
 (define-macro (in-module mod symb . default)
   `(apply symbol-value* ',symb (find-module ',mod) ',default))
-
-

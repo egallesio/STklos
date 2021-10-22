@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 17-Oct-2021 19:20 (eg)
+ * Last file update: 22-Oct-2021 10:55 (eg)
  */
 
 #include "stklos.h"
@@ -83,10 +83,11 @@ struct module_obj {
 #define MODULE_HASH_TABLE(m)    (((struct module_obj *) (m))->hash)
 
 #define VISIBLE_P(symb, mod)    (((mod) == STk_STklos_module) ||        \
-                                 (STk_memq((symb), MODULE_EXPORTS(mod))!=STk_false))
+                                 (STk_assq((symb), MODULE_EXPORTS(mod))!=STk_false))
 
 
 SCM STk_STklos_module;          /* The module whose name is STklos */
+static SCM Scheme_module;       /* The module whose name is SCHEME */
 static SCM all_modules;         /* List of all knowm modules */
 
 static void print_module(SCM module, SCM port, int mode)
@@ -154,11 +155,22 @@ static SCM find_module(SCM name, int create)
  *
 \*===========================================================================*/
 
+static SCM make_export_list(SCM symbols)
+{ /* Transform list of symbols (s1 s2 ...) in ((s1 . s1) (s2 . s2) ...) */
+  SCM res = STk_nil;
+
+  for (SCM l=symbols; l != STk_nil; l=CDR(l)) {
+    res = STk_cons(STk_cons(CAR(l), CAR(l)), res);
+  }
+  return res;
+}
+
+
 void STk_export_all_symbols(SCM module)
 {
   if (!MODULEP(module)) error_bad_module(module);
   if (module != STk_STklos_module)
-    MODULE_EXPORTS(module) = STk_hash_keys(&MODULE_HASH_TABLE(module));
+    MODULE_EXPORTS(module) = make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module)));
 }
 
 /* ==== Undocumented primitives ==== */
@@ -340,7 +352,7 @@ DEFINE_PRIMITIVE("module-exports", module_exports, subr1, (SCM module))
 
   /* STklos module is special: everything is exported ==> module-symbols */
   return (module == STk_STklos_module) ?
-                STk_hash_keys(&MODULE_HASH_TABLE(module)) :
+                make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module))) :
                 MODULE_EXPORTS(module);
 }
 
@@ -402,11 +414,17 @@ DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
 
 DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void))
 {
+  // This function is called to populate the Scheme module with all the
+  // symbols defined in STklos module. This permits to have a copy of the
+  // original bindings that can reliably be used by the runtime.
+  // FIXME: the bindings in the Scheme module should be immutable. 
   for (SCM lst = STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module));
        !NULLP(lst);
        lst = CDR(lst)) {
-    int i; 
-    SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(STk_STklos_module), CAR(lst), &i);
+    int i;
+    SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(STk_STklos_module),
+                                    CAR(lst),
+                                    &i);
     /* Redefine symbol in (car lst) in SCHEME module */
     STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), Scheme_module);
   }
@@ -414,6 +432,7 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
 }
 
 
+// FIXME: To be deleted when new import is ready
 DEFINE_PRIMITIVE("%redefine-module-exports", redefine_module_exports, subr12,
                  (SCM from, SCM to))
 {
@@ -425,18 +444,21 @@ DEFINE_PRIMITIVE("%redefine-module-exports", redefine_module_exports, subr12,
     to =  STk_current_module();
   else
     if (!MODULEP(to)) error_bad_module(to);
+  STk_debug( "redefine-module-exports ~S => ~S", from, to);
+
 
   /* Compute the list of exported symbols */
-  if (from == STk_STklos_module)
-    lst = STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module)); /* everybody */
+  if (from == STk_STklos_module) 
+    STk_error("should not occur anymore");
+    // lst = make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module)));
   else
     lst = MODULE_EXPORTS(from);                         /* explicitly exported */
 
-  for (     ; !NULLP(lst); lst = CDR(lst)) {
-    res = STk_hash_get_variable(&MODULE_HASH_TABLE(from), CAR(lst), &i);
+  for (lst = MODULE_EXPORTS(from); !NULLP(lst); lst = CDR(lst)) {
+    res = STk_hash_get_variable(&MODULE_HASH_TABLE(from), CAR(CAR(lst)), &i);
     if (res)
       /* symbol (car lst) is bound in module from. redefine it in module to */
-      STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), to);
+      STk_define_variable(CAR(CAR(lst)), *BOX_VALUES(CDR(res)), to);
   }
   return STk_void;
 }
@@ -548,7 +570,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   }
   else {
     /* symbol was not found in the given env module. Try to find it in
-     * the  exported symbols of its imported modules.
+     * the exported symbols of its imported modules.
      */
     for (l = MODULE_IMPORTS(env)  ; !NULLP(l); l = CDR(l)) {
       module = CAR(l);
@@ -634,6 +656,6 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(symbol_define);
   ADD_PRIMITIVE(symbol_alias);
   ADD_PRIMITIVE(symbol_link);
-  
+
   return TRUE;
 }
