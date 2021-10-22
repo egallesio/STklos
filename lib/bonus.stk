@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  4-Sep-2021 19:46 (eg)
+;;;; Last file update: 22-Oct-2021 14:27 (eg)
 ;;;;
 
 
@@ -1244,6 +1244,12 @@ doc>
 (define (fprintf port fmt . args)
   (display (apply format fmt args) port))
 
+(define (%debug fmt . args)
+  (let ((out (current-error-port)))
+    (display (ansi-color 'yellow) out)
+    (display (apply format fmt args) out)
+    (display (ansi-color 'normal) out)
+    (newline out)))
 
 #|
 <doc EXT-SYNTAX declare-new-error

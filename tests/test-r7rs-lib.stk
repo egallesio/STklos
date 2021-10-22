@@ -1,0 +1,80 @@
+;;;;
+;;;;
+;;;; test-r7rs-lib.stk         -- Testing R7RS libraries
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 22-Oct-2021 12:15
+;;;; Last file update: 22-Oct-2021 15:28 (eg)
+;;;;
+
+(require "test")
+
+(test-section "R7RS libraries")
+
+(define (sort-list lst)
+  ;; Used to have reproductible results
+  (sort lst
+        (lambda (s1 s2)
+          (string<? (format "~a" s1) (format "~a" s2)))))
+
+(define (library-symbols name)
+  (let ((symbs  (module-symbols (find-module name))))
+    ;; Delete the %module-symbols symbol which is used for module management
+    (sort-list (delete '%module-restore symbs))))
+
+(define (library-exports name)
+  (sort-list (module-exports (find-module name))))
+
+
+;; ______________________________________________________________________
+
+(test-subsection "Testing exportation list")
+
+(define-library (test1)
+  (export a b (rename c d))
+  (begin
+    (define a 10)
+    (define b 20)
+    (define c 30)))
+
+
+(define-library (test2)
+  (import (test1))
+  (export d))
+
+(test "export.1"
+      '((a . a) (b . b) (c . d))
+      (library-exports 'test1))
+
+(test "export.2"
+      '(a b c)
+      (library-symbols 'test1))
+
+(test "export.2"
+      '((d . d))
+      (library-exports 'test2))
+
+(test "export.3"
+      '(a b d)
+      (library-symbols 'test2))
+
+;; ======================================================================
+(test-section-end)
