@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 12-Oct-2021 18:48 (eg)
+;;;; Last file update: 22-Oct-2021 14:44 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -1519,7 +1519,7 @@ doc>
  * TODO
 doc>
 |#
-(define (include-file name)
+(define (%include-file name)
   (let ((port (open-input-file name))
         (old  *compiler-port*))
     (with-handler (lambda (c) (set! *compiler-port* old) (raise c))
@@ -1532,16 +1532,17 @@ doc>
                   (set! *compiler-port* old))
     (close-port port)))
 
+
 (define (compile-include e env tail)
   (unless (every string? (cdr e))
     (compiler-error 'include e "bad include directive ~S" e))
-  (for-each include-file (cdr e)))
+  (for-each %include-file (cdr e)))
 
 (define (compile-include-ci e env tail)
   (unless (every string? (cdr e))
     (compiler-error 'include-ci e "bad include directive ~S" e))
   (parameterize ((read-case-sensitive #f))
-    (for-each include-file (cdr e))))
+    (for-each %include-file (cdr e))))
 
 ;;
 ;; Autoloads management

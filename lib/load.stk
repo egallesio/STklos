@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 12-Oct-2021 18:47 (eg)
+;;;; Last file update: 22-Oct-2021 14:43 (eg)
 ;;;;
 
 
@@ -406,6 +406,9 @@ doc>
 (define-macro (include-ci . files)
   `(%do-include include-ci ,files))
 
+
+(define-macro (include-file file) ;; Only one file no search in the load-path
+  `(%%include ,file))
 
 ;=============================================================================
 ;
