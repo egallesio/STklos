@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 22-Oct-2021 15:17 (eg)
+  ;;;; Last file update: 25-Oct-2021 17:51 (eg)
 ;;;;
 
 ;;
@@ -74,9 +74,10 @@
 ;; IMPORT
 ;;
 ;; ======================================================================
-(define (%do-imports lib clauses)
 
-  (define (parse-import import-set)
+(define (%parse-imports imports)
+
+  (define (parse import-set)
     ;; Build a key-list of the import-set. If the import-set is
     ;;       (prefix (only (a b) x y z) foo-),
     ;; it returns a list of the form
@@ -86,24 +87,27 @@
       (let ((key (car import-set)))
         (case key
 
-          ((only except)
+          ((only)
            (if (>= (length import-set) 3)
-               (let ((identifiers (cddr import-set)))
-                 ;; Verify that all the identfiers are symbols
-                 (unless (every symbol? identifiers)
-                   (error 'import "bad list of symbols ~s in ~a clause"
-                          identifiers key))
-                 `(,@(parse-import (cadr import-set))
-                   ,(string->keyword (symbol->string key))
-                   ,identifiers))
+               (let ((ids (cddr import-set)))
+                 (unless (every symbol? ids)
+                   (error 'import "bad list of symbols ~s in only clause"
+                          ids key))
+                 `(,@(parse (cadr import-set)) #:only ,ids))
                (error 'inport "bad only clause ~s" import-set)))
+
+          ((except)
+           (if (>= (length import-set) 3)
+               (let ((ids (cddr import-set)))
+                 (unless (every symbol? ids)
+                   (error 'import "bad list of symbols ~s in except clause" ids))
+                 `(,@(parse (cadr import-set)) #:except ,ids))
+               (error 'inport "bad except clause ~s" import-set)))
 
           ((prefix)
            (if (and (= (length import-set) 3)
                     (symbol? (caddr import-set)))
-               `(,@(parse-import (cadr import-set))
-                 #:prefix
-                 ,(caddr import-set))
+               `(,@(parse (cadr import-set)) #:prefix ,(caddr import-set))
                (error 'inport "bad prefix clause ~s" import-set)))
 
           ((rename)
@@ -116,9 +120,7 @@
                                 assocs)
                    (error 'import "bad list of associations ~s in rename clause"
                           assocs))
-                 `(,@(parse-import (cadr import-set))
-                   #:rename
-                   ,assocs))
+                 `(,@(parse (cadr import-set)) #:rename ,assocs))
                (error 'inport "bad rename clause ~s" import-set)))
 
           (else
@@ -130,93 +132,94 @@
 
      (else
       (error 'import "bad import set ~s" import-set))))
+  ;;
+  ;; Return a list of parsed imports
+  ;;
+  (map parse imports))
+
+
+
+
+
+(define (%do-imports lib clauses)
 
   (define (eventually-load-library name)
     (let ((module (find-module name #f)))
-      (cond
-        (module)
-        (else
-         ;; Try to load a file which could define this module
-         (require/provide (symbol->string name))
+      (or module
+          ;; Try to load a file which could define this module
+          (begin
+            (require/provide (symbol->string name))
 
-         ;; Verify that the was correctly defined in this file
-         (let ((mod (find-module name #f)))
-           (unless mod
-             (error 'import "module/library ~s does not exist"
-                    (%symbol->library-name name)))
-           mod)))))
+            ;; Verify that the module was correctly defined in this file
+            (let ((mod (find-module name #f)))
+              (unless mod
+                (error 'import "module/library ~s does not exist"
+                       (%symbol->library-name name)))
+              mod)))))
 
-  (define (import-symbols importer name only except rename prefix)
+
+  (define (build-import-list lib lst imported)
+    (if (null? lst)
+        imported
+        (let ((key  (car lst))
+              (val  (cadr lst))
+              (rest (cddr lst)))
+          (case key
+            ((#:only)
+             (let ((public (map cdr imported)))
+               (for-each (lambda (symb)
+                           (unless (memq symb public)
+                             (error 'import "only: symbol ~s is not in the import set"
+                                    symb)))
+                         val)
+               (set! imported (filter! (lambda (x) (memq (cdr x) val)) imported))))
+
+            ((#:except)
+             (let ((public (map cdr imported)))
+               (for-each (lambda (symb)
+                           (if (memq symb public)
+                               (set! imported (remove (lambda (x) (eq? (cdr x) symb)) imported))
+                               (error 'import "except: symbol ~s is not in the import set" symb)))
+                         val)))
+            ((#:rename)
+             (for-each (lambda (pair)
+                         (let ((original (car pair))
+                               (new      (cadr pair)))
+                           (let Loop ((lst imported))
+                             (if (null? lst)
+                                 (error 'import
+                                        "rename: symbol ~s is not in the import set" original)
+                                 (if (eq? (cdar lst) original)
+                                     (set-cdr! (car lst) new)
+                                     (Loop (cdr lst)))))))
+                       val))
+            ((#:prefix)
+             (for-each (lambda (pair)
+                         (set-cdr! pair (symbol-append val (cdr pair))))
+                       imported)))
+          ;; Loop with the rest of lst
+          (build-import-list lib rest imported))))
+
+
+  (define (import-symbols importer name keylist)
     (let* ((mod       (eventually-load-library name))
-           (exported  (map (lambda(x)
-                             ;; FIXME: pair if lib atom if module
-                             (if (pair? x) x (cons x x)))
-                           (module-exports mod))))
-
-      (when except
-        ;; Suppress the symbols in the except list
-        (let ((public (map cdr exported)))
-          (for-each (lambda (symb)
-                      (if (memq symb public)
-                          (set! exported (remove (lambda(x) (eq? (cdr x) symb)) exported))
-                          (error 'import "except: symbol ~s is not in the import set"
-                                 symb)))
-                    except)))
-
-      (when only
-        ;; Verify that all the symbols in the only list are exported
-        (let ((public (map cdr exported)))
-          (for-each (lambda (x)
-                      (unless (memq x public)
-                        (error 'import "only: symbol ~s is not in the import set"
-                               x)))
-                    only))
-        ;; Restrict now the exported set to the only list
-        (set! exported (filter! (lambda (x) (memq (cdr x) only))
-                                exported)))
-
-      (when rename
-        ;; Rename some symbols
-        (for-each (lambda (couple)
-                    (let ((original (car couple))
-                          (new      (cadr couple)))
-                      (let Loop ((lst exported))
-                        (if (null? lst)
-                            (error 'import
-                                   "rename: symbol ~s is not in the import set"
-                                   original)
-                            (if (eq? (cdar lst) original)
-                                (set-cdr! (car lst) new)
-                                (Loop (cdr lst)))))))
-                  rename))
-
-        (when prefix
-          ;; Prefix symbols
-          (for-each (lambda (pair)
-                      (set-cdr! pair (symbol-append prefix (cdr pair))))
-                    exported))
-
-
-        ;; Now we can (finally) make aliases for all symbols in exported list
-        ;; FIXME: cannot be compiled ==> make a runtime call for that
-        ;; something like (%module-link (module-name mod) exported)
-        (for-each (lambda (pair)
-                    (%symbol-link (cdr pair) (car pair) lib mod))
-                  exported)))
+           (imported  (build-import-list mod
+                                         keylist
+                                         (list-copy (module-exports mod)))))
+      ;; Make aliases for all symbols in imported list
+      (for-each (lambda (pair)
+                  (%symbol-link (cdr pair) (car pair) lib mod))
+                imported)))
 
   ;; Call import-symbols for each import spec
   (for-each (lambda (imp)
-              (let* ((flat    (parse-import imp))
-                     (name     (car flat))
-                     (keylist  (cdr flat)))
-                (import-symbols lib
-                                name
-                                (key-get keylist #:only   #f)
-                                (key-get keylist #:except #f)
-                                (key-get keylist #:rename #f)
-                                (key-get keylist #:prefix #f))))
-            clauses))
+              (let ((name     (car imp))
+                    (keylist  (cdr imp)))
+                (import-symbols lib name keylist)))
+            clauses)
 
+  ;; Retain the import list (for module-imports)
+  (%module-imports-set! lib clauses))
 
 ;; ======================================================================
 ;;
@@ -239,23 +242,23 @@
                                        (find-module 'STklos))))
 
     ;; Parse declarations
-    (for-each
-     (lambda (d)
-       (unless (pair? d)
-         (error 'define-library "bad library declaration clause ~s" d))
-       (let ((key  (car d))
-             (rest (cdr d)))
-         (case key
-           ((import)
-                (set! imports (append! imports (list rest))))
-           ((export)
-                (let ((exp (%parse-exports rest)))
-                  (set! exports (append! exports (list exp)))))
-           ((begin include include-ci)
-                (set! body (append body (list d))))
-           (else
-                (error 'define-library "incorrect directive ~s" d)))))
-     decls)
+    (for-each (lambda (d)
+                (unless (pair? d)
+                  (error 'define-library "bad library declaration clause ~s" d))
+                (let ((key  (car d))
+                      (rest (cdr d)))
+                  (case key
+                    ((import)
+                     (let ((imp (%parse-imports rest)))
+                       (set! imports (append! imports (list imp)))))
+                    ((export)
+                     (let ((exp (%parse-exports rest)))
+                       (set! exports (append! exports (list exp)))))
+                    ((begin include include-ci)
+                     (set! body (append body (list d))))
+                    (else
+                     (error 'define-library "incorrect directive ~s" d)))))
+              decls)
     ;;
     ;; Produce the expansion
     ;;
