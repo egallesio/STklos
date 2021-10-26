@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update: 22-Oct-2021 15:14 (eg)
+;;;; Last file update: 26-Oct-2021 20:56 (eg)
 ;;;;
 
 (load-path `("../lib"
@@ -57,4 +57,4 @@
 (define (main _)
   (test-init "TEST.LOG")
   (load-tests)
-  (test-end))
+  (test-terminate))
