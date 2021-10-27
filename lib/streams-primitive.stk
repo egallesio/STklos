@@ -47,7 +47,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Jul-2020 15:12 (jpellegrini)
-;;;; Last file update: 08-Jul-2020 12:43 (jpellegrini)
+;;;; Last file update: 26-Oct-2021 17:45 (eg)
 ;;;;
 
 (define-module STREAMS-PRIMITIVE
@@ -58,6 +58,11 @@
   (export %stream-eager)
   (export stream-cons stream-lambda stream-delay stream-lazy)
   (export-syntax stream-cons stream-lambda stream-delay stream-lazy)
+
+  (define stream-cons   "<<FIXME>>")
+  (define stream-lambda "<<FIXME>>")
+  (define stream-lazy   "<<FIXME>>")
+  (define stream-delay  "<<FIXME>>")
 
 
   ;;(define-record-type (stream-type make-stream stream?)

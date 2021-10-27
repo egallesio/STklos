@@ -52,6 +52,7 @@
 (require "srfi-60")
 
 (define-module SRFI-151
+  (import SRFI-60)
   (export bitwise-not bitwise-and bitwise-ior bitwise-xor bitwise-eqv
           bitwise-nand bitwise-nor bitwise-andc1 bitwise-andc2
           bitwise-orc1 bitwise-orc2
@@ -62,6 +63,16 @@
           bit-field-rotate bit-field-reverse
           bits->list list->bits bits->vector vector->bits bits
           bitwise-fold bitwise-for-each bitwise-unfold make-bitwise-generator)
+
+
+   ;; FIXME: Using a library will resove this problem
+  (define-macro (%define-here . lst)
+   `(begin ,@(map (lambda (symb) `(define ,symb ,symb))
+                  lst)))
+
+  (%define-here bit-field first-set-bit copy-bit bit-set? bitwise-if integer-length
+		bit-count arithmetic-shift bitwise-xor bitwise-ior bitwise-and
+		bitwise-not)
 
 ;;; Using SRFI-60
 (define bit-field-rotate rotate-bit-field)

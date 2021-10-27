@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-14.stk	-- Implementation of SRFI-14
 ;;;;
-;;;; Copyright © 2002 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 14-Jun-2002 21:36 (eg)
-;;;; Last file update: 31-Jul-2002 23:31 (eg)
+;;;; Last file update: 26-Oct-2021 17:17 (eg)
 ;;;;
 
 ;;;
@@ -79,6 +79,8 @@
 	   char-set:hex-digit   char-set:blank       char-set:ascii
 	   char-set:empty       char-set:full)
 
+  (define char-set-difference "<<FIXME>>")    ;; Absent
+  (define char-set-difference! "<<FIXME>>")   ;; Absent
 
 (define-macro (check-arg pred val caller)
   `(if (,pred ,val)

@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 22-Jun-2020 08:21 (jpellegrini)
-;;;; Last file update: 10-Oct-2021 15:06 (eg)
+;;;; Last file update: 26-Oct-2021 19:21 (eg)
 
 (require "srfi-1")
 
@@ -61,6 +61,19 @@
           err-ands
           err-or
           err-ors)
+  
+  (define arg-and  "<<FIXME>>")
+  (define arg-ands "<<FIXME>>")
+  (define arg-or  "<<FIXME>>")
+  (define arg-ors  "<<FIXME>>")
+  (define err-or   "<<FIXME>>")
+  (define err-ors   "<<FIXME>>")
+  (define err-and  "<<FIXME>>")
+  (define err-ands "<<FIXME>>")
+  (define err-ors  "<<FIXME>>")
+
+  
+
 
 (define (rest-values rest . default)
   (let* ((caller (if (or (null? default)

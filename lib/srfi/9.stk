@@ -21,13 +21,14 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-Sep-1999 13:06 (eg)
-;;;; Last file update: 11-Oct-2021 11:12 (eg)
+;;;; Last file update: 26-Oct-2021 16:16 (eg)
 ;;;;
 
 
 (define-module srfi/9
-  ;; FIXME
   (export define-record-type)
+
+  (define define-record-type "<<FIXME>>")   ;; To be deleted 
   
   (define-macro (define-record-type name constructor predicate . fields)
     (let ((struct-type (gensym))

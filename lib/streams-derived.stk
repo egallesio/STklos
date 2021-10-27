@@ -94,6 +94,12 @@
   (export define-stream stream stream-let stream-match stream-of)
   (export-syntax define-stream stream stream-let stream-match stream-of)
   
+  (define define-stream "<<FIXME>>")
+  (define stream        "<<FIXME>>")
+  (define stream-let    "<<FIXME>>")
+  (define stream-match  "<<FIXME>>")
+  (define stream-of     "<<FIXME>>")
+
   (define exists any)
 
   (define-syntax define-stream

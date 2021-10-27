@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 08-Jul-2020 13:21 (jpellegrini)
-;;;; Last file update: 25-May-2020 20:11 (jpellegrini)
+;;;; Last file update: 26-Oct-2021 20:07 (eg)
 ;;;;
 
 (require "srfi-9")
@@ -69,6 +69,11 @@
    ;; need to export %salt, otherwise (hash-salt) won't work:
    %salt%)
 
+(define comparator-if<=> "<<FIXME>>")
+(define hash-salt        "<<FIXME>>")
+(define hash-bound        "<<FIXME>>")
+
+  
 
 ;;;; Main part of the SRFI 114 reference implementation
 

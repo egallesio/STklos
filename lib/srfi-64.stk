@@ -52,7 +52,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 25-Jun-2020 06:21 (jpellegrini)
-;;;; Last file update: 25-May-2020 07:00 (jpellegrini)
+;;;; Last file update: 26-Oct-2021 19:34 (eg)
 ;;;;
 
 (require "srfi-9")
@@ -116,6 +116,25 @@
    test-on-bad-count-simple test-on-bad-end-name-simple
    test-on-final-simple test-on-test-end-simple
    test-on-final-simple)
+
+  (define test-result-ref           "<<FIXME>>")
+  (define test-group-with-cleanup   "<<FIXME>>")
+  (define test-group                "<<FIXME>>")
+  (define test-expect-fail          "<<FIXME>>")
+  (define test-skip                 "<<FIXME>>")
+  (define test-match-any            "<<FIXME>>")
+  (define test-match-all            "<<FIXME>>")
+  (define test-match-nth            "<<FIXME>>")
+  (define test-with-runner          "<<FIXME>>")
+  (define test-error                "<<FIXME>>")
+  (define test-approximate          "<<FIXME>>")
+  (define test-equal                "<<FIXME>>")
+  (define test-eq                   "<<FIXME>>")
+  (define test-eqv                  "<<FIXME>>")
+  (define test-assert               "<<FIXME>>")
+  (define test-begin                "<<FIXME>>")
+  (define test-end                  "<<FIXME>>")
+
   
 ;; (define-syntax %test-record-define
 ;;   (syntax-rules ()
