@@ -29,7 +29,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  5-Jun-2002 19:20 (eg)
-;;;; Last file update: 26-Oct-2021 17:24 (eg)
+;;;; Last file update: 30-Oct-2021 23:58 (eg)
 ;;;;
 
 (require "srfi-14")
@@ -1261,33 +1261,24 @@
 ;;; End of module SRFI-13
 )
 
-;; Import SRFI-13 in the module STklos
 (select-module STklos)
-(import SRFI-13)
 
-;; Redefine the R5RS primitives with the SRFI-13 extended ones
-(set! list->string (in-module SRFI-13 list->string))
-(set! string-copy  (in-module SRFI-13 string-copy))
-(set! string-fill! (in-module SRFI-13 string-fill!))
-
-;; Overload STklos string-index with the SRFI one
-(set! string-index (in-module SRFI-13 string-index))
 
 ;; Some R7RS procedures conflict with this SRFI. If the user required
-;; this SRFI, we shadow the R7RS versions of those procedures.
-(define r7rs:string-map string-map)
-(set! string-map (in-module SRFI-13 string-map))
-(define r7rs:string-for-each string-for-each)
-(set! string-for-each (in-module SRFI-13 string-for-each))
-(define r7rs:string-hash string-hash)
-(set! string-hash (in-module SRFI-13 string-hash))
+;; this SRFI, we keep here the R7RS definitions
+(define r7rs:string-map      string-map)
 (define r7rs:string-downcase string-downcase)
-(set! string-downcase (in-module SRFI-13 string-downcase))
-(define r7rs:string-upcase string-upcase)
-(set! string-upcase (in-module SRFI-13 string-upcase))
+(define r7rs:string-upcase   string-upcase)
 
 
+(import SRFI-13)
 
+;; Note that the R5RS primitives
+;;   - list->string
+;;   - string-copy
+;;   - string-fill!
+;; and the string-index STklos primitive will be overloaded with the SRFI-13
+;; functions in the STklos module.
 
 (provide "srfi-13")
 
