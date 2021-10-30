@@ -21,16 +21,8 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 22-Oct-2021 14:46 (eg)
+;;;; Last file update: 30-Oct-2021 23:39 (eg)
 ;;;;
-
-
-;;//(define (old-module-exports mod)
-;;//  (let ((l (module-exports mod)))
-;;//    (if (and (not (null? l))
-;;//             (pair? (caar l)))
-;;//        (map car l)
-;;//        l)))
 
 
 ;;=============================================================================
@@ -257,7 +249,42 @@ doc>
                           (cons mod res)))       ; add it to our result
               (error 'import "module `~S' does not exist" (car l)))))))
 
+
+#|
+<doc EXT symbol-bound
+ * (symbol-bound symb module)
+ *
+doc> 
+|#
+(define symbol-bound?
+  (let ((absent (list 'absent)))
+    (lambda (symb module)
+      (not (eq? (symbol-value symb module absent) absent)))))
+
+
+(define (%new-module-import importer modules)
+  (let ((STklos (find-module 'STklos)))
+    (for-each (lambda (x)
+                (let ((mod (find-module x #f)))
+                  (if mod
+                      (unless (eq? mod STklos)
+                        (for-each (lambda (symb)
+                                    (%symbol-alias symb symb mod))
+                                  (map car (module-exports mod))))
+                      (error 'import "module `~S' does not exist" x))))
+            modules)))
+
+
+
 (define (%module-aliases module-name symbols export?)
+
+  (define (old-module-exports mod)
+    (let ((l (module-exports mod)))
+      (if (and (not (null? l))
+               (pair? (caar l)))
+          (map car l)
+          l)))
+
   ;; define aliases in the current module of symbols from module-name
   (let ((module (find-module module-name #f)))
     (unless module
@@ -312,15 +339,17 @@ doc>
          (cond
            ((null? part)
             ;; Only full exports
-            `(%module-import (current-module) ',full))
+            `(%new-module-import (current-module) ',full))
            ((null? full)
             ;; Only partial exports
+            (%debug "============================> partial import2")
             `(begin
                ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x) #f))
                       part)))
            (else
+            (%debug "============================> partial import2")
             `(begin
-               (%module-import (current-module) ',full)
+               (%new-module-import (current-module) ',full)
                ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x) #f))
                       part)))))))
 
@@ -394,7 +423,7 @@ doc>
   (let Loop ((l symbols) (res (module-exports lib)))
     (cond
      ((null? l) (%module-exports-set! lib res))
-     (else 
+     (else
           (let ((symbs (car l)))
             (Loop (cdr l)
                   (add-symbol (car symbs) (cdr symbs) res)))))))

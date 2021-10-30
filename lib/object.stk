@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update: 26-Oct-2021 22:40 (eg)
+;;;; Last file update: 30-Oct-2021 23:46 (eg)
 
 
 #|
@@ -1222,12 +1222,8 @@ doc>
 (%object-system-initialized)
 
 ;; ======================================================================
-(define-module STKLOS-COMPILER
-  (import STKLOS-OBJECT))
-
-
 (select-module STklos)
-(%redefine-module-exports (find-module 'STKLOS-OBJECT))
+(import STKLOS-OBJECT)
 
 
 ;; LocalWords:  supers metaclass OOPSLA linearization beurive labri fr Cassels
