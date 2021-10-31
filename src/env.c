@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 22-Oct-2021 10:55 (eg)
+ * Last file update:  1-Nov-2021 11:14 (eg)
  */
 
 #include "stklos.h"
@@ -81,10 +81,6 @@ struct module_obj {
 #define MODULE_IMPORTS(m)       (((struct module_obj *) (m))->imports)
 #define MODULE_IS_LIBRARY(m)    (((struct module_obj *) (m))->is_library)
 #define MODULE_HASH_TABLE(m)    (((struct module_obj *) (m))->hash)
-
-#define VISIBLE_P(symb, mod)    (((mod) == STk_STklos_module) ||        \
-                                 (STk_assq((symb), MODULE_EXPORTS(mod))!=STk_false))
-
 
 SCM STk_STklos_module;          /* The module whose name is STklos */
 static SCM Scheme_module;       /* The module whose name is SCHEME */
@@ -559,34 +555,34 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
 SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
 {
   int i;
-  SCM l, module, res;
+  SCM res;
 
   while (FRAMEP(env)) env = FRAME_NEXT(env);
+
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol, &i);
   if (res) {
     *ref = res;
     return *BOX_VALUES(CDR(res));
   }
-  else {
-    /* symbol was not found in the given env module. Try to find it in
-     * the exported symbols of its imported modules.
-     */
-    for (l = MODULE_IMPORTS(env)  ; !NULLP(l); l = CDR(l)) {
-      module = CAR(l);
-      res    = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol, &i);
-      if (res && VISIBLE_P(symbol, module)) {
-        *ref = res;
-        return *BOX_VALUES(CDR(res));
-      }
-    }
 
-    /* It definitively does not exists  :-< */
-    if (err_if_unbound)
-      error_unbound_variable(symbol);
-    return STk_void;
+  // symbol was not found in the given env module. Try to find it in
+  // the the STklos modle (if this is not a R7RS library)
+  if (!MODULE_IS_LIBRARY(env) &&  env != STk_STklos_module) {
+    env = STk_STklos_module;
+    res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol, &i);
+    if (res) {
+      *ref = res;
+      return *BOX_VALUES(CDR(res));
+    }
   }
+
+  /* It definitively does not exists  :-< */
+  if (err_if_unbound)
+    error_unbound_variable(symbol);
+  return STk_void;
 }
+
 
 
 /*===========================================================================*\
