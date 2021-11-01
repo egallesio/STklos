@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update:  5-Oct-2021 12:58 (eg)
+ * Last file update:  1-Nov-2021 22:13 (eg)
  */
 
 #include "stklos.h"
@@ -366,7 +366,7 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value)
   if (z) {
     /* Variable already exists. Change its value*/
     if (BOXED_INFO(z) & CONS_CONST) {
-      STk_error("cannot redefine the symbol ~S", v);
+      STk_error("cannot set or redefine the symbol ~S", v);
     }
     *BOX_VALUES(CDR(z)) = value;
   } else {
@@ -398,7 +398,8 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly)
     /* Enter the new variable in table */
     SCM new = STk_cons(v, value);
 
-    if (ronly)
+    // FIXME:
+    if (ronly & 0)
       // make the association read only
       BOXED_INFO(new) |= CONS_CONST;
 

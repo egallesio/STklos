@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 30-Oct-2021 23:39 (eg)
+;;;; Last file update:  1-Nov-2021 22:03 (eg)
 ;;;;
 
 
@@ -57,6 +57,19 @@ doc>
             (if (eq? val absent)
                 (Loop (cdr all-mods))
                 val))))))
+
+#|
+<doc EXT symbol-bound?
+ * (symbol-bound symb)
+ * (symbol-bound symb module)
+ *
+doc> 
+|#
+(define symbol-bound?
+  (let ((absent (list 'absent)))
+    (lambda (symb #:optional (module (current-module)))
+      (not (eq? (symbol-value symb module absent) absent)))))
+
 
 ;;=============================================================================
 ;;
@@ -235,123 +248,264 @@ doc>
  * this module is always placed at the end of the list of imported modules.
 doc>
 |#
-(define (%module-import importer modules)
-  (let Loop ((l modules)
-             (res (cdr (reverse! (module-imports importer)))))
-    (if (null? l)
-        (%module-imports-set! importer res)
-        (let ((mod (find-module (car l) #f)))
-          (if mod
-              (Loop (cdr l)
-                      (if (or (eq? mod importer) ; itself
-                              (memq mod res))    ; already imported
-                          res
-                          (cons mod res)))       ; add it to our result
-              (error 'import "module `~S' does not exist" (car l)))))))
+;;//(define (%module-import importer modules)
+;;//  (let Loop ((l modules)
+;;//             (res (cdr (reverse! (module-imports importer)))))
+;;//    (if (null? l)
+;;//        (%module-imports-set! importer res)
+;;//        (let ((mod (find-module (car l) #f)))
+;;//          (if mod
+;;//              (Loop (cdr l)
+;;//                      (if (or (eq? mod importer) ; itself
+;;//                              (memq mod res))    ; already imported
+;;//                          res
+;;//                          (cons mod res)))       ; add it to our result
+;;//              (error 'import "module `~S' does not exist" (car l)))))))
+;;//
+;;//
+;;//
+;;//(define (%new-module-import importer modules)
+;;//  (let ((STklos (find-module 'STklos)))
+;;//    (for-each (lambda (x)
+;;//                (let ((mod (find-module x #f)))
+;;//                  (if mod
+;;//                      (unless (eq? mod STklos)
+;;//                        (for-each (lambda (symb)
+;;//                                    (%symbol-alias symb symb mod))
+;;//                                  (map car (module-exports mod))))
+;;//                      (error 'import "module `~S' does not exist" x))))
+;;//            modules)))
+;;//
+;;//
+;;//
+;;//(define (%module-aliases module-name symbols export?)
+;;//
+;;//  (define (old-module-exports mod)
+;;//    (let ((l (module-exports mod)))
+;;//      (if (and (not (null? l))
+;;//               (pair? (caar l)))
+;;//          (map car l)
+;;//          l)))
+;;//
+;;//  ;; define aliases in the current module of symbols from module-name
+;;//  (let ((module (find-module module-name #f)))
+;;//    (unless module
+;;//      (error 'import "cannot find module ~S" module-name))
+;;//    (let ((exports (old-module-exports module)))
+;;//      (for-each (lambda (x)
+;;//                  (if (memq x exports)
+;;//                      (%symbol-alias x x module)
+;;//                      (error 'import "symbol ~S is not exported from module ~S"
+;;//                             x module-name)))
+;;//                symbols)))
+;;//  ;; if export? is true, export the given symbols
+;;//  (when export?
+;;//    (%do-exports (current-module) symbols)))
+;;//
+;;//
+;;//;;(define-macro (import . modules)
+;;//;;  (if (null? modules)
+;;//;;      '()
+;;//;;      `(%module-import (current-module) ',modules)))
+;;//
+;;//(define-macro (import . modules)
+;;//
+;;//  (define (split-modules lst)
+;;//    (let loop ((lst modules)
+;;//               (full '())
+;;//               (part '()))
+;;//      (cond
+;;//        ((null? lst)
+;;//         (values (reverse! full) (reverse! part)))
+;;//        ((symbol? (car lst))
+;;//         ;; full import
+;;//         (loop (cdr lst)
+;;//               (cons (car lst) full)
+;;//               part))
+;;//        ((and (pair? (car lst)) (symbol? (caar lst)) (null? (cdar lst)))
+;;//         ;; a list which contains only a symbol. This is a full import
+;;//         (loop (cdr lst)
+;;//               (cons (caar lst) full)
+;;//               part))
+;;//        ((and (pair? (car lst)) (every symbol? (car lst)))
+;;//         ;; a partial import
+;;//         (loop (cdr lst)
+;;//               full
+;;//               (cons (car lst) part)))
+;;//        (else (error 'import "bad import clause ~S" (car lst))))))
+;;//
+;;//  (if (null? modules)
+;;//      '()
+;;//      (receive (full part)
+;;//         (split-modules modules)
+;;//         (cond
+;;//           ((null? part)
+;;//            ;; Only full exports
+;;//            `(%new-module-import (current-module) ',full))
+;;//           ((null? full)
+;;//            ;; Only partial exports
+;;//            (%debug "============================> partial import2")
+;;//            `(begin
+;;//               ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x) #f))
+;;//                      part)))
+;;//           (else
+;;//            (%debug "============================> partial import2")
+;;//            `(begin
+;;//               (%new-module-import (current-module) ',full)
+;;//               ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x) #f))
+;;//                      part)))))))
+;;//
+;;//
+;;//
+
+(define (%parse-imports imports)
+
+  (define (parse import-set)
+    ;; Build a key-list of the import-set. If the import-set is
+    ;;       (prefix (only (a b) x y z) foo-),
+    ;; it returns a list of the form
+    ;;       (a/b #:only (x y z) #:prefix foo-)
+    (cond
+     ((list? import-set)
+      (let ((key (car import-set)))
+        (case key
+
+          ((only)
+           (if (>= (length import-set) 3)
+               (let ((ids (cddr import-set)))
+                 (unless (every symbol? ids)
+                   (error 'import "bad list of symbols ~s in only clause"
+                          ids key))
+                 `(,@(parse (cadr import-set)) #:only ,ids))
+               (error 'inport "bad only clause ~s" import-set)))
+
+          ((except)
+           (if (>= (length import-set) 3)
+               (let ((ids (cddr import-set)))
+                 (unless (every symbol? ids)
+                   (error 'import "bad list of symbols ~s in except clause" ids))
+                 `(,@(parse (cadr import-set)) #:except ,ids))
+               (error 'inport "bad except clause ~s" import-set)))
+
+          ((prefix)
+           (if (and (= (length import-set) 3)
+                    (symbol? (caddr import-set)))
+               `(,@(parse (cadr import-set)) #:prefix ,(caddr import-set))
+               (error 'inport "bad prefix clause ~s" import-set)))
+
+          ((rename)
+           (if (>= (length import-set) 3)
+               (let ((assocs (cddr import-set)))
+                 ;; Verify that all the assocs are well formed
+                 (unless (every (lambda (x)
+                                  (and (list? x) (= (length x) 2)
+                                       (symbol? (car x)) (symbol? (cadr x))))
+                                assocs)
+                   (error 'import "bad list of associations ~s in rename clause"
+                          assocs))
+                 `(,@(parse (cadr import-set)) #:rename ,assocs))
+               (error 'inport "bad rename clause ~s" import-set)))
+
+          (else
+           (list (%library-name->symbol import-set))))))
+
+     ((symbol? import-set)
+      ;; a "legacy" STklos module
+      (list import-set))
+
+     (else
+      (error 'import "bad import set ~s" import-set))))
+  ;;
+  ;; Return a list of parsed imports
+  ;;
+  (map parse imports))
 
 
-#|
-<doc EXT symbol-bound
- * (symbol-bound symb module)
- *
-doc> 
-|#
-(define symbol-bound?
-  (let ((absent (list 'absent)))
-    (lambda (symb module)
-      (not (eq? (symbol-value symb module absent) absent)))))
+(define (%do-imports lib clauses)
+
+  (define (eventually-load-library name)
+    (let ((module (find-module name #f)))
+      (or module
+          ;; Try to load a file which could define this module
+          (begin
+            (require/provide (symbol->string name))
+
+            ;; Verify that the module was correctly defined in this file
+            (let ((mod (find-module name #f)))
+              (unless mod
+                (error 'import "module/library ~s does not exist"
+                       (%symbol->library-name name)))
+              mod)))))
 
 
-(define (%new-module-import importer modules)
-  (let ((STklos (find-module 'STklos)))
-    (for-each (lambda (x)
-                (let ((mod (find-module x #f)))
-                  (if mod
-                      (unless (eq? mod STklos)
-                        (for-each (lambda (symb)
-                                    (%symbol-alias symb symb mod))
-                                  (map car (module-exports mod))))
-                      (error 'import "module `~S' does not exist" x))))
-            modules)))
+  (define (build-import-list lib lst imported)
+    (if (null? lst)
+        imported
+        (let ((key  (car lst))
+              (val  (cadr lst))
+              (rest (cddr lst)))
+          (case key
+            ((#:only)
+             (let ((public (map cdr imported)))
+               (for-each (lambda (symb)
+                           (unless (memq symb public)
+                             (error 'import "only: symbol ~s is not in the import set"
+                                    symb)))
+                         val)
+               (set! imported (filter! (lambda (x) (memq (cdr x) val)) imported))))
+
+            ((#:except)
+             (let ((public (map cdr imported)))
+               (for-each (lambda (symb)
+                           (if (memq symb public)
+                               (set! imported (remove (lambda (x) (eq? (cdr x) symb)) imported))
+                               (error 'import "except: symbol ~s is not in the import set" symb)))
+                         val)))
+            ((#:rename)
+             (for-each (lambda (pair)
+                         (let ((original (car pair))
+                               (new      (cadr pair)))
+                           (let Loop ((lst imported))
+                             (if (null? lst)
+                                 (error 'import
+                                        "rename: symbol ~s is not in the import set" original)
+                                 (if (eq? (cdar lst) original)
+                                     (set-cdr! (car lst) new)
+                                     (Loop (cdr lst)))))))
+                       val))
+            ((#:prefix)
+             (for-each (lambda (pair)
+                         (set-cdr! pair (symbol-append val (cdr pair))))
+                       imported)))
+          ;; Loop with the rest of lst
+          (build-import-list lib rest imported))))
 
 
+  (define (import-symbols importer name keylist)
+    (let* ((mod       (eventually-load-library name))
+           (imported  (build-import-list mod
+                                         keylist
+                                         (list-copy (module-exports mod)))))
+      ;; Make aliases for all symbols in imported list
+      (for-each (lambda (pair)
+                  (%symbol-link (cdr pair) (car pair) lib mod))
+                imported)))
 
-(define (%module-aliases module-name symbols export?)
+  ;; Call import-symbols for each import spec
+  (for-each (lambda (imp)
+              (let ((name     (car imp))
+                    (keylist  (cdr imp)))
+                (import-symbols lib name keylist)))
+            clauses)
+  
+  ;; Retain the import list (for module-imports)
+  (%debug "call %module-imports-set! ~s ~s" lib clauses)
+  #;(%module-imports-set! lib clauses))
 
-  (define (old-module-exports mod)
-    (let ((l (module-exports mod)))
-      (if (and (not (null? l))
-               (pair? (caar l)))
-          (map car l)
-          l)))
-
-  ;; define aliases in the current module of symbols from module-name
-  (let ((module (find-module module-name #f)))
-    (unless module
-      (error 'import "cannot find module ~S" module-name))
-    (let ((exports (old-module-exports module)))
-      (for-each (lambda (x)
-                  (if (memq x exports)
-                      (%symbol-alias x x module)
-                      (error 'import "symbol ~S is not exported from module ~S"
-                             x module-name)))
-                symbols)))
-  ;; if export? is true, export the given symbols
-  (when export?
-    (%do-exports (current-module) symbols)))
-
-
-;;(define-macro (import . modules)
-;;  (if (null? modules)
-;;      '()
-;;      `(%module-import (current-module) ',modules)))
 
 (define-macro (import . modules)
-
-  (define (split-modules lst)
-    (let loop ((lst modules)
-               (full '())
-               (part '()))
-      (cond
-        ((null? lst)
-         (values (reverse! full) (reverse! part)))
-        ((symbol? (car lst))
-         ;; full import
-         (loop (cdr lst)
-               (cons (car lst) full)
-               part))
-        ((and (pair? (car lst)) (symbol? (caar lst)) (null? (cdar lst)))
-         ;; a list which contains only a symbol. This is a full import
-         (loop (cdr lst)
-               (cons (caar lst) full)
-               part))
-        ((and (pair? (car lst)) (every symbol? (car lst)))
-         ;; a partial import
-         (loop (cdr lst)
-               full
-               (cons (car lst) part)))
-        (else (error 'import "bad import clause ~S" (car lst))))))
-
-  (if (null? modules)
-      '()
-      (receive (full part)
-         (split-modules modules)
-         (cond
-           ((null? part)
-            ;; Only full exports
-            `(%new-module-import (current-module) ',full))
-           ((null? full)
-            ;; Only partial exports
-            (%debug "============================> partial import2")
-            `(begin
-               ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x) #f))
-                      part)))
-           (else
-            (%debug "============================> partial import2")
-            `(begin
-               (%new-module-import (current-module) ',full)
-               ,@(map (lambda (x) `(%module-aliases ',(car x) ',(cdr x) #f))
-                      part)))))))
+  (let ((imp (%parse-imports modules)))
+    `(%do-imports (current-module) (list-copy ',imp))))
 
 
 ;;=============================================================================
