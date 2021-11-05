@@ -1,5 +1,5 @@
 ;;;;
-;;;; full-syntax.stk	-- Robert Hieb and R. Kent Dybvig syntax-case macros
+;;;; full-syntax.stk    -- Robert Hieb and R. Kent Dybvig syntax-case macros
 ;;;;
 ;;;; Scheme macro system Version 2.1
 ;;;; Robert Hieb and R. Kent Dybvig
@@ -23,7 +23,7 @@
 ;;;; NATURE WHATSOEVER.
 ;;;;
 ;;;;    Creation date: 26-Jan-2001 17:49 (eg)
-;;;; Last file update: 27-Jul-2011 22:52 (eg)
+;;;; Last file update:  5-Nov-2021 17:30 (eg)
 ;;;;
 
 #|
@@ -48,10 +48,10 @@
  * |"full-syntax"|.
  * @lisp
  * (let-syntax ((when (syntax-rules ()
- * 		     ((when test stmt1 stmt2 ...)
- * 		      (if test
- * 			  (begin stmt1
- * 				 stmt2 ...))))))
+ *                   ((when test stmt1 stmt2 ...)
+ *                    (if test
+ *                        (begin stmt1
+ *                               stmt2 ...))))))
  *   (let ((if #t))
  *     (when if (set! if 'now))
  *     if))                           =>  now
@@ -107,16 +107,16 @@ doc>
 (when (find-module 'SYNTAX-CASE #f)
   (error "full syntax is already loaded"))
 
-(define-module SYNTAX-CASE)	;; Empty module just to know that we have
-				;; already loaded this file
+(define-module SYNTAX-CASE)     ;; Empty module just to know that we have
+                                ;; already loaded this file
 
 
 
 ;;;
 ;;; Real code starts here
 ;;;
-(define sc:eval-hook	eval)
-(define sc:andmap    	every)
+(define sc:eval-hook    eval)
+(define sc:andmap       every)
 
 (define (sc:error-hook who why what)
   (error who "~a ~s" why what))
@@ -127,37 +127,37 @@ doc>
 
 (define sc:put-global-definition-hook #f)
 (define sc:get-global-definition-hook #f)
-(define sc:syntax-case-macro?	   #f)
+(define sc:syntax-case-macro?      #f)
 
 (let ((*macros* '()))
   (set! sc:put-global-definition-hook
-	(lambda (symbol binding)
-	  (let ((pair (assq symbol *macros*)))
-	    (if pair
-		(set-cdr! pair binding)
-		(set! *macros* (cons (cons symbol binding) *macros*))))))
+        (lambda (symbol binding)
+          (let ((pair (assq symbol *macros*)))
+            (if pair
+                (set-cdr! pair binding)
+                (set! *macros* (cons (cons symbol binding) *macros*))))))
   (set! sc:get-global-definition-hook
-	(lambda (symbol)
-	  (let ((pair (assq symbol *macros*)))
-	    (and pair (cdr pair)))))
+        (lambda (symbol)
+          (let ((pair (assq symbol *macros*)))
+            (and pair (cdr pair)))))
 
   (set! sc:syntax-case-macro?
-	(lambda (symbol)
-	  (assq symbol *macros*))))
+        (lambda (symbol)
+          (assq symbol *macros*))))
 
 ; These initializations are done here rather than "expand.ss" so that
 ; "expand.ss" can be loaded twice (for bootstrapping purposes).
 
-(define sc:expand-syntax 		#f)
-(define sc:syntax-dispatch 	   	#f)
-(define sc:generate-temporaries 	#f)
-(define sc:identifier? 		   	#f)
-(define sc:syntax-error 		#f)
-(define sc:syntax-object->datum 	#f)
-(define sc:bound-identifier=? 	        #f)
-(define sc:free-identifier=? 	        #f)
+(define sc:expand-syntax                #f)
+(define sc:syntax-dispatch              #f)
+(define sc:generate-temporaries         #f)
+(define sc:identifier?                  #f)
+(define sc:syntax-error                 #f)
+(define sc:syntax-object->datum         #f)
+(define sc:bound-identifier=?           #f)
+(define sc:free-identifier=?            #f)
 (define sc:install-global-transformer   #f)
-(define sc:implicit-identifier 	        #f)
+(define sc:implicit-identifier          #f)
 
 ; The output routines can be tailored to feed a specific system or compiler.
 ; They are set up here to generate the following subset of standard Scheme:
@@ -237,9 +237,10 @@ doc>
 (include "expand.pp")
 
 ;;;;
-;;;; Redefine eval so that it expand sexpr before calling the real eval
+;;;; Redefine eval so that it expand sexpr before calling the real eval.
+;;; Don't use set! here but a define that will break the previous binding
 ;;;;
-(set! eval
+(define eval
   (lambda (x :optional env)
     (sc:eval-hook (sc:expand-syntax x) env)))
 
@@ -247,27 +248,27 @@ doc>
 ;;;; Evaluate new syntaxes with our brand new eval
 ;;;;
 (eval '(begin
-	 (define-syntax with-syntax
-	   (lambda (x)
-	     (syntax-case x ()
-		((_ () e1 e2 ...)
-		 (syntax (begin e1 e2 ...)))
-		((_ ((out in)) e1 e2 ...)
-		 (syntax (syntax-case in () (out (begin e1 e2 ...)))))
-		((_ ((out in) ...) e1 e2 ...)
-		 (syntax (syntax-case (list in ...) ()
-			    ((out ...) (begin e1 e2 ...))))))))
+         (define-syntax with-syntax
+           (lambda (x)
+             (syntax-case x ()
+                ((_ () e1 e2 ...)
+                 (syntax (begin e1 e2 ...)))
+                ((_ ((out in)) e1 e2 ...)
+                 (syntax (syntax-case in () (out (begin e1 e2 ...)))))
+                ((_ ((out in) ...) e1 e2 ...)
+                 (syntax (syntax-case (list in ...) ()
+                            ((out ...) (begin e1 e2 ...))))))))
 
-	 (define-syntax syntax-rules
-	   (lambda (x)
-	     (syntax-case x ()
-		((_ (k ...) ((keyword . pattern) template) ...)
-		 (with-syntax (((dummy ...)
-				(sc:generate-temporaries (syntax (keyword ...)))))
-			      (syntax (lambda (x)
-					(syntax-case x (k ...)
-					   ((dummy . pattern) (syntax template))
-					   ...))))))))))
+         (define-syntax syntax-rules
+           (lambda (x)
+             (syntax-case x ()
+                ((_ (k ...) ((keyword . pattern) template) ...)
+                 (with-syntax (((dummy ...)
+                                (sc:generate-temporaries (syntax (keyword ...)))))
+                              (syntax (lambda (x)
+                                        (syntax-case x (k ...)
+                                           ((dummy . pattern) (syntax template))
+                                           ...))))))))))
 
 
 ;;;;

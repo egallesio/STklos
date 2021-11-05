@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update:  1-Nov-2021 22:13 (eg)
+ * Last file update:  5-Nov-2021 17:07 (eg)
  */
 
 #include "stklos.h"
@@ -356,7 +356,7 @@ SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v, int *index)
 }
 
 
-void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value)
+void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int define)
 {
   SCM z;
   int index;
@@ -365,8 +365,9 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value)
 
   if (z) {
     /* Variable already exists. Change its value*/
-    if (BOXED_INFO(z) & CONS_CONST) {
-      STk_error("cannot set or redefine the symbol ~S", v);
+    if (BOXED_INFO(z) & CONS_CONST && !define) {
+      //STk_error("cannot set or redefine the symbol ~S", v);
+      STk_debug("Setting unmutable binding ~S in ~S", v, STk_current_module());
     }
     *BOX_VALUES(CDR(z)) = value;
   } else {
@@ -398,8 +399,7 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly)
     /* Enter the new variable in table */
     SCM new = STk_cons(v, value);
 
-    // FIXME:
-    if (ronly & 0)
+    if (ronly)
       // make the association read only
       BOXED_INFO(new) |= CONS_CONST;
 

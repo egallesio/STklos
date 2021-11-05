@@ -34,7 +34,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update:  5-Oct-2021 12:35 (eg)
+ * Last file update:  5-Nov-2021 17:07 (eg)
  */
 
 
@@ -94,7 +94,7 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s,
  * higher level interface instead.
  */
 SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v, int *index);
-void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value);
+void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int define);
 void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly);
 
 /*

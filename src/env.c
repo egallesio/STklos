@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  1-Nov-2021 11:14 (eg)
+ * Last file update:  5-Nov-2021 17:13 (eg)
  */
 
 #include "stklos.h"
@@ -489,7 +489,7 @@ SCM STk_clone_frame(SCM f)
 
 void STk_define_variable(SCM symbol, SCM value, SCM module)
 {
-  STk_hash_set_variable(&MODULE_HASH_TABLE(module), symbol, value);
+  STk_hash_set_variable(&MODULE_HASH_TABLE(module), symbol, value, TRUE);
 }
 
 
@@ -558,7 +558,6 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   SCM res;
 
   while (FRAMEP(env)) env = FRAME_NEXT(env);
-
 
   res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol, &i);
   if (res) {
