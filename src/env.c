@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  5-Nov-2021 17:13 (eg)
+ * Last file update:  6-Nov-2021 21:11 (eg)
  */
 
 #include "stklos.h"
@@ -254,6 +254,19 @@ DEFINE_PRIMITIVE("module?", modulep, subr1, (SCM obj))
 {
   return MAKE_BOOLEAN(MODULEP(obj));
 }
+
+/*
+<doc EXT library?
+ * (library? object)
+ *
+ * Returns |#t| if |object| is a module defined as a R7RS library and |#f| otherwise.
+doc>
+*/
+DEFINE_PRIMITIVE("library?", libraryp, subr1, (SCM obj))
+{
+  return MAKE_BOOLEAN(MODULEP(obj) && MODULE_IS_LIBRARY(obj));
+}
+
 
 /*
 <doc EXT find-module
@@ -639,6 +652,7 @@ int STk_late_init_env(void)
 
   /* ==== User primitives ==== */
   ADD_PRIMITIVE(modulep);
+  ADD_PRIMITIVE(libraryp);
   ADD_PRIMITIVE(scheme_find_module);
   ADD_PRIMITIVE(current_module);
   ADD_PRIMITIVE(module_name);
