@@ -21,9 +21,8 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  1-Nov-2021 22:03 (eg)
+;;;; Last file update:  6-Nov-2021 21:17 (eg)
 ;;;;
-
 
 ;;=============================================================================
 ;;
@@ -40,35 +39,35 @@
  * returns |default|.
  * @l
  * Note that this function searches the value of |symbol| in |module|
- * ,(bold "and") all the modules it imports whereas |symbol-value| searches
+ * ,(bold "and") in the STklos module if module is not a R7RS library.
  * only in |module|.
 doc>
 |#
-(define (symbol-value* name module :optional (default #f default?))
-  (let ((absent (gensym)))
-    (let Loop ((all-mods (cons module (module-imports module))))
-      (if (null? all-mods)
-          ;; Symbol was absent in the module and its imported modules
-          (if default?
-              default
-              (error 'symbol-value* "symbol ``~S'' not found" name))
-          ;; Let's see
-          (let ((val (symbol-value name (car all-mods) absent)))
-            (if (eq? val absent)
-                (Loop (cdr all-mods))
-                val))))))
+(define symbol-value*
+  (let ((absent (list 'absent))
+        (stklos-module (find-module 'STklos)))
+    (lambda (name module :optional (default #f default?))
+      (let ((val (symbol-value name module absent)))
+        (when (and (eq? val absent) (not (library? module)))
+          (set! val (symbol-value name stklos-module absent)))
+        (if (eq? val absent)
+            (if default?
+                default
+                (error 'symbol-value* "symbol ``~S'' not found" name))
+            val)))))
 
 #|
 <doc EXT symbol-bound?
  * (symbol-bound symb)
  * (symbol-bound symb module)
  *
-doc> 
+doc>
 |#
 (define symbol-bound?
   (let ((absent (list 'absent)))
     (lambda (symb #:optional (module (current-module)))
-      (not (eq? (symbol-value symb module absent) absent)))))
+      (not (eq? (symbol-value* symb module absent)
+                absent)))))
 
 
 ;;=============================================================================
@@ -488,7 +487,8 @@ doc>
                                          (list-copy (module-exports mod)))))
       ;; Make aliases for all symbols in imported list
       (for-each (lambda (pair)
-                  (%symbol-link (cdr pair) (car pair) lib mod))
+                  (%symbol-link (cdr pair) (car pair) lib mod)
+                  (register-new-global! (cdr pair)))
                 imported)))
 
   ;; Call import-symbols for each import spec
@@ -497,7 +497,7 @@ doc>
                     (keylist  (cdr imp)))
                 (import-symbols lib name keylist)))
             clauses)
-  
+
   ;; Retain the import list (for module-imports)
   (%debug "call %module-imports-set! ~s ~s" lib clauses)
   #;(%module-imports-set! lib clauses))
