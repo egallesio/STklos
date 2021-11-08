@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  6-Nov-2021 21:11 (eg)
+ * Last file update:  8-Nov-2021 18:27 (eg)
  */
 
 #include "stklos.h"
@@ -441,37 +441,6 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
 }
 
 
-// FIXME: To be deleted when new import is ready
-DEFINE_PRIMITIVE("%redefine-module-exports", redefine_module_exports, subr12,
-                 (SCM from, SCM to))
-{
-  SCM lst, res;
-  int i;
-
-  if (!MODULEP(from)) error_bad_module(from);
-  if (!to)
-    to =  STk_current_module();
-  else
-    if (!MODULEP(to)) error_bad_module(to);
-  STk_debug( "redefine-module-exports ~S => ~S", from, to);
-
-
-  /* Compute the list of exported symbols */
-  if (from == STk_STklos_module) 
-    STk_error("should not occur anymore");
-    // lst = make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module)));
-  else
-    lst = MODULE_EXPORTS(from);                         /* explicitly exported */
-
-  for (lst = MODULE_EXPORTS(from); !NULLP(lst); lst = CDR(lst)) {
-    res = STk_hash_get_variable(&MODULE_HASH_TABLE(from), CAR(CAR(lst)), &i);
-    if (res)
-      /* symbol (car lst) is bound in module from. redefine it in module to */
-      STk_define_variable(CAR(CAR(lst)), *BOX_VALUES(CDR(res)), to);
-  }
-  return STk_void;
-}
-
 /*===========================================================================*\
  *
  *              E n v i r o n m e n t   M a n a g e m e n t
@@ -647,7 +616,6 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(select_module);
   ADD_PRIMITIVE(module_imports_set);
   ADD_PRIMITIVE(module_exports_set);
-  ADD_PRIMITIVE(redefine_module_exports);
   ADD_PRIMITIVE(populate_scheme_module);
 
   /* ==== User primitives ==== */
