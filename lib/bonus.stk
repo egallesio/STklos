@@ -1244,12 +1244,6 @@ doc>
 (define (fprintf port fmt . args)
   (display (apply format fmt args) port))
 
-(define (%debug fmt . args)
-  (let ((out (current-error-port)))
-    (display (ansi-color 'yellow) out)
-    (display (apply format fmt args) out)
-    (display (ansi-color 'normal) out)
-    (newline out)))
 
 #|
 <doc EXT-SYNTAX declare-new-error
@@ -1325,9 +1319,7 @@ doc>
 
   ;; Here we go
   (let ((s        (if (symbol? str) (symbol->string str) str))
-        (external (if (library? module)
-                      '()
-                      (module-symbols (find-module 'STklos))))
+        (external (apply append (map module-exports (module-imports module))))
         (internal (module-symbols module)))
     (let Loop ((symbs (list->set (append internal external) '()))
                (res   '()))
@@ -2104,6 +2096,7 @@ doc>
          (conf  (%stklos-configure))
          (stklos-git (%stklos-git))
          (commit (key-get stklos-git :commit ""))
+         (srfis  (filter-map %feature->srfi (features)))
          (git-alist (if (= (string-length commit) 0)
                         '()
                         `((build.git.tag ,(key-get stklos-git :tag '()))
@@ -2118,13 +2111,14 @@ doc>
       (install-dir ,(%library-prefix))
       (website "https://stklos.net")
       (scheme.features ,@(features))
-      (scheme.srfi ,@(filter-map %feature->srfi (features)))
+      (scheme.srfi ,@srfis)
       (scheme.path ,@(load-path))
       (build.configure ,@(key-get conf :configure #f))
       ,@git-alist
       (stklos.threads ,(%thread-system))
       (stklos.system-libs ,@(key-get conf :system #f))
       (stklos.compiled-libs ,@(key-get conf :compiled #f))
+      (stklos.srfi.count ,(length srfis))
       (os.uname ,(vector-ref u 0) ,(vector-ref u 2) ,(vector-ref u 4))
       (os.env.LANG ,(or (getenv "LANG") ""))
       (os.env.TERM ,(or (getenv "TERM") "")))))
