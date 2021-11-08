@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 22-Oct-2021 14:27 (eg)
+;;;; Last file update:  8-Nov-2021 14:41 (eg)
 ;;;;
 
 
@@ -1325,7 +1325,9 @@ doc>
 
   ;; Here we go
   (let ((s        (if (symbol? str) (symbol->string str) str))
-        (external (apply append (map module-exports (module-imports module))))
+        (external (if (library? module)
+                      '()
+                      (module-symbols (find-module 'STklos))))
         (internal (module-symbols module)))
     (let Loop ((symbs (list->set (append internal external) '()))
                (res   '()))
