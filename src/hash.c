@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update:  5-Nov-2021 17:07 (eg)
+ * Last file update:  8-Nov-2021 18:33 (eg)
  */
 
 #include "stklos.h"
@@ -366,8 +366,8 @@ void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int defin
   if (z) {
     /* Variable already exists. Change its value*/
     if (BOXED_INFO(z) & CONS_CONST && !define) {
-      //STk_error("cannot set or redefine the symbol ~S", v);
-      STk_debug("Setting unmutable binding ~S in ~S", v, STk_current_module());
+      STk_error("cannot set or redefine the symbol ~S in ~S",
+                v, STk_current_module());
     }
     *BOX_VALUES(CDR(z)) = value;
   } else {
