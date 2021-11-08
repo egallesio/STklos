@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  8-Nov-2021 14:41 (eg)
+;;;; Last file update:  8-Nov-2021 18:07 (eg)
 ;;;;
 
 
@@ -1245,6 +1245,13 @@ doc>
   (display (apply format fmt args) port))
 
 
+(define (%debug fmt . args)
+  (let ((out (current-error-port)))
+    (display (ansi-color 'yellow) out)
+    (display (apply format fmt args) out)
+    (display (ansi-color 'normal) out)
+    (newline out)))
+
 #|
 <doc EXT-SYNTAX declare-new-error
  * (declare-new-error name)
@@ -1319,7 +1326,9 @@ doc>
 
   ;; Here we go
   (let ((s        (if (symbol? str) (symbol->string str) str))
-        (external (apply append (map module-exports (module-imports module))))
+        (external (if (library? module)
+                       '()
+                       (module-symbols (find-module 'STklos))))
         (internal (module-symbols module)))
     (let Loop ((symbs (list->set (append internal external) '()))
                (res   '()))
