@@ -53,7 +53,8 @@
   (begin
     (define a 10)
     (define b 20)
-    (define c 30)))
+    (define c 30)
+    (define e 40)))
 
 
 (define-library (test2)
@@ -69,7 +70,7 @@
       (library-exports 'test1))
 
 (test "export.2"
-      '(a b c)
+      '(a b c e)
       (library-symbols 'test1))
 
 (test "export.3"
@@ -81,7 +82,7 @@
       (library-symbols 'test2))
 
 
-(test-subsection "Testing simple impoorts")
+(test-subsection "Testing simple imports")
 
 (test "import.1"
       '(10 20 30)
@@ -95,6 +96,39 @@
 (test "import.3"
       30
       (symbol-value 'test2-d (find-module 'test3)))
+
+;; We have imported test1 into test2, but "e" is not exported by test1,
+;; so should not have been imported:
+(test/error "import.4" (in-module test2 e))
+
+;; ----------------------------------------------------------------------
+(test-subsection "Testing immutability of imports")
+
+(define-library (test-mutation)
+  (export var set-var!)
+  (begin
+    (define var 10)
+    (define (set-var! value) (set! var value))))
+
+(define-library (test-mutation-2)
+  (import test-mutation)
+  (export set-var-ok! set-var-wrong!)
+
+  (begin
+    (define (set-var-ok! value)
+      (set-var! value))
+    (define (set-var-wrong! value)
+      (set! var value))))
+
+
+(test/error "immutable-import.1"
+            ((in-module test-mutation-2 set-var-wrong!) 50))
+
+(test "immutable-import.2"
+      50
+      (begin ((in-module test-mutation-2 set-var-ok!) 50)
+             (in-module test-mutation-2 var)))
+
 
 ;; ----------------------------------------------------------------------
 (test-subsection "Testing prefix/rename/only imports")
