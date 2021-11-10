@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-214.stk         -- SRFI-214: Flexvectors
+;;;; 214.stk         -- SRFI-214: Flexvectors
 ;;;;
 ;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
 ;;;;
@@ -45,10 +45,10 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 05-Sep-2021 08:23
-;;;; Last file update: 17-Sep-2021 13:11 (eg)
+;;;; Last file update: 10-Nov-2021 05:33 (jpellegrini)
 ;;;;
 
-(define-module SRFI-214
+(define-module srfi/214
   (export ; Constructors
           make-flexvector flexvector
           flexvector-unfold flexvector-unfold-right
@@ -782,7 +782,4 @@
 
 )
 
-(select-module STklos)
-(import SRFI-214)
-
-(provide "srfi-214")
+(provide "srfi/214")
