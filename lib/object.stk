@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Feb-1994 21:09
-;;;; Last file update: 30-Oct-2021 23:46 (eg)
+;;;; Last file update: 11-Nov-2021 18:08 (eg)
 
 
 #|
@@ -692,6 +692,11 @@ doc>
 ;                       Class redefinition utilities
 ;;
 ;=============================================================================
+;; Define generics to avoid compiler warnings about undefined symbols
+(define-generic remove-class-accessors)
+(define-generic update-direct-method)
+(define-generic update-direct-subclass)
+
 
 ;==== Remove-class-accessors
 (define-method remove-class-accessors ((c <class>))
