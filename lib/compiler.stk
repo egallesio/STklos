@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 22-Oct-2021 14:44 (eg)
+;;;; Last file update: 11-Nov-2021 18:33 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -36,6 +36,7 @@
           compiler:generate-signature
           compiler:inline-common-functions
 
+          %grab-file-information
           %compiler-new-label))
 
 (select-module STKLOS-COMPILER)
@@ -1605,6 +1606,11 @@ doc>
                        (expander `(lambda (form e) (apply ,proc (cdr form)))))
                   (install-expander! name (eval expander) proc)))
               (key-get infos :expanders '()))))
+
+
+(define (%grab-file-information str)
+  (let ((info (find-file-informations str #f #f)))
+    (import-file-informations info)))
 
 ;;;;
 ;;;; REQUIRE

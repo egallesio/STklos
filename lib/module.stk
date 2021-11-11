@@ -21,8 +21,9 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  7-Nov-2021 19:30 (eg)
+;;;; Last file update: 11-Nov-2021 18:33 (eg)
 ;;;;
+
 
 ;;=============================================================================
 ;;
@@ -397,6 +398,12 @@ doc>
 ;;;;
 (define-macro (import . modules)
   (let ((imp (%parse-imports modules)))
+    ;; Since imported modules can define macros. We need to grab them
+    ;; in case we are just compiling a file to produce a '.ostk' file
+    (for-each (lambda (x)
+                (%grab-file-information (symbol->string (car x))))
+              imp)
+    ;; Run time expansion
     `(%do-imports (current-module) (list-copy ',imp))))
 
 
