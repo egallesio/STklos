@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 22-Oct-2021 14:43 (eg)
+;;;; Last file update: 14-Nov-2021 19:49 (eg)
 ;;;;
 
 
@@ -363,9 +363,28 @@ doc>
                     (and (member what provided) #t))))
 
 ;; Overload require with a macro to let the compiler deal with globals
-(define-macro (require what)
-  `(%%require ,what #f))
 
+#| HACK: FIXME:
+ This version of require is a hacked one that transforms calls such
+ as (require "srfi-N") in the sequence
+  (define-module STklo
+    (import (srfi N))
+    (provide "srfi-N"))
+ It is temporary and should be changed when require will no more be used
+ for using SRFIs (and the documentation adapted)
+|#
+(define-macro (require what)
+  (let ((expansion  `(%%require ,what #f)))
+    (if (string? what)
+        (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" what)))  ;; Not srfi-0
+          (when match
+            (let* ((number (string->number (cadr match)))
+                   (lib    `(srfi ,number)))
+              (unless (find-path what) ;; temporary
+                (set! expansion `(define-module STklos 
+                                   (import ,lib)
+                                   (provide ,what))))))))
+    expansion))
 
 (define-macro (require-library what)
   `(%%require ,what #t))
