@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-Sep-1999 13:06 (eg)
-;;;; Last file update: 26-Oct-2021 16:16 (eg)
+;;;; Last file update: 11-Nov-2021 20:57 (eg)
 ;;;;
 
 
@@ -76,9 +76,9 @@
                                               (struct-set! ,tmp ',(car x) ,val))))))
                   fields)
                                         ; Result for oplevel (if any)
-           (values (void) ',name)))))
-  ;; FIXME:
-  (export-syntax define-record-type))
+           (values (void) ',name))))))
+;; FIXME:
+(export-syntax define-record-type)
 
 (provide "srfi/9")
 

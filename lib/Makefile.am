@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 10-Oct-2021 14:48 (eg)
+# Last file update: 12-Nov-2021 21:16 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme srfi                       \
@@ -84,12 +84,6 @@ SRC_STK = bigloo-support.stk  \
           slib.stk            \
           streams-primitive.stk \
           streams-derived.stk \
-          srfi-1.stk          \
-          srfi-2.stk          \
-          srfi-4.stk          \
-          srfi-5.stk          \
-          srfi-7.stk          \
-          srfi-9.stk          \
           srfi-11.stk         \
           srfi-13.stk         \
           srfi-14.stk         \
@@ -163,12 +157,6 @@ scheme_OBJS = compfile.ostk     \
           slib.ostk             \
           streams-primitive.ostk \
           streams-derived.ostk   \
-          srfi-1.ostk           \
-          srfi-2.ostk           \
-          srfi-4.ostk           \
-          srfi-5.ostk           \
-          srfi-7.ostk           \
-          srfi-9.ostk           \
           srfi-11.ostk          \
           srfi-13.ostk          \
           srfi-14.ostk          \
@@ -311,10 +299,10 @@ ffi.ostk: bigmatch.ostk
 full-conditions: srfi-35.ostk srfi-36.ostk
 recette.ostk: pretty-print.ostk
 srfi-13.ostk: srfi-14.ostk
-srfi-66.ostk: srfi-4.ostk
+# srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
 srfi-41.ostk: streams-derived.ostk streams-primitive.ostk
-streams-derived.ostk: srfi-1.ostk streams-primitive.ostk
+streams-derived.ostk: streams-primitive.ostk
 srfi-113.ostk: srfi-128.ostk
 srfi-134.ostk: srfi-158.ostk
 srfi-217.ostk: trie.ostk
