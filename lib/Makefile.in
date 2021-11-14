@@ -36,7 +36,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 12-Nov-2021 21:16 (eg)
+# Last file update: 14-Nov-2021 20:05 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -438,9 +438,6 @@ SRC_STK = bigloo-support.stk  \
           slib.stk            \
           streams-primitive.stk \
           streams-derived.stk \
-          srfi-11.stk         \
-          srfi-13.stk         \
-          srfi-14.stk         \
           srfi-17.stk         \
           srfi-26.stk         \
           srfi-29.stk         \
@@ -510,9 +507,6 @@ scheme_OBJS = compfile.ostk     \
           slib.ostk             \
           streams-primitive.ostk \
           streams-derived.ostk   \
-          srfi-11.ostk          \
-          srfi-13.ostk          \
-          srfi-14.ostk          \
           srfi-17.ostk          \
           srfi-26.ostk          \
           srfi-29.ostk          \
@@ -1001,7 +995,6 @@ compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
 full-conditions: srfi-35.ostk srfi-36.ostk
 recette.ostk: pretty-print.ostk
-srfi-13.ostk: srfi-14.ostk
 # srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
 srfi-41.ostk: streams-derived.ostk streams-primitive.ostk

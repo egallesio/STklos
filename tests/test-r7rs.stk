@@ -22,13 +22,12 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 20:58 (eg)
-;;;; Last file update: 10-Sep-2021 11:16 (eg)
+;;;; Last file update: 14-Nov-2021 20:24 (eg)
 ;;;;
 
 (require "test")
 
 (test-section "R7RS")
-
 
 (test-subsection "4.2 Derived expression types")
 
@@ -1180,6 +1179,10 @@ a")
 
 ;;------------------------------------------------------------------
 (test-subsection "6.10 Control features")
+
+;;; SRFI-13 redefines R7RS string-map in an incompatible way. Redefine
+;;; string-map here to the R7RS version
+(define string-map (in-module SCHEME string-map))
 
 (test "string-map 1"  "abdegh"  (string-map char-downcase "AbdEgH"))
 (test "string-map 2"  "IBM"     (string-map (lambda (c)

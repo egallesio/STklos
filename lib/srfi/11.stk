@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-11.stk        -- LET-VALUES and LET*-VALUES
 ;;;;
-;;;; Copyright © 2002-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,14 +21,14 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 28-May-2002 09:47 (eg)
-;;;; Last file update: 22-Aug-2019 17:19 (eg)
+;;;; Last file update: 14-Nov-2021 20:10 (eg)
 ;;;;
 
 
 ;; let-syntax and let*-values are now R7RS. This file is kept for compatibility
 ;; (in case it is required by some old code)
 
-(provide "srfi-11")
+(provide "srfi/11")
 
 ;; Old implementation was the code provided in the SRFI
 

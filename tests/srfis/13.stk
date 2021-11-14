@@ -2,7 +2,6 @@
 ;;  SRFI 13 ...
 ;; ----------------------------------------------------------------------
 
-(require "srfi-14")
 
 (define (fill text)
   (let* ((len (string-length text))
