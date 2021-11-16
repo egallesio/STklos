@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 26-Sep-2021 20:09 (eg)
+;;;; Last file update: 15-Nov-2021 19:48 (eg)
 ;;;;
 
 
@@ -55,7 +55,7 @@
     (14 "Character-Set Library" () "srfi-14")
     (15 "Syntax for dynamic scoping (withdrawn)") ;; Withdrawn, but supported nevertheless
     (16 "Syntax for procedures of variable arity" (case-lambda))
-    (17 "Generalized set!")
+    (17 "Generalized set!" () "srfi-17")
     (18 "Multithreading support")
     ;;  19 Time Data Types and Procedures
     ;;  20 ........ Withdrawn
