@@ -1,7 +1,10 @@
-;; ----------------------------------------------------------------------
-;;  SRFI 13 ...
-;; ----------------------------------------------------------------------
-
+;; ---------------------------------------------------------------------- SRFI
+;; 13 ...
+;; ---------------------------------------------------------------------- We
+;; need to import here srfi-14 since the followings tests use some values from
+;; srfi-14 . Note that, even if srfi-13 imports srfi-14, the srfi-14 symbols
+;; it used are not reexported, and this code is run in the STklos module.
+(import (srfi 14))
 
 (define (fill text)
   (let* ((len (string-length text))
@@ -782,7 +785,7 @@
 ;; file, load the SRFI-13 string-map, shadowing the R7RS one, and fail the R7RS tests later.
 ;; The following is an ugly hack to  at least let the R7RS tests use the original
 ;; string-map procedure, but there should be a better way... -- jpellegrini
-(set! string-map r7rs:string-map)
+(set! string-map (in-module SCHEME string-map))
 
 
 

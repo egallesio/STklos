@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 14-Nov-2021 19:49 (eg)
+;;;; Last file update: 18-Nov-2021 15:43 (eg)
 ;;;;
 
 
@@ -250,16 +250,19 @@ doc>
 ;  Rewriting of the LOAD primitive
 ;
 ;=============================================================================
-(define (%load fn load-path load-suffixes)
-  (if (%try-load fn load-path load-suffixes)
-    (values (void)) ;; To be sure to have only 1 value (for repl printing defines)
-    (raise (make-condition &i/o-filename-error
+(define (%cannot-load fn)
+  (raise (make-condition &i/o-filename-error
                            'location 'load
                            'message  (format "cannot load file ~S" fn)
                            'backtrace (%vm-backtrace)
                            'filename fn
                            'r7rs-msg "cannot load file"
-                           'r7rs-irritants (list fn)))))
+                           'r7rs-irritants (list fn))))
+
+(define (%load fn load-path load-suffixes)
+  (if (%try-load fn load-path load-suffixes)
+    (values (void)) ;; To be sure to have only 1 value (for repl printing defines)
+    (%cannot-load fn)))
 
 (define (load fn)
   (%load fn (load-path) (load-suffixes)))
@@ -326,50 +329,86 @@ doc>
 (let ((provided '())
       (stklos-building? (getenv "STKLOS_BUILDING")))
 
-  (set! %%require  (lambda (what lib-only?)
-                     (when stklos-building?
-                       ;; When building STklos, require-library ==  require.
-                       ;; Otherwise, we need an already installed  STklos
-                       (set! lib-only? #f))
-                     (unless (member what provided)
-                       (%load what
-                              (if lib-only?
-                                  (list (make-path (%library-prefix)
-                                                   "share" "stklos"
-                                                   (version)))
-                                  (load-path))
-                              (load-suffixes)))
-                     (when (and (warning-when-not-provided)
-                                (not (member what provided)))
-                       (format (current-error-port)
-                               "WARNING: ~S was not provided~%" what))
-                     what))
+  (define (rewrite-require-spec spec path suff)
+    (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" spec)))  ;; Not srfi-0
+      (if match
+          ;; We required "srfi-N", try to transform it in "srfi/N"
+          ;; We don't try first with "srfi-N", because we could find
+          ;; old installed versions lying around
+          (let* ((new (format "srfi/~a" (cadr match)))
+                 (lib  (string->symbol new))
+                 (file (find-path new path suff)))
+            (if file
+                (cons file lib)
+                (let ((file (find-path spec path suff)))
+                  (and file
+                       (cons file #f)))))
+          ;; Non-SRFI require
+          (let ((file (find-path spec path suff)))
+            (and file
+                 (cons file #f))))))
 
-  (set! require   (lambda (what)
-                    (%%require what (load-path))))
+
+  (set! %%require
+    (lambda (what lib-only?)
+      (when stklos-building?
+        ;; When building STklos, require-library ==  require.
+        ;; Otherwise, we need an already installed  STklos
+        (set! lib-only? #f))
+
+      (unless (member what provided)
+        (let* ((path (if lib-only?
+                         (list (make-path (%library-prefix) "share" "stklos" (version)))
+                         (load-path)))
+               (suff (load-suffixes))
+               (file (rewrite-require-spec what path suff)))
+          (if file
+              (let ((file     (car file))
+                    (lib-name (cdr file)))
+                (%load file '() '())  ;; '() => no path & no suffixes
+                (when lib-name
+                  (%do-imports (find-module 'STklos)
+                               (list (list lib-name)))
+                  (provide what)))
+              (%cannot-load what))))
+
+      (when (and (warning-when-not-provided)
+                 (not (member what provided)))
+        (format (current-error-port) "WARNING: ~S was not provided~%" what))
+      what))
+
+
+  (set! require
+    (lambda (what)
+      (%%require what (load-path))))
+
 
   (set! require/provide
-                  (lambda (what)
-                    (unless (member what provided)
-                      (%load what (load-path) (load-suffixes)))
-                    (provide what)))
+    (lambda (what)
+      (unless (member what provided)
+        (%load what (load-path) (load-suffixes)))
+      (provide what)))
 
-  (set! provide   (lambda (what)
-                    (unless (member what provided)
-                      (set! provided (cons what provided)))
-                    what))
 
-  (set! provided? (lambda (what)
-                    (and (member what provided) #t))))
+  (set! provide
+    (lambda (what)
+      (unless (member what provided)
+        (set! provided (cons what provided)))
+      what))
+
+
+  (set! provided?
+    (lambda (what)
+      (and (member what provided) #t))))
 
 ;; Overload require with a macro to let the compiler deal with globals
 
 #| HACK: FIXME:
  This version of require is a hacked one that transforms calls such
  as (require "srfi-N") in the sequence
-  (define-module STklo
-    (import (srfi N))
-    (provide "srfi-N"))
+  (define-module STklos
+    (import (srfi N)))
+  (provide "srfi-N"))
  It is temporary and should be changed when require will no more be used
  for using SRFIs (and the documentation adapted)
 |#
@@ -381,8 +420,8 @@ doc>
             (let* ((number (string->number (cadr match)))
                    (lib    `(srfi ,number)))
               (unless (find-path what) ;; temporary
-                (set! expansion `(define-module STklos 
-                                   (import ,lib)
+                (set! expansion `(begin
+                                   (define-module STklos (import ,lib))
                                    (provide ,what))))))))
     expansion))
 

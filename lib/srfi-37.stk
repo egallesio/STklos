@@ -40,15 +40,17 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 03-Jul-2020 06:39 (jpellegrini)
-;;;; Last file update:  9-Oct-2020 10:52 (eg)
+;;;; Last file update: 17-Nov-2021 18:52 (eg)
 ;;;;
 
 
-(require "srfi-9")
-(require "srfi-13")
+;;(require "srfi-9")
+;;(require "srfi-13")
 
 (define-module SRFI-37
-  (import SRFI-13)
+  (import (srfi 9)
+          (srfi 13))
+  
   (export option option-names option-required-arg?
           option-optional-arg? option-processor
           args-fold)

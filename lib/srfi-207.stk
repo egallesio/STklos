@@ -5,8 +5,9 @@
 (require "srfi-158")
 
 (define-module SRFI-207
-  (import srfi/1)
-  (import SRFI-13)
+  (import (srfi 1)
+          (srfi 9)
+          (srfi 13))
   (import SRFI-151)
   (import SRFI-158)
   (export bytestring bytevector->hex-string bytestring->list
