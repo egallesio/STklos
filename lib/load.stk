@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-May-2000 14:55 (eg)
-;;;; Last file update: 18-Nov-2021 15:43 (eg)
+;;;; Last file update: 18-Nov-2021 22:47 (eg)
 ;;;;
 
 
@@ -326,29 +326,40 @@ doc>
 
 (define warning-when-not-provided (make-parameter #t))
 
+
+#| HACK: FIXME:
+ This version of require is a hacked one that transforms calls such
+ as (require "srfi-N") in the sequence
+  (begin
+    (define-module STklos (import (srfi N)))
+    (provide "srfi-N"))
+ It is temporary and should be changed when require will no more be used
+ for using SRFIs (and the documentation adapted)
+|#
+(define (%rewrite-require-spec spec path suff)
+  (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" spec)))  ;; Not srfi-0
+    (if match
+        ;; We required "srfi-N", try to transform it in "srfi/N"
+        ;; We don't try first with "srfi-N", because we could find
+        ;; old installed versions lying around
+        (let* ((new (format "srfi/~a" (cadr match)))
+               (lib  (string->symbol new))
+               (file (find-path new path suff)))
+          (if file
+              (cons file lib)
+              (let ((file (find-path spec path suff)))
+                (and file
+                     (cons file #f)))))
+        ;; Non-SRFI require
+        (let ((file (find-path spec path suff)))
+          (and file
+               (cons file #f))))))
+
+;; ----------------------------------------
 (let ((provided '())
       (stklos-building? (getenv "STKLOS_BUILDING")))
 
-  (define (rewrite-require-spec spec path suff)
-    (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" spec)))  ;; Not srfi-0
-      (if match
-          ;; We required "srfi-N", try to transform it in "srfi/N"
-          ;; We don't try first with "srfi-N", because we could find
-          ;; old installed versions lying around
-          (let* ((new (format "srfi/~a" (cadr match)))
-                 (lib  (string->symbol new))
-                 (file (find-path new path suff)))
-            (if file
-                (cons file lib)
-                (let ((file (find-path spec path suff)))
-                  (and file
-                       (cons file #f)))))
-          ;; Non-SRFI require
-          (let ((file (find-path spec path suff)))
-            (and file
-                 (cons file #f))))))
-
-
+  
   (set! %%require
     (lambda (what lib-only?)
       (when stklos-building?
@@ -361,7 +372,7 @@ doc>
                          (list (make-path (%library-prefix) "share" "stklos" (version)))
                          (load-path)))
                (suff (load-suffixes))
-               (file (rewrite-require-spec what path suff)))
+               (file (%rewrite-require-spec what path suff)))
           (if file
               (let ((file     (car file))
                     (lib-name (cdr file)))
@@ -401,29 +412,19 @@ doc>
     (lambda (what)
       (and (member what provided) #t))))
 
-;; Overload require with a macro to let the compiler deal with globals
 
-#| HACK: FIXME:
- This version of require is a hacked one that transforms calls such
- as (require "srfi-N") in the sequence
-  (define-module STklos
-    (import (srfi N)))
-  (provide "srfi-N"))
- It is temporary and should be changed when require will no more be used
- for using SRFIs (and the documentation adapted)
-|#
+;; Overload require with a macro to let the compiler deal with globals
 (define-macro (require what)
-  (let ((expansion  `(%%require ,what #f)))
-    (if (string? what)
-        (let ((match (regexp-match"^srfi-([1-9][0-9]*)$" what)))  ;; Not srfi-0
-          (when match
-            (let* ((number (string->number (cadr match)))
-                   (lib    `(srfi ,number)))
-              (unless (find-path what) ;; temporary
-                (set! expansion `(begin
-                                   (define-module STklos (import ,lib))
-                                   (provide ,what))))))))
-    expansion))
+  (if (string? what)
+      (let ((spec (%rewrite-require-spec what (load-path) (load-suffixes))))
+        (if (and spec (cdr spec))
+            ;; spec is of the form ("name of file to load" lib-name)
+            `(begin
+               (define-module STklos (import ,(cdr spec)))
+               (provide ,what))
+            `(%%require ,what #f)))
+      `(%%require ,what #f)))
+
 
 (define-macro (require-library what)
   `(%%require ,what #t))
