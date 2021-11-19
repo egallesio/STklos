@@ -19,20 +19,35 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 16-Nov-2021 12:00 (eg)
+# Last file update: 19-Nov-2021 21:41 (eg)
 
 #======================================================================
 
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
+SO = @SH_SUFFIX@
 
+#
+# SRFI written in Scheme
+#
 SRC_STK   = 1.stk 2.stk 4.stk 5.stk 6.stk 7.stk 8.stk 9.stk 10.stk \
             11.stk 13.stk 14.stk 17.stk
+SRC_OSTK = 1.ostk 2.ostk 4.ostk 5.ostk 6.ostk 7.ostk 8.ostk 9.ostk 10.ostk \
+           11.ostk 13.ostk 14.ostk 17.ostk
+#
+# SRFIs written in C and Scheme
+#
+SRC_C     = 25.c
+SRC_C_STK = 25.stk
+SRC_SHOBJ = 25.$(SO)
 
-srfi_OBJS = 1.ostk 2.ostk 4.ostk 5.ostk 6.ostk 7.ostk 8.ostk 9.ostk 10.ostk \
-            11.ostk 13.ostk 14.ostk 17.ostk
+srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
+
+DOCDB  = ../../DOCDB
+BASEDIR= ../../..
+SOURCES= $(SRC_C) $(SRC_STK)
 
 #======================================================================
 srfidir       = $(prefix)/share/@PACKAGE@/@VERSION@/srfi
@@ -40,14 +55,25 @@ srfi_sources  = $(SRC_STK)
 srfi_DATA     = $(srfi_OBJS)
 
 #======================================================================
-SUFFIXES = .stk .ostk
+SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
 
+.stk-incl.c:
+	$(COMP) -C -o $*-incl.c $*.stk
 
+.c.$(SO) :
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
+	-c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	/bin/rm -f $*.o
+
+#======================================================================
+
+# Dependencies
 13.ostk: 14.ostk
-
+25.$(SO): 25-incl.c 25.c
 
 #======================================================================
 
@@ -55,7 +81,7 @@ install-sources:
 	install $(srfi_sources) $(srfidir)
 
 clean:
-	rm -f $(srfi_OBJS)  *~
+	rm -f $(srfi_OBJS) *-incl.c *~
 
 distclean: clean
 	/bin/rm -f Makefile
@@ -63,3 +89,7 @@ distclean: clean
 uninstall-hook:
 	(cd $(srfidir); rm -f $(srfi_sources))
 	rmdir $(srfidir) || true
+
+doc:
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img \
+		-f ../doc/extract-doc $(SOURCES) >> $(DOCDB)

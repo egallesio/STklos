@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 16-Nov-2021 12:00 (eg)
+# Last file update: 19-Nov-2021 21:21 (eg)
 
 #======================================================================
 
@@ -135,7 +135,6 @@ AM_V_at = $(am__v_at_@AM_V@)
 am__v_at_ = $(am__v_at_@AM_DEFAULT_V@)
 am__v_at_0 = @
 am__v_at_1 = 
-SOURCES =
 DIST_SOURCES =
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -172,6 +171,22 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(srfidir)"
 DATA = $(srfi_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
+# Read a list of newline-separated strings from the standard input,
+# and print each of them once, without duplicates.  Input order is
+# *not* preserved.
+am__uniquify_input = $(AWK) '\
+  BEGIN { nonempty = 0; } \
+  { items[$$0] = 1; nonempty = 1; } \
+  END { if (nonempty) { for (i in items) print i; }; } \
+'
+# Make sure the list of sources is unique.  This is necessary because,
+# e.g., the same source file might be shared among _SOURCES variables
+# for different programs/libraries.
+am__define_uniq_tagged_files = \
+  list='$(am__tagged_files)'; \
+  unique=`for i in $$list; do \
+    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+  done | $(am__uniquify_input)`
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/mkinstalldirs
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -324,12 +339,27 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 STKLOS_FLAGS = --no-init-file --case-sensitive
+SO = @SH_SUFFIX@
+
+#
+# SRFI written in Scheme
+#
 SRC_STK = 1.stk 2.stk 4.stk 5.stk 6.stk 7.stk 8.stk 9.stk 10.stk \
-            11.stk 13.stk 14.stk 17.stk
+            11.stk 13.stk 14.stk
 
-srfi_OBJS = 1.ostk 2.ostk 4.ostk 5.ostk 6.ostk 7.ostk 8.ostk 9.ostk 10.ostk \
-            11.ostk 13.ostk 14.ostk 17.ostk
+SRC_OSTK = 1.ostk 2.ostk 4.ostk 5.ostk 6.ostk 7.ostk 8.ostk 9.ostk 10.ostk \
+           11.ostk 13.ostk 14.ostk
 
+#
+# SRFIs written in C and Scheme
+#
+SRC_C = 25.c
+SRC_C_STK = 25.stk
+SRC_SHOBJ = 25.$(SO)
+srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
+DOCDB = ../../DOCDB
+BASEDIR = ../../..
+SOURCES = $(SRC_C) $(SRC_STK)
 
 #======================================================================
 srfidir = $(prefix)/share/@PACKAGE@/@VERSION@/srfi
@@ -337,11 +367,11 @@ srfi_sources = $(SRC_STK)
 srfi_DATA = $(srfi_OBJS)
 
 #======================================================================
-SUFFIXES = .stk .ostk
+SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .stk .ostk
+.SUFFIXES: .stk .ostk .stk -incl.c .$(SO) .c
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -392,12 +422,58 @@ uninstall-srfiDATA:
 	@list='$(srfi_DATA)'; test -n "$(srfidir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(srfidir)'; $(am__uninstall_files_from_dir)
-tags TAGS:
 
-ctags CTAGS:
+ID: $(am__tagged_files)
+	$(am__define_uniq_tagged_files); mkid -fID $$unique
+tags: tags-am
+TAGS: tags
 
-cscope cscopelist:
+tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
+	set x; \
+	here=`pwd`; \
+	$(am__define_uniq_tagged_files); \
+	shift; \
+	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
+	  test -n "$$unique" || unique=$$empty_fix; \
+	  if test $$# -gt 0; then \
+	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+	      "$$@" $$unique; \
+	  else \
+	    $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
+	      $$unique; \
+	  fi; \
+	fi
+ctags: ctags-am
 
+CTAGS: ctags
+ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
+	$(am__define_uniq_tagged_files); \
+	test -z "$(CTAGS_ARGS)$$unique" \
+	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
+	     $$unique
+
+GTAGS:
+	here=`$(am__cd) $(top_builddir) && pwd` \
+	  && $(am__cd) $(top_srcdir) \
+	  && gtags -i $(GTAGS_ARGS) "$$here"
+cscopelist: cscopelist-am
+
+cscopelist-am: $(am__tagged_files)
+	list='$(am__tagged_files)'; \
+	case "$(srcdir)" in \
+	  [\\/]* | ?:[\\/]*) sdir="$(srcdir)" ;; \
+	  *) sdir=$(subdir)/$(srcdir) ;; \
+	esac; \
+	for i in $$list; do \
+	  if test -f "$$i"; then \
+	    echo "$(subdir)/$$i"; \
+	  else \
+	    echo "$$sdir/$$i"; \
+	  fi; \
+	done >> $(top_builddir)/cscope.files
+
+distclean-tags:
+	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 distdir: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) distdir-am
 
@@ -470,7 +546,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean-am: clean-generic mostlyclean-am
 
-distclean-am: clean-am distclean-generic
+distclean-am: clean-am distclean-generic distclean-tags
 
 dvi: dvi-am
 
@@ -533,16 +609,17 @@ uninstall-am: uninstall-srfiDATA
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 .MAKE: install-am install-strip uninstall-am
 
-.PHONY: all all-am check check-am clean clean-generic cscopelist-am \
-	ctags-am distclean distclean-generic distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-srfiDATA install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
-	pdf-am ps ps-am tags-am uninstall uninstall-am uninstall-hook \
+.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
+	cscopelist-am ctags ctags-am distclean distclean-generic \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-srfiDATA install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags \
+	tags-am uninstall uninstall-am uninstall-hook \
 	uninstall-srfiDATA
 
 .PRECIOUS: Makefile
@@ -554,7 +631,20 @@ STKLOS_BINARY ?= ../src/stklos
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
 
+.stk-incl.c:
+	$(COMP) -C -o $*-incl.c $*.stk
+
+.c.$(SO) :
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
+	-c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	/bin/rm -f $*.o
+
+#======================================================================
+
+# Dependencies
 13.ostk: 14.ostk
+25.$(SO): 25-incl.c 25.c
 
 #======================================================================
 
@@ -562,7 +652,7 @@ install-sources:
 	install $(srfi_sources) $(srfidir)
 
 clean:
-	rm -f $(srfi_OBJS)  *~
+	rm -f $(srfi_OBJS) *-incl.c *~
 
 distclean: clean
 	/bin/rm -f Makefile
@@ -570,6 +660,10 @@ distclean: clean
 uninstall-hook:
 	(cd $(srfidir); rm -f $(srfi_sources))
 	rmdir $(srfidir) || true
+
+doc:
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img \
+		-f ../doc/extract-doc $(SOURCES) >> $(DOCDB)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
