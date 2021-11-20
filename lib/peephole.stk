@@ -203,7 +203,7 @@
                                           (this-arg1 code)
                                           (next-arg1 code))))
 
-             ;; [GLOBAL-REF, TAIL-INVOKE] => GREF-TAIL(INVOKE
+             ;; [GLOBAL-REF, TAIL-INVOKE] => GREF-TAIL-INVOKE
              ((and (eq? i1 'GLOBAL-REF) (eq? i2 'TAIL-INVOKE))
               (replace-2-instr code (list 'GREF-TAIL-INVOKE
                                           (this-arg1 code)
@@ -228,13 +228,24 @@
              ;; Algebraic simplification
              ;; 0 + x => x
              ;; 1 * x => x
+             ;;
+             ;; [IN-SINT-ADD2 0]   => nil
+             ;; [IN-SINT-FXADD2 0] => nil
+             ;; [IN-SINT-DIV2 1]   => nil
+             ;; [IN-SINT-MUL2 1]   => nil
+             ;; [IN-SINT-FXMUL2 1] => nil
+             ;;
+             ;; remark: 0.0 and 1.0 are *not* considered because they may
+             ;;         change the type of the result.
+             ;;         (let ((a 4)) (+ a 0.0))  =>  4.0
+             ;;         'a' was exact, became inexact...
              ((or (and (memq i2 '(IN-SINT-ADD2 IN-SINT-FXADD2))
                        (eq? (next-arg1 code) 0))
                   (and (eq? i2  'IN-SINT-DIV2)
                        (eq? (next-arg1 code) 1))
                   (and (memq i2 '(IN-SINT-MUL2 IN-SINT-FXMUL2))
                        (eq? (next-arg1 code) 1)))
-               (set-cdr! code (cddr code)))
+              (set-cdr! code (cddr code)))   ;; skip the *second* instruction!
 
              (else ;; No optimization; goto next instruction
               (set! code (cdr code))))))
