@@ -225,6 +225,17 @@
              ((and (eq? i1 'RETURN) (eq? i2 'RETURN))
               (replace-2-instr code (list 'RETURN)))
 
+             ;; Algebraic simplification
+             ;; 0 + x => x
+             ;; 1 * x => x
+             ((or (and (memq i2 '(IN-SINT-ADD2 IN-SINT-FXADD2))
+                       (eq? (next-arg1 code) 0))
+                  (and (eq? i2  'IN-SINT-DIV2)
+                       (eq? (next-arg1 code) 1))
+                  (and (memq i2 '(IN-SINT-MUL2 IN-SINT-FXMUL2))
+                       (eq? (next-arg1 code) 1)))
+               (set-cdr! code (cddr code)))
+
              (else ;; No optimization; goto next instruction
               (set! code (cdr code))))))
       ;; Loop again on the same instruction
