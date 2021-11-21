@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-29.stk         -- SRFI-29: Localization
+;;;; srfi/29.stk         -- SRFI-29: Localization
 ;;;;
 ;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
 ;;;;
@@ -51,20 +51,19 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Apr-2021 20:20
-;;;; Last file update:  8-Jun-2021 09:54 (eg)
+;;;; Last file update: 21-Nov-2021 20:13 (eg)
 ;;;;
 
-(define %stklos-format format)
-
-(define-module SRFI-29
-
+(define-module srfi/29
+  (import (rename (only SCHEME format) (format %stklos-format)))
   (export current-language
           current-country
           current-locale-details
           load-bundle!
           store-bundle!
           declare-bundle!
-          localized-template)
+          localized-template
+          (rename %srfi-29:format format))
 
 ;; The association list in which bundles will be stored
 (define *localization-bundles* '())
@@ -280,10 +279,5 @@
 
 );; END OF DEFINE-MODULE
 
-(select-module STklos)
 
-(import SRFI-29)
-
-(define format (in-module SRFI-29 %srfi-29:format))
-
-(provide "srfi-29")
+(provide "srfi/29")
