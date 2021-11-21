@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 21-Nov-2021 11:35 (eg)
+# Last file update: 21-Nov-2021 13:26 (eg)
 
 #======================================================================
 
@@ -32,9 +32,11 @@ SO = @SH_SUFFIX@
 # SRFI written in Scheme
 #
 SRC_STK   = 1.stk 2.stk 4.stk 5.stk 6.stk 7.stk 8.stk 9.stk 10.stk \
-            11.stk 13.stk 14.stk 17.stk
+            11.stk 13.stk 14.stk 16.stk 17.stk 18.stk \
+            22.stk
 SRC_OSTK = 1.ostk 2.ostk 4.ostk 5.ostk 6.ostk 7.ostk 8.ostk 9.ostk 10.ostk \
-           11.ostk 13.ostk 14.ostk 17.ostk
+           11.ostk 13.ostk 14.ostk 16.ostk 17.ostk 18.ostk \
+           22.ostk
 #
 # SRFIs written in C and Scheme
 #

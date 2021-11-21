@@ -21,12 +21,14 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 28-May-2002 09:47 (eg)
-;;;; Last file update: 14-Nov-2021 20:10 (eg)
+;;;; Last file update: 21-Nov-2021 12:11 (eg)
 ;;;;
 
 
 ;; let-syntax and let*-values are now R7RS. This file is kept for compatibility
 ;; (in case it is required by some old code)
+
+(define-module srfi/11)    ;; In case we have an (import (srfi 11))
 
 (provide "srfi/11")
 
