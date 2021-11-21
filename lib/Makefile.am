@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Nov-2021 11:32 (eg)
+# Last file update: 21-Nov-2021 16:36 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme srfi                       \
@@ -84,7 +84,6 @@ SRC_STK = bigloo-support.stk  \
           slib.stk            \
           streams-primitive.stk \
           streams-derived.stk \
-          srfi-26.stk         \
           srfi-29.stk         \
           srfi-31.stk         \
           srfi-35.stk         \
@@ -153,7 +152,6 @@ scheme_OBJS = compfile.ostk     \
           slib.ostk             \
           streams-primitive.ostk \
           streams-derived.ostk   \
-          srfi-26.ostk          \
           srfi-29.ostk          \
           srfi-31.ostk          \
           srfi-35.ostk          \

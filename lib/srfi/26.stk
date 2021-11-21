@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfi-26.stk        -- SRFI-26 implementation
 ;;;;
-;;;; Copyright © 2003-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2003-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,9 +21,16 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 19-Dec-2003 12:57 (eg)
-;;;; Last file update:  4-May-2007 19:49 (eg)
+;;;; Last file update: 21-Nov-2021 17:21 (eg)
 ;;;;
 
+
+(define-module srfi/26
+  (export cut cute)
+
+  (define cut  "<<FIXME>>")  ;; should be deleted
+  (define cute "<<FIXME>>")
+  
 ;; ======================================================================
 ;;
 ;;                              C U T
@@ -69,7 +76,7 @@
           (let* ((body (reverse pos)))
             `(let ,(reverse bindings)
                (lambda ,(reverse slot-names)
-                 ,@body))))
+                 ,body))))
       ((eq? (car lst) '<...>)
           (let* ((rest (gensym))
                  (body (reverse pos)))
@@ -92,5 +99,7 @@
   ;;
   (aux slots-or-exprs '() '() '()))
 
-(export-syntax cute cut)
-(provide "srfi-26")
+(export-syntax cute cut))
+
+
+(provide "srfi/26")
