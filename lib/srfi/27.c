@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 03-May-2021 15:22
- * Last file update: 21-Nov-2021 11:36 (eg)
+ * Last file update: 21-Nov-2021 12:05 (eg)
  */
 
 #include <gmp.h>
@@ -143,7 +143,7 @@ static int tc_state_mt;
    email: m-mat @ math.sci.hiroshima-u.ac.jp (remove spaces)
 */
 
-#include "mt64.h"
+#include "include/mt64.h"
 
 #define NN 312
 #define MM 156
