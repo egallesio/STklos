@@ -21,7 +21,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 03-May-2021 15:22
- * Last file update: 24-Sep-2021 09:49 (eg)
+ * Last file update: 21-Nov-2021 11:36 (eg)
  */
 
 #include <gmp.h>
@@ -32,7 +32,7 @@
 #include "stklos.h"
 #include "struct.h"
 
-#include "srfi-27-incl.c"
+#include "27-incl.c"
 
 
 /********
@@ -464,9 +464,9 @@ DEFINE_PRIMITIVE("%random-real-from-source-mt", srfi_27_rnd_real_src_mt, subr1, 
 
 extern SCM find_module(SCM name, int create);
 
-MODULE_ENTRY_START("srfi-27")
+MODULE_ENTRY_START("srfi/27")
 {
-  SCM module =  STk_create_module(STk_intern("SRFI-27"));
+  SCM module =  STk_create_module(STk_intern("srfi/27"));
 
   tc_state_mt = STk_new_user_type(&xtype_state_mt);
 

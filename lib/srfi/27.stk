@@ -21,10 +21,10 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 28-Apr-2021 02:01
-;;;; Last file update: 21-May-2021 10:36 (eg)
+;;;; Last file update: 21-Nov-2021 11:40 (eg)
 ;;;;
 
-(select-module SRFI-27)
+(select-module srfi/27)
 
 (export default-random-source
         random-integer
@@ -253,9 +253,7 @@
 ;;;
 ;;; END OF SRFI-27 CODE
 ;;;
-
-(select-module STklos)
-(import SRFI-27)
+(provide "srfi/27")
 
 #|
 <doc EXT random-integer
@@ -279,10 +277,16 @@ doc>
 |#
 
 ;; These two procedures were broken due to autoloads, so we force their definition here
-(define (random-integer n) ((in-module SRFI-27 %random-integer-from-source-mt)
-                            ((in-module SRFI-27 %random-source-state-ref) default-random-source) n))
-(define (random-real)      ((in-module SRFI-27 %random-real-from-source-mt)
-                            ((in-module SRFI-27 %random-source-state-ref) default-random-source)))
+
+(define-module STklos
+  (import (srfi 27))
+
+  (define (random-integer n)
+    ((in-module srfi/27 %random-integer-from-source-mt)
+     ((in-module srfi/27 %random-source-state-ref) default-random-source) n))
+
+  (define (random-real)
+    ((in-module srfi/27 %random-real-from-source-mt)
+     ((in-module srfi/27 %random-source-state-ref) default-random-source))))
 
 
-(provide "srfi-27")
