@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-26.stk	-- SRFI-26 implementation
+;;;; srfi-26.stk        -- SRFI-26 implementation
 ;;;;
 ;;;; Copyright © 2003-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
@@ -26,7 +26,7 @@
 
 ;; ======================================================================
 ;;
-;; 				C U T
+;;                              C U T
 ;;
 ;; ======================================================================
 (define-macro (cut . slots-or-exprs)
@@ -34,24 +34,24 @@
     (cond
       ((null? lst)
           (let* ((tmp  (reverse pos))
-		 (fct  (car tmp))
-		 (body (cdr tmp)))
-	    `(lambda ,(reverse slot-names)
-	       ((begin ,fct) ,@body))))
+                 (fct  (car tmp))
+                 (body (cdr tmp)))
+            `(lambda ,(reverse slot-names)
+               ((begin ,fct) ,@body))))
       ((eq? (car lst) '<...>)
           (let* ((rest (gensym))
-		 (body (reverse pos)))
-	    `(lambda (,@(reverse slot-names) . ,rest)
-	       (apply ,@body ,rest))))
+                 (body (reverse pos)))
+            `(lambda (,@(reverse slot-names) . ,rest)
+               (apply ,@body ,rest))))
       ((eq? (car lst) '<>)
           (let ((x (gensym)))
-	    (aux (cdr lst)
-		 (cons x slot-names)
-		 (cons x pos))))
+            (aux (cdr lst)
+                 (cons x slot-names)
+                 (cons x pos))))
       (else
           (aux (cdr lst)
-	       slot-names
-	       (cons (car lst) pos)))))
+               slot-names
+               (cons (car lst) pos)))))
   ;;
   (aux slots-or-exprs '() '()))
 
@@ -59,7 +59,7 @@
 
 ;; ======================================================================
 ;;
-;; 				C U T E
+;;                              C U T E
 ;;
 ;; ======================================================================
 (define-macro (cute . slots-or-exprs)
@@ -67,28 +67,28 @@
     (cond
       ((null? lst)
           (let* ((body (reverse pos)))
-	    `(let ,(reverse bindings)
-	       (lambda ,(reverse slot-names)
-		 ,@body))))
+            `(let ,(reverse bindings)
+               (lambda ,(reverse slot-names)
+                 ,@body))))
       ((eq? (car lst) '<...>)
           (let* ((rest (gensym))
-		 (body (reverse pos)))
-	    `(let ,(reverse bindings)
-		 (lambda (,@(reverse slot-names) . ,rest)
-		   (apply ,@body ,rest)))))
+                 (body (reverse pos)))
+            `(let ,(reverse bindings)
+                 (lambda (,@(reverse slot-names) . ,rest)
+                   (apply ,@body ,rest)))))
       ((eq? (car lst) '<>)
           (let ((x (gensym)))
-	    (aux (cdr lst)
-		 (cons x slot-names)
-		 (cons x pos)
-		 bindings)))
+            (aux (cdr lst)
+                 (cons x slot-names)
+                 (cons x pos)
+                 bindings)))
       (else
           (let ((x (gensym)))
-	    (aux (cdr lst)
-		 slot-names
-		 (cons x pos)
-		 (cons (list x (car lst))
-		       bindings))))))
+            (aux (cdr lst)
+                 slot-names
+                 (cons x pos)
+                 (cons (list x (car lst))
+                       bindings))))))
   ;;
   (aux slots-or-exprs '() '() '()))
 
