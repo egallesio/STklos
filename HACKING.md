@@ -549,7 +549,7 @@ STklos uses a peephole optimzier, located in the file `lib/peephole.stk`.
 This optimizer will transform several instruction patterns in the generated code into
 more efficient ones. For example:
 
-```
+```scheme
              ;; [SMALL-INT, PUSH] => INT-PUSH
              ((and (eq? i1 'SMALL-INT) (eq? i2 'PUSH))
               (replace-2-instr code (list 'INT-PUSH (this-arg1 code))))
@@ -561,7 +561,7 @@ onto the stack).
 
 The peephole optimizer also reduces the size of the bytecode:
 
-```
+```scheme
              ;; [RETURN; RETURN] => [RETURN]
              ((and (eq? i1 'RETURN) (eq? i2 'RETURN))
               (replace-2-instr code (list 'RETURN)))
@@ -574,7 +574,7 @@ between the two `RETURN`s.
 
 Another example is `GOTO` optimization:
 
-```
+```scheme
              ;; [GOTO x], ... ,x: GOTO y => GOTO y
              ;; [GOTO x], ... ,x: RETURN => RETURN
              ((eq? i1 'GOTO)
@@ -588,7 +588,7 @@ perform the transformations indicated in the comments.
 The input code is represented as a list.
 Some relevant definitions are in the beginning of the file:
 
-```
+```scheme
 (label? code)      ; is thecurrent instruction a label?
 (this-instr code)  ; the current instruction (reference to a position in the list)
 (next-instr code)  ; the next instruction (cdr of the current one)
@@ -603,7 +603,7 @@ Some relevant definitions are in the beginning of the file:
 STklos uses the Boehm-Demers-Weiser garbage collector.
 The wrapper for the GC is located in the header file `src/stklos.h`:
 
-```
+```c
 #define STk_must_malloc(size)           GC_MALLOC(size)
 #define STk_must_malloc_atomic(size)    GC_MALLOC_ATOMIC(size)
 #define STk_must_realloc(ptr, size)     GC_REALLOC((ptr), (size))
