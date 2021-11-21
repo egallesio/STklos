@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 21-Nov-2021 18:59 (eg)
+# Last file update: 21-Nov-2021 21:28 (eg)
 
 #======================================================================
 
@@ -49,7 +49,7 @@ srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
 
 DOCDB  = ../../DOCDB
-BASEDIR= ../../..
+BASEDIR= ../..
 SOURCES= $(SRC_C) $(SRC_STK)
 
 #======================================================================
