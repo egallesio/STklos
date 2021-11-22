@@ -41,7 +41,7 @@
 (test/error "lex-scope macros 5" (test-syntax-2))
 
 
-;; Define a variable in one modeule, and a global macro in
+;; Define a variable in one module, and a global macro in
 ;; a different module. The variable binding in the previous module
 ;; should not be affected
 (define test-syntax-3 "a string")
