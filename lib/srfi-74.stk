@@ -38,12 +38,11 @@
 ; This uses SRFIs 23, 26, 60, and 66
 
 (require "srfi-26")
-(require "srfi-60")
 (require "srfi-66")
 
 (define-module SRFI-74
   (import srfi/4)
-  (import SRFI-60)
+  (import (srfi 60))
   (export endianness blob? make-blob blob-length
           blob-u8-ref blob-s8-ref
           blob-u8-set! blob-s8-set!
