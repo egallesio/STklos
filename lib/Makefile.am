@@ -25,7 +25,7 @@
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme srfi                       \
 		  srfi-133 \
-		  srfi-144 srfi-170 srfi-175
+		  srfi-144 srfi-175
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos

@@ -383,7 +383,7 @@ top_srcdir = @top_srcdir@
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme srfi                       \
 		  srfi-133 \
-		  srfi-144 srfi-170 srfi-175
+		  srfi-144 srfi-175
 
 STKLOS_FLAGS = --no-init-file --case-sensitive
 scheme_BOOT = assembler.stk \
