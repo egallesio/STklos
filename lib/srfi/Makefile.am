@@ -41,9 +41,9 @@ SRC_OSTK = 1.ostk 2.ostk 4.ostk 5.ostk 6.ostk 7.ostk 8.ostk 9.ostk 10.ostk \
 #
 # SRFIs written in C and Scheme
 #
-SRC_C     = 25.c     27.c
-SRC_C_STK = 25.stk   27.stk
-SRC_SHOBJ = 25.$(SO) 27.$(SO)
+SRC_C     = 25.c     27.c     132.c
+SRC_C_STK = 25.stk   27.stk   132.stk
+SRC_SHOBJ = 25.$(SO) 27.$(SO) 132.$(SO)
 
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
@@ -77,8 +77,9 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 # Dependencies
 13.ostk: 14.ostk
 
-25.$(SO): 25-incl.c 25.c
-27.$(SO): 27-incl.c 27.c
+25.$(SO):  25-incl.c  25.c
+27.$(SO):  27-incl.c  27.c
+132.$(SO): 132-incl.c 132.c
 
 #======================================================================
 
