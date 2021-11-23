@@ -46,6 +46,52 @@
 
 ;; ______________________________________________________________________
 
+(test-subsection "Testing library syntax")
+
+(test/error "bad library name.1"
+            (define-library (a (b (c))) (export d) (begin (define d 1000))))
+
+(test/error "bad library name.2"
+            (define-library #(a (b)) (export d) (begin (define d 1000))))
+
+(test/error "bad library name.3"
+            (define-library "a" (export d) (begin (define d 1000))))
+
+(test/error "bad library name.4"
+            (define-library 10 (export d) (begin (define d 1000))))
+
+(test/error "bad library name.5"
+            (define-library (a . b)))
+
+(define-library (lib-one lib-two) (export three) (begin (define three 3)))
+
+(test "library name a/b <-> (a b).1"
+      3
+      (in-module lib-one/lib-two three))
+
+(define-library lib-a/lib-b (export c) (begin (define c 1000)))
+(define-library lib-ab (import (lib-a lib-b)) (export c))
+
+(test "library name a/b <-> (a b).2"
+      1000
+      (in-module lib-ab c))
+
+(define-library (1 2) (export three) (begin (define three 3)))
+(define-library one-two (import |1/2|))
+
+(test "library-name a/b <-> (a b).3"
+      3
+      (in-module |1/2| three))
+
+(define-library |10/20| (export thirty) (begin (define thirty 30)))
+(define-library ten-twenty (import (10 20)))
+
+(test "library-name a/b <-> (a b).4"
+      30
+      (in-module ten-twenty thirty))
+
+;; ______________________________________________________________________
+
 (test-subsection "Testing exportation list")
 
 (define-library (test1)
@@ -82,6 +128,8 @@
       (library-symbols 'test2))
 
 
+
+;; ----------------------------------------------------------------------
 (test-subsection "Testing simple imports")
 
 (test "import.1"
