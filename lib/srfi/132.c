@@ -25,7 +25,7 @@
  */
 
 #include <stklos.h>
-#include "srfi-132-incl.c"
+#include "132-incl.c"
 
 static void error_bad_list(SCM x)
 {
@@ -1117,9 +1117,9 @@ DEFINE_PRIMITIVE("vector-delete-neighbor-dups",
     return u;
 }
 
-MODULE_ENTRY_START("srfi-132")
+MODULE_ENTRY_START("srfi/132")
 {
-    SCM module =  STk_create_module(STk_intern("SRFI-132"));
+    SCM module =  STk_create_module(STk_intern("srfi/132"));
 
     ADD_PRIMITIVE_IN_MODULE(list_sorted,module);
     ADD_PRIMITIVE_IN_MODULE(vector_sorted,module);

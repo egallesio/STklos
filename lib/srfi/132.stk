@@ -23,7 +23,7 @@
 ;;;; Last file update: 26-Sep-2021 19:52 (eg)
 
 
-(select-module SRFI-132)
+(select-module srfi/132)
 
 (export list-sort
         list-sort!
@@ -222,6 +222,4 @@
   (apply vector-select! args)
   #void)
 
-(select-module STklos)
-(import SRFI-132)
-(provide "srfi-132")
+(provide "srfi/132")
