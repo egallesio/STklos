@@ -81,7 +81,7 @@
         (string-append
           "Symbols beginning with '%' are intended for low-level use \n"
           "and have therefore been left undocumented.\n"
-          "Furthermore, they can be changed without notice. Dont use them.\n"))
+          "Furthermore, they can be changed without notice. Don't use them.\n"))
       (else
          ;; no documentation
          #f))))

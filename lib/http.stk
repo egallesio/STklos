@@ -270,6 +270,14 @@
 ;; ----------------------------------------------------------------------
 ;;	http-download ...
 ;; ----------------------------------------------------------------------
+#|
+<doc EXT http-download
+ * (http-download url dest)
+ *
+ * Downloads the contents at |url| using HTTP, and sends the result to
+ * |dest|, which must be an output port.
+doc>
+|#
 (define (http-download url dest)
 
   (define (get-username str)

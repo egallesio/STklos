@@ -108,7 +108,6 @@
 - ,pwd             Print working directory
 - ,quit ,q         Exit STklos
 - ,shell ,!        Run a shell command
-
 - ,help ,? ,h      This help\n")
                                    'normal)
                          (current-error-port))
