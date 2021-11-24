@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r7rs.stk   -- R7RS support (Draft-3)
 ;;;;
-;;;; Copyright © 2011-2020 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2021 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 15-Oct-2020 18:53 (eg)
+;;;; Last file update: 24-Nov-2021 13:10 (eg)
 ;;;;
 
 
@@ -1369,20 +1369,18 @@ doc>
 
 (define-struct %continuable-exception value)
 
-(define-macro (with-exception-handler handler thunk)
-  (let ((v   (gensym))
-        (res (gensym))
-        (err (gensym)))
-    `(let ((,res (with-handler (lambda(,v)
-                                 (if (%continuable-exception? ,v)
-                                    (,handler (%continuable-exception-value ,v))
-                                    (begin
-                                      (,handler ,v)
-                                      ',err)))
-                                 (,thunk))))
-       (if (eq? ,res ',err)
-           (error "exception handler returned on non-continuable exception")
-          ,res))))
+(define (with-exception-handler handler thunk)
+  (let* ((err (gensym))
+         (res (with-handler (lambda(v)
+                              (if (%continuable-exception? v)
+                                  (handler (%continuable-exception-value v))
+                                 (begin
+                                   (handler v)
+                                   err)))
+                            (thunk))))
+    (if (eq? res err)
+        (error "exception handler returned on non-continuable exception")
+        res)))
 
 #|
 <doc R7RS raise-continuable
