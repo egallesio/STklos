@@ -6,7 +6,7 @@
 ;;;;           Author: Michael Sperber
 ;;;;      Modified by: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  2005
-;;;; Last file update: 26-Oct-2021 19:57 (eg)
+;;;; Last file update: 24-Nov-2021 10:28 (eg)
 ;;;;
 ;;;; This code is an adaptation of the reference implementation provided
 ;;;; with the SRFI document by Michael Sperber.
@@ -41,8 +41,7 @@
 (require "srfi-66")
 
 (define-module SRFI-74
-  (import srfi/4)
-  (import (srfi 60))
+  (import (srfi 4) (srfi 60))
   (export endianness blob? make-blob blob-length
           blob-u8-ref blob-s8-ref
           blob-u8-set! blob-s8-set!
