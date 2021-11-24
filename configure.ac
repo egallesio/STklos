@@ -2,10 +2,10 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  8-Aug-2021 18:28 (eg)
+### Last file update: 24-Nov-2021 14:45 (eg)
 
 AC_PREREQ([2.69])
-AC_INIT([stklos],[1.60])
+AC_INIT([stklos],[1.70])
 
 #
 # Grab configure options before it is too late
