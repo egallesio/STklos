@@ -1,7 +1,7 @@
 ;;;;
-;;;; srfi-31.stk	-- A special form rec for recursive evaluation
+;;;; 31.stk        -- A special form rec for recursive evaluation
 ;;;;
-;;;; Copyright © 2002-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-Dec-2002 21:31 (eg)
-;;;; Last file update:  4-May-2007 19:43 (eg)
+;;;; Last file update: 24-Nov-2021 11:32 (eg)
 ;;;;
 
 ;;; The implementation given in the SRFI-31 document
@@ -33,15 +33,19 @@
 ;;     ((rec name expression)
 ;;      (letrec ( (name expression) ) name))))
 
+(define-module srfi/31
+  (export rec)
 
-(define-macro (rec name . body)
-  (if (symbol? name)
-      (if (= (length body) 1)
-	  `(letrec ((,name ,@body)) ,name)
-	  (error "rec: bad syntax"))
-      (let ((name     (car name))
-	    (bindings (cdr name)))
-	`(letrec ((,name (lambda ,bindings ,@body))) ,name))))
+  (define-macro (rec name . body)
+    (if (symbol? name)
+        (if (= (length body) 1)
+            `(letrec ((,name ,@body)) ,name)
+            (error "rec: bad syntax"))
+        (let ((name     (car name))
+              (bindings (cdr name)))
+          `(letrec ((,name (lambda ,bindings ,@body))) ,name))))
 
-(export-syntax rec)
-(provide "srfi-31")
+  (define rec "<<FIXME>>")
+  (export-syntax rec))    ;; FIXME
+
+(provide "srfi/31")

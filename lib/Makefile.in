@@ -36,7 +36,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Nov-2021 18:59 (eg)
+# Last file update: 24-Nov-2021 11:34 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -438,7 +438,6 @@ SRC_STK = bigloo-support.stk  \
           slib.stk            \
           streams-primitive.stk \
           streams-derived.stk \
-          srfi-31.stk         \
           srfi-35.stk         \
           srfi-36.stk         \
           srfi-37.stk         \
@@ -502,7 +501,6 @@ scheme_OBJS = compfile.ostk     \
           slib.ostk             \
           streams-primitive.ostk \
           streams-derived.ostk   \
-          srfi-31.ostk          \
           srfi-35.ostk          \
           srfi-36.ostk          \
           srfi-37.ostk          \
