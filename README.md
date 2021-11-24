@@ -1,4 +1,4 @@
-STklos (version 1.60)
+STklos (version 1.70)
 =====================
 
 
