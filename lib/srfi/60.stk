@@ -47,7 +47,7 @@
 ;promotional, or sales literature without prior written consent in
 ;each case.
 
-(define-module SRFI-60
+(define-module srfi/60
   (export logand logior logxor lognot bitwise-if logtest logcount
 	  integer-length log2-binary-factors logbit? copy-bit
 	  bit-field copy-bit-field arithmetic-shift
@@ -224,8 +224,5 @@
 )  ;; End of SRFI-60 module
 
 ;; ----------------------------------------------------------------------
-(select-module STklos)
-(import SRFI-60)
 
-
-(provide "srfi-60")
+(provide "srfi/60")

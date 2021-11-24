@@ -51,10 +51,9 @@
 ;;;;
 
 (require "srfi-9")
-(require "srfi-60")
 
 (define-module SRFI-180
-  (import SRFI-60)
+  (import (srfi 60))
   (export json-number-of-character-limit
           json-nesting-depth-limit
           json-null?
