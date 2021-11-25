@@ -4,9 +4,28 @@ This is the documentation for the opcodes of the STklos virtual machine.
 The VM implementation is contained in the files `src/vm.h` and `src/vm.c`. 
 
 The VM has a stack, which in the source code is accessed using the C functions
-`push(elt)` and `pop()`; one register, `val`; an array of auxiliary registers
-`vals[]`; and the necessary pointers:  the PC, frame pointer, stack pointer,
-current environment etc.
+`push(elt)` and `pop()`. Each VM thread also has:
+
+* `STk_instr *pc`, the program counter
+* `SCM *fp`, the frame pointer
+
+* `SCM *sp`, the Scheme stack pointer
+* `SCM *stack`, the Scheme stack
+* `int stack_len`, the length of the stack
+
+* `SCM val`, a register for the current value
+* `SCM vals[]`, a register for multiple values
+* `int valc`, the number of multiple values 
+* `SCM r1, r2` two registers
+
+* `SCM env`, the current environment
+* `SCM current_module`, the current module
+* `SCM iport, oport, eport`, the current input, output and error ports
+* `SCM scheme_thread`, the Scheme thread associated with this thread
+
+Of these, only a few are relevant to understanding the bytecode -- these are the
+value registers and the stack.
+
 
 You can see the opcodes of a compiled thunk with
 
@@ -551,6 +570,12 @@ IN_VSET
 IN_SSET
 ```
 
+`V` stands for vector, `S` stands for string; then, `REF` and `SET` mean
+"reference" and "set".
+
+The instructions will use the object in the stack and the index from the
+`val` register.
+
 Examples
 
 ```scheme
@@ -581,8 +606,9 @@ Constants:
 0: "abcde"
 ```
 
-When setting a value, the reference to the vecotr or string and the index go
-on the stack, and the value goes on `val`, then the setting opcode is used:
+When setting a value, the reference to the vector or string and the index go
+on the stack (index below the reference to the object -- the index is popped first),
+and the value goes on `val`, then the setting opcode is used:
 
 ```scheme
 (disassemble
@@ -948,6 +974,11 @@ Constants:
 0: m
 1: find-module
 ```
+
+In the above example, the constants were two symbols: `m` and `find-module`.
+The `find-module` procedure, which is called, will leave module `m` in the
+`val` register, which is then used by `SET_CUR_MOD`.
+
 
 The following opcode defines a variable in a module.
 
