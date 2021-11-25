@@ -79,12 +79,12 @@
 ;;;; Last file update: 10-Jul-2020 00:15 (jpellegrini)
 ;;;;
 
-(require "srfi-1")
+
 (require "streams-primitive")
 
 (define-module STREAMS-DERIVED
   (import STREAMS-PRIMITIVE)
-  (import srfi/1)
+  (import (srfi 1))
   (export list->stream port->stream stream->list
           stream-append stream-concat stream-constant stream-drop
           stream-drop-while stream-filter stream-fold stream-for-each stream-from

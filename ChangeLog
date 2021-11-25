@@ -1,3 +1,650 @@
+2021-11-24 Erick Gallesio <eg@unice.fr>
+	- Bumped the version of libffi to 3.4.2
+	- Bumped the PCRE version to 8.45
+	- Fix: with-exception-handler was not a preocedure
+
+2021-11-24 Ivan Maidanski <ivmai@mail.ru>
+	- Update the internal GC library to 8.0.6
+
+2021-11-24 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #279 from jpellegrini/docs
+
+2021-11-21 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Small fixes to disassemble-expr
+	- Various documentation updates
+
+2021-11-16 Erick Gallesio <eg@unice.fr>
+	- SRFI-17 didn't declare a module for it implementation
+
+2021-10-15 Erick Gallesio <eg@unice.fr>
+	- Added the ,pwd and ,cd repl commands
+
+2021-10-14 Erick Gallesio <eg@unice.fr>
+	- Added the ,shell (or ,!) to call the shell from the repl
+
+2021-10-12 Erick Gallesio <eg@unice.fr>
+	- Added the key stklos.srfi.count to version-alist
+
+2021-10-10 Erick Gallesio <eg@unice.fr>
+	- SRFI-1 definitions were not in its module
+
+2021-10-02 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use unicode in hash stats histogram
+
+2021-09-28 Erick Gallesio <eg@unice.fr>
+	- Accept |.| as a valid symbol
+
+2021-09-26 Erick Gallesio <eg@unice.fr>
+	- Updated SRFI list
+	- Removed compilation warnings and compilation problems
+
+2021-09-24 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add tests for SRFI-15
+
+2021-09-24 Erick Gallesio <eg@unice.fr>
+	- Avoid a warning when compiling on MacOs
+	- Suppressed alternative gnu-glob.{c,h} implementation
+
+2021-09-21 Erick Gallesio <eg@unice.fr>
+	- Place the describe code in its own module
+	- Avoid duplication of strings
+
+2021-09-21 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Prettify describe on structs a tiny bit more
+
+2021-09-18 Erick Gallesio <eg@unice.fr>
+	- Fixed issue #266 (number using vertical bars ar not symbols)
+
+2021-09-17 Erick Gallesio <eg@unice.fr>
+	- Use STklos primitive vector-resize for growing  a flexvector
+	- Going back on the implementation of flexvector (using struct)
+
+2021-09-10 Erick Gallesio <eg@unice.fr>
+	- Replaced some malloc calls by (more efficient) malloc_atomic calls
+	- Merge pull request #261 from jpellegrini/small-fixes
+	- Added test on let-values and let*-values
+	- Merge pull request #258 from jpellegrini/let-values
+
+2021-09-09 Erick Gallesio <eg@unice.fr>
+	- Documentation update
+	- Added the forms tagbody and repeat
+	- Replaced all calls to str{,n}cpy by more secure functions
+
+2021-09-05 Jeronimo Pellegrini <j_p@aleph0.info>
+	- <flexvector> are objects w/reder syntax
+	- Add SRFI-214: Flexvectors
+
+2021-09-03 Jeronimo Pellegrini <j_p@aleph0.info>
+	- printlist_star: don't access CDR if it's not a cons
+
+2021-09-03 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #251 from jpellegrini/small-fixes
+	- Adapted a test in SRFI-51 to the new read-list function
+
+2021-09-02 Jeronimo Pellegrini <j_p@aleph0.info>
+	- let-values: accept single variable in binding
+	- Add SRFI-132: Sort Libraries
+
+2021-09-02 Erick Gallesio <eg@unice.fr>
+	- Replaced read_list by a non recursive version
+
+2021-09-01 Erick Gallesio <eg@unice.fr>
+	- Replaced some calls to malloc by malloc_atomic in number.c
+	- Replaced strcat by strncat in conversion of double to string
+	- Suppressed the last sprintf from C code
+	- Avoid the use of sprintf in two more files
+
+2021-08-28 Erick Gallesio <eg@unice.fr>
+	- Replacing sprintf by snprintf in srfi-25 and srfi-27
+	- Replacing sprintf by snprintf in src directory.
+
+2021-08-26 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Advertise SRFI-15
+
+2021-08-20 Erick Gallesio <eg@unice.fr>
+	- Optimize (not (fx=? i1 i2))
+	- Rewrote the code for fixnum compare functions
+
+2021-08-19 Erick Gallesio <eg@unice.fr>
+	- Added instructions to optimize the fx comparisons with 2 parameters
+
+2021-08-18 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use + insted of fx+ in dotimes
+	- Merge pull request #250 from jpellegrini/procedure-print
+	- Added the instructions to install STlklos on an Android Emulator
+
+2021-08-17 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Print signature with procedure object
+
+2021-08-11 Erick Gallesio <eg@unice.fr>
+	- Add fast paths in call-with-values
+	- Code cleaning
+	- Fix: call-with-values didn't make a tail call for its 2nd arg.
+	- Merge pull request #246 from jpellegrini/srfi-25
+
+2021-08-08 Erick Gallesio <eg@unice.fr>
+	- Fixed configure.ac for MacOS
+	- Use of test-approx (instead of test) in one of the tests
+	- Declare  the lgamma_r function on Android
+	- Define a C macro which contain the (sanitized) result of `uname -o`
+
+2021-08-06 Jeronimo Pellegrini <j_p@aleph0.info>
+	- SRFI-25: simplify shape-for-each
+	- SRFI-25 tests: remove extra definition of macro
+
+2021-08-04 Erick Gallesio <eg@unice.fr>
+	- Bug Fix on Android (fix issue #236)
+	- Fix: even? and odd? didn't accept parameters which are inexact.
+	- Documentation update
+	- Minor fixes in and added :accessor documentation
+	- Rewrote the code to avoid warnings
+
+2021-07-28 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-223: Generalized binary search procedures
+	- Fixnums are long, not int
+	- Don't try to call double2rational on nans and infs
+
+2021-07-27 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add docs to define-class, find-class and is-a?
+
+2021-07-16 Erick Gallesio <eg@unice.fr>
+	- Changed the version of alpine in Docker file for stable release too
+	- Change Docketfile to use and older version of alpine
+	- Added the files generated by configure in GTklos int .gitignore
+	- Documented the STKLOS_GTK_DIR environment variable
+	- Changed the way goocanvas presence is tested
+	- Added the GOOCANV variable in configure scripts
+	- Small fixes
+
+2021-07-15 Erick Gallesio <eg@unice.fr>
+	- Added a README in the Gtklos directory and a script to run all demos
+	- Minor fixes to the GTklos configuration
+
+2021-07-13 Erick Gallesio <eg@unice.fr>
+	- Suppressed the symbols corresponding to errno constants
+	- Added POSIX symbolic errno names
+	- Added a new extension stklos-fuse
+
+2021-07-06 Erick Gallesio <eg@unice.fr>
+	- Added some doc for GTklos
+	- Changed back the calculation of width and height on windows
+	- Integrate the etensions in the global autoconf stuff
+	- Started the integration of GTklos in the global STklos configure
+	- CRemove the relay file canvas/present.stklos
+	- Added images in canvases
+
+2021-07-05 Erick Gallesio <eg@unice.fr>
+	- Added SVG paths to canvases + some demos on canvases
+	- Added <canvas-line> class
+	- Added a new allocation scheme for <gtk-virtual-slots-metaclass>
+
+2021-07-02 Erick Gallesio <eg@unice.fr>
+	- Adding event handler is now on the <gtk-object> class
+	- A first bunch of code for canvases
+	- Finished the implementation of event
+
+2021-07-01 Erick Gallesio <eg@unice.fr>
+	- Added the <scroll> widget
+	- Added a simple editor demo
+	- Added a `value` slot to the <file-dialog> class
+	- Added selection management to the text widget
+	- Minor modifications in toolbars and menubars
+	- Added access to the source editor in demos
+
+2021-06-30 Erick Gallesio <eg@unice.fr>
+	- Changed the way width and height are get or set
+	- Added the <toolbar> widget
+	- Added <header-bar> class
+	
+2021-06-29 Erick Gallesio <eg@unice.fr>
+	- Added the <radiobutton> class
+	- Added containers classes which embed a box
+
+2021-06-25 Erick Gallesio <eg@unice.fr>
+	- Added the <font-dialog> widget
+	- Added the <file-dialog> widget.
+	- Added the <color-dialog> widget
+
+2021-06-24 Erick Gallesio <eg@unice.fr>
+	- Added a simple demo for <separator>
+	- Added the <dialog> widget (and its demo)
+	- Implem. of the window title with a gtk-property (it was a virtual)
+
+2021-06-22 Erick Gallesio <eg@unice.fr>
+	- Added the <progress-bar> widget
+	- Added the <menu> widget and co
+	- Simplify the implementation of <image>
+	- Added two demos for <image> widget
+
+2021-06-21 Erick Gallesio <eg@unice.fr>
+	- Added the <scale> widget
+	- Added the <frame> widget and it's demo
+	- Added a justification combobox to the text demo.
+	- Accepts strings for widget properties with a name as well as symbols
+	- Added the <grid> widget
+	- Added container-info method
+	- Added combobox> widget
+
+2021-06-18 Erick Gallesio <eg@unice.fr>
+	- Changed the way event are managed.
+	- Renamed the utils directory in lib
+
+2021-06-17 Erick Gallesio <eg@unice.fr>
+	- Code cleaning
+	- Giving access to rl_event_hook when using readline
+	- Reorganize directory tree for GTklos extension
+	- Added some functions for event management
+
+2021-06-15 Erick Gallesio <eg@unice.fr>
+	- Rename the sys directory in utils
+	- Make <label> always use markup.
+	- Added the text-editable field to entries
+
+2021-06-14 Erick Gallesio <eg@unice.fr>
+	- Addded tooltips to <gtk-widget>
+	- Added width an height fields to <window>
+	- Changed the allocation of use-markup in labels to gtk-property
+	- Added <separator> widget
+
+2021-06-11 Erick Gallesio <eg@unice.fr>
+	- Add <check-button> class
+	- Added the <image> class
+	- Rewriting of GTKlos as an extension (and GTK3)
+
+2021-06-10 Erick Gallesio <eg@unice.fr>
+	- Initialize the "extensions" branch
+	- Removed the kludge introduced before for calling GTk callbacks
+	- Add the modified lib/Makefile.in
+
+2021-06-08 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #80 from jpellegrini/srfi-94
+	- Changed the internal function get-locale-pair
+	- Fixed a problem in lib/Makefile.am
+
+2021-06-07 Erick Gallesio <eg@unice.fr>
+	- Added parenthesis around DBL_MAX
+	- Merge branch 'jpellegrini-srfi-29'
+	- Merge branch 'jpellegrini-srfi-144'
+	- Adaptation of srfi-144 to new mixed-code framework
+	- Fix in expt
+	- Fixed allocation problems
+
+2021-06-04 Erick Gallesio <eg@unice.fr>
+	- Fixed the problems with threads and GC
+
+2021-06-03 Erick Gallesio <eg@unice.fr>
+	- Big review of all Makefiles
+
+2021-06-01 Erick Gallesio <eg@unice.fr>
+	- Compiled Scheme files were no more installed.
+	- Rebuild boot image
+	- Merge pull request #231 from lassik/typo
+
+2021-05-31 Erick Gallesio <eg@unice.fr>
+	- Mofified lib/srfi-*/srfi*.c  to add module information
+	- As before, C compiled files contains module information.
+
+2021-05-30 Erick Gallesio <eg@unice.fr>
+	- Bug fix: Adding a package tried to create an existing directory
+
+2021-05-27 Lassi Kortela <lassi@lassi.io>
+	- Fix typo
+
+2021-05-27 Erick Gallesio <eg@unice.fr>
+	- Print usage message of stklos-pkg on stdout (instead of stderr)
+	- Merge pull request #230 from lassik/usage
+	- Merge pull request #229 from jpellegrini/small-fixes
+
+2021-05-26 Lassi Kortela <lassi@lassi.io>
+	- Fix stdout/stderr and exit code 0/1 in usage
+	
+2021-05-26 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Write help/usage to stdout when -h is used
+
+2021-05-25 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Don't exit with nonzero status for "-h" option
+
+2021-05-25 Erick Gallesio <eg@unice.fr>
+	- Added -C option to tmpcomp
+	- Fixed pkgman which failed whane installing packages
+	- Added function make-temp-directory
+	- Merge branch 'master' of github.com:egallesio/STklos
+	- Fix bug in new writing of expt
+
+2021-05-24 Erick Gallesio <eg@unice.fr>
+	- Use STk_error instead of STk_signal in the abort handler
+	- Consider GC warnings as errors.
+	- Added an handler to catch the abort() calls done by GMP
+	- Use GMP expt builtin function to compute Scheme expt
+
+2021-05-21 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix flnumerator precision
+	- NaN flonums are not finite
+	- Include tests for SRFI 144
+	- Add SRFI-144: Flonums
+	- Don't use "/" in configure.ac  option description
+	- One config option to control fixnum/flonums
+
+2021-05-21 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #221 from jpellegrini/small-fixes
+	- Added documentation of the NaN procedures of SRFI 208
+	- Added SRFI-208 "NaN Procedures"
+
+2021-05-21 Erick Gallesio <eg@unice.fr>
+	- Documenation update
+	- Merge pull request #225 from jpellegrini/manual
+	- Merge pull request #225 from jpellegrini/manual
+	- Added back the documentation of random-integer and random-real
+	- Be more precise when turning rationals into doubles
+
+2021-05-20 Erick Gallesio <eg@unice.fr>
+	- Changed the implementation of GMP-light
+	- Forgot some files
+
+2021-05-18 Erick Gallesio <eg@unice.fr>
+	- Harmonize the files Makefile.am of mixed code SRFI
+	- Numerator returns now a signed value
+
+2021-05-18 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #224 from jpellegrini/srfi-25
+	- Merge pull request #218 from jpellegrini/docs
+	- Removed warnings when compiling srfi-27.c
+	- Modification to allow the compilation of SRFI-27 with gmp-light
+	- Use require-feature instead of require in SRFI-216
+	- Fixed the problems of load and autoload of SRFI-170
+	- Merge branch 'jpellegrini-srfi-27'
+
+2021-05-18 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Describe behaviour of FFI on oversized numbers
+	- Really revert from using "prng-mt" as a name
+
+2021-05-17 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Typo in SRFI numbers
+	- Several fixes to rewrite of SRFI-27
+	- NaN flonums are not finite
+
+2021-05-16 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Trying  to fix loading of SRFI-27
+	- Include language info in markdown
+
+2021-05-15 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fixes to mixed module documentation
+	- Mention MELPA package of geiser-stklos in README
+	- Enhancements to SRFI-27
+
+2021-05-15 Erick Gallesio <eg@unice.fr>
+	- Fix Makefiles for mixed modules with provided GC
+	- Merge pull request #217 from jpellegrini/doc
+	- Add missing line continuation in Makefiles
+	- Manually applied PR#214 (Fix non-threaded build of SRFI 25)
+	- Added documentation on mixed code modules (modules in C + Scheme)
+	- Moved srfi-133 implementation files in a lib/sri-133
+	- Moved srfi-175 implementation files in a lib/sri-175
+	- Moved srfi-25 implementation files in a lib/sri-25
+
+2021-05-12 Erick Gallesio <eg@unice.fr>
+	- Changed the load-path directory order (and added mising directory)
+
+2021-05-12 Erick Gallesio <eg@unice.fr>
+	- Changed the way to make srfis that are implemented in C+Scheme
+	- Modified tmpcomp to llow the generation of C code
+	- Do not produce module information when compiling to C
+
+2021-05-11 Erick Gallesio <eg@unice.fr>
+	- stklos-compile time is expressed now as a fixnum number of ms
+	- Merge pull request #213 from jpellegrini/docs
+
+2021-05-11 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Describe creation of new types in HACKING.md
+
+2021-05-10 Erick Gallesio <eg@unice.fr>
+	- Completely got rid of FILE * for representing file port
+	- Added lib/srfis-data.scm to .gitignore
+
+2021-05-10 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Enhancements to documentation
+
+2021-05-07 Erick Gallesio <eg@unice.fr>
+	- Use the primitive date (instead of a pipe) when creating DOCDB
+
+2021-05-06 Erick Gallesio <eg@unice.fr>
+	- Don't close an already closed port
+	- Added documentation and tests for port-close-hook functions
+
+2021-05-03 Erick Gallesio <eg@unice.fr>
+	- Deleted a trace message
+	- Merge pull request #202 from jpellegrini/srfi-25
+	- Bug fix: GC problems after threads creation
+	- New option --colon-position to stklos-compile command
+
+2021-05-01 Erick Gallesio <eg@unice.fr>
+	- Small optimization in symbol.c
+	- Print bars around symbols which looks like keywords
+
+2021-04-30 Erick Gallesio <eg@unice.fr>
+	- Documentation update
+	- Added documentation on the colon conventions in keywords
+	- Added a new parameter object and four new read directives
+
+2021-04-29 Erick Gallesio <eg@unice.fr>
+	- Changed the reader to allow ':' in a symbol
+
+2021-04-27 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix shared array ref to original lock
+	- Don't run list-copy on potnatially circular list
+	- Fix regexp in SRFI-29
+	- Partially fix format
+	- Add SRFI-29: Localization
+
+2021-04-27 Erick Gallesio <eg@unice.fr>
+	- Suppressed warning when compiling with clang
+	- Allow usage of SRFI-25 and SRFI-216 without thread support
+	- Bug fix: format width and digits where incorrectly initialized
+	- Bug fix: ~f crashed when called with an incorrect parameter
+	- Fix dynamic loading on Android
+
+2021-04-26 Erick Gallesio <eg@unice.fr>
+	- Added a require of SRFI-48 in test-srfi.stk to have access to ~f
+	- Use fx+ instead of + in the dotimes macro.
+	- Added some "animation" when testing SRFIs
+	- Avoid warnings when compiling SRFI-25
+	- Finish to apply @jpellegrino patchs for PR #178
+	- Added a control on the number user types
+	- Merge pull request #200 from jpellegrini/android
+	- Applied partially PR #198 "equal?" arrays should have the same shape
+	- Rebuild documentation
+	- Added the SRFI-25 documentation in reference manual
+
+2021-04-24 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Update instructions for compiling on Android
+
+2021-04-22 Erick Gallesio <eg@unice.fr>
+	- Change the tests for SRFI-25 (shared array cannot be equal? to const)
+
+2021-04-21 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #196 from jpellegrini/srfi-25-extra
+	- Fixed typos in the man page
+
+2021-04-18 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Update copyright
+	- Add tests for wrong array shape checking
+	- Verify incompatible shapes in share-array
+	- Extra procedures with SRFI-25
+
+2021-04-16 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #191 from lassik/darwin
+	- Going back on printing arrays
+	- Addez the definition of the class <array> for SRFI-25 arrays
+
+2021-04-15 Erick Gallesio <eg@unice.fr>
+	- Added the way to customize class-of for user defined types
+
+2021-04-14 Erick Gallesio <eg@unice.fr>
+	- Typo fix in configuire.ac
+	- Merge pull request #192 from jpellegrini/docs
+
+2021-04-13 Erick Gallesio <eg@unice.fr>
+	- Changed the reading tests for arrays (and added some new tests)
+	- Changed the way arrays are printed
+	- Moved the describe code for arrays in the srfi Scheme code
+	- Moved the equal? test for arrays from base to srfi C code
+	- Merge branch 'srfi-25' of https://github.com/jpellegrini/STklos into jpellegrini-srfi-25
+
+2021-04-12 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Documentation enhancements
+
+2021-04-11 Erick Gallesio <eg@unice.fr>
+	- Added functions to acess the information in user defined types
+	- New feature: equal? and eqv? recognize now user extended types
+
+2021-04-10 Lassi Kortela <lassi@lassi.io>
+	- Fix SRFI 170 build error on Mac
+
+2021-04-08 Erick Gallesio <eg@unice.fr>
+	- Added support for SRFI-219 "Define higher-order lambda"
+
+2021-04-06 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use sharp-comma notation and implement reader
+	- Add more tests
+	- Fix error message
+	- Add tests for threaded creatoin of shared arrays
+	- Init mutexes before use
+
+2021-04-06 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #180 from jpellegrini/small-fixes
+	
+2021-04-05 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fixes to documentation and argument checking
+
+2021-04-04 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Update SRFI list in srfis.stk
+	- Fix typo
+	- Add SRFI-25: Multi-dimensional Array Primitives
+
+2021-04-03 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add missing parenses in number.c and fixnum.c
+
+2021-04-02 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #179 from jpellegrini/small-fixes
+	- Continuing code cleaning
+	- Documentation upate
+	- Renamed make-directories in create-directories
+	- Code  cleaning
+	- Continued a better integration of SRFI-170 and the base
+
+2021-03-31 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Remove duplicate clauses in COND
+
+2021-03-29 Erick Gallesio <eg@unice.fr>
+	- Migration of the &posix-error stuff form SRFI-170 to system.c
+	- Require trie (instead of trie.stk in SRFI-217
+
+2021-03-27 Erick Gallesio <eg@unice.fr>
+	- Fix a problem in the documentation of fx*/carry
+
+2021-03-26 Erick Gallesio <eg@unice.fr>
+	- Suppressed warnings when compiling the lib directory
+	- Nex syntax "%compile-time-define"
+	- Use of the callee parameter in check vector functions
+	- Added a new error function "STk_error_with_location"
+	- Suppressed the check-indices primitive
+
+2021-03-25 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #73 from jpellegrini/srfi-133
+	- Merge pull request #175 from jpellegrini/srfi-217
+	- All the frequently used symbols are now interned at init time
+	- Use the constant MAX_PATH_LENGTH in srfi-170-impl.c
+	- Merge branch 'jpellegrini-srfi-170'
+	- The "type" field  of a "%time" struct is now a keyword
+
+2021-03-20 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Fix wrong size of structure
+	- Remove extra closing parenthesis
+	- Define PATH_MAX if not already defined
+
+2021-03-19 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Don't require SRFI-158
+	- Update %time in STklos to have a "type" slot
+	- terminal?: don't fail on non-file ports
+	- Add SRFI 133 - Vector Library (R7RS compatible)
+	- Small modifications of the SRFI-170 implementation
+
+2021-03-19 Erick Gallesio <eg@unice.fr>
+	- Changed the definition of &posix-error
+	- Small minor fixes
+	- Merge branch 'srfi-170' of https://github.com/jpellegrini/STklos
+
+2021-03-17 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use STk_must_malloc instead of malloc
+
+2021-03-16 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI 217 - Integer Sets
+
+2021-03-16 Erick Gallesio <34247321+egallesio@users.noreply.github.com>
+	- Merge pull request #171 from jpellegrini/log
+
+2021-03-15 Erick Gallesio <eg@unice.fr>
+	- Put the options to compile a STklos file in STKLOS_FLAGS
+	- Merge pull request #169 from jpellegrini/small-fixes
+	- Merge pull request #173 from jpellegrini/small-fixes-2
+
+2021-03-15 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI 170 -- POSIX API
+
+2021-03-12 Erick Gallesio <eg@unice.fr>
+	- Bug fix: fx< and co can return a non boolean result
+	- Small fixes
+	- Added the configure option --with-control-fixnums
+	- Added a parameter objet for ensuring fx parameters control
+
+2021-03-09 Erick Gallesio <eg@unice.fr>
+	- Documentation update
+	- Updated lib/http.stk which was using `fx<` instead of `fx<?`
+	- Renamed fixnum funtions to comply with SEFI-143
+	- Added tests for bitwise operations on fixnums
+	- SRFI-143 logical functions fxand, fxior, fxxor are n-ary functions.
+
+2021-03-09 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add rudimentary tests for transcendental functions
+
+2021-03-08 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Allow a second argument to log
+
+2021-03-08 Erick Gallesio <eg@unice.fr>
+	- "Cleaning" fixnum.c
+	- Merge pull request #49 from jpellegrini/srfi-143
+
+2021-03-04 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use -q when calling STklos
+
+2021-02-19 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Add SRFI-94 (Type-Restricted Numerical Functions)
+
+2021-02-19 Erick Gallesio <eg@unice.fr>
+	- Merge branch 'master' of github.com:egallesio/STklos
+	- Bug fix in compiler optimizer
+	- Merge pull request #167 from jpellegrini/small-fixes
+	- Merge pull request #167 from jpellegrini/small-fixes
+
+2021-02-18 Jeronimo Pellegrini <j_p@aleph0.info>
+	- Use $(STKLOS_BINARY) insteadof hardcoded path
+
+2021-02-16 Erick Gallesio <eg@unice.fr>
+	- Added missing documentation for some functions
+	- Documentation update.
+
+2021-02-15 Erick Gallesio <eg@unice.fr>
+	- Preparing version 1.60 release
+
+2021-02-15 Erick Gallesio <eg@unice.fr>
+	- Added a require of SRFI-1 in SRFI-171 implementation.
+	- Fixed a typo
+	- Avoid compilation warnings when compiling lib directory
+	- STklos 1.60 Release
+	=====================
+
+
+
 2021-02-04 Erick Gallesio <eg@unice.fr>
 	- Documentation update
 	- gc and address-of were not tagged as STklos procedures (Issue #166)

@@ -46,12 +46,10 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 22-Jun-2020 08:21 (jpellegrini)
-;;;; Last file update: 26-Oct-2021 19:21 (eg)
-
-(require "srfi-1")
+;;;; Last file update: 24-Nov-2021 10:27 (eg)
 
 (define-module SRFI-51
-  (import srfi/1)
+  (import (srfi 1))
   (export rest-values
           arg-and
           arg-ands

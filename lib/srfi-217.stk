@@ -45,14 +45,12 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 15-Jan-2021 07:29 (jpellegrini)
-;;;; Last file update: 29-Mar-2021 11:11 (eg)
+;;;; Last file update: 24-Nov-2021 10:26 (eg)
 ;;;;
 
-(require "srfi-1")
-(require "srfi-9")
 
 (define-module SRFI-217
-  (import srfi/1)
+  (import (srfi 1) (srfi 9))
   (export iset list->iset
           list->iset!
           iset-unfold make-range-iset
