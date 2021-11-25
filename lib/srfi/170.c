@@ -1,5 +1,5 @@
 /*
- * srfi-170-impl.c   -- C part of SRFI-170: POSIX API
+ * 170.c   -- C part of SRFI-170: POSIX API
  *
  * Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
  *
@@ -41,7 +41,7 @@
 #include "struct.h"
 #include "fport.h"
 
-#include "srfi-170-incl.c"
+#include "170-incl.c"
 
 #if defined(__APPLE__) && defined(__MACH__)  /* Darwin */
 #define st_atim st_atimespec
@@ -869,10 +869,10 @@ DEFINE_PRIMITIVE("terminal?",posix_isatty, subr1, (SCM port))
    MODULE
    ----------------- */
 
-MODULE_ENTRY_START("srfi-170")
+MODULE_ENTRY_START("srfi/170")
 
 {
-  SCM module =  STk_create_module(STk_intern("SRFI-170"));
+  SCM module =  STk_create_module(STk_intern("srfi/170"));
 
   initialize_global_symbols();
 
@@ -924,7 +924,7 @@ MODULE_ENTRY_START("srfi-170")
   STk_define_variable(STk_intern("%directory-info"), dir_info_type, module);
 
 
-    ADD_PRIMITIVE_IN_MODULE(posix_mkfifo,module);
+  ADD_PRIMITIVE_IN_MODULE(posix_mkfifo,module);
   ADD_PRIMITIVE_IN_MODULE(posix_link,module);
   ADD_PRIMITIVE_IN_MODULE(posix_utimensat,module);
   ADD_PRIMITIVE_IN_MODULE(posix_readlink,module);
