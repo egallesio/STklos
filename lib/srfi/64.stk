@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-64.stk		-- Implementation of SRFI-64
+;;;; 64.stk		-- Implementation of SRFI-64
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -55,9 +55,8 @@
 ;;;; Last file update: 26-Oct-2021 19:34 (eg)
 ;;;;
 
-(require "srfi-9")
-
-(define-module SRFI-64
+(define-module srfi/64
+  (import srfi/9)
   ;; List of exported names
   (export
    test-begin ;; must be listed first, since in Kawa (at least) it is "magic".
@@ -1016,7 +1015,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-64)
-(provide "srfi-64")
+(provide "srfi/64")

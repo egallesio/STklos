@@ -7371,7 +7371,7 @@ esac
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile lib/scheme/Makefile lib/srfi/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 doc/skb/stklos-version.stk pkgman/Makefile lib/srfi-132/Makefile lib/srfi-133/Makefile lib/srfi-144/Makefile lib/srfi-170/Makefile lib/srfi-175/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/src/Makefile extensions/gtklos/demos/Makefile extensions/gtklos/src/gtklos-config.h extensions/gtklos/src/gtklos.stk extensions/stklos-fuse/Makefile extensions/stklos-fuse/src/Makefile extensions/stklos-fuse/demos/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile lib/scheme/Makefile lib/srfi/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 doc/skb/stklos-version.stk pkgman/Makefile lib/srfi-133/Makefile lib/srfi-144/Makefile lib/srfi-175/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/src/Makefile extensions/gtklos/demos/Makefile extensions/gtklos/src/gtklos-config.h extensions/gtklos/src/gtklos.stk extensions/stklos-fuse/Makefile extensions/stklos-fuse/src/Makefile extensions/stklos-fuse/demos/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8127,10 +8127,8 @@ do
     "doc/stklos-script.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-script.1" ;;
     "doc/skb/stklos-version.stk") CONFIG_FILES="$CONFIG_FILES doc/skb/stklos-version.stk" ;;
     "pkgman/Makefile") CONFIG_FILES="$CONFIG_FILES pkgman/Makefile" ;;
-    "lib/srfi-132/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-132/Makefile" ;;
     "lib/srfi-133/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-133/Makefile" ;;
     "lib/srfi-144/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-144/Makefile" ;;
-    "lib/srfi-170/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-170/Makefile" ;;
     "lib/srfi-175/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi-175/Makefile" ;;
     "extensions/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/Makefile" ;;
     "extensions/gtklos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/Makefile" ;;
