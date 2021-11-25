@@ -1,6 +1,54 @@
 NEWS
 ====
 
+Version 1.70
+------------
+
+This version further improves compliance with R7RS and brings some new SRFIs
+
+The main changes in this version are:
+
+   - Added the some comma-commands to the REPL (,pwd ,cd and ,shell)
+   - Use system Posix glob instead of the provided gnu-glob
+   - Improved reader (`|.|` is wow  valid symbol as well as numbers with bars)
+   - New primitive/syntaxes
+       - `tagbody`
+       - `repeat`
+       - `keyword-colon-position` is a parameter object specifying the places
+         where the colon can be used in keyword.
+   - Suppressed the calls to insecure C function (such as `strcpy` or `strcat`)
+   - List reading is tail recursive now
+   - Added an extension directory, which contains for now:
+      - **GTKlos** which gives access to the GTK+ toolkit using the OO
+        layer available in STklos. This version uses the GTK+3
+        toolkit.  It also defines a canvas widget. if the to have the
+        *goocanvas* library is installed.
+      - an extension which permits to make a file system in Scheme,
+        using *FUSE* (Filesystem in Userspace).
+   - Use gmp-mini (which is provided) if gmp is not available, instead
+     of our version which was based on old unmaintained version of
+     mpi.
+   - Support of new SRFIs:
+       - SRFI-25: Multi-dimensional Arrays
+       - SRFI-27: Source of random bits
+       - SRFI-29: Localization
+       - SRFI-94: Type-Restricted Numerical Functions
+       - SRFI-132: Sort Libraries
+       - SRFI-133: Vector Library (R7RS-compatible)
+       - SRFI-143: Fixnums
+       - SRFI-144: Flonums
+       - SRFI-170: POSIX API
+       - SRFI-208: NaN procedures
+       - SRFI-214: Flexvectors
+       - SRFI-217: Integer Sets
+       - SRFI-219: Define higher-order lambda
+       - SRFI-223: Generalized binary search procedures
+   - SRFI can be implemented in C and Scheme
+   - Various optimizations
+   - Documentation update
+   - Added tests
+   - Bug fixes
+
 Version 1.60
 ------------
 
@@ -10,39 +58,39 @@ new SRFIS has been implemented (thanks again to [Jeronimo Pellegrini —
 
 Changes in this version are:
 
-	- Added option -I and -A to prepend and append to the loadpath
-	- New primitives/syntaxes
-	    - `require-feature`
-		- `define-values`
-	- Added makefile targets to install only subparts of STklos on constrained
-	  environments
-	- Reader accepts now `#i` for rationals
-    - Changed the version of LALR-SCM to version 2.5.0
-    - Added scripts and documentation in the `exemples` directory
-    - Definition of a new framework for implementing SRFIs
-		- Documentation of SRFI is now automatically built
-		- SRFI tests are automatically done with `make tests`
-		- Automatic update of the SUPPORTED-SRFIS file
-    - Support of new SRFIs
-	    - SRFI-5: A compatible let form with signatures and rest arguments
-	    - SRFI-41: Streams
-		- SRFI-61: A more general COND clause
-		- SRFI-113: Sets and Bags
-		- SRFI-127: Lazy Sequences
-		- SRFI-128: Comparators (reduced)
-		- SRFI-130: Cursor-based string library
-		- SRFI-134: Immutable Deques
-		- SRFI-135: Immutable Texts
-		- SRFI-137: Minimal Unique Types
-		- SRFI-192: Port Positioning
-		- SRFI-193: Command line
-		- SRFI-195: Multiple-value boxes
-		- SRFI-196: Range Objects
-		- SRFI-207: String-notated bytevectors
-		- SRFI-216: SICP Prerequisites (Portable)
-	- Documentations update
-	- Added tests
-	- Bug fixes
+   - Added option -I and -A to prepend and append to the loadpath
+   - New primitives/syntaxes
+       - `require-feature`
+       - `define-values`
+   - Added makefile targets to install only subparts of STklos on constrained
+     environments
+   - Reader accepts now `#i` for rationals
+   - Changed the version of LALR-SCM to version 2.5.0
+   - Added scripts and documentation in the `exemples` directory
+   - Definition of a new framework for implementing SRFIs
+       - Documentation of SRFI is now automatically built
+       - SRFI tests are automatically done with `make tests`
+       - Automatic update of the SUPPORTED-SRFIS file
+   - Support of new SRFIs
+       - SRFI-5: A compatible let form with signatures and rest arguments
+       - SRFI-41: Streams
+       - SRFI-61: A more general COND clause
+       - SRFI-113: Sets and Bags
+       - SRFI-127: Lazy Sequences
+       - SRFI-128: Comparators (reduced)
+       - SRFI-130: Cursor-based string library
+       - SRFI-134: Immutable Deques
+       - SRFI-135: Immutable Texts
+       - SRFI-137: Minimal Unique Types
+       - SRFI-192: Port Positioning
+       - SRFI-193: Command line
+       - SRFI-195: Multiple-value boxes
+       - SRFI-196: Range Objects
+       - SRFI-207: String-notated bytevectors
+       - SRFI-216: SICP Prerequisites (Portable)
+   - Documentations update
+   - Added tests
+   - Bug fixes
 
 Version 1.50
 ------------

@@ -1007,8 +1007,8 @@ top_srcdir = @top_srcdir@
 # Info (current:revision:age) for the Libtool versioning system.
 # These numbers should be updated at most once just before the release,
 # and, optionally, at most once during the development (after the release).
-LIBGC_VER_INFO = 5:3:4
-LIBGCCPP_VER_INFO = 5:0:4
+LIBGC_VER_INFO = 5:4:4
+LIBGCCPP_VER_INFO = 5:1:4
 
 # We currently use the source files directly from libatomic_ops, if we
 # use the internal version.  This is done since libatomic_ops doesn't
@@ -1070,8 +1070,7 @@ pkginclude_HEADERS = $(am__append_12) $(am__append_14) include/gc.h \
 
 # headers which are not installed
 #
-dist_noinst_HEADERS = include/cord.h include/cord_pos.h include/ec.h \
-	include/gc_alloc_ptrs.h include/new_gc_alloc.h \
+dist_noinst_HEADERS = include/gc_alloc_ptrs.h include/new_gc_alloc.h \
 	include/private/darwin_semaphore.h \
 	include/private/darwin_stop_world.h include/private/dbg_mlc.h \
 	include/private/gc_atomic_ops.h include/private/gc_hdrs.h \

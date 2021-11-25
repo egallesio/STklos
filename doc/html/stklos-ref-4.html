@@ -825,7 +825,7 @@ for a number, then <code>string-&gt;number</code> returns <code>#f</code>.
 <code><strong><font color="IndianRed">(bit-or n1 n2 ...)</font></strong></code><br /><code><strong><font color="IndianRed">(bit-xor n1 n2 ...)</font></strong></code><br /><code><strong><font color="IndianRed">(bit-not n)</font></strong></code><br /><code><strong><font color="IndianRed">(bit-shift n m)</font></strong></code><br /><br />These procedures allow the manipulation of integers as bit fields.
 The integers can be of arbitrary length. <code>Bit-and</code>, <code>bit-or</code> and
 <code>bit-xor</code> respectively compute the bitwise <em>and</em>, inclusive and
-exclusive <em>or</em>. <code>bit-not</code> eturns the bitwise <em>not</em> of <code>n</code>.
+exclusive <em>or</em>. <code>bit-not</code> returns the bitwise <em>not</em> of <code>n</code>.
 <code>bit-shift</code> returns the bitwise <em>shift</em> of <code>n</code>. The integer <code>n</code>
 is shifted left by <code>m</code> bits; If <code>m</code> is negative, <code>n</code> is shifted right by
 <code>-m</code> bits.
@@ -6860,7 +6860,7 @@ The call <code>(disassemble fact)</code> will produce the following output:
 <tr><td bgcolor="#dddddd"><a name="disassemble-expr"></a><a name="--index-entry-41610"></a><table width="100%" style="border-collapse: collapse;" frame="void" rules="none"><tbody>
 <tr><td align="center"><code><strong><font color="IndianRed">(disassemble-expr sexpr)</font></strong></code></td><td class="align-right" align="center"><font color="darkolivegreen"><i><span style="font-variant: small-caps">STklos</span> procedure</i></font></td></tr>
 </tbody></table>
-<code><strong><font color="IndianRed">(disassemble-expr show-consts)</font></strong></code><br /><code><strong><font color="IndianRed">(disassemble-expr show-consts port)</font></strong></code><br /><br />This function prints on the given <code>port</code> (by default the current output
+<code><strong><font color="IndianRed">(disassemble-expr sexpr show-consts)</font></strong></code><br /><code><strong><font color="IndianRed">(disassemble-expr sexpr show-consts port)</font></strong></code><br /><br />This function prints on the given <code>port</code> (by default the current output
 port) the instructions of the given <code>sexpr</code>. If <code>show-consts</code> is true,
 the table of the contants used in <code>sexpr</code> is also printed.
 
@@ -6992,6 +6992,6 @@ of the time of day.
 <br>
 </div></td>
 </tr></table><small><hr>This <span style="font-variant: small-caps">Html</span> page has been produced by 
-                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Sun Sep 26 20:11:30 2021</em></small>
+                                     <a  class="http" href="http://www.stklos.net/~eg/Publis/JFP05/article.html">Skribe</a>.<br />Last update <em>Wed Nov 24 17:57:14 2021</em></small>
 </body>
 </html>
