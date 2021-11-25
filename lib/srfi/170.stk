@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-170.stk         -- SRFI-170: POSIX API
+;;;; 170.stk         -- SRFI-170: POSIX API
 ;;;;
 ;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
 ;;;;
@@ -24,7 +24,7 @@
 ;;;; Last file update: 12-May-2021 11:15 (eg)
 ;;;;
 
-(select-module SRFI-170)
+(select-module srfi/170)
 
 (%compile-time-define open-file fd->port create-fifo
                       create-hard-link create-symlink read-symlink
@@ -368,20 +368,17 @@
 
 ;;; ======================================================================
 
-(select-module STklos)
-(import SRFI-170)
-
 (define %rename-file      rename-file)
 (define %directory-files  directory-files)
 (define %delete-directory delete-directory)
 (define %open-file        open-file)
 
-(define rename-file      (in-module SRFI-170 rename-file))
-(define directory-files  (in-module SRFI-170 directory-files))
-(define delete-directory (in-module SRFI-170 delete-directory))
+(define rename-file      (in-module srfi/170 rename-file))
+(define directory-files  (in-module srfi/170 directory-files))
+(define delete-directory (in-module srfi/170 delete-directory))
 (define (open-file . args)
   (if (= (length args) 2)
       (apply %open-file args)
-      (apply (in-module SRFI-170 open-file) args)))
+      (apply (in-module srfi/170 open-file) args)))
 
-(provide "srfi-170")
+(provide "srfi/170")

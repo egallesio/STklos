@@ -595,10 +595,8 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/skb/stklos-version.stk
           pkgman/Makefile
 
-          lib/srfi-132/Makefile
           lib/srfi-133/Makefile
           lib/srfi-144/Makefile
-          lib/srfi-170/Makefile
           lib/srfi-175/Makefile
 
           extensions/Makefile
