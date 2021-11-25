@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 09-Jan-2021 09:14
-;;;; Last file update: 12-May-2021 11:15 (eg)
+;;;; Last file update: 25-Nov-2021 14:19 (eg)
 ;;;;
 
 (select-module srfi/170)
@@ -83,6 +83,20 @@
 
 ;; (open-file fname port-type flags [permission-bits [buffer-mode] ]) implemented as primitive
 ;; (fd->port fd port-type [buffer-mode])                              implemented as primitive
+
+
+;; STklos has already an open-file primitive.
+;; To permit to use both versions, we define here the following relay function.
+;; It calls the STklos version, if it is called with only 2 parameters, and the
+;; one defined in the SRFI otherwise. 
+(let ((srfi-open-file   open-file)
+      (stklos-open-file (in-module SCHEME open-file)))
+  (set! open-file
+        (lambda args
+          (apply (if (= (length args) 2) stklos-open-file srfi-open-file) args))))
+
+
+
 
 (export binary-input
         textual-input
@@ -227,9 +241,7 @@
             (again (fx- tries 1))
             (apply values x rest))))))
 
-(export temp-file-prefix
-
-        time/now
+(export time/now
         time/unchanged
 
         owner/unchanged
@@ -361,24 +373,5 @@
 
 
 ;; (terminal? port)  implemented as primitive
-
-;;;
-;;; END OF MODULE
-;;;
-
-;;; ======================================================================
-
-(define %rename-file      rename-file)
-(define %directory-files  directory-files)
-(define %delete-directory delete-directory)
-(define %open-file        open-file)
-
-(define rename-file      (in-module srfi/170 rename-file))
-(define directory-files  (in-module srfi/170 directory-files))
-(define delete-directory (in-module srfi/170 delete-directory))
-(define (open-file . args)
-  (if (= (length args) 2)
-      (apply %open-file args)
-      (apply (in-module srfi/170 open-file) args)))
 
 (provide "srfi/170")
