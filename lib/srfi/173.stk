@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-173.stk		-- Implementation of SRFI-173
+;;;; 173.stk		-- Implementation of SRFI-173
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -50,9 +50,8 @@
 ;;;; Last file update: 18-May-2020 16:22 (jpellegrini)
 ;;;;
 
-(require "srfi-9")
-
-(define-module SRFI-173
+(define-module srfi/173
+  (import (srfi 9))
   (export make-hook
           hook?
           list->hook
@@ -103,8 +102,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-173)
-(provide "srfi-173")
-
+(provide "srfi/173")
