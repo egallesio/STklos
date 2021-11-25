@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-174.stk		-- Implementation of SRFI-174
+;;;; 174.stk		-- Implementation of SRFI-174
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -50,7 +50,7 @@
 ;;;; Last file update: 25-Mar-2021 15:46 (eg)
 ;;;;
 
-(define-module SRFI-174
+(define-module srfi/174
   (export timespec
           timespec?
           timespec=?
@@ -124,8 +124,6 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-174)
-(provide "srfi-174")
+(provide "srfi/174")
 
