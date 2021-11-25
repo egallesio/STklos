@@ -22,12 +22,10 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 28-Jul-2020 15:35
-;;;; Last file update: 15-May-2021 09:09 (eg)
+;;;; Last file update: 25-Nov-2021 17:27 (eg)
 ;;;;
 
-(select-module STklos)
-(import SRFI-175)
-
-(provide "srfi-175")
 
 
+;; NOTE: This file is empty. However, don't delete it. It will be used when
+;;       the shared object will be built.

@@ -1,5 +1,5 @@
 /*
- * srfi-175.c   -- Implementation fo SRFI-175
+ * 175.c   -- Implementation fo SRFI-175
  *
  * Copyright © 2020-2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
  *
@@ -21,11 +21,11 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Jul-2020 18:41
- * Last file update: 31-May-2021 17:08 (eg)
+ * Last file update: 25-Nov-2021 17:24 (eg)
  */
 
 #include <stklos.h>
-#include "srfi-175-incl.c"
+#include "175-incl.c"
 
 /*
  * Refrain to use <ctype.h> and implement our own ctype function in the
@@ -384,9 +384,9 @@ DEFINE_PRIMITIVE("ascii-lower-case-value", ascii_low_value, subr3, (SCM x, SCM o
 }
 
 
-MODULE_ENTRY_START("srfi-175")
+MODULE_ENTRY_START("srfi/175")
 {
-  SCM module =  STk_create_module(STk_intern("SRFI-175"));
+  SCM module =  STk_create_module(STk_intern("srfi/175"));
 
   /* Predicates to test for ASCII vs non-ASCII objects */
   ADD_PRIMITIVE_IN_MODULE(ascii_codepointp, module);

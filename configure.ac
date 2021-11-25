@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 24-Nov-2021 14:45 (eg)
+### Last file update: 25-Nov-2021 17:10 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -597,7 +597,6 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
 
           lib/srfi-133/Makefile
           lib/srfi-144/Makefile
-          lib/srfi-175/Makefile
 
           extensions/Makefile
 

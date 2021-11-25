@@ -20,12 +20,12 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 25-Nov-2021 15:57 (eg)
+# Last file update: 25-Nov-2021 17:09 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme srfi                       \
 		  srfi-133 \
-		  srfi-144 srfi-175
+		  srfi-144
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
