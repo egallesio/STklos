@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 28-Dec-1999 21:19 (eg)
- * Last file update: 29-Apr-2021 18:34 (eg)
+ * Last file update: 27-Nov-2021 18:42 (eg)
  */
 
 #include "stklos.h"
@@ -72,6 +72,8 @@ static struct option long_options [] =
 {
   {"version",           no_argument,       NULL, 'v'},
   {"file",              required_argument, NULL, 'f'},
+  {"prepend-load-path", required_argument, NULL, 'I'},
+  {"append-load-path",  required_argument, NULL, 'A'},
   {"load",              required_argument, NULL, 'l'},
   {"execute",           required_argument, NULL, 'e'},
   {"boot-file",         required_argument, NULL, 'b'},
@@ -100,24 +102,24 @@ static void Usage(FILE *stream)
   fprintf(stream, "Usage: stklos [option ...] [--] [arg ... ]");
   fprintf(stream, "\n"
 "Possible options:\n"
-"   -l file, --load=file        load 'file' before going interactive\n"
-"   -f file, --file=file        use 'file' as program\n"
-"   -e sexpr, --execute=sexpr   evaluate the given sexpr and exit\n"
-"   -b file, --boot-file=file   use 'file' to boot the system\n"
-"   -D dir, --conf-dir=dir      change configuration dir (default: ~/.stklos)\n"
-"   -I dir                      prepend 'dir' to the load path list.\n"
-"   -A dir                      append 'dir' to the load path list.\n"
-"   -q, --no-init-file          quiet: do not load the user init file\n"
-"   -i, --interactive           interactive mode\n"
-"   -n, --no-line-editor        don't use line editor\n"
-"   -d, --debug                 add information to ease debugging\n"
-"   -s, --stack-size=n          use a stack of size n (default %d)\n"
-"   -c, --case-sensitive        be case sensitive by default\n"
-"       --case-insensitive      be case insensitive by default\n"
-"   -u, --utf8-encoding=yes|no  use/don't use UTF-8 encoding (instead of default)\n"
-"   -v, --version               show version and exit (simple)\n"
-"   -V                          show version and exit (detailed, SRFI-176)\n"
-"   -h, --help                  show this help and exit\n"
+"   -l file, --load=file            load 'file' before going interactive\n"
+"   -f file, --file=file            use 'file' as program\n"
+"   -e sexpr, --execute=sexpr       evaluate the given sexpr and exit\n"
+"   -b file, --boot-file=file       use 'file' to boot the system\n"
+"   -D dir, --conf-dir=dir          change configuration dir (default: ~/.stklos)\n"
+"   -I dir, --prepend-load-path=dir prepend 'dir' to the load path list.\n"
+"   -A dir, --append-load-path=dir  append 'dir' to the load path list.\n"
+"   -q, --no-init-file              quiet: do not load the user init file\n"
+"   -i, --interactive               interactive mode\n"
+"   -n, --no-line-editor            don't use line editor\n"
+"   -d, --debug                     add information to ease debugging\n"
+"   -s, --stack-size=n              use a stack of size n (default %d)\n"
+"   -c, --case-sensitive            be case sensitive by default\n"
+"       --case-insensitive          be case insensitive by default\n"
+"   -u, --utf8-encoding=yes|no      use/don't use UTF-8 encoding\n"
+"   -v, --version                   show version and exit (simple)\n"
+"   -V                              show version and exit (detailed, SRFI-176)\n"
+"   -h, --help                      show this help and exit\n"
 "All the arguments given after options are passed to the Scheme program.\n",
 DEFAULT_STACK_SIZE);
 }
