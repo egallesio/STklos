@@ -1,5 +1,5 @@
 
-(define-module SRFI-207
+(define-module srfi/207
   (import (srfi 1)
           (srfi 9)
           (srfi 13)
@@ -849,7 +849,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-207)
-(provide "srfi-207")
+(provide "srfi/207")
