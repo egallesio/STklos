@@ -110,6 +110,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-207: String-notated bytevectors
     - SRFI-208: NaN procedures
     - SRFI-214: Flexvectors
+    - SRFI-215: Central Log Exchange
     - SRFI-216: SICP Prerequisites (Portable)
     - SRFI-217: Integer Sets
     - SRFI-219: Define higher-order lambda

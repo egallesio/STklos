@@ -31,6 +31,7 @@ SO = @SH_SUFFIX@
 #
 # SRFI written in Scheme
 #
+
 SRC_STK   = 1.stk   \
             2.stk   \
             4.stk   \
@@ -55,7 +56,8 @@ SRC_STK   = 1.stk   \
             60.stk  \
             64.stk  \
             170.stk \
-            214.stk
+            214.stk \
+            215.stk
 
 SRC_OSTK =  1.ostk   \
             2.ostk   \
@@ -81,7 +83,8 @@ SRC_OSTK =  1.ostk   \
             60.ostk  \
             64.ostk  \
             170.ostk \
-            214.ostk
+            214.ostk \
+            215.ostk
 
 #
 # SRFIs written in C and Scheme
