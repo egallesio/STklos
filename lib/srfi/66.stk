@@ -24,7 +24,14 @@
 ;;;; Last file update:  3-Apr-2007 23:25 (eg)
 ;;;;
 
-(require "srfi-4")
+(define-module srfi/66
+
+(import  (srfi 4))
+
+(export u8vector-copy!
+        u8vector-copy
+        u8vector=?
+        u8vector-compare)
 
 (define (u8vector-copy! source source-start target target-start count)
   (if (>= source-start target-start)
@@ -69,5 +76,6 @@
                (cond ((< elt1 elt2) -1)
                      ((> elt1 elt2)  1)
                      (else (Loop (+ i 1)))))))))))
+)
 
-(provide "srfi-66")
+(provide "srfi/66")
