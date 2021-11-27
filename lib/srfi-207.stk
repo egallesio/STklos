@@ -1,11 +1,11 @@
-(require "srfi-158")
 
 (define-module SRFI-207
   (import (srfi 1)
           (srfi 9)
           (srfi 13)
-          (srfi 151))
-  (import SRFI-158)
+          (srfi 151)
+          (srfi 158))
+
   (export bytestring bytevector->hex-string bytestring->list
           make-bytestring make-bytestring!
           hex-string->bytevector bytevector->base64 base64->bytevector

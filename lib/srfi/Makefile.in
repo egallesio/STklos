@@ -369,8 +369,10 @@ SRC_STK = 1.stk   \
             64.stk  \
             66.stk  \
             74.stk  \
+            134.stk \
             141.stk \
             151.stk \
+            158.stk \
             170.stk \
             180.stk \
             189.stk \
@@ -404,8 +406,10 @@ SRC_OSTK = 1.ostk   \
             64.ostk  \
             66.ostk  \
             74.ostk  \
+            134.ostk \
             141.ostk \
             151.ostk \
+            158.ostk \
             170.ostk \
             180.ostk \
             189.ostk \
@@ -711,6 +715,7 @@ STKLOS_BINARY ?= ../src/stklos
 
 # Dependencies
 13.ostk: 14.ostk
+134.ostk: 158.ostk
 
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c
