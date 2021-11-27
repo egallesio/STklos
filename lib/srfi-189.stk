@@ -46,14 +46,11 @@
 
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 25-Jun-2020 06:21 (jpellegrini)
-;;;; Last file update: 26-Oct-2021 20:45 (eg)
+;;;; Last file update: 24-Nov-2021 10:24 (eg)
 ;;;;
 
-(require "srfi-1")
-(require "srfi-9")
-
 (define-module SRFI-189
-  (import srfi/1)
+  (import (srfi 1) (srfi 9))
   (export maybe? either? just nothing left right nothing? just? maybe= left?
           right? either= either-swap
 

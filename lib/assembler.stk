@@ -474,8 +474,8 @@ doc>
 #|
 <doc EXT disassemble-expr
  * (disassemble-expr sexpr)
- * (disassemble-expr show-consts)
- * (disassemble-expr show-consts port)
+ * (disassemble-expr sexpr show-consts)
+ * (disassemble-expr sexpr show-consts port)
  *
  * This function prints on the given |port| (by default the current output
  * port) the instructions of the given |sexpr|. If |show-consts| is true,
@@ -518,7 +518,7 @@ doc>
       ;; Suppress the last instr. (END-OF-CODE) which is useless and confusing
       (disassemble-code (vector-copy code 0 (- (vector-length code) 1)) port)
       (when show-consts
-        (printf "\nConstants:\n")
+        (fprintf port "\nConstants:\n")
         (let Loop ((i 0)
                    (lst *code-constants*))
           (when (pair? lst)

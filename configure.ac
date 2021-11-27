@@ -2,10 +2,10 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 21-Nov-2021 11:33 (eg)
+### Last file update: 25-Nov-2021 17:10 (eg)
 
 AC_PREREQ([2.69])
-AC_INIT([stklos],[1.60])
+AC_INIT([stklos],[1.70])
 
 #
 # Grab configure options before it is too late
@@ -595,11 +595,8 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/skb/stklos-version.stk
           pkgman/Makefile
 
-          lib/srfi-132/Makefile
           lib/srfi-133/Makefile
           lib/srfi-144/Makefile
-          lib/srfi-170/Makefile
-          lib/srfi-175/Makefile
 
           extensions/Makefile
 

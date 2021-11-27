@@ -60,7 +60,7 @@
  * These procedures allow the manipulation of integers as bit fields.
  * The integers can be of arbitrary length. |Bit-and|, |bit-or| and
  * |bit-xor| respectively compute the bitwise ,(emph "and"), inclusive and
- * exclusive ,(emph "or"). |bit-not| eturns the bitwise ,(emph "not") of |n|.
+ * exclusive ,(emph "or"). |bit-not| returns the bitwise ,(emph "not") of |n|.
  * |bit-shift| returns the bitwise ,(emph "shift") of |n|. The integer |n|
  * is shifted left by |m| bits; If |m| is negative, |n| is shifted right by
  * |-m| bits.

@@ -20,7 +20,7 @@
 ;;;; USA.
 ;;;;           Author: Jerônimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 08-Aug-2021 13:31
-;;;; Last file update: 26-Sep-2021 19:52 (eg)
+;;;; Last file update: 25-Nov-2021 12:10 (eg)
 
 
 (select-module srfi/132)
@@ -35,7 +35,7 @@
         vector-select!
         vector-separate! )
 
-;;; Avoi warnings when compiling this file
+;;; Avoid warnings when compiling this file
 (%compile-time-define vector-stable-sort vector-stable-sort! list-stable-sort!)
 
 ;;;;

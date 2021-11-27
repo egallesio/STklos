@@ -518,6 +518,108 @@ In this C file, to use the previously compiled Scheme code, you have to
   about an unresolved reference.
 
 
-## The virtual machine
+# The virtual machine
 
 See the file `vm.md` for a description of the opcodes.
+
+# Compiler and optimizations
+
+## The compiler
+
+The compiler is in the file `lib/compiler.stk`.
+
+There is a `compile` procedure at the end of the file, whose logic is very simple:
+
+1. expand macros
+2. compile special forms
+3. if what's left is a symbol, compile a call
+3. if it's not a symbol, compile it as a constant
+
+In the rest of the file, there are procedures to compile different special forms and
+inlinable primitives.
+
+The code is generated as a list, in the `*code-instr*` global variable in the
+`STKLOS-COMPILER` module. The procedure `emit` conses one more instruction on
+the code (which will later be reversed, of course)
+
+
+## Peephole optimizer
+
+STklos uses a peephole optimzier, located in the file `lib/peephole.stk`.
+This optimizer will transform several instruction patterns in the generated code into
+more efficient ones. For example:
+
+```scheme
+             ;; [SMALL-INT, PUSH] => INT-PUSH
+             ((and (eq? i1 'SMALL-INT) (eq? i2 'PUSH))
+              (replace-2-instr code (list 'INT-PUSH (this-arg1 code))))
+```
+
+This transforms two instructions ("load a small integer into `val`, then
+push it onto the stack") into one single instruction (push an integer
+onto the stack).
+
+The peephole optimizer also reduces the size of the bytecode:
+
+```scheme
+             ;; [RETURN; RETURN] => [RETURN]
+             ((and (eq? i1 'RETURN) (eq? i2 'RETURN))
+              (replace-2-instr code (list 'RETURN)))
+```
+
+This will turn two adjacent `RETURN` instructions into a single one, making the
+object file smaller. This is valid because there won't be any `GOTO` pointing to 
+the second instruction; if this was the case, then the code would have a label
+between the two `RETURN`s.
+
+Another example is `GOTO` optimization:
+
+```scheme
+             ;; [GOTO x], ... ,x: GOTO y => GOTO y
+             ;; [GOTO x], ... ,x: RETURN => RETURN
+             ((eq? i1 'GOTO)
+              (set! code (optimize-goto code)))
+```
+
+The procedure `optimize-goto-code`, also in the file `peephole.stk`, will
+perform the transformations indicated in the comments.
+
+
+The input code is represented as a list.
+Some relevant definitions are in the beginning of the file:
+
+```scheme
+(label? code)      ; is thecurrent instruction a label?
+(this-instr code)  ; the current instruction (reference to a position in the list)
+(next-instr code)  ; the next instruction (cdr of the current one)
+(this-arg1 code)   ; argument 1 of current instruction
+(this-arg2 code)   ; argument 2 of current instruction
+(next-arg1 code)   ; argument 1 of next instruction
+(next-arg2 code)   ; argument 2 of next instruction
+```
+
+# Garbage collection
+
+STklos uses the Boehm-Demers-Weiser garbage collector.
+The wrapper for the GC is located in the header file `src/stklos.h`:
+
+```c
+#define STk_must_malloc(size)           GC_MALLOC(size)
+#define STk_must_malloc_atomic(size)    GC_MALLOC_ATOMIC(size)
+#define STk_must_realloc(ptr, size)     GC_REALLOC((ptr), (size))
+#define STk_free(ptr)                   GC_FREE(ptr)
+#define STk_register_finalizer(ptr, f)  GC_REGISTER_FINALIZER( \
+                                            (void *) (ptr),             \
+                                            (GC_finalization_proc)(f),  \
+                                            0, 0, 0)
+#define STk_gc()                        GC_gcollect()
+
+void STk_gc_init(void);
+```
+
+* `STk_must_malloc` - used to allocate structured objects.
+* `STk_must_malloc_atomic` - used when there won't be any pointers inside the object,
+  and we don't want to confuse the GC with patterns that are supposed to be just a
+  bignum, but "look like  apointer". Used for strings, numbers etc.
+* `STk_register_finalizer` will register a finalizer function `f`, which will be called
+  when the object at `ptr` is collected.

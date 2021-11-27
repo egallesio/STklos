@@ -5,36 +5,34 @@ These libraries are:
 GMP: The Gnu MP library
 =======================
 If you have a version of GMP installed, it will be used. Otherwise,
-STklos uses a part of the MPI library which is provided in the package.
-A wrapper for the subset of the functions used by STklos is built on
-top of MPI to build a GMP API compatible library.
-Note that STklos sources use only the GMP API.
+STklos uses a stripped down version of GMP (called mini-gmp) which is
+included in the main GMP distribution. Only the source of the mini-gmp
+directory is provided here, to avoid the copy of full GMP (which is
+quite large). Note however that mini-gmp is far less efficient than
+the full version counterpart.
 
-for GMP:
-    - Version: the one installed
-    - License: LGPL
-    - Home Page: http://www.swox.com/gmp/
-for MPI
-    - Version: 1.8.6
-    - Licence: Public Domain
-    - Home Page: http://spinning-yarns.org/michael/mpi
+  - Version: 6.2.1 (the mini-gmp included in it)
+  - License: LGPL
+  - Home Page: https://gmplib.org/
 
 
 GC: The Boehm's conservative garbage collector for C and C++
 ============================================================
-    - Version: 8.0.4
+    - Version: 8.0.6
     - License: Free (BSD-like)
-    - Home Page: http://www.hpl.hp.com/personal/Hans_Boehm/gc
+    - Home Page: https://www.hboehm.info/gc/
+
 
 PCRE: Perl-Compatible Regular Expression library
 ================================================
-    - Version: 8.43
+    - Version: 8.45
     - License: BSD
     - Home: http://www.pcre.org/
 
+
 libffi - a portable foreign function interface library
 ======================================================
-        - Version 3.2.1
+        - Version 3.4.2
         - License: Free (BSD like)
         - Home Page: http://sourceware.org/libffi/
 
@@ -56,6 +54,3 @@ LALR: The Dominique Boucher LALR Package
 The GC, PCRE, LIBFFI and GMP libraries provided with STklos are only
 used if there are no identical (or higher) versions of these libraries
 already installed on the system at configuration time.
-
-
-

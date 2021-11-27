@@ -1,0 +1,129 @@
+;;;;
+;;;; 174.stk		-- Implementation of SRFI-174
+;;;;
+;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;; This file is a derivative work from the  implementation of
+;;;; this SRFI by John Cowan, it is copyrighted
+;;;; as:
+;;;;
+;;;;;; Copyright © John Cowan (2019).
+;;;;;;
+;;;;;; Permission is hereby granted, free of charge, to any person obtaining
+;;;;;; a copy of this software and associated documentation files (the
+;;;;;; “Software”), to deal in the Software without restriction, including
+;;;;;; without limitation the rights to use, copy, modify, merge, publish,
+;;;;;; distribute, sublicense, and/or sell copies of the Software, and to
+;;;;;; permit persons to whom the Software is furnished to do so, subject to
+;;;;;; the following conditions:
+;;;;;;
+;;;;;; The above copyright notice and this permission notice (including the
+;;;;;; next paragraph) shall be included in all copies or substantial
+;;;;;; portions of the Software.
+;;;;;;
+;;;;;; THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+;;;;;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+;;;;;; MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+;;;;;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+;;;;;; LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+;;;;;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+;;;;;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 07-Jul-2020 05:11 (jpellegrini)
+;;;; Last file update: 25-Mar-2021 15:46 (eg)
+;;;;
+
+(define-module srfi/174
+  (export timespec
+          timespec?
+          timespec=?
+          timespec-seconds
+          timespec-nanoseconds
+          timespec<?
+          timespec-hash
+          timespec->inexact
+          inexact->timespec)
+
+;; No need to define records!
+;; we'll use a STklos struct instead, as pointed out by egallesio
+;; in the GitHub pull request #51
+;; (define-record-type <timespec>
+;;   (timespec seconds nanoseconds)
+;;   timespec?
+;;   (seconds timespec-seconds)
+;;   (nanoseconds timespec-nanoseconds))
+
+(define (timespec seconds nanoseconds)
+  (make-struct %time :time-utc seconds nanoseconds))
+
+(define timespec? time?)
+
+(define (timespec-seconds ts)
+  (%fast-struct-ref ts %time 'second 1))
+
+(define (timespec-nanoseconds ts)
+  (%fast-struct-ref ts %time 'nanosecond 2))
+
+;; sample implementation using pairs
+; (define timespec cons)
+; (define timespec-seconds car)
+; (define timespec-nanoseconds cdr)
+;
+; (define (timespec? obj)
+;   (and (pair? obj)
+;        (exact-integer? (car obj))
+;        (exact-integer? (cdr obj))
+;        (<= 0 (cdr obj) (- #e1e9 1))))
+
+(define (timespec=? a b)
+  (and (= (timespec-seconds a) (timespec-seconds b))
+       (= (timespec-nanoseconds a) (timespec-nanoseconds b))))
+
+(define (timespec<? a b)
+  (let ((asecs (timespec-seconds a))
+        (bsecs (timespec-seconds b))
+        (ansecs (timespec-nanoseconds a))
+        (bnsecs (timespec-nanoseconds b)))
+    (cond
+      ((< asecs bsecs) #t)
+      ((> asecs bsecs) #f)
+      ((negative? asecs) (> ansecs bnsecs))
+      (else (< ansecs bnsecs)))))
+
+(define (timespec-hash a)
+  (+ (* (abs (timespec-seconds a)) #e1e9) (timespec-nanoseconds a)))
+
+(define (timespec->inexact timespec)
+  (let ((secs (timespec-seconds timespec))
+        (nsecs (timespec-nanoseconds timespec)))
+    (if (negative? secs)
+      (- secs (/ nsecs #i1e9))
+      (+ secs (/ nsecs #i1e9)))))
+
+(define (inexact->timespec inex)
+  (let* ((quo (exact (truncate inex)))
+         (rem (exact (- inex quo))))
+    (timespec quo (exact (truncate (* (abs rem) #e1e9))))))
+
+) ;; END OF DEFINE-MODULE
+;;;; ======================================================================
+
+(provide "srfi/174")
+

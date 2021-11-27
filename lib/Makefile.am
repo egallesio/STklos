@@ -20,12 +20,12 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Nov-2021 18:59 (eg)
+# Last file update: 25-Nov-2021 17:09 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme srfi                       \
 		  srfi-133 \
-		  srfi-144 srfi-170 srfi-175
+		  srfi-144
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
@@ -84,7 +84,6 @@ SRC_STK = bigloo-support.stk  \
           slib.stk            \
           streams-primitive.stk \
           streams-derived.stk \
-          srfi-31.stk         \
           srfi-35.stk         \
           srfi-36.stk         \
           srfi-37.stk         \
@@ -93,9 +92,7 @@ SRC_STK = bigloo-support.stk  \
           srfi-51.stk         \
           srfi-54.stk         \
           srfi-59.stk         \
-          srfi-60.stk         \
           srfi-61.stk         \
-          srfi-64.stk         \
           srfi-66.stk         \
           srfi-69.stk         \
           srfi-70.stk         \
@@ -119,8 +116,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-158.stk        \
           srfi-161.stk        \
           srfi-171.stk        \
-          srfi-173.stk        \
-          srfi-174.stk        \
           srfi-180.stk        \
           srfi-185.stk        \
           srfi-189.stk        \
@@ -150,7 +145,6 @@ scheme_OBJS = compfile.ostk     \
           slib.ostk             \
           streams-primitive.ostk \
           streams-derived.ostk   \
-          srfi-31.ostk          \
           srfi-35.ostk          \
           srfi-36.ostk          \
           srfi-37.ostk          \
@@ -159,9 +153,7 @@ scheme_OBJS = compfile.ostk     \
           srfi-51.ostk          \
           srfi-54.ostk          \
           srfi-59.ostk          \
-          srfi-60.ostk          \
           srfi-61.ostk          \
-          srfi-64.ostk          \
           srfi-66.ostk          \
           srfi-69.ostk          \
           srfi-70.ostk          \
@@ -185,8 +177,6 @@ scheme_OBJS = compfile.ostk     \
           srfi-158.ostk         \
           srfi-161.ostk         \
           srfi-171.ostk         \
-          srfi-173.ostk         \
-          srfi-174.ostk         \
           srfi-180.ostk         \
           srfi-185.ostk         \
           srfi-189.ostk         \
