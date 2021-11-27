@@ -50,9 +50,9 @@ performance penalty).
 .IP "--show-instructions, -S"
 Produce the VM instructions in the generated file. Actually,
 it is probably only useful if you want to hack the VM.
-.IP "--prepend-load-path=<dir>, -L <dir>"
+.IP "--prepend-load-path=<dir>, -I <dir>"
 Prepend the directory <dir> to the compiler loading path.
-.IP "--append-load-path=<dir>"
+.IP "--append-load-path=<dir>, -A <dir>"
 Append the directory <dir> to the compiler loading path.
 .IP "--no-time"
 Do not display the compilation time

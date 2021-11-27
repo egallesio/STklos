@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 31-May-2021 11:55 (eg)
+;;;; Last file update: 27-Nov-2021 18:24 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -150,10 +150,10 @@
         (compiler:show-assembly-code #t))
 
      "Path options"
-     (("prepend-load-path" :alternate "L" :arg dir
+     (("prepend-load-path" :alternate "I" :arg dir
        :help "Prepend <dir> to the loading path")
       (set! (load-path) (cons dir (load-path))))
-     (("append-load-path"  :arg dir
+     (("append-load-path"  :altrenate "A" :arg dir
        :help "Append <dir> to the loading path")
       (set! (load-path) (append (load-path) (list dir))))
 
