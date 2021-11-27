@@ -25,7 +25,7 @@
 ;;;; OTHER DEALINGS IN THE SOFTWARE.
 ;;;;
 ;;;;    Creation date:  8-Dec-2007 10:20 (eg)
-;;;; Last file update:  9-Dec-2007 16:52 (eg)
+;;;; Last file update: 21-Nov-2021 13:34 (eg)
 ;;;;
 
 ; Macro expander for define*.
@@ -357,3 +357,5 @@
                               (vector-set! key-values i (cadr args))
                               (error "duplicate parameter" k))
                           (loop (cddr args)))))))))))
+
+(provide "srfi-89")

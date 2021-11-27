@@ -46,14 +46,11 @@
 
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 25-Jun-2020 06:21 (jpellegrini)
-;;;; Last file update: 25-May-2020 07:00 (jpellegrini)
+;;;; Last file update: 24-Nov-2021 10:24 (eg)
 ;;;;
 
-(require "srfi-1")
-(require "srfi-9")
-
 (define-module SRFI-189
-  (import SRFI-1)
+  (import (srfi 1) (srfi 9))
   (export maybe? either? just nothing left right nothing? just? maybe= left?
           right? either= either-swap
 
@@ -68,7 +65,7 @@
 
           maybe->either either->maybe list->just list->right maybe->list
           either->list maybe->truth either->truth truth->maybe maybe->values
-          maybe->two-values values->maybe either->values values values->either
+          maybe->two-values values->maybe either->values values->either
           two-values->maybe maybe-for-each either-for-each maybe->generation
           generation->maybe list->left list->maybe list->either
           maybe->list-truth either->list-truth list-truth->maybe
@@ -85,6 +82,19 @@
           maybe-let*-values either-let*-values
           maybe-if)
 
+  (define maybe-if           "<<FIXME>>")
+  (define either-let*-values "<<FIXME>>")
+  (define maybe-let*         "<<FIXME>>")
+  (define maybe-let*-values  "<<FIXME>>")
+  (define either-let*        "<<FIXME>>")
+  (define either-or          "<<FIXME>>")
+  (define either-and         "<<FIXME>>")
+  (define maybe-or           "<<FIXME>>")
+  (define maybe-and          "<<FIXME>>")
+  (define either-guard       "<<FIXME>>")
+  
+    
+  
 (define-record-type <just>
   (raw-just objs)
   just?

@@ -46,15 +46,12 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 05-Nov-2020 12:34 (jpellegrini)
-;;;; Last file update:  9-Oct-2021 19:52 (eg)
+;;;; Last file update: 24-Nov-2021 10:25 (eg)
 ;;;;
 
 
-(require "srfi-1")
-(require "srfi-9")
-
 (define-module SRFI-196
-  (import SRFI-1)
+  (import (srfi 1) (srfi 9))
   (export range numeric-range vector-range string-range range-append
           iota-range range? range=? range-length range-ref range-first
           range-last subrange range-segment range-split-at range-take

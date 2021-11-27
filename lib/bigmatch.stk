@@ -1,7 +1,7 @@
 ;;;;
 ;;;; b i g m a t c h  . s t k       -- The bigloo match-case and match-lambda
 ;;;;
-;;;; Copyright © 1997-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1997-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@kaolin.unice.fr]
 ;;;;    Creation date: 28-Oct-1997 20:47
-;;;; Last file update: 19-Sep-2020 19:08 (eg)
+;;;; Last file update: 22-Oct-2021 14:45 (eg)
 ;;;;
 
 ;;;; This file implements code for loading the MATCH-CASE and MATCH-LAMBDA
@@ -35,11 +35,11 @@
 ;;;;
 ;;;; WARNING: Order is important
 ;;;;
-(include "Match.d/s2cfun.scm")
-(include "Match.d/normalize.scm")
-(include "Match.d/descr.scm")
-(include "Match.d/compiler.scm")
-(include "Match.d/mexpand.scm")
+(include-file "Match.d/s2cfun.scm")
+(include-file "Match.d/normalize.scm")
+(include-file "Match.d/descr.scm")
+(include-file "Match.d/compiler.scm")
+(include-file "Match.d/mexpand.scm")
 
 (select-module STklos)
 (import __match_expand)

@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 14-Nov-1993 14:58
- * Last file update: 26-Mar-2021 11:01 (eg)
+ * Last file update: 22-Oct-2021 10:14 (eg)
  */
 
 #include "stklos.h"
@@ -265,13 +265,13 @@ void STk_debug(char *format, ...)
   SCM eport = STk_current_error_port();
 
   /* Print the prologue */
-  STk_fprintf(eport, "**** Debug: ");
+  STk_fprintf(eport, "\033[31m**** Debug: ");
 
   va_start(ap, format);
   print_format(eport, format, ap);
   va_end(ap);
 
-  STk_putc('\n', eport);
+  STk_fprintf(eport, "\033[0m\n");
   STk_flush(eport);
 }
 

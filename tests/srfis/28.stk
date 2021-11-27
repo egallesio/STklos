@@ -1,0 +1,42 @@
+;;;;
+;;;; 28.stk         --
+;;;;
+
+(test "format ~s.0" "\"foo\""
+      (format "~s" "foo"))
+(test "format ~s.1" "foo"
+      (format "~s" 'foo))
+(test "format ~a.0" "foo"
+      (format "~a" "foo"))
+(test "format ~a.1" "foo"
+      (format "~a" 'foo))
+
+(test "format ~%"  "a\nb\n"
+      (format "a~%b~%"))
+
+(test "format ~1"  "~~"
+      (format "~~~~"))
+
+(test "srfi-document.1" "Hello, World!"
+      (format "Hello, ~a" "World!"))
+
+(test "srfi-document.2" "Error, list is too short: (one \"two\" 3)\n"
+      (format "Error, list is too short: ~s~%" '(one "two" 3)))
+
+(test/error "Not enough arguments"
+            (format "~a"))
+(test/error "Too much arguments"
+            (format "~a" 1 2 3))
+
+;; SRFI-28 says that using a "~" not followed by a valid character is an error
+;; This is not the case in STklos whose format is more general
+(test "invalid format.1" "a~R"
+      (format "a~R"))
+
+(test "invalid format.2" "a~"
+      (format "a~"))
+
+
+(test "invalid format.2" "~"
+      (format "~"))
+

@@ -1,0 +1,306 @@
+;;;;
+;;;;
+;;;; test-r7rs-lib.stk         -- Testing R7RS libraries
+;;;;
+;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 22-Oct-2021 12:15
+;;;; Last file update: 25-Oct-2021 17:40 (eg)
+;;;;
+
+(require "test")
+
+(test-section "R7RS libraries")
+
+(define (sort-list lst)
+  ;; Used to have reproductible results
+  (sort lst
+        (lambda (s1 s2)
+          (string<? (format "~a" s1) (format "~a" s2)))))
+
+(define (library-symbols name)
+  (let ((symbs  (module-symbols (find-module name))))
+    ;; Delete the %module-symbols symbol which is used for module management
+    (sort-list (delete '%module-restore symbs))))
+
+(define (library-exports name)
+  (sort-list (module-exports (find-module name))))
+
+
+;; ______________________________________________________________________
+
+(test-subsection "Testing library syntax")
+
+(test/error "bad library name.1"
+            (define-library (a (b (c))) (export d) (begin (define d 1000))))
+
+(test/error "bad library name.2"
+            (define-library #(a (b)) (export d) (begin (define d 1000))))
+
+(test/error "bad library name.3"
+            (define-library "a" (export d) (begin (define d 1000))))
+
+(test/error "bad library name.4"
+            (define-library 10 (export d) (begin (define d 1000))))
+
+(test/error "bad library name.5"
+            (define-library (a . b)))
+
+(define-library (lib-one lib-two) (export three) (begin (define three 3)))
+
+(test "library name a/b <-> (a b).1"
+      3
+      (in-module lib-one/lib-two three))
+
+(define-library lib-a/lib-b (export c) (begin (define c 1000)))
+(define-library lib-ab (import (lib-a lib-b)) (export c))
+
+(test "library name a/b <-> (a b).2"
+      1000
+      (in-module lib-ab c))
+
+(define-library (1 2) (export three) (begin (define three 3)))
+(define-library one-two (import |1/2|))
+
+(test "library-name a/b <-> (a b).3"
+      3
+      (in-module |1/2| three))
+
+(define-library |10/20| (export thirty) (begin (define thirty 30)))
+(define-library ten-twenty (import (10 20)))
+
+(test "library-name a/b <-> (a b).4"
+      30
+      (in-module ten-twenty thirty))
+
+;; ______________________________________________________________________
+
+(test-subsection "Testing exportation list")
+
+(define-library (test1)
+  (export a b (rename c d))
+  (begin
+    (define a 10)
+    (define b 20)
+    (define c 30)
+    (define e 40)))
+
+
+(define-library (test2)
+  (import (test1))
+  (export d))
+
+(define-library (test3)
+  (import (prefix (test2) test2-)))
+
+
+(test "export.1"
+      '((a . a) (b . b) (c . d))
+      (library-exports 'test1))
+
+(test "export.2"
+      '(a b c e)
+      (library-symbols 'test1))
+
+(test "export.3"
+      '((d . d))
+      (library-exports 'test2))
+
+(test "export.4"
+      '(a b d)
+      (library-symbols 'test2))
+
+
+
+;; ----------------------------------------------------------------------
+(test-subsection "Testing simple imports")
+
+(test "import.1"
+      '(10 20 30)
+      (map (lambda (x) (symbol-value x (find-module 'test2)))
+           (library-symbols 'test2)))
+
+(test "import.2"
+      '(test2-d)
+      (library-symbols 'test3))
+
+(test "import.3"
+      30
+      (symbol-value 'test2-d (find-module 'test3)))
+
+;; We have imported test1 into test2, but "e" is not exported by test1,
+;; so should not have been imported:
+(test/error "import.4" (in-module test2 e))
+
+;; ----------------------------------------------------------------------
+(test-subsection "Testing immutability of imports")
+
+(define-library (test-mutation)
+  (export var set-var!)
+  (begin
+    (define var 10)
+    (define (set-var! value) (set! var value))))
+
+(define-library (test-mutation-2)
+  (import test-mutation)
+  (export set-var-ok! set-var-wrong!)
+
+  (begin
+    (define (set-var-ok! value)
+      (set-var! value))
+    (define (set-var-wrong! value)
+      (set! var value))))
+
+
+(test/error "immutable-import.1"
+            ((in-module test-mutation-2 set-var-wrong!) 50))
+
+(test "immutable-import.2"
+      50
+      (begin ((in-module test-mutation-2 set-var-ok!) 50)
+             (in-module test-mutation-2 var)))
+
+
+;; ----------------------------------------------------------------------
+(test-subsection "Testing prefix/rename/only imports")
+
+(define-library (foo 1)
+  (import (scheme base))
+  (export out foo/1-1 foo/1-2 foo/1-3)
+  (begin
+    (define out (open-output-string))
+    (define foo/1-1 "foo/1-1")
+    (define foo/1-2 "foo/1-2")
+    (define foo/1-3 "foo/1-3")
+    (define foo/1-4 "foo/1-4")))
+
+(define-library (foo 2)
+  (import (scheme base)
+          (scheme write)
+          (prefix (rename (only (foo 1) out foo/1-1 foo/1-2 foo/1-3)
+                          (foo/1-1 new-foo/1-1))
+                  prefix-))
+  (begin
+    (for-each (lambda (x)
+                (display x prefix-out)
+                (newline prefix-out))
+              (list prefix-new-foo/1-1
+                    prefix-foo/1-2
+                    prefix-foo/1-3))))
+
+(test "multiple clauses import.1"
+      "foo/1-1\nfoo/1-2\nfoo/1-3\n"
+      (get-output-string (symbol-value 'out (find-module 'foo/1))))
+
+(let ((infos (assoc 'foo/1 (module-imports (find-module 'foo/2)))))
+  (test "multiple clauses import.2"
+        '((foo/1-1 foo/1-2 foo/1-3 out)
+          ()
+          ((foo/1-1 new-foo/1-1))
+          prefix-)
+        (list (sort-list (key-get (cdr infos) #:only   '()))
+              (sort-list (key-get (cdr infos) #:except '()))
+              (sort-list (key-get (cdr infos) #:rename '()))
+              (key-get (cdr infos) #:prefix #f))))
+
+
+(define-library (foo 3)
+  (import (except (only (foo 1) foo/1-1 foo/1-2)
+                  foo/1-1)))
+
+
+ (let ((infos (assoc 'foo/1 (module-imports (find-module 'foo/3)))))
+  (test "multiple clauses import.3"
+        '((foo/1-1 foo/1-2)
+          (foo/1-1)
+          ()
+          #f)
+        (list (sort-list (key-get (cdr infos) #:only   '()))
+              (sort-list (key-get (cdr infos) #:except '()))
+              (sort-list (key-get (cdr infos) #:rename '()))
+              (key-get (cdr infos) #:prefix #f)))
+  (test "multiple clauses import.4"
+         '(foo/1-2)
+         (library-symbols 'foo/3)))
+
+
+(define-library (foo 4)
+  (import (only (except (foo 1) foo/1-3)
+                foo/1-2)))
+
+(let ((infos (assoc 'foo/1 (module-imports (find-module 'foo/4)))))
+  (test "multiple clauses import.5"
+        '((foo/1-2)
+          (foo/1-3)
+          ()
+          #f)
+        (list (sort-list (key-get (cdr infos) #:only   '()))
+              (sort-list (key-get (cdr infos) #:except '()))
+              (sort-list (key-get (cdr infos) #:rename '()))
+              (key-get (cdr infos) #:prefix #f)))
+
+  (test "multiple clauses import.6"
+         '(foo/1-2)
+         (library-symbols 'foo/4)))
+
+
+(define-library (foo 5)
+  (import (except (only (foo 1) foo/1-3)
+                  foo/1-3)))   ;; ==> nobody
+
+(let ((infos (assoc 'foo/1 (module-imports (find-module 'foo/5)))))
+  (test "multiple clauses import.7"
+        '((foo/1-3)
+          (foo/1-3)
+          ()
+          #f)
+        (list (sort-list (key-get (cdr infos) #:only   '()))
+              (sort-list (key-get (cdr infos) #:except '()))
+              (sort-list (key-get (cdr infos) #:rename '()))
+              (key-get (cdr infos) #:prefix #f)))
+
+  (test "multiple clauses import.8"
+         '()
+         (library-symbols 'foo/5)))
+
+
+(define-library (foo 6)
+  (import (except (prefix (foo 1) |P:|)
+                  P:foo/1-1)))
+
+
+(let ((infos (assoc 'foo/1 (module-imports (find-module 'foo/6)))))
+  (test "multiple clauses import.9"
+        '(()
+          (P:foo/1-1)
+          ()
+          |P:|)
+        (list (sort-list (key-get (cdr infos) #:only   '()))
+              (sort-list (key-get (cdr infos) #:except '()))
+              (sort-list (key-get (cdr infos) #:rename '()))
+              (key-get (cdr infos) #:prefix #f)))
+
+  (test "multiple clauses import.10"
+         '(P:foo/1-2 P:foo/1-3 P:out)
+         (library-symbols 'foo/6)))
+
+
+;; ======================================================================
+(test-section-end)

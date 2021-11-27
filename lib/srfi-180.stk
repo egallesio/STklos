@@ -51,21 +51,21 @@
 ;;;;
 
 (require "srfi-9")
-(require "srfi-60")
 
 (define-module SRFI-180
-   (export json-number-of-character-limit
-           json-nesting-depth-limit
-           json-null?
-           json-error?
-           json-error-reason
-           json-fold
-           json-generator
-           json-read
-           json-lines-read
-           json-sequence-read
-           json-accumulator
-           json-write)
+  (import (srfi 60))
+  (export json-number-of-character-limit
+          json-nesting-depth-limit
+          json-null?
+          json-error?
+          json-error-reason
+          json-fold
+          json-generator
+          json-read
+          json-lines-read
+          json-sequence-read
+          json-accumulator
+          json-write)
 
 ;;; **STklos**
 ;;; (define (%read-error? x)

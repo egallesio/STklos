@@ -1,7 +1,7 @@
 ;;;;
-;;;; utils.stk	-- Compiler Utilities
+;;;; utils.stk  -- Compiler Utilities
 ;;;;
-;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Mar-2001 13:57 (eg)
-;;;; Last file update: 13-Nov-2020 12:05 (eg)
+;;;; Last file update:  1-Nov-2021 22:00 (eg)
 ;;;;
 
 
@@ -33,79 +33,72 @@
 (define (%path-without-cwd path)
   (let ((cwd (getcwd)))
     (if (eq? (string-position cwd path) 0)
-	(substring path
-		   (+  1 (string-length cwd))
-		   (string-length path))
-	path)))
+        (substring path
+                   (+  1 (string-length cwd))
+                   (string-length path))
+        path)))
 
 ;;; ----------------------------------------------------------------------
-;;;	compiler-error ...
+;;;     compiler-error ...
 ;;; ----------------------------------------------------------------------
 (define (compiler-error where who fmt . l)
   (let* ((where (if (eq? where (void)) "" (format "~A: " where)))
-	 (loc   (if (%epair? who)
-		    (format "~A:~A: "
-			    (%path-without-cwd (%epair-file who))
-			    (%epair-line who))
-		    "")))
+         (loc   (if (%epair? who)
+                    (format "~A:~A: "
+                            (%path-without-cwd (%epair-file who))
+                            (%epair-line who))
+                    "")))
     (if *compiler-port*
-	;; Compiling a file
-	(apply format
-	       (current-error-port)
-	       (format "~AError: ~A~A\n" loc where fmt)
-	       l)
-	;; Interactive compilation
-	(apply error
-	       (string-append where fmt)
-	       l))))
+        ;; Compiling a file
+        (apply format
+               (current-error-port)
+               (format "~AError: ~A~A\n" loc where fmt)
+               l)
+        ;; Interactive compilation
+        (apply error
+               (string-append where fmt)
+               l))))
 
 ;;; ----------------------------------------------------------------------
-;;;	compiler-warning ...
+;;;     compiler-warning ...
 ;;; ----------------------------------------------------------------------
 (define (compiler-warning where who fmt . l)
   (let* ((where (if (eq? where (void)) "" (format "~A: " where)))
-	 (loc   (if (%epair? who)
-		    (format "~A:~A: "
-			    (%path-without-cwd (%epair-file who))
-			    (%epair-line who))
-		    "")))
+         (loc   (if (%epair? who)
+                    (format "~A:~A: "
+                            (%path-without-cwd (%epair-file who))
+                            (%epair-line who))
+                    "")))
     (if (or #t *compiler-port*)
-	;; Compiling a file
-	(apply format
-	       (current-error-port)
-	       (format "~Awarning: ~A~A\n" loc where fmt)
-	       l)
-	;; Interactive compilation
-	(apply format
-	       (current-error-port)
-	       (format "**** Warning;\n~A~A\n" where fmt)
-	       l))))
+        ;; Compiling a file
+        (apply format
+               (current-error-port)
+               (format "~Awarning: ~A~A\n" loc where fmt)
+               l)
+        ;; Interactive compilation
+        (apply format
+               (current-error-port)
+               (format "**** Warning;\n~A~A\n" where fmt)
+               l))))
 
 ;;//(define (%compiler-message kind where fmt l)
 ;;//  ;; Write an Emacs compatible header
 ;;//  (when *compiler-port*
 ;;//    (format (current-error-port)
-;;//	    "~A:~A: ~A "
-;;//	    (port-file-name *compiler-port*)
-;;//	    (port-current-line *compiler-port*)
-;;//	    kind))
+;;//        "~A:~A: ~A "
+;;//        (port-file-name *compiler-port*)
+;;//        (port-current-line *compiler-port*)
+;;//        kind))
 ;;//
 ;;//  (let ((location (if (eq? where (void)) "" (format #f " ~A:" where))))
 ;;//    (apply format
-;;//	   (current-error-port)
-;;//	   (format #f "~A ~A\n" location fmt)
-;;//	   l)))
+;;//       (current-error-port)
+;;//       (format #f "~A ~A\n" location fmt)
+;;//       l)))
 ;;//
 ;;//
 ;;//(define (compiler-warning where fmt . l)
 ;;//  (%compiler-message "warning" where fmt l))
-
-
-(define symbol-bound?
-  (let ((unbound (list 'unbound)))
-    (lambda (symbol)
-      (not (eq? (symbol-value* symbol (current-module) unbound) unbound)))))
-
 
 (define (unquote . l)
   (error 'unquote "used outside of a quasiquote context"))

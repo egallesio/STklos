@@ -55,7 +55,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Nov-2020 06:15 (jpellegrini)
-;;;; Last file update: 08-Nov-2020 05:58 (jpellegrini)
+;;;; Last file update: 24-Nov-2021 10:29 (eg)
 ;;;;
 
 ;; This implements banker's deque as described in
@@ -63,14 +63,12 @@
 ;; It provides amortized O(1) basic operations.
 ;; Originally written for Gauche, and ported to R7RS
 
-(require "srfi-1")
-(require "srfi-9")
 (require "srfi-158")
 
 (define-module SRFI-134
   ;;(import (scheme base) (scheme case-lambda)
   ;;        (srfi 1) (srfi 9) (srfi 158))
-  (import SRFI-1)
+  (import (srfi 1) (srfi 9))
   (import SRFI-158)
   (export ideque ideque-tabulate ideque-unfold ideque-unfold-right 
           ideque? ideque-empty? ideque= ideque-any ideque-every

@@ -1,7 +1,7 @@
 ;;;;
 ;;;; recette.stk        -- Port of Bigloo Snow recette to STklos
 ;;;;
-;;;; Copyright © 2007-2019 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Manuel Serrano
 ;;;;    Creation date: 16-Mar-2007 15:59 (eg)
-;;;; Last file update: 10-Jun-2019 12:12 (eg)
+;;;; Last file update: 12-Nov-2021 17:50 (eg)
 ;;;;
 
 (require "pretty-print")
@@ -101,7 +101,7 @@
 ;;      define-test ...
 ;; ----------------------------------------------------------------------
 (select-module STklos)
-(%redefine-module-exports (find-module 'recette))
+(import recette)
 
 (define-macro (define-test id prgm . rest)
   (let ((t (cond

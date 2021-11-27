@@ -1,0 +1,287 @@
+;;;;
+;;;;
+;;;; library.stk         -- R7RS define-library
+;;;;
+;;;; Copyright © 2019-2021 Erick Gallesio <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 18-Oct-2019 14:08
+;;;; Last file update: 25-Oct-2021 17:51 (eg)
+;;;;
+
+;;
+;; Define common standard libraries to minimize files accesses at runtime
+;;
+(include "./scheme/base.stk")
+(include "./scheme/write.stk")
+
+;;
+;; library name conversion functions
+;;
+(define (%library-name->string libname)
+  (define (->string libname)
+    (let* ((str (format #f "~A" libname))
+           (res (substring str 1 (- (string-length str) 1))))
+      (regexp-replace-all " " res "/")))
+
+  (cond
+   ((symbol? libname)                                   ;; STklos
+    (symbol->string libname))
+   ((and (pair? libname)
+         (list? libname)
+         (every (lambda (x)
+                  (or (symbol? x) (and (integer? x)
+                                       (positive? x))))
+                libname)
+         (->string libname)))
+   (else
+    (error "bad library name ~S" libname))))
+
+
+(define (%library-name->symbol libname)
+  (string->symbol (%library-name->string libname)))
+
+(define (%symbol->library-name name)
+  (map string->symbol (string-split (symbol->string name) "/")))
+
+;;
+;; A macro to redefine a symbol in a R7RS module
+;;
+(define-macro (%module-define-and-export . lst)
+  `(begin
+     ,@(map (lambda (x) `(%symbol-define ',x ,x)) lst)
+     (export ,@lst)))
+
+
+;; ======================================================================
+;;
+;; IMPORT
+;;
+;; ======================================================================
+
+(define (%parse-imports imports)
+
+  (define (parse import-set)
+    ;; Build a key-list of the import-set. If the import-set is
+    ;;       (prefix (only (a b) x y z) foo-),
+    ;; it returns a list of the form
+    ;;       (a/b #:only (x y z) #:prefix foo-)
+    (cond
+     ((list? import-set)
+      (let ((key (car import-set)))
+        (case key
+
+          ((only)
+           (if (>= (length import-set) 3)
+               (let ((ids (cddr import-set)))
+                 (unless (every symbol? ids)
+                   (error 'import "bad list of symbols ~s in only clause"
+                          ids key))
+                 `(,@(parse (cadr import-set)) #:only ,ids))
+               (error 'import "bad only clause ~s" import-set)))
+
+          ((except)
+           (if (>= (length import-set) 3)
+               (let ((ids (cddr import-set)))
+                 (unless (every symbol? ids)
+                   (error 'import "bad list of symbols ~s in except clause" ids))
+                 `(,@(parse (cadr import-set)) #:except ,ids))
+               (error 'import "bad except clause ~s" import-set)))
+
+          ((prefix)
+           (if (and (= (length import-set) 3)
+                    (symbol? (caddr import-set)))
+               `(,@(parse (cadr import-set)) #:prefix ,(caddr import-set))
+               (error 'import "bad prefix clause ~s" import-set)))
+
+          ((rename)
+           (if (>= (length import-set) 3)
+               (let ((assocs (cddr import-set)))
+                 ;; Verify that all the assocs are well formed
+                 (unless (every (lambda (x)
+                                  (and (list? x) (= (length x) 2)
+                                       (symbol? (car x)) (symbol? (cadr x))))
+                                assocs)
+                   (error 'import "bad list of associations ~s in rename clause"
+                          assocs))
+                 `(,@(parse (cadr import-set)) #:rename ,assocs))
+               (error 'import "bad rename clause ~s" import-set)))
+
+          (else
+           (list (%library-name->symbol import-set))))))
+
+     ((symbol? import-set)
+      ;; a "legacy" STklos module
+      (list import-set))
+
+     (else
+      (error 'import "bad import set ~s" import-set))))
+  ;;
+  ;; Return a list of parsed imports
+  ;;
+  (map parse imports))
+
+
+
+
+
+(define (%do-imports lib clauses)
+
+  (define (eventually-load-library name)
+    (let ((module (find-module name #f)))
+      (or module
+          ;; Try to load a file which could define this module
+          (begin
+            (require/provide (symbol->string name))
+
+            ;; Verify that the module was correctly defined in this file
+            (let ((mod (find-module name #f)))
+              (unless mod
+                (error 'import "module/library ~s does not exist"
+                       (%symbol->library-name name)))
+              mod)))))
+
+
+  (define (build-import-list lib lst imported)
+    (if (null? lst)
+        imported
+        (let ((key  (car lst))
+              (val  (cadr lst))
+              (rest (cddr lst)))
+          (case key
+            ((#:only)
+             (let ((public (map cdr imported)))
+               (for-each (lambda (symb)
+                           (unless (memq symb public)
+                             (error 'import "only: symbol ~s is not in the import set"
+                                    symb)))
+                         val)
+               (set! imported (filter! (lambda (x) (memq (cdr x) val)) imported))))
+
+            ((#:except)
+             (let ((public (map cdr imported)))
+               (for-each (lambda (symb)
+                           (if (memq symb public)
+                               (set! imported (remove (lambda (x) (eq? (cdr x) symb)) imported))
+                               (error 'import "except: symbol ~s is not in the import set" symb)))
+                         val)))
+            ((#:rename)
+             (for-each (lambda (pair)
+                         (let ((original (car pair))
+                               (new      (cadr pair)))
+                           (let Loop ((lst imported))
+                             (if (null? lst)
+                                 (error 'import
+                                        "rename: symbol ~s is not in the import set" original)
+                                 (if (eq? (cdar lst) original)
+                                     (set-cdr! (car lst) new)
+                                     (Loop (cdr lst)))))))
+                       val))
+            ((#:prefix)
+             (for-each (lambda (pair)
+                         (set-cdr! pair (symbol-append val (cdr pair))))
+                       imported)))
+          ;; Loop with the rest of lst
+          (build-import-list lib rest imported))))
+
+
+  (define (import-symbols importer name keylist)
+    (let* ((mod       (eventually-load-library name))
+           (imported  (build-import-list mod
+                                         keylist
+                                         (list-copy (module-exports mod)))))
+      ;; Make aliases for all symbols in imported list
+      (for-each (lambda (pair)
+                  (%symbol-link (cdr pair) (car pair) lib mod))
+                imported)))
+
+  ;; Call import-symbols for each import spec
+  (for-each (lambda (imp)
+              (let ((name     (car imp))
+                    (keylist  (cdr imp)))
+                (import-symbols lib name keylist)))
+            clauses)
+
+  ;; Retain the import list (for module-imports)
+  (%module-imports-set! lib clauses))
+
+;; ======================================================================
+;;
+;; DEFINE-LIBRARY
+;;
+;; ======================================================================
+(define (%eventually-create-library name)
+  (or (find-module name #f)
+      (let ((lib (%make-library)))
+        (%register-library-as-module lib name)
+        lib)))
+
+(define-macro (define-library name . decls)
+  (let* ((module-name    (%library-name->symbol name))
+         (imports        '())
+         (exports        '())
+         (body           '())
+         (lib            (gensym))
+         (module-restore (symbol-value '%module-restore
+                                       (find-module 'STklos))))
+
+    ;; Parse declarations
+    (for-each (lambda (d)
+                (unless (pair? d)
+                  (error 'define-library "bad library declaration clause ~s" d))
+                (let ((key  (car d))
+                      (rest (cdr d)))
+                  (case key
+                    ((import)
+                     (let ((imp (%parse-imports rest)))
+                       (set! imports (append! imports (list imp)))))
+                    ((export)
+                     (let ((exp (%parse-exports rest)))
+                       (set! exports (append! exports (list exp)))))
+                    ((begin include include-ci)
+                     (set! body (append body (list d))))
+                    (else
+                     (error 'define-library "incorrect directive ~s" d)))))
+              decls)
+    ;;
+    ;; Produce the expansion
+    ;;
+    ;; The difficulty here is that libraries have an empty environment. That
+    ;; means that we cannot expand in a "define-module" and do the imports
+    ;; and the exports in it. Consequently, we work in two time:
+    ;;  1. First, we create an empty library and fill it with the import and
+    ;;     the export. This is done in in the STklos environment
+    ;;  2. Then, we use a standard define-module which will use the library
+    ;;     previously built where the imports/exports have bee forged.
+    ;;
+    `(begin
+       ;; ①: Define (eventually) the library and do the imports and exports
+       (let ((,lib (%eventually-create-library ',module-name)))
+         ;; Do the imports
+         ,@(map (lambda (x) `(%do-imports ,lib ',x)) imports)
+
+         ;; Do the exports
+         ,@(map (lambda (x) `(%do-exports ,lib ',x)) exports)
+
+         ;; HACK: %module-restore is used at the end of the expansion.
+         ;; We define here it locally to permit the module restoration
+         (%symbol-define '%module-restore %module-restore ,lib))
+
+       ;; ②: Define a standard STklos module
+       (define-module ,module-name ,@body))))

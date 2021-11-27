@@ -1,7 +1,7 @@
 ;;;;
 ;;;; test.stk   -- STklos regression testing
 ;;;;
-;;;; Copyright © 2005-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 11:19 (eg)
-;;;; Last file update: 26-Nov-2020 14:59 (eg)
+;;;; Last file update: 26-Oct-2021 20:56 (eg)
 ;;;;
 
 (define *all-errors* '())
@@ -60,7 +60,7 @@
 ;; ----------------------------------------------------------------------
 ;;  test-end ...
 ;; ----------------------------------------------------------------------
-(define (test-end)
+(define (test-terminate)
   (for-each (lambda (port)
               (format port "~A\n" (make-string 70 #\-))
               (format port "Number of tests: ~A (OK: ~A Error: ~A)\n"

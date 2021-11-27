@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 10-Sep-2021 11:33 (eg)
+ * Last file update: 21-Nov-2021 18:45 (eg)
  *
  */
 
@@ -895,6 +895,10 @@ static SCM internal_format(int argc, SCM *argv, int error)
   for(p = start_fmt; *p; p++) {
     if (*p == '~') {
       switch(*(++p)) {
+        case '\0':{  /* A ~ at the end of the string */
+                     STk_putc('~', port);
+                     goto EndFormatAnalysis;
+                  }
         case 'A':
         case 'a': {
                     SCM tmp;
@@ -1067,6 +1071,7 @@ static SCM internal_format(int argc, SCM *argv, int error)
     }
   }
 
+ EndFormatAnalysis:
   /* Verify that it doesn't remain arguments on the list */
   if (argc)
     STk_error_bad_io_param("too few ``~~'' in format string %S", start_fmt);

@@ -1,0 +1,292 @@
+;;;;
+;;;; srfi-27.stk         -- SRFI-27: Sources of Random Bits
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 28-Apr-2021 02:01
+;;;; Last file update: 21-Nov-2021 11:40 (eg)
+;;;;
+
+(select-module srfi/27)
+
+(export default-random-source
+        random-integer
+        random-real
+        random-source-make-integers
+        random-source-make-reals
+        random-source-state-ref
+        random-source-state-set!
+        random-source-randomize!
+        random-source-pseudo-randomize!
+        random-source?
+        random-state?
+        make-random-source
+        <random-state>
+        <random-source>
+        <random-state-mt>
+        <random-source-mt>)
+
+(define-syntax push!
+  (syntax-rules ()
+    ((_ e l)
+     (set! l (cons e l)))))
+
+(%compile-time-define %make-random-state-mt
+                      %random-source-pseudo-randomize-mt!
+                      %random-source-randomize-mt!
+                      %random-integer-from-source-mt
+                      %random-real-from-source-mt
+                      %random-state-copy-mt)
+
+;;
+;; The PRNG algorithms. For now, there is only one (Mersenne Twister),
+;; but we could add others (ChaCha and some MWC variants seem interesting).
+;;
+
+(define *prng-algorithms* '())
+
+;;;
+;;; RANDOM STATE
+;;;
+
+(define-class <random-state> () ())
+
+(define-generic random-state?)
+(define-method  random-state? (obj) #f)
+(define-method  random-state? ((st <random-state>)) #t)
+
+;;;
+;;; RANDOM SOURCE
+;;;
+
+;; The getters and setters begin with "%" because we won't expose
+;; them. They do not copy the state, which is what the user expects and
+;; all implementations do -- they return a *reference* to the state.
+;; So, if the user wanted to "save the state for later", it wouldn't
+;; work, since only pointers were saved, and they point to the state
+;; that is still being modified by number generation.
+(define-class <random-source> ()
+  ((algorithm #:init-keyword #:algorithm)
+   (state     #:init-keyword #:state
+              #:getter       %random-source-state-ref
+              #:setter       %random-source-state-set!)))
+
+
+
+(define-generic make-random-source)
+(define-generic random-source-make-integers)
+(define-generic random-source-make-reals)
+(define-generic random-source-state-ref)
+(define-generic random-source-state-set!)
+(define-generic random-source-randomize!)
+(define-generic random-source-pseudo-randomize!)
+
+(define-method random-source? (obj) #f)
+
+
+(define (make-random-source :optional algo)
+  (if algo
+      (let ((maker (assq algo *prng-algorithms*)))
+        (if maker
+            ((cdr maker))
+            (error "bad PRNG algorithm ~S" algo)))
+      default-random-source)) ;; WRONG! Should make a new one
+
+;;;
+;;; MERSENNE TWISTER
+;;;
+
+;; state
+
+(define-class <random-state-mt> (<random-state>) ())
+
+(define-reader-ctor '<random-state-mt>
+  (lambda args
+    (let ((mti (car args))
+          (vec (list->vector (cdr args))))
+      (%make-random-state-mt mti vec))))
+
+
+;; Assert that when we create a "random-state-mt" structure, it is
+;; an instance of <random-state-mt>. Otherwise some generic methods
+;; may fail to apply.
+(%user-type-proc-set! 'random-state-mt 'class-of <random-state-mt>)
+
+;; source
+
+(define-class <random-source-mt> (<random-source>) ())
+
+(push! (cons #:mt (lambda () (make <random-source-mt>
+                              #:algorithm 'mt
+                              #:state     (%make-random-state-mt))))
+       *prng-algorithms*)
+
+;; this is a random-source -- define the predicate!
+(define-method random-source? ((s <random-source-mt>)) #t)
+
+
+(define-method random-source-make-integers((s <random-source-mt>))
+  (let ((state (%random-source-state-ref s)))
+    (lambda (n)
+      (%random-integer-from-source-mt state n))))
+
+(define-method random-source-make-reals ((s <random-source-mt>))
+  (let ((state (%random-source-state-ref s)))
+    (lambda ()
+      (%random-real-from-source-mt state))))
+
+;; The following procedure is correct, but can probably be optimized,
+;; or maybe re-written in C.
+(define-method random-source-make-reals ((s <random-source-mt>)
+                                         (unit <real>))
+  (when (<= unit 0)
+    (error "unit parameter ~S <= 0" unit))
+  (when (>= unit 1)
+    (error "unit parameter ~S >= 0" unit))
+
+  ;; 1/unit is the number of slots of size "unit" that we can fit in
+  ;; the [0,1] interval.
+  ;;
+  ;; rr is a random number in (0,1) -- and it will fall into *some* slot.
+  ;; we find which one ('chosen-slot'), and then find the equivalent number
+  ;; in the *first* slot ('quantum').
+  ;; Then, the closure we return just calculates a slot and returns
+  ;; slot * quantum.
+  ;;
+  ;; This way, the first number is (pseudo-)random, and the others are
+  ;; spaced by exactly 'unit'.
+  ;;
+  ;; NOTE: we cannot use fixnum procedures here.
+  ;;
+  ;; CAVEAT: this works perfectly for rationals, but when choosing
+  ;; floating-point numbers there will be a limit to the available precision
+  ;; and the "random" numbers will always be zero.
+  (let ((slots (inexact->exact (floor (/ 1 unit))))
+        (rr ((random-source-make-reals s))))
+    ;; The SRFI says the type of unit determines the type of the answer, so
+    ;; we check if converting to rational is necessary:
+    (let ((r (if (rational? unit)
+                 (inexact->exact rr)
+                 rr)))
+      (let* ((chosen-slot (floor (/ r unit)))
+             (quantum (- r (* unit chosen-slot))))
+        ;; Each call to the returned procedure will just pick a slot and
+        ;; return the representant of 'quantum' in that slot:
+        (lambda ()
+          (* quantum (+ 1 ((random-source-make-integers s) slots))))))))
+
+(define-method random-source-state-ref ((s <random-source-mt>))
+  (%random-state-copy-mt (%random-source-state-ref s)))
+
+(define-method random-source-state-set! ((src <random-source-mt>)
+                                         (st  <random-state-mt>))
+  (%random-source-state-set! src (%random-state-copy-mt st)))
+
+(define-method random-source-randomize! ((src <random-source-mt>))
+  (%random-source-randomize-mt! (%random-source-state-ref src)))
+
+(define (mix i j)
+  ;;(let ((K #x1000000000000000)) ;; 2^63
+  (let ((K 4611686018427387904)) ;; 2^63
+    ;; Adapted from Gauche
+    (define (interleave-i i j lis)
+     (if (zero? i)
+       (if (zero? j) lis (interleave-j 0 j (cons 0 lis)))
+       (let ((q (quotient i K))
+             (r (remainder i K)))
+         (interleave-j q j (cons r lis)))))
+
+    (define (interleave-j i j lis)
+      (if (zero? j)
+          (if (zero? i) lis (interleave-i i 0 (cons 0 lis)))
+          (let ((q (quotient j K))
+                (r (remainder j K)))
+            (interleave-i i q (cons r lis)))))
+
+    (interleave-i i j '(4611686018427387903)))) ;; 2^63 - 1
+
+(define-method random-source-pseudo-randomize! ((src <random-source-mt>)
+                                                (i   <integer>)
+                                                (j   <integer>))
+  (when (negative? i) (error "parameter i = ~S cannot be negative" i))
+  (when (negative? j) (error "parameter j = ~S cannot be negative" j))
+  ;; %random-source-pseudo-randomize-mt! takes a state and a
+  ;; *vector containing fixnums only*
+  (%random-source-pseudo-randomize-mt! (%random-source-state-ref src)
+                                       (list->vector (mix (+ 1 i) (+ 1 j)))))
+
+
+;;;
+;;; DEFAULT RANDOM SOURCE
+;;;
+
+(define default-random-source
+  (make <random-source-mt>
+        #:algorithm 'mt
+        #:state     (%make-random-state-mt)))
+
+
+;; assigning to default-random-source should not change these procedures
+(define (random-integer n) (%random-integer-from-source-mt
+                            (%random-source-state-ref default-random-source n)))
+(define (random-real)      (%random-real-from-source-mt
+                            (%random-source-state-ref default-random-source)))
+
+
+;;;
+;;; END OF SRFI-27 CODE
+;;;
+(provide "srfi/27")
+
+#|
+<doc EXT random-integer
+ * (random-integer n)
+ *
+ * Return an integer in the range \[0, ..., |n|\[.  Subsequent results of
+ * this procedure appear to be independent uniformly distributed over
+ * the range \[0, ..., |n|\[. The argument |n| must be a positive integer,
+ * otherwise an error is signaled. This function is equivalent to the eponym
+ * function of SRFI-27 (see ,(link-srfi 27) definition for more details).
+doc>
+
+<doc EXT random-real
+ * (random-real)
+ *
+ * Return a real number |r| such that |0 < r < 1|.
+ * Subsequent results of this procedure appear to be independent uniformly
+ * distributed. This function is equivalent to the eponym
+ * function of SRFI-27 (see ,(link-srfi 27) definition for more details).
+doc>
+|#
+
+;; These two procedures were broken due to autoloads, so we force their definition here
+
+(define-module STklos
+  (import (srfi 27))
+
+  (define (random-integer n)
+    ((in-module srfi/27 %random-integer-from-source-mt)
+     ((in-module srfi/27 %random-source-state-ref) default-random-source) n))
+
+  (define (random-real)
+    ((in-module srfi/27 %random-real-from-source-mt)
+     ((in-module srfi/27 %random-source-state-ref) default-random-source))))
+
+

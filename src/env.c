@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 10-Apr-2021 18:39 (eg)
+ * Last file update:  8-Nov-2021 18:27 (eg)
  */
 
 #include "stklos.h"
@@ -71,6 +71,7 @@ struct module_obj {
   SCM name;                     /* module name */
   SCM exported_symbols;         /* symbols declared as exported */
   SCM imports;                  /* imported modules */
+  int is_library;               /* 1 if module is a R7RS library; 0  */
   struct hash_table_obj hash;   /* The associated hash table */
 };
 
@@ -78,13 +79,11 @@ struct module_obj {
 #define MODULE_NAME(m)          (((struct module_obj *) (m))->name)
 #define MODULE_EXPORTS(m)       (((struct module_obj *) (m))->exported_symbols)
 #define MODULE_IMPORTS(m)       (((struct module_obj *) (m))->imports)
+#define MODULE_IS_LIBRARY(m)    (((struct module_obj *) (m))->is_library)
 #define MODULE_HASH_TABLE(m)    (((struct module_obj *) (m))->hash)
 
-#define VISIBLE_P(symb, mod)    (((mod) == STk_STklos_module) ||        \
-                                 (STk_memq((symb), MODULE_EXPORTS(mod))!=STk_false))
-
-
 SCM STk_STklos_module;          /* The module whose name is STklos */
+static SCM Scheme_module;       /* The module whose name is SCHEME */
 static SCM all_modules;         /* List of all knowm modules */
 
 static void print_module(SCM module, SCM port, int mode)
@@ -94,6 +93,26 @@ static void print_module(SCM module, SCM port, int mode)
   STk_putc(']', port);
 }
 
+static SCM make_simple_module(SCM name)
+{
+  register SCM z;
+
+  NEWCELL(z, module);
+  MODULE_NAME(z)        = name;
+  MODULE_EXPORTS(z)     = STk_nil;
+  MODULE_IMPORTS(z)     = STk_nil;
+  MODULE_IS_LIBRARY(z)  = 0;
+  STk_hashtable_init(&MODULE_HASH_TABLE(z), HASH_VAR_FLAG);
+  return z;
+}
+
+static void register_module(SCM mod)
+{
+  MUT_DECL(lck);
+  MUT_LOCK(lck);
+  all_modules = STk_cons(mod, all_modules);
+  MUT_UNLOCK(lck);
+}
 
 static SCM STk_makemodule(SCM name)
 {
@@ -105,12 +124,8 @@ static SCM STk_makemodule(SCM name)
   MODULE_IMPORTS(z)     = (name == STk_void)? STk_nil : LIST1(STk_STklos_module);
   /* Initialize the associated hash table & store the module in the global list*/
   STk_hashtable_init(&MODULE_HASH_TABLE(z), HASH_VAR_FLAG);
-  {
-    MUT_DECL(lck);
-    MUT_LOCK(lck);
-    all_modules = STk_cons(z, all_modules);
-    MUT_UNLOCK(lck);
-  }
+  register_module(z);
+
   return z;
 }
 
@@ -136,11 +151,22 @@ static SCM find_module(SCM name, int create)
  *
 \*===========================================================================*/
 
+static SCM make_export_list(SCM symbols)
+{ /* Transform list of symbols (s1 s2 ...) in ((s1 . s1) (s2 . s2) ...) */
+  SCM res = STk_nil;
+
+  for (SCM l=symbols; l != STk_nil; l=CDR(l)) {
+    res = STk_cons(STk_cons(CAR(l), CAR(l)), res);
+  }
+  return res;
+}
+
+
 void STk_export_all_symbols(SCM module)
 {
   if (!MODULEP(module)) error_bad_module(module);
   if (module != STk_STklos_module)
-    MODULE_EXPORTS(module) = STk_hash_keys(&MODULE_HASH_TABLE(module));
+    MODULE_EXPORTS(module) = make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module)));
 }
 
 /* ==== Undocumented primitives ==== */
@@ -150,6 +176,27 @@ DEFINE_PRIMITIVE("%create-module", create_module, subr1, (SCM name))
   if (!SYMBOLP(name)) error_bad_module_name(name);
   return find_module(name, TRUE);
 }
+
+ DEFINE_PRIMITIVE("%make-library", make_library, subr0, (void))
+{
+  SCM z = make_simple_module(STk_void);
+
+  MODULE_IS_LIBRARY(z) = 1;
+  return z;
+}
+
+DEFINE_PRIMITIVE("%register-library-as-module", register_library,
+                 subr2, (SCM m, SCM name))
+{
+  if (!MODULEP(m))    error_bad_module(m);
+  if (!SYMBOLP(name)) error_bad_symbol(name);
+  MODULE_NAME(m) = name;
+  register_module(m);
+  return STk_void;;
+}
+
+
+
 
 DEFINE_PRIMITIVE("%select-module", select_module, subr1, (SCM module))
 {
@@ -165,8 +212,14 @@ DEFINE_PRIMITIVE("%module-imports-set!", module_imports_set, subr2,
 {
   if (!MODULEP(importer)) error_bad_module(importer);
 
-  if (CONSP(imported))
-    MODULE_IMPORTS(importer) = STk_dappend2(imported, LIST1(STk_STklos_module));
+  if (CONSP(imported)) {
+    /* STklos modules implicitely import STklos, but R7RS library don't */
+    if (MODULE_IS_LIBRARY(importer)) {
+      MODULE_IMPORTS(importer) = imported;
+    }
+    else
+      MODULE_IMPORTS(importer) = STk_dappend2(imported, LIST1(STk_STklos_module));
+  }
   else if (NULLP(imported))
     MODULE_IMPORTS(importer) = STk_nil;
   else error_bad_list(imported);
@@ -201,6 +254,19 @@ DEFINE_PRIMITIVE("module?", modulep, subr1, (SCM obj))
 {
   return MAKE_BOOLEAN(MODULEP(obj));
 }
+
+/*
+<doc EXT library?
+ * (library? object)
+ *
+ * Returns |#t| if |object| is a module defined as a R7RS library and |#f| otherwise.
+doc>
+*/
+DEFINE_PRIMITIVE("library?", libraryp, subr1, (SCM obj))
+{
+  return MAKE_BOOLEAN(MODULEP(obj) && MODULE_IS_LIBRARY(obj));
+}
+
 
 /*
 <doc EXT find-module
@@ -295,7 +361,7 @@ DEFINE_PRIMITIVE("module-exports", module_exports, subr1, (SCM module))
 
   /* STklos module is special: everything is exported ==> module-symbols */
   return (module == STk_STklos_module) ?
-                STk_hash_keys(&MODULE_HASH_TABLE(module)) :
+                make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module))) :
                 MODULE_EXPORTS(module);
 }
 
@@ -355,32 +421,25 @@ DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
 }
 
 
-DEFINE_PRIMITIVE("%redefine-module-exports", redefine_module_exports, subr12,
-                 (SCM from, SCM to))
+DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void))
 {
-  SCM lst, res;
-  int i;
-
-  if (!MODULEP(from)) error_bad_module(from);
-  if (!to)
-    to =  STk_current_module();
-  else
-    if (!MODULEP(to)) error_bad_module(to);
-
-  /* Compute the list of exported symbols */
-  if (from == STk_STklos_module)
-    lst = STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module)); /* everybody */
-  else
-    lst = MODULE_EXPORTS(from);                         /* explicitly exported */
-
-  for (     ; !NULLP(lst); lst = CDR(lst)) {
-    res = STk_hash_get_variable(&MODULE_HASH_TABLE(from), CAR(lst), &i);
-    if (res)
-      /* symbol (car lst) is bound in module from. redefine it in module to */
-      STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), to);
+  // This function is called to populate the Scheme module with all the
+  // symbols defined in STklos module. This permits to have a copy of the
+  // original bindings that can reliably be used by the runtime.
+  // FIXME: the bindings in the Scheme module should be immutable. 
+  for (SCM lst = STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module));
+       !NULLP(lst);
+       lst = CDR(lst)) {
+    int i;
+    SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(STk_STklos_module),
+                                    CAR(lst),
+                                    &i);
+    /* Redefine symbol in (car lst) in SCHEME module */
+    STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), Scheme_module);
   }
   return STk_void;
 }
+
 
 /*===========================================================================*\
  *
@@ -412,15 +471,19 @@ SCM STk_clone_frame(SCM f)
 
 void STk_define_variable(SCM symbol, SCM value, SCM module)
 {
-  STk_hash_set_variable(&MODULE_HASH_TABLE(module), symbol, value);
+  STk_hash_set_variable(&MODULE_HASH_TABLE(module), symbol, value, TRUE);
 }
 
 
-DEFINE_PRIMITIVE("%symbol-define", symbol_define, subr3,
+DEFINE_PRIMITIVE("%symbol-define", symbol_define, subr23,
                  (SCM symbol, SCM value, SCM module))
 {
   if (!SYMBOLP(symbol)) error_bad_symbol(symbol);
-  if (!MODULEP(module)) error_bad_module(module);
+  if (module) {
+    if (!MODULEP(module)) error_bad_module(module);
+  }
+  else
+    module = STk_current_module();
 
   STk_define_variable(symbol, value, module);
   return value;
@@ -443,7 +506,26 @@ DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
   if (!res)
     error_unbound_variable(old);
 
-  STk_hash_set_alias(&MODULE_HASH_TABLE(mod), new, CDR(res));
+  STk_hash_set_alias(&MODULE_HASH_TABLE(mod), new, CDR(res), 0);
+  return STk_void;
+}
+
+DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
+                 (SCM new, SCM old, SCM new_module, SCM old_module))
+{
+  SCM res;
+  int i;
+
+  if (!SYMBOLP(new)) error_bad_symbol(new);
+  if (!SYMBOLP(old)) error_bad_symbol(old);
+  if (!MODULEP(new_module)) error_bad_module(new_module);
+  if (!MODULEP(old_module)) error_bad_module(old_module);
+
+  res = STk_hash_get_variable(&MODULE_HASH_TABLE(old_module), old, &i);
+  if (!res)
+    error_unbound_variable(old);
+
+  STk_hash_set_alias(&MODULE_HASH_TABLE(new_module), new, CDR(res), 1);
   return STk_void;
 }
 
@@ -455,7 +537,7 @@ DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
 SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
 {
   int i;
-  SCM l, module, res;
+  SCM res;
 
   while (FRAMEP(env)) env = FRAME_NEXT(env);
 
@@ -464,25 +546,24 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
     *ref = res;
     return *BOX_VALUES(CDR(res));
   }
-  else {
-    /* symbol was not found in the given env module. Try to find it in
-     * the  exported symbols of its imported modules.
-     */
-    for (l = MODULE_IMPORTS(env)  ; !NULLP(l); l = CDR(l)) {
-      module = CAR(l);
-      res    = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol, &i);
-      if (res && VISIBLE_P(symbol, module)) {
-        *ref = res;
-        return *BOX_VALUES(CDR(res));
-      }
-    }
 
-    /* It definitively does not exists  :-< */
-    if (err_if_unbound)
-      error_unbound_variable(symbol);
-    return STk_void;
+  // symbol was not found in the given env module. Try to find it in
+  // the the STklos modle (if this is not a R7RS library)
+  if (!MODULE_IS_LIBRARY(env) &&  env != STk_STklos_module) {
+    env = STk_STklos_module;
+    res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol, &i);
+    if (res) {
+      *ref = res;
+      return *BOX_VALUES(CDR(res));
+    }
   }
+
+  /* It definitively does not exists  :-< */
+  if (err_if_unbound)
+    error_unbound_variable(symbol);
+  return STk_void;
 }
+
 
 
 /*===========================================================================*\
@@ -526,17 +607,20 @@ int STk_late_init_env(void)
   MODULE_IMPORTS(STk_STklos_module) = LIST1(STk_STklos_module);
 
   /* Create the SCHEME module */
-  STk_makemodule(STk_intern("SCHEME"));
+  Scheme_module = STk_makemodule(STk_intern("SCHEME"));
 
   /* ==== Undocumented primitives ==== */
+  ADD_PRIMITIVE(make_library);
+  ADD_PRIMITIVE(register_library);
   ADD_PRIMITIVE(create_module);
   ADD_PRIMITIVE(select_module);
   ADD_PRIMITIVE(module_imports_set);
   ADD_PRIMITIVE(module_exports_set);
-  ADD_PRIMITIVE(redefine_module_exports);
+  ADD_PRIMITIVE(populate_scheme_module);
 
   /* ==== User primitives ==== */
   ADD_PRIMITIVE(modulep);
+  ADD_PRIMITIVE(libraryp);
   ADD_PRIMITIVE(scheme_find_module);
   ADD_PRIMITIVE(current_module);
   ADD_PRIMITIVE(module_name);
@@ -548,7 +632,7 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(symbol_value);
   ADD_PRIMITIVE(symbol_define);
   ADD_PRIMITIVE(symbol_alias);
-
+  ADD_PRIMITIVE(symbol_link);
 
   return TRUE;
 }

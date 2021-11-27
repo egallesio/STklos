@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 13-Nov-2020 21:10 (jpellegrini)
-;;;; Last file update: 14-Nov-2020 00:03 (jpellegrini)
+;;;; Last file update: 27-Oct-2021 07:24 (eg)
 ;;;;
 
 (require "srfi-13")
@@ -64,7 +64,7 @@
   (export string-tabulate string-unfold string-unfold-right)
   (export string->list/cursors string->vector/cursors
           reverse-list->string string-join)
-  (export string-ref substring/cursors string-copy/cursors
+  (export substring/cursors string-copy/cursors
           string-take string-drop string-take-right string-drop-right
           string-pad string-pad-right
           string-trim string-trim-right string-trim-both)

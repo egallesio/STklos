@@ -1,0 +1,105 @@
+;;;;
+;;;; srfi-26.stk        -- SRFI-26 implementation
+;;;;
+;;;; Copyright © 2003-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@essi.fr]
+;;;;    Creation date: 19-Dec-2003 12:57 (eg)
+;;;; Last file update: 21-Nov-2021 17:21 (eg)
+;;;;
+
+
+(define-module srfi/26
+  (export cut cute)
+
+  (define cut  "<<FIXME>>")  ;; should be deleted
+  (define cute "<<FIXME>>")
+  
+;; ======================================================================
+;;
+;;                              C U T
+;;
+;; ======================================================================
+(define-macro (cut . slots-or-exprs)
+  (define (aux lst slot-names pos)
+    (cond
+      ((null? lst)
+          (let* ((tmp  (reverse pos))
+                 (fct  (car tmp))
+                 (body (cdr tmp)))
+            `(lambda ,(reverse slot-names)
+               ((begin ,fct) ,@body))))
+      ((eq? (car lst) '<...>)
+          (let* ((rest (gensym))
+                 (body (reverse pos)))
+            `(lambda (,@(reverse slot-names) . ,rest)
+               (apply ,@body ,rest))))
+      ((eq? (car lst) '<>)
+          (let ((x (gensym)))
+            (aux (cdr lst)
+                 (cons x slot-names)
+                 (cons x pos))))
+      (else
+          (aux (cdr lst)
+               slot-names
+               (cons (car lst) pos)))))
+  ;;
+  (aux slots-or-exprs '() '()))
+
+
+
+;; ======================================================================
+;;
+;;                              C U T E
+;;
+;; ======================================================================
+(define-macro (cute . slots-or-exprs)
+  (define (aux lst slot-names pos bindings)
+    (cond
+      ((null? lst)
+          (let* ((body (reverse pos)))
+            `(let ,(reverse bindings)
+               (lambda ,(reverse slot-names)
+                 ,body))))
+      ((eq? (car lst) '<...>)
+          (let* ((rest (gensym))
+                 (body (reverse pos)))
+            `(let ,(reverse bindings)
+                 (lambda (,@(reverse slot-names) . ,rest)
+                   (apply ,@body ,rest)))))
+      ((eq? (car lst) '<>)
+          (let ((x (gensym)))
+            (aux (cdr lst)
+                 (cons x slot-names)
+                 (cons x pos)
+                 bindings)))
+      (else
+          (let ((x (gensym)))
+            (aux (cdr lst)
+                 slot-names
+                 (cons x pos)
+                 (cons (list x (car lst))
+                       bindings))))))
+  ;;
+  (aux slots-or-exprs '() '() '()))
+
+(export-syntax cute cut))
+
+
+(provide "srfi/26")

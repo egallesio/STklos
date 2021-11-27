@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  3-Sep-2021 18:40 (eg)
+;;;; Last file update: 11-Nov-2021 18:33 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -36,6 +36,7 @@
           compiler:generate-signature
           compiler:inline-common-functions
 
+          %grab-file-information
           %compiler-new-label))
 
 (select-module STKLOS-COMPILER)
@@ -1514,12 +1515,12 @@ doc>
 
 #|
 <doc EXT-SYNTAX include
- * (include <file>)
+ * (include <string1> <string2> ...)
  *
  * TODO
 doc>
 |#
-(define (include-file name)
+(define (%include-file name)
   (let ((port (open-input-file name))
         (old  *compiler-port*))
     (with-handler (lambda (c) (set! *compiler-port* old) (raise c))
@@ -1532,11 +1533,17 @@ doc>
                   (set! *compiler-port* old))
     (close-port port)))
 
-(define (compile-include e env tail)
-  (if (and (= (length e) 2) (string? (cadr e)))
-      (include-file (cadr e))
-      (compiler-error 'include e "bad include directive ~S" e)))
 
+(define (compile-include e env tail)
+  (unless (every string? (cdr e))
+    (compiler-error 'include e "bad include directive ~S" e))
+  (for-each %include-file (cdr e)))
+
+(define (compile-include-ci e env tail)
+  (unless (every string? (cdr e))
+    (compiler-error 'include-ci e "bad include directive ~S" e))
+  (parameterize ((read-case-sensitive #f))
+    (for-each %include-file (cdr e))))
 
 ;;
 ;; Autoloads management
@@ -1599,6 +1606,11 @@ doc>
                        (expander `(lambda (form e) (apply ,proc (cdr form)))))
                   (install-expander! name (eval expander) proc)))
               (key-get infos :expanders '()))))
+
+
+(define (%grab-file-information str)
+  (let ((info (find-file-informations str #f #f)))
+    (import-file-informations info)))
 
 ;;;;
 ;;;; REQUIRE
@@ -1730,6 +1742,7 @@ doc>
             ((%%require4syntax)   (compile-require4syntax e env tail?))
             ((%%when-compile)     (compile-when-compile   e env tail?))
             ((%%include)          (compile-include        e env tail?))
+            ((%%include-ci)       (compile-include-ci     e env tail?))
             ((%%source-pos)       (compile-%%source-pos   e env tail?))
             ((%%label)            (compile-%%label        e env tail?))
             ((%%goto)             (compile-%%goto         e env tail?))

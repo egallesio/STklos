@@ -39,75 +39,76 @@
 (module __match_descriptions
 
    (export  (pattern-variables f)
-	    (pattern-car p)
-	    (pattern-cdr p)
-	    (pattern-plus p1 p2)
-	    (pattern-minus p1 p2)
-	    (vector-plus v i d)
-	    (vector-minus v i d)
-	    (compatible? p d)
-	    (more-precise? d p)
-	    (extend-vector v lg fill)
-	    (inline isAny? c) 
-	    (inline isCheck? c)
-	    (inline isSuccess? c)
-	    (inline isTop? c)
-	    (inline isBottom? c)
-	    (inline isQuote? c)
-	    (inline isVar? c) 
-	    (inline isNot? c) 
-	    (inline isAnd? c)
-	    (inline isOr? c)
-	    (inline isT-Or? c)
-	    (inline isTagged-Or? c) 
-	    (inline isCons? c)
-	    (inline isACons? c) 
-	    (inline isXCons? c)
-	    (inline isTimes? c)
-	    (inline containsHole? c)
-	    (inline isHole? c)
-	    (inline isVector? c)
-	    (inline isVector-begin? c)
-	    (inline isVector-end? c)
-	    (inline isTree? c) )
+            (pattern-car p)
+            (pattern-cdr p)
+            (pattern-plus p1 p2)
+            (pattern-minus p1 p2)
+            (vector-plus v i d)
+            ;; deleted by eg (2021-10-27)
+            ;; (vector-minus v i d)
+            (compatible? p d)
+            (more-precise? d p)
+            (extend-vector v lg fill)
+            (inline isAny? c)
+            (inline isCheck? c)
+            (inline isSuccess? c)
+            (inline isTop? c)
+            (inline isBottom? c)
+            (inline isQuote? c)
+            (inline isVar? c)
+            (inline isNot? c)
+            (inline isAnd? c)
+            (inline isOr? c)
+            (inline isT-Or? c)
+            (inline isTagged-Or? c)
+            (inline isCons? c)
+            (inline isACons? c)
+            (inline isXCons? c)
+            (inline isTimes? c)
+            (inline containsHole? c)
+            (inline isHole? c)
+            (inline isVector? c)
+            (inline isVector-begin? c)
+            (inline isVector-end? c)
+            (inline isTree? c) )
 
    (import  (__error                   "Llib/error.scm")
-	    (__match_s2cfun            "Match/s2cfun.scm"))
-   
+            (__match_s2cfun            "Match/s2cfun.scm"))
+
    (use     (__type                    "Llib/type.scm")
-	    (__bigloo                  "Llib/bigloo.scm")
-	    (__tvector                 "Llib/tvector.scm")
-	    (__structure               "Llib/struct.scm")
-	    (__tvector                 "Llib/tvector.scm")
-	    (__rgc                     "Rgc/runtime.scm")
-	    (__r4_numbers_6_5          "Ieee/number.scm")
-	    (__r4_numbers_6_5_fixnum   "Ieee/fixnum.scm")
-	    (__r4_numbers_6_5_flonum   "Ieee/flonum.scm")
-	    (__r4_characters_6_6       "Ieee/char.scm")
-	    (__r4_equivalence_6_2      "Ieee/equiv.scm")
-	    (__r4_booleans_6_1         "Ieee/boolean.scm")
-	    (__r4_symbols_6_4          "Ieee/symbol.scm")
-	    (__r4_strings_6_7          "Ieee/string.scm")
-	    (__r4_pairs_and_lists_6_3  "Ieee/pair-list.scm")
-	    (__r4_input_6_10_2         "Ieee/input.scm")
-	    (__r4_control_features_6_9 "Ieee/control.scm")
-	    (__r4_vectors_6_8          "Ieee/vector.scm")
-	    (__r4_ports_6_10_1         "Ieee/port.scm")
-	    (__r4_output_6_10_3        "Ieee/output.scm")
-	    (__evenv                   "Eval/evenv.scm")))
-	    
+            (__bigloo                  "Llib/bigloo.scm")
+            (__tvector                 "Llib/tvector.scm")
+            (__structure               "Llib/struct.scm")
+            (__tvector                 "Llib/tvector.scm")
+            (__rgc                     "Rgc/runtime.scm")
+            (__r4_numbers_6_5          "Ieee/number.scm")
+            (__r4_numbers_6_5_fixnum   "Ieee/fixnum.scm")
+            (__r4_numbers_6_5_flonum   "Ieee/flonum.scm")
+            (__r4_characters_6_6       "Ieee/char.scm")
+            (__r4_equivalence_6_2      "Ieee/equiv.scm")
+            (__r4_booleans_6_1         "Ieee/boolean.scm")
+            (__r4_symbols_6_4          "Ieee/symbol.scm")
+            (__r4_strings_6_7          "Ieee/string.scm")
+            (__r4_pairs_and_lists_6_3  "Ieee/pair-list.scm")
+            (__r4_input_6_10_2         "Ieee/input.scm")
+            (__r4_control_features_6_9 "Ieee/control.scm")
+            (__r4_vectors_6_8          "Ieee/vector.scm")
+            (__r4_ports_6_10_1         "Ieee/port.scm")
+            (__r4_output_6_10_3        "Ieee/output.scm")
+            (__evenv                   "Eval/evenv.scm")))
+
 ;;;--------------------------------------------------------------------*/
 ;;;   Renvoie la liste des variables apparaissant dans un filtre       */
 ;;;--------------------------------------------------------------------*/
 (define (pattern-variables f)
-   (cond 
+   (cond
       ((eq? (car f) 'or)      (pattern-variables (cadr f)))
       ((eq? (car f) 't-or)    (pattern-variables (cadr f)))
       ((eq? (car f) 'and)     (union (pattern-variables (cadr f))
-				     (pattern-variables (caddr f))))
+                                     (pattern-variables (caddr f))))
       ((memq (car f) '(cons vector-cons))
        (union (pattern-variables (cadr f))
-	      (pattern-variables (caddr f))))
+              (pattern-variables (caddr f))))
       ((memq (car f) '(tree times))
        (union (pattern-variables (caddr f))
               (pattern-variables (cadddr f))))
@@ -129,9 +130,9 @@
 (define (union l1 l2)
    (if (null? l1) l2
        (if (member (car l1) l2)
-	   (union (cdr l1) l2)
-	   (cons (car l1) (union (cdr l1) l2)))))
-   
+           (union (cdr l1) l2)
+           (cons (car l1) (union (cdr l1) l2)))))
+
 (define (extend fn pt im)
    (lambda (x) (if (eq? x pt) im (fn x))))
 
@@ -157,42 +158,42 @@
        ; Perte d'information
        old
        (if (isAny? old)
-	   new
-	   (if (isAny? new)
-	       old
-	       (if (isNegation? old)
-		   (norm-class new)
-		   (norm-class (if (isVar? new)
-				   (list 'and new old)
-				   (list 'and old new))))))))
+           new
+           (if (isAny? new)
+               old
+               (if (isNegation? old)
+                   (norm-class new)
+                   (norm-class (if (isVar? new)
+                                   (list 'and new old)
+                                   (list 'and old new))))))))
 
 (define (pattern-minus p1 p2)
-  (if (or (not (or (isNegation? p1) 
-		   (isAny? p1)     ;;; p1 is already a non empty affirmative
-		   (isBottom? p1)))
+  (if (or (not (or (isNegation? p1)
+                   (isAny? p1)     ;;; p1 is already a non empty affirmative
+                   (isBottom? p1)))
           (isTimes? p2) (isTree? p2)) ;;; we don't know how to handle p2
       ; Perte d'information
       p1
       (if (isAny? p1)
-	  (list 'not p2)
-	  (norm-class (list 'and p1 (list 'not p2))))))
+          (list 'not p2)
+          (norm-class (list 'and p1 (list 'not p2))))))
 
 ;;; Une classe est une negation si et seulement si c'est un (not ...),
 ;;; ou un (and f1 f2), dont l'une des deux branches en est une. A noter que
-;;; dans ce dernier cas, les deux branches sont forcement des negations, 
+;;; dans ce dernier cas, les deux branches sont forcement des negations,
 ;;; puisqu'une affirmative annule une negation.
 (define (isNegation? c)
-  (or  (and (eq? (car c) 'and) 
+  (or  (and (eq? (car c) 'and)
             (isNegation? (cadr c)))
        (eq? (car c) 'not)))
 
 (define (pattern-car c)
-  (if (eq? (car c) 'cons) 
+  (if (eq? (car c) 'cons)
       (cadr c)
       '(any)))
 
 (define (pattern-cdr c)
-  (if (eq? (car c) 'cons) 
+  (if (eq? (car c) 'cons)
       (caddr c)
       '(any)))
 
@@ -214,7 +215,7 @@
 ;;;     (and (and f1 f2) f3) = (and f1 (and (f2 f3)))                  */
 ;;;     (and (cons f1 f2) (cons f3 f4)) = (cons (and f1 f3)(and f2 f4))*/
 ;;;                                                                    */
-;;; Elles permettent notamment de s'assurer que toute classe           */ 
+;;; Elles permettent notamment de s'assurer que toute classe           */
 ;;; representant une liste a la forme (cons ...)                       */
 ;;;--------------------------------------------------------------------*/
 
@@ -222,7 +223,7 @@
   (norm c 'foo))
 
 (define (norm c anc)
-  
+
   (cond
    ((equal? anc c) anc)
    ((eq? (car c) 'not)  (norm-not  (cadr c)           ))
@@ -236,7 +237,7 @@
 (define (rewrite-not c)
   (if (eq? (car c) 'not)
       ; (not (not c)) <==> c
-      (cadr c) 
+      (cadr c)
       (list 'not (norm-class c))))
 
 ;;; A priori, c1 et c2 sont normalisees
@@ -246,16 +247,16 @@
 (define (rewrite-and c1 c2)
   (cond
    ((equal? c1 c2) c1)
-   ((eq? (car c1) 'and) 
+   ((eq? (car c1) 'and)
     (list 'and
-          (cadr c1) 
-          (list 'and 
+          (cadr c1)
+          (list 'and
                 (caddr c1)
                 c2)))
-   ((and (eq? (car c1) 'cons) (eq? (car c2) 'cons)) 
+   ((and (eq? (car c1) 'cons) (eq? (car c2) 'cons))
      ;;; and inutile: si c1 est un cons, c2 aussi ...
-    (list 'cons 
-          (list 'and (cadr c1) (cadr c2)) 
+    (list 'cons
+          (list 'and (cadr c1) (cadr c2))
           (list 'and (caddr c1) (caddr c2))))
    (else (list 'and c1 c2))))
 
@@ -275,36 +276,36 @@
 (define (more-precise? descr f)
    (cond
       ((isAny? descr) #f)
-      
+
       ((eqv? (car f) 'any)
        #t)
-      
+
       ((eqv? (car f) 'success)
        #f)
-      
+
       ((eqv? (car f) 'quote)
        (and (isQuote? descr)
-	    (equal? (cadr descr) (cadr f))))
-      
+            (equal? (cadr descr) (cadr f))))
+
       ((eqv? (car f) 'and)
        (and (more-precise? descr (cadr f))
-	    (more-precise? descr (caddr f))))
-      
+            (more-precise? descr (caddr f))))
+
       ((eqv? (car f) 'or)
        (or (more-precise? descr (cadr f))
-	   (more-precise? descr (caddr f))))
-      
+           (more-precise? descr (caddr f))))
+
       ((eqv? (car f) 't-or)
        #f)
-      
+
       ((memq (car f) '(cons acons xcons))
        (and (isCons? descr)
-	    (more-precise? (cadr descr) (cadr f))
-	    (more-precise? (caddr descr) (caddr f))))
+            (more-precise? (cadr descr) (cadr f))
+            (more-precise? (caddr descr) (caddr f))))
 
       ((eqv? (car f) 'vector-begin)
        #f) ;;;(and (isVector? descr)
-	    
+
 
       (else #f)))
 
@@ -329,13 +330,13 @@
 ;;;-- Les filtres composes --------------------------------------------*/
    (if (isAnd? pattern)
        (and (compatible? descr (cadr pattern))
-	    (compatible? descr (caddr pattern)))
+            (compatible? descr (caddr pattern)))
 ;;;-- Les filtres "de base" -------------------------------------------*/
        (compare descr
-		(alpha-convert pattern)
-		(lambda (x) 'unbound)
-		(lambda (x) #t)
-		(lambda (x) #f)))) )
+                (alpha-convert pattern)
+                (lambda (x) 'unbound)
+                (lambda (x) #t)
+                (lambda (x) #f)))) )
       res))
 
 ;;;--------------------------------------------------------------------*/
@@ -353,30 +354,30 @@
 ;;;--------------------------------------------------------------------*/
 
 (define (compare descr pat env k z)
-   
+
    (cond
       ((or (isAny? descr)
-	   (isAny? pat)
-	   (isOr? pat) (isT-Or? pat) (isTagged-Or? pat)
-	   (isSuccess? pat)
-	   (isCheck? pat)
-	   (isTimes? pat)
-	   (isTree? pat))
+           (isAny? pat)
+           (isOr? pat) (isT-Or? pat) (isTagged-Or? pat)
+           (isSuccess? pat)
+           (isCheck? pat)
+           (isTimes? pat)
+           (isTree? pat))
        (k env))
 
       ((isAnd? pat)
        (compare descr (cadr pat) env
-		(lambda (env) (compare descr (caddr pat) env k z))
-		z))
+                (lambda (env) (compare descr (caddr pat) env k z))
+                z))
 
       ((isCons? pat)
        (if (may-be-a-cons descr)
-	   (compare (pattern-car descr) (cadr pat) env
-		    (lambda (env)
-		       (compare (pattern-cdr descr)
-				(caddr pat) env k z) )
-		    z)
-	   (z env)))
+           (compare (pattern-car descr) (cadr pat) env
+                    (lambda (env)
+                       (compare (pattern-cdr descr)
+                                (caddr pat) env k z) )
+                    z)
+           (z env)))
 
 ;;;-- Si le filtre est une valeur, il suffit de la filtrer par --------*/
 ;;;-- la description... non ? -----------------------------------------*/
@@ -385,38 +386,38 @@
 
       ((and (isVar? descr) (isVar? pat))
        (if (eq? (env (cadr descr)) 'unbound)
-	   (if (eq? (env (cadr pat)) 'unbound)
-	       (let ((s (list 'quote (jim-gensym))))
-		  (k (extend (extend env (cadr descr) s)
-			     (cadr pat)
-			     s)))
-	       (k (extend env (cadr descr) (env (cadr pat)))))
-       	   (if (eq? (env (cadr pat)) 'unbound)
-	       (k (extend env (cadr pat) (env (cadr descr))))
-	       (compare (env (cadr descr)) (env (cadr pat)) env k z))))      
+           (if (eq? (env (cadr pat)) 'unbound)
+               (let ((s (list 'quote (jim-gensym))))
+                  (k (extend (extend env (cadr descr) s)
+                             (cadr pat)
+                             s)))
+               (k (extend env (cadr descr) (env (cadr pat)))))
+           (if (eq? (env (cadr pat)) 'unbound)
+               (k (extend env (cadr pat) (env (cadr descr))))
+               (compare (env (cadr descr)) (env (cadr pat)) env k z))))
 
       ((isVar? pat)
        (if (eq? (env (cadr pat)) 'unbound)
-	   (k (extend env (cadr pat) descr))
-	   (compare descr (env (cadr pat)) env k z)) )
+           (k (extend env (cadr pat) descr))
+           (compare descr (env (cadr pat)) env k z)) )
 
       ((isVar? descr)
        (if (eq? (env (cadr descr)) 'unbound)
-	   (k (extend env (cadr descr) pat))
-	   (compare descr (env (cadr descr)) env k z)) )
+           (k (extend env (cadr descr) pat))
+           (compare descr (env (cadr descr)) env k z)) )
 
       ((isNot? pat) (if (more-precise? (cadr pat) descr)
-			(z env)
-			(k env) ) )
+                        (z env)
+                        (k env) ) )
 
       ((isVector-begin? pat)
        (if (isAny? descr)
-	   #t
-	   (if (isVector? descr)
-	       ; la, je matche la descr. avec le pattern,
-	       ; pcq + facile (la descr. est 1 vecteur)
-	       (match pat descr env k z)
-	       #f)))
+           #t
+           (if (isVector? descr)
+               ; la, je matche la descr. avec le pattern,
+               ; pcq + facile (la descr. est 1 vecteur)
+               (match pat descr env k z)
+               #f)))
 
       (else (k env) ) ) )
 
@@ -424,9 +425,9 @@
    (if (equal? descr '(not (cons (any) (any))))
        #f
        (if (isAnd? descr)
-	   (and (may-be-a-cons (cadr descr))
-		(may-be-a-cons (caddr descr)))
-	   #t) ) )
+           (and (may-be-a-cons (cadr descr))
+                (may-be-a-cons (caddr descr)))
+           #t) ) )
 
 
 ;;;--------------------------------------------------------------------*/
@@ -436,28 +437,28 @@
 
    (case (car d)
       ((any)   (k env))
-      
+
       ((quote) (if (eq? e (cadr d)) (k env) (z env)))
 
       ((and)   (match (cadr d) e env
-		      (lambda (env)
-			 (match (caddr d) e env k z))
-		      z) )
+                      (lambda (env)
+                         (match (caddr d) e env k z))
+                      z) )
 
       ((cons)  (if (pair? e)
-		   (match (cadr d) (car e) env
-			  (lambda (env)
-			     (match (caddr d) (cdr e) env k z))
-			  z)
-		   (z env) ) )
+                   (match (cadr d) (car e) env
+                          (lambda (env)
+                             (match (caddr d) (cdr e) env k z))
+                          z)
+                   (z env) ) )
 
 ;;;-- Une regle particuliere pcq on peut avoir des (not (var x)) ------*/
 ;;;-- avec x non lie. -------------------------------------------------*/
       ((not)
        (if (isVar? (cadr d))
-	   (let ((s (jim-gensym "VAR-")))
-	      (k (extend env (cadadr d) `(not (quote s)))))
-	   (match (cadr d) e env z k)))
+           (let ((s (jim-gensym "VAR-")))
+              (k (extend env (cadadr d) `(not (quote s)))))
+           (match (cadr d) e env z k)))
 
 ;;;-- Le cas ou la descr. est un vector et le filtre un vector-begin --*/
 ;;;-- Attention: d est ici le filtre ----------------------------------*/
@@ -466,23 +467,23 @@
 
       ((vector-cons)
        (lambda (i)
-	  (if (>=fx i (vector-length e))
-	      (k env)
-	      (compare (cadr d) (vector-ref e i)
-		       env
-		       (lambda (env)
-			  ((match (caddr d) e env k z)
-			   (+fx i 1)))
-		       z ))))
-      
+          (if (>=fx i (vector-length e))
+              (k env)
+              (compare (cadr d) (vector-ref e i)
+                       env
+                       (lambda (env)
+                          ((match (caddr d) e env k z)
+                           (+fx i 1)))
+                       z ))))
+
       ((vector-end)
        (lambda (i) (k env)))
 
       ((var) (if (eq? (env (cadr d)) 'unbound)
-		 (k (extend env (cadr d) e))
-		 (if (eq? (env (cadr d)) e)
-		     (k env)
-		     (z env)))) ) )
+                 (k (extend env (cadr d) e))
+                 (if (eq? (env (cadr d)) e)
+                     (k env)
+                     (z env)))) ) )
 
 
 ;;;--------------------------------------------------------------------*/
@@ -490,32 +491,32 @@
 ;;;--------------------------------------------------------------------*/
 (define (alpha-convert f)
    (let loop ( (f f)
-	       (env (lambda (x) 'unbound))
-	       (k (lambda (f e) f)) )
+               (env (lambda (x) 'unbound))
+               (k (lambda (f e) f)) )
       (cond
-	 ((or (boolean? f) (symbol? f) (string? f) (integer? f) )
-	  (k f env))
-	 ((null? f)
-	  (k f env))
-	 ((equal? (car f) 'quote)
-	  (k f env))
-	 ((eq? (car f) 'var)
-	  (if (eq? (env (cadr f)) 'unbound)
-	      (let ((s (jim-gensym)))
-		 (k (list 'var s) (extend env (cadr f) s)))
-	      (k (list 'var (env (cadr f))) env)))
-	 (else (loop (car f) env
-		     (lambda (fcar e)
-			(loop (cdr f) e
-			      (lambda (fcdr e)
-				 (k (cons fcar fcdr) e)))))))))
+         ((or (boolean? f) (symbol? f) (string? f) (integer? f) )
+          (k f env))
+         ((null? f)
+          (k f env))
+         ((equal? (car f) 'quote)
+          (k f env))
+         ((eq? (car f) 'var)
+          (if (eq? (env (cadr f)) 'unbound)
+              (let ((s (jim-gensym)))
+                 (k (list 'var s) (extend env (cadr f) s)))
+              (k (list 'var (env (cadr f))) env)))
+         (else (loop (car f) env
+                     (lambda (fcar e)
+                        (loop (cdr f) e
+                              (lambda (fcdr e)
+                                 (k (cons fcar fcdr) e)))))))))
 
 ;;;--------------------------------------------------------------------*/
 ;;;   Les inlines                                                      */
 ;;;--------------------------------------------------------------------*/
 (define-inline (isAny? c) (if (eq? (car c) 'any)
-			      #t
-			      (eq? (car c) 'check)))
+                              #t
+                              (eq? (car c) 'check)))
 
 (define-inline (isCheck? c) (eq? (car c) 'check))
 
@@ -569,24 +570,26 @@
 (define (vector-plus v i d)
    (if (>=fx i (vector-length (caddr v)))
        (set-car! (cddr v)
-		 (extend-vector (caddr v) i '(any)))
+                 (extend-vector (caddr v) i '(any)))
        #t)
    (let ((res `(vector ,(vector-length (caddr v))
-		       ,(list->vector (vector->list (caddr v))))))
+                       ,(list->vector (vector->list (caddr v))))))
       (vector-set! (caddr res) i
-		   (pattern-plus (vector-ref (caddr v) i) d))
+                   (pattern-plus (vector-ref (caddr v) i) d))
       res))
 
-(define (Vector-Minus v i d)
-   (if (>=fx i (vector-length (caddr v)))
-       (set-car! (cddr v)
-		 (extend-vector (caddr v) i '(any)))
-       #t)
-   (let ((res `(vector ,(length (caddr v))
-		       ,(list->vector (vector->list (caddr v))))))
-      (vector-set! (caddr res) i
-		   (pattern-minus (vector-ref (caddr v) i) d))
-      res))
+;; Deleted by eg (2021-20-27)
+;;
+;;(define (Vector-Minus v i d)
+;;   (if (>=fx i (vector-length (caddr v)))
+;;       (set-car! (cddr v)
+;;                 (extend-vector (caddr v) i '(any)))
+;;       #t)
+;;   (let ((res `(vector ,(length (caddr v))
+;;                       ,(list->vector (vector->list (caddr v))))))
+;;      (vector-set! (caddr res) i
+;;                   (pattern-minus (vector-ref (caddr v) i) d))
+;;      res))
 
 ;;;--------------------------------------------------------------------*/
 ;;;   Extend-vector allocates a new longer vector and fills            */
@@ -596,13 +599,13 @@
    (let ((res
    (let ((new-vector (make-vector lg fill)))
       (let loop ((i 0))
-	 (if (=fx i (vector-length v))
-	     new-vector
-	     (begin
-		(vector-set! new-vector i (vector-ref v i))
-		(loop (+fx i 1))))))))
+         (if (=fx i (vector-length v))
+             new-vector
+             (begin
+                (vector-set! new-vector i (vector-ref v i))
+                (loop (+fx i 1))))))))
       res))
-   
+
 ;;;--------------------------------------------------------------------*/
 ;;;   End of file...                                                   */
 ;;;--------------------------------------------------------------------*/

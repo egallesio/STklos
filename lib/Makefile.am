@@ -20,11 +20,12 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  8-Jun-2021 09:02 (eg)
+# Last file update: 25-Nov-2021 17:09 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
-		  srfi-25 srfi-27 srfi-132 srfi-133 \
-		  srfi-144 srfi-170 srfi-175
+SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
+	      scheme srfi                       \
+		  srfi-133 \
+		  srfi-144
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
@@ -41,6 +42,7 @@ scheme_BOOT = assembler.stk \
           equiv.stk         \
           expand.pp         \
           ffi.stk           \
+          library.stk       \
           load.stk          \
           logical.stk       \
           mbe.stk           \
@@ -82,19 +84,6 @@ SRC_STK = bigloo-support.stk  \
           slib.stk            \
           streams-primitive.stk \
           streams-derived.stk \
-          srfi-1.stk          \
-          srfi-2.stk          \
-          srfi-4.stk          \
-          srfi-5.stk          \
-          srfi-7.stk          \
-          srfi-9.stk          \
-          srfi-11.stk         \
-          srfi-13.stk         \
-          srfi-14.stk         \
-          srfi-17.stk         \
-          srfi-26.stk         \
-          srfi-29.stk         \
-          srfi-31.stk         \
           srfi-35.stk         \
           srfi-36.stk         \
           srfi-37.stk         \
@@ -103,9 +92,7 @@ SRC_STK = bigloo-support.stk  \
           srfi-51.stk         \
           srfi-54.stk         \
           srfi-59.stk         \
-          srfi-60.stk         \
           srfi-61.stk         \
-          srfi-64.stk         \
           srfi-66.stk         \
           srfi-69.stk         \
           srfi-70.stk         \
@@ -129,15 +116,12 @@ SRC_STK = bigloo-support.stk  \
           srfi-158.stk        \
           srfi-161.stk        \
           srfi-171.stk        \
-          srfi-173.stk        \
-          srfi-174.stk        \
           srfi-180.stk        \
           srfi-185.stk        \
           srfi-189.stk        \
           srfi-190.stk        \
           srfi-196.stk        \
           srfi-207.stk        \
-          srfi-214.stk        \
           srfi-216.stk        \
           srfi-217.stk        \
           srfi-223.stk        \
@@ -161,19 +145,6 @@ scheme_OBJS = compfile.ostk     \
           slib.ostk             \
           streams-primitive.ostk \
           streams-derived.ostk   \
-          srfi-1.ostk           \
-          srfi-2.ostk           \
-          srfi-4.ostk           \
-          srfi-5.ostk           \
-          srfi-7.ostk           \
-          srfi-9.ostk           \
-          srfi-11.ostk          \
-          srfi-13.ostk          \
-          srfi-14.ostk          \
-          srfi-17.ostk          \
-          srfi-26.ostk          \
-          srfi-29.ostk          \
-          srfi-31.ostk          \
           srfi-35.ostk          \
           srfi-36.ostk          \
           srfi-37.ostk          \
@@ -182,9 +153,7 @@ scheme_OBJS = compfile.ostk     \
           srfi-51.ostk          \
           srfi-54.ostk          \
           srfi-59.ostk          \
-          srfi-60.ostk          \
           srfi-61.ostk          \
-          srfi-64.ostk          \
           srfi-66.ostk          \
           srfi-69.ostk          \
           srfi-70.ostk          \
@@ -208,15 +177,12 @@ scheme_OBJS = compfile.ostk     \
           srfi-158.ostk         \
           srfi-161.ostk         \
           srfi-171.ostk         \
-          srfi-173.ostk         \
-          srfi-174.ostk         \
           srfi-180.ostk         \
           srfi-185.ostk         \
           srfi-189.ostk         \
           srfi-190.ostk         \
           srfi-196.ostk         \
           srfi-207.ostk         \
-          srfi-214.ostk         \
           srfi-216.ostk         \
           srfi-217.ostk         \
           srfi-223.ostk         \
@@ -308,11 +274,10 @@ compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
 full-conditions: srfi-35.ostk srfi-36.ostk
 recette.ostk: pretty-print.ostk
-srfi-13.ostk: srfi-14.ostk
-srfi-66.ostk: srfi-4.ostk
+# srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
 srfi-41.ostk: streams-derived.ostk streams-primitive.ostk
-streams-derived.ostk: srfi-1.ostk streams-primitive.ostk
+streams-derived.ostk: streams-primitive.ostk
 srfi-113.ostk: srfi-128.ostk
 srfi-134.ostk: srfi-158.ostk
 srfi-217.ostk: trie.ostk
