@@ -155,7 +155,7 @@
       (set! (load-path) (cons dir (load-path))))
      (("append-load-path"  :arg dir
        :help "Append <dir> to the loading path")
-      (set! (load-path) (cons (load-path) (list dir))))
+      (set! (load-path) (append (load-path) (list dir))))
 
      "Misc. options"
      (("no-time" :help "Don't display compilation time")
