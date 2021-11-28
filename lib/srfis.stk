@@ -176,7 +176,7 @@
     (135  "Immutable Texts" (immutable-texts) "srfi-135")
     ;; 136  Extensible record types
     (137 "Minimal Unique Types" () "srfi-137")
-    ;; 138  Compiling Scheme programs to executables
+    (138 "Compiling Scheme programs to executables")
     ;; 139  Syntax parameters
     ;; 140  Immutable Strings
     (141 "Integer Division" (integer-division) "srfi-141")
