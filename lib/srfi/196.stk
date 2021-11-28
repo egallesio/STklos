@@ -50,7 +50,7 @@
 ;;;;
 
 
-(define-module SRFI-196
+(define-module srfi/196
   (import (srfi 1) (srfi 9))
   (export range numeric-range vector-range string-range range-append
           iota-range range? range=? range-length range-ref range-first
@@ -613,7 +613,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-196)
-(provide "srfi-196")
+(provide "srfi/196")
