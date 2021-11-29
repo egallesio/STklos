@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 29-Nov-2021 22:12 (eg)
+;;;; Last file update: 29-Nov-2021 22:15 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -99,17 +99,17 @@
 ;; ----------------------------------------------------------------------
 ;;      compile-to-bytecode ...
 ;; ----------------------------------------------------------------------
-(define (compile-to-bytecode file out :key (prepend '()))
+(define (compile-to-bytecode file out prepend)
   (compile-file file out :prepend prepend)
   (chmod out #o755))
 
 ;; ----------------------------------------------------------------------
 ;;      compile-to-C-code ...
 ;; ----------------------------------------------------------------------
-(define (compile-to-C-code file out :key (prepend '()))
+(define (compile-to-C-code file out prepend)
   (let ((tmp  (create-temp-file))
         (name (file-prefix (basename file))))
-    (compile-to-bytecode file tmp :prepend prepend)
+    (compile-to-bytecode file tmp prepend)
     (convert-to-C tmp out name)
     (remove-file tmp)))
 
@@ -146,25 +146,13 @@
        :help "Evaluate <expr> before compiling file")
       (set! *expr* expr))
      (("prepend-code" :alternate "k" :arg expr
-       :help "Insert <expr> before the contents of the file to be compiled")
+       :help "Insert <expr> before file contents")
       (set! *prepend-code* (append *prepend-code* (list expr))))
-
-     (("define-feature" :alternate "D" :arg feature
-       :help "Defines <feature> to be recognized by cond-expand in the compiled code (as per SRFI 138)")
+     (("define-feature" :alternate "D" :arg name
+       :help "Add <name> to known features (SRFI 138)")
       (with-handler (lambda (c)
-                      (die (format "Error in --define-feature ~A option" feature)))
-                    (srfi0-register-feature! (string->symbol feature))))
-     ;; Do we need the feature at run time? The SRFI says it must be available to
-     ;; cond-expand only... And when compiling a file, cond-expand is expanded, so
-     ;; I commented this out:
-     ;;
-     ;; (set! *prepend-code*
-     ;;   (append *prepend-code*
-     ;;           (list (format "(srfi0-register-feature! '~a)" feature)))))
-     ;;
-     ;; BUT -- what if the user compiles (eval (read)) and read returns a
-     ;; cond-expand? Then we'd need the above code...
-
+                      (die (format "Error in --define-feature ~A option" name)))
+                    (srfi0-register-feature! (string->symbol name))))
      (("line-info" :alternate "l" :help "Insert line numbers in generated file")
         (compiler:gen-line-number #t))
      (("show-instructions" :alternate "S" :help "Show instructions in generated file")
@@ -201,8 +189,8 @@
                      *prepend-code*))
 
          (if *c-code*
-             (compile-to-C-code   (car other-arguments) *output* :prepend *prepend-code*)
-             (compile-to-bytecode (car other-arguments) *output* :prepend *prepend-code*))
+             (compile-to-C-code   (car other-arguments) *output* *prepend-code*)
+             (compile-to-bytecode (car other-arguments) *output* *prepend-code*))
          (exit 0))
         (else
           (arg-usage (current-error-port))
