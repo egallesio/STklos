@@ -381,6 +381,14 @@ in your code.])
 ,(tt ":") is equivalent to the keyword ,(tt "||:"), whereas the srfi considers
 that ,(tt ":") is not a keyword but a symbol.])
 
+;; SRFI 138 -- Compiling Scheme programs to executables
+(gen-srfi-documentation 138
+
+[ The ,(tt "stklos-compile") program conforms to SRFI 138, accepting all
+the required command line options. The ,(tt "-D x") flag will define a feature
+(,tt "x") for use with cond-expand in the compiled code only. It will not
+include (,tt "x") in the features list of the runtime.])
+
 ;; SRFI 145 -- Assumptions
 (gen-srfi-documentation 145 [See the ,(ref :mark "assume" :text "assume")
 special form])

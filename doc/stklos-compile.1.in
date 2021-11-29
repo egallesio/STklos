@@ -44,6 +44,13 @@ Produce the byte-code in a C file instead of a ".ostk" file.
 Evaluate the Sexpr <expr> before starting compilation. This is useful,
 for loading files which are needed for the compilation (e.g. files
 defining new syntaxes).
+.IP "--prepend-code=<expr>, k <expr>"
+Insert <expr> before the contents of the file to be compiled, as if it
+were part of the file. This is useful to set variables, define functions
+or even modules that the compiled file will use.
+.IP "--define-feature=<feature>, D <feature>"
+Defines <feature> (which should be an unquoted symbol) to be
+recognized by cond-expand in the compiled code.
 .IP "--line-info, -l"
 Generate line informations to ease debugging (incurs a small
 performance penalty).

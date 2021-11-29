@@ -21,12 +21,28 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
-;;;; Last file update: 22-Oct-2021 14:40 (eg)
+;;;; Last file update: 29-Nov-2021 21:53 (eg)
 ;;;;
 
 (select-module STKLOS-COMPILER)
 
-(define (compile-file input output)
+#|
+<doc EXT compile-file
+ * (compile-file input output)
+ * (compile-file input output :prepend cmds)
+ *
+ * Compiles the file whose name is |input| into a bytecode executable
+ * whose name is |output|.
+ *
+ * If the |:prepend| keyword argument is given, it must be a list of
+ * expressions, which will be compiled before the rest of the input
+ * file. This can be used to define variables that the compiled program
+ * will use (but it does not affect the compiler itself).
+ *
+ * This procedure will not set the executable bit on the generated file.
+doc>
+|#
+(define (compile-file input output :key (prepend '() has-prepend?))
 
   (define (compute-file-informations initial-globals)
     (let ((globs (let loop ((lst (compiler-known-globals))
@@ -57,6 +73,16 @@
 
     (fluid-let ((*code-instr* '())
                 (*code-constants* '()))
+
+      ;; SRFI 138, -D option:
+      (when has-prepend?
+        (unless (list? prepend)
+          (error 'compile-file "prepend should be a list: ~S" prepend))
+        ;; whatever the list is, if we wrap it in a BEGIN form,
+        ;; it will be compiled sequentially:
+        (let ((exprs (cons 'begin prepend)))
+          (compile exprs '() exprs #f)))
+
       ;; Read the source file
       (%include-file input)
       (emit 'END-OF-CODE)
