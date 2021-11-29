@@ -21,14 +21,15 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Mar-2001 12:11 (eg)
-;;;; Last file update: 22-Oct-2021 14:40 (eg)
+;;;; Last file update: 29-Nov-2021 21:53 (eg)
 ;;;;
 
 (select-module STKLOS-COMPILER)
 
 #|
 <doc EXT compile-file
- * (compile-file input output [:prepend cmds])
+ * (compile-file input output)
+ * (compile-file input output :prepend cmds)
  *
  * Compiles the file whose name is |input| into a bytecode executable
  * whose name is |output|.
@@ -75,12 +76,12 @@ doc>
 
       ;; SRFI 138, -D option:
       (when has-prepend?
-        (if (not (list? prepend))
-            (error 'compile-file "prepend should be a list: ~S" prepend)
-            ;; whatever the list is, if we wrap it in a BEGIN form,
-            ;; it will be compiled sequentially:
-            (let ((exprs (cons 'begin prepend)))
-              (compile exprs '() exprs #f))))
+        (unless (list? prepend)
+          (error 'compile-file "prepend should be a list: ~S" prepend))
+        ;; whatever the list is, if we wrap it in a BEGIN form,
+        ;; it will be compiled sequentially:
+        (let ((exprs (cons 'begin prepend)))
+          (compile exprs '() exprs #f)))
 
       ;; Read the source file
       (%include-file input)

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  4-Dec-2001 18:12 (eg)
-;;;; Last file update: 27-Nov-2021 18:24 (eg)
+;;;; Last file update: 29-Nov-2021 22:12 (eg)
 ;;;;
 
 (import STKLOS-COMPILER)
@@ -147,7 +147,7 @@
       (set! *expr* expr))
      (("prepend-code" :alternate "k" :arg expr
        :help "Insert <expr> before the contents of the file to be compiled")
-      (set! *prepend-code* (append *prepend-code* (list exprs))))
+      (set! *prepend-code* (append *prepend-code* (list expr))))
 
      (("define-feature" :alternate "D" :arg feature
        :help "Defines <feature> to be recognized by cond-expand in the compiled code (as per SRFI 138)")
