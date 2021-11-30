@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 11-Nov-2021 18:33 (eg)
+;;;; Last file update: 30-Nov-2021 21:23 (eg)
 ;;;;
 
 
@@ -107,6 +107,13 @@ doc>
 |#
 
 (define-macro (select-module name)
+  ;; HACK: try to register the symbols definied in chose module to make
+  ;; them known to the compiler (and avoid messages about undefined)
+  (let ((mod (find-module name #f)))
+    (when (and mod (not (eq? name 'STklos)))
+      (register-new-globals! (module-symbols mod))))
+
+  ;; The real expansion of the select-module
   `(%%set-current-module (find-module ',name)))
 
 
@@ -377,7 +384,7 @@ doc>
                                          keylist
                                          (list-copy (module-exports mod)))))
       ;; Make aliases for all symbols in imported list
-      (for-each (lambda (pair)
+            (for-each (lambda (pair)
                   (%symbol-link (cdr pair) (car pair) lib mod)
                   (register-new-global! (cdr pair)))
                 imported)))
@@ -437,7 +444,7 @@ doc>
     (cond
      ((null? l)
           ;; Hack to avoid useless compilation messages.
-          (for-each register-new-global!  (map car res))
+          (register-new-globals!  (map car res))
           (reverse! res))
      ((symbol? (car l))
           ;; export a single identifier
