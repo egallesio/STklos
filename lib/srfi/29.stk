@@ -51,8 +51,10 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Apr-2021 20:20
-;;;; Last file update: 21-Nov-2021 20:13 (eg)
+;;;; Last file update: 30-Nov-2021 21:22 (eg)
 ;;;;
+
+(%compile-time-define %stklos-format)  ;; to avoid a warning
 
 (define-module srfi/29
   (import (rename (only SCHEME format) (format %stklos-format)))
