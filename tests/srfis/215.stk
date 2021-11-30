@@ -87,7 +87,9 @@
                        (equal? "bar"
                                (cond ((assq 'FOO msg) => cdr)
                                      (else #f)))))
-                msgs))))
+                msgs))
+    (test/error "bad number" (send-log "bad number" "third message"))
+    (test/error "bad string" (send-log "bad number" 'bad-string))))
 
 
 ;; Check that the example from the document works
