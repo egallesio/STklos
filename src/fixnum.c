@@ -503,7 +503,7 @@ DEFINE_PRIMITIVE("fx=?", fxeq, vsubr, (int argc, SCM *argv))
     if (argc == 1) return STk_true;
     for (p = *argv--; --argc; p=*argv,argv--) {
         ensure_fx(*argv);
-        if (p == *argv) return STk_false;
+        if (p != *argv) return STk_false;
     }
   return STk_true;
 }
