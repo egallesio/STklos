@@ -348,8 +348,20 @@ DEFINE_PRIMITIVE("fxmodulo", fxmod, subr2, (SCM o1, SCM o2))
 
 DEFINE_PRIMITIVE("fxabs", fxabs, subr1, (SCM o))
 {
+    /* As per Sean Eron Anderson's bit twiddling page,
+       we can compute abs directly, without branching and without
+       calling the C library (labs).
+       http://graphics.stanford.edu/~seander/bithacks.html#IntegerAbs
+
+       NOTE: this won't work for fx-least because the result is not
+       a fixnum, but then... It wasn't when we used labs anyway.
+       We assume the user knows overflows and underflows are not
+       signaled (the same is true for other fixnum procedures).
+       --jpellegrini */
   ensure_fx(o);
-  return MAKE_INT(labs(INT_VAL(o)));
+  long v = INT_VAL(o);
+  long const mask = v >> sizeof(long) * CHAR_BIT - 1;
+  return MAKE_INT((v + mask) ^ mask);
 }
 
 DEFINE_PRIMITIVE("fxneg", fxneg, subr1, (SCM o))
@@ -369,7 +381,7 @@ DEFINE_PRIMITIVE("fxneg", fxneg, subr1, (SCM o))
  * that |(fxsqrt n)| returns two values |a|, |b|, such that |a*a+b|=|n|.
  * @lisp
  *   (fxsqrt #f)             =>  error
- *   (fxdqrt (expt 100 100)) =>  error
+ *   (fxsqrt (expt 100 100)) =>  error
  *   (fxsqrt -1)             =>  error
  *   (fxsqrt 0)              =>  0, 0
  *   (fxsqrt 1)              =>  1, 0
@@ -521,7 +533,7 @@ DEFINE_PRIMITIVE("fxnot", fxnot, subr1, (SCM o))
   /* TAG_FIXNUM costs two bitwise operations; doing INT_VAL
      and MAKE_INT would cost two shifts + 1  or.
      --jpellegrini */
-  return TAG_FIXNUM(~o);
+  return (SCM)TAG_FIXNUM(~((long) o));
 }
 
 /* Optimization: instead of doing INT_VALUE several times
@@ -549,7 +561,7 @@ DEFINE_PRIMITIVE(name, func, vsubr, (int argc, SCM *argv))  \
   if (argc == 1) return *argv;                              \
   else {                                                    \
     long int res;                                           \
-    for (res = *argv--; --argc; argv--) {                   \
+    for (res = ((long)*argv--); --argc; argv--) {           \
       ensure_fx(*argv);                                     \
       res op ( (long) (*argv));                             \
     }                                                       \
