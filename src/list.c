@@ -825,7 +825,7 @@ DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
  *        (l2 (list 3))
  *        (l3 (list 4 5))
  *        (l4 (append! l1 l2 l3)))
- *   (list l1 l2 l3))  => ((1 2 3 4 5) (3 4 5) (4 5))
+ *   (list l1 l2 l3 l4))  => ((1 2 3 4 5) (3 4 5) (4 5) (1 2 3 4 5)
  * @end lisp
  * An error is signaled if one of the given lists is a constant list.
 doc>
@@ -865,7 +865,7 @@ DEFINE_PRIMITIVE("append!", dappend, vsubr, (int argc, SCM* argv))
  *
  * Returns a list consisting of the elements of |list| in reverse order.
  * Contrarily to |reverse|, the returned value is not newly allocated but
- * computed "in place".
+ * computed "in place". The original list may be destroyed in this process.
  *
  * @lisp
  * (let ((l '(a b c)))
