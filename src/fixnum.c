@@ -139,7 +139,7 @@ DEFINE_PRIMITIVE("fixnum?", fixnump, subr1, (SCM obj))
 <doc EXT fixnum-width
  * (fixnum-width)
  *
- * Returns the number of bits used to represent a fixnum number
+ * Returns the number of bits used to represent a fixnum number.
 doc>
 */
 DEFINE_PRIMITIVE("fixnum-width", fixnum_width, subr0, (void))
@@ -239,13 +239,23 @@ doc>
 DEFINE_PRIMITIVE("fxodd?", fxoddp, subr1, (SCM o))
 {
   ensure_fx(o);
-  return MAKE_BOOLEAN (INT_VAL(o)&1);
+  /* This was:
+       return MAKE_BOOLEAN (INT_VAL(o)&1);
+     However, since the fixnum tag is "01", we can just check if the
+     third bit is one. --jpellegrini
+  */
+  return MAKE_BOOLEAN (((long) o) & 4);
 }
 
 DEFINE_PRIMITIVE("fxeven?", fxevenp, subr1, (SCM o))
 {
   ensure_fx(o);
-  return MAKE_BOOLEAN (!(INT_VAL(o)&1));
+  /* This was:
+       return MAKE_BOOLEAN (!(INT_VAL(o)&1));
+     However, since the fixnum tag is "01", we can just check if the
+     third bit is one. --jpellegrini
+  */
+  return MAKE_BOOLEAN (!(((long) o) & 4));
 }
 
 
@@ -270,13 +280,23 @@ doc>
 DEFINE_PRIMITIVE("fx+", fxplus, subr2, (SCM o1, SCM o2))
 {
   ensure_fx2(o1,o2);
-  return MAKE_INT(INT_VAL(o1) + INT_VAL(o2));
+  /* This was:
+        return MAKE_INT(INT_VAL(o1) + INT_VAL(o2));
+      However, since the fixnum tag is 01, we could just clear the tag of one
+      operand and sum both. No tagging/untagging necessary.
+      --jpellegrini  */
+  return (SCM) ( ((long) o1) + UNTAG(o2) );
 }
 
 DEFINE_PRIMITIVE("fx-", fxminus, subr2, (SCM o1, SCM o2))
 {
   ensure_fx2(o1, o2);
-  return MAKE_INT(INT_VAL(o1) - INT_VAL(o2));
+  /* This was:
+       return MAKE_INT(INT_VAL(o1) - INT_VAL(o2));
+     However, since the fixnum tag is 01, we could just clear the tag of the
+     second operand and subtract.  No tagging/untagging necessary.
+      --jpellegrini  */
+  return (SCM) ( ((long) o1) - UNTAG(o2) );
 }
 
 DEFINE_PRIMITIVE("fx*", fxtime, subr2, (SCM o1, SCM o2))
@@ -674,10 +694,21 @@ DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o))
 {
   ensure_fx(o);
   {
-    long n = INT_VAL(o);
+      /*
+        We had
+          long n = INT_VAL(o);
+        and then checked each bit like
+          if ( n & 1 )
+        but it's faster to not unbox o, and just check its third bit!
+          if ( o & 4 )
+        In the for loop, we need to explain the compiler that we're
+        doing the shift as if o was integer:
+          o = (SCM) (((long) o) >> 1))
+        but this has no extra cost. --jpellegrini
+      */
     int total=0;
-    for (int i=0; i < (int) INT_LENGTH; i++, n=n>> 1)
-      if ( n & 1 )
+    for (int i=0; i < (int) INT_LENGTH; i++, o=(SCM) (((long) o) >> 1))
+        if ( ((long) o) & 4 )
         total++;
     return MAKE_INT(total);
   }
@@ -702,9 +733,13 @@ DEFINE_PRIMITIVE("fxfirst-set-bit", fxfirst_set_bit, subr1, (SCM o))
 {
   ensure_fx(o);
   {
-    unsigned long n = INT_VAL(o);
-    for (int i=0; i < (int) INT_LENGTH; i++, n=n>> 1)
-      if ( n & 1 )
+      /*
+        We had
+          unsigned long n = INT_VAL(o);
+        here. Same optimization as in fxbit-count was applied. --jpellegrini
+       */
+    for (int i=0; i < (int) INT_LENGTH; i++, o=(SCM) (((long) o) >> 1))
+      if ( ((long) o) & 4 )
         return MAKE_INT(i);
     return MAKE_INT(-1UL);
   }

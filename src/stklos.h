@@ -99,6 +99,9 @@ extern "C"
 #define AS_LONG(x)              ((unsigned long) (x))
 #define AS_SCM(x)               ((SCM) ((unsigned long) (x)))
 
+/* UNTAG removes the tag bits. It is useful in optimized fixnum
+   operations (see fixnum.c). --jpellegrini */
+#define UNTAG(x)                (((long) x) & (~ ((unsigned long) 3)))
 
 /*===========================================================================*\
  *
