@@ -152,6 +152,7 @@ DEFINE_PRIMITIVE("unbox", unbox, subr1, (SCM x))
  * Changes |box| to hold |value|s. It is an error if |set-box!| is called
  * with a number of values that differs from the number of values in the box
  * being set. (In other words, |set-box!| does not allocate memory.)
+ * It is also an error to call |set-box!| on a box which is not mutable.
  *
  * The name |box-set!| is now obsolete and kept only for compatibility.
 doc>

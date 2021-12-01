@@ -384,11 +384,10 @@ DEFINE_PRIMITIVE("char-lower-case?", char_islower, subr1, (SCM c)) {
  * argument if it is a numeric digit (that is, if char-numeric?
  * returns #t), or #f on any other character.
  * @lisp
- * (digit-value
  * (digit-value #\3)        => 3
  * (digit-value #\x0664)    => 4
  * (digit-value #\x0AE6)    => 0
- * (digit-value #\x0EA6)    #f
+ * (digit-value #\x0EA6)    => #f
  * @end lisp
 doc>
  */

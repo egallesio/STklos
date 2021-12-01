@@ -31,7 +31,7 @@
 /*===========================================================================*\
  *
  * A simplified (and very ad hoc) version of printf for error messages.
-  *       %c for character
+ *       %c for character
  *       %s for string
  *       %S for string (surrounded by a pair of quotes)
  *       %d for decimal print

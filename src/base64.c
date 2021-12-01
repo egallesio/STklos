@@ -122,6 +122,15 @@ static void decode(SCM f, SCM g)
  *
  * Encode in Base64 the characters from input port |in| to the output port
  * |out|. If |out| is not specified, it defaults to the current output port.
+ *
+ * @lisp
+ * (with-input-from-string "Hello"
+ *   (lambda ()
+ *     (with-output-to-string
+ *       (lambda ()
+ *         (base64-encode (current-input-port))))))
+ *  => "SGVsbG8="
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("base64-encode", base64_encode, subr12, (SCM f, SCM g))
@@ -143,6 +152,15 @@ DEFINE_PRIMITIVE("base64-encode", base64_encode, subr12, (SCM f, SCM g))
  *
  * Decode the Base64 characters from input port |in| to the output port
  * |out|. If |out| is not specified, it defaults to the current output port.
+ *
+ * @lisp
+ * (with-input-from-string "SGVsbG8="
+ *   (lambda ()
+ *     (with-output-to-string
+ *       (lambda ()
+ *         (base64-decode (current-input-port))))))
+ *  => "Hello"
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("base64-decode", base64_decode, subr12, (SCM f, SCM g))

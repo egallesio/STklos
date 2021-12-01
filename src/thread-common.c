@@ -186,6 +186,11 @@ DEFINE_PRIMITIVE("thread-name", thread_name, subr1, (SCM thr))
  * (thread-stack-size thread)
  *
  * Returns the allocated stack size for |thread|.
+ *
+ * @lisp
+ * (thread-stack-size (make-thread (lambda () #f) 'foo 2000)) => 2000
+ * @end lisp
+ *
  * Note that this procedure is not present in ,(quick-link-srfi 18).
 doc>
 */
