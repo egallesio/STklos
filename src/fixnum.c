@@ -690,13 +690,17 @@ doc>
 DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o))
 /* TODO: Somewhat efficient, but there is a better way, described
    in "Hacker's Delight", but it needs to be adapted to the
-   variable length datum. */
+   variable length datum.
+   Other possibility: do as in
+   http://graphics.stanford.edu/~seander/bithacks.html
+*/
 {
   ensure_fx(o);
   {
-      /*
+      /* NOTE 1:
         We had
-          long n = INT_VAL(o);
+          unsigned long n = INT_VAL(o);
+        here.
         and then checked each bit like
           if ( n & 1 )
         but it's faster to not unbox o, and just check its third bit!
@@ -704,9 +708,24 @@ DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o))
         In the for loop, we need to explain the compiler that we're
         doing the shift as if o was integer:
           o = (SCM) (((long) o) >> 1))
-        but this has no extra cost. --jpellegrini
+          but this has no extra cost. -- jpellegrini */
+
+       /* NOTE 2:
+         SRFI-143 says 
+            "Compatibility note: The R6RS analogue bitwise-bit-count
+            applies bitwise-not to the population count before returning
+            it if i is negative"
+        And the SRFI mandates
+            (fxbit-count -13) =>  2
+        and so on...
+        In fact, this is what SRFI-60 and SRFI-151 do (but for bignums
+        too) in srfi/60.scm.
+        Since tagged o will be negative whenever the original number is,
+        we check "o<0".
+        --jpellegrini
       */
-    int total=0;
+    if ((long) o < 0) o = (SCM) (~((long) o));
+    unsigned long total=0;
     for (int i=0; i < (int) INT_LENGTH; i++, o=(SCM) (((long) o) >> 1))
         if ( ((long) o) & 4 )
         total++;
@@ -736,7 +755,15 @@ DEFINE_PRIMITIVE("fxfirst-set-bit", fxfirst_set_bit, subr1, (SCM o))
       /*
         We had
           unsigned long n = INT_VAL(o);
-        here. Same optimization as in fxbit-count was applied. --jpellegrini
+        here.
+        and then checked each bit like
+          if ( n & 1 )
+        but it's faster to not unbox o, and just check its third bit!
+          if ( o & 4 )
+        In the for loop, we need to explain the compiler that we're
+        doing the shift as if o was integer:
+          o = (SCM) (((long) o) >> 1))
+        but this has no extra cost. --jpellegrini
        */
     for (int i=0; i < (int) INT_LENGTH; i++, o=(SCM) (((long) o) >> 1))
       if ( ((long) o) & 4 )
