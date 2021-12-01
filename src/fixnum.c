@@ -479,8 +479,22 @@ FX_COMP("fx<?",  fxlt, >=)
 FX_COMP("fx<=?", fxle, >)
 FX_COMP("fx>?",  fxgt, <=)
 FX_COMP("fx>=?", fxge, <)
-FX_COMP("fx=?",  fxeq, !=)
 
+/* fx=? is different than other compare ops, as it requires nothing
+   else than a direct comparison with ==, so it's defined separately
+   --jpellegrini */
+DEFINE_PRIMITIVE("fx=?", fxeq, vsubr, (int argc, SCM *argv))
+{
+    SCM p;
+    if (argc == 0) error_fx_at_least_1();
+    ensure_fx(*argv);
+    if (argc == 1) return STk_true;
+    for (p = *argv--; --argc; p=*argv,argv--) {
+        ensure_fx(*argv);
+        if (p == *argv) return STk_false;
+    }
+  return STk_true;
+}
 
 /*
 <doc EXT fxnot fxand fxior fxxor
@@ -504,9 +518,28 @@ doc>
 DEFINE_PRIMITIVE("fxnot", fxnot, subr1, (SCM o))
 {
   ensure_fx(o);
-  return MAKE_INT(~INT_VAL(o));
+  /* TAG_FIXNUM costs two bitwise operations; doing INT_VAL
+     and MAKE_INT would cost two shifts + 1  or.
+     --jpellegrini */
+  return TAG_FIXNUM(~o);
 }
 
+/* Optimization: instead of doing INT_VALUE several times
+   and then MAKE_INT on the result, we operate directly on the
+   bits of the tagged fixnums. This will NOT make a difference
+   for the relevant bits (bit 3 and above), but will destroy the
+   tag, which we re-build later.
+
+   Cost of unboxing + boxing:
+     n*(INT_VALUE) + MAKE_INT   [ n+1 shifts + one "or" ]
+   Cost of optimized version:
+     1*TAG_FIXNUM               [ one "and" + one "or" ]
+
+   When n=1, the first cost is that of two shifts + one "or",
+   but the second is that of one "and" and one "or".
+   When n>1, the second is clearly better.
+   --jpellegrini
+ */
 #define FX_LOGICAL(name, func, op) \
 DEFINE_PRIMITIVE(name, func, vsubr, (int argc, SCM *argv))  \
 {                                                           \
@@ -516,11 +549,12 @@ DEFINE_PRIMITIVE(name, func, vsubr, (int argc, SCM *argv))  \
   if (argc == 1) return *argv;                              \
   else {                                                    \
     long int res;                                           \
-    for (res = INT_VAL(*argv--); --argc; argv--) {          \
+    for (res = *argv--; --argc; argv--) {                   \
       ensure_fx(*argv);                                     \
-      res op INT_VAL(*argv);                                \
+      res op ( (long) (*argv));                             \
     }                                                       \
-    return MAKE_INT(res);                                   \
+    res = TAG_FIXNUM(res);                                  \
+    return (SCM) res;                                       \
   }                                                         \
 }
 

@@ -602,6 +602,8 @@ EXTERN_PRIMITIVE("fx*",        fxtime,  subr2, (SCM o1, SCM o2));
 EXTERN_PRIMITIVE("fxquotient", fxdiv,   subr2, (SCM o1, SCM o2));
 int STk_init_fixnum(void);
 
+/* TAG_FIXNUM forces a fixnum tag on x. */
+#define TAG_FIXNUM(x)      ((UNTAG(x)) | 1)
 
 /*
   ------------------------------------------------------------------------------
