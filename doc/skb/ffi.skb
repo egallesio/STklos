@@ -31,7 +31,7 @@ defined to allow an easy access to functions written in C without
 needing to build C-wrappers and, consequently, without any need to
 write C code.  Note that the FFI is very machine dependent and that it
 works only on a limited set of architectures/systems ,(footnote [FFI
-system should works on the following architectures/systems:
+system should work on the following architectures/systems:
 gcc_ppc_osx, gcc_sparc_unix, gcc_x64_unix, gcc_x86_unix.]). Moreover,
 since FFI allows very low level access, it is easy to crash the
 ,(stklos) VM when using an external C function.])
@@ -76,6 +76,8 @@ between the C and the Scheme worlds.])
 ;       (tr (tdl (bold ":int64")) (tdl "") (tdl ""))
        (tr (tdl (bold ":obj")) (tdl "void *") (tdl "Any Scheme object passed as is")))))
 
+(p [Note that by using the ,(tt ":pointer") type, one gives up the safety of
+the Scheme environment, and care must be taken so the program will not crash.])
 
 (insertdoc 'define-external)
 
@@ -135,6 +137,39 @@ argument will be silently taken as infinity.])
 (c-fabsf -1.0e+250)        ,(symbol-arrow) +inf.0
 (c-fabs (- (expt 10 300))) ,(symbol-arrow) 1e+300
 (c-fabs (- (expt 10 600))) ,(symbol-arrow) +inf.0
+])
+
+In the following example we use the ,(tt ":string") type. C functions accepting
+pointers to null-terminated strings are directly translated to this type.
+
+The POSIX function ,(,emph "strpbrk") accepts two string arguments (in C, two pointers
+to (,emph "char")). The C call ,(emph "strpbrk(str1, str2)") 
+pointer to the first occurrence in the string ,(emph str1) of one of the bytes in
+the string ,(emph str2).
+
+(fontified-code [
+(define-external c-strpbrk ((str :string) (res :string))
+    :entry-name "strpbrk"
+    :return-type :string)
+])
+
+(raw-code [
+(c-strpbrk "a string" "rz") => "ring"
+])
+
+Note that it would be possible to ues a ,(tt :pointer) type instead for the return
+value, although in this case it would be more cumbersome (but does help understand
+the FFI better!):
+
+(fontified-code [
+(define-external c-strpbrk ((str :string) (res :pointer))
+    :entry-name "strpbrk"
+    :return-type :string)
+])
+
+(raw-code [
+(c-strpbrk "a string" "rz")                   => #[C-pointer 7f17baf94d06 @ 7f17bafb4360]
+(cpointer->string (c-strpbrk "a string" "rz") => "ring"
 ])
 
 
