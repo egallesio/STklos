@@ -35,13 +35,12 @@
 ; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ; SOFTWARE.
 
-; This uses SRFIs 23, 26, 60, and 66
 
-(require "srfi-26")
-(require "srfi-66")
-
-(define-module SRFI-74
-  (import (srfi 4) (srfi 60))
+(define-module srfi/74
+  (import (srfi 4) 
+          (srfi 26)
+          (srfi 60)
+          (srfi 66))
   (export endianness blob? make-blob blob-length
           blob-u8-ref blob-s8-ref
           blob-u8-set! blob-s8-set!
@@ -76,9 +75,9 @@
 
 (define-syntax endianness
   (syntax-rules (little big native)
-    ((endianness little) (in-module SRFI-74 *endianness/little*))
-    ((endianness big)    (in-module SRFI-74 *endianness/big*))
-    ((endianness native) (in-module SRFI-74 *endianness/native*))))
+    ((endianness little) (in-module srfi/74 *endianness/little*))
+    ((endianness big)    (in-module srfi/74 *endianness/big*))
+    ((endianness native) (in-module srfi/74 *endianness/native*))))
 
 (define blob? u8vector?)
 
@@ -279,6 +278,5 @@
 
 )
 ;; ----------------------------------------------------------------------
-(select-module stklos)
-(import SRFI-74)
-(provide "srfi-74")
+
+(provide "srfi/74")
