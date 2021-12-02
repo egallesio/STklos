@@ -432,7 +432,7 @@ doc>
  * (define x (make <circle> :radius 100))
  * (radius x)                             => 100
  * (set! (radius x) 200)
- * (raidus x)                             => 200
+ * (radius x)                             => 200
  * @end lisp 
 doc>
 |#
