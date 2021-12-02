@@ -49,7 +49,7 @@
 ;;;; Last file update: 24-Nov-2021 10:24 (eg)
 ;;;;
 
-(define-module SRFI-189
+(define-module srfi/189
   (import (srfi 1) (srfi 9))
   (export maybe? either? just nothing left right nothing? just? maybe= left?
           right? either= either-swap
@@ -960,8 +960,6 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-189)
-(provide "srfi-189")
+(provide "srfi/189")
  
