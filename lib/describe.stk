@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 21-Mar-1993 14:33
-;;;; Last file update: 21-Sep-2021 13:11 (eg)
+;;;; Last file update:  2-Dec-2021 19:32 (eg)
 ;;;;
 
 (define-module DESCRIBE
@@ -70,7 +70,7 @@
                                             user-type-name)))
                               (begin
                                 ;; an object instance
-                                (format port "an an instance of class ~A"
+                                (format port "an instance of class ~A"
                                 (class-name (class-of x))))))))
   (format port ".~%")
   (void))
