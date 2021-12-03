@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Feb-1994 15:56
- * Last file update: 29-Apr-2021 19:12 (eg)
+ * Last file update:  2-Dec-2021 18:44 (eg)
  */
 
 #include "stklos.h"
@@ -912,7 +912,7 @@ static void make_standard_classes(void)
   mk_cls(&Struct_type,  "<struct-type>",Class,           Top,       STk_nil);
   mk_cls(&Cond,         "<condition>",  Class,           Top,       STk_nil);
   mk_cls(&Cond_type,    "<condition-type>",Class,        Top,       STk_nil);
-  mk_cls(&Box,          "<ref>",        Class,           Top,       STk_nil);
+  mk_cls(&Box,          "<box>",        Class,           Top,       STk_nil);
   mk_cls(&UnknownClass, "<unknown>",    Class,           Top,       STk_nil);
   mk_cls(&Procedure,    "<procedure>",  Procedure_class, Top,       STk_nil);
 }
