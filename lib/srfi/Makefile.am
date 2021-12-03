@@ -62,6 +62,7 @@ SRC_STK   = 1.stk   \
             70.stk  \
             74.stk  \
             88.stk  \
+            95.stk \
             111.stk \
             113.stk \
             117.stk \
@@ -76,6 +77,7 @@ SRC_STK   = 1.stk   \
             151.stk \
             158.stk \
             161.stk \
+            170.stk \
             173.stk \
             174.stk \
             180.stk \
@@ -121,6 +123,7 @@ SRC_OSTK =  1.ostk   \
             70.ostk  \
             74.ostk  \
             88.ostk  \
+            95.ostk  \
             111.ostk \
             117.ostk \
             118.ostk \
@@ -135,6 +138,7 @@ SRC_OSTK =  1.ostk   \
             151.ostk \
             158.ostk \
             161.ostk \
+            170.ostk \
             173.ostk \
             174.ostk \
             180.ostk \
@@ -187,6 +191,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 # Dependencies
 13.ostk: 14.ostk
+95.ostk:  132.ostk
 113.ostk:  128.ostk
 134.ostk: 158.ostk
 

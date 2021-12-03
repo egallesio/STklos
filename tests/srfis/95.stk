@@ -1,0 +1,54 @@
+
+;; Basic sorted? checking:
+
+(test "srfi-95.1" #t (sorted? "defghi" char<?))
+(test "srfi-95.2" #t (sorted? "ihgfed" char>?))
+(test "srfi-95.3" #f (sorted? "defahi" char<?))
+(test "srfi-95.4" #f (sorted? "ihgaed" char>?))
+
+(test "srfi-95.5" #t (sorted? '(2 10 50) <))
+(test "srfi-95.6" #t (sorted? '(10 5 1)  >))
+(test "srfi-95.7" #f (sorted? '(2 -1 50) <))
+(test "srfi-95.8" #f (sorted? '(10 -5 1)  >))
+
+(test "srfi-95.9" #t (sorted? #(2 10 50) <))
+(test "srfi-95.10" #t (sorted? #(10 5 1)  >))
+(test "srfi-95.11" #f (sorted? #(2 -1 50) <))
+(test "srfi-95.12" #f (sorted? #(10 -5 1)  >))
+
+;; key
+(test "srfi-95.13" #t (sorted? '(2 4 6 8) < (lambda (x) (floor (/ x 2)))))
+(test "srfi-95.14" #f (sorted? '(1 2 3 4) < (lambda (x) (floor (/ x 2)))))
+
+(test "srfi-95.15"
+      "abcdef"
+      (sort "bdefac" char<?))
+
+(test "srfi-95.16"
+      '(1 2 3 4)
+      (sort '(2 3 1 4) <))
+
+(test "srfi-95.17"
+      #(1 2 3 4)
+      (sort #(2 3 1 4) <))
+
+
+;; the mutating procedures need to return the result
+
+(test "srfi-95.18"
+      '(#t "abcdef")
+      (let ((str (string-copy "bdefac"))) ; make it mutable
+        (let ((res (sort! str char<?)))
+          (list (eq? str res) res))))
+
+(test "srfi-95.19"
+      '(#t (1 2 3 4))
+      (let ((lst '(4 3 1 2)))
+        (let ((res (sort! lst <)))
+          (list (eq? lst res) lst))))
+
+(test "srfi-95.20"
+      '(#t #(1 2 3 4))
+      (let ((vec #(4 3 1 2)))
+        (let ((res (sort! vec <)))
+          (list (eq? vec res) vec))))
