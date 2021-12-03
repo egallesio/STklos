@@ -1,4 +1,7 @@
 
+;; The real testing is in SRFI-132 tests.
+;; Here we only test if the wrapper is working as it should.
+
 ;; Basic sorted? checking:
 
 (test "srfi-95.1" #t (sorted? "defghi" char<?))
@@ -19,6 +22,8 @@
 ;; key
 (test "srfi-95.13" #t (sorted? '(2 4 6 8) < (lambda (x) (floor (/ x 2)))))
 (test "srfi-95.14" #f (sorted? '(1 2 3 4) < (lambda (x) (floor (/ x 2)))))
+
+;; sort
 
 (test "srfi-95.15"
       "abcdef"
@@ -52,3 +57,17 @@
       (let ((vec #(4 3 1 2)))
         (let ((res (sort! vec <)))
           (list (eq? vec res) vec))))
+
+;; merge
+
+(test "srfi-95.16"
+      '(1 2 3 4 5 6 7 8 9 10)
+      (merge '(1 5 7 8 10) '(2 3 4 6 9) <))
+
+(test "srfi-95.19"
+      '(#t (1 2 3 4 5 6 7 8 9 10))
+      (let ((a '(1 5 7 8 10))
+            (b '(2 3 4 6 9)))
+        (let ((res (merge! a b <)))
+          (list (or (eq? a res)
+                    (eq? b res)) res))))
