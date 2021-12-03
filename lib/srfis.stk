@@ -269,7 +269,7 @@
     ;; 227 Optional Arguments (draft)
     ;; 228 A further comparator library (draft)
     ;; 229 Tagged Procedures (draft)
-    ;; 230 Atomic Operations (draft)
+    (230 "Atomic Operations" () "srfi-230")
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file

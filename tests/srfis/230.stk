@@ -1,0 +1,38 @@
+
+;; Test from the SRFI text:
+;;
+
+(define *atomic-counter* (make-atomic-fxbox 0))
+
+(define (task)
+  (do ((i 0 (+ i 1)))
+      ((= i 1000))
+    (atomic-fxbox+/fetch! *atomic-counter* 1)))
+
+(define threads (make-vector 10))
+
+(do ((i 0 (+ i 1)))
+    ((= i 10))
+  (let ((thread (make-thread task)))
+    (vector-set! threads i thread)
+    (thread-start! thread)))
+
+(do ((i 0 (+ i 1)))
+    ((= i 10))
+  (thread-join! (vector-ref threads i)))
+
+(test "srfi-230.1" 10000 (atomic-fxbox-ref *atomic-counter*))
+
+;; tests 2-6
+(let Loop ((n 2) (symbols '(relaxed
+                            acquire
+                            release
+                            acquire-release
+                            sequentially-consistent)))
+  (unless (null? symbols)
+    (test (format #f "srfi-230.~a" n)
+          #t
+          (memory-order? (car symbols)))
+    (Loop (+ n 1) (cdr symbols))))
+            
+(test "srfi-230.7" #t (atomic-box? (make-atomic-box "content")))
