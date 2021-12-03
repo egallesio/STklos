@@ -13,11 +13,11 @@ approximately 15Mb.
 **Example:**
 
 ```bash
-$ docker pull stklos/stklos:1.40          # grab the 1.40 version of STklos
-$ docker run -ti stklos/stklos:1.40       # and run it
+$ docker pull stklos/stklos:1.70          # grab the 1.70 version of STklos
+$ docker run -ti stklos/stklos:1.70       # and run it
 ...
 stklos> (version)
-"1.40"
+"1.70"
 stklos> (exit)
 ```
 

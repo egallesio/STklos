@@ -14,10 +14,10 @@
 # 
 
 # ---------- Build stage
-FROM alpine:3.11 AS build
+FROM alpine:3.15 AS build
 RUN apk update && \
     apk add build-base automake autoconf git \
-        gc-dev gmp-dev libffi-dev pcre-dev 
+        gc-dev gmp-dev libffi-dev pcre-dev readline-dev
 
 WORKDIR /build
 RUN git clone https://github.com/egallesio/STklos.git stklos
@@ -30,7 +30,7 @@ RUN env CFLAGS='-O3' ./configure \
 RUN env TERM="dumb" make all tests install
 
 # ---------- Running stage
-FROM alpine:latest
+FROM alpine:3.15
 RUN apk update && \
     apk add gc gmp libffi pcre readline
 COPY --from=build /usr/local/ /usr/local/
