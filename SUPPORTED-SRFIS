@@ -116,3 +116,4 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-217: Integer Sets
     - SRFI-219: Define higher-order lambda
     - SRFI-223: Generalized binary search procedures
+    - SRFI-229: Tagged Procedures

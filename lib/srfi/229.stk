@@ -1,0 +1,69 @@
+;;;;
+;;;; srfi-229.stk         -- SRFI-229: Tagged Procedures
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date:  3-Dec-2021 08:23
+;;;; Last file update:  3-Dec-2021 08:56 (jpellegrini)
+;;;;
+
+
+(define-module srfi/229
+  (export procedure/tag?
+          procedure-tag
+          set-procedure-tag!) ; extra procedure exported!
+  (export-syntax case-lambda/tag
+	         lambda/tag)
+  
+(define (set-procedure-tag! proc tag)
+  (let ((plist  (%procedure-plist proc)))
+    (if (null? plist)
+        (%set-procedure-plist! proc (list #:tag tag))
+        (key-set! plist #:tag tag)))
+  #void)
+
+(define (procedure-tag proc)
+  (key-get (%procedure-plist proc) #:tag))
+
+(define (procedure/tag? proc)
+  (and (memq #:tag (%procedure-plist proc)) #t))
+
+(define-syntax case-lambda/tag
+  (syntax-rules ()
+    ((case-lambda/tag expr (formals body1 ... body2) ...)
+     (let ((e expr) ;; evaluate expr first (explicitly
+                    ;; required by the SRFI)
+           (proc (case-lambda (formals body1 ... body2) ...)))
+       (set-procedure-tag! proc e)
+       proc))))
+
+(define-syntax lambda/tag
+  (syntax-rules ()
+    ((lambda/tag expr formals body1 ... body2)
+     (let ((e expr) ;; evaluate expr first (explicitly
+                    ;; required by the SRFI)
+           (proc (lambda formals body1 ... body2)))
+       (set-procedure-tag! proc e)
+       proc))))
+
+)
+
+(provide "srfi/229")
+

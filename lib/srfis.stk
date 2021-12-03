@@ -266,10 +266,10 @@
     ;; 224 Integer Mappings
     ;; 225 Dictionaries (draft)
     ;; 226 Control Features (draft)
-    ;; 227 Optional Arguments (draft)
+    ;; 227 Optional Arguments
     ;; 228 A further comparator library (draft)
-    ;; 229 Tagged Procedures (draft)
-    ;; 230 Atomic Operations (draft)
+    (229 "Tagged Procedures" () "srfi-229")
+    ;; 230 Atomic Operations
     ))
 
 ;; Some shortcuts to add to the SRFI-features which permit to load seveal file
