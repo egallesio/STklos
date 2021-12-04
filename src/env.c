@@ -246,7 +246,7 @@ DEFINE_PRIMITIVE("%module-exports-set!", module_exports_set, subr2,
  * @lisp
  * (module? (find-module 'ST\klos))  => #t
  * (module? 'ST\klos)                => #f
- * (module? 123 'no)                => no
+ * (module? 123 'no)                 => no
  * @end lisp
 doc>
 */
@@ -260,6 +260,15 @@ DEFINE_PRIMITIVE("module?", modulep, subr1, (SCM obj))
  * (library? object)
  *
  * Returns |#t| if |object| is a module defined as a R7RS library and |#f| otherwise.
+ * @lisp
+ * (define-module a)
+ * (define-library b)
+ * 
+ * (module? (find-module 'a))   => #t
+ * (module? (find-module 'b))   => #t
+ * (library? (find-module 'a))  => #f
+ * (library? (find-module 'b))  => #t
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("library?", libraryp, subr1, (SCM obj))
