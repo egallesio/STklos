@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-185.stk		-- Implementation of SRFI-185
+;;;; 185.stk		-- Implementation of SRFI-185
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -47,10 +47,15 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 31-Jul-2020 09:12 (jpellegrini)
-;;;; Last file update: 31-Jul-2020 10:14 (jpellegrini)
+;;;; Last file update: 04-Dec-2021 14:24 (jpellegrini)
 ;;;;
 
-
+(define-module srfi/185
+  (export string-append-linear!
+          string-replace-linear!)
+  (export-syntax string-append!
+                 string-replace!)
+  
 ;; define the procedures required by the SRFI.
 ;; these are already built-in, so no problem.
 (define string-append-linear! string-append!)
@@ -63,7 +68,7 @@
 ;; stklos> (eq? string-append! string-append-linear!)
 ;; #t
 ;;
-;; but what we get when we all string-append! now is the
+;; but what we get when we call string-append! now is the
 ;; new macro:
 ;;
 ;; stklos> (string-append! "a" "b")
@@ -89,6 +94,8 @@
     ((_ place . args)
      (set! place (string-replace-linear! place . args)))))
 
-(provide "srfi-185")
+)
+
+(provide "srfi/185")
 
 
