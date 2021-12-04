@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-128.stk		-- Implementation of SRFI-128
+;;;; 128.stk		-- Implementation of SRFI-128
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -46,12 +46,12 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 08-Jul-2020 13:21 (jpellegrini)
-;;;; Last file update: 26-Oct-2021 20:07 (eg)
+;;;; Last file update: 04-Dec-2021 10:22 (jpellegrini)
 ;;;;
 
-(require "srfi-9")
 
-(define-module SRFI-128
+(define-module srfi/128
+  (import (srfi 9))
   (export
    comparator? comparator-ordered? comparator-hashable?
    make-comparator
@@ -71,7 +71,7 @@
 
 (define comparator-if<=> "<<FIXME>>")
 (define hash-salt        "<<FIXME>>")
-(define hash-bound        "<<FIXME>>")
+(define hash-bound       "<<FIXME>>")
 
   
 
@@ -549,7 +549,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-128)
-(provide "srfi-128")
+(provide "srfi/128")

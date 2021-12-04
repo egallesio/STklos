@@ -8,6 +8,8 @@
 
 ;; Most if not all of this code is taken from SRFI-114
 
+(import (srfi 128))
+
 (define exact inexact->exact)
 
 (define string-foldcase string-downcase)
