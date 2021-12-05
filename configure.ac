@@ -595,8 +595,6 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           doc/skb/stklos-version.stk
           pkgman/Makefile
 
-          lib/srfi-133/Makefile
-
           extensions/Makefile
 
           extensions/gtklos/Makefile
