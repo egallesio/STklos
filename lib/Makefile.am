@@ -24,7 +24,6 @@
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme srfi                       \
-		  srfi-133 \
 		  srfi-144
 
 COMP ?= ../utils/tmpcomp
@@ -108,18 +107,15 @@ SRC_STK = bigloo-support.stk  \
           srfi-134.stk        \
           srfi-135.stk        \
           srfi-137.stk        \
-          srfi-141.stk        \
           srfi-151.stk        \
           srfi-156.stk        \
           srfi-158.stk        \
           srfi-161.stk        \
           srfi-171.stk        \
-          srfi-180.stk        \
           srfi-185.stk        \
           srfi-190.stk        \
           srfi-207.stk        \
           srfi-217.stk        \
-          srfi-223.stk        \
           trie.stk            \
           tar.stk             \
           trace.stk
@@ -164,18 +160,15 @@ scheme_OBJS = compfile.ostk     \
           srfi-134.ostk         \
           srfi-135.ostk         \
           srfi-137.ostk         \
-          srfi-141.ostk         \
           srfi-151.ostk         \
           srfi-156.ostk         \
           srfi-158.ostk         \
           srfi-161.ostk         \
           srfi-171.ostk         \
-          srfi-180.ostk         \
           srfi-185.ostk         \
           srfi-190.ostk         \
           srfi-207.ostk         \
           srfi-217.ostk         \
-          srfi-223.ostk         \
           trie.ostk             \
           tar.ostk              \
           trace.ostk
