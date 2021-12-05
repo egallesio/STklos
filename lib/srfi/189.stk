@@ -46,7 +46,7 @@
 
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 25-Jun-2020 06:21 (jpellegrini)
-;;;; Last file update: 24-Nov-2021 10:24 (eg)
+;;;; Last file update:  2-Dec-2021 18:17 (eg)
 ;;;;
 
 (define-module srfi/189
@@ -92,9 +92,13 @@
   (define maybe-or           "<<FIXME>>")
   (define maybe-and          "<<FIXME>>")
   (define either-guard       "<<FIXME>>")
-  
-    
-  
+
+  (export-syntax maybe-if either-let*-values maybe-let*
+                 maybe-let*-values either-let* either-or
+                 either-and maybe-or maybe-and either-guard)
+
+
+
 (define-record-type <just>
   (raw-just objs)
   just?
@@ -962,4 +966,3 @@
 ;;;; ======================================================================
 
 (provide "srfi/189")
- 

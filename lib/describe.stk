@@ -20,12 +20,12 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 21-Mar-1993 14:33
-;;;; Last file update: 21-Sep-2021 13:11 (eg)
+;;;; Last file update:  2-Dec-2021 20:04 (eg)
 ;;;;
 
 (define-module DESCRIBE
   (export describe)
-  
+
 ;;;
 ;;; describe for simple objects
 ;;;
@@ -70,7 +70,7 @@
                                             user-type-name)))
                               (begin
                                 ;; an object instance
-                                (format port "an an instance of class ~A"
+                                (format port "an instance of class ~A"
                                 (class-name (class-of x))))))))
   (format port ".~%")
   (void))
@@ -80,7 +80,7 @@
 ;;; describe for STklos instances
 ;;;
 (define (%describe-parts-header slots port)
-  ;; header of the slot names of classes, objects, structs description 
+  ;; header of the slot names of classes, objects, structs description
   (format port (case (length slots)
                  ((0) "There are no slots.~%")
                  ((1) "The only slot is:~%")
@@ -96,7 +96,7 @@
     (next-method)
     ;; print all the instance slots
     (let ((slots (class-slots (class-of x))))
-      (%describe-parts-header slots port) 
+      (%describe-parts-header slots port)
       (for-each (lambda (slot)
                   (let ((name (slot-definition-name slot)))
                     (format port "     ~S = ~A~%" name
@@ -258,6 +258,23 @@
       (format port "Fields of condition type:\n")
       (for-each (lambda (x) (format port "\t~A\n" x)) fields))))
 
+
+;;; ======================================================================
+;;;     Describe for boxes
+;;; ======================================================================
+(define-method describe ((self <box>) port)
+  (next-method)
+  (let ((arity (box-arity self)))
+    (fprintf port "It is ~amutable and contains ~a.~%"
+             (if (box-mutable? self) "" "not ")
+             (case arity
+               ((0) "no value")
+               ((1) "one value")
+               (else (format "~a values" arity))))
+    (when (>= arity 1)
+      (fprintf port "Its content is:~%")
+      (for-each (lambda (x) (fprintf port "    ~W~%" x))
+                (call-with-values (lambda () (unbox self)) list)))))
 
 ;;; ======================================================================
 ;;;     Describe without second parameter

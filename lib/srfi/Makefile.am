@@ -56,11 +56,14 @@ SRC_STK   = 1.stk   \
             64.stk  \
             66.stk  \
             74.stk  \
+            141.stk \
             170.stk \
+            180.stk \
             189.stk \
             196.stk \
             214.stk \
             215.stk \
+            223.stk \
             229.stk
 
 SRC_OSTK =  1.ostk   \
@@ -88,19 +91,22 @@ SRC_OSTK =  1.ostk   \
             64.ostk  \
             66.ostk  \
             74.ostk  \
+            141.ostk \
             170.ostk \
+            180.ostk \
             189.ostk \
             196.ostk \
             214.ostk \
             215.ostk \
+            223.ostk \
             229.ostk
 
 #
 # SRFIs written in C and Scheme
 #
-SRC_C     = 25.c     27.c     132.c     170.c      175.c
-SRC_C_STK = 25.stk   27.stk   132.stk   170.stk    175.stk
-SRC_SHOBJ = 25.$(SO) 27.$(SO) 132.$(SO) 170.$(SO)  175.$(SO)
+SRC_C     = 25.c     27.c     132.c     133.c      170.c      175.c
+SRC_C_STK = 25.stk   27.stk   132.stk   133.stk    170.stk    175.stk
+SRC_SHOBJ = 25.$(SO) 27.$(SO) 132.$(SO) 133.$(SO)  170.$(SO)  175.$(SO)
 
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
@@ -137,6 +143,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c
 132.$(SO): 132-incl.c 132.c
+133.$(SO): 133-incl.c 133.c
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
 
