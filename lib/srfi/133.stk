@@ -2,7 +2,7 @@
 ;;;;
 ;;;; srfi-133.stk         -- Implementation of SRFI-133
 ;;;;
-;;;; Copyright © 2020 Jeronimo Pellegrini - j_p@aleph0.info
+;;;; Copyright © 2021 Jeronimo Pellegrini - j_p@aleph0.info
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -55,11 +55,11 @@
 ;;;;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
-;;;;    Creation date:  16-Jul-2020 10:20
-;;;; Last file update: 15-May-2021 09:25 (eg)
+;;;;    Creation date: 16-Jul-2020 10:20
+;;;; Last file update: 03-Dec-2021 07:29 (jpellegrini)
 ;;;;
 
-(select-module SRFI-133)
+(select-module srfi/133)
 
 ;; Pseudo-define the primitives defined in C to avoid compiler warnings
 (%compile-time-define check-index vector-parse-start+end %smallest-length
@@ -954,10 +954,8 @@
           (vector-set! result at (string-ref str i))
           (loop (+ at 1) (+ i 1)))))))
 
-;; END of module SRFI-133
+;; END of module srfi/133
 
 ;;; ======================================================================
-(select-module STklos)
-(import SRFI-133)
 
-(provide "srfi-133")
+(provide "srfi/133")

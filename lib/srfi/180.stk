@@ -47,13 +47,12 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  5-Jul-2020 16:36
-;;;; Last file update:  8-Jul-2020 17:34 (eg)
+;;;; Last file update:  3-Dec-2021 07:14 (jpellegrini)
 ;;;;
 
-(require "srfi-9")
-
-(define-module SRFI-180
-  (import (srfi 60))
+(define-module srfi/180
+  (import (srfi 9)
+          (srfi 60))
   (export json-number-of-character-limit
           json-nesting-depth-limit
           json-null?
@@ -872,8 +871,6 @@
 )
 
 ;;; ======================================================================
-(select-module STklos)
-(import SRFI-180)
 
 ;; Plug a REPL error handler for errors coming from the implementation of SRFI-180
 ;;(%add-error-to-repl-handler json-error?
@@ -881,5 +878,4 @@
 ;;                              (format port "(JSON error): ~A\n"
 ;;                                      (json-error-reason e))))
 
-
-(provide "srfi-180")
+(provide "srfi/180")
