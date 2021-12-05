@@ -47,10 +47,10 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 06-Jul-2020 18:10 (jpellegrini)
-;;;; Last file update: 06-Jul-2020 17:22 (jpellegrini)
+;;;; Last file update: 03-Dec-2021 06:41 (jpellegrini)
 ;;;;
 
-(define-module SRFI-141
+(define-module srfi/141
   (export floor/
           floor-quotient
           floor-remainder
@@ -317,7 +317,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-141)
-(provide "srfi-141")
+(provide "srfi/141")
