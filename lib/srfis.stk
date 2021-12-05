@@ -126,7 +126,7 @@
     ;; 85  ....... withdrawn
     ;; 86  MU and NU simulating VALUES & CALL-WITH-VALUES
     (87 "=> in case clauses")
-    (88 "Keyword Objects")
+    (88 "Keyword Objects" () "srfi-88")
     (89 "Optional Positional and Named Parameters" () "srfi-89")
     ;; 90  Extensible hash table constructor
     ;; 91  ....... withdrawn
