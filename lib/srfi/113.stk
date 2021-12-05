@@ -20,11 +20,13 @@
 
 
 
-(require "srfi-69")
+(require "srfi-128")
 
-(define-module srfi/113
-  (import (srfi 9)
-          (srfi 128))
+(define-module SRFI-113
+  (import (srfi 9))
+  (import (srfi 69))
+  (import (srfi 128))
+; (import SRFI-128)
   
   ;(import (only chicken
   ;  include define-record-type define-record-printer

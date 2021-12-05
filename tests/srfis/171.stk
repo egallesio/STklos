@@ -7,6 +7,11 @@
 ;; (require "srfi-69")
 ;; (require "srfi-171")
 
+;; I have no idea why, but if I don't imprt srfi 69 here,
+;; tests fail complaining that stklos:alist->hash-table
+;; is not bound...
+(import (srfi 69))
+
 (define (add1 x) (+ x 1))
 
 (define numeric-list (iota 5))
@@ -17,7 +22,7 @@
 
 ;; for testing all treplace variations
 (define replace-alist '((1 . s) (2 . c) (3 . h) (4 . e) (5 . m)))
-(define stklos-hashtable (%old-alist->hash-table replace-alist eq? md5sum))
+(define stklos-hashtable (stklos:alist->hash-table replace-alist eq? md5sum))
 (define srfi69-hashtable (alist->hash-table replace-alist))
 ;;(define rnrs-hashtable (rnrs:make-eq-hashtable))
 
