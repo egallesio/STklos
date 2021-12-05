@@ -24,7 +24,6 @@
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme srfi                       \
-		  srfi-133 \
 		  srfi-144
 
 COMP ?= ../utils/tmpcomp
