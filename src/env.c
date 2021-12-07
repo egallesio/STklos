@@ -71,7 +71,7 @@ struct module_obj {
   SCM name;                     /* module name */
   SCM exported_symbols;         /* symbols declared as exported */
   SCM imports;                  /* imported modules */
-  int is_library;               /* 1 if module is a R7RS library; 0  */
+  int is_library;               /* 1 if module is a R7RS library; 0 otherwise */
   struct hash_table_obj hash;   /* The associated hash table */
 };
 

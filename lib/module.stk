@@ -520,7 +520,7 @@ doc>
  * |mod|. If this symbol is not bound,  an error is signaled if no |default| is
  * provided, otherwise |in-module| returns |default|. Note that the value of |s|
  * is searched in |mod| and all the modules it imports.
- * @l
+ * 
  * This form is in fact a shortcut. In effect,
  * @lisp
  * (in-module my-module foo)

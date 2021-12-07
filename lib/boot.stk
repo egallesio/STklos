@@ -195,7 +195,7 @@
 ;; ----------------------------------------------------------------------
 ;;      Scheme Module
 ;; ----------------------------------------------------------------------
-;; The SCHEME module is a copy of the STklos module before the user
+;;; The SCHEME module is a copy of the STklos module before the user
 ;;; may have the possibility to modify standard bindings.
 ;;; If a module needs to be sure to have the original bindings, it
 ;;; can import this module which will be visible before the STklos

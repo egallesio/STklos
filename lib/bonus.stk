@@ -768,7 +768,7 @@ doc>
  * Returns the setter associated to a |proc|. Setters are defined in the
  * ,(link-srfi 17) document. A setter proc, can be used in a generalized
  * assignment, as described in |set!|.
- * @l
+ * 
  * To associate |s| to the procedure |p|, use the following form:
  * @lisp
  * (set! (setter p) s)
@@ -1169,7 +1169,7 @@ doc>
  *
  * All these procedure take a port opened for reading. |Port->string| reads
  * |port| until the it reads an end of file object and returns all the
- * characters read as a string. |Port->sexp-list)| and |port->string-list|
+ * characters read as a string. |Port->sexp-list| and |port->string-list|
  * do the same things except that they return a list of S-expressions and
  * a list of strings respectively. For the following example we suppose that
  * file |"foo"| is formed of two lines which contains respectively the number
