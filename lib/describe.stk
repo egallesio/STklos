@@ -29,6 +29,53 @@
 ;;;
 ;;; describe for simple objects
 ;;;
+#|
+<doc EXT describe
+ * (describe obj)
+ *
+ * Shows a brief description of |obj|. If the object is structured
+ * such as a struct, class or instance, some information about its
+ * internal structure will be shown.
+ *
+ * @lisp
+ * (describe 5)
+ *   5 is an integer.
+ * (describe 5.4)
+ *   5.4 is a real.
+ * (describe 2+3i)
+ *   2+3i is a complex number.
+ * (describe #\A)
+ *   #\A is a character, ascii value is 65.
+ * (describe <integer>)
+ *   <integer> is a class. It's an instance of <class>.
+ *   Superclasses are:
+ *       <rational>
+ *   (No direct slot)
+ *   (No direct subclass)
+ *   Class Precedence List is:
+ *       <integer>
+ *       <rational>
+ *       <real>
+ *       <complex>
+ *       <number>
+ *       <top>
+ *   (No direct method)
+ * (define-struct person name email)
+ * (define one (make-person "Some One" "one@domain.org"))
+ * (describe person)
+ *   #[struct-type person 139786494092352] is a structure type whose name is person.
+ *   Parent structure type: #f
+ *   Slots are:
+ *        name
+ *        email
+ * (describe one)
+ *   #[struct person 139786494288064] is an instance of the structure type person.
+ *   Slots are:
+ *        name = "Some One"
+ *        email = "one@domain.org"
+ * @end lisp
+doc>
+|#
 (define-method describe ((x <top>) port)
   (format port "~W is " x)
   (cond
