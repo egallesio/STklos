@@ -64,6 +64,9 @@
      ((library? x)      (format port "an R7RS library named ~A"
                                 (%symbol->library-name (module-name x))))
      ((module? x)       (format port "a module named ~A" (module-name x)))
+     ((port? x)         (format port "an ~a ~a port"
+                                (if (input-port? x) "input" "output")
+                                (if (binary-port? x) "binary" "textual")))
      (else              (let ((user-type-name (%user-type-name x)))
                           (if user-type-name
                               ;; Object type is user defined.
