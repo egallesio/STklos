@@ -50,7 +50,33 @@
 <doc EXT build-path-from-shell-variable
  * (build-path-from-shell-variable var)
  *
- * TODO
+ * Builds a path as a list of strings (which is the way STklos represents
+ * paths) from an environment variable.
+ *
+ * If the variable ,(tt "MYPATH") is ,(tt "lib/srfi:doc"), indicating two
+ * different directories in the path, then the behavior of this procedure
+ * will be as follows.
+ * @lisp
+ * (build-path-from-shell-variable "MYPATH") => ("lib/srfi" "doc")
+ * @end lisp
+ *
+ * The global variable ,(tt "*path-separator*") is a string whose content
+ * are the characters that can be used as separators.
+ * Then,
+ * @lisp
+ * (set! *path-separator* "+")
+ * (build-path-from-shell-variable "MYPATH") => ("lib/srfi:doc")
+ * @end lisp
+ * because the colon is not a separator anymore.
+ *  
+ * A full example:
+ * If variable ,(tt "OTHER_PATH") has value ,(tt "lib:doc#etc;."),
+ * @lisp
+ * (set! *path-separator* ":;#")
+ * (build-path-from-shell-variable "OTHER_PATH") => ("lib" "doc#etc;.")
+ * (set! *path-separator* ":;#")
+ * (build-path-from-shell-variable "OTHER_PATH") => ("lib" "doc" "etc" ".")
+ * @end lisp
 doc>
 |#
 (define (build-path-from-shell-variable var)
