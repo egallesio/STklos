@@ -148,7 +148,7 @@ SCM STk_make_C_parameter2(SCM symbol, SCM (*getter)(void), SCM (*conv)(SCM new_v
  * environment to a cell containing the value returned by the call
  * |(converter init)|. If the conversion procedure |converter| is not
  * specified the identity function is used instead.
- *
+ * @l
  * The parameter object is a procedure which accepts zero or one
  * argument. When it is called with no argument, the content of the
  * cell bound to this parameter object in the current dynamic

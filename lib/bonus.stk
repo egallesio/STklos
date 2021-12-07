@@ -768,7 +768,7 @@ doc>
  * Returns the setter associated to a |proc|. Setters are defined in the
  * ,(link-srfi 17) document. A setter proc, can be used in a generalized
  * assignment, as described in |set!|.
- * 
+ * @l
  * To associate |s| to the procedure |p|, use the following form:
  * @lisp
  * (set! (setter p) s)
