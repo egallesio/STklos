@@ -25,7 +25,7 @@
 ;;;;
 
 #|
-<doc call-with-current-continuation call/cc
+<doc R57RS call-with-current-continuation call/cc
  * (call-with-current-continuation proc)
  * (call/cc proc)
  *
@@ -105,7 +105,7 @@
 doc>
 |#
 #|
-<doc dynamic-wind
+<doc R57RS dynamic-wind
  * (dynamic-wind before thunk after)
  *
  * Calls |thunk| without arguments, returning the result(s) of this call.

@@ -118,7 +118,7 @@ DEFINE_PRIMITIVE("%promise-value-set!", promise_val_set, subr2, (SCM p, SCM v))
 
 
 /*
-<doc force
+<doc R57RS force
  * (force promise)
  *
  * Forces the value of |promise| (see ,(ref :mark "delay")). If no value has been

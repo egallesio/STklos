@@ -349,7 +349,7 @@ SCM STk_open_C_string(char *str)
 
 
 /*
-<doc EXT open-input-string
+<doc R7RS open-input-string
  * (open-input-string str)
  *
  * Returns an input string port capable of delivering characters from
@@ -381,7 +381,7 @@ DEFINE_PRIMITIVE("open-input-bytevector", open_input_bytevector, subr1, (SCM bv)
 
 
 /*
-<doc EXT open-output-string
+<doc R7RS open-output-string
  * (open-output-string)
  *
  * Returns an output string port capable of receiving and collecting characters.
@@ -411,7 +411,7 @@ DEFINE_PRIMITIVE("open-output-bytevector", open_output_bytevector, subr0, (void)
 
 
 /*
-<doc EXT get-output-string
+<doc R7RS get-output-string
  * (get-output-string port)
  *
  * Returns a string containing all the text that has been written on the
@@ -436,7 +436,7 @@ DEFINE_PRIMITIVE("get-output-string", get_output_string, subr1, (SCM port))
 }
 
 /*
-<doc EXT get-output-bytevector
+<doc R7RS get-output-bytevector
  * (get-output-bytevector port)
  *
  * Returns a bytevector consisting of the bytes that have been

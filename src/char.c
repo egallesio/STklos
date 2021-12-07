@@ -232,7 +232,7 @@ char *STk_char2string(int c)            /* convert a character to it's */
 
 DEFINE_PRIMITIVE("char?", charp, subr1, (SCM obj))
 /*
-<doc char?
+<doc R57RS char?
  * (char? obj)
  *
  * Returns |#t| if |obj| is a character, otherwise returns |#f|.
@@ -245,7 +245,7 @@ doc>
 /*=============================================================================*/
 
 /*
-<doc char=? char<? char>? char<=? char>=?
+<doc R57RS char=? char<? char>? char<=? char>=?
  * (char=? char1 char2 ...)
  * (char<? char1 char2 ...)
  * (char>? char1 char2 ...)
@@ -286,7 +286,7 @@ CHAR_COMPARE("char>=?", charge, (charcomp(last, *argv) < 0))
 
 
 /*
-<doc char-ci=? char-ci<? char-ci>? char-ci<=? char-ci>=?
+<doc R57RS char-ci=? char-ci<? char-ci>? char-ci<=? char-ci>=?
  * (char-ci=? char1 char2 ...)
  * (char-ci<? char1 char2 ...)
  * (char-ci>? char1 char2 ...)
@@ -306,7 +306,7 @@ CHAR_COMPARE("char-ci>=?", chargei, (charcompi(last,*argv) < 0))
 
 
 /*
-<doc char-alphabetic? char-numeric? char-whitespace? char-upper-case? char-lower-case?
+<doc R57RS char-alphabetic? char-numeric? char-whitespace? char-upper-case? char-lower-case?
  * (char-alphabetic? char)
  * (char-numeric? char)
  * (char-whitespace? char)
@@ -409,7 +409,7 @@ DEFINE_PRIMITIVE("digit-value", digit_value, subr1, (SCM c))
 /*=============================================================================*/
 
 /*
-<doc char->integer integer->char
+<doc R57RS char->integer integer->char
  * (char->integer char)
  * (integer->char n)
  *
@@ -464,7 +464,7 @@ DEFINE_PRIMITIVE("integer->char", integer2char, subr1, (SCM i))
 /*=============================================================================*/
 
 /*
-<doc char-upcase char-downcase
+<doc R57RS char-upcase char-downcase
  * (char-upcase char)
  * (char-downcase char)
  *
@@ -503,7 +503,7 @@ DEFINE_PRIMITIVE("char-downcase", char_downcase, subr1, (SCM c))
   return MAKE_CHARACTER(STk_to_lower((uint32_t) CHARACTER_VAL(c)));
 }
 /*
-<doc EXT char-foldcase
+<doc R7RS char-foldcase
  * (char-foldcase char)
  *
  * This procedure applies the Unicode simple case folding algorithm and returns

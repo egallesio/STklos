@@ -95,7 +95,7 @@ SCM STk_argv2list(int argc, SCM *argv)
 
 DEFINE_PRIMITIVE("pair?", pairp, subr1, (SCM x))
 /*
-<doc pair?
+<doc R7RS pair?
  * (pair? obj)
  *
  * |Pair?| returns |#t| if |obj| is a pair, and otherwise returns |#f|.
@@ -109,7 +109,7 @@ doc>
 
 DEFINE_PRIMITIVE("cons", cons, subr2, (SCM x, SCM y))
 /*
-<doc cons
+<doc R57RS cons
  * (cons obj1 obj2)
  *
  * Returns a newly allocated pair whose car is obj1 and whose cdr is obj2.
@@ -136,7 +136,7 @@ doc>
 
 DEFINE_PRIMITIVE("car", car, subr1, (SCM x))
 /*
-<doc car
+<doc R57RS car
  * (car pair)
  *
  * Returns the contents of the car field of pair.
@@ -158,7 +158,7 @@ doc>
 
 DEFINE_PRIMITIVE("cdr", cdr, subr1, (SCM x))
 /*
-<doc cdr
+<doc R57RS cdr
  * (cdr pair)
  *
  * Returns the contents of the cdr field of pair.
@@ -179,7 +179,7 @@ doc>
 
 DEFINE_PRIMITIVE("set-car!", setcar, subr2, (SCM cell, SCM value))
 /*
-<doc set-car!
+<doc R57RS set-car!
  * (set-car! pair obj)
  *
  * Stores |obj| in the car field of |pair|.
@@ -203,7 +203,7 @@ doc>
 
 DEFINE_PRIMITIVE("set-cdr!", setcdr, subr2, (SCM cell, SCM value))
 /*
-<doc set-cdr!
+<doc R57RS set-cdr!
  * (set-cdr! pair obj)
  *
  * Stores |obj| in the cdr field of |pair|.
@@ -222,7 +222,7 @@ doc>
 
 DEFINE_PRIMITIVE("null?", nullp, subr1, (SCM x))
 /*
-<doc null?
+<doc R57RS null?
  * (null? obj)
  *
  * Returns |#t| if |obj| is the empty list, otherwise returns |#f|.
@@ -235,7 +235,7 @@ doc>
 
 DEFINE_PRIMITIVE("list?", listp, subr1, (SCM x))
 /*
-<doc list?
+<doc R57RS list?
  * (list? obj)
  *
  * Returns |#t| if |obj| is a list, otherwise returns |#f|. By definition,
@@ -256,7 +256,7 @@ doc>
 
 DEFINE_PRIMITIVE("list", list, vsubr, (int argc, SCM * argv))
 /*
-<doc list
+<doc R57RS list
  * (list obj ...)
  *
  * Returns a newly allocated list of its arguments.
@@ -277,7 +277,7 @@ doc>
 
 DEFINE_PRIMITIVE("length", list_length, subr1, (SCM l))
 /*
-<doc length
+<doc R57RS length
  * (length list)
  *
  * Returns the length of |list|.
@@ -299,7 +299,7 @@ doc>
 
 
 /*
-<doc append
+<doc R57RS append
  * (append list ...)
  *
  * Returns a list consisting of the elements of the first list
@@ -364,7 +364,7 @@ DEFINE_PRIMITIVE("append", append, vsubr, (int argc, SCM* argv))
 
 
 /*
-<doc reverse
+<doc R57RS reverse
  * (reverse list)
  *
  * Returns a newly allocated list consisting of the elements of |list| in
@@ -388,7 +388,7 @@ DEFINE_PRIMITIVE("reverse", reverse, subr1, (SCM l))
 }
 
 /*
-<doc list-tail
+<doc R57RS list-tail
  * (list-tail list k)
  *
  * Returns the sublist of |list| obtained by omitting the first |k| elements.
@@ -425,7 +425,7 @@ DEFINE_PRIMITIVE("list-tail", list_tail, subr2, (SCM list, SCM k))
 
 
 /*
-<doc list-ref
+<doc R57RS list-ref
  * (list-ref list k)
  *
  * Returns the |k|th element of |list|. (This is the same as the car

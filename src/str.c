@@ -314,7 +314,7 @@ SCM STk_Cstring2string(char *str) /* Embed a C string in Scheme world  */
 
 DEFINE_PRIMITIVE("string?", stringp, subr1, (SCM obj))
 /*
-<doc string?
+<doc R57RS string?
  * (string? obj)
  *
  * Returns |#t| if |obj| is a string, otherwise returns |#f|.
@@ -325,7 +325,7 @@ doc>
 }
 
 /*
-<doc  make-string
+<doc R57RS make-string
  * (make-string k)
  * (make-string k char)
  *
@@ -382,7 +382,7 @@ DEFINE_PRIMITIVE("make-string", make_string, subr12, (SCM len, SCM init_char))
 }
 
 /*
-<doc  string
+<doc R57RS string
  * (string char ...)
  *
  * Returns a newly allocated string composed of the arguments.
@@ -426,7 +426,7 @@ DEFINE_PRIMITIVE("string", string, vsubr, (int argc, SCM* argv))
 
 
 /*
-<doc  string-length
+<doc R57RS string-length
  * (string-length string)
  *
  * Returns the number of characters in the given |string|.
@@ -440,7 +440,7 @@ DEFINE_PRIMITIVE("string-length", string_length, subr1, (SCM str))
 
 
 /*
-<doc  string-ref
+<doc R57RS string-ref
  * (string-ref string k)
  *
  * |String-ref| returns character k of string using zero-origin indexing
@@ -471,7 +471,7 @@ DEFINE_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index))
 
 
 /*
-<doc  string-set!
+<doc R57RS string-set!
  * (string-set! string k char)
  *
  * |String-set!| stores |char| in element |k| of |string| and returns
@@ -621,7 +621,7 @@ DEFINE_PRIMITIVE("string-ci>=?", strgei, subr2, (SCM s1, SCM s2))
 
 
 /*
-<doc substring
+<doc R57RS substring
  * (substring string start end)
  *
  * |String| must be a string, and |start| and |end| must be exact integers

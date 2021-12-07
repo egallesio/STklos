@@ -1257,7 +1257,7 @@ SCM STk_Cstr2number(char *str, long base)
 
 
 /*
-<doc number? complex? real? rational? integer?
+<doc R57RS number? complex? real? rational? integer?
  * (number? obj)
  * (complex? obj)
  * (real? obj)
@@ -1379,7 +1379,7 @@ DEFINE_PRIMITIVE("integer?", integerp, subr1, (SCM x))
 
 
 /*
-<doc  exact? inexact?
+<doc R57RS exact? inexact?
  * (exact? z)
  * (inexact? z)
  *
@@ -1417,7 +1417,7 @@ DEFINE_PRIMITIVE("inexact?", inexactp, subr1, (SCM z))
 
 
 /*
-<doc  = < > <= >=
+<doc R57RS = < > <= >=
  * (= z1 z2 z3 ...)
  * (< x1 x2 x3 ...)
  * (> x1 x2 x3 ...)
@@ -1480,9 +1480,21 @@ COMPARE_NUM2(numge,   STk_realp,    >=)
 
 
 /*
-<doc finite? infinite?  zero? positive? negative? odd? even?
+<doc R7RS finite? infinite?
  * (finite? z)
  * (infinite? z)
+ *
+ * These numerical predicates test a number for finiteness,
+ * returning |#t| or |#f|.
+ * @lisp
+ * (finite? -inf.0)            ==>  #f
+ * (infinite? +inf.0)          ==>  #t
+ * @end lisp
+doc>
+*/
+
+/*
+<doc R57RS zero? positive? negative? odd? even?
  * (zero? z)
  * (positive? x)
  * (negative? x)
@@ -1494,8 +1506,6 @@ COMPARE_NUM2(numge,   STk_realp,    >=)
  * @lisp
  * (positive? +inf.0)          ==>  #t
  * (negative? -inf.0)          ==>  #t
- * (finite? -inf.0)            ==>  #f
- * (infinite? +inf.0)          ==>  #t
  * @end lisp
 doc>
  */
@@ -1661,7 +1671,7 @@ DEFINE_PRIMITIVE("nan?", nanp, subr1, (SCM z))
 
 
 /*
-<doc  max min
+<doc R57RS max min
  * (max x1 x2 ...)
  * (min x1 x2 ...)
  *
@@ -1736,7 +1746,7 @@ DEFINE_PRIMITIVE("min", min, vsubr, (int argc, SCM *argv))
 
 
 /*
-<doc    + *
+<doc R57RS  + *
  * (+ z1 ...)
  * (* z1 ...)
  *
@@ -1899,7 +1909,7 @@ DEFINE_PRIMITIVE("*", multiplication, vsubr, (int argc, SCM *argv))
 }
 
 /*
-<doc   - /
+<doc R57RS - /
  * (- z)
  * (- z1 z2)
  * (/ z)
@@ -2043,7 +2053,7 @@ DEFINE_PRIMITIVE("/", division, vsubr, (int argc, SCM *argv))
 
 
 /*
-<doc  abs
+<doc R57RS abs
  * (abs x)
  *
  * |Abs| returns the absolute value of its argument.
@@ -2076,7 +2086,7 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
 
 
 /*
-<doc  quotient remainder modulo
+<doc R57RS quotient remainder modulo
  * (quotient n1 n2)
  * (remainder n1 n2)
  * (modulo n1 n2)
@@ -2211,7 +2221,7 @@ DEFINE_PRIMITIVE("modulo", modulo, subr2, (SCM n1, SCM n2))
 
 
 /*
-<doc  gcd lcm
+<doc R57RS gcd lcm
  * (gcd n1 ...)
  * (lcm n1 ...)
  *
@@ -2260,7 +2270,7 @@ DEFINE_PRIMITIVE("lcm", lcm, vsubr, (int argc, SCM *argv))
 }
 
 /*
-<doc  numerator denominator
+<doc R57RS numerator denominator
  * (numerator q)
  * (denominator q)
  *
@@ -2302,7 +2312,7 @@ DEFINE_PRIMITIVE("denominator", denominator, subr1, (SCM q))
 }
 
 /*
-<doc  floor ceiling truncate round
+<doc R57RS floor ceiling truncate round
  * (floor x)
  * (ceiling x)
  * (truncate x)
@@ -2427,7 +2437,7 @@ DEFINE_PRIMITIVE("round", round, subr1, (SCM x))
 }
 
 /*
-<doc  exp log sin cos tan asin acos atan
+<doc R57RS exp log sin cos tan asin acos atan
  * (exp z)
  * (log z)
  * (log z b)
@@ -2759,7 +2769,7 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
 
 
 /*
-<doc expt
+<doc R57RS expt
  * (expt z1 z2)
  *
  * Returns |z1| raised to the power |z2|.
@@ -2829,7 +2839,7 @@ DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
 }
 
 /*
-<doc  make-rectangular make-polar real-part imag-part magnitude angle
+<doc R57RS make-rectangular make-polar real-part imag-part magnitude angle
  * (make-rectangular x1 x2)
  * (make-polar x3 x)
  * (real-part z)
@@ -2940,7 +2950,22 @@ DEFINE_PRIMITIVE("make-polar", make_polar, subr2, (SCM a, SCM m))
 
 
 /*
-<doc exact->inexact inexact->exact
+<doc R7RS exact inexact
+ * (exact z)
+ * (inexact z)
+ *
+ * |Inexact| returns an inexact representation of z.
+ * The value returned is the inexact number that is numerically closest to
+ * the argument.
+ * |Exact| returns an exact representation of z.
+ * The value returned is the exact number that is numerically closest to
+ * the argument.
+ * These procedures were called |exact->inexact| and  |inexact->exact| in
+ * R5RS.
+doc>
+*/
+/*
+<doc R5RS exact->inexact inexact->exact
  * (exact->inexact z)
  * (inexact->exact z)
  *
@@ -2950,6 +2975,7 @@ DEFINE_PRIMITIVE("make-polar", make_polar, subr2, (SCM a, SCM m))
  * |Inexact->exact| returns an exact representation of z.
  * The value returned is the exact number that is numerically closest to
  * the argument.
+ * These procedures were renamed to |inexact| and |exact| in R7RS.
 doc>
 */
 DEFINE_PRIMITIVE("exact->inexact", ex2inex, subr1, (SCM z))
@@ -2988,7 +3014,7 @@ DEFINE_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z))
 }
 
 /*
-<doc  number->string
+<doc R57RS number->string
  * (number->string z)
  * (number->string z radix)
  *
@@ -3039,7 +3065,7 @@ DEFINE_PRIMITIVE("number->string", number2string, subr12, (SCM n, SCM base))
 }
 
 /*
-<doc  string->number
+<doc R57RS string->number
  * (string->number string)
  * (string->number string radix)
  *

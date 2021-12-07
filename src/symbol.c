@@ -91,7 +91,7 @@ SCM STk_intern(char *name)
 
 DEFINE_PRIMITIVE("symbol?", symbolp, subr1, (SCM x))
 /*
-<doc  symbol?
+<doc R57RS symbol?
  * (symbol? obj)
  *
  * Returns |#t| if obj is a symbol, otherwise returns |#f|.
@@ -111,7 +111,7 @@ doc>
 }
 
 /*
-<doc  symbol->string
+<doc R57RS symbol->string
  * (symbol->string string)
  *
  * Returns the name of |symbol| as a string. If the symbol was part of an
@@ -146,7 +146,7 @@ DEFINE_PRIMITIVE("symbol->string", symbol2string, subr1, (SCM symbol))
 }
 
 /*
-<doc  string->symbol
+<doc R57RS string->symbol
  * (string->symbol string)
  *
  * Returns the symbol whose name is |string|. This procedure can create

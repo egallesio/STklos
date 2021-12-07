@@ -59,7 +59,7 @@ static void limit_max_equal_calls(void) {
 
 DEFINE_PRIMITIVE("not", not, subr1, (SCM x))
 /*
-<doc not
+<doc R57RS not
  * (not obj)
  *
  * Not returns |#t| if |obj| is false, and returns |#f| otherwise.
@@ -81,7 +81,7 @@ doc>
 
 DEFINE_PRIMITIVE("boolean?", booleanp, subr1, (SCM x))
 /*
-<doc  boolean?
+<doc R57RS boolean?
  * (boolean? obj)
  *
  * |Boolean?| returns |#t| if |obj| is either |#t| or |#f| and returns
@@ -100,7 +100,7 @@ doc>
 
 
 /*
-<doc  eqv?
+<doc R57RS eqv?
  * (eqv? obj1 obj2)
  *
  * The |eqv?| procedure defines a useful equivalence relation on objects.
@@ -265,7 +265,7 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
 
 
 /*
-<doc eq?
+<doc R57RS eq?
  * (eq? obj1 obj2)
  *
  * |Eq?| is similar to |eqv?| except that in some cases it is capable of
@@ -319,7 +319,7 @@ DEFINE_PRIMITIVE("eq?", eq, subr2, (SCM x,SCM y))
 
 
 /*
-<doc  equal?
+<doc R57RS equal?
  * (equal? obj1 obj2)
  *
  * |Equal?| recursively compares the contents of pairs, vectors, and

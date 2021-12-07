@@ -656,7 +656,7 @@ void STk_set_line_buffered_mode(SCM port)
 \*=============================================================================*/
 
 /*
-<doc open-input-file
+<doc R57RS open-input-file
  * (open-input-file filename)
  *
  * Takes a string naming an existing file and returns an input port capable
@@ -681,7 +681,7 @@ DEFINE_PRIMITIVE("open-binary-input-file", open_binary_ifile, subr1, (SCM filena
 }
 
 /*
-<doc open-output-file
+<doc R57RS open-output-file
  * (open-output-file filename)
  *
  * Takes a string naming an output file to be created and returns an output
@@ -891,7 +891,7 @@ static SCM load_file(SCM filename)
 
 
 /*
-<doc load
+<doc R57RS load
  * (load filename)
  *
  * |Filename| should be a string naming an existing file containing Scheme

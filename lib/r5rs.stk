@@ -142,7 +142,7 @@ doc>
 |#
 
 #|
-<doc syntax set!
+<doc R57RS syntax set!
  * (set! <variable> <expression>)
  * (set! (<proc> <arg> ...) <expression>)
  *
@@ -193,7 +193,7 @@ doc>
 
 
 #|
-<doc syntax if
+<doc R57RS syntax if
  * (if <test> <consequent> <alternate>)
  * (if <test> <consequent>)
  *
@@ -216,7 +216,7 @@ doc>
 
 
 #|
-<doc syntax cond
+<doc R57RS syntax cond
  * (cond <clause1> <clause2> ...)
  *
  * In a |cond|, each |<clause>| should be of the form
@@ -275,7 +275,7 @@ doc>
 ;;FIXME: mv case documentation in r7rs??
 
 #|
-<doc r7rs-syntax case
+<doc R57RS r7rs-syntax case
  * (case <key> <clause1> <clause2> ...)
  *
  * In a |case|, each |<clause>| should have the form
@@ -354,7 +354,7 @@ doc>
 
 
 #|
-<doc syntax let
+<doc R57RS syntax let
  * (let <bindings> <body>)
  * (let <variable> <bindings> <body>)
  *
@@ -412,7 +412,7 @@ doc>
 |#
 
 #|
-<doc syntax let*
+<doc R57RS syntax let*
  * (let* <bindings> <body>)
  *
  * In a |let*|, |<bindings>| should have the same form as in a |let| (however, a
@@ -437,7 +437,7 @@ doc>
 |#
 
 #|
-<doc syntax letrec
+<doc R57RS syntax letrec
  * (letrec <bindings> <body>)
  *
  * <bindings> should have the form as in |let|.
@@ -467,7 +467,7 @@ doc>
 |#
 
 #|
-<doc syntax begin
+<doc R57SR syntax begin
  * (begin <expression1> <expression2> ...)
  *
  * The |<expression>|s are evaluated sequentially from left to right, and the
@@ -488,7 +488,7 @@ doc>
 |#
 
 #|
-<doc syntax do
+<doc R57RS syntax do
  * (do [[<var1> <init1> <step1>] ...] [<test> <expr> ...] <command> ...)
  *
  * |Do| is an iteration construct.  It specifies a set of variables to be
@@ -539,7 +539,7 @@ doc>
 |#
 
 #|
-<doc syntax quasiquote
+<doc R57RS syntax quasiquote
  * (quasiquote <template>)
  * `<template>
  *
@@ -640,7 +640,7 @@ doc>
 |#
 
 #|
-<doc eval
+<doc R57RS eval
  * (eval expression environment)
  * (eval expression)
  *
@@ -667,7 +667,7 @@ doc>
 
 
 #|
-<doc caar cdar cadr cddr caaar cdaar cadar cddar caadr cdadr caddr cdddr caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr
+<doc R57RS caar cdar cadr cddr caaar cdaar cadar cddar caadr cdadr caddr cdddr caaaar cdaaar cadaar cddaar caadar cdadar caddar cdddar caaadr cdaadr cadadr cddadr caaddr cdaddr cadddr cddddr
  * (caar pair)
  * (cadr pair)
  * ...
@@ -715,7 +715,7 @@ doc>
 
 
 #|
-<doc with-input-from-file with-output-to-file
+<doc R57RS with-input-from-file with-output-to-file
  * (with-input-from-file string thunk)
  * (with-output-to-file string thunk)
  *
@@ -866,7 +866,7 @@ doc>
   (%make-with-port current-error-port "w"))
 
 #|
-<doc call-with-input-file call-with-output-file
+<doc R57RS call-with-input-file call-with-output-file
  * (call-with-input-file string proc)
  * (call-with-output-file string proc)
  *
@@ -901,7 +901,7 @@ doc>
 
 
 #|
-<doc rationalize
+<doc R57RS rationalize
  * (rationalize x y)
  *
  * Rationalize returns the simplest rational number differing from |x|
@@ -954,7 +954,7 @@ doc>
 
 
 #|
-<doc call-with-values
+<doc R57RS call-with-values
  * (call-with-values producer consumer)
  *
  * Calls its producer argument with no values and a continuation that,

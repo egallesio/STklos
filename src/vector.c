@@ -147,7 +147,7 @@ SCM STk_makevect(int len, SCM init)
 /*===========================================================================*/
 
 /*
-<doc  vector?
+<doc R57RS vector?
  * (vector? obj)
  *
  * Returns |#t| if |obj| is a vector, otherwise returns |#f|.
@@ -160,7 +160,7 @@ DEFINE_PRIMITIVE("vector?", vectorp, subr1, (SCM obj))
 
 
 /*
-<doc  make-vector
+<doc R57RS make-vector
  * (make-vector k)
  * (make-vector k fill)
  *
@@ -179,7 +179,7 @@ DEFINE_PRIMITIVE("make-vector", make_vector, subr12, (SCM len, SCM init))
 
 
 /*
-<doc  vector
+<doc R57RS vector
  * (vector obj ...)
  *
  * Returns a newly allocated vector whose elements contain the given arguments.
@@ -203,7 +203,7 @@ DEFINE_PRIMITIVE("vector", vector, vsubr, (int argc, SCM *argv))
 
 
 /*
-<doc  vector-length
+<doc R57RS vector-length
  * (vector-length vector)
  *
  * Returns the number of elements in |vector| as an exact integer.
@@ -218,7 +218,7 @@ DEFINE_PRIMITIVE("vector-length", vector_length, subr1, (SCM v))
 
 
 /*
-<doc  vector-ref
+<doc R57RS vector-ref
  * (vector-ref vector k)
  *
  * |k| must be a valid index of |vector|. |Vector-ref| returns the contents of
@@ -248,7 +248,7 @@ DEFINE_PRIMITIVE("vector-ref", vector_ref, subr2, (SCM v, SCM index))
 
 
 /*
-<doc  vector-set!
+<doc R57RS vector-set!
  * (vector-set! vector k obj)
  *
  * |k| must be a valid index of |vector|. |Vector-set!| stores |obj| in element
@@ -375,7 +375,7 @@ DEFINE_PRIMITIVE("vector-copy", vector_copy, vsubr, (int argc, SCM *argv))
 
 
 /*
-<doc  vector-append
+<doc R7RS vector-append
  * (vector-append vector ...)
  *
  * Returns a newly allocated vector whose elements are the

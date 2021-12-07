@@ -120,7 +120,7 @@ static SCM verify_port(SCM port, int mode)
 
 
 /*
-<doc  input-port? output-port?
+<doc R57RS input-port? output-port?
  * (input-port? obj)
  * (output-port? obj)
  *
@@ -159,7 +159,7 @@ DEFINE_PRIMITIVE("binary-port?", binary_portp, subr1, (SCM port))
 
 
 /*
-<doc R7RS port?
+<doc R57RS port?
  * (port? obj)
  *
  * Returns |#t| if |obj| is an input port or an output port,
@@ -188,7 +188,7 @@ DEFINE_PRIMITIVE("interactive-port?", interactive_portp, subr1, (SCM port))
 
 
 /*
-<doc  current-input-port current-output-port
+<doc R57RS current-input-port current-output-port
  * (current-input-port obj)
  * (current-output-port obj)
  *
@@ -196,7 +196,7 @@ DEFINE_PRIMITIVE("interactive-port?", interactive_portp, subr1, (SCM port))
 doc>
  */
 /*
-<doc EXT current-error-port
+<doc R7RS current-error-port
  * (current-error-port obj)
  *
  * Returns the current default error port.
@@ -236,7 +236,7 @@ static SCM STk_set_current_error_port(SCM port)
 \*=============================================================================*/
 
 /*
-<doc read
+<doc R57RS read
  * (read)
  * (read port)
  *
@@ -303,7 +303,7 @@ DEFINE_PRIMITIVE("%read", scheme_read_cst, subr01, (SCM port))
 
 
 /*
-<doc  read-char
+<doc R57RS read-char
  * (read-char)
  * (read-char port)
  *
@@ -485,7 +485,7 @@ DEFINE_PRIMITIVE("read-byte", read_byte, subr01, (SCM port))
 }
 
 /*
-<doc  peek-char
+<doc R57RS peek-char
  * (peek-char)
  * (peek-char port)
  *
@@ -539,7 +539,7 @@ DEFINE_PRIMITIVE("peek-byte", peek_byte, subr01, (SCM port))
 
 
 /*
-<doc  eof-object?
+<doc R57RS eof-object?
  * (eof-object? obj)
  *
  * Returns |#t| if |obj| is an end of file object, otherwise returns |#f|.
@@ -552,7 +552,7 @@ DEFINE_PRIMITIVE("eof-object?", eof_objectp, subr1, (SCM obj))
 
 
 /*
-<doc EXT eof-object
+<doc R7RS eof-object
  * (eof-object)
  *
  * ,(index "#eof")
@@ -567,7 +567,7 @@ DEFINE_PRIMITIVE("eof-object", eof_object, subr0, (void))
 
 
 /*
-<doc  char-ready?
+<doc R57RS char-ready?
  * (char-ready?)
  * (char-ready? port)
  *
@@ -610,7 +610,7 @@ DEFINE_PRIMITIVE("u8-ready?", u8_readyp, subr01, (SCM port))
 
 
 /*
-<doc  write
+<doc R57RS write
  * (write obj)
  * (write obj port)
  *
@@ -670,7 +670,7 @@ DEFINE_PRIMITIVE("write*", write_star, subr12, (SCM expr, SCM port))
 }
 
 /*
-<doc display
+<doc r57RS display
  * (display obj)
  * (display obj port)
  *
@@ -728,7 +728,7 @@ doc>
 
 
 /*
-<doc  newline
+<doc R57RS newline
  * (newline)
  * (newline port)
  *
@@ -748,7 +748,7 @@ DEFINE_PRIMITIVE("newline", newline, subr01, (SCM port))
 
 
 /*
-<doc  write-char
+<doc R57RS write-char
  * (write-char char)
  * (write-char char port)
  *
@@ -1499,7 +1499,7 @@ DEFINE_PRIMITIVE("copy-port", copy_port, subr23, (SCM p1, SCM p2, SCM max))
 }
 
 /*
-<doc EXT flush-output-port
+<doc R7RS flush-output-port
  * (flush-output-port)
  * (flush-output-port port)
  *

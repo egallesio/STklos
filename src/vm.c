@@ -432,7 +432,7 @@ static int add_global(SCM ref)
 \*===========================================================================*/
 
 /*
-<doc  apply
+<doc R57RS apply
  * (apply proc arg1 ... args)
  *
  * |Proc| must be a procedure and |args| must be a list. Calls |proc| with the
@@ -565,7 +565,7 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
  *
 \*===========================================================================*/
 /*
-<doc values
+<doc R57RS values
  * (values obj ...)
  *
  * Delivers all of its arguments to its continuation.
