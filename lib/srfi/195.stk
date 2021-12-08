@@ -1,6 +1,6 @@
 
 (define-module srfi/195
-  (import STklos)
+  (import SCHEME)
   (export box
           box?
           unbox

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 15-Nov-2021 19:48 (eg)
+;;;; Last file update:  8-Dec-2021 10:40 (eg)
 ;;;;
 
 
@@ -234,7 +234,7 @@
     (192 "Port Positioning")
     (193 "Command line")
     ;; 194 Random data generators
-    (195 "Multiple-value boxes" () "srfi-195")
+    (195 "Multiple-value boxes")
     (196 "Range Objects" () "srfi-196")
     ;; 197  Pipeline Operators
     ;; 198  ...... withdrawn
