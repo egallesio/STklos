@@ -36,7 +36,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 25-Nov-2021 17:09 (eg)
+# Last file update:  8-Dec-2021 15:14 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -380,8 +380,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
-	      scheme srfi                       \
+SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
+          scheme srfi
 
 STKLOS_FLAGS = --no-init-file --case-sensitive
 scheme_BOOT = assembler.stk \
@@ -451,9 +451,7 @@ SRC_STK = bigloo-support.stk  \
           srfi-94.stk         \
           srfi-96.stk         \
           srfi-100.stk        \
-          srfi-113.stk        \
           srfi-117.stk        \
-          srfi-128.stk        \
           srfi-129.stk        \
           srfi-130.stk        \
           srfi-134.stk        \
@@ -502,9 +500,7 @@ scheme_OBJS = compfile.ostk     \
           srfi-94.ostk          \
           srfi-96.ostk          \
           srfi-100.ostk         \
-          srfi-113.ostk         \
           srfi-117.ostk         \
-          srfi-128.ostk         \
           srfi-129.ostk         \
           srfi-130.ostk         \
           srfi-134.ostk         \
@@ -884,7 +880,6 @@ uninstall-am: uninstall-schemeDATA uninstall-schemelibDATA
 	uninstall-hook uninstall-schemeDATA uninstall-schemelibDATA
 
 .PRECIOUS: Makefile
-
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos

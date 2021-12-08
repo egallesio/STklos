@@ -20,11 +20,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 25-Nov-2021 17:09 (eg)
+# Last file update:  8-Dec-2021 15:14 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
-	      scheme srfi                       \
-
+SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
+          scheme srfi
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
@@ -97,9 +96,7 @@ SRC_STK = bigloo-support.stk  \
           srfi-94.stk         \
           srfi-96.stk         \
           srfi-100.stk        \
-          srfi-113.stk        \
           srfi-117.stk        \
-          srfi-128.stk        \
           srfi-129.stk        \
           srfi-130.stk        \
           srfi-134.stk        \
@@ -149,9 +146,7 @@ scheme_OBJS = compfile.ostk     \
           srfi-94.ostk          \
           srfi-96.ostk          \
           srfi-100.ostk         \
-          srfi-113.ostk         \
           srfi-117.ostk         \
-          srfi-128.ostk         \
           srfi-129.ostk         \
           srfi-130.ostk         \
           srfi-134.ostk         \
