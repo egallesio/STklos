@@ -234,7 +234,7 @@
     (192 "Port Positioning")
     (193 "Command line")
     ;; 194 Random data generators
-    (195 "Multiple-value boxes")
+    (195 "Multiple-value boxes" () "srfi-195")
     (196 "Range Objects" () "srfi-196")
     ;; 197  Pipeline Operators
     ;; 198  ...... withdrawn
