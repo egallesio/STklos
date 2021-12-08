@@ -1643,6 +1643,24 @@ doc>
         value)))
 
 
+#|
+<doc EXT define-constant
+ * (define-constant name expr)
+ *
+ * Evaluates the expression |expr|, then creates a new, non-mutable
+ * binding for |name| with the resulting value.
+ *
+ * (define-constant a 'hello)
+ * a                 => 'hello
+ * (set! a 'goodbye) => error
+ * (define q 2)      => ok (it's a new binding)
+doc>
+|#
+(define-macro (define-constant name expr)
+  `(begin (define ,name ,expr)
+          (module-lock-binding! ',name)))
+
+
 ;;;; ======================================================================
 ;;;;
 ;;;; SRFIs support
