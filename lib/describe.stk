@@ -61,9 +61,12 @@
      ((eof-object? x)   (format port "the end-of-file object"))
      ((struct-type? x)  (format port "the type structure named ~A"
                                 (struct-type-name x)))
-     ((library? x)      (format port "an R7RS library named ~A"
-                                (%symbol->library-name (module-name x))))
-     ((module? x)       (format port "a module named ~A" (module-name x)))
+     ((module? x)       (format port "a module named ~A, where new bindings are~A allowed"
+                                (module-name x)
+                                (if (module-define-allowed? x) "" " not")))
+     ((library? x)      (format port "an R7RS library named ~A, where new bindings are~A allowed"
+                                (%symbol->library-name (module-name x))
+                                (if (module-define-allowed? x) "" " not")))
      ((port? x)         (format port "an ~a ~a port"
                                 (if (input-port? x) "input" "output")
                                 (if (binary-port? x) "binary" "textual")))
