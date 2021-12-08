@@ -48,7 +48,7 @@
 ;;;;    Creation date: 13-Nov-2020 05:21 (jpellegrini)
 ;;;; Last file update: 13-Nov-2020 06:40 (jpellegrini)
 ;;;;
-(define-module SRFI-127
+(define-module srfi/127
   
   (export generator->lseq lseq? lseq=?)
   (export lseq-car lseq-first lseq-cdr lseq-rest lseq-ref lseq-take lseq-drop)
@@ -308,7 +308,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-127)
-(provide "srfi-127")
+(provide "srfi/127")
