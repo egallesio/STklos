@@ -24,7 +24,7 @@
 #======================================================================
 
 COMP ?= ../../utils/tmpcomp
-STKLOS_BINARY ?= ../src/stklos
+STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 
@@ -163,5 +163,5 @@ uninstall-hook:
 	rmdir $(srfidir) || true
 
 doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img \
-		-f ../doc/extract-doc $(SOURCES) >> $(DOCDB)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
+		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)

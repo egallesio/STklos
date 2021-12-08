@@ -415,8 +415,6 @@ SRC_OSTK = 1.ostk   \
             223.ostk
 
 
-
-
 #
 # SRFIs written in C and Scheme
 #
@@ -693,7 +691,7 @@ uninstall-am: uninstall-srfiDATA
 
 
 COMP ?= ../../utils/tmpcomp
-STKLOS_BINARY ?= ../src/stklos
+STKLOS_BINARY ?= ../../src/stklos
 
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
@@ -735,8 +733,8 @@ uninstall-hook:
 	rmdir $(srfidir) || true
 
 doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img \
-		-f ../doc/extract-doc $(SOURCES) >> $(DOCDB)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
+		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
