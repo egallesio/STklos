@@ -718,7 +718,6 @@ STKLOS_BINARY ?= ../src/stklos
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c
 132.$(SO): 132-incl.c 132.c
-133.$(SO): 133-incl.c 133.c
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
 
