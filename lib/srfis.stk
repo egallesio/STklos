@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update:  8-Dec-2021 10:40 (eg)
+;;;; Last file update:  8-Dec-2021 10:48 (eg)
 ;;;;
 
 
@@ -126,7 +126,7 @@
     ;; 85  ....... withdrawn
     ;; 86  MU and NU simulating VALUES & CALL-WITH-VALUES
     (87 "=> in case clauses")
-    (88 "Keyword Objects" () "srfi-88")
+    (88 "Keyword Objects")
     (89 "Optional Positional and Named Parameters" () "srfi-89")
     ;; 90  Extensible hash table constructor
     ;; 91  ....... withdrawn
