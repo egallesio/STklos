@@ -51,6 +51,7 @@
   (load "test-utf8.stk")
   (load "test-misc.stk")
   (load "test-r5rs-pitfall.stk")
+  (load "test-unmutable-bindings.stk")
   )
 
 

@@ -534,3 +534,31 @@ doc>
 |#
 (define-macro (in-module mod symb . default)
   `(apply symbol-value* ',symb (find-module ',mod) ',default))
+
+;;=============================================================================
+;;
+;;                            MODULE-LOCK-SYMBOLS!
+;;
+;;=============================================================================
+
+#|
+<doc EXT module-lock-bindings!
+ * (module-lock-bindings! mod)
+ *
+ * Lock all symbol bindins  module |mod|, so they will all be unmutable.
+ * @lisp
+ * (define-module mod (define a 1) (define b 2))
+ * (select-module mod)
+ * (module-lock-bindings! (find-module 'mod))
+ * (set! a 10)   => error
+ * (set! b 20)   => error
+ * (define c 20) => OK, c was not locked when module-lock-bindings was called.
+ * (set! c 50)   => OK for the same reason
+ * (define a -1) => OK, a is a *new* binding, and define is allowed
+ * (set! a -2)   => OK, a is a *new* binding!
+ * @end lisp
+|#
+(define (module-lock-bindings! mod)
+  (unless (module? mod) (error "bad module ~S" mod))
+  (for-each (lambda (sym) (module-lock-binding! sym mod))
+            (module-symbols mod)))

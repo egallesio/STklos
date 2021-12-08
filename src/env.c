@@ -71,7 +71,7 @@ struct module_obj {
   SCM name;                     /* module name */
   SCM exported_symbols;         /* symbols declared as exported */
   SCM imports;                  /* imported modules */
-  int is_library;               /* 1 if module is a R7RS library; 0  */
+  int is_library;               /* 1 if module is a R7RS library; 0 otherwise */
   struct hash_table_obj hash;   /* The associated hash table */
 };
 
@@ -169,6 +169,118 @@ void STk_export_all_symbols(SCM module)
     MODULE_EXPORTS(module) = make_export_list(STk_hash_keys(&MODULE_HASH_TABLE(module)));
 }
 
+
+/*===========================================================================*\
+ *                                  Mutability
+\*===========================================================================*/
+
+/*
+<doc EXT module-define-allowed?
+ * (module-define-allowed? obj)
+ *
+ * Returns |#t| if |obj| is a module where new bindings can be added,
+ * otherwise returns |#f|. The ,(tt SCHEME) module is never mutable.
+ * @lisp
+ * (module-define-allowed? "abc")                 => #f
+ * (module-define-allowed? (find-module 'STklos)) => #t
+ * (module-define-allowed? (find-module 'SCHEME)) => #f
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("module-define-allowed?", module_define_allowedp, subr1, (SCM obj))
+{
+  return MAKE_BOOLEAN(MODULEP(obj) && !(BOXED_INFO(obj) & MODULE_CONST));
+}
+
+
+/*
+<doc EXT binding-mutable?
+ * (binding-mutable? sym)
+ * (binding-mutable? sym mod)
+ *
+ * Locks thebinding of symbol |sym| in module |mod| so it cannot be
+ * changed. If |mod| is not informed, the current module will be used.
+doc>
+*/
+DEFINE_PRIMITIVE("binding-mutable?", module_binding_mutablep, subr12, (SCM sym,
+                                                                       SCM mod))
+{
+    if (mod && (!MODULEP(mod))) STk_error("bad module ~S", mod);
+    if (!SYMBOLP(sym))          STk_error("bad symbol ~S", sym);
+    int i;
+    SCM module = mod ? mod : STk_current_module();
+    SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(module),
+                                    sym,
+                                    &i);
+    return MAKE_BOOLEAN (!(BOXED_INFO(res) & CONS_CONST));
+}
+
+/*
+<doc EXT module-lock-define!
+ * (module-lock-define! mod)
+ *
+ * Turns |mod| into a module where new bindings are not allowed.
+ * @lisp
+ * (define-module v  (define zz -1) (define ww -2))
+ * (select-module v)
+ * (define xx -3)
+ * (module-define-allowed?) => #t
+ * (module-lock-define! (find-module 'v))
+ * (module-define-allowed?) => #f
+ * (define yy -4) => error
+ * (set! xx 10) => ok, xx is not a new binding.
+ * @end lisp
+ *
+ * For a way to disallow mutation of individual bindings (or of all
+ * bindings of a module), see the procedures |module-lock-symbol!|
+ * and |module-lock-symbols!|.
+doc>
+*/
+
+DEFINE_PRIMITIVE("module-lock-define!",module_lock_define, subr1, (SCM obj))
+{
+    if (!MODULEP(obj)) STk_error("bad module ~S", obj);
+    BOXED_INFO(obj) = BOXED_INFO(obj) | MODULE_CONST;
+    return STk_void;
+}
+
+/*
+<doc module-lock-binding!
+ * (module-lock-binding! sym)
+ * (module-lock-binding! sym mod)
+ *
+ * Makes the symbol |sym| in module |mod| unmutable. The module is still
+ * mutable (new bindigs can be added, and other symbols can be mutated),
+ * but changing the value of |sym| is not possible anymore.
+ * If |mod| is not specified, the current module is used.
+ *
+ * @lisp
+ * (define-module mod (define a 1) (define b 2))
+ * (module-lock-binding! 'a (find-module 'mod))
+ * (select-module mod)
+ * (binding-mutable? 'a) => #f
+ * (set! a 10)           => error
+ * (set! b 20)           => OK
+ * (define a -1)         => OK, a is a *new* binding, and define is allowed
+ * (set! a -2)           => OK, a is a *new* binding
+ * @end lisp
+doc>
+ */
+DEFINE_PRIMITIVE("module-lock-binding!", module_lock_binding, subr12, (SCM sym,
+                                                                       SCM mod))
+
+{
+    if (mod && (!MODULEP(mod))) STk_error("bad module ~S", mod);
+    if (!SYMBOLP(sym))          STk_error("bad symbol ~S", sym);
+    SCM module = mod ? mod : STk_current_module();
+    int i;
+    SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(module),
+                                    sym,
+                                    &i);
+    BOXED_INFO(res) = BOXED_INFO(res) | CONS_CONST;
+    return STk_void;
+}
+
 /* ==== Undocumented primitives ==== */
 
 DEFINE_PRIMITIVE("%create-module", create_module, subr1, (SCM name))
@@ -246,7 +358,7 @@ DEFINE_PRIMITIVE("%module-exports-set!", module_exports_set, subr2,
  * @lisp
  * (module? (find-module 'ST\klos))  => #t
  * (module? 'ST\klos)                => #f
- * (module? 123 'no)                => no
+ * (module? 123 'no)                 => no
  * @end lisp
 doc>
 */
@@ -260,6 +372,15 @@ DEFINE_PRIMITIVE("module?", modulep, subr1, (SCM obj))
  * (library? object)
  *
  * Returns |#t| if |object| is a module defined as a R7RS library and |#f| otherwise.
+ * @lisp
+ * (define-module a)
+ * (define-library b)
+ * 
+ * (module? (find-module 'a))   => #t
+ * (module? (find-module 'b))   => #t
+ * (library? (find-module 'a))  => #f
+ * (library? (find-module 'b))  => #t
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("library?", libraryp, subr1, (SCM obj))
@@ -426,7 +547,8 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
   // This function is called to populate the Scheme module with all the
   // symbols defined in STklos module. This permits to have a copy of the
   // original bindings that can reliably be used by the runtime.
-  // FIXME: the bindings in the Scheme module should be immutable. 
+  // The Scheme module will later be made immutable.
+
   for (SCM lst = STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module));
        !NULLP(lst);
        lst = CDR(lst)) {
@@ -471,7 +593,20 @@ SCM STk_clone_frame(SCM f)
 
 void STk_define_variable(SCM symbol, SCM value, SCM module)
 {
-  STk_hash_set_variable(&MODULE_HASH_TABLE(module), symbol, value, TRUE);
+  if (BOXED_INFO(module) & MODULE_CONST)      
+    STk_error("new bindings not allowed in module ~S", MODULE_NAME(module));
+  else {
+    STk_hash_set_variable(&MODULE_HASH_TABLE(module), symbol, value, TRUE);
+    /* FIXME: inefficient? We're getting the variable again. We should change
+              STk_hash_set_variable so it will accept a mutability flag! :) */
+    int i;
+    SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(module),
+                                    symbol,
+                                    &i);
+    /* If this was an old binding, it needs to be set as mutable, since we're
+       redefining it */
+    BOXED_INFO(res) = BOXED_INFO(res) &(~CONS_CONST);
+  }
 }
 
 
@@ -621,6 +756,12 @@ int STk_late_init_env(void)
   /* ==== User primitives ==== */
   ADD_PRIMITIVE(modulep);
   ADD_PRIMITIVE(libraryp);
+
+  ADD_PRIMITIVE(module_define_allowedp);
+  ADD_PRIMITIVE(module_binding_mutablep);
+  ADD_PRIMITIVE(module_lock_define);
+  ADD_PRIMITIVE(module_lock_binding);
+
   ADD_PRIMITIVE(scheme_find_module);
   ADD_PRIMITIVE(current_module);
   ADD_PRIMITIVE(module_name);

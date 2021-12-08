@@ -512,6 +512,9 @@ struct frame_obj {
 #define FRAME_LOCAL(p, i)       (FRAME_LOCALS(p)[i])
 #define FRAMEP(p)               (BOXED_TYPE_EQ((p), tc_frame))
 
+/* MODULE_CONST is used to tell if define can be used in a module */
+#define MODULE_CONST            (1 << 0)
+
 /* modules are defined in env.c but are private */
 #define MODULEP(p)              (BOXED_TYPE_EQ((p), tc_module))
 

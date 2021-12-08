@@ -199,13 +199,15 @@
 ;;; may have the possibility to modify standard bindings.
 ;;; If a module needs to be sure to have the original bindings, it
 ;;; can import this module which will be visible before the STklos
-;;; module. Note that this is only partially true since bindings
-;;; in SCHEME module are mutable
+;;; module.
 ;;; Note that module SCHEME was already created before bootstrap
 (let ((STklos (find-module 'STklos))
       (SCHEME (find-module 'SCHEME)))
   (%populate-scheme-module)
-  (%module-exports-set! SCHEME (module-exports STklos)))
+  (%module-exports-set! SCHEME (module-exports STklos))
+  ;; make the SCHEME module completely unmutable:
+  (module-lock-define!  SCHEME)
+  (module-lock-bindings! SCHEME))
 
 ;; ----------------------------------------------------------------------
 ;;      option analysis and REPL launching

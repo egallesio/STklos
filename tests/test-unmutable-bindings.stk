@@ -1,0 +1,84 @@
+;;;;
+;;;; test-unmutable-bindings.stk   -- Tests on unmutable bindings
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini - <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date:  7-Dec-2021 23:04 (jpellegrini)
+;;;; Last file update:  7-Nov-2021 23:04 (jpellegrini)
+;;;;
+
+
+(define-module %%unmutability)
+
+(select-module %%unmutability)
+     (define a -1)
+     (define b -2)
+     (define c -3)
+(select-module STklos)
+
+
+(require "test")
+
+(test-section "Unmutability")
+
+
+(define %%mod (find-module '%%unmutability))
+
+(module-lock-binding! 'a %%mod)
+
+(test "unmutable binding.1" #f (binding-mutable? 'a %%mod))
+(test "unmutable binding.2" #t (binding-mutable? 'b %%mod))
+(test "unmutable binding.3" #t (binding-mutable? 'c %%mod))
+
+(select-module %%unmutability)
+(test/error "unmutable binding.4"  (set! a 10))
+(test "unmutable binding.5" (void) (set! b 20))
+(select-module STklos)
+(test "unmutable binding.6" -1 (in-module %%unmutability a))
+(test "unmutable binding.7" 20 (in-module %%unmutability b))
+
+(module-lock-bindings! %%mod)
+
+(test "unmutable binding.8"  #f (binding-mutable? 'a %%mod))
+(test "unmutable binding.9"  #f (binding-mutable? 'b %%mod))
+(test "unmutable binding.10" #f (binding-mutable? 'c %%mod))
+
+(select-module %%unmutability)
+(test/error "unmutable binding.11"  (set! a 100))
+(test/error "unmutable binding.12"  (set! b 100))
+(test/error "unmutable binding.13"  (set! c 100))
+(select-module STklos)
+
+(test "unmutable binding.14" -1 (in-module %%unmutability a))
+(test "unmutable binding.15" 20 (in-module %%unmutability b))
+(test "unmutable binding.16" -3 (in-module %%unmutability c))
+
+(test "unmutable SCHEME module.1"
+      #f
+      (module-define-allowed? (find-module 'SCHEME)))
+(test "unmutable SCHEME module.2"
+      #f
+      (binding-mutable? '/ (find-module 'SCHEME)))
+
+(select-module SCHEME)
+(test/error "unmutable SCHEME module.3" (set! + -))
+(select-module STklos)
+
+(test-section-end)

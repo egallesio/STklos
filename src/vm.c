@@ -75,6 +75,9 @@ static int debug_level = 0;     /* 0 is quiet, 1, 2, ... are more verbose */
 
 #define FX(v)                   (STk_fixval(v))
 
+EXTERN_PRIMITIVE("module-name", module_name, subr1, (SCM module));
+
+
 static Inline sigset_t get_signal_mask(void)
 {
   sigset_t new, old;
@@ -1172,9 +1175,10 @@ CASE(GLOBAL_SET) {
   }
   if (BOXED_INFO(ref) & CONS_CONST) {
     RELEASE_LOCK;
-    STk_error("cannot mute the value of ~S in ~S", orig_operand, vm->current_module);
-
+    STk_error("mutating ~S not allowed in module ~S", orig_operand,
+              STk_module_name(vm->current_module));
   }
+
   *BOX_VALUES(CDR(ref)) = vm->val;    /* sure that this box arity is 1 */
   /* patch the code for optimize next accesses */
   vm->pc[-1] = add_global(CDR(ref));
