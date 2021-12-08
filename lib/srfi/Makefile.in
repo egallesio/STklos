@@ -369,6 +369,7 @@ SRC_STK = 1.stk   \
             64.stk  \
             66.stk  \
             74.stk  \
+            88.stk  \
             141.stk \
             170.stk \
             180.stk \
@@ -404,6 +405,7 @@ SRC_OSTK = 1.ostk   \
             64.ostk  \
             66.ostk  \
             74.ostk  \
+            88.ostk  \
             141.ostk \
             170.ostk \
             180.ostk \
@@ -691,7 +693,7 @@ uninstall-am: uninstall-srfiDATA
 
 
 COMP ?= ../../utils/tmpcomp
-STKLOS_BINARY ?= ../../src/stklos
+STKLOS_BINARY ?= ../src/stklos
 
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
@@ -733,8 +735,8 @@ uninstall-hook:
 	rmdir $(srfidir) || true
 
 doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
-		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img \
+		-f ../doc/extract-doc $(SOURCES) >> $(DOCDB)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
