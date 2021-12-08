@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-208.stk         -- SRFI-208: NaN Procedures
+;;;; 208.stk         -- SRFI-208: NaN Procedures
 ;;;;
 ;;;; Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
 ;;;;
@@ -21,11 +21,11 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date:  4-Dec-2021 19:40
-;;;; Last file update:  4-Dec-2021 19:53 (jpellegrini)
+;;;; Last file update:  8-Dec-2021 10:56 (eg)
 ;;;;
 
 (define-module srfi/208
-  (import STklos)
+  (import SCHEME)
   (export make-nan
           nan-negative?
           nan-quiet?
