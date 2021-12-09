@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  9-Dec-2021 12:40 (eg)
+# Last file update:  9-Dec-2021 14:24 (eg)
 
 #======================================================================
 
@@ -58,10 +58,11 @@ SRC_STK   = 1.stk   \
             74.stk  \
             88.stk  \
             111.stk \
+            113.stk \
             127.stk \
+            128.stk \
             141.stk \
             161.stk \
-            170.stk \
             173.stk \
             174.stk \
             180.stk \
@@ -101,10 +102,11 @@ SRC_OSTK =  1.ostk   \
             74.ostk  \
             88.ostk  \
             111.ostk \
+            113.ostk \
             127.ostk \
+            128.ostk \
             141.ostk \
             161.ostk \
-            170.ostk \
             173.ostk \
             174.ostk \
             180.ostk \
@@ -114,7 +116,8 @@ SRC_OSTK =  1.ostk   \
             196.ostk \
             208.ostk \
             214.ostk \
-            215.ostk
+            215.ostk \
+            223.ostk
 
 #
 # SRFIs written in C and Scheme
@@ -155,6 +158,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 # Dependencies
 13.ostk: 14.ostk
+113.ostk:  128.ostk
 
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c
