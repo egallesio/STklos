@@ -52,6 +52,7 @@ SRC_STK   = 1.stk   \
             28.stk  \
             29.stk  \
             31.stk  \
+            54.stk  \
             60.stk  \
             64.stk  \
             66.stk  \
@@ -96,6 +97,7 @@ SRC_OSTK =  1.ostk   \
             28.ostk  \
             29.ostk  \
             31.ostk  \
+            54.ostk  \
             60.ostk  \
             64.ostk  \
             66.ostk  \
