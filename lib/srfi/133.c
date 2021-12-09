@@ -1,5 +1,5 @@
 /*
- * srfi-133-impl.c   -- C part of SRFI-133: Vector Library (R7RS Compatible)
+ * 133.c   -- C part of SRFI-133: Vector Library (R7RS Compatible)
  *
  * Copyright © 2021 Jeronimo Pellegrini <j_p@aleph0.info>
  *
@@ -21,12 +21,12 @@
  *
  *           Author: Jeronimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 09-Mar-2021 12:14 (jpellegrini)
- * Last file update: 31-May-2021 17:07 (eg)
+ * Last file update:  3-Dec-2021 07:27 (jpellegrini)
  */
 
 
 #include "stklos.h"
-#include "srfi-133-incl.c"
+#include "133-incl.c"
 
 DEFINE_PRIMITIVE("check-index", srfi_133_check_index,subr3, (SCM vec,
                                                              SCM index,
@@ -287,9 +287,9 @@ DEFINE_PRIMITIVE("vector-empty?",srfi_133_vector_emptyp,subr1, (SCM vec))
         : STk_false;
 }
 
-MODULE_ENTRY_START("srfi-133")
+MODULE_ENTRY_START("srfi/133")
 {
-  SCM module =  STk_create_module(STk_intern("SRFI-133"));
+  SCM module =  STk_create_module(STk_intern("srfi/133"));
 
   ADD_PRIMITIVE_IN_MODULE(srfi_133_check_index, module);
   ADD_PRIMITIVE_IN_MODULE(srfi_133_vector_parse_start_end, module);
