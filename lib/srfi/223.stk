@@ -45,14 +45,12 @@
 ;;;;;;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;;;;
 ;;;;
-;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.ingo]
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 27-Jul-2021 16:01 (jpellegrini)
-;;;; Last file update:  9-Oct-2021 20:08 (eg)
+;;;; Last file update:  3-Dec-2021 06:55 (jpellegrini)
 ;;;;
 
-;(require "srfi-1")     ;; seems to be uneeded (EG)
-
-(define-module SRFI-223
+(define-module srfi/223
   
   (export bisect-left bisect-right
           bisection
@@ -98,7 +96,4 @@
 
 ) ;;; END of module SRFI-223
 
-(select-module STklos)
-(import SRFI-223)
-
-(provide "srfi-223")
+(provide "srfi/223")
