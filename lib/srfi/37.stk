@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-37.stk                -- Implementation of SRFI-37
+;;;; 37.stk                -- Implementation of SRFI-37
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -40,14 +40,11 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 03-Jul-2020 06:39 (jpellegrini)
-;;;; Last file update: 17-Nov-2021 18:52 (eg)
+;;;; Last file update: 09-Dec-2021 20:12 (jpellegrini)
 ;;;;
 
 
-;;(require "srfi-9")
-;;(require "srfi-13")
-
-(define-module SRFI-37
+(define-module srfi/37
   (import (srfi 9)
           (srfi 13))
   
@@ -233,7 +230,5 @@ program-arguments in ARGS, as decided by the OPTIONS'
     (next-arg)))
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-37)
-(provide "srfi-37")
+(provide "srfi/37")

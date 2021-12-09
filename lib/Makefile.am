@@ -83,7 +83,6 @@ SRC_STK = bigloo-support.stk  \
           streams-derived.stk \
           srfi-35.stk         \
           srfi-36.stk         \
-          srfi-37.stk         \
           srfi-41.stk         \
           srfi-48.stk         \
           srfi-51.stk         \
@@ -131,7 +130,6 @@ scheme_OBJS = compfile.ostk     \
           streams-derived.ostk   \
           srfi-35.ostk          \
           srfi-36.ostk          \
-          srfi-37.ostk          \
           srfi-41.ostk          \
           srfi-48.ostk          \
           srfi-51.ostk          \
