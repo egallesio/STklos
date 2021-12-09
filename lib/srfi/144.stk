@@ -1,5 +1,5 @@
 
-(select-module SRFI-144)
+(select-module srfi/144)
 
 (%compile-time-define fl/ fllog %flinteger-exponent flinteger-fraction
                       %fl-integer-exponent-nan  %fl-integer-exponent-zero)
@@ -86,7 +86,4 @@
 ;;; SPECIAL FUNCTIONS -- DONE
 ;;;
 
-(select-module STklos)
-(import SRFI-144)
-
-(provide "srfi-144")
+(provide "srfi/144")
