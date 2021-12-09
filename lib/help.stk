@@ -82,7 +82,8 @@
         (string-append
           "Symbols beginning with '%' are intended for low-level use \n"
           "and have therefore been left undocumented.\n"
-          "Furthermore, they can be changed without notice. Don't use them.\n"))
+          "Furthermore, they can be changed without notice. Please\n"
+          "don't use them.\n"))
       (else
          ;; no documentation
          #f))))
@@ -183,7 +184,8 @@ doc>
   ;; Interactive help
   (display (do-color (get-repl-color :help)
                      "You are in the interactive STklos help. "
-                     "Enter an *eof* to exit\n"))
+                     "Enter an *eof* to exit (either write #eof or type "
+                     "^D)\n"))
   (let Loop ((prompt (do-color (get-repl-color :help-prompt)
                                "help> " 'none)))
     (display prompt) (flush-output-port)
