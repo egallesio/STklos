@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-161.stk		-- Implementation of SRFI-161
+;;;; 161.stk		-- Implementation of SRFI-161
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -47,13 +47,11 @@
 
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 10-Jul-2020 14:11 (jpellegrini)
-;;;; Last file update: 10-Jul-2020 17:72 (jpellegrini)
+;;;; Last file update: 04-Dec-2021 19:47 (jpellegrini)
 ;;;;
 
-(require "srfi-9")
-
-
-(define-module SRFI-161
+(define-module srfi/161
+  (import (srfi 9))
   (export ubox
           ubox?
           ubox-ref
@@ -116,7 +114,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-161)
-(provide "srfi-161")
+(provide "srfi/161")

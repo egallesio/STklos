@@ -19,12 +19,12 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 25-Nov-2021 17:23 (eg)
+# Last file update:  9-Dec-2021 14:24 (eg)
 
 #======================================================================
 
 COMP ?= ../../utils/tmpcomp
-STKLOS_BINARY ?= ../src/stklos
+STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 
@@ -56,11 +56,21 @@ SRC_STK   = 1.stk   \
             64.stk  \
             66.stk  \
             74.stk  \
+            88.stk  \
+            111.stk \
+            113.stk \
+            127.stk \
+            128.stk \
             141.stk \
-            170.stk \
+            161.stk \
+            173.stk \
+            174.stk \
             180.stk \
+            185.stk \
             189.stk \
+            195.stk \
             196.stk \
+            208.stk \
             214.stk \
             215.stk \
             216.stk \
@@ -91,11 +101,21 @@ SRC_OSTK =  1.ostk   \
             64.ostk  \
             66.ostk  \
             74.ostk  \
+            88.ostk  \
+            111.ostk \
+            113.ostk \
+            127.ostk \
+            128.ostk \
             141.ostk \
-            170.ostk \
+            161.ostk \
+            173.ostk \
+            174.ostk \
             180.ostk \
+            185.ostk \
             189.ostk \
+            195.ostk \
             196.ostk \
+            208.ostk \
             214.ostk \
             215.ostk \
             216.ostk \
@@ -104,9 +124,10 @@ SRC_OSTK =  1.ostk   \
 #
 # SRFIs written in C and Scheme
 #
-SRC_C     = 25.c     27.c     132.c     133.c      170.c      175.c
-SRC_C_STK = 25.stk   27.stk   132.stk   133.stk    170.stk    175.stk
-SRC_SHOBJ = 25.$(SO) 27.$(SO) 132.$(SO) 133.$(SO)  170.$(SO)  175.$(SO)
+
+SRC_C     = 25.c     27.c     132.c     133.c      144.c      170.c      175.c
+SRC_C_STK = 25.stk   27.stk   132.stk   133.stk    144.stk    170.stk    175.stk
+SRC_SHOBJ = 25.$(SO) 27.$(SO) 132.$(SO) 133.$(SO)  144.$(SO)  170.$(SO)  175.$(SO)
 
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
@@ -139,11 +160,13 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 # Dependencies
 13.ostk: 14.ostk
+113.ostk:  128.ostk
 
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c
 132.$(SO): 132-incl.c 132.c
 133.$(SO): 133-incl.c 133.c
+144.$(SO): 144-incl.c 144.c
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
 
@@ -163,5 +186,5 @@ uninstall-hook:
 	rmdir $(srfidir) || true
 
 doc:
-	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../src/boot.img \
-		-f ../doc/extract-doc $(SOURCES) >> $(DOCDB)
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
+		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
