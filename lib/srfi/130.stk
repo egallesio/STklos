@@ -46,7 +46,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 13-Nov-2020 21:10 (jpellegrini)
-;;;; Last file update: 27-Oct-2021 07:24 (eg)
+;;;; Last file update: 10-Dec-2021 20:44 (eg)
 ;;;;
 
 (define-module srfi/130
@@ -1669,20 +1669,6 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-;; (select-module STklos)
 
-;; (define srfi-13:string-index string-index)
-;; (define srfi-13:string-index-right string-index-right)
-;; (define srfi-13:string-split string-split)
-;; (define srfi-13:string-skip string-skip)
-;; (define srfi-13:string-skip-right string-skip)
-
-;; (import SRFI-130)
-
-;; (define string-index (in-module SRFI-130 string-index))
-;; (define string-index-right (in-module SRFI-130 string-index-right))
-;; (define string-split (in-module SRFI-130 string-split))
-;; (define string-skip (in-module SRFI-130 string-skip))
-;; (define string-skip-right (in-module SRFI-130 string-skip-right))
 
 (provide "srfi/130")
