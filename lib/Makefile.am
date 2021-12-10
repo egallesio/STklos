@@ -96,10 +96,8 @@ SRC_STK = bigloo-support.stk  \
           srfi-94.stk         \
           srfi-96.stk         \
           srfi-100.stk        \
-          srfi-129.stk        \
           srfi-130.stk        \
           srfi-134.stk        \
-          srfi-135.stk        \
           srfi-137.stk        \
           srfi-151.stk        \
           srfi-156.stk        \
@@ -107,7 +105,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-171.stk        \
           srfi-190.stk        \
           srfi-207.stk        \
-          srfi-217.stk        \
           trie.stk            \
           tar.stk             \
           trace.stk
@@ -143,10 +140,8 @@ scheme_OBJS = compfile.ostk     \
           srfi-94.ostk          \
           srfi-96.ostk          \
           srfi-100.ostk         \
-          srfi-129.ostk         \
           srfi-130.ostk         \
           srfi-134.ostk         \
-          srfi-135.ostk         \
           srfi-137.ostk         \
           srfi-151.ostk         \
           srfi-156.ostk         \
@@ -154,7 +149,6 @@ scheme_OBJS = compfile.ostk     \
           srfi-171.ostk         \
           srfi-190.ostk         \
           srfi-207.ostk         \
-          srfi-217.ostk         \
           trie.ostk             \
           tar.ostk              \
           trace.ostk

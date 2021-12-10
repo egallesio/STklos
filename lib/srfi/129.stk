@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-129.stk		-- Implementation of SRFI-129
+;;;; 129.stk		-- Implementation of SRFI-129
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -48,10 +48,10 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 04-Jul-2020 07:22 (jpellegrini)
-;;;; Last file update: 04-Jul-2020 09:10 (jpellegrini)
+;;;; Last file update: 04-Dec-2021 10:42 (jpellegrini)
 ;;;;
 
-(define-module SRFI-129
+(define-module srfi/129
   (export char-title-case? char-titlecase string-titlecase)
 
 ;;;; Alists for titlecase functions
@@ -220,15 +220,12 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
-
-(import SRFI-129)
 
 ;; If we just define the new string-titlecase in  SRFI-129
 ;; and import it, STklos will still use the old definition,
 ;; so we define %string-titlecase and explicitly redefine
 ;; string-titlecase here:
-(define %string-titlecase string-titlecase)
-(define string-titlecase (in-module SRFI-129 string-titlecase))
+;;(define %string-titlecase string-titlecase)
+;;(define string-titlecase (in-module SRFI-129 string-titlecase))
 
-(provide "srfi-129")
+(provide "srfi/129")
