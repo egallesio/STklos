@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-54.stk		-- Implementation of SRFI-54
+;;;; 54.stk		-- Implementation of SRFI-54
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -47,11 +47,11 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 23-Jun-2020 12:01 (jpellegrini)
-;;;; Last file update: 23-Jun-2020 13:22 (jpellegrini)
+;;;; Last file update: 09-Dec-2021 19:31 (jpellegrini)
 ;;;;
 
 
-(define-module SRFI-54
+(define-module srfi/54
   (export cat)
 
 
@@ -432,7 +432,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-54)
-(provide "srfi-54")
+(provide "srfi/54")
