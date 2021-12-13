@@ -14,7 +14,7 @@
 ;; For the test we redefine here stream-null?  beacause the test of SRFI-41
 ;; defines its own version of stream-null? which is seen here instead of the
 ;; one of srfi-216.
-(define stream-null? (in-module SRFI-216 stream-null?))
+(define stream-null? (in-module srfi/216 stream-null?))
 
 
 (define (sleep-a-little)

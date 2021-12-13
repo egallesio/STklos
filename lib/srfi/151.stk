@@ -49,7 +49,7 @@
 ;;;; Last file update: 09-Mal-2020 04:00 (jpellegrini)
 ;;;;
 
-(define-module SRFI-151
+(define-module srfi/151
   (import (srfi 60))
   (export bitwise-not bitwise-and bitwise-ior bitwise-xor bitwise-eqv
           bitwise-nand bitwise-nor bitwise-andc1 bitwise-andc2
@@ -245,7 +245,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-151)
-(provide "srfi-151")
+(provide "srfi/151")
