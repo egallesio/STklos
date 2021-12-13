@@ -22,12 +22,11 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 28-Jan-2021 16:03
-;;;; Last file update: 18-May-2021 15:18 (eg)
+;;;; Last file update:  3-Dec-2021 07:06 (jpellegrini)
 ;;;;
 
-(require-feature "srfi-27")
-
-(define-module SRFI-216
+(define-module srfi/216
+  (import (srfi 27))
   (export false true nil
           runtime
           random
@@ -91,8 +90,6 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-216)
-(provide "srfi-216")
+(provide "srfi/216")
 

@@ -46,12 +46,11 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 30-Jun-2020 05:01 (jpellegrini)
-;;;; Last file update: 10-Oct-2021 11:09 (eg)
+;;;; Last file update:  4-Dec-2021 09:16 (jpellegrini)
 ;;;;
 
-(require "srfi-9")
-
-(define-module SRFI-117
+(define-module srfi/117
+  (import (srfi 9))
   (export make-list-queue list-queue list-queue-copy list-queue-unfold list-queue-unfold-right
           list-queue? list-queue-empty?
           list-queue-front list-queue-back list-queue-list list-queue-first-last
@@ -254,7 +253,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-117)
-(provide "srfi-117")
+(provide "srfi/117")

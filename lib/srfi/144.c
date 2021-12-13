@@ -3,7 +3,7 @@
 #include <math.h>
 #include <float.h>
 
-#include "srfi-144-incl.c"
+#include "144-incl.c"
 
 /* FIXME: will fail to compile if NAN is not supported.
    we should generate a NaN by some other means in that case. */
@@ -896,9 +896,9 @@ DEFINE_PRIMITIVE("flerfc", srfi_144_flerfc, subr1, (SCM x))
  *  MODULE SRFI-144  *
 \*********************/
 
-MODULE_ENTRY_START("srfi-144")
+MODULE_ENTRY_START("srfi/144")
 {
-  SCM module =  STk_create_module(STk_intern("SRFI-144"));
+  SCM module =  STk_create_module(STk_intern("srfi/144"));
 
   /* FIXME: this should exist outside of this SRFI... */
   SCM_NaN = double2real(NAN);

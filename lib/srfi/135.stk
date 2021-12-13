@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-135.stk		-- Implementation of SRFI-135
+;;;; 135.stk		-- Implementation of SRFI-135
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -46,14 +46,13 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 19-Nov-2020 10:11 (jpellegrini)
-;;;; Last file update: 20-Nov-2020 00:23 (jpellegrini)
+;;;; Last file update: 04-Dec-2021 10:50 (jpellegrini)
 ;;;;
 
-(require "srfi-9")
-(require "srfi-129")
 
-(define-module SRFI-135
-  (import SRFI-129)
+(define-module srfi/135
+  (import (srfi 9)
+          (srfi 129))
   
   (export
    ;; Predicates
@@ -2493,7 +2492,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-135)
-(provide "srfi-135")
+(provide "srfi/135")
