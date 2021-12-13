@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 25-Nov-2021 17:23 (eg)
+# Last file update:  9-Dec-2021 14:24 (eg)
 
 #======================================================================
 
@@ -388,12 +388,15 @@ SRC_STK = 1.stk   \
             141.stk \
             151.stk \
             158.stk \
+            161.stk \
+            173.stk \
+            174.stk \
             180.stk \
             185.stk \
             189.stk \
             195.stk \
             196.stk \
-            207.stk \
+	    207.stk \
             208.stk \
             214.stk \
             215.stk \
@@ -432,14 +435,14 @@ SRC_OSTK = 1.ostk   \
             74.ostk  \
             88.ostk  \
             111.ostk \
-            113.ostk \
             117.ostk \
             118.ostk \
+            113.ostk \
             127.ostk \
             128.ostk \
             129.ostk \
-            134.ostk \
             130.ostk \
+            134.ostk \
             135.ostk \
             141.ostk \
             151.ostk \
@@ -452,13 +455,12 @@ SRC_OSTK = 1.ostk   \
             189.ostk \
             195.ostk \
             196.ostk \
+            207.ostk \
             208.ostk \
             214.ostk \
             215.ostk \
             216.ostk \
             223.ostk
-
-
 
 
 #
@@ -737,7 +739,7 @@ uninstall-am: uninstall-srfiDATA
 
 
 COMP ?= ../../utils/tmpcomp
-STKLOS_BINARY ?= ../src/stklos
+STKLOS_BINARY ?= ../../src/stklos
 
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk

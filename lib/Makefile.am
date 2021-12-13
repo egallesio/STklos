@@ -94,7 +94,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-100.stk        \
           srfi-137.stk        \
           srfi-156.stk        \
-          srfi-161.stk        \
           srfi-171.stk        \
           srfi-190.stk        \
           trie.stk            \
