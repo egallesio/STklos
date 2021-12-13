@@ -70,8 +70,11 @@ SRC_STK   = 1.stk   \
             128.stk \
             129.stk \
             130.stk \
+            134.stk \
             135.stk \
             141.stk \
+            151.stk \
+            158.stk \
             161.stk \
             173.stk \
             174.stk \
@@ -80,6 +83,7 @@ SRC_STK   = 1.stk   \
             189.stk \
             195.stk \
             196.stk \
+	    207.stk \
             208.stk \
             214.stk \
             215.stk \
@@ -125,8 +129,11 @@ SRC_OSTK =  1.ostk   \
             128.ostk \
             129.ostk \
             130.ostk \
+            134.ostk \
             135.ostk \
             141.ostk \
+            151.ostk \
+            158.ostk \
             161.ostk \
             173.ostk \
             174.ostk \
@@ -135,6 +142,7 @@ SRC_OSTK =  1.ostk   \
             189.ostk \
             195.ostk \
             196.ostk \
+            207.ostk \
             208.ostk \
             214.ostk \
             215.ostk \
@@ -144,7 +152,6 @@ SRC_OSTK =  1.ostk   \
 #
 # SRFIs written in C and Scheme
 #
-
 SRC_C     = 25.c     27.c     132.c     133.c      144.c      170.c      175.c
 SRC_C_STK = 25.stk   27.stk   132.stk   133.stk    144.stk    170.stk    175.stk
 SRC_SHOBJ = 25.$(SO) 27.$(SO) 132.$(SO) 133.$(SO)  144.$(SO)  170.$(SO)  175.$(SO)
@@ -181,6 +188,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 # Dependencies
 13.ostk: 14.ostk
 113.ostk:  128.ostk
+134.ostk: 158.ostk
 
 25.$(SO):  25-incl.c  25.c
 27.$(SO):  27-incl.c  27.c

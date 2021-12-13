@@ -2,7 +2,7 @@
 ;;  SRFI 134 ...
 ;; ----------------------------------------------------------------------
 
-;; (require "srfi-134")
+(import (srfi 158))
 
 ;; "ideque/constructors"
 (test "ideque 1" '() (ideque->list (ideque)))
