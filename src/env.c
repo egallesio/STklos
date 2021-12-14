@@ -212,6 +212,7 @@ DEFINE_PRIMITIVE("binding-mutable?", module_binding_mutablep, subr12, (SCM sym,
     SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(module),
                                     sym,
                                     &i);
+    if (!res) return STk_false; /* TODO: or error? */
     return MAKE_BOOLEAN (!(BOXED_INFO(res) & CONS_CONST));
 }
 
@@ -277,6 +278,7 @@ DEFINE_PRIMITIVE("module-lock-binding!", module_lock_binding, subr12, (SCM sym,
     SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(module),
                                     sym,
                                     &i);
+    if (!res) STk_error("unbound variable ~S", sym);
     BOXED_INFO(res) = BOXED_INFO(res) | CONS_CONST;
     return STk_void;
 }
