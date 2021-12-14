@@ -62,7 +62,7 @@ scheme_BOOT = assembler.stk \
           struct.stk        \
           thread.stk
 
-scheme_extra = STklos.init
+scheme_extra = STklos.init 
 
 SRC_STK = bigloo-support.stk  \
           bigmatch.stk        \
@@ -134,6 +134,11 @@ scheme_OBJS = compfile.ostk     \
           tar.ostk              \
           trace.ostk
 
+SRC_C     = itrie.c
+SRC_C_STK = itrie.stk
+SRC_SHOBJ = itrie.$(SH_SUFFIX)
+
+
 
 DOCDB       = DOCDB
 BASEDIR     = ..
@@ -143,16 +148,19 @@ BASEDIR     = ..
 schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@
 schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@
 scheme_DATA     = $(scheme_extra) $(scheme_OBJS)
-schemelib_DATA  = $(scheme_SOLIBS)
+schemelib_DATA  = $(scheme_SOLIBS) $(SRC_SHOBJ)
 scheme_sources  = $(scheme_BOOT) $(scheme_extra) $(SRC_STK) $(SRC_C)
 #======================================================================
 
-SUFFIXES = .stk .ostk .scm .c
+SUFFIXES = .stk .ostk .scm  -incl.c  .$(SH_SUFFIX) .c
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
 
 .scm.ostk:
 	$(COMP) -o $*.ostk $*.scm
+
+.stk-incl.c:
+	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.@SH_SUFFIX@ :
 	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../src @GCINC@ \
@@ -223,6 +231,7 @@ slib.ostk: slib.stk STklos.init
 srfi-41.ostk: streams-derived.ostk streams-primitive.ostk
 streams-derived.ostk: streams-primitive.ostk
 
+itrie.$(SH_SUFFIX): itrie-incl.c itrie.c
 
 #
 # SRFIs support

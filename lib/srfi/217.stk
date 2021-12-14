@@ -1,0 +1,442 @@
+;;;;
+;;;; srfi-217.stk         -- SRFI-217: Integer Sets
+;;;;
+;;;; Copyright © 2022 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 03-Jan-2022 12:10
+;;;; Last file update: 07-Jan-2022 09:32
+;;;;
+
+
+;;; The comments before each section explain how each procedure was
+;;; implemented (C, Scheme or C + Scheme).
+
+
+;; The core of this SRFI is implemented in the "itrie" module:
+(require "itrie")
+
+(define-module srfi/217
+  
+  (%compile-time-define iset-mutable?
+                        %iset-difference
+                        %iset-intersection
+                        %iset-union
+                        %iset-map)
+
+  (import itrie)
+  (export <iset>
+          ;;; Constructors
+          iset iset-unfold make-range-iset
+
+          ;;; Predicates
+          iset? iset-contains? iset-empty? iset-disjoint?
+
+          ;;; Accessors
+          iset-member iset-min iset-max
+
+          ;;; Updaters
+          iset-adjoin iset-adjoin! iset-delete iset-delete!
+          iset-delete-all iset-delete-all! iset-search
+          iset-search! iset-delete-min iset-delete-min!
+          iset-delete-max iset-delete-max!
+
+          ;;; The whole iset
+          iset-size iset-find iset-count iset-any? iset-every?
+
+          ;;; Mapping and folding
+          iset-map iset-for-each iset-fold iset-fold-right
+          iset-filter iset-filter! iset-remove iset-remove!
+          iset-partition iset-partition!
+
+          ;;; Copying and conversion
+          iset-copy iset->list list->iset list->iset!
+
+          ;;; Subsets
+          iset=? iset<? iset>? iset<=? iset>=?
+
+          ;;; Set Theory Operations
+          iset-union iset-intersection iset-difference iset-xor
+          iset-union! iset-intersection! iset-difference!
+          iset-xor!
+          
+          ;;; Intervals and ranges
+          iset-open-interval iset-closed-interval
+          iset-open-closed-interval iset-closed-open-interval
+          isubset= isubset< isubset<= isubset> isubset>=)
+
+(export %trie-compare)
+
+;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; STklos-specific
+;;;
+;;;;;;;;;;;;;;;;;;;;
+
+(define (describe-iset x port)
+  (format port "a ~a iset, with ~a elements."
+          (if (iset-mutable? x) "mutable" "constant")
+          (iset-size x)))
+
+(%user-type-proc-set! 'iset 'describe describe-iset)
+
+(define-class <iset>      (<top>) ())
+(%user-type-proc-set! 'iset 'class-of <iset>)
+
+(define-reader-ctor '<iset> iset)
+
+
+;;;;;;;;;;;;;;;;;
+;;;
+;;; Constructors
+;;;
+;;;;;;;;;;;;;;;;;
+
+
+;; iset             C
+;; iset-unfold      Scheme
+;; make-range-iset  Scheme
+
+
+(define (iset-unfold stop? mapper successor seed)
+  (let Loop ((iset (iset)) (seed seed))
+    (if (stop? seed)
+        iset
+        (Loop (iset-adjoin iset (mapper seed))
+              (successor seed)))))
+
+(define (make-range-iset start end :optional (step 1))
+  (when (not (integer? step)) (error "non-integer step ~S not allowed" step))
+  (when (zero? step) (error "zero step not allowed"))
+  (let Loop ((iset (iset)) (n start))
+    (if (>= n end)
+        iset
+        (Loop (iset-adjoin iset n)
+              (+ n step)))))
+
+
+;;;;;;;;;;;;;;;
+;;;
+;;; Predicates
+;;;
+;;;;;;;;;;;;;;;
+
+
+;; iset?            C
+;; iset-contains?   C
+;; iset-empty?      C
+;; iset-disjoint?   C
+
+
+;;;;;;;;;;;;;;
+;;;
+;;; Accessors
+;;;
+;;;;;;;;;;;;;;
+
+;; iset-member      C
+;; iset-min         C
+;; iset-max         C
+
+
+;;;;;;;;;;;;;
+;;;
+;;; Updaters
+;;;
+;;;;;;;;;;;;;
+
+;; iset-adjoin        C
+;; iset-adjoin!       Scheme
+;; iset-delete        Scheme
+;; iset-delete!       Scheme
+;; iset-delete-all    Scheme
+;; iset-delete-all!   Scheme
+;; iset-search        Scheme
+;; iset-search!       Scheme
+;; iset-delete-min    C
+;; iset-delete-min!   Scheme
+;; iset-delete-max    C
+;; iset-delete-max!   Scheme
+
+
+
+(define (iset-delete-all set keys)
+  (when (not (or (pair? keys) (null? keys)))
+    (error "bad list ~S" keys))
+  (when (not (iset? set))
+    (error "bad iset ~S" set))
+  (let ((key-set (apply iset keys)))
+    (iset-remove (lambda (k) (iset-contains? key-set k))
+                 set)))
+
+
+(define (iset-delete iset . keys)
+  (iset-delete-all iset keys))
+  
+;; FIXME:
+;; first runs iset-contains? then does another
+;; operation on the trie. could be combined...
+(define (iset-search iset key failure success)
+  (define (update key2 res)
+    (values (iset-adjoin (iset-delete iset key) key2)
+            res))
+  (define (remove res)
+    (values (iset-delete iset key)
+            res))
+  (define (insert res)
+    (values (iset-adjoin iset key)
+            res))
+  (if (iset-contains? iset key)
+      (success key update remove)
+      (failure insert (lambda (res)
+                        (values iset res)))))
+
+(define iset-adjoin!     iset-adjoin)
+(define iset-delete!     iset-delete)
+(define iset-delete-all! iset-delete-all)
+(define iset-search!     iset-search)
+(define iset-delete-min! iset-delete-min)
+(define iset-delete-max! iset-delete-max)
+
+
+;;;;;;;;;;;;;;;;;;
+;;;
+;;; The whole iset
+;;;
+;;;;;;;;;;;;;;;;;;
+
+;; iset-size    C
+;; iset-find    Scheme
+;; iset-count   Scheme
+;; iset-any?    Scheme
+;; iset-every?  Scheme
+
+
+(define (iset-find pred? set failure)
+  (call/cc (lambda (return)
+             ;; filter would go through all the set. we do
+             ;; for-each and jump out when we find the element!
+             (iset-for-each (lambda (x) (when (pred? x) (return x)))
+                            set)
+             (failure))))
+  
+(define (iset-count pred s)
+  (let ((c 0))
+    (%iset-map (lambda (x)
+                 (when (pred x) (set! c (+ 1 c))))
+               s
+               #f)
+    c))
+
+
+(define (iset-any? proc s)
+  (call/cc (lambda (k)
+             (%iset-map (lambda (x)
+                          (when (proc x) (k #t)) #void)
+                        s
+                        #f)
+             #f)))
+
+(define (iset-every? proc s)
+  (call/cc (lambda (k)
+             (%iset-map (lambda (x)
+                          (when (not (proc x)) (k #f)) #void)
+                        s
+                        #f)
+             #t)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Mapping and folding
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; iset-map         C + Scheme
+;; iset-for-each    C + Scheme
+;; iset-fold        C
+;; iset-fold-right  C
+;; iset-filter      C
+;; iset-filter!     Scheme
+;; iset-remove      Scheme
+;; iset-remove!     Scheme
+;; iset-partition   C
+;; iset-partition!  Scheme
+
+
+(define (iset-map proc set)
+  (%iset-map proc set #t))
+
+(define (iset-for-each proc set)
+  (%iset-map proc set #f))
+
+(define (iset-remove pred? iset)
+  (iset-filter (lambda (x) (not (pred? x))) iset))
+
+(define iset-filter!    iset-filter)
+(define iset-remove!    iset-remove)
+(define iset-partition! iset-partition)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Copying and conversion
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; iset-copy    C
+;; iset->list   C
+;; list->iset   C
+;; list->iset!  Scheme
+
+(define (list->iset! iset lst)
+  (iset-union iset (list->iset lst)))
+
+
+;;;;;;;;;;;;
+;;;
+;;; Subsets
+;;;
+;;;;;;;;;;;;
+
+;; iset=?  C + Scheme
+;; iset<?  C + Scheme
+;; iset>?  C + Scheme
+;; iset<=? C + Scheme
+;; iset>=? C + Scheme
+
+
+;; (%trie-compare s t) returns
+;;  0   s = t
+;; -1   s SUBSET of t
+;; +1   s SUPERSET of t
+;; +2   neither is subset of the other
+
+(define (%iset-cmp op args)
+  (for-each (lambda (x)
+              (when (not (iset? x)) (error "bad iset ~S" x)))
+            args)
+  (if (< (length  args) 2)
+      #t
+      (let loop ((sets args))
+        (cond ((null? (cdr sets)) #t)
+              ((op (%trie-compare (car sets) (cadr sets)))
+               (loop (cdr sets)))
+              (else #f)))))
+
+(define (iset=? . args)  (%iset-cmp zero? args))
+(define (iset<? . args)  (%iset-cmp (lambda (x) (fx=? -1 x)) args))
+(define (iset>? . args)  (%iset-cmp (lambda (x) (fx=? +1 x)) args))
+(define (iset<=? . args) (%iset-cmp (lambda (x) (or (fx=? -1 x)
+                                               (zero? x))) args))
+(define (iset>=? . args) (%iset-cmp (lambda (x) (or (fx=? +1 x)
+                                               (zero? x))) args))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Set theory operations
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; iset-union          C + Scheme
+;; iset-intersection   C + Scheme
+;; iset-difference     C + Scheme
+;; iset-xor            C
+;; iset-union!         Scheme
+;; iset-intersection!  Scheme
+;; iset-difference!    Scheme
+;; iset-xor!           Scheme
+
+(define (iset-union . args)
+  (if (null? args)
+      (iset)
+      (%iset-union (lambda (x y) x)
+                   (car args)
+                   (apply iset-union (cdr args)))))
+
+(define (iset-intersection . args)
+  (cond ((null? args)       (iset))
+        ((null? (cdr args)) (car args))
+        (else
+         (%iset-intersection (car args)
+                             (apply iset-intersection (cdr args))))))
+
+(define (iset-difference . args)
+  (if (null? args)
+      (iset)
+      (%iset-difference (car args)
+                        (apply iset-difference (cdr args)))))
+
+
+(define iset-union!        iset-union)
+(define iset-intersection! iset-intersection)
+(define iset-difference!   iset-difference)
+(define iset-xor!          iset-xor)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Intervals and ranges
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; iset-open-interval        Scheme
+;; iset-closed-interval      Scheme
+;; iset-open-closed-interval Scheme
+;; iset-closed-open-interval Scheme
+;; isubset=                  Scheme
+;; isubset<                  Scheme
+;; isubset<=                 Scheme
+;; isubset>                  Scheme
+;; isubset>=                 Scheme
+
+(define (iset-open-interval iset lo hi)
+  (iset-filter (lambda (x) (< lo x hi)) iset))
+
+(define (iset-closed-interval iset lo hi)
+  (iset-filter (lambda (x) (<= lo x hi)) iset))
+
+(define (iset-open-closed-interval iset lo hi)
+  (iset-filter (lambda (x) (and (< lo x)
+                           (<= x hi)))
+               iset))
+
+(define (iset-closed-open-interval iset lo hi)
+  (iset-filter (lambda (x) (and (<= lo x)
+                           (< x hi)))
+               iset))
+
+(define (isubset= set k)
+  (if (iset-contains? set k) (iset k) (iset)))
+  
+(define (isubset< set k)
+  (iset-filter (lambda (x) (< x k)) set))
+
+(define (isubset<= set k)
+  (iset-filter (lambda (x) (<= x k)) set))
+
+(define (isubset> set k)
+  (iset-filter (lambda (x) (> x k)) set))
+
+(define (isubset>= set k)
+  (iset-filter (lambda (x) (>= x k)) set))
+
+)
+
+(provide "srfi/217")
