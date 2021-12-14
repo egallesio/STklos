@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Oct-2019 14:08
-;;;; Last file update: 25-Oct-2021 17:51 (eg)
+;;;; Last file update: 14-Dec-2021 15:35 (eg)
 ;;;;
 
 ;;
@@ -285,3 +285,31 @@
 
        ;; ②: Define a standard STklos module
        (define-module ,module-name ,@body))))
+
+
+#|
+<doc EXT library-name
+ * (library-name lib)
+ *
+ * Returns the name of |lib| if it was defined as an R7RS library, and
+ * raises an error otherwise.
+ *
+ * @lisp
+ * (define-library (example cool-library))
+ * (library-name (find-module 'example/cool-library)) => (example cool-library)
+ * (module-name  (find-module 'example/cool-library)) => example/cool-library
+ *
+ * (define-module example/a-module)
+ * (library-name (find-module 'example/a-module))     => error
+ *
+ * (library-name quotient)                            => error
+ * @end lisp
+doc>
+|#
+(define (library-name lib)
+  (unless (library? lib)
+    (if (module? lib)
+        (error 'library-name "module ~S is not a library" (module-name lib))
+        (error 'library-name "bad module/library ~S" lib)))
+  (%symbol->library-name (module-name lib)))
+
