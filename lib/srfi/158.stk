@@ -50,7 +50,7 @@
 ;;;; Last file update: 15-May-2020 14:14 (jpellegrini)
 ;;;;
 
-(define-module SRFI-158
+(define-module srfi/158
   (export generator circular-generator make-iota-generator make-range-generator
           make-coroutine-generator list->generator vector->generator
           reverse-vector->generator string->generator
@@ -658,7 +658,5 @@
 
 ) ;; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-158)
-(provide "srfi-158")
+(provide "srfi/158")

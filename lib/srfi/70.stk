@@ -1,7 +1,7 @@
 ;;;;
-;;;; srfi-70.stk			-- Inexact Infinities
+;;;; 70.stk                     -- SRFI 70: Numbers
 ;;;;
-;;;; Copyright © 2005 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Aubrey Jaffer (SRFI Reference implementation)
 ;;;;    Creation date: 12-Sep-2005 14:51 (eg)
-;;;; Last file update: 13-Sep-2005 17:36 (eg)
+;;;; Last file update: 12-Dec-2021 20:25 (eg)
 ;;;;
 ;;;;
 ;;;; The implementation is taken directly from the SRFI reference implementation.
@@ -37,23 +37,88 @@
 ;;;; OTHER DEALINGS IN THE SOFTWARE.
 
 
-(unless (provided? "srfi-70")
+
+(define-module srfi/70
+  (import SCHEME)
+
+  ;; we re-export the R5RS procedures in the SRFI
+  ;; in case they have been changed:
+  (export ;; 6.2.2 Exactness
+          exact-round
+          exact-ceiling
+          exact-floor
+          exact-truncate
+
+          ;; 6.2.2x Infinities
+          ;; (nothing to export)
+
+          ;; 6.2.3 Implementation restrictions
+          +            -             *
+          quotient     remainder     modulo
+          max          min           abs
+          numerator    denominator   gcd
+          lcm          floor         ceiling
+          truncate     round         rationalize
+          expt
+
+          ;; 6.2.4 Syntax of numerical constants
+          ;; (reader-specific, nothing to export)
+
+          ;; 6.2.5 Numerical operations
+          number?
+          complex?
+          real?
+          rational?
+          integer?
+          exact?
+          inexact?
+
+          = < > <= >=
+
+          finite? infinite?
+          zero?   positive? negative?
+          odd?    even?
+
+          max min
+
+          /
+
+          abs
+
+          exp  log
+          sin  cos  tan
+          asin acos atan
+          sqrt
+          expt
+
+          make-rectangular make-polar
+          real-part        imag-part
+          magnitude        angle
+
+          exact->inexact
+          inexact->exact
+
+          ;; 6.2.6 Numerical input and output
+          number->string
+          string->number)
+
+
 
 (define (ipow-by-squaring x n acc proc)
   (cond ((zero? n) acc)
-	((eqv? 1 n) (proc acc x))
-	(else (ipow-by-squaring (proc x x)
-				(quotient n 2)
-				(if (even? n) acc (proc acc x))
-				proc))))
+        ((eqv? 1 n) (proc acc x))
+        (else (ipow-by-squaring (proc x x)
+                                (quotient n 2)
+                                (if (even? n) acc (proc acc x))
+                                proc))))
 
 (define (integer-expt x n) (ipow-by-squaring x n (if (exact? x) 1 1.) *))
 
 (define (expt z1 z2)
   (cond ((and (exact? z2) (not (and (zero? z1) (negative? z2))))
-	 (integer-expt z1 z2))
-	((zero? z2) (+ 1 (* z1 z2)))
-	(else (exp (* (if (zero? z1) (real-part z2) z2) (log z1))))))
+         (integer-expt z1 z2))
+        ((zero? z2) (+ 1 (* z1 z2)))
+        (else (exp (* (if (zero? z1) (real-part z2) z2) (log z1))))))
 
 (define integer-quotient quotient)
 (define integer-remainder remainder)
@@ -91,5 +156,4 @@
 (define (exact-truncate x) (inexact->exact (truncate x)))
 )
 
-(provide "srfi-70")
-
+(provide "srfi/70")

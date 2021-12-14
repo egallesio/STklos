@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 21-Mar-1993 14:33
-;;;; Last file update:  2-Dec-2021 20:04 (eg)
+;;;; Last file update: 14-Dec-2021 16:11 (eg)
 ;;;;
 
 (define-module DESCRIBE
@@ -65,7 +65,7 @@
                                 (module-name x)
                                 (if (module-define-allowed? x) "" " not")))
      ((library? x)      (format port "an R7RS library named ~A, where new bindings are~A allowed"
-                                (%symbol->library-name (module-name x))
+                                (library-name x)
                                 (if (module-define-allowed? x) "" " not")))
      ((port? x)         (format port "an ~a ~a port"
                                 (if (input-port? x) "input" "output")

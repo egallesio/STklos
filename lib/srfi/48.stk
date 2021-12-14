@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-48.stk    -- Implementation of SRFI-48
+;;;; 48.stk    -- Implementation of SRFI-48
 ;;;;
 ;;;; Copyright © 2004-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
@@ -58,7 +58,9 @@
 ;;;;     ANY RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR
 ;;;;     FITNESS FOR A PARTICULAR PURPOSE.
 
-
+(define-module srfi/48
+  (export srfi48:help srfi48:format-fixed)
+   
 (define srfi48:help
   (let ((str "(format []  [...]) --  is #t, #f or an output-port
 OPTION  [MNEMONIC]  DESCRIPTION -- Implementation Assumes ASCII Text
@@ -220,6 +222,6 @@ OPTION  [MNEMONIC]  DESCRIPTION -- Implementation Assumes ASCII Text
     (error
      (format "FORMAT: ~~F requires a number or a string, got ~s" number-or-string)))
    ))
+)
 
-
-(provide "srfi-48")
+(provide "srfi/48")

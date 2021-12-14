@@ -63,13 +63,11 @@
 ;; It provides amortized O(1) basic operations.
 ;; Originally written for Gauche, and ported to R7RS
 
-(require "srfi-158")
-
-(define-module SRFI-134
+(define-module srfi/134
   ;;(import (scheme base) (scheme case-lambda)
-  ;;        (srfi 1) (srfi 9) (srfi 158))
-  (import (srfi 1) (srfi 9))
-  (import SRFI-158)
+  (import (srfi 1)
+          (srfi 9)
+          (srfi 158))
   (export ideque ideque-tabulate ideque-unfold ideque-unfold-right 
           ideque? ideque-empty? ideque= ideque-any ideque-every
 
@@ -522,9 +520,7 @@
 
 );; END OF DEFINE-MODULE
 ;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-134)
-(provide "srfi-134")
+(provide "srfi/134")
 
 

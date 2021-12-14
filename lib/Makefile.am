@@ -20,10 +20,11 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  8-Dec-2021 16:11 (eg)
+# Last file update: 10-Dec-2021 20:05 (eg)
 
-SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d \
-          scheme srfi
+SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
+	      scheme srfi
+
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
@@ -83,32 +84,18 @@ SRC_STK = bigloo-support.stk  \
           streams-derived.stk \
           srfi-35.stk         \
           srfi-36.stk         \
-          srfi-37.stk         \
           srfi-41.stk         \
-          srfi-48.stk         \
           srfi-51.stk         \
-          srfi-54.stk         \
           srfi-59.stk         \
           srfi-61.stk         \
-          srfi-69.stk         \
-          srfi-70.stk         \
           srfi-89.stk         \
           srfi-94.stk         \
           srfi-96.stk         \
           srfi-100.stk        \
-          srfi-117.stk        \
-          srfi-129.stk        \
-          srfi-130.stk        \
-          srfi-134.stk        \
-          srfi-135.stk        \
           srfi-137.stk        \
-          srfi-151.stk        \
           srfi-156.stk        \
-          srfi-158.stk        \
           srfi-171.stk        \
           srfi-190.stk        \
-          srfi-207.stk        \
-          srfi-216.stk        \
           trie.stk            \
           tar.stk             \
           trace.stk
@@ -131,32 +118,18 @@ scheme_OBJS = compfile.ostk     \
           streams-derived.ostk   \
           srfi-35.ostk          \
           srfi-36.ostk          \
-          srfi-37.ostk          \
           srfi-41.ostk          \
-          srfi-48.ostk          \
           srfi-51.ostk          \
-          srfi-54.ostk          \
           srfi-59.ostk          \
           srfi-61.ostk          \
-          srfi-69.ostk          \
-          srfi-70.ostk          \
           srfi-89.ostk          \
           srfi-94.ostk          \
           srfi-96.ostk          \
           srfi-100.ostk         \
-          srfi-117.ostk         \
-          srfi-129.ostk         \
-          srfi-130.ostk         \
-          srfi-134.ostk         \
-          srfi-135.ostk         \
           srfi-137.ostk         \
-          srfi-151.ostk         \
           srfi-156.ostk         \
-          srfi-158.ostk         \
           srfi-171.ostk         \
           srfi-190.ostk         \
-          srfi-207.ostk         \
-          srfi-216.ostk         \
           trie.ostk             \
           tar.ostk              \
           trace.ostk
@@ -249,8 +222,6 @@ recette.ostk: pretty-print.ostk
 slib.ostk: slib.stk STklos.init
 srfi-41.ostk: streams-derived.ostk streams-primitive.ostk
 streams-derived.ostk: streams-primitive.ostk
-srfi-134.ostk: srfi-158.ostk
-srfi-217.ostk: trie.ostk
 
 
 #
