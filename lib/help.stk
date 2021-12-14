@@ -25,7 +25,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 20-Dec-2009 18:26 (eg)
-;;;; Last file update:  7-Dec-2021 19:43 (eg)
+;;;; Last file update: 14-Dec-2021 18:38 (eg)
 ;;;;
 
 ;; ----------------------------------------------------------------------
@@ -80,10 +80,10 @@
                                     "\n")))
       ((char=? (string-ref (symbol->string self) 0) #\%)
         (string-append
-          "Symbols beginning with '%' are intended for low-level use \n"
-          "and have therefore been left undocumented.\n"
-          "Furthermore, they can be changed without notice. Please\n"
-          "don't use them.\n"))
+          "Symbols beginning with '%' are intended for low-level use "
+          "and have therefore been\n"
+          "left undocumented. Furthermore, they can be changed without notice.\n"
+          "Please don't use them.\n"))
       (else
          ;; no documentation
          #f))))
@@ -183,9 +183,8 @@ doc>
 (define-method help ()
   ;; Interactive help
   (display (do-color (get-repl-color :help)
-                     "You are in the interactive STklos help. "
-                     "Enter an *eof* to exit (either write #eof or type "
-                     "^D)\n"))
+                     "You are in the interactive STklos help.\n"
+                     "Enter an *eof* to exit (either write #eof or type ^D)\n"))
   (let Loop ((prompt (do-color (get-repl-color :help-prompt)
                                "help> " 'none)))
     (display prompt) (flush-output-port)
