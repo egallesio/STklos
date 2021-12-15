@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 14-Dec-2021 15:35 (eg)
+;;;; Last file update: 15-Dec-2021 21:52 (eg)
 ;;;;
 
 
@@ -41,8 +41,7 @@
  * @l
  * Note that this function searches the value of |symbol| in |module|
  * ,(bold "and") in the STklos module if module is not a R7RS library.
- * only in |module|.
-doc>
+ doc>
 |#
 (define symbol-value*
   (let ((absent (list 'absent))
@@ -59,9 +58,11 @@ doc>
 
 #|
 <doc EXT symbol-bound?
- * (symbol-bound symb)
- * (symbol-bound symb module)
+ * (symbol-bound? symb)
+ * (symbol-bound? symb module)
  *
+ * Returns #t is |symb| is bound in |module| and #f otherwise. If |module| is
+ * omitted it defaults to the current module.
 doc>
 |#
 (define symbol-bound?
@@ -384,7 +385,7 @@ doc>
                                          keylist
                                          (list-copy (module-exports mod)))))
       ;; Make aliases for all symbols in imported list
-            (for-each (lambda (pair)
+      (for-each (lambda (pair)
                   (%symbol-link (cdr pair) (car pair) lib mod)
                   (register-new-global! (cdr pair)))
                 imported)))
