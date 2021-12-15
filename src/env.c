@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 15-Dec-2021 19:15 (eg)
+ * Last file update: 15-Dec-2021 21:38 (eg)
  */
 
 #include "stklos.h"
@@ -71,7 +71,7 @@ struct module_obj {
   SCM name;                     /* module name */
   SCM exported_symbols;         /* symbols declared as exported */
   SCM imports;                  /* imported modules */
-  int is_library;               /* 1 if module is a R7RS library; 0  */
+  int is_library;               /* 1 if module is a R7RS library; 0 otherwise */
   struct hash_table_obj hash;   /* The associated hash table */
 };
 
@@ -264,7 +264,7 @@ DEFINE_PRIMITIVE("%module-exports-set!", module_exports_set, subr2,
  * @lisp
  * (module? (find-module 'ST\klos))  => #t
  * (module? 'ST\klos)                => #f
- * (module? 123 'no)                => no
+ * (module? 123 'no)                 => no
  * @end lisp
 doc>
 */
@@ -278,6 +278,17 @@ DEFINE_PRIMITIVE("module?", modulep, subr1, (SCM obj))
  * (library? object)
  *
  * Returns |#t| if |object| is a module defined as a R7RS library and |#f| otherwise.
+ * Note that R7RS libraries, since they are implemented using ,(stklos) modules, are
+ * also modules.
+ * @lisp
+ * (define-module a)
+ * (define-library b)
+ *
+ * (module? (find-module 'a))   => #t
+ * (module? (find-module 'b))   => #t
+ * (library? (find-module 'a))  => #f
+ * (library? (find-module 'b))  => #t
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("library?", libraryp, subr1, (SCM obj))
@@ -383,7 +394,6 @@ DEFINE_PRIMITIVE("module-exports", module_exports, subr1, (SCM module))
                 MODULE_EXPORTS(module);
 }
 
-
 /*
 <doc EXT module-symbols
  * (module-symbols module)
@@ -407,6 +417,93 @@ doc>
 DEFINE_PRIMITIVE("all-modules", all_modules, subr0, (void))
 {
   return STk_list_copy(all_modules);
+}
+
+/*===========================================================================*\
+ *                                  Mutability
+\*===========================================================================*/
+
+/*
+<doc EXT module-lock!
+ * (module-lock! module)
+ *
+ * Locks the module |module|. When a module is locked, it is impossible
+ * to define int it new symbols or change the value of already defined ones.
+ *
+doc>
+ */
+DEFINE_PRIMITIVE("module-lock!", module_lock, subr1, (SCM module))
+{
+  if (!MODULEP(module)) error_bad_module(module);
+
+  if (BOXED_INFO(module) & MODULE_LOCKED) return STk_void;  //already locked
+
+  for (SCM lst = STk_hash_keys(&MODULE_HASH_TABLE(module));
+       !NULLP(lst);
+       lst = CDR(lst)) {
+    SCM tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), CAR(lst));
+    BOXED_INFO(tmp) |= CONS_CONST;
+  }
+  BOXED_INFO(module) |= MODULE_LOCKED;
+  return STk_void;
+}
+
+
+/*
+<doc EXT module-locked?
+ * (module-locked? mod)
+ *
+ * Returns |#t| if |mod| is a locked module and |#f|  otherwise.  Note that the
+ * |SCHEME| module, which contains the original bindings of the STklos at boot
+ * time, is locked.
+ *
+ * @lisp
+ * (module-locked? (find-module 'STklos)) => #f
+ * (module-locked? (find-module 'SCHEME)) => #t
+ * @end lisp
+doc>
+*/
+DEFINE_PRIMITIVE("module-locked?", module_lockedp, subr1, (SCM module))
+{
+  if (!MODULEP(module)) error_bad_module(module);
+  return MAKE_BOOLEAN((BOXED_INFO(module) & MODULE_LOCKED));
+}
+
+
+/*
+<doc EXT symbol-mutable?
+ * (symbol-mutable? symb)
+ * (symbol-mutable? symb module)
+ *
+ * Returns |#t| if |symb| is mutable in |module| and |#f| otherwise. If |module|
+ * is omitted it defaults to the current module. Note that imported symbols are
+ * always not mutable.
+ * @lisp
+ * (define-module M
+ *    (export x)
+ *    (define x 1))
+ *
+ * (symbol-mutable? 'x (find-module 'M)) => #t
+ * (symbol-mutable? 'x)                  => error, if not defined in current module
+ * (import M)
+ * (symbol-mutable? 'x)                  => #f
+ * @end lisp
+doc>
+ */
+DEFINE_PRIMITIVE("symbol-mutable?", symbol_mutablep, subr12, (SCM symb, SCM module))
+{
+  SCM tmp;
+
+  if (!SYMBOLP(symb)) error_bad_symbol(symb);
+  if (!module)
+    module = STk_current_module();
+  else
+    if (!MODULEP(module)) error_bad_module(module);
+
+  tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symb);
+  if (!tmp)
+    STk_error("symbol ~S is not bound in ~a", symb, module);
+  return MAKE_BOOLEAN(!BOXED_INFO(tmp) & CONS_CONST);
 }
 
 
@@ -648,8 +745,11 @@ int STk_late_init_env(void)
   ADD_PRIMITIVE(module_exports);
   ADD_PRIMITIVE(module_symbols);
   ADD_PRIMITIVE(all_modules);
+  ADD_PRIMITIVE(module_lock);
+  ADD_PRIMITIVE(module_lockedp);
 
   ADD_PRIMITIVE(symbol_value);
+  ADD_PRIMITIVE(symbol_mutablep);
   ADD_PRIMITIVE(symbol_define);
   ADD_PRIMITIVE(symbol_alias);
   ADD_PRIMITIVE(symbol_link);
