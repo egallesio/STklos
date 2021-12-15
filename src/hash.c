@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update:  8-Nov-2021 18:33 (eg)
+ * Last file update: 15-Dec-2021 19:10 (eg)
  */
 
 #include "stklos.h"
@@ -342,7 +342,7 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s, SCM (*create) (cha
  *
 \*===========================================================================*/
 
-SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v, int *index)
+static inline SCM hash_get_variable(struct hash_table_obj *h, SCM v, int *index)
 {
   register SCM l;
   char *s = SYMBOL_PNAME(v);
@@ -355,13 +355,19 @@ SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v, int *index)
   return (SCM) NULL;
 }
 
+SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v)
+{
+  int idx;
+  return hash_get_variable(h, v, &idx);
+}
+
 
 void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int define)
 {
   SCM z;
   int index;
 
-  z = STk_hash_get_variable(h, v, &index);
+  z = hash_get_variable(h, v, &index);
 
   if (z) {
     /* Variable already exists. Change its value*/
@@ -390,7 +396,7 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly)
   SCM z;
   int index;
 
-  z = STk_hash_get_variable(h, v, &index);
+  z = hash_get_variable(h, v, &index);
 
   if (z) {
     /* Variable already exists. Change its value*/

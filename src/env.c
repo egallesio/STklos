@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 15-Dec-2021 18:35 (eg)
+ * Last file update: 15-Dec-2021 19:15 (eg)
  */
 
 #include "stklos.h"
@@ -424,12 +424,11 @@ DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
                  (SCM symbol, SCM module, SCM default_value))
 {
   SCM res;
-  int i;
 
   if (!SYMBOLP(symbol)) error_bad_symbol(symbol);
   if (!MODULEP(module)) error_bad_module(module);
 
-  res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol, &i);
+  res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symbol);
   if (res) {
     return *BOX_VALUES(CDR(res));    /* sure that this box arity is 1 */
   } else {
@@ -448,17 +447,13 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
   for (SCM lst = STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module));
        !NULLP(lst);
        lst = CDR(lst)) {
-    int i;
-    SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(STk_STklos_module),
-                                    CAR(lst),
-                                    &i);
+    SCM res = STk_hash_get_variable(&MODULE_HASH_TABLE(STk_STklos_module), CAR(lst));
+
     /* Redefine symbol in (car lst) in SCHEME module */
     STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), Scheme_module);
 
     /* Make this variable constant */
-    res = STk_hash_get_variable(&MODULE_HASH_TABLE(Scheme_module),
-                                CAR(lst),
-                                &i);
+    res = STk_hash_get_variable(&MODULE_HASH_TABLE(Scheme_module), CAR(lst));
     BOXED_INFO(res) |= CONS_CONST;
   }
   /* Lock the module */
@@ -521,7 +516,6 @@ DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
                  (SCM new, SCM old, SCM module))
 {
   SCM res, mod = STk_current_module();
-  int i;
 
   if (!SYMBOLP(new)) error_bad_symbol(new);
   if (!SYMBOLP(old)) error_bad_symbol(old);
@@ -530,7 +524,7 @@ DEFINE_PRIMITIVE("%symbol-alias", symbol_alias, subr23,
   else
     if (!MODULEP(module)) error_bad_module(module);
 
-  res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), old, &i);
+  res = STk_hash_get_variable(&MODULE_HASH_TABLE(module), old);
   if (!res)
     error_unbound_variable(old);
 
@@ -542,14 +536,13 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
                  (SCM new, SCM old, SCM new_module, SCM old_module))
 {
   SCM res;
-  int i;
 
   if (!SYMBOLP(new)) error_bad_symbol(new);
   if (!SYMBOLP(old)) error_bad_symbol(old);
   if (!MODULEP(new_module)) error_bad_module(new_module);
   if (!MODULEP(old_module)) error_bad_module(old_module);
 
-  res = STk_hash_get_variable(&MODULE_HASH_TABLE(old_module), old, &i);
+  res = STk_hash_get_variable(&MODULE_HASH_TABLE(old_module), old);
   if (!res)
     error_unbound_variable(old);
 
@@ -564,12 +557,11 @@ DEFINE_PRIMITIVE("%symbol-link", symbol_link, subr4,
 
 SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
 {
-  int i;
   SCM res;
 
   while (FRAMEP(env)) env = FRAME_NEXT(env);
 
-  res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol, &i);
+  res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol);
   if (res) {
     *ref = res;
     return *BOX_VALUES(CDR(res));
@@ -579,7 +571,7 @@ SCM STk_lookup(SCM symbol, SCM env, SCM *ref, int err_if_unbound)
   // the the STklos modle (if this is not a R7RS library)
   if (!MODULE_IS_LIBRARY(env) &&  env != STk_STklos_module) {
     env = STk_STklos_module;
-    res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol, &i);
+    res = STk_hash_get_variable(&MODULE_HASH_TABLE(env), symbol);
     if (res) {
       *ref = res;
       return *BOX_VALUES(CDR(res));
