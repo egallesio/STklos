@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 15-Dec-2021 17:50 (eg)
+ * Last file update: 15-Dec-2021 18:35 (eg)
  */
 
 #include "stklos.h"
@@ -88,8 +88,26 @@ static SCM all_modules;         /* List of all knowm modules */
 
 static void print_module(SCM module, SCM port, int mode)
 {
-  STk_nputs(port, "#[module ", 9);
-  STk_print(MODULE_NAME(module), port, mode);
+  if (MODULE_IS_LIBRARY(module)) {
+    char *name = MODULE_NAME(module);
+
+    STk_nputs(port, "#[library ", 11);
+    if (SYMBOLP(name)) {
+      STk_putc('(', port);
+      for (char *s = SYMBOL_PNAME(name); *s; s++) {
+        STk_putc((*s == '/') ? ' ': *s, port);
+      }
+      STk_putc(')', port);
+    } else {
+      /* anonymous library => print its address */
+      char buffer[100];
+      snprintf(buffer, sizeof(buffer), "%lx", (unsigned long) module);
+      STk_puts(buffer, port);
+    }
+  } else  {
+    STk_nputs(port, "#[module ", 9);
+    STk_print(MODULE_NAME(module), port, mode);
+  }
   STk_putc(']', port);
 }
 
