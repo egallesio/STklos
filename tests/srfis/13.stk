@@ -780,12 +780,3 @@
 (test "string-trim empty"    "" (string-trim ""))
 (test "string-trim nonempty" "abc" (string-trim " abc"))
 (test "string-trim no-trimming" "abc" (string-trim "abc"))
-
-;; FIXME: R7RS and SRFI-13 conflict. But when STklos run tests, it will run this
-;; file, load the SRFI-13 string-map, shadowing the R7RS one, and fail the R7RS tests later.
-;; The following is an ugly hack to  at least let the R7RS tests use the original
-;; string-map procedure, but there should be a better way... -- jpellegrini
-(set! string-map (in-module SCHEME string-map))
-
-
-

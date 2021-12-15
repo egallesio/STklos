@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 15-Dec-2021 19:10 (eg)
+ * Last file update: 15-Dec-2021 21:58 (eg)
  */
 
 #include "stklos.h"
@@ -400,14 +400,13 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly)
 
   if (z) {
     /* Variable already exists. Change its value*/
+    if (ronly) BOXED_INFO(z) |= CONS_CONST;  // make the association read only
     CDR(z) = value;
   } else {
     /* Enter the new variable in table */
     SCM new = STk_cons(v, value);
 
-    if (ronly)
-      // make the association read only
-      BOXED_INFO(new) |= CONS_CONST;
+    if (ronly) BOXED_INFO(new) |= CONS_CONST; // ditto
 
     HASH_BUCKETS(h)[index] = STk_cons(new, HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
