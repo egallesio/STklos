@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  8-Nov-2021 18:27 (eg)
+ * Last file update: 15-Dec-2021 17:50 (eg)
  */
 
 #include "stklos.h"
@@ -423,10 +423,10 @@ DEFINE_PRIMITIVE("symbol-value", symbol_value, subr23,
 
 DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void))
 {
-  // This function is called to populate the Scheme module with all the
+  // This function is called to populate the SCHEME module with all the
   // symbols defined in STklos module. This permits to have a copy of the
   // original bindings that can reliably be used by the runtime.
-  // FIXME: the bindings in the Scheme module should be immutable. 
+  // NOTE: the bindings in the SCHEME module are immutable.
   for (SCM lst = STk_hash_keys(&MODULE_HASH_TABLE(STk_STklos_module));
        !NULLP(lst);
        lst = CDR(lst)) {
@@ -436,7 +436,15 @@ DEFINE_PRIMITIVE("%populate-scheme-module", populate_scheme_module, subr0, (void
                                     &i);
     /* Redefine symbol in (car lst) in SCHEME module */
     STk_define_variable(CAR(lst), *BOX_VALUES(CDR(res)), Scheme_module);
+
+    /* Make this variable constant */
+    res = STk_hash_get_variable(&MODULE_HASH_TABLE(Scheme_module),
+                                CAR(lst),
+                                &i);
+    BOXED_INFO(res) |= CONS_CONST;
   }
+  /* Lock the module */
+  BOXED_INFO(Scheme_module) |= MODULE_LOCKED;
   return STk_void;
 }
 
@@ -471,6 +479,8 @@ SCM STk_clone_frame(SCM f)
 
 void STk_define_variable(SCM symbol, SCM value, SCM module)
 {
+  if (BOXED_INFO(module) & MODULE_LOCKED)
+    STk_error("cannot define symbol ~S in ~a", symbol, module);
   STk_hash_set_variable(&MODULE_HASH_TABLE(module), symbol, value, TRUE);
 }
 
