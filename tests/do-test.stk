@@ -21,11 +21,10 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  3-May-2005 12:28 (eg)
-;;;; Last file update: 19-Nov-2021 21:39 (eg)
+;;;; Last file update: 16-Dec-2021 17:35 (eg)
 ;;;;
 
 (load-path `("../lib"
-             ,@(glob "../lib/srfi-[0-9]*/")   ;; FIXME to be deleted 
              ,@(load-path)))
 
 (load "./test.stk")
@@ -49,9 +48,10 @@
   (load "test-r7rs-lib.stk")
   (load "test-circular.stk")
   (load "test-utf8.stk")
+  (load "test-unmutable-bindings.stk")
   (load "test-misc.stk")
   (load "test-r5rs-pitfall.stk")
-  )
+)
 
 
 (define (main _)
