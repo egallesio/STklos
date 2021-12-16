@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 21-Mar-1993 14:33
-;;;; Last file update: 14-Dec-2021 16:11 (eg)
+;;;; Last file update: 16-Dec-2021 10:37 (eg)
 ;;;;
 
 (define-module DESCRIBE
@@ -61,9 +61,12 @@
      ((eof-object? x)   (format port "the end-of-file object"))
      ((struct-type? x)  (format port "the type structure named ~A"
                                 (struct-type-name x)))
-     ((library? x)      (format port "an R7RS library named ~A"
+     ((library? x)      (format port "a ~alocked R7RS library named ~A"
+                                (if (module-locked? x) "" "non ")
                                 (library-name x)))
-     ((module? x)       (format port "a module named ~A" (module-name x)))
+     ((module? x)       (format port "a ~alocked module named ~A"
+                                (if (module-locked? x) "" "non ")
+                                (module-name x)))
      ((port? x)         (format port "an ~a ~a port"
                                 (if (input-port? x) "input" "output")
                                 (if (binary-port? x) "binary" "textual")))
