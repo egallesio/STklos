@@ -134,7 +134,7 @@ static void error_bad_number(SCM n)
   STk_error("~S is a bad number", n);
 }
 
-static void error_bad_number_in_comp(SCM n)
+static void error_not_a_real_number(SCM n)
 {
   if (COMPLEXP(n))
     STk_error("~S is not a real number", n);
@@ -146,11 +146,6 @@ static void error_bad_number_in_comp(SCM n)
 static void error_at_least_1(void)
 {
   STk_error("expects at least one argument");
-}
-
-static void error_not_on_a_complex(SCM n)
-{
-  STk_error("cannot be computed on the complex number ~S", n);
 }
 
 static void error_cannot_operate(char *operation, SCM o1, SCM o2)
@@ -1445,7 +1440,7 @@ doc>
       SCM previous;                                                         \
                                                                             \
       if (argc == 0) error_at_least_1();                                    \
-      if (_max_type_(*argv) == STk_false) error_bad_number_in_comp(*argv);  \
+      if (_max_type_(*argv) == STk_false) error_not_a_real_number(*argv);  \
                                                                             \
       for (previous = *argv--; --argc; previous = *argv--) {                \
         if (_max_type_(*argv) == STk_false) error_bad_number(*argv);        \
@@ -1458,8 +1453,8 @@ doc>
 #define COMPARE_NUM2(_prim_, _max_type_, _operator_)                        \
     long STk_##_prim_##2(SCM o1, SCM o2)                                    \
     {                                                                       \
-      if (_max_type_(o1) == STk_false) error_bad_number_in_comp(o1);        \
-      if (_max_type_(o2) == STk_false) error_bad_number_in_comp(o2);        \
+      if (_max_type_(o1) == STk_false) error_not_a_real_number(o1);        \
+      if (_max_type_(o2) == STk_false) error_not_a_real_number(o2);        \
       return do_compare(o1, o2) _operator_ 0;                               \
     }
 
@@ -1539,8 +1534,7 @@ static int positivep(SCM n)
     case tc_real:     return (REAL_VAL(n) > 0.0);
     case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) > 0);
     case tc_rational: return positivep(RATIONAL_NUM(n));
-    case tc_complex:  error_not_on_a_complex(n); break;
-    default:          error_bad_number(n);
+    default:          error_not_a_real_number(n);
   }
   return FALSE; /* never reached */
 }
@@ -1553,8 +1547,7 @@ static int negativep(SCM n)
     case tc_real:     return (REAL_VAL(n) < 0.0);
     case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) < 0);
     case tc_rational: return negativep(RATIONAL_NUM(n));
-    case tc_complex:  error_not_on_a_complex(n); break;
-    default:          error_bad_number(n);
+    default:          error_not_a_real_number(n);
   }
   return FALSE; /* never reached */
 }
@@ -1689,14 +1682,14 @@ DEFINE_PRIMITIVE("max", max, vsubr, (int argc, SCM *argv))
   if (argc == 0) error_at_least_1();
   if (argc == 1) {
     if (STk_realp(*argv) == STk_true) return *argv;
-    error_bad_number(*argv);
+    error_not_a_real_number(*argv);
   }
 
   exactp = isexactp(*argv);
 
   for (res = *argv--; --argc; argv--) {
     /* See that the argument is a correct number */
-    if (STk_realp(*argv) == STk_false) error_bad_number(*argv);
+    if (STk_realp(*argv) == STk_false) error_not_a_real_number(*argv);
 
     /* determine if result should be exact or not */
     if (!isexactp(*argv)) exactp = 0;
@@ -1716,14 +1709,14 @@ DEFINE_PRIMITIVE("min", min, vsubr, (int argc, SCM *argv))
   if (argc == 0) error_at_least_1();
   if (argc == 1) {
     if (STk_realp(*argv) == STk_true) return *argv;
-    error_bad_number(*argv);
+    error_not_a_real_number(*argv);
   }
 
   exactp = isexactp(*argv);
 
   for (res = *argv--; --argc; argv--) {
     /* See that the argument is a correct number */
-    if (STk_realp(*argv) == STk_false) error_bad_number(*argv);
+    if (STk_realp(*argv) == STk_false) error_not_a_real_number(*argv);
 
     /* determine if result should be exact or not */
     if (!isexactp(*argv)) exactp = 0;
@@ -2069,7 +2062,7 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
     case tc_real:     return (REAL_VAL(x) < 0.0) ? double2real(-REAL_VAL(x)) : x;
     case tc_rational: return make_rational(absolute(RATIONAL_NUM(x)),
                                            RATIONAL_DEN(x));
-    default:          error_bad_number(x);
+    default:          error_not_a_real_number(x);
   }
   return STk_void;      /* never reached */
 }
@@ -2353,7 +2346,7 @@ DEFINE_PRIMITIVE("floor", floor, subr1, (SCM x))
                       }
     case tc_bignum:
     case tc_integer:  return x;
-    default:          error_bad_number(x);
+    default:          error_not_a_real_number(x);
   }
   return STk_void; /* never reached */
 }
@@ -2373,7 +2366,7 @@ DEFINE_PRIMITIVE("ceiling", ceiling, subr1, (SCM x))
                       }
     case tc_bignum:
     case tc_integer:  return x;
-    default:          error_bad_number(x);
+    default:          error_not_a_real_number(x);
   }
   return STk_void; /* never reached */
 }
@@ -2389,7 +2382,7 @@ DEFINE_PRIMITIVE("truncate", truncate, subr1, (SCM x))
     case tc_rational: return STk_quotient(RATIONAL_NUM(x), RATIONAL_DEN(x));
     case tc_bignum:
     case tc_integer:  return x;
-    default:          error_bad_number(x);
+    default:          error_not_a_real_number(x);
   }
   return STk_void; /* never reached */
 }
@@ -2421,7 +2414,7 @@ DEFINE_PRIMITIVE("round", round, subr1, (SCM x))
                       }
     case tc_bignum:
     case tc_integer:  return x;
-    default:          error_bad_number(x);
+    default:          error_not_a_real_number(x);
   }
   return STk_void; /* never reached */
 }
