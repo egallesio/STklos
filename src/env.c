@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update: 15-Dec-2021 21:38 (eg)
+ * Last file update: 17-Dec-2021 11:14 (eg)
  */
 
 #include "stklos.h"
@@ -489,7 +489,7 @@ DEFINE_PRIMITIVE("module-locked?", module_lockedp, subr1, (SCM module))
  * (symbol-mutable? 'x)                  => #f
  * @end lisp
 doc>
- */
+*/
 DEFINE_PRIMITIVE("symbol-mutable?", symbol_mutablep, subr12, (SCM symb, SCM module))
 {
   SCM tmp;
@@ -505,6 +505,43 @@ DEFINE_PRIMITIVE("symbol-mutable?", symbol_mutablep, subr12, (SCM symb, SCM modu
     STk_error("symbol ~S is not bound in ~a", symb, module);
   return MAKE_BOOLEAN(!BOXED_INFO(tmp) & CONS_CONST);
 }
+
+/*
+<doc EXT symbol-lock!
+ * (symbol-lock! symb)
+ * (symbol-lock! symb mod)
+ *
+ * Makes the symbol |symb| in module |mod| unmutable. If |mod| is not specified, 
+ * the current module is used.
+ *
+ * @lisp
+ * (define a 1)
+ * (symbol-mutable? 'a)     => #t
+ * (symbol-lock! 'a)
+ * (symbol-mutable? 'a)     => #f
+ * (set! a 10)              => error
+ * @end lisp
+doc>
+ */
+DEFINE_PRIMITIVE("symbol-lock!", symbol_lock, subr12, (SCM symb, SCM module))
+{
+  SCM tmp;
+
+  if (!SYMBOLP(symb)) error_bad_symbol(symb);
+  if (!module)
+    module = STk_current_module();
+  else
+    if (!MODULEP(module)) error_bad_module(module);
+
+  tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symb);
+
+  if (!tmp) STk_error("symbol ~S is not bound in ~S", symb, module);
+
+  BOXED_INFO(tmp) |= CONS_CONST;
+  return STk_void;
+}
+
+/*===========================================================================*/
 
 
 /*
@@ -750,6 +787,7 @@ int STk_late_init_env(void)
 
   ADD_PRIMITIVE(symbol_value);
   ADD_PRIMITIVE(symbol_mutablep);
+  ADD_PRIMITIVE(symbol_lock);
   ADD_PRIMITIVE(symbol_define);
   ADD_PRIMITIVE(symbol_alias);
   ADD_PRIMITIVE(symbol_link);

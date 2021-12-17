@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  8-Nov-2021 18:07 (eg)
+;;;; Last file update: 17-Dec-2021 22:31 (eg)
 ;;;;
 
 
@@ -1642,6 +1642,38 @@ doc>
         (string-append "stable-" (version))
         value)))
 
+
+#|
+<doc EXT define-constant
+ * (define-constant name expr)
+ * (define-constant (name param1 param2 ...) body)
+ * 
+ * Evaluates the expression |expr|, then creates a new, non-mutable
+ * binding for |name| with the resulting value. Note that the definition 
+ * of constant functions can use the notation of ,(quick-link-srfi 219).
+ *
+ * (define-constant a 'hello)
+ * (set! a 'goodbye)             => error
+ * (define a 2)                  => ok (it's a new binding)
+ * (define-constant ((foo a) b)  => foo is (lambda (a) (lambda (b) ...)))
+ *     ...)
+ doc>
+|#
+(define-macro (define-constant . args)
+  (define (rewrite l)
+    (if (<= (length l) 1)
+        (error "bad constant definition"))
+    (let ((bind (car l))
+          (body (cdr l)))
+      (if (pair? bind)
+          (rewrite `(,(car bind) (lambda ,(cdr bind) ,@body)))
+          l)))
+  (let ((args (rewrite args)))
+    (if (= (length args) 2)
+        `(begin                   ;; NOTE: this code should be atomic
+           (define ,@args)
+           (symbol-lock! ',(car args)))
+        (error "bad constant defiition ~S" `(define-constant ,@args)))))
 
 ;;;; ======================================================================
 ;;;;

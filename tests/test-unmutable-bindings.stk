@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date:  7-Dec-2021 23:04 (jpellegrini)
-;;;; Last file update: 16-Dec-2021 13:14 (eg)
+;;;; Last file update: 17-Dec-2021 22:38 (eg)
 ;;;;
 
 (require "test")
@@ -99,5 +99,14 @@
 (select-module SCHEME)
 (test/error "unmutable SCHEME module.3" (set! + -))
 (select-module STklos)
+
+;;;
+;;; define-constant
+;;;
+(define-module %%unmutability3
+  (define-constant cst 1)
+  (test "define-constant.1" 1 cst)
+  (test "define-constant.2" #f (symbol-mutable? 'cst)))
+
 
 (test-section-end)
