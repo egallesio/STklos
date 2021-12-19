@@ -36,23 +36,103 @@ scheme interpreter is started:
 
 In order to include Scheme code for execution during STklos startup, edit `lib/boot.stk`.
 
-# Adding simple modules or SRFIs
+# Adding simple modules and SRFIs
+
+## Adding modules
 
 * add your `fantastic-module.stk` to `lib/`
 * include `fantastic-module.stk` and `fantastic-module.ostk`  in the variables
-  `scheme_SRCS` and `scheme_OBJS`, in `lib/Makefile.am`
-* For SRFIs, add a line describing it in `lib/srfis.stk` (the format
+  `SRC_STK` and `scheme_OBJS`, in `lib/Makefile.am`
+* Tests reside in the `tests` directory.  Create a new file in `tests`
+  directory and include it in the list of loaded files in
+  `do-test.stk`
+
+## Adding SRFIs
+
+In order to add SRFI 9999 to STklos,
+
+* add your `9999.stk` to `lib/srfi`
+* include `9999.stk` and `9999.ostk`  in the variables
+  `SRC_STK` and `SRC_OSTK`, in `lib/srfi/Makefile.am`
+* Add a line describing it in `lib/srfis.stk` (the format
   is described in the file  itself).
-* Tests reside in the `tests` directory.
-    * for a new SRFI add a test in `tests/srfis/`
-	* for new libraries, create a new file in `tests` directory and
-      include it in the list of loaded files in `do-test.stk`
+* Tests reside in the `tests` directory. Add the tests in a file
+  `tests/srfis/9999.stk`
 
 For new SRFIs, adding its description in `lib/srfis.stk` suffices to update
 
 * the `SUPPORTED-SRFIS` in the main directory
 * launch the tests you added in `tests/srfis` directory, and
 * add an automatically generated documentation for this SRFI
+
+## Mixed SRFIs (Scheme and C)
+
+To add a mixed SRFI 8888,
+
+* Write a `8888.c` file and put it in `lib/srfi`
+* Write a `8888.stk` Scheme file and also put it in `lib/srfi`
+* Add your mixed SRFI to `lib/srfi/Makefile.am`, in the
+  section "SRFIs written in C and Scheme" (variables
+  `SRC_C`, `SRC_C_STK`, and `SRC_SHOBJ`
+
+### Content of the Scheme file
+
+The Scheme file will be compiled as a byte-code stream embedded in C. Here,
+the compiled file will be called `$DIR/srfi-170-incl.c`. It is built by the
+`utils/tmpcomp` script with
+
+```sh
+../../utils/tmpcomp -o srfi-170-incl.c $DIR/srfi-170.stk
+```
+
+Note: when the destination file ends with a `.c` suffix, the `tmpcomp` command
+produces a C file instead of a byte-code file.
+
+You don't have to pay attention to any particular point in the writing of this file.
+
+## Content of the C file
+
+The C file must follow the conventions of dynamically loadable code as shown
+in the example in the `/etc` directory.
+
+In this C file, to use the previously compiled Scheme code, you have to
+(using SRFI 170 as an example):
+
+* include the file `170-incl.c` at the top of your C file
+
+* add a call to execute the Scheme code just before the `MODULE_ENTRY_END`
+  directive. This is done with the following invocation:
+
+```c
+    STk_execute_C_bytecode(__module_consts, __module_code);
+```
+* Add a directive `DEFINE_MODULE_INFO` at the end of the file. It permits to
+  access some information of the module (STklos version used to compile the
+  module, exported symbols, ...). For now, this information is not used, but
+  omitting to add this directive will probably lead to a compiler warning
+  about an unresolved reference.
+
+As one more example, SRFI 25 has, at the end of the C file:
+
+```c
+MODULE_ENTRY_START("srfi/25")
+{
+  SCM module =  STk_create_module(STk_intern("srfi/25"));
+  STk_export_all_symbols(module);
+  
+  ADD_PRIMITIVE_IN_MODULE(...);
+  ...
+  ...
+  
+  /* Execute Scheme code */
+  STk_execute_C_bytecode(__module_consts, __module_code);
+}
+MODULE_ENTRY_END
+
+DEFINE_MODULE_INFO
+```
+
+See SRFI-25, SRFI-27 and SRFI-170 as a reference.
 
 ## Documentation
 
@@ -452,71 +532,6 @@ static struct extended_type_descr xtype_array = {
   (lambda args
     (apply array (apply shape (car args)) (cdr args))))
 ```
-
-
-## Mixed code modules
-
-A mixed code module is a module compiled as a shared library with some parts
-written in Scheme and some parts written in C.
-
-To illustrate our purpose, we will see here how to implement the SRFI-170,
-which is a good example of mixed code module.
-
-The following actions need to be done.
-
-1. Create a subdirectory for the module (here `lib/srfi-170` — named `DIR` hereafter)
-2. Place all the files in this directory. Here we have:
-    - `$DIR/srfi-170.stk`
-    - `$DIR/srfi-170.c`
-3. Create a file name `$DIR/Makefile.am`. This file permits to
-    * compile the Scheme file in a file named `$DIR/srfi-170-incl.c`.
-      This file must be included by the file `$DIR/srfi-170.c`
-    * compile the C file `$DIR/srfi-170.c`
-4. Add the name `lib/srfi-170/Makefile` in `configure.ac` in the
-   `AC_CONFIG_FILES` macro which is at the end of this file. This directive tells
-   the `autoconf/automake` system that a `$DIR/Makefile.in` must be    generated
-   (this file being used by the `configure` script to make the    `$LIB/Makefile`
-   of directory `$DIR`).
-5. Add also the name of the implementation directory `srfi-170`) in the
-   variable `SUBDIR` of file `lib/Makefile.am`
-
-### Content of the Scheme file
-
-The Scheme file will be compiled as a byte-code stream embedded in C. Here,
-the compiled file will be called `$DIR/srfi-170-incl.c`. It is built by the
-`utils/tmpcomp` script with
-
-```sh
-../../utils/tmpcomp -o srfi-170-incl.c $DIR/srfi-170.stk
-```
-
-Note: when the destination file ends with a `.c` suffix, the `tmpcomp` command
-produces a C file instead of a byte-code file.
-
-You don't have to pay attention to a particular point in the writing of this file.
-
-## Content of the C file
-
-The C file must follow the conventions of dynamically loadable code as shown
-in the example in the `/etc` directory.
-
-In this C file, to use the previously compiled Scheme code, you have to
-
-* include the file `srfi-170-incl.c` at the top of your C file
-
-* add a call to execute the Scheme code just before the `MODULE_ENTRY_END`
-  directive. This is done with the following invocation:
-
-    ```c
-        STk_execute_C_bytecode(__module_consts, __module_code);
-    ```
-
-* Add a directive `DEFINE_MODULE_INFO` at the end of the file. It permits to
-  access some information of the module (STklos version used to compile the
-  module, exported symbols, ...). For now, this information is not used, but
-  omitting to add this directive will probably lead to a compiler warning
-  about an unresolved reference.
-
 
 # The virtual machine
 

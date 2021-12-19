@@ -1,0 +1,853 @@
+
+(define-module srfi/207
+  (import (srfi 1)
+          (srfi 9)
+          (srfi 13)
+          (srfi 151)
+          (srfi 158))
+
+  (export bytestring bytevector->hex-string bytestring->list
+          make-bytestring make-bytestring!
+          hex-string->bytevector bytevector->base64 base64->bytevector
+          make-bytestring-generator
+          bytestring-pad bytestring-pad-right bytestring-trim
+          bytestring-trim-right bytestring-trim-both bytestring-replace
+          bytestring-index bytestring-index-right bytestring-break
+          bytestring-span
+          bytestring>? bytestring<? bytestring<=? bytestring>=?
+          bytestring-error? bytestring-error-message bytestring-error-irritants
+          bytestring-join bytestring-split
+          read-textual-bytestring write-textual-bytestring
+          write-binary-bytestring)
+
+
+(define (vector-unfold f len)
+  (let ((res (make-vector len)))
+    (let lp ((i 0))
+      (cond ((= i len) res)
+            (else (vector-set! res i (f i))
+                  (lp (+ i 1)))))))
+
+(define (u8vector-for-each proc bvec)
+  (assume (procedure? proc))
+  (assume (bytevector? bvec))
+  (let ((len (bytevector-length bvec)))
+    (let lp ((i 0))
+      (cond ((= i len) (if #f #f))
+            (else
+             (proc (bytevector-u8-ref bvec i))
+             (lp (+ i 1)))))))
+
+(define (u8vector-unfold f len seed)
+  (let ((u8vec (make-bytevector len)))
+    (let lp ((i 0) (seed seed))
+      (unless (= i len)
+        (let-values (((b seed*) (f i seed)))
+          (bytevector-u8-set! u8vec i b)
+          (lp (+ i 1) seed*))))
+    u8vec))
+
+(define (u8-list->bytevector lis)
+  (let* ((len (length lis))
+         (bvec (make-bytevector len)))
+    (let lp ((i 0) (lis lis))
+      (cond ((null? lis) bvec)
+            (else (bytevector-u8-set! bvec i (car lis))
+                  (lp (+ i 1) (cdr lis)))))))
+
+(define (bytevector->u8-list bvec)
+  (list-tabulate (bytevector-length bvec)
+                 (lambda (i)
+                   (bytevector-u8-ref bvec i))))
+
+                     
+ 
+;; (define-record-type <bytestring-error>
+;;   (raw-bytestring-error message irritants)
+;;   bytestring-error?
+;;   (message bytestring-error-message)
+;;   (irritants bytestring-error-irritants))
+
+;; (define (bytestring-error message . irritants)
+;;   (raise (raw-bytestring-error message irritants)))
+
+
+
+
+(define &bytestring-error
+  (make-condition-type 'bytestring-error
+                       &condition
+                       '(message irritants)))
+
+(define (bytestring-error message . irritants)
+  (raise (make-condition &bytestring-error
+                         'message message
+                         'irritants irritants)))
+
+(define (bytestring-error? obj)
+  (and (condition? obj)
+       (condition-has-type? obj &bytestring-error))) 
+
+(define (bytestring-error-message c)
+  (condition-ref c 'messsage))
+
+(define (bytestring-error-irritants c)
+  (condition-ref c 'irritants))
+
+
+
+
+
+
+
+
+
+
+;;; Simple parser for string-notated bytevectors.
+
+(define (parse prefix)
+  (when prefix (consume-prefix))
+  (consume-quote)
+  (let lp ((c (read-char)))
+    (cond ((eof-object? c) (bytestring-error "unexpected EOF"))
+          ((char=? c #\") (if #f #f))  ; terminating quote
+          ((char=? c #\\)
+           (let ((c* (read-char)))
+             (cond ((eof-object? c*)
+                    (bytestring-error "incomplete escape sequence"))
+                   ((escape c*) =>
+                    (lambda (b)
+                      (write-u8 b)
+                      (lp (read-char))))
+                   (else (lp (read-char))))))
+          ((and (char>=? c #\space) (char<=? c #\~))
+           (write-u8 (char->integer c))
+           (lp (read-char)))
+          (else (bytestring-error "invalid character" c)))))
+
+(define (consume-quote)
+  (let ((c (read-char)))
+    (cond ((eof-object? c) (bytestring-error "unexpected EOF"))
+          ((char=? c #\") #t)
+          (else
+           (bytestring-error "invalid character (expected #\\\")" c)))))
+
+(define (consume-prefix)
+  (let ((s (read-string 3)))
+    (cond ((eof-object? s) (bytestring-error "unexpected EOF"))
+          ((string=? s "#u8") #t)
+          (else (bytestring-error "invalid bytestring prefix" s)))))
+
+(define (escape c)
+  (case c
+    ((#\a) 7)
+    ((#\b) 8)
+    ((#\t) 9)
+    ((#\n) 10)
+    ((#\r) 13)
+    ((#\") 34)
+    ((#\\) 92)
+    ((#\|) 124)
+    ((#\x) (parse-hex))
+    ((#\newline)
+     (skip-horizontal-whitespace)
+     #f)                              ; skip
+    (else
+     (cond ((char-whitespace? c)
+            (skip-horizontal-whitespace)
+            (skip-line-break)
+            #f)
+           (else (bytestring-error "invalid escaped character" c))))))
+
+(define (parse-hex)
+  (let* ((hex1 (read-char))
+         (hex2 (read-char)))
+    (when (or (eof-object? hex1) (eof-object? hex2))
+      (bytestring-error "incomplete hexadecimal sequence"))
+    (if (char=? hex2 #\;)
+        (or (string->number (string hex1) 16)
+            (bytestring-error "invalid hexadecimal sequence"))
+        (let ((term (read-char)))
+          (if (eqv? term #\;)
+              (or (string->number (string hex1 hex2) 16)
+                  (bytestring-error "invalid hexadecimal sequence"))
+              (bytestring-error
+               "overlong or unterminated hexadecimal sequence"))))))
+
+(define (skip-line-break)
+  (let ((c (read-char)))
+    (unless (eqv? #\newline c)
+      (bytestring-error "expected newline" c)))
+  (skip-horizontal-whitespace))
+
+(define (skip-horizontal-whitespace)
+  (let lp ((c (peek-char)))
+    (when (and (char-whitespace? c) (not (char=? c #\newline)))
+      (read-char)
+      (lp (peek-char)))))
+
+(define read-textual-bytestring
+  (case-lambda
+   ((prefix) (read-textual-bytestring prefix (current-input-port)))
+   ((prefix in)
+    (assume (boolean? prefix))
+    (call-with-port
+     (open-output-bytevector)
+     (lambda (out)
+       (parameterize ((current-input-port in)
+                      (current-output-port out))
+         (parse prefix)
+         (get-output-bytevector out)))))))
+
+
+
+
+;;;
+
+
+
+
+
+
+(define outside-char 99) ; luft-balloons
+(define pad-char 101)    ; dalmations
+
+(define (outside-char? x) (eqv? x outside-char))
+(define (pad-char? x) (eqv? x pad-char))
+
+(define (make-base64-decode-table digits)
+  (let ((extra-1 (char->integer (string-ref digits 0)))
+        (extra-2 (char->integer (string-ref digits 1))))
+    (vector-unfold
+     (lambda (i)
+       (cond ((and (>= i 48) (< i 58)) (+ i 4))   ; numbers
+             ((and (>= i 65) (< i 91)) (- i 65))  ; upper case letters
+             ((and (>= i 97) (< i 123)) (- i 71)) ; lower case letters
+             ((= i extra-1) 62)
+             ((= i extra-2) 63)
+             ((= i 61) pad-char)                  ; '='
+             (else outside-char)))
+     #x100)))
+
+(define (base64-decode-u8 table u8)
+  (vector-ref table u8))
+
+(define (make-base64-encode-table digits)
+  (vector-unfold
+   (lambda (i)
+     (cond ((< i 26) (+ i 65))  ; upper-case letters
+           ((< i 52) (+ i 71))  ; lower-case letters
+           ((< i 62) (- i 4))   ; numbers
+           ((= i 62) (char->integer (string-ref digits 0)))
+           ((= i 63) (char->integer (string-ref digits 1)))
+           (else (error "out of range"))))
+   64))
+
+;;;; Decoding
+
+(define (decode-base64-string src digits)
+  (let ((table (make-base64-decode-table digits)))
+    (call-with-port
+     (open-output-bytevector)
+     (lambda (out)
+       (decode-base64-to-port src out table)
+       (get-output-bytevector out)))))
+
+;; Loop through src, writing decoded base64 data to port in chunks
+;; of up to three bytes.
+(define (decode-base64-to-port src port table)
+  (let ((len (string-length src)))
+    (let lp ((i 0) (b1 outside-char) (b2 outside-char) (b3 outside-char))
+      (if (= i len)
+          (decode-base64-trailing port b1 b2 b3)
+          (let* ((c (string-ref src i))
+                 (b (base64-decode-u8 table (char->integer c))))
+            (cond ((pad-char? b) (decode-base64-trailing port b1 b2 b3))
+                  ((char-whitespace? c) (lp (+ i 1) b1 b2 b3))
+                  ((outside-char? b)
+                   (bytestring-error "invalid character in base64 string"
+                                     c
+                                     src))
+                  ((outside-char? b1) (lp (+ i 1) b b2 b3))
+                  ((outside-char? b2) (lp (+ i 1) b1 b b3))
+                  ((outside-char? b3) (lp (+ i 1) b1 b2 b))
+                  (else
+                   (write-u8 (bitwise-ior (arithmetic-shift b1 2)
+                                          (bit-field b2 4 6))
+                             port)
+                   (write-u8 (bitwise-ior
+                              (arithmetic-shift (bit-field b2 0 4) 4)
+                              (bit-field b3 2 6))
+                             port)
+                   (write-u8 (bitwise-ior
+                              (arithmetic-shift (bit-field b3 0 2) 6)
+                              b)
+                             port)
+                   (lp (+ i 1) outside-char outside-char outside-char))))))))
+
+;; Flush any trailing bits accumulated in the decode loop to the
+;; bytevector port `out', then return the finalized bytestring.
+(define (decode-base64-trailing out b1 b2 b3)
+  (cond ((outside-char? b1) #t)
+        ((outside-char? b2) (write-u8 (arithmetic-shift b1 2) out))
+        (else
+         (write-u8 (bitwise-ior (arithmetic-shift b1 2) (bit-field b2 4 6))
+                   out)
+         (unless (outside-char? b3)
+           (write-u8 (bitwise-ior (arithmetic-shift (bit-field b2 0 4) 4)
+                                  (bit-field b3 2 6))
+                     out)))))
+
+;;;; Encoding
+
+(define (base64-encode-bytevector bv digits)
+  (let* ((len (bytevector-length bv))
+         (quot (quotient len 3))
+         (rem (- len (* quot 3)))
+         (res-len (arithmetic-shift (+ quot (if (zero? rem) 0 1)) 2))
+         (res (make-bytevector res-len))
+         (table (make-base64-encode-table digits)))
+    (base64-encode-bytevector! bv 0 len res table)
+    res))
+
+(define (base64-encode-bytevector! bv start end res table)
+  (let ((limit (- end 2))
+        (enc (lambda (i) (vector-ref table i))))
+    (let lp ((i start) (j 0))
+      (if (>= i limit)
+          (case (- end i)
+            ((1)
+             (let ((b1 (bytevector-u8-ref bv i)))
+               (bytevector-u8-set! res j (enc (arithmetic-shift b1 -2)))
+               (bytevector-u8-set!
+                res
+                (+ j 1)
+                (enc (arithmetic-shift (bitwise-and #b11 b1) 4)))
+               (bytevector-u8-set! res (+ j 2) (char->integer #\=))
+               (bytevector-u8-set! res (+ j 3) (char->integer #\=))
+               (+ j 4)))
+            ((2)
+             (let ((b1 (bytevector-u8-ref bv i))
+                   (b2 (bytevector-u8-ref bv (+ i 1))))
+               (bytevector-u8-set! res j (enc (arithmetic-shift b1 -2)))
+               (bytevector-u8-set!
+                res
+                (+ j 1)
+                (enc (bitwise-ior
+                      (arithmetic-shift (bitwise-and #b11 b1) 4)
+                      (bit-field b2 4 8))))
+               (bytevector-u8-set!
+                res
+                (+ j 2)
+                (enc (arithmetic-shift (bit-field b2 0 4) 2)))
+               (bytevector-u8-set! res (+ j 3) (char->integer #\=))
+               (+ j 4)))
+            (else
+             j))
+          (let ((b1 (bytevector-u8-ref bv i))
+                (b2 (bytevector-u8-ref bv (+ i 1)))
+                (b3 (bytevector-u8-ref bv (+ i 2))))
+            (bytevector-u8-set! res j (enc (arithmetic-shift b1 -2)))
+            (bytevector-u8-set!
+             res
+             (+ j 1)
+             (enc (bitwise-ior
+                   (arithmetic-shift (bitwise-and #b11 b1) 4)
+                   (bit-field b2 4 8))))
+            (bytevector-u8-set!
+             res
+             (+ j 2)
+             (enc (bitwise-ior
+                   (arithmetic-shift (bit-field b2 0 4) 2)
+                   (bit-field b3 6 8))))
+            (bytevector-u8-set! res (+ j 3) (enc (bitwise-and #b111111 b3)))
+            (lp (+ i 3) (+ j 4)))))))
+
+
+
+
+
+;;;; Utility
+
+(define (exact-natural? x)
+  (and (integer? x) (exact-integer? x) (not (negative? x))))
+
+(define (u8-or-ascii-char? obj)
+  (or (and (char? obj) (char<=? obj #\delete))
+      (and (exact-natural? obj) (< obj 256))))
+
+(define (string-ascii? obj)
+  (and (string? obj)
+       (string-every (lambda (c) (char<=? c #\delete)) obj)
+       #t))
+
+(define (valid-bytestring-segment? obj)
+  (or (bytevector? obj)
+      (u8-or-ascii-char? obj)
+      (string-ascii? obj)))
+
+(define (%bytestring-null? bstring)
+  (zero? (bytevector-length bstring)))
+
+(define (%bytestring-last bstring)
+  (assume (not (%bytestring-null? bstring)) "empty bytestring")
+  (bytevector-u8-ref bstring (- (bytevector-length bstring) 1)))
+
+(define (negate pred)
+  (lambda (obj)
+    (not (pred obj))))
+
+;;;; Constructors
+
+(define (make-bytestring lis)
+  (assume (or (pair? lis) (null? lis)))
+  (call-with-port
+   (open-output-bytevector)
+   (lambda (out)
+     (for-each (lambda (seg) (%write-bytestring-segment seg out)) lis)
+     (get-output-bytevector out))))
+
+(define (make-bytestring! bvec at lis)
+  (assume (bytevector? bvec))
+  (assume (and (exact-natural? at)
+               (< at (bytevector-length bvec))))
+  (bytevector-copy! bvec at (make-bytestring lis)))
+
+(define (%write-bytestring-segment obj port)
+  ((cond ((and (exact-natural? obj) (< obj 256)) write-u8)
+         ((and (char? obj) (char<=? obj #\delete)) write-char-binary)
+         ((bytevector? obj) write-bytevector)
+         ((string-ascii? obj) write-string-binary)
+         (else
+          (bytestring-error "invalid bytestring element" obj)))
+   obj
+   port))
+
+;; If your Scheme allows binary ports to function as textual ports,
+;; get rid of this dance.
+(define (write-char-binary c port)
+  (write-u8 (char->integer c) port))
+
+(define (write-string-binary s port)
+  (string-for-each (lambda (c)
+                     (write-char-binary c port))
+                   s))
+
+(define (bytestring . args)
+  (if (null? args) (bytevector) (make-bytestring args)))
+
+;;;; Conversion
+
+;;; Hex string conversion
+
+;; Convert an unsigned integer n to a bytevector representing
+;; the base-256 big-endian form (the zero index holds the MSB).
+(define (integer->bytevector n)
+  (assume (and (integer? n) (not (negative? n))))
+  (if (zero? n)
+      (make-bytevector 1 0)
+      (u8-list->bytevector
+       (unfold-right zero?
+                     (lambda (n) (truncate-remainder n 256))
+                     (lambda (n) (truncate-quotient n 256))
+                     n))))
+
+(define (integer->hex-string n)
+  (cond ((number->string n 16) =>
+         (lambda (res)
+           (if (even? (string-length res))
+               res
+               (string-append "0" res))))
+        (else (bytestring-error "not an integer" n))))
+
+(define (bytevector->hex-string bv)
+  (assume (bytevector? bv))
+  (string-concatenate
+   (list-tabulate (bytevector-length bv)
+                  (lambda (i)
+                    (integer->hex-string (bytevector-u8-ref bv i))))))
+
+(define (hex-string->bytevector hex-str)
+  (assume (string? hex-str))
+  (let ((len (string-length hex-str)))
+    (unless (even? len)
+      (bytestring-error "incomplete hexadecimal string" hex-str))
+    (u8vector-unfold
+     (lambda (_ i)
+       (let* ((end (+ i 2))
+              (s (substring hex-str i end))
+              (n (string->number s 16)))
+         (if n
+             (values n end)
+             (bytestring-error "invalid hexadecimal sequence" s))))
+     (truncate-quotient len 2)
+     0)))
+
+(define bytevector->base64
+  (case-lambda
+    ((bvec) (bytevector->base64 bvec "+/"))
+    ((bvec digits)
+     (assume (bytevector? bvec))
+     (assume (string? digits))
+     (utf8->string (base64-encode-bytevector bvec digits)))))
+
+(define base64->bytevector
+  (case-lambda
+    ((base64-string) (base64->bytevector base64-string "+/"))
+    ((base64-string digits)
+     (assume (string? base64-string))
+     (assume (string? digits))
+     (decode-base64-string base64-string digits))))
+
+(define bytestring->list
+  (case-lambda
+    ((bstring) (bytestring->list bstring 0 (bytevector-length bstring)))
+    ((bstring start)
+     (bytestring->list bstring start (bytevector-length bstring)))
+    ((bstring start end)
+     (assume (bytevector? bstring))
+     (assume (and (exact-natural? start) (>= start 0))
+             "invalid start index"
+             start
+             bstring)
+     (assume (and (exact-natural? end) (<= end (bytevector-length bstring)))
+             "invalid end index"
+             end
+             bstring)
+     (assume (>= end start) "invalid indices" start end)
+     (unfold (lambda (i) (= i end))
+             (lambda (i)
+               (let ((b (bytevector-u8-ref bstring i)))
+                 (if (and (>= b #x20) (< b #x7f))
+                     (integer->char b)
+                     b)))
+             (lambda (i) (+ i 1))
+             start))))
+
+;; Lazily generate the bytestring constructed from objs.
+(define (make-bytestring-generator . objs)
+  (list->generator (flatten-bytestring-segments objs)))
+
+;; Convert and flatten chars and strings, and flatten bytevectors
+;; to yield a flat list of bytes.
+(define (flatten-bytestring-segments objs)
+  (fold-right
+   (lambda (x res)
+     (cond ((and (exact-natural? x) (< x 256)) (cons x res))
+           ((and (char? x) (char<=? x #\delete))
+            (cons (char->integer x) res))
+           ((bytevector? x)
+            (append (bytevector->u8-list x) res))
+           ((string-ascii? x)
+            (append (map char->integer (string->list x)) res))
+           (else
+            (bytestring-error "invalid bytestring segment" x))))
+   '()
+   objs))
+
+;;;; Selection
+
+(define (%bytestring-pad-left-or-right bstring len char-or-u8 right)
+  (assume (bytevector? bstring))
+  (assume (exact-natural? len))
+  (assume (u8-or-ascii-char? char-or-u8))
+  (let ((pad-len (- len (bytevector-length bstring)))
+        (pad-byte (if (char? char-or-u8)
+                      (char->integer char-or-u8)
+                      char-or-u8)))
+    (if (<= pad-len 0)
+        (bytevector-copy bstring)
+        (let ((padded (make-bytevector len pad-byte)))
+          (bytevector-copy! padded (if right 0 pad-len) bstring)
+          padded))))
+
+(define (bytestring-pad bstring len char-or-u8)
+  (%bytestring-pad-left-or-right bstring len char-or-u8 #f))
+
+(define (bytestring-pad-right bstring len char-or-u8)
+  (%bytestring-pad-left-or-right bstring len char-or-u8 #t))
+
+(define (bytestring-trim bstring pred)
+  (assume (bytevector? bstring))
+  (assume (procedure? pred))
+  (let ((new-start (bytestring-index bstring (negate pred))))
+    (if new-start
+        (bytevector-copy bstring new-start)
+        (bytevector))))
+
+(define (bytestring-trim-right bstring pred)
+  (assume (bytevector? bstring))
+  (assume (procedure? pred))
+  (cond ((bytestring-index-right bstring (negate pred)) =>
+         (lambda (end-1)
+           (bytevector-copy bstring 0 (+ 1 end-1))))
+        (else (bytevector))))
+
+(define (bytestring-trim-both bstring pred)
+  (assume (bytevector? bstring))
+  (assume (procedure? pred))
+  (let ((neg-pred (negate pred)))
+    (cond ((bytestring-index bstring neg-pred) =>
+           (lambda (start)
+             (bytevector-copy bstring
+                              start
+                              (+ (bytestring-index-right bstring neg-pred)
+                                 1))))
+          (else (bytevector)))))
+
+;;;; Replacement
+
+(define bytestring-replace
+  (case-lambda
+    ((bstring1 bstring2 start end)
+     (bytestring-replace bstring1
+                         bstring2
+                         start
+                         end
+                         0
+                         (bytevector-length bstring2)))
+    ((bstring1 bstring2 start1 end1 start2 end2)
+     (assume (bytevector? bstring1))
+     (assume (bytevector? bstring2))
+     (assume (and (exact-natural? start1) (>= start1 0) (<= start1 end1))
+             "invalid start index"
+             start1)
+     (assume (and (exact-natural? end1)
+                  (<= end1 (bytevector-length bstring1)))
+             "invalid end index"
+             bstring1)
+     (assume (and (exact-natural? start2) (>= start2 0) (<= start2 end2))
+             "invalid start index"
+             start2)
+     (assume (and (exact-natural? end2)
+                  (<= end2 (bytevector-length bstring2)))
+             "invalid end index"
+             bstring2)
+     (if (and (= start1 end1) (= start2 end2))
+         (bytevector-copy bstring1)    ; replace no bits with no bits
+         (let* ((b1-len (bytevector-length bstring1))
+                (sub-len (- end2 start2))
+                (new-len (+ sub-len (- b1-len (- end1 start1))))
+                (bs-new (make-bytevector new-len)))
+           (bytevector-copy! bs-new 0 bstring1 0 start1)
+           (bytevector-copy! bs-new start1 bstring2 start2 end2)
+           (when (< (+ start1 sub-len) new-len)
+             (bytevector-copy! bs-new (+ start1 sub-len) bstring1 end1 b1-len))
+           bs-new)))))
+
+;;;; Comparison
+
+(define (%bytestring-prefix-length bstring1 bstring2)
+  (let ((end (min (bytevector-length bstring1)
+                  (bytevector-length bstring2))))
+    (if (eqv? bstring1 bstring2)  ; fast path
+        end
+        (let lp ((i 0))
+          (if (or (>= i end)
+                  (not (= (bytevector-u8-ref bstring1 i)
+                          (bytevector-u8-ref bstring2 i))))
+              i
+              (lp (+ i 1)))))))
+
+;;; Primitive bytevector comparison functions.
+
+(define (%bytestring-compare bstring1 bstring2 res< res= res>)
+  (let ((len1 (bytevector-length bstring1))
+        (len2 (bytevector-length bstring2)))
+    (let ((match (%bytestring-prefix-length bstring1 bstring2)))
+      (if (= match len1)
+          (if (= match len2) res= res<)
+          (if (= match len2)
+              res>
+              (if (< (bytevector-u8-ref bstring1 match)
+                     (bytevector-u8-ref bstring2 match))
+                  res<
+                  res>))))))
+
+(define (bytestring<? bstring1 bstring2)
+  (assume (bytevector? bstring1))
+  (assume (bytevector? bstring2))
+  (and (not (eqv? bstring1 bstring2))
+       (%bytestring-compare bstring1 bstring2 #t #f #f)))
+
+(define (bytestring>? bstring1 bstring2)
+  (assume (bytevector? bstring1))
+  (assume (bytevector? bstring2))
+  (and (not (eqv? bstring1 bstring2))
+       (%bytestring-compare bstring1 bstring2 #f #f #t)))
+
+(define (bytestring<=? bstring1 bstring2)
+  (assume (bytevector? bstring1))
+  (assume (bytevector? bstring2))
+  (or (eqv? bstring1 bstring2)
+      (%bytestring-compare bstring1 bstring2 #t #t #f)))
+
+(define (bytestring>=? bstring1 bstring2)
+  (assume (bytevector? bstring1))
+  (assume (bytevector? bstring2))
+  (or (eqv? bstring1 bstring2)
+      (%bytestring-compare bstring1 bstring2 #f #t #t)))
+
+;;;; Searching
+
+(define bytestring-index
+  (case-lambda
+    ((bstring pred) (bytestring-index bstring pred 0))
+    ((bstring pred start)
+     (bytestring-index bstring pred start (bytevector-length bstring)))
+    ((bstring pred start end)
+     (assume (bytevector? bstring))
+     (assume (procedure? pred))
+     (assume (exact-natural? start))
+     (assume (exact-natural? end))
+     (let lp ((i start))
+       (and (< i end)
+            (if (pred (bytevector-u8-ref bstring i))
+                i
+                (lp (+ i 1))))))))
+
+(define bytestring-index-right
+  (case-lambda
+    ((bstring pred) (bytestring-index-right bstring pred 0))
+    ((bstring pred start)
+     (bytestring-index-right bstring pred start (bytevector-length bstring)))
+    ((bstring pred start end)
+     (assume (bytevector? bstring))
+     (assume (procedure? pred))
+     (assume (exact-natural? start))
+     (assume (exact-natural? end))
+     (let lp ((i (- end 1)))
+       (and (>= i start)
+            (if (pred (bytevector-u8-ref bstring i))
+                i
+                (lp (- i 1))))))))
+
+(define (bytestring-break bstring pred)
+  (assume (bytevector? bstring))
+  (assume (procedure? pred))
+  (cond ((bytestring-index bstring pred) =>
+         (lambda (len)
+           (values (bytevector-copy bstring 0 len)
+                   (bytevector-copy bstring len))))
+        (else (values (bytevector-copy bstring) (bytevector)))))
+
+(define (bytestring-span bstring pred)
+  (assume (bytevector? bstring))
+  (assume (procedure? pred))
+  (cond ((bytestring-index bstring (negate pred)) =>
+         (lambda (len)
+           (values (bytevector-copy bstring 0 len)
+                   (bytevector-copy bstring len))))
+        (else (values (bytevector-copy bstring) (bytevector)))))
+
+;;;; Joining & Splitting
+
+(define (%bytestring-join-nonempty bstrings delimiter grammar)
+  (call-with-port
+   (open-output-bytevector)
+   (lambda (out)
+     (when (eqv? grammar 'prefix) (write-bytevector delimiter out))
+     (write-bytevector (car bstrings) out)
+     (for-each (lambda (bstr)
+                 (write-bytevector delimiter out)
+                 (write-bytevector bstr out))
+               (cdr bstrings))
+     (when (eqv? grammar 'suffix) (write-bytevector delimiter out))
+     (get-output-bytevector out))))
+
+(define bytestring-join
+  (case-lambda
+    ((bstrings delimiter) (bytestring-join bstrings delimiter 'infix))
+    ((bstrings delimiter grammar)
+     (assume (or (pair? bstrings) (null? bstrings)))
+     (unless (memv grammar '(infix strict-infix prefix suffix))
+       (bytestring-error "invalid grammar" grammar))
+     (let ((delim-bstring (bytestring delimiter)))
+       (if (pair? bstrings)
+           (%bytestring-join-nonempty bstrings delim-bstring grammar)
+           (if (eqv? grammar 'strict-infix)
+               (bytestring-error "empty list with strict-infix grammar")
+               (bytevector)))))))
+
+(define (%find-right bstring byte end)
+  (bytestring-index-right bstring (lambda (b) (= b byte)) 0 end))
+
+(define (%bytestring-infix-split bstring delimiter)
+  (let lp ((token-end (bytevector-length bstring)) (split '()))
+    (cond ((< token-end 0) split)
+          ((%find-right bstring delimiter token-end) =>
+           (lambda (token-start-1)
+             (lp token-start-1
+                 (cons (bytevector-copy bstring (+ 1 token-start-1)
+                                                token-end)
+                       split))))
+          (else (cons (bytevector-copy bstring 0 token-end) split)))))
+
+(define (%trim-byte bstring byte)
+  (bytestring-trim bstring (lambda (b) (= b byte))))
+
+(define (%trim-right-byte bstring byte)
+  (bytestring-trim-right bstring (lambda (b) (= b byte))))
+
+(define (%bytestring-split/trim-outliers bstring delimiter grammar)
+  (let ((trimmed (case grammar
+                  ((infix strict-infix) bstring)
+                  ((prefix) (%trim-byte bstring delimiter))
+                  ((suffix) (%trim-right-byte bstring delimiter)))))
+    (%bytestring-infix-split trimmed delimiter)))
+
+(define bytestring-split
+  (case-lambda
+    ((bstring delimiter) (bytestring-split bstring delimiter 'infix))
+    ((bstring delimiter grammar)
+     (assume (bytevector? bstring))
+     (assume (u8-or-ascii-char? delimiter))
+     (unless (memv grammar '(infix strict-infix prefix suffix))
+       (bytestring-error "invalid grammar" grammar))
+     (if (%bytestring-null? bstring)
+         '()
+         (%bytestring-split/trim-outliers
+          bstring
+          (if (char? delimiter) (char->integer delimiter) delimiter)
+          grammar)))))
+
+;;;; I/O
+
+(define backslash-codepoints
+  '((7 . #\a) (8 . #\b) (9 . #\t) (10 . #\n) (13 . #\r)
+    (34 . #\") (92 . #\\) (124 . #\|)))
+
+(define write-textual-bytestring
+  (case-lambda
+   ((bstring)
+    (write-textual-bytestring bstring (current-output-port)))
+   ((bstring port)
+    (parameterize ((current-output-port port))
+      (write-string "#u8\"")
+      (u8vector-for-each
+       (lambda (b)
+         (cond ((assv b backslash-codepoints) =>
+                (lambda (p)
+                  (write-char #\\)
+                  (write-char (cdr p))))
+               ((and (>= b #x20) (<= b #x7e))
+                (write-char (integer->char b)))
+               (else
+                (write-string "\\x")
+                (write-string (number->string b 16))
+                (write-char #\;))))
+       bstring)
+      (write-char #\")))))
+
+(define (write-binary-bytestring port . args)
+  (assume (binary-port? port))
+  (for-each (lambda (arg)
+              (unless (valid-bytestring-segment? arg)
+                (bytestring-error "invalid bytestring element" arg)))
+            args)
+  (for-each (lambda (seg) (%write-bytestring-segment seg port)) args))
+
+) ;; END OF DEFINE-MODULE
+;;;; ======================================================================
+
+(provide "srfi/207")

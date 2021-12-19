@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 11-Nov-2021 18:33 (eg)
+;;;; Last file update: 14-Dec-2021 17:35 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -935,7 +935,10 @@ doc>
                        (compile (cadr actuals) env epair #f)
                        (emit mnemo))
                      (compiler-error fct epair "2 arguments required (~A provided)"
-                                    len))))
+                                     len))))
+        (oper1 (lambda (mnemo a)
+                 (compile a env epair #f)
+                 (emit mnemo)))
         (oper2 (lambda (mnemo a b)
                  (compile a env epair #f)
                  (emit mnemo b)))
@@ -978,11 +981,15 @@ doc>
                         ((and (number? a) (number? b))
                          (compile-constant (+ a b) env #f))
                         ((small-integer-constant? a)
-                         (oper2 'IN-SINT-ADD2 b a))
+                         (if (= a 1)
+                             (oper1 'IN-INCR b)
+                             (oper2 'IN-SINT-ADD2 b a)))
                         ((small-integer-constant? b)
-                         (oper2 'IN-SINT-ADD2 a b))
+                         (if (= b 1)
+                             (oper1 'IN-INCR a)
+                             (oper2 'IN-SINT-ADD2 a b)))
                         (else
-                         (comp2 'IN-ADD2)))))
+                          (comp2 'IN-ADD2)))))
               (else (compile-normal-call fct actuals len env epair #f))))
       ((-)  (case len
                 ((0)  (compiler-error '- epair "needs at least one argument"))
@@ -996,6 +1003,8 @@ doc>
                            (compile-constant (- a b) env tail?))
                           ((small-integer-constant? a)
                            (oper2 'IN-SINT-SUB2 b a))
+                          ((eq? b 1)
+                           (oper1 'IN-DECR a))
                           ((and (number? b)
                                 (small-integer-constant? (- b)))
                            (oper2 'IN-SINT-ADD2 a (- b)))

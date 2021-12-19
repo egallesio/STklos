@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-Aug-1999 16:26 (eg)
-;;;; Last file update: 17-May-2021 16:43 (eg)
+;;;; Last file update:  9-Dec-2021 16:18 (eg)
 ;;;;
 
 (define-module SRFI-0
@@ -85,7 +85,7 @@
  * This primitive ensures that the |feature| (in sense of SRFI-0 feature) can be used.
  * In particular, it eventually requires the loading of the files needed to used |feature|.
  * The |feature| can be expressed as a string or a symbol, If feature is an integer |n|,
- * it is equivalent to |srfi-n|. Consequently, to use ,(quick-link-srfi 1) 
+ * it is equivalent to |srfi-n|. Consequently, to use ,(quick-link-srfi 1)
  * the following forms are equivalent:
  *
  * @lisp
@@ -106,10 +106,28 @@ doc>
                 (else (error "bad feature" feat))))
          (files (srfi-0-feature-implementation-file name)))
     (when files
-       (for-each (lambda (x)
-                   ;; /!\ do not use the function but the require macro!!
-                   (require x))
-                 files))))
+      (for-each (lambda (x)
+                  ;; NOTE   Do not use the "require" function here, but the macro!!
+                  ;; KLUDGE Since we accept tat srfi-N loads eventually srfi/N, we
+                  ;; need to provide "srfi/N" when require-feature loads a file.
+                  ;; For instance,
+                  ;;   (begin
+                  ;;      (import (srfi 25))
+                  ;;      (require-feature 25))
+                  ;; Here, import will load 25.so (which provides "srfi/25")
+                  ;; and require-feature will require "srfi-25" which will try to
+                  ;; reload "25.so" since "srfi-25" was not provided. Problem:
+                  ;; .so files cannot be loaded more than once.
+                  ;;
+                  (if (regexp-match "srfi-[0-9]+" x)
+                      (let ((str (format "srfi/~a" (substring x 5 (string-length x)))))
+                        (unless (provided? str)
+                          ;; Never loaded srfi/N ore srfi-N
+                          (require x)
+                          (provide str)))
+                      ;; simple require
+                      (require x)))
+                files))))
 
 ;; ----------------------------------------------------------------------
 (define (%has-feature? x)
