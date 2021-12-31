@@ -65,7 +65,7 @@ int STk_read_case_sensitive = DEFAULT_CASE_SENSITIVE;
 #define COLON_AFTER  0x2
 #define COLON_BOTH   0x3
 
-static char colon_pos;
+static char colon_pos = COLON_BOTH;
 
 /*===========================================================================*\
  *
