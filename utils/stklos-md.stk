@@ -1,0 +1,66 @@
+;;;;
+;;;;
+;;;; stklos-md.stk         -- A simple Markdown to HTML converter
+;;;;
+;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date:  1-Jan-2022 15:00
+;;;; Last file update:  2-Jan-2022 20:41 (eg)
+;;;;
+
+
+(load-path (cons "../lib" (load-path)))  ;; to use stklos-md without prior install
+
+(import (prefix (stklos markdown) md-))
+
+(define (main args)
+  (let ((output "-"))
+    (parse-arguments args
+      "Usage: stklos-md [options] document"
+      "Preprocessor for Markdown documents"
+      ""
+      (("define" :alternate "D" :arg str :help "Define new metadata")
+       (md-parse-metadata str))
+
+      (("output" :alternate "o" :arg file :help "Output in <file>")
+       (set! output file))
+
+      (("help" :alternate "h" :help "This help")
+       (arg-usage (current-output-port))
+       (exit 0))
+
+      ""
+      "Examples:"
+      "  stklos-md -D'md-command: \"pandoc\"' f  preprocess f and send result to pandoc"
+      "  stklos-md                             preprocess stdin, output goes to stdout"
+
+      (else
+       (case (length other-arguments)
+         ((0)                ;; No argument: use stdin
+          (md-translate "-")
+          (exit 0))
+         ((1)               ;; One argument: use it as input
+          (md-translate (car other-arguments))
+          (exit 0))
+         (else              ;; Error
+          (arg-usage (current-error-port))
+          (exit 1)))))))
+
+

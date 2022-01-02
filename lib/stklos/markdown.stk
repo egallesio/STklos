@@ -1,0 +1,186 @@
+;;;;
+;;;; markdown.stk     -- various stuff for using Markdown in STklos
+;;;;
+;;;; Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Erick Gallesio [eg@unice.fr]
+;;;;    Creation date: 24-Dec-2021 11:10
+;;;; Last file update:  2-Jan-2022 20:47 (eg)
+;;;;
+
+(define-module stklos/markdown
+  (export parse-metadata translate)
+
+  (define *printing*    #t)
+  (define *print-stack* '())
+  (define *md-env*      (find-module 'stklos/markdown))
+
+  (define (stklos-md-version) "0.1")
+
+  (define (If val)
+    ;; push *printing* on stack
+    (set! *print-stack* (cons *printing* *print-stack*))
+    (set! *printing* val))
+
+  (define (Else)
+    (set! *printing* (not *printing*)))
+
+  (define (End)
+    (when (null? *print-stack*)
+      (error "unbalence tests"))              ;; FIXME: verifier qu'il n'y a pas plusieurs close
+    (set! *printing* (car *print-stack*))
+    (set! *print-stack* (cdr *print-stack*)))
+
+  (define (Include file)
+    (let ((port (open-input-file file)))
+      (let Loop ()
+        (call-with-values
+            (lambda () (read-line port))
+          (lambda (line delim)
+            (unless (eof-object? line)
+              (display line)
+              (unless (eof-object? delim) (display delim))
+              (Loop)))))))
+
+  (define (System str)
+    (Include (string-append "| " str)))
+
+
+  ;;;;
+  ;;;; parse-metadata
+  ;;;;
+  (define (parse-metadata str)
+    (with-input-from-string str
+      (lambda ()
+        (let* ((var (read))
+               (val (read))
+               (end (read)))
+          (unless (keyword? var)    (error "bad key when reading ~S" str))
+          (when   (eof-object? val) (set! val ""))
+          (unless (eof-object? end) (error "too mush values in ~S" str))
+          ;; Store it as a definition in the (stklos markdown) environment
+          (eval `(define ,(string->symbol (keyword->string var)) ,val)
+                *md-env*)))))
+
+  ;;;;
+  ;;;; read-header
+  ;;;;
+  (define (read-header port)
+    (let ((ch (peek-char port)))
+      (when (eq? ch #\%)
+        (read-char port)  ;; to skip the '%'
+        (parse-metadata (read-line port))
+        (read-header port))))
+
+  ;;;;
+  ;;;; read-command
+  ;;;;
+  (define (read-command port open close)
+
+    (define (skip-spaces)
+      (let ((ch (peek-char port)))
+        (when (and (not (eof-object? ch)) (char-whitespace? ch))
+          (read-char port)
+          (skip-spaces))))
+
+    (define (verify-close)
+      (let ((ch (read-char port)))
+        (unless (char=? ch close)
+          (error "expected closing ~S" close))
+        ;; skip a newline if it just follows a end delimiter
+        (let ((ch (peek-char port)))
+          (when (and (not (eof-object? ch)) (char=? ch #\newline))
+            (read-char port)))))
+
+    ;; Fist delimiter is already read
+    (let ((ch (peek-char port)))
+      (if (char=? ch open)
+          (let* ((expr (read port)))
+            (skip-spaces)
+            (verify-close)
+            (if (= (length expr) 1)
+                ;; A single component in the command
+                (let ((res (eval (car expr) *md-env*)))
+                  (if (procedure? res)                ;; FIXME: add handler
+                      (set! res (apply res '())))
+                  (if (eq? res #void) "" (format "~a" res)))
+                (let ((res (eval expr *md-env*)))              ;; FIXME: add handler
+                  (if (eq? res #void) "" (format "~a" res)))))
+          ;; a single opening delimiter
+          (if *printing* open ""))))
+
+  ;;;
+  ;;; process-file
+  ;;;
+  (define (process-file file)
+
+    (define (do-read port)
+      (read-header port)
+      (let Loop ((ch (read-char port)))
+        (if (eof-object? ch)
+            (unless (null? *print-stack*)
+              (error "unclosed if/else"))      ;; FIXME: add opening line
+            (begin
+              (case ch
+                ((#\{)
+                 (display (read-command port #\{ #\})))
+
+                ((#\[)
+                 (display (read-command port #\[ #\])))
+
+                (else
+                 (when *printing* (display ch))))
+              (Loop (read-char port))))))
+    (with-output-to-string
+      (lambda ()
+        (let ((port (if (equal? file "-")
+                        (current-input-port)
+                        (open-input-file file))))
+          (do-read port)))))
+
+
+  (define (translate file)
+    ;; First process the user file since it contains metadata definitions
+    (let ((body (process-file file))
+          (pre  "")                     ;; content of prelude template
+          (post ""))                    ;; content of postlude template
+
+      ;; build prelude and postlude templates
+      (let ((template (symbol-value 'template *md-env* #f)))
+        (when (string? template)
+          (let ((prelude-file (string-append template "-prelude.templ"))
+                (postlude-file (string-append template "-postlude.templ")))
+            (unless (file-exists? prelude-file)
+              (die (format "cannot find prelude template file ~s" prelude-file)))
+            (unless (file-exists? postlude-file)
+              (die (format "cannot find postlude template file ~s" postlude-file)))
+            (set! pre  (process-file prelude-file))
+            (set! post (process-file postlude-file)))))
+
+      ;; display pre + body sent to the external markdown processor + post
+      (display pre)
+      (let ((md-cmd  (symbol-value 'md-command *md-env* "/bin/cat"))
+            (md-args (symbol-value 'md-args *md-env* "")))
+        (with-output-to-file (string-append "| " md-cmd " " md-args)
+          (lambda () (display body))))
+      (display post)))
+
+) ;; End of module markdown
+
+(provide "stklos/markdown")
