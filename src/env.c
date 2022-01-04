@@ -503,7 +503,7 @@ DEFINE_PRIMITIVE("symbol-mutable?", symbol_mutablep, subr12, (SCM symb, SCM modu
   tmp = STk_hash_get_variable(&MODULE_HASH_TABLE(module), symb);
   if (!tmp)
     STk_error("symbol ~S is not bound in ~a", symb, module);
-  return MAKE_BOOLEAN(!BOXED_INFO(tmp) & CONS_CONST);
+  return MAKE_BOOLEAN(!(BOXED_INFO(tmp) & CONS_CONST));
 }
 
 /*
