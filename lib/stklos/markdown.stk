@@ -21,32 +21,35 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update:  2-Jan-2022 20:47 (eg)
+;;;; Last file update:  4-Jan-2022 20:58 (eg)
 ;;;;
 
+
+(define-module stklos/markdown/env
+  ;; This module contains the variables accessible form the document. New
+  ;; bindings can be added with defines embedded in the document or with
+  ;; metadata definitions
+
+  ;; Predefined functions/variables
+  (define (stklos-md-version) "0.1")
+)
+
+;; ----------------------------------------------------------------------
+;;
+;;  The (stklos markdown) module
+;;
+;; ______________________________________________________________________
 (define-module stklos/markdown
   (export parse-metadata translate)
 
-  (define *printing*    #t)
-  (define *print-stack* '())
-  (define *md-env*      (find-module 'stklos/markdown))
+  (define *printing*      #t)
+  (define *print-stack*   '())
+  (define *md-env*        (find-module 'stklos/markdown/env))
+  (define *command-chars* '(#\{ #\}))
 
-  (define (stklos-md-version) "0.1")
-
-  (define (If val)
-    ;; push *printing* on stack
-    (set! *print-stack* (cons *printing* *print-stack*))
-    (set! *printing* val))
-
-  (define (Else)
-    (set! *printing* (not *printing*)))
-
-  (define (End)
-    (when (null? *print-stack*)
-      (error "unbalence tests"))              ;; FIXME: verifier qu'il n'y a pas plusieurs close
-    (set! *printing* (car *print-stack*))
-    (set! *print-stack* (cdr *print-stack*)))
-
+  ;;
+  ;; Utilities
+  ;;
   (define (Include file)
     (let ((port (open-input-file file)))
       (let Loop ()
@@ -61,6 +64,31 @@
   (define (System str)
     (Include (string-append "| " str)))
 
+  (define (exec-internal-command expr)
+    (let ((len (length expr))
+          (cmd (car expr)))
+      (case len
+        ((2) (let ((val (eval (cadr expr) *md-env*)))
+               (case cmd
+                 ((If)
+                  (set! *print-stack* (cons *printing* *print-stack*))
+                  (set! *printing* val))
+                 ((Include)
+                  (when *printing* (Include val)))
+                 ((System)
+                  (when *printing* (System val)))
+                 (else
+                  (die (format "command ~s cannot have parameter" cmd))))))
+        ((1) (case cmd
+               ((Else)
+                (set! *printing* (not *printing*)))
+               ((End)
+                (set! *printing* (car *print-stack*))
+                (set! *print-stack* (cdr *print-stack*)))
+               (else
+                (die (format "command ~s must have a parameter" cmd)))))
+        (else
+         (die (format "bad command call ~s" expr))))))
 
   ;;;;
   ;;;; parse-metadata
@@ -108,22 +136,30 @@
           (when (and (not (eof-object? ch)) (char=? ch #\newline))
             (read-char port)))))
 
+
     ;; Fist delimiter is already read
     (let ((ch (peek-char port)))
       (if (char=? ch open)
           (let* ((expr (read port)))
             (skip-spaces)
             (verify-close)
-            (if (= (length expr) 1)
-                ;; A single component in the command
-                (let ((res (eval (car expr) *md-env*)))
-                  (if (procedure? res)                ;; FIXME: add handler
-                      (set! res (apply res '())))
-                  (if (eq? res #void) "" (format "~a" res)))
-                (let ((res (eval expr *md-env*)))              ;; FIXME: add handler
-                  (if (eq? res #void) "" (format "~a" res)))))
-          ;; a single opening delimiter
-          (if *printing* open ""))))
+            (cond
+             ((member (car expr) '(If Else End Include System))
+              ;; This is and internal command)
+              (exec-internal-command expr))
+
+             ((= (length expr) 1)
+              ;; A single component in the command
+              (let ((res (eval (car expr) *md-env*)))
+                (if (procedure? res)                ;; FIXME: add handler
+                    (set! res (apply res '())))
+                (format "~a" res)))
+             (else
+              ;; a function/macro call
+              (let ((res (eval expr *md-env*)))     ;; FIXME: add handler
+                (format "~a" res)))))
+          ;; A single opening delimiter
+          open)))
 
   ;;;
   ;;; process-file
@@ -137,16 +173,13 @@
             (unless (null? *print-stack*)
               (error "unclosed if/else"))      ;; FIXME: add opening line
             (begin
-              (case ch
-                ((#\{)
-                 (display (read-command port #\{ #\})))
+              (let ((val (if (eq? ch (car *command-chars*))
+                             (apply read-command port *command-chars*)
+                             ch)))
+                (when (and *printing* (not (eq? val #void)))
+                  (display val))
+                (Loop (read-char port)))))))
 
-                ((#\[)
-                 (display (read-command port #\[ #\])))
-
-                (else
-                 (when *printing* (display ch))))
-              (Loop (read-char port))))))
     (with-output-to-string
       (lambda ()
         (let ((port (if (equal? file "-")
