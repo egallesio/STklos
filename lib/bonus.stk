@@ -1,7 +1,7 @@
 ;;;;
 ;;;; bonus.stk  -- Useful primitives not in R5RS
 ;;;;
-;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 17-Dec-2021 22:31 (eg)
+;;;; Last file update:  5-Jan-2022 12:01 (eg)
 ;;;;
 
 
@@ -1647,9 +1647,9 @@ doc>
 <doc EXT define-constant
  * (define-constant name expr)
  * (define-constant (name param1 param2 ...) body)
- * 
+ *
  * Evaluates the expression |expr|, then creates a new, non-mutable
- * binding for |name| with the resulting value. Note that the definition 
+ * binding for |name| with the resulting value. Note that the definition
  * of constant functions can use the notation of ,(quick-link-srfi 219).
  *
  * (define-constant a 'hello)
@@ -1657,7 +1657,7 @@ doc>
  * (define a 2)                  => ok (it's a new binding)
  * (define-constant ((foo a) b)  => foo is (lambda (a) (lambda (b) ...)))
  *     ...)
- doc>
+doc>
 |#
 (define-macro (define-constant . args)
   (define (rewrite l)
