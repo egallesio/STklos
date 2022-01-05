@@ -484,6 +484,8 @@ srfilibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/srfi
 srfi_DATA = $(SRC_OSTK)
 srfilib_DATA = $(SRC_SHOBJ)
 srfi_sources = $(SRC_STK)
+srfi_DATA = $(srfi_OBJS)
+
 #======================================================================
 SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 all: all-am

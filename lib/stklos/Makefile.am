@@ -19,17 +19,23 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  2-Jan-2022 15:26 (eg)
-# Last file update:  2-Jan-2022 15:27 (eg)
+# Last file update:  5-Jan-2022 11:57 (eg)
 
 #======================================================================
 
 COMP ?= ../../utils/tmpcomp
-STKLOS_BINARY ?= ../src/stklos
+STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
+SO = @SH_SUFFIX@
 
 SRC_STK = markdown.stk
+SRC_C   =
 
 scheme_OBJS = markdown.ostk
+
+
+DOCDB  = ../DOCDB
+SOURCES= $(SRC_C) $(SRC_STK)
 
 #======================================================================
 schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@/stklos
@@ -57,3 +63,7 @@ distclean: clean
 uninstall-hook:
 	(cd $(schemedir); rm -f $(scheme_sources))
 	rmdir $(schemedir) || true
+
+doc:
+	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b ../../src/boot.img \
+		-f ../../doc/extract-doc $(SOURCES) >> $(DOCDB)
