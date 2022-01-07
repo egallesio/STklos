@@ -21,14 +21,14 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update:  4-Jan-2022 20:58 (eg)
+;;;; Last file update:  7-Jan-2022 13:18 (eg)
 ;;;;
 
 
 (define-module stklos/markdown/env
-  ;; This module contains the variables accessible form the document. New
-  ;; bindings can be added with defines embedded in the document or with
-  ;; metadata definitions
+  ;; This module contains the variables accessible from the document
+  ;; environment. New bindings can be added with defines embedded in the
+  ;; document or with metadata definitions
 
   ;; Predefined functions/variables
   (define (stklos-md-version) "0.1")
@@ -61,6 +61,9 @@
               (unless (eof-object? delim) (display delim))
               (Loop)))))))
 
+  (define (Include* file)
+    (process-file file))
+  
   (define (System str)
     (Include (string-append "| " str)))
 
@@ -75,6 +78,8 @@
                   (set! *printing* val))
                  ((Include)
                   (when *printing* (Include val)))
+                 ((Include*)
+                  (when *printing* (Include* val)))
                  ((System)
                   (when *printing* (System val)))
                  (else
@@ -144,7 +149,7 @@
             (skip-spaces)
             (verify-close)
             (cond
-             ((member (car expr) '(If Else End Include System))
+             ((member (car expr) '(If Else End Include Include* System))
               ;; This is and internal command)
               (exec-internal-command expr))
 
@@ -153,11 +158,12 @@
               (let ((res (eval (car expr) *md-env*)))
                 (if (procedure? res)                ;; FIXME: add handler
                     (set! res (apply res '())))
-                (format "~a" res)))
+                res))
+
              (else
               ;; a function/macro call
               (let ((res (eval expr *md-env*)))     ;; FIXME: add handler
-                (format "~a" res)))))
+                res))))
           ;; A single opening delimiter
           open)))
 
@@ -176,7 +182,7 @@
               (let ((val (if (eq? ch (car *command-chars*))
                              (apply read-command port *command-chars*)
                              ch)))
-                (when (and *printing* (not (eq? val #void)))
+                (when (and *printing* (not (equal? val #void)))
                   (display val))
                 (Loop (read-char port)))))))
 

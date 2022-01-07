@@ -19,9 +19,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 14-Aug-2000 13:13 (eg)
-# Last file update:  2-Jan-2022 15:46 (eg)
+# Last file update:  7-Jan-2022 08:36 (eg)
 
-scmbin      = stklos-compile stklos-genlex stklos-md
+scmbin      = stklos-compile stklos-genlex stklos-pre
 bin_SCRIPTS = stklos-config  stklos-script $(scmbin)
 
 COMP ?= ./tmpcomp
@@ -35,8 +35,8 @@ stklos-compile: stklos-compile.stk
 stklos-genlex: stklos-genlex.stk
 	$(COMP) -o stklos-genlex stklos-genlex.stk
 
-stklos-md: stklos-md.stk
-	$(COMP) -o stklos-md stklos-md.stk
+stklos-pre: stklos-pre.stk
+	$(COMP) -o stklos-pre stklos-pre.stk
 
 clean-am:
 	rm -f $(scmbin) $(localscript) *~

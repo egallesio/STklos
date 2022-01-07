@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; stklos-md.stk         -- A simple Markdown to HTML converter
+;;;; stklos-pre.stk         -- A simple test preprocessor
 ;;;;
 ;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
@@ -22,10 +22,11 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jan-2022 15:00
-;;;; Last file update:  2-Jan-2022 20:41 (eg)
+;;;; Last file update:  7-Jan-2022 08:36 (eg)
 ;;;;
 
 
+;; FIXME: Delete this line
 (load-path (cons "../lib" (load-path)))  ;; to use stklos-md without prior install
 
 (import (prefix (stklos markdown) md-))
@@ -48,8 +49,8 @@
 
       ""
       "Examples:"
-      "  stklos-md -D'md-command: \"pandoc\"' f  preprocess f and send result to pandoc"
-      "  stklos-md                             preprocess stdin, output goes to stdout"
+      "  stklos-pre -D'run-command: \"pandoc\"' f  preprocess f and send result to pandoc"
+      "  stklos-pre                              preprocess stdin, output goes to stdout"
 
       (else
        (case (length other-arguments)
