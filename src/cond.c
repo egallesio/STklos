@@ -147,7 +147,7 @@ DEFINE_PRIMITIVE("make-condition-type", make_cond_type, subr3,
  * condition type. The slots names of the new condition type is the
  * union of the slots of conditions |ct1| ...
  * @l
- * ,(bold "Note:") This function is not defined in ,(srfi 34).
+ * NOTE: This function is not defined in ,(srfi 34).
 doc>
 */
 DEFINE_PRIMITIVE("make-compound-condition-type", make_comp_cond_type, subr2,

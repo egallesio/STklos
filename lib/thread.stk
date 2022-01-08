@@ -54,7 +54,7 @@
  * field an "uncaught exception" object whose "reason" is the argument
  * of the handler, abandon all mutexes it owns, and finally terminate.
  * @l
- * ,(bold "Note:") The optional parameter |stack-size| permits to specify
+ * NOTE: The optional parameter |stack-size| permits to specify
  * the size (in words) reserved for the thread. This option does not exist
  * in ,(quick-link-srfi 18).
 doc>

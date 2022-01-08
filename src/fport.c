@@ -663,7 +663,7 @@ void STk_set_line_buffered_mode(SCM port)
  * of delivering characters from the file. If the file cannot be opened,
  * an error is signalled.
  * @l
- * ,(bold "Note:") if |filename| starts with the string ,(code  (q "| ")),
+ * NOTE: if |filename| starts with the string ,(code  (q "| ")),
  * this procedure returns a pipe port. Consequently, it is not possible to
  * open a file whose name starts with those two characters.
 doc>
@@ -689,7 +689,7 @@ DEFINE_PRIMITIVE("open-binary-input-file", open_binary_ifile, subr1, (SCM filena
  * cannot be opened, an error is signalled. If a file with the given name
  * already exists, it is rewritten.
  * @l
- * ,(bold "Note:") if |filename| starts with the string ,(code  (q "| ")),
+ * NOTE: if |filename| starts with the string ,(code  (q "| ")),
  * this procedure returns a pipe port. Consequently, it is not possible to
  * open a file whose name starts with those two characters.
 doc>
@@ -898,7 +898,7 @@ static SCM load_file(SCM filename)
  * expressions. |Load| has been extended in STklos to allow loading of
  * file containing Scheme compiled code as well as object files
  * (,(emph "aka") shared objects). The loading of object files is not available on
- * all architectures. The value returned by |load| is ,(emph "void").
+ * all architectures. The value returned by |load| is *_void_-*.
  * @l
  * If the file whose name is |filename| cannot be located, |load| will try
  * to find it in one of the directories given by ,(code (ref :mark "load-path"))

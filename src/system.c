@@ -853,7 +853,7 @@ DEFINE_PRIMITIVE("create-directory", make_directory, subr12, (SCM path, SCM perm
  *
  * Delete the directory with name |dir|.
  * @l
- * ,(bold "Note:") This function is also defined in ,(link-srfi 170). The name
+ * NOTE: This function is also defined in ,(link-srfi 170). The name
  * |remove-directory| is kept for compatibility.
 doc>
 */
@@ -1022,7 +1022,7 @@ DEFINE_PRIMITIVE("glob", glob, vsubr, (int argc, SCM *argv))
  * (delete-file string)
  *
  * Removes the file whose path name is given in |string|.
- * The result of |delete-file| is ,(emph "void").
+ * The result of |delete-file| is *_void_-*.
  * @l
  * This function is also called |remove-file| for compatibility
  * reasons. ,(index "remove-file")
@@ -1050,7 +1050,7 @@ DEFINE_PRIMITIVE("remove-file", remove_file, subr1, (SCM filename))
  * (rename-file string1 string2)
  *
  * Renames the file whose path-name is |string1| to a file whose path-name is
- * |string2|. The result of |rename-file| is ,(emph "void").
+ * |string2|. The result of |rename-file| is *_void_-*.
  * @l
  * This function is also defined in ,(link-srfi 170).
 doc>
@@ -1114,7 +1114,7 @@ DEFINE_PRIMITIVE("directory-files", directory_files, subr12, (SCM dirname, SCM d
  *
  * Copies the file whose path-name is |string1| to a file whose path-name is
  * |string2|. If the file |string2| already exists, its content prior
- * the call to |copy-file| is lost. The result of |copy-file| is ,(emph "void").
+ * the call to |copy-file| is lost. The result of |copy-file| is *_void_-*.
 doc>
 */
 DEFINE_PRIMITIVE("copy-file", copy_file, subr2, (SCM filename1, SCM filename2))
@@ -1285,8 +1285,8 @@ DEFINE_PRIMITIVE("%pre-exit", pre_exit, subr1, (SCM retcode))
  * If  program has registered exit functions with |register-exit-function!|,
  * they are called (in an order which is the reverse of their call order).
  * @l
- * ,(bold "Note:") The ,(stklos) |exit| primitive accepts also an
- * integer value as parameter (,(rseven) accepts only a boolean).
+ * NOTE: The {{stklos}} |exit| primitive accepts also an
+ * integer value as parameter ({{rseven}} accepts only a boolean).
 doc>
 */
 DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
@@ -1319,8 +1319,8 @@ DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
  * dynamic-wind ,(emph "after") procedures and communicates an exit
  * value to the operating system in the same manner as |exit|.
  * @l
- * ,(bold "Note:") The ,(stklos) |emergency-exit| primitive accepts also an
- * integer value as parameter (,(rseven) accepts only a boolean).
+ * NOTE: The {{stklos}} |emergency-exit| primitive accepts also an
+ * integer value as parameter ({{rseven}} accepts only a boolean).
 doc>
 */
 DEFINE_PRIMITIVE("emergency-exit", emergency_exit, subr01, (SCM retcode))
@@ -1442,8 +1442,8 @@ DEFINE_PRIMITIVE("clock", clock, subr0, (void))
  * Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970),
  * measured in seconds.
  * @l
- * @bold("Note"): This ,(stklos) function should not be confused with
- * the ,(rseven)  primitive |current-second| which returns an inexact number
+ * @bold("Note"): This {{stklos}} function should not be confused with
+ * the {{rseven}}  primitive |current-second| which returns an inexact number
  * and whose result is expressed using  the International Atomic Time
  * instead of UTC.
  *
@@ -1711,7 +1711,7 @@ DEFINE_PRIMITIVE("getenv", getenv, subr01, (SCM str))
  * (setenv! var value)
  *
  * Sets the environment variable |var| to |value|. |Var| and
- * |value| must be strings. The result of |setenv!| is ,(emph "void").
+ * |value| must be strings. The result of |setenv!| is *_void_-*.
 doc>
  */
 DEFINE_PRIMITIVE("setenv!", setenv, subr2, (SCM var, SCM value))
@@ -1736,7 +1736,7 @@ DEFINE_PRIMITIVE("setenv!", setenv, subr2, (SCM var, SCM value))
  * (unsetenv! var)
  *
  * Unsets the environment variable |var|. |Var| must be a string.
- * The result of |unsetenv!| is ,(emph "void").
+ * The result of |unsetenv!| is *_void_-*.
 doc>
  */
 DEFINE_PRIMITIVE("unsetenv!", unsetenv, subr1, (SCM var))

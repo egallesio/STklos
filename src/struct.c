@@ -273,7 +273,7 @@ static void print_struct_type(SCM expr, SCM port, int _UNUSED(mode))
  * Returns a newly allocated instance of the structure type |structype|,
  * whose slots are initialized to |expr| ... If fewer |expr| than the number of
  * instances are given to |make-struct|, the remaining slots are inialized with
- * the special ,(emph "void") value.
+ * the special *_void_-* value.
 doc>
 */
 DEFINE_PRIMITIVE("make-struct", make_struct, vsubr, (int argc, SCM *argv))
@@ -356,7 +356,7 @@ DEFINE_PRIMITIVE("struct-ref", struct_ref, subr2, (SCM s, SCM slot))
  * (struct-set! s slot-name value)
  *
  * Stores value in the to slot |slot-name| of the |s| structure. The value
- * returned by |struct-set!| is ,(emph "void").
+ * returned by |struct-set!| is *_void_-*.
  *
  * @lisp
  * (define point  (make-struct-type 'point #f '(x y)))

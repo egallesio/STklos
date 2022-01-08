@@ -252,7 +252,7 @@ DEFINE_PRIMITIVE("vector-ref", vector_ref, subr2, (SCM v, SCM index))
  * (vector-set! vector k obj)
  *
  * |k| must be a valid index of |vector|. |Vector-set!| stores |obj| in element
- * |k| of |vector|. The value returned by |vector-set!| is ,(emph "void").
+ * |k| of |vector|. The value returned by |vector-set!| is *_void_-*.
  *
  * @lisp
  * (let ((vec (vector 0 '(2 2 2 2) "Anna")))
@@ -450,7 +450,7 @@ DEFINE_PRIMITIVE("vector-fill!", vector_fill,  vsubr, (int argc, SCM *argv))
  * Returns a copy of v of the given |size|. If |size| is greater
  * than the vector size of |v|, the contents of the newly allocated vector cells
  * is  set to the value of |fill|. If |fill| is omitted the content of the
- * new cells is ,(emph "void").
+ * new cells is *_void_-*.
 doc>
  */
 DEFINE_PRIMITIVE("vector-resize", vector_resize, subr23,(SCM vect,SCM size,SCM val))

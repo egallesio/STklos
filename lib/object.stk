@@ -416,7 +416,7 @@ doc>
  *   (y :init-form 0 :getter get-y :setter set-y! :init-keyword :y))
  * @end lisp
  *
- * ,(stklos) also defines setters for the specified getters, so the following
+ * {{stklos}} also defines setters for the specified getters, so the following
  * will work with the definition of |<point>| given above:
  *
  * @lisp

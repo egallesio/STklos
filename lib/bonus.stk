@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  5-Jan-2022 12:01 (eg)
+;;;; Last file update:  7-Jan-2022 20:13 (eg)
 ;;;;
 
 
@@ -40,7 +40,7 @@
  * (gensym prefix)
  *
  * Creates a new symbol. The print name of the generated symbol
- * consists of a prefix (which defaults to ,(q [G|])) followed by the decimal
+ * consists of a prefix (which defaults to "G") followed by the decimal
  * representation of a number. If |prefix| is specified, it must be
  * either a string or a symbol.
  * @lisp
@@ -361,7 +361,7 @@ doc>
  * (program-name)
  *
  * Returns the invocation name of the current program as a string. If the file is
- * not a script (in sense of SRFI 193), it is the name of the running ,(stklos)
+ * not a script (in sense of SRFI 193), it is the name of the running {{stklos}}
  * interpreter, otherwise it is the name of the running script. This function always
  * returns a string wheareas the|command-name| procedure returns #f when the
  * program name is not a script.
@@ -414,8 +414,8 @@ doc>
  *
  * This procedure returns #t if |obj| is a condition object that describes a
  * POSIX error, and #f otherwise.
- * ,(linebreak)
- * This function is defined in ,(link-srfi 170).
+ * 
+ * This function is defined in {{link-srfi 170}}.
 doc>
 |#
 (define (posix-error? obj)
@@ -430,8 +430,8 @@ doc>
  * value of |errno| when the POSIX function reported an error. This can be
  * used to provide programmatic recovery when a POSIX function can return
  * more than one value of |errno|.
- * ,(linebreak)
- * This function is defined in ,(link-srfi 170).
+ * 
+ * This function is defined in {{link-srfi 170}}.
 doc>
 |#
 (define (%posix-error-condition-ref posix-error field)
@@ -449,8 +449,8 @@ doc>
  * This procedure returns a string that is an error message reflecting the
  * value of errno when the POSIX function reported an error. This string
  * is useful for reporting the cause of the error to the user
- * ,(linebreak)
- * This function is defined in ,(link-srfi 170).
+ * 
+ * This function is defined in {{link-srfi 170}}.
 doc>
 |#
 (define (posix-error-message posix-error)
@@ -545,7 +545,7 @@ doc>
  *                       (char-downcase (string-ref s i)))))))))
  * @end lisp
  *
- * ,(bold "Note:") Hash tables with a comparison function equal to |eq?| or
+ * NOTE: Hash tables with a comparison function equal to |eq?| or
  * |string=?| are handled in an more efficient way (in fact, they don't use
  * the |hash-table-hash| function to speed up hash table retrievals).
 doc>
@@ -562,7 +562,7 @@ doc>
  * Each entry in |hash| will be represented as a pair whose |car| is the
  * entry's key and whose |cdr| is its value.
  * @l
- * ,(bold "Note:") the order of pairs in the resulting list is unspecified.
+ * NOTE: the order of pairs in the resulting list is unspecified.
  * @lisp
  * (let ((h (make-hash-table)))
  *   (dotimes (i 5)
@@ -766,7 +766,7 @@ doc>
  * (setter proc)
  *
  * Returns the setter associated to a |proc|. Setters are defined in the
- * ,(link-srfi 17) document. A setter proc, can be used in a generalized
+ * {{link-srfi 17}} document. A setter proc, can be used in a generalized
  * assignment, as described in |set!|.
  * @l
  * To associate |s| to the procedure |p|, use the following form:
@@ -850,11 +850,11 @@ doc>
  * (tagbody <expression1> <expression2> ...)
  * (-> tag)
  *
- * The |<expression>|s are evaluated sequentially from left to right,
+ * The `|<expression>|`s are evaluated sequentially from left to right,
  * and the value(s) of the last <expression> is(are) returned as in a
  * |begin| form. Within a |tagbody| form expressions which are keywords
  * are considered as tags and the special form |(-> tag)| is used to
- * transfer execution to the given tag. This is a ,(bold "very low level")
+ * transfer execution to the given tag. This is a **very low level"**
  * form which is inspired on |tabgody| Common Lisp's form. It can be useful
  * for defining new syntaxes, and should probably not used as is.
  *
@@ -868,7 +868,7 @@ doc>
  *    #:top (when (< v 5)
  *            (display v)
  *            (set! v (fx+ v 1))
- *            (-> #:top))))                      => prints 01234
+ *            (-> #:top))))                      @print{} 01234
  *
  * (tagbody (display 1)
  *          (tagbody (display 2)
@@ -879,7 +879,7 @@ doc>
  *                  (-> #:outer)
  *                  (display "not printed too"))
  *    #:outer
- *          (display "4"))                        => prints 1234
+ *          (display "4"))                        @print{} 1234
  * @end lisp
 doc>
 |#
@@ -925,13 +925,13 @@ doc>
  * (dotimes [var count result] <expression1> <expression2> ...)
  *
  * Evaluates the |count| expression, which must return an
- * integer and then evaluates the |<expression>|s once for each
+ * integer and then evaluates the `|<expression>|`s once for each
  * integer from zero (inclusive) to |count| (exclusive), in order,
  * with the symbol |var| bound to the integer; if the value of
- * |count| is zero or negative, then the |<expression>|s are not
+ * |count| is zero or negative, then the `|<expression>|`s are not
  * evaluated. When the loop completes, |result| is evaluated and its
  * value is returned as the value of the |dotimes| construction. If
- * |result| is omitted, |dotimes| result is ,(emph "void").
+ * |result| is omitted, |dotimes| result is *_void_*.
  * @lisp
  * (let ((l '()))
  *   (dotimes (i 4 l)
@@ -954,11 +954,10 @@ doc>
  * (repeat count <expression1> <expression2> ...)
  *
  * Evaluates the |count| expression, which must return an
- * integer and then evaluates the |<expression>|s once for each
+ * integer and then evaluates the `|<expression>|`s once for each
  * integer from zero (inclusive) to |count| (exclusive). The result of
  * |repeat| is undefined.
  *
- * ,(linebreak)
  * This form could be easily simulated with |dotimes|. Its interest is
  * that it is faster.
  * @lisp
@@ -981,8 +980,8 @@ doc>
 <doc EXT-SYNTAX while
  * (while <test> <expression1> <expression2> ...)
  *
- * |While| evaluates the |<expression>|s until |<test>| returns a false
- * value. The value returned by this form is ,(emph "void").
+ * |While| evaluates the `|<expression>|`s until |<test>| returns a false
+ * value. The value returned by this form is *_void_*.
 doc>
 |#
 (define-macro (while test . body)
@@ -994,8 +993,8 @@ doc>
 <doc EXT-SYNTAX until
  * (until <test> <expression1> <expression2> ...)
  *
- * |Until| evaluates the |<expression>|s until |<while>| returns a false
- * value. The value returned by this form is ,(emph "void").
+ * |Until| evaluates the `|<expression>|`s until |<while>| returns a false
+ * value. The value returned by this form is *_void_*.
 doc>
 |#
 (define-macro (until test . body)
@@ -1536,7 +1535,7 @@ doc>
  * |port|.
  *
  * Hereafter is a (not too realistic) example: a message will be displayed
- * repeatedly until a ,(emph "sexpr") is read on the current input port.
+ * repeatedly until a *_sexpr_*) is read on the current input port.
  *
  * @lisp
  * (let ((idle (lambda () (display "Nothing to read!\\n"))))
@@ -1650,7 +1649,7 @@ doc>
  *
  * Evaluates the expression |expr|, then creates a new, non-mutable
  * binding for |name| with the resulting value. Note that the definition
- * of constant functions can use the notation of ,(quick-link-srfi 219).
+ * of constant functions can use the notation of {{quick-link-srfi 219}}.
  *
  * (define-constant a 'hello)
  * (set! a 'goodbye)             => error
@@ -1690,7 +1689,7 @@ doc>
 <doc EXT-SYNTAX receive
  * (receive <formals> <expression> <body>)
  *
- * This form is defined in ,(link-srfi 8). It simplifies
+ * This form is defined in {{link-srfi 8}}. It simplifies
  * the usage of multiple values. Specifically, |<formals>| can have any
  * of three forms:
  * ,(itemize
@@ -1765,7 +1764,7 @@ doc>
  * It is an error for the arguments not to agree with the |<formals>|
  * of any |<clause>|.
  * @l
- * This form is defined in ,(link-srfi 16).
+ * This form is defined in {{link-srfi 16}}.
  *
  * @lisp
  *  (define plus
@@ -1821,7 +1820,7 @@ doc>
 
 (define (write-with-shared-structure obj :optional (port (current-output-port))
                                                    (optarg #f))
-  ;; optarg is unspecified in SRFI-38, it is a hook for implementation
+  ;; optarg is unspecified in {{link-srfi 38}}, it is a hook for implementation
   ;; We don't use it
   (write* obj port))
 
@@ -1918,7 +1917,7 @@ doc>
  * @lisp
  *  (srfi <extension-argument> ...)
  * @end lisp
- * where |<extension-argument>|s may be any Scheme-values.
+ * where `|<extension-argument>|`s may be any Scheme-values.
  * @l
  * If an |<extension-argument>| is a nonnegative integer, the functionality
  * of the indicated SRFIs is made available in the context in
@@ -1927,7 +1926,7 @@ doc>
  * (require-extension (srfi 1 2))
  *                ; Make the SRFI 1 and 2 available
  * @end lisp
- * This form is compatible with ,(link-srfi 55). However, STklos
+ * This form is compatible with {{link-srfi 55}}. However, STklos
  * accepts also some symbolic names for requiring some extensions.
  * For instance,
  * @lisp
@@ -1986,7 +1985,7 @@ doc>
  * Returns the value of the named environment variable as a string, or
  * |%f| if the named environment variable is not found. The name argument
  * is expected to be a string. This function is similar to the |getenv|. It
- * has been added to be  support ,(link-srfi 98).
+ * has been added to be  support {{link-srfi 98}}.
 doc>
 |#
 (define (get-environment-variable name)
@@ -1997,7 +1996,7 @@ doc>
  * (get-environment-variables)
  *
  * Returns names and values of all the environment variables as an a-list.
- * This function is defined by ,(link-srfi 98)
+ * This function is defined by {{link-srfi 98}}.
 doc>
 |#
 (define (get-environment-variables)
@@ -2012,7 +2011,7 @@ doc>
 <doc EXT implementation-name
  * (implementation-name)
  *
- * This function is defined in ,(srfi 112); it returns the Scheme
+ * This function is defined in {{srfi 112}}; it returns the Scheme
  * implementation (i.e. "STklos").
 doc>
 |#
@@ -2023,7 +2022,7 @@ doc>
 <doc EXT cpu-architecture
  * (cpu-architecture)
  *
- * This function is defined in ,(srfi 112); it returns the CPU
+ * This function is defined in {{srfi 112}}; it returns the CPU
  * architecture, real or virtual, on which this implementation
  * is executing.
 doc>
@@ -2034,7 +2033,7 @@ doc>
 <doc EXT machine-name
  * (machine-name)
  *
- * This function is defined in ,(srfi 112); it returns a name for the
+ * This function is defined in {{srfi 112}}; it returns a name for the
  * particular machine on which the implementation is running.
 doc>
 |#
@@ -2045,7 +2044,7 @@ doc>
 <doc EXT os-name
  * (os-name)
  *
- * This function is defined in ,(srfi 112); it returns the name for
+ * This function is defined in {{srfi 112}}; it returns the name for
  * the operating system, platform, or equivalent on which the
  * implementation is running.
 doc>
@@ -2057,7 +2056,7 @@ doc>
 <doc EXT os-version
  * (os-version)
  *
- * This function is defined in ,(srfi 112); it returns the version for
+ * This function is defined in {{srfi 112}}; it returns the version for
  * the operating system, platform, or equivalent on which the
  * implementation is running.
 doc>
@@ -2087,12 +2086,12 @@ doc>
 <doc EXT-SYNTAX assume
  * (assume obj ...)
  *
- * The special form |assume| is defined in ,(srfi 145).
- * When ,(stklos) is in debug mode, this special form is an expression
+ * The special form |assume| is defined in {{srfi 145}}.
+ * When {{stklos}} is in debug mode, this special form is an expression
  * that evaluates to the value of |obj| if |obj| evaluates to a true
  * value and it is an error if |obj| evaluates to a false value.
- * ,(linebreak)
- * When ,(stklos) is not in debug mode, the call to |assume| is elided.
+ *
+ * When {{stklos}} is not in debug mode, the call to |assume| is elided.
 doc>
 |#
 (define-macro (assume expr . args)
@@ -2119,7 +2118,7 @@ doc>
  * (version-alist)
  *
  * This function returns an association list of STklos properties as defined by
- * ,(quick-link-srfi 176).
+ * {{quick-link-srfi 176}}.
 doc>
 |#
 (define (version-alist)
@@ -2282,7 +2281,7 @@ doc>
  * (command-name)
  *
  * Returnd the name of the running program if it is a standalone and #f
- * otherwise. This function is defined in ,(quick-link-srfi 193).
+ * otherwise. This function is defined in {{quick-link-srfi 193}}.
 doc>
 |#
 (define (command-name)
@@ -2324,7 +2323,7 @@ doc>
  *
  * Returns the absolute path of the current script.
  * If the calling program is not a script, #f is returned.
- * This function is defined in ,(quick-link-srfi 193).
+ * This function is defined in {{quick-link-srfi 193}}.
 doc>
 |#
 (define (script-file)
@@ -2358,9 +2357,9 @@ doc>
  * #f for signaling), and whose payload is the positive exact integer payload.
  * It is an error if payload is larger than a NaN can hold.
  *
- * The optional parameter |float|, is never used in ,(stklos).
+ * The optional parameter |float|, is never used in {{stklos}}.
  *
- * This function is defined in ,(quick-link-srfi 208).
+ * This function is defined in {{quick-link-srfi 208}}.
 doc>
 |#
 (define (make-nan negative? quiet? payload :optional float)

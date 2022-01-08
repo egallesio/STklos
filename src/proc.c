@@ -2,7 +2,7 @@
  *
  * p r o c . c                          -- Things about procedures
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 15-Nov-1993 22:02
- * Last file update: 18-Aug-2021 16:22 (eg)
+ * Last file update:  7-Jan-2022 16:39 (eg)
  */
 
 #include "stklos.h"
@@ -176,8 +176,8 @@ DEFINE_PRIMITIVE("%set-procedure-name!", set_procedure_name, subr2, (SCM obj, SC
 <doc EXT closure?
  * (closure? obj)
  *
- * Returns |#t| if |obj| is a procedure created with the |lambda| syntax and
- * |#f| otherwise.
+ * Returns {{true}} if |obj| is a procedure created with the |lambda| syntax and
+ * {{false}} otherwise.
 doc>
  */
 DEFINE_PRIMITIVE("closure?", closurep, subr1, (SCM obj))
@@ -371,7 +371,7 @@ DEFINE_PRIMITIVE("map", map, vsubr, (int argc, SCM* argv))
  * calls proc for its side effects rather than for its values.
  * Unlike |map|, |for-each| is guaranteed to call proc on the elements of
  * the lists in order from the first element(s) to the last, and the value
- * returned by |for-each| is ,(emph "void").
+ * returned by |for-each| is *_void_-*.
  * @lisp
  * (let ((v (make-vector 5)))
  *   (for-each (lambda (i)

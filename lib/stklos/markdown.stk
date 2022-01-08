@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update:  7-Jan-2022 13:18 (eg)
+;;;; Last file update:  7-Jan-2022 16:32 (eg)
 ;;;;
 
 
@@ -40,7 +40,7 @@
 ;;
 ;; ______________________________________________________________________
 (define-module stklos/markdown
-  (export parse-metadata translate)
+  (export parse-metadata process-file process-string translate)
 
   (define *printing*      #t)
   (define *print-stack*   '())
@@ -168,24 +168,25 @@
           open)))
 
   ;;;
+  ;;; do-read
+  ;;;
+  (define (do-read port)
+    (read-header port)
+    (let Loop ((ch (read-char port)))
+      (if (eof-object? ch)
+          (unless (null? *print-stack*)
+            (error "unclosed if/else"))      ;; FIXME: add opening line
+          (begin
+            (let ((val (if (eq? ch (car *command-chars*))
+                           (apply read-command port *command-chars*)
+                           ch)))
+              (when (and *printing* (not (equal? val #void)))
+                (display val))
+              (Loop (read-char port)))))))
+  ;;;
   ;;; process-file
   ;;;
   (define (process-file file)
-
-    (define (do-read port)
-      (read-header port)
-      (let Loop ((ch (read-char port)))
-        (if (eof-object? ch)
-            (unless (null? *print-stack*)
-              (error "unclosed if/else"))      ;; FIXME: add opening line
-            (begin
-              (let ((val (if (eq? ch (car *command-chars*))
-                             (apply read-command port *command-chars*)
-                             ch)))
-                (when (and *printing* (not (equal? val #void)))
-                  (display val))
-                (Loop (read-char port)))))))
-
     (with-output-to-string
       (lambda ()
         (let ((port (if (equal? file "-")
@@ -193,6 +194,13 @@
                         (open-input-file file))))
           (do-read port)))))
 
+  ;;;
+  ;;; process-string
+  ;;;
+  (define (process-string str)
+    (with-output-to-string
+      (lambda ()
+        (do-read (open-input-string str)))))
 
   (define (translate file)
     ;; First process the user file since it contains metadata definitions

@@ -569,7 +569,7 @@ DEFINE_PRIMITIVE("%execute", execute, subr23, (SCM code, SCM consts, SCM envt))
  * (values obj ...)
  *
  * Delivers all of its arguments to its continuation.
- * ,(bold "Note:") R5RS imposes to use multiple values in the context of
+ * NOTE: R5RS imposes to use multiple values in the context of
  * of a |call-with-values|. In STklos, if |values| is not used with
  * |call-with-values|, only the first value is used (i.e. others values are
  * ,(emph "ignored")).

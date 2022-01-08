@@ -183,7 +183,7 @@ DEFINE_PRIMITIVE("set-car!", setcar, subr2, (SCM cell, SCM value))
  * (set-car! pair obj)
  *
  * Stores |obj| in the car field of |pair|.
- * The value returned by |set-car!| is ,(emph "void").
+ * The value returned by |set-car!| is *_void_-*.
  * @lisp
  *    (define (f) (list 'not-a-constant-list))
  *    (define (g) '(constant-list))
@@ -207,7 +207,7 @@ DEFINE_PRIMITIVE("set-cdr!", setcdr, subr2, (SCM cell, SCM value))
  * (set-cdr! pair obj)
  *
  * Stores |obj| in the cdr field of |pair|.
- * The value returned by |set-cdr!| is ,(emph "void").
+ * The value returned by |set-cdr!| is *_void_-*.
  *
 doc>
  */
@@ -528,7 +528,7 @@ DEFINE_PRIMITIVE("list-set!", list_set, subr3, (SCM list, SCM k, SCM obj))
  *    (memv 101 '(100 101 102))       =>  (101 102)
  * @end lisp
  *
- * ,(bold "Note:") As in R7RS, the |member| function accepts also a
+ * NOTE: As in R7RS, the |member| function accepts also a
  * comparison function.
 doc>
  */
@@ -609,7 +609,7 @@ DEFINE_PRIMITIVE("member", member, subr23, (SCM obj, SCM list, SCM cmp))
  * marks in their names because they return useful values rather than just
  * |#t| or #|f|.
  *
- * ,(bold "Note:") As in R7RS, the |assoc| function accepts also a
+ * NOTE: As in R7RS, the |assoc| function accepts also a
  * comparison function.
 doc>
  */

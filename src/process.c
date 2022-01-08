@@ -725,7 +725,7 @@ DEFINE_PRIMITIVE("process-exit-status", proc_xstatus, subr1, (SCM proc))
  * Sends the integer signal |sig| to |proc|. Since value of |sig| is system
  * dependant, use the symbolic defined signal constants to make your program
  * independant of the running system (see ,(ref :mark "signals")).
- * The result of |process-signal| is ,(emph "void").
+ * The result of |process-signal| is *_void_-*.
 doc>
 */
 DEFINE_PRIMITIVE("process-signal", proc_signal, subr2, (SCM proc, SCM sig))

@@ -332,7 +332,7 @@ DEFINE_PRIMITIVE("%open-input-virtual", open_input_vport, subr1, (SCM v))
  *                     (set! str (string-append str s)))
  *        :close (lambda (p) (write str) (newline)))))
  * @end lisp
- * ,(bold "Note:") |write-string| is mainly used for writing strings and is
+ * NOTE: |write-string| is mainly used for writing strings and is
  * generally more efficient than writing the string character by character.
  * However, if |write-string| is not provided, strings are printed with
  * |write-char|.  On the other hand, if |write-char| is absent,

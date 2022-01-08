@@ -255,7 +255,7 @@ static SCM STk_set_current_error_port(SCM port)
  * The port argument may be omitted, in which case it defaults to the value
  * returned by |current-input-port|. It is an error to read from a closed port.
  * @l
- * ,(stklos) |read| supports the ,(link-srfi 10) |#,()| form that can be used
+ * {{stklos}} |read| supports the ,(link-srfi 10) |#,()| form that can be used
  * to denote values that do not have a convenient printed representation. See
  * the SRFI document for more information.
 doc>
@@ -336,7 +336,7 @@ DEFINE_PRIMITIVE("read-char", read_char, subr01, (SCM port))
  * characters. |Port| may be omitted, in which case it defaults to the
  * value returned by |current-input-port|.
  * @l
- * ,(bold "Note:") This function was previously called |read-chars|. Usage
+ * NOTE: This function was previously called |read-chars|. Usage
  * of the old name is deprecated.
 doc>
  */
@@ -393,7 +393,7 @@ DEFINE_PRIMITIVE("read-bytes", read_bytes, subr12, (SCM size, SCM port))
  *              (close-port out)))))))
  * @end lisp
  *
- * ,(bold "Note:") This function was previously called |read-chars!|. Usage
+ * NOTE: This function was previously called |read-chars!|. Usage
  * of the old name is deprecated.
 doc>
  */
@@ -494,7 +494,7 @@ DEFINE_PRIMITIVE("read-byte", read_byte, subr01, (SCM port))
  * available, an end of file object is returned. |Port| may be omitted, in
  * which case it defaults to the value returned by |current-input-port|.
  * @l
- * ,(bold "Note:") The value returned by a call to |peek-char| is the same as the
+ * NOTE: The value returned by a call to |peek-char| is the same as the
  * value that would have been returned by a call to |read-char| with the same
  * port. The only difference is that the very next call to |read-char| or
  * |peek-char| on that port will return the value returned by the preceding
@@ -641,9 +641,9 @@ DEFINE_PRIMITIVE("write", write, subr12, (SCM expr, SCM port))
  * this procedure use the ,(code (q "#n=")) and ,(code (q "#n#"))
  * notations (see ,(ref :mark "Circular structure")).
  * @l
- * ,(bold "Note:") This function is also called |write*|.
- * The name |write*| was the name used by ,(stklos) for
- * |write-shared| before it was introduced in ,(rseven).
+ * NOTE: This function is also called |write*|.
+ * The name |write*| was the name used by {{stklos}} for
+ * |write-shared| before it was introduced in {{rseven}}.
  *
 doc>
 <doc EXT write-with-shared-structure
@@ -685,7 +685,7 @@ DEFINE_PRIMITIVE("write*", write_star, subr12, (SCM expr, SCM port))
  * ,(bold "Rationale:") |Write| is intended for producing machine-readable
  * output and |display| is for producing human-readable output.
  * @l
- * ,(bold "Note:") As required by ,(rseven) does not loop forever when
+ * NOTE: As required by {{rseven}} does not loop forever when
  * |obj| contains self-references.
 doc>
  */
@@ -803,7 +803,7 @@ DEFINE_PRIMITIVE("%write-string", write_string, subr4, (SCM str, SCM port,
  * in which case it defaults to the value returned by
  * |current-output-port|.
  * @l
- * ,(bold "Note:") This function is generally
+ * NOTE: This function is generally
  * faster than |display| for strings. Furthermore, this primitive does
  * not use the buffer associated to |port|.
  *
@@ -1170,12 +1170,12 @@ Incorrect_format_width:
  *                                 => "a new test"
  * @end lisp
  *
- * ,(bold "Note:") The second form of |format| is compliant with
+ * NOTE: The second form of |format| is compliant with
  * ,(link-srfi 28). That is, when
  * |port| is omitted, the output is returned as a string as if |port| was
  * given the value |#f|.
  * @l
- * ,(bold "Note:") Since version 0.58, |format| is also compliant with
+ * NOTE: Since version 0.58, |format| is also compliant with
  * ,(link-srfi 48).
 doc>
  */
@@ -1194,7 +1194,7 @@ DEFINE_PRIMITIVE("format", format, vsubr, (int argc, SCM *argv))
  * of |error| takes  a symbol as first parameter; it is generally used for the
  * name of the procedure which raises the error.
  * @l
- * ,(bold "Note:") The specification string may follow the
+ * NOTE: The specification string may follow the
  * ,(emph "tilde conventions")
  * of |format| (see ,(ref :mark "format")); in this case this procedure builds an
  * error message according to the specification given in |str|. Otherwise,
@@ -1322,7 +1322,7 @@ DEFINE_PRIMITIVE("signal-error", scheme_signal_error, vsubr, (int argc, SCM *arg
  *
  * Closes the port associated with |port|, rendering the port incapable of
  * delivering or accepting characters. These routines have no effect if the
- * port has already been closed. The value returned is ,(emph "void").
+ * port has already been closed. The value returned is *_void_-*.
 doc>
  */
 DEFINE_PRIMITIVE("close-input-port", close_input_port, subr1, (SCM port))
@@ -1364,9 +1364,9 @@ DEFINE_PRIMITIVE("close-port", close_port, subr1, (SCM port))
  * On the contrary, |port-open?| returns |#t| if |port| is open and
  * |#f| otherwise.
  * @l
- * ,(bold "Note:") |port-closed?| was the usual STklos function to
+ * NOTE: |port-closed?| was the usual STklos function to
  * test if a port is closed. |port-open?| has been added to be the companion
- * of the ,(rseven) functions |input-port-open?| and |output-port-open?|
+ * of the {{rseven}} functions |input-port-open?| and |output-port-open?|
 doc>
 */
 DEFINE_PRIMITIVE("port-closed?", port_closed, subr1, (SCM port))
@@ -1397,7 +1397,7 @@ DEFINE_PRIMITIVE("port-open?", port_open, subr1, (SCM port))
  * on |port|, an end of file object is returned.  |Port| may be omitted,
  * in which case it defaults to the value returned by |current-input-port|.
  * @l
- * ,(bold "Note:") As said in ,(ref :mark "values"), if |read-line| is not
+ * NOTE: As said in ,(ref :mark "values"), if |read-line| is not
  * used in  the context of |call-with-values|, the second value returned by
  * this procedure is ignored.
 doc>
@@ -1615,7 +1615,7 @@ DEFINE_PRIMITIVE("port-seek", port_seek, subr23, (SCM port, SCM pos, SCM w))
  * (port-rewind port)
  *
  * Sets the port position to the beginning of |port|. The value returned by
- * |port-rewind| is ,(emph "void").
+ * |port-rewind| is *_void_-*.
 doc>
  */
 DEFINE_PRIMITIVE("port-rewind", port_rewind, subr1, (SCM port))

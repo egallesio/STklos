@@ -1,7 +1,7 @@
 ;;;;
 ;;;; r7rs.stk   -- R7RS support (Draft-3)
 ;;;;
-;;;; Copyright © 2011-2021 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2011-2022 Erick Gallesio - Polytech'Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 24-Nov-2021 13:10 (eg)
+;;;; Last file update:  7-Jan-2022 20:03 (eg)
 ;;;;
 
 
@@ -41,7 +41,7 @@
  * <bindings> should have the form as in |let| and body is a sequence
  * of zero or more definitions followed by one or more expressions.
 
- * The |<variable>|s are bound to fresh locations, each |variable| is
+ * The `|<variable>|`s are bound to fresh locations, each |variable| is
  * assigned in left-to-right order to the result of evaluating the
  * corresponding |init|, the |body| is evaluated in the resulting
  * environment, and the values of the last expression in |body| are
@@ -83,9 +83,9 @@ doc>
  *
  * Each |<formals>| should be a formal arguments list as for a |lambda| expression.
  *
- * The |<expression>|s are evaluated in the current environment,
+ * The `|<expression>|`s are evaluated in the current environment,
  * the variables of the |<formals>| are bound to fresh locations, the return
- * values of the |<expression>|s are stored in the variables, the |<body>| is
+ * values of the `|<expression>|`s are stored in the variables, the |<body>| is
  * evaluated in the extended environment, and the values of the last expression
  * of |<body>| are returned.
  *
@@ -190,13 +190,13 @@ doc>
  * (delay <expression>)
  *
  * The |delay| construct is used together with the procedure |force|
- * to implement ,(emph "lazy evaluation") or ,(emph "call by need"). |(delay
- * <expression>)| returns an object called a ,(emph "promise") which at some
+ * to implement *_lazy evaluation_* or *_call by need_*. |(delay
+ * <expression>)| returns an object called a *_promise_*) which at some
  * point in the future may be asked (by the |force| procedure) to
  * evaluate |<expression>|, and deliver the resulting value.
  * The effect of |<expression>| returning multiple values is unpredictable.
  *
- * See the description of |force| (@pxref{force}) for a more complete
+ * See the description of |force| for a more complete
  * description of |delay|.
 doc>
 |#
@@ -216,7 +216,7 @@ doc>
  * |delay| and |force| can be rewritten using |delay-force| to prevent consuming
  * unbounded space during evaluation.
  *
- * The special form |delay-force| appears with name |lazy| in SRFI-45.
+ * The special form |delay-force| appears with name |lazy| in {{link-srfi 45}}.
  *
 doc>
 |#
@@ -1353,8 +1353,8 @@ doc>
 <doc R7RS with-exception-handler
  * (with-exception-handler <handler> <thunk>)
  *
- * This form is similar to |with-handler|. It uses a ,(emph "thunk") instead of
- * a sequence of expressions. It is conform to ,(link-srfi 34).
+ * This form is similar to |with-handler|. It uses a *_thunk_* instead of
+ * a sequence of expressions. It is conform to {{link-srfi 34}}.
  * In fact,
  * @lisp
  * (with-handler <handler> <expr1> ... <exprn>)

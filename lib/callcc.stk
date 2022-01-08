@@ -100,7 +100,7 @@
  * programmers to do that by creating a procedure that acts just
  * like the current continuation.
  * @l
- * ,(bold "Note:") |call/cc| is just another name for
+ * NOTE: |call/cc| is just another name for
  * |call-with-current-continuation|.
 doc>
 |#

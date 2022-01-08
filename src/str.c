@@ -475,7 +475,7 @@ DEFINE_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index))
  * (string-set! string k char)
  *
  * |String-set!| stores |char| in element |k| of |string| and returns
- * ,(emph "void") (|k| must be a valid index of |string|).
+ * *_void_-* (|k| must be a valid index of |string|).
  *
  * @lisp
  * (define (f) (make-string 3 #\*))
@@ -701,7 +701,7 @@ DEFINE_PRIMITIVE("string-append", string_append, vsubr, (int argc, SCM* argv))
  * was passed to it as first argument, whose size may be larger.
  *
  * ,(linebreak)
- * ,(bold "Note:") This function is defined in SRFI-118.
+ * NOTE: This function is defined in SRFI-118.
 doc>
  */
 DEFINE_PRIMITIVE("string-append!", string_dappend, vsubr, (int argc, SCM* argv))
@@ -800,7 +800,7 @@ int get_substring_size(SCM string, long from, long to) {
  * It is guaranteed that string-replace! will return the same object that
  * was passed to it as first argument, whose size may be larger.
  * ,(linebreak)
- * ,(bold "Note:") This function is defined in SRFI-118.
+ * NOTE: This function is defined in SRFI-118.
 doc>
  */
 DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv))

@@ -221,7 +221,7 @@ doc>
  *   --help, -h                  provides help for the command
  * ])
  *
- * ,(bold "Note:")
+ * NOTE:
  * ,(itemize
  * (item [Short option can be concatenated. That is,
  * @lisp

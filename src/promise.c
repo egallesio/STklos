@@ -1,7 +1,7 @@
 /*
  * promise.c    -- Implementation of promises
  *
- * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *           Author: Erick Gallesio [eg@unice.fr]
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date:  2-Jun-1993 12:27 (eg)
- * Last file update: 27-Aug-2021 20:34 (eg)
+ * Last file update:  7-Jan-2022 17:25 (eg)
  */
 #include "stklos.h"
 
@@ -160,7 +160,7 @@ DEFINE_PRIMITIVE("%promise-value-set!", promise_val_set, subr2, (SCM p, SCM v))
  * (begin (set! x 10)
  *        (force p))     =>  6
  * @end lisp
- * ,(bold "Note:") See R5RS for details on a posssible way to implement
+ * NOTE: See R5RS for details on a posssible way to implement
  * |force| and |delay|.
 doc>
 */
@@ -200,7 +200,7 @@ DEFINE_PRIMITIVE("force", force, subr1, (SCM promise))
 <doc r7rs promise?
  * (promise? obj)
  *
- *  Returns |#t| if |obj| is a promise, otherwise returns |#f|.
+ * Returns |#t| if |obj| is a promise, otherwise returns |#f|.
 doc>
 */
 DEFINE_PRIMITIVE("promise?", promisep, subr1, (SCM obj))

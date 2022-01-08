@@ -564,7 +564,7 @@ DEFINE_PRIMITIVE("hash-table-hash-function", hash_table_hash_func,
  * (hash-table-set! hash key value)
  *
  * Enters an association between |key| and |value| in the|hash| table.
- * The value returned by |hash-table-set!| is ,(emph "void").
+ * The value returned by |hash-table-set!| is *_void_-*.
 doc>
 */
 DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
@@ -725,7 +725,7 @@ DEFINE_PRIMITIVE("hash-table-exists?", hash_existp, subr2, (SCM ht, SCM key))
  * (hash-table-delete! hash key)
  *
  * Deletes the entry for |key| in |hash|, if it exists. Result of
- * |hash-table-delete!| is ,(emph "void").
+ * |hash-table-delete!| is *_void_-*.
  *
  * @lisp
  * (define h (make-hash-table))
@@ -791,11 +791,11 @@ DEFINE_PRIMITIVE("hash-table-delete!", hash_delete, subr2, (SCM ht, SCM key))
  * |Proc| must be a procedure taking two arguments. |Hash-table-for-each|
  * calls |proc| on each key/value association in |hash|, with the key as
  * the first argument and the value as the second.  The value returned by
- * |hash-table-for-each| is ,(emph "void").
+ * |hash-table-for-each| is *_void_-*.
  *  ,(linebreak)
- * ,(bold "Note:") The order of application of |proc| is unspecified.
+ * NOTE: The order of application of |proc| is unspecified.
  *  ,(linebreak)
- * ,(bold "Note:") |hash-table-walk| is another name for |hash-table-for-each|
+ * NOTE: |hash-table-walk| is another name for |hash-table-for-each|
  * (this is the name used in ,(link-srfi 69)).
  *
  * @lisp
@@ -835,7 +835,7 @@ DEFINE_PRIMITIVE("hash-table-for-each", hash_for_each, subr2, (SCM ht, SCM proc)
  * |hash-table-map| is a list of the values returned by |proc|, in an
  * unspecified order.
  * ,(linebreak)
- * ,(bold "Note:") The order of application of |proc| is unspecified.
+ * NOTE: The order of application of |proc| is unspecified.
  * @lisp
  * (let ((h (make-hash-table)))
  *   (dotimes (i 5)

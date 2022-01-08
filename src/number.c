@@ -1670,7 +1670,7 @@ DEFINE_PRIMITIVE("nan?", nanp, subr1, (SCM z))
  * (min -inf.0 x)         =>  -inf.0
  * @end lisp
  *
- * ,(bold "Note:") If any argument is inexact, then the result will also be
+ * NOTE: If any argument is inexact, then the result will also be
  * inexact
 doc>
  */
@@ -1748,7 +1748,7 @@ DEFINE_PRIMITIVE("min", min, vsubr, (int argc, SCM *argv))
  * (* +inf.0 -inf.0)       =>  -inf.0
  * (* 0 +inf.0)            =>  +nan.0
  * @end lisp
- * ,(bold "Note:") For any finite number z:
+ * NOTE: For any finite number z:
  * @lisp
  * (+ +inf.0 z)            =>  +inf.0
  * (+ -inf.0 z)            =>  -inf.0
@@ -2310,7 +2310,7 @@ DEFINE_PRIMITIVE("denominator", denominator, subr1, (SCM q))
  * ,(bold "Rationale:") |Round| rounds to even for consistency with the default
  * rounding mode specified by the IEEE floating point standard.
  * @l
- * ,(bold "Note:") If the argument to one of these procedures is inexact, then the
+ * NOTE: If the argument to one of these procedures is inexact, then the
  * result will also be inexact. If an exact value is needed, the result should
  * be passed to the |inexact->exact| procedure.
  *
@@ -2757,7 +2757,7 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
  *
  * Returns |z1| raised to the power |z2|.
  * @l
- * ,(bold "Note:") |0,(sup "z")| is 1 if |z = 0| and |0| otherwise.
+ * NOTE: |0,(sup "z")| is 1 if |z = 0| and |0| otherwise.
 doc>
  */
 
@@ -2851,7 +2851,7 @@ DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
  * (angle -inf.0)                 => 3.14159265358979
  * @end lisp
  * @l
- * ,(bold "Note:") |Magnitude| is the same as |abs| for a real argument.
+ * NOTE: |Magnitude| is the same as |abs| for a real argument.
 doc>
  */
 
@@ -3006,7 +3006,7 @@ DEFINE_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z))
  * The result returned by |number->string| never contains an explicit radix
  * prefix.
  * @l
- * ,(bold "Note:") The error case can occur only when |z| is not a complex number or
+ * NOTE: The error case can occur only when |z| is not a complex number or
  * is a complex number with a non-rational real or imaginary part.
  * @l
  * ,(bold "Rationale:") If |z| is an inexact number represented using flonums, and

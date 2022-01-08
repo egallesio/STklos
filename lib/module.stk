@@ -1,7 +1,7 @@
 ;;;;
 ;;;; module.stk -- Module stuff
 ;;;;
-;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update: 15-Dec-2021 21:52 (eg)
+;;;; Last file update:  7-Jan-2022 20:48 (eg)
 ;;;;
 
 
@@ -38,10 +38,10 @@
  * Returns the value bound to |symbol| in |module|. If |symbol| is not bound,
  * an error is signaled if no |default| is provided, otherwise |symbol-value|
  * returns |default|.
- * @l
+ * 
  * Note that this function searches the value of |symbol| in |module|
- * ,(bold "and") in the STklos module if module is not a R7RS library.
- doc>
+ * *and* in the STklos module if module is not a R7RS library.
+doc>
 |#
 (define symbol-value*
   (let ((absent (list 'absent))
@@ -85,11 +85,11 @@ doc>
  * The expressions evaluated after |select-module| will take place in
  * module |name| environment.  Module |name| must have been created
  * previously by a |define-module|. The result of |select-module| is
- * ,(emph "void").
+ * *_void_*.
  * |Select-module| is particularly useful when debugging since it
  * allows to place toplevel evaluation in a particular module. The
  * following transcript shows an usage of |select-module|.
- * ,(footnote [This transcript uses the default toplevel loop
+ * footnote:[This transcript uses the default toplevel loop
  *             which displays the name of the current module in the evaluator
  *             prompt.]):
  * @lisp
@@ -132,11 +132,12 @@ doc>
  * |Name| must be a valid symbol. If this symbol has not already been used to
  * define a module, a new module, named |name|, is created.
  * Otherwise, the expressions |<expr1>|, |<expr2>| ... are evaluated in
- * the environment of the (old) module |<name>|
- * ,(footnote [In fact |define-module| on a given name
- *           defines a new module only the first time it is invoked on this name.
- *           By this way, interactively reloading a module does not define
- *           a new entity, and the other modules which use it are not altered.]).
+ * the environment of the (old) module `|<name>|`footnote:[In fact
+ * |define-module| on a given name defines a new module
+ * only the first time it is invoked on this name. By this way, interactively
+ * reloading a module does not define a new entity, and the other modules
+ * which use it are not altered.]
+ *
  * Definitions done in a module are local to the module and do not interact with
  * the definitions in other modules. Consider the following definitions,
  * @lisp
@@ -151,14 +152,14 @@ doc>
  * Here, two modules are defined and they both bind the symbol |a| to a
  * value. However, since |a| has been defined in two distinct modules
  * they denote two different locations.
- * @l
+ *
  * The |STklos| module, which is predefined, is a special module which
- * contains all the ,(emph "global variables") of a R5RS program.  A symbol
+ * contains all the *global bindings* of a R5RS program.  A symbol
  * defined in the |STklos| module, if not hidden by a local definition, is
  * always visible from inside a module. So, in the previous exemple, the
  * |x| symbol refers the |x| symbol defined in the |STklos| module.
- * @l
- * The result of |define-module| is ,(emph "void").
+ *
+ * The result of |define-module| is *_void_*.
 doc>
 |#
 (define %modules-stack  '())
@@ -209,7 +210,7 @@ doc>
  * (<module1> <module2> ...)
  * @end lisp
  * which exports it.
- * @l
+ *
  * If several |import| clauses appear in a module, the set of
  * imported modules  is determined by appending the various list of modules
  * in their apparition order.
@@ -244,15 +245,14 @@ doc>
  * @end lisp
  * In this case, only the symbols |c| and |d| are imported from
  * module |M2|.
- * @l
- * ,(bold "Note:") Importations are not ,(emph "transitive"): when
- * the module ,(emph "C") imports the module ,(emph "B") which is an importer
- * of module ,(emph "A") the symbols of ,(emph "A") are not visible
- * from ,(emph "C"), except  by explicitly importing the ,(emph "A")
- * module from ,(emph "C").
- * @l
- * ,(bold "Note:") The module |STklos|, which contains the ,(emph "global
- * variables") is always implicitly imported from a module. Furthermore,
+ *
+ * NOTE: Importations are not "_transitive_": when
+ * the module -C_ imports the module _B_ which is an importer
+ * of module _A_ the symbols of _A_ are not visible
+ * from _C_, except  by explicitly importing the _A_ module from _C_.
+ *
+ * NOTE: The module |STklos|, which contains the _global variables_
+ * is always implicitly imported from a module. Furthermore,
  * this module is always placed at the end of the list of imported modules.
 doc>
 |#
@@ -424,16 +424,16 @@ doc>
 <doc EXT-SYNTAX export
  * (export <symbol1> <symbol2> ...)
  *
- * Specifies the symbols which are exported (i.e. ,(emph "visible")) outside
- * the current module. By default, symbols defined in a module are not
+ * Specifies the symbols which are exported (i.e. *visible* outside
+ * the current module). By default, symbols defined in a module are not
  * visible outside this module, excepted if they appear in an |export|
  * clause.
- * @l
+ *
  * If several |export| clauses appear in a module, the set of
- * exported symbols is determined by ``,(emph "unionizing")'' symbols exported
+ * exported symbols is determined by "_unionizing_" symbols exported
  * in all the |export| clauses.
- * @l
- * The result of |export| is ,(emph "void").
+ *
+ * The result of |export| is *_void_*.
 doc>
 |#
 
@@ -535,4 +535,3 @@ doc>
 |#
 (define-macro (in-module mod symb . default)
   `(apply symbol-value* ',symb (find-module ',mod) ',default))
-

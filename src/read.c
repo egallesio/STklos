@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 28-Sep-2021 07:51 (eg)
+ * Last file update: 27-Dec-2021 22:57 (eg)
  *
  */
 
@@ -858,8 +858,8 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           STk_ungetc(c, port);
           return STk_C_apply(read_brace_func, 1, port);
         }
-        goto default_case;
-      return read_list(port, '}', ctx);
+        //goto default_case;                   //FIXME
+        return read_list(port, '}', ctx);
       }
 
       case ')':
@@ -1172,7 +1172,7 @@ static SCM read_srfi10(SCM port, SCM l)
  * This parameter object permits to change the default behaviour of
  * the |read| primitive when reading a symbol. If this parameter has a
  * a true value a symbol is not converted to a default case when interned.
- * Since ,(rseven) requires that symbol are case insignificant, the default
+ * Since {{rseven}} requires that symbol are case insignificant, the default
  * value  of this parameter is |#t|.
  * @lisp
  * (read-case-sensitive)        => |#t|
@@ -1180,10 +1180,10 @@ static SCM read_srfi10(SCM port, SCM l)
  * (read-case-sensitive #f)
  * (read-from-string "ABC")     => abc
  * @end lisp
- * ,(bold "Note:")  Default behaviour can be changed for a whole execution
+ * NOTE:  Default behaviour can be changed for a whole execution
  * with the |--case-sensitive| or |case-insensitive| options.
  * @l
- * ,(bold "Note:") See also syntax for ,(ref :mark "bar-in-symbol" :text
+ * NOTE: See also syntax for ,(ref :mark "bar-in-symbol" :text
  * [special characters]) in symbols.
  *
 doc>

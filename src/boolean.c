@@ -123,7 +123,7 @@ doc>
  *                      =>  #t
  * @end lisp
  *
- * ,(bold "Note:") This assumes that neither |obj1| nor |obj2| is an
+ * NOTE: This assumes that neither |obj1| nor |obj2| is an
  * "uninterned symbol".
  * ])
  *
@@ -160,7 +160,7 @@ doc>
  * ])
  * )
  *
- * ,(bold "Note:") STklos extends R5RS |eqv?| to take into account
+ * NOTE: STklos extends R5RS |eqv?| to take into account
  * the keyword type.
  * ,(linebreak)
  * Here are some examples:
@@ -192,7 +192,7 @@ doc>
  *       (lambda (y) y))    =>  unspecified
  * @end lisp
  *
- * ,(bold "Note:") In fact, the value returned by STklos depends of
+ * NOTE: In fact, the value returned by STklos depends of
  * the way code is entered and can yield |#t| in some cases and |#f|
  * in others.
  * ,(linebreak)
@@ -279,10 +279,10 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
  * |Eq?| may also behave differently from |eqv?| on empty vectors
  * and empty strings.
  * ,(linebreak)
- * ,(bold "Note:") STklos extends R5RS |eq?| to take into account
+ * NOTE: STklos extends R5RS |eq?| to take into account
  * the keyword type.
  * ,(linebreak)
- * ,(bold "Note:") In STklos, comparison of character returns |#t| for identical
+ * NOTE: In STklos, comparison of character returns |#t| for identical
  * characters and |#f| otherwise.
  *
  * @lisp
@@ -340,7 +340,7 @@ DEFINE_PRIMITIVE("eq?", eq, subr2, (SCM x,SCM y))
  *         '\#2=(a b a b . \#2\#)) =>  #t
  * @end lisp
  *
- * ,(bold "Note:") A rule of thumb is that objects are generally
+ * NOTE: A rule of thumb is that objects are generally
  * |equal?| if they print the same.
 doc>
  */
