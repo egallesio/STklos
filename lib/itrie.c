@@ -243,6 +243,29 @@ struct trie_leaf_fxmap_obj {
 #define TRIE_MIN  (-1)
 #define TRIE_MAX  (-2)
 
+/*
+  merge_bitmaps is syntactic sugar for bitwise IOR, XOR and AND.
+  Used when merging two tries: we pass one of the macro symbols below
+  and use one single merge procedure for union, xor and intersection.
+*/
+
+#define TRIE_NOP    0
+#define TRIE_IOR    1
+#define TRIE_XOR    2
+#define TRIE_AND    3
+#define TRIE_UPDATE 4
+#define TRIE_ADJUST 5
+#define TRIE_UNION  6
+
+/* When merging two branches, the merge function calls the insert function,
+   and passes a "decide" procedure that is used to decide what to do with duplicate
+   keys. But "merge" on branches "a,b" may need to call insert "a into b" or
+   "b into a", depending on a or b being leaves. So when a and b are swapped,
+   the arguments to "decide" must be swapped too, and this macro is used to
+   tell which situation it is. */
+#define NO_SWAP 0
+#define SWAP    1
+
 
 /***********************************/
 /***                             ***/
@@ -523,19 +546,6 @@ STk_pm2key(long prefix, long bitmap) {
 
 
 
-/*
-  merge_bitmaps is syntactic sugar for bitwise IOR, XOR and AND.
-  Used when merging two tries: we pass one of the macro symbols below
-  and use one single merge procedure for union, xor and intersection.
-*/
-
-#define TRIE_NOP    0
-#define TRIE_IOR    1
-#define TRIE_XOR    2
-#define TRIE_AND    3
-#define TRIE_UPDATE 4
-#define TRIE_ADJUST 5
-#define TRIE_UNION  6
 
 static inline long
 merge_bitmaps(long b1, long b2, int merge_op) {
@@ -561,6 +571,11 @@ merge_bitmaps(long b1, long b2, int merge_op) {
 /***                                  ***/
 /****************************************/
 
+/*
+  Returns a C string representing a number in binary.
+  if full is nonzero, then leading zeros are printed. If not,
+  only the relevant bits are printed.
+ */
 char *
 trie_int2bin(unsigned long n, int full) {
     size_t si = full
@@ -574,12 +589,21 @@ trie_int2bin(unsigned long n, int full) {
     return res;
 }
 
+/*
+  Returns a SCHEME string representing a number in binary.
+  if full is nonzero, then leading zeros are printed. If not,
+  only the relevant bits are printed.
+*/
 SCM trie_int2binSCM (unsigned long v, int full) {
     return STk_Cstring2string(trie_int2bin(v,full));
 }
 
+/* debstep is the number of spaces used for indentation when debug-printing
+   a trie */
 static const unsigned int debstep = 4;
 
+/* Prints a trie, with all its internal data. Extremely useful
+   when debugging! */
 void
 trie_debug(SCM trie, unsigned int depth) {
     unsigned int i;
@@ -710,6 +734,9 @@ DEFINE_PRIMITIVE("iset-height", trie_iset_height, subr1, (SCM trie))
 
   This is used internally here, AND by the trie reader for
   isets and fxmappings.
+
+  USED BY THE PRINT PROCEDURE, which flattens the alist after
+  converting an fxpapping.
  */
 SCM
 trie_flatten(SCM x) {
@@ -720,7 +747,7 @@ trie_flatten(SCM x) {
 }
 
 /*
-  LEAF:
+  LEAF: makes leaves
   
   If value is NULL, an iset leaf is created with prefix + bitmap;
   if value is not NULL, an fxmap leaf is created with key=prefix + value.
@@ -748,7 +775,7 @@ trie_make_leaf(long prefix, long bitmap, SCM value) {
 }
 
 /*
-  BRANCH:
+  BRANCH: makes branches
 
   Just a basic constructor. No special tricks used.
  */
@@ -823,8 +850,9 @@ trie_join(long p0, long m0, SCM t0, long p1, long m1, SCM t1) {
                                 found in an fxmap
   - swap: swap arguments of proc? (v1 <-> v2)
   - merge_op: the operation used when inserting
-    * For ISETs, it is used to specify the operations on bitmaps:
-      + TRIE_NOP
+    * For ISETs, it is used to specify the operations on bitmaps.
+      For FXMAPs, it specifies how duplicate keys are managed:
+      + TRIE_NOP: unused
       + TRIE_IOR:
         . trie_aux uses when inserting into a leaf
         . trie_map_for_each uses to create leaves from bitmaps AND to merge branches
@@ -833,13 +861,13 @@ trie_join(long p0, long m0, SCM t0, long p1, long m1, SCM t1) {
         . iset-adjoin uses when inserting
         . %iset-union, %fxmapping-union
       + TRIE_XOR: used by iset-xor
-      + TRIE_AND
-    * For FXMAPs, it specifies how duplicate keys are managed:
+      + TRIE_AND: unused
       + TRIE_XOR: used by fxmalling-xor (duplicates are deleted)
-      + OVERRIDE
-      + KEEP
-      + PROC_K_V
-      + PROC_K_V2_V1
+      + TRIE_UPDATE: if proc is given, runs  (proc k v-new v-old) to get the new
+                     value; otherwise, force the update with the new one.
+      + TRIE_ADJUST: always run (proc k v-old) to get the new value (there is no
+                     "new" value, see fxmapping-adjust)
+      + TRIE_UNION: used by %fxmapping-union
   
   WHO CALLS THIS FUNCTION:
   ------------------------
@@ -951,16 +979,18 @@ trie_insert_aux(SCM trie, long prefix, unsigned long bitmap, SCM value, SCM proc
         /* insert on left or right: */
         if (trie_zerobit(prefix, TRIE_BRANCHBIT(trie)))
             return trie_make_branch(TRIE_PREFIX(trie),
-                                        TRIE_BRANCHBIT(trie),
-                                        trie_insert_aux(TRIE_LEFT(trie),prefix,bitmap,value,proc,0,merge_op),
-                                        TRIE_RIGHT(trie),
-                                        FXMAPP(trie));
+                                    TRIE_BRANCHBIT(trie),
+                                    trie_insert_aux(TRIE_LEFT(trie),prefix,bitmap,value,
+                                                    proc,NO_SWAP,merge_op),
+                                    TRIE_RIGHT(trie),
+                                    FXMAPP(trie));
         else
             return trie_make_branch(TRIE_PREFIX(trie),
-                                        TRIE_BRANCHBIT(trie),
-                                        TRIE_LEFT(trie),
-                                        trie_insert_aux(TRIE_RIGHT(trie),prefix,bitmap,value,proc,0,merge_op),
-                                        FXMAPP(trie));
+                                    TRIE_BRANCHBIT(trie),
+                                    TRIE_LEFT(trie),
+                                    trie_insert_aux(TRIE_RIGHT(trie),prefix,bitmap,value,
+                                                    proc,NO_SWAP,merge_op),
+                                    FXMAPP(trie));
     else
         /* ok, so our prefix didn't match the branch's prefix. we just
            create a leaf and join it with the branch. */
@@ -1030,7 +1060,7 @@ trie_make_empty(int is_fxmap) {
 }
 
 /*
-  Builds a new trie.
+  Builds a new trie from a variable number of arguments.
  */
 SCM
 trie_aux(int constant, int is_fxmap, int argc, SCM *argv) {
@@ -1051,10 +1081,11 @@ trie_aux(int constant, int is_fxmap, int argc, SCM *argv) {
     for (int i=argc;   i>0;   i -= step , ptr -= step) {
         if (!INTP(*ptr)) STk_error("bad integer ~S", *ptr);
         trie = is_fxmap
-            ? trie_insert_aux(trie, INT_VAL(*ptr), 0, *(ptr-1), NULL,0,TRIE_NOP)
+            ? trie_insert_aux(trie, INT_VAL(*ptr), 0, *(ptr-1), NULL,NO_SWAP,TRIE_NOP)
             : trie_insert_aux(trie,
-                                  trie_prefix(INT_VAL(*ptr)),
-                                  trie_fixnum2bitmap(INT_VAL(*ptr)), NULL, NULL,0,TRIE_IOR);
+                              trie_prefix(INT_VAL(*ptr)),
+                              trie_fixnum2bitmap(INT_VAL(*ptr)),
+                              NULL, NULL,NO_SWAP,TRIE_IOR);
         if (constant)   BOXED_INFO(trie) |= TRIE_CONST;
     }
     /* Not empty anymore: */
@@ -1190,7 +1221,12 @@ trie_difference_aux(SCM s, SCM t) {
 }
 
 /*
-  Merge two tries, using merge_op in bitmaps.
+  Merge two tries.
+
+  - "decide" is the procedure that should be used to obtain the new value when there
+    are duplicate keys in a mapping
+  - "merge_op" is the merge operation (see the comment before trie_insert_aux for a
+    detailed explanation)
  */
 SCM
 trie_merge(SCM decide, int merge_op, SCM a, SCM b) {
@@ -1202,12 +1238,14 @@ trie_merge(SCM decide, int merge_op, SCM a, SCM b) {
     int is_fxmap = FXMAPP(a);
     
     if (TRIE_LEAFP(a)) {
-        if (is_fxmap) return trie_insert_aux(b, p, 0,     TRIE_VALUE(a), decide, 0, merge_op);
-        else          return trie_insert_aux(b, p, TRIE_BITMAP(a), NULL, decide, 0, merge_op);
+        if (is_fxmap) return trie_insert_aux(b, p, 0,     TRIE_VALUE(a), decide, NO_SWAP, merge_op);
+        else          return trie_insert_aux(b, p, TRIE_BITMAP(a), NULL, decide, NO_SWAP, merge_op);
     }
     if (TRIE_LEAFP(b)) {
-        if (is_fxmap) return trie_insert_aux(a, q, 0,     TRIE_VALUE(b), decide, 1, merge_op);
-        else          return trie_insert_aux(a, q, TRIE_BITMAP(b), NULL, decide, 1, merge_op);
+        /* We are changing the order of a and b, so we pass SWAP to the insert
+           procedure. When "decide" is called, its arguments will be swapped too. */
+        if (is_fxmap) return trie_insert_aux(a, q, 0,     TRIE_VALUE(b), decide, SWAP, merge_op);
+        else          return trie_insert_aux(a, q, TRIE_BITMAP(b), NULL, decide, SWAP, merge_op);
     }
 
     long m = TRIE_BRANCHBIT(a);
@@ -1286,7 +1324,7 @@ trie_map_for_each(SCM trie, SCM collect, SCM proc) {
                 long x  = INT_VAL(res);
                 long q  = trie_prefix(x);
                 long bm = trie_fixnum2bitmap(x);
-                t = trie_insert_aux(t, q, bm, NULL, NULL, 0, TRIE_IOR);
+                t = trie_insert_aux(t, q, bm, NULL, NULL, NO_SWAP, TRIE_IOR);
                 b = b & (~trie_lowestbit(b));
             }
             return t;
@@ -1376,6 +1414,8 @@ trie_min_max_aux(SCM trie, int want_max) {
 
 
 /*
+  Delete min or max from a trie.
+  
   Returns a PAIR,
   CAR = the element deleted
   CDR = the new trie, without it
@@ -1449,6 +1489,10 @@ trie_del_min_max_aux(SCM trie, int want_max) {
     return STk_void; /* never reached */
 }
 
+/*
+  Deletes min or max from a trie. This is just a wrapper that checks for
+  empty tries before calling the function that does the actual work.
+ */
 SCM
 trie_del_min_max(SCM trie, int want_max) {
     if (TRIE_EMPTYP(trie)) {
@@ -1491,8 +1535,8 @@ SCM trie_list_aux(SCM trie, SCM tail) {
 }
 
 /*
-  Implementation of fold. When from_right is not zero,
-  fold is done from right to left.
+  Implementation of fold.
+  When from_right is not zero, fold is done from right to left.
  */
 SCM
 trie_fold(SCM proc, SCM nil, SCM trie, int from_right)
@@ -1536,11 +1580,15 @@ trie_fold(SCM proc, SCM nil, SCM trie, int from_right)
 
 /*
   Partitions the trie into two others.
+  Used as a building block for delete, filter and partition.
+  
   - sets is a pair of tries: ( A, B )
     A (car) = those for which pred results in #t
     B (cdr) = those for which pred results in #f
 
-    Pass STk_nil for both when calling.
+    Pass STk_nil for both when calling - that is, when this
+    function is called by others, "sets" should be
+    CONS(STk_nil, STk_nil).
 
   - partition is a flag: when 0, the set B is not build.
     this is useful when we use this function as primitive
@@ -1567,12 +1615,12 @@ trie_partition_aux(SCM pred, SCM trie, SCM sets, int partition) {
                 CAR(sets) = trie_insert_aux(CAR(sets),
                                                 TRIE_KEY(trie),
                                                 0,
-                                                TRIE_VALUE(trie),NULL,0,TRIE_NOP);
+                                                TRIE_VALUE(trie),NULL,NO_SWAP,TRIE_NOP);
             else if (partition)
                 CDR(sets) = trie_insert_aux(CDR(sets),
                                                 TRIE_KEY(trie),
                                                 0,
-                                                TRIE_VALUE(trie),NULL,0,TRIE_NOP);
+                                                TRIE_VALUE(trie),NULL,NO_SWAP,TRIE_NOP);
         } else {
             /* run through the bitmap to get all numbers, from RIGHT to LEFT */
             long  p = TRIE_PREFIX(trie);
@@ -1584,12 +1632,12 @@ trie_partition_aux(SCM pred, SCM trie, SCM sets, int partition) {
                     CAR(sets) = trie_insert_aux(CAR(sets),
                                                     p,
                                                     trie_lowestbit(b),
-                                                    NULL,NULL,0,TRIE_IOR);
+                                                    NULL,NULL,NO_SWAP,TRIE_IOR);
                 if ((!success) && partition)
                     CDR(sets) = trie_insert_aux(CDR(sets),
                                                     p,
                                                     trie_lowestbit(b),
-                                                    NULL,NULL,0,TRIE_IOR);
+                                                    NULL,NULL,NO_SWAP,TRIE_IOR);
                 b = b & (~trie_lowestbit(b));
             }
         }
@@ -1605,6 +1653,8 @@ trie_partition_aux(SCM pred, SCM trie, SCM sets, int partition) {
 
 
 /*
+  Compares two leaves for set-theoretic inclusion.
+  
   Returns:
    -1 if s is subset of t
     0 if s is equal to t
@@ -1627,7 +1677,7 @@ trie_compare_leaves(SCM s, SCM t, SCM compare) {
     long q  = TRIE_PREFIX(t);
     long ba = TRIE_BITMAP(s);
     long bb = TRIE_BITMAP(t);
-    if ( (p == q) && (ba == bb) ) return 0;            /* s == t */
+    if ( (p == q) && (ba == bb) ) return 0;           /* s == t */
     if ( (p == q) && ((ba & (~bb)) == 0) ) return -1; /* s in t */
     if ( (p == q) && ((bb & (~ba)) == 0) ) return +1; /* t in s */
     /* Now, either we have different prefixes, and the leafs are
@@ -1643,6 +1693,17 @@ trie_compare_leaves(SCM s, SCM t, SCM compare) {
 /* FIXME: NOT TAIL RECURSIVE */
 long trie_compare(SCM s, SCM t, SCM compare);
 
+/*
+  Compares a leaf and a branch for set-theoretic inclusion.
+  
+  Returns:
+   -1 if leaf is subset of branch
+    0 if leaf is equal to branch
+   +1 if leaf is superset of branch
+   +2 if leaf and branch are disjoint
+
+  compare is a procedure used to compare values for *equality* in fxmappings.
+*/
 long
 trie_compare_leaf_branch(SCM leaf, SCM branch, SCM compare) {
     long p = TRIE_PREFIX(leaf);
@@ -1656,6 +1717,8 @@ trie_compare_leaf_branch(SCM leaf, SCM branch, SCM compare) {
 }
 
 /*
+  Compares two tries for set-theoretic inclusion.
+  
   Returns
    -1 if s is subset of t
     0 if s is equal to t
@@ -1746,24 +1809,9 @@ trie_compare(SCM s, SCM t, SCM compare) {
     return +3;
 }
 
-DEFINE_PRIMITIVE("%trie-compare", trie_compare, subr23, (SCM s, SCM t, SCM compare))
-{
-    if (!TRIEP(s))                 STk_error("bad iset or fxmapping ~S", s);
-    if (!TRIEP(t))                 STk_error("bad iset or fxmapping ~S", t);
-    if ((ISETP(s) && FXMAPP(t)) ||
-        (ISETP(t) && FXMAPP(s)))   STk_error("cannot compare iset with fxmapping: ~S and ~S");
-    if (compare && (STk_procedurep(compare)==STk_false))
-                                   STk_error("bad procedure ~S", compare);
-    if (ISETP(s) && compare)       STk_error ("cannot use compare procedure when comparing isets");
-    if (FXMAPP(s) && (!compare))   STk_error ("need compare procedure when comparing fxmappings");
-    return MAKE_INT(trie_compare(s,t,compare));
-}
 
 /*
   Turns lists into isets and alists into fxmappings.
-
-
-  
 */
 SCM
 trie_list_trie_aux (SCM list, int is_fxmap, SCM combine) {
@@ -1783,13 +1831,13 @@ trie_list_trie_aux (SCM list, int is_fxmap, SCM combine) {
             k = INT_VAL(CAR(CAR(list)));
             v = CDR(CAR(list));
             trie = combine
-                ? trie_insert_aux(trie, k, b, v, combine, 0, TRIE_UPDATE)
-                : trie_insert_aux(trie, k, b, v, combine, 0, TRIE_NOP);
+                ? trie_insert_aux(trie, k, b, v, combine, NO_SWAP, TRIE_UPDATE)
+                : trie_insert_aux(trie, k, b, v, combine, NO_SWAP, TRIE_NOP);
         } else {
             if (!INTP(CAR(list))) STk_error("bad integer ~S", CAR(list));
             k = trie_prefix(INT_VAL(CAR(list)));
             b = trie_fixnum2bitmap(INT_VAL(CAR(list)));
-            trie = trie_insert_aux(trie, k, b, v, combine, 0, TRIE_IOR);
+            trie = trie_insert_aux(trie, k, b, v, combine, NO_SWAP, TRIE_IOR);
         }
         list = CDR(list);
     }
@@ -1801,7 +1849,7 @@ trie_list_trie_aux (SCM list, int is_fxmap, SCM combine) {
 
 /*
   Copies a trie into a new one. The new trie is always mutable.
- */
+*/
 SCM
 trie_copy (SCM oldtrie) {
     int is_fxmap = FXMAPP(oldtrie);
@@ -2430,7 +2478,7 @@ DEFINE_PRIMITIVE("fxmapping-adjoin", trie_fxmap_adjoin, vsubr, (int argc, SCM *a
     
     for (;  argc > 0; argc-=2, argv-=2) {
         if (!INTP(*argv)) STk_error("bad integer ~S", *argv);
-        trie = trie_insert_aux(trie, INT_VAL(*argv), 0, *(argv-1), NULL,0, TRIE_NOP);
+        trie = trie_insert_aux(trie, INT_VAL(*argv), 0, *(argv-1), NULL, NO_SWAP, TRIE_NOP);
     }
     return trie;
 }
@@ -2449,7 +2497,8 @@ DEFINE_PRIMITIVE("fxmapping-set", trie_fxmap_set, vsubr, (int argc, SCM *argv))
     
     for (;  argc > 0; argc-=2, argv-=2) {
         if (!INTP(*argv)) STk_error("bad integer ~S", *argv);
-        trie = trie_insert_aux(trie, INT_VAL(*argv), 0, *(argv-1), NULL,0, TRIE_UPDATE);
+        trie = trie_insert_aux(trie, INT_VAL(*argv), 0, *(argv-1), NULL,
+                               NO_SWAP, TRIE_UPDATE);
     }
     return trie;
 }
@@ -2459,7 +2508,7 @@ DEFINE_PRIMITIVE("fxmapping-adjust", trie_fxmap_adjust, subr3, (SCM trie, SCM ke
     if (!FXMAPP(trie)) STk_error("bad fxmapping ~S", trie);
     if (!INTP(key)) STk_error("bad integer ~S", key);
     if (STk_procedurep(proc)==STk_false) STk_error("bad procedure ~S", proc);
-    return trie_insert_aux(trie, INT_VAL(key), 0, NULL, proc, 0, TRIE_ADJUST);
+    return trie_insert_aux(trie, INT_VAL(key), 0, NULL, proc, NO_SWAP, TRIE_ADJUST);
 }
 
 
@@ -2481,7 +2530,7 @@ DEFINE_PRIMITIVE("fxmapping-adjoin/combinator", trie_fxmap_adjoin_comb, vsubr, (
     
     for (;  argc > 0; argc-=2, argv-=2) {
         if (!INTP(*argv)) STk_error("bad integer ~S", *argv);
-        trie = trie_insert_aux(trie, INT_VAL(*argv), 0, *(argv-1), proc, 0, TRIE_UPDATE);
+        trie = trie_insert_aux(trie, INT_VAL(*argv), 0, *(argv-1), proc, NO_SWAP, TRIE_UPDATE);
     }
     return trie;
 }
@@ -2497,7 +2546,8 @@ DEFINE_PRIMITIVE("iset-adjoin", trie_iset_adjoin, vsubr, (int argc, SCM *argv))
     for (;  argc > 0; argc--, argv--) {
         if (!INTP(*argv)) STk_error("bad integer ~S", *argv);
         long k = INT_VAL(*argv);
-        trie = trie_insert_aux(trie, trie_prefix(k), trie_fixnum2bitmap(k), NULL,  NULL, 0, TRIE_IOR);
+        trie = trie_insert_aux(trie, trie_prefix(k),
+                               trie_fixnum2bitmap(k), NULL,  NULL, NO_SWAP, TRIE_IOR);
     }
     return trie;
 }
@@ -2916,6 +2966,18 @@ DEFINE_PRIMITIVE("fxmapping-partition", trie_fxmap_partition, subr2, (SCM pred, 
     return STk_n_values(2, CAR(l), CDR(l));
 }
 
+DEFINE_PRIMITIVE("%trie-compare", trie_compare, subr23, (SCM s, SCM t, SCM compare))
+{
+    if (!TRIEP(s))                 STk_error("bad iset or fxmapping ~S", s);
+    if (!TRIEP(t))                 STk_error("bad iset or fxmapping ~S", t);
+    if ((ISETP(s) && FXMAPP(t)) ||
+        (ISETP(t) && FXMAPP(s)))   STk_error("cannot compare iset with fxmapping: ~S and ~S");
+    if (compare && (STk_procedurep(compare)==STk_false))
+                                   STk_error("bad procedure ~S", compare);
+    if (ISETP(s) && compare)       STk_error ("cannot use compare procedure when comparing isets");
+    if (FXMAPP(s) && (!compare))   STk_error ("need compare procedure when comparing fxmappings");
+    return MAKE_INT(trie_compare(s,t,compare));
+}
 
 /***
  *** COPYING AND CONVERSION
@@ -3337,9 +3399,12 @@ DEFINE_PRIMITIVE("%trie/list-flatten", trie_list_flatten, subr1, (SCM l))
 /*
   In order to print, we turn the iset or fxmap into a list
   (or alist), then cons the appropriate symbol, `<iset>`
-  or `<fxmapping>`. No need to write traversal code here! :)
+  or `<fxmapping>`.
   But we need the `trie_flatten` function...
- */
+
+  FIXME: we should be able to do this with for-each. Can we
+         set the print function in Scheme, and not C?
+*/
 static void print_trie(SCM trie, SCM port, int mode) {
     SCM lst = trie_list_aux(trie, STk_nil);
     STk_puts("#,", port);

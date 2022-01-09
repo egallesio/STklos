@@ -529,6 +529,15 @@
 ;; fxmapping<=? Scheme
 ;; fxmapping>=? Scheme
 
+;;; NOTE: the %trie-compare function, written in C,
+;;; returns:
+;;
+;; -1 if s is subset of t
+;;  0 if s is equal to t
+;; +1 if s is superset of t
+;; +2 if s and t are disjoint
+;;
+
 (define (%fxmapping-cmp op proc args)
   (when (not (procedure? proc)) (error "bad procedure ~S" proc))
   (for-each (lambda (x)

@@ -322,11 +322,12 @@
 ;; iset>=? C + Scheme
 
 
-;; (%trie-compare s t) returns
-;;  0   s = t
-;; -1   s SUBSET of t
-;; +1   s SUPERSET of t
-;; +2   neither is subset of the other
+;;; Note: (%trie-compare s t) returns
+;;;
+;;;  0   s = t
+;;; -1   s SUBSET of t
+;;; +1   s SUPERSET of t
+;;; +2   neither is subset of the other
 
 (define (%iset-cmp op args)
   (for-each (lambda (x)
