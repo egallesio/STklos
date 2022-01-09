@@ -364,7 +364,7 @@ DEFINE_PRIMITIVE("condition-ref", condition_ref, subr2, (SCM c, SCM slot))
  * |slot-name|, or one of its (direct or indirect) supertypes must have the
  * slot. |Condition-set!| change the value associated with |slot-name| to |obj|.
  * @l
- * ,(bold "Note"): Whereas |condition-ref| is defined in ,(srfi 35),
+ * NOTE: Whereas |condition-ref| is defined in ,(srfi 35),
  * |confition-set!| is not.
 doc>
 */

@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 12:27 (eg)
-;;;; Last file update:  7-Jan-2022 20:08 (eg)
+;;;; Last file update:  9-Jan-2022 18:05 (eg)
 ;;;;
 
 
@@ -856,8 +856,8 @@ doc>
  * be opened, an error is signaled. If |proc| returns, then the port is closed
  * automatically and the value(s) yielded by the proc is(are) returned.
  * If proc does not return, then the port will not be closed automatically.
- * @l
- * ,(bold "Rationale:") Because Scheme's escape procedures have unlimited extent,
+ * 
+ * IMPORTANT: Because Scheme's escape procedures have unlimited extent,
  * it is possible to escape from the current continuation but later to escape
  * back in. If implementations were permitted to close the port on any escape
  * from the current continuation, then it would be impossible to write portable

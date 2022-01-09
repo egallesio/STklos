@@ -1,7 +1,7 @@
 /*
  * s p o r t . c                        -- String ports management
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 27-Aug-2021 20:15 (eg)
+ * Last file update:  9-Jan-2022 18:15 (eg)
  *
  */
 
@@ -469,7 +469,7 @@ DEFINE_PRIMITIVE("get-output-bytevector", get_output_bytevector, subr1, (SCM por
  * (output-string-port? obj)
  *
  * Returns |#t| if |obj| is an input string port or output string port
- * respectively, otherwise returns #f.
+ * respectively, otherwise returns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("input-string-port?", input_string_portp, subr1, (SCM port))
@@ -488,7 +488,7 @@ DEFINE_PRIMITIVE("output-string-port?", output_string_portp, subr1, (SCM port))
  * (output-bytevector-port? obj)
  *
  * Returns |#t| if |obj| is an input bytevector port or output bytevector port
- * respectively, otherwise returns #f.
+ * respectively, otherwise returns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("input-bytevector-port?", input_bytevector_portp, subr1, (SCM port))

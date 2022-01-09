@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  8-Jan-2022 21:26 (eg)
+;;;; Last file update:  9-Jan-2022 20:36 (eg)
 ;;;;
 
 
@@ -361,7 +361,7 @@ doc>
  * (program-name)
  *
  * Returns the invocation name of the current program as a string. If the file is
- * not a script (in sense of SRFI 193), it is the name of the running {{stklos}}
+ * not a script (in sense of {{quick-link-srfi 193}}), it is the name of the running {{stklos}}
  * interpreter, otherwise it is the name of the running script. This function always
  * returns a string wheareas the|command-name| procedure returns #f when the
  * program name is not a script.
@@ -380,8 +380,9 @@ doc>
  * Create a directory with name |dir|. No error is signaled if |dir| already exists.
  * Parent directories of |dir| are created as needed. If |permissions| is omitted,
  * it defaults to #o775 (masked by the current umask).
- * @l
- * This function was also called |make-directories|. This old name is obsolete.
+ * 
+ * NOTE: This function was also called |make-directories|. This old name is
+ * obsolete.
 doc>
 |#
 (define (create-directories path :optional (perm #o775))
@@ -412,8 +413,8 @@ doc>
 <doc EXT posix-error?
  * (posix-error? obj)
  *
- * This procedure returns #t if |obj| is a condition object that describes a
- * POSIX error, and #f otherwise.
+ * This procedure returns `#t` if |obj| is a condition object that describes a
+ * POSIX error, and `#f` otherwise.
  *
  * This function is defined in {{link-srfi 170}}.
 doc>
@@ -1435,7 +1436,7 @@ doc>
  * (file-separator)
  *
  * Retuns the operating system file separator as a character. This is typically
- * #\\/ on Unix (or Cygwin) systems and #\\\\ on Windows.
+ * `{{sharp}}\/` on Unix (or Cygwin) systems and `{{sharp}}\\` on Windows.
 doc>
 |#
 (define (file-separator)
@@ -1535,7 +1536,7 @@ doc>
  * |port|.
  *
  * Hereafter is a (not too realistic) example: a message will be displayed
- * repeatedly until a *_sexpr_*) is read on the current input port.
+ * repeatedly until a *_sexpr_* is read on the current input port.
  *
  * @lisp
  * (let ((idle (lambda () (display "Nothing to read!\\n"))))
@@ -2005,8 +2006,8 @@ doc>
 <doc EXT implementation-name
  * (implementation-name)
  *
- * This function is defined in {{srfi 112}}; it returns the Scheme
- * implementation (i.e. "STklos").
+ * This function is defined in {{link-srfi 112}}; it returns the Scheme
+ * implementation (i.e. the string `"STklos"`).
 doc>
 |#
 (define (implementation-name) "STklos")
@@ -2016,7 +2017,7 @@ doc>
 <doc EXT cpu-architecture
  * (cpu-architecture)
  *
- * This function is defined in {{srfi 112}}; it returns the CPU
+ * This function is defined in {{link-srfi 112}}; it returns the CPU
  * architecture, real or virtual, on which this implementation
  * is executing.
 doc>
@@ -2027,7 +2028,7 @@ doc>
 <doc EXT machine-name
  * (machine-name)
  *
- * This function is defined in {{srfi 112}}; it returns a name for the
+ * This function is defined in {{link-srfi 112}}; it returns a name for the
  * particular machine on which the implementation is running.
 doc>
 |#
@@ -2038,7 +2039,7 @@ doc>
 <doc EXT os-name
  * (os-name)
  *
- * This function is defined in {{srfi 112}}; it returns the name for
+ * This function is defined in {{link-srfi 112}}; it returns the name for
  * the operating system, platform, or equivalent on which the
  * implementation is running.
 doc>
@@ -2050,7 +2051,7 @@ doc>
 <doc EXT os-version
  * (os-version)
  *
- * This function is defined in {{srfi 112}}; it returns the version for
+ * This function is defined in {{link-srfi 112}}; it returns the version for
  * the operating system, platform, or equivalent on which the
  * implementation is running.
 doc>
@@ -2080,7 +2081,7 @@ doc>
 <doc EXT-SYNTAX assume
  * (assume obj ...)
  *
- * The special form |assume| is defined in {{srfi 145}}.
+ * The special form |assume| is defined in {{link-srfi 145}}.
  * When {{stklos}} is in debug mode, this special form is an expression
  * that evaluates to the value of |obj| if |obj| evaluates to a true
  * value and it is an error if |obj| evaluates to a false value.
@@ -2218,10 +2219,10 @@ doc>
  * position is uninterpretable by the port, an error satisfying
  * i/o-invalid-position-error? is signaled.
  *
- * If set-port-position! procedure is invoked on a port that does not support
+ * If |set-port-position!| procedure is invoked on a port that does not support
  * the operation or if pos is not in the range of valid positions of port,
- * set-port-position! signals an error. Otherwise, it sets the current position
- * of the port to pos. If port is an output port, set-port-position! first flushes
+ * |set-port-position!| signals an error. Otherwise, it sets the current position
+ * of the port to pos. If port is an output port, |set-port-position!| first flushes
  * port (even if the port position will not change).
  *
  * If port is a binary output port and the current position is set beyond the
@@ -2233,7 +2234,7 @@ doc>
  * extended in this manner within the limits of the underlying operating system.
  * In other types of ports, if an attempt is made to set the position beyond the
  * current end of data in the underlying object, and the object does not support
- * extension, an error satisfying i/o-invalid-position-error? is signaled.
+ * extension, an error satisfying |i/o-invalid-position-error?| is signaled.
 doc>
 |#
 (define (set-port-position! port pos)
@@ -2256,10 +2257,10 @@ doc>
 <doc EXT i/o-invalid-position-error?
  * (i/o-invalid-position-error? obj)
  *
- * Returns #t if obj is an object created by
- * make-i/o-invalid-position-error? or an object raised in the circumstances
- * described in SRFI-192 (attempt to access an invalid position in the
- * stream), or #f if it is not.
+ * Returns `#t` if |obj| is an object created by
+ * |make-i/o-invalid-position-error?| or an object raised in the circumstances
+ * described in {{quick-link-srfi 192}} (attempt to access an invalid position in the
+ * stream), or `#f` if it is not.
 doc>
 |#
 (define (i/o-invalid-position-error? obj)

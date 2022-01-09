@@ -2,7 +2,7 @@
  *
  * s y s t e m . c                              -- System relative primitives
  *
- * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update: 10-Sep-2021 11:37 (eg)
+ * Last file update:  9-Jan-2022 20:36 (eg)
  */
 
 #include <unistd.h>
@@ -645,7 +645,7 @@ void STk_error_posix(int err, char *proc_name, SCM obj1, SCM obj2)
  * environment variable (if it is defined) and the current process ID.
  * If a value is provided, it must be a string designating a valid prefix path.
  * @l
- * This parameter object is also defined in ,(link-srfi 170).
+ * This parameter object is also defined in {{link-srfi 170}}.
 doc>
 */
 static SCM init_temp_file_prefix(void)
@@ -682,10 +682,10 @@ static SCM temp_file_prefix_conv(SCM val)
  * file name
  * @lisp
  * (winify-file-name "/tmp")
- *     => "C:\\\\cygwin\\\\tmp"
+ *     => "C:\\cygwin\\tmp"
  * (list (getcwd) (winify-file-name (getcwd)))
  *     => ("//saxo/homes/eg/Projects/STklos"
- *         "\\\\\\\\saxo\\\\homes\\\\eg\\\\Projects\\\\STklos")
+ *         "\\\\saxo\\homes\\eg\\Projects\\STklos")
  * @end lisp
 doc>
 */
@@ -715,7 +715,7 @@ DEFINE_PRIMITIVE("winify-file-name", winify_filename, subr1, (SCM _UNUSED(f)))
  * its external form.
  * file name
  * @lisp
- * (posixify-file-name "C:\\\\cygwin\\\\tmp")
+ * (posixify-file-name "C:\\cygwin\\tmp")
  *        => "/tmp"
  * @end lisp
 doc>
@@ -819,8 +819,8 @@ DEFINE_PRIMITIVE("chdir", chdir, subr1, (SCM s))
  *
  * Create a directory with name |dir|. If |permissions| is omitted, it
  * defaults to #o775 (masked by the current umask).
- * 
- * This function is also defined in ,(link-srfi 170). The old name
+ *
+ * NOTE: This function is also defined in {{link-srfi 170}}. The old name
  * |make-directory| is deprecated.
 doc>
 */
@@ -853,7 +853,7 @@ DEFINE_PRIMITIVE("create-directory", make_directory, subr12, (SCM path, SCM perm
  *
  * Delete the directory with name |dir|.
  * @l
- * NOTE: This function is also defined in ,(link-srfi 170). The name
+ * NOTE: This function is also defined in {{link-srfi 170}}. The name
  * |remove-directory| is kept for compatibility.
 doc>
 */
@@ -870,7 +870,7 @@ DEFINE_PRIMITIVE("delete-directory", delete_directory, subr1, (SCM path))
  * (getpid)
  *
  * Returns the system process number of the current program (i.e. the
- * Unix ,(emph "pid")) as an integer.
+ * Unix _PID_ as an integer).
 doc>
 */
 DEFINE_PRIMITIVE("getpid", getpid, subr0, (void))
@@ -963,7 +963,7 @@ DEFINE_PRIMITIVE("file-exists?", file_existsp, subr1, (SCM f))
  * (file-size string)
  *
  * Returns the size of the file whose path name is given in
- * |string|.If |string| denotes a file which does not exist,
+ * |string|. If |string| denotes a file which does not exist,
  * |file-size| returns |#f|.
 doc>
  */
@@ -984,31 +984,32 @@ DEFINE_PRIMITIVE("file-size", file_size, subr1, (SCM f))
  * csh shell. |Glob| returns a list of the filenames that match at least
  * one of |pattern| arguments.  The |pattern| arguments may contain
  * the following special characters:
- * ,(itemize
- * (item [|?| Matches any single character.])
- * (item [|*| Matches any sequence of zero or more characters.])
- * (item [|\[chars\]| Matches any single character in |chars|.
- * If chars contains a sequence of the form |a-b| then any character
- * between |a| and |b| (inclusive) will match.])
- * (item [|\\x| Matches the character |x|.])
- * (item [|{a,b,...}| Matches any of the strings |a|, |b|, etc.])
+ *
+ * - |?| Matches any single character.
+ * - |*| Matches any sequence of zero or more characters.
+ * - |\[chars\]| Matches any single character in |chars|.
+ *   If chars contains a sequence of the form |a-b| then any character
+ *   between |a| and |b| (inclusive) will match.
+ * - |\x| Matches the character |x|.
+ * - |{a,b,...}| Matches any of the strings |a|, |b|, etc.
  * )
  *
  * As with csh, a '.' at the beginning of a file's name or just after
- * a '/ must be matched explicitly or with a |@{@}| construct.
+ * a '/' must be matched explicitly or with a |@{@}| construct.
  * In addition, all '/' characters must be matched explicitly.
- * @l
+ *
  * If the first character in a pattern is '~' then it refers to
  * the home directory of the user whose name follows the '~'.
- * If the '~' is followed immediately by `/' then the value of
+ * If the '~' is followed immediately by '/' then the value of
  * the environment variable HOME is used.
- * @l
- * |Glob| differs from csh globbing in two ways.  First, it does not
- * sort its result list (use the |sort| procedure if you want the list
- * sorted).
- * Second, |glob| only returns the names of files that actually exist;
- * in csh no check for existence is made unless a pattern contains a
- * |?|, |*|, or |\[\]| construct.
+ *
+ * |Glob| differs from csh globbing in two ways:
+ *
+ * 1. it does not  sort its result list (use the |sort| procedure 
+ * if you want the list  sorted).
+ * 2. |glob| only returns the names of files that actually exist;
+ *    in csh no check for existence is made unless a pattern contains a
+ *    |?|, |*|, or |[]| construct.
 doc>
 */
 DEFINE_PRIMITIVE("glob", glob, vsubr, (int argc, SCM *argv))
@@ -1052,7 +1053,7 @@ DEFINE_PRIMITIVE("remove-file", remove_file, subr1, (SCM filename))
  * Renames the file whose path-name is |string1| to a file whose path-name is
  * |string2|. The result of |rename-file| is *_void_*.
  * @l
- * This function is also defined in ,(link-srfi 170).
+ * This function is also defined in {{link-srfi 170}}.
 doc>
 */
 DEFINE_PRIMITIVE("rename-file", rename_file, subr2, (SCM filename1, SCM filename2))
@@ -1075,7 +1076,7 @@ DEFINE_PRIMITIVE("rename-file", rename_file, subr2, (SCM filename1, SCM filename
  * Regardless of the value of |dotfiles?|, the two files ,(q ".") and ,(q "..")
  * are never  returned.
  * @l
- * This function is also defined in ,(link-srfi 170).
+ * This function is also defined in {{link-srfi 170}}.
 doc>
 */
 DEFINE_PRIMITIVE("directory-files", directory_files, subr12, (SCM dirname, SCM dot))
@@ -1165,10 +1166,10 @@ DEFINE_PRIMITIVE("copy-file", copy_file, subr2, (SCM filename1, SCM filename2))
  *                                current output port and in the file itself.
  * @end lisp
  *
- * ,(bold "Notes:") This function is also defined in ,(link-srfi 170).However,
+ * NOTE: This function is also defined in {{link-srfi 170}}.However,
  * in SRFI-170, |create-temp-file| returns only the name of the temporary file.
- * @l
- * |temporary-file-name| is another name for this function.
+ *
+ * NOTE: |temporary-file-name| is another name for this function.
 doc>
 */
 
@@ -1718,14 +1719,14 @@ DEFINE_PRIMITIVE("setenv!", setenv, subr2, (SCM var, SCM value))
 {
   char *s;
   unsigned long len;
-  
+
   if (!STRINGP(var))                  error_bad_string(var);
   if (strchr(STRING_CHARS(var), '=')) STk_error("variable ~S contains a '='", var);
   if (!STRINGP(value))                STk_error("value ~S is not a string", value);
 
   len = strlen(STRING_CHARS(var))   +
         strlen(STRING_CHARS(value)) + 2; /* 2 because of '=' & \0 */
-  
+
   s = STk_must_malloc_atomic(len);
   snprintf(s, len, "%s=%s", STRING_CHARS(var), STRING_CHARS(value));
   putenv(s);

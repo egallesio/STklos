@@ -1,7 +1,7 @@
 /*
  * f p o r t . c                                -- File ports
  *
- * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  8-Jan-2000 14:48 (eg)
- * Last file update: 28-Aug-2021 11:45 (eg)
+ * Last file update:  9-Jan-2022 19:19 (eg)
  *
  * This implementation is built by reverse engineering on an old SUNOS 4.1.1
  * stdio.h. It has been simplified to fit the needs for STklos. In particular
@@ -662,10 +662,10 @@ void STk_set_line_buffered_mode(SCM port)
  * Takes a string naming an existing file and returns an input port capable
  * of delivering characters from the file. If the file cannot be opened,
  * an error is signalled.
- * @l
- * NOTE: if |filename| starts with the string ,(code  (q "| ")),
- * this procedure returns a pipe port. Consequently, it is not possible to
- * open a file whose name starts with those two characters.
+ *
+ * NOTE: if |filename| starts with the string `"| "`, this procedure returns a pipe port.
+ * Consequently, it is not possible to open a file whose name starts with those two
+ * characters.
 doc>
  */
 DEFINE_PRIMITIVE("open-input-file", open_input_file, subr1, (SCM filename))
@@ -688,10 +688,10 @@ DEFINE_PRIMITIVE("open-binary-input-file", open_binary_ifile, subr1, (SCM filena
  * port capable of writing characters to a new file by that name. If the file
  * cannot be opened, an error is signalled. If a file with the given name
  * already exists, it is rewritten.
- * @l
- * NOTE: if |filename| starts with the string ,(code  (q "| ")),
- * this procedure returns a pipe port. Consequently, it is not possible to
- * open a file whose name starts with those two characters.
+ *
+ * NOTE: if |filename| starts with the string `"| "`, this procedure returns a pipe port.
+ * Consequently, it is not possible to open a file whose name starts with those two
+ * characters.
 doc>
  */
 DEFINE_PRIMITIVE("open-output-file", open_output_file, subr1, (SCM filename))
@@ -713,7 +713,7 @@ DEFINE_PRIMITIVE("open-binary-output-file", open_binary_ofile, subr1, (SCM filen
  * (output-file-port? obj)
  *
  * Returns |#t| if |obj| is a file input port or a file output port respectively,
- * otherwise returns #f.
+ * otherwise returns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("input-file-port?", input_fportp, subr1, (SCM port))
@@ -733,28 +733,28 @@ DEFINE_PRIMITIVE("output-file-port?", output_fportp, subr1, (SCM port))
  *
  * Opens the file whose name is |filename| with the specified string
  * |mode| which can be:
- * ,(itemize
- * (item [|"r"| to open file for reading. The stream is positioned at
- * the beginning of the file.])
  *
- * (item [|"r+"| to open file for reading and writing.  The stream is
- * positioned at the beginning of the file.])
+ * - |"r"| to open file for reading. The stream is positioned at
+ *   the beginning of the file.
  *
- * (item [|"w"| to truncate file to zero length or create file for writing.
- * The stream is positioned at the beginning of the file.])
+ * - |"r+"| to open file for reading and writing.  The stream is
+ *   positioned at the beginning of the file.
  *
- * (item [|"w+"| to open  file for reading and writing. The file is created
- * if it does not exist, otherwise it is truncated. The stream is positioned
- * at the beginning of the file.])
+ * - |"w"| to truncate file to zero length or create file for writing.
+ *   The stream is positioned at the beginning of the file.
  *
- * (item [|"a"| to open for writing.  The file is created if  it  does
- * not exist. The stream is positioned at the end of the file.])
+ * - |"w+"| to open  file for reading and writing. The file is created
+ *   if it does not exist, otherwise it is truncated. The stream is positioned
+ *   at the beginning of the file.
  *
- * (item [|"a+"| to open file for reading and writing. The file is created
- * if it does not exist. The stream is positioned at the end of the file.])
- * )
+ * - |"a"| to open for writing.  The file is created if  it  does
+ *   not exist. The stream is positioned at the end of the file.
+ *
+ * - |"a+"| to open file for reading and writing. The file is created
+ *   if it does not exist. The stream is positioned at the end of the file.
+ *
  * If the file can be opened, |open-file| returns the textual port associated
- * with the given file, otherwise it returns |#f|. Here again, the ``magic''
+ * with the given file, otherwise it returns |#f|. Here again, the *_magic_*
  * string "@pipe " permits to open a pipe port (in this case mode can only be
  * |"r"| or |"w"|).
 doc>
@@ -894,15 +894,17 @@ static SCM load_file(SCM filename)
 <doc load
  * (load filename)
  *
+ * (((load-path)))
+ * (((load-suffixes)))
  * |Filename| should be a string naming an existing file containing Scheme
  * expressions. |Load| has been extended in STklos to allow loading of
- * file containing Scheme compiled code as well as object files
- * (,(emph "aka") shared objects). The loading of object files is not available on
+ * file containing Scheme compiled code as well as object files (_aka_
+ * shared objects). The loading of object files is not available on
  * all architectures. The value returned by |load| is *_void_*.
- * @l
+ *
  * If the file whose name is |filename| cannot be located, |load| will try
- * to find it in one of the directories given by ,(code (ref :mark "load-path"))
- * with the suffixes given by ,(code (ref :mark "load-suffixes")).
+ * to find it in one of the directories given by `"load-path"`
+ * with the suffixes given by `"load-suffixes"`.
 doc>
  */
 DEFINE_PRIMITIVE("load", scheme_load, subr1, (SCM filename))

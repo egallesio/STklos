@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * m i s c . c          -- Misc. functions
  *
- * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  6-Sep-2021 17:28 (eg)
+ * Last file update:  9-Jan-2022 20:30 (eg)
  */
 
 #include "stklos.h"
@@ -101,7 +101,7 @@ SCM STk_read_from_C_string(char *str)
  * Returns a string identifying the current version of the system. A
  * version is constituted of two numbers separated by a point: the version
  * and the release numbers. Note that |implementation-version| corresponds
- * to the ,(srfi 112) name of this function.
+ * to the {{link-srfi 112}} name of this function.
 doc>
  */
 DEFINE_PRIMITIVE("version", version, subr0, (void))
