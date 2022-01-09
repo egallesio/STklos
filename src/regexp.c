@@ -1,7 +1,7 @@
 /*
  * regexp.c -- STklos Regexps
  *
- * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 24-Nov-2000 10:35 (eg)
- * Last file update: 10-Apr-2021 18:46 (eg)
+ * Last file update:  9-Jan-2022 23:24 (eg)
  */
 
 #include "stklos.h"
@@ -190,9 +190,9 @@ DEFINE_PRIMITIVE("regexp?", regexpp, subr1, (SCM obj))
  *                  => ((0 3) (0 1) (1 2) (2 3))
  * (regexp-match-positions "(a*)(b*)(c*)" "c")
  *                  => ((0 1) (0 0) (0 0) (0 1))
- * (regexp-match-positions "(?<=\\\\d{3})(?<!999)foo"
+ * (regexp-match-positions "(?<=\\d{3})(?<!999)foo"
  *                         "999foo and 123foo")
- *      => ((14 17))
+ *                  => ((14 17))
  * @end lisp
 doc>
 */
@@ -274,7 +274,7 @@ DEFINE_PRIMITIVE("regexp-match-positions", regmatch_pos, subr2, (SCM re, SCM str
  * backslash, so that they safely match only themselves.
  * @lisp
  * (regexp-quote "cons")       => "cons"
- * (regexp-quote "list?")      => "list\\\\?"
+ * (regexp-quote "list?")      => "list\\?"
  * @end lisp
  * |regexp-quote| is useful when building a composite regexp from
  * a mix of regexp strings and verbatim strings.
