@@ -98,7 +98,7 @@
  * element is the name of the parameter, and the second one is a type
  * keyword.  All the types defined in the above table, except
  * |:void|, are allowed for the parameters of a foreign function.
- * ,(linebreak)
+ * 
  * |Define-external| accepts several options:
  * ,(itemize
  * (item [

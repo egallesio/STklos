@@ -898,7 +898,7 @@ static SCM load_file(SCM filename)
  * expressions. |Load| has been extended in STklos to allow loading of
  * file containing Scheme compiled code as well as object files
  * (,(emph "aka") shared objects). The loading of object files is not available on
- * all architectures. The value returned by |load| is *_void_-*.
+ * all architectures. The value returned by |load| is *_void_*.
  * @l
  * If the file whose name is |filename| cannot be located, |load| will try
  * to find it in one of the directories given by ,(code (ref :mark "load-path"))

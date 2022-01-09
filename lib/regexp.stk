@@ -36,13 +36,13 @@
  * |pattern| is replaced by the |substitution| string. If there is no
  * match, |regexp-replace| returns |string| unmodified. Note that the
  * given |pattern| could be here either a string or a regular expression.
- * ,(linebreak)
+ * 
  * If |pattern| contains |\\n| where ,(bold "n") is a digit between 1 and 9,
  * then it is replaced in the substitution with the portion of string that
  * matched the ,(bold "n")-th parenthesized subexpression of |pattern|. If
  * ,(bold "n") is equal to 0, then it is replaced in |substitution|
  * with the portion of |string| that matched |pattern|.
- * ,(linebreak)
+ * 
  * |Regexp-replace| replaces the first occurrence of |pattern| in |string|.
  * To replace ,(bold "all") the occurrences of |pattern|, use |regexp-replace-all|.
  *

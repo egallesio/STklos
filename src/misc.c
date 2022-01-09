@@ -129,7 +129,7 @@ DEFINE_PRIMITIVE("%stklos-git", stklos_git, subr0, (void))
  * (void)
  * (void arg1 ...)
  *
- * Returns the special *_void_-* object. If arguments are passed to |void|,
+ * Returns the special *_void_* object. If arguments are passed to |void|,
  * they are evalued and simply ignored.
 doc>
  */

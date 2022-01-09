@@ -2,7 +2,7 @@
  *
  * s t r . c                            -- Strings management
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??????
- * Last file update:  6-Sep-2021 18:44 (eg)
+ * Last file update:  8-Jan-2022 20:49 (eg)
  */
 
 #include <ctype.h>
@@ -475,7 +475,7 @@ DEFINE_PRIMITIVE("string-ref", string_ref, subr2, (SCM str, SCM index))
  * (string-set! string k char)
  *
  * |String-set!| stores |char| in element |k| of |string| and returns
- * *_void_-* (|k| must be a valid index of |string|).
+ * *_void_* (|k| must be a valid index of |string|).
  *
  * @lisp
  * (define (f) (make-string 3 #\*))
@@ -559,8 +559,8 @@ DEFINE_PRIMITIVE("string-set!", string_set, subr3, (SCM str, SCM index, SCM valu
  * characters in the same positions, otherwise returns |#f|. |String-ci=?|
  * treats upper and lower case letters as though they were the same character,
  * but |string=?| treats upper and lower case as distinct characters.
- * @l
- * ,(bold "Note"): R5RS version of these functions accept only two arguments.
+ * 
+ * NOTE: R5RS version of these functions accept only two arguments.
 doc>
  */
 
@@ -581,8 +581,8 @@ doc>
  * characters. If two strings differ in length but are the same up to the
  * length of the shorter string, the shorter string is considered to be
  * lexicographically less than the longer string.
- * @l
- * ,(bold "Note"): R5RS version of these functions accept only two arguments.
+ * 
+ * NOTE: R5RS version of these functions accept only two arguments.
 doc>
  */
 
@@ -700,7 +700,7 @@ DEFINE_PRIMITIVE("string-append", string_append, vsubr, (int argc, SCM* argv))
  * It is guaranteed that string-append! will return the same object that
  * was passed to it as first argument, whose size may be larger.
  *
- * ,(linebreak)
+ * 
  * NOTE: This function is defined in SRFI-118.
 doc>
  */
@@ -799,7 +799,7 @@ int get_substring_size(SCM string, long from, long to) {
  *
  * It is guaranteed that string-replace! will return the same object that
  * was passed to it as first argument, whose size may be larger.
- * ,(linebreak)
+ * 
  * NOTE: This function is defined in SRFI-118.
 doc>
  */
@@ -923,8 +923,7 @@ DEFINE_PRIMITIVE("string-replace!", string_dreplace, vsubr, (int argc, SCM* argv
  * which must be a list of characters. |String->list| and
  * |list->string| are inverses so far as |equal?| is concerned.
  *
- * @l
- * ,(bold "Note"): The R5RS version of |string->list| accepts only one
+ * NOTE: The R5RS version of |string->list| accepts only one
  * parameter.
 doc>
  */
@@ -993,8 +992,8 @@ DEFINE_PRIMITIVE("list->string", list2string, subr1, (SCM l))
  *
  * Returns a newly allocated copy of the part of the given |string|
  * between |start| and |stop|.
- * @l
- * ,(bold "Note"): The R5RS version of |string-copy| accepts only one argument.
+ * 
+ * NOTE: The R5RS version of |string-copy| accepts only one argument.
 doc>
 */
 DEFINE_PRIMITIVE("string-copy", string_copy, vsubr, (int argc, SCM *argv))
@@ -1017,7 +1016,7 @@ DEFINE_PRIMITIVE("string-copy", string_copy, vsubr, (int argc, SCM *argv))
  *
  * Stores |char| in every element of the given |string| between |start| and |end|.
  * @l
- * ,(bold "Note"): The R5RS version of |string-fill!| accepts only one argument.
+ * NOTE: The R5RS version of |string-fill!| accepts only one argument.
 doc>
 */
 DEFINE_PRIMITIVE("string-fill!", string_fill, subr2, (SCM str, SCM c))
@@ -1125,7 +1124,7 @@ DEFINE_PRIMITIVE("string-find?", string_find, subr2, (SCM s1, SCM s2))
  * (string-position "ba" "abracadabra") =>  #f
  * @end lisp
  *
- * ,(bold "Note") This function was also called |string-index|. This name is deprecated
+ * NOTE: This function was also called |string-index|. This name is deprecated
  * since it conficts with the |string-index| defined in SRFI-13.
 doc>
 */
@@ -1149,7 +1148,7 @@ DEFINE_PRIMITIVE("string-position", string_position, subr2, (SCM s1, SCM s2))
  * (string-split str)
  * (string-split str delimiters)
  *
- * parses |string| and returns a list of tokens ended by a character of the
+ * Parses |string| and returns a list of tokens ended by a character of the
  * |delimiters| string. If |delimiters| is omitted, it defaults to a string
  * containing a space, a tabulation and a newline characters.
  * @lisp
@@ -1229,7 +1228,7 @@ DEFINE_PRIMITIVE("string-mutable?", string_mutable, subr1, (SCM obj))
  * (string-downcase "Foo BAR" 4 6)    => "ba"
  * @end lisp
  *
- * ,(bold "Note"): In R7RS, |string-downcase| accepts only one argument.
+ * NOTE: In R7RS, |string-downcase| accepts only one argument.
 doc>
  */
 static SCM string_xxcase(int argc, SCM *argv,
@@ -1335,7 +1334,7 @@ DEFINE_PRIMITIVE("string-downcase!", string_ddowncase, vsubr, (int argc, SCM *ar
  * If |start| is omited, it defaults to 0. If |end| is omited, it defaults to
  * the length of |str|.
  * @l
- * ,(bold "Note"): In R7RS, |string-upcase| accepts only one argument.
+ * NOTE: In R7RS, |string-upcase| accepts only one argument.
 doc>
  */
 DEFINE_PRIMITIVE("string-upcase", string_upcase, vsubr, (int argc, SCM *argv))
@@ -1369,7 +1368,7 @@ DEFINE_PRIMITIVE("string-upcase!", string_dupcase, vsubr, (int argc, SCM *argv))
  * If |start| is omited, it defaults to 0. If |end| is omited, it defaults to
  * the length of |str|.
  * @l
- * ,(bold "Note"): In R7RS, |string-foldcase| accepts only one argument.
+ * NOTE: In R7RS, |string-foldcase| accepts only one argument.
 doc>
  */
 DEFINE_PRIMITIVE("string-foldcase", string_foldcase, vsubr, (int argc, SCM *argv))

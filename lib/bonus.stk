@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  7-Jan-2022 20:13 (eg)
+;;;; Last file update:  8-Jan-2022 21:26 (eg)
 ;;;;
 
 
@@ -414,7 +414,7 @@ doc>
  *
  * This procedure returns #t if |obj| is a condition object that describes a
  * POSIX error, and #f otherwise.
- * 
+ *
  * This function is defined in {{link-srfi 170}}.
 doc>
 |#
@@ -430,7 +430,7 @@ doc>
  * value of |errno| when the POSIX function reported an error. This can be
  * used to provide programmatic recovery when a POSIX function can return
  * more than one value of |errno|.
- * 
+ *
  * This function is defined in {{link-srfi 170}}.
 doc>
 |#
@@ -449,7 +449,7 @@ doc>
  * This procedure returns a string that is an error message reflecting the
  * value of errno when the POSIX function reported an error. This string
  * is useful for reporting the cause of the error to the user
- * 
+ *
  * This function is defined in {{link-srfi 170}}.
 doc>
 |#
@@ -1692,39 +1692,33 @@ doc>
  * This form is defined in {{link-srfi 8}}. It simplifies
  * the usage of multiple values. Specifically, |<formals>| can have any
  * of three forms:
- * ,(itemize
- * (item [(|<variable1>| ... |<variablen>|):
- * ,(linebreak)
- * The environment in which the
- * receive-expression is evaluated is extended by binding |<variable1>|, ...,
- * |<variablen>| to fresh locations.
- * @l
- * The |<expression>| is evaluated, and its
- * values are stored into those locations. (It is an error if |<expression>|
- * does not have exactly n values.)
- * ])
- * (item [|<variable>|:
- * ,(linebreak)
- * The environment in which the receive-expression is
- * evaluated is extended by binding |<variable>| to a fresh location.
- * The |<expression>| is evaluated, its values are converted into a newly
- * allocated list, and the list is stored in the location bound to |<variable>|.
- * ])
- * (item [(|<variable1>| ... |<variablen>| . |<variablen + 1>|):
- * ,(linebreak)
- * The environment
- * in which the receive-expression is evaluated is extended by binding
- * |<variable1>|, ..., |<variablen + 1>| to fresh locations.
- * The |<expression>| is evaluated. Its first n values are stored into the
- * locations bound to |<variable1>| ... |<variablen>|. Any remaining values
- * are converted into a newly allocated list, which is stored into the location
- * bound to |<variablen + 1>|. (It is an error if |<expression>| does not have
- * at least n values.)])
- * )
+ *
+ * - (|<variable~1~>| ... |<variable~n~>|):
+ *   The environment in which the
+ *   receive-expression is evaluated is extended by binding |<variable~1~>|, ...,
+ *   |<variable~n~>| to fresh locations. +
+ *   The |<expression>| is evaluated, and its
+ *   values are stored into those locations. (It is an error if |<expression>|
+ *   does not have exactly n values.)
+ *
+ * - |<variable>|: The environment in which the receive-expression is
+ *   evaluated is extended by binding |<variable>| to a fresh location. +
+ *   The |<expression>| is evaluated, its values are converted into a newly
+ *   allocated list, and the list is stored in the location bound to |<variable>|.
+ *
+ * - (|<variable~1~>| ... |<variable~n~>| . |<variable~n+1~>|):  The environment
+ *   in which the receive-expression is evaluated is extended by binding
+ *   |<variable~1~>|, ..., |<variable~n+1~>| to fresh locations.
+ *   The |<expression>| is evaluated. Its first n values are stored into the
+ *   locations bound to |<variable~1~>| ... |<variable~n~>|. Any remaining values
+ *   are converted into a newly allocated list, which is stored into the location
+ *   bound to |<variable~n+1~>|. (It is an error if |<expression>| does not have
+ *   at least n values.
  *
  * In any case, the expressions in |<body>| are evaluated sequentially in
  * the extended environment. The results of the last expression in the body
  * are the values of the receive-expression.
+ *
  * @lisp
  * (let ((n 123))
  *   (receive (q r)
@@ -2352,9 +2346,9 @@ doc>
  * (make-nan negative? quiet? payload)
  * (make-nan negative? quiet? payload float)
  *
- * Returns a NaN whose sign bit is equal to |negative?|  (#t for negative,
- * #f for positive), whose quiet bit is equal to quiet? (#t for quiet,
- * #f for signaling), and whose payload is the positive exact integer payload.
+ * Returns a NaN whose sign bit is equal to |negative?|  (|%t| for negative,
+ * |%f| for positive), whose quiet bit is equal to quiet? (|%t| for quiet,
+ * |%f| for signaling), and whose payload is the positive exact integer payload.
  * It is an error if payload is larger than a NaN can hold.
  *
  * The optional parameter |float|, is never used in {{stklos}}.

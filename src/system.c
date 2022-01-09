@@ -819,7 +819,7 @@ DEFINE_PRIMITIVE("chdir", chdir, subr1, (SCM s))
  *
  * Create a directory with name |dir|. If |permissions| is omitted, it
  * defaults to #o775 (masked by the current umask).
- * ,(linebreak)
+ * 
  * This function is also defined in ,(link-srfi 170). The old name
  * |make-directory| is deprecated.
 doc>
@@ -1022,7 +1022,7 @@ DEFINE_PRIMITIVE("glob", glob, vsubr, (int argc, SCM *argv))
  * (delete-file string)
  *
  * Removes the file whose path name is given in |string|.
- * The result of |delete-file| is *_void_-*.
+ * The result of |delete-file| is *_void_*.
  * @l
  * This function is also called |remove-file| for compatibility
  * reasons. ,(index "remove-file")
@@ -1050,7 +1050,7 @@ DEFINE_PRIMITIVE("remove-file", remove_file, subr1, (SCM filename))
  * (rename-file string1 string2)
  *
  * Renames the file whose path-name is |string1| to a file whose path-name is
- * |string2|. The result of |rename-file| is *_void_-*.
+ * |string2|. The result of |rename-file| is *_void_*.
  * @l
  * This function is also defined in ,(link-srfi 170).
 doc>
@@ -1114,7 +1114,7 @@ DEFINE_PRIMITIVE("directory-files", directory_files, subr12, (SCM dirname, SCM d
  *
  * Copies the file whose path-name is |string1| to a file whose path-name is
  * |string2|. If the file |string2| already exists, its content prior
- * the call to |copy-file| is lost. The result of |copy-file| is *_void_-*.
+ * the call to |copy-file| is lost. The result of |copy-file| is *_void_*.
 doc>
 */
 DEFINE_PRIMITIVE("copy-file", copy_file, subr2, (SCM filename1, SCM filename2))
@@ -1711,7 +1711,7 @@ DEFINE_PRIMITIVE("getenv", getenv, subr01, (SCM str))
  * (setenv! var value)
  *
  * Sets the environment variable |var| to |value|. |Var| and
- * |value| must be strings. The result of |setenv!| is *_void_-*.
+ * |value| must be strings. The result of |setenv!| is *_void_*.
 doc>
  */
 DEFINE_PRIMITIVE("setenv!", setenv, subr2, (SCM var, SCM value))
@@ -1736,7 +1736,7 @@ DEFINE_PRIMITIVE("setenv!", setenv, subr2, (SCM var, SCM value))
  * (unsetenv! var)
  *
  * Unsets the environment variable |var|. |Var| must be a string.
- * The result of |unsetenv!| is *_void_-*.
+ * The result of |unsetenv!| is *_void_*.
 doc>
  */
 DEFINE_PRIMITIVE("unsetenv!", unsetenv, subr1, (SCM var))

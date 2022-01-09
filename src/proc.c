@@ -371,7 +371,7 @@ DEFINE_PRIMITIVE("map", map, vsubr, (int argc, SCM* argv))
  * calls proc for its side effects rather than for its values.
  * Unlike |map|, |for-each| is guaranteed to call proc on the elements of
  * the lists in order from the first element(s) to the last, and the value
- * returned by |for-each| is *_void_-*.
+ * returned by |for-each| is *_void_*.
  * @lisp
  * (let ((v (make-vector 5)))
  *   (for-each (lambda (i)

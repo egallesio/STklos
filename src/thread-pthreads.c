@@ -164,7 +164,7 @@ DEFINE_PRIMITIVE("thread-yield!", thread_yield, subr0, (void))
  * state. However, another thread attempting to enter this critical section
  * will raise an "abandoned mutex exception" because the mutex is
  * unlocked/abandoned.
- * ,(linebreak)
+ * 
  * On ,(emph "Android"), |thread-terminate!| can be used only to terminate the
  * current thread.  Trying to kill another thread produces an error.
 doc>

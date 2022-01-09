@@ -53,7 +53,7 @@
 ;; ----------------------------------------------------------------------
 (define (pretty-doc str)
   ;; suppress some common Skribe things from the doc string
-  (set! str (regexp-replace-all ",(linebreak)" str " \n"))
+  (set! str (regexp-replace-all "" str " \n"))
   (set! str (regexp-replace-all "@l\n" str " \n"))
   (set! str (regexp-replace-all "@lisp" str (do-color (get-repl-color :help))))
   (set! str (regexp-replace-all "@end lisp" str (do-color 'normal)))

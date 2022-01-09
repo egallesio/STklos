@@ -2,7 +2,7 @@
  *
  * l i s t . c                  -- Lists procedures
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-Oct-1993 21:37
- * Last file update: 23-Jun-2020 09:41 (eg)
+ * Last file update:  8-Jan-2022 14:58 (eg)
  */
 
 #include "stklos.h"
@@ -183,7 +183,7 @@ DEFINE_PRIMITIVE("set-car!", setcar, subr2, (SCM cell, SCM value))
  * (set-car! pair obj)
  *
  * Stores |obj| in the car field of |pair|.
- * The value returned by |set-car!| is *_void_-*.
+ * The value returned by |set-car!| is *_void_*.
  * @lisp
  *    (define (f) (list 'not-a-constant-list))
  *    (define (g) '(constant-list))
@@ -207,7 +207,7 @@ DEFINE_PRIMITIVE("set-cdr!", setcdr, subr2, (SCM cell, SCM value))
  * (set-cdr! pair obj)
  *
  * Stores |obj| in the cdr field of |pair|.
- * The value returned by |set-cdr!| is *_void_-*.
+ * The value returned by |set-cdr!| is *_void_*.
  *
 doc>
  */
@@ -470,7 +470,7 @@ DEFINE_PRIMITIVE("list-ref", list_ref, subr2, (SCM list, SCM k))
  * (let ((ls (list 'one 'two 'five!)))
  *    (list-set! ls 2 'three)
  *    ls)                              => (one two three)
- * (list-set! ’(0 1 2) 1 "oops")       => error (constant list)
+ * (list-set! '(0 1 2) 1 "oops")       => error (constant list)
  * @end lisp
 doc>
 */
@@ -604,7 +604,7 @@ DEFINE_PRIMITIVE("member", member, subr23, (SCM obj, SCM list, SCM cmp))
  *                               =>  (5 7)
  * @end lisp
  *
- * ,(bold "Rationale:") Although they are ordinarily used as predicates,
+ * IMPORTANT: Although they are ordinarily used as predicates,
  * |memq|, |memv|, |member|, |assq|, |assv|, and |assoc| do not have question
  * marks in their names because they return useful values rather than just
  * |#t| or #|f|.

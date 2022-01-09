@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  7-Jan-2022 20:03 (eg)
+;;;; Last file update:  8-Jan-2022 21:06 (eg)
 ;;;;
 
 
@@ -333,7 +333,7 @@ doc>
  * the other procedures return an integer.  All the procedures compute a
  * quotient |q| and remainder |r| such that |n1=n2*q+r|.
  *
- *  See R7RS for more information.
+ * See R7RS for more information.
  *
  * @lisp
  * (floor/ 5 2)         => 2 1
@@ -430,7 +430,7 @@ doc>
 <doc boolean=?
  * (boolean=? boolean1 boolean2  ...)
  *
- * Returns #t if all the arguments are booleans and all are #t or all are #f.
+ * Returns `#t` if all the arguments are booleans and all are `#t` or all are `#f`.
  *
 doc>
 |#
@@ -550,7 +550,7 @@ doc>
  * (string-copy! to at from start)
  * (string-copy! to at from start end)
  *
- *  Copies the characters of |string| from between |start| and |end|
+ * Copies the characters of |string| from between |start| and |end|
  * to string |to|, starting at |at|. The order in which characters are copied
  * is unspecified, except that if the source and destination overlap,
  * copying takes place as if the source is first copied into a temporary
@@ -815,7 +815,7 @@ doc>
  * range [0..255]. It is an error if |k| is not a valid index of |bytevector|.
  *
  * @lisp
- * (bytevector-u8-ref ’#u8(1 1 2 3 5 8 13 21) 5    => 8
+ * (bytevector-u8-ref #u8(1 1 2 3 5 8 13 21) 5    => 8
  * @end lisp
 doc>
 |#

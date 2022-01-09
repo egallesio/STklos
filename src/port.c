@@ -682,7 +682,7 @@ DEFINE_PRIMITIVE("write*", write_star, subr12, (SCM expr, SCM port))
  * unspecified value. The |port| argument may be omitted, in which
  * case it defaults to the value returned by |current-output-port|.
  * @l
- * ,(bold "Rationale:") |Write| is intended for producing machine-readable
+ * IMPORTANT: |Write| is intended for producing machine-readable
  * output and |display| is for producing human-readable output.
  * @l
  * NOTE: As required by {{rseven}} does not loop forever when
@@ -1322,7 +1322,7 @@ DEFINE_PRIMITIVE("signal-error", scheme_signal_error, vsubr, (int argc, SCM *arg
  *
  * Closes the port associated with |port|, rendering the port incapable of
  * delivering or accepting characters. These routines have no effect if the
- * port has already been closed. The value returned is *_void_-*.
+ * port has already been closed. The value returned is *_void_*.
 doc>
  */
 DEFINE_PRIMITIVE("close-input-port", close_input_port, subr1, (SCM port))
@@ -1615,7 +1615,7 @@ DEFINE_PRIMITIVE("port-seek", port_seek, subr23, (SCM port, SCM pos, SCM w))
  * (port-rewind port)
  *
  * Sets the port position to the beginning of |port|. The value returned by
- * |port-rewind| is *_void_-*.
+ * |port-rewind| is *_void_*.
 doc>
  */
 DEFINE_PRIMITIVE("port-rewind", port_rewind, subr1, (SCM port))

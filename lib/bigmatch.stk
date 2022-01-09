@@ -82,7 +82,7 @@ doc>
  * the result of the last is the result of the whole |match-case|
  * expression; otherwise the result of the |match-case| expression
  * is unspecified.
- * ,(linebreak)
+ * 
  * The equality predicate used for tests is |eq?|.
  * @lisp
  * (match-case '(a b a)
