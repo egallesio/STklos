@@ -191,7 +191,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
 # Dependencies
 13.ostk: 14.ostk
-95.ostk:  132.ostk
+95.ostk:  132.ostk 132.$(SO)
 113.ostk:  128.ostk
 134.ostk: 158.ostk
 

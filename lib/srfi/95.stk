@@ -30,6 +30,7 @@
 ;; to all procedures. But it's here, nevertheless!
 
 (define-module srfi/95
+  (import (srfi 132)) ;; the heavy work is there!
   (export sorted?
           merge
           merge!
@@ -42,7 +43,11 @@
           string-sorted?
           string-sort
           string-sort!)
-  (import (srfi 132)) ;; the heavy work is there!
+
+  (%compile-time-define list-merge!
+                        list-merge
+                        list-sorted?
+                        vector-sorted?)
   
 (define (string-sorted? less? str)
   (vector-sorted? less? (string->vector str)))
