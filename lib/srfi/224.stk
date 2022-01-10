@@ -185,6 +185,15 @@
     (if (null? lis) ans
         (lp (cdr lis) (kons (car lis) ans))))))
 
+(define (check-args pred? type . args)
+  (for-each (lambda (x)
+              (when (not (pred? x))
+                (error (string-append "bad "
+                                      (symbol->string type))
+                       x)))
+            args)
+  #t)
+
 ;;;;;;;;;;;;;;;;;;;;
 ;;;
 ;;; STklos-specific
@@ -224,6 +233,7 @@
 ;; alist->fxmapping/combinator   C
 
 (define (fxmapping-unfold stop? mapper successor . seeds)
+  (check-args procedure? 'procedure stop? mapper successor)
   (let Loop ((fxmap (fxmapping)) (seeds seeds))
     (if (apply stop? seeds)
         fxmap
@@ -234,6 +244,7 @@
 
 ;; Translated from the reference implementation
 (define (fxmapping-accumulate proc . seeds)
+  (check-args procedure? 'procedure proc)
   (if (null? (cdr seeds))
       (call/cc (lambda (k)
                  (let loop ((m (fxmapping))
@@ -283,6 +294,7 @@
                        :optional
                        (failure (lambda () (error "key not found and no failure procedure given")))
                        (success values))
+  (check-args procedure? 'procedure success failure)
   (let ((def (gensym)))
     (let ((v (fxmapping-ref/default fxmap k def)))
       (if (eq? v def)
@@ -312,12 +324,10 @@
 ;; fxmapping-pop-min           C
 ;; fxmapping-pop-max           C
 
-;; Adapter from the reference implementation:
+;; Adapted from the reference implementation:
 (define (fxmapping-delete-all fxmap keys)
   (when (not (or (pair? keys) (null? keys)))
     (error "bad list ~S" keys))
-  (when (not (fxmapping? fxmap))
-    (error "bad fxmapping ~S" fxmap))
   (let ((key-map  (fxmapping-unfold null?
                                     (lambda (ks) (values (car ks) #t))
                                     cdr
@@ -336,6 +346,7 @@
   (define (delete)          (fxmapping-delete fxmap k))
   (define (insert  new-val) (fxmapping-adjoin fxmap k new-val))
   (define (ignore)          fxmap)
+  (check-args procedure? 'procedure failure success)
   (let ((mark (cons 1 1)))
     (let ((v (fxmapping-ref/default fxmap k mark)))
       (if (eq? v mark)
@@ -347,6 +358,7 @@
                                      (lambda () (error "key not found and no failure procedure given"))))
   (define (replace new-val) (fxmapping-set fxmap k new-val))
   (define (delete)          (fxmapping-delete fxmap k))
+  (check-args procedure? 'procedure proc failure)
   (let ((mark (cons 1 1)))
     (let ((v (fxmapping-ref/default fxmap k mark)))
       (if (eq? v mark)
@@ -354,6 +366,7 @@
           (proc k v replace delete)))))
 
 (define (fxmapping-update-min fxmap proc)
+  (check-args procedure? 'procedure proc)
   (when (fxmapping-empty? fxmap)
     (error "cannot update minimum of empty fxmapping"))
   (let-values (((k v) (fxmapping-min fxmap)))
@@ -362,6 +375,7 @@
     (proc k v replace delete)))
 
 (define (fxmapping-update-max fxmap proc)
+  (check-args procedure? 'procedure proc)
   (when (fxmapping-empty? fxmap)
     (error "cannot update minimum of empty fxmapping"))
   (let-values (((k v) (fxmapping-max fxmap)))
@@ -385,6 +399,7 @@
 
 (define (fxmapping-find pred? map failure
                         :optional (success values))
+  (check-args procedure? 'procedure success failure)
   (let ((res #f))
     (if (call/cc (lambda (return)
                    ;; filter would go through all the set. we do
@@ -409,21 +424,23 @@
 
 
 (define (fxmapping-any? proc s)
+  (check-args procedure? 'procedure proc)
   (call/cc (lambda (kont)
              (%fxmapping-map (lambda (key value)
-                          (when (proc key value)
-                            (kont #t)) #void)
-                        s
-                        #f)
+                               (when (proc key value)
+                                 (kont #t)) #void)
+                             s
+                             #f)
              #f)))
 
 (define (fxmapping-every? proc s)
+  (check-args procedure? 'procedure proc)
   (call/cc (lambda (kont)
              (%fxmapping-map (lambda (key value)
-                          (when (not (proc key value))
-                            (kont #f)) #void)
-                        s
-                        #f)
+                               (when (not (proc key value))
+                                 (kont #f)) #void)
+                             s
+                             #f)
              #t)))
 
 ;;;;;;;;;;;;;;
@@ -440,12 +457,14 @@
 ;; fxmapping-for-each      C + Scheme
 
 (define (fxmapping-map->list proc fxmap)
+  (check-args procedure? 'procedure proc)
   (fxmapping-fold-right (lambda (k v lst)
                           (cons (proc k v) lst))
                         '()
                         fxmap))
 
 (define (fxmapping-relation-map proc fxmap)
+  (check-args procedure? 'procedure proc)
   (fxmapping-fold-right (lambda (k v new)
                           (let-values (((new-k new-v)
                                         (proc k v)))
@@ -471,6 +490,7 @@
 ;; fxmapping-partition C
 
 (define (fxmapping-remove pred? fxmap)
+  (check-args procedure? 'procedure pred?)
   (fxmapping-filter (lambda (k v) (not (pred? k v)))
                     fxmap))
 
@@ -494,7 +514,7 @@
 
 (define (fxmapping-keys map)
   (fxmapping-fold-right (lambda (k _ lst) (cons k lst)) '() map))
-  
+
 (define (fxmapping-values map)
   (fxmapping-fold-right (lambda (_ v lst) (cons v lst)) '() map))
 
@@ -502,7 +522,6 @@
 ;; The two folloging procedures are taken from the reference implementation
 ;; of SRFI-224.
 (define (fxmapping->generator fxmap)
-  (assume (fxmapping? fxmap))
   (make-coroutine-generator
    (lambda (yield)
      (fxmapping-fold (lambda (k v _) (yield (cons k v)))
@@ -510,7 +529,6 @@
                      fxmap))))
 
 (define (fxmapping->decreasing-generator fxmap)
-  (assume (fxmapping? fxmap))
   (make-coroutine-generator
    (lambda (yield)
      (fxmapping-fold-right (lambda (k v _) (yield (cons k v)))
@@ -539,7 +557,6 @@
 ;;
 
 (define (%fxmapping-cmp op proc args)
-  (when (not (procedure? proc)) (error "bad procedure ~S" proc))
   (for-each (lambda (x)
               (when (not (fxmapping? x)) (error "bad fxmapping ~S" x)))
             args)

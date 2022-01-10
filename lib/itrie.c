@@ -2387,7 +2387,7 @@ doc>
 */
 DEFINE_PRIMITIVE("fxmapping-min", trie_fxmap_min, subr1, (SCM trie))
 {
-    if (!TRIEP(trie)) STk_error("bad fxmapping ~S", trie);
+    if (!FXMAPP(trie)) STk_error("bad fxmapping ~S", trie);
     return trie_min_max_aux(trie, 0);
 }
 

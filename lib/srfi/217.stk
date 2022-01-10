@@ -102,6 +102,14 @@
 
 (define-reader-ctor '<iset> iset)
 
+(define (check-args pred? type . args)
+  (for-each (lambda (x)
+              (when (not (pred? x))
+                (error (string-append "bad "
+                                      (symbol->string type))
+                       x)))
+            args)
+  #t)
 
 ;;;;;;;;;;;;;;;;;
 ;;;
@@ -116,6 +124,7 @@
 
 
 (define (iset-unfold stop? mapper successor seed)
+  (check-args procedure? 'procedure stop? mapper successor)
   (let Loop ((iset (iset)) (seed seed))
     (if (stop? seed)
         iset
@@ -123,7 +132,7 @@
               (successor seed)))))
 
 (define (make-range-iset start end :optional (step 1))
-  (when (not (integer? step)) (error "non-integer step ~S not allowed" step))
+  (check-args fixnum? 'fixnum  step)
   (when (zero? step) (error "zero step not allowed"))
   (let Loop ((iset (iset)) (n start))
     (if (>= n end)
@@ -180,8 +189,6 @@
 (define (iset-delete-all set keys)
   (when (not (or (pair? keys) (null? keys)))
     (error "bad list ~S" keys))
-  (when (not (iset? set))
-    (error "bad iset ~S" set))
   (let ((key-set (apply iset keys)))
     (iset-remove (lambda (k) (iset-contains? key-set k))
                  set)))
@@ -203,6 +210,7 @@
   (define (insert res)
     (values (iset-adjoin iset key)
             res))
+  (check-args procedure? 'procedure failure success)
   (if (iset-contains? iset key)
       (success key update remove)
       (failure insert (lambda (res)
@@ -230,6 +238,7 @@
 
 
 (define (iset-find pred? set failure)
+  (check-args procedure? 'procedure failure)
   (call/cc (lambda (return)
              ;; filter would go through all the set. we do
              ;; for-each and jump out when we find the element!
@@ -237,10 +246,10 @@
                             set)
              (failure))))
   
-(define (iset-count pred s)
+(define (iset-count pred? s)
   (let ((c 0))
     (%iset-map (lambda (x)
-                 (when (pred x) (set! c (+ 1 c))))
+                 (when (pred? x) (set! c (+ 1 c))))
                s
                #f)
     c))
@@ -330,9 +339,6 @@
 ;;; +2   neither is subset of the other
 
 (define (%iset-cmp op args)
-  (for-each (lambda (x)
-              (when (not (iset? x)) (error "bad iset ~S" x)))
-            args)
   (if (< (length  args) 2)
       #t
       (let loop ((sets args))
