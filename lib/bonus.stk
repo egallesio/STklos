@@ -1,5 +1,5 @@
 ;;;;
-;;;; bonus.stk  -- Useful primitives not in R5RS
+
 ;;;;
 ;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update:  9-Jan-2022 20:36 (eg)
+;;;; Last file update: 10-Jan-2022 20:11 (eg)
 ;;;;
 
 
@@ -174,10 +174,10 @@ doc>
  *
  * |any| applies the predicate across the lists, returning true if the
  * predicate returns true on any application.
- * @l
+ *
  * If there are n list arguments |list1| ... |listn|, then |pred| must be
  * a procedure taking n arguments.
- * @l
+ *
  * |any| applies |pred| to the first elements of the |listi| parameters. If
  * this application returns a true value, |any| immediately returns that value.
  * Otherwise, it iterates, applying |pred| to the second elements of the |listi|
@@ -185,7 +185,7 @@ doc>
  * value is produced or one of the lists runs out of values; in the latter case,
  * any returns |%f|. The application of |pred| to the last element of the
  * lists is a tail call.
- * @l
+ *
  * Like every, |any|'s name does not end with a question mark -- this is
  * to indicate that it does not return a simple boolean (|%t| or |%f|), but
  * a general value.
@@ -361,10 +361,10 @@ doc>
  * (program-name)
  *
  * Returns the invocation name of the current program as a string. If the file is
- * not a script (in sense of {{quick-link-srfi 193}}), it is the name of the running {{stklos}}
- * interpreter, otherwise it is the name of the running script. This function always
- * returns a string wheareas the|command-name| procedure returns #f when the
- * program name is not a script.
+ * not a script (in sense of {{quick-link-srfi 193}}), it is the name of the
+ * running {{stklos}} interpreter, otherwise it is the name of the running script.
+ * This function always returns a string wheareas the |command-name| procedure returns
+ * `#f` when the program name is not a script.
 doc>
 |#
 (define (program-name)
@@ -380,7 +380,7 @@ doc>
  * Create a directory with name |dir|. No error is signaled if |dir| already exists.
  * Parent directories of |dir| are created as needed. If |permissions| is omitted,
  * it defaults to #o775 (masked by the current umask).
- * 
+ *
  * NOTE: This function was also called |make-directories|. This old name is
  * obsolete.
 doc>
@@ -507,13 +507,13 @@ doc>
  * computes a hash code for an object and returns the hash code as a non
  * negative integer. Objets with the same hash code are stored in an A-list
  * registered in the bucket corresponding to the key.
- * @l
+ *
  * If omitted,
- * ,(itemize
- * (item [|hash| defaults to the |hash-table-hash| procedure (see
- * ,(ref :mark "hash-table-hash")).])
- * (item [|comparison| defaults to the |eq?| procedure (see ,(ref :mark "eq?")).])
- * )
+ *
+ * - |hash| defaults to the |hash-table-hash| procedure (see
+ *   ,(ref :mark "hash-table-hash")).
+ * - |comparison| defaults to the |eq?| procedure (see ,(ref :mark "eq?")).
+ * 
  * Consequently,
  * @lisp
  * (define h (make-hash-table))
@@ -559,10 +559,10 @@ doc>
 <doc EXT hash-table->alist
  * (hash-table->alist hash)
  *
- * Returns an ``association list'' built from the entries in |hash|.
+ * Returns an _association list_ built from the entries in |hash|.
  * Each entry in |hash| will be represented as a pair whose |car| is the
  * entry's key and whose |cdr| is its value.
- * @l
+ * 
  * NOTE: the order of pairs in the resulting list is unspecified.
  * @lisp
  * (let ((h (make-hash-table)))
@@ -583,7 +583,7 @@ doc>
  * (alist->hash-table alist comparison)
  * (alist->hash-table alist comparison hash)
  *
- * Returns hash-table built from the ``association list''
+ * Returns hash-table built from the _association list_
  * |alist|. This function maps the |car| of every element in |alist|
  * to the |cdr| of corresponding elements in |alist|. the |comparison| and
  * |hash| functions are interpreted as in |make-hash-table|. If some key
@@ -610,7 +610,7 @@ doc>
  * table with the value |(update-fun current-value)|. If no value is
  * associated to |key|, a new entry in the table is first inserted
  * before updating it (this new entry being the result of calling |thunk|).
- * @l
+ * 
  * Note that the expression
  * @lisp
  * (hash-table-update!/default hash key update-fun default)
@@ -1283,7 +1283,7 @@ doc>
  * output, whereas |exec-list| returns a list of the lines which constitute
  * the output of |str|.
  * @lisp
- * (exec "echo A; echo B")                => "A\\nB\\n"
+ * (exec "echo A; echo B")                => "A\nB\n"
  * (exec-list "echo A; echo B")           => ("A" "B")
  * @end lisp
 doc>
@@ -2276,7 +2276,7 @@ doc>
  * (command-name)
  *
  * Returnd the name of the running program if it is a standalone and #f
- * otherwise. This function is defined in {{quick-link-srfi 193}}.
+ * otherwise. This function is defined in {{link-srfi 193}}.
 doc>
 |#
 (define (command-name)
@@ -2318,7 +2318,7 @@ doc>
  *
  * Returns the absolute path of the current script.
  * If the calling program is not a script, #f is returned.
- * This function is defined in {{quick-link-srfi 193}}.
+ * This function is defined in {{link-srfi 193}}.
 doc>
 |#
 (define (script-file)

@@ -2,7 +2,7 @@
  *
  * h a s h  . c                 -- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 15-Dec-2021 21:58 (eg)
+ * Last file update: 10-Jan-2022 20:14 (eg)
  */
 
 #include "stklos.h"
@@ -792,11 +792,11 @@ DEFINE_PRIMITIVE("hash-table-delete!", hash_delete, subr2, (SCM ht, SCM key))
  * calls |proc| on each key/value association in |hash|, with the key as
  * the first argument and the value as the second.  The value returned by
  * |hash-table-for-each| is *_void_*.
- *  
+ *
  * NOTE: The order of application of |proc| is unspecified.
- *  
+ *
  * NOTE: |hash-table-walk| is another name for |hash-table-for-each|
- * (this is the name used in ,(link-srfi 69)).
+ * (this is the name used in {{link-srfi 69}}.
  *
  * @lisp
  * (let ((h   (make-hash-table))
@@ -834,7 +834,7 @@ DEFINE_PRIMITIVE("hash-table-for-each", hash_for_each, subr2, (SCM ht, SCM proc)
  * the first argument and the value as the second.  The result of
  * |hash-table-map| is a list of the values returned by |proc|, in an
  * unspecified order.
- * 
+ *
  * NOTE: The order of application of |proc| is unspecified.
  * @lisp
  * (let ((h (make-hash-table)))

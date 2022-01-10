@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update:  9-Jan-2022 20:21 (eg)
+;;;; Last file update: 10-Jan-2022 19:09 (eg)
 ;;;;
 
 
@@ -1533,13 +1533,12 @@ doc>
  * (features)
  *
  * Returns a list of the feature identifiers which |cond-expand|
- * treats as true. It is an error to modify this list. Here is an
+ * treats as true. Here is an
  * example of what |features| might return:
  *
  * @lisp
- * (features) => (STklos STklos-1.20  almost-r7rs
- *                exact-complex ieee-float full-unicode
- *                ratios little-endian)
+ * (features) => (STklos STklos-{{version}} exact-complex 
+*                 ieee-float full-unicode ratios little-endian ...)
  * @end lisp
 doc>
 |#

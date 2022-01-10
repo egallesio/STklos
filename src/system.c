@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 29-Mar-1994 10:57
- * Last file update:  9-Jan-2022 20:36 (eg)
+ * Last file update: 10-Jan-2022 20:20 (eg)
  */
 
 #include <unistd.h>
@@ -1317,7 +1317,7 @@ DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
  * (emergency-exit ret-code)
  *
  * Terminates the program without running any outstanding
- * dynamic-wind ,(emph "after") procedures and communicates an exit
+ * dynamic-wind _after_ procedures and communicates an exit
  * value to the operating system in the same manner as |exit|.
  * @l
  * NOTE: The {{stklos}} |emergency-exit| primitive accepts also an
@@ -1442,8 +1442,8 @@ DEFINE_PRIMITIVE("clock", clock, subr0, (void))
  *
  * Returns the time since the Epoch (that is 00:00:00 UTC, January 1, 1970),
  * measured in seconds.
- * @l
- * @bold("Note"): This {{stklos}} function should not be confused with
+ * 
+ * NOTE: This {{stklos}} function should not be confused with
  * the {{rseven}}  primitive |current-second| which returns an inexact number
  * and whose result is expressed using  the International Atomic Time
  * instead of UTC.
@@ -1577,7 +1577,7 @@ DEFINE_PRIMITIVE("%seconds->date", seconds2date, subr1, (SCM seconds))
 <doc EXT date->seconds
  * (date->seconds d)
  *
- * Convert the date |d| to the number of seconds since the ,(emph "Epoch").
+ * Convert the date |d| to the number of seconds since the _Epoch"_.
 doc>
 */
 DEFINE_PRIMITIVE("date->seconds", date2seconds, subr1, (SCM date))

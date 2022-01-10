@@ -2,7 +2,7 @@
  *
  * c h a r . c                          -- Characters management
  *
- * Copyright © 1993-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update:  2-Jun-2020 10:47 (eg)
+ * Last file update: 10-Jan-2022 08:47 (eg)
  */
 
 #include <ctype.h>
@@ -422,7 +422,7 @@ DEFINE_PRIMITIVE("digit-value", digit_value, subr1, (SCM c))
  * ordering and some subset of the integers under the |<=|
  * ordering. That is, if
  * @lisp
- *    (char<=? a b) => #t  ,(bold "and")  (<= x y) => #t
+ *    (char<=? a b) => #t  and  (<= x y) => #t
  * @end lisp
  * and x and y are in the domain of |integer->char|, then
  * @lisp
