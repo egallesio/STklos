@@ -1,7 +1,7 @@
 /*                                                      -*- coding: utf-8 -*-
  * c o n d . c          -- Condition implementation
  *
- * Copyright © 2004-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2004-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 22-May-2004 08:57 (eg)
- * Last file update: 27-Aug-2021 20:23 (eg)
+ * Last file update: 11-Jan-2022 17:40 (eg)
  */
 
 #include "stklos.h"
@@ -139,15 +139,15 @@ DEFINE_PRIMITIVE("make-condition-type", make_cond_type, subr3,
 
 /*
 <doc EXT make-compound-condition-type
- * (make-compound-condition-type id ct1 ...)
+ * (make-compound-condition-type id ct~1~ ...)
  *
  * |Make-compound-condition-type| returns a new condition type, built
- * from the condition types |ct1|, ...
+ * from the condition types |ct~1~|, ...
  * |Id| must be a symbol  that serves as a symbolic name for the
  * condition type. The slots names of the new condition type is the
- * union of the slots of conditions |ct1| ...
- * @l
- * NOTE: This function is not defined in ,(srfi 34).
+ * union of the slots of conditions |ct~1~| ...
+ * 
+ * NOTE: This function is not defined in {{link-srfi 34}}.
 doc>
 */
 DEFINE_PRIMITIVE("make-compound-condition-type", make_comp_cond_type, subr2,
@@ -292,10 +292,10 @@ DEFINE_PRIMITIVE("condition?", condp, subr1, (SCM obj))
 
 /*
 <doc EXT make-compound-condition
- * (make-compound-condition condition0 condition1 ...)
+ * (make-compound-condition condition~0~ condition~1~ ...)
  *
  * |Make-compound-condition| returns a compound condition belonging to
- * all condition types that the |conditioni| belong to.
+ * all condition types that the |condition~i~| belong to.
  *
  * |Condition-ref|, when applied to a compound condition will return
  *  the value from the first of the |conditioni| that has such a slot.

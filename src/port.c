@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update:  9-Jan-2022 19:11 (eg)
+ * Last file update: 11-Jan-2022 16:16 (eg)
  *
  */
 
@@ -1190,9 +1190,8 @@ DEFINE_PRIMITIVE("format", format, vsubr, (int argc, SCM *argv))
  * of |error| takes  a symbol as first parameter; it is generally used for the
  * name of the procedure which raises the error.
  *
- * NOTE: The specification string may follow the
- * ,(emph "tilde conventions")
- * of |format| (see ,(ref :mark "format")); in this case this procedure builds an
+ * NOTE: The specification string may follow the _tilde conventions_ of 
+ * |format| (see ,(ref :mark "format")); in this case this procedure builds an
  * error message according to the specification given in |str|. Otherwise,
  * this procedure is conform to the |error| procedure defined in
  * {{link-srfi 23}} and  |str| is printed with the |display| procedure,

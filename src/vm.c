@@ -1,7 +1,7 @@
 /*
  * v m . c                              -- The STklos Virtual Machine
  *
- * Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  1-Mar-2000 19:51 (eg)
- * Last file update:  5-Nov-2021 17:14 (eg)
+ * Last file update: 11-Jan-2022 17:34 (eg)
  */
 
 // INLINER values
@@ -1905,7 +1905,7 @@ void STk_raise_exception(SCM cond)
  * (current-exception-handler)
  *
  * Returns the current exception handler. This procedure is defined in
- * ,(link-srfi 18).
+ * {{link-srfi 18}}.
 doc>
 */
 DEFINE_PRIMITIVE("current-exception-handler", current_handler, subr0, (void))

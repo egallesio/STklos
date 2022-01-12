@@ -1,7 +1,7 @@
 /*
  * parameter.c  -- Parameter Objects (SRFI-39)
  *
- * Copyright © 2003-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 2003-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  1-Jul-2003 11:38 (eg)
- * Last file update: 10-Apr-2021 18:44 (eg)
+ * Last file update: 11-Jan-2022 16:11 (eg)
  */
 
 
@@ -215,7 +215,7 @@ DEFINE_PRIMITIVE("make-parameter", make_parameter, subr12, (SCM value, SCM conv)
 <doc EXT parameter?
  * (parameter? obj)
  *
- *  Returns |#t| if |obj| is a parameter object, otherwise returns |#f|.
+ * Returns |#t| if |obj| is a parameter object, otherwise returns |#f|.
 doc>
  */
 DEFINE_PRIMITIVE("parameter?", parameterp, subr1, (SCM obj))

@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  2-Feb-2006 21:58 (eg)
- * Last file update: 10-Apr-2021 18:49 (eg)
+ * Last file update: 12-Jan-2022 14:24 (eg)
  */
 
 #include <unistd.h>
@@ -55,7 +55,7 @@ void STk_error_deadlock(void)
  * (make-mutex)
  * (make-mutex name)
  *
- *  Returns a new mutex in the unlocked/not-abandoned state. The optional |name|
+ * Returns a new mutex in the unlocked/not-abandoned state. The optional |name|
  * is an arbitrary Scheme object which identifies the mutex
  * (useful for debugging); it defaults to an unspecified value.
  * The mutex's specific field is set to an unspecified value.
@@ -205,7 +205,7 @@ DEFINE_PRIMITIVE("condition-variable?", condvp, subr1, (SCM obj))
 <doc EXT condition-variable-name
  * (conditon-variable-name conditon-variable)
  *
- *Returns the name of the |condition-variable|.
+ * Returns the name of the |condition-variable|.
 doc>
 */
 DEFINE_PRIMITIVE("condition-variable-name", condv_name, subr1, (SCM cv))

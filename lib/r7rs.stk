@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Apr-2011 19:36 (eg)
-;;;; Last file update: 10-Jan-2022 19:09 (eg)
+;;;; Last file update: 11-Jan-2022 17:32 (eg)
 ;;;;
 
 
@@ -1335,9 +1335,9 @@ doc>
 ;;;; ----------------------------------------------------------------------
 #|
 <doc EXT-SYNTAX with-handler
- * (with-handler <handler> <expr1> ... <exprn>)
+ * (with-handler <handler> <expr~1~> ... <expr~n~>)
  *
- * Evaluates the sequences of expressions |<expr1>| to |<exprn>|.
+ * Evaluates the sequences of expressions |<expr~1~>| to |<expr~n~>|.
  * |<handler>| must be a procedure that accepts one argument. It is installed
  * as the current exception handler for the dynamic extent (as determined by
  * dynamic-wind) of the evaluations of the expressions
@@ -1425,27 +1425,27 @@ doc>
  * binding evaluates the clauses as if they were the clauses of a cond
  * expression. That implicit cond  expression is evaluated with the
  * continuation and dynamic environment of the |guard| expression.
- * If every |<clause>|'s test evaluates to false and there is no |else|
- * clause, then |raise|  is re-invoked on the raised object within the
+ * If every `|<clause>|`s test evaluates to false and there is no |else|
+ * clause, then |raise| is re-invoked on the raised object within the
  * dynamic environment of the original call to |raise| except that the
  * current exception handler is that of the |guard| expression.
  *
  * @lisp
  * (guard (condition
- *          ((assq 'a condition) =\> cdr)
+ *          ((assq 'a condition) => cdr)
  *          ((assq 'b condition)))
  *   (raise (list (cons 'a 42))))
  *          => 42
  *
  * (guard (condition
- *          ((assq 'a condition) =\> cdr)
+ *          ((assq 'a condition) => cdr)
  *          ((assq 'b condition)))
  *   (raise (list (cons 'b 23))))
  *          => (b . 23)
  *
  * (with-handler (lambda (c) (format "value ~A was raised" c))
  *   (guard (condition
- *        ((assq 'a condition) =\> cdr)
+ *        ((assq 'a condition) => cdr)
  *        ((assq 'b condition)))
  *       (raise (list (cons 'x 0)))))
  *          => "value ((x . 0)) was raised"

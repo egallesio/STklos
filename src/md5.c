@@ -1,7 +1,7 @@
 /*
  * md5.c            -- MD5 algorithm
  *
- * Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 13-May-2007 22:21 (eg)
- * Last file update:  1-Sep-2021 14:15 (eg)
+ * Last file update: 11-Jan-2022 16:43 (eg)
  */
 
 /*
@@ -280,7 +280,7 @@ static inline char hexchar(unsigned int v)
 <doc EXT md5sum
  * (md5sum obj)
  *
- * Return a string contening the md5 dum of |obj|. The given parameter can
+ * Return a string contening the md5 sum of |obj|. The given parameter can
  * be a string or an open input port.
 doc>
 */

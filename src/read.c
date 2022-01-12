@@ -1,7 +1,7 @@
 /*
  * r e a d  . c                         -- reading stuff
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 27-Dec-2021 22:57 (eg)
+ * Last file update: 12-Jan-2022 14:32 (eg)
  *
  */
 
@@ -1180,12 +1180,13 @@ static SCM read_srfi10(SCM port, SCM l)
  * (read-case-sensitive #f)
  * (read-from-string "ABC")     => abc
  * @end lisp
- * NOTE:  Default behaviour can be changed for a whole execution
- * with the |--case-sensitive| or |case-insensitive| options.
- * @l
- * NOTE: See also syntax for ,(ref :mark "bar-in-symbol" :text
- * [special characters]) in symbols.
- *
+ * [NOTE]
+ * ====
+ * *  Default behaviour can be changed for a whole execution
+ *    with the |--case-sensitive| or |case-insensitive| options.
+ * *  See also syntax for ,(ref :mark "bar-in-symbol" :text
+ *    [special characters]) in symbols.
+ * ====
 doc>
 */
 static SCM read_case_sensitive_conv(SCM value)

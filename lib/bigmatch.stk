@@ -1,7 +1,7 @@
 ;;;;
 ;;;; b i g m a t c h  . s t k       -- The bigloo match-case and match-lambda
 ;;;;
-;;;; Copyright © 1997-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 1997-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
 ;;;; it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@kaolin.unice.fr]
 ;;;;    Creation date: 28-Oct-1997 20:47
-;;;; Last file update: 22-Oct-2021 14:45 (eg)
+;;;; Last file update: 11-Jan-2022 17:12 (eg)
 ;;;;
 
 ;;;; This file implements code for loading the MATCH-CASE and MATCH-LAMBDA
@@ -73,7 +73,7 @@ doc>
  * @end lisp
  * A match-case expression is evaluated as follows: |<key>| is evaluated
  * and the result is compared with each successive pattern. If the |<pattern>|
- * in some clause yields a match, then the |<expression>|s in that clause are
+ * in some clause yields a match, then the `|<expression>|`s in that clause are
  * evaluated from left to right in an environment where the pattern variables
  * are bound to the corresponding subparts of |<key>|, and the result of the
  * last expression in that clause is returned as the result of the

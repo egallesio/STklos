@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 10-Jan-2022 20:11 (eg)
+;;;; Last file update: 11-Jan-2022 16:45 (eg)
 ;;;;
 
 
@@ -1069,7 +1069,7 @@ doc>
 <doc EXT md5sum-file
  * (md5sum-file str)
  *
- * Return a string contening the md5 dum of the file whose name is |str|.
+ * Return a string contening the md5 sum of the file whose name is |str|.
 doc>
 |#
 (define (md5sum-file path)
@@ -2113,7 +2113,7 @@ doc>
  * (version-alist)
  *
  * This function returns an association list of STklos properties as defined by
- * {{quick-link-srfi 176}}.
+ * {{link-srfi 176}}.
 doc>
 |#
 (define (version-alist)

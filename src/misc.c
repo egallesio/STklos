@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date:  9-Jan-2000 12:50 (eg)
- * Last file update:  9-Jan-2022 20:30 (eg)
+ * Last file update: 11-Jan-2022 16:42 (eg)
  */
 
 #include "stklos.h"
@@ -315,31 +315,34 @@ static char URI_regexp[] =
  *
  * Parses the string |str| as a RFC-2396 URI and return a keyed list with the
  * following components
- * ,(itemize
- * (item [|scheme| : the scheme used as a string (defaults to |"file"|)])
- * (item [|user|: the user information (generally expressed as
- *      |login:password|)])
- * (item [|host| : the host as a string (defaults to "")])
- * (item [|port| : the port as an integer (0 if no port specified)])
- * (item [|path| : the path ])
- * (item [|query| : the qury part of the URI as a string (defaults to the
- * empty string)])
- * (item [|fragment| : the fragment of the URI as a string (defaults to the
- * empty string)])
- * )
+ *
+ * - |scheme| : the scheme used as a string (defaults to |"file"|)
+ * - |user|: the user information (generally expressed as |login:password|)
+ * - |host| : the host as a string (defaults to "")
+ * - |port| : the port as an integer (0 if no port specified)
+ * - |path| : the path
+ * - |query| : the qury part of the URI as a string (defaults to the
+ *    empty string)
+ * - |fragment| : the fragment of the URI as a string (defaults to the
+ *   empty string)
+ *
  * @lisp
- * (uri-parse "http://google.com")
- *     => (:scheme "http" :user "" :host "google.com" :port 80
+ * (uri-parse "http://google.com") 
+{*    => (:scheme "http" :user "" :host "google.com" :port 80 
  *         :path "/" :query "" :fragment "")
+ *
  * (uri-parse "http://stklos.net:8080/a/file?x=1;y=2#end")
  *     => (:scheme "http" :user "" :host "stklos.net" :port 8080
  *         :path "/a/file" :query "x=1;y=2" :fragment "end")
+ *
  * (uri-parse "http://foo:secret@stklos.net:2000/a/file")
  *     => (:scheme "http" :user "foo:secret" :host "stklos.net"
  *         :port 2000  :path "/a/file" :query "" :fragment "")
+ * 
  * (uri-parse "/a/file")
  *    => (:scheme "file" :user "" :host "" :port 0 :path "/a/file"
  *        :query "" :fragment "")
+ * 
  * (uri-parse "")
  *    => (:scheme "file"  :user "" :host "" :port 0 :path ""
  *        :query "" :fragment "")
