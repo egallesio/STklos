@@ -22,7 +22,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-4: Homogeneous numeric vector datatypes
     - SRFI-5: A compatible let form with signatures and rest arguments
     - SRFI-6: Basic String Ports
-    - SRFI-7: Feature-based program configuration language 
+    - SRFI-7: Feature-based program configuration language
     - SRFI-8: Receive: Binding to multiple values
     - SRFI-9: Defining Record Types
     - SRFI-10: Sharp Comma External Form
