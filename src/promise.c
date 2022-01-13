@@ -22,7 +22,7 @@
  *           Author: Erick Gallesio [eg@unice.fr]
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date:  2-Jun-1993 12:27 (eg)
- * Last file update:  7-Jan-2022 17:25 (eg)
+ * Last file update: 13-Jan-2022 12:17 (eg)
  */
 #include "stklos.h"
 
@@ -121,11 +121,11 @@ DEFINE_PRIMITIVE("%promise-value-set!", promise_val_set, subr2, (SCM p, SCM v))
 <doc force
  * (force promise)
  *
- * Forces the value of |promise| (see ,(ref :mark "delay")). If no value has been
- * computed for the promise, then a value is computed and
- * returned. The value of the promise is cached (or "memoized") so
- * that if it is forced a second time, the previously computed value
- * is returned.
+ * Forces the value of |promise| (see _<<delay,primitive delay>>_).
+ * If no value has been computed for the promise, then a value is
+ * computed and returned. The value of the promise is cached
+ * (or "memoized") so that if it is forced a second time, the
+ * previously computed value is returned.
  *
  * @lisp
  * (force (delay (+ 1 2)))        =>  3

@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update: 10-Jan-2022 20:14 (eg)
+ * Last file update: 13-Jan-2022 15:01 (eg)
  */
 
 #include "stklos.h"
@@ -894,7 +894,7 @@ DEFINE_PRIMITIVE("hash-table-hash", hash_hash, subr1, (SCM obj))
  * it contains, the number of buckets in its hash array, and the utilization
  * of the buckets. Informations are printed on |port|. If no |port| is given
  * to |hash-table-stats|, information are printed on the current output port
- * (see ,(ref :mark "current-output-port")).
+ * (see _<<curroport,`current-output-port` primitive>>_).
 doc>
 */
 DEFINE_PRIMITIVE("hash-table-stats", hash_stats, subr12, (SCM ht, SCM port))

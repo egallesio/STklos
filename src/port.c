@@ -20,7 +20,7 @@
  *
  *            Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 17-Feb-1993 12:27
- * Last file update: 11-Jan-2022 16:16 (eg)
+ * Last file update: 13-Jan-2022 18:51 (eg)
  *
  */
 
@@ -640,7 +640,7 @@ DEFINE_PRIMITIVE("write", write, subr12, (SCM expr, SCM port))
  * main difference with the |write| procedure is that |write*|
  * handles data structures with cycles. Circular structure written by
  * this procedure use the `"{{sharp}}n="`)) and  `"{{sharp}}n{{sharp}}"`))
- * notations (see ,(ref :mark "Circular structure")).
+ * notations (see <<_other_notations>>).
  *
  * NOTE: This function is also called |write*|.
  * The name |write*| was the name used by {{stklos}} for
@@ -1190,9 +1190,10 @@ DEFINE_PRIMITIVE("format", format, vsubr, (int argc, SCM *argv))
  * of |error| takes  a symbol as first parameter; it is generally used for the
  * name of the procedure which raises the error.
  *
- * NOTE: The specification string may follow the _tilde conventions_ of 
- * |format| (see ,(ref :mark "format")); in this case this procedure builds an
- * error message according to the specification given in |str|. Otherwise,
+ * NOTE: The specification string may follow the _tilde conventions_ of
+ * |format| (see _<<format, primitive `format`>>_); in this case this
+ * procedure builds an error message according to the specification
+ * given in |str|. Otherwise,
  * this procedure is conform to the |error| procedure defined in
  * {{link-srfi 23}} and  |str| is printed with the |display| procedure,
  * whereas the |obj|s are printed  with the |write| procedure.
@@ -1391,7 +1392,7 @@ DEFINE_PRIMITIVE("port-open?", port_open, subr1, (SCM port))
  * on |port|, an end of file object is returned.  |Port| may be omitted,
  * in which case it defaults to the value returned by |current-input-port|.
  * @l
- * NOTE: As said in ,(ref :mark "values"), if |read-line| is not
+ * NOTE: As said in _<<values, primitive `values`>>_, if |read-line| is not
  * used in  the context of |call-with-values|, the second value returned by
  * this procedure is ignored.
 doc>

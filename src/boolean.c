@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 23-Oct-1993 21:37
- * Last file update:  8-Jan-2022 14:25 (eg)
+ * Last file update: 13-Jan-2022 18:59 (eg)
  */
 #include <sys/resource.h>
 #include "stklos.h"
@@ -110,33 +110,36 @@ doc>
  * implementations of Scheme.
  *
  * The |eqv?| procedure returns |#t| if:
+ *
  * - |obj1| and |obj2| are both |#t| or both |#f|.
  *
  * - |obj1| and |obj2| are both symbols and
- * 
- * ----
+ * +
+ * ```scheme
  * (string=? (symbol->string obj1)
  *           (symbol->string obj2))     =>  #t
- * ----
- * *Note:* This assumes that neither |obj1| nor |obj2| is an
+ * ```
+ * +
+ * NOTE: This assumes that neither |obj1| nor |obj2| is an
  * "uninterned symbol".
  *
- * -  |obj1| and |obj2| are both keywords and
- * ----
+ * - |obj1| and |obj2| are both keywords and
+ * +
+ * ```scheme
  * (string=? (keyword->string obj1)
  *           (keyword->string obj2))    =>  #t
- * ----
- * 
- * -  |obj1| and |obj2| are both numbers, are numerically equal
- * (see ,(ref :mark "=")), and are either both exact or both inexact.
+ * ```
+ *
+ * - |obj1| and |obj2| are both numbers, are _<<numeq,numerically equal>>_,
+ *  and are either both exact or both inexact.
  *
  * - |obj1| and |obj2| are both characters and are the same character
- * according to the |char=?| procedure (see ,(ref :mark "char=?")).
+ *   according to the _<<chareq, `char=?` procedure>>`_.
  *
  * -  both |obj1| and |obj2| are the empty list.
  *
  * - |obj1| and |obj2| are pairs, vectors, or strings that denote
- * the same locations in the store.
+ *   the same locations in the store.
  *
  * - |obj1| and |obj2| are procedures whose location tags are equal.
  *
@@ -170,7 +173,7 @@ doc>
  * (eqv? (lambda (x) x)
  *       (lambda (y) y))    =>  unspecified
  * @end lisp
- * 
+ *
  * NOTE: In fact, the value returned by STklos depends of
  * the way code is entered and can yield |#t| in some cases and |#f|
  * in others.
@@ -249,7 +252,7 @@ DEFINE_PRIMITIVE("eqv?", eqv, subr2, (SCM x, SCM y))
  *
  * |Eq?| is similar to |eqv?| except that in some cases it is capable of
  * discerning distinctions finer than those detectable by |eqv?|.
- * 
+ *
  * |Eq?| and |eqv?| are guaranteed to have the same behavior on symbols,
  * keywords, booleans, the empty list, pairs, procedures, and non-empty strings
  * and vectors. `|Eq?|`'s behavior on numbers and characters is

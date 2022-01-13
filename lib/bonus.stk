@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 11-Jan-2022 16:45 (eg)
+;;;; Last file update: 13-Jan-2022 18:23 (eg)
 ;;;;
 
 
@@ -510,10 +510,12 @@ doc>
  *
  * If omitted,
  *
- * - |hash| defaults to the |hash-table-hash| procedure (see
- *   ,(ref :mark "hash-table-hash")).
- * - |comparison| defaults to the |eq?| procedure (see ,(ref :mark "eq?")).
- * 
+ * - |hash| defaults to the |hash-table-hash| procedure
+ *  (see _<<hashtablehash, `hash-table-hash` primitive>>_).
+
+ * - |comparison| defaults to the |eq?| procedure
+ *   (see _<<eqprim, `eq?` primitive>>_)).
+ *
  * Consequently,
  * @lisp
  * (define h (make-hash-table))
@@ -562,7 +564,7 @@ doc>
  * Returns an _association list_ built from the entries in |hash|.
  * Each entry in |hash| will be represented as a pair whose |car| is the
  * entry's key and whose |cdr| is its value.
- * 
+ *
  * NOTE: the order of pairs in the resulting list is unspecified.
  * @lisp
  * (let ((h (make-hash-table)))
@@ -610,7 +612,7 @@ doc>
  * table with the value |(update-fun current-value)|. If no value is
  * associated to |key|, a new entry in the table is first inserted
  * before updating it (this new entry being the result of calling |thunk|).
- * 
+ *
  * Note that the expression
  * @lisp
  * (hash-table-update!/default hash key update-fun default)
@@ -763,7 +765,7 @@ doc>
 ;;;; SETTERS
 ;;;;
 #|
-<doc setter
+<doc EXT setter
  * (setter proc)
  *
  * Returns the setter associated to a |proc|. Setters are defined in the
@@ -788,8 +790,8 @@ doc>
  * (set! (slot-ref x 'name) v)   == (slot-set! x 'name v)
  * (set! (struct-ref x 'name) v) == (struct-set! x 'name v)
  * @end lisp
- * Furhermore, ,(ref :section "Parameter Objects" :text "parameters objects")
- * are their own setter:
+ * Furhermore, Parameter Objects (see _<<_parameter_objects>>_) are
+ * their own setter:
  * @lisp
  * (real-precision)              => 15
  * (set! (real-precision) 12)
@@ -1226,7 +1228,7 @@ doc>
  * (fprintf port fmt obj ...)
  * (eprintf fmt obj ...)
  *
- * These procedures are specialized version of |,(ref :mark "format" "format")|.
+ * These procedures are specialized versions of _<<format, `format` primitive>>_.
  * In these procedures, |fmt| is a string using the |format| conventions.
  * |printf| outputs go on the current output port.
  * |fprintf| outputs go on the specified |port|.
@@ -1928,8 +1930,7 @@ doc>
  * (require-extension (srfi lists and-let*))
  * @end lisp
  * is equivalent to the previous |require-extension|. A list of available
- *  symbols as  |<extension-argument>| is given in chapter
- * ,(ref :chapter "SRFIs").
+ * symbols as |<extension-argument>| is given in <<_srfis>>.
 doc>
 |#
 (define-macro (require-extension . clauses)

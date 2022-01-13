@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update: 12-Jan-2022 15:17 (eg)
+;;;; Last file update: 13-Jan-2022 15:05 (eg)
 ;;;;
 
 
@@ -156,7 +156,7 @@
     ;; 115  Scheme Regular Expressions
     ;; 116  Immutable List Library
     (117 "Queues based on lists" (queues-as-lists) "srfi-117")
-    (118 "Simple adjustable-size strings " (adjustable-strings))
+    (118 "Simple adjustable-size strings" (adjustable-strings))
     ;; 119  wisp: simpler indentation-sensitive scheme
     ;; 120  Timer APIs
     ;; 121  ....... withdrawn

@@ -1,7 +1,7 @@
 /*
  * p r o c e s s . c            -- Access to processes from STklos
  *
- * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *            Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-???-1994 ??:??
- * Last file update: 27-Aug-2021 20:36 (eg)
+ * Last file update: 13-Jan-2022 17:34 (eg)
  *
  * Code for Win32 conributed by (Paul Anderson <paul@grammatech.com> and
  * Sarah Calvo <sarah@grammatech.com>) has been deleted for now. It should be
@@ -724,7 +724,7 @@ DEFINE_PRIMITIVE("process-exit-status", proc_xstatus, subr1, (SCM proc))
  *
  * Sends the integer signal |sig| to |proc|. Since value of |sig| is system
  * dependant, use the symbolic defined signal constants to make your program
- * independant of the running system (see ,(ref :mark "signals")).
+ * independant of the running system (see <<_signals>>).
  * The result of |process-signal| is *_void_*.
 doc>
 */

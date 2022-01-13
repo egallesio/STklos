@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2002 10:06 (eg)
-;;;; Last file update: 10-Jan-2022 20:35 (eg)
+;;;; Last file update: 13-Jan-2022 18:45 (eg)
 ;;;;
 
 ;;;; ======================================================================
@@ -218,13 +218,14 @@ doc>
  * - year : e.g., 2002
  * - week-day : 0 (Sunday) to 6 (Saturday)
  * - year-day : 0 to 365 (365 in leap years)
- * - dst : indication about daylight savings time. See ,(ref :mark "date-dst")
+ * - dst : indication about daylight savings time
+ *   (see _<<datedst, primitive `date-dst`>>_).
  * - tz : the difference between Coordinated Universal Time
  *   (UTC) and local standard time in seconds.])
  *
  * @lisp
  * (seconds->list (current-second))
- *        => (#:second 21 #:minute 35 #:hour 20 #:day 10 #:month 1 
+ *        => (#:second 21 #:minute 35 #:hour 20 #:day 10 #:month 1
  *            #:year 2022 #:week-day 1 #:year-day 10 #:dst 0 #:tz -3600)
  * @end lisp
 doc>
@@ -331,7 +332,7 @@ doc>
  *
  * Convert the date |d| using the string |format| as a
  * specification. Conventions for format are the same as the one
- * of ,(ref :mark "seconds->string").
+ * of _<<seconds2string, primitive `seconds->string`>>_.
 doc>
 |#
 (define (date->string format date)
