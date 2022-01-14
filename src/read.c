@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 12-Jan-2022 14:32 (eg)
+ * Last file update: 14-Jan-2022 12:16 (eg)
  *
  */
 
@@ -1184,8 +1184,7 @@ static SCM read_srfi10(SCM port, SCM l)
  * ====
  * *  Default behaviour can be changed for a whole execution
  *    with the |--case-sensitive| or |case-insensitive| options.
- * *  See also syntax for ,(ref :mark "bar-in-symbol" :text
- *    [special characters]) in symbols.
+ * *  See also syntax for _<<_symbols, special characters>>_ in symbols.
  * ====
 doc>
 */
