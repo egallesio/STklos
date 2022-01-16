@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 16-Jan-2022 18:45 (eg)
+# Last file update: 16-Jan-2022 19:13 (eg)
 
 
 SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc \
@@ -15,7 +15,7 @@ SPP      = ../../utils/stklos-pp
 HTMLMAIN  = stklos-ref.html
 HTMLMULTI = stklos-ref-multi.html
 PDF       = stklos-ref.pdf
-IMG	      = images/hierarchy.jpg
+IMG	      = images/hierarchy.png
 
 all-recursive: all
 
