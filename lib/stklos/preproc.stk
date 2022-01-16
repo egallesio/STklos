@@ -1,5 +1,5 @@
 ;;;;
-;;;; markdown.stk     -- various stuff for using Markdown in STklos
+;;;; preproc.stk     -- various stuff for pre-processing Text file with STlklos
 ;;;;
 ;;;; Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
@@ -21,11 +21,11 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update: 12-Jan-2022 14:06 (eg)
+;;;; Last file update: 16-Jan-2022 17:23 (eg)
 ;;;;
 
 
-(define-module stklos/markdown/env
+(define-module stklos/preproc/env
   ;; This module contains the variables accessible from the document
   ;; environment. New bindings can be added with defines embedded in the
   ;; document or with metadata definitions
@@ -36,15 +36,15 @@
 
 ;; ----------------------------------------------------------------------
 ;;
-;;  The (stklos markdown) module
+;;  The (stklos preproc) module
 ;;
 ;; ______________________________________________________________________
-(define-module stklos/markdown
+(define-module stklos/preproc
   (export parse-metadata process-file process-string translate)
 
   (define *printing*      #t)
   (define *print-stack*   '())
-  (define *md-env*        (find-module 'stklos/markdown/env))
+  (define *md-env*        (find-module 'stklos/preproc/env))
   (define *command-chars* '(#\{ #\}))
 
   ;;
@@ -107,7 +107,7 @@
           (unless (keyword? var)    (error "bad key when reading ~S" str))
           (when   (eof-object? val) (set! val ""))
           (unless (eof-object? end) (error "too mush values in ~S" str))
-          ;; Store it as a definition in the (stklos markdown) environment
+          ;; Store it as a definition in the (stklos preproc) environment
           (eval `(define ,(string->symbol (keyword->string var)) ,val)
                 *md-env*)))))
 
@@ -220,7 +220,8 @@
             (set! pre  (process-file prelude-file))
             (set! post (process-file postlude-file)))))
 
-      ;; display pre + body sent to the external markdown processor + post
+      ;; display pre + body sent to the external document processor + post
+      ;; external document processor can be pandoc, markdown, asciidoc ...
       (display pre)
       (let ((md-cmd  (symbol-value 'md-command *md-env* "/bin/cat"))
             (md-args (symbol-value 'md-args *md-env* "")))
@@ -228,6 +229,6 @@
           (lambda () (display body))))
       (display post)))
 
-) ;; End of module markdown
+) ;; End of module preproc
 
-(provide "stklos/markdown")
+(provide "stklos/preproc")

@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  2-Jan-2022 15:26 (eg)
-# Last file update:  5-Jan-2022 11:57 (eg)
+# Last file update: 16-Jan-2022 17:20 (eg)
 
 #======================================================================
 
@@ -28,10 +28,10 @@ STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 
-SRC_STK = markdown.stk
+SRC_STK = preproc.stk
 SRC_C   =
 
-scheme_OBJS = markdown.ostk
+scheme_OBJS = preproc.ostk
 
 
 DOCDB  = ../DOCDB
