@@ -1,0 +1,23 @@
+{{chapter "Using the SLIB package"}}
+((("require")))
+((("provide")))
+https://cvs.savannah.gnu.org/viewvc/slib/slib/[SLIB] is a library for
+the programming language Scheme, written by Aubrey Jaffer.
+It uses only standard Scheme syntax and thus works on many different
+Scheme implementations. 
+
+To  use this package, you have just to type
+
+```scheme
+(require "slib")
+```
+
+and follow the instructions given in the *_SLIB_* library
+to use a particular package.
+
+NOTE: *_SLIB_* uses also the _require_ and _provide_ mechanism to load
+components of the library. Once *_SLIB_* has been loaded, the standard
+{{stklos}} `require` and `provide` are overloaded such as if their parameter
+is a string this is the old {{stklos}} procedure which is called, and if their
+parameter is a symbol, this is the *_SLIB_* one which is called.
+

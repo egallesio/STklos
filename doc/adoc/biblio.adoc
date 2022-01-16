@@ -1,0 +1,50 @@
+
+[bibliography]
+== Bibliography
+
+
+* [[[AMOP]]] Gregor Kickzales, Jim de Rivières and Daniel G. Bobrow --
+  *The Art of Meta Object Protocol* -- MIT Press, 1991.
+
+* [[[Bigloo]]] Manuel Serrano -- http://www-sop.inria.fr/mimosa/fp/Bigloo/[*Bigloo*] Home Page.
+
+* [[[CLtL2]]] Guy L. Steele Jr. -- *Common Lisp: the Language, 2nd Edition* --
+   Digital Press, 12 Crosby Drive, Bedford, MA 01730, USA, 1990.
+
+* [[[DSSSL]]] ISO/IEC -- *Information technology, Processing Languages, Document Style Semantics and
+  Specification Languages (DSSSL)* -- 10179:1996(E), ISO, , 1996.
+
+* [[[Dylan]]] Apple Computer -- *Dylan: an Object Oriented Dynamic Language* -- Apple, April, 1992.
+
+* [[[GTK]]] http://gtk.org/[*The GTK+ Toolkit Home Page*]
+
+* [[[PCRE]]] Philip Hazel -- http://pcre.org/[*PCRE (Perl Compatible Regular Expressions)*]
+  Home page.
+
+* [[[QuG92]]] C. Queinnec and J-M. Geffroy -- *Partial Evaluation Applied to Symbolic Pattern Matching
+with Intelligent Backtrack* -- Workshop in Static Analysis, Bigre, (81--82), Bordeaux (France), September, 1992.
+
+
+* [[[R5RS]]] Kelsey, R. and Clinger, W. and Rees, J. --
+  https://www.schemers.org/Documents/Standards/R5RS/HTML[*The Revised5 Report on the Algorithmic Language Scheme*] --
+  Higher-Order and Symbolic Computation, 11(1), Sep, 1998.
+
+* [[[R7RS]]] Alex S. Shinn, John Cowan and Arthur A. Gleckler --
+  https://small.r7rs.org/attachment/r7rs.pdf[*The Revised7 Report on the Algorithmic Language Scheme -- R7RS small*]
+  -- July, 2013.
+
+* [[[SOS]]] Chris Hanson --
+   https://www.gnu.org/software/mit-scheme/documentation/stable/mit-scheme-sos.pdf[The SOS Reference Manual, version 1.9] --
+   November, 2011.
+
+* [[[STk]]] Erick Gallesio -- https://www.stklos.net/Doc/STk.pdf[*STk Reference Manual*] -- RT 95-31a,
+   I3S CNRS / Université de Nice - Sophia Antipolis, juillet, 1995.
+
+* [[[Tiny-Clos]]] Gregor Kickzales -- http://community.schemewiki.org/?Tiny-CLOS[*Tiny-Clos*] --
+   December, 1992.
+
+* [[[Tk]]] John K. Ousterhout -- *An X11 toolkit based on the Tcl Language* --
+   USENIX Winter Conference, January, 1991, pp. 105--115.
+
+* [[[TuD96]]] Sho-Huan Simon Tung and R. Kent Dybvig -- *Reliable Interactive Programming
+  with Modules* -- LISP and Symbolic Computation, 91996, pp. 343--358.

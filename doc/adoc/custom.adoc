@@ -1,0 +1,17 @@
+== Customizations
+{{stklos}} environement can be customized using
+Parameter Objects. These
+parmaters are listed below.
+
+{{insertdoc 'real-precision}}
+[#srfi169]
+{{insertdoc 'accept-srfi-169-numbers}}
+{{insertdoc 'read-case-sensitive}}
+{{insertdoc 'write-pretty-quotes}}
+(((STKLOS_LOAD_PATH)))
+{{insertdoc 'load-path}}
+(((STKLOS_LOAD_SUFFIXES)))
+{{insertdoc 'load-suffixes}}
+{{insertdoc 'load-verbose}}
+{{insertdoc 'thread-handler-error-show}}
+{{insertdoc 'stklos-debug-level}}

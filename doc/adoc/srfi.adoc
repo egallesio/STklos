@@ -1,0 +1,335 @@
+{{chapter "SRFIs"}}
+
+((("SRFI")))
+Scheme Request For Implementation (http://srfi.schemers.org[SRFI])
+process grew out of the Scheme Workshop held
+in Baltimore, MD, on September 26, 1998, where the attendees considered a
+number of proposals for standardized feature sets for inclusion in Scheme
+implementations. Many of the proposals received overwhelming support in a
+series of straw votes. Along with this there was concern that the next Revised
+Report would not be produced for several years and this would prevent the
+timely implementation of standardized approaches to several important problems
+and needs in the Scheme community.
+
+
+Only the implemented SRFIs are (briefly) presented here. For further
+information on each SRFI, please look at the official
+SRFI http://srfi.schemers.org[site].
+
+
+=== Supported SRFIs
+
+{{stklos}} supports *{{(length *srfi-database*)}}* finalized SRFIS.
+Some of these SRFIS are _embedded_ and some are _external_.
+
+An _embedded_ SRFI can be directly used without any particular action,
+whereas an _external_ needs to be loaded before use.
+
+The following SRFIS are implemented:
+[.small]
+{{for-each (lambda (x)
+             (let ((nb (car x)))
+              (printf "+-+ (((SRFI-~a))) *~a[SRFI-~a]* -- _~a_ +\n"
+                     nb  (make-srfi-url nb) nb (srfi-title nb))))
+            *srfi-database*}}
+
+
+=== Using a SRFI
+Using a particular SRFI can be done with the special form
+`cond-expand` defined in {{quick-link-srfi 0}} which is fully supported
+by {{stklos}}. This form accepts features identifiers which are of the
+form *_srfi-n_* where *_n_* represents the number of the SRFI
+supported by the implementation (for instance *_srfi-1_* or
+*_srfi-30_*).
+
+For instance, to use *_srfi-n_*, you can use
+```scheme
+(cond-expand
+ (srfi-n))
+```
+
+
+This forms does nothing if *_srfi-n_* is an embedded SRFI and ensures that all
+the files needed by this SRFI will be properly loaded if it is an external
+SRFI.
+
+{{stklos}} also offers the primitive *require-feature* which ensures
+(eventually) the loading of files needed to use a given SRFI. This primitive
+accepts several forms to ensure that the SRFI can be used.  For instance, to
+use {{link-srfi 1}}, the following forms are possible:
+
+```scheme
+(require-feature 'srfi-1)
+(require-feature "srfi-1")
+(require-feature 1)
+(require-feature 'lists)   ;; Since this feature name is an alias for SRFI-1
+```
+
+The list of the aliases defined for the supported SRFIs is given in
+<<feature_identifiers>>.
+
+
+
+==== Embedded SRFIs
+As said before, an _embedded_ SRFI can be used directly without loading a
+support file. (Note that using *require-feature* works too
+and permits to ignore if the SRFI is embedded).
+
+*List of embedded SRFIs:*
+ {{for-each (lambda (x)
+             (let ((nb (car x)))
+               (unless (srfi-file nb)
+                 (printf "``srfi-~a`` " nb))))
+            *srfi-database*}}
+
+
+==== External SRFIs
+
+An external SRFI needs to load at least one external file. This can be done
+with *require* or *require-feature*. As with embedded SRFIS, using
+*require-feature* permits to ignore if the SRFI is external.
+
+*List of external SRFIs:*
+{{for-each (lambda (x)
+             (let ((nb (car x)))
+               (when (srfi-file nb)
+                 (printf "``srfi-~a`` " nb))))
+            *srfi-database*}}
+
+
+==== SRFI features
+For some SRFIs, {{stklos}} accepts that uses them with a name. This names
+are given <<feature_identifiers>>.
+
+[#feature_identifiers]
+.Feature identifiers
+[.small]
+|====
+|symbol| require SRFI(s)
+
+{{for-each (lambda (x)                              ;; PRINT THE SRFIS
+             (let* ((nb    (car x))
+                    (info  (find-srfi nb))
+                    (names (%srfi-names info)))
+                (when (> (length names) 1)
+                  (printf "| ~a | ~a\n" (cadr names) (car names)))))
+           *srfi-database*}}
+{{for-each (lambda (x)                              ;; PRINT THE ALIASES
+             (printf "|~a |" (car x))
+             (for-each (lambda (f) (printf "~a " f)) (cdr x))
+             (printf "\n"))
+           *srfi-shortcuts*}}
+|====
+
+
+=== Misc. Information
+//desactivate numbering 
+:sectnums!:
+Previous section described the general way to use the SRFIS implemented in
+{{stklos}}.  This section concentrates on information not given above.
+
+// **** SRFI-0
+{{srfi-subsection 0}}
+{{quick-link-srfi 0}} defines the `cond-expand` special form. It is fully
+supported by {{stklos}}. {{stklos}} defines several features identifiers which
+are of the form _srfi-n_ where _n_ represents the number of the SRFI
+supported by the implementation (for instance _srfi-1_ or _srfi-30_).
+
+{{stklos}} `cond-expand` accepts also some feature identifiers which are the
+same that the ones defined in <<feature_identifiers>>, such as
+_case_lambda_ or _generators_.
+
+Furthermore, the feature identifier *_stklos_* and *_STklos_* are defined for
+applications which need to know on which Scheme implementation they are
+running on.
+
+// **** SRFI-10
+{{srfi-subsection 10}}
+((("define-reader-ctor")))
+{{quick-link-srfi 10}} is fully supported. This SRFI extends the
+STklos reader with the `#,` notation which is fully described in
+this document (see _<<readerctor, primitive `define-reader-ctor`>>_).
+
+
+// **** SRFI-16
+{{srfi-subsection 16}}
+((("procedure")))
+((("case-lambda")))
+{{quick-link-srfi 16}} is fully supported. Note that `case-lambda` is now defined in {{rseven}}.
+
+
+
+// **** SRFI-17
+{{srfi-subsection 17}}
+[#setter]
+((("assignment")))
+((("set!")))
+((("setter")))
+{{quick-link-srfi 17}} is fully supported. See the documentation of procedures `set!`
+and `setter`. However, requiring explicitly `srfi-17` permits
+to define the setters for the (numerous) `cXXXXr` list procedures.
+
+
+
+// **** SRFI-22
+{{srfi-subsection 22}}
+((("script files")))
+{{quick-link-srfi 22}} describes basic prerequisites for running Scheme
+programs as Unix scripts in a uniform way. Specifically, it describes:
+
+* the syntax of Unix scripts written in Scheme,
+* a uniform convention for calling the Scheme script interpreter, and
+* a method for accessing the Unix command line arguments from within the
+  Scheme script.
+
+{{link-srfi 22}}  recommends to invoke the Scheme script interpreter from the
+script via a /usr/bin/env trampoline, like this:
+
+```
+#!/usr/bin/env <executable>
+```
+
+where `<executable>` can recover several specified names.  {{stklos}} uses
+only the name `stklos-script` for `<executable>`.
+
+Here is an example of the classical `echo` command (without option) in Scheme:
+
+
+```scheme
+#!/usr/bin/env stklos-script
+
+(define (main arguments)
+  (for-each (lambda (x) (display x) (display #\space))
+            (cdr arguments))
+  (newline)
+  0)
+```
+
+
+// **** SRFI-23
+{{srfi-subsection 23}}
+((("error")))
+{{quick-link-srfi 23}} is fully supported.  Note that the {{stklos}} *error*
+is more general than the one defined in SRFI-23.
+
+
+
+// **** SRFI-25
+{{srfi-subsection 25}}
+((("arrays")))
+{{stklos}} implements the arrays of {{quick-link-srfi 25}}. All the
+forms defined in the SRFI are implemented in {{stklos}}, but some other
+functions, not present in the SRFI, are documented here.
+
+{{insertdoc 'shape?}}
+{{insertdoc 'shared-array?}}
+{{insertdoc 'shape-for-each}}
+{{insertdoc 'share-nths}}
+{{insertdoc 'share-column}}
+{{insertdoc 'share-row}}
+{{insertdoc 'share-array/origin}}
+{{insertdoc 'array-copy+share}}
+{{insertdoc 'array-size}}
+{{insertdoc 'array-shape}}
+{{insertdoc 'array->list}}
+{{insertdoc 'array->vector}}
+{{insertdoc 'array-length}}
+{{insertdoc 'array-map}}
+{{insertdoc 'array-map!}}
+{{insertdoc 'array-append}}
+{{insertdoc 'array-share-count}}
+{{insertdoc 'array-copy}}
+{{insertdoc 'array-for-each-index}}
+{{insertdoc 'tabulate-array}}
+{{insertdoc 'array-retabulate!}}
+{{insertdoc 'transpose}}
+
+
+// **** SRFI-27
+{{srfi-subsection 27}}
+((("random-integer")))
+((("random-real")))
+{{quick-link-srfi 27}} is fully supported. Using primitives
+`random-integer` or `random-real` automatically load this SRFI.
+
+
+// **** SRFI-28
+{{srfi-subsection 28}}
+((("format")))
+{{quick-link-srfi 28}} is fully supported. Note that {{stklos}} `format`
+is more general than the one defined this SRFI.
+
+
+// **** SRFI-35
+{{srfi-subsection 35}}
+(((conditions)))
+{{quick-link-srfi 35}} is fully supported.
+See _<<_predefined_conditions>>_ for the predefined conditions
+and when it is required to load this file.
+
+
+// **** SRFI-36
+{{srfi-subsection 36}}
+(((conditions, IO)))
+{{quick-link-srfi 36}} is fully supported.  See _<<_predefined_conditions>>_
+Conditions) for the predefined conditions and when it is required to
+load this file.
+
+
+// **** SRFI-55
+{{srfi-subsection 55}}
+((("require-extension")))
+{{quick-link-srfi 55}} is fully supported. Furthermore, {{stklos}}
+also accepts the symbols defined in <<feature_identifiers>> 
+in a _require-extension_ clause.
+
+
+// **** SRFI-69
+{{srfi-subsection 69}}
+(((Hash table)))
+{{quick-link-srfi 69}} is fully supported. Note that the default
+comparison function in {{stklos}} is `eq?` whereas it is `equal?` for
+the SRFI. Furthermore the hash functions defined in the SRFI are not
+defined by default in {{stklos}}. To have a fully compliant SRFI-69
+behaviour, you need use a `require-feature` in your code.
+
+
+// **** SRFI-88
+{{srfi-subsection 88}}
+{{quick-link-srfi 88}} is fully
+supported. The only difference between the keywords defined in the
+SRFI document and the {{stklos}} keywords is on the zero-length
+keyword: For {{stklos}}, `:` is equivalent to the keyword `#:||`,
+whereas the SRFI considers that `:` is not a keyword but a symbol.
+
+NOTE: To obtain the symbol `:` in {{stklos}}, you must use `|:|`.
+
+
+// **** SRFI-138
+{{srfi-subsection 138}}
+(((stklos-compile)))
+{{quick-link-srfi 138}} is fully supported.  The `stklos-compile`
+program conforms to SRFI 138, accepting all the required command line
+options.
+
+The -D x flag of `stklos-compile` will define a feature named `x` for
+use with `cond-expand` in the compiled code only. It will not include
+`x` in the features list of the runtime.
+
+
+// **** SRFI-145
+{{srfi-subsection 145}}
+(((assume)))
+{{quick-link-srfi 145}} is fully supported. See the 
+_<<assume,`assume` special form>>_.
+
+
+// **** SRFI-169
+{{srfi-subsection 169}}
+(((number, underscore)))
+(((number)))
+(((underscore)))
+{{quick-link-srfi 169}} is fully supported. See _<<srfi169, parameter `accept-srfi-169-numbers`>>_ to eventually forbid the usage of
+underscores in numbers.
+
+:sectnums:

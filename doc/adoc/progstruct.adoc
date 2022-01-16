@@ -1,0 +1,36 @@
+{{chapter "Program structure"}}
+
+
+((("modules")))
+((("name space")))
+((("global variable")))
+((("variable")))
+{{rfive}} discusses how to structure programs. Everything which is
+defined in Section 5 of {{rfive}} applies also to {{stklos}}. To make
+things shorter, this aspects will not be described here (see {{rfive}}
+for complete information).
+
+{{stklos}} modules can be used to organize a program into separate
+environments (or *_name spaces_*). Modules provide a clean way to
+organize and enforce the barriers between the components of a program.
+
+{{stklos}} provides a simple module system which is largely inspired from
+the one of Tung and Dybvig exposed in Tung and Dybvig paper <<TuD96>>. As their
+modules system, {{stklos}} modules are defined to be easily used in an
+interactive environment. 
+
+{{insertdoc 'define-module}}
+{{insertdoc 'current-module}}
+{{insertdoc 'find-module}}
+{{insertdoc 'module?}}
+{{insertdoc 'export}}
+{{insertdoc 'import}}
+{{insertdoc 'select-module}}
+{{insertdoc 'symbol-value}}
+{{insertdoc 'symbol-value*}}
+{{insertdoc 'module-name}}
+{{insertdoc 'module-imports}}
+{{insertdoc 'module-exports}}
+{{insertdoc 'module-symbols}}
+{{insertdoc 'all-modules}}
+{{insertdoc 'in-module}}

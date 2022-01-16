@@ -1,0 +1,57 @@
+= STklos Reference Manual : (version {{version}})
+:authors: Erick Gallesio
+:email: eg@unice.fr
+:logo: images/dice.png
+:doctype: book
+:source-highlighter: rouge
+:rouge-style: monokai
+:icons: font
+:toc: left
+:toclevels: 2
+:sectnums:
+:xrefstyle: short
+:pdf-style: theme/stklos.yml
+:docinfodir: theme
+:docinfo: shared
+
+
+{{load "adoc-lib.stk"}}
+
+// Some sort of Preface (don't use the ascciidoc mechanism
+// [preface]
+// == Preface
+
+{{empty-line 10}}
+This document provides a complete list of procedures and special forms
+implemented in version *{{version}}* of {{stklos}}. The language
+implemented by {{stklos}} is nearly compliant with the language
+described in the Revised^5^ Report on the Algorithmic Language Scheme
+(aka {{rfive}}) <<R5RS>>.
+
+However, since version 1.30, the goal is to make it more compliant
+with {{rseven}} <<R7RS>>. This document states the compliance of each
+construction relatively to these reports, or if it is a {{stklos}}
+extension.
+
+{{Include* "intro.adoc"}}
+{{Include* "expr.adoc"}}
+{{Include* "progstruct.adoc"}}
+{{Include* "stdproc.adoc"}}
+{{Include* "regexp.adoc"}}
+{{Include* "match.adoc"}}
+{{Include* "cond.adoc"}}
+{{Include* "object.adoc"}}
+{{Include* "threads.adoc"}}
+{{Include* "custom.adoc"}}
+{{Include* "scmpkg.adoc"}}
+{{Include* "ffi.adoc"}}
+{{Include* "slib.adoc"}}
+{{Include* "srfi.adoc"}}
+{{Include* "biblio.adoc"}}
+
+
+
+{{If (eq? doc-fmt 'pdf)}}
+[index]
+== Index
+{{End}}

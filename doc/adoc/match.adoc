@@ -1,0 +1,93 @@
+{{chapter "Pattern Matching"}}
+(((pattern Matching)))
+
+Pattern matching is a key feature of most modern functional
+programming languages since it allows clean and secure code to be
+written. Internally, "pattern-matching forms" should be translated
+(compiled) into cascades of "elementary tests" where code is made as
+efficient as possible, avoiding redundant tests; {{stklos}} "pattern
+matching compiler" provides this :footnote[The "pattern matching
+compiler" has been written by Jean-Marie Geffroy and is part of the
+Manuel Serrano's Bigloo compiler since several years <<Bigloo>>. The
+code (and documentation) included in {{stklos}} has been stolen from
+the Bigloo package v2.4 (the only difference between both package is
+the pattern matching of structures which is absent in {{stklos}}.
+
+The technique used is described in details in C. Queinnec and
+J-M. Geffroy paper <<QuG92>>, and the code generated can be considered
+optimal
+
+The "pattern language" allows the expression of a wide variety of patterns,
+including:
+
+ * Non-linear patterns: pattern variables can appear more than
+   once, allowing comparison of subparts of the datum (through `eq?`)
+ * Recursive patterns on lists: for example, checking that the
+   datum is a list of zero or more ``a``s followed by zero or more ```b``s.
+ * Pattern matching on lists as well as on vectors.
+
+
+=== The Pattern Language
+((("pattern language")))
+The syntax for `<pattern>` is:
+
+[:small]
+|===
+| <pattern>                   | Matches:
+
+|  <atom>                     | the <atom>.
+| (kwote <atom>)              | any expression eq? to <atom>.
+| (and <pat~1~> ... <pat~n~>)   | if all of <pati> match.
+| (or <pat~1~> ... ...<pat~n~>) | if any of <pat~1~> through <pat~n~> matches.
+| (not <pat>)                 | if <pat> doesn't match.
+| (? <predicate>)             | if <predicate> is true.
+| (<pat~1~> ... <pat~n~>)      | a list of n elements. Here, ... is a
+                                  meta-character denoting a finite repetition
+                                  of patterns.
+| <pat> ...                   | a (possibly empty) repetition
+                                  of <pat> in a list.
+| #(<pat> ... <pat~n~>)       | a vector of n elements.
+| ?<id>                       | anything, and binds id as a variable.
+| ?-                          | anything.
+| ??-                         | any (possibly empty) repetition of anything in a list.
+| ???-                        | any end of list.
+|===
+
+*Remark:* `and`, `or`, `not` and `kwote` must be quoted in order to be treated
+as literals. This is the only justification for having the `kwote` pattern
+since, by convention, any atom which is not a keyword is quoted.
+
+
+**Explanations Through Examples**
+
+
+* `?-` matches any s-expr.
+* `a` matches the atom `'a`.
+* `?a` matches any expression, and binds the variable `a` to
+  this expression.
+* `(? integer?)` matches any integer.
+* `(a (a b))` matches the only list `'(a (a b))`.
+* `???-` can only appear at the end of a list, and always succeeds.
+  For instance, `(a ???-)` is equivalent to `(a . ?-)`.
+* when occurring in a list, `??-` matches any
+  sequence of anything: `(a ??- b)` matches any list whose
+  `car` is `a` and last `car` is `b`.
+* `(a ...)` matches any list of `a`'s, possibly empty.
+* `(?x ?x)` matches any list of length 2 whose `car` is *_eq_* to its `cadr`.
+* `((and (not a) ?x) ?x)` matches any list of length 2 whose `car` is
+   not *_eq_* to `'a` but is *_eq_* to its `cadr`.
+* `#(?- ?- ???-)` matches any vector whose length is at least 2.
+
+IMPORTANT: `??-` and `...` patterns can not appear inside a vector, where you
+should use `???-` +
+For example, `{{sharp}}(a ??- b)` or `#(a...)` are invalid
+patterns, whereas `{{sharp}}(a ???-)` is valid and matches any vector whose first
+element is the atom `a`.
+
+=== {{stklos}} Pattern Matching Facilities
+
+Only two special forms are provided for this in {{stklos}}: `match-case` and
+`match-lambda`.
+
+{{insertdoc 'match-case}}
+{{insertdoc 'match-lambda}}
