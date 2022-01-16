@@ -174,7 +174,8 @@ utils/stklos-compile
 utils/stklos-config
 utils/stklos-genlex
 utils/stklos-script
-utils/update-srfi-list
+utils/stklos-pp
+
 
 # Extensions directory
 extensions/gtklos/src/gtklos-config.h
