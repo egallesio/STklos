@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update: 16-Jan-2022 17:23 (eg)
+;;;; Last file update: 16-Jan-2022 18:28 (eg)
 ;;;;
 
 
@@ -31,7 +31,7 @@
   ;; document or with metadata definitions
 
   ;; Predefined functions/variables
-  (define (stklos-md-version) "0.1")
+  (define (stklos-pp-version) "0.1")
 )
 
 ;; ----------------------------------------------------------------------

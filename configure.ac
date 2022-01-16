@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  2-Jan-2022 15:33 (eg)
+### Last file update: 16-Jan-2022 17:42 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -585,7 +585,7 @@ AC_SUBST(GOOCANV)
 AC_SUBST(GOOVERS)
 
 AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
-          lib/Makefile utils/Makefile utils/stklos-config
+          doc/adoc/Makefile lib/Makefile utils/Makefile utils/stklos-config
           utils/stklos-script examples/Makefile
           lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile
           lib/ScmPkg.d/Makefile
@@ -593,7 +593,6 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           tests/Makefile
           doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1
           doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1
-          doc/skb/stklos-version.stk
           pkgman/Makefile
 
           extensions/Makefile

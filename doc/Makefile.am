@@ -1,6 +1,6 @@
 # Makefile.am for STklos documentation
 #
-# Copyright © 1999-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 1999-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  1-Jun-2021 19:13 (eg)
+# Last file update: 16-Jan-2022 12:13 (eg)
+
+# SUBDIRS      = adoc
 
 mandir	      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
@@ -63,10 +65,9 @@ docimgdir   = $(doclocation)/html/images
 docimg_DATA = html/images/hierarchy.jpg
 
 
-all: $(DOCDB)
+all: docdb
 
-skribe:
-	(cd skb; $(MAKE) $(HTML) $(PDF))
+docdb: $(DOCDB)
 
 #
 # Database construction
@@ -86,9 +87,10 @@ $(DOCDB): $(OTHERDB)
 #
 clean:
 	/bin/rm -f $(ALLDB)  stklos*.1 *~
+	(cd adoc; $(MAKE) clean)
 
 distclean: clean
-	(cd skb; $(MAKE) distclean)
+	(cd adoc; $(MAKE) distclean)
 	/bin/rm -f Makefile
 
 uninstall-hook:

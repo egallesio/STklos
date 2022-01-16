@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; stklos-pre.stk         -- A simple test preprocessor
+;;;; stklos-pp.stk         -- A simple STklos preprocessor
 ;;;;
 ;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
@@ -22,23 +22,23 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jan-2022 15:00
-;;;; Last file update:  7-Jan-2022 08:36 (eg)
+;;;; Last file update: 16-Jan-2022 18:24 (eg)
 ;;;;
 
 
 ;; FIXME: Delete this line
-(load-path (cons "../lib" (load-path)))  ;; to use stklos-md without prior install
+;(load-path (cons "../../lib" (load-path)))  ;; to use stklos-md without prior install
 
-(import (prefix (stklos markdown) md-))
+(import (prefix (stklos markdown) pp-))
 
 (define (main args)
   (let ((output "-"))
     (parse-arguments args
-      "Usage: stklos-md [options] document"
-      "Preprocessor for Markdown documents"
+      "Usage: stklos-pp [options] document"
+      "A simple preprocessor for text documents"
       ""
       (("define" :alternate "D" :arg str :help "Define new metadata")
-       (md-parse-metadata str))
+       (pp-parse-metadata str))
 
       (("output" :alternate "o" :arg file :help "Output in <file>")
        (set! output file))
@@ -49,19 +49,17 @@
 
       ""
       "Examples:"
-      "  stklos-pre -D'run-command: \"pandoc\"' f  preprocess f and send result to pandoc"
-      "  stklos-pre                              preprocess stdin, output goes to stdout"
+      "  stklos-pp -D'run-command: \"pandoc\"' f  preprocess f and send result to pandoc"
+      "  stklos-pp                              preprocess stdin, output goes to stdout"
 
       (else
        (case (length other-arguments)
          ((0)                ;; No argument: use stdin
-          (md-translate "-")
+          (pp-translate "-")
           (exit 0))
          ((1)               ;; One argument: use it as input
-          (md-translate (car other-arguments))
+          (pp-translate (car other-arguments))
           (exit 0))
          (else              ;; Error
           (arg-usage (current-error-port))
           (exit 1)))))))
-
-
