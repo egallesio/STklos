@@ -22,14 +22,11 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jan-2022 15:00
-;;;; Last file update: 16-Jan-2022 18:24 (eg)
+;;;; Last file update: 17-Jan-2022 18:00 (eg)
 ;;;;
 
 
-;; FIXME: Delete this line
-;(load-path (cons "../../lib" (load-path)))  ;; to use stklos-md without prior install
-
-(import (prefix (stklos markdown) pp-))
+(import (prefix (stklos preproc) pp-))
 
 (define (main args)
   (let ((output "-"))

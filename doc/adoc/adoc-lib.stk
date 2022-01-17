@@ -22,10 +22,10 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  7-Jan-2022 08:49
-;;;; Last file update: 17-Jan-2022 10:34 (eg)
+;;;; Last file update: 17-Jan-2022 18:09 (eg)
 ;;;;
 
-(import (stklos markdown))
+(import (stklos preproc))
 
 
 (define *stderr* (current-error-port))

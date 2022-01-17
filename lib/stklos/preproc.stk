@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Dec-2021 11:10
-;;;; Last file update: 16-Jan-2022 18:28 (eg)
+;;;; Last file update: 17-Jan-2022 17:53 (eg)
 ;;;;
 
 
@@ -63,7 +63,7 @@
 
   (define (Include* file)
     (process-file file))
-  
+
   (define (System str)
     (Include (string-append "| " str)))
 
@@ -229,6 +229,19 @@
           (lambda () (display body))))
       (display post)))
 
+  ;;
+  ;; Define the reader for braces
+  ;;
+  (define (read-brace port)
+    ;; skip opening brace which has been pushed back by the reader
+    (read-char port)
+    ;; read a liste finisched by a closing brace
+    (%read-list port #\}))
+
+  ;; Change the STklos reader for braces
+  (eval `(define %read-brace ,read-brace)
+        (find-module 'STklos))
+  
 ) ;; End of module preproc
 
 (provide "stklos/preproc")

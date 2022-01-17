@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 16-Jan-2022 19:13 (eg)
+# Last file update: 17-Jan-2022 18:16 (eg)
 
 
 SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc \
@@ -10,7 +10,7 @@ SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc \
            regexp.adoc scmpkg.adoc slib.adoc srfi.adoc          \
            stdproc.adoc stklos.adoc threads.adoc
 DOCDB    = ../DOCDB
-SPP      = ../../utils/stklos-pp
+SPP      = ../../src/stklos -q -I ../../lib -f ../../utils/stklos-pp.stk --
 
 HTMLMAIN  = stklos-ref.html
 HTMLMULTI = stklos-ref-multi.html

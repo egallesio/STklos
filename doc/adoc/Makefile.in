@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 16-Jan-2022 19:13 (eg)
+# Last file update: 17-Jan-2022 18:16 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -295,7 +295,7 @@ SOURCES = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc \
            stdproc.adoc stklos.adoc threads.adoc
 
 DOCDB = ../DOCDB
-SPP = ../../utils/stklos-pp
+SPP = ../../src/stklos -q -I ../../lib -f ../../utils/stklos-pp.stk --
 HTMLMAIN = stklos-ref.html
 HTMLMULTI = stklos-ref-multi.html
 PDF = stklos-ref.pdf
