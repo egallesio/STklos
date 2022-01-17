@@ -54,4 +54,7 @@ extension.
 {{If (eq? doc-fmt 'pdf)}}
 [index]
 == Index
+
+// Show undocumented symbols (i.e. symbols have doc but are not in the manual)
+{{show-undocumented}}
 {{End}}
