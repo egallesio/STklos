@@ -20,7 +20,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: ??-Oct-1993 ??:??
- * Last file update: 14-Jan-2022 12:16 (eg)
+ * Last file update: 17-Jan-2022 17:41 (eg)
  *
  */
 
@@ -858,8 +858,8 @@ static SCM read_rec(SCM port, struct read_context *ctx, int inlist)
           STk_ungetc(c, port);
           return STk_C_apply(read_brace_func, 1, port);
         }
-        //goto default_case;                   //FIXME
-        return read_list(port, '}', ctx);
+        goto default_case;                   //FIXME
+        //return read_list(port, '}', ctx);
       }
 
       case ')':
@@ -1251,6 +1251,23 @@ int STk_keyword_colon_convention(void)
   return colon_pos;
 }
 
+
+DEFINE_PRIMITIVE("%read-list", user_read_list, subr2, (SCM port, SCM end_delim))
+{
+  struct read_context ctx;
+
+  if (!PORTP(port)) STk_error_bad_port(port);
+  if (!CHARACTERP(end_delim)) STk_error("bad character ~s", end_delim);
+
+  ctx.cycles           = STk_nil;
+  ctx.inner_refs       = STk_nil;
+  ctx.comment_level    = 0;
+  ctx.case_significant = PORT_CASE_SENSITIVEP(port);
+  ctx.constant         = TRUE;
+
+  return read_list(port, CHARACTER_VAL(end_delim), &ctx);
+}
+
 /*===========================================================================*\
  *
  *                      I n i t i a l i z a t i o n
@@ -1290,5 +1307,10 @@ int STk_init_reader(void)
                         keyword_colon_position_get,
                         keyword_colon_position_set,
                         STk_STklos_module);
+
+  /* Add primitive for reading a list whose first character is already read */
+  /* This is useful to add specialized reader on [] and {} */
+  ADD_PRIMITIVE(user_read_list);
+
   return TRUE;
 }
