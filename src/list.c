@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??-Oct-1993 21:37
- * Last file update:  8-Jan-2022 14:58 (eg)
+ * Last file update: 17-Jan-2022 09:35 (eg)
  */
 
 #include "stklos.h"
@@ -825,7 +825,7 @@ DEFINE_PRIMITIVE("filter!", dfilter, subr2, (SCM pred, SCM list))
  *        (l2 (list 3))
  *        (l3 (list 4 5))
  *        (l4 (append! l1 l2 l3)))
- *   (list l1 l2 l3))  => ((1 2 3 4 5) (3 4 5) (4 5))
+ *   (list l1 l2 l3 l4))  => ((1 2 3 4 5) (3 4 5) (4 5) (1 2 3 4 5))
  * @end lisp
  * An error is signaled if one of the given lists is a constant list.
 doc>

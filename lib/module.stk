@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  1-Jun-2000 12:26 (eg)
-;;;; Last file update:  7-Jan-2022 20:48 (eg)
+;;;; Last file update: 17-Jan-2022 10:11 (eg)
 ;;;;
 
 
@@ -38,7 +38,7 @@
  * Returns the value bound to |symbol| in |module|. If |symbol| is not bound,
  * an error is signaled if no |default| is provided, otherwise |symbol-value|
  * returns |default|.
- * 
+ *
  * Note that this function searches the value of |symbol| in |module|
  * *and* in the STklos module if module is not a R7RS library.
 doc>
@@ -521,12 +521,12 @@ doc>
  * |mod|. If this symbol is not bound,  an error is signaled if no |default| is
  * provided, otherwise |in-module| returns |default|. Note that the value of |s|
  * is searched in |mod| and all the modules it imports.
- * @l
+ *
  * This form is in fact a shortcut. In effect,
  * @lisp
  * (in-module my-module foo)
  * @end lisp
- * @l
+ *
  * is equivalent to
  * @lisp
  * (symbol-value* 'foo (find-module 'my-module))

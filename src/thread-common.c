@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 23-Jan-2006 12:14 (eg)
- * Last file update: 12-Jan-2022 14:14 (eg)
+ * Last file update: 17-Jan-2022 09:34 (eg)
  */
 #include <unistd.h>
 #include "stklos.h"
@@ -186,6 +186,10 @@ DEFINE_PRIMITIVE("thread-name", thread_name, subr1, (SCM thr))
  * (thread-stack-size thread)
  *
  * Returns the allocated stack size for |thread|.
+ * @lisp
+ * (thread-stack-size (make-thread (lambda () #f) 'foo 2000)) => 2000
+ * @end lisp
+ *
  * Note that this procedure is not present in {{quick-link-srfi 18}}.
 doc>
 */

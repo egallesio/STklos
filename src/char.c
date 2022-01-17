@@ -23,7 +23,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: ??????
- * Last file update: 10-Jan-2022 08:47 (eg)
+ * Last file update: 17-Jan-2022 09:32 (eg)
  */
 
 #include <ctype.h>
@@ -388,7 +388,7 @@ DEFINE_PRIMITIVE("char-lower-case?", char_islower, subr1, (SCM c)) {
  * (digit-value #\3)        => 3
  * (digit-value #\x0664)    => 4
  * (digit-value #\x0AE6)    => 0
- * (digit-value #\x0EA6)    #f
+ * (digit-value #\x0EA6)    => #f
  * @end lisp
 doc>
  */
