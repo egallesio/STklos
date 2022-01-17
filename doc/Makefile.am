@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 16-Jan-2022 12:13 (eg)
+# Last file update: 17-Jan-2022 17:19 (eg)
 
 # SUBDIRS      = adoc
 
@@ -41,28 +41,29 @@ docpdfdir   = $(doclocation)/pdf
 docpdf_DATA = pdf/stklos-ref.pdf
 
 dochtmldir  = $(doclocation)/html
-dochtml_DATA= html/index.html		\
-	      html/stklos-ref.html	\
-	      html/stklos-ref-1.html	\
-	      html/stklos-ref-2.html	\
-	      html/stklos-ref-3.html	\
-	      html/stklos-ref-4.html	\
-	      html/stklos-ref-5.html	\
-	      html/stklos-ref-6.html	\
-	      html/stklos-ref-7.html	\
-	      html/stklos-ref-8.html	\
-	      html/stklos-ref-9.html	\
-	      html/stklos-ref-10.html	\
-              html/stklos-ref-11.html	\
-	      html/stklos-ref-12.html	\
-	      html/stklos-ref-13.html	\
-	      html/stklos-ref-14.html	\
-	      html/stklos-ref-15.html	\
-	      html/stklos-ref-16.html	\
-	      html/doc-style.css
+dochtml_DATA= html/_bibliography.html                            \
+              html/_customizations.html                          \
+              html/_exceptions_and_conditions.html               \
+              html/_expressions.html                             \
+              html/_foreign_function_interface.html              \
+              html/_introduction.html                            \
+              html/_pattern_matching.html                        \
+              html/_program_structure.html                       \
+              html/_regular_expressions.html                     \
+              html/_srfis.html                                   \
+              html/_standard_procedures.html                     \
+              html/_stklos_object_system.html                    \
+              html/_the_scmpkg_package_system.html               \
+              html/_threads_mutexes_and_condition_variables.html \
+              html/_using_the_slib_package.html                  \
+              html/index.html                                    \
+              html/stklos-ref-multi.html                         \
+              html/stklos-ref.html                               \
+              html/index.html
+
 
 docimgdir   = $(doclocation)/html/images
-docimg_DATA = html/images/hierarchy.jpg
+docimg_DATA = html/images/hierarchy.png
 
 
 all: docdb
