@@ -17,11 +17,9 @@
 
 {{load "adoc-lib.stk"}}
 
-// Some sort of Preface (don't use the ascciidoc mechanism
-// [preface]
-// == Preface
+[preface]
+== Preface
 
-{{empty-line 10}}
 This document provides a complete list of procedures and special forms
 implemented in version *{{version}}* of {{stklos}}. The language
 implemented by {{stklos}} is nearly compliant with the language
@@ -32,6 +30,30 @@ However, since version 1.30, the goal is to make it more compliant
 with {{rseven}} <<R7RS>>. This document states the compliance of each
 construction relatively to these reports, or if it is a {{stklos}}
 extension.
+
+=== Licences
+
+* {{stklos}} program and supporting files are published under the terms of the
+_GNU General Public Licence version 2 or later_. This licence is available at the 
+following URL: https://www.gnu.org/licenses/gpl-3.0.html
+
+* The manual you’re now reading is published under the terms of the
+_GNU Free Documentation License or later_ (see <<FDL>>).
+
+
+{{If (eq? doc-fmt 'pdf)}}{{empty-line 10}} {{End}}
+
+****
+Copyright © 1999-{{date-year (current-date)}} Erick Gallesio
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+A copy of the license is included in the section entitled <<FDL, "GNU
+Free Documentation License">>.
+****
+
 
 {{Include* "intro.adoc"}}
 {{Include* "expr.adoc"}}
@@ -49,12 +71,18 @@ extension.
 {{Include* "srfi.adoc"}}
 {{Include* "biblio.adoc"}}
 
-
+[appendix]
+[#FDL]
+{{Include* "licence.adoc"}}
 
 {{If (eq? doc-fmt 'pdf)}}
 [index]
 == Index
-
-// Show undocumented symbols (i.e. symbols have doc but are not in the manual)
-{{show-undocumented}}
 {{End}}
+
+
+//
+// Show undocumented symbols (i.e. symbols have doc but are not in the manual)
+//
+
+{{show-undocumented}}
