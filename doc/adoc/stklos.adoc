@@ -41,7 +41,7 @@ following URL: https://www.gnu.org/licenses/gpl-3.0.html
 _GNU Free Documentation License or later_ (see <<FDL>>).
 
 
-{{If (eq? doc-fmt 'pdf)}}{{empty-line 10}} {{End}}
+{{If (eq? doc-fmt 'pdf)}}{{empty-line 14}} {{End}}
 
 ****
 Copyright © 1999-{{date-year (current-date)}} Erick Gallesio
