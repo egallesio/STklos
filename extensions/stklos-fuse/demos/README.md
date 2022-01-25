@@ -10,7 +10,7 @@ In this directory you can find two file systems written in STklos:
     To mount the file system you can for instance type
 
     ```sh
-    $ hellofs -f -s ~/fuse     # Directory must exists
+    $ ./hellofs -f -s ~/fuse     # Directory must exists
     ```
 
      This will mount the **hellofs** on the (already existing and empty)
@@ -29,7 +29,7 @@ In this directory you can find two file systems written in STklos:
    a starting point to develop a new file system. To use it just type
 
    ```sh
-    $ hashfs -f -s ~/fuse
+    $ ./hashfs -f -s ~/fuse
    ```
 
 
