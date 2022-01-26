@@ -19,9 +19,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 17-Jan-2022 17:19 (eg)
+# Last file update: 26-Jan-2022 11:59 (eg)
 
-# SUBDIRS      = adoc
+SUBDIRS      = refman
 
 mandir	      = $(prefix)/share/man
 man_MANS      = stklos.1 stklos-config.1 stklos-compile.1 stklos-genlex.1 \
@@ -41,25 +41,8 @@ docpdfdir   = $(doclocation)/pdf
 docpdf_DATA = pdf/stklos-ref.pdf
 
 dochtmldir  = $(doclocation)/html
-dochtml_DATA= html/_bibliography.html                            \
-              html/_customizations.html                          \
-              html/_exceptions_and_conditions.html               \
-              html/_expressions.html                             \
-              html/_foreign_function_interface.html              \
-              html/_introduction.html                            \
-              html/_pattern_matching.html                        \
-              html/_program_structure.html                       \
-              html/_regular_expressions.html                     \
-              html/_srfis.html                                   \
-              html/_standard_procedures.html                     \
-              html/_stklos_object_system.html                    \
-              html/_the_scmpkg_package_system.html               \
-              html/_threads_mutexes_and_condition_variables.html \
-              html/_using_the_slib_package.html                  \
-              html/index.html                                    \
-              html/stklos-ref-multi.html                         \
-              html/stklos-ref.html                               \
-              html/index.html
+dochtml_DATA= html/stklos-ref.html
+
 
 
 docimgdir   = $(doclocation)/html/images
@@ -88,14 +71,15 @@ $(DOCDB): $(OTHERDB)
 #
 clean:
 	/bin/rm -f $(ALLDB)  stklos*.1 *~
-	(cd adoc; $(MAKE) clean)
 
 distclean: clean
-	(cd adoc; $(MAKE) distclean)
 	/bin/rm -f Makefile
 
 uninstall-hook:
 	rmdir $(docpdfdir) $(docimgdir) $(dochtmldir) $(doclocation) || true
+
+
+
 # Local Variables:
 # tab-width: 8
 # End:

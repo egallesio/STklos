@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.16">
+<meta name="generator" content="Asciidoctor 2.0.17">
 <meta name="author" content="Erick Gallesio">
 <title>STklos Reference Manual : (version 1.70)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
@@ -194,7 +194,8 @@ body.toc2.toc-right{padding-left:0;padding-right:20em}}
 #content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
 details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
 details{margin-left:1.25rem}
-details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;-webkit-tap-highlight-color:transparent}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
 details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
 details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
 details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
@@ -236,9 +237,8 @@ pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
 table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
 table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
 table.linenotable td.code{padding-left:.75em}
-table.linenotable td.linenos{border-right:1px solid;opacity:.35;padding-right:.5em}
-pre.pygments .lineno{border-right:1px solid;opacity:.35;display:inline-block;margin-right:.75em}
-pre.pygments .lineno::before{content:"";margin-right:-.125em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
 .quoteblock{margin:0 1em 1.25em 1.5em;display:table}
 .quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
 .quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
@@ -275,7 +275,7 @@ table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-c
 table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
 table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
 table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
-table.stripes-all tr,table.stripes-odd tr:nth-of-type(odd),table.stripes-even tr:nth-of-type(even),table.stripes-hover tr:hover{background:#f8f8f7}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
 th.halign-left,td.halign-left{text-align:left}
 th.halign-right,td.halign-right{text-align:right}
 th.halign-center,td.halign-center{text-align:center}
@@ -291,10 +291,11 @@ ol{margin-left:1.75em}
 ul li ol{margin-left:1.5em}
 dl dd{margin-left:1.125em}
 dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
-ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
 ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
 ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
 ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
 ul.checklist>li>p:first-child{margin-left:-1em}
 ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
 ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
@@ -337,8 +338,6 @@ sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
 #footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
 #footnotes .footnote:last-of-type{margin-bottom:0}
 #content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
-.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
-.gist .file-data>table td.line-data{width:99%}
 div.unbreakable{page-break-inside:avoid}
 .big{font-size:larger}
 .small{font-size:smaller}
@@ -744,6 +743,8 @@ pre.rouge {
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <p><span class="toc-root"><a href="stklos-ref-multi.html">STklos Reference Manual : (version 1.70)</a></span></p><ul class="sectlevel1">
+<li><a href="_preface.html">Preface</a>
+</li>
 <li><a href="_introduction.html">1. Introduction</a>
 </li>
 <li><a href="_expressions.html">2. Expressions</a>
@@ -819,6 +820,8 @@ pre.rouge {
 <li><a href="_srfis.html">14. SRFIs</a>
 </li>
 <li><a href="_bibliography.html">Bibliography</a>
+</li>
+<li><a href="FDL.html">Appendix B: GNU Free Documentation License</a>
 </li>
 </ul>
 </div>
@@ -3437,7 +3440,7 @@ list in the <code>append!</code> formal parameter list.</p>
        <span class="p">(</span><span class="nf">l2</span> <span class="p">(</span><span class="nb">list</span> <span class="mi">3</span><span class="p">))</span>
        <span class="p">(</span><span class="nf">l3</span> <span class="p">(</span><span class="nb">list</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">))</span>
        <span class="p">(</span><span class="nf">l4</span> <span class="p">(</span><span class="nf">append!</span> <span class="nv">l1</span> <span class="nv">l2</span> <span class="nv">l3</span><span class="p">)))</span>
-  <span class="p">(</span><span class="nb">list</span> <span class="nv">l1</span> <span class="nv">l2</span> <span class="nv">l3</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">)</span> <span class="p">(</span><span class="nf">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">)</span> <span class="p">(</span><span class="nf">4</span> <span class="mi">5</span><span class="p">))</span></code></pre>
+  <span class="p">(</span><span class="nb">list</span> <span class="nv">l1</span> <span class="nv">l2</span> <span class="nv">l3</span> <span class="nv">l4</span><span class="p">))</span>  <span class="nv">=&gt;</span> <span class="p">((</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">)</span> <span class="p">(</span><span class="nf">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">)</span> <span class="p">(</span><span class="nf">4</span> <span class="mi">5</span><span class="p">)</span> <span class="p">(</span><span class="nf">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span><span class="p">))</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -4424,7 +4427,7 @@ returns #t), or #f on any other character.</p>
 <span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\3</span><span class="p">)</span>        <span class="nv">=&gt;</span> <span class="mi">3</span>
 <span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0664</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">4</span>
 <span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0AE6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="mi">0</span>
-<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0EA6</span><span class="p">)</span>    <span class="no">#f</span></code></pre>
+<span class="p">(</span><span class="nf">digit-value</span> <span class="sc">#\x0EA6</span><span class="p">)</span>    <span class="nv">=&gt;</span> <span class="no">#f</span></code></pre>
 </div>
 </div>
 </div>
@@ -9091,9 +9094,9 @@ an end of file object is returned.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>All these procedure take a port opened for reading. <code>Port&#8594;string</code> reads
+<p>All these procedures take a port opened for reading. <code>Port&#8594;string</code> reads
 <code>port</code> until the it reads an end of file object and returns all the
-characters read as a string. <code>Port&#8594;sexp-list)</code> and <code>port&#8594;string-list</code>
+characters read as a string. <code>Port&#8594;sexp-list</code> and <code>port&#8594;string-list</code>
 do the same things except that they return a list of S-expressions and
 a list of strings respectively. For the following example we suppose that
 file <code>"foo"</code> is formed of two lines which contains respectively the number
@@ -13275,7 +13278,8 @@ The name <code>make-constant-box</code> is now obsolete and kept only for compat
 <div class="paragraph">
 <p>Changes <code>box</code> to hold <code>value`s. It is an error if `set-box!</code> is called
 with a number of values that differs from the number of values in the box
-being set. (In other words, <code>set-box!</code> does not allocate memory.)</p>
+being set. (In other words, <code>set-box!</code> does not allocate memory.)
+It is also an error to call <code>set-box!</code> on a box which is not mutable.</p>
 </div>
 <div class="paragraph">
 <p>The name <code>box-set!</code> is now obsolete and kept only for compatibility.</p>
@@ -14842,6 +14846,15 @@ be a string or an open input port.</p>
 <p>Encode in Base64 the characters from input port <code>in</code> to the output port
 <code>out</code>. If <code>out</code> is not specified, it defaults to the current output port.</p>
 </div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">with-input-from-string</span> <span class="s">"Hello"</span>
+  <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span>
+    <span class="p">(</span><span class="nf">with-output-to-string</span>
+      <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span>
+        <span class="p">(</span><span class="nf">base64-encode</span> <span class="p">(</span><span class="nb">current-input-port</span><span class="p">))))))</span> <span class="nv">=&gt;</span> <span class="s">"SGVsbG8="</span></code></pre>
+</div>
+</div>
 <div class="paragraph">
 <p></p>
 </div>
@@ -14859,6 +14872,15 @@ be a string or an open input port.</p>
 <div class="paragraph">
 <p>Decode the Base64 characters from input port <code>in</code> to the output port
 <code>out</code>. If <code>out</code> is not specified, it defaults to the current output port.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">with-input-from-string</span> <span class="s">"SGVsbG8="</span>
+  <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span>
+    <span class="p">(</span><span class="nf">with-output-to-string</span>
+      <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span>
+        <span class="p">(</span><span class="nf">base64-decode</span> <span class="p">(</span><span class="nb">current-input-port</span><span class="p">))))))</span>  <span class="nv">=&gt;</span> <span class="s">"Hello"</span></code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p></p>
@@ -14920,7 +14942,7 @@ encoded format.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-01-16 19:13:25 +0100
+Last updated 2022-01-26 12:47:51 +0100
 </div>
 </div>
 </body>

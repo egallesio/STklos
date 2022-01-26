@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 18-Jan-2022 13:42 (eg)
+# Last file update: 26-Jan-2022 12:47 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -93,7 +93,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = doc/adoc
+subdir = doc/refman
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -298,6 +298,24 @@ DOCDB = ../DOCDB
 SPP = ../../src/stklos -q -I ../../lib -f ../../utils/stklos-pp.stk --
 HTMLMAIN = stklos-ref.html
 HTMLMULTI = stklos-ref-multi.html
+MULTI_AUX = FDL.html                                        \
+            _bibliography.html                              \
+            _customizations.html                            \
+            _exceptions_and_conditions.html                 \
+            _expressions.html                               \
+            _foreign_function_interface.html                \
+            _introduction.html                              \
+            _pattern_matching.html                          \
+            _preface.html                                   \
+            _program_structure.html                         \
+            _regular_expressions.html                       \
+            _srfis.html                                     \
+            _standard_procedures.html                       \
+            _stklos_object_system.html                      \
+            _the_scmpkg_package_system.html                 \
+            _threads_mutexes_and_condition_variables.html   \
+            _using_the_slib_package.html
+
 PDF = stklos-ref.pdf
 IMG = images/hierarchy.png
 all: all-am
@@ -312,9 +330,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/adoc/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu doc/refman/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu doc/adoc/Makefile
+	  $(AUTOMAKE) --gnu doc/refman/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -503,8 +521,6 @@ mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-generic
 
-pdf: pdf-am
-
 pdf-am:
 
 ps: ps-am
@@ -530,17 +546,27 @@ uninstall-am:
 .PRECIOUS: Makefile
 
 
+.PHONY: single multi pdf
+
 all-recursive: all
 
-all:  html/$(HTMLMAIN) html/$(HTMLMULTI) $(PDF)
+all: single
 
 # ----------------------------------------------------------------------
-html/$(HTMLMAIN): $(SOURCES) $(DOCDB) 
-	mkdir -p html/images
+# Various entries. Only the single HTML page is done automatically.
+# Multiple HTML files and PDF file generations must be called by hand
+# since they demand special asciidoctor modules
+
+single : ../html/$(HTMLMAIN)
+multi:   ../html/$(HTMLMULTI)
+pdf:     ../pdf/$(PDF)
+
+# ----------------------------------------------------------------------
+../html/$(HTMLMAIN): $(SOURCES) $(DOCDB)
+	mkdir -p ../html/images
 	$(SPP) -D "doc-fmt: 'html" stklos.adoc | \
-          asciidoctor -o html/$(HTMLMAIN) -
-	(cd html; ln -s $(HTMLMAIN) index.html 2>/dev/null || true)
-	cp -a $(IMG) html/images
+          asciidoctor -o $@ -
+	cp -a $(IMG) ../html/images
 
 # ----------------------------------------------------------------------
 # For the Multiple file version of the manual, we need to install
@@ -548,32 +574,30 @@ html/$(HTMLMAIN): $(SOURCES) $(DOCDB)
 #
 # The STklos prepreocessor creates a file (instead of passing doc as a pipe)
 # to resolve back links to the main page
-html/$(HTMLMULTI): $(SOURCES) $(DOCDB)
-	mkdir -p html/images
+../html/$(HTMLMULTI): $(SOURCES) $(DOCDB)
+	mkdir -p ../html/images
 	$(SPP) -D "doc-fmt: 'html" stklos.adoc > stklos-ref-multi.adoc
 	asciidoctor -r asciidoctor-multipage -b multipage_html5 \
-		  -o html/$(HTMLMULTI) stklos-ref-multi.adoc
+		  -o $@ stklos-ref-multi.adoc
 	rm -f stklos-ref-multi.adoc
 
 # ----------------------------------------------------------------------
-$(PDF):  $(SOURCES) $(DOCDB)
+../pdf/$(PDF):  $(SOURCES) $(DOCDB)
 	$(SPP) -D "doc-fmt: 'pdf" stklos.adoc | \
-          asciidoctor-pdf -o $(PDF) -
+          asciidoctor-pdf -o $@ -
 
 # ----------------------------------------------------------------------
 $(DOCDB):
 	(cd ..; $(MAKE) docdb)
 
 clean:
-	rm -rf  html/* $(PDF) *~
+	rm -f  stklos-ref-multi.adoc *~
 
 distclean: clean
-	rm -rf html
-
-copy: all
-	rm -rf ../html/*.html ../html/images/*;
-	cp -a html/* ../html
-	cp -a $(PDF) ../pdf
+	rm -f  ../html/$(HTMLMAIN) ../html/$(HTMLMULTI) 
+	for i in $(MULTI_AUX); do rm -f ../html/$$i ; done
+	rm -f ../html/$(IMG)
+	rm -f ../pdf/$(PDF)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
