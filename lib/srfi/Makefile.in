@@ -35,7 +35,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 17-Jan-2022 19:06 (eg)
+# Last file update: 26-Jan-2022 11:23 (eg)
 
 #======================================================================
 
@@ -168,8 +168,8 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(srfidir)"
-DATA = $(srfi_DATA)
+am__installdirs = "$(DESTDIR)$(srfidir)" "$(DESTDIR)$(srfilibdir)"
+DATA = $(srfi_DATA) $(srfilib_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -480,9 +480,10 @@ SOURCES = $(SRC_C) $(SRC_STK)
 
 #======================================================================
 srfidir = $(prefix)/share/@PACKAGE@/@VERSION@/srfi
+srfilibdir = $(prefix)/lib/@PACKAGE@/@VERSION@/srfi
+srfi_DATA = $(SRC_OSTK)
+srfilib_DATA = $(SRC_SHOBJ)
 srfi_sources = $(SRC_STK)
-srfi_DATA = $(srfi_OBJS)
-
 #======================================================================
 SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 all: all-am
@@ -539,6 +540,27 @@ uninstall-srfiDATA:
 	@list='$(srfi_DATA)'; test -n "$(srfidir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(srfidir)'; $(am__uninstall_files_from_dir)
+install-srfilibDATA: $(srfilib_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(srfilib_DATA)'; test -n "$(srfilibdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(srfilibdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(srfilibdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(srfilibdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(srfilibdir)" || exit $$?; \
+	done
+
+uninstall-srfilibDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(srfilib_DATA)'; test -n "$(srfilibdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(srfilibdir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -628,7 +650,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(srfidir)"; do \
+	for dir in "$(DESTDIR)$(srfidir)" "$(DESTDIR)$(srfilibdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -677,7 +699,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-srfiDATA
+install-data-am: install-srfiDATA install-srfilibDATA
 
 install-dvi: install-dvi-am
 
@@ -721,7 +743,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-srfiDATA
+uninstall-am: uninstall-srfiDATA uninstall-srfilibDATA
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 .MAKE: install-am install-strip uninstall-am
@@ -733,11 +755,11 @@ uninstall-am: uninstall-srfiDATA
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am install-man \
 	install-pdf install-pdf-am install-ps install-ps-am \
-	install-srfiDATA install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags \
-	tags-am uninstall uninstall-am uninstall-hook \
-	uninstall-srfiDATA
+	install-srfiDATA install-srfilibDATA install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-hook uninstall-srfiDATA uninstall-srfilibDATA
 
 .PRECIOUS: Makefile
 

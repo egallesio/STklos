@@ -1,6 +1,6 @@
 # Makefile for the R7RS SRFI standard libraries
 #
-# Copyright © 2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  9-Dec-2021 14:24 (eg)
+# Last file update: 26-Jan-2022 11:23 (eg)
 
 #======================================================================
 
@@ -169,9 +169,10 @@ SOURCES= $(SRC_C) $(SRC_STK)
 
 #======================================================================
 srfidir       = $(prefix)/share/@PACKAGE@/@VERSION@/srfi
+srfilibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/srfi
+srfi_DATA     = $(SRC_OSTK)
+srfilib_DATA  = $(SRC_SHOBJ)
 srfi_sources  = $(SRC_STK)
-srfi_DATA     = $(srfi_OBJS)
-
 #======================================================================
 SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 
