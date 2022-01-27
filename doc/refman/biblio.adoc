@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 26-Jan-2022 13:16 (eg)
+// Last file update: 27-Jan-2022 09:57 (eg)
 
 
 [bibliography]
@@ -15,6 +15,8 @@
   *The Art of Meta Object Protocol* -- MIT Press, 1991.
 
 * [[[Bigloo]]] Manuel Serrano -- http://www-sop.inria.fr/mimosa/fp/Bigloo/[*Bigloo*] Home Page.
+
+* [[[BoehmGC]]] Hans Boehm -- https://www.hboehm.info/gc/[A garbage collector for C and C++ ] Home Page.
 
 * [[[CLtL2]]] Guy L. Steele Jr. -- *Common Lisp: the Language, 2nd Edition* --
    Digital Press, 12 Crosby Drive, Bedford, MA 01730, USA, 1990.

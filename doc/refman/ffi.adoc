@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 26-Jan-2022 13:16 (eg)
+// Last file update: 27-Jan-2022 09:33 (eg)
 
 {{chapter "Foreign Function Interface"}}
 (((FFI)))
@@ -20,6 +20,10 @@ since FFI allows very low level access, it is easy to crash the
 
 *Note that the support for FFI is still minimal and that it will
 evolve in future versions.*
+
+
+### External functions
+
 
 The definition of an external function is done with the
 `define-external` special form.  This form takes as arguments
@@ -115,5 +119,22 @@ We can now use the function we have just defined:
 (c-fabs (- (expt 10 600))) => +inf.0
 ```
 
-WARNING: *We need to describe `malloc` and `malloc_atomic` and their
-interaction with the GC*
+### C pointers
+
+It is very common that external functions return pointers, serving as
+handles on internal structures. This pointers, called hereafter
+*cpointers*, are then boxed in a Scheme objects. This section presents
+the functions that can be used to deal with C pointers.
+
+
+WARNING: The usage of C pointers in a Scheme program cannot be
+controlled and can lead to memory corruptions, errors, crashes....
+
+{{insertdoc 'cpointer?}}
+{{insertdoc 'cpointer-data-set!}}
+{{insertdoc 'cpointer-type-set!}}
+{{insertdoc 'cpointer->string}}
+{{insertdoc 'allocate-bytes}}
+{{insertdoc 'free-bytes}}
+
+
