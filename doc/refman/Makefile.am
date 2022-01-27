@@ -2,8 +2,10 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 27-Jan-2022 09:51 (eg)
+# Last file update: 27-Jan-2022 10:38 (eg)
 
+
+ADOC=@ASCIIDOCTOR@
 
 SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc \
            intro.adoc licence.adoc match.adoc object.adoc       \
@@ -54,8 +56,7 @@ pdf:     ../pdf/$(PDF)
 # ----------------------------------------------------------------------
 ../html/$(HTMLMAIN): $(SOURCES) $(DOCDB)
 	mkdir -p ../html/images
-	$(SPP) -D "doc-fmt: 'html" stklos.adoc | \
-          asciidoctor -v -o $@ -
+	$(SPP) -D "doc-fmt: 'html" stklos.adoc | $(ADOC) -v -o $@ -
 	cp -a $(IMG) ../html/images
 
 # ----------------------------------------------------------------------
@@ -67,14 +68,14 @@ pdf:     ../pdf/$(PDF)
 ../html/$(HTMLMULTI): $(SOURCES) $(DOCDB)
 	mkdir -p ../html/images
 	$(SPP) -D "doc-fmt: 'html" stklos.adoc > stklos-ref-multi.adoc
-	asciidoctor -v -r asciidoctor-multipage -b multipage_html5 \
+	$(ADOC) -v -r asciidoctor-multipage -b multipage_html5 \
 		  -o $@ stklos-ref-multi.adoc
 	rm -f stklos-ref-multi.adoc
 
 # ----------------------------------------------------------------------
 ../pdf/$(PDF):  $(SOURCES) $(DOCDB)
 	$(SPP) -D "doc-fmt: 'pdf" stklos.adoc | \
-          asciidoctor-pdf -v -o $@ -
+           $(ADOC) -v -r asciidoctor-pdf -b pdf -o $@ -
 
 # ----------------------------------------------------------------------
 $(DOCDB):

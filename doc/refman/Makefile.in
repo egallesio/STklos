@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 27-Jan-2022 09:51 (eg)
+# Last file update: 27-Jan-2022 10:38 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -144,6 +144,7 @@ ACLOCAL = @ACLOCAL@
 ALLOCA = @ALLOCA@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
+ASCIIDOCTOR = @ASCIIDOCTOR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -289,6 +290,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+ADOC = @ASCIIDOCTOR@
 SOURCES = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc \
            intro.adoc licence.adoc match.adoc object.adoc       \
            progstruct.adoc regexp.adoc scmpkg.adoc slib.adoc    \
@@ -564,8 +566,7 @@ pdf:     ../pdf/$(PDF)
 # ----------------------------------------------------------------------
 ../html/$(HTMLMAIN): $(SOURCES) $(DOCDB)
 	mkdir -p ../html/images
-	$(SPP) -D "doc-fmt: 'html" stklos.adoc | \
-          asciidoctor -v -o $@ -
+	$(SPP) -D "doc-fmt: 'html" stklos.adoc | $(ADOC) -v -o $@ -
 	cp -a $(IMG) ../html/images
 
 # ----------------------------------------------------------------------
@@ -577,14 +578,14 @@ pdf:     ../pdf/$(PDF)
 ../html/$(HTMLMULTI): $(SOURCES) $(DOCDB)
 	mkdir -p ../html/images
 	$(SPP) -D "doc-fmt: 'html" stklos.adoc > stklos-ref-multi.adoc
-	asciidoctor -v -r asciidoctor-multipage -b multipage_html5 \
+	$(ADOC) -v -r asciidoctor-multipage -b multipage_html5 \
 		  -o $@ stklos-ref-multi.adoc
 	rm -f stklos-ref-multi.adoc
 
 # ----------------------------------------------------------------------
 ../pdf/$(PDF):  $(SOURCES) $(DOCDB)
 	$(SPP) -D "doc-fmt: 'pdf" stklos.adoc | \
-          asciidoctor-pdf -v -o $@ -
+           $(ADOC) -v -r asciidoctor-pdf -b pdf -o $@ -
 
 # ----------------------------------------------------------------------
 $(DOCDB):

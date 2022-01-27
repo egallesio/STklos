@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  7-Jan-2022 08:49
-;;;; Last file update: 27-Jan-2022 09:53 (eg)
+;;;; Last file update: 27-Jan-2022 11:03 (eg)
 ;;;;
 
 (import (stklos preproc))
@@ -215,7 +215,7 @@
     (for-each (lambda (x)
                 (unless (or (key-get (cdr x) :see #f) (key-get (cdr x) :seen))
                   (when (zero? cpt)
-                    (eprintf "*** Undocumented procedures:\n"))
+                    (eprintf "*** Undocumented procedures/syntaxes:\n"))
                   (eprintf "\t~S\n" (car x))
                   (set! cpt (+ cpt 1))))
               *doc*)

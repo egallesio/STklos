@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 26-Jan-2022 11:34 (eg)
+### Last file update: 27-Jan-2022 11:05 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -45,7 +45,7 @@ AC_PROG_RANLIB
 # AC_PROG_LEX
 AC_PROG_MKDIR_P
 AC_CHECK_PROG(PKGCONFIG, pkg-config, "pkg-config", "false")
-
+AC_CHECK_PROG(ASCIIDOCTOR, asciidoctor, "asciidoctor", "../adoc-fake.sh")
 ### Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h limits.h malloc.h memory.h netdb.h netinet/in.h nlist.h stdlib.h string.h strings.h sys/param.h sys/socket.h sys/time.h syslog.h unistd.h])
 
@@ -576,6 +576,9 @@ AC_SUBST(CONF_SUMMARY)
 AC_SUBST(DEFAULT_CS)
 AC_SUBST(CONTROL_FX_PARAMETERS)
 AC_SUBST(DLLIBS)
+
+# DOC
+AC_SUBST(ASCIIDOCTOR)
 
 # Extensions
 AC_SUBST(HAVE_GTK)
