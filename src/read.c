@@ -1172,7 +1172,7 @@ static SCM read_srfi10(SCM port, SCM l)
  * This parameter object permits to change the default behaviour of
  * the |read| primitive when reading a symbol. If this parameter has a
  * a true value a symbol is not converted to a default case when interned.
- * Since {{rseven}} requires that symbol are case insignificant, the default
+ * Since R7RS requires that symbol are case insignificant, the default
  * value  of this parameter is |#t|.
  * @lisp
  * (read-case-sensitive)        => |#t|

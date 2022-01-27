@@ -644,7 +644,7 @@ DEFINE_PRIMITIVE("write", write, subr12, (SCM expr, SCM port))
  *
  * NOTE: This function is also called |write*|.
  * The name |write*| was the name used by {{stklos}} for
- * |write-shared| before it was introduced in {{rseven}}.
+ * |write-shared| before it was introduced in R7RS.
  *
 doc>
 <doc EXT write-with-shared-structure
@@ -686,7 +686,7 @@ DEFINE_PRIMITIVE("write*", write_star, subr12, (SCM expr, SCM port))
  * IMPORTANT: |Write| is intended for producing machine-readable
  * output and |display| is for producing human-readable output.
  * @l
- * NOTE: As required by {{rseven}} does not loop forever when
+ * NOTE: As required by R7RS does not loop forever when
  * |obj| contains self-references.
 doc>
  */
@@ -1361,7 +1361,7 @@ DEFINE_PRIMITIVE("close-port", close_port, subr1, (SCM port))
  * @l
  * NOTE: |port-closed?| was the usual STklos function to
  * test if a port is closed. |port-open?| has been added to be the companion
- * of the {{rseven}} functions |input-port-open?| and |output-port-open?|
+ * of the R7RS functions |input-port-open?| and |output-port-open?|
 doc>
 */
 DEFINE_PRIMITIVE("port-closed?", port_closed, subr1, (SCM port))

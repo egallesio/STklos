@@ -1287,7 +1287,7 @@ DEFINE_PRIMITIVE("%pre-exit", pre_exit, subr1, (SCM retcode))
  * they are called (in an order which is the reverse of their call order).
  * @l
  * NOTE: The {{stklos}} |exit| primitive accepts also an
- * integer value as parameter ({{rseven}} accepts only a boolean).
+ * integer value as parameter (R7RS accepts only a boolean).
 doc>
 */
 DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
@@ -1321,7 +1321,7 @@ DEFINE_PRIMITIVE("exit", exit, subr01, (SCM retcode))
  * value to the operating system in the same manner as |exit|.
  * @l
  * NOTE: The {{stklos}} |emergency-exit| primitive accepts also an
- * integer value as parameter ({{rseven}} accepts only a boolean).
+ * integer value as parameter (R7RS accepts only a boolean).
 doc>
 */
 DEFINE_PRIMITIVE("emergency-exit", emergency_exit, subr01, (SCM retcode))
@@ -1444,7 +1444,7 @@ DEFINE_PRIMITIVE("clock", clock, subr0, (void))
  * measured in seconds.
  * 
  * NOTE: This {{stklos}} function should not be confused with
- * the {{rseven}}  primitive |current-second| which returns an inexact number
+ * the R7RS  primitive |current-second| which returns an inexact number
  * and whose result is expressed using  the International Atomic Time
  * instead of UTC.
  *
