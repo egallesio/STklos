@@ -2,7 +2,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 26-Jan-2022 12:47 (eg)
+# Last file update: 27-Jan-2022 09:51 (eg)
 
 
 SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc \
@@ -55,7 +55,7 @@ pdf:     ../pdf/$(PDF)
 ../html/$(HTMLMAIN): $(SOURCES) $(DOCDB)
 	mkdir -p ../html/images
 	$(SPP) -D "doc-fmt: 'html" stklos.adoc | \
-          asciidoctor -o $@ -
+          asciidoctor -v -o $@ -
 	cp -a $(IMG) ../html/images
 
 # ----------------------------------------------------------------------
@@ -67,14 +67,14 @@ pdf:     ../pdf/$(PDF)
 ../html/$(HTMLMULTI): $(SOURCES) $(DOCDB)
 	mkdir -p ../html/images
 	$(SPP) -D "doc-fmt: 'html" stklos.adoc > stklos-ref-multi.adoc
-	asciidoctor -r asciidoctor-multipage -b multipage_html5 \
+	asciidoctor -v -r asciidoctor-multipage -b multipage_html5 \
 		  -o $@ stklos-ref-multi.adoc
 	rm -f stklos-ref-multi.adoc
 
 # ----------------------------------------------------------------------
 ../pdf/$(PDF):  $(SOURCES) $(DOCDB)
 	$(SPP) -D "doc-fmt: 'pdf" stklos.adoc | \
-          asciidoctor-pdf -o $@ -
+          asciidoctor-pdf -v -o $@ -
 
 # ----------------------------------------------------------------------
 $(DOCDB):

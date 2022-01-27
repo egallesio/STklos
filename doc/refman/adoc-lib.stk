@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  7-Jan-2022 08:49
-;;;; Last file update: 17-Jan-2022 18:09 (eg)
+;;;; Last file update: 27-Jan-2022 09:53 (eg)
 ;;;;
 
 (import (stklos preproc))
@@ -215,12 +215,12 @@
     (for-each (lambda (x)
                 (unless (or (key-get (cdr x) :see #f) (key-get (cdr x) :seen))
                   (when (zero? cpt)
-                    (eprintf "\n\n**** Undocumented procedures:\n"))
+                    (eprintf "*** Undocumented procedures:\n"))
                   (eprintf "\t~S\n" (car x))
                   (set! cpt (+ cpt 1))))
               *doc*)
     (when (> cpt 0)
-      (eprintf "**** Uninserted symbols in documentation: ~a\n\n" cpt))))
+      (eprintf "*** Uninserted symbols in documentation: ~a\n" cpt))))
 
 
 ;;;
