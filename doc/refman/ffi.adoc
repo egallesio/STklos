@@ -4,19 +4,22 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 27-Jan-2022 09:33 (eg)
+// Last file update: 27-Jan-2022 13:09 (eg)
 
 {{chapter "Foreign Function Interface"}}
 (((FFI)))
+
 The {{stklos}} Foreign Function Interface (FFI for short) has been
 defined to allow an easy access to functions written in C without
 needing to build C-wrappers and, consequently, without any need to
-write C code.  Note that the FFI is very machine dependent and that it
-works only on a limited set of architectures/systems footnote:[FFI
-system should works on the following architectures/systems:
-gcc_ppc_osx, gcc_sparc_unix, gcc_x64_unix, gcc_x86_unix.]. Moreover,
-since FFI allows very low level access, it is easy to crash the
-{{stklos}} VM when using an external C function.
+write C code.  FFI is very machine dependent and {{stklos}} uses the
+https://sourceware.org/libffi/[*libffi library*], a portable Foreign Function
+Interface library, to give access to C written code.
+This library supports a large set of architectures/OS that are
+described on its Home Page.
+
+Moreover, since FFI allows very low level access, it is easy to crash
+the {{stklos}} VM when using an external C function.
 
 *Note that the support for FFI is still minimal and that it will
 evolve in future versions.*
@@ -119,6 +122,44 @@ We can now use the function we have just defined:
 (c-fabs (- (expt 10 600))) => +inf.0
 ```
 
+
+In the following example we use the `:string` type. C functions accepting
+pointers to null-terminated strings are directly translated to this type.
+
+The POSIX function `strpbrk` accepts two string arguments (in C, two
+pointers to `char`). The C call `strpbrk(str1, str2)` returns a
+pointer to the first occurrence in the string `str1` of one of the
+bytes in the string `str2`.
+
+```scheme
+(define-external c-strpbrk ((str :string) (accept :string))
+    :entry-name "strpbrk"
+    :return-type :string)
+```
+
+```scheme
+(c-strpbrk "a string" "rz") => "ring"
+```
+
+Note that it would be possible to use a `:pointer` type instead for the return
+value, although in this case it would be more cumbersome (but does help understand
+the FFI better!):
+
+```scheme
+(define-external c-strpbrk ((str :string) (accept :string))
+    :entry-name "strpbrk"
+    :return-type :pointer)
+```
+
+```scheme
+(c-strpbrk "a string" "rz")
+                            => #[C-pointer 7f17baf94d06 @ 7f17bafb4360]
+(cpointer->string (c-strpbrk "a string" "rz"))
+                            => "ring"
+```
+
+Functions on C pointers are described in the next section.
+
 ### C pointers
 
 It is very common that external functions return pointers, serving as
@@ -127,8 +168,9 @@ handles on internal structures. This pointers, called hereafter
 the functions that can be used to deal with C pointers.
 
 
-WARNING: The usage of C pointers in a Scheme program cannot be
-controlled and can lead to memory corruptions, errors, crashes....
+WARNING: Note that by using *cpointers* objects, one gives up the safety of
+the Scheme environment, and care must be taken to avoid memory corruptions,
+errors, crashes...
 
 {{insertdoc 'cpointer?}}
 {{insertdoc 'cpointer-data-set!}}
