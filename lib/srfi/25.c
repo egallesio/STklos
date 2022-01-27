@@ -1013,7 +1013,7 @@ static void shared_array_inc_count(SCM array)
     MUT_LOCK(a->share_cnt_lock);
     (*(a->orig_share_count))++;
     MUT_UNLOCK(a->share_cnt_lock);
-};
+}
 
 /* Decreases the sare counter of an array. This is registered as a finalizer
    only for arrays that were build with share-array. */
@@ -1024,7 +1024,7 @@ static void shared_array_dec_count(SCM array,  void _UNUSED(*client_data))
     // fprintf(stderr,"DECREMENTED\n");
     (*(a->orig_share_count))--;
     MUT_UNLOCK(a->share_cnt_lock);
-};
+}
 
 
 EXTERN_PRIMITIVE("array-shape",srfi_25_array_shape,subr1,(SCM array));  /* will be used in share-array */
