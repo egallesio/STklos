@@ -46,7 +46,7 @@ extern "C"
 #include <setjmp.h>
 #include <memory.h>
 #include <locale.h>
-#include <stdint.h>
+
 #ifndef THEADS_NONE
 #  include <pthread.h>
 #  define GC_THREADS 1
@@ -255,7 +255,7 @@ typedef struct {
    *    DEFINE_PRIMITIVE("pair?", pairp, subr1, (SCM obj)) {
    *       <body>
    *    }
-   * It will be expansed in
+   * It will be expanded in
    *    SCM STk_pairp(SCM obj);
    *    static struct obj_primitive obj_pairp = { "pair?", tc_subr1, STk_pairp};
    *    SCM STk_pairp(SCM obj){
@@ -512,6 +512,8 @@ struct frame_obj {
 #define FRAME_LOCAL(p, i)       (FRAME_LOCALS(p)[i])
 #define FRAMEP(p)               (BOXED_TYPE_EQ((p), tc_frame))
 
+#define MODULE_LOCKED            (1 << 0)
+
 /* modules are defined in env.c but are private */
 #define MODULEP(p)              (BOXED_TYPE_EQ((p), tc_module))
 
@@ -541,7 +543,7 @@ void STk_export_all_symbols(SCM module);
   ------------------------------------------------------------------------------
 */
   /* The `extended_type_descr' structure is used for the types which need
-   *  more information (such as modules, ports, ....). All the extended
+   * more information (such as modules, ports, ....). All the extended
    * descriptors are stored in the STk_xtypes array.
    */
 struct extended_type_descr {
@@ -1332,9 +1334,9 @@ int STk_char2utf8(int ch, char *str); /* result = length of the UTF-8 repr. */
 int STk_utf8_strlen(char *s, int max);
 int STk_utf8_read_char(SCM port);
 int STk_utf8_sequence_length(char *str); /* # of bytes of sequence starting at str */
-int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch*/
+int STk_utf8_char_bytes_needed(unsigned int ch);/* # of bytes needed to represent ch */
 int STk_utf8_verify_sequence(char *s, int len); /* s constitutes a valid UTF8? */
-char *STk_utf8_index(char *s, int i, int max);/* return the address of ith char of s*/
+char *STk_utf8_index(char *s, int i, int max);/* return the address of ith char of s */
 int STk_utf8_char_from_byte(char *s, int i, int max); /*  byte index => char index */
 
 int STk_init_utf8(void);

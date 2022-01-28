@@ -2,7 +2,7 @@
  *
  * e r r o r . c                        -- The error procedure
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@unice.fr]
  *    Creation date: 14-Nov-1993 14:58
- * Last file update: 22-Oct-2021 10:14 (eg)
+ * Last file update: 11-Jan-2022 16:13 (eg)
  */
 
 #include "stklos.h"
@@ -31,7 +31,7 @@
 /*===========================================================================*\
  *
  * A simplified (and very ad hoc) version of printf for error messages.
-  *       %c for character
+ *       %c for character
  *       %s for string
  *       %S for string (surrounded by a pair of quotes)
  *       %d for decimal print

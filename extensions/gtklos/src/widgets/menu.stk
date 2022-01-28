@@ -1,7 +1,7 @@
 ;;;;
 ;;;; menu.stk           -- GTK+ Menu Management
 ;;;;
-;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 27-Oct-2000 22:09 (eg)
-;;;; Last file update:  1-Jul-2021 10:42 (eg)
+;;;; Last file update: 25-Jan-2022 10:12 (eg)
 ;;;;
 
 ;;;
@@ -269,7 +269,7 @@
 ;;;
 (export <menu-bar>
         <menu> active reserve-toggle-size tearoff-state tearoff-title
-        <menu-item> text-justified right-justified accel-path use-underline
+        <menu-item> right-justified accel-path use-underline
         <menu-check-item> value draw-as-radio inconsistent
         <menu-separator-item>
         add-items-to-menubar)

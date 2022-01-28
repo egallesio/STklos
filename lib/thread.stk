@@ -1,7 +1,7 @@
 ;;;;
 ;;;; thread.stk             -- Threads support
 ;;;;
-;;;; Copyright © 2006-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2006-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 26-Jan-2006 22:56 (eg)
-;;;; Last file update: 29-Apr-2021 19:47 (eg)
+;;;; Last file update: 14-Jan-2022 12:29 (eg)
 ;;;;
 (define (%thread-timeout->seconds timeout)
   (cond
@@ -45,7 +45,7 @@
  * (then) current thread to store the result in its end-result field, abandon
  * all mutexes it owns, and finally terminate. The dynamic-wind
  * stack of the initial continuation is empty. The optional name is an
- * arbitrary Scheme object which identifies the thread (useful for debugging)\;
+ * arbitrary Scheme object which identifies the thread (useful for debugging);
  * it defaults to an unspecified value. The specific field is set to an
  * unspecified value.  The thread inherits the dynamic environment from the
  * current thread. Moreover, in this dynamic environment the exception handler
@@ -53,10 +53,10 @@
  * which causes the (then) current thread to store in its end-exception
  * field an "uncaught exception" object whose "reason" is the argument
  * of the handler, abandon all mutexes it owns, and finally terminate.
- * @l
- * ,(bold "Note:") The optional parameter |stack-size| permits to specify
+ *
+ * NOTE: The optional parameter |stack-size| permits to specify
  * the size (in words) reserved for the thread. This option does not exist
- * in ,(quick-link-srfi 18).
+ * in {{quick-link-srfi 18}}.
 doc>
 |#
 (define (make-thread thunk :optional (name (symbol->string (gensym "thread")))
@@ -100,8 +100,8 @@ doc>
  * (thread-handler-error-show value)
  *
  * When an untrapped error occurs in a thread, it produces an
- * ,(ref :mark "make-thread" "uncaught exception") which can finally be
- * trapped when the thread is ,(ref :mark "thread-join!" "joined").
+ * <<make-thread, _uncaught exception_>> which can finally be
+ * trapped when the thread is <<thread-join, _joined_>>.
  * Setting the |thread-handler-error-show| parameter permits to see
  * error message as soon as possible, even without joining the thread.
  * This makes debugging easier. By default, this parameter is set to
@@ -192,30 +192,38 @@ doc>
 <doc EXT join-timeout-exception?
  * (join-timeout-exception? obj)
  *
- * Returns #t if |obj| is a "join timeout exception" object, otherwise returns #f.
- * A join timeout exception is raised when thread-join! is called, the timeout
+ * Returns `#t` if |obj| is a _join timeout exception_ object,
+ * otherwise returns `#f`.
+ *
+ * A _join timeout exception_ is raised when thread-join! is called, the timeout
  * is reached and no timeout-val is supplied.
 doc>
 <doc EXT abandoned-mutex-exception?
  * (abandoned-mutex-exception? obj)
  *
- * Returns #t if |obj| is an "abandoned mutex exception" object, otherwise returns
- * #f. An abandoned mutex exception is raised when the current thread locks
- * a mutex that was owned by a thread which terminated (see |mutex-lock!|).
+ * Returns `#t` if |obj| is an _abandoned mutex exception_ object,
+ * otherwise returns `#f`.
+ *
+ * An _abandoned mutex exception_ is raised when the current thread locks
+ * a mutex that was owned by a thread which terminated ,(see |mutex-lock!|).
 doc>
 <doc EXT terminated-thread-exception?
  * (terminated-thread-exception? obj)
  *
- * Returns #t if |obj| is a "terminated thread exception" object, otherwise
- * returns #f. A terminated thread exception is raised when thread-join! is
+ * Returns `#t` if |obj| is a _terminated thread exception_ object, otherwise
+ * returns `#f`.
+ *
+ * A _terminated thread exception_ is raised when thread-join! is
  * called and the target thread has terminated as a result of a call to
  * |thread-terminate!|.
 doc>
 <doc EXT uncaught-exception?
  * (uncaught-exception? obj)
  *
- * Returns #t if |obj| is an "uncaught exception" object, otherwise returns
- * #f. An uncaught exception is raised when |thread-join!| is called and the
+ * Returns `#t` if |obj| is an _uncaught exception_ object, otherwise
+ * returns `#f`.
+ *
+ * An _uncaught exception_ is raised when |thread-join!| is called and the
  * target thread has terminated because it raised an exception that called
  * the initial exception handler of that thread.
 doc>
@@ -223,6 +231,6 @@ doc>
  * (uncaught-exception-reason exc)
  *
  * Returns the object which was passed to the initial exception handler
- * of that thread (exc must be an "uncaught exception" object).
+ * of that thread (`exc` must be an _uncaught exception_ object).
 doc>
 |#

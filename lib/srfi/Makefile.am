@@ -1,6 +1,6 @@
 # Makefile for the R7RS SRFI standard libraries
 #
-# Copyright © 2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,9 +19,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  9-Dec-2021 14:24 (eg)
+# Last file update: 28-Jan-2022 18:23 (eg)
 
-#======================================================================
+#-======================================================================
 
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
@@ -74,6 +74,7 @@ SRC_STK   = 1.stk   \
             135.stk \
             141.stk \
             151.stk \
+            154.stk \
             158.stk \
             161.stk \
             173.stk \
@@ -83,12 +84,13 @@ SRC_STK   = 1.stk   \
             189.stk \
             195.stk \
             196.stk \
-	          207.stk \
+            207.stk \
             208.stk \
             214.stk \
             215.stk \
             216.stk \
             223.stk \
+            229.stk \
             230.stk
 
 SRC_OSTK =  1.ostk   \
@@ -134,6 +136,7 @@ SRC_OSTK =  1.ostk   \
             135.ostk \
             141.ostk \
             151.ostk \
+            154.ostk \
             158.ostk \
             161.ostk \
             173.ostk \
@@ -149,6 +152,7 @@ SRC_OSTK =  1.ostk   \
             215.ostk \
             216.ostk \
             223.ostk \
+            229.ostk \
             230.ostk
 
 #
@@ -161,15 +165,16 @@ SRC_SHOBJ = 25.$(SO) 27.$(SO) 132.$(SO) 133.$(SO)  144.$(SO)  170.$(SO)  175.$(S
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
 
-DOCDB  = ../../DOCDB
+DOCDB  = ../DOCDB
 BASEDIR= ../..
-SOURCES= $(SRC_C) $(SRC_STK)
+SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
 srfidir       = $(prefix)/share/@PACKAGE@/@VERSION@/srfi
+srfilibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/srfi
+srfi_DATA     = $(SRC_OSTK)
+srfilib_DATA  = $(SRC_SHOBJ)
 srfi_sources  = $(SRC_STK)
-srfi_DATA     = $(srfi_OBJS)
-
 #======================================================================
 SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 

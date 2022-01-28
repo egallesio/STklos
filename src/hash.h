@@ -34,7 +34,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update:  5-Nov-2021 17:07 (eg)
+ * Last file update: 15-Dec-2021 19:11 (eg)
  */
 
 
@@ -93,7 +93,7 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s,
  * Function for accessing module hash table. Don't use them but the
  * higher level interface instead.
  */
-SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v, int *index);
+SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v);
 void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int define);
 void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly);
 

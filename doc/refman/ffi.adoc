@@ -1,0 +1,182 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//
+//           Author: Erick Gallesio [eg@unice.fr]
+//    Creation date: 26-Nov-2000 18:19 (eg)
+// Last file update: 27-Jan-2022 13:09 (eg)
+
+{{chapter "Foreign Function Interface"}}
+(((FFI)))
+
+The {{stklos}} Foreign Function Interface (FFI for short) has been
+defined to allow an easy access to functions written in C without
+needing to build C-wrappers and, consequently, without any need to
+write C code.  FFI is very machine dependent and {{stklos}} uses the
+https://sourceware.org/libffi/[*libffi library*], a portable Foreign Function
+Interface library, to give access to C written code.
+This library supports a large set of architectures/OS that are
+described on its Home Page.
+
+Moreover, since FFI allows very low level access, it is easy to crash
+the {{stklos}} VM when using an external C function.
+
+*Note that the support for FFI is still minimal and that it will
+evolve in future versions.*
+
+
+### External functions
+
+
+The definition of an external function is done with the
+`define-external` special form.  This form takes as arguments
+a typed list of parameters and accepts several options to define the
+name of the function in the C world, the library which defines this
+function, ... The type of the function result and the type of its
+arguments are defined in <<ffi_types>>. This table lists
+the various keywords reserved for denoting types and their equivalence
+between the C and the Scheme worlds.
+
+[#ffi_types]
+.FFI types
+|====
+| Name | Corresponding C type | Corresponding Scheme type
+
+|*:void*    | void              | _none_
+|*:char*    | char              | Scheme character
+|*:short*   | short             | Scheme integer
+|*:ushort*  | unsigned short    | Scheme integer
+|*:int*     | int               | Scheme integer
+|*:uint*    | unsigned int      | Scheme integer
+|*:long*    | long int          | Scheme integer
+|*:ulong*   | unsigned long int | Scheme integer
+|*:float*   | float             | Scheme real number
+|*:double*  | double            | Scheme real number
+|*:boolean* | int               | boolean
+|*:pointer* | void *            | Scheme pointer object or Scheme string
+|*:string*  | char *            | Scheme string
+|*:obj*     | void *            | Any Scheme object passed as is
+|====
+
+
+{{insertdoc 'define-external}}
+
+Hereafter, are some commented definitions of external functions:
+
+
+```scheme
+ (define-external isatty ((fd :int))
+     :return-type :boolean)
+
+  (define-external system ((cmd :string))
+    :return-type :int)
+
+  (define-external ttyname (:int)
+    :return-type :string)
+```
+
+All these functions are defined in the C standard library, hence it is not
+necessary to specify the `:library-name` option.
+
+
+
+* *_istty_* is declared here as a function which takes an
+  integer and returns a boolean (in fact, the value returned by the
+  C function *_isatty_* is an *_int_*, but we ask here to the FFI
+  system to translate this result as a boolean value in the Scheme
+  world).
+* *_system_* is a function which takes a string as parameter
+  and returns an *_int_*.
+* *_ttyname_* is a function whih takes an int and returns a string.
+  Note that in this function the name of the parameter has been omitted
+  as within C prototypes.
+
+If an external function receives an `:int` argument and is passed a
+Scheme bignum, which then doesn't fit a *_long int_* in C, the
+external function will signal an error. When a `:float` or `:double`
+argument is declared and is passed a Scheme real that requires so many
+bits so as to not be representable in that type, that argument will be
+silently taken as infinity.
+
+```scheme
+ (define-external c-abs ((fd :int))
+     :entry-name "abs"
+     :return-type :int)
+
+ (define-external c-fabs ((fd :double))
+     :entry-name "fabs"
+     :return-type :double)
+
+ (define-external c-fabsf ((fd :float))
+     :entry-name "fabsf"
+     :return-type :float)
+```
+
+We can now use the function we have just defined:
+
+```scheme
+(c-abs (- (expt 2 70)))    => Error
+(c-fabs -1.0e+250)         => 1e+250
+(c-fabsf -1.0e+250)        => +inf.0
+(c-fabs (- (expt 10 300))) => 1e+300
+(c-fabs (- (expt 10 600))) => +inf.0
+```
+
+
+In the following example we use the `:string` type. C functions accepting
+pointers to null-terminated strings are directly translated to this type.
+
+The POSIX function `strpbrk` accepts two string arguments (in C, two
+pointers to `char`). The C call `strpbrk(str1, str2)` returns a
+pointer to the first occurrence in the string `str1` of one of the
+bytes in the string `str2`.
+
+```scheme
+(define-external c-strpbrk ((str :string) (accept :string))
+    :entry-name "strpbrk"
+    :return-type :string)
+```
+
+```scheme
+(c-strpbrk "a string" "rz") => "ring"
+```
+
+Note that it would be possible to use a `:pointer` type instead for the return
+value, although in this case it would be more cumbersome (but does help understand
+the FFI better!):
+
+```scheme
+(define-external c-strpbrk ((str :string) (accept :string))
+    :entry-name "strpbrk"
+    :return-type :pointer)
+```
+
+```scheme
+(c-strpbrk "a string" "rz")
+                            => #[C-pointer 7f17baf94d06 @ 7f17bafb4360]
+(cpointer->string (c-strpbrk "a string" "rz"))
+                            => "ring"
+```
+
+Functions on C pointers are described in the next section.
+
+### C pointers
+
+It is very common that external functions return pointers, serving as
+handles on internal structures. This pointers, called hereafter
+*cpointers*, are then boxed in a Scheme objects. This section presents
+the functions that can be used to deal with C pointers.
+
+
+WARNING: Note that by using *cpointers* objects, one gives up the safety of
+the Scheme environment, and care must be taken to avoid memory corruptions,
+errors, crashes...
+
+{{insertdoc 'cpointer?}}
+{{insertdoc 'cpointer-data-set!}}
+{{insertdoc 'cpointer-type-set!}}
+{{insertdoc 'cpointer->string}}
+{{insertdoc 'allocate-bytes}}
+{{insertdoc 'free-bytes}}
+
+

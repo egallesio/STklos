@@ -1,7 +1,7 @@
 ;;;;
 ;;;; c o m p i l e r . s t k                    -- STklos Compiler
 ;;;;
-;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update: 11-Nov-2021 18:33 (eg)
+;;;; Last file update:  7-Jan-2022 19:13 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -186,7 +186,7 @@
  * :foo       =>  :foo
  * ':foo      =>  :foo
  * @end lisp
- * ,(bold "Note:") R5RS requires to quote constant lists and
+ * NOTE: R5RS requires to quote constant lists and
  * constant vectors. This is not necessary with STklos.
 doc>
 |#
@@ -412,9 +412,9 @@ doc>
                                 A N D
 
 <doc syntax and
- * (and <test1> ...)
+ * (and <test~1~> ...)
  *
- * The |<test>| expressions are evaluated from left to right, and the
+ * The |<test~i~>| expressions are evaluated from left to right, and the
  * value of the first expression that evaluates to a false value is
  * returned.  Any remaining expressions are not evaluated.  If all the
  * expressions evaluate to true values, the value of the last expression
@@ -453,9 +453,9 @@ doc>
                                 O R
  *
 <doc syntax or
- * (or <test1> ...)
+ * (or <test~1~> ...)
  *
- * The |<test>| expressions are evaluated from left to right, and the
+ * The |<test~i~>| expressions are evaluated from left to right, and the
  * value of the first expression that evaluates to a true value is
  * returned.  Any remaining expressions are not evaluated.  If all
  * expressions evaluate to false values, the value of the last expression
@@ -935,7 +935,10 @@ doc>
                        (compile (cadr actuals) env epair #f)
                        (emit mnemo))
                      (compiler-error fct epair "2 arguments required (~A provided)"
-                                    len))))
+                                     len))))
+        (oper1 (lambda (mnemo a)
+                 (compile a env epair #f)
+                 (emit mnemo)))
         (oper2 (lambda (mnemo a b)
                  (compile a env epair #f)
                  (emit mnemo b)))
@@ -978,11 +981,15 @@ doc>
                         ((and (number? a) (number? b))
                          (compile-constant (+ a b) env #f))
                         ((small-integer-constant? a)
-                         (oper2 'IN-SINT-ADD2 b a))
+                         (if (= a 1)
+                             (oper1 'IN-INCR b)
+                             (oper2 'IN-SINT-ADD2 b a)))
                         ((small-integer-constant? b)
-                         (oper2 'IN-SINT-ADD2 a b))
+                         (if (= b 1)
+                             (oper1 'IN-INCR a)
+                             (oper2 'IN-SINT-ADD2 a b)))
                         (else
-                         (comp2 'IN-ADD2)))))
+                          (comp2 'IN-ADD2)))))
               (else (compile-normal-call fct actuals len env epair #f))))
       ((-)  (case len
                 ((0)  (compiler-error '- epair "needs at least one argument"))
@@ -996,6 +1003,8 @@ doc>
                            (compile-constant (- a b) env tail?))
                           ((small-integer-constant? a)
                            (oper2 'IN-SINT-SUB2 b a))
+                          ((eq? b 1)
+                           (oper1 'IN-DECR a))
                           ((and (number? b)
                                 (small-integer-constant? (- b)))
                            (oper2 'IN-SINT-ADD2 a (- b)))

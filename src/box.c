@@ -2,7 +2,7 @@
  *
  * b o x . c                            -- The box type
  *
- * Copyright © 2007-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-Dec-2007 18:04 (eg)
- * Last file update:  4-Sep-2020 14:56 (eg)
+ * Last file update: 17-Jan-2022 09:31 (eg)
  */
 
 #include "stklos.h"
@@ -60,7 +60,7 @@ SCM STk_make_box(SCM obj)   /* A fast path for box with one value */
  *   (list 10 x))        => (10 #&10)
  * @end lisp
  *
- * The name |make-box| is now obsolete and kept only for compatibility.
+ * NOTE: The name |make-box| is now obsolete and kept only for compatibility.
 doc>
 */
 DEFINE_PRIMITIVE("box", box, vsubr, (int argc, SCM *argv))
@@ -88,7 +88,7 @@ DEFINE_PRIMITIVE("box", box, vsubr, (int argc, SCM *argv))
  *
  * Returns a new box that contains all the given |value|s. The box is immutable.
  *
- * The name |make-constant-box| is now obsolete and kept only for compatibility.
+ * NOTE: The name |make-constant-box| is now obsolete and kept only for compatibility.
 doc>
 */
 DEFINE_PRIMITIVE("constant-box", cbox, vsubr, (int argc, SCM *argv))
@@ -103,7 +103,7 @@ DEFINE_PRIMITIVE("constant-box", cbox, vsubr, (int argc, SCM *argv))
 <doc EXT box?
  * (box? obj)
  *
- * Returns |#t| if |obj|is box, |#f| otherwise.
+ * Returns |#t| if |obj| is a box, |#f| otherwise.
 doc>
 */
 DEFINE_PRIMITIVE("box?", boxp, subr1, (SCM x))
@@ -116,7 +116,7 @@ DEFINE_PRIMITIVE("box?", boxp, subr1, (SCM x))
 <doc EXT box-mutable?
  * (box-mutable? obj)
  *
- * Returns |#t| if |obj|is mutable box, |#f| otherwise.
+ * Returns |#t| if |obj| is a mutable box, |#f| otherwise.
 doc>
 */
 DEFINE_PRIMITIVE("box-mutable?", box_mutablep, subr1, (SCM x))
@@ -152,7 +152,8 @@ DEFINE_PRIMITIVE("unbox", unbox, subr1, (SCM x))
  * Changes |box| to hold |value|s. It is an error if |set-box!| is called
  * with a number of values that differs from the number of values in the box
  * being set. (In other words, |set-box!| does not allocate memory.)
- *
+ * It is also an error to call |set-box!| on a box which is not mutable.
+ * 
  * The name |box-set!| is now obsolete and kept only for compatibility.
 doc>
 */
@@ -189,8 +190,8 @@ DEFINE_PRIMITIVE("box-arity", box_arity, subr1, (SCM x))
 <doc EXT unbox-value
  * (unbox-value box i)
  *
- * Returns the |i|th value of |box|. It is an error if |i| is not an exact integer
- * between 0 and |n|-1, when |n| is the number of values in |box|.
+ * Returns the `|i|`th value of |box|. It is an error if |i| is not an exact integer
+ * between 0 and `|n|`-1, when |n| is the number of values in |box|.
 doc>
 */
 DEFINE_PRIMITIVE("unbox-value", unbox_value, subr2, (SCM x, SCM idx))
@@ -206,8 +207,8 @@ DEFINE_PRIMITIVE("unbox-value", unbox_value, subr2, (SCM x, SCM idx))
 <doc EXT set-box-value!
  * (set-box-value! box i obj)
  *
- * Changes the |i|th value of |box| to |obj|. It is an error if |i| is not an
- * exact integer between 0 and |n|-1, when |n| is the number of values in |box|.
+ * Changes the `|i|`th value of |box| to |obj|. It is an error if |i| is not an
+ * exact integer between 0 and `|n|`-1, when |n| is the number of values in |box|.
 doc>
 */
 DEFINE_PRIMITIVE("set-box-value!", set_box_value, subr3, (SCM x, SCM idx, SCM obj))

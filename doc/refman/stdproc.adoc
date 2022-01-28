@@ -1,0 +1,941 @@
+//  SPDX-License-Identifier: GFDL-1.3-or-later
+//
+//  Copyright © 2000-2022 Erick Gallesio <eg@unice.fr>
+//
+//           Author: Erick Gallesio [eg@unice.fr]
+//    Creation date: 26-Nov-2000 18:19 (eg)
+// Last file update: 28-Jan-2022 18:04 (eg)
+
+{{chapter "Standard Procedures"}}
+
+=== Equivalence predicates
+A predicate is a procedure that always returns a boolean value
+(`#t` or `#f`). An equivalence predicate is the
+computational analogue of a mathematical equivalence relation (it
+is symmetric, reflexive, and transitive).  Of the equivalence
+predicates described in this section, `eq?` is the finest
+or most discriminating, and `equal?` is the coarsest.
+`Eqv?` is slightly less discriminating than `eq?`.
+
+{{insertdoc 'eqv?}}
+[#eqprim]
+{{insertdoc 'eq?}}
+{{insertdoc 'equal?}}
+
+=== Numbers
+{{rfive}} description of numbers is quite long and will not be given here.
+STklos support the full number tower as described in {{rfive}}; see this
+document for a complete description.
+
+{{stklos}} extends the number syntax of R5RS with the following
+inexact numerical constants: `+inf.0` (infinity), `-inf.0` (negative
+infinity), `+nan.0` (not a number), and `-nan.0` (not a number).
+
+{{insertdoc 'integer?}}
+{{insertdoc 'inexact?}}
+{{insertdoc 'inexact}}
+{{insertdoc 'exact-integer?}}
+{{insertdoc 'bignum?}}
+[#numeq]
+{{insertdoc '>=}}
+{{insertdoc 'even?}}
+{{insertdoc 'nan?}}
+((("SRFI-208")))
+{{insertdoc 'make-nan}}
+{{insertdoc 'nan-negative?}}
+{{insertdoc 'nan-quiet?}}
+{{insertdoc 'nan-payload}}
+{{insertdoc 'nan=?}}
+{{insertdoc 'min}}
+{{insertdoc 'truncate-remainder}}
+{{insertdoc '*}}
+{{insertdoc '/}}
+{{insertdoc 'abs}}
+{{insertdoc 'modulo}}
+{{insertdoc 'lcm}}
+{{insertdoc 'denominator}}
+{{insertdoc 'round}}
+{{insertdoc 'rationalize}}
+{{insertdoc 'atan}}
+{{insertdoc 'sqrt}}
+{{insertdoc 'square}}
+{{insertdoc 'exact-integer-sqrt}}
+{{insertdoc 'expt}}
+{{insertdoc 'angle}}
+{{insertdoc 'inexact->exact}}
+{{insertdoc 'number->string}}
+{{insertdoc 'string->number}}
+{{insertdoc 'bit-shift}}
+{{insertdoc 'random-integer}}
+{{insertdoc 'random-real}}
+{{insertdoc 'decode-float}}
+
+==== Fixnums
+((("SRFI-143")))
+{{stklos}} defines small integers as fixnums. Operations on fixnums
+are generally faster than operations which accept general numbers.
+Fixnums operations, as described below, may produce results which are incorrect
+if some temporary computation falls outside the range of fixnum. These
+functions should be used only when speed really matters.
+
+The functions defined in this section are conform to the ones defined in
+{{link-srfi 143}}
+
+{{insertdoc 'fixnum?}}
+{{insertdoc 'fixnum-width}}
+{{insertdoc 'greatest-fixnum}}
+{{insertdoc 'fxzero?}}
+{{insertdoc 'fxnegative?}}
+{{insertdoc 'fxeven?}}
+{{insertdoc 'fxneg}}
+{{insertdoc 'fxsqrt}}
+{{insertdoc 'fxmin}}
+{{insertdoc 'fx=?}}
+{{insertdoc 'fxxor}}
+{{insertdoc 'fxarithmetic-shift}}
+{{insertdoc 'fxlength}}
+{{insertdoc 'fxif}}
+{{insertdoc 'fxbit-set?}}
+{{insertdoc 'fxcopy-bit}}
+{{insertdoc 'fxbit-count}}
+{{insertdoc 'fxfirst-set-bit}}
+{{insertdoc 'fxbit-field}}
+{{insertdoc 'fxbit-field-rotate}}
+{{insertdoc 'fxbit-field-reverse}}
+{{insertdoc 'fx+/carry}}
+{{insertdoc 'fx-/carry}}
+{{insertdoc 'fx*/carry}}
+
+=== Booleans
+((("true value")))
+((("false value")))
+((("boolean value")))
+Of all the standard Scheme values, only `#f` counts as false in
+conditional expressions.  Except for `#f`, all standard Scheme values,
+including `#t`, pairs, the empty list, symbols, numbers, strings,
+vectors, and procedures, count as true.
+
+Boolean constants evaluate to themselves, so they do not need to be
+quoted in programs.
+
+{{insertdoc 'not}}
+{{insertdoc 'boolean?}}
+{{insertdoc 'boolean=?}}
+
+=== Pairs and lists
+((("pair")))
+((("list")))
+{{insertdoc 'pair?}}
+{{insertdoc 'cons}}
+{{insertdoc 'car}}
+{{insertdoc 'cdr}}
+{{insertdoc 'set-car!}}
+{{insertdoc 'set-cdr!}}
+{{insertdoc 'cddddr}}
+{{insertdoc 'null?}}
+{{insertdoc 'pair-mutable?}}
+{{insertdoc 'list?}}
+{{insertdoc 'make-list}}
+{{insertdoc 'list}}
+{{insertdoc 'list*}}
+{{insertdoc 'length}}
+{{insertdoc 'append}}
+{{insertdoc 'append!}}
+{{insertdoc 'reverse}}
+{{insertdoc 'reverse!}}
+{{insertdoc 'list-tail}}
+{{insertdoc 'last-pair}}
+{{insertdoc 'list-ref}}
+{{insertdoc 'list-set!}}
+{{insertdoc 'member}}
+{{insertdoc 'assoc}}
+{{insertdoc 'list-copy}}
+{{insertdoc 'filter!}}
+{{insertdoc 'remove!}}
+{{insertdoc 'delete!}}
+
+=== Symbols
+The STklos reader can read symbols whose names contain special
+characters or letters in the non standard case.  When a symbol is
+read, the parts enclosed in bars `|` will be entered
+verbatim into the symbol's name. The `|` characters are not
+part of the symbol; they only serve to delimit the sequence of
+characters that must be entered "as is". In order to maintain
+read-write invariance, symbols containing such sequences of special
+characters will be written between a pair of `|`.
+
+In addition, any character can be used within an identifier when
+specified via an inline hex escape . For example, the identifier
+`H\x65;llo` is the same as the identifier Hello, and, if the
+UTF-8 encoding is used, the identifier `\x3BB;` is the same as
+the identifier `λ`.
+
+
+```scheme
+'|a|                  => a
+(string->symbol "a")  => |A|
+(symbol->string '|A|) => "A"
+'|a  b|               => |a  b|
+'a|B|c                => |aBc|
+(write '|FoO|)        |- |FoO|
+(display '|FoO|)      |- FoO
+```
+
+{{insertdoc 'symbol?}}
+{{insertdoc 'symbol=?}}
+{{insertdoc 'symbol->string}}
+{{insertdoc 'string->symbol}}
+{{insertdoc 'string->uninterned-symbol}}
+{{insertdoc 'gensym}}
+
+=== Characters
+((("ASCII")))
+((("character")))
+The following table gives the list of allowed character names with their
+ASCII eqivalent expressed in octal. Some chracaters have an alternate name
+which is also shown in this table.
+
+[.small]
+|===
+| name | value | alt. name | name | value | alt. name
+
+| nul  | 000   | null      | soh  | 001   |
+| stx  | 002   |           | etx  | 003   |
+| eot  | 004   |           | enq  | 005   |
+| ack  | 006   |           | bel  | 007   | alarm
+| bs   | 010   | backspace | ht   | 011   | tab
+| nl   | 012   | newline   | vt   | 013   |
+| np   | 014   | page      | cr   | 015   | return
+| so   | 016   |           | si   | 017   |
+| dle  | 020   |           | dc1  | 021   |
+| dc2  | 022   |           | dc3  | 023   |
+| dc4  | 024   |           | nak  | 025   |
+| syn  | 026   |           | etb  | 027   |
+| can  | 030   |           | em   | 031   |
+| sub  | 032   |           | esc  | 033   | escape
+| fs   | 034   |           | gs   | 035   |
+| rs   | 036   |           | us   | 037   |
+| sp   | 040   | space     | del  | 177   | delete
+
+|===
+
+
+
+{{stklos}} supports the complete Unicode character set, if UTF-8 encoding is
+used. Hereafter, are some examples of characters:
+
+
+```scheme
+#\A                => uppercase A
+#\a                => lowercase a
+#\x41              => the U+0041 character (uppercase A)
+#\x03bb            => λ
+```
+
+{{insertdoc 'char?}}
+[#chareq]
+{{insertdoc 'char>=?}}
+{{insertdoc 'char-ci>=?}}
+{{insertdoc 'char-lower-case?}}
+{{insertdoc 'integer->char}}
+{{insertdoc 'char-downcase}}
+{{insertdoc 'char-foldcase}}
+{{insertdoc 'digit-value}}
+
+=== Strings
+((("string")))
+STklos string constants allow the insertion of arbitrary characters
+by encoding them as escape sequences. An escape sequence is introduced
+by a backslash "$\backslash$".  The valid escape sequences are shown in
+the following table.
+
+[.small]
+|===
+|Sequence| Character inserted
+
+|\a   | Alarm
+|\b   | Backspace
+|\e   | Escape
+|\n   | Newline
+|\t   | Horizontal Tab
+|\r   | Carriage Return
+|\"  | doublequote U+0022
+|\\  | backslash U+005C
+|\0abc| ASCII character with octal value abc
+|\x<hexa value>;| ASCII character with given hexadecimal value
+|\<intraline whitespace><newline><intraline whitespace>
+|None (permits to enter a string on several lines)
+|\<other>| <other>
+
+|===
+
+For instance, the string
+
+```scheme
+"ab\040\x20;c\nd\
+         e"
+```
+
+is the string consisting of the characters
+`{{sharp}}\a`, `{{sharp}}\b`, `{{sharp}}\space`, `{{sharp}}\space`,
+`{{sharp}}\c`, `{{sharp}}\newline`, `{{sharp}}\d` and `{{sharp}}\e`.
+
+*Notes:*
+
+* Using octal code is limited to characters in the range 0
+to #xFF. It is then not convenient to enter Unicode characters. This
+form is deprecated should not be used anymore.
+* A line ending which is preceded by <intraline whitespace>
+expands to nothing (along with any trailing <intraline
+whitespace>), and can be used to indent strings for improved
+legibility.
+
+
+
+{{insertdoc 'string?}}
+{{insertdoc 'make-string}}
+{{insertdoc 'string}}
+{{insertdoc 'string-length}}
+{{insertdoc 'string-ref}}
+{{insertdoc 'string-set!}}
+{{insertdoc 'string-ci=?}}
+{{insertdoc 'string-ci>=?}}
+{{insertdoc 'substring}}
+{{insertdoc 'string-append}}
+{{insertdoc 'list->string}}
+{{insertdoc 'string-copy}}
+{{insertdoc 'string-copy!}}
+{{insertdoc 'string-split}}
+{{insertdoc 'string-position}}
+{{insertdoc 'string-find?}}
+{{insertdoc 'string-fill!}}
+{{insertdoc 'string-blit!}}
+{{insertdoc 'string-mutable?}}
+((("SRFI-13")))
+The following string primitives are compatible with {{link-srfi 13}}
+and their documentation comes from the SRFI document.
+
+*Notes:*
+
+
+* The string SRFI is supported by {{stklos}}. The
+                function listed below just don't need to load the full SRFI to be
+                used
+* The functions `string-upcase`, `string-downcase` and
+                `string-foldcase` are also defined in {{rseven}}.
+
+
+
+{{insertdoc 'string-downcase}}
+{{insertdoc 'string-downcase!}}
+{{insertdoc 'string-upcase}}
+{{insertdoc 'string-upcase!}}
+{{insertdoc 'string-titlecase}}
+{{insertdoc 'string-titlecase!}}
+((("SRFI-118")))
+{{insertdoc 'string-append!}}
+{{insertdoc 'string-replace!}}
+{{insertdoc 'string-foldcase}}
+{{insertdoc 'string-foldcase!}}
+
+=== Vectors
+((("vectors")))
+Vectors are heterogenous structures whose elements are
+indexed by integers.  A vector typically occupies less space than
+a list of the same length, and the average time required to
+access a randomly chosen element is typically less for the vector
+than for the list.
+
+The length of a vector is the number of elements that it
+contains.  This number is a non-negative integer that is fixed
+when the vector is created.  The valid indexes of a vector are
+the exact non-negative integers less than the length of the
+vector.  The first element in a vector is indexed by zero, and
+the last element is indexed by one less than the length of the
+vector.
+
+Vectors are written using the notation `#(obj ...)`.
+For example, a vector of length 3 containing the number zero in
+element 0, the list `(2 2 2 2)` in element 1, and the
+string `"Anna"` in element 2 can be written as
+following:
+
+```scheme
+#(0 (2 2 2 2) "Anna")
+```
+
+NOTE: In STklos, vectors constants don't need to be quoted.
+
+{{insertdoc 'vector?}}
+{{insertdoc 'make-vector}}
+{{insertdoc 'vector}}
+{{insertdoc 'vector-length}}
+{{insertdoc 'vector-ref}}
+{{insertdoc 'vector-set!}}
+{{insertdoc 'list->vector}}
+{{insertdoc 'string->vector}}
+{{insertdoc 'vector-append}}
+{{insertdoc 'vector-fill!}}
+{{insertdoc 'vector-copy}}
+{{insertdoc 'vector-copy!}}
+{{insertdoc 'vector-resize}}
+{{insertdoc 'vector-mutable?}}
+{{insertdoc 'sort}}
+
+
+=== Structures
+((("structures")))
+A structure type is a record data type composing a number of slots. A
+structure, an instance of a structure type, is a first-class value
+that contains a value for each field of the structure type.
+
+Structures can be created with the `define-struct` high
+level syntax. However, {{stklos}} also offers some low-level functions
+to build and access the internals of a structure.
+
+{{insertdoc 'define-struct}}
+{{insertdoc 'make-struct-type}}
+{{insertdoc 'struct-type?}}
+{{insertdoc 'struct-type-slots}}
+{{insertdoc 'struct-type-parent}}
+{{insertdoc 'struct-type-name}}
+{{insertdoc 'struct-type-change-writer!}}
+{{insertdoc 'make-struct}}
+{{insertdoc 'struct?}}
+{{insertdoc 'struct-type}}
+{{insertdoc 'struct-ref}}
+{{insertdoc 'struct-set!}}
+{{insertdoc 'struct-is-a?}}
+{{insertdoc 'struct->list}}
+
+=== Bytevectors
+((("bytevectors")))
+_Bytevectors_ represent blocks of binary data.  They
+are fixed-length sequences of bytes, where a _byte_ is an
+exact integer in the range `(0, 255)`. A bytevector is typically more
+space-efficient than a vector containing the same values.
+
+The _length_ of a bytevector is the number of elements that it contains. This
+number is a non-negative integer that is fixed when the bytevector is
+created. The _valid indexes_ of a bytevector are the exact non-negative
+integers less than the length of the bytevector, starting at index zero as
+with vectors.
+
+Bytevectors are written using the notation `#u8(byte ...)`.  For example, a
+bytevector of length 3 containing the byte 0 in element 0, the byte 10 in
+element 1, and the byte 5 in element 2 can be written as follows: `#u8(0 10
+5)`
+
+Bytevector constants are self-evaluating, so they do not
+need to be quoted in programs.
+
+{{insertdoc 'bytevector?}}
+{{insertdoc 'make-bytevector}}
+{{insertdoc 'bytevector}}
+{{insertdoc 'bytevector-length}}
+{{insertdoc 'bytevector-u8-ref}}
+{{insertdoc 'bytevector-u8-set!}}
+{{insertdoc 'bytevector-copy}}
+{{insertdoc 'bytevector-copy!}}
+{{insertdoc 'bytevector-append}}
+{{insertdoc 'string->utf8}}
+
+
+=== Control features
+{{insertdoc 'procedure?}}
+{{insertdoc 'apply}}
+{{insertdoc 'map}}
+{{insertdoc 'string-map}}
+{{insertdoc 'vector-map}}
+{{insertdoc 'for-each}}
+{{insertdoc 'string-for-each}}
+{{insertdoc 'vector-for-each}}
+{{insertdoc 'every}}
+{{insertdoc 'any}}
+{{insertdoc 'call/cc}}
+{{insertdoc 'call/ec}}
+[#values]
+((("multiple values")))
+{{insertdoc 'values}}
+{{insertdoc 'call-with-values}}
+{{insertdoc 'receive}}
+{{insertdoc 'dynamic-wind}}
+{{insertdoc 'eval}}
+{{insertdoc 'scheme-report-environment}}
+{{insertdoc 'null-environment}}
+{{insertdoc 'interaction-environment}}
+{{insertdoc 'eval-from-string}}
+
+
+=== Input and Output
+((("input")))
+((("output")))
+((("string port")))
+((("virtual port")))
+{{rfive}} states that ports represent input and output
+devices.  However, it defines only ports which are attached to
+files.  In {{stklos}}, ports can also be attached to strings, to a
+external command input or output, or even be virtual (i.e. the
+behavior of the port is given by the user).
+
+
+
+* String ports are similar to file ports, except that characters are read from
+(or written to) a string rather than a file.
+
+* External command input or output ports are implemented with Unix pipes and
+are called *_pipe ports_*. A pipe port is created by specifying the command to
+execute prefixed with the string `"| "` (that is a pipe bar followed by a
+space).  Specification of a pipe port can occur everywhere a file name is
+needed.
+
+* Virtual ports are created by supplying basic I/O functions at port creation
+time. These functions will be used to simulate low level accesses to a
+``virtual device''. This kind of port is particularly convenient for reading
+or writing in a graphical window as if it was a file. Once a virtual port is
+created, it can be accessed as a normal port with the standard Scheme
+primitives.
+
+
+==== Ports
+{{insertdoc 'call-with-port}}
+{{insertdoc 'call-with-output-file}}
+{{insertdoc 'call-with-input-string}}
+{{insertdoc 'call-with-output-string}}
+{{insertdoc 'output-port?}}
+{{insertdoc 'binary-port?}}
+{{insertdoc 'port?}}
+{{insertdoc 'output-string-port?}}
+{{insertdoc 'output-bytevector-port?}}
+{{insertdoc 'output-file-port?}}
+{{insertdoc 'output-virtual-port?}}
+{{insertdoc 'interactive-port?}}
+[#curroport]
+{{insertdoc 'current-output-port}}
+{{insertdoc 'current-error-port}}
+{{insertdoc 'with-output-to-file}}
+{{insertdoc 'with-error-to-file}}
+{{insertdoc 'with-input-from-string}}
+{{insertdoc 'with-output-to-string}}
+{{insertdoc 'with-error-to-port}}
+{{insertdoc 'open-input-file}}
+((("SRFI-6")))
+{{insertdoc 'open-input-string}}
+{{insertdoc 'open-input-bytevector}}
+{{insertdoc 'open-input-virtual}}
+{{insertdoc 'open-output-file}}
+((("SRFI-6")))
+{{insertdoc 'open-output-string}}
+{{insertdoc 'open-output-bytevector}}
+{{insertdoc 'open-output-virtual}}
+{{insertdoc 'open-file}}
+((("SRFI-6")))
+{{insertdoc 'get-output-string}}
+{{insertdoc 'get-output-bytevector}}
+{{insertdoc 'close-output-port}}
+{{insertdoc 'close-port}}
+{{insertdoc 'port-rewind}}
+{{insertdoc 'seek-file-port}}
+{{insertdoc 'port-current-line}}
+{{insertdoc 'port-current-position}}
+{{insertdoc 'port-file-name}}
+{{insertdoc 'port-idle-reset!}}
+{{insertdoc 'port-closed?}}
+{{insertdoc 'port-close-hook-set!}}
+{{insertdoc 'port-close-hook}}
+ The following procedures are defined in {{link-srfi 192}} which is fully
+  supported:((("SRFI-192")))
+{{insertdoc 'port-has-port-position?}}
+{{insertdoc 'port-position}}
+{{insertdoc 'port-has-set-port-position!?}}
+{{insertdoc 'set-port-position!}}
+{{insertdoc 'make-i/o-invalid-position-error}}
+{{insertdoc 'i/o-invalid-position-error?}}
+
+==== Input
+{{insertdoc 'read}}
+((("SRFI-38")))
+{{insertdoc 'read-with-shared-structure}}
+[#readerctor]
+((("SRFI-10")))
+{{insertdoc 'define-reader-ctor}}
+{{insertdoc 'read-char}}
+{{insertdoc 'read-bytes}}
+{{insertdoc 'read-bytevector}}
+{{insertdoc 'read-bytevector!}}
+{{insertdoc 'read-bytes!}}
+{{insertdoc 'read-byte}}
+{{insertdoc 'peek-char}}
+{{insertdoc 'peek-byte}}
+{{insertdoc 'eof-object?}}
+{{insertdoc 'eof-object}}
+{{insertdoc 'char-ready?}}
+{{insertdoc 'read-string}}
+{{insertdoc 'read-u8}}
+{{insertdoc 'peek-u8}}
+{{insertdoc 'u8-ready?}}
+{{insertdoc 'read-line}}
+{{insertdoc 'read-from-string}}
+{{insertdoc 'port->string-list}}
+
+==== Output
+{{insertdoc 'write}}
+{{insertdoc 'write*}}
+((("SRFI-38")))
+{{insertdoc 'write-with-shared-structure}}
+{{insertdoc 'display}}
+{{insertdoc 'display-shared}}
+{{insertdoc 'display-simple}}
+{{insertdoc 'newline}}
+{{insertdoc 'write-string}}
+{{insertdoc 'write-u8}}
+{{insertdoc 'write-bytevector}}
+{{insertdoc 'write-char}}
+{{insertdoc 'write-chars}}
+{{insertdoc 'write-byte}}
+((("SRFI-28")))
+[#format]
+{{insertdoc 'format}}
+{{insertdoc 'flush-output-port}}
+{{insertdoc 'printerr}}
+{{insertdoc 'eprintf}}
+
+
+=== System interface
+
+The {{stklos}} system interface offers all the functions defined in
+{{rseven}}. Note, that the base implementation provides also a subset of the
+functions defined in {{link-srfi 170}}. These functions are described here.
+
+Note, however that {{quick-link-srfi 170}} is fully supported and accessing the
+other functions it defines can be done by requiring it, as the other SRFIs
+that STklos supports.
+
+
+==== Loading code
+((("STKLOS_LOAD_PATH")))
+{{insertdoc 'load}}
+{{insertdoc 'try-load}}
+{{insertdoc 'find-path}}
+{{insertdoc 'current-loading-file}}
+{{insertdoc 'provided?}}
+
+==== File Primitives
+{{insertdoc 'temp-file-prefix}}
+{{insertdoc 'create-temp-file}}
+{{insertdoc 'create-temp-directory}}
+{{insertdoc 'rename-file}}
+{{insertdoc 'remove-file}}
+{{insertdoc 'copy-file}}
+{{insertdoc 'copy-port}}
+{{insertdoc 'file-exists?}}
+{{insertdoc 'file-is-executable?}}
+{{insertdoc 'file-size}}
+{{insertdoc 'getcwd}}
+{{insertdoc 'chmod}}
+{{insertdoc 'chdir}}
+{{insertdoc 'create-directory}}
+{{insertdoc 'create-directories}}
+{{insertdoc 'ensure-directories-exist}}
+{{insertdoc 'remove-directory}}
+{{insertdoc 'directory-files}}
+((("tilde expansion")))
+{{insertdoc 'expand-file-name}}
+{{insertdoc 'canonical-file-name}}
+{{insertdoc 'decompose-file-name}}
+{{insertdoc 'winify-file-name}}
+{{insertdoc 'posixify-file-name}}
+{{insertdoc 'basename}}
+{{insertdoc 'dirname}}
+{{insertdoc 'file-suffix}}
+{{insertdoc 'file-prefix}}
+{{insertdoc 'file-separator}}
+{{insertdoc 'make-path}}
+{{insertdoc 'glob}}
+((("SRFI-170")))
+{{insertdoc 'posix-error?}}
+{{insertdoc 'posix-error-name}}
+{{insertdoc 'posix-error-message}}
+{{insertdoc 'posix-error-errno}}
+{{insertdoc 'posix-error-procedure}}
+{{insertdoc 'posix-error-arguments}}
+
+==== Environment
+{{insertdoc 'getenv}}
+{{insertdoc 'setenv!}}
+{{insertdoc 'unsetenv!}}
+
+---
+{{stklos}} defines also the {{rseven}} (and {{quick-link-srfi 96}}) standard
+primivitives to acess environment variables.
+
+{{insertdoc 'get-environment-variable}}
+{{insertdoc 'get-environment-variables}}
+
+{{insertdoc 'build-path-from-shell-variable}}
+
+==== Time
+{{insertdoc 'current-second}}
+{{insertdoc 'current-jiffy}}
+{{insertdoc 'jiffies-per-second}}
+{{insertdoc 'clock}}
+{{insertdoc 'sleep}}
+{{insertdoc 'time}}
+
+==== System Information
+{{insertdoc 'features}}
+{{insertdoc 'running-os}}
+{{insertdoc 'hostname}}
+{{insertdoc 'command-line}}
+{{insertdoc 'command-name}}
+{{insertdoc 'command-args}}
+{{insertdoc 'argc}}
+{{insertdoc 'program-name}}
+{{insertdoc 'script-file}}
+{{insertdoc 'script-directory}}
+{{insertdoc 'version}}
+{{insertdoc 'machine-type}}
+{{insertdoc 'implementation-name}}
+{{insertdoc 'cpu-architecture}}
+{{insertdoc 'machine-name}}
+{{insertdoc 'os-name}}
+{{insertdoc 'os-version}}
+{{insertdoc 'getpid}}
+
+==== Program Arguments Parsing
+((("SRFI-22")))
+{{stklos}} provides a simple way to parse program arguments with the
+`parse-arguments` special form. This form is generally used into
+the `main`| function in a Scheme script. See {{link-srfi 22}} on how to
+use a `main` function in a Scheme program.
+
+{{insertdoc 'parse-arguments}}
+{{insertdoc 'arg-usage}}
+
+==== Misc. System Procedures
+{{insertdoc 'system}}
+{{insertdoc 'exec-list}}
+{{insertdoc 'address-of}}
+{{insertdoc 'exit}}
+{{insertdoc 'emergency-exit}}
+{{insertdoc 'die}}
+{{insertdoc 'get-password}}
+{{insertdoc 'register-exit-function!}}
+
+=== Keywords
+((("keyword")))
+((("#!keyword-colon-position-none")))
+((("#!keyword-colon-position-before")))
+((("#!keyword-colon-position-after")))
+((("#!keyword-colon-position-both")))
+Keywords are symbolic constants which evaluate to themselves.
+   By default, a keyword is a symbol whose first (or last) character is a colon
+   (*_":"_*). Alternatively, to be compatible with other Scheme
+   implementations, the notation `#:foo` is also available to denote
+   the keyword of name `foo`.
+
+Note that the four directives `keyword-colon-position-xxx` or the
+   parameter object ` keyword-colon-position` permit to change the
+   default behavior. See section~Identifiers for more
+   information.
+
+{{insertdoc 'keyword?}}
+{{insertdoc 'make-keyword}}
+{{insertdoc 'keyword->string}}
+{{insertdoc 'string->keyword}}
+{{insertdoc 'key-get}}
+{{insertdoc 'key-set!}}
+{{insertdoc 'key-delete!}}
+{{insertdoc 'keyword-colon-position}}
+
+=== Hash Tables
+((("hash tables")))
+A hash table consists of zero or more entries, each consisting of a key
+and a value. Given the key for an entry, the hashing function can very
+quickly locate the entry, and hence the corresponding value. There may
+be at most one entry in a hash table with a particular key, but many
+entries may have the same value.
+
+{{stklos}} hash tables grow gracefully as the number of entries
+increases, so that there are always less than three entries per hash
+bucket, on average.  This allows for fast lookups regardless of the
+number of entries in a table.
+
+{{stklos}} hash tables procedures are identical to the ones
+defined in {{link-srfi 69}}. Note that the default comparison function
+is `eq?` whereas it is `equal?` in this SRFI. See
+SRFI's documentation for more information.
+
+{{insertdoc 'make-hash-table}}
+{{insertdoc 'hash-table?}}
+((("sxhash Common Lisp Function")))
+[#hashtablehash]
+{{insertdoc 'hash-table-hash}}
+{{insertdoc 'alist->hash-table}}
+{{insertdoc 'hash-table->alist}}
+{{insertdoc 'hash-table-set!}}
+{{insertdoc 'hash-table-ref}}
+{{insertdoc 'hash-table-ref/default}}
+{{insertdoc 'hash-table-delete!}}
+{{insertdoc 'hash-table-exists?}}
+{{insertdoc 'hash-table-update!}}
+{{insertdoc 'hash-table-for-each}}
+{{insertdoc 'hash-table-map}}
+{{insertdoc 'hash-table-keys}}
+{{insertdoc 'hash-table-fold}}
+{{insertdoc 'hash-table-copy}}
+{{insertdoc 'hash-table-merge!}}
+{{insertdoc 'hash-table-equivalence-function}}
+{{insertdoc 'hash-table-hash-function}}
+{{insertdoc 'hash-table-size}}
+{{insertdoc 'hash-table-stats}}
+
+=== Dates and Times
+{{stklos}} stores dates and times with a compact
+representation which consists is an integer which represents the
+number of seconds elapsed since the *_Epoch_* (00:00:00 on
+January 1, 1970, Coordinated Universal Time --UTC). Dates can
+also be represented with date structures.
+
+{{insertdoc 'current-second}}
+{{insertdoc 'current-seconds}}
+{{insertdoc 'current-time}}
+{{insertdoc 'time?}}
+{{insertdoc 'time->seconds}}
+{{insertdoc 'seconds->time}}
+{{insertdoc 'current-date}}
+{{insertdoc 'make-date}}
+{{insertdoc 'date?}}
+{{insertdoc 'date-second}}
+{{insertdoc 'date-minute}}
+{{insertdoc 'date-hour}}
+{{insertdoc 'date-day}}
+{{insertdoc 'date-month}}
+{{insertdoc 'date-year}}
+{{insertdoc 'date-week-day}}
+{{insertdoc 'date-year-day}}
+[#datedst]
+{{insertdoc 'date-dst}}
+{{insertdoc 'date-tz}}
+{{insertdoc 'date->seconds}}
+{{insertdoc 'date->string}}
+{{insertdoc 'seconds->date}}
+[#seconds2string]
+{{insertdoc 'seconds->string}}
+{{insertdoc 'seconds->list}}
+{{insertdoc 'date}}
+
+=== Boxes
+Boxes are objects which contain one or several states.  A box may
+be constructed with the box, constant-box. {{stklos}} boxes are
+compatible with the one defined in {{link-srfi 111}} or {{link-srfi 195}}.  Boxes of
+SRFI-111 can contain only one value, whereas SRFI-195 boxes can contain multiple
+values. Furthermore, {{stklos}} defines also the notion of constant boxes which
+are not mutable.
+
+The read primitive can also make single valued boxes (using the `#&`
+notation). Such boxes are mutable.
+
+Note that two boxes are `equal?` *_iff_* their content are `equal?`.
+
+{{insertdoc 'box}}
+{{insertdoc 'constant-box}}
+{{insertdoc 'box?}}
+{{insertdoc 'box-mutable?}}
+{{insertdoc 'set-box!}}
+{{insertdoc 'unbox}}
+{{insertdoc 'box-arity}}
+{{insertdoc 'unbox-value}}
+{{insertdoc 'set-box-value!}}
+
+=== Processes
+((("process")))
+((("PID")))
+{{stklos}} provides access to Unix processes as first class objects.
+Basically, a process contains several informations such as the standard
+system process identification (aka PID on Unix Systems), the files where
+the standard files of the process are redirected.
+
+{{insertdoc 'run-process}}
+{{insertdoc 'process?}}
+{{insertdoc 'process-alive?}}
+{{insertdoc 'process-pid}}
+{{insertdoc 'process-error}}
+{{insertdoc 'process-wait}}
+{{insertdoc 'process-exit-status}}
+{{insertdoc 'process-signal}}
+{{insertdoc 'process-kill}}
+{{insertdoc 'process-continue}}
+{{insertdoc 'process-list}}
+{{insertdoc 'fork}}
+
+=== Sockets
+((("sockets")))
+{{stklos}} defines *sockets*, on systems which support them,
+as first class objects. Sockets permits processes to communicate even if
+they are on different machines. Sockets are useful for creating client-server
+applications.
+
+{{insertdoc 'make-client-socket}}
+{{insertdoc 'make-server-socket}}
+{{insertdoc 'socket-shutdown}}
+{{insertdoc 'socket-accept}}
+{{insertdoc 'socket?}}
+{{insertdoc 'socket-server?}}
+{{insertdoc 'socket-client?}}
+{{insertdoc 'socket-host-name}}
+{{insertdoc 'socket-host-address}}
+{{insertdoc 'socket-local-address}}
+{{insertdoc 'socket-port-number}}
+{{insertdoc 'socket-output}}
+
+=== Signals
+
+WARNING: This section needs to be written
+
+=== Parameter Objects
+{{stklos}} parameters correspond to the ones defined in {{link-srfi 39}}.
+See SRFI document for more information.
+
+{{insertdoc 'make-parameter}}
+{{insertdoc 'parameterize}}
+{{insertdoc 'parameter?}}
+
+=== Misc
+(((Garbage Collector)))
+{{insertdoc 'gc}}
+(((void)))
+{{insertdoc 'void}}
+((("SRFI-23")))
+{{insertdoc 'error}}
+{{insertdoc 'signal-error}}
+{{insertdoc 'file-error?}}
+{{insertdoc 'error-object?}}
+{{insertdoc 'error-object-message}}
+{{insertdoc 'error-object-irritants}}
+{{insertdoc 'error-object-location}}
+{{insertdoc 'require-extension}}
+{{insertdoc 'require-feature}}
+{{insertdoc 'repl}}
+[#assume]
+{{insertdoc 'assume}}
+((("SRFI-176")))
+{{insertdoc 'version-alist}}
+{{insertdoc 'apropos}}
+{{insertdoc 'help}}
+{{insertdoc 'describe}}
+
+{{insertdoc 'trace}}
+{{insertdoc 'untrace}}
+{{insertdoc 'pp}}
+{{insertdoc 'disassemble}}
+{{insertdoc 'disassemble-expr}}
+{{insertdoc 'uri-parse}}
+{{insertdoc 'string->html}}
+{{insertdoc 'md5sum}}
+{{insertdoc 'md5sum-file}}
+{{insertdoc 'base64-encode}}
+{{insertdoc 'base64-decode}}
+{{insertdoc 'base64-encode-string}}
+{{insertdoc 'base64-decode-string}}
+

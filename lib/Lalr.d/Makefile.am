@@ -1,6 +1,6 @@
 # Makefile for lib/Lalr
 #
-# Copyright © 2004-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2004-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date: 25-Oct-2004 16:43 (eg)
-# Last file update:  2-Jun-2021 10:16 (eg)
+# Last file update: 27-Jan-2022 11:11 (eg)
 
 schemedir   = $(prefix)/share/@PACKAGE@/@VERSION@
 scheme_DATA = lalr.ostk
@@ -48,3 +48,4 @@ calc: calc.stk
 clean: 
 	/bin/rm -f *.ostk calc *~
 
+doc:

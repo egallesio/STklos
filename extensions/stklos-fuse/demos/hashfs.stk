@@ -2,7 +2,7 @@
 ;;;;
 ;;;; hashfs.stk -- Fuse Demo. A file system in a hash table
 ;;;;
-;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,17 +22,16 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  8-Dec-2005 14:30 (eg)
-;;;; Last file update: 13-Jul-2021 17:00 (eg)
+;;;; Last file update: 25-Jan-2022 12:34 (eg)
 ;;;;
 
 ;;;; Adapt the load-path.
 (when-load-and-compile
  (let ((path (load-path)))
    (unless (member "../src" path)
-     (load-path `("../src"  ,@path)))))
+     (load-path `("../src" "../../../lib" ,@path)))))
 
 (require "stklos-fuse")
-(require "srfi-170")
 
 
 ;; to avoid warnings about undefined variables
@@ -42,7 +41,8 @@
 
 
 (define-module HASHFS
-  (import FUSE SRFI-170)
+  (import FUSE
+          (srfi 170))
 
 ;; ----------------------------------------------------------------------
 ;;      Structures ...

@@ -22,7 +22,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-4: Homogeneous numeric vector datatypes
     - SRFI-5: A compatible let form with signatures and rest arguments
     - SRFI-6: Basic String Ports
-    - SRFI-7: Feature-based program configuration language 
+    - SRFI-7: Feature-based program configuration language
     - SRFI-8: Receive: Binding to multiple values
     - SRFI-9: Defining Record Types
     - SRFI-10: Sharp Comma External Form
@@ -74,7 +74,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-112: Environment Inquiry
     - SRFI-113: Sets and Bags
     - SRFI-117: Queues based on lists
-    - SRFI-118: Simple adjustable-size strings 
+    - SRFI-118: Simple adjustable-size strings
     - SRFI-127: Lazy Sequences
     - SRFI-128: Comparators (reduced)
     - SRFI-129: Titlecase procedures
@@ -90,6 +90,7 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-144: Flonums
     - SRFI-145: Assumptions
     - SRFI-151: Bitwise Operations
+    - SRFI-154: First-class dynamic extents
     - SRFI-156: Syntactic combiners for binary predicates
     - SRFI-158: Generators and Accumulators
     - SRFI-161: Unifiable Boxes
@@ -116,4 +117,5 @@ implemented in latest version is available at https://stklos.net/srfi.html):
     - SRFI-217: Integer Sets
     - SRFI-219: Define higher-order lambda
     - SRFI-223: Generalized binary search procedures
+    - SRFI-229: Tagged Procedures
     - SRFI-230: Atomic Operations

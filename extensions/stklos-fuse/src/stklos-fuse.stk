@@ -2,7 +2,7 @@
 ;;;;
 ;;;; fuse.stk   -- FUSE support for STklos
 ;;;;
-;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  7-Dec-2005 16:24 (eg)
-;;;; Last file update: 13-Jul-2021 16:31 (eg)
+;;;; Last file update: 25-Jan-2022 14:18 (eg)
 ;;;;
 
 (select-module FUSE)
@@ -77,5 +77,6 @@
        S_ISGID  S_ISVTX S_IRWXU S_IRUSR S_IWUSR S_IXUSR S_IRWXG S_IRGRP
        S_IWGRP  S_IXGRP S_IRWXO S_IROTH S_IWOTH S_IXOTH)
 
-(%module-export (current-module) *all-errno-symbols*)
+(eval `(export ,@*all-errno-symbols*))
+
 (provide "stklos-fuse")

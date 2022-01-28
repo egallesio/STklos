@@ -703,6 +703,7 @@ PTHREADS_TRUE
 POW_LIB
 LIBOBJS
 ALLOCA
+ASCIIDOCTOR
 PKGCONFIG
 RANLIB
 LN_S
@@ -5003,6 +5004,48 @@ printf "%s\n" "no" >&6; }
 fi
 
 
+# Extract the first word of "asciidoctor", so it can be a program name with args.
+set dummy asciidoctor; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_prog_ASCIIDOCTOR+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  if test -n "$ASCIIDOCTOR"; then
+  ac_cv_prog_ASCIIDOCTOR="$ASCIIDOCTOR" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_prog_ASCIIDOCTOR=""asciidoctor""
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_prog_ASCIIDOCTOR" && ac_cv_prog_ASCIIDOCTOR=""../adoc-fake.sh""
+fi
+fi
+ASCIIDOCTOR=$ac_cv_prog_ASCIIDOCTOR
+if test -n "$ASCIIDOCTOR"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ASCIIDOCTOR" >&5
+printf "%s\n" "$ASCIIDOCTOR" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
 
 ### Checks for header files.
 
@@ -7364,6 +7407,9 @@ esac
 
 
 
+# DOC
+
+
 # Extensions
 
 
@@ -7371,7 +7417,7 @@ esac
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile lib/scheme/Makefile lib/srfi/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 doc/skb/stklos-version.stk pkgman/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/src/Makefile extensions/gtklos/demos/Makefile extensions/gtklos/src/gtklos-config.h extensions/gtklos/src/gtklos.stk extensions/stklos-fuse/Makefile extensions/stklos-fuse/src/Makefile extensions/stklos-fuse/demos/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/extraconf.h doc/Makefile doc/refman/Makefile lib/Makefile utils/Makefile utils/stklos-config utils/stklos-script examples/Makefile lib/Match.d/Makefile lib/SILex.d/Makefile lib/Lalr.d/Makefile lib/ScmPkg.d/Makefile lib/scheme/Makefile lib/srfi/Makefile lib/stklos/Makefile tests/Makefile doc/stklos.1 doc/stklos-config.1 doc/stklos-compile.1 doc/stklos-genlex.1 doc/stklos-pkg.1 doc/stklos-script.1 pkgman/Makefile extensions/Makefile extensions/gtklos/Makefile extensions/gtklos/src/Makefile extensions/gtklos/demos/Makefile extensions/gtklos/src/gtklos-config.h extensions/gtklos/src/gtklos.stk extensions/stklos-fuse/Makefile extensions/stklos-fuse/src/Makefile extensions/stklos-fuse/demos/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8107,6 +8153,7 @@ do
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "src/extraconf.h") CONFIG_FILES="$CONFIG_FILES src/extraconf.h" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
+    "doc/refman/Makefile") CONFIG_FILES="$CONFIG_FILES doc/refman/Makefile" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
     "utils/Makefile") CONFIG_FILES="$CONFIG_FILES utils/Makefile" ;;
     "utils/stklos-config") CONFIG_FILES="$CONFIG_FILES utils/stklos-config" ;;
@@ -8118,6 +8165,7 @@ do
     "lib/ScmPkg.d/Makefile") CONFIG_FILES="$CONFIG_FILES lib/ScmPkg.d/Makefile" ;;
     "lib/scheme/Makefile") CONFIG_FILES="$CONFIG_FILES lib/scheme/Makefile" ;;
     "lib/srfi/Makefile") CONFIG_FILES="$CONFIG_FILES lib/srfi/Makefile" ;;
+    "lib/stklos/Makefile") CONFIG_FILES="$CONFIG_FILES lib/stklos/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "doc/stklos.1") CONFIG_FILES="$CONFIG_FILES doc/stklos.1" ;;
     "doc/stklos-config.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-config.1" ;;
@@ -8125,7 +8173,6 @@ do
     "doc/stklos-genlex.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-genlex.1" ;;
     "doc/stklos-pkg.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-pkg.1" ;;
     "doc/stklos-script.1") CONFIG_FILES="$CONFIG_FILES doc/stklos-script.1" ;;
-    "doc/skb/stklos-version.stk") CONFIG_FILES="$CONFIG_FILES doc/skb/stklos-version.stk" ;;
     "pkgman/Makefile") CONFIG_FILES="$CONFIG_FILES pkgman/Makefile" ;;
     "extensions/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/Makefile" ;;
     "extensions/gtklos/Makefile") CONFIG_FILES="$CONFIG_FILES extensions/gtklos/Makefile" ;;

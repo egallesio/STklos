@@ -2,7 +2,7 @@
  *
  * s y m b o l . c                      -- Symbols management
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 20-Nov-1993 12:12
- * Last file update: 28-Sep-2021 11:41 (eg)
+ * Last file update:  8-Jan-2022 15:09 (eg)
  */
 
 #include <ctype.h>
@@ -155,17 +155,15 @@ DEFINE_PRIMITIVE("symbol->string", symbol2string, subr1, (SCM symbol))
  * because in some implementations of Scheme they cannot be read as themselves.
  *
  * @lisp
- *    (eq? 'mISSISSIppi 'mississippi)     =>  #t
- *    (string->symbol "mISSISSIppi")      =>  @pipemISSISSIppi@pipe
- *    (eq? 'bitBlt (string->symbol "bitBlt"))
- *                                        =>  #f
+ *    (eq? 'mISSISSIppi 'mississippi)                   =>  #t
+ *    (string->symbol "mISSISSIppi")                    =>  @pipemISSISSIppi@pipe
+ *    (eq? 'bitBlt (string->symbol "bitBlt"))           =>  #f
  *    (eq? 'JollyWog
  *         (string->symbol
- *           (symbol->string 'JollyWog))) =>  #t
+ *           (symbol->string 'JollyWog)))               =>  #t
  *    (string=? "K. Harper, M.D."
  *              (symbol->string
- *                (string->symbol "K. Harper, M.D.")))
- *                                        =>  #t
+ *                (string->symbol "K. Harper, M.D.")))  =>  #t
  * @end lisp
 doc>
  */
@@ -181,7 +179,7 @@ DEFINE_PRIMITIVE("string->symbol", string2symbol, subr1, (SCM string))
  * (string->unterned-symbol string)
  *
  * Returns the symbol whose print name is made from the characters of
- * |string|. This symbol is guaranteed to be ,(emph "unique") (i.e. not
+ * |string|. This symbol is guaranteed to be _unique_ (i.e. not
  * |eq?| to any other symbol):
  * @lisp
  * (let ((ua (string->uninterned-symbol "a")))

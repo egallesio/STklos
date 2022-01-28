@@ -2,7 +2,7 @@
 ;;;;
 ;;;; hello.stk  -- A simple demo using fuse
 ;;;;
-;;;; Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,25 +22,27 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  7-Dec-2005 22:38 (eg)
-;;;; Last file update: 13-Jul-2021 16:42 (eg)
+;;;; Last file update: 25-Jan-2022 12:33 (eg)
 ;;;;
-
 
 ;;;; Adapt the load-path.
 (when-load-and-compile
  (let ((path (load-path)))
    (unless (member "../src" path)
-     (load-path `("../src"  "../../../lib" "../../../lib/srfi-170" ,@path)))))
+     (load-path `("../src"  "../../../lib" ,@path)))))
 
 (require "stklos-fuse")
-(require "srfi-170")
+
 
 ;; to avoid warnings about undefined variables
 (%compile-time-define   user-gid user-uid EACCES ENOENT)
 
 
+
 (define-module HELLOFS
-  (import FUSE SRFI-170)
+  (import FUSE
+          (srfi 170))
+
 
   (define content "Hello, world!\n")
 

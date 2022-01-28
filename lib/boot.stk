@@ -1,7 +1,7 @@
 ;;;;
 ;;;; boot.stk                                   -- Default boot file
 ;;;;
-;;;; Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 17-Oct-2021 19:28 (eg)
+;;;; Last file update: 17-Jan-2022 10:10 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -193,7 +193,7 @@
 
 
 ;; ----------------------------------------------------------------------
-;;      Scheme Module
+;;      SCHEME Module
 ;; ----------------------------------------------------------------------
 ;; The SCHEME module is a copy of the STklos module before the user
 ;;; may have the possibility to modify standard bindings.

@@ -2,7 +2,7 @@
  *
  * n u m b e r . c      -- Numbers management
  *
- * Copyright © 1993-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 1993-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 12-May-1993 10:34
- * Last file update: 11-Oct-2021 20:33 (eg)
+ * Last file update:  8-Jan-2022 14:45 (eg)
  */
 
 
@@ -134,11 +134,11 @@ static void error_bad_number(SCM n)
   STk_error("~S is a bad number", n);
 }
 
-static void error_bad_number_in_comp(SCM n)
+static void error_not_a_real_number(SCM n)
 {
   if (COMPLEXP(n))
     STk_error("~S is not a real number", n);
-  else 
+  else
     error_bad_number(n);
 }
 
@@ -146,11 +146,6 @@ static void error_bad_number_in_comp(SCM n)
 static void error_at_least_1(void)
 {
   STk_error("expects at least one argument");
-}
-
-static void error_not_on_a_complex(SCM n)
-{
-  STk_error("cannot be computed on the complex number ~S", n);
 }
 
 static void error_cannot_operate(char *operation, SCM o1, SCM o2)
@@ -1350,7 +1345,7 @@ DEFINE_PRIMITIVE("rational?", rationalp, subr1, (SCM x))
  * This predicates returns |#t| if |x| is an integer number too large to be
  * represented with a native integer.
  * @lisp
- * (bignum? (expt 2 300))     => |#t|   (very likely)
+ * (bignum? (expt 2 300))     => |#t|   ;; (very likely)
  * (bignum? 12)               => |#f|
  * (bignum? "no")             => |#f|
  * @end lisp
@@ -1431,9 +1426,11 @@ DEFINE_PRIMITIVE("inexact?", inexactp, subr1, (SCM z))
  * (= +inf.0 +inf.0)           =>  #t
  * (= -inf.0 +inf.0)           =>  #f
  * (= -inf.0 -inf.0)           =>  #t
- * @l
+ * @end lisp
+ *
  * For any finite real number x:
- * @l
+ *
+ * @lisp
  * (< -inf.0 x +inf.0)         =>  #t
  * (> +inf.0 x -inf.0)         =>  #t
  * @end lisp
@@ -1445,7 +1442,7 @@ doc>
       SCM previous;                                                         \
                                                                             \
       if (argc == 0) error_at_least_1();                                    \
-      if (_max_type_(*argv) == STk_false) error_bad_number_in_comp(*argv);  \
+      if (_max_type_(*argv) == STk_false) error_not_a_real_number(*argv);  \
                                                                             \
       for (previous = *argv--; --argc; previous = *argv--) {                \
         if (_max_type_(*argv) == STk_false) error_bad_number(*argv);        \
@@ -1458,8 +1455,8 @@ doc>
 #define COMPARE_NUM2(_prim_, _max_type_, _operator_)                        \
     long STk_##_prim_##2(SCM o1, SCM o2)                                    \
     {                                                                       \
-      if (_max_type_(o1) == STk_false) error_bad_number_in_comp(o1);        \
-      if (_max_type_(o2) == STk_false) error_bad_number_in_comp(o2);        \
+      if (_max_type_(o1) == STk_false) error_not_a_real_number(o1);        \
+      if (_max_type_(o2) == STk_false) error_not_a_real_number(o2);        \
       return do_compare(o1, o2) _operator_ 0;                               \
     }
 
@@ -1539,8 +1536,7 @@ static int positivep(SCM n)
     case tc_real:     return (REAL_VAL(n) > 0.0);
     case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) > 0);
     case tc_rational: return positivep(RATIONAL_NUM(n));
-    case tc_complex:  error_not_on_a_complex(n); break;
-    default:          error_bad_number(n);
+    default:          error_not_a_real_number(n);
   }
   return FALSE; /* never reached */
 }
@@ -1553,8 +1549,7 @@ static int negativep(SCM n)
     case tc_real:     return (REAL_VAL(n) < 0.0);
     case tc_bignum:   return (mpz_cmp_si(BIGNUM_VAL(n), 0L) < 0);
     case tc_rational: return negativep(RATIONAL_NUM(n));
-    case tc_complex:  error_not_on_a_complex(n); break;
-    default:          error_bad_number(n);
+    default:          error_not_a_real_number(n);
   }
   return FALSE; /* never reached */
 }
@@ -1677,7 +1672,7 @@ DEFINE_PRIMITIVE("nan?", nanp, subr1, (SCM z))
  * (min -inf.0 x)         =>  -inf.0
  * @end lisp
  *
- * ,(bold "Note:") If any argument is inexact, then the result will also be
+ * NOTE: If any argument is inexact, then the result will also be
  * inexact
 doc>
  */
@@ -1689,14 +1684,14 @@ DEFINE_PRIMITIVE("max", max, vsubr, (int argc, SCM *argv))
   if (argc == 0) error_at_least_1();
   if (argc == 1) {
     if (STk_realp(*argv) == STk_true) return *argv;
-    error_bad_number(*argv);
+    error_not_a_real_number(*argv);
   }
 
   exactp = isexactp(*argv);
 
   for (res = *argv--; --argc; argv--) {
     /* See that the argument is a correct number */
-    if (STk_realp(*argv) == STk_false) error_bad_number(*argv);
+    if (STk_realp(*argv) == STk_false) error_not_a_real_number(*argv);
 
     /* determine if result should be exact or not */
     if (!isexactp(*argv)) exactp = 0;
@@ -1716,14 +1711,14 @@ DEFINE_PRIMITIVE("min", min, vsubr, (int argc, SCM *argv))
   if (argc == 0) error_at_least_1();
   if (argc == 1) {
     if (STk_realp(*argv) == STk_true) return *argv;
-    error_bad_number(*argv);
+    error_not_a_real_number(*argv);
   }
 
   exactp = isexactp(*argv);
 
   for (res = *argv--; --argc; argv--) {
     /* See that the argument is a correct number */
-    if (STk_realp(*argv) == STk_false) error_bad_number(*argv);
+    if (STk_realp(*argv) == STk_false) error_not_a_real_number(*argv);
 
     /* determine if result should be exact or not */
     if (!isexactp(*argv)) exactp = 0;
@@ -1736,7 +1731,7 @@ DEFINE_PRIMITIVE("min", min, vsubr, (int argc, SCM *argv))
 
 
 /*
-<doc    + *
+<doc + *
  * (+ z1 ...)
  * (* z1 ...)
  *
@@ -1755,10 +1750,10 @@ DEFINE_PRIMITIVE("min", min, vsubr, (int argc, SCM *argv))
  * (* +inf.0 -inf.0)       =>  -inf.0
  * (* 0 +inf.0)            =>  +nan.0
  * @end lisp
- * ,(bold "Note:") For any finite number z:
+ * NOTE: For any finite number z:
  * @lisp
- * (+ +inf.0 z)            =>  +inf.0
- * (+ -inf.0 z)            =>  -inf.0
+ *       (+ +inf.0 z)      =>  +inf.0
+ *       (+ -inf.0 z)      =>  -inf.0
  * @end lisp
 doc>
  */
@@ -2069,7 +2064,7 @@ DEFINE_PRIMITIVE("abs", abs, subr1, (SCM x))
     case tc_real:     return (REAL_VAL(x) < 0.0) ? double2real(-REAL_VAL(x)) : x;
     case tc_rational: return make_rational(absolute(RATIONAL_NUM(x)),
                                            RATIONAL_DEN(x));
-    default:          error_bad_number(x);
+    default:          error_not_a_real_number(x);
   }
   return STk_void;      /* never reached */
 }
@@ -2314,10 +2309,10 @@ DEFINE_PRIMITIVE("denominator", denominator, subr1, (SCM q))
  * larger than the absolute value of |x|. |Round| returns the closest integer
  * to |x|, rounding to even when |x| is halfway between two integers.
  * @l
- * ,(bold "Rationale:") |Round| rounds to even for consistency with the default
+ * IMPORTANT: |Round| rounds to even for consistency with the default
  * rounding mode specified by the IEEE floating point standard.
  * @l
- * ,(bold "Note:") If the argument to one of these procedures is inexact, then the
+ * NOTE: If the argument to one of these procedures is inexact, then the
  * result will also be inexact. If an exact value is needed, the result should
  * be passed to the |inexact->exact| procedure.
  *
@@ -2353,7 +2348,7 @@ DEFINE_PRIMITIVE("floor", floor, subr1, (SCM x))
                       }
     case tc_bignum:
     case tc_integer:  return x;
-    default:          error_bad_number(x);
+    default:          error_not_a_real_number(x);
   }
   return STk_void; /* never reached */
 }
@@ -2373,7 +2368,7 @@ DEFINE_PRIMITIVE("ceiling", ceiling, subr1, (SCM x))
                       }
     case tc_bignum:
     case tc_integer:  return x;
-    default:          error_bad_number(x);
+    default:          error_not_a_real_number(x);
   }
   return STk_void; /* never reached */
 }
@@ -2389,7 +2384,7 @@ DEFINE_PRIMITIVE("truncate", truncate, subr1, (SCM x))
     case tc_rational: return STk_quotient(RATIONAL_NUM(x), RATIONAL_DEN(x));
     case tc_bignum:
     case tc_integer:  return x;
-    default:          error_bad_number(x);
+    default:          error_not_a_real_number(x);
   }
   return STk_void; /* never reached */
 }
@@ -2421,7 +2416,7 @@ DEFINE_PRIMITIVE("round", round, subr1, (SCM x))
                       }
     case tc_bignum:
     case tc_integer:  return x;
-    default:          error_bad_number(x);
+    default:          error_not_a_real_number(x);
   }
   return STk_void; /* never reached */
 }
@@ -2764,7 +2759,7 @@ DEFINE_PRIMITIVE("sqrt", sqrt, subr1, (SCM z))
  *
  * Returns |z1| raised to the power |z2|.
  * @l
- * ,(bold "Note:") |0,(sup "z")| is 1 if |z = 0| and |0| otherwise.
+ * NOTE: |0,(sup "z")| is 1 if |z = 0| and |0| otherwise.
 doc>
  */
 
@@ -2858,7 +2853,7 @@ DEFINE_PRIMITIVE("expt", expt, subr2, (SCM x, SCM y))
  * (angle -inf.0)                 => 3.14159265358979
  * @end lisp
  * @l
- * ,(bold "Note:") |Magnitude| is the same as |abs| for a real argument.
+ * NOTE: |Magnitude| is the same as |abs| for a real argument.
 doc>
  */
 
@@ -3013,10 +3008,10 @@ DEFINE_PRIMITIVE("inexact->exact", inex2ex, subr1, (SCM z))
  * The result returned by |number->string| never contains an explicit radix
  * prefix.
  * @l
- * ,(bold "Note:") The error case can occur only when |z| is not a complex number or
+ * NOTE: The error case can occur only when |z| is not a complex number or
  * is a complex number with a non-rational real or imaginary part.
  * @l
- * ,(bold "Rationale:") If |z| is an inexact number represented using flonums, and
+ * IMPORTANT: If |z| is an inexact number represented using flonums, and
  * the radix is 10, then the above expression is normally satisfied by a result
  * containing a decimal point. The unspecified case allows for infinities,
  * NaNs, and non-flonum representations.
@@ -3256,7 +3251,7 @@ DEFINE_PRIMITIVE("%make-nan", make_nan, subr3, (SCM neg, SCM quiet, SCM payload)
 <doc EXT nan-negative?
  * (nan-negative? nan)
  *
- * returns #t if the sign bit of |nan| is set and #f otherwise.
+ * returns |#t| if the sign bit of |nan| is set and |#f| otherwise.
 doc>
 */
 DEFINE_PRIMITIVE("nan-negative?", nan_negativep, subr1, (SCM nan)) {
@@ -3272,7 +3267,7 @@ DEFINE_PRIMITIVE("nan-negative?", nan_negativep, subr1, (SCM nan)) {
 <doc EXT nan-quiet?
  * (nan-quiet? nan)
  *
- * returns #t  if |nan| is a quiet NaN.
+ * returns |#t| if |nan| is a quiet NaN.
 doc>
 */
 DEFINE_PRIMITIVE("nan-quiet?", nan_quietp, subr1, (SCM nan)) {
@@ -3304,8 +3299,8 @@ DEFINE_PRIMITIVE("nan-payload", nan_payload, subr1, (SCM nan)) {
 <doc EXT nan=?
  * (nan=? nan1 nan2)
  *
- * Returns #t if |nan1| and |nan2| have the same sign, quiet bit,
- * and payload; and #f otherwise.
+ * Returns |#t| if |nan1| and |nan2| have the same sign, quiet bit,
+ * and payload; and |#f| otherwise.
 doc>
 */
 DEFINE_PRIMITIVE("nan=?", nan_equalp, subr2, (SCM n1, SCM n2)) {

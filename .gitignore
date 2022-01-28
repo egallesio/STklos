@@ -43,18 +43,6 @@ Python
 doc/TODO
 doc/GO
 doc/SOURCE
-doc/skb/html
-doc/skb/TODO
-doc/skb/stklos-ref.ctex
-doc/skb/stklos-ref.log
-doc/skb/stklos-ref.pdf
-doc/skb/stklos-ref.tmp
-doc/skb/stklos-ref.tui
-doc/skb/stklos-ref.tuo
-doc/skb/stklos-version.stk
-doc/skb.old
-doc/skb/GO
-doc/skb/SOURCE
 doc/stklos-compile.1
 doc/stklos-config.1
 doc/stklos-genlex.1
@@ -62,9 +50,8 @@ doc/stklos-install.1
 doc/stklos-pkg.1
 doc/stklos-script.1
 doc/stklos.1
-doc/skb/mpgraph.mp
-doc/skb/mprun.mp
-doc/skb/stklos-ref-mpgraph.mp
+doc/adoc/html
+doc/adoc/stklos-ref.pdf
 
 # Examples directory 
 examples/socket-client
@@ -174,7 +161,8 @@ utils/stklos-compile
 utils/stklos-config
 utils/stklos-genlex
 utils/stklos-script
-utils/update-srfi-list
+utils/stklos-pp
+
 
 # Extensions directory
 extensions/gtklos/src/gtklos-config.h

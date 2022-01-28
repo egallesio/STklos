@@ -1,7 +1,7 @@
 ;;;;
 ;;;; srfis.stk  - The list of STklos implemented SRFIs and some utilities
 ;;;;
-;;;; Copyright © 2020-2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 16-Nov-2020 18:43
-;;;; Last file update:  8-Dec-2021 10:48 (eg)
+;;;; Last file update: 13-Jan-2022 15:05 (eg)
 ;;;;
 
 
@@ -45,7 +45,7 @@
         (hvectors) "srfi-4")
     (5  "A compatible let form with signatures and rest arguments" () "srfi-5")
     (6  "Basic String Ports")
-    (7  "Feature-based program configuration language " (program) "srfi-7")
+    (7  "Feature-based program configuration language" (program) "srfi-7")
     (8  "Receive: Binding to multiple values")
     (9  "Defining Record Types" (records) "srfi-9")
     (10 "Sharp Comma External Form")
@@ -156,7 +156,7 @@
     ;; 115  Scheme Regular Expressions
     ;; 116  Immutable List Library
     (117 "Queues based on lists" (queues-as-lists) "srfi-117")
-    (118 "Simple adjustable-size strings " (adjustable-strings))
+    (118 "Simple adjustable-size strings" (adjustable-strings))
     ;; 119  wisp: simpler indentation-sensitive scheme
     ;; 120  Timer APIs
     ;; 121  ....... withdrawn
@@ -192,7 +192,7 @@
     (151 "Bitwise Operations" (bitwise-ops) "srfi-151")
     ;; 152  String Library (reduced)
     ;; 153  ....... withdrawn
-    ;; 154  First-class dynamic extents
+    (154 "First-class dynamic extents" () "srfi-154")
     ;; 155  Promises
     (156 "Syntactic combiners for binary predicates" () "srfi-156")
     ;; 157  Continuation marks
@@ -266,9 +266,9 @@
     ;; 224 Integer Mappings
     ;; 225 Dictionaries (draft)
     ;; 226 Control Features (draft)
-    ;; 227 Optional Arguments (draft)
+    ;; 227 Optional Arguments
     ;; 228 A further comparator library (draft)
-    ;; 229 Tagged Procedures (draft)
+    (229 "Tagged Procedures" () "srfi-229")
     (230 "Atomic Operations" () "srfi-230")
     ))
 

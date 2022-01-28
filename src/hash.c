@@ -2,7 +2,7 @@
  *
  * h a s h  . c                 -- Hash Tables (mostly SRFI-69)
  *
- * Copyright © 1994-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+ * Copyright © 1994-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
  *
  +=============================================================================
  ! This code is a rewriting of the file tclHash.c of the Tcl
@@ -36,7 +36,7 @@
  *
  *           Author: Erick Gallesio [eg@kaolin.unice.fr]
  *    Creation date: 17-Jan-1994 17:49
- * Last file update:  8-Nov-2021 18:33 (eg)
+ * Last file update: 13-Jan-2022 15:01 (eg)
  */
 
 #include "stklos.h"
@@ -342,7 +342,7 @@ SCM STk_hash_intern_symbol(struct hash_table_obj *h, char *s, SCM (*create) (cha
  *
 \*===========================================================================*/
 
-SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v, int *index)
+static inline SCM hash_get_variable(struct hash_table_obj *h, SCM v, int *index)
 {
   register SCM l;
   char *s = SYMBOL_PNAME(v);
@@ -355,13 +355,19 @@ SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v, int *index)
   return (SCM) NULL;
 }
 
+SCM STk_hash_get_variable(struct hash_table_obj *h, SCM v)
+{
+  int idx;
+  return hash_get_variable(h, v, &idx);
+}
+
 
 void STk_hash_set_variable(struct hash_table_obj *h, SCM v, SCM value, int define)
 {
   SCM z;
   int index;
 
-  z = STk_hash_get_variable(h, v, &index);
+  z = hash_get_variable(h, v, &index);
 
   if (z) {
     /* Variable already exists. Change its value*/
@@ -390,18 +396,17 @@ void STk_hash_set_alias(struct hash_table_obj *h, SCM v, SCM value, int ronly)
   SCM z;
   int index;
 
-  z = STk_hash_get_variable(h, v, &index);
+  z = hash_get_variable(h, v, &index);
 
   if (z) {
     /* Variable already exists. Change its value*/
+    if (ronly) BOXED_INFO(z) |= CONS_CONST;  // make the association read only
     CDR(z) = value;
   } else {
     /* Enter the new variable in table */
     SCM new = STk_cons(v, value);
 
-    if (ronly)
-      // make the association read only
-      BOXED_INFO(new) |= CONS_CONST;
+    if (ronly) BOXED_INFO(new) |= CONS_CONST; // ditto
 
     HASH_BUCKETS(h)[index] = STk_cons(new, HASH_BUCKETS(h)[index]);
     HASH_NENTRIES(h) += 1;
@@ -559,7 +564,7 @@ DEFINE_PRIMITIVE("hash-table-hash-function", hash_table_hash_func,
  * (hash-table-set! hash key value)
  *
  * Enters an association between |key| and |value| in the|hash| table.
- * The value returned by |hash-table-set!| is ,(emph "void").
+ * The value returned by |hash-table-set!| is *_void_*.
 doc>
 */
 DEFINE_PRIMITIVE("hash-table-set!", hash_set, subr3, (SCM ht, SCM key, SCM val))
@@ -720,7 +725,7 @@ DEFINE_PRIMITIVE("hash-table-exists?", hash_existp, subr2, (SCM ht, SCM key))
  * (hash-table-delete! hash key)
  *
  * Deletes the entry for |key| in |hash|, if it exists. Result of
- * |hash-table-delete!| is ,(emph "void").
+ * |hash-table-delete!| is *_void_*.
  *
  * @lisp
  * (define h (make-hash-table))
@@ -786,12 +791,12 @@ DEFINE_PRIMITIVE("hash-table-delete!", hash_delete, subr2, (SCM ht, SCM key))
  * |Proc| must be a procedure taking two arguments. |Hash-table-for-each|
  * calls |proc| on each key/value association in |hash|, with the key as
  * the first argument and the value as the second.  The value returned by
- * |hash-table-for-each| is ,(emph "void").
- *  ,(linebreak)
- * ,(bold "Note:") The order of application of |proc| is unspecified.
- *  ,(linebreak)
- * ,(bold "Note:") |hash-table-walk| is another name for |hash-table-for-each|
- * (this is the name used in ,(link-srfi 69)).
+ * |hash-table-for-each| is *_void_*.
+ *
+ * NOTE: The order of application of |proc| is unspecified.
+ *
+ * NOTE: |hash-table-walk| is another name for |hash-table-for-each|
+ * (this is the name used in {{link-srfi 69}}.
  *
  * @lisp
  * (let ((h   (make-hash-table))
@@ -829,8 +834,8 @@ DEFINE_PRIMITIVE("hash-table-for-each", hash_for_each, subr2, (SCM ht, SCM proc)
  * the first argument and the value as the second.  The result of
  * |hash-table-map| is a list of the values returned by |proc|, in an
  * unspecified order.
- * ,(linebreak)
- * ,(bold "Note:") The order of application of |proc| is unspecified.
+ *
+ * NOTE: The order of application of |proc| is unspecified.
  * @lisp
  * (let ((h (make-hash-table)))
  *   (dotimes (i 5)
@@ -889,7 +894,7 @@ DEFINE_PRIMITIVE("hash-table-hash", hash_hash, subr1, (SCM obj))
  * it contains, the number of buckets in its hash array, and the utilization
  * of the buckets. Informations are printed on |port|. If no |port| is given
  * to |hash-table-stats|, information are printed on the current output port
- * (see ,(ref :mark "current-output-port")).
+ * (see _<<curroport,`current-output-port` primitive>>_).
 doc>
 */
 DEFINE_PRIMITIVE("hash-table-stats", hash_stats, subr12, (SCM ht, SCM port))

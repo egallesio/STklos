@@ -1,7 +1,7 @@
 ;;;;
 ;;;; callcc.stk -- R5RS call/cc function written in Scheme
 ;;;;
-;;;; Copyright © 2000-2020 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2006 12:27 (eg)
-;;;; Last file update: 15-Aug-2020 17:40 (eg)
+;;;; Last file update:  9-Jan-2022 14:44 (eg)
 ;;;;
 
 #|
@@ -29,9 +29,9 @@
  * (call-with-current-continuation proc)
  * (call/cc proc)
  *
- *  |Proc| must be a procedure of one argument. The procedure
+ * |Proc| must be a procedure of one argument. The procedure
  * |call-with-current-continuation| packages up the current continuation
- * (see the rationale below) as an ``escape procedure'' and passes it as
+ * (see the rationale below) as an "_escape procedure_" and passes it as
  * an argument to |proc|. The escape procedure is a Scheme procedure that, if
  * it is later called, will abandon whatever continuation is in effect at
  * that later time and will instead use the continuation that was in effect
@@ -78,11 +78,11 @@
  * (list-length '(a b . c))                =>  #f
  * @end lisp
  *
- * ,(bold "Rationale:") A common use of |call-with-current-continuation|
+ * IMPORTANT: common use of |call-with-current-continuation|
  * is for structured, non-local exits from loops or procedure bodies,
  * but in fact |call-with-current-continuation| is extremely useful
  * for implementing a wide variety of advanced control structures.
- * @l
+ *
  * Whenever a Scheme expression is evaluated there is a continuation
  * wanting the result of the expression. The continuation represents
  * an entire (default) future for the computation. If the expression
@@ -100,7 +100,7 @@
  * programmers to do that by creating a procedure that acts just
  * like the current continuation.
  * @l
- * ,(bold "Note:") |call/cc| is just another name for
+ * NOTE: |call/cc| is just another name for
  * |call-with-current-continuation|.
 doc>
 |#
@@ -119,22 +119,23 @@ doc>
  * In Scheme, because of |call-with-current-continuation|, the dynamic
  * extent of a call may not be a single, connected time period. It is
  * defined as follows:
- * ,(itemize
- *   (item [The dynamic extent is entered when execution of the body of
- * the called procedure begins.])
  *
- *   (item [The dynamic extent is also entered when execution is not
- * within the dynamic extent and a continuation is invoked that was
- * captured (using |call-with-current-continuation|) during the dynamic extent.])
+ * - The dynamic extent is entered when execution of the body of
+ *   the called procedure begins.
  *
- *   (item [It is exited when the called procedure returns.])
+ * - The dynamic extent is also entered when execution is not
+ *   within the dynamic extent and a continuation is invoked that was
+ *   captured (using |call-with-current-continuation|) during the dynamic
+ *   extent.
  *
- *   (item [It is also exited when execution is within the dynamic
- * extent and a continuation is invoked that was captured while not within
- * the dynamic extent.]))
- * @l
+ * - It is exited when the called procedure returns.
+ *
+ * - It is also exited when execution is within the dynamic
+ *   extent and a continuation is invoked that was captured while not within
+ *   the dynamic extent.
+ * 
  * If a second call to |dynamic-wind| occurs within the dynamic extent
- * of the call to thunk and then a continuation is invoked in such a
+ * of the call to |thunk| and then a continuation is invoked in such a
  * way that the afters from these two invocations of |dynamic-wind|
  * are both to be called, then the after associated with the
  * second (inner) call to |dynamic-wind| is called first.
@@ -151,6 +152,7 @@ doc>
  *
  * The effect of using a captured continuation to enter or exit the
  * dynamic extent of a call to |before| or |after| is undefined.
+ *
  * @lisp
  * (let ((path '())
  *       (c #f))
@@ -233,11 +235,8 @@ doc>
                       (call-with-values during
                         (lambda results (reroot! here) (apply values results))))))))
 
-(%set-procedure-name! dynamic-wind 'dynamic-wind)   ;; for debug and documentation 
+(%set-procedure-name! dynamic-wind 'dynamic-wind)   ;; for debug and documentation
 ;;
 ;; call-with-current-continuation
 ;;
 (define call-with-current-continuation call/cc)     ;; also set the procedure-name
-
-
-

@@ -85,7 +85,7 @@ In particular,
  * |<Define-syntax>|  extends the top-level syntactic environment by binding
  * the |<identifier>| to the specified transformer.
  *
- * ,(bold "Note:") |<transformer-spec>| should be an instance of |syntax-rules|.
+ * NOTE: |<transformer-spec>| should be an instance of |syntax-rules|.
  * @lisp
  * (define-syntax let*
  *   (syntax-rules ()
@@ -119,7 +119,7 @@ doc>
  * involved in the matching and is not considered a pattern variable or
  * literal identifier.
  * @l
- * ,(bold "Note:") For a complete description of the Scheme pattern language,
+ * NOTE: For a complete description of the Scheme pattern language,
  * refer to R5RS.
 doc>
 |#

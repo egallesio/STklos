@@ -1,7 +1,7 @@
 ;;;;
 ;;;; date.stk                   -- Date and Time Operations
 ;;;;
-;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  3-Apr-2002 10:06 (eg)
-;;;; Last file update: 25-Mar-2021 15:41 (eg)
+;;;; Last file update: 13-Jan-2022 18:45 (eg)
 ;;;;
 
 ;;;; ======================================================================
@@ -177,10 +177,10 @@ doc>
  * (date-dst d)
  *
  * Return an indication about daylight saving adjustment:
- * ,(itemize
- *   (item [0 if no daylight saving adjustment])
- *   (item [1 if daylight saving adjustment])
- *   (item [-1 if the information is not available]))
+ *
+ * - 0 if no daylight saving adjustment
+ * - 1 if daylight saving adjustment
+ * - -1 if the information is not available
 doc>
 <doc EXT date-tz
  * (date-tz d)
@@ -209,25 +209,24 @@ doc>
  *
  * Returns a keyword list for the date given by |sec| (a date based on the
  * Epoch). The keyed values returned are
- * ,(itemize
- * (item [second : 0 to 59 (but can be up to 61 to allow for leap seconds)])
- * (item [minute : 0 to 59])
- * (item [hour : 0 to 23])
- * (item [day : 1 to 31])
- * (item [month : 1 to 12])
- * (item [year : e.g., 2002])
- * (item [week-day : 0 (Sunday) to 6 (Saturday)])
- * (item [year-day : 0 to 365 (365 in leap years)])
- * (item [dst : indication about daylight savings time. See ,(ref :mark "date-dst")])
- * (item [tz : the difference between Coordinated Universal Time
- * (UTC) and local standard time in seconds.])
- * )
+ *
+ * - second : 0 to 59 (but can be up to 61 to allow for leap seconds)
+ * - minute : 0 to 59
+ * - hour : 0 to 23
+ * - day : 1 to 31
+ * - month : 1 to 12
+ * - year : e.g., 2002
+ * - week-day : 0 (Sunday) to 6 (Saturday)
+ * - year-day : 0 to 365 (365 in leap years)
+ * - dst : indication about daylight savings time
+ *   (see _<<datedst, primitive `date-dst`>>_).
+ * - tz : the difference between Coordinated Universal Time
+ *   (UTC) and local standard time in seconds.])
+ *
  * @lisp
  * (seconds->list (current-second))
- *        => (:second 51 :minute 26 :hour 19
- *            :day 5 :month 11 :year 2004
- *            :week-day 5 :year-day 310
- *            :dst 0 :tz -3600)
+ *        => (#:second 21 #:minute 35 #:hour 20 #:day 10 #:month 1
+ *            #:year 2022 #:week-day 1 #:year-day 10 #:dst 0 #:tz -3600)
  * @end lisp
 doc>
 |#
@@ -253,50 +252,51 @@ doc>
  *
  * Convert a date expressed in seconds using the string |format| as a
  * specification. Conventions for |format| are given below:
- * ,(itemize
- *  (item (bold "~~ ") [a literal ~])
- *  (item (bold "~a ") [locale's abbreviated weekday name (Sun...Sat)])
- *  (item (bold "~A ") [locale's full weekday name (Sunday...Saturday)])
- *  (item (bold "~b ") [locale's abbreviate month name (Jan...Dec)])
- *  (item (bold "~B ") [locale's full month day (January...December)])
- *  (item (bold "~c ") [locale's date and time
- * (e.g., ,(code "Fri Jul 14 20:28:42-0400 2000"))])
- *  (item (bold "~d ") [day of month, zero padded (01...31)])
- *  (item (bold "~D ") [date (mm/dd/yy)])
- *  (item (bold "~e ") [day of month, blank padded ( 1...31)])
- *  (item (bold "~f ") [seconds+fractional seconds, using locale's
- *         decimal separator (e.g. 5.2).])
- *  (item (bold "~h ") [same as ~b])
- *  (item (bold "~H ") [hour, zero padded, 24-hour clock (00...23)])
- *  (item (bold "~I ") [hour, zero padded, 12-hour clock (01...12)])
- *  (item (bold "~j ") [day of year, zero padded])
- *  (item (bold "~k ") [hour, blank padded, 24-hour clock (00...23)])
- *  (item (bold "~l ") [hour, blank padded, 12-hour clock (01...12)])
- *  (item (bold "~m ") [month, zero padded (01...12)])
- *  (item (bold "~M ") [minute, zero padded (00...59)])
- *  (item (bold "~n ") [new line])
- *  (item (bold "~p ") [locale's AM or PM])
- *  (item (bold "~r ") [time, 12 hour clock, same as ,(code "~I:~M:~S ~p")])
- *  (item (bold "~s ") [number of full seconds since "the epoch" (in UTC)])
- *  (item (bold "~S ") [second, zero padded (00...61)])
- *  (item (bold "~t ") [horizontal tab])
- *  (item (bold "~T ") [time, 24 hour clock, same as ,(code "~H:~M:~S")])
- *  (item (bold "~U ") [week number of year with Sunday as first day of week
- *         (00...53)])
- *  (item (bold "~V ") [weekISO 8601:1988 week number of year (01...53)
- *       (week 1 is the first week that has at least 4 days in the current year,
- *        and  with  Monday  as  the first day of the week)])
- *  (item (bold "~w ") [day of week (1...7, 1 is Monday)])
- *  (item (bold "~W ") [week number of year with Monday as first day of week
- *         (01...52)])
- *  (item (bold "~x ") [week number of year with Monday as first day of week
- *         (00...53)])
- *  (item (bold "~X ") [locale's date representation, for example: "07/31/00"])
- *  (item (bold "~y ") [last two digits of year (00...99)])
- *  (item (bold "~Y ") [year])
- *  (item (bold "~z ") [time zone in RFC-822 style])
- *  (item (bold "~Z ") [symbol time zone])
- * )
+ *
+ *  - *~~* a literal ~
+ *  - *~a* locale's abbreviated weekday name (Sun...Sat)
+ *  - *~A* locale's full weekday name (Sunday...Saturday)
+ *  - *~b* locale's abbreviate month name (Jan...Dec)
+ *  - *~B* locale's full month day (January...December)
+ *  - *~c* locale's date and time
+ *         (e.g., ,(code "Fri Jul 14 20:28:42-0400 2000"))
+ *  - *~d* day of month, zero padded (01...31)
+ *  - *~D* date (mm/dd/yy)
+ *  - *~e* day of month, blank padded ( 1...31)
+ *  - *~f* seconds+fractional seconds, using locale's
+ *         decimal separator (e.g. 5.2).
+ *  - *~h* same as ~b
+ *  - *~H* hour, zero padded, 24-hour clock (00...23)
+ *  - *~I* hour, zero padded, 12-hour clock (01...12)
+ *  - *~j* day of year, zero padded
+ *  - *~k* hour, blank padded, 24-hour clock (00...23)
+ *  - *~l* hour, blank padded, 12-hour clock (01...12)
+ *  - *~m* month, zero padded (01...12)
+ *  - *~M* minute, zero padded (00...59)
+ *  - *~n* new line
+ *  - *~p* locale's AM or PM
+ *  - *~r* time, 12 hour clock, same as +"~I:~M:+~S ~p"
+ *  - *~s* number of full seconds since _the epoch_ (in UTC)
+ *  - *~S* second, zero padded (00...61)
+ *  - *~t* horizontal tab
+ *  - *~T* time, 24 hour clock, same as +"~H:~M:~S"+
+ *  - *~U* week number of year with Sunday as first day of week
+ *         (00...53)
+ *  - *~V* weekISO 8601:1988 week number of year (01...53)
+ *         (week 1 is the first week that has at least 4 days in
+ *         the current year, and  with  Monday  as  the first day
+*          of the week)
+ *  - *~w* day of week (1...7, 1 is Monday)
+ *  - *~W* week number of year with Monday as first day of week
+ *         (01...52)
+ *  - *~x* week number of year with Monday as first day of week
+ *         (00...53)
+ *  - *~X* locale's date representation, for example: "07/31/00"
+ *  - *~y* last two digits of year (00...99)
+ *  - *~Y* year
+ *  - *~z* time zone in RFC-822 style
+ *  - *~Z* symbol time zone
+
 doc>
 |#
 (define (seconds->string format seconds)
@@ -332,7 +332,7 @@ doc>
  *
  * Convert the date |d| using the string |format| as a
  * specification. Conventions for format are the same as the one
- * of ,(ref :mark "seconds->string").
+ * of _<<seconds2string, primitive `seconds->string`>>_.
 doc>
 |#
 (define (date->string format date)
@@ -344,4 +344,3 @@ doc>
 
 
 (provide "date")
-

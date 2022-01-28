@@ -1,0 +1,112 @@
+;;;;
+;;;; test-unmutable-bindings.stk   -- Tests on unmutable bindings
+;;;;
+;;;; Copyright © 2021 Jeronimo Pellegrini - <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 2 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date:  7-Dec-2021 23:04 (jpellegrini)
+;;;; Last file update: 17-Dec-2021 22:38 (eg)
+;;;;
+
+(require "test")
+(test-section "Unmutability")
+
+(define-module %%unmutability1
+  (export a)
+  (define a -1)
+  (define b -2)
+  (define c -3))
+
+(define-module %%unmutability2
+  (import %%unmutability1)
+  (define b +2)
+  (define c +3))
+
+
+(define %%mod1 (find-module '%%unmutability1))
+(define %%mod2 (find-module '%%unmutability2))
+
+(test "symbol-mutable?.1" #t (symbol-mutable? 'a %%mod1))
+(test "symbol-mutable?.2" #t (symbol-mutable? 'b %%mod1))
+(test "symbol-mutable?.3" #t (symbol-mutable? 'c %%mod1))
+
+(test "symbol-mutable?.4" #f (symbol-mutable? 'a %%mod2))
+(test "symbol-mutable?.5" #t (symbol-mutable? 'b %%mod2))
+(test "symbol-mutable?.6" #t (symbol-mutable? 'c %%mod2))
+
+(select-module %%unmutability1)
+(test "set!.1" -10 (begin (set! a (* a 10)) a))
+(test "set!.2" -20 (begin (set! b (* b 10)) b))
+(test "set!.3" -30 (begin (set! c (* c 10)) c))
+
+;; Lock module %%unmutability1
+(select-module STklos)
+(module-lock! %%mod1)
+(test "symbol-mutable?.7" #f (symbol-mutable? 'a %%mod1))
+(test "symbol-mutable?.8" #f (symbol-mutable? 'b %%mod1))
+(test "symbol-mutable?.9" #f (symbol-mutable? 'c %%mod1))
+
+
+(select-module %%unmutability1)
+(test/error "set!.4"  (begin (set! a (* a 10)) a))
+(test/error "set!.5"  (begin (set! b (* b 10)) b))
+(test/error "set!.6"  (begin (set! c (* c 10)) c))
+(test/error "define.1" (define x 100))  ;; new binding
+(test/error "define.2" (define a 100))  ;; redefinition
+
+(select-module %%unmutability2)
+(test/error "set!.8"       (begin (set! a (* a 10)) a))
+(test       "set!.9"   20  (begin (set! b (* b 10)) b))
+(test       "set!.10"  30  (begin (set! c (* c 10)) c))
+(test       "define.3" 100 (begin (define x 100) x))  ;; new binding
+(test/error "define.4"     (begin (define a 100) a))  ;; redefinition of imported
+(test       "define.4" 100 (begin (define b 100) b))  ;; redefinition of b
+
+
+
+(test "symbol-value.1" -10 (symbol-value 'a %%mod1))
+(test "symbol-value.2" -20 (symbol-value 'b %%mod1))
+(test "symbol-value.3" -30 (symbol-value 'c %%mod1))
+
+(test "symbol-value.4" -10 (symbol-value 'a %%mod2))
+(test "symbol-value.5"  20 (symbol-value 'b %%mod2))
+(test "symbol-value.6"  30 (symbol-value 'c %%mod2))
+
+
+(test "unmutable SCHEME module.1"
+      #t
+      (module-locked? (find-module 'SCHEME)))
+(test "mutable STklos module.2"
+      #f
+      (module-locked? (find-module 'STklos)))
+
+(select-module SCHEME)
+(test/error "unmutable SCHEME module.3" (set! + -))
+(select-module STklos)
+
+;;;
+;;; define-constant
+;;;
+(define-module %%unmutability3
+  (define-constant cst 1)
+  (test "define-constant.1" 1 cst)
+  (test "define-constant.2" #f (symbol-mutable? 'cst)))
+
+
+(test-section-end)
