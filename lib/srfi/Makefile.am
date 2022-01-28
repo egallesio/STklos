@@ -19,9 +19,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 26-Jan-2022 11:23 (eg)
+# Last file update: 28-Jan-2022 18:23 (eg)
 
-#======================================================================
+#-======================================================================
 
 COMP ?= ../../utils/tmpcomp
 STKLOS_BINARY ?= ../../src/stklos
@@ -164,6 +164,7 @@ srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
 
 DOCDB  = ../DOCDB
+BASEDIR= ../..
 SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
