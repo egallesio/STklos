@@ -163,9 +163,8 @@ SRC_SHOBJ = 25.$(SO) 27.$(SO) 132.$(SO) 133.$(SO)  144.$(SO)  170.$(SO)  175.$(S
 srfi_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
 
-DOCDB  = ../../DOCDB
-BASEDIR= ../..
-SOURCES= $(SRC_C) $(SRC_STK)
+DOCDB  = ../DOCDB
+SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
 srfidir       = $(prefix)/share/@PACKAGE@/@VERSION@/srfi
