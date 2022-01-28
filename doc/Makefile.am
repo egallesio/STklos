@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 26-Jan-2022 11:59 (eg)
+# Last file update: 28-Jan-2022 09:43 (eg)
 
 SUBDIRS      = refman
 
@@ -78,6 +78,8 @@ distclean: clean
 uninstall-hook:
 	rmdir $(docpdfdir) $(docimgdir) $(dochtmldir) $(doclocation) || true
 
+extradoc:
+	for d in $(SUBDIRS); do (cd $$d; $(MAKE) $@); done
 
 
 # Local Variables:

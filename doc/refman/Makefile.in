@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 27-Jan-2022 10:38 (eg)
+# Last file update: 28-Jan-2022 09:41 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -562,6 +562,7 @@ all: single
 single : ../html/$(HTMLMAIN)
 multi:   ../html/$(HTMLMULTI)
 pdf:     ../pdf/$(PDF)
+extradoc: multi pdf
 
 # ----------------------------------------------------------------------
 ../html/$(HTMLMAIN): $(SOURCES) $(DOCDB)

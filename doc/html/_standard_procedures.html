@@ -14523,6 +14523,85 @@ strings are given below</p>
 <p></p>
 </div>
 <div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(describe obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Shows a brief description of <code>obj</code>. If the object is structured
+such as a struct, class or instance, some information about its
+internal structure will be shown.</p>
+</div>
+<div class="paragraph">
+<p><strong>Using <code>describe</code> on simple values</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">describe</span> <span class="mi">5</span><span class="p">)</span>
+  <span class="mi">5</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">integer</span><span class="o">.</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="mf">5.4</span><span class="p">)</span>
+  <span class="mf">5.4</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">real</span><span class="o">.</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="mi">2</span><span class="nv">+3i</span><span class="p">)</span>
+  <span class="mi">2</span><span class="nv">+3i</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">complex</span> <span class="nv">number</span><span class="o">.</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="sc">#\A</span><span class="p">)</span>
+  <span class="sc">#\A</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">character,</span> <span class="nv">ascii</span> <span class="nv">value</span> <span class="nv">is</span> <span class="mi">65</span><span class="o">.</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Using `describe on a class</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">describe</span> <span class="nv">&lt;integer&gt;</span><span class="p">)</span>
+  <span class="nv">&lt;integer&gt;</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">class</span><span class="o">.</span> <span class="nv">It</span><span class="ss">'s</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">&lt;class&gt;</span><span class="o">.</span>
+  <span class="nv">Superclasses</span> <span class="nv">are:</span>
+      <span class="nv">&lt;rational&gt;</span>
+  <span class="p">(</span><span class="nf">No</span> <span class="nv">direct</span> <span class="nv">slot</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">No</span> <span class="nv">direct</span> <span class="nv">subclass</span><span class="p">)</span>
+  <span class="nv">Class</span> <span class="nv">Precedence</span> <span class="nv">List</span> <span class="nv">is:</span>
+      <span class="nv">&lt;integer&gt;</span>
+      <span class="nv">&lt;rational&gt;</span>
+      <span class="nv">&lt;real&gt;</span>
+      <span class="nv">&lt;complex&gt;</span>
+      <span class="nv">&lt;number&gt;</span>
+      <span class="nv">&lt;top&gt;</span>
+  <span class="p">(</span><span class="nf">No</span> <span class="nv">direct</span> <span class="nv">method</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Using <code>describe</code> on structures</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-struct</span> <span class="nv">person</span> <span class="nv">name</span> <span class="nv">email</span><span class="p">)</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">one</span> <span class="p">(</span><span class="nf">make-person</span> <span class="s">"Some One"</span> <span class="s">"one@domain.org"</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">person</span><span class="p">)</span>
+  <span class="o">#</span><span class="p">[</span><span class="nf">struct-type</span> <span class="nv">person</span> <span class="mi">139786494092352</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">structure</span> <span class="nv">type</span> <span class="nv">whose</span> <span class="nv">name</span> <span class="nv">is</span> <span class="nv">person</span><span class="o">.</span>
+  <span class="nv">Parent</span> <span class="nv">structure</span> <span class="nv">type:</span> <span class="no">#f</span>
+  <span class="nv">Slots</span> <span class="nv">are:</span>
+       <span class="nv">name</span>
+       <span class="nv">email</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">one</span><span class="p">)</span>
+  <span class="o">#</span><span class="p">[</span><span class="nf">struct</span> <span class="nv">person</span> <span class="mi">139786494288064</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">structure</span> <span class="nv">type</span> <span class="nv">person</span><span class="o">.</span>
+  <span class="nv">Slots</span> <span class="nv">are:</span>
+       <span class="nv">name</span> <span class="nv">=</span> <span class="s">"Some One"</span>
+       <span class="nv">email</span> <span class="nv">=</span> <span class="s">"one@domain.org"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
 <p><span class="rmargin small"><em>STklos</em> syntax</span></p>
 </div>
 <div class="sidebarblock">
@@ -14942,7 +15021,7 @@ encoded format.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-01-26 12:47:51 +0100
+Last updated 2022-01-28 09:43:28 +0100
 </div>
 </div>
 </body>

@@ -848,7 +848,12 @@ pre.rouge {
 <li><a href="#_stklos_pkg_options">11.2. stklos-pkg options</a></li>
 </ul>
 </li>
-<li><a href="#_foreign_function_interface">12. Foreign Function Interface</a></li>
+<li><a href="#_foreign_function_interface">12. Foreign Function Interface</a>
+<ul class="sectlevel2">
+<li><a href="#_external_functions">12.1. External functions</a></li>
+<li><a href="#_c_pointers">12.2. C pointers</a></li>
+</ul>
+</li>
 <li><a href="#_using_the_slib_package">13. Using the SLIB package</a></li>
 <li><a href="#_srfis">14. SRFIs</a>
 <ul class="sectlevel2">
@@ -17209,6 +17214,85 @@ strings are given below</p>
 <p></p>
 </div>
 <div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(describe obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Shows a brief description of <code>obj</code>. If the object is structured
+such as a struct, class or instance, some information about its
+internal structure will be shown.</p>
+</div>
+<div class="paragraph">
+<p><strong>Using <code>describe</code> on simple values</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">describe</span> <span class="mi">5</span><span class="p">)</span>
+  <span class="mi">5</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">integer</span><span class="o">.</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="mf">5.4</span><span class="p">)</span>
+  <span class="mf">5.4</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">real</span><span class="o">.</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="mi">2</span><span class="nv">+3i</span><span class="p">)</span>
+  <span class="mi">2</span><span class="nv">+3i</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">complex</span> <span class="nv">number</span><span class="o">.</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="sc">#\A</span><span class="p">)</span>
+  <span class="sc">#\A</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">character,</span> <span class="nv">ascii</span> <span class="nv">value</span> <span class="nv">is</span> <span class="mi">65</span><span class="o">.</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Using `describe on a class</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">describe</span> <span class="nv">&lt;integer&gt;</span><span class="p">)</span>
+  <span class="nv">&lt;integer&gt;</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">class</span><span class="o">.</span> <span class="nv">It</span><span class="ss">'s</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">&lt;class&gt;</span><span class="o">.</span>
+  <span class="nv">Superclasses</span> <span class="nv">are:</span>
+      <span class="nv">&lt;rational&gt;</span>
+  <span class="p">(</span><span class="nf">No</span> <span class="nv">direct</span> <span class="nv">slot</span><span class="p">)</span>
+  <span class="p">(</span><span class="nf">No</span> <span class="nv">direct</span> <span class="nv">subclass</span><span class="p">)</span>
+  <span class="nv">Class</span> <span class="nv">Precedence</span> <span class="nv">List</span> <span class="nv">is:</span>
+      <span class="nv">&lt;integer&gt;</span>
+      <span class="nv">&lt;rational&gt;</span>
+      <span class="nv">&lt;real&gt;</span>
+      <span class="nv">&lt;complex&gt;</span>
+      <span class="nv">&lt;number&gt;</span>
+      <span class="nv">&lt;top&gt;</span>
+  <span class="p">(</span><span class="nf">No</span> <span class="nv">direct</span> <span class="nv">method</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Using <code>describe</code> on structures</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-struct</span> <span class="nv">person</span> <span class="nv">name</span> <span class="nv">email</span><span class="p">)</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">one</span> <span class="p">(</span><span class="nf">make-person</span> <span class="s">"Some One"</span> <span class="s">"one@domain.org"</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">person</span><span class="p">)</span>
+  <span class="o">#</span><span class="p">[</span><span class="nf">struct-type</span> <span class="nv">person</span> <span class="mi">139786494092352</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">a</span> <span class="nv">structure</span> <span class="nv">type</span> <span class="nv">whose</span> <span class="nv">name</span> <span class="nv">is</span> <span class="nv">person</span><span class="o">.</span>
+  <span class="nv">Parent</span> <span class="nv">structure</span> <span class="nv">type:</span> <span class="no">#f</span>
+  <span class="nv">Slots</span> <span class="nv">are:</span>
+       <span class="nv">name</span>
+       <span class="nv">email</span>
+
+<span class="p">(</span><span class="nf">describe</span> <span class="nv">one</span><span class="p">)</span>
+  <span class="o">#</span><span class="p">[</span><span class="nf">struct</span> <span class="nv">person</span> <span class="mi">139786494288064</span><span class="p">]</span> <span class="nv">is</span> <span class="nv">an</span> <span class="nv">instance</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">structure</span> <span class="nv">type</span> <span class="nv">person</span><span class="o">.</span>
+  <span class="nv">Slots</span> <span class="nv">are:</span>
+       <span class="nv">name</span> <span class="nv">=</span> <span class="s">"Some One"</span>
+       <span class="nv">email</span> <span class="nv">=</span> <span class="s">"one@domain.org"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
 <p><span class="rmargin small"><em>STklos</em> syntax</span></p>
 </div>
 <div class="sidebarblock">
@@ -22435,19 +22519,28 @@ Misc
 <h2 id="_foreign_function_interface">12. Foreign Function Interface</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>
-The <strong><em>STklos</em></strong> Foreign Function Interface (FFI for short) has been
+<p></p>
+</div>
+<div class="paragraph">
+<p>The <strong><em>STklos</em></strong> Foreign Function Interface (FFI for short) has been
 defined to allow an easy access to functions written in C without
 needing to build C-wrappers and, consequently, without any need to
-write C code.  Note that the FFI is very machine dependent and that it
-works only on a limited set of architectures/systems <sup class="footnote">[<a id="_footnoteref_7" class="footnote" href="#_footnotedef_7" title="View footnote.">7</a>]</sup>. Moreover,
-since FFI allows very low level access, it is easy to crash the
-<strong><em>STklos</em></strong> VM when using an external C function.</p>
+write C code.  FFI is very machine dependent and <strong><em>STklos</em></strong> uses the
+<a href="https://sourceware.org/libffi/"><strong>libffi library</strong></a>, a portable Foreign Function
+Interface library, to give access to C written code.
+This library supports a large set of architectures/OS that are
+described on its Home Page.</p>
+</div>
+<div class="paragraph">
+<p>Moreover, since FFI allows very low level access, it is easy to crash
+the <strong><em>STklos</em></strong> VM when using an external C function.</p>
 </div>
 <div class="paragraph">
 <p><strong>Note that the support for FFI is still minimal and that it will
 evolve in future versions.</strong></p>
 </div>
+<div class="sect2">
+<h3 id="_external_functions">12.1. External functions</h3>
 <div class="paragraph">
 <p>The definition of an external function is done with the
 <code>define-external</code> special form.  This form takes as arguments
@@ -22698,6 +22791,60 @@ silently taken as infinity.</p>
 <span class="p">(</span><span class="nf">c-fabs</span> <span class="p">(</span><span class="nb">-</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">10</span> <span class="mi">600</span><span class="p">)))</span> <span class="nv">=&gt;</span> <span class="m">+inf.0</span></code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>In the following example we use the <code>:string</code> type. C functions accepting
+pointers to null-terminated strings are directly translated to this type.</p>
+</div>
+<div class="paragraph">
+<p>The POSIX function <code>strpbrk</code> accepts two string arguments (in C, two
+pointers to <code>char</code>). The C call <code>strpbrk(str1, str2)</code> returns a
+pointer to the first occurrence in the string <code>str1</code> of one of the
+bytes in the string <code>str2</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-external</span> <span class="nv">c-strpbrk</span> <span class="p">((</span><span class="nf">str</span> <span class="nv">:string</span><span class="p">)</span> <span class="p">(</span><span class="nf">accept</span> <span class="nv">:string</span><span class="p">))</span>
+    <span class="nv">:entry-name</span> <span class="s">"strpbrk"</span>
+    <span class="nv">:return-type</span> <span class="nv">:string</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">c-strpbrk</span> <span class="s">"a string"</span> <span class="s">"rz"</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="s">"ring"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that it would be possible to use a <code>:pointer</code> type instead for the return
+value, although in this case it would be more cumbersome (but does help understand
+the FFI better!):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-external</span> <span class="nv">c-strpbrk</span> <span class="p">((</span><span class="nf">str</span> <span class="nv">:string</span><span class="p">)</span> <span class="p">(</span><span class="nf">accept</span> <span class="nv">:string</span><span class="p">))</span>
+    <span class="nv">:entry-name</span> <span class="s">"strpbrk"</span>
+    <span class="nv">:return-type</span> <span class="nv">:pointer</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">c-strpbrk</span> <span class="s">"a string"</span> <span class="s">"rz"</span><span class="p">)</span>
+                            <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">C-pointer</span> <span class="mi">7</span><span class="nv">f17baf94d06</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">f17bafb4360</span><span class="p">]</span>
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="p">(</span><span class="nf">c-strpbrk</span> <span class="s">"a string"</span> <span class="s">"rz"</span><span class="p">))</span>
+                            <span class="nv">=&gt;</span> <span class="s">"ring"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Functions on C pointers are described in the next section.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_c_pointers">12.2. C pointers</h3>
+<div class="paragraph">
+<p>It is very common that external functions return pointers, serving as
+handles on internal structures. This pointers, called hereafter
+<strong>cpointers</strong>, are then boxed in a Scheme objects. This section presents
+the functions that can be used to deal with C pointers.</p>
+</div>
 <div class="admonitionblock warning">
 <table>
 <tr>
@@ -22705,11 +22852,168 @@ silently taken as infinity.</p>
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-<strong>We need to describe <code>malloc</code> and <code>malloc_atomic</code> and their
-interaction with the GC</strong>
+Note that by using <strong>cpointers</strong> objects, one gives up the safety of
+the Scheme environment, and care must be taken to avoid memory corruptions,
+errors, crashes&#8230;&#8203;
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(cpointer? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> is <code>obj</code> is a cpointer (a Scheme object which encapsulate
+a pointer to a C object), and <code>#f</code> otherwise.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(cpointer-data obj)</code></strong><br>
+<strong><code>(cpointer-data-set! obj adr)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>cpointer-data</code> returns the value associated to cpointer <code>obj</code>
+(that is the value of the pointer itself: an address).</p>
+</div>
+<div class="paragraph">
+<p><code>cpointer-data-set!</code> permits to change the pointer stored in the <code>obj</code>
+cpointer to <code>adr</code>. This is of course very dangerous and could lead to
+fatal errors.</p>
+</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(cpointer-type obj)</code></strong><br>
+<strong><code>(cpointer-type-set! obj tag)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>cpointer-type</code> returns the tag type associated to a cpointer. The C
+runtime or an extension can associate * a tag to a cpointer to make
+ some controls  (for instance, verify that <code>obj</code> is a cpointer  on a
+<code>widget</code> structure). This function returns <strong>void</strong> if a type has not
+been set before. The semantic associated to this tag is completely
+left to the extension writer.</p>
+</div>
+<div class="paragraph">
+<p><code>cpointer-type-set!</code> permits to set the tag of the <code>obj</code> cpointer to
+<code>tag</code> (which can be of any type).</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(cpointer&#8594;string str)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns the C (null terminated) string <code>str</code> as a Scheme string.
+If <code>str</code> doesn&#8217;t contain a C string, the result will probably result
+in a fatal error.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">define-external</span> <span class="nv">c-ghn</span> <span class="p">((</span><span class="nf">s</span> <span class="nv">:pointer</span><span class="p">)</span> <span class="p">(</span><span class="nf">size</span> <span class="nv">:int</span><span class="p">))</span>
+                 <span class="nv">:entry-name</span> <span class="s">"gethostname"</span>
+                 <span class="nv">:return-type</span> <span class="nv">:int</span><span class="p">)</span>
+<span class="p">(</span><span class="k">define</span> <span class="nv">name</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="nv">name</span>                    <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">C-pointer</span> <span class="mi">7</span><span class="nv">fd830820f80</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd8305bee40</span><span class="p">]</span>
+<span class="p">(</span><span class="nf">c-ghn</span> <span class="nv">name</span> <span class="mi">9</span><span class="p">)</span>          <span class="nv">=&gt;</span> <span class="mi">0</span>
+<span class="p">(</span><span class="nf">cpointer-&gt;string</span> <span class="nv">name</span><span class="p">)</span> <span class="nv">=&gt;</span> <span class="s">"socrates"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(allocate-bytes n)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Allocate-bytes</code> will allocate <code>n</code> consecutive bytes using the
+the standard STklos allocation function (which uses the
+Boehm–Demers–Weiser garbage collector <a href="#BoehmGC">[BoehmGC]</a>).
+It returns a <code>cpointer</code> Scheme object that points to the first byte
+allocated. This pointer is managed by the  standard GC and doesn&#8217;t need
+to be freed.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(free-bytes obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Obj</code> must be a <code>cpointer</code> to allocated data. When <code>Free-bytes</code> is called
+on <code>obj</code>, it will deallocate its data calling
+- the C function <code>free</code> (if it  was allocated by the standard C <code>malloc</code>
+  function), or
+- the Boehm GC free  function (if the pointer was allocated using
+  <code>allocate-bytes</code> primitive.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">define</span> <span class="nv">a</span> <span class="p">(</span><span class="nf">allocate-bytes</span> <span class="mi">10</span><span class="p">))</span>
+<span class="nv">a</span>   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">C-pointer</span> <span class="mi">7</span><span class="nv">fd91e8e0f80</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd91e897b70</span><span class="p">]</span>
+<span class="p">(</span><span class="nf">cpointer-type-set!</span> <span class="nv">a</span> <span class="ss">'myadress</span><span class="p">)</span>
+<span class="nv">a</span>   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">myadress-pointer</span> <span class="mi">7</span><span class="nv">fd91e8e0f80</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd91e897b70</span><span class="p">]</span>
+<span class="p">(</span><span class="nf">free-bytes</span> <span class="nv">a</span><span class="p">)</span>
+<span class="nv">a</span>   <span class="nv">=&gt;</span> <span class="o">#</span><span class="p">[</span><span class="nf">myadress-pointer</span> <span class="mi">0</span> <span class="nv">@</span> <span class="mi">7</span><span class="nv">fd91e897b70</span><span class="p">]</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After the call to <code>free-bytes</code>, when <code>a</code> is printed, the first number
+shown is zero, indicating that its data pointer does not point to
+allocated memory (a NULL value for C).</p>
+</div>
 </div>
 </div>
 </div>
@@ -23970,6 +24274,9 @@ underscores in numbers.</p>
 <p><a id="Bigloo"></a>[Bigloo] Manuel Serrano&#8201;&#8212;&#8201;<a href="http://www-sop.inria.fr/mimosa/fp/Bigloo/"><strong>Bigloo</strong></a> Home Page.</p>
 </li>
 <li>
+<p><a id="BoehmGC"></a>[BoehmGC] Hans Boehm&#8201;&#8212;&#8201;<a href="https://www.hboehm.info/gc/">A garbage collector for C and C++ </a> Home Page.</p>
+</li>
+<li>
 <p><a id="CLtL2"></a>[CLtL2] Guy L. Steele Jr.&#8201;&#8212;&#8201;<strong>Common Lisp: the Language, 2nd Edition</strong>&#8201;&#8212;&#8201;Digital Press, 12 Crosby Drive, Bedford, MA 01730, USA, 1990.</p>
 </li>
 <li>
@@ -24579,13 +24886,10 @@ their use in free software.</p>
 <div class="footnote" id="_footnotedef_6">
 <a href="#_footnoteref_6">6</a>. This section is an adaptation of Jeff Dalton&#8217;s (<a href="mailto:J.Dalton@ed.ac.uk">J.Dalton@ed.ac.uk</a>) "<strong><em>Brief introduction to CLOS</em></strong>" which can be found at <a href="http://www.aiai.ed.ac.uk/~jeff/clos-guide.html" class="bare">http://www.aiai.ed.ac.uk/~jeff/clos-guide.html</a>
 </div>
-<div class="footnote" id="_footnotedef_7">
-<a href="#_footnoteref_7">7</a>. FFI system should works on the following architectures/systems: gcc_ppc_osx, gcc_sparc_unix, gcc_x64_unix, gcc_x86_unix.
-</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-01-26 12:49:32 +0100
+Last updated 2022-01-28 10:42:02 +0100
 </div>
 </div>
 </body>
