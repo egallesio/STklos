@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 27-Jan-2022 14:01 (eg)
+// Last file update: 28-Jan-2022 18:04 (eg)
 
 {{chapter "Standard Procedures"}}
 
@@ -666,12 +666,13 @@ that STklos supports.
 {{insertdoc 'unsetenv!}}
 
 ---
-
 {{stklos}} defines also the {{rseven}} (and {{quick-link-srfi 96}}) standard
 primivitives to acess environment variables.
 
 {{insertdoc 'get-environment-variable}}
 {{insertdoc 'get-environment-variables}}
+
+{{insertdoc 'build-path-from-shell-variable}}
 
 ==== Time
 {{insertdoc 'current-second}}

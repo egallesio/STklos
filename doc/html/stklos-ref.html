@@ -13459,6 +13459,36 @@ has been added to be  support <strong><a href="http://srfi.schemers.org/srfi-98/
 <p>Returns names and values of all the environment variables as an a-list.
 This function is defined by <strong><a href="http://srfi.schemers.org/srfi-98/srfi-98.html">SRFI-98</a></strong> (<em>Interface to access environment variables</em>).</p>
 </div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(build-path-from-shell-variable var)</code></strong><br>
+<strong><code>(build-path-from-shell-variable var sep)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Builds a path as a list of strings (which is the way STklos represents
+paths) from the environment variable <code>var</code>, given the separator characters
+given in <code>sep</code> (which defaults to <code>":"</code>, the standrad Unix path separator).
+If the <code>var</code> is not definied in the environment,
+<code>build-path-from-shell-variable</code> returns the empty list.</p>
+</div>
+<div class="paragraph">
+<p>If the shell variable <code>MYPATH</code> is "/bin:/sbin:/usr/bin"`, then</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">build-path-from-shell-variable</span> <span class="s">"MYPATH"</span><span class="p">)</span>       <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"/bin"</span> <span class="s">"/sbin"</span> <span class="s">"/usr/bin"</span><span class="p">)</span>
+<span class="p">(</span><span class="nf">build-path-from-shell-variable</span> <span class="s">"MYPATH"</span> <span class="s">"/:"</span><span class="p">)</span>  <span class="nv">=&gt;</span> <span class="p">(</span><span class="s">"bin"</span> <span class="s">"sbin"</span> <span class="s">"usr"</span> <span class="s">"bin"</span><span class="p">)</span></code></pre>
+</div>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_time">4.13.4. Time</h4>
@@ -23081,7 +23111,7 @@ SRFI <a href="http://srfi.schemers.org">site</a>.</p>
 <div class="sect2">
 <h3 id="_supported_srfis">14.1. Supported SRFIs</h3>
 <div class="paragraph">
-  <p><strong><em>STklos</em></strong> supports <strong>102</strong> finalized SRFIS.
+<p><strong><em>STklos</em></strong> supports <strong>102</strong> finalized SRFIS.
 Some of these SRFIS are <em>embedded</em> and some are <em>external</em>.</p>
 </div>
 <div class="paragraph">
@@ -24891,7 +24921,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-01-28 11:17:16 +0100
+Last updated 2022-01-28 18:04:48 +0100
 </div>
 </div>
 </body>

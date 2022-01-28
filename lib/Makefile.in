@@ -382,11 +382,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
-<<<<<<< HEAD
-	      scheme srfi
-=======
 	      scheme srfi stklos
->>>>>>> 681f59c3 (Add a new command stklos-md for Markdown documents)
 
 STKLOS_FLAGS = --no-init-file --case-sensitive
 scheme_BOOT = assembler.stk \
