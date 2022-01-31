@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 26-Feb-2000 10:47 (eg)
-;;;; Last file update:  7-Jan-2022 19:13 (eg)
+;;;; Last file update: 31-Jan-2022 14:33 (eg)
 ;;;;
 
 (define-module STKLOS-COMPILER
@@ -73,8 +73,7 @@
                          (string-set!    . ,string-set!)
                          (eq?            . ,eq?)
                          (eqv?           . ,eqv?)
-                         (equal?         . ,equal?)
-                         (void           . ,void)))
+                         (equal?         . ,equal?)))
 
 (define *inline-symbols* (map car *inline-table*))
 
@@ -969,7 +968,6 @@ doc>
               (comp3 'EXEC-HANDLER))
 
       ;; User functions
-      ((void) (emit 'IM-VOID))
       ((+)  (case len
               ((0)  (emit 'IM-ZERO))
               ((1)  (if (number? (car actuals))
