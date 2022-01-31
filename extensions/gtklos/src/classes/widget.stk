@@ -1,7 +1,7 @@
 ;;;;
 ;;;; widget.stk                                 -- GTK widget
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 30-May-2001 18:30 (eg)
-;;;; Last file update:  2-Jul-2021 17:43 (eg)
+;;;; Last file update: 31-Jan-2022 19:50 (eg)
 ;;;;
 
 
@@ -94,8 +94,8 @@
 (define (set-widget-height! o v)
   (let ((w (slot-ref o 'width-request)))
     (gtk-widget-set-size-request (slot-ref o 'wid) w v)))
-  
-  
+
+
 
 (define-class <gtk-widget> (<gtk-object>)
   ((wid         #:getter         wid)            ;; Widget Id
@@ -164,7 +164,7 @@
                 #:allocation   #:virtual
                 #:slot-ref     get-widget-height
                 #:slot-set!    set-widget-height!)
-   
+
 #;   (font-name #:accessor       font-name
                 #:init-keyword   #:font-name
                 #:allocation     #:gtk-property
@@ -317,10 +317,10 @@
 ;;;
 ;;; Module exports
 ;;;
-(export  ;; accessors
+(export  realize-widget internal-arrange-widget
+         ;; accessors
          parent can-default has-default has-focus height-request name visible
-         sensitive width-request tooltip xalign yalign xpad ypad 
+         sensitive width-request tooltip xalign yalign xpad ypad
          ;; methods
          destroy event-connect event-connect-after
          get-widget-width get-widget-height)
-
