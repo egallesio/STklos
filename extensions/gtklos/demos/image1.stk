@@ -2,7 +2,7 @@
 ;;;;
 ;;;; image.stk  -- GTK Image Demo
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Aug-2001 07:19 (eg)
-;;;; Last file update: 21-Jun-2021 15:39 (eg)
+;;;; Last file update: 31-Jan-2022 19:59 (eg)
 ;;;;
 
 (include "demos-utils.stk")
@@ -185,11 +185,10 @@ The second line of images uses stock icons
   (let* ((win (make <demo-window> #:title "Images Demo"
             #:file "image1" #:border-width 20
             #:message *message*))
-     (lines (make <box> #:parent win #:orientation 'vertical #:spacing 10))
-     (box   (make <box> #:parent lines #:orientation 'horizontal #:padding 70))
+     (lines (make <vbox> #:parent win #:spacing 10))
+     (box   (make <hbox> #:parent lines #:padding 70))
      (sep   (make <separator> #:orientation 'horizontal #:parent lines))
-     (media (make <box> #:parent lines #:orientation 'horizontal #:padding 5
-                  #:expand #t)))
+     (media (make <hbox> #:parent lines #:padding 5 #:expand #t)))
     ;; Create 3 images
     (let ((free (string->image free-logo))
           (gnu  (string->image gnu-logo)))

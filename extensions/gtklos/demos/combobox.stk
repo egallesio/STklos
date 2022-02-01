@@ -1,7 +1,7 @@
 ;;;;
 ;;;; combobox.stk   -- GTKlos combobox demo
 ;;;;
-;;;; Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2002-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 17-Jan-2002 20:20 (eg)
-;;;; Last file update: 20-Jun-2021 19:04 (eg)
+;;;; Last file update: 31-Jan-2022 19:56 (eg)
 ;;;;
 
 (include "demos-utils.stk")
@@ -40,7 +40,7 @@ executed when user selects a new value.
                        #:file "combobox"
                        #:width 400
                        #:message *demo-msg*))
-         (box    (make <box> #:orientation 'vertical
+         (box    (make <vbox>
                        #:padding 8
                        #:border-width 10
                        #:parent window))

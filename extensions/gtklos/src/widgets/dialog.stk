@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 15-Feb-2002 16:39 (eg)
-;;;; Last file update: 25-Jan-2022 10:07 (eg)
+;;;; Last file update: 31-Jan-2022 20:17 (eg)
 ;;;;
 
 ;;;
@@ -158,8 +158,7 @@
                   ((warning)  "dialog-warning")
                   (else       (format "~a" type))))  ;;<- convert to string
          (dialog (make <dialog> #:title title #:buttons buttons))
-         (box    (make <box>    #:orientation 'horizontal #:border-width 10
-                                #:padding 20 #:parent dialog))
+         (box    (make <hbox>   #:border-width 10 #:padding 20 #:parent dialog))
          (img    (make <image>  #:icon-name type :icon-size 'huge
                                 #:parent box))
          (msg    (make <label>  #:text message #:parent box)))
