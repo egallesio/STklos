@@ -33,11 +33,10 @@ If everything is correct, you can install the *GTklos* extension with a `make in
 
 ## Getting started
 
-To use the *GTklos* extension you need to require the `"gtklos"` and import the `GTKLOS` module. This can be done with:
+To use the *GTklos* extension you need to import the `(stklos gtklos)` library. This can be done with:
 
 ```scheme
-(require "gtklos")  ;; to load the gtklos.so extension file
-(import GTKLOS)     ;; to acces the GTKLOS exported symols
+(import (stklos gtklos))     ;; to acces the GTKLOS exported symols
 ```
 
 **Content**
