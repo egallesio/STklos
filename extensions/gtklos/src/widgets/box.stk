@@ -1,7 +1,7 @@
 ;;;;
 ;;;; box.stk    -- Vertical and Horizontal GTk Boxes
 ;;;;
-;;;; Copyright © 2001-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+;;;; Copyright © 2001-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-May-2001 15:44 (eg)
-;;;; Last file update: 29-Jun-2021 12:19 (eg)
+;;;; Last file update: 31-Jan-2022 20:16 (eg)
 ;;;;
 
 
@@ -51,10 +51,10 @@
 
 ;;======================================================================
 ;;
-;;                 C l a s s    < b o x >
+;;                 C l a s s    < g t k - b o x >
 ;;
 ;;======================================================================
-(define-class <box> (<gtk-orientable>)
+(define-class <gtk-box> (<gtk-orientable>)
   ((expand             #:accessor       expand
                        #:init-keyword   #:expand
                        #:init-form      #f)
@@ -76,7 +76,7 @@
 ;;;;
 ;;;; Methods for Boxes
 ;;;;
-(define-method container-add! ((cont <box>) widget
+(define-method container-add! ((cont <gtk-box>) widget
                                #:key (expand  (slot-ref cont 'expand))
                                      (fill    (slot-ref cont 'fill))
                                      (padding (slot-ref cont 'padding))
@@ -87,7 +87,7 @@
     (func c w expand fill padding)))
 
 
-(define-method realize-widget ((self <box>) initargs)
+(define-method realize-widget ((self <gtk-box>) initargs)
   (let* ((orient (key-get initargs #:orientation 'vertical))
          (space  (key-get initargs #:spacing 0))
          (box    (gtk-box-new (orientation->int orient) space)))
@@ -96,7 +96,7 @@
 
 
 ;;// FIXME:
-;;//(define-method %container-place ((cont <box>) widget
+;;//(define-method %container-place ((cont <gtk-box>) widget
 ;;//                 #:key (expand  #t expand?)
 ;;//                      (fill    #t fill?)
 ;;//                      (padding 0  padding?))
@@ -113,7 +113,7 @@
 ;;          C O N T A I N E R - I N F O
 ;;
 ;; ======================================================================
-(define-method %container-info ((parent <box>) widget)
+(define-method %container-info ((parent <gtk-box>) widget)
   (let ((w (wid widget))
         (c (wid parent)))
     (list #:parent parent
@@ -130,7 +130,7 @@
 ;                 C l a s s    < h b o x >
 ;
 ;======================================================================
-(define-class <hbox> (<box>)
+(define-class <hbox> (<gtk-box>)
   ())
 
 (define-method initialize ((self <hbox>) initargs)
@@ -142,7 +142,7 @@
 ;                 C l a s s    < v b o x >
 ;
 ;======================================================================
-(define-class <vbox> (<box>)
+(define-class <vbox> (<gtk-box>)
   ())
 
 (define-method initialize ((self <vbox>) initargs)
@@ -194,7 +194,7 @@
 ;;;
 ;;; Module exports
 ;;;
-(export <box>
+(export <gtk-box>
         ;; accessors
         expand fill padding homogeneous spacing orientation
         <hbox> <vbox>)
