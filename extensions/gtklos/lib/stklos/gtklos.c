@@ -1,7 +1,7 @@
 /*
  * gtklos.c              -- Various GTk+ wrappers for GTklos
  *
- * Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 11-Aug-2007 11:38 (eg)
- * Last file update: 16-Jul-2021 12:20 (eg)
+ * Last file update:  1-Feb-2022 13:32 (eg)
  */
 
 
@@ -881,12 +881,12 @@ DEFINE_PRIMITIVE("%polyline-set-points!", goocanv_set_points, subr2, (SCM line, 
  */
 
 
-MODULE_ENTRY_START("stklos-gtklos") {
+MODULE_ENTRY_START("stklos/gtklos") {
 
   SCM gtklos_module;
 
-  /* Create a new module named "stklos-gtklos" */
-  gtklos_module = STk_create_module(STk_intern("GTKLOS"));
+  /* Create a new module named "stklos/gtklos" */
+  gtklos_module = STk_create_module(STk_intern("stklos/gtklos"));
 
    /* Create a new type for GTK events */
   tc_gtk_event = STk_new_user_type(&xtype_gtk_event);

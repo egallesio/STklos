@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update: 27-Jan-2022 11:05 (eg)
+### Last file update:  1-Feb-2022 13:24 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -482,7 +482,7 @@ else
 fi
 
 if test "X${GOOVERS}" != "X"
-then 
+then
    GTK_CFLAGS=`${PKGCONFIG} --cflags ${GOOVERS}`
    HAVE_GTK=1
    HAVE_CANVAS=1
@@ -601,10 +601,10 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           extensions/Makefile
 
           extensions/gtklos/Makefile
-          extensions/gtklos/src/Makefile
+          extensions/gtklos/lib/stklos/Makefile
+          extensions/gtklos/lib/stklos/gtklos-config.h
+          extensions/gtklos/lib/stklos/gtklos.stk
           extensions/gtklos/demos/Makefile
-          extensions/gtklos/src/gtklos-config.h
-          extensions/gtklos/src/gtklos.stk
 
           extensions/stklos-fuse/Makefile
           extensions/stklos-fuse/src/Makefile

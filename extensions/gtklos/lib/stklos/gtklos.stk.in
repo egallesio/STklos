@@ -2,7 +2,7 @@
 ;;;;
 ;;;; gtklos.stk         -- GTklos extension
 ;;;;
-;;;; Copyright © 2021 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,11 +22,11 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 10-Jun-2021 11:58
-;;;; Last file update: 16-Jul-2021 12:18 (eg)
+;;;; Last file update:  1-Feb-2022 11:06 (eg)
 ;;;;
 
 
-(select-module GTKLOS)
+(select-module stklos/gtklos)
 
 (%compile-time-define %gtk-get-property %gtk-set-property!
                       %readline-idle-hook get-gtk-event
@@ -92,4 +92,4 @@
 (include "canvas/goo-@GOOCANV@.stk")
 
 
-(provide "gtklos")
+(provide "stklos/gtklos")

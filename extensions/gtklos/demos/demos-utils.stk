@@ -21,19 +21,20 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 24-Jul-2001 16:19 (eg)
-;;;; Last file update: 31-Jan-2022 19:56 (eg)
+;;;; Last file update:  1-Feb-2022 13:47 (eg)
 ;;;;
 
 
 ;;;; Adapt the load-path.
 (when-load-and-compile
  (let ((path (load-path)))
-   (unless (member "../src" path)
-     (load-path `("../src"  ,@path)))))
+   (unless (member "../lib" path)
+     (load-path `("../lib"  ,@path)))))
 
-;;; load GTklos
-(require "gtklos")
-(import GTKLOS)
+(import (stklos gtklos))
+
+
+
 
 ;;;;
 ;;;; Utilities

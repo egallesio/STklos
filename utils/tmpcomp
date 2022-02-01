@@ -2,7 +2,7 @@
 #
 # tmpcomp       -- A temporary script to bootstrap the system
 #
-# Copyright © 2002-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2002-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 #
 # This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  1-Jan-2002 18:57 (eg)
-# Last file update: 10-Oct-2021 17:01 (eg)
+# Last file update:  1-Feb-2022 10:59 (eg)
 #
 
 # This script is only used to compile the different components of the
@@ -68,7 +68,11 @@ else
     if test -f ../../src/boot.img ;then
         prefix="../.."
     else
-        prefix="../../.."
+        if test -f ../../../src/boot.img ;then
+            prefix="../../.."
+        else
+            prefix="../../../.."
+        fi
     fi
 fi
 

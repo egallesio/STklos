@@ -1,6 +1,6 @@
 # Makefile for STklos GTklos extension
 #
-# Copyright © 2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 16-Jul-2021 17:37 (eg)
+# Last file update:  1-Feb-2022 10:31 (eg)
 
 EXTENSION=gtklos
 
@@ -43,13 +43,13 @@ SCM_SRCS = lib/events.stk lib/libs.stk lib/utils.stk                     \
 
 #======================================================================
 OUT            = $(EXTENSION).@SH_SUFFIX@
-schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@
-schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@
+schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@/stklos
+schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@/stklos
 
 GTKFLAGS       = @GTK_CFLAGS@
 
 #======================================================================
-BASEDIR= ../../..
+BASEDIR= ../../../..
 COMP ?= $(BASEDIR)/utils/tmpcomp
 STKLOS_BINARY ?= $(BASEDIR)/src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
