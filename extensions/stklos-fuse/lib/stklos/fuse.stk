@@ -22,10 +22,10 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  7-Dec-2005 16:24 (eg)
-;;;; Last file update: 25-Jan-2022 14:18 (eg)
+;;;; Last file update:  1-Feb-2022 17:23 (eg)
 ;;;;
 
-(select-module FUSE)
+(select-module stklos/fuse)
 
 (%compile-time-define %fuse-mount *all-errno-symbols*)
 
@@ -79,4 +79,4 @@
 
 (eval `(export ,@*all-errno-symbols*))
 
-(provide "stklos-fuse")
+(provide "stklos/fuse")

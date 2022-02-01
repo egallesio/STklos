@@ -2,7 +2,7 @@
  *
  * fuse.c                       -- Interface wrapper for FUSE
  *
- * Copyright © 2005-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2005-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  7-Dec-2005 11:30 (eg)
- * Last file update: 13-Jul-2021 16:30 (eg)
+ * Last file update:  1-Feb-2022 17:31 (eg)
  */
 
 
@@ -35,7 +35,7 @@
 
 /* ---------------------------------------------------------------------- */
 #include "stklos.h"
-#include "stklos-fuse-incl.c"
+#include "fuse-incl.c"
 
 static struct user_operations {
   SCM getattr;
@@ -1091,9 +1091,9 @@ static void init_posix_modes(SCM module)
  *
  * ----------------------------------------------------------------------
  */
-MODULE_ENTRY_START("stklos-fuse")
+MODULE_ENTRY_START("stklos/fuse")
 {
-  SCM module = STk_create_module(STk_intern("FUSE"));
+  SCM module = STk_create_module(STk_intern("stklos/fuse"));
 
   ADD_PRIMITIVE_IN_MODULE(f_mount, module);
   init_posix_errno(module);   // Some names are in fact Linux and not POSIX

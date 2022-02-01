@@ -1,6 +1,6 @@
 # Makefile for STklos GTklos extension
 #
-# Copyright © 2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2021-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,19 +19,19 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 12-May-2021 06:54 (eg)
-# Last file update: 13-Jul-2021 12:42 (eg)
+# Last file update:  1-Feb-2022 17:29 (eg)
 
-EXTENSION=stklos-fuse
+EXTENSION=fuse
 
-SCM_SRCS = stklos-fuse.stk
+SCM_SRCS = fuse.stk
 
 #======================================================================
 OUT            = $(EXTENSION).@SH_SUFFIX@
-schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@
-schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@
+schemedir      = $(prefix)/share/@PACKAGE@/@VERSION@/stklos
+schemelibdir   = $(prefix)/lib/@PACKAGE@/@VERSION@/stklos
 
 #======================================================================
-BASEDIR= ../../..
+BASEDIR= ../../../..
 COMP ?= $(BASEDIR)/utils/tmpcomp
 STKLOS_BINARY ?= $(BASEDIR)/src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
