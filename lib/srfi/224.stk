@@ -1,0 +1,695 @@
+;;;;
+;;;; srfi-224.stk         -- SRFI-224: Integer Mappings
+;;;;
+;;;; Copyright © 2022 Jeronimo Pellegrini <j_p@aleph0.info>
+;;;;
+;;;;
+;;;; This program is free software; you can redistribute it and/or modify
+;;;; it under the terms of the GNU General Public License as published by
+;;;; the Free Software Foundation; either version 3 of the License, or
+;;;; (at your option) any later version.
+;;;;
+;;;; This program is distributed in the hope that it will be useful,
+;;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;;;; GNU General Public License for more details.
+;;;;
+;;;; You should have received a copy of the GNU General Public License
+;;;; along with this program; if not, write to the Free Software
+;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+;;;; USA.
+;;;;
+;;;;
+;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
+;;;;    Creation date: 05-Jan-2022 11:03
+;;;; Last file update: 08-Jan-2022 06:21
+;;;;
+
+;;; The comments before each section explain how each procedure was
+;;; implemented (C, Scheme or C + Scheme).
+
+
+;; The core of this SRFI is implemented in the "itrie" module:
+
+(require "itrie")
+
+(define-module srfi/224
+  (import itrie
+          (srfi 128))
+
+  (%compile-time-define %fxmapping-intersection
+                        %fxmapping-difference
+                        %fxmapping-union
+                        %trie-compare
+                        %fxmapping-map
+                        fxmapping-mutable?)
+
+   (export <fxmapping>
+          ;;;
+          ;;; Constructors
+          ;;;
+          fxmapping
+          fxmapping-unfold
+          fxmapping-accumulate
+          alist->fxmapping
+          alist->fxmapping/combinator
+
+          ;;;
+          ;;; Predicates
+          ;;;
+          fxmapping?
+          fxmapping-contains?
+          fxmapping-empty?
+          fxmapping-disjoint?
+
+          ;;;
+          ;;; Accessors
+          ;;;
+          fxmapping-ref
+          fxmapping-ref/default
+          fxmapping-min
+          fxmapping-max
+
+          ;;;
+          ;;; Updaters
+          ;;;
+          fxmapping-adjoin
+          fxmapping-adjoin/combinator
+          fxmapping-set
+          fxmapping-adjust
+          fxmapping-delete
+          fxmapping-delete-all
+          fxmapping-update
+          fxmapping-alter
+          fxmapping-delete-min
+          fxmapping-delete-max
+          fxmapping-update-min
+          fxmapping-update-max
+          fxmapping-pop-min
+          fxmapping-pop-max
+
+          ;;;
+          ;;; The whole fxmapping
+          ;;;
+          fxmapping-size
+          fxmapping-find
+          fxmapping-count
+          fxmapping-any?
+          fxmapping-every?
+
+          ;;;
+          ;;; Traversal
+          ;;;
+          fxmapping-fold
+          fxmapping-fold-right
+          fxmapping-map
+          fxmapping-map->list
+          fxmapping-relation-map
+          fxmapping-for-each
+
+          ;;;
+          ;;; Filter
+          ;;;
+          fxmapping-filter
+          fxmapping-remove
+          fxmapping-partition
+
+          ;;;
+          ;;; Conversion
+          ;;;
+          fxmapping->alist
+          fxmapping->decreasing-alist
+          fxmapping-keys
+          fxmapping-values
+          fxmapping->generator
+          fxmapping->decreasing-generator
+
+          ;;;
+          ;;; Comparison
+          ;;;
+          fxmapping=?
+          fxmapping<?
+          fxmapping>?
+          fxmapping<=?
+          fxmapping>=?
+
+          ;;;
+          ;;; Set theory operations
+          ;;;
+          fxmapping-union
+          fxmapping-intersection
+          fxmapping-difference
+          fxmapping-xor
+          fxmapping-union/combinator
+          fxmapping-intersection/combinator
+
+          ;;;
+          ;;; Submappings
+          ;;;
+          fxmapping-open-interval
+          fxmapping-closed-interval
+          fxmapping-open-closed-interval
+          fxmapping-closed-open-interval
+          fxsubmapping=
+          fxsubmapping<
+          fxsubmapping<=
+          fxsubmapping>=
+          fxsubmapping>
+          fxmapping-split)
+
+;; From SRFI-158.
+;; Instead of loading it as a dependency, just add this piece here.
+(define (make-coroutine-generator proc)
+  (define return #f)
+  (define resume #f)
+  (define (yield v)
+    (call/cc (lambda (r) (set! resume r) (return v))))
+  (lambda ()
+    (call/cc
+     (lambda (cc)
+       (set! return cc)
+       (if resume
+           (resume (if #f #f))
+           (begin (proc yield)
+                  (set! resume (lambda (v) (return (eof-object))))
+                  (return (eof-object))))))))
+
+(define (fold kons knil lis1 . lists)
+  (if (pair? lists)
+      (let lp ((lists (cons lis1 lists)) (ans knil))    ; N-ary case
+    (receive (cars+ans cdrs) (%cars+cdrs+ lists ans)
+      (if (null? cars+ans) ans ; Done.
+          (lp cdrs (apply kons cars+ans)))))
+
+      (let lp ((lis lis1) (ans knil))           ; Fast path
+    (if (null? lis) ans
+        (lp (cdr lis) (kons (car lis) ans))))))
+
+(define (check-args pred? type . args)
+  (for-each (lambda (x)
+              (when (not (pred? x))
+                (error (string-append "bad "
+                                      (symbol->string type))
+                       x)))
+            args)
+  #t)
+
+;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; STklos-specific
+;;;
+;;;;;;;;;;;;;;;;;;;;
+  
+(define (describe-fxmapping x port)
+  (format port "a ~a fxmapping, with ~a elements."
+          (if (fxmapping-mutable? x) "mutable" "constant")
+          (fxmapping-size x)))
+
+(%user-type-proc-set! 'fxmapping 'describe describe-fxmapping)
+
+;; Customize "class-of"
+(define-class <fxmapping> (<top>) ())
+(export <fxmapping>)
+
+(%user-type-proc-set! 'fxmapping 'class-of <fxmapping>)
+
+;; Reader for tries
+;; (define (read-fxmap . args)
+;;   (cond ((null? args) (fxmapping))
+;;         ((pair? (car args)) (apply fxmapping (flatten args)))
+;;         (else (apply fxmaping args))))
+(define-reader-ctor '<fxmapping> fxmapping)
+
+;;;;;;;;;;;;;;;;
+;;;
+;;; Contructors
+;;;
+;;;;;;;;;;;;;;;;
+
+;; fxmapping                     C
+;; fxmapping-unfold              Scheme
+;; fxmapping-accumulate          Scheme
+;; alist->fxmapping              C
+;; alist->fxmapping/combinator   C
+
+(define (fxmapping-unfold stop? mapper successor . seeds)
+  (check-args procedure? 'procedure stop? mapper successor)
+  (let Loop ((fxmap (fxmapping)) (seeds seeds))
+    (if (apply stop? seeds)
+        fxmap
+        (let-values (((k v) (apply mapper seeds))
+                     (seeds (apply successor seeds)))
+          (Loop (fxmapping-adjoin fxmap k v)
+                seeds)))))
+
+;; Translated from the reference implementation
+(define (fxmapping-accumulate proc . seeds)
+  (check-args procedure? 'procedure proc)
+  (if (null? (cdr seeds))
+      (call/cc (lambda (k)
+                 (let loop ((m (fxmapping))
+                            (seed (car seeds)))
+                   (let-values (((k v new-seed)
+                                 (proc (lambda args (apply k m args))
+                                       seed)))
+                     (loop (fxmapping-adjoin m k v) new-seed)))))
+      (call/cc (lambda (k)
+                 (let loop ((m (fxmapping))
+                            (seeds seeds))
+                   (let-values (((k v . new-seeds)
+                                 (apply proc
+                                        (lambda args (apply k m args))
+                                        seeds)))
+                     (loop (fxmapping-adjoin m k v) new-seeds)))))))
+
+;;;;;;;;;;;;;;;
+;;;
+;;; Predicates
+;;;
+;;;;;;;;;;;;;;;
+
+;; fxmapping?           C
+;; fxmapping-contains?  Scheme
+;; fxmapping-empty?     C
+;; fxmapping-disjoint?  C
+
+(define (fxmapping-contains? fxmap k)
+    (let ((def (gensym)))
+      (not (eqv? def (fxmapping-ref/default fxmap k def)))))
+
+
+;;;;;;;;;;;;;;
+;;;
+;;; Accessors
+;;;
+;;;;;;;;;;;;;;
+
+
+;; fxmapping-ref          Scheme
+;; fxmapping-ref/default  C
+;; fxmapping-min          C
+;; fxmapping-max          C
+
+(define (fxmapping-ref fxmap k
+                       :optional
+                       (failure (lambda () (error "key not found and no failure procedure given")))
+                       (success values))
+  (check-args procedure? 'procedure success failure)
+  (let ((def (gensym)))
+    (let ((v (fxmapping-ref/default fxmap k def)))
+      (if (eq? v def)
+          (failure)
+          (success v)))))
+
+
+;;;;;;;;;;;;;
+;;;
+;;; Updaters
+;;;
+;;;;;;;;;;;;;
+
+
+;; fxmapping-adjoin            C
+;; fxmapping-adjoin/combinator C
+;; fxmapping-set               C
+;; fxmapping-adjust            C
+;; fxmapping-delete            Scheme
+;; fxmapping-delete-all        Scheme
+;; fxmapping-update            Scheme
+;; fxmapping-alter             Scheme
+;; fxmapping-delete-min        C
+;; fxmapping-delete-max        C
+;; fxmapping-update-min        Scheme
+;; fxmapping-update-max        Scheme
+;; fxmapping-pop-min           C
+;; fxmapping-pop-max           C
+
+;; Adapted from the reference implementation:
+(define (fxmapping-delete-all fxmap keys)
+  (when (not (or (pair? keys) (null? keys)))
+    (error "bad list ~S" keys))
+  (let ((key-map  (fxmapping-unfold null?
+                                    (lambda (ks) (values (car ks) #t))
+                                    cdr
+                                    keys)))
+    (fxmapping-remove (lambda (k _) (fxmapping-contains? key-map k))
+                      fxmap)))
+
+(define (fxmapping-delete fxmap . keys)
+     (fxmapping-delete-all fxmap keys))
+
+;; FIXME:
+;; first runs fxmapping-ref then does another
+;; operation on the trie. could be combined...
+(define (fxmapping-alter fxmap k failure success)
+  (define (replace new-val) (fxmapping-set fxmap k new-val))
+  (define (delete)          (fxmapping-delete fxmap k))
+  (define (insert  new-val) (fxmapping-adjoin fxmap k new-val))
+  (define (ignore)          fxmap)
+  (check-args procedure? 'procedure failure success)
+  (let ((mark (cons 1 1)))
+    (let ((v (fxmapping-ref/default fxmap k mark)))
+      (if (eq? v mark)
+        (failure insert ignore)
+        (success k v replace delete)))))
+      
+(define (fxmapping-update fxmap k proc
+                          :optional (failure
+                                     (lambda () (error "key not found and no failure procedure given"))))
+  (define (replace new-val) (fxmapping-set fxmap k new-val))
+  (define (delete)          (fxmapping-delete fxmap k))
+  (check-args procedure? 'procedure proc failure)
+  (let ((mark (cons 1 1)))
+    (let ((v (fxmapping-ref/default fxmap k mark)))
+      (if (eq? v mark)
+          (failure)
+          (proc k v replace delete)))))
+
+(define (fxmapping-update-min fxmap proc)
+  (check-args procedure? 'procedure proc)
+  (when (fxmapping-empty? fxmap)
+    (error "cannot update minimum of empty fxmapping"))
+  (let-values (((k v) (fxmapping-min fxmap)))
+    (define (delete) (fxmapping-delete-min fxmap))
+    (define (replace new-val) (fxmapping-set fxmap k new-val))
+    (proc k v replace delete)))
+
+(define (fxmapping-update-max fxmap proc)
+  (check-args procedure? 'procedure proc)
+  (when (fxmapping-empty? fxmap)
+    (error "cannot update minimum of empty fxmapping"))
+  (let-values (((k v) (fxmapping-max fxmap)))
+    (define (delete) (fxmapping-delete-max fxmap))
+    (define (replace new-val) (fxmapping-set fxmap k new-val))
+    (proc k v replace delete)))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; The whole fxmapping
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; fxmapping-size   C
+;; fxmapping-find   Scheme
+;; fxmapping-count  Scheme
+;; fxmapping-any?   Scheme
+;; fxmapping-every? Scheme
+
+(define (fxmapping-find pred? map failure
+                        :optional (success values))
+  (check-args procedure? 'procedure success failure)
+  (let ((res #f))
+    (if (call/cc (lambda (return)
+                   ;; filter would go through all the set. we do
+                   ;; for-each and jump out when we find the element!
+                   (fxmapping-for-each (lambda (k v)
+                                         (when (pred? k v)
+                                           ;; set res to a pair with the values!
+                                           (set! res (cons k v))
+                                           (return #t)))
+                                       map)
+                   #f))
+        (success (car res) (cdr res)) ;; return was called, res was set, call/cc returned #t
+        (failure))))                  ;; return was not called, call/cc returned #f
+
+(define (fxmapping-count pred s)
+  (let ((c 0))
+    (%fxmapping-map (lambda (x y)
+                 (when (pred x y) (set! c (+ 1 c))))
+               s
+               #f)
+    c))
+
+
+(define (fxmapping-any? proc s)
+  (check-args procedure? 'procedure proc)
+  (call/cc (lambda (kont)
+             (%fxmapping-map (lambda (key value)
+                               (when (proc key value)
+                                 (kont #t)) #void)
+                             s
+                             #f)
+             #f)))
+
+(define (fxmapping-every? proc s)
+  (check-args procedure? 'procedure proc)
+  (call/cc (lambda (kont)
+             (%fxmapping-map (lambda (key value)
+                               (when (not (proc key value))
+                                 (kont #f)) #void)
+                             s
+                             #f)
+             #t)))
+
+;;;;;;;;;;;;;;
+;;;
+;;; Traversal
+;;;
+;;;;;;;;;;;;;;
+
+;; fxmapping-fold          C
+;; fxmapping-fold-right    C
+;; fxmapping-map           C + Scheme
+;; fxmapping-map->list     Scheme
+;; fxmapping-relation-map  Scheme
+;; fxmapping-for-each      C + Scheme
+
+(define (fxmapping-map->list proc fxmap)
+  (check-args procedure? 'procedure proc)
+  (fxmapping-fold-right (lambda (k v lst)
+                          (cons (proc k v) lst))
+                        '()
+                        fxmap))
+
+(define (fxmapping-relation-map proc fxmap)
+  (check-args procedure? 'procedure proc)
+  (fxmapping-fold-right (lambda (k v new)
+                          (let-values (((new-k new-v)
+                                        (proc k v)))
+                            (fxmapping-adjoin new new-k new-v)))
+                        (fxmapping)
+                        fxmap))
+
+(define (fxmapping-map proc set)
+  (%fxmapping-map proc set #t))
+
+(define (fxmapping-for-each proc set)
+  (%fxmapping-map proc set #f))
+
+
+;;;;;;;;;;;
+;;;
+;;; Filter
+;;;
+;;;;;;;;;;;
+
+;; fxmapping-filter    C
+;; fxmapping-remove    Scheme
+;; fxmapping-partition C
+
+(define (fxmapping-remove pred? fxmap)
+  (check-args procedure? 'procedure pred?)
+  (fxmapping-filter (lambda (k v) (not (pred? k v)))
+                    fxmap))
+
+;;;;;;;;;;;;;;;
+;;;
+;;; Conversion
+;;;
+;;;;;;;;;;;;;;;
+
+;; fxmapping->alist                C
+;; fxmapping->decreasing-alist     Scheme
+;; fxmapping-keys                  Scheme
+;; fxmapping-values                Scheme
+;; fxmapping->generator            Scheme
+;; fxmapping->decreasing-generator Scheme
+
+(define (fxmapping->decreasing-alist map)
+  (fxmapping-fold (lambda (k v lst) (cons (cons k v) lst))
+                  '()
+                  map))
+
+(define (fxmapping-keys map)
+  (fxmapping-fold-right (lambda (k _ lst) (cons k lst)) '() map))
+
+(define (fxmapping-values map)
+  (fxmapping-fold-right (lambda (_ v lst) (cons v lst)) '() map))
+
+
+;; The two folloging procedures are taken from the reference implementation
+;; of SRFI-224.
+(define (fxmapping->generator fxmap)
+  (make-coroutine-generator
+   (lambda (yield)
+     (fxmapping-fold (lambda (k v _) (yield (cons k v)))
+                     #f
+                     fxmap))))
+
+(define (fxmapping->decreasing-generator fxmap)
+  (make-coroutine-generator
+   (lambda (yield)
+     (fxmapping-fold-right (lambda (k v _) (yield (cons k v)))
+                           #f
+                           fxmap))))
+
+;;;;;;;;;;;;;;;
+;;;
+;;; Comparison
+;;;
+;;;;;;;;;;;;;;;
+
+;; fxmapping=?  Scheme
+;; fxmapping<?  Scheme
+;; fxmapping>?  Scheme
+;; fxmapping<=? Scheme
+;; fxmapping>=? Scheme
+
+;;; NOTE: the %trie-compare function, written in C,
+;;; returns:
+;;
+;; -1 if s is subset of t
+;;  0 if s is equal to t
+;; +1 if s is superset of t
+;; +2 if s and t are disjoint
+;;
+
+(define (%fxmapping-cmp op proc args)
+  (for-each (lambda (x)
+              (when (not (fxmapping? x)) (error "bad fxmapping ~S" x)))
+            args)
+  (if (< (length  args) 2)
+      #t
+      (let loop ((maps args))
+        (cond ((null? (cdr maps)) #t)
+              ((op (%trie-compare (car maps) (cadr maps) proc))
+               (loop (cdr maps)))
+              (else #f)))))
+
+(define (fxmapping=?  comp . args)
+  (%fxmapping-cmp zero? (comparator-equality-predicate comp) args))
+(define (fxmapping<?  comp . args)
+  (%fxmapping-cmp (lambda (x) (fx=? -1 x))
+                  (comparator-equality-predicate comp) args))
+(define (fxmapping>?  comp . args)
+  (%fxmapping-cmp (lambda (x) (fx=? +1 x))
+                  (comparator-equality-predicate comp) args))
+(define (fxmapping<=? comp . args)
+  (%fxmapping-cmp (lambda (x)
+                    (or (fx=? -1 x)
+                        (zero? x)))
+                  (comparator-equality-predicate comp) args))
+(define (fxmapping>=? comp . args)
+  (%fxmapping-cmp (lambda (x)
+                    (or (fx=? +1 x)
+                        (zero? x)))
+                  (comparator-equality-predicate comp) args))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Set theory operations
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; fxmapping-union                   C + Scheme 
+;; fxmapping-intersection            C + Scheme 
+;; fxmapping-difference              C + Scheme 
+;; fxmapping-xor                     C
+;; fxmapping-union/combinator        C + Scheme
+;; fxmapping-intersection/combinator C + Scheme
+
+(define (fxmapping-union . args)
+  (if (null? args)
+      (fxmapping)
+      (%fxmapping-union #f
+                        (car args)
+                        (apply fxmapping-union (cdr args)))))
+
+(define (fxmapping-union/combinator proc . args)
+  (if (null? args)
+      (fxmapping)
+      (%fxmapping-union proc
+                        (car args)
+                        (apply fxmapping-union/combinator (cons proc (cdr args))))))
+
+
+(define (fxmapping-difference . args)
+  (if (null? args)
+      (fxmapping)
+      (%fxmapping-difference (car args)
+                        (apply fxmapping-difference (cdr args)))))
+
+(define (fxmapping-intersection . args)
+  (if (null? args)
+      (fxmapping)
+      (fold (lambda (a b)
+              (%fxmapping-intersection #f a b))
+            (car args) (cdr args))))
+
+(define (fxmapping-intersection/combinator proc . args)
+  (when (not (procedure? proc)) (error "bad procedure ~S" proc))
+  (if (null? args)
+      (fxmapping)
+      (fold (lambda (a b)
+              ;; invert arguments to proc!
+              (%fxmapping-intersection proc b a))
+            (car args) (cdr args))))
+
+
+;;;;;;;;;;;;;;;;
+;;;
+;;; Submappings
+;;;
+;;;;;;;;;;;;;;;;
+
+;; fxmapping-open-interval         Scheme
+;; fxmapping-closed-interval       Scheme
+;; fxmapping-open-closed-interval  Scheme
+;; fxmapping-closed-open-interval  Scheme
+;; fxsubmapping=                   Scheme
+;; fxsubmapping<                   Scheme
+;; fxsubmapping<=                  Scheme
+;; fxsubmapping>=                  Scheme
+;; fxsubmapping>                   Scheme
+;; fxmapping-split                 Scheme
+
+(define (fxmapping-open-interval map lo hi)
+  (fxmapping-filter (lambda (x _) (fx< lo x hi)) map))
+
+(define (fxmapping-closed-interval map lo hi)
+  (fxmapping-filter (lambda (x _) (fx<= lo x hi)) map))
+
+(define (fxmapping-open-closed-interval map lo hi)
+  (fxmapping-filter (lambda (x _) (and (fx< lo x)
+                                  (fx<= x hi)))
+                    map))
+
+(define (fxmapping-closed-open-interval map lo hi)
+  (fxmapping-filter (lambda (x _) (and (fx<= lo x)
+                                  (fx< x hi)))
+               map))
+
+(define (fxsubmapping= map k)
+  (fxmapping-filter (lambda (x _) (fx= k x)) map))
+  
+(define (fxsubmapping< map k)
+  (fxmapping-filter (lambda (x _) (fx< x k)) map))
+
+(define (fxsubmapping<= map k)
+  (fxmapping-filter (lambda (x _) (fx<= x k)) map))
+
+(define (fxsubmapping> map k)
+  (fxmapping-filter (lambda (x _) (fx> x k)) map))
+
+(define (fxsubmapping>= map k)
+  (fxmapping-filter (lambda (x _) (fx>= x k)) map))
+
+(define (fxmapping-split map k)
+  (fxmapping-partition
+   (lambda (x _) (<= x k)) map))
+
+)
+
+(provide "srfi/224")
