@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  2-Jan-2022 15:26 (eg)
-# Last file update: 16-Jan-2022 17:20 (eg)
+# Last file update:  2-Feb-2022 19:40 (eg)
 
 #======================================================================
 
@@ -28,34 +28,57 @@ STKLOS_BINARY ?= ../../src/stklos
 STKLOS_FLAGS   = --no-init-file --case-sensitive
 SO = @SH_SUFFIX@
 
+#
+# Libraries written in Scheme only
+#
 SRC_STK = preproc.stk
-SRC_C   =
 
-scheme_OBJS = preproc.ostk
+SRC_OSTK = preproc.ostk
 
+#
+# Libraries written in C and Scheme
+#
+SRC_C     = itrie.c
+SRC_C_STK = itrie.stk
+SRC_SHOBJ = itrie.$(SO)
+
+scheme_OBJS = $(SRC_OSTK) $(SRC_SHOBJ)
 
 DOCDB  = ../DOCDB
-SOURCES= $(SRC_C) $(SRC_STK)
+BASEDIR= ../..
+SOURCES= $(SRC_C) $(SRC_STK) $(SRC_C_STK)
 
 #======================================================================
 schemedir       = $(prefix)/share/@PACKAGE@/@VERSION@/stklos
+schemelibdir    = $(prefix)/lib/@PACKAGE@/@VERSION@/stklos
+scheme_DATA     = $(SRC_OSTK)
+schemelib_DATA  = $(SRC_SHOBJ)
 scheme_sources  = $(SRC_STK)
-scheme_DATA     = $(scheme_OBJS)
-
 #======================================================================
-SUFFIXES = .stk .ostk
+SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
+
 .stk.ostk:
 	$(COMP) -o $*.ostk $*.stk
 
-.scm.ostk:
-	$(COMP) -o $*.ostk $*.scm
-#======================================================================
+.stk-incl.c:
+	$(COMP) -C -o $*-incl.c $*.stk
 
+.c.$(SO) :
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
+	-c -o $*.o $*.c
+	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
+	/bin/rm -f $*.o
+#======================================================================
+# Dependencies
+
+itrie.$(SO): itrie-incl.c itrie.c
+
+# ======================================================================
 install-sources:
 	install $(scheme_sources) $(schemedir)
 
 clean:
-	rm -f $(scheme_OBJS)  *~
+	rm -f $(scheme_OBJS) *-incl.c  *~
 
 distclean: clean
 	/bin/rm -f Makefile

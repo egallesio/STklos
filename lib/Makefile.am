@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  2-Jan-2022 15:34 (eg)
+# Last file update:  2-Feb-2022 19:30 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme srfi stklos
@@ -134,9 +134,9 @@ scheme_OBJS = compfile.ostk     \
           tar.ostk              \
           trace.ostk
 
-SRC_C     = itrie.c
-SRC_C_STK = itrie.stk
-SRC_SHOBJ = itrie.$(SH_SUFFIX)
+SRC_C     = 
+SRC_C_STK = 
+SRC_SHOBJ = 
 
 
 

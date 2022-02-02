@@ -22,7 +22,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 02-Jan-2022 18:41
- * Last file update:  2-Feb-2022 19:01 (eg)
+ * Last file update:  2-Feb-2022 19:35 (eg)
  */
 
 
@@ -682,7 +682,7 @@ trie_height_aux(SCM trie) {
 }
 
 /*
-<doc fxmapping-height
+<doc EXT fxmapping-height
  * (fxmapping-height trie)
  *
  * Returns the height of the internal trie of an fxmap. The
@@ -697,7 +697,7 @@ DEFINE_PRIMITIVE("fxmapping-height", trie_fxmap_height, subr1, (SCM trie))
 }
 
 /*
-<doc iset-height
+<doc EXT iset-height
  * (iset-height trie)
  *
  * Returns the height of the internal trie of an iset. The
@@ -2054,7 +2054,7 @@ trie_intersection (SCM proc, SCM s, SCM t, int existence) {
  */
 
 /*
-<doc fxmapping constant-fxmapping
+<doc EXT fxmapping constant-fxmapping
  * (fxmapping k1 v1 k2 v2 ... kn vn)
  * (constant-fxmapping k1 v1 k2 v2 ... kn vn)
  *
@@ -2078,7 +2078,7 @@ DEFINE_PRIMITIVE("constant-fxmapping", trie_constant_fxmap, vsubr, (int argc, SC
 }
 
 /*
-<doc iset constant-iset
+<doc EXT iset constant-iset
  * (iset n1 n2 ... nk)
  * (constant-iset n1 n2 ... nk)
  *
@@ -2101,7 +2101,7 @@ DEFINE_PRIMITIVE("constant-iset", trie_constant_iset, vsubr, (int argc, SCM *arg
 }
 
 /*
-<doc alist->fxmapping
+<doc EXT alist->fxmapping
  * (alist->fxmapping alist) → fxmapping
  *
  * Returns a newly allocated fxmapping containing the associations of
@@ -2125,7 +2125,7 @@ doc>
 */
 
 /*
-<doc iset-unfold
+<doc EXT iset-unfold
  * (iset-unfold stop? mapper successor seed)
  *
  * Create a newly allocated iset as if by iset. If the result of
@@ -2146,7 +2146,7 @@ doc>
 */
 
 /*
-<doc make-range-iset
+<doc EXT make-range-iset
  * (make-range-iset start end [step])
  *
  * Returns a newly allocated iset specified by an inclusive lower bound
@@ -2189,7 +2189,7 @@ DEFINE_PRIMITIVE("%itrie?", triep, subr1, (SCM obj)) {
 
 
 /*
-<doc SRFI-224 fxmapping?
+<doc EXT SRFI-224 fxmapping?
  * (fxmapping? obj)
  *
  * Returns |#t| is |obj| is an fxmapping object and |#f| otherwise.
@@ -2201,7 +2201,7 @@ DEFINE_PRIMITIVE("fxmapping?", fxmapp, subr1, (SCM obj)) {
 
 
 /*
-<doc SRFI-217 iset?
+<doc EXT SRFI-217 iset?
  * (iset? obj)
  *
  * Returns |#t| is |obj| is an iset and |#f| otherwise.
@@ -2213,7 +2213,7 @@ DEFINE_PRIMITIVE("iset?", isetp, subr1, (SCM obj)) {
 
 
 /*
-<doc SRFI-224 fxmapping-empty?
+<doc EXT SRFI-224 fxmapping-empty?
  * (fxmapping-empty? obj)
  *
  * Returns |#t| is |obj| is an empty fxmapping and |#f| if it
@@ -2227,7 +2227,7 @@ DEFINE_PRIMITIVE("fxmapping-empty?", trie_fxmap_empty_p, subr1, (SCM obj)) {
 }
 
 /*
-<doc SRFI-217 iset-empty?
+<doc EXT SRFI-217 iset-empty?
  * (iset-empty? obj)
  *
  * Returns |#t| is |obj| is an empty iset and |#f| if it
@@ -2266,7 +2266,7 @@ DEFINE_PRIMITIVE("iset-mutable?", trie_iset_mutable_p, subr1, (SCM obj)) {
 }
 
 /*
-<doc fxmapping-contains?
+<doc EXT fxmapping-contains?
  * (fxmapping-contains? map element)
  *
  * Returns true if |map| contains an association for |element|, and false otherwise.
@@ -2274,7 +2274,7 @@ doc>
  */
 
 /*
-<doc iset-contains?
+<doc EXT iset-contains?
  * (iset-contains? set element)
  *
  * Returns true if |set| contains |element|, and false otherwise.
@@ -2289,7 +2289,7 @@ DEFINE_PRIMITIVE("iset-contains?", trie_iset_contains, subr2, (SCM trie, SCM key
 }
 
 /*
-<doc iset-disjoint?
+<doc EXT iset-disjoint?
  * (iset-disjoint? iset1 iset2)
  *
  * Returns |#t| if |iset1| and |iset2| have no elements in common and |#f| otherwise.
@@ -2333,7 +2333,7 @@ DEFINE_PRIMITIVE("fxmapping-disjoint?",trie_fxmap_disj, subr2, (SCM s, SCM t))
 
 
 /*
-<doc fxmapping-ref/default
+<doc EXT fxmapping-ref/default
  * (fxmapping-ref/default map k obj)
  *
  * If an association |(k, v)| occurs in |map|, returns |v|. Otherwise, returns |obj|.
@@ -2355,7 +2355,7 @@ DEFINE_PRIMITIVE("fxmapping-ref/default", trie_fxmap_refdef, subr23, (SCM trie, 
 }
 
 /*
-<doc iset-member
+<doc EXT iset-member
  * (iset-member element set default)
  *
  * Returns the element of |set| that is equal to |element|. If |element| is not a member
@@ -2372,7 +2372,7 @@ DEFINE_PRIMITIVE("iset-member", trie_iset_member, subr3, (SCM trie, SCM key, SCM
 
 
 /*
-<doc iset-min iset-max
+<doc EXT iset-min iset-max
  * (iset-min set)
  * (iset-max set)
  *
@@ -2430,7 +2430,7 @@ DEFINE_PRIMITIVE("iset-max", trie_iset_max, subr1, (SCM trie))
 */
 
 /*
-<doc iset-adjoin iset-adjoin!
+<doc EXT iset-adjoin iset-adjoin!
  * (iset-adjoin set element1 element2 ...)
  * (iset-adjoin! set element1 element2 ...)
  *
@@ -2448,7 +2448,7 @@ doc>
 */
 
 /*
-<doc  fxmapping-adjoin
+<doc EXT  fxmapping-adjoin
  * (fxmapping-adjoin fxmap k1 obj1 k2 ...)
  *
  * Returns a fxmapping containing all of the associations of |fxmap| as
@@ -2554,7 +2554,7 @@ DEFINE_PRIMITIVE("iset-adjoin", trie_iset_adjoin, vsubr, (int argc, SCM *argv))
 
 
 /*
-<doc  iset-delete iset-delete! iset-delete-all iset-delete-all!
+<doc EXT  iset-delete iset-delete! iset-delete-all iset-delete-all!
  * (iset-delete set element1 element2 ...)
  * (iset-delete! set element1 element2 ...)
  * (iset-delete-all set element-list)
@@ -2582,7 +2582,7 @@ doc>
 */
 
 /*
-<doc iset-delete-min iset-delete-min! iset-delete-max iset-delete-max!
+<doc EXT iset-delete-min iset-delete-min! iset-delete-max iset-delete-max!
  * (iset-delete-min set)
  * (iset-delete-min! set)
  * (iset-delete-max set)
@@ -2646,7 +2646,7 @@ DEFINE_PRIMITIVE("fxmapping-pop-max", trie_fxmap_pop_max, subr1, (SCM trie)) {
 
 
 /*
-<doc iset-search iset-search!
+<doc EXT iset-search iset-search!
  * (iset-search set element failure success)
  * (iset-search! iset element failure success)
  *
@@ -2691,7 +2691,7 @@ doc>
   iset-every?  Scheme
 */
 /*
-<doc fxmapping-size
+<doc EXT fxmapping-size
  * (fxmapping-size trie)
  *
  * Returns the number of key/value pairs in an fxmap.
@@ -2704,7 +2704,7 @@ DEFINE_PRIMITIVE("fxmapping-size", trie_fxmap_size, subr1, (SCM trie))
 }
 
 /*
-<doc iset-size
+<doc EXT iset-size
  * (iset-size set)
  *
  * Returns the number of fixnums in |set|.
@@ -2759,7 +2759,7 @@ doc>
 */
 
 /*
-<doc iset-every?
+<doc EXT iset-every?
  * (iset-every? predicate iset)
  *
  * Returns |#t| if every element of |set| satisfies |predicate|, or |#f|
@@ -2791,7 +2791,7 @@ doc>
 */
 
 /*
-<doc iset-map
+<doc EXT iset-map
  * (iset-map proc set)
  *
  * Applies |proc| to each element of |set| in arbitrary order and returns a
@@ -2810,7 +2810,7 @@ doc>
 */
 
 /*
-<doc iset-for-each
+<doc EXT iset-for-each
  * (iset-for-each proc set)
  *
  * Applies |proc| to |set| in increasing numerical order, discarding the
@@ -2841,7 +2841,7 @@ DEFINE_PRIMITIVE("%fxmapping-map", trie_fxmap_map, subr3, (SCM proc, SCM trie, S
 }
 
 /*
-<doc iset-fold iset-fold-right
+<doc EXT iset-fold iset-fold-right
  * (iset-fold proc nil set)
  * (iset-fold-right proc nil set)
  *
@@ -2881,7 +2881,7 @@ DEFINE_PRIMITIVE("fxmapping-fold-right", trie_fxmap_fold_right, subr3, (SCM proc
 }
 
 /*
-<doc iset-filter iset-filter!
+<doc EXT iset-filter iset-filter!
  * (iset-filter predicate set)
  * (iset-filter! predicate set)
  *
@@ -2915,7 +2915,7 @@ DEFINE_PRIMITIVE("fxmapping-filter", trie_fxmap_filter, subr2, (SCM pred, SCM tr
 }
 
 /*
-<doc iset-remove iset-remove!
+<doc EXT iset-remove iset-remove!
  * (iset-remove predicate set)
  * (iset-remove! predicate set)
  *
@@ -2932,7 +2932,7 @@ doc>
 */
 
 /*
-<doc iset-partition iset-partition!
+<doc EXT iset-partition iset-partition!
  * (iset-partition predicate set)
  * (iset-partition! predicate set)
  *
@@ -3005,7 +3005,7 @@ DEFINE_PRIMITIVE("fxmapping-copy", trie_fxmap_copy, subr1, (SCM trie)) {
 }
 
 /*
-<doc iset-copy
+<doc EXT iset-copy
  * (iset-copy set)
  *
  * Returns a newly allocated iset containing the elements of |set|.
@@ -3013,7 +3013,7 @@ doc>
 */
 
 /*
-<doc iset->list
+<doc EXT iset->list
  * (iset->list set)
  *
  * Returns a newly allocated list containing the members of
@@ -3026,7 +3026,7 @@ doc>
 */
 
 /*
-<doc list->iset
+<doc EXT list->iset
  * (list->iset list)
  * (list->iset! set list)
  *
@@ -3088,7 +3088,7 @@ DEFINE_PRIMITIVE("alist->fxmapping/combinator", trie_list_fxmap_comb, subr2, (SC
 
 
 /*
-<doc fxmapping-keys
+<doc EXT fxmapping-keys
  * (fxmapping-keys fxmap)
  *
  * Returns the keys of |fxmap| as a list in ascending numerical order.
@@ -3103,7 +3103,7 @@ doc>
 */
 
 /*
-<doc fxmapping-values
+<doc EXT fxmapping-values
  * (fxmapping-values fxmap)
  *
  * Returns the values of |fxmap| as a list in ascending numerical order of
@@ -3132,7 +3132,7 @@ doc>
 
 
 /*
-<doc  iset=? iset<? iset>? iset<=? iet>=?
+<doc EXT  iset=? iset<? iset>? iset<=? iet>=?
  * (iset=? iset1 iset2 iset3 ...)
  * (iset<? iset1 iset2 iset3 ...)
  * (iset>? iset1 iset2 iset3 ...)
@@ -3178,7 +3178,7 @@ doc>
 */
 
 /*
-<doc iset-union iset-intersection iset-difference iset-xor iset-union! iset-intersection! iset-difference! iset-xor!
+<doc EXT iset-union iset-intersection iset-difference iset-xor iset-union! iset-intersection! iset-difference! iset-xor!
  * (iset-union iset1 iset2 iset3 ...)
  * (iset-intersection iset1 iset2 iset3 ...)
  * (iset-difference iset1 iset2 iset3 ...)
@@ -3211,7 +3211,7 @@ doc>
 */
 
 /*
-<doc fxmapping-union fxmapping-intersection fxmapping-difference fxmapping-xor
+<doc EXT fxmapping-union fxmapping-intersection fxmapping-difference fxmapping-xor
  * (fxmapping-union fxmap1 fxmap2 fxmap3 ...)
  * (fxmapping-intersection fxmap1 fxmap2 fxmap3 ...)
  * (fxmapping-difference fxmap1 fxmap2 fxmap3 ...)
@@ -3330,7 +3330,7 @@ DEFINE_PRIMITIVE("%fxmapping-intersection",trie_fxmap_inter, subr3, (SCM proc, S
 */
 
 /*
-<doc iset-open-interval iset-closed-interval iset-open-closed-interval iset-closed-open-interval
+<doc EXT iset-open-interval iset-closed-interval iset-open-closed-interval iset-closed-open-interval
  * (iset-open-interval set low high)
  * (iset-closed-interval set low high)
  * (iset-open-closed-interval set low high)
@@ -3350,7 +3350,7 @@ doc>
 */
 
 /*
-<doc isubset= isubset< isubset<= isubset> isubset>=
+<doc EXT isubset= isubset< isubset<= isubset> isubset>=
  * (isubset= set k)
  * (isubset< set k)
  * (isubset<= set k)
@@ -3440,9 +3440,9 @@ static struct extended_type_descr xtype_iset = {
  *
 \*===========================================================================*/
 
-MODULE_ENTRY_START("itrie")
+MODULE_ENTRY_START("stklos/itrie")
 {
-  SCM module =  STk_create_module(STk_intern("itrie"));
+  SCM module =  STk_create_module(STk_intern("stklos/itrie"));
 
   /* Create new types for tries */
   tc_fxmap = STk_new_user_type(&xtype_fxmap);

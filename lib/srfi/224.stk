@@ -22,19 +22,17 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 05-Jan-2022 11:03
-;;;; Last file update: 08-Jan-2022 06:21
+;;;; Last file update:  2-Feb-2022 19:44 (eg)
 ;;;;
 
 ;;; The comments before each section explain how each procedure was
 ;;; implemented (C, Scheme or C + Scheme).
 
 
-;; The core of this SRFI is implemented in the "itrie" module:
-
-(require "itrie")
+;; The core of this SRFI is implemented in the "stklos/itrie" module:
 
 (define-module srfi/224
-  (import itrie
+  (import (stklos itrie)
           (srfi 128))
 
   (%compile-time-define %fxmapping-intersection
@@ -199,7 +197,7 @@
 ;;; STklos-specific
 ;;;
 ;;;;;;;;;;;;;;;;;;;;
-  
+
 (define (describe-fxmapping x port)
   (format port "a ~a fxmapping, with ~a elements."
           (if (fxmapping-mutable? x) "mutable" "constant")
@@ -352,7 +350,7 @@
       (if (eq? v mark)
         (failure insert ignore)
         (success k v replace delete)))))
-      
+
 (define (fxmapping-update fxmap k proc
                           :optional (failure
                                      (lambda () (error "key not found and no failure procedure given"))))
@@ -593,9 +591,9 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; fxmapping-union                   C + Scheme 
-;; fxmapping-intersection            C + Scheme 
-;; fxmapping-difference              C + Scheme 
+;; fxmapping-union                   C + Scheme
+;; fxmapping-intersection            C + Scheme
+;; fxmapping-difference              C + Scheme
 ;; fxmapping-xor                     C
 ;; fxmapping-union/combinator        C + Scheme
 ;; fxmapping-intersection/combinator C + Scheme
@@ -673,7 +671,7 @@
 
 (define (fxsubmapping= map k)
   (fxmapping-filter (lambda (x _) (fx= k x)) map))
-  
+
 (define (fxsubmapping< map k)
   (fxmapping-filter (lambda (x _) (fx< x k)) map))
 

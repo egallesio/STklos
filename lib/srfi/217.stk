@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 03-Jan-2022 12:10
-;;;; Last file update: 07-Jan-2022 09:32
+;;;; Last file update:  2-Feb-2022 19:49 (eg)
 ;;;;
 
 
@@ -30,18 +30,16 @@
 ;;; implemented (C, Scheme or C + Scheme).
 
 
-;; The core of this SRFI is implemented in the "itrie" module:
-(require "itrie")
-
+;; The core of this SRFI is implemented in the "stklos/itrie" module:
 (define-module srfi/217
-  
+  (import (stklos itrie))
+
   (%compile-time-define iset-mutable?
                         %iset-difference
                         %iset-intersection
                         %iset-union
                         %iset-map)
 
-  (import itrie)
   (export <iset>
           ;;; Constructors
           iset iset-unfold make-range-iset
@@ -76,7 +74,7 @@
           iset-union iset-intersection iset-difference iset-xor
           iset-union! iset-intersection! iset-difference!
           iset-xor!
-          
+
           ;;; Intervals and ranges
           iset-open-interval iset-closed-interval
           iset-open-closed-interval iset-closed-open-interval
@@ -196,7 +194,7 @@
 
 (define (iset-delete iset . keys)
   (iset-delete-all iset keys))
-  
+
 ;; FIXME:
 ;; first runs iset-contains? then does another
 ;; operation on the trie. could be combined...
@@ -245,7 +243,7 @@
              (iset-for-each (lambda (x) (when (pred? x) (return x)))
                             set)
              (failure))))
-  
+
 (define (iset-count pred? s)
   (let ((c 0))
     (%iset-map (lambda (x)
@@ -431,7 +429,7 @@
 
 (define (isubset= set k)
   (if (iset-contains? set k) (iset k) (iset)))
-  
+
 (define (isubset< set k)
   (iset-filter (lambda (x) (< x k)) set))
 

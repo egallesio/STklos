@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 28-Jan-2022 18:23 (eg)
+# Last file update:  2-Feb-2022 19:22 (eg)
 
 #-======================================================================
 
@@ -193,7 +193,6 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	/bin/rm -f $*.o
 
 #======================================================================
-
 # Dependencies
 13.ostk: 14.ostk
 113.ostk: 128.ostk
