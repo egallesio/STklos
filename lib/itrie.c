@@ -22,7 +22,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 02-Jan-2022 18:41
- * Last file update: 07-Jan-2022 10:12
+ * Last file update:  2-Feb-2022 19:01 (eg)
  */
 
 
@@ -34,7 +34,7 @@
 
    - iset represents sets of fixnums
    - fxmap represents mappings from fixnums to arbitrary types
-   
+
    These will be filled later, at the end of this file.
 */
 static int tc_iset;
@@ -53,14 +53,14 @@ static int tc_fxmap;
   Integer Maps" and also on the reference implementations of the
   two SRFIs by Wolfgang Corcoran-Mathe, with several changes.
 
-  
+
   ISETs: sets of integers
   -----------------------
-  
+
   When used to represent integer sets, the value is a bitmap
   representing integers. So, the structure of leaves has the
   following layout:
-    
+
     stk_header   long      long
   +------------+---------+-------+
   | header     | prefix  | bitmap |
@@ -85,7 +85,7 @@ static int tc_fxmap;
   +------------+---------+-------+
   | header     | 1010    | 1001  |
   +------------+---------+-------+
-  
+
   This represents
 
   - the prefix, 1011_0000
@@ -98,21 +98,21 @@ static int tc_fxmap;
   NOTE: since we're using plain C 'long ints' to store bitmaps, we get some
   more compression than if we were using Scheme fixnums -- we get up to 64
   numbers per leaf when 'long int" is 64-bit wide!
-  
-  
+
+
   FXMAPS: mappings from fixnums to Scheme values
   ----------------------------------------------
-  
+
   When used to represent integer mappings, the value cell is used
   for the SCM value.
-  
+
     stk_header   long      SCM
   +------------+---------+-------+
   | header     | prefix  | value |
   +------------+---------+-------+
 
   For leaves, the prefix *is* the key.
-  
+
   The information as to wether the trie is of one or the other kind
   is stored in the datatype header (and hence is availabe in each
   trie node).
@@ -123,7 +123,7 @@ static int tc_fxmap;
 
   TRIE NODES
   ==========
-  
+
   Each node (leaf or branch) of a trie is of type tc_fxmap or tc_iset.
   In its header (the stk_header type that all boxed Scheme types have),
   the field cell_info is used to store information about the trie
@@ -138,34 +138,34 @@ static int tc_fxmap;
 
   When bit 1 is set, no insertions or deletions can be made on
   the trie represented by that node:
-  
+
   - if it's a leaf, its key and values cannot be changed
-  
+
   - if it's a branch, its left and right branches are also
     non-mutable, and mutating operations will not be done
     on them
 
   Bit 2 is used to represent empty tries.
-    
+
 
   LAYOUT OF THE EMPTY TRIE
   ========================
 
   The empty trie has the TRIE_EMPTY bit set, and no value:
-  
-    stk_header  
-  +------------+         
+
+    stk_header
+  +------------+
   | header     |   ----> info about emptyness is in the header
   +------------+
 
   We do NOT have a single empty trie for the whole program (which
   is different from the empty list). This is the same case as the
   empty vector:
-  
+
   (eq? (list)   (list))   => #t
   (eq? (vector) (vector)) => #f
   (eq? (iset)  (iset))    => #f
-  
+
 
   LAYOUT OF BRANCHES
   ==================
@@ -179,8 +179,8 @@ static int tc_fxmap;
 
   Not that both LEFT and RIGHT are necessarily present,
   always.
-  
-  
+
+
 */
 
 #define TRIE_CONST     (1 << 0)
@@ -275,7 +275,7 @@ struct trie_leaf_fxmap_obj {
 
 /*
   Returns the INDEX of the first bit set in n.
-  
+
   This is the same as SRFI 143 'fxfirst-set-bit`, but that one works
   in SCM objects, and this one works on unsigned longs:
   - this one doesn't check types
@@ -312,7 +312,7 @@ trie_last_set_bit(unsigned long n)
 }
 
 
-/* 
+/*
    Returns a long integer in which the lowest bit of x
    is set:
 
@@ -329,7 +329,7 @@ trie_lowestbit (long x) {
     return x & (-x);
 }
 
-/* 
+/*
    trie_mask sets the mask bit (branching bit) and
    and every bit BELOW it to ZERO.
 
@@ -351,12 +351,12 @@ trie_mask(long k, long m) {
 
 /*
   Verifies if a key, when masked, matches a prefix.
-  
+
   'mask' is the branching bit, so trie_mask(key,mask)
    is all zeroes after the branching bit.
 
    key  prefix mask   trie_match_prefix
-   
+
  */
 static inline int
 trie_match_prefix(long key, long prefix, long mask) {
@@ -376,7 +376,7 @@ trie_zerobit(long key, long mask) {
 
 /*
   Returns the highest bit set in x.
-  
+
   m is an initial guess, which should be LESS than
   the real answer. If in doubt, use m=1.
 
@@ -464,7 +464,7 @@ static inline int
 trie_branchbit_higher(long m1, long m2) {
     return ((m1 ^ m2) < 0) /* different signs? */
         ? (m1 < 0)
-        : (m1 > m2);        
+        : (m1 > m2);
 }
 
 /*
@@ -580,9 +580,9 @@ char *
 trie_int2bin(unsigned long n, int full) {
     size_t si = full
         ? sizeof(unsigned long)*8
-        : trie_first_set_bit(n);
+      : (size_t) trie_first_set_bit(n);
     char *res = STk_must_malloc(si+1);
-    
+
     for (int i=si-1; i>=0; i--, n = n >> 1)
         res[i] = (n & 1) ? '1' : '0';
     res[si] = 0;
@@ -615,10 +615,10 @@ trie_debug(SCM trie, unsigned int depth) {
         STk_puts("Internal error: void node!", STk_stderr);
         return;
     }
-        
+
     if (TRIE_EMPTYP(trie)) {
         STk_puts(".\n", STk_stderr);
-        
+
     } else if (TRIE_LEAFP(trie)) {
 
         STk_puts("Lf: [ m: ", STk_stderr);
@@ -647,7 +647,7 @@ trie_debug(SCM trie, unsigned int depth) {
         STk_puts(" bb: ", STk_stderr);
         STk_print(MAKE_INT(TRIE_BRANCHBIT(trie)), STk_stderr, DSP_MODE);
         STk_puts(" ]\n", STk_stderr);
-        
+
         for (i=0; i < depth; i++)
             STk_putc(' ', STk_stderr);
         STk_puts("L:\n", STk_stderr);
@@ -748,7 +748,7 @@ trie_flatten(SCM x) {
 
 /*
   LEAF: makes leaves
-  
+
   If value is NULL, an iset leaf is created with prefix + bitmap;
   if value is not NULL, an fxmap leaf is created with key=prefix + value.
 */
@@ -770,7 +770,7 @@ trie_make_leaf(long prefix, long bitmap, SCM value) {
         BOXED_INFO(trie)  |= TRIE_LEAF;
         TRIE_PREFIX(trie)  = prefix;
     }
-    
+
     return trie;
 }
 
@@ -785,13 +785,13 @@ trie_make_branch(long prefix, long branch_bit, SCM left, SCM right, int is_fxmap
 
     if (TRIE_EMPTYP(left))  return right;
     if (TRIE_EMPTYP(right)) return left;
-    
+
     if (is_fxmap) {
         NEWCELL_WITH_LEN(trie, fxmap, sizeof(struct trie_branch_obj));
     } else {
         NEWCELL_WITH_LEN(trie, iset, sizeof(struct trie_branch_obj));
     }
-    
+
     TRIE_PREFIX(trie)    = prefix;
     TRIE_BRANCHBIT(trie) = branch_bit;
     TRIE_LEFT(trie)      = left;
@@ -809,7 +809,7 @@ trie_make_branch(long prefix, long branch_bit, SCM left, SCM right, int is_fxmap
   t0, t1: two tries
   p0, p1: longest common prefixes for t0, t1
   m0, m1: branching bits of t0, t1
-  
+
   If t0 is a leaf, then p0 is its key (same for t1, of course).
  */
 SCM
@@ -824,10 +824,10 @@ trie_join(long p0, long m0, SCM t0, long p1, long m1, SCM t1) {
     /* trie_zerobit(p0,m) decides if p0 has the mth-bit zero'ed.  If
        it does, and **that is the first disagreeing bit**, then it means
        t0 should be to the left of t1! Otherwise, t0 goes to the right. */
-    SCM trie = trie_zerobit(p0, m) 
-        ? trie_make_branch(trie_mask(p0, m), m, t0, t1, fxmap) 
+    SCM trie = trie_zerobit(p0, m)
+        ? trie_make_branch(trie_mask(p0, m), m, t0, t1, fxmap)
         : trie_make_branch(trie_mask(p0, m), m, t1, t0, fxmap);
-    
+
     /* trie_debug(trie, 0);*/
 
     return trie;
@@ -836,12 +836,12 @@ trie_join(long p0, long m0, SCM t0, long p1, long m1, SCM t1) {
 /*
   INSERT:
   =======
-  
+
   Inserts a new element into trie and returns a NEW trie.
 
   ARGUMENTS:
   ----------
-  
+
   - trie: the trie in which we'll be inserting
   - prefix (=key for fxmaps)
   - bitmap (must be 0 for fxmaps)
@@ -868,7 +868,7 @@ trie_join(long p0, long m0, SCM t0, long p1, long m1, SCM t1) {
       + TRIE_ADJUST: always run (proc k v-old) to get the new value (there is no
                      "new" value, see fxmapping-adjust)
       + TRIE_UNION: used by %fxmapping-union
-  
+
   WHO CALLS THIS FUNCTION:
   ------------------------
 
@@ -876,7 +876,7 @@ trie_join(long p0, long m0, SCM t0, long p1, long m1, SCM t1) {
   when a duplicate key is being inserted we need to decide which value it
   will be associated to: the old one, the new one, or the result of a
   procedure.
-  
+
   Internal:
 
   - trie_aux, which in turn is called by:
@@ -885,7 +885,7 @@ trie_join(long p0, long m0, SCM t0, long p1, long m1, SCM t1) {
     * alist->fxmapping/combinator [ when dup: (proc k v2 v1) ]
     * iset
     * list->iset
-    
+
   - trie_merge, via:
     * iset-xor
     * iset-union
@@ -902,14 +902,14 @@ trie_join(long p0, long m0, SCM t0, long p1, long m1, SCM t1) {
     * iset-filter
     * fxmapping-partition [ inserts into the partitions,   no conflicts ]
     * fxmapping-filter    [ inserts into the filtered set, no conflicts ]
-    
+
   - trie_list_trie_aux
     * list->iset
     * alist->fxmapping/combinator [ when dup: (proc k v2 v1) ]
     * alist->fxmapping            [ old values are preserved ]
-  
+
   Scheme primitives:
-  
+
   - fxmapping-adjoin            [ old values are preserved ]
   - fxmapping-set               [ new values override old  ]
   - fxmapping-adjust            [ k? -> (proc k v)   no k? -> same trie ]
@@ -922,7 +922,7 @@ trie_insert_aux(SCM trie, long prefix, unsigned long bitmap, SCM value, SCM proc
 
     long key = 0;
     if FXMAPP(trie) key = prefix;
-    
+
     if (TRIE_EMPTYP(trie))
         /* fxmapping-adjust wants us to *only* adjust, but not insert
            associations: */
@@ -931,7 +931,7 @@ trie_insert_aux(SCM trie, long prefix, unsigned long bitmap, SCM value, SCM proc
             : trie_make_leaf(prefix,bitmap,value);
 
     if (TRIE_LEAFP(trie)) {
-        
+
         if (FXMAPP(trie) && (TRIE_KEY(trie) == key)) {
             SCM val;
             switch (merge_op) {
@@ -957,20 +957,20 @@ trie_insert_aux(SCM trie, long prefix, unsigned long bitmap, SCM value, SCM proc
             }
             return trie_make_leaf(key, 0, val);
         }
-        
+
         if (ISETP(trie) & (prefix == TRIE_PREFIX(trie)) )
             return trie_make_leaf(prefix, merge_bitmaps(TRIE_BITMAP(trie), bitmap,merge_op), NULL);
-        
+
         /* make another leaf and join */
         return trie_join(prefix,
                              0, /* m_0 = 0 for leaf  */
                              trie_make_leaf(prefix, bitmap, value),
-                             
+
                              TRIE_PREFIX(trie),
                              0, /* m_1 = 0 for leaf  */
                              trie);
     }
-    
+
     /* this is a branch. we see if our key matches the prefix; if it does,
        we insert into this branch: */
     if (trie_match_prefix(prefix,
@@ -998,19 +998,19 @@ trie_insert_aux(SCM trie, long prefix, unsigned long bitmap, SCM value, SCM proc
                              TRIE_PREFIX(trie), TRIE_BRANCHBIT(trie), trie);
 
     STk_error ("What happened?");
-    return MAKE_INT(-1);
+    return MAKE_INT((unsigned long) -1);
 }
 
 
 /*
   LOOKUP:
-  
+
   Looks up the value of key in trie.
 
   When key is in trie:
   - For fxmaps, return the mapped value
   - For isets, return #t
-  
+
   When key is not in trie:
   - if def is NULL, an error is signaled
   - if def is not NULL, it is returned
@@ -1019,18 +1019,18 @@ SCM
 trie_lookup_aux(long key, SCM trie, SCM def) {
     if (!TRIE_EMPTYP(trie)) {
         if (TRIE_LEAFP(trie)) {
-            
+
             if (FXMAPP(trie) && (key == TRIE_KEY(trie))) {
                 /* FXMAP, match! */
                 return TRIE_VALUE(trie);
-                
+
             } else if ( (trie_prefix(key) == TRIE_PREFIX(trie)) &&
                         (trie_fixnum2bitmap(key) & TRIE_BITMAP(trie)) ) {
                 /* ISET, match! */
                 return MAKE_INT(key);
             }
 
-            
+
         } else {
             /* branch, recurse! */
             if (trie_match_prefix(key, TRIE_PREFIX(trie), TRIE_BRANCHBIT(trie)))
@@ -1054,7 +1054,7 @@ trie_make_empty(int is_fxmap) {
     } else {
         NEWCELL_WITH_LEN(trie, iset, sizeof(struct trie_empty_obj));
     }
-    
+
     BOXED_INFO(trie) |= TRIE_EMPTY;
     return trie;
 }
@@ -1065,19 +1065,19 @@ trie_make_empty(int is_fxmap) {
 SCM
 trie_aux(int constant, int is_fxmap, int argc, SCM *argv) {
     if (is_fxmap && (argc%2)) STk_error("odd number of arguments to fxmapping");
-    
+
     SCM trie = trie_make_empty(is_fxmap);
 
     if (constant)   BOXED_INFO(trie) |= TRIE_CONST;
 
     if (argc == 0) return trie;
-        
+
     SCM *ptr = argv;
 
     /* When the trie has values associated with keys, we walk the
        argument list TWO at a time; when not, we do that ONE at a time. */
     int step = 1 + is_fxmap;
-    
+
     for (int i=argc;   i>0;   i -= step , ptr -= step) {
         if (!INTP(*ptr)) STk_error("bad integer ~S", *ptr);
         trie = is_fxmap
@@ -1102,7 +1102,7 @@ trie_delete1(SCM trie, long prefix, long bitmap) {
     if (TRIE_EMPTYP(trie)) return trie_make_empty(FXMAPP(trie));
     long p = TRIE_PREFIX(trie);
     long b = TRIE_BITMAP(trie);
-    
+
     if (TRIE_LEAFP(trie)) {
         if (FXMAPP(trie)) {
             return (prefix == TRIE_KEY(trie))
@@ -1114,7 +1114,7 @@ trie_delete1(SCM trie, long prefix, long bitmap) {
             return trie_make_leaf(p, b, NULL);
         }
     }
-    
+
     long m = TRIE_BRANCHBIT(trie);
     SCM  l = TRIE_LEFT(trie);
     SCM  r = TRIE_RIGHT(trie);
@@ -1168,7 +1168,7 @@ trie_difference_aux(SCM s, SCM t) {
             while (1) {
 
                 if (TRIE_EMPTYP(t)) return s;
-                
+
                 q = TRIE_PREFIX(t);
                 m = TRIE_BITMAP(t);
                 if (TRIE_LEAFP(t)) {
@@ -1182,7 +1182,7 @@ trie_difference_aux(SCM s, SCM t) {
                     if (trie_zerobit(p,m))  t = l;
                     else                    t = r;
                 /* prefixes don't match, return s as it is: */
-                else return s;                    
+                else return s;
             }
         }
     }
@@ -1197,7 +1197,7 @@ trie_difference_aux(SCM s, SCM t) {
     SCM sr = TRIE_RIGHT(s);
     SCM tl = TRIE_LEFT(t);
     SCM tr = TRIE_RIGHT(t);
-    
+
     /* same prefix, same branching bit, just recurse: */
     if ((m == n) && (p == q))
         return trie_make_branch(p, m,
@@ -1232,11 +1232,11 @@ SCM
 trie_merge(SCM decide, int merge_op, SCM a, SCM b) {
     if (TRIE_EMPTYP(a)) return b;
     if (TRIE_EMPTYP(b)) return a;
-    
+
     long p = TRIE_PREFIX(a);
     long q = TRIE_PREFIX(b);
     int is_fxmap = FXMAPP(a);
-    
+
     if (TRIE_LEAFP(a)) {
         if (is_fxmap) return trie_insert_aux(b, p, 0,     TRIE_VALUE(a), decide, NO_SWAP, merge_op);
         else          return trie_insert_aux(b, p, TRIE_BITMAP(a), NULL, decide, NO_SWAP, merge_op);
@@ -1254,13 +1254,13 @@ trie_merge(SCM decide, int merge_op, SCM a, SCM b) {
     SCM right_a = TRIE_RIGHT(a);
     SCM left_b  = TRIE_LEFT(b);
     SCM right_b = TRIE_RIGHT(b);
-        
+
     if (m == n && p == q)
         return trie_make_branch(p, m,
                                 trie_merge(decide, merge_op, left_a, left_b),
                                 trie_merge(decide, merge_op, right_a, right_b),
                                 is_fxmap);
-    
+
     if (trie_branchbit_higher(m,n) &&
         trie_match_prefix(q,p,m))
         if (trie_zerobit(q,m))
@@ -1293,7 +1293,7 @@ trie_merge(SCM decide, int merge_op, SCM a, SCM b) {
 /*
   Map/for-each implementation. Applies proc on all values of trie, in
   ascending key order.
-  
+
   MAP: when collect is nonzero, it collects the result in a new trie;
   FOR-EACH: when collect == 0, it only applies proc, but returns void.
  */
@@ -1308,7 +1308,7 @@ trie_map_for_each(SCM trie, SCM collect, SCM proc) {
             SCM res = STk_C_apply(proc, 2,
                                   MAKE_INT(TRIE_KEY(trie)),
                                   TRIE_VALUE(trie));
-            
+
             SCM x = trie_make_leaf(TRIE_KEY(trie), 0, res);
             return (collect == STk_true)?  x : STk_void;
         } else {
@@ -1347,7 +1347,7 @@ trie_map_for_each(SCM trie, SCM collect, SCM proc) {
 
     /* No result needed, it's a for-each operation. Just recurse and return
        void: */
-    
+
     if (TRIE_BRANCHBIT(trie) < 0) {
         trie_map_for_each(TRIE_RIGHT(trie), collect, proc);
         trie_map_for_each(TRIE_LEFT(trie),  collect, proc);
@@ -1380,7 +1380,7 @@ trie_count_aux(SCM trie) {
 SCM
 trie_min_max_aux(SCM trie, int want_max) {
     if (TRIE_EMPTYP(trie)) return STk_false;
-    
+
     while (1) {
         if (TRIE_LEAFP(trie)) {
             long p = TRIE_PREFIX(trie);
@@ -1395,7 +1395,7 @@ trie_min_max_aux(SCM trie, int want_max) {
         }
 
         /* It's a branch! */
-        
+
         /* If the branching bit is <0, we swap the logic and go to the right for
            minimum or left for maximum, because INTERNALLY, negatives go to the right
            of positives in the tree. */
@@ -1415,7 +1415,7 @@ trie_min_max_aux(SCM trie, int want_max) {
 
 /*
   Delete min or max from a trie.
-  
+
   Returns a PAIR,
   CAR = the element deleted
   CDR = the new trie, without it
@@ -1423,17 +1423,17 @@ trie_min_max_aux(SCM trie, int want_max) {
 SCM
 trie_del_min_max_aux(SCM trie, int want_max) {
     long p = TRIE_PREFIX(trie);
-    
+
     if (TRIE_LEAFP(trie)) {
         long b = TRIE_BITMAP(trie);
-        
+
         /* If it's an FXMAP and we're looking for MIN or MAX, then we'll only find
            ONE leaf. Ever. And that is exactly the one we want to delete, so
            we just return an empty tree. */
         if (FXMAPP(trie)) return  STk_cons(STk_cons(MAKE_INT(TRIE_KEY(trie)),
                                                     TRIE_VALUE(trie)),
                                            trie_make_empty(FXMAPP(trie)));
-        
+
         /* It's an ISET, and we use the bitmap-deleting functions: */
         return want_max
             ? STk_cons(MAKE_INT(STk_pm2key(p,trie_highestbit(b,1))),
@@ -1445,15 +1445,15 @@ trie_del_min_max_aux(SCM trie, int want_max) {
                                           trie_bitmap_delete_min(b),
                                           NULL));
     }
-    
+
     /* It's a branch! */
 
     SCM l = TRIE_LEFT(trie);
     SCM r = TRIE_RIGHT(trie);
     long bb = TRIE_BRANCHBIT(trie);
-    
+
     SCM pair, left, right, deleted;
-    
+
     /* If the branching bit is <0, we swap the logic and go to the right for
        minimum or left for maximum, because INTERNALLY, negatives go to the right
        of positives in the tree. */
@@ -1477,14 +1477,14 @@ trie_del_min_max_aux(SCM trie, int want_max) {
             pair    = trie_del_min_max_aux(l, want_max);
             left    = CDR(pair);
         }
-    
+
     deleted = CAR(pair);
 
     /* We pass NULL for "decide" and "TRIE_NOP" for merge_op when we call trie_merge
        because we know that the two tries are distincts, so these won't be used! */
     return STk_cons(deleted,
                     trie_merge(NULL, TRIE_NOP, left, right));
-    
+
     STk_error("trie_min_max internal error");
     return STk_void; /* never reached */
 }
@@ -1544,7 +1544,7 @@ trie_fold(SCM proc, SCM nil, SCM trie, int from_right)
     if (TRIE_EMPTYP(trie)) return nil;
     SCM last = nil;
     if (TRIE_LEAFP(trie))  {
-        if (FXMAPP(trie)) 
+        if (FXMAPP(trie))
             return STk_C_apply(proc, 3, MAKE_INT(TRIE_KEY(trie)), TRIE_VALUE(trie), last);
         else {
             long p = TRIE_PREFIX(trie);
@@ -1564,11 +1564,11 @@ trie_fold(SCM proc, SCM nil, SCM trie, int from_right)
             }
             return last;
         }
-        
+
     }
     /* branch */
     int r = (TRIE_BRANCHBIT(trie)<0) ? from_right : !from_right;
-    
+
     if (r) {
         last = trie_fold(proc, nil,  TRIE_LEFT(trie),  from_right);
         return trie_fold(proc, last, TRIE_RIGHT(trie), from_right);
@@ -1581,7 +1581,7 @@ trie_fold(SCM proc, SCM nil, SCM trie, int from_right)
 /*
   Partitions the trie into two others.
   Used as a building block for delete, filter and partition.
-  
+
   - sets is a pair of tries: ( A, B )
     A (car) = those for which pred results in #t
     B (cdr) = those for which pred results in #f
@@ -1605,13 +1605,13 @@ trie_partition_aux(SCM pred, SCM trie, SCM sets, int partition) {
 
     /* No elements, just return! */
     if (TRIE_EMPTYP(trie)) return;
-    
+
     if (TRIE_LEAFP(trie)) {
         if (FXMAPP(trie)) {
             if (STk_C_apply(pred, 2,
                             MAKE_INT(TRIE_KEY(trie)),
                             TRIE_VALUE(trie)) == STk_true)
-                
+
                 CAR(sets) = trie_insert_aux(CAR(sets),
                                                 TRIE_KEY(trie),
                                                 0,
@@ -1642,8 +1642,8 @@ trie_partition_aux(SCM pred, SCM trie, SCM sets, int partition) {
             }
         }
         return;
-        
-        
+
+
     } else {
         /* branch -- just recurse! */
         trie_partition_aux(pred,TRIE_LEFT(trie),  sets, partition);
@@ -1654,7 +1654,7 @@ trie_partition_aux(SCM pred, SCM trie, SCM sets, int partition) {
 
 /*
   Compares two leaves for set-theoretic inclusion.
-  
+
   Returns:
    -1 if s is subset of t
     0 if s is equal to t
@@ -1695,7 +1695,7 @@ long trie_compare(SCM s, SCM t, SCM compare);
 
 /*
   Compares a leaf and a branch for set-theoretic inclusion.
-  
+
   Returns:
    -1 if leaf is subset of branch
     0 if leaf is equal to branch
@@ -1709,7 +1709,7 @@ trie_compare_leaf_branch(SCM leaf, SCM branch, SCM compare) {
     long p = TRIE_PREFIX(leaf);
     long q = TRIE_PREFIX(branch);
     long m = TRIE_BRANCHBIT(branch);
-    if (trie_match_prefix(p,q,m)) 
+    if (trie_match_prefix(p,q,m))
         return trie_zerobit(p,m)
             ? trie_compare(leaf,TRIE_LEFT(branch),  compare)
             : trie_compare(leaf,TRIE_RIGHT(branch), compare);
@@ -1718,7 +1718,7 @@ trie_compare_leaf_branch(SCM leaf, SCM branch, SCM compare) {
 
 /*
   Compares two tries for set-theoretic inclusion.
-  
+
   Returns
    -1 if s is subset of t
     0 if s is equal to t
@@ -1771,7 +1771,7 @@ trie_compare(SCM s, SCM t, SCM compare) {
     long n = TRIE_BRANCHBIT(t);
 
     /* FIXME: calling trie_compare in non-tail position (can we do better?) */
-    
+
     if (trie_branchbit_higher(m,n)) {
         /* s is at least larger than t. maybe superset */
         if (trie_match_prefix(q,p,m)) {
@@ -1824,7 +1824,7 @@ trie_list_trie_aux (SCM list, int is_fxmap, SCM combine) {
 
     while (!NULLP(list)) {
         if (!CONSP(list)) STk_error ("bad list ~S", list);
-        
+
         if (is_fxmap) {
             if (!CONSP(CAR(list))) STk_error ("alist member not a cons pair ~S", CAR(list));
             if (!INTP(CAR(CAR(list)))) STk_error("bad integer ~S", CAR(list));
@@ -1892,7 +1892,7 @@ trie_leaf_inter(SCM proc, SCM s, SCM t, int existence) {
     if (FXMAPP(s)) {
         long sk = TRIE_KEY(s);
         long tk = TRIE_KEY(t);
-        if (sk == tk) 
+        if (sk == tk)
             return existence
                 ? STk_true
                 : (proc     /* for fxmapping-intersection/combinator: */
@@ -1908,12 +1908,12 @@ trie_leaf_inter(SCM proc, SCM s, SCM t, int existence) {
                 ? STk_false
                 : trie_make_empty(1);
     }
-    
+
     long p =  TRIE_PREFIX(s);
     long q =  TRIE_PREFIX(t);
     long bs = TRIE_BITMAP(s);
     long bt = TRIE_BITMAP(t);
-    
+
     /* different prefixes, no intersection: */
     if (p != q) return existence
                     ? STk_false
@@ -1940,9 +1940,9 @@ trie_inter_leaf_branch(SCM proc, SCM s, SCM t, int existence) {
         if (TRIE_EMPTYP(t)) return existence
                                 ? STk_false
                                 : trie_make_empty(FXMAPP(s));
-        
+
         if (TRIE_LEAFP(t)) return trie_leaf_inter(proc,s,t,existence);
-        
+
         long n  = TRIE_BRANCHBIT(t);
         if (trie_match_prefix(p,q,n))
             if (trie_zerobit(p,n)) t = TRIE_LEFT(t);
@@ -1973,12 +1973,12 @@ trie_intersection (SCM proc, SCM s, SCM t, int existence) {
 
     /* two leaves */
     if (TRIE_LEAFP(s) && TRIE_LEAFP(t)) return trie_leaf_inter(proc,s,t,existence);
-        
+
 
     /* leaf and branch */
     if (TRIE_LEAFP(s)) return trie_inter_leaf_branch(proc,s,t,existence);
     if (TRIE_LEAFP(t)) return trie_inter_leaf_branch(proc,t,s,existence);
-              
+
     /* two branches */
     long p = TRIE_PREFIX(s);
     long q = TRIE_PREFIX(t);
@@ -1998,7 +1998,7 @@ trie_intersection (SCM proc, SCM s, SCM t, int existence) {
                    ? STk_false
                    : trie_make_empty(FXMAPP(s));
     }
-    
+
     if (trie_branchbit_higher(n,m)) {
         if (trie_match_prefix(p,q,n)) {
             return (trie_zerobit(p,n))
@@ -2008,7 +2008,7 @@ trie_intersection (SCM proc, SCM s, SCM t, int existence) {
                    ? STk_false
                    : trie_make_empty(FXMAPP(s));
     }
-    
+
     if (p == q) return existence
                     ? MAKE_BOOLEAN((trie_intersection(proc,sl,tl,existence) == STk_true) &&
                                    (trie_intersection(proc,sr,tr,existence) == STk_true))
@@ -2103,20 +2103,20 @@ DEFINE_PRIMITIVE("constant-iset", trie_constant_iset, vsubr, (int argc, SCM *arg
 /*
 <doc alist->fxmapping
  * (alist->fxmapping alist) → fxmapping
- * 
+ *
  * Returns a newly allocated fxmapping containing the associations of
  * alist. It is an error if the car of any pair in alist is not a
  * fixnum. If an integer k appears as the key of multiple associations in
  * alist (i.e. as the car of multiple pairs), then the first association
  * for k is preferred.
- * 
+ *
  * Example:
  *
  * @lisp
  * (fxmapping->alist
  *   (alist->fxmapping '((1 . b) (0 . a) (2 . c))))
  *  => ((0 . a) (1 . b) (2 . c))
- * 
+ *
  * (fxmapping->alist
  *   (alist->fxmapping '((-10 . "yar") (-10 . "worf"))))
  *  => ((-10 . "yar"))
@@ -2127,7 +2127,7 @@ doc>
 /*
 <doc iset-unfold
  * (iset-unfold stop? mapper successor seed)
- * 
+ *
  * Create a newly allocated iset as if by iset. If the result of
  * applying the predicate |stop?| to |seed| is true, return the
  * iset. Otherwise, apply the procedure |mapper| to |seed|. The
@@ -2148,14 +2148,14 @@ doc>
 /*
 <doc make-range-iset
  * (make-range-iset start end [step])
- * 
+ *
  * Returns a newly allocated iset specified by an inclusive lower bound
  * |start|, an exclusive upper bound |e|nd, and a step value (default 1), all
  * of which are exact integers. This constructor produces an iset
  * containing the sequence
  *
  * |start, (+ start step), (+ start (* 2 step)), ..., (+ start (* n step))|,
- 
+
  * where |n| is the greatest integer such that |(+ start (* n step)) < end|
  * if |step| is positive, or such that |(+ start (* n step)) > end| if |step|
  * is negative. It is an error if |step| is zero.
@@ -2337,7 +2337,7 @@ DEFINE_PRIMITIVE("fxmapping-disjoint?",trie_fxmap_disj, subr2, (SCM s, SCM t))
  * (fxmapping-ref/default map k obj)
  *
  * If an association |(k, v)| occurs in |map|, returns |v|. Otherwise, returns |obj|.
- * 
+ *
  * Examples:
  *
  * @lisp
@@ -2475,7 +2475,7 @@ DEFINE_PRIMITIVE("fxmapping-adjoin", trie_fxmap_adjoin, vsubr, (int argc, SCM *a
                              MAKE_INT(argc), *argv);
 
     SCM trie = *argv--;
-    
+
     for (;  argc > 0; argc-=2, argv-=2) {
         if (!INTP(*argv)) STk_error("bad integer ~S", *argv);
         trie = trie_insert_aux(trie, INT_VAL(*argv), 0, *(argv-1), NULL, NO_SWAP, TRIE_NOP);
@@ -2494,7 +2494,7 @@ DEFINE_PRIMITIVE("fxmapping-set", trie_fxmap_set, vsubr, (int argc, SCM *argv))
                              MAKE_INT(argc), *argv);
 
     SCM trie = *argv--;
-    
+
     for (;  argc > 0; argc-=2, argv-=2) {
         if (!INTP(*argv)) STk_error("bad integer ~S", *argv);
         trie = trie_insert_aux(trie, INT_VAL(*argv), 0, *(argv-1), NULL,
@@ -2524,10 +2524,10 @@ DEFINE_PRIMITIVE("fxmapping-adjoin/combinator", trie_fxmap_adjoin_comb, vsubr, (
 
     SCM proc = *argv--;
     argc--;
-    
+
     if (argc % 2) STk_error ("Odd number (~S) of key+values for insertion in fxmapping ~S",
                              MAKE_INT(argc), trie);
-    
+
     for (;  argc > 0; argc-=2, argv-=2) {
         if (!INTP(*argv)) STk_error("bad integer ~S", *argv);
         trie = trie_insert_aux(trie, INT_VAL(*argv), 0, *(argv-1), proc, NO_SWAP, TRIE_UPDATE);
@@ -2587,11 +2587,11 @@ doc>
  * (iset-delete-min! set)
  * (iset-delete-max set)
  * (iset-delete-max! set)
- * 
+ *
  * Returns two values: the smallest/largest integer n in |set| and a
  * newly-allocated iset that contains all elements of |set| except for
  * n. It is an error if iset is empty.
- * 
+ *
  * The |iset-delete-min!| and |iset-delete-max!| procedures are the same as
  * |iset-delete-min| and |iset-delete-max|, respectively, except that they
  * are permitted to mutate and return the |set| argument instead of
@@ -2608,7 +2608,7 @@ doc>
 doc>
 */
 
-  
+
 DEFINE_PRIMITIVE("fxmapping-delete-min", trie_fxmap_delete_min, subr1, (SCM trie)) {
     if (!FXMAPP(trie)) STk_error ("bad fxmapping ~S", trie);
     return CDR(trie_del_min_max(trie, 0));
@@ -2660,7 +2660,7 @@ DEFINE_PRIMITIVE("fxmapping-pop-max", trie_fxmap_pop_max, subr1, (SCM trie)) {
  *
  * The effects of the continuations are as follows (where |obj| is any
  * Scheme object):
- * 
+ *
  * Invoking |(insert obj)| causes |element| to be inserted into iset.
  *
  * Invoking |(ignore obj)| causes |set| to remain unchanged.
@@ -2844,7 +2844,7 @@ DEFINE_PRIMITIVE("%fxmapping-map", trie_fxmap_map, subr3, (SCM proc, SCM trie, S
 <doc iset-fold iset-fold-right
  * (iset-fold proc nil set)
  * (iset-fold-right proc nil set)
- * 
+ *
  * Invokes |proc| on each member of |set| in increasing/decreasing numerical
  * order, passing the result of the previous invocation as a second
  * argument. For the first invocation, |nil| is used as the second
@@ -2884,7 +2884,7 @@ DEFINE_PRIMITIVE("fxmapping-fold-right", trie_fxmap_fold_right, subr3, (SCM proc
 <doc iset-filter iset-filter!
  * (iset-filter predicate set)
  * (iset-filter! predicate set)
- * 
+ *
  * Returns a newly allocated iset containing just the elements
  * of |set| that satisfy |predicate|.
  *
@@ -2918,7 +2918,7 @@ DEFINE_PRIMITIVE("fxmapping-filter", trie_fxmap_filter, subr2, (SCM pred, SCM tr
 <doc iset-remove iset-remove!
  * (iset-remove predicate set)
  * (iset-remove! predicate set)
- * 
+ *
  * Returns a newly allocated |set| containing just the elements of |set|
  * that do not satisfy |predicate|.
  *
@@ -2935,12 +2935,12 @@ doc>
 <doc iset-partition iset-partition!
  * (iset-partition predicate set)
  * (iset-partition! predicate set)
- * 
+ *
  * Returns two values: a newly allocated iset that contains just the
  * elements of |set| that satisfy |predicate| and another newly allocated
  * iset that contains just the elements of |set| that do not satisfy
  * |predicate|.
- * 
+ *
  *  @lisp
  * (let-values (((low high) (iset-partition (lambda (x) (< x 6))
  *                                          (iset 2 3 5 7 11))))
@@ -2949,7 +2949,7 @@ doc>
  *  @end lisp
 doc>
 */
- 
+
 DEFINE_PRIMITIVE("iset-partition", trie_iset_partition, subr2, (SCM pred, SCM trie)) {
     if (!ISETP(trie)) STk_error("bad iset ~S", trie);
     if (STk_procedurep(pred) == STk_false) STk_error("bad procedure ~S", pred);
@@ -3092,7 +3092,7 @@ DEFINE_PRIMITIVE("alist->fxmapping/combinator", trie_list_fxmap_comb, subr2, (SC
  * (fxmapping-keys fxmap)
  *
  * Returns the keys of |fxmap| as a list in ascending numerical order.
- * 
+ *
  * Example:
  *
  * @lisp
@@ -3105,14 +3105,14 @@ doc>
 /*
 <doc fxmapping-values
  * (fxmapping-values fxmap)
- * 
+ *
  * Returns the values of |fxmap| as a list in ascending numerical order of
  * key. That is, if |(k1, v1), ..., (kn, vn)| are the associations of |fxmap|
  * ordered so that |k1 <= … <= kn|, then |(fxmapping-values fxmap)| produces
  * the list |(v1 ... vn)|.
- * 
+ *
  * Example:
- * 
+ *
  * (fxmapping-values (fxmapping 0 "picard" 1 "riker" 2 "troi"))
  *  => ("picard" "riker" "troi")
 doc>
@@ -3138,7 +3138,7 @@ doc>
  * (iset>? iset1 iset2 iset3 ...)
  * (iset<=? iset1 iset2 iset3 ...)
  * (iset>=? iset1 iset2 iset3 ...)
- * 
+ *
  * These procedures return true when each set is
  * equal (|iset=?|) or a proper subset (|iset<?|), a proper
  * superset (|iset>?|), a subset (|iset<=?|) or a superset
@@ -3286,14 +3286,14 @@ DEFINE_PRIMITIVE("%iset-difference",trie_iset_difference, subr2, (SCM s, SCM t))
 {
     if (!ISETP(s)) STk_error("bad iset ~S", s);
     if (!ISETP(t)) STk_error("bad iset ~S", t);
-    return trie_difference_aux(s, t);   
+    return trie_difference_aux(s, t);
 }
 
 DEFINE_PRIMITIVE("%fxmapping-difference",trie_fxmap_difference, subr2, (SCM s, SCM t))
 {
     if (!FXMAPP(s)) STk_error("bad fxmapping ~S", s);
     if (!FXMAPP(t)) STk_error("bad fxmapping ~S", t);
-    return trie_difference_aux(s, t);   
+    return trie_difference_aux(s, t);
 }
 
 DEFINE_PRIMITIVE("%iset-intersection",trie_iset_inter, subr2, (SCM s, SCM t))
@@ -3335,11 +3335,11 @@ DEFINE_PRIMITIVE("%fxmapping-intersection",trie_fxmap_inter, subr3, (SCM proc, S
  * (iset-closed-interval set low high)
  * (iset-open-closed-interval set low high)
  * (iset-closed-open-interval set low high)
- * 
+ *
  * Procedures that return a subset of |set| contained in the interval from
  * |low| to |high|. The interval may be open, closed, open below and closed
  * above, or open above and closed below.
- * 
+ *
  * @lisp
  * (iset->list (iset-open-interval (iset 2 3 5 7 11) 2 7))        => (3 5)
  * (iset->list (iset-closed-interval (iset 2 3 5 7 11) 2 7))      => (2 3 5 7)
@@ -3356,12 +3356,12 @@ doc>
  * (isubset<= set k)
  * (isubset> set k)
  * (isubset>= set k)
- * 
+ *
  * Procedures that return an integer set containing the elements of |set|
  * that are equal to, less than, less than or equal to, greater than, or
  * greater than or equal to |k|. Note that the result of |isubset=| contains
  * at most one element.
- * 
+ *
  * @lisp
  * (iset->list (isubset= (iset 2 3 5 7 11) 7))  => (7)
  * (iset->list (isubset< (iset 2 3 5 7 11) 7))  => (2 3 5)
@@ -3369,7 +3369,7 @@ doc>
  * @end lisp
 doc>
 */
-    
+
 /***
  *** EXTRA
  ***/
@@ -3410,7 +3410,7 @@ static void print_trie(SCM trie, SCM port, int mode) {
     STk_puts("#,", port);
     if (FXMAPP(trie))
         lst = trie_flatten(STk_cons (STk_intern("<fxmapping>"), lst));
-    else 
+    else
         lst = STk_cons (STk_intern("<iset>"), lst);
     STk_print(lst, port, mode);
 }
@@ -3451,16 +3451,16 @@ MODULE_ENTRY_START("itrie")
   ADD_PRIMITIVE_IN_MODULE(triep,                 module);
   ADD_PRIMITIVE_IN_MODULE(fxmapp,                module);
   ADD_PRIMITIVE_IN_MODULE(isetp,                 module);
-  
+
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_empty_p,    module);
   ADD_PRIMITIVE_IN_MODULE(trie_iset_empty_p,     module);
-  
+
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_mutable_p,  module);
   ADD_PRIMITIVE_IN_MODULE(trie_iset_mutable_p,   module);
 
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_refdef,     module);
   ADD_PRIMITIVE_IN_MODULE(trie_iset_member,      module);
-  
+
   ADD_PRIMITIVE_IN_MODULE(trie_iset_contains,    module);
 
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_size,       module);
@@ -3468,7 +3468,7 @@ MODULE_ENTRY_START("itrie")
 
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_height,     module);
   ADD_PRIMITIVE_IN_MODULE(trie_iset_height,      module);
-  
+
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap,            module);
   ADD_PRIMITIVE_IN_MODULE(trie_iset,             module);
 
@@ -3480,7 +3480,7 @@ MODULE_ENTRY_START("itrie")
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_adjoin,     module);
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_adjoin_comb, module);
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_adjust,     module);
-  
+
   ADD_PRIMITIVE_IN_MODULE(trie_iset_delete_min,  module);
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_delete_min, module);
 
@@ -3532,7 +3532,7 @@ MODULE_ENTRY_START("itrie")
 
   ADD_PRIMITIVE_IN_MODULE(trie_iset_fold,        module);
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_fold,       module);
-  
+
   ADD_PRIMITIVE_IN_MODULE(trie_iset_fold_right,  module);
   ADD_PRIMITIVE_IN_MODULE(trie_fxmap_fold_right, module);
 
