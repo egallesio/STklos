@@ -2,16 +2,16 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 19-Sep-2009 20:29 (eg)
-# Last file update: 13-Jul-2021 19:15 (eg)
+# Last file update:  2-Feb-2022 17:04 (eg)
 
 SRC= hellofs hashfs
 EXE=$(SRC:.stk=)
-COMP=../../../utils/stklos-compile
+COMP=../../../utils/tmpcomp
 
 SUFFIXES= .stk
 
 .stk:
-	$(COMP) -c -o $* $<
+	$(COMP) -o $* $<
 
 all: 	$(EXE)
 
