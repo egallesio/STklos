@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  2-Feb-2022 19:30 (eg)
+# Last file update:  2-Feb-2022 20:14 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme srfi stklos
@@ -96,7 +96,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-156.stk        \
           srfi-171.stk        \
           srfi-190.stk        \
-          trie.stk            \
           tar.stk             \
           trace.stk
 
@@ -130,14 +129,12 @@ scheme_OBJS = compfile.ostk     \
           srfi-156.ostk         \
           srfi-171.ostk         \
           srfi-190.ostk         \
-          trie.ostk             \
           tar.ostk              \
           trace.ostk
 
-SRC_C     = 
-SRC_C_STK = 
-SRC_SHOBJ = 
-
+SRC_C     =
+SRC_C_STK =
+SRC_SHOBJ =
 
 
 DOCDB       = DOCDB
@@ -230,8 +227,6 @@ recette.ostk: pretty-print.ostk
 slib.ostk: slib.stk STklos.init
 srfi-41.ostk: streams-derived.ostk streams-primitive.ostk
 streams-derived.ostk: streams-primitive.ostk
-
-itrie.$(SH_SUFFIX): itrie-incl.c itrie.c
 
 #
 # SRFIs support
