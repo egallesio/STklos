@@ -2,14 +2,14 @@
 #
 #           Author: Erick Gallesio [eg@essi.fr]
 #    Creation date:  1-Sep-2004 16:19 (eg)
-# Last file update: 29-Jan-2022 20:18 (eg)
+# Last file update:  3-Feb-2022 11:46 (eg)
 
 
 ADOC=@ASCIIDOCTOR@
 
-SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc \
-           intro.adoc licence.adoc match.adoc object.adoc       \
-           progstruct.adoc regexp.adoc scmpkg.adoc slib.adoc    \
+SOURCES  = biblio.adoc cond.adoc custom.adoc expr.adoc ffi.adoc      \
+           intro.adoc libs.adoc licence.adoc match.adoc object.adoc  \
+           progstruct.adoc regexp.adoc scmpkg.adoc slib.adoc         \
            srfi.adoc stdproc.adoc stklos.adoc threads.adoc
 DOCDB    = ../DOCDB
 SPP      = ../../src/stklos -q -I ../../lib -f ../../utils/stklos-pp.stk --
