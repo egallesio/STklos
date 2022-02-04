@@ -22,7 +22,7 @@
  *
  *           Author: Jerônimo Pellegrini [j_p@aleph0.info]
  *    Creation date: 02-Jan-2022 18:41
- * Last file update:  2-Feb-2022 19:35 (eg)
+ * Last file update:  4-Feb-2022 10:28 (eg)
  */
 
 
@@ -2110,8 +2110,6 @@ DEFINE_PRIMITIVE("constant-iset", trie_constant_iset, vsubr, (int argc, SCM *arg
  * alist (i.e. as the car of multiple pairs), then the first association
  * for k is preferred.
  *
- * Example:
- *
  * @lisp
  * (fxmapping->alist
  *   (alist->fxmapping '((1 . b) (0 . a) (2 . c))))
@@ -2298,6 +2296,7 @@ DEFINE_PRIMITIVE("iset-contains?", trie_iset_contains, subr2, (SCM trie, SCM key
  * (iset-disjoint? (iset 1 3 5) (iset 0 2 4)) => #t
  * (iset-disjoint? (iset 1 3 5) (iset 2 3 4)) => #f
  * @end lisp
+doc>
 */
 DEFINE_PRIMITIVE("iset-disjoint?",trie_iset_disj, subr2, (SCM s, SCM t))
 {
@@ -2338,12 +2337,10 @@ DEFINE_PRIMITIVE("fxmapping-disjoint?",trie_fxmap_disj, subr2, (SCM s, SCM t))
  *
  * If an association |(k, v)| occurs in |map|, returns |v|. Otherwise, returns |obj|.
  *
- * Examples:
- *
  * @lisp
  * (fxmapping-ref/default (fxmapping 36864 'zap) 36864 #f) => zap
  * (fxmapping-ref/default (fxmapping 0 'a) 36864 #f) => #f
- * end lisp
+ * @end lisp
 doc>
 */
 DEFINE_PRIMITIVE("fxmapping-ref/default", trie_fxmap_refdef, subr23, (SCM trie, SCM key, SCM def))
@@ -2718,15 +2715,15 @@ DEFINE_PRIMITIVE("iset-size", trie_iset_size, subr1, (SCM trie))
 
 /*
 <doc EXT iset-find
-* (iset-find predicate set failure)
-*
-* Returns the smallest element of |set| that satisfies predicate, or
-* the result of invoking |failure| with no arguments if there is none.
-*
-* @lisp
-* (iset-find positive? (iset -1 1) (lambda () #f))  => 1
-* (iset-find zero?     (iset -1 1) (lambda () #f))  => #f
-* @end lisp
+ * (iset-find predicate set failure)
+ *
+ * Returns the smallest element of |set| that satisfies predicate, or
+ * the result of invoking |failure| with no arguments if there is none.
+ *
+ * @lisp
+ * (iset-find positive? (iset -1 1) (lambda () #f))  => 1
+ * (iset-find zero?     (iset -1 1) (lambda () #f))  => #f
+ * @end lisp
 doc>
 */
 
@@ -2941,12 +2938,12 @@ doc>
  * iset that contains just the elements of |set| that do not satisfy
  * |predicate|.
  *
- *  @lisp
+ * @lisp
  * (let-values (((low high) (iset-partition (lambda (x) (< x 6))
  *                                          (iset 2 3 5 7 11))))
  *   (list (iset->list low) (iset->list high)))
  *  => ((2 3 5) (7 11))
- *  @end lisp
+ * @end lisp
 doc>
 */
 
@@ -3093,12 +3090,10 @@ DEFINE_PRIMITIVE("alist->fxmapping/combinator", trie_list_fxmap_comb, subr2, (SC
  *
  * Returns the keys of |fxmap| as a list in ascending numerical order.
  *
- * Example:
- *
  * @lisp
  * (fxmapping-keys (fxmapping 137 'a -24 'b -5072 'c))
  *  => (-5072 -24 137)
- * @lisp end
+ * @end lisp
 doc>
 */
 
@@ -3111,10 +3106,10 @@ doc>
  * ordered so that |k1 <= … <= kn|, then |(fxmapping-values fxmap)| produces
  * the list |(v1 ... vn)|.
  *
- * Example:
- *
+ * @lisp
  * (fxmapping-values (fxmapping 0 "picard" 1 "riker" 2 "troi"))
  *  => ("picard" "riker" "troi")
+ * @end lisp
 doc>
 */
 
@@ -3243,6 +3238,7 @@ doc>
  *                        (fxmapping 2 "worf")
  *                        (fxmapping 1 "data")))
  *     => ((0 . a))
+ * @end lisp
 doc>
 */
 
