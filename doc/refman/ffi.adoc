@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 27-Jan-2022 13:09 (eg)
+// Last file update:  7-Feb-2022 13:38 (eg)
 
 {{chapter "Foreign Function Interface"}}
 (((FFI)))
@@ -173,6 +173,7 @@ the Scheme environment, and care must be taken to avoid memory corruptions,
 errors, crashes...
 
 {{insertdoc 'cpointer?}}
+{{insertdoc 'cpointer-null?}}
 {{insertdoc 'cpointer-data-set!}}
 {{insertdoc 'cpointer-type-set!}}
 {{insertdoc 'cpointer->string}}
