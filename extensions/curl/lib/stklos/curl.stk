@@ -22,9 +22,32 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  7-Feb-2022 15:59
-;;;; Last file update:  7-Feb-2022 15:59 (eg)
+;;;; Last file update:  8-Feb-2022 18:17 (eg)
 ;;;;
 
+;;
+;; Avoid compilation warnings
+;;
+(%compile-time-define curl-version curl-init curl-set-option curl-cleanup
+                      curl-perform)
+
+
+(select-module stklos/curl)
+(export get-content-as-string)
+
+;;
+;; GET-CONTENT-AS-STRING
+;;
+(define (get-content-as-string url)     ;; This is the Clojure "slurp" function
+  (let ((out    (open-output-string))
+        (handle (curl-init)))
+    (curl-set-option handle #:url  url)
+    (curl-set-option handle :oport out)
+    (curl-set-option handle :referer (string-append "(stklos curl) " (curl-version)))
+    (curl-set-option handle :followlocation 1)
+    (curl-perform handle)
+    (curl-cleanup handle)
+    (close-port out)
+    (get-output-string out)))
+
 (provide "stklos/curl")
-
-
