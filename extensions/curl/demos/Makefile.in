@@ -18,7 +18,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 19-Sep-2009 20:29 (eg)
-# Last file update:  8-Feb-2022 19:19 (eg)
+# Last file update:  8-Feb-2022 20:43 (eg)
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -276,7 +276,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SRC = imap.stk
+SRC = imap.stk cat-url.stk
 EXE = $(SRC:.stk=)
 COMP = ../../../utils/tmpcomp
 SUFFIXES = .stk

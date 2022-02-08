@@ -2,9 +2,9 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 19-Sep-2009 20:29 (eg)
-# Last file update:  8-Feb-2022 19:19 (eg)
+# Last file update:  8-Feb-2022 20:43 (eg)
 
-SRC= imap.stk
+SRC= imap.stk cat-url.stk
 EXE=$(SRC:.stk=)
 COMP=../../../utils/tmpcomp
 

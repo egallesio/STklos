@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; imap.stk         -- Get the list of folder from an IMAP server
+;;;; cat-url.stk         -- A cat command whih accepts url
 ;;;;
 ;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
@@ -21,27 +21,21 @@
 ;;;; USA.
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
-;;;;    Creation date:  8-Feb-2022 18:32
-;;;; Last file update:  8-Feb-2022 20:36 (eg)
+;;;;    Creation date:  8-Feb-2022 20:43
+;;;; Last file update:  8-Feb-2022 20:49 (eg)
 ;;;;
 
 
 (import (stklos curl))
 
-(define (ask msg :optional (secret? #f))
-  (display msg)
-  (flush)
-  (if secret? (get-password) (read-line)))
-
-
 (define (main args)
-  (let ((handle   (curl-init))
-        (server   (ask "Server url (e.g. imaps://imap.example.com)? "))
-        (user     (ask "login: "))
-        (password (ask "password: " #t)))
-
-    (curl-set-option handle :username user)
-    (curl-set-option handle :password password)
-    (curl-set-option handle :url server)
-    (curl-perform handle)
+  (when (= (length args) 1)
+    (die (format "Usage: ~A url1 ..." (program-name))))
+  (let ((handle (curl-init)))
+    (for-each (lambda (url)
+                (curl-set-option handle :url url)           ; URL to use
+                (curl-set-option handle :followlocation 1)  ; Do redirections
+                (curl-perform handle))
+              (cdr args))
     (curl-cleanup handle)))
+
