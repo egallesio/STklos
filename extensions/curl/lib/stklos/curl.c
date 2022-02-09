@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  7-Feb-2022 15:55 (eg)
- * Last file update:  9-Feb-2022 17:50 (eg)
+ * Last file update:  9-Feb-2022 18:05 (eg)
  */
 
 #include <stklos.h>
@@ -155,7 +155,7 @@ DEFINE_PRIMITIVE("curl-set-option", curl_set_opt, subr3, (SCM h, SCM opt, SCM va
 
       switch (copt->type) {
         case CURLOT_LONG: {
-          long v = STk_integer_value(val);
+          long v = BOOLEANP(val) ? (long) (val == STk_true) : STk_integer_value(val);
           if (v == LONG_MIN)
             STk_error("bad integer value ~S for option %s", val, opt);
           code = curl_easy_setopt(curl, copt->id, v);
