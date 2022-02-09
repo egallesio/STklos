@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  7-Feb-2022 15:55 (eg)
- * Last file update:  8-Feb-2022 18:12 (eg)
+ * Last file update:  9-Feb-2022 17:50 (eg)
  */
 
 #include <stklos.h>
@@ -214,6 +214,10 @@ MODULE_ENTRY_START("stklos/curl")
   ADD_PRIMITIVE_IN_MODULE(curl_set_opt, module);
   ADD_PRIMITIVE_IN_MODULE(curl_perform, module);
 
+  // Call the CURL global initialization function
+  // (necessary if we use several threads)
+  curl_global_init(CURL_GLOBAL_DEFAULT);
+  
   //Export all the symbols defined here
   STk_export_all_symbols(module);
 
