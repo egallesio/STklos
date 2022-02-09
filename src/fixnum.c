@@ -653,6 +653,23 @@ DEFINE_PRIMITIVE("fxcopy-bit", fxcopy_bit, subr3, (SCM o1, SCM o2, SCM o3))
   }
 }
 
+/* A lookup table with the bit count for every possible byte.  Will be
+   used by  fxbit-count. */
+static unsigned int bc[256] =
+{ 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3,
+  2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4,
+  2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5,
+  4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+  2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4,
+  3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6,
+  4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4,
+  3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+  2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5,
+  4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5,
+  3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6,
+  5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+  4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8 };
+
 /*
 <doc EXT fxbit-count
  * (fxbit-count fx1)
@@ -667,21 +684,35 @@ DEFINE_PRIMITIVE("fxcopy-bit", fxcopy_bit, subr3, (SCM o1, SCM o2, SCM o3))
  * @end lisp
 doc>
 */
-DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o))
-/* TODO: Somewhat efficient, but there is a better way, described
-   in "Hacker's Delight", but it needs to be adapted to the
-   variable length datum. */
-{
-  ensure_fx(o);
-  {
-    long n = INT_VAL(o);
-    int total=0;
-    for (int i=0; i < (int) INT_LENGTH; i++, n=n>> 1)
-      if ( n & 1 )
-        total++;
-    return MAKE_INT(total);
-  }
+/*
+  Count the number of ones in a long integer.
+
+  It does work with signed long integers; the 'unsigned long' in the
+  declaration is to fore a cast so 'n' will be treated as if it were
+  unsigned, because the algoritm does shift it to the right, and if
+  it's signed negative numbers would get ones from the right side when
+  shifted (at least with GCC and LLVM -- this is not defined by the
+  standard, actually).
+ */
+static inline unsigned int
+bit_count(unsigned long n) {
+    unsigned int c = 0;
+    unsigned long mask = 0xff;
+    while(n) {
+        c += bc[n & mask];
+        n = n >> 8;
+    }
+    return c;
 }
+
+DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o))
+{
+    ensure_fx(o);
+    return (INT_VAL(o) < 0)
+        ? MAKE_INT(bit_count(~INT_VAL(o)))
+        : MAKE_INT(bit_count( INT_VAL(o)));
+}
+
 
 /*
 <doc EXT fxfirst-set-bit
