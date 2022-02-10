@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  7-Feb-2022 15:59
-;;;; Last file update:  8-Feb-2022 18:17 (eg)
+;;;; Last file update: 10-Feb-2022 14:06 (eg)
 ;;;;
 
 ;;
@@ -33,21 +33,39 @@
 
 
 (select-module stklos/curl)
-(export get-content-as-string)
+(export curl)
 
-;;
-;; GET-CONTENT-AS-STRING
-;;
-(define (get-content-as-string url)     ;; This is the Clojure "slurp" function
-  (let ((out    (open-output-string))
-        (handle (curl-init)))
-    (curl-set-option handle #:url  url)
-    (curl-set-option handle :oport out)
-    (curl-set-option handle :referer (string-append "(stklos curl) " (curl-version)))
+(define (curl url . options)
+  (let  ((handle (curl-init)))
+    ;; Set the URL
+    (curl-set-option handle #:url url)
+
+    ;; CURL uses stdin, stdout and stder which are different from
+    ;; the scheme port (and they can be redirected) ==> set the port
+    ;; of he curl session to the scheme ports. This can be invalidated
+    ;; just after if the user pass another value
+    (curl-set-option handle #:iport (current-input-port))
+    (curl-set-option handle #:oport (current-output-port))
+    (curl-set-option handle #:eport (current-error-port))
+
+    ;; Permit redirections
     (curl-set-option handle :followlocation 1)
+
+    ;; Set a referer, since some site don't work without it
+    (curl-set-option handle :referer (string-append "(stklos curl) " (curl-version)))
+
+    ;; Set the user options
+    (let Loop ((options options))
+      (unless (null? options)
+        (when (null? (cdr options))
+          (error "Missing value gor option ~S" (car options)))
+        (%debug "Setting option ~S to ~S" (car options) (cadr options))
+        (curl-set-option handle (car options) (cadr options))
+        (Loop (cddr options))))
+
+    ;; The options are set. Perform the action and cleanup handle
     (curl-perform handle)
-    (curl-cleanup handle)
-    (close-port out)
-    (get-output-string out)))
+    (curl-cleanup handle)))
+
 
 (provide "stklos/curl")
