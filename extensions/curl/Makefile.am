@@ -5,7 +5,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 18-Jun-2021 08:18
-# Last file update:  7-Feb-2022 15:53 (eg)
+# Last file update: 10-Feb-2022 16:55 (eg)
 #
 
 SUBDIRS=lib/stklos demos
@@ -13,5 +13,5 @@ SUBDIRS=lib/stklos demos
 clean-am:
 	rm -f *~
 
-distclean-am:
+distclean-am: clean-am
 	rm -f Makefile
