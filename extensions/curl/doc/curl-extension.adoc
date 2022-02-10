@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date:  4-Feb-2022 09:48
-// Last file update: 10-Feb-2022 12:41 (eg)
+// Last file update: 10-Feb-2022 16:26 (eg)
 
 = CURL STklos extension
 :authors: Erick Gallesio
@@ -17,7 +17,7 @@
 :toclevels: 2
 :sectnums:
 :xrefstyle: short
-:pdf-style: ../../../doc/refman/theme/stklos.yml
+:pdf-styless: ../../../doc/refman/theme/stklos.yml
 
 
 {{load "../../../doc/lib/adoc-lib.stk"}}
@@ -170,5 +170,85 @@ previous `curl-init`. It closes all the connections kept open by
 NOTE: The _libcurl_ documentation says: _Do not call this
 function if you intend to transfer more files, re-using handles is a
 key to good performance with libcurl_.
+
+
+=== The curl primitive
+
+{{stklos}} offers a high level function, called `curl,` which embodies
+all the low level details necessary to use the _libcurl_ library.
+
+{{doc-title 'extended '(curl)
+              "(curl url)"
+	     "(curl url key~1~val~1~ ...)"}}
+
+The `curl` function creates a new session on the string `url`. By
+default, this function uses the current input, output and error port
+(instead of the system `stdin`, `stdout` and `stderr` ports used by
+the _libcurl_ library. Consequently, the redirection of Scheme ports
+is effective with this function. Furthermore, by default, this
+function also set the flags
+
+- `#:followlocation` which allows to follow a possible redirection sent by the
+   server with a HTTP header 3xx response.
+
+- `#:referer` which defines a value for the `Referer:` header of a HTTP
+  request.  The value is something like "STklos-curl/xxx" where `xxx` is a
+  sub-string of the value given by `curl-version`. This option is set because
+  some server refuse to respond to requests when there is no referer.
+
+**Exemples:**
+
+Grab a file by FTP an store its content in the file `"/tmp/out"`
+
+```scheme
+(let ((p (open-output-file "/tmp/out")))
+  (curl "ftp://ftp.gnu.org/gnu/emacs/emacs-27.2.tar.gz.sig" :oport p)
+  (close-output-port p))
+```
+
+The following expression in equivalent of the `(slurp "http://example.com")`
+call in Clojure, which returns the content of `example.com` site as a string.
+
+```scheme
+(with-output-to-string
+  (lambda ()
+    (curl "http://example.com")))
+                          => "<!doctype html>\n ... </html>\n"
+```
+
+
+Use a HTTP POST request with `foo=1` and `bar=2`, using the `http://httpbin.org` site
+
+```scheme
+(curl "https://httpbin.org/post" #:postfields "foo=1&bar=2")
+```
+
+The JSON answer will be something like:
+
+```json
+{
+  "args": {},
+  "data": "",
+  "files": {},
+  "form": {
+    "bar": "2",
+    "foo": "1"
+  },
+  "headers": {
+    "Accept": "*/*",
+    "Content-Length": "11",
+    "Content-Type": "application/x-www-form-urlencoded",
+    "Host": "httpbin.org",
+    "Referer": "STklos-curl/libcurl/7.81.0",
+  },
+  "json": null,
+  "origin": "134.59.216.151",
+  "url": "https://httpbin.org/post"
+}
+```
+
+
+
+
 
 //  LocalWords:  libcurl

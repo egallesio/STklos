@@ -21,7 +21,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  6-Jul-2021 11:53
-# Last file update:  2-Feb-2022 16:13 (eg)
+# Last file update: 10-Feb-2022 12:34 (eg)
 #
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -280,7 +280,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-subdirs = gtklos stklos-fuse
+subdirs = curl gtklos stklos-fuse
 all: all-am
 
 .SUFFIXES:

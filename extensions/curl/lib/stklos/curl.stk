@@ -22,7 +22,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date:  7-Feb-2022 15:59
-;;;; Last file update: 10-Feb-2022 14:06 (eg)
+;;;; Last file update: 10-Feb-2022 16:12 (eg)
 ;;;;
 
 ;;
@@ -52,14 +52,15 @@
     (curl-set-option handle :followlocation 1)
 
     ;; Set a referer, since some site don't work without it
-    (curl-set-option handle :referer (string-append "(stklos curl) " (curl-version)))
-
+    (curl-set-option handle
+                     :referer
+                     (string-append "STklos-curl/"
+                                    (car (string-split (curl-version)))))
     ;; Set the user options
     (let Loop ((options options))
       (unless (null? options)
         (when (null? (cdr options))
           (error "Missing value gor option ~S" (car options)))
-        (%debug "Setting option ~S to ~S" (car options) (cadr options))
         (curl-set-option handle (car options) (cadr options))
         (Loop (cddr options))))
 

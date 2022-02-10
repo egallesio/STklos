@@ -2,7 +2,7 @@
 ###
 ###           Author: Erick Gallesio [eg@unice.fr]
 ###    Creation date: 28-Dec-1999 21:19 (eg)
-### Last file update:  7-Feb-2022 16:02 (eg)
+### Last file update:  9-Feb-2022 16:30 (eg)
 
 AC_PREREQ([2.69])
 AC_INIT([stklos],[1.70])
@@ -609,6 +609,7 @@ AC_CONFIG_FILES([Makefile src/Makefile src/extraconf.h doc/Makefile
           extensions/curl/Makefile
           extensions/curl/lib/stklos/Makefile
           extensions/curl/demos/Makefile
+          extensions/curl/doc/Makefile
 
           extensions/stklos-fuse/Makefile
           extensions/stklos-fuse/lib/stklos/Makefile

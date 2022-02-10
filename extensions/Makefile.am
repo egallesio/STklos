@@ -5,11 +5,11 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  6-Jul-2021 11:53
-# Last file update:  2-Feb-2022 16:13 (eg)
+# Last file update: 10-Feb-2022 12:34 (eg)
 #
 
 
-subdirs=gtklos stklos-fuse
+subdirs= curl gtklos stklos-fuse
 
 all:
 	@echo "***"

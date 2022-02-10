@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  7-Feb-2022 15:55 (eg)
- * Last file update: 10-Feb-2022 11:57 (eg)
+ * Last file update: 10-Feb-2022 16:10 (eg)
  */
 
 #include <stklos.h>
@@ -205,14 +205,22 @@ DEFINE_PRIMITIVE("curl-set-option", curl_set_opt, subr3, (SCM h, SCM opt, SCM va
           code = curl_easy_setopt(curl, copt->id, STRING_CHARS(val));
           break;
 
-        case CURLOT_VALUES:  /*      (a defined set or bitmask) */
-        case CURLOT_OFF_T:   /* curl_off_t (a range of values) */
         case CURLOT_OBJECT:  /* pointer (void *) */
+          if (STRINGP(val)) {
+            // This is dangerous ....
+            // but necessary to pass value to POST HTTP request with :postfields
+            code = curl_easy_setopt(curl, copt->id, STRING_CHARS(val));
+          } else {
+            STk_error("don't know how to pass ~S to ~S option", val, opt);
+          }
+          break;
+                          case CURLOT_VALUES:  /*      (a defined set or bitmask) */
+        case CURLOT_OFF_T:   /* curl_off_t (a range of values) */
         case CURLOT_SLIST:   /*         (struct curl_slist *) */
         case CURLOT_CBPTR:   /*         (void * passed as-is to a callback) */
         case CURLOT_BLOB:    /* blob (struct curl_blob *) */
         case CURLOT_FUNCTION: /* function pointer */
-          STk_error("option %s (of type %d) is not handled by this library", opt, copt->type);
+          STk_error("option ~S (of type %d) is not handled by this library", opt, copt->type);
       }
     }
     if (code != CURLE_OK) STk_error("%s", curl_easy_strerror(code));

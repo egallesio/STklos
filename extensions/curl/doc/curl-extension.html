@@ -668,6 +668,7 @@ pre.rouge {
 <li><a href="#_the_stklos_curl_library">2. The (stklos curl) library</a>
 <ul class="sectlevel2">
 <li><a href="#_low_level_primitives">2.1. Low level primitives</a></li>
+<li><a href="#_the_curl_primitive">2.2. The curl primitive</a></li>
 </ul>
 </li>
 </ul>
@@ -945,12 +946,114 @@ key to good performance with libcurl</em>.
 </table>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_the_curl_primitive">2.2. The curl primitive</h3>
+<div class="paragraph">
+<p><strong><em>STklos</em></strong> offers a high level function, called <code>curl,</code> which embodies
+all the low level details necessary to use the <em>libcurl</em> library.</p>
+</div>
+<div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(curl url)</code></strong><br>
+<strong><code>(curl url key<sub>1</sub>val<sub>1</sub> &#8230;&#8203;)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>curl</code> function creates a new session on the string <code>url</code>. By
+default, this function uses the current input, output and error port
+(instead of the system <code>stdin</code>, <code>stdout</code> and <code>stderr</code> ports used by
+the <em>libcurl</em> library. Consequently, the redirection of Scheme ports
+is effective with this function. Furthermore, by default, this
+function also set the flags</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>#:followlocation</code> which allows to follow a possible redirection sent by the
+server with a HTTP header 3xx response.</p>
+</li>
+<li>
+<p><code>#:referer</code> which defines a value for the <code>Referer:</code> header of a HTTP
+request.  The value is something like "STklos-curl/xxx" where <code>xxx</code> is a
+sub-string of the value given by <code>curl-version</code>. This option is set because
+some server refuse to respond to requests when there is no referer.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><strong>Exemples:</strong></p>
+</div>
+<div class="paragraph">
+<p>Grab a file by FTP an store its content in the file <code>"/tmp/out"</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="k">let</span> <span class="p">((</span><span class="nf">p</span> <span class="p">(</span><span class="nb">open-output-file</span> <span class="s">"/tmp/out"</span><span class="p">)))</span>
+  <span class="p">(</span><span class="nf">curl</span> <span class="s">"ftp://ftp.gnu.org/gnu/emacs/emacs-27.2.tar.gz.sig"</span> <span class="nv">:oport</span> <span class="nv">p</span><span class="p">)</span>
+  <span class="p">(</span><span class="nb">close-output-port</span> <span class="nv">p</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following expression in equivalent of the <code>(slurp "http://example.com")</code>
+call in Clojure, which returns the content of <code>example.com</code> site as a string.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">with-output-to-string</span>
+  <span class="p">(</span><span class="k">lambda</span> <span class="p">()</span>
+    <span class="p">(</span><span class="nf">curl</span> <span class="s">"http://example.com"</span><span class="p">)))</span>
+                          <span class="nv">=&gt;</span> <span class="s">"&lt;!doctype html&gt;\n ... &lt;/html&gt;\n"</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Use a HTTP POST request with <code>foo=1</code> and <code>bar=2</code>, using the <code><a href="http://httpbin.org" class="bare">http://httpbin.org</a></code> site</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">curl</span> <span class="s">"https://httpbin.org/post"</span> <span class="o">#</span><span class="nv">:postfields</span> <span class="s">"foo=1&amp;bar=2"</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The JSON answer will be something like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"files"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w">
+  </span><span class="nl">"form"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"bar"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"foo"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"headers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"Accept"</span><span class="p">:</span><span class="w"> </span><span class="s2">"*/*"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"Content-Length"</span><span class="p">:</span><span class="w"> </span><span class="s2">"11"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"Content-Type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"application/x-www-form-urlencoded"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"Host"</span><span class="p">:</span><span class="w"> </span><span class="s2">"httpbin.org"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"Referer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"STklos-curl/libcurl/7.81.0"</span><span class="p">,</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"json"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"origin"</span><span class="p">:</span><span class="w"> </span><span class="s2">"134.59.216.151"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://httpbin.org/post"</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-02-10 12:41:39 +0100
+Last updated 2022-02-10 16:26:30 +0100
 </div>
 </div>
 </body>
