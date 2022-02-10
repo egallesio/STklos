@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  7-Feb-2022 15:55 (eg)
- * Last file update:  9-Feb-2022 18:05 (eg)
+ * Last file update: 10-Feb-2022 11:57 (eg)
  */
 
 #include <stklos.h>
@@ -99,37 +99,73 @@ static size_t read_callback(void *data, size_t size, size_t nmemb, void *port)
   return  STk_read_buffer((SCM) port, data, size * nmemb);
 }
 
+static int debug_callback(CURL *handle, curl_infotype type,
+                          char *data, size_t size,
+                          void *userp)
+{
+  SCM port = (SCM) userp;
 
- static SCM set_transfer_port(CURL *curl, SCM port, int outputp)
- {
-   CURLcode code = CURLE_OK;
+  (void) handle;
+  (void) size;
 
-   if (outputp) {
-    // Set the WRITEDATA option to the given port
-    if (OPORTP(port)) {
-      code = curl_easy_setopt(curl, CURLOPT_WRITEDATA, port);
-      if (code != CURLE_OK) STk_error("%s", curl_easy_strerror(code));
-    } else {
-      STk_error("bad output port ~S", port);
-    }
-    // Set the WRITEFUNCTION option
-    code = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-  } else {
-    // Set the READDATA option to the given port
-    if (IPORTP(port)) {
-      code = curl_easy_setopt(curl, CURLOPT_READDATA, port);
-      if (code != CURLE_OK) STk_error("%s", curl_easy_strerror(code));
-    } else {
-      STk_error("bad,input_port ~S", port);
-    }
-    // Set the WRITEFUNCTION option
-    code = curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  switch (type) {
+    case CURLINFO_TEXT:
+      STk_fprintf(port, "* %s", data);
+      break;
+    case CURLINFO_HEADER_IN:
+      STk_fprintf(port, "< %s", data);
+      break;
+    case CURLINFO_HEADER_OUT:
+      STk_fprintf(port, "> %s", data);
+      break;
+
+    // Do nothing for other cases
+    case CURLINFO_DATA_IN:
+    case CURLINFO_DATA_OUT:
+    case CURLINFO_SSL_DATA_IN:
+    case CURLINFO_SSL_DATA_OUT:
+    default: ;
   }
-
-   if (code != CURLE_OK) STk_error("%s", curl_easy_strerror(code));
-  return STk_void;
+  return 0;
 }
 
+
+static SCM set_transfer_port(CURL *curl, SCM port, int portnum)
+{
+  CURLcode code = CURLE_OK;
+  CURLoption opt_data, opt_func;
+  void *func;
+
+  switch (portnum) {
+  case 0:
+    if (!IPORTP(port)) STk_error("bad input port ~S", port);
+    opt_data = CURLOPT_READDATA;
+    opt_func = CURLOPT_READFUNCTION;
+    func = read_callback;
+    break;
+  case 1:
+    if (!OPORTP(port)) STk_error("bad output port ~S", port);
+    opt_data = CURLOPT_WRITEDATA;
+    opt_func = CURLOPT_WRITEFUNCTION;
+    func = write_callback;
+    break;
+  case 2:
+  default:
+    if (!OPORTP(port)) STk_error("bad output port ~S", port);
+    opt_data = CURLOPT_DEBUGDATA;
+    opt_func = CURLOPT_DEBUGFUNCTION;
+    func = debug_callback;
+    break;
+  }
+  // Set the opt_data to the given port
+  code = curl_easy_setopt(curl, opt_data, port);
+  if (code != CURLE_OK) STk_error("%s", curl_easy_strerror(code));
+
+  // Set the opt_func option to the given port
+  code = curl_easy_setopt(curl, opt_func, func);
+  if (code != CURLE_OK) STk_error("%s", curl_easy_strerror(code));
+  return STk_void;
+}
 
 
 
@@ -144,10 +180,12 @@ DEFINE_PRIMITIVE("curl-set-option", curl_set_opt, subr3, (SCM h, SCM opt, SCM va
     const struct curl_easyoption *copt = curl_easy_option_by_name(name);
     CURLcode code = CURLE_OK;  // for the compiler;
 
-    if (strncasecmp(name, "oport", 5) == 0)
-      return set_transfer_port(curl, val, TRUE);
-    else if (strncasecmp(name, "iport", 5) == 0)
-      return set_transfer_port(curl, val, FALSE);
+    if (strncasecmp(name, "iport", 5) == 0)
+      return set_transfer_port(curl, val, 0);
+    else if (strncasecmp(name, "oport", 5) == 0)
+      return set_transfer_port(curl, val, 1);
+    else if (strncasecmp(name, "eport", 5) == 0)
+      return set_transfer_port(curl, val, 2);
     else {
       // #:iport and #:oport option are treated specially. Other options are
       // treated by the standatd curl_easy_setopt (for the  handled types only).
@@ -217,7 +255,7 @@ MODULE_ENTRY_START("stklos/curl")
   // Call the CURL global initialization function
   // (necessary if we use several threads)
   curl_global_init(CURL_GLOBAL_DEFAULT);
-  
+
   //Export all the symbols defined here
   STk_export_all_symbols(module);
 
