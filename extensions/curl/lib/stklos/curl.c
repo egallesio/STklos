@@ -21,12 +21,11 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  7-Feb-2022 15:55 (eg)
- * Last file update: 10-Feb-2022 16:10 (eg)
+ * Last file update: 15-Feb-2022 21:18 (eg)
  */
 
 #include <stklos.h>
 #include <curl/curl.h>
-#include <stklos/stklos.h>
 #include "curl-incl.c"
 
 struct curl_obj {

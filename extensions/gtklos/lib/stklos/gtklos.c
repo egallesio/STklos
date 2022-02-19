@@ -21,14 +21,14 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date: 11-Aug-2007 11:38 (eg)
- * Last file update:  1-Feb-2022 13:32 (eg)
+ * Last file update: 19-Feb-2022 16:17 (eg)
  */
 
 
 #include <math.h>               /* for isnan */
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>     /* For the keysyms macros */
-#include "stklos.h"
+#include <stklos.h>
 #include "gtklos-config.h"
 
 #include "gtklos-incl.c"
