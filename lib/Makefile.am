@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 19-Feb-2022 16:58 (eg)
+# Last file update: 19-Feb-2022 17:16 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme srfi stklos
@@ -91,7 +91,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-94.stk         \
           srfi-96.stk         \
           srfi-100.stk        \
-          srfi-137.stk        \
           srfi-156.stk        \
           srfi-171.stk        \
           srfi-190.stk        \
@@ -123,7 +122,6 @@ scheme_OBJS = compfile.ostk     \
           srfi-94.ostk          \
           srfi-96.ostk          \
           srfi-100.ostk         \
-          srfi-137.ostk         \
           srfi-156.ostk         \
           srfi-171.ostk         \
           srfi-190.ostk         \
