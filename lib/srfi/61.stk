@@ -1,6 +1,6 @@
 ;;;; srfi-61.stk         -- Implementattion of SRFI-61
 ;;;;
-;;;; Copyright © 2020 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,11 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 25-Oct-2020 20:22
-;;;; Last file update: 27-Oct-2020 19:53 (eg)
+;;;; Last file update: 19-Feb-2022 17:03 (eg)
 ;;;;
 
-(define-module SRFI-61
+(define-module srfi/61
+  (export cond)
 
   (define-syntax cond
     (syntax-rules (else =>)
@@ -64,7 +65,8 @@
 
       )
     )
-
+  ;; FIXME: Must be changed....
+  (define cond #void)
   (export-syntax cond))
 
-(provide "srfi-61")
+(provide "srfi/61")
