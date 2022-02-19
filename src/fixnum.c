@@ -1,7 +1,7 @@
 /*
  * fixnum.c     -- Fixnum operations
  *
- * Copyright © 2007-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+ * Copyright © 2007-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
  *
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 20-Aug-2021 17:23 (eg)
+ * Last file update: 19-Feb-2022 18:59 (eg)
  */
 
 #include "stklos.h"
@@ -360,7 +360,7 @@ DEFINE_PRIMITIVE("fxabs", fxabs, subr1, (SCM o))
        --jpellegrini */
   ensure_fx(o);
   long v = INT_VAL(o);
-  long const mask = v >> sizeof(long) * CHAR_BIT - 1;
+  long const mask = v >> (sizeof(long) * CHAR_BIT - 1);
   return MAKE_INT((v + mask) ^ mask);
 }
 
