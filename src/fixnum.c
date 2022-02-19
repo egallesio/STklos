@@ -21,7 +21,7 @@
  *
  *           Author: Erick Gallesio [eg@essi.fr]
  *    Creation date:  9-May-2007 17:15 (eg)
- * Last file update: 19-Feb-2022 18:59 (eg)
+ * Last file update: 19-Feb-2022 19:29 (eg)
  */
 
 #include "stklos.h"
@@ -733,51 +733,53 @@ DEFINE_PRIMITIVE("fxcopy-bit", fxcopy_bit, subr3, (SCM o1, SCM o2, SCM o3))
  * @end lisp
 doc>
 */
+/*
+  Count the number of ones in a long integer.
+
+  It does work with signed long integers; the 'unsigned long' in the
+  declaration is to fore a cast so 'n' will be treated as if it were
+  unsigned, because the algoritm does shift it to the right, and if
+  it's signed negative numbers would get ones from the right side when
+  shifted (at least with GCC and LLVM -- this is not defined by the
+  standard, actually).
+ */
+static inline unsigned int bit_count(unsigned long n) {
+  /* A lookup table with the bit count for every possible byte. */
+  static unsigned int bc[256] =
+    { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3,
+      2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4,
+      2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5,
+      4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+      2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4,
+      3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6,
+      4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4,
+      3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+      2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5,
+      4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5,
+      3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6,
+      5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+      4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8 };
+
+  unsigned int c = 0;
+  unsigned long mask = 0xff;
+  while(n) {
+    c += bc[n & mask];
+    n = n >> 8;
+  }
+  return c;
+}
+
 DEFINE_PRIMITIVE("fxbit-count", fxbit_count, subr1, (SCM o))
 /* TODO: Somewhat efficient, but there is a better way, described
    in "Hacker's Delight", but it needs to be adapted to the
-   variable length datum.
-   Other possibility: do as in
-   http://graphics.stanford.edu/~seander/bithacks.html
-*/
+   variable length datum. */
 {
-  ensure_fx(o);
-  {
-      /* NOTE 1:
-        We had
-          unsigned long n = INT_VAL(o);
-        here.
-        and then checked each bit like
-          if ( n & 1 )
-        but it's faster to not unbox o, and just check its third bit!
-          if ( o & 4 )
-        In the for loop, we need to explain the compiler that we're
-        doing the shift as if o was integer:
-          o = (SCM) (((long) o) >> 1))
-          but this has no extra cost. -- jpellegrini */
-
-       /* NOTE 2:
-         SRFI-143 says 
-            "Compatibility note: The R6RS analogue bitwise-bit-count
-            applies bitwise-not to the population count before returning
-            it if i is negative"
-        And the SRFI mandates
-            (fxbit-count -13) =>  2
-        and so on...
-        In fact, this is what SRFI-60 and SRFI-151 do (but for bignums
-        too) in srfi/60.scm.
-        Since tagged o will be negative whenever the original number is,
-        we check "o<0".
-        --jpellegrini
-      */
-    if ((long) o < 0) o = (SCM) (~((long) o));
-    unsigned long total=0;
-    for (int i=0; i < (int) INT_LENGTH; i++, o=(SCM) (((long) o) >> 1))
-        if ( ((long) o) & 4 )
-        total++;
-    return MAKE_INT(total);
-  }
+    ensure_fx(o);
+    return (INT_VAL(o) < 0)
+        ? MAKE_INT(bit_count(~INT_VAL(o)))
+        : MAKE_INT(bit_count( INT_VAL(o)));
 }
+
 
 /*
 <doc EXT fxfirst-set-bit
