@@ -36,8 +36,14 @@ CVS
 TODO.org
 .beta-number
 bootstrap
-
 Python
+
+# Clangd
+compile_commands.json
+.cache
+
+
+
 
 # Doc directory 
 doc/TODO

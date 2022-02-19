@@ -1,6 +1,6 @@
 # Makefile.am for STklos source file
 #
-# Copyright © 2000-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
+# Copyright © 2000-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@unice.fr>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 24-Sep-2021 08:44 (eg)
+# Last file update: 19-Feb-2022 18:13 (eg)
 
 # Use AM_CFLAGS instead of CFLAGS since automake issue a warning when
 # CFLAGS is used here
@@ -135,7 +135,7 @@ $(DOCDB): $(stklos_SOURCES)
 	$(STKLOS_BINARY) $(STKLOS_FLAGS) -b boot.img -f ../doc/extract-doc $(stklos_SOURCES) > $(DOCDB)
 
 clean-am:
-	/bin/rm -f *.o $(DOCDB) git-info.h boot.ok
+	/bin/rm -f *.o $(DOCDB) git-info.h boot.ok stklos
 
 distclean: clean
 	/bin/rm -f boot.keep Makefile extraconf.h stklos stamp-h1 stklosconf.h
