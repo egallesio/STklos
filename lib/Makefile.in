@@ -36,7 +36,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 21-Feb-2022 09:50 (eg)
+# Last file update: 21-Feb-2022 11:52 (eg)
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -447,7 +447,6 @@ SRC_STK = bigloo-support.stk  \
           srfi-96.stk         \
           srfi-100.stk        \
           srfi-156.stk        \
-          srfi-171.stk        \
           tar.stk             \
           trace.stk
 
@@ -476,7 +475,6 @@ scheme_OBJS = compfile.ostk     \
           srfi-96.ostk          \
           srfi-100.ostk         \
           srfi-156.ostk         \
-          srfi-171.ostk         \
           tar.ostk              \
           trace.ostk
 
