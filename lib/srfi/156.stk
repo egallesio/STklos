@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-156.stk		-- Implementation of SRFI-156
+;;;; 156.stk            -- Implementation of SRFI-156
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -46,18 +46,21 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 10-Jul-2020 06:55 (jpellegrini)
-;;;; Last file update: 10-Jul-2020 07:30 (jpellegrini)
+;;;; Last file update: 21-Feb-2022 16:46 (eg)
 ;;;;
 
+(define-module srfi/156
+
+(export infix/postfix extract-placeholders identity-syntax is isnt)
 
 (define-syntax infix/postfix
   (syntax-rules ()
     ((infix/postfix x somewhat?)
      (somewhat? x))
-    
+
     ((infix/postfix left related-to? right)
      (related-to? left right))
-    
+
     ((infix/postfix left related-to? right . likewise)
      (let ((right* right))
        (and (infix/postfix left related-to? right*)
@@ -71,29 +74,29 @@
 ;;   (syntax-rules (_)
 ;;     ((extract-placeholders final () () body)
 ;;      (final (infix/postfix . body)))
-    
+
 ;;     ((extract-placeholders final () args body)
 ;;      (lambda args (final (infix/postfix . body))))
-    
+
 ;;     ((extract-placeholders final (_ op . rest) (args ...) (body ...))
 ;;      (extract-placeholders final rest (args ... arg) (body ... arg op)))
-    
+
 ;;     ((extract-placeholders final (arg op . rest) args (body ...))
 ;;      (extract-placeholders final rest args (body ... arg op)))
-    
+
 ;;     ((extract-placeholders final (_) (args ...) (body ...))
 ;;      (extract-placeholders final () (args ... arg) (body ... arg)))
-    
+
 ;;     ((extract-placeholders final (arg) args (body ...))
 ;;      (extract-placeholders final () args (body ... arg)))))
 
 (define-macro  (extract-placeholders final a b body)
   (cond ((and (null? a) (null? b))
            `(,final ,(cons 'infix/postfix body)))
-          
+
           ((null? a)
            `(lambda ,b ,(list final (cons 'infix/postfix body))))
-          
+
           ((and (> (length a) 1)
                 (eq? (car a) '_))
            (let ((op (cadr a))
@@ -142,11 +145,17 @@
     ((isnt . something)
      (extract-placeholders not something () ()))))
 
-
+;; FIXME:
+(define infix/postfix #void)
+(define extract-placeholders #void)
+(define identity-syntax #void)
+(define is #void)
+(define isnt #void)
 (export-syntax infix/postfix
                extract-placeholders
                identity-syntax
                is
                isnt)
+) ;; End of module srfi/156
 
-(provide "srfi-156")
+(provide "srfi/156")
