@@ -1,8 +1,8 @@
 ;;;;
 ;;;;
-;;;; srfi-190.stk         -- Implementation of SRFI-190
+;;;; 190.stk         -- Implementation of SRFI-190
 ;;;;
-;;;; Copyright © 2020 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
+;;;; Copyright © 2020-2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -22,19 +22,27 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 18-Jun-2020 15:32
-;;;; Last file update: 18-Jun-2020 16:50 (eg)
+;;;; Last file update: 21-Feb-2022 11:47 (eg)
 ;;;;
 
-(require "srfi-158")
 
-(define (yield value)
-  (error 'yield "cannot be used outside coroutine generator"))
+(define-module srfi/190
+  (import (srfi 158))
+  (export yield coroutine-generator define-coroutine-generator)
 
-(define-macro (coroutine-generator . body)
-  `(make-coroutine-generator (lambda (yield) ,@body)))
+  (define (yield value)
+    (error 'yield "cannot be used outside coroutine generator"))
 
-(define-macro (define-coroutine-generator proto . body)
-  `(define ,proto (coroutine-generator ,@body)))
+  (define-macro (coroutine-generator . body)
+    `(make-coroutine-generator (lambda (yield) ,@body)))
+
+  (define-macro (define-coroutine-generator proto . body)
+    `(define ,proto (coroutine-generator ,@body)))
+
+  ;;FIXME:
+  (define coroutine-generator #void)
+  (define define-coroutine-generator #void)
+  (export-syntax coroutine-generator define-coroutine-generator))
 
 #|
 Examples:
@@ -59,4 +67,4 @@ Examples:
 (print (generator->list (g3 7)))        ⊢ (0 1 2 3 4 5 6)
 |#
 
-(provide "srfi-190")
+(provide "srfi/190")
