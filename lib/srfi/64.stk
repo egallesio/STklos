@@ -52,11 +52,12 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 25-Jun-2020 06:21 (jpellegrini)
-;;;; Last file update: 26-Oct-2021 19:34 (eg)
+;;;; Last file update: 22-Feb-2022 19:11 (eg)
 ;;;;
 
 (define-module srfi/64
-  (import srfi/9)
+  (import (srfi 9)
+          (srfi 35))
   ;; List of exported names
   (export
    test-begin ;; must be listed first, since in Kawa (at least) it is "magic".

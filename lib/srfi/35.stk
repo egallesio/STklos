@@ -1,7 +1,7 @@
 ;;;;
-;;;; srfi-35.stk	-- Implementation of SRFI-35 (Conditions)
+;;;; 35.stk     -- Implementation of SRFI-35 (Conditions)
 ;;;;
-;;;; Copyright © 2004-2007 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2004-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,75 +21,61 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-May-2004 10:13 (eg)
-;;;; Last file update:  4-May-2007 19:45 (eg)
+;;;; Last file update: 24-Feb-2022 11:19 (eg)
 ;;;;
 
+(define-module srfi/35
+  (import SCHEME)
+  (export
+     ;;Procedures
+     make-condition-type condition-type? make-condition condition?
+     condition-has-type? condition-ref make-compound-condition
+     extract-condition
+
+     ;; Syntaxes
+     define-condition-type condition
+
+     ;; Standard conditions
+     &condition &message &serious &error
+   )
+
 ;; ----------------------------------------------------------------------
-;; 	define-condition-type ...
+;;      define-condition-type ...
 ;; ----------------------------------------------------------------------
 (define-macro (define-condition-type name supertype predicate . slots)
   `(begin
      ;; define the condition name
      (define ,name (make-condition-type ',name
-					,supertype
-					',(map car slots)))
+                                        ,supertype
+                                        ',(map car slots)))
      ;; Define predicate and accessors
      (%define-condition-type-accessors ,name ,supertype ,predicate ,@slots)))
 
 ;; ----------------------------------------------------------------------
-;; 	condition ...
+;;      condition ...
 ;; ----------------------------------------------------------------------
 (define-macro (condition . bindings)
   (let ((ct     (map car bindings))
-	(slots  (apply append (map cdr bindings)))
-	(new-ct (gensym))
-	(new    (gensym)))
+        (slots  (apply append (map cdr bindings)))
+        (new-ct (gensym))
+        (new    (gensym)))
     `(let* ((,new-ct (make-compound-condition-type (gensym) (list ,@ct)))
-	    (,new    (%allocate-condition ,new-ct)))
+            (,new    (%allocate-condition ,new-ct)))
        ,@(map (lambda (x) `(struct-set! ,new ',(car x) ,(cadr x)))
-	      slots)
+              slots)
        ,new)))
 
-;;;; ======================================================================
-;;;;
-;;;; 		    P R E D E F I N E D   C O N D I T I O N S
-;;;;
-;;;; ======================================================================
-
-;; ----------------------------------------------------------------------
-;; 	&message ...
-;; ----------------------------------------------------------------------
-(%define-condition-type-accessors &message &condition
-   message-condition?
-   (message condition-message))
-
-;; ----------------------------------------------------------------------
-;; 	&serious ...
-;; ----------------------------------------------------------------------
-(%define-condition-type-accessors &serious &condition
-  serious-condition?)
-
-;; ----------------------------------------------------------------------
-;; 	&error ...
-;; ----------------------------------------------------------------------
-(%define-condition-type-accessors &error &serious
-  error?)
-
-
-;; ----------------------------------------------------------------------
-;; 	&error-message
-;;
-;; This is not really srfi-35. Anyway ...
-;; ----------------------------------------------------------------------
-(%define-condition-type-accessors &error-message &error
-    error-message?
-    (location error-location)
-    (message  error-message))
-
+;; FIXME
+(define define-condition-type #void)
+(define condition #void)
+(define %define-condition-type-accessors #void)
 (export-syntax define-condition-type condition)
-(provide "srfi-35")
 
+)  ;; End of module
 
+(provide "srfi/35")
+
+
 ;;; (define &ct1 (make-condition-type '&ct1 &condition '(a b c)))
 ;;; (define &ct2 (make-condition-type '&ct2 &ct1       '(d e)))
 ;;; (define &ct3 (make-condition-type '&ct3 &condition '(x y)))

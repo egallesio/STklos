@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 01-Jan-2000 15:04 (eg)
-;;;; Last file update: 17-Jan-2022 10:10 (eg)
+;;;; Last file update: 23-Feb-2022 16:45 (eg)
 ;;;;
 
 (define original-input-port (current-input-port))
@@ -53,6 +53,7 @@
 (include "repl-readline.stk")   ; REPL + readline
 (import REPL REPL-READLINE)
 
+
 ;==============================================================================
 (autoload        "compfile"       compile-file)
 (autoload        "describe"       describe)
@@ -67,7 +68,6 @@
 (autoload        "lex-rt"         lexer-next-token)
 (syntax-autoload "scmpkg-support" interface)
 (autoload        "srfi-27"        random-integer random-real)
-(syntax-autoload "srfi-35"        define-condition-type condition)
 (autoload        "srfi-48"        srfi48:help srfi48:format-fixed)
 
 ;==============================================================================
@@ -283,6 +283,5 @@
     (else  ;; Try to initialize GNU readline and starts the main REPL
            (try-initialize-repl-with-readline)
            (main-repl))))
-
 
 ; LocalWords:  VM EVAL SRFI REPL

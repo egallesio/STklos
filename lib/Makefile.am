@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 22-Feb-2022 17:01 (eg)
+# Last file update: 22-Feb-2022 19:06 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme srfi stklos
@@ -82,7 +82,6 @@ SRC_STK = bigloo-support.stk  \
           slib.stk            \
           streams-primitive.stk \
           streams-derived.stk \
-          srfi-35.stk         \
           srfi-36.stk         \
           srfi-41.stk         \
           srfi-51.stk         \
@@ -109,7 +108,6 @@ scheme_OBJS = compfile.ostk     \
           slib.ostk             \
           streams-primitive.ostk \
           streams-derived.ostk   \
-          srfi-35.ostk          \
           srfi-36.ostk          \
           srfi-41.ostk          \
           srfi-51.ostk          \
@@ -209,7 +207,7 @@ install-sources:
 $(SCHEME_OBJS): ../src/boot.img
 compfile.ostk: getopt.ostk
 ffi.ostk: bigmatch.ostk
-full-conditions: srfi-35.ostk srfi-36.ostk
+#full-conditions: srfi-35.ostk srfi-36.ostk
 recette.ostk: pretty-print.ostk
 # srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init

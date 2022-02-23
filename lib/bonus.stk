@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 17-Jan-2022 10:10 (eg)
+;;;; Last file update: 23-Feb-2022 17:19 (eg)
 ;;;;
 
 
@@ -771,7 +771,7 @@ doc>
  * Returns the setter associated to a |proc|. Setters are defined in the
  * {{link-srfi 17}} document. A setter proc, can be used in a generalized
  * assignment, as described in |set!|.
- * 
+ *
  * To associate |s| to the procedure |p|, use the following form:
  * @lisp
  * (set! (setter p) s)
@@ -1810,19 +1810,9 @@ doc>
            (else (error 'case-lambda "no matching clause in list ~S for ~S"
                         ',(map car clauses) ,args)))))))
 
-;;
-;; SRFI-38: "External Representation for Data With Shared Structure"
-;;
-(define read-with-shared-structure read)
-
-(define (write-with-shared-structure obj :optional (port (current-output-port))
-                                                   (optarg #f))
-  ;; optarg is unspecified in {{link-srfi 38}}, it is a hook for implementation
-  ;; We don't use it
-  (write* obj port))
-
-(define read/ss read-with-shared-structure)
-(define write/ss write-with-shared-structure)
+;;;
+;;; SRFI-35: "Conditions"
+;;;
 
 ;;
 ;; Macro used by SRFI-35 & SRFI-36 implementations
@@ -1840,6 +1830,37 @@ doc>
                      (error ',(cadr x) "bad type for condition ~S" ,obj))
                    (condition-ref ,obj ',(car x))))
               slots))))
+;;
+;; Predefined SRFI-35 conditions
+;;
+(%define-condition-type-accessors &message &condition   ;; &message
+   message-condition?
+   (message condition-message))
+
+(%define-condition-type-accessors &serious &condition   ;; &serious
+  serious-condition?)
+
+(%define-condition-type-accessors &error &serious       ;; &error
+  error?)
+
+(%define-condition-type-accessors &error-message &error ;; &error-message (extension)
+    error-message?
+    (location error-location)
+    (message  error-message))
+
+;;
+;; SRFI-38: "External Representation for Data With Shared Structure"
+;;
+(define read-with-shared-structure read)
+
+(define (write-with-shared-structure obj :optional (port (current-output-port))
+                                                   (optarg #f))
+  ;; optarg is unspecified in {{link-srfi 38}}, it is a hook for implementation
+  ;; We don't use it
+  (write* obj port))
+
+(define read/ss read-with-shared-structure)
+(define write/ss write-with-shared-structure)
 
 ;;
 ;; SRFI-39: "Parameter Objects"
