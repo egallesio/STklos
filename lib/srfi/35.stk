@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 25-May-2004 10:13 (eg)
-;;;; Last file update: 24-Feb-2022 11:19 (eg)
+;;;; Last file update: 24-Feb-2022 16:26 (eg)
 ;;;;
 
 (define-module srfi/35
@@ -38,6 +38,20 @@
      ;; Standard conditions
      &condition &message &serious &error
    )
+
+(define-macro (%define-condition-type-accessors name supertype predicate . slots)
+  (let ((obj (gensym)))
+    `(begin
+       ;; define the predicate
+       (define (,predicate ,obj)
+         (and (condition? ,obj) (condition-has-type? ,obj ,name)))
+       ;; define the accessors
+       ,@(map (lambda(x)
+                `(define (,(cadr x) ,obj)
+                   (unless (,predicate ,obj)
+                     (error ',(cadr x) "bad type for condition ~S" ,obj))
+                   (condition-ref ,obj ',(car x))))
+              slots))))
 
 ;; ----------------------------------------------------------------------
 ;;      define-condition-type ...
