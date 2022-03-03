@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update: 24-Feb-2022 15:03 (eg)
+# Last file update: 24-Feb-2022 18:39 (eg)
 
 #-======================================================================
 
@@ -52,6 +52,7 @@ SRC_STK   = 1.stk   \
             28.stk  \
             29.stk  \
             31.stk  \
+            34.stk  \
             35.stk  \
             36.stk  \
             37.stk  \
@@ -124,6 +125,7 @@ SRC_OSTK =  1.ostk   \
             28.ostk  \
             29.ostk  \
             31.ostk  \
+            34.ostk  \
             35.ostk  \
             36.ostk  \
             37.ostk  \
@@ -205,10 +207,9 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	$(COMP) -C -o $*-incl.c $*.stk
 
 .c.$(SO) :
-	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ \
-	-c -o $*.o $*.c
+	@CC@ @CFLAGS@ @STKCFLAGS@ @SH_COMP_FLAGS@ -I../../src @GCINC@ @GMPINC@ -c -o $*.o $*.c
 	@SH_LOADER@ @SH_LOAD_FLAGS@  $*.$(SO) $*.o @DLLIBS@
-	/bin/rm -f $*.o
+	@/bin/rm -f $*.o
 
 #======================================================================
 # Dependencies
