@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  2-Jan-2022 15:26 (eg)
-# Last file update:  3-Mar-2022 13:58 (eg)
+# Last file update:  3-Mar-2022 16:14 (eg)
 
 #======================================================================
 
@@ -70,7 +70,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 	/bin/rm -f $*.o
 #======================================================================
 # Dependencies
-
+derived.ostk: primitive.ostk
 
 # ======================================================================
 install-sources:

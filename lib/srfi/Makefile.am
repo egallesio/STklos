@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  3-Mar-2022 11:47 (eg)
+# Last file update:  3-Mar-2022 16:21 (eg)
 
 #-======================================================================
 
@@ -218,6 +218,7 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 #======================================================================
 # Dependencies
 13.ostk: 14.ostk
+41.ostk: ../streams/primitive.ostk ../streams/derived.ostk
 113.ostk: 128.ostk
 134.ostk: 158.ostk
 
@@ -228,6 +229,8 @@ SUFFIXES = .stk .ostk .stk -incl.c .$(SO) .c
 144.$(SO): 144-incl.c 144.c
 170.$(SO): 170-incl.c 170.c
 175.$(SO): 175-incl.c 175.c
+
+
 
 #======================================================================
 
