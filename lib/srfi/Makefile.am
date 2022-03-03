@@ -19,7 +19,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date:  8-Oct-2021 11:54 (eg)
-# Last file update:  3-Mar-2022 16:42 (eg)
+# Last file update:  3-Mar-2022 17:02 (eg)
 
 #-======================================================================
 
@@ -61,6 +61,7 @@ SRC_STK   = 1.stk   \
             41.stk  \
             45.stk  \
             48.stk  \
+            51.stk  \
             54.stk  \
             60.stk  \
             61.stk  \
@@ -137,6 +138,7 @@ SRC_OSTK =  1.ostk   \
             41.ostk  \
             45.ostk  \
             48.ostk  \
+            51.ostk  \
             54.ostk  \
             60.ostk  \
             61.ostk  \
