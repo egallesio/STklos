@@ -20,10 +20,10 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update: 24-Feb-2022 15:00 (eg)
+# Last file update:  3-Mar-2022 14:04 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
-	      scheme srfi stklos
+	      scheme streams srfi stklos
 
 COMP ?= ../utils/tmpcomp
 STKLOS_BINARY ?= ../src/stklos
@@ -80,9 +80,6 @@ SRC_STK = bigloo-support.stk  \
           pretty-print.stk    \
           recette.stk         \
           slib.stk            \
-          streams-primitive.stk \
-          streams-derived.stk \
-          srfi-41.stk         \
           srfi-51.stk         \
           srfi-59.stk         \
           srfi-89.stk         \
@@ -105,9 +102,6 @@ scheme_OBJS = compfile.ostk     \
           pretty-print.ostk     \
           recette.ostk          \
           slib.ostk             \
-          streams-primitive.ostk \
-          streams-derived.ostk   \
-          srfi-41.ostk          \
           srfi-51.ostk          \
           srfi-59.ostk          \
           srfi-89.ostk          \
@@ -209,8 +203,7 @@ ffi.ostk: bigmatch.ostk
 recette.ostk: pretty-print.ostk
 # srfi-66.ostk: srfi-4.ostk
 slib.ostk: slib.stk STklos.init
-srfi-41.ostk: streams-derived.ostk streams-primitive.ostk
-streams-derived.ostk: streams-primitive.ostk
+
 
 #
 # SRFIs support

@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-41.stk		-- Implementation of SRFI-41
+;;;; 41.stk         -- Implementation of SRFI-41
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -22,16 +22,16 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 09-Jul-2020 23:22 (jpellegrini)
-;;;; Last file update: 26-Oct-2021 23:03 (eg)
+;;;; Last file update:  3-Mar-2022 12:06 (eg)
 ;;;;
 
-(require "streams-primitive")
-(require "streams-derived")
 
-(define-module SRFI-41
-  (import STREAMS-PRIMITIVE STREAMS-DERIVED)
-  (export stream-null stream-cons stream? stream-null? stream-pair? stream-car
-          stream-cdr stream-lambda define-stream list->stream port->stream stream
+(define-module srfi/41
+  (import (streams primitive) (streams derived))
+  (export make-stream make-stream-pare %stream-eager
+          stream-null stream-cons stream? stream-null? stream-pair?
+          stream-car stream-cdr stream-lambda define-stream
+          list->stream port->stream stream
           stream->list stream-append stream-concat stream-constant stream-drop
           stream-drop-while stream-filter stream-fold stream-for-each stream-from
           stream-iterate stream-length stream-let stream-map stream-match
@@ -55,8 +55,5 @@
 
 
 ) ;; END OF DEFINE-MODULE
-;;;; ======================================================================
-(select-module STklos)
 
-(import SRFI-41)
-(provide "srfi-41")
+(provide "srfi/41")

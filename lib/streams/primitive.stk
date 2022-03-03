@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-41.stk		-- Implementation of SRFI-41 (primitive part)
+;;;; srfi-41.stk         -- Implementation of SRFI-41 (primitive part)
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -47,13 +47,13 @@
 ;;;;
 ;;;;           Author: Jeronimo Pellegrini [j_p@aleph0.info]
 ;;;;    Creation date: 07-Jul-2020 15:12 (jpellegrini)
-;;;; Last file update: 26-Oct-2021 17:45 (eg)
+;;;; Last file update:  3-Mar-2022 12:06 (eg)
 ;;;;
 
-(define-module STREAMS-PRIMITIVE
+(define-module streams/primitive
   (export stream-null stream-cons stream? stream-null? stream-pair?
           stream-car stream-cdr)
-  
+
   (export make-stream make-stream-pare)
   (export %stream-eager)
   (export stream-cons stream-lambda stream-delay stream-lazy)
@@ -70,7 +70,7 @@
   (define-struct stream promise)
   (define (stream-promise! s x)
     (set! (stream-promise s) x))
-  
+
   (define-syntax stream-lazy
     (syntax-rules ()
       ((stream-lazy expr)
@@ -135,8 +135,5 @@
         (lambda formals (stream-lazy (let () body0 body1 ...))))))
 
 ) ;; END OF DEFINE-MODULE
-;;;; ======================================================================
-(select-module STklos)
 
-(import STREAMS-PRIMITIVE)
-(provide "streams-primitive")
+(provide "streams/primitive")

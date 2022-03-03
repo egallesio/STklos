@@ -1,5 +1,5 @@
 ;;;;
-;;;; srfi-41.stk		-- Implementation of SRFI-41 (derived part)
+;;;; srfi-41.stk        -- Implementation of SRFI-41 (derived part)
 ;;;;
 ;;;; Copyright © 2020 Jeronimo Pellegrini - <j_p@aleph0.info>
 ;;;;
@@ -80,20 +80,18 @@
 ;;;;
 
 
-(require "streams-primitive")
-
-(define-module STREAMS-DERIVED
-  (import STREAMS-PRIMITIVE)
-  (import (srfi 1))
+(define-module streams/derived
+  (import (streams primitive)
+          (srfi 1))
   (export list->stream port->stream stream->list
           stream-append stream-concat stream-constant stream-drop
           stream-drop-while stream-filter stream-fold stream-for-each stream-from
-          stream-iterate stream-length stream-map 
+          stream-iterate stream-length stream-map
           stream-range stream-ref stream-reverse stream-scan stream-take
           stream-take-while stream-unfold stream-unfolds stream-zip)
   (export define-stream stream stream-let stream-match stream-of)
   (export-syntax define-stream stream stream-let stream-match stream-of)
-  
+
   (define define-stream "<<FIXME>>")
   (define stream        "<<FIXME>>")
   (define stream-let    "<<FIXME>>")
@@ -107,15 +105,15 @@
       ((define-stream (name . formal) body0 body1 ...)
         (define name (stream-lambda formal body0 body1 ...)))))
 
-  (define (list->stream objs)
+  (define (list->stream YYobjs)
     (define list->stream
-      (stream-lambda (objs)
-        (if (null? objs)
+      (stream-lambda (YYobjs)
+        (if (null? YYobjs)
             stream-null
-            (stream-cons (car objs) (list->stream (cdr objs))))))
-    (if (not (list? objs))
+            (stream-cons (car YYobjs) (list->stream (cdr YYobjs))))))
+    (if (not (list? YYobjs))
         (error 'list->stream "non-list argument")
-        (list->stream objs)))
+        (list->stream YYobjs)))
 
   (define (port->stream . port)
     (define port->stream
@@ -297,22 +295,22 @@
   ;;     (define (wildcard? x)
   ;;       (and (identifier? x)
   ;;            (free-identifier=? x (syntax _))))
-  ;;     (syntax-case x () 
+  ;;     (syntax-case x ()
   ;;       ((stream-match-pattern strm () (binding ...) body)
   ;;         (syntax (and (stream-null? strm) (let (binding ...) body))))
   ;;       ((stream-match-pattern strm (w? . rest) (binding ...) body)
-  ;;         (wildcard? #'w?) 
+  ;;         (wildcard? #'w?)
   ;;         (syntax (and (stream-pair? strm)
   ;;                      (let ((strm (stream-cdr strm)))
   ;;                        (stream-match-pattern strm rest (binding ...) body)))))
   ;;       ((stream-match-pattern strm (var . rest) (binding ...) body)
   ;;         (syntax (and (stream-pair? strm)
-  ;;                      (let ((temp (stream-car strm)) (strm (stream-cdr strm))) 
+  ;;                      (let ((temp (stream-car strm)) (strm (stream-cdr strm)))
   ;;                        (stream-match-pattern strm rest ((var temp) binding ...) body)))))
   ;;       ((stream-match-pattern strm w? (binding ...) body)
   ;;         (wildcard? #'w?)
   ;;         (syntax (let (binding ...) body)))
-  ;;       ((stream-match-pattern strm var (binding ...) body) 
+  ;;       ((stream-match-pattern strm var (binding ...) body)
   ;;         (syntax (let ((var strm) binding ...) body))))))
 
 ;;; BEGIN portion taken from Chibi
@@ -378,7 +376,7 @@
                        (let ((,var (stream-car ,strm)))
                          (stream-of-aux ,expr (,loop (stream-cdr ,strm)) ,@rest ))))))
 
-    
+
   (define-syntax stream-of-aux
     (syntax-rules (in is)
       ((stream-of-aux expr base)
@@ -391,10 +389,10 @@
         ;;       base
         ;;       (let ((var (stream-car strm)))
         ;;         (stream-of-aux expr (loop (stream-cdr strm)) rest ...)))))
-      
+
       ((stream-of-aux expr base (var is exp) rest ...)
         (let ((var exp)) (stream-of-aux expr base rest ...)))
-      
+
       ((stream-of-aux expr base pred? rest ...)
         (if pred? (stream-of-aux expr base rest ...) base))))
 
@@ -517,8 +515,5 @@
           (else (stream-zip strms))))
 
 ) ;; END OF DEFINE-MODULE
-;;;; ======================================================================
-(select-module STklos)
 
-(import STREAMS-DERIVED)
-(provide "streams-derived")
+(provide "streams/derived")
