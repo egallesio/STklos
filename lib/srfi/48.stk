@@ -1,7 +1,7 @@
 ;;;;
 ;;;; 48.stk    -- Implementation of SRFI-48
 ;;;;
-;;;; Copyright © 2004-2021 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
+;;;; Copyright © 2004-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
 ;;;;
 ;;;; This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date: 23-Apr-2004 21:19 (eg)
-;;;; Last file update: 27-Apr-2021 11:53 (eg)
+;;;; Last file update:  3-Mar-2022 16:51 (eg)
 ;;;;
 ;;;;
 ;;;; Most of the implementation is done in C. The part which are
@@ -59,8 +59,9 @@
 ;;;;     FITNESS FOR A PARTICULAR PURPOSE.
 
 (define-module srfi/48
-  (export srfi48:help srfi48:format-fixed)
-   
+  (import SCHEME)
+  (export format srfi48:help srfi48:format-fixed)
+
 (define srfi48:help
   (let ((str "(format []  [...]) --  is #t, #f or an output-port
 OPTION  [MNEMONIC]  DESCRIPTION -- Implementation Assumes ASCII Text
