@@ -1,6 +1,6 @@
 ;;;;
 ;;;;
-;;;; 39.stk         -- Implementation of SRFI-39 (Parameter)
+;;;; 38.stk         -- R7RS library for SRFI-38
 ;;;;
 ;;;; Copyright © 2022 Erick Gallesio - I3S-CNRS/Polytech Nice-Sophia <eg@unice.fr>
 ;;;;
@@ -21,25 +21,14 @@
 ;;;; USA.
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
-;;;;    Creation date: 21-Feb-2022 17:41
-;;;; Last file update:  3-Mar-2022 10:39 (eg)
+;;;;    Creation date:  3-Mar-2022 10:46
+;;;; Last file update:  3-Mar-2022 10:48 (eg)
 ;;;;
 
-;; This library seems useless since `parameterize` and `make-parameter` are
-;; R7RS. However, we can have imageine a library which imports (srfi 39)
-;; without importing (scheme base):
-;;
-;;     (define-library (foo)
-;;       (import (srfi 39))
-;;       (export radix)
-;;       (begin
-;;         (define radix (make-parameter 10))))
-
-(define-module srfi/39
+(define-module srfi/38
   (import SCHEME)
-  (export make-parameter parameterize)
-  ;; FIXME
-  (define parameterize #void)
-  (export-syntax parameterize))
+  (export write-with-shared-structure read-with-shared-structure
+          write/ss read/ss))
 
-(provide "srfi/39")
+(provide "srfi/38")
+
