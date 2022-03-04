@@ -5062,7 +5062,7 @@ functions should be used only when speed really matters.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Returns the number of bits used to represent a fixnum number</p>
+<p>Returns the number of bits used to represent a fixnum number.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -5228,7 +5228,7 @@ that <code>(fxsqrt n)</code> returns two values <code>a</code>, <code>b</code>, 
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme">  <span class="p">(</span><span class="nf">fxsqrt</span> <span class="no">#f</span><span class="p">)</span>             <span class="nv">=&gt;</span>  <span class="nv">error</span>
-  <span class="p">(</span><span class="nf">fxdqrt</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">100</span> <span class="mi">100</span><span class="p">))</span> <span class="nv">=&gt;</span>  <span class="nv">error</span>
+  <span class="p">(</span><span class="nf">fxsqrt</span> <span class="p">(</span><span class="nb">expt</span> <span class="mi">100</span> <span class="mi">100</span><span class="p">))</span> <span class="nv">=&gt;</span>  <span class="nv">error</span>
   <span class="p">(</span><span class="nf">fxsqrt</span> <span class="mi">-1</span><span class="p">)</span>             <span class="nv">=&gt;</span>  <span class="nv">error</span>
   <span class="p">(</span><span class="nf">fxsqrt</span> <span class="mi">0</span><span class="p">)</span>              <span class="nv">=&gt;</span>  <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span>
   <span class="p">(</span><span class="nf">fxsqrt</span> <span class="mi">1</span><span class="p">)</span>              <span class="nv">=&gt;</span>  <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span>
@@ -17086,40 +17086,65 @@ of the procedure which raised the error.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>A clause has the form:</p>
+<p>A clause may have the form:</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"> <span class="p">(</span><span class="nf">srfi</span> <span class="nv">&lt;extension-argument&gt;</span> <span class="o">...</span><span class="p">)</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>where <code>&lt;extension-argument&gt;</code>s may be any Scheme-values.</p>
-</div>
-<div class="paragraph">
-<p>If an <code>&lt;extension-argument&gt;</code> is a nonnegative integer, the functionality
-of the indicated SRFIs is made available in the context in
-which the require-extension form appears. For instance,</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require-extension</span> <span class="p">(</span><span class="nf">srfi</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span>
-               <span class="c1">; Make the SRFI 1 and 2 available</span></code></pre>
-</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><code>(srfi number &#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>(identifier &#8230;&#8203;)</code></p>
+</li>
+<li>
+<p><code>identifier</code></p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
-<p>This form is compatible with <strong><a href="http://srfi.schemers.org/srfi-55/srfi-55.html">SRFI-55</a></strong> (<em>Require-extension</em>). However, STklos
-accepts also some symbolic names for requiring some extensions.
+<p>In the first form the functionality of the indicated SRFIs are made
+available in the context in which the <code>require-extension</code> form appears.
 For instance,</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require-extension</span> <span class="p">(</span><span class="nf">srfi</span> <span class="nv">lists</span> <span class="nv">and-let*</span><span class="p">))</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require-extension</span> <span class="p">(</span><span class="nf">srfi</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span> <span class="c1">; Make the SRFI 1 and 2 available</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>is equivalent to the previous <code>require-extension</code>. A list of available
-symbols as <code>&lt;extension-argument&gt;</code> is given in <a href="#_srfis">Chapter 14</a>.</p>
+<p>This form is compatible with <strong><a href="http://srfi.schemers.org/srfi-55/srfi-55.html">SRFI-55</a></strong> (<em>Require-extension</em>).</p>
+</div>
+<div class="paragraph">
+<p>The second and third forms are <strong><em>STklos</em></strong> extensions.
+If the form is a list, it is equivalent to an import. That is,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require-extension</span> <span class="p">(</span><span class="nf">streams</span> <span class="nv">primitive</span><span class="p">)</span> <span class="p">(</span><span class="nf">streams</span> <span class="nv">derived</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>is equivalent to</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">import</span> <span class="p">(</span><span class="nf">streams</span> <span class="nv">primitive</span><span class="p">)</span> <span class="p">(</span><span class="nf">streams</span> <span class="nv">derived</span><span class="p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The final form permits to use symbolic names for requiring some extensions.
+For instance,</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require-extension</span> <span class="nv">lists</span> <span class="nv">and-let*</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>is equivalent to the requiring <code>srfi-1</code> and <code>srfi-2</code>.</p>
+</div>
+<div class="paragraph">
+<p>A list of available symbolic names for features is given in <a href="#_srfis">Chapter 14</a>.</p>
 </div>
 <div class="paragraph">
 <p></p>
@@ -20314,12 +20339,21 @@ is always allocated.</p>
 <strong><em>STklos</em></strong> implements all the conditions types which are defined in
 <strong><a href="http://srfi.schemers.org/srfi-35/srfi-35.html">SRFI-35</a></strong> (<em>Conditions</em>) and <strong><a href="http://srfi.schemers.org/srfi-36/srfi-36.html">SRFI-36</a></strong> (<em>I/O Conditions</em>).
 However, the access functions which are (implicitely) defined
-in those SRFIs are only available if the file <code>"full-conditions"</code> is
-required. This can be done with the following call</p>
+in those SRFIs are only available if the file <code>"conditions"</code> is
+required. This can be done with the call:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require</span> <span class="s">"full-conditions"</span><span class="p">)</span></code></pre>
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require</span> <span class="s">"conditions"</span><span class="p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Another way to have access to the hierarchy of the <strong><a href="http://srfi.schemers.org/srfi-35/srfi-35.html">SRFI-35</a></strong> (<em>Conditions</em>)
+and <strong><a href="http://srfi.schemers.org/srfi-36/srfi-36.html">SRFI-36</a></strong> (<em>I/O Conditions</em>) condition:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">require-extension</span> <span class="nv">conditions</span><span class="p">)</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -22938,6 +22972,23 @@ errors, crashes&#8230;&#8203;
 a pointer to a C object), and <code>#f</code> otherwise.</p>
 </div>
 <div class="paragraph">
+<p></p>
+</div>
+<div class="paragraph text-right">
+<p><span class="rmargin small"><em>STklos</em> procedure</span></p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="paragraph small">
+<p><strong><code>(cpointer-null? obj)</code></strong><br></p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Returns <code>#t</code> is <code>obj</code> is a cpointer and its value is the C NULL value.
+Returnd <code>#f</code> otherwise.</p>
+</div>
+<div class="paragraph">
 <p>
 </p>
 </div>
@@ -24516,9 +24567,6 @@ fixnum. If an integer k appears as the key of multiple associations in
 alist (i.e. as the car of multiple pairs), then the first association
 for k is preferred.</p>
 </div>
-<div class="paragraph">
-<p>Example:</p>
-</div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">fxmapping-&gt;alist</span>
@@ -24671,9 +24719,6 @@ proportional to this value.</p>
 <div class="paragraph">
 <p>Returns the keys of <code>fxmap</code> as a list in ascending numerical order.</p>
 </div>
-<div class="paragraph">
-<p>Example:</p>
-</div>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="scheme"><span class="p">(</span><span class="nf">fxmapping-keys</span> <span class="p">(</span><span class="nf">fxmapping</span> <span class="mi">137</span> <span class="ss">'a</span> <span class="mi">-24</span> <span class="ss">'b</span> <span class="mi">-5072</span> <span class="ss">'c</span><span class="p">))</span>
@@ -24711,9 +24756,6 @@ proportional to this value.</p>
 </div>
 <div class="paragraph">
 <p>If an association <code>(k, v)</code> occurs in <code>map</code>, returns <code>v</code>. Otherwise, returns <code>obj</code>.</p>
-</div>
-<div class="paragraph">
-<p>Examples:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -26283,7 +26325,7 @@ their use in free software.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-02-04 11:04:12 +0100
+Last updated 2022-03-04 19:13:46 +0100
 </div>
 </div>
 </body>

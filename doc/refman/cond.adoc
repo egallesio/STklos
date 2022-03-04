@@ -4,7 +4,7 @@
 //
 //           Author: Erick Gallesio [eg@unice.fr]
 //    Creation date: 26-Nov-2000 18:19 (eg)
-// Last file update: 24-Feb-2022 18:13 (eg)
+// Last file update:  4-Mar-2022 18:57 (eg)
 
 {{chapter "Exceptions and Conditions"}}
 
@@ -103,11 +103,18 @@ is a simple way to see it's slots and their associated value.
 {{stklos}} implements all the conditions types which are defined in
 {{link-srfi 35}} and {{link-srfi 36}}.
 However, the access functions which are (implicitely) defined
-in those SRFIs are only available if the file `"full-conditions"` is
+in those SRFIs are only available if the file `"conditions"` is
 required. This can be done with the call:
 
 ```scheme
-(require "full-conditions")
+(require "conditions")
+```
+
+Another way to have access to the hierarchy of the {{link-srfi 35}}
+and {{link-srfi 36}} condition:
+
+```scheme
+(require-extension conditions)
 ```
 
 The following hierarchy of conditions is predefined:

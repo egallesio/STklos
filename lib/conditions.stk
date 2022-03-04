@@ -1,5 +1,5 @@
 ;;;;
-;;;; full-conditions.stk	-- full SRFI-35 and SRFI-36 conditions
+;;;; conditions.stk     -- full SRFI-35 and SRFI-36 conditions
 ;;;;
 ;;;; Copyright © 2004-2022 Erick Gallesio - I3S-CNRS/ESSI <eg@essi.fr>
 ;;;;
@@ -21,9 +21,9 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@essi.fr]
 ;;;;    Creation date:  1-Jun-2004 12:32 (eg)
-;;;; Last file update: 24-Feb-2022 18:08 (eg)
+;;;; Last file update:  4-Mar-2022 18:50 (eg)
 ;;;;
 
 (import (srfi 35)
         (srfi 36))
-(provide "full-conditions")
+(provide "conditions")

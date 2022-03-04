@@ -20,7 +20,7 @@
 #
 #           Author: Erick Gallesio [eg@unice.fr]
 #    Creation date: 11-Apr-2000 10:30 (eg)
-# Last file update:  3-Mar-2022 17:01 (eg)
+# Last file update:  4-Mar-2022 18:52 (eg)
 
 SUBDIRS = Match.d SILex.d Lalr.d ScmPkg.d   \
 	      scheme streams srfi stklos
@@ -67,11 +67,11 @@ scheme_extra = STklos.init
 SRC_STK = bigloo-support.stk  \
           bigmatch.stk        \
           compfile.stk        \
+          conditions.stk      \
           describe.stk        \
           env.stk             \
           expand.ss           \
           full-syntax.stk     \
-          full-conditions.stk \
           getopt.stk          \
           help.stk            \
           http.stk            \
@@ -90,8 +90,8 @@ SRC_STK = bigloo-support.stk  \
 
 scheme_OBJS = compfile.ostk     \
           bigmatch.ostk         \
+          conditions.ostk       \
           full-syntax.ostk      \
-          full-conditions.ostk  \
           describe.ostk         \
           env.ostk              \
           getopt.ostk           \
