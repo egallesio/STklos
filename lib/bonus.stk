@@ -21,7 +21,7 @@
 ;;;;
 ;;;;           Author: Erick Gallesio [eg@unice.fr]
 ;;;;    Creation date: 14-Jun-2000 17:24 (eg)
-;;;; Last file update: 24-Feb-2022 17:13 (eg)
+;;;; Last file update:  4-Mar-2022 18:18 (eg)
 ;;;;
 
 
@@ -1929,48 +1929,56 @@ doc>
  * @lisp
  * (require-extension <clause> ...)
  * @end lisp
- * A clause has the form:
- * @lisp
- *  (srfi <extension-argument> ...)
- * @end lisp
- * where `|<extension-argument>|`s may be any Scheme-values.
- * @l
- * If an |<extension-argument>| is a nonnegative integer, the functionality
- * of the indicated SRFIs is made available in the context in
- * which the require-extension form appears. For instance,
- * @lisp
- * (require-extension (srfi 1 2))
- *                ; Make the SRFI 1 and 2 available
- * @end lisp
- * This form is compatible with {{link-srfi 55}}. However, STklos
- * accepts also some symbolic names for requiring some extensions.
+ * A clause may have the form:
+ *
+ * 1. |(srfi number ...)|
+ *
+ * 2. |(identifier ...)|
+ *
+ * 3. |identifier|
+ *
+ * In the first form the functionality of the indicated SRFIs are made
+ * available in the context in which the |require-extension| form appears.
  * For instance,
  * @lisp
- * (require-extension (srfi lists and-let*))
+ * (require-extension (srfi 1 2)) ; Make the SRFI 1 and 2 available
  * @end lisp
- * is equivalent to the previous |require-extension|. A list of available
- * symbols as |<extension-argument>| is given in <<_srfis>>.
+ * This form is compatible with {{link-srfi 55}}.
+ *
+ * The second and third forms are {{stklos}} extensions.
+ * If the form is a list, it is equivalent to an import. That is,
+ * @lisp
+ * (require-extension (streams primitive) (streams derived))
+ * @end lisp
+ * is equivalent to
+ * @lisp
+ * (import (streams primitive) (streams derived))
+ * @end lisp
+ *
+ * The final form permits to use symbolic names for requiring some extensions.
+ * For instance,
+ * @lisp
+ * (require-extension lists and-let*)
+ * @end lisp
+ * is equivalent to the requiring |srfi-1| and |srfi-2|.
+
+ * A list of available symbolic names for features is given in <<_srfis>>.
 doc>
 |#
-(define-macro (require-extension . clauses)
-  (when (null? clauses)
-    (error 'require-extension "requires at least one clause"))
-  `(let ((%has-feature? (in-module SRFI-0 %has-feature?)))
-     ,@(map (lambda (x)
-              `(cond
-                ((and (pair? ',x) (eq? (car ',x) 'srfi) (not (null? (cdr ',x))))
-                 (let ((ok? (lambda (x)
-                              (let ((x (if (integer? x)
-                                           (string->symbol (format "srfi-~a" x))
-                                           x)))
-                                (or (%has-feature? x)
-                                    (error 'require-extension
-                                           "extension ~S is absent" x))))))
-                   (and ,@(map (lambda (x) `(ok? ',x))
-                               (cdr x))
-                        (void))))
-                (else (error 'require-extension "bad clause ~S" ',x))))
-            clauses)))
+
+(define-syntax require-extension
+  (syntax-rules (srfi)
+    ((_ "internal" (srfi id ...))
+     (begin (require-feature id) ...))
+    ((_ "internal" (x ...))
+     (import (x ...)))
+    ((_ "internal" id)
+     (cond-expand
+      (id #void)
+      (else (error "cannot require extension named '~s'" 'id))))
+    ((_ clause ...)
+     (begin (require-extension "internal" clause) ...)) ) )
+
 
 ;;
 ;; SRFI-88: "keyword objects"
